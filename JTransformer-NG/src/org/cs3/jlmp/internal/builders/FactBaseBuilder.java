@@ -63,38 +63,27 @@ public class FactBaseBuilder {
      */
     public final static int IS_ECLIPSE_BUILD = 4;
 
-    
-
     private JLMPProject jlmpProject;
 
     private IProject project;
 
     private PrologInterface pif;
 
-   private Vector listeners=new Vector();
+    private Vector listeners = new Vector();
 
+    private boolean building = false;
 
-
-
-
-private boolean building=false;
-
-
-
-
-
-private long storeTimeStamp;
+    private long storeTimeStamp;
 
     /**
-     *  
+     * 
      */
     public FactBaseBuilder(JLMPProject jlmpProject) {
-        this.jlmpProject=jlmpProject;
+        this.jlmpProject = jlmpProject;
         this.project = jlmpProject.getProject();
         this.pif = jlmpProject.getPrologInterface();
     }
 
-    
     /**
      * Collects changed classes from the delta, and creates new facts for them.
      * The generated facts are consulted into the Prolog System, and if
@@ -106,31 +95,30 @@ private long storeTimeStamp;
      * Implementation may run the build process in a seperate job.
      * 
      * @param delta
-     *                  the delta containing the changed Resources, or null to indicate a full rebuild
+     *                the delta containing the changed Resources, or null to
+     *                indicate a full rebuild
      * @param flags
-     *                  a logical or of the constants defined in this class
+     *                a logical or of the constants defined in this class
      * @param monitor
-     *                  a IProgressMonitor object
+     *                a IProgressMonitor object
      * @throws CoreException
      */
 
     public synchronized void build(final IResourceDelta delta, final int flags,
             IProgressMonitor monitor) throws CoreException {
         try {
-            if(building){
+            if (building) {
                 Debug.warning("skipping build");
                 return;
-            }
-            else{
+            } else {
                 Debug.warning("doing build");
             }
-            building=true;
+            building = true;
             if (monitor == null)
                 monitor = new NullProgressMonitor();
-            
 
-           build_impl(delta, flags, monitor);
-            
+            build_impl(delta, flags, monitor);
+
         } catch (OperationCanceledException e) {
             throw e;
         } catch (Throwable t) {
@@ -138,7 +126,7 @@ private long storeTimeStamp;
             marker.setAttribute(IMarker.MESSAGE,
                     "Could not create PEFs for Project.");
             Debug.report(t);
-        }finally{
+        } finally {
             building = false;
             monitor.done();
         }
@@ -147,13 +135,21 @@ private long storeTimeStamp;
     synchronized private void build_impl(IResourceDelta delta, int flags,
             IProgressMonitor monitor) throws IOException, CoreException {
         PrologSession session = null;
-        storeTimeStamp=-1;
+        storeTimeStamp = -1;
         try {
-            
-            //ain'i paranoid... last chance to reload saved state.
+
+            // ld: if pif is not currently up, this is no problem:
+            // the reload hook will trigger another build in its afterInit
+            // method.
+            // Question is wether we should throw some exception, or
+            // just quietly return? XXX: simple return for now.
+            if (!pif.isUp()) {
+                return;
+            }
+
             getMetaDataEXT();
             getMetaDataSRC();
-            
+
             monitor.beginTask("building PEFs", 100);
             session = pif.getSession();
             final Collection toProcess = new Vector();
@@ -172,30 +168,37 @@ private long storeTimeStamp;
             } else {
                 collectDelta(delta, toProcess, toDelete);
             }
-           submon.done();
-           
-           submon=new SubProgressMonitor(monitor, 10,
-                   SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);                        
-           forgetFacts(submon, toDelete);
-           
-           submon=new SubProgressMonitor(monitor, 40,
-                   SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);           
+            submon.done();
+
+            submon = new SubProgressMonitor(monitor, 10,
+                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+            forgetFacts(submon, toDelete);
+
+            submon = new SubProgressMonitor(monitor, 40,
+                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             buildFacts(submon, toProcess);
-            
-            submon=new SubProgressMonitor(monitor, 40,
-                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);                      
-            loadExternalFacts(submon);     
-            JLMPPlugin.getDefault().save(session);
+
+            submon = new SubProgressMonitor(monitor, 40,
+                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+            loadExternalFacts(submon);
+            JLMPPlugin plugin = JLMPPlugin.getDefault();
+            String v = plugin.getPreferenceValue(JLMP.PREF_USE_PEF_STORE,
+                    "false");
+            if (Boolean.valueOf(v).booleanValue()) {
+                JLMPPlugin.getDefault().save(session);
+            }
         } finally {
-            session.dispose();
+            if (session != null) {
+                session.dispose();
+            }
         }
     }
 
     private void forgetFacts(IProgressMonitor monitor, final Collection toDelete)
             throws IOException {
-        monitor.beginTask("deleting obsolete PEFs ",toDelete.size());
+        monitor.beginTask("deleting obsolete PEFs ", toDelete.size());
         for (Iterator i = toDelete.iterator(); i.hasNext();) {
-            if (monitor.isCanceled()){
+            if (monitor.isCanceled()) {
                 throw new OperationCanceledException("Canceled");
             }
             IFile file = (IFile) i.next();
@@ -207,7 +210,7 @@ private long storeTimeStamp;
 
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
             throws IOException, CoreException {
-        monitor.beginTask("Generating new PEFs ",toProcess.size());
+        monitor.beginTask("Generating new PEFs ", toProcess.size());
         for (Iterator i = toProcess.iterator(); i.hasNext();) {
             if (monitor.isCanceled()) {
                 throw new OperationCanceledException("Canceled");
@@ -246,7 +249,7 @@ private long storeTimeStamp;
                     if (fext != null && fext.equals("java")) {
                         if (delta.getKind() == IResourceDelta.REMOVED) {
                             toDelete.add(resource);
-                        } else if(!isStoreUpToDate((IFile) (resource))){ // added,...???
+                        } else if (!isStoreUpToDate((IFile) (resource))) { // added,...???
                             Debug.debug("Adding " + resource + " to toProcess");
                             toProcess.add(resource);
                         }
@@ -301,7 +304,7 @@ private long storeTimeStamp;
         Debug.debug("Forgetting (possible) previous version of " + file);
 
         String path = file.getFullPath().toString();
-        //ld: an unconsult is not enough due to the multifile-ness of the
+        // ld: an unconsult is not enough due to the multifile-ness of the
         // predicates in question.
         /*
          * if there is no tree with that id, the retraction fails, but no harm
@@ -329,63 +332,72 @@ private long storeTimeStamp;
      * @throws IOException
      * @throws CoreException
      */
-    private boolean isStoreUpToDate(IFile file){
+    private boolean isStoreUpToDate(IFile file) {
         ConsultService cs = getMetaDataSRC();
         long recordTS = getStoreTimeStamp();
         long fileTS = file.getLocalTimeStamp();
-        //ld:no need to create facts that are already known
+        Debug.debug("store ts: " + recordTS);
+        Debug.debug("file ts: " + fileTS);
+        // ld:no need to create facts that are already known
         /*
          * FIXME: currently we only ensure that the record is up-to-date. in
          * theory, so should be the consulted facts, but it might be better to
          * check. otoh, this would be quite expensive if there are many
          * resources to check.
+         * 
+         * 
+         * ld: note that the up-to-date check HAS to be pessimistic if both time
+         * stamps are equal - this is a more commen the case as one might think -
+         * e.g. on my system, time stamps are as coarse grained as one whole
+         * second, which is literaly nothing during test runs.
          */
-        if (recordTS >= fileTS) {
+        if (recordTS > fileTS) {
+            Debug.debug("store is up to date");
             return true;
         }
+        Debug.debug("store is outdated");
         return false;
     }
+
     /**
      * @return
      */
     private long getStoreTimeStamp() {
         JLMPPlugin plugin = JLMPPlugin.getDefault();
-        String v = plugin.getPreferenceValue(JLMP.PREF_USE_PEF_STORE,"false");
-        if(! Boolean.valueOf(v).booleanValue()){
+        String v = plugin.getPreferenceValue(JLMP.PREF_USE_PEF_STORE, "false");
+        if (!Boolean.valueOf(v).booleanValue()) {
             return -1;
         }
-        if(storeTimeStamp==-1){
+        if (storeTimeStamp == -1) {
             try {
-                String filename = jlmpProject.getPreferenceValue(JLMP.PROP_PEF_STORE_FILE,"");                
+                String filename = jlmpProject.getPreferenceValue(
+                        JLMP.PROP_PEF_STORE_FILE, "");
                 File file = new File(filename);
-                if(file.canRead()){
-                    storeTimeStamp=file.lastModified();
-                }
-                else{
-                    storeTimeStamp=-1;
+                if (file.canRead()) {
+                    storeTimeStamp = file.lastModified();
+                } else {
+                    storeTimeStamp = -1;
                 }
             } catch (CoreException e) {
-              Debug.report(e);
-              throw new RuntimeException(e);
+                Debug.report(e);
+                throw new RuntimeException(e);
             }
-                
-            
+
         }
 
         return storeTimeStamp;
     }
 
-
     private void buildFacts(IFile file) throws IOException, CoreException {
 
         /* the file seems to have been deleted */
-        if (!file.exists()||isStoreUpToDate(file)) {
+        if (!file.exists() || isStoreUpToDate(file)) {
             return;
         }
         ConsultService cs = getMetaDataSRC();
         String recordPath = file.getFullPath().addFileExtension("pl")
                 .toString();
-        
+
         ICompilationUnit icu = JavaCore.createCompilationUnitFrom(file);
 
         PrintStream out = cs.getOutputStream(recordPath);
@@ -435,10 +447,10 @@ private long storeTimeStamp;
         return typeNames;
     }
 
-    public void loadExternalFacts(IProgressMonitor monitor)
-    throws IOException, CoreException {
+    public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
+            CoreException {
         Debug.debug("enter loadExternalFacts");
-        monitor.beginTask("creating external PEFs.",IProgressMonitor.UNKNOWN);
+        monitor.beginTask("creating external PEFs.", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
         PrologSession session = pif.getSession();
         try {
@@ -455,67 +467,59 @@ private long storeTimeStamp;
                                     "saw type before, so something seems broken. "
                                             + typeName);
                         }
-//---<DEBUG>--------------------------8<------------------------------------------for trapping  JT-113 
+                        // ---<DEBUG>--------------------------8<------------------------------------------for
+                        // trapping JT-113
                         /*
-                        if("java.lang.Object".equals(typeName)){
-                            Debug.warning("ok, so you want java.lang.Object, huh?");
-                            Debug.warning("let's see...this is our stack: ");
-                            Debug.dumpStackTrace();
-                            Debug.warning("Using divine knowledge to find the record file for external PEFs...");
-                            File flat = pif.getFactory().getResourceLocator().subLocator(JLMP.EXT).resolve("flat.pl");
-                            Debug.warning("\t-->\t should be here: "+flat.toString());
-                            if(flat.canRead()){
-                                Debug.warning("\t-->\t exists and is readable.");
-                                String prologFileName = Util.prologFileName(flat);
-								Map map = session.queryOnce("source_file('"+prologFileName+"')");
-                                if(map!=null){
-                                    Debug.warning("\t-->\t is known to prolog (source_file/1)");
-                                    BufferedReader reader = new BufferedReader(new FileReader(flat));
-                                    boolean doomed=false;
-                                    try{
-                                        String line = reader.readLine();
-                                        while(null!=line){
-                                            if(line.indexOf("'Object'")!=-1){
-                                                doomed=true;
-                                                break;
-                                            }
-                                            line = reader.readLine();
-                                        }
-                                    }
-                                    finally{
-                                        reader.close();
-                                    }
-                                    if(doomed){
-                                        Debug.warning("\t-->\t does contain magic string 'Object'.");
-                                        Debug.warning("\t-->\t realy realy unresolved? "+getUnresolvedTypes().contains("java.lang.Object"));
-                                        Debug.error("this MUST lead to an error, so i can quit right away. see you.");
-                                        System.exit(-42);
-                                    }
-                                    else{
-                                        Debug.warning("\t-->\t does NOT contain magic string 'Object'.");
-                                        Debug.warning("\t-->Ok, no prob, you may pass.");
-                                    }
-                                }
-                                else{
-                                    Debug.warning("\t-->\t is NOT known to prolog (source_file/1)");
-                                    Debug.error("this MUST lead to an error, so i can quit right away. see you.");
-                                    System.exit(-42);
-                                }                                
-                            }
-                            else {
-                                Debug.warning("\t-->\t is NOT readable or does not exist.");
-                                Debug.warning("\t-->Ok, no prob, you may pass.");
-                            }
-                            
-                        }
-// -------------------------------------------------------------------------------------------</DEBUG>
-
-*/
+                         * if("java.lang.Object".equals(typeName)){
+                         * Debug.warning("ok, so you want java.lang.Object,
+                         * huh?"); Debug.warning("let's see...this is our stack:
+                         * "); Debug.dumpStackTrace(); Debug.warning("Using
+                         * divine knowledge to find the record file for external
+                         * PEFs..."); File flat =
+                         * pif.getFactory().getResourceLocator().subLocator(JLMP.EXT).resolve("flat.pl");
+                         * Debug.warning("\t-->\t should be here:
+                         * "+flat.toString()); if(flat.canRead()){
+                         * Debug.warning("\t-->\t exists and is readable.");
+                         * String prologFileName = Util.prologFileName(flat);
+                         * Map map =
+                         * session.queryOnce("source_file('"+prologFileName+"')");
+                         * if(map!=null){ Debug.warning("\t-->\t is known to
+                         * prolog (source_file/1)"); BufferedReader reader = new
+                         * BufferedReader(new FileReader(flat)); boolean
+                         * doomed=false; try{ String line = reader.readLine();
+                         * while(null!=line){ if(line.indexOf("'Object'")!=-1){
+                         * doomed=true; break; } line = reader.readLine(); } }
+                         * finally{ reader.close(); } if(doomed){
+                         * Debug.warning("\t-->\t does contain magic string
+                         * 'Object'."); Debug.warning("\t-->\t realy realy
+                         * unresolved?
+                         * "+getUnresolvedTypes().contains("java.lang.Object"));
+                         * Debug.error("this MUST lead to an error, so i can
+                         * quit right away. see you."); System.exit(-42); }
+                         * else{ Debug.warning("\t-->\t does NOT contain magic
+                         * string 'Object'."); Debug.warning("\t-->Ok, no prob,
+                         * you may pass."); } } else{ Debug.warning("\t-->\t is
+                         * NOT known to prolog (source_file/1)");
+                         * Debug.error("this MUST lead to an error, so i can
+                         * quit right away. see you."); System.exit(-42); } }
+                         * else { Debug.warning("\t-->\t is NOT readable or does
+                         * not exist."); Debug.warning("\t-->Ok, no prob, you
+                         * may pass."); }
+                         *  } //
+                         * -------------------------------------------------------------------------------------------
+                         * </DEBUG>
+                         * 
+                         */
                         seen.add(typeName);
                         try {
-                            SubProgressMonitor submon = new SubProgressMonitor(monitor,IProgressMonitor.UNKNOWN, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-                            submon.beginTask(typeName,IProgressMonitor.UNKNOWN);
-                            if(submon.isCanceled()){
+                            SubProgressMonitor submon = new SubProgressMonitor(
+                                    monitor,
+                                    IProgressMonitor.UNKNOWN,
+                                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+                            submon
+                                    .beginTask(typeName,
+                                            IProgressMonitor.UNKNOWN);
+                            if (submon.isCanceled()) {
                                 throw new OperationCanceledException();
                             }
                             writeFacts(typeName, out);
@@ -536,8 +540,6 @@ private long storeTimeStamp;
         }
     }
 
-    
-
     public static void writeFacts(IProject project, ICompilationUnit icu,
             PrintStream out) throws IOException, CoreException {
         CompilationUnit cu = null;
@@ -547,7 +549,7 @@ private long storeTimeStamp;
                 .addFileExtension("pl").toString();
 
         StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);//metaDataSRC.getPrependablePrologWriter(path);
+        PrologWriter plw = new PrologWriter(sw, true);// metaDataSRC.getPrependablePrologWriter(path);
         FactGenerationToolBox box = new DefaultGenerationToolbox();
         FactGenerator visitor = new FactGenerator(icu, resource.getFullPath()
                 .toString(), box, plw);
@@ -591,7 +593,7 @@ private long storeTimeStamp;
         String header = sw.toString();
         sw.getBuffer().setLength(0);
         String fileName = typeName.replace('.', '/') + ".pl";
-        //out = metaDataEXT.getOutputStream(fileName);
+        // out = metaDataEXT.getOutputStream(fileName);
         out.println(header);
         out.println(data);
     }
@@ -619,10 +621,10 @@ private long storeTimeStamp;
      * generate prolog representation of java source code on the facade level.
      * 
      * @param an
-     *                  compilation unit in working copy mode.
+     *                compilation unit in working copy mode.
      * @param out
-     *                  a writer to which the facts should be written. It is a good
-     *                  idea to use a buffered writer. The writer will not be closed.
+     *                a writer to which the facts should be written. It is a good
+     *                idea to use a buffered writer. The writer will not be closed.
      */
     public void writeFacts(ICompilationUnit icu, PrintStream out)
             throws IOException, CoreException {
@@ -635,15 +637,13 @@ private long storeTimeStamp;
     }
 
     private ConsultService getMetaDataSRC() {
-        
-        
-        
+
         return pif.getConsultService(JLMP.SRC);
     }
 
     private ConsultService getMetaDataEXT() {
-      return  pif.getConsultService(JLMP.EXT);
-        
+        return pif.getConsultService(JLMP.EXT);
+
     }
 
     /**
@@ -657,10 +657,11 @@ private long storeTimeStamp;
         PrologSession session = pif.getSession();
         try {
             session.queryOnce("clearTreeFactbase");
-            //getMetaDataSRC().clearRecords();
-            String storeName = jlmpProject.getPreferenceValue(JLMP.PROP_PEF_STORE_FILE,null);
+            // getMetaDataSRC().clearRecords();
+            String storeName = jlmpProject.getPreferenceValue(
+                    JLMP.PROP_PEF_STORE_FILE, null);
             new File(storeName).delete();
-            storeTimeStamp=-1;
+            storeTimeStamp = -1;
             if (monitor != null) {
                 monitor.done();
             }
@@ -694,12 +695,11 @@ private long storeTimeStamp;
             }
         }
     }
-    
-    
-    protected void fireFactBaseUpdated(){
+
+    protected void fireFactBaseUpdated() {
         JLMPProjectEvent e = new JLMPProjectEvent(this);
         Vector cloned = null;
-        synchronized(listeners){
+        synchronized (listeners) {
             cloned = (Vector) listeners.clone();
         }
         for (Iterator it = cloned.iterator(); it.hasNext();) {
@@ -708,7 +708,4 @@ private long storeTimeStamp;
         }
     }
 
-
-    
-    
 }
