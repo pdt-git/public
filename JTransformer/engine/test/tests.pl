@@ -155,3 +155,6 @@ surr2:-
 testAssertTrue('sadlfkj') :-
 	assert_true('aha',fail).
 */
+
+test_suite(Test) :-
+    clause(test(Test),_).
