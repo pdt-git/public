@@ -124,6 +124,7 @@ public class FactBaseBuilder {
         } finally {
             building = false;
             monitor.done();
+            fireFactBaseUpdated();
         }
     }
 
