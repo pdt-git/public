@@ -54,7 +54,7 @@ public class Initializer extends AbstractPreferenceInitializer {
 //        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
 //                new FileOutputStream(logFile));
 //        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
-//        
+        
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
         String fileSep = File.separator;
