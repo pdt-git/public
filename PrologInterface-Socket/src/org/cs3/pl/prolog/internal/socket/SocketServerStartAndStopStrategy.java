@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -101,7 +102,10 @@ public class SocketServerStartAndStopStrategy implements
 
             Process serverProcess = Runtime.getRuntime().exec(commandArray);
             File logFile = Util.getLogFile("org.cs3.pdt.server.log");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,true));
+            writer.write("\n---8<-----------------------8<---\n");
+            writer.write(new Date().toString()+"\n");
+            writer.write("---8<-----------------------8<---\n\n");
             new _InputStreamPump(serverProcess.getErrorStream(), writer)
                     .start();
             new _InputStreamPump(serverProcess.getInputStream(), writer)
