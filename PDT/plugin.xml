@@ -16,10 +16,6 @@
    <requires>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="Common"/>
-      <import plugin="Console"/>
-      <import plugin="MetaData"/>
-      <import plugin="PrologInterface"/>
    </requires>
    <extension-point id="hooks" name="Lifecycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension
@@ -34,6 +30,10 @@
             category="org.cs3.pdt"
             name="Prolog Console"
             id="org.cs3.pdt.views.PrologConsoleView"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup class="org.cs3.pdt.startup.StartUp"/>
    </extension>
   <!-- <extension
          point="org.cs3.pdt.hooks">
