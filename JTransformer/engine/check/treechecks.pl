@@ -1,68 +1,105 @@
+:- dynamic constraintErrorMsg/1.
+
+/**
+  * violatedContraints(+Id, -ErrorMsg)
+  */
+violatedContraints(Id, ErrorMsg):-
+    retractall(constraintErrorMsg(_)),
+    !,
+    checkTreeLinks(Id, assertErrorMsgs),
+    constraintErrorMsg(ErrorMsg).
+
+setUp(violatedContraints):-
+    assert(classDefT(a,b,c,[d])).
+test(violatedContraints):-
+    assert_true(findall(M,violatedContraints(a,M),List)),
+    assert_true(length(List,4)).     
+tearDown(violatedContraints):-
+    retractall(classDefT(a,b,c,[d])).
+
+assertErrorMsgs(ErrorMsg):-
+    assert(constraintErrorMsg(ErrorMsg)).
 /*
     checkTreeLinks
 
     Testet alle trees auf korrekte Referenzierung durch den parent tree.
 */
 
-checkTreeLinks :- findall(_id, checkTreeLinks(_id), _l).
+checkTreeLinks :- findall(_id, checkTreeLinks(_id,write), _l).
 
-checkTreeLinks(_id) :-
+/*
+    checkTreeLinks(+Id, +ErrorHandler)
+
+    Tests the constraints of parent, encl and referencing trees of id.
+    Provide an ErrorHandler predicate to handle the error message.
+    E.g. checkTreeLinks(1001,write) will write out all error messages to the console.
+*/
+
+
+checkTreeLinks(_id,ErrorHandler) :-
     tree(_id, _p, _ptype),
-	checkConstraints(_id),    
-    checkParentLink(_p,_id),
+	checkConstraints(_id,ErrorHandler),    
+    checkParentLink(_p,_id,ErrorHandler),
     sub_trees(_id, _subs),
-    vars_bound(_id,_subs),
-    checkTreeLinks(_id, _ptype, _subs).
+    vars_bound(_id,_subs,ErrorHandler),
+    checkTreeLinks(_id, _ptype, _subs,ErrorHandler).
 
-checkTreeLinks(_, _, []).
-checkTreeLinks(_pid, _ptype, [_h|_t]) :-
+checkTreeLinks(_, _, [],_).
+checkTreeLinks(_pid, _ptype, [_h|_t],ErrorHandler) :-
     tree(_h, _p, _stype),
 %    checkParentLink(_p,_h),
     !,
-    subtreeError(_h, _stype, _p, _pid, _ptype),
-    checkTreeLinks(_pid, _ptype, _t).
+    subtreeError(_h, _stype, _p, _pid, _ptype,ErrorHandler),
+    checkTreeLinks(_pid, _ptype, _t,ErrorHandler).
 
-checkTreeLinks(_pid, _ptype, [_h|_t]) :-
-    format('referenced subtree ~a from ~a ~a does not exist.~n',[_h, _ptype, _pid]),
-    checkTreeLinks(_pid, _ptype, _t).
+checkTreeLinks(_pid, _ptype, [_h|_t],ErrorHandler) :-
+     sformat(Msg,'referenced subtree ~a from ~a ~a does not exist.~n',[_h, _ptype, _pid]),
+	 Term =.. [ErrorHandler,Msg], 
+	 call(Term),
+     checkTreeLinks(_pid, _ptype, _t,ErrorHandler).
 
 
-checkParentLink(_,ID):-
+checkParentLink(_,ID,_):-
     packageT(ID,_),
     !.
         
-checkParentLink(null,_):-
+checkParentLink(null,_,_):-
 	!.
 	
-checkParentLink(NODE, CHILD) :-
+checkParentLink(NODE, CHILD,_) :-
     blockT(CHILD, _,_,_),
     tryT(NODE, _,_,_,_, CHILD),
     !.
 	
-checkParentLink(Node,Child):-
+checkParentLink(Node,Child,_):-
     sub_trees(Node,Subs),
     member(Child,Subs),
     !.
 
-checkParentLink(Node,Child):-
-    format('node ~a is not a subtree of its parent ~a.~n',[Child,Node]).
-    
+checkParentLink(Node,Child,ErrorHandler):-
+    sformat(Msg,'node ~a is not a subtree of its parent ~a.~n',[Child,Node]),
+	 Term =.. [ErrorHandler,Msg], 
+	 call(Term).
 
-vars_bound(_,[]).
-vars_bound(_id,[_sub|_subs]):-
+vars_bound(_,[],_).
+vars_bound(_id,[_sub|_subs],ErrorHandler):-
     nonvar(_sub),
     !,
-    vars_bound(_id,_subs).
+    vars_bound(_id,_subs,ErrorHandler).
     
-vars_bound(_id,[_sub|_]):-
-    format('referenced id ~a from ~a is not bound.~n',[_sub, _id]),
+vars_bound(_id,[_sub|_],ErrorHandler):-
+    sformat(Msg,'referenced id ~a from ~a is not bound.~n',[_sub, _id]),
+	 Term =.. [ErrorHandler,Msg], 
+	 call(Term),
     fail.
 
-subtreeError(_id, _,   _pid, _pid, _) :- !.
+subtreeError(_id, _,   _pid, _pid, _,_) :- !.
 % sonderfall, classen haben als parent packages statt toplevel, die sie eigentlich referenzieren
-subtreeError(_id, classDefT,   _, _, toplevelT) :- !.
-subtreeError(_id, _stype, _p, _pid, _ptype) :-
-    format('referenced ~a ~a has ~a as parent instead of ~a ~a.~n',[_stype, _id, _p, _ptype, _pid]).
+subtreeError(_id, classDefT,   _, _, toplevelT,_) :- !.
+subtreeError(_id, _stype, _p, _pid, _ptype,ErrorHandler) :-
+    sformat(Msg,'referenced ~a ~a has ~a as parent instead of ~a ~a.~n',[_stype, _id, _p, _ptype, _pid]),
+	 Term =.. [ErrorHandler,Msg], 
+	 call(Term).
 
 
 /*
@@ -140,28 +177,31 @@ printErrorIfNotExpressionOrNull(_).
  * checkConstraint(ID)
  */
  
-checkConstraints(ID):-
+checkConstraints(ID,ErrorHandler):-
     getTerm(ID,Term),
     Term =.. [Functor|[ID|Args]],
     tree_constraints(Functor,Constraints),
-    checkConstraints(Term,Constraints,Args,2).
+    checkConstraints(Term,Constraints,Args,2,ErrorHandler).
     
-checkConstraints(_,[],[],_).
-checkConstraints(Term,[Constraints | CRest],[Arg|ARest],Pos):-
+checkConstraints(_,[],[],_,_).
+checkConstraints(Term,[Constraints | CRest],[Arg|ARest],Pos,ErrorHandler):-
     (
 	  (checkConstraintList(Constraints,Arg),!);
-	  printCheckError(Term,Constraints,Arg,Pos)
+	  printCheckError(Term,Constraints,Arg,Pos,ErrorHandler)
 	),
 	plus(Pos,1,Inc),
-    checkConstraints(Term,CRest,ARest,Inc).
+    checkConstraints(Term,CRest,ARest,Inc,ErrorHandler).
 
 
-printCheckError(Term,Constraints,Arg,Pos):-
+printCheckError(Term,Constraints,Arg,Pos,ErrorHandler):-
     term_to_atom(Term,TermAtom),
     term_to_atom(Constraints,ConstraintsAtom),
     term_to_atom(Arg,ArgAtom),
-    format('ERROR in term: ~a, argument ~a (\'~a\') does not fullfill constraints:~n  ~a~n',
+    sformat(Msg,'ERROR in term: ~a, argument ~a (\'~a\') does not fullfill constraints:~n  ~a~n',
  	  [TermAtom,Pos,ArgAtom,ConstraintsAtom]),
+	 MsgTerm =.. [ErrorHandler,Msg], 
+	 call(MsgTerm),
+ 	  
  	flush_output.
 
 
