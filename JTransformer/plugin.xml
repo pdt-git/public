@@ -2,7 +2,7 @@
 <plugin
    id="org.cs3.pl.JTransformer"
    name="JTransformer"
-   version="2.0.1.15"
+   version="2.0.1.17"
    class="org.cs3.pl.PDTPlugin">
 
    <runtime>
@@ -244,7 +244,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             id="JLMPProjectObjectContribution">
          <action
-               label="Have JTransformer Nature "
+               label="JTransformer Nature"
                style="toggle"
                tooltip="Assignes/retracts JLMP nature to/from a project"
                class="org.cs3.pl.actions.JLMPNatureAction"
