@@ -20,11 +20,13 @@ public class MetadataEngineInstaller {
         factory.ensureInstalled("plparser.pl", MetadataEngineInstaller.class);
         factory.ensureInstalled("runtime.pl", MetadataEngineInstaller.class);
         factory.ensureInstalled("model.pl", MetadataEngineInstaller.class);
+        factory.ensureInstalled("metamodel.pl", MetadataEngineInstaller.class);
         ResourceFileLocator locator = factory.getResourceLocator();
         List l = pif.getBootstrapLibraries();
         l.add(Util.prologFileName(locator.resolve("pdtplugin.pl")));
         l.add(Util.prologFileName(locator.resolve("plparser.pl")));
         l.add(Util.prologFileName(locator.resolve("runtime.pl")));
         l.add(Util.prologFileName(locator.resolve("model.pl")));
+        l.add(Util.prologFileName(locator.resolve("metamodel.pl")));
     }
 }

@@ -1,8 +1,6 @@
 :- module(model,[write_node/1,
 	write_tree/1,
 	delete_tree/1,
-	type_property/2,
-	edge_property/3,
 	node/1,
 	node/2,
 	node_property/2,
