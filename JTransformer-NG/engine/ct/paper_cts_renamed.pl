@@ -287,7 +287,3 @@ ct(addAssociationCode, (
 )).
 
 
-
-num_classes(Num):-
-	findall(C,class(C,_,_),L), 
-	length(L, Num).
