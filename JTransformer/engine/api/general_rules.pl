@@ -1582,59 +1582,29 @@ find_predicates(_namepattern,_list,_length) :-
 	interfaceT -falls gesetzt, das interfaceT tag
 */
 
-deleteTags(_id):-
-	deleteSourceLocations(_id),
-    deleteModifierTs(_id),
-    deleteExtendsT(_id),
-    deleteImplementsTs(_id),
-    deleteExternT(_id),
-    deleteInterfaceT(_id).
-
-% TODO: there should be just one
-deleteSourceLocations(_id) :-
-    forall(
-		slT(_id,_start,_length),
-		retract(slT(_id,_start,_length))
-	).
-
-deleteModifierTs(_id):-
-    forall(
-		modifierT(_id,_mod),
-		retract(modifierT(_id,_mod))
-	).
-
-deleteExtendsT(_id):-
-    extendsT(_id,_super),
-	!,
-    retract(extendsT(_id,_super)).
-
-deleteExtendsT(_id).
-
-deleteImplementsTs(_id):-
-    forall(
-    	implementsT(_id,_iface),
- 	    retract(implementsT(_id,_iface))
-    ).
+removeTags(DeletionKind, ID):-
+    removeTagKind(DeletionKind, slT(ID,_start,_length)),
+    removeTagKind(DeletionKind, modifierT(ID,_mod)),
+    removeTagKind(DeletionKind, implementsT(ID,_iface)),
+    removeTagKind(DeletionKind, extendsT(ID,_super)),
+    removeTagKind(DeletionKind, externT(ID)),
+    removeTagKind(DeletionKind, interfaceT(ID)).
     
-deleteExternT(_id):-
-    externT(_id),
-    !,
-    retract(externT(_id)).
-deleteExternT(_id).
-
-deleteInterfaceT(_id):-
-    interfaceT(_id),
-    !,
-    retract(interfaceT(_id)).
-deleteInterfaceT(_id).
-
+removeTagKind(DeletionKind,Tag) :-
+    forall(
+		Tag,
+		(
+		   Call =.. [DeletionKind,Tag],
+		   call(Call)
+		)
+	).
 
 deepDelete([]).
 deepDelete([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepDelete(_subtrees),
     deleteTree(_head),
-	deleteTags(_head),	
+	removeTags(delete, _head),	
     deepDelete(_tail).
 
 deepDelete(_id) :-
@@ -1647,7 +1617,7 @@ deepRetract([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepRetract(_subtrees),
     retractTree(_head),
-	deleteTags(_head),	
+	removeTags(retract, _head),	
     deepRetract(_tail).
 
 deepRetract(_id) :-
