@@ -56,26 +56,35 @@ apply_ctlist([_head|_tail]) :-
 action(add(_elem)):-
         add(_elem).
 
-/*
-	add(+pef)
-	Adds +pef to the factbase.
-	pef must be a bound PEF term. The addition to the fact base is logged and
-	will be undone in the next rollback.
-*/
+/**
+ *	add(+pef)
+ *	Adds +pef to the factbase.
+ *	pef must be a bound PEF term. The addition to the fact base is logged and
+ *	will be undone in the next rollback.
+ *	
+ *	WARNING (Not finally agreed on): If the pef already 
+ *	exists the predicate is ignored. The pef is not 
+ *	added to the factbase, no rollback information is added.
+ */
 
 add(java_fq(Elem)):-
     !,
     java_fq_to_pef(Elem,PEF),
     add(PEF).
 
-add(_elem) :-
-         nonvar(_elem), 
-%         logChange(_elem),
-         assert(_elem), %assert/1 ist ein Standard Pr¨ adikat von ANSI-
-         asserta(rollback(retract(_elem))),
-         markEnclAsDirty(_elem).
+add(Elem) :-
+    nonvar(Elem), 
+	call(Elem),
+	!,
+	format('WARNING: element: already exists: ~w~n.',[Elem]).
+	
+add(_elem) :-  
+    nonvar(_elem), 
+%    logChange(_elem),
+    assert(_elem), %assert/1 ist ein Standard Pr¨ adikat von ANSI-
+    asserta(rollback(retract(_elem))),
+    markEnclAsDirty(_elem).
          
-
 action(delete(_elem)):-
         delete(_elem).
 
