@@ -73,6 +73,7 @@ createVarDefIdents           (_newParent, _oldList, _newList)
  
 cond(concat_lists(_Lists,_List)).
 
+concat_lists([[]],[]):-!.
 concat_lists([[Head|Tail]],[Head|Tail]):-!.
 concat_lists([Elem],[Elem]).
 
@@ -831,6 +832,9 @@ abstraction(fullQualifiedName(_id, _Fqn)).
   *
   * at least one of the arguments must be bound.
   */
+
+fullQualifiedName(Id, Fqn) :-
+	globalIds(Fqn,Id).
 
 fullQualifiedName(Id, Fqn) :-
 	nonvar(Fqn),
