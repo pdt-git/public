@@ -19,6 +19,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.parser.PrologCompiler;
 import org.cs3.pl.prolog.ConsultService;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -57,14 +58,15 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         PDTPlugin plugin = PDTPlugin.getDefault();
         ConsultService meta = plugin.getConsultService(PDT.CS_METADATA);
         checker.saveMetaDataForClauses(meta.getOutputStream(fileName));
-        if(collector.getMaxSeverity()<IMarker.SEVERITY_ERROR){
+        if (collector.getMaxSeverity() < IMarker.SEVERITY_ERROR) {
             autoConsult(file);
         }
     }
 
     private void autoConsult(IFile file) throws CoreException {
-        IPrologProject plProject=(IPrologProject) file.getProject().getNature(PDT.NATURE_ID);
-        if(!plProject.isAutoConsulted(file)){
+        IPrologProject plProject = (IPrologProject) file.getProject()
+                .getNature(PDT.NATURE_ID);
+        if (!plProject.isAutoConsulted(file)) {
             return;
         }
         IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true,
@@ -72,30 +74,37 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         for (int i = 0; i < markers.length; i++) {
             int val = markers[i].getAttribute(IMarker.SEVERITY,
                     IMarker.SEVERITY_INFO);
-            
-            if (val == IMarker.SEVERITY_ERROR) {                
+
+            if (val == IMarker.SEVERITY_ERROR) {
                 return;
             }
         }
+
+        PDTPlugin plugin = PDTPlugin.getDefault();
+        String prologName = Util.normalizeOnWindoze(file.getLocation()
+                .toOSString());
+        PrologSession s = plugin.getPrologInterface().getSession();
         try {
-            PDTPlugin plugin = PDTPlugin.getDefault();
-            ConsultService consultService = plugin.getConsultService(PDT.CS_WORKSPACE);
-            InputStream in = file.getContents();
-            OutputStream out=consultService.getOutputStream(file.getFullPath().toString());
-            Util.copy(in,out);
-            in.close();
-            out.close();
-        } catch (IOException e) {
-            Debug.error("could not consult.");
-            Debug.report(e);
-        }        
+            s.queryOnce("['" + prologName + "']");
+        } finally {
+            s.dispose();
+        }
+        //            ConsultService consultService =
+        // plugin.getConsultService(PDT.CS_WORKSPACE);
+        //            InputStream in = file.getContents();
+        //            OutputStream
+        // out=consultService.getOutputStream(file.getFullPath().toString());
+        //            Util.copy(in,out);
+        //            in.close();
+        //            out.close();
+
     }
 
     /*
      * (non-Javadoc)
      * 
      * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
-     *           java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
+     *         java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
      */
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
@@ -229,16 +238,16 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         });
     }
 
-    private void forget(IFile file) {        
+    private void forget(IFile file) {
         ConsultService meta = PDTPlugin.getDefault().getConsultService(
                 PDT.CS_METADATA);
-        
+
         String s = file.getFullPath().toString();
         //FIXME:
         throw new RuntimeException("FIXME: how to unconuslt metadata?");
-//        if(meta.isConsulted(s)){
-//            meta.unconsult(s);
-//        }
+        //        if(meta.isConsulted(s)){
+        //            meta.unconsult(s);
+        //        }
     }
 
     /**
