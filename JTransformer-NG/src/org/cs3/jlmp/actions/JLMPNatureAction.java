@@ -1,4 +1,5 @@
 package org.cs3.jlmp.actions;
+import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
@@ -72,7 +73,7 @@ public class JLMPNatureAction implements IObjectActionDelegate {
         IProjectDescription ipd = project.getDescription();
         String[] oldNIDs = ipd.getNatureIds();
         String[] newNIDs = new String[oldNIDs.length + 1];
-        newNIDs[0] = JLMPProjectNature.NATURE_ID;
+        newNIDs[0] = JLMP.NATURE_ID;
         System.arraycopy(oldNIDs, 0, newNIDs, 1, oldNIDs.length);
 		ipd.setNatureIds(newNIDs);
 		  if(!project.isSynchronized(IResource.DEPTH_ONE)){

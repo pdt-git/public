@@ -1,6 +1,6 @@
 /*
  */
-package org.jlmp.internal.hooks;
+package org.cs3.jlmp.internal.hooks;
 
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.natures.JLMPProjectNature;

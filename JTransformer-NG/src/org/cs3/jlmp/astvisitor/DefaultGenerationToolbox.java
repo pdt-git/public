@@ -1,7 +1,6 @@
 package org.cs3.jlmp.astvisitor;
 
 import org.cs3.jlmp.bytecode.IDManagerIType;
-import org.cs3.pl.prolog.PrologSession;
 
 
 /**
@@ -17,11 +16,11 @@ public class DefaultGenerationToolbox extends FactGenerationToolBox {
 	 * local IDs, and a local table for fqn()-Terms.
 	 */
 	
-	public DefaultGenerationToolbox(PrologSession client) {
+	public DefaultGenerationToolbox() {
 		provider = new LocalIDGenerator();
 		fqntrans = new LocalIDFQNTranslator((LocalIDGenerator)provider);
 		idresolver = new IDResolver(fqntrans, provider);
 		tresolver = new TypeResolver(fqntrans);
-		manager = new IDManagerIType(client, fqntrans, provider);
+		manager = new IDManagerIType(fqntrans, provider);
 	}
 }

@@ -103,6 +103,8 @@ public class FactBaseBuilder {
 
     private IProject project;
 
+    private PrintStream out;
+
     /**
      *  
      */
@@ -122,11 +124,11 @@ public class FactBaseBuilder {
      * Implementation may run the build process in a seperate job.
      * 
      * @param delta
-     *                    the delta containing the changed Resources
+     *                  the delta containing the changed Resources
      * @param flags
-     *                    a logical or of the constants defined in this class
+     *                  a logical or of the constants defined in this class
      * @param monitor
-     *                    a IProgressMonitor object
+     *                  a IProgressMonitor object
      */
 
     public synchronized void build(final IResourceDelta delta, final int flags,
@@ -210,9 +212,10 @@ public class FactBaseBuilder {
             project = jlmpProject.getProject();
 
             metaDataEXT = pif.getConsultService(JLMP.EXT);
-            metaDataEXT.setRecording(true);
+            metaDataEXT.setRecording(false);
             metaDataSRC = pif.getConsultService(JLMP.SRC);
-            metaDataSRC.setRecording(true);
+            metaDataSRC.setRecording(false);
+
             Debug.info("Resource delta recieved: " + delta);
 
             if ((flags & CLEAR_PRJ_FACTS) != 0) {
@@ -317,16 +320,20 @@ public class FactBaseBuilder {
                             + file, IProgressMonitor.UNKNOWN);
 
                     forgetFacts(file, delete, false);
-
-                    if (!buildFacts(file)) {
-                        // if an exception in thrown while building,
-                        // the system may look for unresolved types and
-                        // fail in loadExternalFacts(monitor)
-                        errorsInCode = true;
-                        prologClient.query("assert(errors_in_java_code)");
+                    out = metaDataSRC.getOutputStream("flat.pl");
+                    try {
+                        if (!buildFacts(file)) {
+                            // if an exception in thrown while building,
+                            // the system may look for unresolved types and
+                            // fail in loadExternalFacts(monitor)
+                            errorsInCode = true;
+                            prologClient.query("assert(errors_in_java_code)");
+                        }
+                    } finally {
+                        out.close();
+                        monitor.done();
                     }
 
-                    monitor.done();
                 }
                 for (Iterator i = toDelete.iterator(); i.hasNext();) {
 
@@ -349,7 +356,9 @@ public class FactBaseBuilder {
 
             if ((flags & IGNORE_EXT_FACTS) == 0 && loadedJavaFile
                     && !errorsInCode) {
+
                 loadExternalFacts(monitor);
+
             }
 
             //ld: this should be finer grained!
@@ -388,7 +397,7 @@ public class FactBaseBuilder {
         prologClient.queryOnce("delete_toplevel('" + path + "')");
         if (delete) {
             Debug.debug("Deleting resource " + path);
-            metaDataSRC.unconsult(path);
+            // metaDataSRC.unconsult(path);
         }
     }
 
@@ -412,6 +421,7 @@ public class FactBaseBuilder {
 
         try {
             icu.becomeWorkingCopy(null, null);
+            jlmpProject.writeFacts(icu, out);
         } catch (JavaModelException jme) {
             // if this exception occurs, the java file is in some way bad. Thats
             // ok,
@@ -421,66 +431,7 @@ public class FactBaseBuilder {
             Debug.report(jme);
             return false;
         }
-        
-        String path = resource.getFullPath().removeFileExtension().addFileExtension("pl").toString() ;
-
-        if (metaDataSRC.getTimeStamp(path) >= resource.getModificationStamp()) {
-            Debug.debug("Using old version of " + path);
-            //should already be loaded
-            //metaDataSRC.consult(path);
-            return true;
-        } else
-            Debug.debug("Rebuilding " + path + " from scratch");
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);//metaDataSRC.getPrependablePrologWriter(path);
-        FactGenerationToolBox box = new DefaultGenerationToolbox(prologClient);
-        FactGenerator visitor = new FactGenerator(icu, resource.getFullPath()
-                .toString(), box, plw);
-
-        ASTParser parser = ASTParser.newParser(AST.JLS2);
-        parser.setSource(icu);
-        parser.setResolveBindings(true);
-        cu = (CompilationUnit) parser.createAST(null);
-        try {
-            cu.accept(visitor);
-            plw.writeQuery("retractLocalSymtab");
-            plw.flush();
-            String data = sw.getBuffer().toString();
-            sw.getBuffer().setLength(0);
-            Map mapping = box.getFQNTranslator().getFQNMapping();
-            writeSymTab(plw, mapping);
-            plw.flush();
-            plw.close();
-            String header = sw.getBuffer().toString();
-            PrintStream out = metaDataSRC.getOutputStream(path);
-            out.println(header);
-            out.println(data);
-            out.close();
-        } catch (Exception e) {
-            String msg = "parsing of the " + path + " failed.";
-            Debug.debug(msg);
-            plw.close();
-
-            return false;
-        }
         return true;
-
-    }
-
-    private void writeSymTab(PrologWriter plw, Map mapping) {
-        Set set = mapping.keySet();
-        boolean temp = plw.getInterpretMode();
-        plw.setInterpretMode(false);
-        try {
-            for (Iterator it = set.iterator(); it.hasNext();) {
-
-                String fqn = (String) it.next();
-                String id = (String) mapping.get(fqn);
-                plw.writeFact("local2FQN", new String[] { id, fqn });
-            }
-        } finally {
-            plw.setInterpretMode(temp);
-        }
     }
 
     protected List getUnresolvedTypes() {
@@ -503,44 +454,30 @@ public class FactBaseBuilder {
             throws IOException, CoreException {
         List unresolved = getUnresolvedTypes();
 
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);
         Set seen = new HashSet();
         while (!unresolved.isEmpty()) {
-
-            for (Iterator iter = unresolved.iterator(); iter.hasNext();) {
-                String typeName = (String) iter.next();
-                if (seen.contains(typeName)) {
-                    throw new RuntimeException(
-                            "saw type before, so something seems broken. "
-                                    + typeName);
+            out = metaDataEXT.getOutputStream("flat.pl");
+            try {
+                for (Iterator iter = unresolved.iterator(); iter.hasNext();) {
+                    String typeName = (String) iter.next();
+                    if (seen.contains(typeName)) {
+                        throw new RuntimeException(
+                                "saw type before, so something seems broken. "
+                                        + typeName);
+                    }
+                    seen.add(typeName);
+                    try {
+                        jlmpProject.writeFacts(typeName, out);
+                    } catch (ClassNotFoundException e) {
+                        failed.add(typeName);
+                    }
                 }
-                seen.add(typeName);
-                try {
-                    FactGenerationToolBox box = new DefaultGenerationToolbox(
-                            prologClient);
-                    new ByteCodeFactGeneratorIType(project, plw, typeName, box)
-                            .writeAllFacts();
-                    plw.writeQuery("retractLocalSymtab");
-                    plw.flush();
-                    String data = sw.toString();
-                    sw.getBuffer().setLength(0);
-                    Map mapping = box.getFQNTranslator().getFQNMapping();
-                    writeSymTab(plw, mapping);
-                    plw.flush();
-                    String header = sw.toString();
-                    sw.getBuffer().setLength(0);
-                    String fileName = typeName.replace('.', '/')+".pl";
-                    PrintStream out = metaDataEXT.getOutputStream(fileName);
-                    out.println(header);
-                    out.println(data);
-                    out.close();
-                } catch (ClassNotFoundException e) {
-                    failed.add(typeName);
-                }
+            } finally {
+                out.close();
             }
             unresolved = getUnresolvedTypes();
         }
+
     }
 
     /**
@@ -552,7 +489,7 @@ public class FactBaseBuilder {
 
     /**
      * @param jlmpProject
-     *                    The jlmpProject to set.
+     *                  The jlmpProject to set.
      */
     public void setJlmpProject(JLMPProjectNature jlmpProject) {
         this.jlmpProject = jlmpProject;

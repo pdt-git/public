@@ -29,7 +29,7 @@ public class IDManagerIType {
 	
 	private HashMap known = new HashMap();
 	
-	private PrologSession  manager;
+	
 
 	private IType envClass;
 
@@ -38,8 +38,7 @@ public class IDManagerIType {
 	private FQNTranslator fqn;
 	private IIDGenerator ids;
 	
-	public IDManagerIType(PrologSession client, FQNTranslator fqn, IIDGenerator ids){
-		manager = client;
+	public IDManagerIType(FQNTranslator fqn, IIDGenerator ids){		
 		this.fqn = fqn;
 		this.ids = ids;
 	}
@@ -98,12 +97,12 @@ public class IDManagerIType {
 	 * @param p
 	 * @return
 	 */
-	public boolean knowsPackage(Package p) {
+	public boolean knowsPackage(PrologSession s,Package p) {
 		if (known.containsKey(p))
 			return true;
 		else {
 			/* Prolog lookup */
-			boolean rv = lookupPackage(p);
+			boolean rv = lookupPackage(s,p);
 			known.put(p, new Boolean(rv));
 			return rv;
 		}
@@ -263,8 +262,8 @@ public static int getArrayDim(String type) {
 	 * @param p
 	 * @return
 	 */
-	private boolean lookupPackage(Package p) {
-		Map h = manager.queryOnce("packageT(X, '" + p.getName() +"')");
+	private boolean lookupPackage(PrologSession session,Package p) {
+		Map h = session.queryOnce("packageT(X, '" + p.getName() +"')");
 		if (h != null && h.containsKey("X"))
 			return true;
 		

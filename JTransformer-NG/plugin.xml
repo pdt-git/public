@@ -20,6 +20,7 @@
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.junit"/>
    </requires>
 
 
@@ -87,7 +88,7 @@
    <extension
          point="org.cs3.pdt.hooks">
       <hook
-            class="org.jlmp.internal.hooks.ReloadHook"
+            class="org.cs3.jlmp.internal.hooks.ReloadHook"
             id="ReloadHook"/>
    </extension>
 </plugin>
