@@ -5,6 +5,8 @@ package org.cs3.jlmp;
 import java.io.IOException;
 import java.io.PrintStream;
 
+import org.cs3.jlmp.regenerator.ISourceRegenerator;
+import org.cs3.jlmp.regenerator.SourceCodeRegenerator;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
@@ -107,5 +109,9 @@ public interface JLMPProject {
      */
     public void reconfigure();
 
+    /**
+     * @return a source code regenerator for this project.
+     */
+    public ISourceRegenerator getSourceRegenerator();
     
 }

@@ -12,6 +12,8 @@ import org.cs3.jlmp.JLMPProject;
 import org.cs3.jlmp.JLMPProjectEvent;
 import org.cs3.jlmp.JLMPProjectListener;
 import org.cs3.jlmp.internal.builders.FactBaseBuilder;
+import org.cs3.jlmp.regenerator.ISourceRegenerator;
+import org.cs3.jlmp.regenerator.SourceCodeRegenerator;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
@@ -425,6 +427,18 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
             throw e;
         } finally {
             s.dispose();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.cs3.jlmp.JLMPProject#getSourceRegenerator()
+     */
+    public ISourceRegenerator getSourceRegenerator() {       
+        try {
+            return new SourceCodeRegenerator(getPrologInterface());
+        } catch (IOException e) {
+            Debug.report(e);
+            throw new RuntimeException(e);
         }
     }
 

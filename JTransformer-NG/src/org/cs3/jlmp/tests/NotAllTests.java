@@ -12,6 +12,7 @@ public class NotAllTests {
     public static Test suite() {
         TestSuite suite = new TestSuite("Test for org.cs3.jlmp.tests");
         //$JUnit-BEGIN$
+        suite.addTestSuite(SourceCodeRegeneratorTest.class);
         suite.addTestSuite(BuilderTest.class);
         suite.addTestSuite(FullQualifiedNameTest.class);
         suite.addTestSuite(NormalizeTest.class);
