@@ -1,0 +1,86 @@
+/*
+ * Created on 21.10.2003
+ *
+ */
+package ct.refactoring.test;
+
+interface Bag {
+  public java.util.Iterator iterator();
+  public List add(Object element);
+  public List addAll(List l0);
+}
+class List implements Bag {
+  int size = 0;
+  Object[] elems = new Object[10];
+  public java.util.Iterator iterator() {
+    return new Iterator(this);
+  }
+  public List add(Object e) {
+    if (this.size + 1 == this.elems.length) {
+      Object[] newObjects = new Object[2 * this.size];
+      System.arraycopy(this.elems, 0, newObjects, 0, this.size);
+      this.elems = newObjects;
+    }
+    this.elems[this.size++] = e;
+    return this;
+  }
+  public List addAll(List l1) {
+    java.util.Iterator i = l1.iterator();
+    for (; i.hasNext(); this.add(i.next()));
+    return this;
+  }
+  public void sort() {
+    for (int t = 0; t < this.size; t++) {
+      for (int u = t + 1; u < this.size; u++) {
+        Object e1 = this.elems[t];
+        Comparable e2 = (Comparable) this.elems[u];
+        if (e2.compareTo(e1) < 0) {
+          this.elems[t] = e2;
+          this.elems[u] = e1;
+        }
+      }
+    }
+  }
+}
+class Iterator implements java.util.Iterator {
+  private int count = 0;
+  private List l2;
+  Iterator(List l3) {
+    this.l2 = l3;
+  }
+  public boolean hasNext() {
+    return this.count < this.l2.size;
+  }
+  public Object next() {
+    return this.l2.elems[this.count++];
+  }
+  public void remove() {
+    throw new UnsupportedOperationException();
+  }
+}
+class Client {
+  public static void main(String[] args) {
+    List l4 = createList();
+    populate(l4);
+    update(l4);
+    sortList(l4);
+    print(l4);
+  }
+  static List createList() {
+    return new List();
+  }
+  static void populate(List l5) {
+    l5.add("foo").add("bar");
+  }
+  static void update(List l6) {
+    List l7 = new List().add("zap").add("baz");
+    l6.addAll(l7);
+  }
+  static void sortList(List l8) {
+    l8.sort();
+  }
+  static void print(List l9) {
+    for (java.util.Iterator iter = l9.iterator(); iter.hasNext();)
+      System.out.println("Object: " + iter.next());
+  }
+}

@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- Schema file written by PDE -->
+<schema targetNamespace="org.cs3.pl.JTransformer.factbase">
+<annotation>
+      <appInfo>
+         <meta.schema plugin="org.cs3.pl.JTransformer.factbase" id="observer" name="JTransformer factbase observer"/>
+      </appInfo>
+      <documentation>
+         This extension is used for oberservers of fact base updates.
+      </documentation>
+   </annotation>
+
+   <element name="extension">
+      <complexType>
+         <sequence>
+            <element ref="observer" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="point" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="observer">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a unique name that will be used to reference this observer.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a translatable name that will be used for presenting this observer in the UI.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  a fully qualified name of the Java class that implements &lt;samp&gt;org.cs3.pl.extension.IFactbaseUpdatedObserver&lt;/samp&gt; interface.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn="org.cs3.pl.extension.IJTransformerObserver"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="since"/>
+      </appInfo>
+      <documentation>
+         2.0.1_hotfix_8
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="examples"/>
+      </appInfo>
+      <documentation>
+         &lt;p&gt;
+   &lt;pre&gt;
+      &lt;extension point=&quot;org.cs3.pl.extension.factbase.updated&quot;&gt;
+         &lt;parser
+            id=&quot;com.example.xyz.observer1&quot;
+            name=&quot;Observer 1&quot;
+            class=&quot;com.example.xyz.Observer1&quot;&gt;
+         &lt;/parser&gt;
+      &lt;/extension&gt;
+   &lt;/pre&gt;
+   &lt;/p&gt;
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="apiInfo"/>
+      </appInfo>
+      <documentation>
+         Plug-ins that want to extend this extension point must implement &lt;samp&gt;org.cs3.pl.extension.IFactbaseUpdatedObserver&lt;/samp&gt; interface.
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="implementation"/>
+      </appInfo>
+      <documentation>
+         PDTPlugin offeres the interface org.cs3.pl.extension.IFactbaseUpdatedObserver...
+      </documentation>
+   </annotation>
+
+   <annotation>
+      <appInfo>
+         <meta.section type="copyright"/>
+      </appInfo>
+      <documentation>
+         
+      </documentation>
+   </annotation>
+
+</schema>

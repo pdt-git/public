@@ -1,0 +1,36 @@
+Installation help for the JTransformer Plugin
+
+This document describes how to deploy the JTransformer2 Plugin under Linux
+Systems. Any additions or remarks are welcome.
+
+Installation:
+
+1) Download JTransformer from roots.iai.uni-bonn.de (since you are reading
+   this document, you most likely did that already)
+2) Unzip the file into your eclipse directory
+3) Install SWI-Prolog, version >= 5.3.12, including the jpl package (If you
+   encounter problems, see the SWI-Installation section
+4) If necessary, add the paths to libjava.so and libjvm.so (often found under
+   /opt/java/jre/i386 and /opt/java/jre/i386/server) to /etc/ld.so.conf.
+4a) If this is not possible, add these directories to the environment variable
+    LD_SO_PATH before using eclipse
+5) Edit your .plrc file (found in your home directory) to include the line:
+   :- use_module(library(jpl)).
+6) Build an alias for eclipse as follows: 
+alias eclipse=/bin/sh -c 'LD_LIBRARY_PATH=/usr/local/lib/pl-5.3.12/lib/i686-linux/ eclipse'
+6a) If you use another platform then i686-linux, use your platforms description
+6b) If you use another version of SWI-Prolog, use this versions home dir.
+7) Start eclipse using this alias. 
+
+SWI-Installation:
+
+Build SWI-Prolog from source. If the jpl-package fails to configure, use the
+following steps:
+
+1) ./configure --with-world
+2) make (this will fail)
+3) cd packages
+4) JAVAC=javac configure
+5) make
+6) cd ..
+7) make install-world

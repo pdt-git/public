@@ -1,0 +1,50 @@
+package engine.ct.refactoring.test;
+
+
+abstract interface ILeft {
+    void l(int i);
+    void lt(int i);
+    void lm(int i);
+    void lb(int i);
+    void ltmb(int i);
+}
+
+abstract interface ITop {
+    void t(int i);
+    void lt(int i);
+    void tb(int i);
+    void ltmb(int i);
+}
+
+abstract interface IMiddle extends ITop {
+    void m(int i);
+    void lm(int i);
+    void ltmb(int i);
+    void l(int i, int j);
+    void tb(int i, int j);
+}
+
+abstract interface IBottom extends IMiddle, ILeft {
+    void b(int i);
+    void lb(int i);
+    void tb(int i);
+    void ltmb(int i);
+}
+
+public class TheClass implements IBottom, ILeft {
+    public TheClass() {
+    }
+    public void c(int i){ }
+    public void l(int i){ }
+    public void b(int i){ }
+    public void lt(int i){ }
+    public void lm(int i){ }
+    public void lb(int i){ }
+    public void ltmb(int i){ }
+    public void t(int i){ }
+    public void tb(int i){ }
+    public void m(int i){ }
+    public void tb(int i, int j){ }
+    public void l(int i, int j){ }
+}
+

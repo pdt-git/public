@@ -1,0 +1,82 @@
+
+An unexpected exception has been detected in native code outside the VM.
+Unexpected Signal : 11 occurred at PC=0x400DD63B
+Function=(null)+0x400DD63B
+Library=/lib/libc.so.6
+
+NOTE: We are unable to locate the function name symbol for the error
+      just occurred. Please refer to release documentation for possible
+      reason and solutions.
+
+
+Current Java thread:
+	at org.cs3.pl.prolog.ConsoleIOSession.createConsoleStruct(Native Method)
+	at org.cs3.pl.prolog.ConsoleIOSession.initialise(ConsoleIOSession.java:85)
+	at org.cs3.pl.prolog.ConsoleIOSession.main(ConsoleIOSession.java:139)
+
+Dynamic libraries:
+08048000-0804e000 r-xp 00000000 03:06 720928     /opt/sun-jdk-1.4.2.04/bin/java
+0804e000-0804f000 rw-p 00005000 03:06 720928     /opt/sun-jdk-1.4.2.04/bin/java
+40000000-40013000 r-xp 00000000 03:06 739707     /lib/ld-2.3.3.so
+40013000-40014000 rw-p 00012000 03:06 739707     /lib/ld-2.3.3.so
+40027000-40035000 r-xp 00000000 03:06 739714     /lib/libpthread-0.10.so
+40035000-40036000 rw-p 0000e000 03:06 739714     /lib/libpthread-0.10.so
+40078000-4007a000 r-xp 00000000 03:06 739716     /lib/libdl-2.3.3.so
+4007a000-4007b000 rw-p 00002000 03:06 739716     /lib/libdl-2.3.3.so
+4007b000-40183000 r-xp 00000000 03:06 739704     /lib/libc-2.3.3.so
+40183000-40187000 rw-p 00107000 03:06 739704     /lib/libc-2.3.3.so
+40189000-40584000 r-xp 00000000 03:06 737986     /opt/sun-jdk-1.4.2.04/jre/lib/i386/client/libjvm.so
+40584000-4059f000 rw-p 003fa000 03:06 737986     /opt/sun-jdk-1.4.2.04/jre/lib/i386/client/libjvm.so
+405b2000-405ba000 r-xp 00000000 03:06 722122     /opt/sun-jdk-1.4.2.04/jre/lib/i386/native_threads/libhpi.so
+405ba000-405bb000 rw-p 00007000 03:06 722122     /opt/sun-jdk-1.4.2.04/jre/lib/i386/native_threads/libhpi.so
+405c4000-405d6000 r-xp 00000000 03:06 739709     /lib/libnsl-2.3.3.so
+405d6000-405d7000 rw-p 00011000 03:06 739709     /lib/libnsl-2.3.3.so
+405d9000-405fa000 r-xp 00000000 03:06 739706     /lib/libm-2.3.3.so
+405fa000-405fb000 rw-p 00020000 03:06 739706     /lib/libm-2.3.3.so
+405fb000-405ff000 rw-s 00000000 00:0d 10951      /tmp/hsperfdata_terra/7867
+4060d000-40614000 r-xp 00000000 03:06 739708     /lib/libnss_compat-2.3.3.so
+40614000-40615000 rw-p 00006000 03:06 739708     /lib/libnss_compat-2.3.3.so
+40615000-4061d000 r-xp 00000000 03:06 739710     /lib/libnss_nis-2.3.3.so
+4061d000-4061e000 rw-p 00008000 03:06 739710     /lib/libnss_nis-2.3.3.so
+4061e000-40626000 r-xp 00000000 03:06 739721     /lib/libnss_files-2.3.3.so
+40626000-40627000 rw-p 00008000 03:06 739721     /lib/libnss_files-2.3.3.so
+40627000-40637000 r-xp 00000000 03:06 722132     /opt/sun-jdk-1.4.2.04/jre/lib/i386/libverify.so
+40637000-40639000 rw-p 0000f000 03:06 722132     /opt/sun-jdk-1.4.2.04/jre/lib/i386/libverify.so
+40639000-40659000 r-xp 00000000 03:06 722133     /opt/sun-jdk-1.4.2.04/jre/lib/i386/libjava.so
+40659000-4065b000 rw-p 0001f000 03:06 722133     /opt/sun-jdk-1.4.2.04/jre/lib/i386/libjava.so
+4065b000-4066f000 r-xp 00000000 03:06 722118     /opt/sun-jdk-1.4.2.04/jre/lib/i386/libzip.so
+4066f000-40672000 rw-p 00013000 03:06 722118     /opt/sun-jdk-1.4.2.04/jre/lib/i386/libzip.so
+40672000-42012000 r--s 00000000 03:06 722165     /opt/sun-jdk-1.4.2.04/jre/lib/rt.jar
+4205c000-42072000 r--s 00000000 03:06 722147     /opt/sun-jdk-1.4.2.04/jre/lib/sunrsasign.jar
+42072000-4214d000 r--s 00000000 03:06 722154     /opt/sun-jdk-1.4.2.04/jre/lib/jsse.jar
+4214d000-4215e000 r--s 00000000 03:06 722075     /opt/sun-jdk-1.4.2.04/jre/lib/jce.jar
+4215e000-426b7000 r--s 00000000 03:06 722162     /opt/sun-jdk-1.4.2.04/jre/lib/charsets.jar
+4cb67000-4cb83000 r--s 00000000 03:06 737993     /opt/sun-jdk-1.4.2.04/jre/lib/ext/sunjce_provider.jar
+4cb83000-4cb86000 r--s 00000000 03:06 737994     /opt/sun-jdk-1.4.2.04/jre/lib/ext/dnsns.jar
+4cb86000-4cc42000 r--s 00000000 03:06 737996     /opt/sun-jdk-1.4.2.04/jre/lib/ext/localedata.jar
+4cc42000-4cc4f000 r--s 00000000 03:06 737997     /opt/sun-jdk-1.4.2.04/jre/lib/ext/ldapsec.jar
+4cc4f000-4cc52000 r-xp 00000000 03:44 3686443    /home/terra/libjplstream.so
+4cc52000-4cc53000 rw-p 00002000 03:44 3686443    /home/terra/libjplstream.so
+4cc65000-4cd14000 r-xp 00000000 03:43 659431     /usr/lib/gcc-lib/i686-pc-linux-gnu/3.3.3/libstdc++.so.5.0.5
+4cd14000-4cd19000 rw-p 000ae000 03:43 659431     /usr/lib/gcc-lib/i686-pc-linux-gnu/3.3.3/libstdc++.so.5.0.5
+4cd1e000-4cd26000 r-xp 00000000 03:43 659609     /usr/lib/gcc-lib/i686-pc-linux-gnu/3.3.3/libgcc_s.so.1
+4cd26000-4cd27000 rw-p 00007000 03:43 659609     /usr/lib/gcc-lib/i686-pc-linux-gnu/3.3.3/libgcc_s.so.1
+
+Heap at VM Abort:
+Heap
+ def new generation   total 576K, used 248K [0x44760000, 0x44800000, 0x44c40000)
+  eden space 512K,  48% used [0x44760000, 0x4479e268, 0x447e0000)
+  from space 64K,   0% used [0x447e0000, 0x447e0000, 0x447f0000)
+  to   space 64K,   0% used [0x447f0000, 0x447f0000, 0x44800000)
+ tenured generation   total 1408K, used 0K [0x44c40000, 0x44da0000, 0x48760000)
+   the space 1408K,   0% used [0x44c40000, 0x44c40000, 0x44c40200, 0x44da0000)
+ compacting perm gen  total 4096K, used 1029K [0x48760000, 0x48b60000, 0x4c760000)
+   the space 4096K,  25% used [0x48760000, 0x488617c0, 0x48861800, 0x48b60000)
+
+Local Time = Fri Jul 16 15:20:45 2004
+Elapsed Time = 0
+#
+# The exception above was detected in native code outside the VM
+#
+# Java VM: Java HotSpot(TM) Client VM (1.4.2_04-b05 mixed mode)
+#

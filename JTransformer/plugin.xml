@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="org.cs3.pl.JTransformer"
+   name="JTransformer"
+   version="2.0.1.11"
+   class="org.cs3.pl.PDTPlugin">
+
+   <runtime>
+      <library name="jtransformer.jar">
+         <export name="*"/>
+         <packages prefixes="jpl,org"/>
+      </library>
+   </runtime>
+   <requires>
+      <import plugin="org.eclipse.ui.workbench"/>
+      <import plugin="org.eclipse.ant.ui"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.jdt.source"/>
+      <import plugin="org.eclipse.jdt"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.debug.core"/>
+      <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.junit"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.team.core" optional="true"/>
+      <import plugin="org.eclipse.update.configurator"/> 
+   </requires>
+   <extension-point id="factbase.observer" name="factbase" schema="schema/org.cs3.jtransformer.factbase.observer.exsd"/>
+
+
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="org.cs3.pl.actionSet1"
+            visible="true"
+            id="org.cs3.pl.actionSet1">
+         <menu
+               label="Prolo&amp;g"
+               id="org.cs3.pl.menu.Prolog">
+            <separator
+                  name="group">
+            </separator>
+            <separator
+                  name="Fact Generation">
+            </separator>
+            <separator name="group2"/>
+         </menu>
+         <action
+               accelerator="F9"
+               label="consult"
+               class="org.cs3.pl.buttons.ConsultActionDelegate"
+               tooltip="consult the the current file"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.consult.button">
+         </action>
+         <action
+               label="prologdoc"
+               accelerator=""
+               class="org.cs3.pl.buttons.PrologDocActionDelegate"
+               tooltip="generate documentation for the current file"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.consult.button"/>
+         <action
+               accelerator="Ctrl+F9"
+               label="restart"
+               class="org.cs3.pl.buttons.RestartButton"
+               tooltip="restart the prolog process"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.restart.button">
+         </action>
+         <action
+               accelerator="Ctrl+Alt+d"
+               label="debug"
+               class="org.cs3.pl.buttons.DebugButton"
+               tooltip="debug mode"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.debug.button">
+         </action>
+         <action
+               accelerator="Ctrl+Alt+t"
+               label="trace"
+               class="org.cs3.pl.buttons.TraceButton"
+               tooltip="toggle trace mode"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.consult.button">
+         </action>
+         <action
+               accelerator="Ctrl+Alt+F10"
+               label="halt"
+               class="org.cs3.pl.buttons.HaltButton"
+               tooltip="halt the prolog process"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.restart.button">
+         </action>
+         <action
+               accelerator="Ctrl+Alt+a"
+               label="assert"
+               tooltip="toggle trace mode"
+               class="org.cs3.pl.buttons.AssertButton"
+               menubarPath="org.cs3.pl.menu.Prolog/group"
+               id="org.cs3.pl.consult.button">
+         </action>
+         <action
+               label="help"
+               class="org.cs3.pl.buttons.HelpActionDelegate"
+               tooltip="swi-prolog online help"
+               menubarPath="org.cs3.pl.menu.Prolog/group2"
+               id="org.cs3.pl.help.button">
+         </action>
+         <action
+               accelerator="Ctrl+Alt+Shift+R"
+               label="regenerate classes"
+               tooltip="regenerate java sourcecode from prolog"
+               class="org.cs3.pl.buttons.RegenButton"
+               menubarPath="org.cs3.pl.menu.JTransformer/group"
+               id="org.cs3.pl.regenerateclasses.button">
+         </action>
+         <action
+               accelerator="Ctrl+Alt+C"
+               label="facts to query view"
+               class="org.cs3.pl.buttons.FactsToClipboard"
+               tooltip="consult the the current file"
+               menubarPath="org.cs3.pl.menu.JTransformer/group"
+               id="org.cs3.pl.factstoclipboard.button">
+         </action>
+         <menu
+               label="JTransformer"
+               id="org.cs3.pl.menu.JTransformer">
+            <groupMarker
+                  name="group">
+            </groupMarker>
+         </menu>
+         <action
+               accelerator="Ctrl+Alt+Shift+T"
+               label="write to transformed"
+               class="org.cs3.pl.buttons.WriteToTransformed"
+               tooltip="write all classes in the factbase to transformed project"
+               menubarPath="org.cs3.pl.menu.JTransformer/group"
+               id="org.cs3.pl.writetotranformed.button">
+         </action>
+         <action
+               label="rollback"
+               class="org.cs3.pl.buttons.RollbackButton"
+               tooltip="rollback all changes to the fact base made by CTs"
+               menubarPath="org.cs3.pl.menu.JTransformer/group"
+               id="org.cs3.pl.rollback.button">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="PL Editor"
+            icon="icons/prolog_file.gif"
+            extensions="pl"
+            class="org.cs3.pl.editors.PLEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            id="org.cs3.pl.editors.PLEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Prolog Console"
+            id="console">
+      </category>
+      <view
+            name="Prolog Console"
+            icon="icons/JTransformer.gif"
+            category="console"
+            class="org.cs3.pl.views.PrologConsole"
+            id="org.cs3.pl.views.PrologConsole">
+      </view>
+   </extension>
+   <extension
+         id="org.cs3.pl.PDTPerspective"
+         name="PLPerspective"
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               ratio="0.5"
+               relative="org.eclipse.ui.views.TaskList"
+               relationship="right"
+               id="org.cs3.pl.views.PrologConsole">
+         </view>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.cs3.pl.PLPerspective">
+         <newWizardShortcut
+               id="org.eclipse.jdt.ui.wizards.NewProjectCreationWizard">
+         </newWizardShortcut>
+         <viewShortcut
+               id="org.cs3.pl.views.PrologConsole">
+         </viewShortcut>
+         <perspectiveShortcut
+               id="org.eclipse.debug.ui.DebugPerspective">
+         </perspectiveShortcut>
+         <actionSet
+               id="org.eclipse.jdt.ui.JavaActionSet">
+         </actionSet>
+         <view
+               relative="org.eclipse.ui.views.ResourceNavigator"
+               id="org.eclipse.jdt.ui.PackageExplorer"
+               relationship="stack">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         id="JLMPProjectNature"
+         name="JLMP Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.cs3.pl.natures.JLMPProjectNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.cs3.pl.JTransformer.JLMPProjectBuilder">
+      </builder>
+   </extension>
+   <extension
+         id="JLMPProjectBuilder"
+         name="JLMPProjectBuilder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="org.cs3.pl.builders.JLMPProjectBuilder">
+         </run>
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="JLMPProjectObjectContribution">
+         <action
+               label="Have JLMP Nature "
+               style="toggle"
+               tooltip="Assignes/retracts JLMP nature to/from a project"
+               class="org.cs3.pl.actions.JLMPNatureAction"
+               id="JLMPNatureAction">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="ProjectObjectExtension">
+         <action
+               label="Export project factbase"
+               icon="icons/sample.gif"
+               class="org.cs3.pl.export.FactbaseExport"
+               tooltip="Create a new factbase for this project and save it into a file."
+               style="push"
+               id="org.cs3.pl.export.factbaseexport">
+         </action>
+      </objectContribution>
+      
+   </extension>
+   <extension
+         id="JLMPProjectInitializer"
+         name="JLMP Project Initializer"
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.cs3.pl.startup.JLMPProjectInitializer">
+      </startup>
+   </extension>
+   
+<extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="PDTPlugin Prolog Editor"
+            id="pdtplugin.pleditor.commands"/>
+      <command
+            category="pdtplugin.pleditor.commands"
+            categoryId="pdtplugin.pleditor.commands"
+            name="PLEditor Context Information"
+            id="org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc"/>
+	  <keyBinding
+            string="F2"
+            scope="org.eclipse.jdt.ui.prologEditorScope"
+            command="org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+   <keyBinding/>
+       </extension>   
+       
+<!--
+<extension point="org.eclipse.ui.editorActions"> 
+   <editorContribution 
+      id="org.cs3.pl.editors.pleditor.action.contribution" 
+   targetID="org.cs3.pl.editors.PLEditor">
+        <menu
+         id="org.cs3.pl.prolog.editor.menu"
+         label="Prolog Editor"
+         path="additions">
+         <separator name="group"/>
+      </menu>
+         <action
+               label="find references"
+               class="org.cs3.pl.buttons.ReferencesActionDelegate"
+               tooltip="find all references to the selected predicate"
+               menubarPath="org.cs3.pl.prolog.editor.menu/group"
+               id="org.cs3.pl.referencespredicate.action"
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace">
+         </action>
+         <action
+               label="toggle spy"
+               class="org.cs3.pl.buttons.SpyPointActionDelegate"
+               tooltip="toggle spy point on selected predicate"
+               menubarPath="org.cs3.pl.prolog.editor.menu/group"
+               id="org.cs3.pl.spy.point.action"
+               definitionId="org.eclipse.debug.ui.commands.ToggleBreakpoint">
+         </action>
+         
+   </editorContribution> 
+</extension>
+-->
+         <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            name="Editing Prolog Sourcecode"
+            description="%context.editingPrologSource.description"
+            parentId="org.eclipse.ui.textEditorScope"
+            id="org.eclipse.jdt.ui.prologEditorScope">
+      </context>
+   </extension>   
+
+	<extension point="org.eclipse.team.core.fileTypes">
+	        <fileTypes extension="pl" type="text"/>
+	</extension> 
+
+
+	<extension
+		id="PrologSearchResultPage"
+		point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id="org.cs3.pl.search.PrologSearchViewPage"
+			searchResultClass="org.cs3.pl.search.PrologSearchResult"
+			class="org.cs3.pl.search.PrologSearchViewPage">
+		</viewPage>
+	</extension>
+
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="JTransformer"
+            class="org.cs3.pl.PDTPreferencePage"
+            id="org.cs3.pl.PDTPreferencePage">
+      </page>
+   </extension>
+<!--	<extension
+    point = "org.eclipse.ui.viewActions">
+      <viewContribution 
+         id="org.cs3.pl.auto.consult.vc" 
+         targetID="org.eclipse.ui.views.ResourceNavigator">        
+	   <action
+          enablesFor="1"
+          toolbarPath="additions"
+          label="toggle auto consult"
+          class="org.cs3.pl.views.AutomaticConsultActionDelegatee"
+          tooltip="toggle to automatic consultation of the file at the prolog startup (including restarts)"
+          icon="icons/sample.gif"
+          style="toggle"
+          menubarPath="additions"
+          id="org.cs3.pl.auto.consult.va"> 
+		<selection class="org.eclipse.core.resources.IFile" name="*.pl"/> 
+	   </action>
+      </viewContribution>
+ 	</extension> -->
+ <extension
+       point="org.cs3.pl.JTransformer.factbase.observer">
+       <observer
+            class="org.cs3.pl.TestObserver"
+            name="JTransformer2_Head.observer2"
+            id="JTransformer2_Head.observer2"/>
+ </extension>
+
+
+
+</plugin>
