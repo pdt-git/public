@@ -49,7 +49,8 @@ public class LoggerTest extends TestCase {
 		{
 			Thread.sleep(1800);
 		} catch (Exception e) { e.printStackTrace(); }
-		
+	
+		System.out.println("Trying to display contents of the logfile here:\n");
 		System.out.println(logger.readLog());
 		
 		assertEquals(1,1);
