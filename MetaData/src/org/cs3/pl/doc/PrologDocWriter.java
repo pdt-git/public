@@ -11,8 +11,6 @@ import java.util.HashMap;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.fileops.MetaDataManager;
-import org.cs3.pl.fileops.MetaDataManagerFactory;
-import org.cs3.pl.fileops.PrologMetaDataManager;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.SessionException;
 
@@ -24,37 +22,6 @@ public class PrologDocWriter extends HTMLWriter {
 
 
     String dir;
-   
-    /** Creates a new instance of DocWriter */
-    public PrologDocWriter(String targetdir) {
-        super("stylesheet.css");
-        this.dir = targetdir;
-    }
-
-    
-    public void writeHead(String module) throws IOException {
-        super.writeHead(module);
-        write(        
-            "<!-- ========== START OF NAVBAR ========== -->\n"+
-            "<A NAME=\"navbar_top\"><!-- --></A>\n"+
-            "<TABLE BORDER=\"0\" WIDTH=\"100%\" CELLPADDING=\"1\" CELLSPACING=\"0\">\n"+
-            "<TR>\n"+
-            "<TD COLSPAN=2 BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">\n"+
-            "<A NAME=\"navbar_top_firstrow\"><!-- --></A>\n"+
-            "<TABLE BORDER=\"0\" CELLPADDING=\"0\" CELLSPACING=\"3\">\n"+
-            "<TR ALIGN=\"center\" VALIGN=\"top\">\n"+
-            "<TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\""+moveInDirectoryHierachy+ "overview-summary.html\"><FONT ID=\"NavBarFont1\"><B>Overview</B></FONT></A>&nbsp;</TD>\n"+
-            "<TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\""+moveInDirectoryHierachy + module +".pl"+ "\"><FONT ID=\"NavBarFont1\"><B>Library</B></FONT></A>&nbsp;</TD>\n"+
-            "</TR>\n"+
-            "</TABLE>\n"+
-            "</TD>\n"+
-            "<TD ALIGN=\"right\" VALIGN=\"top\" ROWSPAN=3><EM>\n"+
-            "</EM>\n"+
-            "</TD>\n"+
-            "</TR>\n"+
-            "</TABLE>\n");
-
-    }
     
 //    public void write(Library tree) {
 //        File mkdir = new File(dir + tree.name);
@@ -93,7 +60,52 @@ public class PrologDocWriter extends HTMLWriter {
 //        }
 //    }
     
-    MetaDataManager manager = MetaDataManagerFactory.getMetaDataManager(PrologMetaDataManager.DOC,"html");
+    MetaDataManager manager ;
+    
+
+//    public void writeAllClassesFrame(LibraryTypes types) {
+//        Vector libs = types.getAllElements();
+//        this.openStream(dir + "allclasses-frame.html");
+//        writeDefaultHeader("All Classes");
+//        this.writeStream(
+//            "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n"+
+//            "<B>All Classes</B></FONT>\n"+
+//            "<BR>\n"+
+//            "<TABLE BORDER=\"0\" WIDTH=\"100%\">\n"+
+//            "<TR>\n"+
+//            "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">\n");
+//        
+//        for(int i = 0; i< libs.size(); i++) {
+//            Library lib = (Library)libs.get(i);
+//            for(int j = 0; j < lib.classes.size(); j++) {
+//                Clazz clazz = (Clazz)lib.classes.get(j);
+//                this.writeStream(
+//                    "<A HREF=\""+ clazz.fileName() + "\" TARGET=\"classFrame\">" + 
+//                    clazz.name + "</A>\n" +
+//                    "<BR>\n");
+//
+//            }
+//        }
+//        this.writeStream(
+//            "</FONT></TD>\n"+
+//            "</TR>\n"+
+//            "</TABLE>\n");
+//        writeTail();
+//        closeStream();
+//    }
+
+    String moveInDirectoryHierachy = "..\\";
+   
+    /** Creates a new instance of DocWriter */
+    public PrologDocWriter(MetaDataManager manager,String targetdir) {
+        super("stylesheet.css");
+        this.dir = targetdir;
+        this.manager=manager;
+    }
+
+    public String getDocumentationFile(PrologModule module) {
+    	return manager.getFullPath(module.getFilename());
+    }
 
     public void write(PrologModule module) throws IOException {
 //    	File file = new File(dir + module.getHelpFilename());
@@ -108,10 +120,6 @@ public class PrologDocWriter extends HTMLWriter {
 
         writeTail();
         close();
-    }
-
-    public String getDocumentationFile(PrologModule module) {
-    	return manager.getFullPath(module.getFilename());
     }
 
 
@@ -130,6 +138,54 @@ public class PrologDocWriter extends HTMLWriter {
             module.getName() + "</H2>\n"+
             help+"\n"+
             "<BR>\n");
+    }
+
+    void writeDetailEntry(PrologElementData data) throws IOException {
+    	String help = null;
+    	try {
+            help=data.getHelp();
+        } catch (SessionException e) {
+            Debug.report(e);
+        }
+    	if (help == null)
+    		help = "";
+        write(
+            "\n<!-- DETAIL ENTRY -->\n"+
+            "<A NAME=\""+data.getSignature()+ "\"><!-- --></A>\n" +
+            "<H3>"+ data.getSignature() +"</H3>\n"+
+            "<DL>\n"+
+            "<DD><PRE>" +help+"</PRE>\n"+
+            "<P><DD><DL>\n");
+        write(
+            "</DD>\n"+
+            "</DL>\n"+
+            "</DL>\n"+
+            "<HR>\n");
+    }
+
+    
+    public void writeHead(String module) throws IOException {
+        super.writeHead(module);
+        write(        
+            "<!-- ========== START OF NAVBAR ========== -->\n"+
+            "<A NAME=\"navbar_top\"><!-- --></A>\n"+
+            "<TABLE BORDER=\"0\" WIDTH=\"100%\" CELLPADDING=\"1\" CELLSPACING=\"0\">\n"+
+            "<TR>\n"+
+            "<TD COLSPAN=2 BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">\n"+
+            "<A NAME=\"navbar_top_firstrow\"><!-- --></A>\n"+
+            "<TABLE BORDER=\"0\" CELLPADDING=\"0\" CELLSPACING=\"3\">\n"+
+            "<TR ALIGN=\"center\" VALIGN=\"top\">\n"+
+            "<TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\""+moveInDirectoryHierachy+ "overview-summary.html\"><FONT ID=\"NavBarFont1\"><B>Overview</B></FONT></A>&nbsp;</TD>\n"+
+            "<TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\""+moveInDirectoryHierachy + module +".pl"+ "\"><FONT ID=\"NavBarFont1\"><B>Library</B></FONT></A>&nbsp;</TD>\n"+
+            "</TR>\n"+
+            "</TABLE>\n"+
+            "</TD>\n"+
+            "<TD ALIGN=\"right\" VALIGN=\"top\" ROWSPAN=3><EM>\n"+
+            "</EM>\n"+
+            "</TD>\n"+
+            "</TR>\n"+
+            "</TABLE>\n");
+
     }
 //    
 //    public Sub getConstructor(Vector defs) {
@@ -204,63 +260,6 @@ public class PrologDocWriter extends HTMLWriter {
             row + 
             "</TR>\n");
     }
-
-    void writeDetailEntry(PrologElementData data) throws IOException {
-    	String help = null;
-    	try {
-            help=data.getHelp();
-        } catch (SessionException e) {
-            Debug.report(e);
-        }
-    	if (help == null)
-    		help = "";
-        write(
-            "\n<!-- DETAIL ENTRY -->\n"+
-            "<A NAME=\""+data.getSignature()+ "\"><!-- --></A>\n" +
-            "<H3>"+ data.getSignature() +"</H3>\n"+
-            "<DL>\n"+
-            "<DD><PRE>" +help+"</PRE>\n"+
-            "<P><DD><DL>\n");
-        write(
-            "</DD>\n"+
-            "</DL>\n"+
-            "</DL>\n"+
-            "<HR>\n");
-    }
-    
-
-//    public void writeAllClassesFrame(LibraryTypes types) {
-//        Vector libs = types.getAllElements();
-//        this.openStream(dir + "allclasses-frame.html");
-//        writeDefaultHeader("All Classes");
-//        this.writeStream(
-//            "<FONT size=\"+1\" CLASS=\"FrameHeadingFont\">\n"+
-//            "<B>All Classes</B></FONT>\n"+
-//            "<BR>\n"+
-//            "<TABLE BORDER=\"0\" WIDTH=\"100%\">\n"+
-//            "<TR>\n"+
-//            "<TD NOWRAP><FONT CLASS=\"FrameItemFont\">\n");
-//        
-//        for(int i = 0; i< libs.size(); i++) {
-//            Library lib = (Library)libs.get(i);
-//            for(int j = 0; j < lib.classes.size(); j++) {
-//                Clazz clazz = (Clazz)lib.classes.get(j);
-//                this.writeStream(
-//                    "<A HREF=\""+ clazz.fileName() + "\" TARGET=\"classFrame\">" + 
-//                    clazz.name + "</A>\n" +
-//                    "<BR>\n");
-//
-//            }
-//        }
-//        this.writeStream(
-//            "</FONT></TD>\n"+
-//            "</TR>\n"+
-//            "</TABLE>\n");
-//        writeTail();
-//        closeStream();
-//    }
-
-    String moveInDirectoryHierachy = "..\\";
     
 //    public void writeOverviewSummary(LibraryTypes types) {
 //        openStream(dir + "overview-summary.html");
