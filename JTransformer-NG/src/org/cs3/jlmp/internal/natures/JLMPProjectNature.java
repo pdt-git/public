@@ -287,9 +287,11 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
     }
 
     protected void fireFactBaseUpdated() {
+		final JLMPProjectNature currentProject = this;
+		
         Runnable r = new Runnable() {
             public void run() {
-                JLMPProjectEvent e = new JLMPProjectEvent(this);
+                JLMPProjectEvent e = new JLMPProjectEvent(currentProject);
 
                 JLMPPlugin.getDefault().fireFactBaseUpdated(e);
 
