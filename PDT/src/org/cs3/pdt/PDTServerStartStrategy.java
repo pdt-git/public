@@ -47,7 +47,7 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 			return null;
 		}
 		 
-		while(!Util.probePort(port,""+(char)-1)){
+		while(!Util.probePort(port)){
              try {
                  Thread.sleep(50);
              } catch (InterruptedException e1) {

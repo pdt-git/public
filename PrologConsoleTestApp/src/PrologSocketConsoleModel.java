@@ -292,7 +292,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 
 	private boolean isServerActive() {
-		return Util.probePort(port,"end_of_file.\n");
+		return Util.probePort(port);
 	}
 
 

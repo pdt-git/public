@@ -22,7 +22,7 @@ public class DefaultServerStopStrategy implements ServerStopStrategy {
 			s.configure("localhost", port);
 			s.start();						
 			s.call("RemotePrologSession","shutdownServer",new Object[0]);
-			while ((Util.probePort(port, "" + (char) -1))) {
+			while ((Util.probePort(port))) {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException e1) {

@@ -26,7 +26,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 	
     public void onInit(PrologSession s) {
         int port = getPort();
-		if (Util.probePort(port, "end_of_file.\n")) {
+		if (Util.probePort(port)) {
 			Debug.info("Console server thread seems to be running, so i will not start a new one.");			
 		}else{
 		    String queryString = "use_module(library(prolog_server)), prolog_server("+port+", [])";
@@ -36,7 +36,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 			} catch (SessionException e) {
 				Debug.report(e);
 			}
-			while(!Util.probePort(port,"end_of_file.\n")){
+			while(!Util.probePort(port)){
 	             try {
 	                 Thread.sleep(50);
 	             } catch (InterruptedException e1) {
@@ -61,7 +61,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 			return;
 		}
 	    int port = getPort();
-		if (!Util.probePort(port, "end_of_file.\n")) {
+		if (!Util.probePort(port)) {
 			Debug
 					.info("Console server thread does not seem to be running, so i will not stop it.");
 			return;
@@ -73,7 +73,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 		} catch (SessionException e) {
 			Debug.report(e);
 		}
-		while(Util.probePort(port,"end_of_file.\n")){
+		while(Util.probePort(port)){
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e1) {
@@ -88,7 +88,7 @@ public class ConsoleServerHook implements LifeCycleHook{
      */
     private void otherImpl(PrologSession session) {
         int port = getPort();
-		if (!Util.probePort(port, "end_of_file.\n")) {
+		if (!Util.probePort(port)) {
 			Debug
 					.info("Console server thread does not seem to be running, so i will not stop it.");
 			return;
@@ -100,7 +100,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 		} catch (SessionException e) {
 			Debug.report(e);
 		}
-		while(Util.probePort(port,"end_of_file.\n")){
+		while(Util.probePort(port)){
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e1) {

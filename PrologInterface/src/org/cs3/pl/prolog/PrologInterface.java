@@ -421,7 +421,7 @@ public class PrologInterface implements IPrologInterface {
             Debug
                     .info("i will not try to start the server, since its running in stand-alone mode.");
         } else {
-            if (Util.probePort(port, "" + (char) -1)) {
+            if (Util.probePort(port)) {
                 Debug
                         .warning("ahem... the port is in use. \n"
                                 + "Trying to connect & shutdown, but this may not work.");

@@ -58,7 +58,7 @@ public class PrologConsoleView extends ViewPart implements
 		model.setPort(port);
 		view.setModel(model);
 		view.createPartControl(parent);
-		if (Util.probePort(port, "end_of_file.\n")) {
+		if (Util.probePort(port)) {
 			model.connect();
 		}
 		//else: wait til the hook callback is called.
