@@ -1,12 +1,12 @@
 ct(replaceUB(UpperBound), (
-		forLoopT(B0, B1, Encl, [B3], B4, [B5], B6),
+		forLoopT(B0, _B1, Encl, [B3], B4, [_B5], B6),
 		localDefT(B3,B0, Encl, type(basic, int, 0), _, LB),
 		operationT(B4, B0, Encl, [B8, UB], '<', 0),
-		forLoopT(B6, B0, Encl, [B11], B12, [B13], B14),
-		operationT(B12, B6, Encl, [B16, B17], '<', 0),
+		forLoopT(B6, B0, Encl, [_B11], B12, [_B13], _B14),
+		operationT(B12, B6, Encl, [_B16, B17], '<', 0),
 		literalT(B17, B12, Encl, type(basic, int, 0), _),
-		methodDefT(Encl, Class, 'm', [P1,P2,P3], type(basic, void, 0), [], Block),
-		blockT(Block, Encl, Encl, Elements),
+		methodDefT(Encl, _Class, 'm', [P1,P2,P3], type(basic, void, 0), [], Block),
+		blockT(Block, Encl, Encl, _Elements),
 		new_ids([V0,V7,V8,V9,V12,V15,V17,V20,V18,V19,V22,V23,LVLB,V26,V27,V28,LVUB,V30,V31,V34,V36,V37,V38,V39,V40,
 			V35,V32,V33,V41,V42,V43,V44,V45,V46,V47,V48,V50,V51,V52,RUN,V55])
 	), (
