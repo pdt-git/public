@@ -1197,9 +1197,9 @@ basicType(float).
 basicType(double).
 basicType(void).
 basicType(long).
-basicType(s8hort).
+basicType(short).
 basicType(byte).
-basicType(bolean).
+basicType(boolean).
 
 lastID(100000).
 
