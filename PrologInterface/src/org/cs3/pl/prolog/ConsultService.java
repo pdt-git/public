@@ -52,7 +52,7 @@ public interface ConsultService {
      * 
      *  
      */
-    public long getTimeStamp(String s);
+    public long getRecordTimeStamp(String s);
 
     /**
      * @param provider

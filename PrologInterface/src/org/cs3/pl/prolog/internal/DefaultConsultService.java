@@ -109,7 +109,7 @@ public class DefaultConsultService implements ConsultService ,PrologInterfaceLis
      * 
      * @see org.cs3.pl.prolog.IConsultService#getTimeStamp(java.lang.String)
      */
-    public long getTimeStamp(String s) {
+    public long getRecordTimeStamp(String s) {
         return -1;
     }
 
