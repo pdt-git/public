@@ -825,7 +825,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 if (resource.getType() == IResource.FILE) {
                     if (resource.getFileExtension() != null
                             && resource.getFileExtension().equals("java")) {
-                        Debug.debug("Adding " + resource + " to toProcess");
+                        Debug.debug("FactGenerationTest.collectAll: Adding " + resource + " to toProcess");
                         toProcess.add(resource);
                     }
                 }
