@@ -27,5 +27,8 @@ public interface Reusable {
      */
     public void destroy();
     
+    /**
+     * recycle an instance.     
+     */
     public void recylce();
 }

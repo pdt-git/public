@@ -23,11 +23,11 @@ public class ReusablePool {
 
 
 	public void recycle(Reusable s) {
-	
+	    s.recylce();
 		addInstance(s);
 	}
 
-	public void addInstance(Reusable s) {
+	protected void addInstance(Reusable s) {
 		synchronized (pool) {
 			
 			if (poolSize >= maxPoolSize) {
