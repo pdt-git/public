@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * Provides a mapping between ASTNodes and the Bindings presented by them
@@ -84,4 +85,14 @@ public interface IIDResolver extends IIDGenerator {
 	 */
 	
 	public String getJavaLangClassID();
+    
+    /**
+     * returns the id for a synthetic (default) constructor of a given type.
+     * 
+     *  The type argument can be null in which case this method will generat
+     *  the id of java.lang.Object().&lt;init&gt;
+     * @param tb the type for which the constructor id shoul be generated, or null for java.lang.Object.&lt;init&gt;
+     * @return the unique id String, suitable for use with resolver, etc.
+     */
+    public String getSyntheticConstructorID(ITypeBinding tb);
 }

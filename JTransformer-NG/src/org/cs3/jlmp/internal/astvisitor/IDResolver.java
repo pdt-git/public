@@ -230,7 +230,7 @@ public class IDResolver implements IIDResolver {
 		switch (kind) {
 			case IBinding.PACKAGE :
 				IPackageBinding pb = (IPackageBinding) iface;
-				buff.append(pb.getKey());
+				buff.append(normalizeFullQualifiedName(pb.getKey()));
 				buff.append("'");
 				break;
 			case IBinding.METHOD :
@@ -263,6 +263,7 @@ public class IDResolver implements IIDResolver {
 				break;
 			case IBinding.TYPE :
 				ITypeBinding tb = (ITypeBinding) iface;
+                
 			if(tb.getName().equals("Subroutine")){
 			    Debug.debug("debug");
 			}
@@ -396,4 +397,15 @@ public class IDResolver implements IIDResolver {
 	public String getJavaLangClassID() {
 		return fqnManager.transformFQN("fqn('java.lang.Class')");
 	}
+
+    /* (non-Javadoc)
+     * @see org.cs3.jlmp.internal.astvisitor.IIDResolver#getSyntheticConstructorID(org.eclipse.jdt.core.dom.ITypeBinding)
+     */
+    public String getSyntheticConstructorID(ITypeBinding tb) {
+       
+        String key =tb==null? "java.lang.Object" :  IDResolver.normalizeFullQualifiedName(tb.getKey());
+
+        String fqn = "fqn('" + key + "', '<init>', [])";       
+        return fqn;
+    }
 }

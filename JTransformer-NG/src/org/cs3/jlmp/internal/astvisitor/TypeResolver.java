@@ -90,7 +90,9 @@ public class TypeResolver implements ITypeResolver {
 //		return bind.getPackage().isUnnamed() ? buf : bind.getPackage().getName() + "." + buf;
 	    
 // ld: bla bla bla... why not this way:
-	    return bind.getKey().replace('/','.');
+        ///ld: XXX: this is a quick workaround. the whole package should be 
+        //cleaned up.        
+	    return IDResolver.normalizeFullQualifiedName(bind.getKey());
 	    
 	}
 

@@ -2301,9 +2301,9 @@ public class FactGenerator extends ASTVisitor {
 	
 	private String createSynteticConstructor(TypeDeclaration typeDeclaration) {
 		ITypeBinding binding = typeDeclaration.resolveBinding();
-		String key = IDResolver.normalizeFullQualifiedName(binding.getKey());
 
-        String fqn = "fqn('" + key + "', '<init>', [])";
+
+        String fqn = idResolver.getSyntheticConstructorID(binding);
 		
 		String classname = typeDeclaration.resolveBinding().getQualifiedName();
 		String bodyID = idResolver.getID();
@@ -2370,9 +2370,11 @@ public class FactGenerator extends ASTVisitor {
 		String superc;
 		
 		if (sname != null){
-			superc = "fqn('" + ((ITypeBinding)sname.resolveBinding()).getQualifiedName() + "', '<init>', [])";
-		} else { 
-			superc = "fqn('java.lang.Object', '<init>', [])";
+            superc=idResolver.getSyntheticConstructorID((ITypeBinding) sname.resolveBinding());
+			//superc = "fqn('" + ((ITypeBinding)sname.resolveBinding()).getQualifiedName() + "', '<init>', [])";
+		} else {
+            superc=idResolver.getSyntheticConstructorID(null);
+			//superc = "fqn('java.lang.Object', '<init>', [])";
 		}
 		
 		fqnManager.transformFQN(superc);
