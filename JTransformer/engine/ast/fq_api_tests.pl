@@ -1,35 +1,33 @@
+test(java_fq1):-
+   assert_true('full instantiated fieldDefT',(
+			java_fq(methodDefT(_,Class,Name,_,Type,[Ex1,Ex2|_],_)),
+			 Class= 'java.lang.Class',
+			java_fq(classDefT(Class,P,_,_)),packageT(P,'java.lang'),
+			Name = newInstance,
+			Ex1 = 'java.lang.InstantiationException',
+			Ex2 = 'java.lang.IllegalAccessException',
+			 Type = type(class, 'java.lang.Object', 0)
+			 )).
 
-test(atom_to_type_term_):-
-	lookupJavaLangString(JavaLangString),
-	assert_true(atom_to_type_term_('java.lang.String[]',Type)),
-	assert_true(Type = type(class,JavaLangStringId,Arity)),
-	assert_true('JavaLangStringId should equal the ID of the class java.lang.String',JavaLangStringId = JavaLangString),
-	assert_true('Arity should be 1',Arity = 1),
-	assert_true('',atom_to_type_term_('int[][]',type(basic,Int,IntArity))),
-	assert_true('expect the value int',Int = int),
-	assert_true('Arity should be 2.',IntArity = 2),
-	assert_true('simple basic type double',atom_to_type_term_('double',type(basic,double,0))),
-	assert_true('simple java.lang.String type',atom_to_type_term_('java.lang.String',type(class,JavaLangString,0))).	
-
-test(type_term_to_atom_):-
-	lookupJavaLangString(JavaLangString),
-    assert_true(
-       	type_term_to_atom_(type(class,JavaLangString,1),FQN)),
-    assert_true(FQN = 'java.lang.String[]'),
-    assert_true(
-       	type_term_to_atom_(type(basic,int,0),Int)),
-    assert_true(Int = 'int').
-       	
-
-test(type_term_to_atom):-
-	lookupJavaLangString(JavaLangString),
-    assert_true(
-       	type_term_to_atom(type(class,JavaLangString,1),FQN)),
-    assert_true(FQN = 'java.lang.String[]'),
-    assert_true(
-       	type_term_to_atom(TypeTerm,int)),
-    assert_true(type(basic,int,0) = TypeTerm).
-       	
+test(java_fq2):-
+   assert_true('full instantiated fieldDefT',(
+			java_fq(methodDefT(_,Class,Name,_,Type,['java.lang.InstantiationException',Ex2|_],_)),
+			 Class= 'java.lang.Class',
+			java_fq(classDefT(Class,P,_,_)),packageT(P,'java.lang'),
+			Name = newInstance,
+			Ex2 = 'java.lang.IllegalAccessException',
+			 Type = type(class, 'java.lang.Object', 0)
+			 )).
+test(java_fq3):-
+   assert_true('check for field java.langClassLoader.classAssertionStatus and try full instantiated java_fq fieldDefT',(
+   	class(C,P,'ClassLoader'),
+   	packageT(P,'java.lang'),
+   	fieldDefT(F, C, _, classAssertionStatus, null),
+    java_fq(fieldDefT(F, 'java.lang.ClassLoader', type(class,'java.util.Map',0), classAssertionStatus, null)))),
+    assert_true('full instantiated fieldDefT except id',
+      java_fq(fieldDefT(_, 'java.lang.ClassLoader', type(class,'java.util.Map',0), classAssertionStatus, null))),
+    assert_true('',
+	   java_fq(fieldDefT(_,_,type(class,'java.lang.Class',0),_,_))).
        	
 
 lookupJavaLangString(JavaLangString):-

@@ -19,11 +19,13 @@
 :- dynamic cache_file/1.
 :- multifile cache_file/1.
 
+/*
 interpret([_factname | _atomlist]) :-
    exchangeLocalWithGlobalIds(_atomlist, [ID|Rest]),
     Term =.. [_factname | [ID|Rest]],
 % 	checkExistance(ID,Term),
     assert1T(Term).
+*/
 
 checkExistance(Term) :-
     Term =.. [Functor | [ID | _]],

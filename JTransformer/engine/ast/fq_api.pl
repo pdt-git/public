@@ -24,146 +24,6 @@ execT
 */
 
 
-/**
- * class_fq(?FQN, ?PackageName, ?Name)
- *
- * TODO: To be optimized (second clause)
- */
-
-class_fq(FQN,PackageName,Name):-
-    nonvar(FQN),
-    fullQualifiedName(CID,FQN),
-    class(CID, PID, Name),
-    packageT(PID,PackageName).
-
-class_fq(FQN,PackageName,Name):-
-    packageT(PID,PackageName),
-    class(CID, PID, Name),
-    fullQualifiedName(CID,FQN).
-
-/**
- * param_fq(?Id, ?MethodId, ?Type, ?Name)
- *
- */
- 
-param_fq(Id, MethodId, Type, Name) :-
-    var(Id),
-    nonvar(Type),
-    type_term_to_atom(TypeTerm,Type),
-    paramDefT(Id,MethodId,TypeTerm,Name).
-
-param_fq(Id, MethodId, Type, Name) :-
-    type_term_to_atom(TypeTerm,Type),
-    paramDefT(Id,MethodId,TypeTerm,Name).
-
-
-/**
- * field_fq(?Id, ?Type, ?DeclType, ?Name, ?Init)
- *
- * TODO: To be optimized (second clause)
- */
-
-field_fq(Id, Type, DeclType, Name, Init) :-
-    nonvar(DeclType),
-    nonvar(Type),
-    var(Id),
-    !,
-    fullQualifiedName(DeclTypeId,DeclType),
-    type_term_to_atom(TypeTerm,Type),
-    fieldDefT(Id,DeclTypeId,TypeTerm,Name,Init).
-
-field_fq(Id, Type, DeclType, Name, Init) :-
-    fieldDefT(Id,DeclTypeId,TypeTerm,Name,Init),
-    fullQualifiedName(DeclTypeId,DeclType),
-    type_term_to_atom(TypeTerm,Type).
-
-/**
- * method_fq(Id, RetType, DeclType, Name, Params, ExceptionNames, Body)
- *
- * TODO: to be optimized 
- */
- 
-method_fq(Id, RetType, DeclType, Name, Params, ExceptionNames, Body) :-
-    var(Id),
-	nonvar(DeclType),
-	nonvar(RetType),
-	nonvar(ExceptionNames),
-    fullQualifiedName(DeclTypeId,DeclType),
-    fullQualifiedNames(Exceptions, ExceptionNames),
-    type_term_to_atom(RetTypeTerm,RetType),
-    methodDefT(Id,DeclTypeId,Name, Params, RetTypeTerm, Exceptions,Body).
-
-
-method_fq(Id, RetType, DeclType, Name, Params, ExceptionNames, Body) :-
-    methodDefT(Id,DeclTypeId,Name, Params, RetTypeTerm, Exceptions,Body),
-    fullQualifiedName(DeclTypeId,DeclType),
-    fullQualifiedNames(Exceptions, ExceptionNames),
-    type_term_to_atom(RetTypeTerm,RetType).
-
-
-/**
- * type_term_to_atom(+TypeTerm,?Atom)
- */
-
-type_term_to_atom(TypeTerm,Atom):-
-    nonvar(TypeTerm),
-    !,
-    type_term_to_atom_(TypeTerm,Atom).
-
-type_term_to_atom(TypeTerm,Atom):-
-    nonvar(Atom),
-    atom_to_type_term_(Atom,TypeTerm).
-
-type_term_to_atom(TypeTerm,Atom):-
-    nonvar(Atom),
-    atom_to_type_term_(Atom,TypeTerm).
-
-type_term_to_atom_(type(basic,TypeName,Arity), type(basic,TypeName,Arity)).
-    
-type_term_to_atom_(type(class,Id,Arity), type(class,FQN,Arity)):-
-    fullQualifiedName(Id,FQN).
-
-/*  *** original version: type(..) -> FQN ***
-type_term_to_atom_(type(basic,TypeName,Arity), Atom):-
-    arity_to_brackets_(Arity,Brackets),
-    atom_concat(TypeName,Brackets,Atom).
-    
-type_term_to_atom_(type(class,Id,Arity), Atom):-
-    arity_to_brackets_(Arity,Brackets),
-    fullQualifiedName(Id,FQN),
-    atom_concat(FQN,Brackets,Atom).
-*/
-
-/**
- * arity_to_brackets(+Arity,?Brackets)
- */    
-
-arity_to_brackets_(0,'').
-arity_to_brackets_(Dim,Brackets) :-
-    succ(DimDec, Dim),
-    arity_to_brackets_(DimDec,SubBrackets),
-    atom_concat(SubBrackets, '[]',Brackets).
-    
-    
-/**
- * atom_to_type_term(+TypeTerm,?Atom)
- */
-    
-atom_to_type_term_(Atom,type(Kind,Type,Arity)):-
-    remove_brackets(Atom,Kind,Type,Arity).
-
-remove_brackets(Atom,Kind,TypeName,Arity) :-
-    atom_concat(TypeCandidate, '[]',Atom),
-    !,
-	remove_brackets(TypeCandidate,Kind,TypeName,ArityDec),
-    succ(ArityDec,Arity).
-    
-remove_brackets(Atom,basic, Atom,0):-
-	basicType(Atom).    
-
-remove_brackets(Atom,class, Id,0):-
-	fullQualifiedName(Id,Atom).
-
 
 /**
  * java_fq
@@ -258,10 +118,14 @@ checkArgumentNumber(Term):-
     sformat(S,'~a(~a) is not a valid java AST.', [Functor,Atom]),
     error_occured(S).
 	
+
+/**
+	mapArgs([ast_arg1,...],[fq_arg1,...])
+*/
 	
 mapArgs([],[]).
     
-mapArgs([JavaASTArg|JavaASTArgs],[FQN|Args]):-
+mapArgs( [JavaASTArg|JavaASTArgs],[FQN|Args]):-
     classDefT(JavaASTArg,_,_,_),
     !,
     fullQualifiedName(JavaASTArg,FQN),
@@ -269,22 +133,30 @@ mapArgs([JavaASTArg|JavaASTArgs],[FQN|Args]):-
     
 mapArgs([type(Kind,Id,Arity)|JavaASTArgs],[FQN|Args]):-
     !,
-    type_term_to_atom(type(Kind,Id,Arity),FQN),
+    map_type_term(type(Kind,Id,Arity),FQN),
+    mapArgs(JavaASTArgs,Args).
+
+mapArgs([[JavaSubListArg|JavaSubListArgs]|JavaASTArgs],[[SubListArg|SubListArgs]|Args]):-
+    !,
+    mapArgs([JavaSubListArg|JavaSubListArgs],[SubListArg|SubListArgs]),
     mapArgs(JavaASTArgs,Args).
 
 mapArgs([Arg|JavaASTArgs],[Arg|Args]):-
     mapArgs(JavaASTArgs,Args).
+
+/**
+	map_type_term(?type/3 FQN, ?type/3 Id)).
+*/
+    
+map_type_term(type(basic,TypeName,Arity), type(basic,TypeName,Arity)).
+    
+map_type_term(type(class,Id,Arity), type(class,FQN,Arity)):-
+    fullQualifiedName(Id,FQN).
+    
      
-test(java_fq,(
-   assert_true('full instantiated fieldDefT',
-      java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
-   assert_true('full instantiated fieldDefT',
-      java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
-   assert_true('',
-	   java_fq(fieldDefT(_,_,'java.lang.Class',_,_)))
-      )).
-
-
+/**
+	bindArgs([ast_arg_descr/4,...],[java_fq_arg1,...],[java_ast_arg1,...])
+*/
 bindArgs(_, [], []).
 
 bindArgs([_|ArgDefs], [Arg|Args], [_|JavaASTArgs]) :-
@@ -316,7 +188,7 @@ bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaAS
 % assigned, also no nullType)
 bindArgs([ast_arg(_,_, _,  [typeTermType])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
     !,
-    type_term_to_atom(JavaASTArg,FQN),
+    map_type_term(JavaASTArg,FQN),
 	bindArgs(ArgDefs, Args, JavaASTArgs).
 
 % attribute that is not a type term
@@ -337,6 +209,12 @@ bindArgs([ast_arg(_,_, _,  _)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTAr
 	bindArgs(ArgDefs, Args, JavaASTArgs).
          
 replaceFQNsWithClassIds([],[]).
+replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
+    nonvar(Id),
+	!,
+	fullQualifiedName(Id,FQN),
+	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+    
 replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
 	var(FQN),
 	!,
