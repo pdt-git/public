@@ -21,6 +21,7 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.junit"/>
+      <import plugin="org.eclipse.jdt.launching"/>
    </requires>
 
 

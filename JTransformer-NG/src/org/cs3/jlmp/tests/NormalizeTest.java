@@ -6,10 +6,16 @@
  */
 package org.cs3.jlmp.tests;
 
+import java.io.File;
 import java.io.IOException;
 
+import org.cs3.jlmp.JLMPPlugin;
+import org.cs3.pl.common.ResourceFileLocator;
+import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.text.BadLocationException;
 
@@ -26,9 +32,9 @@ public class NormalizeTest extends FactGenerationTest {
 	}
 	
 	public void testNormalize() throws BadLocationException, CoreException, IOException{
-		ICompilationUnit sourceUnit = getCompilationUnit("Converter" , "src", "selftest", "NormalizeTest.java");
+		ICompilationUnit sourceUnit = getCompilationUnit("", "NormalizeTest.java");
 		normalizeCompilationUnit(sourceUnit);
-		IFile expectedFile = getFile("/Converter/src/selftest/NormalizeTest.expected");
+		IFile expectedFile = getTestProject().getFile(new Path("NormalizeTest.expected"));
 		IFile file = (IFile)sourceUnit.getCorrespondingResource();
 		String expected = read(expectedFile);				
 		String actual =read(file);		
@@ -41,6 +47,20 @@ public class NormalizeTest extends FactGenerationTest {
 	
 	public void setUpOnce() {	
 		super.setUpOnce();
+		//no autobuilds please!
+		setAutoBuilding(false);
+		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
+        File r = l.resolve("testdata-selftest.zip");
+        Util.unzip(r);
+        setTestDataLocator(l.subLocator("testdata-selftest"));
+        try {
+            install(new String[]{
+                    "NormalizeTest.expected",
+                    "NormalizeTest.java"
+            });
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
 		System.err.println("setUpOnce caled for key  "+getKey());
 		
 	}

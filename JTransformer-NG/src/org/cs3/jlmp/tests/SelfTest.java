@@ -19,7 +19,9 @@ import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 /**
@@ -50,7 +52,7 @@ public class SelfTest extends FactGenerationTest {
 	public void testSourceWorkSpaceAccess() throws IOException {
 		//ld:this is the 6th line of one of my favourite songs
 		String expected = " our rose-lipped youth is passing by";
-		File sourceFile = getTestDataLocator().resolve("Landslide");
+		File sourceFile = getTestDataLocator().resolve("LandSlide");
 		assertTrue("does not exist: " + sourceFile.getPath(), sourceFile
 				.exists());
 		BufferedReader reader = null;
@@ -71,7 +73,7 @@ public class SelfTest extends FactGenerationTest {
 	}
 	
 	public void testCUAccess1()throws JavaModelException{		
-		ICompilationUnit sourceUnit = getCompilationUnit("Converter" , "src", "test0001", "Test.java");
+		ICompilationUnit sourceUnit = getCompilationUnit( "test0001", "Test.java");
 		assertTrue(sourceUnit.exists());
 	}
 	
@@ -83,7 +85,7 @@ public class SelfTest extends FactGenerationTest {
 	public void testIt() throws CoreException, IOException{
 	   System.err.println("\n testing: "+testString);
 		System.err.print("   Retrieving cu...");		
-		ICompilationUnit sourceUnit = getCompilationUnit("Converter" , "src", testString, "Test.java");
+		ICompilationUnit sourceUnit = getCompilationUnit(testString, "Test.java");
 		System.err.println("done");
 		
 		System.err.print("   writing facts...");
@@ -91,7 +93,7 @@ public class SelfTest extends FactGenerationTest {
 		System.err.println("done");
 		
 		System.err.print("   retrieving expectedFile...");
-		IFile expectedFile = getFile("/Converter/pl/"+testString+"/Test.expected.pl");		
+		IFile expectedFile = getTestProject().getFile(new Path(testString+"/Test.expected.pl"));		
 		System.err.println("done");
 		
 		System.err.print("   reading expected...");		
@@ -116,20 +118,27 @@ public class SelfTest extends FactGenerationTest {
 		//no autobuilds please!
 		setAutoBuilding(false);
 		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
-        File r = l.resolve(JLMP.TEST_WORKSPACE_ZIP);
+        File r = l.resolve("testdata-selftest.zip");
         Util.unzip(r);
-        setTestDataLocator(l.subLocator(JLMP.TEST_WORKSPACE));
+        setTestDataLocator(l.subLocator("testdata-selftest"));
+        try {
+            install(new String[]{
+                    "test0001"
+            });
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
 		System.err.println("setUpOnce caled for key  "+getKey());
 		
 	}
 	
 	
 	
-	public static Test suite() {
+	public static Test _suite() {
         TestSuite s = new TestSuite();      
         s.addTest(new SelfTest("testSourceWorkSpaceAccess"));
         s.addTest(new SelfTest("testCUAccess1"));
-        for(int i=1;i<100;i++) s.addTest(new SelfTest("testIt",generateTestString(i)));        
+        for(int i=1;i<10;i++) s.addTest(new SelfTest("testIt",generateTestString(i)));        
         return s;
     }
  

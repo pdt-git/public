@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -122,8 +123,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         
 		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in " + packageName);
         //retrieve all cus in package
-        ICompilationUnit[] cus = getCompilationUnits("Converter", "src",
-                packageName);
+        ICompilationUnit[] cus = getCompilationUnits( packageName);
         //generate and consult prolog facts
         PrintStream out = pif.getConsultService(JLMP.SRC).getOutputStream("flat.pl");
         for (int i = 0; i < cus.length; i++) {
@@ -158,10 +158,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         //rename the original class and src files in the package (+ subpackages
         // if exist)
         //they will all get an extra ".orig" extension.
-        IFolder binfolder = getWorkspaceRoot().getFolder(
+        IFolder binfolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
                 new Path("/Converter/bin/" + packageName));
         assertTrue("bin folder is not accessible!", binfolder.isAccessible());
-        IFolder srcfolder = getWorkspaceRoot().getFolder(
+        IFolder srcfolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
                 new Path("/Converter/src/" + packageName));
 
         IResourceVisitor renamer = new IResourceVisitor() {
@@ -200,7 +200,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         }
 
         //refetch cus
-        cus = getCompilationUnits("Converter", "src", packageName);
+        cus = getCompilationUnits( packageName);
 
         //normalize again (now the generated source)
         for (int i = 0; i < cus.length; i++) {
@@ -223,7 +223,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                     IFile file = (IFile) resource;
                 	if(!file.getFileExtension().equals("class")) return false;
                 	
-                	IFile orig = getFile(file.getFullPath().addFileExtension("orig"));
+                	IFile orig = ResourcesPlugin.getWorkspace().getRoot().getFile(file.getFullPath().addFileExtension("orig"));
                 	assertTrue("original class file not accessible: "+orig.getFullPath().toString(),orig.isAccessible());
                 	//both files should be of EXACTLY the same size:
                 	BufferedReader origReader = new BufferedReader(new InputStreamReader(orig.getContents()));

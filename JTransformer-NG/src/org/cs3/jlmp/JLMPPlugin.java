@@ -57,17 +57,14 @@ public class JLMPPlugin extends AbstractUIPlugin {
     public ResourceFileLocator getResourceLocator(String key) {
         if (rootLocator == null) {
             URL url = getBundle().getEntry("/");
-            String location = null;
+            File  location = null;
             try {
-                location = new File(Platform.asLocalURL(url).getFile())
-                        .getAbsolutePath();
+                location = new File(Platform.asLocalURL(url).getFile());
             } catch (IOException t) {
                 Debug.report(t);
                 throw new RuntimeException(t);
             }
-            if (location.charAt(location.length() - 1) == File.separatorChar) {
-                location = location.substring(0, location.length() - 1);
-            }
+            
             rootLocator = new DefaultResourceFileLocator(location);
         }
         return rootLocator.subLocator(key);
