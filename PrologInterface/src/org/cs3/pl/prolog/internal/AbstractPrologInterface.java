@@ -223,6 +223,9 @@ public abstract class AbstractPrologInterface implements PrologInterface {
     }
     
     private void waitUntilUp() throws IllegalStateException{
+        if(getState()!=START_UP&&getState()!=UP){
+            throw new IllegalStateException("Not in state START_UP or UP");
+        }
     	synchronized(stateLock){
     		while(!isUp()){
     			try {
@@ -233,6 +236,9 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 				if(ERROR == getState()){
 					throw new IllegalStateException("Error while waiting for pif to come up.");
 				}
+                if(DOWN== getState()){
+                    throw new IllegalStateException("PrologInterface did not come up.");
+                }
     		}
     	}
     }
@@ -304,9 +310,14 @@ public abstract class AbstractPrologInterface implements PrologInterface {
         throw new IllegalArgumentException("option not supported: " + opt);
     }
 
-    /**
-     * @param newState
-     *                  The state to set.
+    /*
+     * there is no real state machiene or something:
+     * This is just an attemp to synchronize (and detect errors in) the state
+     * flow of the pif. Basicaly at some point you say: "Now get to state XY"
+     * and this method will check if this transition is legal (i.e. expected to happen)
+     * Otherwise this method throws an exception.
+     * It is called by state-changing methods start() stop() and emergencyStop()
+     * 
      */
     protected void setState(int newState) throws IllegalStateException {
         synchronized (stateLock) {
@@ -319,7 +330,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                 Debug.info("PLIF ERROR");
                 break;
             case DOWN:
-                if (this.state != SHUT_DOWN) {
+                if (this.state != SHUT_DOWN && this.state != ERROR) {
                     throw new IllegalStateException("transition not allowed.");
                 }
                 Debug.info("PLIF DOWN");
@@ -337,7 +348,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                 Debug.info("PLIF UP");
                 break;
             case SHUT_DOWN:
-                if (this.state == UP || this.state == ERROR) {
+                if (this.state == UP ) {
                     Debug.info("PLIF SHUT_DOWN");
                 } else {
                     throw new IllegalStateException("transition not allowed.");
@@ -374,17 +385,15 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             setState(UP);
             hookHelper.afterInit();
         } catch (Throwable t) {
-            setState(ERROR);
-            Debug
-                    .error("Could not start PI becouse of unhandled exception. Exception will be rethrown.");
             Debug.report(t);
-            stop();
+            Debug.error("Could not start PI becouse of unhandled exception. ");
+            Debug.error("These exception will be rethrown. Trying emergency stop.");    
+            emergencyStop();
             throw new RuntimeException(t);
         }
     }
 
     public synchronized void stop() {
-        boolean dontTakePrisoners = (getState() == ERROR);
         try {
             setState(SHUT_DOWN);
         } catch (IllegalStateException e) {
@@ -418,9 +427,42 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             startAndStopStrategy.stopServer(this, true);
             setState(DOWN);
         } catch (Throwable t) {
-            setState(ERROR);
+            
             Debug.report(t);
-            Debug.error("Could not shut down.");
+            Debug.error("Could not shut down because of uncaught exception(s).");
+            Debug.error("These exception will be rethrown. Trying emergency stop.");    
+            emergencyStop();
+            throw new RuntimeException(t);
+        }
+    }
+    
+    
+    public synchronized void emergencyStop() {      
+        try {
+            setState(ERROR);
+        } catch (IllegalStateException e) {
+            Debug.warning("I will not shut down: no valid state.");
+            return;
+        }
+        try {           
+            synchronized (sessions) {
+                for (Iterator i = sessions.iterator(); i.hasNext();) {
+                    WeakReference element = (WeakReference) i.next();
+                    PrologSession ps = (PrologSession) element.get();
+                    if (ps != null && !ps.isDisposed())
+                        try {
+                            ps.dispose();
+                        } catch (Throwable t) {
+                            Debug.report(t);
+                        }
+                    i.remove();
+                }
+            }
+            startAndStopStrategy.stopServer(this, true);
+            setState(DOWN);
+        } catch (Throwable t) {
+            Debug.error("Emergency stop failed! I don't know what to do now.");
+            Debug.report(t);            
             throw new RuntimeException(t);
         }
     }

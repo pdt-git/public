@@ -51,8 +51,12 @@ public class RestartAction implements IWorkbenchWindowActionDelegate {
 
                         PrologInterface prologInterface = PDTPlugin
                                 .getDefault().getPrologInterface();
-                        prologInterface.stop();
-                        prologInterface.start();
+                        try{
+                            prologInterface.stop();
+                        }
+                        finally{
+                            prologInterface.start();
+                        }
                     } catch (Throwable e) {
                         Debug.report(e);
                         return Status.CANCEL_STATUS;
