@@ -353,7 +353,7 @@ getTypeIfNullEnclClass_fq(null, Stat, FQN) :-
     enclClass(Stat, Encl),
     fullQualifiedName(Encl,FQN).
     
-getTypeIfNullEnclClass(Id, _, FQN) :-
+getTypeIfNullEnclClass_fq(Id, _, FQN) :-
     getType_fq(Id, FQN).
 
     

@@ -201,17 +201,17 @@ ast_node_subtype('Java',Label,statementType) :-
   * In ast_node_def/3 vorhandenes noch mal durchdenken, checken hinsichtlich
   * Konsistenz mit bisherigen tree_constraints und tree_atrributes.
   *
-  * Den fehlenden Rest ergänzen. Dabei muss überall wo es einen Modifier
+  * Den fehlenden Rest ergï¿½nzen. Dabei muss ï¿½berall wo es einen Modifier
   * geben darf (methodDefT, fieldDefT, localDefT, ...?... HINTER den
   * Beschreibungen der bisherigen Argumente noch folgendes hinzu:
   *    ast_arg(modifs,mult(0,*,ord), attr, [atom])
-  * Für classDefT ist das schon geschehen. 
+  * Fï¿½r classDefT ist das schon geschehen. 
   *
-  * Die parent und encl attribute im Folgenden könnten eigentlich oft 
+  * Die parent und encl attribute im Folgenden kï¿½nnten eigentlich oft 
   * genauer getypt sein als nur 'id'.
   *
   * Ich denke, wir sollten 'atom' durch etwas programmiersprachen-
-  * spezifischeres ersetzen (oder ergänzen), wie z.B. 'identifier'.
+  * spezifischeres ersetzen (oder ergï¿½nzen), wie z.B. 'identifier'.
   */
 
 
@@ -232,8 +232,8 @@ ast_node_def('Java',classDefT,[
      ast_arg(defs,    mult(0,*,ord), id,  [methodDefT,fieldDefT,classDefT]),
 %     ast_arg(expr,   mult(1,1,no ), id,  [expressionType]),
      ast_arg(extends, mult(1,1,no ), id,  [classDefT]),
-     ast_arg(implems, mult(0,*,ord), id,  [classDefT]),
-     ast_arg(hasModif,mult(0,*,ord), attr,[atom]),
+     ast_arg(implems, mult(0,*,no ), id,  [classDefT]),
+     ast_arg(hasModif,mult(0,*,no ), attr,[atom]),
      ast_arg(isInterf,mult(0,1,no ),  flag,[]),
      ast_arg(isExtern,mult(0,1,no ),  flag,[])
 ]).
