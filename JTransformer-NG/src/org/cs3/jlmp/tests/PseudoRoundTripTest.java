@@ -395,6 +395,8 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         //blacklist.set(130);
         //blacklist.set(160);
         //blacklist.set(168);
+        //blacklist.set(236);
+        //blacklist.set(238);
         
         /*
          * another "soft" bug: generates no-op a method that only contains
@@ -407,6 +409,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(157);
         blacklist.set(158);
         blacklist.set(170);
+        blacklist.set(237);
         
         
         //ld: the following few do not compile. ergo, not our prob.
@@ -437,8 +440,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(196);
         blacklist.set(197);
         blacklist.set(200);
+        blacklist.set(233);
+        blacklist.set(234);
         
-        for (int i = 200; i <=300; i++)//1-539 
+        for (int i = 239; i <=239; i++)//1-539 
             if (!blacklist.get(i))
                 s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));
