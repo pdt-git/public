@@ -5,7 +5,7 @@
    name="TimeTracker Plug-in"
    version="1.0.0"
    provider-name=""
-   class="TimeTracker.TimeTrackerPlugin">
+   class="org.cs3.timetracker.TimeTrackerPlugin">
 
    <runtime>
       <library name="TimeTracker.jar">
@@ -17,5 +17,27 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
    </requires>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Time Tracker"
+            id="time.tracker.category"/>
+      <view
+            class="org.cs3.timetracker.TimeTrackerGUIViewer"
+            icon="icons/sample.gif"
+            category="time.tracker.category"
+            name="Time Tracker"
+            id="org.cs3.timetracker.TimeTrackerGUIViewer"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.TaskList"
+               id="du.willst.es.Aber"/>
+      </perspectiveExtension>
+   </extension>
 
 </plugin>
