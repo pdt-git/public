@@ -14,22 +14,28 @@ import org.eclipse.swt.widgets.*;
 /**
  * @author schmitzs
  *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * Module: GUI Interaction. Contains 4 buttons - Start, Pause, Continue, Stop.
+ * Should have a reference of TimeTracker to call appropriate methods when 
+ * clicked on the respective button.
+ * 
  */
 public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
-	//private Composite buttonpanel;
+
+/////////////////////////////////////////////////////////////////////
+//// P R I V A T E   M E M B E R   V A R I A B L E S
 	private Button startbutton;
 	private Button pausebutton;
 	private Button continuebutton;
 	private Button stopbutton;
 	private TimeTracker timetracker;
 	
+
+/////////////////////////////////////////////////////////////////////
+////IMPLEMENTATION METHODS
 	
-	/*public Composite getComposite(){
-		return buttonpanel;
-	}*/
-	
+	/**
+	 * Implementation method of ITimeObserver
+	 */
 	public void notify(TimeEvent time){
 		if(time.getMinutes()==0 && time.getSeconds()==0){
 			startbutton.setEnabled(true);
@@ -39,26 +45,10 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 		}
 	}
 	
-	public TimeTrackerGUIInteraction(Composite parent){
-		//buttonpanel = new Composite(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);	//TODO find ot static number
-		startbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		startbutton.setText("start");
-		startbutton.addMouseListener(this);
-		pausebutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		pausebutton.setText("pause");
-		pausebutton.addMouseListener(this);
-		continuebutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		continuebutton.setText("continue");
-		continuebutton.addMouseListener(this);
-		stopbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		stopbutton.setText("stop");
-		stopbutton.addMouseListener(this);
-	}
-	
-	public void addTimeTracker(TimeTracker tracker){
-		timetracker = tracker;
-	}
-	
+
+	/**
+	 * Implementation method of MouseListener
+	 */
 	public void mouseDown(MouseEvent e){
 		Button temp = (Button) e.getSource();
 		String match = temp.getText();
@@ -90,12 +80,52 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 		
 	}
 	
+	
+	/**
+	 * Implementation method of MouseListener
+	 */
 	public void mouseUp(MouseEvent e){
 		
 	}
 	
+	/**
+	 * Implementation method of MouseListener
+	 */
 	public void mouseDoubleClick(MouseEvent e){
 		
+	}
+	
+	
+/////////////////////////////////////////////////////////////////////
+//// PUBLIC Methods
+	
+	/**
+	 * Constructor method
+	 * @param parent
+	 * 
+	 * Initiates the button and add them to parent (Composite)
+	 */
+	public TimeTrackerGUIInteraction(Composite parent){
+		startbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		startbutton.setText("start");
+		startbutton.addMouseListener(this);
+		pausebutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		pausebutton.setText("pause");
+		pausebutton.addMouseListener(this);
+		continuebutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		continuebutton.setText("continue");
+		continuebutton.addMouseListener(this);
+		stopbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		stopbutton.setText("stop");
+		stopbutton.addMouseListener(this);
+	}
+	
+	/**
+	 * Add TimeTracker object to call the methods
+	 * @param tracker
+	 */
+	public void addTimeTracker(TimeTracker tracker){
+		timetracker = tracker;
 	}
 	
 }
