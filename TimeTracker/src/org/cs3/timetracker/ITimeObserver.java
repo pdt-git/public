@@ -14,5 +14,7 @@ package org.cs3.timetracker;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public interface ITimeObserver {
+	
 	public void notify(TimeEvent time);
+	
 }

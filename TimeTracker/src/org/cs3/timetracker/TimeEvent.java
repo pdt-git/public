@@ -28,4 +28,14 @@ public class TimeEvent {
 	public int getSeconds() {
 		return seconds;
 	}
+	
+	public void setMinutes(int Min)
+	{
+		minutes = Min;
+	}
+	
+	public void setSeconds(int Sec)
+	{
+		seconds = Sec;
+	}
 }

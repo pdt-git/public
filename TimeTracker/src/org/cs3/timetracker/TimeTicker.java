@@ -1,6 +1,11 @@
 package org.cs3.timetracker;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 import javax.swing.Timer;
 
@@ -18,37 +23,70 @@ import javax.swing.Timer;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class TimeTicker  {
+	private Timer t;
+	private TimeEvent time;
+	private ArrayList observers;
+	
+	private int Seconds = 180; // 3* 60
+	
+	public void addObserver(ITimeObserver observer)
+	{
+		observers.add(observer);	
+	}
+	
+	public void TimeTick()
+	{
+		time.setMinutes(Seconds / 60);
+  		time.setSeconds(Seconds - ((Seconds / 60) * 60));
+
+  		Iterator i = observers.iterator();
+  		while (i.hasNext()) {
+  			ITimeObserver a = (ITimeObserver) i.next();
+  			a.notify(time);
+  		}
+  		  		
+  		Seconds--;	
+  		
+  		System.out.println("TimeTick()");
+	}
 
 	public TimeTicker()
 	{
-	
+		observers = new ArrayList();
+		time = new TimeEvent(0,0);
+		ActionListener action = new ActionListener() {
+			public void actionPerformed(ActionEvent event) {
+				TimeTick();
+			}
+		};
+				
+		t = new Timer(0, action);
+		t.setRepeats(true);
 	}
 	
 	public void start()
 	{
-      Timer t;
-      
-      t = new Timer(30, new ActionListener() {
-      	public void actionPerformed(ActionEvent _)
-      	{
-      		// 
-      	}
-      });
+		Seconds = 180;
+		t.setDelay(1000);
+		t.start();
+		System.out.println("started.");
 	}
 	
 	public void stop()
 	{
-		
+		t.stop();
+		Seconds = 0;
+		System.out.println("Stopped");
 	}
 	
 	public void pause()
 	{
-	
+		t.stop();
 	}
 	
 	public void resume()
 	{
-		
+		t.start();
 	}
 
 }
