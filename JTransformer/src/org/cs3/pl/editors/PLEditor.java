@@ -10,7 +10,6 @@ import org.cs3.pl.buttons.SpyPointActionDelegate;
 import org.cs3.pl.fileops.MetaDataManagerFactory;
 import org.cs3.pl.fileops.PrologMetaDataManager;
 import org.cs3.pl.parser.PrologCompiler;
-import org.cs3.pl.parser.PrologCompilerBackend;
 import org.cs3.pl.prolog.PrologElementData;
 import org.cs3.pl.prolog.PrologManager;
 import org.cs3.pl.views.PrologOutline;
@@ -26,16 +25,10 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.*;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.text.source.ISourceViewerExtension2;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -194,6 +187,22 @@ public class PLEditor extends TextEditor {
 
 	private String filename;
 
+	/**
+	 * Reinitialize Scanner.
+	 */
+	
+	public void reinitScanner(){
+//	    configuration.reinitScanner();
+//	    if (getSourceViewer() instanceof ISourceViewerExtension2) {
+//            PDTPlugin.getDefault().getDisplay().asyncExec(new Runnable() {
+//                public void run() {
+//                    ((ISourceViewerExtension2) getSourceViewer()).unconfigure();
+//                    getSourceViewer().configure(configuration);
+//                }
+//            });
+//        }
+	}
+	
 	protected void configureSourceViewerDecorationSupport(
 			SourceViewerDecorationSupport support) {
 		getPreferenceStore().setDefault(MATCHING_BRACKETS, true);

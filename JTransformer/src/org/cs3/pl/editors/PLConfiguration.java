@@ -43,28 +43,26 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return doubleClickStrategy;
 	}
 
+	
 	protected PLScanner getPLScanner() {
 		if (scanner == null) {
-			scanner = new PLScanner(colorManager);
-			scanner.setDefaultReturnToken(
-				new Token(
-					new TextAttribute(
-						colorManager.getColor(IPLColorConstants.DEFAULT))));
+			reinitScanner();
 		}
 		return scanner;
 	}
-//	protected PLTagScanner getPLTagScanner() {
-//		if (tagScanner == null) {
-//			tagScanner = new PLTagScanner(colorManager);
-//			tagScanner.setDefaultReturnToken(
-//				new Token(
-//					new TextAttribute(
-//						colorManager.getColor(IPLColorConstants.TAG))));
-//		}
-//		return tagScanner;
-//	}
 
-	public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
+	/**
+     * 
+     */
+    public void reinitScanner() {
+        scanner = new PLScanner(colorManager);
+        scanner.setDefaultReturnToken(
+        	new Token(
+        		new TextAttribute(
+        			colorManager.getColor(IPLColorConstants.DEFAULT))));
+    }
+
+    public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();
 
 		NonRuleBasedDamagerRepairer ndr =

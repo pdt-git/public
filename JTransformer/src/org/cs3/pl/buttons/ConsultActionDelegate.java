@@ -1,6 +1,7 @@
 package org.cs3.pl.buttons;
 
 import org.cs3.pl.PDTPlugin;
+import org.cs3.pl.editors.PLEditor;
 import org.cs3.pl.prolog.IPrologClient;
 import org.cs3.pl.prolog.PrologHelper;
 import org.cs3.pl.prolog.PrologManager;
@@ -32,30 +33,27 @@ public class ConsultActionDelegate implements IWorkbenchWindowActionDelegate {
 		// wait for the calling Runnable to finish -> deadlock in the Eclipse Display Scheduler
 		Thread consulter =  new Thread(){
 			public void run() {
-				final IEditorPart editorPart = PDTPlugin.getDefault().getActiveEditor();
-				boolean dirty = editorPart.isDirty();
-				if (dirty) {
-					PDTPlugin.getDefault().getDisplay().syncExec(new Runnable() {
-						/* (non-Javadoc)
-						 * @see java.lang.Runnable#run()
-						 */
-						public void run() {
-							editorPart.doSave(null);
-						}
-					});
-					
-				}
+                final IEditorPart editorPart = PDTPlugin.getDefault()
+                        .getActiveEditor();
+                if (editorPart != null && editorPart instanceof PLEditor) {
+                    boolean dirty = editorPart.isDirty();
+                    if (dirty) {
+                        PDTPlugin.getDefault().getDisplay().syncExec(
+                                new Runnable() {
+                                    public void run() {
+                                        editorPart.doSave(null);
+                                    }
+                                });
 
-				IPrologClient client;
-				
-					client = PrologManager.getInstance().getClient();
-					final String filename = PDTPlugin.getDefault().getActiveRawFileName();
-/*					CTChecker checker = new CTChecker();
-					checker.check(PDTPlugin.getDefault().getActiveFile());
-*/					new PrologHelper(client).consult(filename);
-					//if (dirty || manager.getCachedPrologElements(filename) == null && ret) {
-					
-			}
+                    }
+                    IPrologClient client = PrologManager.getInstance()
+                            .getClient();
+                    final String filename = PDTPlugin.getDefault()
+                            .getActiveRawFileName();
+                    new PrologHelper(client).consult(filename);
+                    ((PLEditor)editorPart).reinitScanner();
+                }
+            }
 		};
 		consulter.start();
 		
