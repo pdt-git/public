@@ -49,7 +49,7 @@ public class XMLPrologInterface extends AbstractPrologInterface {
            client = new XMLClient(Integer.parseInt(getOption(PORT)));
            client.connect();
        }
-        return new XMLSession(pool,client);
+        return new XMLSession(pool,client,this);
     }
 
     /*

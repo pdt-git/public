@@ -290,12 +290,12 @@ public class RecordingConsultService implements ConsultService {
         }
     }
 
-    public void reload() throws IOException {
+    public void _reload() throws IOException {
         Debug.debug("enter reload:" + prefix.toString());
         //Debug.dumpStackTrace();
         PrintStream out = getOutputStream_impl("src_flat.pl", false);
         try {
-            reload(prefix, out);
+            _reload(prefix, out);
         } finally {
             out.close();
         }
@@ -303,7 +303,7 @@ public class RecordingConsultService implements ConsultService {
         fireConsultDataChanged(new ConsultServiceEvent(this));
     }
 
-    private void reload(File f, PrintStream out) throws IOException {
+    private void _reload(File f, PrintStream out) throws IOException {
         Debug.debug("reload(File) visiting: " + f.getAbsolutePath());
         if (!f.exists()) {
             Debug.debug("\t --> dos not exist: " + f.getAbsolutePath());
@@ -326,7 +326,7 @@ public class RecordingConsultService implements ConsultService {
             Debug.debug("\t --> is a directory: " + f.getAbsolutePath());
             File[] files = f.listFiles();
             for (int i = 0; i < files.length; i++) {
-                reload(files[i], out);
+                _reload(files[i], out);
             }
         }
     }
@@ -334,7 +334,7 @@ public class RecordingConsultService implements ConsultService {
     private void __reload(File f) throws IOException {
 
         PrintStream out = getOutputStream_impl(getUnPrefixedSymbol(f), false);
-        reload(f, out);
+       _reload(f, out);
         out.close();
 
     }

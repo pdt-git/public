@@ -250,23 +250,23 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         File file = getFactory().getResourceLocator().resolve(prefix);
         cs.setPrefix(file);
         addLifeCycleHook(new LifeCycleHook() {
-            public void onInit(PrologSession initSession) {
+            public void onInit(PrologInterface pif,PrologSession initSession) {
                 cs.setPort(port);
                 File file = new DefaultResourceFileLocator(new File(getOption(ENGINE_DIR))).resolve(prefix);
                 cs.setPrefix(file);
                 
                 try {
                     cs.connect();      
-                    cs.reload();
+                    //cs.reload();
                 } catch (IOException e) {
                     Debug.report(e);
                     throw new RuntimeException(e);
                 }
             }
-            public void afterInit() {
+            public void afterInit(PrologInterface pif) {
                 ;
             }
-            public void beforeShutdown(PrologSession session) {
+            public void beforeShutdown(PrologInterface pif,PrologSession session) {
                 cs.disconnect();
             }
         },"SocketPrologInterface.reloadCS."+prefix, new String[0]);
@@ -279,7 +279,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             try {
                 
                 cs.connect();
-                cs.reload();
+                //cs.reload();
             } catch (IOException e) {
                 Debug.report(e);
                 throw new RuntimeException(e);

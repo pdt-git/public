@@ -14,13 +14,14 @@ import javax.xml.stream.XMLStreamException;
 
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
 /**
  */
 public class XMLSession implements PrologSession {
-
+    PrologInterface pif;
     private XMLClient client;
     private ReusablePool pool;
     private boolean disposed=false;
@@ -30,9 +31,10 @@ public class XMLSession implements PrologSession {
     /**
      * 
      */
-    public XMLSession(ReusablePool pool, XMLClient client) {
+    public XMLSession(ReusablePool pool, XMLClient client,PrologInterface pif) {
         this.pool=pool;
         this.client=client;
+        this.pif=pif;
     }
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.PrologSession#dispose()
@@ -209,6 +211,12 @@ public class XMLSession implements PrologSession {
     public boolean isConsulted(String name) throws PrologException {
         // TODO Auto-generated method stub
         return false;
+    }
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
+     */
+    public PrologInterface getPrologInterface() {
+       return pif;
     }
 
 }

@@ -51,6 +51,7 @@ public class SimpleSession implements PrologSession {
     protected boolean queryActive = false;
 
     private ReusableRPCClient rpcDelegate = null;
+    private PrologInterface pif;
 
     /**
      * constructs a SimpleSession. The Server is connected on the local host, at
@@ -62,7 +63,8 @@ public class SimpleSession implements PrologSession {
      *                    a connection failure occurs.
      */
 
-    public SimpleSession(int port) throws IOException {
+    public SimpleSession(int port,PrologInterface pif) throws IOException {
+        this.pif=pif;
         rpcDelegate = new ReusableRPCClient();
         rpcDelegate.enableLogging(new Logger("default"));
         rpcDelegate.configure("localhost", port);
@@ -72,10 +74,10 @@ public class SimpleSession implements PrologSession {
 
     }
 
-    public SimpleSession(ReusableRPCClient connection) {
+    public SimpleSession(ReusableRPCClient connection,PrologInterface pif) {
         rpcDelegate = connection;
         Debug.info("Session created, reusing existing connection");
-
+        this.pif=pif;
     }
 
     public boolean consult(String name) {
@@ -349,6 +351,12 @@ public class SimpleSession implements PrologSession {
             name = name.replace('\\', '/');
 
         return queryOnce("source_file('" + name + "')") != null;
+    }
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
+     */
+    public PrologInterface getPrologInterface() {
+        return pif;
     }
 
 }

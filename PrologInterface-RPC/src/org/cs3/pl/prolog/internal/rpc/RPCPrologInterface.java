@@ -82,7 +82,7 @@ public class RPCPrologInterface implements PrologInterface {
                     LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks
                             .get(it.next());
                     if (h.flipflop != hookFilpFlop) {
-                        h.afterInit();
+                        h.afterInit(RPCPrologInterface.this);
                     }
                 }
             }
@@ -90,8 +90,8 @@ public class RPCPrologInterface implements PrologInterface {
     }
 
     private class InitSession extends SimpleSession {
-        public InitSession(int PORT) throws IOException {
-            super(PORT);
+        public InitSession(int PORT,PrologInterface pif) throws IOException {
+            super(PORT,pif);
         }
 
         public void dispose() {
@@ -104,8 +104,8 @@ public class RPCPrologInterface implements PrologInterface {
     }
 
     private class ShutdownSession extends SimpleSession {
-        public ShutdownSession(int PORT) throws IOException {
-            super(PORT);
+        public ShutdownSession(int PORT,PrologInterface pif) throws IOException {
+            super(PORT,pif);
         }
 
         public void dispose() {
@@ -236,7 +236,7 @@ public class RPCPrologInterface implements PrologInterface {
                         c.start();
                     }
                 }
-                SimpleSession s = new SimpleSession(c);
+                SimpleSession s = new SimpleSession(c,this);
                 s.setConnectionPool(pool);
                 s.setDispatcher(new PrologInterfaceListener() {
                     public void update(PrologInterfaceEvent e) {
@@ -305,7 +305,7 @@ public class RPCPrologInterface implements PrologInterface {
             }
             ShutdownSession s = null;
             try {
-                s = new ShutdownSession(port);
+                s = new ShutdownSession(port,this);
             } catch (Throwable e1) {
                 Debug.report(e1);
                 Debug
@@ -320,7 +320,7 @@ public class RPCPrologInterface implements PrologInterface {
                                 .get(id);
                         if (h.flipflop != hookFilpFlop) {
                             try {
-                                h.beforeShutdown(s);
+                                h.beforeShutdown(RPCPrologInterface.this,s);
                             } catch (Throwable t) {
                                 Debug
                                         .error("could not execute 'beforeShutdown' on hook '"
@@ -403,14 +403,14 @@ public class RPCPrologInterface implements PrologInterface {
                 startStrategy.startServer(port);
             }
             Debug.info("ok... trying to connect to port " + port);
-            InitSession initSession = new InitSession(port);
+            InitSession initSession = new InitSession(port,this);
             synchronized (hooks) {
                 hookFilpFlop = !hookFilpFlop;
                 for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
                     LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks
                             .get(it.next());
                     if (h.flipflop != hookFilpFlop) {
-                        h.onInit(initSession);
+                        h.onInit(RPCPrologInterface.this,initSession);
                     }
                 }
             }
