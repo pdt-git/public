@@ -65,6 +65,12 @@ createVarDefIdents           (_newParent, _oldList, _newList)
 
 :- dynamic isErrorWarningMessage/3.
 
+
+cond(src(_type)).
+
+src(Type):-   
+    not(java_fq(externT(Type))).
+
 /**
  * Flatten List of Lists/Elements.
  * e.g [[a,b],c,[d,e,f]] -> [a,b,c,d,e,f].

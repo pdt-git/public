@@ -7,6 +7,7 @@
 :- dynamic pointcut/1.
 :- dynamic merge_advices/0.
 :- dynamic visibility/3.
+:- dynamic aj_ct_list/1.
 
 %:- assert(merge_advices).
 /*
@@ -65,11 +66,11 @@ action(after(_id, _interID,_forwMethod,_forwBody)) :-
 /*
     before
 
-    Fügt vor einem Statement _call (bisher nur MethodCall)
+    Fï¿½gt vor einem Statement _call (bisher nur MethodCall)
     ein weiteres Statement _insert ein.
     Hierzu wird eine Forwarding Methode erzeugt (falls noch keine existiert)
     in der der Methodenaufruf / Feldzugriff realisiert wird.
-    Am Anfang der Forw. Methode wird das _insert Statement einfügt.
+    Am Anfang der Forw. Methode wird das _insert Statement einfï¿½gt.
 */
 
 replaceStatementWithForwarding(_stat) :-
@@ -133,7 +134,7 @@ after(_stat, _insertList,_forwMethod,_finallyBlock) :-
 %    new_ids([_forwMethod,_forwBody]).
 
 
-% Ausnahme für den execution pointcut
+% Ausnahme fï¿½r den execution pointcut
 bindForwMethod(_,_Method,_Method,_Body):-
     methodDefT(_Method,_,_,_,_,_,_),
     !,
@@ -162,8 +163,8 @@ bindForwMethod(_,_,_forwMethod,_forwBody):-
 /************************** AOP Helper ***************************/
 
 /*
- * Umschließe aktuellen Body mit einem try .. finally block und füge _insert in den finally Block ein,
- * wenn _insert ein Block ist wird insert als finally block eingefügt.
+ * Umschlieï¿½e aktuellen Body mit einem try .. finally block und fï¿½ge _insert in den finally Block ein,
+ * wenn _insert ein Block ist wird insert als finally block eingefï¿½gt.
 c */
 
 addTryFinallyBlockStmts(_,_, []).
@@ -489,12 +490,12 @@ appendBlockStatment(_block, _post) :-
 cond(matchParams(_vardefs, _patterns)).
 matchParams([], []).
 
-% FIXME sehr schlechter workaround für declare error, mock objects
+% FIXME sehr schlechter workaround fï¿½r declare error, mock objects
 %matchParams([VdHead | VdTail], [typePattern(bindTypeList(FNList), _dim)]) :-
 %    paramDefT(VdHead,_,_,_),
 %    !,
 %    matchParamTypeNameList([VdHead | VdTail],FNList).
-% FIXME sehr schlechter workaround für declare error, mock objects
+% FIXME sehr schlechter workaround fï¿½r declare error, mock objects
 
 matchParams([VdHead | VdTail], [Term | PatTail]) :-
     nonvar(Term),
@@ -814,7 +815,7 @@ createForwParam(_forwMethod, _arg, _Param,_counter) :-
 % DEBUG commented
 
 getForwParam(_method, _adviceArg, _IdentRef,_IdentName):-
-    % Ausnahme für den execution pointcut
+    % Ausnahme fï¿½r den execution pointcut
     methodDefT(_method, _class, _, _params, _, _, _),
     !,
     forwards(_, _forwMethod, _, _method),
