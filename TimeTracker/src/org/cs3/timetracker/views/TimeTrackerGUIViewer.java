@@ -1,6 +1,11 @@
 package org.cs3.timetracker.views;
 
 
+import java.io.File;
+import java.io.BufferedReader;
+
+import java.io.FileReader;
+
 import org.cs3.timetracker.ITimeObserver;
 import org.cs3.timetracker.TimeEvent;
 import org.cs3.timetracker.TimeTicker;
@@ -17,7 +22,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
+//import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -59,6 +64,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 
 
 	private Composite composite;
+	private String content = "bvelzirgf";
 
 
 	private TimeTrackerGUIInteraction guiInteraction;
@@ -82,10 +88,44 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 			if(currentTimeEvent.getMinutes()==0 && currentTimeEvent.getSeconds()==0)
 				elements[0]="Time out!";
 			else elements[0] = currentTimeEvent.getFormattedString();
-			return elements;
+						return elements;
+			
 			
 		}
+
+		
+		
+		
+//	public void setElement(Object parent,String s)	
+//	{
+//	}
+	
 	}
+	
+	class ViewContentProvider1 implements IStructuredContentProvider {
+		
+		public ViewContentProvider1(){			
+			System.out.println("Test");
+		}
+		
+		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
+		}
+		
+		public void dispose() {
+		}
+		
+		public Object[] getElements(Object parent) {
+			
+			String[] elements = {"--:--"};
+			elements[0]=content;
+		return elements;
+		}
+				
+	}
+	
+	
+	
+	
 	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public String getColumnText(Object obj, int index) {
 			return getText(obj);
@@ -110,7 +150,9 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 * This is a callback that will allow us
 	 * to create the viewer and initialize it.
 	 */
-	public void createPartControl(Composite parent) {
+	public void createPartControl(Composite parent)
+	{
+		
 		//SashForm sash = 
 		composite = new SashForm(parent, SWT.VERTICAL);
 		//composite = parent;
@@ -125,9 +167,36 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		
 		tt.addObserver(guiInteraction);
 		
+		File file = new File("test.txt");
+		if(file.exists())
+		{
+		try {
+		BufferedReader br=new BufferedReader(new FileReader(file));
+		
+		content=br.readLine();
+		System.out.println("Content"+content);
+			
+			
+		} catch (Exception e) {	e.printStackTrace();	}
+		}else
+		{
+		System.out.println("File Not Found");	
+			
+		}	
+		
+		
+	SashForm composite1 = new SashForm(parent, SWT.VERTICAL);
+	
+	TableViewer viewer1 = new TableViewer(composite1, SWT.MULTI);
+	viewer1.setContentProvider(new ViewContentProvider1());
+	viewer1.setLabelProvider(new ViewLabelProvider());
+	viewer1.setInput(getViewSite());
+	
+				
 		viewer = new TableViewer(composite, SWT.MULTI);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
+		
 		for (int i = 0; i < composite.getChildren().length-1; i++) {
 			composite.getChildren()[i].setFont(new Font(null, "Arial",60,1));
 		}
