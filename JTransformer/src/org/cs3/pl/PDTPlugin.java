@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Vector;
 
 import org.cs3.pl.builders.FactBaseBuilder;
@@ -1099,4 +1100,28 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
     public int getPrologServerPort() {
         return prologServerPort;
     }
+
+	/**
+	 * Show the source location of the specified id.
+	 * 
+	 * @param id
+	 * @throws IOException
+	 * @throws PartInitException
+	 */
+	public void showLocationOfId(int id) throws IOException, PartInitException {
+			IPrologClient manager = PrologManager.getInstance().getHiddenClient();
+			Hashtable result = manager.query("sourceLocation(" + id
+					+ ", File, Start, Length)");
+			if (result == null) {
+				PDTPlugin.getDefault().setStatusErrorMessage(
+						"could not find source location for id '" + id
+								+ "'.");
+			}
+			else {
+				String filename = result.get("File").toString();
+				int start = Integer.parseInt(result.get("Start").toString());
+				int length = Integer.parseInt(result.get("Length").toString());
+				PDTPlugin.getDefault().selectInEditor(start, length, filename);
+			}
+		}	
 }

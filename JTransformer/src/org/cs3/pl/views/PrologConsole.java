@@ -68,30 +68,18 @@ public class PrologConsole extends ViewPart
 			}
 			try {
 				String id = removeTrailingComma(viewer.getSelectionText());
-				Integer.parseInt(id);
-				IPrologClient manager = PrologManager.getInstance().getHiddenClient();
-				Hashtable result = manager.query("sourceLocation(" + id
-						+ ", File, Start, Length)");
-				if (result == null) {
-					PDTPlugin.getDefault().setStatusErrorMessage(
-							"could not find source location for id '" + id
-									+ "'.");
-					return;
-				}
-				String filename = result.get("File").toString();
-				int start = Integer.parseInt(result.get("Start").toString());
-				int length = Integer.parseInt(result.get("Length").toString());
-				PDTPlugin.getDefault().selectInEditor(start, length, filename);
+				int intId = Integer.parseInt(id);
+				PDTPlugin.getDefault().showLocationOfId(intId);
 			} catch (NumberFormatException nfe) {
-				// no (ast) id
+				// no source location found or not an ast id 
+				Debug.report(nfe);
 			} catch (IOException ioe) {
-				// TODO Auto-generated catch block
 				Debug.report(ioe);
 			} catch (PartInitException pie) {
-				// TODO Auto-generated catch block
 				Debug.report(pie);
 			}
 		}
+
 		/**
 		 * @param string
 		 * @return
