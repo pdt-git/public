@@ -32,6 +32,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
@@ -99,6 +100,8 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
                             project.build(IncrementalProjectBuilder.FULL_BUILD,
                                     monitor);
                         }
+                    } catch (OperationCanceledException opc) {
+                        return Status.CANCEL_STATUS;
                     } catch (CoreException e) {
                         return new Status(Status.ERROR, JLMP.PLUGIN_ID, -1,
                                 "exception caught during build", e);
