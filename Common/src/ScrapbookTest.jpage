@@ -1,0 +1,3 @@
+System.getProperty("os.name");
+System.out.println(org.cs3.pl.common.Util.exec("xpce -g source_file(A),concat(X,'/library/system.pl',A),format(\"~a~n\",[X]),halt.")[0] );
+org.cs3.pl.common.Util.exec("date")[0];
