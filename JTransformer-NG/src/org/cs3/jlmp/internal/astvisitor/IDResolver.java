@@ -226,6 +226,7 @@ public class IDResolver implements IIDResolver {
 		int kind = iface.getKind();
 		StringBuffer buff = new StringBuffer();
 		buff.append("fqn('");
+		String key;
 		switch (kind) {
 			case IBinding.PACKAGE :
 				IPackageBinding pb = (IPackageBinding) iface;
@@ -239,7 +240,7 @@ public class IDResolver implements IIDResolver {
 					localBindings.put(mb, resolved);
 					return resolved;
 				}
-				buff.append(mb.getDeclaringClass().getQualifiedName());
+				buff.append(normalizeFullQualifiedName(mb.getDeclaringClass().getQualifiedName()));
 				buff.append("', '");
 				if (mb.isConstructor())
 					buff.append("<init>");
@@ -286,7 +287,7 @@ public class IDResolver implements IIDResolver {
 //					
 //					return theID.toString();					
 //				}
-				buff.append(tb.getKey().replace('/','.'));
+			buff.append(normalizeFullQualifiedName(tb.getKey()));
 				buff.append("'");
 				break;
 			case IBinding.VARIABLE :
@@ -323,6 +324,16 @@ public class IDResolver implements IIDResolver {
 		}
 		buff.append(")");
 		return fqnManager.transformFQN(buff.toString());
+	}
+
+	/**
+	 * @param key
+	 * @return
+	 */
+	static String normalizeFullQualifiedName(String key) {
+		if(key.endsWith(";") && key.startsWith("L"))
+			key = key.substring(1,key.length()-1);
+		return key.replace('/','.');
 	}
 
 	/**

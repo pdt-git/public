@@ -2301,7 +2301,9 @@ public class FactGenerator extends ASTVisitor {
 	
 	private String createSynteticConstructor(TypeDeclaration typeDeclaration) {
 		ITypeBinding binding = typeDeclaration.resolveBinding();
-        String fqn = "fqn('" + binding.getKey().replace('/','.') + "', '<init>', [])";
+		String key = IDResolver.normalizeFullQualifiedName(binding.getKey());
+
+        String fqn = "fqn('" + key + "', '<init>', [])";
 		
 		String classname = typeDeclaration.resolveBinding().getQualifiedName();
 		String bodyID = idResolver.getID();
