@@ -215,6 +215,7 @@ public class PDTPlugin extends AbstractUIPlugin {
      *  
      */
     public void reconfigure() {
+        try {
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
         String debugLevel = service.getString(qualifier, PDT.PREF_DEBUG_LEVEL,
@@ -223,9 +224,9 @@ public class PDTPlugin extends AbstractUIPlugin {
         prologInterface.stop();
         reconfigurePrologInterface();
         reconfigureMetaDataConsultService();
-        try {
+        
             prologInterface.start();
-        } catch (IOException e) {
+        } catch (Throwable e) {
             Debug.report(e);
         }
 
