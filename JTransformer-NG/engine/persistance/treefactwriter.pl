@@ -35,16 +35,15 @@ writeTreeFacts(File):-
 */    
     
 persistant(Fact) :-
-    treeFact(Fact);
-    (
-     (
-      (Head=ct,Arity=3);
-      (Head=aj_ct_list,Arity=1)
-     ),
-     uniqueArgumentList(Arity,Arguments),
-     Fact =.. [Head|Arguments]
-    ).
-    
+    treeFact(Fact).   
+
+%persistant(Fact) :-         
+%	(	(Head=ct,Arity=3)
+%	;	(Head=aj_ct_list,Arity=1)
+%	),
+%	uniqueArgumentList(Arity,Arguments),
+%	Fact =.. [Head|Arguments].
+     
 /*
  treeFact(-Fact)
 */    
