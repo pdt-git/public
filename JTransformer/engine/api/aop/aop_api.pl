@@ -1073,6 +1073,25 @@ addParamList([Param|Params], [Id|Ids],Parent) :-
     add(paramDefT(Id,Parent,Type,Name)),
     addParamList(Params, Ids,Parent).    
     
+/**
+ * action(addParamReferenceList(+Refs, +Params, +Parent,+Encl))
+ *
+ * Adds a list of parameter accesses.
+ * Parent is the parent id and Encl the 
+ * enclosing id of the created identT/5 facts.
+ */
+    
+action(addParamReferenceList(Refs, Params, Parent,Encl)) :-
+	addParamReferenceList(Refs, Params, Parent,Encl).
+	
+addParamReferenceList([], [], _Parent,_Encl).
+
+addParamReferenceList([Ref|Refs], [Param|Params], Parent,Encl) :-
+    paramDefT(Param,_,_,Name),
+    add(identT(Ref,Parent,Encl,Name,Param)),
+	addParamReferenceList(Refs, Params, Parent,Encl).
+    
+    
 action(add_to_class_fq(Class,Member)):-
     add_to_class_fq(Class,Member).
 
