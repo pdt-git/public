@@ -189,9 +189,9 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		viewer.setLabelProvider(new ViewLabelProvider());
 		
 		for (int i = 0; i < composite.getChildren().length-1; i++) {
-			composite.getChildren()[i].setFont(new Font(null, "Arial",60,1));
+			composite.getChildren()[i].setFont(new Font(null, "Arial",16,1));
 		}
-		composite.getChildren()[4].setFont(new Font(null, "Arial",80,1));
+		composite.getChildren()[4].setFont(new Font(null, "Arial",20,1));
 		
 		viewer.setInput(getViewSite());
 		
