@@ -46,9 +46,10 @@ public class ReloadHook implements LifeCycleHook {
                     "false");
             if (Boolean.valueOf(v).booleanValue()) {
                 plugin.reload(initSession);
+            }
                 //ld: see JT-147
                 initSession.queryOnce("update_java_lang");
-            }
+            
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
