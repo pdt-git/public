@@ -6,7 +6,7 @@ test(java_fq1):-
 			Name = newInstance,
 			Ex1 = 'java.lang.InstantiationException',
 			Ex2 = 'java.lang.IllegalAccessException',
-			 Type = 'java.lang.Object'
+			 Type = type(class, 'java.lang.Object', 0)
 			 )).
 
 test(java_fq2):-
@@ -16,36 +16,22 @@ test(java_fq2):-
 			java_fq(classDefT(Class,P,_,_)),packageT(P,'java.lang'),
 			Name = newInstance,
 			Ex2 = 'java.lang.IllegalAccessException',
-			 Type = 'java.lang.Object'
+			 Type = type(class, 'java.lang.Object', 0)
 			 )).
-			 
 test(java_fq3):-
    assert_true('check for field java.langClassLoader.classAssertionStatus and try full instantiated java_fq fieldDefT',(
    	class(C,P,'ClassLoader'),
    	packageT(P,'java.lang'),
    	fieldDefT(F, C, _, classAssertionStatus, null),
-    java_fq(fieldDefT(F, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null)))),
-    
+    java_fq(fieldDefT(F, 'java.lang.ClassLoader', type(class,'java.util.Map',0), classAssertionStatus, null)))),
     assert_true('full instantiated fieldDefT except id',
-      java_fq(fieldDefT(_, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
-      
+      java_fq(fieldDefT(_, 'java.lang.ClassLoader', type(class,'java.util.Map',0), classAssertionStatus, null))),
     assert_true('',
-	   java_fq(fieldDefT(_,_,'java.lang.Class',_,_))).
+	   java_fq(fieldDefT(_,_,type(class,'java.lang.Class',0),_,_))).
        	
 
 lookupJavaLangString(JavaLangString):-
      assert_true('look for class java.lang.String',
      (class(JavaLangString,JavaLang,'String'),
       packageT(JavaLang,'java.lang'))).
-    
-    
-test(java_fq_type_with_brackets1):-
-    assert_true(type_with_brackets(int,2,IntBrackets)),
-    assert_true(('int[][]' ==IntBrackets)).
-    
-test(java_fq_type_with_brackets2):-
-    assert_true(type_with_brackets(Type,Arity,'int[]')),
-    assert_true(('int' == Type)),
-    assert_true((1 == Arity)).
-    
     

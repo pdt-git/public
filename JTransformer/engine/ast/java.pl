@@ -241,7 +241,7 @@ ast_node_def('Java',methodDefT,[
      ast_arg(parent,  mult(1,1,no ), id,  [classDefT]), 
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
      ast_arg(params,  mult(0,*,ord), id,  [paramDefT]),
-     ast_arg(type,    mult(0,1,no),  attr,[typeTermType]),  % 0, if constructor definition
+     ast_arg(type,    mult(0,1,no),  attr,[typeTermType,nullType]),  % 0, if constructor definition
      ast_arg(excepts, mult(0,*,ord), id,  [classDefT]), %ord, only for compatibility with current PEF represenation: detection of lists
      ast_arg(body,    mult(0,1,no),  id,  [blockT]),
      ast_arg(hasModif,mult(0,*,no),  attr,[atom])     
@@ -432,13 +432,13 @@ ast_node_def('Java',labelT,[
      ast_arg(body,    mult(1,1,no ), id,  [statementType]),
      ast_arg(label,   mult(1,1,no ), id,  [atom])
 ]).
-% tree_constraints(literalT ,[[allType],[methodDefT,fieldDefT],[typeTermType],[atom,typeTermType]]).
+% tree_constraints(literalT ,[[allType],[methodDefT,fieldDefT],[typeTermType],[atom]]).
 ast_node_def('Java',literalT,[
      ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(type,    mult(1,1,no ), attr,  [typeTermType]),
-     ast_arg(value,   mult(1,1,no ), attr,  [typeTermType]) % TODO: hier stand vorher: atom,typeTermType - warum?
+     ast_arg(value,   mult(1,1,no ), attr,  [atom]) % TODO: hier stand vorher: atom,typeTermType, type literals are now represented as selectT / identTs selectT(....,class,ident(...,Classname,type(class,java.lang.Class,.))
 ]).
 
 % tree_constraints(localDefT,[[allType],[methodDefT],[typeTermType],[atom],[expressionType,nullType]]).
@@ -459,7 +459,7 @@ ast_node_def('Java',newArrayT,[
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(dims,    mult(1,*,ord), id,  [expressionType]),
      ast_arg(elems,   mult(0,*,ord), id,  [expressionType]), % <-- elems wird momentan im FactGenerator immer auf [] gesetzt, warum???
-     ast_arg(type,    mult(1,1,no ), id,  [expressionType])
+     ast_arg(type,    mult(1,1,no ), id,  [typeTermType])
 ]).
 
 % tree_constraints(newClassT, [[allType],[methodDefT,fieldDefT],[methodDefT,nullType],[expressionType],[identT,selectT],[classDefT,nullType],[classDefT,nullType]]).

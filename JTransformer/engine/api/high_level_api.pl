@@ -91,38 +91,6 @@ test(concat_list/2):-
     	[a,b,c,d,e,f])).
 
 /**
- * action(showError(+Kind, +ID,+Msg))
- */
- 
-action(showError(Kind,ID,Msg)):-
-    showError(Kind,ID,Msg).
-
-/**
- * showError(+Kind, +ID,+Msg)
- */
-showError(_,ID,Msg):-    
-	var(ID),
-	write('ID NOT BOUND: '),
-	write(Msg),
-	flush_output.
-
-showError(Kind,ID,Msg):-    
-    enclMethod(ID,Meth),
-    method(Meth,Class,Name,_,_,_,_),
-    fullQualifiedName(Class,Fqn),
-    format('~a in method ~a.~a  ',[Kind,Fqn,Name]),
-    sourceLocation(ID, File,Start,_),
-    format('(~a:~a)~n~n~a~n', [File,Start,Msg]),
-    gen_tree(ID),
-    flush_output,
-
-    /**
-    * Added Dec 20, 2004 to store all errors/warnings
-    * and move it to the Eclipse Problems View. (AL)
-    */
-    assert(isErrorWarningMessage(Kind, ID, Msg)).
-    
-/**
  * action(set_parent(+ID,+NewParent))
  */
 

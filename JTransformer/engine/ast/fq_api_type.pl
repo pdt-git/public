@@ -145,54 +145,14 @@ mapArgs([Arg|JavaASTArgs],[Arg|Args]):-
     mapArgs(JavaASTArgs,Args).
 
 /**
-	map_type_term(?type/3, ?FQN)).
+	map_type_term(?type/3 FQN, ?type/3 Id)).
 */
     
-map_type_term(type(basic,TypeName,0), TypeName).
-map_type_term(type(basic,TypeName,Arity), FQNBrackets):-
-   type_with_brackets(TypeName,Arity,FQNBrackets).
-
-map_type_term(type(class,Id,0), FQN):-
+map_type_term(type(basic,TypeName,Arity), type(basic,TypeName,Arity)).
+    
+map_type_term(type(class,Id,Arity), type(class,FQN,Arity)):-
     fullQualifiedName(Id,FQN).
-map_type_term(type(class,Id,Arity), FQNBrackets):-
-    fullQualifiedName(Id,FQN),
-    type_with_brackets(FQN,Arity,FQNBrackets).
-  
-/**
- * type_with_brackets(?TypeName,?Arity,?FQNBrackets) 
- * (-,-,+) | (+,+,-)
- */
     
-type_with_brackets(TypeName,Arity,FQNBrackets) :-
-    nonvar(Arity),
-    !,
-    square_brackets_for_arity(Arity,Brackets),
-    atom_concat(TypeName,Brackets,FQNBrackets).
-
-type_with_brackets(FQN,Arity,FQNBrackets) :-
-    nonvar(FQNBrackets),
-    !,
-    arity_for_square_brackets(Arity,FQNBrackets,FQN).
-
-
-square_brackets_for_arity(0,'').
-square_brackets_for_arity(Dim,Brackets) :-
-    nonvar(Dim),
-    !,
-    succ(DimDec, Dim),
-    square_brackets_for_arity(DimDec,RestBrackets),
-    atom_concat(RestBrackets,'[]',Brackets).
-    
-arity_for_square_brackets(0,FQN,FQN):-
-	not(atom_concat(_,'[]',FQN)).
-
-arity_for_square_brackets(Dim,Brackets,FQN) :-
-    nonvar(Brackets),
-    !,
-    atom_concat(RestBrackets,'[]',Brackets),
-    arity_for_square_brackets(DimDec,RestBrackets,FQN),
-    succ(DimDec, Dim).
-
      
 /**
 	bindArgs([ast_arg_descr/4,...],[java_fq_arg1,...],[java_ast_arg1,...])
@@ -224,10 +184,9 @@ bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaAS
     
     
 % type term attribute.
-% INFO: the only other attribute kind than typeTermType possible here MUST be nullType 
-
-bindArgs([ast_arg(_,_, _,  Kinds)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
-    member(typeTermType,Kinds),
+% INFO: there MUST not be other attribute kind possible where [typeTermType]
+% assigned, also no nullType)
+bindArgs([ast_arg(_,_, _,  [typeTermType])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
     !,
     map_type_term(JavaASTArg,FQN),
 	bindArgs(ArgDefs, Args, JavaASTArgs).

@@ -1782,18 +1782,36 @@ public class FactGenerator extends ASTVisitor {
 	 * Generates prolog facts of type literalT.
 	 * <p>
 	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=LiteralT">
-	 * literalT<a>}
+8	 * literalT<a>}
 	 * @see FactGeneratorMethodBodyTest#testVisitTypeLiteral()
    	 */
 	public boolean visit(TypeLiteral node) {
+		String identId = idResolver.getID();
 		String args[] =
 			new String[] {
-				"type(class, " + idResolver.getJavaLangClassID() +", 0)",
-				typeResolver.getTypeTerm(node.getType())
+				"class", identId, "type(class, " + idResolver.getJavaLangClassID() +", 0)"
 		};
 
-		createBodyFact(node, "literalT", args);
+		createBodyFact(node, "selectT", args);
+		writer.writeFact("identT", new String [] {
+				identId,
+				idResolver.getID(node),
+				idResolver.getID(node.getParent()),
+				quote(node.getType().resolveBinding().getQualifiedName()),
+				typeResolver.getTypeTerm(node.getType())
+				
+		});
+		
 
+// original version: replaced to avoid type literals, by this type term are used exclusivly  
+//		String args[] =
+//			new String[] {
+//				"type(class, " + idResolver.getJavaLangClassID() +", 0)",
+//				typeResolver.getTypeTerm(node.getType())
+//		};
+//
+//		createBodyFact(node, "literalT", args);
+//
 		return true;
 		
 	}

@@ -969,6 +969,9 @@ constructor(_constructor,_class,_params):-
     methodDefT(_constructor,_class,'<init>', _paramsConstructor,_,[],_),
     matchParams(_params, _paramsConstructor).
 
+
+/*************** actions ************/
+
 /**
  * addArgList(FnArg, PcArgs, IdList, Parent, Encl)
  */
@@ -993,3 +996,53 @@ lookupForwParameter(_,FnArg,[FnArg|_],[Param|_],Param, Name):-
 lookupForwParameter(ForwMethod,FnArg,[_|PcArgs],[_|ArgParams],Param, Name):-
     lookupForwParameter(ForwMethod,FnArg,PcArgs,ArgParams,Param, Name).
    
+   
+/**
+ * action(showError(+Kind, +ID,+Msg))
+ */
+ 
+action(showError(Kind,ID,Msg)):-
+    showError(Kind,ID,Msg).
+
+/**
+ * showError(+Kind, +ID,+Msg)
+ */
+showError(_,ID,Msg):-    
+	var(ID),
+	write('ID NOT BOUND: '),
+	write(Msg),
+	flush_output.
+
+showError(Kind,ID,Msg):-    
+    enclMethod(ID,Meth),
+    method(Meth,Class,Name,_,_,_,_),
+    fullQualifiedName(Class,Fqn),
+    format('~a in method ~a.~a  ',[Kind,Fqn,Name]),
+    sourceLocation(ID, File,Start,_),
+    format('(~a:~a)~n~n~a~n', [File,Start,Msg]),
+    gen_tree(ID),
+    flush_output,
+
+    /**
+    * Added Dec 20, 2004 to store all errors/warnings
+    * and move it to the Eclipse Problems View. (AL)
+    */
+    assert(isErrorWarningMessage(Kind, ID, Msg)).
+    
+
+/**
+ * action(addParamList(+Params, +Ids,+Parent))
+ */
+
+action(addParamList(Params, Ids,Parent)) :-
+    addParamList(Params, Ids,Parent).
+    
+/**
+ * addParamList(+Params, +Ids,+Parent)
+ */
+
+addParamList([],[],_).
+addParamList([Param|Params], [Id|Ids],Parent) :-
+    paramDefT(Param,_,Type,Name),
+    add(paramDefT(Id,Parent,Type,Name)),
+    addParamList(Params, Ids).    

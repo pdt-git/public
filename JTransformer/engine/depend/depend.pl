@@ -636,7 +636,7 @@ test(mp1):-
     retractall(ct(c1,_,_)),
     retractall(ct(c2,_,_)),
     del_dep_graph.
-
+/*
 test(mp2):-
     assert(ct(c1,
     (
@@ -669,6 +669,7 @@ test(mp2):-
     retractall(ct(c1,_,_)),
     retractall(ct(c2,_,_)),
     del_dep_graph.
+*/
 
 % expand condition
 test(ec1):-
