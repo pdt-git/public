@@ -1,6 +1,7 @@
 package org.cs3.jlmp.builders;
 import java.util.Map;
 
+import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
@@ -82,7 +83,7 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 				return null;
 			}
 			
-			if(! getProject().hasNature(JLMPProjectNature.NATURE_ID)){
+			if(! getProject().hasNature(JLMP.NATURE_ID)){
 				Debug.warning("Project does not have a JLMP nature!");
 				return null;
 			}
@@ -91,7 +92,7 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 				Debug.warning("JLMP Nature is NULL!!");
 				return null;
 			}
-			getBuilder().setJlmpProject(nature);
+			
 			
 			
 			
@@ -107,14 +108,14 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 			if(clearProjectFacts) flags |= FactBaseBuilder.CLEAR_PRJ_FACTS;
 			switch (kind) {
 				case FULL_BUILD :
-					getBuilder().build(null, flags, monitor);
+					nature.getFactBaseBuilder().build(null, flags, monitor);
 					break;
 				case INCREMENTAL_BUILD :
 				case AUTO_BUILD :
 					//ld: i currently don't see any reason to
 					//differantiate here.					
 					//builder.incrementalBuild(getDelta(getProject()),monitor);
-					getBuilder().build(getDelta(getProject()),flags,monitor);
+				    nature.getFactBaseBuilder().build(getDelta(getProject()),flags,monitor);
 					break;
 			}
 			monitor.done();
@@ -136,15 +137,6 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 		fvalue=args==null ? null :(String)args.get("clearExternalFacts");
 		clearExternalFacts=(fvalue!=null)&&fvalue.equals("true");				
 	}
-    /**
-     * @return Returns the builder.
-     */
-    private FactBaseBuilder getBuilder() {
-        if(builder==null){
-            builder = new FactBaseBuilder();
-            
-        }
-        return builder;
-    }
+   
 }
 

@@ -18,9 +18,8 @@ import org.cs3.jlmp.astvisitor.FactGenerationToolBox;
 import org.cs3.jlmp.astvisitor.FactGenerator;
 import org.cs3.jlmp.astvisitor.PrologWriter;
 import org.cs3.jlmp.bytecode.ByteCodeFactGeneratorIType;
-import org.cs3.jlmp.natures.JLMPProjectNature;
+
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -45,16 +44,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 public class FactBaseBuilder {
-    /*
-     * ld: please note: in principle, this builder should be stateless. The
-     * non-final fields will be reconstructed on every call o build()
-     * 
-     * this is a temporary solution, i'm in the middle of a refactoring.
-     */
-
-    private Collection failed = new HashSet();
-
-    private Iterator nextIterator = null;
 
     /**
      * delete all previously generated project fact files.
@@ -87,30 +76,21 @@ public class FactBaseBuilder {
      */
     public final static int IGNORE_EXT_FACTS = 16;
 
-    private boolean loadedJavaFile = false;
-
-    private boolean errorsInCode = false;
-
-    private PrologSession prologClient;
-
-    private JLMPProjectNature jlmpProject;
-
     private ConsultService metaDataSRC;
 
     private ConsultService metaDataEXT;
 
-    private PrologInterface pif;
-
     private IProject project;
 
-    private PrintStream out;
+    private PrologInterface pif;
 
     /**
      *  
      */
-    public FactBaseBuilder() {
+    public FactBaseBuilder(IProject project, PrologInterface pif) {
 
-        // TODO Auto-generated constructor stub
+        this.project = project;
+        this.pif = pif;
     }
 
     /**
@@ -132,98 +112,45 @@ public class FactBaseBuilder {
      */
 
     public synchronized void build(final IResourceDelta delta, final int flags,
-            final IProgressMonitor monitor) {
-        loadedJavaFile = false;
-        WorkspaceJob job = new WorkspaceJob("JLMP Buildjob") {
-            public IStatus runInWorkspace(IProgressMonitor monitor)
-                    throws CoreException {
+            IProgressMonitor monitor) {
 
-                //ld: we catch EVERYTHING, since eclipse eats any exceptions
-                // otherwise :-(
-                try {
-                    if (monitor == null)
-                        monitor = new NullProgressMonitor();
+        //ld: we catch EVERYTHING, since eclipse eats any exceptions
+        // otherwise :-(
+        try {
+            if (monitor == null)
+                monitor = new NullProgressMonitor();
 
-                    build_impl(delta, flags, monitor);
-                } catch (Throwable t) {
-                    if (t instanceof OperationCanceledException)
-                        return new Status(Status.CANCEL, JLMPPlugin.PLUGIN_ID,
-                                Status.OK, "Operation Canceled", t);
+            build_impl(delta, flags, monitor);
+        } catch (Throwable t) {
+            Debug.report(t);
+            throw new RuntimeException(t);
+        }
 
-                    Debug.report(t);
-                    return new Status(Status.ERROR, JLMPPlugin.PLUGIN_ID,
-                            Status.OK, "Exception while rebuilding fact base",
-                            t);
-                }
-
-                //				
-                //					if(!errorsInCode) {
-                //					    WorkbenchJob job = new WorkbenchJob("update factbase
-                // observers") {
-                //	
-                //	                        public IStatus runInUIThread(IProgressMonitor monitor) {
-                //	                            if(!JLMPPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_FACTBASE_UPDATED,prologClient,project))
-                //	            					return new Status(Status.ERROR, JLMPPlugin.PLUGIN_ID, 0,
-                // "Failed to update factbase observers", null);
-                //	                            return Status.OK_STATUS;
-                //	                        }
-                //					        
-                //					    };
-                //					    job.schedule();
-                //					}
-                return Status.OK_STATUS;
-
-                //					PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_BUILD_ERROR,prologClient,project);
-                //					String msg = "Failed to load some classes: ";
-                //					for (Iterator iter = failed.iterator(); iter.hasNext();) {
-                //					    String typename = iter.next().toString();
-                //						msg += typename + "\n";
-                //						
-                //						prologClient.query("assert(ignore_unresolved_type('"+typename
-                // + "'))");
-                //					}
-                //					Debug.error(msg);
-                //					return Status.OK_STATUS;
-            }
-
-        };
-
-        job.schedule();
     }
 
     synchronized private void build_impl(IResourceDelta delta, int flags,
             IProgressMonitor monitor) {
         boolean delete;
 
+        PrologSession session = null;
         try {
-            if (jlmpProject == null) {
-                Debug
-                        .warning("JLMPProjectBuilder called on null project. Aborted.");
-                return;
-            }
 
-            pif = jlmpProject.getPrologInterface();
-            prologClient = pif.getSession();
+            session = pif.getSession();
             final Collection toProcess = new Vector();
             final Collection toDelete = new Vector();
-            failed.clear();
-            errorsInCode = false;
-            prologClient.queryOnce("retractall(errors_in_java_code)");
-            project = jlmpProject.getProject();
 
-            metaDataEXT = pif.getConsultService(JLMP.EXT);
-            metaDataEXT.setRecording(false);
-            metaDataSRC = pif.getConsultService(JLMP.SRC);
-            metaDataSRC.setRecording(false);
+            boolean errorsInCode = false;
+            boolean loadedJavaFile = false;
+            session.queryOnce("retractall(errors_in_java_code)");
 
             Debug.info("Resource delta recieved: " + delta);
 
             if ((flags & CLEAR_PRJ_FACTS) != 0) {
-                metaDataSRC.clearRecords();
+                getMetaDataSRC().clearRecords();
             }
 
             if ((flags & CLEAR_EXT_FACTS) != 0) {
-                metaDataEXT.clearRecords();
+                getMetaDataEXT().clearRecords();
             }
 
             monitor.beginTask("Collecting Files to update",
@@ -248,7 +175,7 @@ public class FactBaseBuilder {
                             return true;
                         if (resource.getType() == IResource.PROJECT)
                             return resource.getProject().hasNature(
-                                    JLMPProjectNature.NATURE_ID);
+                                    JLMP.NATURE_ID);
                         /*
                          * since we only enter Projects that have the JLMP
                          * Nature set, this should be safe...
@@ -279,7 +206,7 @@ public class FactBaseBuilder {
                             return true;
                         if (resource.getType() == IResource.PROJECT)
                             return resource.getProject().hasNature(
-                                    JLMPProjectNature.NATURE_ID);
+                                    JLMP.NATURE_ID);
                         /*
                          * since we only enter Projects that have the JLMP
                          * Nature set, this should be safe...
@@ -320,17 +247,19 @@ public class FactBaseBuilder {
                             + file, IProgressMonitor.UNKNOWN);
 
                     forgetFacts(file, delete, false);
-                    out = metaDataSRC.getOutputStream("flat.pl");
+
                     try {
                         if (!buildFacts(file)) {
                             // if an exception in thrown while building,
                             // the system may look for unresolved types and
                             // fail in loadExternalFacts(monitor)
                             errorsInCode = true;
-                            prologClient.query("assert(errors_in_java_code)");
+                            session.queryOnce("assert(errors_in_java_code)");
+                        } else {
+                            loadedJavaFile = true;
                         }
                     } finally {
-                        out.close();
+
                         monitor.done();
                     }
 
@@ -373,7 +302,7 @@ public class FactBaseBuilder {
         } catch (IOException e) {
             Debug.report(e);
         } finally {
-            prologClient.dispose();
+            session.dispose();
         }
     }
 
@@ -390,14 +319,20 @@ public class FactBaseBuilder {
          * done
          */
 
-        if (removeGlobalIdsFacts)
-            prologClient.queryOnce("remove_contained_global_ids('" + path
-                    + "')");
+        PrologSession session = pif.getSession();
+        try {
+            if (removeGlobalIdsFacts)
+                session
+                        .queryOnce("remove_contained_global_ids('" + path
+                                + "')");
 
-        prologClient.queryOnce("delete_toplevel('" + path + "')");
-        if (delete) {
-            Debug.debug("Deleting resource " + path);
-            // metaDataSRC.unconsult(path);
+            session.queryOnce("delete_toplevel('" + path + "')");
+            if (delete) {
+                Debug.debug("Deleting resource " + path);
+                // metaDataSRC.unconsult(path);
+            }
+        } finally {
+            session.dispose();
         }
     }
 
@@ -411,17 +346,19 @@ public class FactBaseBuilder {
 
     private boolean buildFacts(IFile resource) throws IOException,
             CoreException {
-        loadedJavaFile = true;
+
         if (!resource.exists())
             /* the file seems to have been deleted */
             return true;
 
         ICompilationUnit icu = JavaCore.createCompilationUnitFrom(resource);
         CompilationUnit cu = null;
-
+        PrintStream out = getMetaDataSRC().getOutputStream("flat.pl");
         try {
+
             icu.becomeWorkingCopy(null, null);
-            jlmpProject.writeFacts(icu, out);
+
+            writeFacts(icu, out);
         } catch (JavaModelException jme) {
             // if this exception occurs, the java file is in some way bad. Thats
             // ok,
@@ -430,12 +367,23 @@ public class FactBaseBuilder {
             // classes will not be triggert
             Debug.report(jme);
             return false;
+        } finally {
+            out.close();
         }
         return true;
     }
 
-    protected List getUnresolvedTypes() {
-        List list = prologClient.queryAll("unresolved_types(T)");
+    public List getUnresolvedTypes() {
+        PrologSession session = pif.getSession();
+        try {
+            return getUnresolvedTypes(session, new HashSet());
+        } finally {
+            session.dispose();
+        }
+    }
+
+    protected List getUnresolvedTypes(PrologSession session, HashSet failed) {
+        List list = session.queryAll("unresolved_types(T)");
         List typeNames = new Vector();
         for (Iterator iter = list.iterator(); iter.hasNext();) {
             Map m = (Map) iter.next();
@@ -450,48 +398,152 @@ public class FactBaseBuilder {
         return typeNames;
     }
 
-    protected void loadExternalFacts(IProgressMonitor submon)
-            throws IOException, CoreException {
-        List unresolved = getUnresolvedTypes();
+    public void loadExternalFacts(IProgressMonitor submon)
 
-        Set seen = new HashSet();
-        while (!unresolved.isEmpty()) {
-            out = metaDataEXT.getOutputStream("flat.pl");
-            try {
-                for (Iterator iter = unresolved.iterator(); iter.hasNext();) {
-                    String typeName = (String) iter.next();
-                    if (seen.contains(typeName)) {
-                        throw new RuntimeException(
-                                "saw type before, so something seems broken. "
-                                        + typeName);
+    throws IOException, CoreException {
+        HashSet failed = new HashSet();
+        PrologSession session = pif.getSession();
+        try {
+            List unresolved = getUnresolvedTypes(session, failed);
+
+            Set seen = new HashSet();
+            while (!unresolved.isEmpty()) {
+                PrintStream out = getMetaDataEXT().getOutputStream("flat.pl");
+                try {
+                    for (Iterator iter = unresolved.iterator(); iter.hasNext();) {
+                        String typeName = (String) iter.next();
+                        if (seen.contains(typeName)) {
+                            throw new RuntimeException(
+                                    "saw type before, so something seems broken. "
+                                            + typeName);
+                        }
+                        seen.add(typeName);
+                        try {
+                            writeFacts(typeName, out);
+                        } catch (ClassNotFoundException e) {
+                            failed.add(typeName);
+                        }
                     }
-                    seen.add(typeName);
-                    try {
-                        jlmpProject.writeFacts(typeName, out);
-                    } catch (ClassNotFoundException e) {
-                        failed.add(typeName);
-                    }
+                } finally {
+                    out.close();
                 }
-            } finally {
-                out.close();
+                unresolved = getUnresolvedTypes(session, failed);
             }
-            unresolved = getUnresolvedTypes();
+        } finally {
+            session.dispose();
         }
+    }
 
+    public static void writeFacts(IProject project, ICompilationUnit icu,
+            PrintStream out) throws IOException, CoreException {
+        CompilationUnit cu = null;
+
+        IResource resource = icu.getResource();
+        String path = resource.getFullPath().removeFileExtension()
+                .addFileExtension("pl").toString();
+
+        StringWriter sw = new StringWriter();
+        PrologWriter plw = new PrologWriter(sw, true);//metaDataSRC.getPrependablePrologWriter(path);
+        FactGenerationToolBox box = new DefaultGenerationToolbox();
+        FactGenerator visitor = new FactGenerator(icu, resource.getFullPath()
+                .toString(), box, plw);
+
+        ASTParser parser = ASTParser.newParser(AST.JLS2);
+        parser.setSource(icu);
+        parser.setResolveBindings(true);
+        cu = (CompilationUnit) parser.createAST(null);
+
+        cu.accept(visitor);
+        plw.writeQuery("retractLocalSymtab");
+        plw.flush();
+        String data = sw.getBuffer().toString();
+        sw.getBuffer().setLength(0);
+        Map mapping = box.getFQNTranslator().getFQNMapping();
+        writeSymTab(plw, mapping);
+        plw.flush();
+        plw.close();
+        String header = sw.getBuffer().toString();
+        out.println(header);
+        out.println(data);
+
+    }
+
+    public static void writeFacts(IProject project, String typeName,
+            PrintStream out) throws JavaModelException, CoreException,
+            ClassNotFoundException {
+        StringWriter sw = new StringWriter();
+        PrologWriter plw = new PrologWriter(sw, true);
+
+        FactGenerationToolBox box = new DefaultGenerationToolbox();
+        new ByteCodeFactGeneratorIType(project, plw, typeName, box)
+                .writeAllFacts();
+        plw.writeQuery("retractLocalSymtab");
+        plw.flush();
+        String data = sw.toString();
+        sw.getBuffer().setLength(0);
+        Map mapping = box.getFQNTranslator().getFQNMapping();
+        writeSymTab(plw, mapping);
+        plw.flush();
+        String header = sw.toString();
+        sw.getBuffer().setLength(0);
+        String fileName = typeName.replace('.', '/') + ".pl";
+        //out = metaDataEXT.getOutputStream(fileName);
+        out.println(header);
+        out.println(data);
+    }
+
+    private static void writeSymTab(PrologWriter plw, Map mapping) {
+        Set set = mapping.keySet();
+        boolean temp = plw.getInterpretMode();
+        plw.setInterpretMode(false);
+        try {
+            for (Iterator it = set.iterator(); it.hasNext();) {
+
+                String fqn = (String) it.next();
+                String id = (String) mapping.get(fqn);
+                plw.writeFact("local2FQN", new String[] { id, fqn });
+            }
+        } finally {
+            plw.setInterpretMode(temp);
+        }
     }
 
     /**
-     * @return Returns the jlmpProject.
+     * generate prolog element facts for a given compilation unit.
+     * <p>
+     * More than a convenience method, this should become <b>The Way(tm) </b> to
+     * generate prolog representation of java source code on the facade level.
+     * 
+     * @param an
+     *                  compilation unit in working copy mode.
+     * @param out
+     *                  a writer to which the facts should be written. It is a good
+     *                  idea to use a buffered writer. The writer will not be closed.
      */
-    public JLMPProjectNature getJlmpProject() {
-        return jlmpProject;
+    public void writeFacts(ICompilationUnit icu, PrintStream out)
+            throws IOException, CoreException {
+        writeFacts(project, icu, out);
     }
 
-    /**
-     * @param jlmpProject
-     *                  The jlmpProject to set.
-     */
-    public void setJlmpProject(JLMPProjectNature jlmpProject) {
-        this.jlmpProject = jlmpProject;
+    public void writeFacts(String typeName, PrintStream out)
+            throws JavaModelException, CoreException, ClassNotFoundException {
+        writeFacts(project, typeName, out);
     }
+
+    private ConsultService getMetaDataSRC() {
+        if (metaDataSRC == null) {
+            metaDataSRC = pif.getConsultService(JLMP.EXT);
+            metaDataSRC.setRecording(false);
+        }
+        return metaDataSRC;
+    }
+
+    private ConsultService getMetaDataEXT() {
+        if (metaDataEXT == null) {
+            metaDataEXT = pif.getConsultService(JLMP.EXT);
+            metaDataEXT.setRecording(false);
+        }
+        return metaDataEXT;
+    }
+
 }
