@@ -792,7 +792,7 @@ local(_id) :-
 cond(anonymous(_id)).
 anonymous(_id)  :-
     class(_id,_parent, _),
-    expression(_parent);
+    expression(_parent).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     add_params
