@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.naming.OperationNotSupportedException;
+
 import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
@@ -234,9 +236,11 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 PDT.CS_METADATA);
         
         String s = file.getFullPath().toString();
-        if(meta.isConsulted(s)){
-            meta.unconsult(s);
-        }
+        //FIXME:
+        throw new RuntimeException("FIXME: how to unconuslt metadata?");
+//        if(meta.isConsulted(s)){
+//            meta.unconsult(s);
+//        }
     }
 
     /**
