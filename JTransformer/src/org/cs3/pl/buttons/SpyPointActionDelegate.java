@@ -7,6 +7,7 @@ import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.editors.PLEditor;
 import org.cs3.pl.prolog.IPrologClient;
 import org.cs3.pl.prolog.PrologElementData;
+import org.cs3.pl.prolog.PrologManager;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -41,7 +42,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
 				
 				PLEditor editor = (PLEditor)PDTPlugin.getDefault().getActiveEditor();
 				IPrologClient manager;
-				manager = PDTPlugin.getDefault().getPrologClient();
+				manager = PrologManager.getInstance().getClient();
 				String pred;
 				try {
 					PrologElementData data = editor.getSelectedPrologElement();

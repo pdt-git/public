@@ -295,6 +295,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		store.setDefault(PDTPreferencePage.P_COMPLETE_CACHING, false);
 		store.setDefault(PDTPreferencePage.P_SINGLETON_DTM, false);
 		store.setDefault(PDTPreferencePage.P_PROLOG_SERVER_PORT, PrologManager.getServerPort());
+		store.setDefault(PDTPreferencePage.P_PROLOG_DEBUG_LEVEL, "2");
 	} 
     
 	public void updatePreferences() {
@@ -306,7 +307,10 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		singletonDTM = store.getBoolean(PDTPreferencePage.P_SINGLETON_DTM);
 
 		PrologManager.setServerPort(store.getInt(PDTPreferencePage.P_PROLOG_SERVER_PORT));
-		System.out.println("");
+		int level = Integer.parseInt(store.getString(PDTPreferencePage.P_PROLOG_DEBUG_LEVEL));
+		Debug.setDebugLevel(level);
+		//System.setProperty("org.cs3.pl.jtransformer.debug_level",Debug.setDebugLevel(level));
+		PrologManager.setDebugLevel(level);
 	}
 
 	/**
@@ -537,24 +541,6 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 
 	public Workspace getWorkspace() {
 		return (Workspace)ResourcesPlugin.getWorkspace();
-	}
-	/**
-	 * @return
-	 */
-	public IPrologClient getPrologClient() {
-		//activatePrologConsole();
-//		if(Display.getCurrent()==null){
-//			//ld: _*NOT*_ asyncExec!
-//			getDisplay().syncExec(new Runnable(){
-//				public void run() {
-//					activatePrologConsole();
-//				}
-//			});
-//		}
-//		else{
-//			activatePrologConsole();
-//		}
-		return PrologManager.getInstance().getClient();
 	}
 
 	/**
@@ -842,24 +828,6 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		});
 	}
  
-	/**
-	 * @return
-	 */
-//	public PrologManagerClient getHiddenPrologManager() throws IOException {
-//				
-////		if(Display.getCurrent()==null){
-////			//ld: _*NOT*_ asyncExec!
-////			getDisplay().syncExec(new Runnable(){
-////				public void run() {
-////					activatePrologConsole();
-////				}
-////			});
-////		}
-////		else{
-////			activatePrologConsole();
-////		}
-//		return PrologManagerClient.getHiddenInstance();
-//	}
 
 	/**
 	 * @param start

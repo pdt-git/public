@@ -3,6 +3,7 @@ package org.cs3.pl.buttons;
 import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.prolog.IPrologClient;
 import org.cs3.pl.prolog.PrologHelper;
+import org.cs3.pl.prolog.PrologManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorPart;
@@ -47,7 +48,7 @@ public class ConsultActionDelegate implements IWorkbenchWindowActionDelegate {
 
 				IPrologClient client;
 				
-					client = PDTPlugin.getDefault().getPrologClient();
+					client = PrologManager.getInstance().getClient();
 					final String filename = PDTPlugin.getDefault().getActiveRawFileName();
 /*					CTChecker checker = new CTChecker();
 					checker.check(PDTPlugin.getDefault().getActiveFile());

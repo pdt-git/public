@@ -1,6 +1,7 @@
 package org.cs3.pl.buttons;
 
 import org.cs3.pl.PDTPlugin;
+import org.cs3.pl.prolog.PrologManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -27,12 +28,12 @@ public class DebugButton implements IWorkbenchWindowActionDelegate {
 			public void run() {
 				
 				if (debugmode) {
-					PDTPlugin.getDefault().getPrologClient().query("nodebug");
+					PrologManager.getInstance().getClient().query("nodebug");
 					debugmode = false;
 					appendToConsole("nodebug");
 				}
 				else {
-					PDTPlugin.getDefault().getPrologClient().query("debug");
+					PrologManager.getInstance().getClient().query("debug");
 					appendToConsole("debug");
 					debugmode = true;
 				}
