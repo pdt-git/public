@@ -1,5 +1,6 @@
 package org.cs3.jlmp.internal.natures;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Iterator;
@@ -13,22 +14,35 @@ import org.cs3.jlmp.JLMPProjectListener;
 import org.cs3.jlmp.internal.builders.FactBaseBuilder;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Option;
+import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
  * @see IProjectNature
  */
-public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProjectListener {
+public class JLMPProjectNature implements IProjectNature, JLMPProject,
+        JLMPProjectListener {
 
     //The project for which this nature was requested,
     //see IProject.getNature(String)
     private IProject project;
+
+    private Option[] options;
 
     private FactBaseBuilder builder;
 
@@ -38,6 +52,7 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProje
      *  
      */
     public JLMPProjectNature() {
+
     }
 
     /**
@@ -71,6 +86,33 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProje
             pif.getConsultService(JLMP.SRC).setRecording(true);
             pif.getConsultService(JLMP.EXT).setAppendingRecords(true);
         }
+
+    }
+
+    /**
+     *  
+     */
+    private void initOptions() {
+        options = new Option[] {
+                new SimpleOption(
+                        JLMP.PROP_OUTPUT_FOLDER,
+                        "Output source folder",
+                        "The source folder to which generated sourcecode is written.",
+                        Option.DIR, JLMPPlugin.getDefault().getPreferenceValue(
+                                JLMP.PREF_DEFAULT_OUTPUT_FOLDER, null)),
+                new SimpleOption(
+                        JLMP.PROP_INPLACE,
+                        "Try inplace operation",
+                        "NOT IMPLEMENTED YET! \nIf this option is set, changes "
+                                + "to existing source files will be performed in-place."
+                                + "Source files for which the respective PEFs where "
+                                + "deleted, are removed. \n"
+                                + "Newly created source files however "
+                                + "will still be created in the specified output folder.",
+                        Option.FLAG, "false")
+
+        };
+
     }
 
     /**
@@ -94,6 +136,24 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProje
                     builders.length - index - 1);
             descr.setBuildSpec(newBuilders);
         }
+        PrologInterface pif = getPrologInterface();
+        if (pif.isUp()) {
+            PrologSession s = pif.getSession();
+            try {
+                String projectName = getProject().getName();
+                String sourceFolder = Util.prologFileName(new File(
+                        getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
+                s.queryOnce("retractall(projectLocationT('<default>', '"
+                        + projectName + "', _))");
+            } catch (CoreException e) {
+                Debug.report(e);
+                throw new RuntimeException(
+                        "could not upload output folder location to prolog system",
+                        e);
+            } finally {
+                s.dispose();
+            }
+        }
     }
 
     /**
@@ -108,6 +168,11 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProje
      */
     public void setProject(IProject project) {
         this.project = project;
+        PrologInterface pif = getPrologInterface();
+        if (pif.isUp()) {
+            reconfigure();
+        }
+
     }
 
     public PrologInterface getPrologInterface() {
@@ -164,13 +229,13 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProje
         }
     }
 
-    protected void fireFactBaseUpdated(){
+    protected void fireFactBaseUpdated() {
         Runnable r = new Runnable() {
             public void run() {
                 JLMPProjectEvent e = new JLMPProjectEvent(this);
-                
+
                 JLMPPlugin.getDefault().fireFactBaseUpdated(e);
-                
+
                 Vector cloned = null;
                 synchronized (listeners) {
                     cloned = (Vector) listeners.clone();
@@ -179,26 +244,124 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject, JLMPProje
                     JLMPProjectListener l = (JLMPProjectListener) it.next();
                     l.factBaseUpdated(e);
                 }
-                
+
             }
         };
-        Thread t = new Thread(r,"JLMPProject listener notification");
+        Thread t = new Thread(r, "JLMPProject listener notification");
         t.setDaemon(true);
         t.start();
     }
-    /* (non-Javadoc)
-     * @see org.cs3.jlmp.JLMPProject#generateFacts(org.eclipse.jdt.core.ICompilationUnit, java.io.PrintStream)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cs3.jlmp.JLMPProject#generateFacts(org.eclipse.jdt.core.ICompilationUnit,
+     *         java.io.PrintStream)
      */
-    public void generateFacts(ICompilationUnit cu, PrintStream out) throws IOException, CoreException {
-       getFactBaseBuilder().writeFacts(cu,out);
-        
+    public void generateFacts(ICompilationUnit cu, PrintStream out)
+            throws IOException, CoreException {
+        getFactBaseBuilder().writeFacts(cu, out);
+
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.cs3.jlmp.JLMPProjectListener#factBaseUpdated(org.cs3.jlmp.JLMPProjectEvent)
      */
     public void factBaseUpdated(JLMPProjectEvent e) {
-      fireFactBaseUpdated();  
+        fireFactBaseUpdated();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cs3.jlmp.JLMPProject#getOptions()
+     */
+    public Option[] getOptions() {
+        if (options == null) {
+            initOptions();
+        }
+        return options;
+    }
+
+    /**
+     * look up a preference value.
+     * <p>
+     * tries the following values in the given order and returns the first
+     * non-null result. If everything returns null, the given defaultValue is
+     * returned.
+     * <ul>
+     * <li>System.getProperty(key)</li>
+     * <li>getProject().getPersistentProperty(key)</li>
+     * <li>if an option with the given id exists in the array returned by
+     * getOptions(), take its default value</li>
+     * <li>the given default value
+     * </ul>
+     * 
+     * @param key
+     * @return the value or specified default if no such key exists..
+     * @throws CoreException
+     */
+    public String getPreferenceValue(String key, String defaultValue)
+            throws CoreException {
+        String value = System.getProperty(key);
+        if (value != null) {
+            return value;
+        }
+        value = getProject().getPersistentProperty(new QualifiedName("", key));
+        if (value != null) {
+            return value;
+        }
+        Option[] o = getOptions();
+        for (int i = 0; i < o.length; i++) {
+            if (o[i].getId().equals(key)) {
+                return o[i].getDefault();
+            }
+        }
+        return defaultValue;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cs3.jlmp.JLMPProject#reconfigure()
+     */
+    public void reconfigure(PrologSession s) {
+        try {
+            String projectName = getProject().getName();
+            String sourceFolder = Util.prologFileName(new File(
+                    getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
+            s.queryOnce("retractall(projectLocationT('<default>', '"
+                    + projectName + "', _))");
+            s.queryOnce("assert(projectLocationT('<default>', '" + projectName
+                    + "', '" + sourceFolder + "'))");
+        } catch (CoreException e) {
+            Debug.report(e);
+            throw new RuntimeException(
+                    "could not upload output folder location to prolog system",
+                    e);
+        }
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cs3.jlmp.JLMPProject#reconfigure()
+     */
+    public void reconfigure() {
+        PrologSession s = getPrologInterface().getSession();
+        try {
+            reconfigure(s);
+        } catch (PrologException e) {
+            Debug.report(e);
+            throw e;
+        } finally {
+            s.dispose();
+        }
+    }
+
+    
+    
 }

@@ -70,6 +70,12 @@ public class FactBaseBuilder {
 
    private Vector listeners=new Vector();
 
+
+
+
+
+private boolean building=false;
+
     /**
      *  
      */
@@ -101,6 +107,10 @@ public class FactBaseBuilder {
     public synchronized void build(final IResourceDelta delta, final int flags,
             IProgressMonitor monitor) throws CoreException {
         try {
+            if(building){
+                return;
+            }
+            building=true;
             if (monitor == null)
                 monitor = new NullProgressMonitor();
             build_impl(delta, flags, monitor);
@@ -112,6 +122,9 @@ public class FactBaseBuilder {
             marker.setAttribute(IMarker.MESSAGE,
                     "Could not create PEFs for Project.");
             Debug.report(t);
+        }finally{
+            building = false;
+            monitor.done();
         }
     }
 
@@ -137,11 +150,7 @@ public class FactBaseBuilder {
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             if (delta == null) {
-                /*
-                 * XXX: this is a bit ugly, since in many cases a separate clean
-                 * build has already accured.
-                 */
-                clean(null);
+                session.queryOnce("delete_source_facts");
                 collectAll(toProcess);
             } else {
                 collectDelta(delta, toProcess, toDelete);
@@ -219,7 +228,7 @@ public class FactBaseBuilder {
                     if (fext != null && fext.equals("java")) {
                         if (delta.getKind() == IResourceDelta.REMOVED) {
                             toDelete.add(resource);
-                        } else { // added,...???
+                        } else if(!isRecordUpToDate((IFile) (resource))){ // added,...???
                             Debug.debug("Adding " + resource + " to toProcess");
                             toProcess.add(resource);
                         }
@@ -258,7 +267,8 @@ public class FactBaseBuilder {
                 }
                 if (resource.getType() == IResource.FILE) {
                     if (resource.getFileExtension() != null
-                            && resource.getFileExtension().equals("java")) {
+                            && resource.getFileExtension().equals("java")
+                            && !isRecordUpToDate((IFile) resource)) {
                         Debug.debug("Adding " + resource + " to toProcess");
                         toProcess.add(resource);
                     }
@@ -303,18 +313,12 @@ public class FactBaseBuilder {
      * @throws IOException
      * @throws CoreException
      */
-
-    private void buildFacts(IFile file) throws IOException, CoreException {
-
-        /* the file seems to have been deleted */
-        if (!file.exists()) {
-            return;
-        }
+    private boolean isRecordUpToDate(IFile file){
         ConsultService cs = getMetaDataSRC();
         String recordPath = file.getFullPath().addFileExtension("pl")
                 .toString();
-        long recordTS = cs.getTimeStamp(recordPath);
-        long fileTS = file.getModificationStamp();
+        long recordTS = cs.getRecordTimeStamp(recordPath);
+        long fileTS = file.getLocalTimeStamp();
         //ld:no need to create facts that are already known
         /*
          * FIXME: currently we only ensure that the record is up-to-date. in
@@ -323,8 +327,20 @@ public class FactBaseBuilder {
          * resources to check.
          */
         if (recordTS >= fileTS) {
+            return true;
+        }
+        return false;
+    }
+    private void buildFacts(IFile file) throws IOException, CoreException {
+
+        /* the file seems to have been deleted */
+        if (!file.exists()||isRecordUpToDate(file)) {
             return;
         }
+        ConsultService cs = getMetaDataSRC();
+        String recordPath = file.getFullPath().addFileExtension("pl")
+                .toString();
+        
         ICompilationUnit icu = JavaCore.createCompilationUnitFrom(file);
 
         PrintStream out = cs.getOutputStream(recordPath);
@@ -395,6 +411,7 @@ public class FactBaseBuilder {
                                             + typeName);
                         }
 //---<DEBUG>--------------------------8<------------------------------------------for trapping  JT-113 
+                        /*
                         if("java.lang.Object".equals(typeName)){
                             Debug.warning("ok, so you want java.lang.Object, huh?");
                             Debug.warning("let's see...this is our stack: ");
@@ -444,9 +461,11 @@ public class FactBaseBuilder {
                                 Debug.warning("\t-->\t is NOT readable or does not exist.");
                                 Debug.warning("\t-->Ok, no prob, you may pass.");
                             }
-// -------------------------------------------------------------------------------------------</DEBUG>
                             
                         }
+// -------------------------------------------------------------------------------------------</DEBUG>
+
+*/
                         seen.add(typeName);
                         try {
                             SubProgressMonitor submon = new SubProgressMonitor(monitor,IProgressMonitor.UNKNOWN, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
@@ -640,4 +659,7 @@ public class FactBaseBuilder {
             l.factBaseUpdated(e);
         }
     }
+
+
+    
 }

@@ -75,14 +75,6 @@
       </objectContribution>      
    </extension>
    <extension
-         id="JLMPProjectInitializer"
-         name="JLMP Project Initializer"
-         point="org.eclipse.ui.startup">
-      <startup
-            class="org.cs3.jlmp.startup.JLMPProjectInitializer">
-      </startup>
-   </extension>
-   <extension
          point="org.cs3.pdt.bootstrapContribution">
       <contribution path="engine/main.pl"/>
    </extension>
@@ -99,6 +91,32 @@
       <super type="org.eclipse.core.resources.problemmarker"/>      
       <persistent value="true" />
    </extension>
-   
+   <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="org.cs3.jlmp.internal.preferences.PreferencePage"
+          name="JLMP Preferences"
+          id="org.cs3.jlmp.internal.preferences.PDTPreferencePage"/>
+ </extension>
+ 
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer class="org.cs3.jlmp.internal.preferences.Initializer"/>
+ </extension>
+ 
+ 
+<extension
+       point="org.eclipse.ui.propertyPages">
+    <page
+          objectClass="org.eclipse.core.resources.IProject"
+          class="org.cs3.jlmp.internal.properties.JLMPProjectPropertyPage"
+          icon="icons/sample.gif"
+          name="JLMP Project Properties"
+          id="org.cs3.jlmp.properties.jlmpPropertyPage">
+		  <filter
+               name="nature"
+               value="org.cs3.jlmp.JLMPProjectNature"/>
+    </page>
+ </extension> 
       <extension-point id="projectlistener" name="JLMP Project Listener" schema="schema/projectlistener.exsd"/>
 </plugin>
