@@ -13,9 +13,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -54,6 +56,12 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 */
 	
 	private TimeEvent currentTimeEvent;
+
+
+	private Composite composite;
+
+
+	private TimeTrackerGUIInteraction guiInteraction;
 	 
 	class ViewContentProvider implements IStructuredContentProvider {
 		
@@ -95,6 +103,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 * The constructor.
 	 */
 	public TimeTrackerGUIViewer() {
+		
 	}
 
 	/**
@@ -102,19 +111,28 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
-		
+		//SashForm sash = 
+		composite = new SashForm(parent, SWT.VERTICAL);
+		//composite = parent;
 		TimeTicker tt = new TimeTicker();
 		tt.addObserver(this);
-
-		parent.setLayout(new RowLayout());
-		TimeTrackerGUIInteraction tti = new TimeTrackerGUIInteraction(parent);
-		tti.addTimeTracker(tt); //TODO add correct TimeTracker reference here!!!
+		//composite.setLayout(new FormLayout());
+		//Composite buttons = new Group(composite, SWT.SHADOW_NONE);
 		
-		tt.addObserver(tti);
+		guiInteraction = new TimeTrackerGUIInteraction(composite);
 		
-		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		guiInteraction.addTimeTracker(tt); //TODO add correct TimeTracker reference here!!!
+		
+		tt.addObserver(guiInteraction);
+		
+		viewer = new TableViewer(composite, SWT.MULTI);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
+		for (int i = 0; i < composite.getChildren().length-1; i++) {
+			composite.getChildren()[i].setFont(new Font(null, "Arial",60,1));
+		}
+		composite.getChildren()[4].setFont(new Font(null, "Arial",80,1));
+		
 		viewer.setInput(getViewSite());
 		
 		//viewer.add(tti.getComposite());
@@ -138,12 +156,31 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 
 	public void notify(TimeEvent time) {
 		currentTimeEvent = time;
-		TimeTrackerPlugin.getDefault().getWorkbench().getDisplay().asyncExec(
-				new Runnable(){
-					public void run() {
-						viewer.setInput(getViewSite());
-					}
-				});
+		if(!composite.isDisposed())
+			TimeTrackerPlugin.getDefault().getWorkbench().getDisplay().syncExec(
+					new Runnable(){
+						public void run() {
+								viewer.setInput(getViewSite());
+						}
+					});
 	}
 	
+	/**
+	 * @return Returns the viewer.
+	 */
+	TableViewer getViewer() {
+		return viewer;
+	}
+	/**
+	 * @return Returns the composite.
+	 */
+	Composite getComposite() {
+		return composite;
+	}
+	/**
+	 * @return Returns the guiInteraction.
+	 */
+	TimeTrackerGUIInteraction getGuiInteraction() {
+		return guiInteraction;
+	}
 }

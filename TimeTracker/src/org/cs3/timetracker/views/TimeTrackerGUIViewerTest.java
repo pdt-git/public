@@ -10,6 +10,9 @@ import junit.framework.TestCase;
 
 import org.cs3.timetracker.TimeEvent;
 import org.cs3.timetracker.TimeTrackerPlugin;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.ui.PartInitException;
 
 /**
@@ -32,12 +35,47 @@ public class TimeTrackerGUIViewerTest extends TestCase {
 		
 		TimeEvent myTimeEvent = new TimeEvent(3,5);
 		viewer.notify(myTimeEvent);
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		assertEquals("03:05",viewer.getViewer().getElementAt(0).toString());
 		
+		assertEquals(true,viewer.getComposite().getChildren()[0].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[1].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[2].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[3].isEnabled());
+		
+		clickButton(viewer,0);
+		assertEquals(false,viewer.getComposite().getChildren()[0].isEnabled());
+		assertEquals(true,viewer.getComposite().getChildren()[1].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[2].isEnabled());
+		assertEquals(true,viewer.getComposite().getChildren()[3].isEnabled());
+		
+		clickButton(viewer,1);
+		assertEquals(false,viewer.getComposite().getChildren()[0].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[1].isEnabled());
+		assertEquals(true,viewer.getComposite().getChildren()[2].isEnabled());
+		assertEquals(true,viewer.getComposite().getChildren()[3].isEnabled());
+		
+		clickButton(viewer,2);
+		assertEquals(false,viewer.getComposite().getChildren()[0].isEnabled());
+		assertEquals(true,viewer.getComposite().getChildren()[1].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[2].isEnabled());
+		assertEquals(true,viewer.getComposite().getChildren()[3].isEnabled());
+		
+		clickButton(viewer,3);
+		assertEquals(true,viewer.getComposite().getChildren()[0].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[1].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[2].isEnabled());
+		assertEquals(false,viewer.getComposite().getChildren()[3].isEnabled());
+	}
+
+	/**
+	 * @param viewer
+	 * @param event
+	 */
+	private void clickButton(TimeTrackerGUIViewer viewer,int num) {
+		Event event = new Event();
+		MouseEvent mouseEvent;
+		event.widget = (Button)viewer.getComposite().getChildren()[num];
+		mouseEvent = new MouseEvent(event);
+		viewer.getGuiInteraction().mouseDown(mouseEvent);
 	}
 }
