@@ -1,6 +1,8 @@
-package org.cs3.timetracker;
+package TimeTracker.views;
 
 
+import org.cs3.timetracker.ITimeObserver;
+import org.cs3.timetracker.TimeEvent;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
