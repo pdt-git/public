@@ -40,6 +40,7 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -78,10 +79,12 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -794,7 +797,60 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             }
         }
         return (ICompilationUnit[]) l.toArray(new ICompilationUnit[0]);
+    }
 
+    /*
+     * adopted from org.cs3.jllmp.builders.FactBaseBuilder
+     */
+    private void collectAll(final IResource root,final Collection toProcess) throws CoreException {
+       
+        IProject project=root.getProject();
+        final IJavaProject javaProject = (IJavaProject) project
+                .getNature(JavaCore.NATURE_ID);
+
+        root.accept(new IResourceVisitor() {
+
+            public boolean visit(IResource resource) throws CoreException {
+
+                Debug.debug("Visiting: " + resource);
+
+                if (resource.getType() == IResource.ROOT)
+                    return true;
+                if (resource.getType() == IResource.PROJECT)
+                    return resource.getProject().hasNature(JLMP.NATURE_ID);
+                /*
+                 * since we only enter Projects that have the JLMP Nature set,
+                 * this should be safe...
+                 */
+
+                if (resource.getType() == IResource.FOLDER) {
+                    return javaProject.isOnClasspath(resource);
+                }
+                if (resource.getType() == IResource.FILE) {
+                    if (resource.getFileExtension() != null
+                            && resource.getFileExtension().equals("java")) {
+                        Debug.debug("Adding " + resource + " to toProcess");
+                        toProcess.add(resource);
+                    }
+                }
+                return false;
+            }
+        });
+    }
+    public ICompilationUnit[] getCompilationUnitsRecursive(String packageName)
+            throws CoreException {
+        List files = new Vector();
+        IFolder folder = getTestProject().getFolder(packageName);
+        folder.refreshLocal(IResource.DEPTH_INFINITE, null);
+        collectAll(folder,files); 
+        ICompilationUnit[] result = new ICompilationUnit[files.size()];
+        for (int i=0;i<result.length;i++) {
+            IFile file = (IFile) files.get(i);
+            ICompilationUnit cu = (ICompilationUnit) JavaCore.create(file);
+            result[i]=cu;
+        }
+        
+        return result;
     }
 
     /**
@@ -1035,7 +1091,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 return true;
             }
         }, null);
-
+        try{
         IPath inPath = file.getFullPath();
         IPath outPath = outFile.getFullPath();
         String outPathFsString = outFile.getRawLocation().toFile()
@@ -1045,59 +1101,82 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         getTestJLMPProject().getFactBaseBuilder().writeFacts(icu, out);
         out.close();
         return outFile;
-    }
-    
-    private void normalize(final ASTRewrite rewrite, VariableDeclarationStatement node) {
-        List originalFragments = node.fragments();
-        Block parent = (Block) node
-        .getParent();
-        ASTNode last = node;
-        for(int i=1;i<originalFragments.size();i++){
-            VariableDeclarationFragment origFrag =(VariableDeclarationFragment) originalFragments.get(i);
-            VariableDeclarationFragment movedFrag = (VariableDeclarationFragment) rewrite.createMoveTarget(origFrag);
-            rewrite.remove(origFrag,null);
-            VariableDeclarationStatement newVarDecl = node.getAST().newVariableDeclarationStatement(movedFrag);
-            newVarDecl.setType((Type) rewrite.createCopyTarget(node.getType()));
-            newVarDecl.setModifiers(node.getModifiers());
-            ListRewrite listRewrite = rewrite.getListRewrite(parent,Block.STATEMENTS_PROPERTY);
-            listRewrite.insertAfter(newVarDecl,last, null);
-            last=newVarDecl;
+        }
+        finally{
+            icu.discardWorkingCopy();
         }
     }
-    
+
+    private void normalize(final ASTRewrite rewrite,
+            VariableDeclarationStatement node) {
+        List originalFragments = node.fragments();
+        ASTNode parent = node.getParent();
+        ChildListPropertyDescriptor statementsProperty=null;
+        switch(parent.getNodeType()){
+        	case ASTNode.BLOCK:
+        	    statementsProperty = Block.STATEMENTS_PROPERTY;
+        	break;
+        	case ASTNode.SWITCH_STATEMENT:
+        	    statementsProperty = SwitchStatement.STATEMENTS_PROPERTY;
+        	break;
+        	default:
+        	    throw new IllegalArgumentException("could not handle parent node: "+parent.toString());
+        }
+        
+        
+        ASTNode last = node;
+        for (int i = 1; i < originalFragments.size(); i++) {
+            VariableDeclarationFragment origFrag = (VariableDeclarationFragment) originalFragments
+                    .get(i);
+            VariableDeclarationFragment movedFrag = (VariableDeclarationFragment) rewrite
+                    .createMoveTarget(origFrag);
+            rewrite.remove(origFrag, null);
+            VariableDeclarationStatement newVarDecl = node.getAST()
+                    .newVariableDeclarationStatement(movedFrag);
+            newVarDecl.setType((Type) rewrite.createCopyTarget(node.getType()));
+            newVarDecl.setModifiers(node.getModifiers());
+            ListRewrite listRewrite = rewrite.getListRewrite(parent,
+                    statementsProperty);
+            listRewrite.insertAfter(newVarDecl, last, null);
+            last = newVarDecl;
+        }
+    }
+
     private void normalize(final ASTRewrite rewrite, FieldDeclaration node) {
         List originalFragments = node.fragments();
         AbstractTypeDeclaration parent = (AbstractTypeDeclaration) node
-        .getParent();
+                .getParent();
         ASTNode last = node;
-        for(int i=1;i<originalFragments.size();i++){
-            VariableDeclarationFragment origFrag =(VariableDeclarationFragment) originalFragments.get(i);
-            VariableDeclarationFragment movedFrag = (VariableDeclarationFragment) rewrite.createMoveTarget(origFrag);
-            rewrite.remove(origFrag,null);
-            FieldDeclaration newField = node.getAST().newFieldDeclaration(movedFrag);
+        for (int i = 1; i < originalFragments.size(); i++) {
+            VariableDeclarationFragment origFrag = (VariableDeclarationFragment) originalFragments
+                    .get(i);
+            VariableDeclarationFragment movedFrag = (VariableDeclarationFragment) rewrite
+                    .createMoveTarget(origFrag);
+            rewrite.remove(origFrag, null);
+            FieldDeclaration newField = node.getAST().newFieldDeclaration(
+                    movedFrag);
             newField.setType((Type) rewrite.createCopyTarget(node.getType()));
             newField.setModifiers(node.getModifiers());
-            ListRewrite listRewrite = rewrite.getListRewrite(parent,TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-            listRewrite.insertAfter(newField,last, null);
-            last=newField;
+            ListRewrite listRewrite = rewrite.getListRewrite(parent,
+                    TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+            listRewrite.insertAfter(newField, last, null);
+            last = newField;
         }
-       
+
     }
-    
-   
-    
-    private void normalize(ASTRewrite rewrite, ASTNode node){
-        switch(node.getNodeType()){
-        	case ASTNode.EMPTY_STATEMENT:
-        	    if(ASTNode.BLOCK==node.getParent().getNodeType()){
-        	        rewrite.remove(node,null);
-        	    }
-        	break;
-        	case ASTNode.FIELD_DECLARATION:
-        	    normalize(rewrite,(FieldDeclaration)node);
-        	break;
-        	case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-        	    normalize(rewrite,(VariableDeclarationStatement)node);
+
+    private void normalize(ASTRewrite rewrite, ASTNode node) {
+        switch (node.getNodeType()) {
+        case ASTNode.EMPTY_STATEMENT:
+            if (ASTNode.BLOCK == node.getParent().getNodeType()) {
+                rewrite.remove(node, null);
+            }
+            break;
+        case ASTNode.FIELD_DECLARATION:
+            normalize(rewrite, (FieldDeclaration) node);
+            break;
+        case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+            normalize(rewrite, (VariableDeclarationStatement) node);
         }
     }
 
@@ -1115,8 +1194,6 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         assertFalse(cu.isWorkingCopy());
         cu.becomeWorkingCopy(null, null);
 
-        
-
         // creation of DOM/AST from a ICompilationUnit
         ASTParser parser = ASTParser.newParser(AST.JLS2);
         parser.setSource(cu);
@@ -1124,8 +1201,8 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
         List commentList = astRoot.getCommentList();
         /*
-         * according to comments from usenet there is currently no way to
-         * modify comments api-wise. So we have to be a little "creative" here.
+         * according to comments from usenet there is currently no way to modify
+         * comments api-wise. So we have to be a little "creative" here.
          */
         Stack stack = new Stack();
         for (Iterator iter = commentList.iterator(); iter.hasNext();) {
@@ -1144,7 +1221,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             astRoot = cu.reconcile(AST.JLS2, false, null, null);
         }
 
-        //collect nodes that are known to cause trouble:        
+        //collect nodes that are known to cause trouble:
         final List toProcess = new Vector();
         astRoot.accept(new ASTVisitor() {
 
@@ -1158,18 +1235,17 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 return false;
             }
 
-           
             public boolean visit(VariableDeclarationStatement node) {
                 toProcess.add(node);
                 return false;
             }
         });
 
-        //normalize collected nodes        
+        //normalize collected nodes
         ASTRewrite rewrite = ASTRewrite.create(astRoot.getAST());
         for (Iterator iter = toProcess.iterator(); iter.hasNext();) {
             ASTNode node = (ASTNode) iter.next();
-            normalize(rewrite,node);
+            normalize(rewrite, node);
         }
 
         // creation of a Document
@@ -1190,22 +1266,23 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
         // computation of the text edits
         TextEdit edits = rewrite.rewriteAST(document, options);
-        
+
         // computation of the new source code
         edits.apply(document);
         source = document.get();
         //the ASTRewrite tries to maintain as much formating as possible.
-        //this is not what we want right now, so we have the source code formater
+        //this is not what we want right now, so we have the source code
+        // formater
         //run over the code once more.
         CodeFormatter formatter = ToolFactory.createCodeFormatter(options);
-		edits = formatter.format(CodeFormatter.K_COMPILATION_UNIT, source,
-				0, source.length(), 0, System.getProperty("line.separator"));
-		edits.apply(document);
+        edits = formatter.format(CodeFormatter.K_COMPILATION_UNIT, source, 0,
+                source.length(), 0, System.getProperty("line.separator"));
+        edits.apply(document);
         source = document.get();
-        
+
         // final task: remove empty lines
         source = source.replaceAll("(?s)\\n\\s*\\n", "\n");
-        
+
         // update of the compilation unit
         buffer.setContents(source);
         cu.commitWorkingCopy(false, null);
@@ -1474,15 +1551,14 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 IWorkspace.AVOID_UPDATE, null);
     }
 
-    private void _normalize(final ASTRewrite rewrite, VariableDeclarationStatement node) {
+    private void _normalize(final ASTRewrite rewrite,
+            VariableDeclarationStatement node) {
         List newFragments = new Vector();
-    
+
         List oldFragments = node.fragments();
-        Block parent = (Block) node
-                .getParent();
+        Block parent = (Block) node.getParent();
         if (oldFragments.size() > 1) {
-            for (Iterator iter = oldFragments.iterator(); iter
-                    .hasNext();) {
+            for (Iterator iter = oldFragments.iterator(); iter.hasNext();) {
                 VariableDeclarationFragment oldFragment = (VariableDeclarationFragment) iter
                         .next();
                 rewrite.remove(oldFragment, null);
@@ -1491,15 +1567,14 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 newFragments.add(newFragment);
             }
             ASTNode last = node;
-            for (Iterator iter = newFragments.iterator(); iter
-                    .hasNext();) {
+            for (Iterator iter = newFragments.iterator(); iter.hasNext();) {
                 VariableDeclarationFragment newFragment = (VariableDeclarationFragment) iter
                         .next();
                 AST ast = node.getAST();
                 VariableDeclarationStatement newVarDecl = (VariableDeclarationStatement) rewrite
                         .createCopyTarget(node);
-                ListRewrite listRewrite = rewrite.getListRewrite(
-                        newVarDecl, VariableDeclarationStatement.FRAGMENTS_PROPERTY);
+                ListRewrite listRewrite = rewrite.getListRewrite(newVarDecl,
+                        VariableDeclarationStatement.FRAGMENTS_PROPERTY);
                 listRewrite.insertFirst(newFragment, null);
                 listRewrite = rewrite.getListRewrite(parent,
                         Block.STATEMENTS_PROPERTY);

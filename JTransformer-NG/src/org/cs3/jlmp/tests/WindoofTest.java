@@ -20,6 +20,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -210,7 +211,10 @@ public class WindoofTest extends FactGenerationTest {
         Util.unzip(r);
         org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
         setAutoBuilding(false);
-
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        if(!pif.isUp()){
+            pif.start();
+        }
     }
 
     public void testIt() throws CoreException, IOException,

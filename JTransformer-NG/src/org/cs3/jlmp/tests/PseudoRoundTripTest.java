@@ -257,7 +257,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
                 + packageName);
         //retrieve all cus in package
-        ICompilationUnit[] cus = getCompilationUnitsInFolder(packageName);
+        ICompilationUnit[] cus = getCompilationUnitsRecursive(packageName);
         //normalize source files
         Util.startTime("norm1");
         normalize(cus);
@@ -306,7 +306,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.printTime("writeToplevels");
         //refetch cus
         Util.startTime("norm2");
-        cus = getCompilationUnitsInFolder(packageName);
+        cus = getCompilationUnitsRecursive(packageName);
         normalize(cus);
         Util.printTime("norm2");
         //build again.(the generated source)
@@ -399,6 +399,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 
     }
 
+   
     protected synchronized void tearDown() throws Exception {
         super.tearDown();
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
@@ -444,23 +445,14 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         BitSet blacklist = new BitSet();
 
         /*
-         * XXX: for these the generated code is aequivalent, but the formating
-         * is not! These "differences" should be normalized away. So this IS an
-         * error on my part, an error in the test bed, to be precise.. These
-         * errors are not very critical though.
+         * these need extra libs.
+         * i blacklist them for now
          */
-        //blacklist.set(130);
-        //blacklist.set(160);
-        //blacklist.set(168);
-        //blacklist.set(236);
-        //blacklist.set(238);
-        /*
-         * another "soft" bug: generates no-op a method that only contains a
-         * anonymous class definition.this is a known problem, see JT-102
-         */
-        //blacklist.set(165)
-        //blacklist.set(205)
-
+        blacklist.set(332);
+        blacklist.set(335);
+        blacklist.set(336);
+        
+        
         /*
          * these two are missing for some reason
          */
@@ -468,6 +460,12 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(158);
         blacklist.set(170);
         blacklist.set(237);
+        blacklist.set(305);
+        blacklist.set(306);
+        blacklist.set(316);
+        blacklist.set(340);
+        
+        
 
         /*
          * ld: the following few do not compile. ergo, not our prob. interesting
@@ -501,9 +499,28 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(200);
         blacklist.set(233);
         blacklist.set(234);
-        while (blacklist.isEmpty())
-            ;
-        for (int i = 168; i <= 168; i++) {//1-539
+        blacklist.set(241);
+        blacklist.set(258);
+        blacklist.set(259);
+        blacklist.set(261);
+        blacklist.set(291);
+        blacklist.set(294);
+        blacklist.set(295);
+        blacklist.set(296);
+        blacklist.set(312);
+        blacklist.set(327);
+        blacklist.set(330);
+        blacklist.set(339);
+        blacklist.set(312);
+        blacklist.set(344);
+        blacklist.set(354);
+        blacklist.set(356);
+        blacklist.set(362);
+        blacklist.set(312);
+        blacklist.set(379);
+        blacklist.set(398);
+        
+        for (int i = 350; i <= 360; i++) {//1-539
             if (!blacklist.get(i)) {
                 s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));
