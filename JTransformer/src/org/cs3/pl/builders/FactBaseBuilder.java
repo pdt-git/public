@@ -88,7 +88,7 @@ public class FactBaseBuilder {
 	 */
 	public final static int IGNORE_EXT_FACTS = 16;
 
-	private boolean changedJavaFile =false;
+	private boolean loadedJavaFile =false;
 	
 	/**
 	 * Default constructor.
@@ -134,7 +134,7 @@ public class FactBaseBuilder {
 	 */
 	
 	public synchronized  void build(final IResourceDelta delta, final int flags, final IProgressMonitor monitor)  {
-		changedJavaFile = false;
+		loadedJavaFile = false;
 		WorkspaceJob job = new WorkspaceJob("Buildjob") {
 			public IStatus runInWorkspace(IProgressMonitor monitor)
 					throws CoreException {
@@ -160,7 +160,7 @@ public class FactBaseBuilder {
 				    WorkbenchJob job = new WorkbenchJob("update factbase observers") {
 
                         public IStatus runInUIThread(IProgressMonitor monitor) {
-                            if(!PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_FACTBASE_UPDATED,prologClient))
+                            if(!PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_FACTBASE_UPDATED,prologClient,project))
             					return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, 0, "Failed to update factbase observers", null);
                             return Status.OK_STATUS;
                         }
@@ -172,10 +172,13 @@ public class FactBaseBuilder {
 				}
 				else {
 					
-					PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_BUILD_ERROR,prologClient);
+					PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_BUILD_ERROR,prologClient,project);
 					String msg = "Failed to load some classes: ";
 					for (Iterator iter = failed.iterator(); iter.hasNext();) {
-						msg += iter.next().toString() + "\n";
+					    String typename = iter.next().toString();
+						msg += typename + "\n";
+						
+						prologClient.query("assert(ignore_unresolved_type('"+typename + "'))");
 					}
 					Debug.error(msg);
 					return Status.OK_STATUS;
@@ -265,7 +268,6 @@ public class FactBaseBuilder {
 							String fext = resource.getFileExtension();
 							if (fext != null && fext.equals("java")){
 								Debug.debug("Adding " + resource + " to toProcess");
-								changedJavaFile = true;
 								toProcess.add(resource);
 							}
 						}
@@ -299,7 +301,7 @@ public class FactBaseBuilder {
 			
 			monitor.done();
 			
-			if ((flags & IGNORE_EXT_FACTS) == 0 && changedJavaFile){ 
+			if ((flags & IGNORE_EXT_FACTS) == 0 && loadedJavaFile){ 
 						loadExternalFacts(monitor);
 			}
 			
@@ -329,7 +331,7 @@ public class FactBaseBuilder {
 	}
 	
 	private void buildFacts(IFile resource) throws IOException, CoreException {
-		
+	    loadedJavaFile = true;
 		if (!resource.exists())
 			/* the file seems to have been deleted */
 			return;
