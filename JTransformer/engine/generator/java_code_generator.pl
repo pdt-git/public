@@ -69,9 +69,12 @@ printfa(_str) :-
 gen_komma_list_inits([]).
 gen_komma_list_inits([_head|_tail]) :-
     gen_non_exec(_head),
-    gen_comma_if_not_empty(_tail),
-    gen_komma_list_inits(_tail).
-    
+   %% gen_comma_if_not_empty(_tail),
+    gen_komma_list_inits_rec(_tail).
+ 
+	
+
+
 gen_comma_if_not_empty([]).
 gen_comma_if_not_empty([_|_]):-
     printf(', ').    
@@ -80,7 +83,7 @@ gen_komma_list_inits_rec([]).
 gen_komma_list_inits_rec([_H | _T]) :-
     localDefT(_H, _, _, _, _name, _init),
     printf(', '),
-    printf(' ~a',[_name]),
+    printf('~a',[_name]),
     gen_init(_init),
     gen_komma_list_inits_rec(_T).
 
