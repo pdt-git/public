@@ -86,10 +86,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         
     }
 
-    public int getPort() {
-        return port;
-    }
-
     public PrologSession getSession_impl() throws Throwable {
         ReusableSocket socket = null;
         try {
@@ -114,19 +110,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         }
     }
 
-    /**
-     * @return Returns the useSessionPooling.
-     */
-    public boolean getUseSessionPooling() {
-        return useSessionPooling;
-    }
-
-    /**
-     * @return Returns the standAloneServer.
-     */
-    public boolean isStandAloneServer() {
-        return standAloneServer;
-    }
+    
 
     public void setPort(int port) {
         if (isDown()) {
@@ -186,16 +170,22 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
      */
     public String getOption(String opt) {
+        //ld: changed semantic:: System properties override any settings
+        String s = System.getProperty(opt);
+        if(s!=null){
+            Debug.warning("option "+opt+" is overridden by System Property: "+s);
+            return s;
+        }
         if (PORT.equals(opt)) {
-            return "" + getPort();
+            return "" + port;
         } else if (ENGINE_DIR.equals(opt)) {
             return engineDir;
         } else if (EXECUTABLE.equals(opt)) {
             return executable;
         } else if (STANDALONE.equals(opt)) {
-            return "" + isStandAloneServer();
+            return "" + standAloneServer;
         } else if (USE_POOL.equals(opt)) {
-            return "" + getUseSessionPooling();
+            return "" + useSessionPooling;
         } else {
             throw new IllegalArgumentException("option not supported: " + opt);
         }
