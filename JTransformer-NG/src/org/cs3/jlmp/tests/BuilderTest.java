@@ -78,18 +78,24 @@ public class BuilderTest extends FactGenerationTest {
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		install("rumpel");
 		build();
+        
+        assertNotNull(session.queryOnce("toplevelT(_,_,_,_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		session.dispose();
 		pif.stop();
 
 		pif.start();
+//      this caused problems in the past:
+        //there was a forgotten deleteSourceFacts in the builder
+        build();
 		session = pif.getSession();
+        assertNotNull(session.queryOnce("toplevelT(_,_,_,_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		
 		uninstall("rumpel");
-		build();
+		build(IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		session.dispose();
@@ -113,8 +119,9 @@ public class BuilderTest extends FactGenerationTest {
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		build(IncrementalProjectBuilder.CLEAN_BUILD);
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
-		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
-		
+		//assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
+        //ld: the semantic of clean() has changed. External facts are also deleted.
+		assertNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 	}
 	
 	public void testAddAndRemoveToplevels() throws Throwable{
@@ -153,7 +160,7 @@ public class BuilderTest extends FactGenerationTest {
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		IFile file = getTestProject().getFolder("rumpel").getFile("Humpel.java");
 		file.delete(true,null);
-		build();
+		build(IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		
