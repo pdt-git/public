@@ -28,6 +28,7 @@ import org.cs3.pl.SystemProperties;
 import org.cs3.pl.exceptions.ExceptionHandler;
 import org.cs3.pl.extension.IJTransformerObserver;
 import org.cs3.pl.interaction.InteractionHandler;
+import org.eclipse.core.resources.IProject;
 import org.rapla.components.rpc.Logger;
 import org.rapla.components.rpc.ServiceNotFoundException;
 import org.rapla.components.rpc.TimeoutException;
@@ -324,8 +325,13 @@ public class PrologManager {
 			if (!initfactbase.isCompleteFactbaseLoaded())
 			    PDTPlugin.getDefault().initializeOpenProjects();
 			
-               PDTPlugin.getDefault().updateFactbaseObservers(
-                    IJTransformerObserver.JT_ENGINE_STARTUP, baseClient,null);
+            PDTPlugin.getDefault().updateFactbaseObservers(
+               IJTransformerObserver.JT_ENGINE_STARTUP, baseClient,null);
+            
+            if (initfactbase.isCompleteFactbaseLoaded())
+                PDTPlugin.getDefault().updateFactbaseObservers(
+                		IJTransformerObserver.JT_FACTBASE_UPDATED, baseClient,
+						PDTPlugin.getDefault().getFirstProjectWithJLMPNature());
 		}
 		baseClient.setQueryActive(false);
 	}

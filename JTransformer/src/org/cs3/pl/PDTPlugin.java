@@ -946,6 +946,8 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 			Debug.report(e);
 		}
 	}
+	
+	
 	/**
 	 * Called when a JLMP project is opened.
 	 * FIXME: This should NOT be public
@@ -1123,5 +1125,51 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 				int length = Integer.parseInt(result.get("Length").toString());
 				PDTPlugin.getDefault().selectInEditor(start, length, filename);
 			}
-		}	
+		}
+
+	/**
+	 * @return
+	 */
+	
+	
+	class JLMPProjectLocator implements IResourceVisitor{
+
+		private IProject jlmpProject = null;
+		
+		public boolean visit(IResource resource) throws CoreException {
+			switch(resource.getType()){
+				case IResource.ROOT: return true;
+				case IResource.PROJECT:
+					IProject p = (IProject) resource;
+					if (p.isOpen() && p.hasNature(JLMPProjectNature.NATURE_ID)) {
+						jlmpProject = p;
+					}						
+					break;
+				default: return false;
+			}
+			return false;
+		}
+		
+		/**
+		 * @return Returns the last JLMP 
+		 * Project found in the workspace.
+		 */
+		public IProject getProject() {
+			return jlmpProject;
+		}
+	}
+
+	
+	public IProject getFirstProjectWithJLMPNature() {
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		
+		try {
+			JLMPProjectLocator locator = new JLMPProjectLocator();	
+			root.accept(locator);
+			return locator.getProject();
+		} catch (CoreException e) {
+			Debug.report(e);
+		}
+		return null;
+	}	
 }

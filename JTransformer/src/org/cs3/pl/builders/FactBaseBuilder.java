@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 
@@ -89,6 +90,8 @@ public class FactBaseBuilder {
 	public final static int IGNORE_EXT_FACTS = 16;
 
 	private boolean loadedJavaFile =false;
+
+	private boolean errorsInCode = false;
 
 	
 	/**
@@ -156,35 +159,30 @@ public class FactBaseBuilder {
 					return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, Status.OK, 
 							"Exception while rebuilding fact base", t);
 				}
-				
-				if (failed.isEmpty()){
-				    WorkbenchJob job = new WorkbenchJob("update factbase observers") {
-
-                        public IStatus runInUIThread(IProgressMonitor monitor) {
-                            if(!PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_FACTBASE_UPDATED,prologClient,project))
-            					return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, 0, "Failed to update factbase observers", null);
-                            return Status.OK_STATUS;
-                        }
-				        
-				    };
-				    job.schedule();
-				    
-					return Status.OK_STATUS;
-				}
-				else {
-					
-					PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_BUILD_ERROR,prologClient,project);
-					String msg = "Failed to load some classes: ";
-					for (Iterator iter = failed.iterator(); iter.hasNext();) {
-					    String typename = iter.next().toString();
-						msg += typename + "\n";
-						
-						prologClient.query("assert(ignore_unresolved_type('"+typename + "'))");
+					if(!errorsInCode) {
+					    WorkbenchJob job = new WorkbenchJob("update factbase observers") {
+	
+	                        public IStatus runInUIThread(IProgressMonitor monitor) {
+	                            if(!PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_FACTBASE_UPDATED,prologClient,project))
+	            					return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, 0, "Failed to update factbase observers", null);
+	                            return Status.OK_STATUS;
+	                        }
+					        
+					    };
+					    job.schedule();
 					}
-					Debug.error(msg);
 					return Status.OK_STATUS;
-					//return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, 0, "Failed to load some classes", null);
-				}
+					
+//					PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_BUILD_ERROR,prologClient,project);
+//					String msg = "Failed to load some classes: ";
+//					for (Iterator iter = failed.iterator(); iter.hasNext();) {
+//					    String typename = iter.next().toString();
+//						msg += typename + "\n";
+//						
+//						prologClient.query("assert(ignore_unresolved_type('"+typename + "'))");
+//					}
+//					Debug.error(msg);
+//					return Status.OK_STATUS;
 			}
 
             
@@ -200,6 +198,10 @@ public class FactBaseBuilder {
 		try {
 			final Collection toProcess = new Vector();
 			final Collection toDelete = new Vector();
+			failed.clear();
+			errorsInCode = false;
+			prologClient.query("retractall(errors_in_java_code)");
+
 			
 			if (project == null) {
 				Debug.warning("JLMPProjectBuilder called on null project. Aborted.");
@@ -299,7 +301,14 @@ public class FactBaseBuilder {
 					monitor.beginTask("Generating Facts for source file " + file, IProgressMonitor.UNKNOWN);
 				
 					forgetFacts(file, delete,false);
-					buildFacts(file);
+					
+					if(!buildFacts(file)) {
+						// if an exception in thrown while building, 
+						// the system may look for unresolved types and
+						// fail in loadExternalFacts(monitor)
+						errorsInCode = true;
+						prologClient.query("assert(errors_in_java_code)");
+					}
 					
 					monitor.done();
 				}
@@ -321,7 +330,7 @@ public class FactBaseBuilder {
 			
 			monitor.done();
 			
-			if ((flags & IGNORE_EXT_FACTS) == 0 && loadedJavaFile){ 
+			if ((flags & IGNORE_EXT_FACTS) == 0 && loadedJavaFile && !errorsInCode){ 
 						loadExternalFacts(monitor);
 			}
 			
@@ -353,11 +362,19 @@ public class FactBaseBuilder {
 		}
 	}
 	
-	private void buildFacts(IFile resource) throws IOException, CoreException {
+	/**
+	 * 
+	 * @param resource
+	 * @return false if the building failed
+	 * @throws IOException
+	 * @throws CoreException
+	 */
+	
+	private boolean buildFacts(IFile resource) throws IOException, CoreException {
 	    loadedJavaFile = true;
 		if (!resource.exists())
 			/* the file seems to have been deleted */
-			return;
+			return true;
 		
 		ICompilationUnit icu = cuProvider.createICompilationUnit(resource);
 		CompilationUnit cu = null;
@@ -367,8 +384,10 @@ public class FactBaseBuilder {
 		} catch (JavaModelException jme){
 			// if this exception occurs, the java file is in some way bad. Thats ok,
 			// since it is also dead (deleted) in the Prolog System.
+			// will return false to ensure that the loading of external
+			// classes will not be triggert
 			ExceptionHandler.handle(jme);
-			return;
+			return false;
 		}
 		
 		
@@ -378,7 +397,7 @@ public class FactBaseBuilder {
 		if (metaDataPL.getUpdateTime(path) >= resource.getModificationStamp()){
 			Debug.debug("Using old version of " + path);
 			metaDataPL.consult(path);
-			return;
+			return true;
 		} else 
 			Debug.debug("Rebuilding " + path + " from scratch");
 		
@@ -390,16 +409,25 @@ public class FactBaseBuilder {
 		parser.setSource(icu);
 		parser.setResolveBindings(true);
 		cu = (CompilationUnit) parser.createAST(null);
+		try {
+			cu.accept(visitor);
+			plw.prependActions(box.getFQNTranslator().getFQNMapping());
+			plw.writeQuery("retractLocalSymtab");
+			
+			plw.flush();
+			plw.close();
+			
+			metaDataPL.consult(path);
+		} catch(Exception e){
+			String msg = "parsing of the " + path + " failed.";
+			Debug.debug(msg);
+			plw.close();
+			metaDataPL.delete(path);
+			PDTPlugin.getDefault().setStatusErrorMessage(msg);
+			return false;
+		}
+		return true;
 		
-		cu.accept(visitor);
-		
-		plw.prependActions(box.getFQNTranslator().getFQNMapping());
-		plw.writeQuery("retractLocalSymtab");
-		
-		plw.flush();
-		plw.close();
-		
-		metaDataPL.consult(path);
 	}
 	
 	protected void loadExternalFacts(IProgressMonitor submon) throws IOException, CoreException {		
@@ -410,6 +438,9 @@ public class FactBaseBuilder {
 			
 			if (next == null)
 				break;
+
+			if(failed.contains(next)) 
+				continue;
 			
 			if (submon.isCanceled())
 				throw new OperationCanceledException("Canceled");
@@ -442,8 +473,10 @@ public class FactBaseBuilder {
 				ByteCodeFactGeneratorIType bcfg = new ByteCodeFactGeneratorIType(project, pwriter, next, box);
 				bcfg.writeAllFacts();
 			} catch (ClassNotFoundException cnfe){
+				//FIXME: use SearchEngine, because Secondary Types cannot be found by ByteCodeFactGeneratorIType 
 				Debug.report(cnfe);
 				failed.add(next);
+				pwriter.close();
 				continue;
 			}
 			
