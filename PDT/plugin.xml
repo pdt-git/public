@@ -23,7 +23,10 @@
       <library name="lib/PrologInterface.jar">
          <export name="*"/>
       </library>
-      <library name="lib/RaPlaRPC.jar">
+      <library name="lib/PrologInterface-Socket.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/PrologInterface-XML.jar">
          <export name="*"/>
       </library>
    </runtime>

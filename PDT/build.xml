@@ -25,6 +25,8 @@
 			<depjar name="Console" />
 			<depjar name="MetaData" />
 			<depjar name="PrologInterface" />		
+			<depjar name="PrologInterface-Socket" />		
+			<depjar name="PrologInterface-XML" />		
 		<delete failonerror="false" dir="PDT/engine"></delete>
 		<copydir dest="PDT/engine" src="PDT/pl"></copydir>
 		<library name="Console" />
