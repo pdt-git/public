@@ -29,7 +29,7 @@
 			<depjar name="PrologInterface-XML" />		
 		<delete failonerror="false" dir="PDT/engine"></delete>
 		<copydir dest="PDT/engine" src="PDT/pl"></copydir>
-		<library name="Console" />
+		<!--<library name="Console" />-->
 		<library name="MetaData" />
 		<library name="PrologInterface" />		
 

@@ -32,7 +32,7 @@ public class Factory extends PrologInterfaceFactory {
                         SimpleOption.DIR, null) {
                     public String getDefault() {
                         File f = getResourceLocator().resolve("");
-                        return f.toString();
+                        return Util.prologFileName(f);
                     }
                 },
                 new SimpleOption(SocketPrologInterface.PORT, "Server port",

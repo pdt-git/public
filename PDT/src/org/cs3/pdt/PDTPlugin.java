@@ -341,13 +341,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                     }
                     URI uri = URI.create(url.toString());
                     File file = new File(uri);
-                    try {
-                        r.add(file.getCanonicalPath());
-                    } catch (IOException e) {
-                        Debug.report(e);
-                        throw new RuntimeException("Problem resolving file: "
-                                + file.toString(), e);
-                    }
+                    r.add(Util.prologFileName(file));
                 }
             }
         }
