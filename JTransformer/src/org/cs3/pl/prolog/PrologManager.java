@@ -265,26 +265,27 @@ public class PrologManager {
 		Debug.info("starting client, looking for server at port "+port);
 		long millis = 500;
 		do {
-			try {				
+//			try {				
 				baseClient.start();
-			} catch (IOException e1) {
-				//Debug.report(e1);
-				//FIXME: do we have no other means to handle this?
-				//is there an easy way for the _server_  to notify _us_ 
-				//as soon as it is up and running?
-				if(e1 instanceof TooManyConnectionsException)
-					Debug.error("Can not connect client to server: Too many connections to the server.");
-				else
-					Debug.info("server not up yet, sleeping "+millis+" millis.");
-
-				try {
-					//for now let's sleep (not wait, we WANT to keep all monitors locked!)
-					Thread.sleep(millis);
-				} catch (InterruptedException e2) {
-					Debug.report(e2);
-				}
-			}
-		} while (!baseClient.isRunning() && !STANDALONE_SERVER);
+//			} catch (IOException e1) {
+//				//Debug.report(e1);
+//				//FIXME: do we have no other means to handle this?
+//				//is there an easy way for the _server_  to notify _us_ 
+//				//as soon as it is up and running?
+//				if(e1 instanceof TooManyConnectionsException)
+//					Debug.error("Can not connect client to server: Too many connections to the server.");
+//				else
+//					Debug.info("server not up yet, sleeping "+millis+" millis.");
+//
+//				try {
+//					//for now let's sleep (not wait, we WANT to keep all monitors locked!)
+//					Thread.sleep(millis);
+//				} catch (InterruptedException e2) {
+//					Debug.report(e2);
+//				}
+//			}
+		} 
+		while (!baseClient.isRunning() && !STANDALONE_SERVER);
 		if(STANDALONE_SERVER && !baseClient.isRunning()){
 			Debug.warning("server did NOT start.");
 		}
@@ -404,15 +405,15 @@ public class PrologManager {
             return false;
         }
         try {
-        	try {
+//        	try {
         		stopServerClient.call(PrologClient.ROLE,"systemExit",new Object[0]);
-        	}
-        	catch( SocketException se) {
-        		Debug.debug("killed server process");
-        		return true;
-        	}
-        } catch (TimeoutException e) {
-        	throw new IOException(e.getLocalizedMessage());
+//        	}
+//        	catch( SocketException se) {
+//        		Debug.debug("killed server process");
+//        		return true;
+//        	}
+//        } catch (TimeoutException e) {
+//        	throw new IOException(e.getLocalizedMessage());
         } catch (InvocationTargetException e) {
         	throw new IOException(e.getLocalizedMessage());
         } catch (ServiceNotFoundException e) {

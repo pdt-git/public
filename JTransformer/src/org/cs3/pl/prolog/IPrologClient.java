@@ -63,4 +63,13 @@ public interface IPrologClient {
     public abstract boolean isHidden();
     
     
+    /**
+     * Consults the file pathName.
+     * The pathName will be converted to unix path separators if needed.
+     * 
+     * @param pathName
+     */
+    public abstract void consult(String pathName);
+    
+    
 }

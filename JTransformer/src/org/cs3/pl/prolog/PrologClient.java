@@ -482,4 +482,11 @@ public class PrologClient extends MessagingClientLoggingWrapper implements
         return hidden;
     }
 
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.IPrologClient#consult(java.lang.String)
+     */
+    public void consult(String tmpPathName) {
+        query("consult('"+ PrologHelper.makeFilenameSWIConform(tmpPathName)+ "')");
+    }
+
 }
