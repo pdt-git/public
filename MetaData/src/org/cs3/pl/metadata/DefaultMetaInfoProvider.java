@@ -1,4 +1,3 @@
-
 package org.cs3.pl.metadata;
 
 import java.util.ArrayList;
@@ -6,6 +5,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.SessionException;
 
@@ -13,19 +13,19 @@ import org.cs3.pl.prolog.SessionException;
  * This class is intended as a TEMPORARY solution. it contains 
  * query related conveniance methods, formerly found in the PrologClient.
  */
-public class PDTPrologHelper implements IMetaInfoProvider{
+public class DefaultMetaInfoProvider implements IMetaInfoProvider{
     public static final boolean windowsPlattform = System
     .getProperty("os.name").indexOf("Windows") > -1;
-    private PrologSession session =null;
+    private IPrologInterface pif=null;
 	private String pdtModulePrefix="";
 
     
-    public PDTPrologHelper(PrologSession session) {
-    	this.session=session;
+    public DefaultMetaInfoProvider(IPrologInterface pif) {
+    	this.pif=pif;
     }
 
-    public PDTPrologHelper(String prefix,PrologSession session) {
-    	this.session=session;
+    public DefaultMetaInfoProvider(String prefix,IPrologInterface pif) {
+    	this.pif=pif;
     	this.pdtModulePrefix=prefix;
     }
     
@@ -37,13 +37,15 @@ public class PDTPrologHelper implements IMetaInfoProvider{
 
     public void consult( String filename) throws SessionException{
 	    
-	  
+        	PrologSession session = pif.getSession();
             session.query("consult('" + makeFilenameSWIConform(filename) + "')");
-       
+            session.dispose();
     }
 	
     public  boolean assertFact( String text) throws SessionException{
-        Hashtable r = session.query("assert("+text+")");	   
+        PrologSession session = pif.getSession();
+        Hashtable r = session.query("assert("+text+")");
+        session.dispose();
         return r!=null;
     }
 
@@ -65,10 +67,13 @@ public class PDTPrologHelper implements IMetaInfoProvider{
         //				functor, new Integer(arity), filename});
         //		if (!isCompleted())
         //		abort();
+        PrologSession session = pif.getSession();
         Hashtable solution = session.query(pdtModulePrefix + "get_file_pos('"
                 + filename + "', " + functor + ", " + arity + ",File,Pos,_,_)");
-        if (solution == null)
-            return null;
+        if (solution == null){
+            session.dispose();
+            return null;            
+        }
         SourceLocation location = new SourceLocation();
         location.file = /* removeQuotes( */solution.get("File").toString()/* ) */;
         location.line = Integer.parseInt(solution.get("Pos").toString());
@@ -76,6 +81,7 @@ public class PDTPrologHelper implements IMetaInfoProvider{
                 .debug(
                         "getLocation solution: " + location.file + ", "
                                 + location.line);
+        session.dispose();
         return location;
     
     }
@@ -113,7 +119,8 @@ public class PDTPrologHelper implements IMetaInfoProvider{
             String prefix, String filename) throws NumberFormatException, SessionException {
         //return
         // (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
-    
+        PrologSession session = pif.getSession();
+        
         if (module == null)
             module = "_";
         if (filename == null)
@@ -131,10 +138,13 @@ public class PDTPrologHelper implements IMetaInfoProvider{
             list.add(data);
             result =session.next();
         }
+        session.dispose();
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
     }
 
     public PrologElementData[] retrievePrologElements(String file) throws SessionException {
+        PrologSession session = pif.getSession();
+        
         Hashtable result = session.query("bagof([Pos_,Len_],"
                 + "meta_data"
                 + "('"
@@ -155,6 +165,7 @@ public class PDTPrologHelper implements IMetaInfoProvider{
             list.add(data);
             result = session.next();
         }
+        session.dispose();
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
     }
 
