@@ -151,11 +151,23 @@ mapArgs([Arg|JavaASTArgs],[Arg|Args]):-
 /**
 	map_type_term(?type/3, ?FQN)).
 */
-    
-map_type_term(type(basic,TypeName,0), TypeName):-!.
-map_type_term(type(basic,TypeName,Arity), FQNBrackets):-
-   type_with_brackets(TypeName,Arity,FQNBrackets),
-   !.
+
+
+map_type_term(TypeTerm, FQNBrackets):-
+    nonvar(TypeTerm),
+    type(Kind,TypeName,Arity) = TypeTerm,
+    nonvar(Kind),
+    Kind = basic,
+    !,
+    type_with_brackets(TypeName,Arity,FQNBrackets),
+    !.
+        
+map_type_term(TypeTerm, FQNBrackets):-
+    nonvar(FQNBrackets),
+    type_with_brackets(TypeName,Arity,FQNBrackets),
+    basicType(TypeName),
+    TypeTerm=type(basic,TypeName,Arity),
+    !.    
 
 map_type_term(type(class,Id,0), FQN):-
     fullQualifiedName(Id,FQN),
@@ -244,6 +256,7 @@ bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaAS
 bindArgs([ast_arg(_,_, _,  Kinds)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
     member(typeTermType,Kinds),
     !,
+    
     map_type_term(JavaASTArg,FQN),
 	bindArgs(ArgDefs, Args, JavaASTArgs),
 	!.

@@ -34,6 +34,8 @@ import jpl.fli.IntHolder;
 import jpl.fli.Prolog;
 import jpl.fli.term_t;
 
+import org.cs3.pl.Debug;
+
 //----------------------------------------------------------------------/
 // Term
 /**

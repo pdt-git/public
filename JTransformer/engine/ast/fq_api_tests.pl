@@ -59,4 +59,8 @@ test(java_fq_java_fq_to_pef):-
     assert_bound(Term),
     assert_true((Term = methodDefT(A,Class,hashCode,[],type(basic,int,0), [],null))).
     
-    	   
+test(java_fq_map_type_term):-
+    assert_true(
+       map_type_term(T, 'java.util.Map')),
+    assert_true(T = type(class,CId,0)),
+    assert_true((class(CId,P,'Map'),packageT(P,'java.util'))).

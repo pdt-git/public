@@ -9,7 +9,8 @@
     atom_concat/4,atom_concat/5,
     atom_concat/6,atom_concat/7,
     get_references/5,
-    manual_entry/3]).
+    manual_entry/3,
+    pef_and_spec/5]).
 
 :- use_module(library(help)).
 /*
@@ -352,3 +353,34 @@ user:tearDown('pdtplugin:find_pred') :-
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,5,true,726,11,false,false)),
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,9,false,823,11,false,false)),
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,get_file_pos_,7,true,1956,12,false,false)). 
+
+/**
+ * pef_and_spec(+Id,-Functor,-Args,-ArgDescriptions)
+ *
+ * binds the functor and the argument descriptions.
+ * 
+ * The descriptions are lists for every argument containing:
+ * 1. Argumentname (parent,..)
+ * 2. Kind         (id, attr)
+ * 3. List or Atom (list,atom)
+ * 4. constraints  (atom,classDefT,...)
+ * 5. isVariable   (yes|no) (yes only in the error case!)
+ */
+
+pef_and_spec(Id,Functor,Args,ArgDescr,AtomTerm):-
+    getTerm(Id,Term),
+    term_to_atom(Term,AtomTerm),
+    Term =.. [Functor|Args],
+    ast_node_def('Java',Functor,ArgDefs),
+    retrieve_argument_description(Args,ArgDefs,ArgDescr).
+    
+retrieve_argument_description([],_,[]).
+retrieve_argument_description([Arg|Args],
+        [ast_arg(Name, mult(_,_,Ord),Kind,Constraints)|ArgDefs], 
+        [[Name,Kind,List,Constraints,IsVar]|ArgDescr]):-
+    ((Ord = ord) ->
+       List = list; List = atom),
+    (var(Arg) ->
+       IsVar = yes; IsVar = no),
+	retrieve_argument_description(Args,ArgDefs,ArgDescr).
+         

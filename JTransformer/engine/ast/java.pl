@@ -307,7 +307,7 @@ ast_node_def('Java',blockT,[
      ast_arg(id,      mult(1,1,no ), id,  [blockT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
-     ast_arg(stmts,   mult(0,*,ord), attr,[statementType]) %  **** xxx
+     ast_arg(stmts,   mult(0,*,ord), id,[statementType]) %  **** xxx
 ]).               % ^^^ <-- Blocks duerfen doch auch leer sein, oder?
 				% die Semantik von * habe ich zuerst anders verstanden
 				% Zusammenfassend:

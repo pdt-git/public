@@ -360,7 +360,7 @@ public class PrologServer extends MessagingServerLoggingWrapper implements Remot
 	private Object compoundToArray(Compound compound) {
 		Term[] terms; 
 		try {
-			terms = ((Compound) compound).toTermArray();
+			terms =  compound.toTermArray();
 		} catch (JPLException e) {
 			//System.out.println("...but it is a silly term.");
 			return compound.toString();

@@ -176,7 +176,7 @@
    <extension
          point="org.eclipse.ui.views">
       <category
-            name="Prolog Console"
+            name="JTransformer"
             id="console">
       </category>
       <view
@@ -186,6 +186,13 @@
             class="org.cs3.pl.views.PrologConsole"
             id="org.cs3.pl.views.PrologConsole">
       </view>
+      <view
+            allowMultiple="false"
+            class="org.cs3.pdt.internal.views.NavigatorView"
+            icon="icons/sample.gif"
+            category="console"
+            name="PEF Navigator"
+            id="org.cs3.pdt.internal.views.NavigatorView"/>
    </extension>
    <extension
          id="org.cs3.pl.PDTPerspective"
