@@ -10,7 +10,6 @@
 :- use_module(model).
 
 
-
 node(Id,List):-
     var(List),
     !,
@@ -23,9 +22,7 @@ node(Id,[HeadAttr|TailAttr]):-
     !,
     node_property(Id,HeadAttr),
    	node(Id,TailAttr).
-   	
-    
-    
+   	       
 write_node(Id):-
     format("<<~w>>~n",Id),
     forall(node_property(Id,P),format(" --> ~w~n",[P])).
@@ -58,4 +55,6 @@ parse_property(Functor,[Arg|[]],Functor->Arg).
 
 parse_property_list(In,Out):-
     maplist(parse_property,In,Out).
-  
+
+post(Node,Child):-
+	adjacent(Node,outgoing,_,Child).

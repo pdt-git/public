@@ -31,6 +31,7 @@ source_folder(FolderId,File):-
     (	(	node_property(FolderId,file(Dir)),
 			node_property(FolderId,type(source_folder))
 		)
+	->	true		
 	;	create_node(source_folder,FolderId),
 		add_node_property(FolderId,file(Dir))
 	).

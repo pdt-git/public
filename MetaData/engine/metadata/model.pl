@@ -9,7 +9,7 @@
 % This module should be domain neutral.  Reasoning about semantics carried by the
 % model (e.g. "code analysis") should happen in a higher layer.
 
-:- module(model,[write_node/1,
+:- module(model,[
 	node/1,
 	node_property/2,
 	create_node/2,
@@ -31,13 +31,13 @@
 :-use_module(runtime).
 :-use_module(source).
     
-do_node(A):-
-    runtime_node(A).
+%do_node(A):-
+%    runtime_node(A).
 do_node(A):-
     source_node(A).
 
-do_node_property(Id,Prop):-
-    runtime_node_property(Id,Prop).
+%do_node_property(Id,Prop):-
+%    runtime_node_property(Id,Prop).
 do_node_property(Id,Prop):-
     source_node_property(Id,Prop).
 
@@ -90,6 +90,10 @@ node_property(Id,Prop):-
 % create a new node of a given type. The second argument will be unified
 % with the Id of the new node. 
 create_node(Type,Id):-
+	(	ground(Type),var(Id)
+	->	true
+	;	edit_error(create_node/2,Type,Id,"Id must be a variable")
+	),
     check_type_editable(Type),
 	do_create_node(Type,Id),
 	my_format("created ~w~n",[Id]).
@@ -110,6 +114,7 @@ delete_node(Node):-
     node_property(Node,type(Type)),
     forall(meta_edge(Type,Prop),
 		(	no_peers_connected(Node,_)
+		->	true
 		;	edit_error(delete_node/2,Node,Prop,"Cannot delete node with attached peers.")
 		)
 	),
@@ -138,6 +143,7 @@ set_node_property(Node,Property):-
 	),
 	(	Kind=flag,check_multiplicity(Node,Name,Kind,Mult,ok(1))
 	;	ValueList=[Value],check_multiplicity(Node,Name,Kind,Mult,ok(Value))
+	->	true
 	;	edit_error(set_node_property/2,Node,Property,"operation would violate multiplicity constraints.")
 	),
 	(	atom(Property)
@@ -169,6 +175,7 @@ add_node_property(Node,Property):-
 	; true
 	),	
 	(	check_multiplicity(Node,Name,Kind,Mult,can_add)
+	->	true
 	;	edit_error(add_node_property/2,Node,Property,"operation would violate multiplicity constraints")
 	),
 	do_add_node_property(Node,Property),
@@ -185,8 +192,10 @@ delete_node_property(Node,Property):-
 	-> edit_error(set_node_property/2,Node,Property,"This predicate does not handle edges. Use connect_nodes/4 ")
 	;true
 	),
-	(	Kind=flag,check_multiplicity(Node,Name,Kind,Mult,can_delete(1))
-	;	ValueList=[Value],check_multiplicity(Node,Name,Kind,Mult,can_delete(Value))
+	(	(	Kind=flag,check_multiplicity(Node,Name,Kind,Mult,can_delete(1))
+		;	ValueList=[Value],check_multiplicity(Node,Name,Kind,Mult,can_delete(Value))
+		)
+	->	true
 	;	edit_error(delete_node_property/2,Node,Property,"operation would violate multiplicity constraints.")
 	),
 	do_delete_node_property(Node,Property),
@@ -203,19 +212,26 @@ connect_nodes(Node,Prop,Peer,PeerProp):-
     check_node_editable(Peer),
 	node_property(Node,type(Type)),
 	node_property(Peer,type(PeerType)),
-	(	meta_edge_property(Type,Prop,direction(Direction)),
-		oposite_direction(Direction,PeerDirection)
+	(	(	meta_edge_property(Type,Prop,direction(Direction)),
+			oposite_direction(Direction,PeerDirection)
+		)
+	->	true		
 	;	edit_error(connect_nodes/4,Node,Property,"property is not a directed edge")
 	),
 	(	meta_edge_property(PeerType,PeerProp,direction(PeerDirection))
+	->	true
 	;	edit_error(connect_nodes/4,Node,Property,"no matching peer edge")
 	),
-	(	meta_edge_property(Type,Prop,peer_property(PeerProp))
-	;	meta_edge_property(PeerType,PeerProp,peer_property(Prop))
+	(	(	meta_edge_property(Type,Prop,peer_property(PeerProp))
+		;	meta_edge_property(PeerType,PeerProp,peer_property(Prop))
+		)
+	->	true
 	;	edit_error(connect_nodes/4,Node,Property,"edge pair fails to define peer_property")
 	),
-	(	check_multiplicity(Node,Prop,can_add),
-		check_multiplicity(Peer,PeerProp,can_add)
+	(	(	check_multiplicity(Node,Prop,can_add),
+			check_multiplicity(Peer,PeerProp,can_add)
+		)
+	->	true
 	;	edit_error(connect_nodes/4,Node,Property,"operation violates multiplicity constraints")
 	),
 	add_or_grow_property(Node,Prop,Peer),
@@ -230,13 +246,17 @@ connect_nodes(Node,Prop,Peer,PeerProp):-
 % according to the metamodel before it proceeds.
 disconnect_nodes(Node,Prop,Peer,PeerProp):-
     my_format("enter disconnect_nodes(~w, ~w, ~w, ~w)~n",[Node,Prop,Peer,PeerProp]),
-	(	adjacent(Node,Direction,Prop,Peer),
-		oposite_direction(Direction,PeerDirection),
-		adjacent(Peer,PeerDirection,PeerProp,Node)
+	(	(	adjacent(Node,Direction,Prop,Peer),
+			oposite_direction(Direction,PeerDirection),
+			adjacent(Peer,PeerDirection,PeerProp,Node)
+		)
+	->	true		
 	;	edit_error(disconnect_nodes/4,Node,Property,"nodes are not mutualy connected")
 	),
-	(	check_multiplicity(Node,Prop,can_delete),
-		check_multiplicity(Peer,PeerProp,can_delete)
+	(	(	check_multiplicity(Node,Prop,can_delete),
+			check_multiplicity(Peer,PeerProp,can_delete)
+		)
+	->	true		
 	;	edit_error(disconnect_nodes/4,Node,Property,"operation violates multiplicity constraints")
 	),
 	delete_or_shrink_property(Node,Prop,Peer),
@@ -349,9 +369,11 @@ check_value_list_format(ordered,[[_|_]]).
 %
 check_node_editable(Node):-
     (	node(Node)
+    ->	true
     ;	edit_error(check_node_editable/2,Node,Node,"node does not exist")
     ),
     (	node_property(Node, type(Type))
+    ->	true
 	;	edit_error(check_node_editable/2,Node,Node,"node has no type")
 	),
 	check_type_editable(Type).
@@ -361,9 +383,11 @@ check_node_editable(Node):-
 % checks wether the given type is editable.
 check_type_editable(Type):-
      (	meta_node(Type)
+     ->	true
 	;	edit_error(check_type_editable/2,Type,Type,"type unkown")
 	),
     (	meta_node_property(Type,editable)
+    ->	true
 	;	edit_error(check_type_editable/2,Type,Type,"node type is not editable")
 	).
 	
@@ -374,12 +398,15 @@ check_type_editable(Type):-
 %
 check_property_term(Type,PropertyTerm):-
 	(	PropertyTerm =.. [Name|ValueList]
+	->	true
 	;	edit_error(check_property_term/2,Node,PropertyTerm,"malformed property term")
 	),
 	(	meta_node_property(Type,has(Name,Kind,_))
+	->	true
 	;   edit_error(check_property_term/2,Node,PropertyTerm,"type does not allow properties of this name")
 	),
 	(	check_value_list_format(Kind,ValueList)
+	->	true
 	;   edit_error(check_property_term/2,Node,PropertyTerm,"malformed value term")
 	).
 

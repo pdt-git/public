@@ -72,6 +72,7 @@ source_node_property(list_node(Num),elements([])):-
 my_assert(parsed_node_id(Id)):-
     %format("assert(~w)~n",[Term]),
     ( 	parsed_node_id(Id)
+    ->	true
 	;   assert(parsed_node_id(Id))
 	). 
 
@@ -79,6 +80,7 @@ my_assert(parsed_node_attr(Id,Attr)):-
     %format("assert(~w)~n",[Term]),
     my_assert(parsed_node_id(Id)),
     (	parsed_node_attr(Id,Attr)
+    ->	true
     ;	assert(parsed_node_attr(Id,Attr))
     ).
 
