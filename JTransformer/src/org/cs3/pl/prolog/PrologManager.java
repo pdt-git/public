@@ -256,7 +256,7 @@ public class PrologManager {
 		baseClient = new PrologClient(this,false);
 		baseClient.addPrologListener(dispatcher);
 
-		trace("initialize Prolog Manager Server (" + ++init_counter + ")");
+		Debug.debug("initialize Prolog Manager Server (" + ++init_counter + ")");
 		if (baseClient.isRunning())
 			throwIllegalServerStateException();
 		baseClient.configure("localhost", port);
@@ -364,7 +364,6 @@ public class PrologManager {
 //		engineDir = getEngineDir(); 
 		
 		if (sp.isWindowsPlattform()){
-		
 			prologBin = projectDir + "swipl" + File.separator + "bin";
 			if (!(new File(prologBin)).exists())
 				throw new FileNotFoundException(
@@ -373,7 +372,7 @@ public class PrologManager {
 			
 			startServer(port, prologBin, classPath);
 		} else if (sp.isLinuxPlatform()){ 
-			trace("Linux startup");
+			Debug.debug("Linux startup");
 			
 			startServer(port, ".", classPath);
 			
@@ -383,8 +382,8 @@ public class PrologManager {
 			throw new UnsupportedOperationException("Architecture" + arch + "no supported (yet).");
 		}
 		
-		trace("PDT directory: " + classPath);
-		trace("starting new server");
+		Debug.debug("PDT directory: " + classPath);
+		Debug.debug("starting new server");
 	}
 	/**
 	 * Auxiliary method used in the initialization of the server
@@ -397,11 +396,11 @@ public class PrologManager {
     boolean killServerProcess() throws IOException {
         PrologClient stopServerClient = new PrologClient(this,false);
         stopServerClient.enableLogging(new Logger("stopClient"));
-        trace("kill running server process");
+        Debug.debug("kill running server process");
         stopServerClient.configure("localhost", getServerPort());
         stopServerClient.start();
         if(!stopServerClient.isRunning()){
-            trace("could not connect to server");
+            Debug.debug("could not connect to server");
             return false;
         }
         try {
@@ -409,7 +408,7 @@ public class PrologManager {
         		stopServerClient.call(PrologClient.ROLE,"systemExit",new Object[0]);
         	}
         	catch( SocketException se) {
-        		trace("killed server process");
+        		Debug.debug("killed server process");
         		return true;
         	}
         } catch (TimeoutException e) {
@@ -613,10 +612,10 @@ public class PrologManager {
 			 	baseClient.stop();
 				errPrinter.stop();
 				inPrinter.stop();
-				trace("kill Prolog Manager Server  ...");
+				Debug.debug("kill Prolog Manager Server  ...");
 				prologServer.destroy();
 				prologServer.waitFor();
-				trace("killed Prolog Manager Server");
+				Debug.debug("killed Prolog Manager Server");
 			} catch (Exception ex) {
 				Debug.report(ex);
 			}
@@ -644,14 +643,6 @@ public class PrologManager {
 	}
 	
 
-
-	/**
-	 * @param string
-	 */
-	static private void trace(String string) {
-		
-			Debug.debug(string);
-	}
 
 	class ThreadedReader extends PrologStreamReader {
 		private int kind;
