@@ -20,5 +20,10 @@ public interface Option {
     public  String getLabel();
     public String[][] getEnumValues();
     public  int getType ();
+    /**
+     * @param value
+     * @return
+     */
+    public String validate(String value);
 
 }

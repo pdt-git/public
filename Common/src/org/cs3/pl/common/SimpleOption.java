@@ -60,4 +60,7 @@ public class SimpleOption implements Option {
     public String[][] getEnumValues() {       
         return enumValues;
     }
+    public String validate(String value) {       
+        return null;
+    }
 }
