@@ -7,8 +7,8 @@ import java.io.PrintStream;
 /**
  */
 public class SimpleLogBuffer implements LogBuffer {
-
-    private StringBuffer buf=new StringBuffer();
+    private final static int MAX_LENGTH=500000;//this should be enough. 
+        private StringBuffer buf=new StringBuffer();
     private String lastKey=null;
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, char)
@@ -16,8 +16,16 @@ public class SimpleLogBuffer implements LogBuffer {
     public void log(String key, char c) {
         setKey(key);
         buf.append(c);        
+        cutHead();
     }
 
+    private void cutHead(){
+        int cut = buf.length()-MAX_LENGTH;
+        if(cut>0){
+            buf.delete(0,Math.min(cut*2,buf.length()+1/2));
+        }
+    }
+    
     /**
      * @param key
      */
@@ -27,7 +35,7 @@ public class SimpleLogBuffer implements LogBuffer {
             buf.append("</"+lastKey+">\n<"+key+">");
             lastKey=key;
         }
-        
+        cutHead();
     }
 
     /* (non-Javadoc)
@@ -36,6 +44,7 @@ public class SimpleLogBuffer implements LogBuffer {
     public void log(String key, char[] buf, int offset, int len) {
         setKey(key);
         this.buf.append(buf,offset,len);
+        cutHead();
     }
 
     /* (non-Javadoc)
@@ -50,6 +59,7 @@ public class SimpleLogBuffer implements LogBuffer {
         else{
             this.buf.append("<<EOF>>");
         }
+        cutHead();
     }
 
     /* (non-Javadoc)
@@ -58,6 +68,7 @@ public class SimpleLogBuffer implements LogBuffer {
     public void log(String key, String s) {
         setKey(key);
         buf.append(s);
+        cutHead();
     }
 
     /* (non-Javadoc)
@@ -66,6 +77,7 @@ public class SimpleLogBuffer implements LogBuffer {
     public void log(String key, byte[] b) {
         setKey(key);
         buf.append(b);
+        cutHead();
     }
 
     
@@ -81,6 +93,7 @@ public class SimpleLogBuffer implements LogBuffer {
      * @see java.lang.Object#toString()
      */
     public String toString() {     
+        cutHead();
         return buf.toString();
     }
 }
