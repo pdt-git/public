@@ -225,6 +225,33 @@ add_classDefT(_id, _owner, _name,Defs):-
        add(projectLocationT(TID, Project,SourceFolder))
      );true).
 
+
+action(add(class(_id, _owner, _name,_defs))) :-
+    !,
+    add(classDefT(_id, _owner, _name, _defs)),
+    ((
+       debugme,
+       print(debugme),
+       modifierT(_id,'public'),
+       print(public),       
+       not(getToplevel(_id,_)),
+       getPackage(_id,PID),
+       (_owner = null;_owner = PID),
+       fullPathOfClass(_id,FullPath),
+       print(FullPath),
+	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
+       sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
+       string_to_atom(S,Filename),
+       print(Filename),       
+       new_id(TID),
+       add(toplevelT(TID, PID,Filename,[_id])),
+       print('_added_toplevel'),       
+       assert(created_file(Filename)),
+       print('_created_file'),             
+       add(projectLocationT(TID, Project,SourceFolder))
+     );true).
+
+
 /*
 	sourceFolder(+Toplevel,-Sourcefolder)
 	
@@ -281,6 +308,12 @@ deleteToplevelOfClass(Id) :-
     delete(toplevelT(Tl,TlPackage,Filename, Defs)).
 
 deleteToplevelOfClass(_).    
+    
+action(replace(class(_id, _owner, _name),class(_id, _owner1, _name1))) :-
+    classDefT(_id,_,_,_defs),
+    !,
+    action(delete(classDefT(_id, _owner, _name, _defs))),
+    action(add(class(_id, _owner1, _name1, _defs))).
     
 action(replace(class(_id, _owner, _name))) :-
     classDefT(_id,_,_,_defs),
@@ -405,6 +438,15 @@ action(delete(implements(_class, _super))) :-
 
 cond(subtype(_sub, _super)).
 
+/**
+ * subtype(?Sub, ?Super)
+ *
+ * Binds Super to any direct or 
+ * indirect super type of Sub.
+ * 
+ * Only for object types.
+ */
+
 subtype(_sub, _sub).
 subtype(_sub, _super) :-
     extendsT(_sub,_super).
@@ -464,8 +506,13 @@ method(_id, _class, _name, _params, _type, _exceptions, _body) :-
 action(add(method(_id, _class, _name, _params, _type, _exceptions, _body))) :-
     add(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body)),
     add_to_class(_class, _id).
+
+action(replace(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body),
+    methodDefT(_id, _class1, _name1, _params1, _type1, _exceptions1, _body1))).
+
 action(replace(method(_id, _class, _name, _params, _type, _exceptions, _body))) :-
     action(replace(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body))).
+
 action(delete(method(_id, _class, _name, _params, _type, _exceptions, _body))) :-
     action_all(delete(bodyFact(_id))),
     delete(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body)),
@@ -493,11 +540,17 @@ subTreeArg(field, 5).
 field(_id, _class, _RetType, _name, _init) :-
     fieldDefT(_id, _class, _RetType, _name, _init),
     class(_class, _,_).
+
 action(add(field(_id, _class, _RetType, _name, _init))) :-
     add(fieldDefT(_id, _class, _RetType, _name, _init)),
     add_to_class(_class, _id).
-action(replace(field(_id, _class, _RetType, _name, _init))) :-
-    action(replace(fieldDefT(_id, _class, _RetType, _name, _init))).
+
+action(replace(field(_id, _class, _RetType, _name, _init),
+    field(_id, _class1, _RetType1, _name1, _init1))) :-
+
+action(replace(fieldDefT(_id, _class, _RetType, _name, _init),
+    fieldDefT(_id, _class1, _RetType1, _name1, _init1))).
+
 action(delete(field(_id, _class, _RetType, _name, _init))) :-
     action_all(delete(bodyFact(_id))),
     delete(fieldDefT(_id,  _class, _RetType, _name, _init)),
@@ -545,13 +598,12 @@ cond(setField(_assignT, _parent, _encl, _Receiver, _field, _value)).
 subTreeArg(setField, 4).
 subTreeArg(setField, 6).
 
-setField(_setField, _Parent, _Encl, _Receiver, _field,_value) :-
-    assignT(_setField, _parent, _encl, _getField, _value),
-    getFieldT(_getField, _, _, _Receiver, _, _field),
-    field(_field,_,_,_,_),
-%    not(forwards(_,_,_,_setField)),
-    getRealParent(_setField, _parent,_Parent),
-    getRealEncl(_setField, _encl,_Encl).
+setField(SetField, RealParent, RealEncl, Receiver, Field,Value) :-
+    assignT(SetField, Parent, Encl, GetField, Value),
+    getFieldT(GetField, _, _, Receiver, _, Field),
+    field(Field,_,_,_,_),
+    getRealParent(SetField, Parent,RealParent),
+    getRealEncl(SetField, Encl,RealEncl).
 %    !,
 %    nullIfThis(_receiver, _Receiver).
 
@@ -564,30 +616,39 @@ setField(_setField, _parent, _encl, _Receiver, _field, _value) :-
     nullIfThis(_receiver, _Receiver),
     getSymbol(_identSelect,_field).
     
-
-    
 */
 
 % TODO Port
-action(setField(_assignT, _parent, _encl, _recv, _field, _valueID)) :-
-    addToBlock(_parent, _assignT),
-    field(_field,_,_,_name,_),
-    new_id(_ident),
-    new_id(_newIdSelect),
-    createIdentIfNeeded(_valueID, _assignT, _encl, _ident, _value),
-    createIdentSelect(_newIdSelect, _assignT, _encl, _name, _recv, _field),
-    add(assignT(_assignT, _parent, _encl, _newIdSelect, _value)).
-action(replace(setField(_assignT, _parent, _encl, _recv, _field, _valueID))) :-
-    field(_field,_,_,_name,_),
-    new_id(_ident),
-    new_id(_newIdSelect),
-    createIdentIfNeeded(_valueID, _assignT, _encl, _ident, _value),
-    createIdentSelect(_newIdSelect, _assignT, _encl, _name, _recv, _field),
-    action(replace(assignT(_assignT, _parent, _encl, _newIdSelect, _value))).
-action(delete(setField(_assignT, _parent, _encl, _recv, _field, _valueID))) :-
-    removeFromBlock(_parent, _assignT),
-    assignT(_assignT, _parent, _encl, _lhs, _value),
-    delete(assignT(_assignT, _parent, _encl, _lhs, _value)).
+action(add(setField(AssignT, Parent, Encl, Recv, Field, Value))) :-
+    addToBlock(Parent, AssignT),
+    field(Field,_,Type,_,_),
+    new_id(GetField),
+    add(getFieldT(GetField,AssignT,Encl,Recv,Type,Field)),
+    add(assignT(AssignT, Parent, Encl, GetField, Value)).
+    
+action(replace(setField(AssignT, Parent, Encl, Recv, Field, Value))) :-
+    field(Field,_,_,NewName,_),
+    assignT(AssignT, Parent, Encl, GetField,Value),
+    getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
+    replace(getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
+            getFieldT(GetField,AssignT,Encl,Recv,NewName,Field)),
+    action(replace(assignT(AssignT, Parent, Encl, GetField, Value))).
+
+action(replace(setField(AssignT, Parent, Encl, _Recv, _Field, Value),
+	           setField(AssignT, Parent1, Encl1, Recv1, Field1, Value1))) :-
+    field(Field1,_,_,Name1,_),
+    assignT(AssignT, Parent, Encl, GetField,Value),
+    getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
+    replace(getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
+            getFieldT(GetField,AssignT,Encl1,Recv1,Name1,Field1)),
+    action(replace(assignT(AssignT, Parent1, Encl1, GetField, Value1))).
+
+action(delete(setField(AssignT, Parent, Encl, Recv, Field, Value))) :-
+    removeFromBlock(Parent, AssignT),
+    assignT(AssignT, Parent, Encl, GetField, Value),
+    getFieldT(GetField,AssignT,Encl,Recv,Name,Field),
+    delete(getFieldT(GetField,AssignT,Encl,Recv,Name,Field)),
+    delete(assignT(AssignT, Parent, Encl, GetField, Value)).
 
 cond(getField(_getField, _parent, _encl, _Receiver, _name, _field)).
 subTreeArg(getField, 4).
