@@ -1,7 +1,12 @@
 
 package org.cs3.jlmp;
 
+import java.util.ArrayList;
+
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 
 /**
  * defines constants and ids that are relevant to the JLMP Plugin.
@@ -70,14 +75,42 @@ public final class JLMP {
      * value should be either "true" or "false"
      */
     public static final String PROP_INPLACE = "jlmp.inplace";
+
+    /**
+     * absolute os-filesystem path to at file where PEFs for a project
+     * should be stored. 
+     */
+    public static final String PROP_PEF_STORE_FILE = "jlmp.pef.store.file";
     
     /**
-     * Hook id for the LifeCycleHook that reconfigures a JLMPProject.
-     * unfortunately this depends on the project name, so i cannot make it a constant.
-     * @param p
-     * @return the hook id
+     * global default for PROP_PEF_STORE_FILE
      */
-    public static final String RECONGIFURE_PROJECT_HOOK(IProject p) {
-        return "reconfigure."+p;
+    public static final String PREF_DEFAULT_PEF_STORE_FILE = "jlmp.default.pef.store.file";
+
+    public static final String PROP_OUTPUT_PROJECT = "jlmp.output.project";
+    public static final String PREF_DEFAULT_OUTPUT_PROJECT = "jlmp.default.output.project";
+    
+    public static final String PROP_LAST_BUILD = "jlmp.last.build";
+
+    public static final String PREF_USE_PEF_STORE = "jlmp.use.pef.store";
+    
+    /**
+     * @return all open JLMPProjects that operate on the given PrologInterface instance.
+     * @throws CoreException
+     */
+    public  static JLMPProject[] getJLMPProjects(PrologInterface pif) throws CoreException{
+        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+        ArrayList l = new ArrayList();
+        for (int i = 0; i < projects.length; i++) {
+            IProject project = projects[i];            
+            if(project.isAccessible()&&project.hasNature(JLMP.NATURE_ID)){
+                JLMPProject jlmpProject = (JLMPProject) project.getNature(JLMP.NATURE_ID);
+                if(jlmpProject.getPrologInterface()==pif){
+                    l.add(jlmpProject);
+                }
+            }
+        }
+        JLMPProject[] r = new JLMPProject[l.size()];
+        return (JLMPProject[]) l.toArray(r);
     }
 }
