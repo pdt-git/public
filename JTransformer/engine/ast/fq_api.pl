@@ -272,6 +272,18 @@ bindArgs([ast_arg(_,_, id,  Kind)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaA
 	bindArgs(ArgDefs, Args, JavaASTArgs),
 	!.
 
+% methodDef id 
+bindArgs([ast_arg(_,_, id,  Kind)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
+	methodDefT(JavaASTArg,_,_,_,_,_,_),
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
+
+% fieldDefT id
+bindArgs([ast_arg(_,_, id,  Kind)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
+	fieldDefT(JavaASTArg,_,_,_,_),
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
+
 % id with several Kinds, and a classDefT - TODO: by now expensive!?
 bindArgs([ast_arg(_,_, id, _)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
 	fullQualifiedName(JavaASTArg,FQN),
