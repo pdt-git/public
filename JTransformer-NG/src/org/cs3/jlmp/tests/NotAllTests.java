@@ -2,8 +2,6 @@
  */
 package org.cs3.jlmp.tests;
 
-import org.apache.xpath.compiler.PsuedoNames;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
