@@ -1,0 +1,23 @@
+package ct.refactoring.test;
+
+import ct.refactoring.test.TheClass;
+
+public class SomeClient {
+    public SomeClient() {
+    }
+    public static void main(String[] argv) {
+        TheClass myClass = new TheClass();
+    	myClass.c(1);
+	myClass.l(2);
+	myClass.t(3);
+	myClass.m(4);
+    	myClass.b(5);
+	myClass.lt(6);
+    	myClass.lm(7);
+	myClass.lb(8);
+	myClass.tb(9);
+	myClass.ltmb(10);
+	myClass.l(11, 12);
+	myClass.tb(13, 14);
+    }
+}

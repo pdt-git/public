@@ -1,0 +1,16 @@
+14.08.02
+
+- ct_filter.pl: equals(A,B) durch =(A,B) und not(equals(A,B)) durch \=(A,B) ersetzen
+
+OK
+
+- Namenspattern a&_x&b einbauen
+
+26.08.02	OK
+
+- das Scheitern einer Unifikation eines Elements X führt zum scheitern von Unifikationen
+  aller in X enthaltenen Elemente. Z.B. darf M nicht mit 'm' unifiziert werden:
+  post1=[class(C1,'a'), method(C1,'m')], pre2=[class(C2,'b'),method(C2,M)]
+- ??? das Scheitern einer Unifikation eines Elements X führt zum scheitern von Unifikationen
+  aller Elemente, die sich auf X beziehen. 
+  

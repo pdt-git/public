@@ -1,0 +1,3 @@
+:- ['debugging'].
+:- ['visitor'].
+:- ['duplicatetree'].
