@@ -79,6 +79,8 @@ src(Type):-
  
 cond(concat_lists(_Lists,_List)).
 
+concat_lists([Element],[Element]) :-
+    var(Element).
 
 concat_lists([Element|Tail],[Element|TailFlat]) :-
     var(Element),
@@ -114,7 +116,10 @@ test(concat_list_2):-
    assert_true('[a,B],C,[d,e,f]',(concat_lists([[a,B],C,[d,e,f]],
     	Flat2), !,Flat2=[a,B,C,d,e,f])),
    assert_true('[],[],[d,e,f]',(concat_lists([[],[],[d,e,f]],Flat3),
-    !,Flat3=[d,e,f])).
+    !,Flat3=[d,e,f])),
+   assert_true('[A],[A]',(concat_lists([V1],[V2]),
+    !,V1 == V2)).
+
 /**
  * action(set_parent(+ID,+NewParent))
  */
@@ -542,7 +547,7 @@ subTreeArg(setField, 6).
 
 setField(_setField, _Parent, _Encl, _Receiver, _field,_value) :-
     assignT(_setField, _parent, _encl, _getField, _value),
-    getField(_getField, _, _, _Receiver, _, _field),
+    getFieldT(_getField, _, _, _Receiver, _, _field),
     field(_field,_,_,_,_),
 %    not(forwards(_,_,_,_setField)),
     getRealParent(_setField, _parent,_Parent),
@@ -888,10 +893,18 @@ fullQualifiedName(Id, Fqn) :-
 %   Especially when I use the java_fq abstraction !!! 
 
 
-
+fullQualifiedName(_id, _Fqn) :-
+    nonvar(_id),
+    classDefT(_id, _parent, _name,_),
+    packageT(_parent, _pckgname),
+    !,
+    stringAppend(_pckgname, '.', _name, _Fqn).
+	
+	
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     packageT(_parent, _pckgname),
+    !,
 %    not(_pckgname == 'null'),
 %    !,
     stringAppend(_pckgname, '.', _name, _Fqn).
