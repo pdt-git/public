@@ -23,6 +23,7 @@ public class NotAllTests {
         suite.addTestSuite(PrimitiveTypeLiteralsTest.class);
         suite.addTestSuite(SelfTest.class);
         suite.addTestSuite(MultiFragForLoopInitializerTest.class);
+        suite.addTestSuite(InitializerTest.class);
         suite.addTest(PseudoRoundTripTest.suite());
         //$JUnit-END$
         return suite;

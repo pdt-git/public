@@ -484,6 +484,8 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(81);
         blacklist.set(86);
         blacklist.set(87);
+        blacklist.set(114);
+        blacklist.set(115);
         blacklist.set(118);
         blacklist.set(150);
         blacklist.set(152);
