@@ -11,24 +11,6 @@
       <library name="PDT.jar">
          <export name="*"/>
       </library>
-      <library name="lib/Common.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/Console.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/MetaData.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/PrologInterface.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/PrologInterface-Socket.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/PrologInterface-XML.jar">
-         <export name="*"/>
-      </library>
    </runtime>
 
    <requires>
@@ -44,6 +26,10 @@
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.search"/>
+      <import plugin="org.cs3.pdt.common"/>
+      <import plugin="org.cs3.pdt.console"/>
+      <import plugin="org.cs3.pdt.metadata"/>
+      <import plugin="org.cs3.pdt.prologinterface"/>    
    </requires>
    <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>

@@ -23,6 +23,9 @@
       <import plugin="org.eclipse.ui.views"/>
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.jdt.launching"/>
+      <import plugin="org.cs3.pdt.common"/>
+      <import plugin="org.cs3.pdt.prologinterface"/>
+
    </requires>
 
    <extension
