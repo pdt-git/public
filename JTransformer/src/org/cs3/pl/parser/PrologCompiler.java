@@ -5,7 +5,6 @@
  * Java - Code Generation - Code and Comments
  */
 package org.cs3.pl.parser;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -26,15 +25,16 @@ import org.cs3.pl.prolog.PrologElementData;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 /**
  * @author xproot
@@ -59,6 +59,7 @@ public class PrologCompiler extends PrologParserTraversal {
     private IDocument document;
     private static final String LINESEPARATOR = System.getProperty("line.separator");
     private static final int BUFLENGTH = 1024;
+	private ArrayList markers = new ArrayList();
 	private void resetVars() {
 		vars = new Hashtable();
 	}
@@ -124,36 +125,60 @@ public class PrologCompiler extends PrologParserTraversal {
 		if(addProblems) {
 			int offset = getLineOffset(token.beginLine);
 			HashMap attributes = new HashMap();
-			attributes.put(IMarker.MESSAGE, msg);
-			attributes.put(IMarker.SEVERITY, new Integer(severity));
-			attributes.put(IMarker.LINE_NUMBER, new Integer(token.beginLine));
+			MarkerUtilities.setMessage(attributes, msg);
+			MarkerUtilities.setLineNumber(attributes, token.beginLine);
 			int begin = offset + token.beginColumn - 1;
 			if (begin < 0)
 				begin = 0;
-			int add = 0;
-			if (severity == IMarker.SEVERITY_WARNING) //TODO: clean solution needed
-				add =1;
-			attributes.put(IMarker.CHAR_START, new Integer(begin+add)); // CHAR_START
-																	// not relative
-																	// to line !
-			attributes.put(IMarker.CHAR_END, new Integer(offset + token.endColumn+add));
-			MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
+			//int add = 0;
+			//if (severity == IMarker.SEVERITY_WARNING) //TODO: clean solution needed
+			//	add =1;
+			MarkerUtilities.setCharStart(attributes, begin);
+			MarkerUtilities.setCharEnd(attributes,offset + token.endColumn);
+			attributes.put(IMarker.SEVERITY, new Integer(severity));
+			
+			markers.add(attributes);
+			//createMarker(file,attributes,IMarker.PROBLEM);
+			//MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
 			//		marker.setAttribute(IMarker.CHAR_START, token.beginColumn); //
 			// CHAR_START not relative to line !
 			//		marker.setAttribute(IMarker.CHAR_END, token.endColumn);
-			PDTPlugin.getDefault().getDisplay().syncExec(new Runnable() {
-				public void run() {
-					try {
-						PDTPlugin.getDefault().getActivePage().showView(
-								IPageLayout.ID_PROBLEM_VIEW);
-						PDTPlugin.getDefault().getActiveEditor().getEditorSite()
-								.getPage().activate(
-										PDTPlugin.getDefault().getActiveEditor());
-					} catch (PartInitException e) {
-						Debug.report(e);
-					}
+			
+		}
+	}
+	/**
+	 * @param file2
+	 * @param attributes
+	 * @param problem
+	 * @throws CoreException
+	 */
+	private void createMarker() throws CoreException {
+		if(markers.size()> 0) {
+			
+		IWorkspaceRunnable r= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				for(int i =0 ;i < markers.size();i++){
+				IMarker marker= file.createMarker(IMarker.PROBLEM);
+				marker.setAttributes((HashMap)markers.get(i));
+//				MarkerAnnotation annotation = new MarkerAnnotation(marker);
+//				annotation.setText("ahahahaha");
 				}
-			});
+			}
+		};
+		file.getWorkspace().run(r, null,IWorkspace.AVOID_UPDATE, null);
+		PDTPlugin.getDefault().getDisplay().syncExec(new Runnable() {
+			public void run() {
+				try {
+					PDTPlugin.getDefault().getActivePage().showView(
+							IPageLayout.ID_PROBLEM_VIEW);
+					PDTPlugin.getDefault().getActiveEditor().getEditorSite()
+							.getPage().activate(
+									PDTPlugin.getDefault().getActiveEditor());
+				} catch (PartInitException e) {
+					Debug.report(e);
+				}
+			}
+		});
 		}
 	}
 	/**
@@ -183,6 +208,7 @@ public class PrologCompiler extends PrologParserTraversal {
 	 * @param unit
 	 */
 	private void compile(InputStream content) throws CoreException {
+		try {
 		resetProblems();
 
 		parser = new PrologParser(content);
@@ -223,6 +249,9 @@ public class PrologCompiler extends PrologParserTraversal {
 			token.endColumn = tme.errorColumn;
 			addProblem(token, processParserOutput(tme.getLocalizedMessage()),
 					IMarker.SEVERITY_ERROR);
+		}
+		}finally{
+			createMarker();
 		}
 	}
 	/**
@@ -344,16 +373,7 @@ public class PrologCompiler extends PrologParserTraversal {
 		}
 		return null;
 	}
-//	/**
-//	 * @param node
-//	 * @return
-//	 */
-//	private int getBeginOffset(Token token) {
-//		return getLineOffset(token.beginLine) + token.beginColumn;
-//	}
-//	private int getEndOffset(Token token) {
-//		return getLineOffset(token.endLine)+token.endColumn;
-//	}
+
 	/**
 	 * @param node
 	 * @param data
@@ -388,8 +408,6 @@ public class PrologCompiler extends PrologParserTraversal {
 			} else
 				node.childrenAccept(this, data);
 		} catch (CoreException e) {
-			Platform.getPlugin(PlatformUI.PLUGIN_ID).getLog()
-					.log(e.getStatus());
 			Debug.report(e);
 		}
 	}
