@@ -77,28 +77,29 @@ public class SocketServerStartAndStopStrategy implements
 			throw new RuntimeException(e);
 		}
         
-        String[] cmdArray=executable.split(" ");
-		String[] argArray= new String[]{
-				executable,
+        String[] command=executable.split(" ");
+		String[] args= new String[]{
 				"-g",
 				"['"+Util.prologFileName(tmpFile)+"']",
 				
 		};
-		String[] cmdLine = new String[cmdArray.length+argArray.length];
-		System.arraycopy(cmdArray,0,cmdLine,0,cmdArray.length);
-		System.arraycopy(argArray,0,cmdLine,cmdArray.length,argArray.length);
-//        StringBuffer sb = new StringBuffer();
-//		sb.append(executable);
-//		sb.append(" -g \"['");
-//
-//        sb.append(Util.prologFileName(tmpFile));
-//        sb.append("']\"");
-//        String cmdline = sb.toString();
-        Debug.debug("Starting server with " + Util.prettyPrint(cmdLine));
+		String[] commandArray = new String[command.length+args.length];
+		System.arraycopy(command,0,commandArray,0,command.length);
+		System.arraycopy(args,0,commandArray,command.length,args.length);
+        StringBuffer sb = new StringBuffer();
+		sb.append(executable);
+		sb.append(" -g ['");
+
+        sb.append(Util.prologFileName(tmpFile));
+        sb.append("']");
+        String cmdline = sb.toString();
+        Debug.debug("Starting server with " + Util.prettyPrint(commandArray));
+        
+        
 
         try {
 
-            Process serverProcess = Runtime.getRuntime().exec(cmdArray);
+            Process serverProcess = Runtime.getRuntime().exec(commandArray);
             File logFile = Util.getLogFile("org.cs3.pdt.server.log");
             BufferedWriter writer = new BufferedWriter(new FileWriter(logFile));
             new _InputStreamPump(serverProcess.getErrorStream(), writer)
