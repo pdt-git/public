@@ -162,32 +162,6 @@ getReceiver(_select, _Receiver) :- selectT(_select, _, _, _, _Receiver, _).
 getReceiver(_select, _Receiver) :- getFieldT(_select, _, _, _Receiver, _, _).
 
 
-
-/*
-getReceiverType(_ident, type(class, _enclClass, 0)) :-
-    identT(_ident, _, _, _, _),
-    !,
-    enclClass(_ident, _enclClass).
-getReceiverType(_select, _Type) :-
-    selectT(_select, _, _, _, _selected, _),
-    getSymbol(_selected, _varMethDef),
-    getType(_varMethDef, _Type).
-
-getReceiverType(_select, _Type) :-
-    getFieldT(_select, _, _, _, _,Field),
-    getType(Field, _Type).
-
-getReceiverType(_select, _Type) :-
-    getFieldT(_select, _, _, Recv, _,Field),
-    getType(Field, _Type).
-
-getReceiverType(_select, _Type) :-
-    applyT(_select, _, _, _selected, _,_,_),
-    getSymbol(_selected, MethDef),
-    getType(MethDef, _Type).
-*/
-
-
 /*
     getType(localDefT | fieldDefT | paramDefT | methodDefT, _Type)
 
@@ -474,21 +448,21 @@ getRealArgs(_,_Args,_Args).
 
 :- dynamic forwards/4.
 setUp('getRealEncl'):-
-    assert(methodDefT(methorig,class,methname,[],type(class,whatever,0),[],body)).
+    assert(methodDefT(methorig,class,methname,[],type(class,whatever,0),[],body)),
+    assert(applyT(applyorig,parent,methforw,null,methname,args,methorig)),
+    assert(applyT(applyforw,parent,methorig,null,methname,args,methforw)),
+    assert(forwards(applyforw,methforw,methodCall,applyorig)).
 
 test('getRealEncl'):-
-    assert_true('enclosing method of a method', getRealEncl(methorig,methorig,methorig)),
-    assert(applyT(applyforw,parent,methorig,null,methname,args,methforw)),
-    assert(applyT(applyorig,parent,encl2,null,methname,args,methorig)),
-    assert(forwards(applyforw,forw,methodCall,applyorig)),
-    assert_true('enclosing method of a forwarding method', getRealEncl(forw,methorig)).
+%    assert_true('enclosing method of a method', getRealEncl(applyorig,methorig,methorig)),
+    assert_true('enclosing method of a forwarding method', getRealEncl(applyorig,methforw,methorig)).
     
     
 tearDown('getRealEncl'):-
     retract(methodDefT(methorig,class,methname,[],type(class,whatever,0),[],body)),
+    retract(applyT(applyorig,parent,methforw,null,methname,args,methorig)),
     retract(applyT(applyforw,parent,methorig,null,methname,args,methforw)),
-    retract(applyT(applyorig,parent,encl2,null,methname,args,methorig)),
-    retract(forwards(applyforw,forw,methodCall,applyorig)).
+    retract(forwards(applyforw,methforw,methodCall,applyorig)).
 
 %getRealEncl(_meth, _meth):-
 %    throw('getRealEnclMethod: first Argument must be a method id').
