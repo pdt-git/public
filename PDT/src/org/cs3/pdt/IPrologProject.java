@@ -27,7 +27,7 @@ public interface IPrologProject {
     
     /**
      * parses the current value of the sourcePath property and returns
-     * a Set containing IFolder objects that represent the
+     * a Set containing IContainer objects that represent the
      * source folders that actualy exist within the project.
      * @return
      * @throws CoreException
