@@ -8,6 +8,7 @@ import java.io.FileReader;
 
 import org.cs3.timetracker.ITimeObserver;
 import org.cs3.timetracker.TimeEvent;
+import org.cs3.timetracker.Logger;
 import org.cs3.timetracker.TimeTicker;
 import org.cs3.timetracker.TimeTrackerGUIInteraction;
 import org.cs3.timetracker.TimeTrackerPlugin;
@@ -64,7 +65,8 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 
 
 	private Composite composite;
-	private String content = "bvelzirgf";
+	private String content = "";
+	private Logger log;
 
 
 	private TimeTrackerGUIInteraction guiInteraction;
@@ -116,8 +118,8 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		}
 		
 		public Object[] getElements(Object parent) {
-			
-			String[] elements = {"--:--"};
+			content = log.readLog();
+			String[] elements = {""};
 			elements[0]=content;
 		return elements;
 		}
@@ -158,32 +160,18 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		composite = new SashForm(parent, SWT.VERTICAL);
 		//composite = parent;
 		TimeTicker tt = new TimeTicker();
+		log = new Logger(tt);
 		tt.addObserver(this);
 		//composite.setLayout(new FormLayout());
 		//Composite buttons = new Group(composite, SWT.SHADOW_NONE);
 		
-		guiInteraction = new TimeTrackerGUIInteraction(composite);
+		guiInteraction = new TimeTrackerGUIInteraction(composite, log);
 		
 		guiInteraction.addTimeTracker(tt); //TODO add correct TimeTracker reference here!!!
 		
 		tt.addObserver(guiInteraction);
 		
-		File file = new File("test.txt");
-		if(file.exists())
-		{
-		try {
-		BufferedReader br=new BufferedReader(new FileReader(file));
 		
-		content=br.readLine();
-		System.out.println("Content"+content);
-			
-			
-		} catch (Exception e) {	e.printStackTrace();	}
-		}else
-		{
-		System.out.println("File Not Found");	
-			
-		}	
 		
 		
 	SashForm composite1 = new SashForm(parent, SWT.VERTICAL);

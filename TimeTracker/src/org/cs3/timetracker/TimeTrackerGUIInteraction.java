@@ -29,6 +29,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	private Button stopbutton;
 	private TimeTicker timetracker;
 	private Composite composite;
+	private Logger log;
 	
 
 /////////////////////////////////////////////////////////////////////
@@ -74,6 +75,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 			continuebutton.setEnabled(true);
 			pausebutton.setEnabled(false);
 			stopbutton.setEnabled(true);
+			
 		}
 		if(match.equalsIgnoreCase("continue")){
 			timetracker.resume();
@@ -117,8 +119,9 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	 * 
 	 * Initiates the button and add them to parent (Composite)
 	 */
-	public TimeTrackerGUIInteraction(Composite parent){
+	public TimeTrackerGUIInteraction(Composite parent, Logger logger){
 		composite = parent;
+		log= logger;
 		startbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		startbutton.setText("start");
 		startbutton.addMouseListener(this);
