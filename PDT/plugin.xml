@@ -31,6 +31,16 @@
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.junit"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.search"/>
    </requires>
    <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    
@@ -97,5 +107,22 @@
           class="org.cs3.pdt.preferences.PreferencePage"
           name="PDT Preferences"
           id="org.cs3.pdt.preferences.PDTPreferencePage"/>
+ </extension>
+  <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="PL Editor"
+            icon="icons/prolog_file.gif"
+            extensions="pl"
+            class="org.cs3.pdt.editors.PLEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            id="org.cs3.pdt.editors.PLEditor">
+      </editor>
+   </extension>
+ <extension point="org.eclipse.team.core.fileTypes">
+	        <fileTypes extension="pl" type="text"/>
+	</extension> 
+ <extension
+       point="org.cs3.pdt.hooks">
  </extension>
 </plugin>
