@@ -6,16 +6,13 @@
  */
 package org.cs3.pdt.preferences;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.ListEditor;
-import org.eclipse.jface.preference.PathEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 

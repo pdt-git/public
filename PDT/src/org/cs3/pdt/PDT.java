@@ -31,6 +31,11 @@ public interface PDT {
     public final static String PREF_METADATA_ENGINE_DIR = "pdt.metadata.engine.dir";
     
     /**
+     * An absolute os file system path to the directory containing metadata store
+     */
+    public final static String PREF_METADATA_STORE_DIR = "pdt.metadata.store.dir";
+    
+    /**
      * An absolute os file system path to the directory containing the prolog files of the
      * jtransformer engine.
      */
@@ -88,4 +93,9 @@ public interface PDT {
      * org.cs3.pl.prolog.PrologInterfaceServer
      */
     public final static String PREF_SERVER_CLASSPATH = "pdt.server.classpath";
+    
+    /**
+     * The basename of the resource bundle to be used by the pdt ui
+     */
+    public final static String RES_BUNDLE_UI="org.cs3.pdt.ui";
 }

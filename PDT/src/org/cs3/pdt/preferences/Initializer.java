@@ -26,6 +26,21 @@ public class Initializer extends AbstractPreferenceInitializer {
      * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
      */
     public void initializeDefaultPreferences() {
+        try{
+            initializeDefaultPreferences_impl();
+        }
+        catch(Throwable t){
+            Debug.report(t);
+            throw new RuntimeException(t.getMessage(),t);
+        }
+    }
+
+    
+    
+    /**
+     * 
+     */
+    private void initializeDefaultPreferences_impl() {
         String fileSep = File.separator;
         String pathSep = File.pathSeparator;
         String location="";
@@ -47,6 +62,7 @@ public class Initializer extends AbstractPreferenceInitializer {
         boolean consultRecursive=Boolean.getBoolean(PDT.PREF_CONSULT_RECURSIVE);
         String debugLevel=System.getProperty(PDT.PREF_DEBUG_LEVEL);        
         String metadataEngineDir = System.getProperty(PDT.PREF_METADATA_ENGINE_DIR,location+ fileSep+"engine");
+        String metadataStoreDir = System.getProperty(PDT.PREF_METADATA_STORE_DIR,location+ fileSep+"store");
         String swiplDir=System.getProperty(PDT.PREF_SWIPL_DIR,location +fileSep +"swipl");
         String serverClasspath = System.getProperty(PDT.PREF_SERVER_CLASSPATH,
                   getLibDir()+fileSep+"PrologInterface.jar"+pathSep
@@ -66,6 +82,7 @@ public class Initializer extends AbstractPreferenceInitializer {
             node.putBoolean(PDT.PREF_CONSULT_RECURSIVE,consultRecursive);
             node.put(PDT.PREF_DEBUG_LEVEL,debugLevel);
             node.put(PDT.PREF_METADATA_ENGINE_DIR,metadataEngineDir);
+            node.put(PDT.PREF_METADATA_STORE_DIR,metadataStoreDir);
             node.put(PDT.PREF_SERVER_CLASSPATH,serverClasspath);
             node.putInt(PDT.PREF_SERVER_PORT,serverPort);
             node.putBoolean(PDT.PREF_SERVER_STANDALONE,serverStandAlone);
@@ -77,8 +94,8 @@ public class Initializer extends AbstractPreferenceInitializer {
         Debug.setDebugLevel(debugLevel);
     }
 
-    
-    
+
+
     private String getLocation() throws IOException {
 		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
 		String location = null;
