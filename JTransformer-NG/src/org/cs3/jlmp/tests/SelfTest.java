@@ -131,7 +131,13 @@ public class SelfTest extends FactGenerationTest {
 		System.err.println("setUpOnce caled for key  "+getKey());
 		
 	}
-	
+	/* (non-Javadoc)
+     * @see org.cs3.jlmp.tests.SuiteOfTestCases#setUp()
+     */
+    protected void setUp() throws Exception {
+        super.setUp();
+        setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator("testdata-selftest"));
+    }
 	
 	
 	public static Test _suite() {

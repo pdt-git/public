@@ -1,6 +1,8 @@
 package org.cs3.jlmp.tests;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,6 +29,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -104,14 +107,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         super.setUpOnce();
         //install test workspace
         ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
-        File r = l.resolve(JLMP.TEST_WORKSPACE_ZIP);
+        File r = l.resolve("testdata-roundtrip.zip");
         Util.unzip(r);
-        
-        
-        //no autobuilds please!
-        setAutoBuilding(false);
         org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
-        
+        setAutoBuilding(false);
     }
 
     public void testIt() throws CoreException, IOException,
@@ -124,45 +123,49 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in " + packageName);
         //retrieve all cus in package
         ICompilationUnit[] cus = getCompilationUnits( packageName);
-        //generate and consult prolog facts
-        PrintStream out = pif.getConsultService(JLMP.SRC).getOutputStream("flat.pl");
-        for (int i = 0; i < cus.length; i++) {
-            ICompilationUnit cu = cus[i];            
-            jlmpProject.writeFacts(cu,out);            
-        }
-        out.close();
-        //now we should have SOME toplevelT
-        assertNotNull("no toplevelT????", session.queryOnce("toplevelT(_,_,_,_)"));
-
         //normalize source files
         for (int i = 0; i < cus.length; i++) {
             ICompilationUnit cu = cus[i];
             normalizeCompilationUnit(cu);
 
         }
+        
+        
+        class _ProgressMonitor extends NullProgressMonitor{
+            public Object lock=new Object();
+            public boolean done = false;
+            /* (non-Javadoc)
+             * @see org.eclipse.core.runtime.NullProgressMonitor#done()
+             */
+            public void done() {                
+                done=true;
+                synchronized(lock){
+                    lock.notifyAll();    
+                }                
+            }
+            public void waitTillDone(){
+                while(!done){
+                    synchronized(lock){
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        };
+        
+        _ProgressMonitor m = new _ProgressMonitor();
+        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, m);
+        m.waitTillDone();
+        
+        //now we should have SOME toplevelT
+        assertNotNull("no toplevelT????", session.queryOnce("toplevelT(_,_,_,_)"));
+        //and checkTreeLinks should say "yes"
+        assertNotNull("checkTreeLinks reports errors", session.queryOnce("checkTreeLinks"));      
+        
 
-        //compile all files in the package
-        //LD: currently we are issuing an incremental build on the
-        //whole converter package.
-        //I have a bad feeling about this. although the incremental build will
-        // only
-        //traverse the _complete_ project once (later on only changed resources
-        // will be
-        //reconciled), the "Converter" project is rather large.
-
-        //FIXME: Find out how to do "selective" builds.
-        assertTrue("project is not accessíble!", project.isAccessible());
-        //		project.build(IncrementalProjectBuilder.CLEAN_BUILD,null);
-        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
-
-        //rename the original class and src files in the package (+ subpackages
-        // if exist)
-        //they will all get an extra ".orig" extension.
-        IFolder binfolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
-                new Path("/Converter/bin/" + packageName));
-        assertTrue("bin folder is not accessible!", binfolder.isAccessible());
-        IFolder srcfolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(
-                new Path("/Converter/src/" + packageName));
 
         IResourceVisitor renamer = new IResourceVisitor() {
             public boolean visit(IResource resource) throws CoreException {
@@ -174,15 +177,17 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                     file.move(file.getFullPath().addFileExtension("orig"),
                             true, null);
                     break;
+                case IResource.PROJECT:
+                    return true;
                 default:
-                    throw new IllegalStateException("Unexpected resource type.");
+                    throw new IllegalStateException("Unexpected resource type.");                    
                 }
                 return false;
             }
         };
 
-        srcfolder.accept(renamer);
-        binfolder.accept(renamer);
+        project.getFolder(packageName).accept(renamer);
+        
 
         //next, we use gen_tree on each toplevelT node known to the system.
         //as a result we should be able to regenerate each and every source
@@ -195,6 +200,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             Map result = (Map) iter.next();
             String filename = result.get("FILENAME").toString();
             String content = result.get("CONTENT").toString();
+            System.out.println(content);
             assertTrue("problems writing generated file.", createFile(filename,
                     content).isAccessible());            
         }
@@ -247,20 +253,23 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                 return false;
             }
         };
-        binfolder.accept(comparator);
+        project.getFolder(packageName).accept(comparator);
     }
     protected void setUp() throws Exception {     
         super.setUp(); 
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
         pif.start();
         session=pif.getSession();
+        setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator("testdata-roundtrip"));
         
+        install(packageName);
     }
     protected void tearDown() throws Exception {     
         super.tearDown();
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
         session.dispose();
         pif.stop();
+        //uninstall(packageName);
     }
     public void tearDownOnce() {
         super.tearDownOnce();
@@ -271,9 +280,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         //			e.printStackTrace();
         //		}
         
-        ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
-        File file = l.resolve(JLMP.TEST_WORKSPACE);
-        Util.deleteRecursive(file);
+        
     }
 
     public static Test suite() {

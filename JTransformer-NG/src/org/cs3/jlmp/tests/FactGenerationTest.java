@@ -50,7 +50,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -99,7 +101,40 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     private ResourceFileLocator testDataLocator;
 
     private DefaultResourceFileLocator testWorkspaceLocator;
-
+    /**
+	 * Wait for autobuild notification to occur
+	 */
+	public static void waitForAutoBuild() {
+		boolean wasInterrupted = false;
+		do {
+			try {
+				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+				wasInterrupted = false;
+			} catch (OperationCanceledException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				wasInterrupted = true;
+			}
+		} while (wasInterrupted);
+	}
+	
+	 /**
+	 * Wait for autobuild notification to occur
+	 */
+	public static void waitForManualBuild() {
+		boolean wasInterrupted = false;
+		do {
+			try {
+				Platform.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+				wasInterrupted = false;
+			} catch (OperationCanceledException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				wasInterrupted = true;
+			}
+		} while (wasInterrupted);
+	}
+	
     /*
      * (non-Javadoc)
      * 
@@ -118,8 +153,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             };
             getTestJavaProject().setRawClasspath(cp,project.getFullPath(),null);
         } catch (CoreException e) {
-            e.printStackTrace();
-            fail();
+           throw new RuntimeException(e);
         }
     }
 
@@ -202,10 +236,23 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      * 
      * @param strings
      *                  pathnames relative to the testdata location. Directories will
-     *                  be copied recursively.
+     *                  uninstalled recursively.
+     * @throws CoreException
      */
-    protected void uninstall(String[] strings) {
+    protected void uninstall(String[] strings) throws CoreException {
+        for (int i = 0; i < strings.length; i++) {
+            String string = strings[i];
+            uninstall(string);
+        }
+    }
 
+    /**
+     * @param string
+     * @throws CoreException
+     */
+    protected void uninstall(String string) throws CoreException {       
+        IResource r = getTestProject().findMember(string);
+        r.delete(true,null);
     }
 
     /**
@@ -474,6 +521,14 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 .getProject(projectName);
         IWorkspaceRunnable create = new IWorkspaceRunnable() {
             public void run(IProgressMonitor monitor) throws CoreException {
+                if(project.exists()){
+                    try{
+                        project.open(null);
+                    }catch(Throwable t){
+                        
+                    }
+                    project.delete(true,null);
+                }
                 project.create(null);
                 project.open(null);
             }
@@ -862,7 +917,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 .getAbsolutePath();
         PrintStream out = new PrintStream(new BufferedOutputStream(
                 new FileOutputStream(outPathFsString)));
-        getTestJLMPProject().writeFacts(icu, out);
+        getTestJLMPProject().getFactBaseBuilder().writeFacts(icu, out);
         out.close();
         return outFile;
     }
