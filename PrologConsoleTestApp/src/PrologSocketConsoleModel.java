@@ -78,6 +78,12 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         connect();
     }
 
+    public PrologSocketConsoleModel(boolean doConnect)  {      
+        this.port = 5567;
+        if(doConnect){
+        	connect();
+        }
+    }
 
     public String getLineBuffer() {
         return lineBuffer;
