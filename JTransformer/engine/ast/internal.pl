@@ -63,8 +63,7 @@ clear_old_factbase :-
      ast_arg(parent,  1, id,  [classDefT]), 
      ast_arg(name,    1, attr,[atomType]),
      ast_arg(params,  *, id,  [paramDefT]),
-     ast_arg(type,  0-1, attr,[typeTermType]), 
-     ast_arg(type,  0-1, attr,[typeTermType]), 
+     ast_arg(type,    1, attr,[typeTermType]), 
      ast_arg(excepts, *, id,  [classDefT]),
      ast_arg(body,  0-1, id,  [blockT])
   ]).
