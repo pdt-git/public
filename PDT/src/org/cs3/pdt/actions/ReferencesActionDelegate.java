@@ -2,6 +2,7 @@ package org.cs3.pdt.actions;
 
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.editors.PLEditor;
 import org.cs3.pl.common.Debug;
@@ -29,7 +30,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
  */
 public class ReferencesActionDelegate extends TextEditorAction {
 	public ReferencesActionDelegate(ITextEditor editor) {
-		super(ResourceBundle.getBundle("actions"),ReferencesActionDelegate.class.getName(), editor);
+		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),ReferencesActionDelegate.class.getName(), editor);
 	}
 	
 	/**

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.editors.PLEditor;
 import org.cs3.pl.common.Debug;
@@ -27,7 +28,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
      *  
      */
     public SpyPointActionDelegate(ITextEditor editor) {
-        super(ResourceBundle.getBundle("actions"),SpyPointActionDelegate.class.getName(),editor); //$NON-NLS-1$
+        super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),SpyPointActionDelegate.class.getName(),editor); //$NON-NLS-1$
     }
 
     /**

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.editors.PLEditor;
 import org.cs3.pl.common.Debug;
@@ -42,7 +43,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
      *  
      */
     public FindPredicateActionDelegate(ITextEditor editor) {
-        super(ResourceBundle.getBundle("actions"), FindPredicateActionDelegate.class.getName(), editor); //$NON-NLS-1$
+        super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI), FindPredicateActionDelegate.class.getName(), editor); //$NON-NLS-1$
         this.editor = editor;
         plugin = PDTPlugin.getDefault();
     }
