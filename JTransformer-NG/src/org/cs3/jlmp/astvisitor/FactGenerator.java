@@ -1314,10 +1314,14 @@ public class FactGenerator extends ASTVisitor {
 				if (node.getParent().getNodeType() == ASTNode.FIELD_ACCESS &&
 					 	((FieldAccess)node.getParent()).getName() == node)
 					return false;
+				if (node.getParent().getNodeType() == ASTNode.SUPER_FIELD_ACCESS&&
+					 	((SuperFieldAccess)node.getParent()).getName() == node)
+					return false;
 				if (node.getParent().getParent().getNodeType() == ASTNode.FIELD_DECLARATION &&
 				 	((VariableDeclarationFragment)node.getParent()).getName() == node)
 					return false;
-
+				//ld: just a note: this will called only for IMPLICIT field access. in particular, it won't be called for constructs like
+				// this.var or super.var
 				generateGetFieldIfNodeIsFieldAccess(node, node.getIdentifier());
 			}
 		}
@@ -1437,17 +1441,90 @@ public class FactGenerator extends ASTVisitor {
 	 * @see FactGeneratorMethodBodyTest#testVisitSuperFieldAccess()
 	 */
 	public boolean visit(SuperFieldAccess node) {
+	    String selectedFrom = null;
+		String nodeID = idResolver.getID(node);
+		
+		String thisClassID = idResolver.getID(getUltimateAncestor(node));
+		String superClassID = idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding());
+		
+		if (node.getQualifier() == null){
+			selectedFrom = idResolver.getID();
+			String [] identArgs = {
+					selectedFrom,
+					idResolver.getID(node),
+					idResolver.getID(getEnclosingNode(node)),
+					"'super'",
+					superClassID		
+			};
+			writer.writeFact("identT", identArgs);
+			writer.writeFact("slT", new String [] {
+					idResolver.getID(node),
+					Integer.toString(node.getStartPosition()),
+					Integer.toString(node.getLength())
+			});
+		} else {
+			selectedFrom = idResolver.getID();
+			String[] selectArgs = {
+					selectedFrom,
+					idResolver.getID(node),
+					idResolver.getID(getEnclosingNode(node)),
+					"'super'",
+					idResolver.getID(node.getQualifier()),
+					superClassID
+			};
+			writer.writeFact("selectT", selectArgs);
+			writer.writeFact("slT", new String [] {
+					idResolver.getID(node),
+					Integer.toString(node.getStartPosition()),
+					Integer.toString(node.getLength())
+			});
+			handleSelectsIdents(node.getQualifier(), selectedFrom);
+		}
+	    
+	    
 		String[] args =
 			new String[] {
+				selectedFrom,
 				quote(node.getName().getIdentifier()),
-				idResolver.getID(node.getName()),
 				idResolver.getID(node.resolveFieldBinding())
 				};
-		createBodyFact(node, "getFieldT", args);
 		
-		return true;
+		
+		createBodyFact(node, "getFieldT", args);
+
+		/*XXX ld's 1st try:do we realy need to dig deeper here?
+	 	*ld:yes we need to dig deeper: we need to create an identT for the 'super' 
+	 	* expression.
+	 	*/	
+		
+		return true; 
 	}
 	/**
+     * @param node
+     */
+    private void createSuperIdentTOrSelectT(SuperFieldAccess node) {
+        
+        
+        String args[];
+		String type;
+		if (node.getQualifier() == null){
+			args = new String[] {
+				"'super'",				
+				idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding())};
+			type = "identT";
+		} else {
+			args = new String[] {
+					"super",
+					idResolver.getID(node.getQualifier()),
+					idResolver.getID(node.getQualifier().resolveTypeBinding())
+			};
+			type = "selectT";
+		}
+
+		createBodyFact(node, type, args);
+    }
+
+    /**
 	 * Generates prolog facts of type applyT.
 	 * <p>
 	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=ApplyT">
@@ -1460,7 +1537,9 @@ public class FactGenerator extends ASTVisitor {
 		String nodeID = idResolver.getID(node);
 		
 		String thisClassID = idResolver.getID(getUltimateAncestor(node));
-		String superClassID = idResolver.getID(node.resolveMethodBinding().getDeclaringClass());
+		//String superClassID = idResolver.getID(node.resolveMethodBinding().getDeclaringClass());
+		//ld: guess this is more correct?
+		String superClassID = idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding());
 		
 		if (node.getQualifier() == null){
 			selectedFrom = idResolver.getID();
@@ -2022,10 +2101,10 @@ public class FactGenerator extends ASTVisitor {
 		return node;
 	}
 
-	private ASTNode getUltimateAncestor(ASTNode node) {
+	private TypeDeclaration getUltimateAncestor(ASTNode node) {
 		while (!(node instanceof TypeDeclaration))
 			node = node.getParent();
-		return node;
+		return (TypeDeclaration) node;
 	}
 	/**
 	 * returns an empty list

@@ -80,7 +80,7 @@ public class SuperFieldAccessTest extends FactGenerationTest {
           assertEquals("nein",(String)r.get("Nme"));
           assertEquals(neinFieldId,(String)r.get("Fld"));
           
-          
+          //the following should fail due to jt-103
            l = s.queryAll("getFieldT(Id,_,Enc,Exp,Nme,Fld)," +
           		"methodDefT(Enc,_,'bang',_,_,_,_)," +
           		"identT(Exp,_,_,'super',Sym)");

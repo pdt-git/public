@@ -397,9 +397,9 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         
         //      XXX:ld:These seems to break consecutive tests. excluded until fixed.
         //blacklist.set(178);
-        blacklist.set(200);
-        blacklist.set(242);
-        blacklist.set(433);
+        //blacklist.set(200);
+        //blacklist.set(242);
+        //blacklist.set(433);
 
         //these two are missing for some reason
         blacklist.set(157);
@@ -419,7 +419,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(150);
         blacklist.set(152);
         blacklist.set(153);//the builder eats it anyway.
-        for (int i = 178; i <=178; i++)//1-539 
+        for (int i = 1; i <=539; i++)//1-539 
             if (!blacklist.get(i))
                 s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));
