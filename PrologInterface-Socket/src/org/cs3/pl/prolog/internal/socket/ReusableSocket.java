@@ -10,11 +10,15 @@ import java.net.SocketImpl;
 import java.net.UnknownHostException;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.LogBuffer;
+import org.cs3.pl.common.SimpleLogBuffer;
 import org.cs3.pl.prolog.internal.Reusable;
 
 /**
  */
 public class ReusableSocket extends Socket implements Reusable {
+
+    private LogBuffer logBuffer = new SimpleLogBuffer();
 
     /**
      * 
@@ -104,6 +108,13 @@ public class ReusableSocket extends Socket implements Reusable {
      */
     public void recylce() {
         ;
+    }
+
+    /**
+     * @return
+     */
+    public LogBuffer getLogBuffer() {
+        return this.logBuffer;
     }
 
 }

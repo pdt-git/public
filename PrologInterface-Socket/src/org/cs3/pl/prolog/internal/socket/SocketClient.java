@@ -2,16 +2,22 @@
  */
 package org.cs3.pl.prolog.internal.socket;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.LogBuffer;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
@@ -24,14 +30,17 @@ public class SocketClient  {
     public static final String MORE = "MORE?";
     public static final String SHUTDOWN = "SHUTDOWN";
     public static final String BYE = "BYE";
+    
     private class InputStreamProxy extends InputStream{
         InputStream in;
+        private LogBuffer logBuf;
         /**
          * @param in
          */
-        public InputStreamProxy(InputStream in) {
+        public InputStreamProxy(InputStream in,LogBuffer logBuf) {
             super();
             this.in = in;
+            this.logBuf=logBuf;
         }
         public int available() throws IOException {
             lock();
@@ -72,7 +81,10 @@ public class SocketClient  {
         public int read() throws IOException {
             lock();
             try{
-                return in.read();
+                
+                int read = in.read();
+                logBuf.log("read",(char)read);
+                return read;
             }finally{
                 unlock();
             }
@@ -80,7 +92,9 @@ public class SocketClient  {
         public int read(byte[] b) throws IOException {
             lock();
             try{
-                return in.read(b);
+                int read = in.read(b);
+                logBuf.log("read",b,0,read);
+                return read;
             }finally{
                 unlock();
             }
@@ -88,7 +102,9 @@ public class SocketClient  {
         public int read(byte[] b, int off, int len) throws IOException {
             lock();
             try{
-               return in.read(b,off,len);
+               int read = in.read(b,off,len);
+               logBuf.log("read",b,off,read);
+            return read;
             }finally{
                 unlock();
             }
@@ -113,12 +129,14 @@ public class SocketClient  {
     }
     private class OutputStreamProxy extends OutputStream{
         OutputStream out;
+        private LogBuffer logBuf;
         /**
          * @param out
          */
-        public OutputStreamProxy(OutputStream out) {
+        public OutputStreamProxy(OutputStream out,LogBuffer logBuf) {
             super();
             this.out = out;
+            this.logBuf=logBuf;
         }
         public void close() throws IOException {
             lock();
@@ -140,6 +158,7 @@ public class SocketClient  {
             lock();
             try{
                 out.write(b);
+                logBuf.log("write",b);
             }finally{
                 unlock();
             }
@@ -148,6 +167,7 @@ public class SocketClient  {
             lock();
             try{
                 out.write(b,off,len);
+                logBuf.log("write",b,off,len);
             }finally{
                 unlock();
             }
@@ -156,6 +176,7 @@ public class SocketClient  {
             lock();
             try{
                 out.write(b);
+                logBuf.log("write",(char)b);
             }finally{
                 unlock();
             }
@@ -284,14 +305,14 @@ public class SocketClient  {
         if (socket==null){
             throw new IllegalStateException("Socket is closed, go away. ");
         }
-        return new InputStreamProxy(socket.getInputStream());
+        return new InputStreamProxy(socket.getInputStream(),socket.getLogBuffer());
     }
     
     public OutputStream getOutputStream() throws IOException{
         if (socket==null){
             throw new IllegalStateException("Socket is closed, go away. ");
         }
-        return new OutputStreamProxy(socket.getOutputStream());
+        return new OutputStreamProxy(socket.getOutputStream(),socket.getLogBuffer());
     }
     /**
      * 
@@ -368,7 +389,14 @@ public class SocketClient  {
                 data.append(string);
             }
             string = reader.readLine();
-            if (string == null) {
+            if (string == null) {                
+                Debug.warning("there was an error. Exceptions will be thrown.");
+                File logFile = Util.getLogFile("fail.log");
+                
+                PrintStream p = new PrintStream(new BufferedOutputStream(new FileOutputStream(logFile)));
+                socket.getLogBuffer().printLog(p);
+                p.close();
+                Debug.warning("a connection log was saved to :"+logFile.getCanonicalPath());
                 throw new PrologException(
                         "EndOfStream read while waiting for " + prefix);
             }
