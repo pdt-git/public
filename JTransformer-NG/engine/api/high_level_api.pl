@@ -165,7 +165,7 @@ class(Name):-
 
 action(delete(bodyFact(_encl))) :-
     !,
-    action_all(delete(getField(_, _, _encl, _, _))),
+    action_all(delete(getField(_, _, _encl, _, _, _))),
     action_all(delete(setField(_, _, _encl, _, _, _))),
     action_all(delete(newCall(_, _, _encl, _, _, _))),
     action_all(delete(methodCall(_, _, _encl, _, _, _, _))).
@@ -514,7 +514,7 @@ action(replace(method(_id, _class, _name, _params, _type, _exceptions, _body))) 
     action(replace(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body))).
 
 action(delete(method(_id, _class, _name, _params, _type, _exceptions, _body))) :-
-    action_all(delete(bodyFact(_id))),
+%    action_all(delete(bodyFact(_id))),
     delete(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body)),
     removeFromClass(_class, _id).
 
@@ -552,7 +552,7 @@ action(replace(fieldDefT(_id, _class, _RetType, _name, _init),
     fieldDefT(_id, _class1, _RetType1, _name1, _init1))).
 
 action(delete(field(_id, _class, _RetType, _name, _init))) :-
-    action_all(delete(bodyFact(_id))),
+%    action_all(delete(bodyFact(_id))),
     delete(fieldDefT(_id,  _class, _RetType, _name, _init)),
     removeFromClass(_class, _id).
 
@@ -589,7 +589,7 @@ action(     localVar(_id, _parent, _encl, _type, _name, _init)) :-
 action(replace(localVar(_id, _parent, _encl, _type, _name, _init))) :-
     action(replace(localDefT(_id, _parent, _encl, _type, _name, _init))).
 action(delete(localVar(_id, _parent, _encl, _type, _name, _init))) :-
-    action_all(delete(bodyFact(_id))),
+%    action_all(delete(bodyFact(_id))),
     delete(localDefT(_id,_parent, _encl, _type, _name, _init)),
     removeFromBlock(_parent, _id).
 
