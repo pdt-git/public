@@ -18,6 +18,10 @@ public class DefaultServerStopStrategy implements ServerStopStrategy {
 	public void stopServer(int port) {
 		
 		try {
+		    if(!Util.probePort(port)){
+		        Debug.info("There is no server running, afaics. So i wont stop anything.");
+		        return;
+		    }
 			ReusableClient s = new ReusableClient();
 			s.enableLogging(new Logger("default"));
 			s.configure("localhost", port);
