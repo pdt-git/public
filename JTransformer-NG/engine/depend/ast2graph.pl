@@ -26,7 +26,7 @@ ast_node(T, localDefT(A,B,C,D,E,F), X) :- ast_node(T,localDefT(A,B,C,D,E,F), X) 
 ast_node(T, getFieldT(A,B,C,D,E,F), X) :- ast_node(T,getFieldT(A,B,C,D,E,F), X) .
 %ToWi: ast_node(T, getField(A,B,C,D,E), X) :- ast_node(T,selectT(A,B,C,_,D,E), X) .
 %ToWi: ast_node(T, setField(A,B,C,_,D,E), X) :- ast_node(T,assignT(A,B,C,D,E), X) .
-%ToWi: ast_node(T, methodCall(A,B,C,_,D,E), X) :- ast_node(T,applyT(A,B,C,D,E), X) .
+%ToWi: ast_node(T, methodCall(A,B,C,_,_,D,E), X) :- ast_node(T,applyT(A,B,C,D,E), X) .
 
 ast_edge(T, class(A,B,C), X) :- ast_edge(T,classDefT(A,B,C,_), X) .
 ast_edge(T, method(A,B,C,D,E,F,G), X) :- ast_edge(T,methodDefT(A,B,C,D,E,F,G), X) .
