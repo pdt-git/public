@@ -29,7 +29,6 @@ public class MultiFragForLoopInitializerTest extends FactGenerationTest {
     public void setUp() throws Exception {
         
         super.setUp();
-        Debug.setDebugLevel("DEBUG");
         //install test workspace
         ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
         File r = l.resolve("testdata-roundtrip.zip");

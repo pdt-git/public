@@ -24,7 +24,7 @@ public class PredicatePropertyTest extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
-        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
+        ;
     }
 
     public synchronized void testIt() throws Throwable {

@@ -28,7 +28,6 @@ public class ConsultServiceTest extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
-        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
         final int port = 5624;
         super.setUp();
 

@@ -20,7 +20,6 @@ public class ConsultOutputStreamTest extends TestCase {
      * @see TestCase#setUp()
      */
     protected void setUp() throws Exception {
-        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
         socket = new SocketClient("localhost",PORT);
     }
 

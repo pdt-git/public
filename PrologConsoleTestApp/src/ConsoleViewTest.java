@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ConsoleViewTest {
     public static void main(String[] args) throws IOException {
-        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
         System.out.println(System.getProperty("java.library.path"));
         Shell shell = new Shell();
         shell.setLayout(new FillLayout());

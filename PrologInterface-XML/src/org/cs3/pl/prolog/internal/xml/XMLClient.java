@@ -511,7 +511,7 @@ public class XMLClient implements Reusable {
      */
     public static void main(String[] args) throws XMLStreamException,
             IOException {
-        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
+        
         final XMLClient client = new XMLClient(9944);
         client.connect();
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));

@@ -212,7 +212,7 @@ public class PrologInterfaceServer extends MessagingServerLoggingWrapper
 //                new FileOutputStream(logFile));
 //        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
 
-        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
+        
         server = new MessagingServerLoggingWrapper();
         Logger logger = new Logger("server");
         logger.setDebug(true);
