@@ -56,6 +56,10 @@ public abstract class PrologInterfaceFactory {
     
     public File ensureInstalled(String res, Class clazz){
         File f = locator.resolve(res);
+        //XXX only temporarily! this should be removed for better performance. --lu
+        if(f.exists()){
+            f.delete();
+        }
         if (!f.exists()){
             f.getParentFile().mkdirs();
             try {
