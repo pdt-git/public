@@ -34,7 +34,7 @@ public class TimeTrackerTest extends TestCase {
 		}
 		
 		public void notify(TimeEvent time) {
-			Log = Log + "Time message received. Minutes = "+time.getMinutes()+"; Seconds = "+time.getSeconds();
+			Log = Log + "Time message received. Minutes = "+time.getMinutes()+"; Seconds = "+time.getSeconds()+"\n";
 		}
 		
 	}
@@ -51,27 +51,63 @@ public class TimeTrackerTest extends TestCase {
 		ticker.addObserver(observer);
 		ticker.start();
 		
+		System.out.println("STARTING the TimeTicker now and will wait 5 seconds.");
 		Thread sleeper = new Thread();
 		try 
 		{
-			Thread.sleep(5000);
+			Thread.sleep(4800);
+		} catch(Exception e) { e.printStackTrace(); }
+		
+		System.out.println("PAUSING the Ticker now, waiting 2 seconds.");
+		ticker.pause();
+		
+		try
+		{
+			Thread.sleep(1800);
+		} catch(Exception e) { e.printStackTrace(); }
+		
+		System.out.println("RESUMING the Ticker for 4 seconds.");
+		ticker.resume();
+		
+		try 
+		{
+			Thread.sleep(3800);
+		} catch(Exception e) { e.printStackTrace(); }		
+	
+		System.out.println("STOPPING the Ticker now.");
+		ticker.stop();
+		
+		try
+		{
+			Thread.sleep(500);
 		} catch(Exception e) { e.printStackTrace(); }
 	}
 	
-	public void testThisUnit() throws Exception 
+	public void testObserver() throws Exception 
 	{
 		String ObserverTestString = 
 				"TestTimeObserver started.\n" 
-			+	"Time message received. Minutes = 3; Seconds = 0" 	
-			+	"Time message received. Minutes = 2; Seconds = 59" 	
-			+	"Time message received. Minutes = 2; Seconds = 58" 	
-			+	"Time message received. Minutes = 2; Seconds = 57" 	
-			+	"Time message received. Minutes = 2; Seconds = 56";
-		
-		String TimeTickerTestString = 
-				"Started.\n";
-		
+			+	"Time message received. Minutes = 3; Seconds = 0\n" 	
+			+	"Time message received. Minutes = 2; Seconds = 59\n" 	
+			+	"Time message received. Minutes = 2; Seconds = 58\n" 	
+			+	"Time message received. Minutes = 2; Seconds = 57\n" 	
+			+	"Time message received. Minutes = 2; Seconds = 56\n"
+			+	"Time message received. Minutes = 2; Seconds = 55\n"
+			+	"Time message received. Minutes = 2; Seconds = 54\n"
+			+	"Time message received. Minutes = 2; Seconds = 53\n"
+			+	"Time message received. Minutes = 2; Seconds = 52\n";
+			
 		assertEquals("Observer Test missed.", ObserverTestString, observer.Log);
+	}
+	
+	public void testTicker() throws Exception
+	{
+		String TimeTickerTestString = 
+				"Started.\n"
+			+	"Paused.\n"
+			+ 	"Resumed.\n"
+			+	"Stopped.\n";
+	
 		assertEquals("Time Ticker Test missed.", TimeTickerTestString, ticker.Log);
 	}
 	

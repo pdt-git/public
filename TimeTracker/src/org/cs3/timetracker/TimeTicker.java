@@ -40,14 +40,17 @@ public class TimeTicker  {
 	{
 		time.setMinutes(Seconds / 60);
   		time.setSeconds(Seconds - ((Seconds / 60) * 60));
+  		Seconds--;
+
+  		if (Seconds == 0) {
+  			stop();
+  		}
 
   		Iterator i = observers.iterator();
   		while (i.hasNext()) {
   			ITimeObserver a = (ITimeObserver) i.next();
   			a.notify(time);
   		}
-  		  		
-  		Seconds--;	
 	}
 
 	public TimeTicker()
@@ -61,12 +64,13 @@ public class TimeTicker  {
 		};
 				
 		t = new Timer(0, action);
-		t.setRepeats(true);
+		t.setRepeats(false);
 	}
 	
 	public void start()
 	{
 		Seconds = 180;
+		t.setRepeats(true);
 		t.setDelay(1000);
 		t.start();
 		
@@ -75,6 +79,7 @@ public class TimeTicker  {
 	
 	public void stop()
 	{
+		t.setRepeats(false);
 		t.stop();
 		Seconds = 0;
 		Log = Log + "Stopped.\n";
