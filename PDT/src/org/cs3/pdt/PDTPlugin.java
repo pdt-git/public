@@ -2,6 +2,7 @@ package org.cs3.pdt;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -224,9 +225,15 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             PrologInterfaceFactory factory = PrologInterfaceFactory
                     .newInstance(impl);
             factory.setResourceLocator(getResourceLocator(PDT.LOC_PIF));
-            prologInterface = factory.create();
-
+            prologInterface = factory.create();            
             reconfigurePrologInterface();
+            registerHooks();
+            try {
+                prologInterface.start();
+            } catch (IOException e) {
+                Debug.report(e);
+                throw new RuntimeException(e);
+            }
         }
         return prologInterface;
     }
@@ -274,17 +281,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             }
         }
         try {
-            String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL,
-                    "WARNING");
-            Debug.setDebugLevel(debugLevel);
-            String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE,
-                    null);
-            if(logFileName!=null && ! logFileName.equals("")){
-                File logFile =  new File(logFileName);
-                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-                        new FileOutputStream(logFile, true));
-                Debug.setOutputStream(new PrintStream(bufferedOutputStream));
-            }
+            reconfigureDebugOutput();
            
             reconfigurePrologInterface();
 
@@ -296,6 +293,23 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             Debug.report(e);
         }
 
+    }
+
+    private void reconfigureDebugOutput() throws FileNotFoundException {
+        String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL,
+                "WARNING");
+        Debug.setDebugLevel(debugLevel);
+        String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE,
+                null);
+        if(logFileName!=null && ! logFileName.equals("")){
+            System.out.println("debug output is written to: "+logFileName);
+            File logFile =  new File(logFileName);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+                    new FileOutputStream(logFile, true));
+            Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+        }else{
+            Debug.setOutputStream(System.err);
+        }
     }
 
     private void reconfigurePrologInterface() {
@@ -443,27 +457,24 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     public void start(BundleContext context) throws Exception {
         try {
             super.start(context);
-            initOptions();
+          
 
-            /*
-             * XXX not sure if this is the "eclipse way(tm)" to go, but we need
-             * to make sure that the pdt preferences are correctly initilized
-             * before proceeding.
-             */
-            getPluginPreferences();
-            reconfigure();
-            PrologInterface pif = getPrologInterface();
-            ConsultService metadataConsultService = pif
-                    .getConsultService(PDT.CS_METADATA);
+        
+            reconfigureDebugOutput();
+//            PrologInterface pif = getPrologInterface();
+//            ConsultService metadataConsultService = pif
+//                    .getConsultService(PDT.CS_METADATA);
             //metadataConsultService.setRecording(true);
-            registerHooks();
-            prologInterface.start();
+            
         } catch (Throwable t) {
             Debug.report(t);
         }
     }
 
     public Option[] getOptions() {
+        if(options==null){
+            initOptions();
+        }
         return this.options;
     }
 
@@ -593,25 +604,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return getPrologInterface();
     }
 
-    private String getLibDir() {
-        String proj;
-        String cp;
-
-        String sep = System.getProperty("file.separator");
-        try {
-            if (getLocation() != null) {
-                return getLocation() + sep + "lib";
-            }
-        } catch (IOException e) {
-            // ok, then the other way
-        }
-
-        String resName = "org/cs3/pdt/PDTPlugin.class";
-        URL url = ClassLoader.getSystemClassLoader().getResource(resName);
-        String path = url.getFile();
-
-        return path.substring(0, path.indexOf(resName)) + sep + "lib";
-    }
+   
+   
 
     private String getLocation() throws IOException {
         URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
