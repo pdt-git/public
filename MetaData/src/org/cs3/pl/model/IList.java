@@ -1,6 +1,6 @@
 /*
  */
-package model;
+package org.cs3.pl.model;
 
 /**
  */

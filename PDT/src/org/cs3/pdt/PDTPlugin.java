@@ -11,6 +11,7 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.model.PLRuntime;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -88,6 +89,8 @@ public class PDTPlugin extends AbstractUIPlugin {
     private ResourceBundle resourceBundle;
 
     private RecordingConsultService workspaceConsultService;
+
+    private PLRuntime runtime;
 
  
 
@@ -464,6 +467,21 @@ public class PDTPlugin extends AbstractUIPlugin {
         } finally {
             super.stop(context);
         }
+    }
+
+    /**
+     * @return
+     */
+    public PLRuntime getPLRuntime() {
+        if(runtime==null){
+            try {
+                runtime = new PLRuntime(getPrologInterface());
+            } catch (IOException e) {
+                Debug.report(e);
+                throw new RuntimeException(e);
+            }
+        }
+        return runtime;
     }
 
     //    public IFile getActiveFile() {

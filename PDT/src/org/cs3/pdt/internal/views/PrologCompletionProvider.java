@@ -104,8 +104,8 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			Debug.report(e);
 		}
 		
-		String completion = completions.isEmpty() ? "": (String) completions.first();
-		if(elems.length==0){
+		String completion = completions==null||completions.isEmpty() ? "": (String) completions.first();
+		if(elems==null||elems.length==0){
 			r.newLine=line;
 			r.newPos=pos;			
 		}

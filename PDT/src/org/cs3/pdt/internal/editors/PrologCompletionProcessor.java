@@ -176,8 +176,8 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
             String prefix, List proposals) throws BadLocationException {
 
         Set unique = new HashSet();
-        Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC)
-                .createImage();
+        Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+                
         if (PLEditor.isVarPrefix(prefix) || prefix.length() == 0) {
             int l = begin == 0 ? begin : begin - 1;
             String proposal = null;

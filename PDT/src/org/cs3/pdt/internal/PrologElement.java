@@ -9,7 +9,7 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 public class PrologElement extends PrologElementData implements IAdaptable {
 
 	
-	protected int imageDescriptorId;
+	protected String imageDescriptorId;
 
 	
 	public static PrologElement[] fromData(PrologElementData[] data){
@@ -44,7 +44,7 @@ public class PrologElement extends PrologElementData implements IAdaptable {
 			}
 
 			public ImageDescriptor getImageDescriptor(Object object) {
-				return ImageRepository.getImage(imageDescriptorId); //$NON-NLS-1$ 
+				return ImageRepository.getImageDescriptor(imageDescriptorId); //$NON-NLS-1$ 
 			}
 
 			public String getLabel(Object o) {

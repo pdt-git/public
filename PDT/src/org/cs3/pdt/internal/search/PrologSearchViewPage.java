@@ -25,7 +25,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public class PrologSearchViewPage extends AbstractTextSearchViewPage {
 
 	private TextSearchTableContentProvider fContentProvider;
-	protected static final Image IMAGE = ImageRepository.getImage(ImageRepository.PE_PUBLIC).createImage();
+	protected static final Image IMAGE = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 
 	public PrologSearchViewPage(){
 		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);

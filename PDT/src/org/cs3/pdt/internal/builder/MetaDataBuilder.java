@@ -227,7 +227,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         });
     }
 
-    private void forget(IFile file) {
+    private void forget(IFile file) {        
         ConsultService meta = PDTPlugin.getDefault().getConsultService(
                 PDT.CS_METADATA);
         

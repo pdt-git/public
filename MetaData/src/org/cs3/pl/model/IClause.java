@@ -1,6 +1,6 @@
 /*
  */
-package model;
+package org.cs3.pl.model;
 
 /**
  */
@@ -9,10 +9,8 @@ public interface IClause extends IPrologElement {
     public final static int RULE=1;
     public final static int FACT=2;
     public int getClauseType();
+    public String getClauseReference();
     public IPredicate getPredicate();
     public ITerm getHead();
-    public IGoal[] getBody();
-    public boolean isFact();
-    public boolean isRule();
-    public boolean isDirective();
+    public ITerm getBody();        
 }

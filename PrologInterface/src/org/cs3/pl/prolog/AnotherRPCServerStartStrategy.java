@@ -1,15 +1,14 @@
-package org.cs3.pdt.internal;
+package org.cs3.pl.prolog;
 
 import java.io.File;
 import java.io.InputStream;
 
-import org.cs3.pdt.PDT;
+//import org.cs3.pdt.PDT;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.ServerStartStrategy;
 
-public class PDTServerStartStrategy implements ServerStartStrategy {
+public class AnotherRPCServerStartStrategy implements ServerStartStrategy {
 
 		
     public class _InputStreamPump extends InputStreamPump {
@@ -30,7 +29,7 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 	 * @param swiHome
 	 * @param classPath
 	 */
-	public PDTServerStartStrategy(String swiHome, String classPath, String debugLevel) {
+	public AnotherRPCServerStartStrategy(String swiHome, String classPath, String debugLevel) {
 		super();
 		this.swiHome = swiHome;
 		this.classPath = classPath;
@@ -45,9 +44,7 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 		String dir = isWindoof ? swiHome+"\\bin" 
 					: ".";			
 		
-		String cmdline = "java -D"+PDT.PREF_DEBUG_LEVEL+"="
-				+debugLevel
-				+" -classpath "+classPath
+		String cmdline = "java -classpath "+classPath
 				+ " org.cs3.pl.prolog.internal.PrologInterfaceServer " + port;
 				
 		Debug.debug("Starting server with " + cmdline);

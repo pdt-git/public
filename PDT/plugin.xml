@@ -61,6 +61,13 @@
             category="org.cs3.pdt"
             name="Prolog Console"
             id="org.cs3.pdt.internal.views.PrologConsoleView"/>
+      <view
+            allowMultiple="false"
+            class="org.cs3.pdt.internal.views.NavigatorView"
+            icon="icons/sample.gif"
+            category="org.cs3.pdt"
+            name="Prolog Navigator"
+            id="org.cs3.pdt.internal.views.NavigatorView"/>
    </extension>
  <extension
        point="org.eclipse.core.runtime.preferences">
@@ -188,4 +195,17 @@
 			class="org.cs3.pdt.internal.search.PrologSearchViewPage">
 		</viewPage>
 	</extension>
+<extension
+      point="org.eclipse.ui.perspectiveExtensions">
+   <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+      <view
+            ratio="0.5"
+            relationship="right"
+            relative="org.eclipse.ui.views.TaskList"
+            id="org.cs3.pdt.internal.views.NavigatorView"/>
+   </perspectiveExtension>
+</extension>
+<extension
+      point="org.cs3.pdt.hooks">
+</extension>
 </plugin>

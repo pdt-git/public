@@ -1,12 +1,20 @@
-module(consult_server,[
+:- module(consult_server,[
 	consult_server/1,
-	consulted_symbol/1	
+	consulted_symbol/1,
+	starts_at/2
 ]).
 % Author: Lukas
 % Date: 23.10.2004
 :- use_module(library(socket)).
 
 :- dynamic zombie_symbol/1.
+:- dynamic offset/2.
+
+starts_at(Symbol,Line):-	
+    (	offset(Symbol,Line)
+    ->	true
+    ;	Line is 0
+    ).
 
 consulted_symbol(Symbol) :-
 	source_file(Symbol),
@@ -280,10 +288,23 @@ codes_or_eof_to_atom(end_of_file,_):-
 codes_or_eof_to_atom(Codes,Atom):-
 	atom_codes(Atom,Codes).
 	
-load_stream(Symbol,Stream):-
-	load_files(Symbol,[stream(Stream)]),!,true
-	; 
-	throw(error(pipi,kaka)).
+load_stream(Symbol,Stream):-    
+    (	
+    	retractall(offset(Symbol,_)),
+    	line_count(Stream,Line),
+    	assert(offset(Symbol,Line)),
+    	user:load_files(Symbol,[stream(Stream)])
+    	%new_memory_file(Handle),
+    	%open_memory_file(Handle, write, WriteStream),
+    	%copy_stream_data(Stream,WriteStream),
+    	%close(WriteStream),
+    	%open_memory_file(Handle, read, ReadStream),
+    	%user:load_files(Symbol,[stream(ReadStream)]),
+    	%close(ReadStream),
+    	%free_memory_file(Handle)
+	->	true
+	; 	throw(error(pipi,kaka))
+	).
 	
 count_thread(Prefix,Count):-
 	findall(A,(
@@ -316,12 +337,12 @@ request_line(InStream, OutStream, Prompt, Line):-
 	read_line_to_codes(InStream,LineCodes),
 	codes_or_eof_to_atom(LineCodes,Line),
 	check_eof(Line),
-	thread_self(Self),
-	format("~a: <<< ~a~n",[Self,Line]).
+ 	thread_self(Self),
+ 	format("~a: <<< ~a~n",[Self,Line]).
 
 
 my_read_term(InStream,Term,Options):-
-	read_term(InStream,Term,Options),	
+	read_term(InStream,Term,Options),
 	thread_self(Self),
 	write(Self),write(': <<< '),write(Term),nl.
 	

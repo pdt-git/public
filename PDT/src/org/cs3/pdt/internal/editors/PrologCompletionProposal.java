@@ -33,8 +33,8 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	private PrologElementData data;
 	/** The additional info of this proposal */
 	//private String fAdditionalProposalInfo;
-    private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC).createImage();
-    private static final Image hiddenImage = ImageRepository.getImage(ImageRepository.PE_HIDDEN).createImage();
+    private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+    private static final Image hiddenImage = ImageRepository.getImage(ImageRepository.PE_HIDDEN);
     private String postfix;
     private Image image;
     private IContextInformation context;

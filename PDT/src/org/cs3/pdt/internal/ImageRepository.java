@@ -6,28 +6,50 @@
  */
 package org.cs3.pdt.internal;
 
+import java.net.URL;
+import java.util.HashMap;
+
+import org.cs3.pdt.PDTPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * @author xproot
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * 
+ * To change the template for this generated type comment go to Window -
+ * Preferences - Java - Code Generation - Code and Comments
  */
 public class ImageRepository {
-	
-	public final static int PE_PUBLIC = 0;
-	public final static int PE_HIDDEN = 1;
-	//public final static int PE_MULTIFILE =2;
-	public final static int PE_VARIABLE =3;
-	
-	private final static ImageDescriptor[] images = {
-			ImageDescriptor.createFromFile(PrologElement.class, "icons/public_co.gif"),
-			ImageDescriptor.createFromFile(PrologElement.class, "icons/protected_co.gif"),
-			ImageDescriptor.createFromFile(PrologElement.class, "icons/private_co.gif"),
-			ImageDescriptor.createFromFile(PrologElement.class, "icons/variable.gif")};
 
-	public static final ImageDescriptor getImage(int id){
-		return images[id];
-	}
+    public final static String PE_PUBLIC = "public_co.gif";
+
+    public final static String PE_HIDDEN = "protected_co.gif";
+
+    public final static String PE_MULTIFILE = "multifile.gif";
+
+    public final static String PE_VARIABLE = "variable.gif";
+
+    public final static String PE_MODULE = "module_2.gif";
+
+    public final static String PE_CLAUSE = "clause.gif";
+
+    public final static String PE_TERM = "term.gif";
+
+    private static HashMap cache = new HashMap();
+
+    public static final String PE_ATOM = "atom.gif";
+
+    static final ImageDescriptor getImageDescriptor(String icon) {
+        URL url = PDTPlugin.getDefault().getBundle().getEntry("/icons/" + icon);
+        return ImageDescriptor.createFromURL(url);
+    }
+
+    public static final Image getImage(String icon) {
+        Image image = (Image) cache.get(icon);
+        if (image == null) {
+            image = getImageDescriptor(icon).createImage();
+            cache.put(icon, image);
+        }
+        return image;
+    }
 }

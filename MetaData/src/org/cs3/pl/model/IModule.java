@@ -1,11 +1,10 @@
 /*
  */
-package model;
+package org.cs3.pl.model;
 
 /**
  */
 public interface IModule extends IPrologElement{
-    public ISourceFile getSourceFile();
-    public boolean isDefault();
     public IPredicate[] getPredicates();
+    public ISourceFile getSourceFile();
 }

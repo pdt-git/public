@@ -212,7 +212,7 @@ public class SocketPrologInterface implements IPrologInterface {
             SocketClient client = new SocketClient(socket);
             client.setPool(pool);
             return new SocketSession(client);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
     }

@@ -18,6 +18,8 @@ public class SocketSession implements PrologSession {
 
     private boolean queryActive;
 
+    private String lastQuery;
+
     public SocketSession(SocketClient client) {
         this.client = client;
     }
@@ -60,17 +62,21 @@ public class SocketSession implements PrologSession {
             client.writeln(SocketClient.QUERY);
             client.readUntil(SocketClient.GIVE_TERM);
             query = query.trim();
+            
             if (query.endsWith(".")) {
+                this.lastQuery=query;
                 client.writeln(query);
             } else {
+                this.lastQuery=query+".";
                 client.writeln(query + ".");
             }
+            
             queryActive = true;
             solution = read_solution();
 
         } catch (IOException e) {
             client.unlock();
-            throw new PrologException(e);
+            throw new PrologException("got io trouble. last query was: "+lastQuery,e);
         }
         if (solution == null) {
             endQuery();
@@ -95,8 +101,10 @@ public class SocketSession implements PrologSession {
             client.readUntil(SocketClient.GIVE_TERM);
             query = query.trim();
             if (query.endsWith(".")) {
+                this.lastQuery=query;
                 client.writeln(query);
             } else {
+                this.lastQuery=query+".";
                 client.writeln(query + ".");
             }
             Vector results = new Vector();
@@ -108,7 +116,7 @@ public class SocketSession implements PrologSession {
             }
             return (Hashtable[]) results.toArray(new Hashtable[0]);
         } catch (IOException e) {
-            throw new PrologException(e);
+            throw new PrologException("got io problems. last query was: "+lastQuery,e);
         } finally {
             client.unlock();
         }
@@ -136,7 +144,7 @@ public class SocketSession implements PrologSession {
                 endQuery();
             }
         } catch (IOException e) {
-            throw new PrologException(e);
+            throw new PrologException("got io problems. last query was: "+lastQuery,e);
         } finally {
             client.unlock();
         }
@@ -160,7 +168,8 @@ public class SocketSession implements PrologSession {
                 }
                 if (line.startsWith(SocketClient.ERROR)) {
                     throw new PrologException("Peer reported an error:"
-                            + line.substring(SocketClient.ERROR.length()));
+                            + line.substring(SocketClient.ERROR.length())+"\n" +
+                            		"Last query was: "+lastQuery);
                 }
                 if (SocketClient.END_OF_SOLUTION.equals(line)) {//yes
                     return result;

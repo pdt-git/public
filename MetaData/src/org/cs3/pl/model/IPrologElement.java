@@ -1,20 +1,25 @@
 /*
  */
-package model;
+package org.cs3.pl.model;
 
 import java.util.List;
 
 /**
+ * <b>IMPORTANT 
+ * <p>
+ *As part of the contract of this interface, nodes MUST implement the equals method!</b> 
+ *<p>Nodes are only handles to the actual objects they represent.
+ *Tto handles should be concidered equal if and only if they are handles 
+ *to one and the same object. 
  */
 public interface IPrologElement {    
-  
     
     /**
      * accept a listener coming along a given path.
      * @param visitor the visitor
      * @param path the nodes already visited by the visitor.
      */
-    public void accept(IPrologElementVisitor visitor, List path);
+    public void accept(IPrologElementVisitor visitor, List path, Object role);
     
     /**
      * same as <code>accept(visitor, emptyList)</code>.
@@ -39,7 +44,7 @@ public interface IPrologElement {
      */
     public boolean isSynthetic();
     
-    public String getLable();
+    public String getLabel();
     
     /**
      * The element's source.
