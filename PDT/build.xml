@@ -21,12 +21,12 @@
 	
 	<target name="dist" description="generate the distribution">
 			<depjar name="Common" />
-			<depjar name="RaPlaRPC" />
+<!--			<depjar name="RaPlaRPC" />-->
 			<depjar name="Console" />
 			<depjar name="MetaData" />
 			<depjar name="PrologInterface" />		
 			<depjar name="PrologInterface-Socket" />		
-			<depjar name="PrologInterface-XML" />		
+			<!--<depjar name="PrologInterface-XML" />		-->
 		<delete failonerror="false" dir="PDT/engine"></delete>
 		<copydir dest="PDT/engine" src="PDT/pl"></copydir>
 		<!--<library name="Console" />-->
