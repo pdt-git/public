@@ -1,0 +1,188 @@
+/***************************************************************************
+Dies ist eine Text-Darstellung der von java2jrub generierten Fakten.
+Diese Datei enthält keine Prolog Fakten oder Regeln, sondern nur deren Beschreibungen.
+
+Die Dateien: "generalRules.jrub" und "high_level_api.jrub" enthalten Regeln, die auf dieser Darstellung aufbauen.
+
+
+1) Auf dieser Low-Level API können Abstractionen als Prolog Regeln beschrieben werden.
+In der Datei high_level_api.jrub befinden sich bereits einige nützliche OO-Abstractionen.
+Beispiel:
+    subtype(?sub, ?super) :- extends(?sub, ?super).
+    subtype(?sub, ?super) :- extends(?sub, ?tmp), extends(?tmp, ?super).
+    subtype(?sub, ?super) :- implements(?sub, ?super).
+    subtype(?sub, ?super) :- implements(?sub, ?tmp), implements(?tmp, ?super).
+
+
+2) Oder es können Conditional-Transformations beschrieben werden.
+Syntax: 
+    ct(name,[pre1, pre2, ...], [post1, post2, ...]).
+Die Terme pre1, pre2 sind konjunktiv verknüpft. Negation ist durch not() dargestellt.
+
+Beispiel:
+        ct(CTname, 
+        [
+            classDef(?class, ?owner, C),
+            varDef(?var, ?class, ?type, ?fieldname, ?init),
+            not(methodDef(?meth, ?class, get<?fieldname>, [], ?type, [], ?anybody))
+        ],[
+            methodDef(#newMeth, ?class, get<?fieldname>, [], ?type, [], #body),
+            block(#body, ?newMeth, [#ret]),
+            return(#ret, ?body, #expr),
+            ident(#expr, ?ret, ?fieldname, ?var)
+        ]).
+
+********************************************************************************+
+
+//
+// General 
+//
+
+// every fact of the AST can be examined, by the following rule:
+// f.e: tree(?ID, ?PID, classDef) :- classDef(?ID, ?PID, ?).
+tree(#id, #parent, type) :- type(#id, #parent, ...).
+
+
+modifier(#unit, modifier).
+        - modifier may be public, private ...
+
+TYPE may be 
+    - Basic-Type: 
+      type(basic, int, 0)
+      type(basic, double, 0),
+      ...
+    - Class-Type
+      type(class, classID, 0)
+
+    - Array-Type
+      type(?, ?, dim)
+
+
+//
+// Package
+//
+
+package(#id, fullname).
+
+//
+// Top-Level
+//
+
+toplevel(#id, #package, filename, [#defs]).
+        - #defs may be ID's of imports or classDef
+import(#id, #topLevel, importName).
+        - importName may be something like: java.io.*
+
+//
+// Class-Facts
+//
+
+classDefT(#id, #owner, name, [defs]).             
+        - 1 mal / Klasse
+        - owner may be a package, classDef or methodDef
+extends(#class, #extendedClass).      
+        - 0,1 mal / Klasse
+implements(#class, #interfaceClass).  
+        - 0..N mal / Klasse
+        - #interfaceClass is the ID pointing to a classDef with modifier "interface"
+
+//
+// Class-Members
+//
+
+methodDefT(#id, #classDef, name, [#varDef], TYPE, [#exceptions], #body).
+        - #exceptions may be ID of classDef
+        - #body may be ID of block
+
+fieldDefT(#id, #parent, TYPE, name, #init).
+        - #parent is classDef 
+
+paramDefT(#id, #parent, TYPE, name).
+        - #parent is methodDefT
+
+
+//
+// Method-Body
+//
+
+localDefT(#id, #parent, #encl, TYPE, name, #init).
+
+blockT(#id, #parent, #encl, [#statements]).
+        - #parent may be ID of a methodDef, classDef, or other MethodBody-Fact
+        - #statements may be ID of MethodBody-Facts
+
+selectT(#id, #parent, #encl, name, #selected, #symbol).
+
+identT(#id, #parent, #encl, name, #symbol).
+
+literalT(#id, #parent, #encl, TYPE, value).
+
+execT(#id, #parent, #encl, #statement).
+
+breakT(#id, #parent, #encl, label, #target).
+
+continueT(#id, #parent, #encl, #label, #target).
+
+returnT(#id, #parent, #encl, #exec).
+
+doLoopT(#id, #parent, #encl,, #condition, #body).
+        - #parent may be ID of block or other MethodBody-Fact
+        - #body may be ID of block or other MethodBody-Fact
+
+whileLoopT(#id, #parent, #encl, #condition, #body).
+
+forLoopT(#id, #parent, #encl, [#init], #condition, [#step], #body).
+
+labelledT(#id, #parent, #encl, #body, name).
+
+switchT(#id, #parent, #encl, #selector, [#cases]).
+
+caseT(#id, #parent, #encl, #label, #body).
+
+defaultT(#id, #parent, #encl, #body).
+
+synchronizedT(#id, #parent, #encl, #lock, #body).
+
+tryT(#id, #parent, #encl, #body, [#catcher], #finalizer).
+
+catch(#id, #parent, #encl, #param, #body).
+
+ifT(#id, #parent, #encl, #condition, #ifPart, #thenPart).
+    - z.B. "if(a==b) a++; else a--"
+
+conditionalT(#id, #parent, #encl, #condition, #ifPart, #thenPart).
+    - z.B. "return (a==b) ? a++ : a--;
+
+throwT(#id, #parent, #encl, #exec).
+
+applyT(#id, #parent, #encl, #ident, name,[#arg],#method).
+
+newClassT(#id, #parent, #encl, #methodDef, [#arg], TYPE, #def, #enclosing).
+
+newArrayT(#id, #parent, #encl, [#dims], [#elems], TYPE, dim).
+
+assignT(#id, #parent, #encl, #lhs, #rhs).
+
+operationT(#id, #parent, #encl, [#args], operatorName, pos).
+
+typeCastT(#id, #parent, #encl, TYPE, #expr).
+
+typeTestT(#id, #parent, #encl, TYPE, #expr).
+
+indexedT(#id, #parent, #encl, #index, #indexed).
+
+
+//
+// Obsolete
+//
+typeIdentT(#id, #parent, #encl, TYPE).
+
+typeArrayT(#id, #parent, #encl, TYPE).
+
+assignopT(#id, #parent, #encl, #lhs, opertatorName, #rhs).
+
+operationT(#id, #parent, #encl, [#args], ++).
+
+operationT(#id, #parent, #encl, [#args], --).
+
+*/

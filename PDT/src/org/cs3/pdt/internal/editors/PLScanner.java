@@ -40,9 +40,6 @@ public class PLScanner extends RuleBasedScanner {
                     keywords.add(name);
                 }
                 plDynamicPredicates = (String[])keywords.toArray(new String[0]);
-            } catch (IOException e) {
-                plDynamicPredicates = new String[0];
-                Debug.report(e);
             } catch (PrologException e) {
                 plDynamicPredicates = new String[0];
                 Debug.report(e);
@@ -69,9 +66,6 @@ public class PLScanner extends RuleBasedScanner {
                 }
                 
                 plKeywords = (String[])keywords.toArray(new String[0]);
-            } catch (IOException e) {
-                plKeywords = new String[0];
-                Debug.report(e);
             } catch (PrologException e) {
                 plKeywords = new String[0];
                 Debug.report(e);

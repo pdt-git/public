@@ -5,6 +5,9 @@ package org.cs3.pdt;
  */
 public interface PDT {
 
+    public static final String EP_HOOKS = "hooks";
+    public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
+    
     /**
      * The prolog project nature.
      * <p>

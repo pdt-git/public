@@ -27,7 +27,7 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 public abstract class AbstractPrologInterface implements PrologInterface {
     private List bootstrapLibraries = new Vector();
 
-    public List getBootstrapLIbraries(){
+    public List getBootstrapLibraries(){
         return bootstrapLibraries;
     }
     

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.cs3.jlmp"
+   name="JTransformer"
+   version="2.1.0"
+   provider-name="http://roots.iai.uni-bonn.de"
+   class="org.cs3.jlmp.JLMPPlugin">
+
+   <runtime>
+      <library name="JTransformer_NG.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.cs3.pdt"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.jface.text"/>
+   </requires>
+
+
+ <extension
+         id="JLMPProjectNature"
+         name="JLMP Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.cs3.jlmp.natures.JLMPProjectNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.cs3.jlmp.JLMPProjectBuilder">
+      </builder>
+   </extension>
+   <extension
+         id="JLMPProjectBuilder"
+         name="JLMPProjectBuilder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="org.cs3.jlmp.builders.JLMPProjectBuilder">
+         </run>
+      </builder>
+   </extension>
+     <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="JLMPProjectObjectContribution">
+         <action
+               label="JTransformer Nature"
+               style="toggle"
+               tooltip="Assignes/retracts JLMP nature to/from a project"
+               class="org.cs3.jlmp.actions.JLMPNatureAction"
+               id="JLMPNatureAction">
+         </action>
+      </objectContribution>
+      <objectContribution
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            id="ProjectObjectExtension">
+         <action
+               label="Export project factbase"
+               class="org.cs3.pl.export.FactbaseExport"
+               tooltip="Create a new factbase for this project and save it into a file."
+               style="push"
+               id="org.cs3.jlmp.export.factbaseexport">
+         </action>
+      </objectContribution>      
+   </extension>
+   <extension
+         id="JLMPProjectInitializer"
+         name="JLMP Project Initializer"
+         point="org.eclipse.ui.startup">
+      <startup
+            class="org.cs3.jlmp.startup.JLMPProjectInitializer">
+      </startup>
+   </extension>
+   <extension
+         point="org.cs3.pdt.bootstrapContribution">
+      <contribution path="engine/main.pl"/>
+   </extension>
+   <extension
+         point="org.cs3.pdt.hooks">
+      <hook
+            class="org.jlmp.internal.hooks.ReloadHook"
+            id="ReloadHook"/>
+   </extension>
+</plugin>

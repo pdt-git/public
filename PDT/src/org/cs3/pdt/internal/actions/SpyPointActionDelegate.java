@@ -42,12 +42,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
 
                 PLEditor editor = (PLEditor) plugin.getActiveEditor();
                 PrologSession session = null;
-                try {
-                    session = plugin.getPrologInterface().getSession();
-                } catch (IOException e) {
-                    Debug.report(e);
-                    return;
-                }
+                session = plugin.getPrologInterface().getSession();
                 String pred;
 
                 PrologElementData data;

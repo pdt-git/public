@@ -4,6 +4,7 @@ package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.Option;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
@@ -59,8 +60,8 @@ public class Factory extends PrologInterfaceFactory {
         ensureInstalled(MAIN_PL, Factory.class);
 
         SocketPrologInterface pif = new SocketPrologInterface(this);
-        pif.getBootstrapLIbraries().add(SERVER_PL);
-        pif.getBootstrapLIbraries().add(MAIN_PL);
+        pif.getBootstrapLibraries().add(Util.prologFileName(getResourceLocator().resolve(SERVER_PL)));
+        pif.getBootstrapLibraries().add(Util.prologFileName(getResourceLocator().resolve(MAIN_PL)));
         pif.setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
         for (int i = 0; i < options.length; i++) {
             pif.setOption(options[i].getId(), options[i].getDefault());

@@ -60,7 +60,7 @@ public class SocketServerStartAndStopStrategy implements
         sb.append(" -p library=");
         sb.append(engineDir);
         sb.append(" -g [");
-        List bootstrapLIbraries = pif.getBootstrapLIbraries();
+        List bootstrapLIbraries = pif.getBootstrapLibraries();
         for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
             String s = (String) it.next();
             sb.append("'");
@@ -79,6 +79,12 @@ public class SocketServerStartAndStopStrategy implements
         try {
 
             Process serverProcess = Runtime.getRuntime().exec(cmdline);
+            File logFile = Util.getLogFile("org.cs3.pdt.server.log");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile));
+            new _InputStreamPump(serverProcess.getErrorStream(), writer)
+                    .start();
+            new _InputStreamPump(serverProcess.getInputStream(), writer)
+                    .start();
             while (!Util.probePort(port)) {
                 try {
                     Thread.sleep(50);
@@ -86,12 +92,8 @@ public class SocketServerStartAndStopStrategy implements
                     Debug.report(e1);
                 }
             }
-            File logFile = Util.getLogFile("org.cs3.pdt.server.log");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile));
-            new _InputStreamPump(serverProcess.getErrorStream(), writer)
-                    .start();
-            new _InputStreamPump(serverProcess.getInputStream(), writer)
-                    .start();
+            
+
             return serverProcess;
         } catch (IOException e) {
             e.printStackTrace();

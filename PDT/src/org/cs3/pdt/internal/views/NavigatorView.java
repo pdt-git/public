@@ -80,12 +80,7 @@ public class NavigatorView extends ViewPart {
 		
         private void initializeRoots() {
             PrologInterface pif;
-            try {
-                pif = PDTPlugin.getDefault().getPrologInterface();
-            } catch (IOException e) {
-                Debug.report(e);
-                throw new RuntimeException(e);
-            }
+            pif = PDTPlugin.getDefault().getPrologInterface();
             roots=(INode[]) PrologNode.find(pif,"type(module)").toArray(new INode[0]);            
         }
         public Object getParent(Object child) {

@@ -46,6 +46,7 @@
       <import plugin="org.eclipse.search"/>
    </requires>
    <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
+   <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>
    
    <extension
          point="org.eclipse.ui.startup">
@@ -210,5 +211,9 @@
 </extension>
 <extension
       point="org.cs3.pdt.hooks">
+</extension>
+<extension
+      point="org.cs3.pdt.bootstrapContribution">
+   <contribution path="engine/main.pl"/>
 </extension>
 </plugin>

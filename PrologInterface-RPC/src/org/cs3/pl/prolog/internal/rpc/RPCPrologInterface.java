@@ -684,7 +684,7 @@ public class RPCPrologInterface implements PrologInterface {
   
     private List bootstrapLibraries = new Vector();
 
-    public List getBootstrapLIbraries(){
+    public List getBootstrapLibraries(){
         return bootstrapLibraries;
     }
     

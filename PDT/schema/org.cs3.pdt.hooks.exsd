@@ -47,7 +47,7 @@
                   fully qualified class name of a class implementing the org.cs3.pl.prolog.LifeCycleHook interface.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.cs3.pl.extension.IJTransformerObserver"/>
+                  <meta.attribute kind="java" basedOn="org.cs3.pl.LifeCycleHook"/>
                </appInfo>
             </annotation>
          </attribute>
@@ -62,6 +62,14 @@
             <annotation>
                <documentation>
                   Any string that is unique can serve as an identifier for a hook.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="key" type="string">
+            <annotation>
+               <documentation>
+                  An optional key identifying a PrologInterface instance created by the PDT.&lt;p&gt;
+This hook will be registered with all PIF instance that are created using the &lt;code&gt; org.cs3.pdt.PDTPlugin.getPrologInterface(String key)&lt;/code&gt; method with a matching &lt;code&gt;key&lt;/code&gt; argument. If this attribute is ommited, the hook is registered with every PIF created by the PDT.
                </documentation>
             </annotation>
          </attribute>

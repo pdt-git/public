@@ -40,11 +40,7 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
     public void run(IAction action) {
         PDTPlugin plugin = PDTPlugin.getDefault();
 		PrologInterface pif = null;
-		try {
-			pif = plugin.getPrologInterface();
-		} catch (IOException e) {
-			Debug.report(e);
-		}
+		pif = plugin.getPrologInterface();
 		 try {
              PrologSession session = pif.getSession();
              Map r = session.query("current_thread(A,B)");

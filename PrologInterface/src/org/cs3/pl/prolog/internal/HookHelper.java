@@ -22,9 +22,17 @@ public class HookHelper {
 
         public void run() {
             synchronized (hooks) {
+                /*
+                 * why clone AND sync?
+                 * ld: sync to make sure that hooks operation is serialized 
+                 * clone to make it possible to (un)register hooks in the hook 
+                 * methods - this would not be possible otherwise since the 
+                 * iterator would throw a ConcurrentModificationException.
+                 */
+                HashMap cloned = (HashMap) hooks.clone();
                 hookFilpFlop = !hookFilpFlop;
-                for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
-                    LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks
+                for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
+                    LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned
                             .get(it.next());
                     if (h.flipflop != hookFilpFlop) {
                         h.afterInit();
@@ -96,10 +104,20 @@ public class HookHelper {
     }
 
     public void onInit(PrologSession initSession) {
+        HashMap cloned=null;
         synchronized (hooks) {
+            cloned = (HashMap) hooks.clone();     
+            /*
+             * why clone AND sync?
+             * ld: sync to make sure that hooks operation is serialized 
+             * clone to make it possible to (un)register hooks in the hook 
+             * methods - this would not be possible otherwise since the 
+             * iterator would throw a ConcurrentModificationException.
+             */
+            
             hookFilpFlop = !hookFilpFlop;
-            for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
-                LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(it
+            for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
+                LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned.get(it
                         .next());
                 if (h.flipflop != hookFilpFlop) {
                     h.onInit(initSession);
@@ -125,10 +143,19 @@ public class HookHelper {
             
             if (s != null) {
                 synchronized (hooks) {
+                    /*
+                     * why clone AND sync?
+                     * ld: sync to make sure that hooks operation is serialized 
+                     * clone to make it possible to (un)register hooks in the hook 
+                     * methods - this would not be possible otherwise since the 
+                     * iterator would throw a ConcurrentModificationException.
+                     */
+                    
+                    HashMap cloned = (HashMap) hooks.clone();
                     hookFilpFlop = !hookFilpFlop;
-                    for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
+                    for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
                         String id = (String) it.next();
-                        LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks
+                        LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned
                                 .get(id);
                         if (h.flipflop != hookFilpFlop) {
                             try {

@@ -85,10 +85,6 @@ public interface PrologInterface {
      * create a consult service for an optional prefix.
      * <p>
      * 
-     * If the prolog interface features some optimisation for consulting
-     * large amounts of data, it may return a specific implementation
-     * of the IConsultService interface. Otherwise it should just
-     * return null.
      * 
      * @param prefix an optional prefix for the ConsultService that
      * will transparently prepended to all consulted filenames.
@@ -97,7 +93,7 @@ public interface PrologInterface {
     public abstract ConsultService getConsultService(String prefix);
 
     
-    public List getBootstrapLIbraries();
+    public List getBootstrapLibraries();
     
     public void setBootstrapLibraries(List l);
     /**

@@ -2,11 +2,13 @@ package org.cs3.pdt;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Vector;
 
 import org.cs3.pdt.internal.PDTPrologHelper;
 import org.cs3.pdt.internal.editors.PLEditor;
@@ -23,6 +25,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -54,8 +57,6 @@ import org.osgi.framework.BundleContext;
  */
 public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
-    private static final String EP_INIT_HOOK = "hooks";
-
     public static final String MODULEPREFIX = "pdtplugin:";
 
     //The shared instance.
@@ -81,10 +82,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
     }
 
-    private HashMap consultServices = new HashMap();
-
-    private ConsultService metadataConsultService;
-
     private String pdtModulePrefix = "";
 
     private PDTPrologHelper prologHelper;
@@ -93,8 +90,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     //Resource bundle.
     private ResourceBundle resourceBundle;
-
-    private ConsultService workspaceConsultService;
 
     private Object root;
 
@@ -116,8 +111,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
     }
 
-    public ResourceFileLocator getResourceLocator(String key) {        
-        if(rootLocator==null){
+    public ResourceFileLocator getResourceLocator(String key) {
+        if (rootLocator == null) {
             URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
             String location = null;
             try {
@@ -127,10 +122,10 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                 Debug.report(t);
                 throw new RuntimeException(t);
             }
-            if (location.charAt(location.length() - 1) == File.separatorChar){
+            if (location.charAt(location.length() - 1) == File.separatorChar) {
                 location = location.substring(0, location.length() - 1);
             }
-            rootLocator=new DefaultResourceFileLocator(location);
+            rootLocator = new DefaultResourceFileLocator(location);
         }
         return rootLocator.subLocator(key);
     }
@@ -149,18 +144,13 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     }
 
     /**
-     * Retrieve a registered ConsultService instance. The Plugin may offer
-     * several ConsultServices for different purposes. A service that manages
-     * predicate meta information for the components of the prolog ide is always
-     * be available using the key PDT.CS_METADATA
+     * shortcut for <code>getPrologInterface().getConsultService(key)</code>.
      * 
      * @param key
      * @return
      */
     public ConsultService getConsultService(String key) {
-        synchronized (consultServices) {
-            return (ConsultService) consultServices.get(key);
-        }
+        return getPrologInterface().getConsultService(key);
     }
 
     public Display getDisplay() {
@@ -219,19 +209,21 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
      *               components.
      * @throws IOException
      */
-    public PrologInterface getPrologInterface() throws IOException {
-        if(prologInterface==null){
+    public PrologInterface getPrologInterface() {
+        if (prologInterface == null) {
             IPreferencesService service = Platform.getPreferencesService();
             String qualifier = getBundle().getSymbolicName();
-            String impl= service.getString(qualifier,PDT.PREF_PIF_IMPLEMENTATION,null,  null);         
-             if (impl == null) {
-                throw new RuntimeException("The required property \"" + PDT.PREF_PIF_IMPLEMENTATION
-                        + "\" was not specified.");
-             }
-            PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance(impl);
+            String impl = service.getString(qualifier,
+                    PDT.PREF_PIF_IMPLEMENTATION, null, null);
+            if (impl == null) {
+                throw new RuntimeException("The required property \""
+                        + PDT.PREF_PIF_IMPLEMENTATION + "\" was not specified.");
+            }
+            PrologInterfaceFactory factory = PrologInterfaceFactory
+                    .newInstance(impl);
             factory.setResourceLocator(getResourceLocator(PDT.LOC_PIF));
-            prologInterface=factory.create();            
-           
+            prologInterface = factory.create();
+            
             reconfigurePrologInterface();
         }
         return prologInterface;
@@ -279,7 +271,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             Debug.setDebugLevel(debugLevel);
             prologInterface.stop();
             reconfigurePrologInterface();
-            
 
             prologInterface.start();
         } catch (Throwable e) {
@@ -288,34 +279,79 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     }
 
-    
-
     private void reconfigurePrologInterface() {
-        
+
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
-        String impl= service.getString(qualifier,PDT.PREF_PIF_IMPLEMENTATION,null,  null);         
-         if (impl == null) {
-            throw new RuntimeException("The required property \"" + PDT.PREF_PIF_IMPLEMENTATION
-                    + "\" was not specified.");
-         }
-        List l = prologInterface.getBootstrapLIbraries();
-        l.clear();
-        l.add(Util.prologFileName(getResourceLocator(PDT.LOC_ENGINE).resolve("main.pl")));
-        PrologInterfaceFactory factory = prologInterface.getFactory();      
-        Option[] options = factory.getOptions();
-        for(int i=0;i<options.length;i++){
-            String id=options[i].getId();
-            String val = service.get(id,options[i].getDefault(),null);
-            prologInterface.setOption(id,val);
-        }
         
+        List l = prologInterface.getBootstrapLibraries();
+        l.addAll(getBootstrapList(null));
+//		we are using the bootstrapContribution extension point just as anybody else.
+//        --lu
+//        l.add(Util.prologFileName(getResourceLocator(PDT.LOC_ENGINE).resolve(
+//                "main.pl")));
+        PrologInterfaceFactory factory = prologInterface.getFactory();
+        Option[] options = factory.getOptions();
+        for (int i = 0; i < options.length; i++) {
+            String id = options[i].getId();
+            String val = service.get(id, options[i].getDefault(), null);
+            prologInterface.setOption(id, val);
+        }
+
     }
 
-    public void registerConsultService(String key, ConsultService consultService) {
-        synchronized (consultServices) {
-            consultServices.put(key, consultService);
+    public List getBootstrapList(String key) {
+        IExtensionRegistry registry = Platform.getExtensionRegistry();
+        IExtensionPoint point = registry.getExtensionPoint("org.cs3.pdt",
+                PDT.EP_BOOTSTRAP_CONTRIBUTION);
+        if (point == null) {
+            Debug.error("could not find the extension point "
+                    + PDT.EP_BOOTSTRAP_CONTRIBUTION);
+            return null;
         }
+        IExtension[] extensions = point.getExtensions();
+        List r = new Vector();
+        for (int i = 0; i < extensions.length; i++) {
+            IExtension ext = extensions[i];
+            IConfigurationElement[] configurationElements = ext
+                    .getConfigurationElements();
+            for (int j = 0; j < configurationElements.length; j++) {
+                IConfigurationElement elm = configurationElements[j];
+                String resName = elm.getAttribute("path");
+                String className = elm.getAttribute("class");
+                if (className != null) {
+                    BootstrapContribution bc = null;
+                    try {
+                        bc=(BootstrapContribution) elm.createExecutableExtension("class");
+                        bc.contributeToBootstrapList(key,r);
+                    } catch (CoreException e1) {
+                        Debug.report(e1);
+                        throw new RuntimeException("Problem instantiating: "
+                                + elm.getAttributeAsIs("class"), e1);
+                    }
+                } else if (resName != null) {
+                    URL url = Platform.getBundle(ext.getNamespace())
+                            .getEntry(resName);
+                    try {
+                        url=Platform.resolve(url);
+                    } catch (IOException e) {
+                        Debug.report(e);
+                        throw new RuntimeException("Problem resolving url: "
+                                + url.toString(), e);
+                    }
+                    URI uri = URI.create(url.toString());
+                    File file = new File(uri);
+                    try {
+                        r.add(file.getCanonicalPath());
+                    } catch (IOException e) {
+                        Debug.report(e);
+                        throw new RuntimeException("Problem resolving file: "
+                                + file.toString(), e);
+                    }
+                }
+            }
+        }
+        return r;
     }
 
     /**
@@ -331,9 +367,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     protected boolean registerHooks() {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
         IExtensionPoint point = registry.getExtensionPoint("org.cs3.pdt",
-                EP_INIT_HOOK);
+                PDT.EP_HOOKS);
         if (point == null) {
-            Debug.error("could not find the extension point " + EP_INIT_HOOK);
+            Debug.error("could not find the extension point " + PDT.EP_HOOKS);
             return false;
         }
         IExtension[] extensions = point.getExtensions();
@@ -394,16 +430,15 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         try {
             super.start(context);
             /*
-             * XXX not sure if this is the "eclipse way(tm)" to go, but we need to make sure that
-             * the pdt preferences are correctly initilized before proceeding.
+             * XXX not sure if this is the "eclipse way(tm)" to go, but we need
+             * to make sure that the pdt preferences are correctly initilized
+             * before proceeding.
              */
             getPluginPreferences();
             PrologInterface pif = getPrologInterface();
-            metadataConsultService = pif.getConsultService(PDT.CS_METADATA);
-            workspaceConsultService = pif.getConsultService(PDT.CS_WORKSPACE);
+            ConsultService metadataConsultService = pif
+                    .getConsultService(PDT.CS_METADATA);
             metadataConsultService.setRecording(true);
-            registerConsultService(PDT.CS_METADATA, metadataConsultService);
-            registerConsultService(PDT.CS_WORKSPACE, workspaceConsultService);
             registerHooks();
             prologInterface.start();
         } catch (Throwable t) {
@@ -437,13 +472,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
                     public Object[] getChildren(Object o) {
                         if (modules == null) {
-                            try {
-                                modules = PrologNode.find(getPrologInterface(),
-                                        "type(module)").toArray();
-                            } catch (IOException e) {
-                                Debug.report(e);
-                                throw new RuntimeException(e);
-                            }
+                            modules = PrologNode.find(getPrologInterface(),
+                                    "type(module)").toArray();
                         }
                         return modules;
                     }
@@ -468,5 +498,24 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return null;
     }
 
+    /**
+     * Retrieve a PrologInterface for this Project.
+     * 
+     * <p>
+     * rational: we considered to have per project PIFs or at least some kind
+     * namespace separation between projects. This is my desparate try to
+     * reflect such considrations api-wise.
+     * <p>
+     * NOTE: per-project PIFs are not implemented yet,so you will aways get the
+     * same PIF, but you should use this none the less when you are dealing with
+     * data that can be associated to a concrete project.
+     * 
+     * @return the PIF for this Project.
+     * @param project
+     * @return
+     */
+    public PrologInterface getPrologInterface(String key) {
+        return getPrologInterface();
+    }
 
 }

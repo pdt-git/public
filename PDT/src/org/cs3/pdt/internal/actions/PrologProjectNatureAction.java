@@ -4,6 +4,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
@@ -48,11 +49,11 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 
             IProjectDescription ipd = project.getDescription();
             if (ipd.hasNature(PDT.NATURE_ID)) {
-                removeJLMPNature(project);
+                removePDTNature(project);
                 action.setChecked(false);
             } else {
                 removeNatureFromAllOtherProjects();
-                addJLMPNature(project);
+                addPDTNature(project);
                 action.setChecked(true);
             }
             action
@@ -69,7 +70,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
      * @return
      * @throws CoreException
      */
-private void addJLMPNature(IProject project) throws CoreException {
+private void addPDTNature(IProject project) throws CoreException {
         
         IProjectDescription ipd = project.getDescription();
         String[] oldNIDs = ipd.getNatureIds();
@@ -77,6 +78,9 @@ private void addJLMPNature(IProject project) throws CoreException {
         newNIDs[0] = PDT.NATURE_ID;
         System.arraycopy(oldNIDs, 0, newNIDs, 1, oldNIDs.length);
 		ipd.setNatureIds(newNIDs);
+		  if(!project.isSynchronized(IResource.DEPTH_ONE)){
+              project.refreshLocal(IResource.DEPTH_ONE,null);
+          }
 		project.setDescription(ipd, null);
         
     }
@@ -85,7 +89,7 @@ private void addJLMPNature(IProject project) throws CoreException {
      * @return
      * @throws CoreException
      */
-    private void removeJLMPNature(IProject project) throws CoreException {
+    private void removePDTNature(IProject project) throws CoreException {
         if (project.hasNature(PDT.NATURE_ID)) {
             IProjectDescription ipd = project.getDescription();
             String[] oldNIDs = ipd.getNatureIds();
@@ -99,6 +103,9 @@ private void addJLMPNature(IProject project) throws CoreException {
                 j++;
             }
             ipd.setNatureIds(newNIDs);
+            if(!project.isSynchronized(IResource.DEPTH_ONE)){
+                project.refreshLocal(IResource.DEPTH_ONE,null);
+            }
             project.setDescription(ipd, null);
         }
     }
@@ -112,7 +119,7 @@ private void addJLMPNature(IProject project) throws CoreException {
                 .getProjects();
         for (int i = 0; i < projects.length; i++)
             if (projects[i].isOpen())
-                removeJLMPNature(projects[i]);
+                removePDTNature(projects[i]);
     }
 
     /*

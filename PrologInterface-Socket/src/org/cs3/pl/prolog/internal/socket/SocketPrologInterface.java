@@ -2,6 +2,7 @@ package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
@@ -76,6 +77,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     private PrologInterfaceFactory factory;
 
     private ResourceFileLocator locator;
+
+    private HashMap consultServices = new HashMap();
 
     public SocketPrologInterface(PrologInterfaceFactory factory)  {
         super();
@@ -249,7 +252,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.IPrologInterface#getConsultService(java.lang.String)
      */
-    public ConsultService getConsultService(final String prefix) {
+    public ConsultService createConsultService(final String prefix) {
        final  RecordingConsultService cs = new RecordingConsultService();
        cs.setRecording(false); 
        cs.setPort(port);
@@ -262,7 +265,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
                 cs.setPrefix(file);
                 
                 try {
-                    cs.connect();
+                    cs.connect();      
+                    cs.reload();
                 } catch (IOException e) {
                     Debug.report(e);
                     throw new RuntimeException(e);
@@ -275,14 +279,22 @@ public class SocketPrologInterface extends AbstractPrologInterface {
                 cs.disconnect();
             }
         });
-        if(isUp()){
+//      this is NOT the same as isUp().
+        // e.g. a hook may be added as a side effect of processing another hook's.
+        //onInit() method.
+        //The newly added hook would  not be processed for that init phase. Still
+        //the pif is NOT up yet, so we would miss one oportunity to reload!
+        if(!isDown()){
             try {
+                
                 cs.connect();
+                cs.reload();
             } catch (IOException e) {
                 Debug.report(e);
                 throw new RuntimeException(e);
             }
         }
+        
         return cs;
     }
 
@@ -305,5 +317,17 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      */
     public void setLocator(ResourceFileLocator locator) {
         this.locator = locator;
+    }
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.PrologInterface#getConsultService(java.lang.String)
+     */
+    public ConsultService getConsultService(String prefix) {
+        ConsultService cs = (ConsultService) consultServices.get(prefix);
+        if(cs==null){
+            cs = createConsultService(prefix);
+            consultServices.put(prefix,cs);            
+        }        
+        return cs;
     }
 }

@@ -98,8 +98,6 @@ public class FindPredicateActionDelegate extends TextEditorAction {
                         // Prozess. It is blocked by another operation.");
                         //	//manager.stop();
                         //}
-                    } catch (IOException e) {
-                        Debug.report(e);
                     } catch (PrologException e) {
                         Debug.report(e);
                     }

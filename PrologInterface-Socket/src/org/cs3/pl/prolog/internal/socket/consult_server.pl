@@ -101,6 +101,7 @@ handle_command(InStream,OutStream,'CONSULT'):-
 	load_stream(Symbol,InStream).
 	
 handle_command(InStream,OutStream,'UNCONSULT'):-
+	(
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	consulted_symbol(Symbol),
 	new_memory_file(MemFile),
@@ -108,7 +109,9 @@ handle_command(InStream,OutStream,'UNCONSULT'):-
 	load_stream(Symbol,NullStream),
 	close(NullStream),
 	free_memory_file(MemFile),	
-	delete_symbol(Symbol).
+	delete_symbol(Symbol)
+	)
+	;true.
 	
 handle_command(InStream,OutStream,'LIST_CONSULTED'):-
 	request_line(InStream,OutStream,'GIVE_PREFIX',Prefix),
@@ -155,20 +158,20 @@ handle_command(_,_,'BYE'):-
 	
 
 all_solutions(OutStream,Term,Vars):-
-	forall(
+	user:forall(
 		Term,
 		(
-			print_solution(OutStream,Vars)						
+			consult_server:print_solution(OutStream,Vars)						
 		)		
 	).
 
 	
 iterate_solutions(InStream,OutStream,Term,Vars):-
-	( forall(
+	( user:forall(
 			Term,
 			(
-				print_solution(OutStream,Vars),
-				request_line(InStream,OutStream,'MORE?','YES')											
+				consult_server:print_solution(OutStream,Vars),
+				consult_server:request_line(InStream,OutStream,'MORE?','YES')											
 			)
 		)
 	->my_format(OutStream,"NO~n",[])
