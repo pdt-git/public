@@ -66,4 +66,8 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;
 	}
+	
+	public boolean isCountingUp(){
+		return true;
+	}
 }
