@@ -260,7 +260,10 @@ report_ok(OutStream):-
 	my_format(OutStream,"OK~n",[]).	
 	
 report_error(OutStream, Error):-
-	my_format(OutStream,"ERROR: ~w~n",[Error]).			
+	(	var(Error)
+	->	my_format(OutStream,"ERROR: unbound error term~n",[])
+	;	my_format(OutStream,"ERROR: ~w~n",[Error])
+	).			
 	
 		
 byebye(InStream,OutStream):-
