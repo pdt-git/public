@@ -30,6 +30,8 @@ public class PDTPreferencePage
 		public static final String P_SINGLETON_DTM = "singletoncheckfordtm"; 
 		public static final String P_PROLOG_SERVER_PORT = "prologserverport";
 		public static final String P_PROLOG_DEBUG_LEVEL = "prologdebuglevel"; 
+		public static final String P_PROLOG_ADD_SWIPL_PROJECT = "prologaddswiplproject"; 
+		public static final String P_PROLOG_ADD_JT_ENGINE_PROJECT = "prologaddjtengineproject"; 
 		
 		public PDTPreferencePage() {
 			super(GRID);

@@ -154,6 +154,9 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
     public static final int DEFAULTPORT = 8807;
     
     private int prologServerPort = DEFAULTPORT;
+    
+    private boolean addSwiplProject = false;
+    private boolean addJTransformerEngineProject = true;
 
     final protected String CLASSPATHXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<classpath>\n<classpathentry kind=\"src\" path=\"\"/>\n<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n<classpathentry kind=\"output\" path=\"\"/>\n</classpath>";	
 	
@@ -364,11 +367,14 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		//Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
 		try {
-			location = getLocation()+ SWIPROJECTNAME;
-			addProject(SWIPROJECTNAME,new Path(getCanonicalPath(location)));
-			location = getLocation()+ "engine";
-			
-			addProject(JTRANFORMERENGINE,new Path(getCanonicalPath(location)));
+			if(addSwiplProject){
+				location = getLocation()+ SWIPROJECTNAME;
+				addProject(SWIPROJECTNAME,new Path(getCanonicalPath(location)));
+			}
+			if(addJTransformerEngineProject){
+				location = getLocation()+ "engine";
+				addProject(JTRANFORMERENGINE,new Path(getCanonicalPath(location)));
+			}
 			
 			addProject(TRANSFORMED,new Path(TRANSFORMED));
 			
@@ -988,7 +994,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 			Job j = new Job("JLMP Builder Job"){
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-						//JLMPProjectNature nature = (JLMPProjectNature) p.getNature(JLMPProjectNature.NATURE_ID);
+			 		//JLMPProjectNature nature = (JLMPProjectNature) p.getNature(JLMPProjectNature.NATURE_ID);
 						//nature.getBuilder().build(null,0,monitor);
 						p.build(IncrementalProjectBuilder.FULL_BUILD,JLMPProjectBuilder.BUILDER_ID,null,null);
 					} catch (Throwable e) {//well... uh.....eclipse eats my exceptions :-( 
