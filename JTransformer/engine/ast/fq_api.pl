@@ -292,35 +292,21 @@ replaceFQNsWithClassIds([FQN|FQNsAndIds], [Id|Ids]):-
 
 replaceFQNsWithClassIds([Id|FQNsAndIds], [Id|Ids]):-
 	replaceFQNsWithClassIds(FQNsAndIds,Ids),
-	!.
+	!.      
 
-         
 error_occured(S):-
     write(S),
     flush_output,
 	throw(S).
-      
-
-java_fq(Term):-
-     Term =.. [Functor|Args],
-     attribSignature(Functor,_),
-     !,
-	 ast_node_def('JavaAttributes',Functor,ArgDefs),
-	 bindArgs(ArgDefs, Args, JavaASTArgs),
-     JavaAST =.. [Functor|JavaASTArgs],
-     call(JavaAST),
-     mapArgs(JavaASTArgs,Args).
-     
 
 
-	
 java_fq_to_pef(FQ, PEF):-
      assert_bound(FQ),
-     FQ =.. [Functor|[Id|Args]],
-	 ast_node_def('Java',Functor,[_|ArgDefs]),
+     FQ =.. [Functor|Args],
+	 ast_node_def('Java',Functor,ArgDefs),
 	 !,
 	 bindArgs(ArgDefs, Args, JavaASTArgs),
-     PEF =.. [Functor,Id|JavaASTArgs].
+     PEF =.. [Functor|JavaASTArgs].
      
 
 java_fq_to_pef(FQ, PEF):-

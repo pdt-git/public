@@ -223,7 +223,7 @@ ast_node_def('Java',packageT,[
 
 % tree_constraints(classDefT ,[[execT,packageT,classDefT,newClassT,blockT,nullType],[atom],[methodDefT,fieldDefT,classDefT]]).
 ast_node_def('Java',classDefT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [classDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [execT,packageT, classDefT, newClassT, blockT]), 
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
      ast_arg(defs,    mult(0,*,ord), id,  [methodDefT,fieldDefT,classDefT]),
@@ -237,7 +237,7 @@ ast_node_def('Java',classDefT,[
 
 % tree_constraints(methodDefT ,[[classDefT],[atom],[paramDefT],[typeTermType,nullType],[classDefT],[blockT,nullType]]).
 ast_node_def('Java',methodDefT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [methodDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [classDefT]), 
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
      ast_arg(params,  mult(0,*,ord), id,  [paramDefT]),
@@ -249,7 +249,7 @@ ast_node_def('Java',methodDefT,[
 
 % tree_constraints(fieldDefT ,[[classDefT],[typeTermType],[atom],[expressionType,nullType]]).
 ast_node_def('Java',fieldDefT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [fieldDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [classDefT]),
      ast_arg(type,    mult(1,1,no ), attr,[typeTermType]), % <-- dieser typ ist noch undefined
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
@@ -259,7 +259,7 @@ ast_node_def('Java',fieldDefT,[
 
 % tree_constraints(paramDefT ,[[methodDefT,catchT],[typeTermType],[atom]]).
 ast_node_def('Java',paramDefT,[
-     ast_arg(id,      mult(1,1,no ),  id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ),  id,  [paramDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ),  id,  [methodDefT,catchT]), 
      ast_arg(name,    mult(1,1,no ),  id,  [atom]), 
      ast_arg(type,    mult(1,1,no ),  id,  [typeTermType])     
@@ -269,7 +269,7 @@ ast_node_def('Java',paramDefT,[
 
 % tree_constraints(applyT ,[[allType],[methodDefT,fieldDefT],[expressionType,nullType],[atom],[expressionType],[methodDefT]]).
 ast_node_def('Java', applyT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [applyT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(expr,    mult(0,1,no), id,  [expressionType]),
@@ -279,7 +279,7 @@ ast_node_def('Java', applyT,[
  ]). 
 % tree_constraints(assertT ,[[allType],[methodDefT],[expressionType]]).
 ast_node_def('Java',assertT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [assertT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(expr,    mult(0,1,no), id,  [expressionType]),
@@ -287,7 +287,7 @@ ast_node_def('Java',assertT,[
 ]).
 % tree_constraints(assignopT,[[allType],[methodDefT,fieldDefT],[getFieldT,identT,indexedT],[atom],[expressionType]]).
 ast_node_def('Java',assignT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [assignT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(lhs,     mult(1,1,no ), id,  [getFieldT,identT,indexedT]),
@@ -295,7 +295,7 @@ ast_node_def('Java',assignT,[
 ]).
 % tree_constraints(assignT,[[allType],[methodDefT,fieldDefT],[getFieldT,identT,indexedT],[expressionType]]).
 ast_node_def('Java',assignopT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [assignopT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(lhs,     mult(1,1,no ), id,  [getFieldT,identT,indexedT]),
@@ -304,7 +304,7 @@ ast_node_def('Java',assignopT,[
 ]).
 % tree_constraints(blockT, [[allType],[methodDefT],[statementType]]).
 ast_node_def('Java',blockT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [blockT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(stmts,   mult(0,*,ord), attr,[statementType]) %  **** xxx
@@ -315,7 +315,7 @@ ast_node_def('Java',blockT,[
 				
 % tree_constraints(breakT,[[allType],[methodDefT],[atom],[statementType]]).
 ast_node_def('Java',breakT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [breakT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(label,   mult(1,1,no ), attr,[atom]),
@@ -323,7 +323,7 @@ ast_node_def('Java',breakT,[
 ]).
 % tree_constraints(caseT,[[allType],[methodDefT],[expressionType,nullType]]).
 ast_node_def('Java',caseT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [caseT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(expr,    mult(0,1,no), id,  [expressionType])
@@ -331,7 +331,7 @@ ast_node_def('Java',caseT,[
 
 % tree_constraints(conditionalT,[[allType],[methodDefT,fieldDefT],[expressionType],[expressionType],[expressionType]]).
 ast_node_def('Java',conditionalT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]),
+     ast_arg(id,      mult(1,1,no ), id,  [conditionalT]),
      ast_arg(parent,  mult(1,1,no ), id,  [id]),
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(cond,    mult(1,1,no ), id,  [expressionType]),
@@ -340,7 +340,7 @@ ast_node_def('Java',conditionalT,[
 ]).
 % tree_constraints(continueT,[[allType],[methodDefT],[atom],[nullType,statementType]]).
 ast_node_def('Java',continueT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]),
+     ast_arg(id,      mult(1,1,no ), id,  [continueT]),
      ast_arg(parent,  mult(1,1,no ), id,  [id]),
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(label,   mult(1,1,no ), id,  [atom]),
@@ -348,7 +348,7 @@ ast_node_def('Java',continueT,[
 ]).
 % tree_constraints(doLoopT,[[allType],[methodDefT],[expressionType],[statementType]]).
 ast_node_def('Java',doLoopT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [doLoopT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(cond,    mult(1,1,no ), id,  [expressionType]),
@@ -356,7 +356,7 @@ ast_node_def('Java',doLoopT,[
 ]).
 % tree_constraints(execT,[[allType],[methodDefT],[expressionType,classDefT]]).
 ast_node_def('Java',execT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [execT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(expr,    mult(1,1,no ), id,  [expressionType])
@@ -364,7 +364,7 @@ ast_node_def('Java',execT,[
 
 % tree_constraints(catchT,[[allType],[methodDefT],[paramDefT],[blockT]]).
 ast_node_def('Java',catchT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [catchT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(param,   mult(1,1,no ), id,  [paramDefT]),
@@ -373,7 +373,7 @@ ast_node_def('Java',catchT,[
 
 % tree_constraints(forLoopT,[[allType],[methodDefT],[expressionType,nullType,localDefT],[expressionType,nullType],[expressionType,nullType],[statementType]]).
 ast_node_def('Java',forLoopT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [forLoopT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(inits,   mult(0,*,ord), id,  [[expressionType,localDefT]]),
@@ -383,7 +383,7 @@ ast_node_def('Java',forLoopT,[
 
 % tree_constraints(getFieldT, [[allType],[methodDefT,fieldDefT],[expressionType,nullType],[atom], [fieldDefT,nullType]]). % if it is the length field of an array
 ast_node_def('Java',getFieldT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [getFieldT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(expr,    mult(0,1,no), id,  [expressionType]),
@@ -393,7 +393,7 @@ ast_node_def('Java',getFieldT,[
 
 % tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atom], [classDefT,localDefT,paramDefT,nullType,packageT]]).
 ast_node_def('Java',execT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [execT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(name,    mult(1,1,no ), id,  [atom]),
@@ -402,7 +402,7 @@ ast_node_def('Java',execT,[
 
 % tree_constraints(ifT,[[allType],[methodDefT],[expressionType],[blockT,statementType],[blockT,statementType,nullType]]).
 ast_node_def('Java',ifT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [ifT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(cond,    mult(1,1,no ), id,  [expressionType]),
@@ -412,13 +412,13 @@ ast_node_def('Java',ifT,[
 
 % tree_constraints(importT ,[[toplevelT],[atom,classDefT]]).
 ast_node_def('Java',importT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), 
+     ast_arg(id,      mult(1,1,no ), id,  [importT]), 
      ast_arg(toplevel,mult(1,1,no ), id,  [toplevelT]),
      ast_arg(import,  mult(1,1,no ), id,  [packageT,classDefT])
 ]).
 % tree_constraints(indexedT,[[allType],[methodDefT,fieldDefT],[expressionType],[expressionType]]).
 ast_node_def('Java',indexedT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [indexedT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(index,   mult(1,1,no ), id,  [expressionType]),
@@ -426,7 +426,7 @@ ast_node_def('Java',indexedT,[
 ]).
 % tree_constraints(labelT,[[allType],[methodDefT,fieldDefT],[statementType],[atom]]).
 ast_node_def('Java',labelT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [labelT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(body,    mult(1,1,no ), id,  [statementType]),
@@ -434,7 +434,7 @@ ast_node_def('Java',labelT,[
 ]).
 % tree_constraints(literalT ,[[allType],[methodDefT,fieldDefT],[typeTermType],[atom]]).
 ast_node_def('Java',literalT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [literalT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(type,    mult(1,1,no ), attr,  [typeTermType]),
@@ -443,7 +443,7 @@ ast_node_def('Java',literalT,[
 
 % tree_constraints(localDefT,[[allType],[methodDefT],[typeTermType],[atom],[expressionType,nullType]]).
 ast_node_def('Java',localDefT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [localDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- methodDefT, blockT !?!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(type,    mult(1,1,no ), attr,[typeTermType]), % <-- dieser typ ist noch undefined
@@ -454,7 +454,7 @@ ast_node_def('Java',localDefT,[
 
 % tree_constraints(newArrayT, [[allType],[methodDefT,fieldDefT],[expressionType],[expressionType],[typeTermType]]).
 ast_node_def('Java',newArrayT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [newArrayT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(dims,    mult(1,*,ord), id,  [expressionType]),
@@ -464,7 +464,7 @@ ast_node_def('Java',newArrayT,[
 
 % tree_constraints(newClassT, [[allType],[methodDefT,fieldDefT],[methodDefT,nullType],[expressionType],[identT,selectT],[classDefT,nullType],[classDefT,nullType]]).
 ast_node_def('Java',newClassT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [newClassT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(constr,  mult(0,1,no), id,  [methodDefT]),
@@ -476,14 +476,14 @@ ast_node_def('Java',newClassT,[
 
 % tree_constraints(nopT,[[allType],[methodDefT]]).
 ast_node_def('Java',nopT,[
-     ast_arg(id,     mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,  [nopT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,  [methodDefT])
 ]).
 
 % tree_constraints(operationT,[[allType],[methodDefT,fieldDefT],[expressionType],[atom],[atom]]).
 ast_node_def('Java',operationT,[
-     ast_arg(id,     mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,  [operationT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(args,   mult(1,1,ord), id,  [expressionType]),
@@ -493,7 +493,7 @@ ast_node_def('Java',operationT,[
 
 % tree_constraints(precedenceT,[[allType],[methodDefT,fieldDefT],[expressionType]]).
 ast_node_def('Java',precedenceT,[
-     ast_arg(id,     mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,  [precedenceT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(expr,   mult(1,1,no ), id,  [expressionType])
@@ -501,7 +501,7 @@ ast_node_def('Java',precedenceT,[
 
 % tree_constraints(returnT,[[allType],[methodDefT],[expressionType,nullType]]).
 ast_node_def('Java',execT,[
-     ast_arg(id,     mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,  [execT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,  [methodDefT]),
      ast_arg(expr,   mult(1,1,no ), id,  [expressionType])
@@ -509,7 +509,7 @@ ast_node_def('Java',execT,[
 
 % tree_constraints(selectT, [[allType], [methodDefT,fieldDefT], [atom],[selectT,identT],[classDefT,packageT]]).
 ast_node_def('Java',selectT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [selectT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(name,    mult(1,1,no ), id,  [atom]),
@@ -519,7 +519,7 @@ ast_node_def('Java',selectT,[
 
 % tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atom],[classDefT,packageT]]).
 ast_node_def('Java',identT,[
-     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,      mult(1,1,no ), id,  [identT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(name,    mult(1,1,no ), id,  [atom]),
@@ -529,7 +529,7 @@ ast_node_def('Java',identT,[
 
 % tree_constraints(switchT,[[allType],[methodDefT],[expressionType],[statementType]]).
 ast_node_def('Java',switchT,[
-     ast_arg(id,     mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,  [switchT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,  [methodDefT]),
      ast_arg(cond,   mult(1,1,no ), id,  [expressionType]),
@@ -538,7 +538,7 @@ ast_node_def('Java',switchT,[
 
 % tree_constraints(synchronizedT,[[allType],[methodDefT],[expressionType],[blockT]]).
 ast_node_def('Java',synchronizedT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,   [synchronizedT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,   [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,   [methodDefT]),
      ast_arg(block,  mult(1,1,no ), id,   [blockT])
@@ -546,7 +546,7 @@ ast_node_def('Java',synchronizedT,[
 
 % tree_constraints(throwT,[[allType],[methodDefT],[expressionType]]).
 ast_node_def('Java',throwT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,   [throwT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,   [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,   [methodDefT]),
      ast_arg(expr,   mult(1,1,no ), id,   [expressionType])
@@ -554,7 +554,7 @@ ast_node_def('Java',throwT,[
 
 % tree_constraints(toplevelT, [[packageT,nullType],[atom],[importT,classDefT]]).
 ast_node_def('Java',toplevelT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]), 
+     ast_arg(id,     mult(1,1,no ), id,   [toplevelT]), 
      ast_arg(parent, mult(0,1,no), id,   [packageT]),
      ast_arg(file,   mult(1,1,no ), id,   [atom]),
      ast_arg(defs,   mult(0,*,ord), id,   [importT,classDefT])
@@ -562,7 +562,7 @@ ast_node_def('Java',toplevelT,[
 
 % tree_constraints(tryT,[[allType],[methodDefT],[blockT],[catchT],[blockT,nullType]]).
 ast_node_def('Java',tryT,[
-     ast_arg(id,     mult(1,1,no ), id, [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id, [tryT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id, [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id, [methodDefT]),
      ast_arg(block,  mult(1,1,no ), id, [blockT]),
@@ -572,7 +572,7 @@ ast_node_def('Java',tryT,[
 
 % tree_constraints(typeCastT,[[allType],[methodDefT,fieldDefT],[typeTermType],[expressionType]]).
 ast_node_def('Java',typeCastT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,   [typeCastT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,   [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,   [methodDefT,fieldDefT]),
      ast_arg(type,   mult(1,1,no ), attr, [typeTermType]),
@@ -581,7 +581,7 @@ ast_node_def('Java',typeCastT,[
 
 % tree_constraints(typeTestT,[[allType],[methodDefT,fieldDefT],[typeTermType],[expressionType]]).
 ast_node_def('Java',typeTestT,[    
-     ast_arg(id,     mult(1,1,no ), id,   [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,   [typeTestT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,   [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,   [methodDefT]),
      ast_arg(type,   mult(1,1,no ), attr, [typeTermType]),   % expr instanceof type
@@ -590,7 +590,7 @@ ast_node_def('Java',typeTestT,[
 
 % tree_constraints(whileLoopT,[[allType],[methodDefT],[expressionType],[statementType]]).
 ast_node_def('Java',whileLoopT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]), % <-- convention!!!
+     ast_arg(id,     mult(1,1,no ), id,   [whileLoopT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,   [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,   [methodDefT]),
      ast_arg(cond,   mult(1,1,no ), id,   [expressionType]),
