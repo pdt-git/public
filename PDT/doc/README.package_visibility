@@ -5,11 +5,11 @@ This is the general contract behind internal vs public packages:
 
 An packge fragment "internal" marks its respective sub tree as non-public.
 Classes inside this sub tree may only be referenced from classes belonging 
-to the sub tree or to the parent package of the "internal" 
+to the sub tree or to the parent of the "internal" fragment
 
 
 a package violating the above conditions should be viewed as faulty.
-Since all above conditions can be checked staticaly, their violation should
+Since the above conditions can be checked staticaly, their violation should
 be regarded as a compile-time error.
 It would be realy cool to have e.g. a tool like cultivate auto-check 
 the above conditions.
