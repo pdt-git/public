@@ -240,4 +240,18 @@ public class PDTPlugin extends AbstractUIPlugin {
         return true;
     }
 
+	/**
+	 * 
+	 */
+	public void reconfigure() {
+		prologInterface.stop();
+		reconfigurePrologInterface();
+		try {
+			prologInterface.start();
+		} catch (IOException e) {
+			Debug.report(e);
+		}
+		
+	}
+
 }

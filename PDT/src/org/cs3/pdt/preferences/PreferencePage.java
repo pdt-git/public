@@ -125,7 +125,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements
     public boolean performOk() {
 
         boolean res = super.performOk();
-        //PDTPlugin.getDefault().updatePreferences();
+        PDTPlugin.getDefault().reconfigure();
         return res;
     }
 

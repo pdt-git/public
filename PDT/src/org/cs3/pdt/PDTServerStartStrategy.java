@@ -39,6 +39,7 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 				+ " org.cs3.pl.prolog.PrologInterfaceServer " + port;
 				
 		Debug.debug("Starting server with " + cmdline);
+		Debug.debug("dir="+dir);
 		Process process =null;
 		try {
 			process= Runtime.getRuntime().exec(cmdline, null, new File(dir));
