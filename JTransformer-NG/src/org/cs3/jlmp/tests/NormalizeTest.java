@@ -21,57 +21,82 @@ import org.eclipse.jface.text.BadLocationException;
 
 /**
  * @author lukas
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
+ * 
+ * To change the template for this generated type comment go to Window -
+ * Preferences - Java - Code Generation - Code and Comments
  */
 public class NormalizeTest extends FactGenerationTest {
 
-	public NormalizeTest(String name) {
-		super(name);
-	}
-	
-	public void testNormalize() throws BadLocationException, CoreException, IOException{
-		ICompilationUnit sourceUnit = getCompilationUnit("", "NormalizeTest.java");
-		normalizeCompilationUnit(sourceUnit);
-		IFile expectedFile = getTestProject().getFile(new Path("NormalizeTest.expected"));
-		IFile file = (IFile)sourceUnit.getCorrespondingResource();
-		String expected = read(expectedFile);				
-		String actual =read(file);		
-		assertEquals(expected,actual);
-	}
-	
-	protected Object getKey() {
-		return NormalizeTest.class;
-	}
-	
-	public void setUpOnce() throws Exception {	
-		super.setUpOnce();
-		//no autobuilds please!
-		setAutoBuilding(false);
-		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
+    public NormalizeTest(String name) {
+        super(name);
+    }
+
+    public void testNormalize() throws BadLocationException, CoreException,
+            IOException {
+        ICompilationUnit sourceUnit = getCompilationUnit("normalize",
+                "NormalizeTest.java");
+        normalizeCompilationUnit(sourceUnit);
+        IFile expectedFile = getTestProject().getFolder("normalize").getFile(
+                new Path("NormalizeTest.expected"));
+        IFile file = (IFile) sourceUnit.getCorrespondingResource();
+        String expected = read(expectedFile);
+        String actual = read(file);
+        assertEquals(expected, actual);
+    }
+
+    protected Object getKey() {
+        return NormalizeTest.class;
+    }
+
+    public void setUpOnce() throws Exception {
+        super.setUpOnce();
+        //no autobuilds please!
+        setAutoBuilding(false);
+        ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
         File r = l.resolve("testdata-selftest.zip");
         Util.unzip(r);
         setTestDataLocator(l.subLocator("testdata-selftest"));
         try {
-            install(new String[]{
-                    "NormalizeTest.expected",
-                    "NormalizeTest.java"
-            });
+            install("normalize");
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
-		System.err.println("setUpOnce caled for key  "+getKey());
-		
-	}
-	
-	public void tearDownOnce() {
-		super.tearDownOnce();
-		System.err.println("tearDownOnce caled for key  "+getKey());
-//		try {
-//			deleteProject("Converter");
-//		} catch (CoreException e) {
-//			e.printStackTrace();
-//		}
-	}
+        System.err.println("setUpOnce caled for key  " + getKey());
+
+    }
+
+    public void testConvertVariableDeclarationFragments() throws Throwable {
+        ICompilationUnit sourceUnit = getCompilationUnit("normalize",
+                "VariableDeclarationFragments.java");
+        normalizeCompilationUnit(sourceUnit);
+        IFile expectedFile = getTestProject().getFolder("normalize").getFile(
+                new Path("VariableDeclarationFragments.expected"));
+        IFile file = (IFile) sourceUnit.getCorrespondingResource();
+        String expected = read(expectedFile);
+        String actual = read(file);
+        assertEquals(expected, actual);
+    }
+
+    public void testRemoveNoOps() throws Throwable {
+        ICompilationUnit sourceUnit = getCompilationUnit("normalize",
+                "NoOps.java");
+        normalizeCompilationUnit(sourceUnit);
+        IFile expectedFile = getTestProject().getFolder("normalize").getFile(
+                new Path("NoOps.expected"));
+        
+        IFile file = (IFile) sourceUnit.getCorrespondingResource();
+        String expected = read(expectedFile);
+        String actual = read(file);
+        assertEquals(expected, actual);
+    }
+
+    public void tearDownOnce() {
+        super.tearDownOnce();
+        System.err.println("tearDownOnce caled for key  " + getKey());
+        //		try {
+        //			deleteProject("Converter");
+        //		} catch (CoreException e) {
+        //			e.printStackTrace();
+        //		}
+    }
 }
