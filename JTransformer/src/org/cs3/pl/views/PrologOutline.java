@@ -83,7 +83,7 @@ public class PrologOutline extends ContentOutlinePage {
 				PrologMetaDataManager mdManager = MetaDataManagerFactory.getPrologMetaDataManager(PrologManager.getInstance().getHiddenClient(),PrologMetaDataManager.MODEL);
 				if(!mdManager.exists(filename)) {
 					PrologCompiler compiler = new PrologCompiler();
-					compiler.addProblems(false);
+					compiler.setAddMarkers(false);
 					compiler.compile(PDTPlugin.getDefault().getActiveFile());
 					mdManager.saveMetaDataForClauses(filename, compiler);
 				}
