@@ -24,6 +24,11 @@ import junit.framework.TestCase;
  * <p>
  * please note that this is a quick hack. Lean gently upon it! 
  * In particular please read the comments on setUpOnce(), tearDownOnce().
+ * <p>
+ * ld: i maybe have found a more compact solution:
+ * http://junit.sourceforge.net/doc/faq/faq.htm#organize_3
+ * <p>
+ * problem: how to make the wrapping transparent to subclasses?
  */
 public abstract class SuiteOfTestCases extends TestCase{	
 	/**
@@ -115,6 +120,8 @@ public abstract class SuiteOfTestCases extends TestCase{
 	 * You should only access static members of your subtype within this
 	 * class. Actualy this method should be static, but - well - 
 	 * you could not override it then, could you.
+	 * 
+	 * 
 	 */
 	public  void setUpOnce(){}
 	

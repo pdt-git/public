@@ -1,5 +1,5 @@
 /**
- * ld: most of the methds were copied from the eclipse test suites, so i include
+ * ld: some  of the methds were copied from the eclipse test suites, so i include
  * the copyright notice below.
  */
 
