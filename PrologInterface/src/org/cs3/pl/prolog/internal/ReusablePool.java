@@ -29,9 +29,9 @@ public class ReusablePool {
 
 	protected void addInstance(Reusable s) {
 		synchronized (pool) {
-			
+            Debug.debug("poolSize="+poolSize+", maxPoolSize="+maxPoolSize);
 			if (poolSize >= maxPoolSize) {
-				Debug.debug("maximum pool size exeeded. instance destroyed.");
+				Debug.debug("maximum pool size exeeded. instance destroyed.");                
 				s.destroy();				
 				return;
 			}			
@@ -93,7 +93,7 @@ public class ReusablePool {
 			}
 			it.remove();
 		}
-		
+		poolSize=0;
 	}
 
 }

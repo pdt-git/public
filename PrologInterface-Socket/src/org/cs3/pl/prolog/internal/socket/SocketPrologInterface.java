@@ -95,7 +95,11 @@ public class SocketPrologInterface extends AbstractPrologInterface {
                         .findInstance(ReusableSocket.class);
             }
             if (socket == null) {
+                Debug.info("creating new ReusableSocket");
                 socket = new ReusableSocket("localhost", port);
+            }
+            else{
+                Debug.info("reusing old ReusableSocket");
             }
             SocketClient client = new SocketClient(socket);
             client.setPool(pool);
