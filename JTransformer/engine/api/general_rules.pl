@@ -1373,11 +1373,11 @@ reccreateVarDefIdents(_newParent, [_varDef | _varDefs], [_Ident | _Idents]) :-
 createIdentRefParam(_param,_parent, _Ident) :-
     paramDefT(_param, _encl, _, _name),
     new_id(_Ident),
-    assert(identT(_Ident, _parent, _encl, _name, _param)).
+    add(identT(_Ident, _parent, _encl, _name, _param)).
 
 createThisIdent(_Ident,_parent, _encl, _class) :-
     new_id(_Ident),
-    assert(identT(_Ident, _parent, _encl, 'this', _class)).
+    add(identT(_Ident, _parent, _encl, 'this', _class)).
 
 %createIdent(_parent, _encl, _ref, _Ident) :-
 %    getIdentName(_ref,_name),
