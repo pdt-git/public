@@ -1,4 +1,4 @@
-:- module(treefactwriter,[writeTreeFacts/1]).
+:- module(treefactwriter,[writeTreeFacts/1,clearPersistantFacts/0,clearTreeFactbase/0]).
 
 /* 
   treefactwriter writes all current tree elements 
@@ -8,7 +8,7 @@
 
 writeTreeFacts(File):-
     open(File, write, Stream,[]),
-    forall((treeFact(Fact), %Fact = sourceLocation(_,_,_,_), 
+    forall((persistant(Fact), %Fact = sourceLocation(_,_,_,_), 
     		 call(Fact),
     		 term_to_atom(Fact, Atom)
     	    ),
@@ -23,16 +23,41 @@ writeTreeFacts(File):-
     format(Stream, ':- retractall(lastID(_)),assert(lastID(~a)).',[LastID]),
     close(Stream).
 
+/**
+ * persistant(-Fact)
+ * All facts tree facts, 
+ * 
+ 
+*/    
+    
+persistant(Fact) :-
+    treeFact(Fact);
+    (
+     (
+      (Head=ct,Arity=3);
+      (Head=aj_ct_list,Arity=1)
+     ),
+     uniqueArgumentList(Arity,Arguments),
+     Fact =.. [Head|Arguments]
+    ).
+    
 /*
  treeFact(-Fact)
 */    
-    
 treeFact(Fact) :-
-    (treeSignature(Head,Arity);
-    (Head=ct,Arity=3);
-    (Head=aj_ct_list,Arity=1);
-    attribSignature(Head,Arity)),
+    (
+      treeSignature(Head,Arity);
+      attribSignature(Head,Arity)
+    ),
     uniqueArgumentList(Arity,Arguments),
     Fact =.. [Head|Arguments].
-    
-    
+
+clearTreeFactbase :-
+   forall((treefactwriter:treeFact(A),call(A)),retract(A)).
+
+clearPersistantFacts :-
+   persistant(A),
+   call(A),
+   fail.
+   
+clearPersistantFacts.
