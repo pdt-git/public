@@ -33,7 +33,7 @@
       <import plugin="org.eclipse.team.core" optional="true"/>
       <import plugin="org.eclipse.update.configurator"/> 
    </requires>
-   <extension-point id="factbase.observer" name="factbase" schema="schema/org.cs3.jtransformer.factbase.observer.exsd"/>
+   <extension-point id="factbaseObserver" name="factbase" schema="schema/org.cs3.jtransformer.factbaseObserver.exsd"/>
 
 
    <extension
@@ -382,7 +382,7 @@
       </viewContribution>
  	</extension> -->
  <extension
-       point="org.cs3.pl.JTransformer.factbase.observer">
+       point="org.cs3.pl.JTransformer.factbaseObserver">
        <observer
             class="org.cs3.pl.TestObserver"
             name="JTransformer2_Head.observer2"
