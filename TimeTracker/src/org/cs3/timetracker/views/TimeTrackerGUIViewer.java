@@ -13,8 +13,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -101,7 +100,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
-		parent.setLayout(new GridLayout(2,true));
+		parent.setLayout(new RowLayout());
 		TimeTrackerGUIInteraction tti = new TimeTrackerGUIInteraction(parent);
 		tti.addTimeTracker(new TimeTracker());
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
