@@ -20,6 +20,7 @@ public class Logger {
 	private int toSeconds(String Minutes, String Seconds)
 	{
 		return Integer.parseInt(Minutes) * 60 + Integer.parseInt(Seconds);
+		
 	}
 	
 	/*

@@ -1,9 +1,13 @@
 package org.cs3.timetracker;
 
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.ui.plugin.*;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import java.util.*;
+
+import sun.misc.Resource;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -27,6 +31,7 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
+		ResourcesP
 	}
 
 	/**
