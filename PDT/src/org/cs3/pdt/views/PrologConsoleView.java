@@ -1,26 +1,32 @@
 package org.cs3.pdt.views;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
-import org.cs3.pdt.IPreferences;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PreferenceListener;
-import org.cs3.pdt.PreferencesEvent;
+import org.cs3.pdt.hooks.ConsoleServerHook;
+import org.cs3.pdt.hooks.MetaDataEngineHook;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Properties;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
+import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
 
-public class PrologConsoleView extends ViewPart implements PreferenceListener,
+public class PrologConsoleView extends ViewPart implements
 		LifeCycleHook {
+    public static final String HOOK_ID = "org.cs3.pdt.views.PrologConsoleView";
 
+    
 	private ConsoleView view;
 
 	private PrologSocketConsoleModel model;
@@ -29,42 +35,46 @@ public class PrologConsoleView extends ViewPart implements PreferenceListener,
 
 	private PrologCompletionProvider completionProvider;
 
-	public static final String HOOK_ID = "org.cs3.pdt.views.PrologConsoleView";
-
+	
 	public PrologConsoleView() {
 	}
 
 	public void createPartControl(Composite parent) {
 		PDTPlugin plugin = PDTPlugin.getDefault();
-		PrologInterface pi = null;
+		IPrologInterface pi = null;
 		try {
 			pi = plugin.getPrologInterface();
 		} catch (IOException e) {
 			Debug.report(e);
 		}
 		pi.addLifeCycleHook(this, HOOK_ID,
-				new String[] { CreateServerThreadHook.HOOK_ID });
-		IPreferences preferences = plugin.getPreferences();
-		preferences.addPreferencesListener(this);
-		int port = Integer.parseInt(preferences.get(Properties.CONSOLE_PORT,
-				"4711"));
+				new String[] { ConsoleServerHook.HOOK_ID , MetaDataEngineHook.HOOK_ID});
 
 		view = new ConsoleView();
-		controller = new DefaultConsoleController();
+		DefaultConsoleController controller = new DefaultConsoleController();
 		completionProvider = new PrologCompletionProvider();
 		completionProvider.setPrologInterface(pi);
 		controller.setCompletionProvider(completionProvider);
 		view.setController(controller);
-
+		int port = getPort();
 		model = new PrologSocketConsoleModel(false);
 		model.setPort(port);
+		view.setModel(model);
 		view.createPartControl(parent);
 		if (Util.probePort(port, "end_of_file.\n")) {
 			model.connect();
 		}
 		//else: wait til the hook callback is called.
 	}
-
+	private  int getPort() {
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
+        int port= service.getInt(qualifier,Properties.CONSOLE_PORT,-1,null);       
+    	if(port==-1){
+    		throw new NullPointerException("Required property \""+Properties.CONSOLE_PORT+"\" was not specified.");
+    	}
+		return port;
+	}
 	public void setFocus() {
 		if (view == null) {
 			Debug
@@ -74,22 +84,8 @@ public class PrologConsoleView extends ViewPart implements PreferenceListener,
 		view.setFocus();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see prg.cs3.pdt.PreferenceListener#preferencesChanged(prg.cs3.pdt.PreferencesEvent)
-	 */
-	public void preferencesChanged(PreferencesEvent e) {
-		if (e.getKeys().contains(Properties.CONSOLE_PORT)) {
-			PDTPlugin plugin = PDTPlugin.getDefault();
-			IPreferences preferences = plugin.getPreferences();
-			int port = Integer.parseInt(preferences.get(
-					Properties.CONSOLE_PORT, "4711"));
-			model.disconnect();
-			model.setPort(port);
-			model.connect();
-		}
-	}
+	
+	
 
 	/*
 	 * (non-Javadoc)
@@ -105,6 +101,7 @@ public class PrologConsoleView extends ViewPart implements PreferenceListener,
 	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
 	 */
 	public void afterInit() {
+	    view.setController(controller);
 		model.connect();
 	}
 
@@ -114,6 +111,7 @@ public class PrologConsoleView extends ViewPart implements PreferenceListener,
 	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
 	 */
 	public void beforeShutdown(PrologSession session) {
+	    view.setController(null);
 		model.disconnect();
 	}
 }

@@ -30,4 +30,6 @@ public interface IPrologInterface {
 
 	public void addLifeCycleHook(LifeCycleHook h);
 	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies);
+
+    
 }

@@ -32,6 +32,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
    </requires>
+   <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    
    <extension
          point="org.eclipse.ui.startup">
@@ -51,4 +52,43 @@
             name="Prolog Console"
             id="org.cs3.pdt.views.PrologConsoleView"/>
    </extension>
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer class="org.cs3.pdt.preferences.Initializer"/>
+ </extension>
+ <extension
+       point="org.cs3.pdt.hooks">
+    <hook
+          class="org.cs3.pdt.hooks.ConsoleServerHook"
+          id="org.cs3.pdt.hooks.ConsoleServerHook"/>
+    <hook
+          class="org.cs3.pdt.hooks.MetaDataEngineHook"
+          id="org.cs3.pdt.hooks.MetaDataEngineHook"/>
+ </extension>
+ <extension
+       point="org.eclipse.ui.actionSets">
+    <actionSet
+          label="Prolog Actions"
+          visible="true"
+          id="org.cs3.pdt.actions">
+       <menu
+             label="Prolo&amp;g"
+             id="org.cs3.pdt.menus.Prolog">
+          <separator name="separator1"/>
+       </menu>
+       <action
+             label="restart"
+             class="org.cs3.pdt.actions.RestartAction"
+             accelerator="Ctrl+F9"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator1"
+             id="org.cs3.pdt.actions.restart"/>
+       <action
+             label="dump debug info"
+             class="org.cs3.pdt.actions.DumpDebugInfoAction"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator1"
+             id="org.cs3.pdt.actions.dump"/>
+    </actionSet>
+ </extension>
 </plugin>

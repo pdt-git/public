@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -77,7 +78,6 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         this.port = 5567;
         connect();
     }
-
     public PrologSocketConsoleModel(boolean doConnect)  {      
         this.port = 5567;
         if(doConnect){
@@ -304,5 +304,20 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			return false;
 		}
 		return socket.isConnected();
+	}
+
+
+	
+	/**
+	 * @return Returns the port.
+	 */
+	public int getPort() {
+		return port;
+	}
+	/**
+	 * @param port The port to set.
+	 */
+	public void setPort(int port) {
+		this.port = port;
 	}
 }

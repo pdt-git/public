@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Properties;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.ServerStartStrategy;
 
 public class PDTServerStartStrategy implements ServerStartStrategy {
@@ -38,13 +39,22 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 				+ " org.cs3.pl.prolog.PrologInterfaceServer " + port;
 				
 		Debug.debug("Starting server with " + cmdline);
+		Process process =null;
 		try {
-			return Runtime.getRuntime().exec(cmdline, null, new File(dir));
+			process= Runtime.getRuntime().exec(cmdline, null, new File(dir));
 		} catch (IOException e1) {		
 			Debug.report(e1);
 			return null;
 		}
-		
+		 
+		while(!Util.probePort(port,""+(char)-1)){
+             try {
+                 Thread.sleep(50);
+             } catch (InterruptedException e1) {
+                 Debug.report(e1);
+             }
+         }
+		return process;
 	}
 
 }

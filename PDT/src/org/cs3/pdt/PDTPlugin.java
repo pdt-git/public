@@ -3,10 +3,10 @@ package org.cs3.pdt;
 import java.io.IOException;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Properties;
+import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.CoreException;
@@ -15,140 +15,186 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-
 
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin implements PreferenceListener {
-	//The shared instance.
-	private static PDTPlugin plugin;
-	//Resource bundle.
-	private ResourceBundle resourceBundle;
-	private PrologInterface prologInterface;
-	private IPreferences preferences;
-	private static final String EP_INIT_HOOK = "hooks.init";
-	
-	/**
-	 * The constructor.
-	 */
-	public PDTPlugin() {
-		super();
-		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
-	}
+public class PDTPlugin extends AbstractUIPlugin {
+    //The shared instance.
+    private static PDTPlugin plugin;
 
-	/**
-	 * This method is called upon plug-in activation
-	 */
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		preferences = new Preferences();
-	}
+    //Resource bundle.
+    private ResourceBundle resourceBundle;
 
-	/**
-	 * This method is called when the plug-in is stopped
-	 */
-	public void stop(BundleContext context) throws Exception {
-		super.stop(context);
-	}
+    private PrologInterface prologInterface;
 
-	/**
-	 * Returns the shared instance.
-	 */
-	public static PDTPlugin getDefault() {
-		return plugin;
-	}
+    private static final String EP_INIT_HOOK = "hooks";
 
-	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
-	 */
-	public static String getResourceString(String key) {
-		ResourceBundle bundle = PDTPlugin.getDefault().getResourceBundle();
-		try {
-			return (bundle != null) ? bundle.getString(key) : key;
-		} catch (MissingResourceException e) {
-			return key;
-		}
-	}
+    /**
+     * The constructor.
+     */
+    public PDTPlugin() {
+        super();
+        plugin = this;
+        try {
+            resourceBundle = ResourceBundle
+                    .getBundle("prg.cs3.pdt.PDTPluginResources");
+        } catch (MissingResourceException x) {
+            resourceBundle = null;
+        }
+    }
 
-	/**
-	 * Returns the plugin's resource bundle,
-	 */
-	public ResourceBundle getResourceBundle() {
-		return resourceBundle;
-	}
+    /**
+     * This method is called upon plug-in activation
+     */
+    public void start(BundleContext context) throws Exception {
+        try{
+        super.start(context);
 
-	/**
-	 * @return the prolog interface instance shared among this plugin's components.
-	 * @throws IOException
-	 */
-	public PrologInterface getPrologInterface() throws IOException {
-		if(prologInterface==null){
-			prologInterface = new PrologInterface();
-			int port = Integer.parseInt(preferences.get(Properties.SERVER_PORT,"1414"));
-			preferences.addPreferencesListener(this);
-		}
-		return prologInterface;
-	}
+        prologInterface = new PrologInterface();
+        reconfigurePrologInterface();
 
-	
-	public IPreferences getPreferences() {
-		return preferences;
-	}
+        registerHooks();
+        prologInterface.start();
+        }
+        catch(Throwable t){
+            Debug.report(t);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see prg.cs3.pdt.PreferenceListener#preferencesChanged(prg.cs3.pdt.PreferencesEvent)
-	 */
-	public void preferencesChanged(PreferencesEvent e) {
-		Set keys = e.getKeys();
-		if(keys.contains(Properties.SERVER_PORT)
-				||keys.contains(Properties.ENGINE_DIR)
-				||keys.contains(Properties.SERVER_CLASSPATH)
-				||keys.contains(Properties.DEBUG_LEVEL)
-				||keys.contains(Properties.SERVER_STANDALONE)){
-			try {
-				prologInterface.stop();
-				reconfigurePrologInterface();
-				prologInterface.start();
-			} catch (IOException e1) {
-				Debug.report(e1);
-			}
-		}
-		
-		
-	}
+    /**
+     * This method is called when the plug-in is stopped
+     */
+    public void stop(BundleContext context) throws Exception {
+        try {
+            if (prologInterface != null && !prologInterface.isDown()) {
+                prologInterface.stop();
+            }
+        } finally {
+            super.stop(context);
+        }
+    }
 
-	private void reconfigurePrologInterface() {
-		String swiHome = preferences.get(Properties.SWIPL_DIR);
-		if(swiHome==null){
-			throw new NullPointerException("Required property \""+Properties.SWIPL_DIR+"\" was not specified.");
-		}
-		String classPath = preferences.get(Properties.SERVER_CLASSPATH);			
-		if(classPath==null){
-			throw new NullPointerException("Required property \""+Properties.SERVER_CLASSPATH+"\" was not specified.");
-		}
-		int port = Integer.parseInt(preferences.get(Properties.SERVER_PORT,"1414"));
-		String debugLevel = preferences.get(Properties.DEBUG_LEVEL,"ERROR");
-		boolean standalone=Boolean.getBoolean(preferences.get(Properties.SERVER_STANDALONE,"false"));
-		boolean pooling=Boolean.getBoolean(preferences.get(Properties.USE_SESSION_POOLING,"false"));
-		prologInterface.setPort(port);		
-		prologInterface.setStandAloneServer(standalone);
-		prologInterface.setUseSessionPooling(pooling);
-		prologInterface.setStartStrategy(new PDTServerStartStrategy(swiHome,classPath,debugLevel));
-		
-	}
-	/**
-     * Looks up all avaible extensions for the extension point  
-     * org.cs3.pl.extension.factbase.updated, creates Observer objects
-     * and calls their update() methods. 
+    /**
+     * Returns the shared instance.
+     */
+    public static PDTPlugin getDefault() {
+        return plugin;
+    }
+
+    /**
+     * Returns the string from the plugin's resource bundle, or 'key' if not
+     * found.
+     */
+    public static String getResourceString(String key) {
+        ResourceBundle bundle = PDTPlugin.getDefault().getResourceBundle();
+        try {
+            return (bundle != null) ? bundle.getString(key) : key;
+        } catch (MissingResourceException e) {
+            return key;
+        }
+    }
+
+    /**
+     * Returns the plugin's resource bundle,
+     */
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
+    }
+
+    /**
+     * @return the prolog interface instance shared among this plugin's
+     *               components.
+     * @throws IOException
+     */
+    public IPrologInterface getPrologInterface() throws IOException {
+
+        return prologInterface;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see prg.cs3.pdt.PreferenceListener#preferencesChanged(prg.cs3.pdt.PreferencesEvent)
+     */
+    protected void preferenceChanged(PropertyChangeEvent e) {
+        String key = e.getProperty();
+        if (key.equals(Properties.SERVER_PORT)
+                || key.equals(Properties.SWIPL_DIR)
+                || key.equals(Properties.SERVER_CLASSPATH)
+                || key.equals(Properties.USE_SESSION_POOLING)
+                || key.equals(Properties.DEBUG_LEVEL)
+                || key.equals(Properties.SERVER_STANDALONE)) {
+            try {
+                prologInterface.stop();
+                reconfigurePrologInterface();
+                prologInterface.start();
+            } catch (IOException e1) {
+                Debug.report(e1);
+            }
+        }
+
+    }
+
+    private void reconfigurePrologInterface() {
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = getBundle().getSymbolicName();
+        int port = service.getInt(qualifier, Properties.SERVER_PORT, -1, null);
+        if (port == -1l) {
+            throw new NullPointerException("Required property \""
+                    + Properties.SERVER_PORT + "\" was not specified.");
+        }
+
+        String swiHome = service.getString(qualifier, Properties.SWIPL_DIR,
+                null, null);
+        if (swiHome == null) {
+            throw new NullPointerException("Required property \""
+                    + Properties.SWIPL_DIR + "\" was not specified.");
+        }
+        String classPath = service.getString(qualifier,
+                Properties.SERVER_CLASSPATH, null, null);
+        if (classPath == null) {
+            throw new NullPointerException("Required property \""
+                    + Properties.SERVER_CLASSPATH + "\" was not specified.");
+        }
+        String debugLevel = service.getString(qualifier,
+                Properties.DEBUG_LEVEL, null, null);
+        if (debugLevel == null) {
+            Debug.warning("The property \"" + Properties.DEBUG_LEVEL
+                    + "\" was not specified." + "Assuming default: ERROR");
+            debugLevel = "ERROR";
+        }
+
+        boolean standalone = service.getBoolean(qualifier,
+                Properties.SERVER_STANDALONE, false, null);
+        boolean pooling = service.getBoolean(qualifier,
+                Properties.USE_SESSION_POOLING, false, null);
+
+        Debug.info("configuring PrologInterface instance:");
+        Debug.info("\t" + Properties.SERVER_PORT + " = " + port);
+        Debug.info("\t" + Properties.SERVER_STANDALONE + " = " + standalone);
+        Debug.info("\t" + Properties.SERVER_CLASSPATH + " = " + classPath);
+        Debug.info("\t" + Properties.USE_SESSION_POOLING + " = " + pooling);
+        Debug.info("\t" + Properties.SWIPL_DIR + " = " + swiHome);
+        Debug.info("\t" + Properties.DEBUG_LEVEL + " = " + debugLevel);
+
+        prologInterface.setPort(port);
+        prologInterface.setStandAloneServer(standalone);
+        prologInterface.setUseSessionPooling(pooling);
+        prologInterface.setStartStrategy(new PDTServerStartStrategy(swiHome,
+                classPath, debugLevel));
+
+    }
+
+    /**
+     * Looks up all avaible extensions for the extension point
+     * org.cs3.pl.extension.factbase.updated, creates Observer objects and calls
+     * their update() methods.
+     * 
      * @param project
      * @param prologManager
      * 
@@ -156,11 +202,10 @@ public class PDTPlugin extends AbstractUIPlugin implements PreferenceListener {
      */
     public boolean registerHooks() {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
-        IExtensionPoint point = registry.getExtensionPoint(
-                "org.cs3.pl.JTransformer", EP_INIT_HOOK);
+        IExtensionPoint point = registry.getExtensionPoint("org.cs3.pdt",
+                EP_INIT_HOOK);
         if (point == null) {
-            Debug.error("could not find the extension point "
-                    + EP_INIT_HOOK);
+            Debug.error("could not find the extension point " + EP_INIT_HOOK);
             return false;
         }
         IExtension[] extensions = point.getExtensions();
@@ -168,18 +213,25 @@ public class PDTPlugin extends AbstractUIPlugin implements PreferenceListener {
             for (int i = 0; i < extensions.length; i++) {
                 IConfigurationElement[] celem = extensions[i]
                         .getConfigurationElements();
-                if(! celem[0].getName().equals("hook")){
-                	throw new RuntimeException("hmmm... asumed a hook, but got a "+celem[0].getName());
+                for (int j = 0; j < celem.length; j++) {
+
+                    if (!celem[j].getName().equals("hook")) {
+                        Debug.warning("hmmm... asumed a hook, but got a "
+                                + celem[j].getName());
+                    } else {
+                        LifeCycleHook hook = (LifeCycleHook) celem[j]
+                                .createExecutableExtension("class");
+                        String dependsOn = celem[j]
+                                .getAttributeAsIs("dependsOn");
+                        if (dependsOn == null) {
+                            dependsOn = "";
+                        }
+                        String[] dependencies = dependsOn.split(",");
+                        String id = celem[j].getAttributeAsIs("id");
+                        prologInterface
+                                .addLifeCycleHook(hook, id, dependencies);
+                    }
                 }
-                LifeCycleHook hook = (LifeCycleHook) celem[0].createExecutableExtension("class");
-                String dependsOn= celem[0].getAttributeAsIs("dependsOn");
-                if(dependsOn==null){
-                	dependsOn="";
-                }
-                String[] dependencies = dependsOn.split(",");
-                String id= celem[0].getAttributeAsIs("id");
-                prologInterface.addLifeCycleHook(hook,id,dependencies);
-                
             }
         } catch (CoreException e) {
             Debug.report(e);

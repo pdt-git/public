@@ -20,9 +20,9 @@ public class ConsultEngineDirHook implements LifeCycleHook {
 
     private static String getEngineDir() throws FileNotFoundException {
 		
-    	String engine = System.getProperty(Properties.ENGINE_DIR);
+    	String engine = System.getProperty(Properties.CONSULT_PATH);
     	if(engine==null){
-    		throw new NullPointerException("Required property \""+Properties.ENGINE_DIR+"\" was not specified.");
+    		throw new NullPointerException("Required property \""+Properties.CONSULT_PATH+"\" was not specified.");
     	}
 		return engine;
 	}

@@ -19,7 +19,7 @@ public class DefaultConsoleController implements ConsoleController,
     protected ConsoleHistory history = new DefaultConsoleHistory();
     
     protected ConsoleCompletionProvider completionProvider = null;
-	
+	 
     /**
 	 * @return Returns the history.
 	 */

@@ -3,6 +3,8 @@ package org.cs3.pl.prolog;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.cs3.pl.common.Debug;
+
 
 public class LifeCycleHookWrapper implements LifeCycleHook{
 	
@@ -32,6 +34,7 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 			}
 		}		
 		if(hook!=null){
+		    Debug.info("excecuting onInit() on hook "+id);
 			hook.onInit(initSession);
 		}
 	}
@@ -48,6 +51,7 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 			}
 		}		
 		if(hook!=null){
+		    Debug.info("excecuting afterInit() on hook "+id);
 			hook.afterInit();
 		}	
 	}
@@ -64,6 +68,7 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 			}
 		}		
 		if(hook!=null){
+		    Debug.info("excecuting beforeShutdown() on hook "+id);
 			hook.beforeShutdown(session);
 		}
 	}
