@@ -585,7 +585,7 @@ public class FactBaseBuilder {
 				public void run() {
 					MessageDialog.openError(JLMPPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(),
 							"Build Error", "Could not update factbase, compile (?) error in file: "+icu.getResource().getFullPath()+". " +
-									"\nIf the class names equals the package name you found an Eclipse bug.");
+					 				"\nIf the class name equals the package name you found an Eclipse bug.");
 
 				}
 			});
