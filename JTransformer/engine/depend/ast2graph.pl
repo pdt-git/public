@@ -21,9 +21,9 @@
 ast_node(T, class(A,B,C), X) :- ast_node(T,classDefT(A,B,C,_), X) .
 ast_node(T, method(A,B,C,D,E,F,G), X) :- ast_node(T,methodDefT(A,B,C,D,E,F,G), X) .
 ast_node(T, field(A,B,D,E,F), X) :- ast_node(T,fieldDefT(A,B,D,E,F), X) .
-%ast_node(T, paramDefT(A,B,D,E), X) :- ast_node(T,paramDefT(A,B,D,E), X) .
-%ast_node(T, localDefT(A,B,C,D,E,F), X) :- ast_node(T,localDefT(A,B,C,D,E,F), X) .
-%ast_node(T, getFieldT(A,B,C,D,E,F), X) :- ast_node(T,getFieldT(A,B,C,D,E,F), X) .
+ast_node(T, paramDefT(A,B,D,E), X) :- ast_node(T,paramDefT(A,B,D,E), X) .
+ast_node(T, localDefT(A,B,C,D,E,F), X) :- ast_node(T,localDefT(A,B,C,D,E,F), X) .
+ast_node(T, getFieldT(A,B,C,D,E,F), X) :- ast_node(T,getFieldT(A,B,C,D,E,F), X) .
 %ToWi: ast_node(T, getField(A,B,C,D,E), X) :- ast_node(T,selectT(A,B,C,_,D,E), X) .
 %ToWi: ast_node(T, setField(A,B,C,_,D,E), X) :- ast_node(T,assignT(A,B,C,D,E), X) .
 %ToWi: ast_node(T, methodCall(A,B,C,_,D,E), X) :- ast_node(T,applyT(A,B,C,D,E), X) .
@@ -44,11 +44,9 @@ ast_attr(T, field(A,B,D,E,F), X) :- ast_attr(T,fieldDefT(A,B,D,E,F), X) .
 %ast_attr(T, param(A,B,D,E), X) :- ast_attr(T,paramDefT(A,B,D,E), X) .
 %ast_attr(T, localVar(A,B,C,D,E,F), X) :- ast_attr(T,localDefT(A,B,C,D,E,F), X) .
 %ast_attr(T, getField(A,B,C,_,E), X) :- ast_attr(T,identT(A,B,C,_,E), X) .
-
 %ToWi: ast_attr(T, getField(A,B,C,D,E), X) :- ast_attr(T,selectT(A,B,C,_,D,E), X) .
 %ToWi: ast_attr(T, setField(A,B,C,_,D,E), X) :- ast_attr(T,assignT(A,B,C,D,E), X) .
 %ToWi: ast_attr(T, methodCall(A,B,C,_,D,E), X) :- ast_attr(T,applyT(A,B,C,D,E), X) .
-
 
 
 /************************* nodes ***************************
@@ -59,6 +57,8 @@ ast_attr(T, field(A,B,D,E,F), X) :- ast_attr(T,fieldDefT(A,B,D,E,F), X) .
 
 ast_node(applyT, applyT(_id, _, _, _, _,_,_), _id).
 ast_node(assignT, assignT(_id, _, _, _, _), _id).
+ast_node(assignopT, assignopT(_id, _, _, _, _,_), _id).    %%% GK++
+
 ast_node(blockT, blockT(_id, _, _, _), _id).
 ast_node(breakT, breakT(_id, _, _, _, _), _id).
 ast_node(caseT, caseT(_id, _, _, _), _id).
@@ -71,6 +71,7 @@ ast_node(continueT, continueT(_id, _, _, _, _), _id).
 ast_node(doLoopT, doLoopT(_id, _, _, _, _), _id).
 ast_node(execT, execT(_id, _, _, _), _id).
 ast_node(forLoopT, forLoopT(_id, _, _, _, _, _, _), _id).
+ast_node(getFieldT, getFieldT(_id, _, _, _, _,_), _id).    %%% GK++
 ast_node(identT, identT(_id, _, _, _, _), _id).
 ast_node(ifT, ifT(_id, _, _, _, _, _), _id).
 ast_node(indexedT, indexedT(_id, _, _, _, _), _id).
@@ -88,14 +89,19 @@ ast_node(throwT, throwT(_id, _, _, _), _id).
 ast_node(toplevelT, toplevelT(_id, _, _, _), _id).
 ast_node(tryT, tryT(_id, _, _, _, _, _), _id).
 ast_node(typeCastT, typeCastT(_id, _, _, _, _), _id).
-ast_node(typeTestT, typeTestT(_id, _, _, _, _), _id).
+ast_node(whileLoopT, whileLoopT(_id, _, _, _, _), _id).
 ast_node(fieldDefT, fieldDefT(_id, _, _, _, _), _id).
 ast_node(localDefT, localDefT(_id, _, _, _, _, _), _id).
 ast_node(paramDefT, paramDefT(_id, _, _, _), _id).
 ast_node(whileLoopT, whileLoopT(_id, _, _, _, _), _id).
-% Next clause commented out since it produces infinite many results of 
+ast_node(nopT, nopT(_id, _, _), _id).
+% Next clause commented out since it produces infinite many results of
 % the form "not(not(...(not(PEF))...))" by backtracking -- GK, 3.9.2004:
 % ast_node(_type, not(_tree), _id) :- !, ast_node(_type, _tree, _id).
+% CHECK: Is this better?
+% ast_node(_type, not(_tree), _id) :- var(_tree), !, ast_node(_type, _tree, _id).
+% ast_node(_type, not(_tree), _id) :- nonvar(_tree), !, ast_node(_type, _tree, _id).
+
 
 /* 
   Könnte man eigentlich alles ersetzen durch:
@@ -112,13 +118,15 @@ ast_node(whileLoopT, whileLoopT(_id, _, _, _, _), _id).
 /************************* edges ***************************
 *  ast_edge(?type,+term,?edge)
 *****************************************************************/
-% Next clause commented out since it produces infinite many results of 
-% the form "not(not(...(not(PEF))...))" by backtracking -- GK, 6.10.2004:
+
+% Next clause commented out since it produces infinite many results of
+% the form "not(not(...(not(PEF))...))" by backtracking -- GK, 3.9.2004:
 %ast_edge(_type, not(_tree), _eid) :- !, ast_edge(_type, _tree, _eid).
 
 % parent edge
 ast_edge(parent, applyT(_, _id, _,_,_, _, _), _id).
 ast_edge(parent, assignT(_, _id, _, _, _), _id).
+ast_edge(parent, assignopT(_, _id, _, _, _,_), _id).    %%% GK++
 ast_edge(parent, blockT(_, _id, _, _), _id).
 ast_edge(parent, breakT(_, _id, _, _, _), _id).
 ast_edge(parent, caseT(_, _id, _, _), _id).
@@ -131,6 +139,7 @@ ast_edge(parent, continueT(_, _id, _, _, _), _id).
 ast_edge(parent, doLoopT(_, _id, _, _, _), _id).
 ast_edge(parent, execT(_, _id, _, _), _id).
 ast_edge(parent, forLoopT(_, _id, _, _, _, _, _), _id).
+ast_edge(parent, getFieldT( _, _id, _, _, _, _), _id).    %%% GK++
 ast_edge(parent, identT(_, _id, _, _, _), _id).
 ast_edge(parent, ifT(_, _id, _, _, _, _), _id).
 ast_edge(parent, indexedT(_, _id, _, _, _), _id).
@@ -154,10 +163,11 @@ ast_edge(parent, localDefT(_, _id, _, _, _, _), _id).
 ast_edge(parent, paramDefT(_, _id, _, _), _id).
 ast_edge(parent, whileLoopT(_, _id, _, _, _), _id).
 ast_edge(parent, precedenceT(_, _id, _, _), _id).
-
+ast_edge(parent, nopT( _, _id,_), _id).               %%% GK++
 % enclosing method
 ast_edge(encl, applyT(_, _, _id, _,_,_, _), _id).
 ast_edge(encl, assignT(_, _, _id, _, _), _id).
+ast_edge(encl, assignopT(_, _, _id, _, _,_), _id).    %%% GK++
 ast_edge(encl, blockT(_, _, _id, _), _id).
 ast_edge(encl, breakT(_, _, _id, _, _), _id).
 ast_edge(encl, caseT(_, _, _id, _), _id).
@@ -170,6 +180,7 @@ ast_edge(encl, continueT(_, _, _id, _, _), _id).
 ast_edge(encl, doLoopT(_, _, _id, _, _), _id).
 ast_edge(encl, execT(_, _, _id, _), _id).
 ast_edge(encl, forLoopT(_, _, _id, _, _, _, _), _id).
+ast_edge(encl, getFieldT( _, _, _id, _, _, _), _id).    %%% GK++
 ast_edge(encl, identT(_, _, _id, _, _), _id).
 ast_edge(encl, ifT(_, _, _id, _, _, _), _id).
 ast_edge(encl, indexedT(_, _, _id, _, _), _id).
@@ -191,6 +202,7 @@ ast_edge(encl, typeTestT(_, _, _id, _, _), _id).
 ast_edge(encl, localDefT(_, _, _id, _, _, _), _id).
 ast_edge(encl, whileLoopT(_, _, _id, _, _), _id).
 ast_edge(encl, precedenceT(_, _, _id, _), _id).
+ast_edge(encl, nopT( _, _, _id), _id).                %%% GK++
 
 % references
 ast_edge(reference, identT(_id, _, _, _, _refid), _refid).
