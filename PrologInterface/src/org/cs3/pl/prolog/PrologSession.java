@@ -5,16 +5,13 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Provides an interaction interface with the Prolog System. These methods
- * should provide a way to pass queries to the Prolog engine, and retrieve
- * results. Currently all PrologSession implementations <u>must </u> provide a
- * constructor that takes a single int as argument.
- * 
- * @author terra
- */
 public interface PrologSession {
 
+	/**
+	 * retrieve the PrologInterface that created this session.	
+	 */
+	public PrologInterface getPrologInterface();
+	
     /**
      * Disposes the session. Any further call (except of further dispose calls
      * will cause the system to throw an IllegalStateException.
@@ -107,7 +104,7 @@ public interface PrologSession {
      *                    a filename
      * @throws IllegalStateException
      *                    the session is disposed
-     * @deprecated this methd makes barely any sense at all.
+     * @deprecated this method makes barely any sense at all.
      */
 
     public boolean consult(String name) throws PrologException;

@@ -31,8 +31,11 @@ public class SocketSession implements PrologSession {
 
     private String lastQuery;
 
-    public SocketSession(SocketClient client) {
+	private PrologInterface pif;
+
+    public SocketSession(SocketClient client, PrologInterface pif) {
         this.client = client;
+        this.pif=pif;
     }
 
     /*
@@ -523,5 +526,12 @@ public class SocketSession implements PrologSession {
     public boolean isConsulted(String name) throws PrologException {
         return queryOnce("source_file('" + name + "')") != null;
     }
+
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
+	 */
+	public PrologInterface getPrologInterface() {		
+		return pif;
+	}
 
 }

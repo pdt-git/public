@@ -9,6 +9,7 @@ import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
@@ -19,8 +20,8 @@ import org.cs3.pl.prolog.internal.ReusablePool;
 public class SocketPrologInterface extends AbstractPrologInterface {
 
     private class InitSession extends SocketSession {
-        public InitSession(SocketClient client) throws IOException {
-            super(client);
+        public InitSession(SocketClient client,PrologInterface pif) throws IOException {
+            super(client,pif);
         }
 
         public void dispose() {
@@ -33,8 +34,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     }
 
     private class ShutdownSession extends SocketSession {
-        public ShutdownSession(SocketClient client) throws IOException {
-            super(client);
+        public ShutdownSession(SocketClient client,PrologInterface pif) throws IOException {
+            super(client,pif);
         }
 
         public void dispose() {
@@ -98,7 +99,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             }
             SocketClient client = new SocketClient(socket);
             client.setPool(pool);
-            SocketSession s = new SocketSession(client);
+            SocketSession s = new SocketSession(client,this);
             s.setDispatcher(new PrologInterfaceListener() {
                 public void update(PrologInterfaceEvent e) {
                     fireUpdate(e.getSubject(),e.getEvent());
@@ -218,7 +219,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      */
     protected PrologSession getInitialSession() {
         try {
-            return new InitSession(new SocketClient("localhost", port));
+            return new InitSession(new SocketClient("localhost", port),this);
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
@@ -232,7 +233,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      */
     protected PrologSession getShutdownSession() {        
         try {
-            return new ShutdownSession(new SocketClient("localhost", port));
+            return new ShutdownSession(new SocketClient("localhost", port),this);
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
