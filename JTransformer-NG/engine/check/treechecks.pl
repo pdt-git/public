@@ -174,7 +174,11 @@ printErrorIfNotExpressionOrNull(_id):-
 printErrorIfNotExpressionOrNull(_).
 
 /**
- * checkConstraint(ID)
+ * checkConstraint(ID,ErrorHandler)
+ *
+ * ErrorHandler is a predicate with arity 1
+ * which is evaluated on the error message
+ * generated on failure.
  */
  
 checkConstraints(ID,ErrorHandler):-
@@ -283,7 +287,7 @@ test('tree_constraints_ident'):-
     assert(identT(parentId,a,enclId,a,a)),
     assert(fieldDefT(enclId,a,a,a,a)),
     assert(classDefT(classId,a,a,a)),
-    checkConstraints(1),
+    checkConstraints(1,write),
     retract(identT(1,parentId,enclId,name,classId)),
     retract(identT(parentId,a,enclId,a,a)),
     retract(fieldDefT(enclId,a,a,a,a)),
