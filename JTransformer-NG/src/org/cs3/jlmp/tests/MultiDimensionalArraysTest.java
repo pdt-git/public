@@ -12,6 +12,7 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 
 /**
@@ -40,9 +41,9 @@ public class MultiDimensionalArraysTest extends FactGenerationTest {
              * fail when run first and pass when run a secand time.
              */
             if (pif.isUp()) {
+                getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
                 pif.stop();
-                pif.getConsultService(JLMP.SRC).clearRecords();
-                pif.getConsultService(JLMP.EXT).clearRecords();
+               
             }
             install("test0011");
             pif.start();
@@ -56,9 +57,8 @@ public class MultiDimensionalArraysTest extends FactGenerationTest {
      */
     protected void tearDown() throws Exception {
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
         pif.stop();
-        pif.getConsultService(JLMP.SRC).clearRecords();
-        pif.getConsultService(JLMP.EXT).clearRecords();
         super.tearDown();
     }
     public void testIt() throws CoreException {

@@ -385,6 +385,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             if (!project.isSynchronized(IResource.DEPTH_ONE)) {
                 project.refreshLocal(IResource.DEPTH_ONE, null);
             }
+            assertTrue(project.isAccessible());
             project.setDescription(ipd, null);
         }
     }
@@ -1489,6 +1490,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
     }
 
+    protected void clean() throws CoreException {    
+        build(IncrementalProjectBuilder.CLEAN_BUILD);
+    }
     private void generateSource_impl() throws CoreException, IOException {
         String query = "toplevelT(ID,_,FILENAME,_),gen_tree(ID,CONTENT)";
         PrologSession session = getTestJLMPProject().getPrologInterface()

@@ -34,10 +34,9 @@ public class BuilderTest extends FactGenerationTest {
 		setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
 				"testdata-facts"));
 		setAutoBuilding(false);
-
+		getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
 		
-		getTestJLMPProject().getPrologInterface().getConsultService(JLMP.SRC).clearRecords();
-		getTestJLMPProject().getPrologInterface().getConsultService(JLMP.EXT).clearRecords();
+		
 	}
 
 	/**
@@ -53,9 +52,9 @@ public class BuilderTest extends FactGenerationTest {
 		setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
 		"testdata-facts"));
 		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-        pif.getConsultService(JLMP.SRC).clearRecords();
-		pif.getConsultService(JLMP.EXT).clearRecords();
+        
 		pif.start();
+		getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
 	}
 
 	/* (non-Javadoc)
@@ -65,8 +64,7 @@ public class BuilderTest extends FactGenerationTest {
 		// TODO Auto-generated method stub
 		super.tearDown();
 		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-        pif.getConsultService(JLMP.SRC).clearRecords();
-		pif.getConsultService(JLMP.EXT).clearRecords();
+		getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
 		pif.stop();
 	}
 	/**
@@ -79,10 +77,6 @@ public class BuilderTest extends FactGenerationTest {
 		PrologSession session = pif.getSession();
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		install("rumpel");
-		assertTrue(pif.getConsultService(JLMP.EXT).isRecording());
-		assertTrue(pif.getConsultService(JLMP.SRC).isRecording());
-		assertTrue(pif.getConsultService(JLMP.EXT).isAppendingRecords());
-		assertFalse(pif.getConsultService(JLMP.SRC).isAppendingRecords());
 		build();
 		assertNotNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));

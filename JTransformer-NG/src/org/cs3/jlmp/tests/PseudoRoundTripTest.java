@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -222,8 +223,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             setAutoBuilding(false);
 
             try {
-                pif.getConsultService(JLMP.SRC).clearRecords();
-                pif.getConsultService(JLMP.EXT).clearRecords();
+                getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
                 pif.stop();
                 assertTrue(pif.isDown());
                 pif.start();
@@ -420,8 +420,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                 IFolder folder = getTestProject().getFolder(packageName);
                 rename(folder, new String[] { "java", "class" }, "bak");
                 //2) restart the pif
-                pif.getConsultService(JLMP.SRC).clearRecords();
-                pif.getConsultService(JLMP.EXT).clearRecords();
+                getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
                 pif.stop();
                 assertTrue(pif.isDown());
                 pif.start();
