@@ -2,6 +2,7 @@
 :- dynamic ct/3.
 
 
+:- ['facade/main'].
 :- ['test/main'].
 :- ['error_handling'].
 :- ['compatiblitySWI'].
