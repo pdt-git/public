@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="/Common"/>
+	<classpathentry kind="src" path="/Console"/>
+	<classpathentry kind="src" path="/PrologInterface"/>
+	<classpathentry kind="lib" path="L:/Work/rho/lukas/eclipse30/plugins/org.eclipse.swt.win32_3.0.0/ws/win32/swt.jar"/>
+	<classpathentry kind="src" path="/MetaData"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
