@@ -3,6 +3,7 @@
 package org.cs3.pdt.internal.views;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.cs3.pl.ImageRepository;
 import org.cs3.pl.prolog.IPrologClient;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -22,7 +24,18 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
 
     protected IPrologClient pif;
 
-    protected List args;
+    /**
+     * Map containing mapping between Names and IPEFArguments
+     */
+    
+    protected Map args;
+    
+    /**
+     * Ordered list with the names of all arguments.
+     */
+    
+    protected List argNames;
+    
     protected List children;
 	private static final int ISVAR = 4;
 	private static final int ARGNAME = 0;
@@ -31,31 +44,42 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
 	private static final int ISLIST = 2;
 	private String label;
 	private PEFNode parent;
+	private List errors = new ArrayList();
+
+	private IViewSite site;
+
+	private boolean isList = false; 
 
     /**
+     * @param erroneous2
      * @param string
      * @param kindMap
      * 
      */
-    public PEFNode(IPrologClient pif, String label, PEFNode parent, List args) {
+    public PEFNode(IViewSite site, IPrologClient pif, String label, Map argMap, List argNames, PEFNode node) {
         this.pif=pif;
-        this.args = args;
+        this.args = argMap;
+        this.argNames = argNames;
         this.label = label;
+        this.site = site;
+        this.parent = node;
     }
 
     /* (non-Javadoc)
      * @see org.cs3.pl.model2.INode#getId()
      */
     public String getId() {
-        return (String)((IPEFArgument)args.get(0)).getArg();
+    	if(args.get("id") == null)
+    		System.out.println("A");
+        return (String)((IPEFArgument)args.get("id")).getArg();
     }
 
     /* (non-Javadoc)
      * @see org.cs3.pl.model2.INode#getParent()
      */
     public String getParent() {
-    	IPEFArgument pef = (IPEFArgument)args.get(1);
-    	if(pef.getName().equals("parent"))
+    	IPEFArgument pef = (IPEFArgument)args.get("parent");
+    	if(pef != null)
     		return (String)pef.getArg();
     	else 
     		return null;
@@ -71,64 +95,119 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
         return children;
     }
 
-    public static INode find(IPrologClient client, PEFNode parent, String id){
+    public static INode find(IViewSite site, IPrologClient client, PEFNode parent, String id){
     	if(id == null || id.equals("null"))
     		return null;
+    		List errors = new ArrayList();
         	Hashtable result = 
         	client.query("pef_and_spec("+id+",Functor,Args,ArgDescrs,Term)");
-        	if(result == null || result.size() != 5) 
-        		throw new RuntimeException("error retrieving pef for id " +  id);
-        	Object[] args= (Object[])result.get("Args");
+        	if(result == null || result.size() != 5){ 
+        		setStatusErrorMessage(errors,site, "error retrieving pef for id " +  id);
+        		return null;
+        	}
+        	Object[] argArray= (Object[])result.get("Args");
         	Object[] argDescrs = (Object[])result.get("ArgDescrs");
-        	List argList = new ArrayList();
-        	for (int i = 0; i < args.length; i++) {
+        	Map argMap = new HashMap();
+        	List argNames = new ArrayList();
+        	for (int i = 0; i < argArray.length; i++) {
         		Object[] argDescr = (Object[])argDescrs[i];
         		if(argDescr[ISVAR].toString().equals("yes"))
-            		System.err.println("argument number  " +i  + " of "+ id + " is a variable!");
+        			setStatusErrorMessage(errors, site,"argument number  " +i  + " of "+ id + " is a variable!");
+
         		else 
-        		argList.add(new PEFArgument(args[i],(String)argDescr[KIND],(String)argDescr[ARGNAME],argDescr[ISLIST].equals("list")));
-        		
+        		    argMap.put(argDescr[ARGNAME], new PEFArgument(argArray[i],(String)argDescr[KIND],(String)argDescr[ARGNAME],argDescr[ISLIST].equals("list")));
+        		argNames.add(argDescr[ARGNAME]);
 			}
-        	return new PEFNode(client, (String)result.get("Term"), parent,argList);
+        	Hashtable err = client.query("violatedContraints("+id+", Error)");
+        	while(err != null && err.size() > 0) {
+        		setStatusErrorMessage(errors, site,(String)err.get("Error"));
+        		err = client.next();
+        	}
+        	PEFNode node = new PEFNode(site, client, (String)result.get("Term"), argMap,argNames, parent);
+        	node.setErrors(errors);
+        	return node; 
        }
 
     /**
+	 * @param errors2
+	 */
+	private void setErrors(List errors2) {
+		if(errors2 != null)
+		this.errors = errors2;
+	}
+
+	public List getErrors(){
+		return errors;
+	}
+	public String getErrorMessages(){
+		String msg = "";
+		int i = 1;
+		for (Iterator iter = errors.iterator(); iter.hasNext();){ 
+			msg += "\n"+i++ + ". " +iter.next();	
+		}
+		return msg;
+	}
+	/**
+	 * @param errors2
+     * @param site
+	 * @param string
+	 */
+	private static void setStatusErrorMessage(List errors, IViewSite site, String string) {
+		site.getActionBars().getStatusLineManager().setErrorMessage(string);
+		errors.add(string);
+	}
+
+	/**
      * @return
      */
     protected List generateChildren() {
-    	List list = new ArrayList();
-    	for (Iterator iter = args.iterator(); iter.hasNext();) {
-    		IPEFArgument element = (IPEFArgument) iter.next();
-			if(element.getKind().equals("id") && !
-					(element.getName().equals("parent") ||
-					 element.getName().equals("id") ||
-					 element.getName().equals("encl")))
-	    		if(!element.isList()) {
-	    			INode node = find(pif, this, (String) element.getArg());
-					if (node != null)
-						list.add(node);
-				} else {
-					Object[] ids = (Object[]) element.getArg();
-					if (ids.length > 0) {
-
-						List argList = new ArrayList();
-						argList.add(new PEFArgument(getId() + element.getName(), "id","id", false));
-						for (int i = 0; i < ids.length; i++) {
-							argList.add(new PEFArgument(ids[i], element
-									.getKind(), element.getName(), false));
-						}
-						list.add(new PEFNode(pif, element.getName(), this, argList));
+		List list = new ArrayList();
+		for (Iterator iter = argNames.iterator(); iter.hasNext();) {
+			String name = (String) iter.next();
+			if (!(name.equals("parent") || name.equals("id") || name
+					.equals("encl"))) {
+				IPEFArgument arg = (IPEFArgument) args.get(name);
+				if (arg.getKind().equals("id"))
+					if (!arg.isList()) {
+						INode node = find(site, pif, this, (String) arg.getArg());
+						if (node != null)
+							list.add(node);
+					} else {
+						addListNode(list, name, arg);
 					}
-	    		}
-    		
-
+			}
 		}
-        return list;
-    }
+		return list;
+	}
 
 
 
-    /* (non-Javadoc)
+    /**
+	 * @param list
+	 * @param name
+	 * @param arg
+	 */
+	private void addListNode(List list, String name, IPEFArgument arg) {
+		Object[] ids = (Object[]) arg.getArg();
+		if (ids.length > 0) {
+
+			Map argMap = new HashMap();
+			List argNames = new ArrayList();
+			argMap.put("id", new PEFArgument(getId()
+					+ name, "id", "id", false));
+			argMap.put("parent", this);
+			for (int i = 0; i < ids.length; i++) {
+				argMap.put(name+i, new PEFArgument(ids[i], arg.getKind(), name +i, false));
+				argNames.add(name+i);
+			}
+			PEFNode node = new PEFNode(site, pif, name,
+					argMap, argNames, this);
+			node.isList = true;
+			list.add( node);
+		}
+	}
+
+	/* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     public boolean equals(Object obj) {
@@ -222,8 +301,10 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
 	/* (non-Javadoc)
      * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
      */
-    public ImageDescriptor getImageDescriptor(Object object) {      
-	    return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+    public ImageDescriptor getImageDescriptor(Object object) { 
+    	if(errors.isEmpty())
+    	    return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+    	return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
 	    
     }
 	/* (non-Javadoc)
@@ -240,5 +321,12 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
 	public Object getParent(Object o) {
 		// TODO Auto-generated method stub
 		return parent;
+	}
+
+	/**
+	 * @return
+	 */
+	public boolean isList() {
+		return isList;
 	}
 }
