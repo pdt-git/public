@@ -1,39 +1,82 @@
 % Autor: Guenter Kniesel
 % Date: 7.9.2004
+
  /** 
-  * Internal fact base for JTransformer 2.1 
-  * 
-  * ast_edge als ersatz für jegliche direkte referenzen.
-  * Jeder Knoten enthält nur noch einwertige Attribute.
+  * Language independent representation of abstract syntax trees (ASTs)
+  * in JTransformer. Will be supported as of JTransformer version 2.1.
+  * Also called the "new" internal representation. The previously used
+  * Java-centric representation is often called the "old" one.
+  
+  *   ast_node(Id,label).   
+      % arg1 is the unique identiy of an AST node of type arg2.
+      
+  *   ast_attr(Id,attrName,attrValue). 
+      % arg3 is one value of the attribute arg2 of the node arg1.
+      % Attributes are all the values that are not ids of other nodes.
+      % A list containing ids is still considered as an attribute. 
+      %
+      % The 'true' value of a boolean attribute named 'flag' is 
+      % represented by the fact ast_attr(Id, 'flag', 'true').
+      % The 'false' value of 'flag' is defined as
+      %   ast_attr(Id, 'flag', 'false') :- 
+      %      not(ast_attr(Id, 'flag', true)).
+      
+  *   ast_edge(Id1,Relation,Id2).      
+      % Represents a relation of type arg3 between the node with 
+      % id arg1 and the node with id arg3.
+      
+  *   ast_child(Id1,Role1,Id2,Role2).   
+      % Represents nontrivial bidirectional relations, characterized 
+      % by the fact that the nodes may play different roles in the 
+      % relation. The value of arg2 represents  the role played 
+      % by arg1 and the value of arg4 represents the role played 
+      % by arg2. 
+      % By convention the backreference of an AST node to its parent
+      % is has the role name 'parent' as arg2. 
+  */    
+ /* *****************************************************************
+    Rationale: 
+ 
+    The above is a compromise between a fully inlined 
+    representation, where all attributes and references to other 
+    nodes are represented as arguments of ast_node facts and a
+    fully factored representation, where the ast_node facts only
+    contain the node id and label. In the factored 
+    representation ast_attr(Id,attrName,attrValue) and 
+    ast_edge(Id1,Role1,Id2,Role2) would be sufficient. The
+    ast_flag/2 and ast_edge/3 predicates are special cases.
+    
+    The arguments for a fully factored representation are its 
+    generality, uniformity (no special case treatment necessary),
+    and complete independence of argument positions since all
+    information is accessed only via argument names.
+    
+    The argument against a fully factored represenation were 
+    fears that it would be inefficient.
+    
+    We thought that the chosen compromise balances these forces. 
+    *************************************************************** */
+
+
+ /**
+  * migrate_factbase/0
   *
-  *   ast_node(Id,label,attr1,...).    % single valued attributes
-  *   ast_edge(Id1,Relation,Id2).      % unidirectional references
-  *   ast_edge(Id1,Role1,Id2,Role2).   % nontrivial bidirectional refs
-  *   ast_attr(Id,attrName,attrValue). % multi valued attributes
-  *   ast_flag(Id,attrName).           % flags
+  * Converts the Java-centric fact base representation into the 
+  * language independent one. After the conversion, the old 
+  * facts are deleted.
+  * 
+  * DELETION OF THE OLD FACTBASE IS CURRENTLY INACTIVATED 
+  * (to be enabled after thorough testing). In the transitional
+  * period, the deletion must be triggered excplicitly via an 
+  * invocation of clear_old_factbase/0.
   */
-
- /* ****************************************************************
-  * Migration der vom JTransformer Parser gelieferten Darstellung in
-  * die obige neue Darstellung.
-  *************************************************************** */
-
 migrate_factbase :-                    % migrate ast nodes
     print('Migrating nodes and attributes... '),
-    astNodeSignature(Functor,Arity),      % <-- JT 2.0.1 predicate
+    astNodeSignature(Functor,Arity),   % <-- JT 2.0.1 predicate
       functor(Head,Functor,Arity),
       clause(Head,true),
-      migrate_node(Head),
+      migrate_node(Head),              % <-- this does the real work
      fail.
-/*migrate_factbase :-                    % migrate ast attributes
-    print('Migrating attributes... '),
-    attribSignature(Functor,Arity),     % <-- JT 2.0.1 predicate
-      functor(Head,Functor,Arity),
-      clause(Head,Body),
-      migrate_node(Head),
-      assert(NewHead,true),
-    fail.
-*/
 migrate_factbase :-
     print('Factbase Migration completed. Listing new factbase: '),
     listing(ast_node),
@@ -44,9 +87,10 @@ migrate_factbase :-
     % Automatic deletion only after thorough tests of migration:
     % clear_old_factbase. 
 
+
 clear_old_factbase :-
     print('Deleting old factbase... '),
-    astNodeSignature(Functor,Arity),   % JT 2.0.1 predicate
+    astNodeSignature(Functor,Arity),   % <-- JT 2.0.1 predicate
       functor(Call,Functor,Arity),
       retractall(Call),
     fail. 
@@ -54,42 +98,76 @@ clear_old_factbase :-
     print('Old factbase cleared.').
 
 
- /* Example of transformation of old tree_node facts:
- 
- methodDefT(#id, #class, 'name', [param1,...], TYPE, [#exception1,...], #body)
- &&&  
- ast_node_def('Java',methodDefT,[
-     ast_arg(id,      1, id,  [id]), % <-- convention!!!
-     ast_arg(parent,  1, id,  [classDefT]), 
-     ast_arg(name,    1, attr,[atomType]),
-     ast_arg(params,  *, id,  [paramDefT]),
-     ast_arg(type,    1, attr,[typeTermType]), 
-     ast_arg(excepts, *, id,  [classDefT]),
-     ast_arg(body,  0-1, id,  [blockT])
-  ]).
- --> 
- ast_node(id,name,type).          
- ast_edge(id,parent,#classDef).
- ast_edge(id,params,#param1).
- ...
- ast_edge(id,params,#paramN).
- ast_edge(id,excepts,#exception_1).
- ...
- ast_edge(id,params,#exception_N).
- ast_edge(id,body,#body).
-*/
-
+ /**
+  * migrate_node(+OldNode) 
+  *
+  * For the fact arg1 from the Java-centric AST representation  
+  * a set of equivalent facts in the language independent 
+  * representation are added to the factbase. The old fact (arg1)
+  * is not removed from the factbase. This is the responsibility
+  * of the calling site, which might have reasons not to delete.
+  *
+  * Example -----------------------------------------------:
+  * 
+  * In the following the # symbols just indicate positions 
+  * that have identities as values.
+  *
+  * Value of arg1 in old tree_node/1 fact:
+  *  methodDefT(#id, #class, 'name', [#param1,...], TYPE, 
+  *                                  [#exception1,...], #body)
+  *
+  * Value of ast_node_def fact describing the AST node conceptually:  
+  *  ast_node_def('Java',methodDefT,[
+  *   ast_arg(id,      1, id,  [id]), % <-- convention!!!
+  *   ast_arg(parent,  1, id,  [classDefT]), 
+  *   ast_arg(name,    1, attr,[atomType]),
+  *   ast_arg(params,  *, id,  [paramDefT]),
+  *   ast_arg(type,    1, attr,[typeTermType]), 
+  *   ast_arg(excepts, *, id,  [classDefT]),
+  *   ast_arg(body,  0-1, id,  [blockT])
+  *  ]).
+  * 
+  * New facts created for the above input: 
+  *  ast_node(#id,methodDefT,'name',TYPE).          
+  *  ast_edge(#id,parent,#classDef).
+  *  ast_edge(#id,params,#param1).
+  *  ...
+  *  ast_edge(#id,params,#paramN).
+  *  ast_edge(#id,excepts,#exception_1).
+  *  ...
+  *  ast_edge(#id,params,#exception_N).
+  *  ast_edge(#id,body,#body).
+  */
 migrate_node(OldNode) :- 
+      % The old representation contains the id as first and
+      % the parent reference as second argument in all nodes:
     OldNode =.. [Fkt,Id,Parent|ArgRest], 
-    ast_node_def('Java', Fkt, [Id,ParentDef|ArgDefsRest]),
-    ParentDef = ast_arg(ArgName,_,_,_),
-    migrate_to_ast_edge(Id,ArgName,Parent), 
-    migrate_args(Id,ArgDefsRest,ArgRest,_attrValues),
-    migrate_to_ast_node(Id,_attrValues).
-    
-migrate_to_ast_node(Id,_attrValues) :-
-    NewNode =.. [ast_node,Id|_attrValues],
+      % Get the metainformation that drives the conversion of
+      % nodes of type Fkt in the Java syntax:
+    ast_node_def('Java', Fkt, [Id,ParentDef|ArgDefsRest]), 
+%      % Convert the parent reference to an ast edge:
+%    ParentDef = ast_arg(ArgName,_,_,_),
+%    migrate_to_ast_edge(Id,ArgName,Parent), 
+      % Convert the remaining arguments to edges or multivalued
+      % attributes and return the singlevalued attributes in 
+      % arg4 (SingleValuedAttrs):
+    migrate_args(Id,ArgDefsRest,ArgRest,SingleValuedAttrs),
+      % Create the ast_node fact with the id Id, label Fkt and 
+      % one argument for each elem of SingleValuedAttrs:
+    migrate_to_ast_node(Id,Fkt,SingleValuedAttrs).
+   
+   /**  
+    * migrate_to_ast_node(+Id,+Fkt,+SingleValuedAttrs)
+    *
+    * Add the fact "ast_node(Id,Fkt,Attr1,...AttrN) to the Prolog DB.
+    * Attr1,...AttrN are the elements of SingleValuedAttrs (arg3).
+    */ 
+migrate_to_ast_node(Id,Fkt,_attrValues) :-
+    NewNode =.. [ast_node,Id,Fkt|_attrValues],
     assert(NewNode,true).
+ 
+ 
+ ******************
  
 migrate_to_ast_edge(Id,Label,Id2) :- 
 	assert(ast_edge(Id,Label,Id2),true). 
@@ -99,6 +177,15 @@ migrate_to_ast_edges(Id,Label,[Val]) :-   % es gibt mindestens den Wert 'null'
 migrate_to_ast_edges(Id,Label,[Val|Vals]) :-
     assert(ast_edge(Id,Label,Val),true),
     migrate_to_ast_edges(Id,Label,Vals).    
+
+ /**
+  *  migrate_args(+Id,+ArgDefsRest,+ArgRest,?SingleValuedAttrs)
+  * 
+  *       % Convert the remaining arguments to edges or multivalued
+      % attributes and return the singlevalued attributes in 
+      % arg4 (SingleValuedAttrs):
+  
+
 
 migrate_to_ast_attrs(Id,Label,[Val]) :-   % es gibt mindestens den Wert 'null'
     assert(ast_attr(Id,Label,Val),true).
@@ -120,9 +207,18 @@ migrate_to_ast_attrs(Id,Label,[Val|Vals]) :-
   * migrate_args(?ArgDefs,?Args,-AttrValues)
   *
   */
+ migrate_args(_Id,X,Y,Vals) :-  
+    migrate_args(_Id,X,Y,[],Vals)
+  
+  
+  
+  
+   
  % Wenn beide Listen leer sind sind wir fertig. Die bisher gesammelten
  % Werte für Attribute mit Kardinalität 1 werden zurückgegeben.
 migrate_args(_Id,[],[],Vals,Vals).
+
+migrate_args(_Id,[],[],[]).
 
 % Wenn die Liste der Argumentwerte leer und die der Definitionen noch nicht 
 % leer ist kommen nur noch die Sonderfälle. Daraus ergeben sich keine
@@ -150,6 +246,55 @@ migrate_args(Id,
     not( Card = 1), 
     migrate_to_ast_attrs(Id,Label,ArgVals),
 	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
+	
+  % Bei referenzen werden immer edges angelegt, egal wie die 
+  % Kardinalität ist.
+ migrate_args(Id, 
+             [ast_arg(Label, Card, id, Types)|ArgDefsRest],
+             [ArgVals|ArgValsRest],
+             AttrVals,
+             AttrValsNew
+            ) :- 
+    migrate_to_ast_edges(Id,Label,ArgVals),
+	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
+	
+	   
+  ============================================================
+  
+ % Wenn beide Listen leer sind sind wir fertig. Die bisher gesammelten
+ % Werte für Attribute mit Kardinalität 1 werden zurückgegeben.
+
+ /**
+  * migrate_args(+Id,+ArgDefs,+Args,?SingleValuedAttributes).
+  *
+  */
+
+migrate_args(_Id,[],[],[]).
+
+% Wenn die Liste der Argumentwerte leer und die der Definitionen noch nicht 
+% leer ist kommen nur noch die Sonderfälle. Daraus ergeben sich keine
+% neuen Werte für Attribute mit Kardinalität 1.
+migrate_args(Id,Defs,[],[]) :-  % special cases
+    not( Defs = []),
+    migrate_special_cases(Defs,Id).
+    
+ % Attribute with cardinality 1: add its value to AttrVals
+migrate_args(Id, 
+             [ast_arg(_Label, 1, attr, _Types)|ArgDefsRest],
+             [ArgVal|ArgValsRest],
+             [ArgVal|AttrValsNew]
+            ) :-  
+	migrate_args(Id,ArgDefsRest,ArgValsRest,AttrValsNew).
+	
+ % multivalue attributes: create ast_attr/3 facts 
+migrate_args(Id, 
+             [ast_arg(Label, Card, attr, _Types)|ArgDefsRest],
+             [ArgVals|ArgValsRest],
+             AttrValsNew
+            ) :- 
+    not( Card = 1), 
+    migrate_to_ast_attrs(Id,Label,ArgVals),
+	migrate_args(Id,ArgDefsRest,ArgValsRest,AttrValsNew).   
 	
   % Bei referenzen werden immer edges angelegt, egal wie die 
   % Kardinalität ist.

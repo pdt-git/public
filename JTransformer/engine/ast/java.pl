@@ -135,7 +135,7 @@ ast_node_subtype('Java',Label,statementType) :-
 	statement_type('Java','Java',Label).
 
 
-  /**
+ /**
   * ast_node_def(?Language, ?AstNodeLabel, ?AstNodeArguments)
   *
   * The Abstract Syntax Tree (AST) for the language arg1 contains 
@@ -154,6 +154,9 @@ ast_node_subtype('Java',Label,statementType) :-
   *        Number  | 1       | Any positive integer denoting a fixed 
   *                |         | number of values (most often 1). 
   *       The cardinality 0 indicates that the value may be 'null'.
+  *   IsSubtree is either
+  *       true  Indicates that the value is a reference to a subtree
+  *       false The value is no subtree.
   *   IdOrAttribute is either
   *       id   Indicates that the value is the identity of an 
   *            AST node. By convention the first argument of any
@@ -305,12 +308,11 @@ ast_node_def('Java',blockT,[
      ast_arg(id,      1, id,  [id]), % <-- convention!!!
      ast_arg(parent,  1, id,  [id]), % <-- convention!!!
      ast_arg(encl,    1, id,  [methodDefT]),
-     ast_arg(stmts, 0-*, id,  [statementType])
-]).                % ^^^ <-- Blocks duerfen doch auch leer sein, oder?
+     ast_arg(stmts, 0-*, attr,[statementType])   **** xxx
+]).               % ^^^ <-- Blocks duerfen doch auch leer sein, oder?
 				% die Semantik von * habe ich zuerst anders verstanden
 				% Zusammenfassend:
-				% 0-*: bedeutet geordnete Liste von Argumenten (defs,stmts)
-				% *  : beliebige Anzahl ungeordneter Argumente (hasModif)
+				% 0-*: ist gleichbedeutend mit *
 				
 % tree_constraints(breakT,[[allType],[methodDefT],[atom],[statementType]]).
 ast_node_def('Java',breakT,[
