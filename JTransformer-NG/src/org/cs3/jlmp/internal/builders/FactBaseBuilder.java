@@ -35,12 +35,14 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -243,9 +245,11 @@ public class FactBaseBuilder {
                 if (resource.getType() == IResource.FILE) {
                     String fext = resource.getFileExtension();
                     if (fext != null && fext.equals("java")) {
+						
                         if ("OinkOinkOink.java".equals(resource.getName())) {
                             Debug.debug("debug");
                         }
+						if(!inExclusionPattern(resource))
                         switch (delta.getKind()) {
                         case IResourceDelta.REMOVED:
                             toDelete.add(resource);
@@ -254,11 +258,15 @@ public class FactBaseBuilder {
                             if (!isStoreUpToDate((IFile) (resource))) { // added,...???
                                 Debug.debug("Adding " + resource
                                         + " to toProcess");
-                                toProcess.add(resource);
+								final IJavaProject javaProject = (IJavaProject) project
+				                .getNature(JavaCore.NATURE_ID);
+								
+									toProcess.add(resource);
                             }
                             break;
                         default://added, moved, etc
-                            toProcess.add(resource);
+
+							toProcess.add(resource);
                             break;
                         }
 
@@ -300,7 +308,9 @@ public class FactBaseBuilder {
                             && resource.getFileExtension().equals("java")
                             && !isStoreUpToDate((IFile) resource)) {
                         Debug.debug("Adding " + resource + " to toProcess");
-                        toProcess.add(resource);
+						
+						if(!inExclusionPattern(resource))
+							toProcess.add(resource);
                     }
                 }
                 return false;
@@ -715,5 +725,29 @@ public class FactBaseBuilder {
             l.factBaseUpdated(e);
         }
     }
+
+	/**
+	 * JT-146
+     * FIXME: Extend this check to packages / patterns(?).
+	 * @param resource
+	 * @throws CoreException
+	 * @throws JavaModelException
+	 */
+	private boolean inExclusionPattern(IResource resource) throws CoreException, JavaModelException {
+		final IJavaProject javaProject = (IJavaProject) project
+		.getNature(JavaCore.NATURE_ID);
+		IClasspathEntry[] rawcp = javaProject.getRawClasspath();
+		IFile file = (IFile)resource;
+		for (int i = 0; i < rawcp.length; i++) {
+			IPath[] ep = rawcp[i].getExclusionPatterns();
+			IPath path = file.getFullPath();
+			for (int j = 0; j < ep.length; j++) {
+				IPath epPath =rawcp[i].getPath().append(ep[j]);
+				if (epPath.equals(path)) 
+					return true;
+			}
+		}
+		return false;
+	}
 
 }
