@@ -1,4 +1,8 @@
-:- module(treefactwriter,[writeTreeFacts/1,clearPersistantFacts/0,clearTreeFactbase/0]).
+:- module(treefactwriter,[
+writeTreeFacts/1,
+clearPersistantFacts/0,
+clearTreeFactbase/0
+]).
 
 /* 
   treefactwriter writes all current tree elements 
@@ -53,7 +57,7 @@ treeFact(Fact) :-
     Fact =.. [Head|Arguments].
 
 clearTreeFactbase :-
-   forall((treefactwriter:treeFact(A),call(A)),retract(A)).
+   forall((treeFact(A),user:call(A)),user:retract(A)).
 
 clearPersistantFacts :-
    persistant(A),
