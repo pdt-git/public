@@ -1,6 +1,8 @@
 package org.cs3.pl.common;
 import java.io.PrintStream;
 
+
+
 /**
  * Provides a application-wide mechanism to send debug, or other informational 
  * Messages. Unless specified otherwise, all Messages will be send to the
@@ -26,8 +28,8 @@ public class Debug {
 	
 	static private PrintStream out = System.err;
 	
-	static {
-		String s = System.getProperty(Properties.DEBUG_LEVEL,"ERROR");
+	static public void setDebugLevel(String s) {
+		
 		out.println("initial debug level: "+s);
 		if(s.equalsIgnoreCase("NONE")) debugLevel=LEVEL_NONE;
 		else if(s.equalsIgnoreCase("ERROR")) debugLevel=LEVEL_ERROR;
