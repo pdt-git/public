@@ -77,6 +77,18 @@ public class PDTPreferencePage
 							"singleton check for don't-tell-me variables (start with '_')",
 							getFieldEditorParent()));
 			addField(
+					new BooleanFieldEditor(
+							P_PROLOG_ADD_JT_ENGINE_PROJECT,
+							"add JTransformer Engine Project to Workspace (after startup)",
+							getFieldEditorParent()));
+
+			addField(
+					new BooleanFieldEditor(
+							P_PROLOG_ADD_SWIPL_PROJECT,
+							"add SWI Prolog project to workspace (after startup)",
+							getFieldEditorParent()));
+
+			addField(
 					new IntegerFieldEditor(
 							P_PROLOG_SERVER_PORT,
 							"prolog server port",

@@ -297,7 +297,8 @@ public class PrologManager {
 			hiddenInst.reconnect();
 
 		try {
-			baseClient.call(PrologClient.ROLE, "consult", new String[]{getEngineDir()});
+			baseClient.call(PrologClient.ROLE, "consult", 
+			        new String[]{getEngineDir()+"main.pl"});
 		} catch (Exception e) {
 			Debug.report(e);
 		}
@@ -324,7 +325,7 @@ public class PrologManager {
 			    PDTPlugin.getDefault().initializeOpenProjects();
 			
                PDTPlugin.getDefault().updateFactbaseObservers(
-                    IJTransformerObserver.JT_ENGINE_STARTUP, baseClient);
+                    IJTransformerObserver.JT_ENGINE_STARTUP, baseClient,null);
 		}
 		baseClient.setQueryActive(false);
 	}
@@ -417,12 +418,15 @@ public class PrologManager {
 
 
     /**
+     * Returns the full swi conform (using slashes) path
+     * the the JTransformer engine directory.
+     * 
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	private String getEngineDir() throws FileNotFoundException {
+	static public String getEngineDir() throws FileNotFoundException {
 		String projectDir = getProjectDir();
-		return projectDir.replace('\\', '/') + "engine/main.pl";
+		return projectDir.replace('\\', '/') + "engine/";
 	}
 
 
