@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.jlmp.JLMP;
+import org.cs3.jlmp.JLMPPlugin;
+import org.cs3.jlmp.JLMPProject;
 import org.cs3.jlmp.JLMPProjectEvent;
 import org.cs3.jlmp.JLMPProjectListener;
 import org.cs3.jlmp.internal.astvisitor.DefaultGenerationToolbox;
@@ -41,6 +43,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -62,7 +65,7 @@ public class FactBaseBuilder {
 
     
 
-    
+    private JLMPProject jlmpProject;
 
     private IProject project;
 
@@ -76,12 +79,19 @@ public class FactBaseBuilder {
 
 private boolean building=false;
 
+
+
+
+
+private long storeTimeStamp;
+
     /**
      *  
      */
-    public FactBaseBuilder(IProject project, PrologInterface pif) {
-        this.project = project;
-        this.pif = pif;
+    public FactBaseBuilder(JLMPProject jlmpProject) {
+        this.jlmpProject=jlmpProject;
+        this.project = jlmpProject.getProject();
+        this.pif = jlmpProject.getPrologInterface();
     }
 
     
@@ -108,12 +118,18 @@ private boolean building=false;
             IProgressMonitor monitor) throws CoreException {
         try {
             if(building){
+                Debug.warning("skipping build");
                 return;
+            }
+            else{
+                Debug.warning("doing build");
             }
             building=true;
             if (monitor == null)
                 monitor = new NullProgressMonitor();
-            build_impl(delta, flags, monitor);
+            
+
+           build_impl(delta, flags, monitor);
             
         } catch (OperationCanceledException e) {
             throw e;
@@ -131,6 +147,7 @@ private boolean building=false;
     synchronized private void build_impl(IResourceDelta delta, int flags,
             IProgressMonitor monitor) throws IOException, CoreException {
         PrologSession session = null;
+        storeTimeStamp=-1;
         try {
             
             //ain'i paranoid... last chance to reload saved state.
@@ -167,7 +184,8 @@ private boolean building=false;
             
             submon=new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);                      
-            loadExternalFacts(submon);        
+            loadExternalFacts(submon);     
+            JLMPPlugin.getDefault().save(session);
         } finally {
             session.dispose();
         }
@@ -228,7 +246,7 @@ private boolean building=false;
                     if (fext != null && fext.equals("java")) {
                         if (delta.getKind() == IResourceDelta.REMOVED) {
                             toDelete.add(resource);
-                        } else if(!isRecordUpToDate((IFile) (resource))){ // added,...???
+                        } else if(!isStoreUpToDate((IFile) (resource))){ // added,...???
                             Debug.debug("Adding " + resource + " to toProcess");
                             toProcess.add(resource);
                         }
@@ -268,7 +286,7 @@ private boolean building=false;
                 if (resource.getType() == IResource.FILE) {
                     if (resource.getFileExtension() != null
                             && resource.getFileExtension().equals("java")
-                            && !isRecordUpToDate((IFile) resource)) {
+                            && !isStoreUpToDate((IFile) resource)) {
                         Debug.debug("Adding " + resource + " to toProcess");
                         toProcess.add(resource);
                     }
@@ -283,8 +301,6 @@ private boolean building=false;
         Debug.debug("Forgetting (possible) previous version of " + file);
 
         String path = file.getFullPath().toString();
-        String record = file.getFullPath().addFileExtension("pl").toString();
-        getMetaDataSRC().unconsult(record);
         //ld: an unconsult is not enough due to the multifile-ness of the
         // predicates in question.
         /*
@@ -313,11 +329,9 @@ private boolean building=false;
      * @throws IOException
      * @throws CoreException
      */
-    private boolean isRecordUpToDate(IFile file){
+    private boolean isStoreUpToDate(IFile file){
         ConsultService cs = getMetaDataSRC();
-        String recordPath = file.getFullPath().addFileExtension("pl")
-                .toString();
-        long recordTS = cs.getRecordTimeStamp(recordPath);
+        long recordTS = getStoreTimeStamp();
         long fileTS = file.getLocalTimeStamp();
         //ld:no need to create facts that are already known
         /*
@@ -331,10 +345,41 @@ private boolean building=false;
         }
         return false;
     }
+    /**
+     * @return
+     */
+    private long getStoreTimeStamp() {
+        JLMPPlugin plugin = JLMPPlugin.getDefault();
+        String v = plugin.getPreferenceValue(JLMP.PREF_USE_PEF_STORE,"false");
+        if(! Boolean.valueOf(v).booleanValue()){
+            return -1;
+        }
+        if(storeTimeStamp==-1){
+            try {
+                String filename = jlmpProject.getPreferenceValue(JLMP.PROP_PEF_STORE_FILE,"");                
+                File file = new File(filename);
+                if(file.canRead()){
+                    storeTimeStamp=file.lastModified();
+                }
+                else{
+                    storeTimeStamp=-1;
+                }
+            } catch (CoreException e) {
+              Debug.report(e);
+              throw new RuntimeException(e);
+            }
+                
+            
+        }
+
+        return storeTimeStamp;
+    }
+
+
     private void buildFacts(IFile file) throws IOException, CoreException {
 
         /* the file seems to have been deleted */
-        if (!file.exists()||isRecordUpToDate(file)) {
+        if (!file.exists()||isStoreUpToDate(file)) {
             return;
         }
         ConsultService cs = getMetaDataSRC();
@@ -611,8 +656,11 @@ private boolean building=false;
                 IResource.DEPTH_INFINITE);
         PrologSession session = pif.getSession();
         try {
-            session.queryOnce("delete_source_facts");
-            getMetaDataSRC().clearRecords();
+            session.queryOnce("clearTreeFactbase");
+            //getMetaDataSRC().clearRecords();
+            String storeName = jlmpProject.getPreferenceValue(JLMP.PROP_PEF_STORE_FILE,null);
+            new File(storeName).delete();
+            storeTimeStamp=-1;
             if (monitor != null) {
                 monitor.done();
             }
@@ -661,5 +709,6 @@ private boolean building=false;
     }
 
 
+    
     
 }
