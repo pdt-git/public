@@ -20,7 +20,7 @@ import org.eclipse.ui.views.properties.IPropertySource;
 
 /**
  */
-public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapter {
+public class PEFNode implements INode,IAdaptable,/*IPropertySource,*/IWorkbenchAdapter {
 
     protected IPrologClient pif;
 
@@ -69,8 +69,6 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
      * @see org.cs3.pl.model2.INode#getId()
      */
     public String getId() {
-    	if(args.get("id") == null)
-    		System.out.println("A");
         return (String)((IPEFArgument)args.get("id")).getArg();
     }
 
@@ -233,9 +231,9 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
     }
 
     public Object getAdapter(Class adapter) {
-        if (IPropertySource.class.equals(adapter)){
-            return this;
-        }
+//        if (IPropertySource.class.equals(adapter)){
+//            return this;
+//        }
         if(IWorkbenchAdapter.class.equals(adapter)){
             return this;
         }
