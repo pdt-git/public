@@ -282,7 +282,7 @@ public class RecordingConsultService implements ConsultService {
 
     public void reload() throws IOException {
         	Debug.debug("enter reload:"+prefix.toString());
-        	Debug.dumpStackTrace();
+        	//Debug.dumpStackTrace();
             reload(prefix);
             Debug.debug("exit reload:"+prefix.toString());
         fireConsultDataChanged(new ConsultServiceEvent(this));
