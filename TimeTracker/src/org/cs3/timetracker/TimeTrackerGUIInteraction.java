@@ -27,7 +27,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	private Button pausebutton;
 	private Button continuebutton;
 	private Button stopbutton;
-	private TimeTracker timetracker;
+	private TimeTicker timetracker;
 	
 
 /////////////////////////////////////////////////////////////////////
@@ -37,11 +37,17 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	 * Implementation method of ITimeObserver
 	 */
 	public void notify(TimeEvent time){
+		System.out.println("Min: " + time.getMinutes() + " Sec: " + time.getSeconds());
 		if(time.getMinutes()==0 && time.getSeconds()==0){
-			startbutton.setEnabled(true);
-			stopbutton.setEnabled(false);
-			pausebutton.setEnabled(false);
-			continuebutton.setEnabled(false);
+			TimeTrackerPlugin.getDefault().getWorkbench().getDisplay().asyncExec(
+					new Runnable(){
+						public void run() {
+							startbutton.setEnabled(true);
+							stopbutton.setEnabled(false);
+							pausebutton.setEnabled(false);
+							continuebutton.setEnabled(false);
+						}
+					});			
 		}
 	}
 	
@@ -53,22 +59,25 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 		Button temp = (Button) e.getSource();
 		String match = temp.getText();
 		if(match.equalsIgnoreCase("start")){
-			System.out.println(e.button);
 			timetracker.start();
 			startbutton.setEnabled(false);
+			continuebutton.setEnabled(false);
 			stopbutton.setEnabled(true);
 			pausebutton.setEnabled(true);
 		}
 		if(match.equalsIgnoreCase("pause")){
 			timetracker.pause();
+			startbutton.setEnabled(false);
 			continuebutton.setEnabled(true);
 			pausebutton.setEnabled(false);
-			System.out.println(e.button);
+			stopbutton.setEnabled(true);
 		}
 		if(match.equalsIgnoreCase("continue")){
 			timetracker.resume();
+			startbutton.setEnabled(false);
 			pausebutton.setEnabled(true);
 			continuebutton.setEnabled(false);
+			stopbutton.setEnabled(true);
 		}
 		if(match.equalsIgnoreCase("stop")){
 			timetracker.stop();
@@ -118,13 +127,17 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 		stopbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		stopbutton.setText("stop");
 		stopbutton.addMouseListener(this);
+		startbutton.setEnabled(true);
+		stopbutton.setEnabled(false);
+		pausebutton.setEnabled(false);
+		continuebutton.setEnabled(false);
 	}
 	
 	/**
 	 * Add TimeTracker object to call the methods
 	 * @param tracker
 	 */
-	public void addTimeTracker(TimeTracker tracker){
+	public void addTimeTracker(TimeTicker tracker){
 		timetracker = tracker;
 	}
 	

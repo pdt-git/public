@@ -3,8 +3,9 @@ package org.cs3.timetracker.views;
 
 import org.cs3.timetracker.ITimeObserver;
 import org.cs3.timetracker.TimeEvent;
-import org.cs3.timetracker.TimeTracker;
+import org.cs3.timetracker.TimeTicker;
 import org.cs3.timetracker.TimeTrackerGUIInteraction;
+import org.cs3.timetracker.TimeTrackerPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -40,6 +41,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	private TableViewer viewer;
+	
 
 	/*
 	 * The content provider class is responsible for
@@ -100,9 +102,16 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
+		
+		TimeTicker tt = new TimeTicker();
+		tt.addObserver(this);
+
 		parent.setLayout(new RowLayout());
 		TimeTrackerGUIInteraction tti = new TimeTrackerGUIInteraction(parent);
-		tti.addTimeTracker(new TimeTracker());
+		tti.addTimeTracker(tt); //TODO add correct TimeTracker reference here!!!
+		
+		tt.addObserver(tti);
+		
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
@@ -129,7 +138,12 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 
 	public void notify(TimeEvent time) {
 		currentTimeEvent = time;
-		viewer.setInput(getViewSite());
+		TimeTrackerPlugin.getDefault().getWorkbench().getDisplay().asyncExec(
+				new Runnable(){
+					public void run() {
+						viewer.setInput(getViewSite());
+					}
+				});
 	}
 	
 }

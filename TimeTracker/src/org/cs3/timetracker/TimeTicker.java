@@ -2,18 +2,26 @@ package org.cs3.timetracker;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 import javax.swing.Timer;
 
 /*
- * TimeTicker is a class, which provides a count down clock.
- * Interface is
- * 	(start()
- * stop()
- * 
- * resue()
+ * Created on 30.08.2004
+ *
+ * TODO To change the template for this generated file go to
+ * Window - Preferences - Java - Code Style - Code Templates
  */
 
+/**
+ * @author linder
+ *
+ * TODO To change the template for this generated type comment go to
+ * Window - Preferences - Java - Code Style - Code Templates
+ */
 public class TimeTicker  {
 	private Timer t;
 	private TimeEvent time;
@@ -34,14 +42,14 @@ public class TimeTicker  {
   		time.setSeconds(Seconds - ((Seconds / 60) * 60));
   		Seconds--;
 
-  		if (Seconds == 0) {
-  			stop();
-  		}
-
   		Iterator i = observers.iterator();
   		while (i.hasNext()) {
   			ITimeObserver a = (ITimeObserver) i.next();
   			a.notify(time);
+  		}
+  		
+  		if (Seconds == -1) {
+  			stop();
   		}
 	}
 
