@@ -1467,12 +1467,12 @@ public class FactGenerator extends ASTVisitor {
 	 */
 	public boolean visit(SuperFieldAccess node) {
 	    String selectedFrom = null;
-		String nodeID = idResolver.getID(node);
-		
-		String thisClassID = idResolver.getID(getUltimateAncestor(node));
-		String superClassID = idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding());
 		
 		if (node.getQualifier() == null){
+		    TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
+	        ITypeBinding superclass = ultimateAncestor.getSuperclass().resolveTypeBinding();        
+	        String superClassID = idResolver.getID(superclass);
+			
 			selectedFrom = idResolver.getID();
 			String [] identArgs = {
 					selectedFrom,
@@ -1488,6 +1488,8 @@ public class FactGenerator extends ASTVisitor {
 					Integer.toString(node.getLength())
 			});
 		} else {
+		    ITypeBinding superclass = node.getQualifier().resolveTypeBinding().getSuperclass();
+		    String superClassID = idResolver.getID(superclass);
 			selectedFrom = idResolver.getID();
 			String[] selectArgs = {
 					selectedFrom,
@@ -1505,8 +1507,8 @@ public class FactGenerator extends ASTVisitor {
 			});
 			handleSelectsIdents(node.getQualifier(), selectedFrom);
 		}
-	    
-	    
+	
+	
 		String[] args =
 			new String[] {
 				selectedFrom,
@@ -1557,16 +1559,14 @@ public class FactGenerator extends ASTVisitor {
 	 * @see FactGeneratorMethodBodyTest#testVisitSuperMethodInvocation()
    	 */
 	public boolean visit(SuperMethodInvocation node) {
-		//String uID = idResolver.getUniqueID();
 		String selectedFrom = null;
-		String nodeID = idResolver.getID(node);
-		
-		String thisClassID = idResolver.getID(getUltimateAncestor(node));
-		//String superClassID = idResolver.getID(node.resolveMethodBinding().getDeclaringClass());
-		//ld: guess this is more correct?
-		String superClassID = idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding());
+				
 		
 		if (node.getQualifier() == null){
+		    TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
+	        ITypeBinding superclass = ultimateAncestor.getSuperclass().resolveTypeBinding();        
+	        String superClassID = idResolver.getID(superclass);
+			
 			selectedFrom = idResolver.getID();
 			String [] identArgs = {
 					selectedFrom,
@@ -1582,6 +1582,8 @@ public class FactGenerator extends ASTVisitor {
 					Integer.toString(node.getLength())
 			});
 		} else {
+		    ITypeBinding superclass = node.getQualifier().resolveTypeBinding().getSuperclass();
+		    String superClassID = idResolver.getID(superclass);
 			selectedFrom = idResolver.getID();
 			String[] selectArgs = {
 					selectedFrom,

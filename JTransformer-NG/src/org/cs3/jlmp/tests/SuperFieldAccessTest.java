@@ -3,6 +3,7 @@
 package org.cs3.jlmp.tests;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -33,14 +34,20 @@ public class SuperFieldAccessTest extends FactGenerationTest {
         setAutoBuilding(false);
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
         try {            
-            install("jt103");
+            
             pif.start();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }       
     }
-    
-    public void testIt() throws CoreException {
+    /* (non-Javadoc)
+     * @see org.cs3.jlmp.tests.SuiteOfTestCases#tearDown()
+     */
+    protected void _tearDown() throws Exception {
+        getTestJLMPProject().getPrologInterface().stop();
+    }
+    public void testIt() throws CoreException, IOException {
+        install("jt103");
         build();
         PrologSession s =getTestJLMPProject().getPrologInterface().getSession();
         //get  ids
@@ -89,6 +96,27 @@ public class SuperFieldAccessTest extends FactGenerationTest {
             assertEquals("nein",(String)r.get("Nme"));
             assertEquals(neinFieldId,(String)r.get("Fld"));
             assertEquals(umpfClassId,(String)r.get("Sym"));
+            uninstall("jt103");
     }
     
+    /**
+     * i think jt108 could also affect super field access expressions.
+     * This should cover it. 
+     * @throws CoreException
+     * @throws IOException
+     */
+    public void testQualifiedSuperFieldAccess() throws CoreException, IOException {
+        install("jt108b");
+        build();
+        PrologSession s =getTestJLMPProject().getPrologInterface().getSession();
+        
+        List l = s.queryAll("fieldDefT(Bar,T,_,'bar',_)," +
+        		"methodDefT(Baz,X,'baz',_,_,_,_)," +
+         		"getFieldT(Apply,Par,Baz,Select,'bar',Bar)," +
+         		"selectT(Select,Apply,Baz,'super',Ident,T)," +
+         		"identT(Ident,Select,Baz,'Test',Test)," +
+         		"classDefT(Test,_,'Test',_)");
+        assertEquals(1,l.size());
+        uninstall("jt108b");
+    }
 }
