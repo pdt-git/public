@@ -22,32 +22,43 @@ import javax.swing.Timer;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
+
+// 
+
 public class TimeTicker  {
 	private Timer t;
 	private TimeEvent time;
 	private ArrayList observers;
 	
-	
-	public String Log = ""; 
-	
+	private static final int INITSECONDS = 180;
 	private int seconds;
+	private boolean countsUp;
 
 	private int lastTimeStamp;
-	private static final int INITSECONDS = 180;
 	
+	public String Log = ""; 
 
-	private void init(){
-		seconds = INITSECONDS;
-		lastTimeStamp = seconds;
+	private void init()
+	{
+		if (countsUp)
+		{
+			seconds = 0;
+			lastTimeStamp = 0;
+		}
+		else 
+		{
+			seconds = INITSECONDS;
+			lastTimeStamp = seconds;
+		}		
 	}
-	
-	
-	public int getTimeDifference(){
+		
+	public int getTimeDifference()
+	{
 		return Math.abs(seconds - lastTimeStamp);
 	}
 	
-	
-	public void resetTimeStamp(){
+	public void resetTimeStamp()
+	{
 		lastTimeStamp = seconds;
 	}
 	
@@ -60,7 +71,14 @@ public class TimeTicker  {
 	{
 		time.setMinutes(seconds / 60);
   		time.setSeconds(seconds - ((seconds / 60) * 60));
-  		seconds--;
+  		
+  		if (countsUp)
+  		{
+  			seconds++;
+  		}
+  		else {
+  			seconds--;
+  		}  		
 
   		Iterator i = observers.iterator();
   		while (i.hasNext()) {
@@ -68,14 +86,17 @@ public class TimeTicker  {
   			a.notify(time);
   		}
   		
-  		if (seconds == -1) {
+  		if (!countsUp && (seconds == -1))
+  		{
   			stop();
   		}
 	}
 
 	public TimeTicker()
 	{
+		countsUp = TimeTrackerPlugin.getDefault().isCountingUp(); 
 		init();
+		
 		observers = new ArrayList();
 		time = new TimeEvent(0,0);
 		ActionListener action = new ActionListener() {
@@ -103,7 +124,7 @@ public class TimeTicker  {
 	{
 		t.setRepeats(false);
 		t.stop();
-		seconds = 0;
+//		seconds = 0;
 		Log = Log + "Stopped.\n";
 	}
 	
@@ -122,13 +143,16 @@ public class TimeTicker  {
 	/**
 	 * @return Returns the lastTimeStamp.
 	 */
-	public int getLastTimeStamp() {
+	public int getLastTimeStamp() 
+	{
 		return lastTimeStamp;
 	}
+	
 	/**
 	 * @return Returns the seconds.
 	 */
-	public int getCurrentSeconds() {
+	public int getCurrentSeconds() 
+	{
 		return seconds;
 	}
 }

@@ -16,7 +16,7 @@ import junit.framework.TestCase;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class TimeTrackerTest extends TestCase {
+public class TimeTickerTest extends TestCase {
 	
 	TestTimeObserver observer;
 	TimeTicker ticker;
@@ -80,7 +80,11 @@ public class TimeTrackerTest extends TestCase {
 	
 	public void testObserver() throws Exception 
 	{
-		String ObserverTestString = 
+		String ObserverTestString = "";
+		
+		if (!TimeTrackerPlugin.getDefault().isCountingUp()) {
+			
+		ObserverTestString = 
 				"TestTimeObserver started.\n" 
 			+	"Time message received. Minutes = 3; Seconds = 0\n" 	
 			+	"Time message received. Minutes = 2; Seconds = 59\n" 	
@@ -91,7 +95,23 @@ public class TimeTrackerTest extends TestCase {
 			+	"Time message received. Minutes = 2; Seconds = 54\n"
 			+	"Time message received. Minutes = 2; Seconds = 53\n"
 			+	"Time message received. Minutes = 2; Seconds = 52\n";
-			
+		}
+		
+		else
+		{
+			ObserverTestString = 
+				"TestTimeObserver started.\n" 
+			+	"Time message received. Minutes = 0; Seconds = 0\n" 	
+			+	"Time message received. Minutes = 0; Seconds = 1\n" 	
+			+	"Time message received. Minutes = 0; Seconds = 2\n" 	
+			+	"Time message received. Minutes = 0; Seconds = 3\n" 	
+			+	"Time message received. Minutes = 0; Seconds = 4\n"
+			+	"Time message received. Minutes = 0; Seconds = 5\n"
+			+	"Time message received. Minutes = 0; Seconds = 6\n"
+			+	"Time message received. Minutes = 0; Seconds = 7\n"
+			+	"Time message received. Minutes = 0; Seconds = 8\n";
+		}
+		
 		assertEquals("Observer Test missed.", ObserverTestString, observer.Log);
 	}
 	
@@ -105,14 +125,4 @@ public class TimeTrackerTest extends TestCase {
 	
 		assertEquals("Time Ticker Test missed.", TimeTickerTestString, ticker.Log);
 	}
-	
-
-	/**
-	 * Constructor for TimeTrackerTest.
-	 * @param name
-	 */
-	public TimeTrackerTest(String name) {
-		super(name);
-	}
-
 }
