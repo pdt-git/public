@@ -1,6 +1,7 @@
 package org.cs3.timetracker;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -33,6 +34,24 @@ public class Logger {
 		if ((seconds % 60) < 10) secString = "0" + secString; 
 		
 		return minString + ":" + secString;
+	}
+	
+	public String readLog(){
+		
+		byte[] InputLogByteArray = null; 
+		
+		File FileObject = new File(Filename);
+		try {
+			FileInputStream InputStreamObject = new FileInputStream(FileObject);
+			
+			InputLogByteArray = new byte[InputStreamObject.available()];
+			InputStreamObject.read(InputLogByteArray);
+		}
+		catch(IOException e) {
+			System.out.println("IO Exception occured, while reading from Logfile.");
+		}		
+				
+		return new String(InputLogByteArray); 
 	}
 	
 	public String log(String Comment) throws IllegalArgumentException

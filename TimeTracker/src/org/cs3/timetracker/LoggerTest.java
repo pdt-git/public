@@ -38,6 +38,7 @@ public class LoggerTest extends TestCase {
 		String logString  = logger.log( GlobalTestComment);
 		assertEquals("Recorded [03:00 02:58 00:02] "+GlobalTestComment,logString);
 	}
+
 	
 	/*
 	 * This test proves, if all content written to the File is formerly
