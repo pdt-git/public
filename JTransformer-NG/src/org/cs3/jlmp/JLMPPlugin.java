@@ -21,7 +21,7 @@ public class JLMPPlugin extends AbstractUIPlugin {
 
    
 
-    public static final String PLUGIN_ID = "org.cs3.jlmp";
+    
     private static JLMPPlugin plugin;
     private ResourceBundle resourceBundle;
     private ResourceFileLocator rootLocator;
