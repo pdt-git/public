@@ -1,14 +1,9 @@
 package org.cs3.pl.prolog;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.internal.ReusableClient;
 import org.rapla.components.rpc.Logger;
-import org.rapla.components.rpc.ServiceNotFoundException;
-import org.rapla.components.rpc.TimeoutException;
 
 public class DefaultServerStopStrategy implements ServerStopStrategy {
 
@@ -34,15 +29,10 @@ public class DefaultServerStopStrategy implements ServerStopStrategy {
 					Debug.report(e1);
 				}
 			}
-		} catch (TimeoutException e) {
+		} catch (Throwable e) {
 			Debug.report(e);
-		} catch (InvocationTargetException e) {
-			Debug.report(e);
-		} catch (ServiceNotFoundException e) {
-			Debug.report(e);
-		} catch (IOException e) {
-			Debug.report(e);
-		}
+			throw new RuntimeException(e);
+		} 
 	}
 
 }

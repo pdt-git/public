@@ -1,7 +1,6 @@
 package org.cs3.pdt.internal;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.cs3.pdt.PDT;
@@ -41,7 +40,8 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 	 * @see org.cs3.pl.prolog.ServerStartStrategy#startServer()
 	 */
 	public Process startServer(int port) {
-		boolean isWindoof = System.getProperty("os.name").indexOf("Windows")>-1;
+	    try {
+	    boolean isWindoof = System.getProperty("os.name").indexOf("Windows")>-1;
 		String dir = isWindoof ? swiHome+"\\bin" 
 					: ".";			
 		
@@ -53,25 +53,24 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 		Debug.debug("Starting server with " + cmdline);
 		Debug.debug("dir="+dir);
 		Process process =null;
-		try {
+		
 			process= Runtime.getRuntime().exec(cmdline, null, new File(dir));
 			new _InputStreamPump(process.getErrorStream()).start();
             new _InputStreamPump(process.getInputStream()).start();
             
             
-		} catch (IOException e1) {		
-			Debug.report(e1);
-			return null;
-		}
+				
+		
 		 
 		while(!Util.probePort(port)){
-             try {
-                 Thread.sleep(50);
-             } catch (InterruptedException e1) {
-                 Debug.report(e1);
-             }
+                 Thread.sleep(50);        
          }
 		return process;
+	    }
+		catch (Throwable e) {
+		    Debug.report(e);
+		    throw new RuntimeException(e);
+        }
 	}
 
 }

@@ -19,6 +19,7 @@ public class MetaDataEngineHook implements LifeCycleHook {
             s.consult(getEngineDir()+"/main.pl");
         } catch (FileNotFoundException e) {
             Debug.report(e);
+            throw new RuntimeException(e);
         }
 
     }

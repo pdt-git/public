@@ -25,22 +25,26 @@ public class ConsultServerHook implements LifeCycleHook{
 		}
 	
     public void onInit(PrologSession s) {
+        
         int port = getPort();
 		if (Util.probePort(port)) {
 			Debug.info("Consult server thread seems to be running, so i will not start a new one.");			
 		}else{
 		    String queryString = "consult_server("+port+")";
 		    Debug.info("starting consult server using: "+queryString);
-		    try {				
-                s.query(queryString);
-			} catch (SessionException e) {
-				Debug.report(e);
-			}
+		   		
+                try {
+                    s.query(queryString);
+                }catch (SessionException e) {
+                    Debug.report(e);
+                    throw new RuntimeException(e);
+                }			
 			while(!Util.probePort(port)){
 	             try {
 	                 Thread.sleep(50);
 	             } catch (InterruptedException e1) {
 	                 Debug.report(e1);
+	                 throw new RuntimeException(e1);
 	             }
 	         }
 			Debug.debug("Server thread created");
