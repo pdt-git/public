@@ -92,6 +92,9 @@ failed(_list, _length, _all) :- findall(
                                   length(_tests, _all).
 
 
+assert_true(Goal) :-
+    assert_true('', Goal).
+
 assert_true(Comment, Goal) :-
   call(Goal)
     ->  true
@@ -112,6 +115,9 @@ list_to_line_sep_string([],'').
 list_to_line_sep_string([Head|Tail],String):-
 	list_to_line_sep_string(Tail,StringTail),
 	sformat(String,'~a~n~a',[Head,StringTail]).
+  
+assert_fail(Goal) :-
+    assert_fail('', Goal).
     
 
 assert_fail(Comment, Goal) :-
