@@ -91,7 +91,7 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
         return children;
     }
 
-    public static IPEFNode find(IViewSite site, PEFNode parent, String id){
+    public static IPEFNode find(IViewSite site, PEFNode parent, String id, String kind){
     	if(id == null || id.equals("null"))
     		return null;
     		List errors = new ArrayList();
@@ -123,7 +123,11 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 					Map err = (Map) iter.next();
 	        		setStatusErrorMessage(errors, site,(String)err.get("Error"));
 	        	}
-	        	node = new PEFNode(site, (String)result.get("Term"), argMap,argNames, parent);
+				String labelPrefix = "";
+				if(kind != null && 
+			     !(parent != null && parent.isList))
+					labelPrefix = kind.toUpperCase() + ": ";
+	        	node = new PEFNode(site, labelPrefix+result.get("Term"), argMap,argNames, parent);
 	        	node.setErrors(errors);
     		} catch (CoreException e) {
 				// TODO Auto-generated catch block
@@ -171,12 +175,13 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 		List list = new ArrayList();
 		for (Iterator iter = argNames.iterator(); iter.hasNext();) {
 			String name = (String) iter.next();
-			if (!(name.equals("parent") || name.equals("id") || name
-					.equals("encl"))) {
+//			if (!(name.equals("parent") || name.equals("id") || name
+//					.equals("encl"))) {
+			if (!(name.equals("id"))) {
 				IPEFArgument arg = (IPEFArgument) args.get(name);
 				if (arg.getKind().equals("id"))
 					if (!arg.isList()) {
-						IPEFNode node = find(site, this, (String) arg.getArg());
+						IPEFNode node = find(site, this, (String) arg.getArg(),arg.getName());
 						if (node != null)
 							list.add(node);
 					} else {

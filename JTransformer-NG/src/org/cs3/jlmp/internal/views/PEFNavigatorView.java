@@ -8,6 +8,7 @@ import java.util.Map;
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.internal.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -62,7 +63,7 @@ public class PEFNavigatorView extends ViewPart {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		JLMPProjectNature nature = null;
 		for (int i = 0; i < projects.length; i++) {
-			if(projects[i].hasNature(JLMP.NATURE_ID)){
+			if(projects[i].isAccessible() && projects[i].hasNature(JLMP.NATURE_ID)){
 				nature = (JLMPProjectNature)projects[i].getNature(JLMP.NATURE_ID);
 				break;
 			}
@@ -103,7 +104,7 @@ public class PEFNavigatorView extends ViewPart {
 //					    		getActiveFile().getProject().getNature(JLMP.NATURE_ID)).getPrologInterface();
 //
 				roots = new IPEFNode[1];
-				roots[0] = PEFNode.find(getViewSite(), null, "100001");
+				roots[0] = PEFNode.find(getViewSite(), null, "100001",null);
 				if(roots[0] == null)
 					roots = new IPEFNode[0];
 	        } catch (CoreException e) {
@@ -161,26 +162,7 @@ public class PEFNavigatorView extends ViewPart {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(viewer);
 		contentProvider = new ViewContentProvider();
-		viewer.setContentProvider(contentProvider
-		//				new WorkbenchContentProvider(){
-				//		    /* (non-Javadoc)
-				//             * @see
-				// org.eclipse.ui.model.BaseWorkbenchContentProvider#hasChildren(java.lang.Object)
-				//             */
-				//            public boolean hasChildren(Object element) {
-				//                if(element instanceof INode){
-				//                    try{
-				//                        INode node = (INode) element;
-				//                        return node.hasChildren();
-				//                    }
-				//                    catch(Throwable t){
-				//                        ;
-				//                    }
-				//                }
-				//                return super.hasChildren(element);
-				//            }
-				//		}
-				);
+		viewer.setContentProvider(contentProvider);
 
 		viewer.setLabelProvider(new WorkbenchLabelProvider());
 		viewer.setSorter(new NameSorter());
@@ -213,10 +195,12 @@ public class PEFNavigatorView extends ViewPart {
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(action1);
+		manager.add(action2);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(action1);
+		manager.add(action2);
 		drillDownAdapter.addNavigationActions(manager);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
@@ -224,6 +208,8 @@ public class PEFNavigatorView extends ViewPart {
 
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(action1);
+		manager.add(action2);
+		
 		drillDownAdapter.addNavigationActions(manager);
 	}
 
@@ -240,7 +226,7 @@ public class PEFNavigatorView extends ViewPart {
 				if (dialog.open() != Window.CANCEL) {
 					final String value = dialog.getValue();
 					IPEFNode node;
-					node = PEFNode.find(getViewSite(),  null, value);
+					node = PEFNode.find(getViewSite(),  null, value,null);
 					if (node != null) {
 						list.add(node);
 						contentProvider.roots = (IPEFNode[]) list
@@ -254,6 +240,54 @@ public class PEFNavigatorView extends ViewPart {
 		action1.setToolTipText("Add Element by Id");
 		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+
+		
+		action2 = new Action() {
+			public void run() {
+				//showMessage("Action 1 executed");
+				List list = new ArrayList();
+				for (int i = 0; i < contentProvider.roots.length; i++) {
+					list.add(contentProvider.roots[i]);
+				}
+				InputDialog dialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						"JTransformer", "full qualified name", null, null);
+				if (dialog.open() != Window.CANCEL) {
+					final String value = dialog.getValue();
+					IPEFNode node;
+					PrologSession session = null;
+
+					try {
+						session = getPrologSession();
+						Map result = session.queryOnce("fullQualifiedName(Id,'" + value+"')");
+						if(result != null) {
+							String id = (String)result.get("Id");
+							if(id == null)
+								MessageDialog.openError(getViewSite().getShell(),
+										"JTransformer", "No class found with full qualified name: "+ value);
+							node = PEFNode.find(getViewSite(), null, id, null);
+							if (node != null) {
+								list.add(node);
+								contentProvider.roots = (IPEFNode[]) list
+										.toArray(new IPEFNode[0]);
+								viewer.setInput(getViewSite());
+							}
+						}
+					} catch (CoreException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} finally  {
+						if (session != null)
+						session.dispose();
+					}
+				}
+			}
+		};
+		action2.setText("by Id");
+		action2.setToolTipText("Add class by full qualified name");
+		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		
+		
 		doubleClickAction = new Action() {
 			public void run() {
 				ISelection selection = viewer.getSelection();
