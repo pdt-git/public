@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="L:/Work/rho/lukas/pl/lib/jpl.jar"/>
+	<classpathentry kind="lib" path="/usr/local/lib/swi-prolog/lib/jpl.jar"/>
 	<classpathentry kind="src" path="/Common"/>
 	<classpathentry kind="src" path="/RaPlaRPC"/>
 	<classpathentry kind="output" path="bin"/>
