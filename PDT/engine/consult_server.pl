@@ -119,9 +119,8 @@ handle_command(InStream,OutStream,'QUERY_ALL'):-
 		true
 	).
 
-handle_command(_,_,'end_of_file'):-	
-	throw(peer_quit).
 
+	
 handle_command(_,_,'SHUTDOWN'):-	
 	throw(shut_down).
 
@@ -183,6 +182,18 @@ handle_exception(InStream,OutStream,shut_down):-
 	),
 	thread_signal(main,halt).
 
+handle_exception(InStream,OutStream,peer_reset):-
+	catch(
+		(
+			my_format(OutStream,"RESET~n",[]),
+			report_ok(OutStream)
+		),							
+		_,(
+			shut_down(InStream,OutStream),
+			fail
+			)
+	),
+	handle_client(InStream,OutStream).
 	
 handle_exception(InStream,OutStream,Error):-
 	catch(		
@@ -194,6 +205,9 @@ handle_exception(InStream,OutStream,Error):-
 	),
 	handle_client(InStream,OutStream).
 
+	
+
+	
 report_ok(OutStream):-
 	my_format(OutStream,"OK~n",[]).	
 	
@@ -221,8 +235,37 @@ request_line(InStream, OutStream, Prompt, Line):-
 	my_format(OutStream,"~a~n",[Prompt]),
 	read_line_to_codes(InStream,LineCodes),
 	codes_or_eof_to_atom(LineCodes,Line),
+	check_eof(Line),
 	format("<<< ~a~n",Line).
+
+check_eof(end_of_file):-
+	!,
+	throw(peer_reset).
 	
+check_eof('end_of_file'):-
+	!,
+	throw(peer_reset).
+
+check_eof('end_of_file.'):-
+	!,
+	throw(peer_reset).
+	
+check_eof(A):-
+	atom_concat(_,end_of_file,A),
+	!,
+	throw(peer_reset).
+
+check_eof(A):-
+	atom_concat(_,'end_of_file',A),
+	!,
+	throw(peer_reset).
+
+check_eof(A):-
+	atom_concat(_,'end_of_file.',A),
+	!,
+	throw(peer_reset).	
+check_eof(_):-
+	true.
 request_data(InStream, OutStream, Symbol):-	
 	my_format(OutStream,"USING_SYMBOL: ~a~n",[Symbol]),	
 	read_pending_input(InStream, Trash, []),
@@ -231,7 +274,7 @@ request_data(InStream, OutStream, Symbol):-
 	
 	
 codes_or_eof_to_atom(end_of_file,_):-
-	throw(peer_quit).
+	throw(peer_reset).
 	
 codes_or_eof_to_atom(Codes,Atom):-
 	atom_codes(Atom,Codes).

@@ -191,6 +191,7 @@ public class SocketClient  {
     private ReusablePool pool;
     private BufferedWriter writer;
     private static final long TIMEOUT = 1000;
+    private static final String RESET = "RESET";
     
     
     /**
@@ -221,9 +222,10 @@ public class SocketClient  {
             return;
         }
         lock();
-        
+        reset();
        try{
-           if(pool!=null&&ping()){
+           //if(false){
+           if(pool!=null){
                pool.recycle(socket);
            }
            else {
@@ -236,49 +238,47 @@ public class SocketClient  {
         }
     }
 
-  public boolean ping(){
-      class _Thread extends Thread{
-          private boolean result=false;
-
-        /* (non-Javadoc)
-         * @see java.lang.Thread#run()
-         */
-        public void run() {
-            result=ping_impl();
-        }
-      }
-      _Thread t = new _Thread();
-      t.setDaemon(true);
-      t.start();
-      try {
-        t.join(TIMEOUT);
-    } catch (InterruptedException e) {
-        Debug.report(e);
-        return false;
-    }   
-    return ! t.isAlive() && t.result;
-  }
+  
     
-    /**
-     * @return
+/**
+ * @throws IOException
+ * @throws PrologException
+     * 
      */
-    public boolean ping_impl() {
-       lock();
-       try{
-           while(reader.ready()){
-               reader.read();
-           }
-           writeln(PING);
-           readUntil(PONG);
-           return false;
-       } catch (IOException e) {
-           Debug.report(e);
-           return false;
+    public void reset() throws PrologException, IOException {
+        lock();
+        try{
+            while(reader.ready()){
+            	reader.read();
+            }
+            writeln(EOF+".");
+            readUntil(OK);
+        }
+        finally{
+            unlock();
+        }
+        
     }
-       finally{
-           unlock();
-       }
-    }
+//    /**
+//     * @return
+//     */
+//    public boolean ping() {
+//       lock();
+//       try{
+//           while(reader.ready()){
+//               reader.read();
+//           }
+//           writeln(PING);
+//           readUntil(PONG);
+//           return false;
+//       } catch (IOException e) {
+//           Debug.report(e);
+//           return false;
+//    }
+//       finally{
+//           unlock();
+//       }
+//    }
     public InputStream getInputStream() throws IOException{
         if (socket==null){
             throw new IllegalStateException("Socket is closed, go away. ");
