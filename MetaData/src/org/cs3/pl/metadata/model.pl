@@ -281,23 +281,6 @@ child(compound_node(P),Arg):-
     member(Arg,Args).
 
 
-implicit_edge(module,predicate).
-
-simple_edge(predicate,clause).
-simple_edge(source_folder,compilation_unit).
-simple_edge(compilation_unit,clause).
-simple_edge(brace,argument).
-simple_edge(list,tail).
-
-list_edge(list,elements).
-list_edge(compound,arguments).
-
-type_property(atom,leaf).
-type_property(variable,leaf).
-type_property(string,leaf).
-
-edge_property(predicate,clause,explicit).
-edge_property(predicate,clause,multiplicity(*)).
 	
 my_writeln(Term):-
 	true.

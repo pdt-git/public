@@ -6,6 +6,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -125,50 +126,36 @@ public class JLMPNatureAction implements IObjectActionDelegate {
 	 *           org.eclipse.jface.viewers.ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
+		project=null;
 		if (selection instanceof IStructuredSelection) {
 			Object obj = ((IStructuredSelection) selection).getFirstElement();
 			if (obj instanceof IProject) {
 				// the plugin.xml file should make sure it is indeed
 				// a java project
 				project = (IProject) obj;
-				if (project.isOpen()) {
-					action.setEnabled(true);
-					try {
-						action.setChecked(project.getDescription().hasNature(
-								JLMP.NATURE_ID));
-					} catch (CoreException e) {
-						Debug.report(e);
-					}
-				}
-				else{
-					action.setEnabled(false);
-				}
-			
+							
 			} 
-			else if (obj instanceof IJavaProject) {
-				IJavaProject javaProject = (IJavaProject)obj;
-				project = javaProject.getProject();
-				//TODO: FIXME: the following is exactly the case above.
-				// this should be cleaned up. (ld)
-				if (project.isOpen()) {
-					action.setEnabled(true);
-					try {
-						action.setChecked(project.getDescription().hasNature(
-								JLMP.NATURE_ID));
-					} catch (CoreException e) {
-						Debug.report(e);
-					}
+			else if (obj instanceof IAdaptable) {
+				IAdaptable a = (IAdaptable) obj;
+				IResource r = (IResource) a.getAdapter(IResource.class);
+				if (r != null && IResource.PROJECT == r.getType()) {
+					project = (IProject) r;
+				}		
+			} 			
+		} 
+		if(project!=null){
+			if (project.isOpen()) {
+				action.setEnabled(true);
+				try {
+					action.setChecked(project.getDescription().hasNature(
+							JLMP.NATURE_ID));
+				} catch (CoreException e) {
+					Debug.report(e);
 				}
-				else{
-					action.setEnabled(false);
-				}
-			
-			} 
-			else {
-				project = null;
 			}
-		} else {
-			project = null;
+			else{
+				action.setEnabled(false);
+			}
 		}
 	}
 }

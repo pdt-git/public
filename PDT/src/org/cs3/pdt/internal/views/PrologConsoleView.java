@@ -43,10 +43,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
         PDTPlugin plugin = PDTPlugin.getDefault();
         PrologInterface pi = null;
         pi = plugin.getPrologInterface();
+        
+        view = new ConsoleView();
         pi.addLifeCycleHook(this, HOOK_ID, new String[] {
                 ConsoleServerHook.HOOK_ID});
 
-        view = new ConsoleView();
         controller = new DefaultConsoleController();
         completionProvider = new PrologCompletionProvider();
         completionProvider.setPrologInterface(pi);

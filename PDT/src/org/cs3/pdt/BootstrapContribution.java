@@ -5,7 +5,7 @@ package org.cs3.pdt;
 import java.util.List;
 
 /**
- * models a contribution to the set of bootstrap files consulted during the
+ * describes a contribution to the set of bootstrap files consulted during the
  * start of PrologInterface objects created by the PDT.
  */
 public interface BootstrapContribution {

@@ -70,7 +70,8 @@
      <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
-            objectClass="org.eclipse.jdt.core.IJavaProject"
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
             id="JLMPProjectObjectContribution">
          <action
                label="JTransformer Nature"
@@ -80,17 +81,6 @@
                id="JLMPNatureAction">
          </action>
       </objectContribution>
-      <objectContribution
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            id="ProjectObjectExtension">
-         <action
-               label="Export project factbase"
-               class="org.cs3.pl.export.FactbaseExport"
-               tooltip="Create a new factbase for this project and save it into a file."
-               style="push"
-               id="org.cs3.jlmp.export.factbaseexport">
-         </action>
-      </objectContribution>      
    </extension>
    <extension
          point="org.cs3.pdt.bootstrapContribution">
@@ -126,9 +116,10 @@
 <extension
        point="org.eclipse.ui.propertyPages">
     <page
+          adaptable="true"
           objectClass="org.eclipse.core.resources.IProject"
-          class="org.cs3.jlmp.internal.properties.JLMPProjectPropertyPage"
           icon="icons/sample.gif"
+          class="org.cs3.jlmp.internal.properties.JLMPProjectPropertyPage"
           name="JLMP Project Properties"
           id="org.cs3.jlmp.properties.jlmpPropertyPage">
 		  <filter

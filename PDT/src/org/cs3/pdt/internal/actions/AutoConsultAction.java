@@ -6,6 +6,9 @@ import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -68,28 +71,32 @@ public class AutoConsultAction implements IObjectActionDelegate {
      *           org.eclipse.jface.viewers.ISelection)
      */
     public void selectionChanged(IAction action, ISelection selection) {
-        try {
+    	file = null;
+        project=null;
+    	try {
             if (selection instanceof IStructuredSelection) {
                 Object obj = ((IStructuredSelection) selection)
                         .getFirstElement();
                 if (obj instanceof IFile) {
-                    file = (IFile) obj;
-
-                    project = (IPrologProject) file.getProject()
-                                                .getNature(PDT.NATURE_ID);
-                    action.setEnabled(project != null
-                            && project.isPrologSource(file));
-
-                    action.setChecked(project!=null&&project.isAutoConsulted(file));
+              	  file = (IFile) obj;                  
                 }
-
-                else {
-                    file = null;
-                    project=null;
+                else if (obj instanceof IAdaptable){
+    				IAdaptable a = (IAdaptable) obj;
+    				IResource r = (IResource) a.getAdapter(IResource.class);
+    				if (r != null && IResource.FILE == r.getType()) {
+    					file= (IFile) r;
+    				}
                 }
-            } else {
-                file = null;
-                project=null;
+            }
+            if(file!=null){
+
+                  project = (IPrologProject) file.getProject()
+                                              .getNature(PDT.NATURE_ID);
+                  action.setEnabled(project != null
+                          && project.isPrologSource(file));
+
+                  action.setChecked(project!=null&&project.isAutoConsulted(file));
+
             }
         } catch (Throwable t) {
             Debug.report(t);

@@ -56,7 +56,7 @@ public class SourceCodeRegeneratorTest extends TestCase {
 //	    "action(add(dirty_tree(method3)))";
 		
 		client.query(pred);
-		client.query("prolog_server(1080,[])");
+//		client.query("prolog_server(1080,[])");
 		
 		ISourceRegenerator regen = new SourceCodeRegenerator();
 		IAffectedFile[] files= regen.getAffectedFiles();

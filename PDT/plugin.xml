@@ -133,9 +133,10 @@
  <extension
        point="org.eclipse.ui.propertyPages">
     <page
+          adaptable="true"
           objectClass="org.eclipse.core.resources.IProject"
-          icon="icons/sample.gif"          
           class="org.cs3.pdt.internal.properties.PrologProjectPropertyPage"
+          icon="icons/sample.gif"
           name="Prolog Project Properties"
           id="org.cs3.pdt.properties.samplePropertyPage">
 		  <filter
@@ -146,6 +147,7 @@
  <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
+            adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
             id="PrologProjectObjectContribution">
          <action
@@ -157,6 +159,7 @@
          </action>
       </objectContribution>      
       <objectContribution
+            adaptable="true"
             objectClass="org.eclipse.core.resources.IFile"
             id="PrologFileObjectContribution">
          <action

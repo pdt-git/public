@@ -339,7 +339,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
 
     }
-
+//XXX
     public List getBootstrapList(String key) {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
         IExtensionPoint point = registry.getExtensionPoint("org.cs3.pdt",
