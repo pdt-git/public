@@ -158,17 +158,15 @@ public class Util {
     //  specify buffer size for extraction
     static final int BUFFER = 2048;
 
-    
     /*
      * the body of this method was taken from here.
      * 
-     * http://www.devshed.com/c/a/Java/Zip-Meets-Java/2/ 
-     *
+     * http://www.devshed.com/c/a/Java/Zip-Meets-Java/2/
+     * 
      * Many thanks to the author, Kulvir Singh Bhogal.
-     *  
-     * I could not find any license or copyright notice
-     * If there are any legal problems please let me: know
-     * degenerl_AT_cs_DOT_uni-bonn_DOT_de
+     * 
+     * I could not find any license or copyright notice If there are any legal
+     * problems please let me: know degenerl_AT_cs_DOT_uni-bonn_DOT_de
      * 
      * --lu
      */
@@ -229,21 +227,70 @@ public class Util {
     /**
      * @param file
      */
-    public static void unzip(File file) {        
-        unzip(file,file.getParentFile());
+    public static void unzip(File file) {
+        unzip(file, file.getParentFile());
     }
 
     /**
      * @param file
      */
     public static void deleteRecursive(File file) {
-        if(file.isDirectory()){
+        if (file.isDirectory()) {
             File[] files = file.listFiles();
             for (int i = 0; i < files.length; i++) {
-                deleteRecursive(files[i]);                
+                deleteRecursive(files[i]);
             }
         }
         file.delete();
+    }
+
+    /**
+     * @param line
+     * @param start
+     * @param end
+     * @return
+     */
+    public static String unescape(CharSequence line, int start, int end) {
+        StringBuffer sb = new StringBuffer();
+        boolean escape = false;
+        StringBuffer escBuf = new StringBuffer();
+        for (int i = start; i < end; i++) {
+            char c = line.charAt(i);
+            switch (c) {
+            case '&':
+                escape = true;
+                break;
+            case ';':
+                if (escape) {
+                    escape = false;
+                    String escSeq = escBuf.toString();
+                    escBuf.setLength(0);
+                    if ("lt".equals(escSeq)) {
+                        sb.append('<');
+                    } else if ("gt".equals(escSeq)) {
+                        sb.append('>');
+                    } else if ("amp".equals(escSeq)) {
+                        sb.append('&');
+                    } else if ("apos".equals(escSeq)) {
+                        sb.append('\'');
+                    } else if ("quot".equals(escSeq)) {
+                        sb.append('\"');
+                    }
+                } else {
+                    sb.append(c);
+                }
+                break;
+            default:
+                if(escape){
+                    escBuf.append(c);
+                }
+                else{
+                    sb.append(c);
+                }
+                break;
+            }
+        }
+        return sb.toString();
     }
 
 }
