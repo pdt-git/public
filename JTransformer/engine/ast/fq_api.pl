@@ -114,7 +114,16 @@ type_term_to_atom(TypeTerm,Atom):-
     nonvar(Atom),
     atom_to_type_term_(Atom,TypeTerm).
 
+type_term_to_atom(TypeTerm,Atom):-
+    nonvar(Atom),
+    atom_to_type_term_(Atom,TypeTerm).
 
+type_term_to_atom_(type(basic,TypeName,Arity), type(basic,TypeName,Arity)).
+    
+type_term_to_atom_(type(class,Id,Arity), type(class,FQN,Arity)):-
+    fullQualifiedName(Id,FQN).
+
+/*  *** original version: type(..) -> FQN ***
 type_term_to_atom_(type(basic,TypeName,Arity), Atom):-
     arity_to_brackets_(Arity,Brackets),
     atom_concat(TypeName,Brackets,Atom).
@@ -123,6 +132,7 @@ type_term_to_atom_(type(class,Id,Arity), Atom):-
     arity_to_brackets_(Arity,Brackets),
     fullQualifiedName(Id,FQN),
     atom_concat(FQN,Brackets,Atom).
+*/
 
 /**
  * arity_to_brackets(+Arity,?Brackets)
@@ -283,19 +293,22 @@ bindArgs([_|ArgDefs], [Arg|Args], [_|JavaASTArgs]) :-
 	bindArgs(ArgDefs, Args, JavaASTArgs).
 
 
+bindArgs([ast_arg(_,mult(_,_,ord), id,  Kind)|ArgDefs], [FQNAndIdList|Args], [IdList|JavaASTArgs]) :-
+    !,
+	member(classDefT,Kind),
+	replaceFQNsWithClassIds(FQNAndIdList,IdList),
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
 % in the case the id is null
 bindArgs([ast_arg(_,_, id,  _)|ArgDefs], [null|Args], [null|JavaASTArgs]) :-
 	bindArgs(ArgDefs, Args, JavaASTArgs).
+
 
 % attribute is a classDefT
 bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
     fullQualifiedName(JavaASTArg, FQN),
 	bindArgs(ArgDefs, Args, JavaASTArgs).
     
-bindArgs([ast_arg(_,mult(_,_,ord), id,  Kind)|ArgDefs], [FQNAndIdList|Args], [IdList|JavaASTArgs]) :-
-	member(classDefT,Kind),
-	replaceFQNsWithClassIds(FQNAndIdList,IdList),
-	bindArgs(ArgDefs, Args, JavaASTArgs).
     
     
 % type term attribute.
