@@ -7,14 +7,10 @@
 package org.cs3.pl.export;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Hashtable;
 
 import org.cs3.pl.Debug;
 import org.cs3.pl.PDTPlugin;
-import org.cs3.pl.prolog.IPrologClient;
-import org.cs3.pl.prolog.PrologClient;
-import org.cs3.pl.prolog.PrologManager;
+import org.cs3.pl.buttons.LocateFileDialog;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.action.IAction;
@@ -61,26 +57,19 @@ public class FactbaseExport implements IObjectActionDelegate {
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
 	public void run(IAction action) {
-			
-		FileDialog input = null;
-			
-			input = new FileDialog(PDTPlugin.getShell(),0);
-			
-			String projectName  = currentSelection.getElementName();
-			String filterPath;
-			try {
-				filterPath = PDTPlugin.getDefault().getLocation();
+
+		String filterPath;
+		try {
+			filterPath = PDTPlugin.getDefault().getLocation();
 		} catch (FileNotFoundException e2) {
 			filterPath = PDTPlugin.getDefault().getStateLocation().toOSString();
-			//e2.printStackTrace();
-			//MessageDialog.openError(CultivatePlugin.getDefault().getShell(),"Cultivate","Coud not find the cultivate project location.");
 		}
-		input.setFilterPath(filterPath /*"src"+File.separator+"test"+File.separator+"factbases"+File.separator*/);
-			input.setFileName(projectName+".pl");
-			input.setText("Please provide a filename, where to save the factbase of the project "+ projectName);
-			input.setFilterExtensions(new String[] {".pl"});
 		
-		final String filename = input.open();
+	    LocateFileDialog dialog = new LocateFileDialog(filterPath,
+                "Please provide a filename, where to save the factbase of the project " + 
+                currentSelection.getElementName());
+		
+		final String filename = dialog.openDialog();
 		if(filename == null) {
 			return;
 		} 
