@@ -98,10 +98,8 @@ public class PrologProjectPropertyPage extends PropertyPage {
     }
 
     private String getSourcePathDefault() {
-        IPreferencesService service = Platform.getPreferencesService();
-        String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
-        String d = service.getString(qualifier, PDT.PREF_SOURCE_PATH_DEFAULT,"", null);
-        return d;
+        String value= PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_SOURCE_PATH_DEFAULT, null);
+        return value;
     }
     
     protected void performDefaults() {

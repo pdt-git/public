@@ -18,13 +18,12 @@ public class ConsoleServerHook implements LifeCycleHook {
     public static final String HOOK_ID = "org.cs3.pdt.internal.hooks.ConsoleServerHook";
 
     private static int getPort() {
-        IPreferencesService service = Platform.getPreferencesService();
-        String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
-        int port = service.getInt(qualifier, PDT.PREF_CONSOLE_PORT, -1, null);
-        if (port == -1) {
-            throw new NullPointerException("Required property \""
-                    + PDT.PREF_CONSOLE_PORT + "\" was not specified.");
-        }
+       String value = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_CONSOLE_PORT, null);
+       if (value==null) {
+           throw new NullPointerException("Required property \""
+                   + PDT.PREF_CONSOLE_PORT + "\" was not specified.");
+       }
+       int port = Integer.parseInt(value);        
         return port;
     }
 

@@ -108,12 +108,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
         String val = null;
         val = getProject().getPersistentProperty(
                 new QualifiedName("", PDT.PROP_SOURCE_PATH));
-        if (val == null) {
-            IPreferencesService service = Platform.getPreferencesService();
-            String qualifier = PDTPlugin.getDefault().getBundle()
-                    .getSymbolicName();
-             val = service.getString(qualifier,
-                    PDT.PREF_SOURCE_PATH_DEFAULT, "", null);
+        if (val == null) {           
+             val = PDTPlugin.getDefault().getPreferenceValue(
+                    PDT.PREF_SOURCE_PATH_DEFAULT, "");
         }
         return val;
     }

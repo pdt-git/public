@@ -8,12 +8,13 @@ package org.cs3.pdt.internal.preferences;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pl.prolog.Option;
+import org.cs3.pl.common.Option;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
@@ -60,58 +61,66 @@ public class PreferencePage extends FieldEditorPreferencePage implements
     public void createFieldEditors() {
         
         Composite parent = getFieldEditorParent();
-        addField(new StringFieldEditor(PDT.PREF_PIF_IMPLEMENTATION,"PrologInterfaceFactory implementation",parent));
         IPreferencesService service = Platform.getPreferencesService();
-        String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
+        PDTPlugin plugin = PDTPlugin.getDefault();
+        String qualifier = plugin.getBundle().getSymbolicName();
         String impl= service.getString(qualifier,PDT.PREF_PIF_IMPLEMENTATION,null,  null);         
-        Option[] options = PrologInterfaceFactory.newInstance(impl).getOptions();
+        
+        Option[] options = plugin.getOptions();
+        addEditorsForOptions(parent, options);
+        options = PrologInterfaceFactory.newInstance(impl).getOptions();
+        addEditorsForOptions(parent, options);
+        
+        
+//        FieldEditor editor;
+//        
+//        editor = new IntegerFieldEditor(PDT.PREF_CONSOLE_PORT,
+//                "Port for console IO", parent);
+//        editor.setEnabled(System.getProperty(PDT.PREF_CONSOLE_PORT)==null,parent);
+//        addField(editor);
+//        
+//        editor = new RadioGroupFieldEditor(PDT.PREF_DEBUG_LEVEL,
+//                "debug level", 4, new String[][] { { "error", "ERROR" },
+//                { "warning", "WARNING" }, { "info", "INFO" },
+//                { "debug", "DEBUG" } }, parent, true);
+//        editor.setEnabled(System.getProperty(PDT.PREF_DEBUG_LEVEL)==null,parent);
+//        addField(editor);
+//
+//        editor=new StringFieldEditor(PDT.PREF_PIF_IMPLEMENTATION,"PrologInterfaceFactory implementation",parent);
+//        editor.setEnabled(false,parent);//disabled for now.
+//        //editor.setEnabled(System.getProperty(PDT.PREF_DEBUG_LEVEL)==null,parent);
+//        addField(editor);
+        
+    }
+
+    private void addEditorsForOptions(Composite parent, Option[] options) {
+        FieldEditor editor = null;
         for(int i=0;i<options.length;i++){
             String name = options[i].getId();
             String label = options[i].getLabel();
+            
             switch(options[i].getType()){
             	case Option.DIR:
-            	    addField(new DirectoryFieldEditor(name,label,parent));
+            	    editor = new DirectoryFieldEditor(name,label,parent);            	    
             	break;
             	case Option.FLAG:
-            	    addField(new BooleanFieldEditor(name,label,parent));
+            	    editor = new BooleanFieldEditor(name,label,parent);
             	break;
             	case Option.NUMBER:
-            	    addField(new IntegerFieldEditor(name,label,parent));
+            	    editor = new IntegerFieldEditor(name,label,parent);
+            	break;
+            	case Option.ENUM:
+            	    editor = new RadioGroupFieldEditor(name,label,4,options[i].getEnumValues(),parent,true);
+            	break;
             	default:
-            	    addField(new StringFieldEditor(name,label,parent));
+            	    editor = new StringFieldEditor(name,label,parent);
             		break;
             		
             }
+            //disable the editor, if the value is overridden per sys prop.
+            editor.setEnabled(System.getProperty(name)==null,parent);
+            addField(editor);
         }
-        addField(new IntegerFieldEditor(PDT.PREF_CONSOLE_PORT,
-                "Port for console IO", parent));
-
-        FileListEditor consultPathEditor = new FileListEditor(
-                PDT.PREF_CONSULT_PATH,
-                "List of files/directories to auto-consult", "add pl-file",
-                parent);        
-        consultPathEditor.setFilterExtensions(new String[]{".pl"});
-        addField(consultPathEditor);
-
-        addField(new RadioGroupFieldEditor(PDT.PREF_DEBUG_LEVEL,
-                "debug level", 4, new String[][] { { "error", "ERROR" },
-                        { "warning", "WARNING" }, { "info", "INFO" },
-                        { "debug", "DEBUG" } }, parent, true));
-
-        //      addField(
-        //          new ButtonFieldEditor(
-        //              P_USER,
-        //              "Reset user.rub file.",
-        //              getFieldEditorParent()) { }
-        //      );
-
-        //      addField(
-        //          new BooleanFieldEditor(
-        //              P_RESTORE,
-        //              "Restore trees from previous session",
-        //              getFieldEditorParent())
-        //      );
-
     }
 
     public void init(IWorkbench workbench) {

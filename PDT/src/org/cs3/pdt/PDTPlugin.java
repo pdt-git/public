@@ -1,7 +1,10 @@
 package org.cs3.pdt;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.HashMap;
@@ -15,13 +18,14 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.views.PrologNode;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
+import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
+import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.MetadataEngineInstaller;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.ConsultService;
-import org.cs3.pl.prolog.Option;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
@@ -96,6 +100,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     private DefaultResourceFileLocator rootLocator;
 
+    private Option[] options;
+
     //private HashMap locators=new HashMap();
 
     /**
@@ -122,7 +128,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                 Debug.report(t);
                 throw new RuntimeException(t);
             }
-            
+
             rootLocator = new DefaultResourceFileLocator(location);
         }
         return rootLocator.subLocator(key);
@@ -204,15 +210,13 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     /**
      * @return the prolog interface instance shared among this plugin's
-     *               components.
+     *            components.
      * @throws IOException
      */
     public PrologInterface getPrologInterface() {
         if (prologInterface == null) {
-            IPreferencesService service = Platform.getPreferencesService();
-            String qualifier = getBundle().getSymbolicName();
-            String impl = service.getString(qualifier,
-                    PDT.PREF_PIF_IMPLEMENTATION, null, null);
+
+            String impl = getPreferenceValue(PDT.PREF_PIF_IMPLEMENTATION, null);
             if (impl == null) {
                 throw new RuntimeException("The required property \""
                         + PDT.PREF_PIF_IMPLEMENTATION + "\" was not specified.");
@@ -221,7 +225,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                     .newInstance(impl);
             factory.setResourceLocator(getResourceLocator(PDT.LOC_PIF));
             prologInterface = factory.create();
-            
+
             reconfigurePrologInterface();
         }
         return prologInterface;
@@ -241,11 +245,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
      */
     protected void preferenceChanged(PropertyChangeEvent e) {
         String key = e.getProperty();
-        if (key.equals(PDT.PREF_SERVER_PORT) || key.equals(PDT.PREF_SWIPL_DIR)
-                || key.equals(PDT.PREF_SERVER_CLASSPATH)
-                || key.equals(PDT.PREF_USE_SESSION_POOLING)
-                || key.equals(PDT.PREF_DEBUG_LEVEL)
-                || key.equals(PDT.PREF_SERVER_STANDALONE)) {
+ 
+              
             try {
                 prologInterface.stop();
                 reconfigurePrologInterface();
@@ -253,8 +254,27 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             } catch (IOException e1) {
                 Debug.report(e1);
             }
-        }
 
+
+    }
+
+    /**
+     * look up a preference value.
+     * <p>
+     * will return user settings if available or default settings if not. If a
+     * system property with the given key is defined it will overrule any
+     * existing setting in the preference store. if the key is not defined, this
+     * method returns the given default..
+     * 
+     * @param key
+     * @return the value or specified default if no such key exists..
+     */
+    public String getPreferenceValue(String key, String defaultValue) {
+
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = getBundle().getSymbolicName();
+        String value = service.getString(qualifier, key, defaultValue, null);
+        return System.getProperty(key, value);
     }
 
     /**
@@ -262,11 +282,17 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
      */
     public void reconfigure() {
         try {
-            IPreferencesService service = Platform.getPreferencesService();
-            String qualifier = getBundle().getSymbolicName();
-            String debugLevel = service.getString(qualifier,
-                    PDT.PREF_DEBUG_LEVEL, "ERROR", null);
+            String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL,
+                    "WARNING");
             Debug.setDebugLevel(debugLevel);
+            String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE,
+                    null);
+            File logFile = logFileName == null ? Util
+                    .getLogFile("pdt.client.log") : new File(logFileName);
+            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+                    new FileOutputStream(logFile, true));
+            Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+
             prologInterface.stop();
             reconfigurePrologInterface();
 
@@ -279,23 +305,20 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     private void reconfigurePrologInterface() {
 
-        IPreferencesService service = Platform.getPreferencesService();
-        String qualifier = getBundle().getSymbolicName();
-        
-        
         MetadataEngineInstaller.install(prologInterface);
         List l = prologInterface.getBootstrapLibraries();
         l.addAll(getBootstrapList(null));
-        
-//		we are using the bootstrapContribution extension point just as anybody else.
-//        --lu
-//        l.add(Util.prologFileName(getResourceLocator(PDT.LOC_ENGINE).resolve(
-//                "main.pl")));
+
+        //		we are using the bootstrapContribution extension point just as
+        // anybody else.
+        //        --lu
+        //        l.add(Util.prologFileName(getResourceLocator(PDT.LOC_ENGINE).resolve(
+        //                "main.pl")));
         PrologInterfaceFactory factory = prologInterface.getFactory();
         Option[] options = factory.getOptions();
         for (int i = 0; i < options.length; i++) {
             String id = options[i].getId();
-            String val = service.get(id, options[i].getDefault(), null);
+            String val = getPreferenceValue(id, options[i].getDefault());
             prologInterface.setOption(id, val);
         }
 
@@ -323,18 +346,19 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                 if (className != null) {
                     BootstrapContribution bc = null;
                     try {
-                        bc=(BootstrapContribution) elm.createExecutableExtension("class");
-                        bc.contributeToBootstrapList(key,r);
+                        bc = (BootstrapContribution) elm
+                                .createExecutableExtension("class");
+                        bc.contributeToBootstrapList(key, r);
                     } catch (CoreException e1) {
                         Debug.report(e1);
                         throw new RuntimeException("Problem instantiating: "
                                 + elm.getAttributeAsIs("class"), e1);
                     }
                 } else if (resName != null) {
-                    URL url = Platform.getBundle(ext.getNamespace())
-                            .getEntry(resName);
+                    URL url = Platform.getBundle(ext.getNamespace()).getEntry(
+                            resName);
                     try {
-                        url=Platform.resolve(url);
+                        url = Platform.resolve(url);
                     } catch (IOException e) {
                         Debug.report(e);
                         throw new RuntimeException("Problem resolving url: "
@@ -424,6 +448,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     public void start(BundleContext context) throws Exception {
         try {
             super.start(context);
+            initOptions();
+
             /*
              * XXX not sure if this is the "eclipse way(tm)" to go, but we need
              * to make sure that the pdt preferences are correctly initilized
@@ -439,6 +465,64 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         } catch (Throwable t) {
             Debug.report(t);
         }
+    }
+
+    public Option[] getOptions() {
+        return this.options;
+    }
+
+    /**
+     *  
+     */
+    private void initOptions() {
+        String fileSep = File.separator;
+        String pathSep = File.pathSeparator;
+        String location = "";
+        try {
+            location = getLocation();
+        } catch (IOException e) {
+            Debug.report(e);
+            Debug.error("Could not find plugin installation dir.");
+        }
+
+        options = new Option[] {
+                new SimpleOption(
+                        PDT.PREF_CONSOLE_PORT,
+                        "Console Port",
+                        "Number of the port used for connecting the console to the Prolog prozess",
+                        Option.NUMBER, "4711"),
+                new SimpleOption(PDT.PREF_DEBUG_LEVEL, "Debug Level",
+                        "Determines the verbosity of the debug log file.",
+                        Option.ENUM, "WARNING", new String[][] {
+                                { "error", "ERROR" }, { "warning", "WARNING" },
+                                { "info", "INFO" }, { "debug", "DEBUG" } }),
+                new SimpleOption(
+                        PDT.PREF_METADATA_ENGINE_DIR,
+                        "Metadata Engine Dir",
+                        "Directory containing the prolog implementation of the meta data engine,",
+                        Option.DIR, location + fileSep + "engine"),
+                new SimpleOption(PDT.PREF_METADATA_STORE_DIR,
+                        "Metadata Store Dir",
+                        "Directory used to store metadata for prolog files.",
+                        Option.DIR, location + fileSep + "store"),
+                new SimpleOption(
+                        PDT.PREF_SOURCE_PATH_DEFAULT,
+                        "Default Source Path",
+                        "The default value for the source path of prolog projects.",
+                        Option.STRING, "/pl"),
+                new SimpleOption(
+                        PDT.PREF_PIF_IMPLEMENTATION,
+                        "PrologInterfaceFactory implementation",
+                        "The factory to be used for creating PrologInterface instances",
+                        Option.STRING, PrologInterfaceFactory.DEFAULT),
+                new SimpleOption(
+                        PDT.PREF_CLIENT_LOG_FILE,
+                        "Log file location",
+                        "A file to which debug output of the PDT will be writen",
+                        Option.FILE, location + fileSep + "pdt.log")
+
+        };
+
     }
 
     /**
@@ -511,6 +595,44 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
      */
     public PrologInterface getPrologInterface(String key) {
         return getPrologInterface();
+    }
+
+    private String getLibDir() {
+        String proj;
+        String cp;
+
+        String sep = System.getProperty("file.separator");
+        try {
+            if (getLocation() != null) {
+                return getLocation() + sep + "lib";
+            }
+        } catch (IOException e) {
+            // ok, then the other way
+        }
+
+        String resName = "org/cs3/pdt/PDTPlugin.class";
+        URL url = ClassLoader.getSystemClassLoader().getResource(resName);
+        String path = url.getFile();
+
+        return path.substring(0, path.indexOf(resName)) + sep + "lib";
+    }
+
+    private String getLocation() throws IOException {
+        URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
+        String location = null;
+        location = new File(Platform.asLocalURL(url).getFile())
+                .getAbsolutePath();
+        if (location.charAt(location.length() - 1) == File.separatorChar)
+            location = location.substring(0, location.length() - 1);
+        return location;
+    }
+
+    private String guessExecutableName() {
+        String osname = System.getProperty("os.name");
+        if (osname.indexOf("Windows") > -1) {
+            return "plwin";
+        }
+        return "xpce";
     }
 
 }
