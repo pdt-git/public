@@ -34,12 +34,6 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
-/**
- * @author xproot
- * 
- * To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Generation - Code and Comments
- */
 public class PrologOutline extends ContentOutlinePage {
     private IEditorInput input;
 
@@ -216,46 +210,25 @@ public class PrologOutline extends ContentOutlinePage {
 
     public void createControl(Composite parent) {
         super.createControl(parent);
-        //		SashForm composite = new SashForm(parent,SWT.VERTICAL);//new
-        // Composite(parent, SWT.NONE);
-
-        //		parent.setLayout(new FillLayout());
 
         TreeViewer viewer = getTreeViewer();
 
         contentProvider = new ContentProvider(documentProvider);
         viewer.setContentProvider(contentProvider);
         viewer.setLabelProvider(new WorkbenchLabelProvider());
-        //		viewer.getLabelProvider().
+
         viewer.addSelectionChangedListener(this);
         if (input != null)
             viewer.setInput(input);
 
-        //int[] weights = {100};
-        //composite.setWeights(weights);
+;
 
     }
 
-    //	public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
-    // {
-    //		System.out.println("selection changed");
-    //		if (newInput != null) {
-    //			IDocument document= documentProvider.getDocument(newInput);
-    //			if (document != null && viewer instanceof TreeViewer) {
-    //				((TreeViewer)viewer).add(null, "TestOUT");
-    //			}
-    //		}
-    //	}
 
     public TreeViewer getTreeViewer() {
         return super.getTreeViewer();
     }
-
-    //		public void createControl(Composite parent) {
-    //
-    //		//viewer= new TreeViewer(parent);
-    //		super.createControl(parent);
-    //		}
 
     public void setInput(IEditorInput input) {
         this.input = input;
@@ -274,9 +247,7 @@ public class PrologOutline extends ContentOutlinePage {
      * @param b
      * @return
      */
-    //	private IAdaptable getContentOutline(IFile input2, boolean b) {
-    //		FileStructureView structureView = new FileStructureView();
-    //	}
+
     public void selectionChanged(SelectionChangedEvent event) {
         if (!((StructuredSelection) event.getSelection()).isEmpty()) {
             PrologElement element = ((PrologElement) ((StructuredSelection) event
