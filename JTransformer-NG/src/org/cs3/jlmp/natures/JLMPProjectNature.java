@@ -11,6 +11,7 @@ import org.cs3.jlmp.astvisitor.DefaultGenerationToolbox;
 import org.cs3.jlmp.astvisitor.FactGenerationToolBox;
 import org.cs3.jlmp.astvisitor.FactGenerator;
 import org.cs3.jlmp.astvisitor.PrologWriter;
+import org.cs3.jlmp.builders.FactBaseBuilder;
 import org.cs3.jlmp.builders.JLMPProjectBuilder;
 import org.cs3.jlmp.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.pdt.PDTPlugin;
@@ -40,6 +41,8 @@ public class JLMPProjectNature implements IProjectNature {
     //The project for which this nature was requested,
     //see IProject.getNature(String)
     private IProject project;
+
+    private FactBaseBuilder builder;
 
     /**
      *  
@@ -125,93 +128,13 @@ public class JLMPProjectNature implements IProjectNature {
     }
 
     /**
-     * generate prolog element facts for a given compilation unit.
-     * <p>
-     * More than a convenience method, this should become <b>The Way(tm) </b> to
-     * generate prolog representation of java source code on the facade level.
-     * @param an compilation unit in working copy mode.
-     * @param out a writer to which the facts should be written. It is a good idea to
-     * use a buffered writer. The writer will not be closed.
+     * @return Returns the builder.
      */
-    public  void writeFacts(ICompilationUnit icu,PrintStream out) throws IOException,
-            CoreException {
-    	writeFacts(project,icu,out);
-    }
-    public void writeFacts(String typeName,PrintStream out) throws JavaModelException, CoreException, ClassNotFoundException {
-        writeFacts(project,typeName,out);
-    }
-    public static void writeFacts(IProject project, String typeName,PrintStream out) throws JavaModelException, CoreException, ClassNotFoundException {
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);
-        
-        FactGenerationToolBox box = new DefaultGenerationToolbox();
-        new ByteCodeFactGeneratorIType(project, plw, typeName,
-                box).writeAllFacts();
-        plw.writeQuery("retractLocalSymtab");
-        plw.flush();
-        String data = sw.toString();
-        sw.getBuffer().setLength(0);
-        Map mapping = box.getFQNTranslator().getFQNMapping();
-        writeSymTab(plw, mapping);
-        plw.flush();
-        String header = sw.toString();
-        sw.getBuffer().setLength(0);
-        String fileName = typeName.replace('.', '/') + ".pl";
-        //out = metaDataEXT.getOutputStream(fileName);
-        out.println(header);
-        out.println(data);
-    }
-    
-    public static   void writeFacts(IProject project, ICompilationUnit icu,PrintStream out) throws IOException,
-    CoreException {
-        CompilationUnit cu = null;
-
-        IResource resource = icu.getResource();
-        String path = resource.getFullPath().removeFileExtension()
-                .addFileExtension("pl").toString();
-
-     
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);//metaDataSRC.getPrependablePrologWriter(path);
-        FactGenerationToolBox box = new DefaultGenerationToolbox();
-        FactGenerator visitor = new FactGenerator(icu, resource.getFullPath()
-                .toString(), box, plw);
-
-        ASTParser parser = ASTParser.newParser(AST.JLS2);
-        parser.setSource(icu);
-        parser.setResolveBindings(true);
-        cu = (CompilationUnit) parser.createAST(null);
-        
-            cu.accept(visitor);
-            plw.writeQuery("retractLocalSymtab");
-            plw.flush();
-            String data = sw.getBuffer().toString();
-            sw.getBuffer().setLength(0);
-            Map mapping = box.getFQNTranslator().getFQNMapping();
-            writeSymTab(plw, mapping);
-            plw.flush();
-            plw.close();
-            String header = sw.getBuffer().toString();
-            out.println(header);
-            out.println(data);
-      
-        
-    	
-    }
-    
-    private static  void writeSymTab(PrologWriter plw, Map mapping) {
-        Set set = mapping.keySet();
-        boolean temp = plw.getInterpretMode();
-        plw.setInterpretMode(false);
-        try {
-            for (Iterator it = set.iterator(); it.hasNext();) {
-
-                String fqn = (String) it.next();
-                String id = (String) mapping.get(fqn);
-                plw.writeFact("local2FQN", new String[] { id, fqn });
-            }
-        } finally {
-            plw.setInterpretMode(temp);
+    public FactBaseBuilder getFactBaseBuilder() {
+        if(builder==null){
+            builder = new FactBaseBuilder(getProject(),getPrologInterface());
         }
+        return builder;
     }
+    
 }
