@@ -4,6 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
@@ -205,5 +208,14 @@ public class BuilderTest extends FactGenerationTest {
 	
 	public void _testChangeToplevels() throws Throwable{
 	    fail("Test not implemented");
+	}
+	public Test _suite(){
+	    TestSuite t = new TestSuite();
+	    t.addTest(new BuilderTest("testMoveToplevels"));
+	    t.addTest(new BuilderTest("testMoveToplevels"));
+	    t.addTest(new BuilderTest("testMoveToplevels"));
+	    t.addTest(new BuilderTest("testMoveToplevels"));
+	    t.addTest(new BuilderTest("testMoveToplevels"));
+	    return t;
 	}
 }

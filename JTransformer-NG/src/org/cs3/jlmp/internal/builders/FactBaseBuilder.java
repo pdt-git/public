@@ -71,7 +71,7 @@ public class FactBaseBuilder {
     private long storeTimeStamp;
 
     /**
-     * 
+     *  
      */
     public FactBaseBuilder(JLMPProject jlmpProject) {
         this.jlmpProject = jlmpProject;
@@ -242,12 +242,25 @@ public class FactBaseBuilder {
                 if (resource.getType() == IResource.FILE) {
                     String fext = resource.getFileExtension();
                     if (fext != null && fext.equals("java")) {
-                        if (delta.getKind() == IResourceDelta.REMOVED) {
-                            toDelete.add(resource);
-                        } else if (!isStoreUpToDate((IFile) (resource))) { // added,...???
-                            Debug.debug("Adding " + resource + " to toProcess");
-                            toProcess.add(resource);
+                        if ("OinkOinkOink.java".equals(resource.getName())) {
+                            Debug.debug("debug");
                         }
+                        switch (delta.getKind()) {
+                        case IResourceDelta.REMOVED:
+                            toDelete.add(resource);
+                            break;
+                        case IResourceDelta.CHANGED:
+                            if (!isStoreUpToDate((IFile) (resource))) { // added,...???
+                                Debug.debug("Adding " + resource
+                                        + " to toProcess");
+                                toProcess.add(resource);
+                            }
+                            break;
+                        default://added, moved, etc
+                            toProcess.add(resource);
+                            break;
+                        }
+
                     }
                 }
 
@@ -386,7 +399,7 @@ public class FactBaseBuilder {
     private void buildFacts(IFile file) throws IOException, CoreException {
 
         /* the file seems to have been deleted */
-        if (!file.exists() || isStoreUpToDate(file)) {
+        if (!file.exists()) {
             return;
         }
         ConsultService cs = getMetaDataSRC();
@@ -499,11 +512,10 @@ public class FactBaseBuilder {
                          * quit right away. see you."); System.exit(-42); } }
                          * else { Debug.warning("\t-->\t is NOT readable or does
                          * not exist."); Debug.warning("\t-->Ok, no prob, you
-                         * may pass."); }
-                         *  } //
+                         * may pass."); } } //
                          * -------------------------------------------------------------------------------------------
                          * </DEBUG>
-                         * 
+                         *  
                          */
                         seen.add(typeName);
                         try {
