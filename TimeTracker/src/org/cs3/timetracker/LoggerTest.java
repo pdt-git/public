@@ -36,7 +36,7 @@ public class LoggerTest extends TestCase {
 		} catch(Exception e) { e.printStackTrace(); }		
 		
 		String logString  = logger.log( GlobalTestComment);
-		assertEquals("Recorded [03:00 02:58 00:02] "+GlobalTestComment,logString);
+		assertEquals("Recorded [03:00 02:58 00:02] "+GlobalTestComment, logString);
 	}
 	
 	public void testReadLog() throws Exception

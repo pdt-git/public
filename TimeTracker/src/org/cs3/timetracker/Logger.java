@@ -70,7 +70,8 @@ public class Logger {
 		LogString = "Recorded ["+toTime(ticker.getLastTimeStamp())+
 		  " "+toTime(ticker.getCurrentSeconds())+
 		  " "+toTime(ticker.getTimeDifference())+"]"+
-		  " "+Comment;
+		  " "+Comment+
+		  "\n";
 		try {
 			FileOutputStream OutputStreamObject = new FileOutputStream(FileObject, true);
 			OutputStreamObject.write(LogString.getBytes());
