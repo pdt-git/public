@@ -158,39 +158,42 @@ remove_brackets(Atom,class, Id,0):-
 /**
  * java_fq
  */
+
+% java_fq(Term):-
+%	var(Term),
+	%tree(ID,_,_),
+%	getTerm(_ID,Term),
+%	java_fq(Term).
  
  java_fq(Term):-
      Term =.. [Functor|[Id|Args]],
      nonvar(Id),
-	 ast_node_def('Java',Functor,[_|ArgDefs]),
-     JavaAST =.. [Functor|Id|[JavaASTArgs]],
+	 %ast_node_def('Java',Functor,[_|ArgDefs]),
+	 getTerm(Id,JavaAST),
+     JavaAST =.. [Functor,Id|JavaASTArgs],
      call(JavaAST),
-     mapArgs(ArgDefs,JavaASTArgs,Args).
+     mapArgs(JavaASTArgs,Args).
     
 mapArgs([],[]).
      
 mapArgs([JavaASTArg|JavaASTArgs],[FQN|Args]):-
     classDefT(JavaASTArg,_,_,_),
+    !,
     fullQualifiedName(JavaASTArg,FQN),
     mapArgs(JavaASTArgs,Args).	
     
 mapArgs([type(Kind,Id,Arity)|JavaASTArgs],[FQN|Args]):-
+    !,
     type_term_to_atom(type(Kind,Id,Arity),FQN),
     mapArgs(JavaASTArgs,Args).
+
+mapArgs([Arg|JavaASTArgs],[Arg|Args]):-
+    mapArgs(JavaASTArgs,Args).
      
+test(java_fq,(
+   assert_true('full instantiated fieldDefT',
+      java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
+   assert_true('full instantiated fieldDefT',
+      java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null)))
      
-     % tree_constraints(classDefT ,[[execT,packageT,classDefT,newClassT,blockT,nullType],[atom],[methodDefT,fieldDefT,classDefT]]).
-ast_node_def('Java',classDefT,[
-     ast_arg(id,      1,  id,  [id]), % <-- convention!!!
-     ast_arg(parent,  1,  id,  [execT,packageT, classDefT, newClassT, blockT]), 
-     ast_arg(name,    1,  attr,[atom]),
-     ast_arg(defs,    *,  id,  [methodDefT,fieldDefT,classDefT]),
-     ast_arg(expr,    1,  id,  [expressionType]),
-     ast_arg(extends, 1,  id,  [classDefT]),
-     ast_arg(implems, *,  id,  [classDefT]),
-     ast_arg(hasModif,*,  attr,[atom]),
-     ast_arg(isInterf,0-1,flag,[]),
-     ast_arg(isExtern,0-1,flag,[])
-]).
-     
- 
+      )).
