@@ -27,6 +27,8 @@ public class TimeTicker  {
 	private TimeEvent time;
 	private ArrayList observers;
 	
+	public String Log = ""; 
+	
 	private int Seconds = 180; // 3* 60
 	
 	public void addObserver(ITimeObserver observer)
@@ -46,8 +48,6 @@ public class TimeTicker  {
   		}
   		  		
   		Seconds--;	
-  		
-  		System.out.println("TimeTick()");
 	}
 
 	public TimeTicker()
@@ -69,24 +69,27 @@ public class TimeTicker  {
 		Seconds = 180;
 		t.setDelay(1000);
 		t.start();
-		System.out.println("started.");
+		
+		Log = Log + "Started.\n";
 	}
 	
 	public void stop()
 	{
 		t.stop();
 		Seconds = 0;
-		System.out.println("Stopped");
+		Log = Log + "Stopped.\n";
 	}
 	
 	public void pause()
 	{
 		t.stop();
+		Log = Log + "Paused.\n";
 	}
 	
 	public void resume()
 	{
 		t.start();
+		Log = Log + "Resumed.\n";
 	}
 
 }

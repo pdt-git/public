@@ -22,15 +22,19 @@ import junit.framework.TestCase;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class TimeTrackerTest extends TestCase {
+	
+	TestTimeObserver observer;
+	TimeTicker ticker;
 
-	public class TestTimeObserver implements ITimeObserver {
+	public class TestTimeObserver implements ITimeObserver {		
+		public String Log = "";
 		
 		public TestTimeObserver() {
-			System.out.println("I have been started.");
+			Log = Log + "TestTimeObserver started.\n";
 		}
 		
 		public void notify(TimeEvent time) {
-			System.out.println("Received time Message. Minutes = "+ time.getMinutes()+" ; Seconds = "+time.getSeconds());
+			Log = Log + "Time message received. Minutes = "+time.getMinutes()+"; Seconds = "+time.getSeconds();
 		}
 		
 	}
@@ -41,29 +45,34 @@ public class TimeTrackerTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		TimeTicker ticker = new TimeTicker();
-		TestTimeObserver observer = new TestTimeObserver();
+		observer = new TestTimeObserver();
+		ticker = new TimeTicker();
 		
 		ticker.addObserver(observer);
 		ticker.start();
 		
 		Thread sleeper = new Thread();
-		try {
-		Thread.sleep(5000);
-		}catch(Exception e){ e.printStackTrace();}
-		
-//		Timer testTimer = new Timer(5000, new ActionListener() {
-//			public void actionPerformed(ActionEvent event) {
-//				ticker.stop();
-//			}
-//		});
-//		
-//		testTimer.start();
+		try 
+		{
+			Thread.sleep(5000);
+		} catch(Exception e) { e.printStackTrace(); }
 	}
 	
 	public void testThisUnit() throws Exception 
 	{
-		assertEquals(2,2);	
+		String ObserverTestString = 
+				"TestTimeObserver started.\n" 
+			+	"Time message received. Minutes = 3; Seconds = 0" 	
+			+	"Time message received. Minutes = 2; Seconds = 59" 	
+			+	"Time message received. Minutes = 2; Seconds = 58" 	
+			+	"Time message received. Minutes = 2; Seconds = 57" 	
+			+	"Time message received. Minutes = 2; Seconds = 56";
+		
+		String TimeTickerTestString = 
+				"Started.\n";
+		
+		assertEquals("Observer Test missed.", ObserverTestString, observer.Log);
+		assertEquals("Time Ticker Test missed.", TimeTickerTestString, ticker.Log);
 	}
 	
 
