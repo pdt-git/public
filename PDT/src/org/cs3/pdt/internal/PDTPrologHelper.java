@@ -82,7 +82,7 @@ public class PDTPrologHelper implements IMetaInfoProvider {
         //		if (!isCompleted())
         //		abort();
         PrologSession session = prologInterface.getSession();
-        Map solution = session.query(pdtModulePrefix + "get_file_pos('"
+        Map solution = session.queryOnce(pdtModulePrefix + "get_file_pos('"
                 + filename + "', " + functor + ", " + arity + ",File,Pos,_,_)");
         if (solution == null) {
             session.dispose();
