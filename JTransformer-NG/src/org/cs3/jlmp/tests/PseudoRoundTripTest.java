@@ -76,10 +76,94 @@ import org.eclipse.jface.text.BadLocationException;
  */
 public class PseudoRoundTripTest extends FactGenerationTest {
 
+    private final class Comparator implements IResourceVisitor {
+        public boolean visit(IResource resource) throws CoreException {
+            switch (resource.getType()) {
+            case IResource.FOLDER:
+                return true;
+            case IResource.FILE:
+                IFile file = (IFile) resource;
+                if (!file.getFileExtension().equals("class"))
+                    return false;
+
+                IFile orig = ResourcesPlugin.getWorkspace().getRoot().getFile(
+                        file.getFullPath().addFileExtension("orig"));
+                assertTrue(packageName
+                        + ": original class file not accessible: "
+                        + orig.getFullPath().toString(), orig.isAccessible());
+                //both files should be of EXACTLY the same size:
+                BufferedReader origReader = new BufferedReader(
+                        new InputStreamReader(orig.getContents()));
+                BufferedReader genReader = new BufferedReader(
+                        new InputStreamReader(file.getContents()));
+                int origR = 0;
+                int genR = 0;
+                int i = 0;
+                for (i = 0; origR != -1 && genR != -1; i++) {
+                    try {
+                        origR = origReader.read();
+                        genR = genReader.read();
+                        assertTrue(
+                                packageName
+                                        + ": orig and generated file differ at position "
+                                        + i, origR == genR);
+                    } catch (IOException e) {
+                        org.cs3.pl.common.Debug.report(e);
+                    }
+                }
+                org.cs3.pl.common.Debug.info("compared " + i
+                        + " chars succsessfully.");
+                return false;
+
+            }
+            return false;
+        }
+    }
+
+    private final class Renamer implements IResourceVisitor {
+        String[] extensions = null;
+
+        String suffix = null;
+
+        public Renamer(String extensions[], String suffix) {
+            this.extensions = extensions;
+            this.suffix = suffix;
+        }
+
+        public boolean visit(IResource resource) throws CoreException {
+            switch (resource.getType()) {
+            case IResource.FOLDER:
+                return true;
+            case IResource.FILE:
+                IFile file = (IFile) resource;
+                if (extensions == null || extensions.length == 0) {
+                    file.move(file.getFullPath().addFileExtension(suffix),
+                            true, null);
+                    break;
+                }
+                for (int i = 0; i < extensions.length; i++) {
+                    if (extensions[i].equals(file.getFileExtension())) {
+                        file.move(file.getFullPath().addFileExtension(suffix),
+                                true, null);
+                        break;
+                    }
+                }
+                break;
+            case IResource.PROJECT:
+                return true;
+            default:
+                throw new IllegalStateException("Unexpected resource type.");
+            }
+            return false;
+        }
+    }
+
     private String packageName;
-	private PrologSession session;
+
+    private PrologSession session;
+
     private boolean passed;
-    
+
     /**
      * @param name
      */
@@ -94,7 +178,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
      */
     public PseudoRoundTripTest(String name, String packageName) {
         super(name);
-        
+
         this.packageName = packageName;
     }
 
@@ -105,50 +189,61 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 
     public void setUpOnce() {
         super.setUpOnce();
-        //install test workspace
-        ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
-        File r = l.resolve("testdata-roundtrip.zip");
-        Util.unzip(r);
-        org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
-        setAutoBuilding(false);
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
-        try {
-            pif.start();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        
+        synchronized (pif) {
+
+            //install test workspace
+            ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator(
+                    "");
+            File r = l.resolve("testdata-roundtrip.zip");
+            Util.unzip(r);
+            org.cs3.pl.common.Debug
+                    .info("setUpOnce caled for key  " + getKey());
+            setAutoBuilding(false);
+
+            try {
+                pif.start();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-       
+
     }
 
-    public void testIt()throws CoreException, IOException,
-    BadLocationException{
-       
-            testIt_impl();
-            passed=true;
-       
-    }
-    public synchronized void  testIt_impl() throws CoreException, IOException,
+    public void testIt() throws CoreException, IOException,
             BadLocationException {
-       
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        synchronized (pif) {
+            testIt_impl();
+            passed = true;
+        }
+
+    }
+
+    public synchronized void testIt_impl() throws CoreException, IOException,
+            BadLocationException {
+
         Util.startTime("untilBuild");
         IProject project = getTestProject();
         IJavaProject javaProject = getTestJavaProject();
         JLMPProjectNature jlmpProject = getTestJLMPProject();
         PrologInterface pif = jlmpProject.getPrologInterface();
-        
-		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in " + packageName);
+
+        org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
+                + packageName);
         //retrieve all cus in package
-        ICompilationUnit[] cus = getCompilationUnitsInFolder( packageName);
+        ICompilationUnit[] cus = getCompilationUnitsInFolder(packageName);
         //normalize source files
         Util.startTime("norm1");
         for (int i = 0; i < cus.length; i++) {
             ICompilationUnit cu = cus[i];
-            
-            try{
+
+            try {
                 normalizeCompilationUnit(cu);
-            }
-            catch(Exception e){
-                throw new RuntimeException(packageName+": could not normalize cu "+cu.getElementName(),e);
+            } catch (Exception e) {
+                throw new RuntimeException(packageName
+                        + ": could not normalize cu " + cu.getElementName(), e);
             }
         }
         Util.printTime("norm1");
@@ -159,36 +254,19 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.printTime("build1");
         Util.startTime("untilQueryToplevels");
         //now we should have SOME toplevelT
-        assertNotNull(packageName+": no toplevelT????", session.queryOnce("toplevelT(_,_,_,_)"));
-        
+        assertNotNull(packageName + ": no toplevelT????", session
+                .queryOnce("toplevelT(_,_,_,_)"));
+
         //and checkTreeLinks should say "yes"
-        //assertNotNull("checkTreeLinks reports errors", session.queryOnce("checkTreeLinks"));      
-        
+        //assertNotNull("checkTreeLinks reports errors",
+        // session.queryOnce("checkTreeLinks"));
 
-
-        IResourceVisitor renamer = new IResourceVisitor() {
-            public boolean visit(IResource resource) throws CoreException {
-                switch (resource.getType()) {
-                case IResource.FOLDER:
-                    return true;
-                case IResource.FILE:
-                    IFile file = (IFile) resource;
-                    file.move(file.getFullPath().addFileExtension("orig"),
-                            true, null);
-                    break;
-                case IResource.PROJECT:
-                    return true;
-                default:
-                    throw new IllegalStateException("Unexpected resource type.");                    
-                }
-                return false;
-            }
-        };
+        IResourceVisitor renamer = new Renamer(new String[]{"java","class"},"orig");
         Util.startTime("rename");
-        IFolder folder = project.getFolder(packageName);        
+        IFolder folder = project.getFolder(packageName);
         folder.accept(renamer);
         Util.printTime("rename");
-              
+
         //next, we use gen_tree on each toplevelT node known to the system.
         //as a result we should be able to regenerate each and every source
         // file we consulted
@@ -196,13 +274,12 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         String query = "toplevelT(ID,_,FILENAME,_),gen_tree(ID,CONTENT)";
         Util.printTime("untilQueryToplevels");
         Util.startTime("queryToplevels");
-        
-        List results=null;
-        try{
+
+        List results = null;
+        try {
             results = session.queryAll(query);
-        }
-        catch(PrologException e){
-            throw new RuntimeException(packageName+": "+e.getMessage(),e);
+        } catch (PrologException e) {
+            throw new RuntimeException(packageName + ": " + e.getMessage(), e);
         }
         Util.printTime("queryToplevels");
         Util.startTime("writeToplevels");
@@ -211,18 +288,22 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             String filename = result.get("FILENAME").toString();
             String content = result.get("CONTENT").toString();
             //clean the facts right away. another testcase might be running
-            //concurrently and this is the easiest way to keep things from interfering
-            session.queryOnce("remove_contained_global_ids('" + filename+ "')");
-            session.queryOnce("delete_toplevel('" + filename + "')");              
-            assertTrue(packageName+": problems writing generated file.", createFile(filename,
-                    content).isAccessible());            
-            IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filename));
+            //concurrently and this is the easiest way to keep things from
+            // interfering
+            session
+                    .queryOnce("remove_contained_global_ids('" + filename
+                            + "')");
+            session.queryOnce("delete_toplevel('" + filename + "')");
+            assertTrue(packageName + ": problems writing generated file.",
+                    createFile(filename, content).isAccessible());
+            IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(
+                    new Path(filename));
             String newContent = Util.toString(file.getContents());
-            assertEquals(packageName,content,newContent);
+            assertEquals(packageName, content, newContent);
         }
         Util.printTime("writeToplevels");
         //refetch cus
-      Util.startTime("norm2");
+        Util.startTime("norm2");
         cus = getCompilationUnitsInFolder(packageName);
         //normalize again (now the generated source)
         for (int i = 0; i < cus.length; i++) {
@@ -233,94 +314,102 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.printTime("norm2");
         //build again.(the generated source)
         Util.startTime("build2");
-        
-       build(JavaCore.BUILDER_ID);
-       Util.printTime("build2");
+
+        build(JavaCore.BUILDER_ID);
+        Util.printTime("build2");
         //now, visit each file in the binFolder, that has the .class extension.
         //and compare it to the respective original class file (which should
         // have the same name + .orig)
-        IResourceVisitor comparator = new IResourceVisitor() {
-            public boolean visit(IResource resource) throws CoreException {
-                switch (resource.getType()) {
-                case IResource.FOLDER:
-                    return true;
-                case IResource.FILE:
-                    IFile file = (IFile) resource;
-                	if(!file.getFileExtension().equals("class")) return false;
-                	
-                	IFile orig = ResourcesPlugin.getWorkspace().getRoot().getFile(file.getFullPath().addFileExtension("orig"));
-                	assertTrue(packageName+": original class file not accessible: "+orig.getFullPath().toString(),orig.isAccessible());
-                	//both files should be of EXACTLY the same size:
-                	BufferedReader origReader = new BufferedReader(new InputStreamReader(orig.getContents()));
-                	BufferedReader genReader = new BufferedReader(new InputStreamReader(file.getContents()));
-                	int origR=0;
-                	int genR=0;
-                	int i=0;
-                	for( i=0;origR!=-1&&genR!=-1;i++){
-                	    try {
-                            origR= origReader.read();
-                            genR= genReader.read();
-                            assertTrue(packageName+": orig and generated file differ at position "+i,origR==genR);
-                        } catch (IOException e) {                        
-                            org.cs3.pl.common.Debug.report(e);
-                        }                	    
-                	}
-                	org.cs3.pl.common.Debug.info("compared "+i+" chars succsessfully.");
-                    return false;
-
-                }
-                return false;
-            }
-        };
+        IResourceVisitor comparator = new Comparator();
         Util.startTime("compare");
         folder.accept(comparator);
         Util.printTime("compare");
     }
-    protected synchronized void setUp() throws Exception {     
-        super.setUp(); 
-        PrologInterface pif = getTestJLMPProject().getPrologInterface();        
-        session=pif.getSession();
-        setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator("testdata-roundtrip"));
-        
-        install(packageName);
-        passed=false;
-    }
-    protected synchronized void tearDown() throws Exception {     
-        super.tearDown();
-        PrologInterface pif = getTestJLMPProject().getPrologInterface();        
-        session.dispose();        
-        if(passed){
-            uninstall(packageName);
+
+    protected synchronized void setUp() throws Exception {
+        super.setUp();
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        synchronized (pif) {
+            waitForPif();
+            assertTrue(pif.isUp());
+            session = pif.getSession();
+            if (session == null) {
+                fail("failed to obtain session");
+            }
+            setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
+                    "testdata-roundtrip"));
+
+            install(packageName);
+            passed = false;
         }
-        
     }
+
+    protected synchronized void tearDown() throws Exception {
+        super.tearDown();
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        synchronized (pif) {
+            
+            session.dispose();
+            if (passed) {
+                uninstall(packageName);
+            } else {
+                //if anything breaks,
+                //we must make sure not interfere with consecutive tests.
+                //1) move any left java or class files out of the way of the next build
+                IFolder folder = getTestProject().getFolder(packageName);
+                folder.accept(new Renamer(new String[] { "java", "class" },
+                        "bak"));
+                //2) restart the pif
+                pif.stop();
+                assertTrue(pif.isDown());
+                pif.start();
+            }
+        }
+
+    }
+
     public void tearDownOnce() {
         super.tearDownOnce();
-        org.cs3.pl.common.Debug.info("tearDownOnce caled for key  " + getKey());
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
-        session.dispose();
-        try {
-            pif.stop();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        synchronized (pif) {
+            session.dispose();
+            try {
+                pif.stop();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        
-        
+
     }
 
     public static Test suite() {
         TestSuite s = new TestSuite();
         BitSet blacklist = new BitSet();
-//      XXX:ld:These seems to brek consecutive tests. excluded until fixed.
+        //      XXX:ld:These seems to brek consecutive tests. excluded until fixed.
         blacklist.set(178);
         blacklist.set(200);
         blacklist.set(242);
         blacklist.set(433);
+
+        //ld: the following few do not compile. ergo, not our prob.
+        blacklist.set(44);
+        blacklist.set(78);
+        blacklist.set(79);
+        blacklist.set(80);
+        blacklist.set(81);
+        blacklist.set(86);
+        blacklist.set(118); //funny though, the builder eats it despite the compile errors??!
+        //XXX: the code is aequivalent, but the formating is not!
+        /*
+         * there is something wrong with the test case. These "differences" 
+         * should be normalized away. So this IS an error.
+         * Not a critical one, though.  
+         */
+        //blacklist.set(130); 
         for (int i = 1; i <= 539; i++)
-            if(!blacklist.get(i))
-            s
-                    .addTest(new PseudoRoundTripTest("testIt",
-                            generatePackageName(i)));
+            if (!blacklist.get(i))
+                s.addTest(new PseudoRoundTripTest("testIt",
+                        generatePackageName(i)));
         return s;
     }
 

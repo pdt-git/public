@@ -40,6 +40,9 @@ import org.cs3.jlmp.builders.JLMPProjectBuilder;
 import org.cs3.jlmp.natures.JLMPProjectNature;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
+import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -107,40 +110,54 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     private ResourceFileLocator testDataLocator;
 
     private DefaultResourceFileLocator testWorkspaceLocator;
+
+    private static Object pifLock = new Object();
+
+    public void waitForPif() throws InterruptedException {
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        while(!pif.isUp()){
+            synchronized(pifLock){
+                pifLock.wait();
+            }
+        }
+    }
+
     /**
-	 * Wait for autobuild notification to occur
-	 */
-	public static void waitForAutoBuild() {
-		boolean wasInterrupted = false;
-		do {
-			try {
-				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-				wasInterrupted = false;
-			} catch (OperationCanceledException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				wasInterrupted = true;
-			}
-		} while (wasInterrupted);
-	}
-	
-	 /**
-	 * Wait for autobuild notification to occur
-	 */
-	public static void waitForManualBuild() {
-		boolean wasInterrupted = false;
-		do {
-			try {
-				Platform.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
-				wasInterrupted = false;
-			} catch (OperationCanceledException e) {
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				wasInterrupted = true;
-			}
-		} while (wasInterrupted);
-	}
-	
+     * Wait for autobuild notification to occur
+     */
+    public static void waitForAutoBuild() {
+        boolean wasInterrupted = false;
+        do {
+            try {
+                Platform.getJobManager().join(
+                        ResourcesPlugin.FAMILY_AUTO_BUILD, null);
+                wasInterrupted = false;
+            } catch (OperationCanceledException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                wasInterrupted = true;
+            }
+        } while (wasInterrupted);
+    }
+
+    /**
+     * Wait for autobuild notification to occur
+     */
+    public static void waitForManualBuild() {
+        boolean wasInterrupted = false;
+        do {
+            try {
+                Platform.getJobManager().join(
+                        ResourcesPlugin.FAMILY_MANUAL_BUILD, null);
+                wasInterrupted = false;
+            } catch (OperationCanceledException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                wasInterrupted = true;
+            }
+        } while (wasInterrupted);
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -151,15 +168,31 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         try {
             IProject project = createProject("testproject");
             project.open(null);
-            addNature(project,JavaCore.NATURE_ID);
+            addNature(project, JavaCore.NATURE_ID);
             addNature(project, JLMP.NATURE_ID);
-            IClasspathEntry[] cp = new IClasspathEntry[]{
+            IClasspathEntry[] cp = new IClasspathEntry[] {
                     JavaCore.newSourceEntry(project.getFullPath()),
-                    JavaRuntime.getDefaultJREContainerEntry(), //hehe, neat little method, this one :-)                     
+                    JavaRuntime.getDefaultJREContainerEntry(),
+
             };
-            getTestJavaProject().setRawClasspath(cp,project.getFullPath(),null);
+            getTestJavaProject().setRawClasspath(cp, project.getFullPath(),
+                    null);
+            PrologInterface pif = getTestJLMPProject().getPrologInterface();
+            pif.addLifeCycleHook(new LifeCycleHook() {
+                public void onInit(PrologSession initSession) {
+                }
+
+                public void afterInit() {
+                    synchronized (pifLock) {
+                        pifLock.notifyAll();
+                    }
+                }
+
+                public void beforeShutdown(PrologSession session) {
+                }
+            });
         } catch (CoreException e) {
-           throw new RuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -256,9 +289,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      * @param string
      * @throws CoreException
      */
-    protected void uninstall(String string) throws CoreException {       
+    protected void uninstall(String string) throws CoreException {
         IResource r = getTestProject().findMember(string);
-        r.delete(true,null);
+        r.delete(true, null);
     }
 
     /**
@@ -527,13 +560,13 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 .getProject(projectName);
         IWorkspaceRunnable create = new IWorkspaceRunnable() {
             public void run(IProgressMonitor monitor) throws CoreException {
-                if(project.exists()){
-                    try{
+                if (project.exists()) {
+                    try {
                         project.open(null);
-                    }catch(Throwable t){
-                        
+                    } catch (Throwable t) {
+
                     }
-                    project.delete(true,null);
+                    project.delete(true, null);
                 }
                 project.create(null);
                 project.open(null);
@@ -677,23 +710,22 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     public ICompilationUnit[] getCompilationUnitsInFolder(String packageName)
             throws CoreException {
         IFolder folder = getTestProject().getFolder(packageName);
-        folder.refreshLocal(IResource.DEPTH_INFINITE,null);
+        folder.refreshLocal(IResource.DEPTH_INFINITE, null);
         IResource[] resources = folder.members();
-        Vector l =new Vector();
+        Vector l = new Vector();
         for (int i = 0; i < resources.length; i++) {
-            IResource r = resources[i];            
-            if(r.getType()==IResource.FILE&&"java".equals(r.getFileExtension())){                
-                ICompilationUnit icu=(ICompilationUnit) JavaCore.create(r);
+            IResource r = resources[i];
+            if (r.getType() == IResource.FILE
+                    && "java".equals(r.getFileExtension())) {
+                ICompilationUnit icu = (ICompilationUnit) JavaCore.create(r);
                 assertFalse(icu.isWorkingCopy());
-                l.add(icu);                
+                l.add(icu);
             }
         }
         return (ICompilationUnit[]) l.toArray(new ICompilationUnit[0]);
 
     }
 
-    
-    
     /**
      * Returns the specified compilation unit in the given project, root, and
      * package fragment or <code>null</code> if it does not exist.
@@ -701,12 +733,11 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     private ICompilationUnit[] getCompilationUnits(String rootPath,
             String packageName) throws JavaModelException {
         IPackageFragment pkg = getPackageFragment(rootPath, packageName);
-        
+
         if (pkg == null) {
             return null;
         } else {
-            
-            
+
             return pkg.getCompilationUnits();
         }
     }
@@ -957,7 +988,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     protected void normalizeCompilationUnit(ICompilationUnit cu)
             throws JavaModelException, BadLocationException {
         assertFalse(cu.isWorkingCopy());
-        cu.becomeWorkingCopy(null,null);
+        cu.becomeWorkingCopy(null, null);
         String orig = cu.getSource();
 
         Map options = DefaultCodeFormatterConstants
@@ -992,8 +1023,8 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         formatted = formatted.replaceAll("(?s)\\n\\s*\\n", "\n");
         //save changes.
         cu.getBuffer().replace(0, orig.length(), formatted);
-        cu.commitWorkingCopy(false,null);
-        
+        cu.commitWorkingCopy(false, null);
+
         cu.save(null, true);
         cu.discardWorkingCopy();
         assertFalse(cu.isWorkingCopy());
@@ -1090,21 +1121,27 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     public void setTestDataLocator(ResourceFileLocator testDataLocator) {
         this.testDataLocator = testDataLocator;
     }
-    class _ProgressMonitor extends NullProgressMonitor{
-        public Object lock=new Object();
+
+    class _ProgressMonitor extends NullProgressMonitor {
+        public Object lock = new Object();
+
         public boolean done = false;
-        /* (non-Javadoc)
+
+        /*
+         * (non-Javadoc)
+         * 
          * @see org.eclipse.core.runtime.NullProgressMonitor#done()
          */
-        public void done() {                
-            done=true;
-            synchronized(lock){
-                lock.notifyAll();    
-            }                
+        public void done() {
+            done = true;
+            synchronized (lock) {
+                lock.notifyAll();
+            }
         }
-        public void waitTillDone(){
-            while(!done){
-                synchronized(lock){
+
+        public void waitTillDone() {
+            while (!done) {
+                synchronized (lock) {
                     try {
                         lock.wait();
                     } catch (InterruptedException e) {
@@ -1114,16 +1151,19 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             }
         }
     };
-    protected void build(String builder) throws CoreException{
-        build(builder,new HashMap());
+
+    protected void build(String builder) throws CoreException {
+        build(builder, new HashMap());
     }
-    protected void build(String builder,Map args) throws CoreException{
+
+    protected void build(String builder, Map args) throws CoreException {
         IProject project = getTestProject();
         _ProgressMonitor m = new _ProgressMonitor();
-        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD,builder,args,m);
+        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, builder,
+                args, m);
         m.waitTillDone();
     }
-    
+
     protected void build() throws CoreException {
         IProject project = getTestProject();
         _ProgressMonitor m = new _ProgressMonitor();

@@ -140,14 +140,7 @@ public class SelfTest extends FactGenerationTest {
     }
 	
 	
-	public static Test _suite() {
-        TestSuite s = new TestSuite();      
-        s.addTest(new SelfTest("testSourceWorkSpaceAccess"));
-        s.addTest(new SelfTest("testCUAccess1"));
-        for(int i=1;i<10;i++) s.addTest(new SelfTest("testIt",generateTestString(i)));        
-        return s;
-    }
- 
+	
     /**
 	 * @param i
 	 * @return
