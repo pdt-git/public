@@ -64,6 +64,13 @@ createVarDefIdents           (_newParent, _oldList, _newList)
 :- multifile created_file/1.
 
 
+/**
+ * action(set_parent(+ID,+NewParent))
+ */
+
+action(set_parent(ID,Parent)):-
+    set_parent(ID,Parent).
+    
 /*
 
 meta interpreter
@@ -150,7 +157,7 @@ sourceFolder(Toplevel, SourceFolder):-
 	Binds Project and SourceFolder to the default project and source folder.
 	FullSourceFolder is bound to Project/Sourcefolder.
 	
-8	TODO: by now it picks the first 
+	TODO: by now it picks the first 
 	projectLocationT fact and binds its
 	source folder.
 */
