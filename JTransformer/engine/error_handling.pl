@@ -8,9 +8,9 @@ error_handling(_term, _) :-
     !.
 error_handling(_,_term) :-
     term_to_atom(_term,_err),
-    format('err ~a',[_err]),
+    sformat(ErrorString, 'err ~a',[_err]),
     flush_output,
-    halt.
+    throw(ErrorString).
     
 error_handling(_term, _,_) :-
     call(_term),
