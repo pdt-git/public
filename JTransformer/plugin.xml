@@ -2,7 +2,7 @@
 <plugin
    id="org.cs3.pl.JTransformer"
    name="JTransformer"
-   version="2.0.1.14"
+   version="2.0.1.15"
    class="org.cs3.pl.PDTPlugin">
 
    <runtime>
