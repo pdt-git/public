@@ -146,14 +146,13 @@ ast_node_subtype('Java',Label,statementType) :-
   * where 
   *    ArgName is the name of the argument (usually an atom)
   *    Cardinality is either 
-  *        SCHEMA  | EXAMPLE | EXPLANATION
-  *        --------+---------+------------------------------------
-  *        *       | *       | Any cardinality, including 0.
-  *        From-To | 0-1     | A cardinality range with the lower bound
-  *                |         | From and the uper bound To (inclusive).
-  *        Number  | 1       | Any positive integer denoting a fixed 
-  *                |         | number of values (most often 1). 
-  *       The cardinality 0 indicates that the value may be 'null'.
+  *        SCHEMA   | EXAMPLE      | EXPLANATION
+  *        ---------+--------------+------------------------------------
+  *        *        | mult(0,*,no) | Any cardinality, including 0, no order.
+  *        list     | mult(0,*,ord)| Any cardinality, including 0, the arguments are ordered.
+  *                 |              | In the JT2 representation this argument is a list.
+  *        From-To  | mult(1,2,no) | A cardinality range with the lower bound
+  *        optional | mult(0,1,no) | An optional argument - may be the atom 'null'.
   *   IsSubtree is either
   *       true  Indicates that the value is a reference to a subtree
   *       false The value is no subtree.
@@ -557,7 +556,7 @@ ast_node_def('Java',tryT,[
      ast_arg(parent, mult(1,1,no ), id, [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id, [methodDefT]),
      ast_arg(block,  mult(1,1,no ), id, [blockT]),
-     ast_arg(catchers,1-*, id, [catchT]),
+     ast_arg(catchers,mult(1,*,ord), id, [catchT]),
      ast_arg(finalize,mult(0,1,no), id, [blockT])
 ]).
 
