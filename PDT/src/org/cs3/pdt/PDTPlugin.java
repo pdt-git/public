@@ -378,14 +378,14 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                             resName);
                     try {
                         Debug.debug("trying to resolve this url: "+url);
-                        url = Platform.resolve(url);
+                        url = Platform.asLocalURL(url);
                     } catch (IOException e) {
                         Debug.report(e);
                         throw new RuntimeException("Problem resolving url: "
                                 + url.toString(), e);
                     }
-                    URI uri = URI.create(url.toString());
-                    File file = new File(uri);
+                    //URI uri = URI.create(url.toString());                    
+                    File file = new File(url.getFile());
                     r.add(Util.prologFileName(file));
                 }
             }
