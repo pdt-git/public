@@ -52,7 +52,7 @@ public class Initializer extends AbstractPreferenceInitializer {
         System.out.println("The client debug output is safed in "
                 + logFile.getAbsolutePath());
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-                new FileOutputStream(logFile));
+                new FileOutputStream(logFile,true));
         Debug.setOutputStream(new PrintStream(bufferedOutputStream));
         
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);
