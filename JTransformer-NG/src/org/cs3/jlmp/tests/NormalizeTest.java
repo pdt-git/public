@@ -42,13 +42,7 @@ public class NormalizeTest extends FactGenerationTest {
 	public void setUpOnce() {	
 		super.setUpOnce();
 		System.err.println("setUpOnce caled for key  "+getKey());
-		try {
-			setUpJLMPProject("Converter");
-		} catch (CoreException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 	}
 	
 	public void tearDownOnce() {

@@ -135,7 +135,36 @@ public class JLMPProjectNature implements IProjectNature {
      */
     public  void writeFacts(ICompilationUnit icu,PrintStream out) throws IOException,
             CoreException {
-                CompilationUnit cu = null;
+    	writeFacts(project,icu,out);
+    }
+    public void writeFacts(String typeName,PrintStream out) throws JavaModelException, CoreException, ClassNotFoundException {
+        writeFacts(project,typeName,out);
+    }
+    public static void writeFacts(IProject project, String typeName,PrintStream out) throws JavaModelException, CoreException, ClassNotFoundException {
+        StringWriter sw = new StringWriter();
+        PrologWriter plw = new PrologWriter(sw, true);
+        
+        FactGenerationToolBox box = new DefaultGenerationToolbox();
+        new ByteCodeFactGeneratorIType(project, plw, typeName,
+                box).writeAllFacts();
+        plw.writeQuery("retractLocalSymtab");
+        plw.flush();
+        String data = sw.toString();
+        sw.getBuffer().setLength(0);
+        Map mapping = box.getFQNTranslator().getFQNMapping();
+        writeSymTab(plw, mapping);
+        plw.flush();
+        String header = sw.toString();
+        sw.getBuffer().setLength(0);
+        String fileName = typeName.replace('.', '/') + ".pl";
+        //out = metaDataEXT.getOutputStream(fileName);
+        out.println(header);
+        out.println(data);
+    }
+    
+    public static   void writeFacts(IProject project, ICompilationUnit icu,PrintStream out) throws IOException,
+    CoreException {
+        CompilationUnit cu = null;
 
         IResource resource = icu.getResource();
         String path = resource.getFullPath().removeFileExtension()
@@ -167,32 +196,10 @@ public class JLMPProjectNature implements IProjectNature {
             out.println(data);
       
         
+    	
     }
-    public void writeFacts(String typeName,PrintStream out) throws JavaModelException, CoreException, ClassNotFoundException {
-        writeFacts(project,typeName,out);
-    }
-    public void writeFacts(IProject project, String typeName,PrintStream out) throws JavaModelException, CoreException, ClassNotFoundException {
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);
-        
-        FactGenerationToolBox box = new DefaultGenerationToolbox();
-        new ByteCodeFactGeneratorIType(project, plw, typeName,
-                box).writeAllFacts();
-        plw.writeQuery("retractLocalSymtab");
-        plw.flush();
-        String data = sw.toString();
-        sw.getBuffer().setLength(0);
-        Map mapping = box.getFQNTranslator().getFQNMapping();
-        writeSymTab(plw, mapping);
-        plw.flush();
-        String header = sw.toString();
-        sw.getBuffer().setLength(0);
-        String fileName = typeName.replace('.', '/') + ".pl";
-        //out = metaDataEXT.getOutputStream(fileName);
-        out.println(header);
-        out.println(data);
-    }
-    private  void writeSymTab(PrologWriter plw, Map mapping) {
+    
+    private static  void writeSymTab(PrologWriter plw, Map mapping) {
         Set set = mapping.keySet();
         boolean temp = plw.getInterpretMode();
         plw.setInterpretMode(false);

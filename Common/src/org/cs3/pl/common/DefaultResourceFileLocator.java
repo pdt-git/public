@@ -14,24 +14,24 @@ import java.net.URISyntaxException;
 public class DefaultResourceFileLocator implements ResourceFileLocator {
     URI root = new File(System.getProperty("user.home")).toURI();
    public DefaultResourceFileLocator(){
-       this(System.getProperty("user.home"));
+       this(new File(System.getProperty("user.home")));
    }
     
    
     /**
      * @param root
      */
-    public DefaultResourceFileLocator(String root) {
-        root = new File(root) .toURI().toString();
+    public DefaultResourceFileLocator(File root) {
+        String rootString = root .toURI().toString();
         try {
-            this.root=new URI(root.endsWith("/")?root:root+"/");
+            this.root=new URI(rootString.endsWith("/")? rootString:rootString+"/");
         } catch (URISyntaxException e) {
             Debug.report(e);
             throw new RuntimeException(e);
         }
     }
     public ResourceFileLocator subLocator(String subdir){
-        return new DefaultResourceFileLocator(resolve(subdir).toString());
+        return new DefaultResourceFileLocator(resolve(subdir));
     }
     /*
      * (non-Javadoc)

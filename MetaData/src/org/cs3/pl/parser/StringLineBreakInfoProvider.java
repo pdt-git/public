@@ -4,6 +4,8 @@ package org.cs3.pl.parser;
 
 import java.util.Vector;
 
+import org.cs3.pl.common.Debug;
+
 /**
  */
 public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
@@ -24,7 +26,8 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
      * @param text
      */
     public StringLineBreakInfoProvider(String text) {
-        this(text,System.getProperty("line.separator"));
+        //this(text,System.getProperty("line.separator"));
+    	this(text,"\n");
     }
 
     /*
@@ -33,7 +36,13 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
      * @see org.cs3.pl.parser.LineBreakInfoProvider#getOffsetAtLine(int)
      */
     public int getOffsetAtLine(int line) {
-        return line == 0 ? 0 : ((Integer) lineBreaks.get(line - 1)).intValue()+nl.length();
+        try{
+        	return line == 0 ? 0 : ((Integer) lineBreaks.get(line - 1)).intValue()+nl.length();
+        }
+        catch(ArrayIndexOutOfBoundsException e){
+        	Debug.error("AaaaAAAAaaaaAAAAaaaAAAaaargh.");
+        	throw e;
+        }
     }
 
     /*

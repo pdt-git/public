@@ -14,6 +14,10 @@ import java.io.IOException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.cs3.jlmp.JLMP;
+import org.cs3.jlmp.JLMPPlugin;
+import org.cs3.pl.common.ResourceFileLocator;
+import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -46,8 +50,7 @@ public class SelfTest extends FactGenerationTest {
 	public void testSourceWorkSpaceAccess() throws IOException {
 		//ld:this is the 6th line of one of my favourite songs
 		String expected = " our rose-lipped youth is passing by";
-		File sourceFile = new File(getSourceWorkspacePath() + File.separator
-				+ "LandSlide");
+		File sourceFile = getTestDataLocator().resolve("Landslide");
 		assertTrue("does not exist: " + sourceFile.getPath(), sourceFile
 				.exists());
 		BufferedReader reader = null;
@@ -112,26 +115,15 @@ public class SelfTest extends FactGenerationTest {
 		super.setUpOnce();
 		//no autobuilds please!
 		setAutoBuilding(false);
-
+		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
+        File r = l.resolve(JLMP.TEST_WORKSPACE_ZIP);
+        Util.unzip(r);
+        setTestDataLocator(l.subLocator(JLMP.TEST_WORKSPACE));
 		System.err.println("setUpOnce caled for key  "+getKey());
-		try {
-			setUpJLMPProject("Converter");
-		} catch (CoreException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		
 	}
 	
-	public void tearDownOnce() {
-		super.tearDownOnce();
-		System.err.println("tearDownOnce caled for key  "+getKey());
-		try {
-			deleteProject("Converter");
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
-	}
+	
 	
 	public static Test suite() {
         TestSuite s = new TestSuite();      

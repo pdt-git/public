@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -76,10 +75,8 @@ import org.eclipse.jface.text.BadLocationException;
 public class PseudoRoundTripTest extends FactGenerationTest {
 
     private String packageName;
-    private JLMPProjectNature jlmpProject;
-    private PrologInterface pif;
-    private PrologSession session;
-
+	private PrologSession session;
+    
     /**
      * @param name
      */
@@ -109,25 +106,21 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         File r = l.resolve(JLMP.TEST_WORKSPACE_ZIP);
         Util.unzip(r);
         
+        
         //no autobuilds please!
         setAutoBuilding(false);
         org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
-        try {
-            jlmpProject = setUpJLMPProject("Converter");
-            pif=jlmpProject.getPrologInterface();
-            
-        } catch (CoreException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        
     }
 
     public void testIt() throws CoreException, IOException,
             BadLocationException {
-        IProject project = getProject("Converter");
-        IJavaProject javaProject = getJavaProject("Converter");
-        org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in " + packageName);
+        IProject project = getTestProject();
+        IJavaProject javaProject = getTestJavaProject();
+        JLMPProjectNature jlmpProject = getTestJLMPProject();
+        PrologInterface pif = jlmpProject.getPrologInterface();
+        
+		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in " + packageName);
         //retrieve all cus in package
         ICompilationUnit[] cus = getCompilationUnits("Converter", "src",
                 packageName);
@@ -257,13 +250,15 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         binfolder.accept(comparator);
     }
     protected void setUp() throws Exception {     
-        super.setUp();       
+        super.setUp(); 
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
         pif.start();
         session=pif.getSession();
         
     }
     protected void tearDown() throws Exception {     
         super.tearDown();
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
         session.dispose();
         pif.stop();
     }
