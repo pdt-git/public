@@ -1,6 +1,7 @@
 package org.cs3.pl.common;
 
 import java.io.PrintStream;
+import java.util.Date;
 
 /**
  * Provides a application-wide mechanism to send debug, or other informational
@@ -158,6 +159,9 @@ public class Debug {
         if (out == null)
             throw new IllegalArgumentException("null invalid");
         Debug.out = out;
+        out.println("\n---8<------------------------8<---\n");
+        out.println(new Date());
+        out.println("\n---8<------------------------8<---\n");
     }
 
     private static void write(int level, String msg) {
@@ -166,24 +170,31 @@ public class Debug {
         String prefix;
         switch (level) {
         case LEVEL_DEBUG:
-            prefix = "DEBUG: ";
+            prefix = " DEBUG: ";
             break;
         case LEVEL_WARNING:
-            prefix = "WARNING: ";
+            prefix = " WARNING: ";
             break;
         case LEVEL_ERROR:
-            prefix = "ERROR: ";
+            prefix = " ERROR: ";
             break;
         case LEVEL_INFO:
-            prefix = "INFO: ";
+            prefix = " INFO: ";
             break;
         default:
             throw new IllegalStateException("Bad level value");
         }
-
-        out.println(prefix + msg);
+        String tn = Thread.currentThread().getName();
+        Date d = new Date();
+        out.println(d+"<"+tn+">"+prefix + msg);
         out.flush();
 
     }
-
+    public static void dumpStackTrace() {
+        try{
+            throw new RuntimeException("just to produce a stack trace");
+        }catch(RuntimeException e){                               
+            Debug.report(e);    
+        }
+    }
 }
