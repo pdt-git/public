@@ -10,7 +10,7 @@ public class LoggerTest extends TestCase {
 	
 	private Logger Logger;
 	
-	private String GlobalTestMinutes = "24";
+	private String GlobalTestMinutes = "02";
 	private String GlobalTestSeconds = "12";
 	private String GlobalTestComment = "Kommentar Kommentar Kommentar.";
 	
@@ -35,8 +35,8 @@ public class LoggerTest extends TestCase {
 	{
 		byte[] InputLogByteArray = null; 
 	
-		String LogString = "Recorded ["+GlobalTestMinutes+":"+
-			GlobalTestSeconds+"] "+GlobalTestComment;
+		String LogString = "Recorded [03:00 "+GlobalTestMinutes+":"+
+			GlobalTestSeconds+" 00:48] "+GlobalTestComment;
 
 		File FileObject = new File(GlobalTestFilename);
 		try {
