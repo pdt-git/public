@@ -27,50 +27,56 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 public abstract class AbstractPrologInterface implements PrologInterface {
     private List bootstrapLibraries = new Vector();
 
-    public List getBootstrapLibraries(){
+    public List getBootstrapLibraries() {
         return bootstrapLibraries;
     }
-    
-    public void setBootstrapLibraries(List l){
-        this.bootstrapLibraries=l;
+
+    public void setBootstrapLibraries(List l) {
+        this.bootstrapLibraries = l;
     }
-    /* (non-Javadoc)
-     * @see org.cs3.pl.prolog.IPrologInterface#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cs3.pl.prolog.IPrologInterface#addPrologInterfaceListener(java.lang.String,
+     *          org.cs3.pl.prolog.PrologInterfaceListener)
      */
     public void addPrologInterfaceListener(String subject,
             PrologInterfaceListener l) {
-        synchronized(listenerLists){
+        synchronized (listenerLists) {
             Vector list = (Vector) listenerLists.get(subject);
-            if(list==null){
-                list=new Vector();
-                listenerLists.put(subject,list);                
+            if (list == null) {
+                list = new Vector();
+                listenerLists.put(subject, list);
             }
-            if(!list.contains(l)){
+            if (!list.contains(l)) {
                 list.add(l);
             }
         }
 
     }
-    /* (non-Javadoc)
-     * @see org.cs3.pl.prolog.IPrologInterface#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.cs3.pl.prolog.IPrologInterface#removePrologInterfaceListener(java.lang.String,
+     *          org.cs3.pl.prolog.PrologInterfaceListener)
      */
     public void removePrologInterfaceListener(String subject,
             PrologInterfaceListener l) {
-        synchronized(listenerLists){
+        synchronized (listenerLists) {
             Vector list = (Vector) listenerLists.get(subject);
-            if(list==null){
+            if (list == null) {
                 return;
             }
-            if(list.contains(l)){
-                list.remove(l);                
+            if (list.contains(l)) {
+                list.remove(l);
             }
-            
+
         }
 
     }
-    
-   
-    
+
     private static final int DOWN = 0;
 
     private static final int ERROR = -1;
@@ -85,7 +91,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     private Collection sessions = new LinkedList();
 
-    private ServerStartAndStopStrategy startAndStopStrategy ;
+    private ServerStartAndStopStrategy startAndStopStrategy;
 
     private int state = DOWN;
 
@@ -93,7 +99,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     private HashMap listenerLists = new HashMap();
 
-    public AbstractPrologInterface()  {
+    public AbstractPrologInterface() {
 
         Runtime.getRuntime().addShutdownHook(
                 new Thread("Prolog Shutdown Hook") {
@@ -127,7 +133,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
      * override this if your subclass needs special initial Sessions
      * 
      * @param initSession
-     *                    a session obtained from getInitialSession()
+     *                  a session obtained from getInitialSession()
      */
     protected void disposeInitialSession(PrologSession initSession) {
         initSession.dispose();
@@ -137,7 +143,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
      * overide this if your subclass needs special shutdown sessions.
      * 
      * @param s
-     *                    a session obtained from getShutdownSession()
+     *                  a session obtained from getShutdownSession()
      */
     protected void disposeShutdownSession(PrologSession s) {
         s.dispose();
@@ -163,19 +169,22 @@ public abstract class AbstractPrologInterface implements PrologInterface {
     }
 
     public abstract PrologSession getSession_impl() throws Throwable;
-    public PrologSession getSession(){
-        if(!isUp()){
-            throw new IllegalStateException("cannot create session, not in UP state.");
-        }
-        try{
-            
-            PrologSession s = getSession_impl();
-            sessions.add(new WeakReference(s));
-            return s;
-        }
-        catch(Throwable t){
-            Debug.report(t);
-            throw new RuntimeException(t);
+
+    public PrologSession getSession() {
+        synchronized (stateLock) {
+            if (!isUp()) {
+                throw new IllegalStateException(
+                        "cannot create session, not in UP state.");
+            }
+            try {
+
+                PrologSession s = getSession_impl();
+                sessions.add(new WeakReference(s));
+                return s;
+            } catch (Throwable t) {
+                Debug.report(t);
+                throw new RuntimeException(t);
+            }
         }
     }
 
@@ -237,7 +246,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     /**
      * @param newState
-     *                    The state to set.
+     *                  The state to set.
      */
     protected void setState(int newState) throws IllegalStateException {
         synchronized (stateLock) {
@@ -306,7 +315,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             setState(ERROR);
             Debug
                     .error("Could not start PI becouse of unhandled exception. Exception will be rethrown.");
-            	Debug.report(t);
+            Debug.report(t);
             stop();
             throw new RuntimeException(t);
         }
@@ -335,7 +344,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                 for (Iterator i = sessions.iterator(); i.hasNext();) {
                     WeakReference element = (WeakReference) i.next();
                     PrologSession ps = (PrologSession) element.get();
-                    if (ps != null&& !ps.isDisposed())
+                    if (ps != null && !ps.isDisposed())
                         try {
                             ps.dispose();
                         } catch (Throwable t) {
@@ -353,15 +362,16 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             throw new RuntimeException(t);
         }
     }
+
     /**
-     * @param startAndStopStrategy The startAndStopStrategy to set.
+     * @param startAndStopStrategy
+     *                  The startAndStopStrategy to set.
      */
     public void setStartAndStopStrategy(
             ServerStartAndStopStrategy startAndStopStrategy) {
         this.startAndStopStrategy = startAndStopStrategy;
     }
-    
-    
+
     /**
      * @param subject2
      * @param string
