@@ -374,3 +374,13 @@ getType_fq(Id,FQN):-
 enclClass_fq(Id,FQN):-
     enclClass(Id, Class),
     fullQualifiedName(Class, FQN).
+
+/**
+ * types_fq(+Exprs, ?FQNs)
+ */
+
+types_fq([],[]).
+types_fq([Expr|Exprs], [FQN|FQNs]):-    
+    getType_fq(Expr,FQN),
+    types_fq(Exprs, FQNs).
+   
