@@ -66,7 +66,7 @@ public class PrologServer extends MessagingServerLoggingWrapper implements Remot
 	public PrologServer() {
 		systemProperties = new SystemProperties();
 		WINDOWSPLATTFORM = systemProperties.isWindowsPlattform();
-		JPL.setDTMMode(false);
+		//JPL.setDTMMode(false);
 	}
 	
 	
