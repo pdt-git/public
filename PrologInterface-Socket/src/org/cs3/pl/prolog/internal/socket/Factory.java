@@ -91,8 +91,8 @@ public class Factory extends PrologInterfaceFactory {
     }
 
     private String guessExecutableName() {
-        String osname = System.getProperty("os.name");
-        if (osname.indexOf("Windows") > -1) {
+        
+        if (Util.isWindoze()) {
             return "plwin";
         }
         return "xpce";

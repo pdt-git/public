@@ -73,8 +73,12 @@ public class SocketServerStartAndStopStrategy implements
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 	        for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
 	            String s = (String) it.next();
-	            p.println(":- ['"+s+"'].");
+	            p.println(":- ['"+s+"'].");	            
 	        }
+//	        if(Util.isWindoze()){
+//	        	p.println("main" +
+//	        			"pce_main_loop(main).")	;	        	
+//	        }	        
 	        p.close();
 		} catch (IOException e) {
 			Debug.report(e);
@@ -83,12 +87,22 @@ public class SocketServerStartAndStopStrategy implements
         
         
         
-        
-        sb.append(" -g ['");
+//        if(Util.isWindoze())
+//        {
+//        	sb.append(" -g open_null_stream(In)," +
+//        	"open_null_stream(Out)," +
+//			"set_prolog_IO(In,Out,Out),['");
+//        }
+//	        else{
+	        	sb.append(" -g ['");
+//	        }
         sb.append(Util.prologFileName(tmpFile));
         sb.append("'],consult_server(");
         sb.append(port);
         sb.append(")");
+//        if(Util.isWindoze()){
+//        	sb.append(" -t main");	
+//        }
         String cmdline = sb.toString();
         Debug.debug("Starting server with " + cmdline);
 
