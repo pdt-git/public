@@ -230,7 +230,11 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
     private void forget(IFile file) {
         ConsultService meta = PDTPlugin.getDefault().getConsultService(
                 PDT.CS_METADATA);
-        meta.unconsult(file.getFullPath().toString());
+        
+        String s = file.getFullPath().toString();
+        if(meta.isConsulted(s)){
+            meta.unconsult(s);
+        }
     }
 
     /**

@@ -24,6 +24,9 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -43,15 +46,12 @@ public class FindPredicateActionDelegate extends TextEditorAction {
      *  
      */
     public FindPredicateActionDelegate(ITextEditor editor) {
-        super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI), FindPredicateActionDelegate.class.getName(), editor); //$NON-NLS-1$
+        super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),
+                FindPredicateActionDelegate.class.getName(), editor); //$NON-NLS-1$
         this.editor = editor;
         plugin = PDTPlugin.getDefault();
     }
-    private IEditorPart getActiveEditor(){
-        return PlatformUI
-        .getWorkbench().getActiveWorkbenchWindow().getActivePage()
-        .getActiveEditor();
-    }
+
     
     /**
      * @see IWorkbenchWindowActionDelegate#run
@@ -59,19 +59,18 @@ public class FindPredicateActionDelegate extends TextEditorAction {
     public void run() {
         //		plugin.getDisplay().asyncExec(new Runnable() {
         try {
-            final PrologElementData data = ((PLEditor) PlatformUI
-                    .getWorkbench().getActiveWorkbenchWindow().getActivePage()
-                    .getActiveEditor()).getSelectedPrologElement();
+            final PrologElementData data = ((PLEditor) getTextEditor()).getSelectedPrologElement();
             if (data == null) {
                 MessageDialog.openInformation(
-                        editor.getEditorSite().getShell(), "PDT Plugin", 
-                        "Cannot locate a predicate at the specified location."); 
+                        editor.getEditorSite().getShell(), "PDT Plugin",
+                        "Cannot locate a predicate at the specified location.");
                 return;
             }
             Thread t = new Thread() { // fork from GUI thread
                 public void run() {
                     try {
-                        PrologSession session = plugin.getPrologInterface().getSession();
+                        PrologSession session = plugin.getPrologInterface()
+                                .getSession();
                         //if (!manager.isInCall()) {
                         final SourceLocation location = getLocationForCurrentPredicateInEditor(
                                 data, session);
@@ -84,14 +83,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
                                                             editor
                                                                     .getEditorSite()
                                                                     .getShell(),
-                                                            "PDT Plugin", 
-                                                            "Can't find predicate: " 
+                                                            "PDT Plugin",
+                                                            "Can't find predicate: "
                                                                     + data
                                                                             .getLabel()
                                                                     + "/" //$NON-NLS-1$
                                                                     + data
                                                                             .getArity()
-                                                                    + ".\nProbably it is a build in(TODO)."); 
+                                                                    + ".\nProbably it is a build in(TODO).");
                                             return;
                                         }
                                         plugin.showSourceLocation(location);
@@ -105,7 +104,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
                     } catch (IOException e) {
                         Debug.report(e);
                     } catch (PrologException e) {
-                       Debug.report(e);
+                        Debug.report(e);
                     }
                 }
             };
@@ -113,7 +112,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
             //		);
         } catch (BadLocationException ex) {
             PDTPlugin.getDefault().setStatusErrorMessage(
-                    "Can not find a valid predicate."); 
+                    "Can not find a valid predicate.");
         }
     }
 
@@ -139,7 +138,6 @@ public class FindPredicateActionDelegate extends TextEditorAction {
         return "org.cs3.pl.editors.PLEditor"; //$NON-NLS-1$
     }
 
-    
     private IFile getWorkspaceFile(File file) {
         IWorkspace workspace = ResourcesPlugin.getWorkspace();
         IPath location = new Path(file.getAbsolutePath());
@@ -156,9 +154,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
                 PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
                 new FileLabelProvider());
         dialog.setElements(files);
-        dialog.setTitle("Select Workspace File"); 
+        dialog.setTitle("Select Workspace File");
         dialog
-                .setMessage("The selected file is referenced by multiple linked resources in the workspace.\nPlease select the workspace resource you want to use to open the file."); 
+                .setMessage("The selected file is referenced by multiple linked resources in the workspace.\nPlease select the workspace resource you want to use to open the file.");
         if (dialog.open() == Window.OK)
             return (IFile) dialog.getFirstResult();
         return null;
@@ -192,11 +190,15 @@ public class FindPredicateActionDelegate extends TextEditorAction {
      * @throws PrologException
      */
     private SourceLocation getLocationForCurrentPredicateInEditor(
-            final PrologElementData data, PrologSession manager) throws PrologException {
-        final SourceLocation location = plugin.getMetaInfoProvider().getLocation(
-                data.getLabel(), data.getArity(), ((FileEditorInput) plugin
-                        .getActiveEditor().getEditorInput()).getFile()
-                        .getFullPath().toString());
+            final PrologElementData data, PrologSession manager)
+            throws PrologException {
+        IEditorPart activeEditor = getTextEditor();
+        FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
+                .getEditorInput());
+        IFile file = fileEditorInput.getFile();
+        final SourceLocation location = plugin.getMetaInfoProvider()
+                .getLocation(data.getLabel(), data.getArity(),
+                        file.getFullPath().toString());
         return location;
     }
 

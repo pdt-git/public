@@ -96,6 +96,9 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
                         "getLocation solution: " + location.file + ", "
                                 + location.line);
         session.dispose();
+        if(location.file.startsWith("'")){
+            location.file=location.file.substring(1,location.file.length()-1);
+        }
         return location;
     
     }

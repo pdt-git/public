@@ -2,6 +2,7 @@ package org.cs3.pl.common;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -163,5 +164,16 @@ public class Util {
                 
         }
         return !quote && ! escape;
+    }
+    
+    public static String toString(InputStream in) throws IOException{
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+		byte[] buf = new byte[1024];
+		int read = in.read(buf);
+		while (read > 0) {
+			out.write(buf, 0, read);
+			read = in.read(buf);
+		}
+		return out.toString();
     }
 }

@@ -74,10 +74,6 @@
     <hook
           class="org.cs3.pdt.internal.hooks.MetaDataEngineHook"
           id="org.cs3.pdt.internal.hooks.MetaDataEngineHook"/>
-    <hook
-          class="org.cs3.pdt.internal.hooks.ConsultServerHook"
-          dependsOn="org.cs3.pdt.internal.hooks.MetaDataEngineHook"
-          id="org.cs3.pdt.internal.hooks.ConsultServerHook"/>
  </extension>
  <extension
        point="org.eclipse.ui.actionSets">
@@ -186,4 +182,13 @@
        <run class="org.cs3.pdt.internal.builder.MetaDataBuilder"/>
     </builder>
  </extension>
+<extension
+		id="PrologSearchResultPage"
+		point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id="org.cs3.pl.search.PrologSearchViewPage"
+			searchResultClass="org.cs3.pdt.internal.search.PrologSearchResult"
+			class="org.cs3.pdt.internal.search.PrologSearchViewPage">
+		</viewPage>
+	</extension>
 </plugin>

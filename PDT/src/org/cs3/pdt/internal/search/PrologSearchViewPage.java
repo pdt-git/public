@@ -9,6 +9,7 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.search.ui.NewSearchUI;
@@ -35,11 +36,20 @@ public class PrologSearchViewPage extends AbstractTextSearchViewPage {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
 		System.out.println("changed");
+		
+		StructuredViewer viewer = getViewer();
+		if(viewer!=null){
+		    viewer.refresh();
+		}
 	}
 
 	protected void clear() {
 		if (fContentProvider != null)
 			fContentProvider.clear();
+		StructuredViewer viewer = getViewer();
+		if(viewer!=null){
+		    viewer.refresh();
+		}
 	}
 
 	protected void configureTreeViewer(TreeViewer viewer) {
@@ -79,7 +89,7 @@ public class PrologSearchViewPage extends AbstractTextSearchViewPage {
 		});
 		fContentProvider= new TextSearchTableContentProvider();
 		viewer.setContentProvider(fContentProvider);
-
+		
 		
 		
 	}

@@ -7,9 +7,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.internal.PDTPrologHelper;
-import org.cs3.pdt.internal.PDTServerStartStrategy;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.internal.hooks.ConsultServerHook;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.SourceLocation;
@@ -20,7 +18,6 @@ import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.SocketPrologInterface;
 import org.cs3.pl.prolog.SocketServerStartStrategy;
 import org.cs3.pl.prolog.SocketServerStopStrategy;
-import org.cs3.pl.prolog.internal.rpc.RPCPrologInterface;
 import org.cs3.pl.prolog.internal.socket.RecordingConsultService;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
@@ -150,7 +147,13 @@ public class PDTPlugin extends AbstractUIPlugin {
         IFile file = null;
         IWorkspace workspace = ResourcesPlugin.getWorkspace();
         IWorkspaceRoot root = workspace.getRoot();
-        IPath fpath = new Path(loc.file);
+        IPath fpath;
+        try {
+            fpath = new Path(new File(loc.file).getCanonicalPath());
+        } catch (IOException e1) {
+            Debug.report(e1);
+            return;
+        }
         IFile[] files = root.findFilesForLocation(fpath);
         if (files == null || files.length == 0) {
             Debug.warning("Not in Workspace: " + fpath);
@@ -248,10 +251,10 @@ public class PDTPlugin extends AbstractUIPlugin {
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
 
-        int port = service.getInt(qualifier, PDT.PREF_CONSULT_PORT, -1, null);
+        int port = service.getInt(qualifier, PDT.PREF_SERVER_PORT, -1, null);
         if (port == -1l) {
             throw new NullPointerException("Required property \""
-                    + PDT.PREF_CONSULT_PORT + "\" was not specified.");
+                    + PDT.PREF_SERVER_PORT + "\" was not specified.");
         }
 
         String prefix = service.getString(qualifier,
@@ -439,7 +442,7 @@ public class PDTPlugin extends AbstractUIPlugin {
                 }
             };            
             prologInterface.addLifeCycleHook(hook, "metadataConsultService",
-                    new String[] { ConsultServerHook.HOOK_ID });
+                    new String[0]);
             
             registerConsultService(PDT.CS_METADATA,metadataConsultService);
             registerConsultService(PDT.CS_WORKSPACE,workspaceConsultService);

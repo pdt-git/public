@@ -173,6 +173,8 @@ public class PrologOutline extends ContentOutlinePage {
         public void consultDataChanged(final ConsultServiceEvent e) {
             TreeViewer viewer = getTreeViewer();
             if(viewer==null||viewer.getControl().isDisposed()){
+                ConsultService service = PDTPlugin.getDefault().getConsultService(PDT.CS_METADATA);
+                service.removeConsultServiceListener(this);
                 return;
             }
             Display display = viewer.getControl().getDisplay();

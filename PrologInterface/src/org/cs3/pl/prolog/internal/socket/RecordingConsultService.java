@@ -251,7 +251,8 @@ public class RecordingConsultService implements ConsultService {
     }
 
     private String getUnPrefixedSymbol(String prefixedSymbol) {
-        return prefixedSymbol.substring(getPrefixString().length());
+        String s = prefixedSymbol.substring(getPrefixString().length());
+        return s.startsWith("/")? s : "/"+s;
     }
 
     /*

@@ -19,13 +19,15 @@ package org.cs3.pdt.internal.search;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.search.ui.ISearchResultListener;
+import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 
 /**
  * TODO: this class should replace JavaSearchTableContentProvider
  * (must generalize type of fResult to AbstractTextSearchResult in JavaSearchContentProvider)
  */
-public class TextSearchTableContentProvider implements IStructuredContentProvider {
+public class TextSearchTableContentProvider implements IStructuredContentProvider, ISearchResultListener {
 	protected final Object[] EMPTY_ARRAY= new Object[0];
 	private AbstractTextSearchResult fSearchResult;
 	private TableViewer fTableViewer;
@@ -51,7 +53,13 @@ public class TextSearchTableContentProvider implements IStructuredContentProvide
 	 */
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		fTableViewer= (TableViewer) viewer;
+		if(fSearchResult!=null){
+		    fSearchResult.removeListener(this);
+		}
 		fSearchResult= (AbstractTextSearchResult) newInput;
+		if(fSearchResult!=null){
+		    fSearchResult.addListener(this);
+		}
 	}
 
 	public void elementsChanged(Object[] updatedElements) {
@@ -76,4 +84,15 @@ public class TextSearchTableContentProvider implements IStructuredContentProvide
 		//TODO: copied from JavaSearchTableContentProvider
 		fTableViewer.refresh();
 	}
+
+    /* (non-Javadoc)
+     * @see org.eclipse.search.ui.ISearchResultListener#searchResultChanged(org.eclipse.search.ui.SearchResultEvent)
+     */
+    public void searchResultChanged(SearchResultEvent e) {        
+         fTableViewer.getControl().getDisplay().asyncExec(new Runnable() {
+            public void run() {            
+                fTableViewer.refresh();
+            }
+        });
+    }
 }

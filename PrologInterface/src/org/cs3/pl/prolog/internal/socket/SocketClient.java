@@ -203,6 +203,7 @@ public class SocketClient  {
         this.socket = socket;
         reader = new BufferedReader(new InputStreamReader(getInputStream()));
         writer = new BufferedWriter(new PrintWriter(getOutputStream()));
+        reset();
     }
     /**
      * @param string
@@ -369,7 +370,7 @@ public class SocketClient  {
                 throw new PrologException(
                         "EndOfStream read while waiting for " + prefix);
             }
-            //Debug.debug("read: " + string);
+            Debug.debug("read: " + string);
             if (string.startsWith(SocketClient.ERROR)) {
                 throw new PrologException(
                         "Peer reported an error while waiting for " + prefix

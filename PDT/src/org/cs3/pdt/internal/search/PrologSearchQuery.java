@@ -13,6 +13,7 @@ import java.util.Hashtable;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.PrologException;
@@ -20,11 +21,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -49,15 +52,24 @@ public class PrologSearchQuery implements ISearchQuery {
         //(new PrologSearchViewPage()).setInput(result,null);
 
     }
-
     public IStatus run(IProgressMonitor monitor) {
+        try{
+            return run_impl(monitor);
+        }
+        catch(Throwable t){
+            Debug.report(t);
+            throw new RuntimeException(t);
+        }
+    }
+    private IStatus run_impl(IProgressMonitor monitor) throws CoreException, BadLocationException, IOException {
 
-        try {
+        
             String title = data.getSignature();
             if (data.isModule())
                 title += "  Search for modules not supported yet!";
             if (!data.isModule()) {
-                PrologSession client = PDTPlugin.getDefault()
+                PrologSession client;
+                client = PDTPlugin.getDefault()
                         .getPrologInterface().getSession();
                 //				
                 Hashtable[] solutions = client.queryAll(PDTPlugin.MODULEPREFIX
@@ -68,6 +80,9 @@ public class PrologSearchQuery implements ISearchQuery {
                     Hashtable solution = solutions[i];
                     HashMap attributes = new HashMap();
                     String fileName = solution.get("FileName").toString();
+                    if(fileName.startsWith("'")){
+                        fileName=fileName.substring(1,fileName.length()-1);
+                    }
                     java.io.File ioFile;
                     ioFile = (new File(fileName)).getCanonicalFile();
                     Path path = new Path(ioFile.getAbsolutePath());
@@ -95,7 +110,9 @@ public class PrologSearchQuery implements ISearchQuery {
 
                     int line = Integer
                             .parseInt(solution.get("Line").toString());
-                    IDocument document = new FileDocumentProvider().getDocument(iFile);
+                    
+                    String originalContents = Util.toString(iFile.getContents());
+                    IDocument document = new Document(originalContents);
                     IRegion region = document.getLineInformation(
                             line);
                     FindReplaceDocumentAdapter findAdapter = new FindReplaceDocumentAdapter(
@@ -127,13 +144,7 @@ public class PrologSearchQuery implements ISearchQuery {
             }
             //manager.stop();
             //fView.searchFinished();
-        } catch (IOException e) {
-            Debug.report(e);
-        } catch (BadLocationException e) {
-            Debug.report(e);
-        } catch (PrologException e) {
-            Debug.report(e);
-        }
+        
         return Status.OK_STATUS;
     }
 

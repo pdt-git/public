@@ -46,12 +46,12 @@ public class Initializer extends AbstractPreferenceInitializer {
      *  
      */
     private void initializeDefaultPreferences_impl() throws BackingStoreException, IOException, InterruptedException {
-        File logFile = Util.getLogFile("org.cs3.pdt.client.log");        
-        System.out.println("The client debug output is safed in "
-                + logFile.getAbsolutePath());
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-                new FileOutputStream(logFile));
-        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+//        File logFile = Util.getLogFile("org.cs3.pdt.client.log");        
+//        System.out.println("The client debug output is safed in "
+//                + logFile.getAbsolutePath());
+//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+//                new FileOutputStream(logFile));
+//        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
         String fileSep = File.separator;
@@ -70,8 +70,7 @@ public class Initializer extends AbstractPreferenceInitializer {
                 .intValue();
         int serverPort = Integer.getInteger(PDT.PREF_SERVER_PORT, 4143)
                 .intValue();
-        int consultPort = Integer.getInteger(PDT.PREF_CONSULT_PORT, 5624)
-                .intValue();
+      
         String consultPath = System.getProperty(PDT.PREF_CONSULT_PATH, "");
         boolean serverStandAlone = Boolean
                 .getBoolean(PDT.PREF_SERVER_STANDALONE);
@@ -107,7 +106,6 @@ public class Initializer extends AbstractPreferenceInitializer {
             Debug.error("Häh?!");
         } else {
             node.putInt(PDT.PREF_CONSOLE_PORT, consolePort);            
-            node.putInt(PDT.PREF_CONSULT_PORT, consultPort);            
             node.put(PDT.PREF_CONSULT_PATH, consultPath);            
             node.putBoolean(PDT.PREF_CONSULT_RECURSIVE, consultRecursive);            
             node.put(PDT.PREF_DEBUG_LEVEL, debugLevel);            

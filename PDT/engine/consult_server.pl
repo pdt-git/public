@@ -24,18 +24,40 @@ consult_server(Port):-
 	tcp_bind(ServerSocket, Port),
 	tcp_listen(ServerSocket, 5),
 	concat_atom([consult_server,'@',Port],Alias),
+	%accept_loop(ServerSocket).
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
-    
-accept_loop(ServerSocket) :-
+  
+accept_loop(ServerSocket):-
+	catch(
+		accept_loop_impl(ServerSocket),
+		Error,
+		(
+			write('AAAaaaAAAaaaAAAaaaAAA:'),write(Error),nl,thread_signal(main,halt)
+		)
+	),
+	thread_self(Me),
+	thread_detach(Me),
+	thread_exit(0).
+	
+accept_loop_impl(ServerSocket) :-
+	write(0),nl,
 	tcp_accept(ServerSocket, Slave, Peer),
+	write(1),nl,
 	tcp_open_socket(Slave, InStream, OutStream),
+	write(2),nl,
 	tcp_host_to_address(Host,Peer),
+	write(3),nl,
 	thread_self(Self),
-	atom_concat(Self,'_handle_client_',Prefix),	
-	count_thread(Prefix,Next),
-	concat_atom([Self,'_handle_client_',Next,'@',Host],Alias),	
+	write(4),nl,
+	atom_concat(Self,'_handle_client_',Prefix),
+	atom_concat('@',Host,Suffix),
+	write(5),nl,	
+	unused_thread_name(Prefix,Suffix,Alias),
+	write(7),nl,	
+	%handle_client(InStream, OutStream),
 	thread_create(handle_client(InStream, OutStream), _ , [alias(Alias)]),
-	accept_loop(ServerSocket).
+	write(8),nl,
+	accept_loop_impl(ServerSocket).
 	
 handle_client(InStream, OutStream):-    
 	catch(
@@ -67,8 +89,6 @@ handle_command(InStream,OutStream,'CONSULT'):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	undelete_symbol(Symbol),
 	my_format(OutStream,"USING_SYMBOL: ~a~n",[Symbol]),	
-	read_pending_input(InStream, Trash, []),
-	format("XXX ~a~n",Trash),
 	my_format(OutStream,"GO_AHEAD~n",[]),
 	load_stream(Symbol,InStream).
 	
@@ -101,8 +121,7 @@ handle_command(InStream,OutStream,'IS_CONSULTED'):-
 
 handle_command(InStream,OutStream,'QUERY'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
-	read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
-	write('<<< '),write(Term),nl,
+	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
 	catch(
 		iterate_solutions(InStream,OutStream,Term,Vars),
 		query_aborted,
@@ -111,8 +130,7 @@ handle_command(InStream,OutStream,'QUERY'):-
 
 handle_command(InStream,OutStream,'QUERY_ALL'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
-	read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),	
-	write('<<< '),write(Term),nl,
+	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),		
 	(
 		all_solutions(OutStream,Term,Vars)
 	;
@@ -155,13 +173,7 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 print_solution(OutStream,Vars):-
 	forall(
 		member(Elm,Vars),
-		(
-			write_term(OutStream,Elm,[quoted(true)]),
-			nl(OutStream),
-			write('>>> '),
-			write_term(Elm,[quoted(true)]),
-			nl
-		)
+			my_write_term(OutStream,Elm,[quoted(true)])		
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
 
@@ -231,13 +243,6 @@ shut_down(InStream,OutStream):-
 		true).
 		
 
-request_line(InStream, OutStream, Prompt, Line):-
-	my_format(OutStream,"~a~n",[Prompt]),
-	read_line_to_codes(InStream,LineCodes),
-	codes_or_eof_to_atom(LineCodes,Line),
-	check_eof(Line),
-	format("<<< ~a~n",Line).
-
 check_eof(end_of_file):-
 	!,
 	throw(peer_reset).
@@ -266,11 +271,7 @@ check_eof(A):-
 	throw(peer_reset).	
 check_eof(_):-
 	true.
-request_data(InStream, OutStream, Symbol):-	
-	my_format(OutStream,"USING_SYMBOL: ~a~n",[Symbol]),	
-	read_pending_input(InStream, Trash, []),
-	format("XXXX ~a~n",Trash),
-	my_format(OutStream,"GO_AHEAD~n",[]).
+
 	
 	
 codes_or_eof_to_atom(end_of_file,_):-
@@ -285,18 +286,58 @@ load_stream(Symbol,Stream):-
 	throw(error(pipi,kaka)).
 	
 count_thread(Prefix,Count):-
-	findall(X,(
-		current_thread(A,_),
-			atom_concat(Prefix,X,A)
+	findall(A,(
+			current_thread(A,_),
+			atom_concat(Prefix,_,A),
+			format("There is e.g. a thread named ~a~n",[A])
 		),
 		Bag
-	),
+	),	 
 	length(Bag,Count).
+
+unused_thread_name(Prefix,Suffix,Name):-
+	unused_thread_name(Prefix,Suffix,0,Name).	
 	
+unused_thread_name(Prefix,Suffix,Try,Name):-
+	concat_atom([Prefix,Try,Suffix],A),
+	format("trying ~a~n",[A]),
+	(	current_thread(A,_)
+	->plus(Try,1,Next),
+		unused_thread_name(Prefix,Suffix,Next,Name)
+	; format("unused: ~a~n",[A]),
+		Name=A			
+	).
+	
+
+
+
+request_line(InStream, OutStream, Prompt, Line):-
+	my_format(OutStream,"~a~n",[Prompt]),
+	read_line_to_codes(InStream,LineCodes),
+	codes_or_eof_to_atom(LineCodes,Line),
+	check_eof(Line),
+	thread_self(Self),
+	format("~a: <<< ~a~n",[Self,Line]).
+
+
+my_read_term(InStream,Term,Options):-
+	read_term(InStream,Term,Options),	
+	thread_self(Self),
+	write(Self),write(': <<< '),write(Term),nl.
+	
+my_write_term(OutStream,Elm,Options):-
+	write_term(OutStream,Elm,Options),
+	nl(OutStream),
+	thread_self(Self),
+	write(Self),
+	write(': >>> '),
+	write_term(Elm,Options),
+	nl.
 	
 my_format(OutStream,Format,Args):-
 	format(OutStream,Format,Args),
-	write('>>> '),
+	thread_self(Self),
+	write(Self),write(': >>> '),
 	format(current_output,Format,Args),
 	flush_output(OutStream),
 	flush_output(current_output).

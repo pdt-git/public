@@ -59,21 +59,23 @@ public void run() {
 						ISearchResultViewPart viewPart = NewSearchUI.activateSearchResultView();
 						
 						ISearchQuery query = new org.cs3.pdt.internal.search.PrologSearchQuery(data);
-						Shell shell = plugin.getWorkbench().getActiveWorkbenchWindow().getShell();
-						ProgressMonitorDialog context= new ProgressMonitorDialog(shell);
-						IStatus status= NewSearchUI.runQueryInForeground(context, query);
-						if (status.isOK()) {
-							
-//							OccurrencesSearchLabelProvide page = new OccurrencesSearchResultPage();
-//							FileSearchPage page = new FileSearchPage();
-							PrologSearchViewPage page = new PrologSearchViewPage();
-							page.setViewPart(NewSearchUI.getSearchResultView());
-							page.init(NewSearchUI.getSearchResultView().getActivePage().getSite());
-							page.createControl((Composite)NewSearchUI.getSearchResultView().getActivePage().getControl());
-							//page.setLayout(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
-							page.setInput(query.getSearchResult(), new HashMap());						
-							System.out.println(status.toString());
-						}
+						NewSearchUI.activateSearchResultView();
+						NewSearchUI.runQuery(query);
+//						Shell shell = plugin.getWorkbench().getActiveWorkbenchWindow().getShell();
+//						ProgressMonitorDialog context= new ProgressMonitorDialog(shell);
+//						IStatus status= NewSearchUI.runQueryInForeground(context, query);
+//						if (status.isOK()) {
+//							
+////							OccurrencesSearchLabelProvide page = new OccurrencesSearchResultPage();
+////							FileSearchPage page = new FileSearchPage();
+//							PrologSearchViewPage page = new PrologSearchViewPage();
+//							page.setViewPart(NewSearchUI.getSearchResultView());
+//							page.init(NewSearchUI.getSearchResultView().getActivePage().getSite());
+//							page.createControl((Composite)NewSearchUI.getSearchResultView().getActivePage().getControl());
+//							//page.setLayout(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
+//							page.setInput(query.getSearchResult(), new HashMap());						
+//							System.out.println(status.toString());
+//						}
 				} catch (Exception e) {
 					Debug.report(e);
 				}

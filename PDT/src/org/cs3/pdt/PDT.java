@@ -1,6 +1,5 @@
 package org.cs3.pdt;
 
-import org.eclipse.core.runtime.QualifiedName;
 
 /**
  * All kinds of string keys used by the pdt.
@@ -24,7 +23,7 @@ public interface PDT {
     /**
      * the port to use for writing fact data into the prolog system.
      */
-    public static final String PREF_CONSULT_PORT = "pdt.consult.port";
+    //public static final String PREF_CONSULT_PORT = "pdt.consult.port";
 
     /**
      * A list of absolute os filesystem paths, separated by your favourite
