@@ -238,25 +238,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return resourceBundle;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see prg.cs3.pdt.PreferenceListener#preferencesChanged(prg.cs3.pdt.PreferencesEvent)
-     */
-    protected void preferenceChanged(PropertyChangeEvent e) {
-        String key = e.getProperty();
- 
-              
-            try {
-                prologInterface.stop();
-                reconfigurePrologInterface();
-                prologInterface.start();
-            } catch (IOException e1) {
-                Debug.report(e1);
-            }
-
-
-    }
+   
 
     /**
      * look up a preference value.
@@ -281,22 +263,35 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
      *  
      */
     public void reconfigure() {
+        PrologInterface pif = getPrologInterface();
+        boolean restart=false;
+        if(!pif.isDown()){
+            try {
+                restart=true;
+                pif.stop();
+            } catch (IOException e1) {
+                Debug.report(e1);                
+            }
+        }
         try {
             String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL,
                     "WARNING");
             Debug.setDebugLevel(debugLevel);
             String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE,
                     null);
-            File logFile = logFileName == null ? Util
-                    .getLogFile("pdt.client.log") : new File(logFileName);
-            BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-                    new FileOutputStream(logFile, true));
-            Debug.setOutputStream(new PrintStream(bufferedOutputStream));
-
-            prologInterface.stop();
+            if(logFileName!=null && ! logFileName.equals("")){
+                File logFile =  new File(logFileName);
+                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+                        new FileOutputStream(logFile, true));
+                Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+            }
+           
             reconfigurePrologInterface();
 
-            prologInterface.start();
+            if(restart){
+                pif.start();
+            }
+           
         } catch (Throwable e) {
             Debug.report(e);
         }
@@ -456,6 +451,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
              * before proceeding.
              */
             getPluginPreferences();
+            reconfigure();
             PrologInterface pif = getPrologInterface();
             ConsultService metadataConsultService = pif
                     .getConsultService(PDT.CS_METADATA);
