@@ -515,11 +515,12 @@ public class PrologCompiler extends PrologParserTraversal {
 	        return new ASTNamedCall[0];
 		Node[] members = getUnit().children;
 		List list = new ArrayList();
-		for (int i = 0; i < members.length; i++) {
-			if (members[i] instanceof ASTNamedCall
-					&& ((ASTNamedCall) members[i]).isDynamic())
-				list.add(members[i]);
-		}
+		if(members != null) 
+			for (int i = 0; i < members.length; i++) {
+				if (members[i] instanceof ASTNamedCall
+						&& ((ASTNamedCall) members[i]).isDynamic())
+					list.add(members[i]);
+			}
 		return (ASTNamedCall[]) list.toArray(new ASTNamedCall[0]);
 	}
 	
