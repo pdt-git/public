@@ -381,7 +381,8 @@ ast_node_def('Java',forLoopT,[
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(inits,   mult(0,*,ord), id,  [[expressionType,localDefT]]),
      ast_arg(cond,    mult(0,1,no), id,  [[expressionType]]),
-     ast_arg(updaters,mult(0,*,ord), id,  [[expressionType]])
+     ast_arg(updaters,mult(0,*,ord), id,  [[expressionType]]),
+     ast_arg(body,    mult(1,1,no ), id,  [blockT])
 ]).
 
 % tree_constraints(getFieldT, [[allType],[methodDefT,fieldDefT],[expressionType,nullType],[atom], [fieldDefT,nullType]]). % if it is the length field of an array
