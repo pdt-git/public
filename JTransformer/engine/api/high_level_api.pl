@@ -761,9 +761,16 @@ types_equal([_h1|_t1],[_h2|_t2]) :-
 
 abstraction(fullQualifiedName(_id, _Fqn)).
 
-/*
-  fullQualifiedName(?Id, ?Fqn)
-*/
+ /**
+  * fullQualifiedName(?Id, ?Fqn)
+  *
+  * at least one of the arguments must be bound.
+  */
+
+fullQualifiedName(Id, Fqn) :-
+	nonvar(Fqn),
+	globalIds(Fqn,Id),
+	class(Id,_,_). % to be sure the index is up to date
 
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
@@ -783,6 +790,17 @@ fullQualifiedName(_id, _name) :-
     classDefT(_id, 'null', _name,_),
     !.
 
+
+/**
+ * fullQualifiedNames(?ExceptionClassIdList,?ExceptionNameList)
+ * 
+ * at least one of the arguments must be bound.
+ */
+
+fullQualifiedNames([],[]).
+fullQualifiedNames([Exception|Exceptions], [ExceptionName|ExceptionNames]) :-
+    fullQualifiedName(Exception,ExceptionName),
+    fullQualifiedNames(Exceptions,ExceptionNames).
 
 
 /*

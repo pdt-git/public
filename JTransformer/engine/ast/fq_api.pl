@@ -1,10 +1,106 @@
-
+/*
+ * To Be Done:
+ * Use Partial Evaluation!
+ * PEF_FQN
  
-method_fq(Id, RetType, DeclType, Name, Params, Exceptions, Body):-
+  
+  
+
+typeTerm:
+
+localDefT
+literalT
+typeCastT
+typeTestT
+
+classDefT:
+
+toplevelT
+selectT
+identT
+newClassT
+importT
+execT
+*/
+
+
+/**
+ * class_fq(?FQN, ?PackageName, ?Name)
+ *
+ * TODO: To be optimized (second clause)
+ */
+
+class_fq(FQN,PackageName,Name):-
+    nonvar(FQN),
+    fullQualifiedName(CID,FQN),
+    class(CID, PID, Name),
+    packageT(PID,PackageName).
+
+class_fq(FQN,PackageName,Name):-
+    packageT(PID,PackageName),
+    class(CID, PID, Name),
+    fullQualifiedName(CID,FQN).
+
+/**
+ * param_fq(?Id, ?MethodId, ?Type, ?Name)
+ *
+ */
+ 
+param_fq(Id, MethodId, Type, Name) :-
+    var(Id),
+    nonvar(Type),
+    type_term_to_atom(TypeTerm,Type),
+    paramDefT(Id,MethodId,TypeTerm,Name).
+
+param_fq(Id, MethodId, Type, Name) :-
+    type_term_to_atom(TypeTerm,Type),
+    paramDefT(Id,MethodId,TypeTerm,Name).
+
+
+/**
+ * field_fq(?Id, ?Type, ?DeclType, ?Name, ?Init)
+ *
+ * TODO: To be optimized (second clause)
+ */
+
+field_fq(Id, Type, DeclType, Name, Init) :-
+    nonvar(DeclType),
+    nonvar(Type),
+    var(Id),
+    !,
     fullQualifiedName(DeclTypeId,DeclType),
+    type_term_to_atom(TypeTerm,Type),
+    fieldDefT(Id,DeclTypeId,TypeTerm,Name,Init).
+
+field_fq(Id, Type, DeclType, Name, Init) :-
+    fieldDefT(Id,DeclTypeId,TypeTerm,Name,Init),
+    fullQualifiedName(DeclTypeId,DeclType),
+    type_term_to_atom(TypeTerm,Type).
+
+/**
+ * method_fq(Id, RetType, DeclType, Name, Params, ExceptionNames, Body)
+ *
+ * TODO: to be optimized 
+ */
+ 
+method_fq(Id, RetType, DeclType, Name, Params, ExceptionNames, Body) :-
+    var(Id),
+	nonvar(DeclType),
+	nonvar(RetType),
+	nonvar(ExceptionNames),
+    fullQualifiedName(DeclTypeId,DeclType),
+    fullQualifiedNames(Exceptions, ExceptionNames),
     type_term_to_atom(RetTypeTerm,RetType),
     methodDefT(Id,DeclTypeId,Name, Params, RetTypeTerm, Exceptions,Body).
-    
+
+
+method_fq(Id, RetType, DeclType, Name, Params, ExceptionNames, Body) :-
+    methodDefT(Id,DeclTypeId,Name, Params, RetTypeTerm, Exceptions,Body),
+    fullQualifiedName(DeclTypeId,DeclType),
+    fullQualifiedNames(Exceptions, ExceptionNames),
+    type_term_to_atom(RetTypeTerm,RetType).
+
+
 /**
  * type_term_to_atom(+TypeTerm,?Atom)
  */
