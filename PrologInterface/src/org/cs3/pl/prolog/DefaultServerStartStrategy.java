@@ -3,7 +3,6 @@ package org.cs3.pl.prolog;
 import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.common.Util;
 
 
@@ -25,9 +24,9 @@ public class DefaultServerStartStrategy implements ServerStartStrategy {
 
 
         String cmdline = "java -Djava.library.path=\"" + librarypath
-                + "\" -D"
-				+Properties.DEBUG_LEVEL+"="
-				+System.getProperty(Properties.DEBUG_LEVEL)
+                + "\""/* -D"
+				+Properties.PREF_DEBUG_LEVEL+"="
+				+System.getProperty(Properties.PREF_DEBUG_LEVEL)*/
 				+" -classpath "
                 + classpath 
 				+ " org.cs3.pl.prolog.PrologInterfaceServer "

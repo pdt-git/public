@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.common.Util;
 import org.rapla.components.rpc.Logger;
 
@@ -39,11 +38,9 @@ public class PrologInterface implements IPrologInterface {
 
     private int state = DOWN;
 
-    private boolean useSessionPooling = Boolean
-            .getBoolean(Properties.USE_SESSION_POOLING);
+    private boolean useSessionPooling = true;
 
-    private boolean standAloneServer = Boolean
-            .getBoolean(Properties.SERVER_STANDALONE);
+    private boolean standAloneServer = false;
 
     private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 

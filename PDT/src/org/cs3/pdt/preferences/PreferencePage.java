@@ -7,7 +7,7 @@
 package org.cs3.pdt.preferences;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pl.common.Properties;
+import org.cs3.pdt.PDT;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -55,38 +55,38 @@ public class PreferencePage extends FieldEditorPreferencePage implements
      * editor knows how to save and restore itself.
      */
     public void createFieldEditors() {
-        addField(new DirectoryFieldEditor(Properties.SWIPL_DIR,
+        addField(new DirectoryFieldEditor(PDT.PREF_SWIPL_DIR,
                 "The home of the SWI-Prolog installation",
                 getFieldEditorParent()));
         FileListEditor classpathEditor = new FileListEditor(
-                Properties.SERVER_CLASSPATH,
+                PDT.PREF_SERVER_CLASSPATH,
                 "classpath to be used by the prolog server vm","add Jar...",
                 getFieldEditorParent());
         
         classpathEditor.setFilterExtensions(new String[]{"*.jar"});
         addField(classpathEditor);
-        addField(new BooleanFieldEditor(Properties.SERVER_STANDALONE,
+        addField(new BooleanFieldEditor(PDT.PREF_SERVER_STANDALONE,
                 "Assume a stand-alone server process", getFieldEditorParent()));
 
-        addField(new IntegerFieldEditor(Properties.SERVER_PORT,
+        addField(new IntegerFieldEditor(PDT.PREF_SERVER_PORT,
                 "Port for the connection to the prolog server vm",
                 getFieldEditorParent()));
-        addField(new IntegerFieldEditor(Properties.CONSOLE_PORT,
+        addField(new IntegerFieldEditor(PDT.PREF_CONSOLE_PORT,
                 "Port for console IO", getFieldEditorParent()));
 
         FileListEditor consultPathEditor = new FileListEditor(
-                Properties.CONSULT_PATH,
+                PDT.PREF_CONSULT_PATH,
                 "List of files/directories to auto-consult", "add pl-file",
                 getFieldEditorParent());        
         consultPathEditor.setFilterExtensions(new String[]{".pl"});
         addField(consultPathEditor);
-        addField(new BooleanFieldEditor(Properties.CONSULT_RECURSIVE,
+        addField(new BooleanFieldEditor(PDT.PREF_CONSULT_RECURSIVE,
                 "Automaticaly consult subdirectories", getFieldEditorParent()));
 
-        addField(new BooleanFieldEditor(Properties.USE_SESSION_POOLING,
+        addField(new BooleanFieldEditor(PDT.PREF_USE_SESSION_POOLING,
                 "Use connection pooling (recommended!)", getFieldEditorParent()));
 
-        addField(new RadioGroupFieldEditor(Properties.DEBUG_LEVEL,
+        addField(new RadioGroupFieldEditor(PDT.PREF_DEBUG_LEVEL,
                 "debug level", 4, new String[][] { { "error", "ERROR" },
                         { "warning", "WARNING" }, { "info", "INFO" },
                         { "debug", "DEBUG" } }, getFieldEditorParent(), true));

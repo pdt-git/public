@@ -3,10 +3,10 @@ package org.cs3.pdt.views;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDT;
 import org.cs3.pdt.hooks.ConsoleServerHook;
 import org.cs3.pdt.hooks.MetaDataEngineHook;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
@@ -66,9 +66,9 @@ public class PrologConsoleView extends ViewPart implements
 	private  int getPort() {
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
-        int port= service.getInt(qualifier,Properties.CONSOLE_PORT,-1,null);       
+        int port= service.getInt(qualifier,PDT.PREF_CONSOLE_PORT,-1,null);       
     	if(port==-1){
-    		throw new NullPointerException("Required property \""+Properties.CONSOLE_PORT+"\" was not specified.");
+    		throw new NullPointerException("Required property \""+PDT.PREF_CONSOLE_PORT+"\" was not specified.");
     	}
 		return port;
 	}

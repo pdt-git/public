@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.ServerStartStrategy;
 
@@ -33,7 +32,7 @@ public class PDTServerStartStrategy implements ServerStartStrategy {
 		String dir = isWindoof ? swiHome+"\\bin" 
 					: ".";			
 		
-		String cmdline = "java -D"+Properties.DEBUG_LEVEL+"="
+		String cmdline = "java -D"+PDT.PREF_DEBUG_LEVEL+"="
 				+debugLevel
 				+" -classpath "+classPath
 				+ " org.cs3.pl.prolog.PrologInterfaceServer " + port;

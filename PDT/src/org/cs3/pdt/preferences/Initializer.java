@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDT;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -38,17 +38,17 @@ public class Initializer extends AbstractPreferenceInitializer {
         
         
         //System Properties may override our hardcoded defaults.
-        Integer.getInteger(Properties.CONSOLE_PORT,-1);
-        int consolePort=Integer.getInteger(Properties.CONSOLE_PORT,4711).intValue();
-        int serverPort=Integer.getInteger(Properties.SERVER_PORT,4143).intValue();
-        String consultPath=System.getProperty(Properties.CONSULT_PATH,"");
-        boolean serverStandAlone=Boolean.getBoolean(Properties.SERVER_STANDALONE);        
-        boolean sessionPooling=Boolean.getBoolean(Properties.USE_SESSION_POOLING);        
-        boolean consultRecursive=Boolean.getBoolean(Properties.CONSULT_RECURSIVE);
-        String debugLevel=System.getProperty(Properties.DEBUG_LEVEL);        
-        String metadataEngineDir = System.getProperty(Properties.METADATA_ENGINE_DIR,location+ fileSep+"engine");
-        String swiplDir=System.getProperty(Properties.SWIPL_DIR,location +fileSep +"swipl");
-        String serverClasspath = System.getProperty(Properties.SERVER_CLASSPATH,
+        Integer.getInteger(PDT.PREF_CONSOLE_PORT,-1);
+        int consolePort=Integer.getInteger(PDT.PREF_CONSOLE_PORT,4711).intValue();
+        int serverPort=Integer.getInteger(PDT.PREF_SERVER_PORT,4143).intValue();
+        String consultPath=System.getProperty(PDT.PREF_CONSULT_PATH,"");
+        boolean serverStandAlone=Boolean.getBoolean(PDT.PREF_SERVER_STANDALONE);        
+        boolean sessionPooling=Boolean.getBoolean(PDT.PREF_USE_SESSION_POOLING);        
+        boolean consultRecursive=Boolean.getBoolean(PDT.PREF_CONSULT_RECURSIVE);
+        String debugLevel=System.getProperty(PDT.PREF_DEBUG_LEVEL);        
+        String metadataEngineDir = System.getProperty(PDT.PREF_METADATA_ENGINE_DIR,location+ fileSep+"engine");
+        String swiplDir=System.getProperty(PDT.PREF_SWIPL_DIR,location +fileSep +"swipl");
+        String serverClasspath = System.getProperty(PDT.PREF_SERVER_CLASSPATH,
                   getLibDir()+fileSep+"PrologInterface.jar"+pathSep
                 +getLibDir()+fileSep+"RaPlaRPC.jar"+pathSep
                 +getLibDir()+fileSep+"Common.jar"+pathSep
@@ -61,18 +61,20 @@ public class Initializer extends AbstractPreferenceInitializer {
         if(node==null){
             Debug.error("Häh?!");
         }else {
-            node.putInt(Properties.CONSOLE_PORT,consolePort);
-            node.put(Properties.CONSULT_PATH,consultPath);
-            node.putBoolean(Properties.CONSULT_RECURSIVE,consultRecursive);
-            node.put(Properties.DEBUG_LEVEL,debugLevel);
-            node.put(Properties.METADATA_ENGINE_DIR,metadataEngineDir);
-            node.put(Properties.SERVER_CLASSPATH,serverClasspath);
-            node.putInt(Properties.SERVER_PORT,serverPort);
-            node.putBoolean(Properties.SERVER_STANDALONE,serverStandAlone);
-            node.put(Properties.SWIPL_DIR,swiplDir);
-            node.putBoolean(Properties.USE_SESSION_POOLING,sessionPooling);
+            node.putInt(PDT.PREF_CONSOLE_PORT,consolePort);
+            node.put(PDT.PREF_CONSULT_PATH,consultPath);
+            node.putBoolean(PDT.PREF_CONSULT_RECURSIVE,consultRecursive);
+            node.put(PDT.PREF_DEBUG_LEVEL,debugLevel);
+            node.put(PDT.PREF_METADATA_ENGINE_DIR,metadataEngineDir);
+            node.put(PDT.PREF_SERVER_CLASSPATH,serverClasspath);
+            node.putInt(PDT.PREF_SERVER_PORT,serverPort);
+            node.putBoolean(PDT.PREF_SERVER_STANDALONE,serverStandAlone);
+            node.put(PDT.PREF_SWIPL_DIR,swiplDir);
+            node.putBoolean(PDT.PREF_USE_SESSION_POOLING,sessionPooling);
         }
-
+        debugLevel=node.get(PDT.PREF_DEBUG_LEVEL,"ERROR");
+        System.out.println("Hi. I'm the PDT's Preferences Initializer, and i am now setting the Debug Level to "+debugLevel);
+        Debug.setDebugLevel(debugLevel);
     }
 
     
