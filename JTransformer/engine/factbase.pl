@@ -1186,6 +1186,7 @@ attribSignature(modifierT,2).
 attribSignature(externT,1).
 attribSignature(interfaceT,1).
 attribSignature(sourceLocation,4).
+attribSignature(projectLocationT,3).
 
 basicType(char).
 basicType(int).
