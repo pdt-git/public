@@ -48,6 +48,10 @@ public class SocketServerStartAndStopStrategy implements
      * @see org.cs3.pl.prolog.ServerStartAndStopStrategy#startServer(org.cs3.pl.prolog.IPrologInterface)
      */
     public Process startServer(PrologInterface pif) {
+        if(Boolean.valueOf (pif.getOption(SocketPrologInterface.STANDALONE)).booleanValue()){
+            Debug.warning("Will not start server; the option "+SocketPrologInterface.STANDALONE+" is set.");
+            return null;
+        }
         int port = Integer.parseInt(pif.getOption(SocketPrologInterface.PORT));
         String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
         String engineDir = pif.getOption(SocketPrologInterface.ENGINE_DIR);
@@ -108,7 +112,12 @@ public class SocketServerStartAndStopStrategy implements
      *           boolean)
      */
     public void stopServer(PrologInterface pif, boolean now) {
+        
         try {
+            if(Boolean.valueOf (pif.getOption(SocketPrologInterface.STANDALONE)).booleanValue()){
+                Debug.warning("Will not stop server; the option "+SocketPrologInterface.STANDALONE+" is set.");
+                return;
+            }
             int port = Integer.parseInt(pif
                     .getOption(SocketPrologInterface.PORT));
             if (!Util.probePort(port)) {
