@@ -85,8 +85,9 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 			
 			if(currentTimeEvent==null){return elements;}
 			
-			if(currentTimeEvent.getMinutes()==0 && currentTimeEvent.getSeconds()==0)
+			if(!TimeTrackerPlugin.getDefault().isCountingUp() && currentTimeEvent.getMinutes()==0 && currentTimeEvent.getSeconds()==0){
 				elements[0]="Time out!";
+				}
 			else elements[0] = currentTimeEvent.getFormattedString();
 						return elements;
 			

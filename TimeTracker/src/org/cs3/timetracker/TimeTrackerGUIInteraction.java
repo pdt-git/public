@@ -39,7 +39,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	 */
 	public void notify(TimeEvent time){
 		System.out.println("Min: " + time.getMinutes() + " Sec: " + time.getSeconds());
-		if(time.getMinutes()==0 && time.getSeconds()==0){
+		if(!TimeTrackerPlugin.getDefault().isCountingUp() && time.getMinutes()==0 && time.getSeconds()==0){
 			if(!composite.isDisposed())
 
 			TimeTrackerPlugin.getDefault().getWorkbench().getDisplay().asyncExec(
