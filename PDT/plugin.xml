@@ -16,6 +16,10 @@
    <requires>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="Common"/>
+      <import plugin="Console"/>
+      <import plugin="MetaData"/>
+      <import plugin="PrologInterface"/>
    </requires>
    <extension-point id="hooks" name="Lifecycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension

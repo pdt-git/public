@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="Console"
+   name="Console"
+   version="1.0.0">
+   <requires>
+      <import plugin="Common"/>
+   </requires>
+
+</plugin>

@@ -3,6 +3,10 @@
 	<name>PDT</name>
 	<comment></comment>
 	<projects>
+		<project>Common</project>
+		<project>Console</project>
+		<project>MetaData</project>
+		<project>PrologInterface</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -2,7 +2,6 @@
  */
 package org.cs3.pl.console;
 
-import org.cs3.pl.common.Debug;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.StyledTextContent;
@@ -19,6 +18,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.cs3.pl.common.*;
 
 /**
  */

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="PrologInterface"
+   name="PrologInterface"
+   version="1.0.0">
+   <requires>
+      <import plugin="RaPlaRPC"/>
+      <import plugin="Common"/>
+   </requires>
+
+</plugin>
