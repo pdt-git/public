@@ -224,3 +224,15 @@ get_single_char(A) :-
     print(aha),
     system:get_single_char(A).
 */
+
+/**
+ * disable_tty_control
+ *
+ * Disables tty control char-wise read on the windows platform.
+ */
+
+disable_tty_control :- 
+  current_prolog_flag(windows,T) -> 
+  set_prolog_flag(tty_control,false). 
+
+:- disable_tty_control.
