@@ -1187,6 +1187,16 @@ attribSignature(externT,1).
 attribSignature(interfaceT,1).
 attribSignature(sourceLocation,4).
 
+basicType(char).
+basicType(int).
+basicType(float).
+basicType(double).
+basicType(void).
+basicType(long).
+basicType(short).
+basicType(byte).
+basicType(bolean).
+
 lastID(100000).
 
 %%% source location %%%
