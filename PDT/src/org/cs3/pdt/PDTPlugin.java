@@ -18,6 +18,7 @@ import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.Installer;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.Option;
@@ -281,8 +282,11 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
         
+        
+        Installer.install(prologInterface);
         List l = prologInterface.getBootstrapLibraries();
         l.addAll(getBootstrapList(null));
+        
 //		we are using the bootstrapContribution extension point just as anybody else.
 //        --lu
 //        l.add(Util.prologFileName(getResourceLocator(PDT.LOC_ENGINE).resolve(

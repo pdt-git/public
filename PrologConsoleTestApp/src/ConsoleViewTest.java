@@ -6,6 +6,7 @@ import java.util.Map;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
+import org.cs3.pl.metadata.Installer;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
@@ -19,6 +20,8 @@ import org.eclipse.swt.widgets.Shell;
  */
 public class ConsoleViewTest {
     public static void main(String[] args) throws IOException {
+        Debug.setDebugLevel(Debug.LEVEL_DEBUG);
+        System.out.println(System.getProperty("java.library.path"));
         Shell shell = new Shell();
         shell.setLayout(new FillLayout());
         shell.setSize(400, 500);
@@ -26,18 +29,15 @@ public class ConsoleViewTest {
         ConsoleView view = new ConsoleView();
         view.createPartControl(shell);
         final PrologInterface pif = PrologInterfaceFactory.newInstance().create();
-        int serverPort= Integer.getInteger(PDT.PREF_SERVER_PORT,4143).intValue();
-    	if(serverPort==-1){
-    		throw new NullPointerException("Required property \""+PDT.PREF_SERVER_PORT+"\" was not specified.");
-    	}
+      
         final PrologSocketConsoleModel consoleModel = new PrologSocketConsoleModel(false);
         int consolePort= Integer.getInteger(PDT.PREF_CONSOLE_PORT,4711).intValue();
     	if(consolePort==-1){
     		throw new NullPointerException("Required property \""+PDT.PREF_CONSOLE_PORT+"\" was not specified.");
     	}
         consoleModel.setPort(consolePort);
-        pif.addLifeCycleHook(new ConsoleServerHook(),ConsoleServerHook.HOOK_ID,null);
-        pif.addLifeCycleHook(new MetaDataEngineHook());
+        Installer.install(pif);
+        pif.addLifeCycleHook(new ConsoleServerHook(),ConsoleServerHook.HOOK_ID,null);        
         pif.addLifeCycleHook(new LifeCycleHook(){
 
             public void onInit(PrologSession initSession) {

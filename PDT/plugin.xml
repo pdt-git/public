@@ -209,11 +209,5 @@
             id="org.cs3.pdt.internal.views.NavigatorView"/>
    </perspectiveExtension>
 </extension>
-<extension
-      point="org.cs3.pdt.hooks">
-</extension>
-<extension
-      point="org.cs3.pdt.bootstrapContribution">
-   <contribution path="engine/main.pl"/>
-</extension>
+
 </plugin>
