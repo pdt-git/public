@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
@@ -16,6 +15,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
+ * The Java Logical Meta-Programming.(aka JTransformer) Plugin.
  */
 public class JLMPPlugin extends AbstractUIPlugin {
 
@@ -44,6 +44,16 @@ public class JLMPPlugin extends AbstractUIPlugin {
         return plugin;
     }
 
+    /**
+     * Returns a resource file locator for a given key.
+     * <p>
+     * The current implementation returns the value of
+     * <code>rootLocator.subLocator(key)</code>
+     * where root locator "points" to the installation directory of the
+     * plugin.
+     * @param key should be a valid filesystem path element.
+     * @return a resource file locator 
+     */
     public ResourceFileLocator getResourceLocator(String key) {
         if (rootLocator == null) {
             URL url = getBundle().getEntry("/");
@@ -62,4 +72,8 @@ public class JLMPPlugin extends AbstractUIPlugin {
         }
         return rootLocator.subLocator(key);
     }
+    
+   
+    
+    
 }
