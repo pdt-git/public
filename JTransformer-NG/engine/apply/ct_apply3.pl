@@ -17,12 +17,20 @@ CT's:
 :- dynamic dirty_tree/1. 
 :- dynamic changed/1. 
 :- dynamic rollback/1.
+:- dynamic debug_rollback_output/0.
 :- dynamic applied/1.
 :- dynamic tmp_rollback_file/1.
 :- multifile action/1.
 :- multifile ct/3.
 :- dynamic ct/3.
 :- multifile test/1.
+
+/**
+ * debug_rollback_output
+ * 
+ * activated by default.
+ */
+debug_rollback_output.
 /*
 or(_term1,_term2) :-
     debugme,
@@ -386,13 +394,26 @@ markEnclAsDirty(Elem):-
 
 markEnclAsDirty(_).
     
+toggle_rollback_debug :-
+    debug_rollback_output,
+    !,
+    format('no rollback debug~n',[]),
+    retractall(debug_rollback_output).
+    
+toggle_rollback_debug :-
+    format('rollback debug~n',[]),
+        assert(debug_rollback_output).
+        
 rollback :-
     findall(Term, 
     (
       rollback(Term),
       call(Term),
       term_to_atom(Term,Atom),
-      format('~a~n',[Atom]),
+	  (debug_rollback_output -> 
+      	format('~w~n',[Term])
+      	;true)
+	  ,
 	  Term =.. [_| [ID|_]],
 	  tree(ID, _, _),
 	  assert(dirty_tree(ID))
@@ -423,6 +444,8 @@ test(double_fact):-
       format('~a~n',[Atom])),_),
       retractall(t(_)).
     	
-    	
+remove_dirty_flags :-
+    retractall(dirty_tree(_)).
+    
     
     
