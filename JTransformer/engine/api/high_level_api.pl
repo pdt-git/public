@@ -79,6 +79,12 @@ src(Type):-
  
 cond(concat_lists(_Lists,_List)).
 
+
+concat_lists([Element|Tail],[Element|TailFlat]) :-
+    var(Element),
+    !,
+	concat_lists(Tail,TailFlat).
+
 concat_lists([[]],[]):-!.
 concat_lists([[Head|Tail]],[Head|Tail]):-!.
 concat_lists([Elem],[Elem]).
@@ -88,14 +94,14 @@ concat_lists([[HeadHead|HeadTail]|Tail],FlatList) :-
 	concat_lists(Tail,TailFlat),
     append([HeadHead|HeadTail],TailFlat,FlatList).
     
-concat_lists([Element|Tail],[Element|TailFlat]) :-
-	concat_lists(Tail,TailFlat).
     
-test(concat_list/2):-
+test(concat_list_2):-
     assert_true(concat_lists([[a,b],[d,e,f]],
     	[a,b,d,e,f])),
     assert_true(concat_lists([[a,b],c,[d,e,f]],
-    	[a,b,c,d,e,f])).
+    	[a,b,c,d,e,f])),
+    assert_true(concat_lists([[a,B],C,[d,e,f]],
+    	[a,B,C,d,e,f])).
 
 /**
  * action(set_parent(+ID,+NewParent))
