@@ -25,11 +25,17 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
@@ -38,8 +44,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 public class JLMPProjectNature implements IProjectNature, JLMPProject,
         JLMPProjectListener {
 
-    //The project for which this nature was requested,
-    //see IProject.getNature(String)
+    // The project for which this nature was requested,
+    // see IProject.getNature(String)
     private IProject project;
 
     private Option[] options;
@@ -49,7 +55,7 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
     private Vector listeners = new Vector();
 
     /**
-     *  
+     * 
      */
     public JLMPProjectNature() {
 
@@ -59,6 +65,7 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
      * @see IProjectNature#configure
      */
     public void configure() throws CoreException {
+        getFactBaseBuilder().clean(null);
         Debug.debug("configure was called");
         IProjectDescription descr = project.getDescription();
         ICommand sheepBuilder = descr.newCommand();
@@ -73,33 +80,59 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
         System.arraycopy(builders, 0, newBuilders, 0, builders.length);
         newBuilders[builders.length] = sheepBuilder;
         descr.setBuildSpec(newBuilders);
+
         project.setDescription(descr, null);
 
-        //important: touch the ConsultServices NOW if the pif is already
+        // important: touch the ConsultServices NOW if the pif is already
         // running.
-        //otherwise recorded facts might be reloaded to late! (i.e. by the
+        // otherwise recorded facts might be reloaded to late! (i.e. by the
         // builder AFTER it has
-        //"found" unresolved types
+        // "found" unresolved types
         PrologInterface pif = getPrologInterface();
-        if (pif.isUp()) {
-            pif.getConsultService(JLMP.EXT).setRecording(true);
-            pif.getConsultService(JLMP.SRC).setRecording(true);
-            pif.getConsultService(JLMP.EXT).setAppendingRecords(true);
-        }
+
+        Job j = new Job("building PEFs for project " + project.getName()) {
+            protected IStatus run(IProgressMonitor monitor) {
+                try {
+                    IWorkspaceDescription wd = ResourcesPlugin.getWorkspace()
+                            .getDescription();
+                    if (wd.isAutoBuilding()) {
+                        project.build(IncrementalProjectBuilder.FULL_BUILD,
+                                monitor);
+                    }
+                } catch (CoreException e) {
+                    return new Status(Status.ERROR, JLMP.PLUGIN_ID, -1,
+                            "exception caught during build", e);
+                }
+                return Status.OK_STATUS;
+            }
+        };
+        j.schedule();
 
     }
 
     /**
-     *  
+     * 
      */
     private void initOptions() {
         options = new Option[] {
                 new SimpleOption(
+                        JLMP.PROP_OUTPUT_PROJECT,
+                        "Output Project",
+                        "The project to which generated sourcecode is written."
+                                + "This option is ignored if JTransformer is operating in place.",
+                        Option.STRING, JLMPPlugin.getDefault()
+                                .getPreferenceValue(
+                                        JLMP.PREF_DEFAULT_OUTPUT_PROJECT, null)),
+                new SimpleOption(
                         JLMP.PROP_OUTPUT_FOLDER,
                         "Output source folder",
-                        "The source folder to which generated sourcecode is written.",
-                        Option.DIR, JLMPPlugin.getDefault().getPreferenceValue(
-                                JLMP.PREF_DEFAULT_OUTPUT_FOLDER, null)),
+                        "The source folder to which generated sourcecode is written."
+                                + "This should be a relative path - it is eather appended to the"
+                                + "path of the output project, or - if JTransformer operates inplace -"
+                                + " to that of the original project",
+                        Option.STRING, JLMPPlugin.getDefault()
+                                .getPreferenceValue(
+                                        JLMP.PREF_DEFAULT_OUTPUT_FOLDER, null)),
                 new SimpleOption(
                         JLMP.PROP_INPLACE,
                         "Try inplace operation",
@@ -109,7 +142,14 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
                                 + "deleted, are removed. \n"
                                 + "Newly created source files however "
                                 + "will still be created in the specified output folder.",
-                        Option.FLAG, "false")
+                        Option.FLAG, "false"),
+                new SimpleOption(
+                        JLMP.PROP_PEF_STORE_FILE,
+                        "PEF store file",
+                        "The file where PEFs for this project should be stored",
+                        Option.FILE, JLMPPlugin.getDefault()
+                                .getPreferenceValue(
+                                        JLMP.PREF_DEFAULT_PEF_STORE_FILE, null)),
 
         };
 
@@ -143,8 +183,8 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
                 String projectName = getProject().getName();
                 String sourceFolder = Util.prologFileName(new File(
                         getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
-                s.queryOnce("retractall(projectLocationT('<default>', '"
-                        + projectName + "', _))");
+                s.queryOnce("retractall(project_option('" + projectName
+                        + "', _))");
             } catch (CoreException e) {
                 Debug.report(e);
                 throw new RuntimeException(
@@ -154,6 +194,7 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
                 s.dispose();
             }
         }
+        getFactBaseBuilder().clean(null);
     }
 
     /**
@@ -179,16 +220,24 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
         PrologInterface pif = PDTPlugin.getDefault().getPrologInterface(
                 getProject().getName());
 
-        //	    List libraries = pif.getBootstrapLibraries();
-        //	    ResourceFileLocator l =
+        if (!pif.isUp()) {
+            try {
+                pif.start();
+            } catch (IOException e) {
+                Debug.report(e);
+                throw new RuntimeException(e);
+            }
+        }
+        // List libraries = pif.getBootstrapLibraries();
+        // ResourceFileLocator l =
         // JLMPPlugin.getDefault().getResourceLocator(JLMP.ENGINE);
-        //	    String name = Util.prologFileName(l.resolve(JLMP.MAIN_PL));
-        //	    if(!libraries.contains(name)){
-        //	        libraries.add(name);
-        //	        if(pif.isUp());
-        //	        PrologSession s = pif.getSession();
-        //	        s.queryOnce("['"+name+"']");
-        //	    }
+        // String name = Util.prologFileName(l.resolve(JLMP.MAIN_PL));
+        // if(!libraries.contains(name)){
+        // libraries.add(name);
+        // if(pif.isUp());
+        // PrologSession s = pif.getSession();
+        // s.queryOnce("['"+name+"']");
+        // }
         return pif;
     }
 
@@ -197,7 +246,7 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
      */
     public FactBaseBuilder getFactBaseBuilder() {
         if (builder == null) {
-            builder = new FactBaseBuilder(getProject(), getPrologInterface());
+            builder = new FactBaseBuilder(this);
             builder.addJLMPProjectListener(this);
         }
         return builder;
@@ -330,12 +379,23 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
     public void reconfigure(PrologSession s) {
         try {
             String projectName = getProject().getName();
-            String sourceFolder = Util.prologFileName(new File(
+            String outputFolder = Util.prologFileName(new File(
                     getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
-            s.queryOnce("retractall(projectLocationT('<default>', '"
-                    + projectName + "', _))");
-            s.queryOnce("assert(projectLocationT('<default>', '" + projectName
-                    + "', '" + sourceFolder + "'))");
+            String outputProject = Util.prologFileName(new File(
+                    getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
+            boolean inplace = Boolean.valueOf(
+                    Util.prologFileName(new File(getPreferenceValue(
+                            JLMP.PROP_INPLACE, "false")))).booleanValue();
+
+            s.queryOnce("retractall(project_option('" + projectName + "'))");
+            s.queryOnce("assert(project_option('" + projectName
+                    + "', output_project('" + outputProject + "')))");
+            s.queryOnce("assert(project_option('" + projectName
+                    + "', output_folder('" + outputFolder + "')))");
+            if (inplace) {
+                s.queryOnce("assert(project_option('" + projectName
+                        + "',inplace))");
+            }
         } catch (CoreException e) {
             Debug.report(e);
             throw new RuntimeException(
@@ -362,6 +422,4 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
         }
     }
 
-    
-    
 }
