@@ -49,7 +49,7 @@ class ConsultOutputStream extends OutputStream {
             close();
             if (t.getClass().equals(IOException.class))
                 throw (IOException) t;
-            throw (RuntimeException) t;
+            throw new RuntimeException( t);
         }
     }
 
@@ -84,7 +84,7 @@ class ConsultOutputStream extends OutputStream {
             close();
             if (t.getClass().equals(IOException.class))
                 throw (IOException) t;
-            throw (RuntimeException) t;
+            throw new RuntimeException( t);
         }
     }
 
@@ -110,7 +110,7 @@ class ConsultOutputStream extends OutputStream {
             close();
             if (t.getClass().equals(IOException.class))
                 throw (IOException) t;
-            throw (RuntimeException) t;
+            throw new RuntimeException( t);
         }
     }
 
@@ -129,7 +129,8 @@ class ConsultOutputStream extends OutputStream {
             close();
             if (t.getClass().equals(IOException.class))
                 throw (IOException) t;
-            throw (RuntimeException) t;
+            Debug.report(t);
+            throw new RuntimeException( t);
         }
     }
 
@@ -147,7 +148,7 @@ class ConsultOutputStream extends OutputStream {
             close();
             if (t.getClass().equals(IOException.class))
                 throw (IOException) t;
-            throw (RuntimeException) t;
+            throw new RuntimeException( t);
         }
     }
 
