@@ -1180,6 +1180,8 @@ treeSignature(getFieldT,6).
 treeSignature(precedenceT,4).
 treeSignature(nopT,3).         % TODO: fehlte / inkonsistenz zu tree/3 -- GK 3.9.2004
 
+:- multifile attribSignature/2.
+
 attribSignature(extendsT,2).
 attribSignature(implementsT,2).
 attribSignature(modifierT,2).
@@ -1188,13 +1190,14 @@ attribSignature(interfaceT,1).
 attribSignature(sourceLocation,4).
 attribSignature(projectLocationT,3).
 
+
 basicType(char).
 basicType(int).
 basicType(float).
 basicType(double).
 basicType(void).
 basicType(long).
-basicType(short).
+basicType(s8hort).
 basicType(byte).
 basicType(bolean).
 
@@ -1204,3 +1207,15 @@ lastID(100000).
 :- dynamic slT/3. 
 :- multifile slT/3. 
 
+
+/* 
+ * LogicAJ facts 
+ */
+ 
+attribSignature(aspect,1).
+
+/*
+  aspect(#aspectClass)
+*/
+:-dynamic aspect/1.
+:-multifile aspect/1.
