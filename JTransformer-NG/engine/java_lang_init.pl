@@ -89,5 +89,5 @@ update_java_lang :-
     		assert(user:globalIds(Class,Id)),
     		writeln(globalIds(Class,Id))
     	)).
-
-:- update_java_lang.
+%%ld: we MUST NOT call this here! see JT-147
+%%:- update_java_lang.
