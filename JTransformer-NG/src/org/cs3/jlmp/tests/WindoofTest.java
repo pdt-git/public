@@ -370,58 +370,8 @@ public class WindoofTest extends FactGenerationTest {
         TestSuite s = new TestSuite();
         BitSet blacklist = new BitSet();
 
-        /*
-         * XXX: for these the generated code is aequivalent, but the formating
-         * is not! These "differences" should be normalized away. So this IS an
-         * error on my part, an error in the test bed, to be precise.. These
-         * errors are not very critical though.
-         */
-        //blacklist.set(130);
-        //blacklist.set(160);
-        //blacklist.set(168);
-        //blacklist.set(236);
-        //blacklist.set(238);
-        /*
-         * another "soft" bug: generates no-op a method that only contains a
-         * anonymous class definition.this is a known problem, see JT-102
-         */
-        //blacklist.set(165)
-        //these two are missing for some reason
-        blacklist.set(157);
-        blacklist.set(158);
-        blacklist.set(170);
-        blacklist.set(237);
-
-        //ld: the following few do not compile. ergo, not our prob.
-        //interesting though, the builder eats most of them.
-        blacklist.set(44);
-        blacklist.set(78);
-        blacklist.set(79);
-        blacklist.set(80);
-        blacklist.set(81);
-        blacklist.set(86);
-        blacklist.set(87);
-        blacklist.set(118);
-        blacklist.set(150);
-        blacklist.set(152);
-        blacklist.set(153);
-        blacklist.set(182);
-        blacklist.set(183);
-        blacklist.set(184);
-        blacklist.set(185);
-        blacklist.set(186);
-        blacklist.set(187);
-        blacklist.set(188);
-        blacklist.set(190);
-        blacklist.set(191);
-        blacklist.set(192);
-        blacklist.set(193);
-        blacklist.set(194);
-        blacklist.set(196);
-        blacklist.set(197);
-        blacklist.set(200);
-        blacklist.set(233);
-        blacklist.set(234);
+       s.setName("WindoofTest");
+        
 
         for (int i = 1; i <= 10; i++) {//1-539
             if (!blacklist.get(i)) {
