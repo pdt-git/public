@@ -433,7 +433,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             PrologInterface pif = getPrologInterface();
             ConsultService metadataConsultService = pif
                     .getConsultService(PDT.CS_METADATA);
-            metadataConsultService.setRecording(true);
+            //metadataConsultService.setRecording(true);
             registerHooks();
             prologInterface.start();
         } catch (Throwable t) {
