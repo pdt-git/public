@@ -1072,6 +1072,39 @@ addParamList([Param|Params], [Id|Ids],Parent) :-
     add(paramDefT(Id,Parent,Type,Name)),
     addParamList(Params, Ids).    
     
+action(add_to_class_fq(Class,Member)):-
+    add_to_class_fq(Class,Member).
+
+%add_to_class_fq(_class, _) :- not(classDefT(_class, _, _, _)), !.
+/*
+  add_to_class_fq(+Class,+Member|+MemberList)
+  
+  Adds Member(s) to the class, if the Member is not already in the 
+  member list.
+  Fails if Class or Member is not bound and if Class is not a
+  of type classDefT.
+*/
+
+add_to_class_fq(_, []):- !.
+add_to_class_fq(Class, [Member|Rest]) :-
+    add_to_class_fq(Class,Member),
+    add_to_class_fq(Class,Rest).
+
+add_to_class_fq(_class, _id) :-
+    nonvar(_class),
+    nonvar(_id),
+    java_fq(classDefT(_class, _, _, _members)),
+    member(_id, _members),
+    !.
+add_to_class_fq(_class, _id) :-
+    nonvar(_class),
+    nonvar(_id),
+    java_fq(classDefT(_class, _p,_n,_members)),
+    delete(java_fq(classDefT(_class, _p,_n,_members))),
+    append(_members, [_id], _newMembers),
+    add(java_fq(classDefT(_class, _p, _n, _newMembers))).
+ 
+ 
     
 /**
  * apply_aj_cts.
