@@ -2,6 +2,7 @@
  */
 package org.cs3.pdt.internal.natures;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -106,8 +107,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
         String val = null;
         val = getProject().getPersistentProperty(
                 new QualifiedName("", PDT.PROP_SOURCE_PATH));
-        if (val == null) {           
-             val = PDTPlugin.getDefault().getPreferenceValue(
+        if (val == null) {
+            val = PDTPlugin.getDefault().getPreferenceValue(
                     PDT.PREF_SOURCE_PATH_DEFAULT, "");
         }
         return val;
@@ -135,9 +136,14 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
                 System.getProperty("path.separator"));
         for (int i = 0; i < elms.length; i++) {
             IProject p = getProject();
-            IFolder folder = p.getFolder(elms[i]);
-            if (folder.exists()) {
-                r.add(folder);
+
+            if (File.separator.equals(elms[i].trim())) {
+                r.add(p);
+            } else {
+                IFolder folder = p.getFolder(elms[i]);
+                if (folder.exists()) {
+                    r.add(folder);
+                }
             }
         }
         return r;
@@ -159,24 +165,27 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
         }
         if (resource.getType() == IResource.FILE) {
             String ext = resource.getFileExtension();
-            return ext!=null&&ext.equals("pl")
+            return ext != null && ext.equals("pl")
                     && isPrologSource(resource.getParent());
         } else if (resource.getType() == IResource.FOLDER) {
             return isPrologSource(resource.getParent());
         }
         return false;
     }
-    
-    public void setAutoConsulted(IFile file, boolean val) throws CoreException{
-        file.setPersistentProperty(new QualifiedName("",PDT.PROP_AUTO_CONSULT),val ? "true": "false");
+
+    public void setAutoConsulted(IFile file, boolean val) throws CoreException {
+        file.setPersistentProperty(
+                new QualifiedName("", PDT.PROP_AUTO_CONSULT), val ? "true"
+                        : "false");
     }
-    
-    public boolean isAutoConsulted(IFile file) throws CoreException{        
-        if(!isPrologSource(file)){
+
+    public boolean isAutoConsulted(IFile file) throws CoreException {
+        if (!isPrologSource(file)) {
             return false;
         }
-        String val= file.getPersistentProperty(new QualifiedName("", PDT.PROP_AUTO_CONSULT));
-        boolean autoConsult = val!=null&&val.equalsIgnoreCase("true");
+        String val = file.getPersistentProperty(new QualifiedName("",
+                PDT.PROP_AUTO_CONSULT));
+        boolean autoConsult = val != null && val.equalsIgnoreCase("true");
         return autoConsult;
     }
 
