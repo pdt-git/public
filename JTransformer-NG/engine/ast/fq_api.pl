@@ -356,7 +356,21 @@ getTypeIfNullEnclClass_fq(null, Stat, FQN) :-
 getTypeIfNullEnclClass_fq(Id, _, FQN) :-
     getType_fq(Id, FQN).
 
+/**
+ * getType_fq(Id,FQN)
+ * 
+ * FQN wrapper for enclClass/2.
+ */
     
 getType_fq(Id,FQN):-
     getType(Id, _Type),
     map_type_term(_Type,FQN).
+
+/**
+ * enclClass_fq(Id,FQN)
+ * 
+ * FQN wrapper for enclClass/2.
+ */
+enclClass_fq(Id,FQN):-
+    enclClass(Id, Class),
+    fullQualifiedName(Class, FQN).
