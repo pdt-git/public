@@ -1,7 +1,5 @@
 package org.cs3.pdt.internal.punit;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Map;
 
 import junit.framework.TestCase;

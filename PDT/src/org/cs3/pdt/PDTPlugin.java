@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -27,11 +26,10 @@ import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.MetadataEngineInstaller;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.ConsultService;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -46,7 +44,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
@@ -169,32 +166,10 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return prologHelper;
     }
 
-    public void showSourceLocation(SourceLocation loc) {
-        IFile file = null;
-        IWorkspace workspace = ResourcesPlugin.getWorkspace();
-        IWorkspaceRoot root = workspace.getRoot();
-        IPath fpath;
-        try {
-            fpath = new Path(new File(loc.file).getCanonicalPath());
-        } catch (IOException e1) {
-            Debug.report(e1);
-            return;
-        }
-        IFile[] files = root.findFilesForLocation(fpath);
-        if (files == null || files.length == 0) {
-            Debug.warning("Not in Workspace: " + fpath);
-            return;
-        }
-        if (files.length > 1) {
-            Debug.warning("Mapping into workspace is ambiguose:" + fpath);
-            Debug.warning("i will use the first match found: " + files[0]);
-        }
-        file = files[0];
-        if (!file.isAccessible()) {
-            Debug.warning("The specified file \"" + file
-                    + "\" is not accessible.");
-            return;
-        }
+    public void showSourceLocation(SourceLocation loc) throws IOException {
+        IFile file=null;        
+            file = getFileFromLocation(loc.file);        
+        //IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(loc.file));
         IWorkbenchPage page = PDTPlugin.getDefault().getActivePage();
         IEditorPart part;
         try {
@@ -207,6 +182,36 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             PLEditor editor = (PLEditor) part;
             editor.gotoLine(loc.line);
         }
+    }
+
+    /**
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    private IFile getFileFromLocation(String path) throws IOException {
+        IFile file = null;
+        IWorkspace workspace = ResourcesPlugin.getWorkspace();
+        IWorkspaceRoot root = workspace.getRoot();
+        IPath fpath;
+        
+            fpath = new Path(new File(path).getCanonicalPath());
+            //fpath = new Path(path);
+        
+        IFile[] files = root.findFilesForLocation(fpath);
+        if (files == null || files.length == 0) {
+            throw new IllegalArgumentException("Not in Workspace: " + fpath);            
+        }
+        if (files.length > 1) {
+            Debug.warning("Mapping into workspace is ambiguose:" + fpath);
+            Debug.warning("i will use the first match found: " + files[0]);
+        }
+        file = files[0];
+        if (!file.isAccessible()) {
+            throw new RuntimeException("The specified file \"" + file
+                    + "\" is not accessible.");
+        }
+        return file;
     }
 
     /**
@@ -364,9 +369,13 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                                 + elm.getAttributeAsIs("class"), e1);
                     }
                 } else if (resName != null) {
-                    URL url = Platform.getBundle(ext.getNamespace()).getEntry(
+                    Debug.debug("got this resname: "+resName);
+                    String namespace = ext.getNamespace();
+                    Debug.debug("got this namespace: "+namespace);
+                    URL url = Platform.getBundle(namespace).getEntry(
                             resName);
                     try {
+                        Debug.debug("trying to resolve this url: "+url);
                         url = Platform.resolve(url);
                     } catch (IOException e) {
                         Debug.report(e);

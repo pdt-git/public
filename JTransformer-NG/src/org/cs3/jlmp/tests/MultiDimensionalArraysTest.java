@@ -6,7 +6,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;

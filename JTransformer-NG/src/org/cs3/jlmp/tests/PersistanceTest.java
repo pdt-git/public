@@ -4,13 +4,10 @@ package org.cs3.jlmp.tests;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 
-import org.cs3.jlmp.JLMPProject;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.runtime.CoreException;
 
 /**
  */

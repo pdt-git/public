@@ -7,7 +7,6 @@
 package org.cs3.jlmp.internal.views;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  */

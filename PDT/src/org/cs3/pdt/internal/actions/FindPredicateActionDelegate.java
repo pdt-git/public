@@ -90,7 +90,12 @@ public class FindPredicateActionDelegate extends TextEditorAction {
                                                                     + ".\nProbably it is a build in(TODO).");
                                             return;
                                         }
-                                        plugin.showSourceLocation(location);
+                                        try {
+                                            plugin.showSourceLocation(location);
+                                        } catch (IOException e) {
+                                            Debug.report(e);
+                                            throw new RuntimeException(e);
+                                        }
                                     }
                                 });
                         //} else {

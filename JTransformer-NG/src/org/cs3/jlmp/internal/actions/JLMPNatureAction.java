@@ -1,6 +1,5 @@
 package org.cs3.jlmp.internal.actions;
 import org.cs3.jlmp.JLMP;
-import org.cs3.jlmp.internal.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;

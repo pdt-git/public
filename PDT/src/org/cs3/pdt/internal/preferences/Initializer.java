@@ -2,20 +2,13 @@
  */
 package org.cs3.pdt.internal.preferences;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.net.URL;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;

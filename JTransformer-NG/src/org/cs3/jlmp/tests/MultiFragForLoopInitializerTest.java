@@ -9,7 +9,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.cs3.jlmp.JLMPPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;

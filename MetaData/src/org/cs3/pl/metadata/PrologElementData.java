@@ -10,8 +10,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
 
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -22,7 +22,11 @@ import org.cs3.pl.prolog.PrologSession;
  */
 public class PrologElementData implements Serializable, Comparable{
 
-	/* (non-Javadoc)
+	/**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 1L;
+    /* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	protected String label;

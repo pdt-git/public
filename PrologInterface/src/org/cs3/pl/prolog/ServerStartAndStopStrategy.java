@@ -1,6 +1,5 @@
 package org.cs3.pl.prolog;
 
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 /**
  * A pluggable strategy for starting and stopping a PIF server.

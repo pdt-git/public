@@ -10,8 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.OperationNotSupportedException;
-
 import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;

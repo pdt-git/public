@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;

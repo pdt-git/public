@@ -3,7 +3,11 @@ import java.util.EventObject;
 
 public class ConsoleModelEvent extends EventObject {
 	
-	private String oldLineState=null;
+	/**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 1L;
+    private String oldLineState=null;
     private String newLineState=null;
     private String output = null;
     private boolean errorStream = false;

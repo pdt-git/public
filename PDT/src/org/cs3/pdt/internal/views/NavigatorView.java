@@ -1,7 +1,5 @@
 package org.cs3.pdt.internal.views;
 
-import java.io.IOException;
-
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.model.INode;

@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import junit.framework.TestCase;
-import junit.framework.TestListener;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;

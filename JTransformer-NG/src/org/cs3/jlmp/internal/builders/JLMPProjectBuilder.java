@@ -2,7 +2,6 @@ package org.cs3.jlmp.internal.builders;
 import java.util.Map;
 
 import org.cs3.jlmp.JLMP;
-import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.jlmp.internal.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;

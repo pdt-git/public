@@ -3,11 +3,7 @@ package org.cs3.jlmp.tests;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
@@ -26,14 +22,15 @@ public class BuilderTest extends FactGenerationTest {
 	 * @see org.cs3.jlmp.tests.FactGenerationTest#setUpOnce()
 	 */
 	public void setUpOnce() throws Exception {
-		super.setUpOnce();
+	    setAutoBuilding(false);
+	    super.setUpOnce();
 		getTestJLMPProject().getPrologInterface();
 		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
 		File r = l.resolve("testdata-facts.zip");
 		Util.unzip(r);
 		setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
 				"testdata-facts"));
-		setAutoBuilding(false);
+		
 		getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
 		
 		

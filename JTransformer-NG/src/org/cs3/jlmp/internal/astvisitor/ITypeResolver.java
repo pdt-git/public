@@ -1,6 +1,13 @@
 package org.cs3.jlmp.internal.astvisitor;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 /**
  * This interface provides the framework for implementations of the generation
  * of Type-Term resolvers, that map literals and types (from the eAST) to 

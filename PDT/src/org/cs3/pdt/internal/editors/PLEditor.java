@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.editors;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
@@ -11,7 +10,6 @@ import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
-import org.cs3.pl.parser.PrologCompiler;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

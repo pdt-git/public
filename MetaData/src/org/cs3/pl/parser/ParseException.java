@@ -13,6 +13,11 @@ package org.cs3.pl.parser;
 public class ParseException extends Exception {
 
   /**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 1L;
+
+/**
    * This constructor is used by the method "generateParseException"
    * in the generated parser.  Calling this constructor generates
    * a new object of this type with the fields "currentToken",

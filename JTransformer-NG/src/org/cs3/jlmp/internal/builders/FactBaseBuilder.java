@@ -1,9 +1,6 @@
 package org.cs3.jlmp.internal.builders;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -26,7 +23,6 @@ import org.cs3.jlmp.internal.astvisitor.FactGenerator;
 import org.cs3.jlmp.internal.astvisitor.PrologWriter;
 import org.cs3.jlmp.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -43,7 +39,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;

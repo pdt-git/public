@@ -4,7 +4,11 @@ import java.io.Serializable;
 
 
 public class SourceLocation implements Serializable {
-	public int line;
+	/**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 1L;
+    public int line;
 	public String file;
 	
 	public String toString() {

@@ -2,15 +2,11 @@
  */
 package org.cs3.jlmp.internal.hooks;
 
-import java.io.File;
-
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.jlmp.JLMPProject;
 import org.cs3.jlmp.internal.natures.JLMPProjectNature;
-
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -18,7 +14,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;

@@ -9,7 +9,11 @@ import org.eclipse.ui.model.IWorkbenchAdapter;
 public class PrologElement extends PrologElementData implements IAdaptable {
 
 	
-	protected String imageDescriptorId;
+	/**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 1L;
+    protected String imageDescriptorId;
 
 	
 	public static PrologElement[] fromData(PrologElementData[] data){

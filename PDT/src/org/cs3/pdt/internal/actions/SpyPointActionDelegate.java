@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.actions;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.ResourceBundle;
 

@@ -2,7 +2,6 @@
  */
 package org.cs3.pdt.internal.actions;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;

@@ -8,8 +8,8 @@ import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	/**

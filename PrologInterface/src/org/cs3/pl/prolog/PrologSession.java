@@ -1,7 +1,6 @@
 package org.cs3.pl.prolog;
 
 import java.io.InputStream;
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 

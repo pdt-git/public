@@ -3,7 +3,6 @@
 package org.cs3.pl.common;
 
 import java.io.File;
-import java.io.InputStream;
 
 /**
  * resolves virtual  files or directory names.

@@ -6,9 +6,6 @@
  */
 package org.cs3.jlmp.internal.astvisitor;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 

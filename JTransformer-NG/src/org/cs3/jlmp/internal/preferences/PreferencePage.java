@@ -6,10 +6,8 @@
  */
 package org.cs3.jlmp.internal.preferences;
 
-import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
