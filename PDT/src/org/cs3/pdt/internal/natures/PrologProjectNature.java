@@ -177,17 +177,20 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public void setAutoConsulted(IFile file, boolean val) throws CoreException {
 		file.setPersistentProperty(
-				new QualifiedName("", PDT.PROP_AUTO_CONSULT), val ? "true"
-						: "false");
+				//TODO: toggled functionality - to test
+				new QualifiedName("", PDT.PROP_NO_AUTO_CONSULT), val ? "false"
+						: "true");
 	}
 
 	public boolean isAutoConsulted(IFile file) throws CoreException {
 		if (!isPrologSource(file)) {
 			return false;
 		}
+		
 		String val = file.getPersistentProperty(new QualifiedName("",
-				PDT.PROP_AUTO_CONSULT));
-		boolean autoConsult = val != null && val.equalsIgnoreCase("true");
+				PDT.PROP_NO_AUTO_CONSULT));
+		//TODO: toggled functionality - to test
+		boolean autoConsult = !(val != null && val.equalsIgnoreCase("true"));
 		return autoConsult;
 	}
 

@@ -57,7 +57,7 @@ public interface PDT {
      * a file for which this property is "true" will be consulted each time it
      * is touched by the meta data builder.
      */
-    public static final String PROP_AUTO_CONSULT = "pdt.auto.consult";
+    public static final String PROP_NO_AUTO_CONSULT = "pdt.no.auto.consult";
 
    
     public static final String LOC_PIF = "engine/PrologInterface";

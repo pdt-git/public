@@ -163,7 +163,7 @@
             objectClass="org.eclipse.core.resources.IFile"
             id="PrologFileObjectContribution">
          <action
-               label="Auto-Consult"
+               label="No Auto-Consult"
                style="toggle"
                tooltip="Whether the file should be consulted"
                class="org.cs3.pdt.internal.actions.AutoConsultAction"
