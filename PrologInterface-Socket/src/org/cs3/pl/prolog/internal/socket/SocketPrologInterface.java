@@ -268,7 +268,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             public void beforeShutdown(PrologSession session) {
                 cs.disconnect();
             }
-        });
+        },"SocketPrologInterface.reloadCS."+prefix, new String[0]);
 //      this is NOT the same as isUp().
         // e.g. a hook may be added as a side effect of processing another hook's.
         //onInit() method.
@@ -323,8 +323,16 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
      */
-    public synchronized void stop() {
-        pool.clear();
+    public synchronized void stop() {        
         super.stop();
+        pool.clear();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
+     */
+    public synchronized void start() throws IOException {                
+        pool.clear();
+        super.start();
     }
 }
