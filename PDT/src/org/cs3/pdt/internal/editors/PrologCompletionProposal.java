@@ -1,32 +1,27 @@
-/*
- * Created on 20.04.2004
- *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 package org.cs3.pdt.internal.editors;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.metadata.PrologElementData;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-/**
- * @author windeln
- *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+
 public class PrologCompletionProposal implements ICompletionProposal {
 	
 	/** The string to be displayed in the completion proposal popup */
-	private String fDisplayString;
+	//private String fDisplayString;
 	/** The replacement string */
-	private String fReplacementString;
+	//private String fReplacementString;
 	/** The replacement offset */
 	private int fReplacementOffset;
 	/** The replacement length */
@@ -35,58 +30,62 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	private int fCursorPosition;
 	/** The image to be displayed in the completion proposal popup */
 	private Image fImage;
-	/** The context information of this proposal */
-	private IContextInformation fContextInformation;
+	private PrologElementData data;
 	/** The additional info of this proposal */
-	private String fAdditionalProposalInfo;
+	//private String fAdditionalProposalInfo;
+    private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC).createImage();
+    private static final Image hiddenImage = ImageRepository.getImage(ImageRepository.PE_HIDDEN).createImage();
+    private String postfix;
+    private Image image;
+    private IContextInformation context;
+    private String help;
 
 	/**
 	 * Creates a new completion proposal based on the provided information.  The replacement string is
 	 * considered being the display string too. All remaining fields are set to <code>null</code>.
 	 *
-	 * @param replacementString the actual string to be inserted into the document
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
 	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 */
-	public PrologCompletionProposal(PrologElementData data, String replacementString, int replacementOffset, int replacementLength, int cursorPosition) {
-		this(replacementString, replacementOffset, replacementLength, cursorPosition, null, null, null, null);
-	}
-
-	/**
-	 * Creates a new completion proposal. All fields are initialized based on the provided information.
-	 *
-	 * @param replacementString the actual string to be inserted into the document
-	 * @param replacementOffset the offset of the text to be replaced
-	 * @param replacementLength the length of the text to be replaced
-	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
-	 * @param image the image to display for this proposal
-	 * @param displayString the string to be displayed for the proposal
-	 * @param contextInformation the context information associated with this proposal
-	 * @param additionalProposalInfo the additional information associated with this proposal
-	 */
-	public PrologCompletionProposal(String replacementString, int replacementOffset, int replacementLength, int cursorPosition, Image image, String displayString, IContextInformation contextInformation, String additionalProposalInfo) {
-		Assert.isNotNull(replacementString);
+	public PrologCompletionProposal(PrologElementData data, int replacementOffset, int replacementLength,String prefix) {
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
-		Assert.isTrue(cursorPosition >= 0);
-		
-		fReplacementString= replacementString;
 		fReplacementOffset= replacementOffset;
 		fReplacementLength= replacementLength;
-		fCursorPosition= cursorPosition;
-		fImage= image;
-		fDisplayString= displayString;
-		fContextInformation= contextInformation;
-		fAdditionalProposalInfo= additionalProposalInfo;
+		this.data=data;
+		
+		
+		
+			if(data.getLabel().regionMatches(true,0,prefix,0,prefix.length()) ) {
+				
+				postfix = "";
+                int cursorPos = data.getLabel().length();
+				if (data.getArity() > 0) {
+					postfix = "()";
+					cursorPos++;
+				}
+				else if (data.getArity() == -1) {
+					postfix = ":";
+					cursorPos++;
+				}
+				
+				
+				image = data.isPublic() ? publicImage : hiddenImage;
+                fCursorPosition=cursorPos;
+				
+		
+				
+		}
 	}
 
+	
 	/*
 	 * @see ICompletionProposal#apply(IDocument)
 	 */
 	public void apply(IDocument document) {
 		try {
-			document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
+			document.replace(fReplacementOffset, fReplacementLength, data.getLabel() + postfix);
 		} catch (BadLocationException x) {
 			// ignore
 		}
@@ -102,8 +101,16 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	/*
 	 * @see ICompletionProposal#getContextInformation()
 	 */
-	public IContextInformation getContextInformation() {
-		return fContextInformation;
+	public IContextInformation getContextInformation() {	    
+        if (context==null && getHelp().length() > 0) {
+			int predLen = data.getLabel().length();
+			int firstLB = getHelp().indexOf('\n');
+			if(firstLB > predLen) {
+				String params = getHelp().substring(predLen,firstLB);
+				context = new ContextInformation(null, "", params );
+			}
+		}
+		return context;
 	}
 
 	/*
@@ -117,16 +124,28 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		if (fDisplayString != null)
-			return fDisplayString;
-		return fReplacementString;
+		return data.getSignature();
 	}
 
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		return fAdditionalProposalInfo;
+		return getHelp();
 	}
+
+
+    /**
+     * @return
+     */
+    private String getHelp() {
+        if(this.help==null){
+            this.help=PDTPlugin.getDefault().getMetaInfoProvider().getHelp(data);
+            if(this.help==null){
+                this.help="";
+            }
+        }
+        return help;
+    }
 
 }

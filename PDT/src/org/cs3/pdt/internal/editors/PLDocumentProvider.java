@@ -16,7 +16,9 @@ public class PLDocumentProvider extends FileDocumentProvider {
 					new PLPartitionScanner(),
 					new String[] {
 						PLPartitionScanner.PL_MULTI_COMMENT,
-						PLPartitionScanner.PL_COMMENT });
+						PLPartitionScanner.PL_COMMENT,
+						PLPartitionScanner.PL_SINGLE_QUOTED_STRING,
+						PLPartitionScanner.PL_DOUBLE_QUOTED_STRING});
 			partitioner.connect(document);
 			document.setDocumentPartitioner(partitioner);
 		}

@@ -35,6 +35,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -179,16 +180,20 @@ public class PLEditor extends TextEditor {
 
     private String filename;
 
-    //    protected void configureSourceViewerDecorationSupport(
-    //            SourceViewerDecorationSupport support) {
-    //        getPreferenceStore().setDefault(MATCHING_BRACKETS, true);
-    //        getPreferenceStore().setDefault(MATCHING_BRACKETS_COLOR, "30,30,200");
-    //        support.setCharacterPairMatcher(fBracketMatcher);
-    //        support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS,
-    //                MATCHING_BRACKETS_COLOR);
-    //
-    //        super.configureSourceViewerDecorationSupport(support);
-    //    }
+    private static final String MATCHING_BRACKETS = "matching.brackets";
+
+    private static final String MATCHING_BRACKETS_COLOR = "matching.brackets.color";
+
+    protected void configureSourceViewerDecorationSupport(
+            SourceViewerDecorationSupport support) {
+        getPreferenceStore().setDefault(MATCHING_BRACKETS, true);
+        getPreferenceStore().setDefault(MATCHING_BRACKETS_COLOR, "30,30,200");
+        support.setCharacterPairMatcher(new PLCharacterPairMatcher());
+        support.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS,
+                MATCHING_BRACKETS_COLOR);
+
+        super.configureSourceViewerDecorationSupport(support);
+    }
 
     public void createPartControl(final Composite parent) {
         try {
