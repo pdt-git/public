@@ -168,8 +168,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     public void showSourceLocation(SourceLocation loc) throws IOException {
         IFile file=null;        
-            file = getFileFromLocation(loc.file);        
-        //IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(loc.file));
+         //   file = getFileFromLocation(loc.file);        
+        file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(loc.file));
         IWorkbenchPage page = PDTPlugin.getDefault().getActivePage();
         IEditorPart part;
         try {
@@ -180,7 +180,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
         if (part instanceof PLEditor) {
             PLEditor editor = (PLEditor) part;
-            editor.gotoLine(loc.line);
+           // editor.gotoLine(loc.line);
+            //XXX TODO FIXME a quick workaround.
+            editor.gotoOffset(loc.line);
         }
     }
 
