@@ -2,13 +2,13 @@ import java.io.FileNotFoundException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Properties;
-import org.cs3.pl.prolog.InitHook;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
  * this hool consults pl of the jtransofmer engine.
  */
-public class ConsultEngineDirHook implements InitHook {
+public class ConsultEngineDirHook implements LifeCycleHook {
         public void onInit(PrologSession s) {
         try {
             s.consult(getEngineDir()+"/main.pl");
@@ -59,5 +59,19 @@ public class ConsultEngineDirHook implements InitHook {
 		return pdtDir;
 	}
 
-   */ 
+   */
+
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
+	 */
+	public void afterInit() {
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
+	 */
+	public void beforeShutdown(PrologSession session) {
+		
+	} 
 }

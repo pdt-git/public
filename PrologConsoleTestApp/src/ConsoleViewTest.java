@@ -20,8 +20,6 @@ public class ConsoleViewTest {
         ConsoleView view = new ConsoleView();
         view.createPartControl(shell);
         PrologInterface pif = new PrologInterface();
-        pif.addInitHook(new ConsultEngineDirHook());
-        pif.addInitHook(new ConsoleServerHook());
         pif.start();
         PrologSocketConsoleModel consoleModel = new PrologSocketConsoleModel();      
         view.setModel(consoleModel);

@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
+import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
@@ -47,23 +47,24 @@ public class PrologInterface implements IPrologInterface {
 	private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 
 	private final class StartupThread extends Thread {
-		private Collection hooks;
+		private Map hooks;
 
 		private StartupThread(String name) {
 			super(name);
 		}
 
-		public void start(Collection c) {
+		public void start(Map c) {
 			hooks = c;
 			setDaemon(true);
 			super.start();
 		}
 
 		public void run() {
-			synchronized (hooks) {
-				for (Iterator i = hooks.iterator(); i.hasNext();) {
-					StartupHook element = (StartupHook) i.next();
-					element.onStartup();
+			hookFilpFlop=!hookFilpFlop;
+			for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
+				LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(it.next());
+				if(h.flipflop!=hookFilpFlop){
+					h.afterInit();
 				}
 			}
 		}
@@ -181,12 +182,7 @@ public class PrologInterface implements IPrologInterface {
 
 	
 	
-	private Set initHooks = new HashSet();
-
-	private Set startHooks = new HashSet();
-
-	private Set shutdownHooks = new HashSet();
-
+	
 	private int port = 9966;
 
 	private Vector outListeners = new Vector();
@@ -205,6 +201,9 @@ public class PrologInterface implements IPrologInterface {
 
 	private StartupThread startupThread;
 
+	private HashMap hooks = new HashMap();
+	private boolean hookFilpFlop = false;
+	
 	public PrologInterface() throws IOException {
 		
 //		String property = System.getProperty(Properties.PLIF_HOOKS);
@@ -344,63 +343,6 @@ public class PrologInterface implements IPrologInterface {
 	}
 
 	/**
-	 * adds a system initialization callback. The method onInit() is called from
-	 * each of them, with a specific initialization session. They are all
-	 * executed, synchronously, before any other access is allowed.
-	 * 
-	 * <b>note: </b> adding an init hook while the PI is running is an error
-	 * (there is no way to guarantee the expected execution context as described
-	 * above).
-	 * 
-	 * @param i
-	 *            an InitHook instance
-	 * @throws an
-	 *             IllegalStateException if the PI is already running.
-	 */
-	public void addInitHook(InitHook i) {
-		synchronized (initHooks) {
-			initHooks.add(i);
-		}
-
-	}
-
-	/**
-	 * adds a startup callback. These callbacks are called asynchronously after
-	 * system initialization.
-	 * 
-	 * @param i
-	 *            an StartupHook instance.
-	 */
-	public void addStartupHook(final StartupHook i) {
-		synchronized (startHooks) {
-			startHooks.add(i);
-		}
-		if (!isDown()) {
-			Debug
-					.warning("Adding an startup hook while PI is running. I will execute it ad hoc on an extra thread.");
-			new Thread() {
-				public void run() {
-					i.onStartup();
-				}
-			}.start();
-		}
-
-	}
-
-	/**
-	 * adds a startup callback. These callbacks are called synchronously before
-	 * the system shuts down.
-	 * 
-	 * @param i
-	 *            an StartupHook instance.
-	 */
-	public void addShutdownHook(ShutdownHook i) {
-		synchronized (shutdownHooks) {
-			shutdownHooks.add(i);
-		}
-	}
-
-	/**
 	 * causes complete re-initialization of the Prolog system, and invalidates
 	 * all current sessions.
 	 * 
@@ -430,10 +372,15 @@ public class PrologInterface implements IPrologInterface {
 		} catch (IOException e1) {
 			Debug.report(e1);
 		}
-		for (Iterator i = shutdownHooks.iterator(); i.hasNext();) {
-			ShutdownHook h = (ShutdownHook) i.next();
-			h.beforeShutDown(s);
+		
+		hookFilpFlop=!hookFilpFlop;
+		for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
+			LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(it.next());
+			if(h.flipflop!=hookFilpFlop){
+				h.beforeShutdown(s);
+			}
 		}
+		
 		s.doDispose();
 		
 		synchronized (sessions) {
@@ -491,18 +438,19 @@ public class PrologInterface implements IPrologInterface {
 		}
 		InitSession initSession = new InitSession(port);
 
-		for (Iterator i = initHooks.iterator(); i.hasNext();) {
-			InitHook h = (InitHook) i.next();
-
-			h.onInit(initSession);
+		hookFilpFlop=!hookFilpFlop;
+		for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
+			LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(it.next());
+			if(h.flipflop!=hookFilpFlop){
+				h.onInit(initSession);
+			}
 		}
-
 		initSession.doDispose();		
 		setState(UP);
 		
 		startupThread = new StartupThread("PrologInterface startup Thread");
 
-		startupThread.start(startHooks);
+		startupThread.start(hooks);
 	}
 
 	/**
@@ -672,5 +620,47 @@ public class PrologInterface implements IPrologInterface {
 		else{
 			throw new IllegalStateException("Cannot change port while in use.");
 		}
+	}
+
+
+
+	
+	
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.IPrologInterface#addLifeCycleHook(org.cs3.pl.prolog.LifeCycleHook)
+	 */
+	public void addLifeCycleHook(LifeCycleHook h) {
+		addLifeCycleHook(h,null,null);		
+	}	
+
+
+	/**
+	 * @param hook
+	 * @param id
+	 * @param dependsOn
+	 */
+	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies) {
+		if(id==null){
+			id="<<"+hooks.size()+">>";
+		}
+		if(dependencies==null){
+			dependencies=new String[0];
+		}
+		
+		LifeCycleHookWrapper node =(LifeCycleHookWrapper) hooks.get(id);
+		if( node==null){
+			node = new LifeCycleHookWrapper(hook,id);
+			hooks.put(id,node);
+		}
+		for (int i = 0; i < dependencies.length; i++) {
+			LifeCycleHookWrapper dep = (LifeCycleHookWrapper) hooks.get(dependencies[i]);
+			if(dep==null){
+				dep=new LifeCycleHookWrapper(null,dependencies[i]);
+				hooks.put(dependencies[i],node);
+			}
+			dep.pre.add(node);
+			node.post.add(node);
+		}
+		
 	}
 }
