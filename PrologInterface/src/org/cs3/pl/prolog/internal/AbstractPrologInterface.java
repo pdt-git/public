@@ -99,6 +99,18 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     private HashMap listenerLists = new HashMap();
 
+    /*Debug facility
+     * it was a common mistake in the past to call getSession() during  
+     * startup from the same thread that run the startup (i.e. during init hooks)
+     * This field saves the thread triggereing the startup/shutdown.
+     * In getsessoin, it checks wether it is the same thread, and throws
+     * a helpfull exception to hint the blind, rather than just pissing everyone of
+     * by locking the thread. :-)
+     * 
+     * This can propably be removed someday soon.
+     */
+    Thread theThreadWhoDidIt=null;
+    
     public AbstractPrologInterface() {
 
         Runtime.getRuntime().addShutdownHook(
@@ -120,7 +132,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             String[] dependencies) {
         hookHelper.addLifeCycleHook(hook, id, dependencies);
     }
-
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
+     */
+    public void removeLifeCycleHook(String hookId) {
+        hookHelper.removeLifeCycleHook(hookId);        
+    }
     /**
      * 
      * override this if your subclass needs special initial Sessions
@@ -177,6 +194,10 @@ public abstract class AbstractPrologInterface implements PrologInterface {
     public PrologSession getSession() {
         synchronized (stateLock) {
             if(START_UP==getState()){
+                if(theThreadWhoDidIt==Thread.currentThread()){
+                    Debug.error("getSession() called from init thread. Please read the api docs for LifeCycleHook.onInit(PrologSession).");
+                    throw new IllegalThreadStateException("You cannot call getSession() from the init thread during pif startup.");
+                }
                 waitUntilUp();
             }
             if(UP!=getState()){
@@ -326,6 +347,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                 throw new IllegalArgumentException("Illegal state:" + newState);
             }
             this.state = newState;
+            theThreadWhoDidIt=Thread.currentThread();
             stateLock.notifyAll();
         }
     }
