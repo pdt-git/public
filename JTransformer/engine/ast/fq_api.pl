@@ -338,11 +338,14 @@ java_fq_to_pef(FQ, PEF):-
  * For use with java_fq abstraction. 
  */
 
-getTypeIfNullEnclClass(null, _stat, FQN) :-
-    enclClass(_stat, _encl),
-    fullQualifiedName(_encl,FQN).
+getTypeIfNullEnclClass_fq(null, Stat, FQN) :-
+    enclClass(Stat, Encl),
+    fullQualifiedName(Encl,FQN).
     
-getTypeIfNullEnclClass(_id, _, FQN) :-
-    getType(_id, _Type),
+getTypeIfNullEnclClass(Id, _, FQN) :-
+    getType_fq(Id, FQN).
+
+    
+getType_fq(Id,FQN):-
+    getType(Id, _Type),
     map_type_term(_Type,FQN).
-     

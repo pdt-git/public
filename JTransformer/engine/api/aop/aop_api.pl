@@ -479,18 +479,6 @@ appendBlockStatment(_block, _post) :-
     delete(blockT(_body, _p, _e, _stats)),
     add(blockT(_body, _p, _e, _newStats)).
 
-apply_aj_cts :-
-    aj_ct_list(_list),
-    apply_aspectj_cts(_list).
-
-apply_aspectj_cts([]).
-apply_aspectj_cts([_ct|_t]) :-
-%    appendDir(_ct, _ct_full_path),
-    apply_ct(_ct),
-%    applyCTbacktrack(_h),
-    apply_aspectj_cts(_t).
-
-
 
     /*
   restriction elements
@@ -502,42 +490,48 @@ cond(matchParams(_vardefs, _patterns)).
 matchParams([], []).
 
 % FIXME sehr schlechter workaround für declare error, mock objects
-matchParams([_vdHead | _vdTail], [typePattern(bindTypeList(FNList), _dim)]) :-
-    paramDefT(_vdHead,_,_,_),
-    !,
-    matchParamTypeNameList([_vdHead | _vdTail],FNList).
+%matchParams([VdHead | VdTail], [typePattern(bindTypeList(FNList), _dim)]) :-
+%    paramDefT(VdHead,_,_,_),
+%    !,
+%    matchParamTypeNameList([VdHead | VdTail],FNList).
 % FIXME sehr schlechter workaround für declare error, mock objects
 
-matchParams([_vdHead | _vdTail], [DotDot | _patTail]) :-
-    nonvar(DotDot),
-    DotDot = '..',
-    matchParams(_vdTail, ['..' | _patTail]).
+matchParams([VdHead | VdTail], [Term | PatTail]) :-
+    nonvar(Term),
+    Term = type(Type),
+    getType_fq(VdHead,Type),
+    matchParams(VdTail,  PatTail).
+ 
 
-matchParams(_vardefs, ['..' | _patTail]) :-
-    matchParams(_vardefs, _patTail).
+matchParams([VdHead | VdTail], [Term | PatTail]) :-
+    nonvar(Term),
+    Term = params([Head|Tail]),
+    (
+      var(Head) ->
+        Head = VdHead;
+        (getType(Head,Type),getType(VdHead,Type))
+    ),
+    matchParams(VdTail, [params(Tail) | PatTail]).
+
+matchParams(VdHead, [Term | PatTail]) :-
+    nonvar(Term),
+    Term = params([]),
+    matchParams(VdHead, PatTail).
 
 
-matchParams([_vdHead | _vdTail], [List | _patTail]) :-
+matchParams([VdHead | VdTail], [List | PatTail]) :-
     nonvar(List),
-    List = [_pattern , _vdHead],
+    List = [_pattern , VdHead],
     !,
-    matchParams([_vdHead | _vdTail], [_pattern | _patTail]).
+    matchParams([VdHead | VdTail], [_pattern | PatTail]).
 
-matchParams([_vdHead | _vdTail], [TypeTerm | _patTail]) :-
-    nonvar(TypeTerm),
-    TypeTerm = type(_kind,_id,_dim),
-    getType(_vdHead, type(_kind, _id,_dim)).
-/*    getTypeName(type(_kind, _id,_dim), _name),
-    matchPatterns(_name, _pattern),
-    matchParams(_vdTail, _patTail).*/
-
-%Dirty fix for the LoD example: match Param List with one Free Name
-
-matchParams([_vdHead | _vdTail], [typePattern(_pattern, _dim) | _patTail]) :-
-    getType(_vdHead, type(_kind, _id,_dim)),
+matchParams([VdHead | VdTail], [TypePattern | PatTail]) :-
+    nonvar(TypePattern),
+    TypePattern = typePattern(_pattern, _dim),
+    getType(VdHead, type(_kind, _id,_dim)),
     getTypeName(type(_kind, _id,_dim), _name),
     matchPatterns(_name, _pattern),
-    matchParams(_vdTail, _patTail).
+    matchParams(VdTail, PatTail).
 
 matchParamTypeNameList([],[]).
 matchParamTypeNameList([Head | Tail],[FNHead|FNTail]):-
@@ -557,8 +551,7 @@ matchPatterns(_name, (_pat1;_pat2)) :-
     !,(
     matchPatterns(_name, _pat1);
     matchPatterns(_name, _pat2)
-    ),
-    matchPatterns(_name, _patTail).
+    ).
 
 matchPatterns(_name, (_pat1,_pat2)) :-
     !,
@@ -969,6 +962,33 @@ constructor(_constructor,_class,_params):-
     methodDefT(_constructor,_class,'<init>', _paramsConstructor,_,[],_),
     matchParams(_params, _paramsConstructor).
 
+
+/*************** cond    ************/
+cond(subtype_name(_sub, _super)).
+subtype_name(_sub, _sub).
+subtype_name(_sub, _super) :-
+    java_fq(extendsT(_sub,_super)).
+subtype_name(_sub, _super) :-
+    java_fq(implementsT(_sub,_super)).
+subtype_name(_sub, _super) :-
+    java_fq(extendsT(_sub,_subsuper)),
+    subtype_name(_subsuper, _super).
+subtype_name(_sub, _super) :-
+    java_fq(implementsT(_sub,_subsuper)),
+    subtype_name(_subsuper, _super).
+
+cond(types(_ElementList,_TypeList)).
+
+/**
+ * types(?ElementList,?TypeList).
+ * 
+ * uses full qualified type names (java_fq API).
+ */
+ 
+types([],[]).
+types([Element|ElementTail],[Type|TypeTail]):-
+	getType_fq(Element,Type),
+	types(ElementTail,TypeTail).
 
 /*************** actions ************/
 

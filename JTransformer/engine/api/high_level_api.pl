@@ -353,12 +353,6 @@ action(add(implements(_class, _super))) :-
 action(delete(implements(_class, _super))) :-
     delete(implementsT(_class, _super)).
 
-cond(subtype_name(_sub, _super)).
-subtype_name(SubName, SuperName):-
-    class(Sub,_,SubName),
-    class(Super,_,SuperName),
-    subtype(Sub,Super).
-
 cond(subtype(_sub, _super)).
 
 subtype(_sub, _sub).
