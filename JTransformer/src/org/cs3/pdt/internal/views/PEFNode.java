@@ -69,8 +69,6 @@ public class PEFNode implements INode,IAdaptable,IPropertySource,IWorkbenchAdapt
      * @see org.cs3.pl.model2.INode#getId()
      */
     public String getId() {
-    	if(args.get("id") == null)
-    		System.out.println("A");
         return (String)((IPEFArgument)args.get("id")).getArg();
     }
 
