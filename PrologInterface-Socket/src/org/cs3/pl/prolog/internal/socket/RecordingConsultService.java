@@ -280,12 +280,15 @@ public class RecordingConsultService implements ConsultService {
         }
     }
 
-    public void reload() {
-        reload(prefix);
+    public void reload() throws IOException {
+        	Debug.debug("enter reload:"+prefix.toString());
+        	Debug.dumpStackTrace();
+            reload(prefix);
+            Debug.debug("exit reload:"+prefix.toString());
         fireConsultDataChanged(new ConsultServiceEvent(this));
     }
 
-    private void reload(File f) {
+    private void reload(File f) throws IOException {
         Debug.debug("reload(File) visiting: " + f.getAbsolutePath());
         if (!f.exists()) {
             Debug.debug("\t --> dos not exist: " + f.getAbsolutePath());
@@ -299,7 +302,7 @@ public class RecordingConsultService implements ConsultService {
                 return;
             }
 
-            try {
+           
                 Debug.debug("\t --> loading: " + f.getAbsolutePath());
                 FileInputStream in = new FileInputStream(f);
                 PrintStream out = getOutputStream_impl(getUnPrefixedSymbol(f),
@@ -307,9 +310,7 @@ public class RecordingConsultService implements ConsultService {
                 Util.copy(in, out);
                 in.close();
                 out.close();
-            } catch (Throwable e) {
-                Debug.report(e);
-            }
+           
         } else if (f.isDirectory()) {
             Debug.debug("\t --> is a directory: " + f.getAbsolutePath());
             File[] files = f.listFiles();
