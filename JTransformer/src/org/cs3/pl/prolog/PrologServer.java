@@ -25,14 +25,12 @@ import java.util.Set;
 import jpl.Atom;
 import jpl.Compound;
 import jpl.JPL;
+import jpl.JPLException;
 import jpl.PrologException;
 import jpl.Query;
 import jpl.Term;
-import jpl.Util;
-import jpl.Variable;
 
 import org.cs3.pl.Debug;
-import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.SystemProperties;
 import org.rapla.components.rpc.ClientConnection;
 import org.rapla.components.rpc.ConnectionListener;
@@ -319,14 +317,68 @@ public class PrologServer extends MessagingServerLoggingWrapper implements Remot
 		for (Iterator iter = solution.keySet().iterator(); iter.hasNext();) {
 			String key = iter.next().toString();
 			Object obj = solution.get(key);
-			String val;
-			if (obj instanceof Atom)
-				val = ((Atom)obj).name();
+			Object value = null;
+			if (obj instanceof Atom) {
+				value = ((Atom)obj).name();
+			}
+			else if (obj instanceof Compound) {
+				// if(((Compound)obj).is
+				value = compoundToArray((Compound) obj);
+				// for (int i = 0; i < ((Object[])value).length; i++) 
+				// System.out.println(i + ": "+ ((Object[])value)[i]);
+			}
 			else
-				val = obj.toString();
-			strSolution.put(key, val);
+				value = obj.toString();
+			strSolution.put(key, value);
 		}
 		return strSolution;
+	}
+
+//				val = obj.toString();
+//				if(obj instanceof Compound) {
+//					val = compoundToArray((Compound)obj);
+//					System.out.println("convert: " + val + ", name: " +obj.getClass().getName());
+//					Term[] terms = ((Compound)obj).toTermArray();
+//					
+//					for (int i = 0; i < terms.length; i++) {
+//						System.out.println(i + ": "+ terms[i]);
+//						
+//					}
+//				}
+				
+//			}
+//			strSolution.put(key, val);
+//		}
+//		return strSolution;
+//	}
+
+
+	/**
+	 * @param compound
+	 * @return
+	 */
+	private Object compoundToArray(Compound compound) {
+		Term[] terms; 
+		try {
+			terms = ((Compound) compound).toTermArray();
+		} catch (JPLException e) {
+			//System.out.println("...but it is a silly term.");
+			return compound.toString();
+		}				
+		//System.out.println("Compound has " + terms.length + " entries.");
+		Object[] result = new Object[terms.length];
+		for (int i = 0; i < terms.length; i++) {
+			if (terms[i] instanceof Atom) {
+				result[i] = ((Atom)terms[i]).name();
+			} else if (terms[i] instanceof Compound) {
+			//	System.out.println("Value " + i + " is a compound again.");
+				result[i] = compoundToArray((Compound) terms[i]);
+					
+			} else 
+				result[i] = terms[i].toString();
+
+		}
+		return result;
 	}
 
 

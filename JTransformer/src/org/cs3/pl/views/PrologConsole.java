@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import jpl.Atom;
+import jpl.Compound;
+import jpl.Term;
+
 import org.cs3.pl.Debug;
 import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.editors.PLEditor;
@@ -585,12 +589,37 @@ public class PrologConsole extends ViewPart
 			Enumeration keys = solution.keys();
 			for (; keys.hasMoreElements();) {
 				String varname = (String) keys.nextElement();
-				String value = solution.get(varname).toString();
+				Object value = solution.get(varname);
+				String strValue;
+				if(value instanceof String) 
+					strValue = (String)value;
+				else if(value instanceof Object[])
+					value =  objectArrayToListString((Object[])value);
 				appendToPrologConsole("\n " + varname + " = " + value + " ");
 			}
 			return true;
 		}
 		return false;
+	}
+	
+	private String objectArrayToListString(Object[] value){
+		String result = "[";
+		for (int i = 0; i < value.length; i++) {
+			if(i > 0)
+				result += ",";
+			if (value[i] instanceof String) {
+				result += value[i];
+			} else if (value[i] instanceof Object[]) {
+				result += objectArrayToListString((Object[])value[i]);
+			} else {
+				String msg = "Unknown Class Type class: " +value[i].getClass().getName() + "(" + value[i] + ")";
+				Debug.error(msg);
+				result += (msg);
+			}
+
+		}
+		return result + "]";
+		
 	}
 	
 	public void reset() {
