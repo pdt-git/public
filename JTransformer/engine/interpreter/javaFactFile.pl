@@ -9,6 +9,7 @@
 :- dynamic globalIds/4.
 :- dynamic globalIds/4.
 :- dynamic symtab/2.
+:- dynamic ignore_unresolved_type/1.
 
 :- dynamic local2FQN/2.
 :- multifile local2FQN/2.
@@ -282,13 +283,19 @@ write_cache(_term) :-
     write_term(_fileStream, _term, [quoted(true)] ),
     format(_fileStream, '.~n',[]).
     
-    
+/**
+ * unresolved_types(-UnresolvedTypeName)
+ * 
+ * will bind UnreslvedTypeName to
+ * all types not defined in the current engine.
+ */
 
 unresolved_types(NAME) :- 
 	globalIds(NAME, ID),
 	not(classDefT(ID, _,_,_)),
 	not(packageT(_, NAME)),
-	not(atom_concat(_,'$1',NAME)).
+	not(atom_concat(_,'$1',NAME)),
+	not(ignore_unresolved_type(NAME)).
 
 	
 
@@ -335,3 +342,15 @@ addToGlobalIdsAndFacts(Fqn):-
 		printf('~n'),
     assert(globalIds(Fqn,Id)),
     assert(packageT(Id,Fqn)).		
+
+/**
+ * remove_contained_global_ids(+ToplevelPath)
+ *
+ * Retracts all global ids of classes defined
+ * in the toplevel specified by 'ToplevelPath'.
+ */
+    
+remove_contained_global_ids(Path):-
+	toplevelT(ID, _, Path, Defs), 
+	forall((member(M,Defs),classDefT(M,_,_,_)),
+	       retractall(globalIds(_,M))).

@@ -89,6 +89,7 @@ public class FactBaseBuilder {
 	public final static int IGNORE_EXT_FACTS = 16;
 
 	private boolean loadedJavaFile =false;
+
 	
 	/**
 	 * Default constructor.
@@ -198,6 +199,7 @@ public class FactBaseBuilder {
 		
 		try {
 			final Collection toProcess = new Vector();
+			final Collection toDelete = new Vector();
 			
 			if (project == null) {
 				Debug.warning("JLMPProjectBuilder called on null project. Aborted.");
@@ -267,8 +269,12 @@ public class FactBaseBuilder {
 						if (resource.getType() == IResource.FILE){
 							String fext = resource.getFileExtension();
 							if (fext != null && fext.equals("java")){
-								Debug.debug("Adding " + resource + " to toProcess");
-								toProcess.add(resource);
+							    if(delta.getKind() == IResourceDelta.REMOVED){
+							       toDelete.add(resource); 
+							    } else { // added,...???
+							        Debug.debug("Adding " + resource + " to toProcess");
+							        toProcess.add(resource);
+							    }
 							}
 						}
 							
@@ -282,7 +288,7 @@ public class FactBaseBuilder {
 						
 			if ((flags & IGNORE_PRJ_FACTS) == 0){			
 				
-			
+
 				for (Iterator i = toProcess.iterator(); i.hasNext(); ){	
 					
 					if (monitor.isCanceled())
@@ -292,11 +298,25 @@ public class FactBaseBuilder {
 					
 					monitor.beginTask("Generating Facts for source file " + file, IProgressMonitor.UNKNOWN);
 				
-					forgetFacts(file, delete);
+					forgetFacts(file, delete,false);
 					buildFacts(file);
 					
 					monitor.done();
 				}
+				for (Iterator i = toDelete.iterator(); i.hasNext(); ){	
+					
+					if (monitor.isCanceled())
+						throw new OperationCanceledException("Canceled");
+
+					IFile file = (IFile) i.next();
+					
+					monitor.beginTask("Delete Facts of deleted files " + file, IProgressMonitor.UNKNOWN);
+				
+					forgetFacts(file, delete,true);
+					
+					monitor.done();
+				}
+
 			}
 			
 			monitor.done();
@@ -317,11 +337,14 @@ public class FactBaseBuilder {
 		}		
 	}
 	
-	private void forgetFacts(IFile file, boolean delete) throws IOException {
+	private void forgetFacts(IFile file, boolean delete,boolean removeGlobalIdsFacts) throws IOException {
 		Debug.debug("Forgetting (possible) previous version of " + file);
 		String path = file.getFullPath().toString();
 				
 		/* if there is no tree with that id, the retraction fails, but no harm done */
+		
+		if(removeGlobalIdsFacts)
+		    prologClient.query("remove_contained_global_ids('"+path+"')");
 		
 		prologClient.query("rollback, toplevelT(ID, _, '" + path +	"', _), deepRetract(ID)");
 		if (delete) {
