@@ -330,4 +330,11 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         }        
         return cs;
     }
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
+     */
+    public synchronized void stop() {
+        pool.clear();
+        super.stop();
+    }
 }
