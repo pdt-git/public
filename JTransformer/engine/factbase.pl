@@ -1038,6 +1038,14 @@ ID of the enclosing method declaration.
 */
 :- dynamic nopT/3.
 
+
+/**
+ * sourceLocation(?ID, ?File, ?Begin, ?Length)
+ *
+ * 
+ */
+:- dynamic sourceLocation/4.
+
 :- multifile fieldDefT/5. 
 
 :- multifile paramDefT/4.
@@ -1086,7 +1094,7 @@ ID of the enclosing method declaration.
 :- multifile extendsT/2. 
 :- multifile precedenceT/4.
 :- multifile nopT/3.
-
+:- multifile sourceLocation/4.
 
 tree(_id, null, packageT):-packageT(_id,_).
 tree(_id, _pid, localDefT):-localDefT(_id, _pid,_,_,_,_).
@@ -1177,6 +1185,7 @@ attribSignature(implementsT,2).
 attribSignature(modifierT,2).
 attribSignature(externT,1).
 attribSignature(interfaceT,1).
+attribSignature(sourceLocation,4).
 
 lastID(100000).
 
