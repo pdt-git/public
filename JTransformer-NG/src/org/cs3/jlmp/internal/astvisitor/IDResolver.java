@@ -227,9 +227,11 @@ public class IDResolver implements IIDResolver {
 	 * @return A string, either an numeric ID or an fqn-Term
 	 */
 	public String getID(IBinding iface) {
-		if (iface == null)
+		if (iface == null){
+			System.err.println("Can not resolve id for binding " + iface );
+			Thread.dumpStack();
 			throw new IllegalArgumentException("Binding was not resolved");
-		
+		}
 		/* StS: Hotfix: Local bindings first! */
 		
 		if (localBindings.containsKey(iface))
