@@ -49,8 +49,8 @@ public class RecordingConsultService implements ConsultService {
     private int port = 5624;
 
     private File prefix = null;
-    
-    private boolean keepRecords=true;
+
+    private boolean keepRecords = true;
 
     private boolean appendingRecords;
 
@@ -68,10 +68,8 @@ public class RecordingConsultService implements ConsultService {
 
     }
 
-   
-
-    public void connect() throws IOException {        
-        consultClient=new SocketClient("localhost",port);      
+    public void connect() throws IOException {
+        consultClient = new SocketClient("localhost", port);
     }
 
     public void disconnect() {
@@ -83,8 +81,9 @@ public class RecordingConsultService implements ConsultService {
     }
 
     protected void fireConsultDataChanged(final ConsultServiceEvent e) {
-        //To avoid deadlocks during startup, we move notification to another thread.
-        //otherwise the same thread that starts up the pif might 
+        //To avoid deadlocks during startup, we move notification to another
+        // thread.
+        //otherwise the same thread that starts up the pif might
         //be stuck in some listener requesting a session.
         Runnable r = new Runnable() {
             public void run() {
@@ -99,7 +98,8 @@ public class RecordingConsultService implements ConsultService {
                 }
             }
         };
-        Thread t = new Thread(r,"RecordingConsultService listener notification");
+        Thread t = new Thread(r,
+                "RecordingConsultService listener notification");
         t.setDaemon(true);
         t.start();
     }
@@ -151,7 +151,7 @@ public class RecordingConsultService implements ConsultService {
 
         Debug.debug("prefix: " + prefix + ", s: " + s);
         String string = "";
-        try {            
+        try {
             ConsultOutputStream stream = new ConsultOutputStream(consultClient,
                     getPrefixedSymbol(s));
             if (keepRecord) {
@@ -163,11 +163,11 @@ public class RecordingConsultService implements ConsultService {
                     file.createNewFile();
                 }
                 stream.setRecordStream(new BufferedOutputStream(
-                        new FileOutputStream(file,appendingRecords)));
+                        new FileOutputStream(file, appendingRecords)));
             }
 
             stream.addConsultServiceListener(new ConsultServiceListener() {
-                 public void consultDataChanged(ConsultServiceEvent e) {
+                public void consultDataChanged(ConsultServiceEvent e) {
                     fireConsultDataChanged(new ConsultServiceEvent(
                             RecordingConsultService.this, getUnPrefixedSymbol(e
                                     .getSymbol())));
@@ -179,8 +179,6 @@ public class RecordingConsultService implements ConsultService {
             return null;
         }
     }
-
-  
 
     public int getPort() {
         return port;
@@ -198,17 +196,17 @@ public class RecordingConsultService implements ConsultService {
      */
     private String getPrefixedSymbol(File f) {
         //try {
-            //String symbol = f.toURI().toURL().getFile();
-            String symbol = Util.prologFileName(f);
-            if (!symbol.startsWith(getPrefixString())) {
-                throw new IllegalArgumentException(
-                        "the given file is not within my domain, sorry.");
-            }
-            return symbol;
-//        } catch (IOException e) {
-//            Debug.report(e);
-//            return null;
-//        }
+        //String symbol = f.toURI().toURL().getFile();
+        String symbol = Util.prologFileName(f);
+        if (!symbol.startsWith(getPrefixString())) {
+            throw new IllegalArgumentException(
+                    "the given file is not within my domain, sorry.");
+        }
+        return symbol;
+        //        } catch (IOException e) {
+        //            Debug.report(e);
+        //            return null;
+        //        }
 
     }
 
@@ -233,12 +231,12 @@ public class RecordingConsultService implements ConsultService {
             return "";
         }
         //try {
-            //return prefix.toURI().toURL().getFile();
-        	return Util.prologFileName(prefix);
-//        } catch (MalformedURLException e) {
-//            Debug.report(e);
-//            throw new RuntimeException(e);
-//        }
+        //return prefix.toURI().toURL().getFile();
+        return Util.prologFileName(prefix);
+        //        } catch (MalformedURLException e) {
+        //            Debug.report(e);
+        //            throw new RuntimeException(e);
+        //        }
     }
 
     /*
@@ -246,8 +244,8 @@ public class RecordingConsultService implements ConsultService {
      * 
      * @see org.cs3.pl.metadata.ConsultService#getTimeStamp(java.lang.String)
      */
-    public long getTimeStamp(String s) {
-        if (!isConsulted(s) || ! keepRecords) {
+    public long getRecordTimeStamp(String s) {
+        if (!keepRecords) {
             return -1;
         }
 
@@ -266,7 +264,7 @@ public class RecordingConsultService implements ConsultService {
 
     private String getUnPrefixedSymbol(String prefixedSymbol) {
         String s = prefixedSymbol.substring(getPrefixString().length());
-        return s.startsWith("/")? s : "/"+s;
+        return s.startsWith("/") ? s : "/" + s;
     }
 
     /*
@@ -282,25 +280,30 @@ public class RecordingConsultService implements ConsultService {
             consultClient.readUntil(SocketClient.GIVE_SYMBOL);
             consultClient.writeln(getPrefixedSymbol(s));
             StringBuffer sb = new StringBuffer();
-            consultClient.readUntil(SocketClient.OK,sb );            
+            consultClient.readUntil(SocketClient.OK, sb);
             return sb.toString().trim().equals(SocketClient.YES);
         } catch (IOException e) {
             Debug.report(e);
             throw new PrologException(e);
-        } finally{
+        } finally {
             consultClient.unlock();
         }
     }
 
     public void reload() throws IOException {
-        	Debug.debug("enter reload:"+prefix.toString());
-        	//Debug.dumpStackTrace();
-            reload(prefix);
-            Debug.debug("exit reload:"+prefix.toString());
+        Debug.debug("enter reload:" + prefix.toString());
+        //Debug.dumpStackTrace();
+        PrintStream out = getOutputStream_impl("src_flat.pl", false);
+        try {
+            reload(prefix, out);
+        } finally {
+            out.close();
+        }
+        Debug.debug("exit reload:" + prefix.toString());
         fireConsultDataChanged(new ConsultServiceEvent(this));
     }
 
-    private void reload(File f) throws IOException {
+    private void reload(File f, PrintStream out) throws IOException {
         Debug.debug("reload(File) visiting: " + f.getAbsolutePath());
         if (!f.exists()) {
             Debug.debug("\t --> dos not exist: " + f.getAbsolutePath());
@@ -314,22 +317,26 @@ public class RecordingConsultService implements ConsultService {
                 return;
             }
 
-           
-                Debug.debug("\t --> loading: " + f.getAbsolutePath());
-                FileInputStream in = new FileInputStream(f);
-                PrintStream out = getOutputStream_impl(getUnPrefixedSymbol(f),
-                        false);
-                Util.copy(in, out);
-                in.close();
-                out.close();
-           
+            Debug.debug("\t --> loading: " + f.getAbsolutePath());
+            FileInputStream in = new FileInputStream(f);
+            Util.copy(in, out);
+            in.close();
+
         } else if (f.isDirectory()) {
             Debug.debug("\t --> is a directory: " + f.getAbsolutePath());
             File[] files = f.listFiles();
             for (int i = 0; i < files.length; i++) {
-                reload(files[i]);
+                reload(files[i], out);
             }
         }
+    }
+
+    private void __reload(File f) throws IOException {
+
+        PrintStream out = getOutputStream_impl(getUnPrefixedSymbol(f), false);
+        reload(f, out);
+        out.close();
+
     }
 
     /*
@@ -371,23 +378,23 @@ public class RecordingConsultService implements ConsultService {
             consultClient.readUntil(SocketClient.GIVE_COMMAND);
             consultClient.writeln(SocketClient.UNCONSULT);
             consultClient.readUntil(SocketClient.GIVE_SYMBOL);
-            consultClient.writeln(getPrefixedSymbol(s));            
-            consultClient.readUntil(SocketClient.OK);                        
+            consultClient.writeln(getPrefixedSymbol(s));
+            consultClient.readUntil(SocketClient.OK);
         } catch (IOException e) {
             Debug.report(e);
             throw new PrologException(e);
-        } finally{
+        } finally {
             consultClient.unlock();
         }
 
         File file = getFile(s);
         String filename = file.getAbsolutePath();
-        if (file.exists()&&keepRecords) {
+        if (file.exists() && keepRecords) {
             file.delete();
         }
         fireConsultDataChanged(new ConsultServiceEvent(this, s));
     }
-    
+
     /**
      * @deprecated use isRecording
      * @return
@@ -395,7 +402,7 @@ public class RecordingConsultService implements ConsultService {
     public boolean isKeepRecords() {
         return keepRecords;
     }
-    
+
     /**
      * @deprecated use setRecording(boolean)
      * @param keepRecords
@@ -404,16 +411,14 @@ public class RecordingConsultService implements ConsultService {
         this.keepRecords = keepRecords;
     }
 
-
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.cs3.pl.prolog.IConsultService#clearRecords()
      */
     public void clearRecords() {
-       clearChildRecords(prefix);        
+        clearChildRecords(prefix);
     }
-
-
 
     /**
      * @param prefix2
@@ -422,37 +427,36 @@ public class RecordingConsultService implements ConsultService {
         File[] children = record.listFiles();
         for (int i = 0; i < children.length; i++) {
             File child = children[i];
-            if(child.isDirectory()){
+            if (child.isDirectory()) {
                 clearChildRecords(child);
                 child.delete();
-            }
-            else if (child.getName().endsWith(getExtension())) {
+            } else if (child.getName().endsWith(getExtension())) {
                 child.delete();
-            }                        
-        }        
+            }
+        }
     }
 
-
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.cs3.pl.prolog.IConsultService#isRecording()
      */
-    public boolean isRecording() {      
+    public boolean isRecording() {
         return isKeepRecords();
     }
 
-
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.cs3.pl.prolog.IConsultService#setRecording(boolean)
      */
     public void setRecording(boolean val) {
         setKeepRecords(val);
     }
 
-
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.cs3.pl.prolog.ConsultService#isAppendingRecords()
      */
     public boolean isAppendingRecords() {
@@ -460,13 +464,13 @@ public class RecordingConsultService implements ConsultService {
         return appendingRecords;
     }
 
-
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see org.cs3.pl.prolog.ConsultService#setAppendingRecords(boolean)
      */
     public void setAppendingRecords(boolean val) {
-        appendingRecords=val;
-        
+        appendingRecords = val;
+
     }
 }
