@@ -82,6 +82,7 @@ public class XMLClient implements Reusable {
 
     public XMLClient(int port) {
         this.port = port;
+        
     }
 
     private boolean available() throws IOException, XMLStreamException {

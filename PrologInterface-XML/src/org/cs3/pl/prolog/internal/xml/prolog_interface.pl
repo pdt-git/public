@@ -117,7 +117,7 @@ handle_client(In, Out):-
 
 session(In, Out):-
 	repeat,
-	write(Out,'<ok/>'),
+	write(Out,'<ok></ok>'), %%ld: only temporarily, due to probs with <ok/>
 	nl(Out),
     flush_output(Out),
 	dispatch(In,Out,Codes),	

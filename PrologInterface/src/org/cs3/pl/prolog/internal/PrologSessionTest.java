@@ -25,6 +25,7 @@ public class PrologSessionTest extends TestCase {
     protected void setUp() throws Exception {
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);      
      
+      //pif=PrologInterfaceFactory.newInstance("org.cs3.pl.prolog.internal.xml.Factory").create();
       pif=PrologInterfaceFactory.newInstance().create();
       pif.start();
     }
