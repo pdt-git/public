@@ -23,7 +23,7 @@ localVar(#id, #parent, #enclMeth, TYPE, name, #init).
 
 getField  (#identSelect, #parent, #enclMeth, #recv, #field).
 setField  (#identSelect, #parent, #enclMeth, #recv, #field,  #valueID).
-methodCall(#apply,       #parent, #enclMeth, #recv, #method, [#args]).
+methodCall(#apply,       #parent, #enclMeth, #recv, Name, #method, [#args]).
 execution (#methodDef,   #parent, #enclClass, #method, [#params]).
 newCall   (#newClass,    #parent, #enclMeth, #recv, #method, [#args]).
 
@@ -94,15 +94,27 @@ concat_lists([[HeadHead|HeadTail]|Tail],FlatList) :-
 	concat_lists(Tail,TailFlat),
     append([HeadHead|HeadTail],TailFlat,FlatList).
     
+concat_lists([[]|Tail],TailFlat):-
+	concat_lists(Tail,TailFlat).
+
+concat_lists([Head|Tail],[Head|TailFlat]):-
+	not(is_list(Head)),
+	concat_lists(Tail,TailFlat).    
     
 test(concat_list_2):-
-    assert_true(concat_lists([[a,b],[d,e,f]],
+    assert_true('[a,b],[d,e,f]',concat_lists([[a,b],[d,e,f]],
     	[a,b,d,e,f])),
-    assert_true(concat_lists([[a,b],c,[d,e,f]],
-    	[a,b,c,d,e,f])),
-    assert_true(concat_lists([[a,B],C,[d,e,f]],
-    	[a,B,C,d,e,f])).
+    assert_true('[a,b],[d,e,f]',(concat_lists([[a,b],[d,e,f]],
+    	Flat),!,Flat=[a,b,d,e,f])),
 
+    assert_true('[a,b],c,[d,e,f]', concat_lists([[a,b],c,[d,e,f]],
+    	[a,b,c,d,e,f])),
+    assert_true('[a,B],C,[d,e,f]',concat_lists([[a,B],C,[d,e,f]],
+    	[a,B,C,d,e,f])),
+   assert_true('[a,B],C,[d,e,f]',(concat_lists([[a,B],C,[d,e,f]],
+    	Flat2), !,Flat2=[a,B,C,d,e,f])),
+   assert_true('[],[],[d,e,f]',(concat_lists([[],[],[d,e,f]],Flat3),
+    !,Flat3=[d,e,f])).
 /**
  * action(set_parent(+ID,+NewParent))
  */
@@ -151,7 +163,7 @@ action(delete(bodyFact(_encl))) :-
     action_all(delete(getField(_, _, _encl, _, _))),
     action_all(delete(setField(_, _, _encl, _, _, _))),
     action_all(delete(newCall(_, _, _encl, _, _, _))),
-    action_all(delete(methodCall(_, _, _encl, _, _, _))).
+    action_all(delete(methodCall(_, _, _encl, _, _, _, _))).
 % body fact is not callable - prevent standard action_all treatment
 action_all(delete(bodyFact(_encl))) :-
     !,
@@ -318,6 +330,7 @@ test(dirty_class):-
     assert_true('excepted two dirty classes',[class,class2] = Classes).
     
 setUp(dirty_class):-
+    remove_dirty_flags,
 	assert(classDefT(class,null,cname,[method1,method2])),
     assert(methodDefT(method1,class,name1,[],type(basic,int,0),[],null)),
     assert(methodDefT(method2,class,name2,[],type(basic,int,0),[],null)),
@@ -337,7 +350,8 @@ tearDown(dirty_class):-
 
 	retract(classDefT(class2,null,cname2,[method3])),
     retract(methodDefT(method3,class2,name3,[],type(basic,int,0),[],null)),
-    retract(dirty_tree(method3)).
+    retract(dirty_tree(method3)),
+    remove_dirty_flags.
     
     
 
@@ -609,9 +623,9 @@ execution(_execution, _class, _execution, null, _execution, _params) :-
     not(externT(_class)).
 
 
-cond(methodCall(_apply, _parent, _encl, _Receiver, _OrigMethod, _Args)).
+cond(methodCall(_apply, _parent, _encl, _Receiver, _Name, _OrigMethod, _Args)).
 subTreeArg(methodCall, 4).
-subTreeArg(methodCall, 6).
+subTreeArg(methodCall, 7).
 
 /* 
    methodCall(?Call, ?Parent, ?Encl, ?Receiver, ?Method, ?Args)
@@ -621,7 +635,7 @@ subTreeArg(methodCall, 6).
 	Method is the original method, 
 	even if apply points to a forwarding method */
 
-methodCall(_methodCall, _parent, _Encl, _Receiver, _method, _Args) :-
+methodCall(_methodCall, _parent, _Encl, _Receiver, _method_name, _method, _Args) :-
     applyT(_methodCall, _parent, _encl, _Receiver, _method_name, _args,_method),
     not(_method_name == 'super'),
     not(forwarding(_methodCall)),
@@ -630,7 +644,7 @@ methodCall(_methodCall, _parent, _Encl, _Receiver, _method, _Args) :-
     getRealEncl(_methodCall, _encl,_Encl),
     getRealArgs(_methodCall,_args,_Args).
 
-methodCall(_methodCall, _parent, _Encl, null, _constructor, _Args) :-
+methodCall(_methodCall, _parent, _Encl, null, '<init>', _constructor, _Args) :-
     newClassT(_methodCall, _parent, _encl, _constructor, _args, _typeExpr, _def, _enclosingClass),
 %    _Receiver, _method_name, _args,_method),
     not(forwarding(_methodCall)),
@@ -645,14 +659,14 @@ methodCall(_methodCall, _parent, _Encl, null, _constructor, _Args) :-
 %    getSymbol(_identSelect, _method).
 
 /** Uwe TODO does NOT handle forwarding methods */
-action(methodCall(_apply, _parent, _encl, _recv, _method, _Args)) :-
+action(methodCall(_apply, _parent, _encl, _recv, _name, _method, _Args)) :-
     methodDefT(_method, _, _name, _, _, _, _),
     addToBlock(_parent, _apply),
     new_id(_newIdSelect),
 %    createIdentSelect(_newIdSelect, _apply, _encl, _name, _recv, _method),
     add(applyT(_apply, _parent, _encl, _recv,_name, _Args, _method)).
 
-action(replace(methodCall(_apply, _parent, _encl, _recv, _method, _args))) :-
+action(replace(methodCall(_apply, _parent, _encl, _recv, _name, _method, _args))) :-
 	applyT(_apply, _, _, _,_name, _, _),
     enclMethod(_apply, _e),
     deleteTree(_apply),
@@ -665,7 +679,7 @@ action(replace(methodCall(_apply, _parent, _encl, _recv, _method, _args))) :-
 %    format("replace end ~a,~a,~a,~a,~a,~a~n", [_newIdSelect, _apply, _encl, _name, _recv, ]).
 %    action(replace(applyT(_apply, _parent, _encl, _newIdSelect, _Args))).
 
-action(delete(methodCall(_apply, _, _, _, _, _))) :-
+action(delete(methodCall(_apply, _, _, _, _, _, _))) :-
     removeFromBlock(_parent, _apply),
     delete(applyT(_apply, _, _, _, _, _, _)).
 
