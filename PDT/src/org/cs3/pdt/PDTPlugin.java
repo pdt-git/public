@@ -5,7 +5,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
@@ -17,6 +16,9 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -33,6 +35,11 @@ public class PDTPlugin extends AbstractUIPlugin {
     private PrologInterface prologInterface;
 
     private static final String EP_INIT_HOOK = "hooks";
+    public static final String MODULEPREFIX = "pdtplugin:";
+    private String pdtModulePrefix = "";
+
+    private PDTPrologHelper  prologHelper;
+
 
     /**
      * The constructor.
@@ -52,16 +59,15 @@ public class PDTPlugin extends AbstractUIPlugin {
      * This method is called upon plug-in activation
      */
     public void start(BundleContext context) throws Exception {
-        try{
-        super.start(context);
+        try {
+            super.start(context);
 
-        prologInterface = new PrologInterface();
-        reconfigurePrologInterface();
+            prologInterface = new PrologInterface();
+            reconfigurePrologInterface();
 
-        registerHooks();
-        prologInterface.start();
-        }
-        catch(Throwable t){
+            registerHooks();
+            prologInterface.start();
+        } catch (Throwable t) {
             Debug.report(t);
         }
     }
@@ -123,12 +129,12 @@ public class PDTPlugin extends AbstractUIPlugin {
      */
     protected void preferenceChanged(PropertyChangeEvent e) {
         String key = e.getProperty();
-        if (key.equals(Properties.SERVER_PORT)
-                || key.equals(Properties.SWIPL_DIR)
-                || key.equals(Properties.SERVER_CLASSPATH)
-                || key.equals(Properties.USE_SESSION_POOLING)
-                || key.equals(Properties.DEBUG_LEVEL)
-                || key.equals(Properties.SERVER_STANDALONE)) {
+        if (key.equals(PDT.PREF_SERVER_PORT)
+                || key.equals(PDT.PREF_SWIPL_DIR)
+                || key.equals(PDT.PREF_SERVER_CLASSPATH)
+                || key.equals(PDT.PREF_USE_SESSION_POOLING)
+                || key.equals(PDT.PREF_DEBUG_LEVEL)
+                || key.equals(PDT.PREF_SERVER_STANDALONE)) {
             try {
                 prologInterface.stop();
                 reconfigurePrologInterface();
@@ -143,44 +149,44 @@ public class PDTPlugin extends AbstractUIPlugin {
     private void reconfigurePrologInterface() {
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
-        int port = service.getInt(qualifier, Properties.SERVER_PORT, -1, null);
+        int port = service.getInt(qualifier, PDT.PREF_SERVER_PORT, -1, null);
         if (port == -1l) {
             throw new NullPointerException("Required property \""
-                    + Properties.SERVER_PORT + "\" was not specified.");
+                    + PDT.PREF_SERVER_PORT + "\" was not specified.");
         }
 
-        String swiHome = service.getString(qualifier, Properties.SWIPL_DIR,
+        String swiHome = service.getString(qualifier, PDT.PREF_SWIPL_DIR,
                 null, null);
         if (swiHome == null) {
             throw new NullPointerException("Required property \""
-                    + Properties.SWIPL_DIR + "\" was not specified.");
+                    + PDT.PREF_SWIPL_DIR + "\" was not specified.");
         }
         String classPath = service.getString(qualifier,
-                Properties.SERVER_CLASSPATH, null, null);
+                PDT.PREF_SERVER_CLASSPATH, null, null);
         if (classPath == null) {
             throw new NullPointerException("Required property \""
-                    + Properties.SERVER_CLASSPATH + "\" was not specified.");
+                    + PDT.PREF_SERVER_CLASSPATH + "\" was not specified.");
         }
         String debugLevel = service.getString(qualifier,
-                Properties.DEBUG_LEVEL, null, null);
+                PDT.PREF_DEBUG_LEVEL, null, null);
         if (debugLevel == null) {
-            Debug.warning("The property \"" + Properties.DEBUG_LEVEL
+            Debug.warning("The property \"" + PDT.PREF_DEBUG_LEVEL
                     + "\" was not specified." + "Assuming default: ERROR");
             debugLevel = "ERROR";
         }
 
         boolean standalone = service.getBoolean(qualifier,
-                Properties.SERVER_STANDALONE, false, null);
+                PDT.PREF_SERVER_STANDALONE, false, null);
         boolean pooling = service.getBoolean(qualifier,
-                Properties.USE_SESSION_POOLING, false, null);
+                PDT.PREF_USE_SESSION_POOLING, false, null);
 
         Debug.info("configuring PrologInterface instance:");
-        Debug.info("\t" + Properties.SERVER_PORT + " = " + port);
-        Debug.info("\t" + Properties.SERVER_STANDALONE + " = " + standalone);
-        Debug.info("\t" + Properties.SERVER_CLASSPATH + " = " + classPath);
-        Debug.info("\t" + Properties.USE_SESSION_POOLING + " = " + pooling);
-        Debug.info("\t" + Properties.SWIPL_DIR + " = " + swiHome);
-        Debug.info("\t" + Properties.DEBUG_LEVEL + " = " + debugLevel);
+        Debug.info("\t" + PDT.PREF_SERVER_PORT + " = " + port);
+        Debug.info("\t" + PDT.PREF_SERVER_STANDALONE + " = " + standalone);
+        Debug.info("\t" + PDT.PREF_SERVER_CLASSPATH + " = " + classPath);
+        Debug.info("\t" + PDT.PREF_USE_SESSION_POOLING + " = " + pooling);
+        Debug.info("\t" + PDT.PREF_SWIPL_DIR + " = " + swiHome);
+        Debug.info("\t" + PDT.PREF_DEBUG_LEVEL + " = " + debugLevel);
 
         prologInterface.setPort(port);
         prologInterface.setStandAloneServer(standalone);
@@ -200,7 +206,7 @@ public class PDTPlugin extends AbstractUIPlugin {
      * 
      * @throws CoreException
      */
-    public boolean registerHooks() {
+    protected boolean registerHooks() {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
         IExtensionPoint point = registry.getExtensionPoint("org.cs3.pdt",
                 EP_INIT_HOOK);
@@ -240,18 +246,86 @@ public class PDTPlugin extends AbstractUIPlugin {
         return true;
     }
 
-	/**
-	 * 
-	 */
-	public void reconfigure() {
-		prologInterface.stop();
-		reconfigurePrologInterface();
-		try {
-			prologInterface.start();
-		} catch (IOException e) {
-			Debug.report(e);
-		}
-		
-	}
+    /**
+     *  
+     */
+    public void reconfigure() {
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = getBundle().getSymbolicName();
+        String debugLevel = service.getString(qualifier,PDT.PREF_DEBUG_LEVEL,"ERROR",null);
+        Debug.setDebugLevel(debugLevel);
+        prologInterface.stop();
+        reconfigurePrologInterface();
+        try {
+            prologInterface.start();
+        } catch (IOException e) {
+            Debug.report(e);
+        }
 
+    }
+
+    public IPrologHelper getPrologHelper(){
+        if(prologHelper==null){
+            prologHelper= new PDTPrologHelper(prologInterface,pdtModulePrefix);
+        }
+        return prologHelper;
+    }
+    
+    public IWorkbenchPage getActivePage() {
+        return getWorkbench().getActiveWorkbenchWindow().getActivePage();
+    }
+
+    public IEditorPart getActiveEditor() {
+        try {
+            IWorkbenchPage page = getActivePage();
+            return page.getActiveEditor();
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+
+    public void setStatusErrorMessage(final String string) {
+        getDisplay().asyncExec(new Runnable() {
+            public void run() {
+                getActiveEditor().getEditorSite().getActionBars()
+                        .getStatusLineManager().setErrorMessage(string);
+            }
+        });
+    }
+
+    public void setStatusMessage(final String string) {
+        getDisplay().asyncExec(new Runnable() {
+            public void run() {
+                getActiveEditor().getEditorSite().getActionBars()
+                        .getStatusLineManager().setMessage(string);
+            }
+        });
+
+    }
+
+    public Display getDisplay() {
+        return getWorkbench().getDisplay();
+    }
+
+//    public IFile getActiveFile() {
+//		try {
+//			IEditorPart editorPart = getActiveEditor();
+//			return ((FileEditorInput)editorPart.getEditorInput()).getFile();
+//		}catch (NullPointerException e){ return null; }
+//	}
+//
+//	public String getActiveFileName() {
+//		try {
+//			return getActiveFile().getFullPath().toString();
+//		}catch (NullPointerException e){ return null; }
+//	}
+//	
+//	
+//	public String getActiveRawFileName() {
+//		try {
+//			return getActiveFile().getRawLocation().toFile().getAbsolutePath();
+//		}catch (NullPointerException e){ return null; }
+//
+//	}
+    
 }
