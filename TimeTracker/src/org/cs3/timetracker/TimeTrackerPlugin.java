@@ -1,4 +1,4 @@
-package TimeTracker;
+package org.cs3.timetracker;
 
 import org.eclipse.ui.plugin.*;
 import org.osgi.framework.BundleContext;
