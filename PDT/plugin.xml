@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.cs3.pdt"
+   name="Prolog Development Toolkit"
+   version="0.3.0"
+   provider-name="Universität Bonn, Institut für Informatik III"
+   class="prg.cs3.pdt.PDTPlugin">
+
+   <runtime>
+      <library name="PDT.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+   </requires>
+   <extension-point id="hooks.init" name="InitHooks" schema="schema/InitHooks.exsd"/>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Prolog"
+            id="org.cs3.pdt"/>
+      <view
+            class="org.cs3.pdt.views.PrologConsoleView"
+            icon="icons/sample.gif"
+            category="org.cs3.pdt"
+            name="Prolog Console"
+            id="org.cs3.pdt.views.PrologConsoleView"/>
+   </extension>
+   <extension
+         point="org.cs3.pdt.hooks.init">
+   	<hook class="org.cs3.pdt.ConsoleServerHook"/>
+   </extension>
+
+</plugin>
