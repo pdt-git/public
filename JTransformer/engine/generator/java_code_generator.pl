@@ -511,11 +511,17 @@ print_anonymous_class(_def) :-
     gen_block(_defs).
 
 % uwe neu
-appendDir(_filename, _dirfile) :-
-    outdir(_outdir),
+appendDir(Filename, Dirfile) :-
+    outdir(Outdir),
     !,
-    stringAppend(_outdir, _filename, _dirfile).
-appendDir(_filename, _filename).
+    remove_leading_slash_if_needed(Filename,Clean_Filename),
+    stringAppend(Outdir, Clean_Filename, Dirfile).
+appendDir(Filename, Filename).
+
+remove_leading_slash_if_needed(Filename,Clean_Filename):-
+    atom_concat('/',Clean_Filename,Filename).
+
+remove_leading_slash_if_needed(Filename,Filename).
 
 write_if_fileoutput(X) :-
     output_to_file,
