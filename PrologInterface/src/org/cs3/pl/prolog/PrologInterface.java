@@ -187,7 +187,7 @@ public class PrologInterface implements IPrologInterface {
 
 	private Set shutdownHooks = new HashSet();
 
-	private int PORT = 9966;
+	private int port = 9966;
 
 	private Vector outListeners = new Vector();
 
@@ -207,20 +207,20 @@ public class PrologInterface implements IPrologInterface {
 
 	public PrologInterface() throws IOException {
 		
-		String property = System.getProperty(Properties.PLIF_HOOKS);
-		if(property!=null){
-			String[] names = property.split(
-				",");
-		
-			for (int i = 0; i < names.length; i++) {
-				try {
-					Class.forName(names[i]);
-				} catch (ClassNotFoundException e) {
-					Debug.report(e);
-				}
-			}
-		}
-		//start();
+//		String property = System.getProperty(Properties.PLIF_HOOKS);
+//		if(property!=null){
+//			String[] names = property.split(
+//				",");
+//		
+//			for (int i = 0; i < names.length; i++) {
+//				try {
+//					Class.forName(names[i]);
+//				} catch (ClassNotFoundException e) {
+//					Debug.report(e);
+//				}
+//			}
+//		}
+//		//start();
 		Runtime.getRuntime().addShutdownHook(
 				new Thread("Prolog Shutdown Hook") {
 					public void run() {
@@ -241,7 +241,7 @@ public class PrologInterface implements IPrologInterface {
 	 * @return a DirectAccessSession
 	 */
 
-	public DirectAccessSession getDirectSession() {
+	private DirectAccessSession getDirectSession() {
 		synchronized (this) {
 			if(!isUp()){
 				throw new IllegalStateException("PrologInterface is not up.");
@@ -254,7 +254,7 @@ public class PrologInterface implements IPrologInterface {
 			}
 
 			try {
-				return new StreamBackedSession(PORT, server.getOutputStream());
+				return new StreamBackedSession(port, server.getOutputStream());
 			} catch (IOException e) {
 				Debug.report(e);
 				return null;
@@ -284,8 +284,11 @@ public class PrologInterface implements IPrologInterface {
 	 * @return a new Session Object
 	 * @throws UnsupportedOperationException
 	 *             the class could not be instantiated.
+	 * 
+	 * 
 	 */
-	public PrologSession getSession(Class class1) {
+	//ld: made this private: it's not used right now, and we should not use it anyway.
+	private PrologSession getSession(Class class1) {
 		if (Modifier.isAbstract(class1.getModifiers()) || class1.isInterface())
 			throw new UnsupportedOperationException("argument abstract");
 
@@ -318,7 +321,7 @@ public class PrologInterface implements IPrologInterface {
 
 						c = new ReusableClient();
 						c.enableLogging(new Logger("default"));
-						c.configure("localhost", PORT);
+						c.configure("localhost", port);
 						c.start();
 					}
 				}
@@ -330,7 +333,7 @@ public class PrologInterface implements IPrologInterface {
 
 			return (PrologSession) class1.getConstructor(
 					new Class[] { int.class }).newInstance(
-					new Object[] { new Integer(PORT) });
+					new Object[] { new Integer(port) });
 		} catch (Exception e) {
 			Debug.report(e);
 
@@ -423,7 +426,7 @@ public class PrologInterface implements IPrologInterface {
 		}
 		ShutdownSession s=null;
 		try {
-			s = new ShutdownSession(PORT);
+			s = new ShutdownSession(port);
 		} catch (IOException e1) {
 			Debug.report(e1);
 		}
@@ -448,14 +451,14 @@ public class PrologInterface implements IPrologInterface {
 			Debug
 					.info("i will not try to stop the server, since its running in stand-alone mode.");
 		} else {
-			stopStrategy.stopServer(PORT);
+			stopStrategy.stopServer(port);
 		}
 	}
 
 	/**
 	 * @return
 	 */
-	private boolean isUp() {
+	public boolean isUp() {
 		return getState() == UP;
 	}
 
@@ -472,13 +475,13 @@ public class PrologInterface implements IPrologInterface {
 			Debug
 					.info("i will not try to start the server, since its running in stand-alone mode.");
 		} else {
-			if (Util.probePort(PORT, "" + (char) -1)) {
+			if (Util.probePort(port, "" + (char) -1)) {
 				Debug
 						.warning("ahem... the port is in use. \n"
 								+ "Trying to connect & shutdown, but this may not work.");
-				stopStrategy.stopServer(PORT);
+				stopStrategy.stopServer(port);
 			}
-			server = startStrategy.startServer(PORT);
+			server = startStrategy.startServer(port);
 
 			new ErrorReporterThread("Server Error Reporter").start(server,
 					errListeners);
@@ -486,7 +489,7 @@ public class PrologInterface implements IPrologInterface {
 					outListeners);
 
 		}
-		InitSession initSession = new InitSession(PORT);
+		InitSession initSession = new InitSession(port);
 
 		for (Iterator i = initHooks.iterator(); i.hasNext();) {
 			InitHook h = (InitHook) i.next();
@@ -581,7 +584,13 @@ public class PrologInterface implements IPrologInterface {
 	 *            The standAloneServer to set.
 	 */
 	public void setStandAloneServer(boolean standAloneServer) {
-		this.standAloneServer = standAloneServer;
+		if(isDown()){
+			this.standAloneServer = standAloneServer;		
+		}
+		else{
+			throw new IllegalStateException("Cannot change port while in use.");
+		}
+		
 	}
 
 	/**
@@ -650,7 +659,18 @@ public class PrologInterface implements IPrologInterface {
 		this.useSessionPooling = useSessionPooling;
 	}
 
-	private boolean isDown() {
+	public boolean isDown() {
 		return (getState() == DOWN);
+	}
+	public int getPort() {
+		return port;
+	}
+	public void setPort(int port) {
+		if(isDown()){
+			this.port = port;			
+		}
+		else{
+			throw new IllegalStateException("Cannot change port while in use.");
+		}
 	}
 }
