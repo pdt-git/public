@@ -156,7 +156,18 @@ public abstract class AbstractPrologInterface implements PrologInterface {
      * @return
      */
     protected PrologSession getInitialSession() {
-        return getSession();
+    	 synchronized (stateLock) {
+            if (getState()!=START_UP) {
+                throw new IllegalStateException(
+                        "cannot create initial session, not in START_UP state.");
+            }
+            try {
+                return getSession_internal();
+            } catch (Throwable t) {
+                Debug.report(t);
+                throw new RuntimeException(t);
+            }
+        }
     }
 
     /**
@@ -177,16 +188,24 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                         "cannot create session, not in UP state.");
             }
             try {
-
-                PrologSession s = getSession_impl();
-                sessions.add(new WeakReference(s));
-                return s;
+                return getSession_internal();
             } catch (Throwable t) {
                 Debug.report(t);
                 throw new RuntimeException(t);
             }
         }
     }
+    
+    
+    private PrologSession getSession_internal() throws Throwable {
+        synchronized (stateLock) {
+                            PrologSession s = getSession_impl();
+                sessions.add(new WeakReference(s));
+                return s;
+            
+        }
+    }
+    
 
     /**
      * overide this if your subclass needs special shutdown sessions.
@@ -194,7 +213,18 @@ public abstract class AbstractPrologInterface implements PrologInterface {
      * @return
      */
     protected PrologSession getShutdownSession() {
-        return getSession();
+    	synchronized (stateLock) {
+            if (getState()!=SHUT_DOWN) {
+                throw new IllegalStateException(
+                        "cannot create shutdown session, not in SHUT_DOWN state.");
+            }
+            try {
+                return getSession_internal();
+            } catch (Throwable t) {
+                Debug.report(t);
+                throw new RuntimeException(t);
+            }
+        }
     }
 
     /**
