@@ -83,13 +83,11 @@ pdtplugin_get_file_pos(_pred,_arity, _file,_pos,_dynamic, _multifile) :-
 get_file_pos(_,Name,-1, File,0,0, 0):-
     !,
     meta_data_module(File,Name,_).
-
+get_file_pos(Context, Name,Arity, Context,Pos,0, 0) :- 
+    meta_data(Context, _, Name, Arity, _,Pos,_,_,_),!.
 get_file_pos(_, Name,Arity, File,Pos,0, 0) :-
     get_file_pos_(Name,Arity, File,Pos,0, 0),!.
 
-get_file_pos(Context, Name,Arity, Context,Pos,0, 0) :- 
-%    get_file_pos_context_(Context, Name,Arity, File,Pos,0, 0).
-    meta_data(Context, _, Name, Arity, _,Pos,_,_,_).
     
 get_file_pos_(Name,Arity, File,Pos,0, 0) :-
     term_for_signature(Name,Arity,Pred),
