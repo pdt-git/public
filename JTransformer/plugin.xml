@@ -244,7 +244,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             id="JLMPProjectObjectContribution">
          <action
-               label="Have JLMP Nature "
+               label="Have JTransformer Nature "
                style="toggle"
                tooltip="Assignes/retracts JLMP nature to/from a project"
                class="org.cs3.pl.actions.JLMPNatureAction"
@@ -256,7 +256,6 @@
             id="ProjectObjectExtension">
          <action
                label="Export project factbase"
-               icon="icons/sample.gif"
                class="org.cs3.pl.export.FactbaseExport"
                tooltip="Create a new factbase for this project and save it into a file."
                style="push"
