@@ -1379,7 +1379,9 @@ reccreateVarDefIdents(_newParent, [_varDef | _varDefs], [_Ident | _Idents]) :-
     createIdentRefParam(_varDef,_newParent, _Ident),
     reccreateVarDefIdents(_newParent, _varDefs, _Idents).
 
-
+/**
+ * createIdentRefParam(+Param,+Parent, -Ident)
+ */
 createIdentRefParam(_param,_parent, _Ident) :-
     paramDefT(_param, _encl, _, _name),
     new_id(_Ident),
