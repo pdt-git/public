@@ -31,7 +31,7 @@
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.cs3.jlmp.natures.JLMPProjectNature">
+               class="org.cs3.jlmp.internal.natures.JLMPProjectNature">
          </run>
       </runtime>
       <builder
@@ -45,7 +45,7 @@
       <builder
             hasNature="true">
          <run
-               class="org.cs3.jlmp.builders.JLMPProjectBuilder">
+               class="org.cs3.jlmp.internal.builders.JLMPProjectBuilder">
          </run>
       </builder>
    </extension>
@@ -58,7 +58,7 @@
                label="JTransformer Nature"
                style="toggle"
                tooltip="Assignes/retracts JLMP nature to/from a project"
-               class="org.cs3.jlmp.actions.JLMPNatureAction"
+               class="org.cs3.jlmp.internal.actions.JLMPNatureAction"
                id="JLMPNatureAction">
          </action>
       </objectContribution>
@@ -99,4 +99,6 @@
       <super type="org.eclipse.core.resources.problemmarker"/>      
       <persistent value="true" />
    </extension>
+   
+      <extension-point id="projectlistener" name="JLMP Project Listener" schema="schema/projectlistener.exsd"/>
 </plugin>

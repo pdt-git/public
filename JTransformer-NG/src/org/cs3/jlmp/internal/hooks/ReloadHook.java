@@ -2,23 +2,15 @@
  */
 package org.cs3.jlmp.internal.hooks;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.PrintStream;
-
 import org.cs3.jlmp.JLMP;
-import org.cs3.jlmp.natures.JLMPProjectNature;
+import org.cs3.jlmp.JLMPProject;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 
 /**
  */
@@ -38,7 +30,7 @@ public class ReloadHook implements LifeCycleHook {
 				IProject project = projects[i];
 
 				if (project.isAccessible() && project.hasNature(JLMP.NATURE_ID)) {
-					JLMPProjectNature jlmpProject = (JLMPProjectNature) project
+					JLMPProject jlmpProject = (JLMPProject) project
 							.getNature(JLMP.NATURE_ID);
 					PrologInterface pif = jlmpProject.getPrologInterface();
 					/*
@@ -70,7 +62,7 @@ public class ReloadHook implements LifeCycleHook {
 				IProject project = projects[i];
 
 				if (project.isAccessible() && project.hasNature(JLMP.NATURE_ID)) {
-					JLMPProjectNature jlmpProject = (JLMPProjectNature) project
+					JLMPProject jlmpProject = (JLMPProject) project
 							.getNature(JLMP.NATURE_ID);
 					PrologInterface pif = jlmpProject.getPrologInterface();
 					/*

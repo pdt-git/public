@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
 
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
-import org.cs3.jlmp.natures.JLMPProjectNature;
+import org.cs3.jlmp.JLMPProject;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
@@ -251,7 +251,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.startTime("untilBuild");
         IProject project = getTestProject();
         IJavaProject javaProject = getTestJavaProject();
-        JLMPProjectNature jlmpProject = getTestJLMPProject();
+        JLMPProject jlmpProject = getTestJLMPProject();
         PrologInterface pif = jlmpProject.getPrologInterface();
 
         org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "

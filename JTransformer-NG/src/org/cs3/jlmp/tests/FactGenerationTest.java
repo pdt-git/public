@@ -15,7 +15,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -25,15 +24,13 @@ import java.util.Vector;
 
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
-import org.cs3.jlmp.natures.JLMPProjectNature;
+import org.cs3.jlmp.JLMPProject;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
-import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -70,7 +67,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -97,7 +93,6 @@ import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.TextEdit;
 
 /**
@@ -117,7 +112,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     private IProject testProject;
 
-    private JLMPProjectNature testJLMPProject;
+    private JLMPProject testJLMPProject;
 
     private ResourceFileLocator testDataLocator;
 
@@ -1098,7 +1093,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 .getAbsolutePath();
         PrintStream out = new PrintStream(new BufferedOutputStream(
                 new FileOutputStream(outPathFsString)));
-        getTestJLMPProject().getFactBaseBuilder().writeFacts(icu, out);
+        getTestJLMPProject().generateFacts(icu, out);
         out.close();
         return outFile;
         }
@@ -1407,10 +1402,10 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         return testJavaProject;
     }
 
-    public JLMPProjectNature getTestJLMPProject() {
+    public JLMPProject getTestJLMPProject() {
         if (testJLMPProject == null) {
             try {
-                testJLMPProject = (JLMPProjectNature) getTestProject()
+                testJLMPProject = (JLMPProject) getTestProject()
                         .getNature(JLMP.NATURE_ID);
             } catch (CoreException e) {
                 throw new RuntimeException(e);

@@ -14,5 +14,6 @@ public class JLMP {
     public static final String BUILDER_ID = "org.cs3.jlmp.JLMPProjectBuilder";
     public static final String PLUGIN_ID = "org.cs3.jlmp";
     public static final String PROBLEM_MARKER_ID = "org.cs3.jlmp.jlmpproblem";
+    public static final String EP_PROJECT_LISTENER = "projectlistener";
    
 }
