@@ -28,10 +28,31 @@ class_source_without_toplevel(ID,Package,FQN,Source):-
 	gen_tree(ID, Source).
 */
 /**
- new_id(-Id)
+ * new_id(-Id)
+ *
+ * Binds Id to a unique number.
+ * Throws already_bound_exception(Msg)
+ * argument Id is bound.
+ *
+ */	
 
- Binds Id to a unique number.
-*/	
+new_id(New) :-
+	nonvar(New),
+	New = [_|_],
+	!,
+	term_to_atom(New,Term),
+	sformat(Msg,'new_id: variable is a list: ~a~n',Term),
+	print(Msg),
+	flush_output,
+	throw(already_bound_exception(Msg)).
+	
+new_id(New) :-
+	nonvar(New),
+	!,
+	sformat(Msg,'new_id: variable already bound: ~a~n',New),
+	print(Msg),
+	flush_output,
+	throw(already_bound_exception(Msg)).
 
 new_id(_New) :-
     lastID(_last),
@@ -166,13 +187,13 @@ getReceiver(_select, _Receiver) :- getFieldT(_select, _, _, _Receiver, _, _).
     getType(localDefT | fieldDefT | paramDefT | methodDefT, _Type)
 
     gibt im Param2 den type type((class | basic tpyename), classID, ArrayCount)
-    der *Def zurück
+    der *Def zurï¿½ck
 
     Param1 type
         identT
-            gibt im Param2 den type den umschließenden Klasse zurück
+            gibt im Param2 den type den umschlieï¿½enden Klasse zurï¿½ck
         selectT
-            gibt im Param2 den return type zurück
+            gibt im Param2 den return type zurï¿½ck
 */
 
 getType(type(_kind,_class,_dim),type(_kind,_class,_dim)) :-  !.
@@ -231,7 +252,7 @@ getType(_select, _Type) :-
 getType(null, null).
 
 
-% optimiert für ident | selects
+% optimiert fï¿½r ident | selects
 getRefType(_ident, _Type) :-
     identT(_ident,_,_,_,_ref),
     getType(_ref, _Type).
@@ -321,7 +342,7 @@ comma_reverse(_h, _c, ','(_h,_c)) :- !.
 %comma_map(_func, ','(_h, _t), ','(_fh, _t)) :-
 
 
-% zweites argument sollte kürzere liste sein -> bessere performanz
+% zweites argument sollte kï¿½rzere liste sein -> bessere performanz
 comma_append(_b, _a, _T) :-
     comma_reverse(_a, _ar),
     comma_prepend_(_ar, _b, _T),
@@ -395,9 +416,9 @@ member_save(_m,[_h|_t]) :-
 /**
   getRealParent(_id,_Parent)
   @descr Gibt "realen" parent des durch _id bestimmten
-         trees zurück. <br>
+         trees zurï¿½ck. <br>
          Wenn der tree durch eine Forwarding Methode gekapselt wurde
-         so wird der ursprüngliche Parent zurückgegeben, sonst der
+         so wird der ursprï¿½ngliche Parent zurï¿½ckgegeben, sonst der
          im tree angegebene "low level" parent.
 */
 
@@ -413,9 +434,9 @@ getRealParent(_,_parent,_parent).
   @constraints
     @ground _meth
     @unrestricted _Encl)
-  @descr Gibt die "real" umschließende Methode zurück.
+  @descr Gibt die "real" umschlieï¿½ende Methode zurï¿½ck.
          Wenn die durch _meth bestimmte Methode eine Forwarding Methode ist
-         so wird die Methode zurückgegeben in der sie aufgerufen wird.
+         so wird die Methode zurï¿½ckgegeben in der sie aufgerufen wird.
          getRealEncl geht hierbei rekursiv vor.
          Bestimmt _meth keine Methode, so wird eine Exception geworfen:
          'getRealEnclMethod: first Argument must be a method id'
@@ -1500,7 +1521,7 @@ can_modify(_id) :-
     not(externT(_class)).
 % TODO  forall(reference(_id, _ref), (enclClass(_ref, _c2), not(externT(_c2)))).
 
-% todo TEUER : effizientere lösung
+% todo TEUER : effizientere lï¿½sung
 reference(_id, _Ref) :-
     % look at all facts
     clause(_c, true),
@@ -1539,15 +1560,15 @@ find_predicates(_namepattern,_list,_length) :-
 
    
 /*
-    Löscht rekursiv alle Subtrees eines trees, bzw einer Liste von trees.
+    Lï¿½scht rekursiv alle Subtrees eines trees, bzw einer Liste von trees.
     Ausnahme sind die "targets" von break und continue.
 */
 /*
-	Löscht (sofern vorhanden) folgende 'tags' eines gegebenen baumknotens:
+	Lï¿½scht (sofern vorhanden) folgende 'tags' eines gegebenen baumknotens:
 	slT - die Sourcelocation
 	modifierT - alle modifier,
-	extendsT - alle hinweise auf superklassen (für classDefT),
-	implementsT - alle hinweise auf implementierte interfaces (für classDefT),
+	extendsT - alle hinweise auf superklassen (fï¿½r classDefT),
+	implementsT - alle hinweise auf implementierte interfaces (fï¿½r classDefT),
 	externT - falls gesetzt, das externT tag.,
 	interfaceT -falls gesetzt, das interfaceT tag
 */
@@ -1608,7 +1629,7 @@ emptyListIfNull(_elem, _elem) :-
     not(equals(_elem, 'null')).
 
 /*
-    Gibt alle referenzierten Subtrees zurück.
+    Gibt alle referenzierten Subtrees zurï¿½ck.
     Ausnahme ist
 */
 
