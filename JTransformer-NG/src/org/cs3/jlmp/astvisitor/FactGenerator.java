@@ -1469,10 +1469,14 @@ public class FactGenerator extends ASTVisitor {
 	    String selectedFrom = null;
 		
 		if (node.getQualifier() == null){
-		    TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
-	        ITypeBinding superclass = ultimateAncestor.getSuperclass().resolveTypeBinding();        
-	        String superClassID = idResolver.getID(superclass);
-			
+		    
+	        TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
+	        Name superclassName = ultimateAncestor.getSuperclass();
+	        String superClassID = superclassName == null ? idResolver
+                    .getJavaLangObjectID() : idResolver.getID(superclassName
+                    .resolveTypeBinding());
+	        
+	        
 			selectedFrom = idResolver.getID();
 			String [] identArgs = {
 					selectedFrom,
@@ -1564,8 +1568,10 @@ public class FactGenerator extends ASTVisitor {
 		
 		if (node.getQualifier() == null){
 		    TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
-	        ITypeBinding superclass = ultimateAncestor.getSuperclass().resolveTypeBinding();        
-	        String superClassID = idResolver.getID(superclass);
+	        Name superclassName = ultimateAncestor.getSuperclass();
+	        String superClassID = superclassName == null ? idResolver
+                    .getJavaLangObjectID() : idResolver.getID(superclassName
+                    .resolveTypeBinding());
 			
 			selectedFrom = idResolver.getID();
 			String [] identArgs = {
