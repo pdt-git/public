@@ -516,7 +516,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                         PDT.PREF_SOURCE_PATH_DEFAULT,
                         "Default Source Path",
                         "The default value for the source path of prolog projects.",
-                        Option.STRING, "/pl"),
+                        Option.STRING, "/"),
                 new SimpleOption(
                         PDT.PREF_PIF_IMPLEMENTATION,
                         "PrologInterfaceFactory implementation",
