@@ -1,5 +1,8 @@
 package org.cs3.timetracker;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
@@ -13,35 +16,37 @@ public class LoggerTest extends TestCase {
 	
 	private String GlobalTestFilename = "test.txt";
 
+	private static final String LOGFILE = System.getProperty("java.io.tmpdir") + File.separator + "test.txt";
+
 	/*
 	 * @see TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		Logger = new Logger(new TimeTicker());
+		Logger = new Logger(new TimeTicker(),LOGFILE);
 		Logger.log( GlobalTestComment);
 	}
 
 	public void testPausedTime() {
 		TimeTicker ticker = new TimeTicker();
-		Logger logger = new Logger(ticker);
-		ticker.start();
+		Logger logger = new Logger(ticker,LOGFILE);
+		ticker.start(false);
 		try 
 		{
-			Thread.sleep(1800);
+			Thread.sleep(1500);
 		} catch(Exception e) { e.printStackTrace(); }		
 		
 		String logString  = logger.log( GlobalTestComment);
-		assertEquals("Recorded [03:00 02:58 00:02] "+GlobalTestComment, logString);
+		assertEquals("Recorded [03:00 02:59 00:01] "+GlobalTestComment+"\n", logString);
 	}
 	
 	public void testReadLog() throws Exception
 	{
 		TimeTicker ticker = new TimeTicker();
-		Logger logger = new Logger(ticker);
+		Logger logger = new Logger(ticker,LOGFILE);
 		
-		ticker.start();
+		ticker.start(false);
 		try
 		{
 			Thread.sleep(1800);

@@ -9,18 +9,18 @@ public class Logger {
 	
 	private TimeTicker ticker;
 
-	public Logger(TimeTicker ticker) {
+	public Logger(TimeTicker ticker,String filename) {
+		this.filename = filename;
 		this.ticker = ticker;
 	}
 	
-	private String Filename = "test.txt";
+	private String filename;
 	
 	//private int lastSeconds = 180;
 	
 	private int toSeconds(String Minutes, String Seconds)
 	{
 		return Integer.parseInt(Minutes) * 60 + Integer.parseInt(Seconds);
-		
 	}
 	
 	/*
@@ -41,7 +41,7 @@ public class Logger {
 		
 		byte[] InputLogByteArray = null; 
 		
-		File FileObject = new File(Filename);
+		File FileObject = new File(filename);
 		try {
 			FileInputStream InputStreamObject = new FileInputStream(FileObject);
 			
@@ -60,7 +60,7 @@ public class Logger {
 	
 	public String log(String Comment) throws IllegalArgumentException
 	{
-		File FileObject = new File(Filename);
+		File FileObject = new File(filename);
 		String LogString;
 		
 //		int tempMinutes = Integer.parseInt(Minutes);
