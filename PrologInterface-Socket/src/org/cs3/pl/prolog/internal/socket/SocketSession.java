@@ -176,6 +176,7 @@ public class SocketSession implements PrologSession {
         Hashtable result = new Hashtable();
         try {
             while (true) {
+                
                 String line = client.readln();
                 //Debug.debug("parsing: "+line);
                 if (line == null) {
@@ -199,14 +200,48 @@ public class SocketSession implements PrologSession {
                     // solutions
                     return null;
                 }
-                int eqPos = line.indexOf('=');
-                //Debug.debug("eqPos="+eqPos);
-                String name = line.substring(1, eqPos - 1);
-                String value = line.substring(eqPos + 1).trim();
-                if(value.startsWith("'")&&value.endsWith("'")){
-                    value=value.substring(1,value.length()-1);
+                if(!(line.charAt(0)=='<')){
+                    throw new RuntimeException("expected '<' at begin of line");
                 }
+                StringBuffer buf = new StringBuffer(line);
+                //make sure we read the complete binding
+                Debug.debug("first line: "+line);
+                while(!line.endsWith(">")){
+                    line = client.readln();
+                    buf.append("\n"+line);
+                    Debug.debug("appended: "+line);
+                }
+                line = buf.toString();
+
+                //read the variable name   
+                int start=1;
+                int end = line.indexOf('>');
+                if(end<start){
+                    throw new RuntimeException("ill-formated solution line: "+line);
+                }
+                String name = Util.unescape(line,start,end);
+                
+                //read the variable value
+                start=line.indexOf('<',end)+1;
+                if (start<end){
+                    throw new RuntimeException("ill-formated solution line: "+line);
+                }
+                end=line.indexOf('>',start);
+                if(end<start){
+                    throw new RuntimeException("ill-formated solution line: "+line);
+                }
+                String value = Util.unescape(line,start,end);
                 result.put(name, value);
+//                
+//                int eqPos = line.indexOf('=');
+//                //Debug.debug("eqPos="+eqPos);
+//                String name = line.substring(1, eqPos - 1);
+//                String value = line.substring(eqPos + 1).trim();
+//                if(value.startsWith("'")&&value.endsWith("'")){
+//                    value=value.substring(1,value.length()-1);
+//                    
+//                }
+//                result.put(name, value);
             }
         } finally {
             client.unlock();

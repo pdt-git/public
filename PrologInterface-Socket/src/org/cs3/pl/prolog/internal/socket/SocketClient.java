@@ -318,6 +318,8 @@ public class SocketClient  {
         
     }
 
+    
+    
     public String readln()throws IOException{
         return reader.readLine();
     }

@@ -2,7 +2,7 @@
 	consult_server/1,
 	consulted_symbol/1,
 	starts_at/2
-]).
+	]).
 % Author: Lukas
 % Date: 23.10.2004
 :- use_module(library(socket)).
@@ -11,18 +11,18 @@
 :- dynamic offset/2.
 
 starts_at(Symbol,Line):-	
-    (	offset(Symbol,Line)
-    ->	true
-    ;	Line is 0
-    ).
-
+		(	offset(Symbol,Line)
+		->	true
+		;	Line is 0
+		).
+	
 consulted_symbol(Symbol) :-
 	source_file(Symbol),
 	\+zombie_symbol(Symbol).
-
+	
 delete_symbol(Symbol) :-
 	assert(zombie_symbol(Symbol)).	
-
+	
 undelete_symbol(Symbol) :-
 	retractall(zombie_symbol(Symbol)).
 	
@@ -34,7 +34,7 @@ consult_server(Port):-
 	concat_atom([consult_server,'@',Port],Alias),
 	%accept_loop(ServerSocket).
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
-  
+	
 accept_loop(ServerSocket):-
 	catch(
 		accept_loop_impl(ServerSocket),
@@ -74,12 +74,12 @@ handle_client(InStream, OutStream):-
 		( handle_exception(InStream,OutStream,Error)
 		;	true
 		)			
-  ),
+	),
 	thread_self(Me),
 	thread_detach(Me),
 	thread_exit(0).    
-
-handle_client_impl(InStream, OutStream):-
+	
+	handle_client_impl(InStream, OutStream):-
 	repeat,
 	request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 	( handle_command(InStream,OutStream,Command)
@@ -89,7 +89,7 @@ handle_client_impl(InStream, OutStream):-
 	fail.	
 	
 handle_command(_,_,'').
-
+	
 handle_command(_,OutStream,'PING'):-
 	my_format(OutStream,"PONG~n",[]).
 	
@@ -129,7 +129,7 @@ handle_command(InStream,OutStream,'IS_CONSULTED'):-
 	->my_format(OutStream,"YES~n",[])	
 	; my_format(OutStream,"NO~n",[])
 	).
-
+	
 handle_command(InStream,OutStream,'QUERY'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
 	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
@@ -138,7 +138,7 @@ handle_command(InStream,OutStream,'QUERY'):-
 		query_aborted,
 		true
 	).
-
+	
 handle_command(InStream,OutStream,'QUERY_ALL'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
 	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),		
@@ -147,16 +147,16 @@ handle_command(InStream,OutStream,'QUERY_ALL'):-
 	;
 		true
 	).
-
-
+	
+	
 	
 handle_command(_,_,'SHUTDOWN'):-	
 	throw(shut_down).
-
+	
 handle_command(_,_,'BYE'):-	
 	throw(peer_quit).
 	
-
+	
 all_solutions(OutStream,Term,Vars):-
 	user:forall(
 		Term,
@@ -164,7 +164,7 @@ all_solutions(OutStream,Term,Vars):-
 			consult_server:print_solution(OutStream,Vars)						
 		)		
 	).
-
+	
 	
 iterate_solutions(InStream,OutStream,Term,Vars):-
 	( user:forall(
@@ -178,17 +178,27 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	; my_format(OutStream,"YES~n",[])
 	).
 	
-
+	
 	
 	
 print_solution(OutStream,Vars):-
 	forall(
-		member(Elm,Vars),
-			my_write_term(OutStream,Elm,[quoted(true)])		
+		member(Key=Val,Vars),
+	%%			my_write_term(OutStream,Elm,[quoted(true)])		
+		print_binding(OutStream,Key,Val)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
-
 	
+print_binding(Out,Key,Val):-
+		write(Out,'<'),
+		(write_escaped(Out,Key);true),
+		write(Out, '>'),
+		write(Out,'<'),
+		(write_escaped(Out,Val);true),
+		write(Out, '>'),			
+		nl(Out).
+		
+		
 	
 handle_exception(InStream,OutStream,peer_quit):-
 	catch(	
@@ -204,7 +214,7 @@ handle_exception(InStream,OutStream,shut_down):-
 		shut_down(InStream,OutStream)
 	),
 	thread_signal(main,halt).
-
+	
 handle_exception(InStream,OutStream,peer_reset):-
 	catch(
 		(
@@ -227,9 +237,9 @@ handle_exception(InStream,OutStream,Error):-
 			)
 	),
 	handle_client(InStream,OutStream).
-
 	
-
+	
+	
 	
 report_ok(OutStream):-
 	my_format(OutStream,"OK~n",[]).	
@@ -253,7 +263,7 @@ shut_down(InStream,OutStream):-
 		_,
 		true).
 		
-
+	
 check_eof(end_of_file):-
 	!,
 	throw(peer_reset).
@@ -261,7 +271,7 @@ check_eof(end_of_file):-
 check_eof('end_of_file'):-
 	!,
 	throw(peer_reset).
-
+	
 check_eof('end_of_file.'):-
 	!,
 	throw(peer_reset).
@@ -270,19 +280,19 @@ check_eof(A):-
 	atom_concat(_,end_of_file,A),
 	!,
 	throw(peer_reset).
-
+	
 check_eof(A):-
 	atom_concat(_,'end_of_file',A),
 	!,
 	throw(peer_reset).
-
+	
 check_eof(A):-
 	atom_concat(_,'end_of_file.',A),
 	!,
 	throw(peer_reset).	
 check_eof(_):-
 	true.
-
+	
 	
 	
 codes_or_eof_to_atom(end_of_file,_):-
@@ -292,19 +302,19 @@ codes_or_eof_to_atom(Codes,Atom):-
 	atom_codes(Atom,Codes).
 	
 load_stream(Symbol,Stream):-    
-    (	
-    	retractall(offset(Symbol,_)),
-    	line_count(Stream,Line),
-    	assert(offset(Symbol,Line)),
-    	user:load_files(Symbol,[stream(Stream)])
-    	%new_memory_file(Handle),
-    	%open_memory_file(Handle, write, WriteStream),
-    	%copy_stream_data(Stream,WriteStream),
-    	%close(WriteStream),
-    	%open_memory_file(Handle, read, ReadStream),
-    	%user:load_files(Symbol,[stream(ReadStream)]),
-    	%close(ReadStream),
-    	%free_memory_file(Handle)
+		(	
+			retractall(offset(Symbol,_)),
+			line_count(Stream,Line),
+			assert(offset(Symbol,Line)),
+			user:load_files(Symbol,[stream(Stream)])
+			%new_memory_file(Handle),
+			%open_memory_file(Handle, write, WriteStream),
+			%copy_stream_data(Stream,WriteStream),
+			%close(WriteStream),
+			%open_memory_file(Handle, read, ReadStream),
+			%user:load_files(Symbol,[stream(ReadStream)]),
+			%close(ReadStream),
+			%free_memory_file(Handle)
 	->	true
 	; 	throw(error(pipi,kaka))
 	).
@@ -318,7 +328,7 @@ count_thread(Prefix,Count):-
 		Bag
 	),	 
 	length(Bag,Count).
-
+	
 unused_thread_name(Prefix,Suffix,Name):-
 	unused_thread_name(Prefix,Suffix,0,Name).	
 	
@@ -332,18 +342,18 @@ unused_thread_name(Prefix,Suffix,Try,Name):-
 		Name=A			
 	).
 	
-
-
-
+	
+	
+	
 request_line(InStream, OutStream, Prompt, Line):-
 	my_format(OutStream,"~a~n",[Prompt]),
 	read_line_to_codes(InStream,LineCodes),
 	codes_or_eof_to_atom(LineCodes,Line),
 	check_eof(Line),
- 	thread_self(Self),
- 	format("~a: <<< ~a~n",[Self,Line]).
-
-
+	thread_self(Self),
+	format("~a: <<< ~a~n",[Self,Line]).
+	
+	
 my_read_term(InStream,Term,Options):-
 	read_term(InStream,Term,Options),
 	thread_self(Self),
@@ -365,3 +375,33 @@ my_format(OutStream,Format,Args):-
 	format(current_output,Format,Args),
 	flush_output(OutStream),
 	flush_output(current_output).
+	
+write_escaped(Out,Atom):-
+		nonvar(Atom),
+		( 	atom(Atom)
+		->  atom_chars(Atom,Chars),
+		write_escaped_l(Out,Chars)
+	;	term_to_atom(Atom,AAtom),
+		write_escaped(Out,AAtom)
+	).
+	
+		
+write_escaped_l(_,[]).
+write_escaped_l(Out,['<'|ITail]):-
+	write(Out,'&lt;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,['>'|ITail]):-
+	write(Out,'&gt;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,['&'|ITail]):-
+	write(Out,'&amp;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,['"'|ITail]):-
+	write(Out,'&quot;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,['\''|ITail]):-
+	write(Out,'&apos;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,[C|ITail]):-
+		put_char(Out,C),
+		write_escaped_l(Out,ITail).	
