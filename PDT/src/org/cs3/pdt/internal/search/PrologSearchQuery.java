@@ -60,11 +60,12 @@ public class PrologSearchQuery implements ISearchQuery {
                 PrologSession client = PDTPlugin.getDefault()
                         .getPrologInterface().getSession();
                 //				
-                Hashtable solution = client.query(PDTPlugin.MODULEPREFIX
+                Hashtable[] solutions = client.queryAll(PDTPlugin.MODULEPREFIX
                         + "get_references(" + data.getSignature()
                         + ",FileName,Line,Name,Arity)");
                 int pos = 10;
-                while (solution != null) {
+                for (int i = 0; i < solutions.length; i++) {
+                    Hashtable solution = solutions[i];
                     HashMap attributes = new HashMap();
                     String fileName = solution.get("FileName").toString();
                     java.io.File ioFile;
@@ -121,7 +122,7 @@ public class PrologSearchQuery implements ISearchQuery {
                         PDTPlugin.getDefault().setStatusErrorMessage(msg);
                     }
 
-                    solution = client.next();
+                    //solution = client.next();
                 }
             }
             //manager.stop();

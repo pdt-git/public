@@ -1,10 +1,12 @@
 package org.cs3.pdt.internal.actions;
 
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.search.PrologSearchViewPage;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
 import org.eclipse.core.resources.IFile;
@@ -17,6 +19,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
@@ -61,15 +64,15 @@ public void run() {
 						IStatus status= NewSearchUI.runQueryInForeground(context, query);
 						if (status.isOK()) {
 							
-							//OccurrencesSearchLabelProvide page = new OccurrencesSearchResultPage();
-							//FileSearchPage page = new FileSearchPage();
-//							PrologSearchViewPage page = new PrologSearchViewPage();
-//							page.setViewPart(NewSearchUI.getSearchResultView());
-//							page.init(NewSearchUI.getSearchResultView().getActivePage().getSite());
-//							page.createControl((Composite)NewSearchUI.getSearchResultView().getActivePage().getControl());
-//							//page.setLayout(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
-//							page.setInput(query.getSearchResult(), new HashMap());						
-//							System.out.println(status.toString());
+//							OccurrencesSearchLabelProvide page = new OccurrencesSearchResultPage();
+//							FileSearchPage page = new FileSearchPage();
+							PrologSearchViewPage page = new PrologSearchViewPage();
+							page.setViewPart(NewSearchUI.getSearchResultView());
+							page.init(NewSearchUI.getSearchResultView().getActivePage().getSite());
+							page.createControl((Composite)NewSearchUI.getSearchResultView().getActivePage().getControl());
+							//page.setLayout(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
+							page.setInput(query.getSearchResult(), new HashMap());						
+							System.out.println(status.toString());
 						}
 				} catch (Exception e) {
 					Debug.report(e);
