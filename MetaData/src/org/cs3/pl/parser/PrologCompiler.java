@@ -44,19 +44,19 @@ public class PrologCompiler extends PrologParserTraversal {
 
     
     //private static String newLine = System.getProperty("line.separator");
-    private Hashtable pefs = new Hashtable();
+    protected Hashtable pefs = new Hashtable();
 
-    private Hashtable vars = new Hashtable();
+    protected Hashtable vars = new Hashtable();
 
-    private List clauses = new ArrayList();
+    protected List clauses = new ArrayList();
 
-    private String symbolicFileName;
+    protected String symbolicFileName;
 
-    private ProblemCollector problemCollector;
+    protected ProblemCollector problemCollector;
 
-    private LineBreakInfoProvider lineBreakInfoProvider;
+    protected LineBreakInfoProvider lineBreakInfoProvider;
 
-    private Hashtable singleton = new Hashtable();
+    protected Hashtable singleton = new Hashtable();
 
     protected ASTCompilationUnit unit;
 
@@ -74,24 +74,24 @@ public class PrologCompiler extends PrologParserTraversal {
 
     public static final int ERROR = 2;
 
-    private static final String DEFAULTMODULE = "user";
+    protected static final String DEFAULTMODULE = "user";
 
-    private PrologParser parser;
+    protected PrologParser parser;
 
-    private static final String LINESEPARATOR = System
+    protected static final String LINESEPARATOR = System
             .getProperty("line.separator");
 
-    private static final int BUFLENGTH = 1024;
+    protected static final int BUFLENGTH = 1024;
 
-    private ArrayList markers = new ArrayList();
+    protected ArrayList markers = new ArrayList();
 
-    private boolean singletonCheckForDTMVars=false;
+    protected boolean singletonCheckForDTMVars=false;
 
-    private void resetVars() {
+    protected void resetVars() {
         vars = new Hashtable();
     }
 
-    private void resetSingleton() {
+    protected void resetSingleton() {
         singleton = new Hashtable();
     }
 
@@ -249,7 +249,7 @@ public class PrologCompiler extends PrologParserTraversal {
      * @param newLine
      * @return
      */
-    private String processParserOutput(String msg) {
+    protected String processParserOutput(String msg) {
         //msg = msg.replaceAll("...","");
         msg = msg.replaceAll("<", "");
         msg = msg.replaceAll(">", "");
@@ -502,14 +502,14 @@ public class PrologCompiler extends PrologParserTraversal {
         return elements;
     }
 
-    private HashMap publicModulePredicates = null;
+    protected HashMap publicModulePredicates = null;
 
-    private boolean addProblems = true;
+    protected boolean addProblems = true;
 
     /**
      * @return
      */
-    private HashMap getPublicModulePredicates() {
+    protected HashMap getPublicModulePredicates() {
         if (publicModulePredicates == null && isModule()) {
             ASTList list = (ASTList) getUnit().jjtGetChild(0).jjtGetChild(0)
                     .jjtGetChild(1).jjtGetChild(1);

@@ -10,7 +10,7 @@ package org.cs3.pl.parser;
  */
 public class SimpleNode implements Node {
 	protected Node parent;
-	protected Node[] children;
+	public Node[] children;
 	protected int id;
 	protected PrologParser parser;
 	private Token token;
