@@ -1,2 +1,0 @@
-:- ['aop_api'].
-:- ['resolve'].
