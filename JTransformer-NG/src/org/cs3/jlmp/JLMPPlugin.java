@@ -5,6 +5,7 @@ package org.cs3.jlmp;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -15,6 +16,9 @@ import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -86,15 +90,33 @@ public class JLMPPlugin extends AbstractUIPlugin {
         IClasspathEntry firstSourceFolder = getFirstSourceFolder(dummyOutput);
         IResource r= ResourcesPlugin.getWorkspace().getRoot().findMember(firstSourceFolder.getPath());
         String src= r.getLocation().toOSString();
-        options = new Option[] { new SimpleOption(
+        String storeFile = getResourceLocator("").resolve("global_pef_store.pl").toString();
+        options = new Option[] { 
+                new SimpleOption(
+                JLMP.PREF_DEFAULT_OUTPUT_PROJECT,
+                "Default output source folder",
+                "Used as default value for JLMP Projects that do not specify their own output folder.",
+                Option.STRING, src),
+                new SimpleOption(
                 JLMP.PREF_DEFAULT_OUTPUT_FOLDER,
                 "Default output source folder",
-                "Used as default value for JLMP Project output "
-                        + "folders that do not specify their own output folder.",
-                Option.DIR, src) };
+                "Used as default value for JLMP Projects that do not specify their own output folder.",
+                Option.STRING, src),
+                new SimpleOption(
+                        JLMP.PREF_USE_PEF_STORE,
+                        "Use PEF store",
+                        "If enabled, JTransformer will save PEFs before shutdown and reload them at startup. ",
+                        Option.FLAG, "false"),
+                new SimpleOption(
+                        JLMP.PREF_DEFAULT_PEF_STORE_FILE,
+                        "Default PEF store file",
+                        "Used as default value for JLMP Projects "
+                                + "that do not specify their own store file.",
+                        Option.FILE, storeFile)};
 
     }
 
+    
     private IClasspathEntry getFirstSourceFolder(IJavaProject javaProject) throws JavaModelException {
         IClasspathEntry[] cp = javaProject.getResolvedClasspath(true);
         for(int i=0;i<cp.length;i++){
@@ -304,5 +326,24 @@ public class JLMPPlugin extends AbstractUIPlugin {
 			throw new RuntimeException(e);
 		}
     }
-
+    /**
+     * @deprecated 
+     */
+    public  void reload(PrologSession initSession) {       
+        String storeName = JLMPPlugin.getDefault().getPreferenceValue(JLMP.PREF_DEFAULT_PEF_STORE_FILE,null);
+        File storeFile = new File(storeName);
+         if(storeFile.canRead()){
+            initSession.queryOnce("['"+Util.prologFileName(storeFile)+"']");
+        }
+    }
+    /**
+     * @deprecated 
+     */    
+    public  void save(PrologSession shutdownSession){
+        String storeName = JLMPPlugin.getDefault().getPreferenceValue(JLMP.PREF_DEFAULT_PEF_STORE_FILE,null);
+        File storeFile = new File(storeName);
+        
+            shutdownSession.queryOnce("writeTreeFacts('"+Util.prologFileName(storeFile)+"')");
+        
+    }
 }
