@@ -77,8 +77,9 @@ public class JLMPProjectNature implements IProjectNature {
         //"found" unresolved types
         PrologInterface pif = getPrologInterface();
         if(pif.isUp()){
-            pif.getConsultService(JLMP.EXT);
-            pif.getConsultService(JLMP.SRC);
+            pif.getConsultService(JLMP.EXT).setRecording(true);
+            pif.getConsultService(JLMP.SRC).setRecording(true);
+            pif.getConsultService(JLMP.EXT).setAppendingRecords(true);
         }
     }
 

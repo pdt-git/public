@@ -45,8 +45,9 @@ public class ReloadHook implements LifeCycleHook {
 					 * simply touching the cs should trigger creation and reload
 					 * if neccesary.
 					 */
-					pif.getConsultService(JLMP.SRC);
-					pif.getConsultService(JLMP.EXT);
+					pif.getConsultService(JLMP.SRC).setRecording(true);
+					pif.getConsultService(JLMP.EXT).setRecording(true);
+					pif.getConsultService(JLMP.EXT).setAppendingRecords(true);
 
 				}
 			}
