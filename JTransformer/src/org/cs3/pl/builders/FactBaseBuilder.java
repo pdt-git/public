@@ -31,7 +31,6 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.ui.progress.WorkbenchJob;
 
 
@@ -355,7 +353,7 @@ public class FactBaseBuilder {
 		if(removeGlobalIdsFacts)
 		    prologClient.query("remove_contained_global_ids('"+path+"')");
 		
-		prologClient.query("rollback, toplevelT(ID, _, '" + path +	"', _), deepRetract(ID)");
+		prologClient.query("delete_toplevel('" + path +	"')");
 		if (delete) {
 			Debug.debug("Deleting resource " + path);
 			metaDataPL.delete(path);
