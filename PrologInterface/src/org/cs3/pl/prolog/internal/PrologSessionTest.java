@@ -2,10 +2,12 @@ package org.cs3.pl.prolog.internal;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import junit.framework.TestCase;
+import junit.framework.TestListener;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
@@ -121,5 +123,41 @@ public class PrologSessionTest extends TestCase {
         assertTrue("there should be exactly two solutions!",v.size()==2);
         assertTrue(v.contains("wahrheit"));
         assertTrue(v.contains("wahr(wahrheit)"));
+    }
+	
+	/**
+     * this one fails if the pif impl does not support lists
+     */
+    public void testList() {
+       PrologSession s = pif.getSession();
+       Map map = s.queryOnce("A=[1,2,3,[[a,b,['{}']]],[b,c]]");
+       
+       Object A = map.get("A");
+       assertEquals("[1, 2, 3, [[a, b, [{}]]], [b, c]]",A.toString());
+       assertTrue(A instanceof List);
+       List l = (List) A;
+       assertEquals("1",(String)l.get(0));
+       assertEquals("2",(String)l.get(1));
+       assertEquals("3",(String)l.get(2));
+       assertEquals(5,l.size());
+       A=l.get(3);
+       assertTrue(A instanceof List);
+       List m=(List) A;
+       assertEquals(1, m.size());
+       assertTrue(m.get(0) instanceof List);
+       m=(List) m.get(0);
+       assertEquals(3,m.size());
+       assertEquals("a",(String)m.get(0));
+       assertEquals("b",(String)m.get(1));
+       assertTrue(m.get(2) instanceof List);
+       m=(List) m.get(2);
+       assertEquals(1,m.size());
+       assertEquals("{}",(String)m.get(0));
+       assertTrue(l.get(4) instanceof List);
+       m=(List) l.get(4);
+       assertEquals(2,m.size());
+       assertEquals("b",(String)m.get(0));
+       assertEquals("c",(String)m.get(1));
+       
     }
 }

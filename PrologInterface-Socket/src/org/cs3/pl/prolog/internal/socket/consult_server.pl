@@ -2,7 +2,7 @@
 	consult_server/1,
 	consulted_symbol/1,
 	starts_at/2
-	]).
+	]). 
 % Author: Lukas
 % Date: 23.10.2004
 :- use_module(library(socket)).
@@ -192,13 +192,28 @@ print_solution(OutStream,Vars):-
 print_binding(Out,Key,Val):-
 		write(Out,'<'),
 		(write_escaped(Out,Key);true),
-		write(Out, '>'),
-		write(Out,'<'),
-		(write_escaped(Out,Val);true),
-		write(Out, '>'),			
+		write(Out, '>'),		
+		(print_value(Out,Val);true),		
 		nl(Out).
-		
-		
+
+print_values(_,[]):-
+	!. 
+print_values(Out,[Head|Tail]):-
+	!,
+	print_value(Out,Head),		
+	print_values(Out,Tail).
+	
+print_value(Out,Val):-    	
+	( 	is_list(Val)
+ 	->	write(Out,'{'),
+		(print_values(Out,Val);true),
+		write(Out, '}')		
+	;	write(Out,'<'),
+		(write_escaped(Out,Val);true),
+		write(Out, '>')
+	).
+	
+	
 	
 handle_exception(InStream,OutStream,peer_quit):-
 	catch(	
@@ -384,6 +399,7 @@ write_escaped(Out,Atom):-
 	;	term_to_atom(Atom,AAtom),
 		write_escaped(Out,AAtom)
 	).
+
 	
 		
 write_escaped_l(_,[]).
@@ -392,6 +408,12 @@ write_escaped_l(Out,['<'|ITail]):-
 		write_escaped_l(Out,ITail).
 write_escaped_l(Out,['>'|ITail]):-
 	write(Out,'&gt;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,['{'|ITail]):-
+	write(Out,'&cbo;'),
+		write_escaped_l(Out,ITail).
+write_escaped_l(Out,['}'|ITail]):-
+	write(Out,'&cbc;'),
 		write_escaped_l(Out,ITail).
 write_escaped_l(Out,['&'|ITail]):-
 	write(Out,'&amp;'),

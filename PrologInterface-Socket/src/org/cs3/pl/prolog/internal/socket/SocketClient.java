@@ -301,7 +301,7 @@ public class SocketClient  {
 //           unlock();
 //       }
 //    }
-    public InputStream getInputStream() throws IOException{
+    private InputStream getInputStream() throws IOException{
         if (socket==null){
             throw new IllegalStateException("Socket is closed, go away. ");
         }
@@ -439,5 +439,11 @@ public class SocketClient  {
     }
     public void setPool(ReusablePool pool) {
         this.pool = pool;
+    }
+    /**
+     * @return Returns the reader.
+     */
+    public BufferedReader getReader() {
+        return reader;
     }
 }

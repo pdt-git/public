@@ -271,6 +271,10 @@ public class Util {
                         sb.append('<');
                     } else if ("gt".equals(escSeq)) {
                         sb.append('>');
+                    } else if ("cbo".equals(escSeq)) {
+                        sb.append('{');
+                    } else if ("cbc".equals(escSeq)) {
+                        sb.append('}');
                     } else if ("amp".equals(escSeq)) {
                         sb.append('&');
                     } else if ("apos".equals(escSeq)) {
