@@ -82,15 +82,26 @@ public class RecordingConsultService implements ConsultService {
         }
     }
 
-    protected void fireConsultDataChanged(ConsultServiceEvent e) {
-        Vector cloned = null;
-        synchronized (listeners) {
-            cloned = (Vector) listeners.clone();
-        }
-        for (Iterator it = cloned.iterator(); it.hasNext();) {
-            ConsultServiceListener l = (ConsultServiceListener) it.next();
-            l.consultDataChanged(e);
-        }
+    protected void fireConsultDataChanged(final ConsultServiceEvent e) {
+        //To avoid deadlocks during startup, we move notification to another thread.
+        //otherwise the same thread that starts up the pif might 
+        //be stuck in some listener requesting a session.
+        Runnable r = new Runnable() {
+            public void run() {
+                Vector cloned = null;
+                synchronized (listeners) {
+                    cloned = (Vector) listeners.clone();
+                }
+                for (Iterator it = cloned.iterator(); it.hasNext();) {
+                    ConsultServiceListener l = (ConsultServiceListener) it
+                            .next();
+                    l.consultDataChanged(e);
+                }
+            }
+        };
+        Thread t = new Thread(r,"RecordingConsultService listener notification");
+        t.setDaemon(true);
+        t.start();
     }
 
     public String getExtension() {
