@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.*;
 public class TypeResolver implements ITypeResolver {
 	
 	private FQNTranslator fqnresolve;
+    private IIDResolver idResolver;
 	
 	/**
 	 * constructs a new TypeResolver. The FQNManager is used to
@@ -26,13 +27,15 @@ public class TypeResolver implements ITypeResolver {
 	 * @param fqnresolve an FQNManager translating fqn-terms
 	 */
 	
-	public TypeResolver(FQNTranslator fqnresolve){
+	public TypeResolver(FQNTranslator fqnresolve, IIDResolver idresolver){
 		this.fqnresolve = fqnresolve;
+		this.idResolver=idresolver;
 	}
 	
 	/**
 	 * constructs a new TypeResolver. This constructor does not
 	 * translate fqn(...) terms at all.
+	 * @deprecated
 	 */
 
 	public TypeResolver(){
@@ -78,12 +81,17 @@ public class TypeResolver implements ITypeResolver {
 	 * @return
 	 */
 	private String getFullyQualifiedName(ITypeBinding bind) {
-		String buf = bind.getName();
-		while(bind.getDeclaringClass() != null) {
-			bind = bind.getDeclaringClass();
-			buf = bind.getName() + "$" + buf;
-		}
-		return bind.getPackage().isUnnamed() ? buf : bind.getPackage().getName() + "." + buf;
+//		
+//	    String buf = bind.getName();
+//		while(bind.getDeclaringClass() != null) {
+//			bind = bind.getDeclaringClass();
+//			buf = bind.getName() + "$" + buf;
+//		}
+//		return bind.getPackage().isUnnamed() ? buf : bind.getPackage().getName() + "." + buf;
+	    
+// ld: bla bla bla... why not this way:
+	    return bind.getKey().replace('/','.');
+	    
 	}
 
 	/**
@@ -92,10 +100,19 @@ public class TypeResolver implements ITypeResolver {
 	 * @return
 	 */
 	protected String getClassTypeTerm(String fqn, int dim) {
-		String rv = "type(class, " + fqnresolve.transformFQN("fqn('" + fqn + "')") + ", "+dim+ ")";
+		String fqnTerm = "fqn('" + fqn + "')";
+        String rv = "type(class, " + fqnresolve.transformFQN(fqnTerm) + ", "+dim+ ")";
 		return rv;
 	}
-	
+	  /**
+     * @param type
+     * @param dim
+     * @return
+     */
+    private String getClassTypeTerm(ITypeBinding type, int dim) {
+        String rv = "type(class, " + idResolver.getID(type) + ", "+dim+ ")";
+		return rv;
+    }
 	/**
 	 * @see org.cs3.jlmp.astvisitor.ITypeResolver#getTypeTerm(org.eclipse.jdt.core.dom.StringLiteral)
 	 */
@@ -338,7 +355,9 @@ public class TypeResolver implements ITypeResolver {
 		if (type.isPrimitive())
 			return "type(basic, " + type.getName() + ", "+ dim +")";
 		else 
-			return getClassTypeTerm( getFullyQualifiedName(type), dim);
+			return getClassTypeTerm( type, dim);
 
 	}
+
+  
 }

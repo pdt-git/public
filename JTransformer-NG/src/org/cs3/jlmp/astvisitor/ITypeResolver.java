@@ -89,6 +89,7 @@ public interface ITypeResolver {
 	 * classpath)
 	 * @param str a String to be checked
 	 * @return whether the String is a valid type(...) term.
+	 * @deprecated i see no point in this method, it is never called. will be removed.
 	 */
 	public boolean isTypeTerm(String str);	
 }

@@ -20,7 +20,7 @@ public class DefaultGenerationToolbox extends FactGenerationToolBox {
 		provider = new LocalIDGenerator();
 		fqntrans = new LocalIDFQNTranslator((LocalIDGenerator)provider);
 		idresolver = new IDResolver(fqntrans, provider);
-		tresolver = new TypeResolver(fqntrans);
+		tresolver = new TypeResolver(fqntrans,idresolver);
 		manager = new IDManagerIType(fqntrans, provider);
 	}
 }

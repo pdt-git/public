@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.cs3.pl.common.Debug;
 import org.eclipse.jdt.core.dom.*;
 
 /**
@@ -103,14 +104,18 @@ public class IDResolver implements IIDResolver {
 			rv = getID(pd.resolveBinding());
 		} else if (node instanceof TypeDeclaration) {
 			TypeDeclaration td = (TypeDeclaration) node;
-			if (td.getParent() instanceof AnonymousClassDeclaration) {
+			if(td.getName().toString().equals("Subroutine")){
+			    Debug.debug("debug");
+			}
+			ITypeBinding binding = td.resolveBinding();
+            if (td.getParent() instanceof AnonymousClassDeclaration) {
 				rv = provider.getID();
-				localBindings.put(td.resolveBinding(), rv);
+				localBindings.put(binding, rv);
 			}else if (td.isLocalTypeDeclaration()) {
 				rv = provider.getID();
-				localBindings.put(td.resolveBinding(), rv);
+				localBindings.put(binding, rv);
 			} else {
-				rv = getID(td.resolveBinding());
+				rv = getID(binding);
 			}
 			//ld: AnonymousClassDeclaration != TypeDeclaration !!!!!!!!!!!
 		}else if (node instanceof AnonymousClassDeclaration) {
@@ -257,27 +262,31 @@ public class IDResolver implements IIDResolver {
 				break;
 			case IBinding.TYPE :
 				ITypeBinding tb = (ITypeBinding) iface;
-				if (tb.isTopLevel())
-					buff.append(tb.getQualifiedName());
-				else if (tb.isMember()) {
-					StringBuffer tmp = new StringBuffer();
-					ITypeBinding father = tb.getDeclaringClass();
-					ITypeBinding last = father;
-					tmp.append(tb.getName());
-					while (father != null) {
-						last = father;
-						tmp.insert(0, father.getName() + "$"); //windeln: replaced $
-						father = father.getDeclaringClass();
-					}
-					if(!last.getPackage().isUnnamed())
-					tmp.insert(0, last.getPackage().getName() + ".");
-					buff.append(tmp);
-				} else {
-					// local class or anonymous class
-					Integer theID = (Integer) localBindings.get(tb);
-					
-					return theID.toString();					
-				}
+			if(tb.getName().equals("Subroutine")){
+			    Debug.debug("debug");
+			}
+//				if (tb.isTopLevel())
+//					buff.append(tb.getQualifiedName());
+//				else if (tb.isMember()) {
+//					StringBuffer tmp = new StringBuffer();
+//					ITypeBinding father = tb.getDeclaringClass();
+//					ITypeBinding last = father;
+//					tmp.append(tb.getName());
+//					while (father != null) {
+//						last = father;
+//						tmp.insert(0, father.getName() + "$"); //windeln: replaced $
+//						father = father.getDeclaringClass();
+//					}
+//					if(!last.getPackage().isUnnamed())
+//					tmp.insert(0, last.getPackage().getName() + ".");
+//					buff.append(tmp);
+//				} else {
+//					// local class or anonymous class
+//					Integer theID = (Integer) localBindings.get(tb);
+//					
+//					return theID.toString();					
+//				}
+				buff.append(tb.getKey().replace('/','.'));
 				buff.append("'");
 				break;
 			case IBinding.VARIABLE :

@@ -1020,6 +1020,7 @@ public class FactGenerator extends ASTVisitor {
 		String[] args =
 			new String[] { id, parentId, name, param, type, exceptions, body };
 		writer.writeFact("methodDefT", args);
+		
 		writer.writeFact("slT", new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
@@ -1027,7 +1028,7 @@ public class FactGenerator extends ASTVisitor {
 		});
 
 		//ld: n. verein. brauchen wir das bei nem static block nicht.
-		//writeModifiers(node, node.getModifiers());
+		writeModifiers(node, node.getModifiers());
 		return true;
 	}
 	/**
@@ -1753,7 +1754,10 @@ public class FactGenerator extends ASTVisitor {
 	 * @see FactGeneratorInterfaceTest#testTypeDeclaration()
 	 */
 	public boolean visit(TypeDeclaration node) {
-
+	    String name = quote(node.getName());
+	    if(name.equals("'Subroutine'")){
+	        Debug.debug("debug");
+	    }
 		String id = idResolver.getID(node);
 		String parentId;
 		if (node.getParent().getNodeType() == ASTNode.COMPILATION_UNIT)
@@ -1762,7 +1766,7 @@ public class FactGenerator extends ASTVisitor {
 					((CompilationUnit) node.getParent()).getPackage());
 		else
 			parentId = idResolver.getID(node.getParent());
-		String name = quote(node.getName());
+		
 
 		Iterator bodyIterator = node.bodyDeclarations().iterator();
 		ArrayList expandedList = expandList(bodyIterator);
@@ -2043,22 +2047,31 @@ public class FactGenerator extends ASTVisitor {
 //			if(n.getName().toString().equals("solutions"))
 //				System.out.println("DEBUG");
 
-			String[] args =
+			VariableDeclarationFragment theNode = n;
+            ASTNode theParent = theNode.getParent().getParent();
+            ASTNode theEnc = getEnclosingNode(theNode);
+            ITypeBinding theType = theNode.resolveBinding().getType();
+            String theName = "'" + theNode.getName().getIdentifier() + "'";
+            if(theName.equals("'sub'")){
+                Debug.debug("debug");
+            }
+            Expression theInitializer = theNode.getInitializer();
+            String[] args =
 				new String[] {
-					idResolver.getID(n),
-					idResolver.getID(n.getParent().getParent()),
-					idResolver.getID(getEnclosingNode(n)),
-					typeResolver.getTypeTerm(n.resolveBinding().getType()),
-					"'" + n.getName().getIdentifier() + "'",
-					idResolver.getID(n.getInitializer())};
+					idResolver.getID(theNode),
+					idResolver.getID(theParent),
+					idResolver.getID(theEnc),
+					typeResolver.getTypeTerm(theType),
+					theName,
+					idResolver.getID(theInitializer)};
 
 			writer.writeFact("localDefT", args);
 			writer.writeFact("slT", new String [] {
-					idResolver.getID(n),
-					Integer.toString(n.getStartPosition()),
-					Integer.toString(n.getLength())
+					idResolver.getID(theNode),
+					Integer.toString(theNode.getStartPosition()),
+					Integer.toString(theNode.getLength())
 			});
-			writeModifiers(n, mods);
+			writeModifiers(theNode, mods);
 
 		}
 		return true;
@@ -2287,15 +2300,16 @@ public class FactGenerator extends ASTVisitor {
 	}
 	
 	private String createSynteticConstructor(TypeDeclaration typeDeclaration) {
-		String fqn = "fqn('" + typeDeclaration.resolveBinding().getQualifiedName() + "')";
-		//String classname = typeDeclaration.resolveBinding().getQualifiedName();
+		ITypeBinding binding = typeDeclaration.resolveBinding();
+        String fqn = "fqn('" + binding.getKey().replace('/','.') + "', '<init>', [])";
+		
+		String classname = typeDeclaration.resolveBinding().getQualifiedName();
 		String bodyID = idResolver.getID();
 		
-		fqn = fqn.substring(0, fqn.length() - 1);
-		fqn += ", '<init>', [])";
+		
 		if(typeDeclaration.isLocalTypeDeclaration()) {
 			fqn = idResolver.getID(); 
-			syntheticConstructorIds.put(typeDeclaration.resolveBinding(),fqn);
+			syntheticConstructorIds.put(binding,fqn);
 		} else {
 			fqn = fqnManager.transformFQN(fqn);
 		}
