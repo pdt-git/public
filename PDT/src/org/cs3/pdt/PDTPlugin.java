@@ -5,6 +5,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.fileops.PrologMetaDataManager;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
@@ -26,64 +27,11 @@ import org.osgi.framework.BundleContext;
  * The main plugin class to be used in the desktop.
  */
 public class PDTPlugin extends AbstractUIPlugin {
-    //The shared instance.
-    private static PDTPlugin plugin;
-
-    //Resource bundle.
-    private ResourceBundle resourceBundle;
-
-    private PrologInterface prologInterface;
 
     private static final String EP_INIT_HOOK = "hooks";
     public static final String MODULEPREFIX = "pdtplugin:";
-    private String pdtModulePrefix = "";
-
-    private PDTPrologHelper  prologHelper;
-
-
-    /**
-     * The constructor.
-     */
-    public PDTPlugin() {
-        super();
-        plugin = this;
-        try {
-            resourceBundle = ResourceBundle
-                    .getBundle("prg.cs3.pdt.PDTPluginResources");
-        } catch (MissingResourceException x) {
-            resourceBundle = null;
-        }
-    }
-
-    /**
-     * This method is called upon plug-in activation
-     */
-    public void start(BundleContext context) throws Exception {
-        try {
-            super.start(context);
-
-            prologInterface = new PrologInterface();
-            reconfigurePrologInterface();
-
-            registerHooks();
-            prologInterface.start();
-        } catch (Throwable t) {
-            Debug.report(t);
-        }
-    }
-
-    /**
-     * This method is called when the plug-in is stopped
-     */
-    public void stop(BundleContext context) throws Exception {
-        try {
-            if (prologInterface != null && !prologInterface.isDown()) {
-                prologInterface.stop();
-            }
-        } finally {
-            super.stop(context);
-        }
-    }
+    //The shared instance.
+    private static PDTPlugin plugin;
 
     /**
      * Returns the shared instance.
@@ -105,11 +53,53 @@ public class PDTPlugin extends AbstractUIPlugin {
         }
     }
 
+    private PrologMetaDataManager metaDataManager;
+    private String pdtModulePrefix = "";
+
+    private PDTPrologHelper  prologHelper;
+
+    private PrologInterface prologInterface;
+
+    //Resource bundle.
+    private ResourceBundle resourceBundle;
+
+
     /**
-     * Returns the plugin's resource bundle,
+     * The constructor.
      */
-    public ResourceBundle getResourceBundle() {
-        return resourceBundle;
+    public PDTPlugin() {
+        super();
+        plugin = this;
+        try {
+            resourceBundle = ResourceBundle
+                    .getBundle("prg.cs3.pdt.PDTPluginResources");
+        } catch (MissingResourceException x) {
+            resourceBundle = null;
+        }
+    }
+
+    public IEditorPart getActiveEditor() {
+        try {
+            IWorkbenchPage page = getActivePage();
+            return page.getActiveEditor();
+        } catch (NullPointerException e) {
+            return null;
+        }
+    }
+    
+    public IWorkbenchPage getActivePage() {
+        return getWorkbench().getActiveWorkbenchWindow().getActivePage();
+    }
+
+    public Display getDisplay() {
+        return getWorkbench().getDisplay();
+    }
+
+    public IPrologHelper getPrologHelper(){
+        if(prologHelper==null){
+            prologHelper= new PDTPrologHelper(prologInterface,pdtModulePrefix);
+        }
+        return prologHelper;
     }
 
     /**
@@ -120,6 +110,25 @@ public class PDTPlugin extends AbstractUIPlugin {
     public IPrologInterface getPrologInterface() throws IOException {
 
         return prologInterface;
+    }
+
+    /**
+     * @return
+     * @throws IOException
+     */
+    public PrologMetaDataManager getPrologMetaDataManager() throws IOException {
+        if(this.metaDataManager==null){
+            this.metaDataManager=new PrologMetaDataManager();
+            reconfigureMetaDataManager();
+        }
+        return metaDataManager;
+    }
+
+    /**
+     * Returns the plugin's resource bundle,
+     */
+    public ResourceBundle getResourceBundle() {
+        return resourceBundle;
     }
 
     /*
@@ -144,6 +153,46 @@ public class PDTPlugin extends AbstractUIPlugin {
             }
         }
 
+    }
+
+    /**
+     *  
+     */
+    public void reconfigure() {
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = getBundle().getSymbolicName();
+        String debugLevel = service.getString(qualifier,PDT.PREF_DEBUG_LEVEL,"ERROR",null);
+        Debug.setDebugLevel(debugLevel);
+        prologInterface.stop();
+        reconfigurePrologInterface();
+        reconfigureMetaDataManager();
+        try {
+            prologInterface.start();
+        } catch (IOException e) {
+            Debug.report(e);
+        }
+
+    }
+
+    /**
+     * 
+     */
+    private void reconfigureMetaDataManager() {
+        if(metaDataManager!=null){
+            IPreferencesService service = Platform.getPreferencesService();
+            String qualifier = getBundle().getSymbolicName();
+            String location= service.getString(qualifier, PDT.PREF_METADATA_STORE_DIR,null, null);
+            
+            
+            metaDataManager.setLocation(location);
+            try {
+                IPrologInterface pif = getPrologInterface();
+                metaDataManager.setPrologInterface(pif);
+                metaDataManager.reloadMetaData();
+            } catch (IOException e) {
+                Debug.report(e);
+            }
+        }
     }
 
     private void reconfigurePrologInterface() {
@@ -246,44 +295,6 @@ public class PDTPlugin extends AbstractUIPlugin {
         return true;
     }
 
-    /**
-     *  
-     */
-    public void reconfigure() {
-        IPreferencesService service = Platform.getPreferencesService();
-        String qualifier = getBundle().getSymbolicName();
-        String debugLevel = service.getString(qualifier,PDT.PREF_DEBUG_LEVEL,"ERROR",null);
-        Debug.setDebugLevel(debugLevel);
-        prologInterface.stop();
-        reconfigurePrologInterface();
-        try {
-            prologInterface.start();
-        } catch (IOException e) {
-            Debug.report(e);
-        }
-
-    }
-
-    public IPrologHelper getPrologHelper(){
-        if(prologHelper==null){
-            prologHelper= new PDTPrologHelper(prologInterface,pdtModulePrefix);
-        }
-        return prologHelper;
-    }
-    
-    public IWorkbenchPage getActivePage() {
-        return getWorkbench().getActiveWorkbenchWindow().getActivePage();
-    }
-
-    public IEditorPart getActiveEditor() {
-        try {
-            IWorkbenchPage page = getActivePage();
-            return page.getActiveEditor();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
     public void setStatusErrorMessage(final String string) {
         getDisplay().asyncExec(new Runnable() {
             public void run() {
@@ -303,8 +314,34 @@ public class PDTPlugin extends AbstractUIPlugin {
 
     }
 
-    public Display getDisplay() {
-        return getWorkbench().getDisplay();
+    /**
+     * This method is called upon plug-in activation
+     */
+    public void start(BundleContext context) throws Exception {
+        try {
+            super.start(context);
+
+            prologInterface = new PrologInterface();
+            reconfigurePrologInterface();
+
+            registerHooks();
+            prologInterface.start();
+        } catch (Throwable t) {
+            Debug.report(t);
+        }
+    }
+
+    /**
+     * This method is called when the plug-in is stopped
+     */
+    public void stop(BundleContext context) throws Exception {
+        try {
+            if (prologInterface != null && !prologInterface.isDown()) {
+                prologInterface.stop();
+            }
+        } finally {
+            super.stop(context);
+        }
     }
 
 //    public IFile getActiveFile() {

@@ -6,24 +6,20 @@
  */
 package org.cs3.pdt.views;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pdt.IFileLineBreakInfoProvider;
 import org.cs3.pdt.MarkerProblemCollector;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PrologElement;
 import org.cs3.pdt.editors.PLEditor;
-import org.cs3.pl.fileops.MetaDataManagerFactory;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.fileops.PrologMetaDataManager;
-import org.cs3.pl.parser.PrologCompiler;
-import org.cs3.pl.prolog.IPrologInterface;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.parser.PrologCompiler;
+import org.cs3.pl.prolog.IPrologInterface;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -33,7 +29,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
@@ -102,8 +97,7 @@ public void inputChanged(final Viewer viewer, Object oldInput,
                 String rawFilename = file.getRawLocation().toString();
                 PDTPlugin plugin = PDTPlugin.getDefault();
                 IPrologInterface pif= plugin.getPrologInterface();
-                PrologMetaDataManager mdManager = 
-                    MetaDataManagerFactory.getPrologMetaDataManager(pif, PrologMetaDataManager.MODEL);
+                PrologMetaDataManager mdManager = plugin.getPrologMetaDataManager();
                 if (!mdManager.exists(fileName)) {
                     IFileLineBreakInfoProvider lineInfo = new IFileLineBreakInfoProvider(file);
                     MarkerProblemCollector collector = new MarkerProblemCollector(file,lineInfo);

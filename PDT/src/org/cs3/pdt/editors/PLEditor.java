@@ -5,17 +5,19 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.DocumentLineBreakInfoProvider;
 import org.cs3.pdt.MarkerProblemCollector;
+import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.actions.ReferencesActionDelegate;
 import org.cs3.pdt.actions.SpyPointActionDelegate;
 import org.cs3.pdt.views.PrologOutline;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.fileops.MetaDataManagerFactory;
+
 import org.cs3.pl.fileops.PrologMetaDataManager;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.parser.PrologCompiler;
 import org.cs3.pl.prolog.IPrologInterface;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -87,9 +89,7 @@ public class PLEditor extends TextEditor {
                     checker.compile(fileName, file.getContents(), lineInfo);
                     IPrologInterface pif = PDTPlugin.getDefault()
                             .getPrologInterface();
-                    PrologMetaDataManager manager = MetaDataManagerFactory
-                            .getPrologMetaDataManager(pif,
-                                    PrologMetaDataManager.MODEL);
+                    PrologMetaDataManager manager = PDTPlugin.getDefault().getPrologMetaDataManager();
 
                     manager.saveMetaDataForClauses(fileName, checker);
                     Display display = getEditorSite().getPage()
@@ -209,6 +209,15 @@ public class PLEditor extends TextEditor {
 //    }
 
     public void createPartControl(final Composite parent) {
+        try{
+            createPartControl_impl(parent);
+        }
+        catch(Throwable t){
+            Debug.report(t);
+            throw new RuntimeException(t.getMessage(),t);
+        }
+    }
+    private void createPartControl_impl(final Composite parent) {
         super.createPartControl(parent);
 
         MenuManager menuMgr = createPopupMenu();
@@ -219,9 +228,9 @@ public class PLEditor extends TextEditor {
         Action action;
 
         //TODO: create own bundle
-        ResourceBundle bundle = PDTPlugin.getDefault().getResourceBundle();
+        ResourceBundle bundle = ResourceBundle.getBundle(PDT.RES_BUNDLE_UI);
         action = new TextEditorAction(bundle,
-                "context assist proposal", this) {
+                PLEditor.class.getName()+".ContextAssistProposal", this) {
             public void run() {
                 assistant.showPossibleCompletions();
             }
@@ -231,7 +240,7 @@ public class PLEditor extends TextEditor {
                 ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 
         action = new TextEditorAction(bundle,
-                "PLEditor.ContentAssistContextInformation", this) {
+                PLEditor.class.getName()+".ToolTipAction", this) {
             public void run() {
                 assistant.showContextInformation();
             }
