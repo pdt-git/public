@@ -1,5 +1,6 @@
 package org.cs3.pdt.internal.editors;
 
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
@@ -10,6 +11,7 @@ import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.parser.PrologCompiler;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -34,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -61,8 +64,25 @@ public class PLEditor extends TextEditor {
         setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.prologEditorScope" });
     }
 
-    public void doSave(IProgressMonitor progressMonitor) {
-        super.doSave(progressMonitor);
+    	public void doSave(IProgressMonitor progressMonitor) {
+    		super.doSave(progressMonitor);
+    		Thread thread = new Thread () {
+    			public void run() {
+    				IFile file = ((FileEditorInput)getEditorInput()).getFile();
+    				final String filename = file.getFullPath().toString();
+    				
+    				PrologCompilerGUIWrapper checker = new PrologCompilerGUIWrapper();
+    				try {
+    					checker.compile(getDocumentProvider().getDocument(getEditorInput()),file);
+    				} catch (CoreException e) {
+    					Debug.report(e);
+    				}
+    			}
+    		};
+    		thread.start();
+
+    					
+        
         //        Thread thread = new Thread() {
         //            public void run() {
         //                IFile file = ((FileEditorInput) getEditorInput()).getFile();
