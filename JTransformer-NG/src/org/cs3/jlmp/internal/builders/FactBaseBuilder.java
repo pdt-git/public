@@ -163,7 +163,7 @@ public class FactBaseBuilder {
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             if (delta == null) {
-                session.queryOnce("delete_source_facts");
+                //session.queryOnce("delete_source_facts");
                 collectAll(toProcess);
             } else {
                 collectDelta(delta, toProcess, toDelete);
