@@ -50,22 +50,10 @@ public class MetaDataManagerFactory {
 	 * @throws IOException
 	 */
 	static public PrologMetaDataManager getPrologMetaDataManager(IPrologClient client, String dir) throws IOException {
-//		PrologMetaDataManager manager = (PrologMetaDataManager)managers.get(dir);
-//		if(manager == null) {
 			PrologMetaDataManager manager = new PrologMetaDataManager(client, dir);
 			managers.put(dir,manager);
-			try {
-				// TODO: initialization of the factbase (and other engine elements) 
-				if (dir == PrologMetaDataManager.MODEL){  
-					manager.readFactbaseMetaData();
-					// StS: Moved that here from below, in case the Outline, or something needs it
-					manager.reloadMetaData();
-				}
-			} catch (CoreException e) {
-				Debug.report(e);
-			}
-			
-//		}	
+			if (dir == PrologMetaDataManager.MODEL)
+				manager.reloadMetaData();
 		return manager;
 	}
 
