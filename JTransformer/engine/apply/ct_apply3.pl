@@ -134,6 +134,7 @@ apply(_action) :- call(_action).
 % check and apply work independend
 apply_ct(_name) :-
     ct(_name, _preConditionDA, _action),
+    retractall(pointcut(_)),
     removeDependencyInstructions(_preConditionDA, _preCondition),
     findall(_action,apply_pre(_preCondition,_action),_allActions),
     %quicksort(_allActions,_uniqueActions,[]),
