@@ -22,13 +22,14 @@ public class Debug {
 	final public static int LEVEL_WARNING = 2;
 	final public static int LEVEL_INFO = 3;
 	final public static int LEVEL_DEBUG = 4;
+	final public static String JTRANSFORMER_DEBUG_PROPERTY="org.cs3.pl.jtransformer.debug_level";
 	
 	static private int debugLevel = LEVEL_ERROR;	
 	
 	static private PrintStream out = System.err;
 	
 	static {
-		String s = System.getProperty("org.cs3.pl.jtransformer.debug_level","ERROR");
+		String s = System.getProperty(JTRANSFORMER_DEBUG_PROPERTY,"ERROR");
 		out.println("initial debug level: "+s);
 		if(s.equalsIgnoreCase("NONE")) debugLevel=LEVEL_NONE;
 		else if(s.equalsIgnoreCase("ERROR")) debugLevel=LEVEL_ERROR;
@@ -50,9 +51,27 @@ public class Debug {
 	static public void setDebugLevel(int level) {
 		if (level < LEVEL_NONE || level > LEVEL_DEBUG)
 			throw new IllegalArgumentException("Bad LEVEL");
+		String propertyValue = getDebugLevelName(level);
+		System.setProperty(JTRANSFORMER_DEBUG_PROPERTY,propertyValue);
 		debugLevel = level;
 	}
 	
+	/**
+	 * @param level
+	 * @return
+	 */
+	public static String getDebugLevelName(int level) {
+		String propertyValue;
+		switch(level){
+		case LEVEL_DEBUG:propertyValue="DEBUG";break;
+		case LEVEL_WARNING:propertyValue="WARNING";break;
+		case LEVEL_INFO:propertyValue="INFO";break;
+		case LEVEL_ERROR:propertyValue="ERROR";break;
+		default: throw new IllegalStateException("Bad level value");
+	}
+		return propertyValue;
+	}
+
 	/**
 	 * returns to current verbosity of debug output. Returns the value of one of
 	 * the constants defined in this class.

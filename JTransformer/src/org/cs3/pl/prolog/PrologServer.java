@@ -66,11 +66,12 @@ public class PrologServer extends MessagingServerLoggingWrapper implements Remot
 	public PrologServer() {
 		systemProperties = new SystemProperties();
 		WINDOWSPLATTFORM = systemProperties.isWindowsPlattform();
+		JPL.setDTMMode(false);
 	}
 	
 	
 	public void init() {
-		JPL.init();
+		JPL.init();	
 		JPL.setDTMMode(false);
 	}
 	
@@ -235,6 +236,19 @@ public class PrologServer extends MessagingServerLoggingWrapper implements Remot
 		return next(c);
 	}
 
+	public void setDebugLevel( int level) {
+		throw new RuntimeException("This point should never been reached. Additional first argument ClientConnection expected.");
+	}	
+
+	public void setDebugLevel(ClientConnection c, int level) {
+		
+		String oldLevel = Debug.getDebugLevelName(Debug.getDebugLevel());
+		Debug.setDebugLevel(level);
+		
+		Debug.debug("Set debug level from "
+				+ oldLevel + " to "
+				+ Debug.getDebugLevelName(level));
+	}	
 	
 	public boolean assertFact(ClientConnection client,String text) {
 		return assertFact(text);

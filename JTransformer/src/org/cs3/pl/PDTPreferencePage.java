@@ -7,11 +7,10 @@
 package org.cs3.pl;
 
 
-import org.cs3.pl.prolog.PrologManager;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.IntegerFieldEditor;
+import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -29,7 +28,8 @@ public class PDTPreferencePage
 		public static final String P_JAVA_LANG_CACHING = "javalangfactcaching";
 		public static final String P_COMPLETE_CACHING = "completefactcaching";
 		public static final String P_SINGLETON_DTM = "singletoncheckfordtm"; 
-		public static final String P_PROLOG_SERVER_PORT = "prologserverport"; 
+		public static final String P_PROLOG_SERVER_PORT = "prologserverport";
+		public static final String P_PROLOG_DEBUG_LEVEL = "prologdebuglevel"; 
 		
 		public PDTPreferencePage() {
 			super(GRID);
@@ -79,6 +79,16 @@ public class PDTPreferencePage
 							P_PROLOG_SERVER_PORT,
 							"prolog server port",
 							getFieldEditorParent()));
+			addField(new RadioGroupFieldEditor(
+							P_PROLOG_DEBUG_LEVEL, 
+							"debug level",
+							4,
+							new String[][] {
+									{ "error", "1" }, 
+									{ "warning", "2" }, 
+									{ "info", "3" }, 
+									{ "debug", "4" } },
+				getFieldEditorParent(),true));
 
 			
 //      addField(

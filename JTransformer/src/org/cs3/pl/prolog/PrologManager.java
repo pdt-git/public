@@ -509,7 +509,7 @@ public class PrologManager {
 		Runtime thisRuntime = Runtime.getRuntime();
 		ServerSocket testBindingPort = new ServerSocket(port);
 		testBindingPort.close();
-		String debugOption = "-Dorg.cs3.pl.jtransformer.debug_level="+System.getProperty("org.cs3.pl.jtransformer.debug_level","error");
+		String debugOption = "-Dorg.cs3.pl.jtransformer.debug_level="+System.getProperty(Debug.JTRANSFORMER_DEBUG_PROPERTY,"ERROR");
 		try {
 			String exec = "java -classpath " + classPath +" "
 					+ debugOption+ " org.cs3.pl.prolog.PrologServer " + port;
@@ -741,5 +741,20 @@ public class PrologManager {
     public static void setServerPort(int port) {
         PORT = port;
     }
+
+
+	/**
+	 * @param level
+	 */
+	public static void setDebugLevel(int level) {
+		if(baseClient != null && baseClient.isRunning()) {
+			try {
+				baseClient.call(PrologClient.ROLE,"setDebugLevel", new Object[] {new Integer(level)});
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
 
 }
