@@ -89,24 +89,30 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
         // builder AFTER it has
         // "found" unresolved types
         PrologInterface pif = getPrologInterface();
-
-        Job j = new Job("building PEFs for project " + project.getName()) {
-            protected IStatus run(IProgressMonitor monitor) {
-                try {
-                    IWorkspaceDescription wd = ResourcesPlugin.getWorkspace()
-                            .getDescription();
-                    if (wd.isAutoBuilding()) {
-                        project.build(IncrementalProjectBuilder.FULL_BUILD,
-                                monitor);
+        if (pif.isUp()) {
+            Job j = new Job("building PEFs for project " + project.getName()) {
+                protected IStatus run(IProgressMonitor monitor) {
+                    try {
+                        IWorkspaceDescription wd = ResourcesPlugin
+                                .getWorkspace().getDescription();
+                        if (wd.isAutoBuilding()) {
+                            project.build(IncrementalProjectBuilder.FULL_BUILD,
+                                    monitor);
+                        }
+                    } catch (CoreException e) {
+                        return new Status(Status.ERROR, JLMP.PLUGIN_ID, -1,
+                                "exception caught during build", e);
                     }
-                } catch (CoreException e) {
-                    return new Status(Status.ERROR, JLMP.PLUGIN_ID, -1,
-                            "exception caught during build", e);
+                    return Status.OK_STATUS;
                 }
-                return Status.OK_STATUS;
-            }
-        };
-        j.schedule();
+            };
+            j.schedule();
+        } else {
+            // if the pif is not up yet, this is no problem at all: the reload
+            // hook will
+            // take care of the due build in its afterInit method.
+            ;
+        }
 
     }
 
