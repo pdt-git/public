@@ -4,14 +4,7 @@
  */
 package org.cs3.pl;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringBufferInputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -22,42 +15,14 @@ import org.cs3.pl.builders.JLMPProjectBuilder;
 import org.cs3.pl.editors.PLEditor;
 import org.cs3.pl.extension.IJTransformerObserver;
 import org.cs3.pl.natures.JLMPProjectNature;
-import org.cs3.pl.prolog.CacheOutputPrologListener;
-import org.cs3.pl.prolog.FactBaseInitialization;
-import org.cs3.pl.prolog.IPrologClient;
-import org.cs3.pl.prolog.PrologManager;
-import org.cs3.pl.prolog.SourceLocation;
+import org.cs3.pl.prolog.*;
 import org.cs3.pl.views.PrologConsole;
 import org.eclipse.core.internal.localstore.FileSystemResourceManager;
 import org.eclipse.core.internal.resources.ProjectDescription;
 import org.eclipse.core.internal.resources.Workspace;
 import org.eclipse.core.internal.utils.Assert;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.ISaveContext;
-import org.eclipse.core.resources.ISaveParticipant;
-import org.eclipse.core.resources.ISavedState;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IPluginDescriptor;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -72,13 +37,7 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkingSetManager;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.*;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -156,7 +115,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
     private int prologServerPort = DEFAULTPORT;
     
     private boolean addSwiplProject = false;
-    private boolean addJTransformerEngineProject = true;
+    private boolean addJTransformerEngineProject = false;
 
     final protected String CLASSPATHXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<classpath>\n<classpathentry kind=\"src\" path=\"\"/>\n<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>\n<classpathentry kind=\"output\" path=\"\"/>\n</classpath>";	
 	
@@ -175,7 +134,8 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 
 		// get the preferences from the store
 		updatePreferences();
-		
+		addJTransformerObserver(new PreloadDocumentationFacts());
+
 		//initialize log of user's actions 
 		
 		// Set tracing flags
@@ -299,6 +259,9 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		store.setDefault(PDTPreferencePage.P_SINGLETON_DTM, false);
 		store.setDefault(PDTPreferencePage.P_PROLOG_SERVER_PORT, PrologManager.getServerPort());
 		store.setDefault(PDTPreferencePage.P_PROLOG_DEBUG_LEVEL, "2");
+
+		store.setDefault(PDTPreferencePage.P_PROLOG_ADD_JT_ENGINE_PROJECT, false);
+		store.setDefault(PDTPreferencePage.P_PROLOG_ADD_SWIPL_PROJECT, false);
 	} 
     
 	public void updatePreferences() {
@@ -308,6 +271,8 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		cachingCompleteEnabled = store.getBoolean(PDTPreferencePage.P_COMPLETE_CACHING);
 		cachingJavaLangEnabled = store.getBoolean(PDTPreferencePage.P_JAVA_LANG_CACHING);
 		singletonDTM = store.getBoolean(PDTPreferencePage.P_SINGLETON_DTM);
+		addJTransformerEngineProject = store.getBoolean(PDTPreferencePage.P_PROLOG_ADD_JT_ENGINE_PROJECT);
+		addSwiplProject= store.getBoolean(PDTPreferencePage.P_PROLOG_ADD_SWIPL_PROJECT);
 
 		PrologManager.setServerPort(store.getInt(PDTPreferencePage.P_PROLOG_SERVER_PORT));
 		int level = Integer.parseInt(store.getString(PDTPreferencePage.P_PROLOG_DEBUG_LEVEL));
@@ -1065,18 +1030,25 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
      * Looks up all avaible extensions for the extension point  
      * org.cs3.pl.extension.factbase.updated, creates Observer objects
      * and calls their update() methods. 
+     * @param project
      * @param prologManager
      * 
      * @throws CoreException
      */
-    public boolean updateFactbaseObservers(int kind,IPrologClient prologClient) {
+    public boolean updateFactbaseObservers(int kind,IPrologClient prologClient, IProject project) {
         Vector copy;
         synchronized(observerMonitor) {
             copy = new Vector(observers);
         }
+        Object[] info;
+        if(kind == IJTransformerObserver.JT_ENGINE_STARTUP)
+            info = new Object[] { prologClient};
+        else
+            info = new Object[] { prologClient,project };
+        
         for (int i = 0; i < observers.size(); i++) {
             ((IJTransformerObserver) copy.get(i)).update(kind,
-                    new Object[] { prologClient });
+                    info);
         }
         
         
@@ -1097,7 +1069,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
                 IJTransformerObserver observer = (IJTransformerObserver) celem[0]
                         .createExecutableExtension("class");
                 observer.update(kind,
-                        new Object[] { prologClient });
+                        info);
             }
         } catch (CoreException e) {
             Debug.report(e);
