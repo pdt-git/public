@@ -196,4 +196,19 @@ public class DefaultConsultService implements ConsultService ,PrologInterfaceLis
         
     }
 
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.ConsultService#isAppendingRecords()
+     */
+    public boolean isAppendingRecords() {
+       ;
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.ConsultService#setAppendingRecords(boolean)
+     */
+    public void setAppendingRecords(boolean val) {       
+     ;   
+    }
+
 }

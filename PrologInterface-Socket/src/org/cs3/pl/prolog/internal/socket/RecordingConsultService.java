@@ -52,6 +52,8 @@ public class RecordingConsultService implements ConsultService {
     
     private boolean keepRecords=true;
 
+    private boolean appendingRecords;
+
     /*
      * (non-Javadoc)
      * 
@@ -150,7 +152,7 @@ public class RecordingConsultService implements ConsultService {
                     file.createNewFile();
                 }
                 stream.setRecordStream(new BufferedOutputStream(
-                        new FileOutputStream(file)));
+                        new FileOutputStream(file,appendingRecords)));
             }
 
             stream.addConsultServiceListener(new ConsultServiceListener() {
@@ -433,5 +435,25 @@ public class RecordingConsultService implements ConsultService {
      */
     public void setRecording(boolean val) {
         setKeepRecords(val);
+    }
+
+
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.ConsultService#isAppendingRecords()
+     */
+    public boolean isAppendingRecords() {
+
+        return appendingRecords;
+    }
+
+
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.ConsultService#setAppendingRecords(boolean)
+     */
+    public void setAppendingRecords(boolean val) {
+        appendingRecords=val;
+        
     }
 }

@@ -92,4 +92,15 @@ public interface ConsultService {
      * switch it on or off.
      */
     public void setRecording(boolean val);
+    
+    /**
+     * 
+     * @return true if the consult service appends consulted data to a already exisiting record.
+     */
+    public boolean isAppendingRecords();
+    
+    /**
+     *  if this consult service supports appending to existing records, this method can switch it on and off.
+     */
+    public void setAppendingRecords(boolean val);
 }
