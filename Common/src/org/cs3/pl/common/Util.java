@@ -8,8 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -281,10 +283,9 @@ public class Util {
                 }
                 break;
             default:
-                if(escape){
+                if (escape) {
                     escBuf.append(c);
-                }
-                else{
+                } else {
                     sb.append(c);
                 }
                 break;
@@ -293,4 +294,38 @@ public class Util {
         return sb.toString();
     }
 
+    private static HashMap startTimes = new HashMap();
+
+    public static void startTime(String key) {
+        String prefix = Thread.currentThread().toString();
+        startTimes.put(prefix + key, new Long(System.currentTimeMillis()));
+    }
+
+    public static long time(String key) {
+        String prefix = Thread.currentThread().toString();
+        Long startTime = (Long) startTimes.get(prefix + key);
+        return startTime == null ? -1 : System.currentTimeMillis()
+                - startTime.longValue();
+    }
+
+    static PrintStream logStream = null;
+
+    public static void printTime(String key) {
+        if (logStream == null) {
+            try {
+                File f = getLogFile("times.txt");
+                logStream = new PrintStream(new BufferedOutputStream(
+                        new FileOutputStream(f)));
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    public void run() {
+                        logStream.close();
+                    }
+                });
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        logStream.println(key + " took " + time(key) + " millis.");
+    }
 }
