@@ -1,4 +1,4 @@
-package TimeTracker.views;
+package org.cs3.timetracker.views;
 
 
 import org.cs3.timetracker.ITimeObserver;

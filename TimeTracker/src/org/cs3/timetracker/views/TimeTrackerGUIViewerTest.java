@@ -4,14 +4,13 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package TimeTracker.views;
-
-import org.cs3.timetracker.TimeTrackerPlugin;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.internal.Workbench;
+package org.cs3.timetracker.views;
 
 import junit.framework.TestCase;
+
+import org.cs3.timetracker.TimeEvent;
+import org.cs3.timetracker.TimeTrackerPlugin;
+import org.eclipse.ui.PartInitException;
 
 /**
  * @author thiesa
@@ -31,6 +30,8 @@ public class TimeTrackerGUIViewerTest extends TestCase {
 				.getWorkbench().getActiveWorkbenchWindow().getActivePage()
 				.showView("org.cs3.timetracker.TimeTrackerGUIViewer");
 		
+		TimeEvent myTimeEvent = new TimeEvent(3,5);
+		viewer.notify(myTimeEvent);
 		
 		
 	}
