@@ -24,7 +24,7 @@ public class TimeTrackerGUIViewerTest extends TestCase {
 	 * @throws PartInitException
 	 * 
 	 */
-	private void testInitialization() throws PartInitException {
+	public void testInitialization() throws PartInitException {
 //		Workbench.getInstance().
 		TimeTrackerGUIViewer viewer = (TimeTrackerGUIViewer)TimeTrackerPlugin.getDefault()
 				.getWorkbench().getActiveWorkbenchWindow().getActivePage()
@@ -32,7 +32,12 @@ public class TimeTrackerGUIViewerTest extends TestCase {
 		
 		TimeEvent myTimeEvent = new TimeEvent(3,5);
 		viewer.notify(myTimeEvent);
-		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 }
