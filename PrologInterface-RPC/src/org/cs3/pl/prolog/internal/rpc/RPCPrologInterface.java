@@ -691,4 +691,26 @@ public class RPCPrologInterface implements PrologInterface {
     public void setBootstrapLibraries(List l){
         this.bootstrapLibraries=l;
     }
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
+     */
+    public void removeLifeCycleHook(String hookId) {
+        synchronized(hooks){
+            LifeCycleHookWrapper h =(LifeCycleHookWrapper) hooks.get(hookId);
+            if(h==null){
+                return;
+            }
+            hooks.remove(h);
+            for (Iterator it = h.pre.iterator(); it.hasNext();) {
+                LifeCycleHookWrapper elm= (LifeCycleHookWrapper) it.next();
+                elm.post.remove(h);
+            }
+            for (Iterator it = h.post.iterator(); it.hasNext();) {
+                LifeCycleHookWrapper elm= (LifeCycleHookWrapper) it.next();
+                elm.pre.remove(h);
+            }
+            h.hook=null;//extra paranoia :-)
+        }
+        
+    }
 }
