@@ -44,7 +44,7 @@ public class TimeTickerTest extends TestCase {
 		ticker = new TimeTicker();
 		
 		ticker.addObserver(observer);
-		ticker.start();
+		ticker.start(false);
 		
 		System.out.println("STARTING the TimeTicker now and will wait 5 seconds.");
 		Thread sleeper = new Thread();

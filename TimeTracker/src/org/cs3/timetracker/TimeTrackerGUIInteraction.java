@@ -8,7 +8,9 @@ package org.cs3.timetracker;
 
 
 import org.cs3.timetracker.views.RecordDialog;
+import org.cs3.timetracker.views.TimeTrackerGUIViewer;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
@@ -34,6 +36,8 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	private TimeTicker timetracker;
 	private Composite composite;
 	private Logger log;
+	private TableViewer logViewer;
+	private TimeTrackerGUIViewer guiViewer;
 	
 
 /////////////////////////////////////////////////////////////////////
@@ -67,7 +71,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 		Button temp = (Button) e.getSource();
 		String match = temp.getText();
 		if(match.equalsIgnoreCase("start")){
-			timetracker.start();
+			timetracker.start(TimeTrackerPlugin.getDefault().isCountingUp());
 			startbutton.setEnabled(false);
 			continuebutton.setEnabled(false);
 			stopbutton.setEnabled(true);
@@ -89,6 +93,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 			if (dialog.open() == IDialogConstants.OK_ID)
 			{
 				log.log(dialog.getValue());
+				guiViewer.updateLogViewer();
 			}
 									
 		}
@@ -162,5 +167,15 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	public void addTimeTracker(TimeTicker tracker){
 		timetracker = tracker;
 	}
+
+
+	/**
+	 * @param viewer
+	 */
+	public void setGUIViewer(TimeTrackerGUIViewer viewer) {
+		this.guiViewer = viewer;
+	}
+
+
 	
 }

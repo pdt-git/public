@@ -2,11 +2,12 @@ package org.cs3.timetracker.views;
 
 
 
+import java.io.File;
 import java.util.StringTokenizer;
 
 import org.cs3.timetracker.ITimeObserver;
-import org.cs3.timetracker.TimeEvent;
 import org.cs3.timetracker.Logger;
+import org.cs3.timetracker.TimeEvent;
 import org.cs3.timetracker.TimeTicker;
 import org.cs3.timetracker.TimeTrackerGUIInteraction;
 import org.cs3.timetracker.TimeTrackerPlugin;
@@ -21,7 +22,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-//import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
@@ -47,7 +47,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	private TableViewer viewer;
-	private TableViewer viewer1; 
+	private TableViewer logViewer; 
 
 	/*
 	 * The content provider class is responsible for
@@ -163,7 +163,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		composite = new SashForm(parent, SWT.VERTICAL);
 		
 		TimeTicker tt = new TimeTicker();
-		log = new Logger(tt);
+		log = new Logger(tt,TimeTrackerPlugin.getDefault().getStateLocation().toFile().getAbsolutePath()+ File.separator + "log.txt");
 		tt.addObserver(this);
 		
 		guiInteraction = new TimeTrackerGUIInteraction(composite, log);
@@ -177,11 +177,12 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		
 	SashForm composite1 = new SashForm(parent, SWT.VERTICAL);
 	
-	viewer1 = new TableViewer(composite1, SWT.MULTI);
-	viewer1.setContentProvider(new ViewContentProvider1());
-	viewer1.setLabelProvider(new ViewLabelProvider());
-	viewer1.setInput(getViewSite());
+	logViewer = new TableViewer(composite1, SWT.MULTI);
+	logViewer.setContentProvider(new ViewContentProvider1());
+	logViewer.setLabelProvider(new ViewLabelProvider());
+	logViewer.setInput(getViewSite());
 	
+	guiInteraction.setGUIViewer(this);
 				
 		viewer = new TableViewer(composite, SWT.MULTI);
 		viewer.setContentProvider(new ViewContentProvider());
@@ -220,7 +221,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 					new Runnable(){
 						public void run() {
 								viewer.setInput(getViewSite());
-								viewer1.setInput(getViewSite());
+//								logViewer.setInput(getViewSite());
 						}
 					});
 	}
@@ -243,4 +244,13 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	TimeTrackerGUIInteraction getGuiInteraction() {
 		return guiInteraction;
 	}
+	
+
+	/**
+	 * 
+	 */
+	public void updateLogViewer() {
+		logViewer.setInput(getViewSite());
+	}
+
 }

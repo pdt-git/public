@@ -31,7 +31,6 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
-		ResourcesP
 	}
 
 	/**

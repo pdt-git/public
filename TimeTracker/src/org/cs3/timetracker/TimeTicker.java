@@ -38,9 +38,7 @@ public class TimeTicker  {
 	
 	public String Log = ""; 
 
-	private void init()
-	{
-		countsUp = TimeTrackerPlugin.getDefault().isCountingUp();
+	private void init(boolean countsUp) {
 		
 		if (countsUp)
 		{
@@ -50,13 +48,14 @@ public class TimeTicker  {
 		else 
 		{
 			seconds = INITSECONDS;
-			lastTimeStamp = seconds;
+			lastTimeStamp = INITSECONDS-1;
 		}		
+		this.countsUp = countsUp;
 	}
 		
 	public int getTimeDifference()
 	{
-		return Math.abs(seconds - lastTimeStamp);
+		return Math.abs(correctByOneSecond(seconds) - correctByOneSecond(lastTimeStamp));
 	}
 	
 	public void resetTimeStamp()
@@ -96,7 +95,7 @@ public class TimeTicker  {
 
 	public TimeTicker()
 	{
-		init();
+		//init();
 		
 		observers = new ArrayList();
 		time = new TimeEvent(0,0);
@@ -110,9 +109,9 @@ public class TimeTicker  {
 		t.setRepeats(false);
 	}
 	
-	public void start()
+	public void start(boolean countUp)
 	{
-		init();
+		init(countUp);
 		
 		t.setRepeats(true);
 		t.setDelay(1000);
@@ -146,7 +145,8 @@ public class TimeTicker  {
 	 */
 	public int getLastTimeStamp() 
 	{
-		return lastTimeStamp;
+		
+		return correctByOneSecond(lastTimeStamp);
 	}
 	
 	/**
@@ -154,6 +154,15 @@ public class TimeTicker  {
 	 */
 	public int getCurrentSeconds() 
 	{
-		return seconds;
+		return correctByOneSecond(seconds);
+	}
+
+	/**
+	 * @return
+	 */
+	private int correctByOneSecond(int value) {
+		if (value ==0)
+			return 0;
+		return value +(countsUp ? -1: +1);
 	}
 }
