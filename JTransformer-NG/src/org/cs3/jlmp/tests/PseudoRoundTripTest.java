@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.BitSet;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -208,6 +209,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
     }
 
     public void setUpOnce() throws Exception {
+        setAutoBuilding(false);
         super.setUpOnce();
         PrologInterface pif = getTestJLMPProject().getPrologInterface();
 
@@ -220,7 +222,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             Util.unzip(r);
             org.cs3.pl.common.Debug
                     .info("setUpOnce caled for key  " + getKey());
-            setAutoBuilding(false);
+            
 
             try {
                 getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
@@ -280,8 +282,12 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.printTime("build1");
         Util.startTime("untilQueryToplevels");
         //now we should have SOME toplevelT
-        assertNotNull(packageName + ": no toplevelT????", session
-                .queryOnce("toplevelT(_,_,_,_)"));
+        Map r = session
+                .queryOnce("toplevelT(_,_,_,_)");
+        if(r==null){
+            Debug.debug("debug");
+        }
+        assertNotNull(packageName + ": no toplevelT????", r);
 
         //and checkTreeLinks should say "yes"
         //assertNotNull("checkTreeLinks reports errors",
