@@ -565,7 +565,7 @@ gen_toplevel(_toplevel) :-
 	(
 	   sourceFolder(_toplevel,SourcePath) ->
 	    assert1T(sourcePath(SourcePath));true),
-    add_to_gen_classfile_names(_dirfile),
+    (add_to_gen_classfile_names(_dirfile);true),
     createDirsIfNeeded(_dirfile),
     write_if_fileoutput(_dirfile),
     open(_dirfile, write, _fileStream),
