@@ -153,7 +153,11 @@ public class Util {
 	}
 
 	public static String prologFileName(File f) {
-        return normalizeOnWindoze(f.toString());
+        try {
+			return normalizeOnWindoze(f.getCanonicalPath());
+		} catch (IOException e) {
+		throw new RuntimeException(e);
+		}
     }
 
     public static String toString(InputStream in) throws IOException {

@@ -152,7 +152,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 	 * 
 	 * @see org.cs3.jlmp.tests.SuiteOfTestCases#setUpOnce()
 	 */
-	public void setUpOnce() {
+	public void setUpOnce() throws Exception {
 		super.setUpOnce();
 		try {
 			IProject project = createProject("testproject");

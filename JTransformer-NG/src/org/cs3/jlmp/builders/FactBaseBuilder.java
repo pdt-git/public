@@ -310,10 +310,10 @@ public class FactBaseBuilder {
             boolean removeGlobalIdsFacts) throws IOException {
         Debug.debug("Forgetting (possible) previous version of " + file);
 
+        String path = file.getFullPath().toString();
+        getMetaDataSRC().unconsult(path);
         //ld: an unconsult is not enough due to the multifile-ness of the
         // predicates in question.
-        String path = file.getFullPath().toString();
-
         /*
          * if there is no tree with that id, the retraction fails, but no harm
          * done
@@ -338,24 +338,39 @@ public class FactBaseBuilder {
 
     /**
      * 
-     * @param resource
+     * @param file
      * @return false if the building failed
      * @throws IOException
      * @throws CoreException
      */
 
-    private boolean buildFacts(IFile resource) throws IOException,
+    private boolean buildFacts(IFile file) throws IOException,
             CoreException {
 
-        if (!resource.exists())
-            /* the file seems to have been deleted */
+        /* the file seems to have been deleted */
+        if (!file.exists())        
+        {
             return true;
-
-        ICompilationUnit icu = JavaCore.createCompilationUnitFrom(resource);
+        }
+        ConsultService cs = getMetaDataSRC();
+        String recordPath =file.getFullPath().addFileExtension("pl").toString();
+        long recordTS = cs.getTimeStamp(recordPath);
+        long fileTS = file.getModificationStamp();
+        //ld:no need to create facts that are already known
+        /*FIXME: currently we only ensure that the record is up-to-date.
+         * in theory, so should be the consulted facts, but it might be better to check.
+         * otoh, this would be quite expensive if there are many resources to check.  
+         * */
+        if(recordTS>=fileTS){
+            return true;
+        }
+        ICompilationUnit icu = JavaCore.createCompilationUnitFrom(file);
         CompilationUnit cu = null;
-        PrintStream out = getMetaDataSRC().getOutputStream("flat.pl");
+
+        
+        PrintStream out = cs.getOutputStream(recordPath);
         try {
-            
+
             icu.becomeWorkingCopy(null, null);
 
             writeFacts(icu, out);
@@ -533,8 +548,9 @@ public class FactBaseBuilder {
 
     private ConsultService getMetaDataSRC() {
         if (metaDataSRC == null) {
-            metaDataSRC = pif.getConsultService(JLMP.EXT);
-            metaDataSRC.setRecording(false);
+            metaDataSRC = pif.getConsultService(JLMP.SRC);
+            metaDataSRC.setRecording(true);
+            metaDataSRC.setAppendingRecords(false);
         }
         return metaDataSRC;
     }
@@ -542,9 +558,26 @@ public class FactBaseBuilder {
     private ConsultService getMetaDataEXT() {
         if (metaDataEXT == null) {
             metaDataEXT = pif.getConsultService(JLMP.EXT);
-            metaDataEXT.setRecording(false);
+            metaDataEXT.setRecording(true);
+            metaDataEXT.setAppendingRecords(true);
         }
         return metaDataEXT;
+    }
+
+    /**
+     * @param monitor
+     */
+    public void clean(IProgressMonitor monitor) {
+        Debug.info("clean called on project "+project);
+        PrologSession session = pif.getSession();
+       try{
+        session.queryOnce("delete_source_facts");
+        getMetaDataSRC().clearRecords();        
+        monitor.done();
+       }
+       finally{
+           session.dispose();
+       }
     }
 
 }

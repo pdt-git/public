@@ -45,7 +45,7 @@ public class NormalizeTest extends FactGenerationTest {
 		return NormalizeTest.class;
 	}
 	
-	public void setUpOnce() {	
+	public void setUpOnce() throws Exception {	
 		super.setUpOnce();
 		//no autobuilds please!
 		setAutoBuilding(false);

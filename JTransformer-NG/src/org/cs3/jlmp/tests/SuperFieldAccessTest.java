@@ -23,9 +23,9 @@ public class SuperFieldAccessTest extends FactGenerationTest {
 
     }
 
-    public void setUp() {
+    public void setUp() throws Exception {
         
-        super.setUpOnce();
+        super.setUp();
         //install test workspace
         ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
         File r = l.resolve("testdata-facts.zip");

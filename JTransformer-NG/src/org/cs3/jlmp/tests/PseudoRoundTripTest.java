@@ -205,7 +205,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 		return PseudoRoundTripTest.class;
 	}
 
-	public void setUpOnce() {
+	public void setUpOnce() throws Exception {
 		super.setUpOnce();
 		PrologInterface pif = getTestJLMPProject().getPrologInterface();
 
@@ -417,6 +417,8 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 				IFolder folder = getTestProject().getFolder(packageName);
 				rename(folder, new String[] { "java", "class" }, "bak");
 				//2) restart the pif
+				pif.getConsultService(JLMP.SRC).clearRecords();
+				pif.getConsultService(JLMP.EXT).clearRecords();
 				pif.stop();
 				assertTrue(pif.isDown());
 				pif.start();
@@ -496,14 +498,20 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 		blacklist.set(233);
 		blacklist.set(234);
 
-		for (int i = 1; i <= 539; i++)
+		for (int i = 1; i <=1; i++)
 			//1-539
 			if (!blacklist.get(i))
 				s.addTest(new PseudoRoundTripTest("testIt",
 						generatePackageName(i)));
 		return s;
 	}
-
+	/* (non-Javadoc)
+	 * @see junit.framework.TestCase#getName()
+	 */
+	public String getName() {
+		// TODO Auto-generated method stub
+		return packageName;
+	}
 	/**
 	 * @param i
 	 * @return

@@ -201,7 +201,7 @@ public class WindoofTest extends FactGenerationTest {
 		return WindoofTest.class;
 	}
 
-	public void setUpOnce() {
+	public void setUpOnce() throws Exception {
 		super.setUpOnce();
 
 		//install test workspace

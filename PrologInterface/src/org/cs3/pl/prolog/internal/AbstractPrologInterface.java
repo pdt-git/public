@@ -183,10 +183,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     public PrologSession getSession() {
         synchronized (stateLock) {
-            if (!isUp()) {
-                throw new IllegalStateException(
-                        "cannot create session, not in UP state.");
-            }
+            waitUntilUp();
             try {
                 return getSession_internal();
             } catch (Throwable t) {
@@ -206,6 +203,20 @@ public abstract class AbstractPrologInterface implements PrologInterface {
         }
     }
     
+    private void waitUntilUp() throws IllegalStateException{
+    	synchronized(stateLock){
+    		while(!isUp()){
+    			try {
+					stateLock.wait();
+				} catch (InterruptedException e) {
+					throw new IllegalStateException("interupted");
+				}
+				if(ERROR == getState()){
+					throw new IllegalStateException("Error while waiting for pif to come up.");
+				}
+    		}
+    	}
+    }
 
     /**
      * overide this if your subclass needs special shutdown sessions.
@@ -317,6 +328,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                 throw new IllegalArgumentException("Illegal state:" + newState);
             }
             this.state = newState;
+            stateLock.notifyAll();
         }
     }
 

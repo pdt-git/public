@@ -93,7 +93,7 @@ public abstract class SuiteOfTestCases extends TestCase{
 		callTearDownOnce();
 	}
 	
-	private  void callSetUpOnce(){
+	private  void callSetUpOnce() throws Exception{
 		Object key = getKey();
 		if(setUpClasses.contains(key)) return;
 		if(!instanceLists.containsKey(key)) return;
@@ -120,10 +120,11 @@ public abstract class SuiteOfTestCases extends TestCase{
 	 * You should only access static members of your subtype within this
 	 * class. Actualy this method should be static, but - well - 
 	 * you could not override it then, could you.
+	 * @throws Exception TODO
 	 * 
 	 * 
 	 */
-	public  void setUpOnce(){}
+	public  void setUpOnce() throws Exception{}
 	
 	/**
 	 * This method will be called once for each group.

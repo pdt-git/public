@@ -23,9 +23,9 @@ public class FullQualifiedNameTest extends FactGenerationTest {
 
     }
 
-    public void setUp() {
+    public void setUp() throws Exception {
         
-        super.setUpOnce();
+        super.setUp();
     
         ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
         File r = l.resolve("testdata-facts.zip");

@@ -113,7 +113,7 @@ public class SelfTest extends FactGenerationTest {
 		return SelfTest.class;
 	}
 	
-	public void setUpOnce() {	
+	public void setUpOnce() throws Exception {	
 		super.setUpOnce();
 		//no autobuilds please!
 		setAutoBuilding(false);
