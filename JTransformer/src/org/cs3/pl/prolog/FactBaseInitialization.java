@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import org.cs3.pl.Debug;
 import org.cs3.pl.PDTPlugin;
-import org.cs3.pl.builders.InitialFactBaseBuilder;
+import org.cs3.pl.builders.UnresolvedTypeLoader;
 import org.cs3.pl.fileops.MetaDataManager;
 import org.cs3.pl.fileops.MetaDataManagerFactory;
 import org.cs3.pl.fileops.PrologMetaDataManager;
@@ -140,7 +140,7 @@ public class FactBaseInitialization implements StartupHook {
                         for (int i = 0; i < FQNS.length; i++) {
                             client.query("new_id(ID), assert(globalIds('" + FQNS[i] + "',ID))");
                         }
-                        InitialFactBaseBuilder builder = new InitialFactBaseBuilder(client);
+                        UnresolvedTypeLoader builder = new UnresolvedTypeLoader(client);
                         builder.initFactbase();
                         client.query("writeTreeFacts('" + filename + "')");
                     }

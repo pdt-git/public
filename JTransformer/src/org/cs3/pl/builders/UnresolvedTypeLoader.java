@@ -14,15 +14,10 @@ import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.prolog.IPrologClient;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
  * @author xproot
@@ -30,7 +25,7 @@ import org.eclipse.ui.progress.WorkbenchJob;
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-public class InitialFactBaseBuilder extends FactBaseBuilder {
+public class UnresolvedTypeLoader extends FactBaseBuilder {
 	
 	private Object factGenerationMonitor = new Object();
 	private boolean factGenerationFinished = false;
@@ -39,7 +34,7 @@ public class InitialFactBaseBuilder extends FactBaseBuilder {
 	/**
 	 * @param project
 	 */
-	public InitialFactBaseBuilder(IPrologClient client) {
+	public UnresolvedTypeLoader(IPrologClient client) {
 		super(transproject = ResourcesPlugin.getWorkspace().getRoot().getProject("Transformed"),client);
 	}
 

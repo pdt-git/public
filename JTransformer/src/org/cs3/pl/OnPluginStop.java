@@ -4,7 +4,7 @@
  */
 package org.cs3.pl;
 
-import org.cs3.pl.builders.InitialFactBaseBuilder;
+import org.cs3.pl.builders.UnresolvedTypeLoader;
 import org.cs3.pl.prolog.PrologHelper;
 
 /**
