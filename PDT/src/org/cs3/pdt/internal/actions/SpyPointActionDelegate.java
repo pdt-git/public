@@ -10,7 +10,7 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -78,7 +78,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
                 if (spypred.get(pred) != null) {
                     try {
                         session.query("nospy(" + pred + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-                    } catch (SessionException e1) {
+                    } catch (PrologException e1) {
                         Debug.report(e1);
                         return;
                     }
@@ -86,7 +86,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
                 } else {
                     try {
                         session.query("spy(" + pred + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-                    } catch (SessionException e1) {
+                    } catch (PrologException e1) {
                         Debug.report(e1);
                         return;
                     }

@@ -3,6 +3,8 @@
 package org.cs3.pdt.internal.builder;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,8 +16,9 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.MarkerProblemCollector;
 import org.cs3.pdt.internal.views.IFileLineBreakInfoProvider;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.ConsultService;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.parser.PrologCompiler;
+import org.cs3.pl.prolog.ConsultService;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -51,9 +54,39 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         PrologCompiler checker = new PrologCompiler();
         checker.setProblemCollector(collector);
         checker.compile(fileName, file.getContents(), lineInfo);
-        ConsultService meta = PDTPlugin.getDefault().getConsultService(
-                PDT.CS_METADATA);
+        PDTPlugin plugin = PDTPlugin.getDefault();
+        ConsultService meta = plugin.getConsultService(PDT.CS_METADATA);
         checker.saveMetaDataForClauses(meta.getOutputStream(fileName));
+        if(collector.getMaxSeverity()<IMarker.SEVERITY_ERROR){
+            autoConsult(file);
+        }
+    }
+
+    private void autoConsult(IFile file) throws CoreException {
+        IPrologProject plProject=(IPrologProject) file.getProject().getNature(PDT.NATURE_ID);
+        if(!plProject.isAutoConsulted(file)){
+            return;
+        }
+        IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true,
+                IResource.DEPTH_ZERO);
+        for (int i = 0; i < markers.length; i++) {
+            int val = markers[i].getAttribute(IMarker.SEVERITY,
+                    IMarker.SEVERITY_INFO);
+            
+            if (val == IMarker.SEVERITY_ERROR) {                
+                return;
+            }
+        }
+        try {
+            PDTPlugin plugin = PDTPlugin.getDefault();
+            ConsultService consultService = plugin.getConsultService(PDT.CS_WORKSPACE);
+            InputStream in = file.getContents();
+            OutputStream out=consultService.getOutputStream(file.getFullPath().toString());
+            Util.copy(in,out);
+        } catch (IOException e) {
+            Debug.error("could not consult.");
+            Debug.report(e);
+        }        
     }
 
     /*
@@ -215,19 +248,19 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 
     }
 
-    private boolean isCanidate(IResource r) throws CoreException{
+    private boolean isCanidate(IResource r) throws CoreException {
         final IPrologProject plProject = (IPrologProject) getProject()
-        .getNature(PDT.NATURE_ID);
-        if(plProject.isPrologSource(r)){
+                .getNature(PDT.NATURE_ID);
+        if (plProject.isPrologSource(r)) {
             return true;
         }
         Set srcDirs = plProject.getExistingSourcePathEntries();
         for (Iterator it = srcDirs.iterator(); it.hasNext();) {
             IResource srcDir = (IResource) it.next();
-            if(r.getFullPath().isPrefixOf(srcDir.getFullPath())){
+            if (r.getFullPath().isPrefixOf(srcDir.getFullPath())) {
                 return true;
             }
         }
-        return false;        
+        return false;
     }
 }

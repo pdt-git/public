@@ -2,7 +2,7 @@
  * Created on 21.01.2004
  *
  */
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.rpc;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -83,9 +83,9 @@ public class PrologInterfaceServer extends MessagingServerLoggingWrapper
 
             if (query != null)
                 query.close();
-            query = new jpl.Query("catch((" + text
-                    + "),A,(format(\"~a ~n\",[A]),fail))" + ",flush_output");
-            //query = new jpl.Query( text );
+//            query = new jpl.Query("catch((" + text
+//                    + "),A,(format(\"~a ~n\",[A]),fail))" + ",flush_output");
+            query = new jpl.Query( text );
             queries.put(c, query);
 
             Debug.debug("parsed query: " + text);
@@ -210,13 +210,13 @@ public class PrologInterfaceServer extends MessagingServerLoggingWrapper
         Prolog.set_default_init_args(new String[] { executable, "-f", "none",
                 "-g", "set_prolog_flag(debug_on_error,false)", "-q" });
 
-        File logFile = Util.getLogFile("org.cs3.pdt.server.log");
-       
-        System.out.println("The server debug output is safed in "
-                + logFile.getAbsolutePath());
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-                new FileOutputStream(logFile));
-        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+//        File logFile = Util.getLogFile("org.cs3.pdt.server.log");
+//       
+//        System.out.println("The server debug output is safed in "
+//                + logFile.getAbsolutePath());
+//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+//                new FileOutputStream(logFile));
+//        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
 
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);
         server = new MessagingServerLoggingWrapper();

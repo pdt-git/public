@@ -11,8 +11,8 @@ import java.util.Comparator;
 import java.util.Hashtable;
 
 import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
 
 /**
  * @author xproot
@@ -190,7 +190,7 @@ public class PrologElementData implements Serializable, Comparable{
 		this.length = length;
 	}
 	
-	public String getHelp() throws SessionException {
+	public String getHelp() throws PrologException {
 		if(prologInterface==null){
 			return "If i head a PrologInterface, i could give you more information...";
 		}
@@ -204,7 +204,7 @@ public class PrologElementData implements Serializable, Comparable{
 		    session.dispose();
 		}
 	}
-	public String getSummary() throws SessionException {
+	public String getSummary() throws PrologException {
 		String help = getHelp();
 		if (help == null)
 			return null;

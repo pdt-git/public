@@ -86,7 +86,7 @@ public class ConsoleServerHook implements LifeCycleHook {
         //	    Debug.info("stopping console server using: "+queryString);
         //		try {
         //			session.query(queryString);
-        //		} catch (SessionException e) {
+        //		} catch (PrologException e) {
         //			Debug.report(e);
         //		}
         //		while(Util.probePort(port,"end_of_file.\n")){

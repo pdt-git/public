@@ -1,25 +1,26 @@
 package org.cs3.pdt;
 
-
+import org.eclipse.core.runtime.QualifiedName;
 
 /**
  * All kinds of string keys used by the pdt.
  */
 public interface PDT {
-    
+
     /**
-     * The prolog project nature. 
+     * The prolog project nature.
      * <p>
      * To get an <code>IPrologProject</code> from an <code>IProject</code>
      * you would do the following:
-     * <p><code>
+     * <p>
+     * <code>
      * IProject project = <i>(---some prolog project---)</i>;
      * <p>
      * IPrologProject prologProject = (IPrologProject)project.getNature(PDT.NATURE_ID);
-     * </code> 
+     * </code>
      */
     public final static String NATURE_ID = "org.cs3.pdt.PDTProjectNature";
-    
+
     /**
      * the port to use for writing fact data into the prolog system.
      */
@@ -39,32 +40,32 @@ public interface PDT {
      * startup aswell as on every change to the preference value bound to this
      * property key. Note that the pdt will also reconsult any file that is
      * found using the above methods, if and when it is modified in the prolog
-     * editor. 
+     * editor.
      */
     public final static String PREF_CONSULT_PATH = "pdt.consult.path";
 
     public final static String PREF_CONSULT_RECURSIVE = "pdt.consult.recursive";
 
     /**
-     * An absolute os file system path to the directory containing the prolog files of the
-     * pdt metadata engine.
+     * An absolute os file system path to the directory containing the prolog
+     * files of the pdt metadata engine.
      */
     public final static String PREF_METADATA_ENGINE_DIR = "pdt.metadata.engine.dir";
 
     public static final String BUILDER_ID = "org.cs3.pdt.MetaDataBuilder";
-    
+
     /**
-     * An absolute os file system path to the directory containing metadata store
+     * An absolute os file system path to the directory containing metadata
+     * store
      */
     public final static String PREF_METADATA_STORE_DIR = "pdt.metadata.store.dir";
-    
+
     /**
-     * An absolute os file system path to the directory containing the prolog files of the
-     * jtransformer engine.
+     * An absolute os file system path to the directory containing the prolog
+     * files of the jtransformer engine.
      */
     public final static String PREF_JTRANSFORMER_ENGINE_DIR = "jtransformer.engine.dir";
-    
-    
+
     /**
      * the absolute os file system path to the directory containing the SWI
      * Prolog installation to use. Typicaly something like pdt_HOME/swipl
@@ -85,7 +86,7 @@ public interface PDT {
      * the default to use for PROP_SOURCE_PATH
      */
     public static final String PREF_SOURCE_PATH_DEFAULT = "pdt.source.path.default";
-    
+
     /**
      * a path.separator-separated list of project relative paths pointing to the
      * source directories of a project.
@@ -93,12 +94,23 @@ public interface PDT {
     public static final String PROP_SOURCE_PATH = "pdt.source.path";
 
     /**
+     * a file for which this property is "true" will be consulted each time it
+     * is touched by the meta data builder.
+     */
+    public static final String PROP_AUTO_CONSULT = "pdt.auto.consult";
+
+    /**
      * if set to "true", the prolog interface will not try to start the server
      * process, but instead expect it to be allready running. This option is
      * mainly usefull for debugging the server process.
      */
     public final static String PREF_SERVER_STANDALONE = "pdt.server.standalone";
-   
+
+    /**
+     * the name of the swi prolog executable to use, e.g. <code>"xpce"</code>
+     * or <code>"/usr/local/bin/xpce"</code>.
+     */
+    public static final String PREF_SWIPL_EXECUTABLE = "pdt.swi.executable";
 
     /**
      * if set to "true", the prolog interface will use a pool of PrologSessions
@@ -121,11 +133,15 @@ public interface PDT {
      */
     public final static String PREF_DEBUG_LEVEL = "debug.level";
 
-    
     /**
-     * The key to which the meta data consult sevice is bound. 
+     * The key to which the meta data consult sevice is bound.
      */
     public static final String CS_METADATA = "metadata";
+
+    /**
+     * the key to which the default workspace consult service is bound.
+     */
+    public static final String CS_WORKSPACE = "workspace";
 
     /**
      * contains the classpath to use when starting the server process. It
@@ -133,9 +149,10 @@ public interface PDT {
      * org.cs3.pl.prolog.PrologInterfaceServer
      */
     public final static String PREF_SERVER_CLASSPATH = "pdt.server.classpath";
-    
+
     /**
      * The basename of the resource bundle to be used by the pdt ui
      */
-    public final static String RES_BUNDLE_UI="org.cs3.pdt.ui";
+    public final static String RES_BUNDLE_UI = "org.cs3.pdt.ui";
+
 }

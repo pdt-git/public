@@ -14,7 +14,7 @@ import java.util.HashMap;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 
 /**
  *
@@ -145,7 +145,7 @@ public class PrologDocWriter extends HTMLWriter {
     	String help = null;
     	try {
             help=data.getHelp();
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
         }
     	if (help == null)
@@ -242,7 +242,7 @@ public class PrologDocWriter extends HTMLWriter {
         String summary=null;
         try {
             summary = data.getSummary();
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
         }
         if (summary == null)

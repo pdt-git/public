@@ -15,7 +15,7 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -131,7 +131,7 @@ public class PrologSearchQuery implements ISearchQuery {
             Debug.report(e);
         } catch (BadLocationException e) {
             Debug.report(e);
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
         }
         return Status.OK_STATUS;

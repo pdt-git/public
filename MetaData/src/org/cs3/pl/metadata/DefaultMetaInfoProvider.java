@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
 
 /**
  * This class is intended as a TEMPORARY solution. it contains 
@@ -35,14 +35,14 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
         return file;
     }
 
-    public void consult( String filename) throws SessionException{
+    public void consult( String filename) throws PrologException{
 	    
         	PrologSession session = pif.getSession();
             session.query("consult('" + makeFilenameSWIConform(filename) + "')");
             session.dispose();
     }
 	
-    public  boolean assertFact( String text) throws SessionException{
+    public  boolean assertFact( String text) throws PrologException{
         PrologSession session = pif.getSession();
         Hashtable r = session.query("assert("+text+")");
         session.dispose();
@@ -58,10 +58,10 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
      *                    The arity of the predicate.
      * 
      * @return null, if no location can be found.
-     * @throws SessionException
+     * @throws PrologException
      * @see SourceLocation
      */
-    public SourceLocation getLocation( String functor, int arity, String filename) throws SessionException {
+    public SourceLocation getLocation( String functor, int arity, String filename) throws PrologException {
         //		return (SourceLocation) catchedCall(ROLE, "getLocation", new
         // Object[]{
         //				functor, new Integer(arity), filename});
@@ -89,13 +89,13 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
     /**
      * @param file
      * @return
-     * @throws SessionException
+     * @throws PrologException
      * @throws NumberFormatException
      */
     
     
     public PrologElementData[] getPredicatesWithPrefix(String module,
-            String prefix) throws NumberFormatException, SessionException {
+            String prefix) throws NumberFormatException, PrologException {
         return getPredicatesWithPrefix(module, prefix, null);
     }
 
@@ -112,11 +112,11 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
      *                    can be null -> no restriction on the declaring file
      * @module Module name or null, if module is not defined.
      * @return
-     * @throws SessionException
+     * @throws PrologException
      * @throws NumberFormatException
      */
     public PrologElementData[] getPredicatesWithPrefix(String module,
-            String prefix, String filename) throws NumberFormatException, SessionException {
+            String prefix, String filename) throws NumberFormatException, PrologException {
         //return
         // (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
         PrologSession session = pif.getSession();
@@ -145,7 +145,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
     }
 
-    public PrologElementData[] retrievePrologElements(String file) throws SessionException {
+    public PrologElementData[] retrievePrologElements(String file) throws PrologException {
         PrologSession session = pif.getSession();
         
         Hashtable[] results = session.queryAll("bagof([Pos_,Len_],"
@@ -178,7 +178,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
         Hashtable table=null;
         try {
             table = session.query("manual_entry("+data.getLabel()+","+data.getArity()+",Info)");
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
         }
         finally{

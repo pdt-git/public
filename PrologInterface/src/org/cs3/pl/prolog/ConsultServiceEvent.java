@@ -1,4 +1,4 @@
-package org.cs3.pl.metadata;
+package org.cs3.pl.prolog;
 
 import java.util.EventObject;
 

@@ -70,9 +70,9 @@ public class PrologCompiler extends PrologParserTraversal {
 
     public static final int INFO = 0;
 
-    public static final int WARNING = -1;
+    public static final int WARNING = 1;
 
-    public static final int ERROR = -2;
+    public static final int ERROR = 2;
 
     private static final String DEFAULTMODULE = "user";
 

@@ -1,4 +1,4 @@
-package org.cs3.pl.prolog;
+package org.cs3.pl.prolog.internal.rpc;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -10,10 +10,15 @@ import java.util.LinkedList;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.RPCServerStartStrategy;
+import org.cs3.pl.prolog.RPCServerStopStrategy;
+import org.cs3.pl.prolog.ServerStartStrategy;
+import org.cs3.pl.prolog.ServerStopStrategy;
 import org.cs3.pl.prolog.internal.LifeCycleHookWrapper;
-import org.cs3.pl.prolog.internal.ReusableClient;
 import org.cs3.pl.prolog.internal.ReusablePool;
-import org.cs3.pl.prolog.internal.SimpleSession;
 import org.rapla.components.rpc.Logger;
 
 /**
@@ -31,7 +36,7 @@ import org.rapla.components.rpc.Logger;
  * 
  * @author terra
  */
-public class PrologInterface implements IPrologInterface {
+public class RPCPrologInterface implements IPrologInterface {
     private static final int DOWN = 0;
 
     private static final int START_UP = 1;
@@ -111,9 +116,9 @@ public class PrologInterface implements IPrologInterface {
 
     private boolean serverDown = true;
 
-    private ServerStartStrategy startStrategy = new DefaultServerStartStrategy();
+    private ServerStartStrategy startStrategy = new RPCServerStartStrategy();
 
-    private ServerStopStrategy stopStrategy = new DefaultServerStopStrategy();
+    private ServerStopStrategy stopStrategy = new RPCServerStopStrategy();
 
     private StartupThread startupThread;
 
@@ -121,7 +126,7 @@ public class PrologInterface implements IPrologInterface {
 
     private boolean hookFilpFlop = false;
 
-    public PrologInterface() throws IOException {
+    public RPCPrologInterface() throws IOException {
 
         //		String property = System.getProperty(Properties.PLIF_HOOKS);
         //		if(property!=null){
@@ -140,7 +145,7 @@ public class PrologInterface implements IPrologInterface {
         Runtime.getRuntime().addShutdownHook(
                 new Thread("Prolog Shutdown Hook") {
                     public void run() {
-                        PrologInterface.this.stop();
+                        RPCPrologInterface.this.stop();
                     }
                 });
     }
@@ -191,10 +196,10 @@ public class PrologInterface implements IPrologInterface {
 
             if (useSessionPooling
                     && class1.isAssignableFrom(SimpleSession.class)) {
-                ReusableClient c = null;
+                ReusableRPCClient c = null;
                 synchronized (pool) {
-                    c = (ReusableClient) pool
-                            .findInstance(ReusableClient.class);
+                    c = (ReusableRPCClient) pool
+                            .findInstance(ReusableRPCClient.class);
 
                     if (c != null) {
                         Debug
@@ -203,7 +208,7 @@ public class PrologInterface implements IPrologInterface {
                         Debug
                                 .debug("creating new connection for SimpleSession");
 
-                        c = new ReusableClient();
+                        c = new ReusableRPCClient();
                         c.enableLogging(new Logger("default"));
                         c.configure("localhost", port);
                         c.start();
@@ -302,7 +307,9 @@ public class PrologInterface implements IPrologInterface {
                     i.remove();
                 }
             }
-            pool.clear();
+            if(pool!=null){
+                pool.clear();
+            }
             if (standAloneServer) {
                 Debug
                         .info("i will not try to stop the server, since its running in stand-alone mode.");

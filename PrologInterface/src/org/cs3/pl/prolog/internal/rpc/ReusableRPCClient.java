@@ -1,8 +1,9 @@
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.rpc;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.cs3.pl.prolog.internal.Reusable;
 import org.rapla.components.rpc.MessagingClientLoggingWrapper;
 import org.rapla.components.rpc.ServiceNotFoundException;
 import org.rapla.components.rpc.TimeoutException;
@@ -11,7 +12,7 @@ import org.rapla.components.rpc.TimeoutException;
  * A reusable rpc client.
  * (Watchdog is disabled right now.)
  */
-public class ReusableClient extends MessagingClientLoggingWrapper implements Reusable {
+public class ReusableRPCClient extends MessagingClientLoggingWrapper implements Reusable {
 	
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.Reusable#reuse()

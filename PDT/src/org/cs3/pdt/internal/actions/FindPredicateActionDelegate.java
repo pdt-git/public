@@ -11,7 +11,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -104,7 +104,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
                         //}
                     } catch (IOException e) {
                         Debug.report(e);
-                    } catch (SessionException e) {
+                    } catch (PrologException e) {
                        Debug.report(e);
                     }
                 }
@@ -189,10 +189,10 @@ public class FindPredicateActionDelegate extends TextEditorAction {
      * @param data
      * @param manager
      * @return
-     * @throws SessionException
+     * @throws PrologException
      */
     private SourceLocation getLocationForCurrentPredicateInEditor(
-            final PrologElementData data, PrologSession manager) throws SessionException {
+            final PrologElementData data, PrologSession manager) throws PrologException {
         final SourceLocation location = plugin.getMetaInfoProvider().getLocation(
                 data.getLabel(), data.getArity(), ((FileEditorInput) plugin
                         .getActiveEditor().getEditorInput()).getFile()

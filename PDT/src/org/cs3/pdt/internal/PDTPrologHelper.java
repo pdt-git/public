@@ -14,7 +14,7 @@ import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.resources.IFile;
 
 /**
@@ -35,7 +35,7 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
      * 
      * @see org.cs3.pdt.IPrologHelper#consult(org.eclipse.core.resources.IFile)
      */
-    public void consult(IFile file) throws SessionException {
+    public void consult(IFile file) throws PrologException {
              consult(file.getLocation().toString());
     }
 
@@ -46,7 +46,7 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
         return file;
     }
 
-    public void consult( String filename) throws SessionException{
+    public void consult( String filename) throws PrologException{
 	    PrologSession session = prologInterface.getSession();	 
         session.query("consult('" + makeFilenameSWIConform(filename) + "')");
        session.dispose();
@@ -56,7 +56,7 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
    
    
 
-    public  boolean assertFact( String text) throws SessionException{
+    public  boolean assertFact( String text) throws PrologException{
         PrologSession session = prologInterface.getSession();
         Hashtable r = session.query("assert("+text+")");
         session.dispose();
@@ -72,10 +72,10 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
      *                    The arity of the predicate.
      * 
      * @return null, if no location can be found.
-     * @throws SessionException
+     * @throws PrologException
      * @see SourceLocation
      */
-    public SourceLocation getLocation( String functor, int arity, String filename) throws SessionException {
+    public SourceLocation getLocation( String functor, int arity, String filename) throws PrologException {
         //		return (SourceLocation) catchedCall(ROLE, "getLocation", new
         // Object[]{
         //				functor, new Integer(arity), filename});
@@ -103,11 +103,11 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
     /**
      * @param file
      * @return
-     * @throws SessionException
+     * @throws PrologException
      * @throws NumberFormatException
      */
     public PrologElementData[] getPredicatesWithPrefix(String module,
-            String prefix) throws NumberFormatException, SessionException {
+            String prefix) throws NumberFormatException, PrologException {
         return getPredicatesWithPrefix(module, prefix, null);
     }
 
@@ -124,11 +124,11 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
      *                    can be null -> no restriction on the declaring file
      * @module Module name or null, if module is not defined.
      * @return
-     * @throws SessionException
+     * @throws PrologException
      * @throws NumberFormatException
      */
     public PrologElementData[] getPredicatesWithPrefix(String module,
-            String prefix, String filename) throws NumberFormatException, SessionException {
+            String prefix, String filename) throws NumberFormatException, PrologException {
         //return
         // (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
     
@@ -157,7 +157,7 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
     }
 
-    public PrologElementData[] retrievePrologElements(String file) throws SessionException {
+    public PrologElementData[] retrievePrologElements(String file) throws PrologException {
         PrologSession session = prologInterface.getSession();
         Hashtable[] results = session.queryAll("bagof([Pos_,Len_],"
                 + "meta_data"
@@ -190,7 +190,7 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
         Hashtable table=null;
         try {
             table = session.query(PDTPlugin.MODULEPREFIX+"manual_entry("+data.getLabel()+","+data.getArity()+",Info)");
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
         }
         finally{

@@ -7,8 +7,8 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.rpc.RPCPrologInterface;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
@@ -24,7 +24,7 @@ public class ConsoleViewTest {
         Display display = shell.getDisplay();
         ConsoleView view = new ConsoleView();
         view.createPartControl(shell);
-        final PrologInterface pif = new PrologInterface();
+        final RPCPrologInterface pif = new RPCPrologInterface();
         int serverPort= Integer.getInteger(PDT.PREF_SERVER_PORT,4143).intValue();
     	if(serverPort==-1){
     		throw new NullPointerException("Required property \""+PDT.PREF_SERVER_PORT+"\" was not specified.");

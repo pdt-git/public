@@ -9,7 +9,7 @@ import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	/**
@@ -99,7 +99,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			}
 		} catch (NumberFormatException e) {
 			Debug.report(e);
-		} catch (SessionException e) {
+		} catch (PrologException e) {
 			Debug.report(e);
 		}
 		

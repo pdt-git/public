@@ -14,14 +14,14 @@ import org.cs3.pdt.internal.PrologElement;
 import org.cs3.pdt.internal.editors.MarkerProblemCollector;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.ConsultService;
-import org.cs3.pl.metadata.ConsultServiceEvent;
-import org.cs3.pl.metadata.ConsultServiceListener;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.parser.PrologCompiler;
+import org.cs3.pl.prolog.ConsultService;
+import org.cs3.pl.prolog.ConsultServiceEvent;
+import org.cs3.pl.prolog.ConsultServiceListener;
 import org.cs3.pl.prolog.IPrologInterface;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -104,9 +104,9 @@ public class PrologOutline extends ContentOutlinePage {
 
         /**
          * @param fileName
-         * @throws SessionException
+         * @throws PrologException
          */
-        private void generatePredicates(String fileName) throws SessionException {
+        private void generatePredicates(String fileName) throws PrologException {
             PDTPlugin plugin = PDTPlugin.getDefault();                
             IMetaInfoProvider metaInfo = plugin.getMetaInfoProvider();
             PrologElementData[] data = metaInfo.retrievePrologElements(fileName);
@@ -196,7 +196,7 @@ public class PrologOutline extends ContentOutlinePage {
             if(e.getSymbol()==null||e.getSymbol().equals(fileName)){
                 try {
                     generatePredicates(fileName);
-                } catch (SessionException e1) {
+                } catch (PrologException e1) {
                     Debug.report(e1);
                 }
                 viewer.refresh();

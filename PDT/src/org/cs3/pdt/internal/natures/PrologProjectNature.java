@@ -10,6 +10,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -169,6 +170,19 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
             return isPrologSource(resource.getParent());
         }
         return false;
+    }
+    
+    public void setAutoConsulted(IFile file, boolean val) throws CoreException{
+        file.setPersistentProperty(new QualifiedName("",PDT.PROP_AUTO_CONSULT),val ? "true": "false");
+    }
+    
+    public boolean isAutoConsulted(IFile file) throws CoreException{        
+        if(!isPrologSource(file)){
+            return false;
+        }
+        String val= file.getPersistentProperty(new QualifiedName("", PDT.PROP_AUTO_CONSULT));
+        boolean autoConsult = val!=null&&val.equalsIgnoreCase("true");
+        return autoConsult;
     }
 
 }

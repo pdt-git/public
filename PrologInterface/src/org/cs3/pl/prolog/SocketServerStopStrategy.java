@@ -1,29 +1,32 @@
+/*
+ */
 package org.cs3.pl.prolog;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.internal.ReusableClient;
-import org.rapla.components.rpc.Logger;
+import org.cs3.pl.prolog.internal.socket.SocketClient;
 
-public class DefaultServerStopStrategy implements ServerStopStrategy {
+/**
+ */
+public class SocketServerStopStrategy implements ServerStopStrategy {
 
-	/* (non-Javadoc)
-	 * @see org.cs3.pl.prolog.ServerStopStrategy#shutDownServer(int)
-	 */
-	public void stopServer(int port, boolean now) {
-		
-		try {
+   
+
+    /* (non-Javadoc)
+     * @see org.cs3.pl.prolog.internal.ServerStopStrategy#stopServer(int, boolean)
+     */
+    public void stopServer(int port, boolean now) {
+        try {
 		    if(!Util.probePort(port)){
 		        Debug.info("There is no server running, afaics. So i wont stop anything.");
 		        return;
 		    }
-			ReusableClient s = new ReusableClient();
-			s.enableLogging(new Logger("default"));
-			s.configure("localhost", port);
-			s.start();		
+			SocketClient c = new SocketClient("localhost",port);		
 			try{
-				s.call ("RemotePrologSession","shutdownServer",new Object[]{new Boolean(now)});
-				s.stop();
+			    c.readUntil(SocketClient.GIVE_COMMAND);
+			    c.writeln(SocketClient.SHUTDOWN);		
+			    c.readUntil(SocketClient.BYE);
+			    c.close();
 			}
 			catch (Exception e) {
 				Debug.warning("There was a problem during server shutdown.");
@@ -44,6 +47,7 @@ public class DefaultServerStopStrategy implements ServerStopStrategy {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		} 
-	}
+
+    }
 
 }

@@ -1,9 +1,7 @@
 package org.cs3.pl.prolog;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
@@ -18,7 +16,7 @@ import org.cs3.pl.common.Util;
  * This will not work when running as an eclipse plugin. But it is usefull for
  * testing.
  */
-public class DefaultServerStartStrategy implements ServerStartStrategy {
+public class RPCServerStartStrategy implements ServerStartStrategy {
 
     public class _InputStreamPump extends InputStreamPump {
 

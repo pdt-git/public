@@ -2,7 +2,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 
 /**
  * An Init/ShutdownHook that takes the neccesary steps to open/close
@@ -32,7 +32,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 		    Debug.info("starting console server using: "+queryString);
 		    try {				
                 s.query(queryString);
-			} catch (SessionException e) {
+			} catch (PrologException e) {
 				Debug.report(e);
 			}
 			while(!Util.probePort(port)){
@@ -69,7 +69,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 	    Debug.info("stopping console server using: "+queryString);
 		try {
 			session.query(queryString);
-		} catch (SessionException e) {
+		} catch (PrologException e) {
 			Debug.report(e);
 		}
 		while(Util.probePort(port)){
@@ -96,7 +96,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 	    Debug.info("stopping console server using: "+queryString);
 		try {
 			session.query(queryString);
-		} catch (SessionException e) {
+		} catch (PrologException e) {
 			Debug.report(e);
 		}
 		while(Util.probePort(port)){

@@ -29,41 +29,41 @@ public interface PrologSession {
 	 * Each Query <u>must</u> call the method checkPrologAccess() of the class
 	 * PrologSynchronizer before attempting any interaction with the Prolog
 	 * System. If there is an exclusive query active, the implementation
-	 * must rethrow the resultant SessionException if it is caught.
+	 * must rethrow the resultant PrologException if it is caught.
 	 *   
 	 * @return a hashtable, containing the bindings generated.
 	 * @param query a prolog query
 	 * @throws IllegalStateException the session is disposed
-	 * @throws SessionException an abnormal condition was detected
+	 * @throws PrologException an abnormal condition was detected
 	 */
 	
-	public Hashtable query(String query) throws SessionException;
-	public Hashtable[] queryAll(String query)throws SessionException;
+	public Hashtable query(String query) throws PrologException;
+	public Hashtable[] queryAll(String query)throws PrologException;
 	/**
 	 * returns the next set of Bindings satisfying the last query.
 	 * 
 	 * Each Query <u>must</u> call the method checkPrologAccess() of the class
 	 * PrologSynchronizer before attempting any interaction with the Prolog
 	 * System. If there is an exclusive query active, the implementation
-	 * must rethrow the resultant SessionException if it is caught.
+	 * must rethrow the resultant PrologException if it is caught.
 	 * 
 	 * @return another set of Bindings
 	 * @throws IllegalStateException the session is disposed
-	 * @throws SessionException an IO Error occured
+	 * @throws PrologException an IO Error occured
 	 */
 	
-	public Hashtable next() throws SessionException;
+	public Hashtable next() throws PrologException;
 		
 	/**
 	 * explicitly ends the last query, discarding further results if any existed.
 	 * If no query was active, this is a noop.
 	 * 
 	 * @throws IllegalStateException the session is disposed
-	 * @throws SessionException a lower-level failure has occured while killing
+	 * @throws PrologException a lower-level failure has occured while killing
 	 * the query.
 	 */
 	
-	public void endQuery() throws SessionException;
+	public void endQuery() throws PrologException;
 	
 	/**
 	 * consults the File signified by the path passed into the Prolog System. Typically
@@ -76,7 +76,7 @@ public interface PrologSession {
 	 * @throws IllegalStateException the session is disposed
 	 */
 	
-	public boolean consult(String name);
+	public boolean consult(String name)throws PrologException;
 
 	/**
 	 * checks if the session has been disposed. This can happen without the users explicitly

@@ -1,4 +1,4 @@
-package org.cs3.pl.metadata;
+package org.cs3.pl.prolog;
 
 import java.io.PrintStream;
 
@@ -7,6 +7,7 @@ import java.io.PrintStream;
  * prolog system.
  */
 public interface ConsultService {
+    
     /**
      * provides a stream to which clauses can be written. The supplied data will
      * be consulted as "virtual" file with the symbolic name specified by

@@ -1,6 +1,6 @@
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.rpc;
 
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 
 /**
  * Provides support for exclusive queries to the prolog System. The 
@@ -39,11 +39,11 @@ public class PrologSynchronizer {
 	 * @throws InterruptedException waiting for lock release fails.
 	 */
 		
-	public void lock() throws SessionException, InterruptedException {
+	public void lock() throws PrologException, InterruptedException {
 	    
 	    synchronized (this){
 	        if (locked)
-	            throw new SessionException("Can't access Prolog due to query lock");
+	            throw new PrologException("Can't access Prolog due to query lock");
 	        
 	        locked = true;
 	        
@@ -71,9 +71,9 @@ public class PrologSynchronizer {
 		return locked;
 	}
 
-    synchronized public void beginAccess() throws SessionException {
+    synchronized public void beginAccess() throws PrologException {
         if (locked)
-            throw new SessionException("Prolog is Locked");
+            throw new PrologException("Prolog is Locked");
         
         using++;
     }

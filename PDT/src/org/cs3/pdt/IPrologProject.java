@@ -2,6 +2,7 @@ package org.cs3.pdt;
 
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
@@ -46,6 +47,9 @@ public interface IPrologProject {
      * @throws CoreException
      */
     public boolean isPrologSource(IResource resource) throws CoreException;
+    
+    public boolean isAutoConsulted(IFile file) throws CoreException;
+    public void setAutoConsulted(IFile file,boolean val) throws CoreException;
     
     
 }

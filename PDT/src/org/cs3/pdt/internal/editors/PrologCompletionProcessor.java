@@ -20,7 +20,7 @@ import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -308,7 +308,7 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
         try {
             elems = prologHelper.getPredicatesWithPrefix(module, prefix,
                     activeFileName);
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
             elems = new PrologElementData[0];
         }
@@ -398,7 +398,7 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
         try {
             table = session.query(PDTPlugin.MODULEPREFIX + "manual_entry("
                     + data.getLabel() + "," + data.getArity() + ",Info)");
-        } catch (SessionException e) {
+        } catch (PrologException e) {
             Debug.report(e);
         } finally {
             session.dispose();

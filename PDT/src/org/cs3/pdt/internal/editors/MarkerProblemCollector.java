@@ -28,6 +28,7 @@ public class MarkerProblemCollector implements ProblemCollector {
     private ArrayList markers = new ArrayList();
     private IFile file;
     private LineBreakInfoProvider lineInfo;
+    private int maxSeverity=-1;
     
     /**
      * @param file
@@ -59,7 +60,8 @@ public class MarkerProblemCollector implements ProblemCollector {
      */
     public void reportProblem(Token token, String msg, int severity) {
         severity=mapSeverity(severity);
-        int offset = getLineOffset(token.beginLine);
+        maxSeverity=Math.max(maxSeverity,severity);
+        int offset = getLineOffset(token.beginLine-1);
         HashMap attributes = new HashMap();
         MarkerUtilities.setMessage(attributes, msg);
         MarkerUtilities.setLineNumber(attributes, token.beginLine);
@@ -89,6 +91,7 @@ public class MarkerProblemCollector implements ProblemCollector {
      * @see org.cs3.pl.parser.ProblemCollector#reset()
      */
     public void reset() {
+        maxSeverity=Integer.MIN_VALUE;
        resetProblems();
     }
 
@@ -150,5 +153,8 @@ public class MarkerProblemCollector implements ProblemCollector {
         }
     }
 
+    public int getMaxSeverity() {
+        return maxSeverity;
+    }
 }
 

@@ -2,8 +2,6 @@
  */
 package org.cs3.pl.parser;
 
-import java.io.File;
-
 import junit.framework.TestCase;
 
 /**

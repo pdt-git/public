@@ -11,14 +11,17 @@ import org.cs3.pdt.internal.PDTServerStartStrategy;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.hooks.ConsultServerHook;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.ConsultService;
 import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.metadata.RecordingConsultService;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.SocketPrologInterface;
+import org.cs3.pl.prolog.SocketServerStartStrategy;
+import org.cs3.pl.prolog.SocketServerStopStrategy;
+import org.cs3.pl.prolog.internal.rpc.RPCPrologInterface;
+import org.cs3.pl.prolog.internal.socket.RecordingConsultService;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -76,15 +79,20 @@ public class PDTPlugin extends AbstractUIPlugin {
     private HashMap consultServices = new HashMap();
 
     private RecordingConsultService metadataConsultService;
+ 
 
     private String pdtModulePrefix = "";
 
     private PDTPrologHelper prologHelper;
 
-    private PrologInterface prologInterface;
+    private SocketPrologInterface prologInterface;
 
     //Resource bundle.
     private ResourceBundle resourceBundle;
+
+    private RecordingConsultService workspaceConsultService;
+
+ 
 
     /**
      * The constructor.
@@ -255,7 +263,10 @@ public class PDTPlugin extends AbstractUIPlugin {
 
         metadataConsultService.setPort(port);
         metadataConsultService.setPrefix(new File(prefix));
-        metadataConsultService.setPrologInterface(prologInterface);
+        //metadataConsultService.setPrologInterface(prologInterface);
+        workspaceConsultService.setPort(port);
+        workspaceConsultService.setPrefix(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile());
+        workspaceConsultService.setKeepRecords(false);
 
     }
 
@@ -282,6 +293,10 @@ public class PDTPlugin extends AbstractUIPlugin {
         }
         String debugLevel = service.getString(qualifier, PDT.PREF_DEBUG_LEVEL,
                 null, null);
+        String engineDir = service.getString(qualifier, PDT.PREF_METADATA_ENGINE_DIR,
+                null, null);
+        String executable = service.getString(qualifier, PDT.PREF_SWIPL_EXECUTABLE,
+                null, null);
         if (debugLevel == null) {
             Debug.warning("The property \"" + PDT.PREF_DEBUG_LEVEL
                     + "\" was not specified." + "Assuming default: ERROR");
@@ -304,8 +319,10 @@ public class PDTPlugin extends AbstractUIPlugin {
         prologInterface.setPort(port);
         prologInterface.setStandAloneServer(standalone);
         prologInterface.setUseSessionPooling(pooling);
-        prologInterface.setStartStrategy(new PDTServerStartStrategy(swiHome,
-                classPath, debugLevel));
+//        prologInterface.setStartStrategy(new PDTServerStartStrategy(swiHome,
+//                classPath, debugLevel));
+        prologInterface.setStartStrategy(new SocketServerStartStrategy(engineDir,executable));
+        prologInterface.setStopStrategy(new SocketServerStopStrategy());
 
     }
 
@@ -391,14 +408,16 @@ public class PDTPlugin extends AbstractUIPlugin {
         try {
             super.start(context);
 
-            prologInterface = new PrologInterface();
+            prologInterface = new SocketPrologInterface();
             reconfigurePrologInterface();
             metadataConsultService = new RecordingConsultService();
+            workspaceConsultService = new RecordingConsultService();
             reconfigureMetaDataConsultService();
             LifeCycleHook hook = new LifeCycleHook() {
                 public void onInit(PrologSession initSession) {
                     try {
                         metadataConsultService.connect();
+                        workspaceConsultService.connect();
                         
                     } catch (IOException e) {
                         Debug.report(e);
@@ -407,7 +426,7 @@ public class PDTPlugin extends AbstractUIPlugin {
 
                 public void afterInit() {
                     try{
-                        metadataConsultService.reload();
+                        metadataConsultService.reload();                     
                     }
                     catch(Throwable t){
                         Debug.report(t);
@@ -416,12 +435,14 @@ public class PDTPlugin extends AbstractUIPlugin {
 
                 public void beforeShutdown(PrologSession session) {
                     metadataConsultService.disconnect();
+                    workspaceConsultService.disconnect();
                 }
             };            
             prologInterface.addLifeCycleHook(hook, "metadataConsultService",
                     new String[] { ConsultServerHook.HOOK_ID });
             
             registerConsultService(PDT.CS_METADATA,metadataConsultService);
+            registerConsultService(PDT.CS_WORKSPACE,workspaceConsultService);
             registerHooks();
             prologInterface.start();
         } catch (Throwable t) {

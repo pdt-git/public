@@ -75,8 +75,9 @@ public class Initializer extends AbstractPreferenceInitializer {
         String consultPath = System.getProperty(PDT.PREF_CONSULT_PATH, "");
         boolean serverStandAlone = Boolean
                 .getBoolean(PDT.PREF_SERVER_STANDALONE);
-        boolean sessionPooling = Boolean
-                .getBoolean(PDT.PREF_USE_SESSION_POOLING);
+//        boolean sessionPooling = Boolean
+//                .getBoolean(PDT.PREF_USE_SESSION_POOLING);
+        boolean sessionPooling = Boolean.valueOf(System.getProperty(PDT.PREF_USE_SESSION_POOLING,"true")).booleanValue();
         boolean consultRecursive = Boolean
                 .getBoolean(PDT.PREF_CONSULT_RECURSIVE);
         String debugLevel = System.getProperty(PDT.PREF_DEBUG_LEVEL,"DEBUG");
@@ -97,6 +98,8 @@ public class Initializer extends AbstractPreferenceInitializer {
 
         String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
 
+        String executable = System.getProperty(PDT.PREF_SWIPL_EXECUTABLE,guessExecutableName());
+        
         IScopeContext context = new DefaultScope();
 
         IEclipsePreferences node = context.getNode(qualifier);
@@ -116,6 +119,7 @@ public class Initializer extends AbstractPreferenceInitializer {
             node.put(PDT.PREF_SWIPL_DIR, swiplDir);
             node.putBoolean(PDT.PREF_USE_SESSION_POOLING, sessionPooling);
             node.put(PDT.PREF_SOURCE_PATH_DEFAULT, sourcePathDefault);
+            node.put(PDT.PREF_SWIPL_EXECUTABLE, executable);
             String[] strings = node.keys();
             for (int i = 0; i < strings.length; i++) {
                 Debug.info(strings[i]+" --> "+node.get(strings[i],"n.a."));
@@ -130,6 +134,13 @@ public class Initializer extends AbstractPreferenceInitializer {
         Debug.setDebugLevel("DEBUG");
     }
 
+    private String guessExecutableName(){
+        String osname = System.getProperty("os.name");
+        if(osname.indexOf("Windows")>-1){
+            return "plwin";
+        }
+        return "xpce";
+    }
 
     /**
      *only implemented for linux right now. other platforms should be easy.

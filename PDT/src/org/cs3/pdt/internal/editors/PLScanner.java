@@ -8,7 +8,7 @@ import java.util.List;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -41,7 +41,7 @@ public class PLScanner extends RuleBasedScanner {
             } catch (IOException e) {
                 plDynamicPredicates = new String[0];
                 Debug.report(e);
-            } catch (SessionException e) {
+            } catch (PrologException e) {
                 plDynamicPredicates = new String[0];
                 Debug.report(e);
             }
@@ -69,7 +69,7 @@ public class PLScanner extends RuleBasedScanner {
             } catch (IOException e) {
                 plKeywords = new String[0];
                 Debug.report(e);
-            } catch (SessionException e) {
+            } catch (PrologException e) {
                 plKeywords = new String[0];
                 Debug.report(e);
             }

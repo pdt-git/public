@@ -5,7 +5,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SessionException;
+import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 
@@ -35,7 +35,7 @@ public class ConsultServerHook implements LifeCycleHook{
 		   		
                 try {
                     s.query(queryString);
-                }catch (SessionException e) {
+                }catch (PrologException e) {
                     Debug.report(e);
                     throw new RuntimeException(e);
                 }			

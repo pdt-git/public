@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.rpc;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -10,7 +10,6 @@ import jpl.Query;
 import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -28,7 +27,7 @@ public class PredicatePropertyTest extends TestCase {
     }
 
     public synchronized void testIt() throws Throwable {
-        PrologInterface pif = new PrologInterface();
+        RPCPrologInterface pif = new RPCPrologInterface();
         //pif.setStandAloneServer(true);
         pif.setPort(4143);
         //pif.setStartStrategy(new InProcessStartStrategy());

@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.rpc;
 
 import java.io.IOException;
 
