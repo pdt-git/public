@@ -910,7 +910,7 @@ public class FactGenerator extends ASTVisitor {
 	 * importT<a>}
 	 * @see  FactGeneratorInterfaceTest#testImportDeclaration()
 	 */
-	public boolean visit(ImportDeclaration node) {
+	public boolean _visit(ImportDeclaration node) {
 		String id = idResolver.getID(node);
 		String topLevel = idResolver.getID(node.getParent());
 		String importName = idResolver.getID(node.resolveBinding());
@@ -928,6 +928,31 @@ public class FactGenerator extends ASTVisitor {
 		return false;
 	}
 
+	/**
+	 * Generates prolog facts of type importT.
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=ImportT">
+	 * importT<a>}
+	 * @see  FactGeneratorInterfaceTest#testImportDeclaration()
+	 */
+	public boolean visit(ImportDeclaration node) {
+		String id = idResolver.getID(node);
+		String topLevel = idResolver.getID(node.getParent());
+		String importName = idResolver.getID(node.resolveBinding());
+		IBinding binding =  node.resolveBinding();
+		if (binding.getKind() == IBinding.PACKAGE) 
+			generatePackageFactIfNecessary((IPackageBinding) binding);
+		importName = idResolver.getID(binding);
+		String[] args = new String[] { id, topLevel, importName };
+		writer.writeFact("importT", args);
+		writer.writeFact("slT", new String [] {
+				idResolver.getID(node),
+				Integer.toString(node.getStartPosition()),
+				Integer.toString(node.getLength())
+		});
+		return false;
+	}
+	
 	/**
 	 * Generates prolog facts of type operationT.
 	 * <p>
@@ -1862,7 +1887,7 @@ public class FactGenerator extends ASTVisitor {
 	 * literalT<a>}
 	 * @see FactGeneratorMethodBodyTest#testVisitTypeLiteral()
    	 */
-	public boolean visit(TypeLiteral node) {
+	public boolean _visit(TypeLiteral node) {
 		String args[] =
 			new String[] {
 				"type(class, " + idResolver.getJavaLangClassID() +", 0)",
@@ -1870,6 +1895,34 @@ public class FactGenerator extends ASTVisitor {
 		};
 
 		createBodyFact(node, "literalT", args);
+
+		return true;
+		
+	}
+	
+	/**
+	 * Generates prolog facts of type literalT.
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=LiteralT">
+8	 * literalT<a>}
+	 * @see FactGeneratorMethodBodyTest#testVisitTypeLiteral()
+   	 */
+	public boolean visit(TypeLiteral node) {
+		String identId = idResolver.getID();
+		String args[] =
+			new String[] {
+				"class", identId, "type(class, " + idResolver.getJavaLangClassID() +", 0)"
+		};
+
+		createBodyFact(node, "selectT", args);
+		writer.writeFact("identT", new String [] {
+				identId,
+				idResolver.getID(node),
+				idResolver.getID(node.getParent()),
+				quote(node.getType().resolveBinding().getQualifiedName()),
+				typeResolver.getTypeTerm(node.getType())
+				
+		});
 
 		return true;
 		
