@@ -91,4 +91,11 @@
              id="org.cs3.pdt.actions.dump"/>
     </actionSet>
  </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="org.cs3.pdt.preferences.PreferencePage"
+          name="PDT Preferences"
+          id="org.cs3.pdt.preferences.PDTPreferencePage"/>
+ </extension>
 </plugin>
