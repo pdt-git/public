@@ -836,8 +836,12 @@ abstraction(fullQualifiedName(_id, _Fqn)).
 fullQualifiedName(Id, Fqn) :-
 	nonvar(Fqn),
 	globalIds(Fqn,Id),
-	!,
-	class(Id,_,_). % to be sure the index is up to date
+	!.
+%	class(Id,_,_). %  to be sure the index is up to date
+%   Tobias: DONT DO THIS!!!! At this time the index may NOT be up to date.
+%   Especially when I use the java_fq abstraction !!! 
+
+
 
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
