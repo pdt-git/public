@@ -13,7 +13,9 @@ import java.net.ServerSocket;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -134,15 +136,23 @@ public class Util {
     }
 
     public static String normalizeOnWindoze(String s) {
-        boolean windowsPlattform = System.getProperty("os.name").indexOf(
-                "Windows") > -1;
+        boolean windowsPlattform = isWindoze();
         if (windowsPlattform) {
             s = s.replace('\\', '/');
         }
         return s;
     }
 
-    public static String prologFileName(File f) {
+    /**
+	 * @return
+	 */
+	public static boolean isWindoze() {
+		boolean windowsPlattform = System.getProperty("os.name").indexOf(
+                "Windows") > -1;
+		return windowsPlattform;
+	}
+
+	public static String prologFileName(File f) {
         return normalizeOnWindoze(f.toString());
     }
 
@@ -331,5 +341,37 @@ public class Util {
             }
         }
         logStream.println(key + " took " + time(key) + " millis.");
+    }
+    /**
+     * parse an association list.
+     * 
+     * @param l A list containing strings of the form <code>key->value</code>.
+     * @return A map that represents the association. If the list contains
+     * multiple mappings for a single key, the map will contain a List of this
+     * values. Otherwise, the value type will bs String. 
+     */
+    public static Map parseAssociation(List l){
+    	HashMap map = new HashMap();
+    	for (Iterator it = l.iterator(); it.hasNext();) {
+			String elm = (String) it.next();
+			String[] s = elm.split("->");
+			String key = s[0];
+			String val = s[1];			
+			Object o = map.get(key);
+			if(o==null){
+				map.put(key,val);
+			}
+			else if (o instanceof List){
+				List ll = (List) o;
+				ll.add(val);
+			}
+			else{
+				List ll= new Vector();
+				ll.add(o);
+				ll.add(val);
+				map.put(key,ll);
+			}
+		}
+    	return map;
     }
 }

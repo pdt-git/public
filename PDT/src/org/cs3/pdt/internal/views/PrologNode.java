@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.model.Node;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -47,19 +48,13 @@ public class PrologNode extends Node implements IAdaptable,IPropertySource,IWork
             properties="["+properties+"]";
         }
         try{
-            List r = s.queryAll("node(Id,"+properties+"),node(Id,List)");
+            //List r = s.queryAll("node(Id,"+properties+"),node(Id,List)");
+        	List r = s.queryAll("node(Id,"+properties+"),node(Id,_List),parse_property_list(_List,Parsed)");
             for (Iterator iter = r.iterator(); iter.hasNext();) {
                 Map ri = (Map) iter.next();
-                String childId=(String) ri.get("Id");
-                String childPropList = (String) ri.get("List");
-                List rr = s.queryAll("member(_M,"+childPropList+"),parse_property(_M,Key->Value)");
-                HashMap childProperties = new HashMap();
-                for (Iterator iiter = rr.iterator(); iiter.hasNext();) {
-                    Map rrj = (Map) iiter.next();
-                    String key=(String) rrj.get("Key");
-                    String value=(String) rrj.get("Value");
-                    childProperties.put(key,value);
-                }
+                String childId=(String) ri.get("Id");                
+                List rr = (List) ri.get("Parsed");                
+                Map childProperties = Util.parseAssociation(rr);
                 result.add(new PrologNode(pif,childId,childProperties));
             }            
         }
