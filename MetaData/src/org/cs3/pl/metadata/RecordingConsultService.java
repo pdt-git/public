@@ -86,7 +86,7 @@ public class RecordingConsultService implements ConsultService {
         }
 
         public void write(byte[] b) throws IOException {
-            Debug.debug("writing: '" + new String(b) + "'");
+            //Debug.debug("writing: '" + new String(b) + "'");
             sink.write(b);
             if(record!=null){
                 record.write(b);
@@ -94,7 +94,7 @@ public class RecordingConsultService implements ConsultService {
         }
 
         public void write(byte[] b, int off, int len) throws IOException {
-            Debug.debug("writing: '" + new String(b, off, len) + "'");
+            //Debug.debug("writing: '" + new String(b, off, len) + "'");
             sink.write(b, off, len);
             if(record!=null){
                 record.write(b, off, len);
@@ -102,7 +102,7 @@ public class RecordingConsultService implements ConsultService {
         }
 
         public void write(int b) throws IOException {
-            Debug.debug("writing: '" + (char) b + "'");
+            //Debug.debug("writing: '" + (char) b + "'");
             sink.write(b);
             if(record!=null){
                 record.write(b);
