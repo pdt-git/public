@@ -1,9 +1,3 @@
-/*
- * Created on 11.08.2004
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.InitHook;
@@ -11,10 +5,9 @@ import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.SessionException;
 
 /**
- * @author schulzs1
- * 
- * TODO To change the template for this generated type comment go to Window -
- * Preferences - Java - Code Style - Code Templates
+ * An InitHook that takes the neccesary steps to open
+ * an io socket on the server process to which a 
+ * Console can be connected.
  */
 public class CreateServerThreadHook implements InitHook {
 	

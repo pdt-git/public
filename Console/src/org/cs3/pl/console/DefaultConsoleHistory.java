@@ -156,4 +156,18 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 */
 	public void onOutput(ConsoleModelEvent e) {	}
 
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console.ConsoleModelEvent)
+	 */
+	public void afterConnect(ConsoleModelEvent e) {
+		// TODO should we handle this?		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console.ConsoleModelEvent)
+	 */
+	public void beforeDisconnect(ConsoleModelEvent e) {
+		// TODO should we handle this?		
+	}
+
 }

@@ -1,24 +1,79 @@
 package org.cs3.pl.console;
+
 /**
- * @author schulzs1
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * Abstract model of a console.
+ * 
+ * A Console, as modeled by this interface, mainly consists of a buffer
+ * containing a line of text that can be arbitrarily modified and finaly
+ * comitted. In addition, a console produces output, which can be recieved by
+ * registering an apropiate listener with this console. Note that the model by
+ * itself does not support any buffering of the produced output.
+ * 
+ * As an (optional) feature, a console may support two different kinds of input
+ * processing: the "normal" mode is described above, the alternative is the
+ * so-called "single char" mode. When in single char mode, the underlying
+ * streams expect character-wise unbuffered input via the putSingleChar(char)
+ * method.
  */
 public interface ConsoleModel {
-	
+
+	/**	 
+	 * @return the current content of the linebuffer.
+	 */
 	abstract public String getLineBuffer();
+
+	/**
+	 * set the content of the line buffer. 
+	 * @param line
+	 */
 	abstract public void setLineBuffer(String line);
-	
+
+	/**
+	 * commit the current content of the linebuffer (i.e. "press enter").	 
+	 */
 	abstract public void commitLineBuffer();
-	
+
+	/**
+	 * Register a ConsoleModelListerner with this console.
+	 * @param cml
+	 */
 	abstract public void addConsoleListener(ConsoleModelListener cml);
+
+	/**
+	 * remove a registered ConsoleModelLister from the list of registered Listeners.
+	 * @param cml
+	 */
 	abstract public void removeConsoleListener(ConsoleModelListener cml);
-	
-	abstract public void  putSingleChar(char c);
-	
+
+	/**
+	 * Send a single char to the underlying stream.
+	 * Wether the input buffer is modified or not, is up to the respective implementation.
+	 * <p><P>It is concidered a bad practice to call this method while the model is not in single
+	 * char mode, although some implementations might allow it, this should generaly throw some kind
+	 * of runtime exception.  
+	 * @param c
+	 */
+	abstract public void putSingleChar(char c);
+
+	/**
+	 * @return true if and only if the console is currently in single char mode.
+	 */
 	abstract public boolean isSingleCharMode();
+
+	/**
+	 * tell the model to connect to the underlying streams.
+	 */
+	abstract public void connect();
 	
-	abstract public void shutdown();
-		
+	/**
+	 * tell the model to disconnect from the underlying streams.
+	 */
+	abstract public void disconnect();
+	
+	/**
+	 * @return true if and only if the console is connected to the underlying
+	 * streams, i.e. it is fully operational.
+	 */
+	abstract public boolean isConnected();
+
 }

@@ -1,17 +1,6 @@
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * a bit messy after merge. (ld)
-* i tried not to break anything. please check.
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- */
 package org.cs3.pl.console;
 import java.util.EventObject;
 
-/**
- * @author schulzs1
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
 public class ConsoleModelEvent extends EventObject {
 	
 	private String oldLineState=null;
@@ -23,7 +12,7 @@ public class ConsoleModelEvent extends EventObject {
 
     
     /**
-     * 
+     * use this constructor upon connect/disconnect.
      */
     public ConsoleModelEvent(Object src) {
         super(src);

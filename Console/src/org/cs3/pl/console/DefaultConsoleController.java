@@ -295,8 +295,7 @@ public class DefaultConsoleController implements ConsoleController,
      * @see org.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.ConsoleModelEvent)
      */
     public void onModeChange(ConsoleModelEvent e) {
-        // TODO Auto-generated method stub
-
+    	//pfff...
     }
 
     
@@ -313,5 +312,18 @@ public class DefaultConsoleController implements ConsoleController,
 	public void setCompletionProvider(
 			ConsoleCompletionProvider completionProvider) {
 		this.completionProvider = completionProvider;
+	}
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console.ConsoleModelEvent)
+	 */
+	public void afterConnect(ConsoleModelEvent e) {
+		// TODO should we handle this?
+		
+	}
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console.ConsoleModelEvent)
+	 */
+	public void beforeDisconnect(ConsoleModelEvent e) {
+		// TODO should we handle this?		
 	}
 }

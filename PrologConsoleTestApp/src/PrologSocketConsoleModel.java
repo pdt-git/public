@@ -157,7 +157,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         return singleCharMode;
     }
     
-    synchronized void connect(){
+    public synchronized void connect(){
     	if(isConnected()){
     		Debug.warning("Seems we are already connected?");
     		return;
@@ -196,7 +196,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         super.finalize();
         disconnect();
     }
-    synchronized void disconnect() {
+    public synchronized void disconnect() {
     	Debug.debug("Disconnect began");
         synchronized (this){
             try {
@@ -280,9 +280,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 	
 
-    public void shutdown() {
-        disconnect();
-    }
+    
 
 	
 
@@ -295,7 +293,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	
 
 
-	private boolean isConnected() {
+	public  boolean isConnected() {
 		if(socket==null){
 			return false;
 		}

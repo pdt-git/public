@@ -7,5 +7,6 @@ public interface ConsoleModelListener extends EventListener {
 	abstract public void onEditBufferChanged(ConsoleModelEvent e);
 	abstract public void onCommit(ConsoleModelEvent e);
 	abstract public void onModeChange(ConsoleModelEvent e);
-
+	abstract public void afterConnect(ConsoleModelEvent e);
+	abstract public void beforeDisconnect(ConsoleModelEvent e);
 }
