@@ -112,8 +112,9 @@ ast_node(whileLoopT, whileLoopT(_id, _, _, _, _), _id).
 /************************* edges ***************************
 *  ast_edge(?type,+term,?edge)
 *****************************************************************/
-
-ast_edge(_type, not(_tree), _eid) :- !, ast_edge(_type, _tree, _eid).
+% Next clause commented out since it produces infinite many results of 
+% the form "not(not(...(not(PEF))...))" by backtracking -- GK, 6.10.2004:
+%ast_edge(_type, not(_tree), _eid) :- !, ast_edge(_type, _tree, _eid).
 
 % parent edge
 ast_edge(parent, applyT(_, _id, _,_,_, _, _), _id).
