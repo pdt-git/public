@@ -87,7 +87,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     private static final int UP = 2;
 
-    private HookHelper hookHelper = new HookHelper();
+    private HookHelper hookHelper = new HookHelper(this);
 
     private Collection sessions = new LinkedList();
 
@@ -311,7 +311,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
     protected void setState(int newState) throws IllegalStateException {
         synchronized (stateLock) {
             if (state == newState) {
-                return;
+                throw new IllegalStateException("transition not allowed. (no change!)");
             }
             //check if the transition is allowed.
             switch (newState) {

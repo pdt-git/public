@@ -9,11 +9,20 @@ import java.util.Vector;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
  */
 public class HookHelper {
+    PrologInterface pif;
+    /**
+     * @param pif
+     */
+    public HookHelper(PrologInterface pif) {
+        super();
+        this.pif = pif;
+    }
     private final class StartupThread extends Thread {
 
         private StartupThread(String name) {
@@ -39,7 +48,7 @@ public class HookHelper {
                     LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned
                             .get(it.next());
                     if (h.flipflop != hookFilpFlop) {
-                        h.afterInit();
+                        h.afterInit(pif);
                     }
                 }
             }
@@ -174,7 +183,7 @@ public class HookHelper {
                 LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned.get(it
                         .next());
                 if (h.flipflop != hookFilpFlop) {
-                    h.onInit(initSession);
+                    h.onInit(pif,initSession);
                 }
             }
         }
@@ -209,7 +218,7 @@ public class HookHelper {
                             .get(id);
                     if (h.flipflop != hookFilpFlop) {
                         try {
-                            h.beforeShutdown(s);
+                            h.beforeShutdown(pif,s);
                         } catch (Throwable t) {
                             Debug
                                     .error("could not execute 'beforeShutdown' on hook '"
