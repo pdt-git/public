@@ -261,7 +261,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         addLifeCycleHook(new LifeCycleHook() {
             public void onInit(PrologSession initSession) {
                 cs.setPort(port);
-                File file = new DefaultResourceFileLocator(getOption(ENGINE_DIR)).resolve(prefix);
+                File file = new DefaultResourceFileLocator(new File(getOption(ENGINE_DIR))).resolve(prefix);
                 cs.setPrefix(file);
                 
                 try {

@@ -36,7 +36,7 @@ public class ConsultServiceTest extends TestCase {
         
         Debug.info("prefix: " + prefix.getCanonicalPath());
         PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance();
-        factory.setResourceLocator(new DefaultResourceFileLocator(prefix.toString()));
+        factory.setResourceLocator(new DefaultResourceFileLocator(prefix));
         pif = factory.create();
         pif.start();
         rcs = pif.getConsultService("");
