@@ -18,6 +18,7 @@ CT's:
 :- dynamic changed/1. 
 :- dynamic rollback/1.
 :- dynamic applied/1.
+:- dynamic tmp_rollback_file/1.
 :- multifile action/1.
 :- multifile ct/3.
 :- dynamic ct/3.
@@ -373,9 +374,9 @@ rollback :-
     retractall(rollback(_)),
     retractall(changed(_)),
     % replace deleted with created files
-    findall(File, (deleted_file(File),assert(tmp_file(File)),retract(deleted_file(File))),_),
+    findall(File, (deleted_file(File),assert(tmp_rollback_file(File)),retract(deleted_file(File))),_),
     findall(File, (created_file(File),assert(deleted_file(File)),retract(created_file(File))),_),
-    findall(File, (tmp_file(File),assert(created_file(File)),retract(deleted_file(File))),_).    
+    findall(File, (tmp_rollback_file(File),assert(created_file(File)),retract(deleted_file(File))),_).    
     
     
 logChange(Elem):-
