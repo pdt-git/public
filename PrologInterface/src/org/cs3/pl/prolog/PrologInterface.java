@@ -33,6 +33,8 @@ public class PrologInterface implements IPrologInterface {
 
     private static final int SHUT_DOWN = 3;
 
+    private static final int ERROR = -1;
+    
     private Object stateLock = new Object();
 
     private int state = DOWN;
@@ -201,6 +203,8 @@ public class PrologInterface implements IPrologInterface {
     private HashMap hooks = new HashMap();
 
     private boolean hookFilpFlop = false;
+
+	
 
     public PrologInterface() throws IOException {
 
@@ -416,43 +420,49 @@ public class PrologInterface implements IPrologInterface {
             Debug.warning("I will not start: not in DOWN state!");
             return;
         }
-
-        if (standAloneServer) {
-            Debug
-                    .info("i will not try to start the server, since its running in stand-alone mode.");
-        } else {
-            if (Util.probePort(port)) {
-                Debug
-                        .warning("ahem... the port is in use. \n"
-                                + "Trying to connect & shutdown, but this may not work.");
-                stopStrategy.stopServer(port);
-            }
-            server = startStrategy.startServer(port);
-
-            new ErrorReporterThread("Server Error Reporter").start(server,
-                    errListeners);
-            new OutputReporterThread("Server Output Reporter").start(server,
-                    outListeners);
-
+        try{
+	        if (standAloneServer) {
+	            Debug
+	                    .info("i will not try to start the server, since its running in stand-alone mode.");
+	        } else {
+	            if (Util.probePort(port)) {
+	                Debug
+	                        .warning("ahem... the port is in use. \n"
+	                                + "Trying to connect & shutdown, but this may not work.");
+	                stopStrategy.stopServer(port);
+	            }
+	            server = startStrategy.startServer(port);
+	
+	            new ErrorReporterThread("Server Error Reporter").start(server,
+	                    errListeners);
+	            new OutputReporterThread("Server Output Reporter").start(server,
+	                    outListeners);
+	
+	        }
+	        Debug.info("ok... trying to connect to port " + port);
+	        InitSession initSession = new InitSession(port);
+	        synchronized (hooks) {
+	            hookFilpFlop = !hookFilpFlop;
+	            for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
+	                LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(it
+	                        .next());
+	                if (h.flipflop != hookFilpFlop) {
+	                    h.onInit(initSession);
+	                }
+	            }
+	        }
+	        initSession.doDispose();
+	        setState(UP);
+	
+	        startupThread = new StartupThread("PrologInterface startup Thread");
+	
+	        startupThread.start();
         }
-        Debug.info("ok... trying to connect to port " + port);
-        InitSession initSession = new InitSession(port);
-        synchronized (hooks) {
-            hookFilpFlop = !hookFilpFlop;
-            for (Iterator it = hooks.keySet().iterator(); it.hasNext();) {
-                LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(it
-                        .next());
-                if (h.flipflop != hookFilpFlop) {
-                    h.onInit(initSession);
-                }
-            }
+        catch(RuntimeException t){
+        	setState(ERROR);
+        	Debug.error("Could not start PI becouse of unhandled exception. Exception will be rethrown.");
+        	throw t;
         }
-        initSession.doDispose();
-        setState(UP);
-
-        startupThread = new StartupThread("PrologInterface startup Thread");
-
-        startupThread.start();
     }
 
     /**
@@ -560,6 +570,10 @@ public class PrologInterface implements IPrologInterface {
             if (state == newState) {
                 return;
             }
+            if (newState==ERROR){
+            	state=DOWN;
+            	return;
+            }
             //check if the transition is allowed.
             switch (newState) {
             case DOWN:
@@ -606,6 +620,7 @@ public class PrologInterface implements IPrologInterface {
      */
     public void setUseSessionPooling(boolean useSessionPooling) {
         this.useSessionPooling = useSessionPooling;
+        pool = useSessionPooling ? new ReusablePool() : null;
     }
 
     public boolean isDown() {
