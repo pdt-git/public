@@ -260,22 +260,27 @@ public class ByteCodeFactGeneratorIType {
 		String type = typeForClass(field.getTypeSignature());
 		String name = "'" + field.getElementName() + "'";
 		String init = "'null'";
-		if(field.getConstant() == null)
-			init = "'null'";
-		else {
-			String newId = idManager.newID();
-			init =""+newId;
-			String [] args = new String [] {
-					newId, 
-					id,
-					id,
-					type,
-					"'" + field.getConstant()+"'"
-			};
-			writer.writeFact("literalT", args);
-			
-		}
 		
+		try {
+			if(field.getConstant() == null)
+				init = "'null'";
+			else {
+				String newId = idManager.newID();
+				init =""+newId;
+				String [] args = new String [] {
+						newId, 
+						id,
+						id,
+						type,
+						"'" + field.getConstant()+"'"
+				};
+				writer.writeFact("literalT", args);
+				
+			}
+		} catch(NumberFormatException nfe){
+		    //This seems to be a bug in  org.eclipse.jdt.internal.core.SourceField.getConstant()
+		    Debug.report(nfe);
+		}
 		String [] args = new String [] {
 				id, 
 				cId,
