@@ -13,7 +13,6 @@
 
 :- multifile test/1.
 
-
 %:- use_module('../base/measure').
 
 /*
@@ -832,9 +831,21 @@ binds it to newId.
 */
 
 cloneTree(_id, _newTree) :-
-    createCloneIDs(_id),
     tree(_id, _parent, _),
     enclosing(_id, _encl),
+    cloneTree(_id,_parent,_encl,_newTree).
+
+/**
+cloneTree(+Id,-NewId)
+
+Creates a deep copy of the tree id, 
+binds it to newId and sets the
+new parent to Parent and the Enclosing
+tree to Encl.
+*/
+
+cloneTree(_id, _parent, _encl, _newTree) :-
+    createCloneIDs(_id,_newTree),
     clone(_id, _parent, _encl, _newTree),
     retractall(cloned(_, _)).
 
@@ -924,6 +935,14 @@ createCloneIDs([_h | _t]) :-
 createCloneIDs([]).
 createCloneIDs(_id) :-
     new_id(_new),
+    !,
+    assert(cloned(_id,_new)),
+    sub_trees(_id, _subs),
+    createCloneIDs(_subs).
+
+createCloneIDs(_id,_new) :-
+    ( var(_new)->
+       new_id(_new);true),
     !,
     assert(cloned(_id,_new)),
     sub_trees(_id, _subs),
