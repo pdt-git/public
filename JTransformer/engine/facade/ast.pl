@@ -15,3 +15,13 @@ delete_toplevel(Path):-
 	deepRetract(ID).
 
 delete_toplevel(_).
+
+/**
+ * delete_source_facts
+ *
+ * deletes all source facts.
+ */
+ delete_source_facts:-
+     rollback,
+    toplevelT(ID, _, _, _), 
+	deepRetract(ID).
