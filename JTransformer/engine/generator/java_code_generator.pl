@@ -17,6 +17,7 @@
  */
  
 :- dynamic sourcePath/1.
+:- dynamic sourceFolder/1.
 :- dynamic align/1.
 :- dynamic gen_classfile_names/1.
 align(0).
@@ -512,11 +513,11 @@ print_anonymous_class(_def) :-
 
 % uwe neu
 appendDir(Filename, Dirfile) :-
-    outdir(Outdir),
-    add_slash_if_needed(Outdir,OutDirWithSlash),
+    outdir(OutDirNoSlash),
     !,
     remove_leading_slash_if_needed(Filename,Clean_Filename),
-    stringAppend(OutDirWithSlash, Clean_Filename, Dirfile).
+    add_suffix_slash_if_needed(OutDirNoSlash,OutDir),
+    stringAppend(OutDir, Clean_Filename, Dirfile).
 appendDir(Filename, Filename).
 
 remove_leading_slash_if_needed(Filename,Clean_Filename):-
@@ -524,13 +525,12 @@ remove_leading_slash_if_needed(Filename,Clean_Filename):-
 
 remove_leading_slash_if_needed(Filename,Filename).
 
-add_slash_if_needed(OutDir,OutDir):-
-    atom_concat(_,'/',OutDir),
-    !.
-    
-add_slash_if_needed(OutDir,OutDirWithSlash):-
-    atom_concat(OutDir,'/',OutDirWithSlash).
-    
+add_suffix_slash_if_needed(Filename,Filename):-
+    atom_concat(_,'/',Filename).
+
+add_suffix_slash_if_needed(Filename,Clean_Filename):-
+    atom_concat(Filename,'/',Clean_Filename).
+
 write_if_fileoutput(X) :-
     output_to_file,
     !,
@@ -543,7 +543,8 @@ gen_toplevel(_toplevel) :-
     appendDir(_filename, _dirfile),
 %    packageT(_packg, Name),
 %    atom_concat('/',Project, '/', Name,_,_filename),
-	(sourceFolder(_toplevel,SourcePath) ->
+	(
+	   sourceFolder(_toplevel,SourcePath) ->
 	    assert1T(sourcePath(SourcePath));true),
     add_to_gen_classfile_names(_dirfile),
     createDirsIfNeeded(_dirfile),
