@@ -23,7 +23,7 @@
             name="Time Tracker"
             id="time.tracker.category"/>
       <view
-            class="org.cs3.timetracker.TimeTrackerGUIViewer"
+            class="org.cs3.timetracker.views.TimeTrackerGUIViewer"
             icon="icons/sample.gif"
             category="time.tracker.category"
             name="Time Tracker"
