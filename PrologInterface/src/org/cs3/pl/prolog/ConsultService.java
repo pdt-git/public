@@ -1,5 +1,6 @@
 package org.cs3.pl.prolog;
 
+import java.io.IOException;
 import java.io.PrintStream;
 
 /**
@@ -71,8 +72,9 @@ public interface ConsultService {
      * reload recorded data. If the ConsultService supports recording of
      * consulted streams, it will try to reload any existing records. Otherwise
      * (or if no records are available) this method does nothing.
+     * @throws IOException
      */
-    public void reload();
+   // public void reload() throws IOException;
 
     /**
      * clear recorded data. if the ConsultService supports recording of
