@@ -72,7 +72,7 @@ public class Logger {
 		  " "+toTime(ticker.getTimeDifference())+"]"+
 		  " "+Comment;
 		try {
-			FileOutputStream OutputStreamObject = new FileOutputStream(FileObject);
+			FileOutputStream OutputStreamObject = new FileOutputStream(FileObject, true);
 			OutputStreamObject.write(LogString.getBytes());
 		}
 		catch(IOException e) {

@@ -40,6 +40,8 @@ public class TimeTicker  {
 
 	private void init()
 	{
+		countsUp = TimeTrackerPlugin.getDefault().isCountingUp();
+		
 		if (countsUp)
 		{
 			seconds = 0;
@@ -94,7 +96,6 @@ public class TimeTicker  {
 
 	public TimeTicker()
 	{
-		countsUp = TimeTrackerPlugin.getDefault().isCountingUp(); 
 		init();
 		
 		observers = new ArrayList();

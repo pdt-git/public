@@ -38,6 +38,22 @@ public class LoggerTest extends TestCase {
 		String logString  = logger.log( GlobalTestComment);
 		assertEquals("Recorded [03:00 02:58 00:02] "+GlobalTestComment,logString);
 	}
+	
+	public void testReadLog() throws Exception
+	{
+		TimeTicker ticker = new TimeTicker();
+		Logger logger = new Logger(ticker);
+		
+		ticker.start();
+		try
+		{
+			Thread.sleep(1800);
+		} catch (Exception e) { e.printStackTrace(); }
+		
+		System.out.println(logger.readLog());
+		
+		assertEquals(1,1);
+	}
 
 	
 	/*
