@@ -36,21 +36,10 @@ public class PrologMetaDataManager extends MetaDataManager {
 	
 	private boolean useCompiled = false;
 	static private final String PROLOG_EXTENSION = "pl";
-    private IPrologInterface client;
+    private IPrologInterface prologInterface;
 	
 	
 		
-	/**
-	 * constructs a new PrologMetaDataManager in the specified directory. This
-	 * <u>must</u> bei either MODEL, EXT or PL.
-	 * @param dir one of MODEL, EXT or PL
-	 * @throws IOException an IO error occured
-	 */
-	PrologMetaDataManager(IPrologInterface client, String dir) throws IOException {
-		super(dir,PROLOG_EXTENSION);
-		this.client = client;
-	}
-
 //	/**
 //	 * loads the currently saved MetaData into the Prolog System.
 //	 * 
@@ -65,11 +54,13 @@ public class PrologMetaDataManager extends MetaDataManager {
 //	}
 
 	
-	private void compile(String filename) throws IOException {
+	
+
+    private void compile(String filename) throws IOException {
 		filename = getFileNameWithNewExtension(filename);
 		String metafile = getMetaDataFileLocation(filename);
 		try {
-            new DefaultMetaInfoProvider(client).consult(metafile);
+            new DefaultMetaInfoProvider(prologInterface).consult(metafile);
         } catch (SessionException e) {
             Debug.report(e);
         }
@@ -108,7 +99,7 @@ public class PrologMetaDataManager extends MetaDataManager {
 		
 		
 		try {
-            new DefaultMetaInfoProvider(client).consult(target);
+            new DefaultMetaInfoProvider(prologInterface).consult(target);
         } catch (SessionException e) {
             Debug.report(e);
         }
@@ -130,7 +121,7 @@ public class PrologMetaDataManager extends MetaDataManager {
 	public void reloadMetaData() throws IOException {
 		//File loc = new File(getStateLocation());
 		
-		loadFiles(new File(getLocation()),client);		
+		loadFiles(new File(getLocation()),prologInterface);		
 	}
 
 	private void loadFiles(File dir,IPrologInterface client) throws IOException {
@@ -285,4 +276,16 @@ public class PrologMetaDataManager extends MetaDataManager {
 	private boolean isCompiled() {
 		return useCompiled;
 	}
+    public IPrologInterface getPrologInterface() {
+        return prologInterface;
+    }
+    public void setPrologInterface(IPrologInterface prologInterface) {
+        this.prologInterface = prologInterface;
+    }
+    public boolean isUseCompiled() {
+        return useCompiled;
+    }
+    public void setUseCompiled(boolean useCompiled) {
+        this.useCompiled = useCompiled;
+    }
 }

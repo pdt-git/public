@@ -62,6 +62,9 @@ public class MetaDataManager {
 
 	public void setLocation(String location){
 	    this.location = location;
+	    File file = new File(location);
+		if(!file.exists())
+			file.mkdirs();
 	}
 	/**
 	 * @param filename
@@ -76,26 +79,19 @@ public class MetaDataManager {
 	}
 
 	
-	private final String dir;
+	private  String dir;
 	
-	private static final boolean debug = true;
 	
-	/**
-	 * 
-	 * @param dir
-	 */
 	
-	MetaDataManager(String dir, String ext) {
-		this.dir = dir;
-		this.extension = ext;
-		File file = new File(getLocation());
-		if(!file.exists())
-			file.mkdirs();
-		
-		
-	}
 
-	/**
+    
+    public String getExtension() {
+        return extension;
+    }
+    public void setExtension(String extension) {
+        this.extension = extension;
+    }
+    /**
 	 * @param path
 	 * @return
 	 */
