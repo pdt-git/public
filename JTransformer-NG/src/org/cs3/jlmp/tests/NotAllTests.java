@@ -14,6 +14,7 @@ public class NotAllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(SourceCodeRegeneratorTest.class);
         suite.addTestSuite(BuilderTest.class);
+        suite.addTestSuite(PersistenceTest.class);
         suite.addTestSuite(FullQualifiedNameTest.class);
         suite.addTestSuite(NormalizeTest.class);
         suite.addTestSuite(MultiDimensionalArraysTest.class);
