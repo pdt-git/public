@@ -208,10 +208,19 @@ gen_new_array_elemtype([], type(Kind,Ref,Dim), _elems) :-
 	gen_komma_list_in_curly_brackets(_elems),
     !.
 
-gen_new_array_elemtype(_dims, Type, _) :-
+gen_new_array_elemtype(_dims, type(Kind,Ref,TotalDim), _) :-
     printf('new '),
-    gen_type_name(Type),
-    gen_trees_in_square_brackets(_dims).
+    gen_type_name(type(Kind,Ref,TotalDim)),
+    gen_trees_in_square_brackets(_dims),
+	%% ld: the number of dimension expressions might be less than 
+	%% the total number of dimensions.  
+	%%We need to pad with empty brackets.
+	%% @see roundtrip test 0011.
+	%% @see MultiDimensionalArraysTest
+	length(_dims,DimCount),
+	Diff is TotalDim - DimCount,
+	print_square_brackets(Diff).
+	
 
 gen_array_elems('null'):-!.
 
@@ -1025,11 +1034,18 @@ gen_literal(type(basic, char, _), _value) :-
 gen_literal(type(basic, _, _), Value) :-
     printf('~a', [Value]).
 
+%% ld: just in case i wonder again: the second arg implies that the first one be class
 gen_literal(_, type(class,ID,Dim)) :-
     fullQualifiedName(ID,Name),
     printf(Name),
     print_square_brackets(Dim),
     printf('.class').
+
+gen_literal(_, type(basic,ValTypeName,Dim)) :-
+    printf(ValTypeName),
+    print_square_brackets(Dim),
+    printf('.class').
+
 
 gen_literal(type(class, _classID, 0), _value) :-
     is_java_lang_string(_classID),
