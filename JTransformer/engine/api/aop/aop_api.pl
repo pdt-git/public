@@ -1070,7 +1070,7 @@ addParamList([],[],_).
 addParamList([Param|Params], [Id|Ids],Parent) :-
     paramDefT(Param,_,Type,Name),
     add(paramDefT(Id,Parent,Type,Name)),
-    addParamList(Params, Ids).    
+    addParamList(Params, Ids,Parent).    
     
 action(add_to_class_fq(Class,Member)):-
     add_to_class_fq(Class,Member).
@@ -1105,7 +1105,7 @@ add_to_class_fq(_class, _id) :-
     add(java_fq(classDefT(_class, _p, _n, _newMembers))).
  
  
-    
+test(add_to_class_fq) :- fail.    
 /**
  * apply_aj_cts.
  * 
