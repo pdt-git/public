@@ -3,6 +3,8 @@ package org.cs3.timetracker.views;
 
 import org.cs3.timetracker.ITimeObserver;
 import org.cs3.timetracker.TimeEvent;
+import org.cs3.timetracker.TimeTracker;
+import org.cs3.timetracker.TimeTrackerGUIInteraction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -11,6 +13,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -97,10 +101,15 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	 * to create the viewer and initialize it.
 	 */
 	public void createPartControl(Composite parent) {
+		parent.setLayout(new GridLayout(2,true));
+		TimeTrackerGUIInteraction tti = new TimeTrackerGUIInteraction(parent);
+		tti.addTimeTracker(new TimeTracker());
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setInput(getViewSite());
+		
+		//viewer.add(tti.getComposite());
 	}
 
 

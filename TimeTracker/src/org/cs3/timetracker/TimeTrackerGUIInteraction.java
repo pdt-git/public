@@ -6,8 +6,8 @@
  */
 package org.cs3.timetracker;
 
-import java.awt.FlowLayout;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.*;
 import org.eclipse.swt.widgets.*;
 
@@ -18,12 +18,17 @@ import org.eclipse.swt.widgets.*;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
-	private Composite buttonpanel;
+	//private Composite buttonpanel;
 	private Button startbutton;
 	private Button pausebutton;
 	private Button continuebutton;
 	private Button stopbutton;
 	private TimeTracker timetracker;
+	
+	
+	/*public Composite getComposite(){
+		return buttonpanel;
+	}*/
 	
 	public void notify(TimeEvent time){
 		if(time.getMinutes()==0 && time.getSeconds()==0){
@@ -35,17 +40,17 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	}
 	
 	public TimeTrackerGUIInteraction(Composite parent){
-		buttonpanel = new Composite(parent, 1);	//TODO find ot static number
-		startbutton = new Button(buttonpanel, 1);
+		//buttonpanel = new Composite(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);	//TODO find ot static number
+		startbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		startbutton.setText("start");
 		startbutton.addMouseListener(this);
-		pausebutton = new Button(buttonpanel, 1);
+		pausebutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		pausebutton.setText("pause");
 		pausebutton.addMouseListener(this);
-		continuebutton = new Button(buttonpanel, 1);
+		continuebutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		continuebutton.setText("continue");
 		continuebutton.addMouseListener(this);
-		stopbutton = new Button(buttonpanel, 1);
+		stopbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		stopbutton.setText("stop");
 		stopbutton.addMouseListener(this);
 	}
@@ -55,27 +60,34 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	}
 	
 	public void mouseDown(MouseEvent e){
-		switch(e.button){
-		case 1:	timetracker.start();
-				startbutton.setEnabled(false);
-				stopbutton.setEnabled(true);
-				pausebutton.setEnabled(true);
-				break;
-		case 2: timetracker.pause();
-				continuebutton.setEnabled(true);
-				pausebutton.setEnabled(false);
-				break;
-		case 3: timetracker.resume();
-				pausebutton.setEnabled(true);
-				continuebutton.setEnabled(false);
-				break;
-		case 4: timetracker.stop();
-				startbutton.setEnabled(true);
-				stopbutton.setEnabled(false);
-				pausebutton.setEnabled(false);
-				continuebutton.setEnabled(false);
-				break;
+		Button temp = (Button) e.getSource();
+		String match = temp.getText();
+		if(match.equalsIgnoreCase("start")){
+			System.out.println(e.button);
+			timetracker.start();
+			startbutton.setEnabled(false);
+			stopbutton.setEnabled(true);
+			pausebutton.setEnabled(true);
 		}
+		if(match.equalsIgnoreCase("pause")){
+			timetracker.pause();
+			continuebutton.setEnabled(true);
+			pausebutton.setEnabled(false);
+			System.out.println(e.button);
+		}
+		if(match.equalsIgnoreCase("continue")){
+			timetracker.resume();
+			pausebutton.setEnabled(true);
+			continuebutton.setEnabled(false);
+		}
+		if(match.equalsIgnoreCase("stop")){
+			timetracker.stop();
+			startbutton.setEnabled(true);
+			stopbutton.setEnabled(false);
+			pausebutton.setEnabled(false);
+			continuebutton.setEnabled(false);
+		}
+		
 	}
 	
 	public void mouseUp(MouseEvent e){
