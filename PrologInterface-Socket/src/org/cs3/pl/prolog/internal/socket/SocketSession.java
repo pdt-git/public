@@ -202,7 +202,10 @@ public class SocketSession implements PrologSession {
                 int eqPos = line.indexOf('=');
                 //Debug.debug("eqPos="+eqPos);
                 String name = line.substring(1, eqPos - 1);
-                String value = line.substring(eqPos + 1);
+                String value = line.substring(eqPos + 1).trim();
+                if(value.startsWith("'")&&value.endsWith("'")){
+                    value=value.substring(1,value.length()-1);
+                }
                 result.put(name, value);
             }
         } finally {
