@@ -9,6 +9,7 @@
 :- dynamic globalIds/4.
 :- dynamic globalIds/4.
 :- dynamic symtab/2.
+:- dynamic errors_in_java_code/0.
 :- dynamic ignore_unresolved_type/1.
 
 :- dynamic local2FQN/2.
@@ -351,6 +352,6 @@ addToGlobalIdsAndFacts(Fqn):-
  */
     
 remove_contained_global_ids(Path):-
-	toplevelT(ID, _, Path, Defs), 
+	toplevelT(_, _, Path, Defs), 
 	forall((member(M,Defs),classDefT(M,_,_,_)),
 	       retractall(globalIds(_,M))).
