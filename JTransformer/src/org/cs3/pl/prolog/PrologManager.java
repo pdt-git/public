@@ -88,7 +88,8 @@ public class PrologManager {
 	private static final boolean STANDALONE_SERVER = Boolean.getBoolean("org.cs3.pl.jtransformer.standalone_server");
 	
 
-
+	private static final Object getInstanceMonitor = new Object();
+	
 	private IPrologListener dispatcher = new IPrologListener(){
 
         public void enterCatchedCall(PrologEvent e) {
@@ -110,17 +111,17 @@ public class PrologManager {
 	};
 
 	public static PrologManager getInstance() {
-		
-		if (managerInst == null) {
-			try {
-				managerInst = new PrologManager();
-			} catch (IOException e) {
-				e.printStackTrace();
-				Debug.report(e);
-			}
-			//managerInst.getClient(); //FIXME: encapsulate initialization of the PrologManager
-		}
-		return managerInst;
+	    if (managerInst == null) {
+            synchronized (getInstanceMonitor) {
+                try {
+                    managerInst = new PrologManager();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Debug.report(e);
+                }
+            }
+        }
+        return managerInst;
 	}
 
 
