@@ -23,7 +23,7 @@ public class TimeTrackerPreferencePage
 
 //		public static final String P_WORKING_DIR = "workingDir";
 //  public static final String P_USER = "userRubPreference";
-		public static final String P_IS_COUNTING_UP = "iscountingup";
+		public static final String P_IS_COUNTING_UP = "timetrackerpreferencepage.iscountingup";
 		
 		public TimeTrackerPreferencePage() {
 			super(GRID);
@@ -36,9 +36,7 @@ public class TimeTrackerPreferencePage
 		 */
 		private void initializeDefaults() {
 			IPreferenceStore store = getPreferenceStore();
-			store.setDefault(P_IS_COUNTING_UP, false);
-//      store.setDefault(P_USER, "This field is useless");
-//      store.setDefault(P_RESTORE, true);  
+			store.setDefault(P_IS_COUNTING_UP, true);
 		}
 
 		/**
