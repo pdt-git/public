@@ -274,11 +274,11 @@ tree_constraints(getFieldT, [[allType],[methodDefT,fieldDefT],[expressionType,nu
 tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atomType], [classDefT,localDefT,paramDefT,nullType,packageT]]).
 tree_constraints(ifT,[[allType],[methodDefT],[expressionType],[blockT,statementType],[blockT,statementType,nullType]]).
 tree_constraints(implementsT,[[],[classDefT]]).
-tree_constraints(importT ,[[toplevelT],[atomType,classDefT]]).
+tree_constraints(importT ,[[toplevelT],[packageT,classDefT]]).
 tree_constraints(indexedT,[[allType],[methodDefT,fieldDefT],[expressionType],[expressionType]]).
 tree_constraints(interfaceT ,[[]]).
 tree_constraints(labelT,[[allType],[methodDefT,fieldDefT],[statementType],[atomType]]).
-tree_constraints(literalT ,[[allType],[methodDefT,fieldDefT],[typeTermType],[atomType,typeTermType]]).
+tree_constraints(literalT ,[[allType],[methodDefT,fieldDefT],[typeTermType],[typeTermType/* TODO: vorher auch atomType*/ ]]). 
 tree_constraints(localDefT,[[allType],[methodDefT],[typeTermType],[atomType],[expressionType,nullType]]).
 tree_constraints(methodDefT ,[[classDefT],[atomType],[paramDefT],[typeTermType,nullType],[classDefT],[blockT,nullType]]).
 tree_constraints(modifierT,[[atomType]]).

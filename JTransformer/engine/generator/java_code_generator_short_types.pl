@@ -98,7 +98,7 @@ gen_type(_, type(basic, _type, _dim)) :-
 gen_type(_pos, _typeID) :-
     (
     	importT(_, _top,_typeID);
-	    (importT(_, _top,PName),packageT(PID,PName), classDefT(_typeID,PID,_,_))
+	    (importT(_, _top,PID),classDefT(_typeID,PID,_,_))
 	),
 	!,
 	class(_typeID,_,Name),

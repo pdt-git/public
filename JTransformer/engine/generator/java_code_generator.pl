@@ -636,7 +636,8 @@ gen_tree(_id) :-
     printf('import ~a;~n', [_name]).
 
 gen_tree(_id) :-
-    importT(_id, _pid, _name),
+    importT(_id, _pid, PackageId),
+    packageT(PackageId,_name),
     !,
     printf('import ~a.*;~n', [_name]).
 

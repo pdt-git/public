@@ -159,23 +159,98 @@ remove_brackets(Atom,class, Id,0):-
  * java_fq
  */
 
-% java_fq(Term):-
-%	var(Term),
-	%tree(ID,_,_),
-%	getTerm(_ID,Term),
-%	java_fq(Term).
- 
+ java_fq(Term):-
+	var(Term),
+	throw('java_fq: term not instantiated').
+
+% clause for classDefT
+
+ java_fq(Term):-
+     checkArgumentNumber(Term),
+     Term =.. [classDefT|[FQN|Args]],
+     nonvar(FQN),
+     !,
+     fullQualifiedName(Id,FQN),
+	 getTerm(Id,JavaAST),
+     JavaAST =.. [classDefT,Id|JavaASTArgs],
+     call(JavaAST),
+     mapArgs(JavaASTArgs,Args).
+
+ java_fq(Term):-
+     Term =.. [classDefT|[FQN|Args]],
+     var(FQN),
+     !,
+	 ast_node_def('Java',classDefT,[_|ArgDefs]),
+	 bindArgs(ArgDefs, Args, JavaASTArgs),
+     JavaAST =.. [classDefT,Id|JavaASTArgs],
+     call(JavaAST),
+     fullQualifiedName(Id,FQN),
+     mapArgs(JavaASTArgs,Args).
+
+% attributes (modifierT,interfaceT...)
+java_fq(Term):-
+     Term =.. [Functor|Args],
+     attribSignature(Functor,_),
+     !,
+	 ast_node_def('JavaAttributes',Functor,ArgDefs),
+	 bindArgs(ArgDefs, Args, JavaASTArgs),
+     JavaAST =.. [Functor|JavaASTArgs],
+     call(JavaAST),
+     mapArgs(JavaASTArgs,Args).
+     
+
+% clause for instantiated Id
  java_fq(Term):-
      Term =.. [Functor|[Id|Args]],
      nonvar(Id),
-	 %ast_node_def('Java',Functor,[_|ArgDefs]),
+     !,
 	 getTerm(Id,JavaAST),
      JavaAST =.. [Functor,Id|JavaASTArgs],
      call(JavaAST),
      mapArgs(JavaASTArgs,Args).
     
+% clause for uninstantiated Id
+ java_fq(Term):-
+     Term =.. [Functor|[Id|Args]],
+     !,
+	 ast_node_def('Java',Functor,[_|ArgDefs]),
+	 bindArgs(ArgDefs, Args, JavaASTArgs),
+     JavaAST =.. [Functor,Id|JavaASTArgs],
+     call(JavaAST),
+     mapArgs(JavaASTArgs,Args).
+    
+% clause for uninstantiated Id
+/*
+ java_fq(Term):-
+     Term =.. [Functor|[Id|Args]],
+     !,
+	 checkArgumentNumber(Functor,[Id|Args]),
+     JavaAST =.. [Functor,Id|JavaASTArgs],
+     call(JavaAST),
+     mapArgs(JavaASTArgs,Args).
+ */  
+    
+checkArgumentNumber(Term):-
+    Term =.. [Functor|Args],    
+    length(Args,Len),
+    treeSignature(Functor,Len),
+    !.
+    
+checkArgumentNumber(Term):-
+    Term =.. [Functor|Args],    
+    length(Args,Len),
+    attribSignature(Functor,Len),
+    !.
+
+checkArgumentNumber(Term):-
+    Term =.. [Functor|Args],    
+    term_to_atom(Args,Atom),
+    sformat(S,'~a(~a) is not a valid java AST.', [Functor,Atom]),
+    error_occured(S).
+	
+	
 mapArgs([],[]).
-     
+    
 mapArgs([JavaASTArg|JavaASTArgs],[FQN|Args]):-
     classDefT(JavaASTArg,_,_,_),
     !,
@@ -194,6 +269,79 @@ test(java_fq,(
    assert_true('full instantiated fieldDefT',
       java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
    assert_true('full instantiated fieldDefT',
-      java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null)))
-     
+      java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
+   assert_true('',
+	   java_fq(fieldDefT(Id,Parent,'java.lang.Class',B,C)))
       )).
+
+
+bindArgs(_, [], []).
+
+bindArgs([_|ArgDefs], [Arg|Args], [_|JavaASTArgs]) :-
+    var(Arg),
+    !,
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
+
+% in the case the id is null
+bindArgs([ast_arg(_,_, id,  _)|ArgDefs], [null|Args], [null|JavaASTArgs]) :-
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
+% attribute is a classDefT
+bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
+    fullQualifiedName(JavaASTArg, FQN),
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+    
+bindArgs([ast_arg(_,mult(_,_,ord), id,  Kind)|ArgDefs], [FQNAndIdList|Args], [IdList|JavaASTArgs]) :-
+	member(classDefT,Kind),
+	replaceFQNsWithClassIds(FQNAndIdList,IdList),
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+    
+    
+% type term attribute.
+% INFO: there MUST not be other attribute kind possible where [typeTermType]
+% assigned, also no nullType)
+bindArgs([ast_arg(_,_, _,  [typeTermType])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
+    !,
+    type_term_to_atom(JavaASTArg,FQN),
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
+% attribute that is not a type term
+bindArgs([ast_arg(_,_, attr,  _)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
+% id with several Kinds, but no classDefT
+bindArgs([ast_arg(_,_, id,  Kind)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
+	not(member(classDefT,Kind)),
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
+% id with several Kinds, and a classDefT - TODO: by now expensive!?
+bindArgs([ast_arg(_,_, id, _)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
+	fullQualifiedName(JavaASTArg,FQN),
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+
+bindArgs([ast_arg(_,_, _,  _)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
+	bindArgs(ArgDefs, Args, JavaASTArgs).
+         
+replaceFQNsWithClassIds([],[]).
+replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
+	var(FQN),
+	!,
+	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+	
+	
+replaceFQNsWithClassIds([FQN|FQNsAndIds], [Id|Ids]):-
+	fullQualifiedName(Id,FQN),
+	!,
+	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+
+replaceFQNsWithClassIds([Id|FQNsAndIds], [Id|Ids]):-
+	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+
+
+         
+error_occured(S):-
+    write(S),
+    flush_output,
+	throw(S).
+      
