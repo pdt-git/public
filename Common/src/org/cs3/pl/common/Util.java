@@ -4,12 +4,16 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -69,7 +73,7 @@ public class Util {
      * 
      * @param cmd
      * @return an array of two strings: th 0th one contains process output, the
-     *               1th one error.
+     *             1th one error.
      * @throws IOException
      * @throws InterruptedException
      */
@@ -136,10 +140,10 @@ public class Util {
         return s;
     }
 
-    public static String prologFileName(File f){
+    public static String prologFileName(File f) {
         return normalizeOnWindoze(f.toString());
     }
-    
+
     public static String toString(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         byte[] buf = new byte[1024];
@@ -149,6 +153,97 @@ public class Util {
             read = in.read(buf);
         }
         return out.toString();
+    }
+
+    //  specify buffer size for extraction
+    static final int BUFFER = 2048;
+
+    
+    /*
+     * the body of this method was taken from here.
+     * 
+     * http://www.devshed.com/c/a/Java/Zip-Meets-Java/2/ 
+     *
+     * Many thanks to the author, Kulvir Singh Bhogal.
+     *  
+     * I could not find any license or copyright notice
+     * If there are any legal problems please let me: know
+     * degenerl_AT_cs_DOT_uni-bonn_DOT_de
+     * 
+     * --lu
+     */
+    public static void unzip(File sourceZipFile, File unzipDestinationDirectory) {
+        try {
+
+            // Open Zip file for reading
+            ZipFile zipFile = new ZipFile(sourceZipFile, ZipFile.OPEN_READ);
+
+            // Create an enumeration of the entries in the zip file
+            Enumeration zipFileEntries = zipFile.entries();
+
+            // Process each entry
+            while (zipFileEntries.hasMoreElements()) {
+                // grab a zip file entry
+                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+
+                String currentEntry = entry.getName();
+                System.out.println("Extracting: " + entry);
+
+                File destFile = new File(unzipDestinationDirectory,
+                        currentEntry);
+
+                // grab file's parent directory structure
+                File destinationParent = destFile.getParentFile();
+
+                // create the parent directory structure if needed
+                destinationParent.mkdirs();
+
+                // extract file if not a directory
+                if (!entry.isDirectory()) {
+                    BufferedInputStream is = new BufferedInputStream(zipFile
+                            .getInputStream(entry));
+                    int currentByte;
+                    // establish buffer for writing file
+                    byte data[] = new byte[BUFFER];
+
+                    // write the current file to disk
+                    FileOutputStream fos = new FileOutputStream(destFile);
+                    BufferedOutputStream dest = new BufferedOutputStream(fos,
+                            BUFFER);
+
+                    // read and write until last byte is encountered
+                    while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
+                        dest.write(data, 0, currentByte);
+                    }
+                    dest.flush();
+                    dest.close();
+                    is.close();
+                }
+            }
+            zipFile.close();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
+    }
+
+    /**
+     * @param file
+     */
+    public static void unzip(File file) {        
+        unzip(file,file.getParentFile());
+    }
+
+    /**
+     * @param file
+     */
+    public static void deleteRecursive(File file) {
+        if(file.isDirectory()){
+            File[] files = file.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                deleteRecursive(files[i]);                
+            }
+        }
+        file.delete();
     }
 
 }
