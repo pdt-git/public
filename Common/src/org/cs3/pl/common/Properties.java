@@ -19,20 +19,30 @@ public class Properties {
 	public final static String SWIPL_DIR = "jtransformer.swipl.dir";
 
 	/**
+	 * the port on which the RaPlaRPC server is listening.
+	 */
+	public static final String SERVER_PORT = "jtransformer.server.port";
+	
+	/**
+	 * the port on which the prolog console server is listening.
+	 */
+	public static final String CONSOLE_PORT = "jtransformer.server.port";
+
+	/**
 	 * if set to "true", the prolog interface will not try to start the server
 	 * process, but instead expect it to be allready running. This option is
 	 * mainly usefull for debugging the server process.
 	 */
 	public final static String SERVER_STANDALONE = "jtransformer.server.standalone";
 
-	/**
-	 * a comma-separated list of fully qualified classnames. When the
-	 * PrologInterface class is initialy loaded, it will try to load each of the
-	 * specified classes (class-for-name) thereby triggering any static blocks
-	 * within those classes. By putting them in there, you can make sure your
-	 * init/startup hooks are registered on time.
-	 */
-	public static final String PLIF_HOOKS = "jtransformer.plif.hooks";
+//	/**
+//	 * a comma-separated list of fully qualified classnames. When the
+//	 * PrologInterface class is initialy loaded, it will try to load each of the
+//	 * specified classes (class-for-name) thereby triggering any static blocks
+//	 * within those classes. By putting them in there, you can make sure your
+//	 * init/startup hooks are registered on time.
+//	 */
+//	public static final String PLIF_HOOKS = "jtransformer.plif.hooks";
 
 	/**
 	 * if set to "true", the prolog interface will use a pool of PrologSessions
