@@ -162,7 +162,7 @@ class(_id, _owner, _name) :-
 action(add(class(_id, _owner, _name))) :-
     !,
     add(classDefT(_id, _owner, _name, [])),
-    (
+    ((
        debugme,
        print(debugme),
        modifierT(_id,'public'),
@@ -182,7 +182,7 @@ action(add(class(_id, _owner, _name))) :-
        assert(created_file(Filename)),
        print('_created_file'),             
        add(projectLocationT(TID, Project,SourceFolder))
-     );true.
+     );true).
 
 /*
 	sourceFolder(+Toplevel,-Sourcefolder)
