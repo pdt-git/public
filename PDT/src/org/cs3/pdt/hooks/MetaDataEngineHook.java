@@ -28,7 +28,7 @@ public class MetaDataEngineHook implements LifeCycleHook {
         String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
         String engine = service.getString(qualifier,Properties.METADATA_ENGINE_DIR,null,null);       
     	if(engine==null){
-    		throw new NullPointerException("Required property \""+Properties.CONSULT_PATH+"\" was not specified.");
+    		throw new NullPointerException("Required property \""+Properties.METADATA_ENGINE_DIR+"\" was not specified.");
     	}
 		return engine;
 	}
