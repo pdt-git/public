@@ -2,13 +2,15 @@
  */
 package org.cs3.pl.prolog.internal;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.util.Hashtable;
 
 import org.cs3.pl.prolog.SessionException;
 
 /**
  */
-public interface RemotePrologSession {
+public interface RemotePrologSession extends Remote {
 	/**
 	 * begins a query on the Prolog system. If there was an active query running, further
 	 * results lost, so calls to next() will return results of this query. The
@@ -28,8 +30,8 @@ public interface RemotePrologSession {
 	 * @throws SessionException an abnormal condition was detected
 	 */
 	
-	public Hashtable query(String query) throws SessionException;
-	public Hashtable[] queryAll(String query)throws SessionException;
+	public Hashtable query(String query) throws SessionException,RemoteException;
+	public Hashtable[] queryAll(String query)throws SessionException,RemoteException;
 	/**
 	 * returns the next set of Bindings satisfying the last query.
 	 * 
@@ -43,7 +45,7 @@ public interface RemotePrologSession {
 	 * @throws SessionException an IO Error occured
 	 */
 	
-	public Hashtable next() throws SessionException;
+	public Hashtable next() throws SessionException,RemoteException;
 		
-	public void shutdownServer();
+	public void shutdownServer()throws RemoteException;
 }
