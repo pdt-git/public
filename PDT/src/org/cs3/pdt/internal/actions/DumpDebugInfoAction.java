@@ -3,11 +3,11 @@
 package org.cs3.pdt.internal.actions;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
@@ -39,7 +39,7 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
      */
     public void run(IAction action) {
         PDTPlugin plugin = PDTPlugin.getDefault();
-		IPrologInterface pif = null;
+		PrologInterface pif = null;
 		try {
 			pif = plugin.getPrologInterface();
 		} catch (IOException e) {
@@ -47,7 +47,7 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
 		}
 		 try {
              PrologSession session = pif.getSession();
-             Hashtable r = session.query("current_thread(A,B)");
+             Map r = session.query("current_thread(A,B)");
              while(r!=null){
                  Debug.info(r.get("A")+"-->"+r.get("B"));
                  r=session.next();

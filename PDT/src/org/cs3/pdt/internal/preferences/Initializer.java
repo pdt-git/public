@@ -13,6 +13,8 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.Option;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -52,6 +54,7 @@ public class Initializer extends AbstractPreferenceInitializer {
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
                 new FileOutputStream(logFile));
         Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+        
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
         String fileSep = File.separator;
@@ -68,15 +71,8 @@ public class Initializer extends AbstractPreferenceInitializer {
         Integer.getInteger(PDT.PREF_CONSOLE_PORT, -1);
         int consolePort = Integer.getInteger(PDT.PREF_CONSOLE_PORT, 4711)
                 .intValue();
-        int serverPort = Integer.getInteger(PDT.PREF_SERVER_PORT, 4143)
-                .intValue();
       
         String consultPath = System.getProperty(PDT.PREF_CONSULT_PATH, "");
-        boolean serverStandAlone = Boolean
-                .getBoolean(PDT.PREF_SERVER_STANDALONE);
-//        boolean sessionPooling = Boolean
-//                .getBoolean(PDT.PREF_USE_SESSION_POOLING);
-        boolean sessionPooling = Boolean.valueOf(System.getProperty(PDT.PREF_USE_SESSION_POOLING,"true")).booleanValue();
         boolean consultRecursive = Boolean
                 .getBoolean(PDT.PREF_CONSULT_RECURSIVE);
         String debugLevel = System.getProperty(PDT.PREF_DEBUG_LEVEL,"DEBUG");
@@ -84,20 +80,17 @@ public class Initializer extends AbstractPreferenceInitializer {
                 PDT.PREF_METADATA_ENGINE_DIR, location + fileSep + "engine");
         String metadataStoreDir = System.getProperty(
                 PDT.PREF_METADATA_STORE_DIR, location + fileSep + "store");
-//        String swiplDir = System.getProperty(PDT.PREF_SWIPL_DIR, location
-//              
         String swiplDir = System.getProperty(PDT.PREF_SWIPL_DIR, guessSwiLocation());
-        String serverClasspath = System.getProperty(PDT.PREF_SERVER_CLASSPATH,
-                getLibDir() + fileSep + "PrologInterface.jar" + pathSep
-                        + getLibDir() + fileSep + "RaPlaRPC.jar" + pathSep
-                        + getLibDir() + fileSep + "Common.jar" + pathSep
-                        + swiplDir + fileSep + "lib" + fileSep + "jpl.jar");
         String sourcePathDefault = System.getProperty(
                 PDT.PREF_SOURCE_PATH_DEFAULT, "/pl");
+        String pifImpl =System.getProperty(PDT.PREF_PIF_IMPLEMENTATION,"org.cs3.pl.prolog.internal.socket.Factory");
+        
+        PDTPlugin plugin = PDTPlugin.getDefault();
+        
+        
+        String qualifier = plugin.getBundle().getSymbolicName();
 
-        String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
-
-        String executable = System.getProperty(PDT.PREF_SWIPL_EXECUTABLE,guessExecutableName());
+         
         
         IScopeContext context = new DefaultScope();
 
@@ -111,13 +104,17 @@ public class Initializer extends AbstractPreferenceInitializer {
             node.put(PDT.PREF_DEBUG_LEVEL, debugLevel);            
             node.put(PDT.PREF_METADATA_ENGINE_DIR, metadataEngineDir);
             node.put(PDT.PREF_METADATA_STORE_DIR, metadataStoreDir);
-            node.put(PDT.PREF_SERVER_CLASSPATH, serverClasspath);
-            node.putInt(PDT.PREF_SERVER_PORT, serverPort);
-            node.putBoolean(PDT.PREF_SERVER_STANDALONE, serverStandAlone);
             node.put(PDT.PREF_SWIPL_DIR, swiplDir);
-            node.putBoolean(PDT.PREF_USE_SESSION_POOLING, sessionPooling);
             node.put(PDT.PREF_SOURCE_PATH_DEFAULT, sourcePathDefault);
-            node.put(PDT.PREF_SWIPL_EXECUTABLE, executable);
+            node.put(PDT.PREF_PIF_IMPLEMENTATION,pifImpl);
+            PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance(pifImpl);
+            factory.setResourceLocator(plugin.getResourceLocator(PDT.LOC_PIF));
+            Option[] options = factory.getOptions();
+            for(int i=0;i<options.length;i++){
+                String id=options[i].getId();
+                String def = System.getProperty(id,options[i].getDefault());
+                node.put(id,def);
+            }
             String[] strings = node.keys();
             for (int i = 0; i < strings.length; i++) {
                 Debug.info(strings[i]+" --> "+node.get(strings[i],"n.a."));

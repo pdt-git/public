@@ -3,7 +3,6 @@
 package org.cs3.pdt.internal.editors;
 
 import org.cs3.pl.common.Debug;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;

@@ -1,3 +1,5 @@
-:- [library(pdtplugin)].
-:- [library('PrologInterface/consult_server')].
-:- [library('MetaData/runtime')].
+:- ['pdtplugin'].
+:- ['PrologInterface/consult_server.pl'].
+:- ['MetaData/runtime.pl'].
+:- ['MetaData/plparser.pl'].
+:- ['MetaData/model.pl'].

@@ -2,6 +2,9 @@ package org.cs3.pl.prolog;
 
 import java.util.EventObject;
 
+/**
+ * @deprecated
+ */
 public class ConsultServiceEvent extends EventObject {
     private static final long serialVersionUID = 1L;
     private String symbol;

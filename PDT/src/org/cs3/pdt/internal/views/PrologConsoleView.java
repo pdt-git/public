@@ -9,7 +9,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
-import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.Platform;
@@ -45,7 +45,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
      */
     private void createPartControl_impl(Composite parent) {
         PDTPlugin plugin = PDTPlugin.getDefault();
-        IPrologInterface pi = null;
+        PrologInterface pi = null;
         try {
             pi = plugin.getPrologInterface();
         } catch (IOException e) {

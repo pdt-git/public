@@ -9,8 +9,8 @@ package org.cs3.pdt.internal.editors;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
@@ -18,9 +18,9 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
-import org.cs3.pl.prolog.IPrologInterface;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -392,9 +392,9 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
      */
     private String getHelp(PrologElementData data) throws IOException {
         PDTPlugin plugin = PDTPlugin.getDefault();
-        IPrologInterface pif = plugin.getPrologInterface();
+        PrologInterface pif = plugin.getPrologInterface();
         PrologSession session = pif.getSession();
-        Hashtable table = null;
+        Map table = null;
         try {
             table = session.query(PDTPlugin.MODULEPREFIX + "manual_entry("
                     + data.getLabel() + "," + data.getArity() + ",Info)");

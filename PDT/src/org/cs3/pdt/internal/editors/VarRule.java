@@ -1,6 +1,9 @@
 package org.cs3.pdt.internal.editors;
 
-import org.eclipse.jface.text.rules.*;
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IPredicateRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.Token;
 
 public class VarRule implements IPredicateRule {
 

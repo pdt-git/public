@@ -6,11 +6,11 @@
  */
 package org.cs3.pdt.internal.editors;
 
+import junit.framework.TestCase;
+
 import org.cs3.pl.metadata.PrologElementData;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-
-import junit.framework.TestCase;
 
 /**
  * @author windeln

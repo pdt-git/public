@@ -4,7 +4,7 @@ package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -31,7 +31,7 @@ public class RestartAction implements IWorkbenchWindowActionDelegate {
      */
     public void run(IAction action) {
         try {
-            IPrologInterface prologInterface = PDTPlugin.getDefault().getPrologInterface();
+            PrologInterface prologInterface = PDTPlugin.getDefault().getPrologInterface();
             prologInterface.stop();
             prologInterface.start();
         } catch (Throwable t) {

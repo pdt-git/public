@@ -83,6 +83,8 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
             InputStream in = file.getContents();
             OutputStream out=consultService.getOutputStream(file.getFullPath().toString());
             Util.copy(in,out);
+            in.close();
+            out.close();
         } catch (IOException e) {
             Debug.error("could not consult.");
             Debug.report(e);

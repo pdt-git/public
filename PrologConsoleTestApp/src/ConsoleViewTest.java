@@ -1,14 +1,15 @@
 /*
  */
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.Map;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.internal.rpc.RPCPrologInterface;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Display;
@@ -24,13 +25,11 @@ public class ConsoleViewTest {
         Display display = shell.getDisplay();
         ConsoleView view = new ConsoleView();
         view.createPartControl(shell);
-        final RPCPrologInterface pif = new RPCPrologInterface();
+        final PrologInterface pif = PrologInterfaceFactory.newInstance().create();
         int serverPort= Integer.getInteger(PDT.PREF_SERVER_PORT,4143).intValue();
     	if(serverPort==-1){
     		throw new NullPointerException("Required property \""+PDT.PREF_SERVER_PORT+"\" was not specified.");
     	}
-        pif.setPort(serverPort);
-        pif.setStandAloneServer(Boolean.getBoolean(PDT.PREF_SERVER_STANDALONE));
         final PrologSocketConsoleModel consoleModel = new PrologSocketConsoleModel(false);
         int consolePort= Integer.getInteger(PDT.PREF_CONSOLE_PORT,4711).intValue();
     	if(consolePort==-1){
@@ -68,7 +67,7 @@ public class ConsoleViewTest {
                 if (keyCode==SWT.F9){                    
                     try {
                         PrologSession session = pif.getSession();
-                        Hashtable r = session.query("current_thread(A,B)");
+                        Map r = session.query("current_thread(A,B)");
                         while(r!=null){
                             Debug.info(r.get("A")+"-->"+r.get("B"));
                             r=session.next();
@@ -97,7 +96,11 @@ public class ConsoleViewTest {
                     return false;
                 }
                 if (keyCode==SWT.F12){                    
-                    pif.stop();
+                    try {
+                        pif.stop();
+                    } catch (IOException e) {
+                      Debug.report(e);
+                    }
                     return false;
                 }
                 return super.keyStrokeIntercepted(keyCode, keyChar);

@@ -5,27 +5,26 @@ import java.util.TreeSet;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.DefaultMetaInfoProvider;
+import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
-import org.cs3.pl.prolog.IPrologInterface;
-import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologException;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	/**
 	 * @return Returns the prologInterface.
 	 */
-	public IPrologInterface getPrologInterface() {
+	public PrologInterface getPrologInterface() {
 		return prologInterface;
 	}
 	/**
 	 * @param prologInterface The prologInterface to set.
 	 */
-	public void setPrologInterface(IPrologInterface prologInterface) {
+	public void setPrologInterface(PrologInterface prologInterface) {
 		this.prologInterface = prologInterface;
 	}
-    IPrologInterface prologInterface=null;
+    PrologInterface prologInterface=null;
 	private class _Result implements CompoletionResult{
 
         public String getOriginalLineContent() {

@@ -8,9 +8,9 @@ package org.cs3.pl.metadata;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Hashtable;
+import java.util.Map;
 
-import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -35,7 +35,7 @@ public class PrologElementData implements Serializable, Comparable{
 	private int length;
 	private boolean pub;
 
-	private IPrologInterface prologInterface=null;
+	private PrologInterface prologInterface=null;
 	private String modulePrefix=""; 
 	
 	/**
@@ -196,7 +196,7 @@ public class PrologElementData implements Serializable, Comparable{
 		}
 		PrologSession session = prologInterface.getSession();
 		try {
-		    Hashtable table = session.query(modulePrefix+"manual_entry("+getLabel()+","+getArity()+",Info)");
+		    Map table = session.query(modulePrefix+"manual_entry("+getLabel()+","+getArity()+",Info)");
 		    if (table != null)
 		        return table.get("Info").toString();
 		    return null;

@@ -1,6 +1,5 @@
 package org.cs3.pdt;
 
-
 /**
  * All kinds of string keys used by the pdt.
  */
@@ -24,7 +23,6 @@ public interface PDT {
      * the port to use for writing fact data into the prolog system.
      */
     //public static final String PREF_CONSULT_PORT = "pdt.consult.port";
-
     /**
      * A list of absolute os filesystem paths, separated by your favourite
      * path.separator (i.e. a colon on most unix systems)
@@ -68,11 +66,15 @@ public interface PDT {
     /**
      * the absolute os file system path to the directory containing the SWI
      * Prolog installation to use. Typicaly something like pdt_HOME/swipl
+     * @deprecated pif implementations should define their own options.
+     * @see org.cs3.pl.prolog.PrologInterfaceFactory
      */
     public final static String PREF_SWIPL_DIR = "pdt.swipl.dir";
 
     /**
      * the port on which the RaPlaRPC server is listening.
+     *  @deprecated pif implementations should define their own options.
+     * @see org.cs3.pl.prolog.PrologInterfaceFactory
      */
     public static final String PREF_SERVER_PORT = "pdt.server.port";
 
@@ -102,12 +104,22 @@ public interface PDT {
      * if set to "true", the prolog interface will not try to start the server
      * process, but instead expect it to be allready running. This option is
      * mainly usefull for debugging the server process.
+     * 
+     * @deprecated pif implementations should define their own options.
+     * @see org.cs3.pl.prolog.PrologInterfaceFactory
      */
     public final static String PREF_SERVER_STANDALONE = "pdt.server.standalone";
+
+    public static final String LOC_PIF = "engine/PrologInterface";
+    public static final String LOC_MODEL = "engine/MetaData";
+    public static final String LOC_ENGINE = "engine";
 
     /**
      * the name of the swi prolog executable to use, e.g. <code>"xpce"</code>
      * or <code>"/usr/local/bin/xpce"</code>.
+     * 
+     * @deprecated pif implementations should define their own options.
+     * @see org.cs3.pl.prolog.PrologInterfaceFactory
      */
     public static final String PREF_SWIPL_EXECUTABLE = "pdt.swi.executable";
 
@@ -119,6 +131,9 @@ public interface PDT {
      * connection alive. Reusing it _should_ give some advantage over creating a
      * new one. However, since this is a relatively new feature, and not 100%
      * tested, the default is to go without pooling.
+     * 
+     * @deprecated pif implementations should define their own options.
+     * @see org.cs3.pl.prolog.PrologInterfaceFactory
      */
     public static final String PREF_USE_SESSION_POOLING = "pdt.use.session.pooling";
 
@@ -146,12 +161,25 @@ public interface PDT {
      * contains the classpath to use when starting the server process. It
      * should, for instance, contains the class
      * org.cs3.pl.prolog.PrologInterfaceServer
+     * 
+     * @deprecated pif implementations should define their own options.
+     * @see org.cs3.pl.prolog.PrologInterfaceFactory
      */
     public final static String PREF_SERVER_CLASSPATH = "pdt.server.classpath";
+
+    /**
+     * The fully-qualified classname of a class that extends
+     * PrologInterfaceFactory.
+     */
+    public final static String PREF_PIF_IMPLEMENTATION = "pdt.pif.implementation";
 
     /**
      * The basename of the resource bundle to be used by the pdt ui
      */
     public final static String RES_BUNDLE_UI = "org.cs3.pdt.ui";
+
+    
+
+    
 
 }

@@ -1,8 +1,8 @@
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologSession;
 
 /**
  * An Init/ShutdownHook that takes the neccesary steps to open/close

@@ -4,11 +4,24 @@
 	node/1,
 	node/2,
 	node_property/2,
+	parse_property/2,
+	parse_property_list/2,
 	child/2]
 	).
 :- import(plparser:node_id(_)).	
 :- import(plparser:node_attr(_,_)).
 :- import(consult_server:starts_at(_,_)).
+
+parse_property_list(In,Out):-
+    maplist(parse_property,In,Out).
+
+parse_property(In,Out):-
+	In=..[Functor|Args],
+	parse_property(Functor,Args,Out).
+	
+parse_property(Functor,[],Functor->true).
+
+parse_property(Functor,[Arg|[]],Functor->Arg).		    
 
 node(Id):-
     my_writeln('node(predicate_node(M:F/A))'),

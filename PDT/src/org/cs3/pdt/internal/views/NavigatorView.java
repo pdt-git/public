@@ -1,24 +1,38 @@
 package org.cs3.pdt.internal.views;
 
-import java.util.ArrayList;
+import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.model.IClause;
-import org.cs3.pl.model.IModule;
-import org.cs3.pl.model.IPrologElement;
-import org.cs3.pl.model.PLRuntime;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.part.*;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.jface.action.*;
+import org.cs3.pl.model.INode;
+import org.cs3.pl.prolog.PrologInterface;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.*;
-import org.eclipse.swt.widgets.Menu;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
-import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.part.DrillDownAdapter;
+import org.eclipse.ui.part.ViewPart;
 
 
 /**
@@ -50,7 +64,7 @@ public class NavigatorView extends ViewPart {
 
 	class ViewContentProvider implements IStructuredContentProvider, 
 										   ITreeContentProvider {
-		private PETreeNodeWrapper invisibleRoot;
+		private INode[] roots;
 
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 		}
@@ -58,26 +72,37 @@ public class NavigatorView extends ViewPart {
 		}
 		public Object[] getElements(Object parent) {
 			if (parent.equals(getViewSite())) {
-				if (invisibleRoot==null) initialize();
-				return getChildren(invisibleRoot);
+				if (roots==null) initializeRoots();
+				return roots;
 			}
 			return getChildren(parent);
 		}
-		public Object getParent(Object child) {
-			if (child instanceof PETreeNodeWrapper) {
-				return ((PETreeNodeWrapper)child).getParent();
+		
+        private void initializeRoots() {
+            PrologInterface pif;
+            try {
+                pif = PDTPlugin.getDefault().getPrologInterface();
+            } catch (IOException e) {
+                Debug.report(e);
+                throw new RuntimeException(e);
+            }
+            roots=(INode[]) PrologNode.find(pif,"type(module)").toArray(new INode[0]);            
+        }
+        public Object getParent(Object child) {
+			if (child instanceof INode) {
+				return ((INode)child).getParent();
 			}
 			return null;
 		}
 		public Object [] getChildren(Object parent) {
-			if (parent instanceof PETreeNodeWrapper) {
-				return ((PETreeNodeWrapper)parent).getChildren();
+			if (parent instanceof INode) {
+				return ((INode)parent).getChildren().toArray(new Object[0]);
 			}
 			return new Object[0];
 		}
 		public boolean hasChildren(Object parent) {
-			if (parent instanceof PETreeNodeWrapper)
-				return ((PETreeNodeWrapper)parent).hasChildren();
+			if (parent instanceof INode)
+				return ((INode)parent).hasChildren();
 			return false;
 		}
 /*
@@ -85,27 +110,9 @@ public class NavigatorView extends ViewPart {
  * In a real code, you will connect to a real model and
  * expose its hierarchy.
  */
-		private void initialize() {
-			invisibleRoot = new PETreeNodeWrapper(PDTPlugin.getDefault().getPLRuntime(),null);			
-		}
+		
 	}
-	class ViewLabelProvider extends LabelProvider {
-	    
-		public String getText(Object obj) {
-		    if(obj instanceof IPrologElement){
-		        return ((IPrologElement)obj).getLabel();
-		    }
-			return obj.toString();
-		}
-		public Image getImage(Object obj) {
-		   
-		    if(obj instanceof PETreeNodeWrapper){
-		        return ((PETreeNodeWrapper)obj).getImage();
-		    }
-			String imageKey = ISharedImages.IMG_OBJ_ELEMENT;	
-			return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
-		}
-	}
+	
 	class NameSorter extends ViewerSorter {
 	}
 
@@ -122,10 +129,28 @@ public class NavigatorView extends ViewPart {
 	public void createPartControl_impl(Composite parent) {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(viewer);
-		viewer.setContentProvider(new ViewContentProvider());
-		viewer.setLabelProvider(new ViewLabelProvider());
+		viewer.setContentProvider(new WorkbenchContentProvider(){
+		    /* (non-Javadoc)
+             * @see org.eclipse.ui.model.BaseWorkbenchContentProvider#hasChildren(java.lang.Object)
+             */
+            public boolean hasChildren(Object element) {
+                if(element instanceof INode){
+                    try{
+                        INode node = (INode) element;
+                        return node.hasChildren();
+                    }
+                    catch(Throwable t){
+                        ;
+                    }
+                }
+                return super.hasChildren(element);
+            }
+		});
+		
+		viewer.setLabelProvider(new WorkbenchLabelProvider());
 		viewer.setSorter(new NameSorter());
-		viewer.setInput(getViewSite());
+		viewer.setInput(PDTPlugin.getDefault());
+		getSite().setSelectionProvider(viewer);
 		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();

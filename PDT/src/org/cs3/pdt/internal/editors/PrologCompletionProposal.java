@@ -1,8 +1,5 @@
 package org.cs3.pdt.internal.editors;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.metadata.PrologElementData;

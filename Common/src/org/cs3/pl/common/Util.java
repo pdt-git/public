@@ -4,17 +4,12 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Stack;
-import java.util.Vector;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -128,56 +123,32 @@ public class Util {
                 out.write(buf, 0, read);
             }
         } finally {
-            bOut.close();
-            bIn.close();
+            bOut.flush();
         }
     }
-    public static boolean unescape(CharSequence input, StringBuffer sb){
-        boolean escape=false;
-        boolean quote = false;        
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if(escape){
-                switch(c){
-                	default:
-                	    return false;
-                	case '\\':
-                	case '\'':
-                	case '\"':
-                	    sb.append(c);
-                	    break;
-                	 case 'b':
-                	     sb.append('\b');
-                	     break;
-                	 case 't':
-                	     sb.append('\t');
-                	     break;
-                	 case 'n':
-                	     sb.append('\n');
-                	     break;
-                	 case 'f':
-                	     sb.append('\f');
-                	     break;
-                	 case 'r':
-                	     sb.append('\r');
-                	     break;
-                	 
-                }
-            }
-                
+
+    public static String normalizeOnWindoze(String s) {
+        boolean windowsPlattform = System.getProperty("os.name").indexOf(
+                "Windows") > -1;
+        if (windowsPlattform) {
+            s = s.replace('\\', '/');
         }
-        return !quote && ! escape;
+        return s;
+    }
+
+    public static String prologFileName(File f){
+        return normalizeOnWindoze(f.toString());
     }
     
-    
-    public static String toString(InputStream in) throws IOException{
+    public static String toString(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-		byte[] buf = new byte[1024];
-		int read = in.read(buf);
-		while (read > 0) {
-			out.write(buf, 0, read);
-			read = in.read(buf);
-		}
-		return out.toString();
+        byte[] buf = new byte[1024];
+        int read = in.read(buf);
+        while (read > 0) {
+            out.write(buf, 0, read);
+            read = in.read(buf);
+        }
+        return out.toString();
     }
+
 }

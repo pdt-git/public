@@ -9,14 +9,15 @@ package org.cs3.pdt.internal.search;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -34,7 +35,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 public class PrologSearchQuery implements ISearchQuery {
 
@@ -72,12 +72,12 @@ public class PrologSearchQuery implements ISearchQuery {
                 client = PDTPlugin.getDefault()
                         .getPrologInterface().getSession();
                 //				
-                Hashtable[] solutions = client.queryAll(PDTPlugin.MODULEPREFIX
+                List solutions = client.queryAll(PDTPlugin.MODULEPREFIX
                         + "get_references(" + data.getSignature()
                         + ",FileName,Line,Name,Arity)");
                 int pos = 10;
-                for (int i = 0; i < solutions.length; i++) {
-                    Hashtable solution = solutions[i];
+                for (Iterator iter = solutions.iterator(); iter.hasNext();) {
+                    Map solution = (Map) iter.next();
                     HashMap attributes = new HashMap();
                     String fileName = solution.get("FileName").toString();
                     if(fileName.startsWith("'")){

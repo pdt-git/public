@@ -9,14 +9,18 @@ import java.io.PrintStream;
 import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.internal.socket.RecordingConsultService;
+import org.cs3.pl.common.DefaultResourceFileLocator;
+import org.cs3.pl.prolog.ConsultService;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
 
 /**
  */
 public class ConsultServiceTest extends TestCase {
 
     private String prefix;
-    private RecordingConsultService rcs;
+    private ConsultService rcs;
+    private PrologInterface pif;
 
     /*
      * (non-Javadoc)
@@ -31,11 +35,11 @@ public class ConsultServiceTest extends TestCase {
         File prefix = new File(System.getProperty("java.io.tmpdir"));
         
         Debug.info("prefix: " + prefix.getCanonicalPath());
-
-        rcs = new RecordingConsultService();
-        rcs.setPort(port);
-        rcs.setPrefix(prefix);
-        rcs.connect();
+        PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance();
+        factory.setResourceLocator(new DefaultResourceFileLocator(prefix.toString()));
+        pif = factory.create();
+        pif.start();
+        rcs = pif.getConsultService("");
     }
 
     /*
@@ -45,7 +49,7 @@ public class ConsultServiceTest extends TestCase {
      */
     protected void tearDown() throws Exception {  
         super.tearDown();
-        rcs.disconnect();
+        pif.stop();
     }
 
    

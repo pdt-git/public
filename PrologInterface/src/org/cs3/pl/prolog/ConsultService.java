@@ -5,9 +5,11 @@ import java.io.PrintStream;
 /**
  * provides write access to (virtual) resources which are consulted by the
  * prolog system.
+ * 
+ *  
  */
 public interface ConsultService {
-    
+
     /**
      * provides a stream to which clauses can be written. The supplied data will
      * be consulted as "virtual" file with the symbolic name specified by
@@ -43,16 +45,51 @@ public interface ConsultService {
      * @param s
      *                    a symbolic file name.
      * @return the number of milliseconds between 00:00:00 GMT, January 1, 1970
-     *               and instance the last modification was made to the data consulted as symbolic
-     *               file s, or -1 If the information is not available for what reasons ever.
-     *               
+     *               and instance the last modification was made to the data consulted
+     *               as symbolic file s, or -1 If the information is not available for
+     *               what reasons ever.
+     * 
      *  
      */
     public long getTimeStamp(String s);
 
     /**
      * @param provider
+     * @deprecated use
+     *                        IPrologInterface.addPrologInterfaceListener(IPrologInterface.SUBJECT_CONSULT, _)
      */
     public void addConsultServiceListener(ConsultServiceListener provider);
+
+    /**
+     * @param provider
+     * @deprecated use
+     *                        IPrologInterface.addPrologInterfaceListener(IPrologInterface.SUBJECT_CONSULT, _)
+     */
     public void removeConsultServiceListener(ConsultServiceListener provider);
+
+    /**
+     * reload recorded data. If the ConsultService supports recording of
+     * consulted streams, it will try to reload any existing records. Otherwise
+     * (or if no records are available) this method does nothing.
+     */
+    public void reload();
+
+    /**
+     * clear recorded data. if the ConsultService supports recording of
+     * consulted streams, this will clear all existing records it currently
+     * keeps.
+     */
+    public void clearRecords();
+
+    /**
+     * @return true if and only if this consult service supports recording and
+     *               recording is currently enabled.
+     */
+    public boolean isRecording();
+
+    /**
+     * if this consult service supports recording, this method can be used to
+     * switch it on or off.
+     */
+    public void setRecording(boolean val);
 }

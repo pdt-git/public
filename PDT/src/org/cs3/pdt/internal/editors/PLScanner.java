@@ -2,13 +2,14 @@ package org.cs3.pdt.internal.editors;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -31,10 +32,11 @@ public class PLScanner extends RuleBasedScanner {
 	        PrologSession session=null;
 	        try {
 	        session = PDTPlugin.getDefault().getPrologInterface().getSession();
-	            Hashtable[] solutions = session.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
+	            List solutions = session.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
                 List keywords = new ArrayList();
-                for (int i = 0; i < solutions.length; i++) {
-                    String name=(String) solutions[i].get("Name");
+                for (Iterator it = solutions.iterator(); it.hasNext();) {
+                    Map si = (Map) it.next();
+                    String name=(String) si.get("Name");
                     keywords.add(name);
                 }
                 plDynamicPredicates = (String[])keywords.toArray(new String[0]);
@@ -58,10 +60,11 @@ public class PLScanner extends RuleBasedScanner {
 	        PrologSession session=null;;
             try {
                 session = PDTPlugin.getDefault().getPrologInterface().getSession();
-                Hashtable solutions[] = session.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
+                List solutions = session.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
                 List keywords = new ArrayList();
-                for (int i = 0; i < solutions.length; i++) {
-                    String name=(String) solutions[i].get("Name");
+                for (Iterator it = solutions.iterator(); it.hasNext();) {
+                    Map si = (Map) it.next();
+                    String name=(String) si.get("Name");
                     keywords.add(name);
                 }
                 

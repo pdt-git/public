@@ -5,8 +5,8 @@ package org.cs3.pdt.internal.editors;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.ProblemCollector;
 import org.cs3.pl.parser.PrologCompiler;

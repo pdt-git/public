@@ -1,11 +1,12 @@
 package org.cs3.pl.metadata;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.IPrologInterface;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -16,15 +17,15 @@ import org.cs3.pl.prolog.PrologSession;
 public class DefaultMetaInfoProvider implements IMetaInfoProvider{
     public static final boolean windowsPlattform = System
     .getProperty("os.name").indexOf("Windows") > -1;
-    private IPrologInterface pif=null;
+    private PrologInterface pif=null;
 	private String pdtModulePrefix="";
 
     
-    public DefaultMetaInfoProvider(IPrologInterface pif) {
+    public DefaultMetaInfoProvider(PrologInterface pif) {
     	this.pif=pif;
     }
 
-    public DefaultMetaInfoProvider(String prefix,IPrologInterface pif) {
+    public DefaultMetaInfoProvider(String prefix,PrologInterface pif) {
     	this.pif=pif;
     	this.pdtModulePrefix=prefix;
     }
@@ -44,7 +45,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
 	
     public  boolean assertFact( String text) throws PrologException{
         PrologSession session = pif.getSession();
-        Hashtable r = session.query("assert("+text+")");
+        Map r = session.query("assert("+text+")");
         session.dispose();
         return r!=null;
     }
@@ -68,7 +69,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
         //		if (!isCompleted())
         //		abort();
         PrologSession session = pif.getSession();
-        Hashtable solution = session.query(pdtModulePrefix + "get_file_pos('"
+        Map solution = session.query(pdtModulePrefix + "get_file_pos('"
                 + filename + "', " + functor + ", " + arity + ",File,Pos,_,_)");
         if (solution == null){
             session.dispose();
@@ -125,14 +126,13 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
             module = "_";
         if (filename == null)
             filename = "_";
-        Hashtable[] results = session.queryAll(pdtModulePrefix+ "find_pred('"
+        List results = session.queryAll(pdtModulePrefix+ "find_pred('"
                 + filename + "','" + prefix + "', " + module
                 + ",Name,Arity,Public)");
         List list = new ArrayList();
         //while (result != null) {
-        for (int i = 0; i < results.length; i++) {
-            
-            Hashtable result = results[i];
+        for (Iterator it = results.iterator(); it.hasNext();) {
+            Map result = (Map) it.next();
             boolean pub = Boolean.valueOf(result.get("Public").toString())
                     .booleanValue();
             PrologElementData data = new PrologElementData(result.get("Name")
@@ -148,14 +148,14 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
     public PrologElementData[] retrievePrologElements(String file) throws PrologException {
         PrologSession session = pif.getSession();
         
-        Hashtable[] results = session.queryAll("bagof([Pos_,Len_],"
+        List results = session.queryAll("bagof([Pos_,Len_],"
                 + "meta_data"
                 + "('"
                 + file
                 + "',Module,Name,Arity,Public,Pos_,Len_, Dyn,Mul),[[Pos,Len]|_])");
         List list = new ArrayList();
-        for (int i = 0; i < results.length; i++) {
-            Hashtable result = results[i];
+        for (Iterator it = results.iterator(); it.hasNext();) {
+            Map result = (Map) it.next();
             //debug(result.get("Name").toString()+" - PUBLIC-
             // "+Boolean.valueOf(result.get("Public").toString()).booleanValue());
             PrologElementData data = new PrologElementData(result.get("Name")
@@ -175,7 +175,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
     public String getHelp(PrologElementData data) {	    
         
         PrologSession session = pif.getSession();
-        Hashtable table=null;
+        Map table=null;
         try {
             table = session.query("manual_entry("+data.getLabel()+","+data.getArity()+",Info)");
         } catch (PrologException e) {

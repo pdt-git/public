@@ -2,34 +2,31 @@ package org.cs3.pl.prolog.internal;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.SocketPrologInterface;
 
 /**
  * @author terra
  */
 public class PrologSessionTest extends TestCase {
-	private IPrologInterface pif;
+	private PrologInterface pif;
 
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);      
-        SocketPrologInterface t = new SocketPrologInterface();
-      
-      t.setUseSessionPooling(true);
-      t.setStandAloneServer(true);
-      t.setPort(5624);
-      pif=t;
+     
+      pif=PrologInterfaceFactory.newInstance().create();
+      pif.start();
     }
     
     /* (non-Javadoc)
@@ -53,7 +50,7 @@ public class PrologSessionTest extends TestCase {
 		assertNotNull(ss.query("a(v)"));
 		assertNull(ss.query("a(j)"));
 		
-		Hashtable tab = ss.query("a(X)");
+		Map tab = ss.query("a(X)");
 		
 		assertTrue(tab.containsKey("X"));
 		
@@ -103,7 +100,7 @@ public class PrologSessionTest extends TestCase {
 		PrologSession server = pif.getSession(); 
 		
         //ClientConnection connection= new ClientConnectionStub();
-        Hashtable r = server.query("assert(wahr(wahrheit))");
+        Map r = server.query("assert(wahr(wahrheit))");
         assertNotNull("result should not be null",r);
         assertTrue("result should be empty",r.isEmpty());
         assertNull("Threre should be no further solution",server.next());

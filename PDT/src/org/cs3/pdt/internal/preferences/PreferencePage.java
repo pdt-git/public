@@ -8,11 +8,17 @@ package org.cs3.pdt.internal.preferences;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pl.prolog.Option;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
+import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -52,41 +58,45 @@ public class PreferencePage extends FieldEditorPreferencePage implements
      * editor knows how to save and restore itself.
      */
     public void createFieldEditors() {
-        addField(new DirectoryFieldEditor(PDT.PREF_SWIPL_DIR,
-                "The home of the SWI-Prolog installation",
-                getFieldEditorParent()));
-        FileListEditor classpathEditor = new FileListEditor(
-                PDT.PREF_SERVER_CLASSPATH,
-                "classpath to be used by the prolog server vm","add Jar...",
-                getFieldEditorParent());
         
-        classpathEditor.setFilterExtensions(new String[]{"*.jar"});
-        addField(classpathEditor);
-        addField(new BooleanFieldEditor(PDT.PREF_SERVER_STANDALONE,
-                "Assume a stand-alone server process", getFieldEditorParent()));
-
-        addField(new IntegerFieldEditor(PDT.PREF_SERVER_PORT,
-                "Port for the connection to the prolog server vm",
-                getFieldEditorParent()));
+        Composite parent = getFieldEditorParent();
+        addField(new StringFieldEditor(PDT.PREF_PIF_IMPLEMENTATION,"PrologInterfaceFactory implementation",parent));
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = PDTPlugin.getDefault().getBundle().getSymbolicName();
+        String impl= service.getString(qualifier,PDT.PREF_PIF_IMPLEMENTATION,null,  null);         
+        Option[] options = PrologInterfaceFactory.newInstance(impl).getOptions();
+        for(int i=0;i<options.length;i++){
+            String name = options[i].getId();
+            String label = options[i].getLabel();
+            switch(options[i].getType()){
+            	case Option.DIR:
+            	    addField(new DirectoryFieldEditor(name,label,parent));
+            	break;
+            	case Option.FLAG:
+            	    addField(new BooleanFieldEditor(name,label,parent));
+            	break;
+            	case Option.NUMBER:
+            	    addField(new IntegerFieldEditor(name,label,parent));
+            	default:
+            	    addField(new StringFieldEditor(name,label,parent));
+            		break;
+            		
+            }
+        }
         addField(new IntegerFieldEditor(PDT.PREF_CONSOLE_PORT,
-                "Port for console IO", getFieldEditorParent()));
+                "Port for console IO", parent));
 
         FileListEditor consultPathEditor = new FileListEditor(
                 PDT.PREF_CONSULT_PATH,
                 "List of files/directories to auto-consult", "add pl-file",
-                getFieldEditorParent());        
+                parent);        
         consultPathEditor.setFilterExtensions(new String[]{".pl"});
         addField(consultPathEditor);
-        addField(new BooleanFieldEditor(PDT.PREF_CONSULT_RECURSIVE,
-                "Automaticaly consult subdirectories", getFieldEditorParent()));
-
-        addField(new BooleanFieldEditor(PDT.PREF_USE_SESSION_POOLING,
-                "Use connection pooling (recommended!)", getFieldEditorParent()));
 
         addField(new RadioGroupFieldEditor(PDT.PREF_DEBUG_LEVEL,
                 "debug level", 4, new String[][] { { "error", "ERROR" },
                         { "warning", "WARNING" }, { "info", "INFO" },
-                        { "debug", "DEBUG" } }, getFieldEditorParent(), true));
+                        { "debug", "DEBUG" } }, parent, true));
 
         //      addField(
         //          new ButtonFieldEditor(
