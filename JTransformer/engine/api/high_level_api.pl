@@ -91,12 +91,15 @@ test(concat_list/2):-
     	[a,b,c,d,e,f])).
 
 /**
- * action(showError(+ID,+Msg))
+ * action(showError(+Kind, +ID,+Msg))
  */
  
 action(showError(Kind,ID,Msg)):-
     showError(Kind,ID,Msg).
 
+/**
+ * showError(+Kind, +ID,+Msg)
+ */
 showError(_,ID,Msg):-    
 	var(ID),
 	write('ID NOT BOUND: '),
