@@ -1,0 +1,6 @@
+Note that the former engine directory now lives in a project of its own.
+The engine-ng-bak folder contains a backup copy and will be removed soon.
+if you see a folder engine here, it is most propably created by an ant script. 
+DON'T MAKE CHANGES TO THIS FOLDER'S CONTENTS!!!!
+They will be overwritten the next time the ant script runs.
+--lu
