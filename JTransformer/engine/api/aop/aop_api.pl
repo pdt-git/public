@@ -970,20 +970,26 @@ constructor(_constructor,_class,_params):-
     matchParams(_params, _paramsConstructor).
 
 /**
- * addArgList(Fn_args, PcArgs, Node_9, Node_8, ForwMethod)
+ * addArgList(FnArg, PcArgs, IdList, Parent, Encl)
  */
-addArgList(Fn_args, PcArgs, Idents, Parent, ForwMethod) :-
-    methodDefT(ForwMethod,_,_,[_This,_Target|ArgParams],_,_,_),
-    forall(member(Arg,Fn_args),
-           addArgList_(Arg,Idents,PcArgs,ArgParams,Parent,ForwMethod)).
-    
-addArgList_(Arg,[],[],_,_):-
-	format('No Arg ~a found in pcargs (addArgList_)',[Arg]).
-addArgList_(Arg,[Ident|_], [Arg|_],[Param|_],Parent,Encl):-
-    paramDefT(Param,_,_,Name),
-    !,
-    add(identT(Ident,Parent,Encl,Name,Param)).
+addArgList([], _, [], _,_).
+addArgList([FnArg|FnArgs], PcArgs, [Ident|Idents], Parent, ForwMethod) :-
+    addArg(FnArg,PcArgs,Ident,Parent,ForwMethod),
+    addArgList(FnArgs, PcArgs, Idents, Parent, ForwMethod).
 
-addArgList_(Arg,[_|Idents], [_|PcArgs],[_|ArgParams],Parent,Encl):-
-addArgList_(Arg,Idents, PcArgs,ArgParams,Parent,Encl).
-    
+/**
+ * addArg(FnArg, PcArgs, Id, Parent, Encl)
+ */    
+ 
+addArg(FnArg,PcArgs,Ident,Parent,ForwMethod):-
+    methodDefT(ForwMethod,_,_,[_This,_Target|ArgParams],_,_,_),
+    lookupForwParameter(ForwMethod, FnArg,PcArgs,ArgParams,Param, Name),
+    add(identT(Ident,Parent,ForwMethod,Name,Param)).
+
+lookupForwParameter(Arg,_,[],[],_, _):-
+    format('forwarding parameter lookup failed: ~a~n',[Arg]).
+lookupForwParameter(_,FnArg,[FnArg|_],[Param|_],Param, Name):-
+    paramDefT(Param,_,_,Name).
+lookupForwParameter(ForwMethod,FnArg,[_|PcArgs],[_|ArgParams],Param, Name):-
+    lookupForwParameter(ForwMethod,FnArg,PcArgs,ArgParams,Param, Name).
+   
