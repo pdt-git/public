@@ -338,7 +338,6 @@ replaceFQNsWithClassIds([FQN|FQNsAndIds], [Id|Ids]):-
 replaceFQNsWithClassIds([Id|FQNsAndIds], [Id|Ids]):-
 	replaceFQNsWithClassIds(FQNsAndIds,Ids).
 
-
          
 error_occured(S):-
     write(S),

@@ -1,4 +1,4 @@
-% Autor: Tobias Windeln & Guenter Kniesel
+% Autor: Tobias Rho & Guenter Kniesel
 % Date: 7.9.2004
 % ToDo: Siehe Komentare nach Prologdoc zu ast_node_def
 
