@@ -356,9 +356,15 @@ replaceForwCall(_call, _parent, _method, _origName, _execReturn,_forwMethod,_for
 createForwArgs(_call,_,_,_,_,_Args,_Args):-
     forwards(_call,_,_,_),
     !.
-createForwArgs(_call,_enclMethod,_enclClass,_forwCall,_origReceiver,_Args,[_This|[_origReceiver|_Args]]):-
-    createThisIdent(_This,_forwCall, _enclMethod, _enclClass).
-%    createThisOrGetReceiver(_origReceiver, _forwCall,_Receiver).
+createForwArgs(_call,_enclMethod,_enclClass,_forwCall,_origReceiver,_Args,[_This|[Receiver|_Args]]):-
+    createThisIdent(_This,_forwCall, _enclMethod, _enclClass),
+    ( 
+      (_origReceiver = null,
+       createThisIdent(Receiver,_forwCall, _enclMethod, _enclClass)
+      );
+      _origReceiver = Receiver
+    ).
+    %createThisOrGetReceiver(_origReceiver, _forwCall,_Receiver).
 
 
 getOrigParams(_call,_Params,_Params):-
