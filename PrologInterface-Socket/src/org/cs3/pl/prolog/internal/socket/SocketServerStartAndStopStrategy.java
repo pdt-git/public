@@ -59,13 +59,7 @@ public class SocketServerStartAndStopStrategy implements
         String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
         String engineDir = pif.getOption(SocketPrologInterface.ENGINE_DIR);
         String sep = System.getProperty("file.separator");
-        //        String cmdline = executable + " -p library=" + engineDir + " -s "
-        //                + engineDir + sep + "main_socket.pl -g consult_server(" + port +
-        // ")";//['"+engineDir+sep+"consult_server.pl'],consult_server("+port+")";
-        StringBuffer sb = new StringBuffer();
-        sb.append(executable);
-        sb.append(" -p library=");
-        sb.append(engineDir);
+        
         File tmpFile=null;
         try {			
 			tmpFile = File.createTempFile("socketPif",null);
@@ -75,40 +69,36 @@ public class SocketServerStartAndStopStrategy implements
 	            String s = (String) it.next();
 	            p.println(":- ['"+s+"'].");	            
 	        }
-//	        if(Util.isWindoze()){
-//	        	p.println("main" +
-//	        			"pce_main_loop(main).")	;	        	
-//	        }	        
+	        p.println("file_search_path(library,'"+engineDir+"').");
+	        p.println(":-consult_server("+port+").");
 	        p.close();
 		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
         
-        
-        
-//        if(Util.isWindoze())
-//        {
-//        	sb.append(" -g open_null_stream(In)," +
-//        	"open_null_stream(Out)," +
-//			"set_prolog_IO(In,Out,Out),['");
-//        }
-//	        else{
-	        	sb.append(" -g ['");
-//	        }
-        sb.append(Util.prologFileName(tmpFile));
-        sb.append("'],consult_server(");
-        sb.append(port);
-        sb.append(")");
-//        if(Util.isWindoze()){
-//        	sb.append(" -t main");	
-//        }
-        String cmdline = sb.toString();
-        Debug.debug("Starting server with " + cmdline);
+        String[] cmdArray=executable.split(" ");
+		String[] argArray= new String[]{
+				executable,
+				"-g",
+				"['"+Util.prologFileName(tmpFile)+"']",
+				
+		};
+		String[] cmdLine = new String[cmdArray.length+argArray.length];
+		System.arraycopy(cmdArray,0,cmdLine,0,cmdArray.length);
+		System.arraycopy(argArray,0,cmdLine,cmdArray.length,argArray.length);
+//        StringBuffer sb = new StringBuffer();
+//		sb.append(executable);
+//		sb.append(" -g \"['");
+//
+//        sb.append(Util.prologFileName(tmpFile));
+//        sb.append("']\"");
+//        String cmdline = sb.toString();
+        Debug.debug("Starting server with " + Util.prettyPrint(cmdLine));
 
         try {
 
-            Process serverProcess = Runtime.getRuntime().exec(cmdline);
+            Process serverProcess = Runtime.getRuntime().exec(cmdArray);
             File logFile = Util.getLogFile("org.cs3.pdt.server.log");
             BufferedWriter writer = new BufferedWriter(new FileWriter(logFile));
             new _InputStreamPump(serverProcess.getErrorStream(), writer)

@@ -93,7 +93,7 @@ public class Factory extends PrologInterfaceFactory {
     private String guessExecutableName() {
         
         if (Util.isWindoze()) {
-            return "plwin";
+            return "start /min plwin";
         }
         return "xpce";
     }
