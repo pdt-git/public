@@ -838,9 +838,10 @@ abstraction(fullQualifiedName(_id, _Fqn)).
 
 fullQualifiedName(Id, Fqn) :-
 	nonvar(Fqn),
+	!,
 	globalIds(Fqn,Id),
 	class(Id,_,_). % to be sure the index is up to date
-
+	
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     packageT(_parent, _pckgname),
