@@ -109,14 +109,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
                 });
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.IPrologInterface#addLifeCycleHook(org.cs3.pl.prolog.LifeCycleHook)
-     */
-    public void addLifeCycleHook(LifeCycleHook h) {
-        hookHelper.addLifeCycleHook(h);
-    }
+  
 
     /**
      * @param hook
@@ -183,7 +176,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     public PrologSession getSession() {
         synchronized (stateLock) {
-            waitUntilUp();
+            if(START_UP==getState()){
+                waitUntilUp();
+            }
+            if(UP!=getState()){
+                throw new IllegalStateException("Cannot create session. Not in UP state.");
+            }
             try {
                 return getSession_internal();
             } catch (Throwable t) {
