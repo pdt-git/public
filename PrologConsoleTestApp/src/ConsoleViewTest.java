@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -26,16 +25,16 @@ public class ConsoleViewTest {
         ConsoleView view = new ConsoleView();
         view.createPartControl(shell);
         final PrologInterface pif = new PrologInterface();
-        int serverPort= Integer.getInteger(Properties.SERVER_PORT,4143).intValue();
+        int serverPort= Integer.getInteger(PDT.PREF_SERVER_PORT,4143).intValue();
     	if(serverPort==-1){
-    		throw new NullPointerException("Required property \""+Properties.SERVER_PORT+"\" was not specified.");
+    		throw new NullPointerException("Required property \""+PDT.PREF_SERVER_PORT+"\" was not specified.");
     	}
         pif.setPort(serverPort);
-        pif.setStandAloneServer(Boolean.getBoolean(Properties.SERVER_STANDALONE));
+        pif.setStandAloneServer(Boolean.getBoolean(PDT.PREF_SERVER_STANDALONE));
         final PrologSocketConsoleModel consoleModel = new PrologSocketConsoleModel(false);
-        int consolePort= Integer.getInteger(Properties.CONSOLE_PORT,4711).intValue();
+        int consolePort= Integer.getInteger(PDT.PREF_CONSOLE_PORT,4711).intValue();
     	if(consolePort==-1){
-    		throw new NullPointerException("Required property \""+Properties.CONSOLE_PORT+"\" was not specified.");
+    		throw new NullPointerException("Required property \""+PDT.PREF_CONSOLE_PORT+"\" was not specified.");
     	}
         consoleModel.setPort(consolePort);
         pif.addLifeCycleHook(new ConsoleServerHook(),ConsoleServerHook.HOOK_ID,null);

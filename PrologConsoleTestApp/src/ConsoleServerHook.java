@@ -1,5 +1,4 @@
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
@@ -17,9 +16,9 @@ public class ConsoleServerHook implements LifeCycleHook{
 
 	 private static int getPort() {
 	        
-	        int port= Integer.getInteger(Properties.CONSOLE_PORT,4711).intValue();
+	        int port= Integer.getInteger(PDT.PREF_CONSOLE_PORT,4711).intValue();
 	    	if(port==-1){
-	    		throw new NullPointerException("Required property \""+Properties.CONSOLE_PORT+"\" was not specified.");
+	    		throw new NullPointerException("Required property \""+PDT.PREF_CONSOLE_PORT+"\" was not specified.");
 	    	}
 			return port;
 		}

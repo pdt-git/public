@@ -1,7 +1,6 @@
 import java.io.FileNotFoundException;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Properties;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -20,9 +19,9 @@ public class ConsultEngineDirHook implements LifeCycleHook {
 
     private static String getEngineDir() throws FileNotFoundException {
 		
-    	String engine = System.getProperty(Properties.CONSULT_PATH);
+    	String engine = System.getProperty(PDT.PREF_CONSULT_PATH);
     	if(engine==null){
-    		throw new NullPointerException("Required property \""+Properties.CONSULT_PATH+"\" was not specified.");
+    		throw new NullPointerException("Required property \""+PDT.PREF_CONSULT_PATH+"\" was not specified.");
     	}
 		return engine;
 	}
