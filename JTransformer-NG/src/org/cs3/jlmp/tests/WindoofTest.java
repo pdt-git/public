@@ -1,21 +1,25 @@
 package org.cs3.jlmp.tests;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.BitSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
-import org.cs3.jlmp.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -27,6 +31,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -73,7 +78,7 @@ import org.eclipse.jface.text.BadLocationException;
  * </ul>
  *  
  */
-public class PseudoRoundTripTest extends FactGenerationTest {
+public class WindoofTest extends FactGenerationTest {
 
 	private final class Comparator implements IResourceVisitor {
 		public boolean visit(IResource resource) throws CoreException {
@@ -91,7 +96,6 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 						+ ": original class file not accessible: "
 						+ orig.getFullPath().toString(), orig.isAccessible());
 				//both files should be of EXACTLY the same size:
-				
 				BufferedReader origReader = new BufferedReader(
 						new InputStreamReader(orig.getContents()));
 				BufferedReader genReader = new BufferedReader(
@@ -112,13 +116,6 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 						org.cs3.pl.common.Debug.report(e);
 					}
 				}
-				try {
-						origReader.close();
-						genReader.close();
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-				
 				org.cs3.pl.common.Debug.info("compared " + i
 						+ " chars succsessfully.");
 				return false;
@@ -157,12 +154,13 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 				for (int i = 0; i < extensions.length; i++) {
 					if (extensions[i].equals(file.getFileExtension())) {
 
-						try{
-							file.move(file.getFullPath().addFileExtension(suffix),	true, null);
-						}catch(Throwable t){
+						try {
+							file.move(file.getFullPath().addFileExtension(
+									suffix), true, null);
+						} catch (Throwable t) {
 							Debug.report(t);
 						}
-							
+
 						break;
 					}
 				}
@@ -178,14 +176,12 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 
 	private String packageName;
 
-	private PrologSession session;
-
 	private boolean passed;
 
 	/**
 	 * @param name
 	 */
-	public PseudoRoundTripTest(String name) {
+	public WindoofTest(String name) {
 		super(name);
 		this.packageName = name;
 	}
@@ -194,7 +190,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 	 * @param string
 	 * @param string2
 	 */
-	public PseudoRoundTripTest(String name, String packageName) {
+	public WindoofTest(String name, String packageName) {
 		super(name);
 
 		this.packageName = packageName;
@@ -202,39 +198,25 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 
 	protected Object getKey() {
 
-		return PseudoRoundTripTest.class;
+		return WindoofTest.class;
 	}
 
 	public void setUpOnce() {
 		super.setUpOnce();
-		PrologInterface pif = getTestJLMPProject().getPrologInterface();
 
-		synchronized (pif) {
-
-			//install test workspace
-			ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator(
-					"");
-			File r = l.resolve("testdata-roundtrip.zip");
-			Util.unzip(r);
-			org.cs3.pl.common.Debug
-					.info("setUpOnce caled for key  " + getKey());
-			setAutoBuilding(false);
-
-			try {
-				pif.start();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
+		//install test workspace
+		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
+		File r = l.resolve("testdata-roundtrip.zip");
+		Util.unzip(r);
+		org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
+		setAutoBuilding(false);
 
 	}
 
-	public void testIt() throws CoreException, IOException, BadLocationException, InterruptedException {
-		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-		synchronized (pif) {
-			testIt_impl();
-			passed = true;
-		}
+	public void testIt() throws CoreException, IOException,
+			BadLocationException, InterruptedException {
+		testIt_impl();
+		passed = true;
 
 	}
 
@@ -244,81 +226,58 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 		Util.startTime("untilBuild");
 		IProject project = getTestProject();
 		IJavaProject javaProject = getTestJavaProject();
-		JLMPProjectNature jlmpProject = getTestJLMPProject();
-		PrologInterface pif = jlmpProject.getPrologInterface();
 
 		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
 				+ packageName);
 		//retrieve all cus in package
 		ICompilationUnit[] cus = getCompilationUnitsInFolder(packageName);
 		//normalize source files
-		Util.startTime("norm1");
 		normalize(cus);
-		Util.printTime("norm1");
-		Util.printTime("untilBuild");
-		Util.startTime("build1");
-		IFile javaFile = project.getFolder(packageName).getFile("Test.java");
+		IFolder folder = project.getFolder(packageName);
+		IFile javaFile = folder.getFile("Test.java");
 		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
 		assertTrue(javaFile.exists());
-		
-		
 		build(JavaCore.BUILDER_ID);
+
 		//Thread.sleep(1000);
-		IFile classFile = project.getFolder(packageName).getFile("Test.class");
+		IFile classFile = folder.getFile("Test.class");
 		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
 		assertTrue(classFile.exists());
-		
 		build(JLMP.BUILDER_ID);
 		
 		
-		
-		
-		Util.printTime("build1");
-		Util.startTime("untilQueryToplevels");
-		//now we should have SOME toplevelT
-		assertNotNull(packageName + ": no toplevelT????", session
-				.queryOnce("toplevelT(_,_,_,_)"));
-
-		//and checkTreeLinks should say "yes"
-		//assertNotNull("checkTreeLinks reports errors",
-		// session.queryOnce("checkTreeLinks"));
-
-		Util.startTime("rename");
-		IResource folder = project.getFolder(packageName);
 		rename(folder, new String[] { "java", "class" }, "orig");
-		
-		classFile = project.getFolder(packageName).getFile("Test.class.orig");
+		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
+		assertFalse(classFile.exists());
+		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+		assertFalse(javaFile.exists());		
+		classFile = folder.getFile("Test.class.orig");
+		javaFile = folder.getFile("Test.java.orig");
 		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
 		assertTrue(classFile.exists());
+		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+		assertTrue(javaFile.exists());
 		
-		
-		Util.printTime("rename");
-
-		//next, we use gen_tree on each toplevelT node known to the system.
-		//as a result we should be able to regenerate each and every source
-		// file we consulted
-		//in the first step
 		generateSource();
-		Util.printTime("writeToplevels");
-		//refetch cus
-		Util.startTime("norm2");
-		cus = getCompilationUnitsInFolder(packageName);
-		normalize(cus);
-		Util.printTime("norm2");
-		//build again.(the generated source)
-		Util.startTime("build2");
-
+		/*
+		javaFile = folder.getFile("Test.java");
+		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+		assertTrue(javaFile.exists());
+		
 		build(JavaCore.BUILDER_ID);
-		Util.printTime("build2");
-		//now, visit each file in the binFolder, that has the .class extension.
-		//and compare it to the respective original class file (which should
-		// have the same name + .orig)
-		Util.startTime("compare");
-		compare(folder);
-		Util.printTime("compare");
+		classFile = folder.getFile("Test.class");
+		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
+		assertTrue(classFile.exists());
+		*/
+
 	}
 
-	
+	protected synchronized void tearDown() throws Exception {
+		uninstall(packageName);
+		IFolder folder = getTestProject().getFolder(packageName);
+		assertTrue(folder.isSynchronized(IResource.DEPTH_INFINITE));
+		assertFalse(folder.exists());
+	}
 
 	/**
 	 * @param cus
@@ -373,7 +332,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 			public void run(IProgressMonitor monitor) throws CoreException {
 				try {
 					root.accept(renamer);
-					root.refreshLocal(IResource.DEPTH_INFINITE,null);
+					root.refreshLocal(IResource.DEPTH_INFINITE, null);
 				} catch (Throwable e) {
 					Debug.report(e);
 					throw new RuntimeException(e);
@@ -385,58 +344,16 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 
 	protected synchronized void setUp() throws Exception {
 		super.setUp();
-		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-		synchronized (pif) {
-			waitForPif();
-			assertTrue(pif.isUp());
-			session = pif.getSession();
-			if (session == null) {
-				fail("failed to obtain session");
-			}
-			setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
-					"testdata-roundtrip"));
+		setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
+				"testdata-roundtrip"));
 
-			install(packageName);
-			passed = false;
-		}
-	}
-
-	protected synchronized void tearDown() throws Exception {
-		super.tearDown();
-		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-		synchronized (pif) {
-
-			session.dispose();
-			if (passed) {
-				uninstall(packageName);
-			} else {
-				//if anything breaks,
-				//we must make sure not interfere with consecutive tests.
-				//1) move any left java or class files out of the way of the
-				// next build
-				IFolder folder = getTestProject().getFolder(packageName);
-				rename(folder, new String[] { "java", "class" }, "bak");
-				//2) restart the pif
-				pif.stop();
-				assertTrue(pif.isDown());
-				pif.start();
-			}
-		}
+		install(packageName);
+		passed = false;
 
 	}
 
 	public void tearDownOnce() {
 		super.tearDownOnce();
-		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-		synchronized (pif) {
-			session.dispose();
-			try {
-				pif.stop();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
 	}
 
 	public static Test suite() {
@@ -496,11 +413,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 		blacklist.set(233);
 		blacklist.set(234);
 
-		for (int i = 1; i <= 539; i++)
+		for (int i = 1; i <= 10; i++)
 			//1-539
 			if (!blacklist.get(i))
-				s.addTest(new PseudoRoundTripTest("testIt",
-						generatePackageName(i)));
+				s.addTest(new WindoofTest("testIt", generatePackageName(i)));
 		return s;
 	}
 
