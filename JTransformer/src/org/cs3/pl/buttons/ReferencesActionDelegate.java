@@ -1,15 +1,12 @@
 package org.cs3.pl.buttons;
 
 import java.io.File;
-import java.util.HashMap;
 
 import org.cs3.pl.Debug;
 import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.editors.PLEditor;
 import org.cs3.pl.prolog.PrologElementData;
 import org.cs3.pl.prolog.PrologManager;
-import org.cs3.pl.search.PrologSearchResult;
-import org.cs3.pl.search.PrologSearchViewPage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspace;
@@ -31,7 +28,6 @@ import org.eclipse.search.ui.IGroupByKeyComputer;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.NewSearchUI;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;

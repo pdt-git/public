@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.cs3.pl.Debug;
 import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.prolog.IPrologClient;
-import org.cs3.pl.prolog.PrologClient;
 import org.cs3.pl.prolog.PrologManager;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;

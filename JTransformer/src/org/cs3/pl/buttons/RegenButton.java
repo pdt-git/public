@@ -2,17 +2,10 @@ package org.cs3.pl.buttons;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 
 import org.cs3.pl.Debug;
-import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.exceptions.ExceptionHandler;
-import org.cs3.pl.prolog.IPrologClient;
 import org.cs3.pl.regenerator.SourceCodeRegenerator;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;

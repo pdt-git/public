@@ -10,11 +10,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 import org.cs3.pl.Debug;
-import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.astvisitor.FQNTranslator;
 import org.cs3.pl.astvisitor.IIDGenerator;
-import org.cs3.pl.astvisitor.IdentityFQNTranslator;
-import org.cs3.pl.astvisitor.SimpleIDGenerator;
 import org.cs3.pl.prolog.IPrologClient;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
