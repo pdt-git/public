@@ -24,22 +24,19 @@ import java.io.InputStreamReader;
          try {
              //while ((read = in.read(buf)) > -1) {
              while(true){
-                 if(!in.ready()){
-                     synchronized(in){
-                         in.wait(42);
-                         continue;
-                     }
-                 }
+                
                  read = in.read(buf);
                  if(read>0){;
                      dataAvailable(buf,read);
                  }
+                 if(read==-1){
+                     break;
+                 }
              }
          } catch (IOException e) {
+             e.printStackTrace();
              Debug.report(e);
-         } catch (InterruptedException e) {
-             Debug.report(e);
-        }
+         }
          finally{
              Debug.warning("InputStreamPump stops working!");
          }
