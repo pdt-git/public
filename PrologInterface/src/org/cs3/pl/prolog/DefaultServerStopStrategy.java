@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.internal.ReusableClient;
 import org.rapla.components.rpc.Logger;
 import org.rapla.components.rpc.ServiceNotFoundException;
 import org.rapla.components.rpc.TimeoutException;

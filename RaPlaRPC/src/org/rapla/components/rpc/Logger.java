@@ -6,8 +6,7 @@
  */
 package org.rapla.components.rpc;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import org.cs3.pl.common.Debug;
 
 /**
  * @author xproot
@@ -29,16 +28,7 @@ public class Logger {
 		this.name = name;
 	}
 
-	private void write(String str) {
-		try {
-			FileWriter writer = new FileWriter(tmpPath + java.io.File.separatorChar+ "pdt.socket.communication.log",true);
-			writer.write((str + lineSep));
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-//		System.err.println(str);
-	}
+
 	
 	public Logger getChildLogger(String name){
 		return new Logger(name);
@@ -46,34 +36,30 @@ public class Logger {
 	
 	public void debug(String msg){
 		if (debug)
-			write("DEBUG: "+msg);
+			Debug.debug(msg);
 	}
 
 	public void error(String err, Exception ex){
-		if (error)
-			write("ERROR: "+err);
-		ex.printStackTrace();
+		Debug.error(err);
+		Debug.report(ex);
+	    
 	}
 
 	public void error(String err){
-		if (error)
-			write("ERROR: "+err);
+		Debug.error(err);
 	}
 	
 	
 	public void warn(String msg){
-		if (warning)		
-		write("WARNING: "+msg);
+		Debug.warning(msg);
 	}
 
 	public void info(String msg){
-		if (info)
-			write("INFO: "+msg);
+		Debug.info(msg);
 	}
 	
 	public void log(String msg){
-		if (log)
-			write(msg);
+		Debug.info(msg);
 	}
 	
 	synchronized public void setLog(boolean log) {

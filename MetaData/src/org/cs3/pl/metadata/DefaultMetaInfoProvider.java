@@ -125,18 +125,21 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
             module = "_";
         if (filename == null)
             filename = "_";
-        Hashtable result = session.query(pdtModulePrefix+ "find_pred('"
+        Hashtable[] results = session.queryAll(pdtModulePrefix+ "find_pred('"
                 + filename + "','" + prefix + "', " + module
                 + ",Name,Arity,Public)");
         List list = new ArrayList();
-        while (result != null) {
+        //while (result != null) {
+        for (int i = 0; i < results.length; i++) {
+            
+            Hashtable result = results[i];
             boolean pub = Boolean.valueOf(result.get("Public").toString())
                     .booleanValue();
             PrologElementData data = new PrologElementData(result.get("Name")
                     .toString(), Integer.parseInt(result.get("Arity")
                     .toString()), pub, 0, 0, false, false);
             list.add(data);
-            result =session.next();
+            
         }
         session.dispose();
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
@@ -145,13 +148,14 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
     public PrologElementData[] retrievePrologElements(String file) throws SessionException {
         PrologSession session = pif.getSession();
         
-        Hashtable result = session.query("bagof([Pos_,Len_],"
+        Hashtable[] results = session.queryAll("bagof([Pos_,Len_],"
                 + "meta_data"
                 + "('"
                 + file
                 + "',Module,Name,Arity,Public,Pos_,Len_, Dyn,Mul),[[Pos,Len]|_])");
         List list = new ArrayList();
-        while (result != null) {
+        for (int i = 0; i < results.length; i++) {
+            Hashtable result = results[i];
             //debug(result.get("Name").toString()+" - PUBLIC-
             // "+Boolean.valueOf(result.get("Public").toString()).booleanValue());
             PrologElementData data = new PrologElementData(result.get("Name")
@@ -163,7 +167,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
                     result.get("Dyn").toString().equals("1"), result.get("Mul")
                             .toString().equals("1"));
             list.add(data);
-            result = session.next();
+          
         }
         session.dispose();
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);

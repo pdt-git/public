@@ -6,10 +6,13 @@
  */
 package org.cs3.pl.parser;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -33,6 +36,13 @@ import org.cs3.pl.metadata.PrologElementData;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class PrologCompiler extends PrologParserTraversal {
+    public static final String METADATA = "meta_data";
+
+    public static final String METADATAHELP = METADATA + "_help";
+
+    public static final String METADATAMODULE = METADATA + "_module";
+
+    
     //private static String newLine = System.getProperty("line.separator");
     private Hashtable pefs = new Hashtable();
 
@@ -596,5 +606,80 @@ public class PrologCompiler extends PrologParserTraversal {
     }
     public void setSingletonCheckForDTMVars(boolean singletonCheckForDTMVars) {
         this.singletonCheckForDTMVars = singletonCheckForDTMVars;
+    }
+
+    /**
+     * parses the file, and generates MetaData for the clauses encountered. These are generated for the
+     * facts described in the file, and saved for future reference. They are loaded into the Prolog Engine.
+     * @param stream TODO
+     * 
+     * @param this the compiler used to check the facts for consistency
+     * @throws IOException TODO
+     */
+    
+    public void saveMetaDataForClauses(OutputStream stream) throws IOException {
+    	try {
+    		//PrologMetaDataManager metaDataManager = new PrologMetaDataManager(client,PrologMetaDataManager.MODEL);
+    		//IWorkspaceRoot root = PDTPlugin.getDefault().getWorkspace().getRoot();
+    		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stream));
+    		writer.write(":- style_check(-atom).\n");
+    		String module = getModuleName();
+    		List clauses = getClauses();
+    		String moduleHelp = getModuleHelp();
+    		if (moduleHelp == null)
+    			moduleHelp = "";
+    		writer.write(METADATAMODULE+ "('"+symbolicFileName+"','" + 
+    				module + "', \"" + moduleHelp+"\").\n"); 
+    		//HashMap publicElements = checker.getPublicModulePredicates();
+    		for (Iterator iter = clauses.iterator(); iter.hasNext();) {
+    			ASTClause clause = (ASTClause) iter.next();
+    			PrologElementData data = getPrologElementData(clause);
+    			writer.write(METADATA+"('"+symbolicFileName+"'," + module 
+    					+","+ data.getLabel()
+    					+","+ data.getArity()
+    					+","+ data.isPublic()
+    					+","+ data.getPosition()
+    					+","+ data.getLength()					
+    					+","+ data.isDynamic()
+    					+","+ data.isMultifile()
+    					+").\n");
+    			String comment = clause.getComment(data.getLabel());
+    			if (comment != null)
+    			writer.write(METADATAHELP 
+    					+"("
+    					+ module
+    					+"," +data.getLabel()
+    					+","+ data.getArity()
+    					+","+ comment
+    					+").\n");
+    		}
+    		saveMetaDataHelpForDynamicPredicates(writer);
+    		writer.close();
+    		
+    	} catch (IOException e1) {
+    		Debug.report(e1);
+    	}		
+    }
+
+    private void saveMetaDataHelpForDynamicPredicates(BufferedWriter writer) throws IOException {
+    	ASTNamedCall[] dynamic = getDynamic();
+    	for (int i = 0; i < dynamic.length; i++) {
+    		if(dynamic[i].jjtGetNumChildren() == 1) {
+    			ASTPredicateSignature sig = (ASTPredicateSignature)dynamic[i].jjtGetChild(0);
+    			String name = sig.getName();
+    			String help = dynamic[i].getComment(name);
+    			if (help != null) { 
+    				String module = sig.getModule();
+    				int arity = sig.getArity();
+    				writer.write(METADATAHELP+ "("+
+    						module +
+    						", " + name + 
+    						", " + arity+
+    						", " + help + ").\n");
+    			}		
+    		}
+    		
+    	}
+    	
     }
 }

@@ -38,7 +38,7 @@ public interface PrologSession {
 	 */
 	
 	public Hashtable query(String query) throws SessionException;
-	
+	public Hashtable[] queryAll(String query)throws SessionException;
 	/**
 	 * returns the next set of Bindings satisfying the last query.
 	 * 

@@ -1,25 +1,33 @@
 package org.cs3.pl.prolog;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.internal.LifeCycleHookWrapper;
+import org.cs3.pl.prolog.internal.ReusableClient;
+import org.cs3.pl.prolog.internal.ReusablePool;
+import org.cs3.pl.prolog.internal.SimpleSession;
 import org.rapla.components.rpc.Logger;
 
 /**
  * Provides a means to start PrologSessions. This class models the lowest layer
  * of our connection to the Prolog Engine, and handles startup and shutdown of
- * the Engine. It also abstracts from any particular Engine implementation,
- * leaving only the getSession() interface to interact with Prolog.
+ * the Engine. 
+ * <p><i>
+ * The api provided by this class is intended to be accessed by code that wants
+ * to provide an IPrologInterface service. It contains implementation specific configuration
+ * details that a regular client should not temper with. A regular client only see the 
+ * IPrologInterface api.
+ * <p> 
+ * Any suggestions on how to enforce this are apreciated: degenerl_AT_cs_DOT_uni-bonn_DOT_de 
+ * </i>
  * 
  * @author terra
  */
@@ -69,88 +77,6 @@ public class PrologInterface implements IPrologInterface {
         }
     }
 
-    private final class OutputReporterThread extends Thread {
-        BufferedReader in;
-
-        Vector listeners;
-
-        private OutputReporterThread(String name) {
-            super(name);
-        }
-
-        public void run() {
-
-            while (true) {
-                try {
-                    String l = in.readLine();
-                    if (l == null)
-                        return;
-
-                    Vector list = (Vector) listeners.clone();
-
-                    for (Iterator i = list.iterator(); i.hasNext();) {
-                        OutputListener next = (OutputListener) i.next();
-                        next.onOutput(l);
-                    }
-
-                } catch (IOException e) {
-                    Debug
-                            .error("IOException caught, Server output reporting shutting down");
-                    return;
-                }
-            }
-        }
-
-        public void start(Process p, Vector listeners) {
-            Debug.info("Starting server Error reporting");
-            setDaemon(true);
-            in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            this.listeners = listeners;
-            start();
-        }
-    }
-
-    private final class ErrorReporterThread extends Thread {
-        BufferedReader in;
-
-        Vector listeners;
-
-        private ErrorReporterThread(String name) {
-            super(name);
-        }
-
-        public void run() {
-
-            while (true) {
-                try {
-                    String l = in.readLine();
-                    if (l == null)
-                        return;
-
-                    Vector list = (Vector) listeners.clone();
-
-                    for (Iterator i = list.iterator(); i.hasNext();) {
-                        OutputListener next = (OutputListener) i.next();
-                        next.onOutput(l);
-                    }
-
-                } catch (IOException e) {
-                    Debug
-                            .error("IOException caught, Server error reporting shutting down");
-                    return;
-                }
-            }
-        }
-
-        public void start(Process p, Vector listeners) {
-            Debug.info("Starting server Error reporting");
-            setDaemon(true);
-            in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            this.listeners = listeners;
-            start();
-        }
-    }
-
     private class InitSession extends SimpleSession {
         public InitSession(int PORT) throws IOException {
             super(PORT);
@@ -181,16 +107,12 @@ public class PrologInterface implements IPrologInterface {
 
     private int port = 9966;
 
-    private Vector outListeners = new Vector();
-
-    private Vector errListeners = new Vector();
-
+   
     private Collection sessions = new LinkedList();
 
     private boolean serverDown = true;
 
-    private Process server = null;
-
+    
     private ServerStartStrategy startStrategy = new DefaultServerStartStrategy();
 
     private ServerStopStrategy stopStrategy = new DefaultServerStopStrategy();
@@ -227,36 +149,7 @@ public class PrologInterface implements IPrologInterface {
                 });
     }
 
-    /**
-     * returns a direct session to the Interface. This kind of session does not
-     * support the generic instantiation a normal getSession would support, but
-     * contains the sendChar() method in its interface Direct sessions, despite
-     * their name, may be less performant then normal sessions, and should only
-     * be used when absolutely necessary.
-     * 
-     * @return a DirectAccessSession
-     */
-
-    private DirectAccessSession getDirectSession() {
-        synchronized (this) {
-            if (!isUp()) {
-                throw new IllegalStateException("PrologInterface is not up.");
-            }
-
-            if (server == null) {
-                Debug
-                        .error("DirectSession requested, but we do not control the server process. Things will blow up.");
-                return null;
-            }
-
-            try {
-                return new StreamBackedSession(port, server.getOutputStream());
-            } catch (IOException e) {
-                Debug.report(e);
-                return null;
-            }
-        }
-    }
+    
 
     /**
      * returns an instance of the "default" session. This is actually a call to
@@ -428,13 +321,7 @@ public class PrologInterface implements IPrologInterface {
 	                                + "Trying to connect & shutdown, but this may not work.");
 	                stopStrategy.stopServer(port);
 	            }
-	            server = startStrategy.startServer(port);
-	
-	            new ErrorReporterThread("Server Error Reporter").start(server,
-	                    errListeners);
-	            new OutputReporterThread("Server Output Reporter").start(server,
-	                    outListeners);
-	
+	            startStrategy.startServer(port);
 	        }
 	        Debug.info("ok... trying to connect to port " + port);
 	        InitSession initSession = new InitSession(port);
@@ -462,52 +349,7 @@ public class PrologInterface implements IPrologInterface {
         }
     }
 
-    /**
-     * adds a listener to the Prolog output stream. All output will be forwarded
-     * to the listner objects.
-     * 
-     * @param out
-     *                    an OutputListener instance.
-     */
-
-    public void addOutputListener(OutputListener out) {
-        outListeners.add(out);
-    }
-
-    /**
-     * removes a listener to the Prolog output stream.
-     * 
-     * @param out
-     *                    an OutputListener instance.
-     */
-
-    public void removeOutputListener(OutputListener out) {
-        outListeners.remove(out);
-    }
-
-    /**
-     * adds a listener to the Prolog error stream. All output will be forwarded
-     * to the listner objects.
-     * 
-     * @param out
-     *                    an OutputListener instance.
-     */
-
-    public void addErrorListener(OutputListener err) {
-        errListeners.add(err);
-    }
-
-    /**
-     * removes a listener from the Prolog Error stream.
-     * 
-     * @param an
-     *                    Outputlistener.
-     */
-
-    public void removeErrorListener(OutputListener err) {
-        errListeners.remove(err);
-    }
-
+  
     /**
      * @return Returns the startStrategy.
      */
@@ -670,6 +512,9 @@ public class PrologInterface implements IPrologInterface {
                 node.flipflop = hookFilpFlop;
                 hooks.put(id, node);
             }
+            else{
+                node.hook=hook;
+            }
             for (int i = 0; i < dependencies.length; i++) {
                 LifeCycleHookWrapper dep = (LifeCycleHookWrapper) hooks
                         .get(dependencies[i]);
@@ -679,7 +524,7 @@ public class PrologInterface implements IPrologInterface {
                     Debug.debug("\t\t-> hook unknown, new wrapper created.");
                     dep = new LifeCycleHookWrapper(null, dependencies[i]);
                     dep.flipflop = hookFilpFlop;
-                    hooks.put(dependencies[i], node);
+                    hooks.put(dependencies[i], dep);
                 }
                 dep.pre.add(node);
                 node.post.add(dep);

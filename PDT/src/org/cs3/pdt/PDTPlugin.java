@@ -1,25 +1,42 @@
 package org.cs3.pdt;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.internal.PDTPrologHelper;
+import org.cs3.pdt.internal.PDTServerStartStrategy;
+import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.hooks.ConsultServerHook;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.fileops.PrologMetaDataManager;
+import org.cs3.pl.metadata.ConsultService;
+import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.RecordingConsultService;
+import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -29,7 +46,9 @@ import org.osgi.framework.BundleContext;
 public class PDTPlugin extends AbstractUIPlugin {
 
     private static final String EP_INIT_HOOK = "hooks";
+
     public static final String MODULEPREFIX = "pdtplugin:";
+
     //The shared instance.
     private static PDTPlugin plugin;
 
@@ -53,16 +72,18 @@ public class PDTPlugin extends AbstractUIPlugin {
         }
     }
 
-    private PrologMetaDataManager metaDataManager;
+    private HashMap consultServices = new HashMap();
+
+    private RecordingConsultService metadataConsultService;
+
     private String pdtModulePrefix = "";
 
-    private PDTPrologHelper  prologHelper;
+    private PDTPrologHelper prologHelper;
 
     private PrologInterface prologInterface;
 
     //Resource bundle.
     private ResourceBundle resourceBundle;
-
 
     /**
      * The constructor.
@@ -86,22 +107,70 @@ public class PDTPlugin extends AbstractUIPlugin {
             return null;
         }
     }
-    
+
     public IWorkbenchPage getActivePage() {
         return getWorkbench().getActiveWorkbenchWindow().getActivePage();
+    }
+
+    /**
+     * Retrieve a registered ConsultService instance. The Plugin may offer
+     * several ConsultServices for different purposes. A service that manages
+     * predicate meta information for the components of the prolog ide is always
+     * be available using the key PDT.CS_METADATA
+     * 
+     * @param key
+     * @return
+     */
+    public ConsultService getConsultService(String key) {
+        synchronized (consultServices) {
+            return (ConsultService) consultServices.get(key);
+        }
     }
 
     public Display getDisplay() {
         return getWorkbench().getDisplay();
     }
 
-    public IPrologHelper getPrologHelper(){
-        if(prologHelper==null){
-            prologHelper= new PDTPrologHelper(prologInterface,pdtModulePrefix);
+    public IMetaInfoProvider getMetaInfoProvider() {
+        if (prologHelper == null) {
+            prologHelper = new PDTPrologHelper(prologInterface, pdtModulePrefix);
         }
         return prologHelper;
     }
-
+    public void showSourceLocation(SourceLocation loc)  {
+        IFile file = null;
+        IWorkspace workspace = ResourcesPlugin.getWorkspace();
+        IWorkspaceRoot root = workspace.getRoot();
+        IPath fpath = new Path(loc.file);
+        IFile[] files = root.findFilesForLocation(fpath);
+        if (files == null || files.length == 0) {
+            Debug.warning("Not in Workspace: " + fpath);
+            return;
+        }
+        if (files.length > 1) {
+            Debug.warning("Mapping into workspace is ambiguose:" + fpath);
+            Debug.warning("i will use the first match found: " + files[0]);
+        }
+        file = files[0];
+        if (!file.isAccessible()) {
+            Debug.warning("The specified file \"" + file
+                    + "\" is not accessible.");
+            return;
+        }
+        IWorkbenchPage page = PDTPlugin.getDefault().getActivePage();
+        IEditorPart part;
+        try {
+            part = IDE.openEditor(page, file);
+        } catch (PartInitException e) {
+            Debug.report(e);
+            return;
+        }
+        if (part instanceof PLEditor) {
+            PLEditor editor = (PLEditor) part;
+            editor.gotoLine(loc.line);
+        }
+    }
+  
     /**
      * @return the prolog interface instance shared among this plugin's
      *               components.
@@ -110,18 +179,6 @@ public class PDTPlugin extends AbstractUIPlugin {
     public IPrologInterface getPrologInterface() throws IOException {
 
         return prologInterface;
-    }
-
-    /**
-     * @return
-     * @throws IOException
-     */
-    public PrologMetaDataManager getPrologMetaDataManager() throws IOException {
-        if(this.metaDataManager==null){
-            this.metaDataManager=new PrologMetaDataManager();
-            reconfigureMetaDataManager();
-        }
-        return metaDataManager;
     }
 
     /**
@@ -138,8 +195,7 @@ public class PDTPlugin extends AbstractUIPlugin {
      */
     protected void preferenceChanged(PropertyChangeEvent e) {
         String key = e.getProperty();
-        if (key.equals(PDT.PREF_SERVER_PORT)
-                || key.equals(PDT.PREF_SWIPL_DIR)
+        if (key.equals(PDT.PREF_SERVER_PORT) || key.equals(PDT.PREF_SWIPL_DIR)
                 || key.equals(PDT.PREF_SERVER_CLASSPATH)
                 || key.equals(PDT.PREF_USE_SESSION_POOLING)
                 || key.equals(PDT.PREF_DEBUG_LEVEL)
@@ -161,11 +217,12 @@ public class PDTPlugin extends AbstractUIPlugin {
     public void reconfigure() {
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
-        String debugLevel = service.getString(qualifier,PDT.PREF_DEBUG_LEVEL,"ERROR",null);
+        String debugLevel = service.getString(qualifier, PDT.PREF_DEBUG_LEVEL,
+                "ERROR", null);
         Debug.setDebugLevel(debugLevel);
         prologInterface.stop();
         reconfigurePrologInterface();
-        reconfigureMetaDataManager();
+        reconfigureMetaDataConsultService();
         try {
             prologInterface.start();
         } catch (IOException e) {
@@ -175,24 +232,29 @@ public class PDTPlugin extends AbstractUIPlugin {
     }
 
     /**
-     * 
+     *  
      */
-    private void reconfigureMetaDataManager() {
-        if(metaDataManager!=null){
-            IPreferencesService service = Platform.getPreferencesService();
-            String qualifier = getBundle().getSymbolicName();
-            String location= service.getString(qualifier, PDT.PREF_METADATA_STORE_DIR,null, null);
-            
-            
-            metaDataManager.setLocation(location);
-            try {
-                IPrologInterface pif = getPrologInterface();
-                metaDataManager.setPrologInterface(pif);
-                metaDataManager.reloadMetaData();
-            } catch (IOException e) {
-                Debug.report(e);
-            }
+    private void reconfigureMetaDataConsultService() {
+        IPreferencesService service = Platform.getPreferencesService();
+        String qualifier = getBundle().getSymbolicName();
+
+        int port = service.getInt(qualifier, PDT.PREF_CONSULT_PORT, -1, null);
+        if (port == -1l) {
+            throw new NullPointerException("Required property \""
+                    + PDT.PREF_CONSULT_PORT + "\" was not specified.");
         }
+
+        String prefix = service.getString(qualifier,
+                PDT.PREF_METADATA_STORE_DIR, null, null);
+        if (prefix == null) {
+            throw new NullPointerException("Required property \""
+                    + PDT.PREF_METADATA_STORE_DIR + "\" was not specified.");
+        }
+
+        metadataConsultService.setPort(port);
+        metadataConsultService.setPrefix(prefix);
+        metadataConsultService.setPrologInterface(prologInterface);
+
     }
 
     private void reconfigurePrologInterface() {
@@ -204,8 +266,8 @@ public class PDTPlugin extends AbstractUIPlugin {
                     + PDT.PREF_SERVER_PORT + "\" was not specified.");
         }
 
-        String swiHome = service.getString(qualifier, PDT.PREF_SWIPL_DIR,
-                null, null);
+        String swiHome = service.getString(qualifier, PDT.PREF_SWIPL_DIR, null,
+                null);
         if (swiHome == null) {
             throw new NullPointerException("Required property \""
                     + PDT.PREF_SWIPL_DIR + "\" was not specified.");
@@ -216,8 +278,8 @@ public class PDTPlugin extends AbstractUIPlugin {
             throw new NullPointerException("Required property \""
                     + PDT.PREF_SERVER_CLASSPATH + "\" was not specified.");
         }
-        String debugLevel = service.getString(qualifier,
-                PDT.PREF_DEBUG_LEVEL, null, null);
+        String debugLevel = service.getString(qualifier, PDT.PREF_DEBUG_LEVEL,
+                null, null);
         if (debugLevel == null) {
             Debug.warning("The property \"" + PDT.PREF_DEBUG_LEVEL
                     + "\" was not specified." + "Assuming default: ERROR");
@@ -243,6 +305,12 @@ public class PDTPlugin extends AbstractUIPlugin {
         prologInterface.setStartStrategy(new PDTServerStartStrategy(swiHome,
                 classPath, debugLevel));
 
+    }
+
+    public void registerConsultService(String key, ConsultService consultService) {
+        synchronized (consultServices) {
+            consultServices.put(key, consultService);
+        }
     }
 
     /**
@@ -323,7 +391,35 @@ public class PDTPlugin extends AbstractUIPlugin {
 
             prologInterface = new PrologInterface();
             reconfigurePrologInterface();
+            metadataConsultService = new RecordingConsultService();
+            reconfigureMetaDataConsultService();
+            LifeCycleHook hook = new LifeCycleHook() {
+                public void onInit(PrologSession initSession) {
+                    try {
+                        metadataConsultService.connect();
+                        
+                    } catch (IOException e) {
+                        Debug.report(e);
+                    }
+                }
 
+                public void afterInit() {
+                    try{
+                        metadataConsultService.reload();
+                    }
+                    catch(Throwable t){
+                        Debug.report(t);
+                    }
+                }
+
+                public void beforeShutdown(PrologSession session) {
+                    metadataConsultService.disconnect();
+                }
+            };            
+            prologInterface.addLifeCycleHook(hook, "metadataConsultService",
+                    new String[] { ConsultServerHook.HOOK_ID });
+            
+            registerConsultService(PDT.CS_METADATA,metadataConsultService);
             registerHooks();
             prologInterface.start();
         } catch (Throwable t) {
@@ -344,25 +440,25 @@ public class PDTPlugin extends AbstractUIPlugin {
         }
     }
 
-//    public IFile getActiveFile() {
-//		try {
-//			IEditorPart editorPart = getActiveEditor();
-//			return ((FileEditorInput)editorPart.getEditorInput()).getFile();
-//		}catch (NullPointerException e){ return null; }
-//	}
-//
-//	public String getActiveFileName() {
-//		try {
-//			return getActiveFile().getFullPath().toString();
-//		}catch (NullPointerException e){ return null; }
-//	}
-//	
-//	
-//	public String getActiveRawFileName() {
-//		try {
-//			return getActiveFile().getRawLocation().toFile().getAbsolutePath();
-//		}catch (NullPointerException e){ return null; }
-//
-//	}
-    
+    //    public IFile getActiveFile() {
+    //		try {
+    //			IEditorPart editorPart = getActiveEditor();
+    //			return ((FileEditorInput)editorPart.getEditorInput()).getFile();
+    //		}catch (NullPointerException e){ return null; }
+    //	}
+    //
+    //	public String getActiveFileName() {
+    //		try {
+    //			return getActiveFile().getFullPath().toString();
+    //		}catch (NullPointerException e){ return null; }
+    //	}
+    //	
+    //	
+    //	public String getActiveRawFileName() {
+    //		try {
+    //			return getActiveFile().getRawLocation().toFile().getAbsolutePath();
+    //		}catch (NullPointerException e){ return null; }
+    //
+    //	}
+
 }

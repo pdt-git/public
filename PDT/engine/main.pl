@@ -1,1 +1,2 @@
 :- [pdtplugin].
+:- [consult_server].

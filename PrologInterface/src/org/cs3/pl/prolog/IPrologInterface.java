@@ -28,6 +28,9 @@ public interface IPrologInterface {
 	 */
 	public abstract void start() throws IOException;
 
+	public boolean isUp();
+	public boolean isDown();
+	
 	public void addLifeCycleHook(LifeCycleHook h);
 	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies);
 

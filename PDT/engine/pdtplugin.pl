@@ -12,6 +12,7 @@
     manual_entry/3]).
 
 :- use_module(library(help)).
+
 /*
 meta_data(?Filename,?Module,?Name,?Arity,?Public,Position,?Length,?Dynamic,?Multifile)
 */
@@ -352,3 +353,5 @@ user:tearDown('pdtplugin:find_pred') :-
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,5,true,726,11,false,false)),
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,9,false,823,11,false,false)),
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,get_file_pos_,7,true,1956,12,false,false)). 
+    
+

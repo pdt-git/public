@@ -2,7 +2,12 @@ package org.cs3.pl.prolog;
 
 public class SessionException extends Exception {
 	
-	public SessionException(){
+	/**
+     * Comment for <code>serialVersionUID</code>
+     */
+    private static final long serialVersionUID = 7988782404441586015L;
+
+    public SessionException(){
 		
 	}
 	

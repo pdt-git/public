@@ -6,11 +6,13 @@
 
 package org.cs3.pl.doc;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.fileops.MetaDataManager;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.SessionException;
 
@@ -21,7 +23,6 @@ import org.cs3.pl.prolog.SessionException;
 public class PrologDocWriter extends HTMLWriter {
 
 
-    String dir;
     
 //    public void write(Library tree) {
 //        File mkdir = new File(dir + tree.name);
@@ -60,7 +61,6 @@ public class PrologDocWriter extends HTMLWriter {
 //        }
 //    }
     
-    MetaDataManager manager ;
     
 
 //    public void writeAllClassesFrame(LibraryTypes types) {
@@ -95,24 +95,25 @@ public class PrologDocWriter extends HTMLWriter {
 //    }
 
     String moveInDirectoryHierachy = "..\\";
+
+
+    private OutputStream output;
    
     /** Creates a new instance of DocWriter */
-    public PrologDocWriter(MetaDataManager manager,String targetdir) {
+    public PrologDocWriter(OutputStream output) {
         super("stylesheet.css");
-        this.dir = targetdir;
-        this.manager=manager;
+        this.output=output;
+        setWriter(new BufferedWriter(new OutputStreamWriter(output)));
     }
 
-    public String getDocumentationFile(PrologModule module) {
-    	return manager.getFullPath(module.getFilename());
-    }
+  
 
     public void write(PrologModule module) throws IOException {
 //    	File file = new File(dir + module.getHelpFilename());
 //    	file.getParentFile().mkdirs();
 //        openStream(new FileOutputStream(file));
         
-        setWriter(manager.getMetaDataWriter(module.getFilename()));
+        
         writeHead("Module");
         writeComment(module);
         writeSection(true, "Predicates", module.getElements()); 

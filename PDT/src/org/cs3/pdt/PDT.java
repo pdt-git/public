@@ -1,9 +1,30 @@
 package org.cs3.pdt;
 
+
+
 /**
  * All kinds of string keys used by the pdt.
  */
 public interface PDT {
+    
+    /**
+     * The prolog project nature. 
+     * <p>
+     * To get an <code>IPrologProject</code> from an <code>IProject</code>
+     * you would do the following:
+     * <p><code>
+     * IProject project = <i>(---some prolog project---)</i>;
+     * <p>
+     * IPrologProject prologProject = (IPrologProject)project.getNature(PDT.NATURE_ID);
+     * </code> 
+     */
+    public final static String NATURE_ID = "org.cs3.pdt.PDTProjectNature";
+    
+    /**
+     * the port to use for writing fact data into the prolog system.
+     */
+    public static final String PREF_CONSULT_PORT = "pdt.consult.port";
+
     /**
      * A list of absolute os filesystem paths, separated by your favourite
      * path.separator (i.e. a colon on most unix systems)
@@ -29,6 +50,8 @@ public interface PDT {
      * pdt metadata engine.
      */
     public final static String PREF_METADATA_ENGINE_DIR = "pdt.metadata.engine.dir";
+
+    public static final String BUILDER_ID = "org.cs3.pdt.MetaDataBuilder";
     
     /**
      * An absolute os file system path to the directory containing metadata store
@@ -59,6 +82,17 @@ public interface PDT {
     public static final String PREF_CONSOLE_PORT = "pdt.console.port";
 
     /**
+     * the default to use for PROP_SOURCE_PATH
+     */
+    public static final String PREF_SOURCE_PATH_DEFAULT = "pdt.source.path.default";
+    
+    /**
+     * a path.separator-separated list of project relative paths pointing to the
+     * source directories of a project.
+     */
+    public static final String PROP_SOURCE_PATH = "pdt.source.path";
+
+    /**
      * if set to "true", the prolog interface will not try to start the server
      * process, but instead expect it to be allready running. This option is
      * mainly usefull for debugging the server process.
@@ -86,6 +120,12 @@ public interface PDT {
      * using the static Debug.setDeubgLevel(int) method.
      */
     public final static String PREF_DEBUG_LEVEL = "debug.level";
+
+    
+    /**
+     * The key to which the meta data consult sevice is bound. 
+     */
+    public static final String CS_METADATA = "metadata";
 
     /**
      * contains the classpath to use when starting the server process. It
