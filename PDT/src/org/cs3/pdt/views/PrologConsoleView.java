@@ -48,7 +48,7 @@ public class PrologConsoleView extends ViewPart implements
 				new String[] { ConsoleServerHook.HOOK_ID , MetaDataEngineHook.HOOK_ID});
 
 		view = new ConsoleView();
-		DefaultConsoleController controller = new DefaultConsoleController();
+		controller = new DefaultConsoleController();
 		completionProvider = new PrologCompletionProvider();
 		completionProvider.setPrologInterface(pi);
 		controller.setCompletionProvider(completionProvider);

@@ -34,7 +34,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 		if (Util.probePort(port, "end_of_file.\n")) {
 			Debug.info("Console server thread seems to be running, so i will not start a new one.");			
 		}else{
-		    String queryString = "use_module(library(prolog_server)), catch(prolog_server("+port+", []),_,thread_exit(0))";
+		    String queryString = "use_module(library(prolog_server)), prolog_server("+port+", [])";
 		    Debug.info("starting console server using: "+queryString);
 		    try {				
                 s.query(queryString);
@@ -62,32 +62,32 @@ public class ConsoleServerHook implements LifeCycleHook{
 	     * i have written a mail on the swi list an i am currently waiting for feedback,
 	     * for now, we simply ignore the problem when on non-windows system.
 	     */
-	    boolean isWindoof = System.getProperty("os.name").indexOf("Windows")>-1;
-	    if(!isWindoof){
-	        return;
-	    }
-	    
-	    int port = getPort();
-		if (!Util.probePort(port, "end_of_file.\n")) {
-			Debug
-					.info("Console server thread does not seem to be running, so i will not stop it.");
-			return;
-		}
-		String queryString = "thread_signal(prolog_server,throw(FrissStahlExcpeption))";
-	    Debug.info("stopping console server using: "+queryString);
-		try {
-			session.query(queryString);
-		} catch (SessionException e) {
-			Debug.report(e);
-		}
-		while(Util.probePort(port,"end_of_file.\n")){
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e1) {
-                Debug.report(e1);
-            }
-        }		
-		Debug.debug("Server thread stopped");
+//	    boolean isWindoof = System.getProperty("os.name").indexOf("Windows")>-1;
+//	    if(!isWindoof){
+//	        return;
+//	    }
+//	    
+//	    int port = getPort();
+//		if (!Util.probePort(port, "end_of_file.\n")) {
+//			Debug
+//					.info("Console server thread does not seem to be running, so i will not stop it.");
+//			return;
+//		}
+//		String queryString = "thread_signal(prolog_server,throw(FrissStahlExcpeption))";
+//	    Debug.info("stopping console server using: "+queryString);
+//		try {
+//			session.query(queryString);
+//		} catch (SessionException e) {
+//			Debug.report(e);
+//		}
+//		while(Util.probePort(port,"end_of_file.\n")){
+//            try {
+//                Thread.sleep(50);
+//            } catch (InterruptedException e1) {
+//                Debug.report(e1);
+//            }
+//        }		
+//		Debug.debug("Server thread stopped");
 	}
 
 	/* (non-Javadoc)

@@ -57,11 +57,9 @@ public class ConsoleServerHook implements LifeCycleHook{
 	     * i have written a mail on the swi list an i am currently waiting for feedback,
 	     * for now, we simply ignore the problem when on non-windows system.
 	     */
-	    boolean isWindoof = System.getProperty("os.name").indexOf("Windows")>-1;
-	    if(!isWindoof){
-	       return;
-	    }
-	    
+		if(true){
+			return;
+		}
 	    int port = getPort();
 		if (!Util.probePort(port, "end_of_file.\n")) {
 			Debug
