@@ -230,10 +230,6 @@ getType(_select, _Type) :-
 
 getType(null, null).
 
-getTypeIfNullEnclClass(null, _stat, type(class,_encl,0)) :-
-    enclClass(_stat, _encl).
-getTypeIfNullEnclClass(_id, _, _Type) :-
-    getType(_id, _Type).
 
 % optimiert für ident | selects
 getRefType(_ident, _Type) :-

@@ -2,28 +2,30 @@
 % Date: 14.02.2003
 
 
-resolve_field(type(class,_enclClass,0),_name,_Field):-
-    resolve_field(_enclClass,_name,_Field).
+%resolve_field(type(class,_enclClass,0),_name,_Field):-
+%    resolve_field(_enclClass,_name,_Field).
 
 resolve_field(_enclClass,_name,_Field):-
-    fieldDefT(_Field,_enclClass,_,_name,_),
+    java_fq(fieldDefT(_Field,_enclClass,_,_name,_)),
     !.
 
 resolve_field(_enclClass,_name,_Field):-
-    extendsT(_enclClass,_super),
+    java_fq(extendsT(_enclClass,_super)),
     resolve_field(_super,_name,_Field),
     !.
     
 resolve_field(_enclClass,_name,_Field):-
-    implementsT(_enclClass,_interf),
+    java_fq(implementsT(_enclClass,_interf)),
     resolve_field(_interf,_name,_Field),
     !.
 
 resolve_field(_enclClass,_name,_Field):-
-    classDefT(_enclClass,_,_className,_),
+    java_fq(classDefT(_enclClass,_,_className,_)),
     sformat(_msg,'field ''~a'' not found in class ''~a''',[_name,_className]),
     error_handling(fail, _msg).
 
+/*
+%TODO: muss zu java_fq portiert werden, falls es benötigt wird!
 abstraction(resolve_class(_name,_Class)).
 resolve_class(_name,_Class):-
     fullQualifiedName(_Class, _name),
@@ -58,9 +60,8 @@ resolve_class(_,_name,_):-
     sformat(_msg,'class not found ~a',_name),
     error_handling(fail, _msg).
 
-lookupClassInPackage(_pckg,_name,_Class):-
-    classDefT(_Class,_,_name,_),
-    getPackage(_Class,_pckg).
+lookupClassInPackage(Package,Name,Class):-
+    classDefT(Class,Package,Name,_).
 
 lookupClassInImport(_import,_name,_Class):-
     importT(_import, _, _Class),
@@ -71,10 +72,10 @@ lookupClassInImport(_import,_name,_Class):-
     packageT(_pckg, _packagename),
     lookupClassInPackage(_pckg,_name,_Class).
 
+*/
 
-
-resolve_method(type(class,_enclClass,0),_name,_args,_Meth):-
-    resolve_method(_enclClass,_name,_args,_Meth).
+%resolve_method(type(class,_enclClass,0),_name,_args,_Meth):-
+%    resolve_method(_enclClass,_name,_args,_Meth).
 
 resolve_method(_enclClass,_name,_args,_Meth) :-
     assert(best_method(null)),
@@ -89,23 +90,21 @@ resolve_method(_enclClass,_name,_args,_Meth) :-
     !.
 %    format('method found: ~a~n',_name).
 
-check_best_method(_enclClass,_name,_args,_):-
+check_best_method(EnclClass,Name,Args,_):-
     best_method(null),
     printToTmp,
-    class(_enclClass,_package,_className),
-    packageT(_package,_packageName),
     printf('method (<init> for constructor) not found: '),
-    printf('~a.~a.~a(',[_packageName,_className,_name]),
-    gen_komma_list(_args),
+    printf('~a.~a(',[EnclClass,Name]),
+    gen_komma_list(Args),
     printf(')'),
-    closeTmp(_msg),
-    error_handling(fail, _msg).
+    closeTmp(Msg),
+    error_handling(fail, Msg).
 
 check_best_method(_enclClass,_,_,_Meth):-
     best_method(_Meth).
 
 find_method(_enclClass, _class,_name,_args):-
-    methodDefT(_meth,_class,_name,_params,_,_,_),
+    java_fq(methodDefT(_meth,_class,_name,_params,_,_,_)),
 %    % compare resolve.java in javac
     method_invocation_conversion(_params, _args),
     best_method(_best),
@@ -122,15 +121,15 @@ resolve_candidate(_enclClass,_class,_name,_args):-
         true
     ),
     _name \= '<init>',
-    extendsT(_class,_super),
+    java_fq(extendsT(_class,_super)),
     _class \= _super,
     !,
     resolve_candidate(_enclClass,_super,_name,_args).
     
 check_for_ambiguty(_enclClass,_class,_name,_args):-
     best_method(_best),
-    method(_best,_,_,_,_,_,_),
-    method(_meth,_class,_name,_params,_,_,_),
+    java_fq(methodDefT(_best,_,_,_,_,_,_)),
+    java_fq(methodDefT(_meth,_class,_name,_params,_,_,_)),
     % compare
     method_invocation_conversion(_params, _args),
     not(as_good_as(_enclClass,_best,_meth)),
@@ -146,17 +145,17 @@ as_good_as(_,null,_meth):-
 
 
 as_good_as(_enclClass, _best,_meth):-
-    method(_meth,_class,_,_params,_,_,_),
-    method(_best,_bestClass,_,_bestParams,_,_,_),
+    java_fq(methodDefT(_meth,_class,_,_params,_,_,_)),
+    java_fq(methodDefT(_best,_bestClass,_,_bestParams,_,_,_)),
     !,(
         (
             not(is_accessible(_enclClass,_best)),
             is_accessible(_enclClass,_meth),
-            modifierT(_meth, 'static'),
-            modifierT(_best, 'static')
+            java_fq(modifierT(_meth, 'static')),
+            java_fq(modifierT(_best, 'static'))
 
         );
-        interfaceT(_bestClass);(
+        java_fq(interfaceT(_bestClass));(
             subtype(_bestclass,_class),
             !,
             method_invocation_conversion(_params, _bestParams)
@@ -165,20 +164,21 @@ as_good_as(_enclClass, _best,_meth):-
    
 %private
 is_accessible(_class,_meth):-
-    modifierT(_meth, 'private'),
+    java_fq(modifierT(_meth, 'private')),
     !,
-    method(_meth,_class,_,_,_,_,_).
+    java_fq(methodDefT(_meth,_class,_,_,_,_,_)).
 
 %public, protected
 is_accessible(_class,_meth):-
-    method(_meth,_enclClass,_,_,_,_,_),
-    (modifierT(_meth, 'public') ; modifierT(_meth, 'protected')).
+    java_fq(methodDefT(_meth,_enclClass,_,_,_,_,_)),
+    (java_fq(modifierT(_meth, 'public')) ; 
+     java_fq(modifierT(_meth, 'protected'))).
 %package
-is_accessible(_class,_meth):-
-    method(_meth,_enclClass,_name,_params,_,_,_),
-    getPackage(_class,_pckg),
-    getPackage(_enclClass,_pckg).
-
+is_accessible(Class,Meth):-
+    java_fq(methodDefT(Meth,EnclClass,_,_,_,_,_)),
+    java_fq(classDefT(EnclClass,Package,_,_)),
+    java_fq(classDefT(Class,Package,_,_)).
+    
 method_invocation_conversion([], []).
 method_invocation_conversion([_param|_paramRest], [_arg| _argRest]) :-
     getType(_param, type(_kink,_paramCompType,_arraySize)),
@@ -204,11 +204,16 @@ assignment_check(_lhs,_rhs) :-
     format('~n'),
     error_handling(fail, 1).
 
+
+assignable(A,B) :- 
+    term_to_atom(A,Atom),
+    term_to_atom(B,Btom), %;-)
+    format('to be ported: assignable (resolve.pl) (~a,~a)',[Atom,Btom]).
+
+/* TODO: port to java_fq, when needed
 assignable(type(basic,_t,_dim),type(basic,_t,_dim)) :- !.
 assignable(type(class,_,_),type(basic,null,_)) :- !.
 assignable(type(class,_lc,_dim),type(class,_rc,_dim)) :-
     subtype(_lc, _rc),
     !.
-
-
-
+    */

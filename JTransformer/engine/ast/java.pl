@@ -517,6 +517,16 @@ ast_node_def('Java',selectT,[
      ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT])
 ]).
 
+% tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atom],[classDefT,packageT]]).
+ast_node_def('Java',identT,[
+     ast_arg(id,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
+     ast_arg(name,    mult(1,1,no ), id,  [atom]),
+     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT])
+]).
+
+
 % tree_constraints(switchT,[[allType],[methodDefT],[expressionType],[statementType]]).
 ast_node_def('Java',switchT,[
      ast_arg(id,     mult(1,1,no ), id,  [id]), % <-- convention!!!

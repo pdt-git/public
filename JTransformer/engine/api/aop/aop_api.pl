@@ -972,6 +972,11 @@ constructor(_constructor,_class,_params):-
 
 /*************** actions ************/
 
+action(addArgList(FnArgs, PcArgs, Idents, Parent, ForwMethod)):-
+	addArgList(FnArgs, PcArgs, Idents, Parent, ForwMethod).
+	
+action(addArg(FnArg,PcArgs,Ident,Parent,ForwMethod)):-
+	addArg(FnArg,PcArgs,Ident,Parent,ForwMethod).	    
 /**
  * addArgList(FnArg, PcArgs, IdList, Parent, Encl)
  */
@@ -1046,3 +1051,15 @@ addParamList([Param|Params], [Id|Ids],Parent) :-
     paramDefT(Param,_,Type,Name),
     add(paramDefT(Id,Parent,Type,Name)),
     addParamList(Params, Ids).    
+    
+    
+/**
+ * apply_aj_cts.
+ * 
+ * debugging predicate
+ * applies all cts in the aj_ct_list 
+ * fact in the given order.
+ */
+apply_aj_cts :-
+    aj_ct_list(A),
+    apply_ctlist(A).

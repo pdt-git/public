@@ -135,6 +135,18 @@ assert_fail(Comment, Goal) :-
    	);
    	true).
 
+assert_bound( Term):-
+    assert_bound('',Term).
+	
+assert_bound(Comment, Term):-
+	numbervars(Term,0,Num),
+	Num > 0,
+    term_to_atom(Term,Atom),
+    sformat(Msg, 'The term ~a contains variables.~n~a~n',[Atom,Comment]),
+    write(Msg),
+    flush_output,
+    throw(assertion_failed(Msg)).
+assert_bound(_,_).
 
 /*
 surr2:-

@@ -63,6 +63,11 @@ action(add(_elem)):-
 	will be undone in the next rollback.
 */
 
+add(java_fq(Elem)):-
+    !,
+    java_fq_to_pef(Elem,PEF),
+    add(PEF).
+
 add(_elem) :-
          nonvar(_elem), 
 %         logChange(_elem),
@@ -81,6 +86,12 @@ action(delete(_elem)):-
 	pef must be a bound PEF term. The deletion from the fact base is logged and
 	will be undone in the next rollback.
 */
+
+delete(java_fq(Elem)):-
+    !,
+    java_fq_to_pef(Elem,PEF),
+    delete(PEF).
+    
 delete(_elem) :- 
 %    	term_to_atom(_elem,A),
 %    	format('delete: ~a~n~n',[A]),
@@ -93,6 +104,12 @@ delete(_elem) :-
         
 action(replace(_elem1,_elem2)):-
         replace(_elem1,_elem2).
+
+replace(java_fq(Elem1),java_fq(Elem2)):-
+    !,
+    java_fq_to_pef(Elem1,PEF1),
+    java_fq_to_pef(Elem2,PEF2),
+    replace(PEF1,PEF2).
 
 replace(_elem1, _elem2) :- delete(_elem1), add(_elem2).
 

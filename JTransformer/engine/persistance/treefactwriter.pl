@@ -30,6 +30,7 @@ writeTreeFacts(File):-
 treeFact(Fact) :-
     (treeSignature(Head,Arity);
     (Head=ct,Arity=3);
+    (Head=aj_ct_list,Arity=1);
     attribSignature(Head,Arity)),
     uniqueArgumentList(Arity,Arguments),
     Fact =.. [Head|Arguments].

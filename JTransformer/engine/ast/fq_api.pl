@@ -123,40 +123,47 @@ checkArgumentNumber(Term):-
 	mapArgs([ast_arg1,...],[fq_arg1,...])
 */
 	
-mapArgs([],[]).
+mapArgs([],[]):- !.
     
 mapArgs( [JavaASTArg|JavaASTArgs],[FQN|Args]):-
     classDefT(JavaASTArg,_,_,_),
     !,
     fullQualifiedName(JavaASTArg,FQN),
-    mapArgs(JavaASTArgs,Args).	
+    mapArgs(JavaASTArgs,Args),
+    !.
     
 mapArgs([type(Kind,Id,Arity)|JavaASTArgs],[FQN|Args]):-
     !,
     map_type_term(type(Kind,Id,Arity),FQN),
-    mapArgs(JavaASTArgs,Args).
+    mapArgs(JavaASTArgs,Args),
+    !.
 
 mapArgs([[JavaSubListArg|JavaSubListArgs]|JavaASTArgs],[[SubListArg|SubListArgs]|Args]):-
     !,
     mapArgs([JavaSubListArg|JavaSubListArgs],[SubListArg|SubListArgs]),
-    mapArgs(JavaASTArgs,Args).
+    mapArgs(JavaASTArgs,Args),
+    !.
 
 mapArgs([Arg|JavaASTArgs],[Arg|Args]):-
-    mapArgs(JavaASTArgs,Args).
+    mapArgs(JavaASTArgs,Args),
+    !.
 
 /**
 	map_type_term(?type/3, ?FQN)).
 */
     
-map_type_term(type(basic,TypeName,0), TypeName).
+map_type_term(type(basic,TypeName,0), TypeName):-!.
 map_type_term(type(basic,TypeName,Arity), FQNBrackets):-
-   type_with_brackets(TypeName,Arity,FQNBrackets).
+   type_with_brackets(TypeName,Arity,FQNBrackets),
+   !.
 
 map_type_term(type(class,Id,0), FQN):-
-    fullQualifiedName(Id,FQN).
+    fullQualifiedName(Id,FQN),
+    !.
 map_type_term(type(class,Id,Arity), FQNBrackets):-
     fullQualifiedName(Id,FQN),
-    type_with_brackets(FQN,Arity,FQNBrackets).
+    type_with_brackets(FQN,Arity,FQNBrackets),
+    !.
   
 /**
  * type_with_brackets(?TypeName,?Arity,?FQNBrackets) 
@@ -167,60 +174,68 @@ type_with_brackets(TypeName,Arity,FQNBrackets) :-
     nonvar(Arity),
     !,
     square_brackets_for_arity(Arity,Brackets),
-    atom_concat(TypeName,Brackets,FQNBrackets).
+    atom_concat(TypeName,Brackets,FQNBrackets),
+    !.
 
 type_with_brackets(FQN,Arity,FQNBrackets) :-
     nonvar(FQNBrackets),
     !,
-    arity_for_square_brackets(Arity,FQNBrackets,FQN).
+    arity_for_square_brackets(Arity,FQNBrackets,FQN),
+    !.
 
 
-square_brackets_for_arity(0,'').
+square_brackets_for_arity(0,''):-!.
 square_brackets_for_arity(Dim,Brackets) :-
     nonvar(Dim),
     !,
     succ(DimDec, Dim),
     square_brackets_for_arity(DimDec,RestBrackets),
-    atom_concat(RestBrackets,'[]',Brackets).
+    atom_concat(RestBrackets,'[]',Brackets),
+    !.
     
 arity_for_square_brackets(0,FQN,FQN):-
-	not(atom_concat(_,'[]',FQN)).
+	not(atom_concat(_,'[]',FQN)),
+	!.
 
 arity_for_square_brackets(Dim,Brackets,FQN) :-
     nonvar(Brackets),
     !,
     atom_concat(RestBrackets,'[]',Brackets),
     arity_for_square_brackets(DimDec,RestBrackets,FQN),
-    succ(DimDec, Dim).
+    succ(DimDec, Dim),
+    !.
 
      
 /**
 	bindArgs([ast_arg_descr/4,...],[java_fq_arg1,...],[java_ast_arg1,...])
 */
-bindArgs(_, [], []).
+bindArgs(_, [], []):- !.
 
 bindArgs([_|ArgDefs], [Arg|Args], [_|JavaASTArgs]) :-
     var(Arg),
     !,
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 
 bindArgs([ast_arg(_,mult(_,_,ord), id,  Kind)|ArgDefs], [FQNAndIdList|Args], [IdList|JavaASTArgs]) :-
-    !,
 	member(classDefT,Kind),
+    !,
 	replaceFQNsWithClassIds(FQNAndIdList,IdList),
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 % in the case the id is null
 bindArgs([ast_arg(_,_, id,  _)|ArgDefs], [null|Args], [null|JavaASTArgs]) :-
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 
 % attribute is a classDefT
 bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
     fullQualifiedName(JavaASTArg, FQN),
-	bindArgs(ArgDefs, Args, JavaASTArgs).
-    
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+    !.
     
     
 % type term attribute.
@@ -230,45 +245,54 @@ bindArgs([ast_arg(_,_, _,  Kinds)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]
     member(typeTermType,Kinds),
     !,
     map_type_term(JavaASTArg,FQN),
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 % attribute that is not a type term
 bindArgs([ast_arg(_,_, attr,  _)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 % id with several Kinds, but no classDefT
 bindArgs([ast_arg(_,_, id,  Kind)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
 	not(member(classDefT,Kind)),
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 % id with several Kinds, and a classDefT - TODO: by now expensive!?
 bindArgs([ast_arg(_,_, id, _)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
 	fullQualifiedName(JavaASTArg,FQN),
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
 
 bindArgs([ast_arg(_,_, _,  _)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
-	bindArgs(ArgDefs, Args, JavaASTArgs).
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
          
 replaceFQNsWithClassIds([],[]).
 replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
     nonvar(Id),
 	!,
 	fullQualifiedName(Id,FQN),
-	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+	replaceFQNsWithClassIds(FQNsAndIds,Ids),
+	!.
     
 replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
 	var(FQN),
 	!,
-	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+	replaceFQNsWithClassIds(FQNsAndIds,Ids),
+	!.
 	
 	
 replaceFQNsWithClassIds([FQN|FQNsAndIds], [Id|Ids]):-
 	fullQualifiedName(Id,FQN),
 	!,
-	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+	replaceFQNsWithClassIds(FQNsAndIds,Ids),
+	!.
 
 replaceFQNsWithClassIds([Id|FQNsAndIds], [Id|Ids]):-
-	replaceFQNsWithClassIds(FQNsAndIds,Ids).
+	replaceFQNsWithClassIds(FQNsAndIds,Ids),
+	!.
 
          
 error_occured(S):-
@@ -276,3 +300,49 @@ error_occured(S):-
     flush_output,
 	throw(S).
       
+
+java_fq(Term):-
+     Term =.. [Functor|Args],
+     attribSignature(Functor,_),
+     !,
+	 ast_node_def('JavaAttributes',Functor,ArgDefs),
+	 bindArgs(ArgDefs, Args, JavaASTArgs),
+     JavaAST =.. [Functor|JavaASTArgs],
+     call(JavaAST),
+     mapArgs(JavaASTArgs,Args).
+     
+
+
+	
+java_fq_to_pef(FQ, PEF):-
+     assert_bound(FQ),
+     FQ =.. [Functor|[Id|Args]],
+	 ast_node_def('Java',Functor,[_|ArgDefs]),
+	 !,
+	 bindArgs(ArgDefs, Args, JavaASTArgs),
+     PEF =.. [Functor,Id|JavaASTArgs].
+     
+
+java_fq_to_pef(FQ, PEF):-
+     FQ =.. [Functor|Args],
+     attribSignature(Functor,_),
+     !,
+	 ast_node_def('JavaAttributes',Functor,ArgDefs),
+	 bindArgs(ArgDefs, Args, JavaASTArgs),
+     PEF =.. [Functor|JavaASTArgs].
+     
+     
+/**
+ * getTypeIfNullEnclClass(+ID|null, +Encl,-FQN)
+ * 
+ * For use with java_fq abstraction. 
+ */
+
+getTypeIfNullEnclClass(null, _stat, FQN) :-
+    enclClass(_stat, _encl),
+    fullQualifiedName(_encl,FQN).
+    
+getTypeIfNullEnclClass(_id, _, FQN) :-
+    getType(_id, _Type),
+    map_type_term(_Type,FQN).
+     

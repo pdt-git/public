@@ -48,4 +48,15 @@ test(java_fq_type_with_brackets2):-
     assert_true(('int' == Type)),
     assert_true((1 == Arity)).
     
+test(java_fq_java_fq_to_pef):-
+    assert_true((
+    	class(Class,Package,'Object'),
+    	packageT(Package,'java.lang'),
+    	methodDefT(A,Class,hashCode,[],type(basic,int,0),[],null),
+    	java_fq_to_pef(
+    	   methodDefT(A,'java.lang.Object',hashCode,[],int, [],null),
+    	   Term))),
+    assert_bound(Term),
+    assert_true((Term = methodDefT(A,Class,hashCode,[],type(basic,int,0), [],null))).
     
+    	   
