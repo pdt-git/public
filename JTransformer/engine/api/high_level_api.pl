@@ -131,7 +131,7 @@ cond(concat(_Sub,_Left,_Right)).
 
 cond(class(_Name)).	
 class(Name):-
-    class(_,_,Name).
+    java_fq(classDefT(Name,_,_,_)).
 
 action(delete(bodyFact(_encl))) :-
     !,
