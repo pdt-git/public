@@ -106,7 +106,7 @@ public class JLMPPlugin extends AbstractUIPlugin {
                         JLMP.PREF_USE_PEF_STORE,
                         "Use PEF store",
                         "If enabled, JTransformer will save PEFs before shutdown and reload them at startup. ",
-                        Option.FLAG, "false"),
+                        Option.FLAG, "true"),
                 new SimpleOption(
                         JLMP.PREF_DEFAULT_PEF_STORE_FILE,
                         "Default PEF store file",
