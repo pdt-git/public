@@ -1,7 +1,7 @@
 package org.cs3.pdt.views;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.InitHook;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.SessionException;
 
@@ -10,7 +10,7 @@ import org.cs3.pl.prolog.SessionException;
  * an io socket on the server process to which a 
  * Console can be connected.
  */
-public class CreateServerThreadHook implements InitHook {
+public class CreateServerThreadHook implements LifeCycleHook {
 	
 
 	
@@ -27,6 +27,22 @@ public class CreateServerThreadHook implements InitHook {
 			Debug.report(e);
 		}
 		Debug.debug("Server thread created");
+	}
+
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
+	 */
+	public void afterInit() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
+	 */
+	public void beforeShutdown(PrologSession session) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

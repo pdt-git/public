@@ -17,7 +17,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
    </requires>
-   <extension-point id="hooks.init" name="InitHooks" schema="schema/InitHooks.exsd"/>
+   <extension-point id="hooks" name="Lifecycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <category
@@ -31,8 +31,10 @@
             id="org.cs3.pdt.views.PrologConsoleView"/>
    </extension>
    <extension
-         point="org.cs3.pdt.hooks.init">
-   	<hook class="org.cs3.pdt.ConsoleServerHook"/>
+         point="org.cs3.pdt.hooks">
+   	<hook
+          class="org.cs3.pdt.ConsoleServerHook"
+          id="org.cs3.pdt.ConsoleServerHook"/>
    </extension>
 
 </plugin>

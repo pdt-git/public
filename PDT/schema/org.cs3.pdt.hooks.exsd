@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.cs3.pdt.hooks">
+<schema targetNamespace="org.cs3.pdt">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.cs3.pdt.hooks" id="init" name="InitHooks"/>
+         <meta.schema plugin="org.cs3.pdt" id="hooks" name="Lifecycle Hooks"/>
       </appInfo>
       <documentation>
-         [Enter description of this extension point.]
+         Define code hooks that should be executed on certain points during the lifecycle of the PrologInterface.
       </documentation>
    </annotation>
 
@@ -40,15 +40,28 @@
 
    <element name="hook">
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="class" type="string">
             <annotation>
                <documentation>
-                  
+                  fully qualified class name of a class implementing the org.cs3.pl.prolog.LifeCycleHook interface.
                </documentation>
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.cs3.pl.extension.IJTransformerObserver"/>
                </appInfo>
-               
+            </annotation>
+         </attribute>
+         <attribute name="dependsOn" type="string">
+            <annotation>
+               <documentation>
+                  A comma-separated list of hook ids this hook code depends on. E.g. in start-up situation, the hooks specified here will be executed before this hook. (vice versa for shutdown)
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  Any string that is unique can serve as an identifier for a hook.
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

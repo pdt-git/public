@@ -1,9 +1,14 @@
 package prg.cs3.pdt;
 
+import java.io.IOException;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.Set;
+
 import org.cs3.pdt.PDTServerStartStrategy;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Properties;
-import org.cs3.pl.prolog.InitHook;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -11,11 +16,8 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.ui.plugin.*;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-
-import java.io.IOException;
-import java.util.*;
 
 
 /**
@@ -170,8 +172,15 @@ public class PDTPlugin extends AbstractUIPlugin implements PreferenceListener {
                 if(! celem[0].getName().equals("hook")){
                 	throw new RuntimeException("hmmm... asumed a hook, but got a "+celem[0].getName());
                 }
-                InitHook hook = (InitHook) celem[0].createExecutableExtension("class");
-                prologInterface.addInitHook(hook);
+                LifeCycleHook hook = (LifeCycleHook) celem[0].createExecutableExtension("class");
+                String dependsOn= celem[0].getAttributeAsIs("dependsOn");
+                if(dependsOn==null){
+                	dependsOn="";
+                }
+                String[] dependencies = dependsOn.split(",");
+                String id= celem[0].getAttributeAsIs("id");
+                prologInterface.addLifeCycleHook(hook,id,dependencies);
+                
             }
         } catch (CoreException e) {
             Debug.report(e);
