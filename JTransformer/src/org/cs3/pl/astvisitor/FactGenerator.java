@@ -668,7 +668,8 @@ public class FactGenerator extends ASTVisitor {
 		return true;
 	}
 	
-	/**
+
+    /**
 	 * Generates prolog facts of type toplevelT.
 	 * <p>
 	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=ToplevelT">

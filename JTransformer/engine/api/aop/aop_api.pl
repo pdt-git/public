@@ -265,19 +265,26 @@ createForwBody(_set, _forwMethod, _forwBody, _ForwName, [_thisParam,_recvParam,_
     add(applyT(_forwCall, _parent,_enclMethod, 'null',_ForwName, [_this,_receiver,_value],_forwMethod)),
     updateForwardsFact(_set,setField,_forwCall,_forwMethod).
 
-createForwBody(_call, _forwMethod, _forwBody, _ForwName, [_thisParam|[_recvParam|_forwParams]], _Type, _execReturn) :- %neu
-    applyT(_call,_parent,_enclMethod,_expr,_,_args, _method),
+createForwBody(_call, _forwMethod, _forwBody, _ForwName, [_thisParam|[_recvParam|_forwParams]], Type, _execReturn) :- %neu
+    (
+    	(applyT(_call,_parent,_enclMethod,_expr,_origName,_args, _method_constr),
+    	 method(_method_constr,_,_,Type,_,_,_));
+	    (newClassT(_call,_parent,_enclMethod,_method_constr,_args,_,_,_),
+	    _expr = null,
+	    constructor(_method_constr,ConstrClass,_,_,_),
+	    Type = type(class,ConstrClass,0),
+	     _origName = 'init')
+	),
     !,
     getOrigArgs(_call,_args,_origArgs),
     new_ids([_forwCall, _forwMethIdent]),
 %    applyT(_call, _parent, _enclMethod, _origReceiver, _),
-    method(_method, _, _origName, _, _Type, _exc, _),
     forwardingMethodName(_call, 'call$',_origName, _ForwName),
     enclClass(_enclMethod,_enclClass), %neu
     createForwMethParams(_enclClass,_forwMethod,_expr,_origArgs,[_thisParam|[_recvParam|_forwParams]]),
     replaceId(_parent, _call, _forwCall),
     getOrigParams(_call,[_thisParam|[_recvParam|_forwParams]],_origParams),
-    replaceForwCall(_call, _parent, _method, _origName, _execReturn, _forwMethod,_origParams,_recvParam),
+    replaceForwCall(_call, _parent, _method_constr, _origName, _execReturn, _forwMethod,_origParams,_recvParam),
     createForwArgs(_call,_enclMethod,_enclClass,_forwCall,_expr,_args,_forwArgs),
     set_parent(_forwArgs,_forwCall),
     add(applyT(_forwCall, _parent,_enclMethod, 'null', _ForwName, _forwArgs,_forwMethod)),
@@ -347,9 +354,15 @@ createAroundBody(_call, _forwMethod, _forwBody, _ForwName,_forwParams, _Type) :-
 
 
 replaceForwCall(_call, _parent, _method, _origName, _execReturn,_forwMethod,_forwParams,_recvParam):-
+    applyT(_call,_,_,_,_,_,_),
       createIdentRefParam(_recvParam,_callSelect, _forwReceiver),
       createVarDefIdents(_call, _forwParams, _argsInForw),
     action(replace(applyT(_call, _execReturn, _forwMethod, _forwReceiver,_origName, _argsInForw,_method))).
+
+replaceForwCall(_call, _parent, _method, _origName, _execReturn,_forwMethod,_forwParams,_recvParam):-
+    newClassT(_call,_,_,Constructor,_,TypeExpr,Def,Enclosing),
+    createVarDefIdents(_call, _forwParams, _argsInForw),
+    action(replace(newClassT(_call, _execReturn, _forwMethod, Constructor,_argsInForw,TypeExpr,Def,Enclosing))).			    
 
 
 createForwArgs(_call,_,_,_,_,_Args,_Args):-
@@ -487,29 +500,52 @@ apply_aspectj_cts([_ct|_t]) :-
 
 cond(matchParams(_vardefs, _patterns)).
 matchParams([], []).
-matchParams([_vdHead | _vdTail], ['..' | _patTail]) :-
+
+% FIXME sehr schlechter workaround für declare error, mock objects
+matchParams([_vdHead | _vdTail], [typePattern(bindTypeList(FNList), _dim)]) :-
+    paramDefT(_vdHead,_,_,_),
+    !,
+    matchParamTypeNameList([_vdHead | _vdTail],FNList).
+% FIXME sehr schlechter workaround für declare error, mock objects
+
+matchParams([_vdHead | _vdTail], [DotDot | _patTail]) :-
+    nonvar(DotDot),
+    DotDot = '..',
     matchParams(_vdTail, ['..' | _patTail]).
 
 matchParams(_vardefs, ['..' | _patTail]) :-
     matchParams(_vardefs, _patTail).
 
 
-matchParams([_vdHead | _vdTail], [[_pattern , _vdHead] | _patTail]) :-
+matchParams([_vdHead | _vdTail], [List | _patTail]) :-
+    nonvar(List),
+    List = [_pattern , _vdHead],
     !,
     matchParams([_vdHead | _vdTail], [_pattern | _patTail]).
 
-matchParams([_vdHead | _vdTail], [type(_kind,_id,_dim) | _patTail]) :-
+matchParams([_vdHead | _vdTail], [TypeTerm | _patTail]) :-
+    nonvar(TypeTerm),
+    TypeTerm = type(_kind,_id,_dim),
     getType(_vdHead, type(_kind, _id,_dim)).
 /*    getTypeName(type(_kind, _id,_dim), _name),
     matchPatterns(_name, _pattern),
     matchParams(_vdTail, _patTail).*/
 
+%Dirty fix for the LoD example: match Param List with one Free Name
 
-matchParams([_vdHead | _vdTail], [typePattern(_pattern,_dim) | _patTail]) :-
+matchParams([_vdHead | _vdTail], [typePattern(_pattern, _dim) | _patTail]) :-
     getType(_vdHead, type(_kind, _id,_dim)),
     getTypeName(type(_kind, _id,_dim), _name),
     matchPatterns(_name, _pattern),
     matchParams(_vdTail, _patTail).
+
+matchParamTypeNameList([],[]).
+matchParamTypeNameList([Head | Tail],[FNHead|FNTail]):-
+    paramDefT(Head,_,Type,_),
+    getTypeName(Type,FNHead),
+	matchParamTypeNameList(Tail,FNTail).
+	
+	
 
 test(_,[]).
 test(_1,[_h|_t]) :-
@@ -933,3 +969,21 @@ constructor(_constructor,_class,_params):-
     methodDefT(_constructor,_class,'<init>', _paramsConstructor,_,[],_),
     matchParams(_params, _paramsConstructor).
 
+/**
+ * addArgList(Fn_args, PcArgs, Node_9, Node_8, ForwMethod)
+ */
+addArgList(Fn_args, PcArgs, Idents, Parent, ForwMethod) :-
+    methodDefT(ForwMethod,_,_,[_This,_Target|ArgParams],_,_,_),
+    forall(member(Arg,Fn_args),
+           addArgList_(Arg,Idents,PcArgs,ArgParams,Parent,ForwMethod)).
+    
+addArgList_(Arg,[],[],_,_):-
+	format('No Arg ~a found in pcargs (addArgList_)',[Arg]).
+addArgList_(Arg,[Ident|_], [Arg|_],[Param|_],Parent,Encl):-
+    paramDefT(Param,_,_,Name),
+    !,
+    add(identT(Ident,Parent,Encl,Name,Param)).
+
+addArgList_(Arg,[_|Idents], [_|PcArgs],[_|ArgParams],Parent,Encl):-
+addArgList_(Arg,Idents, PcArgs,ArgParams,Parent,Encl).
+    

@@ -63,6 +63,53 @@ createVarDefIdents           (_newParent, _oldList, _newList)
 :- dynamic created_file/1.
 :- multifile created_file/1.
 
+/**
+ * Flatten List of Lists/Elements.
+ * e.g [[a,b],c,[d,e,f]] -> [a,b,c,d,e,f].
+ * concat(+Lists,?List)
+ */
+ 
+cond(concat_lists(_Lists,_List)).
+
+concat_lists([[Head|Tail]],[Head|Tail]):-!.
+concat_lists([Elem],[Elem]).
+
+concat_lists([[HeadHead|HeadTail]|Tail],FlatList) :-
+    !,
+	concat_lists(Tail,TailFlat),
+    append([HeadHead|HeadTail],TailFlat,FlatList).
+    
+concat_lists([Element|Tail],[Element|TailFlat]) :-
+	concat_lists(Tail,TailFlat).
+    
+test(concat_list/2):-
+    assert_true(concat_lists([[a,b],[d,e,f]],
+    	[a,b,d,e,f])),
+    assert_true(concat_lists([[a,b],c,[d,e,f]],
+    	[a,b,c,d,e,f])).
+
+/**
+ * action(showError(+ID,+Msg))
+ */
+ 
+action(showError(Kind,ID,Msg)):-
+    showError(Kind,ID,Msg).
+
+showError(_,ID,Msg):-    
+	var(ID),
+	write('ID NOT BOUND: '),
+	write(Msg),
+	flush_output.
+
+showError(Kind,ID,Msg):-    
+    enclMethod(ID,Meth),
+    method(Meth,Class,Name,_,_,_,_),
+    fullQualifiedName(Class,Fqn),
+    format('~a in method ~a.~a  ',[Kind,Fqn,Name]),
+    sourceLocation(ID, File,Start,_),
+    format('(~a:~a)~n~n~a~n', [File,Start,Msg]),
+    gen_tree(ID),
+    flush_output.
 
 /**
  * action(set_parent(+ID,+NewParent))
@@ -87,6 +134,25 @@ exists(PEF) :-
 cond(name_concat(_Head,_Rest, _Name)).
 name_concat(Head,Rest, Name) :-
     atom_concat(Head,Rest,Name).
+
+cond(package(_ClassName,_PackageName)).
+
+package(ClassName,PackageName):-
+	class(_,Package,ClassName),
+	packageT(Package,PackageName).
+	
+cond(concat(_Sub,_Left,_Right,_Complete)).	
+concat(Left,Sub,Right,Atom):-
+    sub_atom(Atom,Before,LenSub,After,Sub),
+    sub_atom(Atom,0,Before,_,Left),
+    plus(Before,LenSub,StartRight),
+    sub_atom(Atom,StartRight,After,_a,Right).
+    
+cond(concat(_Sub,_Left,_Right)).	
+
+cond(class(_Name)).	
+class(Name):-
+    class(_,_,Name).
 
 action(delete(bodyFact(_encl))) :-
     !,
@@ -308,7 +374,14 @@ action(add(implements(_class, _super))) :-
 action(delete(implements(_class, _super))) :-
     delete(implementsT(_class, _super)).
 
+cond(subtype_name(_sub, _super)).
+subtype_name(SubName, SuperName):-
+    class(Sub,_,SubName),
+    class(Super,_,SuperName),
+    subtype(Sub,Super).
+
 cond(subtype(_sub, _super)).
+
 subtype(_sub, _sub).
 subtype(_sub, _super) :-
     extendsT(_sub,_super).
@@ -540,16 +613,28 @@ subTreeArg(methodCall, 6).
    methodCall(?Call, ?Parent, ?Encl, ?Receiver, ?Method, ?Args)
 
 	Wrapper predicate for applyT.
+	and newClassT
 	Method is the original method, 
 	even if apply points to a forwarding method */
 
 methodCall(_methodCall, _parent, _Encl, _Receiver, _method, _Args) :-
     applyT(_methodCall, _parent, _encl, _Receiver, _method_name, _args,_method),
+    not(_method_name == 'super'),
     not(forwarding(_methodCall)),
 %    pc_visible(_encl),
     getRealParent(_methodCall,_parent,_Parent),
     getRealEncl(_methodCall, _encl,_Encl),
     getRealArgs(_methodCall,_args,_Args).
+
+methodCall(_methodCall, _parent, _Encl, null, _constructor, _Args) :-
+    newClassT(_methodCall, _parent, _encl, _constructor, _args, _typeExpr, _def, _enclosingClass),
+%    _Receiver, _method_name, _args,_method),
+    not(forwarding(_methodCall)),
+%    pc_visible(_encl),
+    getRealParent(_methodCall,_parent,_Parent),
+    getRealEncl(_methodCall, _encl,_Encl),
+    getRealArgs(_methodCall,_args,_Args).
+
 %    !,
 %    getEncl(_methodCall, _encl),
 %    getReceiverNullIfThis(_identSelect, _Receiver),

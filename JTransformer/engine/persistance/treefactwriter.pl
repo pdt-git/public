@@ -29,6 +29,7 @@ writeTreeFacts(File):-
     
 treeFact(Fact) :-
     (treeSignature(Head,Arity);
+    (Head=ct,Arity=3);
     attribSignature(Head,Arity)),
     uniqueArgumentList(Arity,Arguments),
     Fact =.. [Head|Arguments].

@@ -20,11 +20,14 @@ public interface IJTransformerObserver {
      * is provided in the info parameter:
      * <menu>
      * <li>IJTransformer#JT_FACTBASE_UPDATED:
-     * The PrologClient will be passed as the first parameter,
+     * An instance of IPrologClient will be passed as the first parameter,
      * the second is the updated project
      * </li>
      * <li>IJTransformer#JT_ENGINE_STARTUP:
-     * The PrologClient will be passed as the first and only parameter
+     * An instance of IPrologClient will be passed as the first and only parameter
+     * </li>
+     * <li>IJTransformer#JT_BUILD_ERROR:
+     * Not supported yet.
      * </li>
      * </menu>
      * @param kind 

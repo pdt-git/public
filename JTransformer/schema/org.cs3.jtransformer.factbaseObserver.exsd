@@ -84,7 +84,7 @@
       <documentation>
          &lt;p&gt;
    &lt;pre&gt;
-      &lt;extension point=&quot;org.cs3.pl.extension.factbase.updated&quot;&gt;
+      &lt;extension point=&quot;org.cs3.pl.JTransformer.factbaseObserver&quot;&gt;
          &lt;parser
             id=&quot;com.example.xyz.observer1&quot;
             name=&quot;Observer 1&quot;
@@ -110,7 +110,7 @@
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         PDTPlugin offeres the interface org.cs3.pl.extension.IFactbaseUpdatedObserver...
+         PDTPlugin offeres the interface org.cs3.pl.extension.IJTransformerObserver...
       </documentation>
    </annotation>
 

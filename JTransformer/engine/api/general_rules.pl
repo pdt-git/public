@@ -1847,6 +1847,9 @@ discard_permanently(_fileName):-
     ),
     deepDelete(Id).
     
+/**
+ * sourceLocation(Tree,File,Start,End)
+ */
    
 sourceLocation(Tree,File,Start,End):-
     slT(Tree,Start,End),
