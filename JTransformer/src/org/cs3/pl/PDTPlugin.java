@@ -131,12 +131,16 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 	 */
 	public PDTPlugin(IPluginDescriptor d) {
 		super(d);
-		plugin = this;
-
-		// get the preferences from the store
-		updatePreferences();
-		addJTransformerObserver(new PreloadDocumentationFacts());
-
+	    try {
+			plugin = this;
+	
+			// get the preferences from the store
+			updatePreferences();
+			addJTransformerObserver(new PreloadDocumentationFacts());
+	    }catch(Exception ex){
+	        System.err.println("exception in pdtplugin constructor");
+	        ex.printStackTrace();
+	    }
 		//initialize log of user's actions 
 		
 		// Set tracing flags
@@ -323,6 +327,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		try {
 		ISavedState ss = ResourcesPlugin.getWorkspace().addSaveParticipant(this, this);
 		//root = ResourcesPlugin.getWorkspace().getRoot();
 		String location;
@@ -332,7 +337,6 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		//see the static block of the Debug class.
 		//Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		try {
 			if(addSwiplProject){
 				location = getLocation()+ SWIPROJECTNAME;
 				addProject(SWIPROJECTNAME,new Path(getCanonicalPath(location)));
@@ -357,6 +361,8 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 			Debug.report(e);
 		} catch (IOException e2) {
 			Debug.report(e2);
+		} catch(Exception e) {
+		    e.printStackTrace();
 		}
 		
 	}
@@ -989,7 +995,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 	//ASTParser parser = ASTParser.newParser(AST.LEVEL_2_0);  
 	ASTParser parser = ASTParser.newParser(AST.JLS2);
 
-    private static final String EXTENSIONPOINTFACTBASEUPDATED = "factbase.observer";
+    private static final String EXTENSIONPOINTFACTBASEUPDATED = "factbaseObserver";
 
     private static final Object observerMonitor = new Object();
 	
@@ -1068,11 +1074,14 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
             for (int i = 0; i < extensions.length; i++) {
                 IConfigurationElement[] celem = extensions[i]
                         .getConfigurationElements();
-                Assert.isTrue(celem[0].getName().equals("observer"));
-                IJTransformerObserver observer = (IJTransformerObserver) celem[0]
-                        .createExecutableExtension("class");
-                observer.update(kind,
-                        info);
+                for (int j = 0; j < celem.length; j++) {
+                    //Assert.isTrue(celem[0].getName().equals("observer"));
+	                IJTransformerObserver observer = (IJTransformerObserver) celem[j]
+	                        .createExecutableExtension("class");
+	                observer.update(kind,
+	                        info);
+                    
+                }
             }
         } catch (CoreException e) {
             Debug.report(e);
