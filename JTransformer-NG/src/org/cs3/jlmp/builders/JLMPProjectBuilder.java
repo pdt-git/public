@@ -2,12 +2,17 @@ package org.cs3.jlmp.builders;
 import java.util.Map;
 
 import org.cs3.jlmp.JLMP;
+import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.jlmp.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 /**
@@ -38,9 +43,7 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 	private boolean buildCanceled;
 	//hm. a prolog manager, what else. stupid.
 	
-	private boolean clearProjectFacts;
-	private boolean clearExternalFacts;
-    private FactBaseBuilder builder;
+	
 	/**
 	 * Default constructor. The builder is typicaly created by eclipse. There
 	 * should be no need to create your own instance.
@@ -61,9 +64,7 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 			throws CoreException {
 		Debug.debug("JLMPPRojectBuilder triggered.");
 		
-//		ld: TODO: remove this try/catch, its only used for debuging.
 		try {
-			
 			
 			buildCanceled = false;
 			if (getProject() == null) {
@@ -90,25 +91,14 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 				Debug.warning("Project does not have a JLMP nature!");
 				return null;
 			}
-			JLMPProjectNature nature = (JLMPProjectNature) getProject().getNature(JLMPProjectNature.NATURE_ID);
+			JLMPProjectNature nature = (JLMPProjectNature) getProject().getNature(JLMP.NATURE_ID);
 			if(nature==null){
 				Debug.warning("JLMP Nature is NULL!!");
 				return null;
 			}
 			
 			
-			
-			
-			//monitor.beginTask("Generating Facts:", PROGRESS_SIZE);
-			//parse args, set flags
-			setUpBuildFlags();
-			
 			int flags = FactBaseBuilder.IS_ECLIPSE_BUILD;
-			//ld: better to have the eclipse worker thread wait for our build
-			//    to complete.
-
-			if(clearExternalFacts) flags |= FactBaseBuilder.CLEAR_EXT_FACTS; 
-			if(clearProjectFacts) flags |= FactBaseBuilder.CLEAR_PRJ_FACTS;
 			switch (kind) {
 				case FULL_BUILD :
 					nature.getFactBaseBuilder().build(null, flags, monitor);
@@ -123,23 +113,30 @@ public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 			}
 			monitor.done();
 		}
-		//		ld: see above, this is only used for debuging.
-		//			 since eclipse tends to handle exceptions a bit _too_ quietly :-(
-		catch (Exception e) {
-			Debug.report(e);
+		catch(OperationCanceledException e){
+		    throw e;
+		}
+		catch (Throwable e) {
+			Debug.report(e);		
+			throw new CoreException(new Status(IStatus.ERROR,JLMP.PLUGIN_ID,IResourceStatus.BUILD_FAILED,"Problems during build",e));
 		}
 		return null;
 	}
-	/**
-	 * 
-	 */
-	private void setUpBuildFlags() {
-		String fvalue = null;
-		fvalue=args==null ? null : (String)args.get("clearProjectFacts");
-		clearProjectFacts=(fvalue!=null)&&fvalue.equals("true");
-		fvalue=args==null ? null :(String)args.get("clearExternalFacts");
-		clearExternalFacts=(fvalue!=null)&&fvalue.equals("true");				
-	}
+	
+	/* (non-Javadoc)
+     * @see org.eclipse.core.resources.IncrementalProjectBuilder#clean(org.eclipse.core.runtime.IProgressMonitor)
+     */
+    protected void clean(IProgressMonitor monitor) throws CoreException {
+        try {
+            JLMPProjectNature nature = (JLMPProjectNature) getProject().getNature(JLMP.NATURE_ID);
+            nature.getFactBaseBuilder().clean(monitor);
+        }
+            catch (Throwable e) {
+                Debug.report(e);
+    			throw new CoreException(new Status(IStatus.ERROR,JLMP.PLUGIN_ID,IResourceStatus.BUILD_FAILED,"Problems during clean",e));
+            }
+		}
+    }
    
-}
+
 

@@ -1,5 +1,9 @@
 package org.cs3.jlmp.builders;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
@@ -12,31 +16,33 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.jlmp.JLMP;
-import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.jlmp.astvisitor.DefaultGenerationToolbox;
 import org.cs3.jlmp.astvisitor.FactGenerationToolBox;
 import org.cs3.jlmp.astvisitor.FactGenerator;
 import org.cs3.jlmp.astvisitor.PrologWriter;
 import org.cs3.jlmp.bytecode.ByteCodeFactGeneratorIType;
-
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -46,39 +52,15 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 public class FactBaseBuilder {
 
     /**
-     * delete all previously generated project fact files.
-     */
-    public final static int CLEAR_PRJ_FACTS = 1;
-
-    /**
-     * delete all previously generated external fact files.
-     */
-    public final static int CLEAR_EXT_FACTS = 2;
-
-    /**
      * Set this flag to indicate the build is triggered by eclipse.
      * <p>
      * <i>ignored for now but reserved for possible future use. </i>
      */
     public final static int IS_ECLIPSE_BUILD = 4;
 
-    /**
-     * don't care about project facts. neither generate project fact files, nore
-     * consult any existing project facts. Project facts that are already
-     * consulted will <b>not </b> be retracted.
-     */
-    public final static int IGNORE_PRJ_FACTS = 8;
+    
 
-    /**
-     * don't care about external facts. neither generate external fact files,
-     * nore consult any existing extermal facts. External facts that are already
-     * consulted will <b>not </b> be retracted.
-     */
-    public final static int IGNORE_EXT_FACTS = 16;
-
-    private ConsultService metaDataSRC;
-
-    private ConsultService metaDataEXT;
+    
 
     private IProject project;
 
@@ -88,7 +70,6 @@ public class FactBaseBuilder {
      *  
      */
     public FactBaseBuilder(IProject project, PrologInterface pif) {
-
         this.project = project;
         this.pif = pif;
     }
@@ -104,214 +85,191 @@ public class FactBaseBuilder {
      * Implementation may run the build process in a seperate job.
      * 
      * @param delta
-     *                  the delta containing the changed Resources
+     *                  the delta containing the changed Resources, or null to indicate a full rebuild
      * @param flags
      *                  a logical or of the constants defined in this class
      * @param monitor
      *                  a IProgressMonitor object
+     * @throws CoreException
      */
 
     public synchronized void build(final IResourceDelta delta, final int flags,
-            IProgressMonitor monitor) {
-
-        //ld: we catch EVERYTHING, since eclipse eats any exceptions
-        // otherwise :-(
+            IProgressMonitor monitor) throws CoreException {
         try {
             if (monitor == null)
                 monitor = new NullProgressMonitor();
 
             build_impl(delta, flags, monitor);
+        } catch (OperationCanceledException e) {
+            throw e;
         } catch (Throwable t) {
+            IMarker marker = project.createMarker(JLMP.PROBLEM_MARKER_ID);
+            marker.setAttribute(IMarker.MESSAGE,
+                    "Could not create PEFs for Project.");
             Debug.report(t);
-            throw new RuntimeException(t);
         }
-
     }
 
     synchronized private void build_impl(IResourceDelta delta, int flags,
-            IProgressMonitor monitor) {
-        boolean delete;
-
+            IProgressMonitor monitor) throws IOException, CoreException {
         PrologSession session = null;
         try {
-
+            
+            //ain'i paranoid... last chance to reload saved state.
+            getMetaDataEXT();
+            getMetaDataSRC();
+            
+            monitor.beginTask("building PEFs", 100);
             session = pif.getSession();
             final Collection toProcess = new Vector();
             final Collection toDelete = new Vector();
 
-            boolean errorsInCode = false;
             boolean loadedJavaFile = false;
             session.queryOnce("retractall(errors_in_java_code)");
 
             Debug.info("Resource delta recieved: " + delta);
-
-            if ((flags & CLEAR_PRJ_FACTS) != 0) {
-                getMetaDataSRC().clearRecords();
-            }
-
-            if ((flags & CLEAR_EXT_FACTS) != 0) {
-                getMetaDataEXT().clearRecords();
-            }
-
-            monitor.beginTask("Collecting Files to update",
-                    IProgressMonitor.UNKNOWN);
-
+            SubProgressMonitor submon = new SubProgressMonitor(monitor, 10,
+                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+            submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             if (delta == null) {
-                delete = false;
-
                 /*
-                 * forces reload of all java files in the JLMP-Nature project.
-                 * First we collect them all, then we build them one by one.
+                 * XXX: this is a bit ugly, since in many cases a separate clean
+                 * build has already accured.
                  */
-
-                project.accept(new IResourceVisitor() {
-
-                    public boolean visit(IResource resource)
-                            throws CoreException {
-
-                        Debug.debug("Visiting: " + resource);
-
-                        if (resource.getType() == IResource.ROOT)
-                            return true;
-                        if (resource.getType() == IResource.PROJECT)
-                            return resource.getProject().hasNature(
-                                    JLMP.NATURE_ID);
-                        /*
-                         * since we only enter Projects that have the JLMP
-                         * Nature set, this should be safe...
-                         */
-                        if (resource.getType() == IResource.FOLDER)
-                            return true;
-                        if (resource.getType() == IResource.FILE) {
-                            if (resource.getFileExtension() != null
-                                    && resource.getFileExtension().equals(
-                                            "java")) {
-                                Debug.debug("Adding " + resource
-                                        + " to toProcess");
-                                toProcess.add(resource);
-                            }
-                        }
-                        return false;
-                    }
-                });
+                clean(null);
+                collectAll(toProcess);
             } else {
-                delete = true;
-                delta.accept(new IResourceDeltaVisitor() {
-
-                    public boolean visit(IResourceDelta delta)
-                            throws CoreException {
-                        IResource resource = delta.getResource();
-
-                        if (resource.getType() == IResource.ROOT)
-                            return true;
-                        if (resource.getType() == IResource.PROJECT)
-                            return resource.getProject().hasNature(
-                                    JLMP.NATURE_ID);
-                        /*
-                         * since we only enter Projects that have the JLMP
-                         * Nature set, this should be safe...
-                         */
-                        if (resource.getType() == IResource.FOLDER)
-                            return true;
-                        if (resource.getType() == IResource.FILE) {
-                            String fext = resource.getFileExtension();
-                            if (fext != null && fext.equals("java")) {
-                                if (delta.getKind() == IResourceDelta.REMOVED) {
-                                    toDelete.add(resource);
-                                } else { // added,...???
-                                    Debug.debug("Adding " + resource
-                                            + " to toProcess");
-                                    toProcess.add(resource);
-                                }
-                            }
-                        }
-
-                        return false;
-                    }
-                });
-
+                collectDelta(delta, toProcess, toDelete);
             }
-
-            monitor.done();
-
-            if ((flags & IGNORE_PRJ_FACTS) == 0) {
-
-                for (Iterator i = toProcess.iterator(); i.hasNext();) {
-
-                    if (monitor.isCanceled())
-                        throw new OperationCanceledException("Canceled");
-
-                    IFile file = (IFile) i.next();
-
-                    monitor.beginTask("Generating Facts for source file "
-                            + file, IProgressMonitor.UNKNOWN);
-
-                    forgetFacts(file, delete, false);
-
-                    try {
-                        if (!buildFacts(file)) {
-                            // if an exception in thrown while building,
-                            // the system may look for unresolved types and
-                            // fail in loadExternalFacts(monitor)
-                            errorsInCode = true;
-                            session.queryOnce("assert(errors_in_java_code)");
-                        } else {
-                            loadedJavaFile = true;
-                        }
-                    } finally {
-
-                        monitor.done();
-                    }
-
-                }
-                for (Iterator i = toDelete.iterator(); i.hasNext();) {
-
-                    if (monitor.isCanceled())
-                        throw new OperationCanceledException("Canceled");
-
-                    IFile file = (IFile) i.next();
-
-                    monitor.beginTask("Delete Facts of deleted files " + file,
-                            IProgressMonitor.UNKNOWN);
-
-                    forgetFacts(file, delete, true);
-
-                    monitor.done();
-                }
-
-            }
-
-            monitor.done();
-
-            if ((flags & IGNORE_EXT_FACTS) == 0 && loadedJavaFile
-                    && !errorsInCode) {
-
-                loadExternalFacts(monitor);
-
-            }
-
-            //ld: this should be finer grained!
-            //StS: Nope, it is ok, since there can be changes all over pl. and
-            // ext
-
-            //JT-66 FIX: removed the following line
-            //ResourcesPlugin.getWorkspace().getRoot().refreshLocal(IResource.DEPTH_INFINITE,
-            // null);
-        } catch (CoreException e) {
-            Debug.report(e);
-        } catch (IOException e) {
-            Debug.report(e);
+           submon.done();
+           
+           submon=new SubProgressMonitor(monitor, 10,
+                   SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);                        
+           forgetFacts(submon, toDelete);
+           
+           submon=new SubProgressMonitor(monitor, 40,
+                   SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);           
+            buildFacts(submon, toProcess);
+            
+            submon=new SubProgressMonitor(monitor, 40,
+                    SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);                      
+            loadExternalFacts(submon);        
         } finally {
             session.dispose();
         }
     }
 
-    private void forgetFacts(IFile file, boolean delete,
-            boolean removeGlobalIdsFacts) throws IOException {
+    private void forgetFacts(IProgressMonitor monitor, final Collection toDelete)
+            throws IOException {
+        monitor.beginTask("deleting obsolete PEFs ",toDelete.size());
+        for (Iterator i = toDelete.iterator(); i.hasNext();) {
+            if (monitor.isCanceled()){
+                throw new OperationCanceledException("Canceled");
+            }
+            IFile file = (IFile) i.next();
+            forgetFacts(file, true);
+            monitor.worked(1);
+        }
+        monitor.done();
+    }
+
+    private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
+            throws IOException, CoreException {
+        monitor.beginTask("Generating new PEFs ",toProcess.size());
+        for (Iterator i = toProcess.iterator(); i.hasNext();) {
+            if (monitor.isCanceled()) {
+                throw new OperationCanceledException("Canceled");
+            }
+            IFile file = (IFile) i.next();
+            forgetFacts(file, false);
+            buildFacts(file);
+            monitor.worked(1);
+        }
+        monitor.done();
+    }
+
+    private void collectDelta(IResourceDelta delta, final Collection toProcess,
+            final Collection toDelete) throws CoreException {
+        /*
+         * INCREMENTAL_BUILD
+         */
+        final IJavaProject javaProject = (IJavaProject) project
+                .getNature(JavaCore.NATURE_ID);
+        delta.accept(new IResourceDeltaVisitor() {
+
+            public boolean visit(IResourceDelta delta) throws CoreException {
+                IResource resource = delta.getResource();
+
+                if (resource.getType() == IResource.ROOT) {
+                    return true;
+                }
+                if (resource.getType() == IResource.PROJECT) {
+                    return resource.getProject().hasNature(JLMP.NATURE_ID);
+                }
+                if (resource.getType() == IResource.FOLDER) {
+                    return javaProject.isOnClasspath(resource);
+                }
+                if (resource.getType() == IResource.FILE) {
+                    String fext = resource.getFileExtension();
+                    if (fext != null && fext.equals("java")) {
+                        if (delta.getKind() == IResourceDelta.REMOVED) {
+                            toDelete.add(resource);
+                        } else { // added,...???
+                            Debug.debug("Adding " + resource + " to toProcess");
+                            toProcess.add(resource);
+                        }
+                    }
+                }
+
+                return false;
+            }
+        });
+    }
+
+    private void collectAll(final Collection toProcess) throws CoreException {
+        /*
+         * FULL_BUILD
+         */
+        final IJavaProject javaProject = (IJavaProject) project
+                .getNature(JavaCore.NATURE_ID);
+
+        project.accept(new IResourceVisitor() {
+
+            public boolean visit(IResource resource) throws CoreException {
+
+                Debug.debug("Visiting: " + resource);
+
+                if (resource.getType() == IResource.ROOT)
+                    return true;
+                if (resource.getType() == IResource.PROJECT)
+                    return resource.getProject().hasNature(JLMP.NATURE_ID);
+                /*
+                 * since we only enter Projects that have the JLMP Nature set,
+                 * this should be safe...
+                 */
+
+                if (resource.getType() == IResource.FOLDER) {
+                    return javaProject.isOnClasspath(resource);
+                }
+                if (resource.getType() == IResource.FILE) {
+                    if (resource.getFileExtension() != null
+                            && resource.getFileExtension().equals("java")) {
+                        Debug.debug("Adding " + resource + " to toProcess");
+                        toProcess.add(resource);
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    private void forgetFacts(IFile file, boolean removeGlobalIdsFacts)
+            throws IOException {
         Debug.debug("Forgetting (possible) previous version of " + file);
 
         String path = file.getFullPath().toString();
-        getMetaDataSRC().unconsult(path);
+        String record = file.getFullPath().addFileExtension("pl").toString();
+        getMetaDataSRC().unconsult(record);
         //ld: an unconsult is not enough due to the multifile-ness of the
         // predicates in question.
         /*
@@ -327,10 +285,7 @@ public class FactBaseBuilder {
                                 + "')");
 
             session.queryOnce("delete_toplevel('" + path + "')");
-            if (delete) {
-                Debug.debug("Deleting resource " + path);
-                // metaDataSRC.unconsult(path);
-            }
+
         } finally {
             session.dispose();
         }
@@ -344,30 +299,29 @@ public class FactBaseBuilder {
      * @throws CoreException
      */
 
-    private boolean buildFacts(IFile file) throws IOException,
-            CoreException {
+    private void buildFacts(IFile file) throws IOException, CoreException {
 
         /* the file seems to have been deleted */
-        if (!file.exists())        
-        {
-            return true;
+        if (!file.exists()) {
+            return;
         }
         ConsultService cs = getMetaDataSRC();
-        String recordPath =file.getFullPath().addFileExtension("pl").toString();
+        String recordPath = file.getFullPath().addFileExtension("pl")
+                .toString();
         long recordTS = cs.getTimeStamp(recordPath);
         long fileTS = file.getModificationStamp();
         //ld:no need to create facts that are already known
-        /*FIXME: currently we only ensure that the record is up-to-date.
-         * in theory, so should be the consulted facts, but it might be better to check.
-         * otoh, this would be quite expensive if there are many resources to check.  
-         * */
-        if(recordTS>=fileTS){
-            return true;
+        /*
+         * FIXME: currently we only ensure that the record is up-to-date. in
+         * theory, so should be the consulted facts, but it might be better to
+         * check. otoh, this would be quite expensive if there are many
+         * resources to check.
+         */
+        if (recordTS >= fileTS) {
+            return;
         }
         ICompilationUnit icu = JavaCore.createCompilationUnitFrom(file);
-        CompilationUnit cu = null;
 
-        
         PrintStream out = cs.getOutputStream(recordPath);
         try {
 
@@ -375,18 +329,19 @@ public class FactBaseBuilder {
 
             writeFacts(icu, out);
         } catch (JavaModelException jme) {
-            // if this exception occurs, the java file is in some way bad. Thats
-            // ok,
-            // since it is also dead (deleted) in the Prolog System.
-            // will return false to ensure that the loading of external
-            // classes will not be triggert
-            Debug.report(jme);
-            return false;
+            IMarker marker = file.createMarker(JLMP.PROBLEM_MARKER_ID);
+            marker.setAttribute(IMarker.MESSAGE,
+                    "There seem to be problems in the java code.");
+            PrologSession session = pif.getSession();
+            session.queryOnce("assert(errors_in_java_code)");
+            session.dispose();
+            throw new CoreException(new Status(IStatus.CANCEL, JLMP.PLUGIN_ID,
+                    IResourceStatus.BUILD_FAILED,
+                    "build canceled due to problems in the java code.", jme));
         } finally {
             icu.discardWorkingCopy();
             out.close();
         }
-        return true;
     }
 
     public List getUnresolvedTypes() {
@@ -414,9 +369,10 @@ public class FactBaseBuilder {
         return typeNames;
     }
 
-    public void loadExternalFacts(IProgressMonitor submon)
-
+    public void loadExternalFacts(IProgressMonitor monitor)
     throws IOException, CoreException {
+        Debug.debug("enter loadExternalFacts");
+        monitor.beginTask("creating external PEFs.",IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
         PrologSession session = pif.getSession();
         try {
@@ -433,9 +389,67 @@ public class FactBaseBuilder {
                                     "saw type before, so something seems broken. "
                                             + typeName);
                         }
+//---<DEBUG>--------------------------8<------------------------------------------for trapping  JT-113 
+                        if("java.lang.Object".equals(typeName)){
+                            Debug.warning("ok, so you want java.lang.Object, huh?");
+                            Debug.warning("let's see...this is our stack: ");
+                            Debug.dumpStackTrace();
+                            Debug.warning("Using divine knowledge to find the record file for external PEFs...");
+                            File flat = pif.getFactory().getResourceLocator().subLocator(JLMP.EXT).resolve("flat.pl");
+                            Debug.warning("\t-->\t should be here: "+flat.toString());
+                            if(flat.canRead()){
+                                Debug.warning("\t-->\t exists and is readable.");
+                                Map map = session.queryOnce("source_file('"+Util.prologFileName(flat)+"')");
+                                if(map!=null){
+                                    Debug.warning("\t-->\t is known to prolog (source_file/1)");
+                                    BufferedReader reader = new BufferedReader(new FileReader(flat));
+                                    boolean doomed=false;
+                                    try{
+                                        String line = reader.readLine();
+                                        while(null!=line){
+                                            if(line.indexOf("'Object'")!=-1){
+                                                doomed=true;
+                                                break;
+                                            }
+                                            line = reader.readLine();
+                                        }
+                                    }
+                                    finally{
+                                        reader.close();
+                                    }
+                                    if(doomed){
+                                        Debug.warning("\t-->\t does contain magic string 'Object'.");
+                                        Debug.warning("\t-->\t realy realy unresolved? "+getUnresolvedTypes().contains("java.lang.Object"));
+                                        Debug.error("this MUST lead to an error, so i can quit right away. see you.");
+                                        System.exit(-42);
+                                    }
+                                    else{
+                                        Debug.warning("\t-->\t does NOT contain magic string 'Object'.");
+                                        Debug.warning("\t-->Ok, no prob, you may pass.");
+                                    }
+                                }
+                                else{
+                                    Debug.warning("\t-->\t is NOT known to prolog (source_file/1)");
+                                    Debug.error("this MUST lead to an error, so i can quit right away. see you.");
+                                    System.exit(-42);
+                                }                                
+                            }
+                            else {
+                                Debug.warning("\t-->\t is NOT readable or does not exist.");
+                                Debug.warning("\t-->Ok, no prob, you may pass.");
+                            }
+// -------------------------------------------------------------------------------------------</DEBUG>
+                            
+                        }
                         seen.add(typeName);
                         try {
+                            SubProgressMonitor submon = new SubProgressMonitor(monitor,IProgressMonitor.UNKNOWN, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+                            submon.beginTask(typeName,IProgressMonitor.UNKNOWN);
+                            if(submon.isCanceled()){
+                                throw new OperationCanceledException();
+                            }
                             writeFacts(typeName, out);
+                            submon.done();
                         } catch (ClassNotFoundException e) {
                             failed.add(typeName);
                         }
@@ -447,8 +461,12 @@ public class FactBaseBuilder {
             }
         } finally {
             session.dispose();
+            monitor.done();
+            Debug.debug("exit loadExternalFacts");
         }
     }
+
+    
 
     public static void writeFacts(IProject project, ICompilationUnit icu,
             PrintStream out) throws IOException, CoreException {
@@ -547,37 +565,35 @@ public class FactBaseBuilder {
     }
 
     private ConsultService getMetaDataSRC() {
-        if (metaDataSRC == null) {
-            metaDataSRC = pif.getConsultService(JLMP.SRC);
-            metaDataSRC.setRecording(true);
-            metaDataSRC.setAppendingRecords(false);
-        }
-        return metaDataSRC;
+        
+        
+        
+        return pif.getConsultService(JLMP.SRC);
     }
 
     private ConsultService getMetaDataEXT() {
-        if (metaDataEXT == null) {
-            metaDataEXT = pif.getConsultService(JLMP.EXT);
-            metaDataEXT.setRecording(true);
-            metaDataEXT.setAppendingRecords(true);
-        }
-        return metaDataEXT;
+      return  pif.getConsultService(JLMP.EXT);
+        
     }
 
     /**
      * @param monitor
+     * @throws CoreException
      */
-    public void clean(IProgressMonitor monitor) {
-        Debug.info("clean called on project "+project);
+    public void clean(IProgressMonitor monitor) throws CoreException {
+        Debug.info("clean called on project " + project);
+        project.deleteMarkers(JLMP.PROBLEM_MARKER_ID, true,
+                IResource.DEPTH_INFINITE);
         PrologSession session = pif.getSession();
-       try{
-        session.queryOnce("delete_source_facts");
-        getMetaDataSRC().clearRecords();        
-        monitor.done();
-       }
-       finally{
-           session.dispose();
-       }
+        try {
+            session.queryOnce("delete_source_facts");
+            getMetaDataSRC().clearRecords();
+            if (monitor != null) {
+                monitor.done();
+            }
+        } finally {
+            session.dispose();
+        }
     }
 
 }
