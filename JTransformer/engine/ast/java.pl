@@ -169,6 +169,9 @@ ast_node_subtype('Java',Label,statementType) :-
   *         Every value of the attribute must be from one of these
   *         types. The value 'null', legal if the cardinality includes
   *         0, is considered as an element of every types.
+  *         Two contracts must be fullfilled: 
+  *         The types 'typeTermType' and 'atom' must not be used in 
+  *         combination with another Type for on attribute.
   *
   * Language independent bottom up traversals of an AST are supported 
   * by the convention that the second argument of every AST
@@ -218,7 +221,7 @@ ast_node_subtype('Java',Label,statementType) :-
 % tree_constraints(packageT ,[[atom]]).
 ast_node_def('Java',packageT,[
      ast_arg(id,      mult(1,1,no ),  id,  [id]), % <-- convention!!!
-     ast_arg(name,    mult(1,1,no ),  id,  [atom])
+     ast_arg(name,    mult(1,1,no ),  attr,  [atom])
 ]).
 
 % tree_constraints(classDefT ,[[execT,packageT,classDefT,newClassT,blockT,nullType],[atom],[methodDefT,fieldDefT,classDefT]]).
@@ -261,8 +264,8 @@ ast_node_def('Java',fieldDefT,[
 ast_node_def('Java',paramDefT,[
      ast_arg(id,      mult(1,1,no ),  id,  [paramDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ),  id,  [methodDefT,catchT]), 
-     ast_arg(name,    mult(1,1,no ),  id,  [atom]), 
-     ast_arg(type,    mult(1,1,no ),  id,  [typeTermType])     
+     ast_arg(name,    mult(1,1,no ),  attr,  [atom]), 
+     ast_arg(type,    mult(1,1,no ),  attr,  [typeTermType])     
 ]).
 
 % ****************** Body PEF ******************************
@@ -343,7 +346,7 @@ ast_node_def('Java',continueT,[
      ast_arg(id,      mult(1,1,no ), id,  [continueT]),
      ast_arg(parent,  mult(1,1,no ), id,  [id]),
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
-     ast_arg(label,   mult(1,1,no ), id,  [atom]),
+     ast_arg(label,   mult(1,1,no ), attr,  [atom]),
      ast_arg(target,  mult(0,1,no), id,  [statementType])
 ]).
 % tree_constraints(doLoopT,[[allType],[methodDefT],[expressionType],[statementType]]).
@@ -387,7 +390,7 @@ ast_node_def('Java',getFieldT,[
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(expr,    mult(0,1,no), id,  [expressionType]),
-     ast_arg(name,    mult(0,1,no), id,  [atom]),
+     ast_arg(name,    mult(0,1,no), attr,  [atom]),
      ast_arg(field,   mult(1,1,no ), id,  [fieldDefT])
 ]).
 
@@ -421,7 +424,7 @@ ast_node_def('Java',labelT,[
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(body,    mult(1,1,no ), id,  [statementType]),
-     ast_arg(label,   mult(1,1,no ), id,  [atom])
+     ast_arg(label,   mult(1,1,no ), attr,  [atom])
 ]).
 % tree_constraints(literalT ,[[allType],[methodDefT,fieldDefT],[typeTermType],[atom]]).
 ast_node_def('Java',literalT,[
@@ -450,7 +453,7 @@ ast_node_def('Java',newArrayT,[
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(dims,    mult(1,*,ord), id,  [expressionType]),
      ast_arg(elems,   mult(0,*,ord), id,  [expressionType]), % <-- elems wird momentan im FactGenerator immer auf [] gesetzt, warum???
-     ast_arg(type,    mult(1,1,no ), id,  [typeTermType])
+     ast_arg(type,    mult(1,1,no ), attr,  [typeTermType])
 ]).
 
 % tree_constraints(newClassT, [[allType],[methodDefT,fieldDefT],[methodDefT,nullType],[expressionType],[identT,selectT],[classDefT,nullType],[classDefT,nullType]]).
@@ -478,7 +481,7 @@ ast_node_def('Java',operationT,[
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,   mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(args,   mult(1,1,ord), id,  [expressionType]),
-     ast_arg(op,     mult(1,1,no ), id,  [atom]),
+     ast_arg(op,     mult(1,1,no ), attr,  [atom]),
      ast_arg(pos,    mult(1,1,no ), id,  [number])
 ]).
 
@@ -503,7 +506,7 @@ ast_node_def('Java',selectT,[
      ast_arg(id,      mult(1,1,no ), id,  [selectT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
-     ast_arg(name,    mult(1,1,no ), id,  [atom]),
+     ast_arg(name,    mult(1,1,no ), attr,  [atom]),
      ast_arg(selected,mult(1,1,no ), id,  [selectT,identT]),
      ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT])
 ]).
@@ -513,7 +516,7 @@ ast_node_def('Java',identT,[
      ast_arg(id,      mult(1,1,no ), id,  [identT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
-     ast_arg(name,    mult(1,1,no ), id,  [atom]),
+     ast_arg(name,    mult(1,1,no ), attr,  [atom]),
      ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT])
 ]).
 
@@ -547,7 +550,7 @@ ast_node_def('Java',throwT,[
 ast_node_def('Java',toplevelT,[
      ast_arg(id,     mult(1,1,no ), id,   [toplevelT]), 
      ast_arg(parent, mult(0,1,no), id,   [packageT]),
-     ast_arg(file,   mult(1,1,no ), id,   [atom]),
+     ast_arg(file,   mult(1,1,no ), attr,   [atom]),
      ast_arg(defs,   mult(0,*,ord), id,   [importT,classDefT])
 ]).
 
