@@ -7,9 +7,13 @@
 package org.cs3.timetracker;
 
 
+import org.cs3.timetracker.views.RecordDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
 
 /**
  * @author schmitzs
@@ -76,6 +80,17 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 			pausebutton.setEnabled(false);
 			stopbutton.setEnabled(true);
 			
+			RecordDialog dialog = new RecordDialog(TimeTrackerPlugin.
+					getDefault().
+					getWorkbench().
+					getActiveWorkbenchWindow().
+					getShell());
+			
+			if (dialog.open() == IDialogConstants.OK_ID)
+			{
+				log.log(dialog.getValue());
+			}
+									
 		}
 		if(match.equalsIgnoreCase("continue")){
 			timetracker.resume();

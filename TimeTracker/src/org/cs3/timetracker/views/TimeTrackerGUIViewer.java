@@ -2,6 +2,8 @@ package org.cs3.timetracker.views;
 
 
 
+import java.util.StringTokenizer;
+
 import org.cs3.timetracker.ITimeObserver;
 import org.cs3.timetracker.TimeEvent;
 import org.cs3.timetracker.Logger;
@@ -45,7 +47,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	private TableViewer viewer;
-	
+	private TableViewer viewer1; 
 
 	/*
 	 * The content provider class is responsible for
@@ -115,9 +117,16 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		
 		public Object[] getElements(Object parent) {
 			content = log.readLog();
-			String[] elements = {"----O-----"};
-			elements[0]=content;
-		return elements;
+			StringTokenizer test = new StringTokenizer(content, "\n");
+			String[] elements = new String[test.countTokens()];
+			int i = 0;
+			while (test.hasMoreElements())
+			{
+				elements[i] = test.nextToken();
+				i++;
+			}
+			// elements[0] = content;
+			return elements;
 		}
 				
 	}
@@ -168,7 +177,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		
 	SashForm composite1 = new SashForm(parent, SWT.VERTICAL);
 	
-	TableViewer viewer1 = new TableViewer(composite1, SWT.MULTI);
+	viewer1 = new TableViewer(composite1, SWT.MULTI);
 	viewer1.setContentProvider(new ViewContentProvider1());
 	viewer1.setLabelProvider(new ViewLabelProvider());
 	viewer1.setInput(getViewSite());
@@ -211,6 +220,7 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 					new Runnable(){
 						public void run() {
 								viewer.setInput(getViewSite());
+								viewer1.setInput(getViewSite());
 						}
 					});
 	}
