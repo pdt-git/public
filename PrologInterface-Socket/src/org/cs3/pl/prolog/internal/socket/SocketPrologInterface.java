@@ -256,8 +256,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
                 cs.setPrefix(file);
                 
                 try {
-                    cs.connect();      
-                    //cs.reload();
+                    cs.connect();                         
                 } catch (IOException e) {
                     Debug.report(e);
                     throw new RuntimeException(e);
@@ -277,9 +276,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         //the pif is NOT up yet, so we would miss one oportunity to reload!
         if(!isDown()){
             try {
-                
+               
                 cs.connect();
-                //cs.reload();
+              
             } catch (IOException e) {
                 Debug.report(e);
                 throw new RuntimeException(e);
