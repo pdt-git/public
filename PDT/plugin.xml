@@ -2,23 +2,43 @@
 <?eclipse version="3.0"?>
 <plugin
    id="org.cs3.pdt"
-   name="Prolog Development Toolkit"
-   version="0.3.0"
-   provider-name="Universitaet Bonn, Institut für Informatik III"
+   name="PDT Plug-in"
+   version="1.0.0"
+   provider-name=""
    class="org.cs3.pdt.PDTPlugin">
 
    <runtime>
       <library name="PDT.jar">
          <export name="*"/>
       </library>
+      <library name="lib/Common.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/Console.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/MetaData.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/PrologInterface.jar">
+         <export name="*"/>
+      </library>
+      <library name="lib/RaPlaRPC.jar">
+         <export name="*"/>
+      </library>
    </runtime>
 
    <requires>
-      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
    </requires>
-   <extension-point id="hooks" name="Lifecycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
+   
    <extension
+         point="org.eclipse.ui.startup">
+      <startup class="org.cs3.pdt.startup.StartUp"/>
+   </extension>
+
+	<extension
          point="org.eclipse.ui.views">
       <category
             name="Prolog"
@@ -31,15 +51,4 @@
             name="Prolog Console"
             id="org.cs3.pdt.views.PrologConsoleView"/>
    </extension>
-   <extension
-         point="org.eclipse.ui.startup">
-      <startup class="org.cs3.pdt.startup.StartUp"/>
-   </extension>
-  <!-- <extension
-         point="org.cs3.pdt.hooks">
-   	<hook
-          class="org.cs3.pdt.ConsoleServerHook"
-          id="org.cs3.pdt.ConsoleServerHook"/>
-   </extension>-->
-
 </plugin>
