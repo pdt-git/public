@@ -48,12 +48,12 @@ public class Initializer extends AbstractPreferenceInitializer {
      *  
      */
     private void initializeDefaultPreferences_impl() throws BackingStoreException, IOException, InterruptedException {
-//        File logFile = Util.getLogFile("org.cs3.pdt.client.log");        
-//        System.out.println("The client debug output is safed in "
-//                + logFile.getAbsolutePath());
-//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-//                new FileOutputStream(logFile));
-//        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
+        File logFile = Util.getLogFile("org.cs3.pdt.client.log");        
+        System.out.println("The client debug output is safed in "
+                + logFile.getAbsolutePath());
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+                new FileOutputStream(logFile));
+        Debug.setOutputStream(new PrintStream(bufferedOutputStream));
         
         Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
