@@ -46,12 +46,15 @@ public class Logger {
 			
 			InputLogByteArray = new byte[InputStreamObject.available()];
 			InputStreamObject.read(InputLogByteArray);
+			
 		}
 		catch(IOException e) {
+			//e.printStackTrace();
 			System.out.println("IO Exception occured, while reading from Logfile.");
+			return "";
 		}		
 				
-		return new String(InputLogByteArray); 
+		return new String(InputLogByteArray);
 	}
 	
 	public String log(String Comment) throws IllegalArgumentException

@@ -119,15 +119,13 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 		
 		public Object[] getElements(Object parent) {
 			content = log.readLog();
-			String[] elements = {""};
+			String[] elements = {"----O-----"};
 			elements[0]=content;
 		return elements;
 		}
 				
 	}
-	
-	
-	
+		
 	
 	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public String getColumnText(Object obj, int index) {
