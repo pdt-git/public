@@ -11,6 +11,5 @@ public class JLMP {
     public static final String ENGINE = "engine";
     public static final String MAIN_PL = "main.pl";
     public final static String NATURE_ID = "org.cs3.jlmp.JLMPProjectNature";
-    public static final String TEST_WORKSPACE= "workspace";
-    public static final String TEST_WORKSPACE_ZIP = "test-workspace.zip";
+   
 }
