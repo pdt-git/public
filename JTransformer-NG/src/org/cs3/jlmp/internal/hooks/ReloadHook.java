@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -66,21 +67,35 @@ public class ReloadHook implements LifeCycleHook {
         try {
             IWorkspaceDescription wd = ResourcesPlugin.getWorkspace()
                     .getDescription();
-            if (! wd.isAutoBuilding()) {
+            if (!wd.isAutoBuilding()) {
                 return;
             }
             IProgressMonitor monitor = new NullProgressMonitor();
             IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
                     .getProjects();
-            JLMPProject[] jlmpProjects = JLMP.getJLMPProjects(pif);
-            for (int i = 0; i < jlmpProjects.length; i++) {
-                // XXX: ld: i don't like that cast. Any idee?
-                JLMPProjectNature jlmpProject = (JLMPProjectNature) jlmpProjects[i];
-                IProject project = jlmpProject.getProject();
-                project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
+            final JLMPProject[] jlmpProjects = JLMP.getJLMPProjects(pif);
+            Job j = new Job("Building workspace") {
+                public IStatus run(IProgressMonitor monitor) {
+                    try {
+                        for (int i = 0; i < jlmpProjects.length; i++) {
 
-            }
+                            JLMPProject jlmpProject = jlmpProjects[i];
+                            IProject project = jlmpProject.getProject();
+                            project.build(IncrementalProjectBuilder.FULL_BUILD,
+                                    monitor);
 
+                        }
+                    } catch (OperationCanceledException opc) {
+                        return Status.CANCEL_STATUS;
+                    } catch (Exception e) {
+                        return new Status(IStatus.ERROR, JLMP.PLUGIN_ID, -1,
+                                "Problems during build", e);
+                    }
+                    return Status.OK_STATUS;
+                }
+            };
+
+            j.schedule();
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
