@@ -22,6 +22,9 @@ import org.eclipse.jdt.core.JavaCore;
 public class JLMPProjectBuilder extends IncrementalProjectBuilder{
 	//please keep this ensync with the id assigned to this builder in the
 	// plugin.xml file.
+    /**
+     * @deprecated use JLMP.BUILDER_ID instead.
+     */
 	public static final String BUILDER_ID = "org.cs3.jlmp.JLMPProjectBuilder";
 	//whether we are doing a FULL, INCREMENTAL or AUTO build. set in
 	// build(int,Map,IProgressMonitor)

@@ -28,11 +28,15 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.Vector;
 
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
+import org.cs3.jlmp.builders.FactBaseBuilder;
+import org.cs3.jlmp.builders.JLMPProjectBuilder;
 import org.cs3.jlmp.natures.JLMPProjectNature;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
@@ -46,10 +50,12 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -668,12 +674,26 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         }
     }
 
-    public ICompilationUnit[] getCompilationUnits(String packageName)
-            throws JavaModelException {
-        return getCompilationUnits("", packageName);
+    public ICompilationUnit[] getCompilationUnitsInFolder(String packageName)
+            throws CoreException {
+        IFolder folder = getTestProject().getFolder(packageName);
+        folder.refreshLocal(IResource.DEPTH_INFINITE,null);
+        IResource[] resources = folder.members();
+        Vector l =new Vector();
+        for (int i = 0; i < resources.length; i++) {
+            IResource r = resources[i];            
+            if(r.getType()==IResource.FILE&&"java".equals(r.getFileExtension())){                
+                ICompilationUnit icu=(ICompilationUnit) JavaCore.create(r);
+                assertFalse(icu.isWorkingCopy());
+                l.add(icu);                
+            }
+        }
+        return (ICompilationUnit[]) l.toArray(new ICompilationUnit[0]);
 
     }
 
+    
+    
     /**
      * Returns the specified compilation unit in the given project, root, and
      * package fragment or <code>null</code> if it does not exist.
@@ -681,9 +701,12 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     private ICompilationUnit[] getCompilationUnits(String rootPath,
             String packageName) throws JavaModelException {
         IPackageFragment pkg = getPackageFragment(rootPath, packageName);
+        
         if (pkg == null) {
             return null;
         } else {
+            
+            
             return pkg.getCompilationUnits();
         }
     }
@@ -933,6 +956,8 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      */
     protected void normalizeCompilationUnit(ICompilationUnit cu)
             throws JavaModelException, BadLocationException {
+        assertFalse(cu.isWorkingCopy());
+        cu.becomeWorkingCopy(null,null);
         String orig = cu.getSource();
 
         Map options = DefaultCodeFormatterConstants
@@ -967,7 +992,11 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         formatted = formatted.replaceAll("(?s)\\n\\s*\\n", "\n");
         //save changes.
         cu.getBuffer().replace(0, orig.length(), formatted);
+        cu.commitWorkingCopy(false,null);
+        
         cu.save(null, true);
+        cu.discardWorkingCopy();
+        assertFalse(cu.isWorkingCopy());
     }
 
     /**
@@ -992,6 +1021,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(
                 new Path(path));
         file.create(input, true, null);
+        assertTrue(file.isAccessible());
         return file;
     }
 
@@ -1059,5 +1089,45 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     public void setTestDataLocator(ResourceFileLocator testDataLocator) {
         this.testDataLocator = testDataLocator;
+    }
+    class _ProgressMonitor extends NullProgressMonitor{
+        public Object lock=new Object();
+        public boolean done = false;
+        /* (non-Javadoc)
+         * @see org.eclipse.core.runtime.NullProgressMonitor#done()
+         */
+        public void done() {                
+            done=true;
+            synchronized(lock){
+                lock.notifyAll();    
+            }                
+        }
+        public void waitTillDone(){
+            while(!done){
+                synchronized(lock){
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+    };
+    protected void build(String builder) throws CoreException{
+        build(builder,new HashMap());
+    }
+    protected void build(String builder,Map args) throws CoreException{
+        IProject project = getTestProject();
+        _ProgressMonitor m = new _ProgressMonitor();
+        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD,builder,args,m);
+        m.waitTillDone();
+    }
+    
+    protected void build() throws CoreException {
+        IProject project = getTestProject();
+        _ProgressMonitor m = new _ProgressMonitor();
+        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, m);
+        m.waitTillDone();
     }
 }

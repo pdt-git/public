@@ -7,16 +7,19 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 
-/**
+/*
  * XXX: a ugly and hopefuly temporary solution.
+ * the only (static) method of this class installs the prolog source in the directory pointed
+ * to by the pif's factory's locator. it will then add the installed source files to the
+ * pif's bootstrap library path.
  */
-public class Installer {
+public class MetadataEngineInstaller {
     public static void install(PrologInterface pif) {
         PrologInterfaceFactory factory = pif.getFactory();
-        factory.ensureInstalled("pdtplugin.pl", Installer.class);
-        factory.ensureInstalled("plparser.pl", Installer.class);
-        factory.ensureInstalled("runtime.pl", Installer.class);
-        factory.ensureInstalled("model.pl", Installer.class);
+        factory.ensureInstalled("pdtplugin.pl", MetadataEngineInstaller.class);
+        factory.ensureInstalled("plparser.pl", MetadataEngineInstaller.class);
+        factory.ensureInstalled("runtime.pl", MetadataEngineInstaller.class);
+        factory.ensureInstalled("model.pl", MetadataEngineInstaller.class);
         ResourceFileLocator locator = factory.getResourceLocator();
         List l = pif.getBootstrapLibraries();
         l.add(Util.prologFileName(locator.resolve("pdtplugin.pl")));

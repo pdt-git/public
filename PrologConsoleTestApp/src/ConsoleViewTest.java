@@ -6,7 +6,7 @@ import java.util.Map;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
-import org.cs3.pl.metadata.Installer;
+import org.cs3.pl.metadata.MetadataEngineInstaller;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
@@ -36,7 +36,7 @@ public class ConsoleViewTest {
     		throw new NullPointerException("Required property \""+PDT.PREF_CONSOLE_PORT+"\" was not specified.");
     	}
         consoleModel.setPort(consolePort);
-        Installer.install(pif);
+        MetadataEngineInstaller.install(pif);
         pif.addLifeCycleHook(new ConsoleServerHook(),ConsoleServerHook.HOOK_ID,null);        
         pif.addLifeCycleHook(new LifeCycleHook(){
 

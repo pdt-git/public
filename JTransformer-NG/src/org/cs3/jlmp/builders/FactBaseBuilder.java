@@ -355,7 +355,7 @@ public class FactBaseBuilder {
         CompilationUnit cu = null;
         PrintStream out = getMetaDataSRC().getOutputStream("flat.pl");
         try {
-
+            
             icu.becomeWorkingCopy(null, null);
 
             writeFacts(icu, out);
@@ -368,6 +368,7 @@ public class FactBaseBuilder {
             Debug.report(jme);
             return false;
         } finally {
+            icu.discardWorkingCopy();
             out.close();
         }
         return true;

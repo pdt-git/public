@@ -125,8 +125,8 @@ public class Initializer extends AbstractPreferenceInitializer {
                 .println("Hi. I'm the PDT's Preferences Initializer, and i am now setting the Debug Level to "
                         + debugLevel);
                 
-                //Debug.setDebugLevel(debugLevel);
-        Debug.setDebugLevel("DEBUG");
+                Debug.setDebugLevel(debugLevel);
+        //Debug.setDebugLevel("DEBUG");
     }
 
     private String guessExecutableName(){

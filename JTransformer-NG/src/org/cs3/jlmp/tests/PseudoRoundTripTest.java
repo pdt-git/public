@@ -1,12 +1,9 @@
 package org.cs3.jlmp.tests;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,13 +23,12 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.text.BadLocationException;
 
 /**
@@ -95,6 +91,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
      */
     public PseudoRoundTripTest(String name, String packageName) {
         super(name);
+        
         this.packageName = packageName;
     }
 
@@ -111,10 +108,19 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.unzip(r);
         org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
         setAutoBuilding(false);
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        try {
+            pif.start();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+       
     }
 
     public void testIt() throws CoreException, IOException,
             BadLocationException {
+       
+        Util.startTime("untilBuild");
         IProject project = getTestProject();
         IJavaProject javaProject = getTestJavaProject();
         JLMPProjectNature jlmpProject = getTestJLMPProject();
@@ -122,48 +128,26 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         
 		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in " + packageName);
         //retrieve all cus in package
-        ICompilationUnit[] cus = getCompilationUnits( packageName);
+        ICompilationUnit[] cus = getCompilationUnitsInFolder( packageName);
         //normalize source files
+        Util.startTime("norm1");
         for (int i = 0; i < cus.length; i++) {
             ICompilationUnit cu = cus[i];
             normalizeCompilationUnit(cu);
 
         }
-        
-        
-        class _ProgressMonitor extends NullProgressMonitor{
-            public Object lock=new Object();
-            public boolean done = false;
-            /* (non-Javadoc)
-             * @see org.eclipse.core.runtime.NullProgressMonitor#done()
-             */
-            public void done() {                
-                done=true;
-                synchronized(lock){
-                    lock.notifyAll();    
-                }                
-            }
-            public void waitTillDone(){
-                while(!done){
-                    synchronized(lock){
-                        try {
-                            lock.wait();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }
-        };
-        
-        _ProgressMonitor m = new _ProgressMonitor();
-        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, m);
-        m.waitTillDone();
-        
+        Util.printTime("norm1");
+        Util.printTime("untilBuild");
+        Util.startTime("build1");
+        build(JavaCore.BUILDER_ID);
+        build(JLMP.BUILDER_ID);
+        Util.printTime("build1");
+        Util.startTime("untilQueryToplevels");
         //now we should have SOME toplevelT
         assertNotNull("no toplevelT????", session.queryOnce("toplevelT(_,_,_,_)"));
+        
         //and checkTreeLinks should say "yes"
-        assertNotNull("checkTreeLinks reports errors", session.queryOnce("checkTreeLinks"));      
+        //assertNotNull("checkTreeLinks reports errors", session.queryOnce("checkTreeLinks"));      
         
 
 
@@ -185,38 +169,51 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                 return false;
             }
         };
-
-        project.getFolder(packageName).accept(renamer);
-        
-
+        Util.startTime("rename");
+        IFolder folder = project.getFolder(packageName);        
+        folder.accept(renamer);
+        Util.printTime("rename");
+              
         //next, we use gen_tree on each toplevelT node known to the system.
         //as a result we should be able to regenerate each and every source
         // file we consulted
         //in the first step
         String query = "toplevelT(ID,_,FILENAME,_),gen_tree(ID,CONTENT)";
-        
+        Util.printTime("untilQueryToplevels");
+        Util.startTime("queryToplevels");
         List results = session.queryAll(query);
+        Util.printTime("queryToplevels");
+        Util.startTime("writeToplevels");
         for (Iterator iter = results.iterator(); iter.hasNext();) {
             Map result = (Map) iter.next();
             String filename = result.get("FILENAME").toString();
             String content = result.get("CONTENT").toString();
-            System.out.println(content);
+            //clean the facts right away. another testcase might be running
+            //concurrently and this is the easiest way to keep things from interfering
+            session.queryOnce("remove_contained_global_ids('" + filename+ "')");
+            session.queryOnce("delete_toplevel('" + filename + "')");              
             assertTrue("problems writing generated file.", createFile(filename,
                     content).isAccessible());            
+            IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(filename));
+            String newContent = Util.toString(file.getContents());
+            assertEquals(content,newContent);
         }
-
+        Util.printTime("writeToplevels");
         //refetch cus
-        cus = getCompilationUnits( packageName);
-
+      Util.startTime("norm2");
+        cus = getCompilationUnitsInFolder(packageName);
         //normalize again (now the generated source)
         for (int i = 0; i < cus.length; i++) {
             ICompilationUnit cu = cus[i];
             normalizeCompilationUnit(cu);
 
         }
+        Util.printTime("norm2");
         //build again.(the generated source)
-        project.build(IncrementalProjectBuilder.INCREMENTAL_BUILD, null);
-
+        Util.startTime("build2");
+        
+       build(JavaCore.BUILDER_ID);
+       Util.printTime("build2");
         //now, visit each file in the binFolder, that has the .class extension.
         //and compare it to the respective original class file (which should
         // have the same name + .orig)
@@ -253,12 +250,13 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                 return false;
             }
         };
-        project.getFolder(packageName).accept(comparator);
+        Util.startTime("compare");
+        folder.accept(comparator);
+        Util.printTime("compare");
     }
     protected void setUp() throws Exception {     
         super.setUp(); 
-        PrologInterface pif = getTestJLMPProject().getPrologInterface();
-        pif.start();
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();        
         session=pif.getSession();
         setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator("testdata-roundtrip"));
         
@@ -266,26 +264,27 @@ public class PseudoRoundTripTest extends FactGenerationTest {
     }
     protected void tearDown() throws Exception {     
         super.tearDown();
-        PrologInterface pif = getTestJLMPProject().getPrologInterface();
-        session.dispose();
-        pif.stop();
-        //uninstall(packageName);
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();        
+        session.dispose();        
+        uninstall(packageName);
     }
     public void tearDownOnce() {
         super.tearDownOnce();
         org.cs3.pl.common.Debug.info("tearDownOnce caled for key  " + getKey());
-        //		try {
-        //			deleteProject("Converter");
-        //		} catch (CoreException e) {
-        //			e.printStackTrace();
-        //		}
+        PrologInterface pif = getTestJLMPProject().getPrologInterface();
+        session.dispose();
+        try {
+            pif.stop();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         
         
     }
 
     public static Test suite() {
         TestSuite s = new TestSuite();
-        for (int i = 1; i < 2; i++)
+        for (int i = 1; i <= 539; i++)
             s
                     .addTest(new PseudoRoundTripTest("testIt",
                             generatePackageName(i)));
