@@ -43,7 +43,7 @@ public class SuperFieldAccessTest extends FactGenerationTest {
     /* (non-Javadoc)
      * @see org.cs3.jlmp.tests.SuiteOfTestCases#tearDown()
      */
-    protected void _tearDown() throws Exception {
+    protected void tearDown() throws Exception {
         getTestJLMPProject().getPrologInterface().stop();
     }
     public void testIt() throws CoreException, IOException {

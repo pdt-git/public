@@ -5,3 +5,4 @@ System.out.println(org.cs3.pl.common.Util.exec("plcon -g source_file(A),concat(X
 org.cs3.pl.common.Util.exec("date")[0];
 
 new java.io.PipedOutputStream()
+System.out.println(new java.util.Date());

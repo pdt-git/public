@@ -221,6 +221,11 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 			setAutoBuilding(false);
 
 			try {
+			    pif.getConsultService(JLMP.SRC).clearRecords();
+				pif.getConsultService(JLMP.EXT).clearRecords();
+				pif.stop();
+				assertTrue(pif.isDown());
+				pif.start();
 				pif.start();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
@@ -386,8 +391,6 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 	protected synchronized void setUp() throws Exception {
 		super.setUp();
 		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-		synchronized (pif) {
-			waitForPif();
 			assertTrue(pif.isUp());
 			session = pif.getSession();
 			if (session == null) {
@@ -398,7 +401,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 
 			install(packageName);
 			passed = false;
-		}
+		
 	}
 
 	protected synchronized void tearDown() throws Exception {
@@ -498,18 +501,19 @@ public class PseudoRoundTripTest extends FactGenerationTest {
 		blacklist.set(233);
 		blacklist.set(234);
 
-		for (int i = 1; i <=1; i++)
-			//1-539
-			if (!blacklist.get(i))
+		for (int i = 200; i <=250; i++){//1-539
+			if (!blacklist.get(i)){
 				s.addTest(new PseudoRoundTripTest("testIt",
 						generatePackageName(i)));
+			}
+		}
+		s.setName("PseudoRoundtripTest");
 		return s;
 	}
 	/* (non-Javadoc)
 	 * @see junit.framework.TestCase#getName()
 	 */
-	public String getName() {
-		// TODO Auto-generated method stub
+	public String getName() {		
 		return packageName;
 	}
 	/**

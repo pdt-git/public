@@ -80,359 +80,370 @@ import org.eclipse.jface.text.BadLocationException;
  */
 public class WindoofTest extends FactGenerationTest {
 
-	private final class Comparator implements IResourceVisitor {
-		public boolean visit(IResource resource) throws CoreException {
-			switch (resource.getType()) {
-			case IResource.FOLDER:
-				return true;
-			case IResource.FILE:
-				IFile file = (IFile) resource;
-				if (!file.getFileExtension().equals("class"))
-					return false;
+    private final class Comparator implements IResourceVisitor {
+        public boolean visit(IResource resource) throws CoreException {
+            switch (resource.getType()) {
+            case IResource.FOLDER:
+                return true;
+            case IResource.FILE:
+                IFile file = (IFile) resource;
+                if (!file.getFileExtension().equals("class"))
+                    return false;
 
-				IFile orig = ResourcesPlugin.getWorkspace().getRoot().getFile(
-						file.getFullPath().addFileExtension("orig"));
-				assertTrue(packageName
-						+ ": original class file not accessible: "
-						+ orig.getFullPath().toString(), orig.isAccessible());
-				//both files should be of EXACTLY the same size:
-				BufferedReader origReader = new BufferedReader(
-						new InputStreamReader(orig.getContents()));
-				BufferedReader genReader = new BufferedReader(
-						new InputStreamReader(file.getContents()));
-				int origR = 0;
-				int genR = 0;
-				int i = 0;
-				for (i = 0; origR != -1 && genR != -1; i++) {
-					try {
-						origR = origReader.read();
-						genR = genReader.read();
-						assertTrue(
-								packageName
-										+ ": orig and generated file differ at position "
-										+ i + ": " + orig.getName(),
-								origR == genR);
-					} catch (IOException e) {
-						org.cs3.pl.common.Debug.report(e);
-					}
-				}
-				org.cs3.pl.common.Debug.info("compared " + i
-						+ " chars succsessfully.");
-				return false;
+                IFile orig = ResourcesPlugin.getWorkspace().getRoot().getFile(
+                        file.getFullPath().addFileExtension("orig"));
+                assertTrue(packageName
+                        + ": original class file not accessible: "
+                        + orig.getFullPath().toString(), orig.isAccessible());
+                //both files should be of EXACTLY the same size:
+                BufferedReader origReader = new BufferedReader(
+                        new InputStreamReader(orig.getContents()));
+                BufferedReader genReader = new BufferedReader(
+                        new InputStreamReader(file.getContents()));
+                int origR = 0;
+                int genR = 0;
+                int i = 0;
+                for (i = 0; origR != -1 && genR != -1; i++) {
+                    try {
+                        origR = origReader.read();
+                        genR = genReader.read();
+                        assertTrue(
+                                packageName
+                                        + ": orig and generated file differ at position "
+                                        + i + ": " + orig.getName(),
+                                origR == genR);
+                    } catch (IOException e) {
+                        org.cs3.pl.common.Debug.report(e);
+                    }
+                }
+                org.cs3.pl.common.Debug.info("compared " + i
+                        + " chars succsessfully.");
+                return false;
 
-			}
-			return false;
-		}
-	}
+            }
+            return false;
+        }
+    }
 
-	private final class Renamer implements IResourceVisitor {
-		String[] extensions = null;
+    private final class Renamer implements IResourceVisitor {
+        String[] extensions = null;
 
-		String suffix = null;
+        String suffix = null;
 
-		public Renamer(String extensions[], String suffix) {
-			this.extensions = extensions;
-			this.suffix = suffix;
-		}
+        public Renamer(String extensions[], String suffix) {
+            this.extensions = extensions;
+            this.suffix = suffix;
+        }
 
-		public boolean visit(IResource resource) throws CoreException {
-			switch (resource.getType()) {
-			case IResource.FOLDER:
-				return true;
-			case IResource.FILE:
-				IFile file = (IFile) resource;
-				if (!file.isAccessible()) {
-					Debug.warning("RENAMER:not accsessible: "
-							+ file.getFullPath());
-					break;
-				}
-				if (extensions == null || extensions.length == 0) {
-					file.move(file.getFullPath().addFileExtension(suffix),
-							true, null);
-					break;
-				}
-				for (int i = 0; i < extensions.length; i++) {
-					if (extensions[i].equals(file.getFileExtension())) {
+        public boolean visit(IResource resource) throws CoreException {
+            switch (resource.getType()) {
+            case IResource.FOLDER:
+                return true;
+            case IResource.FILE:
+                IFile file = (IFile) resource;
+                if (!file.isAccessible()) {
+                    Debug.warning("RENAMER:not accsessible: "
+                            + file.getFullPath());
+                    break;
+                }
+                if (extensions == null || extensions.length == 0) {
+                    file.move(file.getFullPath().addFileExtension(suffix),
+                            true, null);
+                    break;
+                }
+                for (int i = 0; i < extensions.length; i++) {
+                    if (extensions[i].equals(file.getFileExtension())) {
 
-						try {
-							file.move(file.getFullPath().addFileExtension(
-									suffix), true, null);
-						} catch (Throwable t) {
-							Debug.report(t);
-						}
+                        try {
+                            file.move(file.getFullPath().addFileExtension(
+                                    suffix), true, null);
+                        } catch (Throwable t) {
+                            Debug.report(t);
+                        }
 
-						break;
-					}
-				}
-				break;
-			case IResource.PROJECT:
-				return true;
-			default:
-				throw new IllegalStateException("Unexpected resource type.");
-			}
-			return false;
-		}
-	}
+                        break;
+                    }
+                }
+                break;
+            case IResource.PROJECT:
+                return true;
+            default:
+                throw new IllegalStateException("Unexpected resource type.");
+            }
+            return false;
+        }
+    }
 
-	private String packageName;
+    private String packageName;
 
-	private boolean passed;
+    private boolean passed;
 
-	/**
-	 * @param name
-	 */
-	public WindoofTest(String name) {
-		super(name);
-		this.packageName = name;
-	}
+    /**
+     * @param name
+     */
+    public WindoofTest(String name) {
+        super(name);
+        this.packageName = name;
+    }
 
-	/**
-	 * @param string
-	 * @param string2
-	 */
-	public WindoofTest(String name, String packageName) {
-		super(name);
+    /**
+     * @param string
+     * @param string2
+     */
+    public WindoofTest(String name, String packageName) {
+        super(name);
 
-		this.packageName = packageName;
-	}
+        this.packageName = packageName;
+    }
 
-	protected Object getKey() {
+    protected Object getKey() {
 
-		return WindoofTest.class;
-	}
+        return WindoofTest.class;
+    }
 
-	public void setUpOnce() throws Exception {
-		super.setUpOnce();
+    public void setUpOnce() throws Exception {
+        super.setUpOnce();
 
-		//install test workspace
-		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
-		File r = l.resolve("testdata-roundtrip.zip");
-		Util.unzip(r);
-		org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
-		setAutoBuilding(false);
+        //install test workspace
+        ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
+        File r = l.resolve("testdata-roundtrip.zip");
+        Util.unzip(r);
+        org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
+        setAutoBuilding(false);
 
-	}
+    }
 
-	public void testIt() throws CoreException, IOException,
-			BadLocationException, InterruptedException {
-		testIt_impl();
-		passed = true;
+    public void testIt() throws CoreException, IOException,
+            BadLocationException, InterruptedException {
+        testIt_impl();
+        passed = true;
 
-	}
+    }
 
-	public synchronized void testIt_impl() throws CoreException, IOException,
-			BadLocationException, InterruptedException {
+    public synchronized void testIt_impl() throws CoreException, IOException,
+            BadLocationException, InterruptedException {
 
-		Util.startTime("untilBuild");
-		IProject project = getTestProject();
-		IJavaProject javaProject = getTestJavaProject();
+        Util.startTime("untilBuild");
+        IProject project = getTestProject();
+        IJavaProject javaProject = getTestJavaProject();
 
-		org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
-				+ packageName);
-		//retrieve all cus in package
-		ICompilationUnit[] cus = getCompilationUnitsInFolder(packageName);
-		//normalize source files
-		normalize(cus);
-		IFolder folder = project.getFolder(packageName);
-		IFile javaFile = folder.getFile("Test.java");
-		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertTrue(javaFile.exists());
-		build(JavaCore.BUILDER_ID);
+        org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
+                + packageName);
+        //retrieve all cus in package
+        ICompilationUnit[] cus = getCompilationUnitsInFolder(packageName);
+        //normalize source files
+        normalize(cus);
+        IFolder folder = project.getFolder(packageName);
+        IFile javaFile = folder.getFile("Test.java");
+        assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+        assertTrue(javaFile.exists());
+        build(JavaCore.BUILDER_ID);
 
-		//Thread.sleep(1000);
-		IFile classFile = folder.getFile("Test.class");
-		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertTrue(classFile.exists());
-		build(JLMP.BUILDER_ID);
-		
-		
-		rename(folder, new String[] { "java", "class" }, "orig");
-		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertFalse(classFile.exists());
-		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertFalse(javaFile.exists());		
-		classFile = folder.getFile("Test.class.orig");
-		javaFile = folder.getFile("Test.java.orig");
-		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertTrue(classFile.exists());
-		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertTrue(javaFile.exists());
-		
-		generateSource();
-		/*
-		javaFile = folder.getFile("Test.java");
-		assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertTrue(javaFile.exists());
-		
-		build(JavaCore.BUILDER_ID);
-		classFile = folder.getFile("Test.class");
-		assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
-		assertTrue(classFile.exists());
-		*/
+        //Thread.sleep(1000);
+        IFile classFile = folder.getFile("Test.class");
+        assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
+        assertTrue(classFile.exists());
+        build(JLMP.BUILDER_ID);
 
-	}
+        rename(folder, new String[] { "java", "class" }, "orig");
+        assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
+        assertFalse(classFile.exists());
+        assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+        assertFalse(javaFile.exists());
+        classFile = folder.getFile("Test.class.orig");
+        javaFile = folder.getFile("Test.java.orig");
+        assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
+        assertTrue(classFile.exists());
+        assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+        assertTrue(javaFile.exists());
 
-	protected synchronized void tearDown() throws Exception {
-		uninstall(packageName);
-		IFolder folder = getTestProject().getFolder(packageName);
-		assertTrue(folder.isSynchronized(IResource.DEPTH_INFINITE));
-		assertFalse(folder.exists());
-	}
+        generateSource();
+        /*
+         * javaFile = folder.getFile("Test.java");
+         * assertTrue(javaFile.isSynchronized(IResource.DEPTH_INFINITE));
+         * assertTrue(javaFile.exists());
+         * 
+         * build(JavaCore.BUILDER_ID); classFile = folder.getFile("Test.class");
+         * assertTrue(classFile.isSynchronized(IResource.DEPTH_INFINITE));
+         * assertTrue(classFile.exists());
+         */
 
-	/**
-	 * @param cus
-	 * @throws CoreException
-	 */
-	private void normalize(final ICompilationUnit[] cus) throws CoreException {
-		IWorkspaceRunnable r = new IWorkspaceRunnable() {
-			public void run(IProgressMonitor mannomonDaRocktDerHase) {
-				for (int i = 0; i < cus.length; i++) {
-					ICompilationUnit cu = cus[i];
+    }
 
-					try {
-						normalizeCompilationUnit(cu);
-					} catch (Exception e) {
-						throw new RuntimeException(packageName
-								+ ": could not normalize cu "
-								+ cu.getElementName(), e);
-					}
-				}
-			}
-		};
-		ResourcesPlugin.getWorkspace().run(r,getTestProject(),IWorkspace.AVOID_UPDATE,null);
-	}
+    protected synchronized void tearDown() throws Exception {
+        uninstall(packageName);
+        IFolder folder = getTestProject().getFolder(packageName);
+        assertTrue(folder.isSynchronized(IResource.DEPTH_INFINITE));
+        assertFalse(folder.exists());
+    }
 
-	/**
-	 * @param folder
-	 * @throws CoreException
-	 */
-	private void compare(final IResource folder) throws CoreException {
-		final IResourceVisitor comparator = new Comparator();
-		IWorkspaceRunnable r = new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				try {
-					folder.accept(comparator);
-				} catch (Throwable e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
-				}
-			}
-		};
-		ResourcesPlugin.getWorkspace().run(r,getTestProject(),IWorkspace.AVOID_UPDATE,null);
-	}
+    /**
+     * @param cus
+     * @throws CoreException
+     */
+    private void normalize(final ICompilationUnit[] cus) throws CoreException {
+        IWorkspaceRunnable r = new IWorkspaceRunnable() {
+            public void run(IProgressMonitor mannomonDaRocktDerHase) {
+                for (int i = 0; i < cus.length; i++) {
+                    ICompilationUnit cu = cus[i];
 
-	/**
-	 * @param folder
-	 * @throws CoreException
-	 */
-	private void rename(final IResource root, String[] exts, String suffix)
-			throws CoreException {
-		final IResourceVisitor renamer = new Renamer(exts, suffix);
-		IWorkspaceRunnable r = new IWorkspaceRunnable() {
-			public void run(IProgressMonitor monitor) throws CoreException {
-				try {
-					root.accept(renamer);
-					root.refreshLocal(IResource.DEPTH_INFINITE, null);
-				} catch (Throwable e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
-				}
-			}
-		};
-		ResourcesPlugin.getWorkspace().run(r,getTestProject(),IWorkspace.AVOID_UPDATE,null);
-	}
+                    try {
+                        normalizeCompilationUnit(cu);
+                    } catch (Exception e) {
+                        throw new RuntimeException(packageName
+                                + ": could not normalize cu "
+                                + cu.getElementName(), e);
+                    }
+                }
+            }
+        };
+        ResourcesPlugin.getWorkspace().run(r, getTestProject(),
+                IWorkspace.AVOID_UPDATE, null);
+    }
 
-	protected synchronized void setUp() throws Exception {
-		super.setUp();
-		setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
-				"testdata-roundtrip"));
+    /**
+     * @param folder
+     * @throws CoreException
+     */
+    private void compare(final IResource folder) throws CoreException {
+        final IResourceVisitor comparator = new Comparator();
+        IWorkspaceRunnable r = new IWorkspaceRunnable() {
+            public void run(IProgressMonitor monitor) throws CoreException {
+                try {
+                    folder.accept(comparator);
+                } catch (Throwable e) {
+                    Debug.report(e);
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        ResourcesPlugin.getWorkspace().run(r, getTestProject(),
+                IWorkspace.AVOID_UPDATE, null);
+    }
 
-		install(packageName);
-		passed = false;
+    /**
+     * @param folder
+     * @throws CoreException
+     */
+    private void rename(final IResource root, String[] exts, String suffix)
+            throws CoreException {
+        final IResourceVisitor renamer = new Renamer(exts, suffix);
+        IWorkspaceRunnable r = new IWorkspaceRunnable() {
+            public void run(IProgressMonitor monitor) throws CoreException {
+                try {
+                    root.accept(renamer);
+                    root.refreshLocal(IResource.DEPTH_INFINITE, null);
+                } catch (Throwable e) {
+                    Debug.report(e);
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        ResourcesPlugin.getWorkspace().run(r, getTestProject(),
+                IWorkspace.AVOID_UPDATE, null);
+    }
 
-	}
+    protected synchronized void setUp() throws Exception {
+        super.setUp();
+        setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
+                "testdata-roundtrip"));
 
-	public void tearDownOnce() {
-		super.tearDownOnce();
-	}
+        install(packageName);
+        passed = false;
 
-	public static Test suite() {
-		TestSuite s = new TestSuite();
-		BitSet blacklist = new BitSet();
+    }
 
-		/*
-		 * XXX: for these the generated code is aequivalent, but the formating
-		 * is not! These "differences" should be normalized away. So this IS an
-		 * error on my part, an error in the test bed, to be precise.. These
-		 * errors are not very critical though.
-		 */
-		//blacklist.set(130);
-		//blacklist.set(160);
-		//blacklist.set(168);
-		//blacklist.set(236);
-		//blacklist.set(238);
-		/*
-		 * another "soft" bug: generates no-op a method that only contains a
-		 * anonymous class definition.this is a known problem, see JT-102
-		 */
-		//blacklist.set(165)
-		//these two are missing for some reason
-		blacklist.set(157);
-		blacklist.set(158);
-		blacklist.set(170);
-		blacklist.set(237);
+    public void tearDownOnce() {
+        super.tearDownOnce();
+    }
 
-		//ld: the following few do not compile. ergo, not our prob.
-		//interesting though, the builder eats most of them.
-		blacklist.set(44);
-		blacklist.set(78);
-		blacklist.set(79);
-		blacklist.set(80);
-		blacklist.set(81);
-		blacklist.set(86);
-		blacklist.set(87);
-		blacklist.set(118);
-		blacklist.set(150);
-		blacklist.set(152);
-		blacklist.set(153);
-		blacklist.set(182);
-		blacklist.set(183);
-		blacklist.set(184);
-		blacklist.set(185);
-		blacklist.set(186);
-		blacklist.set(187);
-		blacklist.set(188);
-		blacklist.set(190);
-		blacklist.set(191);
-		blacklist.set(192);
-		blacklist.set(193);
-		blacklist.set(194);
-		blacklist.set(196);
-		blacklist.set(197);
-		blacklist.set(200);
-		blacklist.set(233);
-		blacklist.set(234);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see junit.framework.TestCase#getName()
+     */
+    public String getName() {
+        return packageName;
+    }
 
-		for (int i = 1; i <= 10; i++)
-			//1-539
-			if (!blacklist.get(i))
-				s.addTest(new WindoofTest("testIt", generatePackageName(i)));
-		return s;
-	}
+    public static Test suite() {
+        TestSuite s = new TestSuite();
+        BitSet blacklist = new BitSet();
 
-	/**
-	 * @param i
-	 * @return
-	 */
-	private static String generatePackageName(int n) {
-		int desiredLength = 4;
-		String number = String.valueOf(n);
-		int padLength = desiredLength - number.length();
-		StringBuffer sb = new StringBuffer("test");
-		for (int i = 0; i < padLength; i++)
-			sb.append('0');
-		sb.append(number);
-		return sb.toString();
-	}
+        /*
+         * XXX: for these the generated code is aequivalent, but the formating
+         * is not! These "differences" should be normalized away. So this IS an
+         * error on my part, an error in the test bed, to be precise.. These
+         * errors are not very critical though.
+         */
+        //blacklist.set(130);
+        //blacklist.set(160);
+        //blacklist.set(168);
+        //blacklist.set(236);
+        //blacklist.set(238);
+        /*
+         * another "soft" bug: generates no-op a method that only contains a
+         * anonymous class definition.this is a known problem, see JT-102
+         */
+        //blacklist.set(165)
+        //these two are missing for some reason
+        blacklist.set(157);
+        blacklist.set(158);
+        blacklist.set(170);
+        blacklist.set(237);
+
+        //ld: the following few do not compile. ergo, not our prob.
+        //interesting though, the builder eats most of them.
+        blacklist.set(44);
+        blacklist.set(78);
+        blacklist.set(79);
+        blacklist.set(80);
+        blacklist.set(81);
+        blacklist.set(86);
+        blacklist.set(87);
+        blacklist.set(118);
+        blacklist.set(150);
+        blacklist.set(152);
+        blacklist.set(153);
+        blacklist.set(182);
+        blacklist.set(183);
+        blacklist.set(184);
+        blacklist.set(185);
+        blacklist.set(186);
+        blacklist.set(187);
+        blacklist.set(188);
+        blacklist.set(190);
+        blacklist.set(191);
+        blacklist.set(192);
+        blacklist.set(193);
+        blacklist.set(194);
+        blacklist.set(196);
+        blacklist.set(197);
+        blacklist.set(200);
+        blacklist.set(233);
+        blacklist.set(234);
+
+        for (int i = 1; i <= 10; i++) {//1-539
+            if (!blacklist.get(i)) {
+                s.addTest(new WindoofTest("testIt", generatePackageName(i)));
+            }
+        }
+        return s;
+    }
+
+    /**
+     * @param i
+     * @return
+     */
+    private static String generatePackageName(int n) {
+        int desiredLength = 4;
+        String number = String.valueOf(n);
+        int padLength = desiredLength - number.length();
+        StringBuffer sb = new StringBuffer("test");
+        for (int i = 0; i < padLength; i++)
+            sb.append('0');
+        sb.append(number);
+        return sb.toString();
+    }
 
 }

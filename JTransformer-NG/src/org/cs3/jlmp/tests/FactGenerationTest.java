@@ -100,16 +100,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
 	private DefaultResourceFileLocator testWorkspaceLocator;
 
-	private static Object pifLock = new Object();
+	//private static Object pifLock = new Object();
 
-	public void waitForPif() throws InterruptedException {
-		PrologInterface pif = getTestJLMPProject().getPrologInterface();
-		while (!pif.isUp()) {
-			synchronized (pifLock) {
-				pifLock.wait();
-			}
-		}
-	}
+	
 
 	/**
 	 * Wait for autobuild notification to occur
@@ -167,19 +160,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 			getTestJavaProject().setRawClasspath(cp, project.getFullPath(),
 					null);
 			PrologInterface pif = getTestJLMPProject().getPrologInterface();
-			pif.addLifeCycleHook(new LifeCycleHook() {
-				public void onInit(PrologSession initSession) {
-				}
-
-				public void afterInit() {
-					synchronized (pifLock) {
-						pifLock.notifyAll();
-					}
-				}
-
-				public void beforeShutdown(PrologSession session) {
-				}
-			});
+			
 		} catch (CoreException e) {
 			throw new RuntimeException(e);
 		}
@@ -1281,7 +1262,13 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 		project.refreshLocal(IResource.DEPTH_INFINITE, null);
 		m.waitTillDone();
 	}
-
+	protected void build(int kind) throws CoreException {
+		final IProject project = getTestProject();
+		_ProgressMonitor m = new _ProgressMonitor();
+		project.build(kind, m);
+		m.waitTillDone();
+		project.refreshLocal(IResource.DEPTH_INFINITE, null);
+	}
 	protected void build() throws CoreException {
 		final IProject project = getTestProject();
 		_ProgressMonitor m = new _ProgressMonitor();
