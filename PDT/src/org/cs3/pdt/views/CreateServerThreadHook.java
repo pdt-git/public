@@ -14,6 +14,8 @@ public class CreateServerThreadHook implements LifeCycleHook {
 	
 
 	
+	public static final String HOOK_ID = "org.cs3.pdt.CreateServerThreadHook";
+
 	public void onInit(PrologSession s) {
 		if (Util.probePort(5567, "end_of_file.\n")) {
 			Debug

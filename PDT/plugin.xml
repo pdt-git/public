@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin
-   id="org.cs3.pdt"
+   id="org.cs3.pdt.PDTPlugin"
    name="Prolog Development Toolkit"
    version="0.3.0"
    provider-name="Universität Bonn, Institut für Informatik III"
-   class="prg.cs3.pdt.PDTPlugin">
+   class="org.cs3.pdt.PDTPlugin">
 
    <runtime>
       <library name="PDT.jar">

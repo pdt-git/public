@@ -1,11 +1,10 @@
-package prg.cs3.pdt;
+package org.cs3.pdt;
 
 import java.io.IOException;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.cs3.pdt.PDTServerStartStrategy;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Properties;
 import org.cs3.pl.prolog.LifeCycleHook;

@@ -1,6 +1,3 @@
-import java.util.Iterator;
-import java.util.Vector;
-
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;

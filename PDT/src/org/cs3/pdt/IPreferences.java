@@ -1,4 +1,4 @@
-package prg.cs3.pdt;
+package org.cs3.pdt;
 
 import java.util.Map;
 
