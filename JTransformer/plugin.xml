@@ -116,6 +116,13 @@
                id="org.cs3.pl.help.button">
          </action>
          <action
+               label="JT with plwin"
+               class="org.cs3.pl.buttons.PlwinActionDelegate"
+               tooltip="start plwin with current PEF tree facts and JT Engine"
+               menubarPath="org.cs3.pl.menu.Prolog/group2"
+               id="org.cs3.pl.plwin.button">
+         </action>
+         <action
                accelerator="Ctrl+Alt+Shift+R"
                label="regenerate classes"
                tooltip="regenerate java sourcecode from prolog"
