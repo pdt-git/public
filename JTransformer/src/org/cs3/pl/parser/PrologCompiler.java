@@ -5,28 +5,14 @@
  * Java - Code Generation - Code and Comments
  */
 package org.cs3.pl.parser;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringBufferInputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 
 import org.cs3.pl.Debug;
 import org.cs3.pl.PDTPlugin;
 import org.cs3.pl.doc.PrologModule;
 import org.cs3.pl.prolog.PrologElementData;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
@@ -272,6 +258,26 @@ public class PrologCompiler extends PrologParserTraversal {
 	    this.document = document;
 	    compile(file.getContents());
 	}
+
+	/**
+	 * 
+	 * Compiles the File 'file'. 
+	 * This will set addMarkers to false,
+	 * because there is no related IFile in the
+	 * workspace avaiables.
+	 * 
+	 * @throws CoreException
+	 * @throws IOException
+	 *  
+	 */
+	public void compile(File file) throws CoreException, IOException {
+		addProblems = false;
+		publicModulePredicates = null;
+		if (document == null)
+		    document = new Document(streamToString(new FileInputStream(file)));
+		compile(new FileInputStream(file));
+	}
+	
 	
 	/**
 	 * @throws CoreException
@@ -282,17 +288,18 @@ public class PrologCompiler extends PrologParserTraversal {
 		this.file = file;
 		publicModulePredicates = null;
 		if (document == null)
-		    document = streamToDocument(file);
+		    document = new Document(streamToString(file.getContents()));
 		compile(file.getContents());
 	}
-	
-	/**
+	 /**
      * @param file
+     * @return
      * @throws CoreException
+     * @throws IOException
      */
-    private Document streamToDocument(IFile file) throws CoreException,IOException {
-        InputStreamReader reader = new InputStreamReader(file.getContents());
+    private String streamToString(InputStream stream) throws CoreException, IOException {
         char[] cBuf = new char[BUFLENGTH];
+        InputStreamReader reader = new InputStreamReader(stream);
         
     		StringBuffer buf = new StringBuffer();
     		int len =reader.read(cBuf);
@@ -302,7 +309,7 @@ public class PrologCompiler extends PrologParserTraversal {
             }
             if(len >= 0)
                 buf.append(cBuf,0,len);
-	    return new Document(buf.toString());
+        return buf.toString();
     }
     public Object visit(ASTCompound node, Object data) {
 		Integer arity = (Integer)pefs.get(node.getName());
@@ -609,7 +616,7 @@ public class PrologCompiler extends PrologParserTraversal {
 		pefs.put("nopT",new Integer(3));
 	}
 	
-	public void addProblems(boolean add) {
+	public void setAddMarkers(boolean add) {
 		addProblems = add;
 	}
 }

@@ -146,16 +146,17 @@ public class PrologMetaDataManager extends MetaDataManager {
 	
 	/**
 	 * parses the file, and generates MetaData for the clauses encountered. These are generated for the
-	 * facts described in the file, and saved for future reference. They are saved in the Prolog Engine.
+	 * facts described in the file, and saved for future reference. They are loaded into the Prolog Engine.
+	 * 
 	 * @param filename the filename to be added to the repository.
 	 * @param checker the compiler used to check the facts for consistency
 	 */
 	
 	public void saveMetaDataForClauses(String filename, PrologCompiler checker) {
 		try {
-			PrologMetaDataManager metaDataManager = new PrologMetaDataManager(client,PrologMetaDataManager.MODEL);
+			//PrologMetaDataManager metaDataManager = new PrologMetaDataManager(client,PrologMetaDataManager.MODEL);
 			IWorkspaceRoot root = PDTPlugin.getDefault().getWorkspace().getRoot();
-			BufferedWriter writer = metaDataManager.getMetaDataWriter(filename);
+			BufferedWriter writer = getMetaDataWriter(filename);
 			writer.write(":- style_check(-atom).\n");
 			String module = checker.getModuleName();
 			List clauses = checker.getClauses();
@@ -189,7 +190,7 @@ public class PrologMetaDataManager extends MetaDataManager {
 			}
 			saveMetaDataHelpForDynamicPredicates(writer, checker);
 			writer.close();
-			metaDataManager.consult(filename);
+			consult(filename);
 		} catch (IOException e1) {
 			Debug.report(e1);
 		}		
@@ -218,7 +219,7 @@ public class PrologMetaDataManager extends MetaDataManager {
 	}
 
 	//FIXME: das muss auch irgendwann gemacht werden: init von factbase.pl meta data
-	void readFactbaseMetaData() throws CoreException, IOException {
+	public void readFactbaseMetaData() throws CoreException, IOException {
 		String filename = "/"+PDTPlugin.JTRANFORMERENGINE + "/factbase.pl";
 		if(exists(filename) && client != null) {
 		    try {
@@ -230,8 +231,10 @@ public class PrologMetaDataManager extends MetaDataManager {
 		}
 		    
 		PrologCompilerBackend checker = new PrologCompilerBackend();
-		IFile factbase = PDTPlugin.getDefault().getFile(new Path(filename ));
-		checker.compile(factbase);
+		//IFile factbase = PDTPlugin.getDefault().getFile(new Path(filename ));
+		String engineDir = PrologManager.getEngineDir();
+		
+		checker.compile(new File(engineDir + "factbase.pl"));
 		
 		saveMetaDataForClauses(filename,checker);
 	}
