@@ -1,10 +1,6 @@
 package org.cs3.timetracker.views;
 
 
-import java.io.File;
-import java.io.BufferedReader;
-
-import java.io.FileReader;
 
 import org.cs3.timetracker.ITimeObserver;
 import org.cs3.timetracker.TimeEvent;
@@ -154,18 +150,16 @@ public class TimeTrackerGUIViewer extends ViewPart implements ITimeObserver{
 	public void createPartControl(Composite parent)
 	{
 		
-		//SashForm sash = 
+		 
 		composite = new SashForm(parent, SWT.VERTICAL);
-		//composite = parent;
+		
 		TimeTicker tt = new TimeTicker();
 		log = new Logger(tt);
 		tt.addObserver(this);
-		//composite.setLayout(new FormLayout());
-		//Composite buttons = new Group(composite, SWT.SHADOW_NONE);
 		
 		guiInteraction = new TimeTrackerGUIInteraction(composite, log);
 		
-		guiInteraction.addTimeTracker(tt); //TODO add correct TimeTracker reference here!!!
+		guiInteraction.addTimeTracker(tt); 
 		
 		tt.addObserver(guiInteraction);
 		
