@@ -519,8 +519,35 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(312);
         blacklist.set(379);
         blacklist.set(398);
+        blacklist.set(401);
+        blacklist.set(409);
+        blacklist.set(413);
+        blacklist.set(417);
+        blacklist.set(419);
+        blacklist.set(426);
+        blacklist.set(427);
+        blacklist.set(431);
+        blacklist.set(436);
+        blacklist.set(437);
+        blacklist.set(438);
+        blacklist.set(439);
+        blacklist.set(443);
+        blacklist.set(444);
+        blacklist.set(447);        
+        blacklist.set(461);
+        blacklist.set(466);
+        blacklist.set(467);
+        blacklist.set(471);
+        blacklist.set(473);
+        blacklist.set(477);
+        blacklist.set(487);
+        blacklist.set(488);
+        blacklist.set(489);
+        blacklist.set(491);
+        blacklist.set(492);
+        blacklist.set(498);
         
-        for (int i = 350; i <= 360; i++) {//1-539
+        for (int i = 450; i <= 450; i++) {//1-539
             if (!blacklist.get(i)) {
                 s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));

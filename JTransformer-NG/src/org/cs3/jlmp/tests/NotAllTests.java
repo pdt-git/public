@@ -14,7 +14,8 @@ public class NotAllTests {
         //$JUnit-BEGIN$
         suite.addTestSuite(FullQualifiedNameTest.class);
         suite.addTestSuite(NormalizeTest.class);
-       // suite.addTestSuite(MultiDimensionalArraysTest.class);
+        suite.addTestSuite(MultiDimensionalArraysTest.class);
+        suite.addTestSuite(MultiFragForLoopInitializerTest.class);
         suite.addTestSuite(SuperFieldAccessTest.class);
         suite.addTestSuite(SuperMethodInvocationTest.class);
         suite.addTestSuite(PrimitiveTypeLiteralsTest.class);
