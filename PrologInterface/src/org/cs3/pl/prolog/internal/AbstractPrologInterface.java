@@ -302,6 +302,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             setState(ERROR);
             Debug
                     .error("Could not start PI becouse of unhandled exception. Exception will be rethrown.");
+            	Debug.report(t);
             stop();
             throw new RuntimeException(t);
         }
