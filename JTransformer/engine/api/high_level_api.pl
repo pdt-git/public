@@ -784,13 +784,15 @@ inner(_id) :-
 cond(local(_id)).
 local(_id) :-
     class(_id,_parent,_),
-    not(inner(_id)),
-    not(packageT(_parent, _)).
-
+    (
+      blockT(_parent,_,_,_);
+      forLoopT(_parent,_,_,_,_,_,_)
+    ).
 
 cond(anonymous(_id)).
 anonymous(_id)  :-
-    class(_id,_parent, 'null').
+    class(_id,_parent, _),
+    expression(_parent);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     add_params
@@ -850,11 +852,20 @@ fullQualifiedName(_id, _Fqn) :-
 %    !,
     stringAppend(_pckgname, '.', _name, _Fqn).
 
+% enclosing class is anomynous
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     classDefT(_parent, _, _,_),
 %    !,
     fullQualifiedName(_parent, _OuterFqn),
+    stringAppend(_OuterFqn, '.', _name, _Fqn).
+
+fullQualifiedName(_id, _Fqn) :-
+    classDefT(_id, _parent, _name,_),
+    not(classDefT(_parent, _, _,_)),
+%    !,
+    enclClass(_parent,ParentClass),
+    fullQualifiedName(ParentClass, _OuterFqn),
     stringAppend(_OuterFqn, '.', _name, _Fqn).
 
 fullQualifiedName(_id, _name) :-
