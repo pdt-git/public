@@ -94,6 +94,12 @@ failed(_list, _length, _all) :- findall(
 
 assert_true(Goal) :-
     assert_true('', Goal).
+/**
+ * assert_true(+Comment, +Goal)
+ * 
+ * Checks if Goal is true, otherwise throws
+ * exception assertion_failed('formated exception').
+ */
 
 assert_true(Comment, Goal) :-
   call(Goal)
