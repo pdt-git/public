@@ -20,3 +20,4 @@
 :- ['persistance/main'].
 :- ['ast/main'].
 :- [pdtplugin].
+:- ['java_lang_init'].
