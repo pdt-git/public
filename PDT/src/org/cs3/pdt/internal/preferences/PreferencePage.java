@@ -99,6 +99,11 @@ public class PreferencePage extends FieldEditorPreferencePage implements
             String name = options[i].getId();
             String label = options[i].getLabel();
             
+			//FIXME: directory does not exist at plugin startup time
+			//Workaround:
+			if(label.equals("Metadata Store Dir"))
+				editor = new StringFieldEditor(name,label,parent);
+			else
             switch(options[i].getType()){
             	case Option.DIR:
             	    editor = new DirectoryFieldEditor(name,label,parent);            	    
