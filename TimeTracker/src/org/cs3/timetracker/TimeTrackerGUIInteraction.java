@@ -136,7 +136,7 @@ public class TimeTrackerGUIInteraction implements ITimeObserver, MouseListener{
 	 */
 	public TimeTrackerGUIInteraction(Composite parent, Logger logger){
 		composite = parent;
-		log= logger;
+		log = logger;
 		startbutton = new Button(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		startbutton.setText("start");
 		startbutton.addMouseListener(this);
