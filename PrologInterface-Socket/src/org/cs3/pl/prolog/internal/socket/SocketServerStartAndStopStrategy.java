@@ -2,11 +2,14 @@
  */
 package org.cs3.pl.prolog.internal.socket;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Iterator;
 import java.util.List;
@@ -63,18 +66,27 @@ public class SocketServerStartAndStopStrategy implements
         sb.append(executable);
         sb.append(" -p library=");
         sb.append(engineDir);
-        sb.append(" -g [");
-        List bootstrapLIbraries = pif.getBootstrapLibraries();
-        for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
-            String s = (String) it.next();
-            sb.append("'");
-            sb.append(s);
-            sb.append("'");
-            if (it.hasNext()) {
-                sb.append(",");
-            }
-        }
-        sb.append("],consult_server(");
+        File tmpFile=null;
+        try {			
+			tmpFile = File.createTempFile("socketPif",null);
+			PrintWriter p = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
+			List bootstrapLIbraries = pif.getBootstrapLibraries();
+	        for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
+	            String s = (String) it.next();
+	            p.println(":- ['"+s+"'].");
+	        }
+	        p.close();
+		} catch (IOException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+        
+        
+        
+        
+        sb.append(" -g ['");
+        sb.append(Util.prologFileName(tmpFile));
+        sb.append("'],consult_server(");
         sb.append(port);
         sb.append(")");
         String cmdline = sb.toString();
