@@ -271,7 +271,7 @@ test(java_fq,(
    assert_true('full instantiated fieldDefT',
       java_fq(fieldDefT(100174, 'java.lang.ClassLoader', 'java.util.Map', classAssertionStatus, null))),
    assert_true('',
-	   java_fq(fieldDefT(Id,Parent,'java.lang.Class',B,C)))
+	   java_fq(fieldDefT(_,_,'java.lang.Class',_,_)))
       )).
 
 
