@@ -22,7 +22,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.cs3.pl.Debug;
+import org.cs3.pl.PDTPerspective;
 import org.cs3.pl.PDTPlugin;
+import org.cs3.pl.PDTPreferencePage;
 import org.cs3.pl.PrologStreamReader;
 import org.cs3.pl.SystemProperties;
 import org.cs3.pl.exceptions.ExceptionHandler;
@@ -361,6 +363,11 @@ public class PrologManager {
 		} else {
 			classPath = projectDir + "bin" + java.io.File.separator;
 		}
+		String storeClasspath = PDTPlugin.getDefault().getPreferenceStore().getString(PDTPreferencePage.P_PROLOG_CLASSPATH);
+		if (storeClasspath != null && storeClasspath.length() > 0) 
+		    classPath +=File.pathSeparator + storeClasspath;
+
+		//classPath +=File.pathSeparator + System.getProperty("java.class.path");
 		
 //		engineDir = getEngineDir(); 
 		

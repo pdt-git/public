@@ -916,13 +916,9 @@ public class FactGenerator extends ASTVisitor {
 		String topLevel = idResolver.getID(node.getParent());
 		String importName = idResolver.getID(node.resolveBinding());
 		IBinding binding =  node.resolveBinding();
-		if (binding.getKind() == IBinding.TYPE)
-			importName = idResolver.getID(binding);
-		else {
-			IPackageBinding pb = (IPackageBinding) binding;
-			importName = quote(pb.getName());
-			generatePackageFactIfNecessary(pb);
-		}
+		if (binding.getKind() == IBinding.PACKAGE) 
+			generatePackageFactIfNecessary((IPackageBinding) binding);
+		importName = idResolver.getID(binding);
 		String[] args = new String[] { id, topLevel, importName };
 		writer.writeFact("importT", args);
 		writer.writeFact("slT", new String [] {

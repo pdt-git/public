@@ -326,4 +326,20 @@ public class PrologMetaDataManager extends MetaDataManager {
 	private boolean isCompiled() {
 		return useCompiled;
 	}
+	
+	/**
+	 * 
+	 * Evaluates the predicate functor(prearg1,..., FilenameForSymbol, postarg1,...)
+	 * ones. 
+	 * 
+	 * 
+	 * @param functor the functor of the predicate
+	 * @param preargs the arguments before the filename, null if no arguments exist
+	 * @param symbol 
+	 * @param postargs the arguments after the filename, null if no arguments exist
+	 */
+	
+	public void query(String functor, String preargs, String symbol, String postargs) {
+	    
+	}
 }

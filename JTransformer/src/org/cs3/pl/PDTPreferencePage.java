@@ -11,6 +11,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
+import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -32,6 +33,7 @@ public class PDTPreferencePage
 		public static final String P_PROLOG_DEBUG_LEVEL = "prologdebuglevel"; 
 		public static final String P_PROLOG_ADD_SWIPL_PROJECT = "prologaddswiplproject"; 
 		public static final String P_PROLOG_ADD_JT_ENGINE_PROJECT = "prologaddjtengineproject"; 
+		public static final String P_PROLOG_CLASSPATH = "prologprocessclasspath"; 
 		
 		public PDTPreferencePage() {
 			super(GRID);
@@ -103,6 +105,11 @@ public class PDTPreferencePage
 									{ "info", "3" }, 
 									{ "debug", "4" } },
 				getFieldEditorParent(),true));
+			addField(
+					new StringFieldEditor(
+							P_PROLOG_CLASSPATH,
+							"classpath for the prolog process",
+							getFieldEditorParent()));
 
 			
 //      addField(

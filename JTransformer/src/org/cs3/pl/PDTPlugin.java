@@ -263,6 +263,7 @@ public class PDTPlugin extends AbstractUIPlugin  implements ISaveParticipant  {
 		store.setDefault(PDTPreferencePage.P_COMPLETE_CACHING, false);
 		store.setDefault(PDTPreferencePage.P_SINGLETON_DTM, false);
 		store.setDefault(PDTPreferencePage.P_PROLOG_SERVER_PORT, PrologManager.getServerPort());
+		store.setDefault(PDTPreferencePage.P_PROLOG_CLASSPATH, "");
 		store.setDefault(PDTPreferencePage.P_PROLOG_DEBUG_LEVEL, "2");
 
 		store.setDefault(PDTPreferencePage.P_PROLOG_ADD_JT_ENGINE_PROJECT, false);
