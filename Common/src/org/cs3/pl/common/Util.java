@@ -144,20 +144,20 @@ public class Util {
     }
 
     /**
-	 * @return
-	 */
-	public static boolean isWindoze() {
-		boolean windowsPlattform = System.getProperty("os.name").indexOf(
+     * @return
+     */
+    public static boolean isWindoze() {
+        boolean windowsPlattform = System.getProperty("os.name").indexOf(
                 "Windows") > -1;
-		return windowsPlattform;
-	}
+        return windowsPlattform;
+    }
 
-	public static String prologFileName(File f) {
+    public static String prologFileName(File f) {
         try {
-			return normalizeOnWindoze(f.getCanonicalPath());
-		} catch (IOException e) {
-		throw new RuntimeException(e);
-		}
+            return normalizeOnWindoze(f.getCanonicalPath());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String toString(InputStream in) throws IOException {
@@ -346,36 +346,36 @@ public class Util {
         }
         logStream.println(key + " took " + time(key) + " millis.");
     }
+
     /**
      * parse an association list.
      * 
-     * @param l A list containing strings of the form <code>key->value</code>.
+     * @param l
+     *                  A list containing strings of the form <code>key->value</code>.
      * @return A map that represents the association. If the list contains
-     * multiple mappings for a single key, the map will contain a List of this
-     * values. Otherwise, the value type will bs String. 
+     *             multiple mappings for a single key, the map will contain a List
+     *             of this values. Otherwise, the value type will bs String.
      */
-    public static Map parseAssociation(List l){
-    	HashMap map = new HashMap();
-    	for (Iterator it = l.iterator(); it.hasNext();) {
-			String elm = (String) it.next();
-			String[] s = elm.split("->");
-			String key = s[0];
-			String val = s[1];			
-			Object o = map.get(key);
-			if(o==null){
-				map.put(key,val);
-			}
-			else if (o instanceof List){
-				List ll = (List) o;
-				ll.add(val);
-			}
-			else{
-				List ll= new Vector();
-				ll.add(o);
-				ll.add(val);
-				map.put(key,ll);
-			}
-		}
-    	return map;
+    public static Map parseAssociation(List l) {
+        HashMap map = new HashMap();
+        for (Iterator it = l.iterator(); it.hasNext();) {
+            String elm = (String) it.next();
+            String[] s = elm.split("->");
+            String key = s[0];
+            String val = s[1];
+            Object o = map.get(key);
+            if (o == null) {
+                map.put(key, val);
+            } else if (o instanceof List) {
+                List ll = (List) o;
+                ll.add(val);
+            } else {
+                List ll = new Vector();
+                ll.add(o);
+                ll.add(val);
+                map.put(key, ll);
+            }
+        }
+        return map;
     }
 }
