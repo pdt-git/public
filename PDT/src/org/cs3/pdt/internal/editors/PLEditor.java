@@ -64,20 +64,20 @@ public class PLEditor extends TextEditor {
 
     	public void doSave(IProgressMonitor progressMonitor) {
     		super.doSave(progressMonitor);
-    		Thread thread = new Thread () {
-    			public void run() {
-    				IFile file = ((FileEditorInput)getEditorInput()).getFile();
-    				final String filename = file.getFullPath().toString();
-    				
-    				PrologCompilerGUIWrapper checker = new PrologCompilerGUIWrapper();
-    				try {
-    					checker.compile(getDocumentProvider().getDocument(getEditorInput()),file);
-    				} catch (CoreException e) {
-    					Debug.report(e);
-    				}
-    			}
-    		};
-    		thread.start();
+//    		Thread thread = new Thread () {
+//    			public void run() {
+//    				IFile file = ((FileEditorInput)getEditorInput()).getFile();
+//    				final String filename = file.getFullPath().toString();
+//    				
+//    				PrologCompilerGUIWrapper checker = new PrologCompilerGUIWrapper();
+//    				try {
+//    					checker.compile(getDocumentProvider().getDocument(getEditorInput()),file);
+//    				} catch (CoreException e) {
+//    					Debug.report(e);
+//    				}
+//    			}
+//    		};
+//    		thread.start();
 
     					
         
