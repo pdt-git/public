@@ -335,4 +335,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         pool.clear();
         super.start();
     }
+
+    
 }
