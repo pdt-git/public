@@ -161,14 +161,32 @@ action_all(delete(_a)) :-
     findall(_a, (call(_a), action(delete(_a))), _l).
 
 abstraction(class(_id, _owner, _name)).
+
+cond(class(_id, _owner, _name,_body)).
+
+class(_id, _owner, _name,_body) :-
+    classDefT(_id, _owner, _name, _body).
+
 subTreeArg(class, 4).
 class(_id, _owner, _name) :-
     classDefT(_id, _owner, _name, _).
-    
+
+action(add(class(_id, _owner, _name,Defs))) :-
+    !,
+    add_classDefT(_id, _owner, _name,Defs).
+        
 action(add(class(_id, _owner, _name))) :-
     !,
-    add(classDefT(_id, _owner, _name, [])),
+    add_classDefT(_id, _owner, _name,[]).
+    
+add_classDefT(_id, _owner, _name,Defs):-
+    add(classDefT(_id, _owner, _name, Defs)),
     ((
+       (globalIds(FQN,_id)->
+       		true;
+       		(fullQualifiedName(_id,FQN),
+       		add(globalIds(FQN,_id)))
+       		),
        debugme,
        print(debugme),
        modifierT(_id,'public'),
@@ -982,4 +1000,3 @@ createReturnOrExec(_parent, _encl, type(basic, void, 0), _stat, _exec) :-
 
 createReturnOrExec(_parent, _encl, _type, _stat, _return) :-
     add(returnT(_return, _parent, _encl, _stat)).
-
