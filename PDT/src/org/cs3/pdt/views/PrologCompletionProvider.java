@@ -6,7 +6,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.metadata.PDTPrologHelper;
+import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -85,8 +85,8 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		
 		String[] split = head.split("[^\\w]");
         String prefix = split[split.length-1];
-		PrologSession session = prologInterface.getSession();
-		IMetaInfoProvider metaInfo = new PDTPrologHelper(session);
+		
+		IMetaInfoProvider metaInfo = new DefaultMetaInfoProvider(prologInterface);
 		PrologElementData[] elems = null;
 		
 		try {
