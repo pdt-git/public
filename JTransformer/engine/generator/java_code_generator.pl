@@ -513,9 +513,10 @@ print_anonymous_class(_def) :-
 % uwe neu
 appendDir(Filename, Dirfile) :-
     outdir(Outdir),
+    add_slash_if_needed(Outdir,OutDirWithSlash),
     !,
     remove_leading_slash_if_needed(Filename,Clean_Filename),
-    stringAppend(Outdir, Clean_Filename, Dirfile).
+    stringAppend(OutDirWithSlash, Clean_Filename, Dirfile).
 appendDir(Filename, Filename).
 
 remove_leading_slash_if_needed(Filename,Clean_Filename):-
@@ -523,6 +524,13 @@ remove_leading_slash_if_needed(Filename,Clean_Filename):-
 
 remove_leading_slash_if_needed(Filename,Filename).
 
+add_slash_if_needed(OutDir,OutDir):-
+    atom_concat(_,'/',OutDir),
+    !.
+    
+add_slash_if_needed(OutDir,OutDirWithSlash):-
+    atom_concat(OutDir,'/',OutDirWithSlash).
+    
 write_if_fileoutput(X) :-
     output_to_file,
     !,
