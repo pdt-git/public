@@ -129,18 +129,22 @@ gen_stats([_H | _T]) :-
     println,
     gen_stats(_T).
 
-gen_type_list([]).
-gen_type_list([_type]) :-
-    gen_type(_type),!.
-gen_type_list([_head|_tail]) :-
-    gen_type(_head),
+gen_type_list(_,[]).
+gen_type_list(Where,[_type]) :-
+    gen_type(Where,type(class,_type,0)),!.
+gen_type_list(Where,[_head|_tail]) :-
+    gen_type(Where,type(class,_head,0)),
     !,
     printf(', '),
-    gen_type_list(_tail).
+    gen_type_list(Where,_tail).
 
-gen_type_list(L) :-
+gen_type_list(_,L) :-
     throwMsg('gen_type_list failed for List: ~a',L).
 
+gen_type(Where,Type):-	
+    type_name(Where,Type,Name),
+    printf(Name).
+/*
 gen_type_name(type(class, _typeID, _dim)) :-
     !,
     gen_type(_typeID).
@@ -179,7 +183,7 @@ gen_type(_typeID) :-
 
 gen_type(TypeID) :-
     throwMsg('can not find Type for id: ~a.',TypeID).
-    
+   */ 
 gen_trees_in_square_brackets([]).
 gen_trees_in_square_brackets([_H | _T]) :-
     printf('['),
@@ -202,18 +206,18 @@ print_square_brackets(_dim) :-
     succ(_dimDec, _dim),
     print_square_brackets(_dimDec).
 
-gen_new_array_elemtype(_, 'null', _) :-!.
+gen_new_array_elemtype(_,_, 'null', _) :-!.
 
-gen_new_array_elemtype([], type(Kind,Ref,Dim), _elems) :-
+gen_new_array_elemtype(Scope,[], type(Kind,Ref,Dim), _elems) :-
     printf('new '),
-    gen_type_name(type(Kind,Ref,Dim)),
-	print_square_brackets(Dim),
+    gen_type(Scope,type(Kind,Ref,Dim)),
+	%%print_square_brackets(Dim), ld: covered in gen_type
 	gen_komma_list_in_curly_brackets(_elems),
     !.
 
-gen_new_array_elemtype(_dims, type(Kind,Ref,TotalDim), _) :-
+gen_new_array_elemtype(Scope,_dims, type(Kind,Ref,TotalDim), _) :-
     printf('new '),
-    gen_type_name(type(Kind,Ref,TotalDim)),
+    gen_type(Scope,type(Kind,Ref,0)),
     gen_trees_in_square_brackets(_dims),
 	%% ld: the number of dimension expressions might be less than 
 	%% the total number of dimensions.  
@@ -313,10 +317,11 @@ gen_extends_interface(_id) :-
     printf('extends ~a ',[_str]).
 
 
-gen_exceptions([]).
-gen_exceptions([_head|_tail]) :-
+gen_exceptions(_,[]).
+gen_exceptions(Method,[_head|_tail]) :-
     printf('throws '),
-    gen_type_list([_head|_tail]).
+    methodDefT(Method,Class,_,_,_,_,_),
+    gen_type_list(Class,[_head|_tail]).
 
 
 gen_semicolon(_pid) :-
@@ -383,12 +388,12 @@ gen_method_name_type(_id) :-
 %    printf(_name).
 
 gen_method_name_type(_id) :-
-    methodDefT(_id, _, _name, _, _type, _, _),
+    methodDefT(_id, Class, _name, _, _type, _, _),
 %    write('method: '),
 %    write(_name),
 
 %    not(equals(_name,'<init>')),
-    gen_type(_type),
+    gen_type(Class,_type),
     printf(' '),
     printf(_name).
 
@@ -672,6 +677,7 @@ gen_tree(_id) :-
     		modifierT(_id,'synthetic'),
     		!
     	);(
+    		gen_modifier(_id),
 		    gen_method_body(_body),
 		    println
 		)
@@ -692,7 +698,7 @@ gen_tree(_id) :-
 		    printf('('),
 		    gen_komma_list(_args),
 	    	printf(')'),
-		    gen_exceptions(_exc),
+		    gen_exceptions(_id,_exc),
 	    	gen_method_body(_body),
 		    println
 		)
@@ -701,8 +707,11 @@ gen_tree(_id) :-
 gen_tree(_id) :-
     paramDefT(_id, _pid, _type, _name),
     !,
+    (	methodDefT(_pid,Scope,_,_,_,_,_)
+    ;	catchT(_pid,_,Scope,_,_)
+    ),
     gen_modifier(_id),
-    gen_type(_type),
+    gen_type(Scope,_type),
     printf(' ~a',[_name]),
     gen_semicolon(_pid).
 
@@ -715,7 +724,7 @@ gen_tree(_id) :-
     		!
     	);(
 		    gen_modifier(_id),
-			gen_type(_type),
+			gen_type(_pid,_type),
 		    printf(' ~a',[_name]),
 		    gen_init(_init),
 		    gen_semicolon(_pid)
@@ -726,7 +735,7 @@ gen_tree(_id) :-
     localDefT(_id, _pid, _, _type, _name, _init),
     !,
     gen_modifier(_id),
-    gen_type(_type),
+    gen_type(_id,_type),
     printf(' ~a',[_name]),
     gen_init(_init),
     gen_semicolon(_pid).
@@ -762,9 +771,9 @@ gen_tree(_ID) :-
     gen_right_bracket_if_parent_not_exec(_parent).
 
 gen_tree(_ID) :-
-    newArrayT(_ID, _p,_, _dims, _elems, _elemtype),
+    newArrayT(_ID, _p,Scope, _dims, _elems, _elemtype),
     !,
-    gen_new_array_elemtype(_dims, _elemtype, _elems).
+    gen_new_array_elemtype(Scope,_dims, _elemtype, _elems).
 %    gen_komma_list_in_curly_brackets(_elems).
 
 gen_tree(_ID) :-
@@ -772,7 +781,7 @@ gen_tree(_ID) :-
     !,
     printf_if_not_parent_assign(_parent, '('),
     printf('('),
-    gen_type(_type),
+    gen_type(_ID,_type),
     printf(')('),
     gen_tree(_expr),
     printf(')'),
@@ -784,7 +793,7 @@ gen_tree(_ID) :-
     printf('('),
     gen_tree(_expr),
     printf(' instanceof '),
-    gen_type(_type),
+    gen_type(_ID,_type),
     printf(')').
 
 gen_tree(_ID) :-
@@ -865,7 +874,7 @@ gen_tree(_ID) :-
     !,
     printf('new '),
     getSymbol(_clazzIdentSelect,_clazz),
-    gen_type_name(_clazz),
+    gen_type(_ID,type(class,_clazz,0)),
     printf('('),
     gen_komma_list(_args),
     printf(')'),
