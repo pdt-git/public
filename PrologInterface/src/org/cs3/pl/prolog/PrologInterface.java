@@ -302,12 +302,13 @@ public class PrologInterface implements IPrologInterface {
                     i.remove();
                 }
             }
+            pool.clear();
             if (standAloneServer) {
                 Debug
                         .info("i will not try to stop the server, since its running in stand-alone mode.");
             } else {
-
-                stopStrategy.stopServer(port);
+            	
+                stopStrategy.stopServer(port, true);
 
             }
             setState(DOWN);
@@ -343,7 +344,7 @@ public class PrologInterface implements IPrologInterface {
                     Debug
                             .warning("ahem... the port is in use. \n"
                                     + "Trying to connect & shutdown, but this may not work.");
-                    stopStrategy.stopServer(port);
+                    stopStrategy.stopServer(port, true);
                 }
                 startStrategy.startServer(port);
             }

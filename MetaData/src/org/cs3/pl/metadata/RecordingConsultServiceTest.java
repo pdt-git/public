@@ -39,9 +39,9 @@ public class RecordingConsultServiceTest extends TestCase {
         final String engine = System.getProperty("engine.dir");
         Debug.info("engine: " + engine);
         //find tempdir and (hopefully :-) )convert to POSIX path
-        File f = new File(System.getProperty("java.io.tmpdir"));
-        String prefix = f.toURI().toURL().getFile();
-        Debug.info("prefix: " + prefix);
+        File prefix = new File(System.getProperty("java.io.tmpdir"));
+        
+        Debug.info("prefix: " + prefix.getCanonicalPath());
 
         /*-Ddebug.level=debug 
          * -Dpdt.swipl.dir="/usr/local/lib/swi-prolog"

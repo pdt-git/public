@@ -1,5 +1,6 @@
 package org.cs3.pdt;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.MissingResourceException;
@@ -253,7 +254,7 @@ public class PDTPlugin extends AbstractUIPlugin {
         }
 
         metadataConsultService.setPort(port);
-        metadataConsultService.setPrefix(prefix);
+        metadataConsultService.setPrefix(new File(prefix));
         metadataConsultService.setPrologInterface(prologInterface);
 
     }

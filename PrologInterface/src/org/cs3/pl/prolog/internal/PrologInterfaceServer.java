@@ -166,6 +166,8 @@ public class PrologInterfaceServer extends MessagingServerLoggingWrapper
 
     private static PrologInterfaceServer instance;
 
+	private boolean shutdown;
+
     public Object dispatch(ClientConnection client, RPCCallEvent call)
             throws Exception {
         // add the client to list of registered services
@@ -189,6 +191,14 @@ public class PrologInterfaceServer extends MessagingServerLoggingWrapper
         ClientConnection client = (ClientConnection) obj.getSource();
         clients.remove(client);
         Debug.info(" client unregistered " + client.getClientName());
+        if(shutdown&&getClientCount()==0){
+        	try {
+				stop();
+			} catch (IOException e) {
+				Debug.report(e);
+			}
+        	System.exit(0);
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -230,8 +240,11 @@ public class PrologInterfaceServer extends MessagingServerLoggingWrapper
 
     }
 
-    public void shutdownServer(ClientConnection c) {
-        Debug.debug("Sepuko requested. AAAaaaAAAaAAaa!.");
-        System.exit(0);
+    public void shutdownServer(ClientConnection c, Boolean now) {
+    	Debug.debug("I will die as soon as all connections have been closed.");
+        shutdown=true;
+        if(now.booleanValue()){
+        	System.exit(-1);
+        }
     }
 }

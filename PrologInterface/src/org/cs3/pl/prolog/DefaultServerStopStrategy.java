@@ -10,7 +10,7 @@ public class DefaultServerStopStrategy implements ServerStopStrategy {
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.ServerStopStrategy#shutDownServer(int)
 	 */
-	public void stopServer(int port) {
+	public void stopServer(int port, boolean now) {
 		
 		try {
 		    if(!Util.probePort(port)){
@@ -20,8 +20,19 @@ public class DefaultServerStopStrategy implements ServerStopStrategy {
 			ReusableClient s = new ReusableClient();
 			s.enableLogging(new Logger("default"));
 			s.configure("localhost", port);
-			s.start();						
-			s.call("RemotePrologSession","shutdownServer",new Object[0]);
+			s.start();		
+			try{
+				s.call ("RemotePrologSession","shutdownServer",new Object[]{new Boolean(now)});
+				s.stop();
+			}
+			catch (Exception e) {
+				Debug.warning("There was a problem during server shutdown.");
+				Debug.report(e);
+				if(! now){
+					throw new RuntimeException(e);
+				}
+			}
+			
 			while ((Util.probePort(port))) {
 				try {
 					Thread.sleep(50);

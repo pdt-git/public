@@ -311,6 +311,12 @@ public class MessagingServerImpl implements MessagingServer {
             throw new IOException("Client-Queue full. Client closed");
         }
     }
+	/**
+	 * @return Returns the clientCount.
+	 */
+	public int getClientCount() {
+		return clientCount;
+	}
 }
 
 

@@ -47,5 +47,5 @@ public interface RemotePrologSession extends Remote {
 	
 	public Hashtable next() throws SessionException,RemoteException;
 		
-	public void shutdownServer()throws RemoteException;
+	public void shutdownServer(Boolean now)throws RemoteException;
 }

@@ -2,8 +2,11 @@
  */
 package org.cs3.pl.prolog.internal;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.cs3.pl.common.Debug;
 
@@ -14,67 +17,13 @@ import org.cs3.pl.common.Debug;
 public class ReusablePool {
 	HashMap pool = new HashMap();
 
-	//HashSet softRefs = new HashSet();
-
 	int maxPoolSize = 5;
 
-	//int maxSoftRefSize = 5;
-	
-	//int gcThreshold = 4;
-
 	int poolSize = 0;
-	//protected void finalize() throws Throwable {
-	//	collector.stop();
-//	}
-	/*
-	private class Collector extends ReferenceQueue implements Runnable {
-		private boolean shouldBeRunning=true;
-		public synchronized void stop(){
-			shouldBeRunning=false;
-		}
-		public void run() {
-			while (getShouldBeRunning()) {
-				try {
-					Reference r = this.remove(1000);					
-					if(r!=null){
-						Reusable reusable = (Reusable) r.get();
-						
-						synchronized (softRefs) {
-							softRefs.remove(r);
-						}					
-						if(reusable==null){
-							Debug.warning("Now cracks a noble heart.");
-						}
-						addInstance(reusable);
-					}
-				} catch (InterruptedException e) {
-					Debug.report(e);
-				}
-				
-			}
-		}
-		
-		private synchronized boolean getShouldBeRunning() {			
-			return shouldBeRunning;
-		}
-		
-	} */
-
-	//Collector collector = new Collector();
 
 
 	public void recycle(Reusable s) {
-		/*synchronized (softRefs) {
-			
-			if (softRefs.size() < maxSoftRefSize) {
-				Debug.debug("creating softref");
-				softRefs.add(new SoftReference(s, collector));
-			} else {
-				Debug
-						.debug("maximum ref queue size exeeded. instance destroyed.");
-				s.destroy();
-			}
-		}*/
+	
 		addInstance(s);
 	}
 
@@ -131,6 +80,20 @@ public class ReusablePool {
 		synchronized (pool) {
 			this.maxPoolSize = size;
 		}
+	}
+	
+	public void clear(){
+		Collection collection = pool.values();
+		for (Iterator it = collection.iterator(); it.hasNext();) {
+			List list = (List) it.next();
+			for (Iterator it2 = list.iterator(); it2.hasNext();) {
+				Reusable s = (Reusable) it2.next();
+				s.destroy();
+				it2.remove();
+			}
+			it.remove();
+		}
+		
 	}
 
 }
