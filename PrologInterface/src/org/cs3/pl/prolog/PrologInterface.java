@@ -646,20 +646,27 @@ public class PrologInterface implements IPrologInterface {
 		if(dependencies==null){
 			dependencies=new String[0];
 		}
-		
+		Debug.debug("requested to add hook: id=\""+id+"\", dependencies=\""+dependencies+"\"");
+	    
 		LifeCycleHookWrapper node =(LifeCycleHookWrapper) hooks.get(id);
+		node.flipflop=hookFilpFlop;
 		if( node==null){
+		    Debug.debug("\t-> hook unknown, new wrapper created.");		    
 			node = new LifeCycleHookWrapper(hook,id);
 			hooks.put(id,node);
 		}
 		for (int i = 0; i < dependencies.length; i++) {
 			LifeCycleHookWrapper dep = (LifeCycleHookWrapper) hooks.get(dependencies[i]);
+			Debug.debug("\t-> looking up dependency \""+dependencies[i]+"\"");
 			if(dep==null){
+			    Debug.debug("\t\t-> hook unknown, new wrapper created.");
 				dep=new LifeCycleHookWrapper(null,dependencies[i]);
+				dep.flipflop=hookFilpFlop;
 				hooks.put(dependencies[i],node);
-			}
+			}			
 			dep.pre.add(node);
 			node.post.add(node);
+			Debug.debug("\t-> edges added.");
 		}
 		
 	}
