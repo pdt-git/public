@@ -22,11 +22,11 @@ output_to_file.
 
 toggle_out :-
     output_to_file,
-    print("output console"),
+    print('output console'),
     !,
     retract(output_to_file).
 toggle_out :-
-    print("output file"),
+    print('output file'),
     assert(output_to_file).
 
 
