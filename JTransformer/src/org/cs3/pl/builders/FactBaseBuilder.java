@@ -23,7 +23,6 @@ import org.cs3.pl.fileops.PrependablePrologWriter;
 import org.cs3.pl.fileops.PrologMetaDataManager;
 import org.cs3.pl.natures.JLMPProjectNature;
 import org.cs3.pl.prolog.IPrologClient;
-import org.eclipse.core.internal.utils.Assert;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -32,15 +31,11 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -92,6 +87,8 @@ public class FactBaseBuilder {
 	 * consulted will <b>not </b> be retracted.
 	 */
 	public final static int IGNORE_EXT_FACTS = 16;
+
+	private boolean changedJavaFile =false;
 	
 	/**
 	 * Default constructor.
@@ -137,7 +134,7 @@ public class FactBaseBuilder {
 	 */
 	
 	public synchronized  void build(final IResourceDelta delta, final int flags, final IProgressMonitor monitor)  {
-			
+		changedJavaFile = false;
 		WorkspaceJob job = new WorkspaceJob("Buildjob") {
 			public IStatus runInWorkspace(IProgressMonitor monitor)
 					throws CoreException {
@@ -176,7 +173,13 @@ public class FactBaseBuilder {
 				else {
 					
 					PDTPlugin.getDefault().updateFactbaseObservers(IJTransformerObserver.JT_BUILD_ERROR,prologClient);
-					return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, 0, "Failed to load some classes", null);
+					String msg = "Failed to load some classes: ";
+					for (Iterator iter = failed.iterator(); iter.hasNext();) {
+						msg += iter.next().toString() + "\n";
+					}
+					Debug.error(msg);
+					return Status.OK_STATUS;
+					//return new Status(Status.ERROR, PDTPlugin.PLUGIN_ID, 0, "Failed to load some classes", null);
 				}
 			}
 
@@ -262,6 +265,7 @@ public class FactBaseBuilder {
 							String fext = resource.getFileExtension();
 							if (fext != null && fext.equals("java")){
 								Debug.debug("Adding " + resource + " to toProcess");
+								changedJavaFile = true;
 								toProcess.add(resource);
 							}
 						}
@@ -295,7 +299,7 @@ public class FactBaseBuilder {
 			
 			monitor.done();
 			
-			if ((flags & IGNORE_EXT_FACTS) == 0){ 
+			if ((flags & IGNORE_EXT_FACTS) == 0 && changedJavaFile){ 
 						loadExternalFacts(monitor);
 			}
 			
