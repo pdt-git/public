@@ -1170,6 +1170,7 @@ treeSignature(catchT,5).
 treeSignature(assertT,5).
 treeSignature(getFieldT,6).
 treeSignature(precedenceT,4).
+treeSignature(nop,3).         % TODO: fehlte / inkonsistenz zu tree/3 -- GK 3.9.2004
 
 attribSignature(extendsT,2).
 attribSignature(implementsT,2).
