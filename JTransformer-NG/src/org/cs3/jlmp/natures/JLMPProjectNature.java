@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.astvisitor.DefaultGenerationToolbox;
 import org.cs3.jlmp.astvisitor.FactGenerationToolBox;
 import org.cs3.jlmp.astvisitor.FactGenerator;
@@ -70,6 +71,15 @@ public class JLMPProjectNature implements IProjectNature {
         newBuilders[builders.length] = sheepBuilder;
         descr.setBuildSpec(newBuilders);
         project.setDescription(descr, null);
+        
+        //important: touch the ConsultServices NOW if the pif is already running.
+        //otherwise recorded facts might be reloaded to late! (i.e. by the builder AFTER it has
+        //"found" unresolved types
+        PrologInterface pif = getPrologInterface();
+        if(pif.isUp()){
+            pif.getConsultService(JLMP.EXT);
+            pif.getConsultService(JLMP.SRC);
+        }
     }
 
     /**
