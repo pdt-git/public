@@ -167,8 +167,6 @@ migrate_to_ast_node(Id,Fkt,_attrValues) :-
     assert(NewNode,true).
  
  
- ******************
- 
 migrate_to_ast_edge(Id,Label,Id2) :- 
 	assert(ast_edge(Id,Label,Id2),true). 
 
@@ -208,7 +206,7 @@ migrate_to_ast_attrs(Id,Label,[Val|Vals]) :-
   *
   */
  migrate_args(_Id,X,Y,Vals) :-  
-    migrate_args(_Id,X,Y,[],Vals)
+    migrate_args(_Id,X,Y,[],Vals).
   
   
   
@@ -259,7 +257,7 @@ migrate_args(Id,
 	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
 	
 	   
-  ============================================================
+ % ============================================================
   
  % Wenn beide Listen leer sind sind wir fertig. Die bisher gesammelten
  % Werte für Attribute mit Kardinalität 1 werden zurückgegeben.
