@@ -833,8 +833,8 @@ abstraction(fullQualifiedName(_id, _Fqn)).
   * at least one of the arguments must be bound.
   */
 
-fullQualifiedName(Id, Fqn) :-
-	globalIds(Fqn,Id).
+%%fullQualifiedName(Id, Fqn) :-
+%%	globalIds(Fqn,Id).
 
 fullQualifiedName(Id, Fqn) :-
 	nonvar(Fqn),
