@@ -6,3 +6,4 @@ org.cs3.pl.common.Util.exec("date")[0];
 
 new java.io.PipedOutputStream()
 System.out.println(new java.util.Date());
+Runtime.getRuntime().exec(new String[]{"plmin.lnk"});An exception occurred during evaluation:  java.io.IOException

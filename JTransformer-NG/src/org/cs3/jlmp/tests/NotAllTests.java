@@ -2,6 +2,8 @@
  */
 package org.cs3.jlmp.tests;
 
+import org.apache.xpath.compiler.PsuedoNames;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -21,6 +23,7 @@ public class NotAllTests {
         suite.addTestSuite(PrimitiveTypeLiteralsTest.class);
         suite.addTestSuite(SelfTest.class);
         suite.addTestSuite(MultiFragForLoopInitializerTest.class);
+        suite.addTest(PseudoRoundTripTest.suite());
         //$JUnit-END$
         return suite;
     }

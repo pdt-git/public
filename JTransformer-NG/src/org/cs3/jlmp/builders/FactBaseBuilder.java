@@ -399,7 +399,8 @@ public class FactBaseBuilder {
                             Debug.warning("\t-->\t should be here: "+flat.toString());
                             if(flat.canRead()){
                                 Debug.warning("\t-->\t exists and is readable.");
-                                Map map = session.queryOnce("source_file('"+Util.prologFileName(flat)+"')");
+                                String prologFileName = Util.prologFileName(flat);
+								Map map = session.queryOnce("source_file('"+prologFileName+"')");
                                 if(map!=null){
                                     Debug.warning("\t-->\t is known to prolog (source_file/1)");
                                     BufferedReader reader = new BufferedReader(new FileReader(flat));

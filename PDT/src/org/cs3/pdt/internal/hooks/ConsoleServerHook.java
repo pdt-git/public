@@ -39,7 +39,7 @@ public class ConsoleServerHook implements LifeCycleHook {
                         + port + ", [])";
                 Debug.info("starting console server using: " + queryString);
 
-                s.query(queryString);
+                s.queryOnce(queryString);
 
                 while (!Util.probePort(port)) {
                     try {

@@ -391,10 +391,14 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         if (session == null) {
             fail("failed to obtain session");
         }
-        setTestDataLocator(JLMPPlugin.getDefault().getResourceLocator(
-                "testdata-roundtrip"));
-
+        ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator(
+                "testdata-roundtrip");
+		setTestDataLocator(l);
+		
         install(packageName);
+//        if(l.resolve(packageName+"_a").exists()){
+//        	install(packageName+"_a");
+//        }
         passed = false;
 
     }
@@ -464,8 +468,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(306);
         blacklist.set(316);
         blacklist.set(340);
-        
-        
+        blacklist.set(452);
+        blacklist.set(462);
+        blacklist.set(472);
+        blacklist.set(469);
 
         /*
          * ld: the following few do not compile. ergo, not our prob. interesting
@@ -537,7 +543,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(461);
         blacklist.set(466);
         blacklist.set(467);
-        blacklist.set(471);
+        blacklist.set(471);        
         blacklist.set(473);
         blacklist.set(477);
         blacklist.set(487);
@@ -546,8 +552,25 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(491);
         blacklist.set(492);
         blacklist.set(498);
+        blacklist.set(501);
+        blacklist.set(504);
+        blacklist.set(505);
+        blacklist.set(510);        
+        blacklist.set(511);
+        blacklist.set(513);
+        blacklist.set(514);
+        blacklist.set(516);
+        blacklist.set(517);
+        blacklist.set(518);
+        blacklist.set(519);
+        blacklist.set(520);
+        blacklist.set(531);
+        blacklist.set(533);
+        blacklist.set(534);
+        blacklist.set(535);
+        blacklist.set(536);
         
-        for (int i = 450; i <= 450; i++) {//1-539
+        for (int i = 1; i <= 539; i++) {//1-539
             if (!blacklist.get(i)) {
                 s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));

@@ -186,18 +186,18 @@ public class RecordingConsultService implements ConsultService {
      * @return
      */
     private String getPrefixedSymbol(File f) {
-        try {
-            String symbol = f.toURI().toURL().getFile();
-
+        //try {
+            //String symbol = f.toURI().toURL().getFile();
+            String symbol = Util.prologFileName(f);
             if (!symbol.startsWith(getPrefixString())) {
                 throw new IllegalArgumentException(
                         "the given file is not within my domain, sorry.");
             }
             return symbol;
-        } catch (IOException e) {
-            Debug.report(e);
-            return null;
-        }
+//        } catch (IOException e) {
+//            Debug.report(e);
+//            return null;
+//        }
 
     }
 
@@ -221,12 +221,13 @@ public class RecordingConsultService implements ConsultService {
         if (prefix == null) {
             return "";
         }
-        try {
-            return prefix.toURI().toURL().getFile();
-        } catch (MalformedURLException e) {
-            Debug.report(e);
-            throw new RuntimeException(e);
-        }
+        //try {
+            //return prefix.toURI().toURL().getFile();
+        	return Util.prologFileName(prefix);
+//        } catch (MalformedURLException e) {
+//            Debug.report(e);
+//            throw new RuntimeException(e);
+//        }
     }
 
     /*
