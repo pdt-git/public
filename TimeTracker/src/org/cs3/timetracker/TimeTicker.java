@@ -27,20 +27,40 @@ public class TimeTicker  {
 	private TimeEvent time;
 	private ArrayList observers;
 	
+	
 	public String Log = ""; 
 	
-	private int Seconds = 180; // 3* 60
+	private int seconds;
+
+	private int lastTimeStamp;
+	private static final int INITSECONDS = 180;
+	
+
+	private void init(){
+		seconds = INITSECONDS;
+		lastTimeStamp = seconds;
+	}
+	
+	
+	public int getTimeDifference(){
+		return Math.abs(seconds - lastTimeStamp);
+	}
+	
+	
+	public void resetTimeStamp(){
+		lastTimeStamp = seconds;
+	}
 	
 	public void addObserver(ITimeObserver observer)
 	{
 		observers.add(observer);	
 	}
 	
-	public void TimeTick()
+	public void timeTick()
 	{
-		time.setMinutes(Seconds / 60);
-  		time.setSeconds(Seconds - ((Seconds / 60) * 60));
-  		Seconds--;
+		time.setMinutes(seconds / 60);
+  		time.setSeconds(seconds - ((seconds / 60) * 60));
+  		seconds--;
 
   		Iterator i = observers.iterator();
   		while (i.hasNext()) {
@@ -48,18 +68,19 @@ public class TimeTicker  {
   			a.notify(time);
   		}
   		
-  		if (Seconds == -1) {
+  		if (seconds == -1) {
   			stop();
   		}
 	}
 
 	public TimeTicker()
 	{
+		init();
 		observers = new ArrayList();
 		time = new TimeEvent(0,0);
 		ActionListener action = new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				TimeTick();
+				timeTick();
 			}
 		};
 				
@@ -69,7 +90,8 @@ public class TimeTicker  {
 	
 	public void start()
 	{
-		Seconds = 180;
+		init();
+		
 		t.setRepeats(true);
 		t.setDelay(1000);
 		t.start();
@@ -81,7 +103,7 @@ public class TimeTicker  {
 	{
 		t.setRepeats(false);
 		t.stop();
-		Seconds = 0;
+		seconds = 0;
 		Log = Log + "Stopped.\n";
 	}
 	
@@ -97,4 +119,16 @@ public class TimeTicker  {
 		Log = Log + "Resumed.\n";
 	}
 
+	/**
+	 * @return Returns the lastTimeStamp.
+	 */
+	public int getLastTimeStamp() {
+		return lastTimeStamp;
+	}
+	/**
+	 * @return Returns the seconds.
+	 */
+	public int getCurrentSeconds() {
+		return seconds;
+	}
 }
