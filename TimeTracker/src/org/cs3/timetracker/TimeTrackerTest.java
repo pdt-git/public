@@ -1,11 +1,6 @@
 
 package org.cs3.timetracker;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.Timer;
-
 import junit.framework.TestCase;
 
 /*
