@@ -4,11 +4,11 @@ package org.cs3.pl.prolog.internal.xml;
 
 import java.io.File;
 
+import org.cs3.pl.common.Option;
+import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.Option;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
-import org.cs3.pl.prolog.internal.SimpleOption;
 
 /**
  */
