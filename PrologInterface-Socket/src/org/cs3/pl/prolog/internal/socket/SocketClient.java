@@ -391,7 +391,7 @@ public class SocketClient  {
             string = reader.readLine();
             if (string == null) {                
                 Debug.warning("there was an error. Exceptions will be thrown.");
-                File logFile = Util.getLogFile("fail.log");
+                File logFile = File.createTempFile("failedSession","log");
                 
                 PrintStream p = new PrintStream(new BufferedOutputStream(new FileOutputStream(logFile)));
                 socket.getLogBuffer().printLog(p);
