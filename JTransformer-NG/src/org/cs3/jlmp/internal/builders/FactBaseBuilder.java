@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.JTree;
+
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.jlmp.JLMPProject;
@@ -50,6 +52,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.dialogs.MessageDialog;
 
 public class FactBaseBuilder {
 
@@ -182,9 +185,9 @@ public class FactBaseBuilder {
             JLMPPlugin plugin = JLMPPlugin.getDefault();
             String v = plugin.getPreferenceValue(JLMP.PREF_USE_PEF_STORE,
                     "false");
-            if (Boolean.valueOf(v).booleanValue()) {
-                JLMPPlugin.getDefault().save(session);
-            }
+//            if (Boolean.valueOf(v).booleanValue()) {
+//                JLMPPlugin.getDefault().save(session);
+//            }
         } finally {
             if (session != null) {
                 session.dispose();
@@ -558,9 +561,8 @@ public class FactBaseBuilder {
         }
     }
 
-    public static void writeFacts(IProject project, ICompilationUnit icu,
+    public static void writeFacts(IProject project, final ICompilationUnit icu,
             PrintStream out) throws IOException, CoreException {
-        CompilationUnit cu = null;
 
         IResource resource = icu.getResource();
         String path = resource.getFullPath().removeFileExtension()
@@ -575,10 +577,21 @@ public class FactBaseBuilder {
         ASTParser parser = ASTParser.newParser(AST.JLS2);
         parser.setSource(icu);
         parser.setResolveBindings(true);
-        cu = (CompilationUnit) parser.createAST(null);
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		try {
+			cu.accept(visitor);
+		} catch(IllegalArgumentException iae){
+			JLMPPlugin.getDefault().getWorkbench().getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					MessageDialog.openError(JLMPPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(),
+							"Build Error", "Could not update factbase, compile (?) error in file: "+icu.getResource().getFullPath()+". " +
+									"\nIf the class names equals the package name you found an Eclipse bug.");
 
-        cu.accept(visitor);
-        plw.writeQuery("retractLocalSymtab");
+				}
+			});
+			throw iae;
+		}
+		plw.writeQuery("retractLocalSymtab");
         plw.flush();
         String data = sw.getBuffer().toString();
         sw.getBuffer().setLength(0);
