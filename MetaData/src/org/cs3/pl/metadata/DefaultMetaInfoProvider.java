@@ -172,5 +172,21 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider{
         session.dispose();
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
     }
+    public String getHelp(PrologElementData data) {	    
+        
+        PrologSession session = pif.getSession();
+        Hashtable table=null;
+        try {
+            table = session.query("manual_entry("+data.getLabel()+","+data.getArity()+",Info)");
+        } catch (SessionException e) {
+            Debug.report(e);
+        }
+        finally{
+            session.dispose();
+        }
+        if (table != null)
+			return table.get("Info").toString().replaceAll("\\\\n","\n");
+		return null;
+	}
 
 }

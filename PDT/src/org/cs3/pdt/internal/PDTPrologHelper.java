@@ -2,10 +2,12 @@
  */
 package org.cs3.pdt.internal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.PrologElementData;
@@ -182,6 +184,21 @@ public PDTPrologHelper(IPrologInterface prologInterface, String pdtModulePrefix)
         session.dispose();
         return (PrologElementData[]) list.toArray(new PrologElementData[0]);
     }
-
+    public String getHelp(PrologElementData data) {	    
+        
+        PrologSession session = prologInterface.getSession();
+        Hashtable table=null;
+        try {
+            table = session.query(PDTPlugin.MODULEPREFIX+"manual_entry("+data.getLabel()+","+data.getArity()+",Info)");
+        } catch (SessionException e) {
+            Debug.report(e);
+        }
+        finally{
+            session.dispose();
+        }
+        if (table != null)
+			return table.get("Info").toString().replaceAll("\\\\n","\n");
+		return null;
+	}
 
 }

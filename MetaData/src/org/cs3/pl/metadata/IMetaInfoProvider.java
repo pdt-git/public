@@ -14,4 +14,5 @@ public interface IMetaInfoProvider {
 	
 	public abstract PrologElementData[] retrievePrologElements(String filename) throws SessionException;
     
+	public abstract String getHelp(PrologElementData elm);
 }
