@@ -1,7 +1,6 @@
 package org.cs3.pdt.views;
 
 import java.io.IOException;
-import java.util.Hashtable;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.hooks.ConsoleServerHook;
@@ -13,11 +12,9 @@ import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
 import org.cs3.pl.prolog.IPrologInterface;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
