@@ -2,6 +2,7 @@ import java.io.FileNotFoundException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -9,7 +10,7 @@ import org.cs3.pl.prolog.PrologSession;
  */
 public class MetaDataEngineHook implements LifeCycleHook {
     public static final String HOOK_ID = "org.cs3.pdt.hooks.MetaDataEngineHook";
-        public void onInit(PrologSession s) {
+        public void onInit(PrologInterface pif,PrologSession s) {
         try {
             s.consult(getEngineDir()+"/main.pl");
         } catch (FileNotFoundException e) {
@@ -33,14 +34,14 @@ public class MetaDataEngineHook implements LifeCycleHook {
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
 	 */
-	public void afterInit() {
+	public void afterInit(PrologInterface pif) {
 		
 	}
 
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
 	 */
-	public void beforeShutdown(PrologSession session) {
+	public void beforeShutdown(PrologInterface pif,PrologSession session) {
 		
 	} 
 }

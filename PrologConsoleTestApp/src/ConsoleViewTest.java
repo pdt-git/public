@@ -40,17 +40,17 @@ public class ConsoleViewTest {
         pif.addLifeCycleHook(new ConsoleServerHook(),ConsoleServerHook.HOOK_ID,null);        
         pif.addLifeCycleHook(new LifeCycleHook(){
 
-            public void onInit(PrologSession initSession) {
+            public void onInit(PrologInterface pif,PrologSession initSession) {
                 // TODO Auto-generated method stub
                 
             }
 
-            public void afterInit() {
+            public void afterInit(PrologInterface pif) {
                 consoleModel.connect();
                 
             }
 
-            public void beforeShutdown(PrologSession session) {
+            public void beforeShutdown(PrologInterface pif,PrologSession session) {
                 consoleModel.disconnect();
                 
             }

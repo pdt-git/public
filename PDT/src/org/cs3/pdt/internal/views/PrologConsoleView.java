@@ -93,7 +93,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
      * 
      * @see org.cs3.pl.prolog.LifeCycleHook#onInit(org.cs3.pl.prolog.PrologSession)
      */
-    public void onInit(PrologSession initSession) {
+    public void onInit(PrologInterface pif,PrologSession initSession) {
     }
 
     /*
@@ -101,7 +101,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
      * 
      * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
      */
-    public void afterInit() {
+    public void afterInit(PrologInterface pif) {
         view.setController(controller);
         model.connect();
     }
@@ -111,7 +111,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
      * 
      * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
      */
-    public void beforeShutdown(PrologSession session) {
+    public void beforeShutdown(PrologInterface pif,PrologSession session) {
         view.setController(null);
         model.disconnect();
     }

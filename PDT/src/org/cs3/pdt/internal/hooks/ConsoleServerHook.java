@@ -5,9 +5,8 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 
 /**
  * An Init/ShutdownHook that takes the neccesary steps to open/close an io
@@ -27,7 +26,7 @@ public class ConsoleServerHook implements LifeCycleHook {
         return port;
     }
 
-    public void onInit(PrologSession s) {
+    public void onInit(PrologInterface pif,PrologSession s) {
         try {
             int port = getPort();
             if (Util.probePort(port)) {
@@ -60,7 +59,7 @@ public class ConsoleServerHook implements LifeCycleHook {
      * 
      * @see org.cs3.pl.prolog.ShutdownHook#beforeShutDown(org.cs3.pl.prolog.PrologSession)
      */
-    public void beforeShutdown(PrologSession session) {
+    public void beforeShutdown(PrologInterface pif,PrologSession session) {
         /*
          * ld: XXX FIXME TODO ARRRRGH! things do not work this way in the linux
          * implementation of swi /clib. i have written a mail on the swi list an
@@ -103,7 +102,7 @@ public class ConsoleServerHook implements LifeCycleHook {
      * 
      * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
      */
-    public void afterInit() {
+    public void afterInit(PrologInterface pif) {
 
     }
 

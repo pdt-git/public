@@ -18,7 +18,7 @@ public interface LifeCycleHook{
      * disposed.  
      * @param initSession safe-mode session for startup phase.
      */
-	abstract void onInit(PrologSession initSession);
+	abstract void onInit(PrologInterface pif, PrologSession initSession);
 	
 	/**
      * called by the PrologInterface  after the startup is complete.
@@ -29,7 +29,7 @@ public interface LifeCycleHook{
      * <br>
      * 
      */	
-	abstract void afterInit();
+	abstract void afterInit(PrologInterface pif);
 	
 	/**
      * called by the PrologInterface  before the pif shuts down.
@@ -42,5 +42,5 @@ public interface LifeCycleHook{
      * or you will very propably couse a dead lock. The cleanup session cannot be 
      * disposed.  
      */		
-	abstract void beforeShutdown(PrologSession session);	
+	abstract void beforeShutdown(PrologInterface pif,PrologSession session);	
 }

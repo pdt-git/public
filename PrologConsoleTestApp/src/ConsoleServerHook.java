@@ -2,6 +2,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -23,7 +24,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 			return port;
 		}
 	
-    public void onInit(PrologSession s) {
+    public void onInit(PrologInterface pif,PrologSession s) {
         int port = getPort();
 		if (Util.probePort(port)) {
 			Debug.info("Console server thread seems to be running, so i will not start a new one.");			
@@ -50,7 +51,7 @@ public class ConsoleServerHook implements LifeCycleHook{
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.ShutdownHook#beforeShutDown(org.cs3.pl.prolog.PrologSession)
 	 */
-	public void beforeShutdown(PrologSession session) {
+	public void beforeShutdown(PrologInterface pif,PrologSession session) {
 	    /*ld: XXX FIXME TODO ARRRRGH!
 	     * things do not work this way in the linux implementation of swi /clib.
 	     * i have written a mail on the swi list an i am currently waiting for feedback,
@@ -113,7 +114,7 @@ public class ConsoleServerHook implements LifeCycleHook{
     /* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
 	 */
-	public void afterInit() {
+	public void afterInit(PrologInterface pif) {
 
 		
 	}
