@@ -256,7 +256,7 @@ createForwBody(_set, _forwMethod, _forwBody, _ForwName, [_thisParam,_recvParam,_
     createThisOrGetReceiver(_lhs, _forwCall,_receiver),
     replaceId(_parent, _set, _forwCall),
     set_parent(_value, _forwCall),
-    retractTree(_lhs), %FIXME: uses retract, not delete!
+    deleteTree(_lhs),
     add(paramDefT(_valueParam, _forwMethod, _Type, '_value')),
     createIdentRefParam(_valueParam,_set, _forwValue),
     createThisIdent(_this,_forwCall, _enclMethod, _enclClass), %neu
@@ -281,7 +281,6 @@ createForwBody(_call, _forwMethod, _forwBody, _ForwName, [_thisParam|[_recvParam
     createForwArgs(_call,_enclMethod,_enclClass,_forwCall,_expr,_args,_forwArgs),
     set_parent(_forwArgs,_forwCall),
     add(applyT(_forwCall, _parent,_enclMethod, 'null', _ForwName, _forwArgs,_forwMethod)),
-%    retractTree(_origReceiver),
     updateForwardsFact(_call,methodCall,_forwCall,_forwMethod).
 
 % execution
@@ -621,7 +620,7 @@ action(add_unboxing_return(_return, _parent, _encl, _expr)):-
 add_unboxing_return(_return, _parent, _encl, _expr):-
     methodDefT(_encl,_,_, _,type(basic,void,0),_,_),
     !,
-    retractTree(_expr), %FIXME: uses retract, not delete!
+    deleteTree(_expr), 
     add(returnT(_return,_parent,_encl,null)).
 
 
@@ -649,8 +648,8 @@ test(add_unboxing) :-
     add(classDefT(class, package, classname, [encl])),
      add_unboxing_return(return, parent, encl, expr),
      gen_tree(class),
-     retractTree(class),
-     retractTree(encl),
+     deleteTree(class),
+     deleteTree(encl),
      not(tree(parent,_,_)),
      not(tree(encl,_,_)),
      not(tree(expr,_,_)).
