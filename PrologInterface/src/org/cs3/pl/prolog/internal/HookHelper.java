@@ -52,9 +52,7 @@ public class HookHelper {
 
     private HashMap hooks = new HashMap();
 
-    public void addLifeCycleHook(LifeCycleHook h) {
-        addLifeCycleHook(h, null, null);
-    }
+   
 
     /**
      * @param hook
@@ -82,6 +80,7 @@ public class HookHelper {
                 node.flipflop = hookFilpFlop;
                 hooks.put(id, node);
             } else {
+                Debug.debug("\t-> hook exists, reusing wrapper, but replacing hook code..");
                 node.hook = hook;
             }
             for (int i = 0; i < dependencies.length; i++) {

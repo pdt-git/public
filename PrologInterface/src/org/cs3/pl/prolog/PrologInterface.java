@@ -36,8 +36,7 @@ public interface PrologInterface {
 
     public boolean isDown();
 
-    public void addLifeCycleHook(LifeCycleHook h);
-
+    
     public void addLifeCycleHook(LifeCycleHook hook, String id,
             String[] dependencies);
 
