@@ -150,7 +150,7 @@ sourceFolder(Toplevel, SourceFolder):-
 	Binds Project and SourceFolder to the default project and source folder.
 	FullSourceFolder is bound to Project/Sourcefolder.
 	
-	TODO: by now it picks the first 
+8	TODO: by now it picks the first 
 	projectLocationT fact and binds its
 	source folder.
 */

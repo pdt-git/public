@@ -755,55 +755,55 @@ set_parent([_H | _T],_newParent) :-
 /*
 	Part of the action/1 definition.
 */
-action(replace(selectT(_id,_pid,_encl,_v1,_v2,_v3))):-        retract(selectT(_id,_,_,_,_,_)), !,        assert(selectT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(identT(_id,_pid,_encl,_v1,_v2))):-             retract(identT(_id,_,_,_,_)), !,           assert(identT(_id,_pid,_encl,_v1,_v2)).
-action(replace(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5))):-   retract(methodDefT(_id,_,_,_,_,_,_)), !,   assert(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5)).
-action(replace(localDefT(_id,_pid,_encl,_v1,_v2,_v3))):-      retract(localDefT(_id,_,_,_,_,_)), !,        assert(localDefT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(fieldDefT(_id,_pid,_v1,_v2,_v3))):-        	retract(fieldDefT(_id,_,_,_,_)), !,        assert(fieldDefT(_id,_pid,_v1,_v2,_v3)).
-action(replace(paramDefT(_id,_pid,_v1,_v2))):-        		retract(paramDefT(_id,_,_,_)), !,        assert(paramDefT(_id,_pid,_v1,_v2)).
-action(replace(classDefT(_id,_pid,_v1,_v2))):-                retract(classDefT(_id,_,_,_)), !,          assert(classDefT(_id,_pid,_v1,_v2)).
-action(replace(toplevelT(_id,_pid,_v1,_v2))):-                retract(toplevelT(_id,_,_,_)), !,          assert(toplevelT(_id,_pid,_v1,_v2)).
-action(replace(blockT(_id,_pid,_encl,_v1))):-                 retract(blockT(_id,_,_,_)), !,             assert(blockT(_id,_pid,_encl,_v1)).
-action(replace(doLoopT(_id,_pid,_encl,_v1,_v2))):-            retract(doLoopT(_id,_,_,_,_)), !,          assert(doLoopT(_id,_pid,_encl,_v1,_v2)).
-action(replace(whileLoopT(_id,_pid,_encl,_v1,_v2))):-         retract(whileLoopT(_id,_,_,_,_)), !,       assert(whileLoopT(_id,_pid,_encl,_v1,_v2)).
-action(replace(forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4))):-   retract(forLoopT(_id,_,_,_,_,_,_)), !,     assert(forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4)).
-action(replace(labelT(_id,_pid,_encl,_v1,_v2))):-          retract(labelT(_id,_,_,_,_)), !,        assert(labelT(_id,_pid,_encl,_v1,_v2)).
-action(replace(switchT(_id,_pid,_encl,_v1,_v2))):-            retract(switchT(_id,_,_,_,_)), !,          assert(switchT(_id,_pid,_encl,_v1,_v2)).
-action(replace(caseT(_id,_pid,_encl,_v1))):-              retract(caseT(_id,_,_,_)), !,            assert(caseT(_id,_pid,_encl,_v1)).
-action(replace(synchronizedT(_id,_pid,_encl,_v1,_v2))):-      retract(synchronizedT(_id,_,_,_,_)), !,    assert(synchronizedT(_id,_pid,_encl,_v1,_v2)).
-action(replace(tryT(_id,_pid,_encl,_v1,_v2,_v3))):-           retract(tryT(_id,_,_,_,_,_)), !,           assert(tryT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(catchT(_id,_pid,_encl,_v1,_v2))):-             retract(catchT(_id,_,_,_,_)), !,           assert(catchT(_id,_pid,_encl,_v1,_v2)).
-action(replace(ifT(_id,_pid,_encl,_v1,_v2,_v3))):-            retract(ifT(_id,_,_,_,_,_)), !,            assert(ifT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(conditionalT(_id,_pid,_encl,_v1,_v2,_v3))):-   retract(conditionalT(_id,_,_,_,_,_)), !,   assert(conditionalT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(execT(_id,_pid,_encl,_v1))):-                  retract(execT(_id,_,_,_)), !,              assert(execT(_id,_pid,_encl,_v1)).
-action(replace(returnT(_id,_pid,_encl,_v1))):-                retract(returnT(_id,_,_,_)), !,            assert(returnT(_id,_pid,_encl,_v1)).
-action(replace(breakT(_id,_pid,_encl,_v1,_v2))):-             retract(breakT(_id,_,_,_,_)), !,           assert(breakT(_id,_pid,_encl,_v1,_v2)).
-action(replace(continueT(_id,_pid,_encl,_v1,_v2))):-          retract(continueT(_id,_,_,_,_)), !,        assert(continueT(_id,_pid,_encl,_v1,_v2)).
-action(replace(throwT(_id,_pid,_encl,_v1))):-                 retract(throwT(_id,_,_,_)), !,             assert(throwT(_id,_pid,_encl,_v1)).
-action(replace(applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4))):-             retract(applyT(_id,_,_,_,_,_,_)), !,           assert(applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4)).
-action(replace(newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5))):-!, retract(newClassT(_id,_,_,_,_,_,_,_)), !,  assert(newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5)).
-action(replace(newArrayT(_id,_pid,_encl,_v1,_v2,_v3))):-  retract(newArrayT(_id,_,_,_,_,_)), !,    assert(newArrayT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(assignT(_id,_pid,_encl,_v1,_v2))):-            retract(assignT(_id,_,_,_,_)), !,          assert(assignT(_id,_pid,_encl,_v1,_v2)).
-action(replace(assignopT(_id,_pid,_encl,_v1,_v2,_v3))):-      retract(assignopT(_id,_,_,_,_,_)), !,      assert(assignopT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(operationT(_id,_pid,_encl,_v1,_v2,_v3))):-     retract(operationT(_id,_,_,_,_,_)), !,     assert(operationT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(typeCastT(_id,_pid,_encl,_v1,_v2))):-          retract(typeCastT(_id,_,_,_,_)), !,        assert(typeCastT(_id,_pid,_encl,_v1,_v2)).
-action(replace(typeTestT(_id,_pid,_encl,_v1,_v2))):-          retract(typeTestT(_id,_,_,_,_)), !,        assert(typeTestT(_id,_pid,_encl,_v1,_v2)).
-action(replace(indexedT(_id,_pid,_encl,_v1,_v2))):-           retract(indexedT(_id,_,_,_,_)), !,         assert(indexedT(_id,_pid,_encl,_v1,_v2)).
-action(replace(literalT(_id,_pid,_encl,_v1,_v2))):-           retract(literalT(_id,_,_,_,_)), !,         assert(literalT(_id,_pid,_encl,_v1,_v2)).
-action(replace(assertT(_id,_pid,_encl,_v1,_v2))):-           retract(assertT(_id,_,_,_,_)), !,         assert(assertT(_id,_pid,_encl,_v1,_v2)).
-action(replace(importT(_id,_pid,_v1))):-                      retract(importT(_id,_,_)), !,              assert(importT(_id,_pid,_v1)).
+action(replace(selectT(_id,_pid,_encl,_v1,_v2,_v3))):-        delete(selectT(_id,_,_,_,_,_)), !,        add(selectT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(identT(_id,_pid,_encl,_v1,_v2))):-             delete(identT(_id,_,_,_,_)), !,           add(identT(_id,_pid,_encl,_v1,_v2)).
+action(replace(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5))):-   delete(methodDefT(_id,_,_,_,_,_,_)), !,   add(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5)).
+action(replace(localDefT(_id,_pid,_encl,_v1,_v2,_v3))):-      delete(localDefT(_id,_,_,_,_,_)), !,        add(localDefT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(fieldDefT(_id,_pid,_v1,_v2,_v3))):-        	delete(fieldDefT(_id,_,_,_,_)), !,        add(fieldDefT(_id,_pid,_v1,_v2,_v3)).
+action(replace(paramDefT(_id,_pid,_v1,_v2))):-        		delete(paramDefT(_id,_,_,_)), !,        add(paramDefT(_id,_pid,_v1,_v2)).
+action(replace(classDefT(_id,_pid,_v1,_v2))):-                delete(classDefT(_id,_,_,_)), !,          add(classDefT(_id,_pid,_v1,_v2)).
+action(replace(toplevelT(_id,_pid,_v1,_v2))):-                delete(toplevelT(_id,_,_,_)), !,          add(toplevelT(_id,_pid,_v1,_v2)).
+action(replace(blockT(_id,_pid,_encl,_v1))):-                 delete(blockT(_id,_,_,_)), !,             add(blockT(_id,_pid,_encl,_v1)).
+action(replace(doLoopT(_id,_pid,_encl,_v1,_v2))):-            delete(doLoopT(_id,_,_,_,_)), !,          add(doLoopT(_id,_pid,_encl,_v1,_v2)).
+action(replace(whileLoopT(_id,_pid,_encl,_v1,_v2))):-         delete(whileLoopT(_id,_,_,_,_)), !,       add(whileLoopT(_id,_pid,_encl,_v1,_v2)).
+action(replace(forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4))):-   delete(forLoopT(_id,_,_,_,_,_,_)), !,     add(forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4)).
+action(replace(labelT(_id,_pid,_encl,_v1,_v2))):-          delete(labelT(_id,_,_,_,_)), !,        add(labelT(_id,_pid,_encl,_v1,_v2)).
+action(replace(switchT(_id,_pid,_encl,_v1,_v2))):-            delete(switchT(_id,_,_,_,_)), !,          add(switchT(_id,_pid,_encl,_v1,_v2)).
+action(replace(caseT(_id,_pid,_encl,_v1))):-              delete(caseT(_id,_,_,_)), !,            add(caseT(_id,_pid,_encl,_v1)).
+action(replace(synchronizedT(_id,_pid,_encl,_v1,_v2))):-      delete(synchronizedT(_id,_,_,_,_)), !,    add(synchronizedT(_id,_pid,_encl,_v1,_v2)).
+action(replace(tryT(_id,_pid,_encl,_v1,_v2,_v3))):-           delete(tryT(_id,_,_,_,_,_)), !,           add(tryT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(catchT(_id,_pid,_encl,_v1,_v2))):-             delete(catchT(_id,_,_,_,_)), !,           add(catchT(_id,_pid,_encl,_v1,_v2)).
+action(replace(ifT(_id,_pid,_encl,_v1,_v2,_v3))):-            delete(ifT(_id,_,_,_,_,_)), !,            add(ifT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(conditionalT(_id,_pid,_encl,_v1,_v2,_v3))):-   delete(conditionalT(_id,_,_,_,_,_)), !,   add(conditionalT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(execT(_id,_pid,_encl,_v1))):-                  delete(execT(_id,_,_,_)), !,              add(execT(_id,_pid,_encl,_v1)).
+action(replace(returnT(_id,_pid,_encl,_v1))):-                delete(returnT(_id,_,_,_)), !,            add(returnT(_id,_pid,_encl,_v1)).
+action(replace(breakT(_id,_pid,_encl,_v1,_v2))):-             delete(breakT(_id,_,_,_,_)), !,           add(breakT(_id,_pid,_encl,_v1,_v2)).
+action(replace(continueT(_id,_pid,_encl,_v1,_v2))):-          delete(continueT(_id,_,_,_,_)), !,        add(continueT(_id,_pid,_encl,_v1,_v2)).
+action(replace(throwT(_id,_pid,_encl,_v1))):-                 delete(throwT(_id,_,_,_)), !,             add(throwT(_id,_pid,_encl,_v1)).
+action(replace(applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4))):-             delete(applyT(_id,_,_,_,_,_,_)), !,           add(applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4)).
+action(replace(newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5))):-!, delete(newClassT(_id,_,_,_,_,_,_,_)), !,  add(newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5)).
+action(replace(newArrayT(_id,_pid,_encl,_v1,_v2,_v3))):-  delete(newArrayT(_id,_,_,_,_,_)), !,    add(newArrayT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(assignT(_id,_pid,_encl,_v1,_v2))):-            delete(assignT(_id,_,_,_,_)), !,          add(assignT(_id,_pid,_encl,_v1,_v2)).
+action(replace(assignopT(_id,_pid,_encl,_v1,_v2,_v3))):-      delete(assignopT(_id,_,_,_,_,_)), !,      add(assignopT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(operationT(_id,_pid,_encl,_v1,_v2,_v3))):-     delete(operationT(_id,_,_,_,_,_)), !,     add(operationT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(typeCastT(_id,_pid,_encl,_v1,_v2))):-          delete(typeCastT(_id,_,_,_,_)), !,        add(typeCastT(_id,_pid,_encl,_v1,_v2)).
+action(replace(typeTestT(_id,_pid,_encl,_v1,_v2))):-          delete(typeTestT(_id,_,_,_,_)), !,        add(typeTestT(_id,_pid,_encl,_v1,_v2)).
+action(replace(indexedT(_id,_pid,_encl,_v1,_v2))):-           delete(indexedT(_id,_,_,_,_)), !,         add(indexedT(_id,_pid,_encl,_v1,_v2)).
+action(replace(literalT(_id,_pid,_encl,_v1,_v2))):-           delete(literalT(_id,_,_,_,_)), !,         add(literalT(_id,_pid,_encl,_v1,_v2)).
+action(replace(assertT(_id,_pid,_encl,_v1,_v2))):-           delete(assertT(_id,_,_,_,_)), !,         add(assertT(_id,_pid,_encl,_v1,_v2)).
+action(replace(importT(_id,_pid,_v1))):-                      delete(importT(_id,_,_)), !,              add(importT(_id,_pid,_v1)).
 action(replace(_tree)) :-
     !,
     arg(1, _tree, _id),
-    retractTree(_id),
-    assert(_tree).
+    deleteTree(_id),
+    add(_tree).
 
 action(replaceDiffTree(_tree)) :-
     !,
     arg(1, _tree, _id),
   %  format('rdt: ~a ~a', [_id, _tree]),
-    retractTree(_id),
-    assert(_tree).
+    deleteTree(_id),
+    add(_tree).
 
 
 :- dynamic cloned/2.
@@ -867,11 +867,11 @@ given as an argument.
 addModifier(_, []) :- !.
 addModifier(Id, [H | T]) :-
     !,
-    assert(modifierT(Id, H)),
+    add(modifierT(Id, H)),
     addModifier(Id, T).
 addModifier(Id, Mod) :-
     !,
-    assert(modifierT(Id, Mod)).
+    add(modifierT(Id, Mod)).
 
 /**
 removeModifier(+Id,+ModList)
@@ -882,12 +882,12 @@ from the tree id.
 removeModifier(_, []) :- !.
 removeModifier(Id, [H | T]) :-
     !,
-    retract(modifierT(Id, H)),
+    delete(modifierT(Id, H)),
     removeModifier(Id,T).
     
 removeModifier(Id, Mod) :-
     !,
-    retract(modifierT(Id, Mod)).
+    delete(modifierT(Id, Mod)).
 
 
 /**
@@ -932,41 +932,41 @@ clone(_id, _parent, _encl, _new) :-
     cloned(_id, _new),
     getCloneIfAvail(_sym, _newSym),
     clone(_selected, _new, _encl, _newSelected),
-    assert(getFieldT(_new,_parent,_encl,_newSelected,_name,_newSym)).
+    add(getFieldT(_new,_parent,_encl,_newSelected,_name,_newSym)).
 
 clone(_id, _parent, _encl, _new) :-
     selectT(_id,_,_,_name,_selected,_sym),!,
     cloned(_id, _new),
     getCloneIfAvail(_sym, _newSym),
     clone(_selected, _new, _encl, _newSelected),
-    assert(selectT(_new,_parent,_encl,_name,_newSelected,_newSym)).
+    add(selectT(_new,_parent,_encl,_name,_newSelected,_newSym)).
 
 
 clone(_id, _parent, _encl, _new) :-
     identT(_id,_,_,_name,_sym),!,
     cloned(_id, _new),
     getCloneIfAvail(_sym, _newSym),
-    assert(identT(_new,_parent,_encl,_name,_newSym)).
+    add(identT(_new,_parent,_encl,_name,_newSym)).
 
 clone(_id, _parent, _encl, _new) :-
     literalT(_id,_,_,_type, _value),!,
     cloned(_id, _new),
     getCloneIfAvail(_type, _newType),
-    assert(literalT(_new, _parent, _encl, _newType, _value)).
+    add(literalT(_new, _parent, _encl, _newType, _value)).
 
 clone(_id, _parent, _encl, _new) :-
     assertT(_id,_,_,_test, _msg),!,
     cloned(_id, _new),
     clone(_test, _new, _encl, _newTest),
     clone(_msg, _new, _encl, _newMsg),
-    assert(assertT(_new, _parent, _encl, _newTest, _newMsg)).
+    add(assertT(_new, _parent, _encl, _newTest, _newMsg)).
 
 clone(_id, _parent, _encl, _new) :-
     blockT(_id, _, _, _subtrees),
     !,
     cloned(_id, _new),
     clone(_subtrees, _new, _encl, _newSubtrees),
-    assert(blockT(_new, _parent, _encl, _newSubtrees)).
+    add(blockT(_new, _parent, _encl, _newSubtrees)).
 
 clone(_id, _parent, _encl, _new) :-
     methodDefT(_id,_,_name,_params,_ret,_thrown,_body),
@@ -977,13 +977,13 @@ clone(_id, _parent, _encl, _new) :-
     clone(_params, _new, _new, _newParams),
     clone(_body, _new, _new, _newBody),
     (add_to_class(_parent, _new);true),
-    assert(methodDefT(_new, _parent, _name, _newParams, _ret, _thrown, _newBody)).
+    add(methodDefT(_new, _parent, _name, _newParams, _ret, _thrown, _newBody)).
 
 clone(_id, _parent, _encl, _new) :-
     execT(_id,_,_,_expr),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _newExpr),
-    assert(execT(_new,_parent,_encl,_newExpr)).
+    add(execT(_new,_parent,_encl,_newExpr)).
 
 clone(_id, _parent, _encl, _new) :-
     localDefT(_id,_,_,_type,_name,_init),
@@ -992,7 +992,7 @@ clone(_id, _parent, _encl, _new) :-
     cloneModifier(_id, _new),
     getCloneIfAvail(_type, _newType),
     clone(_init, _new, _encl, _newInit),
-    assert(localDefT(_new,_parent,_encl,_newType,_name,_newInit)).
+    add(localDefT(_new,_parent,_encl,_newType,_name,_newInit)).
 
 clone(_id, _parent, _encl, _new) :-
     fieldDefT(_id,_,_type,_name,_init),
@@ -1002,7 +1002,7 @@ clone(_id, _parent, _encl, _new) :-
     getCloneIfAvail(_type, _newType),
     clone(_init, _new, _id, _newInit),
     (add_to_class(_parent, _new);true),
-    assert(fieldDefT(_new,_parent,_newType,_name,_newInit)).
+    add(fieldDefT(_new,_parent,_newType,_name,_newInit)).
 
 clone(_id, _parent, _encl, _new) :-
     paramDefT(_id,_,_type,_name),
@@ -1010,21 +1010,21 @@ clone(_id, _parent, _encl, _new) :-
     cloned(_id, _new),
     cloneModifier(_id, _new),
     getCloneIfAvail(_type, _newType),
-    assert(paramDefT(_new,_parent,_newType,_name)).
+    add(paramDefT(_new,_parent,_newType,_name)).
 
 clone(_id, _parent, _encl, _new) :-
     doLoopT(_id,_,_,_cond,_body),!,
     cloned(_id, _new),
     clone(_cond, _new, _encl, _newCond),
     clone(_body, _new, _encl, _newBody),
-    assert(doLoopT(_new,_parent,_encl,_newCond,_newBody)).
+    add(doLoopT(_new,_parent,_encl,_newCond,_newBody)).
 
 clone(_id, _parent, _encl, _new) :-
     whileLoopT(_id,_,_,_cond,_body),!,
     cloned(_id, _new),
     clone(_cond, _new, _encl, _newCond),
     clone(_body, _new, _encl, _newBody),
-    assert(whileLoopT(_new,_parent,_encl,_newCond,_newBody)).
+    add(whileLoopT(_new,_parent,_encl,_newCond,_newBody)).
 
 % body (cond | []) (inits | []) (steps | [])
 clone(_id, _parent, _encl, _new) :-
@@ -1035,33 +1035,33 @@ clone(_id, _parent, _encl, _new) :-
     clone(_cond, _new, _encl, _newCond),
     
     clone(_body, _new, _encl, _newBody),
-    assert(forLoopT(_new,_parent,_encl,_newInitList,_newCond,_newStepList,_newBody)).
+    add(forLoopT(_new,_parent,_encl,_newInitList,_newCond,_newStepList,_newBody)).
 
 clone(_id, _parent, _encl, _new) :-
     labelT(_id,_,_,_body,_label),!,
     cloned(_id, _new),
     clone(_body, _new, _encl, _newBoy),
-    assert(labelT(_new,_parent,_encl,_newBody,_label)).
+    add(labelT(_new,_parent,_encl,_newBody,_label)).
 
 clone(_id, _parent, _encl, _new) :-
     switchT(_id,_,_,_selector,_cases),!,
     cloned(_id, _new),
     clone(_selector, _new, _encl, _newSelector),
     clone(_cases, _new, _encl, _newCases),
-    assert(switchT(_new,_parent,_encl,_newSelector,_newCases)).
+    add(switchT(_new,_parent,_encl,_newSelector,_newCases)).
 
 clone(_id, _parent, _encl, _new) :-
     caseT(_id,_,_,_pat),!,
     cloned(_id, _new),
     clone(_pat, _new, _encl, _newPat),
-    assert(caseT(_new,_parent,_encl,_newPat)).
+    add(caseT(_new,_parent,_encl,_newPat)).
 
 clone(_id, _parent, _encl, _new) :-
     synchronizedT(_id,_,_,_lock,_body),!,
     cloned(_id, _new),
     clone(_lock, _new, _encl, _newLock),
     clone(_body, _new, _encl, _newBody),
-    assert(synchronizedT(_new,_parent,_encl,_newLock, _newBody)).
+    add(synchronizedT(_new,_parent,_encl,_newLock, _newBody)).
 
 clone(_id, _parent, _encl, _new) :-
     tryT(_id,_,_,_body,_catch,_final),
@@ -1070,14 +1070,14 @@ clone(_id, _parent, _encl, _new) :-
     clone(_body, _new, _encl, _newBody),
     clone(_catch, _new, _encl, _newCatch),
     clone(_final, _new, _encl, _newFinal),
-    assert(tryT(_new,_parent,_encl,_newBody, _newCatch, _newFinal)).
+    add(tryT(_new,_parent,_encl,_newBody, _newCatch, _newFinal)).
 
 clone(_id, _parent, _encl, _new) :-
     catchT(_id,_,_,_param,_body),!,
     cloned(_id, _new),
     clone(_body, _new, _encl, _newBody),
     clone(_param, _new, _encl, _newParam),
-    assert(catchT(_new,_parent,_encl, _newParam, _newBody)).
+    add(catchT(_new,_parent,_encl, _newParam, _newBody)).
 
 clone(_id, _parent, _encl, _new) :-
     ifT(_id,_,_,_cond,_then,_else),
@@ -1086,7 +1086,7 @@ clone(_id, _parent, _encl, _new) :-
     clone(_cond, _new, _encl, _newBody),
     clone(_then, _new, _encl, _newThen),
     clone(_else, _new, _encl, _newElse),
-    assert(ifT(_new,_parent,_encl,_newBody,_newThen,_newElse)).
+    add(ifT(_new,_parent,_encl,_newBody,_newThen,_newElse)).
 
 clone(_id, _parent, _encl, _new) :-
     conditionalT(_id,_,_,_cond,_then,_else),!,
@@ -1094,32 +1094,32 @@ clone(_id, _parent, _encl, _new) :-
     clone(_cond, _new, _encl, _newBody),
     clone(_then, _new, _encl, _newThen),
     clone(_else, _new, _encl, _newElse),
-    assert(conditionalT(_new,_parent,_encl,_newBody,_newThen,_newElse)).
+    add(conditionalT(_new,_parent,_encl,_newBody,_newThen,_newElse)).
 
 
 clone(_id, _parent, _encl, _new) :-
     returnT(_id,_,_,_expr),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _newExpr),
-    assert(returnT(_new,_parent,_encl,_newExpr)).
+    add(returnT(_new,_parent,_encl,_newExpr)).
 
 clone(_id, _parent, _encl, _new) :-
     breakT(_id,_,_,_label,_target),!,
     cloned(_id, _new),
     getCloneIfAvail(_target, _newTarget),
-    assert(breakT(_new,_parent,_encl,_label, _newTarget)).
+    add(breakT(_new,_parent,_encl,_label, _newTarget)).
 
 clone(_id, _parent, _encl, _new) :-
     continueT(_id,_,_,_target,_),!,
     cloned(_id, _new),
     getCloneIfAvail(_target,_newTarget),
-    assert(continueT(_new,_parent,_encl,_label, _newTarget)).
+    add(continueT(_new,_parent,_encl,_label, _newTarget)).
 
 clone(_id, _parent, _encl, _new) :-
     throwT(_id,_,_,_expr),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _newExpr),
-    assert(throwT(_new,_parent,_encl,_newExpr)).
+    add(throwT(_new,_parent,_encl,_newExpr)).
 
 clone(_id, _parent, _encl, _new) :-
     applyT(_id,_,_,_recv,_name,_args,_method),!,
@@ -1127,7 +1127,7 @@ clone(_id, _parent, _encl, _new) :-
     clone(_recv, _new, _encl, _newRecv),
     clone(_args, _new, _encl, _newArgs),
     getCloneIfAvail(_method,_newMethod),
-    assert(applyT(_new,_parent,_encl,_newRecv,_name,_newArgs,_newMethod)).
+    add(applyT(_new,_parent,_encl,_newRecv,_name,_newArgs,_newMethod)).
 
 
 clone(_id, _parent, _encl, _new) :-
@@ -1141,7 +1141,7 @@ clone(_id, _parent, _encl, _new) :-
     clone(_clazz, _new, _encl, _newClazz),    
     clone(_enclClazz, _new, _encl, _newEnclClazz),
 %    getClonedIfAvail(_enclClazz, _newEnclClazz),
-    assert(newClassT(_new,_parent,_encl,_newConstr, _newArgs,_newClazz, _newDef, _newEnclClazz)). %FIXME
+    add(newClassT(_new,_parent,_encl,_newConstr, _newArgs,_newClazz, _newDef, _newEnclClazz)). %FIXME
 
 clone(_id, _parent, _encl, _new) :-
     newArrayT(_id,_,_,_dims,_elems,_type),
@@ -1150,68 +1150,68 @@ clone(_id, _parent, _encl, _new) :-
     getCloneIfAvail(_type, _newType),
     clone(_dims, _new, _encl, _newDims),
     clone(_elems, _new, _encl, _newElems),
-    assert(newArrayT(_new,_parent,_encl,_newDims,_newElems, _newType)).
+    add(newArrayT(_new,_parent,_encl,_newDims,_newElems, _newType)).
 
 clone(_id, _parent, _encl, _new) :-
     assignT(_id,_,_,_lhs,_rhs),!,
     cloned(_id, _new),
     clone(_lhs, _new, _encl, _newLhs),
     clone(_rhs, _new, _encl, _newRhs),
-    assert(assignT(_new,_parent,_encl,_newLhs,_newRhs)).
+    add(assignT(_new,_parent,_encl,_newLhs,_newRhs)).
 
 clone(_id, _parent, _encl, _new) :-
     assignopT(_id,_,_,_lhs,_opname,_rhs),!,
     cloned(_id, _new),
     clone(_lhs, _new, _encl, _newLhs),
     clone(_rhs, _new, _encl, _newRhs),
-    assert(assignopT(_new,_parent,_encl,_newLhs,_opname,_newRhs)).
+    add(assignopT(_new,_parent,_encl,_newLhs,_opname,_newRhs)).
 
 clone(_id, _parent, _encl, _new) :-
     operationT(_id,_,_,_args,_opname,_pos),!,
     cloned(_id, _new),
     clone(_args, _new, _encl, _newArgs),
-    assert(operationT(_new,_parent,_encl,_newArgs,_opname,_pos)).
+    add(operationT(_new,_parent,_encl,_newArgs,_opname,_pos)).
 
 clone(_id, _parent, _encl, _new) :-
     typeCastT(_id,_,_,_clazz,_expr),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _newExpr),
     getCloneIfAvail(_clazz, _newClazz),
-    assert(typeCastT(_new,_parent,_encl,_newClazz, _newExpr)).
+    add(typeCastT(_new,_parent,_encl,_newClazz, _newExpr)).
 
 clone(_id, _parent, _encl, _new) :-
     typeTestT(_id,_,_,_,_expr),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _newExpr),
     getCloneIfAvail(_clazz, _newClazz),
-    assert(typeTestT(_new,_parent,_encl,_newClazz, _newExpr)).
+    add(typeTestT(_new,_parent,_encl,_newClazz, _newExpr)).
 
 clone(_id, _parent, _encl, _new) :-
     indexedT(_id,_,_,_index, _indexed),!,
     cloned(_id, _new),
     clone(_index, _new, _encl, _newIndex),
     clone(_indexed, _new, _encl, _newIndexed),
-    assert(indexedT(_new,_parent,_encl,_newIndex, _newIndexed)).
+    add(indexedT(_new,_parent,_encl,_newIndex, _newIndexed)).
 
 
 clone(_id, _parent, _encl, _new) :-
     importT(_id,_,_name),!,
     cloned(_id, _new),
-    assert(importT(_new,_parent,_name)).
+    add(importT(_new,_parent,_name)).
 
 clone(_id, _parent, _encl, _new) :-
     packageT(_id,_name),
     !,
     findall(_sub, toplevelT(_sub, _id, _,_), _subtrees),
     cloned(_id, _new),
-    assert(package(_new, _name)),
+    add(package(_new, _name)),
     clone(_subtrees, _new, _new, _toplevels).
 
 clone(_id, _parent, _encl, _new) :-
     toplevelT(_id,_,_filename,_subtrees),
     cloned(_id, _new),
     clone(_subtrees, _new, _encl, _newSubtrees),
-    assert(toplevelT(_id, _parent, _filename, _newSubtrees)).
+    add(toplevelT(_id, _parent, _filename, _newSubtrees)).
 
 clone(_id, _parent, _encl, _new) :-
     classDefT(_id,Package,_name,Subtrees),!,
@@ -1232,20 +1232,20 @@ clone(_id, _parent, _encl, _new) :-
     	true
     ), 
     clone(Subtrees, _new, _new, NewSubtrees),
-    assert(classDefT(_new, _parent, _name, NewSubtrees)),
+    add(classDefT(_new, _parent, _name, NewSubtrees)),
     add_to_class(_new, NewSubtrees).    
 
 clone(_id, _parent, _encl, _new) :-
     nopT(_id,_,_),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _new),
-    assert(nopT(_new,_parent,_encl)).
+    add(nopT(_new,_parent,_encl)).
 
 clone(_id, _parent, _encl, _new) :-
     precedenceT(_id,_,_,_expr),!,
     cloned(_id, _new),
     clone(_expr, _new, _encl, _newExpr),
-    assert(precedenceT(_new,_parent,_encl,_newExpr)).
+    add(precedenceT(_new,_parent,_encl,_newExpr)).
 
 clone(_id, _, _, _) :-
     tree(_id, _p, _name),
@@ -1264,8 +1264,8 @@ clone(_id, _, _, 'null') :-
 replaceId(_id, _oldId, _newId) :-
     getTerm(_id, _oldTerm),
     replaceIdInTerm(_oldTerm, _newTerm, _oldId, _newId),
-    retract(_oldTerm),
-    assert(_newTerm).
+    delete(_oldTerm),
+    add(_newTerm).
 
 getTerm(_id,packageT(_id,_name)) :-         				  packageT(_id,_name).
 getTerm(_id,getFieldT(_id,_pid,_encl,_v1,_v2,_v3)) :-         getFieldT(_id,_pid,_encl,_v1,_v2,_v3).
@@ -1365,7 +1365,7 @@ recCloneParams(_newParent, [_varDef | _varDefs], [_Copy | _Copies], _counter) :-
     paramDefT(_varDef, _, _retType, _),
     new_id(_Copy),
     appendNum('x', _counter, _name),
-    assert(paramDefT(_Copy, _newParent,_retType, _name)),
+    add(paramDefT(_Copy, _newParent,_retType, _name)),
     plus(_counter, 1, _next),
     recCloneParams(_newParent, _varDefs, _Copies, _next).
 
@@ -1377,8 +1377,8 @@ removeFromClass(_class, _id) :- not(tree(_class, _, classDefT)).
 removeFromClass(_class, _id) :-
     classDefT(_class, _p,_n,_members),
     findall(_m, (member(_m, _members), _m \= _id ), _newMembers),
-    retractT(classDefT(_class, _p,_n,_members)),
-    assert1(classDefT(_class, _p,_n,_newMembers)).
+    delete(classDefT(_class, _p,_n,_members)),
+    add(classDefT(_class, _p,_n,_newMembers)).
 
 %add_to_class(_class, _) :- not(classDefT(_class, _, _, _)), !.
 /*
@@ -1429,9 +1429,9 @@ addToToplevel(_tl, _id) :-
     !.
 addToToplevel(_tl, _id) :-
     toplevelT(_tl, _p,_n,_members),
-    retractT(toplevelT(_tl, _p,_n,_members)),
+    delete(toplevelT(_tl, _p,_n,_members)),
     append(_members, [_id], _newMembers),
-    assert1(toplevelT(_tl, _p, _n, _newMembers)).
+    add(toplevelT(_tl, _p, _n, _newMembers)).
 
 
 removeFromBlock(_block, _id) :- not(blockT(_block, _, _, _)), !.
@@ -1453,16 +1453,16 @@ addToBlock(_block, _id) :-
     !.
 addToBlock(_block, _id) :-
     blockT(_block, _p, _e, _members),
-    retractT(blockT(_block, _p, _e, _members)),
+    delete(blockT(_block, _p, _e, _members)),
     append(_members, [_id], _newMembers),
-    assert1T(blockT(_block, _p, _e, _newMembers)).
+    add(blockT(_block, _p, _e, _newMembers)).
 
 removeFromMethodArgs(_method, _id) :- not(methodDefT(_method, _, _, _, _, _, _)), !.
 removeFromMethodArgs(_method, _id) :-
     methodDefT(_method, _p, _n, _members, _r, _e, _b),
     findall(_m, (member(_m, _members), _m \= _id ), _newMembers),
-    retract(methodDefT(_method, _p, _n, _members, _r, _e, _b)),
-    assert1(methodDefT(_method, _p, _n, _newMembers, _r, _e, _b)).
+    delete(methodDefT(_method, _p, _n, _members, _r, _e, _b)),
+    add(methodDefT(_method, _p, _n, _newMembers, _r, _e, _b)).
 
 addToMethodArgs(_method, _id) :- not(methodDefT(_method, _, _, _, _, _, _)), !.
 addToMethodArgs(_method, _id) :-
@@ -1471,9 +1471,9 @@ addToMethodArgs(_method, _id) :-
     !.
 addToMethodArgs(_method, _id) :-
     methodDefT(_method, _p, _n, _members, _r, _e, _b),
-    retract(methodDefT(_method, _p, _n, _members, _r, _e, _b)),
+    delete(methodDefT(_method, _p, _n, _members, _r, _e, _b)),
     append(_members, [_id], _newMembers),
-    assert1(methodDefT(_method, _p, _n, _newMembers, _r, _e, _b)).
+    add(methodDefT(_method, _p, _n, _newMembers, _r, _e, _b)).
 
 getToplevel(Id, _) :-
     not(tree(Id,_,_)),
@@ -1562,6 +1562,8 @@ removeTags(DeletionKind, ID):-
     removeTagKind(DeletionKind, implementsT(ID,_iface)),
     removeTagKind(DeletionKind, extendsT(ID,_super)),
     removeTagKind(DeletionKind, externT(ID)),
+    removeTagKind(DeletionKind, projectLocationT(ID,_,_)),
+    removeTagKind(DeletionKind, sourceLocation(ID,_,_,_)),
     removeTagKind(DeletionKind, interfaceT(ID)).
     
 removeTagKind(DeletionKind,Tag) :-
