@@ -41,6 +41,7 @@ new_id(New) :-
 	!,
 	term_to_atom(New,Term),
 	sformat(Msg,'new_id: variable is a list: ~a~n',Term),
+	debugme,
 	print(Msg),
 	flush_output,
 	throw(already_bound_exception(Msg)).
@@ -1891,11 +1892,13 @@ discard_permanently(_fileName):-
    
 sourceLocation(Tree,File,Start,End):-
     slT(Tree,Start,End),
+    !,
     getToplevel(Tree,TL),
     toplevelT(TL,_,File,_).
-    
-    
-    
+% temporary necessary while aspects are not 
+% completely represented in prolog factbase
+sourceLocation(ID,File,Start,Length):-
+	slAspectT(ID, File,Start, Length).
 
 /********************************************
  ************* PEF independend **************
