@@ -8,7 +8,7 @@ public class Logger {
 	
 	private String Filename = "test.txt";
 	
-	public void Log(String Minutes, String Seconds, String Comment) throws IllegalArgumentException
+	public void log(String Minutes, String Seconds, String Comment) throws IllegalArgumentException
 	{
 		File FileObject = new File(Filename);
 		String LogString;

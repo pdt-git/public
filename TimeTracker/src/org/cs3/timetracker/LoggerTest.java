@@ -23,7 +23,7 @@ public class LoggerTest extends TestCase {
 		super.setUp();
 		
 		Logger = new Logger();
-		Logger.Log(GlobalTestMinutes, GlobalTestSeconds, GlobalTestComment);
+		Logger.log(GlobalTestMinutes, GlobalTestSeconds, GlobalTestComment);
 	}
 	
 	/*
@@ -70,21 +70,21 @@ public class LoggerTest extends TestCase {
 		
 		try 
 		{
-			Logger.Log(GlobalTestMinutes, GlobalTestSeconds, "");
+			Logger.log(GlobalTestMinutes, GlobalTestSeconds, "");
 			fail();
 		}
 		catch(IllegalArgumentException e) {	}
 
 		try 
 		{
-			Logger.Log("-1", GlobalTestSeconds, GlobalTestComment);
+			Logger.log("-1", GlobalTestSeconds, GlobalTestComment);
 			fail();
 		}
 		catch(IllegalArgumentException e) { }
 
 		try 
 		{
-			Logger.Log(GlobalTestMinutes, "-1", GlobalTestComment);
+			Logger.log(GlobalTestMinutes, "-1", GlobalTestComment);
 			fail();
 		}
 		catch(IllegalArgumentException e) {	}
