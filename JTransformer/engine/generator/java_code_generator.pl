@@ -558,6 +558,8 @@ gen_toplevel(_toplevel) :-
     toplevelT(_toplevel, _packg, _filename, _defs),
     !,
     appendDir(_filename, _dirfile),
+    retractall(align(_)),
+    assert(align(0)),
 %    packageT(_packg, Name),
 %    atom_concat('/',Project, '/', Name,_,_filename),
 	(
