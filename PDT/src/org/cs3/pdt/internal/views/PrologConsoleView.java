@@ -2,10 +2,9 @@ package org.cs3.pdt.internal.views;
 
 import java.io.IOException;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.hooks.ConsoleServerHook;
-import org.cs3.pdt.internal.hooks.MetaDataEngineHook;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleView;
@@ -53,7 +52,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
             Debug.report(e);
         }
         pi.addLifeCycleHook(this, HOOK_ID, new String[] {
-                ConsoleServerHook.HOOK_ID, MetaDataEngineHook.HOOK_ID });
+                ConsoleServerHook.HOOK_ID});
 
         view = new ConsoleView();
         controller = new DefaultConsoleController();

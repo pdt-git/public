@@ -49,7 +49,7 @@ public class SocketServerStartStrategy implements ServerStartStrategy {
      */
     public Process startServer(int port) {
         String sep=System.getProperty("file.separator");
-         String cmdline = executable+ " -g ['"+engineDir+sep+"consult_server.pl'],consult_server("+port+")";
+         String cmdline = executable+ " -p library="+engineDir+" -s "+engineDir+sep+"main.pl -g consult_server("+port+")";//['"+engineDir+sep+"consult_server.pl'],consult_server("+port+")";
         Debug.debug("Starting server with " + cmdline);
 
         try {

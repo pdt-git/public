@@ -71,9 +71,6 @@
     <hook
           class="org.cs3.pdt.internal.hooks.ConsoleServerHook"
           id="org.cs3.pdt.internal.hooks.ConsoleServerHook"/>
-    <hook
-          class="org.cs3.pdt.internal.hooks.MetaDataEngineHook"
-          id="org.cs3.pdt.internal.hooks.MetaDataEngineHook"/>
  </extension>
  <extension
        point="org.eclipse.ui.actionSets">

@@ -1,2 +1,2 @@
-:- [pdtplugin].
-:- [consult_server].
+:- [library(pdtplugin)].
+:- [library('PrologInterface/consult_server')].
