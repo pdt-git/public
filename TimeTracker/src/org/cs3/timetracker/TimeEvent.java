@@ -28,6 +28,24 @@ public class TimeEvent {
 	public int getSeconds() {
 		return seconds;
 	}
+
+	/**
+	 * @return
+	 */
+	public String getFormattedString() {
+		String outString ="";
+		outString = normalizeTime(outString, minutes);
+		outString += ":";
+		outString = normalizeTime(outString, seconds);
+		return outString;
+	}
+
+
+	private String normalizeTime(String outString, int time) {
+		if (time<10) outString = outString + "0";
+		outString += time;
+		return outString;
+	}
 	
 	public void setMinutes(int Min)
 	{
