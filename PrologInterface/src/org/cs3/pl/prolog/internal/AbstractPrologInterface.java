@@ -164,14 +164,18 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     public abstract PrologSession getSession_impl() throws Throwable;
     public PrologSession getSession(){
+        if(!isUp()){
+            throw new IllegalStateException("cannot create session, not in UP state.");
+        }
         try{
+            
             PrologSession s = getSession_impl();
             sessions.add(new WeakReference(s));
             return s;
         }
         catch(Throwable t){
             Debug.report(t);
-            return null;
+            throw new RuntimeException(t);
         }
     }
 
