@@ -1,5 +1,6 @@
 package org.cs3.timetracker;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.*;
 import org.osgi.framework.BundleContext;
 import java.util.*;
@@ -12,6 +13,7 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 	private static TimeTrackerPlugin plugin;
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
+	private boolean isCountingUp = true;
 	
 	/**
 	 * The constructor.
@@ -19,6 +21,7 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 	public TimeTrackerPlugin() {
 		super();
 		plugin = this;
+	
 		try {
 			resourceBundle = ResourceBundle.getBundle("TimeTracker.TimeTrackerPluginResources");
 		} catch (MissingResourceException x) {
@@ -31,6 +34,7 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		updatePreferences();
 	}
 
 	/**
@@ -38,6 +42,7 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
+		savePluginPreferences();
 	}
 
 	/**
@@ -67,9 +72,29 @@ public class TimeTrackerPlugin extends AbstractUIPlugin {
 		return resourceBundle;
 	}
 	
-
-	public boolean isCountingUp()
-	{
-		return true;
+	public boolean isCountingUp(){
+		return isCountingUp;
 	}
+	
+	/*
+	 * Initialize the preference page.
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeDefaultPreferences(org.eclipse.jface.preference.IPreferenceStore)
+	 */
+	
+    protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(TimeTrackerPreferencePage.P_IS_COUNTING_UP, true);
+	}
+    
+	public void updatePreferences() { 
+		try { 
+		IPreferenceStore store = getPreferenceStore();
+		isCountingUp = store.getBoolean(TimeTrackerPreferencePage.P_IS_COUNTING_UP);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		// update all the variables based on the new values in the preference store
+		
+	}
+
 }

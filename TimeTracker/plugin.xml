@@ -30,4 +30,13 @@
             name="Time Tracker"
             id="org.cs3.timetracker.TimeTrackerGUIViewer"/>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="TimeTicker"
+            class="org.cs3.timetracker.TimeTrackerPreferencePage"
+            id="org.cs3.timetracker.TimeTrackerPreferencePage">
+      </page>
+   </extension>
+
 </plugin>
