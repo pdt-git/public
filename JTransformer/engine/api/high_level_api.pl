@@ -63,6 +63,8 @@ createVarDefIdents           (_newParent, _oldList, _newList)
 :- dynamic created_file/1.
 :- multifile created_file/1.
 
+:- dynamic isErrorWarningMessage/3.
+
 /**
  * Flatten List of Lists/Elements.
  * e.g [[a,b],c,[d,e,f]] -> [a,b,c,d,e,f].
@@ -89,15 +91,12 @@ test(concat_list/2):-
     	[a,b,c,d,e,f])).
 
 /**
- * action(showError(+Kind, +ID,+Msg))
+ * action(showError(+ID,+Msg))
  */
  
 action(showError(Kind,ID,Msg)):-
     showError(Kind,ID,Msg).
 
-/**
- * showError(+Kind, +ID,+Msg)
- */
 showError(_,ID,Msg):-    
 	var(ID),
 	write('ID NOT BOUND: '),
@@ -112,8 +111,14 @@ showError(Kind,ID,Msg):-
     sourceLocation(ID, File,Start,_),
     format('(~a:~a)~n~n~a~n', [File,Start,Msg]),
     gen_tree(ID),
-    flush_output.
+    flush_output,
 
+    /**
+    * Added Dec 20, 2004 to store all errors/warnings
+    * and move it to the Eclipse Problems View. (AL)
+    */
+    assert(isErrorWarningMessage(Kind, ID, Msg)).
+    
 /**
  * action(set_parent(+ID,+NewParent))
  */
