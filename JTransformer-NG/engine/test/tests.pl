@@ -26,6 +26,10 @@ Every exception will be printed to the screen.
 After the execution of all tests a summary is shown.
 Presenting all failed test names and how many test were
 failed und how many succeeded.
+
+Use assert_true/2, assert_fail/2 and assert_bound/2 for
+your test cases to check your predicates.
+
 */
 
 runTests :- failed(_list, _length, _all),
@@ -121,11 +125,17 @@ list_to_line_sep_string([],'').
 list_to_line_sep_string([Head|Tail],String):-
 	list_to_line_sep_string(Tail,StringTail),
 	sformat(String,'~a~n~a',[Head,StringTail]).
+
+/**
+ * assert_fail(+Comment, +Goal)
+ * 
+ * Checks if Goal fails, otherwise throws
+ * exception assertion_failed('formated exception').
+ */
   
 assert_fail(Goal) :-
     assert_fail('', Goal).
     
-
 assert_fail(Comment, Goal) :-
   (call(Goal)
     ->  (
@@ -134,6 +144,14 @@ assert_fail(Comment, Goal) :-
    		throw(assertion_failed( FormattedComment))
    	);
    	true).
+
+
+/**
+ * assert_bound(+Comment, +Term)
+ * 
+ * Checks if Term is bound, otherwise throws
+ * exception assertion_failed('formated exception').
+ */
 
 assert_bound( Term):-
     assert_bound('',Term).
