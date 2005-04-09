@@ -1,6 +1,6 @@
 % Author:
 % Date: 07.10.02
-
+/*
 ct(mixedHighLowDepCT1, [
    field(_field, _, _, _, _),
    method(_encl, _, foo, _, _, _, _),
@@ -30,3 +30,4 @@ test('mixedHighLowDepCT') :- findall((A,B), (ct_same_prefix('mixedHighLowDepCT',
 (mixedHighLowDepCT2, mixedHighLowDepCT1)
 ]).
 
+*/
