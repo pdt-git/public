@@ -1202,7 +1202,7 @@ basicType(byte).
 basicType(boolean).
 
 lastID(100000).
-
+packageT(null,'').
 %%% source location %%%
 :- dynamic slT/3. 
 :- multifile slT/3. 
