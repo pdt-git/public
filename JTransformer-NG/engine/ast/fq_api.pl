@@ -26,7 +26,7 @@ execT
 
 
 /**
- * java_fq
+ * java_fq(PEF)
  */
 
  java_fq(Term):-
