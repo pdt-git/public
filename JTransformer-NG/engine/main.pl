@@ -19,5 +19,6 @@
 :- ['visitor/main'].
 :- ['persistance/main'].
 :- ['ast/main'].
+:- ['metrics/main'].
 :- [pdtplugin].
 :- ['java_lang_init'].
