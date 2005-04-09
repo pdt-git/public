@@ -1390,6 +1390,7 @@ createIdentRefParam(_param,_parent, _Ident) :-
 
 createThisIdent(_Ident,_parent, _encl, _class) :-
     new_id(_Ident),
+%    debugme,
     add(identT(_Ident, _parent, _encl, 'this', _class)).
 
 %createIdent(_parent, _encl, _ref, _Ident) :-
@@ -1628,6 +1629,11 @@ deepDelete(_id) :-
     deepDelete([_id]).
 
 deepRetract([]).
+deepRetract([Tree | _]) :-
+    not(tree(Tree,_,_)),
+    sformat(S,'deepRetract: tree not found: ~w',[Tree]),
+    throw(S).
+    
 deepRetract([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepRetract(_subtrees),
