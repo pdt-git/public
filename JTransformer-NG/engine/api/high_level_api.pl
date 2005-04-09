@@ -953,13 +953,16 @@ fullQualifiedName(Id, Fqn) :-
 %   Tobias: DONT DO THIS!!!! At this time the index may NOT be up to date.
 %   Especially when I use the java_fq abstraction !!! 
 
+fullQualifiedName(_id, Fqn) :-
+    nonvar(_id),
+    classDefT(_id, null, Fqn,_).
 
 fullQualifiedName(_id, _Fqn) :-
     nonvar(_id),
     classDefT(_id, _parent, _name,_),
     packageT(_parent, _pckgname),
-    !,
-    stringAppend(_pckgname, '.', _name, _Fqn).
+    stringAppend(_pckgname, '.', _name, _Fqn),
+    !.
 	
 	
 fullQualifiedName(_id, _Fqn) :-
