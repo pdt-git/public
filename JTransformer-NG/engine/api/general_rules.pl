@@ -55,6 +55,14 @@ new_id(New) :-
 	throw(already_bound_exception(Msg)).
 
 new_id(_New) :-
+	findall(ID,lastID(ID),[H|[H2|T]]),
+	!,
+	sformat(Msg,'more than one lastID fact: ~w~n',[[H|[H2|T]]]),
+	print(Msg),
+	flush_output,
+	throw(already_bound_exception(Msg)).
+
+new_id(_New) :-
     lastID(_last),
     sum(_last, 1, _New),
     retract(lastID(_last)),
