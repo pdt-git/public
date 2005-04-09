@@ -100,6 +100,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     private Option[] options;
 
+	private boolean showLine = false;
+
     //private HashMap locators=new HashMap();
 
     /**
@@ -168,8 +170,18 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     public void showSourceLocation(SourceLocation loc) throws IOException {
         IFile file=null;        
-         //   file = getFileFromLocation(loc.file);        
-        file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(loc.file));
+          file = getFileFromLocation(loc.file);
+		//IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocation(new Path(ioFile.getAbsolutePath()));
+//		if(files.length == 0) {
+//			Debug.error("could not find a location for the file: " + loc.file +" \n in the workspace.");
+//			return;
+//		}
+//		if(files.length > 1) {
+//			Debug.error("could not find a unambiguous location for the file: " + loc.file +" \n in the workspace.");
+//			return;
+//		}
+//		file = files[0];
+			//ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(ioFile.getCanonicalPath()));
         IWorkbenchPage page = PDTPlugin.getDefault().getActivePage();
         IEditorPart part;
         try {
@@ -180,9 +192,12 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
         if (part instanceof PLEditor) {
             PLEditor editor = (PLEditor) part;
-           // editor.gotoLine(loc.line);
             //XXX TODO FIXME a quick workaround.
-            editor.gotoOffset(loc.line);
+			//TRHO: gotoOffset -> gotoLine
+			if(showLine)
+				editor.gotoLine(loc.line);
+			else
+				editor.gotoOffset(loc.line);
         }
     }
 
@@ -197,15 +212,22 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         IWorkspaceRoot root = workspace.getRoot();
         IPath fpath;
         
-            fpath = new Path(new File(path).getCanonicalPath());
-            //fpath = new Path(path);
+        fpath = new Path(new File(path).getCanonicalPath());
         
-        IFile[] files = root.findFilesForLocation(fpath);
+		file = root.getFile(fpath );
+		if(file.exists()) {
+			showLine = false;
+			return file;
+		}
+		else {
+			showLine = true;
+		}
+		IFile[] files = root.findFilesForLocation(fpath);
         if (files == null || files.length == 0) {
             throw new IllegalArgumentException("Not in Workspace: " + fpath);            
         }
         if (files.length > 1) {
-            Debug.warning("Mapping into workspace is ambiguose:" + fpath);
+            Debug.warning("Mapping into workspace is ambiguous:" + fpath);
             Debug.warning("i will use the first match found: " + files[0]);
         }
         file = files[0];
