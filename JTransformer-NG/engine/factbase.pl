@@ -1201,7 +1201,22 @@ basicType(short).
 basicType(byte).
 basicType(boolean).
 
-lastID(100000).
+
+/**
+ * initLastID
+ * 
+ * initLastID will adds a fact lastID(10000)
+ * if no lastID fact exists.
+ */
+
+initLastID :-
+  lastID(_),
+  !.
+initLastID :-
+  assert(lastID(10000)).
+
+
+:- initLastID.
 packageT(null,'').
 %%% source location %%%
 :- dynamic slT/3. 
