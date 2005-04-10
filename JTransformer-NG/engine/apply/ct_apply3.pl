@@ -84,7 +84,7 @@ add(Elem) :-
     nonvar(Elem), 
 	call(Elem),
 	!,
-	format('WARNING: element: already exists: ~w~n.',[Elem]).
+	format('~nWARNING: element: already exists: ~w~n.',[Elem]).
 	
 add(_elem) :-  
     nonvar(_elem), 

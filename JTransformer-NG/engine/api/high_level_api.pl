@@ -195,62 +195,56 @@ action(add(class(_id, _owner, _name,Defs))) :-
 action(add(class(_id, _owner, _name))) :-
     !,
     add_classDefT(_id, _owner, _name,[]).
+ 
+action(add(class(Id, Owner, Name,Defs))) :-
+    !,
+    add_classDefT(Id, Owner, Name,Defs).
     
 add_classDefT(_id, _owner, _name,Defs):-
     add(classDefT(_id, _owner, _name, Defs)),
     ((
        (globalIds(FQN,_id)->
        		true;
-       		(fullQualifiedName(_id,FQN),
-       		add(globalIds(FQN,_id)))
+       		(fullQualifiedName(_id,FQN)->
+       		add(globalIds(FQN,_id));true)
        		),
-       debugme,
-       print(debugme),
        modifierT(_id,'public'),
-       print(public),       
        not(getToplevel(_id,_)),
        getPackage(_id,PID),
        (_owner = null;_owner = PID),
        fullPathOfClass(_id,FullPath),
+       print(' added new toplevel: '),       
        print(FullPath),
 	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
        sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
        string_to_atom(S,Filename),
-       print(Filename),       
        new_id(TID),
        add(toplevelT(TID, PID,Filename,[_id])),
-       print('_added_toplevel'),       
        assert(created_file(Filename)),
-       print('_created_file'),             
        add(projectLocationT(TID, Project,SourceFolder))
      );true).
 
 
-action(add(class(_id, _owner, _name,_defs))) :-
-    !,
+
+/*
     add(classDefT(_id, _owner, _name, _defs)),
     ((
-       debugme,
-       print(debugme),
        modifierT(_id,'public'),
-       print(public),       
        not(getToplevel(_id,_)),
        getPackage(_id,PID),
        (_owner = null;_owner = PID),
        fullPathOfClass(_id,FullPath),
+       print(' added new toplevel: '),       
        print(FullPath),
 	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
        sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
        string_to_atom(S,Filename),
-       print(Filename),       
        new_id(TID),
        add(toplevelT(TID, PID,Filename,[_id])),
-       print('_added_toplevel'),       
        assert(created_file(Filename)),
-       print('_created_file'),             
        add(projectLocationT(TID, Project,SourceFolder))
      );true).
-
+*/
 
 /*
 	sourceFolder(+Toplevel,-Sourcefolder)
