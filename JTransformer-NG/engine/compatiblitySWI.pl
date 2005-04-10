@@ -9,7 +9,7 @@
 :- dynamic outdir/1.
 :- dynamic file_output/1.
 :- dynamic output_to_file/0.
-:- dynamic output_to_tmp/1.
+%:- dynamic output_to_tmp/1.
 :- dynamic output_to_memory/2.
 
 outdir('out_faj/').
@@ -75,10 +75,10 @@ printf(_format, _args) :-
     !,
     format(_stream, _format, _args).
 
-printf(_format, _args) :-
-    output_to_tmp(_stream),
-    !,
-    format(_stream, _format, _args).
+%printf(_format, _args) :-
+%    output_to_tmp(_stream),
+%    !,
+%    format(_stream, _format, _args).
 
 printf(_format, _args) :-
     output_to_file,
@@ -98,30 +98,6 @@ printf(_format) :-
 %    current_output(_stream),
 %    format(_stream, _format, []).
 
-printToTmp :-
-    open('prolog.tmp$$$', write,_stream),
-    assert(output_to_tmp(_stream)).
-
-closeTmp(_tmp) :-
-    output_to_tmp(_stream),
-    close(_stream),
-    open('prolog.tmp$$$', read,_stream),
-    read_stream_to_codes(_stream,_string),
-    string_to_atom(_string,_tmp),
-    close(_stream),
-    retractall(output_to_tmp(_)).
-
-test(printToTmp):-
-    printToTmp,
-    printf('aha: ~a',arg),
-    closeTmp(_tmp),
-    _tmp = 'aha: arg'.   
-
-write_to_tmp_file(_term):-
-    open('c:/temp/prolog.tmp$$$', append,_stream),
-    term_to_atom(_term,_atom),
-   format(_stream,'~a~n', [_atom]),
-   close(_stream).
     
 
 println :-
