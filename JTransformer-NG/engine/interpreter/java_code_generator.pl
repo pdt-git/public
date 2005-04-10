@@ -1067,9 +1067,3 @@ gen_literal(type(class, _classID, _), _value) :-
     concat_atom(_list6, '~~', _value7),
     printf('\"~a\"',[_value7]).
 
-
-
-%prolog_trace_interception(Port, Frame, _PC, continue) :-
-%            prolog_frame_attribute(Frame, goal, Goal),
-%            prolog_frame_attribute(Frame, level, Level),
-%            write_to_tmp_file(trace(Port, Level, Goal)).
