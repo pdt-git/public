@@ -60,7 +60,7 @@ new_id(_New) :-
 	sformat(Msg,'more than one lastID fact: ~w~n',[[H|[H2|T]]]),
 	print(Msg),
 	flush_output,
-	throw(already_bound_exception(Msg)).
+	throw(more_than_one_fact_exception(Msg)).
 
 new_id(_New) :-
     lastID(_last),
