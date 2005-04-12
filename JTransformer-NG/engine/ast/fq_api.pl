@@ -357,9 +357,11 @@ getTypeIfNullEnclClass_fq(Id, _, FQN) :-
     getType_fq(Id, FQN).
 
 /**
- * getType_fq(Id,FQN)
+ * getType_fq(+ExprId,?FQN)
  * 
- * FQN wrapper for enclClass/2.
+ * FQN wrapper for getType/2.
+ * Retrieves full-qualified return type 
+ * name for the Expression ExprId.
  */
     
 getType_fq(Id,FQN):-
