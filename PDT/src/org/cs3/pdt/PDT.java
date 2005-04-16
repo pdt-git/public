@@ -38,6 +38,15 @@ public interface PDT {
 
  
     /**
+     * The "master-switch" for auto-consulting of files.
+     * It defaults to "false". for 0.1.1 - see PDT-23 
+     * If set to "true" , every prolog source file on the sourc path will
+     * be automaticaly consulted as long as its PROP_NO_AUTO_CONSULT
+     * flag is not set.
+     */
+    public static final String PREF_AUTO_CONSULT = "pdt.auto.consult";
+    
+    /**
      * the port on which the prolog console server is listening.
      */
     public static final String PREF_CONSOLE_PORT = "pdt.console.port";
@@ -54,8 +63,9 @@ public interface PDT {
     public static final String PROP_SOURCE_PATH = "pdt.source.path";
 
     /**
-     * a file for which this property is "true" will be consulted each time it
-     * is touched by the meta data builder.
+     * a file for which this property is "true" will NOT  be consulted each time it
+     * is touched by the meta data builder. This option only applies when 
+     * PREF_AUTO_CONSULT is set.
      */
     public static final String PROP_NO_AUTO_CONSULT = "pdt.no.auto.consult";
 

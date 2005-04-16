@@ -183,11 +183,19 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public boolean isAutoConsulted(IFile file) throws CoreException {
-		if (!isPrologSource(file)) {
+		//if it is no source file, there is no need to consult it.
+	    if (!isPrologSource(file)) {
 			return false;
 		}
 		
-		String val = file.getPersistentProperty(new QualifiedName("",
+	    //if the "master switch" says "no auto-consult", then there is no auto-consult.
+		String val = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_CONSULT,"false");
+		if("false".equalsIgnoreCase(val)){
+		    return false;
+		}
+		
+		//finally, if auto-consult is enabled, and the file is not explicitly excluded, then auto-consult it. 
+		val = file.getPersistentProperty(new QualifiedName("",
 				PDT.PROP_NO_AUTO_CONSULT));
 		//TODO: toggled functionality - to test
 		boolean autoConsult = !(val != null && val.equalsIgnoreCase("true"));

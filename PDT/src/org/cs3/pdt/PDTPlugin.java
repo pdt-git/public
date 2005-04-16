@@ -559,8 +559,16 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
                         PDT.PREF_CLIENT_LOG_FILE,
                         "Log file location",
                         "A file to which debug output of the PDT will be writen",
-                        Option.FILE, location + fileSep + "pdt.log")
-
+                        Option.FILE, location + fileSep + "pdt.log"),
+                new SimpleOption(
+                        PDT.PREF_AUTO_CONSULT,
+                        "Enable Auto-Consult (EXPERIMENTAL)",
+                        "If this flag is set, the PDT will automaticaly (re-)consult any source file," +
+                        "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental " +
+                        "feature and defaults to \"false\" for 0.1.x",
+                        Option.FLAG, "false"
+                        )
+                        
         };
 
     }
