@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -102,9 +103,9 @@ public class JLMPPlugin extends AbstractUIPlugin {
                 Option.STRING, src),
                 new SimpleOption(
                         JLMP.PREF_USE_PEF_STORE,
-                        "Use PEF store",
+                        "Use PEF store (EXPERIMENTAL)",
                         "If enabled, JTransformer will save PEFs before shutdown and reload them at startup. ",
-                        Option.FLAG, "true"),
+                        Option.FLAG, "false"),
                 new SimpleOption(
                         JLMP.PREF_DEFAULT_PEF_STORE_FILE,
                         "Default PEF store file",
@@ -298,6 +299,15 @@ public class JLMPPlugin extends AbstractUIPlugin {
         String value = service.getString(qualifier, key, defaultValue, null);
         
         return System.getProperty(key, value);
+    }
+    
+    /**
+     * conveniance method. should propably be inlined. --lu
+     */
+    public void setPreferenceValue(String key, String value){
+        Preferences prefStore = getPluginPreferences();
+        prefStore.setValue(key, value);
+        savePluginPreferences();
     }
 
     /**

@@ -7,7 +7,9 @@ import java.io.IOException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -72,7 +74,8 @@ public class BuilderTest extends FactGenerationTest {
 	 * @throws IOException
 	 *  
 	 */
-	public void testRestart() throws Throwable {	    
+	public void testRestart_with_pef_store() throws Throwable {
+	    JLMPPlugin.getDefault().setPreferenceValue(JLMP.PREF_USE_PEF_STORE,"true");
 	    PrologInterface pif = getTestJLMPProject().getPrologInterface();
 		PrologSession session = pif.getSession();
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
@@ -105,6 +108,45 @@ public class BuilderTest extends FactGenerationTest {
 		session = pif.getSession();
 		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
 		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
+		session.dispose();
+		
+	}
+	
+	
+	public void testRestart_without_pef_store() throws Throwable {
+	    JLMPPlugin.getDefault().setPreferenceValue(JLMP.PREF_USE_PEF_STORE,"false");
+	    PrologInterface pif = getTestJLMPProject().getPrologInterface();
+		PrologSession session = pif.getSession();
+		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
+		install("rumpel");
+		build();
+        
+        assertNotNull(session.queryOnce("toplevelT(_,_,_,_)"));
+		assertNotNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
+		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
+		session.dispose();
+		pif.stop();
+
+		pif.start();
+//      this caused problems in the past:
+        //there was a forgotten deleteSourceFacts in the builder
+        build();
+		session = pif.getSession();
+        assertNotNull(session.queryOnce("toplevelT(_,_,_,_)"));
+		assertNotNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
+		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
+		
+		uninstall("rumpel");
+		build(IncrementalProjectBuilder.INCREMENTAL_BUILD);
+		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
+		assertNotNull(session.queryOnce("classDefT(_,_,'Object',_)"));
+		session.dispose();
+		pif.stop();
+
+		pif.start();
+		session = pif.getSession();
+		assertNull(session.queryOnce("classDefT(_,_,'Humpel',_)"));
+		assertNull(session.queryOnce("classDefT(_,_,'Object',_)"));
 		session.dispose();
 		
 	}
