@@ -518,7 +518,7 @@ ast_node_def('Java',identT,[
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(name,    mult(1,1,no ), attr,  [atom]),
-     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT])
+     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT,localDefT])
 ]).
 
 
