@@ -51,6 +51,10 @@ stack_for_frame(Frame,[Info|Stack]) :-
     frame_info(Frame,Info),
     prolog_frame_attribute(Frame,parent,Parent),
 	stack_for_frame(Parent,Stack).
+
+stack_for_frame(Frame,['stack inspection failed']):-
+    !.
+
     
 frame_info(Frame,Info):-
     prolog_frame_attribute(Frame,clause,Ref),

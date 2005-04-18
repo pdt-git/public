@@ -125,7 +125,10 @@ gen_list_rec([_H | _T]) :-
 gen_stats([]).
 gen_stats([_H | _T]) :-
     printAlign,
-    gen_tree(_H),
+    (
+      (gen_tree(_H),!);
+      gen_tree_error_location(_H)
+    ),
     println,
     gen_stats(_T).
 
@@ -1026,9 +1029,36 @@ gen_tree(_ID) :-
 
 gen_tree(_ID) :-
     !,
+    prolog_current_frame(F),
+    stack_for_frame(F,Infos),
+    format('~nstack trace: ~n~w~n',[Infos]),
+%    gen_tree_error_location(_ID),
 %	prolog_choice_attribute(parent,Out),
 %	prolog_choice_attribute(type,Out),
-    throwMsg('~nERROR: cannot find tree with id ~a~nFrame: ~n', _ID).
+    throwMsg('~nERROR: cannot find tree with id ~a~n', _ID).
+
+gen_tree_error_location(ID) :-
+    prolog_current_frame(F0),
+    prolog_frame_attribute(F0,parent,F), 
+    stack_for_frame(F,Infos),
+    sformat(S,'stack trace: ~w~n',[Infos]),
+    throwMsg(S,ID).
+
+%    prolog_frame_attribute(F,clause,Clause),
+%    prolog_frame_attribute(F,goal,Goal),    %
+%	clause(Head,Body,Clause),%
+%	clause_property(Clause,file(File)),%
+%	clause_property(Clause,line_count(Line)),
+%	(
+%	  prolog_frame_attribute(F,argument(1),Arg) ->
+%	  true;Arg='no arguments'
+%	),
+%	format('error when executing goal: ~w~n with (first) argument: ~w~nat pos ~w:~w~nin clause: ~w :- ~w~n~n',[Goal,Arg,File,Line,Head,Body]).
+
+gen_tree_error_location(_ID):-
+	format('error occured while generating error report!~n',[]).
+
+
 
 /**
  gen_literal(+typeTerm, +value)
