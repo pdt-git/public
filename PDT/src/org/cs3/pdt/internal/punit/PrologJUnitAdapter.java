@@ -27,7 +27,7 @@ import org.cs3.pl.prolog.PrologSession;
  * simply write a predicate <code>test('mytest')</code> which succeeds if the
  * test succeeds.
  */
-public class AllTestPredicateTests extends TestPredicateTest {
+public class PrologJUnitAdapter extends TestPredicateTest {
 	
 //	/**
 //	 * Retrieve a free server port >= port.
@@ -64,7 +64,6 @@ public class AllTestPredicateTests extends TestPredicateTest {
 			session = pif.getSession();
 			// result = manager.query("clause(test(Testname), _)");
 			suite = new TestSuite();
-			session.queryOnce("consult('/home/rho/workspace/JTransformer-NG/engine/main.pl')");
 			
 			List tests = session.queryAll("test_suite(Testname)");
 			for (Iterator iter = tests.iterator(); iter.hasNext();) {
@@ -80,31 +79,4 @@ public class AllTestPredicateTests extends TestPredicateTest {
 		return suite;
 	}
 
-//
-//	/**
-//	 * @return
-//	 * @throws IOException
-//	 * @throws FileNotFoundException
-//	 */
-//	public static IPrologClient getInitPrologClient() throws IOException, FileNotFoundException {
-//		if (initializedClient == null){
-//			PrologManager.setServerPort(getFreeServerSocket(8877));
-//			IPrologClient manager = PrologManager.getInstance().getHiddenClient();
-//			String cultivateLocation = LogicAJPlugin.getDefault().getLocation().replace('\\','/');
-//			
-//			
-//			Hashtable result = manager.query("load_files('" + cultivateLocation
-//					+ "/src/metrics/main.pl',[])");
-//			if (result == null) {
-//				throw new RuntimeException("Could not consult main.pl.");
-//			}
-//			result = manager.query("assert(factbaseDirectory('"+cultivateLocation+"/src/test/factbases'))");
-//			if (result == null) {
-//				throw new RuntimeException("Had a problem setting the location assertion.");
-//			}
-//			initializedClient = manager;
-//	}
-//		return initializedClient;
-//	
-//	}
 }
