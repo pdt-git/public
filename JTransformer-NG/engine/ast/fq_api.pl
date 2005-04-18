@@ -290,6 +290,12 @@ bindArgs([ast_arg(_,_, id, _)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
 	bindArgs(ArgDefs, Args, JavaASTArgs),
 	!.
 
+bindArgs([ast_arg(_,_, id, _)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
+	\+ number(JavaASTArg), JavaASTArg \= null, 
+	format('~nwarning: (bindArgs) probably not an ID: ~w~n',[JavaASTArg]),
+	bindArgs(ArgDefs, Args, JavaASTArgs),
+	!.
+
 bindArgs([ast_arg(_,_, _,  _)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|JavaASTArgs]) :-
 	bindArgs(ArgDefs, Args, JavaASTArgs),
 	!.
