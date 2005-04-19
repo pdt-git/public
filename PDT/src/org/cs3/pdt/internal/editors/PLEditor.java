@@ -429,8 +429,7 @@ public class PLEditor extends TextEditor {
             throws BadLocationException {
         Document document = (Document) getDocumentProvider().getDocument(
                 getEditorInput());
-        Display display = PDTPlugin.getDefault().getWorkbench().getDisplay();
-
+        
         String line = null;
         TextSelection selection = (TextSelection) getEditorSite()
                 .getSelectionProvider().getSelection();
