@@ -100,9 +100,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     private Option[] options;
 
-	private boolean showLine = false;
+	
 
-    //private HashMap locators=new HashMap();
+    
 
     /**
      * The constructor.
@@ -169,19 +169,21 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     }
 
     public void showSourceLocation(SourceLocation loc) throws IOException {
-        IFile file=null;        
-          file = getFileFromLocation(loc.file);
-		//IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocation(new Path(ioFile.getAbsolutePath()));
-//		if(files.length == 0) {
-//			Debug.error("could not find a location for the file: " + loc.file +" \n in the workspace.");
-//			return;
-//		}
-//		if(files.length > 1) {
-//			Debug.error("could not find a unambiguous location for the file: " + loc.file +" \n in the workspace.");
-//			return;
-//		}
-//		file = files[0];
-			//ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(ioFile.getCanonicalPath()));
+        IFile file=null;   
+		IPath fpath= new Path(loc.file);
+		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
+		
+		//see if it is a workspace path:
+		file = wsRoot.getFile(fpath );
+		boolean showLine;
+		if(file.exists()) {
+			showLine = false;			
+		}
+		else {
+			showLine = true;
+			file = findFileForLocation(loc.file);
+		}
+        
         IWorkbenchPage page = PDTPlugin.getDefault().getActivePage();
         IEditorPart part;
         try {
@@ -192,13 +194,13 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
         if (part instanceof PLEditor) {
             PLEditor editor = (PLEditor) part;
-            //XXX TODO FIXME a quick workaround.
-			//TRHO: gotoOffset -> gotoLine
+          
 			if(showLine)
 				editor.gotoLine(loc.line);
 			else
 				editor.gotoOffset(loc.line);
         }
+		
     }
 
     /**
@@ -206,28 +208,18 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
      * @return
      * @throws IOException
      */
-    private IFile getFileFromLocation(String path) throws IOException {
+    private IFile findFileForLocation(String path) throws IOException {
         IFile file = null;
         IWorkspace workspace = ResourcesPlugin.getWorkspace();
         IWorkspaceRoot root = workspace.getRoot();
         IPath fpath;
         
-        fpath = new Path(new File(path).getCanonicalPath());
-        
-		file = root.getFile(fpath );
-		if(file.exists()) {
-			showLine = false;
-			return file;
-		}
-		else {
-			showLine = true;
-		}
-		IFile[] files = root.findFilesForLocation(fpath);
+		IFile[] files = PDTUtils.findFilesForLocation(path);
         if (files == null || files.length == 0) {
-            throw new IllegalArgumentException("Not in Workspace: " + fpath);            
+            throw new IllegalArgumentException("Not in Workspace: " + path);            
         }
         if (files.length > 1) {
-            Debug.warning("Mapping into workspace is ambiguous:" + fpath);
+            Debug.warning("Mapping into workspace is ambiguous:" + path);
             Debug.warning("i will use the first match found: " + files[0]);
         }
         file = files[0];

@@ -378,4 +378,9 @@ public class Util {
         }
         return map;
     }
+
+	public static long parsePrologTimeStamp(String input){
+	    long l = 1000* (long) Double.parseDouble(input);
+		return l;
+	}
 }
