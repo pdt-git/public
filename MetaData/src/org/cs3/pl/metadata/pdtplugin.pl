@@ -79,8 +79,25 @@ pdtplugin_get_file_pos(_pred,_arity, _file,_pos,_dynamic, _multifile) :-
     atom_concat(_file_we,'.pl',_file).
 */
 
-% this is needed for modules (in the PrologElementData the arity -1 is used for modules
+% get_file_pos(+Context, +Name, +Arity, -File, -Position, -Dynamic, -Multifile)
+%
+% find the declaration of a given predicate or module
+%
+% Context - A workspace-relative path to the file that serves as context for the search.
+%			It will basicaly be used to determin a context module.
+% Name	- The predicate name
+% Arity - The arity of the preidcate. Use -1 when looking for a module
+% File - Will be unified with the file containing the definition
+% Position - will be unified with either the character offset or the line number of 
+%            the definition within the containing File. If the file defining the searched element
+%		     has already been parsed, character offset will be available. Otherwise information
+%		     is gathered using the build in runtime reflexion, which only gives us line numbers.
+% Dynamic - 1 for dynamic predicates, 0 otherwise. NOT IMPLEMENTED YET-
+% Multifile - 1 for multifile predicates, 0 otherwise. NOT IMLEMENTED YET.
+%
+%
 get_file_pos(_,Name,-1, File,0,0, 0):-
+    % this is needed for modules (in the PrologElementData the arity -1 is used for modules
     !,
     meta_data_module(File,Name,_).
 get_file_pos(Context, Name,Arity, Context,Pos,0, 0) :- 
