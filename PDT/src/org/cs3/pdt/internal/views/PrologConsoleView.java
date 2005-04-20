@@ -49,8 +49,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
                 ConsoleServerHook.HOOK_ID});
 
         controller = new DefaultConsoleController();
-        completionProvider = new PrologCompletionProvider();
-        completionProvider.setPrologInterface(pi);
+        completionProvider = new PrologCompletionProvider();        
+		completionProvider.setMetaInfoProvider(plugin.getMetaInfoProvider());
         controller.setCompletionProvider(completionProvider);
         view.setController(controller);
         int port = getPort();

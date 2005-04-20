@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
@@ -300,7 +301,7 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
 
         PDTPlugin plugin = PDTPlugin.getDefault();
         IMetaInfoProvider prologHelper = plugin.getMetaInfoProvider();
-        IFileEditorInput editorInput = (IFileEditorInput) plugin
+        IFileEditorInput editorInput = (IFileEditorInput) UIUtils
                 .getActiveEditor().getEditorInput();
         String activeFileName = editorInput.getFile().getFullPath().toString();
         PrologElementData[] elems = null;

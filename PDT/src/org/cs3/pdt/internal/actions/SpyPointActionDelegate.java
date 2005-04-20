@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
@@ -35,11 +36,11 @@ public class SpyPointActionDelegate extends TextEditorAction {
 
     public void run() {
         PDTPlugin plugin = PDTPlugin.getDefault();
-        plugin.getDisplay().asyncExec(new Runnable() {
+        UIUtils.getDisplay().asyncExec(new Runnable() {
             public void run() {
                 PDTPlugin plugin = PDTPlugin.getDefault();
 
-                PLEditor editor = (PLEditor) plugin.getActiveEditor();
+                PLEditor editor = (PLEditor) UIUtils.getActiveEditor();
                 PrologSession session = null;
                 session = plugin.getPrologInterface().getSession();
                 String pred;

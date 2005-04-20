@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.ASTClause;
 import org.cs3.pl.parser.ASTCompilationUnit;
@@ -192,14 +192,14 @@ public class PrologCompilerGUIWrapper extends PrologCompiler {
 				}
 			};
 			file.getWorkspace().run(r, null, IWorkspace.AVOID_UPDATE, null);
-			PDTPlugin.getDefault().getDisplay().syncExec(new Runnable() {
+			UIUtils.getDisplay().syncExec(new Runnable() {
 				public void run() {
 					try {
-						PDTPlugin.getDefault().getActivePage().showView(
+						UIUtils.getActivePage().showView(
 								IPageLayout.ID_PROBLEM_VIEW);
-						PDTPlugin.getDefault().getActiveEditor()
+						UIUtils.getActiveEditor()
 								.getEditorSite().getPage().activate(
-										PDTPlugin.getDefault()
+										UIUtils
 												.getActiveEditor());
 					} catch (PartInitException e) {
 						Debug.report(e);

@@ -389,7 +389,7 @@ public class PLEditor extends TextEditor {
 
         Document document = (Document) getDocumentProvider().getDocument(
                 getEditorInput());
-        Display display = PDTPlugin.getDefault().getWorkbench().getDisplay();
+        
 
         String line = null;
         try {

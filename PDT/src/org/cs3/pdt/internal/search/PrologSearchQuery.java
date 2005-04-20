@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.PrologElementData;
@@ -136,7 +137,7 @@ public class PrologSearchQuery implements ISearchQuery {
                         String msg = "Cannot find the file'" + path
                                 + "' in the workspace.";
                         System.out.println(msg);
-                        PDTPlugin.getDefault().setStatusErrorMessage(msg);
+                        UIUtils.setStatusErrorMessage(msg);
                     }
 
                     //solution = client.next();

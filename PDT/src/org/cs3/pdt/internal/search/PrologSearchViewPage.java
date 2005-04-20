@@ -4,7 +4,7 @@
  */
 package org.cs3.pdt.internal.search;
 
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -99,7 +99,7 @@ public class PrologSearchViewPage extends AbstractTextSearchViewPage {
 		IFile file = (IFile)match.getElement();
 		try {
 			//editor= EditorUtility.openInEditor(file, false);
-		    editor = IDE.openEditor(PDTPlugin.getDefault().getActivePage(),file);
+		    editor = IDE.openEditor(UIUtils.getActivePage(),file);
 		} catch (PartInitException e1) {
 			return;
 		}

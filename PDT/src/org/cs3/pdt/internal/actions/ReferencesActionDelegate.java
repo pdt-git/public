@@ -4,6 +4,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.PrologElementData;
@@ -35,7 +36,7 @@ public class ReferencesActionDelegate extends TextEditorAction {
 	 */
 public void run() {
 		final PDTPlugin plugin = PDTPlugin.getDefault();
-		plugin.getDisplay().asyncExec(new Runnable() {
+		UIUtils.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 //				if(PrologManager.getInstance().getClient().isInCall()) {
 //					String msg = "The predicate search cannot access the Prolog System, because the console may run in debug mode.";
@@ -46,7 +47,7 @@ public void run() {
 //					throw new RuntimeException(msg);
 //				}
 				try {
-						PrologElementData data = ((PLEditor) plugin
+						PrologElementData data = ((PLEditor) UIUtils
 								.getActiveEditor()).getSelectedPrologElement();
 						if(data == null)
 							return;

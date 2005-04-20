@@ -5,7 +5,7 @@ package org.cs3.pdt.internal.editors;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.ProblemCollector;
@@ -124,14 +124,14 @@ public class MarkerProblemCollector implements ProblemCollector {
                 Debug.error("problem creating markers");
                 Debug.report(e1);
             }
-            PDTPlugin.getDefault().getDisplay().syncExec(new Runnable() {
+            UIUtils.getDisplay().syncExec(new Runnable() {
                 public void run() {
                     try {
-                        PDTPlugin.getDefault().getActivePage().showView(
+                        UIUtils.getActivePage().showView(
                                 IPageLayout.ID_PROBLEM_VIEW);
-                        PDTPlugin.getDefault().getActiveEditor()
+                        UIUtils.getActiveEditor()
                                 .getEditorSite().getPage().activate(
-                                        PDTPlugin.getDefault()
+                                        UIUtils
                                                 .getActiveEditor());
                     } catch (PartInitException e) {
                         Debug.report(e);

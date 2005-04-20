@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.PrologElement;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
@@ -254,7 +255,7 @@ public class PrologOutline extends ContentOutlinePage {
                     .getSelection()).getFirstElement());
             int pos = element.getPosition();
             int len = element.getLength();
-            ((PLEditor) PDTPlugin.getDefault().getActiveEditor())
+            ((PLEditor) UIUtils.getActiveEditor())
                     .selectAndReveal(pos, len);
         }
     }

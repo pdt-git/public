@@ -6,15 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
-import org.cs3.pdt.internal.PDTPrologHelper;
-import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.views.PrologNode;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
@@ -22,35 +19,24 @@ import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.MetadataEngineInstaller;
-import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -87,7 +73,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 
     private String pdtModulePrefix = "";
 
-    private PDTPrologHelper prologHelper;
+    private DefaultMetaInfoProvider prologHelper;
 
     private PrologInterface prologInterface;
 
@@ -134,19 +120,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return rootLocator.subLocator(key);
     }
 
-    public IEditorPart getActiveEditor() {
-        try {
-            IWorkbenchPage page = getActivePage();
-            return page.getActiveEditor();
-        } catch (NullPointerException e) {
-            return null;
-        }
-    }
-
-    public IWorkbenchPage getActivePage() {
-        return getWorkbench().getActiveWorkbenchWindow().getActivePage();
-    }
-
     /**
      * shortcut for <code>getPrologInterface().getConsultService(key)</code>.
      * 
@@ -157,77 +130,11 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return getPrologInterface().getConsultService(key);
     }
 
-    public Display getDisplay() {
-        return getWorkbench().getDisplay();
-    }
-
     public IMetaInfoProvider getMetaInfoProvider() {
         if (prologHelper == null) {
-            prologHelper = new PDTPrologHelper(prologInterface, pdtModulePrefix);
+            prologHelper = new DefaultMetaInfoProvider(prologInterface, pdtModulePrefix);
         }
         return prologHelper;
-    }
-
-    public void showSourceLocation(SourceLocation loc) throws IOException {
-        IFile file=null;   
-		IPath fpath= new Path(loc.file);
-		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
-		
-		//see if it is a workspace path:
-		file = wsRoot.getFile(fpath );
-		boolean showLine;
-		if(file.exists()) {
-			showLine = false;			
-		}
-		else {
-			showLine = true;
-			file = findFileForLocation(loc.file);
-		}
-        
-        IWorkbenchPage page = PDTPlugin.getDefault().getActivePage();
-        IEditorPart part;
-        try {
-            part = IDE.openEditor(page, file);
-        } catch (PartInitException e) {
-            Debug.report(e);
-            return;
-        }
-        if (part instanceof PLEditor) {
-            PLEditor editor = (PLEditor) part;
-          
-			if(showLine)
-				editor.gotoLine(loc.line);
-			else
-				editor.gotoOffset(loc.line);
-        }
-		
-    }
-
-    /**
-     * @param file
-     * @return
-     * @throws IOException
-     */
-    private IFile findFileForLocation(String path) throws IOException {
-        IFile file = null;
-        IWorkspace workspace = ResourcesPlugin.getWorkspace();
-        IWorkspaceRoot root = workspace.getRoot();
-        IPath fpath;
-        
-		IFile[] files = PDTUtils.findFilesForLocation(path);
-        if (files == null || files.length == 0) {
-            throw new IllegalArgumentException("Not in Workspace: " + path);            
-        }
-        if (files.length > 1) {
-            Debug.warning("Mapping into workspace is ambiguous:" + path);
-            Debug.warning("i will use the first match found: " + files[0]);
-        }
-        file = files[0];
-        if (!file.isAccessible()) {
-            throw new RuntimeException("The specified file \"" + file
-                    + "\" is not accessible.");
-        }
-        return file;
     }
 
     /**
@@ -457,24 +364,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return true;
     }
 
-    public void setStatusErrorMessage(final String string) {
-        getDisplay().asyncExec(new Runnable() {
-            public void run() {
-                getActiveEditor().getEditorSite().getActionBars()
-                        .getStatusLineManager().setErrorMessage(string);
-            }
-        });
-    }
-
-    public void setStatusMessage(final String string) {
-        getDisplay().asyncExec(new Runnable() {
-            public void run() {
-                getActiveEditor().getEditorSite().getActionBars()
-                        .getStatusLineManager().setMessage(string);
-            }
-        });
-
-    }
+   
 
     /**
      * This method is called upon plug-in activation

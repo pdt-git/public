@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologSession;
@@ -41,7 +42,7 @@ public class ConsultAction implements IWorkbenchWindowActionDelegate {
      */
     public void run(IAction action) {
        PDTPlugin plugin = PDTPlugin.getDefault();
-    IEditorInput input = plugin.getActiveEditor().getEditorInput();
+    IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
        if (input==null){
            Debug.warning("Consult action triggered, but active editor input is null.");
        }

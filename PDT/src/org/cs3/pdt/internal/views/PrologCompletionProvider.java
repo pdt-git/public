@@ -12,19 +12,8 @@ import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
-	/**
-	 * @return Returns the prologInterface.
-	 */
-	public PrologInterface getPrologInterface() {
-		return prologInterface;
-	}
-	/**
-	 * @param prologInterface The prologInterface to set.
-	 */
-	public void setPrologInterface(PrologInterface prologInterface) {
-		this.prologInterface = prologInterface;
-	}
-    PrologInterface prologInterface=null;
+	
+    
 	private class _Result implements CompoletionResult{
 
         public String getOriginalLineContent() {
@@ -66,6 +55,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
         
     }
 	TreeSet completions=null;
+	private IMetaInfoProvider metaInfoProvider;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -73,10 +63,10 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	 *      int)
 	 */
 	public CompoletionResult doCompletion(String line, int pos) {
-	    if(prologInterface==null){
+	    if(metaInfoProvider==null){
 	    	return null;
 	    }
-		_Result r = new _Result();
+				_Result r = new _Result();
 		r.line = line;
 		r.pos=pos;		
 		String head = line.substring(0, pos);		
@@ -85,11 +75,10 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		String[] split = head.split("[^\\w]");
         String prefix = split[split.length-1];
 		
-		IMetaInfoProvider metaInfo = new DefaultMetaInfoProvider(prologInterface);
 		PrologElementData[] elems = null;
 		
 		try {
-			elems = metaInfo.getPredicatesWithPrefix(null, prefix);
+			elems = metaInfoProvider.getPredicatesWithPrefix(null, prefix);
 			r.options = new TreeSet();
 			
 			completions = new TreeSet();
@@ -139,5 +128,11 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			len ++;
 		}
 		return len -1;
+	}
+	public void setMetaInfoProvider(IMetaInfoProvider metaInfoProvider) {
+		this.metaInfoProvider=metaInfoProvider;		
+	}
+	public IMetaInfoProvider getMetaInfoProvider() {
+		return metaInfoProvider;
 	}
 }
