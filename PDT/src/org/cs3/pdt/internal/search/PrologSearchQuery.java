@@ -13,7 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -39,130 +41,109 @@ import org.eclipse.search.ui.text.Match;
 
 public class PrologSearchQuery implements ISearchQuery {
 
-    private PrologElementData data;
+	private PrologElementData data;
 
-    private PrologSearchResult result;
+	private PrologSearchResult result;
 
-    private HashMap fSearchViewStates = new HashMap();
+	private HashMap fSearchViewStates = new HashMap();
 
-    public PrologSearchQuery(PrologElementData data) {
-        this.data = data;
-        result = new PrologSearchResult(this, data);
-        // FIXME: Internal FileSearchPage, must implement
-        // AbstractTextSearchViewPage
-        //(new PrologSearchViewPage()).setInput(result,null);
+	public PrologSearchQuery(PrologElementData data) {
+		this.data = data;
+		result = new PrologSearchResult(this, data);
+		// FIXME: Internal FileSearchPage, must implement
+		// AbstractTextSearchViewPage
+		// (new PrologSearchViewPage()).setInput(result,null);
 
-    }
-    public IStatus run(IProgressMonitor monitor) {
-        try{
-            return run_impl(monitor);
-        }
-        catch(Throwable t){
-            Debug.report(t);
-            throw new RuntimeException(t);
-        }
-    }
-    private IStatus run_impl(IProgressMonitor monitor) throws CoreException, BadLocationException, IOException {
+	}
 
-        
-            String title = data.getSignature();
-            if (data.isModule())
-                title += "  Search for modules not supported yet!";
-            if (!data.isModule()) {
-                PrologSession client;
-                client = PDTPlugin.getDefault()
-                        .getPrologInterface().getSession();
-                //				
-                List solutions = client.queryAll(PDTPlugin.MODULEPREFIX
-                        + "get_references(" + data.getSignature()
-                        + ",FileName,Line,Name,Arity)");
-                int pos = 10;
-                for (Iterator iter = solutions.iterator(); iter.hasNext();) {
-                    Map solution = (Map) iter.next();
-                    HashMap attributes = new HashMap();
-                    String fileName = solution.get("FileName").toString();
-                    if(fileName.startsWith("'")){
-                        fileName=fileName.substring(1,fileName.length()-1);
-                    }
-                    java.io.File ioFile;
-                    ioFile = (new File(fileName)).getCanonicalFile();
-                    Path path = new Path(ioFile.getAbsolutePath());
+	public IStatus run(IProgressMonitor monitor) {
+		try {
+			return run_impl(monitor);
+		} catch (Throwable t) {
+			Debug.report(t);
+			return new Status(Status.ERROR,PDT.PLUGIN_ID,42,"Exception caught during search.",t);
+		}
+	}
 
-                    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-                    IWorkspaceRoot root = workspace.getRoot();
+	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
+			BadLocationException, IOException {
 
-                    IFile[] files = root.findFilesForLocation(path);
-                    if (files == null || files.length == 0) {
-                        Debug.warning("Not in Workspace: " + path);
-                        continue;
-                    }
-                    if (files.length > 1) {
-                        Debug.warning("Mapping into workspace is ambiguose:"
-                                + path);
-                        Debug.warning("i will use the first match found: "
-                                + files[0]);
-                    }
-                    IFile iFile = files[0];
-                    if (!iFile.isAccessible()) {
-                        Debug.warning("The specified file \"" + iFile
-                                + "\" is not accessible.");
-                        continue;
-                    }
+		String title = data.getSignature();
+		if (data.isModule()){
+			title += "  Search for modules not supported yet!";
+		}
+		else{
+			PrologSession session;
+			session = PDTPlugin.getDefault().getPrologInterface().getSession();
+				
+			try {
 
-                    int line = Integer
-                            .parseInt(solution.get("Line").toString());
-                    
-                    String originalContents = Util.toString(iFile.getContents());
-                    IDocument document = new Document(originalContents);
-                    IRegion region = document.getLineInformation(
-                            line);
-                    FindReplaceDocumentAdapter findAdapter = new FindReplaceDocumentAdapter(
-                            document);
+				String queryString = PDTPlugin.MODULEPREFIX
+						+ "get_references(" + data.getSignature()
+						+ ",FileName,Line,Name,Arity)";
+				List solutions = session.queryAll(queryString);
+				int pos = 10;
+				for (Iterator iter = solutions.iterator(); iter.hasNext();) {
+					Map solution = (Map) iter.next();
+					HashMap attributes = new HashMap();
+					String fileName = solution.get("FileName").toString();
+					if (fileName.startsWith("'")) {
+						fileName = fileName.substring(1, fileName.length() - 1);
+					}
 
-                    //TODO: provide correct RegEx and find ALL occurances in
-                    // the current predicate (by now it is just the first)
-                    // and add all rule heads to the result, too - modify
-                    // get_references/5.
-                    IRegion resultRegion = findAdapter.find(region.getOffset(),
-                            data.getLabel(), true, true, true, false);
+					IFile file = PDTUtils.findFileForLocation(fileName);
 
-                    if (iFile != null && resultRegion != null) {
+					int line = Integer
+							.parseInt(solution.get("Line").toString());
 
-                        //query.addMatch(new FileMatch(iFile, 0,
-                        // Integer.parseInt(line)));
+					String originalContents = Util.toString(file.getContents());
+					IDocument document = new Document(originalContents);
+					IRegion region = document.getLineInformation(line);
+					FindReplaceDocumentAdapter findAdapter = new FindReplaceDocumentAdapter(
+							document);
 
-                        result.addMatch(new Match(iFile, resultRegion
-                                .getOffset(), resultRegion.getLength()));
-                    } else {
-                        String msg = "Cannot find the file'" + path
-                                + "' in the workspace.";
-                        System.out.println(msg);
-                        UIUtils.setStatusErrorMessage(msg);
-                    }
+					// TODO: provide correct RegEx and find ALL occurances in
+					// the current predicate (by now it is just the first)
+					// and add all rule heads to the result, too - modify
+					// get_references/5.
+					IRegion resultRegion = findAdapter.find(region.getOffset(),
+							data.getLabel(), true, true, true, false);
 
-                    //solution = client.next();
-                }
-            }
-            //manager.stop();
-            //fView.searchFinished();
-        
-        return Status.OK_STATUS;
-    }
+					if (file != null && resultRegion != null) {
+						result.addMatch(new Match(file, resultRegion
+								.getOffset(), resultRegion.getLength()));
+						Debug.debug("Found reference: " + file + ", offset: "
+								+ resultRegion.getOffset() + ", length: "
+								+ resultRegion.getLength());
+					} else {
+						String msg = "Cannot find the file'" + fileName
+								+ "' in the workspace.";
+						Debug.warning(msg);
+						UIUtils.setStatusErrorMessage(msg);
+					}
 
-    public String getLabel() {
-        return "Prolog Query: " + data.getSignature();
-    }
+				}
+			} finally{
+				session.dispose();
+			}
+		}
+		return Status.OK_STATUS;
+	}
 
-    public boolean canRerun() {
-        return true;
-    }
+	public String getLabel() {
+		return "Prolog Query: " + data.getSignature();
+	}
 
-    public boolean canRunInBackground() {
-        return false;
-    }
+	public boolean canRerun() {
+		return true;
+	}
 
-    public ISearchResult getSearchResult() {
-        return result;
-    }
+	public boolean canRunInBackground() {
+		return false;
+	}
+
+	public ISearchResult getSearchResult() {
+		return result;
+	}
 
 }
