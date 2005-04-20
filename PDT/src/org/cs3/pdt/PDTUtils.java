@@ -115,12 +115,13 @@ public final class PDTUtils {
 	 * @throws IOException
 	 */
 	public static IFile findFileForLocation(String path) throws IOException {
-	    IFile file = null;
-	    IWorkspace workspace = ResourcesPlugin.getWorkspace();
-	    IWorkspaceRoot root = workspace.getRoot();
-	    IPath fpath;
 	    
-		IFile[] files = findFilesForLocation(path);
+	    return findFileForLocation(new Path(path));
+	}
+
+	public static IFile findFileForLocation(Path path) {
+		IFile file = null;
+	    IFile[] files = findFilesForLocation(path);
 	    if (files == null || files.length == 0) {
 	        throw new IllegalArgumentException("Not in Workspace: " + path);            
 	    }
@@ -133,7 +134,7 @@ public final class PDTUtils {
 	        throw new RuntimeException("The specified file \"" + file
 	                + "\" is not accessible.");
 	    }
-	    return file;
+	    return file;		
 	}
 
 	

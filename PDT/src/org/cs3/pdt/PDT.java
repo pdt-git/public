@@ -55,6 +55,7 @@ public interface PDT {
      * the default to use for PROP_SOURCE_PATH
      */
     public static final String PREF_SOURCE_PATH_DEFAULT = "pdt.source.path.default";
+	public static final String PLUGIN_ID = "org.cs3.pdt";
 
     /**
      * a path.separator-separated list of project relative paths pointing to the
