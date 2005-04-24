@@ -1,6 +1,8 @@
 /*
  */
-package org.cs3.pl.parser;
+package org.cs3.pl.metadata.tests;
+
+import org.cs3.pl.parser.StringLineBreakInfoProvider;
 
 import junit.framework.TestCase;
 
