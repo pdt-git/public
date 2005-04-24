@@ -5,6 +5,7 @@ package org.cs3.pdt.internal.builder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -57,7 +58,12 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         checker.compile(fileName, file.getContents(), lineInfo);
         PDTPlugin plugin = PDTPlugin.getDefault();
         ConsultService meta = plugin.getConsultService(PDT.CS_METADATA);
-        checker.saveMetaDataForClauses(meta.getOutputStream(fileName));
+        PrintStream outputStream = meta.getOutputStream(fileName);
+		try{
+			checker.saveMetaDataForClauses(outputStream);
+		}finally{
+			outputStream.close();
+		}
         if (collector.getMaxSeverity() < IMarker.SEVERITY_ERROR) {
             autoConsult(file);
         }
