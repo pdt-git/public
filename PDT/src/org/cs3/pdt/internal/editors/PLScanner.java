@@ -71,7 +71,9 @@ public class PLScanner extends RuleBasedScanner {
                 Debug.report(e);
             }
             finally{
-                session.dispose();
+				if(session!=null){
+					session.dispose();
+				}
             }
 	    }
 	}

@@ -10,18 +10,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
@@ -45,9 +43,9 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
 
     public class PrologContextInformation implements IContextInformation {
 
-        private PrologElementData data;
+        private Predicate data;
 
-        public PrologContextInformation(PrologElementData data) {
+        public PrologContextInformation(Predicate data) {
             this.data = data;
         }
 
@@ -304,14 +302,14 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
         IFileEditorInput editorInput = (IFileEditorInput) UIUtils
                 .getActiveEditor().getEditorInput();
         String activeFileName = editorInput.getFile().getFullPath().toString();
-        PrologElementData[] elems = null;
+        Predicate[] elems = null;
         ;
         try {
             elems = prologHelper.getPredicatesWithPrefix(module, prefix,
                     activeFileName);
         } catch (PrologException e) {
             Debug.report(e);
-            elems = new PrologElementData[0];
+            elems = new Predicate[0];
         }
         addProposals(begin, len, prefix, proposals, elems);
     }
@@ -325,7 +323,7 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
      * @return
      */
     private List addProposals(int begin, int len, String prefix,
-            List proposals, PrologElementData[] elems) throws IOException {
+            List proposals, Predicate[] elems) throws IOException {
         Set unique = new HashSet();
 
         for (int i = 0; i < elems.length; i++) {
@@ -391,22 +389,12 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
      * @return
      * @throws IOException
      */
-    private String getHelp(PrologElementData data) throws IOException {
-        PDTPlugin plugin = PDTPlugin.getDefault();
-        PrologInterface pif = plugin.getPrologInterface();
-        PrologSession session = pif.getSession();
-        Map table = null;
-        try {
-            table = session.query(PDTPlugin.MODULEPREFIX + "manual_entry("
-                    + data.getLabel() + "," + data.getArity() + ",Info)");
-        } catch (PrologException e) {
-            Debug.report(e);
-        } finally {
-            session.dispose();
-        }
-        if (table != null)
-            return table.get("Info").toString().replaceAll("\\\\n", "\n");
-        return null;
+    private String getHelp(Predicate data) throws IOException {
+        
+		PDTPlugin plugin = PDTPlugin.getDefault();
+		IMetaInfoProvider metaInfoProvider = plugin.getMetaInfoProvider();
+		
+        return metaInfoProvider.getHelp(data);
     }
 
     /**
@@ -418,11 +406,26 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
      */
     private String getHelp(ITextViewer viewer, int documentOffset)
             throws BadLocationException, IOException {
-        PrologElementData data = PLEditor.getPrologDataFromOffset(viewer
+        Goal data = PLEditor.getPrologDataFromOffset(viewer
                 .getDocument(), documentOffset);
-        if (data == null)
-            return null;
-        return getHelp(data);
+        if (data == null){
+			return null;
+        }
+		PDTPlugin plugin = PDTPlugin.getDefault();
+		IMetaInfoProvider metaInfoProvider = plugin.getMetaInfoProvider();
+		Predicate[] preds = metaInfoProvider.findPredicates(data);
+		//FIXME: what about alternatives?
+		if(preds==null||preds.length==0){
+			return null;
+		}
+        String help = metaInfoProvider.getHelp(preds[0]);
+		if(preds.length>1){
+			help+="\n--------\n NOTE: I found more than one predicate matching the signature" +
+					" '"+data+"'\n" +
+							"Sorry, but code analysis is still work in progress. For now i will" +
+							"simply ignore all but the first match";
+		}
+		return help;
 
     }
 

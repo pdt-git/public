@@ -13,6 +13,8 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.PrologException;
 
@@ -98,11 +100,15 @@ public class PrologDocWriter extends HTMLWriter {
 
 
     private OutputStream output;
+
+
+	private IMetaInfoProvider metaInfoProvider;
    
     /** Creates a new instance of DocWriter */
-    public PrologDocWriter(OutputStream output) {
+    public PrologDocWriter(OutputStream output,IMetaInfoProvider metaInfoProvider) {
         super("stylesheet.css");
         this.output=output;
+		this.metaInfoProvider=metaInfoProvider;
         setWriter(new BufferedWriter(new OutputStreamWriter(output)));
     }
 
@@ -141,10 +147,10 @@ public class PrologDocWriter extends HTMLWriter {
             "<BR>\n");
     }
 
-    void writeDetailEntry(PrologElementData data) throws IOException {
+    void writeDetailEntry(Predicate data) throws IOException {
     	String help = null;
-    	try {
-            help=data.getHelp();
+    	try {            
+			help=metaInfoProvider.getHelp(data);
         } catch (PrologException e) {
             Debug.report(e);
         }
@@ -215,7 +221,7 @@ public class PrologDocWriter extends HTMLWriter {
 //    }
     
     
-    void writeSection(boolean bSummary, String title, PrologElementData[] elements) throws IOException {
+    void writeSection(boolean bSummary, String title, Predicate[] elements) throws IOException {
         if (bSummary)
             writeTableHead(title, "Summary");
         else {
@@ -238,10 +244,11 @@ public class PrologDocWriter extends HTMLWriter {
 
     }
     
-    public void writeSummaryEntry(PrologElementData data) throws IOException {
+    public void writeSummaryEntry(Predicate data) throws IOException {
         String summary=null;
         try {
-            summary = data.getSummary();
+            
+			metaInfoProvider.getSummary(data);
         } catch (PrologException e) {
             Debug.report(e);
         }

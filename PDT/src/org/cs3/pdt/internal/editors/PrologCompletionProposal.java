@@ -2,7 +2,7 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -27,7 +27,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	private int fCursorPosition;
 	/** The image to be displayed in the completion proposal popup */
 	private Image fImage;
-	private PrologElementData data;
+	private Predicate data;
 	/** The additional info of this proposal */
 	//private String fAdditionalProposalInfo;
     private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
@@ -45,7 +45,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	 * @param replacementLength the length of the text to be replaced
 	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 */
-	public PrologCompletionProposal(PrologElementData data, int replacementOffset, int replacementLength,String prefix) {
+	public PrologCompletionProposal(Predicate data, int replacementOffset, int replacementLength,String prefix) {
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
 		fReplacementOffset= replacementOffset;

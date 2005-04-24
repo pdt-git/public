@@ -121,7 +121,7 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
     
 
 
-
+ 
 /*
    term_for_signature(+Name, +Arity, -Term)
 */

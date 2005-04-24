@@ -1,12 +1,6 @@
-/*
- * Created on 23.08.2004
- * 
- * TODO To change the template for this generated file go to Window -
- * Preferences - Java - Code Style - Code Templates
- */
+
 package org.cs3.pdt.internal.search;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,11 +13,13 @@ import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -35,24 +31,23 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.Match;
 
 public class PrologSearchQuery implements ISearchQuery {
 
-	private PrologElementData data;
+	private Predicate data;
 
 	private PrologSearchResult result;
 
 	private HashMap fSearchViewStates = new HashMap();
 
-	public PrologSearchQuery(PrologElementData data) {
+	public PrologSearchQuery(Predicate data) {
 		this.data = data;
 		result = new PrologSearchResult(this, data);
-		// FIXME: Internal FileSearchPage, must implement
-		// AbstractTextSearchViewPage
-		// (new PrologSearchViewPage()).setInput(result,null);
+		
 
 	}
 
@@ -67,64 +62,51 @@ public class PrologSearchQuery implements ISearchQuery {
 
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
 			BadLocationException, IOException {
-
-		String title = data.getSignature();
-		if (data.isModule()){
+		if(data==null){
+			Debug.error("Data is null!");
+			throw new NullPointerException();
+		}
+		String title = data==null?"oops, data is null?!" : data.getSignature();
+		if (false/*FIXME was: data.isModule()*/){
 			title += "  Search for modules not supported yet!";
 		}
 		else{
 			PrologSession session;
-			session = PDTPlugin.getDefault().getPrologInterface().getSession();
-				
-			try {
-
-				String queryString = PDTPlugin.MODULEPREFIX
-						+ "get_references(" + data.getSignature()
-						+ ",FileName,Line,Name,Arity)";
-				List solutions = session.queryAll(queryString);
-				int pos = 10;
-				for (Iterator iter = solutions.iterator(); iter.hasNext();) {
-					Map solution = (Map) iter.next();
-					HashMap attributes = new HashMap();
-					String fileName = solution.get("FileName").toString();
-					if (fileName.startsWith("'")) {
-						fileName = fileName.substring(1, fileName.length() - 1);
-					}
-
-					IFile file = PDTUtils.findFileForLocation(fileName);
-
-					int line = Integer
-							.parseInt(solution.get("Line").toString());
-
-					String originalContents = Util.toString(file.getContents());
-					IDocument document = new Document(originalContents);
-					IRegion region = document.getLineInformation(line);
-					FindReplaceDocumentAdapter findAdapter = new FindReplaceDocumentAdapter(
-							document);
-
-					// TODO: provide correct RegEx and find ALL occurances in
-					// the current predicate (by now it is just the first)
-					// and add all rule heads to the result, too - modify
-					// get_references/5.
-					IRegion resultRegion = findAdapter.find(region.getOffset(),
-							data.getLabel(), true, true, true, false);
-
-					if (file != null && resultRegion != null) {
-						result.addMatch(new Match(file, resultRegion
-								.getOffset(), resultRegion.getLength()));
-						Debug.debug("Found reference: " + file + ", offset: "
-								+ resultRegion.getOffset() + ", length: "
-								+ resultRegion.getLength());
-					} else {
-						String msg = "Cannot find the file'" + fileName
-								+ "' in the workspace.";
-						Debug.warning(msg);
-						UIUtils.setStatusErrorMessage(msg);
-					}
-
+			PDTPlugin plugin = PDTPlugin.getDefault();
+			IMetaInfoProvider mip = plugin.getMetaInfoProvider();
+			SourceLocation[] locations = mip.findReferences(data);
+			if(locations==null){
+				//FIXME: is it realy ok? --lu
+				return Status.OK_STATUS;
+			}
+			for (int i = 0; i < locations.length; i++) {
+				SourceLocation location = locations[i];
+				if (location.isRowBased){
+					String msg = "Sorry, i currently can not handle row-based locations.";
+					Debug.warning(msg);
+					UIUtils.setStatusErrorMessage(msg);
+					continue;
 				}
-			} finally{
-				session.dispose();
+				IRegion resultRegion = new Region(location.offset,location.endOffset-location.offset);
+				IFile file = null;
+				if(location.isWorkspacePath){
+					ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(location.file));
+				}
+				else{
+					file = PDTUtils.findFileForLocation(location.file);
+				}
+				if(file==null||! file.isAccessible()){
+					String msg = "Not found in workspace: "+location.file;
+					Debug.warning(msg);
+					UIUtils.setStatusErrorMessage(msg);
+					continue;
+				}
+				
+				result.addMatch(new Match(file, resultRegion
+						.getOffset(), resultRegion.getLength()));
+				Debug.debug("Found reference: " + file + ", offset: "
+						+ resultRegion.getOffset() + ", length: "
+						+ resultRegion.getLength());				
 			}
 		}
 		return Status.OK_STATUS;

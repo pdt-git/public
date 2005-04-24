@@ -6,24 +6,22 @@ import org.cs3.pl.prolog.PrologException;
 
 
 public interface IMetaInfoProvider {
-	/**
-	 * Retrieves the location or a predicate in the running prolog prozess.
-	 * 
-	 * @param functor
-	 *            The functor of the predicate.
-	 * @param arity
-	 *            The arity of the predicate.
-	 * @return null, if no location can be found.
-	 * @throws PrologException
-	 * @see SourceLocation
-	 */
-    public abstract SourceLocation getLocation(String label, int arity, String contextFile) throws PrologException;    
-    
-   public abstract PrologElementData[] getPredicatesWithPrefix(String module, String prefix, String activeFileName) throws PrologException;
 	
-	public abstract PrologElementData[] getPredicatesWithPrefix(String string, String prefix) throws NumberFormatException, PrologException;
-	
-	public abstract PrologElementData[] retrievePrologElements(String filename) throws PrologException;
+	public abstract Clause[] findClauses(Predicate p);
     
-	public abstract String getHelp(PrologElementData elm);
+	public abstract Predicate[] getPredicatesWithPrefix(String module, String prefix, String activeFileName) throws PrologException;
+	
+	public abstract Predicate[] getPredicatesWithPrefix(String string, String prefix) throws NumberFormatException, PrologException;
+	
+	public abstract Clause[] retrievePrologElements(String filename) throws PrologException;
+    
+	public abstract String getHelp(Predicate elm);
+	
+	public abstract SourceLocation[] findReferences(Predicate data);
+	
+	public abstract Predicate[] findPredicates(Goal data);
+	
+	public String getSummary(Predicate data) throws PrologException;
+	
+	
 }

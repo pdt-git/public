@@ -4,8 +4,7 @@
  */
 package org.cs3.pdt.internal.search;
 
-import org.cs3.pdt.internal.PrologElement;
-import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
@@ -16,7 +15,6 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.part.FileEditorInput;
 
 /**
@@ -26,13 +24,13 @@ import org.eclipse.ui.part.FileEditorInput;
 public class PrologSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter  {
 
 	private PrologSearchQuery query;
-	private PrologElementData data;
+	private Predicate data;
 	private final Match[] EMPTY_ARR= new Match[0];
 	/**
 	 * @param query
 	 * @param queryString
 	 */
-	public PrologSearchResult(PrologSearchQuery query, PrologElementData data) {
+	public PrologSearchResult(PrologSearchQuery query, Predicate data) {
 		this.query = query;
 		this.data = data;
 	}
@@ -46,7 +44,8 @@ public class PrologSearchResult extends AbstractTextSearchResult implements IEdi
 	}
 
 	public String getLabel() {
-		return "Prolog Search: " + data.getSignature();
+		
+		return "Prolog Search: " + (data==null ? "oops, data is null?!" :data.getSignature());
 	}
 
 	public String getTooltip() {
@@ -54,8 +53,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements IEdi
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-		PrologElement element = new PrologElement(data);
-		return ((IWorkbenchAdapter)element.getAdapter(IWorkbenchAdapter.class)).getImageDescriptor(null);
+//		PrologElementAdaptable element = new PrologElementAdaptable(data);
+//		return ((IWorkbenchAdapter)element.getAdapter(IWorkbenchAdapter.class)).getImageDescriptor(null);
+		return null;
 	}
 
 	public ISearchQuery getQuery() {

@@ -8,7 +8,7 @@ package org.cs3.pdt.internal.editors;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.Goal;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
@@ -21,7 +21,7 @@ import org.eclipse.jface.text.Document;
 public class PLEditorTest extends TestCase {
 	public void testGetPrologDataFromOffset() throws BadLocationException {
 		Document document = new Document("  , ahaha(a,b,c).");
-		PrologElementData data = PLEditor.getPrologDataFromOffset(document, 6);
+		Goal data = PLEditor.getPrologDataFromOffset(document, 6);
 		assertEquals("ahaha",data.getLabel());
 		assertEquals(3,data.getArity());
 

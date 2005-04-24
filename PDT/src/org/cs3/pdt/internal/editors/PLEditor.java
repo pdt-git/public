@@ -9,6 +9,8 @@ import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.metadata.PrologElementData;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -34,7 +36,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.editors.text.TextEditor;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -425,7 +426,7 @@ public class PLEditor extends TextEditor {
     /**
      * @return
      */
-    public PrologElementData getSelectedPrologElement()
+    public Goal getSelectedPrologElement()
             throws BadLocationException {
         Document document = (Document) getDocumentProvider().getDocument(
                 getEditorInput());
@@ -443,7 +444,7 @@ public class PLEditor extends TextEditor {
      * @param offset
      * @return
      */
-    public static PrologElementData getPrologDataFromOffset(IDocument document,
+    public static Goal getPrologDataFromOffset(IDocument document,
             int offset) throws BadLocationException {
         String line;
         int start = offset;
@@ -475,15 +476,15 @@ public class PLEditor extends TextEditor {
             if (buf.length() == 0)
                 return null;
             arity = Integer.parseInt(buf);
-            return new PrologElementData(elementName, arity);
+            return new GoalData(null,elementName, arity);
 
         }
         if (document.getLength() == endOfWhiteSpace
                 || document.getChar(endOfWhiteSpace) != '(') {
             if (elementName.endsWith(":"))
-                return new PrologElementData(elementName.substring(0,
+                return new GoalData(null,elementName.substring(0,
                         elementName.length() - 1), -1);
-            return new PrologElementData(elementName, 0);
+            return new GoalData(null,elementName, 0);
         }
 
         end = endOfWhiteSpace + 1;
@@ -516,7 +517,7 @@ public class PLEditor extends TextEditor {
                 end++;
         }
         line = document.get(start, end - start);
-        return new PrologElementData(elementName, arity);
+        return new GoalData(null,elementName, arity);
     }
 
     /**

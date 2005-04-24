@@ -6,6 +6,7 @@
  */
 package org.cs3.pl.doc;
 
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PrologElementData;
 
 /**
@@ -16,12 +17,12 @@ import org.cs3.pl.metadata.PrologElementData;
  */
 public class PrologModule {
 	
-	private PrologElementData[] elements; 
+	private Predicate[] elements; 
 	private String name;
 	private String fileName;
 	private String help;
 
-	public PrologModule(String name, String filename, String help, PrologElementData[] elements) {
+	public PrologModule(String name, String filename, String help, Predicate[] elements) {
 		this.name = name;
 		this.fileName = filename;
 		this.help = help;
@@ -31,7 +32,7 @@ public class PrologModule {
 	/**
 	 * @return Returns the elements.
 	 */
-	public PrologElementData[] getElements() {
+	public Predicate[] getElements() {
 		return elements;
 	}
 	/**

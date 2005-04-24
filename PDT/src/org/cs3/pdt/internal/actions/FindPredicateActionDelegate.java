@@ -7,7 +7,10 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.Clause;
+import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -43,7 +46,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	 */
 	public void run() {
 		try {
-			final PrologElementData data = ((PLEditor) editor)
+			final Goal data = ((PLEditor) editor)
 					.getSelectedPrologElement();
 			if (data == null) {
 				UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
@@ -69,6 +72,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					}
 					return Status.OK_STATUS;
 				}
+
+				
 			};
 			j.schedule();
 		} catch (Throwable t) {
@@ -80,24 +85,38 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	public void dispose() {
 	}
 
-	private void run_impl(PrologElementData data,IFile file) throws BadLocationException {
-
-		PrologSession session = plugin.getPrologInterface().getSession();
-		
-
-		final SourceLocation location = plugin.getMetaInfoProvider()
-				.getLocation(data.getLabel(), data.getArity(),
-						file.getFullPath().toString());
-		if (location == null) {
+	private void run_impl(Goal goal, IFile file) {
+		IMetaInfoProvider mip = plugin.getMetaInfoProvider();
+		Predicate[] predicates = mip.findPredicates(goal);
+		//FIXME: what about alternatives?
+		if(predicates==null||predicates.length==0){
 			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find predicate: " + data.getLabel()
+					"PDT Plugin", "Can't find predicate: " + goal.getLabel()
 							+ "/" //$NON-NLS-1$
-							+ data.getArity()
-							+ ".\nProbably it is a build in(TODO).");
+							+ goal.getArity()
+							+ ".\nSorry, Code analysis is still work in progress.");
 			return;
 		}
-		UIUtils.showSourceLocation(location);
-
+		if(predicates.length>1){
+			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
+					"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
+					+ goal.getLabel()+"/"+ goal.getArity()
+							+ ".\nSorry, Code analysis is still work in progress. " +
+									"For now i will just take you " +
+									"to the first match found.");
+		}
+		Clause[] clauses = mip.findClauses(predicates[0]);
+		if(clauses==null || clauses.length==0){
+			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
+					"PDT Plugin", "Can't find clauses for predicate: " + goal.getLabel()
+							+ "/" //$NON-NLS-1$
+							+ goal.getArity()
+							+ ".\nSorry, Code analysis is still work in progress.");
+			return;
+		}
+		UIUtils.showSourceLocation(clauses[0].getKnownDefinition());
 	}
+	
+	
 
 }

@@ -1,24 +1,14 @@
-/*
- * Created on 31.01.2004
- *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
 package org.cs3.pl.metadata;
 
 import java.io.Serializable;
 import java.util.Comparator;
-import java.util.Map;
 
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologSession;
 
 /**
- * @author xproot
+ * a tuple describing a logical prolog element like a predicate or a module..
+ * 
+ * 
  *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class PrologElementData implements Serializable, Comparable{
 
@@ -26,50 +16,68 @@ public class PrologElementData implements Serializable, Comparable{
      * Comment for <code>serialVersionUID</code>
      */
     private static final long serialVersionUID = 1L;
-    /* (non-Javadoc)
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
+    
+	protected String module;
 	protected String label;
 	protected int arity;
-	protected int pos;
-	
 	
 	protected boolean dynamic;
 	protected boolean multifile;
-	private int length;
-	private boolean pub;
+	protected boolean pub;
 
-	private PrologInterface prologInterface=null;
-	private String modulePrefix=""; 
+	protected String modulePrefix="";
+
+	protected SourceLocation knownDefinition = null;
+
+	protected boolean m_hasKnownDefinition;
+
+	protected boolean isKnown;
+	
 	
 	/**
 	 * @param name
 	 * @param arity
 	 */
-	public PrologElementData(String label, int arity,boolean pub, int pos,int length, boolean dynamic, boolean multifile) {
+	protected PrologElementData(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile, SourceLocation knownDefinition) {
 		this.pub = pub;
 		this.label = label;
 		this.arity = arity;
-		this.pos = pos;
-		this.length = length;
 		this.dynamic = dynamic;
 		this.multifile =multifile;
-		
-//		if (dynamic)
-//			imageDescriptorId = ImageRepository.PE_DYNAMIC;
-//		if (multifile)
-//			imageDescriptorId = ImageRepository.PE_MULTIFILE;
+		this.module=module;		
+		this.isKnown=true;
+		this.knownDefinition=knownDefinition;
+		this.m_hasKnownDefinition=true;
 	}
 
 
 	/**
-	 * @param line
+	 * @param name
+	 * @param arity
 	 */
-	public PrologElementData(String line) {
-		label = getPredicateName(line);
-		arity = getPredicateArity(line);
+	protected PrologElementData(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile) {
+		this.pub = pub;
+		this.label = label;
+		this.arity = arity;
+		this.dynamic = dynamic;
+		this.multifile =multifile;
+		this.module=module;		
+		this.isKnown=true;
+		this.m_hasKnownDefinition=false;
 	}
-
+	
+	public int hashCode() {
+		return getSignature().hashCode();
+	}
+	public boolean equals(Object obj) {
+		if(obj==null){
+			return false;
+		}
+		if(obj instanceof PrologElementData){
+			return ((PrologElementData)obj).getSignature().equals(getSignature());
+		}
+		return super.equals(obj);
+	}
 
 	/**
 	 * Creates a PrologElementData Entity. This class is a container for
@@ -78,9 +86,12 @@ public class PrologElementData implements Serializable, Comparable{
 	 * @param elementName
 	 * @param arity if arity is -1 the element is a module.
 	 */
-	public PrologElementData(String elementName, int arity) {
+	protected PrologElementData(String module,String elementName, int arity) {
+		this.module=module;
 		label = elementName;
 		this.arity = arity;
+		this.isKnown=false;
+		this.m_hasKnownDefinition=false;
 	}
 
 
@@ -93,53 +104,51 @@ public class PrologElementData implements Serializable, Comparable{
 	public String getSignature() {
 		if(arity == -1)
 			return label + " (module)";
-		return label + "/" + arity;
+		return module+":"+label + "/" + arity;
 	}
 
 	public String toString() {
-		return getSignature()+ " ( pos " + pos + ")";
+		return getSignature();
 	}
 
 
-	public void setPosition(int pos) {
-		this.pos = pos;
-	}
+	
 
 
+	/**
+	 * @deprecated use getKnownDefinition.getOffset()
+	 * @return
+	 */
 	public int getPosition() {
-		return pos;
+		return knownDefinition==null?-1:knownDefinition.offset;
 	}
 
 
-	public void setArity(int arity) {
-		this.arity = arity;
-	}
 
 
 	public int getArity() {
 		return arity;
 	}
 
-	public void setDynamic(boolean dynamic) {
-		this.dynamic = dynamic;
-	}
+	
 
 	public boolean isDynamic() {
+		if(!isKnown){
+			throw new UnsupportedOperationException("Not enough information.");
+		}
 		return dynamic;
 	}
 
-	public void setMultifile(boolean multifile) {
-		this.multifile = multifile;
-	}
+	
 
 	public boolean isMultifile() {
+		if(!isKnown){
+			throw new UnsupportedOperationException("Not enough information.");
+		}
 		return multifile;
 	}
 
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
 
 
 	public String getLabel() {
@@ -151,69 +160,25 @@ public class PrologElementData implements Serializable, Comparable{
 		return line;
 	}
 	
-	/**
-	 * 
-	 * TODO This function must be replaced by a parser!
-	 * By now it count the number of counts the number of commas
-	 * that occure bevore the first ')'.
-	 * 
-	 * @author windeln
-	 * @return
-	 */
 	
-	
-	static public int getPredicateArity(String line) {
-		if (line.lastIndexOf(')') == -1)
-			return 0;
-		line = line.substring(0, line.lastIndexOf(')'));
-		int i = 1;
-		while(line.indexOf(',') != -1) {
-			line = line.substring(line.indexOf(',')+1);
-			i++;
-		}
-		return i;
-	}
 
-	public boolean belongsToSamePredicate(PrologElementData data){
-		if (data.arity == arity &&
-			data.label.equals(label))
+	public boolean belongsToSamePredicate(Clause data){
+		if (data.getArity() == arity &&
+			data.getLabel().equals(label))
 			return true;
 		else
 			return false;
 	}
 	/**
 	 * @return Returns the length.
+	 * @deprecated use getKnownDefinition.getEndOffset()-getKnownDefinition().getOffset()
 	 */
 	public int getLength() {
-		return length;
-	}
-	/**
-	 * @param length The length to set.
-	 */
-	public void setLength(int length) {
-		this.length = length;
+		return knownDefinition==null?-1:knownDefinition.endOffset-knownDefinition.offset;
 	}
 	
-	public String getHelp() throws PrologException {
-		if(prologInterface==null){
-			return "If i head a PrologInterface, i could give you more information...";
-		}
-		PrologSession session = prologInterface.getSession();
-		try {
-		    Map table = session.query(modulePrefix+"manual_entry("+getLabel()+","+getArity()+",Info)");
-		    if (table != null)
-		        return table.get("Info").toString();
-		    return null;
-		} finally {
-		    session.dispose();
-		}
-	}
-	public String getSummary() throws PrologException {
-		String help = getHelp();
-		if (help == null)
-			return null;
-		return help.substring(0,help.indexOf('\n'));
-	}
+	
+	
 
 	static public Comparator getComparator() {
 		return new Comparator() {
@@ -227,7 +192,7 @@ public class PrologElementData implements Serializable, Comparable{
 	}
 	
 	public int compareTo(Object arg0) {
-		return getSignature().compareTo(((PrologElementData)arg0).getSignature());
+		return getSignature().compareTo(((Predicate)arg0).getSignature());
 	}
 	
 
@@ -235,14 +200,12 @@ public class PrologElementData implements Serializable, Comparable{
  * @return Returns the pub.
  */
 public boolean isPublic() {
+	if(!isKnown){
+		throw new UnsupportedOperationException("Not enough information.");
+	}
 	return pub;
 }
-/**
- * @param pub The pub to set.
- */
-public void setPublic(boolean pub) {
-	this.pub = pub;
-}
+
 
 /**
  * @return checks if this prolog element is a module.
@@ -250,5 +213,34 @@ public void setPublic(boolean pub) {
 public boolean isModule() {
 	return arity == -1;
 }
+
+
+
+
+
+public SourceLocation getKnownDefinition() {
+	return knownDefinition;
+}
+
+
+public boolean hasKnownDefinition() {
+	return m_hasKnownDefinition;
+}
+
+
+public boolean isKnown() {
+	return isKnown;
+}
+
+
+public String getModule() {
+	return module;
+}
+
+
+
+
+
+
 
 }

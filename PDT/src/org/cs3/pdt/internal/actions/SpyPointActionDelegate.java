@@ -8,7 +8,8 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -45,7 +46,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
                 session = plugin.getPrologInterface().getSession();
                 String pred;
 
-                PrologElementData data;
+                Goal data;
                 try {
                     data = editor.getSelectedPrologElement();
                 } catch (BadLocationException e2) {
@@ -60,19 +61,29 @@ public class SpyPointActionDelegate extends TextEditorAction {
                     return;
 
                 }
-                if (data.isModule()) {
+				Predicate[] p = plugin.getMetaInfoProvider().findPredicates(data);
+				//FIXME what about alternatives?
+				
+                if (p==null||p.length==0) {
                     MessageDialog.openInformation(editor.getEditorSite()
                             .getShell(), "PDT Plugin", 
-                            "Cannot spy on a module " +": "+ data.getSignature()  //$NON-NLS-2$
+                            "Cannot find predicate: "+ data //$NON-NLS-2$
                                     + "."); //$NON-NLS-1$
                     return;
 
                 }
-                pred = data.getSignature();
+				if(p.length>1){
+					UIUtils.displayMessageDialog(UIUtils.getActiveEditor().getEditorSite().getShell(),
+							"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
+							+ data.getLabel()+"/"+ data.getArity()
+									+ ".\nSorry, Code analysis is still work in progress. " +
+											"For now i will ignore all but the first match.");
+				}
+                pred = p[0].getSignature();
 
                 if (spypred.get(pred) != null) {
                     try {
-                        session.query("nospy(" + pred + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+                        session.queryOnce("nospy(" + pred + ")"); //$NON-NLS-1$ //$NON-NLS-2$
                     } catch (PrologException e1) {
                         Debug.report(e1);
                         return;
@@ -80,7 +91,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
                     spypred.remove(pred);
                 } else {
                     try {
-                        session.query("spy(" + pred + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+                        session.queryOnce("spy(" + pred + ")"); //$NON-NLS-1$ //$NON-NLS-2$
                     } catch (PrologException e1) {
                         Debug.report(e1);
                         return;
