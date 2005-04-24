@@ -7,8 +7,6 @@
 package org.cs3.pl.parser;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,7 +23,10 @@ import java.util.TreeSet;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.doc.PrologModule;
+import org.cs3.pl.metadata.ClauseData;
+import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.PrologElementData;
+import org.cs3.pl.metadata.SourceLocation;
 
 
 
@@ -257,23 +258,7 @@ public class PrologCompiler extends PrologParserTraversal {
         //return msg.replaceAll(newLine,", ");
     }
 
-    /**
-     * 
-     * Compiles the File 'file'. This will set addMarkers to false, because
-     * there is no related IFile in the workspace avaiables.
-     * 
-     * @throws CoreException
-     * @throws IOException
-     *  
-     */
-    public void compile(File file) throws IOException {
-
-        addProblems = false;
-        publicModulePredicates = null;
-
-        compile(file.getCanonicalPath(), new FileInputStream(file),
-                new FileLineBreakInfoProvider(file));
-    }
+    
 
     public Object visit(ASTCompound node, Object data) {
         Integer arity = (Integer) pefs.get(node.getName());
@@ -414,25 +399,31 @@ public class PrologCompiler extends PrologParserTraversal {
         return DEFAULTMODULE;
     }
 
-    public PrologElementData getPrologElementData(ASTClause clause) {
+    public Clause getPrologElementData(ASTClause clause) {
         int lineOffset = getLineOffset(clause.getToken().beginLine);
-        PrologElementData data = new PrologElementData(clause.getName(), clause
-                .getArity(), false, lineOffset + clause.getToken().beginColumn
-                - 1, getLength(lineOffset, clause.getToken()), false, false);
-        HashMap map = getPublicModulePredicates();
-        if (map != null)
-            data.setPublic(getPublicModulePredicates().containsKey(
-                    data.getSignature()));
-        else
-            data.setPublic(true); //no module
+		
+		HashMap map = getPublicModulePredicates();
+		String moduleName = getModuleName();
+		String name = clause.getName();
+		int arity = clause
+                .getArity();
+		String sig = moduleName+":"+name + "/"
+        + arity;
+		
+		boolean isPublic = map==null||getPublicModulePredicates().containsKey(sig);
+        int length = getLength(lineOffset, clause.getToken());
+		int offset = lineOffset + clause.getToken().beginColumn
+                - 1;
+		int endOffset=offset+length;
+		SourceLocation sl = new SourceLocation(symbolicFileName,true,false);
+		sl.offset=offset;
+		sl.endOffset=endOffset;
+		Clause data = new ClauseData(moduleName,name, arity, isPublic,  false, false,sl);
         return data;
+        
     }
 
-    public PrologModule getModule() {
-        return new PrologModule(getModuleName(), symbolicFileName,
-                getModuleHelp(), getInterfaceElements());
-    }
-
+   
     /**
      * Returns the help information of the module. null, if no help exists.
      * 
@@ -483,24 +474,6 @@ public class PrologCompiler extends PrologParserTraversal {
         return (ASTNamedCall[]) list.toArray(new ASTNamedCall[0]);
     }
 
-    /**
-     * @return
-     */
-    public PrologElementData[] getInterfaceElements() {
-        PrologElementData[] elements = getPrologElements();
-        HashMap map = new HashMap();
-        final boolean isModule = isModule();
-
-        for (int i = 0; i < elements.length; i++) {
-            if ((!isModule || elements[i].isPublic())
-                    && !map.containsKey(elements[i].getSignature()))
-                map.put(elements[i].getSignature(), elements[i]);
-        }
-        elements = (PrologElementData[]) map.values().toArray(
-                new PrologElementData[0]);
-        java.util.Arrays.sort(elements, PrologElementData.getComparator());
-        return elements;
-    }
 
     protected HashMap publicModulePredicates = null;
 
@@ -509,17 +482,20 @@ public class PrologCompiler extends PrologParserTraversal {
     /**
      * @return
      */
-    protected HashMap getPublicModulePredicates() {
+    public HashMap getPublicModulePredicates() {
         if (publicModulePredicates == null && isModule()) {
             ASTList list = (ASTList) getUnit().jjtGetChild(0).jjtGetChild(0)
                     .jjtGetChild(1).jjtGetChild(1);
+			if(list.children==null){
+				return new HashMap();
+			}
             if(list.children.length % 3 != 0){
                 throw new RuntimeException("LD: i replaced an assert with this exception. if you see it, something went wrong :-)");
             }
             HashMap map = new HashMap();
 
             for (int i = 0; i < list.children.length; i = i + 3) {
-                String sig = ((ASTIdentifier) list.children[i]).getName() + "/"
+                String sig = getModuleName()+":"+((ASTIdentifier) list.children[i]).getName() + "/"
                         + ((ASTAtom) list.children[i + 2]).getName();
                 map.put(sig, sig);
             }
@@ -633,7 +609,7 @@ public class PrologCompiler extends PrologParserTraversal {
     		//HashMap publicElements = checker.getPublicModulePredicates();
     		for (Iterator iter = clauses.iterator(); iter.hasNext();) {
     			ASTClause clause = (ASTClause) iter.next();
-    			PrologElementData data = getPrologElementData(clause);
+    			Clause data = getPrologElementData(clause);
     			writer.write(METADATA+"('"+symbolicFileName+"'," + module 
     					+","+ data.getLabel()
     					+","+ data.getArity()
