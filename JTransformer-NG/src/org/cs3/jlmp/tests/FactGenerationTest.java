@@ -31,6 +31,7 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -1431,35 +1432,35 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         this.testDataLocator = testDataLocator;
     }
 
-    class _ProgressMonitor extends NullProgressMonitor {
-        public Object lock = new Object();
-
-        public boolean done = false;
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see org.eclipse.core.runtime.NullProgressMonitor#done()
-         */
-        public void done() {
-            done = true;
-            synchronized (lock) {
-                lock.notifyAll();
-            }
-        }
-
-        public void waitTillDone() {
-            while (!done) {
-                synchronized (lock) {
-                    try {
-                        lock.wait();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
-        }
-    };
+//    class _ProgressMonitor extends NullProgressMonitor {
+//        public Object lock = new Object();
+//
+//        public boolean done = false;
+//
+//        /*
+//         * (non-Javadoc)
+//         * 
+//         * @see org.eclipse.core.runtime.NullProgressMonitor#done()
+//         */
+//        public void done() {
+//            synchronized (lock) {
+//	            done = true;
+//                lock.notifyAll();
+//            }
+//        }
+//
+//        public void waitTillDone() {
+//                synchronized (lock) {
+//				while (!done) {
+//					try {
+//						lock.wait(1000);
+//					} catch (InterruptedException e) {
+//						throw new RuntimeException(e);
+//					}
+//				}
+//            }
+//        }
+//    };
 
     protected void build(String builder) throws CoreException {
         build(builder, new HashMap());
@@ -1467,26 +1468,39 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     protected void build(final String builder, final Map args)
             throws CoreException {
-        final _ProgressMonitor m = new _ProgressMonitor();
+//        final _ProgressMonitor m = new _ProgressMonitor();
         IProject project = getTestProject();
-        project.build(IncrementalProjectBuilder.FULL_BUILD, builder, args, m);
+        project.build(IncrementalProjectBuilder.FULL_BUILD, builder, args, null);
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
-        m.waitTillDone();
+        waitTillDone();
     }
 
-    protected void build(int kind) throws CoreException {
+    private void waitTillDone()  {
+		try {
+			JobManager.getInstance().join(ResourcesPlugin.FAMILY_AUTO_BUILD,null);
+			JobManager.getInstance().join(ResourcesPlugin.FAMILY_MANUAL_BUILD,null);
+		} catch (OperationCanceledException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	protected void build(int kind) throws CoreException {
         final IProject project = getTestProject();
-        _ProgressMonitor m = new _ProgressMonitor();
-        project.build(kind, m);
-        m.waitTillDone();
+//        _ProgressMonitor m = new _ProgressMonitor();
+        project.build(kind, new NullProgressMonitor());
+        waitTillDone();
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
     }
 
     protected void build() throws CoreException {
         final IProject project = getTestProject();
-        _ProgressMonitor m = new _ProgressMonitor();
-        project.build(IncrementalProjectBuilder.FULL_BUILD, m);
-        m.waitTillDone();
+//        _ProgressMonitor m = new _ProgressMonitor();
+        project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+        waitTillDone();
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
     }
 

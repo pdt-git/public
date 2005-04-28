@@ -7,6 +7,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 /**
  * defines constants and ids that are relevant to the JLMP Plugin.
@@ -113,4 +114,17 @@ public final class JLMP {
         JLMPProject[] r = new JLMPProject[l.size()];
         return (JLMPProject[]) l.toArray(r);
     }
+	
+	public static final ISchedulingRule JLMP_BUILDER_SCHEDULING_RULE = new MutexRule();
+
+	static class MutexRule implements ISchedulingRule {
+	      public boolean isConflicting(ISchedulingRule rule) {
+	         return rule == this;
+	      }
+	      public boolean contains(ISchedulingRule rule) {
+	         return rule == this || rule == ResourcesPlugin.getWorkspace().getRoot() ||
+			 ResourcesPlugin.getWorkspace().getRoot().contains(rule);
+	      }
+	}
+
 }

@@ -91,9 +91,15 @@ public class ReloadHook implements LifeCycleHook {
                     }
                     return Status.OK_STATUS;
                 }
+			      public boolean belongsTo(Object family) {
+				         return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+			      }
+				
             };
 
-            j.schedule();
+			j.setRule(JLMP.JLMP_BUILDER_SCHEDULING_RULE);
+			j.schedule();
+			
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);

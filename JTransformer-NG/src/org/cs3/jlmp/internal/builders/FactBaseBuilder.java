@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.JTree;
-
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
 import org.cs3.jlmp.JLMPProject;
@@ -42,8 +40,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -106,6 +106,7 @@ public class FactBaseBuilder {
 
     public synchronized void build(final IResourceDelta delta, final int flags,
             IProgressMonitor monitor) throws CoreException {
+		IJobManager jobManager = Platform.getJobManager();
         try {
             if (building) {
                 Debug.warning("skipping build");
@@ -114,9 +115,10 @@ public class FactBaseBuilder {
                 Debug.warning("doing build");
             }
             building = true;
-            if (monitor == null)
+            if (monitor == null) {
                 monitor = new NullProgressMonitor();
-
+            }
+			//jobManager.beginRule(JLMP.JLMP_BUILDER_SCHEDULING_RULE,monitor);
             build_impl(delta, flags, monitor);
 
         } catch (OperationCanceledException e) {
@@ -127,6 +129,7 @@ public class FactBaseBuilder {
                     "Could not create PEFs for Project.");
             Debug.report(t);
         } finally {
+			//jobManager.endRule(JLMP.JLMP_BUILDER_SCHEDULING_RULE);
             building = false;
             monitor.done();
             fireFactBaseUpdated();
