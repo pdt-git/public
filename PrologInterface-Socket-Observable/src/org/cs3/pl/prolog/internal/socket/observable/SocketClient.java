@@ -392,6 +392,8 @@ public class SocketClient {
 			//                }
 			//            }
 			if (current != owner && lockCounter > 0) {
+				Debug.error("the socket is locked by another thread. dumping connection log:");
+				Debug.error(socket.getLogBuffer().toString());
 				throw new IllegalThreadStateException(
 						"The client socket is locked by another thread: "
 								+ owner.getName());
@@ -478,10 +480,16 @@ public class SocketClient {
 		synchronized (ownerLock) {
 			Thread current = Thread.currentThread();
 			if (current != owner) {
+				Debug.error("the socket is locked by another thread. dumping connection log:");
+				Debug.error(socket.getLogBuffer().toString());
+				
 				throw new IllegalThreadStateException(
 						"current thread is not the owner!");
 			}
 			if (lockCounter <= 0) {
+				Debug.error("lockcounter == "+lockCounter+"?! Dumping connection log:");
+				Debug.error(socket.getLogBuffer().toString());
+				
 				throw new IllegalStateException(
 						"Wer hat in mein Töpfchen geschissen?!");
 			}
