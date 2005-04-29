@@ -162,6 +162,7 @@ public class PrologEventDispatcher {
                 thread.join();
                 client.close();
                 client=null;
+				thread=null;
             } catch (InterruptedException e) {
                 Debug.report(e);
                 throw new RuntimeException(e);
