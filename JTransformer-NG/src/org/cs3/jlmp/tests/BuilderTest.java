@@ -9,7 +9,7 @@ import junit.framework.TestSuite;
 
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.JLMPPlugin;
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -27,7 +27,7 @@ public class BuilderTest extends FactGenerationTest {
 	 * @see org.cs3.jlmp.tests.FactGenerationTest#setUpOnce()
 	 */
 	public void setUpOnce() throws Exception {
-	    setAutoBuilding(false);
+		setAutoBuilding(false);
 	    super.setUpOnce();
 		getTestJLMPProject().getPrologInterface();
 		ResourceFileLocator l = JLMPPlugin.getDefault().getResourceLocator("");
@@ -67,7 +67,11 @@ public class BuilderTest extends FactGenerationTest {
 		super.tearDown();
 		PrologInterface pif = getTestJLMPProject().getPrologInterface();
 		getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
-		pif.stop();
+		try{
+			pif.stop();
+		}catch(Throwable t){
+			Debug.report(t);
+		}
 	}
 	/**
 	 * @throws CoreException
@@ -75,6 +79,7 @@ public class BuilderTest extends FactGenerationTest {
 	 *  
 	 */
 	public void testRestart_with_pef_store() throws Throwable {
+		Debug.setDebugLevel("DEBUG");
 	    JLMPPlugin.getDefault().setPreferenceValue(JLMP.PREF_USE_PEF_STORE,"true");
 	    PrologInterface pif = getTestJLMPProject().getPrologInterface();
 		PrologSession session = pif.getSession();

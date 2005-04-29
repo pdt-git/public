@@ -2,7 +2,9 @@ package org.cs3.pdt;
 
 import java.util.Set;
 
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
@@ -50,6 +52,10 @@ public interface IPrologProject {
     
     public boolean isAutoConsulted(IFile file) throws CoreException;
     public void setAutoConsulted(IFile file,boolean val) throws CoreException;
+
+	public PrologInterface getPrologInterface();
+
+	public IProject getProject();
     
     
 }

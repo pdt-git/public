@@ -23,7 +23,10 @@ import org.cs3.pl.prolog.PrologSession;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class SourceCodeRegeneratorTest extends FactGenerationTest {
-
+	public void setUpOnce() throws Exception {
+		setAutoBuilding(false);
+		super.setUpOnce();
+	}
 	/**
      * @param name
      */

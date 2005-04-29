@@ -1,9 +1,16 @@
 package org.cs3.pdt;
 
+import java.util.ArrayList;
+
+import org.cs3.pl.prolog.PrologInterface;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+
 /**
  * All kinds of string keys used by the pdt.
  */
-public interface PDT {
+public final  class PDT {
 
     public static final String EP_HOOKS = "hooks";
     public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
@@ -113,6 +120,25 @@ public interface PDT {
      */
     public static final String PREF_CLIENT_LOG_FILE = "pdt.logfile";
 
-    
+	/**
+     * @return all open IPrologProjects that operate on the given PrologInterface instance.
+     * @throws CoreException
+     * @deprecated we wil find a more general solution in PDT 0.2
+     */
+    public  static IPrologProject[] getPrologProjects(PrologInterface pif) throws CoreException{
+        IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+        ArrayList l = new ArrayList();
+        for (int i = 0; i < projects.length; i++) {
+            IProject project = projects[i];            
+            if(project.isAccessible()&&project.hasNature(PDT.NATURE_ID)){
+                IPrologProject prologProject = (IPrologProject) project.getNature(PDT.NATURE_ID);
+                if(prologProject.getPrologInterface()==pif){
+                    l.add(prologProject);
+                }
+            }
+        }
+        IPrologProject[] r = new IPrologProject[l.size()];
+        return (IPrologProject[]) l.toArray(r);
+    }
 
 }

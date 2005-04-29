@@ -68,6 +68,9 @@
     <hook
           class="org.cs3.pdt.internal.hooks.ConsoleServerHook"
           id="org.cs3.pdt.internal.hooks.ConsoleServerHook"/>
+     <hook
+            class="org.cs3.pdt.internal.hooks.ReloadHook"
+            id="PDTReloadHook"/>
  </extension>
  <extension
        point="org.eclipse.ui.actionSets">

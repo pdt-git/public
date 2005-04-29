@@ -98,6 +98,7 @@ public final class JLMP {
     /**
      * @return all open JLMPProjects that operate on the given PrologInterface instance.
      * @throws CoreException
+     * @deprecated we wil find a more general solution in PDT 0.2
      */
     public  static JLMPProject[] getJLMPProjects(PrologInterface pif) throws CoreException{
         IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
