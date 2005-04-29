@@ -16,14 +16,15 @@
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.cs3.pdt"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.jdt.core"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.jdt.launching"/>
-      <import plugin="org.cs3.pdt.common"/>
       <import plugin="org.cs3.pdt.prologinterface"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.cs3.pdt.common"/>
+      <import plugin="org.cs3.pdt"/>
 
    </requires>
 
@@ -127,4 +128,23 @@
     </page>
  </extension> 
       <extension-point id="projectlistener" name="JLMP Project Listener" schema="schema/projectlistener.exsd"/>
+ <extension
+       point="org.eclipse.ui.actionSets">
+    <actionSet
+          label="JTransformer Actions"
+          visible="true"
+          id="org.cs3.jlmp.internal.actions">
+       <menu
+             label="JTransformer"
+             id="org.cs3.jlmp.menus.jtransformer">
+          <separator name="separator2"/>
+       </menu>
+       <action
+             label="selection to clipboard"
+             class="org.cs3.jlmp.internal.actions.FactsToClipboard"
+             style="push"
+             menubarPath="org.cs3.jlmp.menus.jtransformer/separator2"
+             id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
+    </actionSet>
+ </extension>      
 </plugin>
