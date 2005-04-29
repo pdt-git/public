@@ -3,6 +3,8 @@
 package org.cs3.pl.prolog.internal.socket.observable;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
@@ -11,6 +13,8 @@ import java.net.UnknownHostException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.LogBuffer;
+import org.cs3.pl.common.LoggingInputStream;
+import org.cs3.pl.common.LoggingOutputStream;
 import org.cs3.pl.common.SimpleLogBuffer;
 import org.cs3.pl.prolog.internal.Reusable;
 
@@ -19,8 +23,36 @@ import org.cs3.pl.prolog.internal.Reusable;
 public class ReusableSocket extends Socket implements Reusable {
 
     private LogBuffer logBuffer = new SimpleLogBuffer();
+	private LoggingInputStream myInput;
+	private OutputStream myOutput;
 
-    /**
+    public InputStream getInputStream() throws IOException {
+		if (isClosed())
+		    throw new SocketException("Socket is closed");
+		if (!isConnected())
+		    throw new SocketException("Socket is not connected");
+		if (isInputShutdown())
+		    throw new SocketException("Socket input is shutdown");
+		if(myInput==null){
+			myInput= new LoggingInputStream(super.getInputStream(),logBuffer);
+		}
+		return myInput;
+	}
+
+	public OutputStream getOutputStream() throws IOException {
+		if (isClosed())
+		    throw new SocketException("Socket is closed");
+		if (!isConnected())
+		    throw new SocketException("Socket is not connected");
+		if (isOutputShutdown())
+		    throw new SocketException("Socket output is shutdown");
+		if(myOutput==null){
+			myOutput= new LoggingOutputStream(super.getOutputStream(),logBuffer);
+		}
+		return myOutput;		
+	}
+
+	/**
      * 
      */
     public ReusableSocket() {

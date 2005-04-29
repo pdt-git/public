@@ -13,13 +13,11 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, char)
      */
-    public void log(String key, char c) {
-        setKey(key);
-        buf.append(c);        
-        cutHead();
+    public synchronized void log(String key, char c) {
+        log(key,new byte[]{(byte) c});
     }
 
-    private void cutHead(){
+    private synchronized void cutHead(){
         int cut = buf.length()-MAX_LENGTH;
         if(cut>0){
             buf.delete(0,Math.min(cut*2,buf.length()+1/2));
@@ -29,32 +27,30 @@ public class SimpleLogBuffer implements LogBuffer {
     /**
      * @param key
      */
-    private void setKey(String key) {
-        if(lastKey==null&& key!=null
+    private synchronized void setKey(String key) {
+		if(lastKey!=null){
+			buf.append("</"+lastKey+">\n");
+		}
+		
+		if(lastKey==null&& key!=null
                 || ! lastKey.equals(key)){
-            buf.append("</"+lastKey+">\n<"+key+">");
+			buf.append("<"+key+">");
             lastKey=key;
-        }
+        }			
         cutHead();
     }
 
-    /* (non-Javadoc)
-     * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, char[], int, int)
-     */
-    public void log(String key, char[] buf, int offset, int len) {
-        setKey(key);
-        this.buf.append(buf,offset,len);
-        cutHead();
-    }
+    
 
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, byte[], int, int)
      */
-    public void log(String key, byte[] buf, int offset, int len) {
+    public synchronized void log(String key, byte[] buf, int offset, int len) {
         setKey(key);
         if(len>0)
         {
-            this.buf.append(new String(buf,offset,len));
+            String string = new String(buf,offset,len);
+			this.buf.append(string);
         }
         else{
             this.buf.append("<<EOF>>");
@@ -65,19 +61,16 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, java.lang.String)
      */
-    public void log(String key, String s) {
-        setKey(key);
-        buf.append(s);
-        cutHead();
+    public synchronized void log(String key, String s) {
+        byte[] bytes = s.getBytes();
+		log(key,bytes,0,bytes.length);		
     }
 
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, byte[])
      */
-    public void log(String key, byte[] b) {
-        setKey(key);
-        buf.append(b);
-        cutHead();
+    public synchronized void log(String key, byte[] b) {
+		log(key,b,0,b.length);
     }
 
     
@@ -85,14 +78,14 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#printLog(java.io.PrintStream)
      */
-    public void printLog(PrintStream out) {
+    public synchronized void printLog(PrintStream out) {
        out.println(buf.toString());        
     }
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString() {     
+    public synchronized String toString() {     
         cutHead();
         return buf.toString();
     }

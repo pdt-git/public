@@ -49,15 +49,15 @@ public class SocketClient {
 	private class InputStreamProxy extends InputStream {
 		InputStream in;
 
-		private LogBuffer logBuf;
+		
 
 		/**
 		 * @param in
 		 */
-		public InputStreamProxy(InputStream in, LogBuffer logBuf) {
+		public InputStreamProxy(InputStream in) {
 			super();
 			this.in = in;
-			this.logBuf = logBuf;
+
 		}
 
 		public int available() throws IOException {
@@ -106,7 +106,7 @@ public class SocketClient {
 			try {
 
 				int read = in.read();
-				logBuf.log("read", (char) read);
+				
 				return read;
 			} finally {
 				unlock();
@@ -117,7 +117,7 @@ public class SocketClient {
 			lock();
 			try {
 				int read = in.read(b);
-				logBuf.log("read", b, 0, read);
+				
 				return read;
 			} finally {
 				unlock();
@@ -128,7 +128,7 @@ public class SocketClient {
 			lock();
 			try {
 				int read = in.read(b, off, len);
-				logBuf.log("read", b, off, read);
+				
 				return read;
 			} finally {
 				unlock();
@@ -158,15 +158,15 @@ public class SocketClient {
 	private class OutputStreamProxy extends OutputStream {
 		OutputStream out;
 
-		private LogBuffer logBuf;
+		
 
 		/**
 		 * @param out
 		 */
-		public OutputStreamProxy(OutputStream out, LogBuffer logBuf) {
+		public OutputStreamProxy(OutputStream out) {
 			super();
 			this.out = out;
-			this.logBuf = logBuf;
+			
 		}
 
 		public void close() throws IOException {
@@ -191,7 +191,7 @@ public class SocketClient {
 			lock();
 			try {
 				out.write(b);
-				logBuf.log("write", b);
+				
 			} finally {
 				unlock();
 			}
@@ -201,7 +201,7 @@ public class SocketClient {
 			lock();
 			try {
 				out.write(b, off, len);
-				logBuf.log("write", b, off, len);
+				
 			} finally {
 				unlock();
 			}
@@ -211,7 +211,7 @@ public class SocketClient {
 			lock();
 			try {
 				out.write(b);
-				logBuf.log("write", (char) b);
+				
 			} finally {
 				unlock();
 			}
@@ -363,16 +363,14 @@ public class SocketClient {
 		if (socket == null) {
 			throw new IllegalStateException("Socket is closed, go away. ");
 		}
-		return new InputStreamProxy(socket.getInputStream(), socket
-				.getLogBuffer());
+		return new InputStreamProxy(socket.getInputStream());
 	}
 
 	public OutputStream getOutputStream() throws IOException {
 		if (socket == null) {
 			throw new IllegalStateException("Socket is closed, go away. ");
 		}
-		return new OutputStreamProxy(socket.getOutputStream(), socket
-				.getLogBuffer());
+		return new OutputStreamProxy(socket.getOutputStream());
 	}
 
 	/**
