@@ -80,8 +80,10 @@ handle_client(InStream, OutStream):-
 	thread_detach(Me),
 	thread_exit(0).    
 	
-	handle_client_impl(InStream, OutStream):-
+handle_client_impl(InStream, OutStream):-
 	set_prolog_flag(float_format,'%.32g'),
+	thread_self(Me),
+	my_format(OutStream,"Thread ~w at your service.~n",[Me]),	
 	repeat,	
 	request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 	( handle_command(InStream,OutStream,Command)
