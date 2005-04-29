@@ -440,7 +440,7 @@ cond(subtype(_sub, _super)).
  * 
  * Only for object types.
  */
-
+   
 subtype(_sub, _sub).
 subtype(_sub, _super) :-
     extendsT(_sub,_super).
@@ -452,6 +452,9 @@ subtype(_sub, _super) :-
 subtype(_sub, _super) :-
     implementsT(_sub,_subsuper),
     subtype(_subsuper, _super).
+subtype(Var, _):-
+    nonvar(Var),
+    Var = null.
 
 %:- dynamic shareModifier/3.
 %:- multifile shareModifier/3.

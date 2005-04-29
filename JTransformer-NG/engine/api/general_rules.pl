@@ -206,6 +206,10 @@ getReceiver(_select, _Receiver) :- getFieldT(_select, _, _, _Receiver, _, _).
 
 getType(type(_kind,_class,_dim),type(_kind,_class,_dim)) :-  !.
 
+getType(Var,type(basic,null,0)) :- 
+    nonvar(Var),
+    Var = null.
+
 getType(_varDef, _Type) :-
     localDefT(_varDef, _,_, _Type, _,_).
     
@@ -255,10 +259,11 @@ getType(_select, _Type) :-
     selectT(_select,_,_,_,_,_ref),
     getType(_ref, _Type).
 
+getType(Array, Type) :-
+    newArrayT(Array,_,_,_,_,Type).
+
 %TODO: weiter Expressions
-
-getType(null, null).
-
+getType(null, type(class,null,0)).
 
 % optimiert f�r ident | selects
 getRefType(_ident, _Type) :-

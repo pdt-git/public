@@ -5,6 +5,7 @@ import java.util.Iterator;
 
 import org.cs3.pl.common.Debug;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
@@ -16,6 +17,10 @@ import org.eclipse.jdt.core.dom.Type;
  * @inheritDoc
  */
 public class VariableTypeResolver extends TypeResolver {
+	
+	public VariableTypeResolver(FQNTranslator fqnresolve, IIDResolver idresolver){
+		super(fqnresolve,idresolver);
+	}
 	private Hashtable types = new Hashtable();
 	private int varnum = 0;
 	
@@ -47,9 +52,18 @@ public class VariableTypeResolver extends TypeResolver {
 			buf.append("%%% referenced types %%%\n");
 			for (Iterator iterator = types.keySet().iterator(); iterator.hasNext();) {
 				ITypeBinding typeBinding = (ITypeBinding) iterator.next();
+				while(typeBinding.isArray())
+					typeBinding = typeBinding.getElementType();
 				String var = (String)types.get(typeBinding);
+				
+				if(typeBinding.isPrimitive())
+					continue;
+				IPackageBinding packageBinding = typeBinding.getPackage();
+				if (packageBinding == null) //
+					System.out.println("DEBUG");
 				if (!typeBinding.isNested())
-					buf.append("packageT(Pckg" + var +", '" +typeBinding.getPackage().getName()+"'),\n");
+					buf.append("packageT(Pckg" + var +", '" +
+							typeBinding.getPackage().getName()+"'),\n");
 				else 
 					Debug.warning("VariableTypeResolver: The nested class '" + typeBinding.getQualifiedName() + "' will not be fully qualified.");
 				buf.append("classDefT("+var+", Pckg" + var +", '" +typeBinding.getName()+"',_),\n");
@@ -84,7 +98,10 @@ public class VariableTypeResolver extends TypeResolver {
 	private void storeType(ITypeBinding bind) {
 		String fqn = bind.getQualifiedName();
 		if (types.get(fqn) == null) {
+			
 			String var = (String)vars.get(fqn);
+			if(var == null)
+				var = getClassTypeTerm(fqn,bind.getDimensions());
 			types.put(bind,var);
 		}
 	}

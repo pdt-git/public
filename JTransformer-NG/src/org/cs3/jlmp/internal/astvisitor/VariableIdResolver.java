@@ -30,16 +30,26 @@ public class VariableIdResolver extends IDResolver {
 //	}
 
 	public String getID(ASTNode node){
-		return VARPREFIX +  super.getID(node);
+		String id = super.getID(node);
+		return addPrefix(id);  
+	}
+
+	/**
+	 * @param id
+	 * @return
+	 */
+	private String addPrefix(String id) {
+		if(id.equals("'null'") ||id.equals("null"))
+			return id;
+		return VARPREFIX + id;
 	}
 
 	public String getID(IBinding iface) {
 		if (iface == null)
 			throw new IllegalArgumentException("Binding was not resolved");
 		if (localBindings.containsKey(iface))
-			return VARPREFIX +  localBindings.get(iface).toString();
-		String id = VARPREFIX +  provider.getID();
-		
+			return addPrefix(localBindings.get(iface).toString());
+		String id = addPrefix(provider.getID());
 		localBindings.put(iface.getKey(),id);
 		return id;
 	}

@@ -15,6 +15,8 @@ CT's:
 
 
 :- dynamic dirty_tree/1. 
+:- dynamic lastApplyInfo/1.
+:- dynamic lastApplyListInfo/1.
 :- dynamic changed/1. 
 :- dynamic rollback/1.
 :- dynamic debug_rollback_output/0.
@@ -48,18 +50,30 @@ debugme.
 :- dynamic human/1.
 :- dynamic cat/2.
 
-a.
-b.
-c.
-human(uwe).
-
 
 /** apply all ct's **/
-apply_ctlist([]).
-apply_ctlist([_head|_tail]) :-
+apply_ctlist([]):-!.
+apply_ctlist(List) :-
+	apply_ctlist_(List,ApplyInfo),
+	retractall(lastApplyListInfo(_)),
+	assert(lastApplyListInfo(ApplyInfo)),
+	length(ApplyInfo,Num),
+	format('~n===========================~napplied ~a CT:~n',[Num]),
+	forall(member(M,ApplyInfo),format('~w~n',M)).
+
+showApplyListInfo :-
+    lastApplyListInfo(ApplyInfo),
+	length(ApplyInfo,Num),
+	format('~n===========================~napplied ~a CT:~n',[Num]),
+    forall(member(M,ApplyInfo),format('~w~n',M)).
+    
+	
+apply_ctlist_([],[]).
+apply_ctlist_([_head|_tail],[S|ApplyInfoRest]) :-
         apply_ct(_head),
+        lastApplyInfo(S),
         !,
-        apply_ctlist(_tail).
+        apply_ctlist_(_tail,ApplyInfoRest).
 
 action(add(_elem)):-
         add(_elem).
@@ -156,6 +170,7 @@ apply_ct(_name) :-
     findall(_action,apply_pre(_preCondition,_action),_allActions),
     %quicksort(_allActions,_uniqueActions,[]),
     apply_all_post(_allActions),
+    add_apply_info_(_name,_allActions),
     assert1T(applied(_name)).
 
 
@@ -189,6 +204,17 @@ apply_post([_head| _tail]) :-
         apply_post(_tail).
 
 
+/**
+ *  add_apply_info_(+_name,+_allActions)
+ */
+add_apply_info_(_name,_allActions):-
+    length(_allActions,Num),
+	sformat(S,'applied ~w actions for the ct "~w"',[Num,_name]),
+	format('~w~n', [S]),
+	retractall(lastApplyInfo(_)),
+	assert(lastApplyInfo(S)).
+	
+ 
 
 /** check if all preconditions can be applied on fact base **/
 apply_pre(_pre,_action) :-
@@ -409,7 +435,6 @@ rollback :-
     (
       rollback(Term),
       call(Term),
-      term_to_atom(Term,Atom),
 	  (debug_rollback_output -> 
       	format('~w~n',[Term])
       	;true)

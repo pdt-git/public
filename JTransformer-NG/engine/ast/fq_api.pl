@@ -162,6 +162,10 @@ map_type_term(TypeTerm, FQNBrackets):-
     type_with_brackets(TypeName,Arity,FQNBrackets),
     !.
         
+map_type_term(TypeTerm, null):-
+    nonvar(TypeTerm),
+    TypeTerm = type(class,null,0).
+
 map_type_term(TypeTerm, FQNBrackets):-
     nonvar(FQNBrackets),
     type_with_brackets(TypeName,Arity,FQNBrackets),
@@ -176,6 +180,10 @@ map_type_term(type(class,Id,Arity), FQNBrackets):-
     fullQualifiedName(Id,FQN),
     type_with_brackets(FQN,Arity,FQNBrackets),
     !.
+
+test(map_type_term) :-
+    assert_true('gen null type', map_type_term(type(class,null,0),Var)),
+    assert_true('test null type', Var = null).
   
 /**
  * type_with_brackets(?TypeName,?Arity,?FQNBrackets) 
