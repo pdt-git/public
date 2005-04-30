@@ -79,7 +79,7 @@ handle_client(InStream, OutStream):-
 	thread_detach(Me),
 	thread_exit(0).    
 	
-	handle_client_impl(InStream, OutStream):-
+handle_client_impl(InStream, OutStream):-
 	repeat,
 	request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 	( handle_command(InStream,OutStream,Command)
@@ -133,10 +133,13 @@ handle_command(InStream,OutStream,'IS_CONSULTED'):-
 handle_command(InStream,OutStream,'QUERY'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
 	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
-	catch(
-		iterate_solutions(InStream,OutStream,Term,Vars),
-		query_aborted,
-		true
+	%catch(
+%		iterate_solutions(InStream,OutStream,Term,Vars),
+%		query_aborted,
+%		true
+%	).
+	( iterate_solutions(InStream,OutStream,Term,Vars)
+	; true
 	).
 	
 handle_command(InStream,OutStream,'QUERY_ALL'):-
@@ -161,8 +164,14 @@ all_solutions(OutStream,Term,Vars):-
 	user:forall(
 		Term,
 		(
-			consult_server:print_solution(OutStream,Vars)						
+			consult_server:print_solution(OutStream,Vars),
+			nb_setval(hasSolutions,1)
 		)		
+	),
+	(	nb_current(hasSolutions,1)
+	->	my_format(OutStream,"YES~n",[]),
+		nb_delete(hasSolutions)
+	;	my_format(OutStream,"NO~n",[])
 	).
 	
 	
@@ -213,7 +222,9 @@ print_value(Out,Val):-
 		write(Out, '>')
 	).
 	
-	
+handle_exception(InStream,OutStream,Error):-
+	var(Error),
+	handle_exception(InStream,OutStream,unbound_error_term).	
 	
 handle_exception(InStream,OutStream,peer_quit):-
 	catch(	

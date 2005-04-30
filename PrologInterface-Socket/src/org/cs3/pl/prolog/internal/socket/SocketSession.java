@@ -208,9 +208,13 @@ public class SocketSession implements PrologSession {
                     // solutions
                     return null;
                 }
-                if (SocketClient.OK.equals(line)) {//no
+                if (SocketClient.YES.equals(line)) {//no
                     // further
                     // solutions
+					/*
+					 * note: OK is only legal (according to the protocoo)
+					 * when preceeded by END_OF_SOLUTION. (
+					 */
                     return null;
                 }
             }else{ 

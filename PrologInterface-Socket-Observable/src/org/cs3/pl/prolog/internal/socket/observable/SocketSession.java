@@ -204,7 +204,7 @@ public class SocketSession implements PrologSession {
                     // solutions
                     return null;
                 }
-                if (SocketClient.OK.equals(line)) {//no
+                if (SocketClient.YES.equals(line)) {//no
                     // further
                     // solutions
                     return null;

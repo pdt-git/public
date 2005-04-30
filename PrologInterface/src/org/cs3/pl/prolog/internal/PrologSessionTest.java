@@ -2,6 +2,7 @@ package org.cs3.pl.prolog.internal;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -159,4 +160,28 @@ public class PrologSessionTest extends TestCase {
        assertEquals("c",(String)m.get(1));
        
     }
+	public void testQueryAll() throws Throwable{
+		PrologSession s = pif.getSession();
+		
+		List l =s.queryAll("member(A,[ich,du,muellers_kuh])");
+		assertEquals(3,l.size());
+		Vector v = new Vector();
+		for (Iterator it = l.iterator(); it.hasNext();) {
+			Map m = (Map) it.next();
+			v.add(m.get("A"));
+		}
+		assertEquals("ich",v.get(0));
+		assertEquals("du",v.get(1));
+		assertEquals("muellers_kuh",v.get(2));
+		
+		l =s.queryAll("member(ich,[ich,ich,muellers_kuh])");
+		assertEquals(2,l.size());		
+		for (Iterator it = l.iterator(); it.hasNext();) {
+			Map m = (Map) it.next();
+			assertEquals(0,m.size());
+		}
+		l =s.queryAll("member(und,[ich,du,muellers_kuh])");
+		assertEquals(0,l.size());		
+		
+	}
 }
