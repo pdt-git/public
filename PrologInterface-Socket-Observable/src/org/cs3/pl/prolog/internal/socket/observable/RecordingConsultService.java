@@ -148,7 +148,7 @@ public class RecordingConsultService implements ConsultService {
     protected PrintStream getOutputStream_impl(String s, boolean keepRecord) {
         String symbol = getPrefixedSymbol(s);
 
-        Debug.debug("prefix: " + prefix + ", s: " + s);
+        //Debug.debug("prefix: " + prefix + ", s: " + s);
         String string = "";
         try {
             ConsultOutputStream stream = new ConsultOutputStream(consultClient,
@@ -156,7 +156,7 @@ public class RecordingConsultService implements ConsultService {
             if (keepRecord) {
                 File file = getFile(s);
                 String filename = file.getAbsolutePath();
-                Debug.debug("record filename:" + filename);
+                //Debug.debug("record filename:" + filename);
                 if (!file.exists()) {
                     file.getParentFile().mkdirs();
                     file.createNewFile();

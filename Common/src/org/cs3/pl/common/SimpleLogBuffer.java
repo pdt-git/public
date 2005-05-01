@@ -51,9 +51,11 @@ public class SimpleLogBuffer implements LogBuffer {
         {
             String string = new String(buf,offset,len);
 			this.buf.append(string);
+			//Debug.debug(key+": "+string);
         }
         else{
             this.buf.append("<<EOF>>");
+			//Debug.debug(key+": <<EOF>>");
         }
         cutHead();
     }
