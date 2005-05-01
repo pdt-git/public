@@ -115,7 +115,7 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 				}
 
 			};
-			j.setRule(JLMP.JLMP_BUILDER_SCHEDULING_RULE);
+			j.setRule(ResourcesPlugin.getWorkspace().getRoot());
 			j.schedule();
 		} else {
 			// if the pif is not up yet, this is no problem at all: the reload

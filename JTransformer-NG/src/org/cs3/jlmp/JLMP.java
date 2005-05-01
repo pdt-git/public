@@ -115,17 +115,50 @@ public final class JLMP {
         JLMPProject[] r = new JLMPProject[l.size()];
         return (JLMPProject[]) l.toArray(r);
     }
-	
-	public static final ISchedulingRule JLMP_BUILDER_SCHEDULING_RULE = new MutexRule();
-
-	static class MutexRule implements ISchedulingRule {
-	      public boolean isConflicting(ISchedulingRule rule) {
-	         return rule == this;
-	      }
-	      public boolean contains(ISchedulingRule rule) {
-	         return rule == this || rule == ResourcesPlugin.getWorkspace().getRoot() ||
-			 ResourcesPlugin.getWorkspace().getRoot().contains(rule);
-	      }
+//  FIXME, XXX, TODO, Warning, warning, warning!!!
+// LogicAJ relies on this rule, it should use the workspaceroot instead	
+//
+/**
+ * This only exists temporarily so LogicAJ does not break.
+ * @deprecated use ResourcesPlugin.getWorkspace().getRoot() instead.
+ */	
+public static final ISchedulingRule JLMP_BUILDER_SCHEDULING_RULE = new ProxyRule();
+/**
+ * the idea is to keep the classloader from instantiating the resources plugin.
+ * 
+ * @deprecated only used as long as JLMP_BUILDER_SCHEDULING_RULE is used.
+ */
+static class ProxyRule implements ISchedulingRule{
+	ISchedulingRule target=null;
+	public ISchedulingRule getTarget() {
+		if(target==null){
+			target= ResourcesPlugin.getWorkspace().getRoot();
+		}
+		return target;
 	}
+	public boolean contains(ISchedulingRule rule) {
+		return getTarget().contains(rule);
+	}
+	public boolean isConflicting(ISchedulingRule rule) {
+		return getTarget().isConflicting(rule);
+	}
+	public boolean equals(Object obj) {	
+		return getTarget().equals(obj);
+	}
+	public int hashCode() {	
+		return getTarget().hashCode();
+	}
+	
+}
+//
+//	static class MutexRule implements ISchedulingRule {
+//	      public boolean isConflicting(ISchedulingRule rule) {
+//	         return rule == this;
+//	      }
+//	      public boolean contains(ISchedulingRule rule) {
+//	         return rule == this || rule == ResourcesPlugin.getWorkspace().getRoot() ||
+//			 ResourcesPlugin.getWorkspace().getRoot().contains(rule);
+//	      }
+//	}
 
 }

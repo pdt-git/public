@@ -115,6 +115,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
     protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
             throws CoreException {
         try {
+			Debug.debug("MetaDataBuilder.build(...) was triggered");
             String taskname = "building prolog metadata";
             ;
             Set forgetList = new HashSet();
@@ -137,11 +138,13 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 Debug.error("Wasn das für ein Buil kind jetzt?");
                 return null;
             }
-
+			Debug.debug("MetaDataBuilder.build(...) wants to forget: "+forgetList.toString());
+			Debug.debug("MetaDataBuilder.build(...) wants to build: "+buildList.toString());
             monitor.beginTask(taskname, forgetList.size() + buildList.size());
             forget(forgetList, new SubProgressMonitor(monitor, forgetList
                     .size()));
             build(buildList, new SubProgressMonitor(monitor, buildList.size()));
+			Debug.debug("MetaDataBuilder.build(...) is done.");
             monitor.done();
             return null;
         } catch (OperationCanceledException e) {

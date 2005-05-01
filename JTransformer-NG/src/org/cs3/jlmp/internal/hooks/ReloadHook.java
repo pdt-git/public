@@ -11,6 +11,7 @@ import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -63,13 +64,14 @@ public class ReloadHook implements LifeCycleHook {
      */
     public void afterInit(PrologInterface pif) {
         try {
-            IWorkspaceDescription wd = ResourcesPlugin.getWorkspace()
+            IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			IWorkspaceDescription wd = workspace
                     .getDescription();
             if (!wd.isAutoBuilding()) {
                 return;
             }
             IProgressMonitor monitor = new NullProgressMonitor();
-            IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
+            IProject[] projects = workspace.getRoot()
                     .getProjects();
             final JLMPProject[] jlmpProjects = JLMP.getJLMPProjects(pif);
             Job j = new Job("Building workspace") {
@@ -97,7 +99,8 @@ public class ReloadHook implements LifeCycleHook {
 				
             };
 
-			j.setRule(JLMP.JLMP_BUILDER_SCHEDULING_RULE);
+			//j.setRule(JLMP.JLMP_BUILDER_SCHEDULING_RULE);
+			j.setRule(workspace.getRoot());
 			j.schedule();
 			
         } catch (Throwable e) {
