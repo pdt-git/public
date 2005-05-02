@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.pdt.metadata"
    name="MetaData"
-   version="1.0.0">
+   version="0.1.1">
    <runtime>
       <library name="metadata.jar">
          <export name="*"/>

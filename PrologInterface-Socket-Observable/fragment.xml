@@ -3,10 +3,10 @@
 <fragment
    id="org.cs3.pdt.prologinterface.socket.observable"
    name="Prolog Interface Socket (Observable Spike)"
-   version="1.0.0"
+   version="0.1.1"
    provider-name="http://roots.iai.uni-bonn.de"
    plugin-id="org.cs3.pdt.prologinterface"
-   plugin-version="1.0.0">
+   plugin-version="0.1.1">
 
    <runtime>
       <library name="prologinterface-socket-observable.jar">

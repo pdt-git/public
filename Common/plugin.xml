@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.pdt.common"
    name="Common"
-   version="1.0.0">
+   version="0.1.1">
    <runtime>
       <library name="common.jar">
          <export name="*"/>

@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.pdt"
    name="PDT Plug-in"
-   version="0.1.0"
+   version="0.1.1"
    provider-name="http://roots.iai.uni-bonn.de"
    class="org.cs3.pdt.PDTPlugin">
 
