@@ -408,8 +408,8 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 			s.queryOnce("retractall(project_option('" + projectName + "'))");
 			s.queryOnce("assert(project_option('" + projectName
 					+ "', output_project('" + outputProject + "')))");
-			s.queryOnce("assert(project_option('" + projectName
-					+ "', output_folder('" + outputFolder + "')))");
+//			s.queryOnce("assert(project_option('" + projectName
+//					+ "', output_folder('" + outputFolder + "')))");
 			if (inplace) {
 				s.queryOnce("assert(project_option('" + projectName
 						+ "',inplace))");

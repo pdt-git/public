@@ -12,11 +12,19 @@
 %:- dynamic output_to_tmp/1.
 :- dynamic output_to_memory/2.
 
-outdir('out_faj/').
+
+outdir(A):-
+    project_option(_,output_project(A)).
+
+%outdir('out_faj/').
+%
 
 set_outdir(Dir):-
-    retractall(outdir(_)),
-    assert(outdir(Dir)).
+	findall(Project,(
+	          project_option(Project,output_project(_)),
+			  retractall(project_option(Project,output_project(_))), 
+		      assert(project_option(Project,output_project(Dir)))
+		      ),_).
 
 output_to_file.
 
