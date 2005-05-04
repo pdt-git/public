@@ -64,12 +64,16 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 			session = pif.getSession();
 			// result = manager.query("clause(test(Testname), _)");
 			suite = new TestSuite();
-			
+			IPrologInterfaceAdapter adapter = new IPrologInterfaceAdapter() {
+				public PrologInterface getPrologInterface() {
+					return pif;
+				}
+			};
 			List tests = session.queryAll("test_suite(Testname)");
 			for (Iterator iter = tests.iterator(); iter.hasNext();) {
 				Map test = (Map) iter.next();
 				String testname = (String) test.get("Testname");
-				suite.addTest(new TestPredicateTest(testname));
+				suite.addTest(new TestPredicateTest(testname,adapter));
 			}
 		} finally {
 			if (session != null)

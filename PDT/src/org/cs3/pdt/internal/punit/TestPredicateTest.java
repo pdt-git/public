@@ -8,17 +8,20 @@ import junit.framework.TestCase;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.omg.PortableServer.AdapterActivator;
 
 public class TestPredicateTest extends TestCase {
 	 
-	PrologInterface pif; 
+	PrologInterface pif;
+	private IPrologInterfaceAdapter adapter; 
 	
 	public TestPredicateTest() {
 		super();
 	}
 	
-	public TestPredicateTest(String testname) {
+	public TestPredicateTest(String testname,IPrologInterfaceAdapter adapter) {
 		super(testname);
+		this.adapter = adapter;
 	}
 	
 	protected void runTest() {
@@ -26,7 +29,7 @@ public class TestPredicateTest extends TestCase {
 		boolean failed = false;
 		PrologSession session = null;
 		try {
-			pif = PDTPlugin.getDefault().getPrologInterface();
+			pif = adapter.getPrologInterface();
 			session = pif.getSession();
 
 			if (session.queryOnce("clause(setUp('" + getName() + "'),_)") != null
