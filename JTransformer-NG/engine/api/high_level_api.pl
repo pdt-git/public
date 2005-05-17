@@ -66,6 +66,16 @@ createVarDefIdents           (_newParent, _oldList, _newList)
 :- dynamic isErrorWarningMessage/3.
 
 
+/**
+ * types(?ExprOrDeclarationList, ?typeTermList)
+ */
+
+types([],[]).
+types([Expr|Exprs], [Type|Types]):-   
+    getType(Expr,Type),
+    types(Exprs, Types).
+
+
 cond(src(_type)).
 
 src(Type):-   
@@ -159,9 +169,14 @@ concat(Left,Sub,Right,Atom):-
     
 cond(concat(_Sub,_Left,_Right)).	
 
+cond(type(_Name)).	
+type(Name):-
+    java_fq(classDefT(Name,_,_,_)).
+
 cond(class(_Name)).	
 class(Name):-
-    java_fq(classDefT(Name,_,_,_)).
+    java_fq(classDefT(Name,_,_,_)),
+    not(java_fq(interfaceT(Name))).
 
 action(delete(bodyFact(_encl))) :-
     !,
