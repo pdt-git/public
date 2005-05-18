@@ -82,6 +82,7 @@
              label="Prolo&amp;g"
              id="org.cs3.pdt.menus.Prolog">
           <separator name="separator1"/>
+          <separator name="separator2"/>
        </menu>
        <action
              label="restart"
@@ -103,6 +104,12 @@
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.consult"/>
+       <action
+             label="help"
+             class="org.cs3.pdt.internal.actions.HelpActionDelegatee"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator2"
+             id="org.cs3.pdt.internal.actions.help"/>
     </actionSet>
  </extension>
  <extension
