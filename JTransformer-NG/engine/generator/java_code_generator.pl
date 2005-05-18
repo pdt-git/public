@@ -20,6 +20,24 @@
 :- dynamic sourceFolder/1.
 :- dynamic align/1.
 :- dynamic gen_classfile_names/1.
+:- dynamic add_synthetic_methods/0.
+
+/**
+ * Public API
+ * generate_synthetic_methods(+Bool)
+ * 
+ * (De-)/Activate the generation of synthetic methods.
+ * The argument 'Bool' can be true or fail.
+ */
+generate_synthetic_methods(Generate) :-
+    Generate -> 
+   (
+      not(add_synthetic_methods) ->
+      assert(add_synthetic_methods);
+      true
+   );
+   retractall(add_synthetic_methods).
+
 align(0).
 
 throwMsg(Msg,Element):-
@@ -285,6 +303,10 @@ gen_modifier(_id) :-
 
 
 filter_modifieres([],[]).
+
+filter_modifieres(['synthetic' | _t],_T):-
+    !,
+    filter_modifieres(_t, _T).
 
 filter_modifieres(['aspect' | _t],_T):-
     !,
@@ -678,10 +700,12 @@ gen_tree(_id) :-
     methodDefT(_id, _pid, '<clinit>', _args, _ret, _exc, _body),
     !,
     (
+%TODO: bad for aspects, advices on default initializers are ignored!
     	(
+     	    not(add_synthetic_methods),
     		modifierT(_id,'synthetic'),
     		!
-    	);(
+   	);(
     		gen_modifier(_id),
 		    gen_method_body(_body),
 		    println
@@ -694,7 +718,9 @@ gen_tree(_id) :-
 %    debug_this_line(_id),
     !,
     (
+%TODO: bad for aspects, advices on default constructors are ignored!
     	(
+    	    not(add_synthetic_methods),
     		modifierT(_id,'synthetic'),
     		!
     	);(
