@@ -105,8 +105,14 @@
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.consult"/>
        <action
+             label="guitracer"
+             class="org.cs3.pdt.internal.actions.GuitracerActionDelegate"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator1"
+             id="org.cs3.pdt.internal.actions.guitracer"/>
+       <action
              label="help"
-             class="org.cs3.pdt.internal.actions.HelpActionDelegatee"
+             class="org.cs3.pdt.internal.actions.HelpActionDelegate"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator2"
              id="org.cs3.pdt.internal.actions.help"/>

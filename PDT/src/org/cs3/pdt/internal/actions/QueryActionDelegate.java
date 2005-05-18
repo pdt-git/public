@@ -23,16 +23,21 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
  * @author rho
  *
  */
-public class QueryActionDelegatee implements IWorkbenchWindowActionDelegate {
+public class QueryActionDelegate implements IWorkbenchWindowActionDelegate {
 
 	private String query;
 	private String progressInfo;
+	private boolean onConsoleThread;
 	
-	public QueryActionDelegatee(String query,String progressInfo) {
+	public QueryActionDelegate(String query,String progressInfo, boolean onConsoleThread) {
 		this.query = query;
 		this.progressInfo = progressInfo;
+		this.onConsoleThread = onConsoleThread;
 	}
-    public void dispose() {
+    public QueryActionDelegate(String query, String progressInfo) {
+		this(query,progressInfo,false);
+	}
+	public void dispose() {
 
     }
 
@@ -56,7 +61,10 @@ public class QueryActionDelegatee implements IWorkbenchWindowActionDelegate {
                                 .getDefault().getPrologInterface();
                         PrologSession session = prologInterface.getSession();
                         try{
-                            session.queryOnce("thread_signal(main,("+query+"))");
+                        	if(onConsoleThread)
+                        		session.queryOnce("thread_signal('client@localhost',("+query+"))");
+                        	else
+                        		session.queryOnce(query);
                         }
                         finally{
                             session.dispose();
