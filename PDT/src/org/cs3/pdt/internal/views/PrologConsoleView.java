@@ -2,6 +2,7 @@ package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.hooks.ConsoleServerHook;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -10,7 +11,18 @@ import org.cs3.pl.console.DefaultConsoleController;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook {
@@ -61,9 +73,71 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
         if (Util.probePort(port)) {
             model.connect();
         }
-        //else: wait til the hook callback is called.
-
+        IToolBarManager toolbarMenu = getViewSite().getActionBars().getToolBarManager();
+        IMenuManager menu = getViewSite().getActionBars().getMenuManager();
+        
+        IAction guitracer = new Action() {
+        	
+        	public ImageDescriptor getImageDescriptor() {
+        		return ImageRepository.getImageDescriptor(ImageRepository.GUITRACER); 
+        	}
+        	public String getToolTipText() { return "activate GUI tracer"; }
+			public void run() { startQueryJob("guitracer", "activate guitracer"); }
+			public String getText() {return "guitracer";}
+        };
+        IAction noguitracer = new Action() {
+        	
+        	public ImageDescriptor getImageDescriptor() {
+        		return ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER); 
+        	}
+        	public String getToolTipText() { return "deactivate GUI tracer"; }
+			public void run() { startQueryJob("noguitracer","deactivate guitracer"); }
+			public String getText() {return "noguitracer";}
+        };        //else: wait til the hook callback is called.
+        toolbarMenu.add(guitracer);
+        toolbarMenu.add(noguitracer);
+        menu.add(guitracer);
+        menu.add(noguitracer);
     }
+
+	/**
+	 * 
+	 */
+	private void startQueryJob(final String query, String progressInfo) {
+		try {
+
+            Job j = new Job(progressInfo) {
+
+                protected IStatus run(IProgressMonitor monitor) {
+                    try {
+
+                        PrologInterface prologInterface = PDTPlugin
+                                .getDefault().getPrologInterface();
+                        PrologSession session = prologInterface.getSession();
+                        try{
+// Alternative                        	
+//                    		model.setLineBuffer(query + ".");
+//                    		model.commitLineBuffer();
+                        	session.queryOnce("thread_signal('client@localhost',("+query+"))");
+
+                        }
+                        finally{
+                            session.dispose();
+                        }
+                    } catch (Throwable e) {
+                        Debug.report(e);
+                        return Status.CANCEL_STATUS;
+                    } finally {
+                        monitor.done();
+                    }
+                    return Status.OK_STATUS;
+                }
+            };
+            j.schedule();
+        } catch (Throwable t) {
+            Debug.report(t);
+        }
+	}
 
     private  int getPort() {
         String value = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_CONSOLE_PORT, null);

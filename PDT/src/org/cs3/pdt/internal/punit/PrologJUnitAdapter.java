@@ -16,7 +16,7 @@ import junit.framework.TestSuite;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-;
+
 
 
 /**

@@ -21,6 +21,10 @@ import org.eclipse.swt.graphics.Image;
  */
 public class ImageRepository {
 
+	public final static String GUITRACER = "guitracer.gif";
+
+	public final static String NOGUITRACER = "noguitracer.gif";
+	
     public final static String PE_PUBLIC = "public_co.gif";
 
     public final static String PE_HIDDEN = "protected_co.gif";
