@@ -58,3 +58,62 @@ addErrorFacts(sourceLocation(File, Start, Length),Err):-
    new_id(ID),
    add(isErrorWarningMessage('declare error', ID, Err)), 
    add(slAspectT(ID, File,Start, Length)).
+
+
+/**
+ * Public API
+ *
+ * stack_for_frame_atom(+Frame,-StackTraceAtom)
+ *
+ * will bind StackTraceAtom to an linefeed separated list
+ * of stack trace elements.
+ *
+ * use prolog_current_frame(Frame) 
+ * to retrieve current frame.
+ */
+
+stack_for_frame_atom(Frame,StackTrace):-
+    stack_for_frame(Frame,List),
+    list_to_line_sep_string(List, StackTrace).
+
+/**
+ * Public API
+ *
+ * stack_for_frame(+Frame,-StackTraceList)
+ *
+ * use prolog_current_frame(Frame) to retrieve current frame.
+ */
+   
+stack_for_frame(Frame,[]):-
+    prolog_frame_attribute(Frame,top,true),
+    !.
+    
+stack_for_frame(Frame,[Info|Stack]) :-
+    frame_info(Frame,Info),
+    prolog_frame_attribute(Frame,parent,Parent),
+	stack_for_frame(Parent,Stack).
+
+stack_for_frame(Frame,['stack inspection failed']):-
+    !.
+
+    
+frame_info(Frame,Info):-
+    prolog_frame_attribute(Frame,clause,Ref),
+    prolog_frame_attribute(Frame,level,Level),
+    prolog_frame_attribute(Frame,goal,Goal),
+    term_to_atom(Goal, GoalAtom),
+%    nth_clause(Pred,_,Ref),
+    clause_property(Ref,file(File)),
+    clause_property(Ref,line_count(Line)),
+%    functor(Pred,Name,Arity),
+%    term_to_atom(Pred,Atom),
+%    write(Atom),
+    sformat(Info,'~a:~a ~a level: ~a\n',[File,Line,GoalAtom,Level]).
+       
+       
+list_to_line_sep_string([],'').
+
+list_to_line_sep_string([Head|Tail],String):-
+	list_to_line_sep_string(Tail,StringTail),
+	sformat(String,'~a~n~a',[Head,StringTail]).
+       

@@ -110,21 +110,17 @@ assert_true(Comment, Goal) :-
     ->  true
     ; (
 		prolog_current_frame(Frame),
+		stack_for_frame_atom(Frame,StackTrace),
 %		prolog_frame_attribute(Frame,parent,Parent),
-		stack_for_frame(Frame,Info),
+%		stack_for_frame(Frame,Info),
 		%term_to_atom(Info,StackTrace),
-		list_to_line_sep_string(Info,StackTrace),
+%		list_to_line_sep_string(Info,StackTrace),
 		term_to_atom(Goal, AtomGoal),
     	sformat(FormattedComment, 'The goal ~n  ~a~n failed:~n~a.~n~a~n', [AtomGoal, Comment,StackTrace]),
    		throw(assertion_failed(FormattedComment))
    	  ).
    	  
    	  
-list_to_line_sep_string([],'').
-
-list_to_line_sep_string([Head|Tail],String):-
-	list_to_line_sep_string(Tail,StringTail),
-	sformat(String,'~a~n~a',[Head,StringTail]).
 
 /**
  * assert_fail(+Comment, +Goal)

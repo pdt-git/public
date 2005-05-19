@@ -1,4 +1,4 @@
-/*  $Id: main.pl,v 1.1 2004/09/11 13:20:14 rho Exp $
+/*  $Id: main.pl,v 1.1 2005/05/19 08:16:35 gk Exp $
 
     Author:        Uwe Bardey
     E-mail:        UweBardey@gmx.de
@@ -14,6 +14,8 @@
             circle/2,        %    zyklische Abhängigkeit zwischen N CT's
             conflict/2,      %       negative                "
             iteration/2,     %       positiv-monotone        "
+            iteration_add/2,     %       positiv-monotone        "
+            iteration_rem/2,     %       positiv-monotone        "
 
             dep_graph/1,     % Berechnung und Anzeige des Abhängigkeitsgraphen
             gen_dep_graph/1, %    Ausgabe auf Bildschirm und in Faktenbasis
@@ -31,20 +33,23 @@
 :- multifile test/1.
 :- multifile ct/3.
 
-%:- ['../../ct/lowlevelCTs.pl'].
-
+% Load the CONDOR code base
+%:- ['importFromJTransformer/general_rules.pl'].
 :- [ast2graph].
-:- ['../api/general_rules.pl'].
 :- [topo_sort].
+:- ['preprocess/main'].
 :- [graph_algos].
 :- [dep_graph].
-% funktioniert NICHT mit plcon zusammen und damit nicht in A2Ptest!
-%:- ['dep_graph_gui.pl'].
+:- ['dep_graph_gui.pl'].
 :- [ct_filter].
 :- [depend].
-:- ['abstraction.pl'].
 
-%:- gen_dep_graph([aiset_low, acset_low, icounter_low, ccounter_low]), show_dep_graph.
+% Load some example CTs
+%:- ['U:/gk/rootsExt/condor/dependencyAnalysis/cts/paper_cts.pl'].
+
+% Run an example and display the dependency graph
+%:- gen_dep_graph([aiset_low, acset_low, icounter_low, ccounter_low]).
+%, show_dep_graph.
 
 
 

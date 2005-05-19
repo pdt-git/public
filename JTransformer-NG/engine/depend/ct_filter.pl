@@ -1,5 +1,3 @@
-
-:- multifile test/1.
 /** Filtering: Get preprocessed conditional transformer clauses.
  **/
 ct_filter(_name, _Pre, _Act, _PreNE, _PrePatt) :-
@@ -95,7 +93,6 @@ test('comparePatternString#1') :- comparePatternString('set*','se*').
 test('comparePatternString#2') :- comparePatternString('*','se*reterter').
 test('comparePatternString#3') :- comparePatternString('set*','setMyClass').
 test('comparePatternString#4') :- not(comparePatternString('set*','a*')).
-comparePatternString(_a, _a).
 comparePatternString(_a, _d) :-
     atom_chars(_a, _l1),
     atom_chars(_d, _l2),
@@ -134,14 +131,21 @@ posMember(_m, _l) :- member(not(_m), _l).
 posMember(_m, _l) :- member(_m, _l), _m \= not(_).
 
 sharingPattern(_plist1, _plist2, _p1, _p2, _x) :-
+%    posMember(_p1, _plist1),
     member(_p1, _plist1),
+%    _p1 \= not(_),
     free_variables(_p1, _free1),
+%    posMember(_p2, _plist2),
     member(_p2, _plist2),
+%    _p2 \= not(_),
     free_variables(_p2, _free2),
     member(_x1, _free1),
     member(_x2, _free2),
     _x1 == _x2,
     _x = _x1.
+        
+        
+        
         
 /** Preprocessing of negation and equality literals:
     1. "equals(_t1,_t2)" literals from the first argument
@@ -231,12 +235,13 @@ normalizeInequalityLists([_H1|_Body1],[_H2|_Body2],[_head|_body]) :-
     auswerten. Eine normalisierte Ungleichung ist auswertbar, wenn ihre
     Variable instantiiert ist.
  **/
-checkInequalities([]).
-checkInequalities([disjunction(_List)|_Rest]) :- % var
-   !,
-   checkInequalities(_List),
-   checkInequalities(_Rest).
-%checkInequalities([\=(_V,_V)|_Rest]) :- !, fail.
+checkInequalities([]) :- !.
+
+%checkInequalities([disjunction(_List)|_Rest]) :- % var
+%   !,
+%   checkInequalities(_List),
+%   checkInequalities(_Rest).
+%%checkInequalities([\=(_V,_V)|_Rest]) :- !, fail.
 
 checkInequalities([\=(_Var,_Term)|_Rest]) :- % var
    var(_Var),
@@ -254,6 +259,24 @@ checkInequalities([\=(_Var,_Term)|_Rest]) :- % nonvar
    _Var \= _Term,                              % eigentlicher check
    checkInequalities(_Rest).
 
+
+
+
+/*
+checkPatterns([]) :- !.
+checkPatterns([pattern(_patt, _vars, _str)|_Rest]) :- % pattern
+    format('checking pattern ~a~n',[_patt]),
+   (ground(_str);ground(_vars)),
+    !,
+   pattern(_patt, _vars, _str),
+   checkPatterns(_Rest).
+checkPatterns([_h|_t]) :-
+    checkPatterns(_t).
+*/
+
+
+
+
 /**
  * pattern(_pattStr, _varList, _valStr).
  */
@@ -268,13 +291,6 @@ test('pattern/3#6') :- pattern('*tarek*',['uwe ',' bardey'],'uwe tarek bardey').
 test('pattern/3#9') :- not(pattern('* tarek *',_,'uwe bardey')).
 test('pattern/3#10'):- not(pattern('*tarek*',[uwe,bardey],'uwe tarek bardey')).
 test('pattern/3#11'):- not(pattern('aaa*',[_],'bbbb')).
-
-/*
-	pattern(+Pattern, ?WildcardReplacements, +Atom)
-
-	Example:
-	pattern('* tarek *',[uwe,bardey],'uwe tarek bardey')
-	*/
 
 pattern(_pattStr, _L, _valStr) :-
     ground(_valStr),
@@ -389,186 +405,3 @@ pattern(_patt,_vars, _str) :-
     
 get_vars(_pos, [*|_tail],
 */
-
-
-
-/************************** check param patterns ***************************/
-
-sharingParamPattern(_plist1, _plist2, _p1, _p2, _x) :-
-%    posMember(_p1, _plist1),
-    member(_p1, _plist1),
-%    _p1 \= not(_),
-%    free_variables(_p1, _free1),
-%    posMember(_p2, _plist2),
-    member(_p2, _plist2),
-%    _p2 \= not(_),
-%    free_variables(_p2, _free2),
-%   FIX: nur die _param variable in matchParams(..) soll verglichen werden!
-%    member(_x1, _free1),
-%    member(_x2, _free2),
-    _p1 = matchParams(_x1,_),
-    _p2 = matchParams(_x2,_),
-    _x1 == _x2,
-    _x = _x1.
-
-checkParamPattern(_plist1, _plist2 ,_l1,_l2):-
-    sharingParamPattern(_plist1, _plist2, _p1, _p2, _v),
-    !,
-    _p1 = matchParams(_,_patt1),
-    _p2 = matchParams(_,_patt2),
-    compareParamPatterns(_patt1, _patt2,_l1,_l2).
-
-checkParamPattern(_plist1,_plist,_pre,_post):-
-%    maplist(removeActions,_plist1, _plist1ra),
-    maplist(removeActions,_post, _postra),
-    matchParamsFilter(_plist1,_postra,_pre).
-%    matchParamsFilter(_plist2,_l1).
-
-
-matchParamsFilter([],_,_).
-matchParamsFilter([matchParams(_paramIdList,_patterns)|_plist],_post,_pre):-
-    ((
-        is_list(_paramIdList),
-        !,
-        getParamTypes(_paramIdList,_post,_paramTypes),
-        compareParamPatterns(_paramTypes,_patterns,_post,_pre)
-    );
-        true
-    ),
-    matchParamsFilter(_plist,_post,_pre).
-
-
-getParamTypes([],_l,[]).
-getParamTypes([_paramId|_paramIds],_l,[_Type|_Types]):-
-    getTreeIdType(_paramId,_l,_Type),
-    getParamTypes(_paramIds,_l,_Types).
-
-
-%  compareParamPatterns
-%  Vergleicht zwei Pattern Type / Type Listen miteiander die folgenden Elemente enthalten:
-%  '..'                               - entspricht * in einer regex
-%  type(basic |class, _typeid, _dim)  -
-%
-
-compareParamPatterns([], [],_,_).
-compareParamPatterns(['..' | _pat1Tail], ['..' | _pat2Tail],_l1,_l2) :-
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-
-compareParamPatterns([], ['..' | _pat2Tail],_l1,_l2) :-
-    compareParamPatterns([], _pat2Tail,_l1,_l2).
-
-compareParamPatterns(['..' | _pat1Tail], [],_l1,_l2) :-
-    compareParamPatterns(_pat1Tail, [],_l1,_l2).
-
-compareParamPatterns([_ | _pat1Tail], ['..' | _pat2Tail],_l1,_l2) :-
-    compareParamPatterns(_pat1Tail, ['..' |_pat2Tail],_l1,_l2).
-
-compareParamPatterns(['..' | _pat1Tail], [_ | _pat2Tail],_l1,_l2) :-
-    compareParamPatterns(['..'|_pat1Tail], _pat2Tail,_l1,_l2).
-
-compareParamPatterns(_vardefs, ['..' | _patTail],_l1,_l2) :-
-    compareParamPatterns(_vardefs, _patTail,_l1,_l2).
-
-compareParamPatterns([_pat1 | _pat1Tail], [[_pat2 , _] | _pat2Tail],_l1,_l2) :-
-    !,
-    compareParamPatterns([_pat1 | _pat1Tail], [_pat2 | _pat2Tail],_l1,_l2).
-
-compareParamPatterns([[_pat1 | _]| _pat1Tail], [_pat2  | _pat2Tail],_l1,_l2) :-
-    !,
-    compareParamPatterns([_pat1 | _pat1Tail], [_pat2 | _pat2Tail],_l1,_l2).
-
-/*
-compareParamPatterns([type(basic,_name,_dim) | _pat1Tail], [type(basic,_name,_dim) | _pat2Tail],_l1,_l2) :-
-    _name == _name;
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-*/
-
-compareParamPatterns([type(_basicOrClass2,_id1,_dim) | _pat1Tail], [type(_basicOrClass2,_id2,_dim) | _pat2Tail],_l1,_l2) :-
-% TODO subtype, Klassen aus unterschiedlichen Packages
-% TODO: besser flat_equal ???
-    getTreeTypeName(_basicOrClass1, _l1,_id1,_name),
-    getTreeTypeName(_basicOrClass2, _l2,_id2,_name),
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-
-compareParamPatterns([type(_basicOrClass,_id,_dim) | _pat1Tail], [typePattern(_pattern,_dim) | _pat2Tail],_l1,_l2) :-
-% TODO subtype, Klassen aus unterschiedlichen Packages
-    getTreeTypeName(_basicOrClass, _l1,_id,_name),
-    pattern(_pattern, _, _name),
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-
-compareParamPatterns([typePattern(_pattern,_dim) | _pat1Tail], [type(_basicOrClass,_id,_dim) | _pat2Tail],_l1,_l2) :-
-% TODO subtype, Klassen aus unterschiedlichen Packages
-    getTreeTypeName(_basicOrClass, _l2,_id,_name),
-    pattern(_pattern, _, _name),
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-
-compareParamPatterns([typePattern(_patt1,_dim) | _pat1Tail], [typePattern(_patt2,_dim) | _pat2Tail],_l1,_l2) :-
-% TODO subtype, Klassen aus unterschiedlichen Packages
-    comparePatternString(_patt1,_patt2),
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-
-/*
-compareParamPatterns([type(basic,_name,_dim) | _pat1Tail], [type(basic,_name,_dim) | _pat2Tail],_l1,_l2) :-
-    _name == _name;
-    compareParamPatterns(_pat1Tail, _pat2Tail,_l1,_l2).
-*/
-
-getTreeTypeName(class, _trees,_id,_name):-
-    member(classDefT(_cid,_,_name,_),_trees),
-    _cid == _id.
-
-getTreeTypeName(basic, _trees,_name,_name).
-
-/***************************************************************************/
-
-getTreeIdType(_id,_l, _Type):-
-    (
-        exists_tree(_id, _l, _Tree),
-        !,
-        getTreeType(_Tree,_l,_Type)
-    );
-    _Type = '..'.
-
-/***************************************************************************/
-
-getTreeType(localDefT(_, _, _,_Type, _,_),_,_Type):-!.
-getTreeType(fieldDefT(_, _, _Type, _,_),_,_Type):-!.
-getTreeType(paramDefT( _, _,_Type, _),_,_Type):-!.
-
-getTreeType(identT(_ident,_,_,_,_ref),_l, _Type) :-
-    !,
-    getTreeIdType(_ref,_l, _Type).
-
-
-getTreeType(getFieldT(_,_,_,_,_,_ref), _l,_Type) :-
-    !,
-    getTreeIdType(_ref,_l, _Type).
-
-getTreeType(selectT(_,_,_,_,_,_ref), _l,_Type) :-
-    !,
-    getTreeIdType(_ref,_l, _Type).
-
-getTreeType(methodDefT(_methodDef,_, _,_, _Type, _,_), _,_Type):-!.
-
-getTreeType(literalT(_literal,_,_,_Type,_),_, _Type):-!.
-
-getTreeType(classDefT(_class,_,_,_), _,type(class, _class, 0)):-!.
-
-getTreeType(newClassT(_class,_,_,_,_,_ref,_,_), _,_type) :-
-    !,
-    getTreeIdType(_ref,_l, _Type).
-
-
-/***************************************************************************/
-
-bdd(_n):-
-    dst(_n).
-    
-bdd(_n):-
-    write('hey2').
-
-dst(_n):-
-%    !,
-    write('hey1').
-dst(_n):-
-    write('hey3').

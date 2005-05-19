@@ -1,4 +1,4 @@
-/*  $Id: dep_graph_gui.pl,v 1.1 2004/09/11 13:20:13 rho Exp $
+/*  $Id: dep_graph_gui.pl,v 1.1 2005/05/19 08:16:35 gk Exp $
 
     Part of XPCE --- The SWI-Prolog GUI toolkit
 
@@ -34,9 +34,6 @@
 %          ]).
 
 :- use_module(library(pce)).
-
-:- multifile test/2.
-
 %:- require([ forall/2
 %           , free_variables/2
 %           , random/3
@@ -219,18 +216,12 @@ initialise(Node, Name:name) :->
         "Create from name"::
         send(Node, send_super, initialise),
 %        send(Node, display, circle(10), point(-2, -2)),
-        (pattern('*_intro_*',_,Name) ->
-          send(Node, display, new(C, box(26,26)), point(-13, -13));
-          send(Node, display, new(C, circle(30)), point(-15, -15))
-        ),
+        send(Node, display, new(C, circle(30)), point(-15, -15)),
+        
 %        C->fill_pattern = orange,
-        print(Name),
-        (atom_concat('Aspect1',_,Name) ->
-          new(_CO, colour(ctcolour,55000,55000,65000,rgb)),
-          send(C, fill_pattern, colour(ctcolour));
-          new(_CO, colour(ctcolourgrey,15000,15000,15000,rgb)),
-          send(C, fill_pattern, colour(ctcolourgrey))
-        ),
+        new(_CO, colour(ctcolour,50000,50000,65000,rgb)),
+
+        send(C, fill_pattern, colour(ctcolour)),
         send(Node, display, new(T, text(Name, center))),
         send(T, center, point(0, 30)),
         send(Node, send_super, name, Name).
