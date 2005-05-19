@@ -1,0 +1,21 @@
+pattern(+_patt, ?_vars, ?_str) describes a wildcard pattern, 
+where the i.th wildcard in _patt will be unified with the 
+i.th variables in the vars list.
+
+_patt is a string describing a pattern in same syntax as wildcard_match (no [] {})
+_vars is a list of n variables, where n is the number of *,? wildcards in _str
+_str  is the rulting string
+
+example:
+
+?- _x = 'cnt', pattern('get*',[_x], _str). 
+	-> _str = 'getcnt'.
+
+?- pattern('get?',[_y],'geta'). 
+	-> _y = 'a'.
+
+?- pattern('get?',[_y],'getab'). 
+	-> no.
+
+
+
