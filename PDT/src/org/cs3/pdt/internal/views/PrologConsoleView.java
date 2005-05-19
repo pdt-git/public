@@ -70,9 +70,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
         IToolBarManager toolbarMenu = getViewSite().getActionBars().getToolBarManager();
         IMenuManager menu = getViewSite().getActionBars().getMenuManager();
         
-        IAction guitracer = new QueryAction("guitracer","activate guitracer", "activate GUI tracer",
+        IAction guitracer = new QueryConsoleThreadAction("guitracer","activate guitracer", "activate GUI tracer",
         		ImageRepository.getImageDescriptor(ImageRepository.GUITRACER));
-        IAction noguitracer = new QueryAction("noguitracer","deactivate guitracer", "deactivate GUI tracer",
+        IAction noguitracer = new QueryConsoleThreadAction("noguitracer","deactivate guitracer", "deactivate GUI tracer",
         		ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
         IAction breakAction = new QueryMainThreadAction("halt","halt", "halt the prolog system",
         		ImageRepository.getImageDescriptor(ImageRepository.BREAK));

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.PDTPlugin;
@@ -12,10 +9,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
 
 public class QueryAction extends Action {
-
 	private String tooltip;
 
 	String text;
@@ -86,9 +84,7 @@ public class QueryAction extends Action {
 	 * @return
 	 */
 	protected String buildQuery() {
-		return "current_thread(ThreadId,B), "
-				+ "atom_concat('client@',_,ThreadId),"
-				+ "thread_signal(ThreadId,(" + query + "))";
+		return query;
 	}
 
 	/**
@@ -96,5 +92,10 @@ public class QueryAction extends Action {
 	 */
 	public String getQuery() {
 		return query;
+	}
+
+
+	public void setQuery(String query) {
+		this.query = query;
 	}
 }

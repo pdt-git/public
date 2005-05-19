@@ -99,17 +99,11 @@
              id="org.cs3.pdt.internal.actions.dump"/>
        <action
              label="consult"
-             class="org.cs3.pdt.internal.actions.ConsultAction"
+             class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
              accelerator="F9"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.consult"/>
-       <action
-             label="guitracer"
-             class="org.cs3.pdt.internal.actions.GuitracerActionDelegate"
-             style="push"
-             menubarPath="org.cs3.pdt.menus.prolog/separator1"
-             id="org.cs3.pdt.internal.actions.guitracer"/>
        <action
              label="help"
              class="org.cs3.pdt.internal.actions.HelpActionDelegate"
