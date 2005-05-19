@@ -40,7 +40,14 @@ public class RestartAction implements IWorkbenchWindowActionDelegate {
      * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
      */
     public void run(IAction action) {
-        try {
+        runJob();
+    }
+
+	/**
+	 * 
+	 */
+	public void runJob() {
+		try {
 
             Job j = new Job("Restarting the PrologInterface") {
 
@@ -70,7 +77,7 @@ public class RestartAction implements IWorkbenchWindowActionDelegate {
         } catch (Throwable t) {
             Debug.report(t);
         }
-    }
+	}
 
     /*
      * (non-Javadoc)

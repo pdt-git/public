@@ -43,6 +43,10 @@ public class ImageRepository {
 
     public static final String PE_ATOM = "atom.gif";
 
+	public static final String BREAK = "break.gif";
+
+	public static final String RESTART = "restart.gif";
+
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PDTPlugin.getDefault().getBundle().getEntry("/icons/" + icon);
         return ImageDescriptor.createFromURL(url);
