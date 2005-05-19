@@ -77,7 +77,7 @@ public class QueryAction extends Action {
 	}
 
 	public String getText() {
-		return "guitracer";
+		return text;
 	}
 
 	/**
