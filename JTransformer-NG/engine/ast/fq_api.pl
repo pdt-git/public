@@ -149,7 +149,13 @@ mapArgs([Arg|JavaASTArgs],[Arg|Args]):-
     !.
 
 /**
-	map_type_term(?type/3, ?FQN)).
+ *  Public API
+ *	map_type_term(?type/3, ?FQN)).
+ * 
+ *  Maps between type terms and FQNs,
+ *
+ *  map_type_term(type(class,10001,2),'java.lang.Object[][]').
+ * e.g.: 
 */
 
 
@@ -169,10 +175,8 @@ map_type_term(TypeTerm, null):-
 map_type_term(TypeTerm, FQNBrackets):-
     nonvar(FQNBrackets),
     type_with_brackets(TypeName,Arity,FQNBrackets),
-    basicType(TypeName),
-    TypeTerm=type(basic,TypeName,Arity),
+    map_to_basic_or_class(TypeName,Arity,TypeTerm),
     !.    
-
 map_type_term(type(class,Id,0), FQN):-
     fullQualifiedName(Id,FQN),
     !.
@@ -181,9 +185,30 @@ map_type_term(type(class,Id,Arity), FQNBrackets):-
     type_with_brackets(FQN,Arity,FQNBrackets),
     !.
 
+map_to_basic_or_class(TypeName,Arity,TypeTerm):-
+    basicType(TypeName),
+    TypeTerm=type(basic,TypeName,Arity),
+    !.    
+map_to_basic_or_class(TypeName,Arity,TypeTerm):-
+    fullQualifiedName(Id,TypeName),
+    TypeTerm=type(class,Id,Arity),
+    !.    
+
+
 test(map_type_term) :-
     assert_true('gen null type', map_type_term(type(class,null,0),Var)),
-    assert_true('test null type', Var = null).
+    assert_true('FQN->int[][] type term',
+       map_type_term(TTint2,'int[][]'),
+    assert_true('FQN->int[][] type term check',
+     TTint2 = type(basic, int, 2)
+    ),
+    assert_true('test null type', Var = null),
+    assert_true('FQN->type/3', 
+      map_type_term(T,'java.lang.Object[][]')),
+    assert_true('FQN->type/3 correct type check',  
+      (class(CID, _, 'Object'), T = type(class,CID,2))).
+
+	    
   
 /**
  * type_with_brackets(?TypeName,?Arity,?FQNBrackets) 
