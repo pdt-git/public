@@ -11,7 +11,8 @@
 
 /************************* nodes ***************************
 *  ast_node(?type, +term, ?id)
-*
+*     Arg1 is the node type (functor) of arg2 and arg3 is its identity.
+* 
 * Pseudo Knoten: implementsT, extendsT, modifierT,
 * 
 *****************************************************************/
@@ -21,9 +22,14 @@ ast_node(Functor, Term, ID) :-
 %	(var(Term)->tree_kind(Functor,Len);true),
     functor(Term, Functor, Len),
     Term =.. [Functor,ID|_],
-    check_tree_existence(Term,Functor,Len).
+    check_tree_existence(Term,Functor,Len).   
+%   <--- GK: Wofuer dieser check_tree_existence Test? 
+%   Er wiederholt doch nur den "tree_kind" Aufruf,
+%   der hier schon ganz am Anfang stand... 
 
-ast_node(_type, not(_tree), _id) :- 
+ast_node(_type, Term, _id) :- 
+    nonvar(Term),
+    Term = not(_tree),
 	!,
 	ast_node(_type, _tree, _id).
 
@@ -59,11 +65,15 @@ tree_kind(Kind,Len):-
 tree_kind(Kind,Len):- 
 	attribSignature(Kind, Len).
 
+/**
+ *  ast_argument(ArgKind,EdgeName, Term, Edge)
+ *    
+ */
 ast_argument(ArgKind,EdgeName, Term, Edge) :-
 %	(var(Term)->tree_kind(Functor,Len);true),
 	tree_kind(Functor,Len),
     functor(Term, Functor, Len),
-    %check_tree_existence(Term,Functor,Len),
+%   check_tree_existence(Term,Functor,Len),
 %   treeSignature(Kind, Len),
     Term =.. [Functor,_ID|Args],
     ast_node_def(_,Functor,[_|ArgSpec]),
@@ -103,6 +113,7 @@ valid_ast_argument(ArgKind,[_|Edges],
     
 prepend_atom(EdgeName,H,[EdgeName,H]).
 
+/* GK: Refactored, neue version s.u.
 check_tree_existence(Term, Kind,Len):-
        not(tree_kind(Kind,Len))->
 	(
@@ -113,6 +124,21 @@ check_tree_existence(Term, Kind,Len):-
 	  throw(illegal_argument_exeception(Msg))
 	);
 		true.
+*/		
+
+/**
+ * Throw an exception if tree_kind(arg2,arg3) is false. 
+ */
+
+check_tree_existence(Term, Kind,Len):-
+       tree_kind(Kind,Len),
+       !.
+check_tree_existence(Term, Kind,Len):-
+      prolog_current_frame(Frame),
+	  stack_for_frame_atom(Frame,Trace),
+	  sformat(Msg, 'not an AST Node: ~w~n~w',[Term,Trace]),
+	  write(Msg),
+	  throw(illegal_argument_exeception(Msg)).
 
 /*
 my_ast_node(Kind, Term, ID) :-
