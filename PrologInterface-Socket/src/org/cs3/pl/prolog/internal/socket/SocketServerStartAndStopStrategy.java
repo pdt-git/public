@@ -101,6 +101,7 @@ public class SocketServerStartAndStopStrategy implements
         try {
 
             Process serverProcess = Runtime.getRuntime().exec(commandArray);
+            
             File logFile = Util.getLogFile("org.cs3.pdt.server.log");
             BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,true));
             writer.write("\n---8<-----------------------8<---\n");
@@ -110,12 +111,21 @@ public class SocketServerStartAndStopStrategy implements
                     .start();
             new _InputStreamPump(serverProcess.getInputStream(), writer)
                     .start();
+            
+            
             while (!Util.probePort(port)) {
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e1) {
                     Debug.report(e1);
                 }
+                try{
+                	if(serverProcess.exitValue()!=0){
+                		throw new RuntimeException("Failed to start server. Process exited with err code "+serverProcess.exitValue());
+                	}
+                }catch (IllegalThreadStateException e) {
+                	; //nothing. the process is still running.
+				}
             }
             
 

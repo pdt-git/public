@@ -116,6 +116,13 @@ public class SocketServerStartAndStopStrategy implements
                 } catch (InterruptedException e1) {
                     Debug.report(e1);
                 }
+                try{
+                	if(serverProcess.exitValue()!=0){
+                		throw new RuntimeException("Failed to start server. Process exited with err code "+serverProcess.exitValue());
+                	}
+                }catch (IllegalThreadStateException e) {
+                	; //nothing. the process is still running.
+				}
             }
             
 

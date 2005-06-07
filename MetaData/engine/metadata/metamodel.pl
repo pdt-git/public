@@ -150,7 +150,7 @@ meta_node_property(Type,has(type,simple,1-1)):-
 %% given type might be connected to. It is important to understand
 %% that they do NOT represent connections between actual nodes.
 %% Meta Edges are identified by the type of the "from" node and
-%% the name of aproperty, which embodies the edge.
+%% the name of a property, which embodies the edge.
 %%
 meta_edge(module,predicate).
 meta_edge(predicate,clause).

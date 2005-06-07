@@ -3,10 +3,10 @@
 <fragment
    id="org.cs3.pdt.prologinterface.socket"
    name="Prolog Interface Socket"
-   version="0.1.1"
+   version="0.1.2"
    provider-name="http://roots.iai.uni-bonn.de"
    plugin-id="org.cs3.pdt.prologinterface"
-   plugin-version="0.1.1">
+   plugin-version="0.1.2">
 
    <runtime>
       <library name="prologinterface-socket.jar">
