@@ -27,6 +27,8 @@ public class SimpleCharStream
   protected char[] buffer;
   protected int maxNextCharInd = 0;
   protected int inBuf = 0;
+private int endOffset;
+private int beginOffset;
 
   protected void ExpandBuff(boolean wrapAround)
   {
@@ -125,6 +127,7 @@ public class SimpleCharStream
 
   public char BeginToken() throws java.io.IOException
   {
+	  beginOffset = endOffset;
      tokenBegin = -1;
      char c = readChar();
      tokenBegin = bufpos;
@@ -174,6 +177,7 @@ public class SimpleCharStream
 
   public char readChar() throws java.io.IOException
   {
+	  endOffset++;
      if (inBuf > 0)
      {
         --inBuf;
@@ -228,7 +232,7 @@ public class SimpleCharStream
   }
 
   public void backup(int amount) {
-
+	  endOffset -= amount;
     inBuf += amount;
     if ((bufpos -= amount) < 0)
        bufpos += bufsize;
@@ -397,5 +401,19 @@ public class SimpleCharStream
      line = bufline[j];
      column = bufcolumn[j];
   }
+/**
+   * Returns the byte offset for the beginning of the current token.
+   */
+  public final int getBeginOffset()
+  {
+     return beginOffset;
+  }
 
+  /**
+   * Returns the byte offset for the end of the current token.
+   */
+  public final int getEndOffset()
+  {
+     return endOffset;
+  }
 }

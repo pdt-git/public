@@ -1407,8 +1407,10 @@ protected Token jjFillToken()
    t.image = (im == null) ? input_stream.GetImage() : im;
    t.beginLine = input_stream.getBeginLine();
    t.beginColumn = input_stream.getBeginColumn();
+   t.beginOffset=input_stream.getBeginOffset();
    t.endLine = input_stream.getEndLine();
    t.endColumn = input_stream.getEndColumn();
+   t.endOffset= input_stream.getEndOffset();
    return t;
 }
 

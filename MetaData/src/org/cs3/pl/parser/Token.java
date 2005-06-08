@@ -49,6 +49,10 @@ public class Token {
    */
   public Token specialToken;
 
+public int beginOffset;
+
+public int endOffset;
+
   /**
    * Returns the image.
    */
