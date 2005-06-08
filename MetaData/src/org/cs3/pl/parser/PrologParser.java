@@ -4,7 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, PrologParserConstants {/*@bgen(jjtree)*/
-  protected JJTPrologParserState jjtree = new JJTPrologParserState();
+  protected JJTPrologParserState jjtree = new JJTPrologParserState();void jjtreeOpenNodeScope(Node n)
+    {
+      ((SimpleNode)n).setFirstToken(getToken(1));
+    }
+
+    void jjtreeCloseNodeScope(Node n)
+    {
+      ((SimpleNode)n).setLastToken(getToken(0));
+    }
         private List errors = new ArrayList();
 
         public List getErrors() {
@@ -91,6 +99,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
   ASTCompilationUnit jjtn000 = new ASTCompilationUnit(this, JJTCOMPILATIONUNIT);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
     try {
       try {
         label_1:
@@ -134,6 +143,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
      if (jjtc000) {
        jjtree.closeNodeScope(jjtn000, true);
+       jjtreeCloseNodeScope(jjtn000);
      }
     }
   }
@@ -172,7 +182,8 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) Functor */
      ASTFunctor jjtn000 = new ASTFunctor(this, JJTFUNCTOR);
      boolean jjtc000 = true;
-     jjtree.openNodeScope(jjtn000);Token token;
+     jjtree.openNodeScope(jjtn000);
+     jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       if (jj_2_2(2)) {
         token = jj_consume_token(IDENTIFIER);
@@ -186,49 +197,57 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
         token = jj_consume_token(IDENTIFIER);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case DYNAMIC:
         token = jj_consume_token(DYNAMIC);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MULTIFILE:
         token = jj_consume_token(MULTIFILE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MODULE_TRANSPARENT:
         token = jj_consume_token(MODULE_TRANSPARENT);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case VOLATILE:
         token = jj_consume_token(VOLATILE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case POINTER:
         token = jj_consume_token(POINTER);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case AT:
         token = jj_consume_token(AT);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case CHARACTER_ATOM:
         token = jj_consume_token(CHARACTER_ATOM);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       default:
         jj_la1[2] = jj_gen;
@@ -238,6 +257,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -249,7 +269,8 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) FunctorVariableModule */
      ASTFunctorVariableModule jjtn000 = new ASTFunctorVariableModule(this, JJTFUNCTORVARIABLEMODULE);
      boolean jjtc000 = true;
-     jjtree.openNodeScope(jjtn000);Token token;
+     jjtree.openNodeScope(jjtn000);
+     jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       if (jj_2_3(3)) {
         Variable();
@@ -262,49 +283,57 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
         token = jj_consume_token(IDENTIFIER);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case DYNAMIC:
         token = jj_consume_token(DYNAMIC);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MULTIFILE:
         token = jj_consume_token(MULTIFILE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MODULE_TRANSPARENT:
         token = jj_consume_token(MODULE_TRANSPARENT);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case VOLATILE:
         token = jj_consume_token(VOLATILE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case IS:
         token = jj_consume_token(IS);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MOD:
         token = jj_consume_token(MOD);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case CHARACTER_ATOM:
         token = jj_consume_token(CHARACTER_ATOM);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       default:
         jj_la1[3] = jj_gen;
@@ -328,6 +357,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -336,16 +366,18 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) Variable */
     ASTVariable jjtn000 = new ASTVariable(this, JJTVARIABLE);
     boolean jjtc000 = true;
-    jjtree.openNodeScope(jjtn000);Token token;
+    jjtree.openNodeScope(jjtn000);
+    jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(VARIABLE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
+      jjtreeCloseNodeScope(jjtn000);
        jjtn000.setName(token.image.toString());
-       jjtn000.setToken(token);
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -354,48 +386,55 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) Identifier */
     ASTIdentifier jjtn000 = new ASTIdentifier(this, JJTIDENTIFIER);
     boolean jjtc000 = true;
-    jjtree.openNodeScope(jjtn000);Token token;
+    jjtree.openNodeScope(jjtn000);
+    jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case IDENTIFIER:
         //    token=<POINTER> 
-        //    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+        //    {jjtThis.setName(token.image.toString()); }
         //    token=<AT> 
-        //    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+        //    {jjtThis.setName(token.image.toString()); }
             token = jj_consume_token(IDENTIFIER);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case DYNAMIC:
         token = jj_consume_token(DYNAMIC);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MULTIFILE:
         token = jj_consume_token(MULTIFILE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case MODULE_TRANSPARENT:
         token = jj_consume_token(MODULE_TRANSPARENT);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case VOLATILE:
         token = jj_consume_token(VOLATILE);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       case CHARACTER_ATOM:
         token = jj_consume_token(CHARACTER_ATOM);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-     jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+     jjtn000.setName(token.image.toString());
         break;
       default:
         jj_la1[4] = jj_gen;
@@ -405,6 +444,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -413,7 +453,8 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) NamedCall */
  ASTNamedCall jjtn000 = new ASTNamedCall(this, JJTNAMEDCALL);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case QUERY:
@@ -427,7 +468,6 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
         jj_consume_token(-1);
         throw new ParseException();
       }
-                                     jjtn000.setToken(token);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DYNAMIC:
         token = jj_consume_token(DYNAMIC);
@@ -462,9 +502,6 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
         PredicateSignature();
       }
       token = jj_consume_token(DOT);
-                jjtree.closeNodeScope(jjtn000, true);
-                jjtc000 = false;
-               jjtn000.setEndToken(token);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -482,6 +519,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
+      jjtreeCloseNodeScope(jjtn000);
     }
     }
   }
@@ -490,7 +528,8 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) Call */
  ASTCall jjtn000 = new ASTCall(this, JJTCALL);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case QUERY:
@@ -504,11 +543,10 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
         jj_consume_token(-1);
         throw new ParseException();
       }
-                                     jjtn000.setToken(token);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case INIT:
         jj_consume_token(INIT);
-                                                                        jjtn000.setInitialization(true);
+                                              jjtn000.setInitialization(true);
         break;
       default:
         jj_la1[9] = jj_gen;
@@ -516,9 +554,6 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
       }
       Body();
       token = jj_consume_token(DOT);
-                jjtree.closeNodeScope(jjtn000, true);
-                jjtc000 = false;
-               jjtn000.setEndToken(token);
     } catch (Throwable jjte000) {
     if (jjtc000) {
       jjtree.clearNodeScope(jjtn000);
@@ -536,6 +571,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
+      jjtreeCloseNodeScope(jjtn000);
     }
     }
   }
@@ -544,7 +580,8 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) PredicateSignature */
  ASTPredicateSignature jjtn000 = new ASTPredicateSignature(this, JJTPREDICATESIGNATURE);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case LPAREN:
@@ -620,6 +657,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
       token = jj_consume_token(DECIMAL_LITERAL);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
+      jjtreeCloseNodeScope(jjtn000);
      jjtn000.setArity(token.image.toString());
     } catch (Throwable jjte000) {
       if (jjtc000) {
@@ -638,6 +676,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -646,13 +685,13 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) Clause */
  ASTClause jjtn000 = new ASTClause(this, JJTCLAUSE);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       if (jj_2_4(2)) {
         token = jj_consume_token(IDENTIFIER);
-                                          jjtn000.setToken(token);
         jj_consume_token(COLON);
-                                                                             jjtn000.setModule(token.image.toString());
+                                                   jjtn000.setModule(token.image.toString());
       } else {
         ;
       }
@@ -736,9 +775,6 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
         throw new ParseException();
       }
       token = jj_consume_token(DOT);
-                        jjtree.closeNodeScope(jjtn000, true);
-                        jjtc000 = false;
-                       jjtn000.setEndToken(token);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -756,6 +792,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
           }
     }
   }
@@ -765,6 +802,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
   ASTPredicateArgs jjtn000 = new ASTPredicateArgs(this, JJTPREDICATEARGS);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
     try {
       jj_consume_token(LPAREN);
       BodyElement();
@@ -799,6 +837,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -949,6 +988,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
   ASTCompound jjtn000 = new ASTCompound(this, JJTCOMPOUND);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DYNAMIC:
@@ -1038,6 +1078,7 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
     } finally {
                   if (jjtc000) {
                     jjtree.closeNodeScope(jjtn000, true);
+                    jjtreeCloseNodeScope(jjtn000);
                   }
     }
   }
@@ -1046,15 +1087,14 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants, 
  /*@bgen(jjtree) Cut */
  ASTCut jjtn000 = new ASTCut(this, JJTCUT);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(CUT);
-                      jjtree.closeNodeScope(jjtn000, true);
-                      jjtc000 = false;
-                     jjtn000.setToken(token);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
           }
     }
   }
@@ -1070,10 +1110,10 @@ void DividedAtom():
  /*@bgen(jjtree) Sequence */
  ASTSequence jjtn000 = new ASTSequence(this, JJTSEQUENCE);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(LPAREN);
-    jjtn000.setToken(token);
       BodyElement();
       label_4:
       while (true) {
@@ -1106,6 +1146,7 @@ void DividedAtom():
     } finally {
      if (jjtc000) {
        jjtree.closeNodeScope(jjtn000, true);
+       jjtreeCloseNodeScope(jjtn000);
      }
     }
   }
@@ -1114,17 +1155,16 @@ void DividedAtom():
  /*@bgen(jjtree) List */
   ASTList jjtn000 = new ASTList(this, JJTLIST);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token token;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       if (jj_2_7(2)) {
         token = jj_consume_token(LBRACKET);
-                                   jjtn000.setToken(token);
         jj_consume_token(RBRACKET);
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case LBRACKET:
           token = jj_consume_token(LBRACKET);
-                                                                                            jjtn000.setToken(token);
           BodyElement();
           label_5:
           while (true) {
@@ -1188,6 +1228,7 @@ void DividedAtom():
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -1196,10 +1237,10 @@ void DividedAtom():
  /*@bgen(jjtree) Braces */
      ASTBraces jjtn000 = new ASTBraces(this, JJTBRACES);
      boolean jjtc000 = true;
-     jjtree.openNodeScope(jjtn000);Token token;
+     jjtree.openNodeScope(jjtn000);
+     jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(LBRACE);
-                   jjtn000.setToken(token);
       BodyElement();
       label_7:
       while (true) {
@@ -1244,6 +1285,7 @@ void DividedAtom():
     } finally {
      if (jjtc000) {
        jjtree.closeNodeScope(jjtn000, true);
+       jjtreeCloseNodeScope(jjtn000);
      }
     }
   }
@@ -1252,10 +1294,10 @@ void DividedAtom():
  /*@bgen(jjtree) Parenthesis */
   ASTParenthesis jjtn000 = new ASTParenthesis(this, JJTPARENTHESIS);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token token;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(LPAREN);
-                   jjtn000.setToken(token);
       BodyElement();
       label_8:
       while (true) {
@@ -1300,6 +1342,7 @@ void DividedAtom():
     } finally {
      if (jjtc000) {
        jjtree.closeNodeScope(jjtn000, true);
+       jjtreeCloseNodeScope(jjtn000);
      }
     }
   }
@@ -1385,6 +1428,7 @@ void SimpleAtom() #void :
   ASTRestTokens jjtn000 = new ASTRestTokens(this, JJTRESTTOKENS);
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case CLAUSEDEF:
@@ -1405,10 +1449,12 @@ void SimpleAtom() #void :
       }
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
-    jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+    jjtreeCloseNodeScope(jjtn000);
+    jjtn000.setName(token.image.toString());
     } finally {
      if (jjtc000) {
        jjtree.closeNodeScope(jjtn000, true);
+       jjtreeCloseNodeScope(jjtn000);
      }
     }
   }
@@ -1417,7 +1463,8 @@ void SimpleAtom() #void :
  /*@bgen(jjtree) IntAtom */
   ASTIntAtom jjtn000 = new ASTIntAtom(this, JJTINTATOM);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token token;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case MINUS:
@@ -1442,7 +1489,8 @@ void SimpleAtom() #void :
         }
         jjtree.closeNodeScope(jjtn000, true);
         jjtc000 = false;
-       jjtn000.setName("-"+token.image.toString()); jjtn000.setToken(token);
+        jjtreeCloseNodeScope(jjtn000);
+       jjtn000.setName("-"+token.image.toString());
         break;
       case DECIMAL_LITERAL:
       case BIN_LITERAL:
@@ -1468,7 +1516,8 @@ void SimpleAtom() #void :
         }
         jjtree.closeNodeScope(jjtn000, true);
         jjtc000 = false;
-        jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+        jjtreeCloseNodeScope(jjtn000);
+        jjtn000.setName(token.image.toString());
         break;
       default:
         jj_la1[37] = jj_gen;
@@ -1478,6 +1527,7 @@ void SimpleAtom() #void :
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -1486,15 +1536,18 @@ void SimpleAtom() #void :
  /*@bgen(jjtree) FloatAtom */
   ASTFloatAtom jjtn000 = new ASTFloatAtom(this, JJTFLOATATOM);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token token;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(FLOATING_POINT_LITERAL);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-      jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+      jjtn000.setName(token.image.toString());
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -1503,15 +1556,18 @@ void SimpleAtom() #void :
  /*@bgen(jjtree) StringAtom */
   ASTStringAtom jjtn000 = new ASTStringAtom(this, JJTSTRINGATOM);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token token;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(STRING_LITERAL);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-      jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+      jjtn000.setName(token.image.toString());
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -1520,15 +1576,18 @@ void SimpleAtom() #void :
  /*@bgen(jjtree) CharAtom */
   ASTCharAtom jjtn000 = new ASTCharAtom(this, JJTCHARATOM);
   boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);Token token;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       token = jj_consume_token(CHARACTER_ATOM);
       jjtree.closeNodeScope(jjtn000, true);
       jjtc000 = false;
-      jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+      jjtreeCloseNodeScope(jjtn000);
+      jjtn000.setName(token.image.toString());
     } finally {
       if (jjtc000) {
         jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
       }
     }
   }
@@ -1556,7 +1615,8 @@ void SimpleAtom() #void :
  /*@bgen(jjtree) Separator */
  ASTSeparator jjtn000 = new ASTSeparator(this, JJTSEPARATOR);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case COMMA:
@@ -1572,10 +1632,12 @@ void SimpleAtom() #void :
       }
           jjtree.closeNodeScope(jjtn000, true);
           jjtc000 = false;
-         jjtn000.setName(token.image.toString()); jjtn000.setToken(token);
+          jjtreeCloseNodeScope(jjtn000);
+         jjtn000.setName(token.image.toString());
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
           }
     }
   }
@@ -1795,7 +1857,8 @@ void SimpleAtom() #void :
  /*@bgen(jjtree) BinaryOp */
  ASTBinaryOp jjtn000 = new ASTBinaryOp(this, JJTBINARYOP);
  boolean jjtc000 = true;
- jjtree.openNodeScope(jjtn000);Token token;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);Token token;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ARROW:
@@ -1901,10 +1964,12 @@ void SimpleAtom() #void :
       }
   jjtree.closeNodeScope(jjtn000, true);
   jjtc000 = false;
- jjtn000.setToken(token);
+  jjtreeCloseNodeScope(jjtn000);
+
     } finally {
   if (jjtc000) {
     jjtree.closeNodeScope(jjtn000, true);
+    jjtreeCloseNodeScope(jjtn000);
   }
     }
   }
@@ -1970,27 +2035,6 @@ void SimpleAtom() #void :
     try { return !jj_3_9(); }
     catch(LookaheadSuccess ls) { return true; }
     finally { jj_save(8, xla); }
-  }
-
-  final private boolean jj_3_7() {
-    if (jj_scan_token(LBRACKET)) return true;
-    if (jj_scan_token(RBRACKET)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_56() {
-    Token xsp;
-    xsp = jj_scanpos;
-    if (jj_3_7()) {
-    jj_scanpos = xsp;
-    if (jj_3R_69()) return true;
-    }
-    return false;
-  }
-
-  final private boolean jj_3R_28() {
-    if (jj_scan_token(CHARACTER_ATOM)) return true;
-    return false;
   }
 
   final private boolean jj_3R_31() {
@@ -2483,12 +2527,6 @@ void SimpleAtom() #void :
     return false;
   }
 
-  final private boolean jj_3R_69() {
-    if (jj_scan_token(LBRACKET)) return true;
-    if (jj_3R_47()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_66() {
     if (jj_scan_token(CHARACTER_ATOM)) return true;
     return false;
@@ -2589,6 +2627,12 @@ void SimpleAtom() #void :
     return false;
   }
 
+  final private boolean jj_3R_69() {
+    if (jj_scan_token(LBRACKET)) return true;
+    if (jj_3R_47()) return true;
+    return false;
+  }
+
   final private boolean jj_3R_55() {
     Token xsp;
     xsp = jj_scanpos;
@@ -2684,6 +2728,27 @@ void SimpleAtom() #void :
   final private boolean jj_3R_57() {
     if (jj_scan_token(LBRACE)) return true;
     if (jj_3R_47()) return true;
+    return false;
+  }
+
+  final private boolean jj_3_7() {
+    if (jj_scan_token(LBRACKET)) return true;
+    if (jj_scan_token(RBRACKET)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_56() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3_7()) {
+    jj_scanpos = xsp;
+    if (jj_3R_69()) return true;
+    }
+    return false;
+  }
+
+  final private boolean jj_3R_28() {
+    if (jj_scan_token(CHARACTER_ATOM)) return true;
     return false;
   }
 
@@ -2803,12 +2868,7 @@ void SimpleAtom() #void :
     throw generateParseException();
   }
 
-  static private final class LookaheadSuccess extends java.lang.Error {
-
-    /**
-     * Comment for <code>serialVersionUID</code>
-     */
-    private static final long serialVersionUID = 1L; }
+  static private final class LookaheadSuccess extends java.lang.Error { }
   final private LookaheadSuccess jj_ls = new LookaheadSuccess();
   final private boolean jj_scan_token(int kind) {
     if (jj_scanpos == jj_lastpos) {

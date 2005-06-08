@@ -9,7 +9,7 @@ options {
   DEBUG_LOOKAHEAD=false;
   DEBUG_TOKEN_MANAGER=false;
   OPTIMIZE_TOKEN_MANAGER=true;
-  
+  NODE_SCOPE_HOOK=true;
 }
 
 PARSER_BEGIN(PrologParser)
@@ -19,7 +19,15 @@ import java.util.List;
 
 public class PrologParser
 {
+	void jjtreeOpenNodeScope(Node n)
+    {
+      ((SimpleNode)n).setFirstToken(getToken(1));
+    }
 
+    void jjtreeCloseNodeScope(Node n)
+    {
+      ((SimpleNode)n).setLastToken(getToken(0));
+    }
 	private List errors = new ArrayList();
 	
 	public List getErrors() {
@@ -317,11 +325,13 @@ void CompilationUnit() :
 {
    try{
 	(Member())*
+
   <EOF>
 	   }
 	     catch (ParseException e) {
 	    error_skipto(DOT);
 	  }
+	  
 }
 
 void Member() #void:
@@ -350,28 +360,28 @@ void Functor() :
       {jjtThis.setModuleName(token.image.toString());} <COLON> )?
     (
     token=<IDENTIFIER> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<DYNAMIC> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MULTIFILE> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MODULE_TRANSPARENT> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<VOLATILE> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
 //    | token=<INIT> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
     | token=<POINTER> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<AT> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
 
 //    | token=<IS> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
 //    | token=<MOD> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
     | token=<CHARACTER_ATOM>
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
 	)
 }
 
@@ -386,23 +396,23 @@ void FunctorVariableModule() :
     ( LOOKAHEAD(3) Variable() <COLON> ) ?
     (
     token=<IDENTIFIER> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<DYNAMIC> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MULTIFILE> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MODULE_TRANSPARENT> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<VOLATILE> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
 //    | token=<INIT> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
     | token=<IS> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MOD> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<CHARACTER_ATOM>
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
 	)
 }
 
@@ -414,7 +424,7 @@ void Variable() :
     token=<VARIABLE>
     {
        jjtThis.setName(token.image.toString());
-       jjtThis.setToken(token);
+       
     }
 }
 
@@ -425,26 +435,26 @@ void Identifier() :
 {
     (
 //    token=<POINTER> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
 //    token=<AT> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
     token=<IDENTIFIER>
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<DYNAMIC> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MULTIFILE> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<MODULE_TRANSPARENT> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     | token=<VOLATILE> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
     
 //    | token=<IS> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
 //    | token=<MOD> 
-//    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+//    {jjtThis.setName(token.image.toString()); }
     | token=<CHARACTER_ATOM> 
-    {jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    {jjtThis.setName(token.image.toString()); }
 
 	)
 
@@ -454,17 +464,17 @@ void Identifier() :
 void NamedCall() :
 {Token token;}
 {
-  (token=<QUERY>|token=<CLAUSEDEF>) {jjtThis.setToken(token);}
+  (token=<QUERY>|token=<CLAUSEDEF>) 
   (token=<DYNAMIC>|token=<MULTIFILE>|token=<MODULE_TRANSPARENT>|token=<VOLATILE>){jjtThis.setKind(token.kind);} PredicateSignature() (<COMMA> PredicateSignature())* 
-  token=<DOT> {jjtThis.setEndToken(token);}
+  token=<DOT> 
 }
 
 
 void Call() :
 {Token token;}
 {
-  (token=<QUERY>|token=<CLAUSEDEF>) {jjtThis.setToken(token);} (<INIT> {jjtThis.setInitialization(true);} )? Body() 
-  token=<DOT> {jjtThis.setEndToken(token);}
+  (token=<QUERY>|token=<CLAUSEDEF>)  (<INIT> {jjtThis.setInitialization(true);} )? Body() 
+  token=<DOT> 
 }
 
 
@@ -478,7 +488,7 @@ void PredicateSignature() :
 void Clause() :
 {Token token;}
 {
-	(LOOKAHEAD(2) token=<IDENTIFIER> {jjtThis.setToken(token);} <COLON> {jjtThis.setModule(token.image.toString());})?
+	(LOOKAHEAD(2) token=<IDENTIFIER>  <COLON> {jjtThis.setModule(token.image.toString());})?
 	(
 	<LPAREN> 	
 	   Identifier() {jjtThis.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
@@ -490,7 +500,7 @@ void Clause() :
  	  (PredicateArgs())?
       ((<ARROW>| <CLAUSEDEF>) Body())?
 	)
-	  token=<DOT> {jjtThis.setEndToken(token);}
+	  token=<DOT> 
 }
 
 
@@ -545,7 +555,7 @@ void Compound() :
 void Cut() :
 {Token token;}
 {
-	token=<CUT> {jjtThis.setToken(token);}
+	token=<CUT> 
 }
 
 /*
@@ -559,7 +569,7 @@ void Sequence() :
 {Token token;}
 {
    token=<LPAREN>
-   {jjtThis.setToken(token);}
+   
    BodyElement() ( <COMMA> BodyElement())*  <RPAREN>
    
 }
@@ -567,19 +577,19 @@ void Sequence() :
 void List() : 
 { Token token; }
 {
-    LOOKAHEAD(2) token=<LBRACKET> {jjtThis.setToken(token);} <RBRACKET> | token=<LBRACKET> {jjtThis.setToken(token);} BodyElement() (<COMMA> BodyElement())* (<LISTSEP> (Variable() | List()))* <RBRACKET>
+    LOOKAHEAD(2) token=<LBRACKET>  <RBRACKET> | token=<LBRACKET>  BodyElement() (<COMMA> BodyElement())* (<LISTSEP> (Variable() | List()))* <RBRACKET>
 }
 
 void Braces() : 
 {    Token token; }
 {
-   token=<LBRACE> {jjtThis.setToken(token);} BodyElement() ((<COMMA>|<SEMICOLON>)BodyElement())* <RBRACE>
+   token=<LBRACE>  BodyElement() ((<COMMA>|<SEMICOLON>)BodyElement())* <RBRACE>
 }
 
 void Parenthesis() :
 { Token token; }
 {
-   token=<LPAREN> {jjtThis.setToken(token);} BodyElement() ((<COMMA>|<SEMICOLON>)BodyElement())* <RPAREN>
+   token=<LPAREN>  BodyElement() ((<COMMA>|<SEMICOLON>)BodyElement())* <RPAREN>
 }
 
 void Atom() #void :
@@ -609,7 +619,7 @@ void SimpleAtom() #void :
 
 
 void RestTokens() :
-{ }
+{}
 {
    (  
 //      token=<SEMICOLON>
@@ -618,7 +628,7 @@ void RestTokens() :
     | token=<DOLLAR>
     | token=<ZERO_APO_REST>
    )
-  { jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}  
+  { jjtThis.setName(token.image.toString()); }  
 }
 
 
@@ -627,9 +637,9 @@ void IntAtom() :
 { Token token; }
 {
     (<MINUS> (token=<DECIMAL_LITERAL> | token=<BIN_LITERAL>  | token=<OCT_LITERAL>  | token=<HEX_LITERAL> )
-      {jjtThis.setName("-"+token.image.toString()); jjtThis.setToken(token);}  
+      {jjtThis.setName("-"+token.image.toString()); }  
     | (token=<DECIMAL_LITERAL> | token=<BIN_LITERAL>  | token=<OCT_LITERAL>  | token=<HEX_LITERAL> )
-      { jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}   
+      { jjtThis.setName(token.image.toString()); }   
     )
 }
 
@@ -637,7 +647,7 @@ void FloatAtom() :
 { Token token; }
 {
     token=<FLOATING_POINT_LITERAL> 
-    { jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    { jjtThis.setName(token.image.toString()); }
 }
 
 
@@ -645,14 +655,14 @@ void StringAtom() :
 { Token token; }
 {
     token=<STRING_LITERAL>
-    { jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    { jjtThis.setName(token.image.toString()); }
 }
 
 void CharAtom() :
 { Token token; }
 {
     token=<CHARACTER_ATOM>
-    { jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+    { jjtThis.setName(token.image.toString()); }
 }
 
 void Body() #void:
@@ -665,7 +675,7 @@ void Separator() :
 {Token token;}
 {
  	(token=<COMMA>|token=<SEMICOLON>) 
-	{jjtThis.setName(token.image.toString()); jjtThis.setToken(token);}
+	{jjtThis.setName(token.image.toString()); }
 }
 void BodyElement() #void :
 {Token token;}
@@ -673,6 +683,7 @@ void BodyElement() #void :
     ( <NOTPROVABLE> )* 
     (LOOKAHEAD(2)((token=<MINUS> | token=<PLUS>) (TermWithoutOp()|{}) {jjtree.peekNode().setFlag(token);} ) |Term()) // TODO: double occurance of plus or minus  is allowed!
      (BinaryOp() ( <NOTPROVABLE> )* Term())* // TODO: priorities and not provables!
+     
 }
 
 
@@ -716,8 +727,8 @@ void BinaryOp() :
 | token=<BITXOR>
 //  { if(!(token.image.equals("mod") || token.image.equals("is"))) {jj_consume_token(-1); throw new ParseException();}}
 )
-{jjtThis.setToken(token);}
 
 
+{}
 }
 

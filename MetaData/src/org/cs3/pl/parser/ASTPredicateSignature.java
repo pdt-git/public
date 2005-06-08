@@ -34,7 +34,7 @@ public class ASTPredicateSignature extends SimpleNode {
   	if(children[0] instanceof ASTFunctor)
   		return ((ASTFunctor)children[0]).getName();
   	if(children[0] instanceof ASTBinaryOp)
-  		return ((ASTBinaryOp)children[0]).getToken().image.toString();
+  		return ((ASTBinaryOp)children[0]).getFirstToken().image.toString();
   	throw new RuntimeException("ASTPredicateSignature.getName(): This point should never been reached.");
   }
   /**

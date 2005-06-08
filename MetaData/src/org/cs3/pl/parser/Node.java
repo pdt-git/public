@@ -40,8 +40,6 @@ public interface Node {
 	 */
   public void setFlag(Token token);
 
-  public Token getToken();
-  public void setToken(Token token);
   public boolean isHasMinusPrefix();
 /**
  * @return Returns the hasPlusPrefix.

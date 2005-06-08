@@ -13,7 +13,8 @@ public class SimpleNode implements Node {
 	public Node[] children;
 	protected int id;
 	protected PrologParser parser;
-	private Token token;
+	private Token firstToken;
+	private Token lastToken;
 	private boolean hasMinusPrefix = false;
 	private boolean hasPlusPrefix = false;
 	
@@ -95,18 +96,15 @@ public class SimpleNode implements Node {
 	/**
 	 * @return Returns the token.
 	 */
-	public Token getToken() {
-		if (token != null)
-			return token;
-		if (children.length == 0)
-			return null;
-		return ((Node)children[0]).getToken();
+	public Token getFirstToken() {
+			return firstToken;
 	}
-	/**
-	 * @param token The token to set.
+	
+/**
+	 * @return Returns the token.
 	 */
-	public void setToken(Token token) {
-		this.token = token;
+	public Token getLastToken() {
+			return lastToken;
 	}
 	
 	/* (non-Javadoc)
@@ -144,7 +142,7 @@ public class SimpleNode implements Node {
 	 */
 	
 	public String getComment(String predname) {
-		Token token = getToken().specialToken;
+		Token token = getFirstToken().specialToken;
 		if(token != null)
 		   if(token.image.startsWith("/*"))
 			return makeSwiConformString(predname,token.image,token.image.length(),2,2);
@@ -193,6 +191,14 @@ public class SimpleNode implements Node {
 			default:
 				return false;
 		}
+	}
+
+	public void setFirstToken(Token firstToken) {
+		this.firstToken = firstToken;
+	}
+
+	public void setLastToken(Token lastToken) {
+		this.lastToken = lastToken;
 	}
 
 }

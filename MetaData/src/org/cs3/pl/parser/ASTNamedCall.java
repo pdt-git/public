@@ -2,7 +2,7 @@
 
 package org.cs3.pl.parser;
 
-public class ASTNamedCall extends SimpleNode implements ASTUnitMember{
+public class ASTNamedCall extends SimpleNode {
   private Token endToken;
 private int kind;
 
@@ -22,17 +22,7 @@ public ASTNamedCall(int id) {
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.parser.ASTUnitMember#setEndToken(org.cs3.pl.parser.Token)
 	 */
-	public void setEndToken(Token token) {
-		endToken = token;
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see org.cs3.pl.parser.ASTUnitMember#getEndToken(org.cs3.pl.parser.Token)
-	 */
-	public Token getEndToken() {
-		return endToken;
-	}
+	
 
 	/**
 	 * @return

@@ -3,7 +3,7 @@
 package org.cs3.pl.parser;
 
 
-public class ASTClause extends ASTNamedNode implements ASTUnitMember {
+public class ASTClause extends ASTNamedNode {
 	
 	private String module;
 	private Token endToken;
@@ -58,19 +58,6 @@ public class ASTClause extends ASTNamedNode implements ASTUnitMember {
 		return (ASTPredicateArgs)children[1];
 	}
 
-	/* (non-Javadoc)
-	 * @see org.cs3.pl.parser.ASTUnitMember#setEndToken(org.cs3.pl.parser.Token)
-	 */
-	public void setEndToken(Token token) {
-		endToken = token;
-		
-	}
-
-	/* (non-Javadoc)
-	 * @see org.cs3.pl.parser.ASTUnitMember#getEndToken(org.cs3.pl.parser.Token)
-	 */
-	public Token getEndToken() {
-		return endToken;
-	}
+	
 	
 }
