@@ -199,4 +199,9 @@ public class PrologParserTraversal implements PrologParserVisitor {
 		node.childrenAccept(this, data);
 		return node;
 	}
+
+	public Object visit(ASTHead node, Object data) {
+		node.childrenAccept(this, data);
+		return node;
+	}
 }

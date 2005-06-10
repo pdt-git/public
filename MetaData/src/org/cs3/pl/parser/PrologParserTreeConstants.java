@@ -14,20 +14,22 @@ public interface PrologParserTreeConstants
   public int JJTCALL = 7;
   public int JJTPREDICATESIGNATURE = 8;
   public int JJTCLAUSE = 9;
-  public int JJTPREDICATEARGS = 10;
-  public int JJTCOMPOUND = 11;
-  public int JJTCUT = 12;
-  public int JJTSEQUENCE = 13;
-  public int JJTLIST = 14;
-  public int JJTBRACES = 15;
-  public int JJTPARENTHESIS = 16;
-  public int JJTRESTTOKENS = 17;
-  public int JJTINTATOM = 18;
-  public int JJTFLOATATOM = 19;
-  public int JJTSTRINGATOM = 20;
-  public int JJTCHARATOM = 21;
-  public int JJTSEPARATOR = 22;
-  public int JJTBINARYOP = 23;
+  public int JJTHEAD = 10;
+  public int JJTPREDICATEARGS = 11;
+  public int JJTCOMPOUND = 12;
+  public int JJTCUT = 13;
+  public int JJTSEQUENCE = 14;
+  public int JJTLIST = 15;
+  public int JJTBRACES = 16;
+  public int JJTPARENTHESIS = 17;
+  public int JJTRESTTOKENS = 18;
+  public int JJTINTATOM = 19;
+  public int JJTFLOATATOM = 20;
+  public int JJTSTRINGATOM = 21;
+  public int JJTCHARATOM = 22;
+  public int JJTBODY = 23;
+  public int JJTSEPARATOR = 24;
+  public int JJTBINARYOP = 25;
 
 
   public String[] jjtNodeName = {
@@ -41,6 +43,7 @@ public interface PrologParserTreeConstants
     "Call",
     "PredicateSignature",
     "Clause",
+    "Head",
     "PredicateArgs",
     "Compound",
     "Cut",
@@ -53,6 +56,7 @@ public interface PrologParserTreeConstants
     "FloatAtom",
     "StringAtom",
     "CharAtom",
+    "Body",
     "Separator",
     "BinaryOp",
   };

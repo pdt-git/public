@@ -99,13 +99,22 @@ public class SimpleNode implements Node {
 	public Token getFirstToken() {
 			return firstToken;
 	}
-	
-/**
-	 * @return Returns the token.
+	public Token getStartToken(){
+		return getFirstToken();
+	}
+	/**
+	 * @return Returns the last token that is part of this node.
 	 */
 	public Token getLastToken() {
 			return lastToken;
 	}
+	
+	/**
+	 * @return Returns the first token that is NOT part of this node.
+	 */	
+	 public Token getEndToken(){
+		 return getLastToken().next;
+	 }
 	
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.parser.Node#setFlag(org.cs3.pl.parser.Token)
@@ -142,7 +151,7 @@ public class SimpleNode implements Node {
 	 */
 	
 	public String getComment(String predname) {
-		Token token = getFirstToken().specialToken;
+		Token token = getStartToken().specialToken;
 		if(token != null)
 		   if(token.image.startsWith("/*"))
 			return makeSwiConformString(predname,token.image,token.image.length(),2,2);
@@ -201,5 +210,12 @@ public class SimpleNode implements Node {
 		this.lastToken = lastToken;
 	}
 
+	public String getImage(){
+		StringBuffer buf = new StringBuffer();		
+		for(Token t = getStartToken();t!=getEndToken();t=t.next){
+			buf.append(t.image);
+		}
+		return buf.toString();
+	}
 }
 

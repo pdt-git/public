@@ -28,6 +28,11 @@ public class PrologParser
     {
       ((SimpleNode)n).setLastToken(getToken(0));
     }
+    
+    public ASTCompilationUnit getASTRoot(){
+		return (ASTCompilationUnit) jjtree.rootNode();
+  	}
+    
 	private List errors = new ArrayList();
 	
 	public List getErrors() {
@@ -490,19 +495,31 @@ void Clause() :
 {
 	(LOOKAHEAD(2) token=<IDENTIFIER>  <COLON> {jjtThis.setModule(token.image.toString());})?
 	(
-	<LPAREN> 	
-	   Identifier() {jjtThis.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
-	  (PredicateArgs())?
-      ((<ARROW>| <CLAUSEDEF>) Body())?
-    <RPAREN> 
+	 <LPAREN> 	
+	   Head() {jjtThis.setHead( (ASTHead) jjtree.peekNode() );}
+      (	
+        (<ARROW>| <CLAUSEDEF>) 
+      	Body() {jjtThis.setBody( (ASTBody) jjtree.peekNode() );}
+      )?
+      <RPAREN> 
 	 | 
-	  Identifier() {jjtThis.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
- 	  (PredicateArgs())?
-      ((<ARROW>| <CLAUSEDEF>) Body())?
+	  Head() {jjtThis.setHead( (ASTHead) jjtree.peekNode() );}
+      (	
+        (<ARROW>| <CLAUSEDEF>) 
+      	Body() {jjtThis.setBody( (ASTBody) jjtree.peekNode() );}
+      )?
 	)
 	  token=<DOT> 
 }
 
+void Head() :
+{}
+{
+	Identifier() {jjtThis.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
+	(
+	  PredicateArgs() {jjtThis.setArguments( (ASTPredicateArgs) jjtree.peekNode() );}
+	)?
+}
 
 void PredicateArgs() :
 {}
@@ -665,7 +682,7 @@ void CharAtom() :
     { jjtThis.setName(token.image.toString()); }
 }
 
-void Body() #void:
+void Body() :
 {Token token;}
 {
     BodyElement() ( Separator() BodyElement())* 
@@ -681,8 +698,19 @@ void BodyElement() #void :
 {Token token;}
 {
     ( <NOTPROVABLE> )* 
-    (LOOKAHEAD(2)((token=<MINUS> | token=<PLUS>) (TermWithoutOp()|{}) {jjtree.peekNode().setFlag(token);} ) |Term()) // TODO: double occurance of plus or minus  is allowed!
-     (BinaryOp() ( <NOTPROVABLE> )* Term())* // TODO: priorities and not provables!
+    (
+    	LOOKAHEAD(2)(
+	    	(token=<MINUS> | token=<PLUS>) 
+	    	(TermWithoutOp()|{}) 
+	    	{jjtree.peekNode().setFlag(token);} 
+	    ) 
+	    |Term()
+	 ) // TODO: double occurance of plus or minus  is allowed!
+     (
+     	BinaryOp() 
+     	( <NOTPROVABLE> )* 
+	     Term()
+     )* // TODO: priorities and not provables!
      
 }
 

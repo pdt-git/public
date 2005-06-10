@@ -26,6 +26,11 @@ public class PrologParser/*@bgen(jjtree)*/implements PrologParserTreeConstants/*
     {
       ((SimpleNode)n).setLastToken(getToken(0));
     }
+    
+    public ASTCompilationUnit getASTRoot(){
+		return (ASTCompilationUnit) jjtree.rootNode();
+  	}
+    
 	private List errors = new ArrayList();
 	
 	public List getErrors() {
@@ -821,15 +826,19 @@ void Clause() :
 /*@egen*/
 	(LOOKAHEAD(2) token=<IDENTIFIER>  <COLON> {jjtn000.setModule(token.image.toString());})?
 	(
-	<LPAREN> 	
-	   Identifier() {jjtn000.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
-	  (PredicateArgs())?
-      ((<ARROW>| <CLAUSEDEF>) Body())?
-    <RPAREN> 
+	 <LPAREN> 	
+	   Head() {jjtn000.setHead( (ASTHead) jjtree.peekNode() );}
+      (	
+        (<ARROW>| <CLAUSEDEF>) 
+      	Body() {jjtn000.setBody( (ASTBody) jjtree.peekNode() );}
+      )?
+      <RPAREN> 
 	 | 
-	  Identifier() {jjtn000.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
- 	  (PredicateArgs())?
-      ((<ARROW>| <CLAUSEDEF>) Body())?
+	  Head() {jjtn000.setHead( (ASTHead) jjtree.peekNode() );}
+      (	
+        (<ARROW>| <CLAUSEDEF>) 
+      	Body() {jjtn000.setBody( (ASTBody) jjtree.peekNode() );}
+      )?
 	)
 	  token=<DOT>/*@bgen(jjtree)*/
         } catch (Throwable jjte000) {
@@ -855,6 +864,42 @@ void Clause() :
 /*@egen*/ 
 }
 
+void Head() :
+{/*@bgen(jjtree) Head */
+  ASTHead jjtn000 = new ASTHead(this, JJTHEAD);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
+/*@egen*/}
+{/*@bgen(jjtree) Head */
+        try {
+/*@egen*/
+	Identifier() {jjtn000.setName(((ASTIdentifier)jjtree.peekNode()).getName());}
+	(
+	  PredicateArgs() {jjtn000.setArguments( (ASTPredicateArgs) jjtree.peekNode() );}
+	)?/*@bgen(jjtree)*/
+        } catch (Throwable jjte000) {
+          if (jjtc000) {
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            throw (RuntimeException)jjte000;
+          }
+          if (jjte000 instanceof ParseException) {
+            throw (ParseException)jjte000;
+          }
+          throw (Error)jjte000;
+        } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
+          }
+        }
+/*@egen*/
+}
 
 void PredicateArgs() :
 {/*@bgen(jjtree) PredicateArgs */
@@ -1305,10 +1350,38 @@ void CharAtom() :
 /*@egen*/
 }
 
-void Body()      :
-{Token token;}
-{
-    BodyElement() ( Separator() BodyElement())* 
+void Body() :
+{/*@bgen(jjtree) Body */
+ ASTBody jjtn000 = new ASTBody(this, JJTBODY);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);
+/*@egen*/Token token;}
+{/*@bgen(jjtree) Body */
+    try {
+/*@egen*/
+    BodyElement() ( Separator() BodyElement())*/*@bgen(jjtree)*/
+    } catch (Throwable jjte000) {
+      if (jjtc000) {
+        jjtree.clearNodeScope(jjtn000);
+        jjtc000 = false;
+      } else {
+        jjtree.popNode();
+      }
+      if (jjte000 instanceof RuntimeException) {
+        throw (RuntimeException)jjte000;
+      }
+      if (jjte000 instanceof ParseException) {
+        throw (ParseException)jjte000;
+      }
+      throw (Error)jjte000;
+    } finally {
+      if (jjtc000) {
+        jjtree.closeNodeScope(jjtn000, true);
+        jjtreeCloseNodeScope(jjtn000);
+      }
+    }
+/*@egen*/ 
 }
 
 void Separator() :
@@ -1341,8 +1414,19 @@ void BodyElement()       :
 {Token token;}
 {
     ( <NOTPROVABLE> )* 
-    (LOOKAHEAD(2)((token=<MINUS> | token=<PLUS>) (TermWithoutOp()|{}) {jjtree.peekNode().setFlag(token);} ) |Term()) // TODO: double occurance of plus or minus  is allowed!
-     (BinaryOp() ( <NOTPROVABLE> )* Term())* // TODO: priorities and not provables!
+    (
+    	LOOKAHEAD(2)(
+	    	(token=<MINUS> | token=<PLUS>) 
+	    	(TermWithoutOp()|{}) 
+	    	{jjtree.peekNode().setFlag(token);} 
+	    ) 
+	    |Term()
+	 ) // TODO: double occurance of plus or minus  is allowed!
+     (
+     	BinaryOp() 
+     	( <NOTPROVABLE> )* 
+	     Term()
+     )* // TODO: priorities and not provables!
      
 }
 

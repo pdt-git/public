@@ -139,7 +139,7 @@ public class PrologCompiler extends PrologParserTraversal {
         for (Iterator iter = vars.keySet().iterator(); iter.hasNext();) {
             String s = (String) iter.next();
             if (boundVars.get(s) == null)
-                addProblem(((SimpleNode) vars.get(s)).getFirstToken(), "Variable '" + s
+                addProblem(((SimpleNode) vars.get(s)).getStartToken(), "Variable '" + s
                         + "' is not bound by the condition part.", WARNING);
         }
     }
@@ -264,7 +264,7 @@ public class PrologCompiler extends PrologParserTraversal {
         Integer arity = (Integer) pefs.get(node.getName());
         int found = node.jjtGetChild(1).jjtGetNumChildren();
         if (arity != null && arity.intValue() != found)
-            addProblem(node.getFirstToken(), "Expected arity for '" + node.getName()
+            addProblem(node.getStartToken(), "Expected arity for '" + node.getName()
                     + "' is " + arity.intValue() + ", arity found: " + found
                     + ".", WARNING);
 
@@ -293,7 +293,7 @@ public class PrologCompiler extends PrologParserTraversal {
         set.addAll(problemVars);
         for (Iterator iter = set.iterator(); iter.hasNext();) {
             ASTVariable var = (ASTVariable) iter.next();
-            addProblem(var.getFirstToken(), MSG_SINGLETON_VAR_PREFIX + var.getName()
+            addProblem(var.getStartToken(), MSG_SINGLETON_VAR_PREFIX + var.getName()
                     + MSG_SINGLETON_VAR_POSTFIX, WARNING);
         }
 
@@ -332,17 +332,17 @@ public class PrologCompiler extends PrologParserTraversal {
 
         if (node.getName().equals("ct")) {
             if (node.children.length != 2) {
-                addProblem(node.getFirstToken(), "expected arity of 4, was  "
+                addProblem(node.getStartToken(), "expected arity of 4, was  "
                         + node.children.length + ".", WARNING);
             } else {
                 ASTPredicateArgs args = node.getArgs();
                 if (!(args.jjtGetChild(1) instanceof ASTParenthesis)) {
-                    addProblem(((SimpleNode) args.jjtGetChild(1)).getFirstToken(),
+                    addProblem(((SimpleNode) args.jjtGetChild(1)).getStartToken(),
                             MSG_COND_PAREN, WARNING);
                     node.jjtGetChild(1);
                 }
                 if (!(args.jjtGetChild(2) instanceof ASTParenthesis)) {
-                    addProblem(((SimpleNode) args.jjtGetChild(2)).getFirstToken(),
+                    addProblem(((SimpleNode) args.jjtGetChild(2)).getStartToken(),
                             MSG_ACTION_PAREN, WARNING);
                     node.jjtGetChild(1);
                 }
@@ -400,7 +400,7 @@ public class PrologCompiler extends PrologParserTraversal {
     }
 
     public Clause getPrologElementData(ASTClause clause) {
-        int lineOffset = getLineOffset(clause.getFirstToken().beginLine);
+        int lineOffset = getLineOffset(clause.getStartToken().beginLine);
 		
 		HashMap map = getPublicModulePredicates();
 		String moduleName = getModuleName();
@@ -411,8 +411,8 @@ public class PrologCompiler extends PrologParserTraversal {
         + arity;
 		
 		boolean isPublic = map==null||getPublicModulePredicates().containsKey(sig);
-        int length = getLength(lineOffset, clause.getFirstToken());
-		int offset = lineOffset + clause.getFirstToken().beginColumn
+        int length = getLength(lineOffset, clause.getStartToken());
+		int offset = lineOffset + clause.getStartToken().beginColumn
                 - 1;
 		int endOffset=offset+length;
 		SourceLocation sl = new SourceLocation(symbolicFileName,true,false);

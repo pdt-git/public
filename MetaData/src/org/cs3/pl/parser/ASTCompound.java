@@ -15,7 +15,7 @@ public class ASTCompound extends SimpleNode implements ASTTerm{
   	if(children[0] instanceof ASTVariable)
   		return ((ASTVariable)children[0]).getName();
   	if(children[0] instanceof ASTBinaryOp)
-  		return ((ASTBinaryOp)children[0]).getFirstToken().toString();
+  		return ((ASTBinaryOp)children[0]).getStartToken().toString();
   	throw new IllegalStateException("The first child of a Compound must be an atom or a variable.");
   }
   

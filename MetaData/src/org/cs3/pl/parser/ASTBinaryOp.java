@@ -16,4 +16,6 @@ public class ASTBinaryOp extends SimpleNode {
   public Object jjtAccept(PrologParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+
+
 }

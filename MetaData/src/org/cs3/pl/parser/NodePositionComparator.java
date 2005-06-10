@@ -13,8 +13,8 @@ public class NodePositionComparator implements Comparator{
 		public int compare(Object o1, Object o2) {
 			if (!(o1 instanceof SimpleNode) || !(o2 instanceof SimpleNode))
 				throw new RuntimeException("incorrect types " + o1.getClass() + ", " + o2.getClass() +", expected SimpleNode.");
-			Token token1 = ((SimpleNode)o1).getFirstToken();
-			Token token2 = ((SimpleNode)o2).getFirstToken();
+			Token token1 = ((SimpleNode)o1).getStartToken();
+			Token token2 = ((SimpleNode)o2).getStartToken();
 			return token1.beginOffset-token2.beginOffset;
 //			if (token1.beginLine < token2.beginLine)
 //				return -1;

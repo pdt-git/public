@@ -7,6 +7,8 @@ public class ASTClause extends ASTNamedNode {
 	
 	private String module;
 	private Token endToken;
+	private ASTHead head;
+	private ASTBody body;
 	
   public ASTClause(int id) {
     super(id);
@@ -22,40 +24,42 @@ public class ASTClause extends ASTNamedNode {
     return visitor.visit(this, data);
   }
   
-//  public String getName() {
-//  	if (children[0] instanceof ASTFunctor)
-//  		return ((ASTFunctor)children[0]).getName();
-//  	return ((ASTPredicateHead)children[0]).getName();
-//  }
-
-  public int getArity() {
-  	if(children.length < 2)
-  		return 0;
-  	if (children[1] instanceof ASTPredicateArgs)
-  		return children[1].jjtGetNumChildren();
-  	return 0;
+  public String getName() {
+  	return getHead().getName();
   }
 
-	/**
-	 * @return Returns the module.
-	 */
+  public int getArity() {
+	  return getHead().getArity();
+  }
+
 	public String getModule() {
 		return module;
 	}
-	/**
-	 * @param module The module to set.
-	 */
+
 	public void setModule(String module) {
 		this.module = module;
 	}
 
-	/**
-	 * @return
-	 */
 	public ASTPredicateArgs getArgs() {
-		if(children.length == 0)
-			return null;
-		return (ASTPredicateArgs)children[1];
+		return getHead().getArguments();
+	}
+
+	public void setHead(ASTHead head) {
+		this.head=head;
+		
+	}
+
+	public void setBody(ASTBody body) {
+		this.body=body;
+		
+	}
+
+	public ASTBody getBody() {
+		return body;
+	}
+
+	public ASTHead getHead() {
+		return head;
 	}
 
 	
