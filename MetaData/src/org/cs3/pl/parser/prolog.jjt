@@ -478,7 +478,8 @@ void NamedCall() :
 void Call() :
 {Token token;}
 {
-  (token=<QUERY>|token=<CLAUSEDEF>)  (<INIT> {jjtThis.setInitialization(true);} )? Body() 
+  (token=<QUERY>|token=<CLAUSEDEF>)  (<INIT> {jjtThis.setInitialization(true);} )? 
+  Body() {jjtThis.setBody( (ASTBody) jjtree.peekNode() );}
   token=<DOT> 
 }
 
@@ -562,11 +563,13 @@ void TermWithoutOp() #void :
 }
 
 void Compound() :
-{}
+{ASTSequence sequence;}
 {
-		Atom() (<POINTER>)? Sequence() // TODO: what does the pointer mean?
+	(// TODO: what does the pointer mean?
+		Atom() (<POINTER>)? sequence=Sequence() {jjtThis.setArgs( sequence );}
 	| 
-		Variable() <POINTER> Sequence() 
+		Variable() <POINTER> sequence=Sequence()	{jjtThis.setArgs( sequence );}
+	)
 }	
 
 void Cut() :
@@ -582,13 +585,12 @@ void DividedAtom():
     ((LOOKAHEAD(3) SimpleAtom() | Variable())) (BinaryOp() (SimpleAtom() | Variable()))+
 }
 */
-void Sequence() :
+ASTSequence Sequence() :
 {Token token;}
 {
    token=<LPAREN>
-   
    BodyElement() ( <COMMA> BodyElement())*  <RPAREN>
-   
+   {return jjtThis;}
 }
 
 void List() : 

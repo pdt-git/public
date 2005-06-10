@@ -331,20 +331,21 @@ public class PrologCompiler extends PrologParserTraversal {
     private void checkCTValidity(ASTClause node, Object data) {
 
         if (node.getName().equals("ct")) {
-            if (node.children.length != 2) {
-                addProblem(node.getStartToken(), "expected arity of 4, was  "
+        	ASTPredicateArgs args = node.getArgs();
+            if (args.jjtGetNumChildren()!= 3) {
+                addProblem(node.getStartToken(), "expected arity of 3, was  "
                         + node.children.length + ".", WARNING);
             } else {
-                ASTPredicateArgs args = node.getArgs();
+                
                 if (!(args.jjtGetChild(1) instanceof ASTParenthesis)) {
                     addProblem(((SimpleNode) args.jjtGetChild(1)).getStartToken(),
                             MSG_COND_PAREN, WARNING);
-                    node.jjtGetChild(1);
+                    
                 }
                 if (!(args.jjtGetChild(2) instanceof ASTParenthesis)) {
                     addProblem(((SimpleNode) args.jjtGetChild(2)).getStartToken(),
                             MSG_ACTION_PAREN, WARNING);
-                    node.jjtGetChild(1);
+                    
                 }
                 resetVars();
                 args.jjtGetChild(0).jjtAccept(this, data);

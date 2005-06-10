@@ -5,6 +5,7 @@ package org.cs3.pl.parser;
 public class ASTCall extends SimpleNode  {
 	private boolean init;
 	private Token endToken;
+	private ASTBody body;
 
 	public ASTCall(int id) {
 		super(id);
@@ -24,8 +25,9 @@ public class ASTCall extends SimpleNode  {
 	 * @return
 	 */
 	public boolean isModuleDeclaration() {
-		if(children[0] instanceof ASTCompound)
-			return ((ASTFunctor)children[0].jjtGetChild(0)).getName().equals("module");
+		Node firstChild = getBody().jjtGetChild(0);
+		if(firstChild instanceof ASTCompound)
+			return ((ASTCompound)firstChild).getName().equals("module");
 		return false;
 	}
 
@@ -33,7 +35,13 @@ public class ASTCall extends SimpleNode  {
 	 * @return
 	 */
 	public String getModuleName() {
-		return ((ASTIdentifier)children[0].jjtGetChild(1).jjtGetChild(0)).getName();
+		if(isModuleDeclaration()){
+			ASTCompound c = (ASTCompound) getBody().jjtGetChild(0);
+			SimpleNode name = (SimpleNode) c.getArgs().jjtGetChild(0);
+			return name.getImage();
+		}
+		
+		return null;
 	}
 
 	/**
@@ -54,6 +62,15 @@ public class ASTCall extends SimpleNode  {
 	 */
 	public boolean isInitialisation() {
 		return init;
+	}
+
+	public void setBody(ASTBody body) {
+		this.body = body;
+		
+	}
+
+	public ASTBody getBody() {
+		return body;
 	}
 	
 	

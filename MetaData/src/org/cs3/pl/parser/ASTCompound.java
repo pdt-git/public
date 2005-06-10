@@ -3,7 +3,9 @@
 package org.cs3.pl.parser;
 
 public class ASTCompound extends SimpleNode implements ASTTerm{
-  public ASTCompound(int id) {
+  private ASTSequence args;
+
+public ASTCompound(int id) {
     super(id);
   }
 
@@ -28,4 +30,14 @@ public class ASTCompound extends SimpleNode implements ASTTerm{
   public Object jjtAccept(PrologParserVisitor visitor, Object data) {
     return visitor.visit(this, data);
   }
+
+public void setArgs(ASTSequence args) {
+	this.args = args;
+
+	
+}
+
+public ASTSequence getArgs() {
+	return args;
+}
 }

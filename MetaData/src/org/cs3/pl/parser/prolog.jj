@@ -747,7 +747,8 @@ void Call() :
 {/*@bgen(jjtree) Call */
   try {
 /*@egen*/
-  (token=<QUERY>|token=<CLAUSEDEF>)  (<INIT> {jjtn000.setInitialization(true);} )? Body() 
+  (token=<QUERY>|token=<CLAUSEDEF>)  (<INIT> {jjtn000.setInitialization(true);} )? 
+  Body() {jjtn000.setBody( (ASTBody) jjtree.peekNode() );}
   token=<DOT>/*@bgen(jjtree)*/
   } catch (Throwable jjte000) {
     if (jjtc000) {
@@ -971,38 +972,52 @@ void TermWithoutOp()       :
 
 void Compound() :
 {/*@bgen(jjtree) Compound */
-  ASTCompound jjtn000 = new ASTCompound(this, JJTCOMPOUND);
-  boolean jjtc000 = true;
-  jjtree.openNodeScope(jjtn000);
-  jjtreeOpenNodeScope(jjtn000);
-/*@egen*/}
+ ASTCompound jjtn000 = new ASTCompound(this, JJTCOMPOUND);
+ boolean jjtc000 = true;
+ jjtree.openNodeScope(jjtn000);
+ jjtreeOpenNodeScope(jjtn000);
+/*@egen*/ASTSequence sequence;}
 {/*@bgen(jjtree) Compound */
-                try {
+        try {
 /*@egen*/
-		Atom() (<POINTER>)? Sequence() // TODO: what does the pointer mean?
+	(// TODO: what does the pointer mean?
+		Atom() (<POINTER>)? sequence=Sequence()/*@bgen(jjtree)*/
+                                                        {
+                                                          jjtree.closeNodeScope(jjtn000, true);
+                                                          jjtc000 = false;
+                                                          jjtreeCloseNodeScope(jjtn000);
+                                                        }
+/*@egen*/ {jjtn000.setArgs( sequence );}
 	| 
-		Variable() <POINTER> Sequence()/*@bgen(jjtree)*/
-                } catch (Throwable jjte000) {
-                  if (jjtc000) {
-                    jjtree.clearNodeScope(jjtn000);
-                    jjtc000 = false;
-                  } else {
-                    jjtree.popNode();
-                  }
-                  if (jjte000 instanceof RuntimeException) {
-                    throw (RuntimeException)jjte000;
-                  }
-                  if (jjte000 instanceof ParseException) {
-                    throw (ParseException)jjte000;
-                  }
-                  throw (Error)jjte000;
-                } finally {
-                  if (jjtc000) {
-                    jjtree.closeNodeScope(jjtn000, true);
-                    jjtreeCloseNodeScope(jjtn000);
-                  }
-                }
-/*@egen*/ 
+		Variable() <POINTER> sequence=Sequence()/*@bgen(jjtree)*/
+                                                                {
+                                                                  jjtree.closeNodeScope(jjtn000, true);
+                                                                  jjtc000 = false;
+                                                                  jjtreeCloseNodeScope(jjtn000);
+                                                                }
+/*@egen*/	{jjtn000.setArgs( sequence );}
+	)/*@bgen(jjtree)*/
+        } catch (Throwable jjte000) {
+          if (jjtc000) {
+            jjtree.clearNodeScope(jjtn000);
+            jjtc000 = false;
+          } else {
+            jjtree.popNode();
+          }
+          if (jjte000 instanceof RuntimeException) {
+            throw (RuntimeException)jjte000;
+          }
+          if (jjte000 instanceof ParseException) {
+            throw (ParseException)jjte000;
+          }
+          throw (Error)jjte000;
+        } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
+          }
+        }
+/*@egen*/
 }	
 
 void Cut() :
@@ -1032,7 +1047,7 @@ void DividedAtom():
     ((LOOKAHEAD(3) SimpleAtom() | Variable())) (BinaryOp() (SimpleAtom() | Variable()))+
 }
 */
-void Sequence() :
+ASTSequence Sequence() :
 {/*@bgen(jjtree) Sequence */
  ASTSequence jjtn000 = new ASTSequence(this, JJTSEQUENCE);
  boolean jjtc000 = true;
@@ -1043,8 +1058,14 @@ void Sequence() :
    try {
 /*@egen*/
    token=<LPAREN>
-   
    BodyElement() ( <COMMA> BodyElement())*  <RPAREN>/*@bgen(jjtree)*/
+   {
+     jjtree.closeNodeScope(jjtn000, true);
+     jjtc000 = false;
+     jjtreeCloseNodeScope(jjtn000);
+   }
+/*@egen*/
+   {return jjtn000;}/*@bgen(jjtree)*/
    } catch (Throwable jjte000) {
      if (jjtc000) {
        jjtree.clearNodeScope(jjtn000);
@@ -1066,7 +1087,6 @@ void Sequence() :
      }
    }
 /*@egen*/
-   
 }
 
 void List() : 
