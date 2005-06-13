@@ -38,8 +38,11 @@ public class AbbaGraphGenerator implements PrologParserVisitor {
 
 	private Stack parentIds = new Stack();
 
-	public AbbaGraphGenerator(NodeWriterStrategy writerStrategy,
+	private final String fileName;
+
+	public AbbaGraphGenerator(String fileName,NodeWriterStrategy writerStrategy,
 			IDGeneratorStrategy idStrategy) {
+		this.fileName = fileName;
 		this.writerStrategy = writerStrategy;
 		this.idStrategy = idStrategy;
 	}
@@ -111,6 +114,14 @@ public class AbbaGraphGenerator implements PrologParserVisitor {
 						+ node.getName() + "/" + node.getArity());
 		String clauseId = idStrategy.getNodeId(NodeWriterStrategy.NODE_TYPE_CLAUSE,
 				node);
+		String edgeId=idStrategy.getEdgeId(NodeWriterStrategy.EDGE_TYPE_CLAUSE,null,parentId,clauseId);
+		
+		writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_CLAUSE,clauseId,node.getName());
+		writerStrategy.writeEdge(edgeId,NodeWriterStrategy.EDGE_TYPE_CLAUSE,null,parentId,clauseId);
+		int begin = node.getFirstToken().beginOffset;
+		int end = node.getLastToken().endOffset;
+		writerStrategy.writeProperty(clauseId,NodeWriterStrategy.PROPERTY_POSITION,new String[]{""+begin,""+(begin-end)});
+		writerStrategy.writeProperty(clauseId,NodeWriterStrategy.PROPERTY_FILE,new String[]{fileName});
 		parentIds.push(clauseId);
 		Object r = node.childrenAccept(this, data);
 		parentIds.pop();
