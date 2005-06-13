@@ -1,0 +1,678 @@
+options {
+  STATIC=false;
+  NODE_USES_PARSER=true;
+  NODE_PACKAGE="org.cs3.pl.parser";
+  NODE_PREFIX="AST";
+  VISITOR=true;
+  MULTI=true;
+  DEBUG_PARSER=false;
+  DEBUG_LOOKAHEAD=false;
+  DEBUG_TOKEN_MANAGER=false;
+  OPTIMIZE_TOKEN_MANAGER=true;
+  NODE_SCOPE_HOOK=true;
+}
+
+PARSER_BEGIN(PrologParser)
+package org.cs3.pl.parser;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PrologParser
+{
+	void jjtreeOpenNodeScope(Node n)
+    {
+      ((SimpleNode)n).setFirstToken(getToken(1));
+    }
+
+    void jjtreeCloseNodeScope(Node n)
+    {
+      ((SimpleNode)n).setLastToken(getToken(0));
+    }
+    
+    public ASTCompilationUnit getASTRoot(){
+		return (ASTCompilationUnit) jjtree.rootNode();
+  	}
+    
+	private List errors = new ArrayList();
+	
+	public List getErrors() {
+		return errors;
+	}
+
+	public void error_skipto(int kind) {
+	  ParseException e = generateParseException();  // generate the exception object.
+	  errors.add(e);
+//	  System.out.println(e.toString());  // print the error message
+	  Token t;
+	  do {
+	    t = getNextToken();
+	  } while (t.kind != kind && t.kind != EOF);
+//	  if(t.kind != EOF)
+	//  	getNextToken();
+	    // The above loop consumes tokens all the way up to a token of
+	    // "kind".  We use a do-while loop rather than a while because the
+	    // current token is the one immediately before the erroneous token
+	    // (in our case the token immediately before what should have been
+	    // "if"/"while".
+	}
+
+    public static void main (String [] args) {
+        PrologParser parser;
+        String filename = null;
+        long initTime = 0;
+        long parseTime = 0;
+        long startTime = 0;
+        long stopTime = 0;
+        if (args.length == 0)
+        {
+            System.out.println("Prolog Parser Version 0.1:  Reading from standard input . . .");
+            parser = new PrologParser(System.in);
+        } else if (args.length == 1)
+        {
+            filename = args[0];
+            System.out.println("Prolog Parser Version 0.1:  Reading from file " + filename + " . . .");
+            try
+            {
+                startTime = System.currentTimeMillis();
+                parser = new PrologParser(new java.io.FileInputStream(filename));
+                stopTime = System.currentTimeMillis();
+                initTime = stopTime - startTime;
+            } catch (java.io.FileNotFoundException e)
+            {
+                System.out.println("Prolog Parser Version 0.1:  File " + filename + " not found.");
+                return;
+            }
+        } else
+        {
+            System.out.println("Prolog Parser Version 0.1:  Usage is one of:");
+            System.out.println("         java PrologParser < inputfile");
+            System.out.println("OR");
+            System.out.println("         java PrologParser inputfile");
+            return;
+        }
+        try
+        {
+            startTime = System.currentTimeMillis();
+            parser.CompilationUnit();
+            stopTime = System.currentTimeMillis();
+            parseTime = stopTime - startTime;
+            System.out.println("Prolog Parser Version 0.1: ");
+            System.out.println("   Prolog program parsed " + filename + " successfully in " + (initTime + parseTime) + " ms.");
+            System.out.println("      parser initialization time was " + initTime + " ms.");
+            System.out.println("      parser parse time was " + parseTime + " ms.");
+        } catch (ParseException e)
+        {
+            System.out.println(e.getMessage());
+            System.out.println("Prolog Parser Version 0.1:  Encountered errors during parse.");
+        }
+    }
+
+}
+
+PARSER_END(PrologParser)
+
+
+/* WHITE SPACE */
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+/* COMMENTS */
+
+MORE :
+{
+//  "%" : IN_SINGLE_LINE_COMMENT
+//|
+  "/*" : IN_MULTI_LINE_COMMENT
+}
+
+/*
+<IN_SINGLE_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}*/
+
+SPECIAL_TOKEN : {
+
+    < SINGLE_LINE_COMMENT: "%"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > }
+
+
+<IN_MULTI_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_MULTI_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+/* RESERVED WORDS AND LITERALS */
+
+TOKEN :
+{
+  < DYNAMIC: "dynamic" >
+| < MULTIFILE: "multifile" >
+| < INIT: "initialization" >
+| < MODULE_TRANSPARENT : "module_transparent" >
+| < META_PREDICATE : "meta_predicate">
+| < VOLATILE : "volatile" >
+| < THREAD_LOCAL :"thread_local">
+| < DISCONTIGUOUS :"discontiguous">
+}
+
+/* OPERATORS */
+
+TOKEN :
+{
+  < ASSIGN: "=" >
+| < METAASSIGN: "=.." >
+| < GT: ">" >
+| < LT: "<" >
+| < CUT: "!" >
+| < ARROW: "-->" >
+| < IF: "->" >
+| < SOFTCUT: "*->" >
+| < QUERY: "?-" >
+| < NECK: ":-" >
+| < COLON: ":" >
+| < EQ: "==" >
+| < EQ2: "=:=" >
+| < EQ3: "=\\=" >
+| < EQ4: "=@=" >
+| < NEQ: "\\=" >
+| < NEQ2: "\\==" >
+| < IS: "is" >
+| < LE: "<=" >
+| < LE2: "=<" >
+| < GE: ">=" >
+| < GE2: "=>" >
+| < NE: "!=" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < NOTPROVABLE: "\\+" >
+| < NOT: "not" >
+| < MOD: "mod" >
+| < LSHIFT: "<<" >
+| < RSIGNEDSHIFT: ">>" >
+| < DOLLAR: "$" >
+| < SLASH: "/">
+| < POINTER: "^">
+| < AT: "@">
+| < DIVISION: "//">
+| < BITAND: "/\\">
+| < BITOR: "\\//">
+| < BITNOT: "\\/">
+| < BITXOR: "xor">
+| < QUESTIONMARK: "?">
+| < BACKSLASH: "\\">
+}
+
+
+/* LITERALS */
+
+TOKEN :
+{
+//  < ARITY_LITERAL: [<SLASH>] ["1"-"9"] (["0"-"9"])* >
+//|
+  < DECIMAL_LITERAL: ["0"-"9"] (["0"-"9"])* >
+|
+  < BIN_LITERAL: ["0"-"9"] "b" ["0"-"1"] (["0"-"1"])* >
+|
+  < OCT_LITERAL: ["0"-"9"] "o" ["0"-"7"] (["0"-"7"])* >
+|
+  < HEX_LITERAL: ["0"-"9"] "x" ["0"-"9","A"-"F","a"-"f"] (["0"-"9","A"-"F","a"-"f"])* >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])+ (<EXPONENT>)? /*(["f","F","d","D"])?*/
+//      | "." (["0"-"9"])+ (<EXPONENT>)? /*(["f","F","d","D"])?*/
+      | (["0"-"9"])+ <EXPONENT> /*(["f","F","d","D"])?*/
+      | (["0"-"9"])+ (<EXPONENT>)? /*["f","F","d","D"]*/
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < CHARACTER_ATOM:
+      "'"
+      (   (~["\'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            )
+          )
+        | ("''")
+      )*
+      "'"
+  >
+|
+  < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\"]) /*,"\n","\r"*/
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+        | ("\"\"")
+      )*
+      "\""
+  >
+  |
+    < ZERO_APO_REST: "0'" ~["'"] >
+  
+}
+
+/* IDENTIFIERS */
+
+TOKEN :
+{
+  < VARIABLE: (<UNDERLINE> | <UPPERLETTER>) (<DIGIT>|<UPPERLETTER>|<LOWERLETTER>|<UNDERLINE>)* >
+| 
+  < IDENTIFIER: (<LOWERLETTER>|<DOLLAR>)(<DIGIT>|<UPPERLETTER>|<LOWERLETTER>|<VARIABLE>)* >
+|
+  < #UNDERLINE:
+      [
+       "_"
+      ]
+  >
+|
+
+  < #UPPERLETTER:
+      [
+       "A"-"Z"
+      ]
+  >
+|
+  < #DIGIT:
+      [
+       "0"-"9"
+      ]
+  >
+|
+  < #LOWERLETTER:
+      [
+       "a"-"z"
+      ]
+  >
+}
+
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+| < LISTSEP: "|" >
+}
+
+/*****************************************
+ * THE JAVA LANGUAGE GRAMMAR STARTS HERE *
+ *****************************************/
+
+/*
+ * Program structuring syntax follows.
+ */
+
+void CompilationUnit() :
+{}
+{
+  try{
+	(Member())*
+
+  <EOF>
+	   }
+	     catch (ParseException e) {
+	    error_skipto(DOT);
+	  }
+	  
+}
+
+void Member() #void:
+{}{ try{
+	  
+	  ( 
+		
+	    Call()
+	  | 
+	    Clause()
+	   )
+	   }
+	     catch (ParseException e) {
+	    error_skipto(DOT);
+	  }
+}
+
+
+
+void Call() :
+{Token token;}
+{
+  (token=<QUERY>|token=<NECK>)  //TODO: (<INIT> {jjtThis.setInitialization(true);} )? 
+  Body() {jjtThis.setBody( (ASTBody) jjtree.peekNode() );}
+  token=<DOT> 
+}
+
+void Clause() :
+{Token token;}
+{
+	(LOOKAHEAD(2) token=<IDENTIFIER>  <COLON> {jjtThis.setModule(token.image.toString());})?
+	(
+	 <LPAREN> 	
+	   Head() {jjtThis.setHead( (ASTHead) jjtree.peekNode() );}
+      (	
+        (<ARROW>| <NECK>) 
+      	Body() {jjtThis.setBody( (ASTBody) jjtree.peekNode() );}
+      )?
+      <RPAREN> 
+	 | 
+	  Head() {jjtThis.setHead( (ASTHead) jjtree.peekNode() );}
+      (	
+        (<ARROW>| <NECK>) 
+      	Body() {jjtThis.setBody( (ASTBody) jjtree.peekNode() );}
+      )?
+	)
+	  token=<DOT> 
+}
+
+void Head() :
+{}
+{
+	Literal()
+}
+void Body() :
+{}
+{
+	Goal()
+}
+void Goal() #void:
+{}
+{	
+	Literal()
+	|<LPAREN> Goal() <RPAREN>
+	|Conjunction()
+	|Disjunction()
+	|If()
+	|SoftCut()
+	|Cut()
+	|NotProvable()
+}
+
+void Goal_consuming() #void:
+{}
+{	
+	Literal()
+	|<LPAREN> Goal() <RPAREN>
+	|If()
+	|SoftCut()
+	|Cut()
+	|NotProvable()
+}
+
+
+void Literal() :
+{}
+{
+	Term()
+}
+
+void Conjunction() :
+{}
+{
+	Goal_consuming() <COMMA> Goal()
+}
+
+void Disjunction() :
+{}
+{
+	Goal_consuming() <SEMICOLON> Goal()
+}
+
+void If() :
+{}
+{
+	<IF> Goal()
+}
+
+void SoftCut() :
+{}
+{
+	<SOFTCUT> Goal()
+}
+
+void NotProvable() :
+{}
+{
+	(<NOTPROVABLE> Goal())	
+}
+
+
+void Term() #void:
+{}
+{
+	AtomTerm()
+	|CompoundTerm()
+	|InfixOpTerm()
+	|PrefixOpTerm()
+	|ListTerm()
+	|BracesTerm()
+	|StringTerm()
+	|VariableTerm()
+	|ParanthesisTerm()
+}
+
+void Term_consuming() #void:
+{}
+{
+	AtomTerm()
+	|CompoundTerm()
+	|PrefixOpTerm()
+	|ListTerm()
+	|BracesTerm()
+	|StringTerm()
+	|VariableTerm()
+	|ParanthesisTerm()
+}
+
+void AtomTerm() :
+{}
+{
+	<IDENTIFIER>
+	|IntAtom()
+	|FloatAtom()
+	|CharAtom()
+	
+}
+
+void CompoundTerm() :
+{}
+{
+	AtomTerm() <LPAREN>Sequence()<RPAREN> 
+}
+
+void Sequence() :
+{}
+{
+	Term() (<COMMA> Term())*
+}
+
+
+void InfixOpTerm() :
+{}
+{
+	Term_consuming() BinaryOp() Term()
+}
+
+void PrefixOpTerm() :
+{}
+{
+	PrefixOperator() Term()
+}
+
+void ListTerm() :
+{}
+{
+	<LBRACKET>
+		(
+			Sequence()
+			(
+				<LISTSEP>(ListTerm()|VariableTerm())
+			)?
+		)?
+	<RBRACKET>
+}
+
+void BracesTerm() :
+{}
+{
+	<LBRACE>  Term() ((<COMMA>|<SEMICOLON>)Term())* <RBRACE>
+}
+
+void StringTerm() :
+{}
+{
+	<STRING_LITERAL>
+}
+
+void VariableTerm() :
+{}
+{
+	<VARIABLE>
+}
+
+void ParanthesisTerm() :
+{}
+{
+	<LPAREN>  Term() ((<COMMA>|<SEMICOLON>)Term())* <RPAREN>
+}
+
+
+
+void Cut() :
+{}
+{
+	<CUT> 
+}
+
+
+void IntAtom() :
+{ Token token; }
+{
+    (<MINUS> (token=<DECIMAL_LITERAL> | token=<BIN_LITERAL>  | token=<OCT_LITERAL>  | token=<HEX_LITERAL> )
+      {jjtThis.setName("-"+token.image.toString()); }  
+    | (token=<DECIMAL_LITERAL> | token=<BIN_LITERAL>  | token=<OCT_LITERAL>  | token=<HEX_LITERAL> )
+      { jjtThis.setName(token.image.toString()); }   
+    )
+}
+
+void FloatAtom() :
+{ Token token; }
+{
+    token=<FLOATING_POINT_LITERAL> 
+    { jjtThis.setName(token.image.toString()); }
+}
+
+
+void StringAtom() :
+{ Token token; }
+{
+    token=<STRING_LITERAL>
+    { jjtThis.setName(token.image.toString()); }
+}
+
+void CharAtom() :
+{ Token token; }
+{
+    token=<CHARACTER_ATOM>
+    { jjtThis.setName(token.image.toString()); }
+}
+
+
+
+
+
+
+void PrefixOperator() :
+{}
+{
+	<DOLLAR>
+	|<PLUS>
+	|<MINUS>
+	|<QUESTIONMARK>
+	|<BACKSLASH>
+	|<NOT>
+	|<NOTPROVABLE>
+	|<NECK>
+	|<QUERY>
+	|<DISCONTIGUOUS>
+	|<DYNAMIC>
+	|<MODULE_TRANSPARENT>
+ 	|<META_PREDICATE>
+	|<MULTIFILE>
+	|<THREAD_LOCAL>
+	|<VOLATILE>
+	|<INIT>
+	
+}
+
+void BinaryOp() ://TODO: Rename to InfixOperator
+{Token token;}
+{
+( 
+  token=<ARROW>
+| token=<ASSIGN>
+| token=<METAASSIGN>
+| token=<GT>
+| token=<LT>
+//| token=<QUERY>
+| token=<EQ>
+| token=<EQ2>
+| token=<EQ3>
+| token=<EQ4>
+| token=<NEQ>
+| token=<NEQ2>
+| token=<IS>
+| token=<LE>
+| token=<GE>
+| token=<LE2>
+| token=<GE2>
+| token=<COLON>
+| token=<NE>
+| token=<PLUS>
+| token=<MINUS>
+| token=<STAR>
+| token=<LSHIFT>
+| token=<RSIGNEDSHIFT>
+| token=<IF>
+| token=<MOD>
+| token=<SOFTCUT>
+| token=<SLASH>
+| token=<BITAND>
+| token=<DIVISION>
+| token=<BITOR>
+| token=<BITNOT>
+| token=<BITXOR>
+)
+
+
+
+{}
+}
+
