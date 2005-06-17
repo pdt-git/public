@@ -1138,6 +1138,21 @@ tree(_id, _pid, assertT):-assertT(_id, _pid,_,_,_).
 tree(_id, _pid, precedenceT):-precedenceT(_id, _pid,_,_).
 tree(_id, _pid, nopT):-nopT(_id, _pid,_).
 
+/** So soll's sein: -----------------------------------------------------------
+ * treeSignature(?Functor, ?Arity)
+ *    Obsolete, use ast_node_signature/3 instead. See "ast/language_independent.pl"
+ *
+treeSignature(Functor, Arity) :-
+   ast_node_signature('Java', Functor, Arity).
+ */
+ 
+/* So war's bisher:---------------------------------------------------
+Obsolete definition of tree signature. TODO for Sebastian:
+Check whether partial evaluation of the above definition
+yields the following one. IN the cases where the arities do
+not aggree, adapt the definition of ast_node_signature by
+commenting out the trailing surplus arguments. -- GK, 17.6.2005
+*/
 treeSignature(localDefT, 6).
 treeSignature(paramDefT, 4).
 treeSignature(fieldDefT, 5).
@@ -1179,6 +1194,7 @@ treeSignature(assertT,5).
 treeSignature(getFieldT,6).
 treeSignature(precedenceT,4).
 treeSignature(nopT,3).         % TODO: fehlte / inkonsistenz zu tree/3 -- GK 3.9.2004
+*/
 
 :- multifile attribSignature/2.
 
@@ -1191,46 +1207,15 @@ attribSignature(sourceLocation,4).
 attribSignature(projectLocationT,3).
 attribSignature(slT,3).
 
-basicType(char).
-basicType(int).
-basicType(float).
-basicType(double).
-basicType(void).
-basicType(long).
-basicType(short).
-basicType(byte).
-basicType(boolean).
-
 
 /**
- * initLastID
- * 
- * initLastID will adds a fact lastID(10000)
- * if no lastID fact exists.
+ * Represents the default package in Java.
  */
-
-initLastID :-
-  lastID(_),
-  !.
-initLastID :-
-  assert(lastID(10000)).
-
-
-:- initLastID.
 packageT(null,'').
+
+
 %%% source location %%%
 :- dynamic slT/3. 
 :- multifile slT/3. 
 
 
-/* 
- * LogicAJ facts 
- */
- 
-attribSignature(aspect,1).
-
-/*
-  aspect(#aspectClass)
-*/
-:-dynamic aspect/1.
-:-multifile aspect/1.

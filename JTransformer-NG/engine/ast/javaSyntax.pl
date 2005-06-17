@@ -62,9 +62,9 @@ ast_sub_tree('Java',body).
   */ 
 
 ast_reference_type('Java', Label) :-
-	expression_type('Java',Label).
+    expression_type('Java',Label).
 ast_reference_type('Java',Label) :- 
-	statement_type('Java',Label).
+    statement_type('Java',Label).
 
  % expression_type needs the first argument since it is an
  % abstraction (from file languageAbstractions.pl).
@@ -129,10 +129,10 @@ statement_type('Java',whileLoopT).
   */ 
    
 ast_node_subtype('Java',Label,expressionType) :- 
-	expression_type('Java',Label).
-	
+    expression_type('Java',Label).
+    
 ast_node_subtype('Java',Label,statementType) :- 
-	statement_type('Java','Java',Label).
+    statement_type('Java',Label).
 
 
  /**
@@ -197,21 +197,9 @@ ast_node_subtype('Java',Label,statementType) :-
   
  /* ********************************************************************
   * TODO:
-  *  
-  * In ast_node_def/3 vorhandenes noch mal durchdenken, checken hinsichtlich
-  * Konsistenz mit bisherigen tree_constraints und tree_atrributes.
-  *
-  * Den fehlenden Rest erg�nzen. Dabei muss �berall wo es einen Modifier
-  * geben darf (methodDefT, fieldDefT, localDefT, ...?... HINTER den
-  * Beschreibungen der bisherigen Argumente noch folgendes hinzu:
-  *    ast_arg(modifs,mult(0,*,ord), attr, [atom])
-  * F�r classDefT ist das schon geschehen. 
-  *
-  * Die parent und encl attribute im Folgenden k�nnten eigentlich oft 
-  * genauer getypt sein als nur 'id'.
   *
   * Ich denke, wir sollten 'atom' durch etwas programmiersprachen-
-  * spezifischeres ersetzen (oder erg�nzen), wie z.B. 'identifier'.
+  * spezifischeres ersetzen (oder erg�nzen), wie z.B. 'identifier'. -- GK
   */
 
 
@@ -312,10 +300,10 @@ ast_node_def('Java',blockT,[
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT]),
      ast_arg(stmts,   mult(0,*,ord), id,[statementType]) %  **** xxx
 ]).               % ^^^ <-- Blocks duerfen doch auch leer sein, oder?
-				% die Semantik von * habe ich zuerst anders verstanden
-				% Zusammenfassend:
-				% 0-*: ist gleichbedeutend mit *
-				
+                % die Semantik von * habe ich zuerst anders verstanden
+                % Zusammenfassend:
+                % 0-*: ist gleichbedeutend mit *
+                
 % tree_constraints(breakT,[[allType],[methodDefT],[atom],[statementType]]).
 ast_node_def('Java',breakT,[
      ast_arg(id,      mult(1,1,no ), id,  [breakT]), % <-- convention!!!
@@ -665,4 +653,3 @@ ast_node_def('JavaAttributes',externT,[
 ast_node_def('JavaAttributes',interfaceT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
-

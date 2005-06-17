@@ -1,17 +1,36 @@
 % Autor: Guenter Kniesel
 % Date: 7.9.2004
 
+module(languageIndependentAST, [
+       migrate_factbase/0      % Converts the Java-´specific fact base representation 
+                               % into the language independent one.
+     , clear_old_factbase/0    % Delete Java-specific factbase representation.  
+]).
+
+/* 
+ * The multifile predicates that are defined differently for different 
+ * languages in different files must all belong to the default module
+ * "user". Otherwise it would not be possible to import them here.
+ * Here we don't know with which specific language we will be working,
+ * so we cannot name a specific FILE that contains a specific module.
+ */
+% The following is just pseudocode for documentation purposes.
+% The use_module predicate does not specify modules but files.
+% There is no "user" file for the "user module"... :(
+% :- use_module(user, [ast_node_def/3]).
+
+
  /** 
   * Language independent representation of abstract syntax trees (ASTs)
   * in JTransformer. Will be supported as of JTransformer version 2.1.
   * Also called the "new" internal representation. The previously used
-  * Java-centric representation is often called the "old" one.
+  * Java-centric representation is called the "old" one in the following.
   
   *   ast_node(Id,label).   
       % arg1 is the unique identiy of an AST node of type arg2.
       
   *   ast_attr(Id,attrName,attrValue). 
-      % arg3 is one value of the attribute arg2 of the node arg1.
+      % arg3 is a value of the attribute arg2 of the node arg1.
       % Attributes are all the values that are not ids of other nodes.
       % A list containing ids is still considered as an attribute. 
       %
@@ -168,7 +187,7 @@ migrate_to_ast_node(Id,Fkt,_attrValues) :-
  
  
 migrate_to_ast_edge(Id,Label,Id2) :- 
-	assert(ast_edge(Id,Label,Id2),true). 
+    assert(ast_edge(Id,Label,Id2),true). 
 
 migrate_to_ast_edges(Id,Label,[Val]) :-   % es gibt mindestens den Wert 'null'
     assert(ast_edge(Id,Label,Val),true).
@@ -182,7 +201,7 @@ migrate_to_ast_edges(Id,Label,[Val|Vals]) :-
   *       % Convert the remaining arguments to edges or multivalued
       % attributes and return the singlevalued attributes in 
       % arg4 (SingleValuedAttrs):
-  
+  */
 
 
 migrate_to_ast_attrs(Id,Label,[Val]) :-   % es gibt mindestens den Wert 'null'
@@ -190,15 +209,13 @@ migrate_to_ast_attrs(Id,Label,[Val]) :-   % es gibt mindestens den Wert 'null'
 migrate_to_ast_attrs(Id,Label,[Val|Vals]) :-
     assert(ast_attr(Id,Label,Val),true),
     migrate_to_ast_attrs(Id,Label,Vals).    
-	   
+       
 /* ast_arg(encl, 1, id,  [methodDefT,fieldDefT]) 
-    
    *   ast_node(Id,label,attr1,attr2,attr3). % single valued attributes
    *   ast_edge(Id1,Id2,Relation).           % unidirectional references
    *   ast_edge(Id1,Id2,Role1,Role2).        % nontrivial bidirectional references
    *   ast_attr(Id,attrName,attrValue).      % multi valued attributes
    *   ast_flag(Id,attrName).                % flags  
-      
 */    
 
  /**
@@ -232,8 +249,8 @@ migrate_args(Id,
              AttrVals,
              AttrValsNew
             ) :-  
-	migrate_args(Id,ArgDefsRest,[ArgVal|AttrVals],AttrValsNew).
-	
+    migrate_args(Id,ArgDefsRest,[ArgVal|AttrVals],AttrValsNew).
+    
  % multivalue attributes: create ast_attr/3 facts 
 migrate_args(Id, 
              [ast_arg(Label, Card, attr, _Types)|ArgDefsRest],
@@ -243,8 +260,8 @@ migrate_args(Id,
             ) :- 
     not( Card = 1), 
     migrate_to_ast_attrs(Id,Label,ArgVals),
-	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
-	
+    migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
+    
   % Bei referenzen werden immer edges angelegt, egal wie die 
   % Kardinalität ist.
  migrate_args(Id, 
@@ -254,9 +271,9 @@ migrate_args(Id,
              AttrValsNew
             ) :- 
     migrate_to_ast_edges(Id,Label,ArgVals),
-	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
-	
-	   
+    migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
+    
+       
  % ============================================================
   
  % Wenn beide Listen leer sind sind wir fertig. Die bisher gesammelten
@@ -282,8 +299,8 @@ migrate_args(Id,
              [ArgVal|ArgValsRest],
              [ArgVal|AttrValsNew]
             ) :-  
-	migrate_args(Id,ArgDefsRest,ArgValsRest,AttrValsNew).
-	
+    migrate_args(Id,ArgDefsRest,ArgValsRest,AttrValsNew).
+    
  % multivalue attributes: create ast_attr/3 facts 
 migrate_args(Id, 
              [ast_arg(Label, Card, attr, _Types)|ArgDefsRest],
@@ -292,8 +309,8 @@ migrate_args(Id,
             ) :- 
     not( Card = 1), 
     migrate_to_ast_attrs(Id,Label,ArgVals),
-	migrate_args(Id,ArgDefsRest,ArgValsRest,AttrValsNew).   
-	
+    migrate_args(Id,ArgDefsRest,ArgValsRest,AttrValsNew).   
+    
   % Bei referenzen werden immer edges angelegt, egal wie die 
   % Kardinalität ist.
  migrate_args(Id, 
@@ -303,9 +320,9 @@ migrate_args(Id,
              AttrValsNew
             ) :- 
     migrate_to_ast_edges(Id,Label,ArgVals),
-	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
-	
-	   
+    migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
+    
+       
 /* *******************************************************************
    Sonderbehandlung bei Migration erforderlich für bisherige
    astAttributes (keine Knoten im Baum):
@@ -340,13 +357,13 @@ interfaceT(#class)
 
 migrate_special_cases([], _).
 migrate_special_cases([ast_arg(Label, Card, Attr, Types)|ArgDefsRest], Id ) :- 
-	migrate_special(OldLabel, Arity, Label),
-	atomconcat('migrate_', OldLabel, PredName),
-	Call =.. [PredName,Id],
-	call(Call),  % rufe passendes prädikat 'migrate_<OldLabel>(Id)' auf
+    migrate_special(OldLabel, Arity, Label),
+    atomconcat('migrate_', OldLabel, PredName),
+    Call =.. [PredName,Id],
+    call(Call),  % rufe passendes prädikat 'migrate_<OldLabel>(Id)' auf
     migrate_special_cases(ArgDefsRest, Id).
     
-	
+    
 migrate_special(extendsT,    2, extends).
 migrate_special(implementsT, 2, implems).
 migrate_special(modifierT,   2, hasModif).

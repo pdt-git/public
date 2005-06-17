@@ -1,14 +1,14 @@
 /*
-	The module jtbase provides general predicates for 
-	the traversal of the PEFs and serveral predicates
+        The module jtbase provides general predicates for 
+        the traversal of the PEFs and serveral predicates
     that do not depend on the PEFs.
     TODO: move these independend predicates to a separate module.
-	
+        
 
 :- module(jtbase,[new_id/1,findId/2,getSymbol/2,getSymbolName/2,getIdentName/2,replaceIdInTerm/4,
-				  getSymbol/2,getSymbolName/2,getIdentName/2, getTerm/2,
-				  append/4, append/5, prepend/3,insertBefore/4,count/1,
-				  sub_trees/2]).
+                                  getSymbol/2,getSymbolName/2,getIdentName/2, getTerm/2,
+                                  append/4, append/5, prepend/3,insertBefore/4,count/1,
+                                  sub_trees/2]).
 */
 
 :- multifile test/1.
@@ -17,14 +17,14 @@
 
 /*
 class_source_without_toplevel(ID,Package,FQN,Source):-
-	classDefT(ID, PID,_,_),
-	(
-	  packageT(PID,Package);
-	  Package = ''
-	),
-	not(toplevelT(_, PID, _, MLIST), member(ID, MLIST)), 
-	fullQualifiedName(ID,FQN), 
-	gen_tree(ID, Source).
+        classDefT(ID, PID,_,_),
+        (
+          packageT(PID,Package);
+          Package = ''
+        ),
+        not(toplevelT(_, PID, _, MLIST), member(ID, MLIST)), 
+        fullQualifiedName(ID,FQN), 
+        gen_tree(ID, Source).
 */
 /**
  * new_id(-Id)
@@ -33,40 +33,54 @@ class_source_without_toplevel(ID,Package,FQN,Source):-
  * Throws already_bound_exception(Msg)
  * argument Id is bound.
  *
- */	
+ */     
 
 new_id(New) :-
-	nonvar(New),
-	New = [_|_],
-	!,
-	term_to_atom(New,Term),
-	sformat(Msg,'new_id: variable is a list: ~a~n',Term),
-	debugme,
-	print(Msg),
-	flush_output,
-	throw(already_bound_exception(Msg)).
-	
+        nonvar(New),
+        New = [_|_],
+        !,
+        term_to_atom(New,Term),
+        sformat(Msg,'new_id: variable is a list: ~a~n',Term),
+        debugme,
+        print(Msg),
+        flush_output,
+        throw(already_bound_exception(Msg)).
+        
 new_id(New) :-
-	nonvar(New),
-	!,
-	sformat(Msg,'new_id: variable already bound: ~a~n',New),
-	print(Msg),
-	flush_output,
-	throw(already_bound_exception(Msg)).
+        nonvar(New),
+        !,
+        sformat(Msg,'new_id: variable already bound: ~a~n',New),
+        print(Msg),
+        flush_output,
+        throw(already_bound_exception(Msg)).
 
 new_id(_New) :-
-	findall(ID,lastID(ID),[H|[H2|T]]),
-	!,
-	sformat(Msg,'more than one lastID fact: ~w~n',[[H|[H2|T]]]),
-	print(Msg),
-	flush_output,
-	throw(more_than_one_fact_exception(Msg)).
+        findall(ID,lastID(ID),[H|[H2|T]]),
+        !,
+        sformat(Msg,'more than one lastID fact: ~w~n',[[H|[H2|T]]]),
+        print(Msg),
+        flush_output,
+        throw(more_than_one_fact_exception(Msg)).
 
 new_id(_New) :-
     lastID(_last),
     sum(_last, 1, _New),
     retract(lastID(_last)),
     assert(lastID(_New)).
+
+
+/**
+ * initLastID
+ *   adds the fact lastID(10000) if no lastID fact exists.
+ */
+
+initLastID :-
+  lastID(_),
+  !.
+initLastID :-
+  assert(lastID(10000)).
+
+:- initLastID.
 
 
 findId(_root, _id) :-
@@ -113,10 +127,10 @@ new_ids([_H | _T]) :-
     new_ids(_T).
 
 /**
-	getSymbol(?id, ?symbol)
-	
-	Binds ?symbol to the resolved class (member)
-	of a getFieldT, applyT, identT of selectT.
+        getSymbol(?id, ?symbol)
+        
+        Binds ?symbol to the resolved class (member)
+        of a getFieldT, applyT, identT of selectT.
 */
 
 getSymbol(_id, _Symbol) :- getFieldT(_id, _, _, _, _, _Symbol).
@@ -125,19 +139,19 @@ getSymbol(_id, _Symbol) :- selectT(_id, _, _, _, _, _Symbol).
 getSymbol(_id, _Symbol) :- identT(_id, _, _, _, _Symbol).
 
 /**
-	getSymbolName(?id, ?name)
-	
-	Binds ?name to the name of the program element ?id.
-	If the tree ?id has no name argument ?name will be bound
-	to 'null'. 
-	Following trees have a name attribute:
-	
-	  * local variable (localDefT/6)
-	  * field          (fieldDefT/5)
-	  * parameter      (paramDefT/4)
-	  * method         (methodDefT/7)
-	  * class          (classDefT/4)
-	  * package        (packageT/3)
+        getSymbolName(?id, ?name)
+        
+        Binds ?name to the name of the program element ?id.
+        If the tree ?id has no name argument ?name will be bound
+        to 'null'. 
+        Following trees have a name attribute:
+        
+          * local variable (localDefT/6)
+          * field          (fieldDefT/5)
+          * parameter      (paramDefT/4)
+          * method         (methodDefT/7)
+          * class          (classDefT/4)
+          * package        (packageT/3)
 */
 getSymbolName(_id, _name) :-
     localDefT(_id,_,_,_,_name, _),!.
@@ -613,16 +627,16 @@ enclosing(_id, _Encl):-precedenceT(_id, _,_Encl,_), !.
 enclosing(_id, _Encl):-nopT(_id, _,_Encl), !.
 
 /**
-	rec_set_encl_method(+Id, +Encl)
+        rec_set_encl_method(+Id, +Encl)
 
-	Set the enclosing element of the tree Id
-	and all its sub trees to Encl. 
-	The old facts will be retracted and
-	new facts with Encl asserted.
-	
-	INFO: This predicate uses the add/1 and delete/1 
-	predicates which track all changes to
-	the factbase in the rollback functionality.
+        Set the enclosing element of the tree Id
+        and all its sub trees to Encl. 
+        The old facts will be retracted and
+        new facts with Encl asserted.
+        
+        INFO: This predicate uses the add/1 and delete/1 
+        predicates which track all changes to
+        the factbase in the rollback functionality.
 */
 
 rec_set_encl_method('null', _).
@@ -641,16 +655,16 @@ rec_set_encl_method(_id, _encl) :-
     rec_set_encl_method(_subs, _encl).
 
 /**
-	set_encl_method(+Id, +Encl)
+        set_encl_method(+Id, +Encl)
 
-	Set the enclosing element of the tree Id
-	to Encl.
-	The old fact will be retracted and
-	a new fact with Encl asserted.
-	
-	INFO: This predicate uses the add/1 and delete/1 
-	predicates which track all changes to
-	the factbase in the rollback functionality.
+        Set the enclosing element of the tree Id
+        to Encl.
+        The old fact will be retracted and
+        a new fact with Encl asserted.
+        
+        INFO: This predicate uses the add/1 and delete/1 
+        predicates which track all changes to
+        the factbase in the rollback functionality.
 */
 
 set_encl_method(_id,_new_encl):-getFieldT(_id,_pid,_encl,_v1,_v2,_v3),!,delete(getFieldT(_id,_pid,_encl,_v1,_v2,_v3)),add(getFieldT(_id,_pid,_new_encl,_v1,_v2,_v3)).
@@ -695,16 +709,16 @@ set_encl_method(_id,_):-
 
 
 /**
-	rec_set_Parent(+Id, +Parent)
+        rec_set_Parent(+Id, +Parent)
 
-	Sets the parent of the tree Id or the list of 
-	trees IdList to Parent.
-	Then it recursive sets the parents of 
-	the subtrees to their parent.
-	
-	INFO: This predicate uses the add/1 and delete/1 
-	predicates which track all changes to
-	the factbase in the rollback functionality.
+        Sets the parent of the tree Id or the list of 
+        trees IdList to Parent.
+        Then it recursive sets the parents of 
+        the subtrees to their parent.
+        
+        INFO: This predicate uses the add/1 and delete/1 
+        predicates which track all changes to
+        the factbase in the rollback functionality.
 */
 
 rec_set_parent('null', _).
@@ -719,10 +733,10 @@ rec_set_parent(_id, _parent) :-
     rec_set_parent(_subs, _id).
 
 /*
-	set_parent(+Id | +IdList, +Parent)
+        set_parent(+Id | +IdList, +Parent)
  
-	Sets the parent of the tree Id or the list of 
-	trees IdList to Parent.
+        Sets the parent of the tree Id or the list of 
+        trees IdList to Parent.
 */
 set_parent([], _).
 set_parent([_h| _t], _parent) :-
@@ -783,14 +797,14 @@ set_parent([_H | _T],_newParent) :-
 
 
 /*
-	Part of the action/1 definition.
+        Part of the action/1 definition.
 */
 action(replace(selectT(_id,_pid,_encl,_v1,_v2,_v3))):-        delete(selectT(_id,_,_,_,_,_)), !,        add(selectT(_id,_pid,_encl,_v1,_v2,_v3)).
 action(replace(identT(_id,_pid,_encl,_v1,_v2))):-             delete(identT(_id,_,_,_,_)), !,           add(identT(_id,_pid,_encl,_v1,_v2)).
 action(replace(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5))):-   delete(methodDefT(_id,_,_,_,_,_,_)), !,   add(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5)).
 action(replace(localDefT(_id,_pid,_encl,_v1,_v2,_v3))):-      delete(localDefT(_id,_,_,_,_,_)), !,        add(localDefT(_id,_pid,_encl,_v1,_v2,_v3)).
-action(replace(fieldDefT(_id,_pid,_v1,_v2,_v3))):-        	delete(fieldDefT(_id,_,_,_,_)), !,        add(fieldDefT(_id,_pid,_v1,_v2,_v3)).
-action(replace(paramDefT(_id,_pid,_v1,_v2))):-        		delete(paramDefT(_id,_,_,_)), !,        add(paramDefT(_id,_pid,_v1,_v2)).
+action(replace(fieldDefT(_id,_pid,_v1,_v2,_v3))):-              delete(fieldDefT(_id,_,_,_,_)), !,        add(fieldDefT(_id,_pid,_v1,_v2,_v3)).
+action(replace(paramDefT(_id,_pid,_v1,_v2))):-                  delete(paramDefT(_id,_,_,_)), !,        add(paramDefT(_id,_pid,_v1,_v2)).
 action(replace(classDefT(_id,_pid,_v1,_v2))):-                delete(classDefT(_id,_,_,_)), !,          add(classDefT(_id,_pid,_v1,_v2)).
 action(replace(toplevelT(_id,_pid,_v1,_v2))):-                delete(toplevelT(_id,_,_,_)), !,          add(toplevelT(_id,_pid,_v1,_v2)).
 action(replace(blockT(_id,_pid,_encl,_v1))):-                 delete(blockT(_id,_,_,_)), !,             add(blockT(_id,_pid,_encl,_v1)).
@@ -880,20 +894,20 @@ cloneModifier(_id, _new) :-
 
 cloneExtends(Id,NewId) :-
     extendsT(Id,Ext),
-	getCloneIfAvail(Ext,NewExt),
-	add(extendsT(NewId,NewExt)),
-	!.
-	
-cloneExtends(_,_).	
+        getCloneIfAvail(Ext,NewExt),
+        add(extendsT(NewId,NewExt)),
+        !.
+        
+cloneExtends(_,_).      
 
 cloneImplements(Id,NewId) :-
     findall(Impl,(
       implementsT(Id,Impl),
       getCloneIfAvail(Impl,NewImpl),
-	  add(implementsT(NewId,NewImpl))
-	 ),_),
-	!.	
-cloneImplements(_,_).	
+          add(implementsT(NewId,NewImpl))
+         ),_),
+        !.      
+cloneImplements(_,_).   
 
 
 /**
@@ -1270,16 +1284,16 @@ clone(_id, _parent, _encl, _new) :-
     cloneExtends(_id,_new),
     cloneImplements(_id,_new),
     !,
-	(
-		add_to_class(_parent, _new)      % member class
-		;
-		true
-	),(	
-    	toplevelT(Toplevel,Package,_,Members), % toplevel class
-    	member(_id, Members),
-    	addToToplevel(Toplevel, _new) 
-    	;
-    	true
+        (
+                add_to_class(_parent, _new)      % member class
+                ;
+                true
+        ),(     
+        toplevelT(Toplevel,Package,_,Members), % toplevel class
+        member(_id, Members),
+        addToToplevel(Toplevel, _new) 
+        ;
+        true
     ), 
     clone(Subtrees, _new, _new, NewSubtrees),
     add(classDefT(_new, _parent, _name, NewSubtrees)),
@@ -1317,13 +1331,13 @@ replaceId(_id, _oldId, _newId) :-
     delete(_oldTerm),
     add(_newTerm).
 
-getTerm(_id,packageT(_id,_name)) :-         				  packageT(_id,_name).
+getTerm(_id,packageT(_id,_name)) :-                                       packageT(_id,_name).
 getTerm(_id,getFieldT(_id,_pid,_encl,_v1,_v2,_v3)) :-         getFieldT(_id,_pid,_encl,_v1,_v2,_v3).
 getTerm(_id,selectT(_id,_pid,_encl,_v1,_v2,_v3)) :-           selectT(_id,_pid,_encl,_v1,_v2,_v3).
 getTerm(_id,identT(_id,_pid,_encl,_v1,_v2)) :-                identT(_id,_pid,_encl,_v1,_v2).
 getTerm(_id,methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5)) :-      methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5).
 getTerm(_id,localDefT(_id,_pid,_encl,_v1,_v2,_v3)) :-         localDefT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,fieldDefT(_id,_pid,_v1,_v2,_v3)) :-         	  fieldDefT(_id,_pid,_v1,_v2,_v3).
+getTerm(_id,fieldDefT(_id,_pid,_v1,_v2,_v3)) :-                   fieldDefT(_id,_pid,_v1,_v2,_v3).
 getTerm(_id,paramDefT(_id,_pid,_v1,_v2)) :-                   paramDefT(_id,_pid,_v1,_v2).
 getTerm(_id,classDefT(_id,_pid,_v1,_v2)) :-                   classDefT(_id,_pid,_v1,_v2).
 getTerm(_id,toplevelT(_id,_pid,_v1,_v2)) :-                   toplevelT(_id,_pid,_v1,_v2).
@@ -1356,8 +1370,8 @@ getTerm(_id,indexedT(_id,_pid,_encl,_v1,_v2)) :-              indexedT(_id,_pid,
 getTerm(_id,literalT(_id,_pid,_encl,_v1,_v2)) :-              literalT(_id,_pid,_encl,_v1,_v2).
 getTerm(_id,assertT(_id,_pid,_encl,_v1,_v2)) :-               assertT(_id,_pid,_encl,_v1,_v2).
 getTerm(_id,importT(_id,_pid,_v1)) :-                         importT(_id,_pid,_v1).
-getTerm(_id,precedenceT(_id,_pid,_encl,_v1)) :-         	  precedenceT(_id,_pid,_encl,_v1).
-getTerm(_id,nopT(_id,_pid,_encl)) :-         				  	  nopT(_id,_pid,_encl).
+getTerm(_id,precedenceT(_id,_pid,_encl,_v1)) :-                   precedenceT(_id,_pid,_encl,_v1).
+getTerm(_id,nopT(_id,_pid,_encl)) :-                                              nopT(_id,_pid,_encl).
 
 test(getTermT01) :-
     assert(methodDefT(testId,1,2,3,type(1,class, 0),5,6)),
@@ -1600,13 +1614,13 @@ find_predicates(_namepattern,_list,_length) :-
     Ausnahme sind die "targets" von break und continue.
 */
 /*
-	L�scht (sofern vorhanden) folgende 'tags' eines gegebenen baumknotens:
-	slT - die Sourcelocation
-	modifierT - alle modifier,
-	extendsT - alle hinweise auf superklassen (f�r classDefT),
-	implementsT - alle hinweise auf implementierte interfaces (f�r classDefT),
-	externT - falls gesetzt, das externT tag.,
-	interfaceT -falls gesetzt, das interfaceT tag
+        L�scht (sofern vorhanden) folgende 'tags' eines gegebenen baumknotens:
+        slT - die Sourcelocation
+        modifierT - alle modifier,
+        extendsT - alle hinweise auf superklassen (f�r classDefT),
+        implementsT - alle hinweise auf implementierte interfaces (f�r classDefT),
+        externT - falls gesetzt, das externT tag.,
+        interfaceT -falls gesetzt, das interfaceT tag
 */
 
 removeTags(DeletionKind, ID):-
@@ -1621,19 +1635,19 @@ removeTags(DeletionKind, ID):-
     
 removeTagKind(DeletionKind,Tag) :-
     forall(
-		Tag,
-		(
-		   Call =.. [DeletionKind,Tag],
-		   call(Call)
-		)
-	).
+                Tag,
+                (
+                   Call =.. [DeletionKind,Tag],
+                   call(Call)
+                )
+        ).
 
 deepDelete([]).
 deepDelete([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepDelete(_subtrees),
     deleteTree(_head),
-	removeTags(delete, _head),	
+        removeTags(delete, _head),      
     deepDelete(_tail).
 
 deepDelete(_id) :-
@@ -1651,7 +1665,7 @@ deepRetract([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepRetract(_subtrees),
     retractTree(_head),
-	removeTags(retract, _head),	
+        removeTags(retract, _head),     
     deepRetract(_tail).
 
 deepRetract(_id) :-
@@ -1826,8 +1840,8 @@ sub_trees(_id, _subtrees) :-
     getFieldT(_id,_,_,Expr,_,_),
     !,
     (Expr == 'null' ->
-    	(_subtrees = []);
-    	(_subtrees = [Expr])
+        (_subtrees = []);
+        (_subtrees = [Expr])
     ).
 
 sub_trees(_id, []) :-
@@ -1882,12 +1896,12 @@ discard_permanently(Id):-
     toplevelT(Id,_,_,_),
     !,
     forall(
-    	contains_type(Id,Type),
-    	(
-    		globalIds(FQN,Type),    	
-	    	retractall(globalIds(FQN,Type))
-    		%%format('i would retract ~a, but...~n',FQN)
-    	)
+        contains_type(Id,Type),
+        (
+                globalIds(FQN,Type),            
+                retractall(globalIds(FQN,Type))
+                %%format('i would retract ~a, but...~n',FQN)
+        )
     ),
     deepDelete(Id).
 
@@ -1896,12 +1910,12 @@ discard_permanently(_fileName):-
     toplevelT(Id,_,_fileName,_),
     !,
     forall(
-    	contains_type(Id,Type),
-    	(
-	    	globalIds(FQN,Type),
-    		retractall(globalIds(FQN,Type)) 
-    		%%format('i would retract ~a, but...~n',FQN)
-    	)
+        contains_type(Id,Type),
+        (
+                globalIds(FQN,Type),
+                retractall(globalIds(FQN,Type)) 
+                %%format('i would retract ~a, but...~n',FQN)
+        )
     ),
     deepDelete(Id).
     
@@ -1917,7 +1931,7 @@ sourceLocation(Tree,File,Start,End):-
 % temporary necessary while aspects are not 
 % completely represented in prolog factbase
 sourceLocation(ID,File,Start,Length):-
-	slAspectT(ID, File,Start, Length).
+        slAspectT(ID, File,Start, Length).
 
 /********************************************
  ************* PEF independend **************
@@ -1946,11 +1960,11 @@ counter(_i) :-
     countvar(_i).
     
 /**
-	stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4)
-	
-	Atom4 forms the concatination of Atom1, Atom2 and Atom3.
-	
-	TODO: specify possible binding combinations
+        stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4)
+        
+        Atom4 forms the concatination of Atom1, Atom2 and Atom3.
+        
+        TODO: specify possible binding combinations
 */    
     
 stringAppend(_str1, _str2, _str3, _Ret) :-
@@ -1959,10 +1973,10 @@ stringAppend(_str1, _str2, _str3, _Ret) :-
 
 
 /**
-	stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4, ?Atom5)
-	
-	Atom5 forms the concatination of Atom1, Atom2, Atom3 and Atom4.
-	TODO: specify possible binding combinations
+        stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4, ?Atom5)
+        
+        Atom5 forms the concatination of Atom1, Atom2, Atom3 and Atom4.
+        TODO: specify possible binding combinations
 */    
 
 stringAppend(_str1, _str2, _str3, _str4, _Ret) :-
@@ -1970,9 +1984,9 @@ stringAppend(_str1, _str2, _str3, _str4, _Ret) :-
     stringAppend(_tmpName, _str4, _Ret).
 
 /**
-	append(?List1, ?List2, ?List3, ?List4)
-	
-	Succeeds  when List4 unifies with  the concatenation of List1, List2 and
+        append(?List1, ?List2, ?List3, ?List4)
+        
+        Succeeds  when List4 unifies with  the concatenation of List1, List2 and
     List3. The  predicate can be used with any instantiation pattern
     (even four variables).
 */
@@ -1982,9 +1996,9 @@ append(_first, _second, _third, _Ret) :-
     append(_dummyList, _third, _Ret).
 
 /**
-	append(?List1, ?List2, ?List3, ?List4, ?List5)
-	
-	Succeeds  when List5 unifies with  the concatenation of List1, List2, List3 and
+        append(?List1, ?List2, ?List3, ?List4, ?List5)
+        
+        Succeeds  when List5 unifies with  the concatenation of List1, List2, List3 and
     List4. The  predicate can be used with any instantiation pattern
     (even five variables).
 */
@@ -1995,7 +2009,7 @@ append(_first, _second, _third, _fourth, _Ret) :-
 
 
 /*
-	prepend(+List, +Elem, -NewList)
+        prepend(+List, +Elem, -NewList)
 */
 
 prepend(_list, _elem, _return) :-
@@ -2019,11 +2033,11 @@ insertBefore([_Head | _Tail], _elem, _newElem, _RetList) :-
 insertBefore([], _elem, _newElem, _RetList) :- equals(_RetList, []).
 
 /*
-	count(+pred)
-	
-	Counts all binding for the predicate pred.
+        count(+pred)
+        
+        Counts all binding for the predicate pred.
 */
-	
+        
 count(_pred) :-
     findall(_pred, call(_pred), _list),
     length(_list, _len),
@@ -2036,26 +2050,26 @@ count_bag(_pred) :-
     length(_list, _len),
     writef("found %d results.\n",[_len]),
     fail.
-*/	
+*/      
 
 /*
-	first_char_up(?LowerAtom, ?UpperAtom)
-	
-	At least one of the arguments must be bound to
+        first_char_up(?LowerAtom, ?UpperAtom)
+        
+        At least one of the arguments must be bound to
     to a atom where the first character is from 
     the domain [a-z,A-Z].
-	Binds UpperAtom to an atom which is LowerAtom
-	with an uppercase first char, respectively
-	Binds LowerAtom to an atom which is UpperAtom
-	with an lowercase first char.
-	
-	e.g.
-	?- first_char_up(name, Name).
-	 Yes
+        Binds UpperAtom to an atom which is LowerAtom
+        with an uppercase first char, respectively
+        Binds LowerAtom to an atom which is UpperAtom
+        with an lowercase first char.
+        
+        e.g.
+        ?- first_char_up(name, Name).
+         Yes
 */
 first_char_up(Name, UName) :-
     nonvar(Name),
-  	atom_length(Name, Len),
+        atom_length(Name, Len),
     Prec is Len - 1,
 	sub_atom(Name, 1,Prec,_,Rest),
 	atom_concat(FirstChar,Rest,Name),
@@ -2065,18 +2079,18 @@ first_char_up(Name, UName) :-
 	
 first_char_up(Name, UName) :-
     nonvar(UName),
-   	atom_length(UName, Len),
+        atom_length(UName, Len),
     Prec is Len - 1,
-	sub_atom(UName, 1,Prec,_,Rest),
-	atom_concat(FirstChar,Rest,UName),
-	downcase_atom(FirstChar,LowerFirstChar),
-	atom_concat(LowerFirstChar,Rest,Name),
-	!.	
-	
+        sub_atom(UName, 1,Prec,_,Rest),
+        atom_concat(FirstChar,Rest,UName),
+        downcase_atom(FirstChar,LowerFirstChar),
+        atom_concat(LowerFirstChar,Rest,Name),
+        !.      
+        
 /**
-	uniqueArgumentList(+Arity,-Arguments)
+        uniqueArgumentList(+Arity,-Arguments)
 */
-	
+        
 uniqueArgumentList(0,[]):-!.
     
 uniqueArgumentList(Arity,[Argument| Arguments]):-
