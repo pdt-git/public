@@ -2087,3 +2087,21 @@ uniqueArgumentList(Arity,[Argument| Arguments]):-
     
 test(uniqueArgumentList) :-
     uniqueArgumentList(5,[_,_,_,_,_]).
+    
+/**
+ * atom_to_list(+Atom,+Sep,-List)
+ * 
+ * Parses Atom into a sub atom list 
+ * which are separated by Sep.
+ */
+ 
+
+atom_to_list(Name,Sep, [First|RestNames]):-
+    atom_concat(First,Sep,RestName, Name),
+    !,
+  	atom_to_list(RestName,Sep,RestNames).
+  	
+atom_to_list(Name,_, [Name]).  
+
+test(atom_to_list):-
+    atom_to_list( 'Asdf,fdsa,2', ',',['Asdf',fdsa,'2']).
