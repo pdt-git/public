@@ -19,7 +19,7 @@ basicType(short).
 basicType(byte).
 basicType(boolean).
 
-/* So soll es in Zukunft sein: --------------------------------------------
+/* So soll es in Zukunft sein: -------------------------------------------- */
    
 /*
  * TODO für Sebastian: fq_api.pl so anpassen, dass diese Definition genuzt wird.
