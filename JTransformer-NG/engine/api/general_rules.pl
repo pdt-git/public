@@ -69,17 +69,20 @@ new_id(_New) :-
     assert(lastID(_New)).
 
 
+
 /**
  * initLastID
  *   adds the fact lastID(10000) if no lastID fact exists.
  */
+
+:- dynamic lastID/1.
 
 initLastID :-
   lastID(_),
   !.
 initLastID :-
   assert(lastID(10000)).
-
+  
 :- initLastID.
 
 
@@ -1919,10 +1922,21 @@ discard_permanently(_fileName):-
     ),
     deepDelete(Id).
     
+    
+% Folgendes war in factbase.pl inkonsistent zum hiesigen definiert -gk:
+% /**
+%  * sourceLocation(?ID, ?File, ?Begin, ?Length)
+%  */
+:- dynamic sourceLocation/4.
+:- multifile sourceLocation/4.
+
+%%% source location %%%
+:- dynamic slT/3.
+:- multifile slT/3.
+
 /**
  * sourceLocation(Tree,File,Start,End)
  */
-   
 sourceLocation(Tree,File,Start,End):-
     slT(Tree,Start,End),
     !,
@@ -1932,6 +1946,7 @@ sourceLocation(Tree,File,Start,End):-
 % completely represented in prolog factbase
 sourceLocation(ID,File,Start,Length):-
         slAspectT(ID, File,Start, Length).
+
 
 /********************************************
  ************* PEF independend **************
@@ -2071,12 +2086,12 @@ first_char_up(Name, UName) :-
     nonvar(Name),
         atom_length(Name, Len),
     Prec is Len - 1,
-	sub_atom(Name, 1,Prec,_,Rest),
-	atom_concat(FirstChar,Rest,Name),
-	upcase_atom(FirstChar,UpperFirstChar),
-	atom_concat(UpperFirstChar,Rest,UName),
-	!.
-	
+        sub_atom(Name, 1,Prec,_,Rest),
+        atom_concat(FirstChar,Rest,Name),
+        upcase_atom(FirstChar,UpperFirstChar),
+        atom_concat(UpperFirstChar,Rest,UName),
+        !.
+        
 first_char_up(Name, UName) :-
     nonvar(UName),
         atom_length(UName, Len),
@@ -2113,8 +2128,8 @@ test(uniqueArgumentList) :-
 atom_to_list(Name,Sep, [First|RestNames]):-
     atom_concat(First,Sep,RestName, Name),
     !,
-  	atom_to_list(RestName,Sep,RestNames).
-  	
+        atom_to_list(RestName,Sep,RestNames).
+        
 atom_to_list(Name,_, [Name]).  
 
 test(atom_to_list):-
