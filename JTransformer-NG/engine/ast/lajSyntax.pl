@@ -10,6 +10,7 @@
   * -- gk, 17.06.2005
   */
   
+:- multifile attribSignature/2.
 
 attribSignature(aspect,1).
 
