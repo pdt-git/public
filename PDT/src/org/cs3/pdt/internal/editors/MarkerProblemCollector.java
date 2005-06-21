@@ -8,9 +8,9 @@ import java.util.HashMap;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
+import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
-import org.cs3.pl.parser.PrologCompiler;
-import org.cs3.pl.parser.Token;
+import org.cs3.pl.parser.internal.classic.Token;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
@@ -43,11 +43,11 @@ public class MarkerProblemCollector implements ProblemCollector {
     }
     public int mapSeverity(int x){
         switch(x){
-        	case PrologCompiler.INFO:
+        	case Problem.INFO:
         	    return IMarker.SEVERITY_INFO;
-        	 case PrologCompiler.WARNING:
+        	 case Problem.WARNING:
         	     return IMarker.SEVERITY_WARNING;
-        	case PrologCompiler.ERROR:
+        	case Problem.ERROR:
         	    return IMarker.SEVERITY_ERROR; 
         }
         return IMarker.SEVERITY_INFO;
@@ -58,30 +58,19 @@ public class MarkerProblemCollector implements ProblemCollector {
      * @see org.cs3.pl.parser.ProblemCollector#reportProblem(org.cs3.pl.parser.Token,
      *           java.lang.String, int)
      */
-    public void reportProblem(Token token, String msg, int severity) {
-        severity=mapSeverity(severity);
+    public void reportProblem(Problem p) {
+        int severity=mapSeverity(p.severity);
         maxSeverity=Math.max(maxSeverity,severity);
-        int offset = getLineOffset(token.beginLine-1);
+        
         HashMap attributes = new HashMap();
-        MarkerUtilities.setMessage(attributes, msg);
-        MarkerUtilities.setLineNumber(attributes, token.beginLine);
-        int begin = offset + token.beginColumn - 1;
-        if (begin < 0)
-            begin = 0;
-        //int add = 0;
-        //if (severity == IMarker.SEVERITY_WARNING) //TODO: clean solution
-        // needed
-        //	add =1;
-        MarkerUtilities.setCharStart(attributes, begin);
-        MarkerUtilities.setCharEnd(attributes, offset + token.endColumn);
+        MarkerUtilities.setMessage(attributes, p.message);
+        MarkerUtilities.setLineNumber(attributes, p.firstRow);
+        
+        MarkerUtilities.setCharStart(attributes, p.beginOffset);
+        MarkerUtilities.setCharEnd(attributes, p.endOffset);
         attributes.put(IMarker.SEVERITY, new Integer(severity));
 
-        markers.add(attributes);
-        //createMarker(file,attributes,IMarker.PROBLEM);
-        //MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
-        //		marker.setAttribute(IMarker.CHAR_START, token.beginColumn); //
-        // CHAR_START not relative to line !
-        //		marker.setAttribute(IMarker.CHAR_END, token.endColumn);
+        markers.add(attributes);       
 
     }
 

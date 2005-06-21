@@ -3,8 +3,6 @@
 package org.cs3.pdt.internal.builder;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,6 +17,7 @@ import org.cs3.pdt.internal.views.IFileLineBreakInfoProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.parser.PrologCompiler;
+import org.cs3.pl.parser.PrologCompilerFactory;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -53,7 +52,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 lineInfo);
         final String fileName = file.getFullPath().toString();
 
-        PrologCompiler checker = new PrologCompiler();
+        PrologCompiler checker = PrologCompilerFactory.create();
         checker.setProblemCollector(collector);
         checker.compile(fileName, file.getContents(), lineInfo);
         PDTPlugin plugin = PDTPlugin.getDefault();

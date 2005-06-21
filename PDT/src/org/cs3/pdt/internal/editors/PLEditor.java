@@ -94,7 +94,7 @@ public class PLEditor extends TextEditor {
         //                        file, lineInfo);
         //                final String fileName = file.getFullPath().toString();
         //
-        //                PrologCompiler checker = new PrologCompiler();
+        //                ClassicPrologCompiler checker = new ClassicPrologCompiler();
         //                checker.setProblemCollector(collector);
         //                try {
         //                    checker.compile(fileName, file.getContents(), lineInfo);
