@@ -96,7 +96,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 				root.jjtAccept(new PEFChecker(problemCollector),
 						null);
 				
-				root.toCanonicalTerm(true,true).dump("");
+//				root.toCanonicalTerm(true,true).dump("");
 				MemberAnalyzer memberAnalyzer = new MemberAnalyzer(
 						problemCollector);
 				root.jjtAccept(memberAnalyzer, null);

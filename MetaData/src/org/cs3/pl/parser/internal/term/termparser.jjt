@@ -30,6 +30,12 @@ import java.util.ArrayList;
 class PrologTermParser {
 	public OPS ops = new OPS();
 	
+	boolean test(Token t1, Token t2) {
+		return t1.beginOffset == t2.endOffset;
+//		System.err.println("begin: "+t1.image +","+ t1.beginOffset + ", end: "+ t2.endOffset);
+//		return true;
+	}
+	
 	void jjtreeOpenNodeScope(Node n)
     {
     	Token t = getToken(1);
@@ -56,7 +62,7 @@ class PrologTermParser {
 			 SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
 			 s.setFirstToken(firstChild.getFirstToken());
 		}
-		System.err.println("created: "+ s+" : "+s.getImage());
+		//System.err.println("created: "+ s+" : "+s.getImage());
 		
 		
 		if(n instanceof ASTInfixTerm){
@@ -83,7 +89,7 @@ class PrologTermParser {
   public static void main(String args[]) throws FileNotFoundException {
 	InputStream stream = null;
   	if(args==null||args.length==0){	
-	    System.err.println("Reading from standard input...");
+	    //System.err.println("Reading from standard input...");
 	    stream=System.in;
   	}
   	else{
@@ -309,9 +315,9 @@ SimpleNode CompilationUnit() : {}
 		ops.clear();
 		while(jjtree.nodeArity()>0 &&!(jjtree.peekNode() instanceof ASTMember)){
 			
-			System.err.println("popped: "+jjtree.popNode());
+			//System.err.println("popped: "+jjtree.popNode());
 		}
-		System.err.println("next i will read: "+getToken(1));
+//		System.err.println("next i will read: "+getToken(1));
   }
   )*
   <EOF>
@@ -351,7 +357,9 @@ void Term() #void:
 void PrefixBoundTerm() #void:{}
 {
 	(		
-		LOOKAHEAD(CompoundTerm(),{!",".equals(getToken(1).image)}) CompoundTerm()
+		LOOKAHEAD(CompoundTerm(),{
+					test(getToken(2),getToken(1)) &&
+		!",".equals(getToken(1).image)}) CompoundTerm()
 		|
 			LOOKAHEAD(<OPERATOR> PrefixBoundTerm(),{
 				ops.isValidRHPrefixOp(getToken(1).image)
@@ -420,7 +428,7 @@ void CompoundTerm() :
 {}
 {
 	Atom()
-	"(" 
+	"("
 	{ops.pushReset();}
 	Term() 
 	{ops.popOp();}
@@ -480,7 +488,7 @@ void PrefixOperator() :{}
 {
 	<OPERATOR>
 	{	Token t = getToken(0);
-  	System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Prefix Operator.");
+//  	System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Prefix Operator.");
   }
 }
 
@@ -489,6 +497,6 @@ void InfixOperator() :{}
 {
 	<OPERATOR>
 	{	Token t = getToken(0);
-  	System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Infix Operator.");
+//  	System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Infix Operator.");
   }
 }

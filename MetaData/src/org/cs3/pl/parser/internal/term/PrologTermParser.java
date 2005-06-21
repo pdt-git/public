@@ -10,6 +10,12 @@ import java.util.ArrayList;
 class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants, PrologTermParserConstants {/*@bgen(jjtree)*/
   protected JJTPrologTermParserState jjtree = new JJTPrologTermParserState();public OPS ops = new OPS();
 
+        boolean test(Token t1, Token t2) {
+                return t1.beginOffset == t2.endOffset;
+//		System.err.println("begin: "+t1.image +","+ t1.beginOffset + ", end: "+ t2.endOffset);
+//		return true;
+        }
+
         void jjtreeOpenNodeScope(Node n)
     {
         Token t = getToken(1);
@@ -36,7 +42,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
                          SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
                          s.setFirstToken(firstChild.getFirstToken());
                 }
-                System.err.println("created: "+ s+" : "+s.getImage());
+                //System.err.println("created: "+ s+" : "+s.getImage());
 
 
                 if(n instanceof ASTInfixTerm){
@@ -63,7 +69,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   public static void main(String args[]) throws FileNotFoundException {
         InputStream stream = null;
         if(args==null||args.length==0){
-            System.err.println("Reading from standard input...");
+            //System.err.println("Reading from standard input...");
             stream=System.in;
         }
         else{
@@ -105,9 +111,10 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
                 ops.clear();
                 while(jjtree.nodeArity()>0 &&!(jjtree.peekNode() instanceof ASTMember)){
 
-                        System.err.println("popped: "+jjtree.popNode());
+                        //System.err.println("popped: "+jjtree.popNode());
                 }
-                System.err.println("next i will read: "+getToken(1));
+//		System.err.println("next i will read: "+getToken(1));
+
         }
       }
       jj_consume_token(0);
@@ -202,7 +209,8 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   }
 
   final public void PrefixBoundTerm() throws ParseException {
-    if (jj_2_2(2147483647) && (!",".equals(getToken(1).image))) {
+    if (jj_2_2(2147483647) && (test(getToken(2),getToken(1)) &&
+                    !",".equals(getToken(1).image))) {
       CompoundTerm();
     } else if (jj_2_3(2147483647) && (ops.isValidRHPrefixOp(getToken(1).image)
                                     &&  ( ops.isPrefixOp(getToken(2).image)
@@ -605,7 +613,8 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
           jjtc000 = false;
           jjtreeCloseNodeScope(jjtn000);
                 Token t = getToken(0);
-        System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Prefix Operator.");
+//  	System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Prefix Operator.");
+
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -626,7 +635,8 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
           jjtc000 = false;
           jjtreeCloseNodeScope(jjtn000);
                 Token t = getToken(0);
-        System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Infix Operator.");
+//  	System.err.println("Operator "+t.image+" at line "+t.beginLine+" col "+t.beginColumn+" was interpreted as Infix Operator.");
+
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -663,22 +673,6 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     finally { jj_save(3, xla); }
   }
 
-  final private boolean jj_3R_35() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_9() {
-    if (jj_3R_21()) return true;
-    if (jj_3R_6()) return true;
-    return false;
-  }
-
-  final private boolean jj_3_2() {
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_34() {
     Token xsp;
     xsp = jj_scanpos;
@@ -695,11 +689,6 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     return false;
   }
 
-  final private boolean jj_3R_8() {
-    if (jj_3R_4()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_29() {
     Token xsp;
     xsp = jj_scanpos;
@@ -710,6 +699,11 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     if (jj_scan_token(24)) return true;
     }
     }
+    return false;
+  }
+
+  final private boolean jj_3R_8() {
+    if (jj_3R_4()) return true;
     return false;
   }
 
@@ -732,7 +726,8 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     Token xsp;
     xsp = jj_scanpos;
     lookingAhead = true;
-    jj_semLA = !",".equals(getToken(1).image);
+    jj_semLA = test(getToken(2),getToken(1)) &&
+                !",".equals(getToken(1).image);
     lookingAhead = false;
     if (!jj_semLA || jj_3R_8()) {
     jj_scanpos = xsp;
@@ -894,11 +889,6 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     return false;
   }
 
-  final private boolean jj_3_1() {
-    if (jj_3R_3()) return true;
-    return false;
-  }
-
   final private boolean jj_3R_14() {
     if (jj_3R_25()) return true;
     return false;
@@ -906,6 +896,11 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
 
   final private boolean jj_3R_13() {
     if (jj_3R_7()) return true;
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_3()) return true;
     return false;
   }
 
@@ -937,6 +932,22 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
 
   final private boolean jj_3R_30() {
     if (jj_scan_token(CHARACTER_ATOM)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_35() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_9() {
+    if (jj_3R_21()) return true;
+    if (jj_3R_6()) return true;
+    return false;
+  }
+
+  final private boolean jj_3_2() {
+    if (jj_3R_4()) return true;
     return false;
   }
 
