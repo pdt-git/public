@@ -1,22 +1,23 @@
 package org.cs3.pl.parser;
 
+
 /**
  * Collects problem during compilation of prolog streams.
  */
 public interface ProblemCollector {
 
     /**
-     * Called by the PrologCompiler to report a Problem.
+     * Called by the ClassicPrologCompiler to report a Problem.
      * 
      * @param token
      *                    the token causing the problem
      * @param msg
      *                    a message describing the problem.
      * @param severity
-     *                    one of PrologCompiler.INFO,PrologCompiler.WARNING or
-     *                    PrologCompiler.ERROR
+     *                    one of ClassicPrologCompiler.INFO,ClassicPrologCompiler.WARNING or
+     *                    ClassicPrologCompiler.ERROR
      */
-    public void reportProblem(Token token, String msg, int severity);
+    public void reportProblem(Problem p);
     
     /**
      * called by the prolog compiler before parsing of the file.
@@ -31,5 +32,7 @@ public interface ProblemCollector {
      * of collected problems.
      */
     public void done();
+
+	
 
 }

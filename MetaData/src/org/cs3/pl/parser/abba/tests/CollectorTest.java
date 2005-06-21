@@ -6,11 +6,11 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.parser.ASTClause;
-import org.cs3.pl.parser.ASTCompilationUnit;
-import org.cs3.pl.parser.PrologParser;
-import org.cs3.pl.parser.SimpleNode;
 import org.cs3.pl.parser.abba.AbbaGraphGenerator;
+import org.cs3.pl.parser.internal.classic.ASTClause;
+import org.cs3.pl.parser.internal.classic.ASTCompilationUnit;
+import org.cs3.pl.parser.internal.classic.PrologParser;
+import org.cs3.pl.parser.internal.classic.SimpleNode;
 
 public class CollectorTest extends TestCase {
 	public void testCollectLiterals() throws Exception {
