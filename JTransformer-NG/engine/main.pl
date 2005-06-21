@@ -5,7 +5,7 @@
 :- ['facade/main'].
 :- ['test/main'].
 :- ['error_handling'].
-%:- ['compatiblitySWI'].
+:- ['compatiblitySWI'].
 %:- ['factbase']. --> nun in ast/javaFactbase
 :- ['generator/main'].
 :- ['api/main'].
