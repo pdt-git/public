@@ -41,13 +41,20 @@ addToMethodArgs             (_method, _id)
 removeFromMethodArgs        (_method, _id)
 addToBlock                  (_block, _id)
 removeFromBlock             (_block, _id)
-add_to_class                  (_class, _id)
-removeFromClass             (_class, _id)
+add_to_class                (_class, _id)
+remove_from_class           (_class, _id)
 cloneVarDef                 (_newParent, _varDef, _Copy)
-createVarDefIdents           (_newParent, _oldList, _newList)
+createVarDefIdents          (_newParent, _oldList, _newList)
 */
 
 %:- ['garbage_collect.pl'].
+
+:- dynamic sourceLocation/4.
+:- multifile sourceLocation/4.
+
+%%% source location %%%
+:- dynamic slT/3.
+:- multifile slT/3.
 
 :- multifile subTreeArg/2.
 :- multifile forwards/4.
@@ -60,8 +67,6 @@ createVarDefIdents           (_newParent, _oldList, _newList)
 :- dynamic abstraction/1.
 :- dynamic deleted_file/1.
 :- multifile deleted_file/1.
-:- dynamic created_file/1.
-:- multifile created_file/1.
 
 :- dynamic isErrorWarningMessage/3.
 
@@ -70,11 +75,7 @@ createVarDefIdents           (_newParent, _oldList, _newList)
  * types(?ExprOrDeclarationList, ?typeTermList)
  */
 
-types([],[]).
-types([Expr|Exprs], [Type|Types]):-   
-    getType(Expr,Type),
-    types(Exprs, Types).
-
+cond(types(_Exprs,_Types)).
 
 cond(src(_type)).
 
@@ -97,38 +98,6 @@ concat_lists([Element|Tail],[Element|TailFlat]) :-
     !,
 	concat_lists(Tail,TailFlat).
 
-concat_lists([[]],[]):-!.
-concat_lists([[Head|Tail]],[Head|Tail]):-!.
-concat_lists([Elem],[Elem]).
-
-concat_lists([[HeadHead|HeadTail]|Tail],FlatList) :-
-    !,
-	concat_lists(Tail,TailFlat),
-    append([HeadHead|HeadTail],TailFlat,FlatList).
-    
-concat_lists([[]|Tail],TailFlat):-
-	concat_lists(Tail,TailFlat).
-
-concat_lists([Head|Tail],[Head|TailFlat]):-
-	not(is_list(Head)),
-	concat_lists(Tail,TailFlat).    
-    
-test(concat_list_2):-
-    assert_true('[a,b],[d,e,f]',concat_lists([[a,b],[d,e,f]],
-    	[a,b,d,e,f])),
-    assert_true('[a,b],[d,e,f]',(concat_lists([[a,b],[d,e,f]],
-    	Flat),!,Flat=[a,b,d,e,f])),
-
-    assert_true('[a,b],c,[d,e,f]', concat_lists([[a,b],c,[d,e,f]],
-    	[a,b,c,d,e,f])),
-    assert_true('[a,B],C,[d,e,f]',concat_lists([[a,B],C,[d,e,f]],
-    	[a,B,C,d,e,f])),
-   assert_true('[a,B],C,[d,e,f]',(concat_lists([[a,B],C,[d,e,f]],
-    	Flat2), !,Flat2=[a,B,C,d,e,f])),
-   assert_true('[],[],[d,e,f]',(concat_lists([[],[],[d,e,f]],Flat3),
-    !,Flat3=[d,e,f])),
-   assert_true('[A],[A]',(concat_lists([V1],[V2]),
-    !,V1 == V2)).
 
 /**
  * action(set_parent(+ID,+NewParent))
@@ -216,50 +185,7 @@ action(add(class(Id, Owner, Name,Defs))) :-
     add_classDefT(Id, Owner, Name,Defs).
     
 add_classDefT(_id, _owner, _name,Defs):-
-    add(classDefT(_id, _owner, _name, Defs)),
-    ((
-       (globalIds(FQN,_id)->
-       		true;
-       		(fullQualifiedName(_id,FQN)->
-       		add(globalIds(FQN,_id));true)
-       		),
-       modifierT(_id,'public'),
-       not(getToplevel(_id,_)),
-       getPackage(_id,PID),
-       (_owner = null;_owner = PID),
-       fullPathOfClass(_id,FullPath),
-       print(' added new toplevel: '),       
-       print(FullPath),
-	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
-       sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
-       string_to_atom(S,Filename),
-       new_id(TID),
-       add(toplevelT(TID, PID,Filename,[_id])),
-       assert(created_file(Filename)),
-       add(projectLocationT(TID, Project,SourceFolder))
-     );true).
-
-
-
-/*
-    add(classDefT(_id, _owner, _name, _defs)),
-    ((
-       modifierT(_id,'public'),
-       not(getToplevel(_id,_)),
-       getPackage(_id,PID),
-       (_owner = null;_owner = PID),
-       fullPathOfClass(_id,FullPath),
-       print(' added new toplevel: '),       
-       print(FullPath),
-	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
-       sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
-       string_to_atom(S,Filename),
-       new_id(TID),
-       add(toplevelT(TID, PID,Filename,[_id])),
-       assert(created_file(Filename)),
-       add(projectLocationT(TID, Project,SourceFolder))
-     );true).
-*/
+    add_new_class_and_file(_id, _owner, _name, Defs).
 
 /*
 	sourceFolder(+Toplevel,-Sourcefolder)
@@ -278,7 +204,6 @@ sourceFolder(Toplevel, SourceFolder):-
     atom_concat(Project,'/',Tmp),
     atom_concat(Tmp,Folder,SourceFolder),
     !.
-
 
 /*
 	defaultProjectSourceFolder(-Project,-SourceFolder,-FullSourceFolder)
@@ -305,18 +230,6 @@ action(delete(class(_id, _owner, _name))) :-
     classDefT(_id, _owner, _name, Defs),
     delete(classDefT(_id, _owner, _name, Defs)),
     findall(Modifier,(modifierT(_id,Modifier),delete(modifierT(_id,Modifier))),_).
-
-deleteToplevelOfClass(Id) :-
-    modifierT(Id,public),
-    getToplevel(Id, Tl),
-    !,
-    findall(Import,(importT(Import,Tl,ClassPckg),delete(importT(Import,Tl,ClassPckg))),_),
-%    findall(Class,(classDefT(Class,Package,Name,List),delete(classDefT(Class,Package,Name,List))),_),
-    toplevelT(Tl,TlPackage,Filename, Defs),
-    assert(deleted_file(Filename)),
-    delete(toplevelT(Tl,TlPackage,Filename, Defs)).
-
-deleteToplevelOfClass(_).    
     
 action(replace(class(_id, _owner, _name),class(_id, _owner1, _name1))) :-
     classDefT(_id,_,_,_defs),
@@ -333,87 +246,6 @@ action(replace(class(_id, _owner, _name))) :-
     action(replace(classDefT(_id, _owner, _name, []))).
 
 
-/*
-    Helper predicates for file handling
-*/
-
-/*
-	created_file(-Filename,-Src)
-*/
-
-created_file(Filename,Src):-
-    created_file(Filename),
-    toplevelT(Toplevel,_,Filename,_),
-    gen_tree(Toplevel,Src).
-
-/*
-	modified_file(-Filename,-Src)
-*/
-
-modified_file(Filename,Src):-
-    dirty_class(Class),
-    getToplevel(Class,Toplevel),
-    toplevelT(Toplevel,_,Filename,_),
-    not(created_file(Filename)),
-    gen_tree(Toplevel,Src).
-
-
-/*
- 	helper.
-*/
-
-/*
-	dirty_class(-Class)
-	
-	Binds all dirty class.
-	No class will be bound more than once.
-*/
-
-dirty_class(Class):-
-    bagof(Tree,(dirty_tree(Tree),enclClass(Tree,Class)),Tree).
-
-test(dirty_class):-
-    findall(C,dirty_class(C),Classes),
-    assert_true('excepted two dirty classes',[class,class2] = Classes).
-    
-setUp(dirty_class):-
-    remove_dirty_flags,
-	assert(classDefT(class,null,cname,[method1,method2])),
-    assert(methodDefT(method1,class,name1,[],type(basic,int,0),[],null)),
-    assert(methodDefT(method2,class,name2,[],type(basic,int,0),[],null)),
-    assert(dirty_tree(method1)),
-    assert(dirty_tree(method2)),
-
-	assert(classDefT(class2,null,cname2,[method3])),
-    assert(methodDefT(method3,class2,name3,[],type(basic,int,0),[],null)),
-    assert(dirty_tree(method3)).
-    
-tearDown(dirty_class):-
-	retract(classDefT(class,null,cname,[method1,method2])),
-    retract(methodDefT(method1,class,name1,[],type(basic,int,0),[],null)),
-    retract(methodDefT(method2,class,name2,[],type(basic,int,0),[],null)),
-    retract(dirty_tree(method1)),
-    retract(dirty_tree(method2)),
-
-	retract(classDefT(class2,null,cname2,[method3])),
-    retract(methodDefT(method3,class2,name3,[],type(basic,int,0),[],null)),
-    retract(dirty_tree(method3)),
-    remove_dirty_flags.
-    
-    
-
-/*
-	retract_api_meta_data.
-*/
-
-retract_api_meta_data :-
-    retractall(deleted_file(_)),
-    retractall(created_file(_)),
-    retractall(dirty_tree(_)),
-    retractall(rollback(_)),
-    retractall(changed(_)).
-       
-
 /*    
 action(delete(class(_id, _owner, _name))) :-
     %format('defs ~a~n',[_defs]),
@@ -429,23 +261,7 @@ action(delete(class(_id, _owner, _name))) :-
 %    action(delete(class(_, _id, _, _, _))),
 */
 
-cond(extends(_class, _super)).
-extends(_class, _super) :-
-    extendsT(_class, _super).
-action(add(extends(_class, _super))) :-
-    add(extendsT(_class, _super)).
-action(delete(extends(_class, _super))) :-
-    delete(extendsT(_class, _super)).
 
-cond(implements(_class, _super)).
-implements(_class, _super) :-
-    implementsT(_class, _super).
-action(add(implements(_class, _super))) :-
-    add(implementsT(_class, _super)).
-action(delete(implements(_class, _super))) :-
-    delete(implementsT(_class, _super)).
-
-cond(subtype(_sub, _super)).
 
 /**
  * subtype(?Sub, ?Super)
@@ -455,21 +271,8 @@ cond(subtype(_sub, _super)).
  * 
  * Only for object types.
  */
-   
-subtype(_sub, _sub).
-subtype(_sub, _super) :-
-    extendsT(_sub,_super).
-subtype(_sub, _super) :-
-    implementsT(_sub,_super).
-subtype(_sub, _super) :-
-    extendsT(_sub,_subsuper),
-    subtype(_subsuper, _super).
-subtype(_sub, _super) :-
-    implementsT(_sub,_subsuper),
-    subtype(_subsuper, _super).
-subtype(Var, _):-
-    nonvar(Var),
-    Var = null.
+
+cond(subtype(_sub, _super)).
 
 %:- dynamic shareModifier/3.
 %:- multifile shareModifier/3.
@@ -528,7 +331,7 @@ action(replace(method(_id, _class, _name, _params, _type, _exceptions, _body))) 
 action(delete(method(_id, _class, _name, _params, _type, _exceptions, _body))) :-
 %    action_all(delete(bodyFact(_id))),
     delete(methodDefT(_id, _class, _name, _params, _type, _exceptions, _body)),
-    removeFromClass(_class, _id).
+    remove_from_class(_class, _id).
 
 
 cond(constructor(_id, _class, _params, _exceptions, _body)).
@@ -544,7 +347,7 @@ action(replace(constructor(_id, _class, _params, _exceptions, _body))) :-
     action(replace(methodDefT(_id, _class, '<init>', _params, type(basic,void,0), _exceptions, _body))).
 action(delete(constructor(_id, _class, _params, _exceptions, _body))) :-
     action_all(delete(method(_id, _class, '<init>', _params, type(basic,void,0), _exceptions, _body))),
-    removeFromClass(_class, _id).
+    remove_from_class(_class, _id).
 
 
 abstraction(field(_id, _class, _RetType, _name, _init)).
@@ -566,7 +369,7 @@ action(replace(fieldDefT(_id, _class, _RetType, _name, _init),
 action(delete(field(_id, _class, _RetType, _name, _init))) :-
 %    action_all(delete(bodyFact(_id))),
     delete(fieldDefT(_id,  _class, _RetType, _name, _init)),
-    removeFromClass(_class, _id).
+    remove_from_class(_class, _id).
 
 
 cond(param(_id, _method, _type, _name)).
@@ -589,232 +392,6 @@ action(delete(param(_id, _method, _type, _name))) :-
 
 /************************ MethodBody Facts *****************************/
 
-cond(localVar(_id, _parent, _encl, _type, _name, _init)).
-subTreeArg(localVar, 6).
-localVar(_id, _parent, _encl, _type, _name, _init) :-
-    localDefT(_id, _parent, _encl, _type, _name, _init),
-    methodDefT(_encl, _, _, _, _, _, _),
-    _encl \= _parent.
-action(     localVar(_id, _parent, _encl, _type, _name, _init)) :-
-    add(localDefT(_id, _parent, _encl, _type, _name, _init)),
-    addToBlock(_parent, _id).
-action(replace(localVar(_id, _parent, _encl, _type, _name, _init))) :-
-    action(replace(localDefT(_id, _parent, _encl, _type, _name, _init))).
-action(delete(localVar(_id, _parent, _encl, _type, _name, _init))) :-
-%    action_all(delete(bodyFact(_id))),
-    delete(localDefT(_id,_parent, _encl, _type, _name, _init)),
-    removeFromBlock(_parent, _id).
-
-
-cond(setField(_assignT, _parent, _encl, _Receiver, _field, _value)).
-subTreeArg(setField, 4).
-subTreeArg(setField, 6).
-
-setField(SetField, RealParent, RealEncl, Receiver, Field,Value) :-
-    assignT(SetField, Parent, Encl, GetField, Value),
-    getFieldT(GetField, _, _, Receiver, _, Field),
-    field(Field,_,_,_,_),
-    getRealParent(SetField, Parent,RealParent),
-    getRealEncl(SetField, Encl,RealEncl).
-%    !,
-%    nullIfThis(_receiver, _Receiver).
-
-/*
-setField(_setField, _parent, _encl, _Receiver, _field, _value) :-
-    forwards(_setField,_,setField,_assign),
-    applyT(_setField, _, _, _, [_receiver , _value]),
-    getEncl(_setField, _encl),
-    assignT(_assign, _,_, _identSelect, _value),
-    nullIfThis(_receiver, _Receiver),
-    getSymbol(_identSelect,_field).
-    
-*/
-
-% TODO Port
-action(add(setField(AssignT, Parent, Encl, Recv, Field, Value))) :-
-    addToBlock(Parent, AssignT),
-    field(Field,_,Type,_,_),
-    new_id(GetField),
-    add(getFieldT(GetField,AssignT,Encl,Recv,Type,Field)),
-    add(assignT(AssignT, Parent, Encl, GetField, Value)).
-    
-action(replace(setField(AssignT, Parent, Encl, Recv, Field, Value))) :-
-    field(Field,_,_,NewName,_),
-    assignT(AssignT, Parent, Encl, GetField,Value),
-    getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
-    replace(getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
-            getFieldT(GetField,AssignT,Encl,Recv,NewName,Field)),
-    action(replace(assignT(AssignT, Parent, Encl, GetField, Value))).
-
-action(replace(setField(AssignT, Parent, Encl, _Recv, _Field, Value),
-	           setField(AssignT, Parent1, Encl1, Recv1, Field1, Value1))) :-
-    field(Field1,_,_,Name1,_),
-    assignT(AssignT, Parent, Encl, GetField,Value),
-    getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
-    replace(getFieldT(GetField,AssignT,Encl,OldRecv,OldName,OldField),
-            getFieldT(GetField,AssignT,Encl1,Recv1,Name1,Field1)),
-    action(replace(assignT(AssignT, Parent1, Encl1, GetField, Value1))).
-
-action(delete(setField(AssignT, Parent, Encl, Recv, Field, Value))) :-
-    removeFromBlock(Parent, AssignT),
-    assignT(AssignT, Parent, Encl, GetField, Value),
-    getFieldT(GetField,AssignT,Encl,Recv,Name,Field),
-    delete(getFieldT(GetField,AssignT,Encl,Recv,Name,Field)),
-    delete(assignT(AssignT, Parent, Encl, GetField, Value)).
-
-cond(getField(_getField, _parent, _encl, _Receiver, _name, _field)).
-subTreeArg(getField, 4).
-
-getField(_getField, _Parent, _Encl, _Receiver, _Name,_field) :-
-    getFieldT(_getField, _parent, _encl, _receiver, _Name, _field),
-    not(assignT(_parent, _,_,_getField,_)),
-    getRealParent(_getField, _parent,_Parent),
-    getRealEncl(_getField, _encl,_Encl),
-    nullIfThis(_receiver, _Receiver).
-
-
-action(add(getField(_identSelect, _parent, _encl, _recv, _name,_field))) :-
-    field(_field,_,_,_name,_),
-    addToBlock(_parent, _identSelect),
-    add(getField(_identSelect, _parent, _encl, _name, _recv, _field)).
-    
-%    createIdentSelect(_identSelect, _parent, _encl, _name, _recv, _field).
-action(replace(getField(_getField, _parent, _encl, _recv, _field))) :-
-    field(_field,_,_,_name,_),
-    deleteTree(_getField),
-    add(getField(_getField, _parent, _encl, _recv, _field)).
-%    replaceIdentSelect(_identSelect, _parent, _encl, _name, _recv, _field).
-    
-    
-
-action(delete(getField(GetField, _, _, _, _, _))) :-
-	getField(GetField, Parent, Encl, Recv, Name ,Field),
-    removeFromBlock(_parent, _identSelect),
-    delete(getField(GetField, Parent, Encl, Recv, Name ,Field)).
-
-
-/* execution: entspricht methode*/
-cond(execution(_execution, _class, _execution, null, _execution, _params)).
-subTreeArg(execution, 6).
-execution(_execution, _class, _execution, null, _execution, _params) :-
-    methodDefT(_execution, _class, _, _params, _, _exceptions, _),
-    not(externT(_class)).
-
-
-cond(methodCall(_apply, _parent, _encl, _Receiver, _Name, _OrigMethod, _Args)).
-subTreeArg(methodCall, 4).
-subTreeArg(methodCall, 7).
-
-/* 
-   methodCall(?Call, ?Parent, ?Encl, ?Receiver, ?Method, ?Args)
-
-	Wrapper predicate for applyT.
-	and newClassT
-	Method is the original method, 
-	even if apply points to a forwarding method */
-
-methodCall(_methodCall, _parent, _Encl, _Receiver, _method_name, _method, _Args) :-
-    applyT(_methodCall, _parent, _encl, _Receiver, _method_name, _args,_method),
-    not(_method_name == 'super'),
-    not(forwarding(_methodCall)),
-%    pc_visible(_encl),
-    getRealParent(_methodCall,_parent,_Parent),
-    getRealEncl(_methodCall, _encl,_Encl),
-    getRealArgs(_methodCall,_args,_Args).
-
-methodCall(_methodCall, _parent, _Encl, null, '<init>', _constructor, _Args) :-
-    newClassT(_methodCall, _parent, _encl, _constructor, _args, _typeExpr, _def, _enclosingClass),
-%    _Receiver, _method_name, _args,_method),
-    not(forwarding(_methodCall)),
-%    pc_visible(_encl),
-    getRealParent(_methodCall,_parent,_Parent),
-    getRealEncl(_methodCall, _encl,_Encl),
-    getRealArgs(_methodCall,_args,_Args).
-
-%    !,
-%    getEncl(_methodCall, _encl),
-%    getReceiverNullIfThis(_identSelect, _Receiver),
-%    getSymbol(_identSelect, _method).
-
-/** Uwe TODO does NOT handle forwarding methods */
-action(methodCall(_apply, _parent, _encl, _recv, _name, _method, _Args)) :-
-    methodDefT(_method, _, _name, _, _, _, _),
-    addToBlock(_parent, _apply),
-    new_id(_newIdSelect),
-%    createIdentSelect(_newIdSelect, _apply, _encl, _name, _recv, _method),
-    add(applyT(_apply, _parent, _encl, _recv,_name, _Args, _method)).
-
-action(replace(methodCall(_apply, _parent, _encl, _recv, _name, _method, _args))) :-
-	applyT(_apply, _, _, _,_name, _, _),
-    enclMethod(_apply, _e),
-    deleteTree(_apply),
-    methodDefT(_method, _, _name, _, _, _, _),
-    new_id(_newIdSelect),
-    add(applyT(_apply, _parent, _encl, _recv,_name, _args, _method)).
-
-%    format("replace start ~a,~a,~a,~a,~a,~a~n", [_newIdSelect, _apply, _encl, _name, _recv, ]),
-%    action(replaceDiffTree(applyT(_apply, _parent, _encl, _newIdSelect, _Args))).
-%    format("replace end ~a,~a,~a,~a,~a,~a~n", [_newIdSelect, _apply, _encl, _name, _recv, ]).
-%    action(replace(applyT(_apply, _parent, _encl, _newIdSelect, _Args))).
-
-action(delete(methodCall(_apply, _, _, _, _, _, _))) :-
-    removeFromBlock(_parent, _apply),
-    delete(applyT(_apply, _, _, _, _, _, _)).
-
-
-cond(newCall(_newClass, _parent, _encl, _Receiver, _constructor, _args)).
-subTreeArg(newCall, 4).
-subTreeArg(newCall, 6).
-newCall(_newClass, _parent, _encl, _Receiver, _constructor, _args) :-
-    newClassT(_newClass, _parent, _encl, _method, _args, _identSelect, _, _),
-    getReceiver(_identSelect, _Receiver),
-    constructor(_constructor, _, _args, _, _).
-action(newCall(_newClass, _parent, _encl, _recv, _constructor, _args)) :-
-    addToBlock(_parent, _newClass),
-    add(newClassT(_newClass, _parent, _encl, _constructor, _args, _recv, 'null', 'null')).
-action(replace(newCall(_newClass, _parent, _encl, _recv, _constructor, _args))) :-
-    action(replace(newClassT(_newClass, _parent, _encl, _constructor, _args, _recv, 'null', 'null'))).
-action(delete(newCall(_newClass, _parent, _encl, _recv, _constructor, _args))) :-
-    removeFromBlock(_parent, _newClass),
-    delete(newClassT(_newClass, _parent, _encl, _method, _args, _recv, _, _)).
-
-
-%cond(sout(_id, _pid, _encl, _args)).
-
-action(sout(_apply, _pid, _encl, _str)) :-
-
-    stringType(_t),
-
-    packageT(_syspid, 'java.lang'),
-    classDefT(_sysID, _syspid, 'System', _),
-%    classDefT(_sysid3, _syspid, 'String', _),
-    fieldDefT(_outID, _sysID, type(class, _sysid2, 0), 'out', _),
-
-    packageT(_syspid2, 'java.io'),
-    classDefT(_sysid2, _syspid2, 'PrintStream', _),
-    methodDefT(_println, _sysid2, 'println', [_param1], _, _, _),
-    paramDefT(_param1, _meth, _t, _),
-
-    
-    new_id(_get),new_id(_ident),
-
-    add(applyT(__apply, _pid , _encl, _get, 'println',[_str],_println)),
-    add(getFieldT(_get , _apply, _encl, _ident, 'out', _outID)),
-    add(identT(_ident , _get, _encl, 'System', _sysID)).
-
-%    add(operationT(_op, _id, _encl, [_lit, _arg], '+',
-%    add(literalT(_lit, _id, _encl, type(class, _sysid3, 0), _str)),
-
-action(str(_id, _pid, _encl, _str)) :-
-    stringType(_t),
-    add(literalT(_lit, _id, _encl, _t, _str)).
-
-stringType(type(class, _id, 0)) :-
-    stringClass(_id).
-stringClass(_ID) :-
-    packageT(_syspid, 'java.lang'),
-    classDefT(_ID, _syspid, 'String', _).               
-
 
 action(add_to_class(_class,_elem)) :-
     add_to_class(_class,_elem).
@@ -822,78 +399,64 @@ action(add_to_class(_class,_elem)) :-
 action(add_body(_elem,_body)) :-
     add_body(_elem,_body).
 
+action(remove_from_class(Class,Elem)) :-
+	remove_from_class(Class,Elem).
 
 action(set_visibility(_forwMethod, _type, _ref)):-
     set_visibility(_forwMethod, _type, _ref).
 
-/* *** op actions ***
-    a recursive run of set_parent / enclMethod
-    MUST be executed after these actions.
-    
-    @deprecated
+/*
+        Part of the action/1 definition.
 */
-
-cond(opAnd(_id,_p,_e,_arg1, _arg2)).
-opAnd(_id,_p,_e,_arg1, _arg2) :-
-    operationT(_id,_p,_e, [_arg1, _arg2], '&&', 0).
-action(opAnd(_id,_p,_e,_arg1, _arg2)) :-
-    add(operationT(_id,_p,_e, [_arg1, _arg2], '&&', 0)).
-action(delete(opAnd(_id,_p,_e,_arg1, _arg2))) :-
-    delete(operationT(_id,_p,_e, [_arg1, _arg2], '&&', 0)).
-
-cond(opEq(_id,_p,_e,_arg1, _arg2)).
-opEq(_id,_p,_e,_arg1, _arg2) :-
-    operationT(_id,_p,_e, [_arg1, _arg2], '==', 0).
-action(opEq(_id,_p,_e,_arg1, _arg2)) :-
-    add(operationT(_id,_p,_e, [_arg1, _arg2], '==', 0)).
-action(delete(opEq(_id,_p,_e,_arg1, _arg2))) :-
-    delete(operationT(_id,_p,_e, [_arg1, _arg2], '==', 0)).
-
-cond(opNotEq(_id,_p,_e,_arg1, _arg2)).
-opNotEq(_id,_p,_e,_arg1, _arg2) :-
-    operationT(_id,_p,_e, [_arg1, _arg2], '!=', 0).
-action(opNotEq(_id,_p,_e,_arg1, _arg2)) :-
-    add(operationT(_id,_p,_e, [_arg1, _arg2], '!=', 0)).
-action(delete(opNotEq(_id,_p,_e,_arg1, _arg2))) :-
-    delete(operationT(_id,_p,_e, [_arg1, _arg2], '!=', 0)).
-
-cond(ident(_id,_p,_e, _sym)).
-ident(_id,_p,_e,'true') :-
-    identT(_id,_p,_e,'true', _sym),!.
-ident(_id,_p,_e,'false') :-
-    identT(_id,_p,_e,'false', _sym),!.
-ident(_id,_p,_e,_sym) :-
-    identT(_id,_p,_e,_, _sym), !.
-action(ident(_id,_p,_e,'true')) :-
-    add(identT(_id,_p,_e, 'true', 'null')), !,
-    format('DEBUG Ident true: ~a, ~a, ~a, ~a, ~a ~n', [_id,_p,_e, 'true', 'null']).
-action(ident(_id,_p,_e,'false')) :-
-    add(identT(_id,_p,_e, 'false', 'null')), !,
-    format('DEBUG Ident false: ~a, ~a, ~a, ~a, ~a ~n', [_id,_p,_e, 'false', 'null']).
-
-action(ident(_id,_p,_e,_sym)) :-
-%    format('DEBUG Ident class: ~a, ~a, ~a, ~a ~n', [_id,_p,_e, _sym]),
-    classDefT(_sym, _, _,_),
+action(replace(selectT(_id,_pid,_encl,_v1,_v2,_v3))):-        delete(selectT(_id,_,_,_,_,_)), !,        add(selectT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(identT(_id,_pid,_encl,_v1,_v2))):-             delete(identT(_id,_,_,_,_)), !,           add(identT(_id,_pid,_encl,_v1,_v2)).
+action(replace(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5))):-   delete(methodDefT(_id,_,_,_,_,_,_)), !,   add(methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5)).
+action(replace(localDefT(_id,_pid,_encl,_v1,_v2,_v3))):-      delete(localDefT(_id,_,_,_,_,_)), !,        add(localDefT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(fieldDefT(_id,_pid,_v1,_v2,_v3))):-              delete(fieldDefT(_id,_,_,_,_)), !,        add(fieldDefT(_id,_pid,_v1,_v2,_v3)).
+action(replace(paramDefT(_id,_pid,_v1,_v2))):-                  delete(paramDefT(_id,_,_,_)), !,        add(paramDefT(_id,_pid,_v1,_v2)).
+action(replace(classDefT(_id,_pid,_v1,_v2))):-                delete(classDefT(_id,_,_,_)), !,          add(classDefT(_id,_pid,_v1,_v2)).
+action(replace(toplevelT(_id,_pid,_v1,_v2))):-                delete(toplevelT(_id,_,_,_)), !,          add(toplevelT(_id,_pid,_v1,_v2)).
+action(replace(blockT(_id,_pid,_encl,_v1))):-                 delete(blockT(_id,_,_,_)), !,             add(blockT(_id,_pid,_encl,_v1)).
+action(replace(doLoopT(_id,_pid,_encl,_v1,_v2))):-            delete(doLoopT(_id,_,_,_,_)), !,          add(doLoopT(_id,_pid,_encl,_v1,_v2)).
+action(replace(whileLoopT(_id,_pid,_encl,_v1,_v2))):-         delete(whileLoopT(_id,_,_,_,_)), !,       add(whileLoopT(_id,_pid,_encl,_v1,_v2)).
+action(replace(forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4))):-   delete(forLoopT(_id,_,_,_,_,_,_)), !,     add(forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4)).
+action(replace(labelT(_id,_pid,_encl,_v1,_v2))):-          delete(labelT(_id,_,_,_,_)), !,        add(labelT(_id,_pid,_encl,_v1,_v2)).
+action(replace(switchT(_id,_pid,_encl,_v1,_v2))):-            delete(switchT(_id,_,_,_,_)), !,          add(switchT(_id,_pid,_encl,_v1,_v2)).
+action(replace(caseT(_id,_pid,_encl,_v1))):-              delete(caseT(_id,_,_,_)), !,            add(caseT(_id,_pid,_encl,_v1)).
+action(replace(synchronizedT(_id,_pid,_encl,_v1,_v2))):-      delete(synchronizedT(_id,_,_,_,_)), !,    add(synchronizedT(_id,_pid,_encl,_v1,_v2)).
+action(replace(tryT(_id,_pid,_encl,_v1,_v2,_v3))):-           delete(tryT(_id,_,_,_,_,_)), !,           add(tryT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(catchT(_id,_pid,_encl,_v1,_v2))):-             delete(catchT(_id,_,_,_,_)), !,           add(catchT(_id,_pid,_encl,_v1,_v2)).
+action(replace(ifT(_id,_pid,_encl,_v1,_v2,_v3))):-            delete(ifT(_id,_,_,_,_,_)), !,            add(ifT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(conditionalT(_id,_pid,_encl,_v1,_v2,_v3))):-   delete(conditionalT(_id,_,_,_,_,_)), !,   add(conditionalT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(execT(_id,_pid,_encl,_v1))):-                  delete(execT(_id,_,_,_)), !,              add(execT(_id,_pid,_encl,_v1)).
+action(replace(returnT(_id,_pid,_encl,_v1))):-                delete(returnT(_id,_,_,_)), !,            add(returnT(_id,_pid,_encl,_v1)).
+action(replace(breakT(_id,_pid,_encl,_v1,_v2))):-             delete(breakT(_id,_,_,_,_)), !,           add(breakT(_id,_pid,_encl,_v1,_v2)).
+action(replace(continueT(_id,_pid,_encl,_v1,_v2))):-          delete(continueT(_id,_,_,_,_)), !,        add(continueT(_id,_pid,_encl,_v1,_v2)).
+action(replace(throwT(_id,_pid,_encl,_v1))):-                 delete(throwT(_id,_,_,_)), !,             add(throwT(_id,_pid,_encl,_v1)).
+action(replace(applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4))):-             delete(applyT(_id,_,_,_,_,_,_)), !,           add(applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4)).
+action(replace(newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5))):-!, delete(newClassT(_id,_,_,_,_,_,_,_)), !,  add(newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5)).
+action(replace(newArrayT(_id,_pid,_encl,_v1,_v2,_v3))):-  delete(newArrayT(_id,_,_,_,_,_)), !,    add(newArrayT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(assignT(_id,_pid,_encl,_v1,_v2))):-            delete(assignT(_id,_,_,_,_)), !,          add(assignT(_id,_pid,_encl,_v1,_v2)).
+action(replace(assignopT(_id,_pid,_encl,_v1,_v2,_v3))):-      delete(assignopT(_id,_,_,_,_,_)), !,      add(assignopT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(operationT(_id,_pid,_encl,_v1,_v2,_v3))):-     delete(operationT(_id,_,_,_,_,_)), !,     add(operationT(_id,_pid,_encl,_v1,_v2,_v3)).
+action(replace(typeCastT(_id,_pid,_encl,_v1,_v2))):-          delete(typeCastT(_id,_,_,_,_)), !,        add(typeCastT(_id,_pid,_encl,_v1,_v2)).
+action(replace(typeTestT(_id,_pid,_encl,_v1,_v2))):-          delete(typeTestT(_id,_,_,_,_)), !,        add(typeTestT(_id,_pid,_encl,_v1,_v2)).
+action(replace(indexedT(_id,_pid,_encl,_v1,_v2))):-           delete(indexedT(_id,_,_,_,_)), !,         add(indexedT(_id,_pid,_encl,_v1,_v2)).
+action(replace(literalT(_id,_pid,_encl,_v1,_v2))):-           delete(literalT(_id,_,_,_,_)), !,         add(literalT(_id,_pid,_encl,_v1,_v2)).
+action(replace(assertT(_id,_pid,_encl,_v1,_v2))):-           delete(assertT(_id,_,_,_,_)), !,         add(assertT(_id,_pid,_encl,_v1,_v2)).
+action(replace(importT(_id,_pid,_v1))):-                      delete(importT(_id,_,_)), !,              add(importT(_id,_pid,_v1)).
+action(replace(_tree)) :-
     !,
-    format('DEBUG Ident this: ~a, ~a, ~n', [_id,_p,_e, _sym]),
-    add(identT(_id,_p,_e, 'this', _sym)).
-action(ident(_id,_p,_e,_sym)) :-
-%    format('DEBUG Ident 1: ~a, ~a, ~n', [_id, _sym]),
-    getSymbolName(_sym, _symName),
-    format('DEBUG Ident std: ~a, ~a, ~a, ~a, ~a~n', [_id,_p,_e, _symName, _sym]),
-    add(identT(_id,_p,_e, _symName, _sym)).
-action(delete(ident(_id,_p,_e,_sym))) :-
-    delete(identT(_id,_p,_e, _, _sym)).
+    arg(1, _tree, _id),
+    deleteTree(_id),
+    add(_tree).
 
-
-cond(opNot(_id,_p,_e,_arg)).
-opNot(_id,_p,_e,_arg) :-
-    operationT(_id,_p,_e, [_arg], '!', -1).
-action(opNot(_id,_p,_e,_arg)) :-
-    format('DEBUG onNot: ~a, ~a, ~n', [_id, _arg]),
-    add(operationT(_id,_p,_e, [_arg], '!', -1)).
-action(delete(opNot(_id,_p,_e,_arg))) :-
-    delete(operationT(_id,_p,_e, [_arg], '!', -1)).
+action(replaceDiffTree(_tree)) :-
+    !,
+    arg(1, _tree, _id),
+  %  format('rdt: ~a ~a', [_id, _tree]),
+    deleteTree(_id),
+    add(_tree).
 
 
 /********************** NO ACTIONS - START ***********************/
@@ -1041,22 +604,6 @@ fullPathOfClass(_id, _name) :-
     classDefT(_id, 'null', _name,_),
     !.
 
-/*
-	packagePath(+Pckgname,-PckgPath)
-*/
-
-packagePath(Pckgname,PckgPath) :-
-    atom_concat(First,'.',RestName, Pckgname),
-    !,
-  	packagePath(RestName,RestPath),
-    atom_concat(First,'/',Rest1),
-    atom_concat(Rest1, RestPath, PckgPath).
-  
-
-packagePath(Name,Name).
-    
-test(packagePath):-
-    packagePath('pckg1.pckg2.Name','pckg1/pckg2/Name').
 /**************************** tests *********************/
 test(fullQualifiedName1):-
     fullQualifiedName(c1,'Test').
@@ -1088,18 +635,79 @@ tearDownFQN :-
 %    printf(Fqn),
 %    printf(' ').
 
-/************************ Helper ***************************/
-
-
-enclMethodOrNull(_tree, _enclMethod) :-
-    enclMethod(_tree, _enclMethod),
-    !.
-enclMethodOrNull(_tree, 'null').
-
-
-createReturnOrExec(_parent, _encl, type(basic, void, 0), _stat, _exec) :-
+    
+/**
+ * sourceLocation(?ID, ?File, ?Begin, ?Length)
+ */
+sourceLocation(Tree,File,Start,End):-
+    slT(Tree,Start,End),
     !,
-    add(execT(_exec, _parent, _encl, _stat)).
+    getToplevel(Tree,TL),
+    toplevelT(TL,_,File,_).
+% temporary necessary while aspects are not 
+% completely represented in prolog factbase
+sourceLocation(ID,File,Start,Length):-
+        slAspectT(ID, File,Start, Length).
 
-createReturnOrExec(_parent, _encl, _type, _stat, _return) :-
-    add(returnT(_return, _parent, _encl, _stat)).
+/*********************************
+ * ID generation.                *
+ *********************************/
+    
+/**
+ * new_id(-Id)
+ *
+ * Binds Id to a unique number.
+ * Throws already_bound_exception(Msg)
+ * argument Id is bound.
+ *
+ */     
+
+new_id(New) :-
+        nonvar(New),
+        New = [_|_],
+        !,
+        term_to_atom(New,Term),
+        sformat(Msg,'new_id: variable is a list: ~a~n',Term),
+        debugme,
+        print(Msg),
+        flush_output,
+        throw(already_bound_exception(Msg)).
+        
+new_id(New) :-
+        nonvar(New),
+        !,
+        sformat(Msg,'new_id: variable already bound: ~w~n',[New]),
+        print(Msg),
+        flush_output,
+        throw(already_bound_exception(Msg)).
+
+new_id(_New) :-
+        findall(ID,lastID(ID),[H|[H2|T]]),
+        !,
+        sformat(Msg,'more than one lastID fact: ~w~n',[[H|[H2|T]]]),
+        print(Msg),
+        flush_output,
+        throw(more_than_one_fact_exception(Msg)).
+
+new_id(_New) :-
+    lastID(_last),
+    sum(_last, 1, _New),
+    retract(lastID(_last)),
+    assert(lastID(_New)).
+
+/**
+ * initLastID
+ * adds the fact lastID(10000) if no lastID fact exists.
+ *
+ * Do not expose: internal predicate for new_id/1!
+ */
+
+:- dynamic lastID/1.
+
+initLastID :-
+  lastID(_),
+  !.
+initLastID :-
+  assert(lastID(10000)).
+  
+:- initLastID.

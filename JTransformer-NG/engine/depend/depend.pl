@@ -11,8 +11,8 @@ depend(_ct1, _ct2, _type, _label) :-
     ct_edge(_ct1, _ct2, _label, _type).
 depend(_ct1, _ct2, _DepType, _DepElem) :-
     % 1) lade CT's
-    ct(_ct1, _c1, _t1),
-    ct(_ct2, _c2, _t2),
+    ct_depend(_ct1, _c1, _t1),
+    ct_depend(_ct2, _c2, _t2),
     % 2) prüfe ob CT's verschieden sind
     _ct1 \= _ct2,
     % 3) expandiere Abstractionen zu DNF Termen      %do not backtrack

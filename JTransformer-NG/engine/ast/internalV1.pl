@@ -1,4 +1,4 @@
-% Autor: Guenter Kniesel
+	% Autor: Guenter Kniesel
 % Date: 7.9.2004
 
  /** 

@@ -1,5 +1,6 @@
 :- multifile ct/3.
 :- dynamic ct/3.
+:- multifile test/1.
 
 
 :- ['facade/main'].
@@ -12,7 +13,7 @@
 :- ['apply/main'].
 :- ['interpreter/main'].
 :- ['depend/main'].
-:- ['utils/main'].
+:- ['util/main'].
 :- ['ct/main'].
 :- ['check/main'].
 :- ['base/main'].

@@ -7,12 +7,12 @@
        addGetter(Class,Field,Ftype,GetterName),
        addSetter(Class,Field,Ftype,SetterName),
        'AND_SEQ'(
-           replRead(Class,Field,Ftype,GetterName),
-           replWrite(Class,Field,Ftype,SetterName),
-           makePriv(Class,Field)
+           replaceReadAccesses(Class,Field,Ftype,GetterName),
+           replaceWriteAccesses(Class,Field,Ftype,SetterName),
+           changeFieldAccessToPrivate(Class,Field)
        )
     )
-***************************************************************/
+**************************************************************/
 
 encapsulateField(Class,Field,Ftype,GetterName,SetterName) :-
        addGetter(Class,Field,Ftype,GetterName),
@@ -70,22 +70,24 @@ encapsField(Class,Field,Ftype,GetterName,SetterName) :-
  *   a method with that signature doesn't exist yet.
  */
 
-ct(addGetter(Class,Field,Type,Getter), (
-    classDefT(Class,_,_,_),not(externT(Class)),
-    fieldDefT(Field,Class,Type,Name,_),
-	concat(get, Name, Getter), 
-    % No method with signature "Type Getter()" :
-    not( methodDefT(Method,Class,Getter,[],Type,_,_) ),
+ct(addGetter(C,F,T,G), (
+    classDefT(C,_,_,_),not(externT(C)),
+    fieldDefT(F,C,T,N,_),
+	concat(get, N, G), 
+    % No method with signature "T G()" :
+    not( method(M,C,G,[],T,_,_) ),
 
     % Identities of elements to be created:
-    new_id(Method),new_id(Block),new_id(Return),new_id(Get) 
+    new_id(M),       % new method
+    new_id(B),       % its body
+    new_id(R),       % its return statement
+    new_id(Get)      % its getfield access
 ),(
-    % Create Method "Type Getter() { return F}":
-    add( methodDefT(Method,Class,Getter,[],Type,[],Block) ),
-    add( blockT(Block,Method,Method,[Return]) ),
-    add( returnT(Return,Block,Method,Get) ),
-    add( getFieldT(Get,Return,Method,null,Name,Field) ),
-    add_to_class(Class,Method)
+    % Create Method "T G() { return F}":
+    add( method(M,C,G,[],T,[],B) ),
+    add( blockT(B,M,M,[R]) ),
+    add( returnT(R,B,M,Get) ),
+    add( getFieldT(Get,R,M,null,N,F) )
 )).
 
 
@@ -102,7 +104,7 @@ ct(addSetter(C,F,T,S), (
 	concat(set, N, S), 
     % no method with signature "void S(T *)" :
     not((
-    	methodDefT(M,C,S,[P],type(basic,void,0),_,_),
+    	method(M,C,S,[P],type(basic,void,0),_,_),
         paramDefT(P,M,T,_)
     )),
 
@@ -116,14 +118,13 @@ ct(addSetter(C,F,T,S), (
     new_id(RHS)      % the lright-hand-side of the assignment
 ),(
     % Create Method "void S(T newvalue) { F = newvalue }":
-    add( methodDefT(M,C,S,[P],type(basic,void,0),[],B) ),
+    add( method(M,C,S,[P],type(basic,void,0),[],B) ),
     add( paramDefT(P,M,T,'newvalue') ),
     add( blockT(B,M,M,[Exec]) ),
     add( execT(Exec, B, M, A)), 
     add( assignT(A,Exec,M,LHS,RHS) ),
     add( getFieldT(LHS,A,M,null,N,F) ),
-    add( identT(RHS,A,M,'newvalue',P) ),
-    add_to_class(C,M)    
+    add( identT(RHS,A,M,'newvalue',P) )
 )).
 
 
@@ -132,14 +133,14 @@ ct(addSetter(C,F,T,S), (
  ******************************************************/
 ct(replaceWriteAccesses(C,F,T,S), (
     classDefT(C,_,_,_),not(externT(C)),
-        fieldDefT(F,C,T,N,_),
-        % Setter method "void S(T *)" exists:
-		concat(set, N, S), 
-        methodDefT(M,C,S,[P],type(basic,void,0),_,_),
-           paramDefT(P,M,T,_),
+    fieldDefT(F,C,T,N,_),
+    % Setter method "void S(T *)" exists:
+	concat(set, N, S), 
+    method(M,C,S,[P],type(basic,void,0),_,_),
+    paramDefT(P,M,T,_),
     % There is a direct assignment to the field F:
     assignT(A,PA,E,LHS,RHS),
-        getFieldT(LHS,A,E,Recv,N,F),
+    getFieldT(LHS,A,E,Recv,N,F),
     % ... outside of the setter method:
     E \= M
 ),(
@@ -159,7 +160,7 @@ ct(replaceReadAccesses(C,F,T,G), (
     fieldDefT(F,C,T,N,_),
     % Getter method "T G()" exists:
 	concat(get, N, G), 
-    methodDefT(M,C,G,[],T,_,_),
+    method(M,C,G,[],T,_,_),
     % There is a access to the field F:
     getFieldT(GF,Par,Enc,Rcv,N,F),
     not(assignT(Par, _,_,GF,_)),

@@ -19,7 +19,18 @@ CT's:
 :- dynamic lastApplyListInfo/1.
 :- dynamic changed/1. 
 :- dynamic rollback/1.
+/**
+ * debug_rollback_output
+ * 
+ * activated by default.
+ */
 :- dynamic debug_rollback_output/0.
+/**
+ * debug_apply_action_output
+ * 
+ * deactivated by default.
+ */
+:- dynamic debug_apply_action_output/0.
 :- dynamic applied/1.
 :- dynamic tmp_rollback_file/1.
 :- multifile action/1.
@@ -27,12 +38,9 @@ CT's:
 :- dynamic ct/3.
 :- multifile test/1.
 
-/**
- * debug_rollback_output
- * 
- * activated by default.
- */
 debug_rollback_output.
+
+
 /*
 or(_term1,_term2) :-
     debugme,
@@ -58,13 +66,13 @@ apply_ctlist(List) :-
 	retractall(lastApplyListInfo(_)),
 	assert(lastApplyListInfo(ApplyInfo)),
 	length(ApplyInfo,Num),
-	format('~n===========================~napplied ~a CT:~n',[Num]),
+	format('~n===========================~n~napplied ~a CT:~n',[Num]),
 	forall(member(M,ApplyInfo),format('~w~n',M)).
 
 showApplyListInfo :-
     lastApplyListInfo(ApplyInfo),
 	length(ApplyInfo,Num),
-	format('~n===========================~napplied ~a CT:~n',[Num]),
+	format('~n===========================~n~napplied ~a CT:~n',[Num]),
     forall(member(M,ApplyInfo),format('~w~n',M)).
     
 	
@@ -167,7 +175,7 @@ apply_ct(_name) :-
     ct(_name, _preConditionDA, _action),
     retractall(pointcut(_)),
     removeDependencyInstructions(_preConditionDA, _preCondition),
-    findall(_action,apply_pre(_preCondition,_action),_allActions),
+    findall( [_name, _action],apply_pre(_preCondition,_action),_allActions),
     %quicksort(_allActions,_uniqueActions,[]),
     apply_all_post(_allActions),
     add_apply_info_(_name,_allActions),
@@ -175,7 +183,8 @@ apply_ct(_name) :-
 
 
 apply_all_post([]):-!.
-apply_all_post([_h|_t]) :-
+apply_all_post([[Info,_h]|_t]) :-
+    debug_apply_all_post(Info),
     comma2list(_h,_l),
     apply_post(_l),
     retractall(pointcut(_)),
@@ -183,6 +192,22 @@ apply_all_post([_h|_t]) :-
     !.
 apply_all_post(_).
 
+debug_apply_all_post(Info):-
+    debug_apply_action_output,
+    format('action:~w~n',[Info]).
+debug_apply_all_post(_Info).
+    
+toggle_apply_action_debug :-
+    debug_apply_action_output,
+    !,
+    format('no apply action debug output ~n',[]),
+    retractall(debug_apply_action_output).
+    
+toggle_apply_action_debug  :-
+    format('apply action debug output ~n',[]),
+        assert(debug_apply_action_output).
+        
+    
 apply_post([]).
 apply_post([_head| _tail]) :-
         clause(action(_head),_),
@@ -210,7 +235,7 @@ apply_post([_head| _tail]) :-
 add_apply_info_(_name,_allActions):-
     length(_allActions,Num),
 	sformat(S,'applied ~w actions for the ct "~w"',[Num,_name]),
-	format('~w~n', [S]),
+	format('~w~n================================================~n', [S]),
 	retractall(lastApplyInfo(_)),
 	assert(lastApplyInfo(S)).
 	
@@ -429,6 +454,7 @@ toggle_rollback_debug :-
 toggle_rollback_debug :-
     format('rollback debug~n',[]),
         assert(debug_rollback_output).
+
         
 rollback :-
     findall(Term, 

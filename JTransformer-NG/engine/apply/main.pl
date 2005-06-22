@@ -1,2 +1,2 @@
 :- ['garbage_collect'].
-:- ['ct_apply3'].
+:- ['ct_apply'].

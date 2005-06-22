@@ -6,7 +6,6 @@
 :- multifile tearDown/1.
 
 :- dynamic failed/0.
-:- dynamic test/1.
 
 /*
 runTests
@@ -111,6 +110,7 @@ assert_true(Comment, Goal) :-
     ; (
 		prolog_current_frame(Frame),
 		stack_for_frame_atom(Frame,StackTrace),
+		!,
 %		prolog_frame_attribute(Frame,parent,Parent),
 %		stack_for_frame(Frame,Info),
 		%term_to_atom(Info,StackTrace),

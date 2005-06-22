@@ -1,4 +1,8 @@
-:- ['general_rules'].
+:- ['tree_queries'].
+:- ['tree_modifications'].
+:- ['src_file_handling'].
+
 :- ['high_level_api'].
-:- ['patterns'].
-%:- ['aop/main'].
+:- ['aop/main'].
+:- ['debug/main'].
+:- ['traverse/main'].
