@@ -381,6 +381,21 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		checker.compile(clause);
 		assertEquals(getMessage(0),0,getProblemNumber());
 	}
+	
+	public void testModuleQualifiedSignatures(){
+		String clause = ":- multifile a:b/2.";
+		PrologCompiler checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),0,getProblemNumber());
+		clause = ":- multifile a:b/2,c:d/2,e/2.";
+		 checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),0,getProblemNumber());
+		clause = ":- module(test,[a:b/2]).";
+		checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),1,getProblemNumber());		
+	}
 	private PrologCompiler getPrologCompiler() {
 		PrologCompiler c = PrologCompilerFactory.create();
 		c.setProblemCollector(this);

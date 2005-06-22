@@ -9,7 +9,7 @@ import org.cs3.pl.common.Util;
 
 import sun.beans.editors.StringEditor;
 
-public class ASTCharacters extends SimpleNode {
+public class ASTCharacters extends SimpleNode implements Atomic{
 	protected String value;
 	private String label;
 

@@ -161,10 +161,12 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 		}
 		ASTCompoundTerm predicatesCompound = (ASTCompoundTerm) predicatesNode;
 		while (true) {
-			if ("/".equals(predicatesCompound.getLabel())) {
+			if (TermParserUtils.isSignature(predicatesCompound)) {
 				declareProperty(property, predicatesCompound.getOriginal());
 				return;
-			} else if ("','".equals(predicatesCompound.getLabel())) {
+			} else if ("','".equals(predicatesCompound.getLabel())
+					&&TermParserUtils.isSignature(predicatesCompound.getArguments()[0])) {
+				
 				declareProperty(property, predicatesCompound.getArguments()[0]
 						.getOriginal());
 				predicatesNode = predicatesCompound.getArguments()[1];
@@ -228,7 +230,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 		}
 		ASTCompoundTerm exportsList = (ASTCompoundTerm) exportsNode;
 		String image = exportsList.getLabel();
-		while (exportsNode instanceof ASTCompoundTerm) {			
+		while (exportsNode instanceof ASTCompoundTerm) {
 			exportsList = (ASTCompoundTerm) exportsNode;
 			processExport(exportsList.getArguments()[0]);
 			exportsNode = exportsList.getArguments()[1];
@@ -237,22 +239,17 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 
 	private void processExport(SimpleNode export) {
 
-		if (export instanceof ASTCompoundTerm) {
-			if (export.getFunctor().equals("op/3")) {
-				exportOperator(export);
+		if (export instanceof ASTCompoundTerm
+				&& export.getFunctor().equals("op/3")) {
+			exportOperator(export);
 
-			} else if (export.getFunctor().equals("//2")) {
-				exportPredicate((ASTCompoundTerm) export);
-			} else {
-				Problem p = TermParserUtils.createProblem(export.getOriginal(),
-						"should be //2 or op/3", Problem.ERROR);
-			}
+		} else if (TermParserUtils.isExportDeclaration(export)) {
+			exportPredicate((ASTCompoundTerm) export);
 		} else {
 			Problem p = TermParserUtils.createProblem(export.getOriginal(),
-					"Not a valid export term.", Problem.ERROR);
-
+					"should be '/'/2 or op/3", Problem.ERROR);
+			problemCollector.reportProblem(p);
 		}
-
 	}
 
 	private void exportOperator(SimpleNode opTerm) {

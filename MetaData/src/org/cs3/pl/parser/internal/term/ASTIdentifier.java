@@ -2,7 +2,7 @@
 
 package org.cs3.pl.parser.internal.term;
 
-public class ASTIdentifier extends SimpleNode {
+public class ASTIdentifier extends SimpleNode implements Atomic {
 	protected String value;
 
 	public ASTIdentifier(int id) {

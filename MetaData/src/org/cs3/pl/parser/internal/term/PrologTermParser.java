@@ -19,7 +19,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
         void jjtreeOpenNodeScope(Node n)
     {
         Token t = getToken(1);
-        System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
+        //System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
         //System.err.prinln("   first token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");
       ((SimpleNode)n).setFirstToken(t);
 
@@ -42,7 +42,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
                          SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
                          s.setFirstToken(firstChild.getFirstToken());
                 }
-                System.err.println("created: "+ s+" : "+s.getImage());
+                //System.err.println("created: "+ s+" : "+s.getImage());
 
 
                 if(n instanceof ASTInfixTerm){
@@ -117,18 +117,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
 
         }
       }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 0:
-        jj_consume_token(0);
-        break;
-      case FAKEEOF:
-        jj_consume_token(FAKEEOF);
-        break;
-      default:
-        jj_la1[0] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
+      jj_consume_token(0);
     jjtree.closeNodeScope(jjtn000, true);
     jjtc000 = false;
     jjtreeCloseNodeScope(jjtn000);
@@ -254,13 +243,13 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
       case DOT:
         Atom();
         break;
-      case 26:
+      case 25:
         ParanthesisTerm();
         break;
-      case 31:
+      case 30:
         BracesTerm();
         break;
-      case 32:
+      case 31:
         ListTerm();
         break;
       case DECIMAL_LITERAL:
@@ -277,7 +266,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
         Variable();
         break;
       default:
-        jj_la1[1] = jj_gen;
+        jj_la1[0] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -291,11 +280,11 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
     try {
-      jj_consume_token(31);
+      jj_consume_token(30);
          ops.pushReset();
       Term();
          ops.popOp();
-      jj_consume_token(30);
+      jj_consume_token(29);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -325,7 +314,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
     try {
-      jj_consume_token(32);
+      jj_consume_token(31);
          ops.pushReset();
       if (jj_2_5(1)) {
         Term();
@@ -333,7 +322,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
         ;
       }
          ops.popOp();
-      jj_consume_token(29);
+      jj_consume_token(28);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -363,11 +352,11 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
     try {
-      jj_consume_token(26);
+      jj_consume_token(25);
          ops.pushReset();
       Term();
          ops.popOp();
-      jj_consume_token(28);
+      jj_consume_token(27);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -398,11 +387,11 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   jjtreeOpenNodeScope(jjtn000);
     try {
       Atom();
-      jj_consume_token(26);
+      jj_consume_token(25);
          ops.pushReset();
       Term();
          ops.popOp();
-      jj_consume_token(28);
+      jj_consume_token(27);
     } catch (Throwable jjte000) {
           if (jjtc000) {
             jjtree.clearNodeScope(jjtn000);
@@ -439,7 +428,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
       Characters();
       break;
     default:
-      jj_la1[2] = jj_gen;
+      jj_la1[1] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -473,7 +462,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
       Float();
       break;
     default:
-      jj_la1[3] = jj_gen;
+      jj_la1[2] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -529,7 +518,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
         jj_consume_token(DOT);
         break;
       default:
-        jj_la1[4] = jj_gen;
+        jj_la1[3] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -562,7 +551,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
         jj_consume_token(HEX_LITERAL);
         break;
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[4] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -685,6 +674,21 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     finally { jj_save(4, xla); }
   }
 
+  final private boolean jj_3R_15() {
+    if (jj_3R_24()) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_34() {
+    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_14() {
+    if (jj_3R_4()) return true;
+    return false;
+  }
+
   final private boolean jj_3R_13() {
     if (jj_3R_23()) return true;
     return false;
@@ -711,9 +715,9 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     xsp = jj_scanpos;
     if (jj_scan_token(6)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(18)) {
+    if (jj_scan_token(17)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(25)) return true;
+    if (jj_scan_token(24)) return true;
     }
     }
     return false;
@@ -839,7 +843,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   }
 
   final private boolean jj_3R_25() {
-    if (jj_scan_token(26)) return true;
+    if (jj_scan_token(25)) return true;
     return false;
   }
 
@@ -849,7 +853,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   }
 
   final private boolean jj_3R_27() {
-    if (jj_scan_token(32)) return true;
+    if (jj_scan_token(31)) return true;
     return false;
   }
 
@@ -869,7 +873,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   }
 
   final private boolean jj_3R_26() {
-    if (jj_scan_token(31)) return true;
+    if (jj_scan_token(30)) return true;
     return false;
   }
 
@@ -912,15 +916,15 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     if (jj_3R_4()) return true;
     Token xsp;
     xsp = jj_scanpos;
+    if (jj_scan_token(26)) {
+    jj_scanpos = xsp;
     if (jj_scan_token(27)) {
     jj_scanpos = xsp;
     if (jj_scan_token(28)) {
     jj_scanpos = xsp;
     if (jj_scan_token(29)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(30)) {
-    jj_scanpos = xsp;
-    if (jj_scan_token(25)) return true;
+    if (jj_scan_token(24)) return true;
     }
     }
     }
@@ -935,22 +939,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
 
   final private boolean jj_3_2() {
     if (jj_3R_4()) return true;
-    if (jj_scan_token(26)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_15() {
-    if (jj_3R_24()) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_34() {
-    if (jj_scan_token(FLOATING_POINT_LITERAL)) return true;
-    return false;
-  }
-
-  final private boolean jj_3R_14() {
-    if (jj_3R_4()) return true;
+    if (jj_scan_token(25)) return true;
     return false;
   }
 
@@ -963,18 +952,13 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
   public boolean lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[6];
+  final private int[] jj_la1 = new int[5];
   static private int[] jj_la1_0;
-  static private int[] jj_la1_1;
   static {
       jj_la1_0();
-      jj_la1_1();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x10001,0x8706df40,0x3044040,0x1f00,0x2040040,0xf00,};
-   }
-   private static void jj_la1_1() {
-      jj_la1_1 = new int[] {0x0,0x1,0x0,0x0,0x0,0x0,};
+      jj_la1_0 = new int[] {0xc383df40,0x1824040,0x1f00,0x1020040,0xf00,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[5];
   private boolean jj_rescan = false;
@@ -986,7 +970,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -997,7 +981,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1007,7 +991,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1018,7 +1002,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1027,7 +1011,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1037,7 +1021,7 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -1148,27 +1132,24 @@ class PrologTermParser/*@bgen(jjtree)*/implements PrologTermParserTreeConstants,
 
   public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[33];
-    for (int i = 0; i < 33; i++) {
+    boolean[] la1tokens = new boolean[32];
+    for (int i = 0; i < 32; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
             la1tokens[j] = true;
           }
-          if ((jj_la1_1[i] & (1<<j)) != 0) {
-            la1tokens[32+j] = true;
-          }
         }
       }
     }
-    for (int i = 0; i < 33; i++) {
+    for (int i = 0; i < 32; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

@@ -31,7 +31,59 @@ public class TermParserUtils {
 		return r;
 	}
 
+	public static boolean isExportDeclaration(SimpleNode n){
+		return isPredicateSignature(n);
+	}
+
+	public static boolean isPredicateSignature(SimpleNode n) {
+		ASTCompoundTerm t = ASTCompoundTerm.cast(n);
+		if(t==null){			
+			n=n.toCanonicalTerm(false,true);
+		}
+		t = ASTCompoundTerm.cast(n);
+		if(t==null){
+			return false;
+		}
+		if(!"/".equals(t.getLabel())){
+			return false;
+		}
+		if(t.getArity()!=2){
+			return false;
+		}
+		SimpleNode[] arguments = t.getArguments();
+		if(!(arguments[1] instanceof ASTInteger)){
+			return false;
+		}
+		if(!(arguments[0] instanceof Atomic)){
+			return false;
+		}
+		return true;
+	}
 	
+	public static boolean isModuleQualifiedPredicateSignature(SimpleNode n){
+		ASTCompoundTerm t = ASTCompoundTerm.cast(n);
+		if(t==null){			
+			n=n.toCanonicalTerm(false,true);
+		}
+		t = ASTCompoundTerm.cast(n);
+		if(t==null){
+			return false;
+		}
+		if(!":".equals(t.getLabel())){
+			return false;
+		}
+		if(t.getArity()!=2){
+			return false;
+		}
+		SimpleNode[] arguments = t.getArguments();
+		if(!(arguments[0] instanceof Atomic)){
+			return false;
+		}
+		if(!isPredicateSignature(arguments[1])){
+			return false;
+		}
+		return true;
+	}
 
 	public static boolean shouldBeQuoted(String atomValue) {
 		if(atomValue.indexOf(",")>=0){
@@ -80,5 +132,9 @@ public class TermParserUtils {
 	public static void main(String[] args) {
 		System.out.println(shouldBeQuoted("Assumption failed: ~p"));
 		System.exit(0);
+	}
+
+	public static boolean isSignature(SimpleNode n) {
+		return isPredicateSignature(n)||isModuleQualifiedPredicateSignature(n);
 	}
 }

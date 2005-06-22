@@ -2,7 +2,7 @@
 
 package org.cs3.pl.parser.internal.term;
 
-public class ASTCut extends SimpleNode {
+public class ASTCut extends SimpleNode implements Atomic {
 	public ASTCut(int id) {
 		super(id);
 	}

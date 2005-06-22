@@ -26,6 +26,7 @@ public abstract class SimpleNode implements Node, Cloneable {
 	private String comment;
 	
 	
+	
 	public int getPrecedence() {
 		SimpleNode s = getPrincipal();
 		if (s == null||s==this) {

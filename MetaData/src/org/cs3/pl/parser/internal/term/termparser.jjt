@@ -39,7 +39,7 @@ class PrologTermParser {
 	void jjtreeOpenNodeScope(Node n)
     {
     	Token t = getToken(1);
-    	System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
+    	//System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
     	//System.err.prinln("   first token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");
       ((SimpleNode)n).setFirstToken(t);
       
@@ -62,7 +62,7 @@ class PrologTermParser {
 			 SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
 			 s.setFirstToken(firstChild.getFirstToken());
 		}
-		System.err.println("created: "+ s+" : "+s.getImage());
+		//System.err.println("created: "+ s+" : "+s.getImage());
 		
 		
 		if(n instanceof ASTInfixTerm){
@@ -320,7 +320,7 @@ SimpleNode CompilationUnit() : {}
 //		System.err.println("next i will read: "+getToken(1));
   }
   )*
-  (<EOF>|<FAKEEOF>)
+  <EOF>
   { return jjtThis; }
   
 }

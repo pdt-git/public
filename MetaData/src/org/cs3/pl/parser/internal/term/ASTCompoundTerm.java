@@ -6,6 +6,13 @@ import java.util.Stack;
 import java.util.Vector;
 
 public class ASTCompoundTerm extends SimpleNode {
+	public static ASTCompoundTerm cast(SimpleNode from){
+		if(from instanceof ASTCompoundTerm){
+			return (ASTCompoundTerm)from;
+		}
+		return null;
+	}
+	
 	public ASTCompoundTerm(int id) {
 		super(id);
 	}

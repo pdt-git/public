@@ -17,16 +17,15 @@ public interface PrologTermParserConstants {
   int EXPONENT = 13;
   int CHARACTER_ATOM = 14;
   int STRING_LITERAL = 15;
-  int FAKEEOF = 16;
-  int VARIABLE = 17;
-  int IDENTIFIER = 18;
-  int UNDERLINE = 19;
-  int UPPERLETTER = 20;
-  int DIGIT = 21;
-  int LOWERLETTER = 22;
-  int DOLLAR = 23;
-  int CUT = 24;
-  int DOT = 25;
+  int VARIABLE = 16;
+  int IDENTIFIER = 17;
+  int UNDERLINE = 18;
+  int UPPERLETTER = 19;
+  int DIGIT = 20;
+  int LOWERLETTER = 21;
+  int DOLLAR = 22;
+  int CUT = 23;
+  int DOT = 24;
 
   int DEFAULT = 0;
   int IN_MULTI_LINE_COMMENT = 1;
@@ -49,7 +48,6 @@ public interface PrologTermParserConstants {
     "<EXPONENT>",
     "<CHARACTER_ATOM>",
     "<STRING_LITERAL>",
-    "<FAKEEOF>",
     "<VARIABLE>",
     "<IDENTIFIER>",
     "<UNDERLINE>",

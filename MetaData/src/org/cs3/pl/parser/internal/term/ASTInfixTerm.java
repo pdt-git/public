@@ -5,6 +5,13 @@ package org.cs3.pl.parser.internal.term;
 import java.util.Vector;
 
 public class ASTInfixTerm extends SimpleNode {
+	public static ASTInfixTerm cast(SimpleNode from){
+		if(from instanceof ASTInfixTerm){
+			return (ASTInfixTerm)from;
+		}
+		return null;
+	}
+	
 	public ASTInfixTerm(int id) {
 		super(id);
 	}
