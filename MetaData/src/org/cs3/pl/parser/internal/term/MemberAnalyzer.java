@@ -223,7 +223,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 				.equals("'.'"))) {
 			Problem p = TermParserUtils.createProblem(
 					exportsNode.getOriginal(),
-					"The second argument term of module/2 should be a list.",
+					"The second argument term of module/2 should be a list. Found: "+exportsNode.getFunctor(),
 					Problem.ERROR);
 			problemCollector.reportProblem(p);
 			return;
