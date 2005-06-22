@@ -4,6 +4,9 @@ package org.cs3.pdt.internal.builder;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -163,11 +166,41 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
     private void build(Set v, IProgressMonitor monitor) throws CoreException,
             IOException {
         monitor.beginTask("building prolog metadata", v.size());
+        final HashMap timings = new HashMap();
+        String[] filenames = new String[v.size()];
+        int i=0;
         for (Iterator it = v.iterator(); it.hasNext();) {
             IFile file = (IFile) it.next();
-            build(file);
+            filenames[i] = file.getFullPath().toOSString();
+             
+            try{
+            	long time = System.currentTimeMillis();
+            	build(file);
+            	time = System.currentTimeMillis()-time;
+            	timings.put(filenames[i++],new Long(time));
+            }catch (Throwable e) {
+            	timings.put(filenames[i++],new Long(Long.MAX_VALUE));
+			}
+            
             monitor.worked(1);
         }
+        Arrays.sort(filenames,new Comparator() {
+		
+			public int compare(Object o1, Object o2) {
+				Long l1 = (Long) timings.get(o1);
+				Long l2 = (Long) timings.get(o2);
+				return - l1.compareTo(l2);
+			}
+		
+		});
+        Debug.info("TOP 20 Build Times:");
+        StringBuffer sb = new StringBuffer();
+        for (int j = 0; j < Math.min(20,filenames.length); j++) {
+			String filename= filenames[j];
+			sb.append("\n");
+			sb.append(""+j+" "+filename+":  "+timings.get(filename));
+		}
+        Debug.info(sb.toString());
         monitor.done();
     }
 
