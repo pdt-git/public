@@ -39,7 +39,7 @@ class PrologTermParser {
 	void jjtreeOpenNodeScope(Node n)
     {
     	Token t = getToken(1);
-    	//System.err.prinln("open node of type "+n);
+    	System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
     	//System.err.prinln("   first token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");
       ((SimpleNode)n).setFirstToken(t);
       
@@ -62,7 +62,7 @@ class PrologTermParser {
 			 SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
 			 s.setFirstToken(firstChild.getFirstToken());
 		}
-		//System.err.println("created: "+ s+" : "+s.getImage());
+		System.err.println("created: "+ s+" : "+s.getImage());
 		
 		
 		if(n instanceof ASTInfixTerm){
@@ -254,7 +254,7 @@ TOKEN :
       "\""
   >
   //|
-    //< ZERO_APO_REST: "0'" ~["'"] >
+    //< ZERO_APO_REST: "0'" (~["'"])* >
   
 }
 /* IDENTIFIERS */
@@ -320,7 +320,7 @@ SimpleNode CompilationUnit() : {}
 //		System.err.println("next i will read: "+getToken(1));
   }
   )*
-  <EOF>
+  (<EOF>|<FAKEEOF>)
   { return jjtThis; }
   
 }
@@ -336,7 +336,8 @@ void Term() #void:
 	PrefixBoundTerm()
 	(
 		LOOKAHEAD({
-			ops.isValidRHInfixOp(getToken(1).image,(SimpleNode)jjtree.peekNode())
+			jjtree.peekNode()!=null
+			&&ops.isValidRHInfixOp(getToken(1).image,((SimpleNode)jjtree.peekNode()).getPrecedence())
 		})
 		InfixOperator()
 		{ 
@@ -357,22 +358,15 @@ void Term() #void:
 void PrefixBoundTerm() #void:{}
 {
 	(		
-		LOOKAHEAD(CompoundTerm(),{
+		LOOKAHEAD(Atom() "(",{
 					test(getToken(2),getToken(1)) &&
-		!",".equals(getToken(1).image)}) CompoundTerm()
-		|
-			LOOKAHEAD(<OPERATOR> PrefixBoundTerm(),{
-				ops.isValidRHPrefixOp(getToken(1).image)
-				&&  ( ops.isPrefixOp(getToken(2).image)
-						&&  ops.lookupPrefixRHBound(getToken(1).image)
-						    >=ops.lookupPrefixPrec(getToken(2).image)
-					||ops.isInfixOp(getToken(2).image)
-						&&	ops.lookupInfixLHBound(getToken(2).image)
-							<ops.lookupPrefixPrec(getToken(1).image)				
-					|| !ops.isInfixOp(getToken(2).image)
-						&& ! ops.isPrefixOp(getToken(2).image)							
-					) 
-			})
+					!",".equals(getToken(1).image)}) 
+			CompoundTerm()
+			
+		|LOOKAHEAD(Atom() (","|")"|"]"|"}"|".")) Atom()
+		|LOOKAHEAD(<OPERATOR> ,{
+					ops.isValidRHPrefixOp(getToken(1).image, getToken(2).image) 
+				   	})
 			PrefixOperator()
 			{				
 				ops.pushPrefixOp(getToken(0).image);
@@ -383,11 +377,10 @@ void PrefixBoundTerm() #void:{}
 			}
 			#PrefixTerm(2)
 		
-
+		|Atom()
 		|ParanthesisTerm()
 		|BracesTerm()
 		|ListTerm()
-		|Atom()
 		|Number()
 		|String()
 		|Variable()

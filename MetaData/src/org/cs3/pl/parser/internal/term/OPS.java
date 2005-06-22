@@ -101,7 +101,7 @@ public class OPS {
 		return lookupPrefixPrec(image)!=PREC_INVALID;
 	}
 	
-	public boolean isValidRHInfixOp(String image,SimpleNode lefthand){
+	public boolean isValidRHInfixOp(String image,int lhprec){
 		if(image.startsWith("'")){
 			image=image.substring(1,image.length()-1);
 		}
@@ -118,15 +118,7 @@ public class OPS {
 		if(op>topRHBound){
 			return false;
 		}
-//		Do we have a left hand term?
-		
-		//System.err.println("  lefthand is "+lefthand);
-		if(lefthand==null){
-			return false;
-		}
-		
-//		is the current lefthand term within the lh bound of op?		
-		int lhprec = lefthand.getPrecedence();
+		 
 	//	System.err.println("  lhprec is "+lhprec);
 		int lhBound = lookupInfixLHBound(image);
 		//System.err.println("  lhbound is "+lhBound);
@@ -138,7 +130,7 @@ public class OPS {
 		return true;
 	}
 	
-	public boolean isValidRHPrefixOp(String image){
+	public boolean isValidRHPrefixOp(String image, String nextImage){
 		if(image.startsWith("'")){
 			image=image.substring(1,image.length()-1);
 		}
@@ -152,8 +144,30 @@ public class OPS {
 		if(op>peekRHPrec()){
 			return false;
 		}
-		
+		/*
+		 * special rule: what if the next token is a climbing infix op?
+		 * 
+		 * In the swi source code, this is realized by first assuming a 
+		 * prefix op, and later, when it turns out, that the next token is 
+		 * an infix op that climbs over the prefix op, this prefix op is
+		 * converted to an atom.
+		 * 
+		 * We cannot do this the a posteriori way, as with our current gramma
+		 * the infix op would not be accepted once the parser decided that the
+		 * preciding prefix op is a prefix op.
+		 * 
+		 * Instead we simulate the acceptance of the prefix op within a 
+		 * lookahead step. (righ here)
+		 */
 
+		
+		//return true;
+		
+		
+		if(isValidRHInfixOp(nextImage,PREC_MIN)){
+			return false;
+		}
+		
 		return true;
 	}
 	

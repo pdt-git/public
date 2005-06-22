@@ -1,13 +1,20 @@
 package org.cs3.pl.parser;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import junit.framework.TestCase;
 
 public class SyntaxTest extends TestCase implements ProblemCollector {
 	private List problems = new Vector();
-
+	public void test_PDT_34() {
+		PrologCompiler compiler = getPrologCompiler();
+		compiler.compile(":- module(knarz,[]),\ngut(ich).");
+		Set set = compiler.getPublicModulePredicates();
+		assertNotNull(set);
+		assertEquals(getMessage(0),0,set.size());
+	}
 	/* (non-Javadoc)
 	 * @see junit.framework.TestCase#setUp()
 	 */
@@ -39,21 +46,21 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "new_idT(_H) :-\n(var(_H), new_id(_H));true.";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);	
+		assertTrue(getMessage(0),getProblemNumber() == 0);	
 	}
 
 	public void testNoArg() {
 		String clause = "noarg :-\ntrue.";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);	
+		assertTrue(getMessage(0),getProblemNumber() == 0);	
 	}
 
 	public void testNumberFollowedByDot() {
 		String clause = "ifNegAdd(_val, _val, 0, _) :- _val >= 0.";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);	
+		assertTrue(getMessage(0),getProblemNumber() == 0);	
 	}
 	
 	public void testPredicateSignature() {
@@ -61,15 +68,15 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
 		
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 		
 		clause = ":- dynamic test_unify/0.";
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 
 		clause = "test(dynamic).";
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 	}
 	
 	
@@ -78,21 +85,21 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "compare(<,Element,Element).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 	}
 	
 	public void testParenthesis() {
 		String clause = "comma_prepend_(_T, ','(_comma,(_comma)), _T).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 	}
 	
 	public void testMinusPlus() {
 		String clause = "num(-1).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 	}
 
 	public void testSurroundingParenthesis() {
@@ -112,7 +119,7 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "ct(acget(Name),(classDefT(_,Parent,Name,[])),(add(classDefT(1,Parent,Name,[])))).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 	}
 	
 	public void testIsSingleton() {
@@ -130,7 +137,7 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "ct(acget(ClassName), (classDefT(ID,Parent,ClassName,[]),\nParent\\=ID),(delete(classDefT(ID,Parent,ClassName,[])))).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertTrue(getProblemNumber() == 0);
+		assertTrue(getMessage(0),getProblemNumber() == 0);
 	}
 
 	public void testTokenOffsetTab() {
@@ -154,7 +161,7 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = ":- dynamic (^)/2, (ct)/4, (@)/2, ct/1, ct/2,ct/3.";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 	}
 
 	public void testDefineModule() {
@@ -179,7 +186,7 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "p(a) :- p(:,$,:-,*->,=@=).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 	}
 	
 	public void testNotProvable() {
@@ -211,14 +218,14 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "test(\"\"\"\",'''a''''').";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 	}
 
 	public void testModuleExport() { 
 		String clause = ":- module(gensym, [ reset_gensym/0, reset_gensym/1, gensym/2]).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 		assertEquals("gensym",checker.getModuleName());
 	}
 
@@ -268,7 +275,7 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "test(A,B) :- A xor B, A /\\ B, \\ B, A \\/ B.";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 	}
 	
 	public void testCorrectAndUncorrectClauses() { 
@@ -291,39 +298,39 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "test(\\+ a).";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 		clause = "test(A:A/A).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 		clause = "test(A:A).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());	
+		assertEquals(getMessage(0),0,getProblemNumber());	
 		clause = "test(a:a).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 		clause = "style_chck(+dollar).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 		clause = "test(0'$).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 		clause = "test(A):- A^(a),t^(b).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 		clause = "append(-, _).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 		clause = "@(a). ^(b).";
 		checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 		
 	}
 
@@ -345,7 +352,7 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		String clause = "hello(X, Y) :- Y is 100 // X.\n";
 		PrologCompiler checker = getPrologCompiler();
 		checker.compile(clause);
-		assertEquals(0,getProblemNumber());
+		assertEquals(getMessage(0),0,getProblemNumber());
 	}
 	
 	public void testFactbase() {
@@ -356,7 +363,24 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 	}
 	
 
-	
+	public void testAtomVsOperator(){
+		String clause = "---.";
+		PrologCompiler checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),0,getProblemNumber());
+		clause = "--.";
+		 checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),1,getProblemNumber());
+		clause = "----.";
+		checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),1,getProblemNumber());
+		clause = "-----.";
+		checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),0,getProblemNumber());
+	}
 	private PrologCompiler getPrologCompiler() {
 		PrologCompiler c = PrologCompilerFactory.create();
 		c.setProblemCollector(this);
@@ -384,5 +408,10 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 	private Problem getProblem(int i) {
 		return (Problem) problems.get(i);
 	}
-
+	private String getMessage(int i){
+		if(problems.size()>i){
+			return getProblem(i).message;
+		}
+		return null;
+	}
 }

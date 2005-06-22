@@ -1,16 +1,16 @@
-package org.cs3.pl.metadata.tests;
-
+package org.cs3.pl.parser;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-public class MetadataTests {
+public class ParserTests {
 
 	public static Test suite() {
-		TestSuite suite = new TestSuite("Tests for Metadata project");
+		TestSuite suite = new TestSuite("Test for org.cs3.pl.parser");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(PrologCompilerTest.class);
+		suite.addTestSuite(SyntaxTest.class);
 		suite.addTestSuite(StringLineBreakInfoProviderTest.class);
+		suite.addTest(ElementDataTest.suite());
 		//$JUnit-END$
 		return suite;
 	}
