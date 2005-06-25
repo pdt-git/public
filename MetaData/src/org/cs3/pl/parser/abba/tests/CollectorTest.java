@@ -18,7 +18,7 @@ public class CollectorTest extends TestCase {
 		PrologParser parser = new PrologParser(stream);
 		parser.CompilationUnit();
 		ASTCompilationUnit root = parser.getASTRoot();
-//		AbbaGraphGenerator visitor = new AbbaGraphGenerator();
+//		OldAbbaGraphGenerator visitor = new OldAbbaGraphGenerator();
 //		root.childrenAccept(visitor, null);
 //		List l = visitor.abbaLiterals;
 //		for (Iterator iter = l.iterator(); iter.hasNext();) {

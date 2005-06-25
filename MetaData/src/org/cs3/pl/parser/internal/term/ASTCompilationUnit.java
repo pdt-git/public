@@ -4,7 +4,8 @@ package org.cs3.pl.parser.internal.term;
 
 public class ASTCompilationUnit extends SimpleNode {
 
-	String filename;
+	private String filename;
+	public String moduleName;
 	public ASTCompilationUnit(int id) {
 		super(id);
 	}
@@ -19,19 +20,10 @@ public class ASTCompilationUnit extends SimpleNode {
 	}
 	
 	public String getModuleName(){
-		String result = "user";
-		if (jjtGetNumChildren()>0) {
-			ASTMember m = (ASTMember) children[0];
-			if (m.isDirective()) {
-				if (m.bodyLiterals[0] instanceof ASTCompoundTerm) {
-					ASTCompoundTerm cmp = (ASTCompoundTerm) m.bodyLiterals[0];
-					if ("module".equals(cmp.getLabel())) {
-						result = cmp.getArguments()[0].getImage();
-					}
-				}
-			}
+		if(moduleName==null){
+			moduleName="user";
 		}
-		return result;
+		return moduleName;
 	}
 
 	protected void synthesizeImage(StringBuffer sb) {
@@ -48,12 +40,20 @@ public class ASTCompilationUnit extends SimpleNode {
 	public SimpleNode createShallowCopy() {
 		ASTCompilationUnit copy = new ASTCompilationUnit(parser,id);
 		copy.copy=true;
-		copy.filename=this.getFileName();		
+		copy.setFilename(this.getFileName());		
 		return copy;
 	}
 
 	private String getFileName() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
+
+	public String getFilename() {
+		return filename;
 	}
 }

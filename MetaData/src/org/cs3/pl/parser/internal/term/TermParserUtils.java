@@ -25,7 +25,7 @@ public class TermParserUtils {
 
 	static SourceLocation createSourceLocation(SimpleNode node,
 			ASTCompilationUnit root) {
-		SourceLocation r = new SourceLocation(root.filename, true, false);
+		SourceLocation r = new SourceLocation(root.getFilename(), true, false);
 		r.offset = node.getBeginToken().beginOffset;
 		r.endOffset = node.getLastToken().endOffset;
 		return r;

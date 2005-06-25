@@ -32,6 +32,14 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 		this.problemCollector = problemCollector;
 	}
 
+	public Object visit(ASTCompilationUnit node, Object data) {
+		Object o = traverseChildren(node,data);
+		if(moduleName!=null){
+			node.moduleName=moduleName.getLabel();
+		}
+		return o;
+	}
+	
 	public Object visit(ASTMember node, Object data) {
 		this.member = node;
 		this.neckTerm = null;
@@ -82,17 +90,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 		member.head = head == null ? null : head.getOriginal();
 		member.modulePrefix = module == null ? null : module.getOriginal();
 		if (body != null) {
-			body = body.getOriginal();
-			if (body instanceof ASTInfixTerm) {
-				ASTInfixTerm term = (ASTInfixTerm) body;
-				if (",".equals(term.getOperator().value)) {
-					member.bodyLiterals = term.getOperands();
-				} else {
-					member.bodyLiterals = new SimpleNode[] { body };
-				}
-			} else {
-				member.bodyLiterals = new SimpleNode[] { body };
-			}
+			member.body = body.getOriginal();			
 		}
 		return member;
 	}

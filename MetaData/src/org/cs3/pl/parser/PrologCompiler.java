@@ -41,7 +41,9 @@ public interface PrologCompiler {
 	/**@deprecated currently only used by test cases, will be removed.*/
 	public abstract String getModuleName();
 	/**@deprecated currently only used by test cases, will be removed.*/
-	public abstract Set getPublicModulePredicates();		
+	public abstract Set getPublicModulePredicates();
+
+	public abstract void saveAbbaData(OutputStream out) throws IOException;		
 	
 
 }

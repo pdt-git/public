@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.StringBufferInputStream;
 import java.rmi.server.ExportException;
 import java.util.HashMap;
@@ -25,6 +26,9 @@ import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
 import org.cs3.pl.parser.PrologCompiler;
 import org.cs3.pl.parser.StringLineBreakInfoProvider;
+import org.cs3.pl.parser.abba.AbbaGraphGenerator;
+import org.cs3.pl.parser.abba.SimpleIDGeneratorStrategie;
+import org.cs3.pl.parser.abba.WriteTermsToStreamStrategy;
 import org.cs3.pl.parser.internal.classic.ASTClause;
 
 public class TermBasedPrologCompiler implements PrologCompiler {
@@ -86,7 +90,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 
 				}
 				ASTCompilationUnit root = parser.getASTRoot();
-				root.filename = symbolicFileName;
+				root.setFilename(symbolicFileName);
 
 				root.jjtAccept(
 						new SingletonChecker(problemCollector), null);
@@ -272,6 +276,17 @@ public class TermBasedPrologCompiler implements PrologCompiler {
     		Debug.report(e1);
     	}		
     }
+
+	public void saveAbbaData(OutputStream out) throws IOException {
+		
+		ASTCompilationUnit root = parser.getASTRoot();
+		
+		WriteTermsToStreamStrategy writeStrategy = new WriteTermsToStreamStrategy(new PrintStream(out));
+		SimpleIDGeneratorStrategie idStrategy = new SimpleIDGeneratorStrategie();
+		root.jjtAccept(
+				new AbbaGraphGenerator(writeStrategy,idStrategy),null);
+		out.flush();
+	}
 
 
 }

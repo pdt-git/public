@@ -14,15 +14,18 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-public class ElementDataTest extends TestCase implements ProblemCollector {
+public class AbbaDataTest extends TestCase implements ProblemCollector {
 
 	private Vector problems = new Vector();
 
-	private int testNumber;
+	private int testNumber=0;
 
-	private String testLabel;
-
-	public ElementDataTest(String string, int i) {
+	private String testLabel="AbbaDataTest";
+	public AbbaDataTest(String string){
+		this(string,0);
+		testLabel="testIt";
+	}
+	public AbbaDataTest(String string, int i) {
 		super(string);
 		this.testNumber = i;
 		this.testLabel = generateName("test", i, "");
@@ -60,22 +63,22 @@ public class ElementDataTest extends TestCase implements ProblemCollector {
 		return (Problem) problems.get(i);
 	}
 
-	public static Test suite() {
+	public static Test _suite() {
 		TestSuite s = new TestSuite();
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 1; i++) {
 
-			s.addTest(new ElementDataTest("testIt", i));
+			s.addTest(new AbbaDataTest("testIt", i));
 		}
-		s.setName("ElementDataTest");
+		s.setName("AbbaDataTest");
 		return s;
 	}
 
 	public void testIt() throws IOException {
-		String inputName = generateName("testdata/testelementdata", testNumber,
+		String inputName = generateName("testdata/testabbadata", testNumber,
 				".pl");
-		String expectName = generateName("testdata/testelementdata",
+		String expectName = generateName("testdata/testabbadata",
 				testNumber, "-expected.pl");
-		InputStream stream = ElementDataTest.class
+		InputStream stream = AbbaDataTest.class
 				.getResourceAsStream(inputName);
 		PrologCompiler plc = getPrologCompiler();
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
@@ -83,15 +86,11 @@ public class ElementDataTest extends TestCase implements ProblemCollector {
 		ByteArrayInputStream in = new ByteArrayInputStream(buf.toByteArray());
 		plc.compile(testLabel, in, new StringLineBreakInfoProvider(buf
 				.toString()));
-		Set publicModulePredicates = plc.getPublicModulePredicates();
-		for (Iterator iter = publicModulePredicates.iterator(); iter.hasNext();) {
-			String element = (String) iter.next();
-			System.out.println(element);
-		}
+		
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		plc.saveMetaDataForClauses(out);
+		plc.saveAbbaData(out);
 		ByteArrayOutputStream expect = new ByteArrayOutputStream();
-		stream = ElementDataTest.class.getResourceAsStream(expectName);
+		stream = AbbaDataTest.class.getResourceAsStream(expectName);
 		Util.copy(stream, expect);
 		assertEquals(expect.toString(), out.toString());
 	}
@@ -106,5 +105,10 @@ public class ElementDataTest extends TestCase implements ProblemCollector {
 		sb.append(number);
 		sb.append(sufix);
 		return sb.toString();
+	}
+	
+	public static void main(String[] args) throws IOException {
+		AbbaDataTest test = new AbbaDataTest("testIt");
+		test.testIt();
 	}
 }

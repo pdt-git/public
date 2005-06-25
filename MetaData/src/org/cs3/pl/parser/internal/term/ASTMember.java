@@ -5,8 +5,8 @@ package org.cs3.pl.parser.internal.term;
 public class ASTMember extends SimpleNode {
 	SimpleNode head=null;
 	SimpleNode modulePrefix=null;
-	SimpleNode[] bodyLiterals=null;
 	
+	SimpleNode body=null;
 	public ASTMember(int id) {
 		super(id);
 	}
@@ -25,15 +25,20 @@ public class ASTMember extends SimpleNode {
 
 	}
 	
-	public SimpleNode[] getBodyLiterals() {
-		return bodyLiterals;
-
-	}
 	
+	
+		
 	public SimpleNode getModulePrefix(){
 		return modulePrefix;
 	}
 
+	public String getModuleName(){
+		SimpleNode node = getModulePrefix();
+		if(node==null){
+			return ((ASTCompilationUnit)jjtGetParent()).getModuleName();
+		}
+		return node.getLabel();
+	}
 	protected void synthesizeImage(StringBuffer sb) {
 		((SimpleNode) children[0]).synthesizeImage(sb);
 		
@@ -50,7 +55,7 @@ public class ASTMember extends SimpleNode {
 	}
 	
 	public boolean isFact(){
-		return bodyLiterals==null||bodyLiterals.length==0;
+		return body==null;
 	}
 	
 	public boolean isRule() {
@@ -60,6 +65,10 @@ public class ASTMember extends SimpleNode {
 	
 	public SimpleNode getPrincipal() {
 		return (SimpleNode) children[0];
+	}
+
+	public SimpleNode getBody() {
+		return body;
 	}
 	
 }

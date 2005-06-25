@@ -669,5 +669,10 @@ public class ClassicPrologCompiler extends PrologParserTraversal implements Prol
     	
     }
 
+	public void saveAbbaData(OutputStream out) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	
 }
