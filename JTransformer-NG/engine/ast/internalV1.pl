@@ -166,6 +166,9 @@ migrate_to_ast_node(Id,Fkt,_attrValues) :-
     NewNode =.. [ast_node,Id,Fkt|_attrValues],
     assert(NewNode,true).
  
+ 
+/* ****************** */
+ 
 migrate_to_ast_edge(Id,Label,Id2) :- 
 	assert(ast_edge(Id,Label,Id2),true). 
 
@@ -181,7 +184,10 @@ migrate_to_ast_edges(Id,Label,[Val|Vals]) :-
   *       % Convert the remaining arguments to edges or multivalued
       % attributes and return the singlevalued attributes in 
       % arg4 (SingleValuedAttrs):
-  
+  ****   hier noch Baustelle 
+  *
+  **************
+  */
 
 
 migrate_to_ast_attrs(Id,Label,[Val]) :-   % es gibt mindestens den Wert 'null'
@@ -197,15 +203,14 @@ migrate_to_ast_attrs(Id,Label,[Val|Vals]) :-
    *   ast_edge(Id1,Id2,Role1,Role2).        % nontrivial bidirectional references
    *   ast_attr(Id,attrName,attrValue).      % multi valued attributes
    *   ast_flag(Id,attrName).                % flags  
-      
-*/    
+  */    
 
  /**
   * migrate_args(?ArgDefs,?Args,-AttrValues)
   *
   */
  migrate_args(_Id,X,Y,Vals) :-  
-    migrate_args(_Id,X,Y,[],Vals).
+    migrate_args(_Id,X,Y,[],Vals)
   
   
   
@@ -256,6 +261,8 @@ migrate_args(Id,
 	migrate_args(Id,ArgDefsRest,AttrVals,AttrValsNew).   
 	
 	   
+/*  ============================================================ */
+  
  % Wenn beide Listen leer sind sind wir fertig. Die bisher gesammelten
  % Werte für Attribute mit Kardinalität 1 werden zurückgegeben.
 
