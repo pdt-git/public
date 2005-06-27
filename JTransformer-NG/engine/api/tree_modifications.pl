@@ -361,6 +361,10 @@ addToMethodArgs(_method, _id) :-
 */
 
 removeTags(DeletionKind, ID):-
+    forall((attribSignature(Functor,Arity),
+            functor(Term, Functor, Arity), Term =.. [Functor, ID|_]),
+    removeTagKind(DeletionKind, Term)).
+/*
     removeTagKind(DeletionKind, slT(ID,_start,_length)),
     removeTagKind(DeletionKind, modifierT(ID,_mod)),
     removeTagKind(DeletionKind, implementsT(ID,_iface)),
@@ -369,7 +373,7 @@ removeTags(DeletionKind, ID):-
     removeTagKind(DeletionKind, projectLocationT(ID,_,_)),
     removeTagKind(DeletionKind, sourceLocation(ID,_,_,_)),
     removeTagKind(DeletionKind, interfaceT(ID)).
-    
+*/    
 removeTagKind(DeletionKind,Tag) :-
     forall(
                 Tag,

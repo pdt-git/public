@@ -6,4 +6,4 @@
 :- [aggregate].
 :- [simple].
 
-
+:- [encapsulateField].

@@ -320,10 +320,12 @@ gen_extends(_id) :-
     not(extendsT(_id, _)),
     !.
     
+%FIXME: For Trans WS June 05
 gen_extends(_id) :-
-    findall(_extName, (extendsT(_id, _ext), fullQualifiedName(_ext, _extName)), [_head|_tail]),
-    concat_atom([_head|_tail], ', ', _str),
-    printf('extends ~a ',[_str]).
+    findall(_extName, (extendsT(_id, _ext), fullQualifiedName(_ext, _extName), not(_extName='java.lang.Object')), List),%[_head|_tail]),
+    List\=[]->
+    (List=[_head|_tail],concat_atom([_head|_tail], ', ', _str),
+    printf('extends ~a ',[_str]));true.
 
 gen_implements(_id) :-
     not(implementsT(_id, _)),

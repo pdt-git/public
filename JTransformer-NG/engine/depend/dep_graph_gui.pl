@@ -29,6 +29,8 @@
     the GNU General Public License.
 */
 
+/******
+
 %:- module(show_dep_graph,
 %          [ show_dep_graph/0
 %          ]).
@@ -105,20 +107,6 @@ postscript(F) :->
         send(File, done),
         send(F, report, status, 'Saved PostScript in %s', FileName).
 
-/*
-generate(F, Generator:name) :->
-        "Create graph using generator"::
-        (   term_to_atom(Term, Generator),
-            free_variables(Term, [From, To, _Label, Type])
-        ->  send(F, clear),
-            forall(user:Term,
-                   send(F, display_arc, From, To, Type)),%, Label, Type)),
-            send(F, layout),
-            send(F, label, Generator)
-        ;   send(F, report, error,
-                 'Generator should be a Prolog goal with 4 variables')
-        ).
-*/
 
 
 display_all_edges(F) :-
@@ -255,3 +243,4 @@ test(a,b).
 test(a,c).
 test(a,d).
 test(c,d).
+******/

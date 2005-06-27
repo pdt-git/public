@@ -216,7 +216,7 @@ get_single_char(A) :-
  */
 
 disable_tty_control :- 
-  current_prolog_flag(windows,T) -> 
+  current_prolog_flag(windows,_T) -> 
   set_prolog_flag(tty_control,false). 
 
 :- disable_tty_control.

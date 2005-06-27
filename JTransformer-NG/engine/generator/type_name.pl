@@ -29,6 +29,13 @@ empty_square_brackets(_dim,A) :-
     succ(_dimDec, _dim),
     empty_square_brackets(_dimDec,AA),
     atom_concat('[]',AA,A).
+
+%FIXME: temporary for the TRANSFORMATION WS DEMO June 05:
+class_type_name(_Where,Type,Name) :-
+    classDefT(Type,Package,Name,_),
+    packageT(Package,'java.lang'),
+    !.
+
   
 class_type_name(Where,Type,Name):-
     next_common_scope(Where,Type,Scope),
@@ -39,7 +46,7 @@ class_type_name(Where,Type,Name):-
 	    encl_path_down(Scope,Where,RefPath),
     	class_type_name_local(DeclPath,RefPath,Name)
     ).
-class_type_name(Where,Type,Name):-
+class_type_name(_Where,Type,Name):-
     %%getToplevel(Where,Toplevel),
     class_type_name_global(_,Type,Name).
 

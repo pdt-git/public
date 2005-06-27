@@ -1,6 +1,8 @@
 :- multifile ct/3.
 :- dynamic ct/3.
 :- multifile test/1.
+:- multifile tearDown/1.
+:- multifile setUp/1.
 
 
 :- ['facade/main'].
@@ -16,8 +18,6 @@
 :- ['util/main'].
 :- ['ct/main'].
 :- ['check/main'].
-:- ['base/main'].
-:- ['visitor/main'].
 :- ['persistance/main'].
 :- ['ast/main'].
 :- ['metrics/main'].

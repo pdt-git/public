@@ -1,6 +1,19 @@
+
+/**
+ * pattern(_pattStr, _varList, _valStr).
+ */
+test('pattern/3#1') :- pattern('* bardey',[uwe],'uwe bardey').
+test('pattern/3#2') :- pattern('uwe *',[bardey],'uwe bardey').
+test('pattern/3#3') :- pattern('*',['uwe bardey'],'uwe bardey').
+test('pattern/3#4') :- pattern('uwe * bardey',[tarek],'uwe tarek bardey').
+test('pattern/3#5') :- pattern('* tarek *',[uwe,bardey],'uwe tarek bardey').
+test('pattern/3#6') :- pattern('*tarek*',['uwe ',' bardey'],'uwe tarek bardey').
+%test('pattern/3#7') :- not(pattern('* tarek *',_,_)).
+%test('pattern/3#8') :- not(pattern('* tarek *',[uwe,_],_)).
 test('pattern/3#9') :- not(pattern('* tarek *',_,'uwe bardey')).
 test('pattern/3#10'):- not(pattern('*tarek*',[uwe,bardey],'uwe tarek bardey')).
 test('pattern/3#11'):- not(pattern('aaa*',[_],'bbbb')).
+
 
 /*
 	pattern(+Pattern, ?WildcardReplacements, +Atom)

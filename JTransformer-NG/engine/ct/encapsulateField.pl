@@ -14,6 +14,10 @@
     )
 ***************************************************************/
 
+encapsulateField :-
+  class(C,_,'Entity'),
+  encapsulateField(C,_Field,_Ftype,_GetterName,_SetterName).
+
 encapsulateField(Class,Field,Ftype,GetterName,SetterName) :-
        addGetter(Class,Field,Ftype,GetterName),
        addSetter(Class,Field,Ftype,SetterName),

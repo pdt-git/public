@@ -1199,6 +1199,7 @@ treeSignature(nopT,3).         % TODO: fehlte / inkonsistenz zu tree/3 -- GK 3.9
 :- multifile attribSignature/2.
 
 attribSignature(extendsT,2).
+attribSignature(annotationT,2).
 attribSignature(implementsT,2).
 attribSignature(modifierT,2).
 attribSignature(externT,1).
