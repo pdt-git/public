@@ -980,7 +980,7 @@ ID of the class tagged.
 */
 :- dynamic externT/1. 
 :- dynamic interfaceT/1. 
-:- dynamic lastID/1. 
+
 /*
 implementsT(#class, #interface)
 
@@ -1039,15 +1039,7 @@ ID of the enclosing method declaration.
 :- dynamic nopT/3.
 
 
-/**
- * sourceLocation(?ID, ?File, ?Begin, ?Length)
- *
- * 
- */
-:- dynamic sourceLocation/4.
-
 :- multifile fieldDefT/5. 
-
 :- multifile paramDefT/4.
 :- multifile localDefT/6.
 :- multifile methodDefT/7. 
@@ -1094,7 +1086,6 @@ ID of the enclosing method declaration.
 :- multifile extendsT/2. 
 :- multifile precedenceT/4.
 :- multifile nopT/3.
-:- multifile sourceLocation/4.
 
 tree(_id, null, packageT):-packageT(_id,_).
 tree(_id, _pid, localDefT):-localDefT(_id, _pid,_,_,_,_).
@@ -1199,7 +1190,6 @@ treeSignature(nopT,3).         % TODO: fehlte / inkonsistenz zu tree/3 -- GK 3.9
 :- multifile attribSignature/2.
 
 attribSignature(extendsT,2).
-attribSignature(annotationT,2).
 attribSignature(implementsT,2).
 attribSignature(modifierT,2).
 attribSignature(externT,1).
@@ -1214,9 +1204,5 @@ attribSignature(slT,3).
  */
 packageT(null,'').
 
-
-%%% source location %%%
-:- dynamic slT/3. 
-:- multifile slT/3. 
 
 
