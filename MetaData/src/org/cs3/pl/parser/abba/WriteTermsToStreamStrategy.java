@@ -31,7 +31,7 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 
 	public void writeEdge(String edgeId, String edgeType, String label,
 			String sourceId, String targetId) {
-		out.println("edge(" + edgeId + "," + edgeType + "," + label + ","
+		out.println(prefix+"edge(" + edgeId + "," + edgeType + "," + label + ","
 				+ sourceId + "," + targetId + ").");
 
 	}

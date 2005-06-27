@@ -87,7 +87,7 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 	public Object visit(ASTCompilationUnit node, Object data) {
 		this.cuModule = node.getModuleName();
 		this.cuFileName = node.getFilename();
-		return traverseChildren(node.toCanonicalTerm(true, true), data);
+		return traverseChildren(node, data);
 	}
 
 	public Object visit(ASTMember node, Object data) {
@@ -120,7 +120,7 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 					new String[] { cuFileName });
 
 			if (!node.isFact()) {
-				return traverse(node.getBody(), data);
+				return traverse(node.getBody().toCanonicalTerm(true,true), data);
 			}
 		}
 
