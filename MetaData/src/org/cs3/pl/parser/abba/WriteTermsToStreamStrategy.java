@@ -36,4 +36,14 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 
 	}
 
+	public void writeSymTabEntry(String globalSymbol, String localId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void writeRetractSymTab() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -1,8 +1,8 @@
 package org.cs3.pl.parser.abba;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Stack;
 
 import org.cs3.pl.parser.internal.term.ASTCompilationUnit;
 import org.cs3.pl.parser.internal.term.ASTCompoundTerm;
@@ -10,14 +10,14 @@ import org.cs3.pl.parser.internal.term.ASTMember;
 import org.cs3.pl.parser.internal.term.DefaultPrologTermParserVisitor;
 import org.cs3.pl.parser.internal.term.SimpleNode;
 
-import sun.security.action.GetBooleanAction;
-
 public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 	private NodeWriterStrategy writerStrategy;
 
 	private IDGeneratorStrategy idStrategy;
 
-	private Stack parentIds = new Stack();
+	private Map predicates=new HashMap();
+	
+	
 
 	/*
 	 * a data structure describing which argument positions for a term of a
@@ -51,6 +51,8 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 	private Map goalinfo = new HashMap();
 
 	private String clauseId;
+
+	private String ctId;
 
 	public AbbaGraphGenerator(NodeWriterStrategy writerStrategy,
 			IDGeneratorStrategy idStrategy) {
@@ -91,41 +93,88 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 	}
 
 	public Object visit(ASTMember node, Object data) {
-		SimpleNode original = node.getOriginal();
+		
 		if (!node.isDirective()) {
 
-			String functor = node.getHeadLiteral().getFunctor();
-			String parentId = idStrategy.getNodeId(
-					NodeWriterStrategy.NODE_TYPE_PREDICATE, node
-							.getModuleName()
-							+ ":" + functor);
-			clauseId = idStrategy.getNodeId(
-					NodeWriterStrategy.NODE_TYPE_CLAUSE, node);
-			String edgeId = idStrategy.getEdgeId(
-					NodeWriterStrategy.EDGE_TYPE_CLAUSE, null, parentId,
-					clauseId);
-
-			writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_CLAUSE,
-					clauseId, functor);
-			writerStrategy.writeEdge(edgeId,
-					NodeWriterStrategy.EDGE_TYPE_CLAUSE, null, parentId,
-					clauseId);
-			int begin = original.getFirstToken().beginOffset;
-			int end = original.getLastToken().endOffset;
-			writerStrategy.writeProperty(clauseId,
-					NodeWriterStrategy.PROPERTY_POSITION, new String[] {
-							"" + begin, "" + (begin - end) });
-			writerStrategy.writeProperty(clauseId,
-					NodeWriterStrategy.PROPERTY_FILE,
-					new String[] { cuFileName });
+			 processClauseHead(node);
 
 			if (!node.isFact()) {
 				return traverse(node.getBody().toCanonicalTerm(true,true), data);
+			}
+
+			String functor = node.getHeadLiteral().getFunctor();
+			if ("ct/3".equals(functor)){
+				return visitCtTerm((ASTCompoundTerm) node.getHeadLiteral(),data);
+				
 			}
 		}
 
 		return data;
 	}
+
+	private Object visitCtTerm(ASTCompoundTerm ct, Object data) {
+		ctId=idStrategy.getNodeId(NodeWriterStrategy.NODE_TYPE_CT,ct);
+		SimpleNode[] args = ct.getArguments();
+		String ctName=args[0].getLabel();
+		writerStrategy.writeSymTabEntry(ctName,ctId);
+		writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_CT,ctId,ctName);
+		
+		String conditionId = idStrategy.getNodeId(NodeWriterStrategy.NODE_TYPE_CT_CONDITION,args[1]);
+		writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_CT_CONDITION,conditionId,ctName+"/cnd");
+		String edgeId=idStrategy.getEdgeId(NodeWriterStrategy.EDGE_TYPE_CT_CONDITION,null,ctId,conditionId);
+		writerStrategy.writeEdge(edgeId,NodeWriterStrategy.EDGE_TYPE_CT_CONDITION,null,ctId,conditionId);
+		String actionId = idStrategy.getNodeId(NodeWriterStrategy.NODE_TYPE_CT_ACTION,args[2]);
+		writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_CT_ACTION,actionId,ctName+"/act");
+		edgeId=idStrategy.getEdgeId(NodeWriterStrategy.EDGE_TYPE_CT_ACTION,null,ctId,actionId);
+		writerStrategy.writeEdge(edgeId,NodeWriterStrategy.EDGE_TYPE_CT_ACTION,null,ctId,actionId);
+		
+		return null;
+	}
+
+	private void processClauseHead(ASTMember node) {
+		SimpleNode original = node.getOriginal();	
+		String functor = node.getHeadLiteral().getFunctor();
+		String moduleQualifiedFunctor = node
+		.getModuleName()
+		+ ":" + functor;
+
+		String predicateId = getPredicateId(moduleQualifiedFunctor);				
+		
+		clauseId = idStrategy.getNodeId(
+				NodeWriterStrategy.NODE_TYPE_CLAUSE, node);
+		String edgeId = idStrategy.getEdgeId(
+				NodeWriterStrategy.EDGE_TYPE_CLAUSE, null, predicateId,
+				clauseId);
+
+		writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_CLAUSE,
+				clauseId, functor);
+		writerStrategy.writeEdge(edgeId,
+				NodeWriterStrategy.EDGE_TYPE_CLAUSE, null, predicateId,
+				clauseId);
+		int begin = original.getFirstToken().beginOffset;
+		int end = original.getLastToken().endOffset;
+		writerStrategy.writeProperty(clauseId,
+				NodeWriterStrategy.PROPERTY_POSITION, new String[] {
+						"" + begin, "" + (end-begin) });
+		writerStrategy.writeProperty(clauseId,
+				NodeWriterStrategy.PROPERTY_FILE,
+				new String[] { cuFileName });
+		
+	}
+
+	private String getPredicateId(String moduleQualifiedFunctor) {
+		String predicateId = (String) predicates.get(moduleQualifiedFunctor); 
+			if(predicateId==null){
+				predicateId=idStrategy.getNodeId(
+						NodeWriterStrategy.NODE_TYPE_PREDICATE, moduleQualifiedFunctor);
+				predicates.put(moduleQualifiedFunctor,predicateId);
+				writerStrategy.writeSymTabEntry(moduleQualifiedFunctor,predicateId);
+				writerStrategy.writeNode(NodeWriterStrategy.NODE_TYPE_PREDICATE,predicateId,moduleQualifiedFunctor);
+			}
+		return predicateId;
+	}
+	
+	
 
 	public Object visit(ASTCompoundTerm node, Object data) {
 
@@ -165,6 +214,6 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 		int end = original.getLastToken().endOffset;
 		writerStrategy.writeProperty(literalId,
 				NodeWriterStrategy.PROPERTY_POSITION, new String[] {
-						"" + begin, "" + (begin - end) });
+						"" + begin, "" + (end-begin) });
 	}
 }
