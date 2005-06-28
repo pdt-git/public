@@ -13,18 +13,6 @@ CT's:
     ct(_name, _preCond, _action).
 */
 
-
-:- dynamic dirty_tree/1. 
-:- dynamic lastApplyInfo/1.
-:- dynamic lastApplyListInfo/1.
-:- dynamic changed/1. 
-:- dynamic rollback/1.
-/**
- * debug_rollback_output
- * 
- * activated by default.
- */
-:- dynamic debug_rollback_output/0.
 /**
  * debug_apply_action_output
  * 
@@ -32,31 +20,17 @@ CT's:
  */
 :- dynamic debug_apply_action_output/0.
 :- dynamic applied/1.
-:- dynamic tmp_rollback_file/1.
+
+:- dynamic lastApplyInfo/1.
+:- dynamic lastApplyListInfo/1.
+:- dynamic rollback/1.
+:- multifile rollback/1.
+
 :- multifile action/1.
 :- multifile ct/3.
 :- dynamic ct/3.
 :- multifile test/1.
 
-debug_rollback_output.
-
-
-/*
-or(_term1,_term2) :-
-    debugme,
-    call(_term1),
-    write('callterm1:\n'),
-    write(_term1),
-    !.
-
-or(_term1,_term2) :-
-    call(_term2).
-*/
-debugme.
-
-
-:- dynamic human/1.
-:- dynamic cat/2.
 
 
 /** apply all ct's **/
@@ -432,71 +406,3 @@ removeDependencyInstructions(';'(_member,_t), (';'(_memberExp,_T))) :-
 removeDependencyInstruction(dependency_analysis(_command),true):- !.
 removeDependencyInstruction(_command,_command):- !.
 
-
-markEnclAsDirty(Elem):-
-    getTerm(ID,Elem),
-    not(packageT(ID,_)),
-    (
-    	(enclosing(ID,Encl), not(Encl = 'null'),not(packageT(Encl,_)));
-     	Encl = ID
-    ),
-    assert1T(dirty_tree(Encl)),
-    !.
-
-markEnclAsDirty(_).
-    
-toggle_rollback_debug :-
-    debug_rollback_output,
-    !,
-    format('no rollback debug~n',[]),
-    retractall(debug_rollback_output).
-    
-toggle_rollback_debug :-
-    format('rollback debug~n',[]),
-        assert(debug_rollback_output).
-
-        
-rollback :-
-    findall(Term, 
-    (
-      rollback(Term),
-      call(Term),
-	  (debug_rollback_output -> 
-      	format('~w~n',[Term])
-      	;true)
-	  ,
-	  Term =.. [_| [ID|_]],
-	  tree(ID, _, _),
-	  assert(dirty_tree(ID))
-    ),
-    _),
-    retractall(rollback(_)),
-    retractall(changed(_)),
-    % replace deleted with created files
-    findall(File, (deleted_file(File),assert(tmp_rollback_file(File)),retract(deleted_file(File))),_),
-    findall(File, (created_file(File),assert(deleted_file(File)),retract(created_file(File))),_),
-    findall(File, (tmp_rollback_file(File),assert(created_file(File)),retract(deleted_file(File))),_).    
-    
-    
-logChange(Elem):-
-	Elem =.. [_|[Id|_]],
-	slT(Id,_,_),
-	!,
-	assert1T(changed(Id)).
-logChange(_).
-    
-test(double_fact):-
-    assert(t(term(a))),
-    assert(t(term(a))),
-    findall(Term, 
-    	(
-    	t(Term),
-      term_to_atom(Term,Atom),
-      format('~a~n',[Atom])),_),
-      retractall(t(_)).
-    	
-remove_dirty_flags :-
-    retractall(dirty_tree(_)).
-    
-    
-    
