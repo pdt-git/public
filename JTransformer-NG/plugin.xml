@@ -135,7 +135,7 @@
           visible="true"
           id="org.cs3.jlmp.internal.actions">
        <menu
-             label="JTransformer"
+             label="&amp;JTransformer"
              id="org.cs3.jlmp.menus.jtransformer">
           <separator name="separator2"/>
        </menu>
@@ -145,6 +145,12 @@
              style="push"
              menubarPath="org.cs3.jlmp.menus.jtransformer/separator2"
              id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
+       <action
+             label="regenerate classes"
+             class="org.cs3.jlmp.internal.actions.RegenAction"
+             style="push"
+             menubarPath="org.cs3.jlmp.menus.jtransformer/separator2"
+             id="org.cs3.jlmp.internal.actions.regenerateclasses"/>
     </actionSet>
  </extension>      
 </plugin>
