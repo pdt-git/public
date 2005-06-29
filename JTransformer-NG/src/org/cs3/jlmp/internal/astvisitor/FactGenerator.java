@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.cs3.pl.common.Debug;
 import org.eclipse.jdt.core.IBuffer;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.AssertStatement;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BlockComment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -26,6 +28,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -578,25 +581,36 @@ public class FactGenerator extends ASTVisitor {
 	 * get source code for a node.
 	 * @param node
 	 * @return the source code coresponding to this node or null if none
-	 * is available. The
+	 * is available. 
 	 */
+	IBuffer buffer = null;
+	
 	public String getTextForNode(ASTNode node){
+		return getTextForNode(node, 0,0);
+	}
+	
+	/**
+	 * get source code for a node with offset and length diff.
+	 * @param node
+	 * @return the source code coresponding to this node or null if none
+	 * is available. 
+	 */
+	public String getTextForNode(ASTNode node,int offsetdiff, int lendiff){
 		int startPos = node.getStartPosition();
 		int length = node.getLength();
 		if(length<=0) return null;
 		//FIXME: ld: this assumes, expects, needs, hopes, that the
 		//iCompilationUnit is already in WorkingCopymode. Let's hope
 		//this assumption is not to strong.
-		IBuffer buffer = null;
 		try {
-			buffer = iCompilationUnit.getBuffer();
+			if(buffer == null)
+				buffer = iCompilationUnit.getBuffer();
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
 			Debug.report(e);
 		}
-		return buffer.getText(startPos,length);		
+		return buffer.getText(startPos+ offsetdiff,length+lendiff-offsetdiff);		
 	}
-	
 	/**
 	 * Generates prolog facts of type literalT.
 	 * <p>
@@ -676,6 +690,7 @@ public class FactGenerator extends ASTVisitor {
 	 */
 	
 	public boolean visit(CompilationUnit node) {
+		initComments(node);
 		String id = idResolver.getID(node);
 		String pckg = idResolver.getID(node.getPackage());
 
@@ -700,6 +715,53 @@ public class FactGenerator extends ASTVisitor {
 				Integer.toString(node.getLength())
 		});
 		return true;
+	}
+
+	Hashtable annotations;
+	private void initComments(CompilationUnit node) {
+		annotations = new Hashtable();
+		for (Iterator iter = node.getCommentList().iterator(); iter.hasNext();) {
+			Comment comment = (Comment) iter.next();
+			if(comment.isBlockComment() )
+				try {
+					annotations.put(
+						""+(comment.getStartPosition() + comment.getLength()-1),
+						parseAnnotation(getTextForNode(comment,2,-2)));
+
+				} catch(IllegalArgumentException iae){}
+		}
+	}
+
+	private GenericAnnotation getCorrespondingGenericAnnotation(ASTNode node){
+		return (GenericAnnotation)annotations.get(""+(node.getStartPosition()-1));
+	}
+
+	private GenericAnnotation parseAnnotation(String text) throws IllegalArgumentException {
+	
+		if(!text.startsWith("@@"))
+			throw new IllegalArgumentException();
+		StringTokenizer tokenizer = new StringTokenizer(text,"@(,) \n\r\t");
+		String name;
+		List args = new ArrayList();
+		if(tokenizer.hasMoreTokens())
+			name = checkToken(tokenizer.nextToken());
+		else
+			throw new IllegalArgumentException();
+		while(tokenizer.hasMoreElements())
+			args.add(checkToken(tokenizer.nextToken()));
+		return new GenericAnnotationImpl(name, args);
+	}
+
+	private String checkToken(String string) {
+		if(Character.isLowerCase(string.charAt(0))||
+			string.charAt(0) =='\'' && string.charAt(string.length()-1)=='\'')
+			return string;
+		try{
+			Integer.parseInt(string);
+		}catch(NumberFormatException nfe){
+			throw new IllegalArgumentException();
+		}
+		return string;
 	}
 
 	/** 
@@ -1064,7 +1126,6 @@ public class FactGenerator extends ASTVisitor {
 	 * @see  FactGeneratorInterfaceTest#testMethodDeclaration()
 	 */
 	public boolean visit(MethodDeclaration node) {
-
 
 		String id = idResolver.getID(node);
 		String parentId = idResolver.getID(node.getParent());
@@ -2418,13 +2479,18 @@ public class FactGenerator extends ASTVisitor {
 		toPass[2] = idResolver.getID(getEnclosingNode(node));
 		
 		System.arraycopy(args, 0, toPass, 3, args.length);
-		
 		writer.writeFact(name, toPass);
 		writer.writeFact("slT", new String [] {
 				toPass[0],
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
+		GenericAnnotation annotation = getCorrespondingGenericAnnotation(node);
+		if(annotation != null && !name.equals("execT")) {
+			writer.writeFact("annotationT",new String[]{
+					toPass[0], annotation.getPredicate()
+			});
+		}
 	}
 
 }
