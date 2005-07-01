@@ -210,7 +210,7 @@ migrate_to_ast_attrs(Id,Label,[Val|Vals]) :-
   *
   */
  migrate_args(_Id,X,Y,Vals) :-  
-    migrate_args(_Id,X,Y,[],Vals)
+    migrate_args(_Id,X,Y,[],Vals).
   
   
   
