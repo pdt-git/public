@@ -143,24 +143,32 @@ assert_fail(Comment, Goal) :-
 
 
 /**
- * assert_bound(+Comment, +Term)
- * 
- * Checks if Term is bound, otherwise throws
+ * assert_ground(+Comment, +Term)
+ * assert_bound(+Comment, +Term) obsolete
+ *
+ * Checks if Term is ground (that is, contains no free
+ * variables), otherwise throws
  * exception assertion_failed('formated exception').
  */
 
-assert_bound( Term):-
-    assert_bound('',Term).
+% obsolete:
+assert_bound(         Term) :- assert_ground(         Term).
+assert_bound(Comment, Term) :- assert_ground(Comment, Term).
+
+% Use this instead:
+assert_ground( Term):-
+    assert_ground('',Term).
 	
-assert_bound(Comment, Term):-
-	numbervars(Term,0,Num),
-	Num > 0,
+assert_ground(Comment, Term):-
+	not(ground(Term)),
+	% numbervars(Term,0,Num),
+	% Num > 0,
     term_to_atom(Term,Atom),
     sformat(Msg, 'The term ~a contains variables.~n~a~n',[Atom,Comment]),
     write(Msg),
     flush_output,
     throw(assertion_failed(Msg)).
-assert_bound(_,_).
+assert_ground(_,_).
 
 /*
 surr2:-

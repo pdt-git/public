@@ -1185,7 +1185,7 @@ treeSignature(assertT,5).
 treeSignature(getFieldT,6).
 treeSignature(precedenceT,4).
 treeSignature(nopT,3).         % TODO: fehlte / inkonsistenz zu tree/3 -- GK 3.9.2004
-*/
+
 
 :- multifile attribSignature/2.
 
