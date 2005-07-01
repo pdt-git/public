@@ -36,17 +36,17 @@ public class ASTCompoundTerm extends SimpleNode {
 		return (SimpleNode) jjtGetChild(0);
 	}
 
-	public String getLabel(){
-		return getPrincipal().getLabel();
-	}
 	
+	public String getLabel(){
+		return getPrincipal().getValue();
+	}
 	public int getArity(){
 		return getArguments().length;
 	}
 	public SimpleNode[] getArguments() {
 		if (children[1] instanceof ASTInfixTerm) {
 			ASTInfixTerm term = (ASTInfixTerm) children[1];
-			if (",".equals(term.getPrincipal().getImage())) {
+			if (",".equals(term.getPrincipal().getValue())) {
 				SimpleNode[] args = new SimpleNode[term.children.length - 1];
 				System.arraycopy(term.children, 1, args, 0, args.length);
 				return args;
@@ -55,29 +55,9 @@ public class ASTCompoundTerm extends SimpleNode {
 		return new SimpleNode[] { (SimpleNode) children[1] };
 	}
 
-	public SimpleNode[] getArgumentsFlat(){
-		Stack stack = new Stack();
-		Vector queue = new Vector();
-		SimpleNode[] args = getArguments();
-		for (int i = args.length-1; i >=0; i--) {
-			stack.push(args[i]);
-		}
-		while(!stack.isEmpty()){
-			SimpleNode top=(SimpleNode) stack.pop();
-			if(top instanceof ASTCompoundTerm && top.getLabel().equals("','")){
-				args = ((ASTCompoundTerm)top).getArguments();
-				for (int i = args.length-1; i >=0; i--) {
-					stack.push(args[i]);
-				}
-			}
-			else{
-				queue.add(top);
-			}
-		}
-		return (SimpleNode[]) queue.toArray(new SimpleNode[queue.size()]);
-	}
+	
 	protected void synthesizeImage(StringBuffer sb) {
-		sb.append(getLabel());
+		getPrincipal().synthesizeImage(sb);
 		sb.append("(");
 		SimpleNode[] args = getArguments();
 		for (int i = 0; i < args.length; i++) {
@@ -104,13 +84,10 @@ public class ASTCompoundTerm extends SimpleNode {
 		return copy;
 	}
 	public SimpleNode toCanonicalTerm(boolean linked, boolean deep) {
-		if(getLabel().equals("','")){
-			System.out.println("debug");
-		}
 		ASTCompoundTerm copy = (ASTCompoundTerm) clone(linked,false);
 		copy.children[0]=getPrincipal().toCanonicalTerm(linked,deep);
 		SimpleNode argTerm = ((SimpleNode)children[1]);
-		if(argTerm instanceof ASTInfixTerm && argTerm.getLabel().equals("','")){
+		if(argTerm instanceof ASTInfixTerm && argTerm.getPrincipal().getSyntheticImage().equals(",")){
 			ASTInfixTerm  argTermClone=(ASTInfixTerm) argTerm.clone(linked,false);
 			argTermClone.children=new Node[argTerm.children.length];
 			for(int i=0;i<argTermClone.children.length;i++){

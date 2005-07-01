@@ -3,7 +3,7 @@
 package org.cs3.pl.parser.internal.term;
 
 public class ASTVariable extends SimpleNode {
-  private String value;
+  
 
 public ASTVariable(int id) {
     super(id);
@@ -26,7 +26,7 @@ public ASTVariable(int id) {
 
 	}
 
-	private String getValue() {
+	public String getValue() {
 		if (value == null) {
 			value = getImage();
 		}
@@ -40,9 +40,7 @@ public ASTVariable(int id) {
 		return copy;
 	}
 	
-	public String getLabel() {	
-		return getValue();
-	}
+	
 	
 	public int getArity(){
 		return 0;

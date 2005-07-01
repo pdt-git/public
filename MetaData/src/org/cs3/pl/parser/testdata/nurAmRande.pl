@@ -1,0 +1,68 @@
+:- module(test000,[test000/1]).
+check_node(Check,Id,Type,Label,Props):-        
+    catch(
+    (
+      exists(node(Id,Type,Label)),
+      unique(node(Id,_,_)),
+      properties(Id,Props)
+    ),
+    E,
+    throw(check_failed(Check,E))).
+
+check_edge(Check,Id,Type,Label,From,To):-
+    catch(
+    (
+      exists(edge(Id,Type,Label,From,To)),
+      unique(edge(Id,_,_,_,_))
+    ),
+    E,
+    throw(check_failed(Check,E))).
+properties(_,[]).
+properties(Id,[Prop|Tail]):-    
+    unique(property(Id,Prop)),
+    properties(Id,Tail).
+
+exists(Goal):-
+  Goal;throw(exists_failed(Goal)).
+  
+unique(Goal):-
+  findall(Goal,Goal,[Goal]);throw(unique_failed(Goal)).
+        node(node_id(0),predicate,user:rumpel/1).
+node(node_id(1),clause,rumpel/1).
+edge(edge_id(2),clause,null,node_id(0),node_id(1)).
+property(node_id(1),position(0,127)).
+property(node_id(1),file(test000)).
+node(node_id(3),literal,forall/2).
+edge(edge_id(4),body_literal,null,node_id(1),node_id(3)).
+property(node_id(3),position(17,98)).
+node(node_id(5),literal,pumpel/1).
+edge(edge_id(6),body_literal,null,node_id(1),node_id(5)).
+property(node_id(5),position(31,9)).
+node(node_id(7),literal,=/2).
+edge(edge_id(8),body_literal,null,node_id(1),node_id(7)).
+property(node_id(7),position(50,3)).
+node(node_id(9),literal,writeln/1).
+edge(edge_id(10),body_literal,null,node_id(1),node_id(9)).
+property(node_id(9),position(63,13)).
+node(node_id(11),literal,writeln/1).
+edge(edge_id(12),body_literal,null,node_id(1),node_id(11)).
+property(node_id(11),position(85,15)).
+node(node_id(13),literal,true/0).
+edge(edge_id(14),body_literal,null,node_id(1),node_id(13)).
+property(node_id(13),position(122,4)).
+test000(Filename):-
+check_node(0,Pid,predicate,user:rumpel/1,[]),
+check_node(1,Cid,clause,rumpel/1,[file(Filename),position(0,126)]),
+check_edge(2,_,clause,_,Pid,Cid),
+check_node(3,ForallId,literal,forall/2,[position(17,98)]),
+check_edge(4,_,body_literal,_,Cid,ForallId),
+check_node(5,PumpelId,literal,pumpel/1,[position(31,9)]),
+check_edge(6,_,body_literal,_,Cid,PumpelId),
+check_node(7,EQId,literal,'='/2,[position(50,3)]),
+check_edge(8,_,body_literal,_,Cid,EQId),
+check_node(9,WLJaId,literal,writeln/1,[position(63,13)]),
+check_edge(10,_,body_literal,_,Cid,WLJaId),
+check_node(11,WLNeinId,literal,writeln/1,[position(85,15)]),
+check_edge(12,_,body_literal,_,Cid,WLNeinId),
+check_node(13,TrueId,literal,true/0,[position(122,4)]),
+check_edge(14,_,body_literal,_,Cid,TrueId).

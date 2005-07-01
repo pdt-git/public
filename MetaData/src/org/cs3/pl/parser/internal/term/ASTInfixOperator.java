@@ -60,14 +60,5 @@ public class ASTInfixOperator extends SimpleNode {
 
 	}
 
-	public String getLabel() {
-		if (label == null) {
-			label = getValue();
-			if (TermParserUtils.shouldBeQuoted(label)) {
-				label = "'" + StringEscapeUtils.escapeJavaScript(label) + "'";
-			}
-
-		}
-		return label;
-	}
+	
 }

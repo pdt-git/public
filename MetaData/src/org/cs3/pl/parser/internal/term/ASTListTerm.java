@@ -149,9 +149,7 @@ public class ASTListTerm extends SimpleNode {
 		return (ASTCompoundTerm) r;
 	}
 	
-	public String getLabel() {	
-		return "'.'";
-	}
+	
 	public int getArity(){
 		return 2;
 	}

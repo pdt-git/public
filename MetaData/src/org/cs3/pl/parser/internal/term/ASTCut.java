@@ -34,7 +34,5 @@ public class ASTCut extends SimpleNode implements Atomic {
 		return 0;
 	
 	}
-	public String getLabel(){
-		return ";";
-	}
+	
 }

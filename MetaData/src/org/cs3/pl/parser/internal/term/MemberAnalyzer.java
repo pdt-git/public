@@ -35,7 +35,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 	public Object visit(ASTCompilationUnit node, Object data) {
 		Object o = traverseChildren(node,data);
 		if(moduleName!=null){
-			node.moduleName=moduleName.getLabel();
+			node.moduleName=moduleName.getSyntheticImage();
 		}
 		return o;
 	}
@@ -116,7 +116,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 
 		if (node instanceof ASTCompoundTerm) {
 			ASTCompoundTerm term = (ASTCompoundTerm) node;
-			if ("','".equals(term.getLabel())) {
+			if (",".equals(term.getLabel())) {
 				SimpleNode[] args = term.getArguments();
 				if (args[0] instanceof ASTCompoundTerm)
 					checkDirectiveHead((ASTCompoundTerm) args[0]);
@@ -162,7 +162,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 			if (TermParserUtils.isSignature(predicatesCompound)) {
 				declareProperty(property, predicatesCompound.getOriginal());
 				return;
-			} else if ("','".equals(predicatesCompound.getLabel())
+			} else if (",".equals(predicatesCompound.getLabel())
 					&&TermParserUtils.isSignature(predicatesCompound.getArguments()[0])) {
 				
 				declareProperty(property, predicatesCompound.getArguments()[0]
@@ -217,7 +217,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 	}
 
 	private void processExports(SimpleNode exportsNode) {
-		if (!(exportsNode instanceof ASTCompoundTerm && exportsNode.getLabel()
+		if (!(exportsNode instanceof ASTCompoundTerm && exportsNode.getPrincipal().getSyntheticImage()
 				.equals("'.'"))) {
 			Problem p = TermParserUtils.createProblem(
 					exportsNode.getOriginal(),
@@ -227,7 +227,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 			return;
 		}
 		ASTCompoundTerm exportsList = (ASTCompoundTerm) exportsNode;
-		String image = exportsList.getLabel();
+		
 		while (exportsNode instanceof ASTCompoundTerm) {
 			exportsList = (ASTCompoundTerm) exportsNode;
 			processExport(exportsList.getArguments()[0]);
@@ -276,8 +276,8 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 					Problem.WARNING);
 			problemCollector.reportProblem(p);
 		}
-		String label = args[0].getLabel();
-		String arity = args[1].getLabel();
+		String label = args[0].getSyntheticImage();
+		String arity = args[1].getSyntheticImage();
 		exports.add(label + "/" + arity);
 	}
 

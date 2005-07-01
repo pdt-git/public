@@ -4,11 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.cs3.pl.prolog.PrologSession;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -21,6 +25,8 @@ public class AbbaDataTest extends TestCase implements ProblemCollector {
 	private int testNumber=0;
 
 	private String testLabel="AbbaDataTest";
+
+	private static PrologInterface pif;
 	public AbbaDataTest(String string){
 		this(string,0);
 		testLabel="testIt";
@@ -31,6 +37,8 @@ public class AbbaDataTest extends TestCase implements ProblemCollector {
 		this.testLabel = generateName("test", i, "");
 	}
 
+	
+	
 	private PrologCompiler getPrologCompiler() {
 		PrologCompiler c = PrologCompilerFactory.create();
 		c.setProblemCollector(this);
@@ -63,7 +71,7 @@ public class AbbaDataTest extends TestCase implements ProblemCollector {
 		return (Problem) problems.get(i);
 	}
 
-	public static Test _suite() {
+	public static Test suite() {
 		TestSuite s = new TestSuite();
 		for (int i = 0; i < 1; i++) {
 
@@ -74,6 +82,12 @@ public class AbbaDataTest extends TestCase implements ProblemCollector {
 	}
 
 	public void testIt() throws IOException {
+		if(pif==null){
+			pif=PrologInterfaceFactory.newInstance().create();
+		}
+		if(pif.isDown()){
+			pif.start();
+		}
 		String inputName = generateName("testdata/testabbadata", testNumber,
 				".pl");
 		String expectName = generateName("testdata/testabbadata",
@@ -86,13 +100,25 @@ public class AbbaDataTest extends TestCase implements ProblemCollector {
 		ByteArrayInputStream in = new ByteArrayInputStream(buf.toByteArray());
 		plc.compile(testLabel, in, new StringLineBreakInfoProvider(buf
 				.toString()));
-		
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		PrintStream out = pif.getConsultService("").getOutputStream(testLabel);
+		//PrintStream out =System.out;
+		out.println(":- module("+testLabel+",["+testLabel+"/1]).");
+		stream=AbbaDataTest.class.getResourceAsStream("testdata/utils.pl");
+		Util.copy(stream, out);
 		plc.saveAbbaData(out);
-		ByteArrayOutputStream expect = new ByteArrayOutputStream();
 		stream = AbbaDataTest.class.getResourceAsStream(expectName);
-		Util.copy(stream, expect);
-		assertEquals(expect.toString(), out.toString());
+		Util.copy(stream, out);
+		out.close();
+		PrologSession session = pif.getSession();
+		try{
+			session.queryOnce(testLabel+"("+testLabel+")");
+		}
+		finally{
+			if(session!=null){
+				session.dispose();
+			}
+		}
+		
 	}
 
 	private static String generateName(String prefix, int n, String sufix) {

@@ -182,7 +182,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 						.getImage();
 			}
 			String functor = member.getHeadLiteral().getFunctor();
-			String label = member.getHeadLiteral().getLabel();
+			String label = member.getHeadLiteral().getPrincipal().getSyntheticImage();
 			int arity = member.getHeadLiteral().getArity();
 			boolean pub = "user".equals(getModuleName())||exports.contains(functor);
 			boolean dyn = dynamicPredicates
@@ -277,11 +277,15 @@ public class TermBasedPrologCompiler implements PrologCompiler {
     	}		
     }
 
-	public void saveAbbaData(OutputStream out) throws IOException {
+	public void saveAbbaData(OutputStream out) throws IOException {		
+		saveAbbaData("",out);
+	}
+	
+	public void saveAbbaData(String modulePrefix,OutputStream out) throws IOException {
 		
 		ASTCompilationUnit root = parser.getASTRoot();
 		
-		WriteTermsToStreamStrategy writeStrategy = new WriteTermsToStreamStrategy(new PrintStream(out));
+		WriteTermsToStreamStrategy writeStrategy = new WriteTermsToStreamStrategy(new PrintStream(out),modulePrefix);
 		SimpleIDGeneratorStrategie idStrategy = new SimpleIDGeneratorStrategie();
 		root.jjtAccept(
 				new AbbaGraphGenerator(writeStrategy,idStrategy),null);

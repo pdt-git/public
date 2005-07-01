@@ -1,4 +1,3 @@
-:-(module(second,'.'(/(toll,0),[]))).
+:-(module(second,.('/'(2,0),[]))).
 toll.
-.(a,b).
-test(A):-A,.test(A),.
+

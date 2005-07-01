@@ -5,12 +5,15 @@ import java.io.PrintStream;
 public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 	private final PrintStream out;
 
-	private String prefix = "user:";
+	private String prefix = "";
 
 	public WriteTermsToStreamStrategy(PrintStream stream) {
 		this.out = stream;
 	}
-
+	public WriteTermsToStreamStrategy(PrintStream stream,String prefix) {
+		this.out = stream;
+		this.prefix=prefix;
+	}
 	public void writeNode(String type, String nodeId, String label) {
 		out
 				.println(prefix + "node(" + nodeId + "," + type + "," + label
