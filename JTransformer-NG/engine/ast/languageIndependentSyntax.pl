@@ -15,6 +15,12 @@
       The Abstract Syntax Tree (AST) for the language arg1 contains
       nodes with label (functor) arg2 and arity arg3.
 
+   ast_node_term(Lang, Term)
+      The Abstract Syntax Tree (AST) for the language arg1 contains
+      nodes that unify with arg2. This predicate either checks its
+      input or enumerates most general instances of all the legal
+      AST node terms. 
+ 
    ast_node_def(?Language, ?AstNodeLabel, ?AstNodeArguments)
       The Abstract Syntax Tree (AST) for the language arg1 contains
       nodes with label (functor) arg2 and arguments conforming to the
@@ -52,8 +58,28 @@
 ast_node_signature(Lang, NodeType, Arity) :-
     ast_node_def(Lang, NodeType, ArgList),
     length(ArgList,Arity).
-  
-  
+
+/**
+ *  ast_node_term(Lang, Term)
+ *
+ *    The Abstract Syntax Tree (AST) for the language arg1 contains
+ *    nodes that unify with arg2. This predicate either checks its
+ *    input or enumerates most general instances of all the legal
+ *    AST node terms. 
+ */  
+ast_node_term(Lang, Head) :-
+    var(Head),
+    !,
+    ast_node_signature(Lang, NodeType, Arity),
+    functor(Head,NodeType,Arity).
+
+ast_node_term(Lang, Head) :-
+    nonvar(Head),
+    !,
+    functor(Head,NodeType,Arity),
+    ast_node_signature(Lang, NodeType, Arity).
+
+    
  /**
   * ast_node_def(?Language, ?AstNodeLabel, ?AstNodeArguments)
   *
