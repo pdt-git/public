@@ -11,18 +11,43 @@ import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
+import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 public class PrologOutline extends ContentOutlinePage {
-    IEditorInput input;
+    private final class Comparer implements IElementComparer {
+		public int hashCode(Object element) {
+			if(element instanceof Predicate){
+				Predicate p = (Predicate) element;
+				return p.getSignature().hashCode();
+			}
+			return element.hashCode();
+		}
+
+		public boolean equals(Object a, Object b) {
+			if(a instanceof Predicate && b instanceof Predicate){
+				Predicate pa = (Predicate) a;
+				Predicate pb = (Predicate) b;
+				return pa.getSignature().equals(pb.getSignature());
+			}
+			return a.equals(b);
+		}
+	}
+
+    
+    
+    
+	IEditorInput input;
 
     private AbstractTextEditor editor;
 
@@ -49,7 +74,8 @@ public class PrologOutline extends ContentOutlinePage {
         contentProvider = new PrologElementContentProvider(viewer);
         viewer.setContentProvider(contentProvider);
         viewer.setLabelProvider(new PrologElementLabelProvider());
-
+        viewer.setComparer(new Comparer());
+        viewer.setSorter(new ViewerSorter());
         viewer.addSelectionChangedListener(this);
         if (input != null)
             viewer.setInput(input);
