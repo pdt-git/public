@@ -1,4 +1,15 @@
-    
+ /**
+  *   atom_list_concat(+AtomList,?Atom)
+  *     Ar4 is unifiable with the concatenation of all atoms from
+  *     the list in arg1.
+  *     -- Günter Kniesel, 28.06.1006
+  */
+atom_list_concat([],'').
+atom_list_concat([One],One).
+atom_list_concat([H|T],Atom) :-
+   atom_list_concat(T,Tatom),
+   atom_concat(H,Tatom,Atom).   
+   
 /**
         stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4)
         
