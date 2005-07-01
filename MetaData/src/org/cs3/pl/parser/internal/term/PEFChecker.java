@@ -22,11 +22,12 @@ public class PEFChecker extends DefaultPrologTermParserVisitor {
 	}
 	
 	public Object visit(ASTCompoundTerm node, Object data) {
-		if(pefs.containsKey(node.getLabel())){
-			Integer expected = (Integer) pefs.get(node.getLabel());
+		String label = node.getLabel();
+		if(pefs.containsKey(label)){
+			Integer expected = (Integer) pefs.get(label);
 			int arity = node.getOriginal().getArity();
 			if(arity!=expected.intValue()){
-				Problem p = TermParserUtils.createProblem(node.getOriginal(),"Expected arity for '" + node.getLabel()
+				Problem p = TermParserUtils.createProblem(node.getOriginal(),"Expected arity for '" + label
 	                    + "' is " + expected.intValue() + ", arity found: " + arity
 	                    + ".",Problem.WARNING);
 				problemCollecter.reportProblem(p);

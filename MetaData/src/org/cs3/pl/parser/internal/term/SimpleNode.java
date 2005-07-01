@@ -17,7 +17,7 @@ public abstract class SimpleNode implements Node, Cloneable {
 
 	protected PrologTermParser parser;
 
-	
+	protected String value;
 
 	public boolean copy;
 
@@ -42,16 +42,15 @@ public abstract class SimpleNode implements Node, Cloneable {
 	public int getArity(){
 		return 0;
 	}
-	public String getLabel(){
-		if(getPrincipal()!=this){
-			return getPrincipal().getLabel();
-		}
-		return getImage();
+	public String getSyntheticImage(){
+		StringBuffer sb = new StringBuffer();
+		synthesizeImage(sb);
+		return sb.toString();
 	}
 	
 	
 	public String getFunctor(){
-		return ""+getPrincipal().getLabel()+"/"+getArity();
+		return ""+getPrincipal().getSyntheticImage()+"/"+getArity();
 	}
 	public SimpleNode(int i) {
 		id = i;
@@ -287,5 +286,12 @@ public abstract class SimpleNode implements Node, Cloneable {
 			
 		}
 		return comment;
+	}
+
+	protected String getValue() {
+		if(value!=null){
+			value=getImage();
+		}
+		return value;
 	}
 }

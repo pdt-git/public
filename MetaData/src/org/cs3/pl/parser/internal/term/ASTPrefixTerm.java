@@ -71,8 +71,5 @@ public class ASTPrefixTerm extends SimpleNode {
 		return 1;
 	}
 	
-	public String getLabel() {
 	
-		return getOperator().getLabel();
-	}
 }

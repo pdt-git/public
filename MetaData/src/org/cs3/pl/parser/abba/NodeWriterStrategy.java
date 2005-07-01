@@ -3,7 +3,7 @@ package org.cs3.pl.parser.abba;
 public interface NodeWriterStrategy {
 	public final static String NODE_TYPE_PREDICATE = "predicate";
 	public final static String NODE_TYPE_CLAUSE = "clause";
-	public final static String NODE_TYPE_LITERAL = "literal";
+	public final static String NODE_TYPE_BODY_LITERAL = "literal";
 	public final static String NODE_TYPE_TERM = "term";
 	public static final String NODE_TYPE_CT = "ct";
 	public static final String NODE_TYPE_CT_CONDITION = "ct_condition";

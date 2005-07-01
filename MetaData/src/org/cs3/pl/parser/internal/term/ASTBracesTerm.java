@@ -55,9 +55,7 @@ public class ASTBracesTerm extends SimpleNode {
 		
 		return a;
 	}
-	public String getLabel() {
-		return "{}";
-	}
+	
 	public int getArity(){
 		return 1;
 	}

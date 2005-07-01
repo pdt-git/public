@@ -37,7 +37,7 @@ public class ASTMember extends SimpleNode {
 		if(node==null){
 			return ((ASTCompilationUnit)jjtGetParent()).getModuleName();
 		}
-		return node.getLabel();
+		return node.getSyntheticImage();
 	}
 	protected void synthesizeImage(StringBuffer sb) {
 		((SimpleNode) children[0]).synthesizeImage(sb);

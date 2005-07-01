@@ -47,7 +47,5 @@ public class ASTParanthesisTerm extends SimpleNode {
 	public int getArity() {
 		return getPrincipal().getArity();
 	}
-	public String getLabel() {
-		return getPrincipal().getLabel();
-	}
+	
 }

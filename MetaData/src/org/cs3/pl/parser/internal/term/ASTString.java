@@ -29,13 +29,11 @@ public class ASTString extends SimpleNode {
 
 	}
 
-	public String getLabel() {	
-		return "'.'";
-	}
+	
 	public int getArity(){
 		return 2;
 	}
-	private String getValue() {
+	public String getValue() {
 		if (value == null) {
 			value = getImage();
 			value = value.substring(1);

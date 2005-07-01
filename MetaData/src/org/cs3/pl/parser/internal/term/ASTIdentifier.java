@@ -23,11 +23,17 @@ public class ASTIdentifier extends SimpleNode implements Atomic {
 	}
 
 	protected void synthesizeImage(StringBuffer sb) {
+		if(TermParserUtils.shouldBeQuoted(getValue())){
+			sb.append("'");
+		}
 		sb.append(getValue());
+		if(TermParserUtils.shouldBeQuoted(getValue())){
+			sb.append("'");
+		}
 
 	}
 
-	private String getValue() {
+	public String getValue() {
 		if (value == null) {
 			value = getImage();
 			if(value.startsWith("'")){
@@ -48,7 +54,5 @@ public class ASTIdentifier extends SimpleNode implements Atomic {
 		return 0;
 	
 	}
-	public String getLabel(){
-		return getValue();
-	}
+	
 }

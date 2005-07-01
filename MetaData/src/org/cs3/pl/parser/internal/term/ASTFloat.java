@@ -3,7 +3,7 @@
 package org.cs3.pl.parser.internal.term;
 
 public class ASTFloat extends SimpleNode {
-	private String value;
+	String value;
 
 	public ASTFloat(int id) {
 		super(id);
@@ -27,13 +27,6 @@ public class ASTFloat extends SimpleNode {
 		
 	}
 
-	private String getValue() {
-		if(value!=null){
-			value=getImage();
-		}
-		return value;
-	}
-
 	public SimpleNode createShallowCopy() {
 		ASTFloat copy = new ASTFloat(parser,id);
 		copy.copy=true;
@@ -45,7 +38,5 @@ public class ASTFloat extends SimpleNode {
 		return 0;
 	
 	}
-	public String getLabel(){
-		return getValue();
-	}
+	
 }

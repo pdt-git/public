@@ -10,8 +10,8 @@ import org.cs3.pl.common.Util;
 import sun.beans.editors.StringEditor;
 
 public class ASTCharacters extends SimpleNode implements Atomic{
-	protected String value;
-	private String label;
+	
+	
 
 	public ASTCharacters(int id) {
 		super(id);
@@ -32,13 +32,16 @@ public class ASTCharacters extends SimpleNode implements Atomic{
 
 	protected void synthesizeImage(StringBuffer sb) {
 		
-		sb.append(getLabel());
+		sb.append("'"+getValue()+"'");
 		
 
 	}
 
-	private String getValue() {
+	public String getValue() {
 		if (value == null) {
+			if(copy){
+				throw new IllegalStateException("copy with uninitialized value");
+			}
 			value = StringEscapeUtils.unescapeJava(getImage());			
 			value = value.substring(1, value.length() - 1);
 			
@@ -53,15 +56,7 @@ public class ASTCharacters extends SimpleNode implements Atomic{
 		return copy;
 	}
 	
-	public String getLabel() {
-		if(label==null){
-			label = getValue();
-			if(TermParserUtils.shouldBeQuoted(label)){
-				label="'"+StringEscapeUtils.escapeJavaScript(label)+"'";
-			}
-		}					
-		return label;
-	}
+	
 	
 	public SimpleNode toCanonicalTerm(boolean linked, boolean deep) {
 		if(TermParserUtils.shouldBeQuoted(getValue())){

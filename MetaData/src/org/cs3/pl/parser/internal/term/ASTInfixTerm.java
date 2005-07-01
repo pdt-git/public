@@ -117,9 +117,7 @@ public class ASTInfixTerm extends SimpleNode {
 	public SimpleNode toCanonicalTerm(boolean linked, boolean deep){
 		int i=children.length-1;
 		ASTCompoundTerm r=null;
-		if(getLabel().equals("','")&&getOperands()[0].getLabel().equals("classDefT")){
-			System.out.println("debug");
-		}
+		
 		ASTInfixOperator comma = new ASTInfixOperator(parser,PrologTermParserTreeConstants.JJTINFIXOPERATOR);
 		comma.value=",";
 		comma.copy=true;
@@ -164,7 +162,5 @@ public class ASTInfixTerm extends SimpleNode {
 		return 2;
 	}
 	
-	public String getLabel() {	
-		return getOperator().getLabel();
-	}
+	
 }

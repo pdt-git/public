@@ -27,7 +27,7 @@ public class ASTInteger extends SimpleNode {
 
 	}
 
-	private String getValue() {
+	public String getValue() {
 		if (value == null) {
 			if(copy){
 				;//throw new Error("!!!OOPS, my value is gone...!!!");
@@ -49,7 +49,5 @@ public class ASTInteger extends SimpleNode {
 	public int getArity() {	
 		return 0;
 	}
-	public String getLabel() {
-		return getValue();
-	}
+	
 }
