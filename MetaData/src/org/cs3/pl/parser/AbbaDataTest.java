@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -110,8 +111,12 @@ public class AbbaDataTest extends TestCase implements ProblemCollector {
 		Util.copy(stream, out);
 		out.close();
 		PrologSession session = pif.getSession();
+		StringBuffer sb = new StringBuffer();
+		String query=("catch(("+testLabel+"("+testLabel+"),A=ok),E,A=E)");
 		try{
-			session.queryOnce(testLabel+"("+testLabel+")");
+			Map r = session.queryOnce(query);
+			assertNotNull(r);
+			assertEquals("ok",r.get("A").toString());
 		}
 		finally{
 			if(session!=null){

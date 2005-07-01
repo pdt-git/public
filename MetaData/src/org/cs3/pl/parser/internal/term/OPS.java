@@ -91,7 +91,7 @@ public class OPS {
 		return p[0];
 	}
 	public boolean isInfixOp(String image){
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		return lookupInfixPrec(image)!=PREC_INVALID;
