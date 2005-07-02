@@ -40,8 +40,9 @@
 :- ['preprocess/main'].
 :- [graph_algos].
 :- [dep_graph].
-%:- ['dep_graph_gui.pl'].
+:- ['dep_graph_gui.pl'].
 :- [ct_filter].
+:- [expand].
 :- [depend].
 
 % Load some example CTs
