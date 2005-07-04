@@ -25,6 +25,8 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.cs3.pdt.common"/>
       <import plugin="org.cs3.pdt"/>
+      <import plugin="org.cs3.pdt.console"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
 
    </requires>
 
@@ -40,7 +42,7 @@
             icon="icons/sample.gif"
             category="console"
             name="PEF Navigator"
-            id="org.cs3.jlmp.internal.navigator.NavigatorView"/>
+            id="org.cs3.jlmp.internal.navigator.PEFNavigatorView"/>
    </extension>
 
  <extension
@@ -152,5 +154,16 @@
              menubarPath="org.cs3.jlmp.menus.jtransformer/separator2"
              id="org.cs3.jlmp.internal.actions.regenerateclasses"/>
     </actionSet>
+ </extension>
+ <extension
+       point="org.cs3.pdt.console.consoleContextMenu">
+    <SelectionContextAction
+          class="org.cs3.jlmp.internal.actions.GotoPEFNavigatorAction"
+          name="open corresponding elemented for selected ID in PEF navigator"
+          sharedIcon="IMG_DEF_VIEW"/>
+    <SelectionContextAction
+          class="org.cs3.jlmp.internal.actions.OpenSelectionInEditorAction"
+          name="open corresponding elemented for selected ID in Java editor"
+          sharedIcon="IMG_DEF_VIEW"/>
  </extension>      
 </plugin>

@@ -8,7 +8,6 @@ import java.util.Map;
 import org.cs3.jlmp.JLMP;
 import org.cs3.jlmp.internal.natures.JLMPProjectNature;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -45,6 +44,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class PEFNavigatorView extends ViewPart {
 	private TreeViewer viewer;
+	public static final String ID= "org.cs3.jlmp.internal.navigator.PEFNavigatorView";
 
 	private DrillDownAdapter drillDownAdapter;
 
@@ -55,6 +55,8 @@ public class PEFNavigatorView extends ViewPart {
 	private Action doubleClickAction;
 
 	private ViewContentProvider contentProvider;
+	
+	static private PEFNavigatorView pefNavigatorInstance;
 
 	/**
 	 * @throws CoreException
@@ -159,6 +161,7 @@ public class PEFNavigatorView extends ViewPart {
 	 * it.
 	 */
 	public void createPartControl_impl(Composite parent) {
+		pefNavigatorInstance = this;
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(viewer);
 		contentProvider = new ViewContentProvider();
@@ -213,26 +216,28 @@ public class PEFNavigatorView extends ViewPart {
 		drillDownAdapter.addNavigationActions(manager);
 	}
 
+	private void addNewNodeById(String id) {
+		IPEFNode node = PEFNode.find(getViewSite(), null, id, null);
+		if (node != null) {
+			List list = new ArrayList();
+			for (int i = 0; i < contentProvider.roots.length; i++) {
+				list.add(contentProvider.roots[i]);
+			}
+			list.add(node);
+			contentProvider.roots = (IPEFNode[]) list
+					.toArray(new IPEFNode[0]);
+			viewer.setInput(getViewSite());
+		}
+	}
+
 	private void makeActions() {
 		action1 = new Action() {
 			public void run() {
-				//showMessage("Action 1 executed");
-				List list = new ArrayList();
-				for (int i = 0; i < contentProvider.roots.length; i++) {
-					list.add(contentProvider.roots[i]);
-				}
 				InputDialog dialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						"JTransformer", "id", null, null);
 				if (dialog.open() != Window.CANCEL) {
 					final String value = dialog.getValue();
-					IPEFNode node;
-					node = PEFNode.find(getViewSite(),  null, value,null);
-					if (node != null) {
-						list.add(node);
-						contentProvider.roots = (IPEFNode[]) list
-								.toArray(new IPEFNode[0]);
-						viewer.setInput(getViewSite());
-					}
+					addNewNodeById(value);
 				}
 			}
 		};
@@ -245,15 +250,10 @@ public class PEFNavigatorView extends ViewPart {
 		action2 = new Action() {
 			public void run() {
 				//showMessage("Action 1 executed");
-				List list = new ArrayList();
-				for (int i = 0; i < contentProvider.roots.length; i++) {
-					list.add(contentProvider.roots[i]);
-				}
 				InputDialog dialog = new InputDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
 						"JTransformer", "full qualified name", null, null);
 				if (dialog.open() != Window.CANCEL) {
 					final String value = dialog.getValue();
-					IPEFNode node;
 					PrologSession session = null;
 
 					try {
@@ -264,13 +264,7 @@ public class PEFNavigatorView extends ViewPart {
 							if(id == null)
 								MessageDialog.openError(getViewSite().getShell(),
 										"JTransformer", "No class found with full qualified name: "+ value);
-							node = PEFNode.find(getViewSite(), null, id, null);
-							if (node != null) {
-								list.add(node);
-								contentProvider.roots = (IPEFNode[]) list
-										.toArray(new IPEFNode[0]);
-								viewer.setInput(getViewSite());
-							}
+							addNewNodeById(id);
 						}
 					} catch (CoreException e) {
 						// TODO Auto-generated catch block
@@ -369,5 +363,10 @@ public class PEFNavigatorView extends ViewPart {
 			throw new RuntimeException(t);
 		}
 
+	}
+
+	public static void addId(String value) {
+		pefNavigatorInstance.addNewNodeById(value);
+		
 	}
 }
