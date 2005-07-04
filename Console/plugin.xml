@@ -19,13 +19,16 @@
    <extension
          point="org.cs3.pdt.console.consoleContextMenu">
       <SelectionContextAction
-            class="org.cs3.pl.console.CopyAction"
+            class="org.cs3.pl.console.internal.actions.CopyAction"
             name="copy"
             sharedIcon="IMG_TOOL_COPY"/>
       <SelectionContextAction
-            class="org.cs3.pl.console.ClearAction"
+            class="org.cs3.pl.console.internal.actions.ClearAction"
             icon="icons/clear.gif"
             name="clear"/>
+      <SelectionContextAction
+            class="org.cs3.pl.console.internal.actions.SelectAllAction"
+            name="select all"/>
    </extension>
 
 </plugin>
