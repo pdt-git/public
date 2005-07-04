@@ -908,7 +908,7 @@ public class FactGenerator extends ASTVisitor {
 			
 			writer.writeFact("fieldDefT", args);
 			writer.writeFact("slT", new String [] {
-					idResolver.getID(node),
+					id,
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
 			});
