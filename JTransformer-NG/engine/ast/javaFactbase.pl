@@ -1,4 +1,10 @@
 /*
+annotationT(name,[annotations list])
+*/
+:-dynamic annotationT/2.
+:-multifile annotationT/2.
+
+/*
 projectLocationT(#toplevel,Project,SourceFolder)
 */
 :-dynamic projectLocationT/3.
