@@ -1,5 +1,6 @@
-package org.cs3.pl.console;
+package org.cs3.pl.console.internal.actions;
 
+import org.cs3.pl.console.SelectionContextAction;
 import org.eclipse.jface.action.Action;
 import org.eclipse.swt.custom.StyledText;
 
