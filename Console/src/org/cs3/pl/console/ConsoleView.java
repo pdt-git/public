@@ -1,11 +1,17 @@
 package org.cs3.pl.console;
 
+import java.io.IOException;
+
 import org.cs3.pl.common.Debug;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.widgets.Composite;
 
 
 public class ConsoleView  {
 
+	public static final String CONTEXT_ACTION_EXTENSION_POINT_ID = "consoleContextMenu";
+	
     private ConsoleModel model;
 
     private ConsoleUI ui;
@@ -13,12 +19,13 @@ public class ConsoleView  {
     private ConsoleController controller;
 
     
+    
     public ConsoleView() {
         setController(new DefaultConsoleController());
         setUi(new SplitConsoleUI());
         
     }
-
+    
     /**
      * This is a callback that will allow us to create the viewer and initialize
      * it.

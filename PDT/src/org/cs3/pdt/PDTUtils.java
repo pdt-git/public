@@ -100,7 +100,7 @@ public final class PDTUtils {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			IPath p = (IPath) it.next();
 			IResource r = root.findMember(p);
-			if (r.getType() == IResource.FILE) {
+			if (r != null && r.getType() == IResource.FILE) {
 				result.add(r);
 			}
 		}

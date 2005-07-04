@@ -215,5 +215,11 @@
             id="org.cs3.pdt.internal.views.PrologConsoleView"/>
    </perspectiveExtension>
 </extension>
+<extension
+      point="org.cs3.pdt.console.consoleContextMenu">
+   <SelectionContextAction
+         class="org.cs3.pdt.internal.actions.ConsoleErrorMessageGotoLineAction"
+         name="goto error line"/>
+</extension>
 
 </plugin>
