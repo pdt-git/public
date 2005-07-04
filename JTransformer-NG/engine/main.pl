@@ -4,6 +4,7 @@
 :- multifile tearDown/1.
 :- multifile setUp/1.
 
+debugme.
 
 :- ['facade/main'].
 :- ['test/main'].
