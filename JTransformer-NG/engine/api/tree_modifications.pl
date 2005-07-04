@@ -349,7 +349,7 @@ addToMethodArgs(_method, _id) :-
 /** 
  * removeTags(DeletionKind, ID)
     Deletes rekursively all sub trees of a tree, or of a list of trees.
-    Exception ar the targets of break and continue.
+    Exceptions are the targets of break and continue.
 
     Removes  (if they exist) the following 'tags' of a node:
 	slT - the  Sourcelocation

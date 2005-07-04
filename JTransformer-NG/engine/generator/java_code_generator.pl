@@ -38,6 +38,84 @@ generate_synthetic_methods(Generate) :-
    );
    retractall(add_synthetic_methods).
 
+
+/***********************************************************
+ * gen_tree for every possible kind of tree
+ ***********************************************************/
+
+/**
+ * gen_toplevels
+ *
+ * Write all toplevels to the current output project (outdir).
+ * Uses gen_toplevel/1.
+ */
+
+gen_toplevels :-
+  	retractall(sourcePath(_)),
+    appendDir('/gen_classfile_names.txt', _dirfile),
+    createDirsIfNeeded(_dirfile),
+    write_if_fileoutput(_dirfile),
+    open(_dirfile, write, _fileStream),
+    assert(gen_classfile_names(_fileStream)),
+    forall(toplevelT(_id,_,_,_), gen_toplevel(_id)),
+    close(_fileStream),
+    retract(gen_classfile_names(_fileStream)).
+%    write_classpath.
+
+/**
+ * write_classpath
+ *
+ * Reset the current classpath in the output project to
+ * an default classpath containing all sourcefolders.
+ */
+
+write_classpath :-
+    outdir(OutDir),
+    sformat(S, '~a/.classpath',[OutDir]),
+    string_to_atom(S,Classpath),
+    open(Classpath, write, FileStream),
+    format(FileStream,'<?xml version=\"1.0\" encoding=\"UTF-8\"?>~n<classpath>~n<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>~n<classpathentry kind=\"output\" path=\"bin\"/>~n',[]),
+    forall(sourcePath(Path),format(FileStream, '<classpathentry kind=\"src\" path=\"~a\"/>~n',[Path])),
+    format(FileStream,'</classpath>',[]),
+    close(FileStream).
+
+/**
+ * gen_toplevel(+ToplevelId)
+ *
+ * Write the toplevel ToplevelId to the current ouput project (outdir/1).
+ * The source folders will be preserved.
+ */
+
+gen_toplevel(_toplevel) :-
+    toplevelT(_toplevel, _packg, _filename, _defs),
+    !,
+    projectLocationT(_toplevel,Project,_),
+    concat('/',Project,FilenameWOProject, _filename),
+    appendDir(FilenameWOProject, _dirfile),
+    retractall(align(_)),
+    assert(align(0)),
+	(
+	   sourceFolder(_toplevel,SourcePath) ->
+	    assert1T(sourcePath(SourcePath));true),
+    (add_to_gen_classfile_names(_dirfile);true),
+    createDirsIfNeeded(_dirfile),
+    write_if_fileoutput(_dirfile),
+    open(_dirfile, write, _fileStream),
+    retractall(file_output(_)),
+    assert(file_output(_fileStream)),
+    retractall(align(_)),
+    assert1(align(0)),
+    gen_tree(_packg),
+    gen_stats(_defs),
+    retract(file_output(_fileStream)),
+    close(_fileStream).
+
+/*****************************************
+ *********  local predicates *************
+ *****************************************/
+
+
+
 align(0).
 
 throwMsg(Msg,Element):-
@@ -439,47 +517,12 @@ print_if_not_null(_test,_s) :-
     _test \= 'null' -> printf(_s) ; true.
 
 
-/***********************************************************
- * gen_tree for every possible kind of tree
- ***********************************************************/
 
-
-gen_toplevels :-
-    appendDir('/gen_classfile_names.txt', _dirfile),
-    createDirsIfNeeded(_dirfile),
-    write_if_fileoutput(_dirfile),
-    open(_dirfile, write, _fileStream),
-    assert(gen_classfile_names(_fileStream)),
-    forall(toplevelT(_id,_,_,_), gen_toplevel(_id)),
-    close(_fileStream),
-    retract(gen_classfile_names(_fileStream)),
-    write_classpath.
 
 add_to_gen_classfile_names(_filename) :-
     gen_classfile_names(_fileStream),
     format(_fileStream, '~a~n',_filename).
 
-write_classpath :-
-    outdir(OutDir),
-    sformat(S, '~a/.classpath',[OutDir]),
-    string_to_atom(S,Classpath),
-    open(Classpath, write, FileStream),
-    format(FileStream,'<?xml version=\"1.0\" encoding=\"UTF-8\"?>~n<classpath>~n<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>~n<classpathentry kind=\"output\" path=\"bin\"/>~n',[]),
-    forall(sourcePath(Path),format(FileStream, '<classpathentry kind=\"src\" path=\"~a\"/>~n',[Path])),
-    format(FileStream,'</classpath>',[]),
-    close(FileStream).
-    
-    
-    
-/*
-    findall(_tl, toplevelT(_tl,_,_,_), _allTls),
-    gen_toplevels(_allTls).
-
-gen_toplevels([]).
-gen_toplevels([_H | _T]) :-
-    gen_toplevel(_H),
-    gen_toplevels(_T).
-*/
 
 
 createDirsIfNeeded(_filename) :-
@@ -581,31 +624,6 @@ write_if_fileoutput(X) :-
     format('writing ~a~n',[X]).
 write_if_fileoutput(_).
 
-gen_toplevel(_toplevel) :-
-    toplevelT(_toplevel, _packg, _filename, _defs),
-    !,
-    appendDir(_filename, _dirfile),
-    retractall(align(_)),
-    assert(align(0)),
-%    packageT(_packg, Name),
-%    atom_concat('/',Project, '/', Name,_,_filename),
-	(
-	   sourceFolder(_toplevel,SourcePath) ->
-	    assert1T(sourcePath(SourcePath));true),
-    (add_to_gen_classfile_names(_dirfile);true),
-    createDirsIfNeeded(_dirfile),
-    write_if_fileoutput(_dirfile),
-    open(_dirfile, write, _fileStream),
-    %for debugging
-%    current_output(_fileStream),
-    retractall(file_output(_)),
-    assert(file_output(_fileStream)),
-    retractall(align(_)),
-    assert1(align(0)),
-    gen_tree(_packg),
-    gen_stats(_defs),
-    retract(file_output(_fileStream)),
-    close(_fileStream).
 
 debug_this_line(_id) :-
     not(equals(_id, 128548)).

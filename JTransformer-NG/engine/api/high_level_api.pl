@@ -195,6 +195,15 @@ add_classDefT(_id, _owner, _name,Defs):-
 	source folder is bound.
 */
 
+sourceFolder(Toplevel, ''):-
+    projectLocationT(Toplevel,_Project,''),
+    !.
+
+sourceFolder(Toplevel, SourceFolder):-
+    projectLocationT(Toplevel,_Project,SourceFolder),
+    !.
+
+/*
 sourceFolder(Toplevel, Project):-
     projectLocationT(Toplevel,Project,''),
     !.
@@ -204,7 +213,7 @@ sourceFolder(Toplevel, SourceFolder):-
     atom_concat(Project,'/',Tmp),
     atom_concat(Tmp,Folder,SourceFolder),
     !.
-
+*/
 /*
 	defaultProjectSourceFolder(-Project,-SourceFolder,-FullSourceFolder)
 	
