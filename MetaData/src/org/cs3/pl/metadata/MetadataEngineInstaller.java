@@ -21,6 +21,7 @@ public class MetadataEngineInstaller {
         factory.ensureInstalled("runtime.pl", MetadataEngineInstaller.class);
         factory.ensureInstalled("model.pl", MetadataEngineInstaller.class);
         factory.ensureInstalled("metamodel.pl", MetadataEngineInstaller.class);
+        factory.ensureInstalled("abba_graph_generator.pl", MetadataEngineInstaller.class);
         ResourceFileLocator locator = factory.getResourceLocator();
         List l = pif.getBootstrapLibraries();
         l.add(Util.prologFileName(locator.resolve("pdtplugin.pl")));
@@ -28,5 +29,6 @@ public class MetadataEngineInstaller {
         l.add(Util.prologFileName(locator.resolve("runtime.pl")));
         l.add(Util.prologFileName(locator.resolve("model.pl")));
         l.add(Util.prologFileName(locator.resolve("metamodel.pl")));
+        l.add(Util.prologFileName(locator.resolve("abba_graph_generator.pl")));
     }
 }

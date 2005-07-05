@@ -11,6 +11,7 @@ public class ParserTests {
 		suite.addTestSuite(SyntaxTest.class);
 		suite.addTestSuite(StringLineBreakInfoProviderTest.class);
 		suite.addTest(ElementDataTest.suite());
+		suite.addTest(AbbaDataTest.suite());
 		//$JUnit-END$
 		return suite;
 	}
