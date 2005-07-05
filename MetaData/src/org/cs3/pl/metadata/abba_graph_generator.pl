@@ -6,7 +6,7 @@
 
 :- dynamic last_id/1,global_id/2, local_symbol/2, local_id/2.
 :- thread_local local_symbol/2, local_id/2.
-
+:- module_transparent abba_assert_data/1.
 
 abba_assert_data(Term):-
 	replace_local_ids(Term,GlobalTerm),
