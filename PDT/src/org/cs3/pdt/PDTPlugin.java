@@ -540,12 +540,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return location;
     }
 
-    private String guessExecutableName() {
-        String osname = System.getProperty("os.name");
-        if (osname.indexOf("Windows") > -1) {
-            return "plwin";
-        }
-        return "xpce";
-    }
+    
 
 }
