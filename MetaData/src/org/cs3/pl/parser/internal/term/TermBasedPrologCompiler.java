@@ -270,7 +270,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
     					+").\n");
     		}
     		//TODO:saveMetaDataHelpForDynamicPredicates(writer);
-    		//writer.close();
+    		writer.flush();
     		
     	} catch (IOException e1) {
     		Debug.report(e1);
