@@ -9,7 +9,7 @@
 :- module_transparent abba_assert_data/1.
 
 abba_assert_data(Term):-
-	replace_local_ids(Term,GlobalTerm),
+	replace_local_ids_in_args(Term,GlobalTerm),
 	assert(GlobalTerm).
 abba_put_local_symbol(local_id(Local),Symbol):-
 	(	local_symbol(Local,Symbol)
@@ -17,7 +17,8 @@ abba_put_local_symbol(local_id(Local),Symbol):-
 	;	assert(local_symbol(Local,Symbol))
 	).	
 abba_clear_local_symbols:-
-	retractall(local_symbols(_,_)).
+	retractall(local_symbol(_,_)),
+	retractall(local_id(_,_)).
 
 
 
@@ -42,14 +43,18 @@ map_id(Local,Global):-
     ).
     
 		
-replace_lcoal_ids([],[]).
-replace_local_ids([local_id(LId)|LT],	[GId|GT]):-
+replace_local_ids_in_list([],[]).
+replace_local_ids_in_list([local_id(LId)|LT],	[GId|GT]):-
     !,
     map_id(LId,GId),
-    replace_local_ids(LT,GT).
-replace_local_ids(Term,Global):-
+    replace_local_ids_in_list(LT,GT).
+replace_local_ids_in_list([X|LT],	[X|GT]):-
+    !,
+    replace_local_ids_in_list(LT,GT).
+
+replace_local_ids_in_args(Term,Global):-
 	Term=.. TermList,
-	replace_local_ids(TermList,GlobalList),
+	replace_local_ids_in_list(TermList,GlobalList),
 	Global=.. GlobalList.
 	
 unused_id(Id):-

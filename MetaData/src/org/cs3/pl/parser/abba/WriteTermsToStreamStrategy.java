@@ -16,12 +16,12 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 	}
 	public void writeNode(String type, String nodeId, String label) {
 		out
-				.println(prefix + "node(" + nodeId + "," + type + "," + label
-						+ ").");
+				.println(prefix + "abba_assert_data(node(" + nodeId + "," + type + "," + label
+						+ ")).");
 	}
 
 	public void writeProperty(String nodeId, String property, String[] values) {
-		out.print(prefix + "property(" + nodeId + "," + property + "(");
+		out.print(prefix + "abba_assert_data(property(" + nodeId + "," + property + "(");
 		for (int i = 0; i < values.length; i++) {
 			if (i > 0) {
 				out.print(",");
@@ -29,23 +29,22 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 			out.print(values[i]);
 
 		}
-		out.println(")).");
+		out.println("))).");
 	}
 
 	public void writeEdge(String edgeId, String edgeType, String label,
 			String sourceId, String targetId) {
-		out.println(prefix+"edge(" + edgeId + "," + edgeType + "," + label + ","
-				+ sourceId + "," + targetId + ").");
+		out.println(prefix+"abba_assert_data(edge(" + edgeId + "," + edgeType + "," + label + ","
+				+ sourceId + "," + targetId + ")).");
 
 	}
 
 	public void writeSymTabEntry(String globalSymbol, String localId) {
-		// TODO Auto-generated method stub
-		
+		out.println(":- abba_put_local_symbol("+localId+", "+globalSymbol+").");		
 	}
 
 	public void writeRetractSymTab() {
-		// TODO Auto-generated method stub
+		out.println(":- abba_clear_local_symbols.");
 		
 	}
 

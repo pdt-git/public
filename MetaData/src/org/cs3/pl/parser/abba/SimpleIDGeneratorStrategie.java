@@ -31,13 +31,13 @@ public class SimpleIDGeneratorStrategie implements IDGeneratorStrategy {
 			id=new Integer(nextId++);
 			nodeIDs.put(key,id);
 		}
-		return "node_id("+id.toString()+")";
+		return "local_id("+id.toString()+")";
 	}
 
 	public String getEdgeId(String edgeType, String edgeLabel, String fromId,
 			String toId) {
 	
-		return "edge_id("+ (nextId++) +")";
+		return "local_id("+ (nextId++) +")";
 	}
 
 }
