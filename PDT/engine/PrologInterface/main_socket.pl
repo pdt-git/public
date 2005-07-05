@@ -1,0 +1,1 @@
+:- [consult_server].

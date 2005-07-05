@@ -2,6 +2,7 @@
  */
 package org.cs3.pdt.internal.builder;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -63,6 +64,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         PrintStream outputStream = meta.getOutputStream(fileName);
 		try{
 			checker.saveMetaDataForClauses(outputStream);
+			checker.saveAbbaData(new BufferedOutputStream(outputStream));
 		}finally{
 			outputStream.close();
 		}
