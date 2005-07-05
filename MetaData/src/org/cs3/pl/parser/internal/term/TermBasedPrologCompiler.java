@@ -270,7 +270,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
     					+").\n");
     		}
     		//TODO:saveMetaDataHelpForDynamicPredicates(writer);
-    		writer.close();
+    		//writer.close();
     		
     	} catch (IOException e1) {
     		Debug.report(e1);
@@ -289,6 +289,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 		SimpleIDGeneratorStrategie idStrategy = new SimpleIDGeneratorStrategie();
 		root.jjtAccept(
 				new AbbaGraphGenerator(writeStrategy,idStrategy),null);
+		writeStrategy.writeRetractSymTab();
 		out.flush();
 	}
 
