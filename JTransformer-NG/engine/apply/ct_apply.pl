@@ -57,86 +57,6 @@ apply_ctlist_([_head|_tail],[S|ApplyInfoRest]) :-
         !,
         apply_ctlist_(_tail,ApplyInfoRest).
 
-action(add(_elem)):-
-        add(_elem).
-
-/**
- *	add(+pef)
- *	Adds +pef to the factbase.
- *	pef must be a bound PEF term. The addition to the fact base is logged and
- *	will be undone in the next rollback.
- *	
- *	WARNING (Not finally agreed on): If the pef already 
- *	exists the predicate is ignored. The pef is not 
- *	added to the factbase, no rollback information is added.
- */
-
-add(java_fq(Elem)):-
-    !,
-    java_fq_to_pef(Elem,PEF),
-    add(PEF).
-
-add(Elem) :-
-    nonvar(Elem), 
-	call(Elem),
-	!,
-	format('~nWARNING: element: already exists: ~w~n.',[Elem]).
-	
-add(_elem) :-  
-    nonvar(_elem), 
-%    logChange(_elem),
-    assert(_elem), %assert/1 ist ein Standard Pr¨ adikat von ANSI-
-    asserta(rollback(retract(_elem))),
-    markEnclAsDirty(_elem).
-         
-action(delete(_elem)):-
-        delete(_elem).
-
-
-/*
-	delete(+pef)
-	Deletes +pef from the factbase.
-	pef must be a bound PEF term. The deletion from the fact base is logged and
-	will be undone in the next rollback.
-*/
-
-delete(java_fq(Elem)):-
-    !,
-    java_fq_to_pef(Elem,PEF),
-    delete(PEF).
-    
-delete(_elem) :- 
-%    	term_to_atom(_elem,A),
-%    	format('delete: ~a~n~n',[A]),
-
-%        logChange(_elem),
-        nonvar(_elem), 
-        retract(_elem), %retract/1 ist ein Standard Pr¨ adikat von ANSI-
-        markEnclAsDirty(_elem),
-        asserta(rollback(assert(_elem))).
-        
-action(replace(_elem1,_elem2)):-
-        replace(_elem1,_elem2).
-
-replace(java_fq(Elem1),java_fq(Elem2)):-
-    !,
-    java_fq_to_pef(Elem1,PEF1),
-    java_fq_to_pef(Elem2,PEF2),
-    replace(PEF1,PEF2).
-
-replace(_elem1, _elem2) :- delete(_elem1), add(_elem2).
-
-action(replace(_elem)):-
-    replace(_elem).
-
-replace(Elem) :- 
-    Elem =.. [_|[ID|_]],
-    getTerm(ID,ElemOld),
-%    term_to_atom(ElemOld,A),
-%    print(A),
-    flush_output,
-	delete(ElemOld), 
-	add(Elem).
 
 check(_action) :- call(_action).
 apply(empty).
@@ -406,3 +326,72 @@ removeDependencyInstructions(';'(_member,_t), (';'(_memberExp,_T))) :-
 removeDependencyInstruction(dependency_analysis(_command),true):- !.
 removeDependencyInstruction(_command,_command):- !.
 
+
+/**
+ *	add(+pef)
+ *	Adds +pef to the factbase.
+ *	pef must be a bound PEF term. The addition to the fact base is logged and
+ *	will be undone in the next rollback.
+ *	
+ *	WARNING (Not finally agreed on): If the pef already 
+ *	exists the predicate is ignored. The pef is not 
+ *	added to the factbase, no rollback information is added.
+ */
+
+add(java_fq(Elem)):-
+    !,
+    java_fq_to_pef(Elem,PEF),
+    add(PEF).
+
+add(Elem) :-
+    nonvar(Elem), 
+	call(Elem),
+	!,
+	format('~nWARNING: element: already exists: ~w~n.',[Elem]).
+	
+add(_elem) :-  
+    nonvar(_elem), 
+%    logChange(_elem),
+    assert(_elem), %assert/1 ist ein Standard Pr¨ adikat von ANSI-
+    asserta(rollback(retract(_elem))),
+    markEnclAsDirty(_elem).
+
+    
+/*
+	delete(+pef)
+	Deletes +pef from the factbase.
+	pef must be a bound PEF term. The deletion from the fact base is logged and
+	will be undone in the next rollback.
+*/
+
+delete(java_fq(Elem)):-
+    !,
+    java_fq_to_pef(Elem,PEF),
+    delete(PEF).
+    
+delete(_elem) :- 
+%    	term_to_atom(_elem,A),
+%    	format('delete: ~a~n~n',[A]),
+
+%        logChange(_elem),
+        nonvar(_elem), 
+        retract(_elem), %retract/1 ist ein Standard Pr¨ adikat von ANSI-
+        markEnclAsDirty(_elem),
+        asserta(rollback(assert(_elem))).
+
+replace(java_fq(Elem1),java_fq(Elem2)):-
+    !,
+    java_fq_to_pef(Elem1,PEF1),
+    java_fq_to_pef(Elem2,PEF2),
+    replace(PEF1,PEF2).
+
+replace(_elem1, _elem2) :- delete(_elem1), add(_elem2).
+
+replace(Elem) :- 
+    Elem =.. [_|[ID|_]],
+    getTerm(ID,ElemOld),
+%    term_to_atom(ElemOld,A),
+%    print(A),
+    flush_output,
+	delete(ElemOld), 
+	add(Elem).

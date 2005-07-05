@@ -239,7 +239,15 @@ action(delete(class(_id, _owner, _name))) :-
     classDefT(_id, _owner, _name, Defs),
     delete(classDefT(_id, _owner, _name, Defs)),
     findall(Modifier,(modifierT(_id,Modifier),delete(modifierT(_id,Modifier))),_).
+
+
+action(delete(class(_id, _owner, _name,_content))) :-
+	action(delete(class(_id, _owner, _name))).
     
+
+action(replace(class(_id, _owner, _name,_content),class(_id, _owner1, _name1,_content1))) :-
+	action(replace(class(_id, _owner, _name),class(_id, _owner1, _name1))).
+
 action(replace(class(_id, _owner, _name),class(_id, _owner1, _name1))) :-
     classDefT(_id,_,_,_defs),
     !,
@@ -720,3 +728,24 @@ initLastID :-
   assert(lastID(10000)).
   
 :- initLastID.
+
+
+/*************************************************************************************
+ * Keep the default actions add/1, delete/1 and replace/2 predicates at the end of the file!
+ * Otherwise the more specialized predicates will NOT be used and the operations
+ * will typically try to change a static predicate.
+ *************************************************************************************
+ */
+
+action(add(_elem)):-
+        add(_elem).
+         
+action(delete(_elem)):-
+        delete(_elem).
+        
+action(replace(_elem1,_elem2)):-
+        replace(_elem1,_elem2).
+
+action(replace(_elem)):-
+    replace(_elem).
+
