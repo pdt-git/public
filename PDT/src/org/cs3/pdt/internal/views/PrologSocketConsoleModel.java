@@ -7,7 +7,9 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Vector;
 
+import org.cs3.pdt.QueryExpansion;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
@@ -74,6 +76,8 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
     private Socket socket;
 
+	private Vector expansions = new Vector();
+
     public PrologSocketConsoleModel()  {      
         this.port = 5567;
         connect();
@@ -109,7 +113,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         fireOutputEvent(cme);
         
 		try {
-			writer.write(lineBuffer);
+			writer.write(expandQuery(lineBuffer));
 			writer.write("\n");
 			writer.flush();
 
@@ -122,6 +126,29 @@ public class PrologSocketConsoleModel implements ConsoleModel {
     }
 
 
+	private String expandQuery(String query) {
+		for (Iterator it = expansions.iterator(); it.hasNext();) {
+			QueryExpansion exp = (QueryExpansion) it.next();
+			query=exp.apply(query);
+		}
+		return query;
+	}
+	public void registerQueryExpansion(QueryExpansion s){
+		synchronized (expansions) {
+			if(!expansions.contains(s)){
+				expansions.add(s);		
+			}
+		}
+	}
+	
+	public void unregisterQueryExpansion(QueryExpansion s){
+		synchronized (expansions) {
+			if(expansions.contains(s)){
+				expansions.remove(s);		
+			}
+		}
+	}
+	
     public void addConsoleListener(ConsoleModelListener cml) {
         synchronized (listeners){
             listeners.add(cml);
