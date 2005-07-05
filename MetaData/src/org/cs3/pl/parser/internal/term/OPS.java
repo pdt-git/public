@@ -16,7 +16,7 @@ public class OPS {
 		ops.push(null);
 	}
 	public void pushInfixOp(String image){
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		if(image==null){
@@ -31,7 +31,7 @@ public class OPS {
 			ops.push(null);
 		}		
 		else{
-			if(image.startsWith("'")){
+			if(image.startsWith("'")&&image.length()>2){
 				image=image.substring(1,image.length()-1);
 			}
 			ops.push(prefix_map.get(image));
@@ -69,7 +69,7 @@ public class OPS {
 	}
 	
 	public int lookupInfixPrec(String image){
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		int[] p=(int[]) infix_map.get(image);
@@ -81,7 +81,7 @@ public class OPS {
 	}
 	
 	public int lookupPrefixPrec(String image){
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		int[] p=(int[]) prefix_map.get(image);
@@ -102,7 +102,7 @@ public class OPS {
 	}
 	
 	public boolean isValidRHInfixOp(String image,int lhprec){
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		//System.err.println("isValidRhInfixOp: "+image);
@@ -131,7 +131,7 @@ public class OPS {
 	}
 	
 	public boolean isValidRHPrefixOp(String image, String nextImage){
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		int op=lookupPrefixPrec(image);
@@ -172,7 +172,7 @@ public class OPS {
 	}
 	
 	public int lookupInfixLHBound(String image) {
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		int[] p = (int[]) infix_map.get(image);
@@ -183,7 +183,7 @@ public class OPS {
 	}
 	
 	public int lookupInfixRHBound(String image) {
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		int[] p = (int[]) infix_map.get(image);
@@ -194,7 +194,7 @@ public class OPS {
 	}
 	
 	public int lookupPrefixRHBound(String image) {
-		if(image.startsWith("'")){
+		if(image.startsWith("'")&&image.length()>2){
 			image=image.substring(1,image.length()-1);
 		}
 		int[] p = (int[]) prefix_map.get(image);
