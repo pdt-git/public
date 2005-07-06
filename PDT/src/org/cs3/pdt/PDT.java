@@ -77,6 +77,17 @@ public final  class PDT {
      */
     public static final String PROP_NO_AUTO_CONSULT = "pdt.no.auto.consult";
 
+    /**
+     * a regular expression. Only files in the source folder, that 
+     * match this pattern are considered during builds.
+     */
+    public static final String PROP_SOURCE_INCLUSION_PATTERN = "pdt.inclusion.pattern";
+	
+    /**
+     * a regular expression. Files in the source folder, that match thise pattern
+     * are exlcluded from the build, even if they match the inclusion pattern.
+     */
+    public static final String PROP_SOURCE_EXCLUSION_PATTERN = "pdt.exlusion.pattern";
    
     public static final String LOC_PIF = "engine/PrologInterface";
     public static final String LOC_MODEL = "engine/MetaData";
@@ -119,7 +130,8 @@ public final  class PDT {
      * log file location used by the pdt plugin.
      */
     public static final String PREF_CLIENT_LOG_FILE = "pdt.logfile";
-
+	
+	
 	/**
      * @return all open IPrologProjects that operate on the given PrologInterface instance.
      * @throws CoreException
