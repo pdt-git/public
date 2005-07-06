@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.jlmp.internal.properties;
+package org.cs3.pdt.ui.util;
 
 import java.util.Iterator;
 import java.util.Vector;
