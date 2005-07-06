@@ -2,6 +2,7 @@ package org.cs3.pdt;
 
 import java.util.Set;
 
+import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -11,21 +12,10 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * not much yet ;-)
  */
-public interface IPrologProject {
-    /**
-     * get the current source path
-     * @return a list pf project relative paths, delimited by the platforms path.separator char.
-     * @throws CoreException
-     */
-    public String getSourcePath() throws CoreException ;
+public interface IPrologProject extends OptionProvider{
+    
 
-    /**
-     * set the current source path.
-     * 
-     * @param path a list pf project relative paths, delimited by the platforms path.separator char.
-     * @throws CoreException
-     */
-    public void setSourcePath(String path) throws CoreException;
+	    
     
     /**
      * parses the current value of the sourcePath property and returns

@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -201,11 +200,6 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 						getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
 				s.queryOnce("retractall(project_option('" + projectName
 						+ "', _))");
-			} catch (CoreException e) {
-				Debug.report(e);
-				throw new RuntimeException(
-						"could not upload output folder location to prolog system",
-						e);
 			} finally {
 				s.dispose();
 			}
@@ -371,12 +365,17 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 	 * @throws CoreException
 	 */
 	public String getPreferenceValue(String key, String defaultValue)
-			throws CoreException {
+			{
 		String value = System.getProperty(key);
 		if (value != null) {
 			return value;
 		}
-		value = getProject().getPersistentProperty(new QualifiedName("", key));
+		try {
+			value = getProject().getPersistentProperty(new QualifiedName("", key));
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
 		if (value != null) {
 			return value;
 		}
@@ -395,30 +394,23 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 	 * @see org.cs3.jlmp.JLMPProject#reconfigure()
 	 */
 	public void reconfigure(PrologSession s) {
-		try {
-			String projectName = getProject().getName();
-			String outputFolder = Util.prologFileName(new File(
-					getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
-			String outputProject = Util.prologFileName(new File(
-					getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
-			boolean inplace = Boolean.valueOf(
-					Util.prologFileName(new File(getPreferenceValue(
-							JLMP.PROP_INPLACE, "false")))).booleanValue();
+		String projectName = getProject().getName();
+		String outputFolder = Util.prologFileName(new File(
+				getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
+		String outputProject = Util.prologFileName(new File(
+				getPreferenceValue(JLMP.PROP_OUTPUT_FOLDER, null)));
+		boolean inplace = Boolean.valueOf(
+				Util.prologFileName(new File(getPreferenceValue(
+						JLMP.PROP_INPLACE, "false")))).booleanValue();
 
-			s.queryOnce("retractall(project_option('" + projectName + "'))");
+		s.queryOnce("retractall(project_option('" + projectName + "'))");
+		s.queryOnce("assert(project_option('" + projectName
+				+ "', output_project('" + outputProject + "')))");
+		s.queryOnce("assert(project_option('" + projectName
+				+ "', output_folder('" + outputFolder + "')))");
+		if (inplace) {
 			s.queryOnce("assert(project_option('" + projectName
-					+ "', output_project('" + outputProject + "')))");
-			s.queryOnce("assert(project_option('" + projectName
-					+ "', output_folder('" + outputFolder + "')))");
-			if (inplace) {
-				s.queryOnce("assert(project_option('" + projectName
-						+ "',inplace))");
-			}
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(
-					"could not upload output folder location to prolog system",
-					e);
+					+ "',inplace))");
 		}
 
 	}
@@ -452,6 +444,16 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void setPreferenceValue(String id, String value) {
+		try {
+			getProject().setPersistentProperty(new QualifiedName("", id), value);
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+		
 	}
 
 }

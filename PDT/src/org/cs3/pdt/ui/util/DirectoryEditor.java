@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.jlmp.internal.properties;
+package org.cs3.pdt.ui.util;
 
 import org.cs3.pl.common.Option;
 import org.eclipse.swt.SWT;
@@ -12,17 +12,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 /**
  */
-public class FileEditor extends OptionEditor implements PropertyEditor {
+public class DirectoryEditor extends OptionEditor implements PropertyEditor {
     private static final int TEXT_FIELD_WIDTH = 20;
     private Text valueField;
     private Button button;
-    public FileEditor(Composite parent, Option option) {
+    public DirectoryEditor(Composite parent, Option option) {
         super(parent, option);
 
     }
@@ -85,10 +85,11 @@ public class FileEditor extends OptionEditor implements PropertyEditor {
         button.setLayoutData(gd);
         button.addSelectionListener(new SelectionListener() {
             public void widgetSelected(SelectionEvent e) {
-               FileDialog d = new FileDialog(parent.getShell());
+               DirectoryDialog d = new DirectoryDialog(parent.getShell());
                if(getValue()!=null){
                    d.setFilterPath(getValue());
                }
+               d.setMessage("Select folder");
                d.setText(option.getLabel());
                String s = d.open();
                if(s!=null){

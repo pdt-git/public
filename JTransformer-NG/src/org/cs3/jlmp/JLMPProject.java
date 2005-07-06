@@ -8,6 +8,7 @@ import java.io.PrintStream;
 import org.cs3.jlmp.regenerator.ISourceRegenerator;
 import org.cs3.jlmp.regenerator.SourceCodeRegenerator;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -35,7 +36,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * can obtain a PrologInterface instance from the respective JLMPProject.
  *  
  */
-public interface JLMPProject {
+public interface JLMPProject extends OptionProvider{
     /**
      * @return the underlying project.
      */
@@ -102,7 +103,7 @@ public interface JLMPProject {
      * @throws CoreException
      * @throws CoreException
      */
-    public String getPreferenceValue(String key, String defaultValue) throws CoreException;
+    public String getPreferenceValue(String key, String defaultValue) ;
 
     /**
      * 

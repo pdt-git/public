@@ -394,19 +394,14 @@ public class FactBaseBuilder {
             return -1;
         }
         if (storeTimeStamp == -1) {
-            try {
-                String filename = jlmpProject.getPreferenceValue(
-                        JLMP.PROP_PEF_STORE_FILE, "");
-                File file = new File(filename);
-                if (file.canRead()) {
-                    storeTimeStamp = file.lastModified();
-                } else {
-                    storeTimeStamp = -1;
-                }
-            } catch (CoreException e) {
-                Debug.report(e);
-                throw new RuntimeException(e);
-            }
+            String filename = jlmpProject.getPreferenceValue(
+			        JLMP.PROP_PEF_STORE_FILE, "");
+			File file = new File(filename);
+			if (file.canRead()) {
+			    storeTimeStamp = file.lastModified();
+			} else {
+			    storeTimeStamp = -1;
+			}
 
         }
 

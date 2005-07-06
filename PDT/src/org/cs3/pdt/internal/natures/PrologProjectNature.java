@@ -12,6 +12,8 @@ import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Option;
+import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
@@ -36,6 +38,7 @@ import org.eclipse.core.runtime.jobs.Job;
 public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private IProject project;
+	private Option[] options;
 
 	/**
 	 * @see IProjectNature#configure
@@ -148,38 +151,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pdt.IPrologProject#getSourcePath()
-	 */
-	public String getSourcePath() throws CoreException {
-		String val = null;
-		val = getProject().getPersistentProperty(
-				new QualifiedName("", PDT.PROP_SOURCE_PATH));
-		if (val == null) {
-			val = PDTPlugin.getDefault().getPreferenceValue(
-					PDT.PREF_SOURCE_PATH_DEFAULT, "");
-		}
-		return val;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pdt.IPrologProject#setSourcePath(java.lang.String)
-	 */
-	public void setSourcePath(String path) throws CoreException {
-		getProject().setPersistentProperty(
-				new QualifiedName("", PDT.PROP_SOURCE_PATH), path);
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
 	 * @see org.cs3.pdt.IPrologProject#getExistingSourcePathEntries()
 	 */
 	public Set getExistingSourcePathEntries() throws CoreException {
-		Set r = new HashSet();
-		String[] elms = getSourcePath().split(
+ 		Set r = new HashSet();
+		String[] elms = getPreferenceValue(PDT.PROP_SOURCE_PATH,"/").split(
 				System.getProperty("path.separator"));
 		for (int i = 0; i < elms.length; i++) {
 			IProject p = getProject();
@@ -205,7 +181,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 */
 	public boolean isPrologSource(IResource resource) throws CoreException {
 		Set sourcePathEntries = getExistingSourcePathEntries();
-
+		
 		if (!resource.exists()) {
 			return false;
 		}
@@ -213,9 +189,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			return true;
 		}
 		if (resource.getType() == IResource.FILE) {
-			String ext = resource.getFileExtension();
-			return ext != null && ext.equals("pl")
-					&& isPrologSource(resource.getParent());
+			String incl = getPreferenceValue(PDT.PROP_SOURCE_INCLUSION_PATTERN,"");
+			String excl = getPreferenceValue(PDT.PROP_SOURCE_EXCLUSION_PATTERN,"");
+			String path = resource.getFullPath().toString();
+			return isPrologSource(resource.getParent())
+				&& path.matches(incl)
+				&& ! path.matches(excl);
 		} else if (resource.getType() == IResource.FOLDER) {
 			return isPrologSource(resource.getParent());
 		}
@@ -266,6 +245,78 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}		
 		
 		return pif;
+	}
+
+	public Option[] getOptions() {
+		if(options==null){
+			options=new Option[]{
+					new SimpleOption(PDT.PROP_SOURCE_PATH,"Source Path","List of folders in which the PDT looks for Prolog code.",Option.DIRS,"/"){
+						public String getDefault() {						
+							return PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_SOURCE_PATH_DEFAULT,"/");
+						}
+					},
+					new SimpleOption(PDT.PROP_SOURCE_INCLUSION_PATTERN,"Inclusion Pattern","Regular expression - only matched files are considered prolog source code.",Option.STRING,".*\\.pl"),
+					new SimpleOption(PDT.PROP_SOURCE_EXCLUSION_PATTERN,"Exclusion Pattern","Regular expression - matched files are excluded even if they match the inclusion pattern.",Option.STRING,""),
+			};
+		}
+		return options;
+	}
+
+	public void reconfigure() {
+		;
+		//FIXME: should trigger a rebuild? or not?
+	}
+
+	/**
+	 * look up a preference value.
+	 * <p>
+	 * tries the following values in the given order and returns the first
+	 * non-null result. If everything returns null, the given defaultValue is
+	 * returned.
+	 * <ul>
+	 * <li>System.getProperty(key)</li>
+	 * <li>getProject().getPersistentProperty(key)</li>
+	 * <li>if an option with the given id exists in the array returned by
+	 * getOptions(), take its default value</li>
+	 * <li>the given default value
+	 * </ul>
+	 * 
+	 * @param key
+	 * @return the value or specified default if no such key exists..
+	 * @throws CoreException
+	 */
+	public String getPreferenceValue(String key, String defaultValue)
+			{
+		String value = System.getProperty(key);
+		if (value != null) {
+			return value;
+		}
+		try {
+			value = getProject().getPersistentProperty(new QualifiedName("", key));
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+		if (value != null) {
+			return value;
+		}
+		Option[] o = getOptions();
+		for (int i = 0; i < o.length; i++) {
+			if (o[i].getId().equals(key)) {
+				return o[i].getDefault();
+			}
+		}
+		return defaultValue;
+	}
+	
+	public void setPreferenceValue(String id, String value) {		
+			try {
+				getProject().setPersistentProperty(
+				new QualifiedName("", id), value);
+			} catch (CoreException e) {
+				Debug.report(e);
+				throw new RuntimeException(e);
+			}				
 	}
 
 }
