@@ -22,5 +22,5 @@ debugme.
 :- ['persistance/main'].
 :- ['ast/main'].
 :- ['metrics/main'].
-:- [pdtplugin].
+%:- [pdtplugin]. --> this is part of the pdt. don't load it here!
 :- ['java_lang_init'].
