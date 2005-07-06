@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
@@ -38,6 +37,7 @@ import org.eclipse.core.runtime.jobs.Job;
 public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private IProject project;
+
 	private Option[] options;
 
 	/**
@@ -60,19 +60,19 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			newBuilders[builders.length] = builder;
 			descr.setBuildSpec(newBuilders);
 			project.setDescription(descr, null);
-			
-			
+
 			PrologInterface pif = getPrologInterface();
 			if (pif.isUp()) {
-				Job j = new Job("building Prolog Metadata for project " + project.getName()) {
+				Job j = new Job("building Prolog Metadata for project "
+						+ project.getName()) {
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							IWorkspaceDescription wd = ResourcesPlugin
 									.getWorkspace().getDescription();
 							if (wd.isAutoBuilding()) {
-								project.build(IncrementalProjectBuilder.FULL_BUILD,
-										PDT.BUILDER_ID,null,
-										monitor);
+								project.build(
+										IncrementalProjectBuilder.FULL_BUILD,
+										PDT.BUILDER_ID, null, monitor);
 							}
 						} catch (OperationCanceledException opc) {
 							return Status.CANCEL_STATUS;
@@ -87,15 +87,16 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 						return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
 					}
 
-				};				
+				};
 				j.schedule();
 			} else {
-				// if the pif is not up yet, this is no problem at all: the reload
+				// if the pif is not up yet, this is no problem at all: the
+				// reload
 				// hook will
 				// take care of the due build in its afterInit method.
 				;
 			}
-			
+
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -154,8 +155,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * @see org.cs3.pdt.IPrologProject#getExistingSourcePathEntries()
 	 */
 	public Set getExistingSourcePathEntries() throws CoreException {
- 		Set r = new HashSet();
-		String[] elms = getPreferenceValue(PDT.PROP_SOURCE_PATH,"/").split(
+		Set r = new HashSet();
+		String[] elms = getPreferenceValue(PDT.PROP_SOURCE_PATH, "/").split(
 				System.getProperty("path.separator"));
 		for (int i = 0; i < elms.length; i++) {
 			IProject p = getProject();
@@ -181,7 +182,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 */
 	public boolean isPrologSource(IResource resource) throws CoreException {
 		Set sourcePathEntries = getExistingSourcePathEntries();
-		
+
 		if (!resource.exists()) {
 			return false;
 		}
@@ -189,12 +190,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			return true;
 		}
 		if (resource.getType() == IResource.FILE) {
-			String incl = getPreferenceValue(PDT.PROP_SOURCE_INCLUSION_PATTERN,"");
-			String excl = getPreferenceValue(PDT.PROP_SOURCE_EXCLUSION_PATTERN,"");
+			String incl = getPreferenceValue(PDT.PROP_SOURCE_INCLUSION_PATTERN,
+					"");
+			String excl = getPreferenceValue(PDT.PROP_SOURCE_EXCLUSION_PATTERN,
+					"");
 			String path = resource.getFullPath().toString();
-			return isPrologSource(resource.getParent())
-				&& path.matches(incl)
-				&& ! path.matches(excl);
+			return isPrologSource(resource.getParent()) && path.matches(incl)
+					&& !path.matches(excl);
 		} else if (resource.getType() == IResource.FOLDER) {
 			return isPrologSource(resource.getParent());
 		}
@@ -242,29 +244,71 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
-		}		
-		
+		}
+
 		return pif;
 	}
 
 	public Option[] getOptions() {
-		if(options==null){
-			options=new Option[]{
-					new SimpleOption(PDT.PROP_SOURCE_PATH,"Source Path","List of folders in which the PDT looks for Prolog code.",Option.DIRS,"/"){
-						public String getDefault() {						
-							return PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_SOURCE_PATH_DEFAULT,"/");
+		if (options == null) {
+			options = new Option[] {
+					new SimpleOption(
+							PDT.PROP_SOURCE_PATH,
+							"Source Path",
+							"List of folders in which the PDT looks for Prolog code.",
+							Option.DIRS, "/") {
+						public String getDefault() {
+							return PDTPlugin.getDefault().getPreferenceValue(
+									PDT.PREF_SOURCE_PATH_DEFAULT, "/");
 						}
 					},
-					new SimpleOption(PDT.PROP_SOURCE_INCLUSION_PATTERN,"Inclusion Pattern","Regular expression - only matched files are considered prolog source code.",Option.STRING,".*\\.pl"),
-					new SimpleOption(PDT.PROP_SOURCE_EXCLUSION_PATTERN,"Exclusion Pattern","Regular expression - matched files are excluded even if they match the inclusion pattern.",Option.STRING,""),
-			};
+					new SimpleOption(
+							PDT.PROP_SOURCE_INCLUSION_PATTERN,
+							"Inclusion Pattern",
+							"Regular expression - only matched files are considered prolog source code.",
+							Option.STRING, ".*\\.pl"),
+					new SimpleOption(
+							PDT.PROP_SOURCE_EXCLUSION_PATTERN,
+							"Exclusion Pattern",
+							"Regular expression - matched files are excluded even if they match the inclusion pattern.",
+							Option.STRING, ""), };
 		}
 		return options;
 	}
 
 	public void reconfigure() {
-		;
-		//FIXME: should trigger a rebuild? or not?
+		Job j = new Job("Building Prolog Metadata") {
+			public IStatus run(IProgressMonitor monitor) {
+				try {
+
+					;
+					IProject project = getProject();
+					Debug.debug("PDTReloadHook.afterInit: lets build project "
+							+ project);
+					
+					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
+							PDT.BUILDER_ID, null, monitor);
+					
+					Debug.debug("PDTReloadHook.afterInit: done: " + project);
+
+				} catch (OperationCanceledException opc) {
+					return Status.CANCEL_STATUS;
+				} catch (Exception e) {
+					return new Status(IStatus.ERROR, PDT.PLUGIN_ID, -1,
+							"Problems during build", e);
+				}
+				return Status.OK_STATUS;
+			}
+
+			public boolean belongsTo(Object family) {
+				return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+			}
+
+		};
+
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.schedule();
+
 	}
 
 	/**
@@ -285,14 +329,14 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * @return the value or specified default if no such key exists..
 	 * @throws CoreException
 	 */
-	public String getPreferenceValue(String key, String defaultValue)
-			{
+	public String getPreferenceValue(String key, String defaultValue) {
 		String value = System.getProperty(key);
 		if (value != null) {
 			return value;
 		}
 		try {
-			value = getProject().getPersistentProperty(new QualifiedName("", key));
+			value = getProject().getPersistentProperty(
+					new QualifiedName("", key));
 		} catch (CoreException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
@@ -308,15 +352,15 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 		return defaultValue;
 	}
-	
-	public void setPreferenceValue(String id, String value) {		
-			try {
-				getProject().setPersistentProperty(
-				new QualifiedName("", id), value);
-			} catch (CoreException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			}				
+
+	public void setPreferenceValue(String id, String value) {
+		try {
+			getProject()
+					.setPersistentProperty(new QualifiedName("", id), value);
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
 	}
 
 }

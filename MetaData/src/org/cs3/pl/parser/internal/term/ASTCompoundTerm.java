@@ -87,7 +87,7 @@ public class ASTCompoundTerm extends SimpleNode {
 		ASTCompoundTerm copy = (ASTCompoundTerm) clone(linked,false);
 		copy.children[0]=getPrincipal().toCanonicalTerm(linked,deep);
 		SimpleNode argTerm = ((SimpleNode)children[1]);
-		if(argTerm instanceof ASTInfixTerm && argTerm.getPrincipal().getSyntheticImage().equals(",")){
+		if(argTerm instanceof ASTInfixTerm && argTerm.getPrincipal().getValue().equals(",")){
 			ASTInfixTerm  argTermClone=(ASTInfixTerm) argTerm.clone(linked,false);
 			argTermClone.children=new Node[argTerm.children.length];
 			for(int i=0;i<argTermClone.children.length;i++){

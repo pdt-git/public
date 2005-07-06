@@ -3,6 +3,7 @@
 package org.cs3.pdt.internal.builder;
 
 import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -48,8 +49,8 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         super();
     }
 
-    private void build(IFile file) throws CoreException, IOException {
-        file.deleteMarkers(IMarker.PROBLEM, true, 0);
+    private void build(IFile file,PrintStream outputStream) throws CoreException, IOException {
+        
         IFileLineBreakInfoProvider lineInfo = new IFileLineBreakInfoProvider(
                 file);
         MarkerProblemCollector collector = new MarkerProblemCollector(file,
@@ -61,13 +62,10 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         checker.compile(fileName, file.getContents(), lineInfo);
         PDTPlugin plugin = PDTPlugin.getDefault();
         ConsultService meta = plugin.getConsultService(PDT.CS_METADATA);
-        PrintStream outputStream = meta.getOutputStream(fileName);
-		try{
+        
 			checker.saveMetaDataForClauses(outputStream);
 			checker.saveAbbaData(new BufferedOutputStream(outputStream));
-		}finally{
-			outputStream.close();
-		}
+			
         if (collector.getMaxSeverity() < IMarker.SEVERITY_ERROR) {
             autoConsult(file);
         }
@@ -131,23 +129,31 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 collect(getDelta(getProject()), buildList, forgetList);
                 break;
             case IncrementalProjectBuilder.FULL_BUILD:
+				getProject().deleteMarkers(IMarker.PROBLEM,true,IResource.DEPTH_INFINITE);
                 collect(getProject(), buildList);
                 break;
             case IncrementalProjectBuilder.CLEAN_BUILD:
-
+				getProject().deleteMarkers(IMarker.PROBLEM,true,IResource.DEPTH_INFINITE);
                 collect(getProject(), forgetList);
-                buildList.addAll(forgetList);
                 break;
             default:
                 Debug.error("Wasn das für ein Buil kind jetzt?");
                 return null;
             }
+			forgetList.addAll(buildList);
 			Debug.debug("MetaDataBuilder.build(...) wants to forget: "+forgetList.toString());
 			Debug.debug("MetaDataBuilder.build(...) wants to build: "+buildList.toString());
             monitor.beginTask(taskname, forgetList.size() + buildList.size());
-            forget(forgetList, new SubProgressMonitor(monitor, forgetList
+            PrintStream out = PDTPlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+			//PrintStream out = new PrintStream(new FileOutputStream("/tmp/consulted.pl"));
+			try{
+			forget(forgetList, out, new SubProgressMonitor(monitor, forgetList
                     .size()));
-            build(buildList, new SubProgressMonitor(monitor, buildList.size()));
+            build(buildList, out, new SubProgressMonitor(monitor, buildList.size()));
+			}
+			finally{
+				out.close();
+			}
 			Debug.debug("MetaDataBuilder.build(...) is done.");
             monitor.done();
             return null;
@@ -165,7 +171,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
      * @throws IOException
      * @throws CoreException
      */
-    private void build(Set v, IProgressMonitor monitor) throws CoreException,
+    private void build(Set v, PrintStream out,IProgressMonitor monitor) throws CoreException,
             IOException {
         monitor.beginTask("building prolog metadata", v.size());
         final HashMap timings = new HashMap();
@@ -177,7 +183,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
              
             try{
             	long time = System.currentTimeMillis();
-            	build(file);
+            	build(file,out);
             	time = System.currentTimeMillis()-time;
             	timings.put(filenames[i++],new Long(time));
             }catch (Throwable e) {
@@ -214,7 +220,14 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
     protected void clean(IProgressMonitor monitor) throws CoreException {
         Set forgetList = new HashSet();
         collect(getProject(), forgetList);
-        forget(forgetList, monitor);
+		getProject().deleteMarkers(IMarker.PROBLEM,true,IResource.DEPTH_INFINITE);
+		PrintStream out = PDTPlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+		try{		
+			forget(forgetList,out, monitor);
+		}
+		finally{
+			out.close();
+		}
     }
 
     /**
@@ -281,27 +294,25 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         });
     }
 
-    private void forget(IFile file) {
-        ConsultService meta = PDTPlugin.getDefault().getConsultService(
-                PDT.CS_METADATA);
-
+    private void forget(IFile file, PrintStream out) throws CoreException {
+        file.deleteMarkers(IMarker.PROBLEM, true, 0);
         String s = file.getFullPath().toString();
-        //FIXME:
-        throw new RuntimeException("FIXME: how to unconuslt metadata?");
-        //        if(meta.isConsulted(s)){
-        //            meta.unconsult(s);
-        //        }
+		out.println(":- retractall(meta_data_module('"+s+"',_,_)).");
+		out.println(":- retractall(meta_data('"+s+"',_,_,_,_,_,_,_,_)).");
+
     }
 
     /**
+     * @param out 
      * @param forgetList
      * @param monitor
+     * @throws CoreException 
      */
-    private void forget(Set v, IProgressMonitor monitor) {
+    private void forget(Set v, PrintStream out, IProgressMonitor monitor) throws CoreException {
         monitor.beginTask("forgetting prolog metadata", v.size());
         for (Iterator it = v.iterator(); it.hasNext();) {
             IFile file = (IFile) it.next();
-            forget(file);
+            forget(file,out);
             monitor.worked(1);
         }
         monitor.done();

@@ -87,11 +87,17 @@ public class TermParserUtils {
 
 	public static boolean shouldBeQuoted(String atomValue) {
 		//TODO: when exactly?
+		if(true){
+			return true;
+		}
 		OPS ops = new OPS();
 		if(ops.isInfixOp(atomValue)||ops.isPrefixOp(atomValue)){
 			return true;
 		}
 		if(atomValue.indexOf(",")>=0){
+			return true;
+		}
+		if(atomValue.indexOf("$")>=0){
 			return true;
 		}
 		if(atomValue.indexOf(".")>=0){

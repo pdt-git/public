@@ -244,13 +244,13 @@ public class TermBasedPrologCompiler implements PrologCompiler {
     		String moduleHelp = moduleComment;
     		if (moduleHelp == null)
     			moduleHelp = "";
-    		writer.write(METADATAMODULE+ "('"+symbolicFileName+"','" + 
-    				module + "', \"" + moduleHelp+"\").\n"); 
+    		writer.write(":- user:assert("+METADATAMODULE+ "('"+symbolicFileName+"','" + 
+    				module + "', \"" + moduleHelp+"\")).\n"); 
     		//HashMap publicElements = checker.getPublicModulePredicates();
     		for (Iterator iter = clauses.iterator(); iter.hasNext();) {
 				Clause data  = (Clause) iter.next();
     			
-    			writer.write(METADATA+"('"+symbolicFileName+"'," + module 
+    			writer.write(":- user:assert("+METADATA+"('"+symbolicFileName+"'," + module 
     					+","+ data.getLabel()
     					+","+ data.getArity()
     					+","+ data.isPublic()
@@ -258,16 +258,16 @@ public class TermBasedPrologCompiler implements PrologCompiler {
     					+","+ data.getLength()					
     					+","+ data.isDynamic()
     					+","+ data.isMultifile()
-    					+").\n");
+    					+")).\n");
     			String comment = (String) comments.get(data.getSignature());
     			if (comment != null)
-    			writer.write(METADATAHELP 
+    			writer.write(":- user:assert("+METADATAHELP 
     					+"("
     					+ module
     					+"," +data.getLabel()
     					+","+ data.getArity()
     					+","+ comment
-    					+").\n");
+    					+")).\n");
     		}
     		//TODO:saveMetaDataHelpForDynamicPredicates(writer);
     		writer.flush();

@@ -35,7 +35,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 	public Object visit(ASTCompilationUnit node, Object data) {
 		Object o = traverseChildren(node,data);
 		if(moduleName!=null){
-			node.moduleName=moduleName.getSyntheticImage();
+			node.moduleName=moduleName.getValue();
 		}
 		return o;
 	}

@@ -59,9 +59,9 @@ public class ASTCharacters extends SimpleNode implements Atomic{
 	
 	
 	public SimpleNode toCanonicalTerm(boolean linked, boolean deep) {
-		if(TermParserUtils.shouldBeQuoted(getValue())){
-			return super.toCanonicalTerm(linked, deep);
-		}
+//		if(TermParserUtils.shouldBeQuoted(getValue())){
+//			return super.toCanonicalTerm(linked, deep);
+//		}
 		ASTIdentifier copy = new ASTIdentifier(parser,PrologTermParser.IDENTIFIER);
 		copy.copy=true;
 		if(linked){

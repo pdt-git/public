@@ -164,6 +164,9 @@ public class Debug {
         out.println("\n---8<------------------------8<---\n");
     }
 
+	public static PrintStream getOutputStream(){
+		return out;
+	}
     private static void write(int level, String msg) {
         if (level > debugLevel)
             return;

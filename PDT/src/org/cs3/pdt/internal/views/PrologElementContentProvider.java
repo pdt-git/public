@@ -173,14 +173,14 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
         }
         IFile file = editorInput.getFile();
         String fileName = file.getFullPath().toString();
-        if(e.getSymbol()==null||e.getSymbol().equals(fileName)){
+        //if(e.getSymbol()==null||e.getSymbol().equals(fileName)){
             try {
                 generatePredicates(fileName);
             } catch (PrologException e1) {
                 Debug.report(e1);
             }
             viewer.refresh();
-        }            
+        //}            
     }
 
 }
