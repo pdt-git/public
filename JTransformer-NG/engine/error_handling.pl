@@ -108,7 +108,7 @@ frame_info(Frame,Info):-
 %    functor(Pred,Name,Arity),
 %    term_to_atom(Pred,Atom),
 %    write(Atom),
-    sformat(Info,'~a:~a ~a level: ~a\n',[File,Line,GoalAtom,Level]).
+    sformat(Info,'~a:~a ~a level: ~a~n',[File,Line,GoalAtom,Level]).
        
        
 list_to_line_sep_string([],'').
