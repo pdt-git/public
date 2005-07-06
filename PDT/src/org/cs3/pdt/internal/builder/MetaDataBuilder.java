@@ -234,7 +234,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 public boolean visit(IResource resource) throws CoreException {
                     try {
                         if (resource.getType() == IResource.FILE
-                                && plProject.isPrologSource(resource)) {
+                                && isCanidate(resource)) {
                             buildList.add(resource);
                         }
                         return true;
