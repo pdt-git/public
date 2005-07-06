@@ -29,7 +29,7 @@ public class ASTPrefixOperator extends SimpleNode {
 	}
 	
 	protected void synthesizeImage(StringBuffer sb) {
-		sb.append(getValue());
+		sb.append("'"+getValue()+"'");
 
 	}
 

@@ -128,7 +128,7 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 				NodeWriterStrategy.PROPERTY_POSITION, new String[] {
 						"" + begin, "" + (end - begin) });
 		writerStrategy.writeProperty(ctId, NodeWriterStrategy.PROPERTY_FILE,
-				new String[] { cuFileName });
+				new String[] { "'"+cuFileName+"'" });
 
 		// create the condition node and an edge connecting it to the ct
 		SimpleNode condition = args[1];
@@ -208,7 +208,7 @@ public class AbbaGraphGenerator extends DefaultPrologTermParserVisitor {
 				NodeWriterStrategy.PROPERTY_POSITION, new String[] {
 						"" + begin, "" + (end - begin) });
 		writerStrategy.writeProperty(clauseId,
-				NodeWriterStrategy.PROPERTY_FILE, new String[] { cuFileName });
+				NodeWriterStrategy.PROPERTY_FILE, new String[] { "'"+cuFileName+"'" });
 
 	}
 
