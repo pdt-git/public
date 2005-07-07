@@ -287,6 +287,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 		
 		WriteTermsToStreamStrategy writeStrategy = new WriteTermsToStreamStrategy(new PrintStream(out),modulePrefix);
 		SimpleIDGeneratorStrategie idStrategy = new SimpleIDGeneratorStrategie();
+		writeStrategy.writeBeginCu(root.getFilename());
 		root.jjtAccept(
 				new AbbaGraphGenerator(writeStrategy,idStrategy),null);
 		writeStrategy.writeRetractSymTab();

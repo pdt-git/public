@@ -44,8 +44,10 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 	}
 
 	public void writeRetractSymTab() {
-		out.println(":- abba_clear_local_symbols.");
-		
+		out.println(":- abba_clear_local_symbols.");		
+	}
+	public void writeBeginCu(String file) {
+		out.println(":- abba_begin_cu('" +file+"').");		
 	}
 
 }

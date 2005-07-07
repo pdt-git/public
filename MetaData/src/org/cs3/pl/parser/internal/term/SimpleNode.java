@@ -50,7 +50,14 @@ public abstract class SimpleNode implements Node, Cloneable {
 	
 	
 	public String getFunctor(){
-		return ""+getPrincipal().getSyntheticImage()+"/"+getArity();
+		
+		String syntheticImage = getPrincipal().getSyntheticImage();
+		if(parser.ops.isInfixOp(syntheticImage)
+		 ||parser.ops.isPrefixOp(syntheticImage)){
+			return "("+syntheticImage+")/"+getArity();
+		}
+			
+		return ""+syntheticImage+"/"+getArity();
 	}
 	public SimpleNode(int i) {
 		id = i;

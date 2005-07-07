@@ -229,6 +229,14 @@ public class SyntaxTest extends TestCase implements ProblemCollector {
 		assertEquals("gensym",checker.getModuleName());
 	}
 
+	
+	public void testEmptyModuleExport() { 
+		String clause = ":- module(gensym, []).";
+		PrologCompiler checker = getPrologCompiler();
+		checker.compile(clause);
+		assertEquals(getMessage(0),0,getProblemNumber());			
+	}
+	
 	public void testInitialization() { 
 		String clause = ":- initialization p2(a).";
 		PrologCompiler checker = getPrologCompiler();

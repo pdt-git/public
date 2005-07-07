@@ -217,6 +217,21 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 	}
 
 	private void processExports(SimpleNode exportsNode) {
+		if (exportsNode instanceof ASTListTerm) {
+			ASTListTerm listTerm = (ASTListTerm) exportsNode;
+			SimpleNode[] elements = listTerm.getElements();
+			//since we assume a cannonical representation, the list should be empty.
+			//non empty list are represented using nested ./2 terms.
+			if(elements.length!=0){
+				Problem p = TermParserUtils.createProblem(
+						exportsNode.getOriginal(),
+						"Not your fault: not a canonical term representation: "+exportsNode.getImage(),
+						Problem.ERROR);
+				problemCollector.reportProblem(p);
+						
+			}
+			return;
+		}
 		if (!(exportsNode instanceof ASTCompoundTerm && exportsNode.getPrincipal().getSyntheticImage()
 				.equals("'.'"))) {
 			Problem p = TermParserUtils.createProblem(
