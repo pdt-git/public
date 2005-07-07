@@ -17,6 +17,10 @@ public class ASTPrefixTerm extends SimpleNode {
 	public ASTPrefixOperator getOperator() {
 		return (ASTPrefixOperator) getPrincipal();
 	}
+public String getFunctor() {
+		
+		return "("+getPrincipal().getSyntheticImage()+")/1";
+	}
 	
 	public SimpleNode getOperand(){		
 		return (SimpleNode) children[1];

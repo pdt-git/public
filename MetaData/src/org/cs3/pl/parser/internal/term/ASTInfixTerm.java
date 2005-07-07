@@ -16,6 +16,11 @@ public class ASTInfixTerm extends SimpleNode {
 		super(id);
 	}
 
+	public String getFunctor() {
+		
+		return "("+getPrincipal().getSyntheticImage()+")/2";
+	}
+	
 	public ASTInfixTerm(PrologTermParser p, int id) {
 		super(p, id);
 	}

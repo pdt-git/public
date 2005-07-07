@@ -145,7 +145,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 			Debug.debug("MetaDataBuilder.build(...) wants to build: "+buildList.toString());
             monitor.beginTask(taskname, forgetList.size() + buildList.size());
             PrintStream out = PDTPlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
-			//PrintStream out = new PrintStream(new FileOutputStream("/tmp/consulted.pl"));
+			//PrintStream out = new PrintStream(new FileOutputStream("c:\\temp\\consulted.pl"));
 			try{
 			forget(forgetList, out, new SubProgressMonitor(monitor, forgetList
                     .size()));

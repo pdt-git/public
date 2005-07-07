@@ -29,4 +29,5 @@ public interface NodeWriterStrategy {
 	public void writeEdge(String edgeId, String edgeType, String label, String sourceId, String targetId);
 	public void writeSymTabEntry(String globalSymbol, String localId);
 	public void writeRetractSymTab();
+	public void writeBeginCu(String cu);
 }
