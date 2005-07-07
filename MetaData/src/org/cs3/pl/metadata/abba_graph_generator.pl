@@ -4,9 +4,26 @@
 	abba_clear_local_symbols/0
 ]).
 
-:- dynamic last_id/1,global_id/2, local_symbol/2, local_id/2.
-:- thread_local local_symbol/2, local_id/2.
+:- dynamic last_id/1,global_id/2, local_symbol/2, local_id/2,
+           cu_id/2, current_cu/1.
+:- thread_local local_symbol/2, local_id/2, current_cu/1.
 :- module_transparent abba_assert_data/1.
+
+abba_begin_cu(File):-
+	(	cu_id(File,Id)
+	->	retract_cu(Id)
+	;	unused_id(Id),
+		assert(cu_id(File,Id))
+	),
+	retract_all(current_cu(_)),
+	assert(current_cu(Id)).
+	
+retract_cu(Id):-
+	forall(cu_member(Id,Node),retract_node(Node)).
+	
+%retract_node(Node):-
+%	retract_all(edge###	
+
 
 abba_assert_data(Term):-
 	replace_local_ids_in_args(Term,GlobalTerm),
