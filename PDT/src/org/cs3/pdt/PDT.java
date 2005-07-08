@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.CoreException;
  * All kinds of string keys used by the pdt.
  */
 public final  class PDT {
-
+	public static final String CONSOLE_VIEW_ID="org.cs3.pdt.internal.views.PrologConsoleView";
     public static final String EP_HOOKS = "hooks";
     public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
     

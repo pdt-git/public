@@ -7,8 +7,8 @@ import java.io.IOException;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.internal.QueryConsoleThreadAction;
 import org.cs3.pdt.internal.views.PrologConsoleView;
-import org.cs3.pdt.internal.views.QueryConsoleThreadAction;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologSession;
