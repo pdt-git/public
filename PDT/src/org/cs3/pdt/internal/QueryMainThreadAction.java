@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.internal;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 

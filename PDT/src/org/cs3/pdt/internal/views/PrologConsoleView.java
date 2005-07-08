@@ -1,12 +1,21 @@
 package org.cs3.pdt.internal.views;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PrologConsole;
+import org.cs3.pdt.PrologConsoleEvent;
+import org.cs3.pdt.PrologConsoleListener;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.QueryConsoleThreadAction;
+import org.cs3.pdt.internal.QueryMainThreadAction;
 import org.cs3.pdt.internal.actions.RestartAction;
 import org.cs3.pdt.internal.hooks.ConsoleServerHook;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -16,10 +25,17 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.part.ViewPart;
 
-public class PrologConsoleView extends ViewPart implements LifeCycleHook {
+public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
     public static final String HOOK_ID = "org.cs3.pdt.internal.views.PrologConsoleView";
 
     private ConsoleView view;
@@ -30,11 +46,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
 
     private PrologCompletionProvider completionProvider;
 
+	private Composite partControl;
+
+	private Vector listeners=new Vector();
+
+	private PrologInterface pif;
+
     public PrologConsoleView() {
     }
 
     public void createPartControl(Composite parent) {
-        try {
+        
+    	try {
             createPartControl_impl(parent);
         } catch (Throwable t) {
             Debug.report(t);
@@ -46,14 +69,33 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
      * @param parent
      */
     private void createPartControl_impl(Composite parent) {
-        PDTPlugin plugin = PDTPlugin.getDefault();
-        PrologInterface pi = null;
-        pi = plugin.getPrologInterface();
+        PDTPlugin plugin = PDTPlugin.getDefault();        
+        this.partControl=parent;
         
-        view = new ConsoleView();
-        pi.addLifeCycleHook(this, HOOK_ID, new String[] {
-                ConsoleServerHook.HOOK_ID});
+        Listener handler = new Listener(){
 
+			public void handleEvent(Event event) {
+				switch(event.type){
+				case SWT.Show: 
+				case SWT.Hide:
+					fireConsoleVisibilityChanged();
+					break;
+				case SWT.FocusOut:
+					fireConsoleLostFocus();
+				}
+				
+			}
+        	
+        };
+		parent.addListener(SWT.Show,handler);
+		parent.addListener(SWT.Hide,handler);
+		parent.addListener(SWT.FocusOut,handler);
+        this.pif = plugin.getPrologInterface();
+        plugin.getPrologConsoleService().registerPrologConsole(this);
+        view = new ConsoleView();
+        pif.addLifeCycleHook(this, HOOK_ID, new String[] {
+                ConsoleServerHook.HOOK_ID});
+        
         controller = new DefaultConsoleController();
         completionProvider = new PrologCompletionProvider();        
 		completionProvider.setMetaInfoProvider(plugin.getMetaInfoProvider());
@@ -121,8 +163,47 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
             return;
         }
         view.setFocus();
+        fireConsoleRecievedFocus();
     }
 
+    private void fireConsoleRecievedFocus() {
+		Vector clone =null; 
+    	synchronized (listeners) {
+    		clone=(Vector) listeners.clone();
+		}
+    	PrologConsoleEvent e = new PrologConsoleEvent(this);
+    	for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.consoleRecievedFocus(e);
+		}	
+	}
+    private void fireConsoleLostFocus() {
+		Vector clone =null; 
+    	synchronized (listeners) {
+    		clone=(Vector) listeners.clone();
+		}
+    	PrologConsoleEvent e = new PrologConsoleEvent(this);
+    	for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.consoleLostFocus(e);
+		}	
+	}
+    
+    private void fireConsoleVisibilityChanged() {
+		Vector clone =null; 
+    	synchronized (listeners) {
+    		clone=(Vector) listeners.clone();
+		}
+    	PrologConsoleEvent e = new PrologConsoleEvent(this);
+    	for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.consoleVisibilityChanged(e);
+		}	
+	}
+	public void dispose() {
+    	PDTPlugin.getDefault().getPrologConsoleService().unregisterPrologConsole(this);
+    	super.dispose();
+    }
     /*
      * (non-Javadoc)
      * 
@@ -150,4 +231,33 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook {
         view.setController(null);
         model.disconnect();
     }
+
+	public ConsoleModel getModel() {
+		return model;
+	}
+
+	public PrologInterface getPrologInterface() {
+		return pif;
+	}
+
+	public void addPrologConsoleListener(PrologConsoleListener l) {
+		synchronized (listeners) {
+			if(!listeners.contains(l)){
+				listeners.add(l);
+			}
+		}
+		
+	}
+
+	public void removePrologConsoleListener(PrologConsoleListener l) {
+		synchronized (listeners) {
+			if(listeners.contains(l)){
+				listeners.remove(l);
+			}
+		}		
+	}
+
+	public boolean isVisible() {
+		return partControl.isVisible();
+	}
 }

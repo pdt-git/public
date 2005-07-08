@@ -12,6 +12,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
+import org.cs3.pdt.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.internal.views.PrologNode;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
@@ -85,6 +86,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     private DefaultResourceFileLocator rootLocator;
 
     private Option[] options;
+
+	private PrologConsoleService consoleService;
 
 	
 
@@ -539,6 +542,13 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
             location = location.substring(0, location.length() - 1);
         return location;
     }
+
+	public PrologConsoleService getPrologConsoleService() {
+		if(consoleService==null){
+			consoleService=new DefaultPrologConsoleService();
+		}
+		return consoleService;
+	}
 
     
 
