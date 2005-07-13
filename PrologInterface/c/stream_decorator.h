@@ -8,18 +8,24 @@
 /* decorator handle */
 
 typedef struct streamhandle{
-	IOSTREAM * orig_stream; /*the backend stream*/
-	IOSTREAM * decorator_stream; /*the decorator stream*/
-	term_t orig_stream_term; /*ref to the original handle term*/ 
-	term_t decorator_stream_term;		/*ref to the decorator handle term*/
-	term_t args_term; /*argument term*/
-	module_t module;
+	IOFUNCTIONS * orig_io_functions;
+	void * orig_handle;
+	int orig_fileno;
+	int orig_flags;
+	IOSTREAM * stream; 
+	term_t stream_term; 
+	term_t args_term; 
+	predicate_t read_hook;
+	predicate_t write_hook;
+	predicate_t seek_hook;
+	predicate_t close_hook;
+	predicate_t control_hook;
 } HANDLE_T;
 
 /* delegating callbacks */
-int delegate_read(void *_handle, char *buf, int bufsize);
-int delegate_write(void *_handle, char*buf, int bufsize);
-long delegate_seek(void *_handle, long offset, int whence);
-int delegate_close(void *_handle);
-int delegate_control(void *_handle, int action, void *arg);
+static int delegate_read(void *_handle, char *buf, int bufsize);
+static int delegate_write(void *_handle, char*buf, int bufsize);
+static long delegate_seek(void *_handle, long offset, int whence);
+static int delegate_close(void *_handle);
+static int delegate_control(void *_handle, int action, void *arg);
 #endif
