@@ -24,7 +24,9 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         
     private class ConsoleReader implements Runnable {
         
-        private BufferedReader reader;
+        private static final char ESCAPE_CHAR = '\\';
+		private static final char RAW_MODE_CHAR = 's';
+		private BufferedReader reader;
 
         public ConsoleReader(BufferedReader reader){
             this.reader = reader;
@@ -38,17 +40,44 @@ public class PrologSocketConsoleModel implements ConsoleModel {
                     if(count <0){
                         throw new IOException("EndOfStream read.");
                     }
-                    String data = String.copyValueOf(buf,0,count);
-                    //Debug.debug("CONSOLE RECIEVED: " + data);
+                    boolean escaped=false;
+                    StringBuffer data= new StringBuffer();
+                    for(int i=0;i<count;i++){
+                    	if(escaped){
+                    		if(buf[i]==RAW_MODE_CHAR){
+                    			//report what we have until mode switch:
+                    			ConsoleModelEvent cme = new ConsoleModelEvent(PrologSocketConsoleModel.this,data.toString(),false);
+                                fireOutputEvent(cme);
+                                //skip optional newline
+                                if(i-1<count && buf[i+1]=='\n'){
+                                	i++;
+                                }
+                                //clear output buffer 
+                                data.setLength(0);
+                    			setSingleCharMode(true);
+                    		}
+                    		else{
+                    			data.append(buf[i]);
+                    		}
+                    		escaped=false;
+                    	}
+                    	else{
+                    		if(buf[i]==ESCAPE_CHAR){                    		
+                    			escaped = true;
+                    		}
+                    		else{
+                    			data.append(buf[i]);
+                    		}
+                    	}
+                    }
                                         
                     if (data == null){
                         throw new IOException("readLine() returned null");
                     }
-                    
-                    ConsoleModelEvent cme = new ConsoleModelEvent(PrologSocketConsoleModel.this,data,false);
-                    
-                    
-                    fireOutputEvent(cme);
+                    if(data.length()>0){
+                    	ConsoleModelEvent cme = new ConsoleModelEvent(PrologSocketConsoleModel.this,data.toString(),false);                    
+                    	fireOutputEvent(cme);
+                    }
                     
                 } catch (IOException e) {
                     Debug.report(e);
@@ -160,10 +189,14 @@ public class PrologSocketConsoleModel implements ConsoleModel {
             listeners.remove(cml);
         }
     }
-
+/**
+ * precondition: we are in single char mode
+ * postcondition: we are in line mode. 
+ */
     public void putSingleChar(char c) {
-        if (!singleCharMode)
-            throw new IllegalStateException("In line mode");
+        if (!singleCharMode){
+        	throw new IllegalStateException("In line mode");
+        }
         
         synchronized (this){
             if (!isConnected()){
@@ -177,15 +210,28 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         
         
         try {
+        		
+        		/* the newline is required. prolog side does not
+        		 * flush buffers otherwise.
+        		 * we will skip it away on the prolog side.
+        		 */
                 writer.write(c + "\n");
                 writer.flush();
+                /*
+                 * switch back to line mode
+                 */
+                setSingleCharMode(false);
             } catch (IOException e) {
                 disconnect();
             }
         }
     }
 
-
+    protected void setSingleCharMode(boolean on){
+    	this.singleCharMode=on;
+    	fireModeChange(new ConsoleModelEvent(this,on));
+    }
+    
     public boolean isSingleCharMode() {
         return singleCharMode;
     }

@@ -295,7 +295,7 @@ public class DefaultConsoleController implements ConsoleController,
      * @see org.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.ConsoleModelEvent)
      */
     public void onModeChange(ConsoleModelEvent e) {
-    	//pfff...
+    	ui.setSingleCharMode(model.isSingleCharMode());
     }
 
     
