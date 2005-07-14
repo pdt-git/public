@@ -157,6 +157,12 @@ getToplevel(Id, TL) :-
     getToplevel(Outer, TL).
 
 getToplevel(Id, TL) :-
+    class(Id,Parent,_),
+    enclClass(Parent,Outer),
+    !,
+    getToplevel(Outer, TL).
+
+getToplevel(Id, TL) :-
     not(class(Id,_,_)),
     enclClass(Id,Class),
     !,
