@@ -907,6 +907,8 @@ public class FactGenerator extends ASTVisitor {
 			String[] args = new String[] { id, parentId, type, name, init };
 			
 			writer.writeFact("fieldDefT", args);
+			createAnnotationFact(node, id);
+			
 			writer.writeFact("slT", new String [] {
 					id,
 					Integer.toString(node.getStartPosition()),
@@ -1082,7 +1084,8 @@ public class FactGenerator extends ASTVisitor {
 		String[] args =
 			new String[] { id, parentId, name, param, type, exceptions, body };
 		writer.writeFact("methodDefT", args);
-		
+		createAnnotationFact(node, id);
+
 		writer.writeFact("slT", new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
@@ -1152,6 +1155,8 @@ public class FactGenerator extends ASTVisitor {
 		String[] args =
 			new String[] { id, parentId, name, param, type, exceptions, body };
 		writer.writeFact("methodDefT", args);
+		createAnnotationFact(node, id);
+
 		writer.writeFact("slT", new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
@@ -1868,6 +1873,8 @@ public class FactGenerator extends ASTVisitor {
 		writer.addIndention();
 
 		writer.writeFact("classDefT", args);
+		createAnnotationFact(node, id);
+		
 		if (node.isInterface())
 			writer.writeFact("interfaceT", new String[] { id });
 		writeModifiers(node, node.getModifiers());
@@ -2388,7 +2395,7 @@ public class FactGenerator extends ASTVisitor {
 				bodyID
 		};
 		
-		writer.writeFact("methodDefT", args);
+		writer.writeFact("methodDefT", args);		
 		writer.addIndention();
 		
 		args = new String [] {
@@ -2485,10 +2492,15 @@ public class FactGenerator extends ASTVisitor {
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
+		if(!name.equals("execT"))
+			createAnnotationFact(node, toPass[0]);
+	}
+
+	private void createAnnotationFact(ASTNode node, String nodeID) {
 		GenericAnnotation annotation = getCorrespondingGenericAnnotation(node);
-		if(annotation != null && !name.equals("execT")) {
+		if(annotation != null) {
 			writer.writeFact("annotationT",new String[]{
-					toPass[0], annotation.getPredicate()
+					nodeID, annotation.getPredicate()
 			});
 		}
 	}
