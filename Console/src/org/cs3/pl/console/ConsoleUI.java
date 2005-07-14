@@ -38,4 +38,6 @@ public interface ConsoleUI {
 	 */
 	public void setCaretPosition(int caretPosition);
 
+	public void setSingleCharMode(boolean b);
+
 }
