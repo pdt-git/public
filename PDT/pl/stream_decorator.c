@@ -111,7 +111,7 @@ static int delegate_write(void *_handle, char*buf, int bufsize){
 	PL_recorded(handle->args_record,t1);	
 	PL_put_list_nchars(t2,bufsize,buf);
 	PL_put_variable(t3);
-	int rval = PL_call_predicate(NULL,PL_Q_NORMAL|PL_Q_CATCH_EXCEPTION,handle->write_hook,t0);
+	int rval = PL_call_predicate(NULL,PL_Q_NORMAL|PL_Q_CATCH_EXCEPTION|PL_Q_NODEBUG,handle->write_hook,t0);
 	if(rval){
 		unsigned int tail_len=0;
 		char * tail;
