@@ -24,7 +24,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         
     private class ConsoleReader implements Runnable {
         
-        private static final char ESCAPE_CHAR = '\\';
+        private static final char ESCAPE_CHAR = '§';
 		private static final char RAW_MODE_CHAR = 's';
 		private BufferedReader reader;
 
