@@ -221,5 +221,9 @@
          class="org.cs3.pdt.internal.actions.ConsoleErrorMessageGotoLineAction"
          name="goto error line"/>
 </extension>
+<extension
+      point="org.cs3.pdt.bootstrapContribution">
+   <contribution path="pl/single_char_interceptor.pl"/>
+</extension>
 
 </plugin>
