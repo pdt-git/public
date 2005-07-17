@@ -9,9 +9,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelection;
 
 public class QueryAction extends Action {
 	private String tooltip;
@@ -98,4 +96,6 @@ public class QueryAction extends Action {
 	public void setQuery(String query) {
 		this.query = query;
 	}
+
+	
 }
