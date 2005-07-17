@@ -5,6 +5,44 @@
 #include <string.h>
 #include "stream_decorator.h"
 
+static int display_term(term_t t){ 
+	int arity, n;
+	unsigned int len;
+	char *s;
+	atom_t name;
+	term_t a;
+	switch( PL_term_type(t) ){ 
+		case PL_VARIABLE:
+	    case PL_ATOM:
+
+    	case PL_INTEGER:
+	    case PL_FLOAT:
+    	  	PL_get_chars(t, &s, CVT_ALL);
+	      	Sprintf("%s", s);
+	      	break;
+	    case PL_STRING:
+    	  	PL_get_string_chars(t, &s, &len);
+	      	Sprintf("\"%s\"", s);	
+	      	break;
+	    case PL_TERM:
+	      	a = PL_new_term_ref();
+	      	PL_get_name_arity(t, &name, &arity);
+	      	Sprintf("%s(", PL_atom_chars(name));
+	      	for(n=1; n<=arity; n++){
+		      	PL_get_arg(n, t, a);
+        		if ( n > 1 ){
+          			Sprintf(", ");
+        		}
+        		display_term(a);
+      		}
+      		Sprintf(")");
+      		break;
+    	default:
+      		PL_fail;/* should not happen */
+  	}
+  	PL_succeed;
+}
+
 static int delegate_read(void *_handle, char *buf, int bufsize){
 	fid_t frame = PL_open_foreign_frame();	
 	HANDLE_T * handle = _handle;
@@ -13,8 +51,8 @@ static int delegate_read(void *_handle, char *buf, int bufsize){
 	term_t t2 = t1+1;
 	term_t t3 = t2+1;
 	term_t t4 = t3+1;
-	PL_put_term(t0,handle->stream_term);
-	PL_put_term(t1,handle->args_term);
+	PL_recorded(handle->stream_record,t0);
+	PL_recorded(handle->args_record,t1);	
 	PL_put_integer(t2,bufsize);
 	int ttymode=0;  
 	ttymode = PL_ttymode(handle->stream);  
@@ -24,25 +62,40 @@ static int delegate_read(void *_handle, char *buf, int bufsize){
 	   case PL_COOKEDTTY:PL_put_atom_chars(t3,"cooked_tty"); break;    
 	}  
 	PL_put_variable(t4);
-	int rval = PL_call_predicate(NULL,PL_Q_NORMAL|PL_Q_CATCH_EXCEPTION,handle->read_hook,t0);
-	int read_len=0;
-	if(rval==TRUE){
-		//Sputs("read hook defined!\n");
+	qid_t qid = PL_open_query(handle->module,PL_Q_NORMAL|PL_Q_CATCH_EXCEPTION|PL_Q_NODEBUG,handle->read_hook,t0);
+	int rval = PL_next_solution(qid);
+	unsigned int read_len=0;
+	if(rval){
+		Sputs("read hook defined!\n");
 		char * read_data=0;
 
 		if(PL_get_list_nchars(t4,&read_len,&read_data,0)){
-			//Sprintf("got %d chars: %s\n",read_len,read_data);
+			Sprintf("got %d chars: %s\n",read_len,read_data);
 			memcpy(buf,read_data,read_len*sizeof(char));			
 		}else{
 			Sputs("hmm... PL_get_atom_nchars did not work.\n");
 		}
+		PL_close_query(qid); /* discard data */
+		PL_discard_foreign_frame(frame); /* dito */
+		
 	}
 	else{
-		//Sputs("read hook NOT defined or failed!\n");
-		read_len=(*handle->orig_io_functions->read)(handle->orig_handle,buf,bufsize);
-		//Sprintf("relayed %d chars.\n",read_len);
+		term_t exception= PL_exception(qid) ;
+		if(exception ){
+
+			if(!display_term(exception)){
+				Sputs("display failed\n");
+			}
+		}
+		else{
+			Sputs("read hook failed!\n");
+			read_len=(*handle->orig_io_functions->read)(handle->orig_handle,buf,bufsize);
+			Sprintf("relayed %d chars.\n",read_len);
+		}
+		PL_cut_query(qid); /* do not destroy data */
+		PL_close_foreign_frame(frame); /* dito */
 	}
-	PL_close_foreign_frame(frame);
+
 			Sputs("done.\n");
 	return read_len;
 }
@@ -54,13 +107,13 @@ static int delegate_write(void *_handle, char*buf, int bufsize){
 	term_t t1 = t0+1;
 	term_t t2 = t0+2;
 	term_t t3 = t0+3;
-	PL_put_term(t0,handle->stream_term);
-	PL_put_term(t1,handle->args_term);
+	PL_recorded(handle->stream_record,t0);
+	PL_recorded(handle->args_record,t1);	
 	PL_put_list_nchars(t2,bufsize,buf);
 	PL_put_variable(t3);
 	int rval = PL_call_predicate(NULL,PL_Q_NORMAL|PL_Q_CATCH_EXCEPTION,handle->write_hook,t0);
 	if(rval){
-		int tail_len=0;
+		unsigned int tail_len=0;
 		char * tail;
 		if(PL_get_list_nchars(t3,&tail_len,&tail,0)){
 			write_len=bufsize-tail_len;
@@ -129,17 +182,20 @@ static IOFUNCTIONS Sdelegate_functions =
   delegate_control
 };
 foreign_t pl_orig_read(term_t stream_term, term_t bufsize_term, term_t chars_term){
+	display_term(bufsize_term);
 	IOSTREAM * stream=0;
 	if ( !PL_get_stream_handle(stream_term, &stream) ){
-    	return PL_warning("problem obtaining backend stream handle.");
+    	return PL_warning("orig_read: problem obtaining backend stream handle.");
   	}  	
 	if(stream->functions!=&Sdelegate_functions){
-		return PL_warning("does not look like a hijacked stream.");
+		return PL_warning("orig_read: does not look like a hijacked stream.");
 	}
 	HANDLE_T * handle = (HANDLE_T *) stream->handle;
 	int bufsize=0;
 	if(! PL_get_integer(bufsize_term,&bufsize)){
-		return PL_warning("second arg does not look like an integer");
+
+		return PL_warning("orig_read: second arg does not look like an integer");
+		
 	}
 	char buf[bufsize];
 	int read_len=0;
@@ -156,7 +212,7 @@ foreign_t pl_orig_write(term_t stream_term, term_t chars_term, term_t tail_term)
 		return PL_warning("does not look like a hijacked stream.");
 	}
 	HANDLE_T * handle = (HANDLE_T *) stream->handle;
-	int len=0;
+	unsigned int len=0;
 	char * buf=0;
 	if(! PL_get_list_nchars(chars_term,&len,&buf,0)){
 		return PL_warning("problems reading chars from second arg");
@@ -180,6 +236,8 @@ static void unhijack(IOSTREAM * stream){
     stream->handle=handle->orig_handle;
 	stream->functions=handle->orig_io_functions;
 	stream->flags=handle->orig_flags;
+	PL_erase(handle->args_record);
+	PL_erase(handle->stream_record);
 	PL_free(handle);
 	return;
 }
@@ -201,17 +259,21 @@ foreign_t pl_hijack_stream(term_t stream_term, term_t module_term, term_t args_t
 		
 
 	
-	handle->stream_term=stream_term;
+	handle->stream_record=PL_record(stream_term);
+	handle->args_record=PL_record(args_term);
 	handle->stream=stream;
 	handle->orig_handle=stream->handle;
 	handle->orig_io_functions=stream->functions;
-	handle->args_term=args_term;
 	/*
 	 * lookup delegate predicates
 	 */
 	 char * module_name =0;
+	 display_term(module_term);
 	 if(! PL_get_atom_chars(module_term,&module_name)){
 	 	return PL_warning("stream_decorator_create/4: second term does not look like an atom??");
+	 }
+	 if(! PL_get_module(module_term,&(handle->module))){
+	 	return PL_warning("stream_decorator_create/4: problems finding module.");
 	 }
 	handle->read_hook=PL_predicate("stream_decorator_read_hook",5,module_name);
 	handle->write_hook=PL_predicate("stream_decorator_write_hook",4,module_name);
@@ -287,10 +349,12 @@ foreign_t pl_unhijack_stream(term_t stream_term)
 
 install_t install()
 { 
+	// A hack, i admit it. It's all Jan's fault :-)
+	PL_set_feature("tty_control", PL_BOOL, TRUE);
 	PL_register_foreign("hijack_stream", 3, pl_hijack_stream, 0);
 	PL_register_foreign("unhijack_stream", 1, pl_unhijack_stream, 0);
 	PL_register_foreign("orig_read", 3, pl_orig_read, 0);
-	PL_register_foreign("orig_write", 3, pl_orig_read, 0);
+	PL_register_foreign("orig_write", 3, pl_orig_write, 0);
 }
 
 
