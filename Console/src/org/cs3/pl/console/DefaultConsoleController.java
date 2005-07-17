@@ -82,7 +82,8 @@ public class DefaultConsoleController implements ConsoleController,
         if (model == null) {
             return ;
         }
-        if (model.isSingleCharMode()) {
+        if (model.isSingleCharMode()&&keyChar>0) {
+        	//Debug.debug("keyChar: '"+keyChar+"'");
             model.putSingleChar(keyChar);           
         } else {
             switch (keyCode) {
@@ -294,8 +295,18 @@ public class DefaultConsoleController implements ConsoleController,
      * 
      * @see org.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.ConsoleModelEvent)
      */
-    public void onModeChange(ConsoleModelEvent e) {
-    	ui.setSingleCharMode(model.isSingleCharMode());
+    public void onModeChange(final ConsoleModelEvent e) {
+    	Display display = ui.getDisplay();
+        if (Display.getCurrent() != display) {
+            display.asyncExec(new Runnable() {
+                public void run() {
+                	onModeChange(e);
+                }
+            });
+        } else {
+        	ui.setSingleCharMode(model.isSingleCharMode());
+        }
+
     }
 
     
