@@ -13,8 +13,9 @@ typedef struct streamhandle{
 	int orig_fileno;
 	int orig_flags;
 	IOSTREAM * stream; 
-	term_t stream_term; 
-	term_t args_term; 
+	record_t stream_record; 
+	record_t args_record; 
+	module_t module;
 	predicate_t read_hook;
 	predicate_t write_hook;
 	predicate_t seek_hook;
