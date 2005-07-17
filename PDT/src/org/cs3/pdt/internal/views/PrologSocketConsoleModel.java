@@ -258,6 +258,12 @@ public class PrologSocketConsoleModel implements ConsoleModel {
             readerThread.start();
                 
             
+            //install the get_single_char/1 interceptor
+            //does not work on windows yet.
+            if(!Util.isWindoze()){
+            	writer.write("sd_install.\n");
+            	writer.flush();
+            }
             
             Debug.debug("Connect complete");
         } catch (IOException e) {
