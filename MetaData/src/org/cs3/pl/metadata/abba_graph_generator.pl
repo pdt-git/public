@@ -62,7 +62,7 @@ local_id(Local,Global):-
     concat_atom([local_,Local],Atom),
 	catch(nb_getval(Atom,Global),_,fail).
 	    
-clear_local_ids.
+clear_local_ids:-
     thread_self(Me),
     forall(
     	recorded(Me,Local,Ref),
