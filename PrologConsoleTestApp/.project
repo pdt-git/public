@@ -3,6 +3,10 @@
 	<name>PrologConsoleTestApp</name>
 	<comment></comment>
 	<projects>
+		<project>Common</project>
+		<project>Console</project>
+		<project>PrologInterface</project>
+		<project>PrologInterface-Socket</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
