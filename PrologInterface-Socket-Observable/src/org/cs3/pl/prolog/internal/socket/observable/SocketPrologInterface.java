@@ -110,7 +110,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         if (socket == null) {
             Debug.info("creating new ReusableSocket");
             try {
-                socket = new ReusableSocket("localhost", port);
+                socket = new ReusableSocket((String)null, port);
             } catch (Exception e) {
                 Debug.report(e);
                 throw new RuntimeException(e);
@@ -236,7 +236,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      */
     protected PrologSession getInitialSession() {
         try {
-            return new InitSession(new SocketClient("localhost", port), this);
+            return new InitSession(new SocketClient((String)null, port), this);
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
@@ -250,7 +250,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      */
     protected PrologSession getShutdownSession() {
         try {
-            return new ShutdownSession(new SocketClient("localhost", port),
+            return new ShutdownSession(new SocketClient((String)null, port),
                     this);
         } catch (Throwable e) {
             Debug.report(e);

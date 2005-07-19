@@ -153,7 +153,7 @@ public class SocketServerStartAndStopStrategy implements
                         .info("There is no server running, afaics. So i wont stop anything.");
                 return;
             }
-            SocketClient c = new SocketClient("localhost", port);
+            SocketClient c = new SocketClient((String)null, port);
             try {
                 c.readUntil(SocketClient.GIVE_COMMAND);
                 c.writeln(SocketClient.SHUTDOWN);

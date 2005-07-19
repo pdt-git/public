@@ -20,7 +20,7 @@ public class ConsultOutputStreamTest extends TestCase {
      * @see TestCase#setUp()
      */
     protected void setUp() throws Exception {
-        socket = new SocketClient("localhost",PORT);
+        socket = new SocketClient((String)null,PORT);
     }
 
     /* (non-Javadoc)
