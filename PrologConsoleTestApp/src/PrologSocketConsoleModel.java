@@ -176,7 +176,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
     	}
     	try {
     		Debug.info("connecting console to server at port "+port);
-        	socket = new Socket("localhost", port);
+        	socket = new Socket((String)null, port);
             writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             readerThread = new Thread(new ConsoleReader(reader));

@@ -68,7 +68,7 @@ public class RecordingConsultService implements ConsultService {
     }
 
     public void connect() throws IOException {
-        consultClient = new SocketClient("localhost", port);
+        consultClient = new SocketClient((String)null, port);
     }
 
     public void disconnect() {
