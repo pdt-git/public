@@ -1,3 +1,3 @@
-:-(module(second,.('/'(2,0),[]))).
+:-(module(second,.('/'(toll,0),[]))).
 toll.
 
