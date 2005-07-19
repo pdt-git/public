@@ -547,7 +547,8 @@ fullQualifiedName(Id, Fqn) :-
 
 fullQualifiedName(_id, Fqn) :-
     nonvar(_id),
-    classDefT(_id, null, Fqn,_).
+    classDefT(_id, null, Fqn,_),
+    !.
 
 fullQualifiedName(_id, _Fqn) :-
     nonvar(_id),
