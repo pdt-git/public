@@ -19,6 +19,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.MarkerProblemCollector;
 import org.cs3.pdt.internal.views.IFileLineBreakInfoProvider;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.parser.PrologCompiler;
@@ -61,7 +62,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         checker.setProblemCollector(collector);
         checker.compile(fileName, file.getContents(), lineInfo);
         PDTPlugin plugin = PDTPlugin.getDefault();
-        ConsultService meta = plugin.getConsultService(PDT.CS_METADATA);
+        ConsultService meta = PrologRuntimePlugin.getDefault().getConsultService(PDT.CS_METADATA);
         
 			checker.saveMetaDataForClauses(outputStream);
 			checker.saveAbbaData(new BufferedOutputStream(outputStream));
@@ -91,7 +92,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         PDTPlugin plugin = PDTPlugin.getDefault();
         String prologName = Util.normalizeOnWindoze(file.getLocation()
                 .toOSString());
-        PrologSession s = plugin.getPrologInterface().getSession();
+        PrologSession s = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
         try {
             s.queryOnce("['" + prologName + "']");
         } finally {
@@ -144,7 +145,8 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 			Debug.debug("MetaDataBuilder.build(...) wants to forget: "+forgetList.toString());
 			Debug.debug("MetaDataBuilder.build(...) wants to build: "+buildList.toString());
             monitor.beginTask(taskname, forgetList.size() + buildList.size());
-            PrintStream out = PDTPlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+			PDTPlugin r = PDTPlugin.getDefault();
+            PrintStream out = PrologRuntimePlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
 			//PrintStream out = new PrintStream(new FileOutputStream("c:\\temp\\consulted.pl"));
 			try{
 			forget(forgetList, out, new SubProgressMonitor(monitor, forgetList
@@ -221,7 +223,8 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         Set forgetList = new HashSet();
         collect(getProject(), forgetList);
 		getProject().deleteMarkers(IMarker.PROBLEM,true,IResource.DEPTH_INFINITE);
-		PrintStream out = PDTPlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+		PDTPlugin r = PDTPlugin.getDefault();
+		PrintStream out = PrologRuntimePlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
 		try{		
 			forget(forgetList,out, monitor);
 		}

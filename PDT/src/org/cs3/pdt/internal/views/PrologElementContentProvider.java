@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.IMetaInfoProvider;
@@ -37,7 +38,8 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
      */
     public PrologElementContentProvider(Viewer outline) {
         viewer = outline;
-		ConsultService service = PDTPlugin.getDefault().getConsultService(PDT.CS_METADATA);
+		PDTPlugin r = PDTPlugin.getDefault();
+		ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDT.CS_METADATA);
         service.addConsultServiceListener(this);
     }
 
@@ -151,7 +153,8 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
     public void consultDataChanged(final ConsultServiceEvent e) {
        
         if(viewer==null||viewer.getControl().isDisposed()){
-            ConsultService service = PDTPlugin.getDefault().getConsultService(PDT.CS_METADATA);
+            PDTPlugin r = PDTPlugin.getDefault();
+			ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDT.CS_METADATA);
             service.removeConsultServiceListener(this);
             return;
         }

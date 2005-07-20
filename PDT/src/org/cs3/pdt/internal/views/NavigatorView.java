@@ -1,6 +1,7 @@
 package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.model.INode;
 import org.cs3.pl.prolog.PrologInterface;
@@ -78,7 +79,8 @@ public class NavigatorView extends ViewPart {
 		
         private void initializeRoots() {
             PrologInterface pif;
-            pif = PDTPlugin.getDefault().getPrologInterface();
+			PDTPlugin r = PDTPlugin.getDefault();
+            pif = PrologRuntimePlugin.getDefault().getPrologInterface();
             roots=(INode[]) PrologNode.find(pif,"type(module)").toArray(new INode[0]);            
         }
         public Object getParent(Object child) {

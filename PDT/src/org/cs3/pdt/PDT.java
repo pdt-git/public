@@ -12,8 +12,6 @@ import org.eclipse.core.runtime.CoreException;
  */
 public final  class PDT {
 	public static final String CONSOLE_VIEW_ID="org.cs3.pdt.internal.views.PrologConsoleView";
-    public static final String EP_HOOKS = "hooks";
-    public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
     
     /**
      * The prolog project nature.
@@ -57,7 +55,6 @@ public final  class PDT {
      * the port on which the prolog console server is listening.
      */
     public static final String PREF_CONSOLE_PORT = "pdt.console.port";
-
     /**
      * the default to use for PROP_SOURCE_PATH
      */
@@ -89,7 +86,7 @@ public final  class PDT {
      */
     public static final String PROP_SOURCE_EXCLUSION_PATTERN = "pdt.exlusion.pattern";
    
-    public static final String LOC_PIF = "engine/PrologInterface";
+    
     public static final String LOC_MODEL = "engine/MetaData";
     public static final String LOC_ENGINE = "engine";
 
@@ -116,12 +113,7 @@ public final  class PDT {
     public static final String CS_WORKSPACE = "workspace";
 
    
-    /**
-     * The fully-qualified classname of a class that extends
-     * PrologInterfaceFactory.
-     */
-    public final static String PREF_PIF_IMPLEMENTATION = "pdt.pif.implementation";
-
+    
     /**
      * The basename of the resource bundle to be used by the pdt ui
      */

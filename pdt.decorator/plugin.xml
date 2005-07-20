@@ -18,8 +18,8 @@
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.cs3.pdt"/>
       <import plugin="org.cs3.pdt.common"/>
-      <import plugin="org.cs3.pdt.prologinterface"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.cs3.pdt.runtime"/>
    </requires>
    <extension
          point="org.eclipse.ui.decorators">

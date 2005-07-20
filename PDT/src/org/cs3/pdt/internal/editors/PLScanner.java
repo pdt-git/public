@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
@@ -30,7 +31,8 @@ public class PLScanner extends RuleBasedScanner {
 	    if (plDynamicPredicates == null){
 	        PrologSession session=null;
 	        try {
-	        session = PDTPlugin.getDefault().getPrologInterface().getSession();
+	        PDTPlugin r = PDTPlugin.getDefault();
+			session = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
 	            List solutions = session.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
                 List keywords = new ArrayList();
                 for (Iterator it = solutions.iterator(); it.hasNext();) {
@@ -56,7 +58,8 @@ public class PLScanner extends RuleBasedScanner {
 	    if (plKeywords == null){
 	        PrologSession session=null;;
             try {
-                session = PDTPlugin.getDefault().getPrologInterface().getSession();
+                PDTPlugin r = PDTPlugin.getDefault();
+				session = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
                 List solutions = session.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
                 List keywords = new ArrayList();
                 for (Iterator it = solutions.iterator(); it.hasNext();) {

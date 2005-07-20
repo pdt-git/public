@@ -21,12 +21,12 @@
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.jdt.launching"/>
-      <import plugin="org.cs3.pdt.prologinterface"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.cs3.pdt.common"/>
       <import plugin="org.cs3.pdt"/>
       <import plugin="org.cs3.pdt.console"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.cs3.pdt.runtime"/>
 
    </requires>
 
@@ -85,11 +85,11 @@
       </objectContribution>
    </extension>
    <extension
-         point="org.cs3.pdt.bootstrapContribution">
+         point="org.cs3.pdt.runtime.bootstrapContribution">
       <contribution path="engine/main.pl"/>
    </extension>
    <extension
-         point="org.cs3.pdt.hooks">
+         point="org.cs3.pdt.runtime.hooks">
       <hook
             class="org.cs3.jlmp.internal.hooks.ReloadHook"
             id="ReloadHook"/>

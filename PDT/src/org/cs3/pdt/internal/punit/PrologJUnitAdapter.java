@@ -14,6 +14,7 @@ import java.util.Map;
 import junit.framework.TestSuite;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -60,7 +61,8 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 		PrologSession session = null;
 		TestSuite suite = null;
 		try {
-			pif = PDTPlugin.getDefault().getPrologInterface();
+			PDTPlugin r = PDTPlugin.getDefault();
+			pif = PrologRuntimePlugin.getDefault().getPrologInterface();
 			session = pif.getSession();
 			// result = manager.query("clause(test(Testname), _)");
 			suite = new TestSuite();

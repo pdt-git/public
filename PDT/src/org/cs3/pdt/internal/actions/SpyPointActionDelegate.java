@@ -7,6 +7,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.Predicate;
@@ -43,7 +44,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
 
                 PLEditor editor = (PLEditor) UIUtils.getActiveEditor();
                 PrologSession session = null;
-                session = plugin.getPrologInterface().getSession();
+                session = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
                 String pred;
 
                 Goal data;
