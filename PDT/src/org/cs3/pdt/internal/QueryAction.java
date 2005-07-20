@@ -1,6 +1,7 @@
 package org.cs3.pdt.internal;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -44,8 +45,9 @@ public class QueryAction extends Action {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 
-						PrologInterface prologInterface = PDTPlugin
-								.getDefault().getPrologInterface();
+						PDTPlugin r = PDTPlugin
+								.getDefault();
+						PrologInterface prologInterface = PrologRuntimePlugin.getDefault().getPrologInterface();
 						PrologSession session = prologInterface.getSession();
 						try {
 							//	 Alternative                        	

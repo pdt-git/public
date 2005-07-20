@@ -5,6 +5,7 @@ package org.cs3.pdt.internal.actions;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -39,7 +40,7 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
     public void run(IAction action) {
         PDTPlugin plugin = PDTPlugin.getDefault();
 		PrologInterface pif = null;
-		pif = plugin.getPrologInterface();
+		pif = PrologRuntimePlugin.getDefault().getPrologInterface();
 		 try {
              PrologSession session = pif.getSession();
              Map r = session.query("current_thread(A,B)");

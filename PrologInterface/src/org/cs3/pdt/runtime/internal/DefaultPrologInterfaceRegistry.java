@@ -1,4 +1,4 @@
-package org.cs3.pdt;
+package org.cs3.pdt.runtime.internal;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pl.prolog.PrologInterface;
 /**
  * the implemetnations assumes that performance is not an issue - after all, how

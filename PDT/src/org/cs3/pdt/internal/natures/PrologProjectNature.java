@@ -10,6 +10,7 @@ import java.util.Set;
 import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
@@ -234,8 +235,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public PrologInterface getPrologInterface() {
-		PrologInterface pif = PDTPlugin.getDefault().getPrologInterface(
-				getProject().getName());
+		PDTPlugin r = PDTPlugin.getDefault();
+		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface(getProject().getName());
 
 		if (!pif.isUp()) {
 			try {

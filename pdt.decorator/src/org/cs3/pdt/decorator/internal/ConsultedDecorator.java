@@ -18,6 +18,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.decorator.DecoratorPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -149,8 +150,9 @@ public class ConsultedDecorator implements ILightweightLabelDecorator {
             }
 
         };
+		PDTPlugin r1 = PDTPlugin.getDefault();
 
-        PrologInterface pif = PDTPlugin.getDefault().getPrologInterface();
+        PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface();
         pif.addPrologInterfaceListener(PrologInterface.SUBJECT_CONSULTED,
                 pifListener);
         pif.addLifeCycleHook(pifHook, "consulteddecorator", new String[0]);
@@ -328,7 +330,8 @@ public class ConsultedDecorator implements ILightweightLabelDecorator {
      * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
      */
     public void dispose() {
-        PrologInterface pif = PDTPlugin.getDefault().getPrologInterface();
+        PDTPlugin r = PDTPlugin.getDefault();
+		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface();
         pif.removePrologInterfaceListener(PrologInterface.SUBJECT_CONSULTED,
                 pifListener);
         pif.removeLifeCycleHook("consulteddecorator");

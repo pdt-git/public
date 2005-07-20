@@ -4,10 +4,10 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package org.cs3.pdt.internal.preferences;
+package org.cs3.pdt.runtime.internal.preferences;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.runtime.Platform;
@@ -30,24 +30,34 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class PreferencePage extends FieldEditorPreferencePage implements
         IWorkbenchPreferencePage {
 
+    //		public static final String P_WORKING_DIR = "workingDir";
+    //  public static final String P_USER = "userRubPreference";
 
     public PreferencePage() {
         super(GRID);
-        setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
+        setPreferenceStore(PrologRuntimePlugin.getDefault().getPreferenceStore());
         setDescription("Preferences for the PDTPlugin Plugin");
     }
 
-    
+  
     /**
      * Creates the field editors. Field editors are abstractions of the common
      * GUI blocks needed to manipulate various types of preferences. Each field
      * editor knows how to save and restore itself.
      */
-    public void createFieldEditors() {        
+    public void createFieldEditors() {
+        
         Composite parent = getFieldEditorParent();
-        PDTPlugin plugin = PDTPlugin.getDefault();
+        IPreferencesService service = Platform.getPreferencesService();
+        PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
+        String qualifier = plugin.getBundle().getSymbolicName();
+        String impl= service.getString(qualifier,PrologRuntime.PREF_PIF_IMPLEMENTATION,null,  null);         
+        
         Option[] options = plugin.getOptions();
         addEditorsForOptions(parent, options);
+        options = PrologInterfaceFactory.newInstance(impl).getOptions();
+        addEditorsForOptions(parent, options);
+        
     }
 
     private void addEditorsForOptions(Composite parent, Option[] options) {
@@ -86,13 +96,14 @@ public class PreferencePage extends FieldEditorPreferencePage implements
     }
 
     public void init(IWorkbench workbench) {
-        setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
+        setPreferenceStore(PrologRuntimePlugin.getDefault().getPreferenceStore());
     }
 
     /**
      * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
      */
     protected void performDefaults() {
+        //PDTPlugin.getDefault().updatePreferences();
         super.performDefaults();
     }
 
@@ -102,7 +113,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements
     public boolean performOk() {
 
         boolean res = super.performOk();
-        PDTPlugin.getDefault().reconfigure();
+        PrologRuntimePlugin.getDefault().reconfigure();
         return res;
     }
 

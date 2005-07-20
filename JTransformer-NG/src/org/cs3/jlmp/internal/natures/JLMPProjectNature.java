@@ -15,6 +15,7 @@ import org.cs3.jlmp.internal.builders.FactBaseBuilder;
 import org.cs3.jlmp.regenerator.ISourceRegenerator;
 import org.cs3.jlmp.regenerator.SourceCodeRegenerator;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
@@ -227,8 +228,8 @@ public class JLMPProjectNature implements IProjectNature, JLMPProject,
 	}
 
 	public PrologInterface getPrologInterface() {
-		PrologInterface pif = PDTPlugin.getDefault().getPrologInterface(
-				getProject().getName());
+		PDTPlugin r = PDTPlugin.getDefault();
+		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface(getProject().getName());
 
 		if (!pif.isUp()) {
 			try {

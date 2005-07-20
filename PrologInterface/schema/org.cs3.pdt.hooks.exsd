@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.cs3.pdt">
+<schema targetNamespace="org.cs3.pdt.runtime">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.cs3.pdt" id="hooks" name="Lifecycle Hooks"/>
+         <meta.schema plugin="org.cs3.pdt.runtime" id="hooks" name="Lifecycle Hooks"/>
       </appInfo>
       <documentation>
          Define code hooks that should be executed on certain points during the lifecycle of the PrologInterface.

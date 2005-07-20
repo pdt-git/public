@@ -63,24 +63,26 @@ atom_concat(_1,_2,_3,_4,_5,_6,_7,_8,_9) :-
     atom_concat(_7,_8, _tmp).
 
 
-/*
-pdtplugin_get_file_pos(_pred,_arity, _file,_pos,_dynamic, _multifile) :-
-    explain(_pred,_info),
-    atom_concat(_basic_info,'\n        ',_filepos,_info),
-    atom_concat(_module,':',_pred,'/',_arity,' is a ',_dynMul,'predicate defined in',_basic_info),
-    (atom_concat('dynamic',_,_dynMul) ->
-        _dynamic = 1;
-        _dynamic = 0),
-    (atom_concat(_,'multifile ',_dynMul) ->
-        _multifile = 1;
-        _multifile = 0),
-    atom_concat(_file_we,'.pl:',_pos_atom,_filepos),
-    atom_number(_pos_atom,_pos),
-    atom_concat(_file_we,'.pl',_file).
-*/
 
-% this is needed for modules (in the PrologElementData the arity -1 is used for modules
+% get_file_pos(+Context, +Name, +Arity, -File, -Position, -Dynamic, -Multifile)
+%
+% find the declaration of a given predicate or module
+%
+% Context - A workspace-relative path to the file that serves as context for the search.
+%			It will basicaly be used to determin a context module.
+% Name	- The predicate name
+% Arity - The arity of the preidcate. Use -1 when looking for a module
+% File - Will be unified with the file containing the definition
+% Position - will be unified with either the character offset or the line number of 
+%            the definition within the containing File. If the file defining the searched element
+%		     has already been parsed, character offset will be available. Otherwise information
+%		     is gathered using the build in runtime reflexion, which only gives us line numbers.
+% Dynamic - 1 for dynamic predicates, 0 otherwise. NOT IMPLEMENTED YET-
+% Multifile - 1 for multifile predicates, 0 otherwise. NOT IMLEMENTED YET.
+%
+%
 get_file_pos(_,Name,-1, File,0,0, 0):-
+    % this is needed for modules (in the PrologElementData the arity -1 is used for modules
     !,
     meta_data_module(File,Name,_).
 get_file_pos(Context, Name,Arity, Context,Pos,0, 0) :- 
@@ -88,42 +90,16 @@ get_file_pos(Context, Name,Arity, Context,Pos,0, 0) :-
 get_file_pos(_, Name,Arity, File,Pos,0, 0) :-
     get_file_pos_(Name,Arity, File,Pos,0, 0),!.
 
-    
+% get_file_pos(+Name, +Arity, -File, -Position, -Dynamic, -Multifile)
+%
+% find the declaration of a given predicate or module.
+% same as get_file_pos/7, but ignores context. T
 get_file_pos_(Name,Arity, File,Pos,0, 0) :-
     term_for_signature(Name,Arity,Pred),
     nth_clause(Pred,_,Ref),
     clause_property(Ref,file(File)),
     clause_property(Ref,line_count(Pos)).
 
-get_file_pos_context_(Context, Name,Arity, Context,Pos,0, 0) :-
-    meta_data(Context, _, Name, Arity, _,Pos,_,_,_).
-%    sformat(Functor, '~a:~a',[Module, Name]),
-%    get_file_pos(_, Functor,Arity, File,Pos,0, 0).
-/*
-    term_for_signature(Name,Arity,Pred),
-    nth_clause(Pred,_,Ref),
-    clause_property(Ref,file(File)),
-    !,
-    clause_property(Ref,line_count(Pos)).
-*/
-
-/*    atom_concat(_basic_info,'\n        ',_filepos,_info),
-    atom_concat(_module,':',_pred,'/',_arity,' is a ',_dynMul,'predicate defined in',_basic_info),
-    (atom_concat('dynamic',_,_dynMul) ->
-        _dynamic = 1;
-        _dynamic = 0),
-    (atom_concat(_,'multifile ',_dynMul) ->
-        _multifile = 1;
-        _multifile = 0),
-    atom_concat(_file_we,'.pl:',_pos_atom,_filepos),
-    atom_number(_pos_atom,_pos),
-    atom_concat(_file_we,'.pl',_file).*/
-
-%:- dynamic pdtplugin_get_pred_exists/2.
-
-% pdtplugin_get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
-%   priv_pdtplugin_get_pred(_file, _name,_arity,_pos,_dyn,_mul),
-%    retractall(pdtplugin_get_pred_exists(_,_)).
 
 get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
     source_file(_module_pred, _file),
@@ -144,27 +120,8 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
 %   format('~a , ~a , ~a , ~a , ~a~n',[_name,_arity,_file,_dyn,_mul]).
     
 
-%pdtplugin_get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
-%    retractall(pdtplugin_get_pred_exists(_,_)),
-%    !.
 
-/*
-pdtplugin_has_property(_pred,_prop,1) :- 
-    predicate_property(_pred,_prop),
-    !.
-    
-pdtplugin_has_property(_pred,_prop,0).
-
-% +,-,-
-pdtplugin_get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
-    source_file(_module_pred, _file),
-    remove_module_prefix(_module_pred,_pred),
-    functor(_pred,_name,_arity),
-%    !,
-    pdtplugin_get_file_pos(_name,_arity, _file,_pos,_dyn,_mul).
-*/
-
-
+ 
 /*
    term_for_signature(+Name, +Arity, -Term)
 */
@@ -206,15 +163,7 @@ write_reference(Pred,Name, Arity, Nth):-
 mybreakpoint:-
     true.
 
-/*
-pdt_plugin_get_references(Pred):-
-    findall(_Name,(
-      explain(Pred,_e),
-      decode_reference(_e,Nth, Name, Arity),
-      number(Arity),
-      write_reference(Pred, Name, Arity, Nth)
-    ),_).
-*/
+
     
 get_references(Pred,FileName,Line,Name,Arity):-
       explain(Pred,_e),

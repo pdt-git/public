@@ -13,6 +13,7 @@ import org.cs3.pdt.internal.QueryConsoleThreadAction;
 import org.cs3.pdt.internal.QueryMainThreadAction;
 import org.cs3.pdt.internal.actions.RestartAction;
 import org.cs3.pdt.internal.hooks.ConsoleServerHook;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
@@ -90,7 +91,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.addListener(SWT.Show,handler);
 		parent.addListener(SWT.Hide,handler);
 		parent.addListener(SWT.FocusOut,handler);
-        this.pif = plugin.getPrologInterface();
+        this.pif = PrologRuntimePlugin.getDefault().getPrologInterface();
         plugin.getPrologConsoleService().registerPrologConsole(this);
         view = new ConsoleView();
         pif.addLifeCycleHook(this, HOOK_ID, new String[] {

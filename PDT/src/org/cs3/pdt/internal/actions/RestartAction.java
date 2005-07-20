@@ -3,6 +3,7 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,9 +56,10 @@ public class RestartAction implements IWorkbenchWindowActionDelegate {
                     try {
                         monitor.beginTask("initializing...",
                                 IProgressMonitor.UNKNOWN);
+						PDTPlugin r = PDTPlugin
+                                .getDefault();
 
-                        PrologInterface prologInterface = PDTPlugin
-                                .getDefault().getPrologInterface();
+                        PrologInterface prologInterface = PrologRuntimePlugin.getDefault().getPrologInterface();
                         try{
                             prologInterface.stop();
                         }

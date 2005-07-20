@@ -1,12 +1,14 @@
 /*
  */
-package org.cs3.pdt.internal.preferences;
+package org.cs3.pdt.runtime.internal.preferences;
 
 import java.io.IOException;
 
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -40,7 +42,7 @@ public class Initializer extends AbstractPreferenceInitializer {
      */
     private void initializeDefaultPreferences_impl()
             throws BackingStoreException, IOException, InterruptedException {
-        PDTPlugin plugin = PDTPlugin.getDefault();
+        PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
 
         String qualifier = plugin.getBundle().getSymbolicName();
 
@@ -55,7 +57,21 @@ public class Initializer extends AbstractPreferenceInitializer {
                 String id = options[i].getId();
                 String def = System.getProperty(id, options[i].getDefault());
                 node.put(id, def);
-            }            
+            }
+            String pifImpl=plugin.getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,null);
+            PrologInterfaceFactory factory = PrologInterfaceFactory
+                    .newInstance(pifImpl);
+            factory.setResourceLocator(plugin.getResourceLocator(PrologRuntime.LOC_PIF));
+             options = factory.getOptions();
+            for (int i = 0; i < options.length; i++) {
+                String id = options[i].getId();
+                String def = System.getProperty(id, options[i].getDefault());
+                node.put(id, def);
+            }
+            String[] strings = node.keys();
+            for (int i = 0; i < strings.length; i++) {
+                Debug.info(strings[i] + " --> " + node.get(strings[i], "n.a."));
+            }
         }
         
     }

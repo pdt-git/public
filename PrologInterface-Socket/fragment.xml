@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <fragment
-   id="org.cs3.pdt.prologinterface.socket"
+   id="org.cs3.pdt.runtime.socket"
    name="Prolog Interface Socket"
    version="0.1.2"
    provider-name="http://roots.iai.uni-bonn.de"
-   plugin-id="org.cs3.pdt.prologinterface"
+   plugin-id="org.cs3.pdt.runtime"
    plugin-version="0.1.2">
 
    <runtime>

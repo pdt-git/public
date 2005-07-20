@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!-- Schema file written by PDE -->
-<schema targetNamespace="org.cs3.pdt">
+<schema targetNamespace="org.cs3.pdt.runtime">
 <annotation>
       <appInfo>
-         <meta.schema plugin="org.cs3.pdt" id="bootstrapContribution" name="Bootstrap Contribution"/>
+         <meta.schema plugin="org.cs3.pdt.runtime" id="bootstrapContribution" name="Bootstrap Contribution"/>
       </appInfo>
       <documentation>
          [Enter description of this extension point.]
@@ -52,7 +52,7 @@
                   If this attribute is present, its value is interpreted as a fully qualified name of a class implementing the org.cs3.pdt.BootstrapContribution interface. An additional &lt;code&gt;path&lt;/code&gt; attribute will be ignored.
                </documentation>
                <appInfo>
-                  <meta.attribute kind="java" basedOn="org.cs3.pdt.BootstrapContribution"/>
+                  <meta.attribute kind="java" basedOn="org.cs3.pdt.runtime.BootstrapContribution"/>
                </appInfo>
             </annotation>
          </attribute>
