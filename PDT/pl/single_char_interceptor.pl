@@ -29,7 +29,9 @@ escape(A,In,Out):-
 :- prolog_load_context(directory,A), user:assert(file_search_path(foreign,A)).
 
 sd_load:-
-    load_foreign_library(foreign('stream_decorator.so')).
+    current_prolog_flag(shared_object_extension,E),
+    file_name_extension(stream_decorator,E,LibName),
+    load_foreign_library(foreign(LibName)).
         
 sd_install:-
     sd_load,
