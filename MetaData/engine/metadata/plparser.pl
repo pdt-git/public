@@ -19,9 +19,6 @@ parse(File,InStream):-
     unused_id(compilation_unit,Id),
     my_assert(node_attr(Id,type(compilation_unit))),
     my_assert(node_attr(Id,file(File))),
-    source_folder(FolderId,File),
-    my_assert(node_attr(Id,parent(FolderId))),
-    my_assert(node_attr(FolderId,compilation_unit(Id))),
    	parse_clauses(InStream,Id,user).
 
 
@@ -31,15 +28,6 @@ parse(File):-
     parse(File,InStream),
     close(InStream).
 
-source_folder(FolderId,File):-
-    file_directory_name(File,Dir),
-    (	(	node_attr(FolderId,file(Dir)),
-			node_attr(FolderId,type(source_folder))
-		)
-	;	unused_id(source_folder,FolderId),
-		my_assert(node_attr(FolderId,file(Dir))),
-		my_assert(node_attr(FolderId,type(source_folder)))
-	).
 
 parse_clauses(InStream,FileId,CurrentModule):-    
 	parse_clause(InStream,FileId,CurrentModule,NextModule,ClauseId),
@@ -72,7 +60,8 @@ parse_clause(InStream,ParentId,CurrentModule,NextModule,ClauseId):-
 		parse_subterm_positions(ParentId,Term,Sub,ClauseId),
 	   	my_assert(node_attr(ClauseId,line(Line))),      
 		my_assert(node_attr(ClauseId,toplevel_term)),
-		my_assert(node_attr(ClauseId,singletons(Singletons)))
+		my_assert(node_attr(ClauseId,singletons(Singletons))),
+		my_assert(node_attr(ClauseId,module(CurrentModule)))
 	).
 
 
@@ -125,11 +114,12 @@ parse_subterm_positions(ParentId,Term,  brace_term_position(From, To, Arg),Id):-
 parse_subterm_positions(ParentId,Term,  list_position(From, To, Elms, Tail),Id):-
    	unused_id(list,Id),
 	assert_common_attrs(Id,list,ParentId,From-To,Term),
-	parse_elm_positions(Id,Term,Elms,Tail,ElmIDs,TailId),
+	parse_elm_positions(Id,Term,Elms,ElmIDs,TailTerm),
 	my_assert(node_attr(Id,elements(ElmIDs))),
-	(	nonvar(TailId)
-	->	my_assert(node_attr(Id,tail(TailId)))
-	;	true
+	(	Tail==none
+	->	true
+	;	parse_subterm_positions(Id,TailTerm,Tail,TailId),
+		my_assert(node_attr(Id,tail(TailId)))
 	).
     
 parse_subterm_positions(ParentId,Term,  term_position(From, To, FFrom, FTo, SubPos),Id):-
@@ -148,14 +138,13 @@ parse_arg_positions(ParentId,[Arg|Args],[Position|Positions],[Id|Ids]):-
    	parse_subterm_positions(ParentId,Arg,Position,Id),
    	parse_arg_positions(ParentId,Args,Positions,Ids).
 
-parse_elm_positions(_,[],[],_,[],_).   	
+%parse_elm_positions(+Parent,+Term,+ElmPositions,-ElmIds,-TailTerm)
+parse_elm_positions(_,TailTerm,[],[],TailTerm).   	
 
-parse_elm_positions(ParentId,Elm,[],TailPosition,[],TailId):-
-   	parse_subterm_positions(ParentId,Elm,TailPosition,TailId).
+parse_elm_positions(ParentId,[HeadTerm|RestTerm],[HeadPos|RestPos],[HeadId|RestIds],TailTerm):-
+   	parse_subterm_positions(ParentId,HeadTerm,HeadPos,HeadId),
+   	parse_elm_positions(ParentId,RestTerm,RestPos,RestIds,TailTerm).
    	
-parse_elm_positions(ParentId,[Elm|Elms],[Position|Positions],TailPosition,[Id|Ids],TailId):-
-   	parse_subterm_positions(ParentId,Elm,Position,Id),
-   	parse_elm_positions(ParentId,Elms,Positions,TailPosition,Ids,TailId).
 
 my_assert(node_id(Id)):-
     ( 	node_id(Id)

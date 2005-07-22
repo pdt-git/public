@@ -30,5 +30,13 @@ variable_name(variable_node(V),Name):-
     node_attr(variable_node(V),term(Variable)),
     member(Name=Variable,VNames).
 
+operator_type(compound_node(V),prefix):-
+    node_attr(compound_node(V),functor(F/1)),
+    in_toplevel(compound_node(V),TL),
+    node_attr(TL,module(Module)),
+    
+    node_attr(compound_node(V),functor_position(From-_)),
+    node_attr(compound_node(V),From-_).
+    
 
 	
