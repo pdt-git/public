@@ -282,7 +282,7 @@ child(compound_node(P),Arg):-
 
 
 	
-my_writeln(Term):-
+my_writeln(_):-
 	true.
 %    writeln(Term).
 
