@@ -1,11 +1,11 @@
-:- module(plparser,[parse/1,parse/2]). 
+:- module(plparser,[parse/1,parse/2,node_attr/2]). 
 :- dynamic node_attr/2.
 :- dynamic node_id/1.
 
 node_attr(source_folder_node(P),child(C)):-
     node_attr(source_folder_node(P),compilation_unit(C)).
 node_attr(compilation_unit_node(P),child(C)):-
-    node_attr(compilation_unit_node(P),clause(C)).
+    node_attr(compilation_unit_node(P),member(C)).
 node_attr(brace_node(P),child(C)):-
     node_attr(brace_node(P),argument(C)).    
 node_attr(list_node(P),child(C)):-
@@ -45,7 +45,7 @@ parse_clauses(InStream,FileId,CurrentModule):-
 	parse_clause(InStream,FileId,CurrentModule,NextModule,ClauseId),
 	(	ClauseId==end_of_file
 	->	true
-	;	my_assert(node_attr(FileId,clause(ClauseId))),
+	;	my_assert(node_attr(FileId,member(ClauseId))),
 		parse_clauses(InStream,FileId,NextModule)
 	).
 
@@ -53,7 +53,13 @@ parse_clauses(InStream,FileId,CurrentModule):-
 
 parse_clause(InStream,ParentId,CurrentModule,NextModule,ClauseId):-
 	catch(
-		read_term(InStream,Term,[term_position(Pos),subterm_positions(Sub),module(CurrentModule)]),
+		read_term(InStream,Term,
+			[	term_position(Pos),
+				subterm_positions(Sub),
+				module(CurrentModule),
+				variable_names(VarNames),
+				singletons(Singletons)
+			]),
 		error(Error,Context),
 		(handle_error(ClauseId,Error,Context),fail)
 	),	
@@ -62,9 +68,11 @@ parse_clause(InStream,ParentId,CurrentModule,NextModule,ClauseId):-
 	(	Term==end_of_file
 	->	ClauseId=end_of_file
 	;   next_module(Term,NextModule),	    
+		b_setval(bindings,VarNames),
 		parse_subterm_positions(ParentId,Term,Sub,ClauseId),
 	   	my_assert(node_attr(ClauseId,line(Line))),      
-		my_assert(node_attr(ClauseId,clause))
+		my_assert(node_attr(ClauseId,toplevel_term)),
+		my_assert(node_attr(ClauseId,singletons(Singletons)))
 	).
 
 
@@ -86,13 +94,21 @@ assert_common_attrs(Id,Type,Parent,From-To,Term):-
     my_assert(node_attr(Id,parent(Parent))),
     my_assert(node_attr(Id,From-To)),
     my_assert(node_attr(Id,term(Term))).
-    
+var_name(Var,Name):-
+	b_getval(bindings,B),
+	(	member(Name=C,B),C==Var   
+	->	true
+	;	C='_'
+	).
+	
 parse_subterm_positions(ParentId,Term, From-To,Id):-	
-	( atom(Term)
+	( ground(Term)
 	->unused_id(atom,Id),
 	  assert_common_attrs(Id,atom,ParentId,From-To,Term)
 	; unused_id(variable,Id),
-	  assert_common_attrs(Id,variable,ParentId,From-To,Term)
+	  assert_common_attrs(Id,variable,ParentId,From-To,Term),
+	  var_name(Term,Name),
+	  my_assert(node_attr(Id,name(Name)))
 	).
 	
 parse_subterm_positions(ParentId,Term, string_position(From,To),Id):-
