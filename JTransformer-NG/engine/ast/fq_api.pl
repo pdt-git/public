@@ -172,6 +172,10 @@ map_type_term(TypeTerm, null):-
     nonvar(TypeTerm),
     TypeTerm = type(class,null,0).
 
+map_type_term(type(class,null,0), FQNBrackets):-
+    nonvar(FQNBrackets),
+    FQNBrackets = null.
+
 map_type_term(TypeTerm, FQNBrackets):-
     nonvar(FQNBrackets),
     type_with_brackets(TypeName,Arity,FQNBrackets),
