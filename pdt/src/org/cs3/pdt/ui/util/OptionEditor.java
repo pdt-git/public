@@ -36,7 +36,7 @@ abstract public class OptionEditor implements PropertyEditor {
     /*
      * (non-Javadoc)
      * 
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#getControl()
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getControl()
      */
     public Control getControl() {
         if (control == null) {
@@ -54,7 +54,7 @@ abstract public class OptionEditor implements PropertyEditor {
     /*
      * (non-Javadoc)
      * 
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#isEnabled()
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#isEnabled()
      */
     public boolean isEnabled() {
         return getControl().isEnabled();
@@ -63,7 +63,7 @@ abstract public class OptionEditor implements PropertyEditor {
     /*
      * (non-Javadoc)
      * 
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#setEnabled(boolean)
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#setEnabled(boolean)
      */
     public void setEnabled(boolean enabled) {
         getControl().setEnabled(enabled);
@@ -73,7 +73,7 @@ abstract public class OptionEditor implements PropertyEditor {
     /*
      * (non-Javadoc)
      * 
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#setPropertyChangeListener(java.beans.PropertyChangeListener)
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#setPropertyChangeListener(java.beans.PropertyChangeListener)
      */
     public void addPropertyChangeListener(IPropertyChangeListener l) {
         synchronized (listeners) {
@@ -84,7 +84,7 @@ abstract public class OptionEditor implements PropertyEditor {
     }
 
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#removePropertyChangeListener(java.beans.PropertyChangeListener)
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#removePropertyChangeListener(java.beans.PropertyChangeListener)
      */
     public void removePropertyChangeListener(IPropertyChangeListener l) {
         synchronized (listeners) {
@@ -106,14 +106,14 @@ abstract public class OptionEditor implements PropertyEditor {
         }
     }
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#getOption()
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getOption()
      */
     public String getKey() {
       return option.getId();
     }
     
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#revertToDefault()
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#revertToDefault()
      */
     public void revertToDefault() {
       setValue(option.getDefault());
@@ -130,7 +130,7 @@ abstract public class OptionEditor implements PropertyEditor {
      
 
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#validate()
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#validate()
      */
     public String validate() {        
         	return option.validate(getValue());        

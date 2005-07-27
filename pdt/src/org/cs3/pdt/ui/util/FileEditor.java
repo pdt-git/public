@@ -28,7 +28,7 @@ public class FileEditor extends OptionEditor implements PropertyEditor {
     }
 
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.OptionEditor#createControls(org.eclipse.swt.widgets.Composite)
+     * @see org.cs3.jtransformer.internal.properties.OptionEditor#createControls(org.eclipse.swt.widgets.Composite)
      */
     protected void createControls(Composite composite) {
         GridLayout layout = new GridLayout();
@@ -104,7 +104,7 @@ public class FileEditor extends OptionEditor implements PropertyEditor {
     }
 
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#setValue(java.lang.String)
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#setValue(java.lang.String)
      */
     public void setValue(String value) {
         valueField.setText(value);
@@ -112,7 +112,7 @@ public class FileEditor extends OptionEditor implements PropertyEditor {
 
     
     /* (non-Javadoc)
-     * @see org.cs3.jlmp.internal.properties.PropertyEditor#getValue()
+     * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getValue()
      */
     public String getValue() {      
         return valueField.getText();
