@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.console.internal.views;
 import java.util.Iterator;
 import java.util.TreeSet;
 

@@ -11,8 +11,7 @@ import org.eclipse.core.runtime.CoreException;
  * All kinds of string keys used by the pdt.
  */
 public final  class PDT {
-	public static final String CONSOLE_VIEW_ID="org.cs3.pdt.internal.views.PrologConsoleView";
-    
+	
     /**
      * The prolog project nature.
      * <p>
@@ -51,10 +50,6 @@ public final  class PDT {
      */
     public static final String PREF_AUTO_CONSULT = "pdt.auto.consult";
     
-    /**
-     * the port on which the prolog console server is listening.
-     */
-    public static final String PREF_CONSOLE_PORT = "pdt.console.port";
     /**
      * the default to use for PROP_SOURCE_PATH
      */

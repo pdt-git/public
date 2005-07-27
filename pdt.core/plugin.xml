@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin
-   id="org.cs3.pdt.metadata"
+   id="org.cs3.pdt.core"
    name="MetaData"
-   version="0.1.2">
+   version="0.1.2"
+
+   class="org.cs3.pdt.core.PDTCorePlugin">
    <runtime>
       <library name="metadata.jar">
          <export name="*"/>
@@ -16,6 +18,7 @@
       <import plugin="org.cs3.pdt.common"/>
       <import plugin="org.junit"/>
       <import plugin="org.cs3.pdt.runtime"/>
+      <import plugin="org.eclipse.core.runtime"/>
    </requires>
    <extension
          point="org.cs3.pdt.runtime.bootstrapContribution">

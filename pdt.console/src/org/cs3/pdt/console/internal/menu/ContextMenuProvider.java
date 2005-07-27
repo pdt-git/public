@@ -1,4 +1,4 @@
-package org.cs3.pl.console.internal.menu;
+package org.cs3.pdt.console.internal.menu;
 
 import java.net.URL;
 import java.util.ArrayList;

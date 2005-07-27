@@ -1,4 +1,4 @@
-package org.cs3.pdt;
+package org.cs3.pl.console.prolog;
 
 public interface PrologConsoleService {
 	public void registerPrologConsole(PrologConsole console);

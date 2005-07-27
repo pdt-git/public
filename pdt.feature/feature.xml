@@ -52,7 +52,7 @@
          version="0.0.0"/>
 
    <plugin
-         id="org.cs3.pdt.metadata"
+         id="org.cs3.pdt.core"
          download-size="0"
          install-size="0"
          version="0.0.0"/>

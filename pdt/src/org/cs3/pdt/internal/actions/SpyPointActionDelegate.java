@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
@@ -40,7 +41,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
         PDTPlugin plugin = PDTPlugin.getDefault();
         UIUtils.getDisplay().asyncExec(new Runnable() {
             public void run() {
-                PDTPlugin plugin = PDTPlugin.getDefault();
+                
 
                 PLEditor editor = (PLEditor) UIUtils.getActiveEditor();
                 PrologSession session = null;
@@ -62,7 +63,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
                     return;
 
                 }
-				Predicate[] p = plugin.getMetaInfoProvider().findPredicates(data);
+				Predicate[] p = PDTCorePlugin.getDefault().getMetaInfoProvider().findPredicates(data);
 				//FIXME what about alternatives?
 				
                 if (p==null||p.length==0) {

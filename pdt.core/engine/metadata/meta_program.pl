@@ -69,7 +69,7 @@ meta_clause(Id,(
 unfold(FrameId,ClauseId,S0,Node,Sout,
 (
 	GoalA,GoalB
-):-
+)):-
     plast_prop(Node,functor((,)/2)),
     plast_prop(Node,arguments([A,B])),
     unfold(FrameId,ClauseId,S0,A,S1,GoalA),
@@ -78,7 +78,7 @@ unfold(FrameId,ClauseId,S0,Node,Sout,
 unfold(FrameId,ClauseId,S0,Node,Sout,
 (
 	GoalA;GoalB
-):-
+)):-
     plast_prop(Node,functor((;)/2)),
     plast_prop(Node,arguments([A,B])),
     unfold(FrameId,ClauseId,S0,A,S1,GoalA),

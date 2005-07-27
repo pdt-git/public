@@ -10,13 +10,13 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.cs3.pdt.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.internal.views.PrologNode;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.metadata.DefaultMetaInfoProvider;
@@ -36,7 +36,8 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
+public class PDTPlugin extends AbstractUIPlugin implements 
+IAdaptable{
 
     public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -63,9 +64,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
     }
 
-    private String pdtModulePrefix = "";
+    
 
-    private DefaultMetaInfoProvider prologHelper;
+    
 
     
 
@@ -77,8 +78,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     private DefaultResourceFileLocator rootLocator;
 
     private Option[] options;
-
-	private PrologConsoleService consoleService;
 
 	
 
@@ -115,12 +114,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
     }
 
     
-    public IMetaInfoProvider getMetaInfoProvider() {
-        if (prologHelper == null) {
-            prologHelper = new DefaultMetaInfoProvider(PrologRuntimePlugin.getDefault().getPrologInterface(), pdtModulePrefix);
-        }
-        return prologHelper;
-    }
 
     
     /**
@@ -216,12 +209,7 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         }
 
         options = new Option[] {
-        		new SimpleOption(
-                        PDT.PREF_CONSOLE_PORT,
-                        "Console Port",
-                        "Number of the port used for connecting the console to the Prolog prozess",
-                        Option.NUMBER, "4711"),                
-                new SimpleOption(PDT.PREF_DEBUG_LEVEL, "Debug Level",
+        		new SimpleOption(PDT.PREF_DEBUG_LEVEL, "Debug Level",
                         "Determines the verbosity of the debug log file.",
                         Option.ENUM, "WARNING", new String[][] {
                                 { "error", "ERROR" }, { "warning", "WARNING" },
@@ -325,13 +313,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
         return location;
     }
 
-	public PrologConsoleService getPrologConsoleService() {
-		if(consoleService==null){
-			consoleService=new DefaultPrologConsoleService();
-		}
-		return consoleService;
-	}
+	
 
+	
     
 
 }

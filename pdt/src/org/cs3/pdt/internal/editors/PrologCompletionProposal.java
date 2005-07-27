@@ -1,6 +1,7 @@
 package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.text.Assert;
@@ -137,7 +138,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
      */
     private String getHelp() {
         if(this.help==null){
-            this.help=PDTPlugin.getDefault().getMetaInfoProvider().getHelp(data);
+            this.help=PDTCorePlugin.getDefault().getMetaInfoProvider().getHelp(data);
             if(this.help==null){
                 this.help="";
             }

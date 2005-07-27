@@ -2,8 +2,8 @@
  */
 package org.cs3.pl.console;
 
+import org.cs3.pdt.console.internal.menu.ContextMenuProvider;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.internal.menu.ContextMenuProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.StyledTextContent;

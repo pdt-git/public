@@ -1,4 +1,4 @@
-package org.cs3.pdt;
+package org.cs3.pl.console.prolog;
 
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.prolog.PrologInterface;
