@@ -1,27 +1,31 @@
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.console.internal.views;
 
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PrologConsole;
-import org.cs3.pdt.PrologConsoleEvent;
-import org.cs3.pdt.PrologConsoleListener;
-import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.QueryConsoleThreadAction;
-import org.cs3.pdt.internal.QueryMainThreadAction;
-import org.cs3.pdt.internal.actions.RestartAction;
-import org.cs3.pdt.internal.hooks.ConsoleServerHook;
+import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.console.internal.ImageRepository;
+import org.cs3.pdt.console.internal.actions.QueryConsoleThreadAction;
+import org.cs3.pdt.console.internal.actions.QueryMainThreadAction;
+import org.cs3.pdt.console.internal.hooks.ConsoleServerHook;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
+import org.cs3.pl.console.prolog.PrologConsole;
+import org.cs3.pl.console.prolog.PrologConsoleEvent;
+import org.cs3.pl.console.prolog.PrologConsoleListener;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -70,7 +74,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
      * @param parent
      */
     private void createPartControl_impl(Composite parent) {
-        PDTPlugin plugin = PDTPlugin.getDefault();        
+                
         this.partControl=parent;
         
         Listener handler = new Listener(){
@@ -92,14 +96,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.addListener(SWT.Hide,handler);
 		parent.addListener(SWT.FocusOut,handler);
         this.pif = PrologRuntimePlugin.getDefault().getPrologInterface();
-        plugin.getPrologConsoleService().registerPrologConsole(this);
+        PrologConsolePlugin.getDefault().getPrologConsoleService().registerPrologConsole(this);
         view = new ConsoleView();
         pif.addLifeCycleHook(this, HOOK_ID, new String[] {
                 ConsoleServerHook.HOOK_ID});
         
         controller = new DefaultConsoleController();
         completionProvider = new PrologCompletionProvider();        
-		completionProvider.setMetaInfoProvider(plugin.getMetaInfoProvider());
+		completionProvider.setMetaInfoProvider(PDTCorePlugin.getDefault().getMetaInfoProvider());
         controller.setCompletionProvider(completionProvider);
         view.setController(controller);
         int port = getPort();
@@ -121,7 +125,35 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
         		ImageRepository.getImageDescriptor(ImageRepository.BREAK));
         IAction restart = new Action() {
         	public void run() {
-        		(new RestartAction()).runJob();
+        		try {
+
+                    Job j = new Job("Restarting the PrologInterface") {
+
+                        protected IStatus run(IProgressMonitor monitor) {
+                            try {
+                                monitor.beginTask("initializing...",
+                                        IProgressMonitor.UNKNOWN);
+
+                                try{
+                                    pif.stop();
+                                }
+                                finally{
+                                    pif.start();
+                                }
+                            } catch (Throwable e) {
+                                Debug.report(e);
+                                return Status.CANCEL_STATUS;
+                            } finally {
+                                monitor.done();
+                            }
+                            return Status.OK_STATUS;
+                        }
+                    };
+                    j.schedule();
+                } catch (Throwable t) {
+                    Debug.report(t);
+                }
+
         	};
         	public org.eclipse.jface.resource.ImageDescriptor getImageDescriptor() {
         		return ImageRepository.getImageDescriptor(ImageRepository.RESTART);
@@ -147,10 +179,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 
     private  int getPort() {
-        String value = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_CONSOLE_PORT, null);
+        String value = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_PORT, null);
         if (value==null) {
             throw new NullPointerException("Required property \""
-                    + PDT.PREF_CONSOLE_PORT + "\" was not specified.");
+                    + PDTConsole.PREF_CONSOLE_PORT + "\" was not specified.");
         }
         int port = Integer.parseInt(value);        
          return port;
@@ -202,7 +234,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		}	
 	}
 	public void dispose() {
-    	PDTPlugin.getDefault().getPrologConsoleService().unregisterPrologConsole(this);
+    	PrologConsolePlugin.getDefault().getPrologConsoleService().unregisterPrologConsole(this);
     	super.dispose();
     }
     /*

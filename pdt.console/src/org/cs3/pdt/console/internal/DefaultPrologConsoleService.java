@@ -1,12 +1,12 @@
-package org.cs3.pdt.internal;
+package org.cs3.pdt.console.internal;
 
 import java.util.HashSet;
 import java.util.Vector;
 
-import org.cs3.pdt.PrologConsole;
-import org.cs3.pdt.PrologConsoleEvent;
-import org.cs3.pdt.PrologConsoleListener;
-import org.cs3.pdt.PrologConsoleService;
+import org.cs3.pl.console.prolog.PrologConsole;
+import org.cs3.pl.console.prolog.PrologConsoleEvent;
+import org.cs3.pl.console.prolog.PrologConsoleListener;
+import org.cs3.pl.console.prolog.PrologConsoleService;
 
 public class DefaultPrologConsoleService implements PrologConsoleService, PrologConsoleListener {
 

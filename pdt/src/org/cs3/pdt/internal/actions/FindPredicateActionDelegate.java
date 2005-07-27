@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
@@ -29,7 +30,7 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 public class FindPredicateActionDelegate extends TextEditorAction {
 	private ITextEditor editor;
 
-	final PDTPlugin plugin;
+	
 
 	/**
 	 *  
@@ -38,7 +39,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),
 				FindPredicateActionDelegate.class.getName(), editor); //$NON-NLS-1$
 		this.editor = editor;
-		plugin = PDTPlugin.getDefault();
+
 	}
 
 	/**
@@ -86,7 +87,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	}
 
 	private void run_impl(Goal goal, IFile file) {
-		IMetaInfoProvider mip = plugin.getMetaInfoProvider();
+		IMetaInfoProvider mip = PDTCorePlugin.getDefault().getMetaInfoProvider();
 		Predicate[] predicates = mip.findPredicates(goal);
 		//FIXME: what about alternatives?
 		if(predicates==null||predicates.length==0){

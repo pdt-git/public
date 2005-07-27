@@ -1,4 +1,4 @@
-package org.cs3.pdt;
+package org.cs3.pl.console.prolog;
 
 import java.util.EventListener;
 

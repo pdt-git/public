@@ -1,4 +1,4 @@
-package org.cs3.pl.console.internal.actions;
+package org.cs3.pdt.console.internal.actions;
 
 import org.cs3.pl.console.SelectionContextAction;
 import org.eclipse.jface.action.Action;

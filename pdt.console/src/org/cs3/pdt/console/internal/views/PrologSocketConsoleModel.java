@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.console.internal.views;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,12 +9,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-import org.cs3.pdt.QueryExpansion;
+
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.ConsoleModelEvent;
 import org.cs3.pl.console.ConsoleModelListener;
+import org.cs3.pl.console.prolog.QueryExpansion;
 
 /**
  * @author terra

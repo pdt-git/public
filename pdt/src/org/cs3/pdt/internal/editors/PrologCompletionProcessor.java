@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
@@ -297,8 +298,8 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
         //			throw new IOException(msg);
         //		}
 
-        PDTPlugin plugin = PDTPlugin.getDefault();
-        IMetaInfoProvider prologHelper = plugin.getMetaInfoProvider();
+        
+        IMetaInfoProvider prologHelper = PDTCorePlugin.getDefault().getMetaInfoProvider();
         IFileEditorInput editorInput = (IFileEditorInput) UIUtils
                 .getActiveEditor().getEditorInput();
         String activeFileName = editorInput.getFile().getFullPath().toString();
@@ -391,8 +392,8 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
      */
     private String getHelp(Predicate data) throws IOException {
         
-		PDTPlugin plugin = PDTPlugin.getDefault();
-		IMetaInfoProvider metaInfoProvider = plugin.getMetaInfoProvider();
+		
+		IMetaInfoProvider metaInfoProvider = PDTCorePlugin.getDefault().getMetaInfoProvider();
 		
         return metaInfoProvider.getHelp(data);
     }
@@ -411,8 +412,8 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
         if (data == null){
 			return null;
         }
-		PDTPlugin plugin = PDTPlugin.getDefault();
-		IMetaInfoProvider metaInfoProvider = plugin.getMetaInfoProvider();
+		
+		IMetaInfoProvider metaInfoProvider = PDTCorePlugin.getDefault().getMetaInfoProvider();
 		Predicate[] preds = metaInfoProvider.findPredicates(data);
 		//FIXME: what about alternatives?
 		if(preds==null||preds.length==0){

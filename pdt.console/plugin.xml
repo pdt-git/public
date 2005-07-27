@@ -3,7 +3,9 @@
 <plugin
    id="org.cs3.pdt.console"
    name="Console"
-   version="0.1.2">
+   version="0.1.2"
+
+   class="org.cs3.pdt.console.PrologConsolePlugin">
    <runtime>
       <library name="console.jar">
          <export name="*"/>
@@ -14,21 +16,50 @@
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.cs3.pdt.core"/>
+      <import plugin="org.cs3.pdt.runtime"/>
    </requires>
    <extension-point id="consoleContextMenu" name="Console Context Menu" schema="schema/console_context_menu.exsd"/>
    <extension
          point="org.cs3.pdt.console.consoleContextMenu">
       <SelectionContextAction
-            class="org.cs3.pl.console.internal.actions.CopyAction"
+            class="org.cs3.pdt.console.internal.actions.CopyAction"
             name="copy"
             sharedIcon="IMG_TOOL_COPY"/>
       <SelectionContextAction
-            class="org.cs3.pl.console.internal.actions.ClearAction"
+            class="org.cs3.pdt.console.internal.actions.ClearAction"
             icon="icons/clear.gif"
             name="clear"/>
       <SelectionContextAction
-            class="org.cs3.pl.console.internal.actions.SelectAllAction"
+            class="org.cs3.pdt.console.internal.actions.SelectAllAction"
             name="select all"/>
    </extension>
+	<extension
+         point="org.eclipse.ui.views">
+      <view
+            allowMultiple="false"
+            class="org.cs3.pdt.console.internal.views.PrologConsoleView"
+            category="org.cs3.pdt"
+            name="Prolog Console"
+            id="org.cs3.pdt.console.internal.views.PrologConsoleView"/>
+	</extension>
+	 <extension
+       point="org.cs3.pdt.runtime.hooks">
+	    <hook
+          class="org.cs3.pdt.console.internal.hooks.ConsoleServerHook"
+          id="org.cs3.pdt.console.internal.hooks.ConsoleServerHook"/>
+	</extension>
+	<extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer class="org.cs3.pdt.console.internal.preferences.Initializer"/>
+ </extension>
+    <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.pdt.console.internal.preferences.PreferencePage"
+          id="org.cs3.pdt.console.internal.preferences.PDTPreferencePage"
+          name="Prolog Console"/>
+ </extension>
 
 </plugin>

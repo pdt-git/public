@@ -1,7 +1,7 @@
-package org.cs3.pdt.internal.hooks;
+package org.cs3.pdt.console.internal.hooks;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -14,13 +14,13 @@ import org.cs3.pl.prolog.PrologSession;
  */
 public class ConsoleServerHook implements LifeCycleHook {
 
-    public static final String HOOK_ID = "org.cs3.pdt.internal.hooks.ConsoleServerHook";
+    public static final String HOOK_ID = "org.cs3.pdt.console.internal.hooks.ConsoleServerHook";
 
     private static int getPort() {
-       String value = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_CONSOLE_PORT, null);
+       String value = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_PORT, null);
        if (value==null) {
            throw new NullPointerException("Required property \""
-                   + PDT.PREF_CONSOLE_PORT + "\" was not specified.");
+                   + PDTConsole.PREF_CONSOLE_PORT + "\" was not specified.");
        }
        int port = Integer.parseInt(value);        
         return port;

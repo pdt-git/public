@@ -27,9 +27,9 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.cs3.pdt.common"/>
-      <import plugin="org.cs3.pdt.console"/>
-      <import plugin="org.cs3.pdt.metadata"/>
-      <import plugin="org.cs3.pdt.runtime"/>    
+      <import plugin="org.cs3.pdt.core"/>
+      <import plugin="org.cs3.pdt.runtime"/>
+      <import plugin="org.cs3.pdt.console"/>    
    </requires>
    
    <extension
@@ -44,13 +44,6 @@
             id="org.cs3.pdt"/>
       <view
             allowMultiple="false"
-            icon="icons/sample.gif"
-            class="org.cs3.pdt.internal.views.PrologConsoleView"
-            category="org.cs3.pdt"
-            name="Prolog Console"
-            id="org.cs3.pdt.internal.views.PrologConsoleView"/>
-      <view
-            allowMultiple="false"
             class="org.cs3.pdt.internal.views.NavigatorView"
             icon="icons/sample.gif"
             category="org.cs3.pdt"
@@ -63,9 +56,6 @@
  </extension>
  <extension
        point="org.cs3.pdt.runtime.hooks">
-    <hook
-          class="org.cs3.pdt.internal.hooks.ConsoleServerHook"
-          id="org.cs3.pdt.internal.hooks.ConsoleServerHook"/>
      <hook
             class="org.cs3.pdt.internal.hooks.ReloadHook"
             id="PDTReloadHook"/>
@@ -210,7 +200,7 @@
             ratio="0.5"
             relationship="right"
             relative="org.eclipse.ui.views.TaskList"
-            id="org.cs3.pdt.internal.views.PrologConsoleView"/>
+            id="org.cs3.pdt.console.internal.views.PrologConsoleView"/>
    </perspectiveExtension>
 </extension>
 <extension

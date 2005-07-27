@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
@@ -82,9 +83,9 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
      * @throws PrologException
      */
     private void generatePredicates(String fileName) throws PrologException {
-        PDTPlugin plugin = PDTPlugin.getDefault();
+        
 		data.clear();
-        IMetaInfoProvider metaInfo = plugin.getMetaInfoProvider();
+        IMetaInfoProvider metaInfo = PDTCorePlugin.getDefault().getMetaInfoProvider();
         Clause[] clauses = metaInfo.retrievePrologElements(fileName);
         if (clauses == null || clauses.length == 0) {            
             return;

@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.search.PrologSearchQuery;
 import org.cs3.pl.common.Debug;
@@ -29,7 +30,7 @@ public class ReferencesActionDelegate extends TextEditorAction {
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
 public void run() {
-		final PDTPlugin plugin = PDTPlugin.getDefault();
+		
 		UIUtils.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				try {
@@ -39,7 +40,7 @@ public void run() {
 							Debug.warning("data is null");
 							return;
 						}
-						Predicate[] p = PDTPlugin.getDefault().getMetaInfoProvider().findPredicates(data);
+						Predicate[] p = PDTCorePlugin.getDefault().getMetaInfoProvider().findPredicates(data);
 						//FIXME: what about alternatives?
 						if(p==null||p.length==0){
 							return;

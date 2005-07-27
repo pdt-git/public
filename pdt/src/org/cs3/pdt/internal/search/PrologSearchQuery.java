@@ -11,6 +11,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
@@ -72,8 +73,8 @@ public class PrologSearchQuery implements ISearchQuery {
 		}
 		else{
 			PrologSession session;
-			PDTPlugin plugin = PDTPlugin.getDefault();
-			IMetaInfoProvider mip = plugin.getMetaInfoProvider();
+			
+			IMetaInfoProvider mip = PDTCorePlugin.getDefault().getMetaInfoProvider();
 			SourceLocation[] locations = mip.findReferences(data);
 			if(locations==null){
 				//FIXME: is it realy ok? --lu

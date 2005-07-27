@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.actions;
 
-import org.cs3.pdt.internal.QueryAction;
+import org.cs3.pdt.console.internal.actions.QueryAction;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;
