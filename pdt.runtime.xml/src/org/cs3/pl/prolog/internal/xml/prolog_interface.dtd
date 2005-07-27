@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding="ISO-8859-1"?>
+<!ELEMENT response (tuple|failed|exception)*>
+<!ATTLIST response
+          command           CDATA #REQUIRED
+					args							CDATA #REQUIRED>
+
+<!ELEMENT tuple (binding|failed|exception)*>
+<!ELEMENT binding (#PCDATA)>
+<!ATTLIST binding
+					name							CDATA #REQUIRED>
+<!ELEMENT failed (#PCDATA)>
+<!ELEMENT exception (#PCDATA)>
