@@ -1,8 +1,4 @@
-:-module(lieblingsmodul,[]).
-something_i_have_never_seen_before:-
-    writeln('how are ya?').
-:- op(50,xfx,user:lumpi).
-
+:-module(wrapper,[wrap/2,unwrap/2]).
 
 unwrap(f(A),A):-
 	var(A),
@@ -20,7 +16,6 @@ unwrap(f(Term),Out):-
 	    Out=..[Name|OutArgs]
 	 ;	Out=Term
 	 ).	    
-
 
 wrap(A,f(A)):-
 	var(A),
@@ -49,4 +44,3 @@ unwrap_elms([],[]).
 unwrap_elms([H|T],[OH|OT]):-
     unwrap(H,OH),
     unwrap_elms(T,OT).
-    
