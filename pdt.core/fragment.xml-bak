@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<fragment
+   id="org.cs3.pdt.metadata"
+   name="PDT metadata"
+   version="1.0.0"
+   provider-name="http://roots.iai.uni-bonn.de"
+   plugin-id="org.cs3.pdt"
+   plugin-version="1.0.0">
+
+   <runtime>
+      <library name="metadata.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+   <extension
+         point="org.cs3.pdt.bootstrapContribution">
+      <contribution path="engine/metadata/main.pl"/>
+   </extension>
+
+</fragment>
