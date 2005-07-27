@@ -49,8 +49,8 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
         data.horizontalAlignment = GridData.FILL;
         composite.setLayoutData(data);
         
-        OptionProvider jlmpProject = getOptionProvider();
-        Option[] options = jlmpProject.getOptions();
+        OptionProvider jtransformerProject = getOptionProvider();
+        Option[] options = jtransformerProject.getOptions();
         addEditorsForOptions(composite, options);
         load();
         return composite;

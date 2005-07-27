@@ -56,8 +56,8 @@ public class ReloadHook implements LifeCycleHook {
 						Debug.debug("PDTReloadHook.afterInit: job started");
                         for (int i = 0; i < prologProjects.length; i++) {
 
-                            IPrologProject jlmpProject = prologProjects[i];
-                            IProject project = jlmpProject.getProject();
+                            IPrologProject jtransformerProject = prologProjects[i];
+                            IProject project = jtransformerProject.getProject();
 							Debug.debug("PDTReloadHook.afterInit: lets build project "+project);
                             project.build(IncrementalProjectBuilder.FULL_BUILD,
 									PDT.BUILDER_ID,

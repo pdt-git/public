@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin
-   id="org.cs3.jlmp"
+   id="org.cs3.jtransformer"
    name="JTransformer"
    version="2.1.1"
    provider-name="http://roots.iai.uni-bonn.de"
-   class="org.cs3.jlmp.JLMPPlugin">
+   class="org.cs3.jtransformer.JTransformerPlugin">
 
    <runtime>
       <library name="JTransformer_NG.jar">
@@ -38,34 +38,34 @@
       </category>
       <view
             allowMultiple="false"
-            class="org.cs3.jlmp.internal.views.PEFNavigatorView"
+            class="org.cs3.jtransformer.internal.views.PEFNavigatorView"
             icon="icons/sample.gif"
             category="console"
             name="PEF Navigator"
-            id="org.cs3.jlmp.internal.navigator.PEFNavigatorView"/>
+            id="org.cs3.jtransformer.internal.navigator.PEFNavigatorView"/>
    </extension>
 
  <extension
-         id="JLMPProjectNature"
-         name="JLMP Nature"
+         id="JTransformerProjectNature"
+         name="JTransformer Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.cs3.jlmp.internal.natures.JLMPProjectNature">
+               class="org.cs3.jtransformer.internal.natures.JTransformerProjectNature">
          </run>
       </runtime>
       <builder
-            id="org.cs3.jlmp.JLMPProjectBuilder">
+            id="org.cs3.jtransformer.JTransformerProjectBuilder">
       </builder>
    </extension>
    <extension
-         id="JLMPProjectBuilder"
-         name="JLMPProjectBuilder"
+         id="JTransformerProjectBuilder"
+         name="JTransformerProjectBuilder"
          point="org.eclipse.core.resources.builders">
       <builder
             hasNature="true">
          <run
-               class="org.cs3.jlmp.internal.builders.JLMPProjectBuilder">
+               class="org.cs3.jtransformer.internal.builders.JTransformerProjectBuilder">
          </run>
       </builder>
    </extension>
@@ -74,13 +74,13 @@
       <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
-            id="JLMPProjectObjectContribution">
+            id="JTransformerProjectObjectContribution">
          <action
                label="JTransformer Nature"
                style="toggle"
-               tooltip="Assignes/retracts JLMP nature to/from a project"
-               class="org.cs3.jlmp.internal.actions.JLMPNatureAction"
-               id="JLMPNatureAction">
+               tooltip="Assignes/retracts JTransformer nature to/from a project"
+               class="org.cs3.jtransformer.internal.actions.JTransformerNatureAction"
+               id="JTransformerNatureAction">
          </action>
       </objectContribution>
    </extension>
@@ -91,12 +91,12 @@
    <extension
          point="org.cs3.pdt.runtime.hooks">
       <hook
-            class="org.cs3.jlmp.internal.hooks.ReloadHook"
+            class="org.cs3.jtransformer.internal.hooks.ReloadHook"
             id="ReloadHook"/>
    </extension>
    
    <extension
-      id="jlmpproblem"
+      id="jtransformerproblem"
       point="org.eclipse.core.resources.markers">
       <super type="org.eclipse.core.resources.problemmarker"/>      
       <persistent value="true" />
@@ -104,14 +104,14 @@
    <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          class="org.cs3.jlmp.internal.preferences.PreferencePage"
-          name="JLMP Preferences"
-          id="org.cs3.jlmp.internal.preferences.PDTPreferencePage"/>
+          class="org.cs3.jtransformer.internal.preferences.PreferencePage"
+          name="JTransformer Preferences"
+          id="org.cs3.jtransformer.internal.preferences.PDTPreferencePage"/>
  </extension>
  
  <extension
        point="org.eclipse.core.runtime.preferences">
-    <initializer class="org.cs3.jlmp.internal.preferences.Initializer"/>
+    <initializer class="org.cs3.jtransformer.internal.preferences.Initializer"/>
  </extension>
  
  
@@ -121,48 +121,48 @@
           adaptable="true"
           objectClass="org.eclipse.core.resources.IProject"
           icon="icons/sample.gif"
-          class="org.cs3.jlmp.internal.properties.JLMPProjectPropertyPage"
-          name="JLMP Project Properties"
-          id="org.cs3.jlmp.properties.jlmpPropertyPage">
+          class="org.cs3.jtransformer.internal.properties.JTransformerProjectPropertyPage"
+          name="JTransformer Project Properties"
+          id="org.cs3.jtransformer.properties.jtransformerPropertyPage">
 		  <filter
                name="nature"
-               value="org.cs3.jlmp.JLMPProjectNature"/>
+               value="org.cs3.jtransformer.JTransformerProjectNature"/>
     </page>
  </extension> 
-      <extension-point id="projectlistener" name="JLMP Project Listener" schema="schema/projectlistener.exsd"/>
+      <extension-point id="projectlistener" name="JTransformer Project Listener" schema="schema/projectlistener.exsd"/>
  <extension
        point="org.eclipse.ui.actionSets">
     <actionSet
           label="JTransformer Actions"
           visible="true"
-          id="org.cs3.jlmp.internal.actions">
+          id="org.cs3.jtransformer.internal.actions">
        <menu
              label="&amp;JTransformer"
-             id="org.cs3.jlmp.menus.jtransformer">
+             id="org.cs3.jtransformer.menus.jtransformer">
           <separator name="separator2"/>
        </menu>
        <action
              label="selection to clipboard"
-             class="org.cs3.jlmp.internal.actions.FactsToClipboard"
+             class="org.cs3.jtransformer.internal.actions.FactsToClipboard"
              style="push"
-             menubarPath="org.cs3.jlmp.menus.jtransformer/separator2"
+             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
        <action
              label="regenerate classes"
-             class="org.cs3.jlmp.internal.actions.RegenAction"
+             class="org.cs3.jtransformer.internal.actions.RegenAction"
              style="push"
-             menubarPath="org.cs3.jlmp.menus.jtransformer/separator2"
-             id="org.cs3.jlmp.internal.actions.regenerateclasses"/>
+             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
+             id="org.cs3.jtransformer.internal.actions.regenerateclasses"/>
     </actionSet>
  </extension>
  <extension
        point="org.cs3.pdt.console.consoleContextMenu">
     <SelectionContextAction
-          class="org.cs3.jlmp.internal.actions.GotoPEFNavigatorAction"
+          class="org.cs3.jtransformer.internal.actions.GotoPEFNavigatorAction"
           name="open corresponding elemented for selected ID in PEF navigator"
           sharedIcon="IMG_DEF_VIEW"/>
     <SelectionContextAction
-          class="org.cs3.jlmp.internal.actions.OpenSelectionInEditorAction"
+          class="org.cs3.jtransformer.internal.actions.OpenSelectionInEditorAction"
           name="open corresponding elemented for selected ID in Java editor"
           sharedIcon="IMG_DEF_VIEW"/>
  </extension>      
