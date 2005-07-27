@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.transformer.internal.hooks;
+package org.cs3.jtransformer.internal.hooks;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
