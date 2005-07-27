@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="org.cs3.pdt"
+   name="PDT Plug-in"
+   version="0.1.2"
+   provider-name="http://roots.iai.uni-bonn.de"
+   class="org.cs3.pdt.PDTPlugin">
+
+   <runtime>
+      <library name="PDT.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.junit"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.cs3.pdt.common"/>
+      <import plugin="org.cs3.pdt.console"/>
+      <import plugin="org.cs3.pdt.metadata"/>
+      <import plugin="org.cs3.pdt.runtime"/>    
+   </requires>
+   
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup class="org.cs3.pdt.internal.startup.StartUp"/>
+   </extension>
+
+	<extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Prolog"
+            id="org.cs3.pdt"/>
+      <view
+            allowMultiple="false"
+            icon="icons/sample.gif"
+            class="org.cs3.pdt.internal.views.PrologConsoleView"
+            category="org.cs3.pdt"
+            name="Prolog Console"
+            id="org.cs3.pdt.internal.views.PrologConsoleView"/>
+      <view
+            allowMultiple="false"
+            class="org.cs3.pdt.internal.views.NavigatorView"
+            icon="icons/sample.gif"
+            category="org.cs3.pdt"
+            name="Prolog Navigator"
+            id="org.cs3.pdt.internal.views.NavigatorView"/>
+   </extension>
+ <extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer class="org.cs3.pdt.internal.preferences.Initializer"/>
+ </extension>
+ <extension
+       point="org.cs3.pdt.runtime.hooks">
+    <hook
+          class="org.cs3.pdt.internal.hooks.ConsoleServerHook"
+          id="org.cs3.pdt.internal.hooks.ConsoleServerHook"/>
+     <hook
+            class="org.cs3.pdt.internal.hooks.ReloadHook"
+            id="PDTReloadHook"/>
+ </extension>
+ <extension
+       point="org.eclipse.ui.actionSets">
+    <actionSet
+          label="Prolog Actions"
+          visible="true"
+          id="org.cs3.pdt.internal.actions">
+       <menu
+             label="Prolo&amp;g"
+             id="org.cs3.pdt.menus.Prolog">
+          <separator name="separator1"/>
+          <separator name="separator2"/>
+       </menu>
+       <action
+             label="restart"
+             class="org.cs3.pdt.internal.actions.RestartAction"
+             accelerator="Ctrl+F9"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator1"
+             id="org.cs3.pdt.internal.actions.restart"/>
+       <action
+             label="dump debug info"
+             class="org.cs3.pdt.internal.actions.DumpDebugInfoAction"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator1"
+             id="org.cs3.pdt.internal.actions.dump"/>
+       <action
+             label="consult"
+             class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
+             accelerator="F9"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator1"
+             id="org.cs3.pdt.internal.actions.consult"/>
+       <action
+             label="help"
+             class="org.cs3.pdt.internal.actions.HelpActionDelegate"
+             style="push"
+             menubarPath="org.cs3.pdt.menus.prolog/separator2"
+             id="org.cs3.pdt.internal.actions.help"/>
+    </actionSet>
+ </extension>
+ <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          class="org.cs3.pdt.internal.preferences.PreferencePage"
+          name="PDT Preferences"
+          id="org.cs3.pdt.internal.preferences.PDTPreferencePage"/>
+ </extension>
+  <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="PL Editor"
+            icon="icons/prolog_file.gif"
+            extensions="pl"
+            class="org.cs3.pdt.internal.editors.PLEditor"
+            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
+            id="org.cs3.pdt.internal.editors.PLEditor">
+      </editor>
+   </extension>
+ <extension point="org.eclipse.team.core.fileTypes">
+	        <fileTypes extension="pl" type="text"/>
+	</extension> 
+ <extension
+      id="PDTProjectNature"
+         name="Prolog Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.cs3.pdt.internal.natures.PrologProjectNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.cs3.pdt.MetaDataBuilder">
+      </builder>
+ </extension>
+
+ <extension
+       point="org.eclipse.ui.propertyPages">
+    <page
+          adaptable="true"
+          objectClass="org.eclipse.core.resources.IProject"
+          class="org.cs3.pdt.internal.properties.PrologProjectPropertyPage"
+          icon="icons/sample.gif"
+          name="Prolog Project Properties"
+          id="org.cs3.pdt.properties.samplePropertyPage">
+		  <filter
+               name="nature"
+               value="org.cs3.pdt.PDTProjectNature"/>
+    </page>
+ </extension>
+ <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            id="PrologProjectObjectContribution">
+         <action
+               label="Prolog Project Nature"
+               style="toggle"
+               tooltip="Assignes/retracts PrologProject nature to/from a project"
+               class="org.cs3.pdt.internal.actions.PrologProjectNatureAction"
+               id="PrologProjectNatureAction">
+         </action>
+      </objectContribution>      
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IFile"
+            id="PrologFileObjectContribution">
+         <action
+               label="Auto-Consult"
+               style="toggle"
+               tooltip="Whether the file should be consulted"
+               class="org.cs3.pdt.internal.actions.AutoConsultAction"
+               id="AutoConsultAction">
+         </action>
+      </objectContribution>
+ </extension>
+ <extension
+       id="MetaDataBuilder"
+       name="Prolog Metadata Builder"
+       point="org.eclipse.core.resources.builders">
+    <builder hasNature="true">
+       <run class="org.cs3.pdt.internal.builder.MetaDataBuilder"/>
+    </builder>
+ </extension>
+<extension
+		id="PrologSearchResultPage"
+		point="org.eclipse.search.searchResultViewPages">
+		<viewPage
+			id="org.cs3.pl.search.PrologSearchViewPage"
+			searchResultClass="org.cs3.pdt.internal.search.PrologSearchResult"
+			class="org.cs3.pdt.internal.search.PrologSearchViewPage">
+		</viewPage>
+	</extension>
+<extension
+      point="org.eclipse.ui.perspectiveExtensions">
+   <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+      <view
+            ratio="0.5"
+            relationship="right"
+            relative="org.eclipse.ui.views.TaskList"
+            id="org.cs3.pdt.internal.views.PrologConsoleView"/>
+   </perspectiveExtension>
+</extension>
+<extension
+      point="org.cs3.pdt.console.consoleContextMenu">
+   <SelectionContextAction
+         class="org.cs3.pdt.internal.actions.ConsoleErrorMessageGotoLineAction"
+         name="goto error line"/>
+</extension>
+<extension
+      point="org.cs3.pdt.runtime.bootstrapContribution">
+   <contribution path="pl/single_char_interceptor.pl"/>
+</extension>
+
+</plugin>
