@@ -1,12 +1,13 @@
 :- module(treewriter,[write_tree/2,write_tree/1]).
-:- use_module(plparser).
-:- use_module(plparser_utils).
+:- use_module(plast).
+:- use_module(plast_utils).
+
 write_tree(Node):-
     write_tree(current_output,Node).
     
 write_tree(Stream,compilation_unit_node(I)):-
 	forall(
-		node_attr(compilation_unit_node(I),child(J)),    
+		plast_prop(compilation_unit_node(I),child(J)),    
 		(	write_tree(Stream,J),
 			put(Stream,'.'),
 			nl(Stream)
@@ -14,21 +15,21 @@ write_tree(Stream,compilation_unit_node(I)):-
 	).
 	
 write_tree(Stream,atom_node(I)):-
-	node_attr(atom_node(I),term(T)),
+	plast_prop(atom_node(I),term(T)),
 	write(Stream,T).
 
 write_tree(Stream,variable_node(I)):-
-	node_attr(variable_node(I),name(T)),
+	plast_prop(variable_node(I),name(T)),
 	write(Stream,T).
 	
 	
 write_tree(Stream,string_node(I)):-
-	node_attr(string_node(I),term(T)),
+	plast_prop(string_node(I),term(T)),
 	write(Stream,T).	
 	
 write_tree(Stream,compound_node(I)):-
-	node_attr(compound_node(I),functor(N/_)),	
-	node_attr(compound_node(I),arguments(Args)),
+	plast_prop(compound_node(I),functor(N/_)),	
+	plast_prop(compound_node(I),arguments(Args)),
 	write(Stream,N),
 	put(Stream,'('),
 	write_sequence(Stream,Args),
@@ -36,9 +37,9 @@ write_tree(Stream,compound_node(I)):-
 	
 write_tree(Stream,list_node(I)):-
     put(Stream,'['),
-	(	node_attr(list_node(I),elements(Elms))
+	(	plast_prop(list_node(I),elements(Elms))
 	->	write_sequence(Stream,Elms),
-		(	node_attr(list_node(I),tail(Tail))
+		(	plast_prop(list_node(I),tail(Tail))
 		->	put(Stream,'|'),
 			write_tree(Stream,Tail)
 		;	true
@@ -49,7 +50,7 @@ write_tree(Stream,list_node(I)):-
 	
 write_tree(Stream,brace_node(I)):-
 	put(Stream,'{'),
-	node_attr(brace_node(I),argument(Arg)),
+	plast_prop(brace_node(I),argument(Arg)),
 	write_tree(Stream,Arg),
 	put(Stream,'}').
 	

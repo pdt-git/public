@@ -1,4 +1,12 @@
 
+doit(Do,What):-
+    (	Do
+    ->	What
+    ;	writeln(What)
+    ).
+
+
+
 test:-
   test(A),A.
 test:-
@@ -123,20 +131,7 @@ transform_body(Goal,Sin,Sout,(
   apply_subst(Sin,Goal,InGoal),
   do_goal(InGoal,OutGoal),
   unify(Sin,InGoal,OutGoal,Sout)		     
-)):-  
-  var(Goal),!.
-
-
-transform_body((Goal,Tail),Sin,Sout,(TGoal,TTail)):-
-  !,
-  transform_body(Goal,Sin,S,TGoal),
-  transform_body(Tail,S,Sout,TTail).
-transform_body(Goal,Sin,Sout,(
-  apply_subst(Sin,Goal,InGoal),
-  do_goal(InGoal,OutGoal),
-  unify(Sin,InGoal,OutGoal,Sout)		     
-)):-
-  !.
+)),
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
