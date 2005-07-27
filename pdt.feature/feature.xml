@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="PDTFeature"
+      label="PDT-Feature"
+      version="0.2.0"
+      provider-name="http://roots.iai.uni-bonn.de">
+
+   <description url="http://www.yourdomain.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.yourdomain.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.yourdomain.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.jdt.ui"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.junit"/>
+      <import plugin="org.eclipse.jdt.core"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.search"/>
+      <import plugin="org.eclipse.swt"/>
+   </requires>
+
+   <plugin
+         id="org.cs3.pdt"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.common"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.console"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.metadata"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.runtime"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.cs3.pdt.runtime.socket"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
+
+</feature>
