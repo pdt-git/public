@@ -9,7 +9,7 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.internal.actions.QueryConsoleThreadAction;
-import org.cs3.pdt.console.internal.views.PrologConsoleView;
+
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -56,7 +56,6 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements I
            try {
             File file = fileInput.getFile().getLocation().toFile().getCanonicalFile();
             plugin.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
-            PrologSession session = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
             setQuery("consult('"+Util.prologFileName(file)+"')");       
             run();
         } catch (IOException e) {
