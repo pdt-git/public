@@ -1,42 +1,21 @@
 package org.cs3.jtransformer.internal.actions;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.SelectionContextAction;
-import org.eclipse.jface.action.Action;
+import org.cs3.pl.console.prolog.PrologConsole;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.ui.IViewActionDelegate;
+import org.eclipse.ui.IViewPart;
 
-abstract class ConsoleSelectionAction extends Action implements SelectionContextAction {
+abstract class ConsoleSelectionAction implements IViewActionDelegate {
 
-	private String line;
-	private String selection;
-	public void init(StyledText output) {
-		selection = output.getSelectionText();
-		int lineAtOffset = output.getLineAtOffset(output.getCaretOffset());
-		int lineOffset = output.getOffsetAtLine(lineAtOffset);
-		int nextLineOffset;
-		if(output.getLineCount() > lineAtOffset+1) 
-		   nextLineOffset = output.getOffsetAtLine(lineAtOffset+1);
-		else
-			nextLineOffset =output.getText().length(); 
-		if(nextLineOffset > lineOffset)
-			line = output.getTextRange(lineOffset, nextLineOffset-lineOffset);
-		else
-			line = "";
-	}
-
-		public boolean validate() {
-			try {
-				getPefId();
-				return true;
-			} catch (NumberFormatException nfe) {
-				// no source location found or not an ast id 
-				Debug.report(nfe);
-				return false;
-			}
-		}
-
+	private String line="";
+	private String selection="";
+	private PrologConsole console;
 		protected int getPefId() {
-			String idString = removeTrailingComma(selection);
+			String idString = removeTrailingComma(getSelection());
 			return Integer.parseInt(idString);
 		}
 
@@ -44,12 +23,47 @@ abstract class ConsoleSelectionAction extends Action implements SelectionContext
 			return string.replaceAll(",", "").replaceAll(" ", "");
 		}
 
-		public String getLine() {
-			return line;
+		
+
+		
+
+		private void setSelection(String selection) {
+			this.selection = selection;
 		}
 
-		public String getSelection() {
+		protected String getSelection() {
 			return selection;
+		}
+
+		public void init(IViewPart view) {
+			this.console=(PrologConsole) view;
+			
+		}
+
+		
+
+		public void selectionChanged(IAction action, ISelection selection) {
+			if(selection instanceof ITextSelection){
+				ITextSelection s = (ITextSelection) selection;
+				setSelection(s.getText());
+			}
+			
+		}
+
+		
+
+		protected String getLine() {
+			int lineAtOffset = console.getLineAtOffset(console.getCaretOffset());
+			int lineOffset = console.getOffsetAtLine(lineAtOffset);
+			int nextLineOffset;
+			if(console.getLineCount() > lineAtOffset+1) 
+			   nextLineOffset = console.getOffsetAtLine(lineAtOffset+1);
+			else
+				nextLineOffset =console.getText().length(); 
+			if(nextLineOffset > lineOffset)
+				return console.getTextRange(lineOffset, nextLineOffset-lineOffset);
+			else
+				return "";
 		}
 
 

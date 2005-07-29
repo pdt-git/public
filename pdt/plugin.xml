@@ -175,6 +175,15 @@
                id="AutoConsultAction">
          </action>
       </objectContribution>
+      <viewerContribution
+            id="pdt.viewercontribution.console.contextmenu"
+            targetID="org.cs3.pdt.console.internal.views.PrologConsoleView">
+         <action
+               class="org.cs3.pdt.internal.actions.GotoErrorLineViewActionDelegate"
+               id="pdt.action.goto_error_line"
+               label="Goto Error Line"
+               menubarPath="additions"/>
+      </viewerContribution>
  </extension>
  <extension
        id="MetaDataBuilder"
@@ -202,12 +211,6 @@
             relative="org.eclipse.ui.views.TaskList"
             id="org.cs3.pdt.console.internal.views.PrologConsoleView"/>
    </perspectiveExtension>
-</extension>
-<extension
-      point="org.cs3.pdt.console.consoleContextMenu">
-   <SelectionContextAction
-         class="org.cs3.pdt.internal.actions.ConsoleErrorMessageGotoLineAction"
-         name="goto error line"/>
 </extension>
 <extension
       point="org.cs3.pdt.runtime.bootstrapContribution">

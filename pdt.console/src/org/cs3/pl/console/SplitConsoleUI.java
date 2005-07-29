@@ -152,9 +152,8 @@ public class SplitConsoleUI implements ConsoleUI {
 				e.doit = false;
 			}
 		});
-		ContextMenuProvider menuProvider = new ContextMenuProvider();
-		menuProvider.addMenu(output);
-
+		
+		
 	}
 
 	// stolen from the eclipse wiki
