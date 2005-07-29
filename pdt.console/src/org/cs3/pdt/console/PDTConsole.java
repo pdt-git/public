@@ -1,7 +1,7 @@
 package org.cs3.pdt.console;
 
-public class PDTConsole {
-	public static final String CONSOLE_VIEW_ID="org.cs3.pdt.internal.views.PrologConsoleView";
+final public class PDTConsole {
+	public static final String CONSOLE_VIEW_ID="org.cs3.pdt.console.internal.views.PrologConsoleView";
     /**
      * the port on which the prolog console server is listening.
      */
