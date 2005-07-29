@@ -9,4 +9,11 @@ public interface PrologConsole {
 	public void addPrologConsoleListener(PrologConsoleListener l);
 	public void removePrologConsoleListener(PrologConsoleListener l);
 	public boolean isVisible();
+	public String getText();
+	public int getLineAtOffset(int offset);
+	public int getOffsetAtLine(int line);
+	public int getLineCount();
+	public void clearOutput();
+	public int getCaretOffset();
+	public String getTextRange(int offset, int length);
 }

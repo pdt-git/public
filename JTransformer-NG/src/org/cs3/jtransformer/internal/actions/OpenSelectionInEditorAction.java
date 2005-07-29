@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -41,7 +42,7 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 		return nature.getPrologInterface().getSession();
 	}
 	
-	public void run() {
+	public void run(IAction action) {
 		PrologSession session;
 		try {
 			session = getPrologSession();

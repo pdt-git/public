@@ -14,8 +14,8 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.ConsoleView;
 import org.cs3.pl.console.DefaultConsoleController;
+import org.cs3.pl.console.DefaultConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
@@ -28,22 +28,24 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.PaintEvent;
-import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
     public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 
-    private ConsoleView view;
+    private ConsoleViewer viewer;
 
     private PrologSocketConsoleModel model;
 
@@ -57,6 +59,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	private PrologInterface pif;
 
+	private Menu contextMenu;
+
+	
+	
     public PrologConsoleView() {
     }
 
@@ -97,33 +103,35 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 		parent.addListener(SWT.FocusOut,handler);
         this.pif = PrologRuntimePlugin.getDefault().getPrologInterface();
         PrologConsolePlugin.getDefault().getPrologConsoleService().registerPrologConsole(this);
-        view = new ConsoleView();
+        viewer = new ConsoleViewer(parent,SWT.BORDER | SWT.MULTI | SWT.H_SCROLL
+				| SWT.V_SCROLL );
         pif.addLifeCycleHook(this, HOOK_ID, new String[] {
                 ConsoleServerHook.HOOK_ID});
         
-        controller = new DefaultConsoleController();
         completionProvider = new PrologCompletionProvider();        
 		completionProvider.setMetaInfoProvider(PDTCorePlugin.getDefault().getMetaInfoProvider());
-        controller.setCompletionProvider(completionProvider);
-        view.setController(controller);
+        viewer.setCompletionProvider(completionProvider);
+        viewer.setHistory(new DefaultConsoleHistory());
         int port = getPort();
         model = new PrologSocketConsoleModel(false);
         model.setPort(port);
-        view.setModel(model);
-        view.createPartControl(parent);
+        viewer.setModel(model);
         if (Util.probePort(port)) {
             model.connect();
         }
-        IToolBarManager toolbarMenu = getViewSite().getActionBars().getToolBarManager();
-        IMenuManager menu = getViewSite().getActionBars().getMenuManager();
-        
-        IAction guitracer = new QueryConsoleThreadAction("guitracer","activate guitracer", "activate GUI tracer",
-        		ImageRepository.getImageDescriptor(ImageRepository.GUITRACER));
-        IAction noguitracer = new QueryConsoleThreadAction("noguitracer","deactivate guitracer", "deactivate GUI tracer",
-        		ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
-        IAction breakAction = new QueryMainThreadAction("halt","halt", "halt the prolog system",
-        		ImageRepository.getImageDescriptor(ImageRepository.BREAK));
-        IAction restart = new Action() {
+        initMenus(parent);
+        getSite().setSelectionProvider(viewer);
+    }
+
+    private IAction[] createActions(){
+    	return new IAction[]{
+    	new QueryConsoleThreadAction("guitracer","activate guitracer", "activate GUI tracer",
+        		ImageRepository.getImageDescriptor(ImageRepository.GUITRACER)),
+        new QueryConsoleThreadAction("noguitracer","deactivate guitracer", "deactivate GUI tracer",
+        		ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)),
+        new QueryMainThreadAction("halt","halt", "halt the prolog system",
+        		ImageRepository.getImageDescriptor(ImageRepository.BREAK)),
+        new Action() {
         	public void run() {
         		try {
 
@@ -166,17 +174,56 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
         		return "restart";
         	}
 
+        }
         };
-        toolbarMenu.add(restart);
-        toolbarMenu.add(breakAction);
-        toolbarMenu.add(guitracer);
-        toolbarMenu.add(noguitracer);
-        menu.add(restart);
-        menu.add(breakAction);
-        menu.add(guitracer);
-        menu.add(noguitracer);
     }
+    
+	private void initMenus(Control parent) {
+		IToolBarManager toolbarMenu = getViewSite().getActionBars().getToolBarManager();
+        MenuManager manager = new MenuManager();
+        manager.setRemoveAllWhenShown(true);
+        manager.addMenuListener(new IMenuListener() {
+		
+			public void menuAboutToShow(IMenuManager manager) {
+				fillContextMenu(manager);
+				
+			}
+		
+		});
+        fillToolbar(toolbarMenu); 
+        getSite().registerContextMenu(manager,viewer);
+        contextMenu = manager.createContextMenu(parent);
+        viewer.getControl().setMenu(contextMenu);
+        //ContextMenuProvider menuProvider = new ContextMenuProvider();
+		//menuProvider.addMenu(parent);
+	}
 
+	private void fillContextMenu(IMenuManager manager) {
+		IAction[] actions = createActions();
+        for (int i = 0; i < actions.length; i++) {
+			IAction action = actions[i];
+			
+			//menu.add(action);
+			manager.add(action);
+		}
+        manager.add(new Separator
+                (IWorkbenchActionConstants.MB_ADDITIONS));
+        manager.add(new Separator
+                (IWorkbenchActionConstants.MB_ADDITIONS + "-end"));
+	}
+	private void fillToolbar(IToolBarManager manager) {
+		IAction[] actions = createActions();
+        for (int i = 0; i < actions.length; i++) {
+			IAction action = actions[i];
+			
+			//menu.add(action);
+			manager.add(action);
+		}
+        manager.add(new Separator
+                (IWorkbenchActionConstants.MB_ADDITIONS));
+        manager.add(new Separator
+                (IWorkbenchActionConstants.MB_ADDITIONS + "-end"));
+	}
 
     private  int getPort() {
         String value = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_PORT, null);
@@ -190,12 +237,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 
     public void setFocus() {
-        if (view == null) {
+        if (viewer == null) {
             Debug
                     .warning("PrologConsoleView.setFocus(): View not instantiated yet.");
             return;
         }
-        view.setFocus();
+        viewer.getControl().setFocus();
         fireConsoleRecievedFocus();
     }
 
@@ -235,6 +282,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 	}
 	public void dispose() {
     	PrologConsolePlugin.getDefault().getPrologConsoleService().unregisterPrologConsole(this);
+    	contextMenu.dispose();
+    	//viewer.getControl().dispose();
     	super.dispose();
     }
     /*
@@ -251,7 +300,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
      * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
      */
     public void afterInit(PrologInterface pif) {
-        view.setController(controller);
+        //viewer.setController(controller);
         model.connect();
     }
 
@@ -261,7 +310,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
      * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
      */
     public void beforeShutdown(PrologInterface pif,PrologSession session) {
-        view.setController(null);
+        //viewer.setController(null);
         model.disconnect();
     }
 
@@ -292,5 +341,38 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook, Prolog
 
 	public boolean isVisible() {
 		return partControl.isVisible();
+	}
+
+	public ConsoleViewer getViewer() {
+		return viewer;
+	}
+
+	public String getText() {
+		return getViewer().getText();
+	}
+
+	public int getLineAtOffset(int offset) {
+		return getViewer().getLineAtOffset(offset);
+	}
+
+	public int getOffsetAtLine(int line) {
+		return getViewer().getOffsetAtLine(line);
+	}
+
+	public int getLineCount() {		
+		return getViewer().getLineCount();
+	}
+
+	public void clearOutput() {
+		getViewer().clearOutput();
+		
+	}
+
+	public String getTextRange(int offset, int length) {
+		return getViewer().getTextRange(offset,length);
+	}
+
+	public int getCaretOffset() {
+		return getViewer().getCaretOffset();
 	}
 }

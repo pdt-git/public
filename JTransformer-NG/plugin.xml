@@ -83,6 +83,26 @@
                id="JTransformerNatureAction">
          </action>
       </objectContribution>
+      <viewerContribution
+            id="jtransformer.viewercontribution.prologconsole"
+            targetID="org.cs3.pdt.console.internal.views.PrologConsoleView">
+
+
+		<action
+               class="org.cs3.jtransformer.internal.actions.GotoPEFNavigatorAction"
+               id="jtransformer.action.open_in_pef_navigator"
+               label="Open in PEF Navigator"
+               menubarPath="additions"/>
+
+		<action
+		       class="org.cs3.jtransformer.internal.actions.OpenSelectionInEditorAction"
+               id="jtransformer.action.open_in_java_editor"
+               label="Open in Java editor"
+               menubarPath="additions"/>
+
+
+       
+      </viewerContribution>
    </extension>
    <extension
          point="org.cs3.pdt.runtime.bootstrapContribution">

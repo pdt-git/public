@@ -18,6 +18,7 @@
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.cs3.pdt.core"/>
       <import plugin="org.cs3.pdt.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
    </requires>
    <extension-point id="consoleContextMenu" name="Console Context Menu" schema="schema/console_context_menu.exsd"/>
    <extension
