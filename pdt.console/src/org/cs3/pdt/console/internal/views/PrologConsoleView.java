@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.part.ViewPart;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook, PrologConsole {
-    public static final String HOOK_ID = "org.cs3.pdt.internal.views.PrologConsoleView";
+    public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 
     private ConsoleView view;
 
