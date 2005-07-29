@@ -104,11 +104,17 @@ toggle_apply_action_debug  :-
     
 apply_post([]).
 apply_post([_head| _tail]) :-
-        clause(action(_head),_),
-        !,
-         error_handling(action(_head),'apply_post action failed: ~a',[_head]),
-        !,
-        apply_post(_tail).
+    clause(action(_head),_),
+    !,
+    error_handling(action(_head),'apply_post action failed: ~a',[_head]),
+    !,
+    apply_post(_tail).
+
+apply_post([_head| _tail]) :-
+    error_handling(fail,'apply_post action failed:~ could not find action ~a~n',[_head]),
+    !.
+
+/*
 apply_post([not(_head)| _tail]) :-
         !,
 %        not(clause(action(not(_head)),_)),
@@ -121,7 +127,7 @@ apply_post([_head| _tail]) :-
         assert1T(_head),
         !,
         apply_post(_tail).
-
+*/
 
 /**
  *  add_apply_info_(+_name,+_allActions)
@@ -348,11 +354,18 @@ add(Elem) :-
 	call(Elem),
 	!,
 	format('~nWARNING: element: already exists: ~w~n.',[Elem]).
-	
+
+/*
+add(Elem) :-
+    nonvar(Elem), 
+    not(tree(Elem)),
+	!,
+	error_handling(fail, 'ERROR: element is not a tree: ~w~n.',[Elem]).
+*/	
+
 add(_elem) :-  
     nonvar(_elem), 
-%    logChange(_elem),
-    assert(_elem), %assert/1 ist ein Standard Pr¨ adikat von ANSI-
+    assert(_elem),
     asserta(rollback(retract(_elem))),
     markEnclAsDirty(_elem).
 
@@ -370,12 +383,8 @@ delete(java_fq(Elem)):-
     delete(PEF).
     
 delete(_elem) :- 
-%    	term_to_atom(_elem,A),
-%    	format('delete: ~a~n~n',[A]),
-
-%        logChange(_elem),
         nonvar(_elem), 
-        retract(_elem), %retract/1 ist ein Standard Pr¨ adikat von ANSI-
+        retract(_elem), 
         markEnclAsDirty(_elem),
         asserta(rollback(assert(_elem))).
 
