@@ -8,7 +8,6 @@ import java.io.IOException;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.console.internal.actions.QueryConsoleThreadAction;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;

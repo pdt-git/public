@@ -14,6 +14,7 @@ public interface Option {
     public final static int DIRS=6;
     public final static int PATH=7;
     public static final int ENUM = 8;
+	public static final int FONT = 9;
     public  String getDefault();
     public  String getDescription();
     public String getId();

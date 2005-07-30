@@ -20,7 +20,7 @@
       <import plugin="org.cs3.pdt.runtime"/>
       <import plugin="org.eclipse.jface.text"/>
    </requires>
-   <extension-point id="consoleContextMenu" name="Console Context Menu" schema="schema/console_context_menu.exsd"/>
+<!--   <extension-point id="consoleContextMenu" name="Console Context Menu" schema="schema/console_context_menu.exsd"/> 
    <extension
          point="org.cs3.pdt.console.consoleContextMenu">
       <SelectionContextAction
@@ -35,6 +35,7 @@
             class="org.cs3.pdt.console.internal.actions.SelectAllAction"
             name="select all"/>
    </extension>
+   -->
 	<extension
          point="org.eclipse.ui.views">
       <view
@@ -62,5 +63,9 @@
           id="org.cs3.pdt.console.internal.preferences.PDTPreferencePage"
           name="Prolog Console"/>
  </extension>
+    <extension
+          point="org.cs3.pdt.runtime.bootstrapContribution">
+       <contribution path="pl/single_char_interceptor.pl"/>
+    </extension>
 
 </plugin>

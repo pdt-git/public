@@ -6,5 +6,6 @@ final public class PDTConsole {
      * the port on which the prolog console server is listening.
      */
     public static final String PREF_CONSOLE_PORT = "pdt.console.port";
+	public static final String PREF_CONSOLE_FONT = "pdt.console.font";
 
 }

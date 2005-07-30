@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.SelectionContextAction;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -22,7 +21,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
-public class ConsoleErrorMessageGotoLineAction extends Action implements SelectionContextAction{
+public class ConsoleErrorMessageGotoLineAction extends Action {
 
 	private StyledText text;
 	private int targetLine = -1;
