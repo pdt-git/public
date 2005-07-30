@@ -1,4 +1,4 @@
-package org.cs3.pdt.console.internal.actions;
+package org.cs3.pdt.internal.actions;
 
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;

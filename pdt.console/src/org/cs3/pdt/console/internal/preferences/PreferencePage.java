@@ -14,6 +14,7 @@ import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FontFieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
@@ -74,6 +75,9 @@ public class PreferencePage extends FieldEditorPreferencePage implements
             	break;
             	case Option.ENUM:
             	    editor = new RadioGroupFieldEditor(name,label,4,options[i].getEnumValues(),parent,true);
+            	break;
+            	case Option.FONT:
+            	    editor = new FontFieldEditor(name,label,"The quick brown fox jumps over the lazy dog.",parent);
             	break;
             	default:
             	    editor = new StringFieldEditor(name,label,parent);

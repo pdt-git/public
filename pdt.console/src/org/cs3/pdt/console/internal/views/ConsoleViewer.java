@@ -12,11 +12,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.LineStyleEvent;
-import org.eclipse.swt.custom.LineStyleListener;
-import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
@@ -29,9 +28,7 @@ import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Caret;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -123,7 +120,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	};
 
-	private int startOfInput=0;
+	private int startOfInput = 0;
 
 	public ConsoleViewer(Composite parent, int styles) {
 		createControl(parent, styles);
@@ -141,39 +138,48 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 		});
 		control.addSelectionListener(new SelectionListener() {
-		
+
 			public void widgetDefaultSelected(SelectionEvent e) {
 				;
-		
+
 			}
-		
+
 			public void widgetSelected(SelectionEvent e) {
-				fireSelectionChanged(new SelectionChangedEvent(ConsoleViewer.this,getSelection()));		
+				fireSelectionChanged(new SelectionChangedEvent(
+						ConsoleViewer.this, getSelection()));
 			}
-		
+
 		});
-		
+
 		control.addMouseListener(new MouseListener() {
-		
+
 			public void mouseUp(MouseEvent e) {
 				;
 			}
-		
-			public void mouseDown(MouseEvent e) {				
-				int offset=control.getOffsetAtLocation(new Point(e.x,e.y));
-				control.setSelection(offset);
+
+			public void mouseDown(MouseEvent e) {
+				if (control.getSelectionCount() == 0) {
+					int offset = control
+							.getOffsetAtLocation(new Point(e.x, e.y));
+					control.setSelection(offset);
+				}
 			}
-		
+
 			public void mouseDoubleClick(MouseEvent e) {
 				;
-		
+
 			}
-		
+
+		});
+		control.addDisposeListener(new DisposeListener() {
+
+			public void widgetDisposed(DisposeEvent e) {
+				;
+			}
+
 		});
 	}
-  
-	
-	
+
 	public Control getControl() {
 		return control;
 	}
@@ -309,7 +315,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @see org.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.ConsoleModelEvent)
 	 */
 	public void onModeChange(final ConsoleModelEvent e) {
-		Debug.debug("mode changed: "+model.isSingleCharMode());
+		Debug.debug("mode changed: " + model.isSingleCharMode());
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
@@ -318,10 +324,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				}
 			});
 		} else {
-			try{
+			try {
 				ui_setSingleCharMode(model.isSingleCharMode());
-			}
-			catch (Throwable t) {
+			} catch (Throwable t) {
 				Debug.report(t);
 				throw new RuntimeException(t);
 			}
@@ -367,78 +372,84 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	public void beforeDisconnect(ConsoleModelEvent e) {
 		;
 	}
-	private void completionAvailable(CompoletionResult r){
-		   
-	    if( ! model.getLineBuffer().equals(r.getOriginalLineContent())){
-	        Debug.debug("completion discarded.");
-	        return;
-	    }
-	    if( control.getCaretOffset()-startOfInput!=r.getOriginalCaretPosition()){
-	        Debug.debug("completion discarded.");
-	        return;
-	    }
-	    
-	    String[] options = r.getOptions();
-		Debug.debug("found "+options.length+" completions");
-		model.setLineBuffer(r.getNewLineContent());
-		control.setCaretOffset(r.getNewCaretPosition()+startOfInput);
-		if (options.length>1){
-		    StringBuffer buf = new StringBuffer();
-			buf.append("\n");
-			for(int i=0;i<options.length;i++){
-				buf.append(options[i]);
-				buf.append("\n");
-			}			
-			ui_appendOutput(buf.toString());
-		}
-	
-	}
-	private void doCompletion() {
-	    if(completionProvider==null){
+
+	private void completionAvailable(CompoletionResult r) {
+
+		if (!model.getLineBuffer().equals(r.getOriginalLineContent())) {
+			Debug.debug("completion discarded.");
 			return;
 		}
-		
-		final int caretPosition = control.getCaretOffset()-startOfInput;
-		Runnable work = new Runnable(){
-            public void run() {
-                
-                final CompoletionResult r = completionProvider.doCompletion(model.getLineBuffer(),caretPosition);
-                final Runnable notify = new Runnable(){
-        		    public void run(){
-        		        completionAvailable(r);
-        		    }
-        		};
-                control.getDisplay().asyncExec(notify);
-            }
-        };
-        
-        new Thread(work,"Console Completion Worker").start();
-        
+		if (control.getCaretOffset() - startOfInput != r
+				.getOriginalCaretPosition()) {
+			Debug.debug("completion discarded.");
+			return;
 		}
+
+		String[] options = r.getOptions();
+		Debug.debug("found " + options.length + " completions");
+		model.setLineBuffer(r.getNewLineContent());
+		control.setCaretOffset(r.getNewCaretPosition() + startOfInput);
+
+		if (options.length > 1) {
+			StringBuffer buf = new StringBuffer();
+			buf.append("\n");
+			for (int i = 0; i < options.length; i++) {
+				buf.append(options[i]);
+				buf.append("\t\t\t\t\t\t\t\t");
+			}
+			buf.append("\n");
+			ui_appendOutput(buf.toString());
+		}
+
+	}
+
+	private void doCompletion() {
+		if (completionProvider == null) {
+			return;
+		}
+
+		final int caretPosition = control.getCaretOffset() - startOfInput;
+		Runnable work = new Runnable() {
+			public void run() {
+
+				final CompoletionResult r = completionProvider.doCompletion(
+						model.getLineBuffer(), caretPosition);
+				final Runnable notify = new Runnable() {
+					public void run() {
+						completionAvailable(r);
+					}
+				};
+				control.getDisplay().asyncExec(notify);
+			}
+		};
+
+		new Thread(work, "Console Completion Worker").start();
+
+	}
 
 	private void ui_appendOutput(String output) {
 		thatWasMe = true;
-		try{
+		int p = 0;
+		try {
+			p = control.getCaretOffset() - startOfInput;
 			control.replaceTextRange(startOfInput, 0, output);
-			control.setCaretOffset(control.getCaretOffset()+output.length());
+			startOfInput += output.length();
+			control.setCaretOffset(startOfInput + p);
 			control.showSelection();
-		}
-		catch (Throwable e) {
+		} catch (Throwable e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
-		startOfInput += output.length();
 		thatWasMe = false;
 
 	}
 
 	private void ui_setLineBuffer(String string) {
 		thatWasMe = true;
-		int len = control.getContent().getCharCount()-startOfInput;
-		try{
+		int len = control.getContent().getCharCount() - startOfInput;
+		try {
 			control.replaceTextRange(startOfInput, len, string);
-		}
-		catch(Throwable t){
+		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
 		}
@@ -449,127 +460,129 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	private void ui_setSingleCharMode(boolean b) {
 		Display display = control.getDisplay();
-		if(b){
-			control.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
-			
-		}
-		else{
-			control.setBackground(display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		if (b) {
+			control.setBackground(display
+					.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
+
+		} else {
+			control.setBackground(display
+					.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 	}
 
 	protected void ui_inputModificationIntercepted(VerifyEvent e) {
-		if(thatWasMe){
+		if (thatWasMe) {
 			return;
 		}
 		if (model == null) {
-            e.doit= false;
-        }        
-		else if(e.start<startOfInput){
-			e.doit=false;
-		}
-		else{
-			e.doit=true;
+			e.doit = false;
+		} else if (e.start < startOfInput) {
+			e.doit = false;
+		} else {
+			e.doit = true;
 		}
 
 	}
 
 	protected void ui_keyStrokeIntercepted(VerifyEvent event) {
-		try{
-		if(thatWasMe){
-			return;
-		}
-		if(control.getCaretOffset()<startOfInput){
-			control.setCaretOffset(control.getCharCount());
-		}
-		int keyCode=event.keyCode;
-		if (model == null) {
-            event.doit=false;
-            return;
-        }
-        if (model.isSingleCharMode()) {
-        	event.doit=false;
-            
-        } else {
-            switch (keyCode) {
-            case SWT.CR:
-            case SWT.KEYPAD_CR:                
-            	event.doit=false;
-            	break;
+		try {
+			if (thatWasMe) {
+				return;
+			}
+			if (control.getCaretOffset() < startOfInput) {
+				control.setCaretOffset(control.getCharCount());
+			}
+			int keyCode = event.keyCode;
+			if (model == null) {
+				event.doit = false;
+				return;
+			}
+			if (model.isSingleCharMode()) {
+				event.doit = false;
 
-            case SWT.ARROW_UP:
-            case SWT.KEYPAD_8:
-            	event.doit=false;
-            	break;
+			} else {
+				switch (keyCode) {
+				case SWT.CR:
+				case SWT.KEYPAD_CR:
+					event.doit = false;
+					break;
 
-            case SWT.ARROW_DOWN:
-            case SWT.KEYPAD_2:
-            	event.doit=false;
-            	break;
-            
-            case SWT.TAB:            
-            	doCompletion();
-            	event.doit=false;
-            	break;
-            default:
-                event.doit=true;
-            	break;
-            }
-        }
-		}
-		catch (Exception e) {
+				case SWT.ARROW_UP:
+				case SWT.KEYPAD_8:
+					event.doit = false;
+					break;
+
+				case SWT.ARROW_DOWN:
+				case SWT.KEYPAD_2:
+					event.doit = false;
+					break;
+
+				case SWT.TAB:
+					doCompletion();
+					event.doit = false;
+					break;
+				default:
+					event.doit = true;
+					break;
+				}
+			}
+		} catch (Exception e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
 	}
-	/* (non-Javadoc)
-     * @see org.cs3.pl.views.ConsoleController#inputModified(java.lang.String)
-     */
-    public void ui_inputModified(String newInput) {
-        if(! thatWasMe){
-            thatWasMe=true;
-            model.setLineBuffer(newInput);
-            thatWasMe=false;
-        }
-    }
-	
-	protected String ui_getLineBuffer() {		
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.views.ConsoleController#inputModified(java.lang.String)
+	 */
+	public void ui_inputModified(String newInput) {
+		if (!thatWasMe) {
+			thatWasMe = true;
+			model.setLineBuffer(newInput);
+			thatWasMe = false;
+		}
+	}
+
+	protected String ui_getLineBuffer() {
 		int charCount = control.getContent().getCharCount();
-		return control.getContent().getTextRange(startOfInput,charCount-startOfInput);
+		return control.getContent().getTextRange(startOfInput,
+				charCount - startOfInput);
 	}
 
 	protected void ui_keyPressed(int keyCode, char keyChar) {
-		if(thatWasMe){
+		if (thatWasMe) {
 			return;
 		}
-		
+
 		if (model == null) {
-            return ;
-        }
-        if (model.isSingleCharMode()&&keyChar>0) {
-        	Debug.debug("keyChar: '"+keyChar+"'");
-            model.putSingleChar(keyChar);           
-        } else {
-            switch (keyCode) {
-            case SWT.CR:
-            case SWT.KEYPAD_CR:
-                model.commitLineBuffer();
-                break;
-            case SWT.ARROW_UP:
-            case SWT.KEYPAD_8:
-            	Debug.debug("UP");
-                history.previous();
-            	break;
-            case SWT.ARROW_DOWN:
-            case SWT.KEYPAD_2:
-            	history.next();
-                break;
-            case SWT.TAB:
-            	break;
-            default:
-                break;
-            }
-        }
+			return;
+		}
+		if (model.isSingleCharMode() && keyChar > 0) {
+			Debug.debug("keyChar: '" + keyChar + "'");
+			model.putSingleChar(keyChar);
+		} else {
+			switch (keyCode) {
+			case SWT.CR:
+			case SWT.KEYPAD_CR:
+				model.commitLineBuffer();
+				break;
+			case SWT.ARROW_UP:
+			case SWT.KEYPAD_8:
+				Debug.debug("UP");
+				history.previous();
+				break;
+			case SWT.ARROW_DOWN:
+			case SWT.KEYPAD_2:
+				history.next();
+				break;
+			case SWT.TAB:
+				break;
+			default:
+				break;
+			}
+		}
 
 	}
 
@@ -590,13 +603,13 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	public void clearOutput() {
-		thatWasMe=true;
-		int c=control.getCaretOffset()-startOfInput;
-		control.getContent().replaceTextRange(0,startOfInput,"");
-		startOfInput=0;
+		thatWasMe = true;
+		int c = control.getCaretOffset() - startOfInput;
+		control.getContent().replaceTextRange(0, startOfInput, "");
+		startOfInput = 0;
 		control.setCaretOffset(c);
-		thatWasMe=false;
-		
+		thatWasMe = false;
+
 	}
 
 	public int getOffsetAtLine(int line) {
@@ -612,10 +625,27 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	public String getTextRange(int offset, int length) {
-		return control.getTextRange(offset,length);
+		return control.getTextRange(offset, length);
 	}
 
-	public int getCaretOffset() {	
+	public int getCaretOffset() {
 		return control.getCaretOffset();
+	}
+
+	public void cut() {
+		control.cut();
+		
+	}
+	public void copy() {
+		control.copy();
+		
+	}
+	public void paste() {
+		control.paste();
+		
+	}
+	public void selectAll() {
+		control.selectAll();
+		
 	}
 }

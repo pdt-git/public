@@ -1,8 +1,9 @@
-package org.cs3.pl.console;
+package org.cs3.pl.console.oldui;
 
 import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.console.ConsoleModel;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.widgets.Composite;

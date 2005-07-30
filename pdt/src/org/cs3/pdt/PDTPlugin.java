@@ -11,17 +11,12 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.internal.views.PrologNode;
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.metadata.DefaultMetaInfoProvider;
-import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;

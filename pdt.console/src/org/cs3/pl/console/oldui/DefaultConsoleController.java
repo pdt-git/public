@@ -1,9 +1,16 @@
 /*
  */
 
-package org.cs3.pl.console;
+package org.cs3.pl.console.oldui;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.console.CompoletionResult;
+import org.cs3.pl.console.ConsoleCompletionProvider;
+import org.cs3.pl.console.ConsoleHistory;
+import org.cs3.pl.console.ConsoleModel;
+import org.cs3.pl.console.ConsoleModelEvent;
+import org.cs3.pl.console.ConsoleModelListener;
+import org.cs3.pl.console.DefaultConsoleHistory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 

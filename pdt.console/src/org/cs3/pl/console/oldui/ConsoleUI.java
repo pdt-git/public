@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.pl.console;
+package org.cs3.pl.console.oldui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;

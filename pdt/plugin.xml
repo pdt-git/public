@@ -212,9 +212,5 @@
             id="org.cs3.pdt.console.internal.views.PrologConsoleView"/>
    </perspectiveExtension>
 </extension>
-<extension
-      point="org.cs3.pdt.runtime.bootstrapContribution">
-   <contribution path="pl/single_char_interceptor.pl"/>
-</extension>
 
 </plugin>

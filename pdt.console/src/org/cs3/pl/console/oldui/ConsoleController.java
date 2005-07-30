@@ -1,4 +1,6 @@
-package org.cs3.pl.console;
+package org.cs3.pl.console.oldui;
+
+import org.cs3.pl.console.ConsoleModel;
 
 /*
  */
