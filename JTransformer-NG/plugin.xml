@@ -175,15 +175,4 @@
              id="org.cs3.jtransformer.internal.actions.regenerateclasses"/>
     </actionSet>
  </extension>
- <extension
-       point="org.cs3.pdt.console.consoleContextMenu">
-    <SelectionContextAction
-          class="org.cs3.jtransformer.internal.actions.GotoPEFNavigatorAction"
-          name="open corresponding elemented for selected ID in PEF navigator"
-          sharedIcon="IMG_DEF_VIEW"/>
-    <SelectionContextAction
-          class="org.cs3.jtransformer.internal.actions.OpenSelectionInEditorAction"
-          name="open corresponding elemented for selected ID in Java editor"
-          sharedIcon="IMG_DEF_VIEW"/>
- </extension>      
 </plugin>
