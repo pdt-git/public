@@ -7,6 +7,7 @@ public class GenericAnnotationImpl implements GenericAnnotation {
 
 	private String name;
 	private List args;
+	boolean inline;
 	
 	public GenericAnnotationImpl(String name, List args){
 		this.name = name;
@@ -32,6 +33,15 @@ public class GenericAnnotationImpl implements GenericAnnotation {
 		if(annList.length() > 0)
 			annList = "("+annList+")";
 		return name +annList;
+	}
+
+	public void setInline(boolean inline) {
+		this.inline = inline;
+		
+	}
+
+	public boolean isInline() {
+		return inline;
 	}
 
 }
