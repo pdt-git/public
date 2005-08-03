@@ -19,9 +19,7 @@ import org.eclipse.ui.IWorkbenchPart;
  * @inheritDoc
  */
 public class JTransformerNatureAction implements IObjectActionDelegate {
-	private final static String ACTION_ID = "org.cs3.pl.JTransformer.JTransformerNatureAction";
-	private IWorkbenchPart targetPart;
-	private IAction action;
+	public final static String ACTION_ID = "org.cs3.pl.JTransformer.JTransformerNatureAction";
 	private IProject project;
 	
 	/*
@@ -31,8 +29,6 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 *           org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		this.action = action;
-		this.targetPart = targetPart;
 	}
 	
 	/*
