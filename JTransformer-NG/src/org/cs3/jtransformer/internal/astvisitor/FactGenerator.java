@@ -76,7 +76,6 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -175,8 +174,6 @@ public class FactGenerator extends ASTVisitor {
 	 */
 	
 	public boolean visit(AnonymousClassDeclaration node) {
-		String name;
-		ASTNode no = getEnclosingNode(node);
 		
 		String[] args =
 			new String[] {
@@ -223,21 +220,13 @@ public class FactGenerator extends ASTVisitor {
 	 */
 	
 	public boolean visit(ArrayCreation node) {
-		String [] arg;
 		if(node.getInitializer() != null)
 			idResolver.setEquivalence(node,node.getInitializer());
-		
-		List childArrays = new ArrayList();
-		List nextList = new ArrayList();
-		
 		
 		
 		StringBuffer dimbuffer = new StringBuffer("[");
 		List dims = node.dimensions();
 		String elems;
-		
-		// FIXME: use resolveType!
-		Type memberType = node.getType().getComponentType();
 		
 		boolean implicitDimensions = true;
 		
