@@ -721,6 +721,8 @@ public class FactGenerator extends ASTVisitor {
 	}
 
 	private GenericAnnotation getCorrespondingGenericAnnotation(ASTNode node){
+		if(annotations == null) // TODO: quick fix for selection 2 clipboard 
+			return null;
 		return (GenericAnnotation)annotations.get(""+(node.getStartPosition()-1));
 	}
 
