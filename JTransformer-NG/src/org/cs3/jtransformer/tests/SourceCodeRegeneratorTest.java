@@ -14,7 +14,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
- * @author windeln
+ * @author trho
  *
  * TODO To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Style - Code Templates
