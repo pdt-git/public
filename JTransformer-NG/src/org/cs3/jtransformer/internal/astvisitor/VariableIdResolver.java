@@ -7,7 +7,7 @@ import org.eclipse.jdt.core.dom.IBinding;
  * Provides IDs that are Variables in the Prolog System, 
  * for the "Selection to Query" feature.
  * 
- * @author windeln
+ * @author trho
  * @inheritDoc
  */
 public class VariableIdResolver extends IDResolver {

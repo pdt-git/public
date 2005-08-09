@@ -290,7 +290,7 @@ public class IDResolver implements IIDResolver {
 //					tmp.append(tb.getName());
 //					while (father != null) {
 //						last = father;
-//						tmp.insert(0, father.getName() + "$"); //windeln: replaced $
+//						tmp.insert(0, father.getName() + "$"); //trho: replaced $
 //						father = father.getDeclaringClass();
 //					}
 //					if(!last.getPackage().isUnnamed())
