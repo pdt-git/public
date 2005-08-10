@@ -1477,8 +1477,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     private void waitTillDone()  {
 		try {
-			JobManager.getInstance().join(ResourcesPlugin.FAMILY_AUTO_BUILD,null);
-			JobManager.getInstance().join(ResourcesPlugin.FAMILY_MANUAL_BUILD,null);
+			
+			Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD,null);
+			Platform.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD,null);
 		} catch (OperationCanceledException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
@@ -1564,6 +1565,15 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 IWorkspace.AVOID_UPDATE, null);
     }
 
+    /**
+     * Not yet in use - needed to normalize
+     * assign ops and unary operations on fields (++, --).
+     * Must be thoroughly tested first.
+     * 
+     * @param rewrite
+     * @param node
+     * @author Tobias Rho
+     */
     private void _normalize(final ASTRewrite rewrite,
             VariableDeclarationStatement node) {
         List newFragments = new Vector();
@@ -1583,7 +1593,6 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             for (Iterator iter = newFragments.iterator(); iter.hasNext();) {
                 VariableDeclarationFragment newFragment = (VariableDeclarationFragment) iter
                         .next();
-                AST ast = node.getAST();
                 VariableDeclarationStatement newVarDecl = (VariableDeclarationStatement) rewrite
                         .createCopyTarget(node);
                 ListRewrite listRewrite = rewrite.getListRewrite(newVarDecl,
