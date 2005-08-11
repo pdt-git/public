@@ -21,7 +21,7 @@ import org.cs3.pl.prolog.PrologInterfaceListener;
 public class PrologEventDispatcher {
     SocketClient client;
 
-    Thread thread;
+    Thread dispatchThread;
 
     protected boolean shouldBeRunning;
 
@@ -41,7 +41,7 @@ public class PrologEventDispatcher {
         if(!shouldBeRunning){
             return;
         }
-        if (Thread.currentThread() != thread) {
+        if (Thread.currentThread() != dispatchThread) {
             synchronized (queue) {
                 queue.addLast(new Runnable() {
                     public void run() {
@@ -73,11 +73,11 @@ public class PrologEventDispatcher {
             return;
         }
         
-        if (Thread.currentThread() != thread) {
+        if (Thread.currentThread() != dispatchThread) {
             synchronized (queue) {
                 queue.addLast(new Runnable() {
                     public void run() {
-                        enableSubject(subject);
+                        disableSubject(subject);
                     }
                 });
             }
@@ -110,7 +110,7 @@ public class PrologEventDispatcher {
     		throw new IllegalArgumentException("null is not a valid client!");
     	}
         
-        if (thread != null) {
+        if (dispatchThread != null) {
         	Debug.warning("erm... i'm already running. Refusing to start another time");
         	return;
         }
@@ -121,7 +121,7 @@ public class PrologEventDispatcher {
         synchronized (queue) {
             queue.clear();
         }
-        thread = new Thread("Prolog Event Dispatcher") {
+        dispatchThread = new Thread("Prolog Event Dispatcher") {
             public void run() {
                 client.lock();
                 try {
@@ -152,17 +152,17 @@ public class PrologEventDispatcher {
             }
         };
         shouldBeRunning = true;
-        thread.start();
+        dispatchThread.start();
     }
 
     public synchronized void stop() {
-        if (thread != null) {
+        if (dispatchThread != null) {
             shouldBeRunning = false;
             try {
-                thread.join();
+                dispatchThread.join();
                 client.close();
                 client=null;
-				thread=null;
+				dispatchThread=null;
             } catch (InterruptedException e) {
                 Debug.report(e);
                 throw new RuntimeException(e);
