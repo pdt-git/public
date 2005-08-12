@@ -37,7 +37,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
             char[] buf = new char[255];
             while (true){
                 try {
-                    int count = reader.read(buf);
+                    int count = reader.read(buf);	
                     if(count <0){
                         throw new IOException("EndOfStream read.");
                     }
@@ -259,7 +259,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
             readerThread.start();
                 
             
-            writer.write("sd_install.\n");
+            writer.write("sd_install,set_stream(current_output,tty(true)),set_stream(current_input,tty(true)).\n");
             writer.flush();
             
             
