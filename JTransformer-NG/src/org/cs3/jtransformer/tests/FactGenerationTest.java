@@ -31,7 +31,6 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;

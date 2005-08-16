@@ -8,8 +8,8 @@ import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjcetEvent;
+import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
