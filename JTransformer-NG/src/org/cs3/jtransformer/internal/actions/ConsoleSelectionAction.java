@@ -1,11 +1,9 @@
 package org.cs3.jtransformer.internal.actions;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 
