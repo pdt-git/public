@@ -2,7 +2,6 @@
 
 package org.cs3.pl.parser.internal.term;
 
-import org.apache.commons.lang.StringEscapeUtils;
 
 public class ASTPrefixOperator extends SimpleNode {
 	private String value;

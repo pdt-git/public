@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.ImageRepository;

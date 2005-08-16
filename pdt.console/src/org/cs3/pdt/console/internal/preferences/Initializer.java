@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
@@ -49,7 +48,7 @@ public class Initializer extends AbstractPreferenceInitializer {
 
         IEclipsePreferences node = context.getNode(qualifier);
         if (node == null) {
-            Debug.error("Häh?!");
+            Debug.error("Hï¿½h?!");
         } else {
             Option[] options = plugin.getOptions();
             for (int i = 0; i < options.length; i++) {

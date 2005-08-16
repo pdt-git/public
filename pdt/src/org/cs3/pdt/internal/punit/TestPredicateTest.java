@@ -1,14 +1,11 @@
 package org.cs3.pdt.internal.punit;
 
-import java.io.IOException;
 import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.omg.PortableServer.AdapterActivator;
 
 public class TestPredicateTest extends TestCase {
 	 

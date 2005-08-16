@@ -1,8 +1,10 @@
 package org.cs3.pdt.decorator;
 
-import org.eclipse.ui.plugin.*;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import java.util.*;
 
 /**
  * The main plugin class to be used in the desktop.

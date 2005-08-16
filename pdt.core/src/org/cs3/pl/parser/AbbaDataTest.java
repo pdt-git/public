@@ -5,19 +5,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 public class AbbaDataTest extends TestCase implements ProblemCollector {
 

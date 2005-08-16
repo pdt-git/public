@@ -10,6 +10,7 @@ import junit.framework.TestCase;
 
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.parser.PrologCompiler;
+import org.eclipse.core.runtime.CoreException;
 
 
 

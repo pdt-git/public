@@ -12,7 +12,6 @@ import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 

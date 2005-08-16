@@ -11,7 +11,6 @@ import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
-import org.cs3.pl.metadata.PrologElementData;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;

@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
-
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
@@ -25,7 +24,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
         
     private class ConsoleReader implements Runnable {
         
-        private static final char ESCAPE_CHAR = '§';
+        private static final char ESCAPE_CHAR = 'ï¿½';
 		private static final char RAW_MODE_CHAR = 's';
 		private BufferedReader reader;
 

@@ -6,12 +6,8 @@
  */
 package org.cs3.pdt.internal.preferences;
 
-import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;

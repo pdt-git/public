@@ -8,11 +8,8 @@ import java.io.IOException;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.console.PDTConsole;
-
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;

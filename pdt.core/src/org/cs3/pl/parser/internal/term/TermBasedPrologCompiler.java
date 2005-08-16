@@ -7,8 +7,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.StringBufferInputStream;
-import java.rmi.server.ExportException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.Vector;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.ClauseData;
-import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
@@ -29,7 +26,6 @@ import org.cs3.pl.parser.StringLineBreakInfoProvider;
 import org.cs3.pl.parser.abba.AbbaGraphGenerator;
 import org.cs3.pl.parser.abba.SimpleIDGeneratorStrategie;
 import org.cs3.pl.parser.abba.WriteTermsToStreamStrategy;
-import org.cs3.pl.parser.internal.classic.ASTClause;
 
 public class TermBasedPrologCompiler implements PrologCompiler {
 

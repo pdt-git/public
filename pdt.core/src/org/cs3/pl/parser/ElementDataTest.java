@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pl.common.Util;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.cs3.pl.common.Util;
 
 public class ElementDataTest extends TestCase implements ProblemCollector {
 

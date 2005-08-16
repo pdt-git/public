@@ -2,8 +2,6 @@
 
 package org.cs3.pl.parser.internal.term;
 
-import java.util.Stack;
-import java.util.Vector;
 
 public class ASTCompoundTerm extends SimpleNode {
 	public static ASTCompoundTerm cast(SimpleNode from){

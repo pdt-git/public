@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.editors;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.metadata.Predicate;

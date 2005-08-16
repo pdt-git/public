@@ -3,7 +3,6 @@ package org.cs3.pdt.internal.actions;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;

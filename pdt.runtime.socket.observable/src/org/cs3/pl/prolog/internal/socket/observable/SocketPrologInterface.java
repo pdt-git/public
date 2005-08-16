@@ -2,9 +2,7 @@ package org.cs3.pl.prolog.internal.socket.observable;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
@@ -12,7 +10,6 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;

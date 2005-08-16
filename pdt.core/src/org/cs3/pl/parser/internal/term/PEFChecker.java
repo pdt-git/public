@@ -2,8 +2,6 @@ package org.cs3.pl.parser.internal.term;
 
 import java.util.HashMap;
 
-import javax.swing.tree.TreePath;
-
 import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
 
