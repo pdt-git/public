@@ -9,6 +9,8 @@ package org.cs3.pl.parser.internal.classic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 
 /**
  * @author xproot

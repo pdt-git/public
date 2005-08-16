@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pl.prolog.PrologInterface;
 /**

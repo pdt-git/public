@@ -7,7 +7,6 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IAction;

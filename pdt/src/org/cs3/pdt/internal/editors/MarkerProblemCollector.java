@@ -10,7 +10,6 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
-import org.cs3.pl.parser.internal.classic.Token;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;

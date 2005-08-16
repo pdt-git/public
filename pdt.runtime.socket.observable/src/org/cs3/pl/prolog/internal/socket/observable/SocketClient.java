@@ -19,7 +19,6 @@ import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.LogBuffer;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.internal.ReusablePool;
@@ -489,7 +488,7 @@ public class SocketClient {
 				Debug.error(socket.getLogBuffer().toString());
 				
 				throw new IllegalStateException(
-						"Wer hat in mein Töpfchen geschissen?!");
+						"Wer hat in mein Tï¿½pfchen geschissen?!");
 			}
 			lockCounter--;
 			if (lockCounter == 0) {

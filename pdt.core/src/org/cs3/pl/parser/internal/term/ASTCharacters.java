@@ -2,12 +2,7 @@
 
 package org.cs3.pl.parser.internal.term;
 
-import java.io.StringReader;
-
 import org.apache.commons.lang.StringEscapeUtils;
-import org.cs3.pl.common.Util;
-
-import sun.beans.editors.StringEditor;
 
 public class ASTCharacters extends SimpleNode implements Atomic{
 	

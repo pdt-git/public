@@ -3,7 +3,6 @@ package org.cs3.pl.parser.internal.term;
 import java.io.StringReader;
 import java.util.Vector;
 
-import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.parser.Problem;
 

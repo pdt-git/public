@@ -7,7 +7,6 @@
 package org.cs3.pl.doc;
 
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.metadata.PrologElementData;
 
 /**
  * @author xproot

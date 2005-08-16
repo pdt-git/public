@@ -1,7 +1,6 @@
 package org.cs3.pl.parser.abba;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import org.cs3.pl.parser.internal.term.ASTCompilationUnit;

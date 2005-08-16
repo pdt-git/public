@@ -15,7 +15,6 @@ import java.util.HashMap;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.prolog.PrologException;
 
 /**

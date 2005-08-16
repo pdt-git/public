@@ -3,7 +3,6 @@
 package org.cs3.pdt.internal.builder;
 
 import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -138,7 +137,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 collect(getProject(), forgetList);
                 break;
             default:
-                Debug.error("Wasn das für ein Buil kind jetzt?");
+                Debug.error("Wasn das fï¿½r ein Buil kind jetzt?");
                 return null;
             }
 			forgetList.addAll(buildList);
