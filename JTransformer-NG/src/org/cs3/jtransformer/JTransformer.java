@@ -115,7 +115,7 @@ public final class JTransformer {
         JTransformerProject[] r = new JTransformerProject[l.size()];
         return (JTransformerProject[]) l.toArray(r);
     }
-//  FIXME, XXX, TODO, Warning, warning, warning!!!
+//  FIXME XXX TODO Warning, warning, warning!!!
 // LogicAJ relies on this rule, it should use the workspaceroot instead	
 //
 /**
