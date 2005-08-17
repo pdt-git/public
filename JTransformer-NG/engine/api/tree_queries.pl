@@ -199,6 +199,42 @@ getPackage(_id,_pckg):-
     enclosing(_id, _encl),
     getPackage(_encl,_pckg).
 
+
+/**
+ * tree_attributes(ID, Functor, [AttributeVal1,...])
+ *
+ * e.g. for the class id 10001 (java.lang.Object):
+ * 
+ * tree_attributes(10001,  classDefT, ['Object']).
+ */
+    
+tree_attributes(ID, Functor, Attributes) :-
+    tree(ID,_, Functor),
+    getTerm(ID,Term),
+    Term =.. [Functor|Args],
+    ast_node_def('Java', Functor,AttributeDescr),
+    extract_attributes_(AttributeDescr,Args, Attributes).
+
+extract_attributes_(_,[],[]).
+extract_attributes_([ast_arg(_,_, attr, _)|Descrs],[Arg|Args],[Arg|Attribs]) :-
+    !,
+	extract_attributes_(Descrs,Args,Attribs).
+         
+extract_attributes_([_|Descrs],[_|Args],Attribs) :-
+    !,
+	extract_attributes_(Descrs,Args,Attribs).
+    
+test(tree_attributes) :-
+    fullQualifiedName(ID,'java.lang.Object'),
+    tree_attributes(ID, Kind, Attributes),
+    assert_true(Kind = classDefT),
+    assert_true(Attributes = ['Object']).
+
+test(tree_attributes2) :-
+    fullQualifiedName(ID,'java.lang.Object'),
+    tree_attributes(MID,methodDefT,[wait, type(basic, void, 0)]),
+    methodDefT(MID,ID,_,_,_,_,_).
+    
     
 /**
  * sub_trees(_id, _subtrees)
