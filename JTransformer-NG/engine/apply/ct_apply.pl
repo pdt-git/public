@@ -111,7 +111,7 @@ apply_post([_head| _tail]) :-
     apply_post(_tail).
 
 apply_post([_head| _tail]) :-
-    error_handling(fail,'apply_post action failed:~ could not find action ~a~n',[_head]),
+    error_handling(fail,'apply_post action failed: could not find action ~a~n',[_head]),
     !.
 
 /*
