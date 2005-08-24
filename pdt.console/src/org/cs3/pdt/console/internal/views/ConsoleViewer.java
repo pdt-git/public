@@ -94,7 +94,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	private KeyListener keyListener = new KeyListener() {
 		public void keyPressed(KeyEvent e) {
-			ui_keyPressed(e.keyCode, e.character);
+			ui_keyPressed(e);
 		}
 
 		public void keyReleased(KeyEvent e) {
@@ -132,6 +132,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
+		
 		control.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				e.doit = false;
@@ -501,7 +502,16 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				event.doit = false;
 
 			} else {
+				int off = getCaretOffset();
 				switch (keyCode) {
+				case SWT.HOME:
+				case SWT.KEYPAD_7:
+					event.doit=true;
+					break;
+				case SWT.ARROW_LEFT:
+				case SWT.KEYPAD_4:
+					event.doit=off>startOfInput;
+					break;
 				case SWT.CR:
 				case SWT.KEYPAD_CR:
 					event.doit = false;
@@ -551,7 +561,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				charCount - startOfInput);
 	}
 
-	protected void ui_keyPressed(int keyCode, char keyChar) {
+	protected void ui_keyPressed(KeyEvent e) {
+		char keyChar = e.character;
+		int keyCode = e.keyCode;
+		int keyMask=e.stateMask;
 		if (thatWasMe) {
 			return;
 		}
@@ -564,6 +577,20 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			model.putSingleChar(keyChar);
 		} else {
 			switch (keyCode) {
+			case SWT.HOME:
+			case SWT.KEYPAD_7:
+				if((keyMask&SWT.SHIFT)!=0){
+					 
+					Point range = control.getSelectionRange();
+					int to = range.x + range.y;
+					int from = startOfInput;
+					control.setCaretOffset(startOfInput);
+					control.setSelectionRange(to,from-to);
+				}else {
+					control.setCaretOffset(startOfInput);
+				}
+				break;
+			
 			case SWT.CR:
 			case SWT.KEYPAD_CR:
 				model.commitLineBuffer();
