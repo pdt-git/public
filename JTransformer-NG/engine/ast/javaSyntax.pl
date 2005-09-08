@@ -60,6 +60,7 @@ ast_sub_tree('Java',body).
   * autoritative documentation is the one in the file 
   * languageIndependent.pl.
   */ 
+:- multifile ast_reference_type/2.
 
 ast_reference_type('Java', Label) :-
     expression_type('Java',Label).
