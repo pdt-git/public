@@ -29,7 +29,7 @@
     the GNU General Public License.
 */
 
-/******
+
 
 %:- module(show_dep_graph,
 %          [ show_dep_graph/0
@@ -40,7 +40,7 @@
 %           , free_variables/2
 %           , random/3
 %           , term_to_atom/2
-%           , depend:ct_edge/4
+%           , depend:ct_edge/5
 %           ]).
 
 
@@ -107,11 +107,20 @@ postscript(F) :->
         send(File, done),
         send(F, report, status, 'Saved PostScript in %s', FileName).
 
+extractNodeName(Term,Functor) :-
+   ( functor(Term,Functor,_) -> true ; Functor = Term ).
+   
+get_display_edge(FromAtom,ToAtom,TypeAtom) :-
+    ct_edge(_Id,From,To,_Label,Type),
+    extractNodeName(From, FromAtom),
+    extractNodeName(To, ToAtom),
+    extractNodeName(Type, TypeAtom).
 
+    
 
 display_all_edges(F) :-
           send(F, clear),
-            forall(ct_edge(From,To,_Label,Type),
+            forall(get_display_edge(From,To,Type), % GK *** ct_edge(Id,From,To,_Label,Type),
                    send(F, display_arc, From, To, Type)),%, Label, Type)),
             send(F, layout).
 
@@ -239,8 +248,7 @@ event(Node, Ev:event) :->
 
 
 
-test(a,b).
-test(a,c).
-test(a,d).
-test(c,d).
-******/
+%test(a,b).
+%test(a,c).
+%test(a,d).
+%test(c,d).

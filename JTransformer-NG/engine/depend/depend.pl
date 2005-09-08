@@ -1,30 +1,49 @@
 depend(_ct1, _ct2)  :- depend(_ct1,_ct2,_,_).
+    
+% Muss VOR der richtigen dependency definition stehen!!!! 
+posDepend(_ct1, _ct2, _label) :-
+    use_cache_results_only,
+    !,
+    ct_edge(_id, _ct1, _ct2, _label, positive).
 posDepend(_ct1,_ct2,_DepElem) :- depend(_ct1,_ct2,positive,_DepElem).
+    
+% Muss VOR der richtigen dependency definition stehen!!!! 
+negDepend(_ct1, _ct2, _label) :-
+    use_cache_results_only,
+    !,
+    ct_edge(_id, _ct1, _ct2, _label, negative).
 negDepend(_ct1,_ct2,_DepElem) :- depend(_ct1,_ct2,negative,_DepElem).
 
-% Muss VOR der richtigen dependency definition stehen
-% schliesst diese aus !!!!
-% Dient zur Interaktiven Auflösung von Abhängigkeiten
+% Muss VOR der richtigen dependency definition stehen!!!!
+% Dient zur Interaktiven Auflösung von Abhängigkeiten.
 depend(_ct1, _ct2, _type, _label) :-
     use_cache_results_only,
     !,
-    ct_edge(_ct1, _ct2, _label, _type).
+    ct_edge(_id, _ct1, _ct2, _label, _type).
 depend(_ct1, _ct2, _DepType, _DepElem) :-
     % 1) lade CT's
     ct(_ct1, _c1, _t1),
     ct(_ct2, _c2, _t2),
-    % 2) prüfe ob CT's verschieden sind
-    _ct1 \= _ct2,
-    % 3) expandiere Abstractionen zu DNF Termen      %do not backtrack
+    % 2) prüfe ob reflexive Abhängigkeiten mit analysiert werden sollen
+    check_same_ct(_ct1, _ct2),
+    % 3) expandiere Abstractionen zu DNF Termen           %do not backtrack
     expandAbstractionsAndDNF(_c1, _c2, _t2, _c1e, _c2e, _t2e),
     % 4) extrahiere \= und pattern, unifiziere bei =      %do not backtrack
     extractRestrictions(_c1, _c2, _restr),
     % 5) führe auf den expandierten Vorbedingungen und Actionen die Abhängigkeitsanalyse durch
     depend(_c1, _t1, _c2, _t2, _restr, _DepType, _DepElem).
 
-bagofT(_a, _b, _c) :- bagof(_a, _b, _c), !.
-bagofT(_, _, []).
-
+/**
+ * Include reflexive dependencies into the analysis if the corresponding 
+ * option is set. Otherwise exclude them.
+ */
+check_same_ct(_ct1, _ct2) :-       % nothing to check in this case
+    dependency_option(reflexive),
+    !.
+check_same_ct(_ct1, _ct2) :-       % only analyze different CTs 
+    _ct1 \= _ct2.
+    
+    
 depend(_sc1, _st1, _sc2, _st2, _restr, _DepType, _DepElem) :-
     % 5.1) wähle aus der DNF-Formel von ct1 eine Konjunction     O(N)
     semicolon_member((_k1), _sc1),
@@ -40,13 +59,13 @@ depend(_sc1, _st1, _sc2, _st2, _restr, _DepType, _DepElem) :-
     % 5.5) wähle aus der DNF-Formel von t2 eine Konjunction     O(N)
     semicolon_member((_a2), _st2),
     bagofT(_m4, (comma_member(_m4, _a2), tree_action(_m4)), _t2),
+    
     % 5.6) Berechne die PostConditions von _c2
     postcond(_c2, _t2, _p2),
     % 5.7) wähle eine elementare Änderung aus t_2     O(T)
     member(_elemChange, _t2),
     % 5.8) wähle eine Existenzaussage aus _c1
     member(_DepElem, _c1),   
-%    otherpredicate(_DepElem),
     % 5.9) Prüfe ob Änderung Existenzaussage beeinflussen könnte
     effect(_elemChange, _DepElem, _DepType, _restr, _Shared),
     % 5.10) Prüfe auf tiefe Gleichheit (Unifikation)
@@ -54,19 +73,19 @@ depend(_sc1, _st1, _sc2, _st2, _restr, _DepType, _DepElem) :-
     % 5.11) Breche ab sobald die erste Abhängigkeit gefunden wurde (für ein CT-Paar)
 %    !.
 
-otherpredicate(Elem):-
-    Elem = after(_A,_B),
-	debugpoint,
-	!.
-otherpredicate(_Elem).    
+/**
+ * Bagof das im Fehlerfall eine leere liste liefert:
+ */
+bagofT(_a, _b, _c) :- bagof(_a, _b, _c), !.
+bagofT(_, _, []).
 
-debugpoint.
+
 % Berechne den Effekt einer Änderung auf eine Existenzaussage
-effect(add(_a),_x,positive,_restr,_)          :- flat_equal(_a,_x,_restr).
-effect(add(_a),not(_x),negative,_restr,_)     :- flat_equal(_a,_x,_restr).
-effect(delete(_a),not(_x),positive,_restr,_)  :- flat_equal(_a,_x,_restr).
-effect(delete(_a),_x,negative,_restr,_)       :- flat_equal(_a,_x,_restr).
-effect(replace(_a,_b),_x,_t,_restr,_shared) :-
+effect(add(_a),       _x, positive,_restr,_      ) :- flat_equal(_a,_x,_restr).
+effect(add(_a),   not(_x),negative,_restr,_      ) :- flat_equal(_a,_x,_restr).
+effect(delete(_a),not(_x),positive,_restr,_      ) :- flat_equal(_a,_x,_restr).
+effect(delete(_a),    _x, negative,_restr,_      ) :- flat_equal(_a,_x,_restr).
+effect(replace(_a,_b),_x,       _t,_restr,_shared) :-
     can_unify(_a, _x),
     not(change_doesnt_matter(_a, _b, _x, _shared)),
     effect(delete(_a),_x,_t,_restr,_).
@@ -98,6 +117,7 @@ change_on_wildcard(_i, _x, _s) :-
 
 /************* PostCondition ********************/
 
+/* unused: 
 post_condition(_pre, _act, _Post) :-
     comma2list(_pre, _prel),
     comma2list(_act, _actl),
@@ -106,12 +126,15 @@ post_condition(_pre, _act, _Post) :-
     flatten(_postl2, _postl3),
     comma2list(_Post,_postl3).
 
-removeActions(add(_elem), _elem):-!.
-removeActions(delete(_elem), not(_elem)):-!.
+
+removeActions(add(_elem),       _elem):-!.
+removeActions(delete(_elem),    not(_elem)):-!.
 removeActions(replace(_e1,_e2), [not(_e1), _e2]):-!.
 removeActions(_x,_x).
+*/
 
-%postcond(-conditions:list, -actions:list, +postConditions:list)
+
+%postcond(+conditions:list, +actions:list, ?postConditions:list)
 postcond(_pre, _act, _Post) :-
     transd(_pre, _act, _preSimple),
     sublist(removeTrueFalse, _preSimple, _preSimple2),
@@ -123,12 +146,6 @@ removeTrueFalse(not(_x)) :- !, removeTrueFalse(_x).
 removeTrueFalse(true) :- !, fail.
 removeTrueFalse(false) :- !, fail.
 removeTrueFalse(_).
-
-effect_tree(add(_a),_a) :- !.
-effect_tree(delete(_a),_a) :- !.
-effect_tree(replace(_a,_b),_a).
-effect_tree(replace(_a,_b),_b) :- !.
-effect_tree(_x, _x).
 
 
 %transd(-conditions:list, -action:list, +simplifiedConditions:list)
@@ -144,29 +161,41 @@ transd(_kl, [_h|_t],_T) :-
     transd(_kl2, _t, _T),
     !.
 
-% transd(-action:{add(_),delete(_)}, -condition{tree, not(tree)}, +{true, false, tree, not(tree)}
-transd_(_act, not(_c), not(_t)) :- !, transd_(_act, _c, _t).
-transd_(add(_a), _c, true) :- same_tree(_a, _c), !.
-transd_(delete(_a), _c, false) :- same_tree(_a, _c), !.
-transd_(_, _c, _c) :- !.
+% transd(+action:{add(_),delete(_)}, +condition{tree, not(tree)}, +{true, false, tree, not(tree)}
+transd_(_act,       not(_c), not(_t)) :- !, transd_(_act, _c, _t).
+transd_(add(_a),        _c , true   ) :- same_tree(_a, _c), !.
+transd_(delete(_a),     _c , false  ) :- same_tree(_a, _c), !.
+transd_(_,              _c , _c     ) :- !.
 
-same_tree(not(_tree1), _tree2) :- !,same_tree(_tree1, _tree2).
-same_tree(_tree1, not(_tree2)) :- !,same_tree(_tree1, _tree2).
-same_tree(_tree1, _tree2) :-
+
+/**
+ * same_tree(+ASTnode, +ASTnode)
+ * 
+ * Suceeds if 
+ * (a) the two arguments are AST nodes or negations thereof,
+ * (b) the respective ASTnodes are unifiable and have the same (identical) id.
+ */
+same_tree(not(_tree1),     _tree2 ) :- !,same_tree(_tree1, _tree2).
+same_tree(    _tree1 , not(_tree2)) :- !,same_tree(_tree1, _tree2).
+same_tree(    _tree1 ,     _tree2 ) :-
     can_unify(_tree1, _tree2),
     tree_id(_tree1, _id1),
     tree_id(_tree2, _id2),
     _id1 == _id2,
     !.
 
-can_unify(not(_x), _y) :- !, can_unify(_x, _y).
-can_unify(_x, not(_y)) :- !, can_unify(_x, _y).
-can_unify(_x, _y) :-
+/**
+ * can_unify(?,?)
+ * Check if the two arguments are unifiable without unifying them.
+ */
+can_unify(not(_x),     _y ) :- !, can_unify(_x, _y).
+can_unify(    _x,  not(_y)) :- !, can_unify(_x, _y).
+can_unify(    _x,      _y ) :-
     copy_term(_x, _z),
     copy_term(_y, _z).
 
 
-/************* Gleichheit ********************/
+/************* Flache Gleichheit ********************/
 
 % Flache Gleichheit entspricht Unifikation unter der Einschränkung
 % dass alle Ungleichheits-Beziehungen / Pattern weiterhin gelten
@@ -190,14 +219,14 @@ flat_equal(_tree1, _tree2,_restr) :-
     !,
     unification_restrictions(_restr).
 
+/************* Tiefe Gleichheit ********************/
+
 :- dynamic cached_id/1.
-:- dynamic nehypo/0.
 
 % Tiefe Gleichheit entspricht flacher Gleichheit für alle erreichbaren Elemente
 deep_equal(_startElem, _l1, _l2, _restr) :-
     % lösche alte Cache Ergebnisse
     retractall(cached_id(_)),
-    retractall(nehypo),
     tree_id(_startElem, _id), term_to_atom(_id, _a), assert(cached_id(_a)),
     !,
     % Für alle ausgehenden Kanten muss die tiefe Gleichheit gelten
@@ -219,32 +248,41 @@ deep_equal_(_id, _l1, _l2, _restr) :-
     term_to_atom(_id,_a), assert(cached_id(_a)),
     % Prüfe Rekrursiv für alle abgehenden Kanten
     forall(ast_edge(_, _m1, _eid), deep_equal_(_eid, _l1, _l2, _restr)).
+    
 % Element ist nur in Ungleichheit vorhanden
 deep_equal_(_id, _l1, _l2, re(_ne1,_patt1,_ne2,_patt2)) :-
-    (id_not_equals(_id, _ne1, _Ne1);id_not_equals(_id, _ne2, _Ne2)),
+    ( id_not_equals(_ne1, _id, _Ne1) 
+    ; id_not_equals(_ne2, _id, _Ne2)
+    ),
     exists_tree(_id, _l1, _m1),
     exists_tree(_id, _l2, _m2),
     flat_equal(_m1,_m2,re(_Ne1,_patt1,_Ne2,_patt2)),
     !,
     fail.
+    
 % Element ist keiner der beiden AST's vorhanden
 deep_equal_(_id, _, _,_) :- term_to_atom(_id,_a), assert(cached_id(_a)), !.
 
-%:- dynamic ne_hypo/0.
 
-id_not_equals(_, [], []) :- !, fail.
-id_not_equals(_id, [_h|_t], _t) :-
+id_not_equals([], _, []) :- 
+     !, 
+     fail.
+id_not_equals([_h|_t], _id, _t) :-
     _h = '\\='(_idx, _idy),
-%    member('\\='(_idx, _idy), _ne),
-    ((_id == _idx);(_id == _idy)),
+    ((_id == _idx)
+    ;(_id == _idy)
+    ),
     _idx = _idy,
     !.
-%    assert(ne_hypo),
-%    id_not_equals(_id,_t,_T).
-id_not_equals(_id, [_h|_t], [_h|_T]) :-
-    id_not_equals(_id,_t,_T).
+id_not_equals([_h|_t], _id, [_h|_T]) :-
+    id_not_equals(_t,_id,_T).
 
-
+/**
+ * exists_tree(+Id, +ASTNodelist, ?ASTNode)
+ *
+ * Extract from the AST node list in arg2 the one with identiy arg1.
+ * Unify the selected node with arg3. 
+ */
 exists_tree(_id, _l, _Tree) :-
     member(_Tree, _l),
 %    effect_tree(_tree, _Tree),
@@ -252,6 +290,13 @@ exists_tree(_id, _l, _Tree) :-
     _idx == _id.
 
 
+/* unused:
+effect_tree(add(_a),_a) :- !.
+effect_tree(delete(_a),_a) :- !.
+effect_tree(replace(_a,_b),_a).
+effect_tree(replace(_a,_b),_b) :- !.
+effect_tree(_x, _x).
+*/
 
 /**************************************************************************
  * Einige Testdaten
@@ -283,154 +328,30 @@ test('de#11'):- deep_equal(varDefT(_v,C,_,_,_,_),(varDefT(_v,C,_,_,_,_), classDe
  * Graph Sicht auf Programmelemente (unabhängig von Faktenbasis)
  *****************************************************************/
 
-tree(_tree)                         :- ast_node(_,_tree,_).
+/**
+ * tree(+Node)
+ *
+ * Check if the argument term represents a legal AST node.
+ */
+tree(_tree)                    :- ast_node(_,_tree,_).
 
-%tree_edge(_type,_elem,_eid)         :- ast_edge(_type,_elem,_eid).
-
-tree_id(not(_tree), _id)            :- ast_node(_,_tree,_id), !.
-tree_id(add(_tree), _id)            :- ast_node(_,_tree,_id), !.
-tree_id(delete(_tree), _id)         :- ast_node(_,_tree,_id), !.
-tree_id(replace(_tree,_), _id)      :- ast_node(_,_tree,_id), !.
-tree_id(replace(_,_tree), _id)      :- ast_node(_,_tree,_id), !.
-tree_id(_tree, _id)                 :- ast_node(_,_tree,_id), !.
+/**
+ * tree_id(+NodeOrMore, ?id)
+ *
+ * If Arg1 is a term representing an AST node, its negation, or an action
+ * on an AST node then Arg2 is unified with the identity of the node.
+ */
+tree_id(not(_tree),       _id) :- ast_node(_,_tree,_id), !.
+tree_id(add(_tree),       _id) :- ast_node(_,_tree,_id), !.
+tree_id(delete(_tree),    _id) :- ast_node(_,_tree,_id), !.
+tree_id(replace(_tree,_), _id) :- ast_node(_,_tree,_id), !.
+tree_id(replace(_,_tree), _id) :- ast_node(_,_tree,_id), !.
+tree_id(_tree,            _id) :- ast_node(_,_tree,_id), !.
 
 /******************************************************************************
- * Expandieren von Abstraktionen
+ * Was ist mit dem Rest???
  *****************************************************************************/
- 
 
-:- multifile abstraction/1.
-:- multifile spezialisation/1.
-:- multifile tree/1.
-:- multifile tree_id/2.
-:- multifile test/1.
-
-
-expandAbstractionsAndDNF(_c1, _c2, _t2, _c1dnf, _c2dnf, _t2dnf) :-
-    % 4.1) Filtern aller nicht-Programmelemente und Expandieren der Abstraktionen
-    expandConditions(_c1, _c1e),
-    %dnf(_c1e, _c1dnf),
-    _c1dnf = _c1e,
-    % 4.2) Filtern aller nicht-Programmelemente und Expandieren der Abstraktionen
-    expandConditions(_c2, _c2e),
-    dnf(_c2e, _c2dnf),
-    % 4.3) _t2e ist automatisch in dnf, da _t2 eine reine Konjunktion sein muss
-    expandActions(_t2, _t2dnf),
-    !.
-
-% todo: formt eine Bedingung in DNF um
-%dnf(_c,_c).
-
-% Spezialisations are special abstractions,
-% that have the same id as an contained element
-% and cannot exist without this element
-abstraction(_x) :- spezialisation(_x).
-
-% CT kann (muss nicht) in DNF sein.
-expandCT(_ct, _Cexp, _Texp) :-
-    ct(_ct, _c, _t),
-    expandConditions(_c, _Cexp),
-    expandActions(_t, _Texp).
-
-% Grundidee: Folge von Regeln, die eine Abstraktion beschreiben, wird umgefprmt in einen logischen Ausdruck mit Konjunktion und Disjunktion. Alles was nicht Teil des Alphabets (tree/1) und nicht als Abstraktion markiert ist (abstraktion/1) wird ignoriert.
-expandConditions(_member, (_memberExp)) :-
-    _member \= ','(_,_),
-    _member \= ';'(_,_),
-    expandCondition(_member, _memberExp).
-expandConditions(','(_member,_t), ','(_memberExp,_T)) :-
-    expandCondition(_member, _memberExp),
-    expandConditions(_t, _T).
-expandConditions(';'(_member,_t), (';'(_memberExp,_T))) :-
-    expandCondition(_member, _memberExp),
-    expandConditions(_t, _T).
-
-expandCondition(_konjunction, (_Disjunction)) :-
-    bagofT(_kexp, expandCondition_(_konjunction, _kexp), _l),
-    semicolon2list(_Disjunction, _l).
-
-expandCondition_(_abstraction, _abstraction) :-
-    tree(_abstraction).
-expandCondition_(not(_abstraction), not(_T)) :-
-    not(tree(_abstraction)),
-    abstraction(_abstraction),
-    expandCondition_(_abstraction, _T).
-expandCondition_(_abstraction, _T) :-
-    not(tree(_abstraction)),
-    abstraction(_abstraction),
-    _abstraction \= not(_),
-    % wenn es eine regel für diese abstraktion gibt
-    clause(_abstraction, _body),
-    % ersetze die abstraktion durch ihren expandierten body
-    expandConditions(_body, _T).
-expandCondition_(_abstraction, true) :- % lösche elemente die weder abstraktion noch tree sind
-    not(tree(_abstraction)),
-    not(abstraction(_abstraction)),
-    _abstraction \= not(_).
-
-expandActions(_konjunction, _Konjunction) :-
-    bagofT(_kexp, expandActions_(_konjunction, _kexp), _l),
-    semicolon2list(_Konjunction, _l). % be carefull with multiple solutions
-
-expandActions_(_member, _memberExp) :-
-    _member \= ','(_,_),
-    expandAction_(_member, _memberExp).
-expandActions_(','(_member,_t), (_memberExp,_T)) :-
-    expandAction_(_member, _memberExp),
-    expandActions_(_t, _T).
-
-expandAction_(_abstraction, _abstraction) :-
-    tree_action(_abstraction).
-expandAction_(_abstraction, _T) :-
-    not(tree_action(_abstraction)),
-    abstract_action(_abstraction),
-    clause(_abstraction, _body),
-    expandActions_(_body, _T).
-expandAction_(_abstraction, empty) :-
-    not(tree_action(_abstraction)),
-    abstract_action(_abstraction),
-    not(clause(_abstraction, _body)).
-expandAction_(_abstraction, empty) :-
-    not(tree_action(_abstraction)),
-    not(abstract_action(_abstraction)).
-
-abstract_action(add(_)).
-abstract_action(delete(_)).
-abstract_action(replace(_,_)).
-abstract_action(empty).
-tree_action(add(_tree)) :- tree(_tree).
-tree_action(delete(_tree)) :- tree(_tree).
-tree_action(replace(_tree1,_tree2)) :- tree_action(delete(_tree1)), tree_action(add(_tree2)).
-tree_action(empty).
-
-
-/*************************************************************
- * Einige Tests
- */
-
-   /*
-abstraction(s).
-s :- b, not(u).
-s :- a, c.
-abstraction(c).
-c :- d.
-abstraction(u).
-u :- b, d.
-
-tree(a).
-tree(b).
-tree(c).
-tree_id(a,a).
-tree_id(b,b).
-tree_id(c,c).
-
-add(s) :- add(c), add(u).
-
-
-
-test('exp#2') :- expandConditions( (b;s),(b;( (b, not((b, true)));(a, c)))).
-test('exp#3') :- expandConditions( (a;u),(a;(b, true))).
-%test('exp#1') :- expandCT(expand1, (a, (not((b, not((b, true))));not((a, c)))), (add(c), empty)).
-     */
 
 collectIDShared(_cl, _tl, re(_ne1, _p1, _, _),_Ids, _Shared) :-
     append(_cl, _tl, _l),

@@ -64,7 +64,7 @@ fill_dialog(D) :-
 
         send(D, append, button(generate, message(Frame, generate,
                                                D?generator_member?selection))),
-        send(D, append, text_item(generator, 'ct_edge(A,B,C,D)',
+        send(D, append, text_item(generator, 'ct_edge(_,A,B,C,D)',
                                   message(D?generate_member, execute)), right),
 
         send(D, append, button(quit, message(Frame, destroy))),

@@ -238,7 +238,7 @@ ast_node_type(_Lang,_Type) :-
   * autoritative documentation is the one in the file 
   * languageIndependent.pl.
   */ 
-:- multifile ast_reference_type/3.
+:- multifile ast_reference_type/2.
 
 ast_reference_type(_Lang, id).     % supertype of all reference types
 ast_reference_type(Lang,Label) :-  % ast node labels are ref types
