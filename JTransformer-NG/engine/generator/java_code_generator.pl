@@ -23,6 +23,12 @@
 :- dynamic add_synthetic_methods/0.
 
 /**
+ * gen_tree/1 can be extended by a 
+ * generator for a Java extension (e.g. LogicAJ).
+ */
+:- multifile gen_tree/1.
+
+/**
  * Public API
  * generate_synthetic_methods(+Bool)
  * 
