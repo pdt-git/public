@@ -206,6 +206,7 @@ ast_node_subtype('Java',Label,statementType) :-
 
 % ****************** Interface PEF ******************************
 
+:- multifile ast_node_def/4.
 
 % tree_constraints(packageT ,[[atom]]).
 ast_node_def('Java',packageT,[
@@ -246,6 +247,7 @@ ast_node_def('Java',fieldDefT,[
      ast_arg(type,    mult(1,1,no ), attr,[typeTermType]), % <-- dieser typ ist noch undefined
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
      ast_arg(expr,    mult(0,1,no ), id,  [expressionType]),
+     
      ast_arg(hasModif,mult(0,*,no ), attr,[atom])
 ]).
 
@@ -253,8 +255,10 @@ ast_node_def('Java',fieldDefT,[
 ast_node_def('Java',paramDefT,[
      ast_arg(id,      mult(1,1,no ),  id,  [paramDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ),  id,  [methodDefT,catchT]), 
-     ast_arg(name,    mult(1,1,no ),  attr,  [typeTermType]), 
-     ast_arg(type,    mult(1,1,no ),  attr,  [atom])     
+     ast_arg(type,    mult(1,1,no ),  attr,  [typeTermType]), 
+     ast_arg(name,    mult(1,1,no ),  attr,  [atom]),
+     
+     ast_arg(hasModif,mult(0,*,no ), attr,[atom])
 ]).
 
 % ****************** Body PEF ******************************
