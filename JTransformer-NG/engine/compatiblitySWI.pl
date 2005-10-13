@@ -10,7 +10,8 @@
 :- dynamic file_output/1.
 :- dynamic output_to_file/0.
 %:- dynamic output_to_tmp/1.
-:- dynamic output_to_memory/2.
+:- dynamic output_to_memory/3.
+:- dynamic output_to_memory_key/1.
 
 
 outdir(A):-
@@ -37,39 +38,98 @@ toggle_out :-
     print('output file'),
     assert(output_to_file).
 
-
-open_printf_to_memory :-
-%	output_to_memory(_,_),
-%	throw('memory file still open').
-    output_to_memory(Handle,Stream),
-    retractall(output_to_memory(_,_)),
+/**
+ * open_printf_to_memory(Key) 
+ *
+ * Use the following pattern to ensure closing of your stream:
+ *    call_cleanup(
+ *   	  (	    
+ *    	open_printf_to_memory(<key>),
+ *	  ), close_printf_to_memory(<key>, Content)).
+ *
+ */
+ 
+open_printf_to_memory(Key) :-
+    output_to_memory(Key,Handle,Stream),
+    retractall(output_to_memory(Key,_,_)),
     catch((
     close(Stream),
     free_memory_file(Handle)),
     Exception,true),
-    format('catched Exception in open_printf_to_memory: ~a~n', Exception),
+    format('EXCEPTION: catched Exception in open_printf_to_memory. Possible reason: trying to create an existing stream~nSTREAM: ~w ~n~a ~n', [Key,Exception]),
     fail.
 
-
-open_printf_to_memory :-
-    !,
+open_printf_to_memory(Key) :-
+    !, 
     new_memory_file(Handle),
     open_memory_file(Handle, write, Stream),
-    assert(output_to_memory(Handle,Stream)).
-	
+    asserta(output_to_memory(Key,Handle,Stream)),
+	select_printf(Key).
 
-close_printf_to_memory(Content) :-
-    output_to_memory(Handle,Stream),
+/**
+ * openUniqueMemoryStream(+Prefix,-Stream):-
+ *
+ * 
+ */
+
+open_unique_memory_stream(Prefix,Stream):-
+    new_id(StreamID),     	
+    concat(Prefix,StreamID,Stream),
+   	open_printf_to_memory(Stream). 
+
+/**
+ * close_printf_to_memory(+Key,-Content) 
+ *
+ * Closes the current memory stream with key Key. The output is written into Content.
+ * After closing, printf is set to the last memory stream that was opened before this one.
+ * If Key does not exist, nothing will happen
+ *
+ */
+ 
+close_printf_to_memory(Key,Content) :-
+    output_to_memory(Key,Handle,Stream),
     !,
     close(Stream),
     memory_file_to_atom(Handle,Content),
     free_memory_file(Handle),
-    retract(output_to_memory(Handle,Stream)).
+    retract(output_to_memory(Key, Handle,Stream)),
+    (output_to_memory_key(Key) ->
+	    (retract(output_to_memory_key(Key)),
+	     select_printf_last);true).
 
-close_printf_to_memory(_) :-
+close_printf_to_memory(_,_) :-
     throw('no memory file exists').
+    
+    
+close_all_printf_to_memory:-
+    close_all_printf_to_memory(_).
+    
+close_all_printf_to_memory(ContentTemp2):-
+    not(output_to_memory(_,_,_)),
+    ContentTemp2 = ''.    
 
+close_all_printf_to_memory(Content) :-
+    output_to_memory(Key,_,_),   
+    !, 
+    close_printf_to_memory(Key,ContentTemp),
+    close_all_printf_to_memory(ContentTemp2),
+    concat(ContentTemp,ContentTemp2,Content).
 
+/**
+ * select_printf(+Key)
+ *
+ * Select current memory stream.
+ */
+
+select_printf(Key) :-
+	retractall(output_to_memory_key(_)),
+	assert(output_to_memory_key(Key)).
+
+select_printf_last :-
+	output_to_memory(LastKey,_,_),
+	select_printf(LastKey).
+	
+select_printf_last.
 
 test(memory_file) :-
     open_printf_to_memory,
@@ -79,7 +139,7 @@ test(memory_file) :-
     Content = asdfasdf.
 
 printf(_format, _args) :-
-    output_to_memory(_,_stream),
+    output_to_memory(_,_,_stream),
     !,
     format(_stream, _format, _args).
 
