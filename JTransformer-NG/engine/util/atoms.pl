@@ -34,7 +34,28 @@ stringAppend(_str1, _str2, _str3, _str4, _Ret) :-
     stringAppend(_str1, _str2, _str3, _tmpName),
     stringAppend(_tmpName, _str4, _Ret).
 
+/**
+        stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4, ?Atom5, ?Atom6)
+        
+        Atom6 forms the concatination of Atom1, Atom2, Atom3, Atom4 and Atom5.
+        TODO: specify possible binding combinations
+*/    
 
+stringAppend(_str1, _str2, _str3, _str4,_str5, _Ret) :-
+    stringAppend(_str1, _str2, _str3, _str4, _tmpName),
+    stringAppend(_tmpName, _str5, _Ret).
+
+
+/**
+        stringAppend(?Atom1, ?Atom2, ?Atom3, ?Atom4, ?Atom5, ?Atom6, ?Atom7)
+        
+        Atom6 forms the concatination of Atom1, Atom2, Atom3, Atom4, Atom5 and Atom6.
+        TODO: specify possible binding combinations
+*/    
+
+stringAppend(_str1, _str2, _str3, _str4,_str5, _str6, _Ret) :-
+    stringAppend(_str1, _str2, _str3, _str4, _str5, _tmpName),
+    stringAppend(_tmpName, _str6, _Ret).
 /*
         first_char_up(?LowerAtom, ?UpperAtom)
         
