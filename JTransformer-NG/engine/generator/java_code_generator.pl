@@ -12,17 +12,21 @@
 %:- consult('high_level_api.pl').
 */
 
+java_code_generator_memory_stream_key('java_code_generator_memory_stream_key').
+
 /**
  * general helper
  */
- 
+
 :- dynamic sourcePath/1.
 :- dynamic sourceFolder/1.
 :- dynamic align/1.
 :- dynamic gen_classfile_names/1.
 :- dynamic add_synthetic_methods/0.
+:- multifile gen_tree_before/1.
+:- multifile gen_class_after/1.
 
-/**
+/** 
  * gen_tree/1 can be extended by a 
  * generator for a Java extension (e.g. LogicAJ).
  */
@@ -342,6 +346,7 @@ gen_array_elems(_elem) :-
  * Helper
  */
 
+
 gen_class(_id, _name) :-
     not(interfaceT(_id)),
     !,
@@ -350,7 +355,14 @@ gen_class(_id, _name) :-
     gen_extends(_id),
     gen_implements(_id),
     classDefT(_id, _, _, _defs),
-    gen_block(_defs).
+    
+    %AOPHook instead of gen_block(_defs)
+    printf(' {~n'),
+    indent,
+    gen_stats(_defs),
+    gen_class_after(_id),
+    undent,
+    printfa('}').
 
 
 gen_class(_id, _name) :-
@@ -360,7 +372,14 @@ gen_class(_id, _name) :-
     printf('interface ~a ',[_name]),
     gen_extends_interface(_id),
     classDefT(_id, _, _, _defs),
-    gen_block(_defs).
+
+    %AOPHook instead of gen_block(_defs)
+    printf(' {~n'),
+    indent,
+    gen_stats(_defs),
+    gen_class_after(_id),
+    undent,
+    printfa('}').
 
 
 gen_method_body('null') :-
@@ -669,16 +688,17 @@ gen_tree_list([Head|Tail], [Source|SourceTail]):-
 	gen_tree_list(Tail, SourceTail).
 
 gen_tree(_id, _source):-
-    (
-    	open_printf_to_memory,
-	    gen_tree(_id),
-    	!;
-    	true
-    ),
-    close_printf_to_memory(_source).
+   java_code_generator_memory_stream_key(MEMORY_STREAM),
+   open_printf_to_memory(MEMORY_STREAM),
+   gen_tree(_id),
+   !,
+   close_printf_to_memory(MEMORY_STREAM, _source).
 
 
-
+gen_tree(ID):-
+	gen_tree_before(ID),
+	!.
+	
 gen_tree('null'):-
 %    write('n'),
     !.
@@ -726,7 +746,6 @@ gen_tree(_id) :-
     methodDefT(_id, _pid, '<clinit>', _args, _ret, _exc, _body),
     !,
     (
-%TODO: bad for aspects, advices on default initializers are ignored!
     	(
      	    not(add_synthetic_methods),
     		modifierT(_id,'synthetic'),
@@ -1080,6 +1099,7 @@ gen_tree(_ID) :-
 	printf(')').
 
 gen_tree(_ID) :-
+    not(tree(_ID,_,_)),
     !,
     prolog_current_frame(F),
     stack_for_frame(F,Infos),
