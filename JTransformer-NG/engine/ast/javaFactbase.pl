@@ -1093,6 +1093,8 @@ ID of the enclosing method declaration.
 :- multifile precedenceT/4.
 :- multifile nopT/3.
 
+
+/*
 tree(_id, null, packageT):-packageT(_id,_).
 tree(_id, _pid, localDefT):-localDefT(_id, _pid,_,_,_,_).
 tree(_id, _pid, paramDefT):-paramDefT(_id, _pid,_,_).
@@ -1134,6 +1136,32 @@ tree(_id, _pid, catchT):-catchT(_id, _pid,_,_,_).
 tree(_id, _pid, assertT):-assertT(_id, _pid,_,_,_).
 tree(_id, _pid, precedenceT):-precedenceT(_id, _pid,_,_).
 tree(_id, _pid, nopT):-nopT(_id, _pid,_).
+*/
+
+/**
+ * tree(ID, PID, Kind)
+ *
+ */
+tree(ID, PID, Functor) :-
+    treeSignature(Functor, Arity),
+    functor(Term,Functor,Arity),
+    Term =.. [Functor,ID,PotentialPID|_Rest],
+    call(Term),
+    ( 
+      Functor = packageT ->
+       PID = null;
+       PID = PotentialPID
+    ).
+
+/**
+ * tree_attribute(ID, Kind)
+ *
+ */   
+tree_attribute(ID, Functor) :-
+    attribSignature(Functor, Arity),
+    functor(Term,Functor,Arity),
+    Term =.. [Functor,ID|_Rest],
+    call(Term).
 
 /** So soll's sein: -----------------------------------------------------------
  * treeSignature(?Functor, ?Arity)
@@ -1150,6 +1178,9 @@ yields the following one. IN the cases where the arities do
 not aggree, adapt the definition of ast_node_signature by
 commenting out the trailing surplus arguments. -- GK, 17.6.2005
 */
+
+:-multifile treeSignature/2.
+
 treeSignature(localDefT, 6).
 treeSignature(paramDefT, 4).
 treeSignature(fieldDefT, 5).
