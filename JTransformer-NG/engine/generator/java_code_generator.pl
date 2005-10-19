@@ -360,7 +360,7 @@ gen_class(_id, _name) :-
     printf(' {~n'),
     indent,
     gen_stats(_defs),
-    gen_class_after(_id),
+    (gen_class_after(_id);true),
     undent,
     printfa('}').
 
@@ -377,7 +377,7 @@ gen_class(_id, _name) :-
     printf(' {~n'),
     indent,
     gen_stats(_defs),
-    gen_class_after(_id),
+    (gen_class_after(_id);true),
     undent,
     printfa('}').
 
