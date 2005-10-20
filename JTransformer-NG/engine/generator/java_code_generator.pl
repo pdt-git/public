@@ -688,10 +688,14 @@ gen_tree_list([Head|Tail], [Source|SourceTail]):-
 	gen_tree_list(Tail, SourceTail).
 
 gen_tree(_id, _source):-
-   java_code_generator_memory_stream_key(MEMORY_STREAM),
-   open_printf_to_memory(MEMORY_STREAM),
-   gen_tree(_id),
-   !,
+   (
+     java_code_generator_memory_stream_key(MEMORY_STREAM),
+     open_printf_to_memory(MEMORY_STREAM),
+     gen_tree(_id),
+     !
+   ; 
+     true
+   ),
    close_printf_to_memory(MEMORY_STREAM, _source).
 
 
