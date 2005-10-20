@@ -486,6 +486,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	protected void ui_keyStrokeIntercepted(VerifyEvent event) {
+		int keyMask=event.stateMask;
 		try {
 			if (thatWasMe) {
 				return;
@@ -494,6 +495,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				control.setCaretOffset(control.getCharCount());
 			}
 			int keyCode = event.keyCode;
+			int keyChar = event.character;
 			if (model == null) {
 				event.doit = false;
 				return;
@@ -505,11 +507,21 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				int off = getCaretOffset();
 				switch (keyCode) {
 				case SWT.HOME:
+					event.doit=true;
+					break;
 				case SWT.KEYPAD_7:
+					if(isNumLock(keyMask, keyCode,keyChar)){
+						break;
+					}
 					event.doit=true;
 					break;
 				case SWT.ARROW_LEFT:
+					event.doit=off>startOfInput;
+					break;
 				case SWT.KEYPAD_4:
+					if(isNumLock(keyMask, keyCode,keyChar)){
+						break;
+					}
 					event.doit=off>startOfInput;
 					break;
 				case SWT.CR:
@@ -518,12 +530,22 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					break;
 
 				case SWT.ARROW_UP:
+					event.doit = false;
+					break;
 				case SWT.KEYPAD_8:
+					if(isNumLock(keyMask,keyCode,keyChar)){
+						break;
+					}
 					event.doit = false;
 					break;
 
 				case SWT.ARROW_DOWN:
+					event.doit = false;
+					break;
 				case SWT.KEYPAD_2:
+					if(isNumLock(keyMask, keyCode,keyChar)){
+						break;
+					}
 					event.doit = false;
 					break;
 
@@ -540,6 +562,23 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
+	}
+	/**
+	 * 
+	 * due to a known problem with swt, it is currently not possible
+	 * to simply poll the numlock state. 
+	 * 
+	 * this method tries to work around this limitation by not actualy looking at the num lock state,
+	 * but testing, wether the pressed key is one of the keypad numbers
+	 * and wether the resulting character is a digit.
+	 */
+	private boolean isNumLock(int keyMask, int keyCode, int keyChar) {
+		
+		if(keyCode>=SWT.KEYPAD_0
+				&&keyCode<= SWT.KEYPAD_9){
+			return keyChar>=0&&Character.isDigit((char)keyChar);
+		}
+		return false;
 	}
 
 	/*
@@ -564,6 +603,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	protected void ui_keyPressed(KeyEvent e) {
 		char keyChar = e.character;
 		int keyCode = e.keyCode;
+		
 		int keyMask=e.stateMask;
 		if (thatWasMe) {
 			return;
@@ -579,6 +619,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			switch (keyCode) {
 			case SWT.HOME:
 			case SWT.KEYPAD_7:
+				if(isNumLock(keyMask, keyCode,keyChar)){
+					break;
+				}
 				if((keyMask&SWT.SHIFT)!=0){
 					 
 					Point range = control.getSelectionRange();
@@ -596,12 +639,23 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				model.commitLineBuffer();
 				break;
 			case SWT.ARROW_UP:
+				Debug.debug("UP");
+				history.previous();
+				break;
 			case SWT.KEYPAD_8:
+				if(isNumLock(keyMask,keyCode,keyChar)){
+					break;
+				}
 				Debug.debug("UP");
 				history.previous();
 				break;
 			case SWT.ARROW_DOWN:
+				history.next();
+				break;
 			case SWT.KEYPAD_2:
+				if(isNumLock(keyMask, keyCode,keyChar)){
+					break;
+				}				
 				history.next();
 				break;
 			case SWT.TAB:
