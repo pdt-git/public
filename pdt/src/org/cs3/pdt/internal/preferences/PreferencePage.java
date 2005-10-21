@@ -46,32 +46,71 @@ public class PreferencePage extends FieldEditorPreferencePage implements
         addEditorsForOptions(parent, options);
     }
 
-    private void addEditorsForOptions(Composite parent, Option[] options) {
+    private void addEditorsForOptions(Composite parent, final Option[] options) {
         FieldEditor editor = null;
         for(int i=0;i<options.length;i++){
             String name = options[i].getId();
             String label = options[i].getLabel();
-            
+            final int j =i;
 			//FIXME: directory does not exist at plugin startup time
-			//Workaround:
-			if(label.equals("Metadata Store Dir"))
-				editor = new StringFieldEditor(name,label,parent);
-			else
+			//Workaround: 
+			//if(label.equals("Metadata Store Dir"))
+			//	editor = new StringFieldEditor(name,label,parent);
+			//else
+            // lu: better idea: have options validate themselfs.
             switch(options[i].getType()){
             	case Option.DIR:
-            	    editor = new DirectoryFieldEditor(name,label,parent);            	    
+            	    editor = new DirectoryFieldEditor(name,label,parent){
+            		protected boolean doCheckState() {
+            			String errmsg=options[j].validate(getStringValue());
+            			if(errmsg==null){
+            				return super.doCheckState();
+            			}
+            			if(errmsg.length()!=0){
+            				setErrorMessage(errmsg);
+            				return false;
+            			}
+            			return true;
+            		}
+            	};            	    
             	break;
             	case Option.FLAG:
             	    editor = new BooleanFieldEditor(name,label,parent);
+            	    //TODO: flags are not validated right now. 
             	break;
             	case Option.NUMBER:
-            	    editor = new IntegerFieldEditor(name,label,parent);
+            	    editor = new IntegerFieldEditor(name,label,parent){
+                		protected boolean doCheckState() {
+                			String errmsg=options[j].validate(getStringValue());
+                			if(errmsg==null){
+                				return super.doCheckState();
+                			}
+                			if(errmsg.length()!=0){
+                				setErrorMessage(errmsg);
+                				return false;
+                			}
+                			return true;
+                		}
+                	};
             	break;
             	case Option.ENUM:
             	    editor = new RadioGroupFieldEditor(name,label,4,options[i].getEnumValues(),parent,true);
+            	    //TODO: enums are not validated right now. 
             	break;
             	default:
-            	    editor = new StringFieldEditor(name,label,parent);
+            	    editor = new StringFieldEditor(name,label,parent){
+                		protected boolean doCheckState() {
+                			String errmsg=options[j].validate(getStringValue());
+                			if(errmsg==null){
+                				return super.doCheckState();
+                			}
+                			if(errmsg.length()!=0){
+                				setErrorMessage(errmsg);
+                				return false;
+                			}
+                			return true;
+                		}
+                	};
             		break;
             		
             }
@@ -80,7 +119,6 @@ public class PreferencePage extends FieldEditorPreferencePage implements
             addField(editor);
         }
     }
-
     public void init(IWorkbench workbench) {
         setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
     }
