@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.pdt.internal.builder;
+package org.cs3.pdt.core.internal.builder;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -13,11 +13,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pdt.IPrologProject;
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.internal.editors.MarkerProblemCollector;
-import org.cs3.pdt.internal.views.IFileLineBreakInfoProvider;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -60,8 +57,8 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         PrologCompiler checker = PrologCompilerFactory.create();
         checker.setProblemCollector(collector);
         checker.compile(fileName, file.getContents(), lineInfo);
-        PDTPlugin plugin = PDTPlugin.getDefault();
-        ConsultService meta = PrologRuntimePlugin.getDefault().getConsultService(PDT.CS_METADATA);
+        //PDTPlugin plugin = PDTPlugin.getDefault();
+        ConsultService meta = PrologRuntimePlugin.getDefault().getConsultService(PDTCore.CS_METADATA);
         
 			checker.saveMetaDataForClauses(outputStream);
 			checker.saveAbbaData(new BufferedOutputStream(outputStream));
@@ -73,7 +70,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 
     private void autoConsult(IFile file) throws CoreException {
         IPrologProject plProject = (IPrologProject) file.getProject()
-                .getNature(PDT.NATURE_ID);
+                .getNature(PDTCore.NATURE_ID);
         if (!plProject.isAutoConsulted(file)) {
             return;
         }
@@ -88,7 +85,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
             }
         }
 
-        PDTPlugin plugin = PDTPlugin.getDefault();
+        
         String prologName = Util.normalizeOnWindoze(file.getLocation()
                 .toOSString());
         PrologSession s = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
@@ -144,8 +141,8 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 			Debug.debug("MetaDataBuilder.build(...) wants to forget: "+forgetList.toString());
 			Debug.debug("MetaDataBuilder.build(...) wants to build: "+buildList.toString());
             monitor.beginTask(taskname, forgetList.size() + buildList.size());
-			PDTPlugin r = PDTPlugin.getDefault();
-            PrintStream out = PrologRuntimePlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+
+            PrintStream out = PrologRuntimePlugin.getDefault().getPrologInterface().getConsultService(PDTCore.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
 			//PrintStream out = new PrintStream(new FileOutputStream("c:\\temp\\consulted.pl"));
 			try{
 			forget(forgetList, out, new SubProgressMonitor(monitor, forgetList
@@ -222,8 +219,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
         Set forgetList = new HashSet();
         collect(getProject(), forgetList);
 		getProject().deleteMarkers(IMarker.PROBLEM,true,IResource.DEPTH_INFINITE);
-		PDTPlugin r = PDTPlugin.getDefault();
-		PrintStream out = PrologRuntimePlugin.getDefault().getPrologInterface().getConsultService(PDT.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+		PrintStream out = PrologRuntimePlugin.getDefault().getPrologInterface().getConsultService(PDTCore.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
 		try{		
 			forget(forgetList,out, monitor);
 		}
@@ -241,7 +237,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
     private void collect(IProject project, final Set buildList)
             throws CoreException {
         final IPrologProject plProject = (IPrologProject) project
-                .getNature(PDT.NATURE_ID);
+                .getNature(PDTCore.NATURE_ID);
         Set roots = plProject.getExistingSourcePathEntries();
         for (Iterator it = roots.iterator(); it.hasNext();) {
             IResource root = (IResource) it.next();
@@ -272,7 +268,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
     private void collect(IResourceDelta delta, final Set buildList,
             final Set forgetList) throws CoreException {
         final IPrologProject plProject = (IPrologProject) getProject()
-                .getNature(PDT.NATURE_ID);
+                .getNature(PDTCore.NATURE_ID);
 
         delta.accept(new IResourceDeltaVisitor() {
             public boolean visit(IResourceDelta delta) throws CoreException {
@@ -323,7 +319,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 
     private boolean isCanidate(IResource r) throws CoreException {
         final IPrologProject plProject = (IPrologProject) getProject()
-                .getNature(PDT.NATURE_ID);
+                .getNature(PDTCore.NATURE_ID);
         if (plProject.isPrologSource(r)) {
             return true;
         }

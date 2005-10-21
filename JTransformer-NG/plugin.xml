@@ -27,6 +27,7 @@
       <import plugin="org.cs3.pdt.console"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.cs3.pdt.runtime"/>
+      <import plugin="org.cs3.pdt.common.ui"/>
 
    </requires>
 

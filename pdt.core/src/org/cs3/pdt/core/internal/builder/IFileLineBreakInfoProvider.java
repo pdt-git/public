@@ -1,6 +1,6 @@
 /*
  */
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.core.internal.builder;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

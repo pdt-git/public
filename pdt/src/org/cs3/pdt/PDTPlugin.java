@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
+public class PDTPlugin extends AbstractUIPlugin implements IAdaptable{
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -176,7 +176,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 	 */
 	private void initOptions() {
 		String fileSep = File.separator;
-		String pathSep = File.pathSeparator;
 		String location = "";
 		try {
 			location = getLocation();
@@ -192,72 +191,17 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable {
 								{ "error", "ERROR" }, { "warning", "WARNING" },
 								{ "info", "INFO" }, { "debug", "DEBUG" } }),
 				new SimpleOption(
-						PDT.PREF_METADATA_ENGINE_DIR,
-						"Metadata Engine Dir",
-						"Directory containing the prolog implementation of the meta data engine,",
-						Option.DIR, location + fileSep + "engine") {
-
-					public String validate(String value) {
-						return ensureDirExists(value, "Metadata Engine Dir");
-					}
-
-				},
-				new SimpleOption(PDT.PREF_METADATA_STORE_DIR,
-						"Metadata Store Dir",
-						"Directory used to store metadata for prolog files.",
-						Option.DIR, location + fileSep + "store") {
-					public String validate(String value) {
-						return ensureDirExists(value, "Metadata Store Dir");
-					}
-				},
-				new SimpleOption(
-						PDT.PREF_SOURCE_PATH_DEFAULT,
-						"Default Source Path",
-						"The default value for the source path of prolog projects.",
-						Option.STRING, "/"),
-				new SimpleOption(
 						PDT.PREF_CLIENT_LOG_FILE,
 						"Log file location",
 						"A file to which debug output of the PDT will be writen",
-						Option.FILE, location + fileSep + "pdt.log"),
-				new SimpleOption(
-						PDT.PREF_AUTO_CONSULT,
-						"Enable Auto-Consult (EXPERIMENTAL)",
-						"If this flag is set, the PDT will automaticaly (re-)consult any source file,"
-								+ "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental "
-								+ "feature and defaults to \"false\" for 0.1.x",
-						Option.FLAG, "false")
+						Option.FILE, location + fileSep + "pdt.log")
+				
 
 		};
 
 	}
 
-	private String ensureDirExists(String value, String label) {
-		if (value == null) {
-			return label + "must not be null";
-		}
-		if (value.length() == 0) {
-			return label + " must not be empty";
-		}
-		File f = new File(value);
-		if (!f.isAbsolute()) {
-			return label + " must not be an absolute path";
-		}
-		if (!f.exists()) {
-			if (!f.mkdirs()) {
-				return "could not create " + label;
-			}
-			return "";
-		}
-		if (!f.isDirectory()) {
-			return label + " exists, but is not a directory";
-		}
-		if (!f.canWrite()) {
-			return label + " exists, but is not writable";
-		}
-		return "";
-	}
-
+	
 	/**
 	 * This method is called when the plug-in is stopped
 	 */

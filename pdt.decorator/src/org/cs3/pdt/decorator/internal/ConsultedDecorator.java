@@ -13,10 +13,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.IPrologProject;
-import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.decorator.DecoratorPlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
@@ -171,7 +171,7 @@ public class ConsultedDecorator implements ILightweightLabelDecorator {
                                     //the workspace root
                                     return true;
                                 }
-                                if (!project.hasNature(PDT.NATURE_ID)) {
+                                if (!project.hasNature(PDTCore.NATURE_ID)) {
                                     //another prohect...
                                     return false;
                                 }
@@ -180,7 +180,7 @@ public class ConsultedDecorator implements ILightweightLabelDecorator {
                                     return true;
                                 }
                                 IPrologProject plProject = (IPrologProject) project
-                                        .getNature(PDT.NATURE_ID);
+                                        .getNature(PDTCore.NATURE_ID);
                                 if (plProject.isPrologSource(r)) {
                                     if (r.getType() == IResource.FILE) {
                                         modified((IFile) r);

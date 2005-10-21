@@ -16,6 +16,7 @@
       <import plugin="org.junit"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.ui"/>
+      <import plugin="org.cs3.pdt.common.ui"/>
    </requires>
    <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>

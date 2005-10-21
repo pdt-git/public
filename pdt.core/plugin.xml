@@ -19,10 +19,50 @@
       <import plugin="org.junit"/>
       <import plugin="org.cs3.pdt.runtime"/>
       <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.cs3.pdt.common.ui"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.editors"/>
    </requires>
    <extension
          point="org.cs3.pdt.runtime.bootstrapContribution">
       <contribution path="engine/metadata/main.pl"/>
    </extension>
-
+	<extension
+       point="org.eclipse.core.runtime.preferences">
+    <initializer class="org.cs3.pdt.core.internal.preferences.Initializer"/>
+ </extension>
+    <extension
+       point="org.eclipse.ui.preferencePages">
+    <page
+          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.pdt.core.internal.preferences.PreferencePage"
+          id="org.cs3.pdt.core.internal.preferences.PDTPreferencePage"
+          name="Prolog Core"/>
+ </extension>
+ <extension point="org.eclipse.team.core.fileTypes">
+	        <fileTypes extension="pl" type="text"/>
+	</extension> 
+ <extension
+      id="PDTProjectNature"
+         name="Prolog Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="org.cs3.pdt.core.internal.natures.PrologProjectNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.cs3.pdt.core.MetaDataBuilder">
+      </builder>
+ </extension>
+<extension
+       id="MetaDataBuilder"
+       name="Prolog Metadata Builder"
+       point="org.eclipse.core.resources.builders">
+    <builder hasNature="true">
+       <run class="org.cs3.pdt.core.internal.builder.MetaDataBuilder"/>
+    </builder>
+ </extension>
 </plugin>
