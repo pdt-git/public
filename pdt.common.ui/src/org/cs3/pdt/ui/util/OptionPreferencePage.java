@@ -8,7 +8,6 @@ import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.swt.widgets.Composite;
@@ -18,16 +17,22 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public abstract class OptionPreferencePage extends FieldEditorPreferencePage implements
 IWorkbenchPreferencePage{
 
-	private IPreferenceStore store;
 	private Option[] options;
 
+	/** note: if you use this constructor, it is up to you to configure the PreferencePage accordingly.*/
+	public OptionPreferencePage(){
+		super(GRID);
+	}
+	
 	public OptionPreferencePage(IPreferenceStore store, Option[] options, String descr){
 		super(GRID);
-        this.store=store;
-        this.options = options;
+        this.setOptions(options);
 		setPreferenceStore(store);
         setDescription(descr);
 	}
+	
+	
+	
 	/**
      * Creates the field editors. Field editors are abstractions of the common
      * GUI blocks needed to manipulate various types of preferences. Each field
@@ -35,7 +40,7 @@ IWorkbenchPreferencePage{
      */
     public void createFieldEditors() {        
         Composite parent = getFieldEditorParent();
-        addEditorsForOptions(parent, options);
+        addEditorsForOptions(parent, getOptions());
     }
 
     private void addEditorsForOptions(Composite parent, final Option[] options) {
@@ -125,7 +130,13 @@ IWorkbenchPreferencePage{
         reconfigure();
         return res;
     }
-	protected abstract void reconfigure(); 
+	protected abstract void reconfigure();
+	protected void setOptions(Option[] options) {
+		this.options = options;
+	}
+	protected Option[] getOptions() {
+		return options;
+	} 
 
 
 }
