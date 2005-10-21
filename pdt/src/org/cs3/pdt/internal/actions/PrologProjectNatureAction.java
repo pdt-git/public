@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.actions;
 
-import org.cs3.pdt.PDT;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -49,7 +49,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 			}
 
 			IProjectDescription ipd = project.getDescription();
-			if (ipd.hasNature(PDT.NATURE_ID)) {
+			if (ipd.hasNature(PDTCore.NATURE_ID)) {
 				removePDTNature(project);
 				action.setChecked(false);
 			} else {
@@ -59,7 +59,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 			}
 			action
 					.setChecked(project.getDescription().hasNature(
-							PDT.NATURE_ID));
+							PDTCore.NATURE_ID));
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -76,7 +76,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 		IProjectDescription ipd = project.getDescription();
 		String[] oldNIDs = ipd.getNatureIds();
 		String[] newNIDs = new String[oldNIDs.length + 1];
-		newNIDs[0] = PDT.NATURE_ID;
+		newNIDs[0] = PDTCore.NATURE_ID;
 		System.arraycopy(oldNIDs, 0, newNIDs, 1, oldNIDs.length);
 		ipd.setNatureIds(newNIDs);
 		if (!project.isSynchronized(IResource.DEPTH_ONE)) {
@@ -92,14 +92,14 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 	 * @throws CoreException
 	 */
 	private void removePDTNature(IProject project) throws CoreException {
-		if (project.hasNature(PDT.NATURE_ID)) {
+		if (project.hasNature(PDTCore.NATURE_ID)) {
 			IProjectDescription ipd = project.getDescription();
 			String[] oldNIDs = ipd.getNatureIds();
 			String[] newNIDs;
 			newNIDs = new String[oldNIDs.length - 1];
 			int j = 0;
 			for (int i = 0; i < newNIDs.length; i++) {
-				if (oldNIDs[j].equals(PDT.NATURE_ID))
+				if (oldNIDs[j].equals(PDTCore.NATURE_ID))
 					j++;
 				newNIDs[i] = oldNIDs[j];
 				j++;
@@ -149,7 +149,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 				action.setEnabled(true);
 				try {
 					action.setChecked(project.getDescription().hasNature(
-							PDT.NATURE_ID));
+							PDTCore.NATURE_ID));
 				} catch (CoreException e) {
 					Debug.report(e);
 				}

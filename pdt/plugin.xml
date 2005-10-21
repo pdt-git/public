@@ -29,7 +29,8 @@
       <import plugin="org.cs3.pdt.common"/>
       <import plugin="org.cs3.pdt.core"/>
       <import plugin="org.cs3.pdt.runtime"/>
-      <import plugin="org.cs3.pdt.console"/>    
+      <import plugin="org.cs3.pdt.console"/>
+      <import plugin="org.cs3.pdt.common.ui"/>    
    </requires>
    
    <extension
@@ -118,22 +119,6 @@
             id="org.cs3.pdt.internal.editors.PLEditor">
       </editor>
    </extension>
- <extension point="org.eclipse.team.core.fileTypes">
-	        <fileTypes extension="pl" type="text"/>
-	</extension> 
- <extension
-      id="PDTProjectNature"
-         name="Prolog Nature"
-         point="org.eclipse.core.resources.natures">
-      <runtime>
-         <run
-               class="org.cs3.pdt.internal.natures.PrologProjectNature">
-         </run>
-      </runtime>
-      <builder
-            id="org.cs3.pdt.MetaDataBuilder">
-      </builder>
- </extension>
 
  <extension
        point="org.eclipse.ui.propertyPages">
@@ -185,14 +170,7 @@
                menubarPath="additions"/>
       </viewerContribution>
  </extension>
- <extension
-       id="MetaDataBuilder"
-       name="Prolog Metadata Builder"
-       point="org.eclipse.core.resources.builders">
-    <builder hasNature="true">
-       <run class="org.cs3.pdt.internal.builder.MetaDataBuilder"/>
-    </builder>
- </extension>
+ 
 <extension
 		id="PrologSearchResultPage"
 		point="org.eclipse.search.searchResultViewPages">

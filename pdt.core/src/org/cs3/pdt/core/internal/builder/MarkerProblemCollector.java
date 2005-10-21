@@ -1,11 +1,11 @@
 /*
  */
-package org.cs3.pdt.internal.editors;
+package org.cs3.pdt.core.internal.builder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.cs3.pdt.UIUtils;
+
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
@@ -112,20 +112,20 @@ public class MarkerProblemCollector implements ProblemCollector {
                 Debug.error("problem creating markers");
                 Debug.report(e1);
             }
-            UIUtils.getDisplay().syncExec(new Runnable() {
-                public void run() {
-                    try {
-                        UIUtils.getActivePage().showView(
-                                IPageLayout.ID_PROBLEM_VIEW);
-                        UIUtils.getActiveEditor()
-                                .getEditorSite().getPage().activate(
-                                        UIUtils
-                                                .getActiveEditor());
-                    } catch (PartInitException e) {
-                        Debug.report(e);
-                    }
-                }
-            });
+//            UIUtils.getDisplay().syncExec(new Runnable() {
+//                public void run() {
+//                    try {
+//                        UIUtils.getActivePage().showView(
+//                                IPageLayout.ID_PROBLEM_VIEW);
+//                        UIUtils.getActiveEditor()
+//                                .getEditorSite().getPage().activate(
+//                                        UIUtils
+//                                                .getActiveEditor());
+//                    } catch (PartInitException e) {
+//                        Debug.report(e);
+//                    }
+//                }
+//            });
         }
     }
 

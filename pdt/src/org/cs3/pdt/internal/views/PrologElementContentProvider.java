@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
@@ -40,7 +40,7 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
     public PrologElementContentProvider(Viewer outline) {
         viewer = outline;
 		PDTPlugin r = PDTPlugin.getDefault();
-		ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDT.CS_METADATA);
+		ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDTCore.CS_METADATA);
         service.addConsultServiceListener(this);
     }
 
@@ -155,7 +155,7 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
        
         if(viewer==null||viewer.getControl().isDisposed()){
             PDTPlugin r = PDTPlugin.getDefault();
-			ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDT.CS_METADATA);
+			ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDTCore.CS_METADATA);
             service.removeConsultServiceListener(this);
             return;
         }

@@ -2,9 +2,9 @@
  */
 package org.cs3.pdt.internal.actions;
 
-import org.cs3.pdt.IPrologProject;
-import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -91,10 +91,10 @@ public class AutoConsultAction implements IObjectActionDelegate {
             if(file!=null){
 
                   project = (IPrologProject) file.getProject()
-                                              .getNature(PDT.NATURE_ID);
+                                              .getNature(PDTCore.NATURE_ID);
                   
                 
-          		String masterSwitch = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_AUTO_CONSULT,"false");
+          		String masterSwitch = PDTPlugin.getDefault().getPreferenceValue(PDTCore.PREF_AUTO_CONSULT,"false");
           		  
                   action.setEnabled(project != null
                           && project.isPrologSource(file)

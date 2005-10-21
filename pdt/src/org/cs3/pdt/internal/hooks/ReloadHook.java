@@ -2,8 +2,9 @@
  */
 package org.cs3.pdt.internal.hooks;
 
-import org.cs3.pdt.IPrologProject;
 import org.cs3.pdt.PDT;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
@@ -59,7 +60,7 @@ public class ReloadHook implements LifeCycleHook {
                             IProject project = jtransformerProject.getProject();
 							Debug.debug("PDTReloadHook.afterInit: lets build project "+project);
                             project.build(IncrementalProjectBuilder.FULL_BUILD,
-									PDT.BUILDER_ID,
+									PDTCore.BUILDER_ID,
 									null,
                                     monitor);
 							Debug.debug("PDTReloadHook.afterInit: done: "+project);

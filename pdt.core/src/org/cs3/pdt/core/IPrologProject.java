@@ -1,4 +1,4 @@
-package org.cs3.pdt;
+package org.cs3.pdt.core;
 
 import java.util.Set;
 

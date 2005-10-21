@@ -1,15 +1,15 @@
 /*
  */
-package org.cs3.pdt.internal.natures;
+package org.cs3.pdt.core.internal.natures;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.cs3.pdt.IPrologProject;
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
@@ -49,10 +49,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			Debug.debug("configure was called");
 			IProjectDescription descr = project.getDescription();
 			ICommand builder = descr.newCommand();
-			builder.setBuilderName(PDT.BUILDER_ID);
+			builder.setBuilderName(PDTCore.BUILDER_ID);
 			ICommand builders[] = descr.getBuildSpec();
 			for (int i = 0; i < builders.length; i++) {
-				if (builders[i].getBuilderName().equals(PDT.BUILDER_ID)) {
+				if (builders[i].getBuilderName().equals(PDTCore.BUILDER_ID)) {
 					return;
 				}
 			}
@@ -73,12 +73,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							if (wd.isAutoBuilding()) {
 								project.build(
 										IncrementalProjectBuilder.FULL_BUILD,
-										PDT.BUILDER_ID, null, monitor);
+										PDTCore.BUILDER_ID, null, monitor);
 							}
 						} catch (OperationCanceledException opc) {
 							return Status.CANCEL_STATUS;
 						} catch (CoreException e) {
-							return new Status(Status.ERROR, PDT.PLUGIN_ID, -1,
+							return new Status(Status.ERROR, PDTCore.PLUGIN_ID, -1,
 									"exception caught during build", e);
 						}
 						return Status.OK_STATUS;
@@ -114,7 +114,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			ICommand builders[] = descr.getBuildSpec();
 			int index = -1;
 			for (int i = 0; i < builders.length; i++) {
-				if (builders[i].getBuilderName().equals(PDT.BUILDER_ID)) {
+				if (builders[i].getBuilderName().equals(PDTCore.BUILDER_ID)) {
 					index = i;
 					break;
 				}
@@ -157,7 +157,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 */
 	public Set getExistingSourcePathEntries() throws CoreException {
 		Set r = new HashSet();
-		String[] elms = getPreferenceValue(PDT.PROP_SOURCE_PATH, "/").split(
+		String[] elms = getPreferenceValue(PDTCore.PROP_SOURCE_PATH, "/").split(
 				System.getProperty("path.separator"));
 		for (int i = 0; i < elms.length; i++) {
 			IProject p = getProject();
@@ -191,9 +191,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			return true;
 		}
 		if (resource.getType() == IResource.FILE) {
-			String incl = getPreferenceValue(PDT.PROP_SOURCE_INCLUSION_PATTERN,
+			String incl = getPreferenceValue(PDTCore.PROP_SOURCE_INCLUSION_PATTERN,
 					"");
-			String excl = getPreferenceValue(PDT.PROP_SOURCE_EXCLUSION_PATTERN,
+			String excl = getPreferenceValue(PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
 					"");
 			String path = resource.getFullPath().toString();
 			return isPrologSource(resource.getParent()) && path.matches(incl)
@@ -207,7 +207,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public void setAutoConsulted(IFile file, boolean val) throws CoreException {
 		file.setPersistentProperty(
 		// TODO: toggled functionality - to test
-				new QualifiedName("", PDT.PROP_NO_AUTO_CONSULT), val ? "false"
+				new QualifiedName("", PDTCore.PROP_NO_AUTO_CONSULT), val ? "false"
 						: "true");
 	}
 
@@ -219,8 +219,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 		// if the "master switch" says "no auto-consult", then there is no
 		// auto-consult.
-		String val = PDTPlugin.getDefault().getPreferenceValue(
-				PDT.PREF_AUTO_CONSULT, "false");
+		String val = PDTCorePlugin.getDefault().getPreferenceValue(
+				PDTCore.PREF_AUTO_CONSULT, "false");
 		if ("false".equalsIgnoreCase(val)) {
 			return false;
 		}
@@ -228,14 +228,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		// finally, if auto-consult is enabled, and the file is not explicitly
 		// excluded, then auto-consult it.
 		val = file.getPersistentProperty(new QualifiedName("",
-				PDT.PROP_NO_AUTO_CONSULT));
+				PDTCore.PROP_NO_AUTO_CONSULT));
 		// TODO: toggled functionality - to test
 		boolean autoConsult = !(val != null && val.equalsIgnoreCase("true"));
 		return autoConsult;
 	}
 
 	public PrologInterface getPrologInterface() {
-		PDTPlugin r = PDTPlugin.getDefault();
 		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface(getProject().getName());
 
 		if (!pif.isUp()) {
@@ -254,22 +253,22 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		if (options == null) {
 			options = new Option[] {
 					new SimpleOption(
-							PDT.PROP_SOURCE_PATH,
+							PDTCore.PROP_SOURCE_PATH,
 							"Source Path",
 							"List of folders in which the PDT looks for Prolog code.",
 							Option.DIRS, "/") {
 						public String getDefault() {
-							return PDTPlugin.getDefault().getPreferenceValue(
-									PDT.PREF_SOURCE_PATH_DEFAULT, "/");
+							return PDTCorePlugin.getDefault().getPreferenceValue(
+									PDTCore.PREF_SOURCE_PATH_DEFAULT, "/");
 						}
 					},
 					new SimpleOption(
-							PDT.PROP_SOURCE_INCLUSION_PATTERN,
+							PDTCore.PROP_SOURCE_INCLUSION_PATTERN,
 							"Inclusion Pattern",
 							"Regular expression - only matched files are considered prolog source code.",
 							Option.STRING, ".*\\.pl"),
 					new SimpleOption(
-							PDT.PROP_SOURCE_EXCLUSION_PATTERN,
+							PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
 							"Exclusion Pattern",
 							"Regular expression - matched files are excluded even if they match the inclusion pattern.",
 							Option.STRING, ""), };
@@ -288,14 +287,14 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							+ project);
 					
 					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
-							PDT.BUILDER_ID, null, monitor);
+							PDTCore.BUILDER_ID, null, monitor);
 					
 					Debug.debug("PDTReloadHook.afterInit: done: " + project);
 
 				} catch (OperationCanceledException opc) {
 					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
-					return new Status(IStatus.ERROR, PDT.PLUGIN_ID, -1,
+					return new Status(IStatus.ERROR, PDTCore.PLUGIN_ID, -1,
 							"Problems during build", e);
 				}
 				return Status.OK_STATUS;

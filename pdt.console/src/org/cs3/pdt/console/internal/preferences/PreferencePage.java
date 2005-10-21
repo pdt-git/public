@@ -7,107 +7,20 @@
 package org.cs3.pdt.console.internal.preferences;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pl.common.Option;
-import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
-import org.eclipse.jface.preference.FieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FontFieldEditor;
-import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.cs3.pdt.ui.util.OptionPreferencePage;
 
-/**
- * @author trho
- *  
- */
-public class PreferencePage extends FieldEditorPreferencePage implements
-        IWorkbenchPreferencePage {
+public class PreferencePage extends OptionPreferencePage {
 
-    //		public static final String P_WORKING_DIR = "workingDir";
-    //  public static final String P_USER = "userRubPreference";
+	public PreferencePage() {
+		super(PrologConsolePlugin.getDefault().getPreferenceStore(),
+				PrologConsolePlugin.getDefault().getOptions(),
+				"Preferences for the Prolog Console");
 
-    public PreferencePage() {
-        super(GRID);
-        setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
-        setDescription("Preferences for the PDTPlugin Plugin");
-    }
+	}
 
-  
-    /**
-     * Creates the field editors. Field editors are abstractions of the common
-     * GUI blocks needed to manipulate various types of preferences. Each field
-     * editor knows how to save and restore itself.
-     */
-    public void createFieldEditors() {        
-        Composite parent = getFieldEditorParent();        
-        PrologConsolePlugin plugin = PrologConsolePlugin.getDefault();        
-                Option[] options = plugin.getOptions();
-        addEditorsForOptions(parent, options);        
-        
-    }
+	protected void reconfigure() {
+		PrologConsolePlugin.getDefault().reconfigure();
 
-    private void addEditorsForOptions(Composite parent, Option[] options) {
-        FieldEditor editor = null;
-        for(int i=0;i<options.length;i++){
-            String name = options[i].getId();
-            String label = options[i].getLabel();
-            
-			//FIXME: directory does not exist at plugin startup time
-			//Workaround:
-			if(label.equals("Metadata Store Dir"))
-				editor = new StringFieldEditor(name,label,parent);
-			else
-            switch(options[i].getType()){
-            	case Option.DIR:
-            	    editor = new DirectoryFieldEditor(name,label,parent);            	    
-            	break;
-            	case Option.FLAG:
-            	    editor = new BooleanFieldEditor(name,label,parent);
-            	break;
-            	case Option.NUMBER:
-            	    editor = new IntegerFieldEditor(name,label,parent);
-            	break;
-            	case Option.ENUM:
-            	    editor = new RadioGroupFieldEditor(name,label,4,options[i].getEnumValues(),parent,true);
-            	break;
-            	case Option.FONT:
-            	    editor = new FontFieldEditor(name,label,"The quick brown fox jumps over the lazy dog.",parent);
-            	break;
-            	default:
-            	    editor = new StringFieldEditor(name,label,parent);
-            		break;
-            		
-            }
-            //disable the editor, if the value is overridden per sys prop.
-            editor.setEnabled(System.getProperty(name)==null,parent);
-            addField(editor);
-        }
-    }
-
-    public void init(IWorkbench workbench) {
-        setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
-    }
-
-    /**
-     * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
-     */
-    protected void performDefaults() {
-        //PDTPlugin.getDefault().updatePreferences();
-        super.performDefaults();
-    }
-
-    /**
-     * @see org.eclipse.jface.preference.IPreferencePage#performOk()
-     */
-    public boolean performOk() {
-
-        boolean res = super.performOk();
-        PrologConsolePlugin.getDefault().reconfigure();
-        return res;
-    }
+	}
 
 }

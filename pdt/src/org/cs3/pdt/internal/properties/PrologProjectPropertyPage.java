@@ -1,6 +1,6 @@
 package org.cs3.pdt.internal.properties;
 
-import org.cs3.pdt.PDT;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.ui.util.OptionProviderPropertyPage;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.OptionProvider;
@@ -17,8 +17,8 @@ public class PrologProjectPropertyPage extends OptionProviderPropertyPage {
 		if (element instanceof IProject) {
 			IProject project = (IProject) element;
 			try{
-			if(project.hasNature(PDT.NATURE_ID)){
-				return (OptionProvider) project.getNature(PDT.NATURE_ID);
+			if(project.hasNature(PDTCore.NATURE_ID)){
+				return (OptionProvider) project.getNature(PDTCore.NATURE_ID);
 			}
 			}
 			catch (CoreException e){
