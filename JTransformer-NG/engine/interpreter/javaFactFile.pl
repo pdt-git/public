@@ -19,14 +19,6 @@
 :- dynamic cache_file/1.
 :- multifile cache_file/1.
 
-/*
-interpret([_factname | _atomlist]) :-
-   exchangeLocalWithGlobalIds(_atomlist, [ID|Rest]),
-    Term =.. [_factname | [ID|Rest]],
-% 	checkExistance(ID,Term),
-    assert1T(Term).
-*/
-
 checkExistance(Term) :-
     Term =.. [Functor | [ID | _]],
     tree(ID,_,_),
@@ -40,45 +32,17 @@ checkExistance(Term) :-
     
 checkExistance(_).
 
-/*
-Sts: Seem totally obsolete, removing them does not generate more errors then
-having them ;-) Also, caused a bug (the first clase was added to circumvent it)
-inTe(importT(_,_, lId(X))) :-
-		local2FQN(X, FQN),
-		not(globalIds(FQN, _),
-		new_id(X),
-		assert(packageT(X, FQN)),
-		fail.
-
-inTe(importT(_,_,Fqn)) :-
-    not(fqn(_) = Fqn),
-    not(globalIds(Fqn, _)),
-		not(lId(_) = Fqn),
-    new_id(X),
-    assert(packageT(X, Fqn)),
-    fail.
-*/
-
-%inTe(importT(_, _, Fqn)) :-
-%    globalIds(Fqn, _),
-%    !.    
-
 inTe(packageT(_,Name)) :-
     packageT(_,Name),
     !.
     
-%inTe(packageT(_,_name)) :-
-%    new_id(_id),
-%    assert(packageT(_id,_name)),
-%    !.
-
 inTe(_term) :-
   inTe(_term,_translated),
  	checkExistance(_translated),
  	_translated =.. AsList,
 	not(member(lId(_), AsList)),
 	!,
-	assert(_translated).
+	persistant_assert(_translated).
 
 inTe(_term) :-
 	inTe(_term, _translated),
@@ -178,7 +142,7 @@ globalFqn(_fqn, _methName, _paramTypes, _globalid) :-
     new_id(_globalid),
     _term =..[globalIds, _fqn, _methName, _paramTypes, _globalid],
 %    add_to_new(_fqn),
-    assert(_term).
+    persistant_assert(_term).
 
 
 globalFqn(_fqn, _fieldName,_globalid) :-
@@ -189,7 +153,7 @@ globalFqn(_fqn, _fieldName,_globalid) :-
     new_id(_globalid),
     _term =..[globalIds, _fqn, _fieldName,_globalid],
 %    add_to_new(_fqn),
-    assert(_term).
+    persistant_assert(_term).
 
 /*
   globalFqn(+Name,-Id)
@@ -205,57 +169,8 @@ globalFqn(_fqn, _globalid) :-
 globalFqn(_fqn, _globalid) :-
     new_id(_globalid),
     _term =..[globalIds, _fqn, _globalid],
-    assert(_term).
-%    add_to_new(_fqn).
+    persistant_assert(_term).
     
-
-/*
-add_to_new(_fqn):-
-    unresolved_types(_fqn),
-	packageT(_,_fqn),
-	!.
-
-add_to_new(_fqn):-
-    unresolved_types(_fqn),
-    !.
-
-add_to_new(_fqn):-
-	packageT(_,_fqn),
-	!.
-	    
-add_to_new(_fqn):-
-    assert(unresolved_types(_fqn)).
-*/
-/*
-consultIfNewWriteCache([_H|_T]) :-
-    _term =..[consultIfNew, [_H |_T]],
-    write_cache_clause(_term),
-    close_cache_file,
-    consultIfNew([_H| _T]).
-    
-consultIfNew([]).
-consultIfNew([_H|_T]) :-
-    consultIfNew(_H),
-    consultIfNew(_T).
-consultIfNew(_filename) :-
-    appendDir(_filename, _dirname),
-    not(consulted(_filename)),
-    !,
-    assert(consulted(_filename)),
-    consult(_dirname).
-    %consultCacheOrOriginal(_filename).
-consultIfNew(_).
-
-consultCacheOrOriginal(_filename) :-
-    removeExt(_filename, _noExt),
-    concat_atom([_noExt,'.cache.pl'], _cacheFilename),
-    exists_file(_cacheFilename),
-    consult(_cacheFilename),!.
-
-consultCacheOrOriginal(_filename) :-
-    consult(_filename).
-*/
-
 
 removeExt(_filename, _NoExt) :-
     atom_length(_filename, _size),
@@ -266,14 +181,8 @@ open_cache_file :-
     open_cache_file('cache.pl').
 
 open_cache_file(_name).
-%    open(_name, write, _fileStream),
-%    assert(cache_file(_fileStream)).
 
 close_cache_file.
-%    cache_file(_fileStream),
-%    close(_fileStream),
-%    retract(cache_file(_fileStream)).
-
 
 write_cache_clause(_term) :-
     cache_file(_fileStream),
@@ -310,12 +219,12 @@ localSymtab(_id, _globalid) :-
 localSymtab(_id, _globalid) :-
     new_id(_globalid),
     _term =..[symtab, _id, _globalid],
-    assert(_term).
+    persistant_assert(_term).
 
 
 retractLocalSymtab :-
-	retractall(symtab(_,_)),
-	retractall(local2FQN(_,_)).
+	persistant_retractall(symtab(_,_)),
+	persistant_retractall(local2FQN(_,_)).
 
 
 type_dependency(null,Fqn):-
@@ -332,7 +241,7 @@ addToGlobalIds(Fqn):-
 
 addToGlobalIds(Fqn):-
     new_id(Id),
-    assert(globalIds(Fqn,Id)).
+    persistant_assert(globalIds(Fqn,Id)).
 	
 addToGlobalIdsAndFacts(Fqn):-
     globalIds(Fqn,_),
@@ -343,8 +252,8 @@ addToGlobalIdsAndFacts(Fqn):-
 		printf('creating synthetic package '),
 		print(Fqn),
 		printf('~n'),
-    assert(globalIds(Fqn,Id)),
-    assert(packageT(Id,Fqn)).		
+    persistant_assert(globalIds(Fqn,Id)),
+    persistant_assert(packageT(Id,Fqn)).		
 
 /**
  * remove_contained_global_ids(+ToplevelPath)
@@ -356,4 +265,15 @@ addToGlobalIdsAndFacts(Fqn):-
 remove_contained_global_ids(Path):-
 	toplevelT(_, _, Path, Defs), 
 	forall((member(M,Defs),classDefT(M,_,_,_)),
-	       retractall(globalIds(_,M))).
+	       persistant_retractall(globalIds(_,M))).
+
+/**
+ *
+ * Will optionally 
+ * commit the changes to a database in the future.
+ */
+persistant_assert(Term):-
+    assert(user:Term).
+    
+persistant_retractall(Term):-
+    retractall(user:Term).
