@@ -1,8 +1,8 @@
 /*
  */
-package org.cs3.pdt.internal.hooks;
+package org.cs3.pdt.core.internal.hooks;
 
-import org.cs3.pdt.PDT;
+
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
@@ -48,7 +48,7 @@ public class ReloadHook implements LifeCycleHook {
             }
 			Debug.debug("PDTReloadHook.afterInit: autobuild is on, let's rock.");
             IProgressMonitor monitor = new NullProgressMonitor();
-            final IPrologProject[] prologProjects = PDT.getPrologProjects(pif);
+            final IPrologProject[] prologProjects = PDTCore.getPrologProjects(pif);
 			Debug.debug("PDTReloadHook.afterInit: prolog projects: "+prologProjects.toString());
             Job j = new Job("Building Prolog Metadata") {
                 public IStatus run(IProgressMonitor monitor) {
@@ -69,7 +69,7 @@ public class ReloadHook implements LifeCycleHook {
                     } catch (OperationCanceledException opc) {
                         return Status.CANCEL_STATUS;
                     } catch (Exception e) {
-                        return new Status(IStatus.ERROR, PDT.PLUGIN_ID, -1,
+                        return new Status(IStatus.ERROR, PDTCore.PLUGIN_ID, -1,
                                 "Problems during build", e);
                     }
                     return Status.OK_STATUS;

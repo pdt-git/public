@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.properties;
+package org.cs3.pdt.core.internal.properties;
 
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.ui.util.OptionProviderPropertyPage;

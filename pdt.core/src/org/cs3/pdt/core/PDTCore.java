@@ -1,5 +1,12 @@
 package org.cs3.pdt.core;
 
+import java.util.ArrayList;
+
+import org.cs3.pl.prolog.PrologInterface;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+
 public class PDTCore {
 
 	/**
@@ -66,5 +73,25 @@ public class PDTCore {
 	 */
 	public static final String PROP_SOURCE_EXCLUSION_PATTERN = "pdt.exlusion.pattern";
 	public static final String PLUGIN_ID = "org.cs3.pdt.core";
+	/**
+	 * @return all open IPrologProjects that operate on the given PrologInterface instance.
+	 * @throws CoreException
+	 * @deprecated we wil find a more general solution in PDT 0.2
+	 */
+	public  static IPrologProject[] getPrologProjects(PrologInterface pif) throws CoreException{
+	    IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+	    ArrayList l = new ArrayList();
+	    for (int i = 0; i < projects.length; i++) {
+	        IProject project = projects[i];            
+	        if(project.isAccessible()&&project.hasNature(NATURE_ID)){
+	            IPrologProject prologProject = (IPrologProject) project.getNature(NATURE_ID);
+	            if(prologProject.getPrologInterface()==pif){
+	                l.add(prologProject);
+	            }
+	        }
+	    }
+	    IPrologProject[] r = new IPrologProject[l.size()];
+	    return (IPrologProject[]) l.toArray(r);
+	}
 
 }
