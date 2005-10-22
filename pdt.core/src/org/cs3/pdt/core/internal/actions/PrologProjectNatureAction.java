@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.actions;
+package org.cs3.pdt.core.internal.actions;
 
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;

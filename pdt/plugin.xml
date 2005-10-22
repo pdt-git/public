@@ -55,12 +55,7 @@
        point="org.eclipse.core.runtime.preferences">
     <initializer class="org.cs3.pdt.internal.preferences.Initializer"/>
  </extension>
- <extension
-       point="org.cs3.pdt.runtime.hooks">
-     <hook
-            class="org.cs3.pdt.internal.hooks.ReloadHook"
-            id="PDTReloadHook"/>
- </extension>
+ 
  <extension
        point="org.eclipse.ui.actionSets">
     <actionSet
@@ -121,45 +116,7 @@
    </extension>
 
  <extension
-       point="org.eclipse.ui.propertyPages">
-    <page
-          adaptable="true"
-          objectClass="org.eclipse.core.resources.IProject"
-          class="org.cs3.pdt.internal.properties.PrologProjectPropertyPage"
-          icon="icons/sample.gif"
-          name="Prolog Project Properties"
-          id="org.cs3.pdt.properties.samplePropertyPage">
-		  <filter
-               name="nature"
-               value="org.cs3.pdt.PDTProjectNature"/>
-    </page>
- </extension>
- <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            adaptable="true"
-            objectClass="org.eclipse.core.resources.IProject"
-            id="PrologProjectObjectContribution">
-         <action
-               label="Prolog Project Nature"
-               style="toggle"
-               tooltip="Assignes/retracts PrologProject nature to/from a project"
-               class="org.cs3.pdt.internal.actions.PrologProjectNatureAction"
-               id="PrologProjectNatureAction">
-         </action>
-      </objectContribution>      
-      <objectContribution
-            adaptable="true"
-            objectClass="org.eclipse.core.resources.IFile"
-            id="PrologFileObjectContribution">
-         <action
-               label="Auto-Consult"
-               style="toggle"
-               tooltip="Whether the file should be consulted"
-               class="org.cs3.pdt.internal.actions.AutoConsultAction"
-               id="AutoConsultAction">
-         </action>
-      </objectContribution>
+         point="org.eclipse.ui.popupMenus">      
       <viewerContribution
             id="pdt.viewercontribution.console.contextmenu"
             targetID="org.cs3.pdt.console.internal.views.PrologConsoleView">
