@@ -132,7 +132,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
-		
+
 		control.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				e.doit = false;
@@ -160,9 +160,16 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 			public void mouseDown(MouseEvent e) {
 				if (control.getSelectionCount() == 0) {
-					int offset = control
+					try{
+						int offset = control
 							.getOffsetAtLocation(new Point(e.x, e.y));
-					control.setSelection(offset);
+						control.setSelection(offset);
+					}
+					catch(IllegalArgumentException ere){
+						// TODO: what do we do when mouse position is behind the end
+						// of a line?
+						;
+					}
 				}
 			}
 
@@ -486,7 +493,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	protected void ui_keyStrokeIntercepted(VerifyEvent event) {
-		int keyMask=event.stateMask;
+		int keyMask = event.stateMask;
 		try {
 			if (thatWasMe) {
 				return;
@@ -507,22 +514,22 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				int off = getCaretOffset();
 				switch (keyCode) {
 				case SWT.HOME:
-					event.doit=true;
+					event.doit = true;
 					break;
 				case SWT.KEYPAD_7:
-					if(isNumLock(keyMask, keyCode,keyChar)){
+					if (isNumLock(keyMask, keyCode, keyChar)) {
 						break;
 					}
-					event.doit=true;
+					event.doit = true;
 					break;
 				case SWT.ARROW_LEFT:
-					event.doit=off>startOfInput;
+					event.doit = off > startOfInput;
 					break;
 				case SWT.KEYPAD_4:
-					if(isNumLock(keyMask, keyCode,keyChar)){
+					if (isNumLock(keyMask, keyCode, keyChar)) {
 						break;
 					}
-					event.doit=off>startOfInput;
+					event.doit = off > startOfInput;
 					break;
 				case SWT.CR:
 				case SWT.KEYPAD_CR:
@@ -533,7 +540,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					event.doit = false;
 					break;
 				case SWT.KEYPAD_8:
-					if(isNumLock(keyMask,keyCode,keyChar)){
+					if (isNumLock(keyMask, keyCode, keyChar)) {
 						break;
 					}
 					event.doit = false;
@@ -543,7 +550,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					event.doit = false;
 					break;
 				case SWT.KEYPAD_2:
-					if(isNumLock(keyMask, keyCode,keyChar)){
+					if (isNumLock(keyMask, keyCode, keyChar)) {
 						break;
 					}
 					event.doit = false;
@@ -563,20 +570,20 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			throw new RuntimeException(e);
 		}
 	}
+
 	/**
 	 * 
-	 * due to a known problem with swt, it is currently not possible
-	 * to simply poll the numlock state. 
+	 * due to a known problem with swt, it is currently not possible to simply
+	 * poll the numlock state.
 	 * 
-	 * this method tries to work around this limitation by not actualy looking at the num lock state,
-	 * but testing, wether the pressed key is one of the keypad numbers
-	 * and wether the resulting character is a digit.
+	 * this method tries to work around this limitation by not actualy looking
+	 * at the num lock state, but testing, wether the pressed key is one of the
+	 * keypad numbers and wether the resulting character is a digit.
 	 */
 	private boolean isNumLock(int keyMask, int keyCode, int keyChar) {
-		
-		if(keyCode>=SWT.KEYPAD_0
-				&&keyCode<= SWT.KEYPAD_9){
-			return keyChar>=0&&Character.isDigit((char)keyChar);
+
+		if (keyCode >= SWT.KEYPAD_0 && keyCode <= SWT.KEYPAD_9) {
+			return keyChar >= 0 && Character.isDigit((char) keyChar);
 		}
 		return false;
 	}
@@ -603,8 +610,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	protected void ui_keyPressed(KeyEvent e) {
 		char keyChar = e.character;
 		int keyCode = e.keyCode;
-		
-		int keyMask=e.stateMask;
+
+		int keyMask = e.stateMask;
 		if (thatWasMe) {
 			return;
 		}
@@ -619,21 +626,21 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			switch (keyCode) {
 			case SWT.HOME:
 			case SWT.KEYPAD_7:
-				if(isNumLock(keyMask, keyCode,keyChar)){
+				if (isNumLock(keyMask, keyCode, keyChar)) {
 					break;
 				}
-				if((keyMask&SWT.SHIFT)!=0){
-					 
+				if ((keyMask & SWT.SHIFT) != 0) {
+
 					Point range = control.getSelectionRange();
 					int to = range.x + range.y;
 					int from = startOfInput;
 					control.setCaretOffset(startOfInput);
-					control.setSelectionRange(to,from-to);
-				}else {
+					control.setSelectionRange(to, from - to);
+				} else {
 					control.setCaretOffset(startOfInput);
 				}
 				break;
-			
+
 			case SWT.CR:
 			case SWT.KEYPAD_CR:
 				model.commitLineBuffer();
@@ -643,7 +650,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				history.previous();
 				break;
 			case SWT.KEYPAD_8:
-				if(isNumLock(keyMask,keyCode,keyChar)){
+				if (isNumLock(keyMask, keyCode, keyChar)) {
 					break;
 				}
 				Debug.debug("UP");
@@ -653,9 +660,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				history.next();
 				break;
 			case SWT.KEYPAD_2:
-				if(isNumLock(keyMask, keyCode,keyChar)){
+				if (isNumLock(keyMask, keyCode, keyChar)) {
 					break;
-				}				
+				}
 				history.next();
 				break;
 			case SWT.TAB:
@@ -715,18 +722,21 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	public void cut() {
 		control.cut();
-		
+
 	}
+
 	public void copy() {
 		control.copy();
-		
+
 	}
+
 	public void paste() {
 		control.paste();
-		
+
 	}
+
 	public void selectAll() {
 		control.selectAll();
-		
+
 	}
 }
