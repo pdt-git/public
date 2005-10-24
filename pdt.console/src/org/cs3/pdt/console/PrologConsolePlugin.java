@@ -1,10 +1,13 @@
 package org.cs3.pdt.console;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.console.prolog.PrologConsoleService;
@@ -32,13 +35,53 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
                 		PDTConsole.PREF_CONSOLE_FONT,
                 		"Console Font",
                 		"Font used in the Prolog Console view",
-                		Option.FONT,JFaceResources.DEFAULT_FONT)
+                		Option.FONT,JFaceResources.DEFAULT_FONT),
+                new SimpleOption(
+                		PDTConsole.PREF_CONSOLE_HISTORY_FILE,
+                		"History File",
+                		"The Prolog Console uses this to save its command history.\n" +
+                		"Just leave it empty if you do not want the command history to be persistent.",
+                		Option.FILE,System.getProperty("user.home")+File.separator+".prolog_console_histroy"){
+        			public String validate(String value) {
+        				return ensureFileExists(value,"History File");
+        			}
+        		}
                               
         };
 
     }
 
-	
+	private String ensureFileExists(String value, String label) {
+		if (value == null) {
+			return label + "must not be null";
+		}
+		if (value.length() == 0) {
+			return label + " must not be empty";
+		}
+		File f = new File(value);
+		if (!f.isAbsolute()) {
+			return label + " mus be an absolute path";
+		}
+		if (f.isDirectory()) {
+			return label + " exists, but is a directory";
+		}
+		if (!f.exists()) {
+			try {
+				if (!f.createNewFile()) {
+
+					
+				}
+			} catch (IOException e) {
+				Debug.report(e);
+				return "could not create: "+label;				
+			}
+			
+		}		
+		if (!f.canWrite()) {
+			return label + " exists, but is not writable";
+		}
+		return "";
+	}
 	
 //	The shared instance.
     private static PrologConsolePlugin plugin;

@@ -556,6 +556,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					event.doit = false;
 					break;
 
+				case ' ':
+					if((keyMask&SWT.CTRL)!=0){
+						doCompletion();
+						event.doit = false;							
+					}
+					break;
 				case SWT.TAB:
 					doCompletion();
 					event.doit = false;
