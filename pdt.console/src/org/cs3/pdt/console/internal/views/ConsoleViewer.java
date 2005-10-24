@@ -498,11 +498,13 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			if (thatWasMe) {
 				return;
 			}
-			if (control.getCaretOffset() < startOfInput) {
-				control.setCaretOffset(control.getCharCount());
-			}
 			int keyCode = event.keyCode;
 			int keyChar = event.character;
+			
+			if ((keyCode&SWT.MODIFIER_MASK)==0&&control.getCaretOffset() < startOfInput) {
+				
+				control.setCaretOffset(control.getCharCount());
+			}
 			if (model == null) {
 				event.doit = false;
 				return;
