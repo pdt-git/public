@@ -204,6 +204,11 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			cme = new ConsoleModelEvent(this, lineBuffer);
 
 			fireCommitEvent(cme);
+			
+			//clear linebuffer.
+			String oldBuffer = lineBuffer;
+			lineBuffer = "";
+			fireEditBufferChangedEvent(oldBuffer,lineBuffer);
 		} catch (IOException e)
 		{
 			disconnect();
