@@ -144,6 +144,8 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return assistant;
 		
 	}
-	
+	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
+		return new String[]{"%",""};
+	}
 
 }
