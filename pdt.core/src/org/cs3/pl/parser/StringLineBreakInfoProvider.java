@@ -2,6 +2,7 @@
  */
 package org.cs3.pl.parser;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
@@ -45,6 +46,19 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
         }
     }
 
+    public int getLineAtOffset(int offset){
+    	int r=0;
+    	for (Iterator it = lineBreaks.iterator(); it.hasNext();) {
+			Integer i = (Integer) it.next();
+			if(i.intValue()<offset){
+				r++;
+			}else{
+				break;
+			}
+		}
+    	return r;
+    }
+    
     /*
      * (non-Javadoc)
      * 

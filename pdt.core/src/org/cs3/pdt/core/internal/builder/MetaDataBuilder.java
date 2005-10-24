@@ -52,10 +52,12 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
                 file);
         MarkerProblemCollector collector = new MarkerProblemCollector(file,
                 lineInfo);
+        MarkerTaskCollector taskCollector= new MarkerTaskCollector(file);
         final String fileName = file.getFullPath().toString();
 
         PrologCompiler checker = PrologCompilerFactory.create();
         checker.setProblemCollector(collector);
+        checker.setTaskCollector(taskCollector);
         checker.compile(fileName, file.getContents(), lineInfo);
         //PDTPlugin plugin = PDTPlugin.getDefault();
         ConsultService meta = PrologRuntimePlugin.getDefault().getConsultService(PDTCore.CS_METADATA);

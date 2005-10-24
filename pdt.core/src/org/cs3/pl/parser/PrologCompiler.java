@@ -31,6 +31,10 @@ public interface PrologCompiler {
 	public ProblemCollector getProblemCollector();
 	public void setProblemCollector(ProblemCollector problemCollector);
 	
+	public TaskCollector getTaskCollector();
+	public void setTaskCollector(TaskCollector taskCollector);
+	
+	
 	public abstract void saveMetaDataForClauses(OutputStream stream)
 			throws IOException;
 

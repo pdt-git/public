@@ -11,6 +11,10 @@ public interface LineBreakInfoProvider {
      * the offset of the first character in this line.
      */
     public int getOffsetAtLine(int line);
+    
+    public int getLineAtOffset(int offset);
+    
+    
     /**
      * @return the total number of lines.
      */
