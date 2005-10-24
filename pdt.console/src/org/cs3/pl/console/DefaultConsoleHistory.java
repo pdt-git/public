@@ -1,4 +1,12 @@
 package org.cs3.pl.console;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.cs3.pl.common.Debug;
@@ -169,5 +177,28 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	public void beforeDisconnect(ConsoleModelEvent e) {
 		// TODO should we handle this?		
 	}
+	
+	public void saveHistory(OutputStream os) throws IOException{
+		PrintStream ps = new PrintStream(os);
+		for (Iterator iter = head.iterator(); iter.hasNext();) {
+			String line = (String) iter.next();
+			ps.println(line);
+		}
+		for (Iterator iter = tail.iterator(); iter.hasNext();) {
+			String line = (String) iter.next();
+			ps.println(line);
+		}
+	}
 
+	public void loadHistory(InputStream is) throws IOException{
+		head.clear();
+		tail.clear();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+		String line = reader.readLine();
+		while(line!=null){
+			head.addLast(line);
+			line = reader.readLine();
+		}
+		
+	}
 }

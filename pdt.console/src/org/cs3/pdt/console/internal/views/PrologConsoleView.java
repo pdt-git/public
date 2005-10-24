@@ -1,5 +1,9 @@
 package org.cs3.pdt.console.internal.views;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -177,6 +181,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private RestartAction restartAction;
 
+	private DefaultConsoleHistory history;
+
 	public void createPartControl(Composite parent) {
 
 		try {
@@ -222,7 +228,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		completionProvider.setMetaInfoProvider(PDTCorePlugin.getDefault()
 				.getMetaInfoProvider());
 		viewer.setCompletionProvider(completionProvider);
-		viewer.setHistory(new DefaultConsoleHistory());
+		
+		history = new DefaultConsoleHistory();
+		
+		viewer.setHistory(history);
+		
 		int port = getPort();
 		model = new PrologSocketConsoleModel(false);
 		model.setPort(port);
@@ -233,10 +243,22 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		createActions();
 		initMenus(parent);
 		getSite().setSelectionProvider(viewer);
-
+		loadHistory();
 		
 		
 
+	}
+
+	private void loadHistory() {
+		
+		try {
+			FileInputStream in = new FileInputStream(getHistoryFile());
+			history.loadHistory(in);
+			in.close();
+		} catch (IOException e) {
+			Debug.report(e);
+		}
+		
 	}
 
 	private void createActions() {
@@ -329,7 +351,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				+ "-end"));
 	}
 
-	
+	private File getHistoryFile(){
+		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
+				PDTConsole.PREF_CONSOLE_HISTORY_FILE, null);
+		if (value == null) {
+			throw new NullPointerException("Required property \""
+					+ PDTConsole.PREF_CONSOLE_HISTORY_FILE + "\" was not specified.");
+		}
+		return new File(value);
+	}
 
 	private int getPort() {
 		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
@@ -412,6 +442,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	public void afterInit(PrologInterface pif) {
 		// viewer.setController(controller);
 		model.connect();
+		loadHistory();
 	}
 
 	/*
@@ -422,6 +453,17 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
 		// viewer.setController(null);
 		model.disconnect();
+		saveHistory();
+	}
+
+	private void saveHistory() {
+		try {
+			FileOutputStream out = new FileOutputStream(getHistoryFile());
+			history.saveHistory(out);
+			out.close();
+		} catch (IOException e) {
+			Debug.report(e);
+		}		
 	}
 
 	public ConsoleModel getModel() {
