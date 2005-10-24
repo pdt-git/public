@@ -147,5 +147,38 @@
             id="org.cs3.pdt.console.internal.views.PrologConsoleView"/>
    </perspectiveExtension>
 </extension>
+<extension
+      point="org.eclipse.ui.commands">
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Toggles comment prefix on selected lines"
+         id="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
+         name="Toggle Comments"/>
+   <category
+         description="Commands for the Prolog Editor"
+         id="org.cs3.pdt.editing"
+         name="Prolog Editing"/>
+</extension>
+<extension
+      point="org.eclipse.ui.bindings">
+   <key
+         commandId="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
+         contextId="org.eclipse.ui.contexts.window"
+         schemeId="pdt.prolog.editor.scheme"
+         sequence="CTRL+SHIFT+/"/>
+</extension>
+<!--<extension
+      point="org.eclipse.ui.editorActions">
+   <editorContribution
+         id="pdt.editorActionContributions"
+         targetID="org.cs3.pdt.internal.editors.PLEditor">
+      <action
+            class="org.cs3.pdt.internal.actions.ToggleCommentAction"
+            id="pdt.toggle.comment"
+            label="Toggle Comments"
+            style="push"
+            toolbarPath="ToggleComments"/>
+   </editorContribution>
+</extension>-->
 
 </plugin>

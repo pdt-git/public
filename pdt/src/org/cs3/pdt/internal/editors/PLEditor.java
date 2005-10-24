@@ -7,6 +7,7 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
+import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
@@ -43,6 +44,7 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 public class PLEditor extends TextEditor {
 
     public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
+    public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 
     protected AbstractSelectionChangedListener fOutlineSelectionChangedListener = new OutlineSelectionChangedListener();
 
@@ -184,6 +186,7 @@ public class PLEditor extends TextEditor {
         try {
             colorManager = new ColorManager();
             configuration = new PLConfiguration(colorManager);
+            
             setSourceViewerConfiguration(configuration);
             setDocumentProvider(new PLDocumentProvider());
         } catch (Throwable t) {
@@ -252,6 +255,12 @@ public class PLEditor extends TextEditor {
         };
         addAction(menuMgr, action, "Show Tooltip",
                 IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SHOW_TOOLTIP);
+        
+        ToggleCommentAction tca = new ToggleCommentAction(bundle,PLEditor.class.getName()+".ToggleCommentsAction",this);
+        tca.configure(getSourceViewer(),configuration);
+        tca.setEnabled(true);
+        addAction(menuMgr,tca, "Toggle Comments",
+                IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_TOGGLE_COMMENTS);
     }
 
     /**
