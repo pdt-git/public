@@ -73,7 +73,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 		}
 		File f = new File(value);
 		if (!f.isAbsolute()) {
-			return label + " must not be an absolute path";
+			return label + " must be an absolute path";
 		}
 		if (!f.exists()) {
 			if (!f.mkdirs()) {
