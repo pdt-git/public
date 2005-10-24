@@ -132,13 +132,19 @@ MORE :
 
 SPECIAL_TOKEN : {
 
-    < SINGLE_LINE_COMMENT: "%"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > }
+    < SINGLE_LINE_COMMENT: "%"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > 
+    {CommonTokenAction(matchedToken);
+    }
+    }
 
 
 <IN_MULTI_LINE_COMMENT>
 SPECIAL_TOKEN :
 {
-  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+  <MULTI_LINE_COMMENT: "*/" > 
+  {CommonTokenAction(matchedToken);
+    }: DEFAULT
+  
 }
 
 <IN_SINGLE_LINE_COMMENT,IN_MULTI_LINE_COMMENT>

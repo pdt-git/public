@@ -32,6 +32,7 @@ import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
 import org.cs3.pl.parser.PrologCompiler;
 import org.cs3.pl.parser.StringLineBreakInfoProvider;
+import org.cs3.pl.parser.TaskCollector;
 
 
 
@@ -669,6 +670,16 @@ public class ClassicPrologCompiler extends PrologParserTraversal implements Prol
     }
 
 	public void saveAbbaData(OutputStream out) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public TaskCollector getTaskCollector() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setTaskCollector(TaskCollector taskCollector) {
 		// TODO Auto-generated method stub
 		
 	}
