@@ -235,6 +235,17 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		viewer.setHistory(history);
 		
 		
+		configureAndConnect();
+		createActions();
+		initMenus(parent);
+		getSite().setSelectionProvider(viewer);
+		loadHistory();
+		
+		
+
+	}
+
+	private void configureAndConnect() {
 		PrologSession session = pif.getSession();
 		
 		Map m = null;
@@ -247,20 +258,16 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 		int port = Integer.parseInt(m.get("Port").toString());
 		File lockFile = new File((String) m.get("LockFile"));
-		model = new PrologSocketConsoleModel(false);
+		if(model==null){
+			model = new PrologSocketConsoleModel(false);
+		}
 		model.setPort(port);
 		model.setLockFile(lockFile);
+		
 		viewer.setModel(model);
 		if (lockFile.exists()) {
 			model.connect();
 		}
-		createActions();
-		initMenus(parent);
-		getSite().setSelectionProvider(viewer);
-		loadHistory();
-		
-		
-
 	}
 
 	private void loadHistory() {
@@ -446,7 +453,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	 */
 	public void afterInit(PrologInterface pif) {
 		// viewer.setController(controller);
-		model.connect();
+		configureAndConnect();
+		
 		loadHistory();
 	}
 
