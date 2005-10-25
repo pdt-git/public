@@ -216,7 +216,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 				
 				char c = image.charAt(eol);
 				while ('\n' != c && '\r' != c
-						&& eol < image.length()) {
+						&& eol < (image.length()-1)) {
 					eol++;
 					c = image.charAt(eol);
 				}
