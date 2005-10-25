@@ -216,9 +216,13 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 				
 				char c = image.charAt(eol);
 				while ('\n' != c && '\r' != c
-						&& eol < (image.length()-1)) {
+						&& eol < image.length()) {
 					eol++;
-					c = image.charAt(eol);
+					if(eol<image.length()){
+						c = image.charAt(eol);
+					}else{
+						break;
+					}
 				}
 				Task task = new Task();
 				task.beginOffset=special.beginOffset + offset;
