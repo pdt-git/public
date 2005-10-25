@@ -55,6 +55,7 @@ public class PEFNavigatorView extends ViewPart {
 	private Action doubleClickAction;
 
 	private ViewContentProvider contentProvider;
+	private Action actionClear;
 	
 	static private PEFNavigatorView pefNavigatorInstance;
 
@@ -105,10 +106,10 @@ public class PEFNavigatorView extends ViewPart {
 				session = getPrologSession();
 //					    		getActiveFile().getProject().getNature(JTransformer.NATURE_ID)).getPrologInterface();
 //
-				roots = new IPEFNode[1];
-				roots[0] = PEFNode.find(getViewSite(), null, "100001",null);
-				if(roots[0] == null)
-					roots = new IPEFNode[0];
+//				roots = new IPEFNode[1];
+//				roots[0] = PEFNode.find(getViewSite(), null, "100001",null);
+//				if(roots[0] == null)
+				roots = new IPEFNode[0];
 	        } catch (CoreException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -204,6 +205,7 @@ public class PEFNavigatorView extends ViewPart {
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(action1);
 		manager.add(action2);
+		manager.add(actionClear);
 		drillDownAdapter.addNavigationActions(manager);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
@@ -212,6 +214,7 @@ public class PEFNavigatorView extends ViewPart {
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(action1);
 		manager.add(action2);
+		manager.add(actionClear);
 		
 		drillDownAdapter.addNavigationActions(manager);
 	}
@@ -280,7 +283,18 @@ public class PEFNavigatorView extends ViewPart {
 		action2.setToolTipText("Add class by full qualified name");
 		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		
+
+		actionClear = new Action() {
+			public void run() {
+				contentProvider.roots = new IPEFNode[0];
+				viewer.setInput(getViewSite());
+			}
+		};
+		actionClear.setText("clear");
+		actionClear.setToolTipText("clear the PEF navigator");
+		actionClear.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
+				.getImageDescriptor(ISharedImages.IMG_TOOL_CUT));
+
 		
 		doubleClickAction = new Action() {
 			public void run() {
