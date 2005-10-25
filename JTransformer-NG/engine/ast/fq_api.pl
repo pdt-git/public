@@ -396,6 +396,7 @@ getTypeIfNullEnclClass_fq(null, Stat, FQN) :-
     fullQualifiedName(Encl,FQN).
     
 getTypeIfNullEnclClass_fq(Id, _, FQN) :-
+    Id \= null,
     getType_fq(Id, FQN).
 
 /**
