@@ -2,6 +2,7 @@ package org.cs3.pdt.console.internal.views;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -44,9 +45,9 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			{
 				int count = reader.read(buf);
 				StringBuffer data = new StringBuffer();
-
+				
 				while (true)
-				{
+				{					
 					if (count < 0)
 					{
 						throw new IOException("EndOfStream read.");
@@ -119,7 +120,7 @@ public class PrologSocketConsoleModel implements ConsoleModel
 						}
 					}
 					else {
-						System.out.println("READER NOT READY");
+						Debug.warning("READER NOT READY");
 					}
 					count = reader.read(buf);	
 					
@@ -152,6 +153,8 @@ public class PrologSocketConsoleModel implements ConsoleModel
 	private Socket socket;
 
 	private Vector expansions = new Vector();
+
+	private File serverLockFile;
 
 	public PrologSocketConsoleModel()
 	{
@@ -471,7 +474,7 @@ public class PrologSocketConsoleModel implements ConsoleModel
 
 	private boolean isServerActive()
 	{
-		return Util.probePort(port);
+		return serverLockFile.exists();
 	}
 
 	public boolean isConnected()
@@ -497,5 +500,10 @@ public class PrologSocketConsoleModel implements ConsoleModel
 	public void setPort(int port)
 	{
 		this.port = port;
+	}
+
+	public void setLockFile(File lockFile) {
+		this.serverLockFile=lockFile;
+		
 	}
 }

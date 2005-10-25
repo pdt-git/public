@@ -27,11 +27,6 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
         
         options = new Option[] {
         		new SimpleOption(
-                        PDTConsole.PREF_CONSOLE_PORT,
-                        "Console Port",
-                        "Number of the port used for connecting the console to the Prolog prozess",
-                        Option.NUMBER, "4711")   ,
-                new SimpleOption(
                 		PDTConsole.PREF_CONSOLE_FONT,
                 		"Console Font",
                 		"Font used in the Prolog Console view",

@@ -51,12 +51,21 @@ public class SocketServerStartAndStopStrategy implements
      * 
      * @see org.cs3.pl.prolog.ServerStartAndStopStrategy#startServer(org.cs3.pl.prolog.IPrologInterface)
      */
-    public Process startServer(PrologInterface pif) {
+    public Process startServer(PrologInterface pipi) {
+    		SocketPrologInterface pif = (SocketPrologInterface) pipi;
+    		pif.setLockFile(Util.getLockFile());
         if(Boolean.valueOf (pif.getOption(SocketPrologInterface.STANDALONE)).booleanValue()){
             Debug.warning("Will not start server; the option "+SocketPrologInterface.STANDALONE+" is set.");
             return null;
         }
-        int port = Integer.parseInt(pif.getOption(SocketPrologInterface.PORT));
+        int port;
+		try {
+			port = Util.findFreePort();
+			pif.setPort(port);
+		} catch (IOException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
         String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
         String engineDir = pif.getOption(SocketPrologInterface.ENGINE_DIR);
         String sep = System.getProperty("file.separator");
@@ -71,7 +80,7 @@ public class SocketServerStartAndStopStrategy implements
 	            p.println(":- ['"+s+"'].");	            
 	        }
 	        p.println("file_search_path(library,'"+engineDir+"').");
-	        p.println(":-consult_server("+port+").");
+	        p.println(":-consult_server("+port+",'"+Util.prologFileName(pif.getLockFile())+"').");
 	        p.close();
 		} catch (IOException e) {
 			Debug.report(e);
@@ -113,7 +122,7 @@ public class SocketServerStartAndStopStrategy implements
                     .start();
             
             
-            while (!Util.probePort(port)) {
+            while (!pif.getLockFile().exists()) {
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e1) {
@@ -142,16 +151,15 @@ public class SocketServerStartAndStopStrategy implements
      * @see org.cs3.pl.prolog.ServerStartAndStopStrategy#stopServer(org.cs3.pl.prolog.IPrologInterface,
      *           boolean)
      */
-    public void stopServer(PrologInterface pif, boolean now) {
-        
+    public void stopServer(PrologInterface pipi, boolean now) {
+    	SocketPrologInterface pif = (SocketPrologInterface) pipi;
         try {
             if(Boolean.valueOf (pif.getOption(SocketPrologInterface.STANDALONE)).booleanValue()){
                 Debug.warning("Will not stop server; the option "+SocketPrologInterface.STANDALONE+" is set.");
                 return;
             }
-            int port = Integer.parseInt(pif
-                    .getOption(SocketPrologInterface.PORT));
-            if (!Util.probePort(port)) {
+            int port = pif.getPort();
+            if (!pif.getLockFile().exists()) {
                 Debug
                         .info("There is no server running, afaics. So i wont stop anything.");
                 return;
@@ -170,13 +178,8 @@ public class SocketServerStartAndStopStrategy implements
                 }
             }
 
-            while ((Util.probePort(port))) {
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e1) {
-                    Debug.report(e1);
-                }
-            }
+           pif.getLockFile().delete();
+           
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
@@ -188,8 +191,8 @@ public class SocketServerStartAndStopStrategy implements
      * 
      * @see org.cs3.pl.prolog.ServerStartAndStopStrategy#isRunning(org.cs3.pl.prolog.IPrologInterface)
      */
-    public boolean isRunning(PrologInterface pif) {
-        int port = Integer.parseInt(pif.getOption(SocketPrologInterface.PORT));
-        return Util.probePort(port);
+    public boolean isRunning(PrologInterface pif) {        
+        File lockFile = ((SocketPrologInterface)pif).getLockFile();
+		return lockFile!=null&&lockFile.exists();
     }
 }

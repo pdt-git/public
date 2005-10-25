@@ -7,3 +7,13 @@ org.cs3.pl.common.Util.exec("date")[0];
 new java.io.PipedOutputStream()
 System.out.println(new java.util.Date());
 Runtime.getRuntime().exec(new String[]{"plmin.lnk"});An exception occurred during evaluation:  java.io.IOException
+
+Runtime.getRuntime().exec("/usr/local/bin/xpce");
+
+
+System.out.println(org.cs3.pl.common.Util.probePort(4711));
+
+
+new java.net.ServerSocket(4711,50,java.net.Inet4Address.getByName("0.0.0.0")).accept();
+
+org.cs3.pl.common.Util.prettyPrint(java.net.Inet4Address.getAllByName(null));

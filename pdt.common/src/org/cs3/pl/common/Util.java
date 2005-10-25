@@ -9,23 +9,54 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
+import sun.misc.Unsafe;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
 public class Util {
+	
+	
+	
+	public static String generateFingerPrint(){
+		long l = System.currentTimeMillis();
+		double m = Math.random();
+		return "fp:"+l+":"+m;		
+	}
+	
+	public static File getLockFile(){
+		String tmpdir = System.getProperty("java.io.tmpdir");
+		return new File(tmpdir,generateFingerPrint());
+	}
+	
+	/**
+	 * @deprecated this does not work correctly e.g. on systems
+	 * that have separate ip4 and ip6 stacks (MacOS X,...)
+	 */
     public static boolean probePort(int port) {
         try {
             ServerSocket ss = new ServerSocket(port);
+//            Socket cs = ss.accept();
+//            
+//            new InputStreamPump(cs.getInputStream()){
+//            	protected void dataAvailable(char[] buffer, int length) {
+//            		System.out.print(String.copyValueOf(buffer,0,length));
+//            	}
+//            };
             ss.close();
         } catch (IOException e1) {
             return true;
@@ -382,5 +413,12 @@ public class Util {
 	public static long parsePrologTimeStamp(String input){
 	    long l = 1000* (long) Double.parseDouble(input);
 		return l;
+	}
+
+	public static int findFreePort() throws IOException {
+		ServerSocket ss = new ServerSocket(0);
+		int port = ss.getLocalPort();
+		ss.close();
+		return port;
 	}
 }

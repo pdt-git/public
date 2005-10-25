@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.console.PDTConsole;
@@ -233,11 +234,24 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		
 		viewer.setHistory(history);
 		
-		int port = getPort();
+		
+		PrologSession session = pif.getSession();
+		
+		Map m = null;
+		try{
+			 m = session.queryOnce("pdt_console_server(Port,LockFile)");
+		}finally{
+			if(session!=null){
+				session.dispose();
+			}
+		}
+		int port = Integer.parseInt(m.get("Port").toString());
+		File lockFile = new File((String) m.get("LockFile"));
 		model = new PrologSocketConsoleModel(false);
 		model.setPort(port);
+		model.setLockFile(lockFile);
 		viewer.setModel(model);
-		if (Util.probePort(port)) {
+		if (lockFile.exists()) {
 			model.connect();
 		}
 		createActions();
@@ -361,16 +375,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		return new File(value);
 	}
 
-	private int getPort() {
-		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
-				PDTConsole.PREF_CONSOLE_PORT, null);
-		if (value == null) {
-			throw new NullPointerException("Required property \""
-					+ PDTConsole.PREF_CONSOLE_PORT + "\" was not specified.");
-		}
-		int port = Integer.parseInt(value);
-		return port;
-	}
+	
 
 	public void setFocus() {
 		if (viewer == null) {

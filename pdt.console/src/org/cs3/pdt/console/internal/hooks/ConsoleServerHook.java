@@ -1,5 +1,7 @@
 package org.cs3.pdt.console.internal.hooks;
 
+import java.io.File;
+
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
@@ -15,31 +17,33 @@ import org.cs3.pl.prolog.PrologSession;
 public class ConsoleServerHook implements LifeCycleHook {
 
     public static final String HOOK_ID = "org.cs3.pdt.console.internal.hooks.ConsoleServerHook";
-
-    private static int getPort() {
-       String value = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_PORT, null);
-       if (value==null) {
-           throw new NullPointerException("Required property \""
-                   + PDTConsole.PREF_CONSOLE_PORT + "\" was not specified.");
-       }
-       int port = Integer.parseInt(value);        
-        return port;
-    }
+    
+    private int port;
+    private File lockFile;
+//    private static int getPort() {
+//       String value = PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_PORT, null);
+//       if (value==null) {
+//           throw new NullPointerException("Required property \""
+//                   + PDTConsole.PREF_CONSOLE_PORT + "\" was not specified.");
+//       }
+//       int port = Integer.parseInt(value);        
+//        return port;
+//    }
 
     public void onInit(PrologInterface pif,PrologSession s) {
         try {
-            int port = getPort();
-            if (Util.probePort(port)) {
-                Debug
-                        .info("Console server thread seems to be running, so i will not start a new one.");
-            } else {
-                String queryString = "use_module(library(prolog_server)), prolog_server("
-                        + port + ", [])";
+            port = Util.findFreePort();
+            
+            lockFile=Util.getLockFile();       
+                String prologFileName = Util.prologFileName(lockFile);
+				String queryString = "use_module(library(prolog_server)), prolog_server("
+                        + port + ", []),assert(pdt_console_server("+port+",'"+prologFileName+"'))," +
+                        		"consult_server:create_lock_file('"+prologFileName+"')";
                 Debug.info("starting console server using: " + queryString);
 
                 s.queryOnce(queryString);
 
-                while (!Util.probePort(port)) {
+                while (!lockFile.exists()) {
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException e1) {
@@ -47,7 +51,7 @@ public class ConsoleServerHook implements LifeCycleHook {
                     }
                 }
                 Debug.debug("Server thread created");
-            }
+            
         } catch (Throwable e) {
             Debug.report(e);
             throw new RuntimeException(e);
