@@ -35,7 +35,7 @@ public class Util {
 	public static String generateFingerPrint(){
 		long l = System.currentTimeMillis();
 		double m = Math.random();
-		return "fp:"+l+":"+m;		
+		return "fp_"+l+"_"+m;		
 	}
 	
 	public static File getLockFile(){
