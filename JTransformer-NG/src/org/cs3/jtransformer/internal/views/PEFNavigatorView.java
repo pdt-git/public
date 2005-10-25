@@ -279,7 +279,7 @@ public class PEFNavigatorView extends ViewPart {
 				}
 			}
 		};
-		action2.setText("by Id");
+		action2.setText("by full qualified name");
 		action2.setToolTipText("Add class by full qualified name");
 		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_TOOL_NEW_WIZARD));
