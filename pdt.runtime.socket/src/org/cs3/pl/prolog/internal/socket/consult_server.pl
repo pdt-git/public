@@ -1,5 +1,6 @@
 :- module(consult_server,[
 	consult_server/1,
+		consult_server/2,
 	consulted_symbol/1,
 	starts_at/2
 	]). 
@@ -9,6 +10,18 @@
 
 :- dynamic zombie_symbol/1.
 :- dynamic offset/2.
+
+create_lock_file(Filename):-
+	(	exists_file(Filename)
+	->	write('Found existing lockfile, exiting...'),write(Filename),nl,thread_signal(main,halt)
+	;	open(Filename, write, Stream),
+		write(Stream,Filename),
+		nl(Stream),
+		close(Stream)
+	).
+	
+
+
 
 starts_at(Symbol,Line):-	
 		(	offset(Symbol,Line)
@@ -34,6 +47,17 @@ consult_server(Port):-
 	concat_atom([consult_server,'@',Port],Alias),
 	%accept_loop(ServerSocket).
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
+
+consult_server(Port,Lockfile):-
+	tcp_socket(ServerSocket),
+	tcp_setopt(ServerSocket, reuseaddr),
+	tcp_bind(ServerSocket, Port),
+	tcp_listen(ServerSocket, 5),
+	concat_atom([consult_server,'@',Port],Alias),
+	%accept_loop(ServerSocket).
+	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]),
+	create_lock_file(Lockfile).
+
 	
 accept_loop(ServerSocket):-
 	catch(
@@ -46,6 +70,7 @@ accept_loop(ServerSocket):-
 	thread_self(Me),
 	thread_detach(Me),
 	thread_exit(0).
+
 	
 accept_loop_impl(ServerSocket) :-
 	write(0),nl,

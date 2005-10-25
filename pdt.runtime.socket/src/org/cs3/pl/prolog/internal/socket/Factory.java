@@ -35,9 +35,6 @@ public class Factory extends PrologInterfaceFactory {
                         return Util.prologFileName(f);
                     }
                 },
-                new SimpleOption(SocketPrologInterface.PORT, "Server port",
-                        "The port the PIF server is listening on",
-                        SimpleOption.NUMBER, guessPort()),
                 new SimpleOption(
                         SocketPrologInterface.STANDALONE,
                         "stand-alone server",
@@ -83,13 +80,7 @@ public class Factory extends PrologInterfaceFactory {
         return "false";
     }
 
-    /**
-     * @return
-     */
-    private static String guessPort() {
-        return "9944";
-    }
-
+  
     private String guessExecutableName() {
         
         if (Util.isWindoze()) {

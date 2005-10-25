@@ -47,7 +47,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         }
     }
 
-    private int port = 9966;
+    private int port = -1;
 
     private boolean standAloneServer = false;
 
@@ -58,8 +58,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     public final static String EXECUTABLE = "pif.executable";
 
     public final static String ENGINE_DIR = "pif.engine_dir";
-
-    public final static String PORT = "pif.port";
 
     public final static String STANDALONE = "pif.standalone";
 
@@ -80,6 +78,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     private ResourceFileLocator locator;
 
     private HashMap consultServices = new HashMap();
+
+	private File lockFile;
 
     public SocketPrologInterface(PrologInterfaceFactory factory)  {
         super();
@@ -118,11 +118,11 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     
 
     public void setPort(int port) {
-        if (isDown()) {
+        //if (isDown()) {
             this.port = port;
-        } else {
-            throw new IllegalStateException("Cannot change port while in use.");
-        }
+//        } else {
+//            throw new IllegalStateException("Cannot change port while in use.");
+//        }
     }
 
     /**
@@ -154,9 +154,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      *           java.lang.String)
      */
     public void setOption(String opt, String value) {
-        if (PORT.equals(opt)) {
-            setPort(Integer.parseInt(value));
-        } else if (ENGINE_DIR.equals(opt)) {
+         if (ENGINE_DIR.equals(opt)) {
             this.engineDir = value;
         } else if (EXECUTABLE.equals(opt)) {
             this.executable = value;
@@ -181,9 +179,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             Debug.warning("option "+opt+" is overridden by System Property: "+s);
             return s;
         }
-        if (PORT.equals(opt)) {
-            return "" + port;
-        } else if (ENGINE_DIR.equals(opt)) {
+         if (ENGINE_DIR.equals(opt)) {
             return engineDir;
         } else if (EXECUTABLE.equals(opt)) {
             return executable;
@@ -339,6 +335,19 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         pool.clear();
         super.start();
     }
+
+	public void setLockFile(File string) {
+		this.lockFile=string;
+		
+	}
+
+	public File getLockFile() {
+		return lockFile;	
+	}
+
+	public int getPort() {
+		return port;
+	}
 
     
 }
