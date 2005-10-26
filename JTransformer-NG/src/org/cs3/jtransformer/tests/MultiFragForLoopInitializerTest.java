@@ -63,10 +63,10 @@ public class MultiFragForLoopInitializerTest extends FactGenerationTest {
         try {
             Map r = s.queryOnce("toplevelT(A,B,C,D)");
             assertNotNull(r);
-            r = s.queryOnce("open_printf_to_memory,"
+            r = s.queryOnce("open_printf_to_memory(knarz),"
                     + "forLoopT(_,_,_,Inits,_,_,_),"
                     + "gen_komma_list_inits(Inits),"
-                    + "close_printf_to_memory(SRC)");
+                    + "close_printf_to_memory(knarz,SRC)");
             assertNotNull(r);
             assertEquals("int i = 0, j = 0, k = 0", (String) r.get("SRC"));
         }finally{
