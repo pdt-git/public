@@ -18,6 +18,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.DefaultConsoleHistory;
+import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
@@ -183,7 +184,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private RestartAction restartAction;
 
-	private DefaultConsoleHistory history;
+	private NewConsoleHistory history;
 
 	public void createPartControl(Composite parent) {
 
@@ -231,7 +232,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				.getMetaInfoProvider());
 		viewer.setCompletionProvider(completionProvider);
 		
-		history = new DefaultConsoleHistory();
+		history = new NewConsoleHistory();
 		
 		viewer.setHistory(history);
 		
@@ -269,6 +270,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		if (lockFile.exists()) {
 			model.connect();
 		}
+		boolean useEnter = Boolean.valueOf(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_ENTER_FOR_BACKTRACKING,"false")).booleanValue();
+		viewer.setEnterSendsSemicolon(useEnter);
 	}
 
 	private void loadHistory() {

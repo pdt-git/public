@@ -32,6 +32,13 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
                 		"Font used in the Prolog Console view",
                 		Option.FONT,JFaceResources.DEFAULT_FONT),
                 new SimpleOption(
+                        		PDTConsole.PREF_ENTER_FOR_BACKTRACKING,
+                        		"Use Enter Key for backtracking",
+                        		"If enabled, the enter key sends a semicolon(';') when\n" +
+                        		"while the console is in 'get_single_char/1'-mode, \n" +
+                        		"e.g., when backtracking over the solutions to a goal.",
+                        		Option.FLAG,"false"),                		
+                new SimpleOption(
                 		PDTConsole.PREF_CONSOLE_HISTORY_FILE,
                 		"History File",
                 		"The Prolog Console uses this to save its command history.\n" +
