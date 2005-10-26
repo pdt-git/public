@@ -122,6 +122,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	private int startOfInput = 0;
 
+	private boolean enterSendsSemicolon;
+
 	public ConsoleViewer(Composite parent, int styles) {
 		createControl(parent, styles);
 	}
@@ -348,7 +350,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @see org.cs3.pl.views.ConsoleModelListener#onOutput(org.cs3.pl.views.ConsoleModelEvent)
 	 */
 	public void onOutput(final ConsoleModelEvent e) {
-		if (control == null) {
+		if (control == null||control.isDisposed()) {
 			return;
 		}
 		Display display = control.getDisplay();
@@ -629,7 +631,11 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 		if (model.isSingleCharMode() && keyChar > 0) {
 			Debug.debug("keyChar: '" + keyChar + "'");
-			model.putSingleChar(keyChar);
+			if(enterSendsSemicolon&&(keyCode==SWT.CR||keyCode==SWT.KEYPAD_CR)){
+				model.putSingleChar(';');
+			}else{
+				model.putSingleChar(keyChar);
+			}
 		} else {
 			switch (keyCode) {
 			case SWT.HOME:
@@ -746,5 +752,14 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	public void selectAll() {
 		control.selectAll();
 
+	}
+
+	public void setEnterSendsSemicolon(boolean useEnter) {
+		this.enterSendsSemicolon=useEnter;
+		
+	}
+
+	public boolean getEnterSendsSemicolon() {
+		return enterSendsSemicolon;
 	}
 }
