@@ -46,6 +46,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
@@ -283,15 +284,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 
 	private void createActions() {
-		// ActionFactory.IWorkbenchAction copyAction = ActionFactory.COPY
-		// .create(getViewSite().getWorkbenchWindow());
-		// ActionFactory.IWorkbenchAction selectAllAction =
-		// ActionFactory.SELECT_ALL
-		// .create(getViewSite().getWorkbenchWindow());
-		// ActionFactory.IWorkbenchAction cutAction = ActionFactory.CUT
-		// .create(getViewSite().getWorkbenchWindow());
-		// ActionFactory.IWorkbenchAction pasteAction = ActionFactory.PASTE
-		// .create(getViewSite().getWorkbenchWindow());
 		cutAction = new Action() {
 			public void run() {
 				viewer.cut();
@@ -362,7 +354,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		manager.add(restartAction);
 		manager.add(new Separator("#ConsoleInternal-end"));
 		manager.add(new Separator("#Clipboard"));
-		manager.add(ActionFactory.SELECT_ALL.create(window));
+		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
+		sall.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.SELECT_ALL));
+		manager.add(sall);
 		manager.add(ActionFactory.COPY.create(window));
 		manager.add(ActionFactory.CUT.create(window));
 		manager.add(ActionFactory.PASTE.create(window));
