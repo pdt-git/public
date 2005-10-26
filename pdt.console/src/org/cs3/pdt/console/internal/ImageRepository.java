@@ -28,6 +28,8 @@ public class ImageRepository {
 	public static final String BREAK = "break.gif";
 
 	public static final String RESTART = "restart.gif";
+	
+	public static final String SELECT_ALL = "select_all.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
