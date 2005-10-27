@@ -31,4 +31,9 @@ public final  class PDT {
      */
     public static final String PREF_CLIENT_LOG_FILE = "pdt.logfile";
 
+	/**
+	 * ui scope used for keybindings etc in the prolog editor.
+	 */
+    public static final String CONTEXT_EDITING_PROLOG_CODE = "org.cs3.pdt.editingProlog";
+
 }
