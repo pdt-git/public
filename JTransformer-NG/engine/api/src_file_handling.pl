@@ -1,5 +1,5 @@
 /**
- * Currently als includes tracking of 
+ * Currently also includes tracking of 
  * dirty elements.
  * Refactoring necessary!
  */
@@ -9,26 +9,26 @@
 :- multifile created_file/1.
 
 
-add_new_class_and_file(_id, _owner, _name, Defs) :-
-    add(classDefT(_id, _owner, _name, Defs)),
+add_new_class_and_file(ID, Owner, Name, Defs) :-
+    add(classDefT(ID, Owner, Name, Defs)),
     ((
-       (globalIds(FQN,_id)->
+       ((globalIds(FQN,ID);atom_concat('ANONYMOUS$',_,Name))->
        		true;
-       		(fullQualifiedName(_id,FQN)->
-       		add(globalIds(FQN,_id));true)
+       		(fullQualifiedName(ID,FQN)->
+       		add(globalIds(FQN,ID));true)
        		),
-       modifierT(_id,'public'),
-       not(getToplevel(_id,_)),
-       getPackage(_id,PID),
-       (_owner = null;_owner = PID),
-       fullPathOfClass(_id,FullPath),
+       modifierT(ID,'public'),
+       not(getToplevel(ID,_)),
+       getPackage(ID,PID),
+       (Owner = null;Owner = PID),
+       fullPathOfClass(ID,FullPath),
        print(' added new toplevel: '),       
        print(FullPath),
 	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
        sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
        string_to_atom(S,Filename),
        new_id(TID),
-       add(toplevelT(TID, PID,Filename,[_id])),
+       add(toplevelT(TID, PID,Filename,[ID])),
        assert(created_file(Filename)),
        add(projectLocationT(TID, Project,SourceFolder))
      );true).
