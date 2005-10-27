@@ -1,31 +1,35 @@
-/**************************** tests *********************/
-
-
 /*******************fullQualifiedName *********************/
 
-%:- use_module('../test/punit.pl').
-%:- import_module(punit,_).
+setUp(fullQualifiedName_class_in_default_package) :- 
+    add(classDefT(c1,null,'DummyClassX',[])),
+    add(globalIds(c1,'DummyClassX')).
+test(fullQualifiedName_class_in_default_package):-
+    fullQualifiedName(c1,FQN),
+    assert_true((FQN = 'DummyClassX')).
 
-setUp(fullQualifiedName1) :- setUpFQN.
-
-test(fullQualifiedName1):-
-    fullQualifiedName(c2,'Test').
-
-tearDown(fullQualifiedName1) :- tearDownFQN.
+tearDown(fullQualifiedName_class_in_default_package) :- 
+    rollback.
     
-setUp(fullQualifiedName2) :- setUpFQN.
+setUp(fullQualifiedName_class_in_package) :- 
+    add(classDefT(c2,p2,'DummyClassX',[])),
+    add(globalIds(c2,'testpckg.DummyClassX')),
+    add(packageT(p2,'testpckg')).    
+test(fullQualifiedName_class_in_package):-
+    fullQualifiedName(c2,FQN),
+    assert_true((FQN = 'testpckg.DummyClassX')).
+tearDown(fullQualifiedName_class_in_package) :- 
+    rollback.
 
-test(fullQualifiedName2):-
-    fullQualifiedName(c1,'pckg.Test').
-
-tearDown(fullQualifiedName2) :- tearDownFQN.
-
-
-setUpFQN :-
-    add(classDefT(c1,p1,'Test',[])),
-    add(globalIds(c1,'pckg.Test')),
-    assert(packageT(p1,'pckg')),
-    assert(classDefT(c2,null,'Test',[])).
+setUp(fullQualifiedName_anon_class) :- 
+    add(classDefT(anon, newC, 'ANONYMOUS$1',[])),
+    add(newClassT(newC, block, enclMeth, constr, [], typeExpr, anon, null)),
+    add(methodDefT(enclMeth,enclClass,a,b,c,d,e)),
+    add(classDefT(enclClass,null, 'EnclClass',[enclMeth])).
+test(fullQualifiedName_anon_class):-
+    fullQualifiedName(anon,FQNANON),
+    assert_true((FQNANON = 'EnclClass.ANONYMOUS$1')),
+    fullQualifiedName(ANON,'EnclClass.ANONYMOUS$1'),
+    assert_true((ANON = anon)).
+tearDown(fullQualifiedName_anon_class):-
+    rollback.
     
-tearDownFQN :-
-	rollback.	    
