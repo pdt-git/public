@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
@@ -35,6 +36,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
@@ -61,7 +64,7 @@ public class PLEditor extends TextEditor {
     private IContentAssistant assistant;
 
     protected void initializeKeyBindingScopes() {
-        setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.prologEditorScope" });
+        setKeyBindingScopes(new String[] { PDT.CONTEXT_EDITING_PROLOG_CODE });
     }
 
     	public void doSave(IProgressMonitor progressMonitor) {
@@ -261,8 +264,13 @@ public class PLEditor extends TextEditor {
         tca.setEnabled(true);
         addAction(menuMgr,tca, "Toggle Comments",
                 IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_TOGGLE_COMMENTS);
+        IContextService cs =(IContextService) PlatformUI.getWorkbench().getAdapter(IContextService.class);
+        cs.activateContext("lll");
     }
 
+    
+    
+    
     /**
      * @param menuMgr
      */
