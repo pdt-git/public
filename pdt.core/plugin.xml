@@ -27,7 +27,7 @@
    </requires>
    <extension
          point="org.cs3.pdt.runtime.bootstrapContribution">
-      <contribution path="engine/metadata/main.pl"/>
+      <contribution path="engine/main.pl"/>
    </extension>
 	<extension
        point="org.eclipse.core.runtime.preferences">
