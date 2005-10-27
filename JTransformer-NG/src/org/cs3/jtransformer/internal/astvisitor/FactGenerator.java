@@ -179,7 +179,7 @@ public class FactGenerator extends ASTVisitor {
 			new String[] {
 				idResolver.getID(node),
 				idResolver.getID(node.getParent()),
-				"'ANONYMOUS$" + idResolver.getID(node) + "'",
+				"'ANONYMOUS$" + idResolver.getID() + "'",
 				idResolver.getIDs(expandList(node.bodyDeclarations().iterator()))
 			};
 
