@@ -174,19 +174,29 @@ get_references(Pred,FileName,Line,Name,Arity):-
       clause_property(Ref,file(FileName)),
       clause_property(Ref,line_count(Line)).
 
+/**
+ * decode_reference(RefStr,Nth, Pred,Arity)
+ *
+ * Reference string from explain/2 predicate
+ *
+ * IMPORTANT: Hardcoded reference to the user module!
+ * Only works for predicates defined in the user module!
+ */
+
 decode_reference(RefStr,Nth, Pred,Arity):-  
     atom_concat('        Referenced from ',Rest,RefStr),
     atom_concat(NthAtom,'-th clause of user:', Pred,'/',ArityAtom,Rest),
     atom_number(NthAtom,Nth),
     atom_number(ArityAtom,Arity).
-    
-    
-    
+
+user:setUp(decode_reference) :-
+	assert(user:testpred(1,2)).
 user:test(decode_reference) :-
-    decode_reference('        Referenced from 1-th clause of pdtplugin:get_pred/6',
-    '1', 'pdtplugin:get_pred','6').
+    decode_reference('        Referenced from 1-th clause of user:testpred/2', 
+                     1, 'testpred',2).
 
-
+user:tearDown(decode_reference) :-
+	retract(user:testpred(1,2)).
     
 remove_module_prefix(_module_pred,_pred) :-
     term_to_atom(_module_pred,_atom),
