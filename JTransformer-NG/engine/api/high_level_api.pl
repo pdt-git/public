@@ -557,7 +557,7 @@ fullQualifiedName(_id, _Fqn) :-
     stringAppend(_pckgname, '.', _name, _Fqn),
     !.
 	
-	
+/*	
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     packageT(_parent, _pckgname),
@@ -565,8 +565,8 @@ fullQualifiedName(_id, _Fqn) :-
 %    not(_pckgname == 'null'),
 %    !,
     stringAppend(_pckgname, '.', _name, _Fqn).
+*/
 
-% enclosing class is anomynous
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     classDefT(_parent, _, _,_),
@@ -574,9 +574,11 @@ fullQualifiedName(_id, _Fqn) :-
     fullQualifiedName(_parent, _OuterFqn),
     stringAppend(_OuterFqn, '.', _name, _Fqn).
 
+% enclosing class is anomynous
 fullQualifiedName(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     not(classDefT(_parent, _, _,_)),
+    not(packageT(_parent,_)),
 %    !,
     enclClass(_parent,ParentClass),
     fullQualifiedName(ParentClass, _OuterFqn),
@@ -622,29 +624,6 @@ fullPathOfClass(_id, _name) :-
     classDefT(_id, 'null', _name,_),
     !.
 
-/**************************** tests *********************/
-test(fullQualifiedName1):-
-    fullQualifiedName(c1,'Test').
-
-setUp(fullQualifiedName1) :- setUpFQN.
-tearDown(fullQualifiedName1) :- tearDownFQN.
-    
-test(fullQualifiedName2):-
-    fullQualifiedName(c1,'pckg.Test').
-setUp(fullQualifiedName2) :- setUpFQN.
-tearDown(fullQualifiedName2) :- tearDownFQN.
-
-
-setUpFQN :-
-    assert(classDefT(c1,p1,'Test',[])),
-    assert(packageT(p1,'pckg')),
-    assert(classDefT(c1,null,'Test',[])).
-    
-tearDownFQN :-
-    retract(classDefT(c1,p1,'Test',[])),
-    retract(packageT(p1,'pckg')),
-    retract(classDefT(c1,null,'Test',[])).
-	    
 
 
 
