@@ -264,8 +264,7 @@ public class PLEditor extends TextEditor {
         tca.setEnabled(true);
         addAction(menuMgr,tca, "Toggle Comments",
                 IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_TOGGLE_COMMENTS);
-        IContextService cs =(IContextService) PlatformUI.getWorkbench().getAdapter(IContextService.class);
-        cs.activateContext("lll");
+        
     }
 
     
