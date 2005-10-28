@@ -43,42 +43,42 @@ public class PrimitiveTypeLiteralsTest extends FactGenerationTest {
         build();
         PrologSession s =getTestJTransformerProject().getPrologInterface().getSession();
         
-        Map r = s.queryOnce("open_printf_to_memory," +
+        Map r = s.queryOnce("open_printf_to_memory(testkey)," +
         		"classDefT(CID,_,'Class',_)," +
         		"gen_literal(type(class, CID, 0)," +
         		"type(basic,int,0))," +
-        		"close_printf_to_memory(SRC)");
+        		"close_printf_to_memory(testkey,SRC)");
         
         assertEquals("int.class",(String)r.get("SRC"));
         
-         r = s.queryOnce("open_printf_to_memory," +
+         r = s.queryOnce("open_printf_to_memory(testkey)," +
         		"classDefT(CID,_,'Class',_)," +
         		"gen_literal(type(class, CID, 0)," +
         		"type(basic,int,1))," +
-        		"close_printf_to_memory(SRC)");
+        		"close_printf_to_memory(testkey,SRC)");
         
         assertEquals("int[].class",(String)r.get("SRC"));
         
-        r = s.queryOnce("open_printf_to_memory," +
+        r = s.queryOnce("open_printf_to_memory(testkey)," +
         		"classDefT(CID,_,'Class',_)," +
         		"gen_literal(type(class, CID, 0)," +
         		"type(class,CID,1))," +
-        		"close_printf_to_memory(SRC)");
+        		"close_printf_to_memory(testkey,SRC)");
         
         assertEquals("java.lang.Class[].class",(String)r.get("SRC"));
-        r = s.queryOnce("open_printf_to_memory," +
+        r = s.queryOnce("open_printf_to_memory(testkey)," +
         		"classDefT(CID,_,'Class',_)," +
         		"gen_literal(type(class, CID, 0)," +
         		"type(basic,int,3))," +
-        		"close_printf_to_memory(SRC)");
+        		"close_printf_to_memory(testkey,SRC)");
         
         assertEquals("int[][][].class",(String)r.get("SRC"));
         
-        r = s.queryOnce("open_printf_to_memory," +
+        r = s.queryOnce("open_printf_to_memory(testkey)," +
         		"classDefT(CID,_,'Class',_)," +
         		"gen_literal(type(class, CID, 0)," +
         		"type(class,CID,3))," +
-        		"close_printf_to_memory(SRC)");
+        		"close_printf_to_memory(testkey,SRC)");
         
         assertEquals("java.lang.Class[][][].class",(String)r.get("SRC"));
     }
