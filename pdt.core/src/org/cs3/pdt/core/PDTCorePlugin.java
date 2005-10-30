@@ -24,12 +24,12 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 	private DefaultMetaInfoProvider prologHelper;
 	private String pdtModulePrefix = "";
 	private Option[] options;
-    public IMetaInfoProvider getMetaInfoProvider() {
-        if (prologHelper == null) {
-            prologHelper = new DefaultMetaInfoProvider(PrologRuntimePlugin.getDefault().getPrologInterface(), pdtModulePrefix);
-        }
-        return prologHelper;
-    }
+//    public IMetaInfoProvider getMetaInfoProvider() {
+//        if (prologHelper == null) {
+//            prologHelper = new DefaultMetaInfoProvider(PrologRuntimePlugin.getDefault().getPrologInterface(), pdtModulePrefix);
+//        }
+//        return prologHelper;
+//    }
 	public Option[] getOptions() {
 		if (options == null) {
 			initOptions();

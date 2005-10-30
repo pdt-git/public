@@ -22,6 +22,7 @@ import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
+import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -228,8 +229,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				new String[] { ConsoleServerHook.HOOK_ID });
 
 		completionProvider = new PrologCompletionProvider();
-		completionProvider.setMetaInfoProvider(PDTCorePlugin.getDefault()
-				.getMetaInfoProvider());
+		completionProvider.setMetaInfoProvider(new DefaultMetaInfoProvider(pif));
 		viewer.setCompletionProvider(completionProvider);
 		
 		history = new NewConsoleHistory();

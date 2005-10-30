@@ -24,12 +24,26 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	private ColorManager colorManager;
 	private IContentAssistant assistant;
 	
+	/* FIXME should not depend on editor
+	 * 
+	 * 
+	 * this was added for because completion needs some way to 
+	 * associate the document its working on with a prolog resource -
+	 * it needs to get a prolog helper for that project. 
+	 * 
+	 * currently, we assume that completion is only used within the 
+	 * editor. We can use its input to resolve the connected resource.
+	 * -> project -> nature -> plhelper.
+	 */
+	private PLEditor editor;
+	
 //	public IContentAssistant getAssistant(){
 //		return assistant;
 //	}
 
-	public PLConfiguration(ColorManager colorManager) {
+	public PLConfiguration(ColorManager colorManager, PLEditor editor) {
 		this.colorManager = colorManager;
+		this.editor = editor;
 	}
 	
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
@@ -106,7 +120,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		if (assistant != null)
 			return assistant;
 		final ContentAssistant assistant = new PrologContentAssistant();
-		assistant.setContentAssistProcessor(new PrologCompletionProcessor(),IDocument.DEFAULT_CONTENT_TYPE);
+		assistant.setContentAssistProcessor(new PrologCompletionProcessor(editor),IDocument.DEFAULT_CONTENT_TYPE);
 		//assistant.setContentAssistProcessor(new PrologCompletionProcessor(),PLPartitionScanner.PL_COMMENT);
 //		assistant.setContentAssistProcessor(new PrologCompletionProcessor(),PLPartitionScanner.PL_MULTI_COMMENT);
 		assistant.enableAutoActivation(true);

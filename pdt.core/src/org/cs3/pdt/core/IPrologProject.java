@@ -3,6 +3,7 @@ package org.cs3.pdt.core;
 import java.util.Set;
 
 import org.cs3.pl.common.OptionProvider;
+import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -44,6 +45,7 @@ public interface IPrologProject extends OptionProvider{
     public void setAutoConsulted(IFile file,boolean val) throws CoreException;
 
 	public PrologInterface getPrologInterface();
+	public IMetaInfoProvider getMetaInfoProvider();
 
 	public IProject getProject();
     

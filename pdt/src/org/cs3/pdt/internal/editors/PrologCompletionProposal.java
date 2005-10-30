@@ -2,6 +2,7 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -36,22 +37,24 @@ public class PrologCompletionProposal implements ICompletionProposal {
     private Image image;
     private IContextInformation context;
     private String help;
+	private IMetaInfoProvider metaInfoProvider;
 
 	/**
 	 * Creates a new completion proposal based on the provided information.  The replacement string is
 	 * considered being the display string too. All remaining fields are set to <code>null</code>.
+	 * @param provider 
 	 *
 	 * @param replacementOffset the offset of the text to be replaced
 	 * @param replacementLength the length of the text to be replaced
 	 * @param cursorPosition the position of the cursor following the insert relative to replacementOffset
 	 */
-	public PrologCompletionProposal(Predicate data, int replacementOffset, int replacementLength,String prefix) {
+	public PrologCompletionProposal(IMetaInfoProvider provider, Predicate data, int replacementOffset, int replacementLength,String prefix) {
 		Assert.isTrue(replacementOffset >= 0);
 		Assert.isTrue(replacementLength >= 0);
 		fReplacementOffset= replacementOffset;
 		fReplacementLength= replacementLength;
 		this.data=data;
-		
+		this.metaInfoProvider=provider;
 		
 		
 			if(data.getLabel().regionMatches(true,0,prefix,0,prefix.length()) ) {
@@ -137,7 +140,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
      */
     private String getHelp() {
         if(this.help==null){
-            this.help=PDTCorePlugin.getDefault().getMetaInfoProvider().getHelp(data);
+            this.help=metaInfoProvider.getHelp(data);
             if(this.help==null){
                 this.help="";
             }

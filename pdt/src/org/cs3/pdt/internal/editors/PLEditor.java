@@ -188,7 +188,7 @@ public class PLEditor extends TextEditor {
         super();
         try {
             colorManager = new ColorManager();
-            configuration = new PLConfiguration(colorManager);
+            configuration = new PLConfiguration(colorManager,this);
             
             setSourceViewerConfiguration(configuration);
             setDocumentProvider(new PLDocumentProvider());

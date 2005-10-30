@@ -6,6 +6,8 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -14,8 +16,10 @@ import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -44,7 +48,15 @@ public class SpyPointActionDelegate extends TextEditorAction {
                 
 
                 PLEditor editor = (PLEditor) UIUtils.getActiveEditor();
-                PrologSession session = null;
+                IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
+				IPrologProject plProject;
+				try {
+					plProject = (IPrologProject) editorInput.getFile().getProject().getNature(PDTCore.NATURE_ID);
+				} catch (CoreException e) {
+					Debug.report(e);
+					throw new RuntimeException(e);
+				}
+				PrologSession session = null;
                 session = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
                 String pred;
 
@@ -63,7 +75,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
                     return;
 
                 }
-				Predicate[] p = PDTCorePlugin.getDefault().getMetaInfoProvider().findPredicates(data);
+				Predicate[] p = plProject.getMetaInfoProvider().findPredicates(data);
 				//FIXME what about alternatives?
 				
                 if (p==null||p.length==0) {
