@@ -20,7 +20,7 @@
    </requires>
    <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>
-   <extension-point id="prologLibraries" name="Prolog Libraries" schema="schema/prologLibraries.exsd"/>
+   <extension-point id="prologSource" name="Prolog Source" schema="schema/prologSource.exsd"/>
 	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer class="org.cs3.pdt.runtime.internal.preferences.Initializer"/>

@@ -11,9 +11,17 @@
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <documentation>
+            Stick global labels (IDs) on files/direcories containing prolog code. &lt;b&gt;NOTE:&lt;/b&gt; All you can do with this extension point, is globaly assigning IDs to files/directories which can later be referenced from within the java api. So in particular, adding contributions to this extension point alone will not suffice to configure any PrologInterface instances.
+         </documentation>
+      </annotation>
       <complexType>
          <sequence>
-            <element ref="library" minOccurs="1" maxOccurs="unbounded"/>
+            <choice>
+               <element ref="file"/>
+               <element ref="directory"/>
+            </choice>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -42,7 +50,12 @@
       </complexType>
    </element>
 
-   <element name="library">
+   <element name="file">
+      <annotation>
+         <documentation>
+            associates a file with an id.
+         </documentation>
+      </annotation>
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -51,7 +64,36 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="file" type="string" use="required">
+         <attribute name="path" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="resource"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="directory">
+      <complexType>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="alias" type="string" use="default" value="library">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="path" type="string" use="required">
             <annotation>
                <documentation>
                   
