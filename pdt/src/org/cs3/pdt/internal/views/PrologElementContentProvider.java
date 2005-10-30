@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -20,6 +21,8 @@ import org.cs3.pl.prolog.ConsultServiceEvent;
 import org.cs3.pl.prolog.ConsultServiceListener;
 import org.cs3.pl.prolog.PrologException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
@@ -70,8 +73,10 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
                 return;
             }
             IFile file = editorInput.getFile();
+            IPrologProject nature = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
             String fileName = file.getFullPath().toString();
-            generatePredicates(fileName);
+            
+            generatePredicates(nature.getMetaInfoProvider(),fileName);
             return;
         } catch (Exception e) {
             Debug.report(e);
@@ -79,14 +84,14 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
     }
 
     /**
+     * @param provider 
      * @param fileName
      * @throws PrologException
      */
-    private void generatePredicates(String fileName) throws PrologException {
+    private void generatePredicates(IMetaInfoProvider provider, String fileName) throws PrologException {
         
 		data.clear();
-        IMetaInfoProvider metaInfo = PDTCorePlugin.getDefault().getMetaInfoProvider();
-        Clause[] clauses = metaInfo.retrievePrologElements(fileName);
+        Clause[] clauses = provider.retrievePrologElements(fileName);
         if (clauses == null || clauses.length == 0) {            
             return;
         }
@@ -176,10 +181,18 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
             return;
         }
         IFile file = editorInput.getFile();
+        IPrologProject nature;
+		try {
+			nature = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		} catch (CoreException ee) {
+			Debug.report(ee);
+			throw new RuntimeException(ee);
+		}
+        
         String fileName = file.getFullPath().toString();
         //if(e.getSymbol()==null||e.getSymbol().equals(fileName)){
             try {
-                generatePredicates(fileName);
+                generatePredicates(nature.getMetaInfoProvider(),fileName);
             } catch (PrologException e1) {
                 Debug.report(e1);
             }

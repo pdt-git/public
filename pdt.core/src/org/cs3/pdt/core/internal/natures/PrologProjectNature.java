@@ -14,6 +14,8 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.metadata.DefaultMetaInfoProvider;
+import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IFile;
@@ -40,6 +42,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private IProject project;
 
 	private Option[] options;
+
+	private IMetaInfoProvider prologHelper;
 
 	/**
 	 * @see IProjectNature#configure
@@ -78,8 +82,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 						} catch (OperationCanceledException opc) {
 							return Status.CANCEL_STATUS;
 						} catch (CoreException e) {
-							return new Status(Status.ERROR, PDTCore.PLUGIN_ID, -1,
-									"exception caught during build", e);
+							return new Status(Status.ERROR, PDTCore.PLUGIN_ID,
+									-1, "exception caught during build", e);
 						}
 						return Status.OK_STATUS;
 					}
@@ -157,8 +161,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 */
 	public Set getExistingSourcePathEntries() throws CoreException {
 		Set r = new HashSet();
-		String[] elms = getPreferenceValue(PDTCore.PROP_SOURCE_PATH, "/").split(
-				System.getProperty("path.separator"));
+		String[] elms = getPreferenceValue(PDTCore.PROP_SOURCE_PATH, "/")
+				.split(System.getProperty("path.separator"));
 		for (int i = 0; i < elms.length; i++) {
 			IProject p = getProject();
 
@@ -191,10 +195,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			return true;
 		}
 		if (resource.getType() == IResource.FILE) {
-			String incl = getPreferenceValue(PDTCore.PROP_SOURCE_INCLUSION_PATTERN,
-					"");
-			String excl = getPreferenceValue(PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
-					"");
+			String incl = getPreferenceValue(
+					PDTCore.PROP_SOURCE_INCLUSION_PATTERN, "");
+			String excl = getPreferenceValue(
+					PDTCore.PROP_SOURCE_EXCLUSION_PATTERN, "");
 			String path = resource.getFullPath().toString();
 			return isPrologSource(resource.getParent()) && path.matches(incl)
 					&& !path.matches(excl);
@@ -207,8 +211,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public void setAutoConsulted(IFile file, boolean val) throws CoreException {
 		file.setPersistentProperty(
 		// TODO: toggled functionality - to test
-				new QualifiedName("", PDTCore.PROP_NO_AUTO_CONSULT), val ? "false"
-						: "true");
+				new QualifiedName("", PDTCore.PROP_NO_AUTO_CONSULT),
+				val ? "false" : "true");
 	}
 
 	public boolean isAutoConsulted(IFile file) throws CoreException {
@@ -235,7 +239,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public PrologInterface getPrologInterface() {
-		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface(getProject().getName());
+		PrologInterface pif = PrologRuntimePlugin.getDefault()
+				.getPrologInterface(getProject().getName());
 
 		if (!pif.isUp()) {
 			try {
@@ -258,8 +263,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"List of folders in which the PDT looks for Prolog code.",
 							Option.DIRS, "/") {
 						public String getDefault() {
-							return PDTCorePlugin.getDefault().getPreferenceValue(
-									PDTCore.PREF_SOURCE_PATH_DEFAULT, "/");
+							return PDTCorePlugin.getDefault()
+									.getPreferenceValue(
+											PDTCore.PREF_SOURCE_PATH_DEFAULT,
+											"/");
 						}
 					},
 					new SimpleOption(
@@ -285,10 +292,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 					IProject project = getProject();
 					Debug.debug("PDTReloadHook.afterInit: lets build project "
 							+ project);
-					
+
 					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
 							PDTCore.BUILDER_ID, null, monitor);
-					
+
 					Debug.debug("PDTReloadHook.afterInit: done: " + project);
 
 				} catch (OperationCanceledException opc) {
@@ -361,6 +368,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public IMetaInfoProvider getMetaInfoProvider() {
+		if (prologHelper == null) {
+			prologHelper = new DefaultMetaInfoProvider(getPrologInterface(), "");
+		}
+		return prologHelper;
 	}
 
 }

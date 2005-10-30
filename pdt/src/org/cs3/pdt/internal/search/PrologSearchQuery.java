@@ -35,8 +35,11 @@ public class PrologSearchQuery implements ISearchQuery {
 
 	private HashMap fSearchViewStates = new HashMap();
 
-	public PrologSearchQuery(Predicate data) {
+	private IMetaInfoProvider metaInfoProvider;
+
+	public PrologSearchQuery(IMetaInfoProvider provider, Predicate data) {
 		this.data = data;
+		this.metaInfoProvider=provider;
 		result = new PrologSearchResult(this, data);
 		
 
@@ -64,8 +67,7 @@ public class PrologSearchQuery implements ISearchQuery {
 		else{
 			PrologSession session;
 			
-			IMetaInfoProvider mip = PDTCorePlugin.getDefault().getMetaInfoProvider();
-			SourceLocation[] locations = mip.findReferences(data);
+			SourceLocation[] locations = metaInfoProvider.findReferences(data);
 			if(locations==null){
 				//FIXME: is it realy ok? --lu
 				return Status.OK_STATUS;

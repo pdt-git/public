@@ -4,6 +4,8 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
@@ -12,6 +14,7 @@ import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -83,7 +86,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	}
 
 	private void run_impl(Goal goal, IFile file) {
-		IMetaInfoProvider mip = PDTCorePlugin.getDefault().getMetaInfoProvider();
+		IPrologProject plprj;
+		try {
+			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+		IMetaInfoProvider mip = plprj.getMetaInfoProvider();
 		Predicate[] predicates = mip.findPredicates(goal);
 		//FIXME: what about alternatives?
 		if(predicates==null||predicates.length==0){
