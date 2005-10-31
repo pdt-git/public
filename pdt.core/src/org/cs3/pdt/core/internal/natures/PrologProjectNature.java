@@ -377,4 +377,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return prologHelper;
 	}
 
+	public PrologInterface getRuntimePrologInterface() {
+		return PrologRuntimePlugin.getDefault().getPrologInterface("la, la, lala, la");
+	}
+
 }

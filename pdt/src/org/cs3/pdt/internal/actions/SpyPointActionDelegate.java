@@ -5,12 +5,13 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.Predicate;
@@ -57,7 +58,15 @@ public class SpyPointActionDelegate extends TextEditorAction {
 					throw new RuntimeException(e);
 				}
 				PrologSession session = null;
-                session = PrologRuntimePlugin.getDefault().getPrologInterface().getSession();
+                /*FIXME which PIF to use?
+                 * actualy we should not decide here. We are setting
+                 * a property of the source file, not of any runtime. 
+                 * this should be anotated using resource properties or 
+                 * something similar and the consult action should care
+                 * about this. I am creating an issue, so we do not 
+                 * forget about this problem.
+                 */
+				session = PDTUtils.getActiveConsolePif().getSession();
                 String pred;
 
                 Goal data;

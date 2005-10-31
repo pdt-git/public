@@ -43,13 +43,6 @@
       <category
             name="Prolog"
             id="org.cs3.pdt"/>
-      <view
-            allowMultiple="false"
-            class="org.cs3.pdt.internal.views.NavigatorView"
-            icon="icons/sample.gif"
-            category="org.cs3.pdt"
-            name="Prolog Navigator"
-            id="org.cs3.pdt.internal.views.NavigatorView"/>
    </extension>
  <extension
        point="org.eclipse.core.runtime.preferences">

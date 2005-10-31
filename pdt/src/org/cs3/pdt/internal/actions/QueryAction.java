@@ -21,8 +21,11 @@ public class QueryAction extends Action {
 
 	private ImageDescriptor icon;
 
-	public QueryAction(String query, String text, String tooltip,
+	private final PrologInterface pif;
+
+	public QueryAction(PrologInterface pif, String query, String text, String tooltip,
 			ImageDescriptor icon) {
+		this.pif = pif;
 		this.query = query;
 		this.text = text;
 		this.tooltip = tooltip;
@@ -45,8 +48,7 @@ public class QueryAction extends Action {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 
-						PrologInterface prologInterface = PrologRuntimePlugin.getDefault().getPrologInterface();
-						PrologSession session = prologInterface.getSession();
+						PrologSession session = pif.getSession();
 						try {
 							//	 Alternative                        	
 							//	                    		model.setLineBuffer(query + ".");

@@ -31,7 +31,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin implements IAdaptable{
+public class PDTPlugin extends AbstractUIPlugin {
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -202,64 +202,9 @@ public class PDTPlugin extends AbstractUIPlugin implements IAdaptable{
 	}
 
 	
-	/**
-	 * This method is called when the plug-in is stopped
-	 */
-	public void stop(BundleContext context) throws Exception {
-		try {
-			if (PrologRuntimePlugin.getDefault().getPrologInterface() != null
-					&& !PrologRuntimePlugin.getDefault().getPrologInterface()
-							.isDown()) {
-				PrologRuntimePlugin.getDefault().getPrologInterface().stop();
-			}
-		} finally {
-			super.stop(context);
-		}
-	}
+	
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	public Object getAdapter(Class adapter) {
-		if (IWorkbenchAdapter.class.equals(adapter)) {
-			if (root == null) {
-				root = new IWorkbenchAdapter() {
-					private Object[] modules;
-
-					public Object[] getChildren(Object o) {
-						if (modules == null) {
-							modules = PrologNode.find(getPrologInterface(),
-									"type(module)").toArray();
-						}
-						return modules;
-					}
-
-					private PrologInterface getPrologInterface() {
-						return PrologRuntimePlugin.getDefault()
-								.getPrologInterface();
-					}
-
-					public ImageDescriptor getImageDescriptor(Object object) {
-						String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
-						return PlatformUI.getWorkbench().getSharedImages()
-								.getImageDescriptor(imageKey);
-					}
-
-					public String getLabel(Object o) {
-						return "Nur wo PDT drauf steht, ist auch PDT drin.";
-					}
-
-					public Object getParent(Object o) {
-						return null;
-					}
-				};
-			}
-			return root;
-		}
-		return null;
-	}
+	
 
 	private String getLocation() throws IOException {
 		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");

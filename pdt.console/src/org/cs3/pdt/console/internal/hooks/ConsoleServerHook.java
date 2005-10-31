@@ -9,7 +9,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-
+//TODO: this hook should be merged into PrologConsoleView 
 /**
  * An Init/ShutdownHook that takes the neccesary steps to open/close an io
  * socket on the server process to which a Console can be connected.

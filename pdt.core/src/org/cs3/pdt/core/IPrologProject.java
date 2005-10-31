@@ -48,6 +48,8 @@ public interface IPrologProject extends OptionProvider{
 	public IMetaInfoProvider getMetaInfoProvider();
 
 	public IProject getProject();
+
+	public PrologInterface getRuntimePrologInterface();
     
     
 }
