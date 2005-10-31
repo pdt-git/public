@@ -31,6 +31,44 @@ CT's:
 :- dynamic ct/3.
 :- multifile test/1.
 
+/**
+ * i_t(+Id,+Goal)
+ *
+ * i_t is short for interpret_term.
+ * Id is ct-wide unique identifier for Goal.
+ * If the Goal throws the exception 
+ * term_info_exception(PredicateName,Args)}}
+ * the predicate PredicateName(ID,Arg1,..) will be called.
+ *
+ * This enables expressive error 
+ * handling for the predicates in Goal, since
+ * the predicate (error handling) PredicateName is provided 
+ * with the associated abba:node
+ * for the currently evaluated predicate Goal.
+ */
+
+i_t(Id,Goal) :-
+  catch(Goal, Exception,true),
+  term_info_exception_handling(Id, Exception).
+
+term_info_exception_handling(_, Exception):-
+  var(Exception),
+  !.
+
+/**
+ * term_info_exception_handling(+Id, +term_info_exception(Predicate,[Arg1,..]))
+ *
+ * Checks if the predicate Predicate(Id,Arg1,..)
+ * exists and calls this predicate if this is the case.
+ */
+term_info_exception_handling(Id, term_info_exception(Predicate,Args)):-
+  Call =.. [Predicate, Id |Args],
+  current_predicate(_,Call), % check existance
+  !,
+  call(Call).
+
+term_info_exception_handling( _Id, Exception):-
+   throw(Exception).
 
 
 /** apply all ct's **/
@@ -107,6 +145,13 @@ apply_post([_head| _tail]) :-
     clause(action(_head),_),
     !,
     error_handling(action(_head),'apply_post action failed: ~a',[_head]),
+    !,
+    apply_post(_tail).
+    
+apply_post([i_t(_Id,Action)| _tail]) :-
+    clause(action(Action),_),
+    !,
+    error_handling(action(Action),'apply_post action failed: ~a',[Action]),
     !,
     apply_post(_tail).
 
@@ -404,3 +449,5 @@ replace(Elem) :-
     flush_output,
 	delete(ElemOld), 
 	add(Elem).
+
+	
