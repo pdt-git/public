@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -258,12 +259,14 @@ public class PrologRuntimePlugin  extends AbstractUIPlugin {
                     Debug.debug("got this resname: "+resName);
                     String namespace = ext.getNamespace();
                     Debug.debug("got this namespace: "+namespace);
-                    URL url = Platform.getBundle(namespace).getEntry(
-                            resName);
+                    URL url = BundleUtility.find(Platform.getBundle(namespace),resName);
                     try {
+                    	
+//                    URL url = Platform.getBundle(namespace).getEntry(
+//                            resName);
                         Debug.debug("trying to resolve this url: "+url);
                         url = Platform.asLocalURL(url);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         Debug.report(e);
                         throw new RuntimeException("Problem resolving url: "
                                 + url.toString(), e);
