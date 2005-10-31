@@ -7,8 +7,8 @@
 package org.cs3.pdt.internal.views;
 
 
-import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IElementComparer;

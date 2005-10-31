@@ -3,11 +3,12 @@ package org.cs3.pdt.internal.actions;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.UIUtils;
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Goal;
@@ -121,7 +122,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 							+ ".\nSorry, Code analysis is still work in progress.");
 			return;
 		}
-		UIUtils.showSourceLocation(clauses[0].getKnownDefinition());
+		PDTUtils.showSourceLocation(clauses[0].getKnownDefinition());
 	}
 	
 	

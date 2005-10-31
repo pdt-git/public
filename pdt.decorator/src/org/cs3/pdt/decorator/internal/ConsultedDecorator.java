@@ -150,8 +150,8 @@ public class ConsultedDecorator implements ILightweightLabelDecorator {
 
         };
 		PDTPlugin r1 = PDTPlugin.getDefault();
-
-        PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface();
+		//XXX: need to attach to the pif that's currently "active" (e.g. in console)
+        PrologInterface pif = null;//PrologRuntimePlugin.getDefault().getPrologInterface();
         pif.addPrologInterfaceListener(PrologInterface.SUBJECT_CONSULTED,
                 pifListener);
         pif.addLifeCycleHook(pifHook, "consulteddecorator", new String[0]);
@@ -330,7 +330,8 @@ public class ConsultedDecorator implements ILightweightLabelDecorator {
      */
     public void dispose() {
         PDTPlugin r = PDTPlugin.getDefault();
-		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface();
+        //XXX:dito
+		PrologInterface pif = null;//PrologRuntimePlugin.getDefault().getPrologInterface();
         pif.removePrologInterfaceListener(PrologInterface.SUBJECT_CONSULTED,
                 pifListener);
         pif.removeLifeCycleHook("consulteddecorator");

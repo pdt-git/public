@@ -87,6 +87,19 @@ fit_left(Left,[tuple(_,_,Peer,_,_)|_],_):-
 frog_fits(head(A),tail(A)). 
 frog_fits(tail(A),head(A)).
 
+prolog_trace_interception(Port,Frame,_,continue):-
+    writeln(port(Port)),
+    prolog_frame_attribute(Frame,goal,Goal),
+    writeln(goal(Goal)),
+    prolog_frame_attribute(Frame,pc,PC),
+    writeln(pc(PC)),
+    nl.
+
+tester:-
+    writeln(a),
+        writeln(a),
+            writeln(a).
+
 /*
  prints out all solutions to the current game settings.
 */

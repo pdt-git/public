@@ -2,11 +2,14 @@
  */
 package org.cs3.pdt.internal.actions;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.action.IAction;
@@ -39,18 +42,27 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
      */
     public void run(IAction action) {
         PDTPlugin plugin = PDTPlugin.getDefault();
-		PrologInterface pif = null;
-		pif = PrologRuntimePlugin.getDefault().getPrologInterface();
+		
+		
+		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+		PrologInterface pif = console.getPrologInterface();
+		PrologSession session = pif.getSession();
 		 try {
-             PrologSession session = pif.getSession();
-             Map r = session.query("current_thread(A,B)");
-             while(r!=null){
-                 Debug.info(r.get("A")+"-->"+r.get("B"));
-                 r=session.next();
-             }
-             session.dispose();
+             
+             List l = session.queryAll("current_thread(A,B)");
+             for (Iterator iter = l.iterator(); iter.hasNext();) {
+				Map r = (Map) iter.next();
+				Debug.info(r.get("A")+"-->"+r.get("B"));
+			}
+             
+             
          } catch (Throwable e) {
              Debug.report(e);
+         }
+         finally{
+        	 if(session!=null){
+        		 session.dispose();
+        	 }
          }
         
 

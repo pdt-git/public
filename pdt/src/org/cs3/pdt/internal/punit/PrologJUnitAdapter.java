@@ -62,7 +62,8 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 		TestSuite suite = null;
 		try {
 			PDTPlugin r = PDTPlugin.getDefault();
-			pif = PrologRuntimePlugin.getDefault().getPrologInterface();
+			//FIXME: this whole package should be rewritten from scratch...
+			pif = PrologRuntimePlugin.getDefault().getPrologInterface("dummy");
 			session = pif.getSession();
 			// result = manager.query("clause(test(Testname), _)");
 			suite = new TestSuite();

@@ -7,22 +7,18 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.metadata.DefaultMetaInfoProvider;
-import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class PDTCorePlugin extends AbstractUIPlugin {
 
 	private ResourceBundle resourceBundle;
-	private DefaultMetaInfoProvider prologHelper;
-	private String pdtModulePrefix = "";
+	
+	
 	private Option[] options;
 //    public IMetaInfoProvider getMetaInfoProvider() {
 //        if (prologHelper == null) {
@@ -94,7 +90,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 	 */
 	private void initOptions() {
 		String fileSep = File.separator;
-		String pathSep = File.pathSeparator;
+		
 		String location = "";
 		try {
 			location = getLocation();

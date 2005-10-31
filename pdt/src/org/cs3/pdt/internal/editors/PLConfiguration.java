@@ -27,7 +27,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	/* FIXME should not depend on editor
 	 * 
 	 * 
-	 * this was added for because completion needs some way to 
+	 * this was added for because completion, etc. needs some way to 
 	 * associate the document its working on with a prolog resource -
 	 * it needs to get a prolog helper for that project. 
 	 * 
@@ -72,7 +72,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
      * 
      */
     public void reinitScanner() {
-        scanner = new PLScanner(colorManager);
+        scanner = new PLScanner(editor,colorManager);
         scanner.setDefaultReturnToken(
         	new Token(
         		new TextAttribute(

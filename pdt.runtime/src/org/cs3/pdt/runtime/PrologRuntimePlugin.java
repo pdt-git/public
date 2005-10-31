@@ -120,7 +120,7 @@ public class PrologRuntimePlugin  extends AbstractUIPlugin {
      *            components.
      * @throws IOException
      */
-    public PrologInterface getPrologInterface() {
+    private PrologInterface getPrologInterface() {
         if (prologInterface == null) {
 
             String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION, null);

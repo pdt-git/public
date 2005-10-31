@@ -4,8 +4,8 @@
  */
 package org.cs3.pdt.internal.search;
 
-import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;

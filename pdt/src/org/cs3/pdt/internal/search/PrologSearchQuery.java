@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.UIUtils;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
