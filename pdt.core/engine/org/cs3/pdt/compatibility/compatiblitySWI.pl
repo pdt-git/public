@@ -132,10 +132,10 @@ select_printf_last :-
 select_printf_last.
 
 test(memory_file) :-
-    open_printf_to_memory,
+    open_printf_to_memory(testkey),
     printf(asdf),
     printf(asdf),
-    close_printf_to_memory(Content),
+    close_printf_to_memory(testkey,Content),
     Content = asdfasdf.
 
 printf(_format, _args) :-
