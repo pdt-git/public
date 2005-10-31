@@ -93,7 +93,7 @@ stack_for_frame(Frame,[Info|Stack]) :-
     prolog_frame_attribute(Frame,parent,Parent),
 	stack_for_frame(Parent,Stack).
 
-stack_for_frame(Frame,['stack inspection failed']):-
+stack_for_frame(_Frame,['stack inspection failed']):-
     !.
 
     
@@ -116,4 +116,24 @@ list_to_line_sep_string([],'').
 list_to_line_sep_string([Head|Tail],String):-
 	list_to_line_sep_string(Tail,StringTail),
 	sformat(String,'~a~n~a',[Head,StringTail]).
+	
+	
+/********* Currently still unused (speculative generality): ************ */
+	
+/**
+ * throw_exception_upon_failure(+Pred,+Msg) 
+ *   Call Pred. If it fails print Msg and a stack trace.
+ *   Then throw Pred as an exception. 
+ */
+throw_exception_upon_failure(Pred,_Msg):-
+       call(Pred),               
+       !.
+throw_exception_upon_failure(Pred,Msg):-
+     prolog_current_frame(Frame),
+     stack_for_frame_atom(Frame,Trace),
+     sformat(Msg2, 'Failed predicate: ~w~n~w',[Pred,Trace]),
+     concat(Msg,Msg2,ExtMsg),
+     write(ExtMsg),
+        % ExceptionTerm =..[ExceptionType,ExtMsg],
+     throw(Pred/*ExceptionTerm*/).
        

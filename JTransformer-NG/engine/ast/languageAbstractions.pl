@@ -16,7 +16,7 @@ oopl('Java').
 
 consistent(Lang) :-
     programmingLanguage(Lang),
-    ast_node_def(Lang,Label,[Id,Parent,Encl|_]),
+    ast_node_def(Lang,Label,[_Id,_Parent,Encl|_]),
     Encl = ast_args(encl, 1, id, Types),
     correct_enclosing_type(Lang,Label,Types).
   

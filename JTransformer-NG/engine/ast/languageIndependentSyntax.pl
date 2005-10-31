@@ -27,10 +27,10 @@
       argument descriptions in arg3.
 
    ast_id(+Language, ?IdName)
-      returns arg2=<constant for id attribute>.
+      returns arg2 = <constant for id attribute>.
       
    ast_parent(+Language, ?ParentName)
-      returns arg2=<constant for parent attribute>.
+      returns arg2 = <constant for parent attribute>.
       
    ast_sub_tree(?Language, ?ArgumentLabel)
       In all nodes of the AST of language arg1, the argument with
@@ -49,15 +49,6 @@
 
   ***************************************************************** */
 
-/**
- *  ast_node_signature(?Language, ?NodeType, ?Arity)
- *
- *    The Abstract Syntax Tree (AST) for the language arg1 contains
- *    nodes with label (functor) arg2 and arity arg3.
- */
-ast_node_signature(Lang, NodeType, Arity) :-
-    ast_node_def(Lang, NodeType, ArgList),
-    length(ArgList,Arity).
 
 /**
  *  ast_node_term(Lang, Term)
@@ -68,18 +59,51 @@ ast_node_signature(Lang, NodeType, Arity) :-
  *    AST node terms. 
  */  
 ast_node_term(Lang, Head) :-
-    var(Head),
-    !,
-    ast_node_signature(Lang, NodeType, Arity),
-    functor(Head,NodeType,Arity).
-
-ast_node_term(Lang, Head) :-
     nonvar(Head),
     !,
     functor(Head,NodeType,Arity),
     ast_node_signature(Lang, NodeType, Arity).
-
+ast_node_term(Lang, Head) :-
+    var(Head),
+    !,
+    ast_node_signature(Lang, NodeType, Arity),
+    functor(Head,NodeType,Arity).
+  
     
+/**
+ *  ast_node_signature(?Language, ?NodeType, ?Arity)
+ *
+ *    The Abstract Syntax Tree (AST) for the language arg1 contains
+ *    nodes with label (functor) arg2 and arity arg3.
+ */
+ 
+% This is the correct long term definition for the new Java syntax:
+ 
+ast_node_signature_REAL(Lang, NodeType, Arity) :-
+    ast_node_def(Lang, NodeType, ArgList),
+    length(ArgList,Arity).
+ 
+% Use the following hack during co-existence of old an new syntax version:
+ 
+ast_node_signature(Lang, NodeType, Arity) :-
+   ast_node_signature_REAL(Lang, NodeType, N),
+   /* The hack in the following lines accounts for the integration
+      of attributes as normal arguments in the new syntax. In a few
+      cases it leads to longer parameter lists compared to the old
+      syntax. These cases are 'corrected' by hand in the following.
+      The real correction would be an adaptation of the PEF syntax.
+   */
+   (Lang = 'Java' 
+    -> hackTreeSignature(NodeType,N,Arity)
+     ; true).
+  
+hackTreeSignature(Functor,N,Arity) :- 
+   ( (Functor = classDefT,  Arity = 4, !) 
+   ; (Functor = methodDefT, Arity = 7, !)
+   ; (Functor = fieldDefT,  Arity = 5, !)
+   ; (Arity = N)
+   ).   
+       
  /**
   * ast_node_def(?Language, ?AstNodeLabel, ?AstNodeArguments)
   *
