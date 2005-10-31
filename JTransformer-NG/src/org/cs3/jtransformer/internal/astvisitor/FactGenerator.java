@@ -1587,30 +1587,30 @@ public class FactGenerator extends ASTVisitor {
 		
 		return true; 
 	}
-	/**
-     * @param node
-     */
-    private void createSuperIdentTOrSelectT(SuperFieldAccess node) {
-        
-        
-        String args[];
-		String type;
-		if (node.getQualifier() == null){
-			args = new String[] {
-				"'super'",				
-				idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding())};
-			type = "identT";
-		} else {
-			args = new String[] {
-					"super",
-					idResolver.getID(node.getQualifier()),
-					idResolver.getID(node.getQualifier().resolveTypeBinding())
-			};
-			type = "selectT";
-		}
-
-		createBodyFact(node, type, args);
-    }
+//	/**
+//     * @param node
+//     */
+//    private void createSuperIdentTOrSelectT(SuperFieldAccess node) {
+//        
+//        
+//        String args[];
+//		String type;
+//		if (node.getQualifier() == null){
+//			args = new String[] {
+//				"'super'",				
+//				idResolver.getID(getUltimateAncestor(node).getSuperclass().resolveTypeBinding())};
+//			type = "identT";
+//		} else {
+//			args = new String[] {
+//					"super",
+//					idResolver.getID(node.getQualifier()),
+//					idResolver.getID(node.getQualifier().resolveTypeBinding())
+//			};
+//			type = "selectT";
+//		}
+//
+//		createBodyFact(node, type, args);
+//    }
 
     /**
 	 * Generates prolog facts of type applyT.
@@ -1625,7 +1625,12 @@ public class FactGenerator extends ASTVisitor {
 		
 		if (node.getQualifier() == null){
 		    TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
-	        Name superclassName = ultimateAncestor.getSuperclass();
+// TODO: replace the following three lines and ckeck if tests still run:
+//	        Type superclass = ultimateAncestor.getSuperclassType();
+//	        String superClassID = superclass == null ? idResolver
+//                    .getJavaLangObjectID() : idResolver.getID(superclass);
+
+		    Name superclassName = ultimateAncestor.getSuperclass();
 	        String superClassID = superclassName == null ? idResolver
                     .getJavaLangObjectID() : idResolver.getID(superclassName
                     .resolveTypeBinding());
