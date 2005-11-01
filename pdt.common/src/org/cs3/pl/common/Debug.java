@@ -173,23 +173,27 @@ public class Debug {
         String prefix;
         switch (level) {
         case LEVEL_DEBUG:
-            prefix = " DEBUG: ";
+            prefix = "DEBUG";
             break;
         case LEVEL_WARNING:
-            prefix = " WARNING: ";
+            prefix = "WARNING";
             break;
         case LEVEL_ERROR:
-            prefix = " ERROR: ";
+            prefix = "ERROR";
             break;
         case LEVEL_INFO:
-            prefix = " INFO: ";
+            prefix = "INFO";
             break;
         default:
             throw new IllegalStateException("Bad level value");
         }
-        String tn = Thread.currentThread().getName();
+        Thread currentThread = Thread.currentThread();
+		String tn = currentThread.getName();
+        StackTraceElement stackFrame = currentThread.getStackTrace()[4];
+		//String loc = "("+stackFrame.getFileName()+":"+stackFrame.getLineNumber()+")";
+        String loc = stackFrame.toString();
         Date d = new Date();
-        out.println(d+"<"+tn+">"+prefix + msg);
+        out.println(prefix+":"+tn+": "+ loc+": "+ msg);
         out.flush();
 
     }
