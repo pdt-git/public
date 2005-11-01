@@ -29,6 +29,7 @@ import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,6 +44,9 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -53,13 +57,19 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.UIJob;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		PrologConsole {
@@ -122,17 +132,22 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		public void run() {
 			try {
 
-				Job j = new Job("Restarting the PrologInterface") {
+				Job j = new UIJob("Restarting the PrologInterface") {
 
-					protected IStatus run(IProgressMonitor monitor) {
+					public IStatus runInUIThread(IProgressMonitor monitor) {
 						try {
 							monitor.beginTask("initializing...",
 									IProgressMonitor.UNKNOWN);
 
 							try {
-								pif.stop();
-							} finally {
-								pif.start();
+								if(pif!=null){
+									pif.stop();	
+								}
+								//setPrologInterface(getEditorPrologInterface());
+							} finally {								
+								if(pif!=null){
+									pif.start();
+								}
 							}
 						} catch (Throwable e) {
 							Debug.report(e);
@@ -142,6 +157,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 						}
 						return Status.OK_STATUS;
 					}
+
+					
 				};
 				j.schedule();
 			} catch (Throwable t) {
@@ -239,6 +256,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		viewer.getControl().setEnabled(false);
 		PrologInterface thepif = getEditorPrologInterface();
 	
+		
 		setPrologInterface(thepif);
 		
 		
@@ -248,10 +266,80 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		createActions();
 		initMenus(parent);
 		getSite().setSelectionProvider(viewer);
-		configureAndConnect();
+		//configureAndConnect();
+		//This is a bit "shoot-first-talk-later"-ish, but it should do.
+		getViewSite().getPage().addPartListener(new IPartListener2() {
 		
+			public void partInputChanged(IWorkbenchPartReference partRef) {
+				if ( partRef instanceof IEditorReference ){
+					editorInputChanged();
+				}
 		
+			}
+		
+			public void partVisible(IWorkbenchPartReference partRef) {
+				if ( partRef instanceof IEditorReference ){
+					editorInputChanged();
+				}
+		
+			}
+		
+			public void partHidden(IWorkbenchPartReference partRef) {
+//				if ( partRef instanceof IEditorReference ){
+//					editorInputChanged();
+//				}
+		
+			}
+		
+			public void partOpened(IWorkbenchPartReference partRef) {
+				if ( partRef instanceof IEditorReference ){
+					editorInputChanged();
+				}
+		
+			}
+		
+			public void partDeactivated(IWorkbenchPartReference partRef) {
+//				if ( partRef instanceof IEditorReference ){
+//					editorInputChanged();
+//				}
+		
+			}
+		
+			public void partClosed(IWorkbenchPartReference partRef) {
+//				if ( partRef instanceof IEditorReference ){
+//					editorInputChanged();
+//				}
+		
+			}
+		
+			public void partBroughtToTop(IWorkbenchPartReference partRef) {
+				if ( partRef instanceof IEditorReference ){
+					editorInputChanged();
+				}
+		
+			}
+		
+			public void partActivated(IWorkbenchPartReference partRef) {
+				if ( partRef instanceof IEditorReference ){
+					editorInputChanged();
+				}
+		
+			}
+		
+		});
+		
+	}
 
+
+
+
+	protected void editorInputChanged() {
+		PrologInterface thePif = getEditorPrologInterface();
+		if(thePif!=null&&thePif!=pif){
+			Debug.debug("new pif from editor");
+			setPrologInterface(thePif);
+		}
+		
 	}
 
 
@@ -272,8 +360,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			return null;
 		}
 		IPrologProject nature;
+		
 		try {
-			nature = (IPrologProject) editorInput.getFile().getProject().getNature(PDTCore.NATURE_ID);
+			
+			IProject project = editorInput.getFile().getProject();
+			if(!project.hasNature(PDTCore.NATURE_ID)){
+				return null;
+			}
+			nature = (IPrologProject) project.getNature(PDTCore.NATURE_ID);
 		} catch (CoreException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
@@ -440,11 +534,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	public void dispose() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
 				.unregisterPrologConsole(this);
+		disconnect();
 		contextMenu.dispose();
 		// viewer.getControl().dispose();
 		super.dispose();
 	}
 
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -504,23 +601,35 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			addHooks();
 			configureAndConnect();			
 		}
+		else{
+			Debug.debug("no pif (yet).");
+		}
 	}
 
 
 
 
 	private void disconnect() {
+		model.disconnect();
+		removeHooks();
+		if(viewer.getControl().isDisposed()){
+			return;
+		}
 		if(Display.getCurrent()!=viewer.getControl().getDisplay()){
 			viewer.getControl().getDisplay().asyncExec(new Runnable(){
 				public void run(){
-					disconnect();
+					if(!viewer.getControl().isDisposed()){
+						viewer.getControl().setEnabled(false);
+					}
 				}
 			});
 			return;
 		}
-		model.disconnect();
-		removeHooks();
-		viewer.getControl().setEnabled(false);
+		if(!viewer.getControl().isDisposed()){
+			viewer.getControl().setEnabled(false);
+		}
+		
+		
 	}
 	
 	private void addHooks() {
