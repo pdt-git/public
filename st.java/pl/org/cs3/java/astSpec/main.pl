@@ -1,0 +1,3 @@
+:- ['javaFactbase.pl'].
+:- ['javaSyntax.pl'].
+
