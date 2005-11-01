@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Logicaj Fragment
+Bundle-SymbolicName: org.cs3.stransformer.logicaj; singleton:=true
+Bundle-Version: 1.0.0
+Fragment-Host: org.cs3.jtransformer;bundle-version="[2.1.1,3.0.0)"
+Bundle-Localization: plugin
