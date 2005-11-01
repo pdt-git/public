@@ -37,8 +37,9 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 			}
 		}		
 		if(hook!=null){
-		    Debug.info("excecuting onInit() on hook "+id);
+		    Debug.info("enter onInit() on hook "+id);
 			hook.onInit(pif,initSession);
+			Debug.info("exit onInit() on hook "+id);
 		}
 	}
 
@@ -54,8 +55,9 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 			}
 		}		
 		if(hook!=null){
-		    Debug.info("excecuting afterInit() on hook "+id);
+		    Debug.info("enter afterInit() on hook "+id);
 			hook.afterInit(pif);
+			Debug.info("exit afterInit() on hook "+id);
 		}	
 	}
 
@@ -71,8 +73,9 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 			}
 		}		
 		if(hook!=null){
-		    Debug.info("excecuting beforeShutdown() on hook "+id);
+		    Debug.info("enter beforeShutdown() on hook "+id);
 			hook.beforeShutdown(pif,session);
+			Debug.info("exit beforeShutdown() on hook "+id);
 		}
 	}
 
