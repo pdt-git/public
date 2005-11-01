@@ -3,6 +3,7 @@
 package org.cs3.pdt.core.internal.builder;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -15,13 +16,9 @@ import java.util.Set;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.parser.PrologCompiler;
 import org.cs3.pl.parser.PrologCompilerFactory;
-import org.cs3.pl.prolog.ConsultService;
-import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -61,54 +58,15 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 		checker.setTaskCollector(taskCollector);
 		checker.compile(fileName, file.getContents(), lineInfo);
 		// PDTPlugin plugin = PDTPlugin.getDefault();
-		ConsultService meta = PrologRuntimePlugin.getDefault()
-				.getConsultService(PDTCore.CS_METADATA);
+		
 
 		checker.saveMetaDataForClauses(outputStream);
 		checker.saveAbbaData(new BufferedOutputStream(outputStream));
 
-		if (collector.getMaxSeverity() < IMarker.SEVERITY_ERROR) {
-			autoConsult(file);
-		}
+		
 	}
 
-	private void autoConsult(IFile file) throws CoreException {
-		IPrologProject plProject = (IPrologProject) file.getProject()
-				.getNature(PDTCore.NATURE_ID);
-		if (!plProject.isAutoConsulted(file)) {
-			return;
-		}
-		IMarker[] markers = file.findMarkers(IMarker.PROBLEM, true,
-				IResource.DEPTH_ZERO);
-		for (int i = 0; i < markers.length; i++) {
-			int val = markers[i].getAttribute(IMarker.SEVERITY,
-					IMarker.SEVERITY_INFO);
-
-			if (val == IMarker.SEVERITY_ERROR) {
-				return;
-			}
-		}
-
-		String prologName = Util.normalizeOnWindoze(file.getLocation()
-				.toOSString());
-		PrologSession s = plProject.getPrologInterface().getSession();
-		try {
-			s.queryOnce("['" + prologName + "']");
-		} finally {
-			s.dispose();
-		}
-		// ConsultService consultService =
-		// plugin.getConsultService(PDT.CS_WORKSPACE);
-		// InputStream in = file.getContents();
-		// OutputStream
-		// out=consultService.getOutputStream(file.getFullPath().toString());
-		// Util.copy(in,out);
-		// in.close();
-		// out.close();
-
-	}
-
-	/*
+		/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
@@ -150,17 +108,29 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 			monitor.beginTask(taskname, forgetList.size() + buildList.size());
 			IPrologProject plProject = (IPrologProject) getProject().getNature(
 					PDTCore.NATURE_ID);
-			PrintStream out = plProject.getPrologInterface().getConsultService(
-					PDTCore.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+			
+			/* idea: buffer everything and consult it in one big burst.
+			 * TODO: need to limit buffer size.
+			 * bursting is probably a good idea, but if memory consumption 
+			 * causes to many page swaps, this may even slow things down.
+			 */
+			
+			
+			ByteArrayOutputStream buffStream = new ByteArrayOutputStream();
+			PrintStream out=new PrintStream(buffStream);
 			// PrintStream out = new PrintStream(new
 			// FileOutputStream("c:\\temp\\consulted.pl"));
-			try {
+			
 				forget(forgetList, out, new SubProgressMonitor(monitor,
 						forgetList.size()));
 				build(buildList, out, new SubProgressMonitor(monitor, buildList
 						.size()));
+			PrintStream realout = plProject.getPrologInterface().getConsultService(
+						PDTCore.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
+			try {
+				realout.write(buffStream.toByteArray());
 			} finally {
-				out.close();
+				realout.close();
 			}
 			Debug.debug("MetaDataBuilder.build(...) is done.");
 			monitor.done();
