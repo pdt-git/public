@@ -3,6 +3,7 @@
 package org.cs3.pdt.internal.editors;
 
 import org.cs3.pl.common.Debug;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
@@ -22,7 +23,7 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
      * @see org.eclipse.jface.text.source.ICharacterPairMatcher#dispose()
      */
     public void dispose() {
-        // TODO Auto-generated method stub
+    	
 
     }
 
@@ -43,9 +44,23 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
     public IRegion match(IDocument document, int offset) {
         try {
             this.document = document;
-            offset--;
+            offset--;//XXX: why decrement? causes  BadLocationException below when offset==0
+            		//think it is because we always try to match the char left of the cursor.
+                    //if we are at 0, there is nothing to match.
+            if(offset<0){
+            	return null;
+            }
             this.offset = offset;
-            String partitionType = document.getContentType(offset);
+            //XXX: debugging, please remove try/catch
+            String partitionType=null;
+            try {
+            	
+				partitionType = document.getContentType(offset);	
+			} catch (BadLocationException e) {
+				Debug.debug("Aha! offset is "+offset+", document length is "+document.getLength());
+				Debug.report(e);
+			}
+            
             char nextChar = document.getChar(Math.max(offset,0));
             if(!isBracket(nextChar)){
                 return null;
