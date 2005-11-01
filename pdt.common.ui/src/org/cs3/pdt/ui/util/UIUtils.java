@@ -10,6 +10,14 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
+
+/**
+ * 
+ * FIXME: some of the methods have to be called on UI Thread,
+ * others do their own de-syncing. We should agree on one approach or at least
+ * document which methods expects to be run on UI THread.
+ *
+ */
 public final class UIUtils {
 
 	public static IFile getFileInActiveEditor() {
@@ -29,12 +37,13 @@ public final class UIUtils {
 	}
 
 	public static IEditorPart getActiveEditor() {
-	    try {
+	    
 	        IWorkbenchPage page = getActivePage();
+	        if(page==null){
+	        	return null;
+	        }
 	        return page.getActiveEditor();
-	    } catch (NullPointerException e) {
-	        return null;
-	    }
+	    
 	}
 
 	public static void displayMessageDialog(final Shell shell, final String title,
