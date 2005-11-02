@@ -16,12 +16,12 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 	}
 	public void writeNode(String type, String nodeId, String label) {
 		out
-				.println(prefix + ":- abba_assert_data(node(" + nodeId + "," + type + "," + label
+				.println(":- "+prefix+"abba_assert_data(node(" + nodeId + "," + type + "," + label
 						+ ")).");
 	}
 
 	public void writeProperty(String nodeId, String property, String[] values) {
-		out.print(prefix + ":- abba_assert_data(property(" + nodeId + "," + property + "(");
+		out.print(":- "+prefix+"abba_assert_data(property(" + nodeId + "," + property + "(");
 		for (int i = 0; i < values.length; i++) {
 			if (i > 0) {
 				out.print(",");
@@ -34,20 +34,23 @@ public class WriteTermsToStreamStrategy implements NodeWriterStrategy {
 
 	public void writeEdge(String edgeId, String edgeType, String label,
 			String sourceId, String targetId) {
-		out.println(prefix+":- abba_assert_data(edge(" + edgeId + "," + edgeType + "," + label + ","
+		out.println(":- "+prefix+"abba_assert_data(edge(" + edgeId + "," + edgeType + "," + label + ","
 				+ sourceId + "," + targetId + ")).");
 
 	}
 
 	public void writeSymTabEntry(String globalSymbol, String localId) {
-		out.println(":- abba_put_local_symbol("+localId+", "+globalSymbol+").");		
+		out.println(":- "+prefix+"abba_put_local_symbol("+localId+", "+globalSymbol+").");		
 	}
 
 	public void writeRetractSymTab() {
-		out.println(":- abba_clear_local_symbols.");		
+		out.println(":- "+prefix+"abba_clear_local_symbols.");		
 	}
 	public void writeBeginCu(String file) {
-		out.println(":- abba_begin_cu('" +file+"').");		
+		out.println(":- "+prefix+"abba_begin_cu('" +file+"').");		
 	}
 
+	public void writeAssert(String data){
+		out.println(":- "+prefix+"abba_assert_data("+data+").");
+	}
 }

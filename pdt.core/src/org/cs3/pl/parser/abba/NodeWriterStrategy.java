@@ -4,6 +4,7 @@ public interface NodeWriterStrategy {
 	public final static String NODE_TYPE_PREDICATE = "predicate";
 	public final static String NODE_TYPE_CLAUSE = "clause";
 	public final static String NODE_TYPE_BODY_LITERAL = "literal";
+	public final static String NODE_TYPE_HEAD_LITERAL = "literal";
 	public final static String NODE_TYPE_TERM = "term";
 	public static final String NODE_TYPE_CT = "ct";
 	public static final String NODE_TYPE_CT_CONDITION = "ct_condition";
@@ -22,6 +23,7 @@ public interface NodeWriterStrategy {
 	
 	public final static String PROPERTY_FILE = "file";
 	public final static String PROPERTY_POSITION = "position";
+	public final static String PROPERTY_CALLABLE = "callable";
 	
 	
 	public void writeNode(String type,String nodeId,String label);
@@ -30,4 +32,5 @@ public interface NodeWriterStrategy {
 	public void writeSymTabEntry(String globalSymbol, String localId);
 	public void writeRetractSymTab();
 	public void writeBeginCu(String cu);
+	public void writeAssert(String data);
 }
