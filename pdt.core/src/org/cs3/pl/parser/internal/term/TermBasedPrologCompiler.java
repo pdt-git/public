@@ -364,7 +364,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 	}
 
 	public void saveAbbaData(OutputStream out) throws IOException {
-		saveAbbaData("", out);
+		saveAbbaData("abba_pdt:", out);
 	}
 
 	public void saveAbbaData(String modulePrefix, OutputStream out)
