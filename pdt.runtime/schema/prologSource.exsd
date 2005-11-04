@@ -13,15 +13,12 @@
    <element name="extension">
       <annotation>
          <documentation>
-            Stick global labels (IDs) on files/direcories containing prolog code. &lt;b&gt;NOTE:&lt;/b&gt; All you can do with this extension point, is globaly assigning IDs to files/directories which can later be referenced from within the java api. So in particular, adding contributions to this extension point alone will not suffice to configure any PrologInterface instances.
+            Plugins can use this extension point to export prolog code as library that can be used within code of other plugins. 
          </documentation>
       </annotation>
       <complexType>
          <sequence>
-            <choice>
-               <element ref="file"/>
-               <element ref="directory"/>
-            </choice>
+            <element ref="library" minOccurs="1" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -50,24 +47,34 @@
       </complexType>
    </element>
 
-   <element name="file">
+   <element name="library">
       <annotation>
          <documentation>
-            associates a file with an id.
+            A prolog library manifests in a contribution to the prolog source lookup facility. The plugin that hosts a library tags it with a global unique id which can typically be accessed via  public constants in the host plugin&apos;s Java API. Clients can ask the PDT Runtime Plugin to configure the source lookup facility of a particular Prolog Runtime using the information registered with this ID. This will be conducted by adding clauses to the system predicate file_search_path/2.
          </documentation>
       </annotation>
       <complexType>
-         <attribute name="id" type="string" use="required">
+         <sequence>
+            <element ref="dependency" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
+         <attribute name="id" type="string">
             <annotation>
                <documentation>
-                  
+                  global unique identifier for the hosted library
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="alias" type="string" use="default" value="library">
+            <annotation>
+               <documentation>
+                  Defaults to &quot;library&quot;. See documentation of file_search_path/2
                </documentation>
             </annotation>
          </attribute>
          <attribute name="path" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  You should give a path to a directory, relative to the install directory of the hosting plugin. The path will be resolved to an absolute path at runtime.
                </documentation>
                <appInfo>
                   <meta.attribute kind="resource"/>
@@ -77,30 +84,18 @@
       </complexType>
    </element>
 
-   <element name="directory">
+   <element name="dependency">
+      <annotation>
+         <documentation>
+            Used to specify a dependency of the hosted library to some other library, possibly hosted by some other plugin. When the Prolog Runtime is asked to configure the lookup path of a PrologInterface to include the hosted library, it will first make sure that the path also includes the libraries the hosted library depends on.
+         </documentation>
+      </annotation>
       <complexType>
-         <attribute name="id" type="string">
+         <attribute name="library" type="string">
             <annotation>
                <documentation>
-                  
+                  Id of a library 
                </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="alias" type="string" use="default" value="library">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="path" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-               <appInfo>
-                  <meta.attribute kind="resource"/>
-               </appInfo>
             </annotation>
          </attribute>
       </complexType>

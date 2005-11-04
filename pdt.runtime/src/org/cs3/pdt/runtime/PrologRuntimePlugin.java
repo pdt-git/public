@@ -3,9 +3,15 @@ package org.cs3.pdt.runtime;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologInterfaceRegistry;
@@ -55,8 +61,6 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		}
 	}
 
-	private PrologInterface prologInterface;
-
 	// Resource bundle.
 	private ResourceBundle resourceBundle;
 
@@ -65,6 +69,16 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 	private Option[] options;
 
 	private PrologInterfaceRegistry registry;
+	
+	private PrologLibraryManager libraryManager;
+	public PrologLibraryManager getLibraryManager() {
+		if(libraryManager==null){
+			libraryManager=new PrologLibraryManager();
+		}
+		return libraryManager;
+	}
+
+	
 
 	/**
 	 * The constructor.
@@ -113,29 +127,28 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 	 * @throws IOException
 	 */
 	private PrologInterface createPrologInterface() {
-		if (prologInterface == null) {
-
-			String impl = getPreferenceValue(
-					PrologRuntime.PREF_PIF_IMPLEMENTATION, null);
-			if (impl == null) {
-				throw new RuntimeException("The required property \""
-						+ PrologRuntime.PREF_PIF_IMPLEMENTATION
-						+ "\" was not specified.");
-			}
-			PrologInterfaceFactory factory = PrologInterfaceFactory
-					.newInstance(impl);
-			factory
-					.setResourceLocator(getResourceLocator(PrologRuntime.LOC_PIF));
-			prologInterface = factory.create();
-			reconfigurePrologInterface();
-			registerHooks();
-			try {
-				prologInterface.start();
-			} catch (IOException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			}
+		PrologInterface prologInterface = null;
+		String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,
+				null);
+		if (impl == null) {
+			throw new RuntimeException("The required property \""
+					+ PrologRuntime.PREF_PIF_IMPLEMENTATION
+					+ "\" was not specified.");
 		}
+		PrologInterfaceFactory factory = PrologInterfaceFactory
+				.newInstance(impl);
+		factory.setResourceLocator(getResourceLocator(PrologRuntime.LOC_PIF));
+
+		prologInterface = factory.create();
+		reconfigurePrologInterfaces();
+		registerHooks();
+		try {
+			prologInterface.start();
+		} catch (IOException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+
 		return prologInterface;
 	}
 
@@ -182,7 +195,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		try {
 			// reconfigureDebugOutput();
 
-			reconfigurePrologInterface();
+			reconfigurePrologInterfaces();
 
 			if (restart) {
 				pif.start();
@@ -193,8 +206,16 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		}
 
 	}
-
-	private void reconfigurePrologInterface() {
+	private void reconfigurePrologInterfaces() {
+		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
+		Set keys = r.getRegisteredKeys();
+		for (Iterator it = keys.iterator(); it.hasNext();) {
+			String key = (String) it.next();
+			PrologInterface pif = r.getPrologInterface(key);
+			reconfigurePrologInterface(pif);
+		}
+	}
+	private void reconfigurePrologInterface(PrologInterface prologInterface) {
 
 		// MetadataEngineInstaller.install(prologInterface);
 		List l = prologInterface.getBootstrapLibraries();
@@ -210,7 +231,13 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		for (int i = 0; i < options.length; i++) {
 			String id = options[i].getId();
 			String val = getPreferenceValue(id, options[i].getDefault());
-			prologInterface.setOption(id, val);
+			try{
+				prologInterface.setOption(id, val);
+			}
+			catch(Throwable t){
+				Debug.warning("could not set option "+options[i].getLabel()+"("+options[i].getId()+")");
+				Debug.report(t);
+			}
 		}
 
 	}
@@ -312,8 +339,18 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 						}
 						String[] dependencies = dependsOn.split(",");
 						String id = celem[j].getAttributeAsIs("id");
-						prologInterface
-								.addLifeCycleHook(hook, id, dependencies);
+						
+						PrologInterfaceRegistry r = getPrologInterfaceRegistry();
+						Set keys = r.getRegisteredKeys();
+						for (Iterator it = keys.iterator(); it.hasNext();) {
+							String key = (String) it.next();
+							PrologInterface pif = r.getPrologInterface(key);
+							
+							pif.addLifeCycleHook(hook, id, dependencies);
+						}
+						
+						
+								
 					}
 				}
 			}
@@ -358,25 +395,40 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		try {
-			if (prologInterface != null && !prologInterface.isDown()) {
-				prologInterface.stop();
+			PrologInterfaceRegistry r = getPrologInterfaceRegistry();
+			Set keys = r.getRegisteredKeys();
+			for (Iterator it = keys.iterator(); it.hasNext();) {
+				String key = (String) it.next();
+				PrologInterface pif = r.getPrologInterface(key);
+				try{
+					pif.stop();
+					r.removePrologInterface(key);
+				}catch (Throwable e) {
+					Debug.warning("problems during shutdown of pif "+key);
+					Debug.report(e);
+				}
+				
 			}
+			
+			
 		} finally {
 			super.stop(context);
 		}
 	}
 
 	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(key,null,null);
+		return getPrologInterface(key, null, null);
 	}
 
 	public PrologInterface getPrologInterface(String key, String defaultName) {
-		return getPrologInterface(key,null,defaultName);
+		return getPrologInterface(key, null, defaultName);
 	}
-	
-	public PrologInterface getPrologInterface(String key, PrologInterfaceSubscription s) {
-		return getPrologInterface(key,s,null);
+
+	public PrologInterface getPrologInterface(String key,
+			PrologInterfaceSubscription s) {
+		return getPrologInterface(key, s, null);
 	}
+
 	/**
 	 * retrieve a PrologInterface instance identified by the given key. If the
 	 * registry does not contain a pif for that key, it will create a new pif
