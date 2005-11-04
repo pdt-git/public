@@ -189,11 +189,11 @@ public class Debug {
         }
         Thread currentThread = Thread.currentThread();
 		String tn = currentThread.getName();
-        StackTraceElement stackFrame = new Throwable().getStackTrace()[2];//currentThread.getStackTrace()[4];
+        //StackTraceElement stackFrame = new Throwable().getStackTrace()[2];//currentThread.getStackTrace()[4];
 		//String loc = "("+stackFrame.getFileName()+":"+stackFrame.getLineNumber()+")";
-        String loc = stackFrame.toString();
+        //String loc = stackFrame.toString();
         Date d = new Date();
-        out.println(prefix+":"+tn+": "+ loc+": "+ msg);
+        out.println(prefix+":"+tn+": "/*+ loc+": "*/+ msg);
         out.flush();
 
     }
