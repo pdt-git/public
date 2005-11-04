@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.console.PDTConsole;
@@ -14,13 +16,13 @@ import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.hooks.ConsoleServerHook;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
+import org.cs3.pdt.runtime.PrologInterfaceRegistryListener;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.DefaultConsoleHistory;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
@@ -30,13 +32,13 @@ import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -44,10 +46,10 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -55,15 +57,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
@@ -73,6 +71,146 @@ import org.eclipse.ui.progress.UIJob;
 
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		PrologConsole {
+	public final class PifSelector extends ControlContribution implements SelectionListener, PrologInterfaceRegistryListener {
+		private Combo combo;
+		private Vector entries=new Vector();
+
+		public PifSelector(String id) {
+			super(id);
+		}
+
+		protected Control createControl(Composite parent) {
+			
+			combo = new Combo (parent, SWT.READ_ONLY);
+			fillCombo();
+			combo.addSelectionListener(this);
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			reg.addPrologInterfaceRegistryListener(this);
+			return combo;
+		}
+
+		private void fillCombo() {
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			Set keys =  reg.getRegisteredKeys();
+			for (Iterator it = keys.iterator(); it.hasNext();) {
+				String key = (String) it.next();
+				String label = reg.getName(key);
+				if(label==null){
+					label=key;
+				}
+				entries.add(key);
+				combo.add(label);
+			}
+			
+			combo.pack ();
+		}
+
+		public void widgetSelected(SelectionEvent e) {
+			String key = (String) entries.get(combo.getSelectionIndex());
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			String currentKey=reg.getKey(getPrologInterface());
+			if(!key.equals(currentKey)){
+				PrologConsoleView.this.setPrologInterface(reg.getPrologInterface(key));
+			}
+		}
+
+		public void widgetDefaultSelected(SelectionEvent e) {
+			String key = (String) entries.get(combo.getSelectionIndex());
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			String currentKey=reg.getKey(getPrologInterface());
+			if(!key.equals(currentKey)){
+				PrologConsoleView.this.setPrologInterface(reg.getPrologInterface(key));
+			}				
+			
+		}
+
+		public void prologInterfaceAdded(final PrologInterfaceRegistryEvent e) {
+			if(combo.isDisposed()){
+				return;
+			}
+			if(combo.getDisplay()!=Display.getCurrent()){
+				combo.getDisplay().asyncExec(new Runnable() {
+				
+					public void run() {
+						prologInterfaceAdded(e);				
+					}
+				
+				});
+				return;
+			}
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			String key = e.key;
+			String label = reg.getName(key);
+			if(label==null){
+				label=key;
+			}
+			if(entries.contains(key)){
+				return;
+			}
+			entries.add(key);
+			combo.add(label);			
+			combo.pack ();			
+		}
+
+		public void prologInterfaceRemoved(final PrologInterfaceRegistryEvent e) {
+			if(combo.isDisposed()){
+				return;
+			}
+			if(combo.getDisplay()!=Display.getCurrent()){
+				combo.getDisplay().asyncExec(new Runnable() {
+				
+					public void run() {
+						prologInterfaceRemoved(e);				
+					}
+				
+				});
+				return;
+			}	
+			combo.remove(entries.indexOf(e.key));
+		}
+
+		public void subscriptionAdded(PrologInterfaceRegistryEvent e) {
+			;
+		}
+
+		public void subscriptionRemoved(PrologInterfaceRegistryEvent e) {
+			;
+		}
+		
+		public void selectPrologInterface(final PrologInterface pif){
+			if(combo.isDisposed()){
+				return;
+			}
+			if(combo.getDisplay()!=Display.getCurrent()){
+				combo.getDisplay().asyncExec(new Runnable() {
+				
+					public void run() {
+						selectPrologInterface(pif);				
+					}
+				
+				});
+				return;
+			}
+			if(pif==null){
+				combo.deselectAll();
+				return;
+			}
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+			String key = reg.getKey(pif);
+			String label = reg.getName(key);
+			if(label==null){
+				label=key;
+			}
+			int i = entries.indexOf(key);
+			if(i<0){
+				combo.add(label);
+				entries.add(key);
+			}
+			combo.select(entries.size()-1);
+			
+		}
+	}
+
 	private final class ClearAction extends Action {
 		private ClearAction(String text, String tooltip,ImageDescriptor image) {
 			super(text, image);
@@ -214,6 +352,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private NewConsoleHistory history;
 
+	private PifSelector pifSelector;
+
 	public void createPartControl(Composite parent) {
 
 		try {
@@ -265,6 +405,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		
 		createActions();
 		initMenus(parent);
+		initToolBars();
 		getSite().setSelectionProvider(viewer);
 		//configureAndConnect();
 		//This is a bit "shoot-first-talk-later"-ish, but it should do.
@@ -328,6 +469,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		
 		});
 		
+	}
+
+
+
+// 
+	private void createCombo(IToolBarManager toolBarManager) {
+		toolBarManager.add(new PifSelector(PDTConsole.CONTRIB_PIF_SELECTOR_ID));
 	}
 
 
@@ -396,6 +544,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				viewer.cut();
 			}
 		};
+		
 		copyAction = new Action() {
 			public void run() {
 				viewer.copy();
@@ -424,9 +573,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 
 	private void initMenus(Control parent) {
-		IToolBarManager toolbarMenu = getViewSite().getActionBars()
-				.getToolBarManager();
-
+		
 		MenuManager manager = new MenuManager();
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
@@ -437,19 +584,33 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			}
 
 		});
-		
-		IActionBars bars = this.getViewSite().getActionBars();
-		bars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(),
-				selectAllAction);
-		bars.setGlobalActionHandler(ActionFactory.CUT.getId(), cutAction);
-		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), copyAction);
-		bars.setGlobalActionHandler(ActionFactory.PASTE.getId(), pasteAction);
-		addContributions(toolbarMenu);
 		getSite().registerContextMenu(manager, viewer);
 		contextMenu = manager.createContextMenu(parent);
 		viewer.getControl().setMenu(contextMenu);
 		// ContextMenuProvider menuProvider = new ContextMenuProvider();
 		// menuProvider.addMenu(parent);
+		
+		
+		
+		
+	}
+
+
+
+
+	private void initToolBars() {
+		IActionBars bars = this.getViewSite().getActionBars();
+
+		bars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(),
+				selectAllAction);
+		bars.setGlobalActionHandler(ActionFactory.CUT.getId(), cutAction);
+		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), copyAction);
+		bars.setGlobalActionHandler(ActionFactory.PASTE.getId(), pasteAction);
+		IToolBarManager toolBarManager = bars.getToolBarManager();
+
+		addContributions(toolBarManager);
+		//this.pifSelector = new PifSelector(PDTConsole.CONTRIB_PIF_SELECTOR_ID);
+		//toolBarManager.add(pifSelector);
 	}
 
 	private void addContributions(IContributionManager manager) {
@@ -599,10 +760,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		this.pif=newPif;
 		if(pif!=null){
 			addHooks();
-			configureAndConnect();			
+			configureAndConnect();	
+			
 		}
 		else{
 			Debug.debug("no pif (yet).");
+		}
+		if(pifSelector!=null){
+			pifSelector.selectPrologInterface(pif);
 		}
 	}
 
