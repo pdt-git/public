@@ -66,6 +66,10 @@ inTe(importT(_,_,Fqn)) :-
 inTe(packageT(_,Name)) :-
     packageT(_,Name),
     !.
+
+inTe(':'(abba,Term)) :-
+	':'(abba,Term),
+	!.
     
 %inTe(packageT(_,_name)) :-
 %    new_id(_id),
