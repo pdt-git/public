@@ -1,6 +1,7 @@
 package org.cs3.pdt.runtime;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
 
 import org.cs3.pl.prolog.PrologInterface;
 
@@ -12,54 +13,50 @@ import org.cs3.pl.prolog.PrologInterface;
  * @author lukas
  */
 public interface PrologInterfaceRegistry {
-	/**
-	 * register a client with a given prolog interface. If the specified
-	 * (pif,client,use)-tupel is already registered, no action is taken.
-	 * 
-	 * @param pif
-	 *            The prolog interface to register with. If it is not managed by
-	 *            this registry, it will be registered first. May not be null-
-	 *            Be carefull not to register a prolog interface with more than
-	 *            one registry. This is not checked ATM.
-	 * @param client
-	 *            The client that should be associated with this prolog
-	 *            interface. Can be an arbitrary object or even null, but
-	 *            remember that the (pif,client,use) tuple has to be unique.
-	 * @param use
-	 *            A short string key describing the use the client makes of the
-	 *            pif. Can be empty or even null,but remember that the
-	 *            (pif,client,use) tuple has to be unique.
-	 */
-	public void register(PrologInterface pif, Object client, String use);
+
 
 	/**
-	 * unregister a tupel. If the given tupel is not registered with registry,
-	 * no action is taken.
-	 * 
-	 * @param pif
-	 * @param client
-	 * @param use
+	 * @return all keys to which PrologInterfaces are registered.
 	 */
-	public void unregister(PrologInterface pif, Object client, String use);
+	public Set getRegisteredKeys();
 
 	/**
-	 * Retrieve all managed PrologInterfaces
-	 * 
-	 * @return An array containing all PrologInterfaces managed by the registry.
-	 *         This includes those that currently do not have any assoziated
-	 *         clients.
-	 */
-	public PrologInterface[] getPrologInterfaces();
+	 * return all subscriptions to a given registered pif key
+	 * @return null if no such pif, empty list if no subscriptions
+	 */	
+	public List getSubscriptions(String key);
 
-	
+	/**
+	 * A short catchy name associated with a given pif.
+	 * Maybe null if no such pif, or no name. 
+	 */
+	public String getName(String key);
 	
 	/**
-	 * retrieve all client objects associated to a given PIF
-	 * @param pif
-	 * @return A Map containing the use strings as keys as and  java.util.Set instances
-	 * containing the client objects that are associated with the PIF using the  
-	 * respective key.
+	 * Set an optional name for a given pif identifier.
+	 * 
 	 */
-	public Map getClients(PrologInterface pif);
+	public void setName(String key, String name);
+
 	
+	/**
+	 * retrieve the registry key of a registered PrologInterface.	 * 
+	 */
+	public String getKey(PrologInterface prologInterface);
+
+	/**
+	 * retrieve the PrologInterface instance registered for the given key.
+	 */
+	public PrologInterface getPrologInterface(String key);
+
+	
+	public void addPrologInterfaceRegistryListener(PrologInterfaceRegistryListener l);
+	public void removePrologInterfaceRegistryListener(PrologInterfaceRegistryListener l);
+	
+	
+	public void addPrologInterface(String key, PrologInterface pif);
+	public void removePrologInterface(String key);
+	
+	public void addSubscription(PrologInterfaceSubscription s);
+	public void removeSubscription(PrologInterfaceSubscription s);
 }
