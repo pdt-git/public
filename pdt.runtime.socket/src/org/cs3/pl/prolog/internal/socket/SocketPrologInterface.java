@@ -133,7 +133,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         if (isDown()) {
             this.standAloneServer = standAloneServer;
         } else {
-            throw new IllegalStateException("Cannot change port while in use.");
+            throw new IllegalStateException("Cannot change standalone flag while in use.");
         }
 
     }
