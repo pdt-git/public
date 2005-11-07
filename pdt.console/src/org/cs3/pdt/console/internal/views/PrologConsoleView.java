@@ -609,8 +609,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
 		addContributions(toolBarManager);
-		//this.pifSelector = new PifSelector(PDTConsole.CONTRIB_PIF_SELECTOR_ID);
-		//toolBarManager.add(pifSelector);
+		this.pifSelector = new PifSelector(PDTConsole.CONTRIB_PIF_SELECTOR_ID);
+		toolBarManager.add(pifSelector);
 	}
 
 	private void addContributions(IContributionManager manager) {
