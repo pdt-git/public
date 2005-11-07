@@ -11,6 +11,13 @@
    </annotation>
 
    <element name="extension">
+      <annotation>
+         <documentation>
+            Deprecated since 0.2M4. 
+Reason: 
+The connection between a particular pif and a particular set of tasks that is performed on this pif should after all be configurable by the user wherever possible. library contributions are logically connected to such a set of tasks. So they should be registered dynamically using java api and not to a static pif key using the xml file.
+         </documentation>
+      </annotation>
       <complexType>
          <sequence>
             <element ref="contribution" minOccurs="1" maxOccurs="unbounded"/>

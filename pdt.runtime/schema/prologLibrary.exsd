@@ -13,7 +13,7 @@
    <element name="extension">
       <annotation>
          <documentation>
-            Plugins can use this extension point to export prolog code as library that can be used within code of other plugins. 
+            Plugins can use this extension point to export prolog code as library that can be used within code of other plugins.
          </documentation>
       </annotation>
       <complexType>
@@ -27,7 +27,7 @@
                </documentation>
             </annotation>
          </attribute>
-         <attribute name="id" type="string" use="required">
+         <attribute name="id" type="string">
             <annotation>
                <documentation>
                   
@@ -94,7 +94,7 @@
          <attribute name="library" type="string">
             <annotation>
                <documentation>
-                  Id of a library 
+                  Id of a library
                </documentation>
             </annotation>
          </attribute>
