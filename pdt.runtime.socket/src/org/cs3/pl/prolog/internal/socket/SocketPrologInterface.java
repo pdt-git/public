@@ -67,6 +67,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
     public final static String USE_POOL = "pif.use_pool";
     
+    public final static String TIMEOUT = "pif.timeout";
     
 
     private String engineDir;
@@ -80,6 +81,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     private HashMap consultServices = new HashMap();
 
 	private File lockFile;
+
+	private int timeout;
 
     public SocketPrologInterface(PrologInterfaceFactory factory)  {
         super();
@@ -160,6 +163,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             this.executable = value;
         } else if (STANDALONE.equals(opt)) {
             setStandAloneServer(Boolean.valueOf(value).booleanValue());
+        }else if (TIMEOUT.equals(opt)) {
+            this.timeout=Integer.parseInt(value);
         } else if (USE_POOL.equals(opt)) {
             setUseSessionPooling(Boolean.valueOf(value).booleanValue());
         } else {
@@ -187,6 +192,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             return "" + standAloneServer;
         } else if (USE_POOL.equals(opt)) {
             return "" + useSessionPooling;
+        } else if (TIMEOUT.equals(opt)) {
+            return "" + timeout;
         } else {
             throw new IllegalArgumentException("option not supported: " + opt);
         }
@@ -347,6 +354,10 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 	public int getPort() {
 		return port;
+	}
+
+	public int getTimeout() {
+		return timeout;
 	}
 
     
