@@ -13,12 +13,14 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -420,5 +422,20 @@ public class Util {
 		int port = ss.getLocalPort();
 		ss.close();
 		return port;
+	}
+
+	public static String prettyPrint(Collection c) {
+		if (c != null&& !c.isEmpty()) {
+            StringBuffer sb = new StringBuffer();
+            for (Iterator it = c.iterator(); it.hasNext();) {
+                Object next = it.next();
+				String elm =  next==null? "<null>":next.toString();                
+                sb.append(elm+ "\n");
+
+            }
+            return sb.toString();
+        }
+        return "";
+		
 	}
 }
