@@ -21,6 +21,8 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
+import sun.rmi.runtime.GetThreadPoolAction;
+
 /**
  */
 public class SocketServerStartAndStopStrategy implements
@@ -121,9 +123,14 @@ public class SocketServerStartAndStopStrategy implements
             new _InputStreamPump(serverProcess.getInputStream(), writer)
                     .start();
             
-            
+            long timeout=pif.getTimeout();
+            long startTime = System.currentTimeMillis();
             while (!pif.getLockFile().exists()) {
                 try {
+                	long now = System.currentTimeMillis();
+                	if(now-startTime>timeout){
+                		throw new RuntimeException("Timeout exceeded while waiting for peer to come up.");
+                	}
                     Thread.sleep(50);
                 } catch (InterruptedException e1) {
                     Debug.report(e1);
