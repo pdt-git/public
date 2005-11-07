@@ -1,6 +1,6 @@
 package org.cs3.pdt.runtime;
 
-import java.util.List;
+import java.util.Set;
 
 public interface PrologLibrary {
 	/**
@@ -23,5 +23,5 @@ public interface PrologLibrary {
 	/**
 	 * @return a list of identifiers of libraries this library depends on.
 	 */
-	public List getDependencies();
+	public Set getDependencies();
 }

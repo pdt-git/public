@@ -11,25 +11,39 @@ import org.cs3.pl.prolog.PrologSession;
  *
  */
 public class PLUtil {
-	public static void configureLibraries(PrologInterface pif, String[] libIds){
-		PrologLibraryManager mgr=PrologRuntimePlugin.getDefault().getLibraryManager();
-		Stack todo = new Stack();
+	public static void configureFileSearchPath(PrologLibraryManager mgr,PrologSession session, String[] libIds){
 		
+		Stack todo = new Stack();
+		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < libIds.length; i++) {
+			if(mgr.resolveLibrary(libIds[i])==null){
+				throw new IllegalArgumentException("library id "+libIds[i]+" is unresolved");
+			}
+			if(mgr.getBrokenLibraries().contains(libIds[i])){
+				throw new IllegalArgumentException("library id "+libIds[i]+" is broken");
+			}
 			todo.add(libIds[i]);			
 		}
 		
 		while(!todo.isEmpty()){
-			
-		}
-		PrologSession s = pif.getSession();
-		try{
-			
-		}finally{
-			if(s!=null){
-				s.dispose();
+			String key = (String) todo.pop();
+			PrologLibrary lib= mgr.resolveLibrary(key);
+			if(lib==null){
+				//this should not happen
+				throw new IllegalStateException("unresoved: "+key+". Bug in LibraryManager?");
 			}
+			if(sb.length()>0){
+				sb.append(',');
+			}
+			sb.append("(	user:file_search_path("+lib.getAlias()+", '"+lib.getPath()+"')" +
+					  "->	true" +
+					  ";	user:assert(file_search_path("+lib.getAlias()+", '"+lib.getPath()+"'))" +
+					  ")");
 		}
+		
+		
+		session.queryOnce(sb.toString());
+		
 	}
 }
 
