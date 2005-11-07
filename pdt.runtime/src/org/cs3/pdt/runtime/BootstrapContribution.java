@@ -2,7 +2,7 @@
  */
 package org.cs3.pdt.runtime;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * describes a contribution to the set of bootstrap files consulted during the
@@ -20,5 +20,5 @@ public interface BootstrapContribution {
      *                    a project name or null.
      * @return true if the bootstrap list was modified, false otherwise.
      */
-    public boolean contributeToBootstrapList(String key, List bootstrapList);
+    public boolean contributeToBootstrapList(String key, Set bootstrapList);
 }
