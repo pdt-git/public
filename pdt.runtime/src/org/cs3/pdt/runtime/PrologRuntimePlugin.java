@@ -3,15 +3,14 @@ package org.cs3.pdt.runtime;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologInterfaceRegistry;
@@ -71,6 +70,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 	private PrologInterfaceRegistry registry;
 	
 	private PrologLibraryManager libraryManager;
+
+	private HashMap globalHooks ;
+
+	private Map bootStrapLists;
 	public PrologLibraryManager getLibraryManager() {
 		if(libraryManager==null){
 			libraryManager=new PrologLibraryManager();
@@ -110,16 +113,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		return rootLocator.subLocator(key);
 	}
 
-	/**
-	 * shortcut for <code>getPrologInterface().getConsultService(key)</code>.
-	 * 
-	 * @param key
-	 * @return
-	 * @deprecated
-	 */
-	public ConsultService getConsultService(String key) {
-		return createPrologInterface().getConsultService(key);
-	}
+	
 
 	/**
 	 * @return the prolog interface instance shared among this plugin's
@@ -140,14 +134,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		factory.setResourceLocator(getResourceLocator(PrologRuntime.LOC_PIF));
 
 		prologInterface = factory.create();
-		reconfigurePrologInterfaces();
-		registerHooks();
-		try {
-			prologInterface.start();
-		} catch (IOException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
+		
+		
+		
 
 		return prologInterface;
 	}
@@ -212,14 +201,15 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		for (Iterator it = keys.iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			PrologInterface pif = r.getPrologInterface(key);
-			reconfigurePrologInterface(pif);
+			reconfigurePrologInterface(key,pif);
 		}
 	}
-	private void reconfigurePrologInterface(PrologInterface prologInterface) {
+	private void reconfigurePrologInterface(String key, PrologInterface prologInterface) {
 
 		// MetadataEngineInstaller.install(prologInterface);
 		List l = prologInterface.getBootstrapLibraries();
-		l.addAll(getBootstrapList(null));
+		l.addAll(getBootstrapList(""));
+		l.addAll(getBootstrapList(key));
 
 		// we are using the bootstrapContribution extension point just as
 		// anybody else.
@@ -242,8 +232,16 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 
 	}
 
-	// XXX
-	public List getBootstrapList(String key) {
+	
+	private Map getBootStrapLists(){
+		if(bootStrapLists==null){
+			bootStrapLists=new HashMap();
+			registerStaticBootstrapContributions();
+		}
+		return bootStrapLists;
+	}
+	
+	private void registerStaticBootstrapContributions() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(
 				PrologRuntime.PLUGIN_ID,
@@ -251,16 +249,26 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		if (point == null) {
 			Debug.error("could not find the extension point "
 					+ PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
-			return null;
+			throw new RuntimeException("could not find the extension point "
+					+ PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
 		}
 		IExtension[] extensions = point.getExtensions();
-		List r = new Vector();
+		
 		for (int i = 0; i < extensions.length; i++) {
 			IExtension ext = extensions[i];
 			IConfigurationElement[] configurationElements = ext
 					.getConfigurationElements();
 			for (int j = 0; j < configurationElements.length; j++) {
 				IConfigurationElement elm = configurationElements[j];
+				String pifKey = elm.getAttribute("key");
+				if(pifKey==null){
+					pifKey="";
+				}
+				Set contribs = (Set) bootStrapLists.get(pifKey);
+				if(contribs==null){
+					contribs = new HashSet();
+					bootStrapLists.put(pifKey,contribs);
+				}
 				String resName = elm.getAttribute("path");
 				String className = elm.getAttribute("class");
 				if (className != null) {
@@ -268,7 +276,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 					try {
 						bc = (BootstrapContribution) elm
 								.createExecutableExtension("class");
-						bc.contributeToBootstrapList(key, r);
+						bc.contributeToBootstrapList(pifKey, contribs);
 					} catch (CoreException e1) {
 						Debug.report(e1);
 						throw new RuntimeException("Problem instantiating: "
@@ -293,31 +301,30 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 					}
 					// URI uri = URI.create(url.toString());
 					File file = new File(url.getFile());
-					r.add(Util.prologFileName(file));
+					
+					contribs.add(Util.prologFileName(file));
 				}
 			}
 		}
-		return r;
+
+		
 	}
 
-	/**
-	 * Looks up all avaible extensions for the extension point
-	 * org.cs3.pl.extension.factbase.updated, creates Observer objects and calls
-	 * their update() methods.
-	 * 
-	 * @param project
-	 * @param prologManager
-	 * 
-	 * @throws CoreException
-	 */
-	protected boolean registerHooks() {
+	
+	private Set getBootstrapList(String key) {
+		Set r = (Set) getBootStrapLists().get(key);
+		return r==null?new HashSet():r;
+	}
+
+	protected void registerStaticHooks() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(
 				PrologRuntime.PLUGIN_ID, PrologRuntime.EP_HOOKS);
 		if (point == null) {
 			Debug.error("could not find the extension point "
 					+ PrologRuntime.EP_HOOKS);
-			return false;
+			throw new RuntimeException("could not find the extension point "
+					+ PrologRuntime.EP_HOOKS);
 		}
 		IExtension[] extensions = point.getExtensions();
 		try {
@@ -339,26 +346,19 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 						}
 						String[] dependencies = dependsOn.split(",");
 						String id = celem[j].getAttributeAsIs("id");
-						
-						PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-						Set keys = r.getRegisteredKeys();
-						for (Iterator it = keys.iterator(); it.hasNext();) {
-							String key = (String) it.next();
-							PrologInterface pif = r.getPrologInterface(key);
-							
-							pif.addLifeCycleHook(hook, id, dependencies);
+						String pifKey = celem[j].getAttributeAsIs("key");
+						if(pifKey==null){
+							pifKey="";
 						}
-						
-						
-								
+						registerLifeCycleHook(pifKey,hook,id,dependencies);								
 					}
 				}
 			}
 		} catch (CoreException e) {
 			Debug.report(e);
-			return false;
+			throw new RuntimeException(e);
 		}
-		return true;
+		
 	}
 
 	public Option[] getOptions() {
@@ -454,8 +454,28 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 		PrologInterface pif = r.getPrologInterface(key);
 		if (pif == null) {
 			pif = createPrologInterface();
+			reconfigurePrologInterface(key,pif);
 			r.addPrologInterface(key, pif);
-
+			Map hooks = (Map) getGlobalHooks().get(key);
+			if(hooks!=null){
+				for (Iterator it = hooks.values().iterator(); it.hasNext();) {
+					_HookRecord record = (_HookRecord) it.next();
+					pif.addLifeCycleHook(record.hook,record.hookId,record.deps);
+				}
+			}
+			hooks = (Map) getGlobalHooks().get("");
+			if(hooks!=null){
+				for (Iterator it = hooks.values().iterator(); it.hasNext();) {
+					_HookRecord record = (_HookRecord) it.next();
+					pif.addLifeCycleHook(record.hook,record.hookId,record.deps);
+				}
+			}
+			try {
+				pif.start();
+			} catch (IOException e) {
+				Debug.report(e);
+				throw new RuntimeException(e);
+			}
 		}
 		if (r.getName(key) == null && defaultName != null) {
 			r.setName(key, defaultName);
@@ -486,4 +506,97 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 
 	}
 
+	
+	/**
+	 * Checks if a PrologInterface is registered for the given key.
+	 * 
+	 * This method may be used by clients who want to check for the
+	 * existence of a key in the registry without actualy creating
+	 * a PrologInterface (yet).
+	 * 
+	 * This is aequivalent to calling 
+	 * <code>getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey)</code>
+	 * @param pifKey
+	 * @return
+	 */
+	public boolean hasPrologInterface(String pifKey){
+		return getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey);
+	}
+	private static class _HookRecord{
+		LifeCycleHook hook;
+		String hookId;
+		String[] deps;
+		public _HookRecord(LifeCycleHook hook, String hookId, String[] deps) {
+			super();
+			// TODO Auto-generated constructor stub
+			this.hook = hook;
+			this.hookId = hookId;
+			this.deps = deps;
+		}
+		
+	}
+	/**
+	 * globally register a hook with a given pifKey.
+	 * 
+	 *  clients may use this method make sure there code at the earliest
+	 *  possible point. The plugin in will store the key->hook association
+	 *  in a plugin-global table. If there is already a pif registered for
+	 *  the given key, the hook will be added emidiately. Otherwise it will
+	 *  be added the first time some client requests a prolog interface for 
+	 *  the given key.
+	 *  
+	 *  Note that no attempt i made to actualy execute the code in the 
+	 *  hook if the pif is already running. 
+	 *  
+	 *  Further note that the plugin global table consideres two entries
+	 *  equal, if and only if their hookIds are equal.
+	 *   
+	 * @param pifKey
+	 * @param hook
+	 */
+	public void registerLifeCycleHook(String pifKey,LifeCycleHook hook, String hookId,String[] deps){
+		Map hooks = (Map) getGlobalHooks().get(pifKey);
+		if(hooks==null){
+			hooks = new HashMap();
+			getGlobalHooks().put(pifKey,hooks);
+		}
+		hooks.put(hookId,new _HookRecord(hook,hookId,deps));
+		PrologInterface pif = getPrologInterfaceRegistry().getPrologInterface(pifKey);
+		if(pif!=null){
+			pif.addLifeCycleHook(hook,hookId,deps);
+		}
+	}
+	
+	/**
+	 * globally unregister a hook.
+	 * 
+	 * removes the hook from the plugin global table. If pif is registered
+	 * with the given key, the hook is removed from this pif, too.
+	 * 
+	 * Note that no attempt i made to actualy execute the code in the 
+	 * hook if the pif is already running.
+	 * @param pifKey
+	 * @param hook
+	 */
+	public void unregisterLifeCycleHook(String pifKey,String hookId){
+		Map hooks = (Map) getGlobalHooks().get(pifKey);
+		if(hooks==null){
+			return;
+		}
+		hooks.remove(hookId);
+		PrologInterface pif = getPrologInterfaceRegistry().getPrologInterface(pifKey);
+		if(pif!=null){
+			pif.removeLifeCycleHook(hookId);
+		}
+	}
+
+	
+
+	private HashMap getGlobalHooks() {
+		if(globalHooks==null){
+			globalHooks=new HashMap();
+			registerStaticHooks();
+		}
+		return globalHooks;
+	}
 }

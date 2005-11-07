@@ -34,6 +34,9 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
 
 	
 	private HashMap data = new HashMap();
+
+
+	private ConsultService service;
    
 
     /**
@@ -42,11 +45,19 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
      */
     public PrologElementContentProvider(Viewer outline) {
         viewer = outline;
-		PDTPlugin r = PDTPlugin.getDefault();
-		ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDTCore.CS_METADATA);
-        service.addConsultServiceListener(this);
+		
+		
     }
 
+    private void setConsultService(ConsultService nservice){
+    	if(this.service!=null){
+    		this.service.removeConsultServiceListener(this);
+    	}
+    	this.service=nservice;
+    	if(this.service!=null){
+    		this.service.addConsultServiceListener(this);
+    	}
+    }
     /**
      * @see org.eclipse.jface.viewers.IContentProvider#dispose()
      */
@@ -63,17 +74,19 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
 
         try {
             IFileEditorInput editorInput = null;
-            if (input == null) {
-                return;
-            }
+            
             try {
                 editorInput = (IFileEditorInput) input;
-            } catch (ClassCastException e) {
-                //not our concern.
+            } catch (ClassCastException e) {            	
+                
+            }
+            if (input == null) {
+                setConsultService(null);
                 return;
             }
             IFile file = editorInput.getFile();
             IPrologProject nature = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+            setConsultService(nature.getPrologInterface().getConsultService(PDTCore.CS_METADATA));
             String fileName = file.getFullPath().toString();
             
             generatePredicates(nature.getMetaInfoProvider(),fileName);
@@ -159,8 +172,9 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
     public void consultDataChanged(final ConsultServiceEvent e) {
        
         if(viewer==null||viewer.getControl().isDisposed()){
-            PDTPlugin r = PDTPlugin.getDefault();
-			ConsultService service = PrologRuntimePlugin.getDefault().getConsultService(PDTCore.CS_METADATA);
+            
+            
+			ConsultService service = (ConsultService)e.getSource(); 
             service.removeConsultServiceListener(this);
             return;
         }
