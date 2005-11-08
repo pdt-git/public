@@ -49,7 +49,15 @@ CT's:
 
 t_i(Id,Goal) :-
   catch(Goal, Exception,true),
+%  debug_t_i(Exception),
   term_info_exception_handling(Id, Exception).
+
+%  debug_t_i(Exception):-
+%      var(Exception),
+%      !.
+%  
+%  debug_t_i(Exception):-
+%      debugme.
 
 term_info_exception_handling(_, Exception):-
   var(Exception),
@@ -63,7 +71,7 @@ term_info_exception_handling(_, Exception):-
  */
 term_info_exception_handling(Id, term_info_exception(Predicate,Args)):-
   Call =.. [Predicate, Id |Args],
-  current_predicate(_,Call), % check existance
+  current_predicate(Predicate,_), % check existance
   !,
   call(Call).
 
@@ -148,10 +156,10 @@ apply_post([_head| _tail]) :-
     !,
     apply_post(_tail).
     
-apply_post([t_i(_Id,Action)| _tail]) :-
+apply_post([t_i(Id,Action)| _tail]) :-
     clause(action(Action),_),
     !,
-    error_handling(action(Action),'apply_post action failed: ~a',[Action]),
+    error_handling(t_i(Id,action(Action)),'apply_post action failed: ~a',[Action]),
     !,
     apply_post(_tail).
 

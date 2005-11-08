@@ -9,6 +9,44 @@
 :- dynamic slAspectT/4. 
 :- multifile slAspectT/4.
 
+/**
+ * t_i_based_error_handling(Msg)
+ * 
+ */
+t_i_based_error_handling(Msg) :-
+    throw(term_info_exception(add_error_term_based_on_t_i, [Msg])).
+
+
+add_error_term_based_on_t_i(AbbaId, Msg) :-
+    abba:node(AbbaId,_,_),
+    abba:property(AbbaId,position(Start,Length)),
+    abba:get_defining_file(AbbaId,File),
+	error_handling_add_error_term(sourceLocation(File,Start,Length),fail, Msg).
+    
+/**
+ * abba:get_defining_file(AbbaId,File)
+ *
+ * look up the defining file for the current
+ * abba node.
+ * If the file can not be found a stack trace
+ * will be shown and a file_not_found(Msg) exception thrown.
+ */
+
+abba:get_defining_file(AbbaId,File) :-
+    abba:property(AbbaId,file(File)),
+    !.
+
+abba:get_defining_file(AbbaId,File) :-
+    abba:edge(_,parent,_Label,AbbaId,Parent),
+	abba:get_defining_file(Parent,File),
+	!.
+	
+abba:get_defining_file(AbbaId,_File) :-
+	prolog_current_frame(Frame),
+	stack_for_frame_atom(Frame,Stack),
+	write(Stack),
+	sformat(Msg,'could not find the defining abba file for the id: ~w',[AbbaId]),
+    throw(file_not_found(Msg)).
 
 /**
  * error_handling_add_error_term(+SourceLocation, +Goal, +Message)
@@ -28,9 +66,11 @@ error_handling_add_error_term(SourceLocation,_, Err) :-
     addErrorFacts(SourceLocation,Err),  
     flush_output,
     debugme,
-    halt_on_error ->
+    (
+      halt_on_error ->
 	    halt;
-	    throw(ErrorString).
+	    throw(Err)
+	 ).
        
 error_handling(_term, _,_) :-
     call(_term),
