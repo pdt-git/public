@@ -728,6 +728,8 @@ public class FactGenerator extends ASTVisitor {
 
 	private GenericAnnotation parseAnnotation(String text) throws IllegalArgumentException {
 	
+		if(text.startsWith(" @@"))
+			text = text.substring(1);
 		if(!text.startsWith("@@"))
 			throw new IllegalArgumentException();
 		StringTokenizer tokenizer = new StringTokenizer(text,"@(,) \n\r\t");
