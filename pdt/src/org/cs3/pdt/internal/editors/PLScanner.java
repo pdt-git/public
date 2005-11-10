@@ -41,7 +41,7 @@ public class PLScanner extends RuleBasedScanner {
 			PrologSession session = null;
 			try {
 				PDTPlugin r = PDTPlugin.getDefault();
-				session = plProject.getPrologInterface()
+				session = plProject.getMetadataPrologInterface()
 						.getSession();
 				List solutions = session
 						.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
@@ -69,7 +69,7 @@ public class PLScanner extends RuleBasedScanner {
 			;
 			try {
 				PDTPlugin r = PDTPlugin.getDefault();
-				session = plProject.getPrologInterface()
+				session = plProject.getMetadataPrologInterface()
 						.getSession();
 				List solutions = session
 						.queryAll("predicate_property(P,built_in),functor(P,Name,_)");

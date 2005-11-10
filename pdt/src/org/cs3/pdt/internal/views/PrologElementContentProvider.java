@@ -86,7 +86,7 @@ public  class PrologElementContentProvider implements ITreeContentProvider, Cons
             }
             IFile file = editorInput.getFile();
             IPrologProject nature = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
-            setConsultService(nature.getPrologInterface().getConsultService(PDTCore.CS_METADATA));
+            setConsultService(nature.getMetadataPrologInterface().getConsultService(PDTCore.CS_METADATA));
             String fileName = file.getFullPath().toString();
             
             generatePredicates(nature.getMetaInfoProvider(),fileName);

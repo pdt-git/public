@@ -66,7 +66,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			descr.setBuildSpec(newBuilders);
 			project.setDescription(descr, null);
 
-			PrologInterface pif = getPrologInterface();
+			PrologInterface pif = getMetadataPrologInterface();
 			if (pif.isUp()) {
 				Job j = new Job("building Prolog Metadata for project "
 						+ project.getName()) {
@@ -238,7 +238,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return autoConsult;
 	}
 
-	public PrologInterface getPrologInterface() {
+	public PrologInterface getMetadataPrologInterface() {
 		PrologInterface pif = PrologRuntimePlugin.getDefault()
 				.getPrologInterface(getProject().getName());
 
@@ -372,7 +372,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public IMetaInfoProvider getMetaInfoProvider() {
 		if (prologHelper == null) {
-			prologHelper = new DefaultMetaInfoProvider(getPrologInterface(), "");
+			prologHelper = new DefaultMetaInfoProvider(getMetadataPrologInterface(), "");
 		}
 		return prologHelper;
 	}
