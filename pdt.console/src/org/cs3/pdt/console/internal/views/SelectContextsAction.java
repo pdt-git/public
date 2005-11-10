@@ -91,12 +91,12 @@ public class SelectContextsAction extends Action implements IMenuCreator,
 	}
 
 	private void fillMenu() {
-		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault().getContextTrackers();
-		Menu menu=getCreatedMenu();
-		for (int i = 0; i < trackers.length; i++) {
-			
-			createAction(menu, trackers[i]);
-		}
+//		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault().getContextTrackers();
+//		Menu menu=getCreatedMenu();
+//		for (int i = 0; i < trackers.length; i++) {
+//			
+//			createAction(menu, trackers[i]);
+//		}
 	}
 
 	/**
