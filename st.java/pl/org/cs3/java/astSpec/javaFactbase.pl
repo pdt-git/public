@@ -1093,6 +1093,8 @@ ID of the enclosing method declaration.
 :- multifile precedenceT/4.
 :- multifile nopT/3.
 
+%temporary hack: -- TR 03.11.2005
+:- multifile tree/3.
 tree(_id, null, packageT):-packageT(_id,_).
 tree(_id, _pid, localDefT):-localDefT(_id, _pid,_,_,_,_).
 tree(_id, _pid, paramDefT):-paramDefT(_id, _pid,_,_).

@@ -354,15 +354,7 @@ gen_class(_id, _name) :-
     printf('class ~a ',[_name]),
     gen_extends(_id),
     gen_implements(_id),
-    classDefT(_id, _, _, _defs),
-    
-    %AOPHook instead of gen_block(_defs)
-    printf(' {~n'),
-    indent,
-    gen_stats(_defs),
-    (gen_class_after(_id);true),
-    undent,
-    printfa('}').
+	gen_class_body(_id).
 
 
 gen_class(_id, _name) :-
@@ -381,6 +373,17 @@ gen_class(_id, _name) :-
     undent,
     printfa('}').
 
+
+gen_class_body(_id):-
+    classDefT(_id, _, _, _defs),
+    
+    %AOPHook instead of gen_block(_defs)
+    printf(' {~n'),
+    indent,
+    gen_stats(_defs),
+    (gen_class_after(_id);true),
+    undent,
+    printfa('}').
 
 gen_method_body('null') :-
     !,
@@ -620,8 +623,7 @@ print_encl(_encl) :-
 
 print_anonymous_class('null') :- !.
 print_anonymous_class(_def) :-
-    classDefT(_def, _p, _, _defs),
-    gen_block(_defs).
+    gen_class_body(_def).
 
 % uwe neu
 appendDir(Filename, Dirfile) :-
