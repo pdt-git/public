@@ -33,12 +33,24 @@ escape(A,In,Out):-
 sd_load:-
     current_prolog_flag(shared_object_extension,E),
     file_name_extension(stream_decorator,E,LibName),
-    load_foreign_library(foreign(LibName)).
+    (	current_foreign_library(LibName,_)
+    ->	true
+    ;	load_foreign_library(foreign(LibName))
+    ).
         
 sd_install:-
     sd_load,
-    hijack_stream(current_input,single_char_interceptor,[]),
-    hijack_stream(current_output,single_char_interceptor,[]).    
+    set_prolog_flag(tty_control,true),
+    set_stream(current_input,tty(true)),
+    set_stream(current_output,tty(true)),
+    (	is_hijacked_stream(current_input)
+    ->	true
+    ;	hijack_stream(current_input,single_char_interceptor,[])
+    ),
+    (	is_hijacked_stream(current_output)
+    ->	true
+    ;	hijack_stream(current_output,single_char_interceptor,[])
+    ).    
     
 sd_uninstall:-
 	unhijack_stream(current_input),
