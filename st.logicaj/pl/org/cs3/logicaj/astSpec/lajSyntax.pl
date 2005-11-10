@@ -20,3 +20,7 @@ attribSignature(aspect,1).
 */
 :-dynamic aspect/1.
 :-multifile aspect/1.
+
+:-dynamic asdfsadfsd/0.
+
+:- assert(aspect(123213)).

@@ -39,21 +39,25 @@ abba:nodetype(laj_pc_dec).
 abba:nodetype(laj_body).
 
 
-abba:edgetype(parent, laj_effect, aspect).
-abba:edgetype(parent, laj_analysis, aspect).
-abba:edgetype(parent, laj_pcd, aspect).
-abba:edgetype(parent, laj_pc_dec, aspect).
+
+%abba:edgetype(parent, laj_effect, laj_aspect).
+%abba:edgetype(parent, laj_analysis, laj_aspect).
+%abba:edgetype(parent, laj_pcd, laj_effect).
+%abba:edgetype(parent, laj_pcd, laj_analysis).
+%abba:edgetype(parent, laj_pcd, laj_pc_dec).
+%abba:edgetype(parent, laj_body, laj_effect).
+%abba:edgetype(parent, laj_pc_dec, laj_aspect).
 
 abba:propertytype(laj_effect, kind(atom)).
 abba:propertytype(laj_analysis, kind(atom)).
 
-abba:propertytype(laj_effect, position(int, int)).
-abba:propertytype(laj_analysis, position(int, int)).
-abba:propertytype(laj_pcd, position(int, int)).
-abba:propertytype(laj_pc_dec, position(int, int)).
-abba:propertytype(laj_aspect, position(int, int)).
+abba:property(laj_effect, propertytype(position(int, int))).
+abba:property(laj_analysis, propertytype(position(int, int))).
+abba:property(laj_pcd, propertytype(position(int, int))).
+abba:property(laj_pc_dec, propertytype(position(int, int))).
+abba:property(laj_aspect, propertytype(position(int, int))).
 
-abba:propertytype(laj_aspect, file(atom)).
+abba:property(laj_aspect, propertytype(file(string))).
 
 delete_logicaj_abba_model :-
   forall((
