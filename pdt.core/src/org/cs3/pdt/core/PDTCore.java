@@ -73,6 +73,8 @@ public class PDTCore {
 	 */
 	public static final String PROP_SOURCE_EXCLUSION_PATTERN = "pdt.exlusion.pattern";
 	public static final String PLUGIN_ID = "org.cs3.pdt.core";
+
+	public static final String ENGINE_ID = "org.cs3.pdt.core.engine";
 	/**
 	 * @return all open IPrologProjects that operate on the given PrologInterface instance.
 	 * @throws CoreException
@@ -85,7 +87,7 @@ public class PDTCore {
 	        IProject project = projects[i];            
 	        if(project.isAccessible()&&project.hasNature(NATURE_ID)){
 	            IPrologProject prologProject = (IPrologProject) project.getNature(NATURE_ID);
-	            if(prologProject.getPrologInterface()==pif){
+	            if(prologProject.getMetadataPrologInterface()==pif){
 	                l.add(prologProject);
 	            }
 	        }

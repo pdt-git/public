@@ -125,7 +125,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 						forgetList.size()));
 				build(buildList, out, new SubProgressMonitor(monitor, buildList
 						.size()));
-			PrintStream realout = plProject.getPrologInterface().getConsultService(
+			PrintStream realout = plProject.getMetadataPrologInterface().getConsultService(
 						PDTCore.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
 			try {
 				realout.write(buffStream.toByteArray());
@@ -202,7 +202,7 @@ public class MetaDataBuilder extends IncrementalProjectBuilder {
 				IResource.DEPTH_INFINITE);
 		IPrologProject plProject = (IPrologProject) getProject().getNature(
 				PDTCore.NATURE_ID);
-		PrintStream out = plProject.getPrologInterface().getConsultService(
+		PrintStream out = plProject.getMetadataPrologInterface().getConsultService(
 				PDTCore.CS_METADATA).getOutputStream("flat_pl_metadata.pl");
 		try {
 			forget(forgetList, out, monitor);

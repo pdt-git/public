@@ -44,7 +44,7 @@ public interface IPrologProject extends OptionProvider{
     public boolean isAutoConsulted(IFile file) throws CoreException;
     public void setAutoConsulted(IFile file,boolean val) throws CoreException;
 
-	public PrologInterface getPrologInterface();
+	public PrologInterface getMetadataPrologInterface();
 	public IMetaInfoProvider getMetaInfoProvider();
 
 	public IProject getProject();
