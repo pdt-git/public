@@ -162,7 +162,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #expr:
 expression, 'null'
@@ -192,7 +192,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 'name':
 'this', 'super' or an identifier
@@ -217,7 +217,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 TYPE:
 is a valid TypeTerm.
@@ -258,7 +258,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 [#arg1,...]:
 expression
@@ -285,7 +285,7 @@ ID of the fact that represents the parent of this fact in the prolog AST.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #expr:
 ID of another fact representing the expression on which the method is invoked.
@@ -333,7 +333,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 'name':
 name of the subpackage or type which we select.
@@ -360,7 +360,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #condition:
 expression
@@ -415,7 +415,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #lhs:
 getFieldT, identT, indexedT
@@ -461,7 +461,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 [#dim_1,...]:
 expression
@@ -512,7 +512,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #constructor:
 methodDefT, null
@@ -592,7 +592,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 TYPE:
 is a valid TypeTerm.
@@ -715,7 +715,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #index:
 expression
@@ -853,7 +853,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 TYPE:
 is a valid TypeTerm (right operand of this instanceof expression).
@@ -876,7 +876,7 @@ ID of the parent node.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #lhs:
 getFieldT, identT, indexedT
@@ -1022,7 +1022,7 @@ ID if the parent node in the AST.
 
 #encl:
 methodDefT, fieldDefT
-ID of the fact that represents the enclosing element.
+ID of the fact that represents the enclosing interface element.
 
 #expr:
 expression
