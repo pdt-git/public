@@ -165,6 +165,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		if(l.contains(s)){
 			l.remove(s);
 			fireSubscriptionRemoved(s);
+			
 		}
 		
 		

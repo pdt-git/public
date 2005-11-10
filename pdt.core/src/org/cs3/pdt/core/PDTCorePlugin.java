@@ -1,6 +1,5 @@
 package org.cs3.pdt.core;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -17,21 +16,24 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 public class PDTCorePlugin extends AbstractUIPlugin {
 
 	private ResourceBundle resourceBundle;
-	
-	
+
 	private Option[] options;
-//    public IMetaInfoProvider getMetaInfoProvider() {
-//        if (prologHelper == null) {
-//            prologHelper = new DefaultMetaInfoProvider(PrologRuntimePlugin.getDefault().getPrologInterface(), pdtModulePrefix);
-//        }
-//        return prologHelper;
-//    }
+
+	// public IMetaInfoProvider getMetaInfoProvider() {
+	// if (prologHelper == null) {
+	// prologHelper = new
+	// DefaultMetaInfoProvider(PrologRuntimePlugin.getDefault().getPrologInterface(),
+	// pdtModulePrefix);
+	// }
+	// return prologHelper;
+	// }
 	public Option[] getOptions() {
 		if (options == null) {
 			initOptions();
 		}
 		return this.options;
 	}
+
 	/**
 	 * look up a preference value.
 	 * <p>
@@ -44,12 +46,13 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 	 * @return the value or specified default if no such key exists..
 	 */
 	public String getPreferenceValue(String key, String defaultValue) {
-	
+
 		IPreferencesService service = Platform.getPreferencesService();
 		String qualifier = getBundle().getSymbolicName();
 		String value = service.getString(qualifier, key, defaultValue, null);
 		return System.getProperty(key, value);
 	}
+
 	private String getLocation() throws IOException {
 		URL url = PDTCorePlugin.getDefault().getBundle().getEntry("/");
 		String location = null;
@@ -59,7 +62,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 			location = location.substring(0, location.length() - 1);
 		return location;
 	}
-	
+
 	private String ensureDirExists(String value, String label) {
 		if (value == null) {
 			return label + "must not be null";
@@ -85,12 +88,13 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 		}
 		return "";
 	}
+
 	/**
 	 * 
 	 */
 	private void initOptions() {
 		String fileSep = File.separator;
-		
+
 		String location = "";
 		try {
 			location = getLocation();
@@ -98,20 +102,18 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 			Debug.report(e);
 			Debug.error("Could not find plugin installation dir.");
 		}
-	
+
 		options = new Option[] {
 				new SimpleOption(
 						PDTCore.PREF_METADATA_ENGINE_DIR,
 						"Metadata Engine Dir",
 						"Directory containing the prolog implementation of the meta data engine,",
 						Option.DIR, location + fileSep + "engine") {
-	
+
 					public String validate(String value) {
 						return ensureDirExists(value, "Metadata Engine Dir");
 					}
 
-					
-	
 				},
 				new SimpleOption(PDTCore.PREF_METADATA_STORE_DIR,
 						"Metadata Store Dir",
@@ -127,43 +129,53 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						"The default value for the source path of prolog projects.",
 						Option.STRING, "/"),
 				new SimpleOption(
+						PDTCore.PREF_METADATA_PIF_KEY_DEFAULT,
+						"Default Meta Data PrologInterface",
+						"The default value for the Metadata PrologInterface property of prolog projects.",
+						Option.STRING, "%project%"),
+				new SimpleOption(
+						PDTCore.PREF_RUNTIME_PIF_KEY_DEFAULT,
+						"Default Runtime PrologInterface",
+						"The default value for the Runtime PrologInterface property of prolog projects.",
+						Option.STRING, "%project%"),
+				new SimpleOption(
 						PDTCore.PREF_AUTO_CONSULT,
 						"Enable Auto-Consult (EXPERIMENTAL)",
 						"If this flag is set, the PDT will automaticaly (re-)consult any source file,"
 								+ "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental "
 								+ "feature and defaults to \"false\" for 0.1.x",
 						Option.FLAG, "false")
-	
+
 		};
-	
+
 	}
+
 	/**
 	 * 
 	 */
 	public void reconfigure() {
-		;	
+		;
 	}
+
 	public PDTCorePlugin() {
 		super();
-        plugin = this;
-        try {
-            resourceBundle = ResourceBundle
-                    .getBundle("prg.cs3.pdt.PDTPluginResources");
-        } catch (MissingResourceException x) {
-            resourceBundle = null;
-        }
+		plugin = this;
+		try {
+			resourceBundle = ResourceBundle
+					.getBundle("prg.cs3.pdt.PDTPluginResources");
+		} catch (MissingResourceException x) {
+			resourceBundle = null;
+		}
 	}
 
-//	The shared instance.
-    private static PDTCorePlugin plugin;
+	// The shared instance.
+	private static PDTCorePlugin plugin;
 
-    /**
-     * Returns the shared instance.
-     */
-    public static PDTCorePlugin getDefault() {
-        return plugin;
-    }
-    
-    
-    
+	/**
+	 * Returns the shared instance.
+	 */
+	public static PDTCorePlugin getDefault() {
+		return plugin;
+	}
+
 }

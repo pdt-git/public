@@ -75,6 +75,12 @@ public class PDTCore {
 	public static final String PLUGIN_ID = "org.cs3.pdt.core";
 
 	public static final String ENGINE_ID = "org.cs3.pdt.core.engine";
+
+	public static final String PROP_METADATA_PIF_KEY = "pdt.metadata.pif_key";
+	public static final String PROP_RUNTIME_PIF_KEY = "pdt.runtime.pif_key";
+
+	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
+	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
 	/**
 	 * @return all open IPrologProjects that operate on the given PrologInterface instance.
 	 * @throws CoreException

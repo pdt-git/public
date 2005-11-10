@@ -49,7 +49,13 @@ public class Factory extends PrologInterfaceFactory {
 						SocketPrologInterface.USE_POOL,
 						"Use session pooling",
 						"If true, the PIF will try to pool and reuse disposed sessions to reduce connection overhead.",
-						SimpleOption.FLAG, guessUsePool()) };
+						SimpleOption.FLAG, guessUsePool()),
+				new SimpleOption(
+								SocketPrologInterface.HIDE_PLWIN,
+								"Hide plwin (windows only)",
+								"Usefull for windows users who are tired of plwin windows cluttering their system tray." +
+								"\n Note: this only works with the plwin executable.",
+								SimpleOption.FLAG, "true")};
 	}
 
 	/*

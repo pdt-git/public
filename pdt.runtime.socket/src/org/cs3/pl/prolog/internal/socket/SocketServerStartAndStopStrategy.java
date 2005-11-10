@@ -76,6 +76,11 @@ public class SocketServerStartAndStopStrategy implements
         try {			
 			tmpFile = File.createTempFile("socketPif",null);
 			PrintWriter p = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
+			if(pif.isHidePlwin()){
+				p.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" +
+						"->win_window_pos([show(false)])" +
+						";true).");
+			}
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 	        for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
 	            String s = (String) it.next();
