@@ -1,4 +1,3 @@
-
 /**
   enclMethod(?Id, ?MethodId)
   
@@ -558,9 +557,11 @@ enclBlock(_tree, _Block) :-
 
 
 
-getReceiver(_ident, 'null') :- identT(_ident, _, _, _, _),!.
+getReceiver(_ident, 'null') :-     identT(_ident, _, _, _, _),!.
 getReceiver(_select, _Receiver) :- selectT(_select, _, _, _, _Receiver, _).
 getReceiver(_select, _Receiver) :- getFieldT(_select, _, _, _Receiver, _, _).
+getReceiver(_select, _Receiver) :- setField(_select,_,_,_Receiver,_,_).
+getReceiver(_select, _Receiver) :- methodCall(_select, _, _, _Receiver, _, _,_).
 
 
 /*
@@ -595,8 +596,13 @@ getType(_ident, _Type) :-
     identT(_ident,_,_,_,_ref),
     getType(_ref, _Type).
 
-getType(_select, _Type) :-
+getType(_select, _Type) :-    
     getFieldT(_select,_,_,_,_,_ref),
+    getType(_ref, _Type).
+ 
+% has setField a type? type(basic,void,0) ?     
+getType(_select, _Type) :-
+    setField(_select,_,_,_,_ref,_),
     getType(_ref, _Type).
 
 getType(Apply, Type) :-
