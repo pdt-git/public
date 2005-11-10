@@ -426,11 +426,30 @@ foreign_t pl_unhijack_stream(term_t stream_term)
 	{
     	return PL_warning("unhijack_stream/1: problem obtaining backend stream handle.");
   }  	
-	unhijack(stream);
-	PL_succeed;
+	
+	if( stream->functions!=&Sdelegate_functions)
+	{
+		PL_succeed;
+	}
+	else
+	{
+		PL_fail;
+	}
+	
+	
 }	
 
 
+foreign_t pl_is_hijacked_stream(term_t stream_term)
+{
+	IOSTREAM * stream=0;
+	if ( !PL_get_stream_handle(stream_term, &stream) )
+	{
+    	return PL_warning("unhijack_stream/1: problem obtaining backend stream handle.");
+  }  	
+	unhijack(stream);
+	PL_succeed;
+}	
 
 
 
