@@ -81,6 +81,13 @@ static int delegate_read(void *_handle, char *buf, int bufsize)
 	   case PL_COOKEDTTY:PL_put_atom_chars(t3,"cooked_tty"); break;    
 	}  
 	PL_put_variable(t4);
+	display_term(t0);Sprintf("\n");
+	display_term(t1);Sprintf("\n");
+	display_term(t2);Sprintf("\n");
+	display_term(t3);Sprintf("\n");
+	
+	
+	
 	qid = PL_open_query(handle->module,PL_Q_NORMAL|PL_Q_CATCH_EXCEPTION|PL_Q_NODEBUG,handle->read_hook,t0);
 	rval = PL_next_solution(qid);
 	
@@ -427,14 +434,9 @@ foreign_t pl_unhijack_stream(term_t stream_term)
     	return PL_warning("unhijack_stream/1: problem obtaining backend stream handle.");
   }  	
 	
-	if( stream->functions!=&Sdelegate_functions)
-	{
-		PL_succeed;
-	}
-	else
-	{
-		PL_fail;
-	}
+	
+	unhijack(stream);
+	PL_succeed;
 	
 	
 }	
@@ -445,10 +447,17 @@ foreign_t pl_is_hijacked_stream(term_t stream_term)
 	IOSTREAM * stream=0;
 	if ( !PL_get_stream_handle(stream_term, &stream) )
 	{
-    	return PL_warning("unhijack_stream/1: problem obtaining backend stream handle.");
+    	return PL_warning("is_hijacked_stream/1: problem obtaining backend stream handle.");
   }  	
-	unhijack(stream);
-	PL_succeed;
+	
+	if( stream->functions==&Sdelegate_functions)
+	{
+		PL_succeed;
+	}
+	else
+	{
+		PL_fail;
+	}
 }	
 
 
@@ -459,6 +468,7 @@ install_t install()
 	PL_set_feature("tty_control", PL_BOOL, TRUE);
 	PL_register_foreign("hijack_stream", 3, pl_hijack_stream, 0);
 	PL_register_foreign("unhijack_stream", 1, pl_unhijack_stream, 0);
+	PL_register_foreign("is_hijacked_stream", 1, pl_is_hijacked_stream, 0);
 	PL_register_foreign("orig_read", 3, pl_orig_read, 0);
 	PL_register_foreign("orig_write", 3, pl_orig_write, 0);
 }
