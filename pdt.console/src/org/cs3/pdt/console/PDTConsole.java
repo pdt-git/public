@@ -10,6 +10,7 @@ final public class PDTConsole {
 	public static final String PREF_CONSOLE_HISTORY_FILE = "pdt.console.history.file";
 	public static final String PREF_ENTER_FOR_BACKTRACKING = "pdt.console.enter.for.backtracking";
 	public static final String CONTRIB_PIF_SELECTOR_ID = "pdt.console.contribution.pifselector";
+	public static final String PREF_TIMEOUT = "pdt.console.timeout";
 	
 	
 }

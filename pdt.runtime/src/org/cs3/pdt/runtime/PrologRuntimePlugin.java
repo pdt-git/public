@@ -24,6 +24,7 @@ import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
@@ -417,16 +418,17 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 	}
 
 	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(key, null, null);
+		return getPrologInterface(new PrologInterfaceSubscription(key,
+		"No description available."), null);
 	}
 
 	public PrologInterface getPrologInterface(String key, String defaultName) {
-		return getPrologInterface(key, null, defaultName);
+		return getPrologInterface(new PrologInterfaceSubscription(key,
+		"No description available."), defaultName);
 	}
 
-	public PrologInterface getPrologInterface(String key,
-			PrologInterfaceSubscription s) {
-		return getPrologInterface(key, s, null);
+	public PrologInterface getPrologInterface(PrologInterfaceSubscription s) {
+		return getPrologInterface(s, null);
 	}
 
 	/**
@@ -448,15 +450,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 	 * @return the ProlotInterface instance, either from registry, or freshly
 	 *         created.
 	 */
-	public PrologInterface getPrologInterface(String key,
-			PrologInterfaceSubscription s, String defaultName) {
+	public PrologInterface getPrologInterface(PrologInterfaceSubscription s, String defaultName) {
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-		PrologInterface pif = r.getPrologInterface(key);
+		PrologInterface pif = r.getPrologInterface(s.key);
 		if (pif == null) {
 			pif = createPrologInterface();
-			reconfigurePrologInterface(key,pif);
-			r.addPrologInterface(key, pif);
-			Map hooks = (Map) getGlobalHooks().get(key);
+			reconfigurePrologInterface(s.key,pif);
+			r.addPrologInterface(s.key, pif);
+			Map hooks = (Map) getGlobalHooks().get(s.key);
 			if(hooks!=null){
 				for (Iterator it = hooks.values().iterator(); it.hasNext();) {
 					_HookRecord record = (_HookRecord) it.next();
@@ -472,18 +473,24 @@ public class PrologRuntimePlugin extends AbstractUIPlugin {
 			}
 			try {
 				pif.start();
+				//debug code, feel free to remove
+				PrologSession session = pif.getSession();
+				try{
+					session.queryOnce("assert(pifkey('"+s.key+"'))");
+				}finally{
+					if (session!=null){
+						session.dispose();
+					}
+				}
 			} catch (IOException e) {
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
 		}
-		if (r.getName(key) == null && defaultName != null) {
-			r.setName(key, defaultName);
+		if (r.getName(s.key) == null && defaultName != null) {
+			r.setName(s.key, defaultName);
 		}
-		if (s == null) {
-			s = new PrologInterfaceSubscription(key,
-					"No description available.");
-		}
+		
 		r.addSubscription(s);
 		return pif;
 	}

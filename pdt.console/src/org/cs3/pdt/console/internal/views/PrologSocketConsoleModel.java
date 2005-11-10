@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
@@ -329,14 +331,21 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			Debug.warning("Seems we are already connected?");
 			return;
 		}
-		//knock, knock...
-		Debug.info("probing port " + port);
-		if (!isServerActive())
-		{
-			Debug.info("No one is listening on port " + port
-					+ ", i give up for now.");
-			return;
+		long timeout = Long.parseLong(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_TIMEOUT, "5000"));
+		long startTime=System.currentTimeMillis();
+		while(!isServerActive()){
+			try {
+				Thread.sleep(100);
+				long elapsedTime=System.currentTimeMillis()-startTime;
+				if(elapsedTime>timeout){
+					throw new RuntimeException("Timeout while waiting for peer to start console service.");
+				}
+			} catch (InterruptedException e) {
+				Debug.report(e);
+				throw new RuntimeException(e);
+			}
 		}
+		
 		try
 		{
 			Debug.info("connecting console to server at port " + port);
@@ -381,6 +390,8 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			{
 				if (socket != null)
 				{
+					writer.write("sd_uninstall.\n");
+					writer.flush();
 					writer.write("end_of_file.\n");
 					writer.flush();
 					socket.close();

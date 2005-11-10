@@ -11,6 +11,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.console.prolog.PrologConsoleService;
+
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.resource.JFaceResources;
@@ -47,8 +48,12 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
         			public String validate(String value) {
         				return ensureFileExists(value,"History File");
         			}
-        		}
-                              
+        		},
+        		new SimpleOption(
+						PDTConsole.PREF_TIMEOUT,
+						"Connect Timeout",
+						"Maximum time in milliseconds to wait for the console server to come up.",
+						SimpleOption.NUMBER, "5000")         
         };
 
     }

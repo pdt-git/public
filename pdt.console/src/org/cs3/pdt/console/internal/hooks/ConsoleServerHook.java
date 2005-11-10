@@ -31,31 +31,31 @@ public class ConsoleServerHook implements LifeCycleHook {
 //    }
 
     public void onInit(PrologInterface pif,PrologSession s) {
-        try {
-            port = Util.findFreePort();
-            
-            lockFile=Util.getLockFile();       
-                String prologFileName = Util.prologFileName(lockFile);
-				String queryString = "use_module(library(prolog_server)), prolog_server("
-                        + port + ", []),assert(pdt_console_server("+port+",'"+prologFileName+"'))," +
-                        		"consult_server:create_lock_file('"+prologFileName+"')";
-                Debug.info("starting console server using: " + queryString);
-
-                s.queryOnce(queryString);
-
-                while (!lockFile.exists()) {
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e1) {
-                        Debug.report(e1);
-                    }
-                }
-                Debug.debug("Server thread created");
-            
-        } catch (Throwable e) {
-            Debug.report(e);
-            throw new RuntimeException(e);
-        }
+//        try {
+//            port = Util.findFreePort();
+//            
+//            lockFile=Util.getLockFile();       
+//                String prologFileName = Util.prologFileName(lockFile);
+//				String queryString = "use_module(library(prolog_server)), prolog_server("
+//                        + port + ", []),assert(pdt_console_server("+port+",'"+prologFileName+"'))," +
+//                        		"consult_server:create_lock_file('"+prologFileName+"')";
+//                Debug.info("starting console server using: " + queryString);
+//
+//                s.queryOnce(queryString);
+//
+//                while (!lockFile.exists()) {
+//                    try {
+//                        Thread.sleep(50);
+//                    } catch (InterruptedException e1) {
+//                        Debug.report(e1);
+//                    }
+//                }
+//                Debug.debug("Server thread created");
+//            
+//        } catch (Throwable e) {
+//            Debug.report(e);
+//            throw new RuntimeException(e);
+//        }
     }
 
     /*

@@ -68,6 +68,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
     public final static String USE_POOL = "pif.use_pool";
     
     public final static String TIMEOUT = "pif.timeout";
+
+	public static final String HIDE_PLWIN = "pif.hide_plwin";
     
 
     private String engineDir;
@@ -83,6 +85,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	private File lockFile;
 
 	private int timeout;
+
+	private boolean hidePlwin;
 
     public SocketPrologInterface(PrologInterfaceFactory factory)  {
         super();
@@ -165,6 +169,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             setStandAloneServer(Boolean.valueOf(value).booleanValue());
         }else if (TIMEOUT.equals(opt)) {
             this.timeout=Integer.parseInt(value);
+        }else if (HIDE_PLWIN.equals(opt)) {
+            this.hidePlwin=Boolean.valueOf(value).booleanValue();
         } else if (USE_POOL.equals(opt)) {
             setUseSessionPooling(Boolean.valueOf(value).booleanValue());
         } else {
@@ -192,6 +198,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             return "" + standAloneServer;
         } else if (USE_POOL.equals(opt)) {
             return "" + useSessionPooling;
+        } else if (HIDE_PLWIN.equals(opt)) {
+            return "" + hidePlwin;
         } else if (TIMEOUT.equals(opt)) {
             return "" + timeout;
         } else {
@@ -358,6 +366,14 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 	public int getTimeout() {
 		return timeout;
+	}
+
+	public boolean isHidePlwin() {
+		return hidePlwin;
+	}
+
+	public void setHidePlwin(boolean hidePlwin) {
+		this.hidePlwin = hidePlwin;
 	}
 
     

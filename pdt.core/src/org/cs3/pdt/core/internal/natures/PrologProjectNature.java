@@ -10,6 +10,8 @@ import java.util.Set;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologInterfaceSubscription;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
@@ -43,7 +45,15 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private Option[] options;
 
-	private IMetaInfoProvider prologHelper;
+	
+
+	private PrologInterface metadataPif;
+
+	private PrologInterface runtimePif;
+
+	private PrologInterfaceSubscription runtimePifSubscription;
+
+	private PrologInterfaceSubscription metadataPifSubscription;
 
 	/**
 	 * @see IProjectNature#configure
@@ -239,19 +249,21 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public PrologInterface getMetadataPrologInterface() {
-		PrologInterface pif = PrologRuntimePlugin.getDefault()
-				.getPrologInterface(getProject().getName());
-
-		if (!pif.isUp()) {
-			try {
-				pif.start();
-			} catch (IOException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
+		if (metadataPif == null) {
+			String pifID=getMetadataPrologInterfaceKey();
+			String projectName = getProject().getName();
+			metadataPifSubscription = new PrologInterfaceSubscription(pifID,"used as metadata pif for project "+projectName);
+			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(metadataPifSubscription);
+			if (!metadataPif.isUp()) {
+				try {
+					metadataPif.start();
+				} catch (IOException e) {
+					Debug.report(e);
+					throw new RuntimeException(e);
+				}
 			}
 		}
-
-		return pif;
+		return metadataPif;
 	}
 
 	public Option[] getOptions() {
@@ -275,10 +287,36 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Regular expression - only matched files are considered prolog source code.",
 							Option.STRING, ".*\\.pl"),
 					new SimpleOption(
-							PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
-							"Exclusion Pattern",
-							"Regular expression - matched files are excluded even if they match the inclusion pattern.",
-							Option.STRING, ""), };
+							PDTCore.PROP_METADATA_PIF_KEY,
+							"Metadata PrologInterface",
+							"The key identifying the PrologInterface instance used by the pdt core to store"
+									+ " meta information on the project. Any occurance of the string %project% will be"
+									+ " replaced with the project name.",
+							Option.STRING, "") {
+						public String getDefault() {
+							return PDTCorePlugin
+									.getDefault()
+									.getPreferenceValue(
+											PDTCore.PREF_METADATA_PIF_KEY_DEFAULT,
+											"%project%");
+						}
+
+					},
+					new SimpleOption(
+							PDTCore.PROP_RUNTIME_PIF_KEY,
+							"Runtime PrologInterface",
+							"The key identifying the PrologInterface instance that"
+									+ "will be used by default to consult prolog files into it. Any occurance of the string %project% will be"
+									+ " replaced with the project name.",
+							Option.STRING, "") {
+						public String getDefault() {
+							return PDTCorePlugin
+									.getDefault()
+									.getPreferenceValue(
+											PDTCore.PREF_RUNTIME_PIF_KEY_DEFAULT,
+											"%project%");
+						}
+					}, };
 		}
 		return options;
 	}
@@ -361,24 +399,68 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public void setPreferenceValue(String id, String value) {
+		
 		try {
 			getProject()
 					.setPersistentProperty(new QualifiedName("", id), value);
+			if (PDTCore.PROP_RUNTIME_PIF_KEY.equals(id)
+					|| PDTCore.PROP_METADATA_PIF_KEY.equals(id)) {
+				pifKeysChanged();
+			}
 		} catch (CoreException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	public IMetaInfoProvider getMetaInfoProvider() {
-		if (prologHelper == null) {
-			prologHelper = new DefaultMetaInfoProvider(getMetadataPrologInterface(), "");
+	private void pifKeysChanged() {
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		if(runtimePif!=null){
+			reg.removeSubscription(runtimePifSubscription);
+			runtimePifSubscription=null;
+			runtimePif=null;
+			
 		}
-		return prologHelper;
+		if(metadataPif!=null){			
+			reg.removeSubscription(metadataPifSubscription);
+			metadataPifSubscription=null;
+			metadataPif=null;
+		}
+		
+	}
+
+	public IMetaInfoProvider getMetaInfoProvider() {
+		return new DefaultMetaInfoProvider(getMetadataPrologInterface(), "");
 	}
 
 	public PrologInterface getRuntimePrologInterface() {
-		return PrologRuntimePlugin.getDefault().getPrologInterface("la, la, lala, la");//TODO
+		if (runtimePif == null) {
+			String pifID=getRuntimePrologInterfaceKey();
+			String projectName = getProject().getName();
+			runtimePifSubscription = new PrologInterfaceSubscription(pifID,"used as runtime pif for project "+projectName);
+			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(runtimePifSubscription);
+			if (!runtimePif.isUp()){ 
+				try {
+					runtimePif.start();
+				} catch (IOException e) {
+					Debug.report(e);
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return runtimePif;
+	}
+	public String getRuntimePrologInterfaceKey() {
+		String value = getPreferenceValue(PDTCore.PROP_RUNTIME_PIF_KEY,
+				"%project%");
+		value = value.replaceAll("%project%", getProject().getName());
+		return value;
 	}
 
+	public String getMetadataPrologInterfaceKey() {
+		String value = getPreferenceValue(
+				PDTCore.PROP_METADATA_PIF_KEY, "%project%");
+		value = value.replaceAll("%project%", getProject().getName());
+		return value;
+	}
 }
