@@ -108,6 +108,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             else{
                 Debug.info("reusing old ReusableSocket");
             }
+            if(!socket.isConnected()){
+            	Debug.debug("debug");
+            }
             SocketClient client = new SocketClient(socket);
             client.setPool(pool);
             SocketSession s = new SocketSession(client,this);
@@ -340,14 +343,18 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      */
     public synchronized void stop() {        
         super.stop();
-        pool.clear();
+        if(pool!=null){
+        	pool.clear();
+        }
     }
     
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
      */
     public synchronized void start() throws IOException {                
-        pool.clear();
+        if(pool!=null){
+        	pool.clear();
+        }
         super.start();
     }
 

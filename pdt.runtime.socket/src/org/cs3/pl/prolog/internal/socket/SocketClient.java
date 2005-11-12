@@ -243,10 +243,11 @@ public class SocketClient  {
             return;
         }
         lock();
-        reset();
+        
        try{
            //if(false){
            if(pool!=null){
+        	   reset();
                pool.recycle(socket);
            }
            else {
