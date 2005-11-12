@@ -21,6 +21,7 @@
    <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>
    <extension-point id="prologLibrary" name="Prolog Library" schema="schema/prologLibrary.exsd"/>
+   <extension-point id="prologContextTracker" name="Prolog Context Tracker" schema="schema/prologContextTracker.exsd"/>
 	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer class="org.cs3.pdt.runtime.internal.preferences.Initializer"/>
@@ -33,5 +34,9 @@
           id="org.cs3.pdt.runtime.internal.preferences.PDTPreferencePage"
           name="Prolog Runtime"/>
  </extension>
+    <extension
+          point="org.eclipse.ui.startup">
+       <startup/>
+    </extension>
  
 </plugin>
