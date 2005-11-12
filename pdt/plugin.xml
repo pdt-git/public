@@ -168,6 +168,13 @@
          name="Editing Prolog Code"
          parentId="org.eclipse.ui.textEditorScope"/>
 </extension>
+<extension
+      point="org.cs3.pdt.runtime.prologContextTracker">
+   <tracker
+         class="org.cs3.pdt.internal.editors.PLEditorTracker"
+         id="pdt.track.pleditor"
+         label="Follow PL Editor"/>
+</extension>
 <!--<extension
       point="org.eclipse.ui.editorActions">
    <editorContribution
