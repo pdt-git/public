@@ -123,7 +123,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 	}
 
 	public void removePrologInterface(String key) {
-		List l = (List) subscriptionLists.get(key);
+		List l = (List) ((Vector)subscriptionLists.get(key)).clone();
 		if(l!=null){
 			for (Iterator iter = l.iterator(); iter.hasNext();) {
 				PrologInterfaceSubscription s = (PrologInterfaceSubscription) iter.next();
