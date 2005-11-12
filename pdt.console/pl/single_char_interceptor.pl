@@ -31,16 +31,30 @@ escape(A,In,Out):-
 :- prolog_load_context(directory,A), user:assert(file_search_path(foreign,A)).
 
 sd_load:-
-    current_prolog_flag(shared_object_extension,E),
-    file_name_extension(stream_decorator,E,LibName),
+
+    lib_name(LibName),
+    
     (	current_foreign_library(LibName,_)
     ->	true
     ;	load_foreign_library(foreign(LibName))
     ).
+
+lib_name(LibName):-
+    current_prolog_flag(shared_object_extension,Ext),
+    current_prolog_flag(arch,Arch),
+    concat_atom([stream_decorator,Arch,Ext],'.',LibName),
+    expand_file_search_path(foreign(LibName),A),
+    exists_file(A),
+    !.
+       
+lib_name(LibName):- %fallback to "default" arch
+    current_prolog_flag(shared_object_extension,Ext),
+    concat_atom([stream_decorator,Ext],'.',LibName).
+       
         
 sd_install:-
     sd_load,
-    set_prolog_flag(tty_control,true),
+    %set_prolog_flag(tty_control,true),
     set_stream(current_input,tty(true)),
     set_stream(current_output,tty(true)),
     (	is_hijacked_stream(current_input)
