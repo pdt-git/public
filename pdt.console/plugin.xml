@@ -67,8 +67,12 @@
           name="Prolog Console"/>
  </extension>
     <extension
-          point="org.cs3.pdt.runtime.bootstrapContribution">
-       <contribution path="pl/single_char_interceptor.pl"/>
+          point="org.cs3.pdt.runtime.prologLibrary">
+       <library
+             alias="library"
+             id="pdt.console.library"
+             path="pl">
+       </library>
     </extension>
 
 </plugin>
