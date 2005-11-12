@@ -115,6 +115,13 @@
                value="org.cs3.pdt.core.PDTProjectNature"/>
     </page>
  </extension>
+  <extension
+        point="org.cs3.pdt.runtime.prologLibrary">
+     <library
+           alias="library"
+           id="pdt.core.library"
+           path="engine"/>
+  </extension>
  
  
 </plugin>
