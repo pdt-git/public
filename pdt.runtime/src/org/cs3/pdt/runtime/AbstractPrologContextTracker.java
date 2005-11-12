@@ -41,7 +41,7 @@ public abstract class AbstractPrologContextTracker implements
 			PrologContextTrackerListener l) {
 
 		synchronized (listeners) {
-			if (!listeners.contains(l)) {
+			if (listeners.contains(l)) {
 				listeners.remove(l);
 			}
 		}
@@ -57,10 +57,21 @@ public abstract class AbstractPrologContextTracker implements
 	}
 
 	
-
+	public AbstractPrologContextTracker(){
+		id=null;
+		label=null;
+	}
 	public AbstractPrologContextTracker(String id, String label) {
 		this.id = id;
 		this.label = label;
+	}
+
+	public void setLabel(String label) {
+		this.label=label;
+		
+	}
+	public void setId(String id){
+		this.id=id;
 	}
 
 }

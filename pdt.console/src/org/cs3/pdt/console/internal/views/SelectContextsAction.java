@@ -1,11 +1,18 @@
 package org.cs3.pdt.console.internal.views;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
 import org.cs3.pdt.runtime.PrologContextTracker;
+import org.cs3.pdt.runtime.PrologContextTrackerListener;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
@@ -14,10 +21,13 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.internal.ide.IDEInternalWorkbenchImages;
 
-public class SelectContextsAction extends Action implements IMenuCreator,
-		IWorkbenchWindowPulldownDelegate2 {
+public abstract class SelectContextsAction extends Action implements IMenuCreator,
+		IWorkbenchWindowPulldownDelegate2, PrologContextTrackerListener {
 
+	List activeTrackers=new Vector();
+	
 	/**
 	 * Cascading menu
 	 */
@@ -38,10 +48,13 @@ public class SelectContextsAction extends Action implements IMenuCreator,
 	public SelectContextsAction() {
 		super();
 
-		setText("some text here TODO");
+		setText(null);
+		setImageDescriptor(ImageDescriptor.getMissingImageDescriptor());		
 		setMenuCreator(this);
 	}
 
+	
+	
 	/**
 	 * @see IAction#run()
 	 */
@@ -49,13 +62,34 @@ public class SelectContextsAction extends Action implements IMenuCreator,
 		// do nothing, this action just creates a cascading menu.
 	}
 
+	public PrologInterface getCurrentPrologInterface(){
+		
+		for (Iterator it = activeTrackers.iterator(); it.hasNext();) {
+			PrologContextTracker tracker = (PrologContextTracker) it.next();
+			PrologInterface pif = tracker.getCurrentPrologInterface();
+			if(pif!=null){
+				return pif;
+			}
+		}
+		return null;
+	}
+	
 	private void createAction(Menu parent, final PrologContextTracker tracker) {
 		IAction action = new Action(tracker.getLabel(),IAction.AS_CHECK_BOX){
 			public void run() {
-				//tracker.setActive(isChecked());	
+				if(activeTrackers.contains(tracker)){
+					activeTrackers.remove(tracker);
+					tracker.removePrologContextTrackerListener(SelectContextsAction.this);
+					
+				}else{
+					activeTrackers.add(tracker);
+					tracker.addPrologContextTrackerListener(SelectContextsAction.this);
+					
+				}
+				setChecked(activeTrackers.contains(tracker));
 			}
 		};
-		//action.setChecked(tracker.isActive());
+		action.setChecked(activeTrackers.contains(tracker));
 		ActionContributionItem item = new ActionContributionItem(action);
 		
 		item.fill(parent, -1);
@@ -74,7 +108,13 @@ public class SelectContextsAction extends Action implements IMenuCreator,
 	 * @see IMenuCreator#getMenu(Control)
 	 */
 	public Menu getMenu(Control parent) {
-		return null;
+		if (getCreatedMenu() != null) {
+			getCreatedMenu().dispose();
+		}
+		setCreatedMenu(new Menu(parent));
+		fillMenu();
+		initMenu();
+		return getCreatedMenu();
 	}
 
 	/**
@@ -91,12 +131,12 @@ public class SelectContextsAction extends Action implements IMenuCreator,
 	}
 
 	private void fillMenu() {
-//		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault().getContextTrackers();
-//		Menu menu=getCreatedMenu();
-//		for (int i = 0; i < trackers.length; i++) {
-//			
-//			createAction(menu, trackers[i]);
-//		}
+		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTrackers();
+		Menu menu=getCreatedMenu();
+		for (int i = 0; i < trackers.length; i++) {
+			
+			createAction(menu, trackers[i]);
+		}
 	}
 
 	/**
