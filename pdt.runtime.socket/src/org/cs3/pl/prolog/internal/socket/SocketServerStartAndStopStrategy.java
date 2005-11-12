@@ -110,7 +110,7 @@ public class SocketServerStartAndStopStrategy implements
         sb.append(Util.prologFileName(tmpFile));
         sb.append("']");
         String cmdline = sb.toString();
-        Debug.debug("Starting server with " + Util.prettyPrint(commandArray));
+        Debug.info("Starting server with " + Util.prettyPrint(commandArray));
         
         
 
