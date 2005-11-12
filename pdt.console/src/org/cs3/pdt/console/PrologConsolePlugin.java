@@ -53,7 +53,7 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 						PDTConsole.PREF_TIMEOUT,
 						"Connect Timeout",
 						"Maximum time in milliseconds to wait for the console server to come up.",
-						SimpleOption.NUMBER, "5000")         
+						SimpleOption.NUMBER, "15000")         
         };
 
     }
