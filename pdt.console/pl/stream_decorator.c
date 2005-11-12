@@ -327,6 +327,13 @@ static void unhijack(IOSTREAM * stream)
 
 foreign_t pl_hijack_stream(term_t stream_term, term_t module_term, term_t args_term)	
 { 
+	/* A hack, i admit it.
+	 On windows it seems to be allowed to modify this flag in prolog.
+	 on linux, at least with my version, it is not allowed.
+	 Pfff...
+	*/
+	PL_set_feature("tty_control", PL_BOOL, TRUE);
+	
 	IOSTREAM * stream=0;
 	HANDLE_T * handle=0;
 	char * module_name =0;
@@ -337,8 +344,8 @@ foreign_t pl_hijack_stream(term_t stream_term, term_t module_term, term_t args_t
 	
 	if ( !PL_get_stream_handle(stream_term, &stream) )
 	{
-    	return PL_warning("stream_decorator_create/4: problem obtaining backend stream handle.");
-  }  	
+		return PL_warning("stream_decorator_create/4: problem obtaining backend stream handle.");
+	}  	
 	handle = (HANDLE_T *)PL_malloc(sizeof(HANDLE_T));
 	if(! handle)
 	{
@@ -348,7 +355,6 @@ foreign_t pl_hijack_stream(term_t stream_term, term_t module_term, term_t args_t
 	
 	 
 
-	
 	handle->stream_record=PL_record(stream_term);
 	handle->args_record=PL_record(args_term);
 	handle->stream=stream;
@@ -464,8 +470,7 @@ foreign_t pl_is_hijacked_stream(term_t stream_term)
 
 install_t install()
 { 
-	/* A hack, i admit it.*/
-	PL_set_feature("tty_control", PL_BOOL, TRUE);
+	
 	PL_register_foreign("hijack_stream", 3, pl_hijack_stream, 0);
 	PL_register_foreign("unhijack_stream", 1, pl_unhijack_stream, 0);
 	PL_register_foreign("is_hijacked_stream", 1, pl_is_hijacked_stream, 0);
