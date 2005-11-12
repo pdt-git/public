@@ -44,7 +44,7 @@ public class Factory extends PrologInterfaceFactory {
 						SocketPrologInterface.TIMEOUT,
 						"Connect Timeout",
 						"Maximum time in milliseconds to wait for the prolog process to come up.",
-						SimpleOption.NUMBER, "5000"),
+						SimpleOption.NUMBER, "15000"),
 				new SimpleOption(
 						SocketPrologInterface.USE_POOL,
 						"Use session pooling",
