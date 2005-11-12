@@ -28,6 +28,7 @@ public class PrologSocketConsoleModel implements ConsoleModel
 
 	private class ConsoleReader implements Runnable
 	{
+		
 
 		private static final int ESCAPE_CHAR = 42;
 
@@ -48,12 +49,9 @@ public class PrologSocketConsoleModel implements ConsoleModel
 				int count = reader.read(buf);
 				StringBuffer data = new StringBuffer();
 				
-				while (true)
+				while (count>0)
 				{					
-					if (count < 0)
-					{
-						throw new IOException("EndOfStream read.");
-					}
+					
 					boolean escaped = false;
 					for (int i = 0; i < count; i++)
 					{
@@ -99,7 +97,8 @@ public class PrologSocketConsoleModel implements ConsoleModel
 						Thread.sleep(1);
 					} catch (InterruptedException e)
 					{
-						e.printStackTrace();
+						Debug.report(e);
+						throw new RuntimeException(e);
 					}
 					if(!reader.ready() || 
 						/*this is optional:
@@ -131,8 +130,7 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			} catch (IOException e)
 			{
 				Debug.report(e);
-				disconnect();
-//				break;
+				throw new RuntimeException(e);
 			}
 
 			Debug.info("Console Reader Thread terminating");
@@ -216,7 +214,8 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			fireEditBufferChangedEvent(oldBuffer,lineBuffer);
 		} catch (IOException e)
 		{
-			disconnect();
+			Debug.report(e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -308,7 +307,8 @@ public class PrologSocketConsoleModel implements ConsoleModel
 				setSingleCharMode(false);
 			} catch (IOException e)
 			{
-				disconnect();
+				Debug.report(e);
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -360,15 +360,17 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			readerThread.start();
 
 			writer
-					.write("sd_install,set_stream(current_output,tty(true)),set_stream(current_input,tty(true)).\n");
+					.write("use_module(library(single_char_interceptor)).\n" +
+							"sd_install," +
+							"set_stream(current_output,tty(true))," +
+							"set_stream(current_input,tty(true)).\n");
 			writer.flush();
 
 			Debug.debug("Connect complete");
 		} catch (IOException e)
 		{
 			Debug.report(e);
-			Debug.error("Connect failed, trying to disconnect gracefully...");
-			disconnect();
+			throw new RuntimeException();
 		}
 	}
 
@@ -394,10 +396,14 @@ public class PrologSocketConsoleModel implements ConsoleModel
 					writer.flush();
 					writer.write("end_of_file.\n");
 					writer.flush();
+//					writer.close();
+					readerThread.join(10000);
 					socket.close();
 				}
 			} catch (IOException e)
 			{
+				Debug.report(e);
+			} catch (InterruptedException e) {
 				Debug.report(e);
 			}
 

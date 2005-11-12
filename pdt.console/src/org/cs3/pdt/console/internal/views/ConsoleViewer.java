@@ -264,6 +264,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		this.model = consoleModel;
 		if (model != null) {
 			model.addConsoleListener(this);
+			ui_setSingleCharMode(model.isSingleCharMode());
 		}
 
 		if (history != null) {
@@ -271,6 +272,45 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 
+	public static final class SavedState{
+		private int startOfInput;
+		private String contents;
+		private ConsoleHistory history;
+		private ConsoleModel model;
+		public ConsoleCompletionProvider completionProvider;
+		public int caretPosition;
+		
+	}
+	
+	public SavedState saveState(){
+		SavedState s = new SavedState();
+		s.startOfInput=startOfInput;
+		s.contents=control.getText();
+		s.history=history;
+		s.model=model;
+		s.completionProvider=completionProvider;
+		s.caretPosition=control.getCaretOffset();
+		return s;
+	}
+	
+	public void loadState(SavedState s){
+		thatWasMe=true;
+		setCompletionProvider(null);
+		setHistory(null);
+		setModel(null);
+		startOfInput=0;
+		control.setText("");
+		
+		startOfInput=s.startOfInput;
+		control.setText(s.contents);
+		control.setCaretOffset(s.caretPosition);
+		setHistory(s.history);
+		setModel(s.model);
+		setCompletionProvider(s.completionProvider);
+		control.showSelection();
+		thatWasMe=false;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
