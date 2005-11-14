@@ -15,6 +15,7 @@ import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -23,6 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
@@ -31,6 +33,8 @@ import org.eclipse.ui.ide.IDE;
 
 public final class PDTUtils {
 
+	
+		
 	public static IPath normalize(IPath path) {
 		IPath testLocation = null;
 		try {

@@ -21,6 +21,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -194,17 +195,19 @@ public class PDTPlugin extends AbstractUIPlugin {
 						PDT.PREF_CLIENT_LOG_FILE,
 						"Log file location",
 						"A file to which debug output of the PDT will be writen",
-						Option.FILE, location + fileSep + "pdt.log")
-				
+						Option.FILE, location + fileSep + "pdt.log"),
+				new SimpleOption(
+						PDT.PREF_ADD_NATURE_ON_OPEN,
+						"Automatically add Prolog Nature when opening pl files",
+						"When i open a file in the prolog editor that does not belong to " +
+						"a prolog project, ask if i want to add the prolog nature.",
+						Option.ENUM, MessageDialogWithToggle.PROMPT, new String[][] {
+								{ "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
+								{ "ask", MessageDialogWithToggle.PROMPT }})
 
 		};
 
 	}
-
-	
-	
-
-	
 
 	private String getLocation() throws IOException {
 		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");

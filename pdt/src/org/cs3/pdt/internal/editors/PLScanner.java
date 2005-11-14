@@ -8,13 +8,10 @@ import java.util.Map;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
@@ -37,12 +34,16 @@ public class PLScanner extends RuleBasedScanner {
 	private String[] plDynamicPredicates = null;
 
 	private void initDynamicPredicates(IPrologProject plProject) {
+		if(plProject==null){
+			plDynamicPredicates=null;
+			return;
+		}
 		if (plDynamicPredicates == null) {
+			
 			PrologSession session = null;
 			try {
 				PDTPlugin r = PDTPlugin.getDefault();
-				session = plProject.getMetadataPrologInterface()
-						.getSession();
+				session = plProject.getMetadataPrologInterface().getSession();
 				List solutions = session
 						.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
 				List keywords = new ArrayList();
@@ -64,13 +65,17 @@ public class PLScanner extends RuleBasedScanner {
 	}
 
 	private void initKeywords(IPrologProject plProject) {
+		if(plProject==null){
+			plKeywords=null;
+			return;
+		}
 		if (plKeywords == null) {
+			
 			PrologSession session = null;
 			;
 			try {
 				PDTPlugin r = PDTPlugin.getDefault();
-				session = plProject.getMetadataPrologInterface()
-						.getSession();
+				session = plProject.getMetadataPrologInterface().getSession();
 				List solutions = session
 						.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
 				List keywords = new ArrayList();
@@ -93,16 +98,25 @@ public class PLScanner extends RuleBasedScanner {
 	}
 
 	public PLScanner(PLEditor editor, ColorManager manager) {
-		IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
-
-		IPrologProject plProject;
+		IFileEditorInput editorInput = null;
+		IProject project = null;
+		IPrologProject plProject = null;
+		if (editor.getEditorInput() instanceof IFileEditorInput) {
+			editorInput = (IFileEditorInput) editor.getEditorInput();
+		}
+		if (editorInput != null) {
+			project = editorInput.getFile().getProject();
+		}
 		try {
-			plProject = (IPrologProject) editorInput.getFile().getProject()
-					.getNature(PDTCore.NATURE_ID);
+			if (project != null && project.hasNature(PDTCore.NATURE_ID)) {
+				plProject = (IPrologProject) project
+						.getNature(PDTCore.NATURE_ID);
+			}
+
 		} catch (CoreException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
-		}		
+		}
 
 		initKeywords(plProject);
 		initDynamicPredicates(plProject);
@@ -125,10 +139,12 @@ public class PLScanner extends RuleBasedScanner {
 		WordRule wordRule = new WordRule(new WordDetector(), wordToken);
 		WordRule dynamicRule = new WordRule(new WordDetector(), dynamicToken);
 
-		for (int i = 0; i < plKeywords.length; i++)
+		for (int i = 0; plKeywords!=null&&i < plKeywords.length; i++){
 			wordRule.addWord(plKeywords[i], keywordToken);
-		for (int i = 0; i < plDynamicPredicates.length; i++)
+		}
+		for (int i = 0; plDynamicPredicates!=null&&i < plDynamicPredicates.length; i++){
 			wordRule.addWord(plDynamicPredicates[i], dynamicToken);
+		}
 
 		rules[0] = new VarRule(procInstr);
 		// Add rule for double quotes
