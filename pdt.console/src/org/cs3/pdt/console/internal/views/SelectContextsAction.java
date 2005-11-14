@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerListener;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -49,7 +50,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 		super();
 
 		setText(null);
-		setImageDescriptor(ImageDescriptor.getMissingImageDescriptor());		
+		setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.TRACK_CONTEXT));		
 		setMenuCreator(this);
 	}
 

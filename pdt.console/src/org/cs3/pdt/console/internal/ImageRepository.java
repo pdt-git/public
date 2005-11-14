@@ -15,6 +15,8 @@ import org.eclipse.swt.graphics.Image;
 
 public class ImageRepository {
 
+	private static HashMap cache = new HashMap();
+	
 	public final static String GUITRACER = "guitracer.gif";
 
 	public final static String CLEAR = "clear.gif";
@@ -22,7 +24,7 @@ public class ImageRepository {
 	public final static String NOGUITRACER = "noguitracer.gif";
 	
     
-    private static HashMap cache = new HashMap();
+    
 
     
 	public static final String BREAK = "break.gif";
@@ -30,6 +32,8 @@ public class ImageRepository {
 	public static final String RESTART = "restart.gif";
 	
 	public static final String SELECT_ALL = "select_all.gif";
+	public static final String SELECT_PIF = "console_view.gif";
+	public static final String TRACK_CONTEXT = "synced.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PrologConsolePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
