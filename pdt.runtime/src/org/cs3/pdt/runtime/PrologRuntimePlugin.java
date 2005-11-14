@@ -160,6 +160,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		PrologInterface prologInterface = null;
 		String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,
 				null);
+		String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR,
+				System.getProperty("java.io.tmpdir"));
 		if (impl == null) {
 			throw new RuntimeException("The required property \""
 					+ PrologRuntime.PREF_PIF_IMPLEMENTATION
@@ -167,7 +169,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 		PrologInterfaceFactory factory = PrologInterfaceFactory
 				.newInstance(impl);
-		factory.setResourceLocator(getResourceLocator(PrologRuntime.LOC_PIF));
+		factory.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
 
 		prologInterface = factory.create();
 
@@ -518,7 +520,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				PrologRuntime.PREF_PIF_IMPLEMENTATION,
 				"PrologInterfaceFactory implementation",
 				"The factory to be used for creating PrologInterface instances",
-				Option.STRING, PrologInterfaceFactory.DEFAULT) };
+				Option.STRING, PrologInterfaceFactory.DEFAULT),
+				new SimpleOption(
+						PrologRuntime.PREF_PIF_BOOTSTRAP_DIR,
+						"PrologInterface Bootstrap Directory",
+						"The PrologInterface needs to temporarily store some" +
+						"prolog files during bootstrapping. Any directory for which " +
+						"you have write permissions will do.",
+						Option.DIR, System.getProperty("java.io.tmpdir"))};
 
 	}
 

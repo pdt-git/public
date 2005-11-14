@@ -60,8 +60,7 @@ public class Initializer extends AbstractPreferenceInitializer {
             }
             String pifImpl=plugin.getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,null);
             PrologInterfaceFactory factory = PrologInterfaceFactory
-                    .newInstance(pifImpl);
-            factory.setResourceLocator(plugin.getResourceLocator(PrologRuntime.LOC_PIF));
+                    .newInstance(pifImpl);            
              options = factory.getOptions();
             for (int i = 0; i < options.length; i++) {
                 String id = options[i].getId();
