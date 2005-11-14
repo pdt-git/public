@@ -3,6 +3,7 @@ package org.cs3.pdt.console.internal.views;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
@@ -21,8 +22,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.internal.ide.dialogs.UpdateProjectCapabilityWizard;
 
 public abstract  class SelectPifAction extends Action implements IMenuCreator,
@@ -49,9 +53,9 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	 */
 	public SelectPifAction() {
 		super();
-
+		
 		setText(null);
-		setImageDescriptor(ImageDescriptor.getMissingImageDescriptor());
+		setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.SELECT_PIF));
 		setMenuCreator(this);
 		
 		
