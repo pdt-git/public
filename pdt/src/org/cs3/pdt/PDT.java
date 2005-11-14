@@ -18,7 +18,7 @@ public final  class PDT {
      * using the static Debug.setDeubgLevel(int) method.
      */
     public final static String PREF_DEBUG_LEVEL = "debug.level";
-
+    public static final String PREF_ADD_NATURE_ON_OPEN = "pdt.ask.add_nature";
     
      
     /**
@@ -35,5 +35,7 @@ public final  class PDT {
 	 * ui scope used for keybindings etc in the prolog editor.
 	 */
     public static final String CONTEXT_EDITING_PROLOG_CODE = "org.cs3.pdt.editingProlog";
+
+	
 
 }
