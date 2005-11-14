@@ -69,8 +69,7 @@ public class SocketServerStartAndStopStrategy implements
 			throw new RuntimeException(e);
 		}
         String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
-        String engineDir = pif.getOption(SocketPrologInterface.ENGINE_DIR);
-        String sep = System.getProperty("file.separator");
+        String engineDir = Util.prologFileName(pif.getFactory().getResourceLocator().resolve("/"));
         
         File tmpFile=null;
         try {			

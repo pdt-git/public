@@ -25,16 +25,19 @@ public class Factory extends PrologInterfaceFactory {
 				new SimpleOption(SocketPrologInterface.EXECUTABLE,
 						"SWI-Prolog executable", "eg. xpce or /usr/bin/xpce",
 						SimpleOption.FILE, guessExecutableName()),
-				new SimpleOption(
-						SocketPrologInterface.ENGINE_DIR,
-						"PIF engine directory",
-						"The directory containing the prolog implementation of the PIF.",
-						SimpleOption.DIR, null) {
-					public String getDefault() {
-						File f = getResourceLocator().resolve("");
-						return Util.prologFileName(f);
-					}
-				},
+//				new SimpleOption(
+//						SocketPrologInterface.ENGINE_DIR,
+//						"PIF engine directory",
+//						"There are a couple of prolog files that need to be temporarily" +
+//						"stored somewhere during bootstrapping  of the prolog interface." +
+//						"Any directory to which you have write permissions will be fine.",
+//						SimpleOption.DIR, null) {
+//					public String getDefault() {
+//						File f = 
+//							getResourceLocator().resolve("");
+//						return Util.prologFileName(f);
+//					}
+//				},
 				new SimpleOption(
 						SocketPrologInterface.STANDALONE,
 						"stand-alone server",

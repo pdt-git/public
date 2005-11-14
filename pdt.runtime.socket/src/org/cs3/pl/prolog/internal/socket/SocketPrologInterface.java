@@ -164,9 +164,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
      *           java.lang.String)
      */
     public void setOption(String opt, String value) {
-         if (ENGINE_DIR.equals(opt)) {
-            this.engineDir = value;
-        } else if (EXECUTABLE.equals(opt)) {
+         if (EXECUTABLE.equals(opt)) {
             this.executable = value;
         } else if (STANDALONE.equals(opt)) {
             setStandAloneServer(Boolean.valueOf(value).booleanValue());
@@ -193,9 +191,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
             Debug.warning("option "+opt+" is overridden by System Property: "+s);
             return s;
         }
-         if (ENGINE_DIR.equals(opt)) {
-            return engineDir;
-        } else if (EXECUTABLE.equals(opt)) {
+         if (EXECUTABLE.equals(opt)) {
             return executable;
         } else if (STANDALONE.equals(opt)) {
             return "" + standAloneServer;
@@ -270,7 +266,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         addLifeCycleHook(new LifeCycleHook() {
             public void onInit(PrologInterface pif,PrologSession initSession) {
                 cs.setPort(port);
-                File file = new DefaultResourceFileLocator(new File(getOption(ENGINE_DIR))).resolve(prefix);
+                //File file = new DefaultResourceFileLocator(new File(getOption(ENGINE_DIR))).resolve(prefix);
+                File file = pif.getFactory().getResourceLocator().resolve("/");
                 cs.setPrefix(file);
                 
                 try {
