@@ -1,6 +1,7 @@
 package org.cs3.pdt.core.internal.actions;
 
 import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -50,11 +51,11 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 
 			IProjectDescription ipd = project.getDescription();
 			if (ipd.hasNature(PDTCore.NATURE_ID)) {
-				removePDTNature(project);
+				PDTCoreUtils.removePDTNature(project);
 				action.setChecked(false);
 			} else {
 				//removeNatureFromAllOtherProjects();
-				addPDTNature(project);
+				PDTCoreUtils.addPDTNature(project);
 				action.setChecked(true);
 			}
 			action
@@ -66,51 +67,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 		}
 	}
 
-	/**
-	 * @param ipd
-	 * @return
-	 * @throws CoreException
-	 */
-	private void addPDTNature(IProject project) throws CoreException {
-
-		IProjectDescription ipd = project.getDescription();
-		String[] oldNIDs = ipd.getNatureIds();
-		String[] newNIDs = new String[oldNIDs.length + 1];
-		newNIDs[0] = PDTCore.NATURE_ID;
-		System.arraycopy(oldNIDs, 0, newNIDs, 1, oldNIDs.length);
-		ipd.setNatureIds(newNIDs);
-		if (!project.isSynchronized(IResource.DEPTH_ONE)) {
-			project.refreshLocal(IResource.DEPTH_ONE, null);
-		}
-		project.setDescription(ipd, null);
-
-	}
-
-	/**
-	 * @param project
-	 * @return
-	 * @throws CoreException
-	 */
-	private void removePDTNature(IProject project) throws CoreException {
-		if (project.hasNature(PDTCore.NATURE_ID)) {
-			IProjectDescription ipd = project.getDescription();
-			String[] oldNIDs = ipd.getNatureIds();
-			String[] newNIDs;
-			newNIDs = new String[oldNIDs.length - 1];
-			int j = 0;
-			for (int i = 0; i < newNIDs.length; i++) {
-				if (oldNIDs[j].equals(PDTCore.NATURE_ID))
-					j++;
-				newNIDs[i] = oldNIDs[j];
-				j++;
-			}
-			ipd.setNatureIds(newNIDs);
-			if (!project.isSynchronized(IResource.DEPTH_ONE)) {
-				project.refreshLocal(IResource.DEPTH_ONE, null);
-			}
-			project.setDescription(ipd, null);
-		}
-	}
+	
 
 	/**
 	 * @param project2
@@ -121,7 +78,7 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 				.getProjects();
 		for (int i = 0; i < projects.length; i++)
 			if (projects[i].isOpen())
-				removePDTNature(projects[i]);
+				PDTCoreUtils.removePDTNature(projects[i]);
 	}
 
 	/*
