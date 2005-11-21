@@ -4,29 +4,37 @@ package org.cs3.pdt.core.internal.natures;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.runtime.DefaultPrologLibrary;
+import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologInterfaceSubscription;
+import org.cs3.pdt.runtime.PrologLibrary;
+import org.cs3.pdt.runtime.PrologLibraryManager;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -51,9 +59,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private PrologInterface runtimePif;
 
-	private PrologInterfaceSubscription runtimePifSubscription;
+	private Subscription runtimePifSubscription;
 
-	private PrologInterfaceSubscription metadataPifSubscription;
+	private Subscription metadataPifSubscription;
+
+	private HashMap libraries;
 
 	/**
 	 * @see IProjectNature#configure
@@ -75,42 +85,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			newBuilders[builders.length] = builder;
 			descr.setBuildSpec(newBuilders);
 			project.setDescription(descr, null);
-
-			PrologInterface pif = getMetadataPrologInterface();
-			if (pif.isUp()) {
-				Job j = new Job("building Prolog Metadata for project "
-						+ project.getName()) {
-					protected IStatus run(IProgressMonitor monitor) {
-						try {
-							IWorkspaceDescription wd = ResourcesPlugin
-									.getWorkspace().getDescription();
-							if (wd.isAutoBuilding()) {
-								project.build(
-										IncrementalProjectBuilder.FULL_BUILD,
-										PDTCore.BUILDER_ID, null, monitor);
-							}
-						} catch (OperationCanceledException opc) {
-							return Status.CANCEL_STATUS;
-						} catch (CoreException e) {
-							return new Status(Status.ERROR, PDTCore.PLUGIN_ID,
-									-1, "exception caught during build", e);
-						}
-						return Status.OK_STATUS;
-					}
-
-					public boolean belongsTo(Object family) {
-						return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
-					}
-
-				};
-				j.schedule();
-			} else {
-				// if the pif is not up yet, this is no problem at all: the
-				// reload
-				// hook will
-				// take care of the due build in its afterInit method.
-				;
-			}
+			registerLibraries();
 
 		} catch (Throwable t) {
 			Debug.report(t);
@@ -118,11 +93,31 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 	}
 
+	private void registerLibraries() {
+		HashMap libs = getPrologLibraries();
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		for (Iterator it = libs.values().iterator(); it.hasNext();) {
+			PrologLibrary lib = (PrologLibrary) it.next();
+			mgr.addLibrary(lib);
+		}
+		
+	}
+
+	private void unregisterLibraries() {
+		HashMap libs = getPrologLibraries();
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		for (Iterator it = libs.values().iterator(); it.hasNext();) {
+			PrologLibrary lib = (PrologLibrary) it.next();
+			mgr.removeLibrary(lib);
+		}
+		
+	}
 	/**
 	 * @see IProjectNature#deconfigure
 	 */
 	public void deconfigure() throws CoreException {
 		try {
+			unregisterLibraries();
 			IProjectDescription descr = project.getProject().getDescription();
 			org.cs3.pl.common.Debug.debug("deconfigure was called");
 			ICommand builders[] = descr.getBuildSpec();
@@ -249,11 +244,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public PrologInterface getMetadataPrologInterface() {
-		if (metadataPif == null) {
-			String pifID=getMetadataPrologInterfaceKey();
-			String projectName = getProject().getName();
-			metadataPifSubscription = new PrologInterfaceSubscription(pifID,"used as metadata pif for project "+projectName);
-			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(metadataPifSubscription);
+		if (metadataPif == null) {			
+			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(getMetadataSubscription());
 			if (!metadataPif.isUp()) {
 				try {
 					metadataPif.start();
@@ -266,6 +258,74 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return metadataPif;
 	}
 
+	public PrologInterface getRuntimePrologInterface() {
+		if (runtimePif == null) {			
+			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(getRuntimeSubscription());
+			if (!runtimePif.isUp()){ 
+				try {
+					runtimePif.start();
+				} catch (IOException e) {
+					Debug.report(e);
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return runtimePif;
+	}
+	
+	public Subscription getMetadataSubscription() {
+		String id = getMetadataSubscriptionKey();
+		String pifKey = getMetadataPrologInterfaceKey();
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		if(metadataPifSubscription==null){
+			r.getSubscription(id); 
+		}
+		if(metadataPifSubscription==null){
+			metadataPifSubscription=new MetadataSubscription(getProject().getName(),id,pifKey);
+			r.addSubscription(metadataPifSubscription);
+		}
+		
+		return metadataPifSubscription;
+	}
+
+	public Subscription getRuntimeSubscription() {
+		String id = getRuntimeSubscriptionKey();
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		if(runtimePifSubscription==null){
+			r.getSubscription(id); 
+		}
+		if(runtimePifSubscription==null){
+			String pifID=getRuntimePrologInterfaceKey();
+			String projectName = getProject().getName();
+			runtimePifSubscription = new RuntimeSubscription(projectName,id,pifID);
+			r.addSubscription(runtimePifSubscription);
+		}
+		
+		return runtimePifSubscription;
+	}		
+	
+	private String getRuntimeSubscriptionKey() {
+		return getProject().getName()+".runtime_subscription";
+	}
+
+	private String getMetadataSubscriptionKey() {
+		return getProject().getName()+".metadata_subscription";
+	}
+
+	private String getRuntimePrologInterfaceKey() {
+		String value = getPreferenceValue(PDTCore.PROP_RUNTIME_PIF_KEY,
+				"%project%");
+		value = value.replaceAll("%project%", getProject().getName());
+		return value;
+	}
+
+	private String getMetadataPrologInterfaceKey() {
+		String value = getPreferenceValue(
+				PDTCore.PROP_METADATA_PIF_KEY, "%project%");
+		value = value.replaceAll("%project%", getProject().getName());
+		return value;
+	}
+	
 	public Option[] getOptions() {
 		if (options == null) {
 			options = new Option[] {
@@ -433,34 +493,45 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return new DefaultMetaInfoProvider(getMetadataPrologInterface(), "");
 	}
 
-	public PrologInterface getRuntimePrologInterface() {
-		if (runtimePif == null) {
-			String pifID=getRuntimePrologInterfaceKey();
-			String projectName = getProject().getName();
-			runtimePifSubscription = new PrologInterfaceSubscription(pifID,"used as runtime pif for project "+projectName);
-			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(runtimePifSubscription);
-			if (!runtimePif.isUp()){ 
-				try {
-					runtimePif.start();
-				} catch (IOException e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
-				}
-			}
-		}
-		return runtimePif;
-	}
-	public String getRuntimePrologInterfaceKey() {
-		String value = getPreferenceValue(PDTCore.PROP_RUNTIME_PIF_KEY,
-				"%project%");
-		value = value.replaceAll("%project%", getProject().getName());
-		return value;
+	public String[] getPrologLibraryKeys() {
+
+		HashMap libs = getPrologLibraries();
+		
+		return (String[]) libs.keySet().toArray(new String[libs.size()]);
 	}
 
-	public String getMetadataPrologInterfaceKey() {
-		String value = getPreferenceValue(
-				PDTCore.PROP_METADATA_PIF_KEY, "%project%");
-		value = value.replaceAll("%project%", getProject().getName());
-		return value;
+	public HashMap getPrologLibraries() {
+		if(libraries==null){
+			createLibraries();
+			registerLibraries();
+		}
+		return libraries;
 	}
+
+	private void createLibraries() {
+		try {
+			Set s= getExistingSourcePathEntries();
+			libraries = new HashMap();
+			for (Iterator it = s.iterator(); it.hasNext();) {
+				IContainer c = (IContainer) it.next();
+				File f = c.getLocation().toFile();
+				String key = c.getFullPath().toString();
+				if(f!=null){
+					libraries.put(key,new DefaultPrologLibrary(
+						key,
+						new String[0], 		// TODO let user define dependencies
+						"library",
+						Util.prologFileName(f)	
+					));
+				}
+			}
+			
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	
+	
 }

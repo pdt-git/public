@@ -18,6 +18,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.ClauseData;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.parser.Index;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
@@ -28,6 +29,7 @@ import org.cs3.pl.parser.TaskCollector;
 import org.cs3.pl.parser.abba.AbbaGraphGenerator;
 import org.cs3.pl.parser.abba.SimpleIDGeneratorStrategie;
 import org.cs3.pl.parser.abba.WriteTermsToStreamStrategy;
+import org.cs3.pl.parser.internal.term.index.Indexer;
 
 public class TermBasedPrologCompiler implements PrologCompiler {
 
@@ -388,6 +390,12 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 	public void setTaskCollector(TaskCollector taskCollector) {
 		this.taskCollector = taskCollector;
 
+	}
+
+	public void updateIndex(Index index) {
+		ASTCompilationUnit root = parser.getASTRoot();
+		root.jjtAccept(new Indexer(index,symbolicFileName),null);
+		
 	}
 
 }

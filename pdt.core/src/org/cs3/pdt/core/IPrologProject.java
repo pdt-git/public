@@ -50,6 +50,15 @@ public interface IPrologProject extends OptionProvider{
 	public IProject getProject();
 
 	public PrologInterface getRuntimePrologInterface();
+
+	/**
+	 * returns the library keys that represent 
+	 * the existing source folders 
+	 * in this project.
+	 * 
+	 * @return a set of PrologLibrary instances.
+	 */
+	public String[] getPrologLibraryKeys();
     
     
 }

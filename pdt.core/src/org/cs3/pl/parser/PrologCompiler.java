@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
+
 public interface PrologCompiler {
 
 	public static final String METADATA = "meta_data";
@@ -46,7 +47,9 @@ public interface PrologCompiler {
 	/**@deprecated currently only used by test cases, will be removed.*/
 	public abstract Set getPublicModulePredicates();
 
-	public abstract void saveAbbaData(OutputStream out) throws IOException;		
+	public abstract void saveAbbaData(OutputStream out) throws IOException;
+
+	public abstract void updateIndex(Index index);		
 	
 
 }
