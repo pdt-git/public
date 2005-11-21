@@ -293,6 +293,43 @@ public class Util {
         file.delete();
     }
 
+    public static String escape(String s) {
+		StringBuffer result= new StringBuffer(s.length() + 10);
+		for (int i= 0; i < s.length(); ++i){
+			char c = s.charAt(i);
+			switch (c) {
+			case '<' :
+				result.append("&lt;"); //$NON-NLS-1$
+				break;
+			case '>' :
+				result.append("&gt;"); //$NON-NLS-1$
+				break;
+			case '"' :
+				result.append("&quot;"); //$NON-NLS-1$
+				break;
+			case '\'' :
+				result.append("&apos;"); //$NON-NLS-1$
+				break;
+			case '&' :
+				result.append("&amp;"); //$NON-NLS-1$
+				break;
+			case '{' :
+				result.append("&cbo;"); //$NON-NLS-1$
+				break;
+			case '}' :
+				result.append("&cbc;"); //$NON-NLS-1$
+				break;		
+			default:
+				result.append(c);
+				break;
+		}			
+		}
+		return result.toString();
+	}
+	
+    
+   
+    
     /**
      * @param line
      * @param start
@@ -438,4 +475,6 @@ public class Util {
         return "";
 		
 	}
+
+	
 }
