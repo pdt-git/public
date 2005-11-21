@@ -1,7 +1,14 @@
 package org.cs3.pdt.runtime;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,22 +30,29 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.eclipse.core.resources.ISaveContext;
+import org.eclipse.core.resources.ISaveParticipant;
+import org.eclipse.core.resources.ISavedState;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
+
+	public static final Object muxPreferences = new Object();
 
 	// The shared instance.
 	private static PrologRuntimePlugin plugin;
@@ -70,7 +84,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private Option[] options;
 
-	private PrologInterfaceRegistry registry;
+	private DefaultPrologInterfaceRegistry registry;
 
 	private PrologLibraryManager libraryManager;
 
@@ -79,6 +93,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private HashMap globalHooks;
 
 	private Map bootStrapLists;
+
+	
 
 	public PrologLibraryManager getLibraryManager() {
 		if (libraryManager == null) {
@@ -145,7 +161,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				Debug.report(t);
 				throw new RuntimeException(t);
 			}
-
+			
 			rootLocator = new DefaultResourceFileLocator(location);
 		}
 		return rootLocator.subLocator(key);
@@ -160,8 +176,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		PrologInterface prologInterface = null;
 		String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,
 				null);
-		String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR,
-				System.getProperty("java.io.tmpdir"));
+		String bootStrapDir = getPreferenceValue(
+				PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System
+						.getProperty("java.io.tmpdir"));
 		if (impl == null) {
 			throw new RuntimeException("The required property \""
 					+ PrologRuntime.PREF_PIF_IMPLEMENTATION
@@ -169,7 +186,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 		PrologInterfaceFactory factory = PrologInterfaceFactory
 				.newInstance(impl);
-		factory.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
+		factory.setResourceLocator(new DefaultResourceFileLocator(new File(
+				bootStrapDir)));
 
 		prologInterface = factory.create();
 
@@ -195,11 +213,19 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * @return the value or specified default if no such key exists..
 	 */
 	public String getPreferenceValue(String key, String defaultValue) {
+		
+		synchronized (muxPreferences) {
 
-		IPreferencesService service = Platform.getPreferencesService();
-		String qualifier = getBundle().getSymbolicName();
-		String value = service.getString(qualifier, key, defaultValue, null);
-		return System.getProperty(key, value);
+		
+
+			IPreferencesService service = Platform.getPreferencesService();
+			String qualifier = getBundle().getSymbolicName();
+			String value = service
+					.getString(qualifier, key, defaultValue, null);
+			
+			
+			return System.getProperty(key, value);
+		}	
 	}
 
 	/**
@@ -296,15 +322,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					.getConfigurationElements();
 			for (int j = 0; j < configurationElements.length; j++) {
 				IConfigurationElement elm = configurationElements[j];
-				String pifKey = elm.getAttribute("key");
-				if (pifKey == null) {
-					pifKey = "";
-				}
-				Set contribs = (Set) bootStrapLists.get(pifKey);
-				if (contribs == null) {
-					contribs = new HashSet();
-					bootStrapLists.put(pifKey, contribs);
-				}
+				
 				String id = elm.getAttribute("id");
 				String alias = elm.getAttribute("alias");
 				String resName = elm.getAttribute("path");
@@ -327,14 +345,15 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				// URI uri = URI.create(url.toString());
 				File file = new File(url.getFile());
 				String path = Util.prologFileName(file);
-				
+
 				IConfigurationElement[] depElms = elm.getChildren();
 				Set deps = new HashSet();
 				for (int k = 0; k < depElms.length; k++) {
 					IConfigurationElement depElm = depElms[k];
 					deps.add(depElm.getAttribute("library"));
 				}
-				PrologLibrary lib = new DefaultPrologLibrary(id,deps,alias,path);
+				PrologLibrary lib = new DefaultPrologLibrary(id, deps, alias,
+						path);
 				getLibraryManager().addLibrary(lib);
 
 			}
@@ -516,18 +535,19 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 */
 	private void initOptions() {
 
-		options = new Option[] { new SimpleOption(
-				PrologRuntime.PREF_PIF_IMPLEMENTATION,
-				"PrologInterfaceFactory implementation",
-				"The factory to be used for creating PrologInterface instances",
-				Option.STRING, PrologInterfaceFactory.DEFAULT),
+		options = new Option[] {
+				new SimpleOption(
+						PrologRuntime.PREF_PIF_IMPLEMENTATION,
+						"PrologInterfaceFactory implementation",
+						"The factory to be used for creating PrologInterface instances",
+						Option.STRING, PrologInterfaceFactory.DEFAULT),
 				new SimpleOption(
 						PrologRuntime.PREF_PIF_BOOTSTRAP_DIR,
 						"PrologInterface Bootstrap Directory",
-						"The PrologInterface needs to temporarily store some" +
-						"prolog files during bootstrapping. Any directory for which " +
-						"you have write permissions will do.",
-						Option.DIR, System.getProperty("java.io.tmpdir"))};
+						"The PrologInterface needs to temporarily store some"
+								+ "prolog files during bootstrapping. Any directory for which "
+								+ "you have write permissions will do.",
+						Option.DIR, System.getProperty("java.io.tmpdir")) };
 
 	}
 
@@ -556,18 +576,36 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 
+	/**
+	 * get a PrologInterface to a given key. This is a convenience method to
+	 * "just get the darn thing". It uses an anonymous subscription. It does not
+	 * attempt to set the name of the pif.
+	 * 
+	 * @deprecated It is nearly always better to use a propper subscriptilon.
+	 * @param key
+	 * @return
+	 */
 	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(new PrologInterfaceSubscription(key,
-				"No description available."), null);
+		return getPrologInterface(new DefaultSubscription(null, key,
+				"No description available.", null));
 	}
 
+	/**
+	 * get a PrologInterface to a given key. This is a convenience method to
+	 * "just get the darn thing". It uses an anonymous subscription. It does not
+	 * attempt to set the name of the pif.
+	 * 
+	 * @deprecated It is nearly always better to use a propper subscriptilon.
+	 * @param key
+	 * @param defaultName
+	 *            A default name for the pif. If the no pif existed for the
+	 *            given key, or if no name was attached to it until now, the
+	 *            given string will be used. May be null.
+	 * @return the PrologInterface instance.
+	 */
 	public PrologInterface getPrologInterface(String key, String defaultName) {
-		return getPrologInterface(new PrologInterfaceSubscription(key,
-				"No description available."), defaultName);
-	}
-
-	public PrologInterface getPrologInterface(PrologInterfaceSubscription s) {
-		return getPrologInterface(s, null);
+		return getPrologInterface(new DefaultSubscription("", key,
+				null, defaultName));
 	}
 
 	/**
@@ -575,29 +613,21 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * registry does not contain a pif for that key, it will create a new pif
 	 * and register it with the registry.
 	 * 
-	 * @param key
-	 *            A unique identifier for the PrologInterface. Must NOT be null.
 	 * @param s
 	 *            Information describing what use the caller is about to make of
 	 *            the pif. This is used by the ui to help the user to
-	 *            distinguish multiple active instances. Can be null, in which
-	 *            case some default information will be generated.
-	 * @param defaultName
-	 *            A default name for the pif. If the no pif existed for the
-	 *            given key, or if no name was attached to it until now, the
-	 *            given string will be used. May be null.
+	 *            distinguish multiple active instances. Must not be null.
 	 * @return the ProlotInterface instance, either from registry, or freshly
 	 *         created.
 	 */
-	public PrologInterface getPrologInterface(PrologInterfaceSubscription s,
-			String defaultName) {
+	public PrologInterface getPrologInterface(Subscription s) {
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-		PrologInterface pif = r.getPrologInterface(s.key);
+		PrologInterface pif = r.getPrologInterface(s.getPifKey());
 		if (pif == null) {
 			pif = createPrologInterface();
-			reconfigurePrologInterface(s.key, pif);
-			r.addPrologInterface(s.key, pif);
-			Map hooks = (Map) getGlobalHooks().get(s.key);
+			reconfigurePrologInterface(s.getPifKey(), pif);
+			r.addPrologInterface(s.getPifKey(), pif);
+			Map hooks = (Map) getGlobalHooks().get(s.getPifKey());
 			if (hooks != null) {
 				for (Iterator it = hooks.values().iterator(); it.hasNext();) {
 					_HookRecord record = (_HookRecord) it.next();
@@ -621,9 +651,6 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				throw new RuntimeException(e);
 			}
 		}
-		if (r.getName(s.key) == null && defaultName != null) {
-			r.setName(s.key, defaultName);
-		}
 
 		r.addSubscription(s);
 		return pif;
@@ -632,6 +659,101 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
 		if (this.registry == null) {
 			this.registry = new DefaultPrologInterfaceRegistry();
+			try {
+				ISavedState lastState = ResourcesPlugin.getWorkspace()
+						.addSaveParticipant(this, new ISaveParticipant() {
+
+							public void saving(ISaveContext context)
+									throws CoreException {
+								switch (context.getKind()) {
+								case ISaveContext.FULL_SAVE:
+									PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
+											.getDefault();
+									// save the plug-in state
+									int saveNumber = context.getSaveNumber();
+									String saveFileName = "registry-"
+											+ Integer.toString(saveNumber);
+									File f = myPluginInstance
+											.getStateLocation().append(
+													saveFileName).toFile();
+									// if we fail to write, an exception is
+									// thrown and we do not update the path
+									Writer w = null;
+									try {
+
+										w = new BufferedWriter(
+												new FileWriter(f));
+										myPluginInstance.registry.save(w);
+										w.close();
+									} catch (IOException e) {
+										Debug.report(e);
+										throw new RuntimeException(e);
+									}
+									context.map(new Path("registry"), new Path(
+											saveFileName));
+									context.needSaveNumber();
+									break;
+								case ISaveContext.PROJECT_SAVE:
+									break;
+								case ISaveContext.SNAPSHOT:
+									break;
+								}
+
+							}
+
+							public void rollback(ISaveContext context) {
+								PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
+										.getDefault();
+
+								// since the save operation has failed, delete
+								// the saved state we have just written
+								int saveNumber = context.getSaveNumber();
+								String saveFileName = "registry-"
+										+ Integer.toString(saveNumber);
+								File f = myPluginInstance.getStateLocation()
+										.append(saveFileName).toFile();
+								f.delete();
+
+							}
+
+							public void prepareToSave(ISaveContext context)
+									throws CoreException {
+								;
+							}
+
+							public void doneSaving(ISaveContext context) {
+								PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
+										.getDefault();
+
+								// delete the old saved state since it is not
+								// necessary anymore
+								int previousSaveNumber = context
+										.getPreviousSaveNumber();
+								String oldFileName = "registry-"
+										+ Integer.toString(previousSaveNumber);
+								File f = myPluginInstance.getStateLocation()
+										.append(oldFileName).toFile();
+								f.delete();
+
+							}
+
+						});
+
+				if(lastState!=null){
+					IPath location = lastState.lookup(new Path("registry"));
+					location = getStateLocation().append(location);
+					File file = location.toFile();
+					Reader r = new BufferedReader(new FileReader(file));
+					registry.load(r);
+				}
+			} catch (CoreException e) {
+				Debug.report(e);
+				throw new RuntimeException(e);
+			} catch (IOException e) {
+				Debug.report(e);
+				throw new RuntimeException(e);
+
+			}
 		}
 		return this.registry;
 
@@ -663,7 +785,6 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 		public _HookRecord(LifeCycleHook hook, String hookId, String[] deps) {
 			super();
-			// TODO Auto-generated constructor stub
 			this.hook = hook;
 			this.hookId = hookId;
 			this.deps = deps;

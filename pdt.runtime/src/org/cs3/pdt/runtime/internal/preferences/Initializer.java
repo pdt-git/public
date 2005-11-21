@@ -27,7 +27,10 @@ public class Initializer extends AbstractPreferenceInitializer {
      */
     public void initializeDefaultPreferences() {
         try {
-            initializeDefaultPreferences_impl();
+        	
+        	synchronized(PrologRuntimePlugin.muxPreferences){
+        		initializeDefaultPreferences_impl();
+        	}
         } catch (Throwable t) {
             Debug.report(t);
             throw new RuntimeException(t.getMessage(), t);

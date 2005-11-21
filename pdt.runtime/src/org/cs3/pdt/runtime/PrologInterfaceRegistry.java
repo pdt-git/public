@@ -24,17 +24,18 @@ public interface PrologInterfaceRegistry {
 	 * return all subscriptions to a given registered pif key
 	 * @return null if no such pif, empty list if no subscriptions
 	 */	
-	public List getSubscriptions(String key);
+	public List getSubscriptionsForPif(String key);
 
 	/**
 	 * A short catchy name associated with a given pif.
 	 * Maybe null if no such pif, or no name. 
+	 * @deprecated the method may be removed, due to its unclear semantics see PDT-108
 	 */
 	public String getName(String key);
 	
 	/**
 	 * Set an optional name for a given pif identifier.
-	 * 
+	 * @deprecated the method may be removed, due to its unclear semantics see PDT-108
 	 */
 	public void setName(String key, String name);
 
@@ -57,6 +58,8 @@ public interface PrologInterfaceRegistry {
 	public void addPrologInterface(String key, PrologInterface pif);
 	public void removePrologInterface(String key);
 	
-	public void addSubscription(PrologInterfaceSubscription s);
-	public void removeSubscription(PrologInterfaceSubscription s);
+	public void addSubscription(Subscription s);
+	public void removeSubscription(Subscription s);
+
+	public Subscription getSubscription(String key);
 }
