@@ -9,12 +9,12 @@ public class PrologInterfaceRegistryEvent extends EventObject {
 
 	public String key = null;
 
-	public PrologInterfaceSubscription subscription = null;
+	public Subscription subscription = null;
 
 	public PrologInterfaceRegistryEvent(Object source, 
 			PrologInterface pif,
 			String key, 
-			PrologInterfaceSubscription subscription) {
+			Subscription subscription) {
 		super(source);
 		this.pif = pif;
 		this.key = key;
@@ -22,9 +22,9 @@ public class PrologInterfaceRegistryEvent extends EventObject {
 	}
 
 	public PrologInterfaceRegistryEvent(PrologInterfaceRegistry reg,
-			PrologInterfaceSubscription subscription) {
+			Subscription subscription) {
 		super(reg);
-		this.key = subscription.key;
+		this.key = subscription.getPifKey();
 		this.subscription = subscription;
 		this.pif = reg.getPrologInterface(key);
 	}
