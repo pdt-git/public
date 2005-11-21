@@ -42,7 +42,7 @@ comma_reverse(_h, _c, ','(_h,_c)) :- !.
 %comma_map(_func, ','(_h, _t), ','(_fh, _t)) :-
 
 
-% zweites argument sollte k�rzere liste sein -> bessere performanz
+% zweites argument sollte krzere liste sein -> bessere performanz
 comma_append(_b, _a, _T) :-
     comma_reverse(_a, _ar),
     comma_prepend_(_ar, _b, _T),
