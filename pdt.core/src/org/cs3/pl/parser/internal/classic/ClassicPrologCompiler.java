@@ -27,6 +27,7 @@ import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.ClauseData;
 import org.cs3.pl.metadata.PrologElementData;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.parser.Index;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
 import org.cs3.pl.parser.ProblemCollector;
@@ -680,6 +681,11 @@ public class ClassicPrologCompiler extends PrologParserTraversal implements Prol
 	}
 
 	public void setTaskCollector(TaskCollector taskCollector) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void updateIndex(Index index) {
 		// TODO Auto-generated method stub
 		
 	}

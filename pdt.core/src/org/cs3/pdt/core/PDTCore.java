@@ -74,7 +74,7 @@ public class PDTCore {
 	public static final String PROP_SOURCE_EXCLUSION_PATTERN = "pdt.exlusion.pattern";
 	public static final String PLUGIN_ID = "org.cs3.pdt.core";
 
-	public static final String ENGINE_ID = "org.cs3.pdt.core.engine";
+	public static final String ENGINE_ID = "pdt.core.library";
 
 	public static final String PROP_METADATA_PIF_KEY = "pdt.metadata.pif_key";
 	public static final String PROP_RUNTIME_PIF_KEY = "pdt.runtime.pif_key";
