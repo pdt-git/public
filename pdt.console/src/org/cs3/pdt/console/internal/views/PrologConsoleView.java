@@ -376,6 +376,16 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				setPrologInterface(e.getPrologInterface());
 				
 			}
+
+			protected void trackerActivated(PrologContextTracker tracker) {
+				setPrologInterface(contextSelector.getCurrentPrologInterface());
+				
+			}
+
+			protected void trackerDeactivated(PrologContextTracker tracker) {
+				setPrologInterface(contextSelector.getCurrentPrologInterface());
+				
+			}
 			
 		};
 		
