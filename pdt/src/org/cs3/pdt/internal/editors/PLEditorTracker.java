@@ -62,7 +62,7 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 
 	public void init(IWorkbench workbench) {
 		workbench.getActiveWorkbenchWindow().getPartService().addPartListener(this);
-		
+		fireContextChanged();
 	}
 	
 	private void check(IWorkbenchPartReference partRef) {

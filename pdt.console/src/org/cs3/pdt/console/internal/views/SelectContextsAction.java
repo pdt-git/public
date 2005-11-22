@@ -11,6 +11,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerListener;
+import org.cs3.pdt.runtime.PrologContextTrackerService;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -87,11 +88,11 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 				if(getActiveTrackers().contains(trackerId)){
 					getActiveTrackers().remove(trackerId);
 					tracker.removePrologContextTrackerListener(SelectContextsAction.this);
-					
+					trackerDeactivated(tracker);
 				}else{
 					getActiveTrackers().add(trackerId);
 					tracker.addPrologContextTrackerListener(SelectContextsAction.this);
-					
+					trackerActivated(tracker);
 				}
 				PrologConsolePlugin.getDefault().setPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,Util.splice(getActiveTrackers(),","));
 				setChecked(getActiveTrackers().contains(trackerId));
@@ -102,6 +103,14 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 		
 		item.fill(parent, -1);
 	}
+
+	protected abstract void trackerActivated(PrologContextTracker tracker) ;
+
+
+
+	protected abstract void trackerDeactivated(PrologContextTracker tracker) ;
+
+
 
 	/**
 	 * @see IMenuCreator#dispose()
@@ -219,7 +228,12 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	Set getActiveTrackers() {
 		if(activeTrackers==null){
 			activeTrackers=new HashSet();			
-			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);			
+			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);
+			PrologContextTrackerService trackerService = PrologRuntimePlugin.getDefault().getContextTrackerService();
+			for (Iterator iter = activeTrackers.iterator(); iter.hasNext();) {
+				String id = (String) iter.next();				
+				trackerService.getContextTracker(id).addPrologContextTrackerListener(this);
+			}
 		}
 		return activeTrackers;
 	}
