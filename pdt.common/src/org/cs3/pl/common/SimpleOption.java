@@ -63,4 +63,12 @@ public class SimpleOption implements Option {
     public String validate(String value) {       
         return null;
     }
+
+    /**
+     * this implementation always returns true.
+     * override to change.
+     */
+    public boolean isVisible() {
+		return true;
+	}
 }

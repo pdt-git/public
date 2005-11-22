@@ -53,7 +53,16 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 						PDTConsole.PREF_TIMEOUT,
 						"Connect Timeout",
 						"Maximum time in milliseconds to wait for the console server to come up.",
-						SimpleOption.NUMBER, "15000")         
+						SimpleOption.NUMBER, "15000"),         
+				new SimpleOption(
+						PDTConsole.PREF_CONTEXT_TRACKERS,
+						"active context trackers",
+						"comma-separated list of trackers the console does follow",
+						SimpleOption.STRING, ""){
+        			public boolean isVisible() {
+        				return false;
+        			}
+        		}
         };
 
     }
@@ -145,6 +154,10 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
         return System.getProperty(key, value);
     }
 
+    public void setPreferenceValue(String key,String value){
+    	getPreferenceStore().setValue(key,value);
+    }
+    
 	public void reconfigure() {
 		// XXX reconnect console here.
 		

@@ -1,19 +1,23 @@
 package org.cs3.pdt.console.internal.views;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerListener;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
@@ -22,12 +26,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
-import org.eclipse.ui.internal.ide.IDEInternalWorkbenchImages;
 
 public abstract class SelectContextsAction extends Action implements IMenuCreator,
 		IWorkbenchWindowPulldownDelegate2, PrologContextTrackerListener {
 
-	List activeTrackers=new Vector();
+	private Set activeTrackers;
 	
 	/**
 	 * Cascading menu
@@ -65,8 +68,9 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 
 	public PrologInterface getCurrentPrologInterface(){
 		
-		for (Iterator it = activeTrackers.iterator(); it.hasNext();) {
-			PrologContextTracker tracker = (PrologContextTracker) it.next();
+		for (Iterator it = getActiveTrackers().iterator(); it.hasNext();) {
+			String trackerId = (String) it.next();
+			PrologContextTracker tracker = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTracker(trackerId); 
 			PrologInterface pif = tracker.getCurrentPrologInterface();
 			if(pif!=null){
 				return pif;
@@ -76,21 +80,24 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	}
 	
 	private void createAction(Menu parent, final PrologContextTracker tracker) {
+		final String trackerId = tracker.getId();
 		IAction action = new Action(tracker.getLabel(),IAction.AS_CHECK_BOX){
 			public void run() {
-				if(activeTrackers.contains(tracker)){
-					activeTrackers.remove(tracker);
+				
+				if(getActiveTrackers().contains(trackerId)){
+					getActiveTrackers().remove(trackerId);
 					tracker.removePrologContextTrackerListener(SelectContextsAction.this);
 					
 				}else{
-					activeTrackers.add(tracker);
+					getActiveTrackers().add(trackerId);
 					tracker.addPrologContextTrackerListener(SelectContextsAction.this);
 					
 				}
-				setChecked(activeTrackers.contains(tracker));
+				PrologConsolePlugin.getDefault().setPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,Util.splice(getActiveTrackers(),","));
+				setChecked(getActiveTrackers().contains(trackerId));
 			}
 		};
-		action.setChecked(activeTrackers.contains(tracker));
+		action.setChecked(getActiveTrackers().contains(trackerId));
 		ActionContributionItem item = new ActionContributionItem(action);
 		
 		item.fill(parent, -1);
@@ -201,6 +208,20 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	private void initialize(IAction action) {
 		fAction = action;
 
+	}
+
+
+
+	
+
+
+
+	Set getActiveTrackers() {
+		if(activeTrackers==null){
+			activeTrackers=new HashSet();			
+			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);			
+		}
+		return activeTrackers;
 	}
 
 }

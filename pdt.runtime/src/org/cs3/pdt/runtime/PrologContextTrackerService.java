@@ -40,4 +40,6 @@ public interface PrologContextTrackerService {
 	 * @return an array containing all context trackers currently registered with the runtime plugin.
 	 */
 	public PrologContextTracker[] getContextTrackers();
+
+	public PrologContextTracker getContextTracker(String trackerId);
 }

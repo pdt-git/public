@@ -120,4 +120,8 @@ public class DefaultPrologContextTrackerService implements
 		return (PrologContextTracker[]) contextTrackers.values().toArray(new PrologContextTracker[contextTrackers.size()]);
 	}
 
+	public PrologContextTracker getContextTracker(String trackerId) {
+		return (PrologContextTracker) contextTrackers.get(trackerId);
+	}
+
 }

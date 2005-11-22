@@ -380,6 +380,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		};
 		
 		toolBarManager.add(contextSelector);
+		setPrologInterface(contextSelector.getCurrentPrologInterface());
 	}
 
 	private void addContributions(IContributionManager manager) {
