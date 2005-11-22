@@ -118,6 +118,9 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 		
 	}
 	public void update(){
+		if (window==null){
+			return;
+		}
 		Display display = window.getShell().getDisplay();
 		if(display!=Display.getCurrent()){
 			display.asyncExec(new Runnable() {
@@ -200,6 +203,7 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	 */
 	public void init(IWorkbenchWindow window) {
 		this.window=window;
+		
 	}
 
 	/**

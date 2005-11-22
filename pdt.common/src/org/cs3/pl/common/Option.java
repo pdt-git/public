@@ -49,4 +49,11 @@ public interface Option {
 	 *         validation.
 	 */
 	public String validate(String value);
+	
+	/**
+	 * options can be hidden from the ui by letting this method return
+	 * false.
+	 * @return
+	 */
+	public boolean isVisible();
 }

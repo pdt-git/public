@@ -46,8 +46,14 @@ IWorkbenchPreferencePage{
     private void addEditorsForOptions(Composite parent, final Option[] options) {
         FieldEditor editor = null;
         for(int i=0;i<options.length;i++){
-            String name = options[i].getId();
+            
+        	if(!options[i].isVisible()){
+            	continue;
+            }
+        	
+        	String name = options[i].getId();
             String label = options[i].getLabel();
+            
             final int j =i;
             switch(options[i].getType()){
             	case Option.DIR:

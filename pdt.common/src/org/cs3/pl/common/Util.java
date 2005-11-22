@@ -476,5 +476,30 @@ public class Util {
 		
 	}
 
+	public static void split(String s, String delm, Collection target){
+		if(s.trim().length()==0){
+			return;
+		}
+		String[] strings = s.split(delm);
+		for (int i = 0; i < strings.length; i++) {
+			target.add(strings[i]);
+		}
+	}
+	
+	public static String splice(Collection c, String delim) {
+		if (c != null&& !c.isEmpty()) {
+            StringBuffer sb = new StringBuffer();
+            for (Iterator it = c.iterator(); it.hasNext();) {
+                Object next = it.next();				
+				sb.append(next);
+				if(it.hasNext()){
+					sb.append(delim);	
+				}
+            }
+            return sb.toString();
+        }
+        return "";
+		
+	}
 	
 }

@@ -12,6 +12,7 @@ final public class PDTConsole {
 	public static final String CONTRIB_PIF_SELECTOR_ID = "pdt.console.contribution.pifselector";
 	public static final String PREF_TIMEOUT = "pdt.console.timeout";
 	public static final String PL_LIBRARY = "pdt.console.library";
+	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";
 	
 	
 }
