@@ -52,7 +52,7 @@ import org.osgi.framework.BundleContext;
 
 public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
-	public static final Object muxPreferences = new Object();
+	
 
 	// The shared instance.
 	private static PrologRuntimePlugin plugin;
@@ -94,22 +94,39 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private Map bootStrapLists;
 
-	
+	private final static Object contextTrackerMux=new Object();
+
+	private final static Object libraryManagerMux=new Object();
+
+	private final static Object globalHooksMux=new Object();
+
+	private final static Object registryMux=new Object();
+
+	private final static Object optionsMux=new Object();
+
+	private static final Object preferencesMux = new Object();
 
 	public PrologLibraryManager getLibraryManager() {
-		if (libraryManager == null) {
-			libraryManager = new PrologLibraryManager();
-			registerStaticLibraries();
+		synchronized (libraryManagerMux) {
+			if (libraryManager == null) {
+				
+					libraryManager = new PrologLibraryManager();
+					registerStaticLibraries();
+				
+			}
+		
+			return libraryManager;
 		}
-		return libraryManager;
 	}
 
 	public PrologContextTrackerService getContextTrackerService() {
-		if (contextTrackerService == null) {
-			contextTrackerService = new DefaultPrologContextTrackerService();
-			registerStaticTrackers();
+		synchronized(contextTrackerMux){
+			if (contextTrackerService == null) {
+				contextTrackerService = new DefaultPrologContextTrackerService();
+				registerStaticTrackers();
+			}
+			return contextTrackerService;
 		}
-		return contextTrackerService;
 	}
 
 	public void earlyStartup() {
@@ -214,7 +231,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 */
 	public String getPreferenceValue(String key, String defaultValue) {
 		
-		synchronized (muxPreferences) {
+		synchronized (preferencesMux) {
 
 		
 
@@ -296,6 +313,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	}
 
+	/**
+	 * @deprecated Bootstrap Contributions stink.
+	 * @return
+	 */
 	private Map getBootStrapLists() {
 		if (bootStrapLists == null) {
 			bootStrapLists = new HashMap();
@@ -428,6 +449,11 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	}
 
+	/**
+	 * @deprecated bootstrap contributions stink.
+	 * @param key
+	 * @return
+	 */
 	private Set getBootstrapList(String key) {
 		Set r = (Set) getBootStrapLists().get(key);
 		return r == null ? new HashSet() : r;
@@ -524,10 +550,12 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	public Option[] getOptions() {
-		if (options == null) {
-			initOptions();
+		synchronized (optionsMux) {
+			if (options == null) {
+				initOptions();
+			}
+			return this.options;
 		}
-		return this.options;
 	}
 
 	/**
@@ -657,106 +685,36 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
-		if (this.registry == null) {
-			this.registry = new DefaultPrologInterfaceRegistry();
-			try {
-				ISavedState lastState = ResourcesPlugin.getWorkspace()
-						.addSaveParticipant(this, new ISaveParticipant() {
-
-							public void saving(ISaveContext context)
-									throws CoreException {
-								switch (context.getKind()) {
-								case ISaveContext.FULL_SAVE:
-									PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
-											.getDefault();
-									// save the plug-in state
-									int saveNumber = context.getSaveNumber();
-									String saveFileName = "registry-"
-											+ Integer.toString(saveNumber);
-									File f = myPluginInstance
-											.getStateLocation().append(
-													saveFileName).toFile();
-									// if we fail to write, an exception is
-									// thrown and we do not update the path
-									Writer w = null;
-									try {
-
-										w = new BufferedWriter(
-												new FileWriter(f));
-										myPluginInstance.registry.save(w);
-										w.close();
-									} catch (IOException e) {
-										Debug.report(e);
-										throw new RuntimeException(e);
-									}
-									context.map(new Path("registry"), new Path(
-											saveFileName));
-									context.needSaveNumber();
-									break;
-								case ISaveContext.PROJECT_SAVE:
-									break;
-								case ISaveContext.SNAPSHOT:
-									break;
-								}
-
-							}
-
-							public void rollback(ISaveContext context) {
-								PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
-										.getDefault();
-
-								// since the save operation has failed, delete
-								// the saved state we have just written
-								int saveNumber = context.getSaveNumber();
-								String saveFileName = "registry-"
-										+ Integer.toString(saveNumber);
-								File f = myPluginInstance.getStateLocation()
-										.append(saveFileName).toFile();
-								f.delete();
-
-							}
-
-							public void prepareToSave(ISaveContext context)
-									throws CoreException {
-								;
-							}
-
-							public void doneSaving(ISaveContext context) {
-								PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
-										.getDefault();
-
-								// delete the old saved state since it is not
-								// necessary anymore
-								int previousSaveNumber = context
-										.getPreviousSaveNumber();
-								String oldFileName = "registry-"
-										+ Integer.toString(previousSaveNumber);
-								File f = myPluginInstance.getStateLocation()
-										.append(oldFileName).toFile();
-								f.delete();
-
-							}
-
-						});
-
-				if(lastState!=null){
-					IPath location = lastState.lookup(new Path("registry"));
-					location = getStateLocation().append(location);
-					File file = location.toFile();
-					Reader r = new BufferedReader(new FileReader(file));
-					registry.load(r);
-				}
-			} catch (CoreException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			} catch (IOException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-
+		synchronized (registryMux) {
+			if (this.registry == null) {
+				this.registry = new DefaultPrologInterfaceRegistry();
+				initRegistry();
 			}
+			return this.registry;
 		}
-		return this.registry;
 
+	}
+
+	private void initRegistry() {
+		try {
+			ISavedState lastState = ResourcesPlugin.getWorkspace()
+					.addSaveParticipant(this, new _SaveParticipant());
+
+			if(lastState!=null){
+				IPath location = lastState.lookup(new Path("registry"));
+				location = getStateLocation().append(location);
+				File file = location.toFile();
+				Reader r = new BufferedReader(new FileReader(file));
+				registry.load(r);
+			}
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		} catch (IOException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+
+		}
 	}
 
 	/**
@@ -774,6 +732,82 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	public boolean hasPrologInterface(String pifKey) {
 		return getPrologInterfaceRegistry().getRegisteredKeys()
 				.contains(pifKey);
+	}
+
+	private final class _SaveParticipant implements ISaveParticipant {
+		public void saving(ISaveContext context)
+				throws CoreException {
+			switch (context.getKind()) {
+			case ISaveContext.FULL_SAVE:
+				PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
+						.getDefault();
+				// save the plug-in state
+				int saveNumber = context.getSaveNumber();
+				String saveFileName = "registry-"
+						+ Integer.toString(saveNumber);
+				File f = myPluginInstance
+						.getStateLocation().append(
+								saveFileName).toFile();
+				// if we fail to write, an exception is
+				// thrown and we do not update the path
+				Writer w = null;
+				try {
+		
+					w = new BufferedWriter(
+							new FileWriter(f));
+					myPluginInstance.registry.save(w);
+					w.close();
+				} catch (IOException e) {
+					Debug.report(e);
+					throw new RuntimeException(e);
+				}
+				context.map(new Path("registry"), new Path(
+						saveFileName));
+				context.needSaveNumber();
+				break;
+			case ISaveContext.PROJECT_SAVE:
+				break;
+			case ISaveContext.SNAPSHOT:
+				break;
+			}
+		
+		}
+
+		public void rollback(ISaveContext context) {
+			PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
+					.getDefault();
+		
+			// since the save operation has failed, delete
+			// the saved state we have just written
+			int saveNumber = context.getSaveNumber();
+			String saveFileName = "registry-"
+					+ Integer.toString(saveNumber);
+			File f = myPluginInstance.getStateLocation()
+					.append(saveFileName).toFile();
+			f.delete();
+		
+		}
+
+		public void prepareToSave(ISaveContext context)
+				throws CoreException {
+			;
+		}
+
+		public void doneSaving(ISaveContext context) {
+			PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
+					.getDefault();
+		
+			// delete the old saved state since it is not
+			// necessary anymore
+			int previousSaveNumber = context
+					.getPreviousSaveNumber();
+			String oldFileName = "registry-"
+					+ Integer.toString(previousSaveNumber);
+			File f = myPluginInstance.getStateLocation()
+					.append(oldFileName).toFile();
+			f.delete();
+		
+		}
 	}
 
 	private static class _HookRecord {
@@ -812,16 +846,19 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 */
 	public void registerLifeCycleHook(String pifKey, LifeCycleHook hook,
 			String hookId, String[] deps) {
+		synchronized (globalHooksMux) {
 		Map hooks = (Map) getGlobalHooks().get(pifKey);
-		if (hooks == null) {
-			hooks = new HashMap();
-			getGlobalHooks().put(pifKey, hooks);
-		}
-		hooks.put(hookId, new _HookRecord(hook, hookId, deps));
-		PrologInterface pif = getPrologInterfaceRegistry().getPrologInterface(
-				pifKey);
-		if (pif != null) {
-			pif.addLifeCycleHook(hook, hookId, deps);
+		
+			if (hooks == null) {
+				hooks = new HashMap();
+				getGlobalHooks().put(pifKey, hooks);
+			}
+			hooks.put(hookId, new _HookRecord(hook, hookId, deps));
+			PrologInterface pif = getPrologInterfaceRegistry()
+					.getPrologInterface(pifKey);
+			if (pif != null) {
+				pif.addLifeCycleHook(hook, hookId, deps);
+			}
 		}
 	}
 
@@ -838,24 +875,29 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * @param hook
 	 */
 	public void unregisterLifeCycleHook(String pifKey, String hookId) {
+		synchronized (globalHooksMux) {
 		Map hooks = (Map) getGlobalHooks().get(pifKey);
-		if (hooks == null) {
-			return;
-		}
-		hooks.remove(hookId);
-		PrologInterface pif = getPrologInterfaceRegistry().getPrologInterface(
-				pifKey);
-		if (pif != null) {
-			pif.removeLifeCycleHook(hookId);
+		
+			if (hooks == null) {
+				return;
+			}
+			hooks.remove(hookId);
+			PrologInterface pif = getPrologInterfaceRegistry()
+					.getPrologInterface(pifKey);
+			if (pif != null) {
+				pif.removeLifeCycleHook(hookId);
+			}
 		}
 	}
 
 	private HashMap getGlobalHooks() {
-		if (globalHooks == null) {
-			globalHooks = new HashMap();
-			registerStaticHooks();
+		synchronized (globalHooksMux) {
+			if (globalHooks == null) {
+				globalHooks = new HashMap();
+				registerStaticHooks();
+			}
+			return globalHooks;
 		}
-		return globalHooks;
 	}
 
 }
