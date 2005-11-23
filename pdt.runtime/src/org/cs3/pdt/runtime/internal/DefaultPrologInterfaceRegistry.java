@@ -153,13 +153,20 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		return pifs.keySet();
 	}
 
-	public List getSubscriptionsForPif(String key) {
-		if (pifs.containsKey(key)) {
+	public Set getSubscriptionsForPif(String key) {
+			Set l = getSubscriptionKeysForPif(key);
+			Set s = new HashSet();
+			for (Iterator it = l.iterator(); it.hasNext();) {
+				String id = (String) it.next();
+				s.add(getSubscription(id));
+			}
+			
+		return s;
+	}
 
-			List l = (List) subscriptionLists.get(key);
-			return l == null ? new Vector() : l;
-		}
-		return null;
+	public Set getSubscriptionKeysForPif(String key) {
+		Set l = (Set) subscriptionLists.get(key);
+		return l == null ? new HashSet() : l;		
 	}
 
 	public String getName(String key) {
@@ -257,7 +264,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 	public void addPrologInterface(String key, PrologInterface pif) {
 		pifs.put(key, pif);
 		keys.put(pif, key);
-		List l = getSubscriptionsForPif(key);
+		Set l = getSubscriptionsForPif(key);
 		for (Iterator it = l.iterator(); it.hasNext();) {
 			Subscription s = (Subscription) it.next();
 			s.configure(pif);
@@ -271,10 +278,10 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		if (pif == null) {
 			return;
 		}
-		List l = (List) ((Vector) subscriptionLists.get(key)).clone();
+		Set l = (Set) ((HashSet) subscriptionLists.get(key)).clone();
 		if (l != null) {
 			for (Iterator iter = l.iterator(); iter.hasNext();) {
-				Subscription s = (Subscription) iter.next();
+				Subscription s = getSubscription((String) iter.next());
 				s.deconfigure(pif);
 			}
 		}
@@ -291,12 +298,12 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		if (s.getId() == null) {
 			return;
 		}
-		List l = (List) subscriptionLists.get(s.getPifKey());
+		Set l = (Set) subscriptionLists.get(s.getPifKey());
 		if (l == null) {
-			l = new Vector();
+			l = new HashSet();
 			subscriptionLists.put(s.getPifKey(), l);
 		}
-		l.add(s);
+		l.add(s.getId());
 		subscriptions.put(s.getId(), s);
 		if (pifs.containsKey(s.getPifKey())) {
 			s.configure(getPrologInterface(s.getPifKey()));
@@ -304,6 +311,10 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		fireSubscriptionAdded(s);
 	}
 
+	public void removeSubscription(String id) {
+		removeSubscription(getSubscription(id));
+	}
+	
 	public void removeSubscription(Subscription s) {
 		// do not remove anonymous subscriptions
 		if (s.getId() == null) {
@@ -317,12 +328,12 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		}
 		subscriptions.remove(s.getId());
 
-		List l = (List) subscriptionLists.get(s.getPifKey());
+		Set l = (Set) subscriptionLists.get(s.getPifKey());
 		if (l == null) {
 			return;
 		}
-		if (l.contains(s)) {
-			l.remove(s);
+		if (l.contains(s.getId())) {
+			l.remove(s.getId());
 			fireSubscriptionRemoved(s);
 
 		}

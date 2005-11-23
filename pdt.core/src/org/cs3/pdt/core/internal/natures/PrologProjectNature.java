@@ -85,8 +85,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			newBuilders[builders.length] = builder;
 			descr.setBuildSpec(newBuilders);
 			project.setDescription(descr, null);
+			
 			registerLibraries();
-
+			registerSubscriptions();
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -117,6 +118,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 */
 	public void deconfigure() throws CoreException {
 		try {
+			unregisterSubscriptions();
 			unregisterLibraries();
 			IProjectDescription descr = project.getProject().getDescription();
 			org.cs3.pl.common.Debug.debug("deconfigure was called");
@@ -272,6 +274,19 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 		return runtimePif;
 	}
+	protected void registerSubscriptions(){
+		//this should do the trick:
+		getMetadataSubscription();
+		getRuntimeSubscription();
+	}
+	
+	protected void unregisterSubscriptions(){
+		//this should do the trick:
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		r.removeSubscription(getMetadataSubscriptionKey());
+		r.removeSubscription(getRuntimeSubscriptionKey());
+	}
+	
 	
 	public Subscription getMetadataSubscription() {
 		String id = getMetadataSubscriptionKey();
