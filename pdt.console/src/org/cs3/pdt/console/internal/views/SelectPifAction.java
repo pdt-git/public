@@ -1,6 +1,7 @@
 package org.cs3.pdt.console.internal.views;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.cs3.pdt.console.internal.ImageRepository;
@@ -9,6 +10,7 @@ import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryListener;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -108,9 +110,9 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 
 	private void fillMenu() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-		Set registeredKeys = reg.getRegisteredKeys();
+		Set keys = reg.getAllKeys();
 		Menu menu=getCreatedMenu();
-		for (Iterator it = registeredKeys.iterator(); it.hasNext();) {
+		for (Iterator it = keys.iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			createAction(menu, reg, key);
 		}	
@@ -144,27 +146,38 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 			setToolTipText("unregisterd Prologinterface???");
 			return;
 		}
-		String label = reg.getName(key);
-		label=label==null?key:label;
-		setToolTipText(label);
+		setToolTipText(key);
 		
 	}
 	private void createAction(Menu menu, final PrologInterfaceRegistry reg, final String key) {
-		String label = reg.getName(key);
-		label=label==null?key:label;
-		IAction action = new Action(label,IAction.AS_RADIO_BUTTON){
+		IAction action = new Action(key,IAction.AS_RADIO_BUTTON){
 			public void run() {
 				setPrologInterface(reg.getPrologInterface(key));
 			}
 
 			
 		};
-		action.setChecked(reg.getPrologInterface(key)==getPrologInterface());
-		//action.setChecked(tracker.isActive());
+		action.setChecked(key.equals(reg.getKey(getPrologInterface())));
+		StringBuffer buf = new StringBuffer();
+		List subs = reg.getSubscriptionsForPif(key);
+		buf.append(key);
+		buf.append(":\n");
+		for (Iterator it = subs.iterator(); it.hasNext();) {
+			Subscription sub = (Subscription) it.next();
+			buf.append("\t");
+			buf.append(sub.getName());
+			buf.append(" - ");
+			buf.append(sub.getDescritpion());
+			if(it.hasNext()){
+				buf.append('\n');
+			}
+		}
+		//action.setToolTipText(buf.toString());
+		action.setText(buf.toString());
 		ActionContributionItem item = new ActionContributionItem(action);
 		
 		item.fill(menu, -1);
-		
+		//menu.getItem(menu.getItemCount()-1).
 	}
 	protected abstract void setPrologInterface(PrologInterface prologInterface) ;
 	protected abstract PrologInterface getPrologInterface() ;

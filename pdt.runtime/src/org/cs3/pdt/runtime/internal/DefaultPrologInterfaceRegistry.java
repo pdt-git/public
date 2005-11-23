@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -331,6 +332,16 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 	public Subscription getSubscription(String key) {
 		return (Subscription) subscriptions.get(key);
 
+	}
+
+	public Set getAllKeys() {
+		Set s = new HashSet(getRegisteredKeys());
+		s.addAll(subscriptionLists.keySet());
+		return s;
+	}
+
+	public Set getAllSubscriptionIDs() {
+		return new HashSet(subscriptions.keySet());
 	}
 
 }

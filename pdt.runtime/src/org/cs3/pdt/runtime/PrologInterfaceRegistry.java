@@ -21,6 +21,18 @@ public interface PrologInterfaceRegistry {
 	public Set getRegisteredKeys();
 
 	/**
+	 * @return all keys that are known to the registry, including keys
+	 * for which no pif is registered.
+	 */
+	public Set getAllKeys();
+	
+	/**
+	 * @return the IDs of all subscriptions registered with the 
+	 * registry..
+	 */
+	public Set getAllSubscriptionIDs();
+	
+	/**
 	 * return all subscriptions to a given registered pif key
 	 * @return null if no such pif, empty list if no subscriptions
 	 */	
