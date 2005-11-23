@@ -159,17 +159,14 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 		};
 		action.setChecked(key.equals(reg.getKey(getPrologInterface())));
 		StringBuffer buf = new StringBuffer();
-		List subs = reg.getSubscriptionsForPif(key);
+		Set subs = reg.getSubscriptionsForPif(key);
 		buf.append(key);
-		buf.append(":\n");
+		buf.append(": ");
 		for (Iterator it = subs.iterator(); it.hasNext();) {
 			Subscription sub = (Subscription) it.next();
-			buf.append("\t");
 			buf.append(sub.getName());
-			buf.append(" - ");
-			buf.append(sub.getDescritpion());
 			if(it.hasNext()){
-				buf.append('\n');
+				buf.append(", ");
 			}
 		}
 		//action.setToolTipText(buf.toString());

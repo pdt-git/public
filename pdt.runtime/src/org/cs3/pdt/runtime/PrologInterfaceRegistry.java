@@ -36,8 +36,10 @@ public interface PrologInterfaceRegistry {
 	 * return all subscriptions to a given registered pif key
 	 * @return null if no such pif, empty list if no subscriptions
 	 */	
-	public List getSubscriptionsForPif(String key);
+	public Set getSubscriptionsForPif(String key);
 
+	public Set getSubscriptionKeysForPif(String key);
+	
 	/**
 	 * A short catchy name associated with a given pif.
 	 * Maybe null if no such pif, or no name. 
@@ -72,6 +74,7 @@ public interface PrologInterfaceRegistry {
 	
 	public void addSubscription(Subscription s);
 	public void removeSubscription(Subscription s);
+	public void removeSubscription(String id);
 
 	public Subscription getSubscription(String key);
 }
