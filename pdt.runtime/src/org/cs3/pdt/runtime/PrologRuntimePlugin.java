@@ -52,8 +52,6 @@ import org.osgi.framework.BundleContext;
 
 public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
-	
-
 	// The shared instance.
 	private static PrologRuntimePlugin plugin;
 
@@ -94,33 +92,33 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private Map bootStrapLists;
 
-	private final static Object contextTrackerMux=new Object();
+	private final static Object contextTrackerMux = new Object();
 
-	private final static Object libraryManagerMux=new Object();
+	private final static Object libraryManagerMux = new Object();
 
-	private final static Object globalHooksMux=new Object();
+	private final static Object globalHooksMux = new Object();
 
-	private final static Object registryMux=new Object();
+	private final static Object registryMux = new Object();
 
-	private final static Object optionsMux=new Object();
+	private final static Object optionsMux = new Object();
 
 	private static final Object preferencesMux = new Object();
 
 	public PrologLibraryManager getLibraryManager() {
 		synchronized (libraryManagerMux) {
 			if (libraryManager == null) {
-				
-					libraryManager = new PrologLibraryManager();
-					registerStaticLibraries();
-				
+
+				libraryManager = new PrologLibraryManager();
+				registerStaticLibraries();
+
 			}
-		
+
 			return libraryManager;
 		}
 	}
 
 	public PrologContextTrackerService getContextTrackerService() {
-		synchronized(contextTrackerMux){
+		synchronized (contextTrackerMux) {
 			if (contextTrackerService == null) {
 				contextTrackerService = new DefaultPrologContextTrackerService();
 				registerStaticTrackers();
@@ -178,7 +176,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				Debug.report(t);
 				throw new RuntimeException(t);
 			}
-			
+
 			rootLocator = new DefaultResourceFileLocator(location);
 		}
 		return rootLocator.subLocator(key);
@@ -230,48 +228,24 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * @return the value or specified default if no such key exists..
 	 */
 	public String getPreferenceValue(String key, String defaultValue) {
-		
-		synchronized (preferencesMux) {
 
-		
+		synchronized (preferencesMux) {
 
 			IPreferencesService service = Platform.getPreferencesService();
 			String qualifier = getBundle().getSymbolicName();
 			String value = service
 					.getString(qualifier, key, defaultValue, null);
-			
-			
+
 			return System.getProperty(key, value);
-		}	
+		}
 	}
 
 	/**
 	 * 
 	 */
 	public void reconfigure() {
-		PrologInterface pif = createPrologInterface();
-		boolean restart = false;
-		if (!pif.isDown()) {
-			try {
-				restart = true;
-				pif.stop();
-			} catch (IOException e1) {
-				Debug.report(e1);
-			}
-		}
-		try {
-			// reconfigureDebugOutput();
 
-			reconfigurePrologInterfaces();
-
-			if (restart) {
-				pif.start();
-			}
-
-		} catch (Throwable e) {
-			Debug.report(e);
-		}
-
+		reconfigurePrologInterfaces();
 	}
 
 	private void reconfigurePrologInterfaces() {
@@ -343,7 +317,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					.getConfigurationElements();
 			for (int j = 0; j < configurationElements.length; j++) {
 				IConfigurationElement elm = configurationElements[j];
-				
+
 				String id = elm.getAttribute("id");
 				String alias = elm.getAttribute("alias");
 				String resName = elm.getAttribute("path");
@@ -606,82 +580,66 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	/**
 	 * get a PrologInterface to a given key. This is a convenience method to
-	 * "just get the darn thing". It uses an anonymous subscription. It does not
-	 * attempt to set the name of the pif.
+	 * "just get the darn thing". This will use create the PrologInterface if
+	 * the registry does not contain it, and register it with the registry. No
+	 * subscription will be added to the history.
 	 * 
-	 * @deprecated It is nearly always better to use a propper subscriptilon.
 	 * @param key
 	 * @return
 	 */
 	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(new DefaultSubscription(null, key,
-				"No description available.", null));
+		return getPrologInterface(new DefaultSubscription(null, key, null, null));
 	}
 
 	/**
-	 * get a PrologInterface to a given key. This is a convenience method to
-	 * "just get the darn thing". It uses an anonymous subscription. It does not
-	 * attempt to set the name of the pif.
-	 * 
-	 * @deprecated It is nearly always better to use a propper subscriptilon.
-	 * @param key
-	 * @param defaultName
-	 *            A default name for the pif. If the no pif existed for the
-	 *            given key, or if no name was attached to it until now, the
-	 *            given string will be used. May be null.
-	 * @return the PrologInterface instance.
-	 */
-	public PrologInterface getPrologInterface(String key, String defaultName) {
-		return getPrologInterface(new DefaultSubscription("", key,
-				null, defaultName));
-	}
-
-	/**
-	 * retrieve a PrologInterface instance identified by the given key. If the
-	 * registry does not contain a pif for that key, it will create a new pif
-	 * and register it with the registry.
+	 * Subscribe to a PrologInterface. If the registry does not contain a pif
+	 * for key the subscription is for, this method will create a new pif and
+	 * register it with the registry.
 	 * 
 	 * @param s
-	 *            Information describing what use the caller is about to make of
-	 *            the pif. This is used by the ui to help the user to
-	 *            distinguish multiple active instances. Must not be null.
+	 *            The subscription to use. If a subscription with the same id
+	 *            exists, it is replaced. Must not be null.
 	 * @return the ProlotInterface instance, either from registry, or freshly
 	 *         created.
 	 */
 	public PrologInterface getPrologInterface(Subscription s) {
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-		PrologInterface pif = r.getPrologInterface(s.getPifKey());
+		String pifKey = s.getPifKey();
+		PrologInterface pif = r.getPrologInterface(pifKey);
 		if (pif == null) {
 			pif = createPrologInterface();
-			reconfigurePrologInterface(s.getPifKey(), pif);
-			r.addPrologInterface(s.getPifKey(), pif);
-			Map hooks = (Map) getGlobalHooks().get(s.getPifKey());
-			if (hooks != null) {
-				for (Iterator it = hooks.values().iterator(); it.hasNext();) {
-					_HookRecord record = (_HookRecord) it.next();
-					pif.addLifeCycleHook(record.hook, record.hookId,
-							record.deps);
-				}
-			}
-			hooks = (Map) getGlobalHooks().get("");
-			if (hooks != null) {
-				for (Iterator it = hooks.values().iterator(); it.hasNext();) {
-					_HookRecord record = (_HookRecord) it.next();
-					pif.addLifeCycleHook(record.hook, record.hookId,
-							record.deps);
-				}
-			}
-			try {
-				pif.start();
+			reconfigurePrologInterface(pifKey, pif);
+			r.addPrologInterface(pifKey, pif);
+			addGlobalHooks(pifKey, pif);
+		}
+		if (s.getId() != null) {
+			r.addSubscription(s);
+		}
+		return pif;
+	}
 
-			} catch (IOException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
+	private void addGlobalHooks(String pifKey, PrologInterface pif) {
+		Map hooks = (Map) getGlobalHooks().get(pifKey);
+		if (hooks != null) {
+			for (Iterator it = hooks.values().iterator(); it.hasNext();) {
+				_HookRecord record = (_HookRecord) it.next();
+				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
 			}
 		}
+		hooks = (Map) getGlobalHooks().get("");
+		if (hooks != null) {
+			for (Iterator it = hooks.values().iterator(); it.hasNext();) {
+				_HookRecord record = (_HookRecord) it.next();
+				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
+			}
+		}
+		try {
+			pif.start();
 
-		r.addSubscription(s);
-		return pif;
+		} catch (IOException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
 	}
 
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
@@ -700,7 +658,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			ISavedState lastState = ResourcesPlugin.getWorkspace()
 					.addSaveParticipant(this, new _SaveParticipant());
 
-			if(lastState!=null){
+			if (lastState != null) {
 				IPath location = lastState.lookup(new Path("registry"));
 				location = getStateLocation().append(location);
 				File file = location.toFile();
@@ -735,8 +693,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	private final class _SaveParticipant implements ISaveParticipant {
-		public void saving(ISaveContext context)
-				throws CoreException {
+		public void saving(ISaveContext context) throws CoreException {
 			switch (context.getKind()) {
 			case ISaveContext.FULL_SAVE:
 				PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
@@ -745,24 +702,21 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				int saveNumber = context.getSaveNumber();
 				String saveFileName = "registry-"
 						+ Integer.toString(saveNumber);
-				File f = myPluginInstance
-						.getStateLocation().append(
-								saveFileName).toFile();
+				File f = myPluginInstance.getStateLocation().append(
+						saveFileName).toFile();
 				// if we fail to write, an exception is
 				// thrown and we do not update the path
 				Writer w = null;
 				try {
-		
-					w = new BufferedWriter(
-							new FileWriter(f));
+
+					w = new BufferedWriter(new FileWriter(f));
 					myPluginInstance.registry.save(w);
 					w.close();
 				} catch (IOException e) {
 					Debug.report(e);
 					throw new RuntimeException(e);
 				}
-				context.map(new Path("registry"), new Path(
-						saveFileName));
+				context.map(new Path("registry"), new Path(saveFileName));
 				context.needSaveNumber();
 				break;
 			case ISaveContext.PROJECT_SAVE:
@@ -770,43 +724,40 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			case ISaveContext.SNAPSHOT:
 				break;
 			}
-		
+
 		}
 
 		public void rollback(ISaveContext context) {
 			PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
 					.getDefault();
-		
+
 			// since the save operation has failed, delete
 			// the saved state we have just written
 			int saveNumber = context.getSaveNumber();
-			String saveFileName = "registry-"
-					+ Integer.toString(saveNumber);
-			File f = myPluginInstance.getStateLocation()
-					.append(saveFileName).toFile();
+			String saveFileName = "registry-" + Integer.toString(saveNumber);
+			File f = myPluginInstance.getStateLocation().append(saveFileName)
+					.toFile();
 			f.delete();
-		
+
 		}
 
-		public void prepareToSave(ISaveContext context)
-				throws CoreException {
+		public void prepareToSave(ISaveContext context) throws CoreException {
 			;
 		}
 
 		public void doneSaving(ISaveContext context) {
 			PrologRuntimePlugin myPluginInstance = PrologRuntimePlugin
 					.getDefault();
-		
+
 			// delete the old saved state since it is not
 			// necessary anymore
-			int previousSaveNumber = context
-					.getPreviousSaveNumber();
+			int previousSaveNumber = context.getPreviousSaveNumber();
 			String oldFileName = "registry-"
 					+ Integer.toString(previousSaveNumber);
-			File f = myPluginInstance.getStateLocation()
-					.append(oldFileName).toFile();
+			File f = myPluginInstance.getStateLocation().append(oldFileName)
+					.toFile();
 			f.delete();
-		
+
 		}
 	}
 
@@ -829,26 +780,21 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	/**
 	 * globally register a hook with a given pifKey.
 	 * 
-	 * clients may use this method make sure there code at the earliest possible
-	 * point. The plugin in will store the key->hook association in a
-	 * plugin-global table. If there is already a pif registered for the given
-	 * key, the hook will be added emidiately. Otherwise it will be added the
-	 * first time some client requests a prolog interface for the given key.
+	 * The plugin will store the key->hook association in a plugin-global table.
+	 * If there is already a pif registered for the given key, the hook will be
+	 * added emidiately. Otherwise it will be added the first time some client
+	 * requests a prolog interface for the given key.
 	 * 
 	 * Note that no attempt is made to actualy execute the code in the hook if
 	 * the pif is already running.
 	 * 
-	 * Further note that the plugin global table consideres two entries equal,
-	 * if and only if their hookIds are equal.
 	 * 
-	 * @param pifKey
-	 * @param hook
 	 */
-	public void registerLifeCycleHook(String pifKey, LifeCycleHook hook,
+	private void registerLifeCycleHook(String pifKey, LifeCycleHook hook,
 			String hookId, String[] deps) {
 		synchronized (globalHooksMux) {
-		Map hooks = (Map) getGlobalHooks().get(pifKey);
-		
+			Map hooks = (Map) getGlobalHooks().get(pifKey);
+
 			if (hooks == null) {
 				hooks = new HashMap();
 				getGlobalHooks().put(pifKey, hooks);
@@ -874,10 +820,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * @param pifKey
 	 * @param hook
 	 */
-	public void unregisterLifeCycleHook(String pifKey, String hookId) {
+	private void unregisterLifeCycleHook(String pifKey, String hookId) {
 		synchronized (globalHooksMux) {
-		Map hooks = (Map) getGlobalHooks().get(pifKey);
-		
+			Map hooks = (Map) getGlobalHooks().get(pifKey);
+
 			if (hooks == null) {
 				return;
 			}
