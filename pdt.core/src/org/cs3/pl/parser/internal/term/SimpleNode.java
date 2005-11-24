@@ -287,10 +287,10 @@ public abstract class SimpleNode implements Node, Cloneable {
 					sb.append(image);
 					break;
 				}				
-				sb.append(st.image);
+				//sb.append(st.image);
 				
 			}
-			
+			comment=sb.toString();
 		}
 		return comment;
 	}
