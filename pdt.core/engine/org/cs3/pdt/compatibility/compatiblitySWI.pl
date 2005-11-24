@@ -1,4 +1,4 @@
-:- consult(library(memfile)).
+	:- consult(library(memfile)).
 :- multifile test/1.
 
 /**
@@ -85,22 +85,64 @@ open_unique_memory_stream(Prefix,Stream):-
  * If Key does not exist, nothing will happen
  *
  */
+my_call_cleanup(Goal,Cleanup):-
+    catch(Goal,E,true),!,
+    Cleanup,
+    (	nonvar(E)
+    ->	throw(E)
+    ;	true
+    ).
+my_call_cleanup(_,Cleanup):-    
+    Cleanup,
+    fail.
+    
+close_printf_to_memory(Key,Content):-
+	
+    my_call_cleanup(
+    	close_and_get_content(Key,Content),
+    	delete_printf_to_memory(Key)
+    ).
+%close_printf_to_memory(_,_) :-
+ %   throw('no memory file exists').
  
-close_printf_to_memory(Key,Content) :-
-    output_to_memory(Key,Handle,Stream),
-    !,
-    close(Stream),
-    memory_file_to_atom(Handle,Content),
-    free_memory_file(Handle),
-    retract(output_to_memory(Key, Handle,Stream)),
-    (output_to_memory_key(Key) ->
-	    (retract(output_to_memory_key(Key)),
-	     select_printf_last);true).
 
-close_printf_to_memory(_,_) :-
-    throw('no memory file exists').
+close_and_get_content(Key,Content):-
+    output_to_memory(Key,Handle,Stream),
+	close(Stream),
+	memory_file_to_atom(Handle,Content).
+
+delete_printf_to_memory(Key):-
+
+    output_to_memory(Key,Handle,_),
+    retractall(output_to_memory(Key,_,_)),
+	free_memory_file(Handle),
+	(  	output_to_memory_key(Key) 
+    -> 	retract(output_to_memory_key(Key)),
+		select_printf_last
+	;  	true
+	).
+
+%close_printf_to_memory(Key,Content) :-
+%	output_to_memory(Key,Handle,Stream),
+%	!,
+%    call_cleanup(      	
+%    	memory_file_to_atom(Handle,Content),
+%		do_close_printf_to_memory(Key,Stream,Handle)		
+%	).
+%
+%do_close_printf_to_memory(Key,Stream,Handle):-
+%    close(Stream),
+%    free_memory_file(Handle),
+%   	retract(output_to_memory(Key, Handle,Stream)),    
+%    (  	output_to_memory_key(Key) 
+%    -> 	retract(output_to_memory_key(Key)),
+%		select_printf_last
+%	;  	true
+%	).
     
+
     
+
 close_all_printf_to_memory:-
     close_all_printf_to_memory(_).
     
