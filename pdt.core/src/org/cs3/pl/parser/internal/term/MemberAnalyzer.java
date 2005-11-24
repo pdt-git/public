@@ -48,9 +48,11 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 				true, true), data);
 		if (!member.isDirective()) {
 			String functor = member.getHeadLiteral().getFunctor();
+			String module = member.getModuleName();
 			String comment = member.getComment();
+			String signatur=module+":"+functor;
 			if (comment != null) {
-				comments.put(functor, comment);
+				comments.put(signatur, comment);
 			}
 		}
 

@@ -97,7 +97,7 @@ public class PrologElementData implements Serializable, Comparable{
 
 	/**
 	 * Returns the signature of the predicate:
-	 * name/arity.
+	 * module:name/arity.
 	 * 
 	 * @return
 	 */

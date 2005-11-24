@@ -4,7 +4,7 @@ public interface Clause {
 
 	/**
 	 * Returns the signature of the predicate:
-	 * name/arity.
+	 * module:name/arity.
 	 * 
 	 * @return
 	 */

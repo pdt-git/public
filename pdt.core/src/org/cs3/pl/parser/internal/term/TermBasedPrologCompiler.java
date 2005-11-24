@@ -351,13 +351,16 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 						+ data.isPublic() + "," + data.getPosition() + ","
 						+ data.getLength() + "," + data.isDynamic() + ","
 						+ data.isMultifile() + ")).\n");
-				String comment = (String) comments.get(data.getSignature());
+				String signature = data.getSignature();
+				String comment = (String) comments.get(signature);
+				comment = "\""+comment.replaceAll("\"","\\\\\"")+"\"";
 				if (comment != null)
 					writer.write(":- user:assert(" + METADATAHELP + "("
 							+ module + "," + data.getLabel() + ","
 							+ data.getArity() + "," + comment + ")).\n");
+				
 			}
-			// TODO:saveMetaDataHelpForDynamicPredicates(writer);
+			
 			writer.flush();
 
 		} catch (IOException e1) {
