@@ -182,11 +182,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		return rootLocator.subLocator(key);
 	}
 
-	/**
-	 * @return the prolog interface instance shared among this plugin's
-	 *         components.
-	 * @throws IOException
-	 */
+	
 	private PrologInterface createPrologInterface() {
 		PrologInterface prologInterface = null;
 		String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,

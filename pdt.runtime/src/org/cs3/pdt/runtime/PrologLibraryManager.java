@@ -8,7 +8,12 @@ import java.util.Set;
 import java.util.Stack;
 
 
-
+/**
+ * TODO: this should be an interface.
+ * TODO: add docs.
+ * @author lukas
+ *
+ */
 public class PrologLibraryManager {
 	/**
 	 * maps ids to libraries
