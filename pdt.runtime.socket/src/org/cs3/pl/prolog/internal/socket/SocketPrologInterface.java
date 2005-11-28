@@ -25,7 +25,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         }
 
         public void dispose() {
-            Debug.error("Trying to dispose the initial session!");
+            Debug.warning("Ignoring attempt to dispose an initial session!");
+            Debug.warning("called from here:");
+            Thread.dumpStack();
         }
 
         public void doDispose() {
@@ -39,7 +41,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         }
 
         public void dispose() {
-            Debug.error("Trying to dispose the shutdown session!");
+        	 Debug.warning("Ignoring attempt to dispose a shutdown session!");
+             Debug.warning("called from here:");
+             Thread.dumpStack();
         }
 
         public void doDispose() {
