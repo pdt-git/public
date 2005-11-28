@@ -6,6 +6,7 @@ import org.cs3.pl.prolog.PrologInterface;
 public interface PrologConsole {
 	public ConsoleModel getModel();
 	public PrologInterface getPrologInterface();
+	public void setPrologInterface(PrologInterface pif);
 	public void addPrologConsoleListener(PrologConsoleListener l);
 	public void removePrologConsoleListener(PrologConsoleListener l);
 	public boolean isVisible();
@@ -16,4 +17,5 @@ public interface PrologConsole {
 	public void clearOutput();
 	public int getCaretOffset();
 	public String getTextRange(int offset, int length);
+	
 }

@@ -36,6 +36,8 @@ public final  class PDT {
 	 */
     public static final String CONTEXT_EDITING_PROLOG_CODE = "org.cs3.pdt.editingProlog";
 
+	public static final String PREF_SWITCH_TO_DEFAULT_PIF = "pdt.ask.switch_to_default_pif";
+
 	
 
 }

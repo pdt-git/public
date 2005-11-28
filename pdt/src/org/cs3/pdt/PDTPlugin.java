@@ -203,6 +203,14 @@ public class PDTPlugin extends AbstractUIPlugin {
 						"a prolog project, ask if i want to add the prolog nature.",
 						Option.ENUM, MessageDialogWithToggle.PROMPT, new String[][] {
 								{ "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
+								{ "ask", MessageDialogWithToggle.PROMPT }}),
+				new SimpleOption(
+						PDT.PREF_SWITCH_TO_DEFAULT_PIF,
+						"Switch to default runtime before consulting",
+						"When i consult a prolog file, but the active console view is not connected to the default runtime" +
+						"of the respective prolog project, should i switch to the default runtime first?",
+						Option.ENUM, MessageDialogWithToggle.PROMPT, new String[][] {
+								{ "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
 								{ "ask", MessageDialogWithToggle.PROMPT }})
 
 		};
