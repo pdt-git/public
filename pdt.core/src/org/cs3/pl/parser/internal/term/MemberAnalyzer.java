@@ -18,7 +18,7 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 
 	protected HashSet exports = new HashSet();
 
-	protected SimpleNode moduleName;
+	
 
 	private boolean firstTerm = true;
 
@@ -28,15 +28,17 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 
 	public Map comments = new HashMap();
 
+	private ASTCompilationUnit compilationUnit;
+
 	public MemberAnalyzer(ProblemCollector problemCollector) {
 		this.problemCollector = problemCollector;
 	}
 
 	public Object visit(ASTCompilationUnit node, Object data) {
+		this.compilationUnit = node;
 		Object o = traverseChildren(node,data);
-		if(moduleName!=null){
-			node.moduleName=moduleName.getValue();
-		}
+		
+		
 		return o;
 	}
 	
@@ -213,7 +215,10 @@ public class MemberAnalyzer extends DefaultPrologTermParserVisitor {
 			return;
 
 		}
-		moduleName = node.getArguments()[0];
+		SimpleNode moduleName = node.getArguments()[0];
+		if(compilationUnit!=null){
+			compilationUnit.moduleName=moduleName.getValue();
+		}
 		SimpleNode exportsNode = node.getArguments()[1];
 		processExports(exportsNode);
 	}
