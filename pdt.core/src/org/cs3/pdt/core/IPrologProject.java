@@ -2,6 +2,7 @@ package org.cs3.pdt.core;
 
 import java.util.Set;
 
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.PrologInterface;
@@ -45,11 +46,13 @@ public interface IPrologProject extends OptionProvider{
     public void setAutoConsulted(IFile file,boolean val) throws CoreException;
 
 	public PrologInterface getMetadataPrologInterface();
+	public Subscription getMetadataSubscription();
 	public IMetaInfoProvider getMetaInfoProvider();
 
 	public IProject getProject();
 
 	public PrologInterface getRuntimePrologInterface();
+	public Subscription getRuntimeSubscription();
 
 	/**
 	 * returns the library keys that represent 
