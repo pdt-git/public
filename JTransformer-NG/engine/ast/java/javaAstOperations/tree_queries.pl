@@ -173,7 +173,7 @@ can_modify(_id) :-
     not(externT(_class)).
 % TODO  forall(reference(_id, _ref), (enclClass(_ref, _c2), not(externT(_c2)))).
 
-% todo TEUER : effizientere l�sung
+% todo TEUER : effizientere loesung
 reference(_id, _Ref) :-
     % look at all facts
     clause(_c, true),
@@ -643,7 +643,7 @@ getType(Array, Type) :-
 %TODO: weiter Expressions
 getType(null, type(class,null,0)).
 
-% optimiert f�r ident | selects
+% optimiert fuer ident | selects
 getRefType(_ident, _Type) :-
     identT(_ident,_,_,_,_ref),
     getType(_ref, _Type).

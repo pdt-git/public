@@ -2,7 +2,7 @@
 % Date: 7.9.2004
 
 module(languageIndependentAST, [
-       migrate_factbase/0      % Converts the Java-´specific fact base representation 
+       migrate_factbase/0      % Converts the Java-specific fact base representation 
                                % into the language independent one.
      , clear_old_factbase/0    % Delete Java-specific factbase representation.  
 ]).
