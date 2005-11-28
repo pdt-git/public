@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
+import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -25,7 +26,41 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
  * Subclasses have to implement getSession().
  */
 public abstract class AbstractPrologInterface implements PrologInterface {
-    private List bootstrapLibraries = new Vector();
+    protected static final class PifShutdownHook extends Thread {
+    	WeakHashMap pifs;
+		private static PifShutdownHook instance;
+		
+		private PifShutdownHook() {
+			super("PifShutdownHook");
+			pifs = new WeakHashMap();
+			Runtime.getRuntime().addShutdownHook(this);
+		}
+		static synchronized PifShutdownHook getInstance(){
+			if(instance==null){
+				instance=new PifShutdownHook();
+			}
+			return instance;
+		}
+		public void run() {
+		    for (Iterator it = pifs.keySet().iterator(); it.hasNext();) {
+				PrologInterface pif = (PrologInterface) it.next();
+				if(pif!=null){
+			    	try {
+						pif.stop();
+					} catch (IOException e) {
+						Debug.report(e);
+						Debug.error("not rethrown. We are shutting down anyway...");
+					}
+			    }	
+			}
+			
+		}
+		public void add(PrologInterface pif){
+			pifs.put(pif,null);
+		}
+	}
+   
+	private List bootstrapLibraries = new Vector();
 
     public List getBootstrapLibraries() {
         return bootstrapLibraries;
@@ -112,15 +147,13 @@ public abstract class AbstractPrologInterface implements PrologInterface {
     Thread theThreadWhoDidIt=null;
     
     public AbstractPrologInterface() {
-
-        Runtime.getRuntime().addShutdownHook(
-                new Thread("Prolog Shutdown Hook") {
-                    public void run() {
-                        AbstractPrologInterface.this.stop();
-                    }
-                });
+       PifShutdownHook.getInstance().add(this);               
     }
 
+    protected void finalize() throws Throwable {
+    	stop();
+    	super.finalize();
+    }
   
 
     /**
