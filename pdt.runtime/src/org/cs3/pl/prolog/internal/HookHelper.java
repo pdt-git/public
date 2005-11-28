@@ -228,12 +228,7 @@ public class HookHelper {
                     }
                 }
             }
-            try {
-                s.dispose();
-            } catch (Throwable t) {
-                Debug.error("could not dispose shutdown session.");
-                Debug.report(t);
-            }
+            
         }
     }
 }
