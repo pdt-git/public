@@ -21,7 +21,7 @@ public class ASTCompilationUnit extends SimpleNode {
 	
 	public String getModuleName(){
 		if(moduleName==null){
-			moduleName="user";
+			return "user";
 		}
 		return moduleName;
 	}
