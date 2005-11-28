@@ -281,9 +281,9 @@ public abstract class SimpleNode implements Node, Cloneable {
 					break;
 				case PrologTermParser.MULTI_LINE_COMMENT:
 					
-					image=image.replaceAll("\\n\\s*\\*","\n");
 					image=image.replaceAll("/\\*+","");
 					image=image.replaceAll("\\*+/","");
+					image=image.replaceAll("\\n\\s*\\*","\n");
 					sb.append(image);
 					break;
 				}				
