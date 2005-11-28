@@ -353,12 +353,13 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 						+ data.isMultifile() + ")).\n");
 				String signature = data.getSignature();
 				String comment = (String) comments.get(signature);
-				comment = "\""+comment.replaceAll("\"","\\\\\"")+"\"";
-				if (comment != null)
+				
+				if (comment != null&&comment.length()>0){
+					comment = "\""+comment.replaceAll("\"","\\\\\"")+"\"";
 					writer.write(":- user:assert(" + METADATAHELP + "("
 							+ module + "," + data.getLabel() + ","
 							+ data.getArity() + "," + comment + ")).\n");
-				
+				}
 			}
 			
 			writer.flush();
