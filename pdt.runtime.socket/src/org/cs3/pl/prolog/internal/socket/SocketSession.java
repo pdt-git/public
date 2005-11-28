@@ -68,6 +68,9 @@ public class SocketSession implements PrologSession {
         if (isDisposed()) {
             throw new IllegalStateException("Session is disposed!");
         }
+        if(query.length()==0){
+        	return new HashMap();
+        }
         Map solution;
         endQuery();
         client.lock();
@@ -108,7 +111,14 @@ public class SocketSession implements PrologSession {
         if (isDisposed()) {
             throw new IllegalStateException("Session is disposed!");
         }
+        
         endQuery();
+        if(query.length()==0){
+        	List l = Vector();
+        	l.add(new HashMap());
+			return l;
+        }
+        
         client.lock();
         try {
             client.readUntil(SocketClient.GIVE_COMMAND);
@@ -138,7 +148,12 @@ public class SocketSession implements PrologSession {
         }
     }
 
-    /*
+    private List Vector() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see org.cs3.pl.prolog.PrologSession#queryOnce(java.lang.String)
