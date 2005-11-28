@@ -70,7 +70,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 						.getNodeValue();
 				int count = attributes.getLength();
 				HashMap params = new HashMap();
-				for (int j = 0; j < length; j++) {
+				for (int j = 0; j < count; j++) {
 					Node parmNode = attributes.item(j);
 					params.put(parmNode.getNodeName(), parmNode.getNodeValue());
 				}
