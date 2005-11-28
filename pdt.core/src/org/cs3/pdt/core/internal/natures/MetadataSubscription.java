@@ -44,7 +44,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
-		if (pif.isUp()) {
+		if (!pif.isDown()) {
 			afterInit(pif);
 		}
 	}
@@ -93,7 +93,8 @@ public class MetadataSubscription extends DefaultSubscription implements
 		PrologSession s = pif.getSession();
 		try{
 			PLUtil.configureFileSearchPath(mgr,s,new String[]{PDTCore.ENGINE_ID});
-			Map map = s.queryOnce("use_module(library('/org/cs3/pdt/metadata/main'))");
+			Map map = s.queryOnce("use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +
+					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
 			if(map==null){
 				throw new RuntimeException("could not load metadata engine");
 			}
