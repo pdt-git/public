@@ -2,6 +2,14 @@ package org.cs3.pdt.runtime;
 
 import java.util.Set;
 
+/**
+ * A contribution to the Prolog file lookup path.
+ * 
+ * An instance moreless represents a clause that can be
+ * contributed to the file_search_path/2 predicate.
+ * @author lukas
+ *
+ */
 public interface PrologLibrary {
 	/**
 	 * @return the global unique identifier for this library
