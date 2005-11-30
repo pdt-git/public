@@ -36,6 +36,7 @@ public final class UIUtils {
 	    return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
 
+	
 	public static IEditorPart getActiveEditor() {
 	    
 	        IWorkbenchPage page = getActivePage();
