@@ -28,6 +28,7 @@
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.cs3.pdt.runtime"/>
       <import plugin="org.cs3.pdt.common.ui"/>
+      <import plugin="org.eclipse.jdt.ui"/>
 
    </requires>
 
@@ -175,5 +176,12 @@
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              id="org.cs3.jtransformer.internal.actions.regenerateclasses"/>
     </actionSet>
+ </extension>
+ <extension
+       point="org.cs3.pdt.runtime.prologContextTracker">
+    <tracker
+          class="org.cs3.jtransformer.internal.tracker.JavaEditorTracker"
+          id="org.cs3.jtransformer.internal.tracker.FollowJavaEditor"
+          label="follow Java editor"/>
  </extension>
 </plugin>
