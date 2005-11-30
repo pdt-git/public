@@ -71,7 +71,11 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 		
 		for (Iterator it = getActiveTrackers().iterator(); it.hasNext();) {
 			String trackerId = (String) it.next();
-			PrologContextTracker tracker = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTracker(trackerId); 
+			PrologContextTracker tracker = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTracker(trackerId);
+			if(tracker == null)
+			{
+				return null;
+			}
 			PrologInterface pif = tracker.getCurrentPrologInterface();
 			if(pif!=null){
 				return pif;
@@ -232,7 +236,10 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 			PrologContextTrackerService trackerService = PrologRuntimePlugin.getDefault().getContextTrackerService();
 			for (Iterator iter = activeTrackers.iterator(); iter.hasNext();) {
 				String id = (String) iter.next();				
-				trackerService.getContextTracker(id).addPrologContextTrackerListener(this);
+				PrologContextTracker contextTracker = trackerService.getContextTracker(id);
+				if(contextTracker!=null){
+					contextTracker.addPrologContextTrackerListener(this);
+				}
 			}
 		}
 		return activeTrackers;
