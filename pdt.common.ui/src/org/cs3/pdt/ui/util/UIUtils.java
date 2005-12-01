@@ -12,20 +12,43 @@ import org.eclipse.ui.part.FileEditorInput;
 
 
 /**
+ * most of the methods in this class include code that needs to run on the ui thread.
  * 
- * FIXME: some of the methods have to be called on UI Thread,
- * others do their own de-syncing. We should agree on one approach or at least
- * document which methods expects to be run on UI THread.
+ * If the calling thread is not the ui thread, this methods will take care of scheduling
+ * the respective code using Diplay.asyncExec() for void methods and Display.syncExec for 
+ * all others.
  *
  */
 public final class UIUtils {
+	private abstract static class _SyncReturn implements Runnable {
+		public Object rval;
 
+		_SyncReturn() {
+			Display display = getDisplay();
+			if (Display.getCurrent() != display) {
+				display.syncExec(this);
+			} else {
+				run();
+			}
+		}
+		
+		public void run() {
+			rval=getRVal();
+		}
+
+		abstract Object getRVal();
+	}
 	public static IFile getFileInActiveEditor() {
-		IEditorPart activeEditor = getActiveEditor();
-		FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
-				.getEditorInput());
-		IFile file = fileEditorInput.getFile();
-		return file;
+		return (IFile) new _SyncReturn(){
+			Object getRVal() {
+				IEditorPart activeEditor = getActiveEditor();
+				FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
+						.getEditorInput());
+				IFile file = fileEditorInput.getFile();
+				return file;		
+			}
+		}.rval;
+		
 	}
 
 	public static Display getDisplay() {
@@ -33,17 +56,26 @@ public final class UIUtils {
 	}
 
 	public static IWorkbenchPage getActivePage() {
-	    return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		return (IWorkbenchPage) new _SyncReturn(){
+			Object getRVal() {
+				return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();		
+			}
+		}.rval;
+	    
 	}
 
 	
 	public static IEditorPart getActiveEditor() {
-	    
-	        IWorkbenchPage page = getActivePage();
-	        if(page==null){
-	        	return null;
-	        }
-	        return page.getActiveEditor();
+		return (IEditorPart) new _SyncReturn(){
+			Object getRVal() {
+				IWorkbenchPage page = getActivePage();
+		        if(page==null){
+		        	return null;
+		        }
+		        return page.getActiveEditor();		
+			}
+		}.rval;
+	        
 	    
 	}
 
