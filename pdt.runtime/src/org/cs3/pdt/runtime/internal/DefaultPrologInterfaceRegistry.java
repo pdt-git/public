@@ -278,8 +278,9 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 		if (pif == null) {
 			return;
 		}
-		Set l = (Set) ((HashSet) subscriptionLists.get(key)).clone();
+		HashSet l =  ((HashSet) subscriptionLists.get(key));
 		if (l != null) {
+			l = (HashSet) l.clone();
 			for (Iterator iter = l.iterator(); iter.hasNext();) {
 				Subscription s = getSubscription((String) iter.next());
 				s.deconfigure(pif);
