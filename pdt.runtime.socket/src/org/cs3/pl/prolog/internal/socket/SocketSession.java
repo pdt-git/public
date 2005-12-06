@@ -14,18 +14,23 @@ import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Option;
+import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologSession;
+
+import org.cs3.pl.prolog.PrologSession2;
 
 /**
  */
-public class SocketSession implements PrologSession {
+public class SocketSession implements PrologSession2 {
 
-    private SocketClient client;
+    private static final String OPT_CANONICAL = "socketsession.canonical";
+
+	private SocketClient client;
 
     private boolean queryActive;
 
@@ -76,7 +81,12 @@ public class SocketSession implements PrologSession {
         client.lock();
         try {
             client.readUntil(SocketClient.GIVE_COMMAND);
-            client.writeln(SocketClient.QUERY);
+            if(canonical){
+            	client.writeln(SocketClient.QUERY_CANONICAL);
+            }else{
+            	client.writeln(SocketClient.QUERY);	
+            }
+            
             client.readUntil(SocketClient.GIVE_TERM);
             query = query.trim();
 
@@ -122,7 +132,13 @@ public class SocketSession implements PrologSession {
         client.lock();
         try {
             client.readUntil(SocketClient.GIVE_COMMAND);
-            client.writeln(SocketClient.QUERY_ALL);
+            
+            if(canonical){
+            	client.writeln(SocketClient.QUERY_ALL_CANONICAL);
+            }else{
+            	client.writeln(SocketClient.QUERY_ALL);	
+            }
+            
             client.readUntil(SocketClient.GIVE_TERM);
             query = query.trim();
             if (query.endsWith(".")) {
@@ -452,6 +468,10 @@ public class SocketSession implements PrologSession {
 
     private PrologInterfaceListener dispatcher = null;
 
+	private Option[] options;
+
+	private boolean canonical;
+
     /**
      * @return Returns the dispatcher.
      */
@@ -551,6 +571,38 @@ public class SocketSession implements PrologSession {
 	 */
 	public PrologInterface getPrologInterface() {		
 		return pif;
+	}
+
+	public Option[] getOptions() {
+		if(options==null){
+			options=new Option[]{
+				new SimpleOption(OPT_CANONICAL,"canonical values","if set, the session will answer canonical terms",Option.FLAG,"false")
+			};
+		}
+		return options;
+	}
+
+	
+	/**
+	 * this implementation does nothing.	
+	 */
+	public void reconfigure() {
+		;
+		
+	}
+
+	public String getPreferenceValue(String id, String string) {
+		if(OPT_CANONICAL.equals(id)){
+			return canonical ? "true": "false";
+		}
+		throw new IllegalArgumentException("unkown option id: "+id);
+	}
+
+	public void setPreferenceValue(String id, String value) {
+		if(OPT_CANONICAL.equals(id)){
+			canonical = Boolean.valueOf(value).booleanValue();
+		}
+		throw new IllegalArgumentException("unkown option id: "+id);		
 	}
 
 }

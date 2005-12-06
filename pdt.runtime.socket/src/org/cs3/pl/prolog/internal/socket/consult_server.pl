@@ -158,12 +158,7 @@ handle_command(InStream,OutStream,'IS_CONSULTED'):-
 handle_command(InStream,OutStream,'QUERY'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
 	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
-	%catch(
-%		iterate_solutions(InStream,OutStream,Term,Vars),
-%		query_aborted,
-%		true
-%	).
-	( iterate_solutions(InStream,OutStream,Term,Vars)
+	( iterate_solutions(InStream,OutStream,Term,Vars,default)
 	; true
 	).
 	
@@ -171,11 +166,26 @@ handle_command(InStream,OutStream,'QUERY_ALL'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
 	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),		
 	(
-		all_solutions(OutStream,Term,Vars)
+		all_solutions(OutStream,Term,Vars,default)
 	;
 		true
 	).
 	
+handle_command(InStream,OutStream,'QUERY_CANONICAL'):-
+	my_format(OutStream,"GIVE_TERM~n",[]),	
+	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
+	( iterate_solutions(InStream,OutStream,Term,Vars,canonical)
+	; true
+	).
+	
+handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL'):-
+	my_format(OutStream,"GIVE_TERM~n",[]),
+	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),		
+	(
+		all_solutions(OutStream,Term,Vars,canonical)
+	;
+		true
+	).
 	
 	
 handle_command(_,_,'SHUTDOWN'):-	
@@ -185,11 +195,11 @@ handle_command(_,_,'BYE'):-
 	throw(peer_quit).
 	
 	
-all_solutions(OutStream,Term,Vars):-
+all_solutions(OutStream,Term,Vars,Mode):-
 	user:forall(
 		Term,
 		(
-			consult_server:print_solution(OutStream,Vars),
+			consult_server:print_solution(OutStream,Vars,Mode),
 			nb_setval(hasSolutions,1)
 		)		
 	),
@@ -200,11 +210,11 @@ all_solutions(OutStream,Term,Vars):-
 	).
 	
 	
-iterate_solutions(InStream,OutStream,Term,Vars):-
+iterate_solutions(InStream,OutStream,Term,Vars,Mode):-
 	( user:forall(
 			Term,
 			(
-				consult_server:print_solution(OutStream,Vars),
+				consult_server:print_solution(OutStream,Vars,Mode),
 				consult_server:request_line(InStream,OutStream,'MORE?','YES')											
 			)
 		)
@@ -215,35 +225,35 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 	
 	
 	
-print_solution(OutStream,Vars):-
+print_solution(OutStream,Vars,Mode):-
 	forall(
 		member(Key=Val,Vars),
 	%%			my_write_term(OutStream,Elm,[quoted(true)])		
-		print_binding(OutStream,Key,Val)
+		print_binding(OutStream,Key,Val,Mode)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
 	
-print_binding(Out,Key,Val):-
+print_binding(Out,Key,Val,Mode):-
 		write(Out,'<'),
-		(write_escaped(Out,Key);true),
+		(write_escaped(Out,Key,Mode);true),
 		write(Out, '>'),		
-		(print_value(Out,Val);true),		
+		(print_value(Out,Val,Mode);true),		
 		nl(Out).
 
-print_values(_,[]):-
+print_values(_,[],_):-
 	!. 
-print_values(Out,[Head|Tail]):-
+print_values(Out,[Head|Tail],Mode):-
 	!,
-	print_value(Out,Head),		
-	print_values(Out,Tail).
+	print_value(Out,Head,Mode),		
+	print_values(Out,Tail,Mode).
 	
-print_value(Out,Val):-    	
+print_value(Out,Val,Mode):-    	
 	( 	is_list(Val)
  	->	write(Out,'{'),
-		(print_values(Out,Val);true),
+		(print_values(Out,Val,Mode);true),
 		write(Out, '}')		
 	;	write(Out,'<'),
-		(write_escaped(Out,Val);true),
+		(write_escaped(Out,Val,Mode);true),
 		write(Out, '>')
 	).
 	
@@ -431,6 +441,17 @@ my_format(OutStream,Format,Args):-
 	flush_output(current_output).
 	
 write_escaped(Out,Atom):-
+	write_escaped(Out,Atom,canonical).
+	
+write_escaped(Out,Atom,canonical):-
+		nonvar(Atom),
+		( 	atom(Atom)
+		->  atom_chars(Atom,Chars),
+		write_escaped_l(Out,Chars)
+	;	term_to_canonical_atom(Atom,AAtom),
+		write_escaped(Out,AAtom)
+	).
+write_escaped(Out,Atom,default):-
 		nonvar(Atom),
 		( 	atom(Atom)
 		->  atom_chars(Atom,Chars),
@@ -439,7 +460,16 @@ write_escaped(Out,Atom):-
 		write_escaped(Out,AAtom)
 	).
 
+
+term_to_canonical_atom(Term,AAtom):-
+	new_memory_file(Memfile),
+	open_memory_file(Memfile,write,Stream),
+	write_term(Stream,Term,[ignore_ops(true),quoted(true)]),
+	close(Stream),
+	memory_file_to_atom(Memfile,AAtom),
+	free_memory_file(Memfile),
 	
+    
 		
 write_escaped_l(_,[]).
 write_escaped_l(Out,['<'|ITail]):-

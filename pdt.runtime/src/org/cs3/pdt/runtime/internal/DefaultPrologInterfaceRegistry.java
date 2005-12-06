@@ -287,9 +287,12 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			}
 		}
 
-		pifs.remove(key);
+		
 
 		firePrologInterfaceRemoved(key);
+		keys.remove(pif);
+		pifs.remove(key);
+		
 		names.remove(key);
 
 	}
