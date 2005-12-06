@@ -2,7 +2,7 @@
 
 package org.cs3.pl.parser.internal.term;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.cs3.pl.common.Util;
 
 public class ASTCharacters extends SimpleNode implements Atomic{
 	
@@ -37,7 +37,7 @@ public class ASTCharacters extends SimpleNode implements Atomic{
 			if(copy){
 				throw new IllegalStateException("copy with uninitialized value");
 			}
-			value = StringEscapeUtils.unescapeJava(getImage());			
+			value = Util.unquoteAtom(getImage());			
 			value = value.substring(1, value.length() - 1);
 			
 		}
