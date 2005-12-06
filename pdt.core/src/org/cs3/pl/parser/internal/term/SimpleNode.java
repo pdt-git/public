@@ -166,9 +166,7 @@ public abstract class SimpleNode implements Node, Cloneable {
 		return firstToken;
 	}
 
-	public Token getBeginToken() {
-		return getFirstToken();
-	}
+	
 
 	public void setFirstToken(Token firstToken) {
 		this.firstToken = firstToken;
@@ -178,6 +176,9 @@ public abstract class SimpleNode implements Node, Cloneable {
 		return lastToken;
 	}
 
+	public Token getBeginToken() {
+		return getFirstToken();
+	}
 	public Token getEndToken() {
 		return lastToken.next;
 	}
