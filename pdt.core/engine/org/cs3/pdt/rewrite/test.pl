@@ -1,5 +1,6 @@
 :- use_module(pdt_match).
 :- use_module(library('org/cs3/pdt/util/pdt_util_io')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- ensure_loaded(library('org/cs3/pdt/compatibility/compatiblitySWI.pl')).
 
 
@@ -39,28 +40,8 @@ show_that_it_works(Text,_,[],Positions):-
 	sub_atom(Text,From,Len,_,SubText),
 	writeln(match(From,To,SubText)).
 show_that_it_works(Text,Term,[H|T],Positions):-
-	sub_positions(Positions,H,SubPositions),
+	sub_position(Positions,H,SubPositions),
 	arg(H,Term,SubTerm),	
     show_that_it_works(Text,SubTerm,T,SubPositions).
     
  
-top_position(From-To,From,To).
-top_position(string_position(From,To),From,To).
-top_position(brace_term_position(From,To,_),From,To).
-top_position(list_position(From,To,_,_),From,To).	
-top_position(term_position(From,To,_,_,_),From,To).	
-
-sub_positions(brace_term_position(_,_,T),1,T).
-sub_positions(list_position(_,_,[H|_],_),1,H).		
-sub_positions(list_position(_,_,[_|[First|T]],none),2,list_position(From,To,[First|T],none)):-
-	last([First|T],Last),
-	top_position(First,From,_),
-	top_position(Last,_,To).	
-sub_positions(list_position(_,_,Elms,Tail),2,list_position(From,To,[First|T],none)):-
-    \+Tail=none,
-    append(Elms,[Tail],[_|[First|T]]),
-    last([First|T],Last),
-	top_position(First,From,_),
-	top_position(Last,_,To).	    
-sub_positions(term_position(_,_,_,_,ArgPositions),N,SubPos):-
-	nth1(N,ArgPositions,SubPos).
