@@ -189,7 +189,9 @@ public class SocketClient  {
     public static final String UNCONSULT = "UNCONSULT";
     public static final String LIST = "LIST";
     public static final String QUERY = "QUERY";
+    public static final String QUERY_CANONICAL = "QUERY_CANONICAL";
     public static final String QUERY_ALL = "QUERY_ALL";
+    public static final String QUERY_ALL_CANONICAL = "QUERY_ALL_CANONICAL";
     public static final String IS_CONSULTED = "IS_CONSULTED";    
     public static final String GO_AHEAD = "GO_AHEAD";    
     public static final String LINE_SEPARATOR = "\n";
@@ -212,6 +214,7 @@ public class SocketClient  {
     private BufferedWriter writer;
     private static final long TIMEOUT = 1000;
     private static final String RESET = "RESET";
+	
     
     
     /**
