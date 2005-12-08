@@ -1,19 +1,19 @@
 :- module(pdt_util_aterm,[
-	pdt_strip_anotation/3,
-	pdt_splice_anotation/3
+	pdt_strip_annotation/3,
+	pdt_splice_annotation/3
 ]).
 
-pdt_strip_anotation(AnotatedTerm,Term,Anotation):-
+pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
     nonvar(AnotatedTerm),check_aterm(AnotatedTerm),
     !,
     strip(AnotatedTerm,Term,Anotation).
 
-pdt_splice_anotation(Term,Anotation,AnotatedTerm):-
-    check_anotation(Term,Anotation),
+pdt_splice_annotation(Term,Anotation,AnotatedTerm):-
+    check_annotation(Term,Anotation),
     !,
     splice(Term,Anotation,AnotatedTerm).
 
-check_anotation(Term,(TopAn,ArgsAn)):-
+check_annotation(Term,(TopAn,ArgsAn)):-
     nonvar(ArgsAn),    
     unbound_tail(TopAn),
  	(   var(Term)
@@ -21,15 +21,15 @@ check_anotation(Term,(TopAn,ArgsAn)):-
 	;	Term=..[_|Args],
 		functor(Term,_,Arity),
     	length(ArgsAn,Arity),
-    	check_arg_anotations(Args,ArgsAn)
+    	check_arg_annotations(Args,ArgsAn)
     ),!.
-check_anotation(Term,Anotation):-
-    throw(invalid_anotation(term(Term),anotation(Anotation))).
+check_annotation(Term,Anotation):-
+    throw(invalid_annotation(term(Term),annotation(Anotation))).
     
-check_arg_anotations([],[]).
-check_arg_anotations([H|T],[AnH|AnT]):-
-    check_anotation(H,AnH),
-    check_arg_anotations(T,AnT).
+check_arg_annotations([],[]).
+check_arg_annotations([H|T],[AnH|AnT]):-
+    check_annotation(H,AnH),
+    check_arg_annotations(T,AnT).
 
 check_aterm(aterm(Top,AnotatedTerm)):-
     unbound_tail(Top),
