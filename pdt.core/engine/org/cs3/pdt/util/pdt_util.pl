@@ -1,7 +1,8 @@
 :-module(pdt_util,[
 	pdt_call_cleanup/2,
 	pdt_maybe/1,
-	pdt_file_spec/2
+	pdt_file_spec/2,
+	pdt_member/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
@@ -46,3 +47,18 @@ to absolute file names.
 */		
 pdt_file_spec(FileSpec, Abs):-
 	absolute_file_name(FileSpec,[extensions(['.pl','.ct','']),access(read)],Abs).
+
+/*
+pdt_member(?Member,+List):-
+    true if Member is an element of List.
+    
+    Redefines builtin member/2 to handle lists with an unbound tail.
+    Like member/2 this predicate will bind unbound elements of the list.
+    Unlike member/2, this predicate will NOT bind an unbound tail.
+*/	
+pdt_member(_,Var):-
+    var(Var),!,fail.
+pdt_member(M,[M|_]).
+pdt_member(M,[_|T]):-
+    pdt_member(M,T).
+    
