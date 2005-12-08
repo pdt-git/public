@@ -6,11 +6,12 @@
 
 
 
-term_anotation_hook(Stack,_,InTerm,OutTerm):-
+term_pre_anotation_hook(Stack,_,InTerm,OutTerm):-
 	file_refs(Stack,InTerm,OutTerm).
 
 file_anotation_hook(_,_,Terms,InAnos,[references_files(Refs)|InAnos]):-
     collect_refs(Terms,Refs).
+
 
 file_refs(Stack,InTerm,OutTerm):-
     pdt_strip_anotation(InTerm,Term,(Head,Tail)),

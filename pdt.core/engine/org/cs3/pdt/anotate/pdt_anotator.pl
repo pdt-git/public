@@ -38,7 +38,7 @@ register_anotator(+FileSpec)
 Filespec should be a file defining a module that defines the following 
 predicates:
 
- - term_anotation_hook(+FileStack,+OpModule,+InTerm,-OutTerm)
+ - term_pre_anotation_hook(+FileStack,+OpModule,+InTerm,-OutTerm)
    	- FileStack is a stack containing the file names of 
    	  the files that are currently anotated. E.g. if file a loads
    	  file b and file b is the file currently to which the currently 
@@ -61,7 +61,9 @@ predicates:
     - InAnos is a list of terms that where already attached by 
       other hooks.
     - OutAnos should be InAnos + the additions this hook whishes to make.
-
+ - term_post_anotation_hook(+FileStack,+OpModule,+FileAnos,+InTerm,-OutTerm)
+ 	like term_pre_anotation/4, but is called after all file anotation hooks
+ 	have been processed.
 */
 register_anotator(File):-
     anotator(File,_),!.
@@ -99,7 +101,8 @@ ensure_anotated([FileSpec|Stack]):-
     gen_op_module(Abs,OpModule),
     read_stream_to_wraped_terms([Abs|Stack],OpModule,Input,Terms),
     process_file([Abs|Stack],OpModule,Terms,FileAnos),
-    assert(file_anotation(Abs,Time,FileAnos,Terms)),
+    post_process_terms([Abs|Stack],OpModule,FileAnos,Terms,OutTerms),
+    assert(file_anotation(Abs,Time,FileAnos,OutTerms)),
 	close(Input),
 	free_memory_file(MemFile).
 	
@@ -112,24 +115,43 @@ read_stream_to_wraped_terms(FileStack,OpModule,In,Terms):-
     	->	Terms=[]
     	;	Terms=[H|T],    		
     		wrap_term(Term,Positions,WrapedTerm),   
-    		process_term(FileStack,OpModule,WrapedTerm,H),
+    		pre_process_term(FileStack,OpModule,WrapedTerm,H),
 			read_stream_to_wraped_terms(FileStack,OpModule,In,T)
 		).
 
-process_term(FileStack,OpModule,InTerm,OutTerm):-
+pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
     findall(Anotator,anotator(_,Anotator),Anotators),
-    process_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
+    preprocess_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
     
-process_term([],_,_,Term,Term). 
-process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
+pre_process_term([],_,_,Term,Term). 
+pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
     pdt_maybe(
-    	Anotator:term_anotation_hook(FileStack,OpModule,InTerm,TmpTerm)
+    	Anotator:term_pre_anotation_hook(FileStack,OpModule,InTerm,TmpTerm)
     ),
     (	var(TmpTerm)
-    ->	process_term(T,FileStack,OpModule,InTerm,OutTerm)
-    ;	process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
+    ->	pre_process_term(T,FileStack,OpModule,InTerm,OutTerm)
+    ;	pre_process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
     ).
+
+post_process_terms(_,_,_,[],[]).
+post_process_terms(Stack,OpModule,FileAnos,[InHead|InTail],[OutHead|OutTail]):-
+    post_process_term(Stack,OpModule,FileAnos,InHead,OutHead),
+    post_process_terms(Stack,OpModule,FileAnos,InTail,OutTail).
 	
+post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
+    findall(Anotator,anotator(_,Anotator),Anotators),
+    post_process_term(Anotators,FileStack,OpModule,FileAnos,InTerm,OutTerm).
+
+post_process_term([],_,_,_,Term,Term). 
+post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-
+    pdt_maybe(
+    	Anotator:term_post_anotation_hook(FileStack,OpModule,FileAnos,InTerm,TmpTerm)
+    ),
+    (	var(TmpTerm)
+    ->	post_process_term(T,FileStack,OpModule,FileAnos,InTerm,OutTerm)
+    ;	post_process_term(T,FileStack,OpModule,FileAnos,TmpTerm,OutTerm)
+    ).
+
 
 process_file(FileStack,OpModule,Terms,FileAnos):-
 	findall(Anotator,anotator(_,Anotator),Anotators),
@@ -140,6 +162,9 @@ process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
 	    Anotator:file_anotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
 	),
 	process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos).
+
+
+
 
 		
 wrap_term(Term,Positions,aterm([position(From-To)|_],SubTerm)):-
