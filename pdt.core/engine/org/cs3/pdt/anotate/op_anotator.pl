@@ -5,12 +5,14 @@
 
 
 
-term_anotation_hook(_,OpModule,InTerm,OutTerm):-
+term_pre_anotation_hook(_,OpModule,InTerm,OutTerm):-
     pdt_strip_anotation(InTerm,':-'(op(Precedence,Type,Name)),(TopAnot,ArgAnot)),
     pdt_splice_anotation(':-'(op(Precedence,Type,Name)),([declares_op(op(Precedence,Type,Name))|TopAnot],ArgAnot),OutTerm),
     op(Precedence,Type,OpModule:Name).
 file_anotation_hook(_,_,Terms,InAnos,[declares_ops(Ops)|InAnos]):-
     collect_ops(Terms,Ops).
+
+term_post_anotation_hook(_,_,_,_,_).
 
 collect_ops([],[]).
 collect_ops([H|T],[op(Precedence,Type,Name)|TOps]):-
