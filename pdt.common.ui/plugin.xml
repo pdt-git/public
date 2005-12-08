@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.pdt.common.ui"
    name="Common UI"
-   version="0.1.2">
+   version="0.2.0">
    <runtime>
       <library name="commonui.jar">
          <export name="*"/>

@@ -3,7 +3,7 @@
 <fragment
    id="org.cs3.pdt.runtime.socket"
    name="Prolog Interface Socket"
-   version="0.1.2"
+   version="0.2.0"
    provider-name="http://roots.iai.uni-bonn.de"
    plugin-id="org.cs3.pdt.runtime"
    plugin-version="0.1.2">
