@@ -1160,6 +1160,9 @@ Obsolete definition of tree signature. TODO for Sebastian:
 Check whether partial evaluation of the above definition
 yields the following one. -- GK, 17.6.2005
 */
+
+:- multifile treeSignature/2.
+
 treeSignature(localDefT, 6).
 treeSignature(paramDefT, 4).
 treeSignature(fieldDefT, 5).
