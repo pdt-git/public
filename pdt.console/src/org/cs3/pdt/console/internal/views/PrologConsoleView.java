@@ -26,7 +26,7 @@ import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.metadata.DefaultMetaInfoProvider;
+import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -696,7 +696,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			viewer.setModel((ConsoleModel) models.get(pif));
 			completionProvider = new PrologCompletionProvider();
 			completionProvider
-					.setMetaInfoProvider(new DefaultMetaInfoProvider(pif));
+					.setMetaInfoProvider(MetaInfoProviderFactory.newInstance().create(pif));
 			viewer.setCompletionProvider(completionProvider);
 			history = new NewConsoleHistory();
 			viewer.setHistory(history);

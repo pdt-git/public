@@ -4,7 +4,11 @@ package org.cs3.pl.metadata;
 import org.cs3.pl.prolog.PrologException;
 
 
-
+/**
+ * 
+ * @author lukas
+ *
+ */
 public interface IMetaInfoProvider {
 	
 	public abstract Clause[] findClauses(Predicate p);

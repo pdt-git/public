@@ -1,4 +1,4 @@
-package org.cs3.pl.metadata;
+package org.cs3.pl.metadata.internal.classic;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,6 +8,13 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.metadata.Clause;
+import org.cs3.pl.metadata.ClauseData;
+import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.Predicate;
+import org.cs3.pl.metadata.PredicateData;
+import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
