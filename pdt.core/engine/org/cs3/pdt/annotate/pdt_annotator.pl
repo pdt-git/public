@@ -124,13 +124,14 @@ read_stream_to_wraped_terms(FileStack,OpModule,In,Terms):-
 
 pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
     findall(Anotator,annotator(_,Anotator),Anotators),
-    preprocess_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
+    pre_process_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
     
 pre_process_term([],_,_,Term,Term). 
 pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
-    pdt_maybe(
+    pdt_maybe((
+    	Anotator:current_predicate(term_pre_annotation_hook/4),
     	Anotator:term_pre_annotation_hook(FileStack,OpModule,InTerm,TmpTerm)
-    ),
+    )),
     (	var(TmpTerm)
     ->	pre_process_term(T,FileStack,OpModule,InTerm,OutTerm)
     ;	pre_process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
@@ -147,9 +148,10 @@ post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
 
 post_process_term([],_,_,_,Term,Term). 
 post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-
-    pdt_maybe(
+    pdt_maybe((
+    	Anotator:current_predicate(term_post_annotation_hook/5),
     	Anotator:term_post_annotation_hook(FileStack,OpModule,FileAnos,InTerm,TmpTerm)
-    ),
+    )),
     (	var(TmpTerm)
     ->	post_process_term(T,FileStack,OpModule,FileAnos,InTerm,OutTerm)
     ;	post_process_term(T,FileStack,OpModule,FileAnos,TmpTerm,OutTerm)
@@ -161,9 +163,10 @@ pre_process_file(FileStack,OpModule,Terms,FileAnos):-
     pre_process_file(Anotators,FileStack,OpModule,Terms,[],FileAnos).
 pre_process_file([],_,_,_,Terms,Terms). 
 pre_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
-    pdt_maybe(
+    pdt_maybe((
+	    Anotator:current_predicate(file_pre_annotation_hook/5),
 	    Anotator:file_pre_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
-	),
+	)),
 	(	var(TmpAnos)
 	->	pre_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
 	;	pre_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
@@ -174,9 +177,10 @@ post_process_file(FileStack,OpModule,Terms,InAnos,OutAnos):-
     post_process_file(Anotators,FileStack,OpModule,Terms,InAnos,OutAnos).
 post_process_file([],_,_,_,Terms,Terms). 
 post_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
-    pdt_maybe(
+    pdt_maybe((
+	    Anotator:current_predicate(file_post_annotation_hook/5),    
 	    Anotator:file_post_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
-	),
+	)),
 	(	var(TmpAnos)
 	->	post_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
 	;	post_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)

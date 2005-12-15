@@ -1,3 +1,13 @@
+la(1).
+la(2).
+la(3).
+
+testla:-
+    repeat,
+    la(A),
+    writeln(A),
+    fail.
+
 hu(u(A),u(B)):-
     ra(A),
     ra(B).

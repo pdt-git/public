@@ -1,0 +1,7 @@
+The modules in org/cs3/pdt/core define the 
+subsystem interface of the prolog core. 
+
+The java side of the pdt core should access the
+prolog core only through the public 
+predicates of the modules defined in this 
+directory.

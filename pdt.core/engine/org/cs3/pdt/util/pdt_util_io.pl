@@ -1,7 +1,9 @@
 :- module(pdt_util_io,[
 	copy_file_to_memfile/2,
 	copy_memfile_to_file/2,
-	pretty_print/3
+	pretty_print/3,
+	pretty_print/2,
+	pretty_print/1
 ]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
@@ -42,6 +44,34 @@ copy_memfile_to_file(MemFile,File):-
     close(Stream),
     close(MemStream).    
     
+
+pretty_print(Term):-
+    pretty_print(current_output,'',Term).
+    
+pretty_print(Stream,Term):-
+    pretty_print(Stream,'',Term).
+
+pretty_print(Stream,Indent,[H|T]):-
+    !,
+	format(Stream,"~w[~n",[Indent]),
+    atom_concat(Indent,'   ',IIndent),
+    pretty_print_args(Stream,IIndent,[H|T]),
+	format(Stream,"~w]",[Indent]).    
+
+pretty_print(Stream,Indent,Module:Name/Arity):-
+    atom(Module),
+    atom(Name),
+    number(Arity),
+    !,
+    format(Stream, "~w~w:~w/~w",[Indent,Module,Name,Arity]).
+
+pretty_print(Stream,Indent,Name/Arity):-
+    atom(Name),
+    number(Arity),
+    !,
+    format(Stream, "~w~w/~w",[Indent,Name,Arity]).
+
+	
 pretty_print(Stream,Indent,aterm(A,T)):-
     compound(T),
     !,
