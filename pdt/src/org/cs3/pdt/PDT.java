@@ -38,6 +38,8 @@ public final  class PDT {
 
 	public static final String PREF_SWITCH_TO_DEFAULT_PIF = "pdt.ask.switch_to_default_pif";
 
+	public static final String PL_PARTITIONER = "pdt.pl_partitioner";
+
 	
 
 }

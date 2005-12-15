@@ -8,13 +8,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.DefaultPrologLibrary;
-import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologLibrary;
 import org.cs3.pdt.runtime.PrologLibraryManager;
@@ -24,8 +22,8 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.DefaultMetaInfoProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
@@ -505,7 +503,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public IMetaInfoProvider getMetaInfoProvider() {
-		return new DefaultMetaInfoProvider(getMetadataPrologInterface(), "");
+		return MetaInfoProviderFactory.newInstance().create(getMetadataPrologInterface());
 	}
 
 	public String[] getPrologLibraryKeys() {
