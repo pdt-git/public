@@ -994,8 +994,8 @@ public class FactGenerator extends ASTVisitor {
 	public boolean visit(ImportDeclaration node) {
 		String id = idResolver.getID(node);
 		String topLevel = idResolver.getID(node.getParent());
-		String importName = idResolver.getID(node.resolveBinding());
 		IBinding binding =  node.resolveBinding();
+		String importName = idResolver.getID(binding);
 		if (binding.getKind() == IBinding.PACKAGE) 
 			generatePackageFactIfNecessary((IPackageBinding) binding);
 		importName = idResolver.getID(binding);
