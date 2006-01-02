@@ -467,7 +467,7 @@ term_to_canonical_atom(Term,AAtom):-
 	write_term(Stream,Term,[ignore_ops(true),quoted(true)]),
 	close(Stream),
 	memory_file_to_atom(Memfile,AAtom),
-	free_memory_file(Memfile),
+	free_memory_file(Memfile).
 	
     
 		
