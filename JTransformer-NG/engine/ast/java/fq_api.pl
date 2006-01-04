@@ -368,14 +368,13 @@ error_occured(S):-
 
 
 java_fq_to_pef(FQ, PEF):-
-     assert_bound(FQ),
+     t_i_assert_bound(FQ),
      FQ =.. [Functor|Args],
          ast_node_def('Java',Functor,ArgDefs),
          !,
          bindArgs(ArgDefs, Args, JavaASTArgs),
      PEF =.. [Functor|JavaASTArgs].
      
-
 java_fq_to_pef(FQ, PEF):-
      FQ =.. [Functor|Args],
      attribSignature(Functor,_),
@@ -384,6 +383,13 @@ java_fq_to_pef(FQ, PEF):-
          bindArgs(ArgDefs, Args, JavaASTArgs),
      PEF =.. [Functor|JavaASTArgs].
      
+t_i_assert_bound(FQ) :-
+    not(ground(FQ)),
+    sformat(Message,'compiler error, term not ground: ~w',[FQ]),    
+    t_i_based_error_handling(Message).
+
+t_i_assert_bound(_FQ).
+    
      
 /**
  * getTypeIfNullEnclClass(+ID|null, +Encl,-FQN)
