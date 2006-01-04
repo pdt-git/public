@@ -47,7 +47,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 				removeJTransformerNature(project);
 				action.setChecked(false);
 			} else {
-			    removeNatureFromAllOtherProjects();
+			    //removeNatureFromAllOtherProjects();
 			    //PrologManager.getInstance().restart();
 			    addJTransformerNature(project);
 			    action.setChecked(true);
