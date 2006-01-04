@@ -1,13 +1,32 @@
 % Author: Tobias
 % Date: 14.11.2002
 
+/**
+ * globalIds(+full qualfied type name, +Id)
+ *
+ * Global (process-wide) mapping
+ * full qualified type name and id.
+ * Generate by the PEF linking (this file).
+ */
 :- multifile globalIds/2.
-:- multifile globalIds/3.
-:- multifile globalIds/4.
 :- dynamic globalIds/2.
+/**
+ * globalIds(+full qualfied type name, +field name, +Id)
+ */
+:- multifile globalIds/3.
 :- dynamic globalIds/3.
+/**
+ * globalIds(+full qualfied type name, +method name, +parameter type list, +Id)
+ */
+:- multifile globalIds/4.
 :- dynamic globalIds/4.
-:- dynamic globalIds/4.
+
+
+/**
+ * symtab(+Id, +fullQualifiedName)
+ * 
+ * Contains the local symbol table for a file/class.
+ */
 :- dynamic symtab/2.
 :- dynamic errors_in_java_code/0.
 :- dynamic ignore_unresolved_type/1.
