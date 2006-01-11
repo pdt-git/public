@@ -33,12 +33,25 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
                 		"Font used in the Prolog Console view",
                 		Option.FONT,JFaceResources.DEFAULT_FONT),
                 new SimpleOption(
-                        		PDTConsole.PREF_ENTER_FOR_BACKTRACKING,
-                        		"Use Enter Key for backtracking",
-                        		"If enabled, the enter key sends a semicolon(';') when\n" +
-                        		"while the console is in 'get_single_char/1'-mode, \n" +
-                        		"e.g., when backtracking over the solutions to a goal.",
-                        		Option.FLAG,"false"),                		
+                		PDTConsole.PREF_ENTER_FOR_BACKTRACKING,
+                		"Use Enter Key for backtracking",
+                		"If enabled, the enter key sends a semicolon(';') when\n" +
+                		"while the console is in 'get_single_char/1'-mode, \n" +
+                		"e.g., when backtracking over the solutions to a goal.",
+                		Option.FLAG,"false"), 
+        		new SimpleOption(
+                		PDTConsole.PREF_ENABLE_CONSOLE_VOODOO,
+                		"intercept get_single_char/1 calls",
+                		"When enabled, the console view will be able to detect\n" +
+                		"whether the user input stream is read from via get_single_char/1" +
+                		"(e.g. when backtracking through query results).\n" +
+                		"In those situations, the console view will emulate the " +
+                		"unbuffered behaviour of the SWI-Prolog default terminal/plwin " +
+                		"interface. This works just fine in most cases, but there have been " +
+                		"reports of problems when using Edinburgh-style io predicates.\n" +
+                		"If you get unexpected io behaviour from " +
+                		"your application, disabling this flag may help.",
+                		Option.FLAG,"true"),                        		
                 new SimpleOption(
                 		PDTConsole.PREF_CONSOLE_HISTORY_FILE,
                 		"History File",

@@ -13,6 +13,7 @@ final public class PDTConsole {
 	public static final String PREF_TIMEOUT = "pdt.console.timeout";
 	public static final String PL_LIBRARY = "pdt.console.library";
 	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";
+	public static final String PREF_ENABLE_CONSOLE_VOODOO = "pdt.console.enable_voodoo";
 	
 	
 }
