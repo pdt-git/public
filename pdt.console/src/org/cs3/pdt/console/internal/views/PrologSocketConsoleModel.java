@@ -23,12 +23,9 @@ import org.cs3.pl.console.prolog.QueryExpansion;
 /**
  * @author terra
  */
-public class PrologSocketConsoleModel implements ConsoleModel
-{
+public class PrologSocketConsoleModel implements ConsoleModel {
 
-	private class ConsoleReader implements Runnable
-	{
-		
+	private class ConsoleReader implements Runnable {
 
 		private static final int ESCAPE_CHAR = 42;
 
@@ -36,99 +33,81 @@ public class PrologSocketConsoleModel implements ConsoleModel
 
 		private BufferedReader reader;
 
-		public ConsoleReader(BufferedReader reader)
-		{
+		public ConsoleReader(BufferedReader reader) {
 			this.reader = reader;
 		}
 
-		public void run()
-		{
+		public void run() {
 			char[] buf = new char[255];
-			try
-			{
+			try {
 				int count = reader.read(buf);
 				StringBuffer data = new StringBuffer();
-				
-				while (count>0)
-				{					
-					
+
+				while (count > 0) {
+
 					boolean escaped = false;
-					for (int i = 0; i < count; i++)
-					{
-						if (escaped)
-						{
-							if (buf[i] == RAW_MODE_CHAR)
-							{
-								//report what we have until mode switch:
+					for (int i = 0; i < count; i++) {
+						if (escaped) {
+							if (buf[i] == RAW_MODE_CHAR) {
+								// report what we have until mode switch:
 								ConsoleModelEvent cme = new ConsoleModelEvent(
 										PrologSocketConsoleModel.this, data
 												.toString(), false);
 								fireOutputEvent(cme);
-								//skip optional newline
-								if (i - 1 < count && buf[i + 1] == '\n')
-								{
+								// skip optional newline
+								if (i - 1 < count && buf[i + 1] == '\n') {
 									i++;
 								}
-								//clear output buffer 
+								// clear output buffer
 								data.setLength(0);
 								setSingleCharMode(true);
-							} else
-							{
+							} else {
 								data.append(buf[i]);
 							}
 							escaped = false;
-						} else
-						{
-							if (buf[i] == ESCAPE_CHAR)
-							{
+						} else {
+							if (buf[i] == ESCAPE_CHAR) {
 								escaped = true;
-							} else
-							{
+							} else {
 								data.append(buf[i]);
 							}
 						}
 					}
 
-					try
-					{
+					try {
 						/*
-						 * FIXME: UGLY 
+						 * FIXME: UGLY
 						 */
 						Thread.sleep(1);
-					} catch (InterruptedException e)
-					{
+					} catch (InterruptedException e) {
 						Debug.report(e);
 						throw new RuntimeException(e);
 					}
-					if(!reader.ready() || 
-						/*this is optional:
-						   event after eache line;
-						   could be changed to certain character number*/
-						//data.indexOf("\n") >= 0
-							data.length() >= 500)
-					{
-						if (data == null)
-						{
+					if (!reader.ready() ||
+					/*
+					 * this is optional: event after eache line; could be
+					 * changed to certain character number
+					 */
+					// data.indexOf("\n") >= 0
+							data.length() >= 500) {
+						if (data == null) {
 							throw new IOException("readLine() returned null");
 						}
-						if (data.length() > 0)
-						{
+						if (data.length() > 0) {
 							ConsoleModelEvent cme = new ConsoleModelEvent(
-									PrologSocketConsoleModel.this, data.toString(),
-									false);
+									PrologSocketConsoleModel.this, data
+											.toString(), false);
 							fireOutputEvent(cme);
 							data = new StringBuffer();
 						}
-					}
-					else {
+					} else {
 						Debug.warning("READER NOT READY");
 					}
-					count = reader.read(buf);	
-					
+					count = reader.read(buf);
+
 				}
-				
-			} catch (IOException e)
-			{
+
+			} catch (IOException e) {
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
@@ -156,40 +135,33 @@ public class PrologSocketConsoleModel implements ConsoleModel
 
 	private File serverLockFile;
 
-	public PrologSocketConsoleModel()
-	{
+	public PrologSocketConsoleModel() {
 		this.port = 5567;
 		connect();
 	}
 
-	public PrologSocketConsoleModel(boolean doConnect)
-	{
+	public PrologSocketConsoleModel(boolean doConnect) {
 		this.port = 5567;
-		if (doConnect)
-		{
+		if (doConnect) {
 			connect();
 		}
 	}
 
-	public String getLineBuffer()
-	{
+	public String getLineBuffer() {
 		return lineBuffer;
 	}
 
-	public void setLineBuffer(String buffer)
-	{
+	public void setLineBuffer(String buffer) {
 		String oldBuffer = lineBuffer;
 		lineBuffer = buffer;
 		fireEditBufferChangedEvent(oldBuffer, lineBuffer);
 	}
 
-	synchronized public void commitLineBuffer()
-	{
+	synchronized public void commitLineBuffer() {
 		if (singleCharMode)
 			throw new IllegalStateException("In single char mode");
 
-		if (!isConnected())
-		{
+		if (!isConnected()) {
 			connect();
 		}
 
@@ -198,8 +170,7 @@ public class PrologSocketConsoleModel implements ConsoleModel
 
 		fireOutputEvent(cme);
 
-		try
-		{
+		try {
 			writer.write(expandQuery(lineBuffer));
 			writer.write("\n");
 			writer.flush();
@@ -207,97 +178,77 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			cme = new ConsoleModelEvent(this, lineBuffer);
 
 			fireCommitEvent(cme);
-			
-			//clear linebuffer.
+
+			// clear linebuffer.
 			String oldBuffer = lineBuffer;
 			lineBuffer = "";
-			fireEditBufferChangedEvent(oldBuffer,lineBuffer);
-		} catch (IOException e)
-		{
+			fireEditBufferChangedEvent(oldBuffer, lineBuffer);
+		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	private String expandQuery(String query)
-	{
-		for (Iterator it = expansions.iterator(); it.hasNext();)
-		{
+	private String expandQuery(String query) {
+		for (Iterator it = expansions.iterator(); it.hasNext();) {
 			QueryExpansion exp = (QueryExpansion) it.next();
 			query = exp.apply(query);
 		}
 		return query;
 	}
 
-	public void registerQueryExpansion(QueryExpansion s)
-	{
-		synchronized (expansions)
-		{
-			if (!expansions.contains(s))
-			{
+	public void registerQueryExpansion(QueryExpansion s) {
+		synchronized (expansions) {
+			if (!expansions.contains(s)) {
 				expansions.add(s);
 			}
 		}
 	}
 
-	public void unregisterQueryExpansion(QueryExpansion s)
-	{
-		synchronized (expansions)
-		{
-			if (expansions.contains(s))
-			{
+	public void unregisterQueryExpansion(QueryExpansion s) {
+		synchronized (expansions) {
+			if (expansions.contains(s)) {
 				expansions.remove(s);
 			}
 		}
 	}
 
-	public void addConsoleListener(ConsoleModelListener cml)
-	{
-		synchronized (listeners)
-		{
+	public void addConsoleListener(ConsoleModelListener cml) {
+		synchronized (listeners) {
 			listeners.add(cml);
 		}
 	}
 
-	public void removeConsoleListener(ConsoleModelListener cml)
-	{
-		synchronized (listeners)
-		{
+	public void removeConsoleListener(ConsoleModelListener cml) {
+		synchronized (listeners) {
 			listeners.remove(cml);
 		}
 	}
 
 	/**
-	 * precondition: we are in single char mode
-	 * postcondition: we are in line mode. 
+	 * precondition: we are in single char mode postcondition: we are in line
+	 * mode.
 	 */
-	public void putSingleChar(char c)
-	{
-		if (!singleCharMode)
-		{
+	public void putSingleChar(char c) {
+		if (!singleCharMode) {
 			throw new IllegalStateException("In line mode");
 		}
 
-		synchronized (this)
-		{
-			if (!isConnected())
-			{
-				try
-				{
+		synchronized (this) {
+			if (!isConnected()) {
+				try {
 					wait(500);
 					connect();
-				} catch (InterruptedException e1)
-				{
+				} catch (InterruptedException e1) {
 					return;
 				}
 			}
 
-			try
-			{
+			try {
 
-				/* the newline is required. prolog side does not
-				 * flush buffers otherwise.
-				 * we will skip it away on the prolog side.
+				/*
+				 * the newline is required. prolog side does not flush buffers
+				 * otherwise. we will skip it away on the prolog side.
 				 */
 				writer.write(c + "\n");
 				writer.flush();
@@ -305,49 +256,45 @@ public class PrologSocketConsoleModel implements ConsoleModel
 				 * switch back to line mode
 				 */
 				setSingleCharMode(false);
-			} catch (IOException e)
-			{
+			} catch (IOException e) {
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
 		}
 	}
 
-	protected void setSingleCharMode(boolean on)
-	{
+	protected void setSingleCharMode(boolean on) {
 		this.singleCharMode = on;
 		fireModeChange(new ConsoleModelEvent(this, on));
 	}
 
-	public boolean isSingleCharMode()
-	{
+	public boolean isSingleCharMode() {
 		return singleCharMode;
 	}
 
-	public synchronized void connect()
-	{
-		if (isConnected())
-		{
+	public synchronized void connect() {
+		if (isConnected()) {
 			Debug.warning("Seems we are already connected?");
 			return;
 		}
-		long timeout = Long.parseLong(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_TIMEOUT, "5000"));
-		long startTime=System.currentTimeMillis();
-		while(!isServerActive()){
+		long timeout = Long.parseLong(PrologConsolePlugin.getDefault()
+				.getPreferenceValue(PDTConsole.PREF_TIMEOUT, "5000"));
+		long startTime = System.currentTimeMillis();
+		while (!isServerActive()) {
 			try {
 				Thread.sleep(100);
-				long elapsedTime=System.currentTimeMillis()-startTime;
-				if(elapsedTime>timeout){
-					throw new RuntimeException("Timeout while waiting for peer to start console service.");
+				long elapsedTime = System.currentTimeMillis() - startTime;
+				if (elapsedTime > timeout) {
+					throw new RuntimeException(
+							"Timeout while waiting for peer to start console service.");
 				}
 			} catch (InterruptedException e) {
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
 		}
-		
-		try
-		{
+
+		try {
 			Debug.info("connecting console to server at port " + port);
 			socket = new Socket((String) null, port);
 			writer = new BufferedWriter(new OutputStreamWriter(socket
@@ -359,49 +306,53 @@ public class PrologSocketConsoleModel implements ConsoleModel
 			readerThread.setName("Console Reader Thread");
 			readerThread.start();
 
-			writer
-					.write("use_module(library(single_char_interceptor)).\n" +
-							"sd_install," +
-							"set_stream(current_output,tty(true))," +
-							"set_stream(current_input,tty(true)).\n");
+			String valString = PrologConsolePlugin.getDefault()
+					.getPreferenceValue(PDTConsole.PREF_ENABLE_CONSOLE_VOODOO,
+							"false");
+			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
+			if (useVoodoo) {
+				writer.write("use_module(library(single_char_interceptor)).\n"
+						+ "sd_install,"
+						+ "set_stream(current_output,tty(true)),"
+						+ "set_stream(current_input,tty(true)).\n");
+				
+			}
+			else{
+				writer.write("set_stream(current_output,tty(true)),"
+						+ "set_stream(current_input,tty(true)).\n");
+			}
 			writer.flush();
-
 			Debug.debug("Connect complete");
-		} catch (IOException e)
-		{
+		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException();
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#finalize()
 	 */
-	protected void finalize() throws Throwable
-	{
+	protected void finalize() throws Throwable {
 		super.finalize();
 		disconnect();
 	}
 
-	public synchronized void disconnect()
-	{
+	public synchronized void disconnect() {
 		Debug.debug("Disconnect began");
-		synchronized (this)
-		{
-			try
-			{
-				if (socket != null)
-				{
+		synchronized (this) {
+			try {
+				if (socket != null) {
 					writer.write("sd_uninstall.\n");
 					writer.flush();
 					writer.write("end_of_file.\n");
 					writer.flush();
-//					writer.close();
+					// writer.close();
 					readerThread.join(10000);
 					socket.close();
 				}
-			} catch (IOException e)
-			{
+			} catch (IOException e) {
 				Debug.report(e);
 			} catch (InterruptedException e) {
 				Debug.report(e);
@@ -421,83 +372,68 @@ public class PrologSocketConsoleModel implements ConsoleModel
 		Debug.debug("Disconnect complete");
 	}
 
-	void fireOutputEvent(ConsoleModelEvent cme)
-	{
+	void fireOutputEvent(ConsoleModelEvent cme) {
 		HashSet l;
 
-		synchronized (listeners)
-		{
+		synchronized (listeners) {
 			l = (HashSet) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();)
-		{
+		for (Iterator i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = (ConsoleModelListener) i.next();
 			list.onOutput(cme);
 		}
 
 	}
 
-	void fireModeChange(ConsoleModelEvent cme)
-	{
+	void fireModeChange(ConsoleModelEvent cme) {
 		HashSet l;
 
-		synchronized (listeners)
-		{
+		synchronized (listeners) {
 			l = (HashSet) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();)
-		{
+		for (Iterator i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = (ConsoleModelListener) i.next();
 			list.onModeChange(cme);
 		}
 
 	}
 
-	private void fireCommitEvent(ConsoleModelEvent cme)
-	{
+	private void fireCommitEvent(ConsoleModelEvent cme) {
 		HashSet l;
 
-		synchronized (listeners)
-		{
+		synchronized (listeners) {
 			l = (HashSet) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();)
-		{
+		for (Iterator i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = (ConsoleModelListener) i.next();
 			list.onCommit(cme);
 		}
 	}
 
-	private void fireEditBufferChangedEvent(String oldBuffer, String buffer)
-	{
+	private void fireEditBufferChangedEvent(String oldBuffer, String buffer) {
 		ConsoleModelEvent ev = new ConsoleModelEvent(this, oldBuffer, buffer);
 
 		HashSet l;
 
-		synchronized (listeners)
-		{
+		synchronized (listeners) {
 			l = (HashSet) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();)
-		{
+		for (Iterator i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = (ConsoleModelListener) i.next();
 			list.onEditBufferChanged(ev);
 		}
 	}
 
-	private boolean isServerActive()
-	{
+	private boolean isServerActive() {
 		return serverLockFile.exists();
 	}
 
-	public boolean isConnected()
-	{
-		if (socket == null)
-		{
+	public boolean isConnected() {
+		if (socket == null) {
 			return false;
 		}
 		return socket.isConnected();
@@ -506,21 +442,20 @@ public class PrologSocketConsoleModel implements ConsoleModel
 	/**
 	 * @return Returns the port.
 	 */
-	public int getPort()
-	{
+	public int getPort() {
 		return port;
 	}
 
 	/**
-	 * @param port The port to set.
+	 * @param port
+	 *            The port to set.
 	 */
-	public void setPort(int port)
-	{
+	public void setPort(int port) {
 		this.port = port;
 	}
 
 	public void setLockFile(File lockFile) {
-		this.serverLockFile=lockFile;
-		
+		this.serverLockFile = lockFile;
+
 	}
 }
