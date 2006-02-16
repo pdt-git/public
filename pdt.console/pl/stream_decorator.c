@@ -332,10 +332,12 @@ foreign_t pl_hijack_stream(term_t stream_term, term_t module_term, term_t args_t
 	 on linux, at least with my version, it is not allowed.
 	 Pfff...
 	*/
-	PL_set_feature("tty_control", PL_BOOL, TRUE);
+	
+	
 	
 	IOSTREAM * stream=0;
 	HANDLE_T * handle=0;
+	int wasssolldas =  PL_set_feature("tty_control", PL_BOOL, TRUE);
 	char * module_name =0;
 	
 	/*
