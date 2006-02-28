@@ -1,22 +1,59 @@
-:- module(single_char_interceptor,[sd_load/0,sd_install/0, sd_uninstall/0]).
+:- module(single_char_interceptor,[sci_install/0]).
 
-stream_decorator_read_hook(Stream,_,_,raw_tty,[C]):-
-    char_code(A,42),
-  orig_write_all(current_output, [A,'s']),
-  orig_read(Stream,2,[C,'\n']).
-%stream_decorator_read_hook(_,_,_,A,_):-
-%	writeln(A),fail.
-    
-stream_decorator_write_hook(Stream,_,Chars,[]):-
-    char_code(A,42),
-	escape(A,Chars,EscapedChars),
-	orig_write_all(Stream,EscapedChars).
-    
+:- prolog_load_context(directory,A), user:assert(file_search_path(foreign,A)).
 
-orig_write_all(_,[]).
-orig_write_all(Stream,Chars):-
-    orig_write(Stream,Chars,Left),
-    orig_write_all(Stream,Left).
+:- dynamic sci_stream_args/2.
+
+sci_setting(escape_char,'*').
+sci_setting(char(cooked_tty),'c').
+sci_setting(char(raw_tty),'s').
+sci_setting(char(no_tty),'n').
+sci_setting(cio_base_name,custom_io).
+
+cio_read(_,sci(read,In,Out),Size,TTYMode,Chars):-
+%    writeln(in_read(TTYMode)),
+    sci_setting(escape_char,Esc),
+    sci_setting(char(TTYMode),TTYChar),
+    put_char(Out,Esc),
+    put_char(Out,TTYChar),
+    flush_output(Out),
+    do_read(In,TTYMode,Size,Chars).
+%writeln(out_read(Chars)).
+	
+do_read(In,cooked_tty,Size,Chars):-
+	cio_read_n_chars(In,Size,Chars).
+do_read(In,no_tty,Size,Chars):-
+	cio_read_n_chars(In,Size,Chars).
+do_read(In,raw_tty,_,[C]):-
+	cio_read_n_chars(In,2,[C|_]).	
+
+%cio_read(_,sci(read,In,_),Size,_,Chars):-
+%    writeln(read),
+%	cio_read_n_chars(In,Size,Chars).
+
+
+%cio_read(A,B,C,D,E):-
+%    writeln(cio_read(A,B,C,D,E)).
+
+cio_write(_,sci(write,_,Out),Chars,[]):-
+%    write(Out,write),nl(Out),
+	sci_setting(escape_char,C),
+	escape(C,Chars,EscapedChars),
+	put_chars(Out,EscapedChars).
+
+
+
+cio_close(_,sci(read,In,_)):-
+	close(In).
+cio_close(_,sci(write,_,Out)):-
+	close(Out).
+
+
+put_chars(_,[]).
+put_chars(Out,[H|T]):-
+    put_char(Out,H),
+    put_chars(Out,T).
+ 
 
 escape(_,[],[]).
 escape(A,In,Out):-
@@ -28,12 +65,12 @@ escape(A,In,Out):-
     ).
     
 
-:- prolog_load_context(directory,A), user:assert(file_search_path(foreign,A)).
 
-sd_load:-
+
+sci_load:-
 
     lib_name(LibName),
-    
+    writeln(trying(LibName)),
     (	current_foreign_library(LibName,_)
     ->	true
     ;	load_foreign_library(foreign(LibName))
@@ -42,30 +79,37 @@ sd_load:-
 lib_name(LibName):-
     current_prolog_flag(shared_object_extension,Ext),
     current_prolog_flag(arch,Arch),
-    concat_atom([stream_decorator,Arch,Ext],'.',LibName),
+    sci_setting(cio_base_name,Base),
+    concat_atom([Base,Arch,Ext],'.',LibName),
     expand_file_search_path(foreign(LibName),A),
     exists_file(A),
     !.
        
 lib_name(LibName):- %fallback to "default" arch
     current_prolog_flag(shared_object_extension,Ext),
-    concat_atom([stream_decorator,Ext],'.',LibName).
+    sci_setting(cio_base_name,Base),
+    concat_atom([Base,Ext],'.',LibName).
        
-        
-sd_install:-
-    sd_load,
-    %set_prolog_flag(tty_control,true),
+  
+  
+sci_install:-
+    sci_load,
+    current_output(OrigOut),
+    current_input(OrigIn),
     set_stream(current_input,tty(true)),
     set_stream(current_output,tty(true)),
-    (	is_hijacked_stream(current_input)
-    ->	true
-    ;	hijack_stream(current_input,single_char_interceptor,[])
-    ),
-    (	is_hijacked_stream(current_output)
-    ->	true
-    ;	hijack_stream(current_output,single_char_interceptor,[])
-    ).    
-    
-sd_uninstall:-
-	unhijack_stream(current_input),
-	unhijack_stream(current_output).    
+    (	sci_stream_args(OrigIn,_)
+    ->	throw(sci(allready_wrapped,input,OrigIn))
+    ;    cio_create(single_char_interceptor,sci(read,OrigIn,OrigOut),read,In),
+    		assert(sci_stream_args(In,sci(read,OrigIn,OrigOut)))
+    	),
+    	(	sci_stream_args(OrigOut,_)
+    ->	throw(sci(allready_wrapped,output,OrigOut))
+    ;    cio_create(single_char_interceptor,sci(write,OrigIn,OrigOut),write,Out),
+    		assert(sci_stream_args(Out,sci(write,OrigIn,OrigOut)))
+    	),
+	set_prolog_IO(In,Out,Out),
+    set_stream(In,tty(true)),
+    set_stream(Out,tty(true)).    
+
+        

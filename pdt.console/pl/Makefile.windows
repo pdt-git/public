@@ -1,9 +1,10 @@
 !include rules.mk
-DLLS=stream_decorator.dll
+LIBNAME=custom_io
+DLLS=$(LIBNAME).dll
 all:	$(DLLS)
 
-stream_decorator.dll:	stream_decorator.obj
-	$(LD) /dll /out:$@ $(LDFLAGS) stream_decorator.obj $(TERMLIB) $(PLLIB) $(LIBS)
+$(LIBNAME).dll:	$(LIBNAME).obj
+	$(LD) /dll /out:$@ $(LDFLAGS) $(LIBNAME).obj $(TERMLIB) $(PLLIB) $(LIBS)
 
 clean::
 	if exist *.obj del *.obj
