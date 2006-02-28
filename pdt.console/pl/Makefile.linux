@@ -1,12 +1,13 @@
-OBJ= stream_decorator.o
+LIBNAME=custom_io
+OBJ= $(LIBNAME).o
 SRC= $(OBJ:.o=.c)
 
-all: stream_decorator.so
+all: $(LIBNAME).so
 clean: 
 	rm $(OBJ)
-	rm stream_decorator.so
-stream_decorator.so: $(OBJ)
-	gcc  -Wall -g -shared -o stream_decorator.so $(OBJ)
+	rm $(LIBNAME).so
+$(LIBNAME).so: $(OBJ)
+	gcc  -Wall -g -shared -o $(LIBNAME).so $(OBJ)
 
-stream_decorator.o: stream_decorator.c
-	gcc -Wall -g -I/usr/local/lib/swipl/include -fpic -c stream_decorator.c
+$(LIBNAME).o: $(LIBNAME).c
+	gcc -Wall -g -I/usr/local/lib/pl-5.6.5/include -fPIC -c $(LIBNAME).c
