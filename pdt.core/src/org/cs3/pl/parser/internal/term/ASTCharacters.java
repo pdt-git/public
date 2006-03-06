@@ -38,7 +38,7 @@ public class ASTCharacters extends SimpleNode implements Atomic{
 				throw new IllegalStateException("copy with uninitialized value");
 			}
 			value = Util.unquoteAtom(getImage());			
-			value = value.substring(1, value.length() - 1);
+			//value = value.substring(1, value.length() - 1);
 			
 		}
 		return value;
