@@ -360,6 +360,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Regular expression - only matched files are considered prolog source code.",
 							Option.STRING, ".*\\.pl"),
 					new SimpleOption(
+									PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
+									"Exclusion Pattern",
+									"Regular expression - matching files are NOT considered prolog source code, even if \n" +
+									"they match the inclusion pattern above.",
+									Option.STRING, ""),							
+					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
 							"Metadata PrologInterface",
 							"The key identifying the PrologInterface instance used by the pdt core to store"
