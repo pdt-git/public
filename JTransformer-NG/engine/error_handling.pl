@@ -37,7 +37,7 @@ abba:get_defining_file(AbbaId,File) :-
     !.
 
 abba:get_defining_file(AbbaId,File) :-
-    abba:edge(_,parent,_Label,AbbaId,Parent),
+    abba:within(AbbaId,Parent),
 	abba:get_defining_file(Parent,File),
 	!.
 	

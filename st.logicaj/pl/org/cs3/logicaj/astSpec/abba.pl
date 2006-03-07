@@ -6,6 +6,9 @@
 :- multifile edge/5.
 :- dynamic edge/5.
 
+:- multifile within/2.
+:- dynamic within/2.
+
 :- multifile node/3.
 :- dynamic node/3.
 
