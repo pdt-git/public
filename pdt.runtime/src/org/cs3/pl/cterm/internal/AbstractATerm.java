@@ -27,6 +27,16 @@ public abstract class AbstractATerm implements CTerm {
 		return (CTerm) annotation.get(functor);
 	}
 	
+	public boolean hasAnnotation(String functor) {	
+		if(annotation==null){
+			annotation = new HashMap();
+			if(anotated){
+				processAnotations();
+			}
+		}
+		return  annotation.containsKey(functor);
+	}
+	
 	private void processAnotations() {
 		CCompound aterm =(CCompound) this.term;
 		CTerm current = aterm.getArgument(0);
@@ -55,17 +65,29 @@ public abstract class AbstractATerm implements CTerm {
 	public AbstractATerm(ATermFactory factory, CTerm aterm) {
 		this.term=aterm;
 		this.factory=factory;
-		this.anotated = aterm.getArity()==2&& "term".equals(aterm.getFunctorValue());
+		this.anotated = isATerm(aterm);
+	}
+
+	public static boolean isATerm(CTerm aterm) {
+		return aterm.getArity()==2&& "aterm".equals(aterm.getFunctorValue());
 	}
 
 	
+	
 	public String getFunctorValue() {
 		if(anotated){
-			return ((CCompound)term).getArgument(1).getFunctorValue();
+			return unwrapOutermostATerm().getFunctorValue();
 		}
 		return term.getFunctorValue();
 	}
 
+	private CTerm unwrapOutermostATerm() {
+		return ((CCompound)term).getArgument(1);
+	}
+
+	public static CTerm unwrapOutermostATerm( CTerm aterm) {
+		return ((CCompound)aterm).getArgument(1);
+	}
 	
 
 	public CTermFactory getFactory() {
@@ -76,7 +98,7 @@ public abstract class AbstractATerm implements CTerm {
 
 	public String getFunctorImage() {
 		if(anotated){
-			return ((CCompound)term).getArgument(1).getFunctorImage();
+			return unwrapOutermostATerm().getFunctorImage();
 		}
 		return term.getFunctorImage();
 	}
@@ -85,10 +107,12 @@ public abstract class AbstractATerm implements CTerm {
 
 	public int getArity() {	
 		if(anotated){
-			return ((CCompound)term).getArgument(1).getArity();
+			return unwrapOutermostATerm().getArity();
 		}
 		return term.getArity();
 
 	}
+	
+	
 
 }

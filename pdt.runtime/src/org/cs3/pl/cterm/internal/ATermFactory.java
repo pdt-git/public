@@ -4,6 +4,8 @@ import org.cs3.pl.cterm.CAtom;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CFloat;
 import org.cs3.pl.cterm.CInteger;
+import org.cs3.pl.cterm.CNil;
+import org.cs3.pl.cterm.CString;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.CVariable;
@@ -21,6 +23,22 @@ public class ATermFactory implements CTermFactory {
 	private  class _Atom extends AbstractATerm implements CAtom{
 
 		public _Atom(CTerm term) {
+			super(ATermFactory.this, term);
+		}
+		
+	}
+	
+	private  class _String extends AbstractATerm implements CString{
+
+		public _String(CTerm term) {
+			super(ATermFactory.this, term);
+		}
+		
+	}
+	
+	private  class _Nil extends AbstractATerm implements CAtom{
+
+		public _Nil(CTerm term) {
 			super(ATermFactory.this, term);
 		}
 		
@@ -71,7 +89,7 @@ public class ATermFactory implements CTermFactory {
 
 		public _Compound(CTerm node) {
 			super(ATermFactory.this, node);
-			args = new CTerm[node.getArity()]; 
+			args = new CTerm[getArity()]; 
 		}
 
 		public CTerm getArgument(int i) {
@@ -85,24 +103,37 @@ public class ATermFactory implements CTermFactory {
 			}
 			return args[i];
 		}
-
+		
 		
 	}
 	private  CTerm create(CTerm root) {
-		if(root instanceof CAtom){
+		CTerm wrapped;
+		if(AbstractATerm.isATerm(root)){
+			wrapped=AbstractATerm.unwrapOutermostATerm(root);
+		}
+		else{
+			wrapped=root;
+		}
+		if(wrapped instanceof CAtom){
 			return new _Atom(root);
 		} 
-		if(root instanceof CVariable){
+		if(wrapped instanceof CString){
+			return new _String(root);
+		}
+		if(wrapped instanceof CVariable){
 			return new _Variable( root);
 		} 
-		if(root instanceof CCompound){
+		if(wrapped instanceof CCompound){
 			return new _Compound(root);
 		} 
-		if(root instanceof CInteger){
+		if(wrapped instanceof CInteger){
 			return new _Integer( root);
 		}		
-		if(root instanceof CFloat){
+		if(wrapped instanceof CFloat){
 			return new _Float(root);
+		}
+		if(wrapped instanceof CNil){
+			return new _Nil(root);
 		}
 		throw new IllegalArgumentException("bad cterm type: "+root.getClass().getName());
 	}

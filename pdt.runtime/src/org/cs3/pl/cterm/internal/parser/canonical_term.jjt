@@ -123,23 +123,28 @@ TOKEN : /* SEPARATORS */
 |   < RPAREN: ")" > 
 |   < COMMA: "," >
 |   < DOT: "." >
-
+|   < LSQB: "[" >
+|   < RSQB: "]" >
+|	< CUT: "!" >
 }
 
 
 TOKEN : /* IDENTIFIERS */
 {
-  < ATOM_IDENTIFIER: <LC_LETTER> (<LETTER>|<DIGIT>)* >
+  < ATOM_IDENTIFIER: (<LC_LETTER>|<GRAPHIC>) (<LETTER>|<DIGIT>|<GRAPHIC>)* >
 | < VARIABLE_IDENTIFIER: <UC_LETTER> (<LETTER>|<DIGIT>)* >
 |  < #LETTER: <UC_LETTER>|<LC_LETTER> >
-|  < #LC_LETTER: ["a"-"z"] >
+|  < #LC_LETTER: ["a"-"z"]|<UNICODE_LETTER> >
+|  < #UNICODE_LETTER:  ["\u00C0" - "\u1FFF"]| ["\u3040" - "\uD7FF"]| ["\uE000" - "\uFFEF"]>
+|  < #GRAPHIC : [";","$","#","&","*", "+" ,"-", "." ,"/" ,":" ,"<", "=", ">", "?", "@", "\\", "^", "~"] 
+	             |["\u00A1" - "\u00BF"]| [ "\u2010" - "\u303F"] >
 |  < #UC_LETTER: ["_","A"-"Z"] >
 |  < #DIGIT: ["0"-"9"] >
 }
 
 TOKEN : /* LITERALS */
 {  
-  < DECIMAL_LITERAL: ("0'" ~[])|(["0"-"9"] (["0"-"9"])*) >
+  < DECIMAL_LITERAL: ("0'" (<LETTER>|<DIGIT>|<GRAPHIC>))|(["0"-"9"] (["0"-"9"])*) >
 |  < BIN_LITERAL: ["0"-"9"] "b" ["0"-"1"] (["0"-"1"])* >
 |  < OCT_LITERAL: ["0"-"9"] "o" ["0"-"7"] (["0"-"7"])* >
 |  < HEX_LITERAL: ["0"-"9"] "x" ["0"-"9","A"-"F","a"-"f"] (["0"-"9","A"-"F","a"-"f"])* >
@@ -160,27 +165,51 @@ TOKEN : /* LITERALS */
       )*
       "'" 
   >
-
+| < QUOTED_STRING:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            )
+          )
+        | ("''")
+      )*
+      "\"" 
+  >
 
 }
 
-
+void Start()#void:{}
+{
+	Term()
+	< EOF >
+}
 
 void Term()#void:{}
 {
+	
 	LOOKAHEAD(Atom() "(") Compound()
+	|String()
 	|Atom()
 	|Number()	
+	|Nil()
+	|Variable()
+	
 }
 
 void Atom():{}
 {
-	<ATOM_IDENTIFIER>|<QUOTED_ATOM>
+	<ATOM_IDENTIFIER>|<QUOTED_ATOM>|<CUT>
+}
+
+void Nil():{}
+{
+	<LSQB><RSQB>
 }
 
 void Variable():{}
 {
-	<VARIABLE_IDENTIFIER>|<QUOTED_ATOM>
+	<VARIABLE_IDENTIFIER>
 }
 
 
@@ -203,10 +232,15 @@ void Number() #void:{}
 
 void Integer() : {}
 {
-  <DECIMAL_LITERAL>|<BIN_LITERAL>|<OCT_LITERAL>|<HEX_LITERAL>
+  <DECIMAL_LITERAL>|<BIN_LITERAL>/*|<OCT_LITERAL>|<HEX_LITERAL>*/
 }
 
 void Float() :{}
 {
 	<FLOATING_POINT_LITERAL>
+}
+
+void String() :{}
+{
+	<QUOTED_STRING>
 }

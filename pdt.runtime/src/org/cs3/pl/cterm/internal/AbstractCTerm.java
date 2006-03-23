@@ -16,6 +16,9 @@ public abstract class AbstractCTerm implements CTerm {
 	public CTerm getAnotation(String functor) {	
 		return null;
 	}
+	public boolean hasAnnotation(String functor) {	
+		return false;
+	}
 	
 	public AbstractCTerm(ParserCTermFactory factory, SimpleNode node) {
 		this.node=node;

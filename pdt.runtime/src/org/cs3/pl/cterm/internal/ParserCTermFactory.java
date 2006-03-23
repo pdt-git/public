@@ -5,10 +5,13 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CAtom;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CFloat;
 import org.cs3.pl.cterm.CInteger;
+import org.cs3.pl.cterm.CNil;
+import org.cs3.pl.cterm.CString;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.CVariable;
@@ -16,11 +19,14 @@ import org.cs3.pl.cterm.internal.parser.ASTAtom;
 import org.cs3.pl.cterm.internal.parser.ASTCompound;
 import org.cs3.pl.cterm.internal.parser.ASTFloat;
 import org.cs3.pl.cterm.internal.parser.ASTInteger;
+import org.cs3.pl.cterm.internal.parser.ASTNil;
+import org.cs3.pl.cterm.internal.parser.ASTString;
 import org.cs3.pl.cterm.internal.parser.ASTVariable;
 import org.cs3.pl.cterm.internal.parser.CanonicalTermParser;
 import org.cs3.pl.cterm.internal.parser.Node;
 import org.cs3.pl.cterm.internal.parser.ParseException;
 import org.cs3.pl.cterm.internal.parser.SimpleNode;
+import org.cs3.pl.cterm.internal.parser.Token;
 
 public class ParserCTermFactory implements CTermFactory {
 
@@ -41,8 +47,9 @@ public class ParserCTermFactory implements CTermFactory {
 		}
 		
 		try {
-			parser.Term();
-		} catch (ParseException e) {
+			parser.Start();
+			
+		} catch (Throwable e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
@@ -56,6 +63,17 @@ public class ParserCTermFactory implements CTermFactory {
 			super(ParserCTermFactory.this, node);
 		}
 		
+	}
+	
+	private  class _String extends AbstractCTerm implements CString{
+
+		public _String(SimpleNode node) {
+			super(ParserCTermFactory.this, node);
+		}
+		public String getFunctorValue() {
+			String image = getFunctorImage();
+			return Util.unquoteString(image);
+		}
 	}
 	
 	private  class _Variable extends AbstractCTerm implements CVariable{
@@ -80,6 +98,19 @@ public class ParserCTermFactory implements CTermFactory {
 		public double getDoubleValue() {			
 			return Double.parseDouble(getFunctorValue());
 		}
+
+		
+		
+	}
+	
+	private  class _Nil extends AbstractCTerm implements CNil{
+
+		public _Nil(SimpleNode node) {
+			super(ParserCTermFactory.this, node);
+		
+		}
+
+		
 
 		
 		
@@ -116,11 +147,18 @@ public class ParserCTermFactory implements CTermFactory {
 		protected String doGetFunctorImage() {
 			return ((ASTAtom)node.jjtGetChild(0)).getImage();
 		}
+		
+		public int getArity() {
+			return args.length;
+		}
 	}
 	private  CTerm create(Node root) {
 		if(root instanceof ASTAtom){
 			return new _Atom((SimpleNode) root);
 		} 
+		if(root instanceof ASTString){
+			return new _String((SimpleNode) root);
+		}
 		if(root instanceof ASTVariable){
 			return new _Variable((SimpleNode) root);
 		} 
@@ -133,6 +171,9 @@ public class ParserCTermFactory implements CTermFactory {
 		
 		if(root instanceof ASTFloat){
 			return new _Float((SimpleNode) root);
+		}
+		if(root instanceof ASTNil){
+			return new _Nil((SimpleNode) root);
 		}
 		throw new IllegalArgumentException("bad node type: "+root.getClass().getName());
 	}

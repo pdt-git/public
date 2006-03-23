@@ -8,19 +8,25 @@ public interface CanonicalTermParserConstants {
   int RPAREN = 8;
   int COMMA = 9;
   int DOT = 10;
-  int ATOM_IDENTIFIER = 11;
-  int VARIABLE_IDENTIFIER = 12;
-  int LETTER = 13;
-  int LC_LETTER = 14;
-  int UC_LETTER = 15;
-  int DIGIT = 16;
-  int DECIMAL_LITERAL = 17;
-  int BIN_LITERAL = 18;
-  int OCT_LITERAL = 19;
-  int HEX_LITERAL = 20;
-  int FLOATING_POINT_LITERAL = 21;
-  int EXPONENT = 22;
-  int QUOTED_ATOM = 23;
+  int LSQB = 11;
+  int RSQB = 12;
+  int CUT = 13;
+  int ATOM_IDENTIFIER = 14;
+  int VARIABLE_IDENTIFIER = 15;
+  int LETTER = 16;
+  int LC_LETTER = 17;
+  int UNICODE_LETTER = 18;
+  int GRAPHIC = 19;
+  int UC_LETTER = 20;
+  int DIGIT = 21;
+  int DECIMAL_LITERAL = 22;
+  int BIN_LITERAL = 23;
+  int OCT_LITERAL = 24;
+  int HEX_LITERAL = 25;
+  int FLOATING_POINT_LITERAL = 26;
+  int EXPONENT = 27;
+  int QUOTED_ATOM = 28;
+  int QUOTED_STRING = 29;
 
   int DEFAULT = 0;
 
@@ -36,10 +42,15 @@ public interface CanonicalTermParserConstants {
     "\")\"",
     "\",\"",
     "\".\"",
+    "\"[\"",
+    "\"]\"",
+    "\"!\"",
     "<ATOM_IDENTIFIER>",
     "<VARIABLE_IDENTIFIER>",
     "<LETTER>",
     "<LC_LETTER>",
+    "<UNICODE_LETTER>",
+    "<GRAPHIC>",
     "<UC_LETTER>",
     "<DIGIT>",
     "<DECIMAL_LITERAL>",
@@ -49,6 +60,7 @@ public interface CanonicalTermParserConstants {
     "<FLOATING_POINT_LITERAL>",
     "<EXPONENT>",
     "<QUOTED_ATOM>",
+    "<QUOTED_STRING>",
   };
 
 }
