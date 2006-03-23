@@ -66,11 +66,16 @@ public class Util {
 
 	public static String prettyPrint(Map r) {
 		if (r != null) {
+			boolean first=true;
 			StringBuffer sb = new StringBuffer();
 			for (Iterator it = r.keySet().iterator(); it.hasNext();) {
+				if(!first){
+					sb.append(", ");
+				}
 				String key = (String) it.next();
 				String val = (String) r.get(key);
-				sb.append(key + "-->" + val + "\n");
+				sb.append(key + "-->" + val);
+				first=false;
 
 			}
 			return sb.toString();
@@ -83,14 +88,14 @@ public class Util {
 			return "";
 		}
 		StringBuffer sb = new StringBuffer();
-		sb.append("{");
+		//sb.append("{");
 		for (int i = 0; i < a.length; i++) {
 			if (i > 0) {
 				sb.append(", ");
 			}
 			sb.append(a[i].toString());
 		}
-		sb.append("}");
+		//sb.append("}");
 		return sb.toString();
 	}
 
@@ -459,11 +464,15 @@ public class Util {
 	public static String prettyPrint(Collection c) {
 		if (c != null && !c.isEmpty()) {
 			StringBuffer sb = new StringBuffer();
+			boolean first=true;
 			for (Iterator it = c.iterator(); it.hasNext();) {
+				if(!first){
+					sb.append(", ");
+				}
 				Object next = it.next();
 				String elm = next == null ? "<null>" : next.toString();
-				sb.append(elm + "\n");
-
+				sb.append(elm);
+				first=false;
 			}
 			return sb.toString();
 		}
@@ -501,6 +510,27 @@ public class Util {
 		
 		image=image.trim();
 		if(image.length()==0 ||image.charAt(0)!='\''){
+			return image;
+		}
+		image = image.substring(1,image.length()-1);
+		StringBuffer sb = new StringBuffer();
+
+		for (int i = 0; i < image.length(); i++) {
+			char c = image.charAt(i);
+			if (c == '\\') {
+				int len = appendUnescapedChar(image, i, sb);
+				i += len - 1;
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+	
+public static String unquoteString(String image) {
+		
+		image=image.trim();
+		if(image.length()==0 ||image.charAt(0)!='\"'){
 			return image;
 		}
 		image = image.substring(1,image.length()-1);

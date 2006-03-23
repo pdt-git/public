@@ -5,6 +5,7 @@ import java.util.Map;
 
 
 public interface CTerm {
+	boolean hasAnnotation(String string);
 	public CTerm getAnotation(String functor);
 	public String getFunctorImage();
 	public int getArity();

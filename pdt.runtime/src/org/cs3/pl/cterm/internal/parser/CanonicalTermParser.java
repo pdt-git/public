@@ -82,21 +82,34 @@ public static void main(String args[]) throws FileNotFoundException {
                 return  jjtree.rootNode();
         }
 
+  final public void Start() throws ParseException {
+    Term();
+    jj_consume_token(0);
+  }
+
   final public void Term() throws ParseException {
     if (jj_2_1(2147483647)) {
       Compound();
     } else {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case QUOTED_STRING:
+        String();
+        break;
+      case CUT:
       case ATOM_IDENTIFIER:
       case QUOTED_ATOM:
         Atom();
         break;
       case DECIMAL_LITERAL:
       case BIN_LITERAL:
-      case OCT_LITERAL:
-      case HEX_LITERAL:
       case FLOATING_POINT_LITERAL:
         Number();
+        break;
+      case LSQB:
+        Nil();
+        break;
+      case VARIABLE_IDENTIFIER:
+        Variable();
         break;
       default:
         jj_la1[0] = jj_gen;
@@ -120,11 +133,31 @@ public static void main(String args[]) throws FileNotFoundException {
       case QUOTED_ATOM:
         jj_consume_token(QUOTED_ATOM);
         break;
+      case CUT:
+        jj_consume_token(CUT);
+        break;
       default:
         jj_la1[1] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
+    } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
+          }
+    }
+  }
+
+  final public void Nil() throws ParseException {
+            /*@bgen(jjtree) Nil */
+  ASTNil jjtn000 = new ASTNil(this, JJTNIL);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
+    try {
+      jj_consume_token(LSQB);
+      jj_consume_token(RSQB);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -140,18 +173,7 @@ public static void main(String args[]) throws FileNotFoundException {
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
     try {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case VARIABLE_IDENTIFIER:
-        jj_consume_token(VARIABLE_IDENTIFIER);
-        break;
-      case QUOTED_ATOM:
-        jj_consume_token(QUOTED_ATOM);
-        break;
-      default:
-        jj_la1[2] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
+      jj_consume_token(VARIABLE_IDENTIFIER);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
@@ -177,7 +199,7 @@ public static void main(String args[]) throws FileNotFoundException {
           ;
           break;
         default:
-          jj_la1[3] = jj_gen;
+          jj_la1[2] = jj_gen;
           break label_1;
         }
         jj_consume_token(COMMA);
@@ -210,15 +232,13 @@ public static void main(String args[]) throws FileNotFoundException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DECIMAL_LITERAL:
     case BIN_LITERAL:
-    case OCT_LITERAL:
-    case HEX_LITERAL:
       Integer();
       break;
     case FLOATING_POINT_LITERAL:
       Float();
       break;
     default:
-      jj_la1[4] = jj_gen;
+      jj_la1[3] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -238,14 +258,8 @@ public static void main(String args[]) throws FileNotFoundException {
       case BIN_LITERAL:
         jj_consume_token(BIN_LITERAL);
         break;
-      case OCT_LITERAL:
-        jj_consume_token(OCT_LITERAL);
-        break;
-      case HEX_LITERAL:
-        jj_consume_token(HEX_LITERAL);
-        break;
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[4] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -273,6 +287,22 @@ public static void main(String args[]) throws FileNotFoundException {
     }
   }
 
+  final public void String() throws ParseException {
+                /*@bgen(jjtree) String */
+  ASTString jjtn000 = new ASTString(this, JJTSTRING);
+  boolean jjtc000 = true;
+  jjtree.openNodeScope(jjtn000);
+  jjtreeOpenNodeScope(jjtn000);
+    try {
+      jj_consume_token(QUOTED_STRING);
+    } finally {
+          if (jjtc000) {
+            jjtree.closeNodeScope(jjtn000, true);
+            jjtreeCloseNodeScope(jjtn000);
+          }
+    }
+  }
+
   final private boolean jj_2_1(int xla) {
     jj_la = xla; jj_lastpos = jj_scanpos = token;
     try { return !jj_3_1(); }
@@ -280,19 +310,22 @@ public static void main(String args[]) throws FileNotFoundException {
     finally { jj_save(0, xla); }
   }
 
-  final private boolean jj_3_1() {
-    if (jj_3R_2()) return true;
-    if (jj_scan_token(LPAREN)) return true;
-    return false;
-  }
-
   final private boolean jj_3R_2() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_scan_token(11)) {
+    if (jj_scan_token(14)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(23)) return true;
+    if (jj_scan_token(28)) {
+    jj_scanpos = xsp;
+    if (jj_scan_token(13)) return true;
     }
+    }
+    return false;
+  }
+
+  final private boolean jj_3_1() {
+    if (jj_3R_2()) return true;
+    if (jj_scan_token(LPAREN)) return true;
     return false;
   }
 
@@ -305,13 +338,13 @@ public static void main(String args[]) throws FileNotFoundException {
   public boolean lookingAhead = false;
   private boolean jj_semLA;
   private int jj_gen;
-  final private int[] jj_la1 = new int[6];
+  final private int[] jj_la1 = new int[5];
   static private int[] jj_la1_0;
   static {
       jj_la1_0();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0xbe0800,0x800800,0x801000,0x200,0x3e0000,0x1e0000,};
+      jj_la1_0 = new int[] {0x34c0e800,0x10006000,0x200,0x4c00000,0xc00000,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[1];
   private boolean jj_rescan = false;
@@ -326,7 +359,7 @@ public static void main(String args[]) throws FileNotFoundException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -340,7 +373,7 @@ public static void main(String args[]) throws FileNotFoundException {
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -350,7 +383,7 @@ public static void main(String args[]) throws FileNotFoundException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -361,7 +394,7 @@ public static void main(String args[]) throws FileNotFoundException {
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -370,7 +403,7 @@ public static void main(String args[]) throws FileNotFoundException {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -380,7 +413,7 @@ public static void main(String args[]) throws FileNotFoundException {
     jj_ntk = -1;
     jjtree.reset();
     jj_gen = 0;
-    for (int i = 0; i < 6; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -491,15 +524,15 @@ public static void main(String args[]) throws FileNotFoundException {
 
   public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[24];
-    for (int i = 0; i < 24; i++) {
+    boolean[] la1tokens = new boolean[30];
+    for (int i = 0; i < 30; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 6; i++) {
+    for (int i = 0; i < 5; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -508,7 +541,7 @@ public static void main(String args[]) throws FileNotFoundException {
         }
       }
     }
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 30; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
