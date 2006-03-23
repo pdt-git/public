@@ -84,6 +84,11 @@ public class PDTCore {
 	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
 	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
 
+	public static final String PREF_PARSER = "pdt.parser";
+	public static final String JAVACC = "pdt.parser.javacc";
+	public static final String READ_TERM_3 = "pdt.parser.read_term_3";
+
+
 	
 	/**
 	 * @return all open IPrologProjects that operate on the given PrologInterface instance.

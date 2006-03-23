@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -64,6 +65,11 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	protected IProject[] build(int kind, Map args, final IProgressMonitor monitor)
 			throws CoreException {
 		try {
+			String val = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER,PDTCore.JAVACC);
+			if(!PDTCore.READ_TERM_3.equals(val)){
+				Debug.info("skipping MetaDataBuilder, parser framework is set to "+val);
+				return null;
+			}
 			Debug.debug("PrologBuilder.build(...) was triggered");
 			String taskname = "building prolog metadata";
 			;

@@ -23,6 +23,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -33,8 +35,27 @@ import org.eclipse.ui.ide.IDE;
 
 public final class PDTUtils {
 
-	
-		
+	/**
+	 * converts a logical character offset to a physical character offset. E.g.
+	 * prolog uses logical offsets in the sense that it counts any line
+	 * delimiter as a single character, even if it is CRLF, etc.
+	 * 
+	 * Eclipse documents and views however seem to count physical characters,
+	 * i.e. the CRLF line delimiter would count as two characters.
+	 * 
+	 */
+	public static int logicalToPhysicalOffset(String data, int logical) {
+		int physical = 0;
+		int nextPos = data.indexOf("\r\n");
+		while (nextPos >= 0 && nextPos < logical) {
+			physical += (nextPos + 2);
+			logical -= (nextPos + 1);
+			data = data.substring(nextPos + 2);
+			nextPos = data.indexOf("\r\n");
+		}
+		return physical + logical;
+	}
+
 	public static IPath normalize(IPath path) {
 		IPath testLocation = null;
 		try {
@@ -97,7 +118,7 @@ public final class PDTUtils {
 		return results;
 	}
 
-	 /**
+	/**
 	 * @param file
 	 * @return
 	 * @throws IOException
@@ -132,52 +153,53 @@ public final class PDTUtils {
 	 * @throws IOException
 	 */
 	public static IFile findFileForLocation(String path) throws IOException {
-	    
-	    return findFileForLocation(new Path(path));
+
+		return findFileForLocation(new Path(path));
 	}
 
 	public static IFile findFileForLocation(Path path) {
 		IFile file = null;
-	    IFile[] files = findFilesForLocation(path);
-	    if (files == null || files.length == 0) {
-	        throw new IllegalArgumentException("Not in Workspace: " + path);            
-	    }
-	    if (files.length > 1) {
-	        Debug.warning("Mapping into workspace is ambiguous:" + path);
-	        Debug.warning("i will use the first match found: " + files[0]);
-	    }
-	    file = files[0];
-	    if (!file.isAccessible()) {
-	        throw new RuntimeException("The specified file \"" + file
-	                + "\" is not accessible.");
-	    }
-	    return file;		
+		IFile[] files = findFilesForLocation(path);
+		if (files == null || files.length == 0) {
+			throw new IllegalArgumentException("Not in Workspace: " + path);
+		}
+		if (files.length > 1) {
+			Debug.warning("Mapping into workspace is ambiguous:" + path);
+			Debug.warning("i will use the first match found: " + files[0]);
+		}
+		file = files[0];
+		if (!file.isAccessible()) {
+			throw new RuntimeException("The specified file \"" + file
+					+ "\" is not accessible.");
+		}
+		return file;
 	}
 
-	public static PrologInterface getActiveConsolePif(){
-		return PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface();
+	public static PrologInterface getActiveConsolePif() {
+		return PrologConsolePlugin.getDefault().getPrologConsoleService()
+				.getActivePrologConsole().getPrologInterface();
 	}
-	
-	
+
 	public static void showSourceLocation(final SourceLocation loc) {
-		if(Display.getCurrent()!=UIUtils.getDisplay()){
-			UIUtils.getDisplay().asyncExec(new Runnable() {			
+		if (Display.getCurrent() != UIUtils.getDisplay()) {
+
+			UIUtils.getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					showSourceLocation(loc);
-				}			
+				}
 			});
 			return;
 		}
-		
-	    IFile file=null;   
-		IPath fpath= new Path(loc.file);
+
+		IFile file = null;
+		IPath fpath = new Path(loc.file);
 		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
-		
-		//see if it is a workspace path:
-		file = wsRoot.getFile(fpath );
-		
+
+		// see if it is a workspace path:
+		file = wsRoot.getFile(fpath);
+
 		boolean showLine;
-		if(!loc.isWorkspacePath) {
+		if (!loc.isWorkspacePath) {
 			try {
 				file = findFileForLocation(loc.file);
 			} catch (IOException e) {
@@ -185,26 +207,25 @@ public final class PDTUtils {
 				throw new RuntimeException(e);
 			}
 		}
-	    
-	    IEditorPart part;
-		
-	    try {
-	        IWorkbenchPage page=UIUtils.getActivePage();
+
+		IEditorPart part;
+
+		try {
+			IWorkbenchPage page = UIUtils.getActivePage();
 			part = IDE.openEditor(page, file);
-	    } catch (PartInitException e) {
-	        Debug.report(e);
-	        return;
-	    }
-	    if (part instanceof PLEditor) {
-	        PLEditor editor = (PLEditor) part;
-	      
-			if(loc.isRowBased)
+		} catch (PartInitException e) {
+			Debug.report(e);
+			return;
+		}
+		if (part instanceof PLEditor) {
+			PLEditor editor = (PLEditor) part;
+
+			if (loc.isRowBased)
 				editor.gotoLine(loc.line);
 			else
 				editor.gotoOffset(loc.offset);
-	    }
-		
+		}
+
 	}
 
-	
 }

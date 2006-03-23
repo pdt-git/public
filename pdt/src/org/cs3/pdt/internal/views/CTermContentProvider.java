@@ -216,6 +216,8 @@ public class CTermContentProvider implements ITreeContentProvider,
 			Map map = s.queryOnce(query);
 			if (map == null) {
 				data = new Object[0];
+				Debug.warning("no annotation found for file "+plFile+".\n" +
+						"(failed query: \""+query+"\"");
 				return;
 			}
 			CTerm membersTerm = (CTerm) map.get("Members");
