@@ -32,11 +32,13 @@ current_file_annotation(-Filename,-FileAnotations,-Terms)
  - Terms will be unified with a list of annotated terms, each one 
    annotated with arbitrary terms.
 */
-current_file_annotation(FileName,FileAnotations,Terms):-    
-    file_annotation(FileName,_,FileAnotations,Terms).
+current_file_annotation(FileSpec,FileAnotations,Terms):-
+    pdt_file_spec(FileSpec,Abs),    
+    file_annotation(Abs,_,FileAnotations,Terms).
 
-current_file_error(Filename,Error):-
-    file_error(Filename,_,Error).
+current_file_error(FileSpec,Error):-
+    pdt_file_spec(FileSpec,Abs),
+    file_error(Abs,_,Error).
     
 /**
 register_annotator(+FileSpec)
