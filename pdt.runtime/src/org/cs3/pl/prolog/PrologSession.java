@@ -4,18 +4,13 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-public interface PrologSession {
+public interface PrologSession extends Disposable{
 
 	/**
 	 * retrieve the PrologInterface that created this session.	
 	 */
 	public PrologInterface getPrologInterface();
 	
-    /**
-     * Disposes the session. Any further call (except of further dispose calls
-     * will cause the system to throw an IllegalStateException.
-     */
-    public void dispose();
 
     /**
      * begins a query on the Prolog system. If there was an active query
@@ -112,13 +107,5 @@ public interface PrologSession {
 //    public void unconsult(String name)throws PrologException;
 //    public boolean isConsulted(String name)throws PrologException;
 
-    /**
-     * checks if the session has been disposed. This can happen without the
-     * users explicitly calling dispose, if for example restart() is called on
-     * the PrologInterface.
-     * 
-     * @return true if the interface has been disposed, false otherwise
-     */
-    public boolean isDisposed();
 
 }
