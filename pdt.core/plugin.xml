@@ -82,9 +82,9 @@
                class="org.cs3.pdt.core.internal.natures.PrologProjectNature">
          </run>
       </runtime>
-      <builder
-            id="org.cs3.pdt.core.MetaDataBuilder">
-      </builder>
+      <builder id="org.cs3.pdt.core.MetaDataBuilder"/>
+      <builder id="org.cs3.pdt.core.PrologBuilder"/>
+
  </extension>
 <extension
        id="MetaDataBuilder"
@@ -92,6 +92,14 @@
        point="org.eclipse.core.resources.builders">
     <builder hasNature="true">
        <run class="org.cs3.pdt.core.internal.builder.MetaDataBuilder"/>
+    </builder>
+ </extension>
+<extension
+       id="PrologBuilder"
+       name="Prolog Builder"
+       point="org.eclipse.core.resources.builders">
+    <builder hasNature="true">
+       <run class="org.cs3.pdt.core.internal.builder.PrologBuilder"/>
     </builder>
  </extension>
  

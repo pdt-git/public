@@ -70,7 +70,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		try {
 			Debug.debug("configure was called");
 			addBuilder(PDTCore.METADATA_BUILDER_ID);
-			//addBuilder(PDTCore.PROLOG_BUILDER_ID);
+			addBuilder(PDTCore.PROLOG_BUILDER_ID);
 			
 			registerLibraries();
 			registerSubscriptions();
@@ -124,7 +124,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			unregisterSubscriptions();
 			unregisterLibraries();
 			removeBuilder(PDTCore.METADATA_BUILDER_ID);
-			//removeBuilder(PDTCore.PROLOG_BUILDER_ID);
+			removeBuilder(PDTCore.PROLOG_BUILDER_ID);
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -423,8 +423,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
 							PDTCore.METADATA_BUILDER_ID, null, monitor);
 
-					//project.build(IncrementalProjectBuilder.CLEAN_BUILD,
-					//		PDTCore.PROLOG_BUILDER_ID, null, monitor);
+					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
+							PDTCore.PROLOG_BUILDER_ID, null, monitor);
 					
 					Debug.debug("PDTReloadHook.afterInit: done: " + project);
 

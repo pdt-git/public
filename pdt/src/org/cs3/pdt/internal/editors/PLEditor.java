@@ -29,10 +29,15 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.AbstractDocument;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.ITextListener;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
@@ -76,65 +81,11 @@ public class PLEditor extends TextEditor {
 		setKeyBindingScopes(new String[] { PDT.CONTEXT_EDITING_PROLOG_CODE });
 	}
 
+	
+	
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
-		// Thread thread = new Thread () {
-		// public void run() {
-		// IFile file = ((FileEditorInput)getEditorInput()).getFile();
-		// final String filename = file.getFullPath().toString();
-		//    				
-		// PrologCompilerGUIWrapper checker = new PrologCompilerGUIWrapper();
-		// try {
-		// checker.compile(getDocumentProvider().getDocument(getEditorInput()),file);
-		// } catch (CoreException e) {
-		// Debug.report(e);
-		// }
-		// }
-		// };
-		// thread.start();
 
-		// Thread thread = new Thread() {
-		// public void run() {
-		// IFile file = ((FileEditorInput) getEditorInput()).getFile();
-		// IDocument document = getDocumentProvider().getDocument(
-		// getEditorInput());
-		// DocumentLineBreakInfoProvider lineInfo = new
-		// DocumentLineBreakInfoProvider(
-		// document);
-		// MarkerProblemCollector collector = new MarkerProblemCollector(
-		// file, lineInfo);
-		// final String fileName = file.getFullPath().toString();
-		//
-		// ClassicPrologCompiler checker = new ClassicPrologCompiler();
-		// checker.setProblemCollector(collector);
-		// try {
-		// checker.compile(fileName, file.getContents(), lineInfo);
-		// ConsultService meta =
-		// PDTPlugin.getDefault().getConsultService(PDT.CS_METADATA);
-		// checker.saveMetaDataForClauses(meta.getOutputStream(fileName));
-		// Display display = getEditorSite().getPage()
-		// .getWorkbenchWindow().getShell().getDisplay();
-		// display.asyncExec(new Runnable() {
-		// public void run() {
-		// try {
-		//
-		// updateOutline((PLEditor) PDTPlugin.getDefault()
-		// .getActiveEditor(), fileName);
-		// } catch (Exception e) {
-		// Debug.report(e);
-		// }
-		//
-		// }
-		//
-		// });
-		// } catch (CoreException e) {
-		// Debug.report(e);
-		// } catch (IOException e) {
-		// Debug.report(e);
-		// }
-		// }
-		// };
-		// thread.start();
 
 	}
 
@@ -237,7 +188,7 @@ public class PLEditor extends TextEditor {
 
 	private void createPartControl_impl(final Composite parent) {
 		super.createPartControl(parent);
-
+		
 		MenuManager menuMgr = createPopupMenu();
 
 		createInspectionMenu(menuMgr);
@@ -332,8 +283,7 @@ public class PLEditor extends TextEditor {
 				if (fOutlinePage == null) {
 					// fOutlinePage= new PrologOutline(this,
 					// ((IFileEditorInput)getEditorInput()).getFile());
-					fOutlinePage = new PrologOutline(getDocumentProvider(),
-							this);
+					fOutlinePage = new PrologOutline(this);
 					fOutlineSelectionChangedListener.install(fOutlinePage);
 					if (getEditorInput() != null)
 						fOutlinePage.setInput(getEditorInput());
