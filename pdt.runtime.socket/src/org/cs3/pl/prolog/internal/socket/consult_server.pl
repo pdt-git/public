@@ -116,7 +116,8 @@ handle_client_impl(InStream, OutStream):-
 handle_command(_,_,'').
 	
 handle_command(_,OutStream,'PING'):-
-	my_format(OutStream,"PONG~n",[]).
+    thread_self(Alias),
+	my_format(OutStream,"PONG ~a~n",[Alias]).
 	
 handle_command(InStream,OutStream,'CONSULT'):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
@@ -154,17 +155,113 @@ handle_command(InStream,OutStream,'IS_CONSULTED'):-
 	->my_format(OutStream,"YES~n",[])	
 	; my_format(OutStream,"NO~n",[])
 	).
+
+handle_command(InStream,OutStream,'ENTER_BATCH'):-
+	my_format(OutStream,"GO_AHEAD~n",[]),
+	repeat,
+		handle_batch_messages,
+		my_read_command(InStream,Term),
+		handle_batch_command(Term,InStream,OutStream),
+		Term=end_of_batch,!.
+
+my_read_command(InStream,Term):-
+    my_read_term(InStream,Term,[/*double_quotes(string)*/]).
+my_read_goal(InStream,Term,Vars):-
+    read_line_to_codes(InStream,Codes),
+    atom_codes(Atom,Codes),
+    thread_self(Self),
+	format("~a: <<< (goal) >~a~n<",[Self,Atom]),
+    atom_to_term(Atom,Term,Vars).
+
+		
+handle_batch_messages:-
+    repeat,    
+    (	thread_peek_message(Message),handle_batch_message(Message)
+    ->	thread_get_message(Message), fail
+    ;	true
+    ),!.
+handle_batch_message(abort(Id)):-
+	recordz(pif_batch_abort,Id).
+
+handle_batch_command(abort(Id),_,OutStream):-
+	(	recorded(pif_batch_abort,Id,Ref)
+	->	erase(Ref),
+		my_format(OutStream, "ABORT_COMPLETE: ~a~n",[Id])
+	;	my_format(OutStream, "WARNING: ~a unexpected abort marker~n",[Id])
+	).
+handle_batch_command(join(Id),_,OutStream):-
+	my_format(OutStream, "JOIN_COMPLETE: ~a~n",[Id]).
+handle_batch_command(end_of_batch,InStream,OutStream):-
+	forall(recorded(pif_batch_abort,Id),handle_batch_command(abort(Id),InStream,OutStream)),
+	my_format(OutStream, "END_OF_BATCH_COMPLETE~n",[]).
+handle_batch_command(query_once(Id,_),InStream,OutStream):-
+    recorded(pif_batch_abort,_),
+    !,
+    my_read_goal(InStream,_,_),    
+    my_format(OutStream, "SKIPPING_QUERY: ~a~n",[Id]).
+handle_batch_command(query_all(Id,_),InStream,OutStream):-
+    recorded(pif_batch_abort,_),
+    !,
+    my_read_goal(InStream,_,_),
+    my_format(OutStream, "SKIPPING_QUERY: ~a~n",[Id]).
+    
+handle_batch_command(query_once(Id,Mode),InStream,OutStream):-
+    my_format(OutStream, "RESULTS_FOR_QUERY: ~a~n",[Id]),
+    call_save(OutStream,(
+    		my_read_goal(InStream,Goal,Vars),
+    		one_solution(OutStream,Goal,Vars,Mode)
+    		)
+    	).
+handle_batch_command(query_all(Id,Mode),InStream,OutStream):-
+    my_format(OutStream, "RESULTS_FOR_QUERY: ~a~n",[Id]),
+    call_save(OutStream,(
+    		my_read_goal(InStream,Goal,Vars),
+    		solutions_weak_until_cut(OutStream,Goal,Vars,Mode)
+    		)
+    	).
+
+call_save(OutStream, Goal):-
+    catch(Goal,
+	    Error,
+    		report_error(OutStream,Error)
+    	).
+
+solutions_weak_until_cut(OutStream,Term,Vars,Mode):-
+	(	solutions_until_cut(OutStream,Term,Vars,Mode)
+	->	my_format(OutStream, "CUT~n",[])
+	;	solutions_yes_or_no(OutStream)
+	).
+
+
+solutions_until_cut(OutStream,Term,Vars,Mode):-
+	user:Term,
+	nb_setval(hasSolutions,1),
+	print_solution(OutStream,Vars,Mode),
+	goal_was_cut,!.	
+
+goal_was_cut:-
+	handle_batch_messages,
+	recorded(pif_batch_abort,_).
+	
+solutions_yes_or_no(OutStream):-
+	(	nb_current(hasSolutions,1)
+	->	my_format(OutStream,"YES~n",[]),
+		nb_delete(hasSolutions)
+	; 	my_format(OutStream,"NO~n",[])
+	).
+
+	
 	
 handle_command(InStream,OutStream,'QUERY'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
-	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
 	( iterate_solutions(InStream,OutStream,Term,Vars,default)
 	; true
 	).
 	
 handle_command(InStream,OutStream,'QUERY_ALL'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
-	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),		
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
 	(
 		all_solutions(OutStream,Term,Vars,default)
 	;
@@ -173,14 +270,14 @@ handle_command(InStream,OutStream,'QUERY_ALL'):-
 	
 handle_command(InStream,OutStream,'QUERY_CANONICAL'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
-	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
 	( iterate_solutions(InStream,OutStream,Term,Vars,canonical)
 	; true
 	).
 	
 handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL'):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
-	my_read_term(InStream,Term,[variable_names(Vars),double_quotes(string)]),		
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
 	(
 		all_solutions(OutStream,Term,Vars,canonical)
 	;
@@ -193,6 +290,13 @@ handle_command(_,_,'SHUTDOWN'):-
 	
 handle_command(_,_,'BYE'):-	
 	throw(peer_quit).
+
+one_solution(OutStream,Term,Vars,Mode):-
+	( 	user:Term
+	->	consult_server:print_solution(OutStream,Vars,Mode),
+		my_format(OutStream,"YES~n",[])
+	; 	my_format(OutStream,"NO~n",[])
+	).
 	
 	
 all_solutions(OutStream,Term,Vars,Mode):-
@@ -247,15 +351,21 @@ print_values(Out,[Head|Tail],Mode):-
 	print_value(Out,Head,Mode),		
 	print_values(Out,Tail,Mode).
 	
-print_value(Out,Val,Mode):-    	
+print_value(Out,Val,default):-    	
 	( 	is_list(Val)
  	->	write(Out,'{'),
-		(print_values(Out,Val,Mode);true),
+		(print_values(Out,Val,default);true),
 		write(Out, '}')		
 	;	write(Out,'<'),
-		(write_escaped(Out,Val,Mode);true),
+		(write_escaped(Out,Val,default);true),
 		write(Out, '>')
 	).
+
+print_value(Out,Val,canonical):-    	
+		write(Out,'<'),
+		(write_escaped(Out,Val,canonical);true),
+		write(Out, '>').
+
 	
 handle_exception(InStream,OutStream,Error):-
 	var(Error),
@@ -274,7 +384,9 @@ handle_exception(InStream,OutStream,shut_down):-
 		_,
 		shut_down(InStream,OutStream)
 	),
-	thread_signal(main,halt).
+	threads,
+	thread_signal(main,halt),
+	threads.
 	
 handle_exception(InStream,OutStream,peer_reset):-
 	catch(
@@ -464,7 +576,8 @@ write_escaped(Out,Atom,default):-
 term_to_canonical_atom(Term,AAtom):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
-	write_term(Stream,Term,[ignore_ops(true),quoted(true)]),
+%	write_term(Stream,Term,[ignore_ops(true),quoted(true)]),
+	write_canonical(Stream,Term),
 	close(Stream),
 	memory_file_to_atom(Memfile,AAtom),
 	free_memory_file(Memfile).

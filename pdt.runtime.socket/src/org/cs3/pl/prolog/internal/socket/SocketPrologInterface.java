@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.ConsultService;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
@@ -15,9 +16,10 @@ import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface2;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
-public class SocketPrologInterface extends AbstractPrologInterface {
+public class SocketPrologInterface extends AbstractPrologInterface2 {
 
     private class InitSession extends SocketSession {
         public InitSession(SocketClient client,PrologInterface pif) throws IOException {
@@ -129,7 +131,33 @@ public class SocketPrologInterface extends AbstractPrologInterface {
         }
     }
 
-    
+    public AsyncPrologSession getAsyncSession_impl() throws Throwable {
+    	 ReusableSocket socket = null;
+         try {
+             if (useSessionPooling) {
+                 socket = (ReusableSocket) pool
+                         .findInstance(ReusableSocket.class);
+             }
+             if (socket == null) {
+                 Debug.info("creating new ReusableSocket");
+                 socket = new ReusableSocket((String)null, port);
+             }
+             else{
+                 Debug.info("reusing old ReusableSocket");
+             }
+             if(!socket.isConnected()){
+             	Debug.debug("debug");
+             }
+             SocketClient client = new SocketClient(socket);
+             client.setParanoiaEnabled(false);
+             client.setPool(pool);
+             AsyncPrologSession s = new AsyncSocketSession(client,this);
+             
+             return s;
+         } catch (Throwable e) {
+             throw new RuntimeException(e);
+         }
+	}
 
     public void setPort(int port) {
         //if (isDown()) {
@@ -383,6 +411,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public void setHidePlwin(boolean hidePlwin) {
 		this.hidePlwin = hidePlwin;
 	}
+
+	
 
     
 }

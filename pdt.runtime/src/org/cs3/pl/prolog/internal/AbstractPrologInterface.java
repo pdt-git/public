@@ -13,6 +13,7 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.Disposable;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
@@ -112,25 +113,25 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
     }
 
-    private static final int DOWN = 0;
+    protected static final int DOWN = 0;
 
-    private static final int ERROR = -1;
+    protected static final int ERROR = -1;
 
-    private static final int SHUT_DOWN = 3;
+    protected static final int SHUT_DOWN = 3;
 
-    private static final int START_UP = 1;
+    protected static final int START_UP = 1;
 
-    private static final int UP = 2;
+    protected static final int UP = 2;
 
     private HookHelper hookHelper = new HookHelper(this);
 
-    private Collection sessions = new LinkedList();
+    protected Collection sessions = new LinkedList();
 
     private ServerStartAndStopStrategy startAndStopStrategy;
 
     private int state = DOWN;
 
-    private Object stateLock = new Object();
+    protected Object stateLock = new Object();
 
     private HashMap listenerLists = new HashMap();
 
@@ -255,7 +256,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
         }
     }
     
-    private void waitUntilUp() throws IllegalStateException{
+    protected void waitUntilUp() throws IllegalStateException{
         if(getState()!=START_UP&&getState()!=UP){
             throw new IllegalStateException("Not in state START_UP or UP");
         }
@@ -447,7 +448,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             synchronized (sessions) {
                 for (Iterator i = sessions.iterator(); i.hasNext();) {
                     WeakReference element = (WeakReference) i.next();
-                    PrologSession ps = (PrologSession) element.get();
+                    Disposable ps = (Disposable) element.get();
                     if (ps != null && !ps.isDisposed())
                         try {
                             ps.dispose();
@@ -481,7 +482,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             synchronized (sessions) {
                 for (Iterator i = sessions.iterator(); i.hasNext();) {
                     WeakReference element = (WeakReference) i.next();
-                    PrologSession ps = (PrologSession) element.get();
+                    Disposable ps = (Disposable) element.get();
                     if (ps != null && !ps.isDisposed())
                         try {
                             ps.dispose();
