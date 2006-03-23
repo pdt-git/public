@@ -132,8 +132,8 @@ public class Debug {
      * 
      * @param t
      *                    a throwable object
-     */
-
+     */    
+    
     public static void report(Throwable t) {
         if (debugLevel == LEVEL_NONE)
             return;
@@ -146,6 +146,11 @@ public class Debug {
         }
     }
 
+    public static void rethrow(Throwable t){
+    		report(t);
+    		throw new RuntimeException(t);
+    }
+    
     /**
      * redirects debug output to another PrintStream. The parameter stream may
      * not be null, and must not be closed by an external class. Use this method
