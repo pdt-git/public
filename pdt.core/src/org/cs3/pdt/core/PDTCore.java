@@ -23,7 +23,9 @@ public class PDTCore {
 	 */
 	public final static String NATURE_ID = "org.cs3.pdt.core.PDTProjectNature";
 	
-	public static final String BUILDER_ID = "org.cs3.pdt.core.MetaDataBuilder";
+	public static final String METADATA_BUILDER_ID = "org.cs3.pdt.core.MetaDataBuilder";
+	public static final String PROLOG_BUILDER_ID = "org.cs3.pdt.core.PrologBuilder";
+	
 	/**
 	 * The key to which the meta data consult sevice is bound.
 	 */
@@ -81,6 +83,8 @@ public class PDTCore {
 
 	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
 	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
+
+	
 	/**
 	 * @return all open IPrologProjects that operate on the given PrologInterface instance.
 	 * @throws CoreException

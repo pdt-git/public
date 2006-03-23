@@ -2,6 +2,7 @@
 	ensure_annotated/1,
 	register_annotator/1,
 	current_file_annotation/3,
+	current_file_error/2,
 	forget_file_annotation/1
 ]).
 
@@ -13,12 +14,14 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 
 :-dynamic file_annotation/4.
+:-dynamic file_error/3.
 :-dynamic annotator/2.
 
 
 forget_file_annotation(Spec):-
     pdt_file_spec(Spec,FileName),
-    retractall(file_annotation(FileName,_,_,_)).
+    retractall(file_annotation(FileName,_,_,_)),
+    retractall(file_error(FileName,_,_)).
 
 /**
 current_file_annotation(-Filename,-FileAnotations,-Terms)
@@ -31,6 +34,9 @@ current_file_annotation(-Filename,-FileAnotations,-Terms)
 */
 current_file_annotation(FileName,FileAnotations,Terms):-    
     file_annotation(FileName,_,FileAnotations,Terms).
+
+current_file_error(Filename,Error):-
+    file_error(Filename,_,Error).
     
 /**
 register_annotator(+FileSpec)
@@ -96,31 +102,52 @@ ensure_annotated([FileSpec|_]):-
 ensure_annotated([FileSpec|Stack]):-    
     new_memory_file(MemFile),
     pdt_file_spec(FileSpec,Abs),
+    gen_op_module(Abs,OpModule),
+    clear_ops(OpModule),
     retractall(file_annotation(Abs,_,_,_)),
+    retractall(file_error(Abs,_,_)),
     time_file(Abs,Time),
     copy_file_to_memfile(FileSpec,MemFile),
     open_memory_file(MemFile,read,Input),
-    gen_op_module(Abs,OpModule),
-    read_stream_to_wraped_terms([Abs|Stack],OpModule,Input,Terms),
+    read_stream_to_wraped_terms([Abs|Stack],OpModule,Input,Terms,Errors),
     pre_process_file([Abs|Stack],OpModule,Terms,FileAnos),
     post_process_terms([Abs|Stack],OpModule,FileAnos,Terms,OutTerms),
     post_process_file([Abs|Stack],OpModule,OutTerms,FileAnos,OutAnos),
     assert(file_annotation(Abs,Time,OutAnos,OutTerms)),
+    (	Errors\==[]
+    ->	forall(member(Error,Errors),assert(file_error(Abs,Time,Error)))
+    ;	true
+    ),
 	close(Input),
 	free_memory_file(MemFile).
+
+clear_ops(OpModule):-
+    forall(current_op(P,T,OpModule:N),
+    		(	current_op(P,T,user:N)
+    		->	true
+    		;	op(0,T,OpModule:N)
+    		)
+    	).
 	
-read_stream_to_wraped_terms(FileStack,OpModule,In,Terms):-
-    	read_term(In,Term,[
-    		subterm_positions(Positions),
-    		module(OpModule),
-    		double_quotes(string)]),
+read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,Errors):-
+	catch(
+		( read_term(In,Term,[subterm_positions(Positions),module(OpModule),double_quotes(string)]),
+		  Errors=ET
+		),
+		E,
+		Errors=[E|ET]
+	),
     	(	Term==end_of_file
-    	->	Terms=[]
-    	;	Terms=[H|T],    		
-    		wrap_term(Term,Positions,WrapedTerm),   
-    		pre_process_term(FileStack,OpModule,WrapedTerm,H),
-			read_stream_to_wraped_terms(FileStack,OpModule,In,T)
-		).
+    	->	Terms=[],
+    		Errors=[]%Errors and ET should be sharing variables at this point
+    	;	(	nonvar(Term)
+    		->	Terms=[H|T],    		
+	    		wrap_term(Term,Positions,WrapedTerm),   
+    			pre_process_term(FileStack,OpModule,WrapedTerm,H),
+			read_stream_to_wraped_terms(FileStack,OpModule,In,T,ET)
+    		;	read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,ET)
+    		)
+	).
 
 pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
     findall(Anotator,annotator(_,Anotator),Anotators),
