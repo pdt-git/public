@@ -622,7 +622,7 @@ public class ClassicPrologCompiler extends PrologParserTraversal implements Prol
     			ASTClause clause = (ASTClause) iter.next();
     			Clause data = getPrologElementData(clause);
     			writer.write(METADATA+"('"+symbolicFileName+"'," + module 
-    					+","+ data.getLabel()
+    					+","+ data.getName()
     					+","+ data.getArity()
     					+","+ data.isPublic()
     					+","+ data.getPosition()
@@ -630,12 +630,12 @@ public class ClassicPrologCompiler extends PrologParserTraversal implements Prol
     					+","+ data.isDynamic()
     					+","+ data.isMultifile()
     					+").\n");
-    			String comment = clause.getComment(data.getLabel());
+    			String comment = clause.getComment(data.getName());
     			if (comment != null)
     			writer.write(METADATAHELP 
     					+"("
     					+ module
-    					+"," +data.getLabel()
+    					+"," +data.getName()
     					+","+ data.getArity()
     					+","+ comment
     					+").\n");

@@ -1,5 +1,6 @@
 package org.cs3.pl.metadata;
 
+/**@deprecated*/
 public class ClauseData extends PrologElementData implements Clause {
 
 	private static final long serialVersionUID = 1L;

@@ -347,7 +347,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 
 				writer.write(":- user:assert(" + METADATA + "('"
 						+ symbolicFileName + "'," + module + ","
-						+ data.getLabel() + "," + data.getArity() + ","
+						+ data.getName() + "," + data.getArity() + ","
 						+ data.isPublic() + "," + data.getPosition() + ","
 						+ data.getLength() + "," + data.isDynamic() + ","
 						+ data.isMultifile() + ")).\n");
@@ -357,7 +357,7 @@ public class TermBasedPrologCompiler implements PrologCompiler {
 				if (comment != null&&comment.length()>0){
 					comment = "\""+comment.replaceAll("\"","\\\\\"")+"\"";
 					writer.write(":- user:assert(" + METADATAHELP + "("
-							+ module + "," + data.getLabel() + ","
+							+ module + "," + data.getName() + ","
 							+ data.getArity() + "," + comment + ")).\n");
 				}
 			}
