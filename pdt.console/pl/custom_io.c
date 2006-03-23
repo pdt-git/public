@@ -155,10 +155,17 @@ static IOFUNCTIONS Sdelegate_functions =
 
 
 foreign_t pl_cio_create(term_t module_term, term_t args_term, term_t mode_term, term_t stream_term){
-	PL_set_feature("tty_control", PL_BOOL, TRUE); //FIXME: is there no way to do this?
+
+/* The value t is never actualy used. 
+ * But please keep this assignment anyway!
+ * If it is removed, the mycrashoft compiler
+ * chokes and mumbles nonsense.  Any suggestions why this happens?
+ */
+	int	t=PL_set_feature("tty_control", PL_BOOL, TRUE); //FIXME: is there no way to do this?
 	IOSTREAM * stream=0;
 	HANDLE_T * handle=0;
 	char * module_name =0;
+	char * mode_chars = 0;
 	int flags = (
 		SIO_TEXT|
 		SIO_NOCLOSE|
@@ -198,7 +205,7 @@ foreign_t pl_cio_create(term_t module_term, term_t args_term, term_t mode_term, 
 	/*
 	 * determin read/write mode
 	 */
-	char * mode_chars = 0;
+
 	if(!PL_get_atom_chars(mode_term,&mode_chars)){
 		return PL_warning("could not get chars from mode term");	
 	}
