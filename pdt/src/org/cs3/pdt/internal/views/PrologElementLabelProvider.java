@@ -1,7 +1,9 @@
 package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Clause;
+import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -53,11 +55,18 @@ public class PrologElementLabelProvider implements ILabelProvider {
 	public String getLabel(Object o) {
 		if (o instanceof Predicate) {
 			Predicate p = (Predicate) o;
-			return p.getLabel() + "/" + p.getArity();
+			return p.getName() + "/" + p.getArity();
 		} else if (o instanceof Clause) {
 			Clause c = (Clause) o;
-			return c.getLabel() + "/" + c.getArity();
+			return c.getName() + "/" + c.getArity();
+		} else if (o instanceof Directive){
+			Directive d = (Directive) o;
+			return "!-";
+		} else if (o instanceof CTerm){
+			CTerm t = (CTerm) o;
+			return t.getFunctorValue()+"/"+t.getArity();
 		}
+		
 		return o.toString();
 	}
 
