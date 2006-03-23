@@ -57,10 +57,10 @@ public class PrologCompletionProposal implements ICompletionProposal {
 		this.metaInfoProvider=provider;
 		
 		
-			if(data.getLabel().regionMatches(true,0,prefix,0,prefix.length()) ) {
+			if(data.getName().regionMatches(true,0,prefix,0,prefix.length()) ) {
 				
 				postfix = "";
-                int cursorPos = data.getLabel().length();
+                int cursorPos = data.getName().length();
 				if (data.getArity() > 0) {
 					postfix = "()";
 					cursorPos++;
@@ -85,7 +85,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	 */
 	public void apply(IDocument document) {
 		try {
-			document.replace(fReplacementOffset, fReplacementLength, data.getLabel() + postfix);
+			document.replace(fReplacementOffset, fReplacementLength, data.getName() + postfix);
 		} catch (BadLocationException x) {
 			// ignore
 		}
@@ -103,7 +103,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	 */
 	public IContextInformation getContextInformation() {	    
         if (context==null && getHelp().length() > 0) {
-			int predLen = data.getLabel().length();
+			int predLen = data.getName().length();
 			int firstLB = getHelp().indexOf('\n');
 			if(firstLB > predLen) {
 				String params = getHelp().substring(predLen,firstLB);

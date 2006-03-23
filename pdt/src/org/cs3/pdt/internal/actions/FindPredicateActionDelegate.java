@@ -99,7 +99,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		//FIXME: what about alternatives?
 		if(predicates==null||predicates.length==0){
 			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find predicate: " + goal.getLabel()
+					"PDT Plugin", "Can't find predicate: " + goal.getName()
 							+ "/" //$NON-NLS-1$
 							+ goal.getArity()
 							+ ".\nSorry, Code analysis is still work in progress.");
@@ -108,7 +108,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		if(predicates.length>1){
 			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
 					"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
-					+ goal.getLabel()+"/"+ goal.getArity()
+					+ goal.getName()+"/"+ goal.getArity()
 							+ ".\nSorry, Code analysis is still work in progress. " +
 									"For now i will just take you " +
 									"to the first match found.");
@@ -116,13 +116,13 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		Clause[] clauses = mip.findClauses(predicates[0]);
 		if(clauses==null || clauses.length==0){
 			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find clauses for predicate: " + goal.getLabel()
+					"PDT Plugin", "Can't find clauses for predicate: " + goal.getName()
 							+ "/" //$NON-NLS-1$
 							+ goal.getArity()
 							+ ".\nSorry, Code analysis is still work in progress.");
 			return;
 		}
-		PDTUtils.showSourceLocation(clauses[0].getKnownDefinition());
+		PDTUtils.showSourceLocation(clauses[0].getSourceLocation());
 	}
 	
 	

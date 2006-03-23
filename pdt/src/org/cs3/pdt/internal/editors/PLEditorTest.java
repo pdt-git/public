@@ -22,37 +22,37 @@ public class PLEditorTest extends TestCase {
 	public void testGetPrologDataFromOffset() throws BadLocationException {
 		Document document = new Document("  , ahaha(a,b,c).");
 		Goal data = PLEditor.getPrologDataFromOffset(document, 6);
-		assertEquals("ahaha",data.getLabel());
+		assertEquals("ahaha",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document("  , ahah1a(a,b(a),c).");
 		data = PLEditor.getPrologDataFromOffset(document, 6);
-		assertEquals("ahah1a",data.getLabel());
+		assertEquals("ahah1a",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document("  , ahaha(\"asdf\\\"\'\",b(a),c).");
 		data = PLEditor.getPrologDataFromOffset(document, 6);
-		assertEquals("ahaha",data.getLabel());
+		assertEquals("ahaha",data.getName());
 		assertEquals(3,data.getArity());
 	
 		document = new Document("  , ahaha(\"as,df\\\"\'\",b(a),[c,b]).");
 		data = PLEditor.getPrologDataFromOffset(document, 6);
-		assertEquals("ahaha",data.getLabel());
+		assertEquals("ahaha",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document("  , aha_ha(\"as,df\\\"\'\",b(a),[c,b]).");
 		data = PLEditor.getPrologDataFromOffset(document, 6);
-		assertEquals("aha_ha",data.getLabel());
+		assertEquals("aha_ha",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document(" test/12");
 		data = PLEditor.getPrologDataFromOffset(document, 3);
-		assertEquals("test",data.getLabel());
+		assertEquals("test",data.getName());
 		assertEquals(12,data.getArity());
 
 		document = new Document("type: ");
 		data = PLEditor.getPrologDataFromOffset(document, 3);
-		assertEquals("type",data.getLabel());
+		assertEquals("type",data.getName());
 		assertEquals(-1,data.getArity());
 	}
 }

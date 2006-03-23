@@ -96,7 +96,7 @@ public class PrologCompletionProcessor implements IContentAssistProcessor {
 
 		try {
 			IDocument document = viewer.getDocument();
-
+			
 			documentOffset = documentOffset == 0 ? documentOffset
 					: documentOffset - 1;
 			int begin = documentOffset;

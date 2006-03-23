@@ -98,7 +98,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
 				if(p.length>1){
 					UIUtils.displayMessageDialog(UIUtils.getActiveEditor().getEditorSite().getShell(),
 							"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
-							+ data.getLabel()+"/"+ data.getArity()
+							+ data.getName()+"/"+ data.getArity()
 									+ ".\nSorry, Code analysis is still work in progress. " +
 											"For now i will ignore all but the first match.");
 				}
