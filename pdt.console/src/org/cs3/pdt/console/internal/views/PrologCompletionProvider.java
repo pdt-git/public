@@ -1,13 +1,18 @@
 package org.cs3.pdt.console.internal.views;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
+import org.cs3.pl.metadata.PredicateData;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologSession;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	
@@ -53,7 +58,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
         
     }
 	TreeSet completions=null;
-	private IMetaInfoProvider metaInfoProvider;
+	private PrologInterface pif;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -61,7 +66,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	 *      int)
 	 */
 	public CompoletionResult doCompletion(String line, int pos) {
-	    if(metaInfoProvider==null){
+	    if(pif==null){
 	    	return null;
 	    }
 				_Result r = new _Result();
@@ -76,13 +81,13 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		Predicate[] elems = null;
 		
 		try {
-			elems = metaInfoProvider.getPredicatesWithPrefix(null, prefix);
+			elems = getPredicatesWithPrefix(null, prefix,null);
 			r.options = new TreeSet();
 			
 			completions = new TreeSet();
 			for (int i = 0; i < elems.length; i++) {
 				r.options.add(elems[i].getSignature() );
-				completions.add(elems[i].getLabel());
+				completions.add(elems[i].getName());
 			}
 		} catch (NumberFormatException e) {
 			Debug.report(e);
@@ -108,6 +113,35 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		return r;
 	}
 
+	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
+			String filename) throws NumberFormatException, PrologException {
+		// return
+		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
+		PrologSession session = pif.getSession();
+
+		if (module == null)
+			module = "_";
+		if (filename == null)
+			filename = "_";
+		String query = "find_pred('"
+				+ filename + "','" + prefix + "', " + module
+				+ ",Name,Arity,Public)";
+		List results = session.queryAll(query);
+		List list = new ArrayList();
+		// while (result != null) {
+		for (Iterator it = results.iterator(); it.hasNext();) {
+			Map result = (Map) it.next();
+			boolean pub = Boolean.valueOf(result.get("Public").toString())
+					.booleanValue();
+			Predicate data = new PredicateData(module, result.get("Name")
+					.toString(), Integer.parseInt(result.get("Arity")
+					.toString()), pub, false, false);
+			list.add(data);
+
+		}
+		session.dispose();
+		return (Predicate[]) list.toArray(new Predicate[0]);
+	}
 	//propably there is a smarter way of doing this...
 	int getCommonLength() {
 		int len = 1;
@@ -127,10 +161,10 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		}
 		return len -1;
 	}
-	public void setMetaInfoProvider(IMetaInfoProvider metaInfoProvider) {
-		this.metaInfoProvider=metaInfoProvider;		
+	public void setPrologInterface(PrologInterface pif) {
+		this.pif=pif;		
 	}
-	public IMetaInfoProvider getMetaInfoProvider() {
-		return metaInfoProvider;
+	public PrologInterface getPrologInterface() {
+		return pif;
 	}
 }
