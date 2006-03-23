@@ -199,7 +199,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		PrologSession session = pif.getSession();
 		Map table = null;
 		try {
-			table = session.queryOnce("manual_entry(" + data.getLabel() + ","
+			table = session.queryOnce("manual_entry(" + data.getName() + ","
 					+ data.getArity() + ",Info)");
 		} catch (PrologException e) {
 			Debug.report(e);
@@ -222,7 +222,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			
 			String query= "meta_data(File,"
 				+"'"+p.getModule()+"',"
-				+"'"+p.getLabel()+"',"
+				+"'"+p.getName()+"',"
 				+p.getArity()+","
 				+"_,"//wether it is public - we already know this.
 				+"Pos,"
@@ -243,7 +243,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				SourceLocation sl = new SourceLocation((String) m.get("File"),true,false);				
 				sl.offset=Integer.parseInt( (String) m.get("Pos"));
 				sl.endOffset=sl.offset+Integer.parseInt( (String) m.get("Len"));				
-				result[i]=new ClauseData(p.getModule(),p.getLabel(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
+				result[i]=new ClauseData(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
 			}
 			return result;
 		} finally {
@@ -268,7 +268,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		try{
 			String query= "meta_data(File,"
 				+"Module,"
-				+"'"+g.getLabel()+"',"
+				+"'"+g.getName()+"',"
 				+g.getArity()+","
 				+"Pub,"
 				+"_,"
@@ -280,7 +280,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			for (Iterator it = l.iterator(); it.hasNext();) {
 				Map m = (Map) it.next();
 				String module = (String) m.get("Module");
-				String label = g.getLabel();
+				String label = g.getName();
 				int arity = g.getArity();
 				boolean pub = "1".equals(m.get("Pub"));
 				boolean dyn = "1".equals(m.get("Dyn"));

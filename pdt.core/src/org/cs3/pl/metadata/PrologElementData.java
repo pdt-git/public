@@ -7,7 +7,7 @@ import java.util.Comparator;
 /**
  * a tuple describing a logical prolog element like a predicate or a module..
  * 
- * 
+ *@deprecated
  *
  */
 public class PrologElementData implements Serializable, Comparable{
@@ -151,7 +151,7 @@ public class PrologElementData implements Serializable, Comparable{
 
 
 
-	public String getLabel() {
+	public String getName() {
 		return label;
 	}
 		
@@ -164,7 +164,7 @@ public class PrologElementData implements Serializable, Comparable{
 
 	public boolean belongsToSamePredicate(Clause data){
 		if (data.getArity() == arity &&
-			data.getLabel().equals(label))
+			data.getName().equals(label))
 			return true;
 		else
 			return false;
@@ -218,7 +218,7 @@ public boolean isModule() {
 
 
 
-public SourceLocation getKnownDefinition() {
+public SourceLocation getSourceLocation() {
 	return knownDefinition;
 }
 
