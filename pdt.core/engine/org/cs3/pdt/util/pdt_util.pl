@@ -46,7 +46,7 @@ to absolute file names.
 
 */		
 pdt_file_spec(FileSpec, Abs):-
-	absolute_file_name(FileSpec,[extensions(['.pl','.ct','']),access(read)],Abs).
+	absolute_file_name(FileSpec,[file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs).
 
 /*
 pdt_member(?Member,+List):-

@@ -93,10 +93,22 @@ public class MetadataSubscription extends DefaultSubscription implements
 		PrologSession s = pif.getSession();
 		try{
 			PLUtil.configureFileSearchPath(mgr,s,new String[]{PDTCore.ENGINE_ID});
-			Map map = s.queryOnce("use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +
+			Map map = s.queryOnce(
+					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
+					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
+					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +
 					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
 			if(map==null){
-				throw new RuntimeException("could not load metadata engine");
+				throw new RuntimeException("could not load annotator framework");
+			}
+			map=null;
+			map = s.queryOnce(
+					"register_annotator(library('/org/cs3/pdt/annotate/op_annotator'))," +
+					"register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
+					"register_annotator(library('/org/cs3/pdt/annotate/export_annotator'))," +
+					"register_annotator(library('/org/cs3/pdt/annotate/member_annotator'))");
+			if(map==null){
+				throw new RuntimeException("could not load annotator modules");
 			}
 		}finally{
 			if(s!=null){
@@ -155,7 +167,9 @@ public class MetadataSubscription extends DefaultSubscription implements
 			IProject project = getProject();
 			Debug.debug("lets build project " + project);
 			project.build(IncrementalProjectBuilder.FULL_BUILD,
-					PDTCore.BUILDER_ID, null, monitor);
+					PDTCore.METADATA_BUILDER_ID, null, monitor);
+			project.build(IncrementalProjectBuilder.FULL_BUILD,
+					PDTCore.PROLOG_BUILDER_ID, null, monitor);
 			Debug
 					.debug("runBuildJob: done: "
 							+ project);

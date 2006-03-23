@@ -9,9 +9,12 @@ term_pre_annotation_hook(_,OpModule,InTerm,OutTerm):-
     pdt_strip_annotation(InTerm,':-'(op(Precedence,Type,Name)),(TopAnot,ArgAnot)),
     pdt_splice_annotation(':-'(op(Precedence,Type,Name)),([declares_op(op(Precedence,Type,Name))|TopAnot],ArgAnot),OutTerm),
     op(Precedence,Type,OpModule:Name).
-file_pre_annotation_hook(_,_,Terms,InAnos,[declares_ops(Ops)|InAnos]):-
-    collect_ops(Terms,Ops).
-
+file_pre_annotation_hook(_,_,Terms,InAnos,OutAnos):-
+    collect_ops(Terms,Ops),
+    (	Ops==[]
+    ->	OutAnos=InAnos
+    ;	OutAnos=[declares_ops(Ops)|InAnos]
+    ).
 
 collect_ops([],[]).
 collect_ops([H|T],[op(Precedence,Type,Name)|TOps]):-

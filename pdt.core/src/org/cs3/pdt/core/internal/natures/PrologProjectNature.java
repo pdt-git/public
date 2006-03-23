@@ -69,20 +69,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public void configure() throws CoreException {
 		try {
 			Debug.debug("configure was called");
-			IProjectDescription descr = project.getDescription();
-			ICommand builder = descr.newCommand();
-			builder.setBuilderName(PDTCore.BUILDER_ID);
-			ICommand builders[] = descr.getBuildSpec();
-			for (int i = 0; i < builders.length; i++) {
-				if (builders[i].getBuilderName().equals(PDTCore.BUILDER_ID)) {
-					return;
-				}
-			}
-			ICommand newBuilders[] = new ICommand[builders.length + 1];
-			System.arraycopy(builders, 0, newBuilders, 0, builders.length);
-			newBuilders[builders.length] = builder;
-			descr.setBuildSpec(newBuilders);
-			project.setDescription(descr, null);
+			addBuilder(PDTCore.METADATA_BUILDER_ID);
+			//addBuilder(PDTCore.PROLOG_BUILDER_ID);
 			
 			registerLibraries();
 			registerSubscriptions();
@@ -90,6 +78,23 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			Debug.report(t);
 			throw new RuntimeException(t);
 		}
+	}
+
+	private void addBuilder(String builderId) throws CoreException {
+		IProjectDescription descr = project.getDescription();
+		ICommand builder = descr.newCommand();
+		builder.setBuilderName(builderId);
+		ICommand builders[] = descr.getBuildSpec();
+		for (int i = 0; i < builders.length; i++) {
+			if (builders[i].getBuilderName().equals(builderId)) {
+				return;
+			}
+		}
+		ICommand newBuilders[] = new ICommand[builders.length + 1];
+		System.arraycopy(builders, 0, newBuilders, 0, builders.length);
+		newBuilders[builders.length] = builder;
+		descr.setBuildSpec(newBuilders);
+		project.setDescription(descr, null);
 	}
 
 	private void registerLibraries() {
@@ -118,26 +123,31 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		try {
 			unregisterSubscriptions();
 			unregisterLibraries();
-			IProjectDescription descr = project.getProject().getDescription();
-			org.cs3.pl.common.Debug.debug("deconfigure was called");
-			ICommand builders[] = descr.getBuildSpec();
-			int index = -1;
-			for (int i = 0; i < builders.length; i++) {
-				if (builders[i].getBuilderName().equals(PDTCore.BUILDER_ID)) {
-					index = i;
-					break;
-				}
-			}
-			if (index != -1) {
-				ICommand newBuilders[] = new ICommand[builders.length - 1];
-				System.arraycopy(builders, 0, newBuilders, 0, index);
-				System.arraycopy(builders, index + 1, newBuilders, index,
-						builders.length - index - 1);
-				descr.setBuildSpec(newBuilders);
-			}
+			removeBuilder(PDTCore.METADATA_BUILDER_ID);
+			//removeBuilder(PDTCore.PROLOG_BUILDER_ID);
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
+		}
+	}
+
+	private void removeBuilder(String builderId) throws CoreException {
+		IProjectDescription descr = project.getProject().getDescription();
+		org.cs3.pl.common.Debug.debug("deconfigure was called");
+		ICommand builders[] = descr.getBuildSpec();
+		int index = -1;
+		for (int i = 0; i < builders.length; i++) {
+			if (builders[i].getBuilderName().equals(builderId)) {
+				index = i;
+				break;
+			}
+		}
+		if (index != -1) {
+			ICommand newBuilders[] = new ICommand[builders.length - 1];
+			System.arraycopy(builders, 0, newBuilders, 0, index);
+			System.arraycopy(builders, index + 1, newBuilders, index,
+					builders.length - index - 1);
+			descr.setBuildSpec(newBuilders);
 		}
 	}
 
@@ -411,8 +421,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							+ project);
 
 					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
-							PDTCore.BUILDER_ID, null, monitor);
+							PDTCore.METADATA_BUILDER_ID, null, monitor);
 
+					//project.build(IncrementalProjectBuilder.CLEAN_BUILD,
+					//		PDTCore.PROLOG_BUILDER_ID, null, monitor);
+					
 					Debug.debug("PDTReloadHook.afterInit: done: " + project);
 
 				} catch (OperationCanceledException opc) {
