@@ -17,7 +17,7 @@ public class ATermFactoryTest extends TestCase {
 	
 	public void testSingleAnno00() throws Throwable{
 		CTerm term = factory.createCTerm("aterm('.'(anno,[]),hola)");		
-		assertTrue("type is "+term.getClass().getCanonicalName(),term instanceof CAtom);
+		assertTrue("type is "+term.getClass().getName(),term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor value","hola",atom.getFunctorValue());
 		assertEquals("functor image","hola",atom.getFunctorImage());

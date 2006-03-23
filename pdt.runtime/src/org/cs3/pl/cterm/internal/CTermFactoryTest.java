@@ -80,7 +80,7 @@ public class CTermFactoryTest extends TestCase {
 	
 	public void testQuotedStromg01() throws Throwable{
 		CTerm term = factory.createCTerm("\"Ecce, \\\"Corinna\\\" venit.\"");		
-		assertTrue("type is "+term.getClass().getCanonicalName(),term instanceof CString);
+		assertTrue("type is "+term.getClass().getName(),term instanceof CString);
 		CString string= (CString)term;
 		assertEquals("functor image","\"Ecce, \\\"Corinna\\\" venit.\"",string.getFunctorImage());
 		assertEquals("functor value","Ecce, \"Corinna\" venit.",string.getFunctorValue());
