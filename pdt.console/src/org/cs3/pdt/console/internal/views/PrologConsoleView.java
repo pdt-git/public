@@ -696,7 +696,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			viewer.setModel((ConsoleModel) models.get(pif));
 			completionProvider = new PrologCompletionProvider();
 			completionProvider
-					.setMetaInfoProvider(MetaInfoProviderFactory.newInstance().create(pif));
+					.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
 			history = new NewConsoleHistory();
 			viewer.setHistory(history);

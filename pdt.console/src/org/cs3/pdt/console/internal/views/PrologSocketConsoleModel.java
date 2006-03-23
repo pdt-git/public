@@ -14,7 +14,6 @@ import java.util.Vector;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.ConsoleModelEvent;
 import org.cs3.pl.console.ConsoleModelListener;
@@ -27,9 +26,13 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 	private class ConsoleReader implements Runnable {
 
-		private static final int ESCAPE_CHAR = 42;
+		private static final int ESCAPE_CHAR = '*';
 
 		private static final char RAW_MODE_CHAR = 's';
+
+		private static final char COOKED_MODE_CHAR = 'c';
+
+		private static final char NO_MODE_CHAR = 'n';
 
 		private BufferedReader reader;
 
@@ -48,22 +51,39 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 					boolean escaped = false;
 					for (int i = 0; i < count; i++) {
 						if (escaped) {
-							if (buf[i] == RAW_MODE_CHAR) {
-								// report what we have until mode switch:
+							switch(buf[i]){
+							case RAW_MODE_CHAR:
+//								 report what we have until mode switch:
 								ConsoleModelEvent cme = new ConsoleModelEvent(
 										PrologSocketConsoleModel.this, data
 												.toString(), false);
 								fireOutputEvent(cme);
-								// skip optional newline
-								if (i - 1 < count && buf[i + 1] == '\n') {
-									i++;
-								}
 								// clear output buffer
 								data.setLength(0);
+								
+
 								setSingleCharMode(true);
-							} else {
+								break;
+							case COOKED_MODE_CHAR:
+							case NO_MODE_CHAR:
+								//disable single char mode again. should not be neccessary... 
+								setSingleCharMode(false);
+								break;
+							case ESCAPE_CHAR:
 								data.append(buf[i]);
+								break;
+							default:
+								//current default is to echo the escaped char.
+								data.append(buf[i]);
+							break;
 							}
+							
+							// our "protocol" allows an optional newline after the escaped character. 
+							// If its there, we skip it silently.
+							if (i + 1 < count && buf[i + 1] == '\n') {
+								i++;
+							}
+
 							escaped = false;
 						} else {
 							if (buf[i] == ESCAPE_CHAR) {
@@ -74,22 +94,16 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 						}
 					}
 
-					try {
-						/*
-						 * FIXME: UGLY
-						 */
-						Thread.sleep(1);
-					} catch (InterruptedException e) {
-						Debug.report(e);
-						throw new RuntimeException(e);
-					}
-					if (!reader.ready() ||
-					/*
-					 * this is optional: event after eache line; could be
-					 * changed to certain character number
-					 */
-					// data.indexOf("\n") >= 0
-							data.length() >= 500) {
+//					try {
+//						/*
+//						 * FIXME: UGLY
+//						 */
+//						Thread.sleep(1);
+//					} catch (InterruptedException e) {
+//						Debug.report(e);
+//						throw new RuntimeException(e);
+//					}
+					if (!reader.ready() ||	data.length() >= 500) {
 						if (data == null) {
 							throw new IOException("readLine() returned null");
 						}
@@ -98,14 +112,14 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 									PrologSocketConsoleModel.this, data
 											.toString(), false);
 							fireOutputEvent(cme);
-							data = new StringBuffer();
+							data.setLength(0);
 						}
 					} else {
 						Debug.warning("READER NOT READY");
 					}
 					count = reader.read(buf);
 
-				}
+				}//while(count>0)
 
 			} catch (IOException e) {
 				Debug.report(e);
@@ -264,8 +278,10 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	protected void setSingleCharMode(boolean on) {
-		this.singleCharMode = on;
-		fireModeChange(new ConsoleModelEvent(this, on));
+		if(on!=this.singleCharMode){
+			this.singleCharMode = on;		
+			fireModeChange(new ConsoleModelEvent(this, on));
+		}
 	}
 
 	public boolean isSingleCharMode() {
@@ -311,15 +327,18 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 							"false");
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
-				writer.write("use_module(library(single_char_interceptor)).\n"
-						+ "sd_install,"
+//				writer.write("use_module(library(single_char_interceptor)).\n"
+//						+ "sd_install,"
+//						+ "set_stream(current_output,tty(true)),"
+//						+ "set_stream(current_input,tty(true)).\n");
+				writer.write("use_module(library(single_char_interceptor)).\n" +
+						"sci_install.\n"
 						+ "set_stream(current_output,tty(true)),"
 						+ "set_stream(current_input,tty(true)).\n");
-				
 			}
 			else{
-				writer.write("set_stream(current_output,tty(true)),"
-						+ "set_stream(current_input,tty(true)).\n");
+//				writer.write("set_stream(current_output,tty(true)),"
+//						+ "set_stream(current_input,tty(true)).\n");
 			}
 			writer.flush();
 			Debug.debug("Connect complete");
@@ -344,8 +363,8 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		synchronized (this) {
 			try {
 				if (socket != null) {
-					writer.write("sd_uninstall.\n");
-					writer.flush();
+//					writer.write("sd_uninstall.\n");
+//					writer.flush();
 					writer.write("end_of_file.\n");
 					writer.flush();
 					// writer.close();
