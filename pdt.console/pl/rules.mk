@@ -11,7 +11,7 @@
 
 # prefix=C:\Program Files
 #HOME=$(USERPROFILE)
-prefix=l:\work\degenerl
+prefix=z:
 PLBASE=$(prefix)\pl
 PLHOME=$(PLBASE)
 BINDIR=$(PLBASE)\bin
