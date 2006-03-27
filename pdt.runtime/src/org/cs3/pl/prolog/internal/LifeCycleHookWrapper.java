@@ -38,7 +38,13 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 		}		
 		if(hook!=null){
 		    Debug.info("enter onInit() on hook "+id);
-			hook.onInit(pif,initSession);
+		    try{
+		    	hook.onInit(pif,initSession);
+		    }
+		    catch(Throwable t){
+	    			Debug.error("onInit() failed for hook: "+id+", exception trace follows:");
+	    			Debug.report(t);
+		    }
 			Debug.info("exit onInit() on hook "+id);
 		}
 	}
@@ -56,7 +62,13 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 		}		
 		if(hook!=null){
 		    Debug.info("enter afterInit() on hook "+id);
-			hook.afterInit(pif);
+		    try{
+		    	hook.afterInit(pif);
+		    }
+		    catch(Throwable t){
+		    		Debug.error("afterInit() failed for hook: "+id+", exception trace follows:");
+		    		Debug.report(t);
+		    }
 			Debug.info("exit afterInit() on hook "+id);
 		}	
 	}
@@ -74,7 +86,13 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 		}		
 		if(hook!=null){
 		    Debug.info("enter beforeShutdown() on hook "+id);
-			hook.beforeShutdown(pif,session);
+		    try{
+		    		hook.beforeShutdown(pif,session);
+		    }
+		    catch(Throwable t){
+	    			Debug.error("beforeShutdown() failed for hook: "+id+", exception trace follows:");
+	    			Debug.report(t);
+		    }
 			Debug.info("exit beforeShutdown() on hook "+id);
 		}
 	}
