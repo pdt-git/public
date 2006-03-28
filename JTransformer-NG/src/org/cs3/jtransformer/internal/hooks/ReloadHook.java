@@ -6,6 +6,8 @@ import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.pdt.runtime.PLUtil;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
@@ -33,7 +35,6 @@ public class ReloadHook implements LifeCycleHook {
      */
     public void onInit(PrologInterface pif, final PrologSession initSession) {
         try {
-
             JTransformerProject[] jtransformerProjects = JTransformer.getJTransformerProjects(pif);
             for (int i = 0; i < jtransformerProjects.length; i++) {
                 // XXX: ld: i don't like that cast. Any idee?
