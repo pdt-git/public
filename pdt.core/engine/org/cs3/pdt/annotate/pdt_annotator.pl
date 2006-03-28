@@ -33,8 +33,12 @@ current_file_annotation(-Filename,-FileAnotations,-Terms)
    annotated with arbitrary terms.
 */
 current_file_annotation(FileSpec,FileAnotations,Terms):-
+    nonvar(FileSpec),
     pdt_file_spec(FileSpec,Abs),    
     file_annotation(Abs,_,FileAnotations,Terms).
+current_file_annotation(File,FileAnotations,Terms):-
+    var(File),
+    file_annotation(File,_,FileAnotations,Terms).    
 
 current_file_error(FileSpec,Error):-
     pdt_file_spec(FileSpec,Abs),
