@@ -20,21 +20,21 @@
 
 
 :-module(pdt_util_hashtable,[
-	pdt_put/3,
-	pdt_set/3,
-	pdt_get/3,
-	pdt_remove/3,
-	pdt_remove_all/3,
-	pdt_remove_all/2,
-	pdt_clear/1
+	pdt_ht_put/3,
+	pdt_ht_set/3,
+	pdt_ht_get/3,
+	pdt_ht_remove/3,
+	pdt_ht_remove_all/3,
+	pdt_ht_remove_all/2,
+	pdt_ht_clear/1
 ]).
 
 
-pdt_get(HT,Key,Value):-
+pdt_ht_get(HT,Key,Value):-
     ground(Key),
 	hash_key(HT,Key,HashKey),
 	recorded(HashKey,entry(Key,Value)).
-pdt_get(HT,Key,Value):-
+pdt_ht_get(HT,Key,Value):-
     var(Key),
     first_key(HT,First),
     next_entry(First,entry(Key,Value)).
@@ -49,35 +49,35 @@ next_key(HKey,NextKey):-
 	recorded(HKey,chain(_,NextKey)),
 	nonvar(NextKey).
 
-pdt_set(HT,Key,Value):-
-    pdt_remove_all(HT,Key),
-    pdt_put(HT,Key,Value).
+pdt_ht_set(HT,Key,Value):-
+    pdt_ht_remove_all(HT,Key),
+    pdt_ht_put(HT,Key,Value).
 
-pdt_put(HT,Key,Value):-
+pdt_ht_put(HT,Key,Value):-
 	hash_key(HT,Key,HashKey),
 	use_key(HT,HashKey),
 	recordz(HashKey,entry(Key,Value)).
     
   
 
-pdt_remove(HT,Key,Value):-
+pdt_ht_remove(HT,Key,Value):-
     hash_key(HT,Key,HashKey),
     recorded(HashKey,entry(Key,Value),Ref),
     erase(Ref),
 	unuse_key(HT,HashKey).
 
 
-pdt_remove_all(HT,Key,Value):-
+pdt_ht_remove_all(HT,Key,Value):-
     hash_key(HT,Key,HashKey),
     remove_all(HashKey,Key,Value),
     unuse_key(HT,HashKey).
 
-pdt_remove_all(HT,Key):-
+pdt_ht_remove_all(HT,Key):-
     hash_key(HT,Key,HashKey),
     remove_all(HashKey,Key),
     unuse_key(HT,HashKey).
 
-pdt_clear(HT):-
+pdt_ht_clear(HT):-
     first_key(HT,Key),
 	clear_recursive(Key),
 	set_first_key(HT,_),
