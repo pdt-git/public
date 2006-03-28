@@ -111,7 +111,7 @@ ensure_annotated([FileSpec|Stack]):-
     time_file(Abs,Time),
     copy_file_to_memfile(FileSpec,MemFile),
     open_memory_file(MemFile,read,Input),
-    read_stream_to_wraped_terms([Abs|Stack],OpModule,Input,Terms,Errors),
+    read_terms([Abs|Stack],OpModule,Input,Terms,Errors),
     pre_process_file([Abs|Stack],OpModule,Terms,FileAnos),
     post_process_terms([Abs|Stack],OpModule,FileAnos,Terms,OutTerms),
     post_process_file([Abs|Stack],OpModule,OutTerms,FileAnos,OutAnos),
@@ -131,24 +131,58 @@ clear_ops(OpModule):-
     		)
     	).
 	
-read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,Errors):-
-	catch(
-		( read_term(In,Term,[subterm_positions(Positions),module(OpModule),double_quotes(string)]),
-		  Errors=ET
-		),
-		E,
-		Errors=[E|ET]
-	),
-    	(	Term==end_of_file
-    	->	Terms=[],
-    		Errors=[]%Errors and ET should be sharing variables at this point
-    	;	(	nonvar(Term)
-    		->	Terms=[H|T],    		
-	    		wrap_term(Term,Positions,WrapedTerm),   
-    			pre_process_term(FileStack,OpModule,WrapedTerm,H),
-			read_stream_to_wraped_terms(FileStack,OpModule,In,T,ET)
-    		;	read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,ET)
-    		)
+%read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,Errors):-
+%	catch(
+%		( read_term(In,Term,[subterm_positions(Positions),module(OpModule),double_quotes(string)]),
+%		  Errors=ET
+%		),
+%		E,
+%		Errors=[E|ET]
+%	),
+%    	(	Term==end_of_file
+%    	->	Terms=[],
+%    		Errors=[]%Errors and ET should be sharing variables at this point
+%    	;	(	nonvar(Term)
+%    		->	Terms=[H|T],    		
+%	    		wrap_term(Term,Positions,WrapedTerm),   
+%    			pre_process_term(FileStack,OpModule,WrapedTerm,H),
+%			read_stream_to_wraped_terms(FileStack,OpModule,In,T,ET)
+%    		;	read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,ET)
+%    		)
+%	).
+
+
+read_terms(FileStack,OpModule,In,Terms,Errors):-
+    
+    	read_terms_rec(FileStack,OpModule,In,Terms,Errors).
+    	
+read_terms_rec(FileStack,Module,In,Terms,Errors):-
+    Options=[
+		subterm_positions(_),
+		variable_names(_),
+		singletons(_),
+    		module(Module),
+    		double_quotes(string)
+    	],
+    do_read_term(In,Term,Options,Error),
+    do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
+
+
+do_process_term(_,_,_,end_of_file,_,_,[],[]):-!.
+do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
+    nonvar(Error),!,
+    read_terms_rec(FileStack,Module,In,Terms,Errors).
+do_process_term(FileStack,OpModule,In,Term,Options,_,[ProcessedTerm|Terms],Errors):-    
+	member(subterm_positions(Positions),Options),
+	wrap_term(Term,Positions,WrapedTerm),   
+    	pre_process_term(FileStack,OpModule,WrapedTerm,ProcessedTerm),
+    read_terms_rec(FileStack,OpModule,In,Terms,Errors).
+
+do_read_term(In,Term,Options,Error):-
+    catch(
+		read_term(In,Term,Options),
+		Error,
+		true
 	).
 
 pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
@@ -224,8 +258,10 @@ wrap_term(Term,Positions,aterm([position(From-To)|_],SubTerm)):-
     Term=..[Functor|Args],
     top_position(Positions, From,To),
     sub_positions(Positions,SubPositions),
-    wrap_args(Args,SubPositions,WrapedArgs),
-    SubTerm=..[Functor|WrapedArgs].
+    functor(Term,Functor,Arity),
+    functor(SubTerm,Functor,Arity),
+    SubTerm=..[Functor|WrapedArgs],
+    wrap_args(Args,SubPositions,WrapedArgs).
 wrap_term(Term,Positions,aterm([position(From-To)|_],Term)):-
     \+ compound(Term),
     top_position(Positions, From,To),!.
