@@ -1,6 +1,8 @@
 % Author: Tobias
 % Date: 06.02.2003
 
+:- use_module('library(abba)').
+
 :- dynamic errorhandling/0.
 :- dynamic halt_on_error/0.
 

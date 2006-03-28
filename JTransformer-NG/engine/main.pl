@@ -51,6 +51,7 @@ debugme.
  
 % Libraries allgemeiner Art (nicht JT-spezifisch) -------------------------- :
 
+:- ['abba'].
 :- ['error_handling'].  % dependent on JavaAST, to be generalized (gk&tr, TODO)
 %:- ['test/main'].                 % --> general library for PDT (gk&tr)
 %:- ['compatiblitySWI'].           % --> general library for PDT (gk&tr)
