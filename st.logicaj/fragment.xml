@@ -7,5 +7,12 @@
          point="org.cs3.pdt.runtime.bootstrapContribution">
       <contribution path="pl/main.stl.pl"/>
    </extension>
+   <extension
+         point="org.cs3.pdt.runtime.prologLibrary">
+      <library
+            alias="library"
+            id="org.cs3.logicaj.astspec"
+            path="pl"/>
+   </extension>
 
 </fragment>
