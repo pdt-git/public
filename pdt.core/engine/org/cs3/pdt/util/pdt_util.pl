@@ -2,7 +2,9 @@
 	pdt_call_cleanup/2,
 	pdt_maybe/1,
 	pdt_file_spec/2,
-	pdt_member/2
+	pdt_member/2,
+	pdt_chop_before/3,
+	pdt_chop_after/3
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
@@ -62,3 +64,26 @@ pdt_member(M,[M|_]).
 pdt_member(M,[_|T]):-
     pdt_member(M,T).
     
+    
+% pdt_chop_before(+Elm,+Elms,+Suffix)
+
+% Elms should be an orderd list.
+% Suffix will unified with the first suffix of Elms
+% whos elements are equal or greater than Elm.
+pdt_chop_before(Elm,[Elm|Elms],[Elm|Elms]):-
+	!.
+pdt_chop_before(Elm,[Head|NextElms],Elms):-
+    Head@<Elm,!,
+    pdt_chop_before(Elm,NextElms,Elms).
+pdt_chop_before(_,Elms,Elms).
+
+% pdt_chop_after(+Elm,+Elms,+Suffix)
+
+% Elms should be an orderd list.
+% Suffix will unified with the first suffix of Elms
+% whos elements are strictly greater than Elm.
+pdt_chop_after(Elm,[Head|NextElms],Elms):-
+    Head@=<Elm,!,
+    pdt_chop_after(Elm,NextElms,Elms).
+pdt_chop_after(_,Elms,Elms).
+        

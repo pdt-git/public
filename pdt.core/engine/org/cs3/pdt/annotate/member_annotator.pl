@@ -2,6 +2,7 @@
 
 :- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 
 %we require that the export_annotator is also registered
@@ -48,32 +49,41 @@ file_post_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions)|OutAnnos]):-
     collect_properties(Properties,Terms,InAnnos,OutAnnos).
 
 collect_properties([],_,In,In).
-collect_properties([H|T],Terms,In,[Prop|Tmp]):-
-    collect_properties(T,Terms,In,Tmp),
-    collect_property(H,Terms,Sigs),
-    Prop=..[H,Sigs].
+collect_properties([Property|Properties],Terms,In,[PropTerm|PropTerms]):-
+    collect_property(Property,Terms,Sigs),
+    PropTerm=..[Property,Sigs],
+    collect_properties(Properties,Terms,In,PropTerms).
     
-collect_property(_,[],[]).
-collect_property(Property,[TermH|TermT],Sigs):-    
-    collect_property(Property,TermT,SigsT),
-    pdt_strip_annotation(TermH,_,(TopAn,_)),
-    PropTerm=..[Property,SigsH],
-    (	pdt_member(PropTerm,TopAn)    	
-    ->	append(SigsT,SigsH,Appended),
-    	list_to_set(Appended,Sigs)
-    ;	Sigs=SigsT
-    ).
+collect_property(_,[],Sigs,Sigs).
+collect_property(Property,[Term|Terms],InSigs,OutSigs):-    
+    pdt_top_annotation(Term,TopAn),
+    collect_property_X(Property,TopAn,MySigs),
+    merge_set(InSigs,MySigs,NextSigs),  
+    collect_property(Property,Terms,NextSigs,OutSigs).
 
-collect_definitions([],[]).    
-collect_definitions([TermH|TermT],Definitions):-
-    collect_definitions(TermT,DefinitionT),
-    pdt_strip_annotation(TermH,_,(TopAn,_)),
-    (	( pdt_member(clause_of(DefinitionH),TopAn),
-    	  \+ memberchk(DefinitionH,DefinitionT)
-    	)
-    ->	Definitions=[DefinitionH|DefinitionT]
-    ;	Definitions=DefinitionT
-    ).
+collect_property_X(Property,TopAn,OutSigs):-
+    PropTerm=..[Property,Sigs],
+    	pdt_member(PropTerm,TopAn),
+    	!,
+    sort(Sigs,OutSigs).
+collect_property_X(_,_,[]).
+
+collect_definitions(Terms,Definitions):-
+    pdt_rbtree_new(Tree0),
+    collect_definitions(Terms,Tree0,Tree),
+    findall(A,pdt_rbtree_next('',A,_,Tree),Definitions).
+    
+
+collect_definitions([],Tree,Tree).   
+collect_definitions([Term|Terms],InTree,OutTree):-
+    pdt_top_annotation(Term,TopAn),
+    pdt_member(clause_of(Definition),TopAn),
+    !,
+    pdt_rbtree_insert(InTree,Definition,Definition,NextTree),
+	collect_definitions(Terms,NextTree,OutTree).
+collect_definitions([Term|Terms],InTree,OutTree):-
+	collect_definitions(Terms,InTree,OutTree).
+
     
 module_definition(FileAnos,Module,Exports):-
 	pdt_member(defines_module(Module),FileAnos),

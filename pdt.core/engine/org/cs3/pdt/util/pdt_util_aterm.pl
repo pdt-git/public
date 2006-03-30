@@ -1,7 +1,10 @@
 :- module(pdt_util_aterm,[
 	pdt_strip_annotation/3,
-	pdt_splice_annotation/3
+	pdt_splice_annotation/3,
+	pdt_top_annotation/2
 ]).
+
+pdt_top_annotation(aterm(A,_),A).
 
 pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
     nonvar(AnotatedTerm),check_aterm(AnotatedTerm),
