@@ -25,24 +25,45 @@ public class Factory extends PrologInterfaceFactory {
 				new SimpleOption(SocketPrologInterface.EXECUTABLE,
 						"SWI-Prolog executable", "eg. xpce or /usr/bin/xpce",
 						SimpleOption.FILE, guessExecutableName()),
-//				new SimpleOption(
-//						SocketPrologInterface.ENGINE_DIR,
-//						"PIF engine directory",
-//						"There are a couple of prolog files that need to be temporarily" +
-//						"stored somewhere during bootstrapping  of the prolog interface." +
-//						"Any directory to which you have write permissions will be fine.",
-//						SimpleOption.DIR, null) {
-//					public String getDefault() {
-//						File f = 
-//							getResourceLocator().resolve("");
-//						return Util.prologFileName(f);
-//					}
-//				},
+				// new SimpleOption(
+				// SocketPrologInterface.ENGINE_DIR,
+				// "PIF engine directory",
+				// "There are a couple of prolog files that need to be
+				// temporarily" +
+				// "stored somewhere during bootstrapping of the prolog
+				// interface." +
+				// "Any directory to which you have write permissions will be
+				// fine.",
+				// SimpleOption.DIR, null) {
+				// public String getDefault() {
+				// File f =
+				// getResourceLocator().resolve("");
+				// return Util.prologFileName(f);
+				// }
+				// },
 				new SimpleOption(
 						SocketPrologInterface.STANDALONE,
 						"stand-alone server",
 						"If true, the PIF will not try to start and stop its own server process.",
-						SimpleOption.FLAG, guessStandAlone()),
+						SimpleOption.FLAG, guessStandAlone()) {
+					public boolean isVisible() {
+						return false;
+					}
+				},
+				new SimpleOption(SocketPrologInterface.HOST, "Server host",
+						"The host the PIF server is listening on",
+						SimpleOption.STRING, null) {
+					public boolean isVisible() {
+						return false;
+					}
+				},
+				new SimpleOption(SocketPrologInterface.PORT, "Server port",
+						"The port the PIF server is listening on",
+						SimpleOption.NUMBER, "9944") {
+					public boolean isVisible() {
+						return false;
+					}
+				},
 				new SimpleOption(
 						SocketPrologInterface.TIMEOUT,
 						"Connect Timeout",
@@ -54,11 +75,11 @@ public class Factory extends PrologInterfaceFactory {
 						"If true, the PIF will try to pool and reuse disposed sessions to reduce connection overhead.",
 						SimpleOption.FLAG, guessUsePool()),
 				new SimpleOption(
-								SocketPrologInterface.HIDE_PLWIN,
-								"Hide plwin (windows only)",
-								"Usefull for windows users who are tired of plwin windows cluttering their system tray." +
-								"\n Note: this only works with the plwin executable.",
-								SimpleOption.FLAG, "true")};
+						SocketPrologInterface.HIDE_PLWIN,
+						"Hide plwin (windows only)",
+						"Usefull for windows users who are tired of plwin windows cluttering their system tray."
+								+ "\n Note: this only works with the plwin executable.",
+						SimpleOption.FLAG, "true") };
 	}
 
 	/*

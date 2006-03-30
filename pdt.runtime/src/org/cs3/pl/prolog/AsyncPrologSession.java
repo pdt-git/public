@@ -97,4 +97,9 @@ public interface AsyncPrologSession extends OptionProvider,Disposable{
 	 * @see dispose()
 	 */
 	public boolean isDisposed();
+	
+	/**
+	 * retrieve the thread alias of the processor.
+	 */
+	public String getProcessorThreadAlias();
 }

@@ -232,7 +232,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
-				l.goalHasSolutionException(e);
+				l.goalHasSolution(e);
 			}
 		}
 	}
@@ -518,7 +518,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		int id = storeTicket(ticket);
 		PrologSession session = pif.getSession();
 		try {
-			session.queryOnce("thread_send_message('"+client.getProcessorThread()+"', abort("+id+"))");
+			session.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
 			synchronized (ticket) {
 				if(!disposing){
 					client.writeln("abort("+id+").");
@@ -601,6 +601,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		} else {
 			throw new IllegalArgumentException("unkown option id: " + id);
 		}
+	}
+
+	public String getProcessorThreadAlias() {
+		
+		return client.getProcessorThread();
 	}
 
 	
