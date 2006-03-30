@@ -106,8 +106,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"register_annotator(library('/org/cs3/pdt/annotate/op_annotator'))," +
 					"register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
 					"register_annotator(library('/org/cs3/pdt/annotate/export_annotator'))," +
-					"register_annotator(library('/org/cs3/pdt/annotate/member_annotator'))," +
-					"register_annotator(library('/org/cs3/pdt/index/pdt_index'))");
+					"register_annotator(library('/org/cs3/pdt/annotate/member_annotator'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator modules");
 			}
