@@ -21,7 +21,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
-import sun.rmi.runtime.GetThreadPoolAction;
+
 
 /**
  */

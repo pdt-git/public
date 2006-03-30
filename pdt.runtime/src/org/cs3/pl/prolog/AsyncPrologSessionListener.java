@@ -12,7 +12,7 @@ public interface AsyncPrologSessionListener {
 
 	void goalRaisedException(AsyncPrologSessionEvent e);
 
-	void goalHasSolutionException(AsyncPrologSessionEvent e);
+	void goalHasSolution(AsyncPrologSessionEvent e);
 
 	void goalSkipped(AsyncPrologSessionEvent e);
 

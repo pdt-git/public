@@ -102,7 +102,7 @@ public class AsyncSocketSessionTest extends TestCase {
 			notifyAll();
 		}
 
-		public synchronized void goalHasSolutionException(AsyncPrologSessionEvent e) {
+		public synchronized void goalHasSolution(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalHasSolution",e));
 			notifyAll();
 		}

@@ -23,7 +23,7 @@ public class DefaultAsyncPrologSessionListener implements
 		;
 	}
 
-	public void goalHasSolutionException(AsyncPrologSessionEvent e) {
+	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		;
 	}
 

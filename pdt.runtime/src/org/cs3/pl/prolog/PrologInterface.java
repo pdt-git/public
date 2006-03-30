@@ -81,7 +81,7 @@ public interface PrologInterface {
      *                    implementation.
      * @param l
      *                    the listener to register.
-     * 
+     * @deprecated 
      */
     public void addPrologInterfaceListener(String subject,
             PrologInterfaceListener l);
@@ -91,6 +91,7 @@ public interface PrologInterface {
      * 
      * @param subject
      * @param l
+     * @deprecated 
      */
     public void removePrologInterfaceListener(String subject,
             PrologInterfaceListener l);

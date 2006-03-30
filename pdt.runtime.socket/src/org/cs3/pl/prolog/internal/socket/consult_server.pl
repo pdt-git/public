@@ -176,9 +176,11 @@ my_read_goal(InStream,Term,Vars):-
 		
 handle_batch_messages:-
     repeat,    
-    (	thread_peek_message(Message),handle_batch_message(Message)
-    ->	thread_get_message(Message), fail
-    ;	true
+    (	thread_peek_message(batch_message(Message)),
+    	writeln(found_batch_message_in_queue(Message)),
+    	handle_batch_message(Message)
+    ->	thread_get_message(batch_message(Message)), fail
+    ;	writeln(no_more_messages_in_queue),true
     ),!.
 handle_batch_message(abort(Id)):-
 	recordz(pif_batch_abort,Id).

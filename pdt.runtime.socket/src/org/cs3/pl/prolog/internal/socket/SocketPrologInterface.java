@@ -76,8 +76,13 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     public final static String TIMEOUT = "pif.timeout";
 
 	public static final String HIDE_PLWIN = "pif.hide_plwin";
+
+	public static final String PORT = "pif.port";
+	public static final String HOST = "pif.host";
     
 
+	private String host;
+	
     private String engineDir;
 
     private String executable;
@@ -166,7 +171,9 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 //            throw new IllegalStateException("Cannot change port while in use.");
 //        }
     }
-
+    private void setHost(String value) {
+        this.port = port;		
+	}
     /**
      * @param standAloneServer
      *                    The standAloneServer to set.
@@ -206,12 +213,18 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
             this.hidePlwin=Boolean.valueOf(value).booleanValue();
         } else if (USE_POOL.equals(opt)) {
             setUseSessionPooling(Boolean.valueOf(value).booleanValue());
+        } else if (HOST.equals(opt)) {
+            setHost(value);
+        } else if (PORT.equals(opt)) {
+            setPort(Integer.parseInt(value));
         } else {
             throw new IllegalArgumentException("option not supported: " + opt);
         }
     }
 
-    /*
+    
+
+	/*
      * (non-Javadoc)
      * 
      * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
@@ -233,6 +246,10 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
             return "" + hidePlwin;
         } else if (TIMEOUT.equals(opt)) {
             return "" + timeout;
+        } else if (HOST.equals(opt)) {
+            return host;
+        } else if (PORT.equals(opt)) {
+            return "" + port;
         } else {
             throw new IllegalArgumentException("option not supported: " + opt);
         }
