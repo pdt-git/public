@@ -34,5 +34,5 @@ property_name_value(Prop,Name,Value):-
     Prop=..[Name,Value].
 property_name_value(Prop,Name,Value):-
 	Prop=..[Name,Args],
-	value=..[array,Args].    
+	Value=..[array,Args].    
 	

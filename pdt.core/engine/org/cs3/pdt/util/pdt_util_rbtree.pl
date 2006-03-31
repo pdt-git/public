@@ -1,17 +1,29 @@
 /*
 
-i have stolen this code from a library contained in
-the Yap Prolog system. 
+I have "borrowed" this code from a library contained in
+the Yap Prolog system. Many thanks to the original author, Vitor Santos Costa, for making
+his work available to the public.
 
+The YAP Prolog implementation is actualy quiet interesting. Have a look:
 http://www.ncc.up.pt/~vsc/Yap/
 
-The only thing i have added is a set of predicates for ordered iteration of 
-nodes starting from a given key value. Besides i have changed the predicate names to fit into
+Changes i made to the original file:
+- I have added is a set of predicates for ordered iteration of 
+nodes starting from a given key value. 
+- I have changed the predicate names to fit into
 the pdt naming scheme.
+- I have changed the file and module name.
 
-Many thanks to the original author, this is realy a nice peace of work.
+The original file was released under the terms of the 
 
---lu
+Perl Artistic License 
+http://www.perl.com/pub/a/language/misc/Artistic.html
+
+I see no reason not to redistribute it under the same terms.
+
+The original copyright notice follows below. 
+
+Lukas Degener, 2006-03-31
 */
 
 /* 
@@ -41,25 +53,7 @@ pdt_rbtree_new(black([],[],[],[])).
 pdt_rbtree_new(K,V,black(Nil,K,V,Nil)) :-
 	Nil = black([],[],[],[]).
 	
-%
-%black(
-%	black(
-%		black([], [], [], []), 
-%		a, 1, 
-%		black([], [], [], [])
-%	), 
-%	a, 1, 
-%	black(
-%		black([], [], [], []), 
-%		b, 2, 
-%		red(
-%			black([], [], [], []), 
-%			c, 3, 
-%			black([], [], [], [])
-%		)
-%	)
-%)
-	
+
 	
 pdt_rbtree_next(_, _, _, black([],_,_,[])) :- 
 	!, 

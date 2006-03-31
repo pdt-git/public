@@ -50,7 +50,7 @@ file_post_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions)|OutAnnos]):-
 
 collect_properties([],_,In,In).
 collect_properties([Property|Properties],Terms,In,[PropTerm|PropTerms]):-
-    collect_property(Property,Terms,Sigs),
+    collect_property(Property,Terms,[],Sigs),
     PropTerm=..[Property,Sigs],
     collect_properties(Properties,Terms,In,PropTerms).
     
@@ -81,7 +81,7 @@ collect_definitions([Term|Terms],InTree,OutTree):-
     !,
     pdt_rbtree_insert(InTree,Definition,Definition,NextTree),
 	collect_definitions(Terms,NextTree,OutTree).
-collect_definitions([Term|Terms],InTree,OutTree):-
+collect_definitions([_|Terms],InTree,OutTree):-
 	collect_definitions(Terms,InTree,OutTree).
 
     
