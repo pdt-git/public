@@ -6,7 +6,7 @@
 
 %this module can be used as an annotator to updates the clause index according to the clauses defined (or not defined) in
 %the parsed file. It can also be used stand alone, provided that the file to be indexed has already been annotated.
-%The index table id used by the indexer is 'clause_definitions'.
+%The index table id used by the indexer is 'predicate_definitions'.
 
 
 
@@ -17,7 +17,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 
 %This module registers itself as a property factory for handles of type 'predicate_definition'. See pdt_handle.
-:- pdt_register_property_factory(predicate_definition,clause_indexer).
+:- pdt_add_property_factory(predicate_definition,clause_indexer).
 
 get_property(handle(id(File,Module,Name,Arity),predicate_definition,_),clauses,Value):-
     current_file_annotation(File,_,Terms),
@@ -58,9 +58,9 @@ update_index(File,Annos,_,_):-
 	get_time(IxTime),
 	clear_index(File,Annos),
 	pdt_ht_set(index_times,File,IxTime),	
-	pdt_index_load(clause_definitions,IX),
-	index_clauses(File,Annos,Definitions,IX,NewIX),
-	pdt_index_store(clause_definitions,NewIX).
+	pdt_index_load(predicate_definitions,IX),
+	index_clauses(File,Annos,IX,NewIX),
+	pdt_index_store(predicate_definitions,NewIX).
 	
 clear_index(File,Annos):-
 	pdt_ht_remove_all(index_times,File,_),
@@ -70,29 +70,54 @@ clear_index(File,Annos):-
 	pdt_index_store(clause_definitions,NewIX).
 
 
-% clause_definition_index_entry(Module:Name/Arity,File,Key,Value)
-clause_definition_index_entry(Module:Name/Arity,File,Name/Arity,ix_entry(Module,File)).
 	
 
 index_clauses(File,Annos,IX,NewIX):-
-    	member(defines(Clauses),Annos),
+    	member(defines(Defs),Annos),
    	member(defines_multifile(MultifileDefs),Annos),
    	member(defines_dynamic(DynamicDefs),Annos),
    	member(defines_module_transparent(TransparentDefs),Annos),
    	member(exports(Exports),Annos),
-	index_clauses_X(Clauses,DynamicDefs0,MultifileDefs0,TransparentDefs0,[],
-	                        DynamicDefs, MultifileDefs, TransparentDefs ,Props),
+	index_clauses(IX,File,Defs,DynamicDefs,MultifileDefs,TransparentDefs,Exports,NewIX).
 	
-    pdt_index_put(IX,Key,Value,NextIX),
-    !,
-    index_clauses(File,Annos,Definitions,NextIX,NewIX).
 
+index_clauses(IX,_,[],_,_,_,_,IX).
+index_clauses(IX,File,[Def|Defs],DynamicDefs,MultifileDefs,TransparentDefs,Exports,OutIX):-
+    index_clause(IX,File,Def,DynamicDefs,MultifileDefs,TransparentDefs,Exports,
+	                      NextDynamicDefs,NextMultifileDefs,NextTransparentDefs,NextExports,NextIX),
+	index_clauses(NextIX,File,Defs,NextDynamicDefs,NextMultifileDefs,NextTransparentDefs,NextExports,OutIX).
+
+
+index_clause(IX,File,Def,DynamicDefs,MultifileDefs,TransparentDefs,Exports,
+	                 NextDynamicDefs,NextMultifileDefs,NextTransparentDefs,NextExports,NextIX):-
+	M:N/A=Def,
+	Props0=[file(File),module(M),name(N),arity(A)],
+	matcher(Def,DynamicDefs,dynamic(true),Props0,Props1,NextDynamicDefs),
+	matcher(Def,MultifileDefs,multifile(true),Props1,Props2,NextMultifileDefs),
+	matcher(Def,TransparentDefs,module_transparent(true),Props2,Props3,NextTransparentDefs),	
+	matcher(N/A,Exports,exported(true),Props3,Props4,NextExports),	
+	index_clause(IX,File,Def,Props4,NextIX).
+
+index_clause(IX,File,Def,Props,NextIX):-
+    clause_definition_index_entry(Def,File,Props,Key,Value),
+    pdt_index_put(IX,Key,Value,NextIX).
 
 unindex_clauses(_,[],IX,IX).
 unindex_clauses(File,[Definition|Definitions],IX,NewIX):-
-    clause_definition_index_entry(Definition,File,Key,Value),    
+    clause_definition_index_entry(Definition,File,_,Key,Value),    
     pdt_index_remove(IX,Key,Value,NextIX),
-    index_clauses(File,Definitions,NextIX,NewIX).
+    unindex_clauses(File,Definitions,NextIX,NewIX).
+
+% clause_definition_index_entry(+Signature,
+%								+File
+%                               +Props,
+%                               -Key,
+%                               -Value)
+clause_definition_index_entry(Module:Name/Arity,
+                              File,
+                              Props,
+                              Name,
+                              handle(id(File,Module:Name/Arity), predicate_definition,Props)).
 	    
 
 time_index(File,IxTime):-
