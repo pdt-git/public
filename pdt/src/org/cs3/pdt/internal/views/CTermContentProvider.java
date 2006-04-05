@@ -175,6 +175,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		if(file!=null){
 			String plFile = Util.prologFileName(file.getLocation().toFile());
 			getPrologProject().getMetaDataEventDispatcher().removePrologInterfaceListener("file_annotation('"+plFile+"')", this);
+			
 		}
 		this.file = file;
 		if(file!=null){
@@ -341,5 +342,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 		viewer.refresh();
 		
 	}
+
+
+
+	
 
 }

@@ -52,4 +52,6 @@ public interface PrologInterfaceListener extends EventListener{
      * @param e
      */
     void update(PrologInterfaceEvent e);
+
+	
 }

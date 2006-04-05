@@ -39,11 +39,132 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/* NOTE: This file contains third-party code!
+
+   Most of this file was borrowed from the swi-prolog library 
+   prolog_server. Many thanks to the original authors for making their 
+   work available to the public. 
+   
+   I changed the following things:
+   1) added a way to gracefully stop the console server accept loop
+   2) changed the naming policy for thread alias names, so that more
+      than one client may connect from the same host.
+   
+   The copyright header of the original file 
+   follows.
+   	--lu
+*/
+
+/*  $Id$
+
+    Part of SWI-Prolog
+
+    Author:        Jan Wielemaker & Steve Prior
+    E-mail:        jan@swi.psy.uva.nl
+    WWW:           http://www.swi-prolog.org
+    Copyright (C): 1985-2002, University of Amsterdam
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU General Public License
+    as published by the Free Software Foundation; either version 2
+    of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    As a special exception, if you link this library with other files,
+    compiled with a Free Software compiler, to produce an executable, this
+    library does not by itself cause the resulting executable to be covered
+    by the GNU General Public License. This exception does not however
+    invalidate any other reasons why the executable file might be covered by
+    the GNU General Public License.
+*/
+   
+   
+
 :- module(pdt_console_server,[
 	pdt_current_console_server/2,
-	pdt_start_console_server/2
+	pdt_start_console_server/2,
+	pdt_stop_console_server/2
 ]).
-:- use_module(library(prolog_server)).
+:- use_module(library(socket)).
+ 
+
+
+prolog_server(Port, Options) :-
+	tcp_socket(ServerSocket),
+	tcp_setopt(ServerSocket, reuseaddr),
+	tcp_bind(ServerSocket, Port),
+	tcp_listen(ServerSocket, 5),
+	thread_create(server_loop(ServerSocket, Options), _,
+		      [ alias(pdt_console_server)
+		      ]).
+ 
+server_loop(ServerSocket, Options):-
+    server_loop_impl(ServerSocket,Options),
+    thread_exit(0).
+server_loop_impl(ServerSocket, Options) :-
+	tcp_accept(ServerSocket, Slave, Peer),
+	server_loop_impl_X(ServerSocket,Options,Slave,Peer).
+
+server_loop_impl_X(ServerSocket,_,Slave,_):-
+	recorded(pdt_console_server_flag,shutdown,Ref),
+	!,
+	erase(Ref),
+	% the accepted connection is just a "wakeup call" we can savely discard it.
+    tcp_close_socket(Slave),
+    % that's it, we are closing down business.
+    tcp_close_socket(ServerSocket).	
+server_loop_impl_X(ServerSocket,Options,Slave,Peer):-	
+	tcp_open_socket(Slave, InStream, OutStream),
+	tcp_host_to_address(Host, Peer),
+	flag(pdt_console_client_id,Id,Id+1),
+	concat_atom(['pdt_console_client_',Id,'@',Host],Alias),
+	thread_create(service_client(InStream, OutStream, Peer, Options),
+		      _,
+		      [ alias(Alias)
+		      ]),
+	server_loop_impl(ServerSocket, Options).
+ 
+service_client(InStream, OutStream, Peer, Options) :-
+	allow(Peer, Options), !,
+	thread_self(Id),
+	set_prolog_IO(InStream, OutStream, OutStream),
+	format(user_error,
+	       'Welcome to the SWI-Prolog server on thread ~w~n~n',
+	       [Id]),
+	run_prolog,
+	close(InStream),
+	close(OutStream),
+	thread_detach(Id).
+service_client(InStream, OutStream, _, _):-
+	thread_self(Id),
+	format(OutStream, 'Go away!!~n', []),
+	close(InStream),
+	close(OutStream),
+	thread_detach(Id).
+
+
+run_prolog :-
+	catch(prolog, E,
+	      ( print_message(error, E),
+%		E = error(_, _),
+		run_prolog)).
+
+
+allow(Peer, Options) :-
+	(   member(allow(Allow), Options)
+	*-> Peer = Allow,
+	    !
+	;   Peer = ip(127,0,0,1)
+	).
+
 % TODO make this dependency explicit!
 %:- use_module(library('org/cs3/pdt/runtime/consult_server')).
 
@@ -72,9 +193,33 @@ pdt_start_console_server(Port,LockFile):-
     	start_server(Port,LockFile)
     ).
 
+% pdt_stop_console_server(+LockFile)
+% stops the console server, removing the Lockfile.
+pdt_stop_console_server:-
+    with_mutex(pdt_console_server_mux,
+    	stop_server
+    ).
+
+:- multifile consult_server:pif_shutdown_hook/0.
+consult_server:pif_shutdown_hook:-
+    pdt_stop_console_server.
+
 start_server(Port,LockFile):-
-    \+ current_thread(prolog_server,_),
+    \+ current_thread(pdt_console_server,_),
     prolog_server(Port, []),
     assert(server(Port,LockFile)),
     consult_server:create_lock_file(LockFile).
-	    
+
+stop_server:-
+	server(Port,LockFile),
+	!,
+	do_stop_server(Port,LockFile).
+stop_server.
+
+do_stop_server(Port,LockFile):-
+	recordz(pdt_console_server_flag,shutdown),
+	tcp_socket(Socket),
+	tcp_connect(Socket,localhost:Port),
+	tcp_close_socket(Socket),
+	retractall(server(Port,LockFile)),
+    consult_server:delete_lock_file(LockFile).

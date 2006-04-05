@@ -137,8 +137,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 			Map map = s.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
 					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
-					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +
-					"use_module(library(pif_observe))," +
+					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +					
 					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator framework");

@@ -143,7 +143,7 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 		}
 	}
 
-
+	
 
 	
 
@@ -212,4 +212,8 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 	public int hashCode() {
 		return constructHandleTerm().hashCode();
 	}
+
+
+
+	
 }

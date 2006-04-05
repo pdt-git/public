@@ -53,6 +53,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_io')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
@@ -64,6 +65,7 @@ forget_file_annotation(Spec):-
     pdt_file_spec(Spec,FileName),
     retractall(file_annotation(FileName,_,_,_)),
     retractall(file_error(FileName,_,_)),
+    clear_timestamp(FileName),
     pif_notify(file_annotation(FileName),forget).
 
 /**
@@ -130,6 +132,15 @@ register_annotator(File):-
     current_module(Anotator,Abs),
     assert(annotator(File,Anotator)).
 
+
+up_to_date(File):-
+    time_file(File,Time),
+    pdt_ht_get(pdt_annotation_time,File,Time).
+update_timestamp(File):-
+    time_file(File,Time),
+    pdt_ht_put(pdt_annotation_time,File,Time).
+clear_timestamp(File):-
+    pdt_ht_remove_all(pdt_annotation_time,File).
 /**
 ensure_annotated(+FileSpec)
 
@@ -142,12 +153,10 @@ to infinite recursion.
 */
 ensure_annotated(FileSpec):-
     \+ is_list(FileSpec),
-    ensure_annotated([FileSpec]).
+	ensure_annotated([FileSpec]).
 ensure_annotated([FileSpec|_]):-
     pdt_file_spec(FileSpec,Abs),
-    time_file(Abs,Time),
-    file_annotation(Abs,Time,_,_),    
-	%pif_notify(file_annotation(Abs),update),
+    up_to_date(Abs),
     !.
 ensure_annotated([FileSpec|Stack]):-    
     new_memory_file(MemFile),
@@ -156,7 +165,7 @@ ensure_annotated([FileSpec|Stack]):-
     clear_ops(OpModule),
     retractall(file_annotation(Abs,_,_,_)),
     retractall(file_error(Abs,_,_)),
-    time_file(Abs,Time),
+	update_timestamp(Abs),
     copy_file_to_memfile(FileSpec,MemFile),
     open_memory_file(MemFile,read,Input),
     read_terms([Abs|Stack],OpModule,Input,Terms,Errors),
@@ -164,14 +173,18 @@ ensure_annotated([FileSpec|Stack]):-
     post_process_terms([Abs|Stack],OpModule,FileAnos,Terms,OutTerms),
     post_process_file([Abs|Stack],OpModule,OutTerms,FileAnos,OutAnos),
     assert(file_annotation(Abs,Time,OutAnos,OutTerms)),
-    (	Errors\==[]
+    (	nonvar(Errors),Errors\==[]
     ->	forall(member(Error,Errors),assert(file_error(Abs,Time,Error)))
     ;	true
     ),
 	close(Input),
 	free_memory_file(MemFile),
-	pif_notify(file_annotation(Abs),update).
-
+	pif_notify(file_annotation(Abs),update),!.
+ensure_annotated([FileSpec|_]):-    
+    pdt_file_spec(FileSpec,Abs),
+    clear_timestamp(Abs),
+    fail.
+    
 clear_ops(OpModule):-
     forall(current_op(P,T,OpModule:N),
     		(	current_op(P,T,user:N)
@@ -206,8 +219,10 @@ do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
     read_terms_rec(FileStack,Module,In,Terms,Errors).
 do_process_term(FileStack,OpModule,In,Term,Options,_,[ProcessedTerm|Terms],Errors):-    
 	member(subterm_positions(Positions),Options),
+%	writeln(wrapping(Term)),
 	wrap_term(Term,Positions,WrapedTerm),   
-    	pre_process_term(FileStack,OpModule,WrapedTerm,ProcessedTerm),
+%	writeln(successfully_wrapped(Term)),
+   	pre_process_term(FileStack,OpModule,WrapedTerm,ProcessedTerm),
     read_terms_rec(FileStack,OpModule,In,Terms,Errors).
 
 do_read_term(In,Term,Options,Error):-
@@ -284,26 +299,7 @@ post_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
 
 
 		
-wrap_term(Term,Positions,aterm([position(From-To)|_],SubTerm)):-
-    compound(Term),
-    !,
-    Term=..[Functor|Args],
-    top_position(Positions, From,To),
-    sub_positions(Positions,SubPositions),
-    functor(Term,Functor,Arity),
-    functor(SubTerm,Functor,Arity),
-    SubTerm=..[Functor|WrapedArgs],
-    wrap_args(Args,SubPositions,WrapedArgs).
-wrap_term(Term,Positions,aterm([position(From-To)|_],Term)):-
-    \+ compound(Term),
-    top_position(Positions, From,To),!.
-wrap_term(Term,_,aterm([implicit_nil|_],Term)):-
-    \+ compound(Term).    
 
-wrap_args([],[],[]).
-wrap_args([H|T],[PH|PT],[WH|WT]):-
-    wrap_term(H,PH,WH),
-    wrap_args(T,PT,WT).
     
     
 gen_op_module(Abs,OpModule):-
