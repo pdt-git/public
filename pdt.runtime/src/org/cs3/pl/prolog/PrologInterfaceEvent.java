@@ -84,5 +84,8 @@ public class PrologInterfaceEvent extends EventObject {
         this.key=key;
         this.event=event;
 	}
+	public PrologInterfaceEvent(Object source) {
+		super(source);
+	}
     
 }

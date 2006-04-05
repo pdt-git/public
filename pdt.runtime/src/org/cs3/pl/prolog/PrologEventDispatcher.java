@@ -42,9 +42,15 @@
 package org.cs3.pl.prolog;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.pdt.runtime.PLUtil;
+import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Util;
 
 public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
@@ -67,24 +73,43 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 	public PrologEventDispatcher(PrologInterface2 pif) {
 		this.pif = pif;
 		//make sure that we do not hang the pif on shutdown.
-		pif.addLifeCycleHook(new LifeCycleHook(){
+		LifeCycleHook hook = new LifeCycleHook(){
 
 			public void onInit(PrologInterface pif, PrologSession initSession) {
-				;
-				
+				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{PrologRuntime.LIBRARY_ID});
+				initSession.queryOnce("use_module(library(pif_observe))");
 			}
 
 			public void afterInit(PrologInterface pif) {
-				;
+				Set subjects = listenerLists.keySet();
+				for (Iterator it = subjects.iterator(); it.hasNext();) {
+					String subject = (String) it.next();
+					enableSubject(subject);
+				}
 				
 			}
 
+			
+
 			public void beforeShutdown(PrologInterface pif, PrologSession session) {
-				abort(session);
-				
+				stop(session);
 			}
 			
-		}, null, null);
+		};
+		pif.addLifeCycleHook(hook, null,null);
+		if(pif.isUp()){
+			PrologSession s = pif.getSession();
+			try{
+				hook.onInit(pif,s);
+				
+			}
+			finally{
+				if(s!=null){
+					s.dispose();
+				}
+			}
+			
+		}
 	}
 
 	protected void finalize() throws Throwable {
@@ -188,11 +213,21 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 				+ "',notify('$abort',_))");
 	}
 
+	
 	public void stop() {
 		if (session == null) {
 			return;
 		}
 		abort();
+		session.dispose();
+		session = null;
+	}
+	
+	public void stop(PrologSession s) {
+		if (session == null) {
+			return;
+		}
+		abort(s);
 		session.dispose();
 		session = null;
 	}
@@ -218,6 +253,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 			l.update(e);
 		}
 	}
+	
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		String subject = (String) e.bindings.get("Subject");

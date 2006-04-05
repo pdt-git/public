@@ -252,4 +252,6 @@ public class DefaultConsultService implements ConsultService ,PrologInterfaceLis
      ;   
     }
 
+	
+
 }

@@ -217,7 +217,7 @@ public class Util {
 		if (windowsPlattform) {
 			s = s.replace('\\', '/');
 		}
-		return s;
+		return s.toLowerCase();
 	}
 
 	/**

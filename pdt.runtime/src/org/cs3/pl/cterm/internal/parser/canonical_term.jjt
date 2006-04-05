@@ -228,8 +228,8 @@ void Start()#void:{}
 
 void Term()#void:{}
 {
-	
-	LOOKAHEAD(Atom() "(") Compound()
+	LOOKAHEAD("(") "(" Term() ")"
+	|LOOKAHEAD(Atom() "(") Compound()
 	|String()
 	|Atom()
 	|Number()	

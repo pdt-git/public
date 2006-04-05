@@ -61,6 +61,11 @@ create_lock_file(Filename):-
 		close(Stream)
 	).
 	
+delete_lock_file(Filename):-
+	(	exists_file(Filename)
+	->	delete_file(Filename)
+	;	true
+	).
 
 
 
@@ -80,7 +85,7 @@ delete_symbol(Symbol) :-
 undelete_symbol(Symbol) :-
 	retractall(zombie_symbol(Symbol)).
 	
-consult_server(Port):-
+consult_server(Port):- 
 	tcp_socket(ServerSocket),
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
@@ -110,26 +115,43 @@ accept_loop(ServerSocket):-
 			write('AAAaaaAAAaaaAAAaaaAAA:'),write(Error),nl,thread_signal(main,halt)
 		)
 	),
-	thread_self(Me),
-	thread_detach(Me),
+%	thread_self(Me),
+%	thread_detach(Me),
 	% at this point we need to signal main that the server is going down and the
 	% process may be terminated when all threads besids main are gone.
 	% It would probably be best to run the accept loop itself on main, but
 	% otoh it is also nice to leave a debugging console if everything else breaks.
 	% So atm, we have to -reluctantly- use thread_signal/2 to do the job.
+	writeln(before_signaling_main),
 	thread_signal(main,do_shutdown),
+	writeln(after_signaling_main),
 	thread_exit(0).
 
+
+:- multifile pif_shutdown_hook/0.
+:- dynamic pif_shutdown_hook/0.
+
+pif_shutdown_hook.
+
+call_shutdown_hook:-
+    forall(pif_shutdown_hook,true).
+    
 do_shutdown:-
+   	writeln(do_shutdown_0),
+   	call_shutdown_hook,
     %join any thread that is not main.
     (	current_thread(Id,_),
-	    do_shutdown_X(Id)
+       	writeln(do_shutdown_1),
+	    do_shutdown_X(Id),
+       	writeln(do_shutdown_2),
+       	fail
 	;	writeln(shutdown_done),threads,halt
 	).
 do_shutdown_X(Id):-
     Id\==main,
     writeln(joining(Id)),
-    thread_join(Id,_).
+    thread_join(Id,Status),
+    writeln(done_joining(Id,Status)).
     
 	
 accept_loop_impl(ServerSocket) :-
@@ -163,15 +185,16 @@ handle_client(InStream, OutStream):-
 		)			
 	),
 	byebye(InStream,OutStream),
-	thread_self(Me),
-	thread_detach(Me),
+	%thread_self(Me),
+	%thread_detach(Me),
 	thread_exit(0).    
 	
 handle_client_impl(InStream, OutStream):-
 	request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 	( handle_command(InStream,OutStream,Command,Next)
 	->report_ok(OutStream)
-	;	report_error(OutStream, 'failed, sorry.')
+	;	report_error(OutStream, 'failed, sorry.'),
+		Next=continue
 	),
 	handle_next(InStream,OutStream,Next).	
 
