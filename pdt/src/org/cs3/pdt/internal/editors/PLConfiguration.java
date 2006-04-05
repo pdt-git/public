@@ -41,6 +41,8 @@
 
 package org.cs3.pdt.internal.editors;
 
+import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
@@ -165,13 +167,17 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		if (assistant != null)
 			return assistant;
-		final ContentAssistant assistant = new PrologContentAssistant();
-		assistant.setContentAssistProcessor(new PrologCompletionProcessor(editor),IDocument.DEFAULT_CONTENT_TYPE);
-		//assistant.setContentAssistProcessor(new PrologCompletionProcessor(),PLPartitionScanner.PL_COMMENT);
-//		assistant.setContentAssistProcessor(new PrologCompletionProcessor(),PLPartitionScanner.PL_MULTI_COMMENT);
+		ContentAssistant assistant =null;
+		String parser = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER, PDTCore.JAVACC);
+		if(PDTCore.READ_TERM_3.equals(parser)){
+			assistant=new ContentAssistant();
+			assistant.setContentAssistProcessor(new NewPrologCompletionProcessor(),IDocument.DEFAULT_CONTENT_TYPE);
+		}else{
+			assistant=new PrologContentAssistant();
+			assistant.setContentAssistProcessor(new PrologCompletionProcessor(editor),IDocument.DEFAULT_CONTENT_TYPE);	
+		}
+		
 		assistant.enableAutoActivation(true);
-		//assistant.enableAutoInsert(true);
-//		assistant.setAutoActivationDelay(500);
 		assistant.setAutoActivationDelay(500);
 		assistant.install(sourceViewer);
 		assistant.setInformationControlCreator(new IInformationControlCreator() {
@@ -182,25 +188,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
         });
 		this.assistant = assistant;
 
-//		StyledText text= sourceViewer.getTextWidget();
-//		text.addKeyListener(new KeyListener() {
-//			boolean lastKeyCtrl = false;
-//			
-//			public void keyPressed(KeyEvent e) {
-//				//System.out.println("mask: " +e.stateMask + ", data: "+e.data + ", code: "+ e.keyCode +  "\n");
-////				if (e.keyCode == 16777227) { //F2
-////					assistant.showPossibleCompletions();		
-////				}	
-//				if (e.keyCode == 16777230) { //F5
-//					assistant.showContextInformation();		
-//				}	
-//				lastKeyCtrl = (e.keyCode == 262144);// CTRL   TODO: simultanous pressed keys are not recognized
-//			}
-//
-//			public void keyReleased(KeyEvent e) {
-//			}
-//			
-//		});
+//		
 		return assistant;
 		
 	}

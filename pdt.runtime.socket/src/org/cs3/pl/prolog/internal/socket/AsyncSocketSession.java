@@ -68,6 +68,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private Option[] options;
 
+	
+	
 	private boolean canonical;
 	private SocketPrologInterface pif;
 	private SocketClient client;
@@ -464,6 +466,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		client.lock();
 		try{
 			client.writeln(SocketClient.EOB);
+			
 			dispatcher.join();
 			client.readUntil(SocketClient.OK);
 		} catch (InterruptedException e) {
@@ -562,12 +565,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			session.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
 			synchronized (ticket) {
 				if(!disposing){
-					client.writeln("abort("+id+").");
+					client.writeln("abort("+id+").");					
 				}
-				//do not wait for tickets on the dispatcher thread. the dispatcher is the one who notifies waiting threads!!
-				//if(Thread.currentThread()!=dispatcher){
-					ticket.wait();
-				//}
+				
+				ticket.wait();
+
 			}
 			
 		} catch (IOException e) {
@@ -579,6 +581,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 		
 	}
+
+	
 	public void dispose() {
 		if (isDisposed()) {
 			return;
@@ -648,6 +652,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 		return client.getProcessorThread();
 	}
+
+	
 
 	
 }

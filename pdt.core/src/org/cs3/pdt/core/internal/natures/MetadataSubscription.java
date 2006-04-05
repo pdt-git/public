@@ -138,6 +138,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
 					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
 					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +
+					"use_module(library(pif_observe))," +
 					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator framework");
@@ -150,8 +151,10 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"register_annotator(library('/org/cs3/pdt/annotate/member_annotator'))," +
 					"register_annotator(library('/org/cs3/pdt/annotate/indexer'))");
 			if(map==null){
-				throw new RuntimeException("could not load annotator modules");
+				throw new RuntimeException("could not load annotator modules: query failed.");
 			}
+		}catch(Throwable t){
+			Debug.rethrow(t);
 		}finally{
 			if(s!=null){
 				s.dispose();

@@ -60,7 +60,7 @@
 %This module registers itself as a property factory for handles of type 'predicate_definition'. See pdt_handle.
 :- pdt_add_property_factory(predicate_definition,clause_indexer).
 
-get_property(handle(id(File,Module,Name,Arity),predicate_definition,_),clauses,Value):-
+get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),clauses,Value):-
     current_file_annotation(File,_,Terms),
 	filter_clauses(Terms,Module:Name/Arity,Clauses),
 	Value=..[array|Clauses].
@@ -118,7 +118,10 @@ index_clauses(File,Annos,IX,NewIX):-
    	member(defines_multifile(MultifileDefs),Annos),
    	member(defines_dynamic(DynamicDefs),Annos),
    	member(defines_module_transparent(TransparentDefs),Annos),
-   	member(exports(Exports),Annos),
+   	(	member(exports(Exports),Annos)
+   	->	true
+   	;	Exports=[]
+   	),   	
 	index_clauses(IX,File,Defs,DynamicDefs,MultifileDefs,TransparentDefs,Exports,NewIX).
 	
 

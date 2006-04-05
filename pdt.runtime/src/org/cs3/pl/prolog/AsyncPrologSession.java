@@ -109,14 +109,21 @@ public interface AsyncPrologSession extends OptionProvider,Disposable{
 	/**
 	 * Abort the batch.
 	 *
-	 * Adds a special abort marker to the queue. The processor will cut the 
+	 * Adds a special abort marker to the queue and sends an abort message to the processor's 
+	 * message queue. The processor will cut the 
 	 * current query at the earliest possible time and will then skip all 
 	 * enqueued queries until it reaches the abort marker. (other markers will be
 	 * processed normally)
 	 * During the whole process, the batch is operational and can be used as 
 	 * always.
+	 * Note that abort can be used to break out of endless loops, e.g. by cutting a a repeat/0.
+	 * It does however not help in waking up blocking system calls, etc.
+	 * Those have to be dealt with in an application-specific manner. 
+	 * 
 	 */
 	public void abort();
+	
+	
 	
 	/**
 	 * Dispose the batch.

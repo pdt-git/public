@@ -157,15 +157,18 @@ pdt_rbtree_lookupall(Key, Val, Tree) :-
 	lookupall(Cmp,Key,Val,Tree).
 
 lookupall(>, K, V, Tree) :-
-	arg(4,Tree,NTree),
+	arg(1,Tree,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
 lookupall(=, _, V, Tree) :-
 	arg(3,Tree,V).
 lookupall(=, K, V, Tree) :-
 	arg(1,Tree,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
+lookupall(=, K, V, Tree) :-
+	arg(4,Tree,NTree),
+	pdt_rbtree_lookupall(K, V, NTree).
 lookupall(<, K, V, Tree) :-
-	arg(1,Tree,NTree),
+	arg(4,Tree,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
 
 %
@@ -230,6 +233,7 @@ insert2(black(L,K0,V0,R), K, V, NT, Flag) :-
 fix_left(done,T,T,done) :- !.
 fix_left(not_done,Tmp,Final,Done) :-
 	fix_left(Tmp,Final,Done).
+
 
 %
 % case 1 of RB: just need to change colors.

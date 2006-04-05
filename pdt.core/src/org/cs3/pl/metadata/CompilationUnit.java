@@ -39,25 +39,24 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
 
-public class PrologRuntime {
-	
-	public static final String PLUGIN_ID = "org.cs3.pdt.runtime";
-	public static final String LIBRARY_ID = "pdt.core.library";
-	
-	
-	/**
-     * The fully-qualified classname of a class that extends
-     * PrologInterfaceFactory.
-     */
-    public final static String PREF_PIF_IMPLEMENTATION = "pdt.pif.implementation";
-    public static final String PREF_PIF_BOOTSTRAP_DIR = "pdt.pif.bootstrap.dir";
-    public static final String EP_HOOKS = "hooks";
-    public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
-	public static final String EP_TRACKERS = "prologContextTracker";
-	public static final String EP_PROLOG_LIBRARY = "prologLibrary";
-	
-    
+package org.cs3.pl.metadata;
 
+import org.cs3.pdt.core.IPrologProject;
+
+
+/**
+ * 
+ * A prolog compilation unit handle.
+ *  
+ * WARNING: work in progress.
+ * 
+ * An instance of this class serves as a handle to a fragment of code 
+ * that is known to the prolog core by a certain prolog file name.
+ *
+ * The handle contains some 
+ */
+public interface CompilationUnit extends Handle, Comparable {
+	String getPrologFileName();	
+	IPrologProject getPrologProject();
 }

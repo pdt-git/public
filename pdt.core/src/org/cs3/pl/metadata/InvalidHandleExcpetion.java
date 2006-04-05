@@ -39,25 +39,15 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
 
-public class PrologRuntime {
-	
-	public static final String PLUGIN_ID = "org.cs3.pdt.runtime";
-	public static final String LIBRARY_ID = "pdt.core.library";
-	
-	
-	/**
-     * The fully-qualified classname of a class that extends
-     * PrologInterfaceFactory.
-     */
-    public final static String PREF_PIF_IMPLEMENTATION = "pdt.pif.implementation";
-    public static final String PREF_PIF_BOOTSTRAP_DIR = "pdt.pif.bootstrap.dir";
-    public static final String EP_HOOKS = "hooks";
-    public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
-	public static final String EP_TRACKERS = "prologContextTracker";
-	public static final String EP_PROLOG_LIBRARY = "prologLibrary";
-	
-    
+package org.cs3.pl.metadata;
+
+public class InvalidHandleExcpetion extends Exception {
+
+	public InvalidHandleExcpetion(String string) {
+		super(string);
+	}
+
+	private static final long serialVersionUID = -7482904099837969775L;
 
 }

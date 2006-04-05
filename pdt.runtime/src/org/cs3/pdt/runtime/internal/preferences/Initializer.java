@@ -109,6 +109,9 @@ public class Initializer extends AbstractPreferenceInitializer {
             for (int i = 0; i < options.length; i++) {
                 String id = options[i].getId();
                 String def = System.getProperty(id, options[i].getDefault());
+                if(id==null||def==null){
+                		Debug.warning("during preferences default initialization: id="+id+", def="+def);
+                }
                 node.put(id, def);
             }
             String[] strings = node.keys();

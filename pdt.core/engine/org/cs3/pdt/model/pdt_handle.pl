@@ -41,6 +41,8 @@
 
 :- module(pdt_handle,[
 	pdt_property/3,
+	pdt_property/4,	
+	pdt_properties/2,
 	pdt_property_cached/3,
 	pdt_add_property_factory/2,
 	pdt_remove_property_factory/2
@@ -68,7 +70,8 @@ pdt_property_cached(handle(_,_,Cache),Name,Value):-
     property_name_value(Prop,Name,Value).
 
 property_name_value(Name,Name,true):-
-    atom(Name).
+    atom(Name),
+    !.
 property_name_value(Prop,Name,Value):-
     functor(Prop,Name,1),
     !,
@@ -77,3 +80,13 @@ property_name_value(Prop,Name,Value):-
 	Prop=..[Name,Args],
 	Value=..[array,Args].    
 	
+pdt_properties(_,[]).
+pdt_properties(H,[Prop|Props]):-
+    Prop=..[Name,Value],
+    pdt_property(H,Name,Value,false),
+    pdt_properties(H,Props).
+
+pdt_property(H,Name,Value,_):-
+	pdt_property(H,Name,Value),
+	!.
+pdt_property(_,_,Default,Default).	

@@ -124,5 +124,8 @@ public abstract class PrologInterfaceFactory {
         return bootstrapLibraries;
     }
     
-   
+    protected String guessBootDirectory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

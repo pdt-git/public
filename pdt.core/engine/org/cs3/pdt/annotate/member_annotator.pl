@@ -112,7 +112,8 @@ collect_property_X(_,_,[]).
 collect_definitions(Terms,Definitions):-
     pdt_rbtree_new(Tree0),
     collect_definitions(Terms,Tree0,Tree),
-    findall(A,pdt_rbtree_next('',A,_,Tree),Definitions).
+    findall(A,pdt_rbtree_next('',A,_,Tree),Definitions0),
+    pdt_remove_duplicates(Definitions0,Definitions).
     
 
 collect_definitions([],Tree,Tree).   

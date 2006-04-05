@@ -49,18 +49,15 @@ import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.internal.editors.PLPartitionScanner;
 import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Clause;
-import org.cs3.pl.metadata.ClauseData;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.prolog.ConsultService;
-import org.cs3.pl.prolog.ConsultServiceEvent;
-import org.cs3.pl.prolog.ConsultServiceListener;
+import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession2;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -70,9 +67,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
 
 public class CTermContentProvider implements ITreeContentProvider,
-		ConsultServiceListener {
+		 PrologInterfaceListener {
 
-	private ConsultService service;
 
 	private Object[] data;
 
@@ -89,15 +85,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	}
 
-	private void setConsultService(ConsultService nservice) {
-		if (this.service != null) {
-			this.service.removeConsultServiceListener(this);
-		}
-		this.service = nservice;
-		if (this.service != null) {
-			this.service.addConsultServiceListener(this);
-		}
-	}
+	
 
 	public Object[] getChildren(Object parentElement) {
 
@@ -171,12 +159,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 						.getNature(PDTCore.NATURE_ID);
 			}
 			if (plProject == null) {
-				setConsultService(null);
+				setFile(null);
 				return;
 			}
-			setConsultService(plProject.getMetadataPrologInterface()
-					.getConsultService(PDTCore.CS_METADATA));
+			
 			setFile(file);
+			viewer.refresh();
 
 		} catch (Exception e) {
 			Debug.report(e);
@@ -184,7 +172,15 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	private void setFile(IFile file) {
+		if(file!=null){
+			String plFile = Util.prologFileName(file.getLocation().toFile());
+			getPrologProject().getMetaDataEventDispatcher().removePrologInterfaceListener("file_annotation('"+plFile+"')", this);
+		}
 		this.file = file;
+		if(file!=null){
+			String plFile = Util.prologFileName(file.getLocation().toFile());
+			getPrologProject().getMetaDataEventDispatcher().addPrologInterfaceListener("file_annotation('"+plFile+"')", this);
+		}
 		this.data = null;
 
 	}
@@ -198,27 +194,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	}
 
-	public void consultDataChanged(final ConsultServiceEvent e) {
-		if (viewer == null || viewer.getControl().isDisposed()) {
-
-			ConsultService service = (ConsultService) e.getSource();
-			service.removeConsultServiceListener(this);
-			return;
-		}
-		Display display = viewer.getControl().getDisplay();
-		if (Display.getCurrent() != display) {
-			display.asyncExec(new Runnable() {
-				public void run() {
-					consultDataChanged(e);
-				}
-			});
-			return;
-		}
-		data = null;
-		clauses = null;
-		viewer.refresh();
-
-	}
+	
 
 	private Object[] getData() {
 		if (data == null) {
@@ -343,6 +319,27 @@ public class CTermContentProvider implements ITreeContentProvider,
 			}
 		}
 		data = tempData.toArray();
+	}
+
+
+
+	public void update(final PrologInterfaceEvent e) {
+		if (viewer == null || viewer.getControl().isDisposed()) {
+			return;
+		}
+		Display display = viewer.getControl().getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					update(e);
+				}
+			});
+			return;
+		}
+		data = null;
+		clauses = null;
+		viewer.refresh();
+		
 	}
 
 }

@@ -51,6 +51,7 @@ import java.util.Vector;
 
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -157,5 +158,14 @@ public class PLUtil {
 			term = compound.getArgument(1);
 		}
 		return m;
+	}
+	
+	private static ATermFactory factory = new ATermFactory();
+	
+	/**
+	 * @deprecated this is an ad-hoc solution. I am not sure yet where to put this stuff.
+	 */
+	public static CTerm createCTerm(Object input){
+		return factory.createCTerm(input);
 	}
 }

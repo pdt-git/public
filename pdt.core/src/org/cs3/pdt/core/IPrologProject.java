@@ -46,6 +46,7 @@ import java.util.Set;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
+import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -103,6 +104,8 @@ public interface IPrologProject extends OptionProvider{
 	 * @return a set of PrologLibrary instances.
 	 */
 	public String[] getPrologLibraryKeys();
+
+	public PrologEventDispatcher getMetaDataEventDispatcher();
     
     
 }

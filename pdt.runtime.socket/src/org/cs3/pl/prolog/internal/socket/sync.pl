@@ -103,8 +103,15 @@
  * depends_fact(grosseltern, eltern).
  */
 
+:- use_module(library(pif_observe)).
 
+pif_observe:pif_observe_hook(_,Subject,_):-
+	init_idb(Subject).
 
+pif_observe:pif_unobserve_hook(_,Subject,_):-
+	unregister_observer(Subject). 
+	
+	
 depends_fact(Term, Term).
 
 depends(Var, _):-
@@ -234,7 +241,7 @@ notify_if_predicate_updated(Signature) :-
    forall(term_ref(Term,Ref), (
      update_idb(Term,Ref),
      (changed(Ref) ->
-      observe:notify(Term, 'update');
+      pif_notify(Term, 'update');
      true)
    )),   writeln(succeed:forall).
 
