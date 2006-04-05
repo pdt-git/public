@@ -46,13 +46,18 @@ some predicate definitions for queries frequently used by the pdt.core
 :-module(pdt_meta_info,[
 	pdt_file_contains_clause/5,
 	pdt_file_includes/2,
-	pdt_file_depends/2
+	pdt_file_depends/2,
+	pdt_predicate_completion/4,
+	pdt_file_module/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :-use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
+:-use_module(library('/org/cs3/pdt/model/pdt_index')).
+:-use_module(library('/org/cs3/pdt/model/pdt_handle')).
 
+%TODO: most of the file_<something> predicates should be replaced by an index/factory combi
 
 pdt_file_contains_clause(File,DefModule,Name,Arity,aterm(Anns,Term)):-
     pdt_file_spec(File,Abs),
@@ -72,6 +77,30 @@ pdt_file_depends(File,File).
 pdt_file_depends(DependentFile,DependencyFile):-
 	pdt_file_includes(DependentFile,IncludedFile),
 	pdt_file_depends(IncludedFile,DependencyFile).
-    
-	
-	
+
+pdt_file_module(FileSpec,Module):-
+    pdt_file_spec(FileSpec,Abs),
+    current_file_annotation(Abs,Ann,_),
+    memberchk(defines_module(Module),Ann),
+    !.
+pdt_file_module(_,user).    
+
+pdt_predicate_completion(ContextModule,Prefix,P,Properties):-
+   pdt_index_load(predicate_definitions,IX),
+   pdt_index_after(IX,Prefix,P,H),
+   (		atom_concat(Prefix,_,P)
+   ->	true
+   ;		!,fail
+   ),
+   visible_in_context(ContextModule,H),
+   pdt_properties(H,Properties).    
+
+visible_in_context(ContextModule,H):-
+    pdt_property(H,module,ContextModule),
+    !.
+visible_in_context(_,H):-	
+	pdt_property(H,module,user),
+	!.
+visible_in_context(_,H):-	
+	pdt_property(H,exported,true),
+	!.	

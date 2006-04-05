@@ -547,6 +547,10 @@ public class Util {
 
 	}
 
+	public static String quoteAtom(String term){
+		return "'"+term.replaceAll("\\'","\\\\'")+"'";
+	}
+	
 	public static String unquoteAtom(String image) {
 		
 		image=image.trim();

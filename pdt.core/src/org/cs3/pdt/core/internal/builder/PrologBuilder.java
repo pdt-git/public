@@ -108,11 +108,11 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		try {
 			String val = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER,PDTCore.JAVACC);
 			if(!PDTCore.READ_TERM_3.equals(val)){
-				Debug.info("skipping MetaDataBuilder, parser framework is set to "+val);
+				Debug.info("skipping PrologBuilder, parser framework is set to "+val);
 				return null;
 			}
 			Debug.debug("PrologBuilder.build(...) was triggered");
-			String taskname = "building prolog metadata";
+			String taskname = "updating prolog metadata";
 			;
 			Set forgetList = new HashSet();
 			Set buildList = new HashSet();

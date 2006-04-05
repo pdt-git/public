@@ -39,5 +39,12 @@
           point="org.eclipse.ui.startup">
        <startup/>
     </extension>
+    <extension
+          point="org.cs3.pdt.runtime.prologLibrary">
+       <library
+             alias="library"
+             id="pdt.runtime.library"
+             path="library/pif/"/>
+    </extension>
  
 </plugin>

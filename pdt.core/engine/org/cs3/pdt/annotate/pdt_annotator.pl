@@ -53,6 +53,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_io')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
 :-dynamic file_error/3.
@@ -62,7 +63,8 @@
 forget_file_annotation(Spec):-
     pdt_file_spec(Spec,FileName),
     retractall(file_annotation(FileName,_,_,_)),
-    retractall(file_error(FileName,_,_)).
+    retractall(file_error(FileName,_,_)),
+    pif_notify(file_annotation(FileName),forget).
 
 /**
 current_file_annotation(-Filename,-FileAnotations,-Terms)
@@ -145,6 +147,7 @@ ensure_annotated([FileSpec|_]):-
     pdt_file_spec(FileSpec,Abs),
     time_file(Abs,Time),
     file_annotation(Abs,Time,_,_),    
+	%pif_notify(file_annotation(Abs),update),
     !.
 ensure_annotated([FileSpec|Stack]):-    
     new_memory_file(MemFile),
@@ -166,7 +169,8 @@ ensure_annotated([FileSpec|Stack]):-
     ;	true
     ),
 	close(Input),
-	free_memory_file(MemFile).
+	free_memory_file(MemFile),
+	pif_notify(file_annotation(Abs),update).
 
 clear_ops(OpModule):-
     forall(current_op(P,T,OpModule:N),
@@ -176,25 +180,6 @@ clear_ops(OpModule):-
     		)
     	).
 	
-%read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,Errors):-
-%	catch(
-%		( read_term(In,Term,[subterm_positions(Positions),module(OpModule),double_quotes(string)]),
-%		  Errors=ET
-%		),
-%		E,
-%		Errors=[E|ET]
-%	),
-%    	(	Term==end_of_file
-%    	->	Terms=[],
-%    		Errors=[]%Errors and ET should be sharing variables at this point
-%    	;	(	nonvar(Term)
-%    		->	Terms=[H|T],    		
-%	    		wrap_term(Term,Positions,WrapedTerm),   
-%    			pre_process_term(FileStack,OpModule,WrapedTerm,H),
-%			read_stream_to_wraped_terms(FileStack,OpModule,In,T,ET)
-%    		;	read_stream_to_wraped_terms(FileStack,OpModule,In,Terms,ET)
-%    		)
-%	).
 
 
 read_terms(FileStack,OpModule,In,Terms,Errors):-
@@ -213,7 +198,9 @@ read_terms_rec(FileStack,Module,In,Terms,Errors):-
     do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
 
 
-do_process_term(_,_,_,end_of_file,_,_,[],[]):-!.
+do_process_term(_,_,_,Term,_,_,[],[]):-
+	Term==end_of_file,
+	!.
 do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
     nonvar(Error),!,
     read_terms_rec(FileStack,Module,In,Terms,Errors).

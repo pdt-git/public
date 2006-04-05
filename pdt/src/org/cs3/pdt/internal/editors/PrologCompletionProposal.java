@@ -68,14 +68,14 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	/** The cursor position after this proposal has been applied */
 	private int fCursorPosition;
 	/** The image to be displayed in the completion proposal popup */
-	private Image fImage;
+	private Image image;
 	private Predicate data;
 	/** The additional info of this proposal */
 	//private String fAdditionalProposalInfo;
     private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
     private static final Image hiddenImage = ImageRepository.getImage(ImageRepository.PE_HIDDEN);
     private String postfix;
-    private Image image;
+    
     private IContextInformation context;
     private String help;
 	private IMetaInfoProvider metaInfoProvider;
@@ -158,7 +158,7 @@ public class PrologCompletionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		return fImage;
+		return image;
 	}
 
 	/*

@@ -104,7 +104,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
     public final static String EXECUTABLE = "pif.executable";
 
-    public final static String ENGINE_DIR = "pif.engine_dir";
+    public final static String BOOT_DIR = "pif.engine_dir";
 
     public final static String STANDALONE = "pif.standalone";
 

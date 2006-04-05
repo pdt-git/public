@@ -65,7 +65,9 @@ import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.MetaInfoProviderFactory;
+import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterface2;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -103,6 +105,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private Subscription metadataPifSubscription;
 
 	private HashMap libraries;
+
+	private PrologEventDispatcher metaDataEventDispatcher;
 
 	/**
 	 * @see IProjectNature#configure
@@ -603,6 +607,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public PrologEventDispatcher getMetaDataEventDispatcher() {
+		if(metaDataEventDispatcher==null){
+			metaDataEventDispatcher= new PrologEventDispatcher((PrologInterface2) getMetadataPrologInterface()); 
+		}
+		return metaDataEventDispatcher;
 	}
 
 	

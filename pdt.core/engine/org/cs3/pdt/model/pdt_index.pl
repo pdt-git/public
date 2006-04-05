@@ -107,7 +107,7 @@ pdt_index_remove(IX,_,_,IX).
 % find the first matching entry for Key.
 % On backtracking, this will produce all other entries for Key.
 pdt_index_get(IX,Key,Val):-
-    pdt_rbtree_lookup(Key,Val,IX).
+    pdt_rbtree_lookupall(Key,Val,IX).
 
 % pdt_index_after(+IX,+Start,-Key,-Val)
 %

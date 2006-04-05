@@ -87,6 +87,7 @@ consult_server(Port):-
 	tcp_listen(ServerSocket, 5),
 	concat_atom([consult_server,'@',Port],Alias),
 	%accept_loop(ServerSocket).
+	recordz(pif_flag,port(Port)),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]).
 
 consult_server(Port,Lockfile):-
@@ -96,6 +97,7 @@ consult_server(Port,Lockfile):-
 	tcp_listen(ServerSocket, 5),
 	concat_atom([consult_server,'@',Port],Alias),
 	%accept_loop(ServerSocket).
+	recordz(pif_flag,port(Port)),
 	thread_create(accept_loop(ServerSocket), _,[alias(Alias)]),
 	create_lock_file(Lockfile).
 
@@ -110,27 +112,46 @@ accept_loop(ServerSocket):-
 	),
 	thread_self(Me),
 	thread_detach(Me),
+	% at this point we need to signal main that the server is going down and the
+	% process may be terminated when all threads besids main are gone.
+	% It would probably be best to run the accept loop itself on main, but
+	% otoh it is also nice to leave a debugging console if everything else breaks.
+	% So atm, we have to -reluctantly- use thread_signal/2 to do the job.
+	thread_signal(main,do_shutdown),
 	thread_exit(0).
 
+do_shutdown:-
+    %join any thread that is not main.
+    (	current_thread(Id,_),
+	    do_shutdown_X(Id)
+	;	writeln(shutdown_done),threads,halt
+	).
+do_shutdown_X(Id):-
+    Id\==main,
+    writeln(joining(Id)),
+    thread_join(Id,_).
+    
 	
 accept_loop_impl(ServerSocket) :-
-	write(0),nl,
 	tcp_accept(ServerSocket, Slave, Peer),
-	write(1),nl,
+	accept_loop_impl_X(ServerSocket,Slave,Peer).
+
+accept_loop_impl_X(ServerSocket,Slave,_):-
+    recorded(pif_flag,shutdown),
+    !,
+    % the accepted connection is just a "wakeup call" we can savely discard it.
+    tcp_close_socket(Slave),
+    % that's it, we are closing down business.
+    tcp_close_socket(ServerSocket).
+
+accept_loop_impl_X(ServerSocket,Slave,Peer):-
 	tcp_open_socket(Slave, InStream, OutStream),
-	write(2),nl,
 	tcp_host_to_address(Host,Peer),
-	write(3),nl,
 	thread_self(Self),
-	write(4),nl,
 	atom_concat(Self,'_handle_client_',Prefix),
 	atom_concat('@',Host,Suffix),
-	write(5),nl,	
 	unused_thread_name(Prefix,Suffix,Alias),
-	write(7),nl,	
-	%handle_client(InStream, OutStream),
 	thread_create(handle_client(InStream, OutStream), _ , [alias(Alias)]),
-	write(8),nl,
 	accept_loop_impl(ServerSocket).
 	
 handle_client(InStream, OutStream):-    
@@ -141,33 +162,52 @@ handle_client(InStream, OutStream):-
 		;	true
 		)			
 	),
+	byebye(InStream,OutStream),
 	thread_self(Me),
 	thread_detach(Me),
 	thread_exit(0).    
 	
 handle_client_impl(InStream, OutStream):-
-	repeat,
 	request_line(InStream,OutStream,'GIVE_COMMAND',Command),
-	( handle_command(InStream,OutStream,Command)
+	( handle_command(InStream,OutStream,Command,Next)
 	->report_ok(OutStream)
 	;	report_error(OutStream, 'failed, sorry.')
 	),
-	fail.	
-	
-handle_command(_,_,'').
-	
-handle_command(_,OutStream,'PING'):-
+	handle_next(InStream,OutStream,Next).	
+
+handle_next(_,_,stop):-
+    !.
+handle_next(InStream,OutStream,continue):-
+	handle_client_impl(InStream, OutStream).
+		
+handle_command(_,_,'BYE',stop).	
+handle_command(_,_,'SHUTDOWN',stop):-	
+	% stop accept loop:
+	% we set the shutdown flag (which is read by the accept loop)
+	% then we have to kick the accept loop out of the tcp_accept/3 call.
+	% we do this by simply opening a connection to the listen port.
+	writeln(shutdown(0)),
+	recordz(pif_flag,shutdown),
+	writeln(shutdown(1)),
+	recorded(pif_flag,port(Port)),
+	writeln(shutdown(2)),
+	tcp_socket(Socket),
+	writeln(shutdown(3)),
+	tcp_connect(Socket,localhost:Port),
+	writeln(shutdown(4)),
+	tcp_close_socket(Socket),
+	writeln(shutdown(5)).
+handle_command(_,_,'',continue).
+handle_command(_,OutStream,'PING',continue):-
     thread_self(Alias),
 	my_format(OutStream,"PONG ~a~n",[Alias]).
-	
-handle_command(InStream,OutStream,'CONSULT'):-
+handle_command(InStream,OutStream,'CONSULT',continue):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	undelete_symbol(Symbol),
 	my_format(OutStream,"USING_SYMBOL: ~a~n",[Symbol]),	
 	my_format(OutStream,"GO_AHEAD~n",[]),
 	load_stream(Symbol,InStream).
-	
-handle_command(InStream,OutStream,'UNCONSULT'):-
+handle_command(InStream,OutStream,'UNCONSULT',continue):-
 	(
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	consulted_symbol(Symbol),
@@ -179,8 +219,7 @@ handle_command(InStream,OutStream,'UNCONSULT'):-
 	delete_symbol(Symbol)
 	)
 	;true.
-	
-handle_command(InStream,OutStream,'LIST_CONSULTED'):-
+handle_command(InStream,OutStream,'LIST_CONSULTED',continue):-
 	request_line(InStream,OutStream,'GIVE_PREFIX',Prefix),
 	forall(
 		(
@@ -189,21 +228,50 @@ handle_command(InStream,OutStream,'LIST_CONSULTED'):-
 		),
 		my_format(OutStream,"~a~n",Symbol)
 	).
-	
-handle_command(InStream,OutStream,'IS_CONSULTED'):-
+handle_command(InStream,OutStream,'IS_CONSULTED',continue):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	( consulted_symbol(Symbol) 
 	->my_format(OutStream,"YES~n",[])	
 	; my_format(OutStream,"NO~n",[])
 	).
-
-handle_command(InStream,OutStream,'ENTER_BATCH'):-
+handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 	my_format(OutStream,"GO_AHEAD~n",[]),
 	repeat,
 		handle_batch_messages,
 		my_read_command(InStream,Term),
 		handle_batch_command(Term,InStream,OutStream),
 		Term=end_of_batch,!.
+handle_command(InStream,OutStream,'QUERY',continue):-
+	my_format(OutStream,"GIVE_TERM~n",[]),	
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
+	( iterate_solutions(InStream,OutStream,Term,Vars,default)
+	; true
+	).
+handle_command(InStream,OutStream,'QUERY_ALL',continue):-
+	my_format(OutStream,"GIVE_TERM~n",[]),
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
+	(
+		all_solutions(OutStream,Term,Vars,default)
+	;
+		true
+	).
+handle_command(InStream,OutStream,'QUERY_CANONICAL',continue):-
+	my_format(OutStream,"GIVE_TERM~n",[]),	
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
+	( iterate_solutions(InStream,OutStream,Term,Vars,canonical)
+	; true
+	).
+handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL',continue):-
+	my_format(OutStream,"GIVE_TERM~n",[]),
+	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
+	(
+		all_solutions(OutStream,Term,Vars,canonical)
+	;
+		true
+	).
+
+	
+
 
 my_read_command(InStream,Term):-
     my_read_term(InStream,Term,[/*double_quotes(string)*/]).
@@ -295,44 +363,7 @@ solutions_yes_or_no(OutStream):-
 
 	
 	
-handle_command(InStream,OutStream,'QUERY'):-
-	my_format(OutStream,"GIVE_TERM~n",[]),	
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
-	( iterate_solutions(InStream,OutStream,Term,Vars,default)
-	; true
-	).
-	
-handle_command(InStream,OutStream,'QUERY_ALL'):-
-	my_format(OutStream,"GIVE_TERM~n",[]),
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
-	(
-		all_solutions(OutStream,Term,Vars,default)
-	;
-		true
-	).
-	
-handle_command(InStream,OutStream,'QUERY_CANONICAL'):-
-	my_format(OutStream,"GIVE_TERM~n",[]),	
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
-	( iterate_solutions(InStream,OutStream,Term,Vars,canonical)
-	; true
-	).
-	
-handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL'):-
-	my_format(OutStream,"GIVE_TERM~n",[]),
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
-	(
-		all_solutions(OutStream,Term,Vars,canonical)
-	;
-		true
-	).
-	
-	
-handle_command(_,_,'SHUTDOWN'):-	
-	throw(shut_down).
-	
-handle_command(_,_,'BYE'):-	
-	throw(peer_quit).
+
 
 one_solution(OutStream,Term,Vars,Mode):-
 	( 	user:Term
@@ -414,22 +445,7 @@ handle_exception(InStream,OutStream,Error):-
 	var(Error),
 	handle_exception(InStream,OutStream,unbound_error_term).	
 	
-handle_exception(InStream,OutStream,peer_quit):-
-	catch(	
-		byebye(InStream,OutStream),
-		_,
-		shut_down(InStream,OutStream)
-	).
-	
-handle_exception(InStream,OutStream,shut_down):-
-	catch(	
-		byebye(InStream,OutStream),
-		_,
-		shut_down(InStream,OutStream)
-	),
-	threads,
-	thread_signal(main,halt),
-	threads.
+
 	
 handle_exception(InStream,OutStream,peer_reset):-
 	catch(
@@ -438,7 +454,7 @@ handle_exception(InStream,OutStream,peer_reset):-
 			report_ok(OutStream)
 		),							
 		_,(
-			shut_down(InStream,OutStream),
+		%	shut_down(InStream,OutStream),
 			fail
 			)
 	),
@@ -448,7 +464,7 @@ handle_exception(InStream,OutStream,Error):-
 	catch(		
 		report_error(OutStream,Error),					
 		_,(
-			shut_down(InStream,OutStream),
+%			shut_down(InStream,OutStream),
 			fail
 			)
 	),
@@ -472,39 +488,17 @@ byebye(InStream,OutStream):-
 	close(InStream),
 	close(OutStream).
 	
-shut_down(InStream,OutStream):-
-	catch(
-		close(InStream, [force(true)]),
-		_,
-		true),
-	catch(
-		close(OutStream, [force(true)]),
-		_,
-		true).
-		
-	
+
 check_eof(end_of_file):-
 	!,
-	throw(peer_reset).
-	
-check_eof('end_of_file'):-
-	!,
-	throw(peer_reset).
-	
+	throw(peer_reset).	
 check_eof('end_of_file.'):-
 	!,
-	throw(peer_reset).
-	
+	throw(peer_reset).	
 check_eof(A):-
 	atom_concat(_,end_of_file,A),
 	!,
-	throw(peer_reset).
-	
-check_eof(A):-
-	atom_concat(_,'end_of_file',A),
-	!,
-	throw(peer_reset).
-	
+	throw(peer_reset).	
 check_eof(A):-
 	atom_concat(_,'end_of_file.',A),
 	!,

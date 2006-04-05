@@ -45,7 +45,8 @@
 	pdt_file_spec/2,
 	pdt_member/2,
 	pdt_chop_before/3,
-	pdt_chop_after/3
+	pdt_chop_after/3,
+	pdt_remove_duplicates/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
@@ -128,3 +129,16 @@ pdt_chop_after(Elm,[Head|NextElms],Elms):-
     pdt_chop_after(Elm,NextElms,Elms).
 pdt_chop_after(_,Elms,Elms).
         
+        
+% pdt_remove_duplicates(+In,-Out) 
+%
+% In should be an ordered List.
+% Out will be unified with the duplicate-free version of In
+pdt_remove_duplicates([],[]).
+pdt_remove_duplicates([Elm,Elm|Elms],[Elm|DupFreeElms]):-
+    !,
+    pdt_remove_duplicates([Elm|Elms],[Elm|DupFreeElms]).
+pdt_remove_duplicates([Elm|Elms],[Elm|DupFreeElms]):-
+    !,
+    pdt_remove_duplicates(Elms,DupFreeElms).
+    

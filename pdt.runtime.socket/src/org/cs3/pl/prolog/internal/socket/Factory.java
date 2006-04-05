@@ -66,22 +66,7 @@ public class Factory extends PrologInterfaceFactory {
 				new SimpleOption(SocketPrologInterface.EXECUTABLE,
 						"SWI-Prolog executable", "eg. xpce or /usr/bin/xpce",
 						SimpleOption.FILE, guessExecutableName()),
-				// new SimpleOption(
-				// SocketPrologInterface.ENGINE_DIR,
-				// "PIF engine directory",
-				// "There are a couple of prolog files that need to be
-				// temporarily" +
-				// "stored somewhere during bootstrapping of the prolog
-				// interface." +
-				// "Any directory to which you have write permissions will be
-				// fine.",
-				// SimpleOption.DIR, null) {
-				// public String getDefault() {
-				// File f =
-				// getResourceLocator().resolve("");
-				// return Util.prologFileName(f);
-				// }
-				// },
+				
 				new SimpleOption(
 						SocketPrologInterface.STANDALONE,
 						"stand-alone server",
@@ -93,7 +78,7 @@ public class Factory extends PrologInterfaceFactory {
 				},
 				new SimpleOption(SocketPrologInterface.HOST, "Server host",
 						"The host the PIF server is listening on",
-						SimpleOption.STRING, null) {
+						SimpleOption.STRING, "localhost") {
 					public boolean isVisible() {
 						return false;
 					}
@@ -123,6 +108,8 @@ public class Factory extends PrologInterfaceFactory {
 						SimpleOption.FLAG, "true") };
 	}
 
+	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -135,8 +122,8 @@ public class Factory extends PrologInterfaceFactory {
 		SocketPrologInterface pif = new SocketPrologInterface(this);
 		pif.getBootstrapLibraries().add(
 				Util.prologFileName(getResourceLocator().resolve(SERVER_PL)));
-		pif.getBootstrapLibraries().add(
-				Util.prologFileName(getResourceLocator().resolve(MAIN_PL)));
+//		pif.getBootstrapLibraries().add(
+//				Util.prologFileName(getResourceLocator().resolve(MAIN_PL)));
 		pif.setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
 		for (int i = 0; i < options.length; i++) {
 			pif.setOption(options[i].getId(), options[i].getDefault());
