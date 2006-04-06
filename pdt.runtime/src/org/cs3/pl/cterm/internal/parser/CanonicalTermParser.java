@@ -99,6 +99,7 @@ public static void main(String args[]) throws FileNotFoundException {
       case QUOTED_STRING:
         String();
         break;
+      case LBRC:
       case CUT:
       case ATOM_IDENTIFIER:
       case QUOTED_ATOM:
@@ -139,6 +140,10 @@ public static void main(String args[]) throws FileNotFoundException {
         break;
       case CUT:
         jj_consume_token(CUT);
+        break;
+      case LBRC:
+        jj_consume_token(LBRC);
+        jj_consume_token(RBRC);
         break;
       default:
         jj_la1[1] = jj_gen;
@@ -324,11 +329,14 @@ public static void main(String args[]) throws FileNotFoundException {
   final private boolean jj_3R_2() {
     Token xsp;
     xsp = jj_scanpos;
-    if (jj_scan_token(14)) {
+    if (jj_scan_token(16)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(28)) {
+    if (jj_scan_token(30)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(13)) return true;
+    if (jj_scan_token(15)) {
+    jj_scanpos = xsp;
+    if (jj_3R_3()) return true;
+    }
     }
     }
     return false;
@@ -342,6 +350,12 @@ public static void main(String args[]) throws FileNotFoundException {
 
   final private boolean jj_3_1() {
     if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  final private boolean jj_3R_3() {
+    if (jj_scan_token(LBRC)) return true;
+    if (jj_scan_token(RBRC)) return true;
     return false;
   }
 
@@ -360,7 +374,7 @@ public static void main(String args[]) throws FileNotFoundException {
       jj_la1_0();
    }
    private static void jj_la1_0() {
-      jj_la1_0 = new int[] {0x34c0e800,0x10006000,0x200,0x4c00000,0xc00000,};
+      jj_la1_0 = new int[] {0xd303a800,0x4001a000,0x200,0x13000000,0x3000000,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -540,8 +554,8 @@ public static void main(String args[]) throws FileNotFoundException {
 
   public ParseException generateParseException() {
     jj_expentries.removeAllElements();
-    boolean[] la1tokens = new boolean[30];
-    for (int i = 0; i < 30; i++) {
+    boolean[] la1tokens = new boolean[32];
+    for (int i = 0; i < 32; i++) {
       la1tokens[i] = false;
     }
     if (jj_kind >= 0) {
@@ -557,7 +571,7 @@ public static void main(String args[]) throws FileNotFoundException {
         }
       }
     }
-    for (int i = 0; i < 30; i++) {
+    for (int i = 0; i < 32; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

@@ -166,6 +166,8 @@ TOKEN : /* SEPARATORS */
 |   < DOT: "." >
 |   < LSQB: "[" >
 |   < RSQB: "]" >
+|	< LBRC:	"{" >
+|   < RBRC: "}" >
 |	< CUT: "!" >
 }
 
@@ -240,7 +242,7 @@ void Term()#void:{}
 
 void Atom():{}
 {
-	<ATOM_IDENTIFIER>|<QUOTED_ATOM>|<CUT>
+	<ATOM_IDENTIFIER>|<QUOTED_ATOM>|<CUT>|<LBRC><RBRC>
 }
 
 void Nil():{}
