@@ -215,9 +215,9 @@ public class Util {
 	public static String normalizeOnWindoze(String s) {
 		boolean windowsPlattform = isWindoze();
 		if (windowsPlattform) {
-			s = s.replace('\\', '/');
+			s = s.replace('\\', '/').toLowerCase();
 		}
-		return s.toLowerCase();
+		return s;
 	}
 
 	/**
