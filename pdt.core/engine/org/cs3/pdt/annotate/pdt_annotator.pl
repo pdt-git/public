@@ -130,8 +130,22 @@ register_annotator(File):-
     use_module(File),
     pdt_file_spec(File,Abs),
     current_module(Anotator,Abs),
+    add_missing_hooks(Anotator),
     assert(annotator(File,Anotator)).
 
+
+add_missing_hooks(Anotator):-
+    add_missing_hook(Anotator:term_pre_annotation_hook/4),
+    add_missing_hook(Anotator:term_post_annotation_hook/5),
+    add_missing_hook(Anotator:file_pre_annotation_hook/5),
+    add_missing_hook(Anotator:file_post_annotation_hook/5).
+
+add_missing_hook(Module:Name/Arity):-
+    (	Module:current_predicate(Name/Arity)
+    ;	functor(Head,Name,Arity),
+	    Module:assert(Head)
+    ),
+    !.
 
 up_to_date(File):-
     time_file(File,Time),
@@ -239,7 +253,6 @@ pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
 pre_process_term([],_,_,Term,Term). 
 pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
     pdt_maybe((
-    	Anotator:current_predicate(term_pre_annotation_hook/4),
     	Anotator:term_pre_annotation_hook(FileStack,OpModule,InTerm,TmpTerm)
     )),
     (	var(TmpTerm)
@@ -259,7 +272,6 @@ post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
 post_process_term([],_,_,_,Term,Term). 
 post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-
     pdt_maybe((
-    	Anotator:current_predicate(term_post_annotation_hook/5),
     	Anotator:term_post_annotation_hook(FileStack,OpModule,FileAnos,InTerm,TmpTerm)
     )),
     (	var(TmpTerm)
@@ -274,7 +286,6 @@ pre_process_file(FileStack,OpModule,Terms,FileAnos):-
 pre_process_file([],_,_,_,Terms,Terms). 
 pre_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
     pdt_maybe((
-	    Anotator:current_predicate(file_pre_annotation_hook/5),
 	    Anotator:file_pre_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
 	)),
 	(	var(TmpAnos)
@@ -288,7 +299,6 @@ post_process_file(FileStack,OpModule,Terms,InAnos,OutAnos):-
 post_process_file([],_,_,_,Terms,Terms). 
 post_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
     pdt_maybe((
-	    Anotator:current_predicate(file_post_annotation_hook/5),    
 	    Anotator:file_post_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
 	)),
 	(	var(TmpAnos)
