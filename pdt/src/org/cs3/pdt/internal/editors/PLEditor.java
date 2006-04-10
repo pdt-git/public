@@ -122,11 +122,8 @@ public class PLEditor extends TextEditor {
 		setKeyBindingScopes(new String[] { PDT.CONTEXT_EDITING_PROLOG_CODE });
 	}
 
-	
-	
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
-
 
 	}
 
@@ -229,7 +226,7 @@ public class PLEditor extends TextEditor {
 
 	private void createPartControl_impl(final Composite parent) {
 		super.createPartControl(parent);
-		
+
 		MenuManager menuMgr = createPopupMenu();
 
 		createInspectionMenu(menuMgr);
@@ -455,21 +452,28 @@ public class PLEditor extends TextEditor {
 	 */
 	public static Goal getPrologDataFromOffset(IDocument document, int offset)
 			throws BadLocationException {
-		String line;
+		
 		int start = offset;
 		int end = offset;
-		while (isPredicatenameChar(document.getChar(start)) && start > 0)
-			start--;
-		if (start > 0 || !isPredicatenameChar(document.getChar(start)))
-			start++;
+		while (isPredicatenameChar(document.getChar(start)) && start > 0) {
+			start--; // scan left until first non-predicate char
+		}
+		start++; // start is now the position of the first predictate char
+					// (or module prefix char)
+
 		while (isPredicatenameChar(document.getChar(end))
-				&& end < document.getLength())
-			end++;
+				&& end < document.getLength()) {
+			end++;// scan right for first non-predicate char
+		}
+
 		if (start > end) {
 			return null;
 		}
 
+		// element name will be the functor name, prefixed with a module name,
+		// if present.
 		String elementName = document.get(start, end - start);
+
 		int endOfWhiteSpace = findEndOfWhiteSpace(document, end, document
 				.getLength());
 		int arity = 1;
@@ -477,8 +481,7 @@ public class PLEditor extends TextEditor {
 				&& document.getChar(endOfWhiteSpace) == '/') {
 			end = endOfWhiteSpace + 1;
 			String buf = "";
-			while (end < document.getLength() && document.getChar(end) >= '0'
-					&& document.getChar(end) >= '0') {
+			while (end < document.getLength() && document.getChar(end) >= '0') {
 				buf += document.getChar(end);
 				end++;
 			}
@@ -490,10 +493,18 @@ public class PLEditor extends TextEditor {
 		}
 		if (document.getLength() == endOfWhiteSpace
 				|| document.getChar(endOfWhiteSpace) != '(') {
-			if (elementName.endsWith(":"))
-				return new GoalData(null, elementName.substring(0, elementName
-						.length() - 1), -1);
-			return new GoalData(null, elementName, 0);
+
+			if (elementName.endsWith(":")) {
+				return new GoalData(null, elementName.substring(0, 
+						elementName.length() - 1), -1);
+			}
+			String[] fragments = elementName.split(":");
+			if(fragments.length==2){
+				return new GoalData(fragments[0], fragments[1], 0);
+			}
+			String module =null;
+	
+			return new GoalData(module, elementName, 0);
 		}
 
 		end = endOfWhiteSpace + 1;
@@ -525,9 +536,18 @@ public class PLEditor extends TextEditor {
 
 				end++;
 		}
-		line = document.get(start, end - start);
-		return new GoalData(null, elementName, arity);
+		
+		String[] fragments = elementName.split(":");
+		if(fragments.length==2){
+			return new GoalData(fragments[0], fragments[1], arity);
+		}
+		String module =null;
+		
+		return new GoalData(module, elementName, arity);
+		
 	}
+
+	
 
 	/**
 	 * @param document
@@ -759,16 +779,18 @@ public class PLEditor extends TextEditor {
 			String pref = plugin.getPreferenceValue(key,
 					MessageDialogWithToggle.PROMPT);
 			boolean toggleState = false;
-			boolean shouldAddNature = MessageDialogWithToggle.ALWAYS.equals(pref);
+			boolean shouldAddNature = MessageDialogWithToggle.ALWAYS
+					.equals(pref);
 			IPreferenceStore store = plugin.getPreferenceStore();
 			if (MessageDialogWithToggle.PROMPT.equals(pref)) {
 				MessageDialogWithToggle toggle = MessageDialogWithToggle
 						.openYesNoQuestion(getEditorSite().getShell(),
 								dialogTitle, dialogMessage, toggleMessage,
 								toggleState, store, key);
-				shouldAddNature=IDialogConstants.YES_ID==toggle.getReturnCode();
+				shouldAddNature = IDialogConstants.YES_ID == toggle
+						.getReturnCode();
 			}
-			if(shouldAddNature){
+			if (shouldAddNature) {
 				try {
 					PDTCoreUtils.addPDTNature(project);
 				} catch (CoreException e) {

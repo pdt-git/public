@@ -71,7 +71,7 @@ property_definition(Term,defines_dynamic,Sigs):-
 property_definition(Term,defines_multifile,Sigs):-
     Term=..[multifile|Sigs].
 property_definition(Term,defines_module_transparent,Sigs):-
-    Term=..[module_transparent|Sigs].    
+    Term=..[transparent|Sigs].    
     
 module_qualified_signatures(_,[],[]).
 module_qualified_signatures(FileModule,[InH|InT],[OutH|OutT]):-

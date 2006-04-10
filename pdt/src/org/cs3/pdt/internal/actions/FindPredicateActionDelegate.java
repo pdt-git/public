@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.internal.actions;
 
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
@@ -51,10 +52,13 @@ import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
+import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -128,6 +132,13 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	}
 
 	private void run_impl(Goal goal, IFile file) {
+		
+		SourceLocation loc = findFirstClausePosition(file,goal);
+		
+		PDTUtils.showSourceLocation(loc);
+	}
+
+	private SourceLocation findFirstClausePosition(IFile file, Goal goal) {
 		IPrologProject plprj;
 		try {
 			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
@@ -135,35 +146,29 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
-		IMetaInfoProvider mip = plprj.getMetaInfoProvider();
-		Predicate[] predicates = mip.findPredicates(goal);
-		//FIXME: what about alternatives?
-		if(predicates==null||predicates.length==0){
-			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find predicate: " + goal.getName()
-							+ "/" //$NON-NLS-1$
-							+ goal.getArity()
-							+ ".\nSorry, Code analysis is still work in progress.");
-			return;
+		String plFile = Util.prologFileName(file.getLocation().toFile());
+		PrologSession s = plprj.getMetadataPrologInterface().getSession();
+		SourceLocation loc =null;
+		try{
+			String contextModule = goal.getModule();
+			String query=null;
+			if(contextModule==null){
+				query = "pdt_file_module('"+plFile+"',Context)," +
+						"pdt_find_first_clause_position(Context,"+goal.getName()+"/"+goal.getArity()+",File,From-To)";	
+			}else{
+				query = "pdt_find_first_clause_position("+contextModule+","+goal.getName()+"/"+goal.getArity()+",File,From-To)";
+			}
+			Map map = s.queryOnce(query);
+			String fileName = (String) map.get("File");
+			loc=new SourceLocation(fileName,false,false);
+			loc.offset=Integer.parseInt((String)map.get("From"));
+			loc.endOffset=Integer.parseInt((String)map.get("To"));
+		}finally{
+			if(s!=null){
+				s.dispose();
+			}
 		}
-		if(predicates.length>1){
-			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
-					+ goal.getName()+"/"+ goal.getArity()
-							+ ".\nSorry, Code analysis is still work in progress. " +
-									"For now i will just take you " +
-									"to the first match found.");
-		}
-		Clause[] clauses = mip.findClauses(predicates[0]);
-		if(clauses==null || clauses.length==0){
-			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find clauses for predicate: " + goal.getName()
-							+ "/" //$NON-NLS-1$
-							+ goal.getArity()
-							+ ".\nSorry, Code analysis is still work in progress.");
-			return;
-		}
-		PDTUtils.showSourceLocation(clauses[0].getSourceLocation());
+		return loc;
 	}
 	
 	

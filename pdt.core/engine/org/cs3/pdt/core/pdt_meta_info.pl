@@ -44,14 +44,18 @@ some predicate definitions for queries frequently used by the pdt.core
 */
 
 :-module(pdt_meta_info,[
-	pdt_file_contains_clause/5,
+	pdt_find_clauses/4,
+	pdt_find_first_clause/4,
+	pdt_find_first_clause_position/4,
 	pdt_file_includes/2,
 	pdt_file_depends/2,
 	pdt_predicate_completion/4,
+	pdt_predicate_completion/5,
 	pdt_file_module/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
+:-use_module(library('/org/cs3/pdt/util/pdt_util_dfs')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :-use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :-use_module(library('/org/cs3/pdt/model/pdt_index')).
@@ -59,34 +63,75 @@ some predicate definitions for queries frequently used by the pdt.core
 
 %TODO: most of the file_<something> predicates should be replaced by an index/factory combi
 
-pdt_file_contains_clause(File,DefModule,Name,Arity,aterm(Anns,Term)):-
-    pdt_file_spec(File,Abs),
-	current_file_annotation(Abs,_,Terms),
-	member(aterm(Anns,Term),Terms),
-	pdt_member(clause_of(DefModule:Name/Arity),Anns).
+%pdt_file_contains_clause(File,DefModule,Name,Arity,aterm(Anns,Term)):-
+%    pdt_file_spec(File,Abs),
+%	current_file_annotation(Abs,_,Terms),
+%	member(aterm(Anns,Term),Terms),
+%	pdt_member(clause_of(DefModule:Name/Arity),Anns).
   
 
 pdt_file_includes(FileSpec,IncludeSpec):-
+    nonvar(FileSpec),
+    !,
+    get_includes(FileSpec,IncludeSpec).
+pdt_file_includes(FileSpec,IncludeSpec):-
+    nonvar(IncludeSpec),
+    get_including(IncludeSpec,FileSpec).
+
+get_includes(FileSpec,IncludeSpec):-  
     pdt_file_spec(FileSpec,Abs),
     current_file_annotation(Abs,Terms,_),
     member(references_files(Refs),Terms),
     member(IncludeSpec,Refs).
     
+get_including(IncludeSpec,File):-
+	pdt_file_spec(IncludeSpec,Abs),
+    current_file_annotation(File,Terms,_),
+    member(references_files(Refs),Terms),
+    member(Abs,Refs).
 
-pdt_file_depends(File,File).
 pdt_file_depends(DependentFile,DependencyFile):-
-	pdt_file_includes(DependentFile,IncludedFile),
-	pdt_file_depends(IncludedFile,DependencyFile).
+    nonvar(DependentFile),
+    !,
+    get_file_dependency(DependentFile,DependencyFile).
+pdt_file_depends(DependentFile,DependencyFile):-
+    nonvar(DependencyFile),
+    get_dependent_file(DependencyFile,DependentFile).
+
+get_file_dependency(DependentFile,DependencyFile):-
+    pdt_dfs(DependentFile,get_includes(From,To),From,To,DependencyFile).
+get_dependent_file(DependencyFile,DependentFile):-
+    pdt_dfs(DependencyFile,get_including(From,To),From,To,DependentFile).
+	
+pdt_file_module(FileSpec,Module):-
+    nonvar(FileSpec),
+    !,
+    get_module(FileSpec,Module).
 
 pdt_file_module(FileSpec,Module):-
+	nonvar(Module),
+	!,
+	get_file(Module,FileSpec).    
+
+get_module(FileSpec,Module):-    
     pdt_file_spec(FileSpec,Abs),
     current_file_annotation(Abs,Ann,_),
     memberchk(defines_module(Module),Ann),
     !.
-pdt_file_module(_,user).    
+get_module(_,user).    
+
+get_file(Module,File):-
+    pdt_index_load(module_definitions,Ix),
+    pdt_index_get(Ix,Module,H),
+    pdt_property(H,file,File).
 
 pdt_predicate_completion(ContextModule,Prefix,P,Properties):-
-   pdt_index_load(predicate_definitions,IX),
+	pdt_predicate_completion(predicate_definitions,ContextModule,Prefix,P,Properties).
+pdt_predicate_completion(ContextModule,Prefix,P,Properties):-	
+	pdt_predicate_completion(builtin_predicates,ContextModule,Prefix,P,Properties).
+
+pdt_predicate_completion(IxName,ContextModule,Prefix,P,Properties):-
+   pdt_index_load(IxName,IX),
    pdt_index_after(IX,Prefix,P,H),
    (		atom_concat(Prefix,_,P)
    ->	true
@@ -94,12 +139,35 @@ pdt_predicate_completion(ContextModule,Prefix,P,Properties):-
    ),
    visible_in_context(ContextModule,H),
    pdt_properties(H,Properties).    
+   
+pdt_find_clauses(Context,Name/Arity,DefFile,Clauses):-
+    pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H),
+    pdt_property(H,arity,Arity),
+    visible_in_context(Context,H),
+    pdt_property(H,file,DefFile),
+    pdt_file_module(ContextFile,Context),
+    pdt_file_depends(ContextFile,DefFile),
+    pdt_property(H,clauses,Clauses).
+
+pdt_find_first_clause(Context,Name/Arity,DefFile,Clause):-
+	pdt_find_clauses(Context,Name/Arity,DefFile,Clauses),
+	arg(1,Clauses,Clause).
+
+pdt_find_first_clause_position(Context,Name/Arity,DefFile,Position):-
+	pdt_find_first_clause(Context,Name/Arity,DefFile,Clause),
+	pdt_top_annotation(Clause,Anno),
+	memberchk(position(Position),Anno).
+
 
 visible_in_context(ContextModule,H):-
     pdt_property(H,module,ContextModule),
     !.
 visible_in_context(_,H):-	
 	pdt_property(H,module,user),
+	!.
+visible_in_context(_,H):-	
+	pdt_property(H,module,system),
 	!.
 visible_in_context(_,H):-	
 	pdt_property(H,exported,true),

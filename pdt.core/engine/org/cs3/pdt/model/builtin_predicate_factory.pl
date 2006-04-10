@@ -39,77 +39,54 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- module(pdt_handle,[
-	pdt_property/3,
-	pdt_lookup/3,
-	pdt_virtual_handle/3,
-	pdt_property/4,	
-	pdt_properties/2,
-	pdt_property_cached/3,
-	pdt_add_property_factory/2,
-	pdt_remove_property_factory/2
-]).
-:-dynamic factory/2.
-
-pdt_virtual_handle(Type,Props,virtual_handle(Props,handle(_Id,Type,_Cache))).
-
-pdt_add_property_factory(Type,Factory):-
-    factory(Type,Factory),!.
-pdt_add_property_factory(Type,Factory):-
-    assert(factory(Type,Factory)).
-
-pdt_remove_property_factory(Type,Factory):-
-	retractall(factory(Type,Factory)).
-
-pdt_property(virtual_handle(_,handle(Id,Type,Cache)),Name,Value):-    
-	nonvar(Id),
-	!,
-	pdt_property(handle(Id,Type,Cache),Name,Value).
-pdt_property(virtual_handle(Props,Handle),Name,Value):-    	
-	handle(_,Type,_)=Handle,
-	pdt_lookup(Props,Type,Handle),
-	pdt_property(Handle,Name,Value).
-pdt_property(handle(Id,Type,Cache),Name,Value):-    
-    var(Cache),
-    !,
-    pdt_lookup(handle(Id,Type,Cache)),
-    pdt_property(handle(Id,Type,Cache),Name,Value).
-pdt_property(handle(_,_,Cache),Name,Value):-    
-    pdt_property_cached(handle(_,_,Cache),Name,Value).
-pdt_property(handle(Id,Type,Cache),Name,Value):-
-    factory(Type,Factory),
-    Factory:get_property(handle(Id,Type,Cache),Name,Value).
-
-pdt_property_cached(handle(_,_,Cache),Name,Value):-
-    member(Prop,Cache),
-    property_name_value(Prop,Name,Value).
-
-pdt_lookup(Props,Type,H):-
-    factory(Type,Factory),
-    Factory:lookup_handle(Props,H),
-    handle(Id,_,Cache)=H,
-    nonvar(Id),
-    nonvar(Cache).
+:-module(builtin_predicate_factory,[
+	pdt_index_builtins/0
+	]).
 
 
-property_name_value(Name,Name,true):-
-    atom(Name),
-    !.
-property_name_value(Prop,Name,Value):-
-    functor(Prop,Name,1),
-    !,
-    Prop=..[Name,Value].
-property_name_value(Prop,Name,Value):-
-	Prop=..[Name,Args],
-	Value=..[array,Args].    
+
+:- use_module(library('org/cs3/pdt/model/pdt_index')).
+:- use_module(library('org/cs3/pdt/model/pdt_handle')).
+:- use_module(library('org/cs3/pdt/util/pdt_util')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
+
+
+:- pdt_add_property_factory(builtin_predicate,builtin_predicate_factory).
+
+lookup_handle(handle(id(Module:Name/Arity), builtin_predicate,Cache)):-
+    pdt_index_load(builtin_predicates,Ix),
+    pdt_index_get(Ix,Name,handle(id(Module:Name/Arity), builtin_predicate,Cache)).
+
+get_property(_,_,_):-fail.
+
 	
-pdt_properties(_,[]).
-pdt_properties(H,[Prop|Props]):-
-    Prop=..[Name,Value],
-    pdt_property(H,Name,Value,false),
-    pdt_properties(H,Props).
-
-pdt_property(H,Name,Value,_):-
-	pdt_property(H,Name,Value),
+pdt_index_builtins:-
+    forall(builtin(Module,Name,Arity),index_builtin(Module,Name,Arity)).
+    
+    
+    
+builtin(Module,Name,Arity):-    
+	current_predicate(Name/Arity),
+	functor(Head,Name,Arity),
+	predicate_property(Head,built_in),
+	user_imported_from(Head,Module).    
+	
+user_imported_from(Head,Module):-
+	user:predicate_property(Head,imported_from(Module)),
 	!.
-pdt_property(_,_,Default,Default).	
+user_imported_from(_,user).
+
+index_builtin(Module,Name,Arity):-
+    pdt_index_load(builtin_predicates,IX),
+	index_builtin(Module,Name,Arity,IX,NextIX),
+	pdt_index_store(builtin_predicates,NextIX).
+	
+index_builtin(Module,Name,Arity,IX,NextIX):-
+	functor(Head,Name,Arity),
+	findall(Prop,user:predicate_property(Head,Prop),Props),
+	index_entry(Module:Name/Arity,[module(Module),name(Name),arity(Arity)|Props],Key,Value),
+	pdt_index_put(IX,Key,Value,NextIX).
+	
+	
+%index_entry(+Signature, +Props, -Key, -Value)
+index_entry(Module:Name/Arity, Props,Name, handle(id(Module:Name/Arity), builtin_predicate,Props)).	

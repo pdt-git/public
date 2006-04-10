@@ -172,22 +172,18 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	private void setFile(IFile file) {
-		if(file!=null){
-			String plFile = Util.prologFileName(file.getLocation().toFile());
+		if(this.file!=null){
+			String plFile = Util.prologFileName(this.file.getLocation().toFile());
 			getPrologProject().getMetaDataEventDispatcher().removePrologInterfaceListener("file_annotation('"+plFile+"')", this);
 			
 		}
 		this.file = file;
 		if(file!=null){
-			String plFile = Util.prologFileName(file.getLocation().toFile());
+			String plFile = Util.prologFileName(this.file.getLocation().toFile());
 			getPrologProject().getMetaDataEventDispatcher().addPrologInterfaceListener("file_annotation('"+plFile+"')", this);
 		}
 		this.data = null;
 
-	}
-
-	private IFile getFile() {
-		return this.file;
 	}
 
 	private IPrologProject getPrologProject() {
@@ -214,8 +210,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	private void update() {
 		clauses = new HashMap();
-		IFile wsfile = getFile();
-		String plFile = Util.prologFileName(wsfile.getLocation().toFile());
+		if(file==null){
+			Debug.warning("CTermContentProvider.update was called, but wsfile is null");
+			data = new Object[0];
+			return;
+		}
+		String plFile = Util.prologFileName(file.getLocation().toFile());
 		plProject = getPrologProject();
 		PrologSession2 s = (PrologSession2) plProject
 				.getMetadataPrologInterface().getSession();
@@ -260,28 +260,28 @@ public class CTermContentProvider implements ITreeContentProvider,
 		if (sigterm != null) {
 			sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				exported.add(new PredicateNode(sigs[i], module));
+				exported.add(new PredicateNode((CCompound) sigs[i], module));
 			}
 		}
 		sigterm = (CTerm) fileAnnos.get("dynamic");
 		if (sigterm != null) {
 			sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				dynamic.add(new PredicateNode(sigs[i], module));
+				dynamic.add(new PredicateNode((CCompound) sigs[i], module));
 			}
 		}
 		sigterm = (CTerm) fileAnnos.get("multifile");
 		if (sigterm != null) {
 			sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				multifile.add(new PredicateNode(sigs[i], module));
+				multifile.add(new PredicateNode((CCompound) sigs[i], module));
 			}
 		}
-		sigterm = (CTerm) fileAnnos.get("module_transparent");
+		sigterm = (CTerm) fileAnnos.get("transparent");
 		if (sigterm != null) {
 			sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				module_transparent.add(new PredicateNode(sigs[i], module));
+				module_transparent.add(new PredicateNode((CCompound) sigs[i], module));
 			}
 		}
 		Vector tempData = new Vector();
@@ -289,9 +289,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 		for (int i = 0; i < members.length; i++) {
 			CTerm term = members[i];
 			if (term.getAnotation("clause_of") == null) {
-				tempData.add(new DirectiveNode(wsfile, module, term));
+				tempData.add(new DirectiveNode(file, module, term));
 			} else {
-				Clause clause = new ClauseNode(term, wsfile);
+				Clause clause = new ClauseNode(term, file);
 				Predicate predicate = clause.getPredicate();
 				List l = (List) clauses.get(predicate);
 				if (l == null) {

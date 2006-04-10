@@ -41,14 +41,17 @@
 
 package org.cs3.pdt.core.internal.natures;
 
+import java.io.File;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pdt.runtime.PrologLibraryManager;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -85,7 +88,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
-		if (!pif.isDown()) {
+		if (pif.isUp()) {
 			afterInit(pif);
 		}
 	}
@@ -137,6 +140,10 @@ public class MetadataSubscription extends DefaultSubscription implements
 			Map map = s.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
 					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
+					"use_module(library('/org/cs3/pdt/model/predicate_definition_factory'))," +
+					"use_module(library('/org/cs3/pdt/model/builtin_predicate_factory'))," +
+					"use_module(library('/org/cs3/pdt/model/pdt_index'))," +
+					"use_module(library('/org/cs3/pdt/model/pdt_handle'))," +
 					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +					
 					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
 			if(map==null){
@@ -151,6 +158,19 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"register_annotator(library('/org/cs3/pdt/annotate/indexer'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator modules: query failed.");
+			}
+			File builtinIdxFile = PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.BUILTIN_INDEX_FILE).toFile();
+			String plFile = Util.prologFileName(builtinIdxFile);
+			if(builtinIdxFile.exists()){
+				map=s.queryOnce("pdt_index_load_from_file(builtin_predicates,'"+plFile+"')");
+				if(map==null){
+					throw new RuntimeException("could not load builtin predicate index");
+				}
+			}else{
+				map=s.queryOnce("pdt_index_builtins,pdt_index_save_to_file(builtin_predicates,'"+plFile+"')");
+				if(map==null){
+					throw new RuntimeException("could not load builtin predicate index");
+				}
 			}
 		}catch(Throwable t){
 			Debug.rethrow(t);
