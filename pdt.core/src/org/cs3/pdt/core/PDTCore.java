@@ -129,6 +129,8 @@ public class PDTCore {
 	public static final String JAVACC = "pdt.parser.javacc";
 	public static final String READ_TERM_3 = "pdt.parser.read_term_3";
 
+	public static final String BUILTIN_INDEX_FILE = "builtin_predicates.idx";
+
 
 	
 	/**

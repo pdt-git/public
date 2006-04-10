@@ -45,7 +45,6 @@ import java.util.HashMap;
 
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
-import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
 
@@ -59,7 +58,7 @@ public class PredicateNode implements Predicate {
 
 	private String module;
 
-	public PredicateNode(CTerm signature, String defaultModule) {
+	public PredicateNode(CCompound signature, String defaultModule) {
 		CCompound term = (CCompound) signature;
 		module=defaultModule;
 		if(":".equals(term.getFunctorValue())){

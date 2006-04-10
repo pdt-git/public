@@ -91,7 +91,7 @@
 :- module(pdt_console_server,[
 	pdt_current_console_server/2,
 	pdt_start_console_server/2,
-	pdt_stop_console_server/2
+	pdt_stop_console_server/0
 ]).
 :- use_module(library(socket)).
  
@@ -174,7 +174,7 @@ allow(Peer, Options) :-
 :- dynamic server/2.
 
 :- at_initialization(mutex_create(pdt_console_server_mux)).
-:- at_halt(mutex_destroy(pdt_console_server_mux)).
+%:- at_halt(mutex_destroy(pdt_console_server_mux)).
 
 % pdt_current_console_server(-Port, -LockFile).
 % retrieve information about running servers

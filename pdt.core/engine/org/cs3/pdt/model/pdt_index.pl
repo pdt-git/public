@@ -45,7 +45,9 @@
 	pdt_index_put/4,	
 	pdt_index_remove/4,	
 	pdt_index_get/3,		
-	pdt_index_after/4				
+	pdt_index_after/4,
+	pdt_index_load_from_file/2,		
+	pdt_index_save_to_file/2				
 ]).
 
 %Currently we only support rb trees as index data structure. Once i found a good way to implement a
@@ -117,4 +119,17 @@ pdt_index_get(IX,Key,Val):-
 pdt_index_after(IX,Start,Key,Val):-
     pdt_rbtree_next(Start,Key,Val,IX).    
 
+
+pdt_index_save_to_file(IxName,File):-
+	tell(File),   
+    pdt_index_load(IxName,X),
+    write_canonical(X),
+    writeln('.'),
+    told.
+    
+pdt_index_load_from_file(IxName,File):-
+    see(File),
+    read(X),
+    seen,
+    pdt_index_store(IxName,X).
 

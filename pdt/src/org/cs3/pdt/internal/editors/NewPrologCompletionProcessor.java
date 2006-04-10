@@ -276,14 +276,14 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 				"exported(Exported)," +
 				"dynamic(Dynamic)," +
 				"multifile(Multifile)," +
-				"module_transparent(Transparent)])";	
+				"transparent(Transparent)])";	
 			}else{
 				query = "pdt_predicate_completion("+contextModule+",'"+prefix+"',Name,[module(Module)," +
 				"arity(Arity)," +
 				"exported(Exported)," +
 				"dynamic(Dynamic)," +
 				"multifile(Multifile)," +
-				"module_transparent(Transparent)])";
+				"transparent(Transparent)])";
 			}
 			
 			List l=session.queryAll(query);

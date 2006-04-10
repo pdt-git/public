@@ -57,22 +57,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 
-%This module registers itself as a property factory for handles of type 'predicate_definition'. See pdt_handle.
-:- pdt_add_property_factory(predicate_definition,clause_indexer).
 
-get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),clauses,Value):-
-    current_file_annotation(File,_,Terms),
-	filter_clauses(Terms,Module:Name/Arity,Clauses),
-	Value=..[array|Clauses].
-
-filter_clauses([],_,[]).
-filter_clauses([Term|Terms],Sig,[Term|Clauses]):-
-    Term=aterm(Anns,_),
-    memberchk(clause_of(Sig),Anns),
-    !,
-    filter_clauses(Terms,Sig,Clauses).
-filter_clauses([_|Terms],Sig,Clauses):-
-    filter_clauses(Terms,Sig,Clauses).
 
 file_post_annotation_hook([File|_],_,_,Annos,[indexed(IxTime)|Annos]):-
     time_file(File,ModTime),
@@ -97,21 +82,53 @@ update_index(_,_,ModTime,IxTime):-
 	    
 update_index(File,Annos,_,_):-	    
 	get_time(IxTime),
-	clear_index(File,Annos),
-	pdt_ht_set(index_times,File,IxTime),	
-	pdt_index_load(predicate_definitions,IX),
-	index_clauses(File,Annos,IX,NewIX),
-	pdt_index_store(predicate_definitions,NewIX).
+	pdt_ht_set(index_times,File,IxTime),		
+	update_predicate_definitions(File,Annos),
+	update_module_definitions(File,Annos).
+	
 	
 clear_index(File,Annos):-
 	pdt_ht_remove_all(index_times,File,_),
+	clear_predicate_definitions(File,Annos),
+	clear_module_definitions(File,Annos).
+
+clear_predicate_definitions(File,Annos):-
 	member(defines(Definitions),Annos),
 	pdt_index_load(clause_definitions,IX),
 	unindex_clauses(File,Definitions,IX,NewIX),
 	pdt_index_store(clause_definitions,NewIX).
 
+update_predicate_definitions(File,Annos):-
+	pdt_index_load(predicate_definitions,IX),
+	index_clauses(File,Annos,IX,NewIX),
+	pdt_index_store(predicate_definitions,NewIX).
 
+clear_module_definitions(File,Annos):-
+	pdt_index_load(module_definitions,Ix),
+	memberchk(defines_module(Module),Annos),
+	memberchk(exports(Exports),Annos),
+	exports_to_handles(Module,Exports,Handles),
+	module_definition_index_entry(Module,File,Handles,Key,Value),
+	pdt_index_remove(Ix,Key,Value,NewIX),
+	pdt_index_store(module_definitions,NewIX).
+
+update_module_definitions(File,Annos):-
+	pdt_index_load(module_definitions,Ix),
+	memberchk(defines_module(Module),Annos),
+	memberchk(exports(Exports),Annos),
+	exports_to_handles(Module,Exports,Handles),
+	module_definition_index_entry(Module,File,Handles,Key,Value),
+	pdt_index_put(Ix,Key,Value,NewIX),
+	pdt_index_store(module_definitions,NewIX).
 	
+
+exports_to_handles(_,[],[]).
+exports_to_handles(Module,[Name/Arity|Exports],[Handle|Handles]):-
+    !,
+    pdt_virtual_handle(module_definitions,[module(Module),name(Name),arity(Arity)],Handle),
+    exports_to_handles(Module,Exports,Handles).
+exports_to_handles(Module,[_|Exports],[Handles]):-
+    exports_to_handles(Module,Exports,Handles).
 
 index_clauses(File,Annos,IX,NewIX):-
     	member(defines(Defs),Annos),
@@ -138,7 +155,7 @@ index_clause(IX,File,Def,DynamicDefs,MultifileDefs,TransparentDefs,Exports,
 	Props0=[file(File),module(M),name(N),arity(A)],
 	matcher(Def,DynamicDefs,dynamic(true),Props0,Props1,NextDynamicDefs),
 	matcher(Def,MultifileDefs,multifile(true),Props1,Props2,NextMultifileDefs),
-	matcher(Def,TransparentDefs,module_transparent(true),Props2,Props3,NextTransparentDefs),	
+	matcher(Def,TransparentDefs,transparent(true),Props2,Props3,NextTransparentDefs),	
 	matcher(N/A,Exports,exported(true),Props3,Props4,NextExports),	
 	index_clause(IX,File,Def,Props4,NextIX).
 
@@ -162,6 +179,8 @@ clause_definition_index_entry(Module:Name/Arity,
                               Props,
                               Name,
                               handle(id(File,Module:Name/Arity), predicate_definition,Props)).
+                              
+module_definition_index_entry(Name,File,Exports,Name,handle(id(Name,File), module_definition,[name(Name),file(File),exports(Exports)])).
 	    
 
 time_index(File,IxTime):-

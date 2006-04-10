@@ -44,6 +44,7 @@
 	pdt_maybe/1,
 	pdt_file_spec/2,
 	pdt_member/2,
+	pdt_memberchk/2,	
 	pdt_chop_before/3,
 	pdt_chop_after/3,
 	pdt_remove_duplicates/2
@@ -105,7 +106,10 @@ pdt_member(_,Var):-
 pdt_member(M,[M|_]).
 pdt_member(M,[_|T]):-
     pdt_member(M,T).
-    
+
+pdt_memberchk(M,L):-
+	pdt_member(M,L),
+	!.    
     
 % pdt_chop_before(+Elm,+Elms,+Suffix)
 
