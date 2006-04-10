@@ -130,6 +130,11 @@ public class PrologOutline extends ContentOutlinePage {
 				}
 				
 			}
+			if( e1 instanceof Predicate && e2 instanceof Predicate){
+				Predicate p1=(Predicate)e1;
+				Predicate p2=(Predicate)e2;
+				return p1.compareTo(p2);
+			}
 			return super.compare(viewer, e1, e2);
 		}
 	}
