@@ -108,7 +108,12 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					try {
 						monitor.beginTask("searching...",
 								IProgressMonitor.UNKNOWN);
-						run_impl(data,file);
+						String parser = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER,PDTCore.JAVACC);
+						if(PDTCore.JAVACC.equals(parser)){
+							run_old_impl(data,file);
+						}else{
+							run_impl(data,file);
+						}
 
 					} catch (Throwable e) {
 						Debug.report(e);
@@ -131,6 +136,45 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	public void dispose() {
 	}
 
+	private void run_old_impl(Goal goal, IFile file) {
+		IPrologProject plprj;
+		try {
+			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+		IMetaInfoProvider mip = plprj.getMetaInfoProvider();
+		Predicate[] predicates = mip.findPredicates(goal);
+		//FIXME: what about alternatives?
+		if(predicates==null||predicates.length==0){
+			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
+					"PDT Plugin", "Can't find predicate: " + goal.getName()
+							+ "/" //$NON-NLS-1$
+							+ goal.getArity()
+							+ ".\nSorry, Code analysis is still work in progress.");
+			return;
+		}
+		if(predicates.length>1){
+			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
+					"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
+					+ goal.getName()+"/"+ goal.getArity()
+							+ ".\nSorry, Code analysis is still work in progress. " +
+									"For now i will just take you " +
+									"to the first match found.");
+		}
+		Clause[] clauses = mip.findClauses(predicates[0]);
+		if(clauses==null || clauses.length==0){
+			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
+					"PDT Plugin", "Can't find clauses for predicate: " + goal.getName()
+							+ "/" //$NON-NLS-1$
+							+ goal.getArity()
+							+ ".\nSorry, Code analysis is still work in progress.");
+			return;
+		}
+		PDTUtils.showSourceLocation(clauses[0].getSourceLocation());
+	}
+	
 	private void run_impl(Goal goal, IFile file) {
 		
 		SourceLocation loc = findFirstClausePosition(file,goal);
