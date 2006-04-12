@@ -42,10 +42,17 @@
 :- module(pdt_util_aterm,[
 	pdt_strip_annotation/3,
 	pdt_splice_annotation/3,
-	pdt_top_annotation/2
+	pdt_top_annotation/2,
+	pdt_term_annotation/3
 ]).
 
+%@deprecated: use pdt_term_annotation/3
 pdt_top_annotation(aterm(A,_),A).
+
+%pdt_term_annotation(?AnnotatedTerm,?Term,?Annotation).
+% succeeds if AnnotatedTerm is an annotated term, Annotation is the top annotation, and
+% Term is the unwrapped toplevel (its arguments are still annotated).
+pdt_term_annotation(aterm(A,T),T,A).
 
 pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
     nonvar(AnotatedTerm),check_aterm(AnotatedTerm),

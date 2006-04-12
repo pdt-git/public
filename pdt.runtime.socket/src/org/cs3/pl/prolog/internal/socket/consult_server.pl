@@ -597,20 +597,20 @@ my_read_term(InStream,Term,Options):-
 	
 my_write_term(OutStream,Elm,Options):-
 	write_term(OutStream,Elm,Options),
-	nl(OutStream),
-	thread_self(Self),
-	write(Self),
-	write(': >>> '),
-	write_term(Elm,Options),
-	nl.
+	nl(OutStream).
+%	thread_self(Self),
+	%write(Self),
+	%write(': >>> '),
+	%write_term(Elm,Options),
+	%nl.
 	
 my_format(OutStream,Format,Args):-
 	format(OutStream,Format,Args),
-	thread_self(Self),
-	write(Self),write(': >>> '),
-	format(current_output,Format,Args),
-	flush_output(OutStream),
-	flush_output(current_output).
+%	thread_self(Self),
+%	write(Self),write(': >>> '),
+%	format(current_output,Format,Args),
+	flush_output(OutStream).
+%	flush_output(current_output).
 	
 write_escaped(Out,Atom):-
 	write_escaped(Out,Atom,canonical).
