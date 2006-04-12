@@ -231,12 +231,14 @@ do_process_term(_,_,_,Term,_,_,[],[]):-
 do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
     nonvar(Error),!,
     read_terms_rec(FileStack,Module,In,Terms,Errors).
-do_process_term(FileStack,OpModule,In,Term,Options,_,[ProcessedTerm|Terms],Errors):-    
+do_process_term(FileStack,OpModule,In,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
 	member(subterm_positions(Positions),Options),
-%	writeln(wrapping(Term)),
-	wrap_term(Term,Positions,WrapedTerm),   
-%	writeln(successfully_wrapped(Term)),
-   	pre_process_term(FileStack,OpModule,WrapedTerm,ProcessedTerm),
+	wrap_term(Term0,Positions,Term1),   
+	pdt_term_annotation(Term1,T,A),
+	memberchk(variable_names(Names),Options),
+	memberchk(singletons(Singletons),Options),	
+	pdt_term_annotation(Term2,T,[variable_names(Names),singletons(Singletons)|A]),
+   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
     read_terms_rec(FileStack,OpModule,In,Terms,Errors).
 
 do_read_term(In,Term,Options,Error):-
