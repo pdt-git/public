@@ -44,8 +44,8 @@ package org.cs3.pdt.runtime;
 public class PrologRuntime {
 	
 	public static final String PLUGIN_ID = "org.cs3.pdt.runtime";
-	public static final String LIBRARY_ID = "pdt.core.library";
-	
+	public static final String LIB_PIF = "pdt.runtime.library.pif";
+	public static final String LIB_COMMON = "pdt.runtime.library.common";
 	
 	/**
      * The fully-qualified classname of a class that extends
@@ -57,6 +57,7 @@ public class PrologRuntime {
     public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
 	public static final String EP_TRACKERS = "prologContextTracker";
 	public static final String EP_PROLOG_LIBRARY = "prologLibrary";
+	
 	
     
 
