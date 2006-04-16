@@ -123,7 +123,8 @@
            alias="library"
            id="pdt.core.library"
            path="engine">
-        <dependency library="pdt.runtime.library"/>
+        <dependency library="pdt.runtime.library.pif"/>
+        <dependency library="pdt.runtime.library.common"/>
      </library>
   </extension>
  

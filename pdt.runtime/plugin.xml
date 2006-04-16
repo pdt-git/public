@@ -43,8 +43,12 @@
           point="org.cs3.pdt.runtime.prologLibrary">
        <library
              alias="library"
-             id="pdt.runtime.library"
+             id="pdt.runtime.library.pif"
              path="library/pif/"/>
+		<library
+             alias="library"
+             id="pdt.runtime.library.common"
+             path="library/common/"/>             
     </extension>
  
 </plugin>
