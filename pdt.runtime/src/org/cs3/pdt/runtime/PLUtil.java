@@ -44,12 +44,15 @@ package org.cs3.pdt.runtime;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.PrologSession;
@@ -158,6 +161,117 @@ public class PLUtil {
 			term = compound.getArgument(1);
 		}
 		return m;
+	}
+	
+	/**
+	 * lookup an entry in a red-black tree.
+	 * 
+	 * See module org/cs3/pdt/util/pdt_util_rbtree for details on the expected datastructure.
+	 * This method does NOT call prolog. It performs a binary search on the CTerm 
+	 * data structure passed as first argument. 
+	 * 
+	 * Note that only the functor name of key terms is compared. (I do not want to 
+	 * implement deep standard-order term comparision in java). 
+	 * 
+	 * @param tree
+	 * @param key
+	 * @return the first match found or null if none found.
+	 * 
+	 */
+	public static CTerm rbtreeLookup(CTerm tree,String key){
+		while(tree instanceof CCompound){//if it's a compound, it's not NIL.
+			CTerm keyTerm = ((CCompound)tree).getArgument(1);
+			String keyString = keyTerm.getFunctorValue();
+			int c = key.compareTo(keyString);
+			if(c<0){
+				tree=((CCompound)tree).getArgument(0);
+			}else if(c==0){
+				return tree=((CCompound)tree).getArgument(2);
+			}else if (c>0){
+				tree=((CCompound)tree).getArgument(3);
+			}
+		}
+		//in a correctly formed rbtree, the invariant only fails if tree is NIL.  
+		return null;
+	}
+	
+	private static class _rbTreeNodeIterator implements Iterator{
+		
+		/* invariance: the left-most node that was not yet returned is top on stack.
+		 */
+		
+		private LinkedList stack = new LinkedList();
+		
+		public _rbTreeNodeIterator(CTerm root) {
+			diveLeft(root);
+		}
+
+		public boolean hasNext() {		
+			return ! stack.isEmpty();
+		}
+		
+		public Object next() {
+			//climb up
+			CCompound top = (CCompound) stack.removeLast();
+			//left subtree is already done. ->dive right 
+			if(hasRightChild(top)){
+				CCompound right = (CCompound) top.getArgument(3);
+				diveLeft(right);
+			}
+			
+			return top;
+		}
+				
+		private void diveLeft(CTerm node) {
+			while(!isEmptyTree(node)){				
+				stack.addLast(node);
+				node=((CCompound)node).getArgument(0);
+				
+			}
+			
+			
+		}
+
+		private boolean isEmptyTree(CTerm c){
+			return isEmptyTree((CCompound)c);
+		}
+		private boolean isEmptyTree(CCompound c){
+			return "black".equals(c.getFunctorValue())
+			&& c.getArgument(0) instanceof CNil
+			&& c.getArgument(1) instanceof CNil
+			&& c.getArgument(2) instanceof CNil
+			&& c.getArgument(3) instanceof CNil;
+		}
+		private boolean hasLeftChild(CTerm node) {
+			if(!(node instanceof CCompound)){
+				return false;
+			}
+			CCompound c = (CCompound)node;
+			
+			return !isEmptyTree((CCompound) c.getArgument(0));
+		}
+		private boolean hasRightChild(CTerm node) {
+			if(!(node instanceof CCompound)){
+				return false;
+			}
+			CCompound c = (CCompound)node;
+			
+			return !isEmptyTree((CCompound) c.getArgument(3));
+		}
+		
+		
+
+		public void remove() {
+			throw new UnsupportedOperationException();
+			
+		}
+		
+	
+
+	}
+	public static Iterator rbtreeIterateNodes(CTerm tree){
+		return new _rbTreeNodeIterator(tree);
+
 	}
 	
 	private static ATermFactory factory = new ATermFactory();
