@@ -76,7 +76,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			public void onInit(PrologInterface pif, PrologSession initSession) {
-				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{PrologRuntime.LIBRARY_ID});
+				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{PrologRuntime.LIB_PIF});
 				initSession.queryOnce("use_module(library(pif_observe))");
 			}
 

@@ -77,7 +77,7 @@ public class ATermFactory implements CTermFactory {
 		
 	}
 	
-	private  class _Nil extends AbstractATerm implements CAtom{
+	private  class _Nil extends AbstractATerm implements CNil{
 
 		public _Nil(CTerm term) {
 			super(ATermFactory.this, term);
