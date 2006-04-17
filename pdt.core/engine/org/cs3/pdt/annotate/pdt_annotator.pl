@@ -1,4 +1,4 @@
- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is part of the Prolog Development Tool (PDT)
 % 
 % Author: Lukas Degener (among others) 
@@ -234,13 +234,11 @@ do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
 do_process_term(FileStack,OpModule,In,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
 	member(subterm_positions(Positions),Options),
 	wrap_term(Term0,Positions,Term1),   
-	%pdt_term_annotation(Term1,T,A),
+	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	%pdt_term_annotation(Term2,T,[variable_names(Names),singletons(Singletons)|A]),
-   	pdt_add_annotation(Term1,variable_names,Names,Term2),
-   	pdt_add_annotation(Term2,singletons,Singletons,Term3),
-   	pre_process_term(FileStack,OpModule,Term3,ProcessedTerm),
+	pdt_term_annotation(Term2,T,[variable_names(Names),singletons(Singletons)|A]),
+   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
     read_terms_rec(FileStack,OpModule,In,Terms,Errors).
 
 do_read_term(In,Term,Options,Error):-

@@ -40,37 +40,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- module(pdt_util_aterm,[
-	pdt_add_annotation/4,
-	pdt_remove_annotation/4,
-	pdt_remove_annotation/3,
 	pdt_strip_annotation/3,
 	pdt_splice_annotation/3,
 	pdt_top_annotation/2,
 	pdt_term_annotation/3
 ]).
-
-:- use_module(library('/org/cs3/pdt/util/pdt_util_multimap')).
-
-
-pdt_add_annotation(InTerm,Key,Value,OutTerm):-
-	pdt_term_annotation(InTerm,Term,InAnn),
-	pdt_multimap_add(InAnn,Key,Value,OutAnn),
-	pdt_term_annotation(OutTerm,Term,OutAnn).
-	
-pdt_remove_annotation(InTerm,Key,Value,OutTerm):-
-    pdt_term_annotation(InTerm,Term,InAnn),
-    pdt_multimap_remove(InAnn,Key,Value,OutAnn),
-    pdt_term_annotation(OutTerm,Term,OutAnn).
-    
-pdt_remove_annotation(InTerm,Key,OutTerm):-
-    pdt_term_annotation(InTerm,Term,InAnn),
-    pdt_multimap_remove_all(InAnn,Key,OutAnn),
-    pdt_term_annotation(OutTerm,Term,OutAnn).
-    
-pdt_get_annotation(InTerm,Key,Value):-
-	pdt_term_annotation(InTerm,_,Ann),
-	pdt_multimap_get(Ann,Key,Value).    
-
 
 %@deprecated: use pdt_term_annotation/3
 pdt_top_annotation(aterm(A,_),A).
@@ -78,11 +52,7 @@ pdt_top_annotation(aterm(A,_),A).
 %pdt_term_annotation(?AnnotatedTerm,?Term,?Annotation).
 % succeeds if AnnotatedTerm is an annotated term, Annotation is the top annotation, and
 % Term is the unwrapped toplevel (its arguments are still annotated).
-pdt_term_annotation(aterm(A,T),T,A):-
-    (	var(A)
-    ->	pdt_multimap_empty(A)
-    ;	true
-    ).
+pdt_term_annotation(aterm(A,T),T,A).
 
 pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
     nonvar(AnotatedTerm),check_aterm(AnotatedTerm),
