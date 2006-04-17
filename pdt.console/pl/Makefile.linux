@@ -51,4 +51,4 @@ $(LIBNAME).so: $(OBJ)
 	gcc  -Wall -g -shared -o $(LIBNAME).so $(OBJ)
 
 $(LIBNAME).o: $(LIBNAME).c
-	gcc -Wall -g -I/usr/local/lib/pl-5.6.5/include -fPIC -c $(LIBNAME).c
+	gcc -Wall -g -I/usr/local/lib/pl-5.6.11/include -fPIC -c $(LIBNAME).c

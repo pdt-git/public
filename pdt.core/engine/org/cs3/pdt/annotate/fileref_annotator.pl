@@ -55,11 +55,13 @@ file_pre_annotation_hook(_,_,Terms,InAnos,[references_files(Refs)|InAnos]):-
 
 
 file_refs(Stack,InTerm,OutTerm):-
-    pdt_strip_annotation(InTerm,Term,(Head,Tail)),
+    %pdt_strip_annotation(InTerm,Term,(Head,Tail)),
+    pdt_term_annotation(InTerm,Term,_),
     find_file_refs(Term,Refs),   
     resolve_file_Refs(Refs,ResRefs),
     annotate_refered_files(Stack,ResRefs),
-    pdt_splice_annotation(Term,([file_refs(ResRefs)|Head],Tail),OutTerm).
+    pdt_add_annotation(InTerm,file_refs,ResRefs,OutTerm).
+%    pdt_splice_annotation(Term,([file_refs(ResRefs)|Head],Tail),OutTerm).
 
     
 find_file_refs(:-[H,T],[H,T]).
