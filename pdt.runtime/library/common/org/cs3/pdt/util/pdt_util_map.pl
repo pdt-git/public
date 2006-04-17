@@ -58,7 +58,7 @@ pdt_map_empty(In):-
     pdt_rbtree_new(In).
 
 pdt_map_put(In,Key,Value,Out):-
-    pdt_map_remove(In,Key,M),
+    pdt_map_delete(In,Key,_,M),
     !,
     pdt_rbtree_insert(M,Key,Value,Out).
 pdt_map_put(In,Key,Value,Out):-

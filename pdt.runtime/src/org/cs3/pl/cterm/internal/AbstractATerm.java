@@ -42,10 +42,8 @@
 package org.cs3.pl.cterm.internal;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
-import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
@@ -80,12 +78,9 @@ public abstract class AbstractATerm implements CTerm {
 		return  annotation.containsKey(functor);
 	}
 	
-	private void processAnotations_bak() {
+	private void processAnotations() {
 		CCompound aterm =(CCompound) this.term;
 		CTerm current = aterm.getArgument(0);
-		
-		
-		
 		while(current.getFunctorValue().equals(".")
 				&& current.getArity()==2){
 			CTerm term = ((CCompound)current).getArgument(0);
@@ -94,20 +89,8 @@ public abstract class AbstractATerm implements CTerm {
 		}
 		
 	}
-	
-	private void processAnotations() {
-		CCompound aterm =(CCompound) this.term;
-		CTerm current = aterm.getArgument(0);
-		
-		Iterator it = PLUtil.rbtreeIterateNodes(current);
-		while(it.hasNext()){
-			CTerm node = (CTerm) it.next();
-			processAnotation(node);
-		}
-		
-		
-	}
-	private void processAnotation_bak(CTerm term) {
+
+	private void processAnotation(CTerm term) {
 		String key = term.getFunctorValue();
 		CTerm value = null;
 		if( term instanceof CCompound){
@@ -118,10 +101,6 @@ public abstract class AbstractATerm implements CTerm {
 			}
 		}
 		annotation.put(key,value);
-	}
-	private void processAnotation(CTerm term) {
-		CCompound node = (CCompound) term;
-		annotation.put(node.getArgument(1).getFunctorValue(),node.getArgument(2));
 	}
 
 	public AbstractATerm(ATermFactory factory, CTerm aterm) {
