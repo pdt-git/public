@@ -59,8 +59,12 @@
 pdt_multimap_empty(M):-
     pdt_map_empty(M).
 
+pdt_multimap_get(M,Key,Value):-
+    get_values(M,Key,Values),
+    pdt_set_element(Values,Value).
+
 pdt_multimap_add(In,Key,Value,Out):-
-	get_values(_,_,Values),
+	get_values(In,Key,Values),
 	pdt_set_add(Values,Value,OutValues),
 	pdt_map_put(In,Key,OutValues,Out).
 

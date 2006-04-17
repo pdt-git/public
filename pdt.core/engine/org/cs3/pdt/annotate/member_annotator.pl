@@ -55,16 +55,17 @@ term_post_annotation_hook(_,_,FileAnos,InTerm,OutTerm):-
     ;	FileModule=user
     ),
     pdt_strip_annotation(InTerm, Term, (TopAnnos, ArgAnnos)),
-	process_member(Term,FileModule,AddAnno),
-    pdt_splice_annotation(Term, ([AddAnno|TopAnnos],ArgAnnos),OutTerm).
+	process_member(Term,FileModule,Key,Value),
+	pdt_add_annotation(InTerm,Key,Value,OutTerm).
+    %pdt_splice_annotation(Term, ([AddAnno|TopAnnos],ArgAnnos),OutTerm).
 
-process_member(Term,FileModule,clause_of(Module:Functor/Arity)):-
+process_member(Term,FileModule,clause_of,Module:Functor/Arity):-
     has_head(Term,FileModule, Module, Functor, Arity),
     Functor\=':-'.
-process_member(':-'(Term),FileModule,Annotation):-
+process_member(':-'(Term),FileModule,Property,ModuleQualifiedSignatures):-
     property_definition(Term,Property,Signatures),
-    module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures),
-    Annotation=..[Property,ModuleQualifiedSignatures].
+    module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures).
+%    Annotation=..[Property,ModuleQualifiedSignatures].
 
 property_definition(Term,defines_dynamic,Sigs):-
     Term=..[dynamic|Sigs].
@@ -118,8 +119,7 @@ collect_definitions(Terms,Definitions):-
 
 collect_definitions([],Tree,Tree).   
 collect_definitions([Term|Terms],InTree,OutTree):-
-    pdt_top_annotation(Term,TopAn),
-    pdt_member(clause_of(Definition),TopAn),
+    pdt_get_annotation(Term,clause_of,Definition),
     !,
     pdt_rbtree_insert(InTree,Definition,Definition,NextTree),
 	collect_definitions(Terms,NextTree,OutTree).
