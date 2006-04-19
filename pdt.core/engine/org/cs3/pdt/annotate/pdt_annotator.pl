@@ -88,6 +88,40 @@ current_file_annotation(File,FileAnotations,Terms):-
 current_file_error(FileSpec,Error):-
     pdt_file_spec(FileSpec,Abs),
     file_error(Abs,_,Error).
+
+
+/*
+pdt_annotator_context(+In,+Scope,-InMap,+OutMap,-Out).
+
+
+all hook predicates use a set of accumulators which can be  
+accessed and updated through this predicate.
+
+In should be the input context as passed to the hook
+Scope should be local,term,file, or global.
+InMap will be unified with the current multimap for that scope
+Out will be unified with a copy of in where the scope map is replaced by OutMap.
+
+scope maps:
+- global the 
+
+*/
+
+pdt_annotator_context(context(G,F,T,L0),local,L0,L1,context(G,F,T,L1)).
+pdt_annotator_context(context(G,F,T0,L),term,T0,T1,context(G,F,T1,L)).
+pdt_annotator_context(context(G,F0,T,L),file,F0,F1,context(G,F1,T,L)).
+pdt_annotator_context(context(G0,F,T,L),global,G0,G1,context(G1,F,T,L)).
+
+/*
+convenience predicates: these are just shortcuts using the above ones
+pdt_annotator_context_get(+In,+Scope,+Key,-val).
+pdt_annotator_context_add(+In,+Scope,+Key,+val,-Out).
+
+*/
+
+pdt_annotator_context_get(In,Scope,Key,Val):-
+    pdt_annotator_context(In,Scope,Map,_,_),
+    pdt_multimap_get(Map,Key,Val).
     
 /**
 register_annotator(+FileSpec)
