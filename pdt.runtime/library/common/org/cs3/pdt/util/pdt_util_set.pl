@@ -49,7 +49,8 @@
 	pdt_set_empty/1,
 	pdt_set_add/3,
 	pdt_set_remove/3,
-	pdt_set_element/2
+	pdt_set_element/2,
+	pdt_set_to_list/2
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
@@ -57,6 +58,9 @@
 
 pdt_set_empty(Set):-
     pdt_map_empty(Set).
+
+pdt_set_to_list(Set,List):-
+    findall(Elm,pdt_set_element(Set,Elm),List).
 
 pdt_set_add(In,Elm,Out):-
     pdt_map_put(In,Elm,true,Out).

@@ -39,12 +39,16 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- module(pdt_annotator,[
+:- module(pdt_annotator2,[
 	ensure_annotated/1,
 	register_annotator/1,
 	current_file_annotation/3,
 	current_file_error/2,
-	forget_file_annotation/1
+	forget_file_annotation/1,
+	pdt_annotator_context/5,
+	pdt_annotator_context_get/4,
+	pdt_annotator_context_add/5,
+	pdt_annotator_context_empty/1
 ]).
 
 
@@ -54,6 +58,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
@@ -69,7 +74,6 @@ forget_file_annotation(Spec):-
     clear_timestamp(FileName),
     pif_notify(file_annotation(FileName),forget).
 
-
 call_cleanup_hook(FileName):-
     findall(Anotator,annotator(_,Anotator),Anotators),
     call_cleanup_hook(Anotators,FileName).
@@ -80,6 +84,8 @@ call_cleanup_hook([Annotator|Annotators],File):-
     	Annotator:cleanup_hook(File)
     ),
     call_cleanup_hook(Annotators,File).     
+
+
 
 /**
 current_file_annotation(-Filename,-FileAnotations,-Terms)
@@ -116,7 +122,21 @@ InMap will be unified with the current multimap for that scope
 Out will be unified with a copy of in where the scope map is replaced by OutMap.
 
 scope maps:
-- global the 
+- global 
+	
+
+- file 
+	reset when annotator is called.
+	initially contains file, op_module
+	when all hooks are done, contents are saved as file annotations.
+	
+- term 
+	reset before a term is read
+	initialy contains singletons, variable_names
+	when all hooks are done, contents are saved in the top annotation of the term.
+	
+- local 
+	not used right now.		
 
 */
 
@@ -125,6 +145,15 @@ pdt_annotator_context(context(G,F,T0,L),term,T0,T1,context(G,F,T1,L)).
 pdt_annotator_context(context(G,F0,T,L),file,F0,F1,context(G,F1,T,L)).
 pdt_annotator_context(context(G0,F,T,L),global,G0,G1,context(G1,F,T,L)).
 
+pdt_annotator_context_reset(Cx,Scope,CxOut):-
+	pdt_annotator_context(Cx,Scope,_,EmptyMap,CxOut),
+	pdt_multimap_empty(EmptyMap).
+
+pdt_annotator_context_empty(context(G,F,T,L)):-
+    pdt_multimap_empty(G),
+    pdt_multimap_empty(F),
+    pdt_multimap_empty(T),	
+    pdt_multimap_empty(L).
 /*
 convenience predicates: these are just shortcuts using the above ones
 pdt_annotator_context_get(+In,+Scope,+Key,-val).
@@ -135,6 +164,16 @@ pdt_annotator_context_add(+In,+Scope,+Key,+val,-Out).
 pdt_annotator_context_get(In,Scope,Key,Val):-
     pdt_annotator_context(In,Scope,Map,_,_),
     pdt_multimap_get(Map,Key,Val).
+
+pdt_annotator_context_add(In,Scope,Key,Val,Out):-
+    pdt_annotator_context(In,Scope,InMap,OutMap,Out),
+    pdt_multimap_add(InMap,Key,Val,OutMap).
+    
+pdt_annotator_context_update(CxIn,Scope,Key,OldVal,NewVal,CxOut):-
+    pdt_annotator_context(CxIn,Scope,InMap,OutMap,CxOut),
+    pdt_multimap_get(InMap,Key,OldVal),
+    pdt_multimap_remove_all(InMap,Key,TmpMap),
+    pdt_multimap_add(TmpMap,Key,NewVal,OutMap).
     
 /**
 register_annotator(+FileSpec)
@@ -214,13 +253,15 @@ currently on stack, so that files that include each other do not lead
 to infinite recursion.
 */
 ensure_annotated(FileSpec):-
-    \+ is_list(FileSpec),
-	ensure_annotated([FileSpec]).
-ensure_annotated([FileSpec|_]):-
+    pdt_annotator_context_empty(Cx),
+	ensure_annotated(FileSpec,Cx,_).
+
+
+ensure_annotated(FileSpec,Cx,Cx):-
     pdt_file_spec(FileSpec,Abs),
     up_to_date(Abs),
     !.
-ensure_annotated([FileSpec|Stack]):-    
+ensure_annotated(FileSpec,CxIn,CxOut):-    
     new_memory_file(MemFile),
     pdt_file_spec(FileSpec,Abs),
     gen_op_module(Abs,OpModule),
@@ -230,11 +271,14 @@ ensure_annotated([FileSpec|Stack]):-
 	update_timestamp(Abs),
     copy_file_to_memfile(FileSpec,MemFile),
     open_memory_file(MemFile,read,Input),
-    read_terms([Abs|Stack],OpModule,Input,Terms,Errors),
-    pre_process_file([Abs|Stack],OpModule,Terms,FileAnos),
-    post_process_terms([Abs|Stack],OpModule,FileAnos,Terms,OutTerms),
-    post_process_file([Abs|Stack],OpModule,OutTerms,FileAnos,OutAnos),
-    assert(file_annotation(Abs,Time,OutAnos,OutTerms)),
+    pdt_annotator_context_update(CxIn,global,file_stack,Stack,[Abs|Stack],Cx0),
+    pdt_annotator_context_add(Cx0,file,file,Abs,Cx1),
+    pdt_annotator_context_add(Cx1,file,op_module,OpModule,Cx2),
+    read_terms(Cx2,Input,Cx3),
+    pre_process_file(Cx3,Cx4),
+    post_process_terms(Cx4,Cx5),
+    post_process_file(Cx5,FileAnnotations,Terms),
+    assert(file_annotation(Abs,Time,FileAnnotations,Terms)),
     (	nonvar(Errors),Errors\==[]
     ->	forall(member(Error,Errors),assert(file_error(Abs,Time,Error)))
     ;	true
@@ -256,11 +300,21 @@ clear_ops(OpModule):-
     	).
 	
 
+read_terms(CxIn,Input,CxOut):-
+	pdt_annotator_context_get(Cx1,file,op_module,Module),
+  	Options=[
+		subterm_positions(_),
+		variable_names(_),
+		singletons(_),
+    		module(Module),
+    		double_quotes(string)
+    	],
+	do_read_term(In,Term,Options,Error),
+    do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
 
-read_terms(FileStack,OpModule,In,Terms,Errors):-
-    
-    	read_terms_rec(FileStack,OpModule,In,Terms,Errors).
-    	
+%read_terms(FileStack,OpModule,In,Terms,Errors):-
+%     	read_terms_rec(FileStack,OpModule,In,Terms,Errors).
+/*    	
 read_terms_rec(FileStack,Module,In,Terms,Errors):-
     Options=[
 		subterm_positions(_),
@@ -272,7 +326,7 @@ read_terms_rec(FileStack,Module,In,Terms,Errors):-
     do_read_term(In,Term,Options,Error),
     do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
 
-
+*/
 do_process_term(_,_,_,Term,_,_,[],[]):-
 	Term==end_of_file,
 	!.

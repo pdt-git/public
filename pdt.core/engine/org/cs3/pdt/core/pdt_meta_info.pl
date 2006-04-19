@@ -61,6 +61,8 @@ some predicate definitions for queries frequently used by the pdt.core
 :-use_module(library('/org/cs3/pdt/model/pdt_index')).
 :-use_module(library('/org/cs3/pdt/model/pdt_handle')).
 
+
+
 %TODO: most of the file_<something> predicates should be replaced by an index/factory combi
 
 %pdt_file_contains_clause(File,DefModule,Name,Arity,aterm(Anns,Term)):-
