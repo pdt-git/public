@@ -57,7 +57,7 @@
 
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_rbtree')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 
 
 % pdt_index_load(+IxName,-IX)
@@ -67,7 +67,7 @@
 pdt_index_load(IxName,IX):-
     pdt_ht_get(index,IxName,IX),!.
 pdt_index_load(IxName,IX):-
-    pdt_rbtree_new(IX),
+    pdt_multimap_empty(IX),
     pdt_index_store(IxName,IX).
 
 % pdt_index_store(+IxName,+IX)
@@ -87,9 +87,9 @@ pdt_index_store(IxName,IX):-
 % provided the values differ.
 % The resulting index table is unified with NewIX.
 pdt_index_put(IX,Key,Val,IX):-
-    pdt_rbtree_lookup(Key,Val,IX),!.
+    pdt_multimap_get(IX,Key,Val),!.
 pdt_index_put(IX,Key,Val,NextIX):-    
-    pdt_rbtree_insert(IX,Key,Val,NextIX).
+    pdt_multimap_add(IX,Key,Val,NextIX).
 
 
 % pdt_index_remove(+IX,+Key,?Value,-NewIX)
@@ -99,7 +99,7 @@ pdt_index_put(IX,Key,Val,NextIX):-
 pdt_index_remove(IX,Key,Value,NewIX):-
     pdt_index_get(IX,Key,Value),
     !,
-    pdt_rbtree_delete(IX,Key,Value,NextIX),
+    pdt_multimap_remove(IX,Key,Value,NextIX),
     pdt_index_remove(NextIX,Key,Value,NewIX).
 pdt_index_remove(IX,_,_,IX).
     
@@ -109,7 +109,7 @@ pdt_index_remove(IX,_,_,IX).
 % find the first matching entry for Key.
 % On backtracking, this will produce all other entries for Key.
 pdt_index_get(IX,Key,Val):-
-    pdt_rbtree_lookupall(Key,Val,IX).
+    pdt_multimap_get(IX,Key,Val).
 
 % pdt_index_after(+IX,+Start,-Key,-Val)
 %
@@ -117,7 +117,7 @@ pdt_index_get(IX,Key,Val):-
 % Start. On Backtracking, this will successfully produce all entries after the first one found,
 % in standard term order. This can be used to implement interval searches in the index.
 pdt_index_after(IX,Start,Key,Val):-
-    pdt_rbtree_next(Start,Key,Val,IX).    
+    pdt_multimap_next(IX,Start,Key,Val).    
 
 
 pdt_index_save_to_file(IxName,File):-

@@ -105,6 +105,13 @@ pdt_rbtree_next(At,Key,Val,Tree):-
 	lookup_next(Cmp,At,Key,Val,Tree).
 
 
+my_compare(=,A,B):-
+    unifiable(A,B,_),
+    !.
+my_compare(C,A,B):-
+    A\=B,
+    compare(C,A,B).
+    
 lookup_next(<,At, K, V, Tree) :-
 %    	writeln(left_off->look_right),
 	arg(4,Tree,NTree),
@@ -138,7 +145,7 @@ lookup_next(>, At,K, V, Tree) :-
 pdt_rbtree_lookup(_, _, black([],_,_,[])) :- !, fail.
 pdt_rbtree_lookup(Key, Val, Tree) :-
 	arg(2,Tree,KA),
-	compare(Cmp,KA,Key),
+	my_compare(Cmp,KA,Key),
 	lookup(Cmp,Key,Val,Tree).
 
 lookup(>, K, V, Tree) :-
@@ -150,10 +157,14 @@ lookup(<, K, V, Tree) :-
 lookup(=, _, V, Tree) :-
 	arg(3,Tree,V).
 
+pdt_rbtree_lookupall(Key, Val, T):-
+    var(Key),
+    !,
+    pdt_rbtree_next('',Key,Val,T).
 pdt_rbtree_lookupall(_, _, black([],_,_,[])) :- !, fail.
 pdt_rbtree_lookupall(Key, Val, Tree) :-
 	arg(2,Tree,KA),
-	compare(Cmp,KA,Key),
+	my_compare(Cmp,KA,Key),
 	lookupall(Cmp,Key,Val,Tree).
 
 lookupall(>, K, V, Tree) :-
@@ -321,22 +332,22 @@ pdt_rbtree_delete(T, K, NT) :-
 % I am afraid our representation is not as nice for delete
 %
 delete(red(L,K0,V0,R), K, NT, Flag) :-
-	K @< K0, !,
+	my_compare(<,K,K0),!, %K @< K0, !,
 	delete(L, K, NL, Flag0),
 	fixup_left(Flag0,red(NL,K0,V0,R),NT, Flag).
 delete(red(L,K0,V0,R), K, NT, Flag) :-
-	K @> K0, !,
+	my_compare(>,K,K0),!, %	K @> K0, !,
 	delete(R, K, NR, Flag0),
 	fixup_right(Flag0,red(L,K0,V0,NR),NT, Flag).
 delete(red(L,_,_,R), _, OUT, Flag) :-
 %	K == K0,
 	delete_red_node(L,R,OUT,Flag).
 delete(black(L,K0,V0,R), K, NT, Flag) :-
-	K @< K0, !,
+	my_compare(<,K,K0),!, %	K @< K0, !,
 	delete(L, K, NL, Flag0),
 	fixup_left(Flag0,black(NL,K0,V0,R),NT, Flag).
 delete(black(L,K0,V0,R), K, NT, Flag) :-
-	K @> K0, !,
+	my_compare(>,K,K0),!, %	K @> K0, !,
 	delete(R, K, NR, Flag0),
 	fixup_right(Flag0,black(L,K0,V0,NR),NT, Flag).
 delete(black(L,_,_,R), _, OUT, Flag) :-

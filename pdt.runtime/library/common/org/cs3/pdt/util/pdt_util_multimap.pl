@@ -50,17 +50,46 @@
 	pdt_multimap_add/4,
 	pdt_multimap_remove/4,
 	pdt_multimap_remove_all/3,
-	pdt_multimap_get/3
+	pdt_multimap_get/3,
+	pdt_multimap_next/4,	
+	pdt_multimap_to_list/2
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_set')).
 
+pdt_multimap_to_list(M,L):-
+    findall(Term,
+    	(
+    		pdt_map_get(M,Key,Values),
+    		pdt_set_to_list(Values,ValueList),
+    		values_to_property(Key,ValueList,Term)    		
+    	),
+    	L
+    ).
+    
+values_to_property(_,[],_):-
+    !, fail.
+values_to_property(Key,[Value],Property):-
+    !,
+	functor(Property,Key,1),
+	arg(1,Property,Value).
+values_to_property(Key,Values,Property):-
+	functor(Property,Key,1),
+	arg(1,Property,Values).
+
 pdt_multimap_empty(M):-
     pdt_map_empty(M).
+pdt_multimap_get(In,Key,Value):-
+    get_values(In,Key,Values),
+    pdt_set_element(Values,Value).
 
+pdt_multimap_next(M,Start,Key,Value):-
+    next_values(M,Start,Key,Values),
+    pdt_set_element(Values,Value).
+    
 pdt_multimap_add(In,Key,Value,Out):-
-	get_values(_,_,Values),
+	get_values(In,Key,Values),
 	pdt_set_add(Values,Value,OutValues),
 	pdt_map_put(In,Key,OutValues,Out).
 
@@ -69,6 +98,10 @@ get_values(In,Key,Values):-
     !.
 get_values(_,_,Values):-
 	pdt_set_empty(Values).
+
+next_values(In,Start,Key,Values):-
+    pdt_map_next(In,Start,Key,Values).
+
     
 pdt_multimap_remove(In,Key,Value,Out):-
 	pdt_map_get(In,Key,Values),

@@ -63,6 +63,9 @@ file_post_annotation_hook([File|_],_,_,Annos,[indexed(IxTime)|Annos]):-
     time_file(File,ModTime),
     time_index(File,IxTime),
     update_index(File,Annos,ModTime,IxTime).
+
+cleanup_hook(File):-
+    pdt_clear_index(File).
     
 pdt_update_index(FileSpec):-
     pdt_file_spec(FileSpec,File),
@@ -94,9 +97,9 @@ clear_index(File,Annos):-
 
 clear_predicate_definitions(File,Annos):-
 	member(defines(Definitions),Annos),
-	pdt_index_load(clause_definitions,IX),
+	pdt_index_load(predicate_definitions,IX),
 	unindex_clauses(File,Definitions,IX,NewIX),
-	pdt_index_store(clause_definitions,NewIX).
+	pdt_index_store(predicate_definitions,NewIX).
 
 update_predicate_definitions(File,Annos):-
 	pdt_index_load(predicate_definitions,IX),

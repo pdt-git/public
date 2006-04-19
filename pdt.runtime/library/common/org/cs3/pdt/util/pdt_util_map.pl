@@ -49,7 +49,8 @@
 	pdt_map_empty/1,
 	pdt_map_put/4,
 	pdt_map_remove/3,
-	pdt_map_get/3
+	pdt_map_get/3,
+	pdt_map_next/4
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
@@ -58,7 +59,7 @@ pdt_map_empty(In):-
     pdt_rbtree_new(In).
 
 pdt_map_put(In,Key,Value,Out):-
-    pdt_map_delete(In,Key,_,M),
+    pdt_map_remove(In,Key,M),
     !,
     pdt_rbtree_insert(M,Key,Value,Out).
 pdt_map_put(In,Key,Value,Out):-
@@ -70,3 +71,6 @@ pdt_map_remove(In,Key,Out):-
 
 pdt_map_get(In,Key,Value):-
 	pdt_rbtree_lookupall(Key,Value,In).
+	
+pdt_map_next(In,Start,Key,Value):-
+    pdt_rbtree_next(Start,Key,Value,In).
