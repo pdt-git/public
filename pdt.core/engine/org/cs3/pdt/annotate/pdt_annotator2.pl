@@ -168,6 +168,21 @@ pdt_annotator_context_get(In,Scope,Key,Val):-
 pdt_annotator_context_add(In,Scope,Key,Val,Out):-
     pdt_annotator_context(In,Scope,InMap,OutMap,Out),
     pdt_multimap_add(InMap,Key,Val,OutMap).
+
+pdt_annotator_context_add_all(Cx,_,[],Cx).
+pdt_annotator_context_add_all(In,Scope,[Prop|Props],Out):-
+    annotator_add_prop(In,Scope,Prop,Next),
+	pdt_annotator_add_props(Next,Scope,Props,Out).
+
+annotator_add_prop(In,Scope,Prop,Out):-
+	Prop=..[Key|Args],
+    annotator_add_prop(In,Scope,Key,Args,Out).
+    
+annotator_add_prop(Cx,Scope,Key,[],Out):-
+    (	pdt_annotator_context_get(Cx,Scope,Key,_)
+    ->	true
+    ;	pdt_annotator_context_add(Cx,Scope,Key,true,Out)
+    ).
     
 pdt_annotator_context_update(CxIn,Scope,Key,OldVal,NewVal,CxOut):-
     pdt_annotator_context(CxIn,Scope,InMap,OutMap,CxOut),
@@ -301,7 +316,7 @@ clear_ops(OpModule):-
 	
 
 read_terms(CxIn,Input,CxOut):-
-	pdt_annotator_context_get(Cx1,file,op_module,Module),
+	pdt_annotator_context_get(CxIn,file,op_module,Module),
   	Options=[
 		subterm_positions(_),
 		variable_names(_),
@@ -310,38 +325,29 @@ read_terms(CxIn,Input,CxOut):-
     		double_quotes(string)
     	],
 	do_read_term(In,Term,Options,Error),
-    do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
+    do_process_term(Term,Error,Options,CxIn,CxNext),    
+    do_read_next(Term,Input,CxNext,CxOut).
 
-%read_terms(FileStack,OpModule,In,Terms,Errors):-
-%     	read_terms_rec(FileStack,OpModule,In,Terms,Errors).
-/*    	
-read_terms_rec(FileStack,Module,In,Terms,Errors):-
-    Options=[
-		subterm_positions(_),
-		variable_names(_),
-		singletons(_),
-    		module(Module),
-    		double_quotes(string)
-    	],
-    do_read_term(In,Term,Options,Error),
-    do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
-
-*/
-do_process_term(_,_,_,Term,_,_,[],[]):-
-	Term==end_of_file,
+do_process_term(_,Error,_,CxIn,CxOut):-
+    nonvar(Error),
+    !,
+    pdt_annotator_context_add(CxIn,file,error,Error,CxOut).
+do_process_term(end_of_file,_,_,Cx,Cx):-
 	!.
-do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
-    nonvar(Error),!,
-    read_terms_rec(FileStack,Module,In,Terms,Errors).
-do_process_term(FileStack,OpModule,In,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
-	member(subterm_positions(Positions),Options),
-	wrap_term(Term0,Positions,Term1),   
-	pdt_term_annotation(Term1,T,A),
+do_process_term(TermIn,_,Options,CxIn,CxOut):-    
+	memberchk(subterm_positions(Positions),Options),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	pdt_term_annotation(Term2,T,[variable_names(Names),singletons(Singletons)|A]),
-   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
-    read_terms_rec(FileStack,OpModule,In,Terms,Errors).
+	wrap_term(TermIn,Positions,Term1),   
+	pdt_annotator_context_add(CxIn,term,variable_names,Names,Cx1),
+	pdt_annotator_context_add(Cx1,term,singletons,Singletons,Cx2)
+   	pre_process_term(Term1,Term2,Cx2,Cx3),
+   	pdt_annotator_context(Cx3,term,Map,_,_),
+   	pdt_multimap_to_list(Map,PropList),
+   	pdt_term_annotation(Term2,T,A0),
+   	append
+   	pdt_term_annotation(Term3,T,A1),
+
 
 do_read_term(In,Term,Options,Error):-
     catch(
