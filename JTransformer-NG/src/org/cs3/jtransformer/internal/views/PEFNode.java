@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.ISharedImages;
@@ -34,8 +34,11 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
      */
     
     protected List argNames;
-    
+   
     protected List children;
+    
+	protected PrologInterface pef;
+	
 	private static final int ISVAR = 4;
 	private static final int ARGNAME = 0;
 	private static final int KIND = 1;
@@ -47,7 +50,8 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 
 	private IViewSite site;
 
-	private boolean isList = false; 
+	private boolean isList = false;
+
 
     /**
      * @param erroneous2
@@ -55,12 +59,14 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
      * @param kindMap
      * 
      */
-    public PEFNode(IViewSite site, String label, Map argMap, List argNames, PEFNode node) {
+    public PEFNode(IViewSite site, String label, Map argMap, List argNames, PEFNode node,
+    		PrologInterface pef) {
         this.args = argMap;
         this.argNames = argNames;
         this.label = label;
         this.site = site;
         this.parent = node;
+    	this.pef = pef;
     }
 
     /* (non-Javadoc)
@@ -91,14 +97,14 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
         return children;
     }
 
-    public static IPEFNode find(IViewSite site, PEFNode parent, String id, String kind){
+    public static IPEFNode find(IViewSite site, PEFNode parent, String id, String kind, PrologInterface pef){
     	if(id == null || id.equals("null"))
     		return null;
     		List errors = new ArrayList();
     		PrologSession session = null;
     		PEFNode node = null;
     		try {
-    			session = PEFNavigatorView.getPrologSession();
+    			session = pef.getSession();
 	        	Map result = 
 	        	session.queryOnce("pef_and_spec("+id+",Functor,Args,ArgDescrs,Term)");
 	        	if(result == null || result.size() != 4){ 
@@ -127,12 +133,9 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 				if(kind != null && 
 			     !(parent != null && parent.isList))
 					labelPrefix = kind.toUpperCase() + ": ";
-	        	node = new PEFNode(site, labelPrefix+result.get("Term"), argMap,argNames, parent);
+	        	node = new PEFNode(site, labelPrefix+result.get("Term"), argMap,argNames, parent,pef);
 	        	node.setErrors(errors);
-    		} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
+    		} finally {
     			if (session != null)
     				session.dispose();
     		}
@@ -181,7 +184,7 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 				IPEFArgument arg = (IPEFArgument) args.get(name);
 				if (arg.getKind().equals("id"))
 					if (!arg.isList()) {
-						IPEFNode node = find(site, this, (String) arg.getArg(),arg.getName());
+						IPEFNode node = find(site, this, (String) arg.getArg(),arg.getName(),pef);
 						if (node != null)
 							list.add(node);
 					} else {
@@ -213,7 +216,7 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 				argNames.add(name+i);
 			}
 			PEFNode node = new PEFNode(site, name,
-					argMap, argNames, this);
+					argMap, argNames, this,pef);
 			node.isList = true;
 			list.add( node);
 		}
@@ -336,5 +339,10 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 	 */
 	public boolean isList() {
 		return isList;
+	}
+
+	public PrologInterface getPrologInterface()
+	{
+		return pef;
 	}
 }

@@ -16,7 +16,10 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * @author schulzs1
@@ -53,8 +56,8 @@ public class IDManagerIType {
 		return fqn.transformFQN("fqn('" + getFullyQualifiedName(type)+"')");
 	}
 
-	public String getID(String type) throws JavaModelException {
-		return fqn.transformFQN("fqn('" + getTypeName(type)+"')");
+	public String getID(IMethod method, String type) throws JavaModelException {
+		return fqn.transformFQN("fqn('" + getTypeName(method, type)+"')");
 	}
 
 	
@@ -68,7 +71,7 @@ public class IDManagerIType {
 	public String getID(IMethod method) throws JavaModelException {
 		String name = method.isConstructor() ? "<init>" : method.getElementName();
 		return fqn.transformFQN("fqn('" + getFullyQualifiedName(method.getDeclaringType()) + "', '" +
-		name + "',"+ arglist(method.getParameterTypes())+")");
+		name + "',"+ arglist(method, method.getParameterTypes())+")");
 	} 
 
 //	public String getID(Member o){
@@ -141,10 +144,11 @@ public class IDManagerIType {
 	
 
    /**
- 	* @param classes
+ 	* @param method 
+ * @param classes
  	* @return
  	*/
-	private String arglist(String[] classes) throws JavaModelException {
+	private String arglist(IMethod method, String[] classes) throws JavaModelException {
 		StringBuffer buf = new StringBuffer("[");
 		boolean first = true;
 		
@@ -161,7 +165,7 @@ public class IDManagerIType {
 			
 			buf.append("'");
 			int dim  = getArrayDim(type);
-			buf.append(getTypeName(type.substring(dim)));
+			buf.append(getTypeName(method, type.substring(dim)));
 			for (; dim > 0; dim--)
 				buf.append("[]");
 			buf.append("'");
@@ -175,11 +179,14 @@ public class IDManagerIType {
 	/**
 	 * 
 	 * See Java VM Spec: 4.3.2 Field Descriptors
- * @param string
- * @return
- */
-	public String getTypeName(String s) throws JavaModelException {
-	switch(s.charAt(0)){
+	 * @param enclosingMethod the enclosing method of this resolve operation. If there
+	 * is no enclosing method (e.g. field return type) this argument is null. 
+	 * @param string
+	 * @return
+	 */
+		
+	public String getTypeName(IMethod enclosingMethod, String s) throws JavaModelException {
+ 	switch(s.charAt(0)){
 		case 'B':
 			return "byte";
 		case 'C':
@@ -193,7 +200,7 @@ public class IDManagerIType {
 		case 'J':
 			return "long";
 		case 'L':
-			return s.substring(1,s.length()-1);//.replace('$','.');
+			return Signature.toString(Signature.getTypeErasure(s));
 		case 'S':
 			return "short";
 		case 'V':
@@ -202,15 +209,35 @@ public class IDManagerIType {
 			return "boolean";
 		case 'Q':
 			Debug.warning("The class " + envClass.getFullyQualifiedName() + " is available in SC.");
-			String[] aFqn = null;
-				String simpleClassName;
-				// TODO: warum ist mal ein ; da und manchmal nicht?
-				if(s.charAt(s.length()-1) == ';')
-					simpleClassName = s.substring(1,s.length()-1);
-				else
-					simpleClassName = s.substring(1);
- 				String fqn = resolveClassNameFromSimpleName(simpleClassName);
-			return fqn;
+			String simpleClassName = Signature.getTypeErasure(s);
+			return resolveClassNameFromSimpleName(Signature.toString(simpleClassName));
+		case 'T':
+			String parameter = Signature.toString(s);
+			ITypeParameter tp = null;
+			if(enclosingMethod != null){
+				tp = (ITypeParameter)enclosingMethod.getTypeParameter(parameter);
+			}
+			if(enclosingMethod == null || !tp.exists()) {
+				tp = (ITypeParameter)envClass.getTypeParameter(parameter);
+			}
+			IType currentClass = envClass;
+			while(!tp.exists() ) {
+				currentClass= currentClass.getDeclaringType();
+				if(currentClass == null)
+					throw new RuntimeException("Unvalid type parameter: " + tp + "in class " + envClass);
+				tp = (ITypeParameter)currentClass.getTypeParameter(parameter);
+			}
+
+//			if(!tp.exists()) {
+//				throw new RuntimeException("Unvalid type parameter: " + tp + "in class " + envClass);
+//			}
+			String[] bounds = tp.getBounds();
+			if(bounds.length > 0) {
+				return bounds[0]; // convert to raw type
+			}
+			return "java.lang.Object";
+			//ITypeBinding type = tp.resolveBinding();
+			
 		default:
 			throw new RuntimeException("can not find type for: " + s);
 	}
@@ -242,11 +269,23 @@ public static boolean isPrimitive(String s) {
 			return false;
 		case 'Q':
 			return false;
+		case 'T':
+			return false;
 		default:
 			return true;
 	}
 }
 
+public static boolean isTypeParameter(String s) {
+	switch(s.charAt(0)){
+		case '[':
+			throw new RuntimeException("no arrayType excpected: " + s);
+		case 'T':
+			return true;
+		default:
+			return false;
+	}
+}
 	/**
  * @param type
  * @return

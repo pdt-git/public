@@ -103,7 +103,8 @@ public class TypeResolver implements ITypeResolver {
 // ld: bla bla bla... why not this way:
         ///ld: XXX: this is a quick workaround. the whole package should be 
         //cleaned up.        
-	    return IDResolver.normalizeFullQualifiedName(bind.getKey());
+		String fqn = bind.getErasure().getQualifiedName();
+	    return IDResolver.normalizeFullQualifiedName(fqn);
 	    
 	}
 

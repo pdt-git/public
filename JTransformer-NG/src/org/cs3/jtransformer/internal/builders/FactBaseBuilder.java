@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -180,7 +181,7 @@ public class FactBaseBuilder {
 
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-            buildFacts(submon, toProcess);
+             buildFacts(submon, toProcess);
 
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
@@ -572,7 +573,8 @@ public class FactBaseBuilder {
         FactGenerator visitor = new FactGenerator(icu, resource.getFullPath()
                 .toString(), box, plw);
 
-        ASTParser parser = ASTParser.newParser(AST.JLS2);
+        ASTParser parser = getJavaParser();
+
         parser.setSource(icu);
         parser.setResolveBindings(true);
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
@@ -589,7 +591,9 @@ public class FactBaseBuilder {
 			});
 			throw iae;
 		}
-		plw.writeQuery("retractLocalSymtab");
+
+        plw.writeQuery("retractLocalSymtab");
+		
         plw.flush();
         String data = sw.getBuffer().toString();
         sw.getBuffer().setLength(0);
@@ -598,10 +602,31 @@ public class FactBaseBuilder {
         plw.flush();
         plw.close();
         String header = sw.getBuffer().toString();
+//        System.err.println("\n--------------------\n\n"+path+"\n\n------------------\n");
+//        System.err.println(header + "\n\n");
+//        System.err.println(data + "\n\n");
         out.println(header);
         out.println(data);
 
     }
+
+	private static ASTParser getJavaParser()
+	{
+		ASTParser parser = ASTParser.newParser(AST.JLS3);
+        //setJavaSourceVersion(parser);
+
+		return parser;
+	}
+
+	private static void setJavaSourceVersion(ASTParser parser)
+	{
+		Map options = new HashMap();
+        options.put("org.eclipse.jdt.core.compiler.compliance" /* "Source Compatibility Mode" */,
+    		    JavaCore.VERSION_1_5);
+        options.put("org.eclipse.jdt.core.compiler.source" /* "Source Compatibility Mode" */,
+    		    JavaCore.VERSION_1_5);
+        parser.setCompilerOptions(options);
+	}
 
     public static void writeFacts(IProject project, String typeName,
             PrintStream out) throws JavaModelException, CoreException,

@@ -116,9 +116,6 @@ public class IDResolver implements IIDResolver {
 			rv = getID(pd.resolveBinding());
 		} else if (node instanceof TypeDeclaration) {
 			TypeDeclaration td = (TypeDeclaration) node;
-			if(td.getName().toString().equals("Subroutine")){
-			    Debug.debug("debug");
-			}
 			ITypeBinding binding = td.resolveBinding();
             if (td.getParent() instanceof AnonymousClassDeclaration) {
 				rv = provider.getID();
@@ -156,7 +153,12 @@ public class IDResolver implements IIDResolver {
 				localBindings.put(((MethodDeclaration)node).resolveBinding(), rv);
 			} else {
 				MethodDeclaration md = (MethodDeclaration) node;
-				rv = getID(md.resolveBinding());
+				try {
+					rv = getID(md.resolveBinding());
+				} catch(IllegalArgumentException iae)
+				{
+					System.err.println("DEBUG");
+				}
 			}
 		} else {
 			rv = provider.getID();
@@ -278,31 +280,7 @@ public class IDResolver implements IIDResolver {
 			case IBinding.TYPE :
 				ITypeBinding tb = (ITypeBinding) iface;
                 
-			if(tb.getName().equals("Subroutine")){
-			    Debug.debug("debug");
-			}
-//				if (tb.isTopLevel())
-//					buff.append(tb.getQualifiedName());
-//				else if (tb.isMember()) {
-//					StringBuffer tmp = new StringBuffer();
-//					ITypeBinding father = tb.getDeclaringClass();
-//					ITypeBinding last = father;
-//					tmp.append(tb.getName());
-//					while (father != null) {
-//						last = father;
-//						tmp.insert(0, father.getName() + "$"); //trho: replaced $
-//						father = father.getDeclaringClass();
-//					}
-//					if(!last.getPackage().isUnnamed())
-//					tmp.insert(0, last.getPackage().getName() + ".");
-//					buff.append(tmp);
-//				} else {
-//					// local class or anonymous class
-//					Integer theID = (Integer) localBindings.get(tb);
-//					
-//					return theID.toString();					
-//				}
-			buff.append(normalizeFullQualifiedName(tb.getKey()));
+			buff.append(tb.getErasure().getQualifiedName());
 				buff.append("'");
 				break;
 			case IBinding.VARIABLE :

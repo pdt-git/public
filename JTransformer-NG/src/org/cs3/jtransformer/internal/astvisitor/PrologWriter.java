@@ -24,8 +24,10 @@ public class PrologWriter implements IPrologWriter {
 
     private boolean interpreted;
 
+
     private static final String INTE = "inTe";
 
+	
     /*
      * (non-Javadoc)
      * 
@@ -138,21 +140,24 @@ public class PrologWriter implements IPrologWriter {
     /**
      * @param string
      */
-    private void write(String string) {
-       try {
-        out.write(string);
-    } catch (IOException e) {
-       Debug.report(e);
-       throw new RuntimeException(e);
-    }
-        
-    }
+    private void write(String string)
+	{
+		try
+		{
+			out.write(string);
+		} catch (IOException e)
+		{
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+
+	}
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.jtransformer.internal.astvisitor.IPrologWriter#setInterpretMode(boolean)
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.jtransformer.internal.astvisitor.IPrologWriter#setInterpretMode(boolean)
+	 */
     public void setInterpretMode(boolean interpret) {
         this.interpreted = interpret;
 

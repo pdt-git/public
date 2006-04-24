@@ -29,7 +29,6 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -80,6 +79,7 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -173,9 +173,15 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                     JavaRuntime.getDefaultJREContainerEntry(),
 
             };
-            getTestJavaProject().setRawClasspath(cp, project.getFullPath(),
-                    null);
-            PrologInterface pif = getTestJTransformerProject().getPrologInterface();
+            getTestJavaProject().setRawClasspath(cp, project.getFullPath(),null);
+            		Map options = new HashMap();
+//            options.put("org.eclipse.jdt.core.compiler.compliance" /* "Source Compatibility Mode" */,
+//        		    JavaCore.VERSION_1_5);
+            options.put(JavaCore.COMPILER_SOURCE /* "Source Compatibility Mode" */,
+        		    JavaCore.VERSION_1_5);
+
+            getTestJavaProject().setOptions(options);
+            //PrologInterface pif = getTestJTransformerProject().getPrologInterface();
 
         } catch (CoreException e) {
             throw new RuntimeException(e);
@@ -1130,7 +1136,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             VariableDeclarationStatement newVarDecl = node.getAST()
                     .newVariableDeclarationStatement(movedFrag);
             newVarDecl.setType((Type) rewrite.createCopyTarget(node.getType()));
-            newVarDecl.setModifiers(node.getModifiers());
+            newVarDecl.modifiers().clear();
+            newVarDecl.modifiers().addAll(node.getAST().newModifiers(node.getModifiers()));				
+            
             ListRewrite listRewrite = rewrite.getListRewrite(parent,
                     statementsProperty);
             listRewrite.insertAfter(newVarDecl, last, null);
@@ -1152,7 +1160,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             FieldDeclaration newField = node.getAST().newFieldDeclaration(
                     movedFrag);
             newField.setType((Type) rewrite.createCopyTarget(node.getType()));
-            newField.setModifiers(node.getModifiers());
+            newField.modifiers().clear();
+            newField.modifiers().addAll(node.getAST().newModifiers(node.getModifiers()));				
+
             ListRewrite listRewrite = rewrite.getListRewrite(parent,
                     TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
             listRewrite.insertAfter(newField, last, null);
@@ -1191,7 +1201,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         cu.becomeWorkingCopy(null, null);
 
         // creation of DOM/AST from a ICompilationUnit
-        ASTParser parser = ASTParser.newParser(AST.JLS2);
+        ASTParser parser = ASTParser.newParser(AST.JLS3);
         parser.setSource(cu);
         CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);
 
@@ -1214,7 +1224,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         }
         //if we changed the cu, we have to reconcile...
         if (!commentList.isEmpty()) {
-            astRoot = cu.reconcile(AST.JLS2, false, null, null);
+            astRoot = cu.reconcile(AST.JLS3, false, null, null);
         }
 
         //collect nodes that are known to cause trouble:
@@ -1476,7 +1486,6 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     private void waitTillDone()  {
 		try {
-			
 			Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD,null);
 			Platform.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD,null);
 		} catch (OperationCanceledException e) {
@@ -1500,6 +1509,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         final IProject project = getTestProject();
 //        _ProgressMonitor m = new _ProgressMonitor();
         project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+        
         waitTillDone();
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
     }
