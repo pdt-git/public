@@ -165,6 +165,15 @@ pdt_annotator_context_get(In,Scope,Key,Val):-
     pdt_annotator_context(In,Scope,Map,_,_),
     pdt_multimap_get(Map,Key,Val).
 
+pdt_annotator_context_get_set(In,Scope,Key,Set):-
+    pdt_annotator_context(In,Scope,Map,_,_),
+    pdt_multimap_get_set(Map,Key,Set).
+
+pdt_annotator_context_get_list(In,Scope,Key,List):-
+    pdt_annotator_context(In,Scope,Map,_,_),
+    pdt_multimap_get_list(Map,Key,List).
+
+
 pdt_annotator_context_add(In,Scope,Key,Val,Out):-
     pdt_annotator_context(In,Scope,InMap,OutMap,Out),
     pdt_multimap_add(InMap,Key,Val,OutMap).
@@ -245,7 +254,7 @@ add_missing_hooks(Anotator):-
 add_missing_hook(Module:Name/Arity):-
     (	Module:current_predicate(Name/Arity)
     ;	functor(Head,Name,Arity),
-	    Module:assert(Head)
+	    Module:assert(Head:-fail)
     ),
     !.
 
@@ -339,14 +348,16 @@ do_process_term(TermIn,_,Options,CxIn,CxOut):-
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
 	wrap_term(TermIn,Positions,Term1),   
-	pdt_annotator_context_add(CxIn,term,variable_names,Names,Cx1),
-	pdt_annotator_context_add(Cx1,term,singletons,Singletons,Cx2)
+	pdt_annotator_context_reset(CxIn,term,Cx0),
+	pdt_annotator_context_add(Cx0,term,variable_names,Names,Cx1),
+	pdt_annotator_context_add(Cx1,term,singletons,Singletons,Cx2),
    	pre_process_term(Term1,Term2,Cx2,Cx3),
    	pdt_annotator_context(Cx3,term,Map,_,_),
    	pdt_multimap_to_list(Map,PropList),
    	pdt_term_annotation(Term2,T,A0),
-   	append
+   	append(A0,PropList,A1),
    	pdt_term_annotation(Term3,T,A1),
+	pdt_annotator_context_add(Cx3,file,terms,Term3,CxOut).
 
 
 do_read_term(In,Term,Options,Error):-
@@ -356,28 +367,49 @@ do_read_term(In,Term,Options,Error):-
 		true
 	).
 
-pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
-    findall(Anotator,annotator(_,Anotator),Anotators),
-    pre_process_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
+pre_process_term(InTerm,OutTerm,CxIn,CxOut):-
+    findall(Annotator,annotator(_,Annotator),Annotators),
+    pre_process_term(Annotators,InTerm,OutTerm,CxIn,CxOut).
     
-pre_process_term([],_,_,Term,Term). 
-pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
-    pdt_maybe((
-    	Anotator:term_pre_annotation_hook(FileStack,OpModule,InTerm,TmpTerm)
-    )),
-    (	var(TmpTerm)
-    ->	pre_process_term(T,FileStack,OpModule,InTerm,OutTerm)
-    ;	pre_process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
+pre_process_term([],Term,Term,Cx,Cx). 
+pre_process_term([Annotator|Annotators],InTerm,OutTerm,CxIn,CxOut):-
+    (	Annotator:term_pre_annotation_hook(InTerm,NextTerm,CxIn,CxNext)
+    ->	pre_process_term(Annotators,NextTerm,OutTerm,CxNext,CxOut)
+    ;	pre_process_term(Annotators,InTerm,OutTerm,CxIn,CxOut)
     ).
 
-post_process_terms(_,_,_,[],[]).
-post_process_terms(Stack,OpModule,FileAnos,[InHead|InTail],[OutHead|OutTail]):-
-    post_process_term(Stack,OpModule,FileAnos,InHead,OutHead),
-    post_process_terms(Stack,OpModule,FileAnos,InTail,OutTail).
-	
-post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
-    findall(Anotator,annotator(_,Anotator),Anotators),
-    post_process_term(Anotators,FileStack,OpModule,FileAnos,InTerm,OutTerm).
+post_process_terms(CxIn,CxOut):-
+    pdt_annotator_context_get_list(CxIn,file,terms,TermsIn),
+    findall(Annotator,annotator(_,Annotator),Annotators),
+    post_process_terms(Annotators,TermsIn,TermsOut,CxIn,CxOut).
+
+
+post_process_terms([],Terms,Terms,Cx,Cx):-
+	!.
+post_process_terms(_,[],[],Cx,Cx):-
+	!.
+post_process_terms(Annotators,[InTerm|InTerms],[OutTerm|OutTerms],CxIn,CxOut):-    
+    post_process_term(Annotators,InTerm,OutTerm,CxIn,CxNext),
+    post_process_terms(Annotators,InTerms,OutTerms,CxNext,CxOut).
+
+post_process_term(Annotators,InTerm,OutTerm,CxIn,CxOut):-
+    pdt_annotator_context_reset(CxIn,term,Cx0),
+    post_process_term(Annotators,InTerm,Term0,Cx0,Cx1),
+   	pdt_annotator_context(Cx1,term,Map,_,_),
+   	pdt_multimap_to_list(Map,PropList),
+   	pdt_term_annotation(Term0,T,A0),
+   	append(A0,PropList,A1),
+   	pdt_term_annotation(OutTerm,T,A1),
+    
+    
+    
+post_process_term_X([],Term,Term,Cx,Cx).	
+post_process_term_X([Annotator|Annotators],InTerm,OutTerm,CxIn,CxOut):-
+    (	Annotator:term_post_annotation_hook(InTerm,NextTerm,CxIn,CxNext)
+    ->	post_process_term(Annotators,NextTerm,OutTerm,CxNext,CxOut)
+    ;	post_process_term(Annotators,InTerm,OutTerm,CxIn,CxOut)
+    ).
+ 
 
 post_process_term([],_,_,_,Term,Term). 
 post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-

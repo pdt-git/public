@@ -81,14 +81,33 @@ Lukas Degener, 2006-03-31
 
 :- module(pdt_util_rbtree,
 	  [pdt_rbtree_new/1,
+       pdt_rbtree_empty/1,
 	   pdt_rbtree_lookup/3,
 	   pdt_rbtree_lookupall/3,
 	   pdt_rbtree_insert/4,
 	   pdt_rbtree_delete/3,
-	   pdt_rbtree_next/4]).
+	   pdt_rbtree_next/4,
+	   pdt_rbtree_left/2,
+	   pdt_rbtree_right/2,
+	   pdt_rbtree_top/3
+	   ]).
 
 % create an empty tree.
 pdt_rbtree_new(black([],[],[],[])).
+pdt_rbtree_empty(black([],[],[],[])).
+
+pdt_rbtree_left(Tree,_):- 
+	pdt_rbtree_empty(Tree),
+	!,
+	fail.
+pdt_rbtree_left(Tree,Left):-
+	arg(1,Tree,Left).     
+
+
+pdt_rbtree_right(black([],[],[],[]),_):-!,fail.
+pdt_rbtree_right(Tree,right):-
+	arg(1,Tree,Left).     
+
 
 pdt_rbtree_new(K,V,black(Nil,K,V,Nil)) :-
 	Nil = black([],[],[],[]).
