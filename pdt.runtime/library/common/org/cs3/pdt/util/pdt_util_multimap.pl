@@ -51,12 +51,24 @@
 	pdt_multimap_remove/4,
 	pdt_multimap_remove_all/3,
 	pdt_multimap_get/3,
+	pdt_multimap_get_set/3,
+	pdt_multimap_get_list/3,
 	pdt_multimap_next/4,	
 	pdt_multimap_to_list/2
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_set')).
+
+
+pdt_multimap_get_set(M,Key,Set):-
+    get_values(M,Key,Set).
+
+pdt_multimap_get_list(M,Key,List):-
+    get_values(M,Key,Set),
+    pdt_set_to_list(Set,List).
+
+
 
 pdt_multimap_to_list(M,L):-
     findall(Term,
