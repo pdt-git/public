@@ -57,11 +57,13 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -76,6 +78,7 @@ import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -621,6 +624,8 @@ public class FactGenerator extends ASTVisitor {
 		createBodyFact(node, "literalT", args);
 		return false;
 	}
+	
+	
 	/** 
 	 * Generates prolog facts of type newClassT.
 	 * <p>
@@ -630,8 +635,30 @@ public class FactGenerator extends ASTVisitor {
 	 */
 	public boolean visit(ClassInstanceCreation node) { 
 		String constructor; 
+		ITypeBinding binding = node.getType().resolveBinding();
+		generatePackageFactIfNecessary(binding);
+
+		Type type = node.getType();
+		Name name;
+		if(type instanceof SimpleType)
+			name = ((SimpleType)type).getName();
+		else if(type instanceof ParameterizedType)
+			throw new RuntimeException("generics not supported yet");
+		else 
+			name = ((QualifiedType)type).getName();
+		
 		String arg1 = idResolver.getIDs(node.arguments()); 
-		String type = idResolver.getID(node.getName());
+		String typeName = idResolver.getID(name);
+		handleSelectsIdents(name,null);
+//		String[] identTargs = new String [] {
+//				typeIdent,
+//				idResolver.getID(node),
+//				idResolver.getID(getEnclosingNode(node)),
+//				quote(binding.getErasure().getQualifiedName()),
+//				idResolver.getID(binding)
+//		};
+//		writer.writeFact("identT", identTargs);
+		
 		String def = idResolver.getID(node.getAnonymousClassDeclaration());
 		
 	
@@ -640,8 +667,10 @@ public class FactGenerator extends ASTVisitor {
 		
 		if(constructor == null) // Constructor is NOT a synthetic constructor of local class  
 			constructor = idResolver.getID(node.resolveConstructorBinding());
-		
-		String enclose = idResolver.getID(node.getExpression());
+		Expression expr = node.getExpression();
+//		if(expr != null)
+//			System.out.println("DEBUG");
+		String enclose = idResolver.getID(expr);
 		
 		if (node.getAnonymousClassDeclaration() != null){
 			/* in an anonymous class, there is always a synthetic
@@ -658,7 +687,7 @@ public class FactGenerator extends ASTVisitor {
 		String [] args = new String [] {
 				constructor,
 				arg1,
-				type,
+				typeName,
 				def,
 				enclose
 		};
@@ -668,6 +697,7 @@ public class FactGenerator extends ASTVisitor {
 	//	handleSelectsIdents(node.getName(), null);
 		return true;
 	}
+	
 	
 	/**
 	 * Generates prolog facts of type toplevelT.
@@ -1375,6 +1405,8 @@ public class FactGenerator extends ASTVisitor {
 		generatePackageFactIfNecessary(node.resolveBinding());
 		
 		if (node.resolveBinding().getKind() == IBinding.TYPE){
+			if(((ITypeBinding)node.resolveBinding()).isTypeVariable())
+				return false;
 			handleSelectsIdents(node, null);
 			return false;
 		}
@@ -1530,10 +1562,10 @@ public class FactGenerator extends ASTVisitor {
 		if (node.getQualifier() == null){
 		    
 	        TypeDeclaration ultimateAncestor = getUltimateAncestor(node);
-	        Name superclassName = ultimateAncestor.getSuperclass();
-	        String superClassID = superclassName == null ? idResolver
-                    .getJavaLangObjectID() : idResolver.getID(superclassName
-                    .resolveTypeBinding());
+	        Type superclassType = ultimateAncestor.getSuperclassType();
+	        String superClassID = superclassType == null ? idResolver
+                    .getJavaLangObjectID() : idResolver.getID(superclassType
+                    .resolveBinding());
 	        
 	        
 			selectedFrom = idResolver.getID();
@@ -1632,10 +1664,11 @@ public class FactGenerator extends ASTVisitor {
 //	        String superClassID = superclass == null ? idResolver
 //                    .getJavaLangObjectID() : idResolver.getID(superclass);
 
-		    Name superclassName = ultimateAncestor.getSuperclass();
-	        String superClassID = superclassName == null ? idResolver
-                    .getJavaLangObjectID() : idResolver.getID(superclassName
-                    .resolveTypeBinding());
+		    
+	        Type superclassType = ultimateAncestor.getSuperclassType();
+	        String superClassID = superclassType == null ? idResolver
+                    .getJavaLangObjectID() : idResolver.getID(superclassType
+                    .resolveBinding());
 			
 			selectedFrom = idResolver.getID();
 			String [] identArgs = {
@@ -1818,9 +1851,6 @@ public class FactGenerator extends ASTVisitor {
 	 */
 	public boolean visit(TypeDeclaration node) {
 	    String name = quote(node.getName());
-	    if(name.equals("'Subroutine'")){
-	        Debug.debug("debug");
-	    }
 		String id = idResolver.getID(node);
 		String parentId;
 		if (node.getParent().getNodeType() == ASTNode.COMPILATION_UNIT)
@@ -1854,8 +1884,8 @@ public class FactGenerator extends ASTVisitor {
 		if (!foundConstructor && !node.isInterface()){
 			//System.out.println("No constructor found: " + prologList);
 			String synthConstrId=createSynteticConstructor(node);
-			
 			prologList = prologList.substring(1);
+			
 			
 			String prefix = "[" + synthConstrId;
 			if (prologList.equals("]"))
@@ -1881,24 +1911,24 @@ public class FactGenerator extends ASTVisitor {
 				Integer.toString(node.getLength())
 		});
 		
-		Name sc = node.getSuperclass();
+		Type superClassTyper = node.getSuperclassType();
 		String superClass;
-		if (sc != null) 
-			superClass = idResolver.getID(sc.resolveBinding());
-		else
+		if (superClassTyper != null) {
+			superClass = idResolver.getID(superClassTyper.resolveBinding());
+		} else {
 			/* YUCK! There has to be a better way of doing this
 			 * StS
 			 */
 			superClass = idResolver.getJavaLangObjectID();
-			
+		}
 		writer.writeFact("extendsT", new String [] {id, superClass});
 			
 				
-		Iterator implementsIterator = node.superInterfaces().iterator();
+		Iterator implementsIterator = node.superInterfaceTypes().iterator();
 		
 		for (; implementsIterator.hasNext(); ){
-			Name n = (Name) implementsIterator.next();
-			String [] arg = new String [] { id, idResolver.getID(n.resolveBinding()) };
+			Type type = (Type) implementsIterator.next();
+			String [] arg = new String [] { id, idResolver.getID(type.resolveBinding()) };
 			writer.writeFact("implementsT", arg);
 		}
 		
@@ -1951,7 +1981,7 @@ public class FactGenerator extends ASTVisitor {
 	public boolean visit(TypeDeclarationStatement node) {
 		String[] args =
 			new String[] {
-				idResolver.getID(node.getTypeDeclaration())};
+				idResolver.getID(node.getDeclaration())};
 
 		createBodyFact(node, "execT", args);
 
@@ -2370,6 +2400,7 @@ public class FactGenerator extends ASTVisitor {
 
         String fqn = idResolver.getSyntheticConstructorID(binding);
 		
+        //FIXME: delete this once all tests are green
 		String classname = typeDeclaration.resolveBinding().getQualifiedName();
 		String bodyID = idResolver.getID();
 		
@@ -2431,11 +2462,11 @@ public class FactGenerator extends ASTVisitor {
 		};
 		
 		
-		Name sname = typeDeclaration.getSuperclass();
+		Type type = typeDeclaration.getSuperclassType();
 		String superc;
 		
-		if (sname != null){
-            superc=idResolver.getSyntheticConstructorID((ITypeBinding) sname.resolveBinding());
+		if (type != null){
+            superc=idResolver.getSyntheticConstructorID((ITypeBinding) type.resolveBinding());
 			//superc = "fqn('" + ((ITypeBinding)sname.resolveBinding()).getQualifiedName() + "', '<init>', [])";
 		} else {
             superc=idResolver.getSyntheticConstructorID(null);

@@ -7,11 +7,17 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 /**
  * Called by Eclipse to implement real-time updates and building 
  * of JTransformer-Projects.
@@ -29,6 +35,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 *           org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+
 	}
 	
 	/*
@@ -49,6 +56,21 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			} else {
 			    //removeNatureFromAllOtherProjects();
 			    //PrologManager.getInstance().restart();
+		        final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+		        if(javaProject == null) {
+		    		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+					MessageDialog.openError(shell,"JTransformer", 
+							"You can only assign the JTransformer nature to Java projects.");
+					return;
+		        }
+		        if(javaProject.getOption(JavaCore.COMPILER_SOURCE,true).equals(JavaCore.VERSION_1_5)) {
+		    		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+					MessageDialog.openError(shell,"JTransformer", 
+							"JTransformer is not yet compatible with Java 5.0 source code.\n" +
+							"Please change the source compatibility to 1.4 in the project preferences.");
+					return;
+		        }
+		        	
 			    addJTransformerNature(project);
 			    action.setChecked(true);
 			}

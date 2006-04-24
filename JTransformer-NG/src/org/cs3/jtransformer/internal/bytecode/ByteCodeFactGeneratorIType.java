@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -181,7 +182,8 @@ public class ByteCodeFactGeneratorIType {
 		String name = method.isConstructor() ? "'<init>'" : "'"+method.getElementName()+"'";
 		
 		StringBuffer paramBuffer = new StringBuffer("[");
-		String type = typeForClass(method.getReturnType());
+
+		String type = typeForClass(method, method.getReturnType());
 		StringBuffer exceptionBuffer = new StringBuffer("[");
 		String body = "'null'";
 		boolean first = true;
@@ -204,7 +206,7 @@ public class ByteCodeFactGeneratorIType {
 			String [] paramdefargs = new String [] {
 					newID, 
 					id, 
-					typeForClass(cls[i]), 
+					typeForClass(method, cls[i]), 
 					"'__" + i + "'"
 			};
 				
@@ -225,8 +227,8 @@ public class ByteCodeFactGeneratorIType {
 			else
 				first = false;
 			
-			exceptionBuffer.append(idManager.getID(element));
-		}
+			exceptionBuffer.append(idManager.getID(method, element));
+		}	
 		exceptionBuffer.append("]");
 		
 		String [] args = new String [] {
@@ -256,7 +258,7 @@ public class ByteCodeFactGeneratorIType {
 	protected void writeField(IField field) throws JavaModelException {
 		String id = idManager.getID(field);
 		String cId = idManager.getID(field.getDeclaringType());	
-		String type = typeForClass(field.getTypeSignature());
+		String type = typeForClass(null, field.getTypeSignature());
 		String name = "'" + field.getElementName() + "'";
 		String init = "'null'";
 		
@@ -460,21 +462,38 @@ public class ByteCodeFactGeneratorIType {
 		if ((Flags.AccDeprecated & i) > 0)
 			writer.writeFact("modifierT", new String [] {id, "'deprecated'"});
 	}
-	
-	private String typeForClass(String s) throws JavaModelException{
+	/**
+	 * 
+	 * @param method the enclosing method, if it exists. Otherwise null.
+	 * @param s
+	 * @return
+	 * @throws JavaModelException
+	 */
+	private String typeForClass(IMethod method, String s) throws JavaModelException{
 		
 		String kind;
 
 		int dim = IDManagerIType.getArrayDim(s);
 		String vmtypename = s.substring(dim);
-		String name;
-		if(IDManagerIType.isPrimitive(vmtypename)) {
-			kind = "basic";
-			name = "'" + idManager.getTypeName(vmtypename) + "'";
-		}
-		else {
+		String name;        
+//		System.out.println(""+JavaCore.getDefaultOptions());
+
+		String type = idManager.getTypeName(method, vmtypename);
+		
+		if(IDManagerIType.isTypeParameter(vmtypename)) {
+			// FIXME: in the future change this to
+			// kind = "typevar";
+			//name = "'" + type + "'";
+
 			kind = "class";
-			name = "fqn('" + idManager.getTypeName(vmtypename) + "')";
+			name = "fqn('" + type + "')";
+			name = fqn.transformFQN(name);
+		} else if(IDManagerIType.isPrimitive(vmtypename)) {
+			kind = "basic";
+			name = "'" + type + "'";
+		} else {
+			kind = "class";
+			name = "fqn('" + type + "')";
 			name = fqn.transformFQN(name);
 		}
 		

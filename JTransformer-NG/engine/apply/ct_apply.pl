@@ -125,6 +125,7 @@ apply_ct(_name) :-
 apply_all_post([]):-!.
 apply_all_post([[Info,_h]|_t]) :-
     debug_apply_all_post(Info),
+   % format('~n~w',[_h]),
     comma2list(_h,_l),
     apply_post(_l),
     retractall(pointcut(_)),

@@ -84,7 +84,7 @@ public void run(IAction action)  {
 			Debug.report(e);
 		}
 	}
-	ASTParser parser = ASTParser.newParser(AST.JLS2);
+	ASTParser parser = ASTParser.newParser(AST.JLS3);
 
 	public CompilationUnit parseICompilationUnit(ICompilationUnit icu) {
 		parser.setSource(icu);

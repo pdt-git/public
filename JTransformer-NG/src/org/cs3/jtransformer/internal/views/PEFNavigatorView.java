@@ -5,13 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.jtransformer.JTransformer;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -44,7 +41,7 @@ import org.eclipse.ui.part.ViewPart;
 
 public class PEFNavigatorView extends ViewPart {
 	private TreeViewer viewer;
-	public static final String ID= "org.cs3.jtransformer.internal.navigator.PEFNavigatorView";
+	public static final String ID = "org.cs3.jtransformer.internal.navigator.PEFNavigatorView";
 
 	private DrillDownAdapter drillDownAdapter;
 
@@ -59,29 +56,20 @@ public class PEFNavigatorView extends ViewPart {
 	
 	static private PEFNavigatorView pefNavigatorInstance;
 
-	/**
-	 * @throws CoreException
-	 */
-	static PrologSession getPrologSession() throws CoreException {
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		JTransformerProjectNature nature = null;
-		for (int i = 0; i < projects.length; i++) {
-			if(projects[i].isAccessible() && projects[i].hasNature(JTransformer.NATURE_ID)){
-				nature = (JTransformerProjectNature)projects[i].getNature(JTransformer.NATURE_ID);
-				break;
-			}
+	static private PrologInterface getPrologInterface()
+	{
+		try {
+			return PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface();
+		} catch(Exception ex) {
+			throw new IllegalStateException("Could not find an active prolog console.");
 		}
-		if(nature == null)
-			return null;
-		return nature.getPrologInterface().getSession();
 	}
-	
+
 	class ViewContentProvider implements IStructuredContentProvider,
 			ITreeContentProvider {
 		public IPEFNode[] roots;
 
 		public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-			//System.out.println("DEBUG");
 		}
 
 		public void dispose() {
@@ -101,23 +89,7 @@ public class PEFNavigatorView extends ViewPart {
 		}
 
 		private void initializeRoots() throws IOException {
-			PrologSession session = null; 
-			try {
-				session = getPrologSession();
-//					    		getActiveFile().getProject().getNature(JTransformer.NATURE_ID)).getPrologInterface();
-//
-//				roots = new IPEFNode[1];
-//				roots[0] = PEFNode.find(getViewSite(), null, "100001",null);
-//				if(roots[0] == null)
-				roots = new IPEFNode[0];
-	        } catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} finally {
-	        	if(session != null) {
-	        		session.dispose();
-	        	}
-	        }
+			roots = new IPEFNode[0];
 		}
 
 
@@ -219,8 +191,8 @@ public class PEFNavigatorView extends ViewPart {
 		drillDownAdapter.addNavigationActions(manager);
 	}
 
-	private void addNewNodeById(String id) {
-		IPEFNode node = PEFNode.find(getViewSite(), null, id, null);
+	private void addNewNodeById(String id,PrologInterface pef) {
+		IPEFNode node = PEFNode.find(getViewSite(), null, id, null,pef);
 		if (node != null) {
 			List list = new ArrayList();
 			for (int i = 0; i < contentProvider.roots.length; i++) {
@@ -240,7 +212,7 @@ public class PEFNavigatorView extends ViewPart {
 						"JTransformer", "id", null, null);
 				if (dialog.open() != Window.CANCEL) {
 					final String value = dialog.getValue();
-					addNewNodeById(value);
+					addNewNodeById(value,getPrologInterface());
 				}
 			}
 		};
@@ -249,7 +221,6 @@ public class PEFNavigatorView extends ViewPart {
 		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
 				.getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 
-		
 		action2 = new Action() {
 			public void run() {
 				//showMessage("Action 1 executed");
@@ -260,18 +231,20 @@ public class PEFNavigatorView extends ViewPart {
 					PrologSession session = null;
 
 					try {
-						session = getPrologSession();
+						PrologInterface pef = getPrologInterface();
+						session = pef.getSession();
 						Map result = session.queryOnce("fullQualifiedName(Id,'" + value+"')");
 						if(result != null) {
 							String id = (String)result.get("Id");
 							if(id == null)
 								MessageDialog.openError(getViewSite().getShell(),
 										"JTransformer", "No class found with full qualified name: "+ value);
-							addNewNodeById(id);
+							addNewNodeById(id,pef);
 						}
-					} catch (CoreException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					} catch (IllegalStateException e) {
+						MessageDialog.openError(getViewSite().getShell(),
+								"JTransformer", 
+								"Could not find an active prolog console. Please open the console view and select.");
 					} finally  {
 						if (session != null)
 						session.dispose();
@@ -300,7 +273,7 @@ public class PEFNavigatorView extends ViewPart {
 			public void run() {
 				ISelection selection = viewer.getSelection();
 				if (!selection.isEmpty()) {
-					PEFNode node = (PEFNode) ((IStructuredSelection) selection)
+					PEFNode node = (PEFNode)((IStructuredSelection) selection)
 							.getFirstElement();
 					if (node.getErrors().size() > 0)
 						MessageDialog.openInformation(getViewSite().getShell(),
@@ -310,15 +283,12 @@ public class PEFNavigatorView extends ViewPart {
 						if(!node.isList()) {
 							PrologSession session = null;
 							try {
-								session = getPrologSession();
+								session = node.getPrologInterface().getSession();
 								Map ht = session.queryOnce("gen_tree("+ node.getId() + ",Src)");
 								if(ht != null && !ht.isEmpty())
 									MessageDialog.openInformation(getViewSite().getShell(),
 											"JTransformer - Src for id "+node.getId(), 
 											(String)ht.get("Src"));						
-							} catch (CoreException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
 							}finally{
 								if(session != null)
 									session.dispose();
@@ -338,10 +308,6 @@ public class PEFNavigatorView extends ViewPart {
 		});
 	}
 
-	private void showMessage(String message) {
-		MessageDialog.openInformation(viewer.getControl().getShell(),
-				"Prolog Navigator", message);
-	}
 
 	/**
 	 * Passing the focus request to the viewer's control.
@@ -376,11 +342,10 @@ public class PEFNavigatorView extends ViewPart {
 			Debug.report(t);
 			throw new RuntimeException(t);
 		}
-
 	}
 
 	public static void addId(String value) {
-		pefNavigatorInstance.addNewNodeById(value);
+		pefNavigatorInstance.addNewNodeById(value,getPrologInterface());
 		
 	}
 }

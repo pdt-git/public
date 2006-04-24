@@ -37,9 +37,9 @@ public class LocalIDFQNTranslator implements FQNTranslator {
 		string = string.replace('$','.'); //FIXME: DOLLARREPLACEDWITHDOT: can not run tests!
 		synchronized (fqnToIDTable){
 			if (!fqnToIDTable.containsKey(string)){
-			    if(string.indexOf("Subroutine")>-1){
-			        Debug.debug("debug");
-			    }
+//			    if(string.indexOf("Subroutine")>-1){
+//			        Debug.debug("debug");
+//			    }
 				fqnToIDTable.put(string, provider.getID());
 			}
 			return (String) fqnToIDTable.get(string);

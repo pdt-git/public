@@ -75,6 +75,8 @@ import org.eclipse.jface.text.BadLocationException;
  */
 public class PseudoRoundTripTest extends FactGenerationTest {
 
+	private static final boolean SHOW_PLWIN_INSTANCE = false;
+	
     private final class Comparator implements IResourceVisitor {
         public boolean visit(IResource resource) throws CoreException {
             switch (resource.getType()) {
@@ -177,6 +179,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         }
     }
 
+
     private String packageName;
 
     private PrologSession session;
@@ -210,7 +213,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         setAutoBuilding(false);
         super.setUpOnce();
         PrologInterface pif = getTestJTransformerProject().getPrologInterface();
-
+        
         synchronized (pif) {
 
             //install test workspace
@@ -239,6 +242,8 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             BadLocationException, InterruptedException {
         PrologInterface pif = getTestJTransformerProject().getPrologInterface();
         synchronized (pif) {
+        	if(SHOW_PLWIN_INSTANCE)
+        		session.queryOnce("win_window_pos([show(true)])");
             testIt_impl();
             passed = true;
         }
@@ -279,6 +284,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         //now we should have SOME toplevelT
         Map r = session
                 .queryOnce("toplevelT(_,_,_,_)");
+
         if(r==null){
             Debug.debug("debug");
         }
@@ -333,8 +339,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             ICompilationUnit cu = cus[i];
 
             try {
+            	//session.queryOnce("win_window_pos([show(true)])");
                 normalizeCompilationUnit(cu);
             } catch (Exception e) {
+            	e.printStackTrace();
                 throw new RuntimeException(packageName
                         + ": could not normalize cu " + cu.getElementName(), e);
             }
@@ -571,9 +579,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         blacklist.set(534);
         blacklist.set(535);
         blacklist.set(536);
-        
+        	
         for (int i = 1; i <= 539; i++) {//1-539
             if (!blacklist.get(i)) {
+            	//if(i == 317)
                 s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));
             }
