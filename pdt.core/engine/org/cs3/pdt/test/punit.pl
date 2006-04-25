@@ -105,6 +105,16 @@ runTestsStartingWith(Prefix):-
         plus(Failed,Success,All),
         writef("\n=======================\nsuccessful tests: (%d/%d)\n", [Success, All]).
 
+
+runTestsStartingInDir(Prefix):- 
+        failed_in_dir(FailedTests, Failed, All,Prefix),
+		counter(0),
+        writef("\n=======================\nfailed tests:\n"),
+        write(FailedTests),
+        plus(Failed,Success,All),
+        writef("\n=======================\nsuccessful tests: (%d/%d)\n", [Success, All]).
+
+
 /**
  * runTest(+Testname)
  * 
@@ -126,6 +136,18 @@ test_case(Name,Prefix):-
    term_to_atom(Name,Atom),
    atom_concat(Prefix,_,Atom).
    
+   
+test_case_in_dir(Name,Prefix):-
+   var(Prefix),
+   !,
+   clause(test(Name), _).
+
+test_case_in_dir(Name,Prefix):-
+   clause(test(Name),_,Ref), 
+   clause_property(Ref,file(File)),
+   atom_concat(Prefix,_,File).
+    
+ 
 testfailed(Testname) :- 
 %    format('the test case ~a does not exist.',[Testname]),
     not(clause(test(Testname), _)),
@@ -175,6 +197,21 @@ failed(_list, _length, _all,Prefix) :- findall(
                                   length(_list, _length),
                                   findall([_test],
                                           test_case(_testname,Prefix),
+                                          _tests
+                                  ),
+                                  length(_tests, _all).
+
+
+failed_in_dir(_list, _length, _all,Prefix) :- findall(
+                                    [_testname],
+                                    (test_case_in_dir(_testname,Prefix),
+                                     testfailed(_testname)
+                                    ), 
+                                    _list
+                                  ),
+                                  length(_list, _length),
+                                  findall([_test],
+                                          test_case_in_dir(_testname,Prefix),
                                           _tests
                                   ),
                                   length(_tests, _all).
