@@ -154,12 +154,12 @@ reportException(Pred,Testname):-
     Goal =.. [Pred,Testname],
     catch(Goal, Catcher, 
     	( term_to_atom(Catcher, Atom),
-    	  format('predicate ~a for test ~a catched exception: ~a~n',[Pred, Testname,Atom]),
+    	  format('predicate ~w for test ~w catched exception: ~w~n',[Pred, Testname,Atom]),
     	  assert(failed))
     ).
     
 reportException(Pred,Testname):-
-    format('predicate ~a for test ~a failed~n',[Pred, Testname]),
+    format('predicate ~w for test ~w failed~n',[Pred, Testname]),
     assert(failed).
     
 % testfailed(_testname) :- test(_testname), writef('.').
