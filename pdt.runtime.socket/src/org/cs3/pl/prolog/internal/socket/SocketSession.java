@@ -104,7 +104,7 @@ public class SocketSession implements PrologSession2 {
 			client.close();
 		} catch (IOException e) {
 			Debug.report(e);
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		} finally {
 			client.unlock();
 			client = null;
@@ -356,7 +356,7 @@ public class SocketSession implements PrologSession2 {
 					break;
 				case '>':
 					// flush and unescape buffer
-					value = Util.unescape(sb, 0, sb.length());
+					value = Util.unescape(sb.toString(), 0, sb.length());
 					// if the stack is empty, return the value.
 					// otherwise, the value is elem of the list lying on top of
 					// the stack.
@@ -571,56 +571,8 @@ public class SocketSession implements PrologSession2 {
 		return client == null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#consult(java.lang.String,
-	 *      java.io.InputStream)
-	 */
-	public void consult(String name, InputStream content)
-			throws PrologException {
-		try {
-			OutputStream out = new ConsultOutputStream(client, name);
-			Util.copy(content, out);
-			out.close();
-			if (dispatcher != null) {
-				dispatcher.update(new PrologInterfaceEvent(this,
-						PrologInterface.SUBJECT_CONSULTED, name));
-			}
-		} catch (IOException e) {
-			throw new PrologException(e);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#unconsult(java.lang.String)
-	 */
-	public void unconsult(String name) throws PrologException {
-		try {
-			OutputStream out = new ConsultOutputStream(client, name);
-			out.close();
-			if (dispatcher != null) {
-				dispatcher.update(new PrologInterfaceEvent(this,
-						PrologInterface.SUBJECT_CONSULTED, name));
-			}
-		} catch (IOException e) {
-			throw new PrologException(e);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#isConsulted(java.lang.String)
-	 */
-	public boolean isConsulted(String name) throws PrologException {
-		return queryOnce("source_file('" + name + "')") != null;
-	}
-
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
