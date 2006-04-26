@@ -73,8 +73,7 @@ public class Initializer extends AbstractPreferenceInitializer {
         		initializeDefaultPreferences_impl();
         	
         } catch (Throwable t) {
-            Debug.report(t);
-            throw new RuntimeException(t.getMessage(), t);
+            Debug.rethrow(t.getMessage(), t);
         }
     }
 

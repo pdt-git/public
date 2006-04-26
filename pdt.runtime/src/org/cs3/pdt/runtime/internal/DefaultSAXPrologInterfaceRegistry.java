@@ -42,108 +42,143 @@
 package org.cs3.pdt.runtime.internal;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.cs3.pdt.runtime.PersistableSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryListener;
 import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.Platform;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
-public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
+public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistry {
 
 	public void load(Reader reader) throws IOException {
-		Element cpElement;
+		//Element cpElement;
 
 		try {
-			DocumentBuilder parser = DocumentBuilderFactory.newInstance()
-					.newDocumentBuilder();
-			cpElement = parser.parse(new InputSource(reader))
-					.getDocumentElement();
+			SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+			parser.parse(new InputSource(reader),new RegistryHandler());
+			
 		} catch (SAXException e) {
-			IOException ee = new IOException();
-			ee.initCause(e);
-			throw ee;
+			throw new _IOException(e);
 		} catch (ParserConfigurationException e) {
-			IOException ee = new IOException();
-			ee.initCause(e);
-			throw ee;
+			throw new _IOException(e);
 		} finally {
 			reader.close();
 		}
+	}
+	
+	class RegistryHandler extends DefaultHandler {
 
-		if (!cpElement.getNodeName().equalsIgnoreCase("registry")) { //$NON-NLS-1$
-			throw new IOException("expected <registry>, but was <"
-					+ cpElement.getNodeName() + ">");
+		public RegistryHandler() {
+
 		}
-		NodeList list = cpElement.getElementsByTagName("subscription"); //$NON-NLS-1$
+		
+		PersistableSubscription subscription;
+		
+		public void startElement(String arg0, String arg1, String arg2,
+				Attributes attributes) throws SAXException {
+			if (arg1.equals("subscription")) {
 
-		int length = list.getLength();
-
-		for (int i = 0; i < length; ++i) {
-			Node node = list.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				NamedNodeMap attributes = node.getAttributes();
-				String bundle = attributes.getNamedItem("bundle")
-						.getNodeValue();
-				String className = attributes.getNamedItem("class")
-						.getNodeValue();
+				String bundle = attributes.getValue("bundle");
+				String className = attributes.getValue("class");
 				int count = attributes.getLength();
 				HashMap params = new HashMap();
 				for (int j = 0; j < count; j++) {
-					Node parmNode = attributes.item(j);
-					params.put(parmNode.getNodeName(), parmNode.getNodeValue());
+					String value = attributes.getValue(j);
+					String name = attributes.getLocalName(j);
+					params.put(name, value);
 				}
 
+				Class clazz;
 				try {
-					Class clazz = Platform.getBundle(bundle).loadClass(
-							className);
+					clazz = Platform.getBundle(bundle).loadClass(className);
 					PersistableSubscription subscription = (PersistableSubscription) clazz
 							.newInstance();
 					subscription.restoreState(params);
 					addSubscription(subscription);
 				} catch (ClassNotFoundException e) {
-					IOException ee = new IOException();
-					ee.initCause(e);
-					throw ee;
+					Debug.rethrow(e);
 				} catch (IllegalAccessException e) {
-					IOException ee = new IOException();
-					ee.initCause(e);
-					throw ee;
+					Debug.rethrow(e);
 				} catch (InstantiationException e) {
-					IOException ee = new IOException();
-					ee.initCause(e);
-					throw ee;
-				} catch (ClassCastException e) {
-					IOException ee = new IOException();
-					ee.initCause(e);
-					throw ee;
+					Debug.rethrow(e);
 				}
-
 			}
+
 		}
 	}
+
+	
+	public static class _IOException extends IOException{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2488611686137600862L;
+		private Throwable cause;
+		private String message;
+
+		public _IOException(Throwable e) {
+			this.cause = e;
+			message="wrapped exception";
+		}
+
+		public _IOException(String message,Throwable e) {
+			this.cause = e;
+			this.message = message;
+		}
+		
+		public Throwable fillInStackTrace() {
+			return cause.fillInStackTrace();
+		}
+
+		public String getLocalizedMessage() {
+			return message + " ("+cause.getLocalizedMessage()+")";
+		}
+
+		public String getMessage() {
+			return message + " ("+cause.getMessage()+")";
+		}
+
+		public void printStackTrace() {
+			cause.printStackTrace();
+		}
+
+		public void printStackTrace(PrintStream arg0) {
+			cause.printStackTrace(arg0);
+		}
+
+		public void printStackTrace(PrintWriter arg0) {
+			cause.printStackTrace(arg0);
+		}
+
+		public String toString() {
+			return cause.toString();
+		}
+    	
+    }
 
 	public void save(Writer w) throws IOException {
 		w.write("<registry>\n");

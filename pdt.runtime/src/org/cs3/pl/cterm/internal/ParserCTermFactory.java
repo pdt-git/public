@@ -92,7 +92,7 @@ public class ParserCTermFactory implements CTermFactory {
 			
 		} catch (Throwable e) {
 			Debug.report(e);
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		}
 		return create(parser.getASTRoot());
 	}

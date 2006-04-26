@@ -126,27 +126,6 @@ public interface PrologSession extends Disposable{
 
     public void endQuery() throws PrologException;
 
-    /**
-     * consults the File signified by the path passed into the Prolog System.
-     * Typically implemented by a query. The return value is a "best effort"
-     * guess, since several failed directives do not necessarly prompt Prolog to
-     * consider the overall consultation failed. Consulted facts are (of course)
-     * globally valid for all sessions.
-     * 
-     * @return true if the consultation seems to have succeeded, false if it
-     *               definitly failed
-     * @param name
-     *                    a filename
-     * @throws IllegalStateException
-     *                    the session is disposed
-     * @deprecated this method makes barely any sense at all.
-     */
-
-    public boolean consult(String name) throws PrologException;
-
-    public void consult(String name, InputStream content)throws PrologException;   
-//    public void unconsult(String name)throws PrologException;
-//    public boolean isConsulted(String name)throws PrologException;
-
+   
 
 }

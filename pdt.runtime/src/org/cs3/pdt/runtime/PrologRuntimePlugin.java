@@ -61,7 +61,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
-import org.cs3.pdt.runtime.internal.DefaultPrologInterfaceRegistry;
+import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
@@ -123,7 +123,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private Option[] options;
 
-	private DefaultPrologInterfaceRegistry registry;
+	private DefaultSAXPrologInterfaceRegistry registry;
 
 	private PrologLibraryManager libraryManager;
 
@@ -214,10 +214,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			try {
 				location = new File(Platform.asLocalURL(url).getFile());
 			} catch (IOException t) {
-				Debug.report(t);
-				throw new RuntimeException(t);
+            	Debug.rethrow(t);
 			}
-
 			rootLocator = new DefaultResourceFileLocator(location);
 		}
 		return rootLocator.subLocator(key);
@@ -370,9 +368,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					Debug.debug("trying to resolve this url: " + url);
 					url = Platform.asLocalURL(url);
 				} catch (Exception e) {
-					Debug.report(e);
-					throw new RuntimeException("Problem resolving url: "
-							+ url.toString(), e);
+	            	Debug.rethrow("Problem resolving url: "
+							+ url.toString(),e);
 				}
 				// URI uri = URI.create(url.toString());
 				File file = new File(url.getFile());
@@ -429,8 +426,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 								.createExecutableExtension("class");
 						bc.contributeToBootstrapList(pifKey, contribs);
 					} catch (CoreException e1) {
-						Debug.report(e1);
-						throw new RuntimeException("Problem instantiating: "
+						Debug.rethrow("Problem instantiating: "
 								+ elm.getAttributeAsIs("class"), e1);
 					}
 				} else if (resName != null) {
@@ -446,8 +442,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 						Debug.debug("trying to resolve this url: " + url);
 						url = Platform.asLocalURL(url);
 					} catch (Exception e) {
-						Debug.report(e);
-						throw new RuntimeException("Problem resolving url: "
+						Debug.rethrow("Problem resolving url: "
 								+ url.toString(), e);
 					}
 					// URI uri = URI.create(url.toString());
@@ -498,7 +493,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 						if (dependsOn == null) {
 							dependsOn = "";
 						}
-						String[] dependencies = dependsOn.split(",");
+						String[] dependencies = Util.split(dependsOn,",");
 						String id = celem[j].getAttributeAsIs("id");
 						String pifKey = celem[j].getAttributeAsIs("key");
 						if (pifKey == null) {
@@ -509,8 +504,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				}
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
+			Debug.rethrow(e);
 		}
 
 	}
@@ -554,8 +548,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				}
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
+			Debug.rethrow(e);
 		}
 
 	}
@@ -674,15 +667,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			pif.start();
 
 		} catch (IOException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
+			Debug.rethrow(e);
 		}
 	}
 
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
 		synchronized (registryMux) {
 			if (this.registry == null) {
-				this.registry = new DefaultPrologInterfaceRegistry();
+				this.registry = new DefaultSAXPrologInterfaceRegistry();
 				initRegistry();
 			}
 			return this.registry;
@@ -703,11 +695,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				registry.load(r);
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
+			Debug.rethrow(e);
 		} catch (IOException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
+			Debug.rethrow(e);
 
 		}
 	}
@@ -750,8 +740,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					myPluginInstance.registry.save(w);
 					w.close();
 				} catch (IOException e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
+					Debug.rethrow(e);
 				}
 				context.map(new Path("registry"), new Path(saveFileName));
 				context.needSaveNumber();

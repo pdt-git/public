@@ -242,7 +242,7 @@ public class HookHelper {
             try {
                 startupThread.join();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Debug.rethrow(e);
             }
         }
 

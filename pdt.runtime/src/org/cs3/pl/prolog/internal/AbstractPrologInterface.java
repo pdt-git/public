@@ -249,8 +249,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             try {
                 return getSession_internal();
             } catch (Throwable t) {
-                Debug.report(t);
-                throw new RuntimeException(t);
+            	Debug.rethrow(t);
+            	return null;
             }
         }
     }
@@ -281,8 +281,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             try {
                 return getSession_internal();
             } catch (Throwable t) {
-                Debug.report(t);
-                throw new RuntimeException(t);
+            	Debug.rethrow(t);
+            	return null;
             }
         }
     }
@@ -332,8 +332,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             try {
                 return getSession_internal();
             } catch (Throwable t) {
-                Debug.report(t);
-                throw new RuntimeException(t);
+            	Debug.rethrow(t);
+            	return null;
             }
         }
     }
@@ -464,7 +464,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             Debug.error("Could not start PI becouse of unhandled exception. ");
             Debug.error("These exception will be rethrown. Trying emergency stop.");    
             emergencyStop();
-            throw new RuntimeException(t);
+        	Debug.rethrow(t);
         }
     }
 
@@ -503,11 +503,11 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             setState(DOWN);
         } catch (Throwable t) {
             
-            Debug.report(t);
             Debug.error("Could not shut down because of uncaught exception(s).");
             Debug.error("These exception will be rethrown. Trying emergency stop.");    
             emergencyStop();
-            throw new RuntimeException(t);
+        	Debug.rethrow(t);
+
         }
     }
     
@@ -537,8 +537,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
             setState(DOWN);
         } catch (Throwable t) {
             Debug.error("Emergency stop failed! I don't know what to do now.");
-            Debug.report(t);            
-            throw new RuntimeException(t);
+        	Debug.rethrow(t);
         }
     }
 
