@@ -141,7 +141,7 @@ public class ReusableSocket extends Socket implements Reusable {
             close();
         } catch (IOException e) {
 	        Debug.report(e);
-	        throw new RuntimeException(e);
+	        throw new RuntimeException(e.getMessage());
         }
     }
 

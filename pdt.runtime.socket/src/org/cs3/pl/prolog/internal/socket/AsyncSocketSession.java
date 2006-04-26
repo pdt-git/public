@@ -400,7 +400,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 					break;
 				case '>':
 					// flush and unescape buffer
-					value = Util.unescape(sb, 0, sb.length());
+					value = Util.unescape(sb.toString(), 0, sb.length());
 					// if the stack is empty, return the value.
 					// otherwise, the value is elem of the list lying on top of
 					// the stack.
@@ -594,7 +594,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.close();
 		} catch (IOException e) {
 			Debug.report(e);
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		} finally {
 			client.unlock();
 			client = null;
