@@ -107,31 +107,45 @@ update_predicate_definitions(File,Annos):-
 	pdt_index_store(predicate_definitions,NewIX).
 
 clear_module_definitions(File,Annos):-
-	pdt_index_load(module_definitions,Ix),
-	memberchk(defines_module(Module),Annos),
-	memberchk(exports(Exports),Annos),
-	exports_to_handles(Module,Exports,Handles),
+	pdt_index_load(module_definitions,Ix),	
+	get_module_exports(Annos,Module,Handles),
 	module_definition_index_entry(Module,File,Handles,Key,Value),
 	pdt_index_remove(Ix,Key,Value,NewIX),
 	pdt_index_store(module_definitions,NewIX).
 
 update_module_definitions(File,Annos):-
 	pdt_index_load(module_definitions,Ix),
-	memberchk(defines_module(Module),Annos),
-	memberchk(exports(Exports),Annos),
-	exports_to_handles(Module,Exports,Handles),
+	get_module_exports(Annos,Module,Handles),
 	module_definition_index_entry(Module,File,Handles,Key,Value),
 	pdt_index_put(Ix,Key,Value,NewIX),
 	pdt_index_store(module_definitions,NewIX).
 	
+get_module_exports(Annos,Module,Handles):-
+	memberchk(defines_module(Module),Annos),
+	!,
+	memberchk(exports(Exports),Annos),
+	exports_to_handles(Module,Exports,Handles).		
+get_module_exports(Annos,user,Handles):-	
+	memberchk(defines(Defs),Annos),
+	defines_to_handles(Defs,Handles).
+
+
+
+
+defines_to_handles([],[]).
+defines_to_handles([Module:Name/Arity|Defines],[Handle|Handles]):-
+    !,
+    pdt_virtual_handle(predicate_definition,[module(Module),name(Name),arity(Arity)],Handle),
+    defines_to_handles(Defines,Handles).
 
 exports_to_handles(_,[],[]).
 exports_to_handles(Module,[Name/Arity|Exports],[Handle|Handles]):-
     !,
-    pdt_virtual_handle(module_definitions,[module(Module),name(Name),arity(Arity)],Handle),
+    pdt_virtual_handle(predicate_definition,[module(Module),name(Name),arity(Arity)],Handle),
     exports_to_handles(Module,Exports,Handles).
 exports_to_handles(Module,[_|Exports],[Handles]):-
     exports_to_handles(Module,Exports,Handles).
+
 
 index_clauses(File,Annos,IX,NewIX):-
     	member(defines(Defs),Annos),
