@@ -78,8 +78,8 @@ public abstract class PrologInterfaceFactory {
         return (PrologInterfaceFactory) impl.newInstance();
         }
         catch(Throwable t){
-            Debug.report(t);
-            throw new RuntimeException(t);
+            Debug.rethrow(t);
+            return null;
         }
     }
     
@@ -111,8 +111,7 @@ public abstract class PrologInterfaceFactory {
                 in.close();
                 out.close();            
             } catch (IOException e) {
-                Debug.report(e);
-              throw new RuntimeException(e);
+                Debug.rethrow(e);
             }
         }
         return f;

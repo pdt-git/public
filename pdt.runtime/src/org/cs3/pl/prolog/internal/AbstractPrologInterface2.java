@@ -66,8 +66,8 @@ public abstract class AbstractPrologInterface2 extends AbstractPrologInterface i
 	            try {
 	                return getAsyncSession_internal();
 	            } catch (Throwable t) {
-	                Debug.report(t);
-	                throw new RuntimeException(t);
+	                Debug.rethrow(t);
+	                return null;
 	            }
 	        }
 	    }

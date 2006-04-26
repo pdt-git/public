@@ -3,12 +3,59 @@ package org.cs3.pl.cterm.internal.parser;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserTreeConstants, CanonicalTermParserConstants {/*@bgen(jjtree)*/
-  protected JJTCanonicalTermParserState jjtree = new JJTCanonicalTermParserState();
+	 public static class RuntimeException extends java.lang.RuntimeException{
+
+			private Throwable cause;
+			private String message;
+
+			public RuntimeException(Throwable e) {
+				this.cause = e;
+				message="wrapped exception";
+			}
+
+			public RuntimeException(String message,Throwable e) {
+				this.cause = e;
+				this.message = message;
+			}
+			
+			public Throwable fillInStackTrace() {
+				return cause.fillInStackTrace();
+			}
+
+			public String getLocalizedMessage() {
+				return message + " ("+cause.getLocalizedMessage()+")";
+			}
+
+			public String getMessage() {
+				return message + " ("+cause.getMessage()+")";
+			}
+
+			public void printStackTrace() {
+				cause.printStackTrace();
+			}
+
+			public void printStackTrace(PrintStream arg0) {
+				cause.printStackTrace(arg0);
+			}
+
+			public void printStackTrace(PrintWriter arg0) {
+				cause.printStackTrace(arg0);
+			}
+
+			public String toString() {
+				return cause.toString();
+			}
+	    	
+	    }
+	
+	protected JJTCanonicalTermParserState jjtree = new JJTCanonicalTermParserState();
         private List errors = new ArrayList();
 
         public List getErrors() {

@@ -43,9 +43,11 @@
  */
 package org.cs3.pl.prolog;
 
+import org.cs3.pl.common.Debug;
+
 /**
  */
-public class PrologException extends RuntimeException {
+public class PrologException extends Debug._RuntimeException {
 
     /**
      * Comment for <code>serialVersionUID</code>

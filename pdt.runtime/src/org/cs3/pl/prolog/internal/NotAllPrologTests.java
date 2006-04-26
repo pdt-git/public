@@ -49,7 +49,7 @@ public class NotAllPrologTests {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for org.cs3.pl.prolog.internal");
 		//$JUnit-BEGIN$
-		suite.addTestSuite(ConsultServiceTest.class);
+		
 		suite.addTestSuite(PrologSessionTest.class);
 		suite.addTestSuite(PrologSessionThrowTest.class);
 		//$JUnit-END$
