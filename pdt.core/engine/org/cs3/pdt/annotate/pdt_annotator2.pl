@@ -181,7 +181,7 @@ pdt_annotator_context_add(In,Scope,Key,Val,Out):-
 pdt_annotator_context_add_all(Cx,_,[],Cx).
 pdt_annotator_context_add_all(In,Scope,[Prop|Props],Out):-
     annotator_add_prop(In,Scope,Prop,Next),
-	pdt_annotator_add_props(Next,Scope,Props,Out).
+	pdt_annotator_context_add_all(Next,Scope,Props,Out).
 
 annotator_add_prop(In,Scope,Prop,Out):-
 	Prop=..[Key|Args],
