@@ -56,8 +56,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
@@ -243,7 +243,7 @@ public class SocketServerStartAndStopStrategy implements
 			}
 
 			pif.getLockFile().delete();
-			_Ripper.getInstance().enqueue(serverProcess, 5000);
+			JackTheProcessRipper.getInstance().enqueue(serverProcess, 5000);
 			serverProcess=null;
 			
 
@@ -261,75 +261,5 @@ public class SocketServerStartAndStopStrategy implements
 	public boolean isRunning(PrologInterface pif) {
 		File lockFile = ((SocketPrologInterface) pif).getLockFile();
 		return lockFile != null && lockFile.exists();
-	}
-
-	private static class _Ripper extends Thread {
-
-		private static _Ripper instance;
-
-		private TreeMap heap = new TreeMap();
-
-		public static _Ripper getInstance() {
-			if (instance == null) {
-				instance = new _Ripper();
-			}
-			return instance;
-		}
-
-		private _Ripper() {
-			super("Jack the Prolog Ripper");
-			setDaemon(true);
-			start();
-		}
-
-		public void run() {
-			Process process = null;
-			//Runtime.getRuntime().addShutdownHook(this);
-			//FIXME: what to do on vm shutdown?
-			while (true) {
-				process = dequeue();
-				try {
-					process.destroy();
-				} catch (Throwable t) {
-					Debug.report(t);
-				}
-
-			}
-
-		}
-
-		private Process dequeue() {
-			synchronized (heap) {
-				while (heap.isEmpty()) {
-					try {
-						heap.wait(50000);
-					} catch (InterruptedException e) {
-						Debug.report(e);
-					}
-				}
-				Long next = (Long) heap.firstKey();
-				if (System.currentTimeMillis() - next.longValue() > 20) {
-					try {
-						Thread.sleep(20 + next.longValue()
-								- System.currentTimeMillis());
-					} catch (InterruptedException e) {
-						Debug.report(e);
-					}
-				}
-				return (Process) heap.remove(next);
-			}
-		}
-
-		public void enqueue(Process p, long timeout) {
-			synchronized (heap) {
-				long due = System.currentTimeMillis() + timeout;
-				Long key = null;
-				while (heap.containsKey(key = new Long(due))) {
-					due++;
-				}
-				heap.put(key, p);
-				heap.notifyAll();
-			}
-		}
 	}
 }
