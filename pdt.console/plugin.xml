@@ -74,5 +74,32 @@
              path="pl">
        </library>
     </extension>
+    <extension
+          point="org.eclipse.ui.commands">
+       <category
+             id="org.cs3.pdt.console"
+             name="PDT Console Commands"/>
+       <command
+             category="org.cs3.pdt.console"
+             categoryId="org.cs3.pdt.console"
+             description="Paste the name of the file currently edited in the editor"
+             id="pdt.console.paste_filename"
+             name="Paste Filename"/>
+    </extension>
+    <extension
+          point="org.eclipse.ui.contexts">
+       <context
+             id="org.cs3.pdt.console"
+             name="using the prolog console view"
+             parentId="org.eclipse.ui.contexts.dialogAndWindow"/>
+    </extension>
+    <extension
+          point="org.eclipse.ui.bindings">
+       <key
+             commandId="pdt.console.paste_filename"
+             contextId="org.eclipse.ui.contexts.window"
+             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+             sequence="CTRL+SHIFT+V"/>
+    </extension>
 
 </plugin>

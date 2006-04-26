@@ -549,6 +549,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		thatWasMe = false;
 	}
 
+	
+	
 	private void ui_setSingleCharMode(boolean b) {
 		Display display = control.getDisplay();
 		if (b) {
@@ -815,6 +817,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		return control.getCaretOffset();
 	}
 
+	public void setCaretOffset(int offset){
+		control.setCaretOffset(offset);
+	}
+	
 	public void cut() {
 		control.cut();
 
@@ -842,5 +848,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	public boolean getEnterSendsSemicolon() {
 		return enterSendsSemicolon;
+	}
+
+	public int getStartOfInput() {
+		return startOfInput;
 	}
 }

@@ -60,6 +60,7 @@ import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerEvent;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
@@ -71,6 +72,7 @@ import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -94,6 +96,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
@@ -114,6 +117,69 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 	}
 
+	private abstract class PasteAction extends Action{
+		public PasteAction( String text, String tooltip,
+				ImageDescriptor icon) {
+			super(text, icon);
+			
+			setToolTipText(tooltip);
+		}
+		protected abstract String getTextToInsert();
+		public void run() {
+			try {
+
+				UIJob j = new UIJob(getToolTipText()) {
+
+					public IStatus runInUIThread(IProgressMonitor monitor) {
+						try {
+							PrologConsole c = getConsole();
+							int caretOffset = c.getCaretOffset();
+							int offsetInLineBuffer = caretOffset-c.getStartOfInput();
+							if(offsetInLineBuffer<0){
+								return Status.OK_STATUS;
+							}
+							ConsoleModel model = c.getModel();
+							String lineBuffer = model.getLineBuffer();
+							String textToInsert = getTextToInsert();
+							if(textToInsert==null){
+								return Status.OK_STATUS;
+							}
+							lineBuffer=lineBuffer.substring(0,offsetInLineBuffer)
+							+ textToInsert 
+							+ lineBuffer.substring(offsetInLineBuffer);
+							
+							model.setLineBuffer(lineBuffer);
+							c.setCaretOffset(caretOffset+textToInsert.length());
+							
+						} catch (Throwable e) {
+							Debug.report(e);
+							return Status.CANCEL_STATUS;
+						} finally {
+							monitor.done();
+						}
+						return Status.OK_STATUS;
+					}
+
+					
+
+					private PrologConsole getConsole() {
+						return PrologConsoleView.this;
+					}
+
+
+
+					
+
+				};
+				
+				j.schedule();
+			} catch (Throwable t) {
+				Debug.report(t);
+			}
+		}
+		
+	}
+	
 	private final class ConsoleAction extends Action {
 		private String query;
 
@@ -238,6 +304,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private ClearAction clearAction;
 
 	private ConsoleAction deactivateGuiTracerAction;
+	
+	private PasteAction pasteFileNameAction;
 
 	private RestartAction restartAction;
 
@@ -355,7 +423,23 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		deactivateGuiTracerAction = new ConsoleAction("noguitracer",
 				"deactivate guitracer", "deactivate GUI tracer",
 				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
+		pasteFileNameAction = new PasteAction("paste filename","paste the name of the current editor file",
+				ImageRepository.getImageDescriptor(ImageRepository.PASTE_FILENAME)){
 
+					protected String getTextToInsert() {
+						IFile file= UIUtils.getFileInActiveEditor();
+						if(file==null){
+							return null;
+						}
+						return Util.quoteAtom(Util.prologFileName(file.getLocation().toFile()));
+					}
+			
+		};
+		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
+		
+		keyBindingService.setScopes(new String[]{PDTConsole.CONTEXT_USING_CONSOLE_VIEW});
+		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
 	}
 
@@ -387,11 +471,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		bars.setGlobalActionHandler(ActionFactory.CUT.getId(), cutAction);
 		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), copyAction);
 		bars.setGlobalActionHandler(ActionFactory.PASTE.getId(), pasteAction);
+		
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
 		addContributions(toolBarManager);
 		createCombo(toolBarManager);
 		pifSelector.init(getViewSite().getWorkbenchWindow());
+		
 	}
 
 	private void createCombo(IToolBarManager toolBarManager) {
@@ -440,6 +526,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		manager.add(clearAction);
 		manager.add(activateGuiTracerAction);
 		manager.add(deactivateGuiTracerAction);
+		manager.add(pasteFileNameAction);
 		manager.add(restartAction);
 		manager.add(new Separator("#ConsoleInternal-end"));
 		manager.add(new Separator("#Clipboard"));
@@ -812,5 +899,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	public int getCaretOffset() {
 		return getViewer().getCaretOffset();
+	}
+
+	public int getStartOfInput() {
+
+		return getViewer().getStartOfInput();
+	}
+
+	public void setCaretOffset(int offset) {
+		getViewer().setCaretOffset(offset);
+		
 	}
 }
