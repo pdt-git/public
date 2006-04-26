@@ -42,6 +42,7 @@
 package org.cs3.pl.common;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Date;
 
 /**
@@ -187,10 +188,6 @@ public class Debug {
         }
     }
 
-    public static void rethrow(Throwable t){
-    		report(t);
-    		throw new RuntimeException(t);
-    }
     
     /**
      * redirects debug output to another PrintStream. The parameter stream may
@@ -250,4 +247,72 @@ public class Debug {
             Debug.report(e);    
         }
     }
+
+    public static class _RuntimeException extends RuntimeException{
+
+		private Throwable cause;
+		private String message;
+
+		public _RuntimeException(Throwable e) {
+			this.cause = e;
+			message="wrapped exception";
+		}
+
+		public _RuntimeException(String message,Throwable e) {
+			this.cause = e;
+			this.message = message;
+		}
+		
+		public _RuntimeException() {
+			cause=new RuntimeException();
+			message="wrapped exception";
+		}
+
+		public _RuntimeException(String message) {
+			cause=new RuntimeException();
+		}
+
+		public Throwable fillInStackTrace() {
+			return cause.fillInStackTrace();
+		}
+
+		public String getLocalizedMessage() {
+			return message + " ("+cause.getLocalizedMessage()+")";
+		}
+
+		public String getMessage() {
+			return message + " ("+cause.getMessage()+")";
+		}
+
+		public void printStackTrace() {
+			cause.printStackTrace();
+		}
+
+		public void printStackTrace(PrintStream arg0) {
+			cause.printStackTrace(arg0);
+		}
+
+		public void printStackTrace(PrintWriter arg0) {
+			cause.printStackTrace(arg0);
+		}
+
+		public String toString() {
+			return cause.toString();
+		}
+    	
+    }
+	public static void rethrow(String string, Throwable e) {
+		warning("wrapping an exception:"+string);
+		report(e);
+		throw new _RuntimeException(string, e);
+		
+	}
+	
+	public static void rethrow( Throwable e) {
+		warning("wrapping an exception");
+		report(e);
+		throw new _RuntimeException(e);
+		
+	}
+	
 }

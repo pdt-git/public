@@ -44,8 +44,6 @@
 package org.cs3.pl.common;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 /**
  * Canonical implementation.
@@ -53,24 +51,24 @@ import java.net.URISyntaxException;
  * of its resource tree. By default it uses the user home directory.
  */
 public class DefaultResourceFileLocator implements ResourceFileLocator {
-    URI root = new File(System.getProperty("user.home")).toURI();
-   public DefaultResourceFileLocator(){
-       this(new File(System.getProperty("user.home")));
-   }
-    
-   
-    /**
-     * @param root
-     */
-    public DefaultResourceFileLocator(File root) {
-        String rootString = root .toURI().toString();
-        try {
-            this.root=new URI(rootString.endsWith("/")? rootString:rootString+"/");
-        } catch (URISyntaxException e) {
-            Debug.report(e);
-            throw new RuntimeException(e);
-        }
+    String root;
+    public DefaultResourceFileLocator(){
+        this(new File(System.getProperty("user.home")));
     }
+     
+     /**
+      * FIXME: was URI now String
+      * @param root
+      */
+     public DefaultResourceFileLocator(File root) {
+     	String rootPath = root.getAbsolutePath();
+         try {
+             this.root=rootPath.endsWith(File.separator)? rootPath:rootPath+File.separator;
+         } catch (Exception e) {
+             Debug.report(e);
+             throw new RuntimeException(e.getMessage());
+         }
+     }
     public ResourceFileLocator subLocator(String subdir){
         return new DefaultResourceFileLocator(resolve(subdir));
     }
@@ -81,10 +79,8 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
      */
     public File resolve(String rel) {
        
-            File resolved = new File(root.resolve(rel));
-            return resolved;
-
-       
+        File resolved = new File(root+ rel);
+        return resolved;
     }
 
     public static void main(String[] args) {
