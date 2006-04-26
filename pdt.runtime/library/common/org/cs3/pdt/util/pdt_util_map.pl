@@ -50,13 +50,13 @@
 	pdt_map_put/4,
 	pdt_map_remove/3,
 	pdt_map_get/3,
-	pdt_map_next/4,
-	pdt_map_merge/3
+	pdt_map_next/4/*,
+	pdt_map_merge/3*/
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
 
-pdt_map_merge(InA,InB,Out):-
+%pdt_map_merge(InA,InB,Out):-
     
 
 pdt_map_empty(In):-
