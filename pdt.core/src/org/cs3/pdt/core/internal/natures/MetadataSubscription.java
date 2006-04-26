@@ -230,8 +230,8 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 			IProject project = getProject();
 			Debug.debug("lets build project " + project);
-			project.build(IncrementalProjectBuilder.FULL_BUILD,
-					PDTCore.METADATA_BUILDER_ID, null, monitor);
+//			project.build(IncrementalProjectBuilder.FULL_BUILD,
+//					PDTCore.METADATA_BUILDER_ID, null, monitor);
 			project.build(IncrementalProjectBuilder.FULL_BUILD,
 					PDTCore.PROLOG_BUILDER_ID, null, monitor);
 			Debug
