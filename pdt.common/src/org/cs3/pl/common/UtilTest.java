@@ -46,9 +46,28 @@ import java.io.IOException;
 import junit.framework.TestCase;
 
 public class UtilTest extends TestCase {
-    public void testExec() throws IOException, InterruptedException {
-    	String[] r = org.cs3.pl.common.Util.exec("plwin -t source_file(A),concat(X,'/plwin.rc',A),write(X),nl,flush_output. -g halt.");
-		System.out.println("'"+r[0]+"'\n'"+r[1]+"'" );
-    	assertEquals("hallo",Util.exec("echo hallo")[0].trim());
-    }
+	public void testExec() throws IOException, InterruptedException {
+		String[] r = org.cs3.pl.common.Util
+				.exec("plwin -t source_file(A),concat(X,'/plwin.rc',A),write(X),nl,flush_output. -g halt.");
+		System.out.println("'" + r[0] + "'\n'" + r[1] + "'");
+		assertEquals("hallo", Util.exec("echo hallo")[0].trim());
+	}
+
+	public void testReplaceAll() {
+		assertEquals(Util.replaceAll("\\\"", "\\", "\\\\"), "\\\\\"");
+		assertEquals(Util.replaceAll("ab", "a", "b"), "bb");
+	}
+	
+	public void testSplit(){
+		String[] elms = Util.split("konsole -e xpce", " ");
+		assertEquals(3,elms.length);
+		assertEquals("konsole",elms[0]);
+		assertEquals("-e",elms[1]);
+		assertEquals("xpce",elms[2]);
+		
+	}
+	public void testQuoteAtom(){
+		String atom="something('something else')";
+		assertEquals("'something(\\'something else\\')'", Util.quoteAtom(atom));
+	}
 }

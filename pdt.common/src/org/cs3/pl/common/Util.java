@@ -50,23 +50,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import sun.misc.Unsafe;
 
 /**
  * contains static methods that do not quite fit anywhere else :-)=
@@ -233,7 +228,7 @@ public class Util {
 		try {
 			return normalizeOnWindoze(f.getCanonicalPath());
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -377,7 +372,7 @@ public class Util {
 	 * @param end
 	 * @return
 	 */
-	public static String unescape(CharSequence line, int start, int end) {
+	public static String unescape(String line, int start, int end) {
 		StringBuffer sb = new StringBuffer();
 		boolean escape = false;
 		StringBuffer escBuf = new StringBuffer();
@@ -452,7 +447,7 @@ public class Util {
 				});
 
 			} catch (IOException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getMessage());
 			}
 		}
 		logStream.println(key + " took " + time(key) + " millis.");
@@ -471,7 +466,7 @@ public class Util {
 		HashMap map = new HashMap();
 		for (Iterator it = l.iterator(); it.hasNext();) {
 			String elm = (String) it.next();
-			String[] s = elm.split("->");
+            String[] s = splitKeyValue(elm);
 			String key = s[0];
 			String val = s[1];
 			Object o = map.get(key);
@@ -490,6 +485,25 @@ public class Util {
 		return map;
 	}
 
+	private static String[] splitKeyValue(String elm) {
+		final int LEN = elm.length();
+		int l = 0;
+		StringBuffer key = new StringBuffer();
+		String value;
+		while(l < LEN-1){
+			if(elm.charAt(l) == '-' &&
+			   elm.charAt(l+1) == '>') {
+				value = elm.substring(l+2,LEN);
+				return new String[] { key.toString(), value };
+			} else {
+				key.append(elm.charAt(l));
+			}
+			l++;
+		}
+		
+		throw new IllegalArgumentException(elm);
+	}
+	
 	public static long parsePrologTimeStamp(String input) {
 		long l = 1000 * (long) Double.parseDouble(input);
 		return l;
@@ -521,16 +535,24 @@ public class Util {
 
 	}
 
-	public static void split(String s, String delm, Collection target) {
-		if (s.trim().length() == 0) {
-			return;
-		}
-		String[] strings = s.split(delm);
-		for (int i = 0; i < strings.length; i++) {
-			target.add(strings[i]);
-		}
-	}
 
+	public static String quoteAtom(String term){
+		
+		return "'"+replaceAll(term,"'","\\'")+"'";
+	}
+	
+	public static String replaceAll(String string,String search,String replace){
+		int i=-1;
+		StringBuffer sb=new StringBuffer();
+		while((i =string.indexOf(search,0))>=0){
+			sb.append(string.substring(0,i));
+			sb.append(replace);
+			string=string.substring(i+search.length());			
+		}
+		sb.append(string);
+		return sb.toString();
+	}
+	
 	public static String splice(Collection c, String delim) {
 		if (c != null && !c.isEmpty()) {
 			StringBuffer sb = new StringBuffer();
@@ -547,10 +569,6 @@ public class Util {
 
 	}
 
-	public static String quoteAtom(String term){
-		return "'"+term.replaceAll("\\'","\\\\'")+"'";
-	}
-	
 	public static String unquoteAtom(String image) {
 		
 		image=image.trim();
@@ -677,7 +695,29 @@ public static String unquoteString(String image) {
 		  &&c<='7';
 	}
 
+	public static void split(String string, String search, Collection results)
+	{
+		if (string == null) {
+			return;
+		}
+		int i=-1;
+		while((i =string.indexOf(search,0))>=0){
+			results.add(string.substring(0,i));			
+			string=string.substring(i+search.length());			
+		}
+		results.add(string);
+
+		
+	}
+
 	
+	public static String[] split(String string, String search) {
+		Vector v = new Vector();
+		split(string,search,v);
+		return (String[])v.toArray(new String[v.size()]);
+		
+	}
+
 	
 
 	
