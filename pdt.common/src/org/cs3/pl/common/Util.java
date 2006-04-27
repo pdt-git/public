@@ -718,6 +718,27 @@ public static String unquoteString(String image) {
 		
 	}
 
+	/**
+	 * fascilate testing by replacing things like $stream(1760696) with
+	 * <replace>
+	 * @param message
+	 * @return
+	 */
+	public static String hideStreamHandles(String string,String replace) {
+		int i=-1;
+		String search="$stream(";
+		StringBuffer sb=new StringBuffer();
+		while((i =string.indexOf(search,0))>=0){
+			sb.append(string.substring(0,i));
+			sb.append(replace);
+			int j=string.indexOf(')',i+search.length());
+			string=string.substring(j+1);			
+		}
+		sb.append(string);
+		return sb.toString();
+
+	}
+
 	
 
 	
