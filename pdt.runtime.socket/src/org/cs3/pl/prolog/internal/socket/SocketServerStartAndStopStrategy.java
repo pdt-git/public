@@ -198,7 +198,7 @@ public class SocketServerStartAndStopStrategy implements
 			}
 
 			// an experiment
-
+			JackTheProcessRipper.getInstance().registerProcess(serverProcess);
 			return serverProcess;
 		} catch (IOException e) {
 			e.printStackTrace();
