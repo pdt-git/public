@@ -65,7 +65,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		//Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = Factory.newInstance();
 		pif = (PrologInterface2) factory.create();
-		//pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole --noclose -e xpce");
+//		pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole --noclose -e xpce");
 		pif.start();
 		rec=new Recorder();
 		session = pif.getAsyncSession();
@@ -108,7 +108,7 @@ public class AsyncSocketSessionTest extends TestCase {
 					sb.append(r.event.ticket==null?"null":"dummy");
 				}
 				sb.append(',');
-				sb.append(r.event.message==null?"null":r.event.message);
+				sb.append(r.event.message==null?"null":Util.hideStreamHandles(r.event.message,"$stream(_)"));
 				sb.append(',');
 				sb.append(r.event.bindings==null?"null":"("+Util.prettyPrint(r.event.bindings)+")");
 				sb.append(')');
@@ -176,7 +176,7 @@ public class AsyncSocketSessionTest extends TestCase {
 				"goalSucceeded(1,null,null), " +
 				"goalHasSolution(2,null,()), " +
 				"goalSucceeded(2,null,null), " +
-				"goalRaisedException(3,error(syntax_error(cannot_start_term), string(member(a,[a,b,c). . , 15)),null), "+
+				"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 152)),null), "+
 				"goalFailed(4,null,null), " +
 				"batchComplete(null,null,null)", 
 				rec.toString());
@@ -195,10 +195,29 @@ public class AsyncSocketSessionTest extends TestCase {
 				"goalSucceeded(1,null,null), " +
 				"goalHasSolution(2,null,()), " +
 				"goalSucceeded(2,null,null), " +
-				"goalRaisedException(3,error(syntax_error(cannot_start_term), string(member(a,[a,b,c). . , 15)),null), "+
+				
+				
+				"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 149)),null), "+
 				"goalFailed(4,null,null), " +
 				"batchComplete(null,null,null)", 
 				rec.toString());
+	}
+	
+	public void test_longAtom() throws Throwable{
+//		session.queryOnce("0", "guitracer");
+//		session.queryOnce("0", "trace");
+//		session.join();
+//		rec.clear();
+		StringBuffer sb = new StringBuffer();
+		sb.append("atom(");
+		for(int i=0;i<600000;i++){
+			sb.append('a');
+		}
+		sb.append(")");
+		
+		session.queryOnce("1", sb.toString());
+		session.join();
+		assertEquals("goalHasSolution(1,null,()), goalSucceeded(1,null,null), joinComplete(dummy,null,null)", rec.toString());
 	}
 	
 	public void test_abort01() throws Throwable{
