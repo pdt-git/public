@@ -70,4 +70,9 @@ public class UtilTest extends TestCase {
 		String atom="something('something else')";
 		assertEquals("'something(\\'something else\\')'", Util.quoteAtom(atom));
 	}
+	
+	public void testHideStreamHandles(){
+		String s="something(to($stream(hid976)))$stream(562)";
+		assertEquals("something(to($stream(_)))$stream(_)", Util.hideStreamHandles(s, "$stream(_)"));
+	}
 }
