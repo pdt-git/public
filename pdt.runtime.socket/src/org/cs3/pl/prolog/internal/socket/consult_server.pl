@@ -298,21 +298,24 @@ handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL',continue):-
 
 my_read_command(InStream,Term):-
     my_read_term(InStream,Term,[/*double_quotes(string)*/]).
+
+%my_read_goal(InStream,Term,Vars):-
+%    read_line_to_codes(InStream,Codes),
+%    atom_codes(Atom,Codes),
+%    thread_self(Self),
+%	format("~a: <<< (goal) >~a~n<",[Self,Atom]),
+%    atom_to_term(Atom,Term,Vars).
+
 my_read_goal(InStream,Term,Vars):-
-    read_line_to_codes(InStream,Codes),
-    atom_codes(Atom,Codes),
-    thread_self(Self),
-	format("~a: <<< (goal) >~a~n<",[Self,Atom]),
-    atom_to_term(Atom,Term,Vars).
+    my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]).
 
 		
 handle_batch_messages:-
     repeat,    
     (	thread_peek_message(batch_message(Message)),
-    	writeln(found_batch_message_in_queue(Message)),
-    	handle_batch_message(Message)
+    	    	handle_batch_message(Message)
     ->	thread_get_message(batch_message(Message)), fail
-    ;	writeln(no_more_messages_in_queue),true
+    ;	true
     ),!.
 handle_batch_message(abort(Id)):-
 	recordz(pif_batch_abort,Id).
@@ -585,15 +588,12 @@ request_line(InStream, OutStream, Prompt, Line):-
 	my_format(OutStream,"~a~n",[Prompt]),
 	read_line_to_codes(InStream,LineCodes),
 	codes_or_eof_to_atom(LineCodes,Line),
-	check_eof(Line),
-	thread_self(Self),
-	format("~a: <<< ~a~n",[Self,Line]).
+	check_eof(Line).
+	
 	
 	
 my_read_term(InStream,Term,Options):-
-	read_term(InStream,Term,Options),
-	thread_self(Self),
-	write(Self),write(': <<< '),write(Term),nl.
+	read_term(InStream,Term,Options).
 	
 my_write_term(OutStream,Elm,Options):-
 	write_term(OutStream,Elm,Options),
