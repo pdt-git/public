@@ -99,6 +99,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 
     public final static String EXECUTABLE = "pif.executable";
+    public static final String ENVIRONMENT = "pif.environment";
+    
     public static final String KILLCOMMAND = "pif.killcommand";
     public final static String BOOT_DIR = "pif.engine_dir";
 
@@ -114,11 +116,10 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	public static final String HIDE_PLWIN = "pif.hide_plwin";
 
-	public static final String PORT = "pif.port";
 	public static final String HOST = "pif.host";
+	public static final String PORT = "pif.port";
 
 	
-    
 
 	private String host;
 	
@@ -137,6 +138,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	private int timeout;
 
 	private boolean hidePlwin;
+
+	private String environment;
 
 	private String killcommand;
 
@@ -248,6 +251,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     public void setOption(String opt, String value) {
          if (EXECUTABLE.equals(opt)) {
             this.executable = value;
+        } else if (ENVIRONMENT.equals(opt)) {
+            this.environment = value;
         } else if (KILLCOMMAND.equals(opt)) {
             this.killcommand=value;
         } else if (STANDALONE.equals(opt)) {
@@ -283,6 +288,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
         }
          if (EXECUTABLE.equals(opt)) {
             return executable;
+        }else if (ENVIRONMENT.equals(opt)) {
+            return environment;
         } else if (KILLCOMMAND.equals(opt)) {
             return ""+killcommand;
         } else if (STANDALONE.equals(opt)) {

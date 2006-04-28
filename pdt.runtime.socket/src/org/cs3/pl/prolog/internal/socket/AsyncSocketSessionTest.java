@@ -248,6 +248,8 @@ public class AsyncSocketSessionTest extends TestCase {
 			
 			}
 		}.start();
+		//session.queryOnce("toggle uitracer","guitracer");
+		//session.queryOnce("start tracer","trace");
 		session.abort();
 		
 		session.dispose();

@@ -71,7 +71,7 @@ public class SocketServerStartAndStopStrategy implements
 		ServerStartAndStopStrategy {
 
 	private ProcessWrapper serverProcess;
-	private Process serverProcessWrapper;
+	
 
 	public class _InputStreamPump extends InputStreamPump {
 
@@ -115,19 +115,18 @@ public class SocketServerStartAndStopStrategy implements
 			Debug.report(e);
 			throw new RuntimeException(e.getMessage());
 		}
-		String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
-		String engineDir = Util.prologFileName(pif.getFactory()
-				.getResourceLocator().resolve("/"));
-
-		File tmpFile = null;
-		try {
-			tmpFile = File.createTempFile("socketPif", null);
-			PrintWriter p = new PrintWriter(new BufferedOutputStream(
-					new FileOutputStream(tmpFile)));
-			if (pif.isHidePlwin()) {
-				p
-						.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))"
-								+ "->win_window_pos([show(false)])" + ";true).");
+        String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
+        String envstring = pif.getOption(SocketPrologInterface.ENVIRONMENT);
+        String engineDir = Util.prologFileName(pif.getFactory().getResourceLocator().resolve("/"));
+        
+        File tmpFile=null;
+        try {			
+			tmpFile = File.createTempFile("socketPif",null);
+			PrintWriter p = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
+			if(pif.isHidePlwin()){
+				p.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" +
+						"->win_window_pos([show(false)])" +
+						";true).");
 			}
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
@@ -157,37 +156,43 @@ public class SocketServerStartAndStopStrategy implements
 
 		sb.append(Util.prologFileName(tmpFile));
 		sb.append("']");
-		String cmdline = sb.toString();
-		Debug.info("Starting server with " + Util.prettyPrint(commandArray));
+		//String cmdline = sb.toString();
+		String[] envarray = Util.split(envstring,",");
+		Debug.info("Starting server with " + Util.prettyPrint(commandArray));		
+		Debug.info("using environment: "+Util.prettyPrint(envarray));
 
 		try {
 
-			
-			Process process = Runtime.getRuntime().exec(commandArray);
-			
-			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
-			BufferedWriter writer = new BufferedWriter(new FileWriter(logFile
-					.getAbsolutePath(), true));
-			writer.write("\n---8<-----------------------8<---\n");
-			writer.write(new Date().toString() + "\n");
-			writer.write("---8<-----------------------8<---\n\n");
-			new _InputStreamPump(process.getErrorStream(), writer)
-					.start();
-			new _InputStreamPump(process.getInputStream(), writer)
-					.start();
-
-			long timeout = pif.getTimeout();
-			long startTime = System.currentTimeMillis();
-			while (!pif.getLockFile().exists()) {
-				try {
-					long now = System.currentTimeMillis();
-					if (now - startTime > timeout) {
-						throw new RuntimeException(
-								"Timeout exceeded while waiting for peer to come up.");
-					}
-					Thread.sleep(50);
-				} catch (InterruptedException e1) {
-					Debug.report(e1);
+            Process process = Runtime.getRuntime().exec(commandArray,envarray);
+            
+            File logFile = Util.getLogFile("org.cs3.pdt.server.log");
+            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,true));
+            writer.write("\n---8<-----------------------8<---\n");
+            writer.write(new Date().toString()+"\n");
+            writer.write("---8<-----------------------8<---\n\n");
+            new _InputStreamPump(process.getErrorStream(), writer)
+                    .start();
+            new _InputStreamPump(process.getInputStream(), writer)
+                    .start();
+            
+            long timeout=pif.getTimeout();
+            long startTime = System.currentTimeMillis();
+            while (!pif.getLockFile().exists()) {
+                try {
+                	long now = System.currentTimeMillis();
+                	if(now-startTime>timeout){
+                		throw new RuntimeException("Timeout exceeded while waiting for peer to come up.");
+                	}
+                    Thread.sleep(50);
+                } catch (InterruptedException e1) {
+                    Debug.report(e1);
+                }
+                try{
+                	if(process.exitValue()!=0){
+                		throw new RuntimeException("Failed to start server. Process exited with err code "+process.exitValue());
+                	}
+                }catch (IllegalThreadStateException e) {
+                	; //nothing. the process is still running.
 				}
 				try {
 					if (process.exitValue() != 0) {

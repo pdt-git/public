@@ -70,6 +70,10 @@ public class Factory extends PrologInterfaceFactory {
 				new SimpleOption(SocketPrologInterface.EXECUTABLE,
 						"SWI-Prolog executable", "eg. xpce or /usr/bin/xpce",
 						SimpleOption.FILE, guessExecutableName()),
+				new SimpleOption(SocketPrologInterface.ENVIRONMENT,
+								"Extra environment variables", "A comma-separated list of VARIABLE=VALUE pairs.",
+								SimpleOption.STRING, guessEnvironmentVariables()),
+						
 				new SimpleOption(SocketPrologInterface.KILLCOMMAND,
 								"command to kill processes", "eg. kill or /usr/bin/kill on most systems",
 								SimpleOption.FILE, guessKillCommandName()),						
@@ -128,6 +132,9 @@ public class Factory extends PrologInterfaceFactory {
 		
 	}
 
+
+
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -164,6 +171,14 @@ public class Factory extends PrologInterfaceFactory {
 	 */
 	private static String guessStandAlone() {
 		return "false";
+	}
+
+	private String guessEnvironmentVariables() {
+		if (Util.isMacOS()) {
+			String home = System.getProperty("user.home");
+			return "DISPLAY=:0.0, HOME="+home;
+		}
+		return "";
 	}
 
 	private String guessExecutableName() {
