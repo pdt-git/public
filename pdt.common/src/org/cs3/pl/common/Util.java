@@ -54,11 +54,9 @@ import java.net.ServerSocket;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -224,6 +222,14 @@ public class Util {
 		return windowsPlattform;
 	}
 
+	/**
+	 * @return
+	 */
+	public static boolean isMacOS() {
+		boolean mac = System.getProperty("os.name").indexOf(
+				"Mac") > -1;
+		return mac;
+	}
 	public static String prologFileName(File f) {
 		try {
 			return normalizeOnWindoze(f.getCanonicalPath());
@@ -705,7 +711,7 @@ public static String unquoteString(String image) {
 			results.add(string.substring(0,i));			
 			string=string.substring(i+search.length());			
 		}
-		results.add(string);
+		results.add(string.trim());
 
 		
 	}
