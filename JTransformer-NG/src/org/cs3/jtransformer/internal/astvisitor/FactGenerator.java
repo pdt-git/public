@@ -2436,12 +2436,6 @@ public class FactGenerator extends ASTVisitor {
 		writer.writeFact("modifierT", args);
 		writer.addIndention();
 		
-		/*	
-		 * :- inTe(blockT(100002, fqn('humptydumpty', '<init>', []), fqn('humptydumpty', '<init>', []), [100004])).
-		 * :- inTe(execT(100004, 100002, fqn('humptydumpty', '<init>', []), 100003)).
-		 * :- inTe(applyT(100003, 100004, fqn('humptydumpty', '<init>', []), 'null', 'super', [], fqn('java.lang.Object', '<init>', []))).
-		 */
-		
 		String execID = idResolver.getID();
 		String applyID = idResolver.getID();
 		
@@ -2467,10 +2461,8 @@ public class FactGenerator extends ASTVisitor {
 		
 		if (type != null){
             superc=idResolver.getSyntheticConstructorID((ITypeBinding) type.resolveBinding());
-			//superc = "fqn('" + ((ITypeBinding)sname.resolveBinding()).getQualifiedName() + "', '<init>', [])";
 		} else {
             superc=idResolver.getSyntheticConstructorID(null);
-			//superc = "fqn('java.lang.Object', '<init>', [])";
 		}
 		
 		fqnManager.transformFQN(superc);

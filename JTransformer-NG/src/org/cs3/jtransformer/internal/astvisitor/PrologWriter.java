@@ -2,23 +2,24 @@
  */
 package org.cs3.jtransformer.internal.astvisitor;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.cs3.pl.common.Debug;
+import java.util.List;
 
 /**
  */
 public class PrologWriter implements IPrologWriter {
-    private Writer out;
+	
+private List clauses;
+
+
+//    private Writer out;
 
     /**
      * @param out
      * @param interpreted
      */
-    public PrologWriter(Writer out, boolean interpreted) {
+    public PrologWriter(List list, boolean interpreted) {
         super();
-        this.out = out;
+        this.clauses = list;
         this.interpreted = interpreted;
     }
 
@@ -26,6 +27,9 @@ public class PrologWriter implements IPrologWriter {
 
 
     private static final String INTE = "inTe";
+
+
+	private static final String ASSERT = "assert";
 
 	
     /*
@@ -66,10 +70,10 @@ public class PrologWriter implements IPrologWriter {
      */
     public void writeFact(String string, String[] param) {
         StringBuffer trm = term(string, param);
-        String s = interpreted ? ":- "+term(INTE, trm) : trm.toString();
+        String s = interpreted ? term(INTE, trm).toString() : 
+        	term(ASSERT,trm.toString()).toString();
         
-        write(s);
-        write(".\n");
+        clauses.add(s);
     }
 
     private StringBuffer term(String functor, String arg) {
@@ -117,41 +121,38 @@ public class PrologWriter implements IPrologWriter {
      *           java.lang.String[], java.lang.String[])
      */
     public void writeRule(String functor, String[] args, String[] condi) {
+    	StringBuffer buf = new StringBuffer();
         if (interpreted) {
-            write(":- ");
-            write(INTE);
-            write("(");
+            buf.append(INTE);
+            buf.append("(");
         }
-        write(term(functor,args).toString());
-        if (condi!=null&&condi.length>0) {
-            write(":-");
+        buf.append(term(functor,args).toString());
+        if (condi != null && condi.length > 0) {
+        	buf.append(" :- ");
             for (int i = 0; i < condi.length; i++) {                    
-                write("\n\t");
-                write(condi[i]);
+                buf.append(",");
+                buf.append(condi[i]);
             }
         }
-        
-        if (interpreted) {
-            write(")");
-        }
-        write(".\n");
+       	buf.append(")");
+       	clauses.add(buf.toString());
     }
 
-    /**
-     * @param string
-     */
-    private void write(String string)
-	{
-		try
-		{
-			out.write(string);
-		} catch (IOException e)
-		{
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
-
-	}
+//    /**
+//     * @param string
+//     */
+//    private void write(String string)
+//	{
+//		try
+//		{
+//			out.write(string);
+//		} catch (IOException e)
+//		{
+//			Debug.report(e);
+//			throw new RuntimeException(e);
+//		}
+//
+//	}
 
     /*
 	 * (non-Javadoc)
@@ -178,7 +179,7 @@ public class PrologWriter implements IPrologWriter {
      * @see org.cs3.jtransformer.internal.astvisitor.IPrologWriter#writeQuery(java.lang.String)
      */
     public void writeQuery(String query) {
-        write(":- " + query +".\n");
+        clauses.add(query);
 
     }
 
@@ -188,12 +189,12 @@ public class PrologWriter implements IPrologWriter {
      * @see org.cs3.jtransformer.internal.astvisitor.IPrologWriter#close()
      */
     public void close() {
-       try {
-        out.close();
-    } catch (IOException e) {
-        Debug.report(e);
-        throw new RuntimeException(e);
-    }
+//       try {
+//        out.close();
+//    } catch (IOException e) {
+//        Debug.report(e);
+//        throw new RuntimeException(e);
+//    }
 
     }
 
@@ -203,12 +204,12 @@ public class PrologWriter implements IPrologWriter {
      * @see org.cs3.jtransformer.internal.astvisitor.IPrologWriter#flush()
      */
     public void flush() {
-        try {
-            out.flush();
-        } catch (IOException e) {
-            Debug.report(e);
-            throw new RuntimeException(e);
-        }
+//        try {
+//            out.flush();
+//        } catch (IOException e) {
+//            Debug.report(e);
+//            throw new RuntimeException(e);
+//        }
 
     }
 

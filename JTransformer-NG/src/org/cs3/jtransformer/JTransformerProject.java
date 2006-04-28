@@ -3,11 +3,11 @@
 package org.cs3.jtransformer;
 
 import java.io.IOException;
-import java.io.PrintStream;
 
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -73,7 +73,7 @@ public interface JTransformerProject extends OptionProvider{
      * @deprecated this is only used in some irrelevant test cases. I would like
      *                   to get rid of it.
      */
-    public void generateFacts(ICompilationUnit cu, PrintStream out)
+    public void generateFacts(AsyncPrologSession session, ICompilationUnit cu)
             throws IOException, CoreException;
 
     /**
