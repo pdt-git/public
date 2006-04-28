@@ -11,9 +11,13 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
+import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.AsyncPrologSession;
+import org.cs3.pl.prolog.PrologInterface2;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -84,24 +88,33 @@ public class SelfTest extends FactGenerationTest {
 		System.err.println("done");
 		
 		System.err.print("   writing facts...");
-		IFile outFile = writeFactsToFile(sourceUnit);
-		System.err.println("done");
+		JTransformerProject jtransformerProject = (JTransformerProject) getTestProject().getNature(JTransformer.NATURE_ID);
+		AsyncPrologSession session = ((PrologInterface2)jtransformerProject.getPrologInterface()).getAsyncSession();
+		try {
+			IFile outFile = writeFactsToFile(session,sourceUnit);
+
+			System.err.println("done");
 		
-		System.err.print("   retrieving expectedFile...");
-		IFile expectedFile = getTestProject().getFile(new Path(testString+"/Test.expected.pl"));		
-		System.err.println("done");
-		
-		System.err.print("   reading expected...");		
-		String expected = read(expectedFile);
-		System.err.println("done");
-		
-		System.err.print("   reading actual...");
-		String actual =read(outFile);
-		System.err.println("done");
-		
-		System.err.print("   comparing...");
-		assertEquals(expected,actual);
-		System.err.println("done");
+			System.err.print("   retrieving expectedFile...");
+			IFile expectedFile = getTestProject().getFile(new Path(testString+"/Test.expected.pl"));		
+			System.err.println("done");
+			
+			System.err.print("   reading expected...");		
+			String expected = read(expectedFile);
+			System.err.println("done");
+			
+			System.err.print("   reading actual...");
+			String actual =read(outFile);
+			System.err.println("done");
+			
+			System.err.print("   comparing...");
+			assertEquals(expected,actual);
+			System.err.println("done");
+		} finally {
+			if(session != null)
+				session.dispose();
+		}
+
 	}
 	
 	protected Object getKey() {		

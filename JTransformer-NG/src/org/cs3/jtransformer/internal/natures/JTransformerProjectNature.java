@@ -2,7 +2,6 @@ package org.cs3.jtransformer.internal.natures;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -19,6 +18,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -317,9 +317,9 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 * @see org.cs3.jtransformer.JTransformerProject#generateFacts(org.eclipse.jdt.core.ICompilationUnit,
 	 *      java.io.PrintStream)
 	 */
-	public void generateFacts(ICompilationUnit cu, PrintStream out)
+	public void generateFacts(AsyncPrologSession session, ICompilationUnit cu)
 			throws IOException, CoreException {
-		getFactBaseBuilder().writeFacts(cu, out);
+		getFactBaseBuilder().writeFacts(session, cu);
 
 	}
 

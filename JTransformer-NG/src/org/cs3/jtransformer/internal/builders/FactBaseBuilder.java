@@ -1,9 +1,10 @@
 package org.cs3.jtransformer.internal.builders;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,8 +25,9 @@ import org.cs3.jtransformer.internal.astvisitor.FactGenerator;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.ConsultService;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -64,6 +66,8 @@ public class FactBaseBuilder {
      */
     public final static int IS_ECLIPSE_BUILD = 4;
 
+	private static final Object TICKET = "TICKET";
+
     private JTransformerProject jtransformerProject;
 
     private IProject project;
@@ -75,7 +79,7 @@ public class FactBaseBuilder {
     private boolean building = false;
 
     private long storeTimeStamp;
-
+    
     /**
      *  
      */
@@ -152,8 +156,8 @@ public class FactBaseBuilder {
                 return;
             }
 
-            getMetaDataEXT();
-            getMetaDataSRC();
+//            getMetaDataEXT();
+//            getMetaDataSRC();
 
             monitor.beginTask("building PEFs", 100);
             session = pif.getSession();
@@ -216,16 +220,26 @@ public class FactBaseBuilder {
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
             throws IOException, CoreException {
         monitor.beginTask("Generating new PEFs ", toProcess.size());
-        for (Iterator i = toProcess.iterator(); i.hasNext();) {
-            if (monitor.isCanceled()) {
-                throw new OperationCanceledException("Canceled");
-            }
-            IFile file = (IFile) i.next();
-            forgetFacts(file, false);
-            buildFacts(file);
-            monitor.worked(1);
+        AsyncPrologSession session = ((PrologInterface2)pif).getAsyncSession();
+        try {
+	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
+	            if (monitor.isCanceled()) {
+	                throw new OperationCanceledException("Canceled");
+	            }
+	            IFile file = (IFile) i.next();
+	            forgetFacts(file, false);
+	            monitor.subTask(" - process " + file.getName());
+	            buildFacts(session, file);
+	            monitor.worked(1);
+	        }
+        } finally {
+            monitor.subTask(" - write source file facts");
+        	
+        	if(session != null)
+        		session.dispose();
+        	monitor.done();
         }
-        monitor.done();
+	        
     }
 
     private void collectDelta(IResourceDelta delta, final Collection toProcess,
@@ -253,9 +267,6 @@ public class FactBaseBuilder {
                     String fext = resource.getFileExtension();
                     if (fext != null && fext.equals("java")) {
 						
-                        if ("OinkOinkOink.java".equals(resource.getName())) {
-                            Debug.debug("debug");
-                        }
 						if(!inExclusionPattern(resource))
                         switch (delta.getKind()) {
                         case IResourceDelta.REMOVED:
@@ -359,7 +370,6 @@ public class FactBaseBuilder {
      * @throws CoreException
      */
     private boolean isStoreUpToDate(IFile file) {
-        ConsultService cs = getMetaDataSRC();
         long recordTS = getStoreTimeStamp();
         long fileTS = file.getLocalTimeStamp();
         Debug.debug("store ts: " + recordTS);
@@ -409,37 +419,34 @@ public class FactBaseBuilder {
         return storeTimeStamp;
     }
 
-    private void buildFacts(IFile file) throws IOException, CoreException {
+    private void buildFacts(AsyncPrologSession session, IFile file) throws IOException, CoreException {
 
         /* the file seems to have been deleted */
         if (!file.exists()) {
             return;
         }
-        ConsultService cs = getMetaDataSRC();
+//        ConsultService cs = getMetaDataSRC();
         String recordPath = file.getFullPath().addFileExtension("pl")
                 .toString();
 
         ICompilationUnit icu = JavaCore.createCompilationUnitFrom(file);
 
-        PrintStream out = cs.getOutputStream(recordPath);
+        //PrintStream out = cs.getOutputStream(recordPath);
         try {
 
             icu.becomeWorkingCopy(null, null);
 
-            writeFacts(icu, out);
+            writeFacts(session, icu);
         } catch (JavaModelException jme) {
             IMarker marker = file.createMarker(JTransformer.PROBLEM_MARKER_ID);
             marker.setAttribute(IMarker.MESSAGE,
                     "There seem to be problems in the java code.");
-            PrologSession session = pif.getSession();
-            session.queryOnce("assert(errors_in_java_code)");
-            session.dispose();
+            session.queryOnce(TICKET,"assert(errors_in_java_code)");
             throw new CoreException(new Status(IStatus.CANCEL, JTransformer.PLUGIN_ID,
                     IResourceStatus.BUILD_FAILED,
                     "build canceled due to problems in the java code.", jme));
         } finally {
             icu.discardWorkingCopy();
-            out.close();
         }
     }
 
@@ -474,13 +481,13 @@ public class FactBaseBuilder {
         monitor.beginTask("creating external PEFs.", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
         PrologSession session = pif.getSession();
+		AsyncPrologSession asyncSession = ((PrologInterface2)pif).getAsyncSession();
         try {
             List unresolved = getUnresolvedTypes(session, failed);
 
             Set seen = new HashSet();
             while (!unresolved.isEmpty()) {
-                PrintStream out = getMetaDataEXT().getOutputStream("flat.pl");
-                try {
+
                     for (Iterator iter = unresolved.iterator(); iter.hasNext();) {
                         String typeName = (String) iter.next();
                         if (seen.contains(typeName)) {
@@ -488,48 +495,6 @@ public class FactBaseBuilder {
                                     "saw type before, so something seems broken. "
                                             + typeName);
                         }
-                        // ---<DEBUG>--------------------------8<------------------------------------------for
-                        // trapping JT-113
-                        /*
-                         * if("java.lang.Object".equals(typeName)){
-                         * Debug.warning("ok, so you want java.lang.Object,
-                         * huh?"); Debug.warning("let's see...this is our stack:
-                         * "); Debug.dumpStackTrace(); Debug.warning("Using
-                         * divine knowledge to find the record file for external
-                         * PEFs..."); File flat =
-                         * pif.getFactory().getResourceLocator().subLocator(JTransformer.EXT).resolve("flat.pl");
-                         * Debug.warning("\t-->\t should be here:
-                         * "+flat.toString()); if(flat.canRead()){
-                         * Debug.warning("\t-->\t exists and is readable.");
-                         * String prologFileName = Util.prologFileName(flat);
-                         * Map map =
-                         * session.queryOnce("source_file('"+prologFileName+"')");
-                         * if(map!=null){ Debug.warning("\t-->\t is known to
-                         * prolog (source_file/1)"); BufferedReader reader = new
-                         * BufferedReader(new FileReader(flat)); boolean
-                         * doomed=false; try{ String line = reader.readLine();
-                         * while(null!=line){ if(line.indexOf("'Object'")!=-1){
-                         * doomed=true; break; } line = reader.readLine(); } }
-                         * finally{ reader.close(); } if(doomed){
-                         * Debug.warning("\t-->\t does contain magic string
-                         * 'Object'."); Debug.warning("\t-->\t realy realy
-                         * unresolved?
-                         * "+getUnresolvedTypes().contains("java.lang.Object"));
-                         * Debug.error("this MUST lead to an error, so i can
-                         * quit right away. see you."); System.exit(-42); }
-                         * else{ Debug.warning("\t-->\t does NOT contain magic
-                         * string 'Object'."); Debug.warning("\t-->Ok, no prob,
-                         * you may pass."); } } else{ Debug.warning("\t-->\t is
-                         * NOT known to prolog (source_file/1)");
-                         * Debug.error("this MUST lead to an error, so i can
-                         * quit right away. see you."); System.exit(-42); } }
-                         * else { Debug.warning("\t-->\t is NOT readable or does
-                         * not exist."); Debug.warning("\t-->Ok, no prob, you
-                         * may pass."); } } //
-                         * -------------------------------------------------------------------------------------------
-                         * </DEBUG>
-                         *  
-                         */
                         seen.add(typeName);
                         try {
                             SubProgressMonitor submon = new SubProgressMonitor(
@@ -542,33 +507,33 @@ public class FactBaseBuilder {
                             if (submon.isCanceled()) {
                                 throw new OperationCanceledException();
                             }
-                            writeFacts(typeName, out);
+                            writeFacts(asyncSession, typeName);
                             submon.done();
                         } catch (ClassNotFoundException e) {
                             failed.add(typeName);
                         }
                     }
-                } finally {
-                    out.close();
-                }
+                System.err.println("BEFORE DISPOSE");
+                asyncSession.join();
+                System.err.println("BEFORE DISPOSE");
                 unresolved = getUnresolvedTypes(session, failed);
             }
         } finally {
             session.dispose();
+            asyncSession.dispose();
             monitor.done();
             Debug.debug("exit loadExternalFacts");
         }
     }
 
-    public static void writeFacts(IProject project, final ICompilationUnit icu,
-            PrintStream out) throws IOException, CoreException {
+    public void writeFacts(AsyncPrologSession session, IProject project, final ICompilationUnit icu) throws IOException, CoreException {
 
         IResource resource = icu.getResource();
         String path = resource.getFullPath().removeFileExtension()
                 .addFileExtension("pl").toString();
 
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);// metaDataSRC.getPrependablePrologWriter(path);
+        List clauses  = new ArrayList();
+        PrologWriter plw = new PrologWriter(clauses, true);// metaDataSRC.getPrependablePrologWriter(path);
         FactGenerationToolBox box = new DefaultGenerationToolbox();
         FactGenerator visitor = new FactGenerator(icu, resource.getFullPath()
                 .toString(), box, plw);
@@ -591,24 +556,61 @@ public class FactBaseBuilder {
 			});
 			throw iae;
 		}
-
-        plw.writeQuery("retractLocalSymtab");
 		
-        plw.flush();
-        String data = sw.getBuffer().toString();
-        sw.getBuffer().setLength(0);
-        Map mapping = box.getFQNTranslator().getFQNMapping();
-        writeSymTab(plw, mapping);
-        plw.flush();
-        plw.close();
-        String header = sw.getBuffer().toString();
-//        System.err.println("\n--------------------\n\n"+path+"\n\n------------------\n");
-//        System.err.println(header + "\n\n");
-//        System.err.println(data + "\n\n");
-        out.println(header);
-        out.println(data);
-
+        writeSymtabAndClauses(session, project, clauses, plw, box);
     }
+    
+// PrologSession session
+	private void assertClauses(AsyncPrologSession session, List clauses)
+	{
+		if (clauses.size() == 0)
+		{
+			return;
+		}
+
+		// final PrologSession as = prologInterface.getSession();
+
+		// monitor.beginTask(taskname, size);
+		// as.addBatchListener(new DefaultAsyncPrologSessionListener(){
+		// public void goalSucceeded(AsyncPrologSessionEvent e) {
+		// monitor.worked(1);
+		// if(monitor.isCanceled()){
+		// new Thread(){
+		// public void run() {
+		// as.abort();
+		// Debug.debug("JTransformer builder aborted ");
+		// }
+		// }.start();
+		//					
+		// }
+		// }
+		// });
+		StringBuffer buf = new StringBuffer();
+		for (Iterator iter = clauses.iterator(); iter.hasNext();)
+		{
+			if (buf.length() > 0)
+			{
+				buf.append(",");
+			}
+			buf.append(iter.next());
+		}
+		//writeToFile(buf.toString());
+		session.queryOnce( TICKET, "inTeArray(term(" + buf.toString() + "))");
+	}
+
+	private void writeToFile(String str)
+	{
+		try
+		{
+			BufferedWriter writer = new BufferedWriter(new FileWriter("c:\\temp\\asq.pl",true));
+			writer.write(str);
+			writer.write("\n");
+			writer.close();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
 
 	private static ASTParser getJavaParser()
 	{
@@ -628,29 +630,36 @@ public class FactBaseBuilder {
         parser.setCompilerOptions(options);
 	}
 
-    public static void writeFacts(IProject project, String typeName,
-            PrintStream out) throws JavaModelException, CoreException,
+    public void writeFacts(AsyncPrologSession session, IProject project, String typeName) throws JavaModelException, CoreException,
             ClassNotFoundException {
-        StringWriter sw = new StringWriter();
-        PrologWriter plw = new PrologWriter(sw, true);
-
+        List clauses = new ArrayList();
+        PrologWriter plw = new PrologWriter(clauses, true);
+        	
         FactGenerationToolBox box = new DefaultGenerationToolbox();
         new ByteCodeFactGeneratorIType(project, plw, typeName, box)
                 .writeAllFacts();
-        plw.writeQuery("retractLocalSymtab");
-        plw.flush();
-        String data = sw.toString();
-        sw.getBuffer().setLength(0);
-        Map mapping = box.getFQNTranslator().getFQNMapping();
-        writeSymTab(plw, mapping);
-        plw.flush();
-        String header = sw.toString();
-        sw.getBuffer().setLength(0);
-        String fileName = typeName.replace('.', '/') + ".pl";
-        // out = metaDataEXT.getOutputStream(fileName);
-        out.println(header);
-        out.println(data);
+        writeSymtabAndClauses(session, project, clauses, plw, box);
     }
+
+	private void writeSymtabAndClauses(AsyncPrologSession session, IProject project, List clauses, PrologWriter plw, FactGenerationToolBox box) throws CoreException
+	{
+		plw.writeQuery("retractLocalSymtab");
+        
+        List symtab  = new ArrayList();
+        PrologWriter plwSymtab = new PrologWriter(symtab, true);
+        Map mapping = box.getFQNTranslator().getFQNMapping();
+        writeSymTab(plwSymtab, mapping);
+//      System.err.println("\n--------------------\n\n"+path+"\n\n------------------\n");
+//      System.err.println(header + "\n\n");
+//      System.err.println(data + "\n\n");
+//		writeToFile("% write file ");
+		symtab.addAll(clauses);
+		assertClauses(session,symtab);
+//		writeToFile("% before join ");
+      //as.join();
+//		writeToFile("% after join ");
+      
+	}
 
     private static void writeSymTab(PrologWriter plw, Map mapping) {
         Set set = mapping.keySet();
@@ -676,29 +685,17 @@ public class FactBaseBuilder {
      * 
      * @param an
      *                compilation unit in working copy mode.
-     * @param out
-     *                a writer to which the facts should be written. It is a good
-     *                idea to use a buffered writer. The writer will not be closed.
      */
-    public void writeFacts(ICompilationUnit icu, PrintStream out)
+    public void writeFacts(AsyncPrologSession session, ICompilationUnit icu)
             throws IOException, CoreException {
-        writeFacts(project, icu, out);
+        writeFacts(session, project, icu);
     }
 
-    public void writeFacts(String typeName, PrintStream out)
+    public void writeFacts(AsyncPrologSession session, String typeName)
             throws JavaModelException, CoreException, ClassNotFoundException {
-        writeFacts(project, typeName, out);
+        writeFacts(session, project, typeName);
     }
 
-    private ConsultService getMetaDataSRC() {
-
-        return pif.getConsultService(JTransformer.SRC);
-    }
-
-    private ConsultService getMetaDataEXT() {
-        return pif.getConsultService(JTransformer.EXT);
-
-    }
 
     /**
      * @param monitor

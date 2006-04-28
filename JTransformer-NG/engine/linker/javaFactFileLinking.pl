@@ -78,9 +78,10 @@ inTe(importT(_,_,Fqn)) :-
     fail.
 */
 
-%inTe(importT(_, _, Fqn)) :-
-%    globalIds(Fqn, _),
-%    !.    
+
+inTeArray(Term) :-
+	forall(arg(_, Term, Value),
+	       call(Value)).
 
 inTe(packageT(_,Name)) :-
     packageT(_,Name),

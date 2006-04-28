@@ -28,6 +28,7 @@ import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IContainer;
@@ -79,7 +80,6 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -1054,13 +1054,13 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      * @throws IOException
      * @throws CoreException
      */
-    protected IFile writeFactsToFile(ICompilationUnit icu) throws IOException,
+    protected IFile writeFactsToFile(AsyncPrologSession session, ICompilationUnit icu) throws IOException,
             CoreException {
         IFile file = (IFile) icu.getResource();
         IPath inPath = file.getFullPath();
         IPath outPath = inPath.removeFileExtension().addFileExtension(
                 "actual.pl");
-        return writeFactsToFile(icu, ResourcesPlugin.getWorkspace().getRoot()
+        return writeFactsToFile(session, icu, ResourcesPlugin.getWorkspace().getRoot()
                 .getFile(outPath));
     }
 
@@ -1074,7 +1074,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      * @throws IOException
      * @throws CoreException
      */
-    protected IFile writeFactsToFile(ICompilationUnit icu, IFile outFile)
+    protected IFile writeFactsToFile(AsyncPrologSession session, ICompilationUnit icu, IFile outFile)
             throws IOException, CoreException {
         //ensureAccessible(outFile);
         IFile file = (IFile) icu.getResource();
@@ -1100,7 +1100,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 .getAbsolutePath();
         PrintStream out = new PrintStream(new BufferedOutputStream(
                 new FileOutputStream(outPathFsString)));
-        getTestJTransformerProject().generateFacts(icu, out);
+        getTestJTransformerProject().generateFacts(session, icu);
         out.close();
         return outFile;
         }
