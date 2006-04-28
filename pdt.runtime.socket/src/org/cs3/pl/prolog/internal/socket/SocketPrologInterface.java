@@ -99,7 +99,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 
     public final static String EXECUTABLE = "pif.executable";
-
+    public static final String KILLCOMMAND = "pif.killcommand";
     public final static String BOOT_DIR = "pif.engine_dir";
 
     public final static String STANDALONE = "pif.standalone";
@@ -116,6 +116,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	public static final String PORT = "pif.port";
 	public static final String HOST = "pif.host";
+
+	
     
 
 	private String host;
@@ -135,6 +137,10 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	private int timeout;
 
 	private boolean hidePlwin;
+
+	private String killcommand;
+
+	
 
     public SocketPrologInterface(PrologInterfaceFactory factory)  {
         super();
@@ -156,9 +162,9 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
             else{
                 Debug.info("reusing old ReusableSocket");
             }
-//            if(!socket.isConnected()){
-//            	Debug.debug("debug");
-//            }
+// if(!socket.isConnected()){
+// Debug.debug("debug");
+// }
             SocketClient client = new SocketClient(socket);
             client.setPool(pool);
             SocketSession s = new SocketSession(client,this);
@@ -187,9 +193,9 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
              else{
                  Debug.info("reusing old ReusableSocket");
              }
-//             if(!socket.isConnected()){
-//             	Debug.debug("debug");
-//             }
+// if(!socket.isConnected()){
+// Debug.debug("debug");
+// }
              SocketClient client = new SocketClient(socket);
              client.setParanoiaEnabled(false);
              client.setPool(pool);
@@ -202,19 +208,19 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	}
 
     public void setPort(int port) {
-        //if (isDown()) {
+        // if (isDown()) {
             this.port = port;
-//        } else {
-//            throw new IllegalStateException("Cannot change port while in use.");
-//        }
+// } else {
+// throw new IllegalStateException("Cannot change port while in use.");
+// }
     }
     private void setHost(String value) {
         this.port = port;		
 	}
     /**
-     * @param standAloneServer
-     *                    The standAloneServer to set.
-     */
+	 * @param standAloneServer
+	 *            The standAloneServer to set.
+	 */
     public void setStandAloneServer(boolean standAloneServer) {
         if (isDown()) {
             this.standAloneServer = standAloneServer;
@@ -225,25 +231,27 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     }
 
     /**
-     * @param useSessionPooling
-     *                    The useSessionPooling to set.
-     */
+	 * @param useSessionPooling
+	 *            The useSessionPooling to set.
+	 */
     public void setUseSessionPooling(boolean useSessionPooling) {
         this.useSessionPooling = useSessionPooling;
         pool = useSessionPooling ? new ReusablePool() : null;
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.IPrologInterface#setOption(java.lang.String,
-     *           java.lang.String)
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.IPrologInterface#setOption(java.lang.String,
+	 *      java.lang.String)
+	 */
     public void setOption(String opt, String value) {
          if (EXECUTABLE.equals(opt)) {
             this.executable = value;
+        } else if (KILLCOMMAND.equals(opt)) {
+            this.killcommand=value;
         } else if (STANDALONE.equals(opt)) {
-            setStandAloneServer(Boolean.valueOf(value).booleanValue());
+        	setStandAloneServer(Boolean.valueOf(value).booleanValue());
         }else if (TIMEOUT.equals(opt)) {
             this.timeout=Integer.parseInt(value);
         }else if (HIDE_PLWIN.equals(opt)) {
@@ -262,12 +270,12 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     
 
 	/*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
+	 */
     public String getOption(String opt) {
-        //ld: changed semantic:: System properties override any settings
+        // ld: changed semantic:: System properties override any settings
         String s = System.getProperty(opt);
         if(s!=null){
             Debug.warning("option "+opt+" is overridden by System Property: "+s);
@@ -275,6 +283,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
         }
          if (EXECUTABLE.equals(opt)) {
             return executable;
+        } else if (KILLCOMMAND.equals(opt)) {
+            return ""+killcommand;
         } else if (STANDALONE.equals(opt)) {
             return "" + standAloneServer;
         } else if (USE_POOL.equals(opt)) {
@@ -293,30 +303,30 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeInitialSession(org.cs3.pl.prolog.PrologSession)
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeInitialSession(org.cs3.pl.prolog.PrologSession)
+	 */
     protected void disposeInitialSession(PrologSession initSession) {
         InitSession s = (InitSession) initSession;
         s.doDispose();
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeShutdownSession(org.cs3.pl.prolog.PrologSession)
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeShutdownSession(org.cs3.pl.prolog.PrologSession)
+	 */
     protected void disposeShutdownSession(PrologSession s) {
         ShutdownSession ss = (ShutdownSession) s;
         ss.doDispose();
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getInitialSession()
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getInitialSession()
+	 */
     protected PrologSession getInitialSession() {
         try {
             return new InitSession(new SocketClient((String)null, port),this);
@@ -327,10 +337,10 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getShutdownSession()
-     */
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getShutdownSession()
+	 */
     protected PrologSession getShutdownSession() {        
         try {
             return new ShutdownSession(new SocketClient((String)null, port),this);
@@ -341,30 +351,35 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
     }
 
  
-    /* (non-Javadoc)
-     * @see org.cs3.pl.prolog.IPrologInterface#getFactory()
-     */
+    /*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.IPrologInterface#getFactory()
+	 */
     public PrologInterfaceFactory getFactory() {
         return factory;
     }
 
     
     /**
-     * @return Returns the locator.
-     */
+	 * @return Returns the locator.
+	 */
     public ResourceFileLocator getLocator() {
         return locator;
     }
     /**
-     * @param locator The locator to set.
-     */
+	 * @param locator
+	 *            The locator to set.
+	 */
     public void setLocator(ResourceFileLocator locator) {
         this.locator = locator;
     }
 
-    /* (non-Javadoc)
-     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
-     */
+    /*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
+	 */
     public synchronized void stop() {        
         super.stop();
         if(pool!=null){
@@ -372,9 +387,11 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
         }
     }
     
-    /* (non-Javadoc)
-     * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
-     */
+    /*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
+	 */
     public synchronized void start() throws IOException {                
         if(pool!=null){
         	pool.clear();

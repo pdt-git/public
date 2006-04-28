@@ -62,7 +62,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	private AsyncPrologSession session;
 	
 	protected void setUp() throws Exception {
-		//Debug.setDebugLevel(Debug.LEVEL_DEBUG);
+		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = Factory.newInstance();
 		pif = (PrologInterface2) factory.create();
 //		pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole --noclose -e xpce");

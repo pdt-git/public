@@ -13,24 +13,22 @@ class JackTheProcessRipper extends Thread {
 	static JackTheProcessRipper instance;
 
 	/**
-	 * the heap contains processes that are scheduled for 
-	 * termination. The times at which they should be killed
-	 * is used as Keys. (Long)
+	 * the heap contains processes that are scheduled for termination. The times
+	 * at which they should be killed is used as Keys. (Long)
 	 */
 	private TreeMap heap = new TreeMap();
 
 	/**
-	 * processes is a set of all processes that were started using the
-	 * enclosing strategy. When the vm is shutting down, the ripper 
-	 * will make sure that the heap is empty AND the processes set
-	 * are empty. It will not allow the vm to exit before this condition holds.
-	 * It will not allow the creation of another process once the shutdown has 
-	 * begun.
+	 * processes is a set of all processes that were started using the enclosing
+	 * strategy. When the vm is shutting down, the ripper will make sure that
+	 * the heap is empty AND the processes set are empty. It will not allow the
+	 * vm to exit before this condition holds. It will not allow the creation of
+	 * another process once the shutdown has begun.
 	 */
 	private HashSet processes = new HashSet();
 
-	private boolean shuttingDown=false;
-	
+	private boolean shuttingDown = false;
+
 	public static JackTheProcessRipper getInstance() {
 		if (instance == null) {
 			instance = new JackTheProcessRipper();
@@ -41,28 +39,30 @@ class JackTheProcessRipper extends Thread {
 	private JackTheProcessRipper() {
 		super("Jack the Process Ripper");
 		setDaemon(false);
-		Runtime.getRuntime().addShutdownHook(new Thread("Jack The Process Ripper Shutdown Hook"){
-			public void run() {
-				shuttingDown=true;
-			}
-		});
+		Runtime.getRuntime().addShutdownHook(
+				new Thread("Jack The Process Ripper Shutdown Hook") {
+					public void run() {
+						shuttingDown = true;
+					}
+				});
 		start();
 	}
 
-	public void registerProcess(Process p){
-		if(shuttingDown){
-			throw new IllegalStateException("you cannot register processes during shutdown");
+	public void registerProcess(ProcessWrapper p) {
+		if (shuttingDown) {
+			throw new IllegalStateException(
+					"you cannot register processes during shutdown");
 		}
-		synchronized(processes){			
+		synchronized (processes) {
 			processes.add(p);
 		}
 	}
-	
+
 	public void run() {
-		Process process = null;
-		//Runtime.getRuntime().addShutdownHook(this);
-		//FIXME: what to do on vm shutdown?
-		while (!(shuttingDown&&processes.isEmpty()&&heap.isEmpty())) {
+		ProcessWrapper process = null;
+		// Runtime.getRuntime().addShutdownHook(this);
+		// FIXME: what to do on vm shutdown?
+		while (!(shuttingDown && processes.isEmpty() && heap.isEmpty())) {
 			process = dequeue();
 			try {
 				process.destroy();
@@ -75,7 +75,7 @@ class JackTheProcessRipper extends Thread {
 
 	}
 
-	private Process dequeue() {
+	private ProcessWrapper dequeue() {
 		synchronized (heap) {
 			while (heap.isEmpty()) {
 				try {
@@ -93,11 +93,11 @@ class JackTheProcessRipper extends Thread {
 					Debug.report(e);
 				}
 			}
-			return (Process) heap.remove(next);
+			return (ProcessWrapper) heap.remove(next);
 		}
 	}
 
-	public void enqueue(Process p, long timeout) {
+	public void enqueue(ProcessWrapper p, long timeout) {
 		synchronized (heap) {
 			long due = System.currentTimeMillis() + timeout;
 			Long key = null;
