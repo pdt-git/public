@@ -58,6 +58,7 @@ import java.net.UnknownHostException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.LogBuffer;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
@@ -327,6 +328,8 @@ public class SocketClient {
 
 	private String processorThread;
 
+	private long pid;
+
 	private static final long TIMEOUT = 1000;
 
 
@@ -348,8 +351,10 @@ public class SocketClient {
 			readUntil(GIVE_COMMAND);
 			writeln(PING);
 			String line = readln();
-			//line is "PONG <thread alias>"
-			this.processorThread=line.substring(5);
+			//line is "PONG <pid>:<thread alias>"
+			String[] strings = Util.split(line.substring(5),":");
+			this.pid=Long.parseLong(strings[0]);
+			this.processorThread=strings[1];
 		}finally{
 			unlock();
 		}
@@ -605,5 +610,8 @@ public class SocketClient {
 
 	public String getProcessorThread() {
 		return processorThread;
+	}
+	public long getServerPid(){
+		return pid;
 	}
 }

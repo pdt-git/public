@@ -1,4 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% test
 % This file is part of the Prolog Development Tool (PDT)
 % 
 % Author: Lukas Degener (among others) 
@@ -222,8 +223,9 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	writeln(shutdown(5)).
 handle_command(_,_,'',continue).
 handle_command(_,OutStream,'PING',continue):-
+		current_prolog_flag(pid,Pid),
     thread_self(Alias),
-	my_format(OutStream,"PONG ~a~n",[Alias]).
+	my_format(OutStream,"PONG ~a:~a~n",[Pid,Alias]).
 handle_command(InStream,OutStream,'CONSULT',continue):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	undelete_symbol(Symbol),

@@ -44,7 +44,9 @@
 package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
+import java.io.IOException;
 
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
@@ -56,7 +58,9 @@ import org.cs3.pl.prolog.PrologInterfaceFactory;
 public class Factory extends PrologInterfaceFactory {
 	private static final String MAIN_PL = "main_socket.pl";
 
-	private static final String SERVER_PL = "consult_server.pl";
+	public static final String SERVER_PL = "consult_server.pl";
+
+	public static final String FKILL_EXE = "fkill.exe";
 
 	private Option[] options;
 
@@ -66,7 +70,9 @@ public class Factory extends PrologInterfaceFactory {
 				new SimpleOption(SocketPrologInterface.EXECUTABLE,
 						"SWI-Prolog executable", "eg. xpce or /usr/bin/xpce",
 						SimpleOption.FILE, guessExecutableName()),
-				
+				new SimpleOption(SocketPrologInterface.KILLCOMMAND,
+								"command to kill processes", "eg. kill or /usr/bin/kill on most systems",
+								SimpleOption.FILE, guessKillCommandName()),						
 				new SimpleOption(
 						SocketPrologInterface.STANDALONE,
 						"stand-alone server",
@@ -108,7 +114,19 @@ public class Factory extends PrologInterfaceFactory {
 						SimpleOption.FLAG, "true") };
 	}
 
-	
+	private String guessKillCommandName() {		
+		if(Util.isWindoze()){
+			try {
+				return getResourceLocator().resolve(Factory.FKILL_EXE).getCanonicalPath();
+			} catch (IOException e) {
+				Debug.report(e);
+				return "kill";
+			}
+		}
+		
+		return "kill";
+		
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -118,12 +136,15 @@ public class Factory extends PrologInterfaceFactory {
 	public PrologInterface create() {
 		ensureInstalled(SERVER_PL, Factory.class);
 		ensureInstalled(MAIN_PL, Factory.class);
+		if (Util.isWindoze()) {
+			ensureInstalled(FKILL_EXE, Factory.class);
+		}
 
 		SocketPrologInterface pif = new SocketPrologInterface(this);
 		pif.getBootstrapLibraries().add(
 				Util.prologFileName(getResourceLocator().resolve(SERVER_PL)));
-//		pif.getBootstrapLibraries().add(
-//				Util.prologFileName(getResourceLocator().resolve(MAIN_PL)));
+		// pif.getBootstrapLibraries().add(
+		// Util.prologFileName(getResourceLocator().resolve(MAIN_PL)));
 		pif.setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
 		for (int i = 0; i < options.length; i++) {
 			pif.setOption(options[i].getId(), options[i].getDefault());
@@ -149,6 +170,7 @@ public class Factory extends PrologInterfaceFactory {
 
 		if (Util.isWindoze()) {
 			return "cmd.exe /c start /min plwin";
+			// return "plwin";
 		}
 		return "xpce";
 	}

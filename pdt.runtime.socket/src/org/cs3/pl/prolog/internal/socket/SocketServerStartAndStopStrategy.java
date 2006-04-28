@@ -70,7 +70,8 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 public class SocketServerStartAndStopStrategy implements
 		ServerStartAndStopStrategy {
 
-	private Process serverProcess;
+	private ProcessWrapper serverProcess;
+	private Process serverProcessWrapper;
 
 	public class _InputStreamPump extends InputStreamPump {
 
@@ -161,16 +162,18 @@ public class SocketServerStartAndStopStrategy implements
 
 		try {
 
-			serverProcess = Runtime.getRuntime().exec(commandArray);
+			
+			Process process = Runtime.getRuntime().exec(commandArray);
+			
 			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
 			BufferedWriter writer = new BufferedWriter(new FileWriter(logFile
 					.getAbsolutePath(), true));
 			writer.write("\n---8<-----------------------8<---\n");
 			writer.write(new Date().toString() + "\n");
 			writer.write("---8<-----------------------8<---\n\n");
-			new _InputStreamPump(serverProcess.getErrorStream(), writer)
+			new _InputStreamPump(process.getErrorStream(), writer)
 					.start();
-			new _InputStreamPump(serverProcess.getInputStream(), writer)
+			new _InputStreamPump(process.getInputStream(), writer)
 					.start();
 
 			long timeout = pif.getTimeout();
@@ -187,19 +190,24 @@ public class SocketServerStartAndStopStrategy implements
 					Debug.report(e1);
 				}
 				try {
-					if (serverProcess.exitValue() != 0) {
+					if (process.exitValue() != 0) {
 						throw new RuntimeException(
 								"Failed to start server. Process exited with err code "
-										+ serverProcess.exitValue());
+										+ process.exitValue());
 					}
 				} catch (IllegalThreadStateException e) {
 					; // nothing. the process is still running.
 				}
 			}
-
+			//The process should be up now.
+			SocketClient c = new SocketClient((String) null, port);
+			long pid = c.getServerPid();
+			c.close();
+			String cmd =pipi.getOption(SocketPrologInterface.KILLCOMMAND)+ " "+pid;
 			// an experiment
+			this.serverProcess=new ExternalKillProcessWrapper(process,cmd);
 			JackTheProcessRipper.getInstance().registerProcess(serverProcess);
-			return serverProcess;
+			return process;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
