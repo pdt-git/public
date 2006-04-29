@@ -72,6 +72,9 @@ public class Util {
 		return "fp_" + l + "_" + m;
 	}
 
+	public static  boolean isJava5(){
+		return System.getProperty("java.version").startsWith("1.5");
+	}
 	public static File getLockFile() {
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		return new File(tmpdir, generateFingerPrint());
@@ -708,10 +711,13 @@ public static String unquoteString(String image) {
 		}
 		int i=-1;
 		while((i =string.indexOf(search,0))>=0){
-			results.add(string.substring(0,i));			
+			results.add(string.substring(0,i).trim());			
 			string=string.substring(i+search.length());			
 		}
-		results.add(string.trim());
+		String rest = string.trim();
+		if(rest.length()>0){
+			results.add(rest);
+		}
 
 		
 	}

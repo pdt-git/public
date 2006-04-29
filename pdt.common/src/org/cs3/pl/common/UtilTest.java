@@ -63,9 +63,20 @@ public class UtilTest extends TestCase {
 		assertEquals(3,elms.length);
 		assertEquals("konsole",elms[0]);
 		assertEquals("-e",elms[1]);
-		assertEquals("xpce",elms[2]);
-		
+		assertEquals("xpce",elms[2]);				
 	}
+	
+	public void testSplit_empty(){
+		String[] elms = Util.split("", " ");
+		assertEquals(0,elms.length);					
+	}
+	
+	public void testSplit_no_delim(){
+		String[] elms = Util.split("word", " ");
+		assertEquals(1,elms.length);		
+		assertEquals("word",elms[0]);
+	}
+	
 	public void testQuoteAtom(){
 		String atom="something('something else')";
 		assertEquals("'something(\\'something else\\')'", Util.quoteAtom(atom));

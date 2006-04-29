@@ -43,10 +43,13 @@ package org.cs3.pl.prolog.internal.socket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -85,6 +88,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	private CTermFactory ctermFactory;
 
 	private Vector listeners=new Vector();
+
+	
+
+	private Object lastAbortTicket;
 
 	public void addBatchListener(AsyncPrologSessionListener l) {
 		synchronized (listeners) {
@@ -184,8 +191,14 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	
 	private void dispatchAbortComplete(int id) {
 		Object ticket = findAndRemoveTicket(id);
+		synchronized (lastAbortTicket) {
+			if(lastAbortTicket==ticket){
+				lastAbortTicket=null;
+			}
+		}
 		fireAbortComplete(ticket);
 		synchronized (ticket) {
+			
 			ticket.notifyAll();
 		}
 		
@@ -523,6 +536,13 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		return id;
 	}
 
+	public boolean isPending(Object ticket){
+		synchronized (tickets) {
+			return tickets.containsValue(ticket);
+
+		}
+	}
+	
 	private Object findAndRemoveTicket(int id){
 		synchronized (tickets) {
 			return tickets.remove(new Integer(id));
@@ -541,7 +561,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				if(!disposing){
 					client.writeln("join("+id+").");
 				}
-				ticket.wait();
+				while(isPending(ticket)){
+					ticket.wait();
+				}
 			}
 			
 		} catch (IOException e) {
@@ -552,13 +574,17 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 	public void abort() {
+		abort(new Object());
+	}
+	public void abort(Object ticket) {
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call abort() from dispatch thread!");
 		}
 		if(client==null){
 			return;
 		}
-		Object ticket = new Object();
+		//Object ticket = new Object();
+		lastAbortTicket=ticket;
 		int id = storeTicket(ticket);
 		PrologSession session = pif.getSession();
 		try {
@@ -568,8 +594,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 					client.writeln("abort("+id+").");					
 				}
 				
-				ticket.wait();
-
+				while(isPending(ticket)){
+					ticket.wait();
+				}
+				
 			}
 			
 		} catch (IOException e) {
@@ -577,6 +605,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
 		}finally{
+			
 			session.dispose();
 		}
 		
@@ -602,6 +631,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 
+	
+	public Object getLastAbortTicket(){
+		return lastAbortTicket;
+	}
+	
 	public boolean isDisposed() {
 		return disposing||client == null;
 	}
