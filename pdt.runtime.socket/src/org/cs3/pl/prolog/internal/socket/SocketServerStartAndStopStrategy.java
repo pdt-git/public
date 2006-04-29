@@ -53,9 +53,11 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
 
@@ -71,7 +73,6 @@ public class SocketServerStartAndStopStrategy implements
 		ServerStartAndStopStrategy {
 
 	private ProcessWrapper serverProcess;
-	
 
 	public class _InputStreamPump extends InputStreamPump {
 
@@ -115,18 +116,20 @@ public class SocketServerStartAndStopStrategy implements
 			Debug.report(e);
 			throw new RuntimeException(e.getMessage());
 		}
-        String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
-        String envstring = pif.getOption(SocketPrologInterface.ENVIRONMENT);
-        String engineDir = Util.prologFileName(pif.getFactory().getResourceLocator().resolve("/"));
-        
-        File tmpFile=null;
-        try {			
-			tmpFile = File.createTempFile("socketPif",null);
-			PrintWriter p = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-			if(pif.isHidePlwin()){
-				p.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" +
-						"->win_window_pos([show(false)])" +
-						";true).");
+		String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
+		String envstring = pif.getOption(SocketPrologInterface.ENVIRONMENT);
+		String engineDir = Util.prologFileName(pif.getFactory()
+				.getResourceLocator().resolve("/"));
+
+		File tmpFile = null;
+		try {
+			tmpFile = File.createTempFile("socketPif", null);
+			PrintWriter p = new PrintWriter(new BufferedOutputStream(
+					new FileOutputStream(tmpFile)));
+			if (pif.isHidePlwin()) {
+				p
+						.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))"
+								+ "->win_window_pos([show(false)])" + ";true).");
 			}
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
@@ -150,49 +153,67 @@ public class SocketServerStartAndStopStrategy implements
 		String[] commandArray = new String[command.length + args.length];
 		System.arraycopy(command, 0, commandArray, 0, command.length);
 		System.arraycopy(args, 0, commandArray, command.length, args.length);
-		StringBuffer sb = new StringBuffer();
-		sb.append(executable);
-		sb.append(" -g ['");
-
-		sb.append(Util.prologFileName(tmpFile));
-		sb.append("']");
-		//String cmdline = sb.toString();
-		String[] envarray = Util.split(envstring,",");
-		Debug.info("Starting server with " + Util.prettyPrint(commandArray));		
-		Debug.info("using environment: "+Util.prettyPrint(envarray));
-
+		
+		Map env=new HashMap();
+		if(Util.isJava5()){
+			env.putAll(System.getenv());
+		}
+		
+		String[] envarray = Util.split(envstring, ",");
+		for (int i = 0; i < envarray.length; i++) {
+			String[] mapping = Util.split(envarray[i],"=");
+			env.put(mapping[0],mapping[1]);
+		}
+		envarray = new String[env.size()];
+		int i=0;
+		for (Iterator it = env.keySet().iterator(); it.hasNext();) {
+			String key = (String) it.next();
+			String value = (String) env.get(key);
+			envarray[i++]=key+"="+value;
+		}
+		Process process=null;
 		try {
+			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
+			if(envarray.length==0){
+				Debug.info("inheriting system environment");		
+				process = Runtime.getRuntime().exec(commandArray);
+			}else{
+				Debug.info("using environment: " + Util.prettyPrint(envarray));		
+				process = Runtime.getRuntime().exec(commandArray, envarray);
+			}
+			
 
-            Process process = Runtime.getRuntime().exec(commandArray,envarray);
-            
-            File logFile = Util.getLogFile("org.cs3.pdt.server.log");
-            BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,true));
-            writer.write("\n---8<-----------------------8<---\n");
-            writer.write(new Date().toString()+"\n");
-            writer.write("---8<-----------------------8<---\n\n");
-            new _InputStreamPump(process.getErrorStream(), writer)
-                    .start();
-            new _InputStreamPump(process.getInputStream(), writer)
-                    .start();
-            
-            long timeout=pif.getTimeout();
-            long startTime = System.currentTimeMillis();
-            while (!pif.getLockFile().exists()) {
-                try {
-                	long now = System.currentTimeMillis();
-                	if(now-startTime>timeout){
-                		throw new RuntimeException("Timeout exceeded while waiting for peer to come up.");
-                	}
-                    Thread.sleep(50);
-                } catch (InterruptedException e1) {
-                    Debug.report(e1);
-                }
-                try{
-                	if(process.exitValue()!=0){
-                		throw new RuntimeException("Failed to start server. Process exited with err code "+process.exitValue());
-                	}
-                }catch (IllegalThreadStateException e) {
-                	; //nothing. the process is still running.
+			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
+			BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,
+					true));
+			writer.write("\n---8<-----------------------8<---\n");
+			writer.write(new Date().toString() + "\n");
+			writer.write("---8<-----------------------8<---\n\n");
+			
+			new _InputStreamPump(process.getErrorStream(), writer).start();
+			new _InputStreamPump(process.getInputStream(), writer).start();
+
+			long timeout = pif.getTimeout();
+			long startTime = System.currentTimeMillis();
+			while (!pif.getLockFile().exists()) {
+				try {
+					long now = System.currentTimeMillis();
+					if (now - startTime > timeout) {
+						throw new RuntimeException(
+								"Timeout exceeded while waiting for peer to come up.");
+					}
+					Thread.sleep(50);
+				} catch (InterruptedException e1) {
+					Debug.report(e1);
+				}
+				try {
+					if (process.exitValue() != 0) {
+						throw new RuntimeException(
+								"Failed to start server. Process exited with err code "
+										+ process.exitValue());
+					}
+				} catch (IllegalThreadStateException e) {
+					; // nothing. the process is still running.
 				}
 				try {
 					if (process.exitValue() != 0) {
@@ -204,13 +225,14 @@ public class SocketServerStartAndStopStrategy implements
 					; // nothing. the process is still running.
 				}
 			}
-			//The process should be up now.
+			// The process should be up now.
 			SocketClient c = new SocketClient((String) null, port);
 			long pid = c.getServerPid();
 			c.close();
-			String cmd =pipi.getOption(SocketPrologInterface.KILLCOMMAND)+ " "+pid;
+			String cmd = pipi.getOption(SocketPrologInterface.KILLCOMMAND)
+					+ " " + pid;
 			// an experiment
-			this.serverProcess=new ExternalKillProcessWrapper(process,cmd);
+			this.serverProcess = new ExternalKillProcessWrapper(process, cmd);
 			JackTheProcessRipper.getInstance().registerProcess(serverProcess);
 			return process;
 		} catch (IOException e) {
@@ -257,8 +279,7 @@ public class SocketServerStartAndStopStrategy implements
 
 			pif.getLockFile().delete();
 			JackTheProcessRipper.getInstance().enqueue(serverProcess, 5000);
-			serverProcess=null;
-			
+			serverProcess = null;
 
 		} catch (Throwable e) {
 			Debug.report(e);
