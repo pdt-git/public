@@ -8,11 +8,13 @@ package org.cs3.jtransformer.internal.views;
 
 import java.util.List;
 
+import org.cs3.pl.prolog.PrologInterfaceException;
+
 /**
  */
 public interface IPEFNode {
     public String getId();
     public String getParent();
-    public List getChildren();
+    public List getChildren() throws PrologInterfaceException;
     public boolean hasChildren();
 }

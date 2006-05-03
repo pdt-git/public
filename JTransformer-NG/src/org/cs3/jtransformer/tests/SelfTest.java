@@ -18,6 +18,7 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface2;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
@@ -80,8 +81,9 @@ public class SelfTest extends FactGenerationTest {
 	 * generic compare of fact file (generated vs exoected()
 	 * @throws CoreException
 	 * @throws IOException
+	 * @throws PrologInterfaceException 
 	 */
-	public void testIt() throws CoreException, IOException{
+	public void testIt() throws CoreException, IOException, PrologInterfaceException{
 	   System.err.println("\n testing: "+testString);
 		System.err.print("   Retrieving cu...");		
 		ICompilationUnit sourceUnit = getCompilationUnit(testString, "Test.java");

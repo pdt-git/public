@@ -26,8 +26,10 @@ import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -142,7 +144,7 @@ public class FactBaseBuilder {
     }
 
     synchronized private void build_impl(IResourceDelta delta, int flags,
-            IProgressMonitor monitor) throws IOException, CoreException {
+            IProgressMonitor monitor) throws IOException, CoreException, PrologInterfaceException {
         PrologSession session = null;
         storeTimeStamp = -1;
         try {
@@ -204,7 +206,7 @@ public class FactBaseBuilder {
     }
 
     private void forgetFacts(IProgressMonitor monitor, final Collection toDelete)
-            throws IOException {
+            throws PrologInterfaceException {
         monitor.beginTask("deleting obsolete PEFs ", toDelete.size());
         for (Iterator i = toDelete.iterator(); i.hasNext();) {
             if (monitor.isCanceled()) {
@@ -218,7 +220,7 @@ public class FactBaseBuilder {
     }
 
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
-            throws IOException, CoreException {
+            throws IOException, CoreException, PrologInterfaceException {
         monitor.beginTask("Generating new PEFs ", toProcess.size());
         AsyncPrologSession session = ((PrologInterface2)pif).getAsyncSession();
         try {
@@ -337,7 +339,7 @@ public class FactBaseBuilder {
     }
 
     private void forgetFacts(IFile file, boolean removeGlobalIdsFacts)
-            throws IOException {
+            throws PrologInterfaceException {
         Debug.debug("Forgetting (possible) previous version of " + file);
 
         String path = file.getFullPath().toString();
@@ -419,7 +421,7 @@ public class FactBaseBuilder {
         return storeTimeStamp;
     }
 
-    private void buildFacts(AsyncPrologSession session, IFile file) throws IOException, CoreException {
+    private void buildFacts(AsyncPrologSession session, IFile file) throws IOException, CoreException, PrologInterfaceException {
 
         /* the file seems to have been deleted */
         if (!file.exists()) {
@@ -450,7 +452,7 @@ public class FactBaseBuilder {
         }
     }
 
-    public List getUnresolvedTypes() {
+    public List getUnresolvedTypes() throws PrologInterfaceException {
         PrologSession session = pif.getSession();
         try {
             return getUnresolvedTypes(session, new HashSet());
@@ -459,7 +461,7 @@ public class FactBaseBuilder {
         }
     }
 
-    protected List getUnresolvedTypes(PrologSession session, HashSet failed) {
+    protected List getUnresolvedTypes(PrologSession session, HashSet failed) throws PrologInterfaceException {
         List list = session.queryAll("unresolved_types(T)");
         List typeNames = new Vector();
         for (Iterator iter = list.iterator(); iter.hasNext();) {
@@ -476,7 +478,7 @@ public class FactBaseBuilder {
     }
 
     public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
-            CoreException {
+            CoreException, PrologInterfaceException {
         Debug.debug("enter loadExternalFacts");
         monitor.beginTask("creating external PEFs.", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
@@ -513,9 +515,9 @@ public class FactBaseBuilder {
                             failed.add(typeName);
                         }
                     }
-                System.err.println("BEFORE DISPOSE");
+//                System.err.println("BEFORE DISPOSE");
                 asyncSession.join();
-                System.err.println("BEFORE DISPOSE");
+//                System.err.println("BEFORE DISPOSE");
                 unresolved = getUnresolvedTypes(session, failed);
             }
         } finally {
@@ -526,7 +528,7 @@ public class FactBaseBuilder {
         }
     }
 
-    public void writeFacts(AsyncPrologSession session, IProject project, final ICompilationUnit icu) throws IOException, CoreException {
+    public void writeFacts(AsyncPrologSession session, IProject project, final ICompilationUnit icu) throws IOException, CoreException, PrologInterfaceException {
 
         IResource resource = icu.getResource();
         String path = resource.getFullPath().removeFileExtension()
@@ -561,7 +563,7 @@ public class FactBaseBuilder {
     }
     
 // PrologSession session
-	private void assertClauses(AsyncPrologSession session, List clauses)
+	private void assertClauses(AsyncPrologSession session, List clauses) throws PrologInterfaceException
 	{
 		if (clauses.size() == 0)
 		{
@@ -631,7 +633,7 @@ public class FactBaseBuilder {
 	}
 
     public void writeFacts(AsyncPrologSession session, IProject project, String typeName) throws JavaModelException, CoreException,
-            ClassNotFoundException {
+            ClassNotFoundException, PrologInterfaceException {
         List clauses = new ArrayList();
         PrologWriter plw = new PrologWriter(clauses, true);
         	
@@ -641,7 +643,7 @@ public class FactBaseBuilder {
         writeSymtabAndClauses(session, project, clauses, plw, box);
     }
 
-	private void writeSymtabAndClauses(AsyncPrologSession session, IProject project, List clauses, PrologWriter plw, FactGenerationToolBox box) throws CoreException
+	private void writeSymtabAndClauses(AsyncPrologSession session, IProject project, List clauses, PrologWriter plw, FactGenerationToolBox box) throws CoreException, PrologInterfaceException
 	{
 		plw.writeQuery("retractLocalSymtab");
         
@@ -685,14 +687,15 @@ public class FactBaseBuilder {
      * 
      * @param an
      *                compilation unit in working copy mode.
+     * @throws PrologInterfaceException 
      */
     public void writeFacts(AsyncPrologSession session, ICompilationUnit icu)
-            throws IOException, CoreException {
+            throws IOException, CoreException, PrologInterfaceException {
         writeFacts(session, project, icu);
     }
 
     public void writeFacts(AsyncPrologSession session, String typeName)
-            throws JavaModelException, CoreException, ClassNotFoundException {
+            throws JavaModelException, CoreException, ClassNotFoundException, PrologInterfaceException {
         writeFacts(session, project, typeName);
     }
 
@@ -700,8 +703,9 @@ public class FactBaseBuilder {
     /**
      * @param monitor
      * @throws CoreException
+     * @throws PrologInterfaceException 
      */
-    public void clean(IProgressMonitor monitor) throws CoreException {
+    public void clean(IProgressMonitor monitor) throws CoreException, PrologInterfaceException {
         Debug.info("clean called on project " + project);
         project.deleteMarkers(JTransformer.PROBLEM_MARKER_ID, true,
                 IResource.DEPTH_INFINITE);

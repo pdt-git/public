@@ -15,7 +15,9 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -225,21 +227,17 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                     .info("setUpOnce caled for key  " + getKey());
             
 
-            try {
-                getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
-                pif.stop();
-                assertTrue(pif.isDown());
-                pif.start();
-                pif.start();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            getTestProject().build(IncrementalProjectBuilder.CLEAN_BUILD,null);
+            pif.stop();
+            assertTrue(pif.isDown());
+            pif.start();
+            pif.start();
         }
 
     }
 
     public void testIt() throws CoreException, IOException,
-            BadLocationException, InterruptedException {
+            BadLocationException, InterruptedException, PrologException, PrologInterfaceException {
         PrologInterface pif = getTestJTransformerProject().getPrologInterface();
         synchronized (pif) {
         	if(SHOW_PLWIN_INSTANCE)
@@ -251,7 +249,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
     }
 
     public synchronized void testIt_impl() throws CoreException, IOException,
-            BadLocationException, InterruptedException {
+            BadLocationException, InterruptedException, PrologException, PrologInterfaceException {
 
         Util.startTime("untilBuild");
         IProject project = getTestProject();
@@ -443,11 +441,13 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         PrologInterface pif = getTestJTransformerProject().getPrologInterface();
         synchronized (pif) {
             session.dispose();
-            try {
-                pif.stop();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            try
+			{
+				pif.stop();
+			} catch (PrologInterfaceException e)
+			{
+				throw new RuntimeException(e);
+			}
         }
 
     }

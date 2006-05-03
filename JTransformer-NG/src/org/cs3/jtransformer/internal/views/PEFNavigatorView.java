@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -103,7 +107,19 @@ public class PEFNavigatorView extends ViewPart {
 
 		public Object[] getChildren(Object parent) {
 			if (parent instanceof IPEFNode) {
-				return ((IPEFNode) parent).getChildren().toArray(new Object[0]);
+				try
+				{
+					return ((IPEFNode) parent).getChildren().toArray(new Object[0]);
+				} catch (PrologInterfaceException e)
+				{
+					UIUtils.logAndDisplayError(
+							JTransformerPlugin.getDefault().getErrorMessageProvider(),
+							UIUtils.getDisplay().getActiveShell(),
+							JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+							JTransformer.ERR_CONTEXT_ACTION_FAILED,
+							e
+							);
+				}
 			}
 			return new Object[0];
 		}
@@ -191,7 +207,7 @@ public class PEFNavigatorView extends ViewPart {
 		drillDownAdapter.addNavigationActions(manager);
 	}
 
-	private void addNewNodeById(String id,PrologInterface pef) {
+	private void addNewNodeById(String id,PrologInterface pef) throws PrologInterfaceException {
 		IPEFNode node = PEFNode.find(getViewSite(), null, id, null,pef);
 		if (node != null) {
 			List list = new ArrayList();
@@ -212,7 +228,19 @@ public class PEFNavigatorView extends ViewPart {
 						"JTransformer", "id", null, null);
 				if (dialog.open() != Window.CANCEL) {
 					final String value = dialog.getValue();
-					addNewNodeById(value,getPrologInterface());
+					try
+					{
+						addNewNodeById(value,getPrologInterface());
+					} catch (PrologInterfaceException e)
+					{
+						UIUtils.logAndDisplayError(
+								JTransformerPlugin.getDefault().getErrorMessageProvider(),
+								UIUtils.getDisplay().getActiveShell(),
+								JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+								JTransformer.ERR_CONTEXT_ACTION_FAILED,
+								e
+								);
+					}
 				}
 			}
 		};
@@ -245,6 +273,15 @@ public class PEFNavigatorView extends ViewPart {
 						MessageDialog.openError(getViewSite().getShell(),
 								"JTransformer", 
 								"Could not find an active prolog console. Please open the console view and select.");
+					} catch (PrologInterfaceException e)
+					{
+						UIUtils.logAndDisplayError(
+								JTransformerPlugin.getDefault().getErrorMessageProvider(),
+								UIUtils.getDisplay().getActiveShell(),
+								JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+								JTransformer.ERR_CONTEXT_ACTION_FAILED,
+								e
+								);
 					} finally  {
 						if (session != null)
 						session.dispose();
@@ -289,6 +326,15 @@ public class PEFNavigatorView extends ViewPart {
 									MessageDialog.openInformation(getViewSite().getShell(),
 											"JTransformer - Src for id "+node.getId(), 
 											(String)ht.get("Src"));						
+							} catch (PrologInterfaceException e)
+							{
+								UIUtils.logAndDisplayError(
+										JTransformerPlugin.getDefault().getErrorMessageProvider(),
+										UIUtils.getDisplay().getActiveShell(),
+										JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+										JTransformer.ERR_CONTEXT_ACTION_FAILED,
+										e
+										);
 							}finally{
 								if(session != null)
 									session.dispose();
@@ -344,7 +390,7 @@ public class PEFNavigatorView extends ViewPart {
 		}
 	}
 
-	public static void addId(String value) {
+	public static void addId(String value) throws PrologInterfaceException {
 		pefNavigatorInstance.addNewNodeById(value,getPrologInterface());
 		
 	}

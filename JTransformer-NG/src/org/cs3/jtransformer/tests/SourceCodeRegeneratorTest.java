@@ -11,6 +11,7 @@ import java.io.IOException;
 import org.cs3.jtransformer.regenerator.IAffectedFile;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -33,9 +34,10 @@ public class SourceCodeRegeneratorTest extends FactGenerationTest {
 
     /**
 	 * @throws IOException
+     * @throws PrologInterfaceException 
 	 * 
 	 */
-	public void testRegeneration() throws IOException {
+	public void testRegeneration() throws IOException, PrologInterfaceException {
 		PrologInterface pif = getTestJTransformerProject().getPrologInterface();
 		PrologSession session = pif.getSession();
 		try{

@@ -10,7 +10,9 @@ import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -115,7 +117,7 @@ public class ReloadHook implements LifeCycleHook {
      * 
      * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
      */
-    public void beforeShutdown(PrologInterface pif, PrologSession session) {
+    public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
         JTransformerPlugin plugin = JTransformerPlugin.getDefault();
         String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE, "false");
         if (Boolean.valueOf(v).booleanValue()) {

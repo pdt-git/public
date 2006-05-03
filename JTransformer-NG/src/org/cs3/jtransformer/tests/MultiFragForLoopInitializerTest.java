@@ -12,6 +12,7 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -55,7 +56,7 @@ public class MultiFragForLoopInitializerTest extends FactGenerationTest {
         s.addTest(new  MultiFragForLoopInitializerTest("testIt"));
         return s;
     }
-    public void testIt() throws CoreException, InterruptedException {
+    public void testIt() throws CoreException, InterruptedException, PrologInterfaceException {
         ICompilationUnit[] cus = getCompilationUnitsInFolder("test0360");
         assertFalse(cus.length==0);
         build();

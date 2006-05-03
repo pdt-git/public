@@ -12,6 +12,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 
@@ -77,16 +78,17 @@ public class InitializerTest extends FactGenerationTest {
         super.tearDownOnce();
         try {
             getTestJTransformerProject().getPrologInterface().stop();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        } catch (PrologInterfaceException e)
+		{
+			e.printStackTrace();
+		}
     }
 
     public void tearDown() {
         Debug.debug("tearing down testPEFS: " + (passed ? "passed" : "failed"));
     }
 
-    public void testPEFs() throws CoreException, IOException {
+    public void testPEFs() throws CoreException, IOException, PrologInterfaceException {
 
         // methodDefT(Method,_,'<clinit>',[],null,[],Block),blockT(Block,Method,Method,[NoOp]),nopT(NoOp,Block,Method).
         install("initializer");

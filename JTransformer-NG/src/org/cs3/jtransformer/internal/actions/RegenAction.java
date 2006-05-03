@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -62,6 +65,15 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 			} catch (CoreException e) {
 				e.printStackTrace();
 				Debug.report(e);
+			} catch (PrologInterfaceException e)
+			{
+				UIUtils.logAndDisplayError(
+						JTransformerPlugin.getDefault().getErrorMessageProvider(),
+						UIUtils.getDisplay().getActiveShell(),
+						JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+						JTransformer.ERR_CONTEXT_SOURCE_REGENERATION,
+						e
+						);
 			}
 		}
 		

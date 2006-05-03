@@ -5,6 +5,7 @@ import java.util.Map;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -27,8 +28,9 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 
 	/**
 	 * @throws CoreException
+	 * @throws PrologInterfaceException 
 	 */
-	static PrologSession getPrologSession() throws CoreException {
+	static PrologSession getPrologSession() throws CoreException, PrologInterfaceException {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		JTransformerProjectNature nature = null;
 		for (int i = 0; i < projects.length; i++) {
@@ -60,7 +62,9 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 				selectInEditor(start, length, filename);
 			}
 		} catch (CoreException e) {
-			e.printStackTrace();
+			Debug.report(e);
+		} catch (PrologInterfaceException e)
+		{
 			Debug.report(e);
 		}
 	}

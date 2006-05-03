@@ -9,6 +9,7 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 
@@ -41,7 +42,7 @@ public class TypeTestTest extends FactGenerationTest {
         }
     }
 
-    public void testIt() throws CoreException {
+    public void testIt() throws CoreException, PrologInterfaceException {
         clean();
         build();
         PrologSession s = getTestJTransformerProject().getPrologInterface()

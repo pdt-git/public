@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,8 +50,9 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
      * @param fqn
      *                full qualified names (without quotes)
      * @return
+     * @throws PrologInterfaceException 
      */
-    public String generateClassString(String fqn) {
+    public String generateClassString(String fqn) throws PrologInterfaceException {
         PrologSession s = pif.getSession();
         try {
             Map table = s
@@ -64,7 +66,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
 
     }
 
-    public void generateClass(int id) throws CoreException {
+    public void generateClass(int id) throws CoreException, PrologInterfaceException {
         ResourcesPlugin rp = ResourcesPlugin.getPlugin();
         IWorkspaceRoot iwr = ResourcesPlugin.getWorkspace().getRoot();
 
@@ -145,10 +147,11 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
      * </pre>
      * 
      * facts from the fact base.
+     * @throws PrologInterfaceException 
      *  
      */
 
-    public void generateDirtyClasses() {
+    public void generateDirtyClasses() throws PrologInterfaceException {
         //ld: lost while porting to jt ng. what was this line supposed to do?
         //PDTPlugin.getDefault().getPrologConsole().setFocus();
         PrologSession s = pif.getSession();
@@ -170,9 +173,10 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
      * gets a list of the IDs of dirty classes from Prolog.
      * 
      * @return a list of dirty classes
+     * @throws PrologInterfaceException 
      */
 
-    private Set getDirtyClasses() {
+    private Set getDirtyClasses() throws PrologInterfaceException {
         Set set = new HashSet();
         List l = null;
         PrologSession s = pif.getSession();        
@@ -218,7 +222,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
      * 
      * @see org.cs3.jtransformer.regenerator.ISourceRegenerator#getAffectedTypes()
      */
-    public IAffectedFile[] getAffectedFiles() {
+    public IAffectedFile[] getAffectedFiles() throws PrologInterfaceException {
 
         List l = new ArrayList();
 
@@ -237,8 +241,9 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
 
     /**
      * @param l
+     * @throws PrologInterfaceException 
      */
-    private void changedFiles(List l, String pred, int status) {
+    private void changedFiles(List l, String pred, int status) throws PrologInterfaceException {
         PrologSession s = pif.getSession();
         List results=null;
         try{
@@ -261,7 +266,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
      * modification of Java code in the Java Editor.
      */
 
-    public void rollback() {
+    public void rollback() throws PrologInterfaceException {
         PrologSession s = pif.getSession();        
         try{
             s.queryOnce("rollback, retract_api_meta_data");
@@ -275,7 +280,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
      * Commits all changes made by CTs. No rollback possible afterwards.
      */
 
-    public void commit() {
+    public void commit() throws PrologInterfaceException {
         PrologSession s = pif.getSession();        
         try{
             s.queryOnce("retract_api_meta_data");
@@ -287,8 +292,9 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
 
     /**
      * @param l
+     * @throws PrologInterfaceException 
      */
-    private Set retrieveDeletedFiles() {
+    private Set retrieveDeletedFiles() throws PrologInterfaceException {
         Set result=new HashSet();
         List l=null;
         PrologSession s = pif.getSession();        
