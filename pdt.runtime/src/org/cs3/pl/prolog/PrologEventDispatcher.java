@@ -72,7 +72,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 	public PrologEventDispatcher(PrologInterface2 pif){
 		this.pif = pif;
 		//make sure that we do not hang the pif on shutdown.
-		LifeCycleHook hook = new LifeCycleHook(){
+		LifeCycleHook hook = new LifeCycleHook2(){
 
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {
 				
@@ -95,6 +95,13 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 			public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
 				stop(session);
 			}
+
+			public void onError(PrologInterface pif) {
+				session=null;
+				
+			}
+
+			
 			
 		};
 		pif.addLifeCycleHook(hook, null,null);
