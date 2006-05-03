@@ -229,6 +229,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 
 		});
+		
+		control.setEnabled(model!=null&&model.isConnected());
 	}
 
 	public Control getControl() {
@@ -306,6 +308,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		if (model != null) {
 			model.addConsoleListener(this);
 			ui_setSingleCharMode(model.isSingleCharMode());
+			ui_setEnabled(model.isConnected());
+		}
+		else{
+			ui_setEnabled(false);
 		}
 
 		if (history != null) {
@@ -324,6 +330,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 	
 	public SavedState saveState(){
+		if(control.isDisposed()){
+			return null;
+		}
 		SavedState s = new SavedState();
 		s.startOfInput=startOfInput;
 		s.contents=control.getText();
@@ -451,8 +460,17 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * 
 	 * @see org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console.ConsoleModelEvent)
 	 */
-	public void afterConnect(ConsoleModelEvent e) {
-		;
+	public void afterConnect(final ConsoleModelEvent e) {
+		Display display = control.getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					afterConnect(e);
+				}
+			});
+		} else {
+			ui_setEnabled(true);
+		}
 	}
 
 	/*
@@ -460,8 +478,17 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * 
 	 * @see org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console.ConsoleModelEvent)
 	 */
-	public void beforeDisconnect(ConsoleModelEvent e) {
-		;
+	public void beforeDisconnect(final ConsoleModelEvent e) {
+		Display display = control.getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					beforeDisconnect(e);
+				}
+			});
+		} else {
+			ui_setEnabled(false);
+		}
 	}
 
 	private void completionAvailable(CompoletionResult r) {
@@ -560,6 +587,19 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		} else {
 			control.setBackground(display
 					.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		}
+	}
+	
+	private void ui_setEnabled(boolean b){
+		control.setEnabled(b);
+		Display display = control.getDisplay();
+		if (b) {
+			control.setBackground(display
+					.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+
+		} else {
+			control.setBackground(display
+					.getSystemColor(SWT.COLOR_GRAY));
 		}
 	}
 
