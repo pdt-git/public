@@ -30,6 +30,7 @@ import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -1053,9 +1054,10 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      * @return
      * @throws IOException
      * @throws CoreException
+     * @throws PrologInterfaceException 
      */
     protected IFile writeFactsToFile(AsyncPrologSession session, ICompilationUnit icu) throws IOException,
-            CoreException {
+            CoreException, PrologInterfaceException {
         IFile file = (IFile) icu.getResource();
         IPath inPath = file.getFullPath();
         IPath outPath = inPath.removeFileExtension().addFileExtension(
@@ -1073,9 +1075,10 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
      * @return
      * @throws IOException
      * @throws CoreException
+     * @throws PrologInterfaceException 
      */
     protected IFile writeFactsToFile(AsyncPrologSession session, ICompilationUnit icu, IFile outFile)
-            throws IOException, CoreException {
+            throws IOException, CoreException, PrologInterfaceException {
         //ensureAccessible(outFile);
         IFile file = (IFile) icu.getResource();
         icu.becomeWorkingCopy(new IProblemRequestor() {
@@ -1517,7 +1520,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     protected void clean() throws CoreException {    
         build(IncrementalProjectBuilder.CLEAN_BUILD);
     }
-    private void generateSource_impl() throws CoreException, IOException {
+    private void generateSource_impl() throws CoreException, IOException, PrologInterfaceException {
         String query = "toplevelT(ID,_,FILENAME,_),gen_tree(ID,CONTENT)";
         PrologSession session = getTestJTransformerProject().getPrologInterface()
                 .getSession();
@@ -1561,13 +1564,16 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     protected void generateSource() throws CoreException, IOException {
         IWorkspaceRunnable r = new IWorkspaceRunnable() {
-            public void run(IProgressMonitor monitor) throws CoreException {
+            public void run(IProgressMonitor monitor) throws CoreException{
                 try {
                     generateSource_impl();
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                }
+                } catch (PrologInterfaceException e)
+				{
+        			JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e);
+				}
             }
         };
         ResourcesPlugin.getWorkspace().run(r, getTestProject(),

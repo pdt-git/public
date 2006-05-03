@@ -10,12 +10,17 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
+import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.ui.util.ErrorMessageProvider;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -29,6 +34,7 @@ import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -62,7 +68,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         plugin = this;
         try {
             resourceBundle = ResourceBundle
-                    .getBundle("prg.cs3.pdt.PDTPluginResources");
+                    .getBundle("prg.cs3.pdt.PDTPluginResources"); //$NON-NLS-1$
         } catch (MissingResourceException x) {
             resourceBundle = null;
         }
@@ -89,28 +95,28 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         IClasspathEntry firstSourceFolder = getFirstSourceFolder(dummyOutput);
         IResource r= ResourcesPlugin.getWorkspace().getRoot().findMember(firstSourceFolder.getPath());
         String src= r.getLocation().toOSString();
-        String storeFile = getResourceLocator("").resolve("global_pef_store.pl").toString();
+        String storeFile = getResourceLocator("").resolve("global_pef_store.pl").toString(); //$NON-NLS-1$ //$NON-NLS-2$
         options = new Option[] { 
                 new SimpleOption(
                 JTransformer.PREF_DEFAULT_OUTPUT_PROJECT,
-                "Default output source folder",
-                "Used as default value for JTransformer Projects that do not specify their own output folder.",
+                "Default output source folder", //$NON-NLS-1$
+                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
                 Option.STRING, src),
                 new SimpleOption(
                 JTransformer.PREF_DEFAULT_OUTPUT_FOLDER,
-                "Default output source folder",
-                "Used as default value for JTransformer Projects that do not specify their own output folder.",
+                "Default output source folder", //$NON-NLS-1$
+                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
                 Option.STRING, src),
                 new SimpleOption(
                         JTransformer.PREF_USE_PEF_STORE,
-                        "Use PEF store (EXPERIMENTAL)",
-                        "If enabled, JTransformer will save PEFs before shutdown and reload them at startup. ",
-                        Option.FLAG, "false"),
+                        "Use PEF store (EXPERIMENTAL)", //$NON-NLS-1$
+                        "If enabled, JTransformer will save PEFs before shutdown and reload them at startup. ", //$NON-NLS-1$
+                        Option.FLAG, "false"), //$NON-NLS-1$
                 new SimpleOption(
                         JTransformer.PREF_DEFAULT_PEF_STORE_FILE,
-                        "Default PEF store file",
-                        "Used as default value for JTransformer Projects "
-                                + "that do not specify their own store file.",
+                        "Default PEF store file", //$NON-NLS-1$
+                        "Used as default value for JTransformer Projects " //$NON-NLS-1$
+                                + "that do not specify their own store file.", //$NON-NLS-1$
                         Option.FILE, storeFile)};
 
     }
@@ -131,7 +137,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      * @throws CoreException
      */
     private IJavaProject getDummyOutput() throws CoreException {
-        String projectName = "JTransformer-dummy_output";
+        String projectName = "JTransformer-dummy_output"; //$NON-NLS-1$
         IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
         if(!project.exists()){
             project=createProject(projectName);
@@ -212,7 +218,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      */
     public ResourceFileLocator getResourceLocator(String key) {
         if (rootLocator == null) {
-            URL url = getBundle().getEntry("/");
+            URL url = getBundle().getEntry("/"); //$NON-NLS-1$
             File location = null;
             try {
                 location = new File(Platform.asLocalURL(url).getFile());
@@ -228,10 +234,10 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 
     private void collectListeners() {
         IExtensionRegistry registry = Platform.getExtensionRegistry();
-        IExtensionPoint point = registry.getExtensionPoint("org.cs3.jtransformer",
+        IExtensionPoint point = registry.getExtensionPoint("org.cs3.jtransformer", //$NON-NLS-1$
                 JTransformer.EP_PROJECT_LISTENER);
         if (point == null) {
-            Debug.error("could not find the extension point "
+            Debug.error("could not find the extension point " //$NON-NLS-1$
                     + JTransformer.EP_PROJECT_LISTENER);
             return;
         }
@@ -242,12 +248,12 @@ public class JTransformerPlugin extends AbstractUIPlugin {
                         .getConfigurationElements();
                 for (int j = 0; j < celem.length; j++) {
 
-                    if (!celem[j].getName().equals("listener")) {
-                        Debug.warning("hmmm... asumed a listener, but got a "
+                    if (!celem[j].getName().equals("listener")) { //$NON-NLS-1$
+                        Debug.warning("hmmm... asumed a listener, but got a " //$NON-NLS-1$
                                 + celem[j].getName());
                     } else {
                         JTransformerProjectListener listener = (JTransformerProjectListener) celem[j]
-                                .createExecutableExtension("class");
+                                .createExecutableExtension("class"); //$NON-NLS-1$
                         projectlisteners.add(listener);
                     }
                 }
@@ -335,23 +341,70 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 		}
     }
     /**
+     * @throws PrologInterfaceException 
+     * @throws PrologException 
      * @deprecated 
      */
-    public  void reload(PrologSession initSession) {       
+    public  void reload(PrologSession initSession) throws PrologException, PrologInterfaceException {       
         String storeName = JTransformerPlugin.getDefault().getPreferenceValue(JTransformer.PREF_DEFAULT_PEF_STORE_FILE,null);
         File storeFile = new File(storeName);
          if(storeFile.canRead()){
-            initSession.queryOnce("['"+Util.prologFileName(storeFile)+"']");
+            initSession.queryOnce("['"+Util.prologFileName(storeFile)+"']"); //$NON-NLS-1$ //$NON-NLS-2$
         }
     }
     /**
+     * @throws PrologInterfaceException 
+     * @throws PrologException 
      * @deprecated 
      */    
-    public  void save(PrologSession shutdownSession){
+    public  void save(PrologSession shutdownSession) throws PrologException, PrologInterfaceException{
         String storeName = JTransformerPlugin.getDefault().getPreferenceValue(JTransformer.PREF_DEFAULT_PEF_STORE_FILE,null);
         File storeFile = new File(storeName);
         
-            shutdownSession.queryOnce("writeTreeFacts('"+Util.prologFileName(storeFile)+"')");
+            shutdownSession.queryOnce("writeTreeFacts('"+Util.prologFileName(storeFile)+"')"); //$NON-NLS-1$ //$NON-NLS-2$
         
     }
+
+	public ErrorMessageProvider getErrorMessageProvider()
+	{
+		return new JTransformerErrorMessageProvider(plugin);
+	}
+	
+	public void createPrologInterfaceExceptionCoreExceptionWrapper(PrologInterfaceException e1) throws CoreException
+	{
+		throw new CoreException(UIUtils.createErrorStatus(
+				new DefaultErrorMessageProvider(getDefault()), e1,
+				JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION));
+	}
+
+	class JTransformerErrorMessageProvider implements ErrorMessageProvider {
+		
+		private Plugin plugin;
+
+		public JTransformerErrorMessageProvider(Plugin plugin) {
+			this.plugin = plugin;
+		}
+
+		public String getErrorMessage(int errCode)
+		{
+			return Messages.getString("JTransformerPlugin." + errCode); //$NON-NLS-1$
+		}
+
+		public String getContextMessage(int cxCode)
+		{
+			return Messages.getString("JTransformerPlugin." + cxCode); //$NON-NLS-1$
+		}
+
+		public String getId()
+		{
+			return getPlugin().getBundle().getSymbolicName();
+		}
+
+		public Plugin getPlugin()
+		{
+			return plugin;
+		}
+		
+	};
+
 }

@@ -14,6 +14,7 @@ import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
@@ -21,6 +22,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
@@ -66,7 +68,14 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 * @see IProjectNature#configure
 	 */
 	public void configure() throws CoreException {
-		getFactBaseBuilder().clean(null);
+		try
+		{
+			getFactBaseBuilder().clean(null);
+		} catch (PrologInterfaceException e1)
+		{
+			JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e1);
+			
+		}
 		Debug.debug("configure was called");
 		IProjectDescription descr = project.getDescription();
 		ICommand sheepBuilder = descr.newCommand();
@@ -192,19 +201,26 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 			descr.setBuildSpec(newBuilders);
 		}
 		PrologInterface pif = getPrologInterface();
-		if (pif.isUp()) {
-			PrologSession s = pif.getSession();
-			try {
-				String projectName = getProject().getName();
-				String sourceFolder = Util.prologFileName(new File(
-						getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
-				s.queryOnce("retractall(project_option('" + projectName
-						+ "', _))");
-			} finally {
-				s.dispose();
+		PrologSession s = null;
+
+		try {
+			if (pif.isUp()) {
+					s = pif.getSession();
+					String projectName = getProject().getName();
+					String sourceFolder = Util.prologFileName(new File(
+							getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
+					s.queryOnce("retractall(project_option('" + projectName
+							+ "', _))");
 			}
+			getFactBaseBuilder().clean(null);
+		} catch (PrologInterfaceException e)
+		{
+			JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e);
+		} finally {
+			if(s != null)
+				s.dispose();
 		}
-		getFactBaseBuilder().clean(null);
+
 	}
 
 	/**
@@ -217,7 +233,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	/**
 	 * @see IProjectNature#setProject
 	 */
-	public void setProject(IProject project) {
+	public void setProject(IProject project){
 		this.project = project;
 		PrologInterface pif = getPrologInterface();
 		if (pif.isUp()) {
@@ -228,14 +244,14 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	public PrologInterface getPrologInterface() {
 		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface(getProject().getName());
 
-		if (!pif.isUp()) {
-			try {
-				pif.start();
-			} catch (IOException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			}
-		}
+//		if (!pif.isUp()) {
+//			try {
+//				pif.start();
+//			} catch (IOException e) {
+//				Debug.report(e);
+//				throw new RuntimeException(e);
+//			}
+//		}
 		// List libraries = pif.getBootstrapLibraries();
 		// ResourceFileLocator l =
 		// JTransformerPlugin.getDefault().getResourceLocator(JTransformer.ENGINE);
@@ -318,7 +334,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 *      java.io.PrintStream)
 	 */
 	public void generateFacts(AsyncPrologSession session, ICompilationUnit cu)
-			throws IOException, CoreException {
+			throws IOException, CoreException, PrologInterfaceException {
 		getFactBaseBuilder().writeFacts(session, cu);
 
 	}
@@ -391,7 +407,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 * 
 	 * @see org.cs3.jtransformer.JTransformerProject#reconfigure()
 	 */
-	public void reconfigure(PrologSession s) {
+	public void reconfigure(PrologSession s) throws PrologException, PrologInterfaceException {
 		String projectName = getProject().getName();
 		String outputFolder = Util.prologFileName(new File(
 				getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
@@ -418,15 +434,26 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 * 
 	 * @see org.cs3.jtransformer.JTransformerProject#reconfigure()
 	 */
-	public void reconfigure() {
-		PrologSession s = getPrologInterface().getSession();
+	public void reconfigure(){
+		PrologSession s = null;
 		try {
+			s = getPrologInterface().getSession();
 			reconfigure(s);
 		} catch (PrologException e) {
 			Debug.report(e);
 			throw e;
+		} catch (PrologInterfaceException e)
+		{
+			UIUtils.logAndDisplayError(
+					JTransformerPlugin.getDefault().getErrorMessageProvider(),
+					UIUtils.getDisplay().getActiveShell(),
+					JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+					JTransformer.ERR_CONTEXT_NATURE_INIT,
+					e
+					);
 		} finally {
-			s.dispose();
+			if(s != null)
+				s.dispose();
 		}
 	}
 

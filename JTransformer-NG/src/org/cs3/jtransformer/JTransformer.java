@@ -14,6 +14,32 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
  */
 public final class JTransformer {
 
+	/**
+	 * Error message id when the PrologInterfaceException
+	 * was catched.
+	 */
+    public static final int ERR_PROLOG_INTERFACE_EXCEPTION = 1;
+	
+	/**
+	 * Error context id for the JTransformer Nature (re)initialization.
+	 */
+    public static final int ERR_CONTEXT_NATURE_INIT = 2;
+
+    /**
+	 * Error context id for an arbitrary failed action.
+	 */
+    public static final int ERR_CONTEXT_ACTION_FAILED = 3;
+    
+    /**
+     * Error occurred in the source regeneration.
+     */
+    public static final int ERR_CONTEXT_SOURCE_REGENERATION = 4;
+    
+    /**
+     * Any exception occurred.
+     */
+    public static final int ERR_CONTEXT_EXCEPTION = 5;
+
     /**
      * key that is used to identify the consultservice for external PEFs.
      */
@@ -123,6 +149,11 @@ public final class JTransformer {
  * @deprecated use ResourcesPlugin.getWorkspace().getRoot() instead.
  */	
 public static final ISchedulingRule JTransformer_BUILDER_SCHEDULING_RULE = new ProxyRule();
+
+
+
+
+
 /**
  * the idea is to keep the classloader from instantiating the resources plugin.
  * 

@@ -12,6 +12,8 @@ import java.util.Map;
 import org.cs3.jtransformer.internal.astvisitor.FQNTranslator;
 import org.cs3.jtransformer.internal.astvisitor.IIDGenerator;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
@@ -99,8 +101,9 @@ public class IDManagerIType {
 	/**
 	 * @param p
 	 * @return
+	 * @throws PrologInterfaceException 
 	 */
-	public boolean knowsPackage(PrologSession s,Package p) {
+	public boolean knowsPackage(PrologSession s,Package p) throws PrologInterfaceException {
 		if (known.containsKey(p))
 			return true;
 		else {
@@ -300,8 +303,10 @@ public static int getArrayDim(String type) {
 	/**
 	 * @param p
 	 * @return
+	 * @throws PrologInterfaceException 
+	 * @throws  
 	 */
-	private boolean lookupPackage(PrologSession session,Package p) {
+	private boolean lookupPackage(PrologSession session,Package p) throws PrologInterfaceException {
 		Map h = session.queryOnce("packageT(X, '" + p.getName() +"')");
 		if (h != null && h.containsKey("X"))
 			return true;

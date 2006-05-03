@@ -9,6 +9,7 @@ import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -74,7 +75,7 @@ public interface JTransformerProject extends OptionProvider{
      *                   to get rid of it.
      */
     public void generateFacts(AsyncPrologSession session, ICompilationUnit cu)
-            throws IOException, CoreException;
+            throws IOException, CoreException, PrologInterfaceException;
 
     /**
      * 

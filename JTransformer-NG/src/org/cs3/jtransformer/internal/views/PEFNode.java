@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -90,14 +91,14 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
     /* (non-Javadoc)
      * @see org.cs3.pl.model2.INode#getChildren()
      */
-    public List getChildren() {
+    public List getChildren() throws PrologInterfaceException {
        if(children==null){
            children=generateChildren();
        }
         return children;
     }
 
-    public static IPEFNode find(IViewSite site, PEFNode parent, String id, String kind, PrologInterface pef){
+    public static IPEFNode find(IViewSite site, PEFNode parent, String id, String kind, PrologInterface pef) throws PrologInterfaceException{
     	if(id == null || id.equals("null"))
     		return null;
     		List errors = new ArrayList();
@@ -173,8 +174,9 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 
 	/**
      * @return
+	 * @throws PrologInterfaceException 
      */
-    protected List generateChildren() {
+    protected List generateChildren() throws PrologInterfaceException {
 		List list = new ArrayList();
 		for (Iterator iter = argNames.iterator(); iter.hasNext();) {
 			String name = (String) iter.next();
