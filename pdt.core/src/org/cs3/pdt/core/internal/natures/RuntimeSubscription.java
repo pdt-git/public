@@ -52,6 +52,7 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -82,14 +83,23 @@ public class RuntimeSubscription extends DefaultSubscription implements
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
 		if (pif.isUp()) {
-			afterInit(pif);
+			try {
+				afterInit(pif);
+			} catch (PrologInterfaceException e) {
+				//nothing to do. The pif will have to be restarted anyway to be used.
+			}
 		}
 	}
 
 	public void deconfigure(PrologInterface pif) {
 		pif.removeLifeCycleHook(getId());
 		if (pif.isUp()) {
-			PrologSession session = pif.getSession();
+			PrologSession session=null;
+			try {
+				session = pif.getSession();
+			} catch (PrologInterfaceException e) {
+				Debug.rethrow(e);
+			}
 			try {
 				beforeShutdown(pif, session);
 			} finally {
@@ -125,15 +135,20 @@ public class RuntimeSubscription extends DefaultSubscription implements
 
 	}
 
-	public void afterInit(PrologInterface pif) {
+	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
 		IPrologProject plp = getPrologProject();
-		String[] keys = plp.getPrologLibraryKeys();
-		
-		
-		PrologSession s = pif.getSession();
+		String[] keys = null;
 		try {
+			keys = plp.getPrologLibraryKeys();
+		} catch (CoreException e) {
+			Debug.rethrow(e);
+		}
+		PrologSession s =null;
+		try {
+		s= pif.getSession();
+		
 			PLUtil.configureFileSearchPath(mgr, s,keys);
 			
 		} finally {

@@ -48,6 +48,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
+import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
@@ -56,6 +58,7 @@ import org.cs3.pl.console.prolog.PrologConsoleService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 
@@ -182,6 +185,7 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 	}
 
 	private PrologConsoleService consoleService;
+	private ErrorMessageProvider errorMessageProvider;
 
 	public PrologConsoleService getPrologConsoleService() {
 		if(consoleService==null){
@@ -215,5 +219,12 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 	public void reconfigure() {
 		// XXX reconnect console here.
 		
+	}
+
+	public ErrorMessageProvider getErrorMessageProvider() {
+		if(errorMessageProvider==null){
+			errorMessageProvider=new DefaultErrorMessageProvider(this);
+		}
+		return errorMessageProvider;
 	}
 }

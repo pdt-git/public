@@ -53,6 +53,8 @@ import java.util.ResourceBundle;
 
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
@@ -64,6 +66,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -73,7 +76,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin {
+public class PDTPlugin extends AbstractUIPlugin  {
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -108,6 +111,8 @@ public class PDTPlugin extends AbstractUIPlugin {
 	private DefaultResourceFileLocator rootLocator;
 
 	private Option[] options;
+
+	private DefaultErrorMessageProvider errorMessageProvider;
 
 	/**
 	 * The constructor.
@@ -266,6 +271,18 @@ public class PDTPlugin extends AbstractUIPlugin {
 		if (location.charAt(location.length() - 1) == File.separatorChar)
 			location = location.substring(0, location.length() - 1);
 		return location;
+	}
+
+	
+	public String getId() {		
+		return getBundle().getSymbolicName();
+	}
+
+	public ErrorMessageProvider getErrorMessageProvider() {
+		if(errorMessageProvider==null){
+			errorMessageProvider=new DefaultErrorMessageProvider(this);
+		}
+		return errorMessageProvider;
 	}
 
 }

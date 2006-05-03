@@ -54,8 +54,11 @@ import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerListener;
 import org.cs3.pdt.runtime.PrologContextTrackerService;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -117,7 +120,8 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 			{
 				return null;
 			}
-			PrologInterface pif = tracker.getCurrentPrologInterface();
+			PrologInterface pif=null;
+			pif = tracker.getCurrentPrologInterface();
 			if(pif!=null){
 				return pif;
 			}

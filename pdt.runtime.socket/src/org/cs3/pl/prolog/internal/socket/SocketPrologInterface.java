@@ -50,6 +50,7 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
@@ -58,80 +59,83 @@ import org.cs3.pl.prolog.internal.ReusablePool;
 
 public class SocketPrologInterface extends AbstractPrologInterface2 {
 
-    private class InitSession extends SocketSession {
-        public InitSession(SocketClient client,PrologInterface pif) throws IOException {
-            super(client,pif);
-        }
+	private class InitSession extends SocketSession {
+		public InitSession(SocketClient client, SocketPrologInterface pif)
+				throws IOException {
+			super(client, pif);
+		}
 
-        public void dispose() {
-            Debug.warning("Ignoring attempt to dispose an initial session!");
-            Debug.warning("called from here:");
-            Thread.dumpStack();
-        }
+		public void dispose() {
+			Debug.warning("Ignoring attempt to dispose an initial session!");
+			Debug.warning("called from here:");
+			Thread.dumpStack();
+		}
 
-        public void doDispose() {
-            super.dispose();
-        }
-    }
+		public void doDispose() {
+			super.dispose();
+		}
+	}
 
-    private class ShutdownSession extends SocketSession {
-        public ShutdownSession(SocketClient client,PrologInterface pif) throws IOException {
-            super(client,pif);
-        }
+	private class ShutdownSession extends SocketSession {
+		public ShutdownSession(SocketClient client, SocketPrologInterface pif)
+				throws IOException {
+			super(client, pif);
+		}
 
-        public void dispose() {
-        	 Debug.warning("Ignoring attempt to dispose a shutdown session!");
-             Debug.warning("called from here:");
-             Thread.dumpStack();
-        }
+		public void dispose() {
+			Debug.warning("Ignoring attempt to dispose a shutdown session!");
+			Debug.warning("called from here:");
+			Thread.dumpStack();
+		}
 
-        public void doDispose() {
-            super.dispose();
-        }
-    }
+		public void doDispose() {
+			super.dispose();
+		}
+	}
 
-    private int port = -1;
+	private int port = -1;
 
-    private boolean standAloneServer = false;
+	private boolean standAloneServer = false;
 
-    private boolean useSessionPooling = true;
+	private boolean useSessionPooling = true;
 
-    private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
+	private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 
-    public final static String EXECUTABLE = "pif.executable";
-    public static final String ENVIRONMENT = "pif.environment";
-    
-    public static final String KILLCOMMAND = "pif.killcommand";
-    public final static String BOOT_DIR = "pif.engine_dir";
+	public final static String EXECUTABLE = "pif.executable";
 
-    public final static String STANDALONE = "pif.standalone";
+	public static final String ENVIRONMENT = "pif.environment";
 
-    public static final String ENGINE_FILE = "pif.engine_file";
+	public static final String KILLCOMMAND = "pif.killcommand";
 
-    public static final String MAIN_FILE =  "pif.main_file";
+	public final static String BOOT_DIR = "pif.engine_dir";
 
-    public final static String USE_POOL = "pif.use_pool";
-    
-    public final static String TIMEOUT = "pif.timeout";
+	public final static String STANDALONE = "pif.standalone";
+
+	public static final String ENGINE_FILE = "pif.engine_file";
+
+	public static final String MAIN_FILE = "pif.main_file";
+
+	public final static String USE_POOL = "pif.use_pool";
+
+	public final static String TIMEOUT = "pif.timeout";
 
 	public static final String HIDE_PLWIN = "pif.hide_plwin";
 
 	public static final String HOST = "pif.host";
+
 	public static final String PORT = "pif.port";
 
-	
-
 	private String host;
-	
-    private String engineDir;
 
-    private String executable;
+	private String engineDir;
 
-    private PrologInterfaceFactory factory;
+	private String executable;
 
-    private ResourceFileLocator locator;
+	private PrologInterfaceFactory factory;
 
-    private HashMap consultServices = new HashMap();
+	private ResourceFileLocator locator;
+
+	private HashMap consultServices = new HashMap();
 
 	private File lockFile;
 
@@ -143,276 +147,275 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	private String killcommand;
 
-	
+	public SocketPrologInterface(PrologInterfaceFactory factory) {
+		super();
+		this.factory = factory;
 
-    public SocketPrologInterface(PrologInterfaceFactory factory)  {
-        super();
-        this.factory=factory;
-        
-    }
-
-    public PrologSession getSession_impl() throws Throwable {
-        ReusableSocket socket = null;
-        try {
-            if (useSessionPooling) {
-                socket = (ReusableSocket) pool
-                        .findInstance(ReusableSocket.class);
-            }
-            if (socket == null) {
-                Debug.info("creating new ReusableSocket");
-                socket = new ReusableSocket((String)null, port);
-            }
-            else{
-                Debug.info("reusing old ReusableSocket");
-            }
-// if(!socket.isConnected()){
-// Debug.debug("debug");
-// }
-            SocketClient client = new SocketClient(socket);
-            client.setPool(pool);
-            SocketSession s = new SocketSession(client,this);
-            s.setDispatcher(new PrologInterfaceListener() {
-                public void update(PrologInterfaceEvent e) {
-                    fireUpdate(e.getSubject(),e.getEvent());
-                }
-            });
-            return s;
-        } catch (Throwable e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    public AsyncPrologSession getAsyncSession_impl() throws Throwable {
-    	 ReusableSocket socket = null;
-         try {
-             if (useSessionPooling) {
-                 socket = (ReusableSocket) pool
-                         .findInstance(ReusableSocket.class);
-             }
-             if (socket == null) {
-                 Debug.info("creating new ReusableSocket");
-                 socket = new ReusableSocket((String)null, port);
-             }
-             else{
-                 Debug.info("reusing old ReusableSocket");
-             }
-// if(!socket.isConnected()){
-// Debug.debug("debug");
-// }
-             SocketClient client = new SocketClient(socket);
-             client.setParanoiaEnabled(false);
-             client.setPool(pool);
-             AsyncPrologSession s = new AsyncSocketSession(client,this);
-             
-             return s;
-         } catch (Throwable e) {
-             throw new RuntimeException(e.getMessage());
-         }
 	}
 
-    public void setPort(int port) {
-        // if (isDown()) {
-            this.port = port;
-// } else {
-// throw new IllegalStateException("Cannot change port while in use.");
-// }
-    }
-    private void setHost(String value) {
-        this.port = port;		
+	public PrologSession getSession_impl() throws Throwable {
+		ReusableSocket socket = null;
+		try {
+			if (useSessionPooling) {
+				socket = (ReusableSocket) pool
+						.findInstance(ReusableSocket.class);
+			}
+			if (socket == null) {
+				Debug.info("creating new ReusableSocket");
+				socket = new ReusableSocket((String) null, port);
+			} else {
+				Debug.info("reusing old ReusableSocket");
+			}
+
+			SocketClient client = new SocketClient(socket);
+			client.setPool(pool);
+			SocketSession s = new SocketSession(client, this);
+			s.setDispatcher(new PrologInterfaceListener() {
+				public void update(PrologInterfaceEvent e) {
+					fireUpdate(e.getSubject(), e.getEvent());
+				}
+			});
+			return s;
+		} catch (Throwable e) {
+			handleException(e);
+			return null;
+		}
 	}
-    /**
+
+	public AsyncPrologSession getAsyncSession_impl() throws Throwable {
+		ReusableSocket socket = null;
+		try {
+			if (useSessionPooling) {
+				socket = (ReusableSocket) pool
+						.findInstance(ReusableSocket.class);
+			}
+			if (socket == null) {
+				Debug.info("creating new ReusableSocket");
+				socket = new ReusableSocket((String) null, port);
+			} else {
+				Debug.info("reusing old ReusableSocket");
+			}
+			SocketClient client = new SocketClient(socket);
+			client.setParanoiaEnabled(false);
+			client.setPool(pool);
+			AsyncPrologSession s = new AsyncSocketSession(client, this);
+
+			return s;
+		} catch (Throwable e) {
+			handleException(e);
+			return null;
+		}
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	private void setHost(String value) {
+		this.host = value;
+	}
+
+	/**
 	 * @param standAloneServer
 	 *            The standAloneServer to set.
 	 */
-    public void setStandAloneServer(boolean standAloneServer) {
-        if (isDown()) {
-            this.standAloneServer = standAloneServer;
-        } else {
-            throw new IllegalStateException("Cannot change standalone flag while in use.");
-        }
+	public void setStandAloneServer(boolean standAloneServer) {
+		if (isDown()) {
+			this.standAloneServer = standAloneServer;
+		} else {
+			throw new IllegalStateException(
+					"Cannot change standalone flag while in use.");
+		}
 
-    }
+	}
 
-    /**
+	/**
 	 * @param useSessionPooling
 	 *            The useSessionPooling to set.
 	 */
-    public void setUseSessionPooling(boolean useSessionPooling) {
-        this.useSessionPooling = useSessionPooling;
-        pool = useSessionPooling ? new ReusablePool() : null;
-    }
+	public void setUseSessionPooling(boolean useSessionPooling) {
+		this.useSessionPooling = useSessionPooling;
+		pool = useSessionPooling ? new ReusablePool() : null;
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.IPrologInterface#setOption(java.lang.String,
 	 *      java.lang.String)
 	 */
-    public void setOption(String opt, String value) {
-         if (EXECUTABLE.equals(opt)) {
-            this.executable = value;
-        } else if (ENVIRONMENT.equals(opt)) {
-            this.environment = value;
-        } else if (KILLCOMMAND.equals(opt)) {
-            this.killcommand=value;
-        } else if (STANDALONE.equals(opt)) {
-        	setStandAloneServer(Boolean.valueOf(value).booleanValue());
-        }else if (TIMEOUT.equals(opt)) {
-            this.timeout=Integer.parseInt(value);
-        }else if (HIDE_PLWIN.equals(opt)) {
-            this.hidePlwin=Boolean.valueOf(value).booleanValue();
-        } else if (USE_POOL.equals(opt)) {
-            setUseSessionPooling(Boolean.valueOf(value).booleanValue());
-        } else if (HOST.equals(opt)) {
-            setHost(value);
-        } else if (PORT.equals(opt)) {
-            setPort(Integer.parseInt(value));
-        } else {
-            throw new IllegalArgumentException("option not supported: " + opt);
-        }
-    }
-
-    
+	public void setOption(String opt, String value) {
+		if (EXECUTABLE.equals(opt)) {
+			this.executable = value;
+		} else if (ENVIRONMENT.equals(opt)) {
+			this.environment = value;
+		} else if (KILLCOMMAND.equals(opt)) {
+			this.killcommand = value;
+		} else if (STANDALONE.equals(opt)) {
+			setStandAloneServer(Boolean.valueOf(value).booleanValue());
+		} else if (TIMEOUT.equals(opt)) {
+			this.timeout = Integer.parseInt(value);
+		} else if (HIDE_PLWIN.equals(opt)) {
+			this.hidePlwin = Boolean.valueOf(value).booleanValue();
+		} else if (USE_POOL.equals(opt)) {
+			setUseSessionPooling(Boolean.valueOf(value).booleanValue());
+		} else if (HOST.equals(opt)) {
+			setHost(value);
+		} else if (PORT.equals(opt)) {
+			setPort(Integer.parseInt(value));
+		} else {
+			throw new IllegalArgumentException("option not supported: " + opt);
+		}
+	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
 	 */
-    public String getOption(String opt) {
-        // ld: changed semantic:: System properties override any settings
-        String s = System.getProperty(opt);
-        if(s!=null){
-            Debug.warning("option "+opt+" is overridden by System Property: "+s);
-            return s;
-        }
-         if (EXECUTABLE.equals(opt)) {
-            return executable;
-        }else if (ENVIRONMENT.equals(opt)) {
-            return environment;
-        } else if (KILLCOMMAND.equals(opt)) {
-            return ""+killcommand;
-        } else if (STANDALONE.equals(opt)) {
-            return "" + standAloneServer;
-        } else if (USE_POOL.equals(opt)) {
-            return "" + useSessionPooling;
-        } else if (HIDE_PLWIN.equals(opt)) {
-            return "" + hidePlwin;
-        } else if (TIMEOUT.equals(opt)) {
-            return "" + timeout;
-        } else if (HOST.equals(opt)) {
-            return host;
-        } else if (PORT.equals(opt)) {
-            return "" + port;
-        } else {
-            throw new IllegalArgumentException("option not supported: " + opt);
-        }
-    }
+	public String getOption(String opt) {
+		// ld: changed semantic:: System properties override any settings
+		String s = System.getProperty(opt);
+		if (s != null) {
+			Debug.warning("option " + opt
+					+ " is overridden by System Property: " + s);
+			return s;
+		}
+		if (EXECUTABLE.equals(opt)) {
+			return executable;
+		} else if (ENVIRONMENT.equals(opt)) {
+			return environment;
+		} else if (KILLCOMMAND.equals(opt)) {
+			return "" + killcommand;
+		} else if (STANDALONE.equals(opt)) {
+			return "" + standAloneServer;
+		} else if (USE_POOL.equals(opt)) {
+			return "" + useSessionPooling;
+		} else if (HIDE_PLWIN.equals(opt)) {
+			return "" + hidePlwin;
+		} else if (TIMEOUT.equals(opt)) {
+			return "" + timeout;
+		} else if (HOST.equals(opt)) {
+			return host;
+		} else if (PORT.equals(opt)) {
+			return "" + port;
+		} else {
+			throw new IllegalArgumentException("option not supported: " + opt);
+		}
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeInitialSession(org.cs3.pl.prolog.PrologSession)
 	 */
-    protected void disposeInitialSession(PrologSession initSession) {
-        InitSession s = (InitSession) initSession;
-        s.doDispose();
-    }
+	protected void disposeInitialSession(PrologSession initSession) {
+		InitSession s = (InitSession) initSession;
+		s.doDispose();
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeShutdownSession(org.cs3.pl.prolog.PrologSession)
 	 */
-    protected void disposeShutdownSession(PrologSession s) {
-        ShutdownSession ss = (ShutdownSession) s;
-        ss.doDispose();
-    }
+	protected void disposeShutdownSession(PrologSession s) {
+		ShutdownSession ss = (ShutdownSession) s;
+		ss.doDispose();
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getInitialSession()
 	 */
-    protected PrologSession getInitialSession() {
-        try {
-            return new InitSession(new SocketClient((String)null, port),this);
-        } catch (Throwable e) {
-            Debug.report(e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+	protected PrologSession getInitialSession() throws PrologInterfaceException {
+		try {
+			return new InitSession(new SocketClient((String) null, port), this);
+		} catch (Throwable e) {
+			handleException(e);
+			return null;
+		}
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getShutdownSession()
 	 */
-    protected PrologSession getShutdownSession() {        
-        try {
-            return new ShutdownSession(new SocketClient((String)null, port),this);
-        } catch (Throwable e) {
-            Debug.report(e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+	protected PrologSession getShutdownSession() throws PrologInterfaceException {
+		try {
+			return new ShutdownSession(new SocketClient((String) null, port),
+					this);
+		} catch (Throwable e) {
+			handleException(e);
+			return null;
+		}
+	}
 
- 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.IPrologInterface#getFactory()
 	 */
-    public PrologInterfaceFactory getFactory() {
-        return factory;
-    }
+	public PrologInterfaceFactory getFactory() {
+		return factory;
+	}
 
-    
-    /**
+	/**
 	 * @return Returns the locator.
 	 */
-    public ResourceFileLocator getLocator() {
-        return locator;
-    }
-    /**
+	public ResourceFileLocator getLocator() {
+		return locator;
+	}
+
+	/**
 	 * @param locator
 	 *            The locator to set.
 	 */
-    public void setLocator(ResourceFileLocator locator) {
-        this.locator = locator;
-    }
+	public void setLocator(ResourceFileLocator locator) {
+		this.locator = locator;
+	}
 
-    /*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
-    public synchronized void stop() {        
-        super.stop();
-        if(pool!=null){
-        	pool.clear();
-        }
-    }
-    
-    /*
+	public synchronized void stop() throws PrologInterfaceException {
+		super.stop();
+		if (pool != null) {
+			pool.clear();
+		}
+	}
+
+	public synchronized void emergencyStop() {
+
+		super.emergencyStop();
+		if (pool != null) {
+			pool.clear();
+		}
+	}
+
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
-    public synchronized void start() throws IOException {                
-        if(pool!=null){
-        	pool.clear();
-        }
-        super.start();
-    }
+	public synchronized void start() throws PrologInterfaceException {
+		if (pool != null) {
+			pool.clear();
+		}
+		super.start();
+	}
 
 	public void setLockFile(File string) {
-		this.lockFile=string;
-		
+		this.lockFile = string;
+
 	}
 
 	public File getLockFile() {
-		return lockFile;	
+		return lockFile;
 	}
 
 	public int getPort() {
@@ -431,7 +434,4 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		this.hidePlwin = hidePlwin;
 	}
 
-	
-
-    
 }

@@ -44,6 +44,9 @@ package org.cs3.pdt.runtime;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterfaceException;
+
 /**
  * Convenience class for implementing PrologContextTracker.
  * 
@@ -74,10 +77,12 @@ public abstract class AbstractPrologContextTracker implements
 	 * 
 	 * Subclasses should call this method whenever they think the "current"
 	 * PrologInterface has changed, become available or invalid.
+	 * @throws PrologInterfaceException 
 	 */
-	protected void fireContextChanged() {
+	protected void fireContextChanged()  {
 
-		PrologContextTrackerEvent e = new PrologContextTrackerEvent(this,
+		PrologContextTrackerEvent e=null;
+		e = new PrologContextTrackerEvent(this,
 				getCurrentPrologInterface());
 		Vector cloned = null;
 		synchronized (listeners) {

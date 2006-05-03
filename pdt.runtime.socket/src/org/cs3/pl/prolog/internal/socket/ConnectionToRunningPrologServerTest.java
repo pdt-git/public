@@ -50,6 +50,7 @@ import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
@@ -194,7 +195,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	}
 
 
-	private PrologInterface init() throws IOException {
+	private PrologInterface init() throws PrologInterfaceException {
 		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
 		PrologInterface pif = factory.create();
 		pif.setOption(SocketPrologInterface.STANDALONE,"true");

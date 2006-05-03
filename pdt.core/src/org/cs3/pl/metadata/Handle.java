@@ -43,6 +43,7 @@
 package org.cs3.pl.metadata;
 
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.prolog.PrologInterfaceException;
 
 
 /**
@@ -80,9 +81,10 @@ public interface Handle {
 	/**
 	 * lookup the entity in the corresponding entity index.
 	 * This will update the handles property cache.
+	 * @throws PrologInterfaceException 
 	 * @throws InvalidHandleException if the lookup fails.
 	 */
-	public void lookup() throws InvalidHandleExcpetion;
+	public void lookup() throws InvalidHandleExcpetion, PrologInterfaceException;
 	
 	/**
 	 * add an arbitrary property->value binding to the property cache of this handle.
@@ -102,13 +104,15 @@ public interface Handle {
 	 * Listeners will be informed if the underlying entity is updated or removed.
 	 * THIS IS OPTIONAL BEHAVIOUR: wether or not notifications are actually created
 	 * is up to the prolog side implementation of the entity backend.
+	 * @throws PrologInterfaceException 
 	 * 
 	 */
-	public void addEntityListener(EntityListener l);
+	public void addEntityListener(EntityListener l) throws PrologInterfaceException;
 	
 	/**
 	 * Remove a listener from the list of registered EntityListeners
 	 * @param l
+	 * @throws PrologInterfaceException 
 	 */
-	public void removeEntityListener(EntityListener l);
+	public void removeEntityListener(EntityListener l) throws PrologInterfaceException;
 }

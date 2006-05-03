@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.internal.editors;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.ImageRepository;
@@ -56,9 +57,8 @@ import org.cs3.pdt.internal.views.PredicateNode;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
@@ -133,9 +133,20 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 				return null;
 			return (ICompletionProposal[]) proposals
 					.toArray(new ICompletionProposal[proposals.size()]);
-		} catch (Throwable t) {
-			Debug.report(t);
-			throw new RuntimeException(t);
+		} catch (BadLocationException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), viewer.getTextWidget().getShell(), PDT.ERR_COMPLETION_BAD_LOCATION, PDT.CX_COMPLETION, e);
+			return null;
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), viewer.getTextWidget().getShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
+			return null;
+		} catch (CoreException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), viewer.getTextWidget().getShell(), PDT.ERR_CORE_EXCEPTION, PDT.CX_COMPLETION, e);
+			return null;
+		}finally{
+			
 		}
 	}
 
@@ -220,7 +231,7 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 	}
 
 	private List addProposals(int begin, int len, String prefix,
-			List proposals, Predicate[] elems) throws IOException {
+			List proposals, Predicate[] elems){
 
 		for (int i = 0; i < elems.length; i++) {
 			ICompletionProposal proposal = new NewPrologCompletionProposal(
@@ -232,26 +243,22 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 	}
 
 	private void addPredicateProposals(IDocument document, int begin, int len,
-			String prefix, List proposals, String module) throws IOException {
+			String prefix, List proposals, String module) throws PrologInterfaceException, CoreException {
 
 		if (PLEditor.isVarPrefix(prefix)) {
 			return;
 		}
 		Predicate[] elems = null;
 
-		try {
-			elems = getPredicatesWithPrefix(module, prefix);
-		} catch (PrologException e) {
-			Debug.report(e);
-			
-		}
+		elems = getPredicatesWithPrefix(module, prefix);
+		
 		if(elems==null){
 			elems = new Predicate[0];
 		}
 		addProposals(begin, len, prefix, proposals, elems);
 	}
 
-	private Predicate[] getPredicatesWithPrefix(String contextModule, String prefix) {
+	private Predicate[] getPredicatesWithPrefix(String contextModule, String prefix) throws PrologInterfaceException,CoreException {
 		
 
 		IFileEditorInput editorInput = (IFileEditorInput) UIUtils
@@ -259,13 +266,9 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 
 		String activeFileName = Util.prologFileName(editorInput.getFile().getLocation().toFile());
 		IPrologProject plProject;
-		try {
 			plProject = (IPrologProject) editorInput.getFile().getProject()
 					.getNature(PDTCore.NATURE_ID);
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
+		
 		PrologSession session = plProject.getMetadataPrologInterface().getSession();
 		Predicate[] elms = null;
 		try{

@@ -54,6 +54,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
@@ -96,7 +97,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 	public void deconfigure(PrologInterface pif) {
 		pif.removeLifeCycleHook(getId());
 		if (pif.isUp()) {
-			PrologSession session = pif.getSession();
+			PrologSession session=null;
+			try {
+				session = pif.getSession();
+			} catch (PrologInterfaceException e) {
+				Debug.rethrow(e);
+			}
 			try {
 				beforeShutdown(pif, session);
 			} finally {
@@ -134,7 +140,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	public void afterInit(PrologInterface pif) {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
-		PrologSession s = pif.getSession();
+		PrologSession s=null;;
+		try {
+			s = pif.getSession();
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
 		try{
 			PLUtil.configureFileSearchPath(mgr,s,new String[]{PDTCore.ENGINE_ID});
 			Map map = s.queryOnce(

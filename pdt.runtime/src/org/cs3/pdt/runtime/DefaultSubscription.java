@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 
 
 /**
@@ -116,7 +117,7 @@ public class DefaultSubscription implements PersistableSubscription {
 	/**
 	 * the default implementation does nothing.
 	 */	
-	public void deconfigure(PrologInterface pif) {
+	public void deconfigure(PrologInterface pif){
 		;
 	}
 

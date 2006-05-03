@@ -65,6 +65,7 @@ import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.runtime.Platform;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -124,7 +125,7 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 					Debug.rethrow(e);
 				} catch (InstantiationException e) {
 					Debug.rethrow(e);
-				}
+				} 
 			}
 
 		}
@@ -338,6 +339,13 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 	}
 
 	public void addPrologInterface(String key, PrologInterface pif) {
+		Object old=pifs.get(key);
+		if(old==pif){
+			return;
+		}
+		if(old!=null){
+			removePrologInterface(key);
+		}
 		pifs.put(key, pif);
 		keys.put(pif, key);
 		Set l = getSubscriptionsForPif(key);
@@ -349,7 +357,7 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 		firePrologInterfaceAdded(key);
 	}
 
-	public void removePrologInterface(String key) {
+	public void removePrologInterface(String key)  {
 		PrologInterface pif = (PrologInterface) pifs.get(key);
 		if (pif == null) {
 			return;
@@ -373,18 +381,27 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 
 	}
 
-	public void addSubscription(Subscription s) {
+	public void addSubscription(Subscription s){
 		// do not add anonymous subscriptions
-		if (s.getId() == null) {
+		String sid = s.getId();
+		
+		if (sid == null) {
 			return;
+		}
+		Object old = subscriptions.get(sid);
+		if(old==s){
+			return;
+		}
+		if(old!=null){
+			removeSubscription(sid);
 		}
 		Set l = (Set) subscriptionLists.get(s.getPifKey());
 		if (l == null) {
 			l = new HashSet();
 			subscriptionLists.put(s.getPifKey(), l);
 		}
-		l.add(s.getId());
-		subscriptions.put(s.getId(), s);
+		l.add(sid);
+		subscriptions.put(sid, s);
 		if (pifs.containsKey(s.getPifKey())) {
 			s.configure(getPrologInterface(s.getPifKey()));
 		}
@@ -395,7 +412,7 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 		removeSubscription(getSubscription(id));
 	}
 	
-	public void removeSubscription(Subscription s) {
+	public void removeSubscription(Subscription s){
 		// do not remove anonymous subscriptions
 		if (s.getId() == null) {
 			return;

@@ -43,6 +43,10 @@ package org.cs3.pdt.ui.util;
 
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -133,7 +137,50 @@ public final class UIUtils {
 		MessageDialog.openInformation(shell, title, msg);
 	
 	}
+	
+	public static void displayErrorDialog(final Shell shell, final String title,
+			final String msg) {
+		if (Display.getCurrent() != shell.getDisplay()) {
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					displayMessageDialog(shell, title, msg);
+				}
+			});
+			return;
+		}
+		MessageDialog.openError(shell, title, msg);
+	
+	}
+	
+	public static void displayErrorDialog(final ErrorMessageProvider provider, final Shell shell, final int code, final int context, final Exception x){
+		
+		if (Display.getCurrent() != shell.getDisplay()) {
+			shell.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					displayErrorDialog(provider,shell, code,context, x);
+				}
+			});
+			return;
+		}
+		IStatus status = createErrorStatus(provider, x, code);
+		String cxMsg=provider.getContextMessage(context);		
+		ErrorDialog.openError(shell,"Problem encountered", cxMsg, status);
+	}
+	public static IStatus createErrorStatus(ErrorMessageProvider provider, Throwable e, int errCode){
+		Status status = new Status(Status.ERROR,provider.getId(),errCode,provider.getErrorMessage(errCode),e);
+		
+		return status;
+	}
 
+	public static void logError(final ErrorMessageProvider provider, final int code, final int context, final Exception x){
+		IStatus status = createErrorStatus(provider, x, code);		
+		Plugin plugin =provider.getPlugin();
+		plugin.getLog().log(status);
+	}
+	public static void logAndDisplayError(final ErrorMessageProvider provider, final Shell shell, final int code, final int context, final Exception x){
+		logError(provider, code, context, x);
+		displayErrorDialog(provider, shell, code, context, x);
+	}
 	public static void setStatusErrorMessage(final String string) {
 	    getDisplay().asyncExec(new Runnable() {
 	        public void run() {

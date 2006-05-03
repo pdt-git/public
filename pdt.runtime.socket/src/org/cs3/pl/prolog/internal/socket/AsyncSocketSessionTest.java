@@ -51,7 +51,9 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface2;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -260,8 +262,15 @@ public class AsyncSocketSessionTest extends TestCase {
 					// AFTER
 					// the abort call, otherwise, abort will lock up forever.
 					synchronized (lock) {
-						syncSession.queryOnce("thread_send_message('" + alias
-								+ "',test(2))");
+						try {
+							syncSession.queryOnce("thread_send_message('" + alias
+									+ "',test(2))");
+						} catch (PrologException e) {
+							Debug.report(e);
+							
+						} catch (PrologInterfaceException e) {
+							Debug.report(e);
+						}
 					}
 
 				}

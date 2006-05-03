@@ -97,7 +97,7 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 	 */
 	static PrologInterface pif; 
 	
-	public static TestSuite suite() throws IOException {
+	public static TestSuite suite() throws Exception {
 		
 		PrologSession session = null;
 		TestSuite suite = null;

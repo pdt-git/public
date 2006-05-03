@@ -41,8 +41,14 @@
 
 package org.cs3.pdt.internal.editors;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterfaceException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
@@ -63,48 +69,50 @@ import org.eclipse.swt.widgets.Shell;
 
 public class PLConfiguration extends SourceViewerConfiguration {
 	private PLDoubleClickStrategy doubleClickStrategy;
-//	private PLTagScanner tagScanner;
+
+	// private PLTagScanner tagScanner;
 	private PLScanner scanner;
+
 	private ColorManager colorManager;
+
 	private IContentAssistant assistant;
-	
-	/* FIXME should not depend on editor
+
+	/*
+	 * FIXME should not depend on editor
 	 * 
 	 * 
-	 * this was added for because completion, etc. needs some way to 
-	 * associate the document its working on with a prolog resource -
-	 * it needs to get a prolog helper for that project. 
+	 * this was added for because completion, etc. needs some way to associate
+	 * the document its working on with a prolog resource - it needs to get a
+	 * prolog helper for that project.
 	 * 
-	 * currently, we assume that completion is only used within the 
-	 * editor. We can use its input to resolve the connected resource.
-	 * -> project -> nature -> plhelper.
+	 * currently, we assume that completion is only used within the editor. We
+	 * can use its input to resolve the connected resource. -> project -> nature ->
+	 * plhelper.
 	 */
 	private PLEditor editor;
-	
-//	public IContentAssistant getAssistant(){
-//		return assistant;
-//	}
+
+	// public IContentAssistant getAssistant(){
+	// return assistant;
+	// }
 
 	public PLConfiguration(ColorManager colorManager, PLEditor editor) {
 		this.colorManager = colorManager;
 		this.editor = editor;
 	}
-	
+
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
-		return new String[] {
-			IDocument.DEFAULT_CONTENT_TYPE,
-			PLPartitionScanner.PL_COMMENT,
-			PLPartitionScanner.PL_MULTI_COMMENT };
+		return new String[] { IDocument.DEFAULT_CONTENT_TYPE,
+				PLPartitionScanner.PL_COMMENT,
+				PLPartitionScanner.PL_MULTI_COMMENT };
 	}
+
 	public ITextDoubleClickStrategy getDoubleClickStrategy(
-		ISourceViewer sourceViewer,
-		String contentType) {
+			ISourceViewer sourceViewer, String contentType) {
 		if (doubleClickStrategy == null)
 			doubleClickStrategy = new PLDoubleClickStrategy();
 		return doubleClickStrategy;
 	}
 
-	
 	protected PLScanner getPLScanner() {
 		if (scanner == null) {
 			reinitScanner();
@@ -113,87 +121,97 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	}
 
 	/**
-     * 
-     */
-    public void reinitScanner() {
-        scanner = new PLScanner(editor,colorManager);
-        scanner.setDefaultReturnToken(
-        	new Token(
-        		new TextAttribute(
-        			colorManager.getColor(IPLColorConstants.DEFAULT))));
-    }
+	 * 
+	 */
+	public void reinitScanner() {
+		try {
+			scanner = new PLScanner(editor, colorManager);
+		} catch (CoreException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
+					PDT.ERR_CORE_EXCEPTION, PDT.CX_EDITOR_CONFIGURATION, e);
+		} catch (PrologInterfaceException e) {
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
+					PDT.ERR_PIF, PDT.CX_EDITOR_CONFIGURATION, e);
+		}
+		scanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager
+				.getColor(IPLColorConstants.DEFAULT))));
+	}
 
-    public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer) {
+	public IPresentationReconciler getPresentationReconciler(
+			ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();
 
-		NonRuleBasedDamagerRepairer ndr =
-			new NonRuleBasedDamagerRepairer(
-					new TextAttribute(
-							colorManager.getColor(IPLColorConstants.PL_COMMENT)));
+		NonRuleBasedDamagerRepairer ndr = new NonRuleBasedDamagerRepairer(
+				new TextAttribute(colorManager
+						.getColor(IPLColorConstants.PL_COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
-//		DefaultDamagerRepairer dr =
-//			new DefaultDamagerRepairer(getPLScanner());
-//		reconciler.setDamager(dr, PLPartitionScanner.PL_MULTI_COMMENT);
-//		reconciler.setRepairer(dr, PLPartitionScanner.PL_MULTI_COMMENT);
+		// DefaultDamagerRepairer dr =
+		// new DefaultDamagerRepairer(getPLScanner());
+		// reconciler.setDamager(dr, PLPartitionScanner.PL_MULTI_COMMENT);
+		// reconciler.setRepairer(dr, PLPartitionScanner.PL_MULTI_COMMENT);
 
 		DefaultDamagerRepairer dr = new DefaultDamagerRepairer(getPLScanner());
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
-/*		dr = new DefaultDamagerRepairer(getPLScanner());
-		reconciler.setDamager(dr, PLPartitionScanner.PL_DEFAULT);
-		reconciler.setRepairer(dr, PLPartitionScanner.PL_DEFAULT);
-*/		
-		ndr =
-			new NonRuleBasedDamagerRepairer(
-				new TextAttribute(
-					colorManager.getColor(IPLColorConstants.PL_COMMENT)));
+		/*
+		 * dr = new DefaultDamagerRepairer(getPLScanner());
+		 * reconciler.setDamager(dr, PLPartitionScanner.PL_DEFAULT);
+		 * reconciler.setRepairer(dr, PLPartitionScanner.PL_DEFAULT);
+		 */
+		ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager
+				.getColor(IPLColorConstants.PL_COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_COMMENT);
 
 		return reconciler;
 	}
 
-	public IAutoIndentStrategy getAutoIndentStrategy(ISourceViewer sourceViewer, String contentType) {
+	public IAutoIndentStrategy getAutoIndentStrategy(
+			ISourceViewer sourceViewer, String contentType) {
 		return new PLAutoIndentStrategy();
 	}
 
-	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer)
-	{
-	  return new AnnotationHover();
-	} 
-	
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new AnnotationHover();
+	}
+
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		if (assistant != null)
 			return assistant;
-		ContentAssistant assistant =null;
-		String parser = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER, PDTCore.JAVACC);
-		if(PDTCore.READ_TERM_3.equals(parser)){
-			assistant=new ContentAssistant();
-			assistant.setContentAssistProcessor(new NewPrologCompletionProcessor(),IDocument.DEFAULT_CONTENT_TYPE);
-		}else{
-			assistant=new PrologContentAssistant();
-			assistant.setContentAssistProcessor(new PrologCompletionProcessor(editor),IDocument.DEFAULT_CONTENT_TYPE);	
-		}
+		ContentAssistant assistant = null;
 		
+			assistant = new ContentAssistant();
+			assistant.setContentAssistProcessor(
+					new NewPrologCompletionProcessor(),
+					IDocument.DEFAULT_CONTENT_TYPE);
+		
+
 		assistant.enableAutoActivation(true);
 		assistant.setAutoActivationDelay(500);
 		assistant.install(sourceViewer);
-		assistant.setInformationControlCreator(new IInformationControlCreator() {
-            public IInformationControl createInformationControl(Shell parent) {
+		assistant
+				.setInformationControlCreator(new IInformationControlCreator() {
+					public IInformationControl createInformationControl(
+							Shell parent) {
 
-                return new DefaultInformationControl(parent);
-            }
-        });
+						return new DefaultInformationControl(parent);
+					}
+				});
 		this.assistant = assistant;
 
-//		
+		//		
 		return assistant;
-		
+
 	}
-	public String[] getDefaultPrefixes(ISourceViewer sourceViewer, String contentType) {
-		return new String[]{"%",""};
+
+	public String[] getDefaultPrefixes(ISourceViewer sourceViewer,
+			String contentType) {
+		return new String[] { "%", "" };
 	}
 
 }

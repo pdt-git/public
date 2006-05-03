@@ -87,9 +87,9 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
 		
 		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 		PrologInterface pif = console.getPrologInterface();
-		PrologSession session = pif.getSession();
+		PrologSession session = null;
 		 try {
-             
+			 session = pif.getSession();
              List l = session.queryAll("current_thread(A,B)");
              for (Iterator iter = l.iterator(); iter.hasNext();) {
 				Map r = (Map) iter.next();

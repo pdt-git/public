@@ -70,6 +70,7 @@ import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
@@ -616,6 +617,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * 
 	 * @param key
 	 * @return
+	 * @throws PrologInterfaceException 
 	 */
 	public PrologInterface getPrologInterface(String key) {
 		return getPrologInterface(new DefaultSubscription(null, key, null, null));
@@ -631,8 +633,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 *            exists, it is replaced. Must not be null.
 	 * @return the ProlotInterface instance, either from registry, or freshly
 	 *         created.
+	 * @throws PrologInterfaceException 
 	 */
-	public PrologInterface getPrologInterface(Subscription s) {
+	public PrologInterface getPrologInterface(Subscription s){
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
 		String pifKey = s.getPifKey();
 		PrologInterface pif = r.getPrologInterface(pifKey);
@@ -648,7 +651,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		return pif;
 	}
 
-	private void addGlobalHooks(String pifKey, PrologInterface pif) {
+	private void addGlobalHooks(String pifKey, PrologInterface pif)  {
 		Map hooks = (Map) getGlobalHooks().get(pifKey);
 		if (hooks != null) {
 			for (Iterator it = hooks.values().iterator(); it.hasNext();) {
@@ -663,12 +666,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
 			}
 		}
-		try {
-			pif.start();
-
-		} catch (IOException e) {
-			Debug.rethrow(e);
-		}
+//		pif.start();
 	}
 
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {

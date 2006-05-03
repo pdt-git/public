@@ -41,12 +41,15 @@
 
 package org.cs3.pdt.internal.editors;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.AbstractPrologContextTracker;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorInput;
@@ -66,7 +69,7 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 
 	
 
-	public PrologInterface getCurrentPrologInterface() {
+	public PrologInterface getCurrentPrologInterface(){
 		IEditorPart editor = UIUtils.getActiveEditor();
 		
 		PLEditor plEditor=null;
@@ -106,7 +109,7 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 		fireContextChanged();
 	}
 	
-	private void check(IWorkbenchPartReference partRef) {
+	private void check(IWorkbenchPartReference partRef)  {
 		if(partRef instanceof IEditorReference){
 			if(getCurrentPrologInterface()!=null){
 				fireContextChanged();

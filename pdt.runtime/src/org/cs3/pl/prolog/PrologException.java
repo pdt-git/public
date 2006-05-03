@@ -46,6 +46,9 @@ package org.cs3.pl.prolog;
 import org.cs3.pl.common.Debug;
 
 /**
+ * A prolog exception is thrown when a prolog query
+ * executed through a PrologSession raised an exception in 
+ * the prolog runtime.
  */
 public class PrologException extends Debug._RuntimeException {
 
@@ -54,14 +57,14 @@ public class PrologException extends Debug._RuntimeException {
      */
     private static final long serialVersionUID = 2832762018351845476L;
 
-    /**
-     * 
-     */
-    public PrologException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
+//    /**
+//     * 
+//     */
+//    public PrologException() {
+//        super();
+//        // TODO Auto-generated constructor stub
+//    }
+//
     /**
      * @param message
      */

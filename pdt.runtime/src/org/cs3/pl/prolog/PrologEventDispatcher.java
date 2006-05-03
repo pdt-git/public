@@ -49,6 +49,7 @@ import java.util.Vector;
 import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 
 public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
@@ -68,17 +69,19 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 	private PrologInterface2 pif;
 
-	public PrologEventDispatcher(PrologInterface2 pif) {
+	public PrologEventDispatcher(PrologInterface2 pif){
 		this.pif = pif;
 		//make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook(){
 
-			public void onInit(PrologInterface pif, PrologSession initSession) {
-				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{PrologRuntime.LIB_PIF});
-				initSession.queryOnce("use_module(library(pif_observe))");
+			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {
+				
+					PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{PrologRuntime.LIB_PIF});
+					initSession.queryOnce("use_module(library(pif_observe))");
+				
 			}
 
-			public void afterInit(PrologInterface pif) {
+			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 				Set subjects = listenerLists.keySet();
 				for (Iterator it = subjects.iterator(); it.hasNext();) {
 					String subject = (String) it.next();
@@ -89,17 +92,20 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 			
 
-			public void beforeShutdown(PrologInterface pif, PrologSession session) {
+			public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
 				stop(session);
 			}
 			
 		};
 		pif.addLifeCycleHook(hook, null,null);
 		if(pif.isUp()){
-			PrologSession s = pif.getSession();
+			PrologSession s =null;
 			try{
+				s= pif.getSession();
 				hook.onInit(pif,s);
 				
+			} catch (PrologInterfaceException e) {
+				Debug.rethrow(e);
 			}
 			finally{
 				if(s!=null){
@@ -118,7 +124,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 	}
 
 	public void addPrologInterfaceListener(String subject,
-			PrologInterfaceListener l) {
+			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
 			Vector list = (Vector) listenerLists.get(subject);
 			if (list == null) {
@@ -140,7 +146,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 	 *      org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
 	public void removePrologInterfaceListener(String subject,
-			PrologInterfaceListener l) {
+			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
 			Vector list = (Vector) listenerLists.get(subject);
 			if (list == null) {
@@ -157,7 +163,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 	}
 
-	private void enableSubject(String subject) {
+	private void enableSubject(String subject) throws PrologInterfaceException {
 		if (session == null) {
 			session = pif.getAsyncSession();
 			session.addBatchListener(this);
@@ -176,7 +182,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 		dispatch();
 	}
 
-	private void disableSubject(String subject) {
+	private void disableSubject(String subject) throws PrologInterfaceException {
 		if (session == null) {
 			return;
 		}
@@ -189,11 +195,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 		}
 	}
 
-	private void dispatch() {
+	private void dispatch() throws PrologInterfaceException {
 		session.queryAll(eventTicket, "pif_dispatch(Subject,Key,Event)");
 	}
 
-	private void abort() {
+	private void abort() throws PrologInterfaceException {
 		PrologSession s = pif.getSession();
 		try {
 			abort(s);
@@ -205,14 +211,14 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 	}
 
-	private void abort(PrologSession s) {
+	private void abort(PrologSession s) throws PrologException, PrologInterfaceException {
 		s.queryOnce("thread_send_message('"
 				+ session.getProcessorThreadAlias()
 				+ "',notify('$abort',_))");
 	}
 
 	
-	public void stop() {
+	public void stop() throws PrologInterfaceException {
 		if (session == null) {
 			return;
 		}
@@ -221,7 +227,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 		session = null;
 	}
 	
-	public void stop(PrologSession s) {
+	public void stop(PrologSession s) throws PrologException, PrologInterfaceException {
 		if (session == null) {
 			return;
 		}

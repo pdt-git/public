@@ -39,6 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 :- module(cio_test_stream,[create_test_stream/2,delete_test_stream/2]).
 :- load_foreign_library(custom_io).
 

@@ -53,6 +53,7 @@ import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession2;
 
@@ -63,7 +64,7 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 	
 	
 
-	public void lookup() throws InvalidHandleExcpetion {
+	public void lookup() throws InvalidHandleExcpetion, PrologInterfaceException {
 		if(project==null){
 			return;
 		}
@@ -102,7 +103,7 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 		return (CTerm) cache.get(name);
 	}
 
-	public void addEntityListener(EntityListener l) {
+	public void addEntityListener(EntityListener l) throws PrologInterfaceException {
 		
 		synchronized (listeners) {
 			
@@ -119,7 +120,7 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 
 	}
 
-	public void removeEntityListener(EntityListener l) {
+	public void removeEntityListener(EntityListener l) throws PrologInterfaceException {
 		synchronized (listeners) {
 			if(listeners.contains(l)){
 				listeners.remove(l);

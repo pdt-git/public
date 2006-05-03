@@ -51,6 +51,7 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -105,7 +106,7 @@ public class PLScanner extends RuleBasedScanner {
 		}
 	}
 
-	private void initKeywords(IPrologProject plProject) {
+	private void initKeywords(IPrologProject plProject) throws PrologInterfaceException {
 		if(plProject==null){
 			plKeywords=null;
 			return;
@@ -138,7 +139,7 @@ public class PLScanner extends RuleBasedScanner {
 		}
 	}
 
-	public PLScanner(PLEditor editor, ColorManager manager) {
+	public PLScanner(PLEditor editor, ColorManager manager) throws CoreException, PrologInterfaceException {
 		IFileEditorInput editorInput = null;
 		IProject project = null;
 		IPrologProject plProject = null;
@@ -148,16 +149,13 @@ public class PLScanner extends RuleBasedScanner {
 		if (editorInput != null) {
 			project = editorInput.getFile().getProject();
 		}
-		try {
+		
 			if (project != null && project.hasNature(PDTCore.NATURE_ID)) {
 				plProject = (IPrologProject) project
 						.getNature(PDTCore.NATURE_ID);
 			}
 
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
+		
 
 		initKeywords(plProject);
 		initDynamicPredicates(plProject);

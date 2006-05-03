@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.console.internal.views;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -64,13 +63,17 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
+import org.cs3.pl.console.ConsoleModelEvent;
+import org.cs3.pl.console.ConsoleModelListener;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
 import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -104,7 +107,7 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-public class PrologConsoleView extends ViewPart implements LifeCycleHook,
+public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		PrologConsole {
 	private final class ClearAction extends Action {
 		private ClearAction(String text, String tooltip, ImageDescriptor image) {
@@ -117,14 +120,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 	}
 
-	private abstract class PasteAction extends Action{
-		public PasteAction( String text, String tooltip,
-				ImageDescriptor icon) {
+	private abstract class PasteAction extends Action {
+		public PasteAction(String text, String tooltip, ImageDescriptor icon) {
 			super(text, icon);
-			
+
 			setToolTipText(tooltip);
 		}
+
 		protected abstract String getTextToInsert();
+
 		public void run() {
 			try {
 
@@ -134,23 +138,26 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 						try {
 							PrologConsole c = getConsole();
 							int caretOffset = c.getCaretOffset();
-							int offsetInLineBuffer = caretOffset-c.getStartOfInput();
-							if(offsetInLineBuffer<0){
+							int offsetInLineBuffer = caretOffset
+									- c.getStartOfInput();
+							if (offsetInLineBuffer < 0) {
 								return Status.OK_STATUS;
 							}
 							ConsoleModel model = c.getModel();
 							String lineBuffer = model.getLineBuffer();
 							String textToInsert = getTextToInsert();
-							if(textToInsert==null){
+							if (textToInsert == null) {
 								return Status.OK_STATUS;
 							}
-							lineBuffer=lineBuffer.substring(0,offsetInLineBuffer)
-							+ textToInsert 
-							+ lineBuffer.substring(offsetInLineBuffer);
-							
+							lineBuffer = lineBuffer.substring(0,
+									offsetInLineBuffer)
+									+ textToInsert
+									+ lineBuffer.substring(offsetInLineBuffer);
+
 							model.setLineBuffer(lineBuffer);
-							c.setCaretOffset(caretOffset+textToInsert.length());
-							
+							c.setCaretOffset(caretOffset
+									+ textToInsert.length());
+
 						} catch (Throwable e) {
 							Debug.report(e);
 							return Status.CANCEL_STATUS;
@@ -160,26 +167,20 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 						return Status.OK_STATUS;
 					}
 
-					
-
 					private PrologConsole getConsole() {
 						return PrologConsoleView.this;
 					}
 
-
-
-					
-
 				};
-				
+
 				j.schedule();
 			} catch (Throwable t) {
 				Debug.report(t);
 			}
 		}
-		
+
 	}
-	
+
 	private final class ConsoleAction extends Action {
 		private String query;
 
@@ -304,7 +305,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private ClearAction clearAction;
 
 	private ConsoleAction deactivateGuiTracerAction;
-	
+
 	private PasteAction pasteFileNameAction;
 
 	private RestartAction restartAction;
@@ -319,9 +320,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private SelectContextsAction contextSelector;
 
-	private HashMap viewerStates=new HashMap();
-
-	
+	private HashMap viewerStates = new HashMap();
 
 	public void createPartControl(Composite parent) {
 
@@ -357,29 +356,26 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		parent.addListener(SWT.FocusOut, handler);
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
 				.registerPrologConsole(this);
-		GridLayout layout = new GridLayout(1,true);
-		layout.horizontalSpacing=0;
-		layout.verticalSpacing=0;
-		layout.marginWidth=0;
-		layout.marginHeight=0;
+		GridLayout layout = new GridLayout(1, true);
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
 		parent.setLayout(layout);
 		GridData ld = new GridData(GridData.FILL_HORIZONTAL);
-		title= new Label(parent,SWT.HORIZONTAL);
+		title = new Label(parent, SWT.HORIZONTAL);
 		title.setLayoutData(ld);
 		viewer = new ConsoleViewer(parent, SWT.BORDER | SWT.MULTI | SWT.WRAP
 				| SWT.V_SCROLL);
 		viewer.getControl().setEnabled(false);
-		ld=new GridData(GridData.FILL_BOTH);
+		ld = new GridData(GridData.FILL_BOTH);
 		viewer.getControl().setLayoutData(ld);
 		createActions();
 		initMenus(parent);
 		initToolBars();
 		getSite().setSelectionProvider(viewer);
-		
+
 	}
-
-
-	
 
 	private void loadHistory() {
 
@@ -423,22 +419,26 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		deactivateGuiTracerAction = new ConsoleAction("noguitracer",
 				"deactivate guitracer", "deactivate GUI tracer",
 				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
-		pasteFileNameAction = new PasteAction("paste filename","paste the name of the current editor file",
-				ImageRepository.getImageDescriptor(ImageRepository.PASTE_FILENAME)){
+		pasteFileNameAction = new PasteAction("paste filename",
+				"paste the name of the current editor file", ImageRepository
+						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
 
-					protected String getTextToInsert() {
-						IFile file= UIUtils.getFileInActiveEditor();
-						if(file==null){
-							return null;
-						}
-						return Util.quoteAtom(Util.prologFileName(file.getLocation().toFile()));
-					}
-			
+			protected String getTextToInsert() {
+				IFile file = UIUtils.getFileInActiveEditor();
+				if (file == null) {
+					return null;
+				}
+				return Util.quoteAtom(Util.prologFileName(file.getLocation()
+						.toFile()));
+			}
+
 		};
-		pasteFileNameAction.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+		pasteFileNameAction
+				.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
-		
-		keyBindingService.setScopes(new String[]{PDTConsole.CONTEXT_USING_CONSOLE_VIEW});
+
+		keyBindingService
+				.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
 		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
 	}
@@ -471,13 +471,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		bars.setGlobalActionHandler(ActionFactory.CUT.getId(), cutAction);
 		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), copyAction);
 		bars.setGlobalActionHandler(ActionFactory.PASTE.getId(), pasteAction);
-		
+
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
 		addContributions(toolBarManager);
 		createCombo(toolBarManager);
 		pifSelector.init(getViewSite().getWorkbenchWindow());
-		
+
 	}
 
 	private void createCombo(IToolBarManager toolBarManager) {
@@ -494,28 +494,29 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		};
 		toolBarManager.add(pifSelector);
-		
-		contextSelector = new SelectContextsAction(){
+
+		contextSelector = new SelectContextsAction() {
 
 			public void contextChanged(PrologContextTrackerEvent e) {
-				PrologContextTracker tracker = (PrologContextTracker) e.getSource();
-				Debug.info("context changed for tracker "+tracker.getLabel());
+				PrologContextTracker tracker = (PrologContextTracker) e
+						.getSource();
+				Debug.info("context changed for tracker " + tracker.getLabel());
 				setPrologInterface(e.getPrologInterface());
-				
+
 			}
 
 			protected void trackerActivated(PrologContextTracker tracker) {
 				setPrologInterface(contextSelector.getCurrentPrologInterface());
-				
+
 			}
 
 			protected void trackerDeactivated(PrologContextTracker tracker) {
 				setPrologInterface(contextSelector.getCurrentPrologInterface());
-				
+
 			}
-			
+
 		};
-		
+
 		toolBarManager.add(contextSelector);
 		setPrologInterface(contextSelector.getCurrentPrologInterface());
 	}
@@ -605,10 +606,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				.unregisterPrologConsole(this);
 		for (Iterator it = models.keySet().iterator(); it.hasNext();) {
 			PrologInterface pif = (PrologInterface) it.next();
-			try{
+			try {
 				detachFromPif(pif);
 				removeHooks(pif);
-			}catch (Throwable e) {
+			} catch (Throwable e) {
 				Debug.report(e);
 			}
 		}
@@ -629,28 +630,25 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
-			
-			
-			
+
 			int port = Util.findFreePort();
-			
+
 			File lockFile = Util.getLockFile();
 			String prologFileName = Util.prologFileName(lockFile);
-			String queryString = "use_module(library(pdt_console_server)), " +
-					"pdt_start_console_server("
-				    + port
-					+ ",'"
-					+ prologFileName
-					+ "')";
+			String queryString = "use_module(library(pdt_console_server)), "
+					+ "pdt_start_console_server(" + port + ",'"
+					+ prologFileName + "')";
 			Debug.info("starting console server using: " + queryString);
 			Map map = session.queryOnce(queryString);
-			if(map==null){
-				Debug.info("starting server failed, which may mean that it is actualy running already.");
-				map = session.queryOnce("pdt_current_console_server(Port,LockFile)");				
-				lockFile=new File((String) map.get("LockFile"));
-				Debug.info("Yep. got this lockfile: "+lockFile.getCanonicalPath());
+			if (map == null) {
+				Debug
+						.info("starting server failed, which may mean that it is actualy running already.");
+				map = session
+						.queryOnce("pdt_current_console_server(Port,LockFile)");
+				lockFile = new File((String) map.get("LockFile"));
+				Debug.info("Yep. got this lockfile: "
+						+ lockFile.getCanonicalPath());
 			}
-			
 
 			while (!lockFile.exists()) {
 				try {
@@ -674,10 +672,19 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	 */
 	public void afterInit(PrologInterface pif) {
 		// viewer.setController(controller);
-		attachToPif(pif);
-//		if(pif==currentPif){
-//			reconfigureViewer(pif);
-//		}
+		try {
+			attachToPif(pif);
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);// not much we can do.
+			
+			UIUtils.logError(PrologConsolePlugin.getDefault()
+					.getErrorMessageProvider(),
+					PDTConsole.ERR_PIF,
+					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
+		}
+		// if(pif==currentPif){
+		// reconfigureViewer(pif);
+		// }
 
 	}
 
@@ -689,9 +696,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
 		saveHistory();
 		detachFromPif(pif);
-		if(pif==currentPif){
-			viewerStates.put(pif,viewer.saveState());
+		if (pif == currentPif) {
+			viewerStates.put(pif, viewer.saveState());
 		}
+	}
+
+	public void onError(PrologInterface pif) {
+		saveHistory();
+		detachFromPif(pif);
+		if (pif == currentPif) {
+			viewerStates.put(pif, viewer.saveState());
+		}
+
 	}
 
 	private void saveHistory() {
@@ -705,21 +721,34 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 
 	public ConsoleModel getModel() {
-		return (ConsoleModel) (currentPif==null?null:models.get(currentPif));
+		return (ConsoleModel) (currentPif == null ? null : models
+				.get(currentPif));
 	}
 
 	public PrologInterface getPrologInterface() {
 		return currentPif;
 	}
 
-	public void setPrologInterface(PrologInterface newPif) {
+	public void setPrologInterface(PrologInterface newPif)
+			 {
 		if (currentPif != null) {
-			viewerStates.put(currentPif,viewer.saveState());
+			viewerStates.put(currentPif, viewer.saveState());
 		}
+		PrologInterface oldPif = this.currentPif;
 		this.currentPif = newPif;
 		if (currentPif != null) {
 			addHooks(currentPif);
-			attachToPif(currentPif);
+			try {
+				attachToPif(currentPif);
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+				currentPif=oldPif;
+				
+				UIUtils.logAndDisplayError(PrologConsolePlugin.getDefault()
+						.getErrorMessageProvider(), getViewSite().getShell(),
+						PDTConsole.ERR_PIF,
+						PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
+			}
 			reconfigureViewer(currentPif);
 
 		} else {
@@ -731,32 +760,62 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 
 	/*
-	 * note: implementation should take into account, that this method might
-	 * be called several times for the same pif, even during one single life cycle.
+	 * note: implementation should take into account, that this method might be
+	 * called several times for the same pif, even during one single life cycle.
 	 */
-	private void attachToPif(PrologInterface pif) {
-		
+	private void attachToPif(final PrologInterface pif)
+			throws PrologInterfaceException {
+
 		PrologSocketConsoleModel model = (PrologSocketConsoleModel) models
 				.get(pif);
 		if (model == null) {
 			model = new PrologSocketConsoleModel(false);
+			model.addConsoleListener(new ConsoleModelListener(){
+
+				public void onOutput(ConsoleModelEvent e) {
+				;	
+				}
+
+				public void onEditBufferChanged(ConsoleModelEvent e) {
+				;	
+				}
+
+				public void onCommit(ConsoleModelEvent e) {
+				;	
+				}
+
+				public void onModeChange(ConsoleModelEvent e) {
+				;	
+				}
+
+				public void afterConnect(ConsoleModelEvent e) {
+				;	
+				}
+
+				public void beforeDisconnect(ConsoleModelEvent e) {
+					detachFromPif(pif);
+				}
+				
+			});
 			models.put(pif, model);
 		}
 		if (model.isConnected()) {
 			return;
 		}
 		PrologSession session = pif.getSession();
-		PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),session,new String[]{PDTConsole.PL_LIBRARY});
+		PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
+				.getLibraryManager(), session,
+				new String[] { PDTConsole.PL_LIBRARY });
 		Map m = null;
 		try {
-			m = session
-					.queryOnce("use_module(library(pdt_console_server))," +
-							"pdt_current_console_server(Port,LockFile)");
+			m = session.queryOnce("use_module(library(pdt_console_server)),"
+					+ "pdt_current_console_server(Port,LockFile)");
 
 			if (m == null) {
 				startServer(pif, session);
-				m = session.queryOnce("pdt_current_console_server(Port,LockFile)");
-;
+				m = session
+						.queryOnce("pdt_current_console_server(Port,LockFile)");
+				;
 			}
 			if (m == null) {
 				// now we really have a problem
@@ -785,8 +844,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		model.disconnect();
 
 	}
-
-	
 
 	private void addHooks(PrologInterface pif) {
 		pif.addLifeCycleHook(this, HOOK_ID, new String[0]);
@@ -818,31 +875,31 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			return;
 		}
 
-		ConsoleViewer.SavedState savedState = (SavedState) viewerStates.get(pif);
-		if(savedState==null){
+		ConsoleViewer.SavedState savedState = (SavedState) viewerStates
+				.get(pif);
+		if (savedState == null) {
 			viewer.clearOutput();
 			viewer.setModel((ConsoleModel) models.get(pif));
 			completionProvider = new PrologCompletionProvider();
-			completionProvider
-					.setPrologInterface(pif);
+			completionProvider.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
 			history = new NewConsoleHistory();
 			viewer.setHistory(history);
 			loadHistory();
-		}
-		else{
+		} else {
 			viewer.loadState(savedState);
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
 		String label = reg.getName(key);
-		label=label==null?key:label;
+		label = label == null ? key : label;
 		title.setText(label);
 		boolean useEnter = Boolean.valueOf(
 				PrologConsolePlugin.getDefault().getPreferenceValue(
 						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
 				.booleanValue();
-				
+
 		viewer.setEnterSendsSemicolon(useEnter);
 		viewer.getControl().setEnabled(true);
 	}
@@ -908,6 +965,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	public void setCaretOffset(int offset) {
 		getViewer().setCaretOffset(offset);
-		
+
 	}
+
 }

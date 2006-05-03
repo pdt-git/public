@@ -81,6 +81,32 @@ public final  class PDT {
 
 	public static final String PL_PARTITIONER = "pdt.pl_partitioner";
 
+	public static final int ERR_UNKNOWN = -1;
+	
+	public static final int CX_UNKNOWN = -1;
+	
+	public static final int ERR_COMPLETION_BAD_LOCATION = -2;
+
+	public static final int CX_COMPLETION = -2;
+
+	public static final int ERR_PIF = -3;
+
+	public static final int ERR_CORE_EXCEPTION = -4;
+
+	public static final int CX_EDITOR_CONFIGURATION = -5;
+
+	public static final int CX_GENERATING_OUTLINE_DATA = -6;
+
+	public static final int CX_UPDATING_OUTLINE = -7;
+
+	public static final int ERR_FILENAME_CONVERSION_PROBLEM = -8;
+
+	public static final int CX_CONSULT =-9;
+
+	public static final int ERR_WORKBENCH_UI_PROBLEM = -10;
+	
+	
+
 	
 
 }
