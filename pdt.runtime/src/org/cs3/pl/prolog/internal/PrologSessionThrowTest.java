@@ -47,6 +47,7 @@ import junit.framework.TestCase;
 
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -68,8 +69,9 @@ public class PrologSessionThrowTest extends TestCase {
 	/**
 	 * @see http://roots.iai.uni-bonn.de/jira/browse/PDT-10
 	 * @throws PrologException
+	 * @throws PrologInterfaceException 
 	 */
-	public void testThrow() throws PrologException{
+	public void testThrow() throws PrologException, PrologInterfaceException{
 		PrologSession ss = pif.getSession();
 		try  {
 		Map query = ss.queryOnce("throw(A)");

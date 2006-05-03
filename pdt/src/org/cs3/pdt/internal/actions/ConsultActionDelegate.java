@@ -60,6 +60,7 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -80,6 +81,7 @@ import org.eclipse.ui.PartInitException;
 public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 		IWorkbenchWindowActionDelegate {
 
+	
 	private IWorkbenchWindow window;
 
 	public ConsultActionDelegate() {
@@ -122,21 +124,27 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 						.getCanonicalFile();
 				plugin.getWorkbench().getActiveWorkbenchWindow()
 						.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
-				try{
-					checkPif();
-				}catch(OperationCanceledException e){
-					return;
-				}
+				
+				checkPif();
+				
 
 				setQuery("consult('" + Util.prologFileName(file) + "')");
 
 				run();
 			} catch (IOException e) {
 				Debug.report(e);
-				throw new RuntimeException(e);
+				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+						window.getShell(), PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_CONSULT, e);
 			} catch (PartInitException e) {
 				Debug.report(e);
-				throw new RuntimeException(e);
+				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+						window.getShell(), PDT.ERR_WORKBENCH_UI_PROBLEM, PDT.CX_CONSULT, e);
+			} catch (OperationCanceledException e) {
+				return;
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+						window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
 			}
 
 		} else {
@@ -145,7 +153,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 		}
 	}
 
-	private void checkPif() throws OperationCanceledException{
+	private void checkPif() throws OperationCanceledException, PrologInterfaceException{
 		PrologInterface pif = PDTUtils.getActiveConsolePif();
 		if (pif == null) {
 			// boring. nothing to check.
@@ -207,8 +215,10 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			}
 			if (shouldSwitchPif) {
 
-				pif = PrologRuntimePlugin.getDefault().getPrologInterface(
-						projectPifKey);
+				
+					pif = PrologRuntimePlugin.getDefault().getPrologInterface(
+							projectPifKey);
+				
 				PrologConsolePlugin.getDefault().getPrologConsoleService()
 						.getActivePrologConsole().setPrologInterface(pif);
 

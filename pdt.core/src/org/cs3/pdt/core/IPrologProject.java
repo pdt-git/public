@@ -48,6 +48,7 @@ import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -88,8 +89,8 @@ public interface IPrologProject extends OptionProvider{
     public void setAutoConsulted(IFile file,boolean val) throws CoreException;
 
 	public PrologInterface getMetadataPrologInterface();
-	public Subscription getMetadataSubscription();
-	public IMetaInfoProvider getMetaInfoProvider();
+	public Subscription getMetadataSubscription() ;
+	public IMetaInfoProvider getMetaInfoProvider() ;
 
 	public IProject getProject();
 
@@ -102,10 +103,11 @@ public interface IPrologProject extends OptionProvider{
 	 * in this project.
 	 * 
 	 * @return a set of PrologLibrary instances.
+	 * @throws CoreException 
 	 */
-	public String[] getPrologLibraryKeys();
+	public String[] getPrologLibraryKeys() throws CoreException;
 
-	public PrologEventDispatcher getMetaDataEventDispatcher();
+	public PrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
     
     
 }

@@ -350,11 +350,16 @@ public class SocketClient {
 		try{
 			readUntil(GIVE_COMMAND);
 			writeln(PING);
-			String line = readln();
-			//line is "PONG <pid>:<thread alias>"
-			String[] strings = Util.split(line.substring(5),":");
+			
+			StringBuffer sb = new StringBuffer();
+			String pong = readUntil(PONG,sb);
+			
+			Debug.debug("got ping reply:"+pong);
+			Debug.debug("after skipping:"+sb.toString());
+			String[] strings = Util.split(pong,":");
 			this.pid=Long.parseLong(strings[0]);
 			this.processorThread=strings[1];
+			readUntil(OK);
 		}finally{
 			unlock();
 		}
@@ -538,7 +543,7 @@ public class SocketClient {
 				throw new PrologException("EndOfStream read while waiting for "
 						+ prefix);
 			}
-			Debug.debug("read: " + string);
+			
 			if (string.startsWith(SocketClient.ERROR)) {
 				throw new PrologException(
 						"Peer reported an error while waiting for " + prefix

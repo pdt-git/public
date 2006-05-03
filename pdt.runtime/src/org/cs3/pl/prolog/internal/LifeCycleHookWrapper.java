@@ -46,11 +46,12 @@ import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
 
-public class LifeCycleHookWrapper implements LifeCycleHook{
+public class LifeCycleHookWrapper implements LifeCycleHook2{
 	
 	String id;
 	/**things i depend on*/
@@ -135,6 +136,21 @@ public class LifeCycleHookWrapper implements LifeCycleHook{
 	    			Debug.report(t);
 		    }
 			Debug.info("exit beforeShutdown() on hook "+id);
+		}
+	}
+
+	public void onError(PrologInterface pif) {
+		//ignore dependencies, just do it.
+		if(hook!=null&&hook instanceof LifeCycleHook2){
+		    Debug.info("enter onError() on hook "+id);
+		    try{
+		    		((LifeCycleHook2)hook).onError(pif);
+		    }
+		    catch(Throwable t){
+	    			Debug.error("onError() failed for hook: "+id+", exception trace follows:");
+	    			Debug.report(t);
+		    }
+			Debug.info("exit onError() on hook "+id);
 		}
 	}
 

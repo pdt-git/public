@@ -272,4 +272,19 @@ public class HookHelper {
             
         }
     }
+
+	public void onError(AbstractPrologInterface interface1) {
+		HashMap cloned = null;
+        synchronized (hooks) {
+            batchUpdateHooks();
+            cloned = (HashMap) hooks.clone();
+            
+            for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
+                LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned.get(it
+                        .next());                
+                    h.onError(pif);
+                
+            }
+        }
+	}
 }

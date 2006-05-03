@@ -41,7 +41,6 @@
 
 package org.cs3.pl.prolog;
 
-import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -80,11 +79,11 @@ public interface PrologSession extends Disposable{
      *                    an abnormal condition was detected
      */
 
-    public Map query(String query) throws PrologException;
+    public Map query(String query) throws PrologException,PrologInterfaceException;
 
-    public Map queryOnce(String query) throws PrologException;
+    public Map queryOnce(String query) throws PrologException,PrologInterfaceException;
 
-    public List queryAll(String query) throws PrologException;
+    public List queryAll(String query) throws PrologException,PrologInterfaceException;
 
     /**
      * returns the next set of Bindings satisfying the last query.
@@ -105,7 +104,7 @@ public interface PrologSession extends Disposable{
      *                    an IO Error occured .
      */
 
-    public Map next() throws PrologException;
+    public Map next() throws PrologException,PrologInterfaceException;
 
     /**
      * explicitly ends the last query, discarding further results if any
@@ -124,7 +123,7 @@ public interface PrologSession extends Disposable{
      *                    a lower-level failure has occured while killing the query.
      */
 
-    public void endQuery() throws PrologException;
+    public void endQuery() throws PrologException,PrologInterfaceException;
 
    
 

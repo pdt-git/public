@@ -270,10 +270,14 @@ public class Debug {
 
 		public _RuntimeException(String message) {
 			cause=new RuntimeException();
+			this.message=message;
 		}
 
 		public Throwable fillInStackTrace() {
-			return cause.fillInStackTrace();
+			if(cause!=null){
+				cause.fillInStackTrace();
+			}
+			return this;
 		}
 
 		public String getLocalizedMessage() {

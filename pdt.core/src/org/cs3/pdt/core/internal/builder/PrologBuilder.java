@@ -55,12 +55,15 @@ import java.util.Set;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface2;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -72,6 +75,7 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
@@ -87,7 +91,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	}
 
 	private void build(IFile file, AsyncPrologSession as)
-			throws CoreException, IOException {
+			throws CoreException, PrologInterfaceException {
 
 		
 		File ioFile = file.getLocation().toFile();
@@ -155,7 +159,11 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 					if(monitor.isCanceled()){
 						new Thread(){
 							public void run() {
-								as.abort();
+								try {
+									as.abort();
+								} catch (PrologInterfaceException e) {
+									Debug.rethrow(e);
+								}
 								Debug.debug("prolog builder aborted (theoretically)");
 							}
 						}.start();
@@ -186,13 +194,18 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			return null;
 		} catch (OperationCanceledException e) {
 			throw e;
-		} catch (Throwable t) {
-			Debug.report(t);
-			return null;
+			
+		}catch (PrologInterfaceException e) {
+			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin.getDefault().getErrorMessageProvider(), e, PDTCore.ERR_PIF);
+			throw new CoreException(status);
+		}
+		catch (Throwable t) {
+			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin.getDefault().getErrorMessageProvider(), t, PDTCore.ERR_UNKNOWN);
+			throw new CoreException(status);
 		}
 	}
 
-	private void update_markers(Set buildList, PrologSession s) throws CoreException {
+	private void update_markers(Set buildList, PrologSession s) throws CoreException, PrologException, PrologInterfaceException {
 		StringBuffer sb = new StringBuffer();
 		sb.append('[');
 		boolean first=true;
@@ -242,9 +255,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @param v
 	 * @throws IOException
 	 * @throws CoreException
+	 * @throws PrologInterfaceException 
 	 */
 	private void build(Set v, AsyncPrologSession as,IProgressMonitor monitor)
-			throws CoreException, IOException {
+			throws CoreException, IOException, PrologInterfaceException {
 		
 		
 		for (Iterator it = v.iterator(); !monitor.isCanceled()&&it.hasNext();) {
@@ -267,9 +281,14 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				IResource.DEPTH_INFINITE);
 		IPrologProject plProject = (IPrologProject) getProject().getNature(
 				PDTCore.NATURE_ID);
-		AsyncPrologSession as = ((PrologInterface2)plProject.getMetadataPrologInterface()).getAsyncSession();
+		AsyncPrologSession as = null;
 		try {
+		as = ((PrologInterface2)plProject.getMetadataPrologInterface()).getAsyncSession();
+		
 			forget(forgetList, as,monitor);
+		} catch (PrologInterfaceException e) {
+			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin.getDefault().getErrorMessageProvider(), e, PDTCore.ERR_PIF);
+			throw new CoreException(status);
 		} finally {
 			if(as!=null){
 				as.dispose();
@@ -341,7 +360,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		});
 	}
 
-	private void forget(IFile file, AsyncPrologSession as) throws CoreException {
+	private void forget(IFile file, AsyncPrologSession as) throws CoreException, PrologInterfaceException {
 		file.deleteMarkers(IMarker.PROBLEM, true, 0);
 		
 		File ioFile = file.getLocation().toFile();
@@ -357,9 +376,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @param monitor 
 	 * @param forgetList
 	 * @throws CoreException
+	 * @throws PrologInterfaceException 
 	 */
 	private void forget(Set v, AsyncPrologSession as, IProgressMonitor monitor)
-			throws CoreException {
+			throws CoreException, PrologInterfaceException {
 		for (Iterator it = v.iterator(); it.hasNext();) {
 			IFile file = (IFile) it.next();
 			forget(file, as);

@@ -55,6 +55,8 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.internal.ATermFactory;
+import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -64,7 +66,7 @@ import org.cs3.pl.prolog.PrologSession;
 public class PLUtil {
 
 	public static void configureFileSearchPath(PrologLibraryManager mgr,
-			PrologSession session, String[] libIds) {
+			PrologSession session, String[] libIds) throws PrologException, PrologInterfaceException {
 
 		StringBuffer sb = new StringBuffer();
 		PrologLibrary[] required = getRequiredLibs(mgr, libIds);

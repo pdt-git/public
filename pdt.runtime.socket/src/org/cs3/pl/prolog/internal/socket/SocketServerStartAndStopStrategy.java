@@ -247,7 +247,7 @@ public class SocketServerStartAndStopStrategy implements
 	 * @see org.cs3.pl.prolog.ServerStartAndStopStrategy#stopServer(org.cs3.pl.prolog.IPrologInterface,
 	 *      boolean)
 	 */
-	public void stopServer(PrologInterface pipi, boolean now) {
+	public void stopServer(PrologInterface pipi) {
 		SocketPrologInterface pif = (SocketPrologInterface) pipi;
 		try {
 			if (Boolean
@@ -263,8 +263,9 @@ public class SocketServerStartAndStopStrategy implements
 						.info("There is no server running, afaics. So i wont stop anything.");
 				return;
 			}
-			SocketClient c = new SocketClient((String) null, port);
+			
 			try {
+				SocketClient c = new SocketClient((String) null, port);
 				c.readUntil(SocketClient.GIVE_COMMAND);
 				c.writeln(SocketClient.SHUTDOWN);
 				c.readUntil(SocketClient.BYE);
@@ -272,12 +273,11 @@ public class SocketServerStartAndStopStrategy implements
 			} catch (Exception e) {
 				Debug.warning("There was a problem during server shutdown.");
 				Debug.report(e);
-				if (!now) {
-					throw new RuntimeException(e.getMessage());
-				}
+				
 			}
 
 			pif.getLockFile().delete();
+			Debug.info("server process will be killed in 5 seconds.");
 			JackTheProcessRipper.getInstance().enqueue(serverProcess, 5000);
 			serverProcess = null;
 

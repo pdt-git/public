@@ -42,6 +42,7 @@
 package org.cs3.pl.metadata;
 
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterfaceException;
 
 
 /**
@@ -51,21 +52,21 @@ import org.cs3.pl.prolog.PrologException;
  */
 public interface IMetaInfoProvider {
 	
-	public abstract Clause[] findClauses(Predicate p);
+	public abstract Clause[] findClauses(Predicate p) throws PrologInterfaceException;
     
-	public abstract Predicate[] getPredicatesWithPrefix(String module, String prefix, String activeFileName) throws PrologException;
+	public abstract Predicate[] getPredicatesWithPrefix(String module, String prefix, String activeFileName) throws PrologException, NumberFormatException, PrologInterfaceException;
 	
-	public abstract Predicate[] getPredicatesWithPrefix(String string, String prefix) throws NumberFormatException, PrologException;
+	public abstract Predicate[] getPredicatesWithPrefix(String string, String prefix) throws NumberFormatException, PrologException, PrologInterfaceException;
 	
-	public abstract Clause[] retrievePrologElements(String filename) throws PrologException;
+	public abstract Clause[] retrievePrologElements(String filename) throws PrologException, PrologInterfaceException;
     
-	public abstract String getHelp(Predicate elm);
+	public abstract String getHelp(Predicate elm) throws PrologInterfaceException;
 	
 	public abstract SourceLocation[] findReferences(Predicate data);
 	
-	public abstract Predicate[] findPredicates(Goal data);
+	public abstract Predicate[] findPredicates(Goal data) throws PrologInterfaceException;
 	
-	public String getSummary(Predicate data) throws PrologException;
+	public String getSummary(Predicate data) throws PrologException, PrologInterfaceException;
 	
 	
 }

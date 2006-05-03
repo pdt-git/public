@@ -4,12 +4,13 @@ import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 
 import junit.framework.TestCase;
 
 public class XpceTest extends TestCase {
-	public void testXpce() throws IOException {
+	public void testXpce() throws  PrologInterfaceException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterface arsch = PrologInterfaceFactory.newInstance().create();
 		arsch.start();

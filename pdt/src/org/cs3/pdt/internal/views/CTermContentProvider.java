@@ -47,9 +47,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.PLUtil;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
@@ -57,6 +60,7 @@ import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession2;
 import org.eclipse.core.resources.IFile;
@@ -67,8 +71,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
 
 public class CTermContentProvider implements ITreeContentProvider,
-		 PrologInterfaceListener {
-
+		PrologInterfaceListener {
 
 	private Object[] data;
 
@@ -84,8 +87,6 @@ public class CTermContentProvider implements ITreeContentProvider,
 		viewer = outline;
 
 	}
-
-	
 
 	public Object[] getChildren(Object parentElement) {
 
@@ -162,7 +163,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 				setFile(null);
 				return;
 			}
-			
+
 			setFile(file);
 			viewer.refresh();
 
@@ -172,18 +173,29 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	private void setFile(IFile file) {
-		if(this.file!=null){
-			String plFile = Util.prologFileName(this.file.getLocation().toFile());
-			getPrologProject().getMetaDataEventDispatcher().removePrologInterfaceListener("file_annotation('"+plFile+"')", this);
-			
-		}
-		this.file = file;
-		if(file!=null){
-			String plFile = Util.prologFileName(this.file.getLocation().toFile());
-			getPrologProject().getMetaDataEventDispatcher().addPrologInterfaceListener("file_annotation('"+plFile+"')", this);
-		}
-		this.data = null;
+		try {
+			if (this.file != null) {
+				String plFile = Util.prologFileName(this.file.getLocation()
+						.toFile());
+				getPrologProject().getMetaDataEventDispatcher()
+						.removePrologInterfaceListener(
+								"file_annotation('" + plFile + "')", this);
 
+			}
+			this.file = file;
+			if (file != null) {
+				String plFile = Util.prologFileName(this.file.getLocation()
+						.toFile());
+				getPrologProject().getMetaDataEventDispatcher()
+						.addPrologInterfaceListener(
+								"file_annotation('" + plFile + "')", this);
+			}
+			this.data = null;
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+					viewer.getControl().getShell(), PDT.ERR_PIF, PDT.CX_UPDATING_OUTLINE, e);
+		}
 	}
 
 	private IPrologProject getPrologProject() {
@@ -191,27 +203,42 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	}
 
-	
-
 	private Object[] getData() {
 		if (data == null) {
-			update();
+			try {
+				update();
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+				UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+						.getErrorMessageProvider(), viewer.getControl()
+						.getShell(), PDT.ERR_PIF,
+						PDT.CX_GENERATING_OUTLINE_DATA, e);
+			}
 		}
 		return data;
 	}
 
 	private Clause[] getClauses(Predicate p) {
 		if (clauses == null) {
-			update();
+			try {
+				update();
+			} catch (PrologInterfaceException e) {
+				Debug.report(e);
+				UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+						.getErrorMessageProvider(), viewer.getControl()
+						.getShell(), PDT.ERR_PIF,
+						PDT.CX_GENERATING_OUTLINE_DATA, e);
+			}
 		}
 		List l = (List) clauses.get(p);
 		return (Clause[]) l.toArray(new Clause[l.size()]);
 	}
 
-	private void update() {
+	private void update() throws PrologInterfaceException {
 		clauses = new HashMap();
-		if(file==null){
-			Debug.warning("CTermContentProvider.update was called, but wsfile is null");
+		if (file == null) {
+			Debug
+					.warning("CTermContentProvider.update was called, but wsfile is null");
 			data = new Object[0];
 			return;
 		}
@@ -234,15 +261,15 @@ public class CTermContentProvider implements ITreeContentProvider,
 			Map map = s.queryOnce(query);
 			if (map == null) {
 				data = new Object[0];
-				Debug.warning("no annotation found for file "+plFile+".\n" +
-						"(failed query: \""+query+"\"");
+				Debug.warning("no annotation found for file " + plFile + ".\n"
+						+ "(failed query: \"" + query + "\"");
 				return;
 			}
 			CTerm membersTerm = (CTerm) map.get("Members");
 			CTerm annosTerm = (CTerm) map.get("Annos");
 			members = PLUtil.listAsArray(membersTerm);
 			fileAnnos = PLUtil.listAsMap(annosTerm);
-		}catch(Throwable t){				
+		} catch (Throwable t) {
 			Debug.report(t);
 			data = new Object[0];
 			return;
@@ -281,7 +308,8 @@ public class CTermContentProvider implements ITreeContentProvider,
 		if (sigterm != null) {
 			sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				module_transparent.add(new PredicateNode((CCompound) sigs[i], module));
+				module_transparent.add(new PredicateNode((CCompound) sigs[i],
+						module));
 			}
 		}
 		Vector tempData = new Vector();
@@ -322,8 +350,6 @@ public class CTermContentProvider implements ITreeContentProvider,
 		data = tempData.toArray();
 	}
 
-
-
 	public void update(final PrologInterfaceEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed()) {
 			return;
@@ -340,11 +366,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		data = null;
 		clauses = null;
 		viewer.refresh();
-		
+
 	}
-
-
-
-	
 
 }

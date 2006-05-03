@@ -58,6 +58,7 @@ import org.cs3.pl.metadata.PredicateData;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 /**
@@ -81,73 +82,20 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		this.pdtModulePrefix = prefix;
 	}
 
-	public static String makeFilenameSWIConform(String file) {
-		if (windowsPlattform)
-			return file.toLowerCase().replace('\\', '/');
-		return file;
-	}
-
-	public void consult(String filename) throws PrologException {
-
-		PrologSession session = pif.getSession();
-		session
-				.queryOnce("consult('" + makeFilenameSWIConform(filename)
-						+ "')");
-		session.dispose();
-	}
-
-	public boolean assertFact(String text) throws PrologException {
-		PrologSession session = pif.getSession();
-		Map r = session.queryOnce("assert(" + text + ")");
-		session.dispose();
-		return r != null;
-	}
-
-	public SourceLocation getLocation(String functor, int arity,
-			String contextFile) throws PrologException {
-		// return (SourceLocation) catchedCall(ROLE, "getLocation", new
-		// Object[]{
-		// functor, new Integer(arity), filename});
-		// if (!isCompleted())
-		// abort();
-		PrologSession session = pif.getSession();
-		Map solution = session.queryOnce(pdtModulePrefix + "get_file_pos('"
-				+ contextFile + "', " + functor + ", " + arity
-				+ ",File,Pos,_,_)," +
-				// lu: we want to know where this information come from, so we
-				// ask.
-				"( meta_data(File,_,_,_,_,_,_,_,_)," + "  Parsed=yes"
-				+ "; Parsed=no" + ")");
-		if (solution == null) {
-			session.dispose();
-			return null;
-		}
-		boolean parsed = "yes".equals(solution.get("Parsed"));
-		SourceLocation location = new SourceLocation(solution.get("File")
-				.toString(), parsed, !parsed);
-		location.file = solution.get("File").toString();
-		if (parsed) {
-			location.offset = Integer.parseInt(solution.get("Pos").toString());
-		} else {
-			location.line = Integer.parseInt(solution.get("Pos").toString());
-		}
-
-		Debug.debug("getLocation solution: " + location.file + ", "
-				+ location.line);
-		session.dispose();
-		return location;
-
-	}
+	
+	
+	
 
 	/**
 	 * @param file
 	 * @return
 	 * @throws PrologException
 	 * @throws NumberFormatException
+	 * @throws PrologInterfaceException 
 	 */
 
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix)
-			throws NumberFormatException, PrologException {
+			throws NumberFormatException, PrologException, PrologInterfaceException {
 		return getPredicatesWithPrefix(module, prefix, null);
 	}
 
@@ -165,9 +113,10 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 * @return
 	 * @throws PrologException
 	 * @throws NumberFormatException
+	 * @throws PrologInterfaceException 
 	 */
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
-			String filename) throws NumberFormatException, PrologException {
+			String filename) throws NumberFormatException, PrologException, PrologInterfaceException {
 		// return
 		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
 		PrologSession session = pif.getSession();
@@ -196,14 +145,14 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return (Predicate[]) list.toArray(new Predicate[0]);
 	}
 
-	public String getSummary(Predicate data) throws PrologException {
+	public String getSummary(Predicate data) throws PrologException, PrologInterfaceException {
 		String help = getHelp(data);
 		if (help == null)
 			return null;
 		return help.substring(0, help.indexOf('\n'));
 	}
 
-	public Clause[] retrievePrologElements(String file) throws PrologException {
+	public Clause[] retrievePrologElements(String file) throws PrologException, PrologInterfaceException {
 		PrologSession session = pif.getSession();
 
 		List results = session.queryAll(/*
@@ -235,7 +184,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return (Clause[]) list.toArray(new Clause[0]);
 	}
 
-	public String getHelp(Predicate data) {
+	public String getHelp(Predicate data) throws PrologInterfaceException {
 
 		PrologSession session = pif.getSession();
 		Map table = null;
@@ -257,7 +206,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return null;
 	}
 
-	public Clause[] findClauses(Predicate p) {
+	public Clause[] findClauses(Predicate p) throws PrologInterfaceException {
 		PrologSession session = pif.getSession();
 		try {
 			
@@ -303,7 +252,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 * Best we can do atm. :-(
 	 * 
 	 */
-	public Predicate[] findPredicates(Goal g) {
+	public Predicate[] findPredicates(Goal g) throws PrologInterfaceException {
 		Set result = new HashSet();
 		PrologSession session = pif.getSession();
 		try{

@@ -44,6 +44,7 @@ package org.cs3.pdt.runtime;
 import java.util.Set;
 
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 
 /**
  * Central registry for managing PrologInterface instances and Subscriptions.
@@ -143,13 +144,20 @@ public interface PrologInterfaceRegistry {
 	/**
 	 * Register a PrologInterface with this registry.
 	 * 
+	 * If another PrologInterface is already registered with this key,
+	 * it is removed first.
+	 * 
+	 * If the same PrologInterace is already registered with this key,
+	 * this method has no effect.
+	 * 
 	 * This method will cause a call to the method configure() on any waiting
 	 * subscriptions that are already registered for the given pifkey.
 	 * 
 	 * @param key
 	 * @param pif
+	 * @throws PrologInterfaceException 
 	 */
-	public void addPrologInterface(String key, PrologInterface pif);
+	public void addPrologInterface(String key, PrologInterface pif) ;
 
 	/**
 	 * Remove a PrologInterface from this registry.
@@ -164,10 +172,15 @@ public interface PrologInterfaceRegistry {
 	 * @param key
 	 * 
 	 */
-	public void removePrologInterface(String key);
+	public void removePrologInterface(String key) throws PrologInterfaceException;
 
 	/**
 	 * Add a subscription to the registry.
+	 * 
+	 * If there is already a Subscription with the same key, it will be removed
+	 * first.
+	 * 
+	 * If the same subscription is already registered, this method has no effect.
 	 * 
 	 * If there is already a PrologInterface instance registered for the
 	 * subscriptions pifKey, this method will cause a call to the method
@@ -178,8 +191,9 @@ public interface PrologInterfaceRegistry {
 	 * workbench shutdown and restore it on the next startup.
 	 * 
 	 * @param s
+	 * @throws PrologInterfaceException 
 	 */
-	public void addSubscription(Subscription s);
+	public void addSubscription(Subscription s) ;
 
 	/**
 	 * Remove a subscription from the registry.
@@ -189,6 +203,7 @@ public interface PrologInterfaceRegistry {
 	 * deconfigure() on the argument Subscription instance.
 	 * 
 	 * @param s
+	 * @throws PrologInterfaceException 
 	 */
 	public void removeSubscription(Subscription s);
 
@@ -199,6 +214,7 @@ public interface PrologInterfaceRegistry {
 	 * 
 	 * @see removeSubscription(Subscription)
 	 * @param id
+	 * @throws PrologInterfaceException 
 	 */
 	public void removeSubscription(String id);
 

@@ -59,6 +59,7 @@ import org.cs3.pdt.runtime.PrologLibrary;
 import org.cs3.pdt.runtime.PrologLibraryManager;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
@@ -68,6 +69,7 @@ import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -85,6 +87,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.activities.WorkbenchActivityHelper;
 
 /**
  */
@@ -93,8 +96,6 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private IProject project;
 
 	private Option[] options;
-
-	
 
 	private PrologInterface metadataPif;
 
@@ -112,17 +113,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * @see IProjectNature#configure
 	 */
 	public void configure() throws CoreException {
-		try {
-			Debug.debug("configure was called");
-			addBuilder(PDTCore.METADATA_BUILDER_ID);
-			addBuilder(PDTCore.PROLOG_BUILDER_ID);
-			
-			registerLibraries();
-			registerSubscriptions();
-		} catch (Throwable t) {
-			Debug.report(t);
-			throw new RuntimeException(t);
-		}
+
+		Debug.debug("configure was called");
+		addBuilder(PDTCore.METADATA_BUILDER_ID);
+		addBuilder(PDTCore.PROLOG_BUILDER_ID);
+
+		registerLibraries();
+
 	}
 
 	private void addBuilder(String builderId) throws CoreException {
@@ -142,25 +139,28 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		project.setDescription(descr, null);
 	}
 
-	private void registerLibraries() {
+	private void registerLibraries() throws CoreException {
 		HashMap libs = getPrologLibraries();
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+				.getLibraryManager();
 		for (Iterator it = libs.values().iterator(); it.hasNext();) {
 			PrologLibrary lib = (PrologLibrary) it.next();
 			mgr.addLibrary(lib);
 		}
-		
+
 	}
 
-	private void unregisterLibraries() {
+	private void unregisterLibraries() throws CoreException {
 		HashMap libs = getPrologLibraries();
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+				.getLibraryManager();
 		for (Iterator it = libs.values().iterator(); it.hasNext();) {
 			PrologLibrary lib = (PrologLibrary) it.next();
 			mgr.removeLibrary(lib);
 		}
-		
+
 	}
+
 	/**
 	 * @see IProjectNature#deconfigure
 	 */
@@ -299,85 +299,78 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public PrologInterface getMetadataPrologInterface() {
-		if (metadataPif == null) {			
-			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(getMetadataSubscription());
-			if (!metadataPif.isUp()) {
-				try {
-					metadataPif.start();
-				} catch (IOException e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
-				}
-			}
+		if (metadataPif == null) {
+			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(
+					getMetadataSubscription());
+			
 		}
 		return metadataPif;
 	}
 
 	public PrologInterface getRuntimePrologInterface() {
-		if (runtimePif == null) {			
-			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(getRuntimeSubscription());
-			if (!runtimePif.isUp()){ 
-				try {
-					runtimePif.start();
-				} catch (IOException e) {
-					Debug.report(e);
-					throw new RuntimeException(e);
-				}
-			}
+		if (runtimePif == null) {
+			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(
+					getRuntimeSubscription());
+			
 		}
 		return runtimePif;
 	}
-	protected void registerSubscriptions(){
-		//this should do the trick:
+
+	protected void registerSubscriptions() {
+		// this should do the trick:
 		getMetadataSubscription();
 		getRuntimeSubscription();
 	}
-	
-	protected void unregisterSubscriptions(){
-		//this should do the trick:
-		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+
+	protected void unregisterSubscriptions() throws PrologInterfaceException {
+		// this should do the trick:
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
 		r.removeSubscription(getMetadataSubscriptionKey());
 		r.removeSubscription(getRuntimeSubscriptionKey());
 	}
-	
-	
-	public Subscription getMetadataSubscription() {
+
+	public Subscription getMetadataSubscription()  {
 		String id = getMetadataSubscriptionKey();
 		String pifKey = getMetadataPrologInterfaceKey();
-		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-		if(metadataPifSubscription==null){
-			r.getSubscription(id); 
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
+		if (metadataPifSubscription == null) {
+			metadataPifSubscription=r.getSubscription(id);
 		}
-		if(metadataPifSubscription==null){
-			metadataPifSubscription=new MetadataSubscription(getProject().getName(),id,pifKey);
+		if (metadataPifSubscription == null) {
+			metadataPifSubscription = new MetadataSubscription(getProject()
+					.getName(), id, pifKey);
 			r.addSubscription(metadataPifSubscription);
 		}
-		
+
 		return metadataPifSubscription;
 	}
 
 	public Subscription getRuntimeSubscription() {
 		String id = getRuntimeSubscriptionKey();
-		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-		if(runtimePifSubscription==null){
-			r.getSubscription(id); 
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
+		if (runtimePifSubscription == null) {
+			runtimePifSubscription=r.getSubscription(id);
 		}
-		if(runtimePifSubscription==null){
-			String pifID=getRuntimePrologInterfaceKey();
+		if (runtimePifSubscription == null) {
+			String pifID = getRuntimePrologInterfaceKey();
 			String projectName = getProject().getName();
-			runtimePifSubscription = new RuntimeSubscription(projectName,id,pifID);
+			runtimePifSubscription = new RuntimeSubscription(projectName, id,
+					pifID);
 			r.addSubscription(runtimePifSubscription);
 		}
-		
+
 		return runtimePifSubscription;
-	}		
-	
+	}
+
 	private String getRuntimeSubscriptionKey() {
-		return getProject().getName()+".runtime_subscription";
+		return getProject().getName() + ".runtime_subscription";
 	}
 
 	private String getMetadataSubscriptionKey() {
-		return getProject().getName()+".metadata_subscription";
+		return getProject().getName() + ".metadata_subscription";
 	}
 
 	private String getRuntimePrologInterfaceKey() {
@@ -388,12 +381,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private String getMetadataPrologInterfaceKey() {
-		String value = getPreferenceValue(
-				PDTCore.PROP_METADATA_PIF_KEY, "%project%");
+		String value = getPreferenceValue(PDTCore.PROP_METADATA_PIF_KEY,
+				"%project%");
 		value = value.replaceAll("%project%", getProject().getName());
 		return value;
 	}
-	
+
 	public Option[] getOptions() {
 		if (options == null) {
 			options = new Option[] {
@@ -415,11 +408,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Regular expression - only matched files are considered prolog source code.",
 							Option.STRING, ".*\\.pl"),
 					new SimpleOption(
-									PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
-									"Exclusion Pattern",
-									"Regular expression - matching files are NOT considered prolog source code, even if \n" +
-									"they match the inclusion pattern above.",
-									Option.STRING, ""),							
+							PDTCore.PROP_SOURCE_EXCLUSION_PATTERN,
+							"Exclusion Pattern",
+							"Regular expression - matching files are NOT considered prolog source code, even if \n"
+									+ "they match the inclusion pattern above.",
+							Option.STRING, ""),
 					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
 							"Metadata PrologInterface",
@@ -470,7 +463,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
 							PDTCore.PROLOG_BUILDER_ID, null, monitor);
-					
+
 					Debug.debug("PDTReloadHook.afterInit: done: " + project);
 
 				} catch (OperationCanceledException opc) {
@@ -536,7 +529,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public void setPreferenceValue(String id, String value) {
-		
+
 		try {
 			getProject()
 					.setPersistentProperty(new QualifiedName("", id), value);
@@ -551,71 +544,69 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private void pifKeysChanged() {
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-		if(runtimePif!=null){
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
+		if (runtimePif != null) {
 			reg.removeSubscription(runtimePifSubscription);
-			runtimePifSubscription=null;
-			runtimePif=null;
-			
+			runtimePifSubscription = null;
+			runtimePif = null;
+
 		}
-		if(metadataPif!=null){			
+		if (metadataPif != null) {
 			reg.removeSubscription(metadataPifSubscription);
-			metadataPifSubscription=null;
-			metadataPif=null;
+			metadataPifSubscription = null;
+			metadataPif = null;
 		}
-		
+
 	}
 
 	public IMetaInfoProvider getMetaInfoProvider() {
-		return MetaInfoProviderFactory.newInstance().create(getMetadataPrologInterface());
+		return MetaInfoProviderFactory.newInstance().create(
+				getMetadataPrologInterface());
 	}
 
-	public String[] getPrologLibraryKeys() {
+	public String[] getPrologLibraryKeys() throws CoreException {
 
 		HashMap libs = getPrologLibraries();
-		
+
 		return (String[]) libs.keySet().toArray(new String[libs.size()]);
 	}
 
-	public HashMap getPrologLibraries() {
-		if(libraries==null){
+	public HashMap getPrologLibraries() throws CoreException {
+		if (libraries == null) {
 			createLibraries();
 			registerLibraries();
 		}
 		return libraries;
 	}
 
-	private void createLibraries() {
-		try {
-			Set s= getExistingSourcePathEntries();
-			libraries = new HashMap();
-			for (Iterator it = s.iterator(); it.hasNext();) {
-				IContainer c = (IContainer) it.next();
-				File f = c.getLocation().toFile();
-				String key = c.getFullPath().toString();
-				if(f!=null){
-					libraries.put(key,new DefaultPrologLibrary(
-						key,
-						new String[0], 		// TODO let user define dependencies
-						"library",
-						Util.prologFileName(f)	
-					));
-				}
+	private void createLibraries() throws CoreException {
+
+		Set s = getExistingSourcePathEntries();
+		libraries = new HashMap();
+		for (Iterator it = s.iterator(); it.hasNext();) {
+			IContainer c = (IContainer) it.next();
+			File f = c.getLocation().toFile();
+			String key = c.getFullPath().toString();
+			if (f != null) {
+				libraries.put(key, new DefaultPrologLibrary(key, new String[0], // TODO
+																				// let
+																				// user
+																				// define
+																				// dependencies
+						"library", Util.prologFileName(f)));
 			}
-			
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
 		}
+
 	}
 
-	public PrologEventDispatcher getMetaDataEventDispatcher() {
-		if(metaDataEventDispatcher==null){
-			metaDataEventDispatcher= new PrologEventDispatcher((PrologInterface2) getMetadataPrologInterface()); 
+	public PrologEventDispatcher getMetaDataEventDispatcher()
+			throws PrologInterfaceException {
+		if (metaDataEventDispatcher == null) {
+			metaDataEventDispatcher = new PrologEventDispatcher(
+					(PrologInterface2) getMetadataPrologInterface());
 		}
 		return metaDataEventDispatcher;
 	}
 
-	
-	
 }

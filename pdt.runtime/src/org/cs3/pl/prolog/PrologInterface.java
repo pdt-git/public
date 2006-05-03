@@ -63,20 +63,20 @@ public interface PrologInterface {
      * 
      * @return a new Session Object
      */
-    public abstract PrologSession getSession();
+    public abstract PrologSession getSession() throws PrologInterfaceException;
 
     /**
      * Stop the prolog system (if it is up).
      * This will terminate all running sessions and shut down the prolog process.
      * @throws IOException
      */
-    public abstract void stop() throws IOException;
+    public abstract void stop() throws PrologInterfaceException;
 
     /**
      * Starts the prolog system (if it is down).
      * @throws IOException
      */
-    public abstract void start() throws IOException;
+    public abstract void start() throws PrologInterfaceException;
 
     /**
      * checks wether the prologInterface is up and running.
@@ -136,4 +136,6 @@ public interface PrologInterface {
      * @param reconfigureHookId
      */
     public abstract void removeLifeCycleHook(String hookId);
+
+	
 }

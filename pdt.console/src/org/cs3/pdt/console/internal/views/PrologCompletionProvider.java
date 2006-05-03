@@ -40,6 +40,7 @@
  ****************************************************************************/
 
 package org.cs3.pdt.console.internal.views;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,53 +54,68 @@ import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PredicateData;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
-	
-    
-	private class _Result implements CompoletionResult{
 
-        public String getOriginalLineContent() {
-            return line;
-        }
-        public int getOriginalCaretPosition() {
-            return pos;
-        }
+	private class _Result implements CompoletionResult {
 
-    	public String[] getOptions() {
-    		if(options==null){
-    			return null;
-    		}
-    		String[] result = new String[options.size()];
-    		int i=0;
-    		for (Iterator it = options.iterator(); it.hasNext();i++) {
-    			String o = (String) it.next();
-    			result[i]=o;
-    		}
-    		return result;
-    	}
-        /* (non-Javadoc)
-         * @see org.cs3.pl.views.ConsoleCompletionProvider#getCaretPosition()
-         */
-        public int getNewCaretPosition() {
-        	return newPos;
-        }
-        /* (non-Javadoc)
-         * @see org.cs3.pl.views.ConsoleCompletionProvider#getNewLineContent()
-         */
-        public String getNewLineContent() {
-        	return newLine;
-        }
-        String line = null;
-        String newLine = null;
-        int newPos = -1;
-        TreeSet options = null;
-        int pos = -1;
-        
-    }
-	TreeSet completions=null;
+		public String getOriginalLineContent() {
+			return line;
+		}
+
+		public int getOriginalCaretPosition() {
+			return pos;
+		}
+
+		public String[] getOptions() {
+			if (options == null) {
+				return null;
+			}
+			String[] result = new String[options.size()];
+			int i = 0;
+			for (Iterator it = options.iterator(); it.hasNext(); i++) {
+				String o = (String) it.next();
+				result[i] = o;
+			}
+			return result;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.cs3.pl.views.ConsoleCompletionProvider#getCaretPosition()
+		 */
+		public int getNewCaretPosition() {
+			return newPos;
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see org.cs3.pl.views.ConsoleCompletionProvider#getNewLineContent()
+		 */
+		public String getNewLineContent() {
+			return newLine;
+		}
+
+		String line = null;
+
+		String newLine = null;
+
+		int newPos = -1;
+
+		TreeSet options = null;
+
+		int pos = -1;
+
+	}
+
+	TreeSet completions = null;
+
 	private PrologInterface pif;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -107,104 +123,114 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	 *      int)
 	 */
 	public CompoletionResult doCompletion(String line, int pos) {
-	    if(pif==null){
-	    	return null;
-	    }
-				_Result r = new _Result();
+		if (pif == null) {
+			return null;
+		}
+		_Result r = new _Result();
 		r.line = line;
-		r.pos=pos;		
-		String head = line.substring(0, pos);		
+		r.pos = pos;
+		String head = line.substring(0, pos);
 		String tail = line.substring(pos);
-		
+
 		String[] split = head.split("[^\\w]");
-        String prefix = split[split.length-1];
-		
+		String prefix = split[split.length - 1];
+
 		Predicate[] elems = null;
-		
+
 		try {
-			elems = getPredicatesWithPrefix(null, prefix,null);
+			elems = getPredicatesWithPrefix(null, prefix, null);
 			r.options = new TreeSet();
-			
+
 			completions = new TreeSet();
 			for (int i = 0; i < elems.length; i++) {
-				r.options.add(elems[i].getSignature() );
+				r.options.add(elems[i].getSignature());
 				completions.add(elems[i].getName());
 			}
 		} catch (NumberFormatException e) {
 			Debug.report(e);
 		} catch (PrologException e) {
 			Debug.report(e);
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
 		}
-		
-		String completion = completions==null||completions.isEmpty() ? "": (String) completions.first();
-		if(elems==null||elems.length==0){
-			r.newLine=line;
-			r.newPos=pos;			
+
+		String completion = completions == null || completions.isEmpty() ? ""
+				: (String) completions.first();
+		if (elems == null || elems.length == 0) {
+			r.newLine = line;
+			r.newPos = pos;
+		} else if (elems.length == 1) {
+			r.newLine = head + completion.substring(prefix.length()) + tail;
+			r.newPos = pos - prefix.length() + completion.length();
+		} else {
+			int commonLength = getCommonLength();
+			String commonPart = completion.substring(prefix.length(),
+					commonLength);
+			r.newLine = head + commonPart + tail;
+			r.newPos = pos - prefix.length() + commonLength;
 		}
-		else if(elems.length==1){			
-			r.newLine= head + completion.substring(prefix.length()) + tail;
-			r.newPos=pos-prefix.length()+completion.length();
-		}
-		else{
-			int commonLength = getCommonLength();			
-			String commonPart = completion.substring(prefix.length(), commonLength);
-			r.newLine=head + commonPart	+ tail;
-			r.newPos=pos-prefix.length()+commonLength;
-		}		
 		return r;
 	}
 
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
-			String filename) throws NumberFormatException, PrologException {
+			String filename) throws NumberFormatException, PrologException,
+			PrologInterfaceException {
 		// return
 		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
 		PrologSession session = pif.getSession();
+		try {
+			if (module == null)
+				module = "_";
+			if (filename == null)
+				filename = "_";
+			String query = "find_pred('" + filename + "','" + prefix + "', "
+					+ module + ",Name,Arity,Public)";
+			List results = session.queryAll(query);
+			List list = new ArrayList();
+			// while (result != null) {
+			for (Iterator it = results.iterator(); it.hasNext();) {
+				Map result = (Map) it.next();
+				boolean pub = Boolean.valueOf(result.get("Public").toString())
+						.booleanValue();
+				Predicate data = new PredicateData(module, result.get("Name")
+						.toString(), Integer.parseInt(result.get("Arity")
+						.toString()), pub, false, false);
+				list.add(data);
 
-		if (module == null)
-			module = "_";
-		if (filename == null)
-			filename = "_";
-		String query = "find_pred('"
-				+ filename + "','" + prefix + "', " + module
-				+ ",Name,Arity,Public)";
-		List results = session.queryAll(query);
-		List list = new ArrayList();
-		// while (result != null) {
-		for (Iterator it = results.iterator(); it.hasNext();) {
-			Map result = (Map) it.next();
-			boolean pub = Boolean.valueOf(result.get("Public").toString())
-					.booleanValue();
-			Predicate data = new PredicateData(module, result.get("Name")
-					.toString(), Integer.parseInt(result.get("Arity")
-					.toString()), pub, false, false);
-			list.add(data);
-
+			}
+			return (Predicate[]) list.toArray(new Predicate[0]);
+		} finally {
+			if (session != null) {
+				session.dispose();
+			}
 		}
-		session.dispose();
-		return (Predicate[]) list.toArray(new Predicate[0]);
+
 	}
-	//propably there is a smarter way of doing this...
+
+	// propably there is a smarter way of doing this...
 	int getCommonLength() {
 		int len = 1;
-		while(true){
-			
-			String first =(String)completions.first();
-			String last =(String)completions.last();
-			if(first.length()<len||last.length()<len){
+		while (true) {
+
+			String first = (String) completions.first();
+			String last = (String) completions.last();
+			if (first.length() < len || last.length() < len) {
 				break;
 			}
-			String a = first.substring(0,len);
-			String b = last.substring(0,len);
-			if(! a.equals(b)){
+			String a = first.substring(0, len);
+			String b = last.substring(0, len);
+			if (!a.equals(b)) {
 				break;
 			}
-			len ++;
+			len++;
 		}
-		return len -1;
+		return len - 1;
 	}
+
 	public void setPrologInterface(PrologInterface pif) {
-		this.pif=pif;		
+		this.pif = pif;
 	}
+
 	public PrologInterface getPrologInterface() {
 		return pif;
 	}

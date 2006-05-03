@@ -58,6 +58,7 @@ import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -65,6 +66,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -109,15 +111,13 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						monitor.beginTask("searching...",
 								IProgressMonitor.UNKNOWN);
 						String parser = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER,PDTCore.JAVACC);
-						if(PDTCore.JAVACC.equals(parser)){
-							run_old_impl(data,file);
-						}else{
+						
 							run_impl(data,file);
-						}
+						
 
 					} catch (Throwable e) {
 						Debug.report(e);
-						return Status.CANCEL_STATUS;
+						
 					} finally {
 						monitor.done();
 					}
@@ -136,53 +136,28 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	public void dispose() {
 	}
 
-	private void run_old_impl(Goal goal, IFile file) {
-		IPrologProject plprj;
-		try {
-			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
-		IMetaInfoProvider mip = plprj.getMetaInfoProvider();
-		Predicate[] predicates = mip.findPredicates(goal);
-		//FIXME: what about alternatives?
-		if(predicates==null||predicates.length==0){
-			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find predicate: " + goal.getName()
-							+ "/" //$NON-NLS-1$
-							+ goal.getArity()
-							+ ".\nSorry, Code analysis is still work in progress.");
-			return;
-		}
-		if(predicates.length>1){
-			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
-					+ goal.getName()+"/"+ goal.getArity()
-							+ ".\nSorry, Code analysis is still work in progress. " +
-									"For now i will just take you " +
-									"to the first match found.");
-		}
-		Clause[] clauses = mip.findClauses(predicates[0]);
-		if(clauses==null || clauses.length==0){
-			UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
-					"PDT Plugin", "Can't find clauses for predicate: " + goal.getName()
-							+ "/" //$NON-NLS-1$
-							+ goal.getArity()
-							+ ".\nSorry, Code analysis is still work in progress.");
-			return;
-		}
-		PDTUtils.showSourceLocation(clauses[0].getSourceLocation());
-	}
 	
-	private void run_impl(Goal goal, IFile file) {
+	
+	private void run_impl(Goal goal, IFile file) throws CoreException {
 		
-		SourceLocation loc = findFirstClausePosition(file,goal);
+		SourceLocation loc;
+		try {
+			loc = findFirstClausePosition(file,goal);
+			PDTUtils.showSourceLocation(loc);
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+			Shell shell = editor.getSite().getShell();
+			IPrologProject plprj;
+			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+			
+			
+			UIUtils.displayErrorDialog(shell, "PrologInterface Error", "The connection to the Prolog process was lost. ");
+		}
 		
-		PDTUtils.showSourceLocation(loc);
+		
 	}
 
-	private SourceLocation findFirstClausePosition(IFile file, Goal goal) {
+	private SourceLocation findFirstClausePosition(IFile file, Goal goal) throws PrologInterfaceException {
 		IPrologProject plprj;
 		try {
 			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);

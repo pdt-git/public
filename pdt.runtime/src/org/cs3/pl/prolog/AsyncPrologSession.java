@@ -41,6 +41,8 @@
 
 package org.cs3.pl.prolog;
 
+import java.io.IOException;
+
 import org.cs3.pl.common.OptionProvider;
 
 /**
@@ -83,7 +85,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 *            the query goal
 	 * @see AsyncPrologSessionListener
 	 */
-	public void queryAll(Object ticket, String query);
+	public void queryAll(Object ticket, String query) throws PrologInterfaceException;
 
 	/**
 	 * Enque a request for the first solution to a goal.
@@ -99,7 +101,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 *            the query goal
 	 * @see AsyncPrologSessionListener
 	 */
-	public void queryOnce(Object ticket, String query);
+	public void queryOnce(Object ticket, String query) throws PrologInterfaceException;
 
 	/**
 	 * Wait for pending queries.
@@ -114,7 +116,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * thread is waiting. Also note that another thread may abort the batch -
 	 * the marker will be processed nevertheless.
 	 */
-	public void join();
+	public void join() throws PrologInterfaceException;
 
 	/**
 	 * Abort the batch.
@@ -130,7 +132,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * application-specific manner.
 	 * 
 	 */
-	public void abort();
+	public void abort() throws PrologInterfaceException;
 
 	/**
 	 * Abort the batch, using a sepcific monitor as ticket.
@@ -160,7 +162,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * things happen in a certain order. You should overuse it in your
 	 * application. 
 	 */
-	public void abort(Object monitor);
+	public void abort(Object monitor) throws PrologInterfaceException;
 
 	/**
 	 * get the ticket used for the last abort request.
@@ -190,6 +192,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * 
 	 * While the batch is disposing, it is still possible to call join() and
 	 * abort(), Once the batch has been closed, this calls will have no effect.
+	 * @throws PrologInterfaceException 
 	 */
 	public void dispose();
 

@@ -39,49 +39,56 @@
  *   distributed.
  ****************************************************************************/
 
+/*
+ */
 package org.cs3.pl.prolog;
 
+import org.cs3.pl.common.Debug;
 
 /**
- * hook into the PIFs lifecycle.
+ * A PrologInterfaceException is thrown when a PrologInterface looses
+ * the connection to the prolog process due to an error.
  */
-public interface LifeCycleHook{
+public class PrologInterfaceException extends Exception {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1298404946804072338L;
+
+    
+
     /**
-     * called by the PrologInterface during startup phase.
-     * <br>
-     * This method executes on the same thread that starts the prolog interface.
-     * No interaction via regular PrologSessions will take place before
-     * this method is called on all registered LifeCycleHooks.
-     * <br><b>Important Note:</b> Only access the pif through the
-     * initSession argument. In particular, take care that this method
-     * does not indirectly trigger a call to PrologInterface.getSession() on the same thread,
-     * or you will very propably couse a dead lock. The initial session cannot be 
-     * disposed.  
-     * @param initSession safe-mode session for startup phase.
-     */
-	abstract void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException;
-	
-	/**
-     * called by the PrologInterface  after the startup is complete.
-     * <br>
-     * This method executes asynchronously to the thread that started
-     * the prolog interface. By the time it is called, the pif is guaranteed to be
-     * up and ready for normal operation (getSession() and friends).
-     * <br>
      * 
-     */	
-	abstract void afterInit(PrologInterface pif) throws PrologInterfaceException;
-	
-	/**
-     * called by the PrologInterface  before the pif shuts down.
-     * <br>
-     * This method is called on the same thread that stops the prolog interface.
-     * There are no other sessions running. (FIXME verify this!!)
-     * <br><b>Important Note:</b> Only access the pif through the
-     * initSession argument. In particular, take care that this method
-     * does not indirectly trigger a call to PrologInterface.getSession() on the same thread,
-     * or you will very propably couse a dead lock. The cleanup session cannot be 
-     * disposed.  
-     */		
-	abstract void beforeShutdown(PrologInterface pif,PrologSession session) throws PrologInterfaceException;	
+     */
+    public PrologInterfaceException() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param message
+     */
+    public PrologInterfaceException(String message) {
+        super(message);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param cause
+     */
+    public PrologInterfaceException(Throwable cause) {
+        super(cause);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public PrologInterfaceException(String message, Throwable cause) {
+        super(message, cause);
+        // TODO Auto-generated constructor stub
+    }
+
 }

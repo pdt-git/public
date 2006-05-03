@@ -39,49 +39,37 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog;
+
+package org.cs3.pdt.ui.util;
+
+import org.eclipse.core.runtime.Plugin;
 
 
-/**
- * hook into the PIFs lifecycle.
- */
-public interface LifeCycleHook{
-    /**
-     * called by the PrologInterface during startup phase.
-     * <br>
-     * This method executes on the same thread that starts the prolog interface.
-     * No interaction via regular PrologSessions will take place before
-     * this method is called on all registered LifeCycleHooks.
-     * <br><b>Important Note:</b> Only access the pif through the
-     * initSession argument. In particular, take care that this method
-     * does not indirectly trigger a call to PrologInterface.getSession() on the same thread,
-     * or you will very propably couse a dead lock. The initial session cannot be 
-     * disposed.  
-     * @param initSession safe-mode session for startup phase.
-     */
-	abstract void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException;
-	
-	/**
-     * called by the PrologInterface  after the startup is complete.
-     * <br>
-     * This method executes asynchronously to the thread that started
-     * the prolog interface. By the time it is called, the pif is guaranteed to be
-     * up and ready for normal operation (getSession() and friends).
-     * <br>
-     * 
-     */	
-	abstract void afterInit(PrologInterface pif) throws PrologInterfaceException;
-	
-	/**
-     * called by the PrologInterface  before the pif shuts down.
-     * <br>
-     * This method is called on the same thread that stops the prolog interface.
-     * There are no other sessions running. (FIXME verify this!!)
-     * <br><b>Important Note:</b> Only access the pif through the
-     * initSession argument. In particular, take care that this method
-     * does not indirectly trigger a call to PrologInterface.getSession() on the same thread,
-     * or you will very propably couse a dead lock. The cleanup session cannot be 
-     * disposed.  
-     */		
-	abstract void beforeShutdown(PrologInterface pif,PrologSession session) throws PrologInterfaceException;	
+public class DefaultErrorMessageProvider implements ErrorMessageProvider{
+
+	private String id;
+	private Plugin plugin;
+
+	public DefaultErrorMessageProvider(Plugin plugin) {
+		this.id =plugin.getBundle().getSymbolicName();
+		this.plugin=plugin;
+	}
+
+	public String getErrorMessage(int errCode) {
+		return "unknown error("+errCode+")";
+	}
+
+	public String getContextMessage(int cxCode) {
+		return "unknown error context("+cxCode+")";
+	}
+
+	public String getId() {
+
+		return id;
+	}
+
+	public Plugin getPlugin() {
+		return plugin;
+	}
+
 }

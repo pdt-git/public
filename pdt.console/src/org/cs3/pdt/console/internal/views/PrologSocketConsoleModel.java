@@ -92,34 +92,35 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 					boolean escaped = false;
 					for (int i = 0; i < count; i++) {
 						if (escaped) {
-							switch(buf[i]){
+							switch (buf[i]) {
 							case RAW_MODE_CHAR:
-//								 report what we have until mode switch:
+								// report what we have until mode switch:
 								ConsoleModelEvent cme = new ConsoleModelEvent(
 										PrologSocketConsoleModel.this, data
 												.toString(), false);
 								fireOutputEvent(cme);
 								// clear output buffer
 								data.setLength(0);
-								
 
 								setSingleCharMode(true);
 								break;
 							case COOKED_MODE_CHAR:
 							case NO_MODE_CHAR:
-								//disable single char mode again. should not be neccessary... 
+								// disable single char mode again. should not be
+								// neccessary...
 								setSingleCharMode(false);
 								break;
 							case ESCAPE_CHAR:
 								data.append(buf[i]);
 								break;
 							default:
-								//current default is to echo the escaped char.
+								// current default is to echo the escaped char.
 								data.append(buf[i]);
-							break;
+								break;
 							}
-							
-							// our "protocol" allows an optional newline after the escaped character. 
+
+							// our "protocol" allows an optional newline after
+							// the escaped character.
 							// If its there, we skip it silently.
 							if (i + 1 < count && buf[i + 1] == '\n') {
 								i++;
@@ -135,16 +136,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 						}
 					}
 
-//					try {
-//						/*
-//						 * FIXME: UGLY
-//						 */
-//						Thread.sleep(1);
-//					} catch (InterruptedException e) {
-//						Debug.report(e);
-//						throw new RuntimeException(e);
-//					}
-					if (!reader.ready() ||	data.length() >= 500) {
+					if (!reader.ready() || data.length() >= 500) {
 						if (data == null) {
 							throw new IOException("readLine() returned null");
 						}
@@ -160,13 +152,13 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 					}
 					count = reader.read(buf);
 
-				}//while(count>0)
+				}
 
-			} catch (IOException e) {
+			} catch (Throwable e) {
 				Debug.report(e);
-				throw new RuntimeException(e);
-			}
 
+			}
+			disconnect();
 			Debug.info("Console Reader Thread terminating");
 		}
 
@@ -189,6 +181,8 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	private Vector expansions = new Vector();
 
 	private File serverLockFile;
+
+	private boolean disconnecting;
 
 	public PrologSocketConsoleModel() {
 		this.port = 5567;
@@ -319,8 +313,8 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	protected void setSingleCharMode(boolean on) {
-		if(on!=this.singleCharMode){
-			this.singleCharMode = on;		
+		if (on != this.singleCharMode) {
+			this.singleCharMode = on;
 			fireModeChange(new ConsoleModelEvent(this, on));
 		}
 	}
@@ -368,18 +362,17 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 							"false");
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
-//				writer.write("use_module(library(single_char_interceptor)).\n"
-//						+ "sd_install,"
-//						+ "set_stream(current_output,tty(true)),"
-//						+ "set_stream(current_input,tty(true)).\n");
-				writer.write("use_module(library(single_char_interceptor)).\n" +
-						"sci_install.\n"
+				// writer.write("use_module(library(single_char_interceptor)).\n"
+				// + "sd_install,"
+				// + "set_stream(current_output,tty(true)),"
+				// + "set_stream(current_input,tty(true)).\n");
+				writer.write("use_module(library(single_char_interceptor)).\n"
+						+ "sci_install.\n"
 						+ "set_stream(current_output,tty(true)),"
 						+ "set_stream(current_input,tty(true)).\n");
-			}
-			else{
-//				writer.write("set_stream(current_output,tty(true)),"
-//						+ "set_stream(current_input,tty(true)).\n");
+			} else {
+				// writer.write("set_stream(current_output,tty(true)),"
+				// + "set_stream(current_input,tty(true)).\n");
 			}
 			writer.flush();
 			Debug.debug("Connect complete");
@@ -400,28 +393,32 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	public synchronized void disconnect() {
-		Debug.debug("Disconnect began");
-		synchronized (this) {
-			try {
-				if (socket != null) {
-//					writer.write("sd_uninstall.\n");
-//					writer.flush();
-					writer.write("end_of_file.\n");
-					writer.flush();
-					// writer.close();
-					readerThread.join(10000);
-					socket.close();
-				}
-			} catch (IOException e) {
-				Debug.report(e);
-			} catch (InterruptedException e) {
-				Debug.report(e);
-			}
-
-			socket = null;
-			writer = null;
-			readerThread = null;
+		if(disconnecting){
+			return;
 		}
+		disconnecting=true;
+		Debug.debug("Disconnect began");
+		fireBeforeDisconnect();
+
+		try {
+			if (socket != null) {
+				// writer.write("sd_uninstall.\n");
+				// writer.flush();
+				writer.write("end_of_file.\n");
+				writer.flush();
+				// writer.close();
+				readerThread.join(10000);
+				socket.close();
+			}
+		} catch (IOException e) {
+			Debug.report(e);
+		} catch (InterruptedException e) {
+			Debug.report(e);
+		}
+
+		socket = null;
+		writer = null;
+		readerThread = null;
 
 		ConsoleModelEvent cme = new ConsoleModelEvent(this,
 				"<<< (Not an) ERROR: Connection to Prolog Process closed >>>",
@@ -430,6 +427,23 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		fireOutputEvent(cme);
 
 		Debug.debug("Disconnect complete");
+		disconnecting=false;
+	}
+
+	private void fireBeforeDisconnect() {
+
+		ConsoleModelEvent e = new ConsoleModelEvent(this);
+		HashSet l;
+
+		synchronized (listeners) {
+			l = (HashSet) listeners.clone();
+		}
+
+		for (Iterator i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = (ConsoleModelListener) i.next();
+			list.beforeDisconnect(e);
+		}
+
 	}
 
 	void fireOutputEvent(ConsoleModelEvent cme) {

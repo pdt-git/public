@@ -53,6 +53,7 @@ import junit.framework.TestCase;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -79,14 +80,14 @@ public class PrologSessionTest extends TestCase {
     protected void tearDown() throws Exception {
         pif.stop();
     }
-	public void testCreation(){
+	public void testCreation() throws PrologInterfaceException{
 		PrologSession ss = pif.getSession();
 		
 		assertNotNull(ss);
 		ss.dispose();
 	}
 	
-	public void testQueries() throws PrologException{
+	public void testQueries() throws PrologException, PrologInterfaceException{
 		PrologSession ss = pif.getSession();
 		
 		assertNotNull(ss.query("assert(a(b))"));
@@ -126,7 +127,7 @@ public class PrologSessionTest extends TestCase {
 		assertNotNull(ss.query("v(x)"));
 	}
 	
-	public void testDispose() throws PrologException  {
+	public void testDispose() throws PrologException, PrologInterfaceException  {
 		PrologSession ss = pif.getSession();
 		
 		ss.dispose();
@@ -140,7 +141,7 @@ public class PrologSessionTest extends TestCase {
 		fail("Exception thrown on disposed object");
 	}
 	
-	public void testMultipleQuery() throws PrologException {
+	public void testMultipleQuery() throws PrologException, PrologInterfaceException {
 		PrologSession server = pif.getSession(); 
 		
         //ClientConnection connection= new ClientConnectionStub();
@@ -168,8 +169,9 @@ public class PrologSessionTest extends TestCase {
 	
 	/**
      * this one fails if the pif impl does not support lists
+	 * @throws PrologInterfaceException 
      */
-    public void testList() {
+    public void testList() throws PrologInterfaceException {
        PrologSession s = pif.getSession();
        Map map = s.queryOnce("A=[1,2,3,[[a,b,['{}']]],[b,c]]");
        

@@ -63,6 +63,7 @@ import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 
 import org.cs3.pl.prolog.PrologSession2;
@@ -81,11 +82,11 @@ public class SocketSession implements PrologSession2 {
 
 	private String lastQuery;
 
-	private PrologInterface pif;
+	private SocketPrologInterface pif;
 
 	private CTermFactory ctermFactory = new ATermFactory();
 
-	public SocketSession(SocketClient client, PrologInterface pif) {
+	public SocketSession(SocketClient client, SocketPrologInterface pif) {
 		this.client = client;
 		this.pif = pif;
 	}
@@ -103,8 +104,11 @@ public class SocketSession implements PrologSession2 {
 			client.lock();
 			client.close();
 		} catch (IOException e) {
-			Debug.report(e);
-			throw new RuntimeException(e.getMessage());
+			try {
+				pif.handleException(e);
+			} catch (PrologInterfaceException e1) {
+				;
+			}
 		} finally {
 			client.unlock();
 			client = null;
@@ -116,7 +120,7 @@ public class SocketSession implements PrologSession2 {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#query(java.lang.String)
 	 */
-	public Map query(String query) throws PrologException {
+	public Map query(String query) throws PrologException, PrologInterfaceException {
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
@@ -150,8 +154,9 @@ public class SocketSession implements PrologSession2 {
 
 		} catch (IOException e) {
 			client.unlock();
-			throw new PrologException("got io trouble. last query was: "
-					+ lastQuery, e);
+			solution=null;
+			pif.handleException(e);
+			
 		}
 		if (solution == null) {
 			endQuery();
@@ -164,7 +169,7 @@ public class SocketSession implements PrologSession2 {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#queryAll(java.lang.String)
 	 */
-	public List queryAll(String query) throws PrologException {
+	public List queryAll(String query) throws PrologException, PrologInterfaceException {
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
@@ -204,8 +209,8 @@ public class SocketSession implements PrologSession2 {
 			}
 			return results;
 		} catch (IOException e) {
-			throw new PrologException("got io problems. last query was: "
-					+ lastQuery, e);
+			pif.handleException(e);
+			return null;
 		} finally {
 			client.unlock();
 		}
@@ -218,7 +223,7 @@ public class SocketSession implements PrologSession2 {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#queryOnce(java.lang.String)
 	 */
-	public Map queryOnce(String query) throws PrologException {
+	public Map queryOnce(String query) throws PrologException, PrologInterfaceException {
 		Map result = query(query);
 		endQuery();
 		return result;
@@ -229,7 +234,7 @@ public class SocketSession implements PrologSession2 {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#next()
 	 */
-	public Map next() throws PrologException {
+	public Map next() throws PrologException, PrologInterfaceException {
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
@@ -246,8 +251,7 @@ public class SocketSession implements PrologSession2 {
 				endQuery();
 			}
 		} catch (IOException e) {
-			throw new PrologException("got io problems. last query was: "
-					+ lastQuery, e);
+			pif.handleException(e);
 		} finally {
 			client.unlock();
 		}
@@ -399,89 +403,14 @@ public class SocketSession implements PrologSession2 {
 		return value;
 	}
 
-	/**
-	 * @return
-	 * @throws IOException
-	 * @throws PrologException
-	 */
-	private Hashtable read_solution_old() throws PrologException, IOException {
-		client.lock();
-		Hashtable result = new Hashtable();
-		try {
-			while (true) {
-
-				String line = client.readln();
-				// Debug.debug("parsing: "+line);
-				if (line == null) {
-					throw new PrologException("don't know what to do.");
-				}
-				if (line.startsWith(SocketClient.ERROR)) {
-					throw new PrologException("Peer reported an error:"
-							+ line.substring(SocketClient.ERROR.length())
-							+ "\n" + "Last query was: " + lastQuery);
-				}
-				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
-					return result;
-				}
-				if (SocketClient.NO.equals(line)) {// no
-					// further
-					// solutions
-					return null;
-				}
-				if (SocketClient.OK.equals(line)) {// no
-					// further
-					// solutions
-					return null;
-				}
-				if (!(line.charAt(0) == '<')) {
-					throw new RuntimeException("expected '<' at begin of line");
-				}
-
-				StringBuffer buf = new StringBuffer(line);
-				// make sure we read the complete binding
-				Debug.debug("first line: " + line);
-				while (!line.endsWith(">")) {
-					line = client.readln();
-					buf.append("\n" + line);
-					Debug.debug("appended: " + line);
-				}
-				line = buf.toString();
-
-				// read the variable name
-				int start = 1;
-				int end = line.indexOf('>');
-				if (end < start) {
-					throw new RuntimeException("ill-formated solution line: "
-							+ line);
-				}
-				String name = Util.unescape(line, start, end);
-
-				// read the variable value
-				start = line.indexOf('<', end) + 1;
-				if (start < end) {
-					throw new RuntimeException("ill-formated solution line: "
-							+ line);
-				}
-				end = line.indexOf('>', start);
-				if (end < start) {
-					throw new RuntimeException("ill-formated solution line: "
-							+ line);
-				}
-				String value = Util.unescape(line, start, end);
-				result.put(name, value);
-
-			}
-		} finally {
-			client.unlock();
-		}
-	}
+	
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#endQuery()
 	 */
-	public void endQuery() throws PrologException {
+	public void endQuery() throws PrologException, PrologInterfaceException {
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
@@ -493,7 +422,7 @@ public class SocketSession implements PrologSession2 {
 			while (true) {
 				String line = client.readln();
 				if (line == null) {
-					throw new PrologException("don't know what to do.");
+					pif.handleException(new IllegalStateException("don't know what to do."));
 				}
 				if (SocketClient.MORE.equals(line)) {
 					client.writeln(SocketClient.NO);
@@ -507,7 +436,7 @@ public class SocketSession implements PrologSession2 {
 				}
 			}
 		} catch (IOException e) {
-			throw new PrologException(e);
+			pif.handleException(e);
 		} finally {
 			// this is no typo!
 			// we need to release lock TWO times:
@@ -542,24 +471,7 @@ public class SocketSession implements PrologSession2 {
 		this.dispatcher = dispatcher;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#consult(java.lang.String)
-	 */
-	public boolean consult(String name) {
-		boolean windowsPlattform = System.getProperty("os.name").indexOf(
-				"Windows") > -1;
-		if (windowsPlattform) {
-			name = name.replace('\\', '/');
-		}
-		Map r = query("consult('" + name + "')");
-		if (r != null && dispatcher != null) {
-			dispatcher.update(new PrologInterfaceEvent(this,
-					PrologInterface.SUBJECT_CONSULTED, name));
-		}
-		return r != null;
-	}
+	
 
 	/*
 	 * (non-Javadoc)
@@ -613,6 +525,10 @@ public class SocketSession implements PrologSession2 {
 		} else {
 			throw new IllegalArgumentException("unkown option id: " + id);
 		}
+	}
+
+	public SocketClient getClient() {
+		return client;
 	}
 
 }

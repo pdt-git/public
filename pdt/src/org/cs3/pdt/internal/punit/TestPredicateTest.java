@@ -45,7 +45,9 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 public class TestPredicateTest extends TestCase {
@@ -62,7 +64,7 @@ public class TestPredicateTest extends TestCase {
 		this.adapter = adapter;
 	}
 	
-	protected void runTest() {
+	protected void runTest() throws PrologException, PrologInterfaceException {
 		String resultString = "";
 		boolean failed = false;
 		PrologSession session = null;

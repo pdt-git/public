@@ -42,6 +42,7 @@
 package org.cs3.pdt.runtime;
 
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.ui.IWorkbench;
 
 /**
@@ -111,8 +112,10 @@ public interface PrologContextTracker {
 	 * 
 	 * @return the PrologInterface or null, if the tracker thinks that none is
 	 *         active.
+	 * @throws PrologInterfaceException 
+	 * @throws PrologInterfaceException 
 	 */
-	public PrologInterface getCurrentPrologInterface();
+	public PrologInterface getCurrentPrologInterface() ;
 
 	/**
 	 * initialize the tracker.

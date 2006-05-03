@@ -69,14 +69,8 @@ public interface ServerStartAndStopStrategy {
      * 
      * @param pif
      *                    the IPrologInterface for which the server should be stopped.
-     * @param now
-     *                    Normaly we should allow the server process to terminate
-     *                    gracefully. if this flag is set, the implementation should
-     *                    forget all politeness and "simply do it". This is ment as a
-     *                    hint. Wether this flag has any effect depends on the concrete
-     *                    implementation.
      */
-    public void stopServer(PrologInterface pif, boolean now);
+    public void stopServer(PrologInterface pif);
 
     /**
      * @param interface1

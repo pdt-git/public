@@ -47,6 +47,8 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
@@ -56,6 +58,14 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class PDTCorePlugin extends AbstractUIPlugin {
 
+	private ErrorMessageProvider errorMessageProvider;
+
+	public ErrorMessageProvider getErrorMessageProvider() {
+		if(errorMessageProvider==null){
+			errorMessageProvider=new DefaultErrorMessageProvider(this);
+		}
+		return errorMessageProvider;
+	}
 	
 	private ResourceBundle resourceBundle;
 
