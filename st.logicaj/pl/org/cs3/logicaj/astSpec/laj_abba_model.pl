@@ -1,3 +1,12 @@
+:- multifile abba:node/3.
+:- dynamic abba:node/3.
+
+:- dynamic abba:property/2.
+:- multifile abba:property/2.
+
+:- dynamic abba:edge/4.
+:- multifile abba:edge/4.
+
 /**
  * Specification of the LogicAJ abba nodes.
  *
