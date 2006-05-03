@@ -155,10 +155,10 @@ public class SocketServerStartAndStopStrategy implements
 		System.arraycopy(args, 0, commandArray, command.length, args.length);
 		
 		Map env=new HashMap();
-		if(Util.isJava5()){
-			env.putAll(System.getenv());
-		}
-		
+//		if(Util.isJava5()){
+//			env.putAll(System.getenv());
+//		}
+//		
 		String[] envarray = Util.split(envstring, ",");
 		for (int i = 0; i < envarray.length; i++) {
 			String[] mapping = Util.split(envarray[i],"=");
