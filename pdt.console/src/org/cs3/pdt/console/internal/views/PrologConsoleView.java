@@ -62,15 +62,12 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.console.ConsoleHistory;
 import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.ConsoleModelEvent;
-import org.cs3.pl.console.ConsoleModelListener;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.console.prolog.PrologConsoleEvent;
 import org.cs3.pl.console.prolog.PrologConsoleListener;
-import org.cs3.pl.metadata.MetaInfoProviderFactory;
-import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -237,13 +234,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 									IProgressMonitor.UNKNOWN);
 
 							try {
-								if (currentPif != null) {
-									currentPif.stop();
+								if (getPrologInterface() != null) {
+									getPrologInterface().stop();
 								}
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
-								if (currentPif != null) {
-									currentPif.start();
+								if (getPrologInterface() != null) {
+									getPrologInterface().start();
 								}
 							}
 						} catch (Throwable e) {
@@ -280,10 +277,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private ConsoleViewer viewer;
 
-	// private PrologSocketConsoleModel model;
-
-	private PrologCompletionProvider completionProvider;
-
 	private Composite partControl;
 
 	private Vector listeners = new Vector();
@@ -310,7 +303,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private RestartAction restartAction;
 
-	private NewConsoleHistory history;
+	// private NewConsoleHistory history;
 
 	private SelectPifAction pifSelector;
 
@@ -377,7 +370,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	}
 
-	private void loadHistory() {
+	private void loadHistory(NewConsoleHistory history) {
 
 		try {
 			FileInputStream in = new FileInputStream(getHistoryFile());
@@ -607,7 +600,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		for (Iterator it = models.keySet().iterator(); it.hasNext();) {
 			PrologInterface pif = (PrologInterface) it.next();
 			try {
-				detachFromPif(pif);
+				disconnect(pif);
 				removeHooks(pif);
 			} catch (Throwable e) {
 				Debug.report(e);
@@ -673,13 +666,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	public void afterInit(PrologInterface pif) {
 		// viewer.setController(controller);
 		try {
-			attachToPif(pif);
+			connect(pif);
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);// not much we can do.
-			
+
 			UIUtils.logError(PrologConsolePlugin.getDefault()
-					.getErrorMessageProvider(),
-					PDTConsole.ERR_PIF,
+					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
 					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
 		}
 		// if(pif==currentPif){
@@ -694,23 +686,26 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
 	 */
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
-		saveHistory();
-		detachFromPif(pif);
-		if (pif == currentPif) {
-			viewerStates.put(pif, viewer.saveState());
-		}
+		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
+		saveHistory(history);
+		disconnect(pif);
+//		if (pif == getPrologInterface()) {
+//			viewerStates.put(pif, viewer.saveState());
+//		}
 	}
 
 	public void onError(PrologInterface pif) {
-		saveHistory();
-		detachFromPif(pif);
-		if (pif == currentPif) {
-			viewerStates.put(pif, viewer.saveState());
-		}
+		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
+		saveHistory(history);
+		disconnect(pif);
+		
 
 	}
 
-	private void saveHistory() {
+	private void saveHistory(NewConsoleHistory history) {
+		if (history == null) {
+			return;
+		}
 		try {
 			FileOutputStream out = new FileOutputStream(getHistoryFile());
 			history.saveHistory(out);
@@ -721,32 +716,28 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	}
 
 	public ConsoleModel getModel() {
-		return (ConsoleModel) (currentPif == null ? null : models
-				.get(currentPif));
+		return (ConsoleModel) (getPrologInterface() == null ? null : models
+				.get(getPrologInterface()));
 	}
 
 	public PrologInterface getPrologInterface() {
 		return currentPif;
 	}
 
-	public void setPrologInterface(PrologInterface newPif)
-			 {
+	public void setPrologInterface(PrologInterface newPif) {
 		if (currentPif != null) {
 			viewerStates.put(currentPif, viewer.saveState());
 		}
-		PrologInterface oldPif = this.currentPif;
-		this.currentPif = newPif;
+		currentPif = newPif;
 		if (currentPif != null) {
 			addHooks(currentPif);
 			try {
-				attachToPif(currentPif);
+				connect(currentPif);
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
-				currentPif=oldPif;
-				
-				UIUtils.logAndDisplayError(PrologConsolePlugin.getDefault()
-						.getErrorMessageProvider(), getViewSite().getShell(),
-						PDTConsole.ERR_PIF,
+
+				UIUtils.logError(PrologConsolePlugin.getDefault()
+						.getErrorMessageProvider(), PDTConsole.ERR_PIF,
 						PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
 			}
 			reconfigureViewer(currentPif);
@@ -762,85 +753,67 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	/*
 	 * note: implementation should take into account, that this method might be
 	 * called several times for the same pif, even during one single life cycle.
+	 * 
+	 * attach means: ensure a model exsists for this pif. ensure the model is
+	 * connected. console only attach to a pif that is in UP state.
+	 * 
 	 */
-	private void attachToPif(final PrologInterface pif)
+	private void connect(final PrologInterface pif)
 			throws PrologInterfaceException {
 
 		PrologSocketConsoleModel model = (PrologSocketConsoleModel) models
 				.get(pif);
 		if (model == null) {
 			model = new PrologSocketConsoleModel(false);
-			model.addConsoleListener(new ConsoleModelListener(){
 
-				public void onOutput(ConsoleModelEvent e) {
-				;	
-				}
-
-				public void onEditBufferChanged(ConsoleModelEvent e) {
-				;	
-				}
-
-				public void onCommit(ConsoleModelEvent e) {
-				;	
-				}
-
-				public void onModeChange(ConsoleModelEvent e) {
-				;	
-				}
-
-				public void afterConnect(ConsoleModelEvent e) {
-				;	
-				}
-
-				public void beforeDisconnect(ConsoleModelEvent e) {
-					detachFromPif(pif);
-				}
-				
-			});
 			models.put(pif, model);
 		}
 		if (model.isConnected()) {
 			return;
 		}
-		PrologSession session = pif.getSession();
-		PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
-				.getLibraryManager(), session,
-				new String[] { PDTConsole.PL_LIBRARY });
-		Map m = null;
-		try {
-			m = session.queryOnce("use_module(library(pdt_console_server)),"
-					+ "pdt_current_console_server(Port,LockFile)");
-
-			if (m == null) {
-				startServer(pif, session);
+		//if (pif.isUp()) {
+			PrologSession session = pif.getSession();
+			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
+					.getLibraryManager(), session,
+					new String[] { PDTConsole.PL_LIBRARY });
+			Map m = null;
+			try {
 				m = session
-						.queryOnce("pdt_current_console_server(Port,LockFile)");
-				;
-			}
-			if (m == null) {
-				// now we really have a problem
-				throw new RuntimeException("could not install console server");
-			}
-		} finally {
-			if (session != null) {
-				session.dispose();
-			}
-		}
-		int port = Integer.parseInt(m.get("Port").toString());
-		File lockFile = new File((String) m.get("LockFile"));
+						.queryOnce("use_module(library(pdt_console_server)),"
+								+ "pdt_current_console_server(Port,LockFile)");
 
-		model.setPort(port);
-		model.setLockFile(lockFile);
-		model.connect();
+				if (m == null) {
+					startServer(pif, session);
+					m = session
+							.queryOnce("pdt_current_console_server(Port,LockFile)");
+					;
+				}
+				if (m == null) {
+					// now we really have a problem
+					throw new RuntimeException(
+							"could not install console server");
+				}
+			} finally {
+				if (session != null) {
+					session.dispose();
+				}
+			}
+			int port = Integer.parseInt(m.get("Port").toString());
+			File lockFile = new File((String) m.get("LockFile"));
 
+			model.setPort(port);
+			model.setLockFile(lockFile);
+			model.connect();
+		//}
 	}
 
-	private void detachFromPif(PrologInterface pif) {
+	private void disconnect(PrologInterface pif) {
 		PrologSocketConsoleModel model = (PrologSocketConsoleModel) models
 				.get(pif);
 		if (model == null) {
 			return;
 		}
+
 		model.disconnect();
 
 	}
@@ -866,8 +839,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			});
 			return;
 		}
-		if (pif == null || !pif.isUp()) {
-			viewer.getControl().setEnabled(false);
+		if (pif == null ) {
+
 			viewer.setModel(null);
 			viewer.setHistory(null);
 			viewer.setCompletionProvider(null);
@@ -880,28 +853,26 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		if (savedState == null) {
 			viewer.clearOutput();
 			viewer.setModel((ConsoleModel) models.get(pif));
-			completionProvider = new PrologCompletionProvider();
+			PrologCompletionProvider completionProvider = new PrologCompletionProvider();
 			completionProvider.setPrologInterface(pif);
 			viewer.setCompletionProvider(completionProvider);
-			history = new NewConsoleHistory();
+			NewConsoleHistory history = new NewConsoleHistory();
 			viewer.setHistory(history);
-			loadHistory();
+			loadHistory(history);
 		} else {
 			viewer.loadState(savedState);
 		}
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
-		String label = reg.getName(key);
-		label = label == null ? key : label;
-		title.setText(label);
+		title.setText(key);
 		boolean useEnter = Boolean.valueOf(
 				PrologConsolePlugin.getDefault().getPreferenceValue(
 						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
 				.booleanValue();
 
 		viewer.setEnterSendsSemicolon(useEnter);
-		viewer.getControl().setEnabled(true);
+
 	}
 
 	public void addPrologConsoleListener(PrologConsoleListener l) {

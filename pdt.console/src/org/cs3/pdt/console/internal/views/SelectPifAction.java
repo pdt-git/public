@@ -193,6 +193,7 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	private void createAction(Menu menu, final PrologInterfaceRegistry reg, final String key) {
 		IAction action = new Action(key,IAction.AS_RADIO_BUTTON){
 			public void run() {
+				if(this.isChecked())
 				setPrologInterface(PrologRuntimePlugin.getDefault().getPrologInterface(key));
 			}
 

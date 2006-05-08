@@ -478,7 +478,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 	
-	private void exitBatch() throws IOException{
+	private void exitBatch() throws IOException, PrologInterfaceException{
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call exitBatch() from dispatch thread");
 		}
@@ -486,7 +486,18 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		try{
 			client.writeln(SocketClient.EOB);
 			
-			dispatcher.join();
+			dispatcher.join(pif.getTimeout());
+			if(dispatcher.isAlive()){
+				Debug.error("Dispatcher won't die. Trying to abort it.");
+				abort();
+				dispatcher.join(pif.getTimeout());
+				if(dispatcher.isAlive()){
+					Debug.error("Thread is still alive. I will not longer wait for it.");					
+				}
+			}
+			synchronized (listeners) {
+				listeners.clear();
+			}
 			client.readUntil(SocketClient.OK);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);			
@@ -633,6 +644,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			} catch (PrologInterfaceException e1) {
 				;
 			}
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
 		} finally {
 			client.unlock();
 			client = null;

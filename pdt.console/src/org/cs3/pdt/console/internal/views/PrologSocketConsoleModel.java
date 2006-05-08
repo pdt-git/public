@@ -137,9 +137,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 					}
 
 					if (!reader.ready() || data.length() >= 500) {
-						if (data == null) {
-							throw new IOException("readLine() returned null");
-						}
+						
 						if (data.length() > 0) {
 							ConsoleModelEvent cme = new ConsoleModelEvent(
 									PrologSocketConsoleModel.this, data
@@ -147,9 +145,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 							fireOutputEvent(cme);
 							data.setLength(0);
 						}
-					} else {
-						Debug.warning("READER NOT READY");
-					}
+					} 
 					count = reader.read(buf);
 
 				}
@@ -376,6 +372,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			}
 			writer.flush();
 			Debug.debug("Connect complete");
+			fireAfterConnect();
 		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException();
@@ -392,42 +389,62 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		disconnect();
 	}
 
-	public synchronized void disconnect() {
-		if(disconnecting){
+	public void disconnect() {
+		if (disconnecting||!isConnected()) {
 			return;
 		}
-		disconnecting=true;
-		Debug.debug("Disconnect began");
-		fireBeforeDisconnect();
+		synchronized (this) {
 
-		try {
-			if (socket != null) {
-				// writer.write("sd_uninstall.\n");
-				// writer.flush();
-				writer.write("end_of_file.\n");
-				writer.flush();
-				// writer.close();
-				readerThread.join(10000);
-				socket.close();
+			disconnecting = true;
+			Debug.debug("Disconnect began");
+			fireBeforeDisconnect();
+
+			try {
+				if (socket != null) {
+					// writer.write("sd_uninstall.\n");
+					// writer.flush();
+					writer.write("end_of_file.\n");
+					writer.flush();
+					// writer.close();
+					if(Thread.currentThread()!=readerThread){
+						readerThread.join(10000);
+					}
+					socket.close();
+				}
+			} catch (IOException e) {
+				Debug.report(e);
+			} catch (InterruptedException e) {
+				Debug.report(e);
 			}
-		} catch (IOException e) {
-			Debug.report(e);
-		} catch (InterruptedException e) {
-			Debug.report(e);
+
+			socket = null;
+			writer = null;
+			readerThread = null;
+
+			ConsoleModelEvent cme = new ConsoleModelEvent(
+					this,
+					"<<< (Not an) ERROR: Connection to Prolog Process closed >>>",
+					true);
+
+			fireOutputEvent(cme);
+
+			Debug.debug("Disconnect complete");
+			disconnecting = false;
+		}
+	}
+
+	private void fireAfterConnect() {
+		ConsoleModelEvent e = new ConsoleModelEvent(this);
+		HashSet l;
+
+		synchronized (listeners) {
+			l = (HashSet) listeners.clone();
 		}
 
-		socket = null;
-		writer = null;
-		readerThread = null;
-
-		ConsoleModelEvent cme = new ConsoleModelEvent(this,
-				"<<< (Not an) ERROR: Connection to Prolog Process closed >>>",
-				true);
-
-		fireOutputEvent(cme);
-
-		Debug.debug("Disconnect complete");
-		disconnecting=false;
+		for (Iterator i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = (ConsoleModelListener) i.next();
+			list.afterConnect(e);
+		}
 	}
 
 	private void fireBeforeDisconnect() {

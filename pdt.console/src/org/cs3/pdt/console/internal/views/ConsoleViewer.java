@@ -345,11 +345,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	
 	public void loadState(SavedState s){
 		thatWasMe=true;
-		setCompletionProvider(null);
-		setHistory(null);
-		setModel(null);
-		startOfInput=0;
-		control.setText("");
 		
 		startOfInput=s.startOfInput;
 		control.setText(s.contents);
@@ -892,5 +887,20 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	public int getStartOfInput() {
 		return startOfInput;
+	}
+
+	public void setEnabled(final boolean b) {
+		if(Display.getCurrent() == control.getDisplay()) {
+			ui_setEnabled(b);
+		} else {
+			control.getDisplay().asyncExec(new Runnable(){
+
+				public void run() {
+					ui_setEnabled(b);
+				}
+				
+			});
+		}
+		
 	}
 }
