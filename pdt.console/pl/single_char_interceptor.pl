@@ -39,7 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- module(single_char_interceptor,[sci_install/0]).
+:- module(single_char_interceptor,[arch_lib_name/1,sci_install/0, sci_setting/2]).
 
 :- prolog_load_context(directory,A), user:assert(file_search_path(foreign,A)).
 
@@ -117,11 +117,15 @@ sci_load:-
     ;	load_foreign_library(foreign(LibName))
     ).
 
-lib_name(LibName):-
+arch_lib_name(LibName):-
     current_prolog_flag(shared_object_extension,Ext),
     current_prolog_flag(arch,Arch),
     sci_setting(cio_base_name,Base),
-    concat_atom([Base,Arch,Ext],'.',LibName),
+    concat_atom([Base,Arch,Ext],'.',LibName).
+
+
+lib_name(LibName):-
+    arch_lib_name(LibName),
     expand_file_search_path(foreign(LibName),A),
     exists_file(A),
     !.
