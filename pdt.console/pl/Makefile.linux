@@ -39,16 +39,19 @@
 #    distributed.                                                        #
 ##########################################################################
 
-LIBNAME=custom_io
-OBJ= $(LIBNAME).o
+SO= $(shell xpce -qt [libname],full_name)
+BASE= $(shell xpce -qt [libname],base_name)
+OBJ= $(BASE).o
 SRC= $(OBJ:.o=.c)
+SWI_HOME="/usr/local/lib/pl-5.6.11"
 
-all: $(LIBNAME).so
+all: $(SO)
 clean: 
 	rm $(OBJ)
-	rm $(LIBNAME).so
-$(LIBNAME).so: $(OBJ)
-	gcc  -Wall -g -shared -o $(LIBNAME).so $(OBJ)
+	rm $(SO)
 
-$(LIBNAME).o: $(LIBNAME).c
-	gcc -Wall -g -I/usr/local/lib/pl-5.6.11/include -fPIC -c $(LIBNAME).c
+$(SO): $(OBJ)
+	gcc  -Wall -g -shared -o $(SO) $(OBJ)
+
+$(OBJ): $(SRC)
+	gcc -Wall -g -I$(SWI_HOME)/include -fPIC -c $(SRC)

@@ -39,21 +39,26 @@
 #    distributed.                                                        #
 ##########################################################################
 
-LIBNAME=custom_io
-OBJ= $(LIBNAME).o
+SO= $(shell xpce -qt [libname],full_name)
+BASE= $(shell xpce -qt [libname],base_name)
+OBJ= $(BASE).o
 SRC= $(OBJ:.o=.c)
+MACOSX_DEPLOYMENT_TARGET="10.4"
+SWI_HOME="/opt/local/lib/swipl-5.6.12"
 
-all: $(LIBNAME).dylib
 
-prepare:
-	export MACOSX_DEPLOYMENT_TARGET=10.4
+all: $(SO)
+
+ 
 clean: 
 	rm $(OBJ)
-	rm $(LIBNAME).dylib
+	rm $(SO)
 
-$(LIBNAME).dylib: prepare $(OBJ)
-	gcc  -Wall -g -undefined dynamic_lookup -dynamiclib -o $(LIBNAME).dylib $(OBJ)
+$(SO): $(OBJ)
+	export MACOSX_DEPLOYMENT_TARGET
+	gcc  -Wall -g -undefined dynamic_lookup -dynamiclib -o $(SO) $(OBJ)
 
-$(LIBNAME).o: $(LIBNAME).c
-	gcc -Wall -g -I/opt/local/lib/swipl-5.6.12/include -fpic -c $(LIBNAME).c
+$(OBJ): $(SRC)
+	export MACOSX_DEPLOYMENT_TARGET
+	gcc -Wall -g -I$(SWI_HOME)/include -fpic -c $(SRC)
 
