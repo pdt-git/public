@@ -42,14 +42,11 @@
 package org.cs3.pdt.console.internal.views;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
-import org.cs3.pdt.runtime.PrologInterfaceRegistryListener;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.prolog.PrologInterface;
@@ -57,7 +54,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
@@ -65,12 +61,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.internal.ide.dialogs.UpdateProjectCapabilityWizard;
 
 public abstract  class SelectPifAction extends Action implements IMenuCreator,
 		IWorkbenchWindowPulldownDelegate2{
