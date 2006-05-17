@@ -406,6 +406,17 @@ statementType(whileLoopT).
 
 statement(Id) :- tree(Id, _, Type), statementType(Type). 
 
+
+
+% ma
+declarationType(classDefT).
+declarationType(methodDefT).
+declarationType(fieldDefT).
+
+declaration(Id) :- tree(Id, _, Type), declarationType(Type). 
+
+
+
 /*validReferenceType(_type, _pos, _validtypes) :-
     (_type == identT, 
     	(_pos == 5, _validtypes == [classDefT, localDefT, paramDefT, fieldDefT]));
