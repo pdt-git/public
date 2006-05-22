@@ -46,12 +46,16 @@ import java.lang.ref.WeakReference;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface2;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 public abstract class AbstractPrologInterface2 extends AbstractPrologInterface implements PrologInterface2{
 	 public abstract AsyncPrologSession getAsyncSession_impl() throws Throwable;
 
-	    public AsyncPrologSession getAsyncSession() {
+	    public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
+	    		if(DOWN==getState()){
+				start();
+			}
 	        synchronized (stateLock) {
 	            if(START_UP==getState()){
 	                if(theThreadWhoDidIt==Thread.currentThread()){
