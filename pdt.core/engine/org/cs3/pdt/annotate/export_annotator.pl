@@ -43,5 +43,11 @@
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 file_pre_annotation_hook(_,_,[H|_],In,[defines_module(Module), exports(SortedExports)|In]):-
-    pdt_strip_annotation(H,':-'(module(Module,Exports)),_),
+    pdt_strip_annotation(H,':-'(module(Module,Exports)),_),    
     sort(Exports,SortedExports).
+    
+    
+%check_exports(In,Out):-
+%	pdt_subterm(In,[1,2],ST),
+%	pdt_term_annotation(ST,Exports,_),
+%	pdt_check_exports_list(Exports,CheckedExports

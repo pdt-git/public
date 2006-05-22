@@ -43,15 +43,80 @@
 	pdt_strip_annotation/3,
 	pdt_splice_annotation/3,
 	pdt_top_annotation/2,
-	pdt_term_annotation/3
+	pdt_term_annotation/3,
+	pdt_subterm/3,
+	pdt_aterm/1,
+	pdt_aterm_visit/3
 ]).
+
+pdt_aterm(aterm(_,_)).
+
+
+%pdt_aterm_visit(+InTerm,!Goal,-ContextVar,-OutTerm)
+%constructs a modified version of InTerm in top-down fashion.
+%
+%- ContextBefore is unified with the respective visitor context 
+%  (see pdt_aterm_visitor_context/3.
+%- Goal is called. It should unify ContextAfter with a modified version of ContextBefore, or it should
+%  fail to indicate that subterm should not be modified.
+%- If Goal succeeded, ContextAfter is used to create a modified version of subterm.
+%- If Goal succeeded, the arguments of the modified version are visited.
+%	
+%The resulting term is unified with OutTerm.
+%
+%pdt_aterm_visit(InTerm,Goal,CxBefore,CxAfter,OutTerm):-
+%    context_init(InTerm,CxBefore),
+%    (	Goal
+%    	->	process_subterm(InTerm,CxAfter,NextTerm),
+%    		process_args(NextTerm,Goal,CxAfter,OutTerm)
+%    	;	InTerm=OutTerm
+%    	).
+%    	
+%process_args(InTerm,Goal,CxParent,OutTerm):-
+%    pdt_term_annotation(InTerm,Term,Annotation),
+%    Term =.. [Functor|InArgs].
+%    process_args(InArgs,Goal,CxParent,OutArgs),
+%    Out =[Functor|OutArgs]
+    
+    	
+
+%pdt_subterm(+Term,+Path,?Subterm).
+%succeeds if Term is a term or an annotated term and Path is a list of integers
+%such that if each element of Path is interpreted as an argument position, Path induces a
+%path from Term to (annotated or not annotated) sub term SubTerm.
+pdt_subterm(Term,[], Term).
+pdt_subterm(ATerm,Path,SubTerm):-
+	pdt_aterm(ATerm),
+	!,
+	pdt_term_annotation(ATerm,Term,_),
+	pdt_subterm(Term,Path,SubTerm).
+pdt_subterm(Term,[ArgNum|ArgNums],SubTerm):-
+	compound(Term),
+	arg(ArgNum,Term,ArgVal),
+	pdt_subterm(ArgVal,ArgNums,SubTerm).
+	    
+
+pdt_subst(InTerm,[], OutTerm,OutTerm).
+pdt_subst(InATerm,Path,SubATerm,OutATerm):-
+	pdt_aterm(ATerm),
+	pdt_aterm(SubATerm),
+	!,
+	pdt_term_annotation(InATerm,InTerm,Anno),
+	pdt_subst(InTerm,Path,SubATerm,OutTerm),
+	pdt_term_annotation(OutATerm,OutTerm,Anno).
+pdt_subst(InTerm,[ArgNum|ArgNums],SubTerm,OutTerm):-
+	compound(InTerm),
+	arg(ArgNum,InTerm,ArgVal),
+	pdt_subst(ArgVal,ArgNums,SubTerm).
+    
+
 
 %@deprecated: use pdt_term_annotation/3
 pdt_top_annotation(aterm(A,_),A).
 
 %pdt_term_annotation(?AnnotatedTerm,?Term,?Annotation).
 % succeeds if AnnotatedTerm is an annotated term, Annotation is the top annotation, and
-% Term is the unwrapped toplevel (its arguments are still annotated).
+% Term is the unwrapped toplevel with annotated argument terms.
 pdt_term_annotation(aterm(A,T),T,A).
 
 pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
