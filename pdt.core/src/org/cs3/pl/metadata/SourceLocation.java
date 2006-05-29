@@ -41,6 +41,8 @@
 
 package org.cs3.pl.metadata;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -128,6 +130,11 @@ public final class SourceLocation implements Serializable, Comparable {
 		this.file = file;
 		this.isWorkspacePath = isWorkspacePath;
 		this.isRowBased = isRowBased;
+	}
+	
+	public SourceLocation(File file,
+			boolean isRowBased) throws IOException {
+		this(file.getCanonicalPath(),false,isRowBased);
 	}
 
 	public String toString() {
