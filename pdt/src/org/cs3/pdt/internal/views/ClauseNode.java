@@ -41,6 +41,9 @@
 
 package org.cs3.pdt.internal.views;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
@@ -51,16 +54,19 @@ import org.eclipse.core.resources.IFile;
 
 public class ClauseNode implements Clause{
 	CTerm term;
-	IFile file;
+	
 	private SourceLocation loc;
 	PredicateNode predicate;
-	public ClauseNode(CTerm term, IFile file) {		
+	public ClauseNode(CTerm term, IFile file) throws IOException {		
+		this(term,file.getLocation().toFile());
+	}
+	public ClauseNode(CTerm term, File file) throws IOException {		
 		this.term = term;
-		this.file = file;
+	
 		CCompound posterm = (CCompound) term.getAnotation("position");
 		int from = ((CInteger)posterm.getArgument(0)).getIntValue();
 		int to = ((CInteger)posterm.getArgument(1)).getIntValue();
-		loc = new SourceLocation(file.getFullPath().toString(),true,false);
+		loc = new SourceLocation(file,false);
 		loc.offset=from;
 		loc.endOffset=to;
 		CCompound anno = (CCompound) term.getAnotation("clause_of");

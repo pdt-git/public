@@ -41,28 +41,18 @@
 
 package org.cs3.pdt.internal.views;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.io.IOException;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.metadata.Clause;
-import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologSession2;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -73,41 +63,34 @@ import org.eclipse.ui.IFileEditorInput;
 public class CTermContentProvider implements ITreeContentProvider,
 		PrologInterfaceListener {
 
-	private Object[] data;
+	
 
 	private IFile file;
 
 	private IPrologProject plProject;
 
-	private HashMap clauses;
+	
 
 	private Viewer viewer;
 
+	private CTermContentProviderBackend backend;
+	
 	public CTermContentProvider(Viewer outline) {
 		viewer = outline;
-
+		backend = new CTermContentProviderBackend();
+		
 	}
 
 	public Object[] getChildren(Object parentElement) {
-
-		if (parentElement instanceof CCompound) {
-			CCompound compound = (CCompound) parentElement;
-			Object[] children = new Object[compound.getArity()];
-			for (int i = 0; i < children.length; i++) {
-				children[i] = compound.getArgument(i);
-			}
-			return children;
-		} else if (parentElement instanceof Predicate) {
-			Predicate p = (Predicate) parentElement;
-			return getClauses(p);
-		} else if (parentElement instanceof ClauseNode) {
-			ClauseNode c = (ClauseNode) parentElement;
-			return new CTerm[] { c.term };
-		} else if (parentElement instanceof DirectiveNode) {
-			DirectiveNode d = (DirectiveNode) parentElement;
-			return new CTerm[] { d.term };
+		try {
+			return backend.getChildren(parentElement);
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getControl().getShell(),
+					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
+			return new Object[0];
 		}
-		return getData();
 	}
 
 	public Object getParent(Object element) {
@@ -115,10 +98,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	public boolean hasChildren(Object parentElement) {
-		return parentElement instanceof CCompound
-				|| parentElement instanceof Predicate
-				|| parentElement instanceof ClauseNode
-				|| parentElement instanceof DirectiveNode;
+		return backend.hasChildren(parentElement);
 
 	}
 
@@ -174,28 +154,36 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	private void setFile(IFile file) {
 		try {
-			if (this.file != null) {
-				String plFile = Util.prologFileName(this.file.getLocation()
-						.toFile());
+			if (this.file!= null) {
 				getPrologProject().getMetaDataEventDispatcher()
 						.removePrologInterfaceListener(
-								"file_annotation('" + plFile + "')", this);
-
+								"file_annotation('" + getPlFile() + "')", this);
+				backend.setPif(null);
 			}
-			this.file = file;
+			this.file=file;
+			backend.setFile(file.getLocation().toFile());
 			if (file != null) {
-				String plFile = Util.prologFileName(this.file.getLocation()
-						.toFile());
 				getPrologProject().getMetaDataEventDispatcher()
 						.addPrologInterfaceListener(
-								"file_annotation('" + plFile + "')", this);
+								"file_annotation('" + getPlFile() + "')", this);
+				backend.setPif(getPrologProject().getMetadataPrologInterface());
 			}
-			this.data = null;
+			
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-					viewer.getControl().getShell(), PDT.ERR_PIF, PDT.CX_UPDATING_OUTLINE, e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getControl().getShell(),
+					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
+		} catch (IOException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getControl().getShell(),
+					PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_OUTLINE, e);
 		}
+	}
+
+	private String getPlFile() {
+		return file==null?null:Util.prologFileName(file.getLocation().toFile());
 	}
 
 	private IPrologProject getPrologProject() {
@@ -203,153 +191,11 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	}
 
-	private Object[] getData() {
-		if (data == null) {
-			try {
-				update();
-			} catch (PrologInterfaceException e) {
-				Debug.report(e);
-				UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-						.getErrorMessageProvider(), viewer.getControl()
-						.getShell(), PDT.ERR_PIF,
-						PDT.CX_GENERATING_OUTLINE_DATA, e);
-			}
-		}
-		return data;
-	}
+	
 
-	private Clause[] getClauses(Predicate p) {
-		if (clauses == null) {
-			try {
-				update();
-			} catch (PrologInterfaceException e) {
-				Debug.report(e);
-				UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-						.getErrorMessageProvider(), viewer.getControl()
-						.getShell(), PDT.ERR_PIF,
-						PDT.CX_GENERATING_OUTLINE_DATA, e);
-			}
-		}
-		List l = (List) clauses.get(p);
-		return (Clause[]) l.toArray(new Clause[l.size()]);
-	}
+	
 
-	private void update() throws PrologInterfaceException {
-		clauses = new HashMap();
-		if (file == null) {
-			Debug
-					.warning("CTermContentProvider.update was called, but wsfile is null");
-			data = new Object[0];
-			return;
-		}
-		String plFile = Util.prologFileName(file.getLocation().toFile());
-		plProject = getPrologProject();
-		PrologSession2 s = (PrologSession2) plProject
-				.getMetadataPrologInterface().getSession();
-		CTerm[] members = null;
-		Map fileAnnos = null;
-		String module = null;
-
-		HashSet exported = new HashSet();
-		HashSet dynamic = new HashSet();
-		HashSet multifile = new HashSet();
-		HashSet module_transparent = new HashSet();
-		try {
-			s.setPreferenceValue("socketsession.canonical", "true");
-			String query = "current_file_annotation('" + plFile
-					+ "',Annos,Members)";
-			Map map = s.queryOnce(query);
-			if (map == null) {
-				data = new Object[0];
-				Debug.warning("no annotation found for file " + plFile + ".\n"
-						+ "(failed query: \"" + query + "\"");
-				return;
-			}
-			CTerm membersTerm = (CTerm) map.get("Members");
-			CTerm annosTerm = (CTerm) map.get("Annos");
-			members = PLUtil.listAsArray(membersTerm);
-			fileAnnos = PLUtil.listAsMap(annosTerm);
-		} catch (Throwable t) {
-			Debug.report(t);
-			data = new Object[0];
-			return;
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-		}
-		CTerm moduleTerm = (CTerm) fileAnnos.get("defines_module");
-		module = moduleTerm == null ? "user" : moduleTerm.getFunctorValue();
-
-		CTerm[] sigs = null;
-
-		CTerm sigterm = (CTerm) fileAnnos.get("exports");
-		if (sigterm != null) {
-			sigs = PLUtil.listAsArray(sigterm);
-			for (int i = 0; i < sigs.length; i++) {
-				exported.add(new PredicateNode((CCompound) sigs[i], module));
-			}
-		}
-		sigterm = (CTerm) fileAnnos.get("dynamic");
-		if (sigterm != null) {
-			sigs = PLUtil.listAsArray(sigterm);
-			for (int i = 0; i < sigs.length; i++) {
-				dynamic.add(new PredicateNode((CCompound) sigs[i], module));
-			}
-		}
-		sigterm = (CTerm) fileAnnos.get("multifile");
-		if (sigterm != null) {
-			sigs = PLUtil.listAsArray(sigterm);
-			for (int i = 0; i < sigs.length; i++) {
-				multifile.add(new PredicateNode((CCompound) sigs[i], module));
-			}
-		}
-		sigterm = (CTerm) fileAnnos.get("transparent");
-		if (sigterm != null) {
-			sigs = PLUtil.listAsArray(sigterm);
-			for (int i = 0; i < sigs.length; i++) {
-				module_transparent.add(new PredicateNode((CCompound) sigs[i],
-						module));
-			}
-		}
-		Vector tempData = new Vector();
-
-		for (int i = 0; i < members.length; i++) {
-			CTerm term = members[i];
-			if (term.getAnotation("clause_of") == null) {
-				tempData.add(new DirectiveNode(file, module, term));
-			} else {
-				Clause clause = new ClauseNode(term, file);
-				Predicate predicate = clause.getPredicate();
-				List l = (List) clauses.get(predicate);
-				if (l == null) {
-					l = new Vector();
-					clauses.put(predicate, l);
-					tempData.add(predicate);
-					if (exported.contains(predicate)) {
-						predicate.setPredicateProperty(Predicate.EXPORTED,
-								"true");
-					}
-					if (dynamic.contains(predicate)) {
-						predicate.setPredicateProperty(Predicate.DYNAMIC,
-								"true");
-					}
-					if (multifile.contains(predicate)) {
-						predicate.setPredicateProperty(Predicate.MULTIFILE,
-								"true");
-					}
-					if (module_transparent.contains(predicate)) {
-						predicate.setPredicateProperty(
-								Predicate.MODULE_TRANSPARENT, "true");
-					}
-				}
-				l.add(clause);
-
-			}
-		}
-		data = tempData.toArray();
-	}
-
+	
 	public void update(final PrologInterfaceEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed()) {
 			return;
@@ -363,8 +209,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		data = null;
-		clauses = null;
+		backend.reset();
 		viewer.refresh();
 
 	}

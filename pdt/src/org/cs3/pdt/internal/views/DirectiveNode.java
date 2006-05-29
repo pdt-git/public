@@ -41,6 +41,9 @@
 
 package org.cs3.pdt.internal.views;
 
+import java.io.File;
+import java.io.IOException;
+
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
@@ -71,18 +74,20 @@ public class DirectiveNode implements Directive{
 	public int hashCode() {
 		return getSourceLocation().hashCode();
 	}
-	public DirectiveNode(IFile file, String contextModule,CTerm term){
+	public DirectiveNode(IFile file, String contextModule,CTerm term) throws IOException{
+		this(file.getLocation().toFile(),contextModule,term);
+	}
+	public DirectiveNode(File file, String contextModule,CTerm term) throws IOException{
 		this.term = term;
 		this.contextModule=contextModule;
 		CCompound posterm = (CCompound) term.getAnotation("position");
 		int from = ((CInteger)posterm.getArgument(0)).getIntValue();
 		int to = ((CInteger)posterm.getArgument(1)).getIntValue();
-		loc = new SourceLocation(file.getFullPath().toString(),true,false);
+		loc = new SourceLocation(file,false);
 		loc.offset=from;
 		loc.endOffset=to;
 		goal = new GoalNode(contextModule,((CCompound)term).getArgument(0));
 	}
-	
 	public SourceLocation getSourceLocation() {		
 		return loc;
 	}

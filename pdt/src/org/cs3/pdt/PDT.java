@@ -97,7 +97,7 @@ public final  class PDT {
 
 	public static final int CX_GENERATING_OUTLINE_DATA = -6;
 
-	public static final int CX_UPDATING_OUTLINE = -7;
+	public static final int CX_OUTLINE = -7;
 
 	public static final int ERR_FILENAME_CONVERSION_PROBLEM = -8;
 
