@@ -441,7 +441,7 @@ print_solution(OutStream,Vars,Mode):-
 	
 print_binding(Out,Key,Val,Mode):-
 		write(Out,'<'),
-		(write_escaped(Out,Key,Mode);true),
+		(write_escaped(Out,Key,default);true),
 		write(Out, '>'),		
 		(print_value(Out,Val,Mode);true),		
 		nl(Out).
@@ -614,60 +614,66 @@ my_format(OutStream,Format,Args):-
 	flush_output(OutStream).
 %	flush_output(current_output).
 	
-write_escaped(Out,Atom):-
-	write_escaped(Out,Atom,canonical).
+write_escaped(Out,Term):-
+	write_escaped(Out,Term,canonical).
 	
-write_escaped(Out,Atom,canonical):-
-		nonvar(Atom),
-		( 	atom(Atom)
-		->  atom_chars(Atom,Chars),
-		write_escaped_l(Out,Chars)
-	;	term_to_canonical_atom(Atom,AAtom),
-		write_escaped(Out,AAtom)
-	).
-write_escaped(Out,Atom,default):-
-		nonvar(Atom),
-		( 	atom(Atom)
-		->  atom_chars(Atom,Chars),
-		write_escaped_l(Out,Chars)
-	;	term_to_atom(Atom,AAtom),
-		write_escaped(Out,AAtom)
-	).
 
+write_escaped(Out,Term,Mode):-
+    write_term_to_memfile(Term,Mode,Memfile),
+    new_memory_file(TmpFile),
+    open_memory_file(Memfile,read,In),
+    open_memory_file(TmpFile,write,Tmp),
+    escape_stream(In,Tmp),    
+    close(In),
+    close(Tmp),
+    memory_file_to_atom(TmpFile,Atom),
+    free_memory_file(TmpFile),
+    free_memory_file(Memfile),
+    write(Out,Atom).
 
-term_to_canonical_atom(Term,AAtom):-
+write_term_to_memfile(Term,canonical,Memfile):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
-%	write_term(Stream,Term,[ignore_ops(true),quoted(true)]),
 	write_canonical(Stream,Term),
-	close(Stream),
-	memory_file_to_atom(Memfile,AAtom),
-	free_memory_file(Memfile).
+	close(Stream).
+write_term_to_memfile(Term,_,Memfile):-
+	new_memory_file(Memfile),
+	open_memory_file(Memfile,write,Stream),
+	write(Stream,Term),
+	close(Stream).
+
+escape_stream(In,Out):-
+    repeat,	    
+    (	at_end_of_stream(In)
+    ->	!,true
+    ;   get_char(In,Char),    	
+	    write_escaped_char(Out,Char),
+	    fail
+	).
 	
-    
-		
-write_escaped_l(_,[]).
-write_escaped_l(Out,['<'|ITail]):-
+
+write_escaped_char(Out,'<'):-
 	write(Out,'&lt;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,['>'|ITail]):-
+	!.
+write_escaped_char(Out,'>'):-
 	write(Out,'&gt;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,['{'|ITail]):-
+	!.
+write_escaped_char(Out,'{'):-
 	write(Out,'&cbo;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,['}'|ITail]):-
+	!.
+write_escaped_char(Out,'}'):-
 	write(Out,'&cbc;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,['&'|ITail]):-
+	!.
+write_escaped_char(Out,'&'):-
 	write(Out,'&amp;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,['"'|ITail]):-
+	!.
+write_escaped_char(Out,'"'):-
 	write(Out,'&quot;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,['\''|ITail]):-
+	!.
+write_escaped_char(Out,'\''):-
 	write(Out,'&apos;'),
-		write_escaped_l(Out,ITail).
-write_escaped_l(Out,[C|ITail]):-
-		put_char(Out,C),
-		write_escaped_l(Out,ITail).	
+	!.
+write_escaped_char(Out,C):-
+	put_char(Out,C).	
+		
+		

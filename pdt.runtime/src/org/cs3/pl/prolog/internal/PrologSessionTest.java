@@ -108,7 +108,7 @@ public class PrologSessionTest extends TestCase {
 		ss.dispose();
 	}
 	
-	public void testConsult() throws Exception{
+	public void _testConsult() throws Exception{
 		File tmpdir = new File (System.getProperty("java.io.tmpdir"));
 		File tmpfile = new File(tmpdir, "test.pl");
 		
@@ -225,6 +225,61 @@ public class PrologSessionTest extends TestCase {
 		}
 		l =s.queryAll("member(und,[ich,du,muellers_kuh])");
 		assertEquals(0,l.size());		
+		
+	}
+	
+	
+	public void _test_longAtomLength() throws Throwable {
+		// session.queryOnce("0", "guitracer");
+		// session.queryOnce("0", "trace");
+		// session.join();
+		// rec.clear();
+		StringBuffer sb = new StringBuffer();
+		
+		int len = 600000;
+		for (int i = 0; i < len; i++) {
+			sb.append('a');
+		}
+		
+
+		String atom=sb.toString();
+		PrologSession s = pif.getSession();
+		Map map=s.queryOnce("atom_length("+atom+",1,3,_,Sub)");
+		assertEquals("aaa", map.get("Sub"));
+	}
+	
+	public void _test_longAtom_result() throws Throwable {
+		// session.queryOnce("0", "guitracer");
+		// session.queryOnce("0", "trace");
+		// session.join();
+		// rec.clear();
+		StringBuffer sb = new StringBuffer();
+		
+		for (int i = 0; i < 600000; i++) {
+			sb.append('a');
+		}
+		
+
+		String atom=sb.toString();
+		PrologSession s = pif.getSession();
+		Map map = s.queryOnce("A="+atom);
+		assertEquals(atom,map.get("A"));
+	}
+	public void test_longAtom() throws Throwable {
+		// session.queryOnce("0", "guitracer");
+		// session.queryOnce("0", "trace");
+		// session.join();
+		// rec.clear();
+		StringBuffer sb = new StringBuffer();
+		
+		for (int i = 0; i < 600000; i++) {
+			sb.append('a');
+		}
+		
+
+		String atom=sb.toString();
+		PrologSession s = pif.getSession();
+		assertNotNull(s.queryOnce("atom("+atom+")"));
 		
 	}
 }
