@@ -196,19 +196,8 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						"If this flag is set, the PDT will automaticaly (re-)consult any source file,"
 								+ "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental "
 								+ "feature and defaults to \"false\" for 0.1.x",
-						Option.FLAG, "false"),
-						new SimpleOption(
-								PDTCore.PREF_PARSER,
-								"Parser Framework",
-								"Determines which parser framework the PDT core uses. \n" +
-								"\"javacc parser\" is a javacc generated parser. This is the parser" +
-								"all versions before 0.2M5 were working with.\n" +
-								"\"read_term/3 parser\" is implemented in prolog using the builtin read_term/3." +
-								"It has several advantages compared to the traditional javacc parser, but it is" +
-								"relatively new and needs further performance optimisation. ",
-								Option.ENUM, PDTCore.JAVACC, new String[][] {
-										{ "javacc parser", PDTCore.JAVACC}, 
-										{ "read_term/3 parser", PDTCore.READ_TERM_3 }})
+						Option.FLAG, "false")
+						
 
 		};
 

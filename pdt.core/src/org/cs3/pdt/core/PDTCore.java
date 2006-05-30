@@ -64,7 +64,7 @@ public class PDTCore {
 	 */
 	public final static String NATURE_ID = "org.cs3.pdt.core.PDTProjectNature";
 	
-	public static final String METADATA_BUILDER_ID = "org.cs3.pdt.core.MetaDataBuilder";
+	
 	public static final String PROLOG_BUILDER_ID = "org.cs3.pdt.core.PrologBuilder";
 	
 	/**
@@ -125,9 +125,7 @@ public class PDTCore {
 	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
 	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
 
-	public static final String PREF_PARSER = "pdt.parser";
-	public static final String JAVACC = "pdt.parser.javacc";
-	public static final String READ_TERM_3 = "pdt.parser.read_term_3";
+	
 
 	public static final String BUILTIN_INDEX_FILE = "builtin_predicates.idx";
 

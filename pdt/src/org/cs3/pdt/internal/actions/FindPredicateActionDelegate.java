@@ -110,7 +110,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					try {
 						monitor.beginTask("searching...",
 								IProgressMonitor.UNKNOWN);
-						String parser = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER,PDTCore.JAVACC);
+						
 						
 							run_impl(data,file);
 						

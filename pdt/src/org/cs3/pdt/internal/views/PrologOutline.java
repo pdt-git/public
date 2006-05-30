@@ -180,23 +180,13 @@ public class PrologOutline extends ContentOutlinePage {
 
 		TreeViewer viewer = getTreeViewer();
 
-		String val = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_PARSER,PDTCore.JAVACC);
-		if(PDTCore.READ_TERM_3.equals(val)){
+		
 			contentProvider=new CTermContentProvider(viewer);
 			viewer.setContentProvider(contentProvider);
 			viewer.setLabelProvider(new PrologElementLabelProvider());
 			viewer.setSorter(new MyViewSorter());	
 			this.convertPositions=true;
-		}
-//		else if(PDTCore.JAVACC.equals(val)){
-//			contentProvider = new PrologElementContentProvider(viewer);
-//			viewer.setContentProvider(contentProvider);
-//			viewer.setLabelProvider(new PrologElementLabelProvider());
-//			this.convertPositions=false;
-//		}
-		else{
-			throw new IllegalArgumentException("Don't know which content provider to use for parser framework: "+val);
-		}
+		
 		viewer.setComparer(new Comparer());
 		
 		viewer.addSelectionChangedListener(this);
