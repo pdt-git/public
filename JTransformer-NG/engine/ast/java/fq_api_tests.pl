@@ -47,6 +47,11 @@ test(java_fq_type_with_brackets2):-
     assert_true(type_with_brackets(Type,Arity,'int[]')),
     assert_true(('int' == Type)),
     assert_true((1 == Arity)).
+
+test(java_fq_type_with_brackets3):-
+    assert_true(type_with_brackets(Type,Arity,'int')),
+    assert_true(('int' == Type)),
+    assert_true((0 == Arity)).
     
 test(java_fq_java_fq_to_pef):-
     assert_true((
