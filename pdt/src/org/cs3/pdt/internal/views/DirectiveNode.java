@@ -86,7 +86,7 @@ public class DirectiveNode implements Directive{
 		loc = new SourceLocation(file,false);
 		loc.offset=from;
 		loc.endOffset=to;
-		goal = new GoalNode(contextModule,((CCompound)term).getArgument(0));
+		
 	}
 	public SourceLocation getSourceLocation() {		
 		return loc;
@@ -94,7 +94,9 @@ public class DirectiveNode implements Directive{
 
 	public Goal getBody() {
 		
-		
+		if(goal==null&&term instanceof CCompound){
+			goal = new GoalNode(contextModule,((CCompound)term).getArgument(0));
+		}
 		return goal;
 	}
 }

@@ -57,15 +57,22 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 
+:- pdt_annotator([file],[
+	library('org/cs3/pdt/annotate/export_annotator'),
+	library('org/cs3/pdt/annotate/member_annotator')
+]).
 
-
-file_post_annotation_hook([File|_],_,_,Annos,[indexed(IxTime)|Annos]):-
+file_annotation_hook([File|_],_,_,Annos,[indexed(IxTime)|Annos]):-
     time_file(File,ModTime),
     time_index(File,IxTime),
     update_index(File,Annos,ModTime,IxTime).
 
 cleanup_hook(File):-
     pdt_clear_index(File).
+
+cleanup_hook(File,Annos,Terms):-
+    pdt_clear_index(File,Annos,Terms).
+
     
 pdt_update_index(FileSpec):-
     pdt_file_spec(FileSpec,File),
@@ -78,6 +85,11 @@ pdt_clear_index(FileSpec):-
     pdt_file_spec(FileSpec,File),
     current_file_annotation(File,Annos,_),
     clear_index(File,Annos).
+
+pdt_clear_index(FileSpec,Annos,_):-
+    pdt_file_spec(FileSpec,File),
+    clear_index(File,Annos).
+
     
 update_index(_,_,ModTime,IxTime):-
 	    ModTime @=< IxTime,

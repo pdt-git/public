@@ -45,12 +45,19 @@
 :-use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :-use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 
+:- pdt_annotator([term,file],[]).
 
 
-term_pre_annotation_hook(Stack,_,InTerm,OutTerm):-
+%term_pre_annotation_hook(Stack,_,InTerm,OutTerm):-
+%	file_refs(Stack,InTerm,OutTerm).
+%
+%file_pre_annotation_hook(_,_,Terms,InAnos,[references_files(Refs)|InAnos]):-
+%    collect_refs(Terms,Refs).
+
+term_annotation_hook(Stack,_,_,InTerm,OutTerm):-
 	file_refs(Stack,InTerm,OutTerm).
 
-file_pre_annotation_hook(_,_,Terms,InAnos,[references_files(Refs)|InAnos]):-
+file_annotation_hook(_,_,Terms,InAnos,[references_files(Refs)|InAnos]):-
     collect_refs(Terms,Refs).
 
 

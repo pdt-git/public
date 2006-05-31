@@ -46,10 +46,9 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 
-%we require that the export_annotator is also registered
-:- register_annotator(library('/org/cs3/pdt/annotate/export_annotator')).
+:- pdt_annotator([term,file],[library('/org/cs3/pdt/annotate/export_annotator')]).
 
-term_post_annotation_hook(_,_,FileAnos,InTerm,OutTerm):-
+term_annotation_hook(_,_,FileAnos,InTerm,OutTerm):-
     (	module_definition(FileAnos,FileModule,_)
     ->	true
     ;	FileModule=user
@@ -84,7 +83,7 @@ module_qualified_signature(_,(Module:Name)/Arity,Module:Name/Arity).
     
 
 
-file_post_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions)|OutAnnos]):-
+file_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions)|OutAnnos]):-
     collect_definitions(Terms,Definitions),
     findall(Property,property_definition(_,Property,[_]),Properties),
     collect_properties(Properties,Terms,InAnnos,OutAnnos).

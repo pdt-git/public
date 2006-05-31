@@ -45,8 +45,11 @@
 	pdt_top_annotation/2,
 	pdt_term_annotation/3,
 	pdt_subterm/3,
+	pdt_outer_match/4,
+	pdt_inner_match/4,
+	pdt_subst/4,
 	pdt_aterm/1,
-	pdt_aterm_visit/3
+	pdt_aterm_member/3
 ]).
 
 pdt_aterm(aterm(_,_)).
@@ -78,6 +81,16 @@ pdt_aterm(aterm(_,_)).
 %    process_args(InArgs,Goal,CxParent,OutArgs),
 %    Out =[Functor|OutArgs]
     
+    
+
+pdt_aterm_member(List,Path, Elm):-
+    match_elms(List,Path,Elm).
+    
+match_elms(List,[1],Elm):-
+    pdt_subterm(List,[1],Elm).
+match_elms(List,[2|T],Elm):-
+    pdt_subterm(List,[2],Elms),
+    match_elms(Elms,T,Elm).
     	
 
 %pdt_subterm(+Term,+Path,?Subterm).
@@ -89,16 +102,64 @@ pdt_subterm(ATerm,Path,SubTerm):-
 	pdt_aterm(ATerm),
 	!,
 	pdt_term_annotation(ATerm,Term,_),
-	pdt_subterm(Term,Path,SubTerm).
-pdt_subterm(Term,[ArgNum|ArgNums],SubTerm):-
+	pdt_subterm_rec(Term,Path,SubTerm).
+pdt_subterm(Term,Path,SubTerm):-
+	pdt_subterm_rec(Term,Path,SubTerm).
+
+pdt_subterm_rec(Term,[ArgNum|ArgNums],SubTerm):-
 	compound(Term),
 	arg(ArgNum,Term,ArgVal),
 	pdt_subterm(ArgVal,ArgNums,SubTerm).
 	    
-
-pdt_subst(InTerm,[], OutTerm,OutTerm).
-pdt_subst(InATerm,Path,SubATerm,OutATerm):-
+:-module_transparent pdt_outer_match/4.
+:-module_transparent pdt_inner_match/4.
+	    
+pdt_outer_match(ArgVal,ArgNums,SubTerm,Goal):-
+    context_module(Module),
+    pdt_util_aterm:outer_match(ArgVal,ArgNums,SubTerm,Module,Goal).
+pdt_inner_match(ArgVal,ArgNums,SubTerm,Goal):-
+    context_module(Module),
+    pdt_util_aterm:inner_match(ArgVal,ArgNums,SubTerm,Module,Goal).
+	    
+outer_match(Term,[], Term,Module,Goal):-
+    Module:call(Goal),
+    !.
+outer_match(ATerm,Path,SubTerm,Module,Goal):-
 	pdt_aterm(ATerm),
+	!,
+	pdt_term_annotation(ATerm,Term,_),
+	outer_match_rec(Term,Path,SubTerm,Module,Goal).
+outer_match(Term,Path,SubTerm,Module,Goal):-	
+	outer_match_rec(Term,Path,SubTerm,Module,Goal).
+
+outer_match_rec(Term,[ArgNum|ArgNums],SubTerm,Module,Goal):-
+	compound(Term),
+	arg(ArgNum,Term,ArgVal),
+	outer_match(ArgVal,ArgNums,SubTerm,Module,Goal).
+
+
+%%TODO this needs testing. 
+inner_match(ATerm,Path,SubTerm,Module,Goal):-
+	pdt_aterm(ATerm),
+	!,
+	pdt_term_annotation(ATerm,Term,_),
+	inner_match(Term,Path,SubTerm,Module,Goal).
+inner_match(Term,ArgNums,SubTerm,Module,Goal):-
+    (	inner_match_recursive(Term,ArgNums,SubTerm,Module,Goal)
+    *->	true
+    ;	inner_match_local(Term,ArgNums,SubTerm,Module,Goal)
+    ).
+inner_match_recursive(Term,[ArgNum|ArgNums],SubTerm,Module,Goal):-
+	compound(Term),
+	arg(ArgNum,Term,ArgVal),
+	inner_match(ArgVal,ArgNums,SubTerm,Module,Goal).
+inner_match_local(Term,[], Term,Module,Goal):-
+    Module:call(Goal).
+
+
+pdt_subst(_InTerm,[], OutTerm,OutTerm).
+pdt_subst(InATerm,Path,SubATerm,OutATerm):-
+	pdt_aterm(InATerm),
 	pdt_aterm(SubATerm),
 	!,
 	pdt_term_annotation(InATerm,InTerm,Anno),
@@ -107,9 +168,21 @@ pdt_subst(InATerm,Path,SubATerm,OutATerm):-
 pdt_subst(InTerm,[ArgNum|ArgNums],SubTerm,OutTerm):-
 	compound(InTerm),
 	arg(ArgNum,InTerm,ArgVal),
-	pdt_subst(ArgVal,ArgNums,SubTerm).
+	pdt_subst(ArgVal,ArgNums,SubTerm,OutArg),
+	InTerm=..[Functor|InArgs],
+	subst_nth_elm(InArgs,ArgNum,OutArg,OutArgs),
+	OutTerm=..[Functor|OutArgs].
     
 
+subst_nth_elm([_InArg|InArgs],1,SubstArg,[SubstArg|InArgs]):-
+	!.
+subst_nth_elm([InArg|InArgs],ArgNum,SubstArg,[InArg|OutArgs]):-
+    %ArgNum > 1,
+    N is ArgNum - 1,
+    subst_nth_elm(InArgs,N,SubstArg,OutArgs).
+    
+    
+    
 
 %@deprecated: use pdt_term_annotation/3
 pdt_top_annotation(aterm(A,_),A).
