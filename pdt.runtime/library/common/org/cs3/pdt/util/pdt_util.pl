@@ -68,6 +68,8 @@ pdt_call_cleanup(_,Cleanup):-
     Cleanup,
     fail.
 
+
+:- module_transparent pdt_maybe/1.
 /*
 pdt_maybe(+Goal)
 

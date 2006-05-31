@@ -41,10 +41,12 @@
 
 :- module(pdt_annotator,[
 	ensure_annotated/1,
-	register_annotator/1,
+	%%register_annotator/1, 
 	current_file_annotation/3,
 	current_file_error/2,
-	forget_file_annotation/1
+	forget_file_annotation/1,
+	pdt_annotator/2,
+	pdt_annotator/3
 ]).
 
 
@@ -54,32 +56,146 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_dependency')).
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
 :-dynamic file_error/3.
 :-dynamic annotator/2.
+:-dynamic annotator/3.
+
+
+/**
+pdt_annotator(+Hooks, +Dependencies)
+
+New hook registration api.member_annotator:file_annotation_hook
+Modules that whish to register as a annotator should contain a directive
+:- pdt_annotator(+Hooks, +Dependencies)
+Hooks should be a list containing the atoms 'term' and/or 'file'. 
+When the annotator is executed, this list will be processed element by element.
+For each 'file' element, the process_file hook will be calle for the respective annotator.
+For each 'term' element, the process_term hook will be called on each individual term for the respective
+annotator.
+
+Dependencies should be a list of file specs that contain annotator modules. The parser framework
+will make sure that all of the listed annotators are registered and get executed before the
+declaring annotator is executed.
+
+annotators can optionaly define a prediceate cleanup_hook/2 which will be called
+when the annotation of a file is about to be forgotten. These clean_up hooks will always be executed
+independently of what is listed in the hooks list above. They will be called in no particualr order,
+i.e. dependencies will not be respected.
+
+*/
+:- module_transparent pdt_annotator/2.
+pdt_annotator(Hooks, Dependencies):-
+    context_module(Module),
+    pdt_annotator:pdt_annotator(Module,Hooks,Dependencies).
+
+pdt_annotator(Module,_Hooks, _Dependencies):-
+    annotator(Module,_,_),!.
+pdt_annotator(Module,Hooks, Dependencies):-
+    add_missing_hooks2(Module),
+    assert(annotator(Module,Hooks,Dependencies)),
+    pdt_add_node(annotator_process_order,Module),
+    process_dependencies(Module,Dependencies).
+
+
+process_dependencies(_Module,[]).
+process_dependencies(Module,[Dependency|Dependencies]):-
+    
+    process_dependency(Module,Dependency),
+    process_dependencies(Module,Dependencies).
+
+process_dependency(Module,Dependency):-
+%	 dependency has to be loaded
+	use_module(Dependency),
+	pdt_file_spec(Dependency,DependencyFile),
+	current_module(DependencyModule,DependencyFile),
+%    dependency has to be executed before module
+	pdt_add_dependency(annotator_process_order,Module,DependencyModule).
+
+
+add_missing_hooks2(Anotator):-
+    add_missing_hook(Anotator:cleanup_hook/3),    
+    add_missing_hook(Anotator:term_annotation_hook/5),
+    add_missing_hook(Anotator:file_annotation_hook/5).
+
+execute_annotators(FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut):-
+    pdt_process_order(annotator_process_order,Annotators),
+    execute_annotators(Annotators,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut).
+
+execute_annotators([],_FileStack,_OpModule,FileAnnos,Terms,FileAnnos,Terms).
+execute_annotators([Annotator|Annotators],FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut):-
+    execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosTmp,TermsTmp),
+    execute_annotators(Annotators,FileStack,OpModule,FileAnnosTmp,TermsTmp,FileAnnosOut,TermsOut).
+
+execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut):-
+    annotator(Annotator,Hooks,_),
+    execute_annotator_hooks(Annotator,Hooks,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut).
+
+execute_annotator_hooks(_Annotator,[],_FileStack,_OpModule,FileAnnos,Terms,FileAnnos,Terms).
+execute_annotator_hooks(Annotator,[Hook|Hooks],FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut):-
+    execute_annotator_hook(Annotator,Hook,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosTmp,TermsTmp),
+    execute_annotator_hooks(Annotator,Hooks,FileStack,OpModule,FileAnnosTmp,TermsTmp,FileAnnosOut,TermsOut).
+
+execute_annotator_hook(Annotator,file,FileStack,OpModule,FileAnnosIn,Terms,FileAnnosOut,Terms):-
+    pdt_maybe(Annotator:file_annotation_hook(FileStack,OpModule,Terms,FileAnnosIn,TmpAnnos)),
+	(	var(TmpAnnos)
+	->	FileAnnosOut=FileAnnosIn
+	;	FileAnnosOut=TmpAnnos
+	).
+
+
+execute_annotator_hook(_Annotator,term,_FileStack,_OpModule,FileAnnos,[],FileAnnos,[]).
+execute_annotator_hook(Annotator,term,FileStack,OpModule,FileAnnos,[TermIn|TermsIn],FileAnnos,[TermOut|TermsOut]):-
+    pdt_maybe(Annotator:term_annotation_hook(FileStack,OpModule,FileAnnos,TermIn,TmpTerm)),
+    (	var(TmpTerm)
+    ->	TermOut=TermIn
+    ;	TermOut=TmpTerm
+    ),
+    execute_annotator_hook(Annotator,term,FileStack,OpModule,FileAnnos,TermsIn,FileAnnos,TermsOut).
+
 
 
 forget_file_annotation(Spec):-
     pdt_file_spec(Spec,FileName),
-    call_cleanup_hook(FileName),
+%    call_cleanup_hook(FileName),
+    call_cleanup_hook2(FileName),
     retractall(file_annotation(FileName,_,_,_)),
     retractall(file_error(FileName,_,_)),
     clear_timestamp(FileName),
     pif_notify(file_annotation(FileName),forget).
 
 
-call_cleanup_hook(FileName):-
-    findall(Anotator,annotator(_,Anotator),Anotators),
-    call_cleanup_hook(Anotators,FileName).
-    
-call_cleanup_hook([],_).
-call_cleanup_hook([Annotator|Annotators],File):-
+%call_cleanup_hook(FileName):-
+%    findall(Anotator,annotator(_,Anotator),Anotators),
+%    call_cleanup_hook(Anotators,FileName).
+
+call_cleanup_hook2(FileName):-
+    findall(Anotator,annotator(Anotator,_,_),Anotators),
+    get_annos_for_cleanup(FileName,Annos,Terms),
+    call_cleanup_hook2(Anotators,FileName,Annos,Terms).
+
+get_annos_for_cleanup(FileName,Annos,Terms):-
+    current_file_annotation(FileName,Annos,Terms),
+    !.
+get_annos_for_cleanup(_FileName,[],[]).
+
+%call_cleanup_hook([],_).
+%call_cleanup_hook([Annotator|Annotators],File):-
+%    pdt_maybe(
+%    	Annotator:cleanup_hook(File)
+%    ),
+%    call_cleanup_hook(Annotators,File).     
+
+call_cleanup_hook2([],_,_,_).
+call_cleanup_hook2([Annotator|Annotators],File,Annos,Terms):-
     pdt_maybe(
-    	Annotator:cleanup_hook(File)
+    	Annotator:cleanup_hook(File,Annos,Terms)
     ),
-    call_cleanup_hook(Annotators,File).     
+    call_cleanup_hook2(Annotators,File,Annos,Terms).     
+
 
 /**
 current_file_annotation(-Filename,-FileAnotations,-Terms)
@@ -171,22 +287,22 @@ predicates:
   - file_post_annotation_hook(+FileStack,+OpModule,+Terms,+InAnos,-OutAnos) 	
   	like file_pre_annotation/5, but is called after term post processing.
 */
-register_annotator(File):-
-    annotator(File,_),!.
-register_annotator(File):-
-    use_module(File),
-    pdt_file_spec(File,Abs),
-    current_module(Anotator,Abs),
-    add_missing_hooks(Anotator),
-    assert(annotator(File,Anotator)).
-
-
-add_missing_hooks(Anotator):-
-    add_missing_hook(Anotator:cleanup_hook/1),    
-    add_missing_hook(Anotator:term_pre_annotation_hook/4),
-    add_missing_hook(Anotator:term_post_annotation_hook/5),
-    add_missing_hook(Anotator:file_pre_annotation_hook/5),
-    add_missing_hook(Anotator:file_post_annotation_hook/5).
+%register_annotator(File):-
+%    annotator(File,_),!.
+%register_annotator(File):-
+%    use_module(File),
+%    pdt_file_spec(File,Abs),
+%    current_module(Anotator,Abs),
+%    add_missing_hooks(Anotator),
+%    assert(annotator(File,Anotator)).
+%
+%
+%add_missing_hooks(Anotator):-
+%    add_missing_hook(Anotator:cleanup_hook/1),    
+%    add_missing_hook(Anotator:term_pre_annotation_hook/4),
+%    add_missing_hook(Anotator:term_post_annotation_hook/5),
+%    add_missing_hook(Anotator:file_pre_annotation_hook/5),
+%    add_missing_hook(Anotator:file_post_annotation_hook/5).
 
 add_missing_hook(Module:Name/Arity):-
     (	Module:current_predicate(Name/Arity)
@@ -220,7 +336,7 @@ ensure_annotated([FileSpec|_]):-
     pdt_file_spec(FileSpec,Abs),
     up_to_date(Abs),
     !.
-ensure_annotated([FileSpec|Stack]):-    
+ensure_annotated([FileSpec|Stack]):- 
     new_memory_file(MemFile),
     pdt_file_spec(FileSpec,Abs),
     gen_op_module(Abs,OpModule),
@@ -230,11 +346,12 @@ ensure_annotated([FileSpec|Stack]):-
 	update_timestamp(Abs),
     copy_file_to_memfile(FileSpec,MemFile),
     open_memory_file(MemFile,read,Input),
-    read_terms([Abs|Stack],OpModule,Input,Terms,Errors),
-    pre_process_file([Abs|Stack],OpModule,Terms,FileAnos),
-    post_process_terms([Abs|Stack],OpModule,FileAnos,Terms,OutTerms),
-    post_process_file([Abs|Stack],OpModule,OutTerms,FileAnos,OutAnos),
-    assert(file_annotation(Abs,Time,OutAnos,OutTerms)),
+    read_terms([Abs|Stack],OpModule,Input,Terms0,Errors),
+%    pre_process_file([Abs|Stack],OpModule,Terms0,FileAnnos0),
+    execute_annotators([Abs|Stack],OpModule,[],Terms0,FileAnnos1,Terms1),
+%    post_process_terms([Abs|Stack],OpModule,FileAnnos1,Terms1,Terms2),
+%    post_process_file([Abs|Stack],OpModule,Terms2,FileAnnos1,FileAnnos2),
+    assert(file_annotation(Abs,Time,FileAnnos1,Terms1)),
     (	nonvar(Errors),Errors\==[]
     ->	forall(member(Error,Errors),assert(file_error(Abs,Time,Error)))
     ;	true
@@ -259,9 +376,9 @@ clear_ops(OpModule):-
 
 read_terms(FileStack,OpModule,In,Terms,Errors):-
     
-    	read_terms_rec(FileStack,OpModule,In,Terms,Errors).
+    	read_terms_rec(FileStack,OpModule,In,1,Terms,Errors).
     	
-read_terms_rec(FileStack,Module,In,Terms,Errors):-
+read_terms_rec(FileStack,Module,In,N,Terms,Errors):-
     Options=[
 		subterm_positions(_),
 		variable_names(_),
@@ -270,92 +387,94 @@ read_terms_rec(FileStack,Module,In,Terms,Errors):-
     		double_quotes(string)
     	],
     do_read_term(In,Term,Options,Error),
-    do_process_term(FileStack,Module,In,Term,Options,Error,Terms,Errors).
+    do_process_term(FileStack,Module,In,N,Term,Options,Error,Terms,Errors).
 
 
-do_process_term(_,_,_,Term,_,_,[],[]):-
+do_process_term(_,_,_,_,Term,_,_,[],[]):-
 	Term==end_of_file,
 	!.
-do_process_term(FileStack,Module,In,_,_,Error,Terms,[Error|Errors]):-
+do_process_term(FileStack,Module,In,N,_,_,Error,Terms,[Error|Errors]):-
     nonvar(Error),!,
-    read_terms_rec(FileStack,Module,In,Terms,Errors).
-do_process_term(FileStack,OpModule,In,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
+    M is N+1,
+    read_terms_rec(FileStack,Module,In,M,Terms,Errors).
+do_process_term(FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
 	member(subterm_positions(Positions),Options),
 	wrap_term(Term0,Positions,Term1),   
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	pdt_term_annotation(Term2,T,[variable_names(Names),singletons(Singletons)|A]),
-   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
-    read_terms_rec(FileStack,OpModule,In,Terms,Errors).
+	pdt_term_annotation(ProcessedTerm,T,[n(N),variable_names(Names),singletons(Singletons)|A]),
+%   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
+	M is N+1,
+    read_terms_rec(FileStack,OpModule,In,M,Terms,Errors).
 
 do_read_term(In,Term,Options,Error):-
     catch(
 		read_term(In,Term,Options),
 		Error,
-		true
+		true 
 	).
 
-pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
-    findall(Anotator,annotator(_,Anotator),Anotators),
-    pre_process_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
-    
-pre_process_term([],_,_,Term,Term). 
-pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
-    pdt_maybe((
-    	Anotator:term_pre_annotation_hook(FileStack,OpModule,InTerm,TmpTerm)
-    )),
-    (	var(TmpTerm)
-    ->	pre_process_term(T,FileStack,OpModule,InTerm,OutTerm)
-    ;	pre_process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
-    ).
-
-post_process_terms(_,_,_,[],[]).
-post_process_terms(Stack,OpModule,FileAnos,[InHead|InTail],[OutHead|OutTail]):-
-    post_process_term(Stack,OpModule,FileAnos,InHead,OutHead),
-    post_process_terms(Stack,OpModule,FileAnos,InTail,OutTail).
-	
-post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
-    findall(Anotator,annotator(_,Anotator),Anotators),
-    post_process_term(Anotators,FileStack,OpModule,FileAnos,InTerm,OutTerm).
-
-post_process_term([],_,_,_,Term,Term). 
-post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-
-    pdt_maybe((
-    	Anotator:term_post_annotation_hook(FileStack,OpModule,FileAnos,InTerm,TmpTerm)
-    )),
-    (	var(TmpTerm)
-    ->	post_process_term(T,FileStack,OpModule,FileAnos,InTerm,OutTerm)
-    ;	post_process_term(T,FileStack,OpModule,FileAnos,TmpTerm,OutTerm)
-    ).
-
-
-pre_process_file(FileStack,OpModule,Terms,FileAnos):-
-	findall(Anotator,annotator(_,Anotator),Anotators),
-    pre_process_file(Anotators,FileStack,OpModule,Terms,[],FileAnos).
-pre_process_file([],_,_,_,Terms,Terms). 
-pre_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
-    pdt_maybe((
-	    Anotator:file_pre_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
-	)),
-	(	var(TmpAnos)
-	->	pre_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
-	;	pre_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
-	).
-
-post_process_file(FileStack,OpModule,Terms,InAnos,OutAnos):-
-	findall(Anotator,annotator(_,Anotator),Anotators),
-    post_process_file(Anotators,FileStack,OpModule,Terms,InAnos,OutAnos).
-post_process_file([],_,_,_,Terms,Terms). 
-post_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
-    pdt_maybe((
-	    Anotator:file_post_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
-	)),
-	(	var(TmpAnos)
-	->	post_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
-	;	post_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
-	).
-
+%pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
+%    findall(Anotator,annotator(_,Anotator),Anotators),
+%    pre_process_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
+%    
+%pre_process_term([],_,_,Term,Term). 
+%pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
+%    pdt_maybe((
+%    	Anotator:term_pre_annotation_hook(FileStack,OpModule,InTerm,TmpTerm)
+%    )),
+%    (	var(TmpTerm)
+%    ->	pre_process_term(T,FileStack,OpModule,InTerm,OutTerm)
+%    ;	pre_process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
+%    ).
+%
+%post_process_terms(_,_,_,[],[]).
+%post_process_terms(Stack,OpModule,FileAnos,[InHead|InTail],[OutHead|OutTail]):-
+%    post_process_term(Stack,OpModule,FileAnos,InHead,OutHead),
+%    post_process_terms(Stack,OpModule,FileAnos,InTail,OutTail).
+%	
+%post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
+%    findall(Anotator,annotator(_,Anotator),Anotators),
+%    post_process_term(Anotators,FileStack,OpModule,FileAnos,InTerm,OutTerm).
+%
+%post_process_term([],_,_,_,Term,Term). 
+%post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-
+%    pdt_maybe((
+%    	Anotator:term_post_annotation_hook(FileStack,OpModule,FileAnos,InTerm,TmpTerm)
+%    )),
+%    (	var(TmpTerm)
+%    ->	post_process_term(T,FileStack,OpModule,FileAnos,InTerm,OutTerm)
+%    ;	post_process_term(T,FileStack,OpModule,FileAnos,TmpTerm,OutTerm)
+%    ).
+%
+%
+%pre_process_file(FileStack,OpModule,Terms,FileAnos):-
+%	findall(Anotator,annotator(_,Anotator),Anotators),
+%    pre_process_file(Anotators,FileStack,OpModule,Terms,[],FileAnos).
+%pre_process_file([],_,_,_,Terms,Terms). 
+%pre_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
+%    pdt_maybe((
+%	    Anotator:file_pre_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
+%	)),
+%	(	var(TmpAnos)
+%	->	pre_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
+%	;	pre_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
+%	).
+%
+%post_process_file(FileStack,OpModule,Terms,InAnos,OutAnos):-
+%	findall(Anotator,annotator(_,Anotator),Anotators),
+%    post_process_file(Anotators,FileStack,OpModule,Terms,InAnos,OutAnos).
+%post_process_file([],_,_,_,Terms,Terms). 
+%post_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
+%    pdt_maybe((
+%	    Anotator:file_post_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
+%	)),
+%	(	var(TmpAnos)
+%	->	post_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
+%	;	post_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
+%	).
+%
 
 
 		

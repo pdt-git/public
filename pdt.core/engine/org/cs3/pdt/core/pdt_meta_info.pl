@@ -44,6 +44,7 @@ some predicate definitions for queries frequently used by the pdt.core
 */
 
 :-module(pdt_meta_info,[
+	pdt_file_problem/3,
 	pdt_find_clauses/4,
 	pdt_find_first_clause/4,
 	pdt_find_first_clause_position/4,
@@ -71,6 +72,15 @@ some predicate definitions for queries frequently used by the pdt.core
 %	member(aterm(Anns,Term),Terms),
 %	pdt_member(clause_of(DefModule:Name/Arity),Anns).
   
+  
+  
+pdt_file_problem(FileSpec,Problem,Pos):-
+    pdt_file_spec(FileSpec,Abs),
+    current_file_annotation(Abs,_,Terms),
+    pdt_subterm(Terms,_,ATerm),
+    pdt_term_annotation(ATerm,_,Annos),
+    pdt_member(problem(Problem),Annos),
+    pdt_member(position(Pos),Annos).
 
 pdt_file_includes(FileSpec,IncludeSpec):-
     nonvar(FileSpec),

@@ -90,27 +90,26 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		super();
 	}
 
-	private void build(IFile file, AsyncPrologSession as)
-			throws CoreException, PrologInterfaceException {
+	private void build(IFile file, AsyncPrologSession as) throws CoreException,
+			PrologInterfaceException {
 
-		
 		File ioFile = file.getLocation().toFile();
-		String plFileName =	Util.prologFileName(ioFile);
-		
-		as.queryOnce(file,"ensure_annotated('"+plFileName+"')");
-		
+		String plFileName = Util.prologFileName(ioFile);
+
+		as.queryOnce(file, "ensure_annotated('" + plFileName + "')");
+
 	}
 
-		/*
+	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
 	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected IProject[] build(int kind, Map args, final IProgressMonitor monitor)
-			throws CoreException {
+	protected IProject[] build(int kind, Map args,
+			final IProgressMonitor monitor) throws CoreException {
 		try {
-			
+
 			Debug.debug("PrologBuilder.build(...) was triggered");
 			String taskname = "updating prolog metadata";
 			;
@@ -141,47 +140,49 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 					+ forgetList.toString());
 			Debug.debug("PrologBuilder.build(...) wants to build: "
 					+ buildList.toString());
-			
+
 			IPrologProject plProject = (IPrologProject) getProject().getNature(
 					PDTCore.NATURE_ID);
-			
 
-			final AsyncPrologSession as = ((PrologInterface2)plProject.getMetadataPrologInterface()).getAsyncSession();
-			
+			final AsyncPrologSession as = ((PrologInterface2) plProject
+					.getMetadataPrologInterface()).getAsyncSession();
+
 			monitor.beginTask(taskname, forgetList.size() + buildList.size());
-			as.addBatchListener(new DefaultAsyncPrologSessionListener(){
+			as.addBatchListener(new DefaultAsyncPrologSessionListener() {
 				public void goalSucceeded(AsyncPrologSessionEvent e) {
 					monitor.worked(1);
-					if(monitor.isCanceled()){
-						new Thread(){
+					if (monitor.isCanceled()) {
+						new Thread() {
 							public void run() {
 								try {
 									as.abort();
 								} catch (PrologInterfaceException e) {
 									Debug.rethrow(e);
 								}
-								Debug.debug("prolog builder aborted (theoretically)");
+								Debug
+										.debug("prolog builder aborted (theoretically)");
 							}
 						}.start();
-						
+
 					}
 				}
 			});
-			try{
-				forget(forgetList, as,monitor);			
-				build(buildList,as,monitor);
-			}finally{
-				if(as!=null){
+			try {
+				forget(forgetList, as, monitor);
+				build(buildList, as, monitor);
+			} finally {
+				if (as != null) {
 					as.dispose();
-					
+
 				}
 			}
 
-			PrologSession s = plProject.getMetadataPrologInterface().getSession();
-			try{
-				update_markers(buildList,s);
-			} finally{
-				if(s!=null){
+			PrologSession s = plProject.getMetadataPrologInterface()
+					.getSession();
+			try {
+				update_markers(buildList, s);
+			} finally {
+				if (s != null) {
 					s.dispose();
 				}
 			}
@@ -190,60 +191,107 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			return null;
 		} catch (OperationCanceledException e) {
 			throw e;
-			
-		}catch (PrologInterfaceException e) {
-			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin.getDefault().getErrorMessageProvider(), e, PDTCore.ERR_PIF);
+
+		} catch (PrologInterfaceException e) {
+			IStatus status = UIUtils
+					.createErrorStatus(PDTCorePlugin.getDefault()
+							.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
 			throw new CoreException(status);
-		}
-		catch (Throwable t) {
-			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin.getDefault().getErrorMessageProvider(), t, PDTCore.ERR_UNKNOWN);
+		} catch (Throwable t) {
+			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin
+					.getDefault().getErrorMessageProvider(), t,
+					PDTCore.ERR_UNKNOWN);
 			throw new CoreException(status);
 		}
 	}
 
-	private void update_markers(Set buildList, PrologSession s) throws CoreException, PrologException, PrologInterfaceException {
+	private void update_markers(Set buildList, PrologSession s)
+			throws CoreException, PrologException, PrologInterfaceException {
 		StringBuffer sb = new StringBuffer();
 		sb.append('[');
-		boolean first=true;
+		boolean first = true;
 		Map wsFiles = new HashMap();
 		for (Iterator it = buildList.iterator(); it.hasNext();) {
-			if(!first){
+			if (!first) {
 				sb.append(',');
 			}
 			IFile file = (IFile) it.next();
 			file.deleteMarkers(IMarker.PROBLEM, true, 0);
 			File ioFile = file.getLocation().toFile();
-			String plFileName =	Util.prologFileName(ioFile);
+			String plFileName = Util.prologFileName(ioFile);
 			wsFiles.put(plFileName, file);
 			sb.append('\'');
 			sb.append(plFileName);
 			sb.append('\'');
-			first=false;
+			first = false;
 		}
 		sb.append(']');
 		String fileList = sb.toString();
-		List list = s.queryAll("member(File,"+fileList+"),current_file_error(File," +
-				"error(Type, stream(_, Line, Column, CharOffset)))," +
-				"message_to_string(error(Type, _),Message)");
+		List list = s.queryAll("member(File," + fileList
+				+ "),current_file_error(File,"
+				+ "error(Type, stream(_, Line, Column, CharOffset))),"
+				+ "message_to_string(error(Type, _),Message)");
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
 			int line = Integer.parseInt((String) map.get("Line"));
 			int column = Integer.parseInt((String) map.get("Column"));
 			int offset = Integer.parseInt((String) map.get("CharOffset"));
-			String message = (String)map.get("Message");
+			String message = (String) map.get("Message");
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
-	        MarkerUtilities.setMessage(attributes, message);
-	        MarkerUtilities.setLineNumber(attributes, line);
-	        
-	        MarkerUtilities.setCharStart(attributes, offset);
-	        MarkerUtilities.setCharEnd(attributes, offset+1);
-	        
-	        
-	        attributes.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_ERROR));
-	        	marker.setAttributes(attributes);
+			MarkerUtilities.setMessage(attributes, message);
+			MarkerUtilities.setLineNumber(attributes, line);
+
+			MarkerUtilities.setCharStart(attributes, offset);
+			MarkerUtilities.setCharEnd(attributes, offset + 1);
+
+			attributes.put(IMarker.SEVERITY,
+					new Integer(IMarker.SEVERITY_ERROR));
+			marker.setAttributes(attributes);
+		}
+
+		list = s.queryAll("member(File," + fileList
+				+ "),pdt_file_problem(File," + "error(Error),From-To)");
+		for (Iterator it = list.iterator(); it.hasNext();) {
+			Map map = (Map) it.next();
+			String plFile = (String) map.get("File");
+			int start = Integer.parseInt((String) map.get("From"));
+			int end = Integer.parseInt((String) map.get("To"));
+			String message = (String) map.get("Error");
+			IFile wsFile = (IFile) wsFiles.get(plFile);
+			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
+			HashMap attributes = new HashMap();
+			MarkerUtilities.setMessage(attributes, message);
+
+			MarkerUtilities.setCharStart(attributes, start);
+			MarkerUtilities.setCharEnd(attributes, end);
+
+			attributes.put(IMarker.SEVERITY,
+					new Integer(IMarker.SEVERITY_ERROR));
+			marker.setAttributes(attributes);
+		}
+
+		list = s.queryAll("member(File," + fileList
+				+ "),pdt_file_problem(File," + "warning(Warning),From-To)");
+		for (Iterator it = list.iterator(); it.hasNext();) {
+			Map map = (Map) it.next();
+			String plFile = (String) map.get("File");
+			int start = Integer.parseInt((String) map.get("From"));
+			int end = Integer.parseInt((String) map.get("To"));
+			String message = (String) map.get("Warning");
+			IFile wsFile = (IFile) wsFiles.get(plFile);
+			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
+			HashMap attributes = new HashMap();
+			MarkerUtilities.setMessage(attributes, message);
+
+			MarkerUtilities.setCharStart(attributes, start);
+			MarkerUtilities.setCharEnd(attributes, end);
+
+			attributes.put(IMarker.SEVERITY,
+					new Integer(IMarker.SEVERITY_WARNING));
+			marker.setAttributes(attributes);
 		}
 	}
 
@@ -251,18 +299,16 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @param v
 	 * @throws IOException
 	 * @throws CoreException
-	 * @throws PrologInterfaceException 
+	 * @throws PrologInterfaceException
 	 */
-	private void build(Set v, AsyncPrologSession as,IProgressMonitor monitor)
+	private void build(Set v, AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, IOException, PrologInterfaceException {
-		
-		
-		for (Iterator it = v.iterator(); !monitor.isCanceled()&&it.hasNext();) {
+
+		for (Iterator it = v.iterator(); !monitor.isCanceled() && it.hasNext();) {
 			IFile file = (IFile) it.next();
-			build(file, as);					
+			build(file, as);
 		}
-		
-		
+
 	}
 
 	/*
@@ -279,14 +325,17 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				PDTCore.NATURE_ID);
 		AsyncPrologSession as = null;
 		try {
-		as = ((PrologInterface2)plProject.getMetadataPrologInterface()).getAsyncSession();
-		
-			forget(forgetList, as,monitor);
+			as = ((PrologInterface2) plProject.getMetadataPrologInterface())
+					.getAsyncSession();
+
+			forget(forgetList, as, monitor);
 		} catch (PrologInterfaceException e) {
-			IStatus status = UIUtils.createErrorStatus(PDTCorePlugin.getDefault().getErrorMessageProvider(), e, PDTCore.ERR_PIF);
+			IStatus status = UIUtils
+					.createErrorStatus(PDTCorePlugin.getDefault()
+							.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
 			throw new CoreException(status);
 		} finally {
-			if(as!=null){
+			if (as != null) {
 				as.dispose();
 			}
 		}
@@ -356,32 +405,31 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		});
 	}
 
-	private void forget(IFile file, AsyncPrologSession as) throws CoreException, PrologInterfaceException {
+	private void forget(IFile file, AsyncPrologSession as)
+			throws CoreException, PrologInterfaceException {
 		file.deleteMarkers(IMarker.PROBLEM, true, 0);
-		
+
 		File ioFile = file.getLocation().toFile();
-		String plFileName =	Util.prologFileName(ioFile);
-		
-		as.queryOnce(file, "forget_file_annotation('"+plFileName+"')");
-		
+		String plFileName = Util.prologFileName(ioFile);
+
+		as.queryOnce(file, "forget_file_annotation('" + plFileName + "')");
 
 	}
 
 	/**
 	 * @param as
-	 * @param monitor 
+	 * @param monitor
 	 * @param forgetList
 	 * @throws CoreException
-	 * @throws PrologInterfaceException 
+	 * @throws PrologInterfaceException
 	 */
 	private void forget(Set v, AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, PrologInterfaceException {
 		for (Iterator it = v.iterator(); it.hasNext();) {
 			IFile file = (IFile) it.next();
 			forget(file, as);
-			
+
 		}
-		
 
 	}
 

@@ -154,19 +154,21 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"use_module(library('/org/cs3/pdt/model/predicate_definition_factory'))," +
 					"use_module(library('/org/cs3/pdt/model/builtin_predicate_factory'))," +
 					"use_module(library('/org/cs3/pdt/model/pdt_index'))," +
-					"use_module(library('/org/cs3/pdt/model/pdt_handle'))," +
+					"use_module(library('/org/cs3/pdt/model/pdt_handle'))");/*," +
 					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +					
-					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
+					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");*/
 			if(map==null){
 				throw new RuntimeException("could not load annotator framework");
 			}
 			map=null;
 			map = s.queryOnce(
-					"register_annotator(library('/org/cs3/pdt/annotate/op_annotator'))," +
-					"register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
-					"register_annotator(library('/org/cs3/pdt/annotate/export_annotator'))," +
-					"register_annotator(library('/org/cs3/pdt/annotate/member_annotator'))," +
-					"register_annotator(library('/org/cs3/pdt/annotate/indexer'))");
+					"use_module(library('/org/cs3/pdt/annotate/op_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/export_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/member_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/undefined_export_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/singleton_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/indexer'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator modules: query failed.");
 			}
