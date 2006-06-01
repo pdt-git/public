@@ -49,7 +49,9 @@
 	pdt_inner_match/4,
 	pdt_subst/4,
 	pdt_aterm/1,
-	pdt_aterm_member/3
+	pdt_aterm_member/3,
+	pdt_functor/2,
+	pdt_operand/4
 ]).
 
 pdt_aterm(aterm(_,_)).
@@ -85,13 +87,35 @@ pdt_aterm(aterm(_,_)).
 
 pdt_aterm_member(List,Path, Elm):-
     match_elms(List,Path,Elm).
+pdt_operand(Operator,List,Path, Elm):-
+    match_operand(Operator,List,Path,Elm).
+pdt_functor(Aterm,Functor/Arity):-
+    pdt_aterm(Aterm),
+    !,
+    pdt_term_annotation(Aterm,Term,_),
+    functor(Term,Functor,Arity).
+pdt_functor(Term,Functor/Arity):-
+    functor(Term,Functor,Arity).
     
+
 match_elms(List,[1],Elm):-
     pdt_subterm(List,[1],Elm).
+%match_elms(List,[2],Elm):-
+%    pdt_subterm(List,[2],Elm).
 match_elms(List,[2|T],Elm):-
     pdt_subterm(List,[2],Elms),
     match_elms(Elms,T,Elm).
     	
+
+match_operand(Operator,ATerm,[],ATerm):-
+    \+ pdt_functor(ATerm,Operator),
+    !.
+match_operand(_Operator,ATerm,[1],Elm):-    
+    pdt_subterm(ATerm,[1],Elm).
+match_operand(Operator,ATerm,[2|T],Elm):-
+    pdt_subterm(ATerm,[2],Elms),
+    match_operand(Operator,Elms,T,Elm).
+
 
 %pdt_subterm(+Term,+Path,?Subterm).
 %succeeds if Term is a term or an annotated term and Path is a list of integers
@@ -193,47 +217,14 @@ pdt_top_annotation(aterm(A,_),A).
 pdt_term_annotation(aterm(A,T),T,A).
 
 pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
-    nonvar(AnotatedTerm),check_aterm(AnotatedTerm),
+    nonvar(AnotatedTerm),
     !,
     strip(AnotatedTerm,Term,Anotation).
 
 pdt_splice_annotation(Term,Anotation,AnotatedTerm):-
-    check_annotation(Term,Anotation),
-    !,
     splice(Term,Anotation,AnotatedTerm).
 
-check_annotation(Term,(TopAn,ArgsAn)):-
-    nonvar(ArgsAn),    
-    unbound_tail(TopAn),
- 	(   var(Term)
- 	->	ArgsAn=[]
-	;	Term=..[_|Args],
-		functor(Term,_,Arity),
-    	length(ArgsAn,Arity),
-    	check_arg_annotations(Args,ArgsAn)
-    ),!.
-check_annotation(Term,Anotation):-
-    throw(invalid_annotation(term(Term),annotation(Anotation))).
-    
-check_arg_annotations([],[]).
-check_arg_annotations([H|T],[AnH|AnT]):-
-    check_annotation(H,AnH),
-    check_arg_annotations(T,AnT).
 
-check_aterm(aterm(Top,AnotatedTerm)):-
-    unbound_tail(Top),
-    (	var(AnotatedTerm)
-    ->	true
-    ;	AnotatedTerm=..[_|Args],
-    	check_arg_aterms(Args)
-    ),!.
-check_aterm(Term):-
-	throw(invalid_aterm(Term)).    
-
-check_arg_aterms([]).
-check_arg_aterms([H|T]):-
-	check_aterm(H),
-	check_arg_aterms(T).
 	
 	    
 unbound_tail(Term):-

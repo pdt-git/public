@@ -81,7 +81,7 @@ pdt_annotation_add(In,Key,Value,[Prop|In]):-
 	
 
 
-get_values(In,Key,Values):-
+get_values(Prop,Key,Values):-
     Prop=..[Key,Value],
 	findall(Value,member(Key,Value),Values).    
 
