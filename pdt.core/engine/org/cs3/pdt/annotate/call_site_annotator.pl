@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is part of the Prolog Development Tool (PDT)
-% 
+%  
 % Author: Lukas Degener (among others) 
 % E-mail: degenerl@cs.uni-bonn.de
 % WWW: http://roots.iai.uni-bonn.de/research/pdt 

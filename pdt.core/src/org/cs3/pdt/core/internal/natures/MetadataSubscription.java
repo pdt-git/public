@@ -166,7 +166,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"use_module(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/export_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/member_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/undefined_export_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/undefined_exports_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/singleton_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/indexer'))");
 			if(map==null){

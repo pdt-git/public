@@ -39,7 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:-module(undefined_export_annotator,[]).
+:-module(undefined_exports_annotator,[]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
@@ -56,7 +56,9 @@
 term_annotation_hook(_,_,Annos,InTerm,OutTerm):-
     %% check if term is a module declaration
     pdt_strip_annotation(InTerm,':-'(module(_Module,_Exports)),_),    
-    pdt_member(defines(Defs),Annos),
+    pdt_member(defines(StatDefs),Annos),
+    pdt_member(defines_dynamic(DynDefs),Annos),
+    append(StatDefs,DynDefs,Defs),
     pdt_member(defines_module(Module),Annos),
 	%% check the exports list 
 	check_exports(InTerm,Module,Defs,OutTerm).

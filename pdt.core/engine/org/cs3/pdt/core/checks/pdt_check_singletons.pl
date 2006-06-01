@@ -19,7 +19,7 @@ check_singletons_terms([_|Terms],Occurance):-
 	check_singletons_terms(Terms,Occurance).    
 	
 check_singletons_term(Term,Occurance):-
-    pdt_term_annotation(Term,_,Annos),
+    pdt_term_annotation(Term,_,_),
     
 	pdt_subterm(Term,_,Occurance),
 	singleton(Occurance).

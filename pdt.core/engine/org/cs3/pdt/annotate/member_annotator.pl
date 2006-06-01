@@ -1,6 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is part of the Prolog Development Tool (PDT)
-% 
+%  
 % Author: Lukas Degener (among others) 
 % E-mail: degenerl@cs.uni-bonn.de
 % WWW: http://roots.iai.uni-bonn.de/research/pdt 
@@ -53,24 +53,72 @@ term_annotation_hook(_,_,FileAnos,InTerm,OutTerm):-
     ->	true
     ;	FileModule=user
     ),
-    pdt_strip_annotation(InTerm, Term, (TopAnnos, ArgAnnos)),
-	process_member(Term,FileModule,AddAnno),
-    pdt_splice_annotation(Term, ([AddAnno|TopAnnos],ArgAnnos),OutTerm).
+	process_member(InTerm,FileModule,OutTerm).
 
-process_member(Term,FileModule,clause_of(Module:Functor/Arity)):-
-    has_head(Term,FileModule, Module, Functor, Arity),
-    Functor\=':-'.
-process_member(':-'(Term),FileModule,Annotation):-
-    property_definition(Term,Property,Signatures),
-    module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures),
-    Annotation=..[Property,ModuleQualifiedSignatures].
 
-property_definition(Term,defines_dynamic,Sigs):-
-    Term=..[dynamic|Sigs].
-property_definition(Term,defines_multifile,Sigs):-
-    Term=..[multifile|Sigs].
-property_definition(Term,defines_module_transparent,Sigs):-
-    Term=..[transparent|Sigs].    
+process_member(InTerm,FileModule,OutTerm):-
+    pdt_term_annotation(InTerm,Term,Annos),
+    pdt_strip_annotation(InTerm,Stripped,_),
+    has_head(Stripped,FileModule, Module, Functor, Arity),
+    Functor\=(':-'),
+    pdt_term_annotation(OutTerm,Term,[clause_of(Module:Functor/Arity)|Annos]).
+%process_member(':-'(Term),FileModule,Annotation):-
+%    property_definition(Term,Property,Signatures),
+%    module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures),
+%    Annotation=..[Property,ModuleQualifiedSignatures].
+
+process_member(InTerm,FileModule,OutTerm):-
+    pdt_term_annotation(InTerm,':-'(InBody),DirectiveAnnos),
+    pdt_term_annotation(InBody,BodyTerm0,BodyAnnos),
+    BodyTerm0=..[Functor,InSigs],
+    property_functor(Property,Functor),
+    check_signatures(InSigs,Signatures,OutSigs),
+    BodyTerm1=..[Functor,OutSigs],
+	module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures),    
+    Annotation=..[Property,ModuleQualifiedSignatures],
+    pdt_term_annotation(OutBody,BodyTerm1,BodyAnnos),
+    pdt_term_annotation(OutTerm,':-'(OutBody),[Annotation|DirectiveAnnos]).
+
+
+property_functor(defines_dynamic,dynamic).
+property_functor(defines_multifile,multifile).
+property_functor(defines_module_transparent,transparent).
+
+check_signatures(InSigs,Signatures,OutSigs):-
+	findall(
+		ill_formed(Path,ASignature),
+		(	pdt_operand((,)/2,InSigs,Path,ASignature),
+			pdt_strip_annotation(ASignature,Signature,_),
+			\+ well_formed_signature(Signature)
+		),
+		IllFormedSignatures
+	),
+	findall(
+		Signature,
+		(	pdt_operand((,)/2,InSigs,Path,ASignature),
+			pdt_strip_annotation(ASignature,Signature,_),
+			well_formed_signature(Signature)
+		),
+		Signatures
+	),
+	add_ill_formed_annos(InSigs,IllFormedSignatures,OutSigs).
+
+add_ill_formed_annos(In,[],In).
+add_ill_formed_annos(In,[ill_formed(Path,InExport)|IFEs],Out):-
+    pdt_term_annotation(InExport,Term,Annotation),
+    pdt_term_annotation(OutExport,Term,[problem(error(malformed_signature))|Annotation]),
+    pdt_subst(In,Path,OutExport,Next),
+    add_ill_formed_annos(Next,IFEs,Out).
+
+	
+well_formed_signature(Name/Arity):-
+    atom(Name),
+    integer(Arity).	
+well_formed_signature(Module:Name/Arity):-
+    atom(Module),
+    atom(Name),
+    integer(Arity).	
+    
     
 module_qualified_signatures(_,[],[]).
 module_qualified_signatures(FileModule,[InH|InT],[OutH|OutT]):-
@@ -85,7 +133,7 @@ module_qualified_signature(_,(Module:Name)/Arity,Module:Name/Arity).
 
 file_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions)|OutAnnos]):-
     collect_definitions(Terms,Definitions),
-    findall(Property,property_definition(_,Property,[_]),Properties),
+    findall(Property,property_functor(Property,_),Properties),
     collect_properties(Properties,Terms,InAnnos,OutAnnos).
 
 collect_properties([],_,In,In).
