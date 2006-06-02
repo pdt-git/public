@@ -66,9 +66,9 @@ public abstract class AbstractEditorTracker extends AbstractPrologContextTracker
 	
 	private void check(IWorkbenchPartReference partRef) {
 		if(partRef instanceof IEditorReference){
-			
+			if(getCurrentPrologInterface()!=null){
 				fireContextChanged();
-			
+			}			
 		}
 	}
 	
