@@ -47,10 +47,22 @@
 	pdt_memberchk/2,	
 	pdt_chop_before/3,
 	pdt_chop_after/3,
-	pdt_remove_duplicates/2
+	pdt_remove_duplicates/2,
+	pdt_count/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
+
+pdt_count(Goal,N):-
+    nb_setval('pdt_util:pdt_count$counter',0),
+    forall(Goal,
+    	(	nb_getval('pdt_util:pdt_count$counter',Old),
+    		New is Old +1,
+    		nb_setval('pdt_util:pdt_count$counter',New)
+    	)
+    ),
+    nb_getval('pdt_util:pdt_count$counter',N).
+
 
 /*
 as the implementation of the sys pred call_cleanup/2 seems to be
