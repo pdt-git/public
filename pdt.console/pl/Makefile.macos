@@ -38,13 +38,14 @@
 #    particular conditions under which they may be used, modified and/or  #
 #    distributed.                                                        #
 ##########################################################################
-
-SO= $(shell xpce -qt [libname],full_name)
-BASE= $(shell xpce -qt [libname],base_name)
+SWI_EXECUTABLE="/opt/local/bin/xpce"
+SWI_HOME="/opt/local/lib/swipl-5.6.12"
+SO= $(shell $(SWI_EXECUTABLE) -qt [libname],full_name)
+BASE= $(shell $(SWI_EXECUTABLE) -qt [libname],base_name)
 OBJ= $(BASE).o
 SRC= $(OBJ:.o=.c)
-MACOSX_DEPLOYMENT_TARGET="10.4"
-SWI_HOME="/opt/local/lib/swipl-5.6.12"
+export MACOSX_DEPLOYMENT_TARGET="10.4"
+
 
 
 all: $(SO)
@@ -54,11 +55,9 @@ clean:
 	rm $(OBJ)
 	rm $(SO)
 
-$(SO): $(OBJ)
-	export MACOSX_DEPLOYMENT_TARGET
-	gcc  -Wall -g -undefined dynamic_lookup -dynamiclib -o $(SO) $(OBJ)
+$(SO): $(OBJ)	
+	MACOSX_DEPLOYMENT_TARGET="10.4" gcc  -Wall -g -undefined dynamic_lookup -dynamiclib -o $(SO) $(OBJ)
 
 $(OBJ): $(SRC)
-	export MACOSX_DEPLOYMENT_TARGET
-	gcc -Wall -g -I$(SWI_HOME)/include -fpic -c $(SRC)
+	MACOSX_DEPLOYMENT_TARGET="10.4" gcc -Wall -g -I$(SWI_HOME)/include -fpic -c $(SRC)
 
