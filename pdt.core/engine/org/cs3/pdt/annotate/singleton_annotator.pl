@@ -53,9 +53,11 @@
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
 	pdt_term_annotation(InTerm,_,Annos),
     pdt_member(singletons(Singletons),Annos),
+    pdt_member(variable_names(Variables),Annos),
 
 	%% check the exports list 
-	check_singletons(InTerm,Singletons,OutTerm).
+	check_singletons(InTerm,Singletons,TmpTerm),
+	check_no_singletons(TmpTerm,Variables,OutTerm).
 
     
 check_singletons(In,Singletons,Out):-
@@ -64,8 +66,9 @@ check_singletons(In,Singletons,Out):-
 	findall(singleton(Path,Singleton),
 		(	pdt_subterm(In,Path,Singleton),
 			pdt_term_annotation(Singleton,Var,_),
-			member(_=Value,Singletons),
-			Var==Value			
+			member(Name=Value,Singletons),
+			Var==Value,
+			\+atom_concat('_',_,Name)
 		),
 		Occurances
 	),
@@ -78,4 +81,32 @@ add_singleton_annos(In,[singleton(Path,InExport)|IFEs],Out):-
     pdt_subst(In,Path,OutExport,Next),
     add_singleton_annos(Next,IFEs,Out).
 
+check_no_singletons(In,[],In).
+check_no_singletons(In,[Variable|Variables],Out):-
+	check_no_singleton(In,Variable,Tmp),
+	check_no_singletons(Tmp,Variables,Out).
+
+check_no_singleton(In,Name=Variable,Out):-
+    atom_concat('_',_,Name),
+    !,
+	findall(no_singleton(Path,Singleton),
+		(	pdt_subterm(In,Path,Singleton),
+			pdt_term_annotation(Singleton,Var,_),
+			Variable==Var			
+		),
+		Occurances
+	),
+	length(Occurances,Count),
+	(	Count>1
+	->	add_no_singleton_annos(In,Occurances,Out)
+	;	In=Out
+	).
+check_no_singleton(In,_,In).
+
+add_no_singleton_annos(In,[],In).
+add_no_singleton_annos(In,[no_singleton(Path,InExport)|IFEs],Out):-
+    pdt_term_annotation(InExport,Term,Annotation),
+    pdt_term_annotation(OutExport,Term,[problem(warning(no_singleton))|Annotation]),
+    pdt_subst(In,Path,OutExport,Next),
+    add_no_singleton_annos(Next,IFEs,Out).
     

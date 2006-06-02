@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jardesc>
+<jar path="Z:/testen/deploy/prolog_interface-0.2M5-00.jar"/>
+<options buildIfNeeded="true" compress="true" descriptionLocation="/pdt.runtime/pif-export.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" useSourceFolders="false"/>
+<manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
+<sealing sealJar="false">
+<packagesToSeal/>
+<packagesToUnSeal/>
+</sealing>
+</manifest>
+<selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
+<javaElement handleIdentifier="=pdt.runtime.socket/src"/>
+<javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.cterm"/>
+<javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.cterm.internal"/>
+<javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.prolog"/>
+<folder path="/pdt.runtime/library/pif"/>
+<folder path="/pdt.runtime/library/common"/>
+<javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.prolog.internal"/>
+<javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.cterm.internal.parser"/>
+</selectedElements>
+</jardesc>

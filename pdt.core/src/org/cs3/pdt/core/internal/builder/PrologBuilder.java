@@ -259,7 +259,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFile = (String) map.get("File");
 			int start = Integer.parseInt((String) map.get("From"));
 			int end = Integer.parseInt((String) map.get("To"));
-			String message = (String) map.get("Error");
+			String message = getMessage((String) map.get("Error"));
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
@@ -280,7 +280,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFile = (String) map.get("File");
 			int start = Integer.parseInt((String) map.get("From"));
 			int end = Integer.parseInt((String) map.get("To"));
-			String message = (String) map.get("Warning");
+			String message = getMessage((String) map.get("Warning"));
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
@@ -293,6 +293,26 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 					new Integer(IMarker.SEVERITY_WARNING));
 			marker.setAttributes(attributes);
 		}
+	}
+
+	private String getMessage(String string) {
+		if("singleton".equals(string)){
+			return "[singleton] Variable apears only once in clause.";
+		}
+		if("no_singleton".equals(string)){
+			return "[no_singleton] Variable is not a singleton.";
+		}
+		if("malformed_export".equals(string)){
+			return "[malformed_export] Malformed signature in export list.";
+		}
+		if("undefined_export".equals(string)){
+			return "[undefined_export] Predicate is exported but not defined by the module.";
+		}		
+		if("malformed_signature".equals(string)){
+			return "[malformed_signature] Malformed signature in property definition.";
+		}
+		
+		return "[unknown error] "+string;
 	}
 
 	/**
