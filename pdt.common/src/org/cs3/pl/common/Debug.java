@@ -269,7 +269,7 @@ public class Debug {
 		}
 
 		public _RuntimeException(String message) {
-			cause=new RuntimeException();
+			cause=new RuntimeException(message);
 			this.message=message;
 		}
 
