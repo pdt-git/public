@@ -89,6 +89,13 @@ enclosing(_id, _Encl):-precedenceT(_id, _,_Encl,_), !.
 enclosing(_id, _Encl):-nopT(_id, _,_Encl), !.
 
 
+/**
+ * getTerm(?Id, ?Term)
+ *
+ * binds Term to the fact represented by the id, e.g.:
+ *
+ * getTerm(1, classDefT(1,2,'Test',[3,4])
+ */
 getTerm(_id,packageT(_id,_name)) :-                           packageT(_id,_name).
 getTerm(_id,getFieldT(_id,_pid,_encl,_v1,_v2,_v3)) :-         getFieldT(_id,_pid,_encl,_v1,_v2,_v3).
 getTerm(_id,selectT(_id,_pid,_encl,_v1,_v2,_v3)) :-           selectT(_id,_pid,_encl,_v1,_v2,_v3).
@@ -137,7 +144,12 @@ test(getTermT01) :-
     retract(methodDefT(testId,1,2,3,type(1,class, 0),5,6)).
 
     
-
+/**
+ * getToplevel(+Tree, ?Toplevel)
+ *
+ * binds Toplevel to the enclosing 
+ * toplevelT (file) of Tree.
+ */
 getToplevel(Id, _) :-
     not(tree(Id,_,_)),
     !,
@@ -167,7 +179,13 @@ getToplevel(Id, TL) :-
     !,
     getToplevel(Class, TL).
 
-
+/**
+ * can_modify(+Id)
+ *
+ * checks if Id is a pef defined in a
+ * source class. 
+ * The enclosing class is not marked with externT/1.
+ */
 can_modify(_id) :-
     enclClass(_id, _class),
     not(externT(_class)).
@@ -183,6 +201,13 @@ reference(_id, _Ref) :-
     % and reference _id
     arg(_, _c, _id).
     
+    
+/**
+ * getPackage(+Tree,?Package)
+ *
+ * binds Package to the enclosing 
+ * package id of Tree.
+ */
 getPackage(_pckg,_pckg):-
     packageT(_pckg, _),
     !.
@@ -443,9 +468,13 @@ contains_type(_list,_type):-
     member(_node,_list),
     classDefT(_node,_,_,_defs),
     contains_type(_defs,_type).
-    
-    
 
+/**    
+ * findId(+Root, ?Id)
+ *
+ * looks up the tree Id
+ * in the sub tree of Root.
+ */ 
 findId(_root, _id) :-
     sub_trees(_root, _subs),
     !,
@@ -453,7 +482,14 @@ findId(_root, _id) :-
 findId(_root, _id) :-
     format("Tree node for ~d does not exist!~n", [_root]).
 
-
+/**    
+ * findId(+Root, +[Subtree1,...], ?Id)
+ *
+ * looks up the tree Id
+ * in the sub tree of Root.
+ *
+ * private predicate (TODO: will be hidden in a module)
+ */ 
 findId(_, [], _).
 findId(_root, [_h | _t], _h) :-
     tree(_h, _,_type),
@@ -529,7 +565,16 @@ getSymbolName(_id, _name) :-
 getSymbolName(_id, 'null').
 
 
-
+/**
+ * beforeInBlock(+Elem, +NewElem, -EnclBlock, -NewList)
+ * 
+ * insert the pef NewElem into the enclosing block of Elem
+ * at the position before Elem. If the parent of Elem is not
+ * a block (parent is a nested structure like an expression) 
+ * NewElem will be added before the first ancestor pef which 
+ * a member of a block.
+ * 
+ */
 beforeInBlock(_elem, _newElem, _EnclBlock, _NewList) :-
     enclBlockMember(_elem, _BlockMember),
     tree(_BlockMember, _EnclBlock, _),
@@ -537,7 +582,13 @@ beforeInBlock(_elem, _newElem, _EnclBlock, _NewList) :-
     insertBefore(_List, _BlockMember, _newElem, _NewList).
 
 
-
+/**
+ * enclBlockMember(+Tree, +Anchestor)
+ *
+ * Ancestor has a block as its parent.
+ *
+ * private predicate (TODO: will be hidden in a module)
+ */
 enclBlockMember(_tree, _tree) :-
     tree(_tree, _Parent, _),
     blockT(_Parent, _, _, _).
@@ -550,13 +601,28 @@ enclBlockMember(_tree, _BlockMember) :-
     not(equals(_Factname, packageT)),
     enclBlockMember(_Parent, _BlockMember).
 
-enclBlock(_tree, _tree) :- tree(_tree, _p, blockT).
+/**
+ * enclBlock(?Tree, ?Block)
+ *
+ * Block is the enclosing block of Tree.
+ */
+enclBlock(_tree, _tree) :- 
+	tree(_tree, _p, blockT).
 enclBlock(_tree, _Block) :-
    enclBlockMember(_tree, _BlockMember), 
    tree(_BlockMember, _Block, _).
 
 
-
+/**
+ * getReceiver(?Expr, ?Receiver)
+ *
+ * Receiver is the expression on which
+ * Expr is evaluated. E.g. f is a field access
+ * expression on the receiver r in the expression " r.f ".
+ * Receiver is null, if the receiver is implicit (this).
+ * 
+ * Only implemented for identT, selectT, getFieldT and applyT.
+ */
 getReceiver(_ident, 'null') :-     identT(_ident, _, _, _, _),!.
 getReceiver(_select, _Receiver) :- selectT(_select, _, _, _, _Receiver, _).
 getReceiver(_select, _Receiver) :- getFieldT(_select, _, _, _Receiver, _, _).
@@ -644,6 +710,11 @@ getType(Array, Type) :-
 getType(null, type(class,null,0)).
 
 % optimiert fuer ident | selects
+/**
+ * getRefType(?Tree, ?Type)
+ *
+ * TODO: to be removed
+ */
 getRefType(_ident, _Type) :-
     identT(_ident,_,_,_,_ref),
     getType(_ref, _Type).
