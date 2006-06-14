@@ -2025,7 +2025,7 @@ public class FactGenerator extends ASTVisitor {
 		writer.writeFact("identT", new String [] {
 				identId,
 				idResolver.getID(node),
-				idResolver.getID(node.getParent()),
+				idResolver.getID(getEnclosingNode(node)),
 				quote(node.getType().resolveBinding().getQualifiedName()),
 				typeResolver.getTypeTerm(node.getType())
 				
