@@ -315,7 +315,7 @@ tree_constraints(externT,[[]]).
 tree_constraints(fieldDefT ,[[classDefT],[typeTermType],[atomType],[expressionType,nullType]]).
 tree_constraints(forLoopT,[[allType],[methodDefT],[expressionType,nullType,localDefT],[expressionType,nullType],[expressionType,nullType],[statementType]]).
 tree_constraints(getFieldT, [[allType],[methodDefT,fieldDefT],[expressionType,nullType],[atomType], [fieldDefT,nullType]]). % if it is the length field of an array
-tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atomType], [classDefT,localDefT,paramDefT,nullType,packageT]]).
+tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atomType], [classDefT,localDefT,paramDefT,nullType,packageT]]). % FIXME: should contain: ,typeTermType
 tree_constraints(ifT,[[allType],[methodDefT],[expressionType],[blockT,statementType],[blockT,statementType,nullType]]).
 tree_constraints(implementsT,[[],[classDefT]]).
 tree_constraints(importT ,[[toplevelT],[packageT,classDefT]]).
@@ -334,7 +334,7 @@ tree_constraints(packageT ,[[atomType]]).
 tree_constraints(paramDefT ,[[methodDefT,catchT],[typeTermType],[atomType]]).
 tree_constraints(precedenceT,[[allType],[methodDefT,fieldDefT],[expressionType]]).
 tree_constraints(returnT,[[allType],[methodDefT],[expressionType,nullType]]).
-tree_constraints(selectT, [[allType], [methodDefT,fieldDefT], [atomType],[selectT,identT],[classDefT,packageT]]).
+tree_constraints(selectT, [[allType], [methodDefT,fieldDefT], [atomType],[selectT,identT],[classDefT,packageT]]).% FIXME: should contain: ,typeTermType
 tree_constraints(switchT,[[allType],[methodDefT],[expressionType],[statementType]]).
 tree_constraints(synchronizedT,[[allType],[methodDefT],[expressionType],[blockT]]).
 tree_constraints(throwT,[[allType],[methodDefT],[expressionType]]).
