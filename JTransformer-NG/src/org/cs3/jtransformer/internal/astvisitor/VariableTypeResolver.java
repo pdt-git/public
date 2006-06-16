@@ -21,7 +21,7 @@ public class VariableTypeResolver extends TypeResolver {
 	public VariableTypeResolver(FQNTranslator fqnresolve, IIDResolver idresolver){
 		super(fqnresolve,idresolver);
 	}
-	private Hashtable types = new Hashtable();
+	protected Hashtable types = new Hashtable();
 	private int varnum = 0;
 	
 	private Hashtable vars = new Hashtable();
