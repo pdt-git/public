@@ -175,6 +175,12 @@
              style="push"
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              id="org.cs3.jtransformer.internal.actions.regenerateclasses"/>
+       <action
+             class="org.cs3.jtransformer.internal.actions.AddingFactsToClipboard"
+             id="org.cs3.pdt.internal.actions.addingfactstoclipboard"
+             label="adding selection to clipboard"
+             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
+             style="push"/>
     </actionSet>
  </extension>
  <extension
