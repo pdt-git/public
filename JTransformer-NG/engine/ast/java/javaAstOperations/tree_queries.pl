@@ -507,7 +507,11 @@ findId(_root, [_h | _t], _id) :-
     findId(_h, _id),
     findId(_root, _t, _id).
 
-
+/**
+ * new_ids_by_list(+List,-IdList)
+ *
+ * Creates a list of Ids of the same lenght as List. 
+ */
 
 new_ids_by_list([],[]).
 new_ids_by_list([_ | _t],[_id | _T]) :-
@@ -723,9 +727,11 @@ getRefType(_select, _Type) :-
     selectT(_select,_,_,_,_,_ref),
     getType(_ref, _Type).
 
-/*
-    Returns null if the id refers to an this ident,
-    else it returns id
+/**
+  nullIfThis(+Expr, -NullOrExpr)
+
+   Returns null if the id refers to an this ident,
+   else it returns id
 */
 nullIfThis(_this, 'null') :-
     identT(_this, _, _, 'this', _),!.
@@ -792,6 +798,12 @@ subtype(Var, _):-
 stringType(type(class, _id, 0)) :-
     stringClass(_id).
 
+/**
+ * stringClass(-Id)
+ *
+ * Binds Id to the java.lang.String
+ * class Id.
+ */
 stringClass(_ID) :-
     packageT(_syspid, 'java.lang'),
     classDefT(_ID, _syspid, 'String', _).               

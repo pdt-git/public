@@ -284,6 +284,14 @@ delete(_elem) :-
         markEnclAsDirty(_elem),
         asserta(rollback(assert(_elem))).
 
+/*
+	replace(+Pef1,+Pef2)
+
+	replaces Pef1 with Pef2.
+	Pef1 and Pef2 must be a bound PEF terms. 
+	The replacement is logged and
+	will be undone in the next rollback.
+*/
 replace(java_fq(Elem1),java_fq(Elem2)):-
     !,
     java_fq_to_pef(Elem1,PEF1),

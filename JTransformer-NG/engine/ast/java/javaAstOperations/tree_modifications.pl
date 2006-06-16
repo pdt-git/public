@@ -52,7 +52,7 @@ add_to_class(_class, _id) :-
     add(classDefT(_class, _p, _n, _newMembers)).
 
 /**
-        rec_set_encl_method(+Id, +Encl)
+   rec_set_encl_method(+Id, +Encl)
 
         Set the enclosing element of the tree Id
         and all its sub trees to Encl. 
@@ -61,7 +61,8 @@ add_to_class(_class, _id) :-
         
         INFO: This predicate uses the add/1 and delete/1 
         predicates which track all changes to
-        the factbase in the rollback functionality.
+        the factbase in the rollback facility.
+        Use rollback/0 to undo this operation.
 */
 
 rec_set_encl_method('null', _).
@@ -134,7 +135,7 @@ set_encl_method(_id,_):-
 
 
 /**
-        rec_set_Parent(+Id, +Parent)
+   rec_set_parent(+Id, +Parent)
 
         Sets the parent of the tree Id or the list of 
         trees IdList to Parent.
@@ -223,10 +224,11 @@ set_parent([_H | _T],_newParent) :-
 
 
 /**
- replaceId(+Term, +oldId, +newId)
- 
- Replaces the
-*/
+ * replaceId(+PefId, +OldId, +NewId)
+ *
+ * Replaces OldId with NewId in the fact 
+ * represented by PefId.
+ */
 
 replaceId(_id, _oldId, _newId) :-
     getTerm(_id, _oldTerm),
@@ -235,11 +237,24 @@ replaceId(_id, _oldId, _newId) :-
     add(_newTerm).
 
 
+/**
+ * replaceIdInTerm(+Term, -TranslatedTerm,+OldId, +NewId)
+ *
+ * Replaces OldId with NewId in Term an binds the resulting
+ * Term to TranslatedTerm.
+ */
 replaceIdInTerm(_term, _Translated,_oldId, _newId) :-
     _term =.. [_name | _args],
     replaceIdInList(_args, _translatedArgs,_oldId, _newId),
     _Translated =.. [_name | _translatedArgs].
 
+/**
+ * replaceIdInList(+List, -TranslatedList,+OldMember, +MewMember)
+ *
+ * Replaces the member OldMember with NewMember in the 
+ * list List an binds the resulting List to TranslatedList.
+ * Term to TranslatedTerm.
+ */
 replaceIdInList([], [],_,_) :- !.
 replaceIdInList([_oldId | _t], [_newId | _rest], _oldId, _newId) :-
     replaceIdInList(_t, _rest, _oldId, _newId).
@@ -272,12 +287,24 @@ createIdentRefParam(_param,_parent, _Ident) :-
     new_id(_Ident),
     add(identT(_Ident, _parent, _encl, _name, _param)).
 
+/**
+ * createThisIdent(-Ident,+Parent, +Encl, +Class)
+ *
+ * Create new this identT fact with Parent as its parent
+ * Encl as its enclosing element and Class as its
+ * instance type.
+ */
 createThisIdent(_Ident,_parent, _encl, _class) :-
     new_id(_Ident),
 %    debugme,
     add(identT(_Ident, _parent, _encl, 'this', _class)).
 
 
+/**
+ * add_body(+Method, +Body)
+ *
+ * replaces the current body of Method with Body
+ */
 add_body(_elem, _body):-
     methodDefT(_elem,_parent,_name,_parm,_type,_exc, _),
     action(replace(methodDefT(_elem,_parent,_name,_parm,_type,_exc, _body))).
@@ -290,6 +317,12 @@ add_body(_elem, _init):-
     fieldDefT(_elem, _class, _RetType, _name, _),
     action(replace(fieldDefT(_elem, _class, _RetType, _name, _init))).
 
+/**
+ * addToToplevel(+Toplevel, +Member)
+ * 
+ * appends Member to Toplevel.
+ * No validity check is performed on Member.
+ */
 
 addToToplevel(_tl, _id) :- not(toplevelT(_tl, _, _, _)), !.
 addToToplevel(_tl, _id) :-
@@ -302,7 +335,13 @@ addToToplevel(_tl, _id) :-
     append(_members, [_id], _newMembers),
     add(toplevelT(_tl, _p, _n, _newMembers)).
 
-
+/**
+ * removeFromBlock(+Block, +Pef)
+ *
+ * Removes Pef from Block.
+ * This operation is logged and will be undone
+ * 
+ */
 removeFromBlock(_block, _id) :- not(blockT(_block, _, _, _)), !.
 removeFromBlock(_block, _id) :-
     blockT(_block, _p, _e, _members),
@@ -310,6 +349,11 @@ removeFromBlock(_block, _id) :-
     delete(blockT(_block, _p, _e, _members)),
     add(blockT(_block, _p, _e, _newMembers)).
 
+/**
+ * addToBlock(+Block, +Pef | +[Pef1,..])
+ *
+ * appends a pef or a pef list to a block.
+ */
 addToBlock(_block, []) :- !.
 addToBlock(_block, [_H, _T]) :-
     addToBlock(_block, _H),
@@ -326,6 +370,11 @@ addToBlock(_block, _id) :-
     append(_members, [_id], _newMembers),
     add(blockT(_block, _p, _e, _newMembers)).
 
+/**
+ * removeFromMethodArgs(+Method, +Pef)
+ *
+ * removes Pef from the parameters of Method.
+ */
 removeFromMethodArgs(_method, _id) :- not(methodDefT(_method, _, _, _, _, _, _)), !.
 removeFromMethodArgs(_method, _id) :-
     methodDefT(_method, _p, _n, _members, _r, _e, _b),
@@ -333,6 +382,11 @@ removeFromMethodArgs(_method, _id) :-
     delete(methodDefT(_method, _p, _n, _members, _r, _e, _b)),
     add(methodDefT(_method, _p, _n, _newMembers, _r, _e, _b)).
 
+/**
+ * addToMethodArgs(+Method, +Pef)
+ *
+ * adds Pef to the parameters of Method.
+ */
 addToMethodArgs(_method, _id) :- not(methodDefT(_method, _, _, _, _, _, _)), !.
 addToMethodArgs(_method, _id) :-
     methodDefT(_method, _p, _n, _members, _r, _e, _b),
@@ -383,6 +437,15 @@ removeTagKind(DeletionKind,Tag) :-
                 )
         ).
 
+/**
+ * deepDelete(+Pef | +[Pef1,...])
+ *
+ * deeply deletes Pef or a list of pefs.
+ * To remove the element delete/1 is used.
+ * Therefore the deletions are logged and
+ * will be undone in the next rollback.
+ */
+
 deepDelete([]).
 deepDelete([_head | _tail]) :-
     sub_trees(_head, _subtrees),
@@ -395,6 +458,16 @@ deepDelete(_id) :-
     tree(_id, _,_),
     !,
     deepDelete([_id]).
+
+/**
+ * deepRetract(+Pef | +[Pef1,...])
+ *
+ * deeply retracts Pef or a list of pefs.
+ * In contrast to deepDelete/1 the pefs
+ * are simply retracted from the factbase
+ * without logging the operation for future
+ * rollback operations.
+ */
 
 deepRetract([]).
 deepRetract([Tree | _]) :-
@@ -484,7 +557,15 @@ createReturnOrExec(_parent, _encl, type(basic, void, 0), _stat, _exec) :-
 createReturnOrExec(_parent, _encl, _type, _stat, _return) :-
     add(returnT(_return, _parent, _encl, _stat)).
 
-    
+/**
+ * deleteToplevelOfClass(+Toplevel)
+ * 
+ * delete the complete toplevel with all
+ * descendants.
+ * The deletion operation is logged and
+ * will be undone in the next rollback/0 operation.
+ */
+
 deleteToplevelOfClass(Id) :-
     modifierT(Id,public),
     getToplevel(Id, Tl),
