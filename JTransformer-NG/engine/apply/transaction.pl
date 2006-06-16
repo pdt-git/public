@@ -35,18 +35,46 @@ toggle_rollback_debug :-
     format('rollback debug~n',[]),
         assert(debug_rollback_output).
 
+/**
+ * checkpoint_new(+Checkpoint)
+ *
+ * define new check point for the
+ * rollback facility.
+ */
 checkpoint_new(Checkpoint):-
     new_id(ID),
     atom_concat(checkpoint_,ID,Checkpoint),
     asserta(rollback(rollback_checkpoint(Checkpoint))).
 
+/**
+ * checkpoint_commit(+Checkpoint)
+ *
+ * commit the rollback check point Checkpoint.
+ * This will not commit the facts, it
+ * will just remove the check point.
+ * use commit/0 to remove all existing 
+ * rollback information.
+ *
+ * TODO: rename to remove_checkpoint
+ */
 checkpoint_commit(Checkpoint) :-
     retractall(rollback_checkpoint(Checkpoint)).
 
+/**
+ * commit
+ *
+ * commits all rollback information.
+ * This predicate deletes all rollback logging information.
+ */
 commit :-
     retractall(rollback(_)),
     retractall(changed(_)).
     
+/**
+ * checkpoint_rollback(+Checkpoint)
+ *
+ * rollback to the checkpoint Checkpoint.
+ */
 checkpoint_rollback(Checkpoint) :-
     catch(
 	    findall(Term, 
@@ -82,6 +110,13 @@ delete_checkpoint(rollback_checkpoint(Checkpoint)):-
 	rollback_debug_format('~w~n',[retract(rollback_checkpoint(Checkpoint))]),
     !.
 
+/**
+ * rollback/0
+ *
+ * undoes all add/1, delete/1 and replace/2 operations
+ * since the last rollback evaluation.
+ * 
+ */
 rollback :-
     findall(Term, 
     (
