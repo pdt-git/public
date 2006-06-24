@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
+package org.cs3.pl.prolog;
 
 import java.util.Set;
 

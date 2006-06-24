@@ -68,10 +68,13 @@ import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.DefaultPrologLibrary;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.cs3.pl.prolog.PrologLibrary;
+import org.cs3.pl.prolog.PrologLibraryManager;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
@@ -239,7 +242,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				.newInstance(impl);
 		factory.setResourceLocator(new DefaultResourceFileLocator(new File(
 				bootStrapDir)));
-
+		factory.setLibraryManager(getLibraryManager());
 		prologInterface = factory.create();
 
 		return prologInterface;

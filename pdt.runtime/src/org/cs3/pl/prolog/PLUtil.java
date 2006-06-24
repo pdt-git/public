@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
+package org.cs3.pl.prolog;
 
 import java.io.File;
 import java.util.HashMap;
@@ -55,9 +55,6 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.internal.ATermFactory;
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.

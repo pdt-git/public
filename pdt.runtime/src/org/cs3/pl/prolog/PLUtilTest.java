@@ -40,17 +40,16 @@
  ****************************************************************************/
 
 
-package org.cs3.pdt.runtime;
+package org.cs3.pl.prolog;
 
 import java.util.Iterator;
 import java.util.Map;
 
+import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
-import org.cs3.pl.prolog.PrologSession2;
 
 import junit.framework.TestCase;
 

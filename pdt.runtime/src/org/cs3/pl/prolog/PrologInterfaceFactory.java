@@ -64,6 +64,8 @@ public abstract class PrologInterfaceFactory {
 
     private ResourceFileLocator locator= new DefaultResourceFileLocator().subLocator(".PrologInterface");
 
+	private PrologLibraryManager libraryManager;
+
     public static PrologInterfaceFactory newInstance(){
         return newInstance(DEFAULT);
     }
@@ -95,10 +97,17 @@ public abstract class PrologInterfaceFactory {
         return locator;
     }
 
+    public void setLibraryManager(PrologLibraryManager mgr){
+    	this.libraryManager=mgr;
+    }
+    
+    public PrologLibraryManager getLibraryManager(){
+    	return this.libraryManager;
+    }
     
     public File ensureInstalled(String res, Class clazz){
         File f = locator.resolve(res);
-        //XXX only temporarily! this should be removed for better performance. --lu
+        
         if(f.exists()){
             f.delete();
         }
