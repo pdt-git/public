@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
+package org.cs3.pl.prolog;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
+
 
 
 /**

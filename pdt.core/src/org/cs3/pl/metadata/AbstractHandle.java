@@ -49,8 +49,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.runtime.PLUtil;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;

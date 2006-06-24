@@ -4,13 +4,13 @@ import java.io.File;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.PLUtil;
-import org.cs3.pdt.runtime.PrologLibraryManager;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 
 import junit.framework.TestCase;

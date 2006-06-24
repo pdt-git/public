@@ -46,9 +46,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.runtime.PLUtil;
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+//import org.cs3.pdt.runtime.PrologRuntime;
+//import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 
@@ -76,7 +75,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {
 				
-					PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{PrologRuntime.LIB_PIF});
+					PLUtil.configureFileSearchPath(pif.getFactory().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});
 					initSession.queryOnce("use_module(library(pif_observe))");
 				
 			}
