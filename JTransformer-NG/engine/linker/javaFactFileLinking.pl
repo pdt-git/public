@@ -1,5 +1,27 @@
 % Author: Tobias
 % Date: 14.11.2002
+/**
+ * Usage:
+ *
+ * 1. for classes or package generate:
+ *     local2FQN(lId(<MyLocalID>), fqn('<full qualified class or package name>')). 
+ *    for fields:
+ *     local2FQN(lId(<MyLocalID>), fqn('<full qualified class name>', '<field name>')). 
+ *    for method:
+ *     local2FQN(lId(<MyLocalID>), fqn('<full qualified class name>', '<method name>', ['<fqn param type 1>', ...])). 
+ * 
+ * 2. Now add your pefs / facts via inTe/1 (interprete Term), e.g.: 
+ * 
+ *     :- inTe(classDefT(lId(<classId>),lId(<classId | packageId>), <name>, [lId(<body id | null>), ...]).
+ *
+ * 3. clean local symbol table (localFQN, symbol)
+ *     :- retractLocalSymtab.
+ *
+ * 4. retrieve the FQNs of the unresolved class names (via backtracking):
+ *     :- unresolved_types(-UnresolvedTypeName)
+ */
+
+
 
 /**
  * globalIds(+full qualfied type name, +Id)
