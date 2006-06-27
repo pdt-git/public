@@ -184,7 +184,10 @@ public class SocketServerStartAndStopStrategy implements
 			
 
 			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
-			BufferedWriter writer = new BufferedWriter(new FileWriter(logFile,
+			// TR: Do not change this constructor call!
+			// J2ME requirement: FileWriter(File,boolean) -> FileWriter(String, boolean)
+			BufferedWriter writer = new BufferedWriter(new FileWriter(
+					logFile.getAbsolutePath(),
 					true));
 			writer.write("\n---8<-----------------------8<---\n");
 			writer.write(new Date().toString() + "\n");
