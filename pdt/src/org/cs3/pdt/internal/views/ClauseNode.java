@@ -51,8 +51,10 @@ import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.views.properties.IPropertySource;
 
-public class ClauseNode implements Clause{
+public class ClauseNode implements Clause,IAdaptable{
 	CTerm term;
 	
 	private SourceLocation loc;
@@ -122,5 +124,18 @@ public class ClauseNode implements Clause{
 	}
 	public int hashCode() {
 		return getSourceLocation().hashCode();
+	}
+	
+	public CTerm getHeadTerm(){
+		if(term.getFunctorValue().equals(":-") && term.getArity()==2){
+			return ((CCompound)term).getArgument(0);
+		}
+		return term;
+	}
+	public Object getAdapter(Class adapter) {
+		if(IPropertySource.class.isAssignableFrom(adapter)){
+			return new CTermPropertySource(term);
+		}
+		return null;
 	}
 }

@@ -168,6 +168,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"use_module(library('/org/cs3/pdt/annotate/member_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/undefined_exports_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/singleton_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/variable_name_annotator')),"+ 
 					"use_module(library('/org/cs3/pdt/annotate/indexer'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator modules: query failed.");

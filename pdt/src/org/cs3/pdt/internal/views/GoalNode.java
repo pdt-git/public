@@ -43,8 +43,10 @@ package org.cs3.pdt.internal.views;
 
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Goal;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.views.properties.IPropertySource;
 
-public class GoalNode implements Goal {
+public class GoalNode implements Goal,IAdaptable {
 
 	private String module;
 	private CTerm term;
@@ -69,6 +71,13 @@ public class GoalNode implements Goal {
 
 	public CTerm getTerm() {
 		return term;
+	}
+
+	public Object getAdapter(Class adapter) {
+		if(IPropertySource.class.isAssignableFrom(adapter)){
+			return new CTermPropertySource(term);
+		}
+		return null;
 	}
 
 }

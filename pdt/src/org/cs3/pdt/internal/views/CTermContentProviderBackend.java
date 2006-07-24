@@ -61,7 +61,7 @@ public class CTermContentProviderBackend  {
 		return (Clause[]) l.toArray(new Clause[l.size()]);
 	}
 	public boolean hasChildren(Object parentElement) {
-		return parentElement instanceof CCompound
+		return (parentElement instanceof CTermNode && ((CTermNode)parentElement).term instanceof CCompound)
 				|| parentElement instanceof Predicate
 				|| parentElement instanceof ClauseNode
 				|| parentElement instanceof DirectiveNode;
@@ -70,22 +70,26 @@ public class CTermContentProviderBackend  {
 	public Object[] getChildren(Object parentElement)
 			throws PrologInterfaceException {
 
-		if (parentElement instanceof CCompound) {
-			CCompound compound = (CCompound) parentElement;
-			Object[] children = new Object[compound.getArity()];
-			for (int i = 0; i < children.length; i++) {
-				children[i] = compound.getArgument(i);
+		if (parentElement instanceof CTermNode) {
+			CTerm term = ((CTermNode)parentElement).term;
+			if(term instanceof CCompound){
+				CCompound compound = (CCompound) term;
+				Object[] children = new Object[compound.getArity()];
+				for (int i = 0; i < children.length; i++) {
+					children[i] = new CTermNode(compound.getArgument(i));
+				}
+				return children;
 			}
-			return children;
+			return null;
 		} else if (parentElement instanceof Predicate) {
 			Predicate p = (Predicate) parentElement;
 			return getClauses(p);
 		} else if (parentElement instanceof ClauseNode) {
 			ClauseNode c = (ClauseNode) parentElement;
-			return new CTerm[] { c.term };
+			return new CTermNode[] { new CTermNode(c.term) };
 		} else if (parentElement instanceof DirectiveNode) {
 			DirectiveNode d = (DirectiveNode) parentElement;
-			return new CTerm[] { d.term };
+			return new CTermNode[] { new CTermNode(d.term) };
 		}
 		return getData();
 	}
