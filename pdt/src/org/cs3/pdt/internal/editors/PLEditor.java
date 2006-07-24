@@ -97,6 +97,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
+import org.eclipse.ui.views.properties.IPropertySheetPage;
+import org.eclipse.ui.views.properties.PropertySheetPage;
 
 public class PLEditor extends TextEditor {
 
@@ -328,6 +330,9 @@ public class PLEditor extends TextEditor {
 				}
 				return fOutlinePage;
 			}
+//			if (required.equals(IPropertySheetPage.class)) {
+//	            return new PropertySheetPage();
+//	        }
 			return super.getAdapter(required);
 		} catch (Throwable t) {
 			Debug.report(t);

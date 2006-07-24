@@ -43,9 +43,11 @@ package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CVariable;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Predicate;
+import org.cs3.pl.prolog.PLUtil;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -97,15 +99,19 @@ public class PrologElementLabelProvider implements ILabelProvider {
 		if (o instanceof Predicate) {
 			Predicate p = (Predicate) o;
 			return p.getName() + "/" + p.getArity();
-		} else if (o instanceof Clause) {
-			Clause c = (Clause) o;
-			return c.getName() + "/" + c.getArity();
+		} else if (o instanceof ClauseNode) {
+			ClauseNode c = (ClauseNode) o;
+			return PLUtil.renderTerm(c.getHeadTerm());
 		} else if (o instanceof Directive){
 			Directive d = (Directive) o;
-			return "!-";
-		} else if (o instanceof CTerm){
-			CTerm t = (CTerm) o;
-			return t.getFunctorValue()+"/"+t.getArity();
+			return ":-"+PLUtil.renderTerm(d.getBody().getTerm());
+		} else if (o instanceof CTermNode){
+			CTermNode t = (CTermNode) o;
+			CTerm term = t.term;
+			if(term instanceof CVariable){
+				return ((CVariable)term).getVariableName();
+			}
+			return t.term.getFunctorValue()+"/"+t.term.getArity();
 		}
 		
 		return o.toString();

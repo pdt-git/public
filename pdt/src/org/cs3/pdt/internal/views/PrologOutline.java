@@ -221,6 +221,7 @@ public class PrologOutline extends ContentOutlinePage {
 	 */
 
 	public void selectionChanged(SelectionChangedEvent event) {
+		super.selectionChanged(event);
 		if (!((StructuredSelection) event.getSelection()).isEmpty()) {
 			Object elm = ((StructuredSelection) event.getSelection())
 					.getFirstElement();
@@ -229,8 +230,8 @@ public class PrologOutline extends ContentOutlinePage {
 			int endOffset = -1;
 
 			SourceLocation loc;
-			if (elm instanceof CTerm) {
-				CTerm term = (CTerm) elm;
+			if (elm instanceof CTermNode) {
+				CTerm term = ((CTermNode) elm).term;
 				CCompound posterm = (CCompound) term.getAnotation("position");
 				if (posterm != null) { // can be null, e.g. for implicit NILs
 					startOffset = ((CInteger) posterm.getArgument(0)).getIntValue();
