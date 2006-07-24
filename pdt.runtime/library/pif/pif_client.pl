@@ -4,12 +4,12 @@
 	pif_stop/1,
 	pif_status/2,
 	pif_set_option/3,
-	pif_current_option/3,
+	pif_current_option/3/*,
 	pif_session_create/2,
 	pif_session_dispose/1,
 	pif_session_query/2,
 	pif_session_query_once/2,
-	pif_session_query_all/2
+	pif_session_query_all/2*/
 ]).
 
 :-dynamic pif/1.

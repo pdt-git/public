@@ -49,6 +49,7 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.internal.parser.SimpleNode;
+import org.cs3.pl.prolog.PLUtil;
 
 public abstract class AbstractATerm implements CTerm {
 
@@ -57,6 +58,19 @@ public abstract class AbstractATerm implements CTerm {
 	protected CTerm term;
 	Map annotation;
 	protected boolean anotated;
+	public String toString() {
+		
+		return PLUtil.renderTerm(this);
+	}
+	public String[] getAnnotationKeys() {
+		if(annotation==null){
+			annotation = new HashMap();
+			if(anotated){
+				processAnotations();
+			}
+		}
+		return (String[]) annotation.keySet().toArray(new String[annotation.keySet().size()]);
+	}
 	
 	public CTerm getAnotation(String functor) {	
 		if(annotation==null){

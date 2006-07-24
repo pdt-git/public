@@ -57,32 +57,7 @@
 pdt_aterm(aterm(_,_)).
 
 
-%pdt_aterm_visit(+InTerm,!Goal,-ContextVar,-OutTerm)
-%constructs a modified version of InTerm in top-down fashion.
-%
-%- ContextBefore is unified with the respective visitor context 
-%  (see pdt_aterm_visitor_context/3.
-%- Goal is called. It should unify ContextAfter with a modified version of ContextBefore, or it should
-%  fail to indicate that subterm should not be modified.
-%- If Goal succeeded, ContextAfter is used to create a modified version of subterm.
-%- If Goal succeeded, the arguments of the modified version are visited.
-%	
-%The resulting term is unified with OutTerm.
-%
-%pdt_aterm_visit(InTerm,Goal,CxBefore,CxAfter,OutTerm):-
-%    context_init(InTerm,CxBefore),
-%    (	Goal
-%    	->	process_subterm(InTerm,CxAfter,NextTerm),
-%    		process_args(NextTerm,Goal,CxAfter,OutTerm)
-%    	;	InTerm=OutTerm
-%    	).
-%    	
-%process_args(InTerm,Goal,CxParent,OutTerm):-
-%    pdt_term_annotation(InTerm,Term,Annotation),
-%    Term =.. [Functor|InArgs].
-%    process_args(InArgs,Goal,CxParent,OutArgs),
-%    Out =[Functor|OutArgs]
-    
+
     
 
 pdt_aterm_member(List,Path, Elm):-
@@ -167,8 +142,11 @@ inner_match(ATerm,Path,SubTerm,Module,Goal):-
 	pdt_aterm(ATerm),
 	!,
 	pdt_term_annotation(ATerm,Term,_),
-	inner_match(Term,Path,SubTerm,Module,Goal).
-inner_match(Term,ArgNums,SubTerm,Module,Goal):-
+	inner_match_X(Term,Path,SubTerm,Module,Goal).
+inner_match_(Term,ArgNums,SubTerm,Module,Goal):-
+    inner_match_X(Term,ArgNums,SubTerm,Module,Goal).
+	
+inner_match_X(Term,ArgNums,SubTerm,Module,Goal):-
     (	inner_match_recursive(Term,ArgNums,SubTerm,Module,Goal)
     *->	true
     ;	inner_match_local(Term,ArgNums,SubTerm,Module,Goal)
@@ -187,9 +165,15 @@ pdt_subst(InATerm,Path,SubATerm,OutATerm):-
 	pdt_aterm(SubATerm),
 	!,
 	pdt_term_annotation(InATerm,InTerm,Anno),
-	pdt_subst(InTerm,Path,SubATerm,OutTerm),
+	pdt_subst_X(InTerm,Path,SubATerm,OutTerm),
 	pdt_term_annotation(OutATerm,OutTerm,Anno).
-pdt_subst(InTerm,[ArgNum|ArgNums],SubTerm,OutTerm):-
+pdt_subst(InTerm,Path,SubTerm,OutTerm):-	
+	pdt_subst_X(InTerm,Path,SubTerm,OutTerm).
+	% Don't "inline" pdt_subst_X! This would _NOT_ be semantic-preserving! 
+	% Think of what happens if the parsed file actually contains aterm/2 terms.
+
+	
+pdt_subst_X(InTerm,[ArgNum|ArgNums],SubTerm,OutTerm):-
 	compound(InTerm),
 	arg(ArgNum,InTerm,ArgVal),
 	pdt_subst(ArgVal,ArgNums,SubTerm,OutArg),

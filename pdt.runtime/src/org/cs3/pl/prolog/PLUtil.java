@@ -54,6 +54,7 @@ import java.util.Vector;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CVariable;
 import org.cs3.pl.cterm.internal.ATermFactory;
 
 /**
@@ -280,5 +281,32 @@ public class PLUtil {
 	 */
 	public static CTerm createCTerm(Object input){
 		return factory.createCTerm(input);
+	}
+	
+	public static String renderTerm(CTerm term){
+		StringBuffer sb = new StringBuffer();
+		renderTerm(term,sb);
+		return sb.toString();
+	}
+
+	private static void renderTerm(CTerm term, StringBuffer sb) {
+		
+		if(term instanceof CVariable){
+			sb.append(((CVariable)term).getVariableName());
+		}else{
+			sb.append(term.getFunctorValue());
+		}
+		if(term.getArity()>0){
+			sb.append('(');
+			CCompound compound = (CCompound) term;
+			for(int i=0;i<compound.getArity();i++){
+				if(i>0){
+					sb.append(", ");					
+				}
+				renderTerm(compound.getArgument(i),sb);
+			}
+			sb.append(')');
+		}
+		
 	}
 }

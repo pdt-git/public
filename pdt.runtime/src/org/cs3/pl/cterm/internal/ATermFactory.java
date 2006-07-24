@@ -91,8 +91,12 @@ public class ATermFactory implements CTermFactory {
 			super(ATermFactory.this, node);
 		}
 
-		public String getVariableId() {
-			return getFunctorValue();
+		public String getVariableName() {
+			CTerm name = getAnotation("variable_name");
+			if(name==null){
+				return getFunctorValue();
+			}
+			return name.getFunctorValue();
 		}
 		
 	}

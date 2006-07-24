@@ -48,6 +48,7 @@ import java.util.Map;
 public interface CTerm {
 	boolean hasAnnotation(String string);
 	public CTerm getAnotation(String functor);
+	public String[] getAnnotationKeys();
 	public String getFunctorImage();
 	public int getArity();
 	public String getFunctorValue();
