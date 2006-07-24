@@ -45,6 +45,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.internal.parser.SimpleNode;
+import org.cs3.pl.prolog.PLUtil;
 
 public abstract class AbstractCTerm implements CTerm {
 
@@ -53,6 +54,15 @@ public abstract class AbstractCTerm implements CTerm {
 	protected SimpleNode node;
 	private String functorImage;
 	private String functorValue;
+	
+	public String toString() {
+	
+		return PLUtil.renderTerm(this);
+	}
+	
+	public String[] getAnnotationKeys() {
+		return null;
+	}
 	
 	public CTerm getAnotation(String functor) {	
 		return null;
