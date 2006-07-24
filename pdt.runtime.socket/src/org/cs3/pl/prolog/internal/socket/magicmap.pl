@@ -44,7 +44,7 @@
  */
 
 :- module(magicmap,
-	   [ position/2,
+	   [ /*position/2,*/
 	   position_attr/3]).
 
 /** 
