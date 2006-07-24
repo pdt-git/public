@@ -47,7 +47,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 
 
-:- pdt_annotator([term],[]).
+:- pdt_annotator([term],[/*library('/org/cs3/pdt/annotate/variable_name_annotator')*/]).
 
 
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
@@ -63,19 +63,21 @@ term_annotation_hook(_,_,_,InTerm,OutTerm):-
 check_singletons(In,Singletons,Out):-
 
 	%% find ill-formed elements in the exports list
-	findall(singleton(Path,Singleton),
+	findall(singleton(Path,Singleton,TVs),
 		(	pdt_subterm(In,Path,Singleton),
 			pdt_term_annotation(Singleton,Var,_),
 			member(Name=Value,Singletons),
 			Var==Value,
-			\+atom_concat('_',_,Name)
+			\+atom_concat('_',_,Name),
+			term_variables(In,TVs)
 		),
 		Occurances
 	),
 	add_singleton_annos(In,Occurances,Out).
 
 add_singleton_annos(In,[],In).
-add_singleton_annos(In,[singleton(Path,InExport)|IFEs],Out):-
+add_singleton_annos(In,[singleton(Path,InExport,TVs)|IFEs],Out):-
+    term_variables(In,TVs),
     pdt_term_annotation(InExport,Term,Annotation),
     pdt_term_annotation(OutExport,Term,[problem(warning(singleton))|Annotation]),
     pdt_subst(In,Path,OutExport,Next),
@@ -89,10 +91,11 @@ check_no_singletons(In,[Variable|Variables],Out):-
 check_no_singleton(In,Name=Variable,Out):-
     atom_concat('_',_,Name),
     !,
-	findall(no_singleton(Path,Singleton),
+	findall(no_singleton(Path,Singleton,TVs),
 		(	pdt_subterm(In,Path,Singleton),
 			pdt_term_annotation(Singleton,Var,_),
-			Variable==Var			
+			Variable==Var,
+			term_variables(In,TVs)
 		),
 		Occurances
 	),
@@ -104,7 +107,8 @@ check_no_singleton(In,Name=Variable,Out):-
 check_no_singleton(In,_,In).
 
 add_no_singleton_annos(In,[],In).
-add_no_singleton_annos(In,[no_singleton(Path,InExport)|IFEs],Out):-
+add_no_singleton_annos(In,[no_singleton(Path,InExport,TVs)|IFEs],Out):-
+    term_variables(In,TVs),
     pdt_term_annotation(InExport,Term,Annotation),
     pdt_term_annotation(OutExport,Term,[problem(warning(no_singleton))|Annotation]),
     pdt_subst(In,Path,OutExport,Next),

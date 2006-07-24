@@ -4,7 +4,8 @@ wrap(w(catch(G,_,true)),A):-
     member(G,[writeln(A),writeln(A:A)]).
 
 
-data(writeln(nein)).
+data(w(writeln(nein))).
+text(w(text)).
 
 unify(A,A).
 
@@ -18,14 +19,40 @@ seltsam(_):-
     
     
 gemein:-
-    unify(w(writeln(hähä)),WrappedGoal),
-    w(Goal)=WrappedGoal,
+    data(D),
+    unwrap(D,Goal),    
     call(Goal).
+
+gemein:-
+    text(D),
+    unwrap(D,Text),    
+    writeln(Text).
+
+metacall(Call):-
+	call(Call).
+	
+invisible(Call,A,B):-
+    metacall(Call).
+
+%:-invisible(A=B,A,B),A=writeln(ogottogott),B.
     
+sonicht(A,B):-
+	A=B.	    
+sonicht(writeln(asas),C):-
+	call(C).  
+	
+%:-sonicht(D,E),sonicht(E,D).
+
+dada(A).
     
 gemeiner:-
     unwrap(_,Goal),
     call(Goal).
+    
+kacke([1]).
+kacke([M,N|Ns]):-
+    kacke([N|Ns]),
+     M is N+1.
 nichsoschlimm(HGoal):-
     unify(Goal,HGoal),
     call(Goal).
@@ -35,7 +62,7 @@ kompliziert(Module):-
 	data(Data),
 	Module:Goal.
 
-:- module_transparent maybe/1.
+%:- module_transparent maybe/1.
 
 maybe(Goal):-
 		call(Goal).
@@ -48,7 +75,7 @@ write_all([A|As]):-
 
 
 
-:-call_all([writeln(a),writeln(b),true]).
+%:-call_all([writeln(a),writeln(b),true]).
 %:-call_all([true,_B|_C]).
     
 write_n_times(0,_):-
@@ -73,6 +100,9 @@ write_countdown(N):-
     M is N+1,
 	write_countdown(M).	
 	
+
+%:-list_of_as(A).
+%:-list_of_as([1,2,3]).
 	
 list_of_as([]).
 list_of_as([a|L]):-

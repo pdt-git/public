@@ -68,7 +68,7 @@
 /**
 pdt_annotator(+Hooks, +Dependencies)
 
-New hook registration api.member_annotator:file_annotation_hook
+New hook registration api.
 Modules that whish to register as a annotator should contain a directive
 :- pdt_annotator(+Hooks, +Dependencies)
 Hooks should be a list containing the atoms 'term' and/or 'file'. 
@@ -404,6 +404,7 @@ do_process_term(FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Er
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
 	pdt_term_annotation(ProcessedTerm,T,[n(N),variable_names(Names),singletons(Singletons)|A]),
+%	numbervars(ProcessedTerm,0,_),
 %   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
 	M is N+1,
     read_terms_rec(FileStack,OpModule,In,M,Terms,Errors).

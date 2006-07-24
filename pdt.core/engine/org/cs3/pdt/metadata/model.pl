@@ -175,15 +175,15 @@ node_property(module_node(M),type(module)):-
     node(module_node(M)).
 node_property(module_node(M),file(File)):-
     current_module(M,File).
-node_property(module_node(M),predicate(predicate_node(M:_X))):-
-    node(predicate_node(M:_X)).
+node_property(module_node(M),predicate(predicate_node(M:X))):-
+    node(predicate_node(M:X)).
 
 node_property(predicate_node(T),type(predicate)):-
     my_writeln('node_property(predicate_node(T),type(predicate))'),
     node(predicate_node(T)).
-node_property(predicate_node(M:_X),parent(module_node(M)))    :-
+node_property(predicate_node(M:X),parent(module_node(M)))    :-
     my_writeln('node_property(predicate_node(M:_X),parent(module_node(M)))'),
-    node(predicate_node(M:_X)).
+    node(predicate_node(M:X)).
 node_property(predicate_node(M:F/A),name(F)):-
     my_writeln('node_property(predicate_node(M:F/A),name(F))'),
 	node(predicate_node(M:F/A)).

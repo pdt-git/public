@@ -43,8 +43,7 @@
 [
 	meta_node/1,
 	meta_node_property/2,
-	meta_edge/1,
-	meta_edge_property/2
+	meta_edge/1
 ]).
 
 meta_node(module).

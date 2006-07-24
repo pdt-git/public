@@ -39,7 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- module(u_term,[u_term/2,lr_u_term/7]).
+:- module(u_term,[u_term/3,lr_u_term/7]).
 
 :- use_module(plast).
 :- use_module(plast_utils).
