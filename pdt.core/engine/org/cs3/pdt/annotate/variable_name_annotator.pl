@@ -39,32 +39,43 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- module(multiplicity,[
-	multiplicity_check/3,	
-	count/2
-	]
-).
+:-module(variable_name_annotator,[]).
 
-:- use_module(model).
-% multiplicity_check(+Defined,+Current,?State)
-multiplicity_check(0-n,_,ok).
-multiplicity_check(N-M,C,ok):-
-    (compare(=,N,C); compare(<,N,C)),
-    (compare(=,C,M); compare(<,C,M)).
-multiplicity_check(_-n,_,can_create).
-multiplicity_check(_-N,C,can_create):-
-    compare(<,C, N).
-multiplicity_check(N-_,C,can_delete):-
-    compare(<,N,C).
+:- use_module(library('/org/cs3/pdt/util/pdt_util')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+
+
+:- pdt_annotator([term],[]).
+
+
+term_annotation_hook(_,_,_,InTerm,OutTerm):-
+	pdt_term_annotation(InTerm,_,Annos),
+    pdt_member(variable_names(Variables),Annos),
+	propagate_variable_names(InTerm,Variables,OutTerm).
+
     
-count(Goal,Count):-
-    nb_setval(my_counter,0),
-    (	(	Goal,
-    		nb_getval(my_counter,I),
-    		succ(I,II),
-    		nb_setval(my_counter,II),
-    		fail
-    	)
-    ; 	nb_getval(my_counter,Count),
-    	nb_delete(my_counter)
-    ).
+propagate_variable_names(In,Variables,Out):-
+
+	%% find subterms that are variables
+	findall(occurance(Path,Occurance,Name,TVs),
+		(	pdt_subterm(In,Path,Occurance),
+			pdt_term_annotation(Occurance,Var,_),
+			member(Name=XVar,Variables),
+			Var==XVar,
+			term_variables(In,TVs)
+		),
+		Occurances
+	),
+	%% add variable names
+	add_varname_annos(In,Occurances,Out).
+
+add_varname_annos(In,[],In).
+add_varname_annos(In,[occurance(Path,InOcc,Name,TVs)|Occs],Out):-
+    term_variables(In,TVs),
+    pdt_term_annotation(InOcc,Term,Annotation),
+    pdt_term_annotation(OutOcc,Term,[variable_name(Name)|Annotation]),
+    pdt_subst(In,Path,OutOcc,Next),
+    add_varname_annos(Next,Occs,Out).
+
