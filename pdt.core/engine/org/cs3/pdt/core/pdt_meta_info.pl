@@ -52,7 +52,12 @@ some predicate definitions for queries frequently used by the pdt.core
 	pdt_file_depends/2,
 	pdt_predicate_completion/4,
 	pdt_predicate_completion/5,
-	pdt_file_module/2
+	pdt_file_module/2,
+	pdt_lookup_aterm/3,
+	pdt_lookup_aterm/4,
+	pdt_render_term/4,
+	pdt_file_directive/2,
+	pdt_predicate_clause/3
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
@@ -72,7 +77,60 @@ some predicate definitions for queries frequently used by the pdt.core
 %	member(aterm(Anns,Term),Terms),
 %	pdt_member(clause_of(DefModule:Name/Arity),Anns).
   
+pdt_lookup_aterm(FileSpec,N,ATerm,Member):-
+	pdt_file_spec(FileSpec,Abs),
+    current_file_annotation(Abs,_,Terms),
+    lookup_aterm(Terms,N,ATerm,Member).
+
+pdt_lookup_aterm(FileSpec,N,ATerm):-
+	pdt_lookup_aterm(FileSpec,N,ATerm,_).
+
   
+lookup_aterm([Member|_],N,ATerm,Member):-
+    lookup_aterm_X(Member,N,ATerm),
+    !.
+lookup_aterm([Member|Members],N,ATerm,Container):-
+    pdt_term_annotation(Member,_,Annos),
+    pdt_member(last_n(LastN),Annos),
+    LastN<N,
+    lookup_aterm(Members,N,ATerm,Container).
+  
+lookup_aterm_X(ATerm,N,ATerm):-
+	pdt_term_annotation(ATerm,_,Annos),
+	pdt_member(n(N),Annos),
+	!.
+lookup_aterm_X(Container,N,ATerm):-
+	pdt_term_annotation(Container,_,Annos),
+	pdt_member(n(Left),Annos),
+	pdt_member(last_n(Right),Annos),
+	Left < N,
+	N =< Right,
+	pdt_subterm(Container,[_|_],SubContainer),
+	lookup_aterm_X(SubContainer,N,ATerm).
+    
+pdt_file_directive(FileSpec,[label(Label)|Annos]):-
+	current_file_annotation(FileSpec,_,Terms),
+	member(Term,Terms),
+	pdt_term_annotation(Term,:-(_),Annos),
+	get_op_module(FileSpec,OpModule),
+	pdt_subterm(Term,[1],Body),
+	render_term(Body,Term,OpModule,4,Label).
+
+pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos]):-
+	current_file_annotation(FileSpec,_,Terms),
+	member(Term,Terms),	
+	pdt_term_annotation(Term,TTerm,Annos),
+	pdt_member(clause_of(Module:Name/Arity),Annos),
+	(	functor(TTerm,:-,2)
+	->	pdt_subterm(Term,[1],Head),
+		Type=rule
+	;	Head=Term,
+		Type=fact
+	),
+	
+	get_op_module(FileSpec,OpModule),
+	render_term(Head,Term,OpModule,4,Label).
+	
   
 pdt_file_problem(FileSpec,Problem,Pos):-
     pdt_file_spec(FileSpec,Abs),
@@ -184,3 +242,32 @@ visible_in_context(_,H):-
 visible_in_context(_,H):-	
 	pdt_property(H,exported,true),
 	!.	
+	
+pdt_render_term(FileSpec,N,Depth,Out):-
+	pdt_lookup_aterm(FileSpec,N,ATerm,Clause),
+	get_op_module(FileSpec,OpModule),
+	render_term(ATerm,Clause,OpModule,Depth,Out).
+	
+render_term(ATerm,Clause,OpModule,Depth,Out):-
+	new_memory_file(MemFile),
+	open_memory_file(MemFile,write,Stream),	
+	pdt_term_annotation(Clause,_,Annos),
+	pdt_member(variable_names(VarNames),Annos),
+	execute_elms(VarNames),
+	term_variables(ATerm,Vars),
+	unify_with_underscores(Vars),
+	pdt_strip_annotation(ATerm,Term,_),
+	write_term(Stream,Term,[max_depth(Depth),module(OpModule),portray(true)]),
+	close(Stream),
+	memory_file_to_atom(MemFile,Out),
+	free_memory_file(MemFile).
+	
+execute_elms([]).
+execute_elms([Goal|Goals]):-
+	Goal,
+	execute_elms(Goals).
+	
+unify_with_underscores([]).
+unify_with_underscores([Var|Vars]):-
+	Var='_',
+	unify_with_underscores(Vars).

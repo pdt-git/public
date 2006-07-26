@@ -20,7 +20,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession2;
 
-public class CTermContentProviderBackend  {
+public class OldCTermContentProviderBackend  {
 
 	private File file;
 
@@ -63,7 +63,7 @@ public class CTermContentProviderBackend  {
 	public boolean hasChildren(Object parentElement) {
 		return (parentElement instanceof CTermNode && ((CTermNode)parentElement).term instanceof CCompound)
 				|| parentElement instanceof Predicate
-				|| parentElement instanceof ClauseNode
+				|| parentElement instanceof ClauseNode && ((ClauseNode)parentElement).hasBody()
 				|| parentElement instanceof DirectiveNode;
 
 	}
@@ -86,10 +86,11 @@ public class CTermContentProviderBackend  {
 			return getClauses(p);
 		} else if (parentElement instanceof ClauseNode) {
 			ClauseNode c = (ClauseNode) parentElement;
-			return new CTermNode[] { new CTermNode(c.term) };
+			
+			return c.hasBody()?new CTermNode[] { new CTermNode(c.getBodyTerm()) }:null;
 		} else if (parentElement instanceof DirectiveNode) {
 			DirectiveNode d = (DirectiveNode) parentElement;
-			return new CTermNode[] { new CTermNode(d.term) };
+			return new CTermNode[] { new CTermNode(d.getBody().getTerm()) };
 		}
 		return getData();
 	}

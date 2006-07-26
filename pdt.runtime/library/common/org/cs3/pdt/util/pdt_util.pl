@@ -43,6 +43,7 @@
 	pdt_call_cleanup/2,
 	pdt_maybe/1,
 	pdt_file_spec/2,
+	pdt_file_ref/2,
 	pdt_member/2,
 	pdt_memberchk/2,	
 	pdt_chop_before/3,
@@ -104,8 +105,34 @@ pdt "standard" procedure for resolving file specifications
 to absolute file names.
 
 */		
+pdt_file_spec(file_ref(Ref), Abs):-
+	fileref(Abs,Ref).
+
 pdt_file_spec(FileSpec, Abs):-
+	filespec(FileSpec, Abs).
+
+filespec(FileSpec, Abs):-
 	absolute_file_name(FileSpec,[file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs).
+	
+:-dynamic fileref/2.
+:-index(fileref(1,1)).
+
+pdt_file_ref(FileSpec,Ref):-
+	fileref(FileSpec,Ref),
+	!.
+pdt_file_ref(FileSpec,Ref):-
+   	filespec(FileSpec,Abs),
+	fileref(Abs,Ref),
+	!.
+pdt_file_ref(FileSpec,Ref):-
+	filespec(FileSpec,Abs),
+	gen_fileref(Ref),
+	assert(fileref(Abs,Ref)).
+	
+gen_fileref(Ref):-
+    flag(pdt_annotator_current_file_ref,Ref,Ref+1).
+    
+    
 
 /*
 pdt_member(?Member,+List):-

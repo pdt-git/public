@@ -207,4 +207,9 @@ public class CTermFactoryTest extends TestCase {
 		assertEquals("t arity",0,t.getArity());
 		
 	}
+	//'.'(label('module(op_annotator, [])'), '.'(variable_names([]), '.'(singletons([]), '.'(file_ref(93), '.'(n(1), '.'(last_n(4), '.'(position(-(2042, 2067)), '.'(functor_type(prefix), _G799))))))))
+	public void testMisc00() throws Throwable{
+		String input = "'.'(label('module(op_annotator, [])'), '.'(variable_names([]), '.'(singletons([]), '.'(file_ref(93), '.'(n(1), '.'(last_n(4), '.'(position(-(2042, 2067)), '.'(functor_type(prefix), _G799))))))))";
+		CTerm term = factory.createCTerm("','(!,b)");		
+	}
 }

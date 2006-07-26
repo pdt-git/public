@@ -85,7 +85,9 @@ public class DefaultPrologContextTrackerService implements
 			final IWorkbench workbench = PlatformUI.getWorkbench();
 			workbench.getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					tracker.init(workbench);	
+					if(PlatformUI.getWorkbench().getActiveWorkbenchWindow()!=null){
+						tracker.init(workbench);	
+					}
 				}
 			});
 			

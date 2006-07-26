@@ -47,7 +47,6 @@ import org.cs3.pl.cterm.CVariable;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.prolog.PLUtil;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -55,7 +54,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-public class PrologElementLabelProvider implements ILabelProvider {
+public class PrologElementLabelProvider implements ILabelProvider{
+
+	
+	
 
 	public Object[] getChildren(Object o) {
 		/*
@@ -73,7 +75,7 @@ public class PrologElementLabelProvider implements ILabelProvider {
 	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
 	 */
 	public ImageDescriptor getImageDescriptor(Object object) {
-
+		
 		if (object instanceof String) {// FIXME: need a module type --lu
 			return ImageRepository
 					.getImageDescriptor(ImageRepository.PE_MODULE);
@@ -96,15 +98,16 @@ public class PrologElementLabelProvider implements ILabelProvider {
 	}
 
 	public String getLabel(Object o) {
+	
 		if (o instanceof Predicate) {
 			Predicate p = (Predicate) o;
 			return p.getName() + "/" + p.getArity();
 		} else if (o instanceof ClauseNode) {
-			ClauseNode c = (ClauseNode) o;
-			return PLUtil.renderTerm(c.getHeadTerm());
+			ClauseNode c = (ClauseNode) o;		
+			return c.getProperty("label");
 		} else if (o instanceof Directive){
-			Directive d = (Directive) o;
-			return ":-"+PLUtil.renderTerm(d.getBody().getTerm());
+			DirectiveNode d = (DirectiveNode) o;			
+			return d.getProperty("label");
 		} else if (o instanceof CTermNode){
 			CTermNode t = (CTermNode) o;
 			CTerm term = t.term;
@@ -116,6 +119,10 @@ public class PrologElementLabelProvider implements ILabelProvider {
 		
 		return o.toString();
 	}
+
+	
+	
+	
 
 	public Object getParent(Object o) {
 		if (o instanceof Predicate) {
@@ -142,6 +149,9 @@ public class PrologElementLabelProvider implements ILabelProvider {
 		if (object instanceof Clause) {
 			return ImageRepository.getImage(ImageRepository.PE_CLAUSE);
 		}
+		if (object instanceof Directive) {
+			return ImageRepository.getImage(ImageRepository.PE_CLAUSE);
+		}
 
 		String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
 		return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
@@ -153,7 +163,6 @@ public class PrologElementLabelProvider implements ILabelProvider {
 	}
 
 	public void addListener(ILabelProviderListener listener) {
-
 	}
 
 	public void dispose() {
@@ -165,7 +174,10 @@ public class PrologElementLabelProvider implements ILabelProvider {
 	}
 
 	public void removeListener(ILabelProviderListener listener) {
-
 	}
 
+
+
+	
+	
 }

@@ -57,11 +57,11 @@ public class DefaultAsyncPrologSessionListener implements
 	}
 
 	public void goalFailed(AsyncPrologSessionEvent e) {
-		;
+		System.out.println("failed");;
 	}
 
 	public void goalRaisedException(AsyncPrologSessionEvent e) {
-		;
+		System.out.println(e.message);
 	}
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
