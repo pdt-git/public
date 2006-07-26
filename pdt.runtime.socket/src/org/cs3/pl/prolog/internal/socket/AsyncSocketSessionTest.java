@@ -281,6 +281,7 @@ public class AsyncSocketSessionTest extends TestCase {
 
 			session.abort(lock);
 		}
+		
 		session.dispose();
 		assertEquals("goalHasSolution(2,null,(M-->2)), "
 				+ "goalCut(2,null,null), " + "goalSkipped(3,null,null), "
@@ -289,4 +290,9 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	}
 
+	public void test_abort02() throws Exception{
+		session.abort();
+		session.dispose();
+
+	}
 }
