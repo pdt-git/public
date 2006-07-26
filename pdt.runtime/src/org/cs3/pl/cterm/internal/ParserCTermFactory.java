@@ -124,11 +124,7 @@ public class ParserCTermFactory implements CTermFactory {
 		}
 
 		public String getVariableName() {
-			CTerm name = getAnotation("variable_name");
-			if(name==null){
-				return getFunctorValue();
-			}
-			return name.getFunctorValue();
+			return getFunctorValue();			
 		}
 		
 	}

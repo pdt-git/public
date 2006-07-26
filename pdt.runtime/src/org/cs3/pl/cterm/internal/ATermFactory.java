@@ -94,7 +94,7 @@ public class ATermFactory implements CTermFactory {
 		public String getVariableName() {
 			CTerm name = getAnotation("variable_name");
 			if(name==null){
-				return getFunctorValue();
+				return "_";
 			}
 			return name.getFunctorValue();
 		}

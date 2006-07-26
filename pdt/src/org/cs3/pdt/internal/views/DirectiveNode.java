@@ -43,6 +43,7 @@ package org.cs3.pdt.internal.views;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
@@ -52,51 +53,88 @@ import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.views.properties.IPropertySource;
 
-public class DirectiveNode implements Directive{
+public class DirectiveNode implements Directive, IAdaptable {
 	CTerm term;
-	
+
 	private SourceLocation loc;
+
 	private String contextModule;
 
 	private GoalNode goal;
+
+	private Map properties;
+
 	public int compareTo(Object arg0) {
-		if(!(arg0 instanceof Clause)){
+		if (!(arg0 instanceof Clause)) {
 			return -1;
 		}
 		Clause other = (Clause) arg0;
 		return getSourceLocation().compareTo(other.getSourceLocation());
 	}
-	
+
 	public boolean equals(Object obj) {
-		return compareTo(obj)==0;
+		return compareTo(obj) == 0;
 	}
+
 	public int hashCode() {
 		return getSourceLocation().hashCode();
 	}
-	public DirectiveNode(IFile file, String contextModule,CTerm term) throws IOException{
-		this(file.getLocation().toFile(),contextModule,term);
+
+	public DirectiveNode(IFile file, String contextModule, CTerm term)
+			throws IOException {
+		this(file.getLocation().toFile(), contextModule, term);
 	}
-	public DirectiveNode(File file, String contextModule,CTerm term) throws IOException{
+
+	public DirectiveNode(File file, String contextModule, CTerm term)
+			throws IOException {
 		this.term = term;
-		this.contextModule=contextModule;
+		this.contextModule = contextModule;
 		CCompound posterm = (CCompound) term.getAnotation("position");
-		int from = ((CInteger)posterm.getArgument(0)).getIntValue();
-		int to = ((CInteger)posterm.getArgument(1)).getIntValue();
-		loc = new SourceLocation(file,false);
-		loc.offset=from;
-		loc.endOffset=to;
-		
+		int from = ((CInteger) posterm.getArgument(0)).getIntValue();
+		int to = ((CInteger) posterm.getArgument(1)).getIntValue();
+		loc = new SourceLocation(file, false);
+		loc.offset = from;
+		loc.endOffset = to;
+
 	}
-	public SourceLocation getSourceLocation() {		
+
+	public DirectiveNode(Map properties, File file) throws IOException {
+
+		this.properties = properties;
+		CCompound posterm = (CCompound) properties.get("position");
+		int from = ((CInteger) posterm.getArgument(0)).getIntValue();
+		int to = ((CInteger) posterm.getArgument(1)).getIntValue();
+		loc = new SourceLocation(file, false);
+		loc.offset = from;
+		loc.endOffset = to;
+	}
+
+	public SourceLocation getSourceLocation() {
 		return loc;
 	}
 
 	public Goal getBody() {
-		
-		if(goal==null&&term instanceof CCompound){
-			goal = new GoalNode(contextModule,((CCompound)term).getArgument(0));
+
+		if (goal == null && term instanceof CCompound) {
+			goal = new GoalNode(contextModule, ((CCompound) term)
+					.getArgument(0));
 		}
 		return goal;
 	}
+
+	public Object getAdapter(Class adapter) {
+		if (IPropertySource.class.isAssignableFrom(adapter)) {
+			return new SimplePropertySource(properties);
+		}
+		return null;
+	}
+
+	public String getProperty(String string) {
+
+		return ((CTerm) properties.get(string)).getFunctorValue();
+	}
+
 }

@@ -50,6 +50,7 @@ import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
@@ -61,7 +62,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
 
 public class CTermContentProvider implements ITreeContentProvider,
-		PrologInterfaceListener {
+		PrologFileContentModelListener, PrologInterfaceListener {
+	//TODO: actually the content model should be a pif listener, not the content provider.
 
 	
 
@@ -73,11 +75,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	private Viewer viewer;
 
-	private CTermContentProviderBackend backend;
+	private PrologFileContentModel backend;
 	
 	public CTermContentProvider(Viewer outline) {
 		viewer = outline;
-		backend = new CTermContentProviderBackend();
+		backend = new ContentModel();
+		backend.addPrologFileContentModelListener(this);
 		
 	}
 
@@ -145,6 +148,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			}
 
 			setFile(file);
+			backend.setRoot(input);
 			viewer.refresh();
 
 		} catch (Exception e) {
@@ -155,7 +159,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 	private void setFile(IFile file) {
 		try {
 			if (this.file!= null) {
-				getPrologProject().getMetaDataEventDispatcher()
+				IPrologProject prologProject = getPrologProject();
+				PrologEventDispatcher metaDataEventDispatcher = prologProject.getMetaDataEventDispatcher();
+					metaDataEventDispatcher
 						.removePrologInterfaceListener(
 								"file_annotation('" + getPlFile() + "')", this);
 				backend.setPif(null);
@@ -163,10 +169,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 			this.file=file;
 			backend.setFile(file.getLocation().toFile());
 			if (file != null) {
-				getPrologProject().getMetaDataEventDispatcher()
+				IPrologProject prologProject = getPrologProject();
+				PrologEventDispatcher metaDataEventDispatcher = prologProject.getMetaDataEventDispatcher();
+				metaDataEventDispatcher
 						.addPrologInterfaceListener(
 								"file_annotation('" + getPlFile() + "')", this);
-				backend.setPif(getPrologProject().getMetadataPrologInterface());
+				backend.setPif(prologProject.getMetadataPrologInterface());
 			}
 			
 		} catch (PrologInterfaceException e) {
@@ -212,6 +220,57 @@ public class CTermContentProvider implements ITreeContentProvider,
 		backend.reset();
 		viewer.refresh();
 
+	}
+
+	public void childrenAdded(final PrologFileContentModelEvent e) {
+		if (viewer == null || viewer.getControl().isDisposed()) {
+			return;
+		}
+		Display display = viewer.getControl().getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					childrenAdded(e);
+				}
+			});
+			return;
+		}
+		viewer.refresh();//TODO: fine grained viewer updates
+		
+	}
+
+	public void childrenChanged(final PrologFileContentModelEvent e) {
+		if (viewer == null || viewer.getControl().isDisposed()) {
+			return;
+		}
+		Display display = viewer.getControl().getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					childrenChanged(e);
+				}
+			});
+			return;
+		}
+		viewer.refresh();//TODO: fine grained viewer updates
+		
+	}
+
+	public void childrenRemoved(final PrologFileContentModelEvent e) {
+		if (viewer == null || viewer.getControl().isDisposed()) {
+			return;
+		}
+		Display display = viewer.getControl().getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					childrenRemoved(e);
+				}
+			});
+			return;
+		}
+		viewer.refresh();//TODO: fine grained viewer updates
+		
 	}
 
 }

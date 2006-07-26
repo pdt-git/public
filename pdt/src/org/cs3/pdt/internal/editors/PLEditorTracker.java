@@ -58,9 +58,11 @@ import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
 
 
 public class PLEditorTracker extends AbstractPrologContextTracker implements IPartListener2 {
@@ -105,7 +107,9 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 	}
 
 	public void init(IWorkbench workbench) {
-		workbench.getActiveWorkbenchWindow().getPartService().addPartListener(this);
+		IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
+		IPartService partService = activeWorkbenchWindow.getPartService();
+		partService.addPartListener(this);
 		fireContextChanged();
 	}
 	

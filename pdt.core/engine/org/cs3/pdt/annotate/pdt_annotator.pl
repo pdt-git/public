@@ -41,6 +41,7 @@
 
 :- module(pdt_annotator,[
 	ensure_annotated/1,
+	get_op_module/2,
 	%%register_annotator/1, 
 	current_file_annotation/3,
 	current_file_error/2,
@@ -376,7 +377,7 @@ clear_ops(OpModule):-
 
 read_terms(FileStack,OpModule,In,Terms,Errors):-
     
-    	read_terms_rec(FileStack,OpModule,In,1,Terms,Errors).
+    	read_terms_rec(FileStack,OpModule,In,0,Terms,Errors).
     	
 read_terms_rec(FileStack,Module,In,N,Terms,Errors):-
     Options=[
@@ -396,18 +397,21 @@ do_process_term(_,_,_,_,Term,_,_,[],[]):-
 do_process_term(FileStack,Module,In,N,_,_,Error,Terms,[Error|Errors]):-
     nonvar(Error),!,
     M is N+1,
-    read_terms_rec(FileStack,Module,In,M,Terms,Errors).
+    read_terms_rec(FileStack,Module,In,M,Terms,Errors).    
 do_process_term(FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
 	member(subterm_positions(Positions),Options),
-	wrap_term(Term0,Positions,Term1),   
+	FileStack=[File|_],
+	pdt_file_ref(File,FileRef),
+	M is N+1,
+	wrap_term(Term0,Positions,FileRef,M,Term1,NextN),   
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	pdt_term_annotation(ProcessedTerm,T,[n(N),variable_names(Names),singletons(Singletons)|A]),
+	pdt_term_annotation(ProcessedTerm,T,[variable_names(Names),singletons(Singletons)|A]),
 %	numbervars(ProcessedTerm,0,_),
 %   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
-	M is N+1,
-    read_terms_rec(FileStack,OpModule,In,M,Terms,Errors).
+
+    read_terms_rec(FileStack,OpModule,In,NextN,Terms,Errors).
 
 do_read_term(In,Term,Options,Error):-
     catch(
@@ -479,8 +483,9 @@ do_read_term(In,Term,Options,Error):-
 
 
 		
-
-    
+get_op_module(FileSpec,OpModule):-
+	pdt_file_spec(FileSpec,Abs),
+	gen_op_module(Abs,OpModule).
     
 gen_op_module(Abs,OpModule):-
     concat_atom([Abs,'$',op_module],OpModule).

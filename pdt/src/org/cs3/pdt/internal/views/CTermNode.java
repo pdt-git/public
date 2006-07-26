@@ -14,7 +14,6 @@ public class CTermNode implements IAdaptable{
 
 	public Object getAdapter(Class adapter) {
 		if(IPropertySource.class.isAssignableFrom(adapter)){
-			System.out.println("yep");
 			return new CTermPropertySource(term);
 		}
 		return null;

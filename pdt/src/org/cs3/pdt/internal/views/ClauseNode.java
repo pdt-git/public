@@ -43,6 +43,7 @@ package org.cs3.pdt.internal.views;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
@@ -59,6 +60,8 @@ public class ClauseNode implements Clause,IAdaptable{
 	
 	private SourceLocation loc;
 	PredicateNode predicate;
+
+	private Map properties;
 	public ClauseNode(CTerm term, IFile file) throws IOException {		
 		this(term,file.getLocation().toFile());
 	}
@@ -72,6 +75,21 @@ public class ClauseNode implements Clause,IAdaptable{
 		loc.offset=from;
 		loc.endOffset=to;
 		CCompound anno = (CCompound) term.getAnotation("clause_of");
+		String module = anno.getArgument(0).getFunctorValue();
+		anno=(CCompound) anno.getArgument(1);
+		String name = anno.getArgument(0).getFunctorValue();
+		int arity = ((CInteger)anno.getArgument(1)).getIntValue();
+		predicate = new PredicateNode(module,name,arity);
+	}
+	public ClauseNode(Map properties, File file) throws IOException {
+		this.properties=properties;
+		CCompound posterm = (CCompound) properties.get("position");
+		int from = ((CInteger)posterm.getArgument(0)).getIntValue();
+		int to = ((CInteger)posterm.getArgument(1)).getIntValue();
+		loc = new SourceLocation(file,false);
+		loc.offset=from;
+		loc.endOffset=to;
+		CCompound anno = (CCompound) properties.get("clause_of");
 		String module = anno.getArgument(0).getFunctorValue();
 		anno=(CCompound) anno.getArgument(1);
 		String name = anno.getArgument(0).getFunctorValue();
@@ -132,10 +150,24 @@ public class ClauseNode implements Clause,IAdaptable{
 		}
 		return term;
 	}
-	public Object getAdapter(Class adapter) {
-		if(IPropertySource.class.isAssignableFrom(adapter)){
-			return new CTermPropertySource(term);
+	public CTerm getBodyTerm(){
+		if(term.getFunctorValue().equals(":-") && term.getArity()==2){
+			return ((CCompound)term).getArgument(1);
 		}
 		return null;
+	}
+	public boolean hasBody(){
+		
+		return "rule".equals(getProperty("type"));
+	}
+	public Object getAdapter(Class adapter) {
+		if(IPropertySource.class.isAssignableFrom(adapter)){
+			return new SimplePropertySource(properties);
+		}
+		return null;
+	}
+	public String getProperty(String string) {
+		
+		return ((CTerm)properties.get(string)).getFunctorValue();
 	}
 }

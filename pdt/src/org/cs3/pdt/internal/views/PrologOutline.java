@@ -47,6 +47,8 @@
  */
 package org.cs3.pdt.internal.views;
 
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
@@ -60,6 +62,7 @@ import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -171,6 +174,9 @@ public class PrologOutline extends ContentOutlinePage {
 	private PLEditor editor;
 
 
+	private PrologElementLabelProvider labelProvider;
+
+
 	public PrologOutline(PLEditor editor) {
 		this.editor=editor;
 	}
@@ -182,17 +188,17 @@ public class PrologOutline extends ContentOutlinePage {
 
 		
 			contentProvider=new CTermContentProvider(viewer);
+			labelProvider=new PrologElementLabelProvider();
 			viewer.setContentProvider(contentProvider);
-			viewer.setLabelProvider(new PrologElementLabelProvider());
+			viewer.setLabelProvider(labelProvider);
 			viewer.setSorter(new MyViewSorter());	
 			this.convertPositions=true;
 		
 		viewer.setComparer(new Comparer());
 		
 		viewer.addSelectionChangedListener(this);
-		if (input != null){
-			viewer.setInput(input);
-		}
+		setInput(input);
+		
 
 		
 
@@ -208,6 +214,7 @@ public class PrologOutline extends ContentOutlinePage {
 		if (viewer != null) {
 			viewer.setInput(input);
 		}
+		
 	}
 
 	public IEditorInput getInput() {
@@ -251,6 +258,11 @@ public class PrologOutline extends ContentOutlinePage {
 			} else if (elm instanceof Predicate) {
 				Object[] children = getContentProvider().getChildren(elm);
 				if (children == null || children.length == 0) {
+					return;
+				}
+				if(!(children[0] instanceof Clause)){
+					//XXX: children may not have been fetched yet, in which case there is only a pseudo child.
+					// we need a way to wait for children.
 					return;
 				}
 				Clause c = (Clause) children[0];
