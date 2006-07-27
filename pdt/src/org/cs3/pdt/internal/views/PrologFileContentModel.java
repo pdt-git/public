@@ -15,13 +15,13 @@ public interface PrologFileContentModel {
 
 	public abstract File getFile();
 
-	public abstract void setFile(File file) throws 	IOException;
+	public abstract void setFile(File file) throws 	IOException, PrologInterfaceException;
 
-	public abstract void setPif(PrologInterface pif);
+	public abstract void setPif(PrologInterface pif) throws PrologInterfaceException;
 
 	public abstract PrologInterface getPif();
 
-	public abstract void reset();
+	public abstract void reset() throws PrologInterfaceException;
 
 	public void addPrologFileContentModelListener(PrologFileContentModelListener l);
 	public void removePrologFileContentModelListener(PrologFileContentModelListener l);

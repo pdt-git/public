@@ -217,7 +217,13 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		backend.reset();
+		try {
+			backend.reset();
+		} catch (PrologInterfaceException e1) {
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getControl().getShell(),
+					PDT.ERR_PIF, PDT.CX_OUTLINE, e1);
+		}
 		viewer.refresh();
 
 	}

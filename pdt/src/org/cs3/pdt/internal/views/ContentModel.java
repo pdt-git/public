@@ -21,8 +21,8 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
-public class ContentModel extends
-		DefaultAsyncPrologSessionListener implements PrologFileContentModel {
+public class ContentModel extends DefaultAsyncPrologSessionListener implements
+		PrologFileContentModel {
 
 	private File file;
 
@@ -42,7 +42,9 @@ public class ContentModel extends
 
 	private Vector listeners = new Vector();
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#hasChildren(java.lang.Object)
 	 */
 	public boolean hasChildren(Object parentElement) {
@@ -54,16 +56,21 @@ public class ContentModel extends
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#getChildren(java.lang.Object)
 	 */
 	public Object[] getChildren(Object parentElement)
 			throws PrologInterfaceException {
-		
-		Vector children = getCachedChildren(parentElement);
-		if (children.isEmpty()) {
-			children.add(oneMomentPlease);
-			fetchChildren(parentElement);
+		Vector children = null;
+		synchronized (cache) {
+			children = getCachedChildren(parentElement);
+
+			if (children.isEmpty()) {
+				children.add(oneMomentPlease);
+				fetchChildren(parentElement);
+			}
 		}
 		return children.toArray();
 	}
@@ -71,6 +78,14 @@ public class ContentModel extends
 	private void fetchChildren(Object parentElement)
 			throws PrologInterfaceException {
 		if (pif == null) {
+			return;
+		}
+		if(getSession().isPending(parentElement)){
+			return;
+		}
+		if(root==parentElement&&
+				( getSession().isPending(directiveTicket)
+						|| getSession().isPending(fileAnnosTicket))){
 			return;
 		}
 		if (parentElement instanceof CTermNode) {
@@ -90,7 +105,7 @@ public class ContentModel extends
 		} else {
 			fetchPredicates();
 			fetchDirectives();
-			
+
 		}
 
 	}
@@ -143,12 +158,15 @@ public class ContentModel extends
 		// TODO
 
 	}
-public void goalFailed(AsyncPrologSessionEvent e) {
-	Debug.error("Goal failed!");
-}
-public void goalRaisedException(AsyncPrologSessionEvent e) {
-	Debug.error("Goal raised an exception: "+e.message);
-}
+
+	public void goalFailed(AsyncPrologSessionEvent e) {
+		Debug.error("Goal failed!");
+	}
+
+	public void goalRaisedException(AsyncPrologSessionEvent e) {
+		Debug.error("Goal raised an exception: " + e.message);
+	}
+
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		if (e.ticket == directiveTicket) {
 			addDirective(e);
@@ -266,17 +284,21 @@ public void goalRaisedException(AsyncPrologSessionEvent e) {
 		return session;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#getFile()
 	 */
 	public File getFile() {
 		return file;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setFile(java.io.File)
 	 */
-	public void setFile(File file) throws IOException {
+	public void setFile(File file) throws IOException, PrologInterfaceException {
 		if (file != null) {
 			// check if the file name can be resolved.
 			// if there is a problem, throw now.
@@ -290,10 +312,12 @@ public void goalRaisedException(AsyncPrologSessionEvent e) {
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setPif(org.cs3.pl.prolog.PrologInterface)
 	 */
-	public void setPif(PrologInterface pif) {
+	public void setPif(PrologInterface pif) throws PrologInterfaceException {
 		this.pif = pif;
 		if (this.session != null) {
 			session.removeBatchListener(this);
@@ -307,83 +331,103 @@ public void goalRaisedException(AsyncPrologSessionEvent e) {
 		return file == null ? null : Util.prologFileName(file);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#getPif()
 	 */
 	public PrologInterface getPif() {
 		return pif;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#reset()
 	 */
-	public void reset() {
-		cache.clear();
+	public void reset() throws PrologInterfaceException {
+		if(pif!=null){
+			AsyncPrologSession session = getSession();
+			session.abort();
+		}
+		synchronized(cache){
+			cache.clear();
+			
+		}
+		
 
 	}
 
 	private void addChildren(Object parent, Collection collection) {
-		Vector children = getCachedChildren(parent);
-		if (children.contains(oneMomentPlease)) {
-			children.clear();
-		}
-		children.addAll(collection);
+		synchronized (cache) {
+			Vector children = getCachedChildren(parent);
+			if (children.contains(oneMomentPlease)) {
+				children.clear();
+			}
+			children.addAll(collection);	
+		}		
 		fireChildrenAdded(parent, collection.toArray());
 	}
 
 	private void addChild(Object parent, Object child) {
-		Vector children = getCachedChildren(parent);
-		if (children.contains(oneMomentPlease)) {
-			children.clear();
+		synchronized (cache) {
+			Vector children = getCachedChildren(parent);
+			if (children.contains(oneMomentPlease)) {
+				children.clear();
+			}
+			children.add(child);	
 		}
-		children.add(child);
-		fireChildrenAdded(parent, new Object[]{child});
+		
+		fireChildrenAdded(parent, new Object[] { child });
 	}
 
 	private Vector getCachedChildren(Object parent) {
-		Vector children = (Vector) cache.get(parent);
-		if (children == null) {
-			children = new Vector();
-			
-			cache.put(parent, children);
+		synchronized (cache) {
+			Vector children = (Vector) cache.get(parent);
+			if (children == null) {
+				children = new Vector();
+
+				cache.put(parent, children);
+			}
+			return children;	
 		}
-		return children;
+		
 	}
 
-	
-
 	private void fireChildrenAdded(Object parent, Object[] children) {
-		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,parent,children);
-		Vector clone=null;
+		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
+				parent, children);
+		Vector clone = null;
 		synchronized (listeners) {
-			clone=(Vector) listeners.clone();
+			clone = (Vector) listeners.clone();
 		}
 		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologFileContentModelListener l= (PrologFileContentModelListener) iter.next();
+			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
+					.next();
 			l.childrenAdded(e);
 		}
 
 	}
 
-	public void addPrologFileContentModelListener(PrologFileContentModelListener l) {
-		if(! listeners.contains(l)){
+	public void addPrologFileContentModelListener(
+			PrologFileContentModelListener l) {
+		if (!listeners.contains(l)) {
 			listeners.add(l);
 		}
-		
+
 	}
 
-	public void removePrologFileContentModelListener(PrologFileContentModelListener l) {
-		if(listeners.contains(l)){
+	public void removePrologFileContentModelListener(
+			PrologFileContentModelListener l) {
+		if (listeners.contains(l)) {
 			listeners.remove(l);
 		}
-		
 
-		
 	}
 
 	public void setRoot(Object input) {
-		this.root=input;
-		
+		this.root = input;
+
 	}
 
 }
