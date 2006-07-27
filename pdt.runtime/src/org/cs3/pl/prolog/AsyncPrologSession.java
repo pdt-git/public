@@ -181,6 +181,12 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * 
 	 */
 	public boolean isPending(Object ticket);
+	
+	/**
+	 * 
+	 * @return true if there are no pending requests.
+	 */
+	public boolean isIdle();
 
 	/**
 	 * Dispose the batch.

@@ -262,7 +262,7 @@ handle_command(InStream,OutStream,'IS_CONSULTED',continue):-
 handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 	my_format(OutStream,"GO_AHEAD~n",[]),
 	repeat,
-		handle_batch_messages,
+		handle_batch_messages(OutStream),
 		my_read_command(InStream,Term),
 		handle_batch_command(Term,InStream,OutStream),
 		Term=end_of_batch,!.
@@ -299,7 +299,8 @@ handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL',continue):-
 
 
 my_read_command(InStream,Term):-
-    my_read_term(InStream,Term,[/*double_quotes(string)*/]).
+    my_read_term(InStream,Term,[/*double_quotes(string)*/]),
+    my_debug(read_command(Term)).
 
 %my_read_goal(InStream,Term,Vars):-
 %    read_line_to_codes(InStream,Codes),
@@ -309,37 +310,83 @@ my_read_command(InStream,Term):-
 %    atom_to_term(Atom,Term,Vars).
 
 my_read_goal(InStream,Term,Vars):-
-    my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]).
+    my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
+    my_debug(read_goal(Term)).
 
 		
-handle_batch_messages:-
+handle_batch_messages(OutStream):-
     repeat,    
     (	thread_peek_message(batch_message(Message)),
-    	    	handle_batch_message(Message)
-    ->	thread_get_message(batch_message(Message)), fail
-    ;	true
+    	my_debug(recieved_message(Message)),
+    	handle_batch_message(Message, OutStream)
+    ->	thread_get_message(batch_message(Message)), 
+    	my_debug(dequeued_message(Message)),
+    	fail
+    ;	(var(Message);my_debug(could_not_handle_message(Message))),
+    	true
     ),!.
-handle_batch_message(abort(Id)):-
-	recordz(pif_batch_abort,Id).
+    
+%note on aborts: an abort request is complete if BOTH the async abort message aswell as the
+%sync abort marker have been recieved. I originally assumed that the async message would always 
+%preceed the marker, but it seems to be more tricky. So i will now handle this symetrically.
+
+record_abort_request(Type,Id):-
+    thread_self(Thread),
+    (	recorded(pif_batch_abort,request(Thread,Type,Id))
+    ->	true
+    ;	recordz(pif_batch_abort,request(Thread,Type,Id))
+    ).
+    
+
+erase_abort_request(Type,Id):-
+    thread_self(Thread),
+    (	recorded(pif_batch_abort,request(Thread,Type,Id),Ref)
+    ->	erase(Ref)
+    ;	true
+    ).
+    
+abort_requested(Type,Id):-
+	thread_self(Thread),
+	recorded(pif_batch_abort(Thread,Type,Id)).    
+
+aborting:-
+    abort_requested(async,_).
+
+send_abort_complete(Id,OutStream):-    
+   	my_format(OutStream, "ABORT_COMPLETE: ~a~n",[Id]),
+   	my_debug(abort_complete(Id)).
+    
+handle_batch_message(abort(Id),OutStream):-    
+	my_debug(recieved_abort_async(Id)),
+	(	abort_requested(sync,Id)
+	->	erase_abort_request(sync,Id),
+		send_abort_complete(Id,OutStream)
+	;	record_abort_request(async,Id),
+		my_debug(recorded_abort_async(Id))
+	).
+	
 
 handle_batch_command(abort(Id),_,OutStream):-
-	(	recorded(pif_batch_abort,Id,Ref)
-	->	erase(Ref),
-		my_format(OutStream, "ABORT_COMPLETE: ~a~n",[Id])
-	;	my_format(OutStream, "WARNING: ~a unexpected abort marker~n",[Id])
+    my_debug(recieved_abort_sync(Id)),
+	(	abort_requested(async,Id)
+	->	erase_abort_request(async,Id),
+		send_abort_complete(Id,OutStream)
+	;	record_abort_request(sync,Id),
+		my_debug(recorded_abort_sync(Id))
 	).
 handle_batch_command(join(Id),_,OutStream):-
 	my_format(OutStream, "JOIN_COMPLETE: ~a~n",[Id]).
 handle_batch_command(end_of_batch,InStream,OutStream):-
-	forall(recorded(pif_batch_abort,Id),handle_batch_command(abort(Id),InStream,OutStream)),
+	forall(abort_requested(async,Id),handle_batch_command(abort(Id),InStream,OutStream)),
+	forall(abort_requested(sync,Id),handle_batch_message(abort(Id),OutStream)),
 	my_format(OutStream, "END_OF_BATCH_COMPLETE~n",[]).
 handle_batch_command(query_once(Id,_),InStream,OutStream):-
-    recorded(pif_batch_abort,_),
+	aborting,
     !,
     my_read_goal(InStream,_,_),    
     my_format(OutStream, "SKIPPING_QUERY: ~a~n",[Id]).
 handle_batch_command(query_all(Id,_),InStream,OutStream):-
-    recorded(pif_batch_abort,_),
+    aborting,
     !,
     my_read_goal(InStream,_,_),
     my_format(OutStream, "SKIPPING_QUERY: ~a~n",[Id]).
@@ -376,11 +423,11 @@ solutions_until_cut(OutStream,Term,Vars,Mode):-
 	user:Term,
 	nb_setval(hasSolutions,1),
 	print_solution(OutStream,Vars,Mode),
-	goal_was_cut,!.	
+	goal_was_cut(OutStream),!.	
 
-goal_was_cut:-
-	handle_batch_messages,
-	recorded(pif_batch_abort,_).
+goal_was_cut(OutStream):-
+	handle_batch_messages(OutStream),
+	aborting.
 	
 solutions_yes_or_no(OutStream):-
 	(	nb_current(hasSolutions,1)
@@ -575,12 +622,11 @@ unused_thread_name(Prefix,Suffix,Name):-
 	
 unused_thread_name(Prefix,Suffix,Try,Name):-
 	concat_atom([Prefix,Try,Suffix],A),
-	format("trying ~a~n",[A]),
+
 	(	current_thread(A,_)
 	->plus(Try,1,Next),
 		unused_thread_name(Prefix,Suffix,Next,Name)
-	; format("unused: ~a~n",[A]),
-		Name=A			
+	;	Name=A			
 	).
 	
 	
@@ -676,4 +722,8 @@ write_escaped_char(Out,'\''):-
 write_escaped_char(Out,C):-
 	put_char(Out,C).	
 		
+my_debug(A):-
+	thread_self(Self),
+	write(Self),write(': >>> '),writeln(A).
+
 		

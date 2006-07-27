@@ -196,6 +196,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	
 	private void dispatchAbortComplete(int id) {
+		Debug.info("abort complete recieved, id="+id);
 		Object ticket = findAndRemoveTicket(id);
 		synchronized (lastAbortTicket) {
 			if(lastAbortTicket==ticket){
@@ -203,9 +204,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			}
 		}
 		fireAbortComplete(ticket);
+		Debug.info("listeners were notified about abort completion, id="+id);
 		synchronized (ticket) {
-			
+			Debug.info("notifying waiting threads, id="+id);
 			ticket.notifyAll();
+			Debug.info("notifying done, id="+id);
 		}
 		
 	}
@@ -594,26 +597,45 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		abort(new Object());
 	}
 	public void abort(Object ticket) throws PrologInterfaceException {
+		if(ticket==null){
+			throw new IllegalArgumentException("null ticket!");
+		}
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call abort() from dispatch thread!");
 		}
 		if(client==null){
 			return;
 		}
+		if(isIdle()){
+			fireAbortComplete(ticket);
+			synchronized (ticket) {
+				
+				ticket.notifyAll();
+			}
+			return;
+		}
 		//Object ticket = new Object();
 		lastAbortTicket=ticket;
 		int id = storeTicket(ticket);
+		Debug.info("abort ticket stored, id="+id);
 		PrologSession session = pif.getSession();
 		try {
 			session.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
+			Debug.info("async abort request queued, id="+id);
 			synchronized (ticket) {
 				if(!disposing){
-					client.writeln("abort("+id+").");					
+					client.writeln("abort("+id+").");			
+					Debug.info("sync abort marker queued, id="+id);
 				}
 				
 				while(isPending(ticket)){
+					Debug.info("waiting for pending ticket, id="+id);
+					if(id==8){
+						Debug.debug("debug");
+					}
 					ticket.wait();
 				}
+				Debug.info("abort ticket is not/no longer pending, id="+id);
 				
 			}
 			
@@ -707,6 +729,13 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	public String getProcessorThreadAlias() {
 		
 		return client.getProcessorThread();
+	}
+
+	public boolean isIdle() {
+		synchronized (tickets) {
+			return tickets.isEmpty();
+
+		}
 	}
 
 	
