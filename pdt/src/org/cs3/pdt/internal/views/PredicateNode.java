@@ -47,8 +47,10 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.views.properties.IPropertySource;
 
-public class PredicateNode implements Predicate {
+public class PredicateNode implements Predicate,IAdaptable{
 
 	HashMap properties = new HashMap();
 
@@ -144,5 +146,12 @@ public class PredicateNode implements Predicate {
 	public void setPredicateProperty(String property, String value) {
 		properties.put(property, value);
 		
+	}
+
+	public Object getAdapter(Class adapter) {
+		if(IPropertySource.class.isAssignableFrom(adapter)){
+			return new SimplePropertySource(properties);
+		}
+		return null;
 	}
 }
