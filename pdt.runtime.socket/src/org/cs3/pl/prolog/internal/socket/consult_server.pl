@@ -347,7 +347,7 @@ erase_abort_request(Type,Id):-
     
 abort_requested(Type,Id):-
 	thread_self(Thread),
-	recorded(pif_batch_abort(Thread,Type,Id)).    
+	recorded(pif_batch_abort,request(Thread,Type,Id)).    
 
 aborting:-
     abort_requested(async,_).
@@ -645,20 +645,20 @@ my_read_term(InStream,Term,Options):-
 	
 my_write_term(OutStream,Elm,Options):-
 	write_term(OutStream,Elm,Options),
-	nl(OutStream).
-%	thread_self(Self),
-	%write(Self),
-	%write(': >>> '),
-	%write_term(Elm,Options),
-	%nl.
+	nl(OutStream)/*,
+	thread_self(Self),
+	write(Self),
+	write(': >>> '),
+	write_term(Elm,Options),
+	nl*/.
 	
 my_format(OutStream,Format,Args):-
 	format(OutStream,Format,Args),
-%	thread_self(Self),
-%	write(Self),write(': >>> '),
-%	format(current_output,Format,Args),
-	flush_output(OutStream).
-%	flush_output(current_output).
+	flush_output(OutStream)/*,
+	thread_self(Self),
+	write(Self),write(': >>> '),
+	format(current_output,Format,Args),
+	flush_output(current_output)*/.
 	
 write_escaped(Out,Term):-
 	write_escaped(Out,Term,canonical).
