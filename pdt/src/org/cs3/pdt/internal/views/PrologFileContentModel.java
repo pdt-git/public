@@ -25,6 +25,9 @@ public interface PrologFileContentModel {
 
 	public void addPrologFileContentModelListener(PrologFileContentModelListener l);
 	public void removePrologFileContentModelListener(PrologFileContentModelListener l);
+	
+	public void addPrologFileContentModelListener(Object parent,PrologFileContentModelListener l);
+	public void removePrologFileContentModelListener(Object parent,PrologFileContentModelListener l);
 
 	public abstract void setRoot(Object input);
 }
