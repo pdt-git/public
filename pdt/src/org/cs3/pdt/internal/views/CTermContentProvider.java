@@ -77,10 +77,10 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	private PrologFileContentModel backend;
 	
-	public CTermContentProvider(Viewer outline) {
-		viewer = outline;
-		backend = new ContentModel();
-		backend.addPrologFileContentModelListener(this);
+	public CTermContentProvider(Viewer outline,PrologFileContentModel backend) {
+		this.viewer = outline;
+		this.backend = backend;
+		this.backend.addPrologFileContentModelListener(this);
 		
 	}
 

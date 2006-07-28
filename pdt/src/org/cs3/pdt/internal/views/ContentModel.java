@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
@@ -41,6 +42,8 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	private AsyncPrologSession session;
 
 	private Vector listeners = new Vector();
+
+	private HashMap specificListeners = new HashMap();
 
 	/*
 	 * (non-Javadoc)
@@ -80,12 +83,12 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (pif == null) {
 			return;
 		}
-		if(getSession().isPending(parentElement)){
+		if (getSession().isPending(parentElement)) {
 			return;
 		}
-		if(root==parentElement&&
-				( getSession().isPending(directiveTicket)
-						|| getSession().isPending(fileAnnosTicket))){
+		if (root == parentElement
+				&& (getSession().isPending(directiveTicket) || getSession()
+						.isPending(fileAnnosTicket))) {
 			return;
 		}
 		if (parentElement instanceof CTermNode) {
@@ -269,8 +272,12 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (sigterm != null) {
 			CTerm[] sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				((PredicateNode) defines.get(PLUtil.renderTerm(sigs[i])))
-						.setPredicateProperty(property, "true");
+				PredicateNode predicate = ((PredicateNode) defines.get(PLUtil
+						.renderTerm(sigs[i])));
+				if (predicate != null) {
+					predicate.setPredicateProperty(property, "true");
+				}
+
 			}
 		}
 	}
@@ -346,15 +353,14 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#reset()
 	 */
 	public void reset() throws PrologInterfaceException {
-		if(pif!=null){
+		if (pif != null) {
 			AsyncPrologSession session = getSession();
 			session.abort();
 		}
-		synchronized(cache){
+		synchronized (cache) {
 			cache.clear();
-			
+
 		}
-		
 
 	}
 
@@ -364,8 +370,8 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			if (children.contains(oneMomentPlease)) {
 				children.clear();
 			}
-			children.addAll(collection);	
-		}		
+			children.addAll(collection);
+		}
 		fireChildrenAdded(parent, collection.toArray());
 	}
 
@@ -375,9 +381,9 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			if (children.contains(oneMomentPlease)) {
 				children.clear();
 			}
-			children.add(child);	
+			children.add(child);
 		}
-		
+
 		fireChildrenAdded(parent, new Object[] { child });
 	}
 
@@ -389,17 +395,20 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 				cache.put(parent, children);
 			}
-			return children;	
+			return children;
 		}
-		
+
 	}
 
 	private void fireChildrenAdded(Object parent, Object[] children) {
 		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
 				parent, children);
-		Vector clone = null;
+		HashSet clone = new HashSet();
 		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
+			clone.addAll(listeners);
+		}
+		synchronized (specificListeners) {
+			clone.addAll(getListenersForParent(parent));
 		}
 		for (Iterator iter = clone.iterator(); iter.hasNext();) {
 			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
@@ -428,6 +437,38 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	public void setRoot(Object input) {
 		this.root = input;
 
+	}
+
+	public Vector getListenersForParent(Object parent) {
+		synchronized (specificListeners) {
+			Vector listeners = (Vector) specificListeners.get(parent);
+			if (listeners == null) {
+				listeners = new Vector();
+				specificListeners.put(parent, listeners);
+			}
+			return listeners;
+		}
+	}
+
+	public void addPrologFileContentModelListener(Object parent,
+			PrologFileContentModelListener l) {
+		synchronized (specificListeners) {
+			Vector listeners = getListenersForParent(parent);
+			if (!listeners.contains(l)) {
+				listeners.add(l);
+			}
+		}
+
+	}
+
+	public void removePrologFileContentModelListener(Object parent,
+			PrologFileContentModelListener l) {
+		synchronized (specificListeners) {
+			Vector listeners = getListenersForParent(parent);
+			if (listeners.contains(l)) {
+				listeners.remove(l);
+			}
+		}
 	}
 
 }
