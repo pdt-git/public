@@ -47,6 +47,8 @@
  */
 package org.cs3.pdt.internal.views;
 
+import java.util.HashSet;
+
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
@@ -55,6 +57,7 @@ import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
@@ -63,6 +66,9 @@ import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterfaceException;
+
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -72,9 +78,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
@@ -175,6 +183,8 @@ public class PrologOutline extends ContentOutlinePage {
 
 	private PrologElementLabelProvider labelProvider;
 
+	private PrologOutlineFilter[] filters;
+
 	public PrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
@@ -193,8 +203,17 @@ public class PrologOutline extends ContentOutlinePage {
 		this.convertPositions = true;
 
 		viewer.setComparer(new Comparer());
+		
 
+			
 		viewer.addSelectionChangedListener(this);
+		initFilters();
+		
+		IActionBars actionBars= getSite().getActionBars();
+		IToolBarManager toolBarManager= actionBars.getToolBarManager();
+		Action action = new FilterActionMenu(this);
+		toolBarManager.add(action);
+		
 		setInput(input);
 
 	}
@@ -329,5 +348,29 @@ public class PrologOutline extends ContentOutlinePage {
 
 	private ITreeContentProvider getContentProvider() {
 		return contentProvider;
+	}
+
+	public PrologOutlineFilter[] getAvailableFilters() {
+		if(filters==null){
+			filters=new PrologOutlineFilter[]{
+				new HideDirectivesFilter("hide_directives","Hide Directives"),
+				new HidePrivatePredicatesFilter("hide_private_predicates","Hide Private Predicates"),
+				new HideSubtermsFilter("hide_subterms","Hide Subterms")
+			};
+		}
+		return filters;
+	}
+	
+	protected void initFilters(){
+		String value=PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_OUTLINE_FILTERS, "");
+		HashSet enabledIds = new HashSet();
+		Util.split(value, ",",enabledIds);
+		PrologOutlineFilter[] filters = getAvailableFilters();
+		for (int i = 0; i < filters.length; i++) {
+			PrologOutlineFilter filter = filters[i];
+			if(enabledIds.contains(filter.getId())){
+				getTreeViewer().addFilter(filter);
+			}
+		}
 	}
 }

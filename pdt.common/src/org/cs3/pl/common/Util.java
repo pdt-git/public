@@ -61,6 +61,8 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+
+
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
@@ -749,6 +751,22 @@ public static String unquoteString(String image) {
 		sb.append(string);
 		return sb.toString();
 
+	}
+
+	public static String splice(Object[] c, String delim) {
+		if (c != null && c.length>0) {
+			StringBuffer sb = new StringBuffer();
+			for (int i=0;i<c.length;i++) {
+				if (i>0) {
+					sb.append(delim);
+				}
+				Object next =c[i];
+				sb.append(next);
+				
+			}
+			return sb.toString();
+		}
+		return "";
 	}
 
 	
