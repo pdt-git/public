@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.internal.natures.MetadataSubscription;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
@@ -17,13 +19,17 @@ import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologSession;
 
 public class ContentModel extends DefaultAsyncPrologSessionListener implements
-		PrologFileContentModel {
+		PrologFileContentModel, LifeCycleHook {
+
+	private static final String HOOK_ID = "PrologFileContentModelHook";
 
 	private File file;
 
@@ -81,7 +87,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 							children.add(new CTermNode(c.getArgument(i)));
 						}
 					}
-				} else {
+				} else if (pif!=null&&pif.isUp()){
 					children.add(oneMomentPlease);
 					fetchChildren(parentElement);
 				}
@@ -246,17 +252,19 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (sigterm != null) {
 			CTerm[] sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				defines.put(PLUtil.renderSignature(sigs[i],module), new PredicateNode(
-						(CCompound) sigs[i], module));
+				defines.put(PLUtil.renderSignature(sigs[i], module),
+						new PredicateNode((CCompound) sigs[i], module));
 			}
 		}
 
-		setPredicateProperty(defines, fileAnnos, module,"exports", Predicate.EXPORTED);
-		setPredicateProperty(defines, fileAnnos, module,"defines_dynamic", Predicate.DYNAMIC);
-		setPredicateProperty(defines, fileAnnos, module,"defines_multifile",
+		setPredicateProperty(defines, fileAnnos, module, "exports",
+				Predicate.EXPORTED);
+		setPredicateProperty(defines, fileAnnos, module, "defines_dynamic",
+				Predicate.DYNAMIC);
+		setPredicateProperty(defines, fileAnnos, module, "defines_multifile",
 				Predicate.MULTIFILE);
-		setPredicateProperty(defines, fileAnnos, module,"defines_module_transparent",
-				Predicate.MODULE_TRANSPARENT);
+		setPredicateProperty(defines, fileAnnos, module,
+				"defines_module_transparent", Predicate.MODULE_TRANSPARENT);
 
 		addChildren(root, defines.values());
 	}
@@ -278,14 +286,14 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	}
 
-	private void setPredicateProperty(Map defines, Map fileAnnos,String module, String key,
-			String property) {
+	private void setPredicateProperty(Map defines, Map fileAnnos,
+			String module, String key, String property) {
 		CTerm sigterm = (CTerm) fileAnnos.get(key);
 		if (sigterm != null) {
 			CTerm[] sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
 				PredicateNode predicate = ((PredicateNode) defines.get(PLUtil
-						.renderSignature(sigs[i],module)));
+						.renderSignature(sigs[i], module)));
 				if (predicate != null) {
 					predicate.setPredicateProperty(property, "true");
 				}
@@ -337,11 +345,17 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setPif(org.cs3.pl.prolog.PrologInterface)
 	 */
 	public void setPif(PrologInterface pif) throws PrologInterfaceException {
-		this.pif = pif;
 		if (this.session != null) {
 			session.removeBatchListener(this);
 			session.dispose();
 			session = null;
+		}
+		if (this.pif != null) {
+			this.pif.removeLifeCycleHook(HOOK_ID);
+		}
+		this.pif = pif;
+		if (this.pif != null) {
+			this.pif.addLifeCycleHook(this,HOOK_ID, new String[0]);
 		}
 		reset();
 	}
@@ -481,6 +495,26 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 				listeners.remove(l);
 			}
 		}
+	}
+
+	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
+		;
+		
+	}
+
+	public void beforeShutdown(PrologInterface pif, PrologSession s) throws PrologInterfaceException {
+		if (this.session != null) {
+			session.removeBatchListener(this);
+			session.dispose();
+			session = null;
+		}
+		reset();
+		
+	}
+
+	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
+		;
+		
 	}
 
 }

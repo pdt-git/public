@@ -170,6 +170,10 @@ public class PDTPlugin extends AbstractUIPlugin  {
 		return System.getProperty(key, value);
 	}
 
+	public void setPreferenceValue(String key, String value) {
+		getPreferenceStore().setValue(key, value);
+	}
+	
 	/**
 	 * 
 	 */
@@ -257,7 +261,20 @@ public class PDTPlugin extends AbstractUIPlugin  {
 						"of the respective prolog project, should i switch to the default runtime first?",
 						Option.ENUM, MessageDialogWithToggle.PROMPT, new String[][] {
 								{ "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
-								{ "ask", MessageDialogWithToggle.PROMPT }})
+								{ "ask", MessageDialogWithToggle.PROMPT }}),
+				new SimpleOption(
+						PDT.PREF_OUTLINE_FILTERS,
+						"Active Filters for the Prolog Outline",
+						"A comma separated list of filter ids that should be activated at startup",
+						Option.STRING, "hide_subterms"
+				){
+					@Override
+					public boolean isVisible() {
+					
+						return false;
+					}
+				}
+				
 
 		};
 

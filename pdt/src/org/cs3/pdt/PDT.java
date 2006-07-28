@@ -104,6 +104,8 @@ public final  class PDT {
 	public static final int CX_CONSULT =-9;
 
 	public static final int ERR_WORKBENCH_UI_PROBLEM = -10;
+
+	public static final String PREF_OUTLINE_FILTERS = "pdt.outline.filters";
 	
 	
 

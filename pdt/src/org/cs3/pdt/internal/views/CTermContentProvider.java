@@ -57,7 +57,9 @@ import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
 
@@ -73,12 +75,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	
 
-	private Viewer viewer;
+	private TreeViewer viewer;
 
 	private PrologFileContentModel backend;
 	
 	public CTermContentProvider(Viewer outline,PrologFileContentModel backend) {
-		this.viewer = outline;
+		this.viewer = (TreeViewer) outline;
 		this.backend = backend;
 		this.backend.addPrologFileContentModelListener(this);
 		
@@ -101,6 +103,15 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	public boolean hasChildren(Object parentElement) {
+		//XXX a hack.
+		if(parentElement instanceof DirectiveNode||parentElement instanceof ClauseNode){
+			ViewerFilter[] filters = viewer.getFilters();
+			for (int i = 0; i < filters.length; i++) {
+				if(filters[i] instanceof HideSubtermsFilter){
+					return false;
+				}
+			}
+		}
 		return backend.hasChildren(parentElement);
 
 	}
