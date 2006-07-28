@@ -66,13 +66,25 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	 */
 	public Object[] getChildren(Object parentElement)
 			throws PrologInterfaceException {
+
 		Vector children = null;
 		synchronized (cache) {
 			children = getCachedChildren(parentElement);
-
 			if (children.isEmpty()) {
-				children.add(oneMomentPlease);
-				fetchChildren(parentElement);
+				if (parentElement instanceof CTermNode) {
+					// FIXME: handle partial fetched terms (not implemented yet)
+					CTerm term = ((CTermNode) parentElement).term;
+					CCompound c = null;
+					if (term instanceof CCompound) {
+						c = (CCompound) term;
+						for (int i = 0; i < c.getArity(); i++) {
+							children.add(new CTermNode(c.getArgument(i)));
+						}
+					}
+				} else {
+					children.add(oneMomentPlease);
+					fetchChildren(parentElement);
+				}
 			}
 		}
 		return children.toArray();
@@ -234,16 +246,16 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (sigterm != null) {
 			CTerm[] sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
-				defines.put(PLUtil.renderTerm(sigs[i]), new PredicateNode(
+				defines.put(PLUtil.renderSignature(sigs[i],module), new PredicateNode(
 						(CCompound) sigs[i], module));
 			}
 		}
 
-		setPredicateProperty(defines, fileAnnos, "exports", Predicate.EXPORTED);
-		setPredicateProperty(defines, fileAnnos, "dynamic", Predicate.DYNAMIC);
-		setPredicateProperty(defines, fileAnnos, "multifile",
+		setPredicateProperty(defines, fileAnnos, module,"exports", Predicate.EXPORTED);
+		setPredicateProperty(defines, fileAnnos, module,"defines_dynamic", Predicate.DYNAMIC);
+		setPredicateProperty(defines, fileAnnos, module,"defines_multifile",
 				Predicate.MULTIFILE);
-		setPredicateProperty(defines, fileAnnos, "transparent",
+		setPredicateProperty(defines, fileAnnos, module,"defines_module_transparent",
 				Predicate.MODULE_TRANSPARENT);
 
 		addChildren(root, defines.values());
@@ -266,14 +278,14 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	}
 
-	private void setPredicateProperty(Map defines, Map fileAnnos, String key,
+	private void setPredicateProperty(Map defines, Map fileAnnos,String module, String key,
 			String property) {
 		CTerm sigterm = (CTerm) fileAnnos.get(key);
 		if (sigterm != null) {
 			CTerm[] sigs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < sigs.length; i++) {
 				PredicateNode predicate = ((PredicateNode) defines.get(PLUtil
-						.renderTerm(sigs[i])));
+						.renderSignature(sigs[i],module)));
 				if (predicate != null) {
 					predicate.setPredicateProperty(property, "true");
 				}
