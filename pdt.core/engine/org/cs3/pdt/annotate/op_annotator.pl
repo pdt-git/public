@@ -44,9 +44,9 @@
 :-use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :-use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 
-:-pdt_annotator([term,file],[]).
+:-pdt_annotator([interleaved,file],[]).
 
-term_annotation_hook(_,OpModule,_,InTerm,OutTerm):-
+interleaved_annotation_hook(_,OpModule,InTerm,OutTerm):-
     pdt_strip_annotation(InTerm,':-'(op(Precedence,Type,Name)),(TopAnot,ArgAnot)),
     pdt_splice_annotation(':-'(op(Precedence,Type,Name)),([declares_op(op(Precedence,Type,Name))|TopAnot],ArgAnot),OutTerm),
     op(Precedence,Type,OpModule:Name).
