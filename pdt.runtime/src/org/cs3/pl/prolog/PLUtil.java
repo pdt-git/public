@@ -52,6 +52,7 @@ import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CVariable;
@@ -309,5 +310,15 @@ public class PLUtil {
 		}
 		
 	}
-	
+	public static String renderSignature(CTerm sig,String defaultModule){
+		CCompound term = (CCompound) sig;
+		String module = defaultModule;
+		if(":".equals(term.getFunctorValue())){
+			module=term.getArgument(0).getFunctorValue();
+			term=(CCompound) term.getArgument(1);
+		}
+		String name = term.getArgument(0).getFunctorValue();
+		int arity = ((CInteger)term.getArgument(1)).getIntValue();
+		return module+":"+name+"/"+arity;
+	}
 }
