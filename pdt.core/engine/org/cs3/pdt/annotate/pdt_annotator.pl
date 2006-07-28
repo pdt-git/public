@@ -120,11 +120,40 @@ process_dependency(Module,Dependency):-
 add_missing_hooks2(Anotator):-
     add_missing_hook(Anotator:cleanup_hook/3),    
     add_missing_hook(Anotator:term_annotation_hook/5),
-    add_missing_hook(Anotator:file_annotation_hook/5).
+    add_missing_hook(Anotator:file_annotation_hook/5),
+    add_missing_hook(Anotator:interleaved_annotation_hook/4).
 
 execute_annotators(FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut):-
     pdt_process_order(annotator_process_order,Annotators),
     execute_annotators(Annotators,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut).
+
+interleaved_annotators(IAs):-
+    pdt_process_order(annotator_process_order,Annotators),
+    filter_interleaved_annotators(Annotators,IAs).
+
+filter_interleaved_annotators([],[]).
+
+filter_interleaved_annotators([A|As],[A|IAs]):-
+    annotator(A,Hooks,_),
+    member(interleaved,Hooks),
+    !,
+    filter_interleaved_annotators(As,IAs).
+filter_interleaved_annotators([_|As],IAs):-
+    filter_interleaved_annotators(As,IAs).
+    
+
+execute_interleaved_hooks([],_,_,Term,Term).
+execute_interleaved_hooks([Annotator|Annotators],FileStack,OpModule,TermIn,TermOut):-
+	execute_interleaved_hook(Annotator,FileStack,OpModule,TermIn,TermNext),
+	execute_interleaved_hooks(Annotators,FileStack,OpModule,TermNext,TermOut).
+	
+execute_interleaved_hook(Annotator,FileStack,OpModule,TermIn,TermOut):-
+    pdt_maybe(Annotator:interleaved_annotation_hook(FileStack,OpModule,TermIn,TermTmp)),
+	(	var(TermTmp)
+	->	TermOut=TermIn
+	;	TermOut=TermTmp
+	).
+
 
 execute_annotators([],_FileStack,_OpModule,FileAnnos,Terms,FileAnnos,Terms).
 execute_annotators([Annotator|Annotators],FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosOut,TermsOut):-
@@ -140,6 +169,7 @@ execute_annotator_hooks(Annotator,[Hook|Hooks],FileStack,OpModule,FileAnnosIn,Te
     execute_annotator_hook(Annotator,Hook,FileStack,OpModule,FileAnnosIn,TermsIn,FileAnnosTmp,TermsTmp),
     execute_annotator_hooks(Annotator,Hooks,FileStack,OpModule,FileAnnosTmp,TermsTmp,FileAnnosOut,TermsOut).
 
+execute_annotator_hook(_,interleaved,_,_,FileAnnos,Terms,FileAnnos,Terms).
 execute_annotator_hook(Annotator,file,FileStack,OpModule,FileAnnosIn,Terms,FileAnnosOut,Terms):-
     pdt_maybe(Annotator:file_annotation_hook(FileStack,OpModule,Terms,FileAnnosIn,TmpAnnos)),
 	(	var(TmpAnnos)
@@ -376,10 +406,10 @@ clear_ops(OpModule):-
 
 
 read_terms(FileStack,OpModule,In,Terms,Errors):-
-    
-    	read_terms_rec(FileStack,OpModule,In,0,Terms,Errors).
+   	    interleaved_annotators(IAs),
+    	read_terms_rec(IAs,FileStack,OpModule,In,0,Terms,Errors).
     	
-read_terms_rec(FileStack,Module,In,N,Terms,Errors):-
+read_terms_rec(IAs,FileStack,Module,In,N,Terms,Errors):-
     Options=[
 		subterm_positions(_),
 		variable_names(_),
@@ -388,17 +418,17 @@ read_terms_rec(FileStack,Module,In,N,Terms,Errors):-
     		double_quotes(string)
     	],
     do_read_term(In,Term,Options,Error),
-    do_process_term(FileStack,Module,In,N,Term,Options,Error,Terms,Errors).
+    do_process_term(IAs,FileStack,Module,In,N,Term,Options,Error,Terms,Errors).
 
 
-do_process_term(_,_,_,_,Term,_,_,[],[]):-
+do_process_term(_,_,_,_,_,Term,_,_,[],[]):-
 	Term==end_of_file,
 	!.
-do_process_term(FileStack,Module,In,N,_,_,Error,Terms,[Error|Errors]):-
+do_process_term(IAs,FileStack,Module,In,N,_,_,Error,Terms,[Error|Errors]):-
     nonvar(Error),!,
     M is N+1,
-    read_terms_rec(FileStack,Module,In,M,Terms,Errors).    
-do_process_term(FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
+    read_terms_rec(IAs,FileStack,Module,In,M,Terms,Errors).    
+do_process_term(IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
 	member(subterm_positions(Positions),Options),
 	FileStack=[File|_],
 	pdt_file_ref(File,FileRef),
@@ -407,11 +437,12 @@ do_process_term(FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Er
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	pdt_term_annotation(ProcessedTerm,T,[variable_names(Names),singletons(Singletons)|A]),
+	pdt_term_annotation(ProcessedTerm0,T,[variable_names(Names),singletons(Singletons)|A]),
+	execute_interleaved_hooks(IAs,FileStack,OpModule,ProcessedTerm0,ProcessedTerm),
 %	numbervars(ProcessedTerm,0,_),
 %   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
 
-    read_terms_rec(FileStack,OpModule,In,NextN,Terms,Errors).
+    read_terms_rec(IAs,FileStack,OpModule,In,NextN,Terms,Errors).
 
 do_read_term(In,Term,Options,Error):-
     catch(

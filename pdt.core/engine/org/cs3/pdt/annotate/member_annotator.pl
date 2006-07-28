@@ -82,7 +82,7 @@ process_member(InTerm,FileModule,OutTerm):-
 
 property_functor(defines_dynamic,dynamic).
 property_functor(defines_multifile,multifile).
-property_functor(defines_module_transparent,transparent).
+property_functor(defines_module_transparent,module_transparent).
 
 check_signatures(InSigs,Signatures,OutSigs):-
 	findall(

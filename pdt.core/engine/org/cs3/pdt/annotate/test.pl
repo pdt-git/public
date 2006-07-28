@@ -1,2 +1,4 @@
-:-dynamic gut/2.
-gut(a,b).
+
+:-op(100,xfx,lu).
+
+gut(a lu b).
