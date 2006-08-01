@@ -70,6 +70,8 @@ public class ImageRepository {
 	
 	public final static String FILTER = "filter.gif";
 	
+	public final static String SORT = "alphab_sort_co.gif";
+	
     public final static String PE_PUBLIC = "public_co.gif";
 
     public final static String PE_HIDDEN = "protected_co.gif";

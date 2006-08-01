@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 
-final class FilterActionMenu extends Action implements IMenuCreator,
+final class SortActionMenu extends Action implements IMenuCreator,
 		IWorkbenchWindowPulldownDelegate2 {
 	private Menu fCreatedMenu;
 
@@ -37,13 +37,12 @@ final class FilterActionMenu extends Action implements IMenuCreator,
 
 	private PrologOutline outline;
 
-	FilterActionMenu(PrologOutline outline) {
-		super("Filter", Action.AS_DROP_DOWN_MENU|Action.AS_CHECK_BOX);
-		//setChecked(true);
-		setImageDescriptor(ImageRepository
-				.getImageDescriptor(ImageRepository.FILTER));
+	SortActionMenu(PrologOutline outline) {
+		super("Sort", ImageRepository
+				.getImageDescriptor(ImageRepository.SORT));
 		this.outline=outline;
 		setMenuCreator(this);
+		
 	}
 
 	public void dispose() {

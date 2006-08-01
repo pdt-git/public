@@ -77,9 +77,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
@@ -90,67 +88,6 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 public class PrologOutline extends ContentOutlinePage {
-	private final class MyViewSorter extends ViewerSorter {
-		public int category(Object element) {
-			if (element instanceof Directive) {
-				return 0;
-			}
-			if (element instanceof Clause) {
-				return 1;
-			}
-			if (element instanceof Predicate) {
-				return 2;
-			}
-			if (element instanceof CTerm) {
-				return 3;
-			}
-			return 4;
-		}
-
-		public int compare(Viewer viewer, Object e1, Object e2) {
-			if (e1 instanceof Directive && e2 instanceof Directive) {
-				return ((Comparable) e1).compareTo(e2);
-			}
-			if (e1 instanceof Clause && e2 instanceof Clause) {
-				return ((Comparable) e1).compareTo(e2);
-			}
-			if (e2 instanceof CTerm && e2 instanceof CTerm) {
-				CTerm t1 = (CTerm) e1;
-				CTerm t2 = (CTerm) e2;
-				CCompound pos1 = (CCompound) t1.getAnotation("position");
-				CCompound pos2 = (CCompound) t2.getAnotation("position");
-				int TOP = Integer.MAX_VALUE;
-				int start1 = TOP;
-				int start2 = TOP;
-				int end1 = TOP;
-				int end2 = TOP;
-				if (pos1 != null) { // can be null, e.g. for implicit NILs
-					start1 = ((CInteger) pos1.getArgument(0)).getIntValue();
-					end1 = ((CInteger) pos1.getArgument(1)).getIntValue();
-				}
-				if (pos2 != null) { // can be null, e.g. for implicit NILs
-					start2 = ((CInteger) pos2.getArgument(0)).getIntValue();
-					end2 = ((CInteger) pos2.getArgument(1)).getIntValue();
-				}
-				int c = start1 - start2;
-				if (c != 0) {
-					return c;
-				}
-				c = end1 - end2;
-				if (c != 0) {
-					return c;
-				}
-
-			}
-			if (e1 instanceof Predicate && e2 instanceof Predicate) {
-				Predicate p1 = (Predicate) e1;
-				Predicate p2 = (Predicate) e2;
-				return p1.compareTo(p2);
-			}
-			return super.compare(viewer, e1, e2);
-		}
-	}
-
 	private final class Comparer implements IElementComparer {
 		public int hashCode(Object element) {
 			if (element instanceof Predicate) {
@@ -199,7 +136,7 @@ public class PrologOutline extends ContentOutlinePage {
 		labelProvider = new PrologElementLabelProvider();
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(labelProvider);
-		viewer.setSorter(new MyViewSorter());
+		viewer.setSorter(new LexicalPrologOutlineSorter());
 		this.convertPositions = true;
 
 		viewer.setComparer(new Comparer());

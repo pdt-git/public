@@ -173,7 +173,7 @@ public final class SourceLocation implements Serializable, Comparable {
 				return c;
 			}
 		}
-		c = other.offset - offset;
+		c = offset-other.offset ;
 		if (c != 0) {
 			return c;
 		}
@@ -183,7 +183,7 @@ public final class SourceLocation implements Serializable, Comparable {
 				return c;
 			}
 		}
-		c = other.endOffset - endOffset;
+		c = endOffset-other.endOffset;
 		if (c != 0) {
 			return c;
 		}

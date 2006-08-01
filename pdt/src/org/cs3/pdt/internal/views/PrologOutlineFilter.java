@@ -23,7 +23,6 @@ public abstract class PrologOutlineFilter extends ViewerFilter {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return getId();
 	}
 }
