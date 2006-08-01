@@ -282,4 +282,22 @@ public class PrologSessionTest extends TestCase {
 		assertNotNull(s.queryOnce("atom("+atom+")"));
 		
 	}
+	
+	public void testException() throws Exception {
+	       PrologSession session = pif.getSession();
+	       Map map = null;
+	       try{
+	           map = session.queryOnce("cluse(a,b)");
+	           fail("expected exception");
+	       } catch(Exception e){
+	           try {
+	              map = session.queryOnce("true"); // <--- blocks the system
+	           } catch(Exception ex){
+	               fail("no exception expected");
+	           }
+	           session.dispose();
+	           e.printStackTrace();
+	       }
+	   }
+
 }
