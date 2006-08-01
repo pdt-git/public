@@ -44,6 +44,7 @@
 :- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_multimap')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 
 :- pdt_annotator([term,file],[library('/org/cs3/pdt/annotate/export_annotator')]).
@@ -131,8 +132,9 @@ module_qualified_signature(_,(Module:Name)/Arity,Module:Name/Arity).
     
 
 
-file_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions)|OutAnnos]):-
+file_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions),defines2(Definitions2)|OutAnnos]):-
     collect_definitions(Terms,Definitions),
+    collect_definitions2(Terms,Definitions2),
     findall(Property,property_functor(Property,_),Properties),
     collect_properties(Properties,Terms,InAnnos,OutAnnos).
 
@@ -161,6 +163,11 @@ collect_definitions(Terms,Definitions):-
     collect_definitions(Terms,Tree0,Tree),
     findall(A,pdt_rbtree_next('',A,_,Tree),Definitions0),
     pdt_remove_duplicates(Definitions0,Definitions).
+
+collect_definitions2(Terms,Definitions2):-
+    pdt_multimap_empty(Map0),
+    collect_definitions2(Terms,Map0,Map),
+    pdt_multimap_to_list(Map,Definitions2).
     
 
 collect_definitions([],Tree,Tree).   
@@ -172,6 +179,19 @@ collect_definitions([Term|Terms],InTree,OutTree):-
 	collect_definitions(Terms,NextTree,OutTree).
 collect_definitions([_|Terms],InTree,OutTree):-
 	collect_definitions(Terms,InTree,OutTree).
+
+
+collect_definitions2([],Map,Map).   
+collect_definitions2([Term|Terms],InMap,OutMap):-
+    pdt_term_annotation(Term,_,TopAn),
+    pdt_member(clause_of(Definition),TopAn),
+    pdt_member(n(N),TopAn),
+    !,
+    term_to_atom(Definition,Key),
+    pdt_multimap_add(InMap,Key,N,NextMap),
+	collect_definitions2(Terms,NextMap,OutMap).
+collect_definitions2([_|Terms],InMap,OutMap):-
+	collect_definitions2(Terms,InMap,OutMap).
 
     
 module_definition(FileAnos,Module,Exports):-
