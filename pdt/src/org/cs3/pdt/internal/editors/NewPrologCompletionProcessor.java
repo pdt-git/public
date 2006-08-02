@@ -58,6 +58,7 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Predicate;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
@@ -103,7 +104,7 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 
 		try {
 			IDocument document = viewer.getDocument();
-			
+
 			documentOffset = documentOffset == 0 ? documentOffset
 					: documentOffset - 1;
 			int begin = documentOffset;
@@ -135,18 +136,25 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 					.toArray(new ICompletionProposal[proposals.size()]);
 		} catch (BadLocationException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), viewer.getTextWidget().getShell(), PDT.ERR_COMPLETION_BAD_LOCATION, PDT.CX_COMPLETION, e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getTextWidget()
+					.getShell(), PDT.ERR_COMPLETION_BAD_LOCATION,
+					PDT.CX_COMPLETION, e);
 			return null;
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), viewer.getTextWidget().getShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getTextWidget()
+					.getShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
 			return null;
 		} catch (CoreException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), viewer.getTextWidget().getShell(), PDT.ERR_CORE_EXCEPTION, PDT.CX_COMPLETION, e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), viewer.getTextWidget()
+					.getShell(), PDT.ERR_CORE_EXCEPTION, PDT.CX_COMPLETION, e);
 			return null;
-		}finally{
-			
+		} finally {
+
 		}
 	}
 
@@ -231,10 +239,20 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 	}
 
 	private List addProposals(int begin, int len, String prefix,
-			List proposals, Predicate[] elems){
+			List proposals, Predicate[] elems) throws CoreException {
+		IFileEditorInput editorInput = (IFileEditorInput) UIUtils
+				.getActiveEditor().getEditorInput();
+
+		String activeFileName = Util.prologFileName(editorInput.getFile()
+				.getLocation().toFile());
+		IPrologProject plProject;
+		plProject = (IPrologProject) editorInput.getFile().getProject()
+				.getNature(PDTCore.NATURE_ID);
+
+		PrologInterface pif = plProject.getMetadataPrologInterface();
 
 		for (int i = 0; i < elems.length; i++) {
-			ICompletionProposal proposal = new NewPrologCompletionProposal(
+			ICompletionProposal proposal = new NewPrologCompletionProposal(pif,
 					elems[i], begin, len, prefix);
 			proposals.add(proposal);
 
@@ -243,7 +261,8 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 	}
 
 	private void addPredicateProposals(IDocument document, int begin, int len,
-			String prefix, List proposals, String module) throws PrologInterfaceException, CoreException {
+			String prefix, List proposals, String module)
+			throws PrologInterfaceException, CoreException {
 
 		if (PLEditor.isVarPrefix(prefix)) {
 			return;
@@ -251,61 +270,70 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 		Predicate[] elems = null;
 
 		elems = getPredicatesWithPrefix(module, prefix);
-		
-		if(elems==null){
+
+		if (elems == null) {
 			elems = new Predicate[0];
 		}
 		addProposals(begin, len, prefix, proposals, elems);
 	}
 
-	private Predicate[] getPredicatesWithPrefix(String contextModule, String prefix) throws PrologInterfaceException,CoreException {
-		
+	private Predicate[] getPredicatesWithPrefix(String contextModule,
+			String prefix) throws PrologInterfaceException, CoreException {
 
 		IFileEditorInput editorInput = (IFileEditorInput) UIUtils
 				.getActiveEditor().getEditorInput();
 
-		String activeFileName = Util.prologFileName(editorInput.getFile().getLocation().toFile());
+		String activeFileName = Util.prologFileName(editorInput.getFile()
+				.getLocation().toFile());
 		IPrologProject plProject;
-			plProject = (IPrologProject) editorInput.getFile().getProject()
-					.getNature(PDTCore.NATURE_ID);
-		
-		PrologSession session = plProject.getMetadataPrologInterface().getSession();
+		plProject = (IPrologProject) editorInput.getFile().getProject()
+				.getNature(PDTCore.NATURE_ID);
+
+		PrologSession session = plProject.getMetadataPrologInterface()
+				.getSession();
 		Predicate[] elms = null;
-		try{
-			String query=null;
-			if(contextModule==null){
-				query = "pdt_file_module('"+activeFileName+"',Context),pdt_predicate_completion(Context,'"+prefix+"',Name,[module(Module)," +
-				"arity(Arity)," +
-				"exported(Exported)," +
-				"dynamic(Dynamic)," +
-				"multifile(Multifile)," +
-				"transparent(Transparent)])";	
-			}else{
-				query = "pdt_predicate_completion("+contextModule+",'"+prefix+"',Name,[module(Module)," +
-				"arity(Arity)," +
-				"exported(Exported)," +
-				"dynamic(Dynamic)," +
-				"multifile(Multifile)," +
-				"transparent(Transparent)])";
+		try {
+			String query = null;
+			if (contextModule == null) {
+				query = "pdt_file_module('" + activeFileName
+						+ "',Context),pdt_predicate_completion(Context,'"
+						+ prefix + "',Name,[module(Module)," + "arity(Arity),"
+						+ "exported(Exported)," + "dynamic(Dynamic),"
+						+ "multifile(Multifile),"
+						+ "transparent(Transparent)]),"
+						+ "pdt_builtin_help(Name,Arity,Summary)";
+			} else {
+				query = "pdt_predicate_completion(" + contextModule + ",'"
+						+ prefix + "',Name,[module(Module)," + "arity(Arity),"
+						+ "exported(Exported)," + "dynamic(Dynamic),"
+						+ "multifile(Multifile),"
+						+ "transparent(Transparent)])"
+						+ "pdt_builtin_help(Name,Arity,Summary)";
 			}
-			
-			List l=session.queryAll(query);
+
+			List l = session.queryAll(query);
 			elms = new Predicate[l.size()];
-			int i=0;
+			int i = 0;
 			for (Iterator iter = l.iterator(); iter.hasNext();) {
 				Map m = (Map) iter.next();
-				String module=(String) m.get("Module");
+				String module = (String) m.get("Module");
 				String name = (String) m.get("Name");
 				int arity = Integer.parseInt((String) m.get("Arity"));
-				PredicateNode p = new PredicateNode(module,name,arity);
-				p.setPredicateProperty(Predicate.EXPORTED, (String) m.get("Exported"));
-				p.setPredicateProperty(Predicate.DYNAMIC, (String) m.get("Dynamic"));
-				p.setPredicateProperty(Predicate.MULTIFILE, (String) m.get("Multifile"));
-				p.setPredicateProperty(Predicate.MODULE_TRANSPARENT, (String) m.get("Transparent"));
-				elms[i++]=p;
+				PredicateNode p = new PredicateNode(module, name, arity);
+				p.setPredicateProperty(Predicate.EXPORTED, (String) m
+						.get("Exported"));
+				p.setPredicateProperty(Predicate.DYNAMIC, (String) m
+						.get("Dynamic"));
+				p.setPredicateProperty(Predicate.MULTIFILE, (String) m
+						.get("Multifile"));
+				p.setPredicateProperty(Predicate.MODULE_TRANSPARENT, (String) m
+						.get("Transparent"));
+				p.setPredicateProperty("summary", (String) m.get("Summary"));
+
+				elms[i++] = p;
 			}
-		}finally{
-			if(session!=null){
+		} finally {
+			if (session != null) {
 				session.dispose();
 			}
 		}
