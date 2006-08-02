@@ -45,6 +45,7 @@ package org.cs3.pdt.core.internal.builder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -206,11 +207,12 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	}
 
 	private void update_markers(Set buildList, PrologSession s)
-			throws CoreException, PrologException, PrologInterfaceException {
+			throws CoreException, PrologException, PrologInterfaceException, IOException {
 		StringBuffer sb = new StringBuffer();
 		sb.append('[');
 		boolean first = true;
 		Map wsFiles = new HashMap();
+		Map fileContents = new HashMap(); //plFile as key
 		for (Iterator it = buildList.iterator(); it.hasNext();) {
 			if (!first) {
 				sb.append(',');
@@ -220,6 +222,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			File ioFile = file.getLocation().toFile();
 			String plFileName = Util.prologFileName(ioFile);
 			wsFiles.put(plFileName, file);
+			InputStream stream = file.getContents();
+			String data=Util.toString(stream);
+			stream.close();
+			fileContents.put(plFileName, data);
 			sb.append('\'');
 			sb.append(plFileName);
 			sb.append('\'');
@@ -234,11 +240,13 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
+			IFile wsFile = (IFile) wsFiles.get(plFile);
+			String data = (String) fileContents.get(plFile);
 			int line = Integer.parseInt((String) map.get("Line"));
 			int column = Integer.parseInt((String) map.get("Column"));
-			int offset = Integer.parseInt((String) map.get("CharOffset"));
+			int offset = Util.logicalToPhysicalOffset(data, Integer.parseInt((String) map.get("CharOffset")));
 			String message = (String) map.get("Message");
-			IFile wsFile = (IFile) wsFiles.get(plFile);
+			
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
 			MarkerUtilities.setMessage(attributes, message);
@@ -257,10 +265,11 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
-			int start = Integer.parseInt((String) map.get("From"));
-			int end = Integer.parseInt((String) map.get("To"));
-			String message = getMessage((String) map.get("Error"));
 			IFile wsFile = (IFile) wsFiles.get(plFile);
+			String data = (String) fileContents.get(plFile);
+			int start = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("From")));
+			int end = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("To")));
+			String message = getMessage((String) map.get("Error"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
 			MarkerUtilities.setMessage(attributes, message);
@@ -278,10 +287,12 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
-			int start = Integer.parseInt((String) map.get("From"));
-			int end = Integer.parseInt((String) map.get("To"));
-			String message = getMessage((String) map.get("Warning"));
 			IFile wsFile = (IFile) wsFiles.get(plFile);
+			String data = (String) fileContents.get(plFile);
+			int start = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("From")));
+			int end = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("To")));
+			
+			String message = getMessage((String) map.get("Warning"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
 			MarkerUtilities.setMessage(attributes, message);
