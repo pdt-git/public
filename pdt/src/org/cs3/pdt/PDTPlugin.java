@@ -273,6 +273,18 @@ public class PDTPlugin extends AbstractUIPlugin  {
 					
 						return false;
 					}
+					
+				},new SimpleOption(
+						PDT.PREF_OUTLINE_SORT,
+						"Whether the Prolog Outline is to be sorted lexicographical",
+						"true or false",
+						Option.FLAG, "false"
+				){
+					@Override
+					public boolean isVisible() {
+					
+						return false;
+					}
 				}
 				
 

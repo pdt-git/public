@@ -107,6 +107,8 @@ public final  class PDT {
 
 	public static final String PREF_OUTLINE_FILTERS = "pdt.outline.filters";
 	
+	public static final String PREF_OUTLINE_SORT = "pdt.outline.sort";
+	
 	
 
 	
