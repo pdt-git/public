@@ -520,7 +520,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		manager.add(clearAction);
 		manager.add(activateGuiTracerAction);
 		manager.add(deactivateGuiTracerAction);
-		manager.add(pasteFileNameAction);
 		manager.add(restartAction);
 		manager.add(new Separator("#ConsoleInternal-end"));
 		manager.add(new Separator("#Clipboard"));
@@ -531,6 +530,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		manager.add(ActionFactory.COPY.create(window));
 		manager.add(ActionFactory.CUT.create(window));
 		manager.add(ActionFactory.PASTE.create(window));
+		manager.add(pasteFileNameAction);
+		
 		manager.add(new Separator("#Clipboard-end"));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS
