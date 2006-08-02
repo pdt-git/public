@@ -136,7 +136,8 @@ public class PrologOutline extends ContentOutlinePage {
 		labelProvider = new PrologElementLabelProvider();
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(labelProvider);
-		viewer.setSorter(new PositionalPrologOutlineSorter());
+		
+		
 		this.convertPositions = true;
 
 		viewer.setComparer(new Comparer());
