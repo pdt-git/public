@@ -42,20 +42,33 @@
 
 package org.cs3.pdt.internal.editors;
 
+import java.util.Map;
+
+import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Predicate;
+import org.cs3.pl.prolog.AsyncPrologSession;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 
 
-public class NewPrologCompletionProposal implements ICompletionProposal {
-
+public class NewPrologCompletionProposal implements ICompletionProposal,ICompletionProposalExtension5 {
+	
+	private PrologInterface pif;
 	private Predicate predicate;
 	private int replacementOffset;
 	private int replacementLength;
@@ -63,10 +76,13 @@ public class NewPrologCompletionProposal implements ICompletionProposal {
 	private int cursorPosition;
 	private String postfix;
 	private Image image;
+	private IContextInformation contextInfo;
+	
 	private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
     private static final Image hiddenImage = ImageRepository.getImage(ImageRepository.PE_HIDDEN);
     
-	public NewPrologCompletionProposal(Predicate predicate, int begin, int len, String prefix) {
+	public NewPrologCompletionProposal(PrologInterface pif,Predicate predicate, int begin, int len, String prefix) {
+		this.pif=pif;
 		this.predicate=predicate;
 		this.replacementOffset=begin;
 		this.replacementLength=len;
@@ -109,12 +125,12 @@ public class NewPrologCompletionProposal implements ICompletionProposal {
 	}
 
 	public String getAdditionalProposalInfo() {
-//		 TODO need to parse pldoc
-		return null;
+		return "bla";
 	}
 
 	public String getDisplayString() {
-		return predicate.getName()+"/"+predicate.getArity()+"  ("+predicate.getModule()+")";
+		String summary=predicate.getPredicateProperty("summary");
+		return predicate.getName()+"/"+predicate.getArity()+"  ("+predicate.getModule()+") - "+ summary;
 	}
 
 	public Image getImage() {
@@ -123,8 +139,31 @@ public class NewPrologCompletionProposal implements ICompletionProposal {
 	}
 
 	public IContextInformation getContextInformation() {
-		// TODO need to parse pldoc
+//		if(contextInfo==null){
+//			String summary=predicate.getPredicateProperty("summary");
+//			contextInfo= new ContextInformation(summary,summary);
+//		}
+//		return contextInfo;
 		return null;
+	}
+
+	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
+		
+		monitor.beginTask("fetching help",IProgressMonitor.UNKNOWN);
+		PrologSession s = null;
+		Map map = null;
+		try {
+			s= pif.getSession();	
+			map = s.queryOnce("pdt_builtin_help("+predicate.getName()+","+predicate.getArity()+",_,Help)");
+			
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+					.getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
+			return null;
+		}
+		monitor.done();
+		return map.get("Help");
 	}
 
 }

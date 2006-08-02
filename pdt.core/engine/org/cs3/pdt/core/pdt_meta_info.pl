@@ -57,7 +57,9 @@ some predicate definitions for queries frequently used by the pdt.core
 	pdt_lookup_aterm/4,
 	pdt_render_term/4,
 	pdt_file_directive/2,
-	pdt_predicate_clause/3
+	pdt_predicate_clause/3,
+	pdt_builtin_help/3,
+	pdt_builtin_help/4
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
@@ -67,7 +69,8 @@ some predicate definitions for queries frequently used by the pdt.core
 :-use_module(library('/org/cs3/pdt/model/pdt_index')).
 :-use_module(library('/org/cs3/pdt/model/pdt_handle')).
 
-
+:- use_module(library(help)).
+:- use_module(library(helpidx)).
 
 %TODO: most of the file_<something> predicates should be replaced by an index/factory combi
 
@@ -266,8 +269,71 @@ execute_elms([]).
 execute_elms([Goal|Goals]):-
 	Goal,
 	execute_elms(Goals).
-	
+
 unify_with_underscores([]).
 unify_with_underscores([Var|Vars]):-
 	Var='_',
 	unify_with_underscores(Vars).
+	
+	
+pdt_builtin_help(Name,Arity,Summary):-
+		predicate(Name,Arity,Summary,_,_),
+		!.
+pdt_builtin_help(_Name,_Arity,'').
+		
+pdt_builtin_help(Name,Arity,Summary,Help):-
+	find_manual(ManPath),
+	open(ManPath,read,ManStream),
+	predicate(Name,Arity,Summary,From,To),
+	!,
+	new_memory_file(MemFile),
+	open_memory_file(MemFile,write,MemStream),
+	show_ranges([From-To],ManStream,MemStream),
+	close(MemStream),
+	memory_file_to_atom(MemFile,Help),
+	free_memory_file(MemFile).
+pdt_builtin_help(_Name,_Arity,'', '').
+	
+%
+% the following predicates where copied from the library help.pl
+% which is distributed with swi-prolog. 
+%
+
+find_manual(Path) :-
+	absolute_file_name(library('MANUAL'), [access(read)], Path).
+
+show_ranges([], _, _) :- !.
+show_ranges([From-To|Rest], Manual, Pager) :-
+	seek(Manual, From, bof, _),
+	Range is To - From,
+	copy_chars(Range, Manual, Pager),
+	nl(Pager),
+	show_ranges(Rest, Manual, Pager).
+
+copy_chars(N, From, To) :-
+	get0(From, C0),
+	copy_chars(N, From, To, C0).
+
+copy_chars(N, _, _, _) :-
+	N =< 0, !.
+copy_chars(N, _, To, _) :-
+	0 =:= N mod 4096,
+	flush_output(To),
+	fail.
+copy_chars(N, From, To, C) :-
+	get0(From, C1),
+	(   C1 == 8,			% backspace
+	    \+ current_prolog_flag(write_help_with_overstrike, true)
+	->  get0(From, C2),
+	    NN is N - 2,
+	    copy_chars(NN, From, To, C2)
+	;   put_printable(To, C),
+	    NN is N - 1,
+	    copy_chars(NN, From, To, C1)
+	).
+
+put_printable(_, 12) :- !.
+put_printable(_, -1) :- !.
+put_printable(To, C) :-
+	put(To, C).
+	
