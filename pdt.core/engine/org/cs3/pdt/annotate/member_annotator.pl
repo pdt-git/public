@@ -167,7 +167,7 @@ collect_definitions(Terms,Definitions):-
 collect_definitions2(Terms,Definitions2):-
     pdt_multimap_empty(Map0),
     collect_definitions2(Terms,Map0,Map),
-    pdt_multimap_to_list(Map,Definitions2).
+    pdt_multimap_to_list2(Map,Definitions2).
     
 
 collect_definitions([],Tree,Tree).   
@@ -187,8 +187,8 @@ collect_definitions2([Term|Terms],InMap,OutMap):-
     pdt_member(clause_of(Definition),TopAn),
     pdt_member(n(N),TopAn),
     !,
-    term_to_atom(Definition,Key),
-    pdt_multimap_add(InMap,Key,N,NextMap),
+%    term_to_atom(Definition,Key),
+    pdt_multimap_add(InMap,Definition,N,NextMap),
 	collect_definitions2(Terms,NextMap,OutMap).
 collect_definitions2([_|Terms],InMap,OutMap):-
 	collect_definitions2(Terms,InMap,OutMap).

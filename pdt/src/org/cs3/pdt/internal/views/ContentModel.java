@@ -247,14 +247,21 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		CTerm moduleTerm = (CTerm) fileAnnos.get("defines_module");
 		module = moduleTerm == null ? "user" : moduleTerm.getFunctorValue();
 
-		CTerm sigterm = (CTerm) fileAnnos.get("defines");
+		CTerm sigterm = (CTerm) fileAnnos.get("defines2");
 		HashMap defines = new HashMap();
 		if (sigterm != null) {
-			CTerm[] sigs = PLUtil.listAsArray(sigterm);
-			for (int i = 0; i < sigs.length; i++) {
-				defines.put(PLUtil.renderSignature(sigs[i], module),
-						new PredicateNode((CCompound) sigs[i], module));
+			CTerm[] assocs = PLUtil.listAsArray(sigterm);
+			for (int i = 0; i < assocs.length; i++) {
+				CTerm sig = ((CCompound)assocs[i]).getArgument(0);
+				CTerm[] refTerms = PLUtil.listAsArray(((CCompound)assocs[i]).getArgument(1));
+				String refString = Util.splice(refTerms, ",");			
+				
+				PredicateNode predicateNode = new PredicateNode((CCompound) sig, module);
+				predicateNode.setPredicateProperty("clause_refs", refString);
+				defines.put(PLUtil.renderSignature(sig, module),
+						predicateNode);
 			}
+			
 		}
 
 		setPredicateProperty(defines, fileAnnos, module, "exports",

@@ -54,7 +54,8 @@
 	pdt_multimap_get_set/3,
 	pdt_multimap_get_list/3,
 	pdt_multimap_next/4,	
-	pdt_multimap_to_list/2
+	pdt_multimap_to_list/2,
+	pdt_multimap_to_list2/2
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
@@ -79,6 +80,17 @@ pdt_multimap_to_list(M,L):-
     	),
     	L
     ).
+
+pdt_multimap_to_list2(M,L):-
+    findall(Term,
+    	(
+    		pdt_map_get(M,Key,Values),
+    		pdt_set_to_list(Values,ValueList),
+    		values_to_property2(Key,ValueList,Term)    		
+    	),
+    	L
+    ).
+
     
 values_to_property(_,[],_):-
     !, fail.
@@ -89,6 +101,12 @@ values_to_property(Key,[Value],Property):-
 values_to_property(Key,Values,Property):-
 	functor(Property,Key,1),
 	arg(1,Property,Values).
+
+values_to_property2(_,[],_):-
+    !, fail.
+values_to_property2(Key,Values,Key=Values).
+    
+
 
 pdt_multimap_empty(M):-
     pdt_map_empty(M).

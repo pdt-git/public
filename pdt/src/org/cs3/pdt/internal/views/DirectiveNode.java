@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
@@ -56,7 +57,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-public class DirectiveNode implements Directive, IAdaptable {
+public class DirectiveNode implements Directive, IAdaptable,Positional {
 	CTerm term;
 
 	private SourceLocation loc;
@@ -135,6 +136,20 @@ public class DirectiveNode implements Directive, IAdaptable {
 	public String getProperty(String string) {
 
 		return ((CTerm) properties.get(string)).getFunctorValue();
+	}
+
+	public String getPositionString() {
+
+		return getProperty("n");
+	}
+
+	public int[] getPositions() {
+		String[] strings = Util.split(getPositionString(), ",");
+		int[] ints = new int[strings.length];
+		for (int i = 0; i < ints.length; i++) {
+			ints[i]=Integer.parseInt(strings[i]);
+		}
+		return ints;
 	}
 
 }

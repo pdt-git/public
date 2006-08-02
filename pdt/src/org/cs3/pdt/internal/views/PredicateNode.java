@@ -43,6 +43,7 @@ package org.cs3.pdt.internal.views;
 
 import java.util.HashMap;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.metadata.Clause;
@@ -50,7 +51,7 @@ import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-public class PredicateNode implements Predicate,IAdaptable{
+public class PredicateNode implements Predicate,IAdaptable,Positional{
 
 	HashMap properties = new HashMap();
 
@@ -153,5 +154,17 @@ public class PredicateNode implements Predicate,IAdaptable{
 			return new SimplePropertySource(properties);
 		}
 		return null;
+	}
+
+	public String getPositionString() {
+		return getPredicateProperty("clause_refs");
+	}
+	public int[] getPositions() {
+		String[] strings = Util.split(getPositionString(), ",");
+		int[] ints = new int[strings.length];
+		for (int i = 0; i < ints.length; i++) {
+			ints[i]=Integer.parseInt(strings[i]);
+		}
+		return ints;
 	}
 }
