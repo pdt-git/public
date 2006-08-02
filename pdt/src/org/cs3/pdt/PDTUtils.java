@@ -76,26 +76,7 @@ import org.eclipse.ui.ide.IDE;
 
 public final class PDTUtils {
 
-	/**
-	 * converts a logical character offset to a physical character offset. E.g.
-	 * prolog uses logical offsets in the sense that it counts any line
-	 * delimiter as a single character, even if it is CRLF, etc.
-	 * 
-	 * Eclipse documents and views however seem to count physical characters,
-	 * i.e. the CRLF line delimiter would count as two characters.
-	 * 
-	 */
-	public static int logicalToPhysicalOffset(String data, int logical) {
-		int physical = 0;
-		int nextPos = data.indexOf("\r\n");
-		while (nextPos >= 0 && nextPos < logical) {
-			physical += (nextPos + 2);
-			logical -= (nextPos + 1);
-			data = data.substring(nextPos + 2);
-			nextPos = data.indexOf("\r\n");
-		}
-		return physical + logical;
-	}
+	
 
 	public static IPath normalize(IPath path) {
 		IPath testLocation = null;

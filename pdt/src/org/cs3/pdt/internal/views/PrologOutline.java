@@ -262,9 +262,9 @@ public class PrologOutline extends ContentOutlinePage {
 						getInput());
 
 				try {
-					startOffset = PDTUtils.logicalToPhysicalOffset(doc.get(),
+					startOffset = Util.logicalToPhysicalOffset(doc.get(),
 							startOffset);
-					endOffset = PDTUtils.logicalToPhysicalOffset(doc.get(),
+					endOffset = Util.logicalToPhysicalOffset(doc.get(),
 							endOffset);
 					Debug.debug(">>"
 							+ doc.get(startOffset, endOffset - startOffset)
