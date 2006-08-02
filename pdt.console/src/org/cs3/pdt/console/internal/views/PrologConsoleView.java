@@ -726,6 +726,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	}
 
 	public void setPrologInterface(PrologInterface newPif) {
+		if(currentPif==newPif){
+			return;
+		}
 		if (currentPif != null) {
 			viewerStates.put(currentPif, viewer.saveState());
 		}
