@@ -137,11 +137,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 							int caretOffset = c.getCaretOffset();
 							int offsetInLineBuffer = caretOffset
 									- c.getStartOfInput();
-							if (offsetInLineBuffer < 0) {
-								return Status.OK_STATUS;
-							}
 							ConsoleModel model = c.getModel();
 							String lineBuffer = model.getLineBuffer();
+							if (offsetInLineBuffer < 0) {
+								offsetInLineBuffer=lineBuffer.length();
+								caretOffset=c.getStartOfInput()+lineBuffer.length();
+							}
+							
+							
 							String textToInsert = getTextToInsert();
 							if (textToInsert == null) {
 								return Status.OK_STATUS;

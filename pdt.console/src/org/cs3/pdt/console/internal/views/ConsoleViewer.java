@@ -605,7 +605,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		if (model == null) {
 			e.doit = false;
 		} else if (e.start < startOfInput) {
+			//allow insertion (put the new text at the very end of the buffer)
+			//but do not allow modification of text before startOfInput.
 			e.doit = false;
+			if(e.end==e.start){//insertion
+				control.replaceTextRange(control.getCharCount(), 0, e.text);
+			}
 		} else {
 			e.doit = true;
 		}
