@@ -118,10 +118,16 @@ pdt_rbtree_next(_, _, _, black([],_,_,[])) :-
 	fail.
 pdt_rbtree_next(At,Key,Val,Tree):-
 	arg(2,Tree,KA),
-	compare(Cmp,KA,At),
+	my_compare(Cmp,KA,At),
 	lookup_next(Cmp,At,Key,Val,Tree).
 
-
+%introduce an artificial lower bound
+my_compare(<,'',_):-
+	!.
+my_compare(>,_,''):-
+	!.
+my_compare(=,'',''):-
+	!.
 my_compare(=,A,B):-
     unifiable(A,B,_),
     !.

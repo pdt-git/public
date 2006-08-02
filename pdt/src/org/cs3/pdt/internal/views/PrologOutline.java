@@ -136,7 +136,7 @@ public class PrologOutline extends ContentOutlinePage {
 		labelProvider = new PrologElementLabelProvider();
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(labelProvider);
-		viewer.setSorter(new LexicalPrologOutlineSorter());
+		viewer.setSorter(new PositionalPrologOutlineSorter());
 		this.convertPositions = true;
 
 		viewer.setComparer(new Comparer());
@@ -148,7 +148,9 @@ public class PrologOutline extends ContentOutlinePage {
 		
 		IActionBars actionBars= getSite().getActionBars();
 		IToolBarManager toolBarManager= actionBars.getToolBarManager();
-		Action action = new FilterActionMenu(this);
+		Action action = new ToggleSortAction(this);
+		toolBarManager.add(action);
+		action = new FilterActionMenu(this);
 		toolBarManager.add(action);
 		
 		setInput(input);
