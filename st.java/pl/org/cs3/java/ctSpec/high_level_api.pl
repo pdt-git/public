@@ -620,6 +620,8 @@ fullPathOfClass(_id, _name) :-
     
 /**
  * sourceLocation(?ID, ?File, ?Begin, ?Length)
+ *
+ * Binds File to the defining file and Begin and Lenght to the position of Pef.
  */
 sourceLocation(Tree,File,Start,End):-
     slT(Tree,Start,End),
@@ -640,7 +642,7 @@ sourceLocation(ID,File,Start,Length):-
  *
  * Binds Id to a unique number.
  * Throws already_bound_exception(Msg)
- * argument Id is bound.
+ * if Id is already bound.
  *
  */     
 
