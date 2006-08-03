@@ -1095,6 +1095,11 @@ ID of the enclosing method declaration.
 
 %temporary hack: -- TR 03.11.2005
 :- multifile tree/3.
+/**
+ * tree(?Pef, ?Parent, ?Functor)
+ * 
+ * e.g. tree(10001, 10002, classDefT)
+ */
 tree(_id, null, packageT):-packageT(_id,_).
 tree(_id, _pid, localDefT):-localDefT(_id, _pid,_,_,_,_).
 tree(_id, _pid, paramDefT):-paramDefT(_id, _pid,_,_).
