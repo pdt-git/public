@@ -25,7 +25,6 @@ public class ToggleSortAction extends Action {
 		
 	}
 
-	@Override
 	public void run() {
 		if(isChecked()){
 			outline.getTreeViewer().setSorter(new LexicalPrologOutlineSorter());

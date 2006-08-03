@@ -9,7 +9,6 @@ public class HideSubtermsFilter extends PrologOutlineFilter {
 
 	}
 
-	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if(element instanceof CTermNode){
 			return false;

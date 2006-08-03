@@ -10,7 +10,6 @@ public class HideDirectivesFilter extends PrologOutlineFilter {
 		super(id, label);
 	}
 
-	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		if(element instanceof Directive){
 			return false;
