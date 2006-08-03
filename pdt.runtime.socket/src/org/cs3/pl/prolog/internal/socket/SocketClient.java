@@ -411,7 +411,7 @@ public class SocketClient {
 			while (reader.ready()) {
 				reader.read();
 			}
-			writeln(EOF + ".");
+			writeln("");
 			readUntil(OK);
 		} finally {
 			unlock();

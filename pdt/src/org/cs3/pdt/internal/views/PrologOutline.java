@@ -260,7 +260,10 @@ public class PrologOutline extends ContentOutlinePage {
 			if (convertPositions) {
 				IDocument doc = editor.getDocumentProvider().getDocument(
 						getInput());
-
+				if(doc==null){
+					//wunder, grübel,...
+					Debug.debug("Debug: input="+input);
+				}
 				try {
 					startOffset = Util.logicalToPhysicalOffset(doc.get(),
 							startOffset);

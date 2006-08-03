@@ -47,7 +47,7 @@ import java.util.Map;
 public class AsyncPrologSessionEvent extends EventObject {
 	
 	private static final long serialVersionUID = 1787537795491818031L;
-	
+	public String query=null;
 	public Object ticket=null;
 	public String message=null;
 	public Map bindings = null;

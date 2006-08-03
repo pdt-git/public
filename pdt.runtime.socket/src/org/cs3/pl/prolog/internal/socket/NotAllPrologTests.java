@@ -39,7 +39,8 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.socket;
+
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -50,8 +51,8 @@ public class NotAllPrologTests {
 		TestSuite suite = new TestSuite("Test for org.cs3.pl.prolog.internal");
 		//$JUnit-BEGIN$
 		
-		suite.addTestSuite(PrologSessionTest.class);
-		suite.addTestSuite(PrologSessionThrowTest.class);
+		suite.addTestSuite(SocketSessionTest.class);
+		suite.addTestSuite(SocketSessionThrowTest.class);
 		//$JUnit-END$
 		return suite;
 	}
