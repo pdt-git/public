@@ -268,7 +268,6 @@ public class PDTPlugin extends AbstractUIPlugin  {
 						"A comma separated list of filter ids that should be activated at startup",
 						Option.STRING, "hide_subterms"
 				){
-					@Override
 					public boolean isVisible() {
 					
 						return false;
@@ -280,7 +279,6 @@ public class PDTPlugin extends AbstractUIPlugin  {
 						"true or false",
 						Option.FLAG, "false"
 				){
-					@Override
 					public boolean isVisible() {
 					
 						return false;
