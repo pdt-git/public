@@ -320,10 +320,22 @@ copy_chars(N, _, To, _) :-
 	0 =:= N mod 4096,
 	flush_output(To),
 	fail.
+%copy_chars(N, From, To, C) :-
+%	get0(From, C1),
+%	(   C1 == 8,			% backspace
+%	    \+ current_prolog_flag(write_help_with_overstrike, true)
+%	->  get0(From, C2),
+%	    NN is N - 2,
+%	    copy_chars(NN, From, To, C2)
+%	;   put_printable(To, C),
+%	    NN is N - 1,
+%	    copy_chars(NN, From, To, C1)
+%	).
+
 copy_chars(N, From, To, C) :-
 	get0(From, C1),
-	(   C1 == 8,			% backspace
-	    \+ current_prolog_flag(write_help_with_overstrike, true)
+	(   C1 == 8			% backspace
+	    %\+ current_prolog_flag(write_help_with_overstrike, true)
 	->  get0(From, C2),
 	    NN is N - 2,
 	    copy_chars(NN, From, To, C2)
