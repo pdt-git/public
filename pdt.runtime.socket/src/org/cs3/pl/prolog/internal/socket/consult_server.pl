@@ -178,26 +178,31 @@ accept_loop_impl_X(ServerSocket,Slave,Peer):-
 	accept_loop_impl(ServerSocket).
 	
 handle_client(InStream, OutStream):-    
+	repeat,
+	my_debug(start_hanlde_client),
 	catch(
 		handle_client_impl(InStream,OutStream),
 		Error,
-		( handle_exception(InStream,OutStream,Error)
-		;	true
-		)			
+		(handle_exception(InStream,OutStream,Error,Action),!,Action==stop)
+					
 	),
+	!,
 	byebye(InStream,OutStream),
 	%thread_self(Me),
 	%thread_detach(Me),
 	thread_exit(0).    
 	
 handle_client_impl(InStream, OutStream):-
-	request_line(InStream,OutStream,'GIVE_COMMAND',Command),
-	( handle_command(InStream,OutStream,Command,Next)
-	->report_ok(OutStream)
-	;	report_error(OutStream, 'failed, sorry.'),
-		Next=continue
-	),
-	handle_next(InStream,OutStream,Next).	
+    repeat,
+		request_line(InStream,OutStream,'GIVE_COMMAND',Command),
+		( handle_command(InStream,OutStream,Command,Next)
+		->report_ok(OutStream)
+		;	report_error(OutStream, 'failed, sorry.'),
+			Next=continue
+		),
+	Next==stop,
+	!.
+		
 
 handle_next(_,_,stop):-
     !.
@@ -450,7 +455,7 @@ one_solution(OutStream,Term,Vars,Mode):-
 	
 all_solutions(OutStream,Term,Vars,Mode):-
 	user:forall(
-		Term,
+		catch(Term,E,throw(wrapped(E))),
 		(
 			consult_server:print_solution(OutStream,Vars,Mode),
 			nb_setval(hasSolutions,1)
@@ -465,7 +470,7 @@ all_solutions(OutStream,Term,Vars,Mode):-
 	
 iterate_solutions(InStream,OutStream,Term,Vars,Mode):-
 	( user:forall(
-			Term,
+			catch(Term,E,throw(wrapped(E))),
 			(
 				consult_server:print_solution(OutStream,Vars,Mode),
 				consult_server:request_line(InStream,OutStream,'MORE?','YES')											
@@ -516,13 +521,14 @@ print_value(Out,Val,canonical):-
 		write(Out, '>').
 
 	
-handle_exception(InStream,OutStream,Error):-
+handle_exception(InStream,OutStream,Error,Action):-
 	var(Error),
-	handle_exception(InStream,OutStream,unbound_error_term).	
+	!,
+	handle_exception(InStream,OutStream,unbound_error_term,Action).	
 	
 
 	
-handle_exception(InStream,OutStream,peer_reset):-
+handle_exception(_InStream,OutStream,peer_reset,continue):-
 	catch(
 		(
 			my_format(OutStream,"RESET~n",[]),
@@ -533,9 +539,9 @@ handle_exception(InStream,OutStream,peer_reset):-
 			fail
 			)
 	),
-	handle_client(InStream,OutStream).
+	!.
 	
-handle_exception(InStream,OutStream,Error):-
+handle_exception(_InStream,OutStream,wrapped(Error),continue):-
 	catch(		
 		report_error(OutStream,Error),					
 		_,(
@@ -543,8 +549,10 @@ handle_exception(InStream,OutStream,Error):-
 			fail
 			)
 	),
-	handle_client(InStream,OutStream).
+	!.
 	
+handle_exception(_InStream,_OutStream,Error,stop):-
+	my_debug(Error).
 	
 	
 	
@@ -564,27 +572,11 @@ byebye(InStream,OutStream):-
 	close(OutStream).
 	
 
-check_eof(end_of_file):-
-	!,
-	throw(peer_reset).	
-check_eof('end_of_file.'):-
-	!,
-	throw(peer_reset).	
-check_eof(A):-
-	atom_concat(_,end_of_file,A),
-	!,
-	throw(peer_reset).	
-check_eof(A):-
-	atom_concat(_,'end_of_file.',A),
-	!,
-	throw(peer_reset).	
-check_eof(_):-
-	true.
 	
 	
 	
 codes_or_eof_to_atom(end_of_file,_):-
-	throw(peer_reset).
+	throw(end_of_file).
 	
 codes_or_eof_to_atom(Codes,Atom):-
 	atom_codes(Atom,Codes).
@@ -635,8 +627,7 @@ unused_thread_name(Prefix,Suffix,Try,Name):-
 request_line(InStream, OutStream, Prompt, Line):-
 	my_format(OutStream,"~a~n",[Prompt]),
 	read_line_to_codes(InStream,LineCodes),
-	codes_or_eof_to_atom(LineCodes,Line),
-	check_eof(Line).
+	codes_or_eof_to_atom(LineCodes,Line).
 	
 	
 	

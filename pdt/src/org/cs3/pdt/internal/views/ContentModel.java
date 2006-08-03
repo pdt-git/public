@@ -180,13 +180,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	}
 
-	public void goalFailed(AsyncPrologSessionEvent e) {
-		Debug.error("Goal failed!");
-	}
-
-	public void goalRaisedException(AsyncPrologSessionEvent e) {
-		Debug.error("Goal raised an exception: " + e.message);
-	}
+	
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		if (e.ticket == directiveTicket) {

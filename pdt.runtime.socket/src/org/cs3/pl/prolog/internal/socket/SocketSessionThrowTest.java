@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.socket;
 
 import java.util.Map;
 
@@ -54,7 +54,7 @@ import org.cs3.pl.prolog.PrologSession;
 /**
  * @author terra
  */
-public class PrologSessionThrowTest extends TestCase {
+public class SocketSessionThrowTest extends TestCase {
 	private PrologInterface pif;
 
     protected void setUp() throws Exception {

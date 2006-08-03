@@ -1,8 +1,5 @@
-:-use_module(pdt_util_rbtree).
+%      this is my 
+	%favourite predicate
+test(%some
 
-zgut.
-ungut.
-
-gut.
-:-ungut.
-gut.
+stuff/*more*/).

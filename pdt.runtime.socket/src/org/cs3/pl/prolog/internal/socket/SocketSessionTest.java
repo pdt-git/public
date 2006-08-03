@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -60,7 +60,7 @@ import org.cs3.pl.prolog.PrologSession;
 /**
  * @author terra
  */
-public class PrologSessionTest extends TestCase {
+public class SocketSessionTest extends TestCase {
 	private PrologInterface pif;
 
     /* (non-Javadoc)
@@ -71,6 +71,9 @@ public class PrologSessionTest extends TestCase {
      
       //pif=PrologInterfaceFactory.newInstance("org.cs3.pl.prolog.internal.xml.Factory").create();
       pif=PrologInterfaceFactory.newInstance().create();
+      pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+	  pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+		
       pif.start();
     }
     

@@ -41,6 +41,8 @@
 
 package org.cs3.pl.prolog;
 
+import org.cs3.pl.common.Debug;
+
 public class DefaultAsyncPrologSessionListener implements
 		AsyncPrologSessionListener {
 
@@ -57,11 +59,11 @@ public class DefaultAsyncPrologSessionListener implements
 	}
 
 	public void goalFailed(AsyncPrologSessionEvent e) {
-		System.out.println("failed");;
+		Debug.info("Goal failed: "+e.query );
 	}
 
 	public void goalRaisedException(AsyncPrologSessionEvent e) {
-		System.out.println(e.message);
+		Debug.error("Goal raised exception: "+e.message+"\n query: "+e.query );
 	}
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {

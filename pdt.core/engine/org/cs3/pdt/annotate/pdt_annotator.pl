@@ -58,6 +58,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_dependency')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
@@ -377,7 +378,7 @@ ensure_annotated([FileSpec|Stack]):-
 	update_timestamp(Abs),
     copy_file_to_memfile(FileSpec,MemFile),
     open_memory_file(MemFile,read,Input),
-    read_terms([Abs|Stack],OpModule,Input,Terms0,Errors),
+    read_terms([Abs|Stack],OpModule,Input,Terms0,Comments,Errors),
 %    pre_process_file([Abs|Stack],OpModule,Terms0,FileAnnos0),
     execute_annotators([Abs|Stack],OpModule,[],Terms0,FileAnnos1,Terms1),
 %    post_process_terms([Abs|Stack],OpModule,FileAnnos1,Terms1,Terms2),
@@ -405,30 +406,39 @@ clear_ops(OpModule):-
 	
 
 
-read_terms(FileStack,OpModule,In,Terms,Errors):-
+read_terms(FileStack,OpModule,In,Terms,Comments,Errors):-
    	    interleaved_annotators(IAs),
-    	read_terms_rec(IAs,FileStack,OpModule,In,0,Terms,Errors).
+   	    pdt_multimap_empty(Comments0),
+    	read_terms_rec(IAs,FileStack,OpModule,In,0,Terms,Comments0,Comments,Errors).
     	
-read_terms_rec(IAs,FileStack,Module,In,N,Terms,Errors):-
+read_terms_rec(IAs,FileStack,Module,In,N,Terms,Comments0,Comments,Errors):-
     Options=[
 		subterm_positions(_),
 		variable_names(_),
 		singletons(_),
     		module(Module),
-    		double_quotes(string)
+    		double_quotes(string),
+    		comments(TermComments)
     	],
     do_read_term(In,Term,Options,Error),
-    do_process_term(IAs,FileStack,Module,In,N,Term,Options,Error,Terms,Errors).
+    process_term_comments(Comments0,N,TermComments,Comments1),
+    do_process_term(IAs,FileStack,Module,In,N,Term,Options,Error,Terms,Comments1,Comments,Errors).
 
-
-do_process_term(_,_,_,_,_,Term,_,_,[],[]):-
+process_term_comments(Comments,_,TCs,Comments):-
+    var(TCs),!.
+process_term_comments(Comments,_,[],Comments).
+process_term_comments(CommentsIn,N,[TermComment|TermComments],CommentsOut):-
+    pdt_multimap_add(CommentsIn,N,TermComment,CommentsNext),
+    process_term_comments(CommentsNext,N,TermComments,CommentsOut).
+    
+do_process_term(_,_,_,_,_,Term,_,_,_,_,[],[]):-
 	Term==end_of_file,
 	!.
-do_process_term(IAs,FileStack,Module,In,N,_,_,Error,Terms,[Error|Errors]):-
+do_process_term(IAs,FileStack,Module,In,N,_,_,Error,Terms,Comments0,Comments,[Error|Errors]):-
     nonvar(Error),!,
     M is N+1,
-    read_terms_rec(IAs,FileStack,Module,In,M,Terms,Errors).    
-do_process_term(IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Errors):-    
+    read_terms_rec(IAs,FileStack,Module,In,M,Terms,Comments0,Comments,Errors).    
+do_process_term(IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Comments0,Comments,Errors):-    
 	member(subterm_positions(Positions),Options),
 	FileStack=[File|_],
 	pdt_file_ref(File,FileRef),
@@ -442,7 +452,7 @@ do_process_term(IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms
 %	numbervars(ProcessedTerm,0,_),
 %   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
 
-    read_terms_rec(IAs,FileStack,OpModule,In,NextN,Terms,Errors).
+    read_terms_rec(IAs,FileStack,OpModule,In,NextN,Terms,Comments0,Comments,Errors).
 
 do_read_term(In,Term,Options,Error):-
     catch(

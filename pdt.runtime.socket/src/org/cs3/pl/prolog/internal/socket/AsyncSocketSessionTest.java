@@ -69,7 +69,8 @@ public class AsyncSocketSessionTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = Factory.newInstance();
 		pif = (PrologInterface2) factory.create();
-		pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
+		pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+		pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		pif.start();
 		rec = new Recorder();
 		session = pif.getAsyncSession();
@@ -190,7 +191,7 @@ public class AsyncSocketSessionTest extends TestCase {
 						+ "goalSucceeded(1,null,null), "
 						+ "goalHasSolution(2,null,()), "
 						+ "goalSucceeded(2,null,null), "
-						+ "goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 152)),null), "
+						+ "goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 140)),null), "
 						+ "goalFailed(4,null,null), "
 						+ "batchComplete(null,null,null)", rec.toString());
 	}
@@ -211,7 +212,7 @@ public class AsyncSocketSessionTest extends TestCase {
 						+ "goalSucceeded(2,null,null), "
 						+
 
-						"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 149)),null), "
+						"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 137)),null), "
 						+ "goalFailed(4,null,null), "
 						+ "batchComplete(null,null,null)", rec.toString());
 	}
