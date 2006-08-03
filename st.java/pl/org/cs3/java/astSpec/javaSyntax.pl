@@ -500,14 +500,14 @@ ast_node_def('Java',returnT,[
      ast_arg(expr,   mult(1,1,no ), id,  [expressionType])
 ]).
 
-% tree_constraints(selectT, [[allType], [methodDefT,fieldDefT], [atom],[selectT,identT],[classDefT,packageT]]).
+% tree_constraints(selectT, [[allType], [methodDefT,fieldDefT], [atom],[selectT,identT],[classDefT,packageT,typeTermType]]).
 ast_node_def('Java',selectT,[
      ast_arg(id,      mult(1,1,no ), id,  [selectT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(name,    mult(1,1,no ), attr,  [atom]),
      ast_arg(selected,mult(1,1,no ), id,  [selectT,identT]),
-     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT])
+     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT]) %%FIXME: currently also typeTermType, this breaks java_fq!
 ]).
 
 % tree_constraints(identT, [[allType], [methodDefT,fieldDefT], [atom],[classDefT,packageT]]).
@@ -516,9 +516,10 @@ ast_node_def('Java',identT,[
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
      ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
      ast_arg(name,    mult(1,1,no ), attr,  [atom]),
-     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT,localDefT])
+     ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT,localDefT,paramDefT]) 
+      %FIXME: currently also typeTermType, this breaks java_fq!
+      %solution: introduce new PEF typeExpr(ID,PARENT,ENCL,NAME, TYPETERM).
 ]).
-
 
 % tree_constraints(switchT,[[allType],[methodDefT],[expressionType],[statementType]]).
 ast_node_def('Java',switchT,[
