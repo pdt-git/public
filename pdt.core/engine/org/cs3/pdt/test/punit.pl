@@ -218,7 +218,13 @@ failed_in_dir(_list, _length, _all,Prefix) :- findall(
 
 
 assert_true(Goal) :-
-    assert_true('', Goal).
+    Goal \= ':'(_, _),
+    punit_for_modules:active_module(Module),
+    nonvar(Module),
+    assert_true('', ':'(Module, Goal)), !.
+
+assert_true(Goal) :-
+    assert_true('', Goal), !.
 /**
  * assert_true(+Comment, +Goal)
  * 
@@ -240,7 +246,7 @@ assert_true(Comment, Goal) :-
 		term_to_atom(Goal, AtomGoal),
     	sformat(FormattedComment, 'The goal ~n  ~a~n failed:~n~a.~n~a~n', [AtomGoal, Comment,StackTrace]),
    		throw(assertion_failed(FormattedComment))
-   	  ).
+   	  ), !.
    	  
    	  
 
@@ -250,9 +256,14 @@ assert_true(Comment, Goal) :-
  * Checks if Goal fails, otherwise throws
  * exception assertion_failed('formated exception').
  */
+assert_fail(Goal) :-
+    Goal \= ':'(_, _),
+    punit_for_modules:active_module(Module),
+    nonvar(Module),
+    assert_fail('', ':'(Module, Goal)), !. 
   
 assert_fail(Goal) :-
-    assert_fail('', Goal).
+    assert_fail('', Goal), !.
     
 assert_fail(Comment, Goal) :-
   (call(Goal)
@@ -261,7 +272,7 @@ assert_fail(Comment, Goal) :-
     	sformat(FormattedComment, 'The goal ~n   ~a~n unexpectedly succeeded:~n~a.', [AtomGoal, Comment]),
    		throw(assertion_failed( FormattedComment))
    	);
-   	true).
+   	true), !.
 
 
 /**
