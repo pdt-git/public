@@ -45,6 +45,7 @@
 	%%register_annotator/1, 
 	current_file_annotation/3,
 	current_file_error/2,
+	current_file_comments/2,
 	forget_file_annotation/1,
 	pdt_annotator/2,
 	pdt_annotator/3
@@ -59,9 +60,12 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_dependency')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_map')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
+:-dynamic file_comments/3.
 :-dynamic file_error/3.
 :-dynamic annotator/2.
 :-dynamic annotator/3.
@@ -250,6 +254,14 @@ current_file_error(FileSpec,Error):-
     pdt_file_spec(FileSpec,Abs),
     file_error(Abs,_,Error).
 
+current_file_comments(FileSpec,Comments):-
+    nonvar(FileSpec),
+    pdt_file_spec(FileSpec,Abs),    
+    file_comments(Abs,_,Comments).
+current_file_comments(File,Comments):-
+    var(File),
+    file_comments(File,_,Comments).    
+
 
 /*
 pdt_annotator_context(+In,+Scope,-InMap,+OutMap,-Out).
@@ -377,13 +389,15 @@ ensure_annotated([FileSpec|Stack]):-
     retractall(file_error(Abs,_,_)),
 	update_timestamp(Abs),
     copy_file_to_memfile(FileSpec,MemFile),
+    memory_file_to_atom(MemFile,MemFileAtom),
     open_memory_file(MemFile,read,Input),
-    read_terms([Abs|Stack],OpModule,Input,Terms0,Comments,Errors),
+    read_terms(MemFileAtom,[Abs|Stack],OpModule,Input,Terms0,CommentsMap,Errors),
 %    pre_process_file([Abs|Stack],OpModule,Terms0,FileAnnos0),
     execute_annotators([Abs|Stack],OpModule,[],Terms0,FileAnnos1,Terms1),
 %    post_process_terms([Abs|Stack],OpModule,FileAnnos1,Terms1,Terms2),
 %    post_process_file([Abs|Stack],OpModule,Terms2,FileAnnos1,FileAnnos2),
     assert(file_annotation(Abs,Time,FileAnnos1,Terms1)),
+    assert(file_comments(Abs,Time,CommentsMap)),
     (	nonvar(Errors),Errors\==[]
     ->	forall(member(Error,Errors),assert(file_error(Abs,Time,Error)))
     ;	true
@@ -406,12 +420,12 @@ clear_ops(OpModule):-
 	
 
 
-read_terms(FileStack,OpModule,In,Terms,Comments,Errors):-
+read_terms(MemFileAtom,FileStack,OpModule,In,Terms,Comments,Errors):-
    	    interleaved_annotators(IAs),
    	    pdt_multimap_empty(Comments0),
-    	read_terms_rec(IAs,FileStack,OpModule,In,0,Terms,Comments0,Comments,Errors).
+    	read_terms_rec(MemFileAtom,IAs,FileStack,OpModule,In,0,Terms,Comments0,Comments,Errors).
     	
-read_terms_rec(IAs,FileStack,Module,In,N,Terms,Comments0,Comments,Errors):-
+read_terms_rec(MemFileAtom,IAs,FileStack,Module,In,N,Terms,CommentsMapIn,CommentsMapOut,Errors):-
     Options=[
 		subterm_positions(_),
 		variable_names(_),
@@ -421,24 +435,19 @@ read_terms_rec(IAs,FileStack,Module,In,N,Terms,Comments0,Comments,Errors):-
     		comments(TermComments)
     	],
     do_read_term(In,Term,Options,Error),
-    process_term_comments(Comments0,N,TermComments,Comments1),
-    do_process_term(IAs,FileStack,Module,In,N,Term,Options,Error,Terms,Comments1,Comments,Errors).
+    comments_map(CommentsMapIn,TermComments,CommentsMapNext),
+    do_process_term(MemFileAtom,IAs,FileStack,Module,In,N,Term,Options,Error,Terms,CommentsMapNext,CommentsMapOut,Errors).
 
-process_term_comments(Comments,_,TCs,Comments):-
-    var(TCs),!.
-process_term_comments(Comments,_,[],Comments).
-process_term_comments(CommentsIn,N,[TermComment|TermComments],CommentsOut):-
-    pdt_multimap_add(CommentsIn,N,TermComment,CommentsNext),
-    process_term_comments(CommentsNext,N,TermComments,CommentsOut).
     
-do_process_term(_,_,_,_,_,Term,_,_,_,_,[],[]):-
+    
+do_process_term(_,_,_,_,_,_,Term,_,_,[],CommentsMap,CommentsMap,[]):-
 	Term==end_of_file,
 	!.
-do_process_term(IAs,FileStack,Module,In,N,_,_,Error,Terms,Comments0,Comments,[Error|Errors]):-
+do_process_term(MemFileAtom,IAs,FileStack,Module,In,N,_,_,Error,Terms,CommentsMapIn,CommentsMapOut,[Error|Errors]):-
     nonvar(Error),!,
     M is N+1,
-    read_terms_rec(IAs,FileStack,Module,In,M,Terms,Comments0,Comments,Errors).    
-do_process_term(IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],Comments0,Comments,Errors):-    
+    read_terms_rec(MemFileAtom,IAs,FileStack,Module,In,M,Terms,CommentsMapIn,CommentsMapOut,Errors).    
+do_process_term(MemFileAtom,IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms],CommentsMapIn,CommentsMapOut,Errors):-    
 	member(subterm_positions(Positions),Options),
 	FileStack=[File|_],
 	pdt_file_ref(File,FileRef),
@@ -447,12 +456,16 @@ do_process_term(IAs,FileStack,OpModule,In,N,Term0,Options,_,[ProcessedTerm|Terms
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
+	memberchk(comments(Comments),Options),	
+	comment_positions(Comments,CommentPositions),
 	pdt_term_annotation(ProcessedTerm0,T,[variable_names(Names),singletons(Singletons)|A]),
-	execute_interleaved_hooks(IAs,FileStack,OpModule,ProcessedTerm0,ProcessedTerm),
-%	numbervars(ProcessedTerm,0,_),
-%   	pre_process_term(FileStack,OpModule,Term2,ProcessedTerm),
-
-    read_terms_rec(IAs,FileStack,OpModule,In,NextN,Terms,Comments0,Comments,Errors).
+	atom_to_memory_file(MemFileAtom,MemFile),
+	open_memory_file(MemFile,read,Stream),
+	pdt_attach_comments(ProcessedTerm0,CommentsMapIn,Stream,CommentPositions,_,ProcessedTerm1),
+	close(Stream),
+	free_memory_file(MemFile),
+	execute_interleaved_hooks(IAs,FileStack,OpModule,ProcessedTerm1,ProcessedTerm),
+    read_terms_rec(MemFileAtom,IAs,FileStack,OpModule,In,NextN,Terms,CommentsMapIn,CommentsMapOut,Errors).
 
 do_read_term(In,Term,Options,Error):-
     catch(
@@ -461,66 +474,38 @@ do_read_term(In,Term,Options,Error):-
 		true 
 	).
 
-%pre_process_term(FileStack,OpModule,InTerm,OutTerm):-
-%    findall(Anotator,annotator(_,Anotator),Anotators),
-%    pre_process_term(Anotators,FileStack,OpModule,InTerm,OutTerm).
-%    
-%pre_process_term([],_,_,Term,Term). 
-%pre_process_term([Anotator|T],FileStack,OpModule,InTerm,OutTerm):-
-%    pdt_maybe((
-%    	Anotator:term_pre_annotation_hook(FileStack,OpModule,InTerm,TmpTerm)
-%    )),
-%    (	var(TmpTerm)
-%    ->	pre_process_term(T,FileStack,OpModule,InTerm,OutTerm)
-%    ;	pre_process_term(T,FileStack,OpModule,TmpTerm,OutTerm)
-%    ).
+
+
+% comment_positions(+Comments, -Positions)
 %
-%post_process_terms(_,_,_,[],[]).
-%post_process_terms(Stack,OpModule,FileAnos,[InHead|InTail],[OutHead|OutTail]):-
-%    post_process_term(Stack,OpModule,FileAnos,InHead,OutHead),
-%    post_process_terms(Stack,OpModule,FileAnos,InTail,OutTail).
-%	
-%post_process_term(FileStack,OpModule,FileAnos,InTerm,OutTerm):-
-%    findall(Anotator,annotator(_,Anotator),Anotators),
-%    post_process_term(Anotators,FileStack,OpModule,FileAnos,InTerm,OutTerm).
+% extract the character offsets from a list of comments as returned by read_term/*
+comment_positions([],[]).
+comment_positions([CPos-_|Cs],[Position|Positions]):-
+    stream_position_data(char_count,CPos,Position),
+    comment_positions(Cs,Positions).
+
+
+% comments_map(+Comments,-Map)
 %
-%post_process_term([],_,_,_,Term,Term). 
-%post_process_term([Anotator|T],FileStack,OpModule,FileAnos,InTerm,OutTerm):-
-%    pdt_maybe((
-%    	Anotator:term_post_annotation_hook(FileStack,OpModule,FileAnos,InTerm,TmpTerm)
-%    )),
-%    (	var(TmpTerm)
-%    ->	post_process_term(T,FileStack,OpModule,FileAnos,InTerm,OutTerm)
-%    ;	post_process_term(T,FileStack,OpModule,FileAnos,TmpTerm,OutTerm)
-%    ).
+% create a associative datastructure that maps comment positions to comment strings
+% Comments is a list of comments as returned by read_term
+% Map is a associative map. (See pdt_util_map) 
+% The map contains character offsets of comments as keys and comment strings as values.
+comments_map(Comments,Map):-
+    pdt_map_empty(Map0),
+    comments_map(Map0,Comments,Map).
+
+% comments_map(+MapIn, +Comments,-MapOut)
 %
-%
-%pre_process_file(FileStack,OpModule,Terms,FileAnos):-
-%	findall(Anotator,annotator(_,Anotator),Anotators),
-%    pre_process_file(Anotators,FileStack,OpModule,Terms,[],FileAnos).
-%pre_process_file([],_,_,_,Terms,Terms). 
-%pre_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
-%    pdt_maybe((
-%	    Anotator:file_pre_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
-%	)),
-%	(	var(TmpAnos)
-%	->	pre_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
-%	;	pre_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
-%	).
-%
-%post_process_file(FileStack,OpModule,Terms,InAnos,OutAnos):-
-%	findall(Anotator,annotator(_,Anotator),Anotators),
-%    post_process_file(Anotators,FileStack,OpModule,Terms,InAnos,OutAnos).
-%post_process_file([],_,_,_,Terms,Terms). 
-%post_process_file([Anotator|T],FileStack,OpModule,Terms,InAnos,OutAnos):-
-%    pdt_maybe((
-%	    Anotator:file_post_annotation_hook(FileStack,OpModule,Terms,InAnos,TmpAnos)
-%	)),
-%	(	var(TmpAnos)
-%	->	post_process_file(T,FileStack,OpModule,Terms,InAnos,OutAnos)
-%	;	post_process_file(T,FileStack,OpModule,Terms,TmpAnos,OutAnos)
-%	).
-%
+% add position --> comment mappings to an existing map.
+% Comments is a list of comments as returned by read_term
+% Map is a associative map. (See pdt_util_map) 
+% The map contains character offsets of comments as keys and comment strings as values.    
+comments_map(In,[],In).
+comments_map(In,[CPos-Comment|Cs],Out):-
+    stream_position_data(char_count,CPos,Position),
+    pdt_map_put(In,Position,Comment,Next),
+    comments_map(Next,Cs,Out).
 
 
 		

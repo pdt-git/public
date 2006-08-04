@@ -47,7 +47,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 
 
-:- pdt_annotator([term],[/*library('/org/cs3/pdt/annotate/variable_name_annotator')*/]).
+:- pdt_annotator([term],[library('/org/cs3/pdt/annotate/variable_name_annotator')]).
 
 
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
@@ -79,7 +79,8 @@ add_singleton_annos(In,[],In).
 add_singleton_annos(In,[singleton(Path,InExport,TVs)|IFEs],Out):-
     term_variables(In,TVs),
     pdt_term_annotation(InExport,Term,Annotation),
-    pdt_term_annotation(OutExport,Term,[problem(warning(singleton))|Annotation]),
+    pdt_member(variable_name(Name),Annotation),
+    pdt_term_annotation(OutExport,Term,[problem(warning(singleton(Name)))|Annotation]),
     pdt_subst(In,Path,OutExport,Next),
     add_singleton_annos(Next,IFEs,Out).
 
