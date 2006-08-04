@@ -307,8 +307,9 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	}
 
 	private String getMessage(String string) {
-		if("singleton".equals(string)){
-			return "[singleton] Variable apears only once in clause.";
+		if(string.startsWith("singleton(")){
+			String varname = string.substring("singleton(".length(), string.length()-1);
+			return "[singleton] Variable "+varname+" apears only once in clause.";
 		}
 		if("no_singleton".equals(string)){
 			return "[no_singleton] Variable is not a singleton.";
