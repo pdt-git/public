@@ -165,22 +165,29 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	
 	private void dispatchBatchComplete() {
 		fireBatchComplete();
+		
 		synchronized (tickets) {
-			for (Iterator it = tickets.values().iterator(); it.hasNext();) {
-				Object ticket=it.next();
+			
+			
+			tickets.clear();
+			Vector values = new Vector(tickets.values());
+			
+			for (Iterator it = values.iterator(); it.hasNext();) {
+				Object ticket=it.next();				
 				synchronized (ticket) {
 					ticket.notifyAll();
 				}
 			}
-			tickets.clear();
+			
 		}
 	}
 	
 	
 
 	private void dispatchSkippingQuery(int id) {
-		Object ticket = findAndRemoveTicket(id);
+		Object ticket = getTicket(id);
 		fireGoalSkipped(ticket);
+		removeTicket(id);
 		synchronized (ticket) {
 			ticket.notifyAll();
 		}
@@ -189,8 +196,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	
 
 	private void dispatchJoinComplete(int id) {
-		Object ticket = findAndRemoveTicket(id);
+		Object ticket = getTicket(id);
 		fireJoinComplete(ticket);
+		removeTicket(id);
 		synchronized (ticket) {
 			ticket.notifyAll();
 		}
@@ -199,12 +207,13 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	
 	private void dispatchAbortComplete(int id) {
 		Debug.info("abort complete recieved, id="+id);
-		Object ticket = findAndRemoveTicket(id);
+		Object ticket = getTicket(id);
 		synchronized (lastAbortTicket) {
 			if(lastAbortTicket==ticket){
 				lastAbortTicket=null;
 			}
 		}
+		removeTicket(id);
 		fireAbortComplete(ticket);
 		Debug.info("listeners were notified about abort completion, id="+id);
 		synchronized (ticket) {
@@ -217,14 +226,15 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	
 	
 	private void readAndDispatchResults(int id) throws IOException {
-		Object ticket = findAndRemoveTicket(id);
+		Object ticket = getTicket(id);
 		try{				
-			while (read_solution(ticket));			
+			while (read_solution(id,ticket));			
 		}
 		finally{
 			synchronized (ticket) {
 				ticket.notifyAll();
-				removeQuery(ticket);
+				
+				
 			}
 		}
 	}
@@ -336,7 +346,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 
 	
-	private boolean read_solution(Object ticket) throws IOException {
+	private boolean read_solution(int id,Object ticket) throws IOException {
 		HashMap result = new HashMap();
 		// try to read a variable name
 		while (true) {
@@ -350,6 +360,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
 					fireGoalRaisedException(ticket, line.substring(SocketClient.ERROR.length()));
+					removeTicket(id);
 					return false;
 				}
 				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
@@ -358,14 +369,17 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				}
 				if (SocketClient.NO.equals(line)) {
 					fireGoalFailed(ticket);
+					removeTicket(id);
 					return false;
 				}
 				if (SocketClient.YES.equals(line)) {
 					fireGoalSucceeded(ticket);
+					removeTicket(id);
 					return false;
 				}
 				if (SocketClient.CUT.equals(line)) {
 					fireGoalCut(ticket);
+					removeTicket(id);
 					return false;
 				}
 			} else {
@@ -586,11 +600,19 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 	
-	private Object findAndRemoveTicket(int id){
+	private Object getTicket(int id){
 		synchronized (tickets) {
 			Integer key = new Integer(id);			
-			Object ticket = tickets.remove(key);			
+			Object ticket = tickets.get(key);			
 			return ticket;
+		}
+	}
+	
+	private void removeTicket(int id){
+		synchronized (tickets) {
+			Integer key = new Integer(id);			
+			Object ticket= tickets.remove(key);			
+			queries.remove(ticket);
 		}
 	}
 	
