@@ -113,17 +113,30 @@ do_attach_right(ATermIn,Positions,ATermOut):-
     pdt_term_annotation(ATermOut,Term,[comments_right(Positions)|Annos]).
 
 next_token_position(Stream,End,CommentsMap,TPos):-
-    seek(Stream,End,bof,End),
+    /*FIXME: since end positions are exclusive, it can happen that
+      end>eof. There is probably a better way to handle this, but this is how i do it:
+      
+      seek to end-1, check if it is eof, if not seek +1
+     */
+    BeforeEnd is End - 1,    
+    catch(seek(Stream,BeforeEnd,bof,BeforeEnd),_,seek(Stream,0,eof,_)),
+    (	at_end_of_stream(Stream)
+    ->	TPos=End
+    ;   get_code(Stream,_), %seek +1
+    	next_token_position_X(Stream,CommentsMap,TPos)
+	).
+	
+next_token_position_X(Stream,CommentsMap,TPos):-
     repeat,
     	peek_code(Stream,C),
     	( C >= 0, code_type(C,space)
-    	->	get_code(Stream,C),
+	   	->	get_code(Stream,C),
     		fail
     	;	% the character may be the start of a comment. Skip over it.
     		\+ skip_comment(Stream,CommentsMap)
     	),
     !,
-    character_count(Stream,TPos).
+	character_count(Stream,TPos).
 
 
 skip_comment(Stream,CommentsMap):-

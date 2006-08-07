@@ -293,6 +293,16 @@ pdt_builtin_help(Name,Arity,Summary,Help):-
 	memory_file_to_atom(MemFile,Help),
 	free_memory_file(MemFile).
 pdt_builtin_help(_Name,_Arity,'', '').
+
+pdt_parsed_help(FileSpec,Module:Name/Arity,Summary,Help):-
+    pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H),
+    pdt_file_spec(FileSpec,File),
+    pdt_property(H,arity,Arity),
+    pdt_property(H,file,File),
+    pdt_property(H,module,Module),
+    pdt_property(H,clauses,Clauses),
+    member(Clause,Clauses).
 	
 %
 % the following predicates where copied from the library help.pl
