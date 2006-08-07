@@ -87,7 +87,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 							children.add(new CTermNode(c.getArgument(i)));
 						}
 					}
-				} else if (pif!=null&&pif.isUp()){
+				} else if (pif != null && pif.isUp()) {
 					children.add(oneMomentPlease);
 					fetchChildren(parentElement);
 				}
@@ -104,12 +104,16 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (getSession().isPending(parentElement)) {
 			return;
 		}
-		if (root == parentElement
-				&& (getSession().isPending(directiveTicket) || getSession()
-						.isPending(fileAnnosTicket))) {
-			return;
-		}
-		if (parentElement instanceof CTermNode) {
+		
+		if (root == parentElement) {
+			if (getSession().isPending(directiveTicket)
+					|| getSession().isPending(fileAnnosTicket)) {
+				return;
+			} else {
+				fetchPredicates();
+				fetchDirectives();
+			}
+		} else if (parentElement instanceof CTermNode) {
 			fetchArguments((CTermNode) parentElement);
 
 		} else if (parentElement instanceof PredicateNode) {
@@ -123,12 +127,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		} else if (parentElement instanceof DirectiveNode) {
 			DirectiveNode d = (DirectiveNode) parentElement;
 			fetchBody(d);
-		} else {
-			fetchPredicates();
-			fetchDirectives();
-
 		}
-
 	}
 
 	private void fetchDirectives() throws PrologInterfaceException {
@@ -179,8 +178,6 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		// TODO
 
 	}
-
-	
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		if (e.ticket == directiveTicket) {
@@ -246,16 +243,17 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (sigterm != null) {
 			CTerm[] assocs = PLUtil.listAsArray(sigterm);
 			for (int i = 0; i < assocs.length; i++) {
-				CTerm sig = ((CCompound)assocs[i]).getArgument(0);
-				CTerm[] refTerms = PLUtil.listAsArray(((CCompound)assocs[i]).getArgument(1));
-				String refString = Util.splice(refTerms, ",");			
-				
-				PredicateNode predicateNode = new PredicateNode((CCompound) sig, module);
+				CTerm sig = ((CCompound) assocs[i]).getArgument(0);
+				CTerm[] refTerms = PLUtil.listAsArray(((CCompound) assocs[i])
+						.getArgument(1));
+				String refString = Util.splice(refTerms, ",");
+
+				PredicateNode predicateNode = new PredicateNode(
+						(CCompound) sig, module);
 				predicateNode.setPredicateProperty("clause_refs", refString);
-				defines.put(PLUtil.renderSignature(sig, module),
-						predicateNode);
+				defines.put(PLUtil.renderSignature(sig, module), predicateNode);
 			}
-			
+
 		}
 
 		setPredicateProperty(defines, fileAnnos, module, "exports",
@@ -356,7 +354,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		}
 		this.pif = pif;
 		if (this.pif != null) {
-			this.pif.addLifeCycleHook(this,HOOK_ID, new String[0]);
+			this.pif.addLifeCycleHook(this, HOOK_ID, new String[0]);
 		}
 		reset();
 	}
@@ -500,22 +498,24 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 		;
-		
+
 	}
 
-	public void beforeShutdown(PrologInterface pif, PrologSession s) throws PrologInterfaceException {
+	public void beforeShutdown(PrologInterface pif, PrologSession s)
+			throws PrologInterfaceException {
 		if (this.session != null) {
 			session.removeBatchListener(this);
 			session.dispose();
 			session = null;
 		}
 		reset();
-		
+
 	}
 
-	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
+	public void onInit(PrologInterface pif, PrologSession initSession)
+			throws PrologInterfaceException {
 		;
-		
+
 	}
 
 }
