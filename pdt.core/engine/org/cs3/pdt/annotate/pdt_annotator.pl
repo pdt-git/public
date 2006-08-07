@@ -62,6 +62,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
+:- use_module(library('org/cs3/pdt/util/pdt_preferences')).
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/4.
@@ -70,6 +71,13 @@
 :-dynamic annotator/2.
 :-dynamic annotator/3.
 
+
+:- pdt_add_preference(
+	parse_comments,
+	'Parse Comments', 
+	'If true, the read_term/* option parse_comments will be used.',
+	false
+).
 
 /**
 pdt_annotator(+Hooks, +Dependencies)
@@ -424,18 +432,38 @@ read_terms(MemFileAtom,FileStack,OpModule,In,Terms,Comments,Errors):-
    	    interleaved_annotators(IAs),
    	    pdt_multimap_empty(Comments0),
     	read_terms_rec(MemFileAtom,IAs,FileStack,OpModule,In,0,Terms,Comments0,Comments,Errors).
-    	
-read_terms_rec(MemFileAtom,IAs,FileStack,Module,In,N,Terms,CommentsMapIn,CommentsMapOut,Errors):-
+
+setup_options(Options):-
+    pdt_preference_value(parse_comments,true),
+    !,
     Options=[
 		subterm_positions(_),
 		variable_names(_),
 		singletons(_),
-    		module(Module),
+    		module(_Module),
     		double_quotes(string),
-    		comments(TermComments)
-    	],
+    		comments(_TermComments)
+    	].
+
+setup_options(Options):-
+    Options=[
+		subterm_positions(_),
+		variable_names(_),
+		singletons(_),
+    		module(_Module),
+    		double_quotes(string)
+    	].
+
+    	
+read_terms_rec(MemFileAtom,IAs,FileStack,Module,In,N,Terms,CommentsMapIn,CommentsMapOut,Errors):-
+    setup_options(Options),
+    memberchk(module(Module),Options),
     do_read_term(In,Term,Options,Error),
-    comments_map(CommentsMapIn,TermComments,CommentsMapNext),
+    (	memberchk(comments(TermComments),Options)
+    ->	comments_map(CommentsMapIn,TermComments,CommentsMapNext)
+    ;	CommentsMapIn=CommentsMapNext
+    ),
+    memberchk(module(Module),Options),
     do_process_term(MemFileAtom,IAs,FileStack,Module,In,N,Term,Options,Error,Terms,CommentsMapNext,CommentsMapOut,Errors).
 
     
@@ -456,14 +484,8 @@ do_process_term(MemFileAtom,IAs,FileStack,OpModule,In,N,Term0,Options,_,[Process
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	memberchk(comments(Comments),Options),	
-	comment_positions(Comments,CommentPositions),
 	pdt_term_annotation(ProcessedTerm0,T,[variable_names(Names),singletons(Singletons)|A]),
-	atom_to_memory_file(MemFileAtom,MemFile),
-	open_memory_file(MemFile,read,Stream),
-	pdt_attach_comments(ProcessedTerm0,CommentsMapIn,Stream,CommentPositions,_,ProcessedTerm1),
-	close(Stream),
-	free_memory_file(MemFile),
+	process_comments(MemFileAtom,CommentsMapIn,ProcessedTerm0,Options,ProcessedTerm1),
 	execute_interleaved_hooks(IAs,FileStack,OpModule,ProcessedTerm1,ProcessedTerm),
     read_terms_rec(MemFileAtom,IAs,FileStack,OpModule,In,NextN,Terms,CommentsMapIn,CommentsMapOut,Errors).
 
@@ -474,7 +496,16 @@ do_read_term(In,Term,Options,Error):-
 		true 
 	).
 
-
+process_comments(MemFileAtom,CommentsMap,ATermIn,Options,ATermOut):-
+    memberchk(comments(Comments),Options),
+    !,
+	comment_positions(Comments,CommentPositions),
+	atom_to_memory_file(MemFileAtom,MemFile),
+	open_memory_file(MemFile,read,Stream),
+	pdt_attach_comments(ATermIn,CommentsMap,Stream,CommentPositions,_,ATermOut),
+	close(Stream),
+	free_memory_file(MemFile).
+process_comments(_MemFileAtom,_CommentsMap,ATerm,_Options,ATerm).
 
 % comment_positions(+Comments, -Positions)
 %
