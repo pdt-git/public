@@ -236,6 +236,29 @@ public class AsyncSocketSessionTest extends TestCase {
 				rec.toString());
 	}
 
+	public void test_pending_during_queryall() throws Throwable {
+		String alias = session.getProcessorThreadAlias();
+		String ticket = "queryall";
+		session.queryAll(ticket, "repeat,writeln(waiting),thread_get_message(test(M)),writeln(got(M)),(M==stop,!;true)");
+		PrologSession syncSession = pif.getSession();
+		rec.clear();
+		synchronized (rec) {
+			syncSession.queryOnce("writeln('i am here'),thread_send_message('" + alias
+					+ "',test(1))");
+			rec.wait();
+		}
+		boolean pending1 = session.isPending(ticket);
+		synchronized (rec) {
+			syncSession.queryOnce("thread_send_message('" + alias
+					+ "',test(stop))");
+			rec.wait();
+		}
+		session.join();
+		boolean pending2 = session.isPending(ticket);
+		assertEquals("not pending during queryall",true,pending1);
+		assertEquals("pending after queryall",false,pending2);
+	}
+	
 	public void test_abort01() throws Throwable {
 		session.queryOnce("1", "thread_self(Alias)");
 		session.join();
