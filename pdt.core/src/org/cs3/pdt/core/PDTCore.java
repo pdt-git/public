@@ -121,7 +121,7 @@ public class PDTCore {
 
 	public static final String PROP_METADATA_PIF_KEY = "pdt.metadata.pif_key";
 	public static final String PROP_RUNTIME_PIF_KEY = "pdt.runtime.pif_key";
-
+	public static final String PROP_PARSE_COMMENTS = "pdt.parse_comments";
 	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
 	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
 
@@ -134,6 +134,9 @@ public class PDTCore {
 
 	public static final int CX_UNKNOWN = -1;
 	public static final int CX_START_PIF = -2;
+
+
+	
 
 
 	

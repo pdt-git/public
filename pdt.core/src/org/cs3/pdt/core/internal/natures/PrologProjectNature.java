@@ -414,6 +414,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 									+ "they match the inclusion pattern above.",
 							Option.STRING, ""),
 					new SimpleOption(
+							PDTCore.PROP_PARSE_COMMENTS,
+									"Parse Comments",
+									"If true, the pdt core will parse and process comments in prolog source files." +
+									"This is disabled by default because of a bug in the current SWI-Prolog release. (5.6.17)",
+									Option.FLAG, "false"),							
+					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
 							"Metadata PrologInterface",
 							"The key identifying the PrologInterface instance used by the pdt core to store"
