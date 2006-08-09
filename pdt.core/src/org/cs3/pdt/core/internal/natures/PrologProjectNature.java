@@ -44,7 +44,6 @@
 package org.cs3.pdt.core.internal.natures;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -57,7 +56,6 @@ import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProviderEvent;
@@ -90,7 +88,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.ui.activities.WorkbenchActivityHelper;
 
 /**
  */
@@ -216,7 +213,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * @see org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core.resources.IProject)
 	 */
 	public void setProject(IProject project) {
+		if (this.project != null) {
+
+		}
 		this.project = project;
+
 	}
 
 	/*
@@ -539,16 +540,54 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public void setPreferenceValue(String id, String value) {
 
 		try {
-			getProject()
-					.setPersistentProperty(new QualifiedName("", id), value);
-			if (PDTCore.PROP_RUNTIME_PIF_KEY.equals(id)
-					|| PDTCore.PROP_METADATA_PIF_KEY.equals(id)) {
-				pifKeysChanged();
+
+			String oldValue = getPreferenceValue(id, "");
+			if (!oldValue.equals(value)) {
+				getProject().setPersistentProperty(new QualifiedName("", id),
+						value);
+
+				if (PDTCore.PROP_RUNTIME_PIF_KEY.equals(id)
+						|| PDTCore.PROP_METADATA_PIF_KEY.equals(id)) {
+					pifKeysChanged();
+
+				}
+				fireValueChanged(id);
 			}
+
 		} catch (CoreException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);
 		}
+	}
+
+	public void setPreferenceValues(String[] ids, String[] values) {
+		Vector changed = new Vector();
+		try {
+			for (int i = 0; i < values.length; i++) {
+				String value = values[i];
+				String id = ids[i];
+				String oldValue = getPreferenceValue(id, "");
+				if (!oldValue.equals(value)) {
+					getProject().setPersistentProperty(
+							new QualifiedName("", id), value);
+					if (PDTCore.PROP_RUNTIME_PIF_KEY.equals(id)
+							|| PDTCore.PROP_METADATA_PIF_KEY.equals(id)) {
+						pifKeysChanged();
+					}
+					changed.add(id);
+				}
+
+			}
+			if (!changed.isEmpty()) {
+				fireValuesChanged((String[]) changed.toArray(new String[changed
+						.size()]));
+			}
+
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+
 	}
 
 	private void pifKeysChanged() {
@@ -633,16 +672,30 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 
 	}
-	protected void fireValueChanged(String id){
-		OptionProviderEvent e = new OptionProviderEvent(this,id);
-		Vector clone=new Vector();
+
+	protected void fireValueChanged(String id) {
+		OptionProviderEvent e = new OptionProviderEvent(this, id);
+		Vector clone = new Vector();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
 		for (Iterator it = clone.iterator(); it.hasNext();) {
 			OptionProviderListener l = (OptionProviderListener) it.next();
-			l.valueChanged(e);
+			l.valuesChanged(e);
 		}
+	}
+
+	private void fireValuesChanged(String[] ids) {
+		OptionProviderEvent e = new OptionProviderEvent(this, ids);
+		Vector clone = new Vector();
+		synchronized (listeners) {
+			clone.addAll(listeners);
+		}
+		for (Iterator it = clone.iterator(); it.hasNext();) {
+			OptionProviderListener l = (OptionProviderListener) it.next();
+			l.valuesChanged(e);
+		}
+
 	}
 
 }

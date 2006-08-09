@@ -1,5 +1,6 @@
 package org.cs3.pdt.core.internal.decorators;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -33,7 +34,10 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 				return;
 			}
 			IPrologProject prologProject = (IPrologProject)project.getNature(PDTCore.NATURE_ID);
+			
+			//TODO: this is a bit ugly, or isn't it`?
 			prologProject.addOptionProviderListener(this);
+			
 			if(prologProject.getExistingSourcePathEntries().contains(resource)){
 				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.SOURCEPATH_DECORATION));				
 			}
@@ -71,10 +75,14 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
-	public void valueChanged(OptionProviderEvent e) {
-		if(PDTCore.PROP_SOURCE_PATH.equals(e.id)){
-			fireLabelProviderChanged();
+	public void valuesChanged(OptionProviderEvent e) {
+		String[] ids= e.ids;
+		for (int i = 0; i < ids.length; i++) {
+			if(PDTCore.PROP_SOURCE_PATH.equals(ids[i])){
+				fireLabelProviderChanged();
+			}	
 		}
+		
 		
 	}
 

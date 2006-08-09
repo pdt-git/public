@@ -71,6 +71,17 @@
                id="AutoConsultAction">
          </action>
       </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="pdt.core.SourceFolderContribution"
+            objectClass="org.eclipse.core.resources.IContainer">
+         <action
+               class="org.cs3.pdt.core.internal.actions.ToggleSourceFolderAction"
+               id="pdt.core.toggle.source.folder.action"
+               label="Include in Prolog Source Path"
+               style="toggle"
+               tooltip="If checked, the fodler is included in the source lookup path"/>
+      </objectContribution>
 
  </extension>	
  <extension
