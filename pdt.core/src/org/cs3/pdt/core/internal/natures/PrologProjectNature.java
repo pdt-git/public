@@ -49,6 +49,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
@@ -59,6 +60,8 @@ import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.OptionProviderEvent;
+import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.IMetaInfoProvider;
@@ -109,13 +112,15 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private PrologEventDispatcher metaDataEventDispatcher;
 
+	private Vector listeners = new Vector();
+
 	/**
 	 * @see IProjectNature#configure
 	 */
 	public void configure() throws CoreException {
 
 		Debug.debug("configure was called");
-		
+
 		addBuilder(PDTCore.PROLOG_BUILDER_ID);
 
 		registerLibraries();
@@ -168,7 +173,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		try {
 			unregisterSubscriptions();
 			unregisterLibraries();
-			
+
 			removeBuilder(PDTCore.PROLOG_BUILDER_ID);
 		} catch (Throwable t) {
 			Debug.report(t);
@@ -270,7 +275,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public void setAutoConsulted(IFile file, boolean val) throws CoreException {
 		file.setPersistentProperty(
-		// TODO: toggled functionality - to test
+				// TODO: toggled functionality - to test
 				new QualifiedName("", PDTCore.PROP_NO_AUTO_CONSULT),
 				val ? "false" : "true");
 	}
@@ -302,7 +307,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		if (metadataPif == null) {
 			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(
 					getMetadataSubscription());
-			
+
 		}
 		return metadataPif;
 	}
@@ -311,7 +316,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		if (runtimePif == null) {
 			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(
 					getRuntimeSubscription());
-			
+
 		}
 		return runtimePif;
 	}
@@ -330,13 +335,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		r.removeSubscription(getRuntimeSubscriptionKey());
 	}
 
-	public Subscription getMetadataSubscription()  {
+	public Subscription getMetadataSubscription() {
 		String id = getMetadataSubscriptionKey();
 		String pifKey = getMetadataPrologInterfaceKey();
 		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		if (metadataPifSubscription == null) {
-			metadataPifSubscription=r.getSubscription(id);
+			metadataPifSubscription = r.getSubscription(id);
 		}
 		if (metadataPifSubscription == null) {
 			metadataPifSubscription = new MetadataSubscription(getProject()
@@ -352,7 +357,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		if (runtimePifSubscription == null) {
-			runtimePifSubscription=r.getSubscription(id);
+			runtimePifSubscription = r.getSubscription(id);
 		}
 		if (runtimePifSubscription == null) {
 			String pifID = getRuntimePrologInterfaceKey();
@@ -415,10 +420,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							Option.STRING, ""),
 					new SimpleOption(
 							PDTCore.PROP_PARSE_COMMENTS,
-									"Parse Comments",
-									"If true, the pdt core will parse and process comments in prolog source files." +
-									"This is disabled by default because of a bug in the current SWI-Prolog release. (5.6.17)",
-									Option.FLAG, "false"),							
+							"Parse Comments",
+							"If true, the pdt core will parse and process comments in prolog source files."
+									+ "This is disabled by default because of a bug in the current SWI-Prolog release. (5.6.17)",
+							Option.FLAG, "false"),
 					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
 							"Metadata PrologInterface",
@@ -463,8 +468,6 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 					IProject project = getProject();
 					Debug.debug("PDTReloadHook.afterInit: lets build project "
 							+ project);
-
-					
 
 					project.build(IncrementalProjectBuilder.CLEAN_BUILD,
 							PDTCore.PROLOG_BUILDER_ID, null, monitor);
@@ -595,10 +598,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			String key = c.getFullPath().toString();
 			if (f != null) {
 				libraries.put(key, new DefaultPrologLibrary(key, new String[0], // TODO
-																				// let
-																				// user
-																				// define
-																				// dependencies
+						// let
+						// user
+						// define
+						// dependencies
 						"library", Util.prologFileName(f)));
 			}
 		}
@@ -612,6 +615,34 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 					(PrologInterface2) getMetadataPrologInterface());
 		}
 		return metaDataEventDispatcher;
+	}
+
+	public void addOptionProviderListener(OptionProviderListener l) {
+		synchronized (listeners) {
+			if (!listeners.contains(l)) {
+				listeners.add(l);
+			}
+		}
+	}
+
+	public void removeOptionProviderListener(OptionProviderListener l) {
+		synchronized (listeners) {
+			if (listeners.contains(l)) {
+				listeners.remove(l);
+			}
+		}
+
+	}
+	protected void fireValueChanged(String id){
+		OptionProviderEvent e = new OptionProviderEvent(this,id);
+		Vector clone=new Vector();
+		synchronized (listeners) {
+			clone.addAll(listeners);
+		}
+		for (Iterator it = clone.iterator(); it.hasNext();) {
+			OptionProviderListener l = (OptionProviderListener) it.next();
+			l.valueChanged(e);
+		}
 	}
 
 }

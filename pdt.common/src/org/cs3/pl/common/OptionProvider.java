@@ -45,6 +45,10 @@ package org.cs3.pl.common;
 public interface OptionProvider {
 
 	public Option[] getOptions();
+	
+	/**
+	 * @deprecated
+	 */
 	public void reconfigure();
 
 	
@@ -55,5 +59,6 @@ public interface OptionProvider {
 	 */ 
 	public String getPreferenceValue(String id, String string);
 	public void setPreferenceValue(String id, String value);
+	
 
 }
