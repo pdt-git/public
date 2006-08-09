@@ -118,6 +118,29 @@
         <dependency library="pdt.runtime.library.common"/>
      </library>
   </extension>
+  <extension
+        point="org.eclipse.ui.decorators">
+     <decorator
+           adaptable="true"
+           class="org.cs3.pdt.core.internal.decorators.SourcePathDecorator"
+           icon="icons/sample_decorator.gif"
+           id="org.cs3.pdt.core.sourcepath.decorator"
+           label="Resource Decorator"
+           lightweight="true"
+           location="TOP_RIGHT"
+           objectClass="org.eclipse.core.resources.IContainer"
+           state="true">
+        <enablement>
+           <and>
+              <objectClass name="org.eclipse.core.resources.IResource"/>
+              <or>
+                 <objectClass name="org.eclipse.core.resources.IProject"/>
+                 <objectClass name="org.eclipse.core.resources.IFile"/>
+              </or>
+           </and>
+        </enablement>
+     </decorator>
+  </extension>
  
  
 </plugin>
