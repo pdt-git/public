@@ -133,6 +133,7 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
      */
     public boolean performOk() {
         Option[] options = getOptionProvider().getOptions();
+        
         for (int i = 0; i < options.length; i++) {
             Option option = options[i];
             String id = option.getId();
