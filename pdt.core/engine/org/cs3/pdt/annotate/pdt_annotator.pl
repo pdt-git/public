@@ -208,6 +208,7 @@ forget_file_annotation(Spec):-
     call_cleanup_hook2(FileName),
     retractall(file_annotation(FileName,_,_,_)),
     retractall(file_error(FileName,_,_)),
+    retractall(file_comments(FileName,_,_)),
     clear_timestamp(FileName),
     pif_notify(file_annotation(FileName),forget).
 
@@ -535,7 +536,7 @@ comments_map(Comments,Map):-
 comments_map(In,[],In).
 comments_map(In,[CPos-Comment|Cs],Out):-
     stream_position_data(char_count,CPos,Position),
-    pdt_map_put(In,Position,Comment,Next),
+    pdt_map_put(In,Position,CPos-Comment,Next),
     comments_map(Next,Cs,Out).
 
 

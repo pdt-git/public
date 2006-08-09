@@ -141,7 +141,7 @@ next_token_position_X(Stream,CommentsMap,TPos):-
 
 skip_comment(Stream,CommentsMap):-
     character_count(Stream,Pos),
-    pdt_map_get(CommentsMap,Pos,Comment),
+    pdt_map_get(CommentsMap,Pos,_-Comment),
     string_length(Comment,Len),
     seek(Stream,Len,current,Len).
     
