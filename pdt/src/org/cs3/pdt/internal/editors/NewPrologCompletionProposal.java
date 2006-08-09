@@ -57,16 +57,20 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension5;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Shell;
 
 
 
-public class NewPrologCompletionProposal implements ICompletionProposal,ICompletionProposalExtension5 {
+public class NewPrologCompletionProposal implements ICompletionProposal,ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator {
 	
 	private PrologInterface pif;
 	private Predicate predicate;
@@ -164,6 +168,24 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 		}
 		monitor.done();
 		return map.get("Help");
+	}
+
+	public IInformationControlCreator getInformationControlCreator() {
+
+		return this;
+	}
+
+	public int getPrefixCompletionStart(IDocument document, int completionOffset) {
+		return completionOffset;
+	}
+
+	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+		return getDisplayString();
+	}
+
+	public IInformationControl createInformationControl(Shell parent) {
+		
+		return new BrowserInformationControl(parent);
 	}
 
 }
