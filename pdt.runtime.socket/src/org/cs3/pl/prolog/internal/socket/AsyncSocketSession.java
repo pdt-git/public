@@ -186,7 +186,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private void dispatchSkippingQuery(int id) {
 		Object ticket = getTicket(id);
-		fireGoalSkipped(ticket);
+		fireGoalSkipped(id,ticket);
 		removeTicket(id);
 		synchronized (ticket) {
 			ticket.notifyAll();
@@ -197,7 +197,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private void dispatchJoinComplete(int id) {
 		Object ticket = getTicket(id);
-		fireJoinComplete(ticket);
+		fireJoinComplete(id,ticket);
 		removeTicket(id);
 		synchronized (ticket) {
 			ticket.notifyAll();
@@ -214,7 +214,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			}
 		}
 		removeTicket(id);
-		fireAbortComplete(ticket);
+		fireAbortComplete(id,ticket);
 		Debug.info("listeners were notified about abort completion, id="+id);
 		synchronized (ticket) {
 			Debug.info("notifying waiting threads, id="+id);
@@ -252,8 +252,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 	
-	private void fireJoinComplete(Object ticket) {
+	private void fireJoinComplete(int id,Object ticket) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -263,8 +264,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 
-	private void fireAbortComplete(Object ticket) {
+	private void fireAbortComplete(int id,Object ticket) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -275,9 +277,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 	
-	private void fireGoalSucceeded(Object ticket) {
+	private void fireGoalSucceeded(int id,Object ticket) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket);
-		e.query=getQuery(ticket);
+		e.id=id;
+		e.query=getQuery(id);
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -286,9 +289,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 
-	private void fireGoalFailed(Object ticket) {
+	private void fireGoalFailed(int id,Object ticket) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket);
-		e.query=getQuery(ticket);
+		e.query=getQuery(id);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -298,9 +302,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 
-	private void fireGoalRaisedException(Object ticket, String string) {
+	private void fireGoalRaisedException(int id,Object ticket, String string) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket,string);
-		e.query=getQuery(ticket);
+		e.query=getQuery(id);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -310,9 +315,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 
-	private void fireGoalHasSolution(Object ticket, Map result) {
+	private void fireGoalHasSolution(int id,Object ticket, Map result) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket,result);
-		e.query=getQuery(ticket);
+		e.query=getQuery(id);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -321,9 +327,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 
-	private void fireGoalSkipped(Object ticket) {
+	private void fireGoalSkipped(int id,Object ticket) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket);
-		e.query=getQuery(ticket);
+		e.query=getQuery(id);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -333,9 +340,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 
-	private void fireGoalCut(Object ticket) {
+	private void fireGoalCut(int id,Object ticket) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this,ticket);
-		e.query=getQuery(ticket);
+		e.query=getQuery(id);
+		e.id=id;
 		synchronized (listeners) {
 			for (Iterator it = listeners.iterator(); it.hasNext();) {
 				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
@@ -359,26 +367,26 @@ public class AsyncSocketSession implements AsyncPrologSession {
 					throw new PrologException("don't know what to do.");
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
-					fireGoalRaisedException(ticket, line.substring(SocketClient.ERROR.length()));
+					fireGoalRaisedException(id,ticket, line.substring(SocketClient.ERROR.length()));
 					removeTicket(id);
 					return false;
 				}
 				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
-					fireGoalHasSolution(ticket, result);
+					fireGoalHasSolution(id,ticket, result);
 					return true;
 				}
 				if (SocketClient.NO.equals(line)) {
-					fireGoalFailed(ticket);
+					fireGoalFailed(id,ticket);
 					removeTicket(id);
 					return false;
 				}
 				if (SocketClient.YES.equals(line)) {
-					fireGoalSucceeded(ticket);
+					fireGoalSucceeded(id,ticket);
 					removeTicket(id);
 					return false;
 				}
 				if (SocketClient.CUT.equals(line)) {
-					fireGoalCut(ticket);
+					fireGoalCut(id,ticket);
 					removeTicket(id);
 					return false;
 				}
@@ -575,10 +583,13 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private int storeTicket(Object ticket,String query) {
 		int id=ticketCounter++;
+		if(query==null&&!(ticket instanceof _AbortTicket)){
+			Debug.debug("debug");
+		}
 		synchronized (tickets) {
 			Integer key = new Integer(id);
 			tickets.put(key,ticket);
-			queries.put(ticket,query);
+			queries.put(key,query);
 		}		
 		return id;
 	}
@@ -591,14 +602,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 	public String getQuery(int id){
 		synchronized (tickets) {
-			return (String) queries.get(tickets.get(new Integer(id)));
+			return (String) queries.get(new Integer(id));
 		}
 	}
-	public String getQuery(Object ticket){
-		synchronized (tickets) {
-			return (String) queries.get(ticket);
-		}
-	}
+	
 	
 	private Object getTicket(int id){
 		synchronized (tickets) {
@@ -611,16 +618,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	private void removeTicket(int id){
 		synchronized (tickets) {
 			Integer key = new Integer(id);			
-			Object ticket= tickets.remove(key);			
-			queries.remove(ticket);
+			tickets.remove(key);			
+			queries.remove(key);
 		}
 	}
 	
-	private void removeQuery(Object ticket){
-		synchronized (tickets) {
-			queries.remove(ticket);			
-		}
-	}
+	
 	
 
 	public void join() throws PrologInterfaceException{
@@ -646,8 +649,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 		
 	}
+	private static class _AbortTicket{}
+	
 	public void abort() throws PrologInterfaceException {
-		abort(new Object());
+		abort(new _AbortTicket());
 	}
 	public void abort(Object ticket) throws PrologInterfaceException {
 		if(ticket==null){
@@ -660,7 +665,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			return;
 		}
 		if(isIdle()){
-			fireAbortComplete(ticket);
+			fireAbortComplete(-1,ticket);
 			synchronized (ticket) {
 				
 				ticket.notifyAll();

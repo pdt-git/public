@@ -51,6 +51,7 @@ public class AsyncPrologSessionEvent extends EventObject {
 	public Object ticket=null;
 	public String message=null;
 	public Map bindings = null;
+	public int id=-1;
 	
 	public AsyncPrologSessionEvent(Object source) {
 		super(source);
