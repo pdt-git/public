@@ -4,11 +4,16 @@ import java.util.EventObject;
 
 public class OptionProviderEvent extends EventObject {
 
-	public String id;
+	public String[] ids;
 
 	public OptionProviderEvent(Object source,String id) {
 		super(source);
-		this.id=id;
+		this.ids=new String[]{id};
+	}
+
+	public OptionProviderEvent(Object source, String[] ids) {
+		super(source);
+		this.ids=ids;
 	}
 
 }
