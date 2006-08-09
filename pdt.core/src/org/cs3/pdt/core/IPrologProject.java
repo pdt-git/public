@@ -45,6 +45,7 @@ import java.util.Set;
 
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.OptionProvider;
+import org.cs3.pl.common.OptionProviderExtension;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
@@ -57,7 +58,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * not much yet ;-)
  */
-public interface IPrologProject extends OptionProvider{
+public interface IPrologProject extends OptionProvider,OptionProviderExtension{
     
 
 	    
