@@ -136,6 +136,9 @@ public class PDTCore {
 	public static final int CX_START_PIF = -2;
 
 
+	public static final int CX_TOGGLE_SOURCE_PATH_ENTRY = -3;
+
+
 	
 
 
