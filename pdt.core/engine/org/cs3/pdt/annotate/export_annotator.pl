@@ -48,7 +48,9 @@
 
 :- pdt_annotator([term,file],[]).
 
-file_annotation_hook(_,_,[H|_],In,[defines_module(Module), exports(SortedExports)|In]):-
+file_annotation_hook([File|_],_,In,[defines_module(Module), exports(SortedExports)|In]):-
+	current_file_term(File,H),
+	!,
     pdt_strip_annotation(H,':-'(module(Module,_)),_),   
     collect_exports(H,Exports),
     sort(Exports,SortedExports).

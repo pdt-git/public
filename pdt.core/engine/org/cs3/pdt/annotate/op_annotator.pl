@@ -50,18 +50,19 @@ interleaved_annotation_hook(_,OpModule,InTerm,OutTerm):-
     pdt_strip_annotation(InTerm,':-'(op(Precedence,Type,Name)),(TopAnot,ArgAnot)),
     pdt_splice_annotation(':-'(op(Precedence,Type,Name)),([declares_op(op(Precedence,Type,Name))|TopAnot],ArgAnot),OutTerm),
     op(Precedence,Type,OpModule:Name).
-file_annotation_hook(_,_,Terms,InAnos,OutAnos):-
-    collect_ops(Terms,Ops),
+file_annotation_hook([File|_],_,InAnos,OutAnos):-
+    pdt_file_record_key(term,File,Key),
+    collect_ops(Key,Ops),
     (	Ops==[]
     ->	OutAnos=InAnos
     ;	OutAnos=[declares_ops(Ops)|InAnos]
     ).
 
-collect_ops([],[]).
-collect_ops([H|T],[op(Precedence,Type,Name)|TOps]):-
-    pdt_strip_annotation(H,':-'(op(Precedence,Type,Name)),_),
-	!,
-	collect_ops(T,TOps).
-collect_ops([_|T],TOps):-
-	collect_ops(T,TOps).
 
+collect_ops(Key,Ops):-
+    findall(op(Precedence,Type,Name),
+    	(	pdt_file_record(Key,ATerm),
+    		pdt_strip_annotation(ATerm,':-'(op(Precedence,Type,Name)),_)
+    	),Ops
+    ).
+    

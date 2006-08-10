@@ -67,26 +67,28 @@ lookup_handle(handle(id(File,Module:Name/Arity), predicate_definition,Cache)):-
 % atm, all properties are cached except the indexed property clauses
 %
 get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),clauses,Value):-
-    current_file_annotation(File,_,Terms),
-	filter_clauses(Terms,Module:Name/Arity,Clauses),
+    pdt_file_record_key(term,File,Key),
+	filter_clauses(Key,Module:Name/Arity,Clauses),
 	Value=..[array|Clauses].
 
 
 get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),comments,Value):-
-    current_file_annotation(File,_,Terms),
     current_file_comments(File,CommentsMap),
-	collect_comments(CommentsMap,Terms,Module:Name/Arity,CommentsTexts),
+    pdt_file_record_key(term,File,Key),
+	collect_comments(CommentsMap,Key,Module:Name/Arity,CommentsTexts),
 	flatten(CommentsTexts,Value).
 	
     
-collect_comments(_,[],_,[]).
-collect_comments(CommentsMap,[Term|Terms],Sig,[CommentTexts|Comments]):-
-    Term=aterm(Anns,_),
-    pdt_memberchk(clause_of(Sig),Anns),
-    pdt_memberchk(comments_left(CommentPositions),Anns),
-    !,
-	comment_texts(CommentsMap,CommentPositions,CommentTexts),
-    collect_comments(CommentsMap,Terms,Sig,Comments).
+collect_comments(CommentsMap,Key,Sig,Comments):-
+    findall(CommentTexts,
+    	(	pdt_file_record(Key,Term),
+    		pdt_term_annotation(Term,_,Anns),
+		    pdt_memberchk(clause_of(Sig),Anns),
+    		pdt_memberchk(comments_left(CommentPositions),Anns),
+			comment_texts(CommentsMap,CommentPositions,CommentTexts)
+		), Comments
+	).
+    	
 collect_comments(CommentsMap,[_|Terms],Sig,Comments):-
     collect_comments(CommentsMap,Terms,Sig,Comments).
     

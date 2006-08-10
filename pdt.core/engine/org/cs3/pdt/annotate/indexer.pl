@@ -62,7 +62,7 @@
 	library('org/cs3/pdt/annotate/member_annotator')
 ]).
 
-file_annotation_hook([File|_],_,_,Annos,[indexed(IxTime)|Annos]):-
+file_annotation_hook([File|_],_,Annos,[indexed(IxTime)|Annos]):-
     time_file(File,ModTime),
     time_index(File,IxTime),
     update_index(File,Annos,ModTime,IxTime).
