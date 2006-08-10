@@ -41,7 +41,6 @@
 
 :-module(pdt_util,[
 	pdt_call_cleanup/2,
-	pdt_maybe/1,
 	pdt_file_spec/2,
 	pdt_file_ref/2,
 	pdt_member/2,
@@ -51,7 +50,8 @@
 	pdt_chop_before/4,
 	pdt_chop_after/4,
 	pdt_remove_duplicates/2,
-	pdt_count/2
+	pdt_count/2,
+	pdt_unique/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
@@ -84,20 +84,7 @@ pdt_call_cleanup(_,Cleanup):-
     fail.
 
 
-:- module_transparent pdt_maybe/1.
-/*
-pdt_maybe(+Goal)
 
-tries to call goal, catching all exceptions.
-
-This predicate does always succeed.
-*/
-pdt_maybe(Goal):-
-%	catch(		
-		(Goal;true).%,
-%		E,
-%		debugme(E)
-%	).
 debugme(E):-
     pretty_print(current_output,'',E).
 /*
@@ -210,4 +197,8 @@ pdt_remove_duplicates([Elm,Elm|Elms],[Elm|DupFreeElms]):-
 pdt_remove_duplicates([Elm|Elms],[Elm|DupFreeElms]):-
     !,
     pdt_remove_duplicates(Elms,DupFreeElms).
-    
+
+pdt_unique(Prefix,Unique):-
+	atom_concat(unique,Prefix,Counter),
+	flag(Counter,N,N+1),
+	atom_concat(Prefix,N,Unique).    

@@ -140,7 +140,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	private void fetchPredicates() throws PrologInterfaceException {
 		AsyncPrologSession session = getSession();
 		String query = "current_file_annotation('" + Util.prologFileName(file)
-				+ "',FileAnnos,_)";
+				+ "',FileAnnos)";
 		session.queryOnce(fileAnnosTicket, query);
 
 	}

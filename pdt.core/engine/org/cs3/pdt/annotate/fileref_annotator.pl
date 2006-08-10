@@ -57,8 +57,8 @@
 interleaved_annotation_hook(Stack,_,InTerm,OutTerm):-
 	file_refs(Stack,InTerm,OutTerm).
 
-file_annotation_hook(_,_,Terms,InAnos,[references_files(Refs)|InAnos]):-
-    collect_refs(Terms,Refs).
+file_annotation_hook([File|_],_,InAnos,[references_files(Refs)|InAnos]):-
+    collect_refs(File,Refs).
 
 
 file_refs(Stack,InTerm,OutTerm):-
@@ -111,14 +111,15 @@ annotate_refered_file(Stack):-
 %this_debug([Cur|_]):-
 %    format("back to ~w~n",[Cur]).
 
-collect_refs([],[]).
-collect_refs([H|T],Out):-
-    pdt_strip_annotation(H,_,(Head,_)),
-    (	pdt_member(file_refs(Refs),Head)
-    ->  sort(Refs,SortedRefs)
-    ;	SortedRefs=[]
+
+collect_refs(File,SortedRefs):-
+    pdt_file_record_key(term,File,Key),
+    findall(RefList,
+    	(	pdt_file_record(Key,ATerm),
+    		pdt_term_annotation(ATerm,_,Annos),
+    		pdt_member(file_refs(RefList),Annos)
+    	), RefLists
     ),
-    collect_refs(T,Rest),
-    merge_set(SortedRefs,Rest,Out).
-    
-    
+    flatten(RefLists,Refs),
+    sort(Refs,SortedRefs).
+

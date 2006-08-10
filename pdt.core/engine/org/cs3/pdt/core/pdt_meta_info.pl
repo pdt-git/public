@@ -81,47 +81,53 @@ some predicate definitions for queries frequently used by the pdt.core
 %	pdt_member(clause_of(DefModule:Name/Arity),Anns).
   
 pdt_lookup_aterm(FileSpec,N,ATerm,Member):-
-	pdt_file_spec(FileSpec,Abs),
-    current_file_annotation(Abs,_,Terms),
-    lookup_aterm(Terms,N,ATerm,Member).
+	pdt_file_record_key(term,FileSpec,Key),
+    lookup_aterm(Key,N,ATerm,Member).
 
 pdt_lookup_aterm(FileSpec,N,ATerm):-
 	pdt_lookup_aterm(FileSpec,N,ATerm,_).
 
   
-lookup_aterm([Member|_],N,ATerm,Member):-
-    lookup_aterm_X(Member,N,ATerm),
-    !.
-lookup_aterm([Member|Members],N,ATerm,Container):-
-    pdt_term_annotation(Member,_,Annos),
+lookup_aterm(Key,N,Subterm,Member):-
+    pdt_file_record(Key,Member),
+    pdt_term_annotation(Member,Subterm,Annos),
+    pdt_member(n(FirstN),Annos),
     pdt_member(last_n(LastN),Annos),
-    LastN<N,
-    lookup_aterm(Members,N,ATerm,Container).
-  
-lookup_aterm_X(ATerm,N,ATerm):-
+	(	% term is right off
+		N < FirstN	->	   
+		!, % this is not a bug. All other remaining terms will be right off.
+		fail
+	;	% term is left off 
+		LastN < N ->
+		fail % Do not cut. Annother term may fit.
+	;	% term is a subterm of member
+		lookup_subterm(Member,N,Subterm)		
+	).
+	
+lookup_subterm(ATerm,N,ATerm):-
 	pdt_term_annotation(ATerm,_,Annos),
 	pdt_member(n(N),Annos),
 	!.
-lookup_aterm_X(Container,N,ATerm):-
+lookup_subterm(Container,N,ATerm):-
 	pdt_term_annotation(Container,_,Annos),
 	pdt_member(n(Left),Annos),
 	pdt_member(last_n(Right),Annos),
 	Left < N,
 	N =< Right,
-	pdt_subterm(Container,[_|_],SubContainer),
+	pdt_subterm(Container,[_],SubContainer),
 	lookup_aterm_X(SubContainer,N,ATerm).
     
 pdt_file_directive(FileSpec,[label(Label)|Annos]):-
-	current_file_annotation(FileSpec,_,Terms),
-	member(Term,Terms),
+	pdt_file_record_key(term,FileSpec,Key),
+	pdt_file_record(Key,Term),
 	pdt_term_annotation(Term,:-(_),Annos),
 	get_op_module(FileSpec,OpModule),
 	pdt_subterm(Term,[1],Body),
 	render_term(Body,Term,OpModule,4,Label).
 
 pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos]):-
-	current_file_annotation(FileSpec,_,Terms),
-	member(Term,Terms),	
+	pdt_file_record_key(term,FileSpec,Key),
+	pdt_file_record(Key,Term),
 	pdt_term_annotation(Term,TTerm,Annos),
 	pdt_member(clause_of(Module:Name/Arity),Annos),
 	(	functor(TTerm,:-,2)
@@ -136,9 +142,9 @@ pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos])
 	
   
 pdt_file_problem(FileSpec,Problem,Pos):-
-    pdt_file_spec(FileSpec,Abs),
-    current_file_annotation(Abs,_,Terms),
-    pdt_subterm(Terms,_,ATerm),
+	pdt_file_record_key(term,FileSpec,Key),
+	pdt_file_record(Key,Term),
+    pdt_subterm(Term,_,ATerm),
     pdt_term_annotation(ATerm,_,Annos),
     pdt_member(problem(Problem),Annos),
     pdt_member(position(Pos),Annos).
@@ -153,14 +159,14 @@ pdt_file_includes(FileSpec,IncludeSpec):-
 
 get_includes(FileSpec,IncludeSpec):-  
     pdt_file_spec(FileSpec,Abs),
-    current_file_annotation(Abs,Terms,_),
-    member(references_files(Refs),Terms),
+    current_file_annotation(Abs,Annos),
+    member(references_files(Refs),Annos),
     member(IncludeSpec,Refs).
     
 get_including(IncludeSpec,File):-
 	pdt_file_spec(IncludeSpec,Abs),
-    current_file_annotation(File,Terms,_),
-    member(references_files(Refs),Terms),
+    current_file_annotation(File,Annos),
+    member(references_files(Refs),Annos),
     member(Abs,Refs).
 
 pdt_file_depends(DependentFile,DependencyFile):-
@@ -188,7 +194,7 @@ pdt_file_module(FileSpec,Module):-
 
 get_module(FileSpec,Module):-    
     pdt_file_spec(FileSpec,Abs),
-    current_file_annotation(Abs,Ann,_),
+    current_file_annotation(Abs,Ann),
     memberchk(defines_module(Module),Ann),
     !.
 get_module(_,user).    
@@ -302,7 +308,8 @@ pdt_parsed_help(FileSpec,Module:Name/Arity,Summary,Help):-
     pdt_property(H,file,File),
     pdt_property(H,module,Module),
     pdt_property(H,clauses,Clauses),
-    member(Clause,Clauses).
+    member(Clause,Clauses)%TODO: not ready!
+    .
 	
 %
 % the following predicates where copied from the library help.pl

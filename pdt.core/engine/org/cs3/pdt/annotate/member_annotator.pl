@@ -62,12 +62,8 @@ process_member(InTerm,FileModule,OutTerm):-
     pdt_strip_annotation(InTerm,Stripped,_),
     has_head(Stripped,FileModule, Module, Functor, Arity),
     Functor\=(':-'),
+    !,
     pdt_term_annotation(OutTerm,Term,[clause_of(Module:Functor/Arity)|Annos]).
-%process_member(':-'(Term),FileModule,Annotation):-
-%    property_definition(Term,Property,Signatures),
-%    module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures),
-%    Annotation=..[Property,ModuleQualifiedSignatures].
-
 process_member(InTerm,FileModule,OutTerm):-
     pdt_term_annotation(InTerm,':-'(InBody),DirectiveAnnos),
     pdt_term_annotation(InBody,BodyTerm0,BodyAnnos),
@@ -132,66 +128,52 @@ module_qualified_signature(_,(Module:Name)/Arity,Module:Name/Arity).
     
 
 
-file_annotation_hook(_,_,Terms,InAnnos,[defines(Definitions),defines2(Definitions2)|OutAnnos]):-
-    collect_definitions(Terms,Definitions),
-    collect_definitions2(Terms,Definitions2),
+file_annotation_hook([File|_],_,InAnnos,[defines(Definitions),defines2(Definitions2)|OutAnnos]):-
+	pdt_file_record_key(term,File,Key),
+    collect_definitions(Key,Definitions),
+    collect_definitions2(Key,Definitions2),
     findall(Property,property_functor(Property,_),Properties),
-    collect_properties(Properties,Terms,InAnnos,OutAnnos).
+    collect_properties(Properties,Key,InAnnos,OutAnnos).
 
 collect_properties([],_,In,In).
-collect_properties([Property|Properties],Terms,In,[PropTerm|PropTerms]):-
-    collect_property(Property,Terms,[],Sigs),
+collect_properties([Property|Properties],RecordKey,In,[PropTerm|PropTerms]):-
+    collect_property(Property,RecordKey,Sigs),
     PropTerm=..[Property,Sigs],
-    collect_properties(Properties,Terms,In,PropTerms).
-    
-collect_property(_,[],Sigs,Sigs).
-collect_property(Property,[Term|Terms],InSigs,OutSigs):-    
-    pdt_top_annotation(Term,TopAn),
-    collect_property_X(Property,TopAn,MySigs),
-    merge_set(InSigs,MySigs,NextSigs),  
-    collect_property(Property,Terms,NextSigs,OutSigs).
-
-collect_property_X(Property,TopAn,OutSigs):-
-    PropTerm=..[Property,Sigs],
-    	pdt_member(PropTerm,TopAn),
-    	!,
-    sort(Sigs,OutSigs).
-collect_property_X(_,_,[]).
-
-collect_definitions(Terms,Definitions):-
-    pdt_rbtree_new(Tree0),
-    collect_definitions(Terms,Tree0,Tree),
-    findall(A,pdt_rbtree_next('',A,_,Tree),Definitions0),
-    pdt_remove_duplicates(Definitions0,Definitions).
-
-collect_definitions2(Terms,Definitions2):-
-    pdt_multimap_empty(Map0),
-    collect_definitions2(Terms,Map0,Map),
-    pdt_multimap_to_list2(Map,Definitions2).
+    collect_properties(Properties,RecordKey,In,PropTerms).
     
 
-collect_definitions([],Tree,Tree).   
-collect_definitions([Term|Terms],InTree,OutTree):-
-    pdt_top_annotation(Term,TopAn),
-    pdt_member(clause_of(Definition),TopAn),
-    !,
-    pdt_rbtree_insert(InTree,Definition,Definition,NextTree),
-	collect_definitions(Terms,NextTree,OutTree).
-collect_definitions([_|Terms],InTree,OutTree):-
-	collect_definitions(Terms,InTree,OutTree).
+collect_property(Property,RecordKey,SortedSignatures):-    
+	findall(SignatureList,
+		(	pdt_file_record(RecordKey,ATerm),
+			pdt_term_annotation(ATerm,_,Annos),
+		    PropTerm=..[Property,SignatureList],
+	    	pdt_member(PropTerm,Annos)
+	    ),SignatureLists
+	),
+	flatten(SignatureLists,Signatures),
+	sort(Signatures,SortedSignatures).
 
+collect_definitions(Key,SortedDefinitions):-
+    findall(Definition,
+    	(	pdt_file_record(Key,ATerm),
+    		pdt_term_annotation(ATerm,_,Annos),
+    		pdt_member(clause_of(Definition),Annos)
+    	), Definitions
+    ),
+    sort(Definitions,SortedDefinitions).
 
-collect_definitions2([],Map,Map).   
-collect_definitions2([Term|Terms],InMap,OutMap):-
-    pdt_term_annotation(Term,_,TopAn),
-    pdt_member(clause_of(Definition),TopAn),
-    pdt_member(n(N),TopAn),
-    !,
-%    term_to_atom(Definition,Key),
-    pdt_multimap_add(InMap,Definition,N,NextMap),
-	collect_definitions2(Terms,NextMap,OutMap).
-collect_definitions2([_|Terms],InMap,OutMap):-
-	collect_definitions2(Terms,InMap,OutMap).
+collect_definitions2(RecordKey,Definitions2):-
+	pdt_multimap_findall(Key,Value,
+		(	pdt_file_record(RecordKey,ATerm),
+    		pdt_term_annotation(ATerm,_,Annos),
+    		pdt_member(clause_of(Key),Annos),
+   		    pdt_member(n(Value),Annos)
+		), Map
+	),
+	pdt_multimap_to_list2(Map,Definitions2).
+
+    
+
 
     
 module_definition(FileAnos,Module,Exports):-
