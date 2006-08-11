@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+     03.08.2006 14:59:44                                                        
+
+     project    
+     description
+                   
+     Tobias rho                                                                
+     ====================================================================== -->
+<project name="project" default="PrologServerAndBundle">
+    <description>
+            description
+    </description>
+
+    <!-- ================================= 
+          target: default              
+         ================================= -->
+    <target name="PrologServerAndBundle" depends="depends" description="--> description">
+    	<copy file="${basedir}/src/org/cs3/pl/prolog/internal/socket/tester.pl" todir="${basedir}/../PrologServer"/>
+    	<copy file="${basedir}/src/org/cs3/pl/prolog/internal/socket/consult_server.pl" todir="${basedir}/../PrologServer/library/server"/>
+    	<copydir src="${basedir}/../pdt.runtime/library/pif" dest="${basedir}/../PrologServer/library/pif" />
+    	<copydir src="${basedir}/../pdt.runtime/library/common/org/cs3/pdt/util" dest="${basedir}/../PrologServer/library/common/org/cs3/pdt/util/" />
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/bin"
+        />
+    	<delete file="${basedir}/../BundleProlog/prolog.jar"/>
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.common/bin"
+    		update="true"
+        />
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.runtime/"
+    		includes="library/**"
+    		update="true"
+        />
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.runtime/bin/"
+    		update="true"
+        />
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.runtime.socket/bin/"
+    		update="true"
+        />
+
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: depends                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="depends">
+    </target>
+
+</project>
