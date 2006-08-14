@@ -48,8 +48,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
@@ -126,14 +124,7 @@ public abstract class PrologInterfaceFactory {
         return f;
     }
     
-    
-    private List bootstrapLibraries = new Vector(); 
-    private List getBootstrapLIbraries(){
-        return bootstrapLibraries;
-    }
-    
     protected String guessBootDirectory() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }
