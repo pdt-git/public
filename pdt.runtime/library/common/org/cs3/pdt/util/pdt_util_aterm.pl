@@ -50,9 +50,12 @@
 	pdt_subst/4,
 	pdt_aterm/1,
 	pdt_aterm_member/3,
-	pdt_functor/2,
+	pdt_functor/3,
+	pdt_arg/3,
 	pdt_operand/4
 ]).
+
+
 
 pdt_aterm(aterm(_,_)).
 
@@ -64,6 +67,24 @@ pdt_aterm_member(List,Path, Elm):-
     match_elms(List,Path,Elm).
 pdt_operand(Operator,List,Path, Elm):-
     match_operand(Operator,List,Path,Elm).
+
+
+
+
+
+%% pdt_functor(?Term,?Functor,?Arity)
+% An ATerm-transparent version of functor/3.
+% Note: this predicate can, like functor/3, be used to 
+% construct terms. To construct ATerms, use
+%
+%  pdt_aterm(T),pdt_functor(T,Name,Arity)
+pdt_functor(Var,Functor,Arity):-
+    pdt_functor(Var,Functor/Arity).
+
+pdt_functor(Var,Functor/Arity):-
+    var(Var),
+    !,
+    functor(Var,Functor,Arity).
 pdt_functor(Aterm,Functor/Arity):-
     pdt_aterm(Aterm),
     !,
@@ -72,6 +93,21 @@ pdt_functor(Aterm,Functor/Arity):-
 pdt_functor(Term,Functor/Arity):-
     functor(Term,Functor,Arity).
     
+
+%% pdt_arg(?ArgNum,+Term,?ArgVal)
+% An ATerm-transparent version of arg/3
+pdt_arg(N,Var,Val):-
+    var(Var),
+    !,
+    arg(N,Var,Val).
+pdt_arg(N,Aterm,Value):-
+    pdt_aterm(Aterm),
+    !,
+    pdt_term_annotation(Aterm,Term,_),
+    arg(N,Term,Value).
+pdt_arg(N,Term,Value):-
+    arg(N,Term,Value).
+
 
 match_elms(List,[1],Elm):-
     pdt_subterm(List,[1],Elm).
@@ -245,3 +281,21 @@ splice_args([ArgsH|ArgsT],
 			[AnotatedArgsH|AnotatedArgsT]):-
     splice(ArgsH,ArgAnotationsH,AnotatedArgsH),
     splice_args(ArgsT,ArgAnotationsT,AnotatedArgsT).
+    
+cs(cs(_T,_C,_S)).
+cs_subterm(cs(T,_C,_S),T).
+cs_condition(cs(_T,C,_S),C).
+cs_substitution(cs(_T,_C,S),S).
+
+pdt_conditional_substitution(In,CS,Out):-
+    cs(CS),
+    apply_cs(In,CS,Out).
+
+%apply_cs(In,CS,Out):-
+%    copy_term(CS,CSCopy),
+%    cs_match(In,CSCopy),
+%    cs_substitution(CSCopy,Subst),
+%    apply_cs(Subst,CS,Out)
+%    Condition,!,
+%    cs(Tmp,
+    
