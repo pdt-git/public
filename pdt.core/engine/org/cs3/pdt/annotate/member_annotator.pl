@@ -182,19 +182,27 @@ module_definition(FileAnos,Module,Exports):-
 	
 	
 has_head(':-'(Module:HeadTerm,_),_,Module,Functor,Arity):-
+    nonvar(HeadTerm),
+    nonvar(Module),
     !,
     functor(HeadTerm,Functor,Arity).
     
 has_head(':'(Module,':-'(HeadTerm,_)),_,Module,Functor,Arity):-
+    nonvar(HeadTerm),
+    nonvar(Module),
     !,
     functor(HeadTerm,Functor,Arity).
 has_head(':-'(HeadTerm,_),FileModule,FileModule,Functor,Arity):-
+    nonvar(HeadTerm),
     !,
     functor(HeadTerm,Functor,Arity).
 has_head(':'(Module,HeadTerm),_,Module,Functor,Arity):-
+    nonvar(HeadTerm),
+    nonvar(Module),
     !,   
     functor(HeadTerm,Functor,Arity).    
 has_head(HeadTerm,FileModule,FileModule,Functor,Arity):-
+    nonvar(HeadTerm),
     !,
     functor(HeadTerm,Functor,Arity).    
     

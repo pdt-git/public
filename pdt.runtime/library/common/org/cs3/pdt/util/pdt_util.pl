@@ -95,9 +95,11 @@ pdt "standard" procedure for resolving file specifications
 to absolute file names.
 
 */		
+pdt_file_spec(Var, Abs):-
+    var(Var),nonvar(Abs),!,
+    Var=Abs.
 pdt_file_spec(file_ref(Ref), Abs):-
 	fileref(Abs,Ref).
-
 pdt_file_spec(FileSpec, Abs):-
 	filespec(FileSpec, Abs).
 

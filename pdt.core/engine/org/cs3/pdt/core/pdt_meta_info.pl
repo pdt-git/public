@@ -58,13 +58,17 @@ some predicate definitions for queries frequently used by the pdt.core
 	pdt_render_term/4,
 	pdt_file_directive/2,
 	pdt_predicate_clause/3,
-	pdt_builtin_help/3,
-	pdt_builtin_help/4
+	pdt_parsed_help_html/3,
+	pdt_parsed_help_summary/4,	
+	pdt_help_summary/4,
+	pdt_help_html/3,
+	pdt_find_predicate/2
 ]).
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_dfs')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:-use_module(library('/org/cs3/pdt/util/pdt_util_comments')).
 :-use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :-use_module(library('/org/cs3/pdt/model/pdt_index')).
 :-use_module(library('/org/cs3/pdt/model/pdt_handle')).
@@ -283,9 +287,7 @@ unify_with_underscores([Var|Vars]):-
 	
 	
 pdt_builtin_help(Name,Arity,Summary):-
-		predicate(Name,Arity,Summary,_,_),
-		!.
-pdt_builtin_help(_Name,_Arity,'').
+		predicate(Name,Arity,Summary,_,_).
 		
 pdt_builtin_help(Name,Arity,Summary,Help):-
 	find_manual(ManPath),
@@ -294,22 +296,69 @@ pdt_builtin_help(Name,Arity,Summary,Help):-
 	!,
 	new_memory_file(MemFile),
 	open_memory_file(MemFile,write,MemStream),
+	write(MemStream,'<html><body><pre>'),
 	show_ranges([From-To],ManStream,MemStream),
+	write(MemStream,'</pre></body></html>'),
 	close(MemStream),
 	memory_file_to_atom(MemFile,Help),
 	free_memory_file(MemFile).
 pdt_builtin_help(_Name,_Arity,'', '').
 
-pdt_parsed_help(FileSpec,Module:Name/Arity,Summary,Help):-
+pdt_parsed_help_summary(Module:Name/Arity,FileSpec,Head,Summary):-
     pdt_index_load(predicate_definitions,IX),
     pdt_index_get(IX,Name,H),
-    pdt_file_spec(FileSpec,File),
     pdt_property(H,arity,Arity),
-    pdt_property(H,file,File),
+    pdt_property(H,file,FileRef),
+    pdt_file_spec(FileRef,File),
+    pdt_file_spec(FileSpec,File),
+    
     pdt_property(H,module,Module),
-    pdt_property(H,clauses,Clauses),
-    member(Clause,Clauses)%TODO: not ready!
-    .
+    pdt_property(H,comments,Comments),
+    member(Pos-Comment,Comments),
+    pdt_comment_summary(File,Pos,Comment,Head,Summary).
+
+pdt_parsed_help_html(Module:Name/Arity,FileSpec,HTML):-
+    pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H),
+    pdt_property(H,arity,Arity),
+    pdt_property(H,file,FileRef),
+    pdt_file_spec(FileRef,File),    
+    pdt_file_spec(FileSpec,File),
+    pdt_property(H,module,Module),
+    pdt_property(H,comments,Comments),
+    member(Pos-Comment,Comments),
+    pdt_comment_dom(File,Pos,Comment,Dom),
+	pdt_dom_html(File,Dom,HTML).
+
+pdt_help_summary(Pred,File,Head,Summary):-
+    pdt_parsed_help_summary(Pred,File,Head,Summary),
+    !.
+pdt_help_summary(Pred,'builtin','no head info',Summary):-    
+    (Pred=Name/Arity;Pred=_:Name/Arity),
+    pdt_builtin_help(Name,Arity,Summary),
+    !.
+pdt_help_summary(_,_,'','').
+
+pdt_help_html(Pred,File,HTML):-
+    pdt_parsed_help_html(Pred,File,HTML).
+pdt_help_html(Pred,builtin,HTML):-
+    (Pred=Name/Arity;Pred=_:Name/Arity),
+    pdt_builtin_help(Name,Arity,_,HTML).    
+
+pdt_find_predicate(Name,H):-    
+	pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H).
+
+pdt_find_predicate(Name/Arity,H):-    
+	pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H),
+    pdt_property(H,arity,Arity).
+
+pdt_find_predicate(Module:Name/Arity,H):-    
+	pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H),
+    pdt_property(H,arity,Arity),
+    pdt_property(H,module,Module).
 	
 %
 % the following predicates where copied from the library help.pl

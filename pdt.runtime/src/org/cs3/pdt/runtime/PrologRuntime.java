@@ -46,6 +46,7 @@ public class PrologRuntime {
 	public static final String PLUGIN_ID = "org.cs3.pdt.runtime";
 	public static final String LIB_PIF = "pdt.runtime.library.pif";
 	public static final String LIB_COMMON = "pdt.runtime.library.common";
+	public static final String LIB_SWIPL = "pdt.runtime.library.swipl";
 	
 	/**
      * The fully-qualified classname of a class that extends

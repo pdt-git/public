@@ -48,7 +48,11 @@
 		<library
              alias="library"
              id="pdt.runtime.library.common"
-             path="library/common/"/>             
+             path="library/common/"/>
+  <library
+        alias="library"
+        id="pdt.runtime.library.swipl"
+        path="library/swipl/"/>             
     </extension>
  
 </plugin>

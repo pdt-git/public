@@ -46,6 +46,7 @@
 :- module(pdt_util_comments,[
 	pdt_attach_comments/6,
 	pdt_comment_dom/4,
+	pdt_comment_summary/5,
 	pdt_dom_html/3
 	]).
 	
@@ -57,8 +58,8 @@
 
 %FIXME: Jan said this probably all subject to changes, but that the predicates
 % with relevance to the PDT will eventually become public api.
-%:- ensure_loaded(library('pldoc/test_wiki')). 
-%:- ensure_loaded(library('pldoc/html')).
+:- ensure_loaded(library('test_wiki')). 
+:- ensure_loaded(library('html')).
 	
 %attach_comments(+ATermIn,+InputStream,+CPositions, -RemainingPositions, -ATermOut)
 %
@@ -165,7 +166,7 @@ attach_arg_comments([ArgIn|ArgsIn],CommentsMap,Stream,Positions,[ArgOut|ArgsOut]
     pdt_attach_comments(ArgIn,CommentsMap,Stream,Positions,RemainingPositions,ArgOut),
     attach_arg_comments(ArgsIn,CommentsMap,Stream,RemainingPositions,ArgsOut).
     
-%% pdt_comment(+File, +Pos, +CommentString, -Dom)
+%% pdt_comment_dom(+File, +Pos, +CommentString, -Dom)
 % Parse raw comment data into a DOM
 %
 % This predicate is used as an interface to functionality from the pldoc package, which is still under 
@@ -178,6 +179,37 @@ attach_arg_comments([ArgIn|ArgsIn],CommentsMap,Stream,Positions,[ArgOut|ArgsOut]
 pdt_comment_dom(FileSpec,Pos,CommentString,Dom):-
     pdt_file_spec(FileSpec,File),
     process_comment(File, Pos-CommentString, Dom).
+
+
+%% pdt_comment_summary(+CommentString, -Summary)
+% Extract summary line from a source comment.
+%
+% This predicate is used as an interface to functionality from the pldoc package, which is still under 
+% development.
+% 
+% @param FileSpec 		The file containing the comment
+% @param Pos 			The comment position. this is a stream_position_data term.
+% @param CommentString	The raw comment string,
+% @param Summary			Will be unified with a summary String.
+pdt_comment_summary(FileSpec,Pos,String,Head,Summary):-    
+    pdt_file_spec(FileSpec,File),
+	stream_position_data(line_count, Pos, Line),
+	FilePos = File:Line,
+	is_structured_comment(String, Prefixes),
+	indented_lines(String, Prefixes, Lines),
+	process_modes(Lines, FilePos, Modes0, _Args0, Lines1),
+	copy_term(Modes0,Modes),
+	member(mode(Head,Args),Modes),
+	execute_elms(Args),	
+	summary(Lines1,SummaryString),
+	string_to_atom(SummaryString,Summary).
+
+
+execute_elms([]).
+execute_elms([Goal|Goals]):-
+	Goal,
+	execute_elms(Goals).
+
 
 %% pdt_dom_html(+File, +Dom, -Html)
 % Render a DOM term to HTML text.

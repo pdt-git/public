@@ -47,7 +47,9 @@
 :-pdt_annotator([interleaved,file],[]).
 
 interleaved_annotation_hook(_,OpModule,InTerm,OutTerm):-
-    pdt_strip_annotation(InTerm,':-'(op(Precedence,Type,Name)),(TopAnot,ArgAnot)),
+    pdt_strip_annotation(InTerm,Term,(TopAnot,ArgAnot)),
+    nonvar(Term),
+    Term=':-'(op(Precedence,Type,Name)),
     pdt_splice_annotation(':-'(op(Precedence,Type,Name)),([declares_op(op(Precedence,Type,Name))|TopAnot],ArgAnot),OutTerm),
     op(Precedence,Type,OpModule:Name).
 file_annotation_hook([File|_],_,InAnos,OutAnos):-
