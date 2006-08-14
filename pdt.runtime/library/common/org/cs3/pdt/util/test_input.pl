@@ -1,0 +1,1 @@
+aterm([A,B],t(aterm([B,C],A),aterm([C,D],A))).

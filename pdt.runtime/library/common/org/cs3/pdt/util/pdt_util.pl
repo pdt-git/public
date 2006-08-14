@@ -56,6 +56,7 @@
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
 
+:-module_transparent pdt_count/2.
 pdt_count(Goal,N):-
     nb_setval('pdt_util:pdt_count$counter',0),
     forall(Goal,
