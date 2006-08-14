@@ -229,7 +229,7 @@ public class SocketServerStartAndStopStrategy implements
 				}
 			}
 			// The process should be up now.
-			SocketClient c = new SocketClient((String) null, port);
+			SocketClient c = new SocketClient(pif.getOption(SocketPrologInterface.HOST), port);
 			long pid = c.getServerPid();
 			c.close();
 			String cmd = pipi.getOption(SocketPrologInterface.KILLCOMMAND)
@@ -268,7 +268,7 @@ public class SocketServerStartAndStopStrategy implements
 			}
 			
 			try {
-				SocketClient c = new SocketClient((String) null, port);
+				SocketClient c = new SocketClient(pif.getOption(SocketPrologInterface.HOST), port);
 				c.readUntil(SocketClient.GIVE_COMMAND);
 				c.writeln(SocketClient.SHUTDOWN);
 				c.readUntil(SocketClient.BYE);

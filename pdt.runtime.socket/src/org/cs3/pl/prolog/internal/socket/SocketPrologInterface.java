@@ -162,7 +162,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			}
 			if (socket == null) {
 				Debug.info("creating new ReusableSocket");
-				socket = new ReusableSocket((String) null, port);
+				socket = new ReusableSocket(host, port);
 			} else {
 				Debug.info("reusing old ReusableSocket");
 			}
@@ -191,7 +191,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			}
 			if (socket == null) {
 				Debug.info("creating new ReusableSocket");
-				socket = new ReusableSocket((String) null, port);
+				socket = new ReusableSocket(host, port);
 			} else {
 				Debug.info("reusing old ReusableSocket");
 			}
@@ -331,7 +331,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 */
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 		try {
-			return new InitSession(new SocketClient((String) null, port), this);
+			return new InitSession(new SocketClient(host, port), this);
 		} catch (Throwable e) {
 			handleException(e);
 			return null;
@@ -345,7 +345,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 */
 	protected PrologSession getShutdownSession() throws PrologInterfaceException {
 		try {
-			return new ShutdownSession(new SocketClient((String) null, port),
+			return new ShutdownSession(new SocketClient(host, port),
 					this);
 		} catch (Throwable e) {
 			handleException(e);
