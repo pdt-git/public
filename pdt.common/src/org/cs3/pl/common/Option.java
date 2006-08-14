@@ -97,4 +97,15 @@ public interface Option {
 	 * @return
 	 */
 	public boolean isVisible();
+	
+	/**
+	 * get the value of a custom property.
+	 * 
+	 * This method is intended to allow implementations to provide additional
+	 * information on how the option should be presented to the user. Keys and values
+	 * as well as their semantics depend on the respective application.  
+	 * @param key the property key. 
+	 * @return the value or null if the property is not set.
+	 */
+	public String getHint(String key);
 }

@@ -56,6 +56,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
 
+
 /**
  * most of the methods in this class include code that needs to run on the ui thread.
  * 
@@ -65,6 +66,27 @@ import org.eclipse.ui.part.FileEditorInput;
  *
  */
 public final class UIUtils {
+	
+	/**
+	 * hint for file option. if true, option values should be in the workspace
+	 */
+	public final static String IS_WORKSPACE_RESOURCE = "is_workspace_resource";
+	
+	/**
+	 * hint for file options. if set, only files/folders below the given container 
+	 * should be legal option values.
+	 */
+	public final static String ROOT_CONTAINER = "root_container";
+	
+	/**
+	 * hint for file options. if set to true, values should be interpreted
+	 * as relative paths.
+	 * This typically involves ROOT_CONTAINER, too.
+	 * 
+	 */
+	public final static String RELATIVE = "relative";
+	
+	
 	private abstract static class _SyncReturn implements Runnable {
 		public Object rval;
 

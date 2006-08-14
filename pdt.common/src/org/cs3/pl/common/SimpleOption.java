@@ -112,4 +112,8 @@ public class SimpleOption implements Option {
     public boolean isVisible() {
 		return true;
 	}
+    
+	public String getHint(String key) {
+		return null;
+	}
 }

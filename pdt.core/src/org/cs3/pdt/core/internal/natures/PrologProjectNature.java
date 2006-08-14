@@ -44,6 +44,7 @@
 package org.cs3.pdt.core.internal.natures;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,6 +57,7 @@ import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProviderEvent;
@@ -85,6 +87,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -407,6 +410,19 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 											PDTCore.PREF_SOURCE_PATH_DEFAULT,
 											"/");
 						}
+						@Override
+						public String getHint(String key) {
+							if(UIUtils.IS_WORKSPACE_RESOURCE.equals(key)){
+								return "true";
+							}
+							if(UIUtils.ROOT_CONTAINER.equals(key)){
+								return getProject().getFullPath().toPortableString();
+							}
+							if(UIUtils.RELATIVE.equals(key)){
+								return "true";
+							}
+							return null;
+						}
 					},
 					new SimpleOption(
 							PDTCore.PROP_SOURCE_INCLUSION_PATTERN,
@@ -419,6 +435,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Regular expression - matching files are NOT considered prolog source code, even if \n"
 									+ "they match the inclusion pattern above.",
 							Option.STRING, ""),
+					new SimpleOption(
+									PDTCore.PROP_ADDITIONAL_LIBRARIES,
+									"Additional Libraries",
+									"A list of directories that should be included in the file search path.",
+									Option.DIRS, ""),							
 					new SimpleOption(
 							PDTCore.PROP_PARSE_COMMENTS,
 							"Parse Comments",
@@ -644,6 +665,22 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 						"library", Util.prologFileName(f)));
 			}
 		}
+		String string = getPreferenceValue(PDTCore.PROP_ADDITIONAL_LIBRARIES, "");
+		String[] strings = Util.split(string, System.getProperty("path.separator"));
+		for (int i = 0; i < strings.length; i++) {
+			File f = new Path(strings[i]).toFile();
+			String key=null;
+			try {
+				key = f.getCanonicalPath();
+			} catch (IOException e) {
+			
+				e.printStackTrace();
+			}
+			libraries.put(key, new DefaultPrologLibrary(key, new String[0],
+					"library", Util.prologFileName(f)));
+		}
+		
+		
 
 	}
 
