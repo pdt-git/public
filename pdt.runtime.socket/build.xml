@@ -29,6 +29,11 @@
     		update="true"
         />
     	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.common/src"
+    		update="true"
+        />
+
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
     		basedir="${basedir}/../pdt.runtime/"
     		includes="library/**"
     		update="true"
@@ -37,10 +42,21 @@
     		basedir="${basedir}/../pdt.runtime/bin/"
     		update="true"
         />
+    	
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.runtime/src/"
+    		update="true"
+        />
+    	
     	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
     		basedir="${basedir}/../pdt.runtime.socket/bin/"
     		update="true"
         />
+    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    		basedir="${basedir}/../pdt.runtime.socket/src/"
+    		update="true"
+        />
+
 
     </target>
 
