@@ -90,7 +90,7 @@ pdt_lookup_aterm(FileSpec,N,ATerm):-
   
 lookup_aterm(Key,N,Subterm,Member):-
     pdt_file_record(Key,Member),
-    pdt_term_annotation(Member,Subterm,Annos),
+    pdt_term_annotation(Member,_,Annos),
     pdt_member(n(FirstN),Annos),
     pdt_member(last_n(LastN),Annos),
 	(	% term is right off
@@ -115,7 +115,7 @@ lookup_subterm(Container,N,ATerm):-
 	Left < N,
 	N =< Right,
 	pdt_subterm(Container,[_],SubContainer),
-	lookup_aterm_X(SubContainer,N,ATerm).
+	lookup_subterm(SubContainer,N,ATerm).
     
 pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 	pdt_file_record_key(term,FileSpec,Key),
