@@ -45,6 +45,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_cs')).
 
 
 :- pdt_annotator([term],[]).
@@ -56,26 +57,23 @@ term_annotation_hook(_,_,_,InTerm,OutTerm):-
 	propagate_variable_names(InTerm,Variables,OutTerm).
 
     
-propagate_variable_names(In,Variables,Out):-
 
-	%% find subterms that are variables
-	findall(occurance(Path,Occurance,Name,TVs),
-		(	pdt_subterm(In,Path,Occurance),
-			pdt_term_annotation(Occurance,Var,_),
+	
+
+propagate_variable_names(In,Variables,Out):-
+	pdt_cs(CS),
+	pdt_cs_subterm(CS,T),
+	pdt_cs_carrier(CS,Variables),
+	pdt_cs_condition(CS,
+		(	pdt_term_annotation(T,Var,Annos),
+			var(Var),
 			member(Name=XVar,Variables),
 			Var==XVar,
-			term_variables(In,TVs)
-		),
-		Occurances
+			pdt_term_annotation(TT,Var,[variable_name(Name)|Annos])
+		)
 	),
-	%% add variable names
-	add_varname_annos(In,Occurances,Out).
+	pdt_cs_substitution(CS,TT),
+	pdt_cs_apply(In,CS,Out).
 
-add_varname_annos(In,[],In).
-add_varname_annos(In,[occurance(Path,InOcc,Name,TVs)|Occs],Out):-
-    term_variables(In,TVs),
-    pdt_term_annotation(InOcc,Term,Annotation),
-    pdt_term_annotation(OutOcc,Term,[variable_name(Name)|Annotation]),
-    pdt_subst(In,Path,OutOcc,Next),
-    add_varname_annos(Next,Occs,Out).
+
 

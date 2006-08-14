@@ -45,6 +45,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_cs')).
 
 
 :- pdt_annotator([term],[library('/org/cs3/pdt/annotate/variable_name_annotator')]).
@@ -61,28 +62,23 @@ term_annotation_hook(_,_,_,InTerm,OutTerm):-
 
     
 check_singletons(In,Singletons,Out):-
-
-	%% find ill-formed elements in the exports list
-	findall(singleton(Path,Singleton,TVs),
-		(	pdt_subterm(In,Path,Singleton),
-			pdt_term_annotation(Singleton,Var,_),
-			member(Name=Value,Singletons),
-			Var==Value,
+	pdt_cs(CS),
+	pdt_cs_subterm(CS,T),
+	pdt_cs_carrier(CS,Singletons),
+	pdt_cs_condition(CS,
+		(	pdt_term_annotation(T,Var,Annos),
+			var(Var),
+			member(Name=XVar,Singletons),
+			Var==XVar,
 			\+atom_concat('_',_,Name),
-			term_variables(In,TVs)
-		),
-		Occurances
+			pdt_term_annotation(TT,Var,[problem(warning(singleton(Name)))|Annos])
+		)
 	),
-	add_singleton_annos(In,Occurances,Out).
+	pdt_cs_substitution(CS,TT),
+	pdt_cs_apply(In,CS,Out).
 
-add_singleton_annos(In,[],In).
-add_singleton_annos(In,[singleton(Path,InExport,TVs)|IFEs],Out):-
-    term_variables(In,TVs),
-    pdt_term_annotation(InExport,Term,Annotation),
-    pdt_member(variable_name(Name),Annotation),
-    pdt_term_annotation(OutExport,Term,[problem(warning(singleton(Name)))|Annotation]),
-    pdt_subst(In,Path,OutExport,Next),
-    add_singleton_annos(Next,IFEs,Out).
+
+
 
 check_no_singletons(In,[],In).
 check_no_singletons(In,[Variable|Variables],Out):-
@@ -91,27 +87,24 @@ check_no_singletons(In,[Variable|Variables],Out):-
 
 check_no_singleton(In,Name=Variable,Out):-
     atom_concat('_',_,Name),
+    pdt_count((pdt_subterm(In,_,ST),pdt_term_annotation(ST,Term,_),Term==Variable),Count),
+    writeln(Count),
+    Count > 1, 
     !,
-	findall(no_singleton(Path,Singleton,TVs),
-		(	pdt_subterm(In,Path,Singleton),
-			pdt_term_annotation(Singleton,Var,_),
-			Variable==Var,
-			term_variables(In,TVs)
-		),
-		Occurances
+    
+    pdt_cs(CS),
+	pdt_cs_subterm(CS,T),
+	pdt_cs_carrier(CS,Variable),
+	pdt_cs_condition(CS,
+		(	pdt_term_annotation(T,Var,Annos),
+			var(Var),			
+			Var==Variable,
+			pdt_term_annotation(TT,Var,[problem(warning(no_singleton))|Annos])
+		)
 	),
-	length(Occurances,Count),
-	(	Count>1
-	->	add_no_singleton_annos(In,Occurances,Out)
-	;	In=Out
-	).
+	pdt_cs_substitution(CS,TT),
+	pdt_cs_apply(In,CS,Out).
 check_no_singleton(In,_,In).
 
-add_no_singleton_annos(In,[],In).
-add_no_singleton_annos(In,[no_singleton(Path,InExport,TVs)|IFEs],Out):-
-    term_variables(In,TVs),
-    pdt_term_annotation(InExport,Term,Annotation),
-    pdt_term_annotation(OutExport,Term,[problem(warning(no_singleton))|Annotation]),
-    pdt_subst(In,Path,OutExport,Next),
-    add_no_singleton_annos(Next,IFEs,Out).
+
     

@@ -131,7 +131,7 @@ sub_positions(list_position(_,_,Elms,Tail),[SubHead,SubTail]):-
 
     
 %wrap_term(+Term,+Positions,-ATerm)
-wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(LastN),position(From-To),functor_type(FType)|_],SubTerm),LastN):-
+wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(LastN),position(From-To),functor_type(FType)],SubTerm),LastN):-
     compound(Term),
     !,
     Term=..[Functor|Args],
@@ -143,10 +143,10 @@ wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(LastN),p
     SubTerm=..[Functor|WrapedArgs],
 %	NextN is N+1,    
     wrap_args(Args,SubPositions,FileRef,N,WrapedArgs,LastN).
-wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(N),position(From-To)|_],Term),N):-
+wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(N),position(From-To)],Term),N):-
     \+ compound(Term),
     top_position(Positions, From,To),!.
-wrap_term(Term,_,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(N),implicit_nil|_],Term),N):-
+wrap_term(Term,_,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(N),implicit_nil],Term),N):-
     \+ compound(Term).    
   
 wrap_args([],[],_,N,[],N).

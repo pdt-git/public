@@ -146,7 +146,6 @@ process_dependency(Module,Dependency):-
 %    dependency has to be executed before module
 	pdt_add_dependency(annotator_process_order,Module,DependencyModule).
 
-
 add_missing_hooks2(Anotator):-
     add_missing_hook(Anotator:cleanup_hook/2),    
     add_missing_hook(Anotator:term_annotation_hook/5),
@@ -405,8 +404,9 @@ ensure_annotated([FileSpec|Stack]):-
     pdt_file_spec(FileSpec,Abs),
     gen_op_module(Abs,OpModule),
     clear_ops(OpModule),
-    retractall(file_annotation(Abs,_,_,_)),
-    retractall(file_error(Abs,_,_)),
+    
+    retractall(file_annotation(Abs,_)),
+    retractall(file_error(Abs,_)),
 	update_timestamp(Abs),
     copy_file_to_memfile(FileSpec,MemFile),
     memory_file_to_atom(MemFile,MemFileAtom),
@@ -470,7 +470,8 @@ read_terms_rf_done(Term):-
     nonvar(Term),Term==end_of_file.
 
 
-do_process_term_rf(_Options,_MemFileAtom,_IAs,FileStack,N,end_of_file,_Error,N):-
+do_process_term_rf(_Options,_MemFileAtom,_IAs,FileStack,N,Term,_Error,N):-
+	nonvar(Term),Term==end_of_file,
 	record_term(FileStack,end_of_file),
 	!.	
 do_process_term_rf(_Options,_MemFileAtom,_IAs,FileStack,N,_Term,Error,N):-
