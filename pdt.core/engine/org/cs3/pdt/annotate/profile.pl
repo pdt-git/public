@@ -2,6 +2,11 @@ lala:-
     findall(A, current_file_annotation(A,_),Files),
     profile(build(Files)).
 
+lele:-
+    findall(A, current_file_annotation(A,_),Files),
+    build(Files).
+
+
 build([]).
 build([File|Files]):-
 	forget_file_annotation(File),
@@ -13,4 +18,4 @@ lulu:-
 		build(
 	['z:/eclipse/runtime-new_configuration/work/tester/pefs.pl']
 		)
-	).	
+	). 	 

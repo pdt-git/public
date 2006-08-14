@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<title>/staff/jan/src/pl/packages/pldoc/pldoc.pl</title>
+<link rel="stylesheet" type="text/css" href="pldoc.css">
+</head>
+<body>
+
+<h1 class="module">Process source documentation</h1>
+
+The pldoc module processes structured comments in Prolog source files into
+well formatted HTML documents.
+
+<dl class="tags">
+<dt class="tag">author<dd>Jan Wielemaker
+<dt class="tag">license<dd>GPL
+</dl>
+
+<dl>
+<dt class="preddef"><b class="pred">read_comments</b><var class="arglist">(+In:stream, -Term, -Comments:list)</var> is <b class="det">det</b><br>
+<dd class="defbody">Read next term and its comments from <var>In</var>. If a syntax error is
+encountered, it is printed and reading continues to the next
+term.
+<dt class="preddef"><b class="pred">is_structured_comment</b><var class="arglist">(+Comment:string, -Prefixes:list(codes))</var> is <b class="det">semidet</b><br>
+<dd class="defbody">True if <var>Comment</var> is a structured comment that should use <var>Prefixes</var>
+to extract the plain text using <a href="/predicate/indented_lines/3">indented_lines/3</a>.
+<dt class="preddef"><b class="pred">doc_file_name</b><var class="arglist">(+Source:atom, -Doc:atom, +Options:list)</var> is <b class="det">det</b><br>
+<dd class="defbody"><var>Doc</var> is the name of the file documenting <var>Source</var>.
+
+<dl class="tags">
+<dt class="tag">error<dd>permission_error(overwrite, <var>Source</var>)
+</dl>
+
+</dl>
+
+</body>
+</html>

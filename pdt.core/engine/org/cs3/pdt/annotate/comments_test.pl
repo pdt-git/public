@@ -3,20 +3,35 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
 find_doc(Name,File,Pos,String):-
     % fetch comment raw data for some named predicate
-	pdt_index_load(predicate_definitions,IX),
-    pdt_index_get(IX,Name,H),
+	find_pred(Name,H),
     pdt_property(H,comments,Comments),
     member(Pos-String,Comments),   
     
     % fetch name of the file defining the predicate
     pdt_property(H,file,File).
-    
+
+find_pred(Name,H):-    
+	pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H).
+
+find_pred(Name/Arity,H):-    
+	pdt_index_load(predicate_definitions,IX),
+    pdt_index_get(IX,Name,H),
+    pdt_property(H,arity,Arity).
 
 
-doc_test(Name,Html):-
+name_dom(Name,Dom):-
+	find_doc(Name,File,Pos,String),
+    pdt_comment_dom(File,Pos,String,Dom).
+
+doc_test(Name):-
     find_doc(Name,File,Pos,String),
     pdt_comment_dom(File,Pos,String,Dom),
-	pdt_dom_html(File,Dom,Html).
+    pdt_comment_summary(File,Pos,String,Modes,Summary),
+    writeln(modes(Modes)),
+    writeln(summary(Summary)),
+	pdt_dom_html(File,Dom,Html),
+	writeln(Html).
 
 %% aja(+A,-B) 
 % 

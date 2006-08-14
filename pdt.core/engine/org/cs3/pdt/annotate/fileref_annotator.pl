@@ -62,30 +62,33 @@ file_annotation_hook([File|_],_,InAnos,[references_files(Refs)|InAnos]):-
 
 
 file_refs(Stack,InTerm,OutTerm):-
-    pdt_strip_annotation(InTerm,Term,(Head,Tail)),
-    find_file_refs(Term,Refs),   
+    pdt_strip_annotation(InTerm,:-Term,(Head,Tail)),
+    (	nonvar(Term)
+    ->	find_file_refs(Term,Refs)
+    ;	Refs=[]
+    ),
     resolve_file_Refs(Refs,ResRefs),
     annotate_refered_files(Stack,ResRefs),
-    pdt_splice_annotation(Term,([file_refs(ResRefs)|Head],Tail),OutTerm).
+    pdt_splice_annotation(:-Term,([file_refs(ResRefs)|Head],Tail),OutTerm).
 
     
-find_file_refs(:-[H,T],[H,T]).
-find_file_refs(:-load_files([H,T],_),[H,T]).
-find_file_refs(:-load_files(H,_),[H]):-
+find_file_refs([H,T],[H,T]).
+find_file_refs(load_files([H,T],_),[H,T]).
+find_file_refs(load_files(H,_),[H]):-
     \+ is_list(H).
-find_file_refs(:-consult([H,T]),[H,T]).
-find_file_refs(:-consult(H),[H]):-
+find_file_refs(consult([H,T]),[H,T]).
+find_file_refs(consult(H),[H]):-
     \+ is_list(H).
-find_file_refs(:-ensure_loaded([H,T]),[H,T]).
-find_file_refs(:-ensure_loaded(H),[H]):-
+find_file_refs(ensure_loaded([H,T]),[H,T]).
+find_file_refs(ensure_loaded(H),[H]):-
     \+ is_list(H).
-find_file_refs(:-include(H),[H]):-
+find_file_refs(include(H),[H]):-
     \+ is_list(H).    
-find_file_refs(:-use_module([H,T]),[H,T]).
-find_file_refs(:-use_module(H),[H]):-
+find_file_refs(use_module([H,T]),[H,T]).
+find_file_refs(use_module(H),[H]):-
     \+ is_list(H).
-find_file_refs(:-use_module([H,T],_),[H,T]).
-find_file_refs(:-use_module(H),_,[H]):-
+find_file_refs(use_module([H,T],_),[H,T]).
+find_file_refs(use_module(H),_,[H]):-
     \+ is_list(H).
 
 resolve_file_Refs([],[]).

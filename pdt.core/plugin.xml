@@ -127,6 +127,7 @@
            path="engine">
         <dependency library="pdt.runtime.library.pif"/>
         <dependency library="pdt.runtime.library.common"/>
+        <dependency library="pdt.runtime.library.swipl"/>
      </library>
   </extension>
   <extension

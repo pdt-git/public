@@ -88,7 +88,6 @@ check_no_singletons(In,[Variable|Variables],Out):-
 check_no_singleton(In,Name=Variable,Out):-
     atom_concat('_',_,Name),
     pdt_count((pdt_subterm(In,_,ST),pdt_term_annotation(ST,Term,_),Term==Variable),Count),
-    writeln(Count),
     Count > 1, 
     !,
     
