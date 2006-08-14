@@ -1,5 +1,7 @@
-:- ensure_loaded(library(test_wiki)).
-find_doc(Name,File,DOM):-
+:- use_module(library('org/cs3/pdt/model/pdt_index')).
+:- use_module(library('org/cs3/pdt/model/pdt_handle')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
+find_doc(Name,File,Pos,String):-
     % fetch comment raw data for some named predicate
 	pdt_index_load(predicate_definitions,IX),
     pdt_index_get(IX,Name,H),
@@ -7,21 +9,14 @@ find_doc(Name,File,DOM):-
     member(Pos-String,Comments),   
     
     % fetch name of the file defining the predicate
-    pdt_property(H,file,File),
+    pdt_property(H,file,File).
     
-    % create DOM
-    process_comment(File, Pos-String, DOM).
-    
-dom2html(File,Dom,HTML):-
-    new_memory_file(MF),
-    open_memory_file(MF,write,Out),
-    doc_write_html(Out, File, Dom),
-    close(Out),
-    memory_file_to_atom(MF,HTML).    
 
-doc_test(Name,HTML):-
-    find_doc(Name,File,Dom),
-    dom2html(File,Dom,HTML).
+
+doc_test(Name,Html):-
+    find_doc(Name,File,Pos,String),
+    pdt_comment_dom(File,Pos,String,Dom),
+	pdt_dom_html(File,Dom,Html).
 
 %% aja(+A,-B) 
 % 

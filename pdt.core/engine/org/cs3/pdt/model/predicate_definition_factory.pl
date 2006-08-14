@@ -52,6 +52,7 @@
 :- use_module(library('org/cs3/pdt/model/pdt_handle')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 
 %This module registers itself as a property factory for handles of type 'predicate_definition'. See pdt_handle.

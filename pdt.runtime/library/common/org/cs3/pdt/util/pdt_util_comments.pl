@@ -39,14 +39,26 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+/* maybe this should be moved to the core module? Not sure.
+*/
+
 :- module(pdt_util_comments,[
-	pdt_attach_comments/6
+	pdt_attach_comments/6,
+	pdt_comment_dom/4,
+	pdt_dom_html/3
 	]).
 	
-:- use_module(pdt_util).
-:- use_module(pdt_util_aterm).
-:- use_module(pdt_util_map).
-:- use_module(pdt_util_term_position).
+:- use_module(library('/org/cs3/pdt/util/pdt_util')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_term_position')).
+
+
+%FIXME: Jan said this probably all subject to changes, but that the predicates
+% with relevance to the PDT will eventually become public api.
+%:- ensure_loaded(library('pldoc/test_wiki')). 
+%:- ensure_loaded(library('pldoc/html')).
 	
 %attach_comments(+ATermIn,+InputStream,+CPositions, -RemainingPositions, -ATermOut)
 %
@@ -67,7 +79,8 @@
 %ATermOut will be unified with an annotated term that results from ATermIn with additional comments_left and
 %comments_right annotations. The values of these annotations are lists of character offsets of comments.
 
-pdt_attach_comments(ATerm,_,_,[],[],ATerm).
+pdt_attach_comments(ATerm,_,_,[],[],ATerm):-
+    !.
 pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATermOut):-
 	% read character start and end offsets of the term from the term annotations.	
 	pdt_term_annotation(ATermIn,_,AnnosIn),
@@ -77,7 +90,6 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 	% Left positions are left of the term, mid within abd right positions are at the right of the term.
 	pdt_chop_before(Start,CPositions,LeftPositions,TmpPositions),
 	pdt_chop_before(End,TmpPositions,MidPositions,RightPositions),
-	
 	
 	% left is easy: all comments that were not claimed by any preceeding term are attached
 	% to this term.
@@ -145,8 +157,40 @@ skip_comment(Stream,CommentsMap):-
     string_length(Comment,Len),
     seek(Stream,Len,current,Len).
     
-attach_arg_comments([],_,_,_,[]).
-attach_arg_comments(Args,_,_,[],Args).
+attach_arg_comments([],_,_,_,[]):-
+	!.
+attach_arg_comments(Args,_,_,[],Args):-
+    !.
 attach_arg_comments([ArgIn|ArgsIn],CommentsMap,Stream,Positions,[ArgOut|ArgsOut]):-
     pdt_attach_comments(ArgIn,CommentsMap,Stream,Positions,RemainingPositions,ArgOut),
     attach_arg_comments(ArgsIn,CommentsMap,Stream,RemainingPositions,ArgsOut).
+    
+%% pdt_comment(+File, +Pos, +CommentString, -Dom)
+% Parse raw comment data into a DOM
+%
+% This predicate is used as an interface to functionality from the pldoc package, which is still under 
+% development.
+% 
+% @param FileSpec 		The file containing the comment
+% @param Pos 			The comment position. this is a stream_position_data term.
+% @param CommentString	The raw comment string,
+% @param Dom			Will be unified with a DOM term that can for instance be used with pdt_dom_html/3.
+pdt_comment_dom(FileSpec,Pos,CommentString,Dom):-
+    pdt_file_spec(FileSpec,File),
+    process_comment(File, Pos-CommentString, Dom).
+
+%% pdt_dom_html(+File, +Dom, -Html)
+% Render a DOM term to HTML text.
+%
+% This predicate is used as an interface to functionality from the the pldoc package, which is still under 
+% development.
+% 
+% @param FileSpec 		The file containing the comment.
+% @param Dom			A DOM term as created by pdt_comment_dom/4.    
+% @param Html			Will be unified with an atom containing HTML data.
+pdt_dom_html(File,Dom,HTML):-
+    new_memory_file(MF),
+    open_memory_file(MF,write,Out),
+    doc_write_html(Out, File, Dom),
+    close(Out),
+    memory_file_to_atom(MF,HTML).        
