@@ -98,7 +98,7 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 			} else {
 				project = null;
 			}
-			if (project != null) {
+			if (project != null&&project.isOpen()) {
 
 				if (project.hasNature(PDTCore.NATURE_ID)) {
 					plProject = (IPrologProject) project

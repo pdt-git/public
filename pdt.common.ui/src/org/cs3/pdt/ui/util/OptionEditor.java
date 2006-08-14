@@ -183,6 +183,9 @@ abstract public class OptionEditor implements PropertyEditor {
             return new DirectoryEditor(parent,o);        
         case Option.FILE:
             return new FileEditor(parent,o);
+//        case Option.FILES:
+        case Option.DIRS:
+            return new FileListEditorAdapter(parent,o);            
         case Option.FLAG:
             return new FlagEditor(parent,o);
         default:
