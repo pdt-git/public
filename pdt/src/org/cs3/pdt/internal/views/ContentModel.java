@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.internal.natures.MetadataSubscription;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
@@ -19,7 +17,7 @@ import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
-import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
@@ -27,7 +25,7 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 public class ContentModel extends DefaultAsyncPrologSessionListener implements
-		PrologFileContentModel, LifeCycleHook {
+		PrologFileContentModel, LifeCycleHook2 {
 
 	private static final String HOOK_ID = "PrologFileContentModelHook";
 
@@ -104,7 +102,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		if (getSession().isPending(parentElement)) {
 			return;
 		}
-		
+
 		if (root == parentElement) {
 			if (getSession().isPending(directiveTicket)
 					|| getSession().isPending(fileAnnosTicket)) {
@@ -378,10 +376,11 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#reset()
 	 */
 	public void reset() throws PrologInterfaceException {
-		if (pif != null) {
-			AsyncPrologSession session = getSession();
+		if (session != null) {
 			session.abort();
+			
 		}
+
 		synchronized (cache) {
 			cache.clear();
 
@@ -510,6 +509,18 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		}
 		reset();
 
+	}
+
+	public void onError(PrologInterface pif) {
+		if (this.session != null) {
+			session.removeBatchListener(this);
+			session = null;
+		}
+		try {
+			reset();
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
 	}
 
 	public void onInit(PrologInterface pif, PrologSession initSession)
