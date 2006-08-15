@@ -84,17 +84,19 @@ call_unobserve_hook(_,_,_).
 pif_observe(Thread,Subject):-
    term_to_atom(Subject,Key),
    pif_observe(Thread,Subject,Key). 
-/**
- * pif_observe(+Thread,+Subject)
- *
- * @arg Thread the Thread that is running dispatch/3
- * @arg Subject the subject to observe. 
- *		This term is unified with the subject given as second argument to notify/2.
- * @arg Key should be an atom. During notification, if the Subject terms was successfully unified,
- *		the key is also passed to the observer. The idea of this is to help observers calling from
- *		Java, or otherwise lacking the concept of unification, to recognize the Subject they subscribed 
- *		for. 
- */
+%% pif_observe(+Thread,+Subject).
+%  Add an observer to a subject.
+% 
+%  
+% 
+%  @param Thread the observer, i.e. a thread that is running dispatch/3
+%  @param Subject the subject to observe. 
+% 		This term is unified with the subject given as second argument to notify/2.
+%  @param Key should be an atom. During notification, if the Subject terms was successfully unified,
+% 		the key is also passed to the observer. The idea of this is to help observers calling from
+% 		Java, or otherwise lacking the concept of unification, to recognize the Subject they subscribed 
+% 		for. 
+% 
 pif_observe(Thread,Subject,Key) :-
   recorded(pif_observer,observation(Thread,OtherSubject,Key)),
   OtherSubject =@= Subject,
@@ -106,11 +108,13 @@ pif_observe(Thread,Subject,Key) :-
   recordz(pif_observer,observation(Thread,Subject,Key)).
 
 
-/**
- * pif_unobserve(+Thread,+Subject) 
- *
- * @arg Thread associated thread
- */
+
+%%  pif_unobserve(+Thread,+Subject) 
+%  Remove an observer from a subject.
+% 
+%  @param Thread the observer thread to remove.
+%  @param Subject the subject from which to remove the observer.
+% 
 
 pif_unobserve(Thread,Subject) :-
   recorded(pif_observer,observation(Thread,OtherSubject,Key),Ref),
@@ -119,13 +123,11 @@ pif_unobserve(Thread,Subject) :-
   %sync:unregister_observer(Subject). 
   call_unobserve_hook(Thread,Subject,Key).
 
-/**
- * pif_notify(+Subject,+Event)
- *
- * Notify all active observers.
- * If observer's thread is stopped
- * it will be removed.
- */
+%% pif_notify(+Subject,+Event)
+% Notify all active observers.
+% If observer's thread is stopped
+% it will be removed.
+% 
 pif_notify(Subject,Event) :-
    forall(
     	( 
@@ -140,11 +142,13 @@ pif_notify(Subject,Event) :-
     	)
     ).   
 
-/*
- this predicate is intended to be called by the PrologEventDispatcher class.
- It produces solutions for every recieved event.
- If it recieves an event for the subject '$stop' it will cut and fail.
- */
+%% pif_dispatch(-Subject,-Key,-Event)
+% Recieve events.
+% This predicate is intended to be called by observer threads. 
+% It produces solutions for every recieved event, i.e. every time
+% pif_notify/2 is called on a subject the observer thread is subscribed for.
+% If it recieves an event for the subject '$stop' it will cut and fail.
+
  
  pif_dispatch(Subject,Key,Event):-
      	thread_self(Me),
