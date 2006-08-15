@@ -49,6 +49,7 @@
 % Author: Lukas
 % Date: 23.10.2004
 :- use_module(library(socket)).
+:- use_module(library(memfile)).
 
 :- dynamic zombie_symbol/1.
 :- dynamic offset/2.
