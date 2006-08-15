@@ -50,6 +50,7 @@
 
 :- use_module(library('org/cs3/pdt/model/pdt_index')).
 :- use_module(library('org/cs3/pdt/model/pdt_handle')).
+:- use_module(library('org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
@@ -69,7 +70,13 @@ lookup_handle(handle(id(File,Module:Name/Arity), predicate_definition,Cache)):-
 %
 get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),clauses,Value):-
     pdt_file_record_key(term,File,Key),
-	filter_clauses(Key,Module:Name/Arity,Clauses),
+    findall(Clause,
+    	(	pdt_file_record(Key,Clause),
+    		pdt_term_annotation(Clause,_,Annos),
+    		pdt_member(clause_of(Module:Name/Arity),Annos)
+    	),
+    	Clauses
+    ),
 	Value=..[array|Clauses].
 
 
@@ -95,14 +102,6 @@ collect_comments(CommentsMap,[_|Terms],Sig,Comments):-
     
 
 		
-filter_clauses([],_,[]).
-filter_clauses([Term|Terms],Sig,[Term|Clauses]):-
-    Term=aterm(Anns,_),
-    pdt_memberchk(clause_of(Sig),Anns),
-    !,
-    filter_clauses(Terms,Sig,Clauses).
-filter_clauses([_|Terms],Sig,Clauses):-
-    filter_clauses(Terms,Sig,Clauses).
 
 
 comment_texts(_CommentsMap,[],[]).

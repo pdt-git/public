@@ -301,14 +301,14 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 						+ "exported(Exported)," + "dynamic(Dynamic),"
 						+ "multifile(Multifile),"
 						+ "transparent(Transparent)]),"
-						+ "pdt_builtin_help(Name,Arity,Summary)";
+						+ "pdt_help_summary(Module:Name/Arity,_,_,Summary)";
 			} else {
 				query = "pdt_predicate_completion(" + contextModule + ",'"
 						+ prefix + "',Name,[module(Module)," + "arity(Arity),"
 						+ "exported(Exported)," + "dynamic(Dynamic),"
 						+ "multifile(Multifile),"
-						+ "transparent(Transparent)])"
-						+ "pdt_builtin_help(Name,Arity,Summary)";
+						+ "transparent(Transparent)]),"
+						+ "pdt_help_summary(Module:Name/Arity,_,_,Summary)";
 			}
 
 			List l = session.queryAll(query);

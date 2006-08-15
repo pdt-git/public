@@ -30,7 +30,8 @@
 */
 
 :- module(pldoc_html,
-	  [ doc_write_html/3		% +Stream, +Title, +Term
+	  [ doc_write_html/3,		% +Stream, +Title, +Term
+	    doc_write_html/2
 	  ]).
 :- use_module(modes).
 :- use_module(library('http/html_write')).
@@ -45,6 +46,10 @@ doc_write_html(Out, Title, Doc) :-
 	page_dom(Title, Doc, DOM),
 	phrase(html(DOM), Tokens),
 	print_html_head(Out),
+	print_html(Out, Tokens).
+
+doc_write_html(Out, DOM) :-
+	phrase(html(DOM), Tokens),
 	print_html(Out, Tokens).
 
 page_dom(Title, Body, DOM) :-

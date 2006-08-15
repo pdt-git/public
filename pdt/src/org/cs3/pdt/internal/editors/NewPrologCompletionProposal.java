@@ -42,6 +42,8 @@
 
 package org.cs3.pdt.internal.editors;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Map;
 
 import org.cs3.pdt.PDT;
@@ -54,7 +56,11 @@ import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -67,6 +73,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.framework.Bundle;
 
 
 
@@ -81,6 +88,7 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 	private String postfix;
 	private Image image;
 	private IContextInformation contextInfo;
+	private URL fStyleSheetURL;
 	
 	private static final Image publicImage = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
     private static final Image hiddenImage = ImageRepository.getImage(ImageRepository.PE_HIDDEN);
@@ -158,7 +166,7 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 		Map map = null;
 		try {
 			s= pif.getSession();	
-			map = s.queryOnce("pdt_builtin_help("+predicate.getName()+","+predicate.getArity()+",_,Help)");
+			map = s.queryOnce("pdt_help_html("+predicate.getModule()+":"+predicate.getName()+"/"+predicate.getArity()+",_,Help)");
 			
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
@@ -166,10 +174,34 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 					.getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
 			return null;
 		}
+		String info=(String) map.get("Help");
+		if (info != null && info.length() > 0) {
+			StringBuffer buffer= new StringBuffer();
+			HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
+			buffer.append(info);
+			HTMLPrinter.addPageEpilog(buffer);
+			info= buffer.toString();
+		}
 		monitor.done();
-		return map.get("Help");
+		return info;
 	}
 
+	protected URL getStyleSheetURL() {
+		if (fStyleSheetURL == null) {
+
+			Bundle bundle= Platform.getBundle(PDT.PLUGIN_ID);
+			fStyleSheetURL= bundle.getEntry("/css/pldoc.css"); //$NON-NLS-1$
+			if (fStyleSheetURL != null) {
+				try {
+					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
+				} catch (IOException ex) {
+					JavaPlugin.log(ex);
+				}
+			}
+		}
+		return fStyleSheetURL;
+	}
+	
 	public IInformationControlCreator getInformationControlCreator() {
 
 		return this;
