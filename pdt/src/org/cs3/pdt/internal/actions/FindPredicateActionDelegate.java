@@ -178,6 +178,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				query = "pdt_find_first_clause_position("+contextModule+","+goal.getName()+"/"+goal.getArity()+",File,From-To)";
 			}
 			Map map = s.queryOnce(query);
+			if(map==null){
+				return null;
+			}
 			String fileName = (String) map.get("File");
 			loc=new SourceLocation(fileName,false,false);
 			loc.offset=Integer.parseInt((String)map.get("From"));
