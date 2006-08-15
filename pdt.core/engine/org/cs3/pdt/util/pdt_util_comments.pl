@@ -220,9 +220,9 @@ execute_elms([Goal|Goals]):-
 % @param FileSpec 		The file containing the comment.
 % @param Dom			A DOM term as created by pdt_comment_dom/4.    
 % @param Html			Will be unified with an atom containing HTML data.
-pdt_dom_html(File,Dom,HTML):-
+pdt_dom_html(_File,Dom,HTML):-
     new_memory_file(MF),
     open_memory_file(MF,write,Out),
-    doc_write_html(Out, File, Dom),
+    doc_write_html(Out,  Dom),
     close(Out),
     memory_file_to_atom(MF,HTML).        

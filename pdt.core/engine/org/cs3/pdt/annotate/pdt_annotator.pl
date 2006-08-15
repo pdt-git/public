@@ -236,7 +236,7 @@ forget_file_annotation(Spec):-
     call_cleanup_hook2(FileName),
     retractall(file_annotation(FileName,_)),
     retractall(file_error(FileName,_,_)),
-    retractall(file_comments(FileName,_,_)),
+    retractall(file_comments(FileName,_)),
     clear_timestamp(FileName),
     clear_file_records(FileName),
     pif_notify(file_annotation(FileName),forget).

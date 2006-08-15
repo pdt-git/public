@@ -84,6 +84,16 @@ some predicate definitions for queries frequently used by the pdt.core
 %	member(aterm(Anns,Term),Terms),
 %	pdt_member(clause_of(DefModule:Name/Arity),Anns).
   
+%% pdt_lookup_aterm(+FileSpec,+N,-ATerm,-Member)
+% lookup a subterm by term reference number.
+%
+% Lookup time =O(n + log m)= where  =n= is the number of toplevel terms in the file and
+% =m= the maximum term depth within the file.
+%
+% @param FileSpec the File containing the term.
+% @param N the term reference number
+% @param ATerm will be unified with the (annotated) subterm found
+% @param Member will be unified with the (annotated) toplevel term containing the subterm.
 pdt_lookup_aterm(FileSpec,N,ATerm,Member):-
 	pdt_file_record_key(term,FileSpec,Key),
     lookup_aterm(Key,N,ATerm,Member).
@@ -121,6 +131,22 @@ lookup_subterm(Container,N,ATerm):-
 	pdt_subterm(Container,[_],SubContainer),
 	lookup_subterm(SubContainer,N,ATerm).
     
+%% pdt_file_directive(+FileSpec,-Annos)
+% find directives in a source file.
+%
+% _(this predicate is used by the prolog outline view of the pdt)_
+%
+% Successfully unifies Annos with the annotations of the
+% each directive found in file. 
+% In addition to the original annotation an annotation =label(Label)= is
+% added, which contains a rendered version of the directive body suitable for display
+% in ui widgets.
+%
+% To retrieve the actual term, obtain the term reference number from the annotations
+% (element =n(N)=) and use pdt_lookup_aterm/4.
+%
+% @param FileSpec the file containing the directive
+% @param Annos The term annotations of the directive.
 pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
@@ -129,6 +155,23 @@ pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 	pdt_subterm(Term,[1],Body),
 	render_term(Body,Term,OpModule,4,Label).
 
+%% pdt_predicate_clause(+FileSpec,+Signature,-Annos)
+% find clauses of a predicate.
+%
+% _(this predicate is used by the prolog outline view of the pdt)_
+%
+% Successfully unifies Annos with the annotations of the
+% each clause found for the specified predicate within the specified file. 
+% In addition to the original annotation an annotation =label(Label)= is
+% added, which contains a rendered version of the clause head suitable for display
+% in ui widgets.
+%
+% To retrieve the actual term, obtain the term reference number from the annotations
+% (element =n(N)=) and use pdt_lookup_aterm/4.
+%
+% @param FileSpec the file containing the directive
+% @param Signature the module-qualified signature of the predicate
+% @param Annos The term annotations of the directive.
 pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos]):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
@@ -144,7 +187,13 @@ pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos])
 	get_op_module(FileSpec,OpModule),
 	render_term(Head,Term,OpModule,4,Label).
 	
-  
+%% pdt_file_problem(+FileSpec,-Problem, -Pos)
+%  find problems in asource file.
+%
+% @param Problem will be unified with the problem term
+% @param Pos will be unified with a term of the form =From-To=
+%     where =From= and =To= are integers representing the character
+%     start and end offsets of the subterm to which the problem is attached.
 pdt_file_problem(FileSpec,Problem,Pos):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
@@ -153,6 +202,12 @@ pdt_file_problem(FileSpec,Problem,Pos):-
     pdt_member(problem(Problem),Annos),
     pdt_member(position(Pos),Annos).
 
+%% pdt_file_includes(?FileSpec,?IncludeSpec)
+% Explicit includes relation between source files.
+%
+% Succeeds if =FileSpec= directly and necessarily includes =IncludeSpec=.
+%
+% The transitive closure of this predicate is calculated by pdt_file_depends/2.
 pdt_file_includes(FileSpec,IncludeSpec):-
     nonvar(FileSpec),
     !,
@@ -173,6 +228,14 @@ get_including(IncludeSpec,File):-
     member(references_files(Refs),Annos),
     member(Abs,Refs).
 
+%% pdt_file_depends(?DependentFile,?DependencyFile)
+% Explicit dependency relation between source files.
+%
+% Succeeds if =DependentFile= directly or indirectly depends on =DependencyFile=.
+% A file is said to depend on another file, if consulting the first file *necessarily* involves
+% consulting the second file. 
+%
+% This predicate computes the transitive closure of pdt_file_includes/2.
 pdt_file_depends(DependentFile,DependencyFile):-
     nonvar(DependentFile),
     !,
@@ -186,11 +249,13 @@ get_file_dependency(DependentFile,DependencyFile):-
 get_dependent_file(DependencyFile,DependentFile):-
     pdt_dfs(DependencyFile,get_including(From,To),From,To,DependentFile).
 	
+%% pdt_file_module(?FileSpec,?Module)
+% File - Module relation.
+% succeeds if =FileSpec= is a source file defining the module =Module=.
 pdt_file_module(FileSpec,Module):-
     nonvar(FileSpec),
     !,
     get_module(FileSpec,Module).
-
 pdt_file_module(FileSpec,Module):-
 	nonvar(Module),
 	!,
@@ -208,11 +273,27 @@ get_file(Module,File):-
     pdt_index_get(Ix,Module,H),
     pdt_property(H,file,File).
 
+%% pdt_predicate_completion(+ContextModule,+Prefix,-P,?Properties)
+% Find predicates starting with a given prefix.
+% This predicate will find builtins aswell as predicates defined in source files.
+% _(this predicate is used by the prolog content assistant of the pdt)_
+%
+% @param ContextModule The module in the context of which the completion should be found.
+% @param Prefix The prefix for which completions should be found.
+% @param P a predicate handle. (see module =pdt_handle=)
+% @param Properties A list of properties. See pdt_handle:pdt_properties/3.
 pdt_predicate_completion(ContextModule,Prefix,P,Properties):-
 	pdt_predicate_completion(predicate_definitions,ContextModule,Prefix,P,Properties).
 pdt_predicate_completion(ContextModule,Prefix,P,Properties):-	
 	pdt_predicate_completion(builtin_predicates,ContextModule,Prefix,P,Properties).
 
+%% pdt_predicate_completion(+IxName,+ContextModule,+Prefix,-P,?Properties)
+% Find predicates starting with a given prefix.
+% 
+% Like pdt_predicate_completion/4, but restricts the search to the specified index.
+% 
+% @param IxName the name of the index to be searched. One of =predicate_definitions= or
+%               =builtin_predicates=.
 pdt_predicate_completion(IxName,ContextModule,Prefix,P,Properties):-
    pdt_index_load(IxName,IX),
    pdt_index_after(IX,Prefix,P,H),
@@ -222,7 +303,16 @@ pdt_predicate_completion(IxName,ContextModule,Prefix,P,Properties):-
    ),
    visible_in_context(ContextModule,H),
    pdt_properties(H,Properties).    
-   
+
+%% pdt_find_clauses(+Context,+Signature,-DefFile,-Clauses)
+% Find clauses of a goal.
+%
+% _(This predicate is used by the 'Open Declaration'-feature of the PDT)_
+%
+% @param ContextModule The module in the context of which the goal is to be resolved
+% @param Signature an unqualified predicate signature of the form =Name>/Arity>=
+% @param DefFile the file in which the clauses where found
+% @param Clauses a list of annotated clause terms.
 pdt_find_clauses(Context,Name/Arity,DefFile,Clauses):-
     pdt_index_load(predicate_definitions,IX),
     pdt_index_get(IX,Name,H),
@@ -233,10 +323,21 @@ pdt_find_clauses(Context,Name/Arity,DefFile,Clauses):-
     pdt_file_depends(ContextFile,DefFile),
     pdt_property(H,clauses,Clauses).
 
+%% pdt_find_first_clause(+Context,+Signature,-DefFile,-Clause)
+% Find the first clause of a goal in a file.
+%
+% Like pdt_find_clauses/4, but only finds the first clause for each file containing a clause.
 pdt_find_first_clause(Context,Name/Arity,DefFile,Clause):-
 	pdt_find_clauses(Context,Name/Arity,DefFile,Clauses),
 	arg(1,Clauses,Clause).
 
+%% pdt_find_first_clause(+Context,+Signature,-DefFile,-Position)
+% Find the first clause of a goal in a file.
+%
+% Like pdt_find_clauses/4, but only finds the *position* of the first clause for each file containing clauses.
+%
+% @param Position will be unified with term of the form =From-To= where from and to are
+%                 integers representing the character start and end offsets of the clause.
 pdt_find_first_clause_position(Context,Name/Arity,DefFile,Position):-
 	pdt_find_first_clause(Context,Name/Arity,DefFile,Clause),
 	pdt_top_annotation(Clause,Anno),
@@ -348,12 +449,10 @@ pdt_help_html(Pred,builtin,HTML):-
 pdt_find_predicate(Name,H):-    
 	pdt_index_load(predicate_definitions,IX),
     pdt_index_get(IX,Name,H).
-
 pdt_find_predicate(Name/Arity,H):-    
 	pdt_index_load(predicate_definitions,IX),
     pdt_index_get(IX,Name,H),
     pdt_property(H,arity,Arity).
-
 pdt_find_predicate(Module:Name/Arity,H):-    
 	pdt_index_load(predicate_definitions,IX),
     pdt_index_get(IX,Name,H),
