@@ -88,13 +88,15 @@ pdt_call_cleanup(_,Cleanup):-
 
 debugme(E):-
     pretty_print(current_output,'',E).
-/*
-file_spec(+FileSpec, -Abs)
 
-pdt "standard" procedure for resolving file specifications
-to absolute file names.
-
-*/		
+%% file_spec(+FileSpec, -Abs)
+%
+% pdt "standard" procedure for resolving file specifications
+% to absolute file names.
+% 
+% @param FileSpec can be a filename, an aliased file names or a file references.
+% @param Abs will be unified with a canonical, absolute path.
+		
 pdt_file_spec(Var, Abs):-
     var(Var),nonvar(Abs),!,
     Var=Abs.
@@ -126,14 +128,14 @@ gen_fileref(Ref):-
     
     
 
-/*
-pdt_member(?Member,+List):-
-    true if Member is an element of List.
-    
-    Redefines builtin member/2 to handle lists with an unbound tail.
-    Like member/2 this predicate will bind unbound elements of the list.
-    Unlike member/2, this predicate will NOT bind an unbound tail.
-*/	
+
+%% pdt_member(?Member,+List).
+%    true if Member is an element of List.
+%    
+%    Redefines builtin member/2 to handle lists with an unbound tail.
+%    Like member/2 this predicate will bind unbound elements of the list.
+%    Unlike member/2, this predicate will NOT bind an unbound tail.
+	
 pdt_member(_,Var):-
     var(Var),!,fail.
 pdt_member(M,[M|_]).
@@ -144,8 +146,8 @@ pdt_memberchk(M,L):-
 	pdt_member(M,L),
 	!.    
     
-% pdt_chop_before(+Elm,+Elms,+Suffix)
-
+%% pdt_chop_before(+Elm,+Elms,+Suffix)
+%
 % Elms should be an orderd list.
 % Suffix will unified with the first suffix of Elms
 % whos elements are equal or greater than Elm.
@@ -156,8 +158,8 @@ pdt_chop_before(Elm,[Head|NextElms],Elms):-
     pdt_chop_before(Elm,NextElms,Elms).
 pdt_chop_before(_,Elms,Elms).
 
-% pdt_chop_after(+Elm,+Elms,+Suffix)
-
+%% pdt_chop_after(+Elm,+Elms,+Suffix)
+%
 % Elms should be an orderd list.
 % Suffix will unified with the first suffix of Elms
 % whos elements are strictly greater than Elm.
@@ -167,8 +169,8 @@ pdt_chop_after(Elm,[Head|NextElms],Elms):-
 pdt_chop_after(_,Elms,Elms).
        
        
-% pdt_chop_before(+Elm,+Elms,+Suffix)
-
+%% pdt_chop_before(+Elm,+Elms,+Suffix)
+%
 % Elms should be an orderd list.
 % Suffix will unified with the first suffix of Elms
 % whos elements are equal or greater than Elm.
@@ -179,8 +181,8 @@ pdt_chop_before(Elm,[Head|NextElms],[Head|NextPrefs],Elms):-
     pdt_chop_before(Elm,NextElms,NextPrefs,Elms).
 pdt_chop_before(_,Elms,[],Elms).
 
-% pdt_chop_after(+Elm,+Elms,+Suffix)
-
+%% pdt_chop_after(+Elm,+Elms,+Suffix)
+%
 % Elms should be an orderd list.
 % Suffix will unified with the first suffix of Elms
 % whos elements are strictly greater than Elm.
@@ -189,7 +191,7 @@ pdt_chop_after(Elm,[Head|NextElms],[Head|NextPrefs],Elms):-
     pdt_chop_after(Elm,NextElms,NextPrefs,Elms).
 pdt_chop_after(_,Elms,[],Elms).        
         
-% pdt_remove_duplicates(+In,-Out) 
+%% pdt_remove_duplicates(+In,-Out) 
 %
 % In should be an ordered List.
 % Out will be unified with the duplicate-free version of In

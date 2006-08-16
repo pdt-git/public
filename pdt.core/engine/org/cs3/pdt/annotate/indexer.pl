@@ -78,12 +78,12 @@ pdt_update_index(FileSpec):-
     pdt_file_spec(FileSpec,File),
     time_file(File,ModTime),
     time_index(File,IxTime),
-    current_file_annotation(File,Annos,_),
+    pdt_file_annotation(File,Annos,_),
     update_index(File,Annos,ModTime,IxTime).
 
 pdt_clear_index(FileSpec):-
     pdt_file_spec(FileSpec,File),
-    current_file_annotation(File,Annos,_),
+    pdt_file_annotation(File,Annos,_),
     clear_index(File,Annos).
 
 pdt_clear_index(FileSpec,Annos,_):-

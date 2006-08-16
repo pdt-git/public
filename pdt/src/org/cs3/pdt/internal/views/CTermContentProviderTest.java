@@ -63,7 +63,7 @@ public class CTermContentProviderTest extends TestCase {
 		backend.setFile(file);
 		backend.setPif(pif);
 		PrologSession s = pif.getSession();
-		s.queryOnce("ensure_annotated('"+Util.prologFileName(file)+"')");
+		s.queryOnce("pdt_ensure_annotated('"+Util.prologFileName(file)+"')");
 		
 		//FIXME
 		/*Object[] data = backend.getData();

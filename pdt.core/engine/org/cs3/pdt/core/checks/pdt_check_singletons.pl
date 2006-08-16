@@ -9,7 +9,7 @@
 %pdt_check_singletons(+File,-Occurance)
 %succeeds if Occurance is an annotated subterm in File that is a singleton variable.
 pdt_check_singletons(File,Occurance):-
-    current_file_annotation(File,_,Terms),
+    pdt_file_annotation(File,_,Terms),
     check_singletons(Terms,Occurance).
 
 
