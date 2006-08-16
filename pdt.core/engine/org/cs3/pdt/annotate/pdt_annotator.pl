@@ -236,6 +236,13 @@ update_term_record(Key,end_of_file,_):-
 update_term_record(Key,_,TermOut):-    
 	recordz(Key,TermOut).
 
+%% pdt_forget_annotation(+FileSpec)
+% forget all information about FileSpec.
+%
+% removes all data that was gathered by pdt_ensure_annotated/1.
+% This includes errors, comments, terms, file annotations and index entries.
+% Note however that only data associeated with the specified file is removed, i.e. this predicate
+% does not recurse on the dependency graph.
 pdt_forget_annotation(Spec):-
     pdt_file_spec(Spec,FileName),
 %    call_cleanup_hook(FileName),
@@ -504,7 +511,22 @@ collect_errors([File|_],Errors):-
     	), Errors
     ).
 
-
+%% pdt_file_record_key(+Topic,+FileSpec,-Key)
+% retrieve a record key for the given File and topic.
+%
+% The annotator stores different kinds of information on processed files
+% in the record database. The record keys are unique for each (file, topic) pair.
+% The record keys optained from this predicate can be used together with
+% pdt_file_record/2 to access the recorded data.
+%
+% Currently, the following topics are supported:
+% $=term=: records all annotated terms. See also pdt_file_term/2
+% $=comments=: records lists of comments as obtained via read_term/3
+% $=errors=:records syntax errors.
+%
+% @param Topic the topic
+% @param FileSpec a file specification. See pdt_util:pdt_file_spec/2.
+% @param Key will be unified with the record key.
 pdt_file_record_key(Kind,FileRef,Key):-
     file_key(Kind,FileRef,Key).
 
@@ -598,6 +620,12 @@ comments_map(In,[CPos-Comment|Cs],Out):-
 
 
 		
+%% pdt_op_module(+FileSpec,-OpModule)
+% access the operator module for a source file.
+%
+% The annotator uses a separate module for each file to cope with operator redefinitions and the like.
+% ( This will hopefully be obsoleted soon by the prolog_source library.)
+
 pdt_op_module(FileSpec,OpModule):-
 	pdt_file_spec(FileSpec,Abs),
 	gen_op_module(Abs,OpModule).

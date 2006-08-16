@@ -40,7 +40,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% abstraction layer arround annotation.
+% abstraction layer arround annotation. (currently not used!)
 % this resambles the subset of the interface of multimaps, because i want to eventualy switch 
 % from flat lists to multi maps. I won't do this, however, before all depending code has been
 % refactored to use this layer.

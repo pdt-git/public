@@ -66,11 +66,22 @@ process_order_last(Graph,Node,Last):-
 process_order_last(Graph,Node,Node):-
     node(Graph,Node).
 
+%% pdt_add_dependency(+Graph,+Node,+Dependency)
+% add an edge to the dependency graph.
+% 
+% @param Graph the graph identifier
+% @param Node the dependend node. It will be created if it does not exist.
+% @param Dependency the node on which Node depends. It will be created if it does not exist.
 pdt_add_dependency(Graph,Node,Dependency):-
     add_node(Graph,Node),
     add_node(Graph,Dependency),
     add_dependency(Graph,Node,Dependency).
-
+%% pdt_add_node(+Graph,+Node)
+% add a node to a dependency graph.
+%
+% If the node exists already, nothing happens.
+% @param Graph the graph identifier.
+% @param Node the node to be added.
 pdt_add_node(Graph,Node):-
     add_node(Graph,Node).
     
@@ -115,6 +126,11 @@ process_order(Graph,Root,[Root|Tail]):-
     process_order(Graph,Next,Tail).
 process_order(_Graph,Root,[Root]).
 
+%% pdt_process_order(+Graph,-Order)
+% calculate a process order for a dependency graph.
+%
+% @param Graph is the graph identifier
+% @param Order is a list of nodes in which each node is preceeded by the nodes it depends on.
 pdt_process_order(Graph,Order):-
     process_order(Graph,Order).
 
