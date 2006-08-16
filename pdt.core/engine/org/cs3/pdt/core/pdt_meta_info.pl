@@ -80,7 +80,7 @@ some predicate definitions for queries frequently used by the pdt.core
 
 %pdt_file_contains_clause(File,DefModule,Name,Arity,aterm(Anns,Term)):-
 %    pdt_file_spec(File,Abs),
-%	current_file_annotation(Abs,_,Terms),
+%	pdt_file_annotation(Abs,_,Terms),
 %	member(aterm(Anns,Term),Terms),
 %	pdt_member(clause_of(DefModule:Name/Arity),Anns).
   
@@ -151,7 +151,7 @@ pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
 	pdt_term_annotation(Term,:-(_),Annos),
-	get_op_module(FileSpec,OpModule),
+	pdt_op_module(FileSpec,OpModule),
 	pdt_subterm(Term,[1],Body),
 	render_term(Body,Term,OpModule,4,Label).
 
@@ -184,7 +184,7 @@ pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos])
 		Type=fact
 	),
 	
-	get_op_module(FileSpec,OpModule),
+	pdt_op_module(FileSpec,OpModule),
 	render_term(Head,Term,OpModule,4,Label).
 	
 %% pdt_file_problem(+FileSpec,-Problem, -Pos)
@@ -218,13 +218,13 @@ pdt_file_includes(FileSpec,IncludeSpec):-
 
 get_includes(FileSpec,IncludeSpec):-  
     pdt_file_spec(FileSpec,Abs),
-    current_file_annotation(Abs,Annos),
+    pdt_file_annotation(Abs,Annos),
     member(references_files(Refs),Annos),
     member(IncludeSpec,Refs).
     
 get_including(IncludeSpec,File):-
 	pdt_file_spec(IncludeSpec,Abs),
-    current_file_annotation(File,Annos),
+    pdt_file_annotation(File,Annos),
     member(references_files(Refs),Annos),
     member(Abs,Refs).
 
@@ -263,7 +263,7 @@ pdt_file_module(FileSpec,Module):-
 
 get_module(FileSpec,Module):-    
     pdt_file_spec(FileSpec,Abs),
-    current_file_annotation(Abs,Ann),
+    pdt_file_annotation(Abs,Ann),
     memberchk(defines_module(Module),Ann),
     !.
 get_module(_,user).    
@@ -359,7 +359,7 @@ visible_in_context(_,H):-
 	
 pdt_render_term(FileSpec,N,Depth,Out):-
 	pdt_lookup_aterm(FileSpec,N,ATerm,Clause),
-	get_op_module(FileSpec,OpModule),
+	pdt_op_module(FileSpec,OpModule),
 	render_term(ATerm,Clause,OpModule,Depth,Out).
 	
 render_term(ATerm,Clause,OpModule,Depth,Out):-

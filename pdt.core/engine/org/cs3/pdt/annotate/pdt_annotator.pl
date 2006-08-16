@@ -40,14 +40,14 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- module(pdt_annotator,[
-	ensure_annotated/1,
-	get_op_module/2,
+	pdt_ensure_annotated/1,
+	pdt_op_module/2,
 	%%register_annotator/1, 
-	current_file_annotation/2,
-	current_file_error/2,
-	current_file_term/2,
-	current_file_comments/2,
-	forget_file_annotation/1,
+	pdt_file_annotation/2,
+	pdt_file_error/2,
+	pdt_file_term/2,
+	pdt_file_comments/2,
+	pdt_forget_annotation/1,
 	pdt_annotator/2,
 	pdt_annotator/3,
 	pdt_file_record_key/3,
@@ -96,29 +96,35 @@ pdt_maybe(Goal):-
 %		E,
 %		debugme(E)
 %	).
-/**
-pdt_annotator(+Hooks, +Dependencies)
 
-New hook registration api.
-Modules that whish to register as a annotator should contain a directive
-:- pdt_annotator(+Hooks, +Dependencies)
-Hooks should be a list containing the atoms 'term' and/or 'file'. 
-When the annotator is executed, this list will be processed element by element.
-For each 'file' element, the process_file hook will be calle for the respective annotator.
-For each 'term' element, the process_term hook will be called on each individual term for the respective
-annotator.
-
-Dependencies should be a list of file specs that contain annotator modules. The parser framework
-will make sure that all of the listed annotators are registered and get executed before the
-declaring annotator is executed.
-
-annotators can optionaly define a prediceate cleanup_hook/2 which will be called
-when the annotation of a file is about to be forgotten. These clean_up hooks will always be executed
-independently of what is listed in the hooks list above. They will be called in no particualr order,
-i.e. dependencies will not be respected.
-
-*/
 :- module_transparent pdt_annotator/2.
+
+%% pdt_annotator(+Hooks, +Dependencies)
+%
+%register an annotator hook.
+%Modules that whish to register as a annotator should contain a directive
+% 
+% = :- pdt_annotator(+Hooks, +Dependencies) =
+%
+%Hooks should be a list containing the atoms =term= and/or =file=. 
+%When the annotator is executed, this list will be processed element by element.
+%For each 'file' element, the process_file hook will be calle for the respective annotator.
+%For each 'term' element, the process_term hook will be called on each individual term for the respective
+%annotator.
+%
+% *Update*: I added a new hook type =interleaved= which is executed interleaved with term reading.
+% This makes sense for hooks that modify the read context (operators, file references, etc)
+%Dependencies should be a list of file specs that contain annotator modules. The parser framework
+%will make sure that all of the listed annotators are registered and get executed before the
+%declaring annotator is executed.
+%
+%annotators can optionaly define a prediceate cleanup_hook/2 which will be called
+%when the annotation of a file is about to be forgotten. These clean_up hooks will always be executed
+%independently of what is listed in the hooks list above. They will be called in no particualr order,
+%i.e. dependencies will not be respected.
+
+
+
 pdt_annotator(Hooks, Dependencies):-
     context_module(Module),
     pdt_annotator:pdt_annotator(Module,Hooks,Dependencies).
@@ -230,7 +236,7 @@ update_term_record(Key,end_of_file,_):-
 update_term_record(Key,_,TermOut):-    
 	recordz(Key,TermOut).
 
-forget_file_annotation(Spec):-
+pdt_forget_annotation(Spec):-
     pdt_file_spec(Spec,FileName),
 %    call_cleanup_hook(FileName),
     call_cleanup_hook2(FileName),
@@ -249,7 +255,7 @@ call_cleanup_hook2(FileName):-
     call_cleanup_hook2(Anotators,FileName,Annos).
 
 get_annos_for_cleanup(FileName,Annos):-
-    current_file_annotation(FileName,Annos),
+    pdt_file_annotation(FileName,Annos),
     !.
 get_annos_for_cleanup(_FileName,[]).
 
@@ -262,110 +268,64 @@ call_cleanup_hook2([Annotator|Annotators],File,Annos):-
     call_cleanup_hook2(Annotators,File,Annos).     
 
 
-/**
-current_file_annotation(-Filename,-FileAnotations,-Terms)
 
- - Filename will be unified with an absolute file name
- - FileAnotations will be unified with a list of arbitrary annotations
-   for that file.
- - Terms will be unified with a list of annotated terms, each one 
-   annotated with arbitrary terms.
-*/
-current_file_annotation(FileSpec,FileAnotations):-
+%% pdt_file_annotation(?Filename,-FileAnotations)
+% retrieve file level annotations.
+%
+% @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
+% @param FileAnotations will be unified with a list of annotations
+%   for that file.
+
+
+pdt_file_annotation(FileSpec,FileAnotations):-
     nonvar(FileSpec),
     pdt_file_spec(FileSpec,Abs),    
     file_annotation(Abs,FileAnotations).
-current_file_annotation(File,FileAnotations):-
+pdt_file_annotation(File,FileAnotations):-
     var(File),
     file_annotation(File,FileAnotations).    
 
-current_file_error(FileSpec,Error):-
+%% pdt_file_error(?Filename,-FileAnotations)
+% retrieve syntax errors in a file.
+%
+% @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
+% @param FileAnotations will be unified with an error term.
+
+pdt_file_error(FileSpec,Error):-
     pdt_file_spec(FileSpec,Abs),
     file_error(Abs,Error).
 
-current_file_comments(FileSpec,Comments):-
+%% pdt_file_comments(?Filename,-FileAnotations)
+% retrieve comments table for a file.
+%
+% @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
+% @param FileAnotations will be unified with associative datastructure, see module pdt_util_map.
+pdt_file_comments(FileSpec,Comments):-
     nonvar(FileSpec),
     pdt_file_spec(FileSpec,Abs),    
     file_comments(Abs,Comments).
-current_file_comments(File,Comments):-
+pdt_file_comments(File,Comments):-
     var(File),
     file_comments(File,Comments).    
 
-current_file_term(FileSpec,Term):-
+%% pdt_file_term(?Filename,-FileAnotations)
+% retrieve annotated terms in a file.
+%
+% @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
+% @param FileAnotations will be unified with an annotated term. see module pdt_util_aterm.
+pdt_file_term(FileSpec,Term):-
     pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term).
 
+%% pdt_file_record(+Key,-Term)
+% retrieve a file record.
+% see pdt_file_record_key/3.
+%
+% @param Key a record key as retrieaved by pdt_file_record_key/3
+% @param Term the term recorded for this key.
 pdt_file_record(Key,Term):-
     recorded(Key,Term).
 
-/*
-pdt_annotator_context(+In,+Scope,-InMap,+OutMap,-Out).
-
-
-all hook predicates use a set of accumulators which can be  
-accessed and updated through this predicate.
-
-In should be the input context as passed to the hook
-Scope should be local,term,file, or global.
-InMap will be unified with the current multimap for that scope
-Out will be unified with a copy of in where the scope map is replaced by OutMap.
-
-scope maps:
-- global the 
-
-*/
-
-pdt_annotator_context(context(G,F,T,L0),local,L0,L1,context(G,F,T,L1)).
-pdt_annotator_context(context(G,F,T0,L),term,T0,T1,context(G,F,T1,L)).
-pdt_annotator_context(context(G,F0,T,L),file,F0,F1,context(G,F1,T,L)).
-pdt_annotator_context(context(G0,F,T,L),global,G0,G1,context(G1,F,T,L)).
-
-/*
-convenience predicates: these are just shortcuts using the above ones
-pdt_annotator_context_get(+In,+Scope,+Key,-val).
-pdt_annotator_context_add(+In,+Scope,+Key,+val,-Out).
-
-*/
-
-pdt_annotator_context_get(In,Scope,Key,Val):-
-    pdt_annotator_context(In,Scope,Map,_,_),
-    pdt_multimap_get(Map,Key,Val).
-    
-/**
-register_annotator(+FileSpec)
-
-Filespec should be a file defining a module that defines the following 
-predicates:
-
- - term_pre_annotation_hook(+FileStack,+OpModule,+InTerm,-OutTerm)
-   	- FileStack is a stack containing the file names of 
-   	  the files that are currently annotated. E.g. if file a loads
-   	  file b and file b is the file currently to which the currently 
-   	  annotated term belongs, the stack will be [b,a]. If the hook 
-   	  implementation requires the annotation of another file c, 
-   	  it should call ensure_annotated([c,b,a]). It is within the 
-   	  responsibility of the hook implementation to avoid recursion by
-   	  checking that the file c is not already on stack.
-   	- OpModule is the module that is used by read_term for determining
-   	  currently defined operators.
-   	- InTerm is an annotated term that may already include an
-   	  arbitrary number of annotations
-   	- OutTerm should be unified with the same term including 
-   	  the additional annotations the hook wishes to make.
-   	
- - file_pre_annotation_hook(+FileStack,+OpModule,+Terms,+InAnos,-OutAnos)
-    - FileStack is defined as above.
-    - OpModule is defined as above.
-    - Terms is a list of all (annotated) terms contained in the file
-    - InAnos is a list of terms that where already attached by 
-      other hooks.
-    - OutAnos should be InAnos + the additions this hook whishes to make.
- - term_post_annotation_hook(+FileStack,+OpModule,+FileAnos,+InTerm,-OutTerm)
- 	like term_pre_annotation/4, but is called after all file annotation hooks
- 	have been processed.
-  - file_post_annotation_hook(+FileStack,+OpModule,+Terms,+InAnos,-OutAnos) 	
-  	like file_pre_annotation/5, but is called after term post processing.
-*/
 
 add_missing_hook(Module:Name/Arity):-
     (	Module:current_predicate(Name/Arity)
@@ -382,24 +342,26 @@ update_timestamp(File):-
     pdt_ht_put(pdt_annotation_time,File,Time).
 clear_timestamp(File):-
     pdt_ht_remove_all(pdt_annotation_time,File).
-/**
-ensure_annotated(+FileSpec)
 
-FileSpec should either be a single file specification or
-a list of file specs.
-Note: ensure_annotated/1 will only annotate the head entry of the list.
-The tail is only used to pass along information on what files are
-currently on stack, so that files that include each other do not lead
-to infinite recursion.
-*/
-ensure_annotated(FileSpec):-
+%% pdt_ensure_annotated(+FileSpec)
+% create/update annotation for a source file.
+% 
+% @param FileSpec should either be a single file specification or
+%        a list of file specs. pdt_ensure_annotated/1 will only annotate the head entry of the list.
+%      The tail is only used to pass along information on what files are
+%       currently on stack, so that files that include each other do not lead
+%       to infinite recursion.
+% $ *Warning*: this predicate does not do the recursion check itself. If an annotator requires nested calls of 
+%           this predicate, it is the responsibility of that hook to examine the stack and avoid recursions.
+
+pdt_ensure_annotated(FileSpec):-
     \+ is_list(FileSpec),
-	ensure_annotated([FileSpec]).
-ensure_annotated([FileSpec|_]):-
+	pdt_ensure_annotated([FileSpec]).
+pdt_ensure_annotated([FileSpec|_]):-
     pdt_file_spec(FileSpec,Abs),
     up_to_date(Abs),
     !.
-ensure_annotated([FileSpec|Stack]):- 
+pdt_ensure_annotated([FileSpec|Stack]):- 
     new_memory_file(MemFile),
     pdt_file_spec(FileSpec,Abs),
     gen_op_module(Abs,OpModule),
@@ -428,7 +390,7 @@ ensure_annotated([FileSpec|Stack]):-
 	close(Input),
 	free_memory_file(MemFile),
 	pif_notify(file_annotation(Abs),update),!.
-ensure_annotated([FileSpec|_]):-    
+pdt_ensure_annotated([FileSpec|_]):-    
     pdt_file_spec(FileSpec,Abs),
     clear_timestamp(Abs),
     fail.
@@ -636,7 +598,7 @@ comments_map(In,[CPos-Comment|Cs],Out):-
 
 
 		
-get_op_module(FileSpec,OpModule):-
+pdt_op_module(FileSpec,OpModule):-
 	pdt_file_spec(FileSpec,Abs),
 	gen_op_module(Abs,OpModule).
     

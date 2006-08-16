@@ -106,7 +106,7 @@ annotate_refered_files(Stack,[H|T]):-
 annotate_refered_file([H|Stack]):-
 	member(H,Stack),!.    
 annotate_refered_file(Stack):-
-	ensure_annotated(Stack).    	
+	pdt_ensure_annotated(Stack).    	
 
 %the_debug([Cur|_],H):-
 %    format("~w refers to ~w~n",[Cur,H]).

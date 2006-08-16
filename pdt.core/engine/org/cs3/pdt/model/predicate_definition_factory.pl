@@ -81,7 +81,7 @@ get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),clauses,
 
 
 get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),comments,Value):-
-    current_file_comments(File,CommentsMap),
+    pdt_file_comments(File,CommentsMap),
     pdt_file_record_key(term,File,Key),
 	collect_comments(CommentsMap,Key,Module:Name/Arity,CommentsTexts),
 	flatten(CommentsTexts,Value).

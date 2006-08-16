@@ -97,7 +97,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 
-		as.queryOnce(file, "ensure_annotated('" + plFileName + "')");
+		as.queryOnce(file, "pdt_ensure_annotated('" + plFileName + "')");
 
 	}
 
@@ -236,7 +236,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		sb.append(']');
 		String fileList = sb.toString();
 		List list = s.queryAll("member(File," + fileList
-				+ "),current_file_error(File,"
+				+ "),pdt_file_error(File,"
 				+ "error(Type, stream(_, Line, Column, CharOffset))),"
 				+ "message_to_string(error(Type, _),Message)");
 		for (Iterator it = list.iterator(); it.hasNext();) {
@@ -446,7 +446,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 
-		as.queryOnce(file, "forget_file_annotation('" + plFileName + "')");
+		as.queryOnce(file, "pdt_forget_annotation('" + plFileName + "')");
 
 	}
 

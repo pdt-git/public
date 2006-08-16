@@ -123,7 +123,7 @@ public class OldCTermContentProviderBackend  {
 			
 			s.setPreferenceValue("socketsession.canonical", "true");
 			//s.queryOnce("guitracer");
-			String query = "current_file_annotation('" + plFile
+			String query = "pdt_file_annotation('" + plFile
 					+ "',Annos,Members)";
 			
 			Map map = s.queryOnce(query);
