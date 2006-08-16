@@ -54,6 +54,7 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -265,9 +266,9 @@ public class PrologOutline extends ContentOutlinePage {
 					Debug.debug("Debug: input="+input);
 				}
 				try {
-					startOffset = Util.logicalToPhysicalOffset(doc.get(),
+					startOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
 							startOffset);
-					endOffset = Util.logicalToPhysicalOffset(doc.get(),
+					endOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
 							endOffset);
 					Debug.debug(">>"
 							+ doc.get(startOffset, endOffset - startOffset)
