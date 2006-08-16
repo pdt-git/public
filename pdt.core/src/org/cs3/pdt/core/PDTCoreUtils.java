@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.core;
 
+import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -91,5 +92,13 @@ public final class PDTCoreUtils {
 			}
 			project.setDescription(ipd, null);
 		}
+	}
+	
+	public static int convertCharacterOffset(String data, int offset){
+		String value = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_CONVERT_CHARACTER_OFFSETS, "true");
+		if("true".equalsIgnoreCase(value)){
+			return Util.logicalToPhysicalOffset(data, offset);
+		}
+		return offset;
 	}
 }

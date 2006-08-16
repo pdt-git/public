@@ -190,6 +190,14 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						"Default Runtime PrologInterface",
 						"The default value for the Runtime PrologInterface property of prolog projects.",
 						Option.STRING, "%project%"),
+					new SimpleOption(
+								PDTCore.PREF_CONVERT_CHARACTER_OFFSETS,
+								"Convert character offsets",
+								"If true, character offsets read by the prolog core will be interpreted as " +
+								"logical offsets (e.g. windows line-endings counting as a single character), and " +
+								"will be converted to physical offsets by the ui.",
+								Option.FLAG, "true"),
+												
 				new SimpleOption(
 						PDTCore.PREF_AUTO_CONSULT,
 						"Enable Auto-Consult (EXPERIMENTAL)",

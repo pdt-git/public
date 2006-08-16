@@ -56,6 +56,7 @@ import java.util.Set;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -246,7 +247,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String data = (String) fileContents.get(plFile);
 			int line = Integer.parseInt((String) map.get("Line"));
 			int column = Integer.parseInt((String) map.get("Column"));
-			int offset = Util.logicalToPhysicalOffset(data, Integer.parseInt((String) map.get("CharOffset")));
+			int offset = PDTCoreUtils.convertCharacterOffset(data, Integer.parseInt((String) map.get("CharOffset")));
 			String message = (String) map.get("Message");
 			
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
@@ -269,8 +270,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFile = (String) map.get("File");
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			String data = (String) fileContents.get(plFile);
-			int start = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("From")));
-			int end = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("To")));
+			int start = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("From")));
+			int end = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("To")));
 			String message = getMessage((String) map.get("Error"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
@@ -291,8 +292,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFile = (String) map.get("File");
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			String data = (String) fileContents.get(plFile);
-			int start = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("From")));
-			int end = Util.logicalToPhysicalOffset(data,Integer.parseInt((String) map.get("To")));
+			int start = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("From")));
+			int end = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("To")));
 			
 			String message = getMessage((String) map.get("Warning"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
