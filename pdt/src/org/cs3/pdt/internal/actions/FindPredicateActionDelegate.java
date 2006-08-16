@@ -143,7 +143,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		SourceLocation loc;
 		try {
 			loc = findFirstClausePosition(file,goal);
-			PDTUtils.showSourceLocation(loc);
+			if(loc!=null){
+				PDTUtils.showSourceLocation(loc);
+			}
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
 			Shell shell = editor.getSite().getShell();
