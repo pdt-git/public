@@ -51,6 +51,7 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
@@ -190,7 +191,8 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 		if (fStyleSheetURL == null) {
 
 			Bundle bundle= Platform.getBundle(PDT.PLUGIN_ID);
-			fStyleSheetURL= bundle.getEntry("/css/pldoc.css"); //$NON-NLS-1$
+			 
+			fStyleSheetURL= bundle.getEntry(Util.isWindoze()?"/css/pldoc_ie.css":"/css/pldoc.css"); //$NON-NLS-1$
 			if (fStyleSheetURL != null) {
 				try {
 					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);

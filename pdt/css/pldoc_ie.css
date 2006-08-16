@@ -59,7 +59,7 @@ h1.file, h1.module
 dd.defbody
 { margin-bottom: 1em;
   margin-left:1em;
-	text-indent:1em
+	text-indent:-2em
 }
 
 
@@ -76,7 +76,7 @@ dt.tag
 }
 
 dl.tags dd
-{ margin-left:1em; text-indent:0em
+{ margin-left: -2em; text-indent:0em
 }
 
 dt.error, dt.warn
