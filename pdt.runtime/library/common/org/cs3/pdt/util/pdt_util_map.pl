@@ -58,7 +58,8 @@
 
 %pdt_map_merge(InA,InB,Out):-
     
-
+%% pdt_map_empty(?In)
+% unifies In with an empty map.
 pdt_map_empty(In):-
     pdt_rbtree_new(In).
 

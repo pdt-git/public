@@ -87,25 +87,25 @@
 ]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
-%%pdt_cs(?CS).
+%% pdt_cs(?CS).
 % unifies CS with a generic CS term.
 pdt_cs(cs(_T,_V,_C,_S)).
 
-%%pdt_cs_subterm(+CS, ?Subterm).
+%% pdt_cs_subterm(+CS, ?Subterm).
 % access the Subterm part of a CS term.
 pdt_cs_subterm(cs(T,_V,_C,_S),T).
 
-%%pdt_cs_condition(+CS, ?Condition).
+%% pdt_cs_condition(+CS, ?Condition).
 % access the Condition part of a CS term.
 pdt_cs_condition(cs(_T,_V,C,_S),C).
 
 
-%%pdt_cs_substitution(+CS, ?Substitution).
+%% pdt_cs_substitution(+CS, ?Substitution).
 % access the Substitution part of a CS term.
 pdt_cs_substitution(cs(_T,_V,_C,S),S).
 
 
-%%pdt_cs_substitution(+CS, ?Substitution).
+%% pdt_cs_substitution(+CS, ?Substitution).
 % access the carrier part of a CS term.
 %
 % Before a cs is matched and possibly applied on a subterm, it is copied, i.e. fresh variables are used
@@ -118,7 +118,7 @@ pdt_cs_substitution(cs(_T,_V,_C,S),S).
 % original, and thus any variables it hold are sharing with the ones in the original.
 pdt_cs_carrier(cs(_T,V,_C,_S),V).
 
-%%pdt_cs_apply(+TermIn,+CS,-TermOut):-
+%% pdt_cs_apply(+TermIn,+CS,-TermOut)
 % apply a conditional substitution to a term.
 %
 % Works with both, annotated and plain terms.

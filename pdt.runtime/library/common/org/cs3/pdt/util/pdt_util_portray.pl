@@ -1,3 +1,7 @@
+/*
+ * work in progress. 
+ */
+
 :-module(pdt_util_portray,[portray_clause/1]).
 
 portray_clause(Term) :-

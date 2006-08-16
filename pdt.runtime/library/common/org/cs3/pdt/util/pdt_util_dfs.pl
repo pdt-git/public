@@ -47,13 +47,15 @@
 
 
 :-module_transparent pdt_dfs/5.
-%pdt_dfs(+Start,+EdgeGoal,+EdgeFrom,+EdgeTo,-Found).
+%% pdt_dfs(+Start,+EdgeGoal,+EdgeFrom,+EdgeTo,-Found).
 % perform a (cycle-safe) depth-first search on an arbitrary graph.
-% EdgeGoal should be a Goal that unifies EdgeFrom and EdgeTo with two nodes
-% that are connected by an edge. Start should the node at which the search is started.
-% Found will successfully be unified with all found nodes.
 %
-% Note: if a node can be reached along different paths, it may be reported more than once.
+% @param EdgeGoal should be a Goal that unifies EdgeFrom and EdgeTo with two nodes
+%        that are connected by an edge. 
+% @param Start should the node at which the search is started.
+% @param Found will successfully be unified with all found nodes.
+%
+% $Note:if a node can be reached along different paths, it may be reported more than once.
 % Along a single path, each node is only considered once, so this predicate may be used on
 % cyclic graphs.
 

@@ -45,29 +45,40 @@
 	pdt_top_annotation/2,
 	pdt_term_annotation/3,
 	pdt_subterm/3,
-	pdt_outer_match/4,
-	pdt_inner_match/4,
+/*	pdt_outer_match/4,
+	pdt_inner_match/4,*/
 	pdt_subst/4,
 	pdt_aterm/1,
 	pdt_aterm_member/3,
 	pdt_functor/3,
-	pdt_arg/3,
-	pdt_operand/4
+	pdt_arg/3/*,
+	pdt_operand/4*/
 ]).
 
 
 
+%% pdt_aterm(?Term)
+% succeeds if Term is an annotated term.
+%
 pdt_aterm(aterm(_,_)).
 
 
 
     
-
+%% pdt_aterm_member(+List,?Path,?Elm)
+% succeeds if Elm is a member of the annotated list List.
+%
+% @param List an annotated list term.
+% @param Path subterm path. See pdt_subterm/3.
+% @param Elm an annotated element of List.
+%
 pdt_aterm_member(List,Path, Elm):-
     match_elms(List,Path,Elm).
+
+/*
 pdt_operand(Operator,List,Path, Elm):-
     match_operand(Operator,List,Path,Elm).
-
+*/
 
 
 
@@ -117,7 +128,7 @@ match_elms(List,[2|T],Elm):-
     pdt_subterm(List,[2],Elms),
     match_elms(Elms,T,Elm).
     	
-
+/*
 match_operand(Operator,ATerm,[],ATerm):-
     \+ pdt_functor(ATerm,Operator),
     !.
@@ -126,12 +137,13 @@ match_operand(_Operator,ATerm,[1],Elm):-
 match_operand(Operator,ATerm,[2|T],Elm):-
     pdt_subterm(ATerm,[2],Elms),
     match_operand(Operator,Elms,T,Elm).
+*/
 
-
-%pdt_subterm(+Term,+Path,?Subterm).
+%% pdt_subterm(+Term,+Path,?Subterm).
+%
 %succeeds if Term is a term or an annotated term and Path is a list of integers
 %such that if each element of Path is interpreted as an argument position, Path induces a
-%path from Term to (annotated or not annotated) sub term SubTerm.
+%path from Term to the (plain or annotated) sub term SubTerm.
 pdt_subterm(Term,[], Term).
 pdt_subterm(ATerm,Path,SubTerm):-
 	pdt_aterm(ATerm),
@@ -145,7 +157,8 @@ pdt_subterm_rec(Term,[ArgNum|ArgNums],SubTerm):-
 	compound(Term),
 	arg(ArgNum,Term,ArgVal),
 	pdt_subterm(ArgVal,ArgNums,SubTerm).
-	    
+	
+/*	    
 :-module_transparent pdt_outer_match/4.
 :-module_transparent pdt_inner_match/4.
 	    
@@ -193,8 +206,12 @@ inner_match_recursive(Term,[ArgNum|ArgNums],SubTerm,Module,Goal):-
 	inner_match(ArgVal,ArgNums,SubTerm,Module,Goal).
 inner_match_local(Term,[], Term,Module,Goal):-
     Module:call(Goal).
+*/
 
-
+%% pdt_subst(+InATerm,+Path,+SubATerm,-OutATerm)
+% substitute a subterm.
+% Unfifies OutAterm with a modified version of InATerm, where the 
+% subterm described by Path is replaced by SubATerm.
 pdt_subst(_InTerm,[], OutTerm,OutTerm).
 pdt_subst(InATerm,Path,SubATerm,OutATerm):-
 	pdt_aterm(InATerm),
@@ -227,20 +244,36 @@ subst_nth_elm([InArg|InArgs],ArgNum,SubstArg,[InArg|OutArgs]):-
     
     
     
-
+%% pdt_top_annotation(?ATerm,?Annotation).
 %@deprecated: use pdt_term_annotation/3
 pdt_top_annotation(aterm(A,_),A).
 
-%pdt_term_annotation(?AnnotatedTerm,?Term,?Annotation).
+%% pdt_term_annotation(?AnnotatedTerm,?Term,?Annotation).
 % succeeds if AnnotatedTerm is an annotated term, Annotation is the top annotation, and
 % Term is the unwrapped toplevel with annotated argument terms.
 pdt_term_annotation(aterm(A,T),T,A).
 
+%% pdt_strip_annotation(+AnotatedTerm,-Term,-Annotation)
+% recirsively strip annotation from an annotated term.
+%
+% @param AnnotatedTerm the annotated term
+% @param Term the plain term
+% @param Annotation a term of the form
+% ==
+% Annotations ::= (<Annotation>,[Annotations]) 
+% ==
+% 
+% @deprecated I would like to remove the third argument. 
 pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
     nonvar(AnotatedTerm),
     !,
     strip(AnotatedTerm,Term,Anotation).
 
+
+%% pdt_splice_annotation(-Term,+Anotation,+AnotatedTerm)
+% creat an annotated term.
+%
+% @deprecated ATerms should not be constructed this way, it reveals to much about the data structure used.
 pdt_splice_annotation(Term,Anotation,AnotatedTerm):-
     splice(Term,Anotation,AnotatedTerm).
 
@@ -281,21 +314,4 @@ splice_args([ArgsH|ArgsT],
 			[AnotatedArgsH|AnotatedArgsT]):-
     splice(ArgsH,ArgAnotationsH,AnotatedArgsH),
     splice_args(ArgsT,ArgAnotationsT,AnotatedArgsT).
-    
-cs(cs(_T,_C,_S)).
-cs_subterm(cs(T,_C,_S),T).
-cs_condition(cs(_T,C,_S),C).
-cs_substitution(cs(_T,_C,S),S).
-
-pdt_conditional_substitution(In,CS,Out):-
-    cs(CS),
-    apply_cs(In,CS,Out).
-
-%apply_cs(In,CS,Out):-
-%    copy_term(CS,CSCopy),
-%    cs_match(In,CSCopy),
-%    cs_substitution(CSCopy,Subst),
-%    apply_cs(Subst,CS,Out)
-%    Condition,!,
-%    cs(Tmp,
     
