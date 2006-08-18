@@ -174,6 +174,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				as.queryOnce("set parse_comments option", "pdt_annotator:pdt_set_preference_value(parse_comments,"+value+")");
 				forget(forgetList, as, monitor);
 				build(buildList, as, monitor);
+				as.join();
 			} finally {
 				if (as != null) {
 					as.dispose();
