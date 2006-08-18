@@ -380,34 +380,49 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			session.abort();
 			
 		}
-
+		Vector children = getCachedChildren(root);
 		synchronized (cache) {
 			cache.clear();
 
 		}
-
+		fireChildrenRemoved(root,children.toArray());
 	}
 
+	
+
 	private void addChildren(Object parent, Collection collection) {
+		Vector children=null;
+		boolean removed=false;
 		synchronized (cache) {
-			Vector children = getCachedChildren(parent);
+			children = getCachedChildren(parent);
 			if (children.contains(oneMomentPlease)) {
+				removed=true;
 				children.clear();
+				
 			}
 			children.addAll(collection);
+		}
+		if(removed){
+			fireChildrenRemoved(parent, children.toArray());
 		}
 		fireChildrenAdded(parent, collection.toArray());
 	}
 
 	private void addChild(Object parent, Object child) {
+		Vector children=null;
+		boolean removed=false;
 		synchronized (cache) {
-			Vector children = getCachedChildren(parent);
+			children = getCachedChildren(parent);
 			if (children.contains(oneMomentPlease)) {
+				removed=true;
 				children.clear();
+				
 			}
 			children.add(child);
 		}
-
+		if(removed){
+			fireChildrenRemoved(parent, children.toArray());
+		}
 		fireChildrenAdded(parent, new Object[] { child });
 	}
 
@@ -441,7 +456,23 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		}
 
 	}
-
+	private void fireChildrenRemoved(Object parent, Object[] children) {
+		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
+				parent, children);
+		HashSet clone = new HashSet();
+		synchronized (listeners) {
+			clone.addAll(listeners);
+		}
+		synchronized (specificListeners) {
+			clone.addAll(getListenersForParent(parent));
+		}
+		for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
+					.next();
+			l.childrenRemoved(e);
+		}
+		
+	}
 	public void addPrologFileContentModelListener(
 			PrologFileContentModelListener l) {
 		if (!listeners.contains(l)) {

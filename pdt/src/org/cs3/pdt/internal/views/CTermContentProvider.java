@@ -252,8 +252,8 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		viewer.refresh();//TODO: fine grained viewer updates
-		
+		//viewer.refresh();//TODO: fine grained viewer updates
+		viewer.add(e.parent, e.children);
 	}
 
 	public void childrenChanged(final PrologFileContentModelEvent e) {
@@ -269,8 +269,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		viewer.refresh();//TODO: fine grained viewer updates
-		
+		viewer.remove(e.parent, e.children);
 	}
 
 	public void childrenRemoved(final PrologFileContentModelEvent e) {
