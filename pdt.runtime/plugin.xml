@@ -52,7 +52,11 @@
   <library
         alias="library"
         id="pdt.runtime.library.swipl"
-        path="library/swipl/"/>             
+        path="library/swipl/"/>
+  <library
+        alias="library"
+        id="pdt.runtime.library.attic"
+        path="library/attic/"/>             
     </extension>
  
 </plugin>

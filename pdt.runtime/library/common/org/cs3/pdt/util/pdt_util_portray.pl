@@ -4,6 +4,8 @@
 
 :-module(pdt_util_portray,[portray_clause/1]).
 
+
+
 portray_clause(Term) :-
 	current_output(Out),
 	portray_clause(Out, Term).

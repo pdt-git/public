@@ -25,10 +25,6 @@
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ui.editors"/>
    </requires>
-  <extension
-         point="org.cs3.pdt.runtime.bootstrapContribution">
-      <contribution path="engine/main.pl"/>
-   </extension>
 	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer class="org.cs3.pdt.core.internal.preferences.Initializer"/>
@@ -128,6 +124,7 @@
         <dependency library="pdt.runtime.library.pif"/>
         <dependency library="pdt.runtime.library.common"/>
         <dependency library="pdt.runtime.library.swipl"/>
+        <dependency library="pdt.runtime.library.attic"/>
      </library>
   </extension>
   <extension

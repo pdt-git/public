@@ -57,6 +57,7 @@ import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerEvent;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -782,11 +783,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			PrologSession session = pif.getSession();
 			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
 					.getLibraryManager(), session,
-					new String[] { PDTConsole.PL_LIBRARY });
+					new String[] { PDTConsole.PL_LIBRARY,PrologRuntime.LIB_ATTIC });
 			Map m = null;
 			try {
 				m = session
-						.queryOnce("use_module(library(pdt_console_server)),"
+						.queryOnce("use_module(library(pdt_console_server))," +
+								"use_module(library('org/cs3/pdt/metadata/pdtplugin')),"
 								+ "pdt_current_console_server(Port,LockFile)");
 
 				if (m == null) {
