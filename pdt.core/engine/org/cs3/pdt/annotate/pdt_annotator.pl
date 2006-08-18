@@ -322,7 +322,8 @@ pdt_file_comments(File,Comments):-
 % @param FileAnotations will be unified with an annotated term. see module pdt_util_aterm.
 pdt_file_term(FileSpec,Term):-
     pdt_file_record_key(term,FileSpec,Key),
-	pdt_file_record(Key,Term).
+	pdt_file_record(Key,Term),
+	\+ (Term == end_of_file).
 
 %% pdt_file_record(+Key,-Term)
 % retrieve a file record.

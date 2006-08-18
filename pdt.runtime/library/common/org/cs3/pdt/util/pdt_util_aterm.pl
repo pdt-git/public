@@ -51,8 +51,8 @@
 	pdt_aterm/1,
 	pdt_aterm_member/3,
 	pdt_functor/3,
-	pdt_arg/3/*,
-	pdt_operand/4*/
+	pdt_arg/3,
+	pdt_operand/4
 ]).
 
 
@@ -60,7 +60,15 @@
 %% pdt_aterm(?Term)
 % succeeds if Term is an annotated term.
 %
-pdt_aterm(aterm(_,_)).
+pdt_aterm(aterm(Annos,Term)):-
+	(	var(Annos)
+	;	is_list(Annos)
+	),
+	(	compound(Term)
+	->	\+ pdt_aterm(Term),
+		forall(arg(_,Term,Arg),pdt_aterm(Arg))
+	;	true
+	).
 
 
 
@@ -75,10 +83,10 @@ pdt_aterm(aterm(_,_)).
 pdt_aterm_member(List,Path, Elm):-
     match_elms(List,Path,Elm).
 
-/*
+
 pdt_operand(Operator,List,Path, Elm):-
     match_operand(Operator,List,Path,Elm).
-*/
+
 
 
 
@@ -128,7 +136,7 @@ match_elms(List,[2|T],Elm):-
     pdt_subterm(List,[2],Elms),
     match_elms(Elms,T,Elm).
     	
-/*
+
 match_operand(Operator,ATerm,[],ATerm):-
     \+ pdt_functor(ATerm,Operator),
     !.
@@ -137,7 +145,7 @@ match_operand(_Operator,ATerm,[1],Elm):-
 match_operand(Operator,ATerm,[2|T],Elm):-
     pdt_subterm(ATerm,[2],Elms),
     match_operand(Operator,Elms,T,Elm).
-*/
+
 
 %% pdt_subterm(+Term,+Path,?Subterm).
 %
