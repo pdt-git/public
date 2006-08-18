@@ -170,7 +170,10 @@ accept_loop_impl_X(ServerSocket,Slave,_):-
 
 accept_loop_impl_X(ServerSocket,Slave,Peer):-
 	tcp_open_socket(Slave, InStream, OutStream),
-	tcp_host_to_address(Host,Peer),
+% The following line is evil. It will crash connection initiated from a IAI WLAN IP, because the host name can not be resolved:
+%	 tcp_host_to_address(Host,Peer),
+% replaced by
+	term_to_atom(Peer, Host),
 	thread_self(Self),
 	atom_concat(Self,'_handle_client_',Prefix),
 	atom_concat('@',Host,Suffix),
