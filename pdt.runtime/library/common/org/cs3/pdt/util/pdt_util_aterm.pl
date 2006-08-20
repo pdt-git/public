@@ -55,7 +55,34 @@
 	pdt_operand/4
 ]).
 
+:- use_module(library('org/cs3/pdt/util/pdt_util')).
+:- use_module(library('org/cs3/pdt/util/pdt_source_term')).
 
+:- multifile source_term_hook/2.
+:- dynamic source_term_hook/2.
+pdt_source_term:source_term_hook(ATerm,pdt_util_aterm):-
+    pdt_aterm(ATerm).
+    
+source_term_expansion_hook(ATerm,Term):-
+	pdt_strip_annotation(ATerm,Term,_).
+	
+source_term_functor_hook(ATerm,Name,Arity):-
+	pdt_term_annotation(ATerm,Term,_),
+	functor(Term,Name,Arity).
+
+source_term_arg_hook(ArgNum,ATerm,ArgVal):-
+	pdt_term_annotation(ATerm,Term,_),
+	arg(ArgNum,Term,ArgVal).
+
+source_term_property_hook(ATerm,Key,Value):-
+	pdt_term_annotation(ATerm,_,Annos),
+	Property=..[Key,Value],
+	pdt_memberchk(Property,Annos).
+	
+source_term_set_property_hook(ATerm,Key,Value,NewTerm):-	
+	pdt_term_annotation(ATerm,Term,Annos),
+	Property=..[Key,Value],
+	pdt_term_annotation(NewTerm,Term,[Property|Annos]).
 
 %% pdt_aterm(?Term)
 % succeeds if Term is an annotated term.
