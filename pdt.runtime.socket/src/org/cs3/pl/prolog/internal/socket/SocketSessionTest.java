@@ -71,8 +71,8 @@ public class SocketSessionTest extends TestCase {
      
       //pif=PrologInterfaceFactory.newInstance("org.cs3.pl.prolog.internal.xml.Factory").create();
       pif=PrologInterfaceFactory.newInstance().create();
-      pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
-	  pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+      //pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+	  //pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		
       pif.start();
     }
