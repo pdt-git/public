@@ -392,36 +392,36 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private void addChildren(Object parent, Collection collection) {
 		Vector children=null;
-		boolean removed=false;
+		Object[] removed=null;
 		synchronized (cache) {
 			children = getCachedChildren(parent);
 			if (children.contains(oneMomentPlease)) {
-				removed=true;
+				removed=children.toArray();
 				children.clear();
 				
 			}
 			children.addAll(collection);
 		}
-		if(removed){
-			fireChildrenRemoved(parent, children.toArray());
+		if(removed!=null){
+			fireChildrenRemoved(parent, removed);
 		}
 		fireChildrenAdded(parent, collection.toArray());
 	}
 
 	private void addChild(Object parent, Object child) {
 		Vector children=null;
-		boolean removed=false;
+		Object[] removed=null;
 		synchronized (cache) {
 			children = getCachedChildren(parent);
 			if (children.contains(oneMomentPlease)) {
-				removed=true;
+				removed=children.toArray();
 				children.clear();
 				
 			}
 			children.add(child);
 		}
-		if(removed){
-			fireChildrenRemoved(parent, children.toArray());
+		if(removed!=null){
+			fireChildrenRemoved(parent, removed);
 		}
 		fireChildrenAdded(parent, new Object[] { child });
 	}
