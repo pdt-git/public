@@ -410,7 +410,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 											PDTCore.PREF_SOURCE_PATH_DEFAULT,
 											"/");
 						}
-						@Override
+						
 						public String getHint(String key) {
 							if(UIUtils.IS_WORKSPACE_RESOURCE.equals(key)){
 								return "true";

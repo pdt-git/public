@@ -14,7 +14,7 @@ public class ToggleSortAction extends Action {
 				.getImageDescriptor(ImageRepository.SORT));
 		this.outline = outline;
 		String val = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_OUTLINE_SORT, "false");
-		if(Boolean.parseBoolean(val)){
+		if("true".equalsIgnoreCase(val)){
 			setChecked(true);
 			outline.getTreeViewer().setSorter(new LexicalPrologOutlineSorter());	
 		}

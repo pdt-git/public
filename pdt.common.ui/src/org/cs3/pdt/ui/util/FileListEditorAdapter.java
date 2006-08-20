@@ -31,7 +31,7 @@ public class FileListEditorAdapter extends OptionEditor {
      * Gap between label and control.
      */
     protected static final int HORIZONTAL_GAP = 8;
-	@Override
+	
 	protected void createControls(Composite composite) {
 		GridLayout layout = new GridLayout();
         layout.numColumns = editor.getNumberOfControls();
