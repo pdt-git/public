@@ -69,8 +69,8 @@ public class AsyncSocketSessionTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = Factory.newInstance();
 		pif = (PrologInterface2) factory.create();
-		pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
-		pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+		//pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+		//pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		pif.start();
 		rec = new Recorder();
 		session = pif.getAsyncSession();

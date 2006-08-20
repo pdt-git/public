@@ -54,7 +54,13 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
-
+/**
+ * 
+ * Before running this test, please start an external prolog process and consult the file
+ * main_socket.pl 
+ * TODO: include this in the test fixture.
+ *
+ */
 public class ConnectionToRunningPrologServerTest extends TestCase {
 
 	public final static String FACTORY="org.cs3.pl.prolog.internal.socket.Factory";
@@ -198,6 +204,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 	private PrologInterface init() throws PrologInterfaceException {
 		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
 		PrologInterface pif = factory.create();
+		
 		pif.setOption(SocketPrologInterface.STANDALONE,"true");
 		pif.start();
 		return pif;
