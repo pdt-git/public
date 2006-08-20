@@ -60,6 +60,9 @@
 % with relevance to the PDT will eventually become public api.
 :- ensure_loaded(library('test_wiki')). 
 :- ensure_loaded(library('html')).
+:- ensure_loaded(library('pldoc')).
+:- ensure_loaded(library('wiki')).
+:- ensure_loaded(library('modes')).
 	
 %attach_comments(+ATermIn,+InputStream,+CPositions, -RemainingPositions, -ATermOut)
 %
@@ -169,8 +172,9 @@ attach_arg_comments([ArgIn|ArgsIn],CommentsMap,Stream,Positions,[ArgOut|ArgsOut]
 %% pdt_comment_dom(+File, +Pos, +CommentString, -Dom)
 % Parse raw comment data into a DOM
 %
-% This predicate is used as an interface to functionality from the pldoc package, which is still under 
-% development.
+% This predicate is used as an interface to 
+% functionality from the pldoc package, which 
+% is still under development.
 % 
 % @param FileSpec 		The file containing the comment
 % @param Pos 			The comment position. this is a stream_position_data term.
