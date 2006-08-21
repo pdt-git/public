@@ -39,36 +39,88 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/*********
+it is assumed that
+ - a source term represents a piece of source code that would be parsed into a prolog term. 
+   It typically has a well-defined location (e.g. given as character 
+   offsets) within a source file. 
+ - Arbitrary application data can be attached to subterms.
+ - source terms are datastructures representing a "working copy" of the actual information stored somewhere on heap.
+ - source terms carry enough information to identify the source file to which they belong aswell as their position
+   relative to the other terms in this file.
+ - source terms live on the stack. All operations on source terms are non-destructive.
+ - source terms can be stored or "commited" on the heap and associated with a given source file.
+ - it is possible to iterate all source terms that were stored for a given file.
+ - it is possible to compare two source terms within a file by order of occurance in the containing file. 
+   this order is expected to be transitive. Both of the following conditions hold:
+   + a parent term preceeds all its subterms. (pre-fix ordering of subterms)
+   + a term is preceeded by all subterms of its left sibblings (order by occurance)
 
+A typical life cycle of a source term would look like this:
+ - the term is checked out from some heap data structure. 
+ - the term is modified, i.e properties are added, the structure is modified, ...
+ - the term is commited back to the heap.
+
+
+
+*********/
 :- module(pdt_source_term,[
 	source_term/2,
+	source_term_var/1,
 	source_term_arg/3,
 	source_term_expand/2,
 	source_term_functor/3,
 	source_term_property/3,
-	source_term_set_property/4
+	source_term_set_property/4,
+	source_term_copy_properties/3,
+	source_term_create/3
+/*	source_term_update/2,
+	source_term_commit/2,
+	source_term_checkout/2*/
 ]).
 
 
 :- dynamic source_term_hook/2.
 :- multifile source_term_hook/2.
 
-%% source_term(?SourceTerm)  
-% verify that the argument a source term.
+%% source_term(+SourceTerm,-Module)  
+% Check if there is an Implementation for the given source term.
 %
-% I.e. _somehow_ refering to a character sequence read 
-% from an actual source file.
+% This calls souce_term_hook/2 to find a module that contains the necessary hook clauses
+% to handle this source term. It should NOT be used to create source terms. See source_term_create/3.
 source_term(SourceTerm,Module):-
     source_term_hook(SourceTerm,Module),
     !.
 source_term(_,pdt_source_term).
 
+
+%% source_term_var(?Sourceterm)
+% succeeds if SourceTerm is a source term that represents a variable.
+source_term_var(SourceTerm):-
+    source_term(SourceTerm,Module),
+    Module:current_predicate(source_term_var_hook/1),
+    !,
+    Module:source_term_var_hook(SourceTerm).
+source_term_var(SourceTerm):-
+    var(SourceTerm).
+%% source_term_create(+Module,?Term,-SourceTerm)  
+% creates a new source term.
+% Uses the implementation in Module to create a new SourceTerm. 
+% Whether or not any annotations are initially added to the (sub-) term(s) is 
+% completely up to the implementation.
+
+source_term_create(Module,Term,SourceTerm):-
+    Module:current_predicate(source_term_create_hook/2),
+    !,
+    Module:source_term_create_hook(Term,SourceTerm).
+source_term_create(_,Term,Term).
+
+
+
 %% source_term_expand(+SourceTerm, -Term) 
 % Expand source term
 %
-% if the term is - as in e.g. with "annotated terms" - wrapped 
-% in some data structure, unify the "actual" 
-% (plain, unwrapped, ...) term with the second argument.
+% unify the second argument with the plain prolog term represented by this source term.
 source_term_expand(SourceTerm,Term):-
     source_term(SourceTerm,Module),
     Module:current_predicate(source_term_expand_hook/2),
@@ -77,8 +129,12 @@ source_term_expand(SourceTerm,Term):-
 source_term_expand(Term,Term).
 
 
-%% source_term_functor(+SourceTerm, Name,Arity) 
+
+%% source_term_functor(+SourceTerm, ?Name,?Arity) 
 % access the principal functor of a source term.
+% This works much as functor/3. If SourceTerm is a source term representing a variable,
+% and if Name and Arity are ground, SourceTerm will become a source term representing a term with
+% the given name and arity. Note however that this source term is incomplete, as its arguments are not specified.
 source_term_functor(SourceTerm,Name,Arity):-
     source_term(SourceTerm,Module),
     Module:current_predicate(source_term_functor_hook/3),
@@ -89,6 +145,10 @@ source_term_functor(SourceTerm,Name,Arity):-
 
 %% source_term_arg(?ArgNum, +SourceTerm, ?ArgValue) 
 % like arg/3, only that second and third arguments are source terms.
+% Similar to arg/3 this predicate can be used to construct source terms:
+% If the ArgNum-th argument of SourceTerm was not yet specified, and ArgValue is bound to a
+% source term, then ArgValue will in fact become the ArgNum-th argument of SourceTerm.
+
 source_term_arg(ArgNum,SourceTerm,ArgVal):-
     source_term(SourceTerm,Module),
     Module:current_predicate(source_term_arg_hook/3),
@@ -116,4 +176,14 @@ source_term_set_property(SourceTerm,Key,Value,NewSourceTerm):-
     !,
     Module:source_term_set_property_hook(SourceTerm,Key,Value,NewSourceTerm).
 
+%% source_term_copy_properties
+% copy term annotations.
+% this copies all properties of source term In to source term Out, overwriting any conflicting 
+% properties in Out.
+source_term_copy_properties(From,To,Out):-
+    source_term(From,Module),
+    source_term(To,Module),
+    Module:current_predicate(source_term_copy_properties_hook/3),
+    !,
+    Module:source_term_copy_properties_hook(From,To,Out).
 
