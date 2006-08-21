@@ -61,6 +61,7 @@
 :- multifile source_term_hook/2.
 :- dynamic source_term_hook/2.
 pdt_source_term:source_term_hook(ATerm,pdt_util_aterm):-
+    nonvar(ATerm),
     pdt_aterm(ATerm).
     
 source_term_expansion_hook(ATerm,Term):-
@@ -76,18 +77,51 @@ source_term_arg_hook(ArgNum,ATerm,ArgVal):-
 
 source_term_property_hook(ATerm,Key,Value):-
 	pdt_term_annotation(ATerm,_,Annos),
-	Property=..[Key,Value],
-	pdt_memberchk(Property,Annos).
+	(	var(Annos)
+	->	fail
+	;	Property=..[Key,Value],
+		pdt_memberchk(Property,Annos)
+	).
 	
 source_term_set_property_hook(ATerm,Key,Value,NewTerm):-	
 	pdt_term_annotation(ATerm,Term,Annos),
+	(	var(Annos)
+	->	Annos=[]
+	;	true
+	),
 	Property=..[Key,Value],
 	pdt_term_annotation(NewTerm,Term,[Property|Annos]).
+
+
+source_term_copy_properties_hook(From,To,Out):-	
+	pdt_term_annotation(From,_,FromProperties),
+	pdt_term_annotation(To,ToTerm,ToProperties),
+	(	var(ToProperties)
+	->	ToProperties=[]
+	;	true
+	),
+	append(ToProperties,FromProperties,OutProperties),
+	pdt_term_annotation(Out,ToTerm,OutProperties).
+
+source_term_create_hook(Term,ATerm):-
+    pdt_splice_annotation(Term,_,ATerm).
+    
+source_term_var_hook(ATerm):-
+    pdt_term_annotation(ATerm,Term,_),
+    var(Term).
 
 %% pdt_aterm(?Term)
 % succeeds if Term is an annotated term.
 %
-pdt_aterm(aterm(Annos,Term)):-
+pdt_aterm(A):-
+    pdt_aterm_fast(A).
+
+pdt_aterm_fast(aterm(Annos,Term)):-
+    (	var(Annos)
+	;	is_list(Annos)
+	).
+	
+pdt_aterm_save(aterm(Annos,Term)):-
 	(	var(Annos)
 	;	is_list(Annos)
 	),

@@ -57,7 +57,8 @@ file_annotation_hook([File|_],_,In,[defines_module(Module), exports(SortedExport
 
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
     %% check if term is a module declaration
-    pdt_strip_annotation(InTerm,':-'(module(_Module,_Exports)),_),    
+    pdt_strip_annotation(InTerm,Stripped,_),    
+    Stripped==':-'(module(_Module,_Exports)),
 	%% check the exports list 
 	check_position(InTerm,TmpTerm),
 	check_exports(TmpTerm,OutTerm).

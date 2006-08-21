@@ -51,7 +51,7 @@
 	]).
 	
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
-:- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/util/pdt_source_term')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_term_position')).
 
@@ -87,8 +87,11 @@ pdt_attach_comments(ATerm,_,_,[],[],ATerm):-
     !.
 pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATermOut):-
 	% read character start and end offsets of the term from the term annotations.	
+	/*
 	pdt_term_annotation(ATermIn,_,AnnosIn),
 	pdt_member(position(Start-End),AnnosIn),
+	*/
+	source_term_property(ATermIn,position,Start-End),
 	
 	% rough separation of comments in three intervals left, mid and right.
 	% Left positions are left of the term, mid within abd right positions are at the right of the term.
@@ -100,6 +103,7 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 	do_attach_left(ATermIn,LeftPositions,ATerm1),
 	
 	% the middle must belong to the arguments of the term. Recurse on arguments.
+	/*	
 	pdt_term_annotation(ATerm1,Subterm1,Annos1),
 	(	nonvar(Subterm1)
 	->	Subterm1=..[Functor|Args1],
@@ -108,6 +112,8 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 		pdt_term_annotation(ATerm2,Subterm2,Annos1)
 	;	true
 	),
+	*/
+	do_attach_middle(ATerm1,MidPositions,CommentsMap,Stream,ATerm2),
 	
 	% from the comments reamining to the right, we claim all comments that "directly" follow
 	% the current term, i.e., there is no non-whitespace token between the end of the term and the beginning
@@ -119,14 +125,39 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 	% for the other positoins are unified with RemainingPositions.
 	pdt_chop_before(TPos,RightPositions,ClaimedPositions,RemainingPositions),
 	do_attach_right(ATerm2,ClaimedPositions,ATermOut).
-	
+
+
+do_attach_middle(Term,[],_CommentsMap,_Stream,Term):-
+    !.
+do_attach_middle(TermIn,Positions,CommentsMap,Stream,TermOut):-
+    source_term_functor(TermIn,Name,Arity),
+    source_term_functor(Term1,Name,Arity),
+    source_term_copy_properties(TermIn,Term1,TermOut),
+    do_attach_args(TermIn,Positions,CommentsMap,Stream,1,Arity,TermOut).
+    
+do_attach_args(_TermIn,_Positions,_CommentsMap,_Stream,N,M,_TermOut):-
+    N>M,
+    !.
+do_attach_args(TermIn,Positions,CommentsMap,Stream,N,M,TermOut):-
+	source_term_arg(N,TermIn,ArgIn),
+    pdt_attach_comments(ArgIn,CommentsMap,Stream,Positions,RemainingPositions,ArgOut),
+    source_term_arg(N,TermOut,ArgOut),
+    O is N + 1,
+    do_attach_args(TermIn,RemainingPositions,CommentsMap,Stream,O,M,TermOut).
+    
 do_attach_left(ATermIn,Positions,ATermOut):-
-    pdt_term_annotation(ATermIn,Term,Annos),
+	source_term_set_property(ATermIn,comments_left,Positions,ATermOut).
+/*    
+	pdt_term_annotation(ATermIn,Term,Annos),
     pdt_term_annotation(ATermOut,Term,[comments_left(Positions)|Annos]).
+*/
 
 do_attach_right(ATermIn,Positions,ATermOut):-
+	source_term_set_property(ATermIn,comments_right,Positions,ATermOut).
+/*
     pdt_term_annotation(ATermIn,Term,Annos),
     pdt_term_annotation(ATermOut,Term,[comments_right(Positions)|Annos]).
+*/
 
 next_token_position(Stream,End,CommentsMap,TPos):-
     /*FIXME: since end positions are exclusive, it can happen that
@@ -161,6 +192,8 @@ skip_comment(Stream,CommentsMap):-
     string_length(Comment,Len),
     seek(Stream,Len,current,Len).
     
+    
+/*    
 attach_arg_comments([],_,_,_,[]):-
 	!.
 attach_arg_comments(Args,_,_,[],Args):-
@@ -168,7 +201,8 @@ attach_arg_comments(Args,_,_,[],Args):-
 attach_arg_comments([ArgIn|ArgsIn],CommentsMap,Stream,Positions,[ArgOut|ArgsOut]):-
     pdt_attach_comments(ArgIn,CommentsMap,Stream,Positions,RemainingPositions,ArgOut),
     attach_arg_comments(ArgsIn,CommentsMap,Stream,RemainingPositions,ArgsOut).
-    
+*/  
+
 %% pdt_comment_dom(+File, +Pos, +CommentString, -Dom)
 % Parse raw comment data into a DOM
 %

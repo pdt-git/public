@@ -1,5 +1,4 @@
 :- module(pdt_term_pattern,[
-	term_pattern_expansion/3,
 	pdt_term_pattern_match/2,
 	pdt_input_arg/3,
 	pdt_input_functor/3,

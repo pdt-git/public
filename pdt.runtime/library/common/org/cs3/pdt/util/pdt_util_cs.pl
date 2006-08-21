@@ -83,26 +83,27 @@
 	pdt_cs_condition/2,
 	pdt_cs_substitution/2,	
 	pdt_cs_carrier/2,
+	pdt_cs_module/2,
 	pdt_cs_apply/3
 ]).
 
-:- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('org/cs3/pdt/util/pdt_source_term')).
 %% pdt_cs(?CS).
 % unifies CS with a generic CS term.
-pdt_cs(cs(_T,_V,_C,_S)).
+pdt_cs(cs(_T,_V,_M,_C,_S)).
 
 %% pdt_cs_subterm(+CS, ?Subterm).
 % access the Subterm part of a CS term.
-pdt_cs_subterm(cs(T,_V,_C,_S),T).
+pdt_cs_subterm(cs(T,_V,_M,_C,_S),T).
 
 %% pdt_cs_condition(+CS, ?Condition).
 % access the Condition part of a CS term.
-pdt_cs_condition(cs(_T,_V,C,_S),C).
+pdt_cs_condition(cs(_T,_V,_M,C,_S),C).
 
 
 %% pdt_cs_substitution(+CS, ?Substitution).
 % access the Substitution part of a CS term.
-pdt_cs_substitution(cs(_T,_V,_C,S),S).
+pdt_cs_substitution(cs(_T,_V,_M,_C,S),S).
 
 
 %% pdt_cs_substitution(+CS, ?Substitution).
@@ -116,7 +117,11 @@ pdt_cs_substitution(cs(_T,_V,_C,S),S).
 %
 % So after copying the CS but before applying it, the carrier of the copy is unified with that of the
 % original, and thus any variables it hold are sharing with the ones in the original.
-pdt_cs_carrier(cs(_T,V,_C,_S),V).
+pdt_cs_carrier(cs(_T,V,_M,_C,_S),V).
+
+pdt_cs_module(cs(_T,_V,M,_C,_S),M).
+
+:-module_transparent pdt_cs_apply/3.
 
 %% pdt_cs_apply(+TermIn,+CS,-TermOut)
 % apply a conditional substitution to a term.
@@ -126,41 +131,34 @@ pdt_cs_carrier(cs(_T,V,_C,_S),V).
 %
 pdt_cs_apply(TermIn,CS,TermOut):-
     pdt_cs(CS),
-	tt(TermIn,CS,TermOut).
+    pdt_cs_module(CS,Module),
+    (	var(Module)
+    ->  context_module(ModuleCopy),
+    	copy_term(CS,CSCopy),
+    	pdt_cs_carrier(CS,Carry),
+    	pdt_cs_carrier(CSCopy,Carry),
+    	pdt_cs_module(CSCopy,ModuleCopy)
+    ;	CSCopy=CS
+    ),
+	tt(TermIn,CSCopy,TermOut).
 
 tt_args(T,_CS,T):-
-    var(T),
+    source_term_var(T),
     !.
-tt_args(T,CS,Out):-
-    pdt_aterm(T),
-    !,
-    tt_args_aterm(T,CS,Out).
-tt_args(T,CS,Out):-
-    tt_args_plain(T,CS,Out).
-
 
     
-tt_args_plain(T,CS,Out):-
-    functor(T,Name,Arity),
-    functor(Out,Name,Arity),
+tt_args(T,CS,Out):-
+    source_term(T,Module),
+    source_term_functor(T,Name,Arity),
+    source_term_create(Module,_,Tmp),
+    source_term_copy_properties(T,Tmp,Out),
+    source_term_functor(Out,Name,Arity),
     tt_args(T,1,Arity,CS,Out).
     
-tt_args_aterm(T,CS,Out):-    
-    pdt_term_annotation(T,ST,Annos),
-    (	var(ST)
-    ->	Out=T
-    ;   pdt_functor(T,Name,Arity),
-    	pdt_aterm(Out),
-	    pdt_functor(Out,Name,Arity),
-    	pdt_term_annotation(Out,_,Annos),
-	    tt_args(T,1,Arity,CS,Out)
-	).
     
     
-tt_args(T,_,0,_,T):-    
-    !.
-tt_args(T,Arity,Arity,CS,Out):-
-	tt_arg(T,Arity,CS,Out),
+tt_args(_T,N,M,_,_):-    
+    N>M,
     !.
 tt_args(T,N,Arity,CS,Out):-    
 	tt_arg(T,N,CS,Out),
@@ -168,8 +166,8 @@ tt_args(T,N,Arity,CS,Out):-
     tt_args(T,M,Arity,CS,Out).
 
 tt_arg(T,N,CS,Out):-
-	pdt_arg(N,T,Subterm),
-	pdt_arg(N,Out,OutSubterm),
+	source_term_arg(N,T,Subterm),
+	source_term_arg(N,Out,OutSubterm),
     tt(Subterm,CS,OutSubterm).
 
 
@@ -187,16 +185,31 @@ tt_apply_cs(T,CS,Out):-
 	pdt_cs_carrier(CS,Vars),
 	pdt_cs_carrier(CSCopy,Vars),
 	pdt_cs_subterm(CSCopy,T),
+	pdt_cs_module(CSCopy,Module),
 	pdt_cs_condition(CSCopy,Condition),
-	call(Condition),
+	Module:call(Condition),
 	pdt_cs_substitution(CSCopy,Out).
 	
-tt_test_file(InFile,CS,OutFile):-
-	open(InFile,read,In),
-	open(OutFile,write,Out),
+	
+tt_test_cs(CS):-
+    pdt_cs(CS),
+    pdt_cs_carrier(CS,[]),
+    pdt_cs_subterm(CS,T),
+    pdt_cs_condition(CS,
+    	(	\+source_term_var(T),
+    		source_term_functor(T,t,_),
+    		source_term_set_property(T,unfug,kaputt,TT)
+    	)
+    ),
+    pdt_cs_substitution(CS,TT).
+	
+tt_test:-
+    tt_test_cs(CS),
+	open('v:/workspace/pdt.runtime/library/common/org/cs3/pdt/util/test_input.pl',read,In),
+	open('v:/workspace/pdt.runtime/library/common/org/cs3/pdt/util/test_output.pl',write,Out),
 	repeat,
 		read_term(In,Term,[]),
-		tt(Term,CS,ModTerm),
+		pdt_cs_apply(Term,CS,ModTerm),
 		portray_clause(Out,ModTerm),
 		nl(Out),
 		Term==end_of_file,

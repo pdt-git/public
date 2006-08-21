@@ -54,7 +54,7 @@
 	pdt_unique/2
 ]).
 
-:-use_module(library('/org/cs3/pdt/util/pdt_util_io')).
+
 
 :-module_transparent pdt_count/2.
 pdt_count(Goal,N):-
@@ -86,15 +86,14 @@ pdt_call_cleanup(_,Cleanup):-
 
 
 
-debugme(E):-
-    pretty_print(current_output,'',E).
 
-%% file_spec(+FileSpec, -Abs)
+%% pdt_file_spec(+FileSpec, -Abs)
 %
 % pdt "standard" procedure for resolving file specifications
 % to absolute file names.
 % 
-% @param FileSpec can be a filename, an aliased file names or a file references.
+% @param FileSpec can be a filename, an aliased file names or a file references, i.e. a term of the form 
+% =file_ref(<integer>)=. See pdt_file_ref/2.
 % @param Abs will be unified with a canonical, absolute path.
 		
 pdt_file_spec(Var, Abs):-
@@ -111,6 +110,10 @@ filespec(FileSpec, Abs):-
 :-dynamic fileref/2.
 :-index(fileref(1,1)).
 
+
+%% pdt_file_ref(?FileSpec, ?Integer)
+% get a file specification for reference number or vice versa.
+% If no reference number exists for a given file, it will be created.
 pdt_file_ref(FileSpec,Ref):-
 	fileref(FileSpec,Ref),
 	!.
