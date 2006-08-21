@@ -16,44 +16,44 @@
           target: default              
          ================================= -->
     <target name="PrologServerAndBundle" depends="depends" description="--> description">
-    	<copy file="${basedir}/src/org/cs3/pl/prolog/internal/socket/tester.pl" todir="${basedir}/../PrologServer"/>
-    	<copy file="${basedir}/src/org/cs3/pl/prolog/internal/socket/consult_server.pl" todir="${basedir}/../PrologServer/library/server"/>
-    	<copydir src="${basedir}/../pdt.runtime/library/pif" dest="${basedir}/../PrologServer/library/pif" />
-    	<copydir src="${basedir}/../pdt.runtime/library/common/org/cs3/pdt/util" dest="${basedir}/../PrologServer/library/common/org/cs3/pdt/util/" />
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
+    	<copy file="${basedir}/src/org/cs3/pl/prolog/internal/socket/tester.pl" todir="${prolog.server}"/>
+    	<copy file="${basedir}/src/org/cs3/pl/prolog/internal/socket/consult_server.pl" todir="${prolog.server}/library/server"/>
+    	<copydir src="${pdt.runtime}/library/pif" dest="${prolog.server}/library/pif" />
+    	<copydir src="${pdt.runtime}/library/common/org/cs3/pdt/util" dest="${prolog.server}/library/common/org/cs3/pdt/util/" />
+    	<jar destfile="${bundle.prolog}/prolog.jar"
     		basedir="${basedir}/bin"
         />
-    	<delete file="${basedir}/../BundleProlog/prolog.jar"/>
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.common/bin"
+    	<delete file="${bundle.prolog}/prolog.jar"/>
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.common}/bin"
     		update="true"
         />
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.common/src"
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.common}/src"
     		update="true"
         />
 
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.runtime/"
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.runtime}/"
     		includes="library/**"
     		update="true"
         />
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.runtime/bin/"
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.runtime}/bin/"
     		update="true"
         />
     	
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.runtime/src/"
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.runtime}/src/"
     		update="true"
         />
     	
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.runtime.socket/bin/"
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.runtime.socket}/bin/"
     		update="true"
         />
-    	<jar destfile="${basedir}/../BundleProlog/prolog.jar"
-    		basedir="${basedir}/../pdt.runtime.socket/src/"
+    	<jar destfile="${bundle.prolog}/prolog.jar"
+    		basedir="${pdt.runtime.socket}/src/"
     		update="true"
         />
 
