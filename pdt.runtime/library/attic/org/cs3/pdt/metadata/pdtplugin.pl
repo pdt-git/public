@@ -54,7 +54,7 @@
     pef_and_spec/5]).
 
 :- use_module(library(help)).
-:- ensure_loaded(library('org/cs3/pdt/compatibility/compatiblitySWI')).
+%:- [library('org/cs3/pdt/compatibility/compatiblitySWI')].
 /*
 meta_data(?Filename,?Module,?Name,?Arity,?Public,Position,?Length,?Dynamic,?Multifile)
 */
