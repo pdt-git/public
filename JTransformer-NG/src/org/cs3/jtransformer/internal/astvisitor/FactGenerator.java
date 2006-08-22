@@ -1089,10 +1089,10 @@ public class FactGenerator extends ASTVisitor {
 		operands.append(idResolver.getID(node.getRightOperand()));
 
 		for (Iterator it = node.extendedOperands().iterator(); it.hasNext();) {
-			throw new RuntimeException("extended operands (deeply nested operations) are not supported by the PEF representation");
-//			Expression extop = (Expression) it.next();
-//			operands.append(", ");
-//			operands.append(idResolver.getID(extop));
+//			throw new RuntimeException("extended operands (deeply nested operations) are not supported by the PEF representation");
+			Expression extop = (Expression) it.next();
+			operands.append(", ");
+			operands.append(idResolver.getID(extop));
 		}
 		operands.append("]");
 		String[] args =
@@ -1835,7 +1835,7 @@ public class FactGenerator extends ASTVisitor {
 				//idResolver.getID(getUltimateAncestor(node))};
 				idResolver.getID(node.resolveTypeBinding())};
 			type = "identT";
-			writeSourceLocationArgumentIdentifier(node.getQualifier());
+			writeSourceLocationArgumentRaw(node,ARGUMENT_IDENTIFIER,node.getStartPosition(),node.getLength());
 
 		} else {
 			args = new String[] {
@@ -2032,6 +2032,9 @@ public class FactGenerator extends ASTVisitor {
 	 * @param name
 	 */
 	private void writeSourceLocationArgumentIdentifier(Name name) {
+		if(name == null) {
+			System.err.println("DEBUG");
+		}
 		writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
 				idResolver.getID(name),
 				ARGUMENT_IDENTIFIER,

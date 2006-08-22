@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class FactBaseBuilder {
 
@@ -113,6 +114,8 @@ public class FactBaseBuilder {
 
     public synchronized void build(final IResourceDelta delta, final int flags,
             IProgressMonitor monitor) throws CoreException {
+    	// FIXME: Expensive?
+    	clearAllMarkersWithJTransformerFlag();
 		IJobManager jobManager = Platform.getJobManager();
         try {
             if (building) {
@@ -131,9 +134,22 @@ public class FactBaseBuilder {
         } catch (OperationCanceledException e) {
             throw e;
         } catch (Throwable t) {
-            IMarker marker = project.createMarker(JTransformer.PROBLEM_MARKER_ID);
-            marker.setAttribute(IMarker.MESSAGE,
-                    "Could not create PEFs for Project.");
+			HashMap attributes = new HashMap();
+
+			attributes.put(IMarker.MESSAGE, "Could not create PEFs for project: " + project.getName() + " - " +t.getLocalizedMessage());
+			attributes.put(IMarker.SEVERITY, new Integer(IMarker.SEVERITY_ERROR));
+			attributes.put(IMarker.LOCATION, project.getLocation());
+//			attributes.put(IMarker.LINE_NUMBER, new Integer(line));
+
+//			// attributes.put(IMarker.CHAR_START, new Integer(startOffset));
+			// attributes.put(IMarker.CHAR_END, new Integer(startOffset + 1));
+			attributes.put(JTransformer.PROBLEM_MARKER_ID, "1");
+
+			MarkerUtilities.createMarker(project, attributes, IMarker.PROBLEM);
+        	
+            //IMarker marker = project.createMarker(IMarker.SEVERITY_ERROR);//JTransformer.PROBLEM_MARKER_ID);
+//            marker.setAttribute(IMarker.MESSAGE,
+//                    "Could not create PEFs for Project.");
             Debug.report(t);
         } finally {
 			//jobManager.endRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
@@ -143,6 +159,34 @@ public class FactBaseBuilder {
         }
     }
 
+	/**
+	 * @throws CoreException
+	 * @throws PrologInterfaceException 
+	 * @throws PrologException 
+	 */
+	protected void clearAllMarkersWithJTransformerFlag() throws CoreException
+	{
+		// Modified Dec 21, 2004 (AL)
+		// Clearing all Markers from current Workspace
+		// that have got LogicAJPlugin "Nature"
+		IMarker[] currentMarkers = project
+				.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+		if (currentMarkers != null)
+		{
+			for (int i = 0; i < currentMarkers.length; i++)
+			{
+				if (currentMarkers[i].getAttribute(JTransformer.PROBLEM_MARKER_ID) != null)
+				{
+					// Hier k�nnte in Zukunft noch eine Abfrage hinzu
+					// um welchen Aspekt es sich gerade handelt.
+					// Gibts im Moment aber nicht. Deswegen
+					// l�sche ich einfach alle
+					currentMarkers[i].delete();
+				}
+			}
+		}
+	}
+    
     synchronized private void build_impl(IResourceDelta delta, int flags,
             IProgressMonitor monitor) throws IOException, CoreException, PrologInterfaceException {
         PrologSession session = null;
@@ -189,7 +233,7 @@ public class FactBaseBuilder {
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
              buildFacts(submon, toProcess);
-
+            
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             loadExternalFacts(submon);
@@ -222,7 +266,7 @@ public class FactBaseBuilder {
 
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
             throws IOException, CoreException, PrologInterfaceException {
-        monitor.beginTask("Generating new PEFs ", toProcess.size());
+        monitor.beginTask("Generating new PEFs", toProcess.size());
         AsyncPrologSession session = ((PrologInterface2)pif).getAsyncSession();
         try {
 	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
@@ -231,7 +275,7 @@ public class FactBaseBuilder {
 	            }
 	            IFile file = (IFile) i.next();
 	            forgetFacts(file, false);
-	            monitor.subTask(" - process " + file.getName());
+	            monitor.subTask(" - processing " + file.getName());
 	            buildFacts(session, file);
 	            monitor.worked(1);
 	        }
@@ -279,9 +323,6 @@ public class FactBaseBuilder {
                             if (!isStoreUpToDate((IFile) (resource))) { // added,...???
                                 Debug.debug("Adding " + resource
                                         + " to toProcess");
-								final IJavaProject javaProject = (IJavaProject) project
-				                .getNature(JavaCore.NATURE_ID);
-								
 									toProcess.add(resource);
                             }
                             break;
@@ -481,7 +522,7 @@ public class FactBaseBuilder {
     public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
             CoreException, PrologInterfaceException {
         Debug.debug("enter loadExternalFacts");
-        monitor.beginTask("creating external PEFs.", IProgressMonitor.UNKNOWN);
+        monitor.beginTask("creating external PEFs ", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
         PrologSession session = pif.getSession();
 		AsyncPrologSession asyncSession = ((PrologInterface2)pif).getAsyncSession();
@@ -504,9 +545,8 @@ public class FactBaseBuilder {
                                     monitor,
                                     IProgressMonitor.UNKNOWN,
                                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-                            submon
-                                    .beginTask(typeName,
-                                            IProgressMonitor.UNKNOWN);
+                            submon.subTask(" - processing " + typeName);
+                            //submon.subTask(" - processing " + typeName);
                             if (submon.isCanceled()) {
                                 throw new OperationCanceledException();
                             }
