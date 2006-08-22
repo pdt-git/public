@@ -15,6 +15,11 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 public final class JTransformer {
 
 	/**
+	 * JTransformer "core" engine.
+	 */
+	public static final String LIB_ENGINE = "org.cs3.jtransformer.engine";
+	
+	/**
 	 * Error message id when the PrologInterfaceException
 	 * was catched.
 	 */

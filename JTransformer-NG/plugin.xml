@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.jtransformer"
    name="JTransformer"
-   version="2.1.1"
+   version="2.2.0"
    provider-name="http://roots.iai.uni-bonn.de"
    class="org.cs3.jtransformer.JTransformerPlugin">
 
@@ -106,16 +106,6 @@
        
       </viewerContribution>
    </extension>
-   <extension
-         point="org.cs3.pdt.runtime.bootstrapContribution">
-      <contribution path="engine/main.pl"/>
-   </extension>
-   <extension
-         point="org.cs3.pdt.runtime.hooks">
-      <hook
-            class="org.cs3.jtransformer.internal.hooks.ReloadHook"
-            id="ReloadHook"/>
-   </extension>
    
    <extension
       id="jtransformerproblem"
@@ -189,5 +179,14 @@
           class="org.cs3.jtransformer.internal.tracker.JavaEditorTracker"
           id="org.cs3.jtransformer.internal.tracker.FollowJavaEditor"
           label="follow Java editor"/>
+ </extension>
+ <extension
+       point="org.cs3.pdt.runtime.prologLibrary">
+    <library
+          alias="library"
+          id="org.cs3.jtransformer.engine"
+          path="engine">
+       <dependency library="pdt.runtime.library.attic"/>
+    </library>
  </extension>
 </plugin>

@@ -17,6 +17,30 @@ test(violatedContraints):-
 tearDown(violatedContraints):-
     retractall(classDefT(a,b,c,[d])).
 
+setUp(violatedContraintTypeTerm):-
+    add(packageT(package,pname)),
+    add(classDefT(class1,package,name,[a])),
+    add(fieldDefT(a,class1,type(class,class1,0),fname,null)),
+    add(classDefT(class2,package,name2,[a2])),
+    add(fieldDefT(a2,class2,type(basic,int,0),fname2,null)),
+    add(classDefT(class3,package,name3,[a3])),
+    add(fieldDefT(a3,class3,type(class,nonexisting,0),fname3,null)).
+    
+    
+test(violatedContraintTypeTerm):-
+    assert_true('evaluate check tree links on field with bad class type term',
+                findall(M,(
+                	 member(Tree,[a,a2,a3]),
+                	 violatedContraints(Tree,M)
+                	),List
+                )
+    ),
+    assert_true('test for one expected error: type term references a nonexisting class', 
+                length(List,1)).     
+tearDown(violatedContraintTypeTerm):-
+    rollback.
+
+
 assertErrorMsgs(ErrorMsg):-
     assert(constraintErrorMsg(ErrorMsg)).
 /*
@@ -377,7 +401,15 @@ refType(paramDefT).
 refType(fieldDefT).
 refType(methodDefT).
 
-typeTermType(type(_,_,_)).
+/**
+ * check if the argument is a type term, that
+ * the referenced class exists
+ */
+typeTermType(type(basic,_,_)):- 
+   !.
+typeTermType(type(class,Type,_)):-
+   class(Type,_,_).
+    
 
 nullType('null').
 

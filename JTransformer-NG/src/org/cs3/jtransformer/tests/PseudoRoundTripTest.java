@@ -77,7 +77,7 @@ import org.eclipse.jface.text.BadLocationException;
  */
 public class PseudoRoundTripTest extends FactGenerationTest {
 
-	private static final boolean SHOW_PLWIN_INSTANCE = false;
+	private static final boolean SHOW_PLWIN_INSTANCE = true;
 	
     private final class Comparator implements IResourceVisitor {
         public boolean visit(IResource resource) throws CoreException {
@@ -286,6 +286,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         if(r==null){
             Debug.debug("debug");
         }
+        
         assertNotNull(packageName + ": no toplevelT????", r);
 
         //and checkTreeLinks should say "yes"
