@@ -13,13 +13,18 @@ import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
+import org.cs3.pdt.runtime.DefaultSubscription;
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
+import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -28,12 +33,14 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
@@ -241,8 +248,156 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 		}
 
 	}
+	
+	PrologInterface pif = null;
+	Object pifMonitor = new Object();
+	
+	class JTransformerSubscription extends DefaultSubscription implements LifeCycleHook {
+		
+		
+		public JTransformerSubscription(String id,
+				   String pifID,  
+				   String descritpion, 
+				   String name){
+			super(id, pifID, descritpion, name);
+		}
+
+		public void configure(PrologInterface pif) {
+			pif.addLifeCycleHook(this, getId(), new String[0]);
+			if (pif.isUp()) {
+				try {
+					afterInit(pif);
+				} catch (PrologInterfaceException e) {
+					Debug.rethrow(e);
+				}
+			}
+		}
+
+		
+	    /*
+	     * (non-Javadoc)
+	     * 
+	     * @see org.cs3.pl.prolog.LifeCycleHook#onInit(org.cs3.pl.prolog.PrologSession)
+	     */
+	    public void onInit(PrologInterface pif, final PrologSession initSession) {
+	        try {
+	            JTransformerProject[] jtransformerProjects = JTransformer.getJTransformerProjects(pif);
+	            for (int i = 0; i < jtransformerProjects.length; i++) {
+	                // XXX: ld: i don't like that cast. Any idee?
+	                JTransformerProjectNature jtransformerProject = (JTransformerProjectNature) jtransformerProjects[i];
+
+	                jtransformerProject.reconfigure(initSession);
+
+	            }
+	            JTransformerPlugin plugin = JTransformerPlugin.getDefault();
+	            String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE,
+	                    "false");
+	            if (Boolean.valueOf(v).booleanValue()) {
+	                plugin.reload(initSession);
+	            }
+			
+					PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),
+						initSession, new String[] {JTransformer.LIB_ENGINE});
+					
+					initSession.queryOnce(
+							"[library('jt_engine.pl')],"+
+							"[library('org/cs3/pdt/test/main.pl')],"+
+							"[library('org/cs3/pdt/util/main.pl')]," +
+					        "[library('org/cs3/pdt/compatibility/main.pl')]");
+	                initSession.queryOnce("update_java_lang");
+
+
+				
+	            
+	        } catch (Throwable e) {
+	            Debug.report(e);
+	            throw new RuntimeException(e);
+	        }
+	    }
+
+	    /*
+	     * (non-Javadoc)
+	     * 
+	     * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
+	     */
+	    public void afterInit(PrologInterface pif) throws PrologInterfaceException{
+
+	    	
+	        try {
+	            IWorkspace workspace = ResourcesPlugin.getWorkspace();
+				IWorkspaceDescription wd = workspace
+	                    .getDescription();
+	            if (!wd.isAutoBuilding()) {
+	                return;
+	            }
+	            IProgressMonitor monitor = new NullProgressMonitor();
+	            IProject[] projects = workspace.getRoot()
+	                    .getProjects();
+	            final JTransformerProject[] jtransformerProjects = JTransformer.getJTransformerProjects(pif);
+	            Job j = new Job("Building workspace") {
+	                public IStatus run(IProgressMonitor monitor) {
+	                    try {
+	                        for (int i = 0; i < jtransformerProjects.length; i++) {
+
+	                            JTransformerProject jtransformerProject = jtransformerProjects[i];
+	                            IProject project = jtransformerProject.getProject();
+	                            project.build(IncrementalProjectBuilder.FULL_BUILD,
+	                                    monitor);
+
+	                        }
+	                    } catch (OperationCanceledException opc) {
+	                        return Status.CANCEL_STATUS;
+	                    } catch (Exception e) {
+	                        return new Status(IStatus.ERROR, JTransformer.PLUGIN_ID, -1,
+	                                "Problems during build", e);
+	                    }
+	                    return Status.OK_STATUS;
+	                }
+				      public boolean belongsTo(Object family) {
+					         return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+				      }
+					
+	            };
+
+				//j.setRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
+				j.setRule(workspace.getRoot());
+				j.schedule();
+				
+	        } catch (Throwable e) {
+	            Debug.report(e);
+	            throw new RuntimeException(e);
+	        }
+	    }
+
+	    /*
+	     * (non-Javadoc)
+	     * 
+	     * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
+	     */
+	    public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
+	        JTransformerPlugin plugin = JTransformerPlugin.getDefault();
+	        String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE, "false");
+	        if (Boolean.valueOf(v).booleanValue()) {
+	            JTransformerPlugin.getDefault().save(session);
+	        }
+	    }
+	}
+	
 	public PrologInterface getPrologInterface() {
-		PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterface(getProject().getName());
+		synchronized (pifMonitor) {
+			if(pif != null) {
+				return pif;
+			}
+			pif = PrologRuntimePlugin.getDefault().getPrologInterface(
+					new JTransformerSubscription(
+							getProject().getName(),
+					        getProject().getName(),
+					        "JTransformer factbase of project " + getProject().getName(),
+					        "JTransformer")
+					);
+	
+			return pif;
+		}
 
 //		if (!pif.isUp()) {
 //			try {
@@ -262,7 +417,6 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 		// PrologSession s = pif.getSession();
 		// s.queryOnce("['"+name+"']");
 		// }
-		return pif;
 	}
 
 	/**

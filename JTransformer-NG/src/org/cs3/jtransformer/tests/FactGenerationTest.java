@@ -30,6 +30,7 @@ import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IContainer;
@@ -52,6 +53,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -182,7 +184,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         		    JavaCore.VERSION_1_5);
 
             getTestJavaProject().setOptions(options);
-            //PrologInterface pif = getTestJTransformerProject().getPrologInterface();
+            
 
         } catch (CoreException e) {
             throw new RuntimeException(e);
@@ -646,8 +648,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 project.open(null);
             }
         };
-        ResourcesPlugin.getWorkspace().run(create, getTestProject(),
-                IWorkspace.AVOID_UPDATE, null);
+		ISchedulingRule rule = ResourcesPlugin.getWorkspace().getRuleFactory().modifyRule(project);
+        
+        ResourcesPlugin.getWorkspace().run(create, rule, IWorkspace.AVOID_UPDATE, null);
         return project;
     }
 
@@ -1510,12 +1513,31 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     protected void build() throws CoreException {
         final IProject project = getTestProject();
+        try {
+			disableGenerationOfSyntheticConstructors();
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
+        
 //        _ProgressMonitor m = new _ProgressMonitor();
         project.build(IncrementalProjectBuilder.FULL_BUILD, null);
         
         waitTillDone();
         project.refreshLocal(IResource.DEPTH_INFINITE, null);
     }
+
+	private void disableGenerationOfSyntheticConstructors() throws PrologInterfaceException {
+		PrologInterface pif = getTestJTransformerProject().getPrologInterface();
+        PrologSession session = null;
+        try {
+        	session = pif.getSession();
+        	// make sure that the synthetic constructors are not generated.
+        	session.queryOnce("generate_synthetic_methods(fail)");
+        } finally {
+        	if(session != null)
+        		session.dispose();
+        }
+	}
 
     protected void clean() throws CoreException {    
         build(IncrementalProjectBuilder.CLEAN_BUILD);

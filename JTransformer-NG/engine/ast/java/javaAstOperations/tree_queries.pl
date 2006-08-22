@@ -173,11 +173,15 @@ getToplevel(Id, TL) :-
     !,
     getToplevel(Outer, TL).
 
+getToplevel(Id, Id) :-
+    toplevelT(Id,_,_,_).
+
 getToplevel(Id, TL) :-
     not(class(Id,_,_)),
     enclClass(Id,Class),
     !,
     getToplevel(Class, TL).
+    
 
 /**
  * can_modify(+Id)

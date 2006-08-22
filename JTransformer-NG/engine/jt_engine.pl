@@ -66,6 +66,11 @@ debugme.
 :- ['apply/main'].                 % Apply CTs, garbage collection, rollback
 :- ['debug/main'].                 % 
 :- ['persistence/main'].           % Write all PEFs to a file
+	
+:- [library('org/cs3/pdt/test/main.pl')].
+:- [library('org/cs3/pdt/util/main.pl')].
+:- [library('org/cs3/pdt/compatibility/main.pl')].
+
 % :- ['facade/main'].              % --> src_file_handling     (gk&tr, 20.10.05)
 % :- [astAlternative/...].         % Future AST representation ???
 

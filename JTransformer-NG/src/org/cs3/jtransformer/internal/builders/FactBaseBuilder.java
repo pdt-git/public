@@ -173,6 +173,7 @@ public class FactBaseBuilder {
             SubProgressMonitor submon = new SubProgressMonitor(monitor, 10,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
+            project.refreshLocal(IResource.DEPTH_INFINITE, null);
             if (delta == null) {
                 //session.queryOnce("delete_source_facts");
                 collectAll(toProcess);
@@ -533,7 +534,7 @@ public class FactBaseBuilder {
         IResource resource = icu.getResource();
         String path = resource.getFullPath().removeFileExtension()
                 .addFileExtension("pl").toString();
-
+        
         List clauses  = new ArrayList();
         PrologWriter plw = new PrologWriter(clauses, true);// metaDataSRC.getPrependablePrologWriter(path);
         FactGenerationToolBox box = new DefaultGenerationToolbox();
