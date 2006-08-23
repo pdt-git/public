@@ -205,7 +205,7 @@ public class FactBaseBuilder {
 //            getMetaDataEXT();
 //            getMetaDataSRC();
 
-            monitor.beginTask("building PEFs", 100);
+            monitor.beginTask(project.getName() + " - building PEFs", 100);
             session = pif.getSession();
             final Collection toProcess = new Vector();
             final Collection toDelete = new Vector();
@@ -252,7 +252,7 @@ public class FactBaseBuilder {
 
     private void forgetFacts(IProgressMonitor monitor, final Collection toDelete)
             throws PrologInterfaceException {
-        monitor.beginTask("deleting obsolete PEFs ", toDelete.size());
+        monitor.beginTask(project.getName() + " - deleting obsolete PEFs", toDelete.size());
         for (Iterator i = toDelete.iterator(); i.hasNext();) {
             if (monitor.isCanceled()) {
                 throw new OperationCanceledException("Canceled");
@@ -266,7 +266,7 @@ public class FactBaseBuilder {
 
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
             throws IOException, CoreException, PrologInterfaceException {
-        monitor.beginTask("Generating new PEFs", toProcess.size());
+        monitor.beginTask(project.getName() + " - generating new PEFs", toProcess.size());
         AsyncPrologSession session = ((PrologInterface2)pif).getAsyncSession();
         try {
 	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
@@ -522,7 +522,7 @@ public class FactBaseBuilder {
     public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
             CoreException, PrologInterfaceException {
         Debug.debug("enter loadExternalFacts");
-        monitor.beginTask("creating external PEFs ", IProgressMonitor.UNKNOWN);
+        monitor.beginTask(project.getName() + " - creating external PEFs", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
         PrologSession session = pif.getSession();
 		AsyncPrologSession asyncSession = ((PrologInterface2)pif).getAsyncSession();

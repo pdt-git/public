@@ -333,18 +333,18 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	            IProgressMonitor monitor = new NullProgressMonitor();
 	            IProject[] projects = workspace.getRoot()
 	                    .getProjects();
-	            final JTransformerProject[] jtransformerProjects = JTransformer.getJTransformerProjects(pif);
+	            // final JTransformerProject[] jtransformerProjects = JTransformer.getJTransformerProjects(pif);
 	            Job j = new Job("Building workspace") {
 	                public IStatus run(IProgressMonitor monitor) {
 	                    try {
-	                        for (int i = 0; i < jtransformerProjects.length; i++) {
+	                       // for (int i = 0; i < jtransformerProjects.length; i++) {
 
-	                            JTransformerProject jtransformerProject = jtransformerProjects[i];
-	                            IProject project = jtransformerProject.getProject();
+	                           // JTransformerProject jtransformerProject = jtransformerProjects[i];
+	                           // IProject project = jtransformerProject.getProject();
 	                            project.build(IncrementalProjectBuilder.FULL_BUILD,
 	                                    monitor);
 
-	                        }
+//	                        }
 	                    } catch (OperationCanceledException opc) {
 	                        return Status.CANCEL_STATUS;
 	                    } catch (Exception e) {
