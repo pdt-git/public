@@ -242,8 +242,8 @@ public class Debug {
     }
     public static void dumpStackTrace() {
         try{
-            throw new RuntimeException("just to produce a stack trace");
-        }catch(RuntimeException e){                               
+            throw new Error("just to produce a stack trace");
+        }catch(Throwable e){                               
             Debug.report(e);    
         }
     }
