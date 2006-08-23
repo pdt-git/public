@@ -3,14 +3,6 @@
 
 %
 
-/*
-%:- consult('tests.pl').
-%:- consult('compatiblitySWI.pl').
-%:- consult('factbase.pl').
-%:- consult('generalRules.pl').
-%:- consult('high_level_api.pl').
-*/
-
 /**
  * general helper
  */

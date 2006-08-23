@@ -56,6 +56,9 @@ createVarDefIdents          (_newParent, _oldList, _newList)
 :- dynamic slT/3.
 :- multifile slT/3.
 
+:- dynamic sl_argT/4.
+:- multifile sl_argT/4.
+
 :- multifile subTreeArg/2.
 :- multifile forwards/4.
 :- dynamic forwards/4.
@@ -623,11 +626,19 @@ fullPathOfClass(_id, _name) :-
  *
  * Binds File to the defining file and Begin and Lenght to the position of Pef.
  */
+
+sourceLocation(Tree,File,Start,End):-
+    packageT(Tree,_),
+    toplevelT(TL,Tree,File,_),
+    sl_argT(TL,package, Start,End).
+    
 sourceLocation(Tree,File,Start,End):-
     slT(Tree,Start,End),
     !,
     getToplevel(Tree,TL),
     toplevelT(TL,_,File,_).
+   
+    
 % temporary necessary while aspects are not 
 % completely represented in prolog factbase
 sourceLocation(ID,File,Start,Length):-
