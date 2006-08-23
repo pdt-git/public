@@ -1232,9 +1232,16 @@ attribSignature(implementsT,2).
 attribSignature(modifierT,2).
 attribSignature(externT,1).
 attribSignature(interfaceT,1).
+/**
+ * sourceLocation(ID, ..,)
+ */
 attribSignature(sourceLocation,4).   % :( nicht in ast_node_def :(  
 attribSignature(projectLocationT,3). % :( nicht in ast_node_def :(
+/**
+ * slT(ID, File)
+ */
 attribSignature(slT,3).              % :( nicht in ast_node_def :(
+attribSignature(sl_argT,4).              % :( nicht in ast_node_def :(
 
 
 /**

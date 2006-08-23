@@ -4,13 +4,6 @@
 
 %
 
-/*
-%:- consult('tests.pl').
-%:- consult('compatiblitySWI.pl').
-%:- consult('factbase.pl').
-%:- consult('generalRules.pl').
-%:- consult('high_level_api.pl').
-*/
 
 java_code_generator_memory_stream_key('java_code_generator_memory_stream_key').
 
