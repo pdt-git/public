@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.util.BitSet;
 import java.util.Map;
 
@@ -182,7 +183,10 @@ public class PseudoRoundTripTest extends FactGenerationTest {
     }
 
 
-    private String packageName;
+	protected static Class clazz;
+
+
+    protected String packageName;
 
     private PrologSession session;
 
@@ -193,6 +197,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
      */
     public PseudoRoundTripTest(String name) {
         super(name);
+        Debug.setOutputStream(System.err);
         this.packageName = name;
     }
 
@@ -202,7 +207,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
      */
     public PseudoRoundTripTest(String name, String packageName) {
         super(name);
-
+        Debug.setOutputStream(System.err);
         this.packageName = packageName;
     }
 
@@ -293,6 +298,8 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         //assertNotNull("checkTreeLinks reports errors",
         // session.queryOnce("checkTreeLinks"));
 
+        checkTreeValidity();
+        
         Util.startTime("rename");
         IResource folder = project.getFolder(packageName);
         rename(folder, new String[] { "java", "class" }, "orig");
@@ -329,6 +336,15 @@ public class PseudoRoundTripTest extends FactGenerationTest {
     }
 
     /**
+     * Template method. Called after the PEFs are generated
+     * and before the directory is moved.
+     *
+     */
+    protected void checkTreeValidity() {
+		
+	}
+
+	/**
      * @param cus
      * @throws CoreException
      */
@@ -584,8 +600,15 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         for (int i = 1; i <= 539; i++) {//1-539
             if (!blacklist.get(i)) {
             	//if(i == 317)
-                s.addTest(new PseudoRoundTripTest("testIt",
+            	if(clazz != null && clazz.equals(SourceLocationArgumentTest.class)) {
+            		s.addTest(
+            				new SourceLocationArgumentTest("testIt",
+                            generatePackageName(i)));
+            		
+            	} else {
+            		s.addTest(new PseudoRoundTripTest("testIt",
                         generatePackageName(i)));
+            	}
             }
         }
         s.setName("PseudoRoundtripTest");

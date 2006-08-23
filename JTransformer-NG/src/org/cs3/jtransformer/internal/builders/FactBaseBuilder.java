@@ -761,9 +761,13 @@ public class FactBaseBuilder {
             if (monitor != null) {
                 monitor.done();
             }
+        } catch(Throwable t) {
+        	Debug.error(t.getLocalizedMessage());
+        	Debug.dumpStackTrace();
+        	Debug.rethrow(t);
         } finally {
             session.dispose();
-        }
+        } 
     }
 
     /*
