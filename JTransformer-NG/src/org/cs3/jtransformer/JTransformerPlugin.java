@@ -122,7 +122,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
     }
 
     
-    private IClasspathEntry getFirstSourceFolder(IJavaProject javaProject) throws JavaModelException {
+    public IClasspathEntry getFirstSourceFolder(IJavaProject javaProject) throws JavaModelException {
         IClasspathEntry[] cp = javaProject.getResolvedClasspath(true);
         for(int i=0;i<cp.length;i++){
             if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
