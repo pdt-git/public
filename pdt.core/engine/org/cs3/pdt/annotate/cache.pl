@@ -12,6 +12,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
+:- use_module(library('pif_observe')).
 :- pdt_add_preference(
 	cache_dir,
 	'Cache Directory', 
@@ -122,8 +123,7 @@ pdt_write_cache(FileSpec):-
 	new_index_entry(File),
 	cache_file(File,CacheFile),
 	open(CacheFile,write,Stream),
-	pdt_write_file_annotation(Stream,File),
-	close(Stream),
+	call_cleanup(pdt_write_file_annotation(Stream,File),close(Stream)),
 	update_index_entry(File).
 
 pdt_read_cache(FileSpec):-
@@ -132,8 +132,7 @@ pdt_read_cache(FileSpec):-
     Time > 0,
     cache_file(File,CacheFile),
     open(CacheFile,read,Stream),
-    pdt_read_file_annotation(Stream),
-    close(Stream),
+    call_cleanup(pdt_read_file_annotation(Stream),close(Stream)),
     pif_notify(file_annotation(File),update).
 	
 pdt_clear_cache(FileSpec):-
@@ -191,11 +190,14 @@ pdt_write_cache_index:-
     cache_dir(Dir),
     atom_concat(Dir,'/cache_index',File),
     open(File,write,Stream),
-    forall(
-    	cache_index(Hk,CacheFile,Time,Serial),
-    	portray_clause(Stream,cache_index(Hk,CacheFile,Time,Serial))
-    ),
-    close(Stream).
+    call_cleanup(
+    	(    forall(
+    			cache_index(Hk,CacheFile,Time,Serial),
+		    	portray_clause(Stream,cache_index(Hk,CacheFile,Time,Serial))
+		      )
+		 ), 
+		 close(Stream)
+	).
 pdt_read_cache_index:-
     cache_dir(Dir),
     atom_concat(Dir,'/cache_index',File),

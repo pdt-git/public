@@ -206,16 +206,22 @@ execute_interleaved_hook(Annotator,FileStack,OpModule,TermIn,TermOut):-
 	).
 
 
-execute_annotators([],_FileStack,_OpModule,FileAnnos,FileAnnos).
+annotator_hooks(Annotator,Hooks):-
+    annotator(Annotator,Hooks,_),
+    !.
+
+execute_annotators([],_FileStack,_OpModule,FileAnnos,FileAnnos):-
+	!.
 execute_annotators([Annotator|Annotators],FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
     execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,FileAnnosTmp),
     execute_annotators(Annotators,FileStack,OpModule,FileAnnosTmp,FileAnnosOut).
 
 execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
-    annotator(Annotator,Hooks,_),
+    annotator_hooks(Annotator,Hooks),
     execute_annotator_hooks(Annotator,Hooks,FileStack,OpModule,FileAnnosIn,FileAnnosOut).
 
-execute_annotator_hooks(_Annotator,[],_FileStack,_OpModule,FileAnnos,FileAnnos).
+execute_annotator_hooks(_Annotator,[],_FileStack,_OpModule,FileAnnos,FileAnnos):-
+	!.
 execute_annotator_hooks(Annotator,[Hook|Hooks],FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
     %format("executing hook ~w on ~w ...~n",[Hook,Annotator]),
     execute_annotator_hook(Annotator,Hook,FileStack,OpModule,FileAnnosIn,FileAnnosTmp),
@@ -224,8 +230,10 @@ execute_annotator_hooks(Annotator,[Hook|Hooks],FileStack,OpModule,FileAnnosIn,Fi
 
 
 %interleaved hooks are handled separately, see do_process_term and friends
-execute_annotator_hook(_,interleaved,_,_,FileAnnos,FileAnnos).
+execute_annotator_hook(_,interleaved,_,_,FileAnnos,FileAnnos):-
+    !.
 execute_annotator_hook(Annotator,file,FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
+    !,
     pdt_maybe(Annotator:file_annotation_hook(FileStack,OpModule,FileAnnosIn,TmpAnnos)),
 	(	var(TmpAnnos)
 	->	FileAnnosOut=FileAnnosIn
@@ -303,6 +311,7 @@ call_cleanup_hook2([Annotator|Annotators],File,Annos):-
 
 pdt_file_annotation(FileSpec,FileAnotations):-
     nonvar(FileSpec),
+    !,
     pdt_file_spec(FileSpec,Abs),    
     file_annotation(Abs,FileAnotations).
 pdt_file_annotation(File,FileAnotations):-
@@ -449,25 +458,16 @@ pdt_ensure_annotated([FileSpec|Stack]):-%case 3: cannot use cache, rebuild from 
     copy_file_to_memfile(FileSpec,MemFile),
     memory_file_to_atom(MemFile,MemFileAtom),
     open_memory_file(MemFile,read,Input),
-    
-    read_terms(MemFileAtom,[Abs|Stack],OpModule,Input),
-    execute_annotators([Abs|Stack],OpModule,[],FileAnnos1),
-	
-%    collect_terms(FileStack,Terms),
-    assert(file_annotation(Abs,FileAnnos1)),
+    call_cleanup(
+    	(    read_terms(MemFileAtom,[Abs|Stack],OpModule,Input),
+		    execute_annotators([Abs|Stack],OpModule,[],FileAnnos1),	
+		    assert(file_annotation(Abs,FileAnnos1))
+		),	
+		(	close(Input),
+			free_memory_file(MemFile)
+		)
+	),
 
-/*
-	collect_comments([Abs|Stack],CommentsMap),
-    assert(file_comments(Abs,CommentsMap)),
-
-	collect_errors([Abs|Stack],Errors),
-    (	nonvar(Errors),Errors\==[]
-    ->	forall(member(Error,Errors),assert(file_error(Abs,Error)))
-    ;	true
-    ),
-    */
-	close(Input),
-	free_memory_file(MemFile),
 	%format("writing cache...~n",[]),
 	%format("done~n",[]),
 	pdt_write_cache(Abs),
@@ -633,8 +633,10 @@ process_comments(MemFileAtom,CommentsMap,ATermIn,Options,ATermOut):-
 	comment_positions(Comments,CommentPositions),
 	atom_to_memory_file(MemFileAtom,MemFile),
 	open_memory_file(MemFile,read,Stream),
-	pdt_attach_comments(ATermIn,CommentsMap,Stream,CommentPositions,_,ATermOut),
-	close(Stream),
+	call_cleanup(
+		pdt_attach_comments(ATermIn,CommentsMap,Stream,CommentPositions,_,ATermOut),
+		close(Stream)
+	),
 	free_memory_file(MemFile).
 process_comments(_MemFileAtom,_CommentsMap,ATerm,_Options,ATerm).
 

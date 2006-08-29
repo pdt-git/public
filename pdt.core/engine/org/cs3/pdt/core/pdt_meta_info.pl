@@ -371,16 +371,19 @@ pdt_render_term(FileSpec,N,Depth,Out):-
 	render_term(ATerm,Clause,OpModule,Depth,Out).
 	
 render_term(ATerm,Clause,OpModule,Depth,Out):-
-	new_memory_file(MemFile),
-	open_memory_file(MemFile,write,Stream),	
+
 	pdt_term_annotation(Clause,_,Annos),
 	pdt_member(variable_names(VarNames),Annos),
 	execute_elms(VarNames),
 	term_variables(ATerm,Vars),
 	unify_with_underscores(Vars),
 	pdt_strip_annotation(ATerm,Term,_),
-	write_term(Stream,Term,[max_depth(Depth),module(OpModule),portray(true)]),
-	close(Stream),
+	new_memory_file(MemFile),	
+	open_memory_file(MemFile,write,Stream),	
+	call_cleanup(
+		write_term(Stream,Term,[max_depth(Depth),module(OpModule),portray(true)]),
+		close(Stream)
+	),
 	memory_file_to_atom(MemFile,Out),
 	free_memory_file(MemFile).
 	
@@ -405,10 +408,13 @@ pdt_builtin_help(Name,Arity,Summary,Help):-
 	!,
 	new_memory_file(MemFile),
 	open_memory_file(MemFile,write,MemStream),
-	write(MemStream,'<html><body><pre>'),
-	show_ranges([From-To],ManStream,MemStream),
-	write(MemStream,'</pre></body></html>'),
-	close(MemStream),
+	call_cleanup(
+		(	write(MemStream,'<html><body><pre>'),
+			show_ranges([From-To],ManStream,MemStream),
+			write(MemStream,'</pre></body></html>')
+		),
+		close(MemStream)
+	),
 	memory_file_to_atom(MemFile,Help),
 	free_memory_file(MemFile).
 pdt_builtin_help(_Name,_Arity,'', '').

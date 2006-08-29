@@ -118,7 +118,7 @@ source_term_var_hook(ATerm):-
 pdt_aterm(A):-
     pdt_aterm_fast(A).
 
-pdt_aterm_fast(aterm(Annos,Term)):-
+pdt_aterm_fast(aterm(Annos,_Term)):-
     (	var(Annos)
 	;	is_list(Annos)
 	).
@@ -215,7 +215,7 @@ match_operand(Operator,ATerm,[2|T],Elm):-
 %succeeds if Term is a term or an annotated term and Path is a list of integers
 %such that if each element of Path is interpreted as an argument position, Path induces a
 %path from Term to the (plain or annotated) sub term SubTerm.
-pdt_subterm(Term,[], Term).
+pdt_subterm(Term,[], Term). %Do NOT cut this clause!!!
 pdt_subterm(ATerm,Path,SubTerm):-
 	pdt_aterm(ATerm),
 	!,

@@ -113,7 +113,10 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 	;	true
 	),
 	*/
-	do_attach_middle(ATerm1,MidPositions,CommentsMap,Stream,ATerm2),
+	(	source_term_var(ATerm1)
+	->	ATerm2=ATerm1
+	;	do_attach_middle(ATerm1,MidPositions,CommentsMap,Stream,ATerm2)
+	),
 	
 	% from the comments reamining to the right, we claim all comments that "directly" follow
 	% the current term, i.e., there is no non-whitespace token between the end of the term and the beginning
@@ -131,9 +134,9 @@ do_attach_middle(Term,[],_CommentsMap,_Stream,Term):-
     !.
 do_attach_middle(TermIn,Positions,CommentsMap,Stream,TermOut):-
 	source_term(TermIn,Module),
-    source_term_functor(TermIn,Name,Arity),
     source_term_create(Module,_,Term1),
-    source_term_functor(Term1,Name,Arity),
+	source_term_functor(TermIn,Name,Arity),
+	source_term_functor(Term1,Name,Arity),
     source_term_copy_properties(TermIn,Term1,TermOut),
     do_attach_args(TermIn,Positions,CommentsMap,Stream,1,Arity,TermOut).
     
@@ -263,6 +266,8 @@ execute_elms([Goal|Goals]):-
 pdt_dom_html(_File,Dom,HTML):-
     new_memory_file(MF),
     open_memory_file(MF,write,Out),
-    doc_write_html(Out,  Dom),
-    close(Out),
+    call_cleanup(
+	    doc_write_html(Out,  Dom),
+    	close(Out)
+    ),
     memory_file_to_atom(MF,HTML).        
