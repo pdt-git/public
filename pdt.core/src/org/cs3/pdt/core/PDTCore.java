@@ -47,6 +47,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 public class PDTCore {
 
@@ -129,7 +130,8 @@ public class PDTCore {
 	
 
 	public static final String BUILTIN_INDEX_FILE = "builtin_predicates.idx";
-
+	public static final String CACHE_DIR = "cache";
+	
 	public static final int ERR_UNKNOWN = -1;
 	public static final int ERR_PIF = -2;
 
@@ -138,6 +140,9 @@ public class PDTCore {
 
 
 	public static final int CX_TOGGLE_SOURCE_PATH_ENTRY = -3;
+
+
+	
 
 
 	

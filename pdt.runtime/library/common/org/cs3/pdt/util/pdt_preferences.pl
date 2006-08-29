@@ -76,11 +76,11 @@ do_preference_value(Module,Key,Value):-
     preference_default(Module,Key,Value).
     
 pdt_set_preference_value(Key,Value):-
-	context_module(Module),
+	context_module(Module), 
 	set_preference_value(Module,Key,Value).
 	
 set_preference_value(Module,Key,Value):-
-	preference(Module,Key,_,_,_),
+	%preference(Module,Key,_,_,_),
 	retractall(preference_value(Module,Key,_)),
 	assert(preference_value(Module,Key,Value)).
 	

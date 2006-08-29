@@ -97,9 +97,9 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
-
-		as.queryOnce(file, "pdt_ensure_annotated('" + plFileName + "')");
-
+		
+		as.queryOnce(file, "pdt_ensure_annotated('" + plFileName + "')");		
+		
 	}
 
 	/*
@@ -137,7 +137,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				Debug.error("Wasn das f�r ein Buil kind jetzt?");
 				return null;
 			}
-			forgetList.addAll(buildList);
+			
 			Debug.debug("PrologBuilder.build(...) wants to forget: "
 					+ forgetList.toString());
 			Debug.debug("PrologBuilder.build(...) wants to build: "
@@ -152,15 +152,13 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			monitor.beginTask(taskname, forgetList.size() + buildList.size());
 			as.addBatchListener(new DefaultAsyncPrologSessionListener() {
 				public void goalSucceeded(AsyncPrologSessionEvent e) {
-					monitor.worked(1);
+					if(e.ticket instanceof IFile){
+						monitor.worked(1);
+					}
 					if (monitor.isCanceled()) {
 						new Thread() {
 							public void run() {
-								try {
-									as.abort();
-								} catch (PrologInterfaceException e) {
-									Debug.rethrow(e);
-								}
+								as.dispose();
 								Debug
 										.debug("prolog builder aborted (theoretically)");
 							}
@@ -172,20 +170,30 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			try {
 				String value = plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS, "false");
 				as.queryOnce("set parse_comments option", "pdt_annotator:pdt_set_preference_value(parse_comments,"+value+")");
+				
+//				File cacheDir = PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.CACHE_DIR).toFile();
+//				String plCacheDir = Util.prologFileName(cacheDir);
+//				as.queryOnce("set cache dir option", "pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
 				forget(forgetList, as, monitor);
 				build(buildList, as, monitor);
-				as.join();
+				if(!monitor.isCanceled()){
+					as.join();
+				}
 			} finally {
 				if (as != null) {
 					as.dispose();
 
 				}
 			}
-
+			if(monitor.isCanceled()){
+				return null;
+			}
 			PrologSession s = plProject.getMetadataPrologInterface()
 					.getSession();
 			try {
 				update_markers(buildList, s);
+				s.queryOnce("pdt_write_cache_index");
+				s.queryOnce("pdt_index_save_to_disk");
 			} finally {
 				if (s != null) {
 					s.dispose();
@@ -449,6 +457,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		String plFileName = Util.prologFileName(ioFile);
 
 		as.queryOnce(file, "pdt_forget_annotation('" + plFileName + "')");
+		
 
 	}
 
@@ -461,7 +470,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 */
 	private void forget(Set v, AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, PrologInterfaceException {
-		for (Iterator it = v.iterator(); it.hasNext();) {
+		for (Iterator it = v.iterator(); it.hasNext()&& ! monitor.isCanceled();) {
 			IFile file = (IFile) it.next();
 			forget(file, as);
 

@@ -151,6 +151,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 			PLUtil.configureFileSearchPath(mgr,s,new String[]{PDTCore.ENGINE_ID});
 			Map map = s.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
+					"use_module(library('/org/cs3/pdt/annotate/cache'))," +
 					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
 					"use_module(library('/org/cs3/pdt/model/predicate_definition_factory'))," +
 					"use_module(library('/org/cs3/pdt/model/builtin_predicate_factory'))," +
@@ -174,19 +175,35 @@ public class MetadataSubscription extends DefaultSubscription implements
 			if(map==null){
 				throw new RuntimeException("could not load annotator modules: query failed.");
 			}
-			File builtinIdxFile = PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.BUILTIN_INDEX_FILE).toFile();
-			String plFile = Util.prologFileName(builtinIdxFile);
-			if(builtinIdxFile.exists()){
-				map=s.queryOnce("pdt_index_load_from_file(builtin_predicates,'"+plFile+"')");
-				if(map==null){
-					throw new RuntimeException("could not load builtin predicate index");
-				}
-			}else{
-				map=s.queryOnce("pdt_index_builtins,pdt_index_save_to_file(builtin_predicates,'"+plFile+"')");
-				if(map==null){
-					throw new RuntimeException("could not load builtin predicate index");
-				}
+			map=null;
+
+			//setup cache directory 
+			//FIXME: what if several projects share one pif?
+			//then there are multiple subscriptions to the same pif
+			//then there are conflicting cache_dir settings.
+			//possible resolution: make this a per pif property.
+			// see PDT-186
+			File cacheDir = getProject().getWorkingLocation(PDTCore.PLUGIN_ID).append(PDTCore.CACHE_DIR).toFile();
+			String plCacheDir = Util.prologFileName(cacheDir);
+			map=s.queryOnce("pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
+			Debug.info("setting cache dir to "+plCacheDir);
+			if(map==null){
+				throw new RuntimeException("could not configure cache dir: query failed.");
 			}
+			map=null;
+
+			map=s.queryOnce("pdt_read_cache_index");
+			if(map==null){
+				Debug.warning("could not read cache index");
+			}
+			
+			map=null;
+			map=s.queryOnce("pdt_index_load_from_disk");
+			if(map==null){
+				Debug.warning("could not read index tables");
+			}			
+			
+			
 		}catch(Throwable t){
 			Debug.rethrow(t);
 		}finally{

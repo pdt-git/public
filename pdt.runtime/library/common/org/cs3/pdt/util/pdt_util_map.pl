@@ -50,11 +50,31 @@
 	pdt_map_put/4,
 	pdt_map_remove/3,
 	pdt_map_get/3,
-	pdt_map_next/4/*,
-	pdt_map_merge/3*/
+	pdt_map_next/4,
+	pdt_map_findall/4
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util')).
+
+
+
+:-module_transparent pdt_map_findall/4.
+
+pdt_map_findall(Key,Value,Goal,Map):-
+	pdt_map_empty(Map0),
+	pdt_unique(pdt_map_findall,U),
+	nb_setval(U,Map0),
+	forall(Goal,
+		(	nb_getval(U,MapIn),
+			pdt_map_put(MapIn,Key,Value,MapOut),
+			nb_setval(U,MapOut)
+		)
+	),
+	nb_getval(U,Map),
+	nb_delete(U).
+
+
 
 %pdt_map_merge(InA,InB,Out):-
     
