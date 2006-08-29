@@ -60,6 +60,8 @@
 
 :- multifile source_term_hook/2.
 :- dynamic source_term_hook/2.
+
+implements_source_term.
 pdt_source_term:source_term_hook(ATerm,pdt_util_aterm):-
     nonvar(ATerm),
     pdt_aterm(ATerm).
