@@ -49,6 +49,10 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private HashMap specificListeners = new HashMap();
 
+	public ContentModel(){
+		Debug.debug("debug");
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
