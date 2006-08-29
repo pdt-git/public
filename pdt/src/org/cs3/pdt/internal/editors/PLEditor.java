@@ -106,7 +106,7 @@ public class PLEditor extends TextEditor {
 
 	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 
-	protected AbstractSelectionChangedListener fOutlineSelectionChangedListener = new OutlineSelectionChangedListener();
+	
 
 	private ColorManager colorManager;
 
@@ -129,17 +129,7 @@ public class PLEditor extends TextEditor {
 
 	}
 
-	class OutlineSelectionChangedListener extends
-			AbstractSelectionChangedListener {
-		public void selectionChanged(SelectionChangedEvent event) {
-			doSelectionChanged(event);
-		}
-	}
-
-	protected void doSelectionChanged(SelectionChangedEvent event) {
-		// TODO doSelectionChanged
-	}
-
+	
 	protected abstract class AbstractSelectionChangedListener implements
 			ISelectionChangedListener {
 
@@ -324,7 +314,7 @@ public class PLEditor extends TextEditor {
 					// fOutlinePage= new PrologOutline(this,
 					// ((IFileEditorInput)getEditorInput()).getFile());
 					fOutlinePage = new PrologOutline(this);
-					fOutlineSelectionChangedListener.install(fOutlinePage);
+					
 					if (getEditorInput() != null)
 						fOutlinePage.setInput(getEditorInput());
 				}
@@ -345,23 +335,13 @@ public class PLEditor extends TextEditor {
 	 */
 	public void outlinePageClosed() {
 		if (fOutlinePage != null) {
-			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
+			
 			fOutlinePage = null;
 			resetHighlightRange();
 		}
 	}
 
-	protected void synchronizeOutlinePage(ISourceReference element,
-			boolean checkIfOutlinePageActive) {
-		if (fOutlinePage != null && element != null) {// !(checkIfOutlinePageActive
-			// &&
-			// isJavaOutlinePageActive()))
-			// {
-			fOutlineSelectionChangedListener.uninstall(fOutlinePage);
-			// fOutlinePage.select(element);
-			fOutlineSelectionChangedListener.install(fOutlinePage);
-		}
-	}
+	
 
 	public PrologOutline getOutlinePage() {
 		return fOutlinePage;
