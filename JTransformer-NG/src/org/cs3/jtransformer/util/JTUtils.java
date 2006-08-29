@@ -143,8 +143,8 @@ public class JTUtils
 		
 		// ---
 		
-		adaptOutputProjectName(destProject, "/.project");
-		adaptOutputProjectName(destProject, "/bundle-pack");
+		//adaptOutputProjectName(destProject, "/.project");
+		//adaptOutputProjectName(destProject, "/bundle-pack");
 	}
 
 	private static void copyFile(IProject srcProject, IProject destProject, final String fileName) throws CoreException
