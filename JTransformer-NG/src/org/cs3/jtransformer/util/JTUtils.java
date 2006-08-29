@@ -1,6 +1,5 @@
 package org.cs3.jtransformer.util;
 
-import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -8,6 +7,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.JavaModelException;
  *
  */
 public class JTUtils
+
 {
 	private static Boolean useSameOutdirWithSuffix = null;
 	
@@ -51,32 +52,33 @@ public class JTUtils
 	 * is used.<br>
 	 * Otherwise the default output project location is used
 	 * (normally, ends with '<i>LogicAJOutput</i>').
+	 * @param project 
 	 * 
 	 * @see JTConstants.SYSTEM_PROPERTY_USE_SAME_OUTDIR_WITH_SUFFIX
 	 * 
 	 * @return String the absolute path of the output dir
 	 * @throws JavaModelException
 	 */
-	public static String getOutputProjectPath()
+	public static String getOutputProjectPath(IProject project)
 	{
-		String outputProjectLocation = getOutputProjectLocation();
-		
-		if( outputProjectLocation == null )
-			System.err.println("************************ schmatz: outputProjectLocation is null");
-			
-		String outdir = null;
-		if( outputProjectLocation != null && JTUtils.useSameOutdirWithSuffix() )
-		{
-			outdir = outputProjectLocation + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
-		}
-		else
-		{
-			/*
-			 * This is the original code:
-			 */
-			outdir = getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName();
-		}
-		return outdir;
+//		String outputProjectLocation = getOutputProjectLocation();
+//		
+//		if( outputProjectLocation == null )
+//			System.err.println("************************ schmatz: outputProjectLocation is null");
+//			
+//		String outdir = null;
+//		if( outputProjectLocation != null && JTUtils.useSameOutdirWithSuffix() )
+//		{
+//			outdir = outputProjectLocation + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
+//		}
+//		else
+//		{
+//			/*
+//			 * This is the original code:
+//			 */
+			return getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName(project);
+//		}
+//		return outdir;
 	}
 
 	/**
@@ -90,11 +92,11 @@ public class JTUtils
 	 *  
 	 * @return String
 	 */
-	public static String getOutputProjectName()
+	public static String getOutputProjectName(IProject project)
 	{
 		if( JTUtils.useSameOutdirWithSuffix() )
 		{
-			String outputProjectName = getOutputProjectName_() + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
+			String outputProjectName = project.getName() + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
 			if( outputProjectName == null )
 			{
 				System.err.println("************************ schmatz: outputProjectName is null");
@@ -125,57 +127,44 @@ public class JTUtils
 			.getLocation().toOSString();
 	}
 	
-	public static void copyClasspath(IProject srcProject, IProject destProject)
-			throws CoreException
+	/**
+	 * Copies all needed files like the class path.
+	 * 
+	 * @param srcProject
+	 * @param destProject
+	 * @throws CoreException
+	 */
+	public static void copyAllNeededFiles(IProject srcProject, IProject destProject) throws CoreException
 	{
-		IFile old = destProject.getFile(new Path("/.classpath"));
-		old.refreshLocal(IResource.DEPTH_INFINITE, null);
-		old.delete(true, true, null);
-		IFile file = srcProject.getFile(new Path("/.classpath"));
-		file.copy(new Path(destProject.getFullPath() + "/.classpath"), true,
-				null);
-		destProject.refreshLocal(IResource.DEPTH_INFINITE,
-				new NullProgressMonitor());
+		copyFile(srcProject, destProject, "/.classpath");
+		copyFile(srcProject, destProject, "/.project");
+		copyFile(srcProject, destProject, "/bundle.manifest");
+		copyFile(srcProject, destProject, "/bundle-pack");
+		
+		// ---
+		
+		adaptOutputProjectName(destProject, "/.project");
+		adaptOutputProjectName(destProject, "/bundle-pack");
 	}
 
-	// ---------------------------------------------
-	
-	/**
-	 * This method has dependencies to Eclipse.<br><br>
-	 * 
-	 * Returns the location (absolute path) of the
-	 * current project.<br><br>
-	 * 
-	 * E.g. '<tt>C:/Dokumente und Einstellungen/Mark Schmatz/Eigene Dateien/runtime-EclipseApplication/MarksLogicAJDemo</tt>'
-	 * 
-	 * @param project
-	 * @return String The absolute path of the given 's location
-	 */
-	private static String getOutputProjectLocation()
+	private static void copyFile(IProject srcProject, IProject destProject, final String fileName) throws CoreException
 	{
-		try
+		IFile file = srcProject.getFile(new Path(fileName));
+		if( file.exists() )
 		{
-			IFile f = UIUtils.getFileInActiveEditor();
-			if( f != null )
-			{
-				String projectLocation = f.getProject().getLocation().makeAbsolute().toString();
-				return projectLocation;
-			}
+			IFile old = destProject.getFile(new Path(fileName));
+			old.refreshLocal(IResource.DEPTH_INFINITE, null);
+			old.delete(true, true, null);
+			file.copy(new Path(destProject.getFullPath() + fileName), true, null);
+			destProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		}
-		catch (Exception e)
-		{
-			System.out.println("No active editor open");
-		}
-		
-		return null;
 	}
 	
-	private static String getOutputProjectName_()
+	private static void adaptOutputProjectName(IProject destProject, String fileName) throws CoreException
 	{
-		String projectLocation = getOutputProjectLocation();
-		if( projectLocation != null )
-			return projectLocation.substring(projectLocation.lastIndexOf("/")+1);
-		else
-			return null;
+		IFile file = destProject.getFile(new Path(fileName));
+		if( file.exists() )
+		{
+		}
 	}
 }
