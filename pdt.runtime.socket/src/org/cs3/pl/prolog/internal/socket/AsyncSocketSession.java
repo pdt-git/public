@@ -159,6 +159,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			
 		} catch (IOException e) {
 			pif.handleException(e);
+			return false;
 		}
 		return true;
 	}
