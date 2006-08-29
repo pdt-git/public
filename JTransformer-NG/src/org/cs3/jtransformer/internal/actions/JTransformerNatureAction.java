@@ -1,5 +1,6 @@
 package org.cs3.jtransformer.internal.actions;
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -9,7 +10,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -71,6 +71,14 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 					return;
 		        }
 		        	
+				/*
+				 *  Schmatz:
+				 *  Moved from LogicAJPlugin
+				 */
+				IProject destProject = CreateOutdirUtils.getInstance().createOutputProject().getProject();
+				JTUtils.copyClasspath(project, destProject);
+				// End - Schmatz
+
 			    addJTransformerNature(project);
 			    action.setChecked(true);
 			}
@@ -142,7 +150,8 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
 	 *           org.eclipse.jface.viewers.ISelection)
 	 */
-	public void selectionChanged(IAction action, ISelection selection) {
+	public void selectionChanged(IAction action, ISelection selection)
+	{
 		project=null;
 		if (selection instanceof IStructuredSelection) {
 			Object obj = ((IStructuredSelection) selection).getFirstElement();
@@ -164,8 +173,8 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			if (project.isOpen()) {
 				action.setEnabled(true);
 				try {
-					action.setChecked(project.getDescription().hasNature(
-							JTransformer.NATURE_ID));
+					boolean checked = project.getDescription().hasNature(JTransformer.NATURE_ID);
+					action.setChecked(checked);
 				} catch (CoreException e) {
 					Debug.report(e);
 				}
