@@ -31,4 +31,4 @@ a page entry is a record that contains
 
 */
 
-page_get_entry(Page,Key,Entry)
+page_get_entry(Page,Key,Entry).

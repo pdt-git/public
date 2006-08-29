@@ -150,12 +150,15 @@ pdt_index_load_from_disk:-
 
 my_consult(File):-
     open(File,read,Stream),
-    repeat,
-		read_term(Stream,Term,[double_quotes(string)]),
-		record_term(Term),
-		Term==end_of_file,
-	!,
-	close(Stream).
+	call_cleanup(
+		(    repeat,
+				read_term(Stream,Term,[double_quotes(string)]),
+				record_term(Term),
+				Term==end_of_file,
+			!
+		),
+		close(Stream)
+	).
 
 
 record_term(end_of_file):-
@@ -167,8 +170,10 @@ record_term(index_table(IxName,Ix)):-
 pdt_index_save_to_disk:-
     index_file(File),
     open(File,write,Stream),
-    forall(index_table(IxName,Ix),portray_clause(Stream,index_table(IxName,Ix))),
-    close(Stream).
+    call_cleanup(
+	    forall(index_table(IxName,Ix),portray_clause(Stream,index_table(IxName,Ix))),
+	    close(Stream)
+	).
     
 index_file(File):-
     pdt_cache_dir(Dir),

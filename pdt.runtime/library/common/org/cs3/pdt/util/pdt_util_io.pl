@@ -61,11 +61,16 @@ MemFile - a handle to a Memfile.
 */
 copy_file_to_memfile(File,MemFile):-
     pdt_file_spec(File,Abs),
-    open_memory_file(MemFile,write,MemStream),    
-    open(Abs,read,Stream),
-    copy_stream_data(Stream,MemStream),
-    close(Stream),
-    close(MemStream).
+    open_memory_file(MemFile,write,MemStream),  
+    call_cleanup(  
+    	(	open(Abs,read,Stream),
+    		call_cleanup(
+			    copy_stream_data(Stream,MemStream),
+			    close(Stream)
+			)
+		),
+	    close(MemStream)
+	).
     
     
 /**
@@ -80,10 +85,15 @@ MemFile - a handle to a Memfile.
 copy_memfile_to_file(MemFile,File):-
     pdt_file_spec(File,Abs),
     open_memory_file(MemFile,read,MemStream),    
-    open(Abs,write,Stream),
-    copy_stream_data(MemStream,Stream),
-    close(Stream),
-    close(MemStream).    
+    call_cleanup(
+    	(	open(Abs,write,Stream),
+    		call_cleanup(
+			    copy_stream_data(MemStream,Stream),
+			    close(Stream)
+			)
+		),
+	    close(MemStream)
+	).    
     
 
 pretty_print(Term):-
