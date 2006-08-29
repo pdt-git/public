@@ -106,34 +106,90 @@ Thinks left to do:
 	   ]).
 
 % create an empty tree.
-pdt_rbtree_new(black([],[],[],[])).
-pdt_rbtree_empty(black([],[],[],[])).
+pdt_rbtree_new(N):-
+    node_nil(N).
+pdt_rbtree_empty(N):-
+    node_nil(N).
 
-pdt_rbtree_left(Tree,_):- 
-	pdt_rbtree_empty(Tree),
-	!,
-	fail.
+
+
+%context access
+node_arity(5).
+attribute_argnum(color,1).
+attribute_argnum(left,2).
+attribute_argnum(key,3).
+attribute_argnum(value,4).
+attribute_argnum(right,5).
+
+node(N):-
+	node_arity(A),
+    functor(N,node,A).
+
+red(N):-
+	node(N),
+    attribute(N,color,red).
+    
+black(N):-
+	node(N),
+    !,
+    attribute(N,color,black).    
+black(N):-
+	nil(N).    
+
+nil([]).
+    
+
+attribute(Node,_Attr,_Val):-
+    nil(Node),
+    !,
+    fail.
+attribute(Node,Attr,Val):-
+    attribute_argnum(Attr,Num),
+    arg(Num,Node,Val).
+
+set_attribute(Nil,_Attr,_Val,_Out):-
+    nil(Nil),
+    !,
+    fail.
+set_attribute(In,Attr,Val,Out):-
+	attribute_argnum(Attr,Num),
+	node_arity(Arity),
+	node(Out),
+	set_attribute(In,Num,Val,Out,1,Arity).
+
+
+set_attribute(_In,_Num,_Val,_Out,N,Arity):-
+    N>Arity,
+    !.
+set_attribute(In,Num,Val,Out,Num,Arity):-    
+    !,
+    arg(Num,Out,Val),
+    Next is Num + 1,
+	set_attribute(In,Num,Val,Out,Next,Arity).
+set_attribute(In,Num,Val,Out,N,Arity):-
+    arg(N,In,Val),
+    arg(N,Out,Val),
+    Next is N + 1,
+	set_attribute(In,Num,Val,Out,Next,Arity).
+	
+
 pdt_rbtree_left(Tree,Left):-
-	arg(1,Tree,Left).     
+	attribute(Tree,left,Left).     
 
 
-pdt_rbtree_right(black([],[],[],[]),_):-!,fail.
 pdt_rbtree_right(Tree,Right):-
-	arg(1,Tree,Right).    
-
-pdt_rbtree_new(K,V,black(Nil,K,V,Nil)) :-
-	Nil = black([],[],[],[]).
+	attribute(Tree,right,Left).     
+	
+pdt_rbtree_new(K,V,Tree) :-
+    black(Tree),
+    attribute(Tree,left,Nil),
+    attribute(Tree,right,Nil),
+    attribute(Tree,key,K),
+    attribute(Tree,value,V),
+	nil(Nil).
 	
 
 	
-pdt_rbtree_next(_, _, _, black([],_,_,[])) :- 
-	!, 
-%	writeln(leaf),
-	fail.
-pdt_rbtree_next(At,Key,Val,Tree):-
-	arg(2,Tree,KA),
-	my_compare(Cmp,KA,At),
-	lookup_next(Cmp,At,Key,Val,Tree).
 
 %introduce an artificial lower bound
 my_compare(<,'',_):-
@@ -148,92 +204,153 @@ my_compare(=,A,B):-
 my_compare(C,A,B):-
     A\=B,
     compare(C,A,B).
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+% searching.
+
+
+%%
+% pdt_rbtree_next(+At,-Key,-Val,+Tree)
+%
+% iterate all entries with keys equal to or greater than At.
+%
+% @param At the index value at which the search is to be started.
+% @param Key is unified with the Key of each matching entry.
+% @param Val is unified with the Value of each matching entry.
+% @param The Red-Black-Tree to be searched.
+pdt_rbtree_next(_, _, _, Tree) :- 
+    nil(Tree),
+	!, 
+	fail.
+pdt_rbtree_next(At,Key,Val,Tree):-
+	attribute(Tree,key,KA),
+	my_compare(Cmp,KA,At),
+	lookup_next(Cmp,At,Key,Val,Tree).
+
+
     
 lookup_next(<,At, K, V, Tree) :-
 %    	writeln(left_off->look_right),
-	arg(4,Tree,NTree),
+	attribute(Tree,right,NTree),
 	pdt_rbtree_next(At,K, V, NTree).
 lookup_next(>, At,K, V, Tree) :-
 %    writeln(right_off->look_left),
-	arg(1,Tree,NTree),
+	attribute(Tree,left,NTree),
 	pdt_rbtree_next(At,K, V, NTree).
 lookup_next(=, At,K, V, Tree) :-
 %	writeln(match->look_left),
-	arg(1,Tree,NTree),
+	attribute(Tree,left,NTree),
 	pdt_rbtree_next(At,K, V, NTree).
 lookup_next(=,_, K, V, Tree) :-
-%    writeln(match),
-    	arg(2,Tree,K),
-	arg(3,Tree,V).
+    attribute(Tree,key,K),
+	attribute(Tree,value,V).
 lookup_next(=, At,K, V, Tree) :-
 %	writeln(match->look_right),
-	arg(4,Tree,NTree),
+	attribute(Tree,right,NTree),
 	pdt_rbtree_next(At,K, V, NTree).
 lookup_next(>, _,K, V, Tree) :-
 %    writeln(right_off->match),
-    	arg(2,Tree,K),
-	arg(3,Tree,V).
+    attribute(Tree,key,K),
+	attribute(Tree,value,V).
 lookup_next(>, At,K, V, Tree) :-
 %    writeln(right_off->look_right),
-	arg(4,Tree,NTree),
+	attribute(Tree,right,NTree),
 	pdt_rbtree_next(At,K, V, NTree).
 
 
-pdt_rbtree_lookup(_, _, black([],_,_,[])) :- !, fail.
+%pdt_rbtree_lookup(_, _, black([],_,_,[])) :- !, fail.
+
+%% pdt_rbtree_lookup(+Key, -Val, +Tree) is det
+% lookup the first matching entry in a R-B-Tree
+% 
+% @param Key the key too look up.
+% @param Val will be unified with the value of the first matching entry.
+% @param Tree the tree to be searched.
+pdt_rbtree_lookup(_, _, Tree) :- 
+    nil(Tree),
+	!, 
+	fail.
 pdt_rbtree_lookup(Key, Val, Tree) :-
-	arg(2,Tree,KA),
+	attribute(Tree,key,KA),
 	my_compare(Cmp,KA,Key),
 	lookup(Cmp,Key,Val,Tree).
 
 lookup(>, K, V, Tree) :-
-	arg(1,Tree,NTree),
+	attribute(Tree,left,NTree),
 	pdt_rbtree_lookup(K, V, NTree).
 lookup(<, K, V, Tree) :-
-	arg(4,Tree,NTree),
+	attribute(Tree,right,NTree),
 	pdt_rbtree_lookup(K, V, NTree).
 lookup(=, _, V, Tree) :-
-	arg(3,Tree,V).
+	attribute(Tree,value,V).
 
+%% pdt_rbtree_lookupall(+Key, -Val, +Tree)
+% like lookup/3, but finds all matching entries.
 pdt_rbtree_lookupall(Key, Val, T):-
     var(Key),
     !,
     pdt_rbtree_next('',Key,Val,T).
-pdt_rbtree_lookupall(_, _, black([],_,_,[])) :- !, fail.
+%pdt_rbtree_lookupall(_, _, black([],_,_,[])) :- !, fail.
+pdt_rbtree_lookupall(_, _, Tree) :- 
+	nil(Tree),
+	!, 
+	fail.
 pdt_rbtree_lookupall(Key, Val, Tree) :-
-	arg(2,Tree,KA),
+	attribute(Tree,key,KA),
 	my_compare(Cmp,KA,Key),
 	lookupall(Cmp,Key,Val,Tree).
 
 lookupall(>, K, V, Tree) :-
-	arg(1,Tree,NTree),
+	attribute(Tree,left,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
 lookupall(=, _, V, Tree) :-
-	arg(3,Tree,V).
+	attribute(Tree,value,V).
 lookupall(=, K, V, Tree) :-
-	arg(1,Tree,NTree),
+	attribute(Tree,left,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
 lookupall(=, K, V, Tree) :-
-	arg(4,Tree,NTree),
+	attribute(Tree,right,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
 lookupall(<, K, V, Tree) :-
-	arg(4,Tree,NTree),
+	attribute(Tree,right,NTree),
 	pdt_rbtree_lookupall(K, V, NTree).
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% manipulation.
+
+
+%% pdt_rbtree_insert(+Tree0,+Key,+Val,-Tree) is det
+% Tree insertion.
 %
-% Tree insertion
+% Insert an entry in the tree. Note that this will _not_ 
+% override any previous entry with the same key.
 %
-% We don't use parent nodes, so we may have to fix the root.
+% @param Tree0 the original tree into which the entry is to be inserted.
+% @param Key the key of the new entry.
+% @param Val the value of the new entry.
+% @param Tree will be unified with the tree resulting from the insertion.
 %
 pdt_rbtree_insert(Tree0,Key,Val,Tree) :-
+    % We don't use parent nodes, so we may have to fix the root.
 	insert2(Tree0,Key,Val,TreeI,_),
 	fix_root(TreeI,Tree).
 
 %
 % make sure the root is always black.
 %
-fix_root(black(L,K,V,R),black(L,K,V,R)).
-fix_root(red(L,K,V,R),black(L,K,V,R)).
+/*fix_root(black(L,K,V,R),black(L,K,V,R)).
+fix_root(red(L,K,V,R),black(L,K,V,R)).*/
 
+fix_root(N,N):-
+    black(N),
+    !.
+fix_root(Red,Black):-
+    red(Red),
+    set_attribute(Red,color,black,Black).
 
 %
 % Cormen et al present the algorithm as 
@@ -255,30 +372,79 @@ fix_root(red(L,K,V,R),black(L,K,V,R)).
 
 
 
+%%
+% insert2(+In, +K, +V, -Out, -Status) 
 %
-% actual insertion
-%
-insert2(black([],[],[],[]), K, V, T, Status) :- !,
-	Nil = black([],[],[],[]),
-	T = red(Nil,K,V,Nil),
+%insert2(black([],[],[],[]), K, V, T, Status) :- !,node(red
+%insert2(+In, +K, +V, -Out, -Status) 
+insert2(In, K, V, Out, Status) :- 
+	nil(In),
+	!,
+	% empty tree / nil
+	% replace it with a red node  that has two NIL children.
+	%
+	red(Out),
+	attribute(Out,left,In),
+	attribute(Out,right,In),
+	attribute(Out,key,K),
+	attribute(Out,value,V),
 	Status = not_done.
-insert2(red(L,K0,V0,R), K, V, red(NL,K0,V0,R), Flag) :-
+
+%insert2(red(L,K0,V0,R), K, V, red(NL,K0,V0,R), Flag) :-
+insert2(In, K, V, Out, Flag) :-
+    % if the current node is red 
+    % and the key beeing inserted is left of the current node.
+    % recurse on the left subtree.
+    node(red,In),
+    attribute(In,key,K0),
 	K @< K0, !,
-	insert2(L, K, V, NL, Flag).
-insert2(red(L,K0,V0,R), K, V, red(L,K0,V0,NR), Flag) :-
-	insert2(R, K, V, NR, Flag).
-insert2(black(L,K0,V0,R), K, V, NT, Flag) :-
+	attribute(In,left,OldLeft),
+	set_attribute(In,left,NewLeft,Out),	
+	insert2(OldLeft, K, V, NewLeft, Flag).
+
+%insert2(red(L,K0,V0,R), K, V, red(L,K0,V0,NR), Flag) :-
+insert2(In, K, V, Out, Flag) :-
+    % if the current node is red 
+    % and the key beeing inserted is NOT left of the current node.
+    % recurse on the right subtree.
+    red(In),
+    !,
+    attribute(In,right,OldRight),
+    set_attribute(In,right,NewRight,Out),
+	insert2(OldRight, K, V, NewRight, Flag).
+%insert2(black(L,K0,V0,R), K, V, NT, Flag) :-
+insert2(In, K, V, Out, Flag) :-
+    % if the current node is black
+    % and the key beeing inserted is  left of the current node.
+    % insert in the left subtree.
+    % repair (how?)
+    node(black,In),
+    attribute(In,key,K0),
 	K @< K0, !,
-	insert2(L, K, V, IL, Flag0),
-	fix_left(Flag0, black(IL,K0,V0,R), NT, Flag).
-insert2(black(L,K0,V0,R), K, V, NT, Flag) :-
-	insert2(R, K, V, IR, Flag0),
-	fix_right(Flag0, black(L,K0,V0,IR), NT, Flag).
+    attribute(In,left,OldLeft),
+	insert2(OldLeft, K, V, NewLeft, Flag0),
+	set_attribute(In,left,NewLeft,Tmp),
+	fix_left(Flag0, Tmp, Out, Flag).
+insert2(In, K, V, Out, Flag) :-
+    % if the current node is black
+    % and the key beeing inserted is NOT left of the current node.
+    % insert in the right subtree.
+    % repair (how?)
+    node(black,In),
+    !,
+    attribute(In,right,OldRight),
+	insert2(OldRight, K, V, NewRight, Flag0),
+	set_attribute(In,right,NewRight,Tmp),
+	fix_right(Flag0, Tmp, Out, Flag).
+
 
 %
 % How to fix if we have inserted on the left
 %
-fix_left(done,T,T,done) :- !.
+fix_left(done,T,T,done) :- 
+	% the damage has been repaired by a nested call 
+	% in the left subtree.
+	!.
 fix_left(not_done,Tmp,Final,Done) :-
 	fix_left(Tmp,Final,Done).
 
@@ -286,12 +452,63 @@ fix_left(not_done,Tmp,Final,Done) :-
 %
 % case 1 of RB: just need to change colors.
 %
-fix_left(black(red(Al,AK,AV,red(Be,BK,BV,Ga)),KC,VC,red(De,KD,VD,Ep)),
-	red(black(Al,AK,AV,red(Be,BK,BV,Ga)),KC,VC,black(De,KD,VD,Ep)),
-	not_done) :- !.
-fix_left(black(red(red(Al,KA,VA,Be),KB,VB,Ga),KC,VC,red(De,KD,VD,Ep)),
-	red(black(red(Al,KA,VA,Be),KB,VB,Ga),KC,VC,black(De,KD,VD,Ep)),
-	not_done) :- !.
+
+%fix_left(
+%	black(
+%		red(Al,AK,AV,red(Be,BK,BV,Ga)),
+%		KC,VC,
+%		red(De,KD,VD,Ep)
+%	),
+%	red(
+%		black(Al,AK,AV,red(Be,BK,BV,Ga)),
+%		KC,VC,
+%		black(De,KD,VD,Ep)
+%	),
+%	not_done) :- !.
+fix_left(Tmp,Final,not_done):-
+    black(Tmp),
+    attribute(Tmp,left,A),
+	    red(A),
+	    attribute(A,right,B),
+	    	red(B),
+	attribute(Tmp,right,D),
+	red(D),
+	!,
+	set_attribute(Tmp,color,red,Tmp1),
+	set_attribute(A,color,black,A1),
+	set_attribute(Tmp1,left,A1, Tmp2),
+	set_attribute(D,color,black,D1),
+	set_attribute(Tmp2,right,D1,Final).
+	
+%fix_left(
+%	black(
+%		red(red(Al,KA,VA,Be),KB,VB,Ga),
+%		KC,VC,
+%		red(De,KD,VD,Ep)
+%	),
+%	red(
+%		black(red(Al,KA,VA,Be),	KB,VB,Ga),
+%		KC,VC,
+%		black(De,KD,VD,Ep)
+%	),
+%	not_done) :- !.
+fix_left(Tmp,Final,not_done):-
+	black(Tmp),
+    attribute(Tmp,left,B),
+	    red(B),
+	    attribute(B,left,A),
+	    	red(A),
+	attribute(Tmp,right,D),
+	red(D),
+	!,
+	set_attribute(Tmp,color,red,Tmp1),
+	set_attribute(B,color,black,B1),
+	set_attribute(Tmp1,left,B1, Tmp2),
+	set_attribute(D,color,black,D1),
+	set_attribute(Tmp2,right,D1,Final).
+
+%% HERE %%
+
 %
 % case 2 of RB: got a knee so need to do rotations
 %
