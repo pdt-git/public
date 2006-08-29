@@ -47,7 +47,9 @@
 	pdt_index_get/3,		
 	pdt_index_after/4,
 	pdt_index_load_from_file/2,		
-	pdt_index_save_to_file/2				
+	pdt_index_save_to_file/2,
+	pdt_index_load_from_disk/0,		
+	pdt_index_save_to_disk/0				
 ]).
 
 %Currently we only support rb trees as index data structure. Once i found a good way to implement a
@@ -56,19 +58,24 @@
 %see pdt_handle.pl
 
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
+
 :- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 
+:- use_module(library('org/cs3/pdt/util/pdt_preferences')).
+:- use_module(library('org/cs3/pdt/annotate/cache')).
 
+
+:-dynamic index_table/2.
 % pdt_index_load(+IxName,-IX)
 %
 % load the index table that is associated with the name IxName.
 % If no such association exists, a new index table is created and associated with IxName.
 pdt_index_load(IxName,IX):-
-    pdt_ht_get(index,IxName,IX),!.
+    index_table(IxName,IX),
+    !.
 pdt_index_load(IxName,IX):-
     pdt_multimap_empty(IX),
-    pdt_index_store(IxName,IX).
+    assert(index_table(IxName,IX)).
 
 % pdt_index_store(+IxName,+IX)
 %
@@ -77,7 +84,8 @@ pdt_index_load(IxName,IX):-
 % If another index table was already associated with IxName, the old table is droped and replaced 
 % by the new one.
 pdt_index_store(IxName,IX):-
-    pdt_ht_set(index,IxName,IX).
+    retractall(index_table(IxName,_)),
+    assert(index_table(IxName,IX)).
 
 % pdt_index_put(+IX,+Key,+Value,-NewIX)
 %
@@ -133,3 +141,37 @@ pdt_index_load_from_file(IxName,File):-
     seen,
     pdt_index_store(IxName,X).
 
+pdt_index_load_from_disk:-
+    index_file(File),
+    exists_file(File),    
+    %consult runs out of local stack. 
+    %let's try to do it on our own.
+    my_consult(File).
+
+my_consult(File):-
+    open(File,read,Stream),
+    repeat,
+		read_term(Stream,Term,[double_quotes(string)]),
+		record_term(Term),
+		Term==end_of_file,
+	!,
+	close(Stream).
+
+
+record_term(end_of_file):-
+    !.
+record_term(index_table(IxName,Ix)):-
+    assert(index_table(IxName,Ix)).
+    
+    
+pdt_index_save_to_disk:-
+    index_file(File),
+    open(File,write,Stream),
+    forall(index_table(IxName,Ix),portray_clause(Stream,index_table(IxName,Ix))),
+    close(Stream).
+    
+index_file(File):-
+    pdt_cache_dir(Dir),
+    atom_concat(Dir,'/index_tables.pl',File).
+    
+    
