@@ -44,6 +44,9 @@
 % NOTE: this library should be considered public api.
 % !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+% NOTE: this library is deprecated!!!.
+% !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 %storage abstraction: i want "something" to behave similar to a hashtable.
 %assert is to expansive, recordz for itself is to limited: i want to hash terms, 
