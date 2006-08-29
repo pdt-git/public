@@ -114,6 +114,8 @@ filespec(FileSpec, Abs):-
 %% pdt_file_ref(?FileSpec, ?Integer)
 % get a file specification for reference number or vice versa.
 % If no reference number exists for a given file, it will be created.
+pdt_file_ref(file_ref(Ref),Ref):-
+	!.
 pdt_file_ref(FileSpec,Ref):-
 	fileref(FileSpec,Ref),
 	!.

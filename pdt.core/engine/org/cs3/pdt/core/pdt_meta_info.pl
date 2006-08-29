@@ -96,14 +96,16 @@ some predicate definitions for queries frequently used by the pdt.core
 % @param Member will be unified with the (annotated) toplevel term containing the subterm.
 pdt_lookup_aterm(FileSpec,N,ATerm,Member):-
 	pdt_file_record_key(term,FileSpec,Key),
-    lookup_aterm(Key,N,ATerm,Member).
+    pdt_file_ref(FileSpec,FileRef),
+    lookup_aterm(FileRef,Key,N,ATerm,Member).
 
 pdt_lookup_aterm(FileSpec,N,ATerm):-
 	pdt_lookup_aterm(FileSpec,N,ATerm,_).
 
   
-lookup_aterm(Key,N,Subterm,Member):-
+lookup_aterm(FileRef,Key,N,Subterm,Member):-
     pdt_file_record(Key,Member),
+   	pdt_bind_file_ref(FileRef,Member),
     pdt_term_annotation(Member,_,Annos),
     pdt_member(n(FirstN),Annos),
     pdt_member(last_n(LastN),Annos),
@@ -150,6 +152,8 @@ lookup_subterm(Container,N,ATerm):-
 pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
+	pdt_file_ref(FileSpec,Ref),
+	pdt_bind_file_ref(Ref,Term),
 	pdt_term_annotation(Term,:-(_),Annos),
 	pdt_op_module(FileSpec,OpModule),
 	pdt_subterm(Term,[1],Body),
@@ -175,6 +179,8 @@ pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos]):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
+	pdt_file_ref(FileSpec,Ref),
+	pdt_bind_file_ref(Ref,Term),
 	pdt_term_annotation(Term,TTerm,Annos),
 	pdt_member(clause_of(Module:Name/Arity),Annos),
 	(	functor(TTerm,:-,2)
@@ -197,6 +203,8 @@ pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos])
 pdt_file_problem(FileSpec,Problem,Pos):-
 	pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
+	pdt_file_ref(FileSpec,Ref),
+	pdt_bind_file_ref(Ref,Term),
     pdt_subterm(Term,_,ATerm),
     pdt_term_annotation(ATerm,_,Annos),
     pdt_member(problem(Problem),Annos),
