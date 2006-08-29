@@ -55,7 +55,7 @@
 :- use_module(library('org/cs3/pdt/model/pdt_index')).
 :- use_module(library('org/cs3/pdt/model/pdt_handle')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
+
 
 :- pdt_annotator([file],[
 	library('org/cs3/pdt/annotate/export_annotator'),
@@ -97,13 +97,13 @@ update_index(_,_,ModTime,IxTime):-
 	    
 update_index(File,Annos,_,_):-	    
 	get_time(IxTime),
-	pdt_ht_set(index_times,File,IxTime),		
+	set_index_time(File,IxTime),		
 	update_predicate_definitions(File,Annos),
 	update_module_definitions(File,Annos).
 	
 	
 clear_index(File,Annos):-
-	pdt_ht_remove_all(index_times,File,_),
+	clear_index_time(File),
 	clear_predicate_definitions(File,Annos),
 	clear_module_definitions(File,Annos).
 
@@ -124,8 +124,12 @@ clear_module_definitions(File,Annos):-
 	module_definition_index_entry(Module,File,Handles,Key,Value),
 	pdt_index_remove(Ix,Key,Value,NewIX),
 	pdt_index_store(module_definitions,NewIX).
-
+debugme.
 update_module_definitions(File,Annos):-
+    (	File=='/tmp/test_input_11.pl'
+    ->	debugme
+    ;	true
+    ),
 	pdt_index_load(module_definitions,Ix),
 	get_module_exports(Annos,Module,Handles),
 	module_definition_index_entry(Module,File,Handles,Key,Value),
@@ -211,12 +215,18 @@ clause_definition_index_entry(Module:Name/Arity,
                               
 module_definition_index_entry(Name,File,Exports,Name,handle(id(Name,File), module_definition,[name(Name),file(File),exports(Exports)])).
 	    
-
+:- dynamic index_time/2.
 time_index(File,IxTime):-
-    pdt_ht_get(index_times,File,IxTime),
+    index_time(File,IxTime),
     !.    
 time_index(_, -1).    
 
+set_index_time(File,Time):-
+    retractall(index_time(File,_)),
+    assert(index_time(File,Time)).
+    
+clear_index_time(File):-
+    retractall(index_time(File,_)).
 
 
 % matcher(+Elm,+Elms,+Prop,+InProps,-OutProps,-OutElms)
