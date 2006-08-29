@@ -73,7 +73,8 @@ A typical life cycle of a source term would look like this:
 	source_term_property/3,
 	source_term_set_property/4,
 	source_term_copy_properties/3,
-	source_term_create/3
+	source_term_create/3,
+	implements_source_term/0
 /*	source_term_update/2,
 	source_term_commit/2,
 	source_term_checkout/2*/
@@ -82,6 +83,21 @@ A typical life cycle of a source term would look like this:
 
 :- dynamic source_term_hook/2.
 :- multifile source_term_hook/2.
+
+
+:-module_transparent implements_source_term/0.
+
+implements_source_term:-
+	dynamic 	
+		source_term_var_hook/1,
+		source_term_arg_hook/3,
+		source_term_expand_hook/2,
+		source_term_functor_hook/3,
+		source_term_property_hook/3,
+		source_term_set_property_hook/4,
+		source_term_copy_properties_hook/3,
+		source_term_create_hook/2.
+:-implements_source_term.
 
 %% source_term(+SourceTerm,-Module)  
 % Check if there is an Implementation for the given source term.
@@ -97,10 +113,9 @@ source_term(_,pdt_source_term).
 %% source_term_var(?Sourceterm)
 % succeeds if SourceTerm is a source term that represents a variable.
 source_term_var(SourceTerm):-
-    source_term(SourceTerm,Module),
-    Module:current_predicate(source_term_var_hook/1),
-    !,
-    Module:source_term_var_hook(SourceTerm).
+    source_term(SourceTerm,Module),    
+    Module:source_term_var_hook(SourceTerm),
+    !.
 source_term_var(SourceTerm):-
     var(SourceTerm).
 %% source_term_create(+Module,?Term,-SourceTerm)  
@@ -110,9 +125,8 @@ source_term_var(SourceTerm):-
 % completely up to the implementation.
 
 source_term_create(Module,Term,SourceTerm):-
-    Module:current_predicate(source_term_create_hook/2),
-    !,
-    Module:source_term_create_hook(Term,SourceTerm).
+    Module:source_term_create_hook(Term,SourceTerm),
+    !.
 source_term_create(_,Term,Term).
 
 
@@ -122,10 +136,10 @@ source_term_create(_,Term,Term).
 %
 % unify the second argument with the plain prolog term represented by this source term.
 source_term_expand(SourceTerm,Term):-
-    source_term(SourceTerm,Module),
-    Module:current_predicate(source_term_expand_hook/2),
-    !,
-    Module:source_term_expand_hook(SourceTerm,Term).
+    source_term(SourceTerm,Module),    
+    Module:source_term_expand_hook(SourceTerm,Term),
+    !.
+    
 source_term_expand(Term,Term).
 
 
@@ -137,9 +151,8 @@ source_term_expand(Term,Term).
 % the given name and arity. Note however that this source term is incomplete, as its arguments are not specified.
 source_term_functor(SourceTerm,Name,Arity):-
     source_term(SourceTerm,Module),
-    Module:current_predicate(source_term_functor_hook/3),
-    !,
-    Module:source_term_functor_hook(SourceTerm,Name,Arity).
+    Module:source_term_functor_hook(SourceTerm,Name,Arity),
+    !.
 source_term_functor(SourceTerm,Name,Arity):-
     functor(SourceTerm,Name,Arity).
 
@@ -151,9 +164,8 @@ source_term_functor(SourceTerm,Name,Arity):-
 
 source_term_arg(ArgNum,SourceTerm,ArgVal):-
     source_term(SourceTerm,Module),
-    Module:current_predicate(source_term_arg_hook/3),
-    !,
-    Module:source_term_arg_hook(ArgNum,SourceTerm,ArgVal).
+    Module:source_term_arg_hook(ArgNum,SourceTerm,ArgVal),
+    !.
 source_term_arg(ArgNum,SourceTerm,ArgVal):-
     arg(ArgNum,SourceTerm,ArgVal).
     
@@ -162,9 +174,8 @@ source_term_arg(ArgNum,SourceTerm,ArgVal):-
 % access term annotation.
 source_term_property(SourceTerm,Key,Property):-
     source_term(SourceTerm,Module),
-    Module:current_predicate(source_term_property_hook/3),
-    !,
-    Module:source_term_property_hook(SourceTerm,Key,Property).
+    Module:source_term_property_hook(SourceTerm,Key,Property),
+    !.
 
 
 
@@ -172,9 +183,8 @@ source_term_property(SourceTerm,Key,Property):-
 % modify term annotation.
 source_term_set_property(SourceTerm,Key,Value,NewSourceTerm):-
     source_term(SourceTerm,Module),
-    Module:current_predicate(source_term_set_property_hook/4),
-    !,
-    Module:source_term_set_property_hook(SourceTerm,Key,Value,NewSourceTerm).
+    Module:source_term_set_property_hook(SourceTerm,Key,Value,NewSourceTerm),
+    !.
 
 %% source_term_copy_properties
 % copy term annotations.
@@ -183,7 +193,6 @@ source_term_set_property(SourceTerm,Key,Value,NewSourceTerm):-
 source_term_copy_properties(From,To,Out):-
     source_term(From,Module),
     source_term(To,Module),
-    Module:current_predicate(source_term_copy_properties_hook/3),
-    !,
-    Module:source_term_copy_properties_hook(From,To,Out).
-
+    Module:source_term_copy_properties_hook(From,To,Out),
+    !.
+source_term_copy_properties(_From,To,To).

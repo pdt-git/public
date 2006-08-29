@@ -130,7 +130,9 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 do_attach_middle(Term,[],_CommentsMap,_Stream,Term):-
     !.
 do_attach_middle(TermIn,Positions,CommentsMap,Stream,TermOut):-
+	source_term(TermIn,Module),
     source_term_functor(TermIn,Name,Arity),
+    source_term_create(Module,_,Term1),
     source_term_functor(Term1,Name,Arity),
     source_term_copy_properties(TermIn,Term1,TermOut),
     do_attach_args(TermIn,Positions,CommentsMap,Stream,1,Arity,TermOut).
