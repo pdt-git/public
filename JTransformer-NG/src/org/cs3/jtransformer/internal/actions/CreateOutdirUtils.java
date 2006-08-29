@@ -28,9 +28,9 @@ public class CreateOutdirUtils
 		return instance;
 	}
 	
-	public IJavaProject createOutputProject() throws CoreException
+	public IProject createOutputProject(IProject srcProject) throws CoreException
 	{
-		String projectName = JTUtils.getOutputProjectName();
+		String projectName = JTUtils.getOutputProjectName(srcProject);
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
 				projectName);
 		if (!project.exists())
@@ -55,7 +55,7 @@ public class CreateOutdirUtils
 			javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 			javaProject.setRawClasspath(cp, project.getFullPath(), null);
 		}
-		return javaProject;
+		return project;
 	}
 
 	/*
