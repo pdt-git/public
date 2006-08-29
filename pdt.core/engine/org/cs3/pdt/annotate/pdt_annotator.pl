@@ -47,11 +47,14 @@
 	pdt_file_error/2,
 	pdt_file_term/2,
 	pdt_file_comments/2,
+	pdt_file_comment/2,
 	pdt_forget_annotation/1,
 	pdt_annotator/2,
 	pdt_annotator/3,
 	pdt_file_record_key/3,
-	pdt_file_record/2
+	pdt_file_record/2,
+	pdt_bind_file_ref/2,
+	trace_annotator/1
 ]).
 
 
@@ -60,19 +63,20 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_io')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_dependency')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
 :- use_module(library('org/cs3/pdt/util/pdt_preferences')).
+
+:- use_module(library('org/cs3/pdt/annotate/cache')).
+
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/2.
-:-dynamic file_comments/2.
-:-dynamic file_error/2.
 :-dynamic annotator/2.
 :-dynamic annotator/3.
+
 
 
 :- pdt_add_preference(
@@ -82,7 +86,17 @@
 	false
 ).
 
+
+
 :- module_transparent pdt_maybe/1.
+
+
+trace_annotator(File):-
+    guitracer,
+    pdt_forget_annotation(File),
+    trace,
+    pdt_ensure_annotated(File).
+
 /*
 pdt_maybe(+Goal)
 
@@ -160,7 +174,9 @@ add_missing_hooks2(Anotator):-
 
 execute_annotators(FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
     pdt_process_order(annotator_process_order,Annotators),
-    execute_annotators(Annotators,FileStack,OpModule,FileAnnosIn,FileAnnosOut).
+    %format("executing annotators: ~w~n",[Annotators]),
+    execute_annotators(Annotators,FileStack,OpModule,FileAnnosIn,FileAnnosOut)/*,
+    format("done executing annotators~n",[])*/.
 
 interleaved_annotators(IAs):-
     pdt_process_order(annotator_process_order,Annotators),
@@ -201,7 +217,9 @@ execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
 
 execute_annotator_hooks(_Annotator,[],_FileStack,_OpModule,FileAnnos,FileAnnos).
 execute_annotator_hooks(Annotator,[Hook|Hooks],FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
+    %format("executing hook ~w on ~w ...~n",[Hook,Annotator]),
     execute_annotator_hook(Annotator,Hook,FileStack,OpModule,FileAnnosIn,FileAnnosTmp),
+
     execute_annotator_hooks(Annotator,Hooks,FileStack,OpModule,FileAnnosTmp,FileAnnosOut).
 
 
@@ -248,10 +266,9 @@ pdt_forget_annotation(Spec):-
 %    call_cleanup_hook(FileName),
     call_cleanup_hook2(FileName),
     retractall(file_annotation(FileName,_)),
-    retractall(file_error(FileName,_,_)),
-    retractall(file_comments(FileName,_)),
     clear_timestamp(FileName),
     clear_file_records(FileName),
+    pdt_clear_cache(FileName),
     pif_notify(file_annotation(FileName),forget).
 
 
@@ -299,31 +316,54 @@ pdt_file_annotation(File,FileAnotations):-
 % @param FileAnotations will be unified with an error term.
 
 pdt_file_error(FileSpec,Error):-
-    pdt_file_spec(FileSpec,Abs),
-    file_error(Abs,Error).
+    pdt_file_record_key(error,FileSpec,Key),
+    pdt_file_record(Key,Error).
 
-%% pdt_file_comments(?Filename,-FileAnotations)
-% retrieve comments table for a file.
+
+%% pdt_file_comments(?Filename,-Comment)
+% retrieve source comments in a file.
 %
 % @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
-% @param FileAnotations will be unified with associative datastructure, see module pdt_util_map.
-pdt_file_comments(FileSpec,Comments):-
-    nonvar(FileSpec),
-    pdt_file_spec(FileSpec,Abs),    
-    file_comments(Abs,Comments).
-pdt_file_comments(File,Comments):-
-    var(File),
-    file_comments(File,Comments).    
+% @param Comment will be unified with a comment term as obtained by read_term/3.
+pdt_file_comment(FileSpec,Comments):-
+    pdt_file_record_key(comment,FileSpec,Key),
+    pdt_file_record(Key,Comments).
+
+%% pdt_file_comments(?Filename,-CommentsMap)
+% retrieve comments table for a file.
+%
+% The comments table maps character positions to comment terms as obtained by read_term/3.
+%
+% @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
+% @param CommentsMap will be unified with associative datastructure, see module pdt_util_map. 
+pdt_file_comments(FileSpec,CommentsMap):-
+    pdt_file_record_key(comment,FileSpec,Key),
+        findall(Comment, pdt_file_record(Key,Comment), Comments),
+    comments_map(Comments,CommentsMap).
+
 
 %% pdt_file_term(?Filename,-FileAnotations)
 % retrieve annotated terms in a file.
+%
+% this will bind the file_ref annotations to a reference to the containing file.
 %
 % @param Filename should be a file spec, see pdt_util:pdt_file_spec/2.
 % @param FileAnotations will be unified with an annotated term. see module pdt_util_aterm.
 pdt_file_term(FileSpec,Term):-
     pdt_file_record_key(term,FileSpec,Key),
 	pdt_file_record(Key,Term),
-	\+ (Term == end_of_file).
+	\+ (Term == end_of_file),
+	pdt_bind_file_ref(FileSpec,Term).
+
+pdt_bind_file_ref(Spec,Term):-
+    (	integer(Spec)
+    ->	Ref=Spec
+    ;	pdt_file_ref(Spec,Ref)
+    ),
+	pdt_term_annotation(Term,_,Annos),
+	pdt_memberchk(file_ref(Ref),Annos).
+
+
 
 %% pdt_file_record(+Key,-Term)
 % retrieve a file record.
@@ -341,15 +381,30 @@ add_missing_hook(Module:Name/Arity):-
 	    Module:assert(Head)
     ),
     !.
-
+:- dynamic annotation_time/2.
 up_to_date(File):-
     time_file(File,Time),
-    pdt_ht_get(pdt_annotation_time,File,Time).
+    annotation_time(File,Time).
 update_timestamp(File):-
     time_file(File,Time),
-    pdt_ht_put(pdt_annotation_time,File,Time).
+    retractall(annotation_time(File,_)),
+    assert(annotation_time(File,Time)).
+
 clear_timestamp(File):-
-    pdt_ht_remove_all(pdt_annotation_time,File).
+    retractall(annotation_time(File,_)).
+
+
+
+process_referenced_files([Current|Stack]):-
+    pdt_file_annotation(Current,Annos),
+    pdt_member(references_files(Files),Annos),
+    forall( 
+    	(	member(File,Files),
+    		\+ member(File,[Current|Stack])
+    	),	
+    	pdt_ensure_annotated([File,Current|Stack])
+    ).
+
 
 %% pdt_ensure_annotated(+FileSpec)
 % create/update annotation for a source file.
@@ -362,31 +417,46 @@ clear_timestamp(File):-
 % $ *Warning*: this predicate does not do the recursion check itself. If an annotator requires nested calls of 
 %           this predicate, it is the responsibility of that hook to examine the stack and avoid recursions.
 
+
 pdt_ensure_annotated(FileSpec):-
     \+ is_list(FileSpec),
 	pdt_ensure_annotated([FileSpec]).
-pdt_ensure_annotated([FileSpec|_]):-
+pdt_ensure_annotated([FileSpec|_]):-%case 1: the currrent annotation is up to date
     pdt_file_spec(FileSpec,Abs),
     up_to_date(Abs),
+    %writeln(up_to_date(Abs)),
     !.
-pdt_ensure_annotated([FileSpec|Stack]):- 
+pdt_ensure_annotated([FileSpec|Stack]):-%case 2: the cached annotation is up to date
+    pdt_file_spec(FileSpec,File),
+	time_file(File,SourceTime),
+	pdt_cache_time(File,CacheTime),
+	CacheTime > 0,
+	CacheTime >= SourceTime,
+    %writeln(cached(File)),
+    !,    
+    pdt_read_cache(File),
+   	update_timestamp(File),
+    process_referenced_files([File|Stack]).
+
+pdt_ensure_annotated([FileSpec|Stack]):-%case 3: cannot use cache, rebuild from scratch
+	pdt_forget_annotation(FileSpec),
     new_memory_file(MemFile),
     pdt_file_spec(FileSpec,Abs),
+    writeln(build(Abs)),
     gen_op_module(Abs,OpModule),
     clear_ops(OpModule),
-    
-    retractall(file_annotation(Abs,_)),
-    retractall(file_error(Abs,_)),
-	update_timestamp(Abs),
+	update_timestamp(Abs), %important to do it BEFORE the actual annotations (avoid redundant nested builds)
     copy_file_to_memfile(FileSpec,MemFile),
     memory_file_to_atom(MemFile,MemFileAtom),
     open_memory_file(MemFile,read,Input),
+    
     read_terms(MemFileAtom,[Abs|Stack],OpModule,Input),
     execute_annotators([Abs|Stack],OpModule,[],FileAnnos1),
 	
 %    collect_terms(FileStack,Terms),
     assert(file_annotation(Abs,FileAnnos1)),
 
+/*
 	collect_comments([Abs|Stack],CommentsMap),
     assert(file_comments(Abs,CommentsMap)),
 
@@ -395,8 +465,12 @@ pdt_ensure_annotated([FileSpec|Stack]):-
     ->	forall(member(Error,Errors),assert(file_error(Abs,Error)))
     ;	true
     ),
+    */
 	close(Input),
 	free_memory_file(MemFile),
+	%format("writing cache...~n",[]),
+	%format("done~n",[]),
+	pdt_write_cache(Abs),
 	pif_notify(file_annotation(Abs),update),!.
 pdt_ensure_annotated([FileSpec|_]):-    
     pdt_file_spec(FileSpec,Abs),
@@ -449,9 +523,10 @@ do_process_term_rf(_Options,_MemFileAtom,_IAs,FileStack,N,_Term,Error,N):-
 	record_error(FileStack,Error).
 do_process_term_rf(Options,MemFileAtom,IAs,FileStack,N,Term0,_Error,M):-    
     member(subterm_positions(Positions),Options),	
-	FileStack=[File|_],
-	pdt_file_ref(File,FileRef),
-	wrap_term(Term0,Positions,FileRef,N,Term1,M),   
+	%FileStack=[File|_],
+	%pdt_file_ref(File,FileRef),
+	%experiment: leave file ref unbound. bind it on checkout.
+	wrap_term(Term0,Positions,_FileRef,N,Term1,M),   
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
@@ -471,7 +546,7 @@ record_error([File|_],Error):-
     recordz(Key,Error).
 
 record_comments([File|_],Comments):-
-    file_key(comments,File,Key),
+    file_key(comment,File,Key),
     record_comments_X(Key,Comments).
 
 record_comments_X(_Key,[]).
@@ -486,31 +561,6 @@ record_term([File|_],Term):-
 clear_file_records(File):-
 	forall((file_key(_,File,Key),recorded(Key,_,Ref)),erase(Ref)).
 
-collect_terms([File|_],Terms):-
-	file_key(term,File,Key),
-    findall(Term,
-    	(	recorded(Key,Term,Ref),
-    		erase(Ref)
-    	), Terms
-    ).
-    
-collect_comments([File|_],CommentsMap):-
-	file_key(comments,File,Key),
-    findall(TermComments,
-    	(	recorded(Key,TermComments,Ref),
-    		erase(Ref)
-    	), CommentsLists
-    ),
-    flatten(CommentsLists,Comments),
-    comments_map(Comments,CommentsMap).
-
-collect_errors([File|_],Errors):-
-	file_key(error,File,Key),
-    findall(Error,
-    	(	recorded(Key,Error,Ref),
-    		erase(Ref)
-    	), Errors
-    ).
 
 %% pdt_file_record_key(+Topic,+FileSpec,-Key)
 % retrieve a record key for the given File and topic.
@@ -522,7 +572,7 @@ collect_errors([File|_],Errors):-
 %
 % Currently, the following topics are supported:
 % $=term=: records all annotated terms. See also pdt_file_term/2
-% $=comments=: records lists of comments as obtained via read_term/3
+% $=comment=: records lists of comments as obtained via read_term/3
 % $=errors=:records syntax errors.
 %
 % @param Topic the topic
@@ -542,8 +592,8 @@ do_file_key(term,Ref,Key):-
     concat_atom([pdt_annotator,term,Ref],'$',Key).
 do_file_key(error,Ref,Key):-
     concat_atom([pdt_annotator,error,Ref],'$',Key).
-do_file_key(comments,Ref,Key):-
-    concat_atom([pdt_annotator,comments,Ref],'$',Key).
+do_file_key(comment,Ref,Key):-
+    concat_atom([pdt_annotator,comment,Ref],'$',Key).
 
 
 
@@ -633,3 +683,8 @@ pdt_op_module(FileSpec,OpModule):-
     
 gen_op_module(Abs,OpModule):-
     concat_atom([Abs,'$',op_module],OpModule).
+    
+	    
+	
+	
+	
