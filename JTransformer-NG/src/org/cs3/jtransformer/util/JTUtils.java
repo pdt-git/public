@@ -1,5 +1,14 @@
 package org.cs3.jtransformer.util;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -7,7 +16,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -19,7 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JTUtils
 
 {
-	private static Boolean useSameOutdirWithSuffix = null;
+	private static Boolean useSameProjectNameSuffix = null;
 	
 	
 	/**
@@ -29,15 +37,15 @@ public class JTUtils
 	 * 
 	 * @return boolean
 	 */
-	public static boolean useSameOutdirWithSuffix()
+	public static boolean useSameProjectNameSuffix()
 	{
-		if( useSameOutdirWithSuffix == null )
+		if( useSameProjectNameSuffix == null )
 		{
-			useSameOutdirWithSuffix = new Boolean(
+			useSameProjectNameSuffix = new Boolean(
 				"true".equals(System.getProperty(JTConstants.SYSTEM_PROPERTY_USE_SAME_OUTDIR_WITH_SUFFIX, /*Default = */ "false")));
 		}
 
-		return useSameOutdirWithSuffix.booleanValue();
+		return useSameProjectNameSuffix.booleanValue();
 	}
 	
 	/**
@@ -61,24 +69,7 @@ public class JTUtils
 	 */
 	public static String getOutputProjectPath(IProject project)
 	{
-//		String outputProjectLocation = getOutputProjectLocation();
-//		
-//		if( outputProjectLocation == null )
-//			System.err.println("************************ schmatz: outputProjectLocation is null");
-//			
-//		String outdir = null;
-//		if( outputProjectLocation != null && JTUtils.useSameOutdirWithSuffix() )
-//		{
-//			outdir = outputProjectLocation + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
-//		}
-//		else
-//		{
-//			/*
-//			 * This is the original code:
-//			 */
-			return getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName(project);
-//		}
-//		return outdir;
+		return getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName(project);
 	}
 
 	/**
@@ -94,7 +85,7 @@ public class JTUtils
 	 */
 	public static String getOutputProjectName(IProject project)
 	{
-		if( JTUtils.useSameOutdirWithSuffix() )
+		if( JTUtils.useSameProjectNameSuffix() )
 		{
 			String outputProjectName = project.getName() + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
 			if( outputProjectName == null )
@@ -117,12 +108,6 @@ public class JTUtils
 	 */
 	public static String getWorkspaceRootLocation()
 	{
-		// Note: LogicAJPlugin.getDefault().getWorkspace() == ResourcesPlugin.getWorkspace() !!!
-		if ( ResourcesPlugin.getWorkspace() != ResourcesPlugin.getWorkspace() )
-		{
-			System.err.println("************************** schmatz: Error in LAJUtil.getWorkspaceRootLocation()");
-		}
-		
 		return ResourcesPlugin.getWorkspace().getRoot()
 			.getLocation().toOSString();
 	}
@@ -134,37 +119,113 @@ public class JTUtils
 	 * @param destProject
 	 * @throws CoreException
 	 */
+	// New by Mark Schmatz
 	public static void copyAllNeededFiles(IProject srcProject, IProject destProject) throws CoreException
 	{
-		copyFile(srcProject, destProject, "/.classpath");
-		copyFile(srcProject, destProject, "/.project");
-		copyFile(srcProject, destProject, "/bundle.manifest");
-		copyFile(srcProject, destProject, "/bundle-pack");
+		String srcProjectName = srcProject.getName();
+		String destProjectName = destProject.getName();
 		
-		// ---
+		List neededFileForCopying = new ArrayList();
+		neededFileForCopying.add(new CopyFileHelper("/.classpath"));
+		neededFileForCopying.add(new CopyFileHelper("/bundle.manifest"));
+		neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
+		neededFileForCopying.add(new CopyFileHelper("/bundle-pack", srcProjectName, destProjectName));
 		
-		//adaptOutputProjectName(destProject, "/.project");
-		//adaptOutputProjectName(destProject, "/bundle-pack");
+		Iterator iterator = neededFileForCopying.iterator();
+		while( iterator.hasNext() )
+		{
+			CopyFileHelper cfh = (CopyFileHelper) iterator.next();
+			copyFile(srcProject, destProject, cfh.getFileName());
+			if( cfh.needsAdaptation() )
+			{
+				adaptOutputProjectName(destProject, cfh);
+			}
+		}
 	}
 
+	/**
+	 * Copies the file for <tt>fileName</tt> from the
+	 * source project to the dest project if it exists.
+	 * If it doesn't exist nothing will be done.
+	 * 
+	 * @param srcProject
+	 * @param destProject
+	 * @param fileName
+	 * @throws CoreException
+	 */
+	// Modified by Mark Schmatz
 	private static void copyFile(IProject srcProject, IProject destProject, final String fileName) throws CoreException
 	{
 		IFile file = srcProject.getFile(new Path(fileName));
 		if( file.exists() )
 		{
 			IFile old = destProject.getFile(new Path(fileName));
-			old.refreshLocal(IResource.DEPTH_INFINITE, null);
-			old.delete(true, true, null);
+			if( old.exists() )
+			{
+				// Just to be sure: delete the file if it exists...
+				old.refreshLocal(IResource.DEPTH_INFINITE, null);
+				old.delete(true, true, null);
+			}
 			file.copy(new Path(destProject.getFullPath() + fileName), true, null);
 			destProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		}
 	}
 	
-	private static void adaptOutputProjectName(IProject destProject, String fileName) throws CoreException
+	/**
+	 * 
+	 * @param destProject
+	 * @param fileName
+	 * @throws CoreException
+	 */
+	// New by Mark Schmatz
+	private static void adaptOutputProjectName(IProject destProject, CopyFileHelper cfh) throws CoreException
 	{
-		IFile file = destProject.getFile(new Path(fileName));
+		IFile file = destProject.getFile(new Path(cfh.getFileName()));
 		if( file.exists() )
 		{
+			String fileContent = getFileContent(file);
+			
+			fileContent = fileContent.replaceAll(cfh.getRegexPattern(), cfh.getNewString());
+			
+			byte[] buffer = fileContent.getBytes();
+			InputStream is = new ByteArrayInputStream(buffer);
+			
+			file.setContents(is, IFile.FORCE, null);
 		}
+	}
+	
+	/**
+	 * Returns the content of the file as String.
+	 * 
+	 * @param file
+	 * @return String
+	 * @throws CoreException
+	 */
+	private static String getFileContent(IFile file) throws CoreException
+	{
+		if( file.exists() )
+		{
+			try
+			{
+				StringBuffer strb = new StringBuffer();
+				InputStream is = file.getContents();
+				BufferedReader br = new BufferedReader(new InputStreamReader(is));
+				String line = null;
+				while( (line = br.readLine()) != null )
+				{
+					strb.append(line).append("\n");
+				}
+				br.close();
+				is.close();
+				
+				return strb.toString();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
 	}
 }

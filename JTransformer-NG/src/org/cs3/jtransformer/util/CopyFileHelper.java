@@ -1,6 +1,5 @@
 package org.cs3.jtransformer.util;
 
-import java.util.regex.Pattern;
 
 /**
  * Encapsulates some data used during file copy.
@@ -12,20 +11,24 @@ public class CopyFileHelper
 {
 	private String fileName;
 	private boolean needsAdaptation;
-	private Pattern pattern;
+	private String regexPattern;
+	private String newString;
+	
 	
 	public CopyFileHelper(String fileName)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = false;
-		this.pattern = null;
+		this.regexPattern = null;
+		this.newString = null;
 	}
 	
-	public CopyFileHelper(String fileName, Pattern pattern)
+	public CopyFileHelper(String fileName, String regexPattern, String newString)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = true;
-		this.pattern = pattern;
+		this.regexPattern = regexPattern;
+		this.newString = newString;
 	}
 
 	public String getFileName()
@@ -38,8 +41,13 @@ public class CopyFileHelper
 		return needsAdaptation;
 	}
 
-	public Pattern getPattern()
+	public String getRegexPattern()
 	{
-		return pattern;
+		return regexPattern;
+	}
+
+	public String getNewString()
+	{
+		return newString;
 	}
 }
