@@ -123,6 +123,11 @@ public class JTUtils
 	// New by Mark Schmatz
 	public static void copyAllNeededFiles(IProject srcProject, IProject destProject) throws CoreException
 	{
+		if( !srcProject.isOpen() )
+			srcProject.open(null);
+		if( !destProject.isOpen() )
+			destProject.open(null);
+		
 		String srcProjectName = srcProject.getName();
 		String destProjectName = destProject.getName();
 		

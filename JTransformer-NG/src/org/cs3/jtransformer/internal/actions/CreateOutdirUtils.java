@@ -30,32 +30,30 @@ public class CreateOutdirUtils
 	
 	public IProject createOutputProject(IProject srcProject) throws CoreException
 	{
-		String projectName = JTUtils.getOutputProjectName(srcProject);
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
-				projectName);
-		if (!project.exists())
+		String destProjectName = JTUtils.getOutputProjectName(srcProject);
+		IProject destProject = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjectName);
+		if ( !destProject.exists() )
 		{
-			project = createProject(projectName);
+			destProject = createProject(destProjectName);
 		}
-		if (!project.isOpen())
+		if ( !destProject.isOpen() )
 		{
-			project.open(null);
+			destProject.open(null);
 		}
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);
-		if (!project.hasNature(JavaCore.NATURE_ID))
+		IJavaProject destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
+		if (!destProject.hasNature(JavaCore.NATURE_ID))
 		{
-			addNature(project, JavaCore.NATURE_ID);
+			addNature(destProject, JavaCore.NATURE_ID);
 			
 			IClasspathEntry[] cp = new IClasspathEntry[] {
-					JavaCore.newSourceEntry(project.getFullPath()),
+					JavaCore.newSourceEntry(destProject.getFullPath()),
 					JavaRuntime.getDefaultJREContainerEntry(),
 
 			};
-			javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
-			javaProject.setRawClasspath(cp, project.getFullPath(), null);
+			destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
+			destJavaProject.setRawClasspath(cp, destProject.getFullPath(), null);
 		}
-		return project;
+		return destProject;
 	}
 
 	/*
