@@ -81,13 +81,14 @@ public class JTUtils
 	 * Otherwise the default output project name is used
 	 * (normally '<i>LogicAJOutput</i>').
 	 *  
+	 * @param srcProject The source project
 	 * @return String
 	 */
-	public static String getOutputProjectName(IProject project)
+	public static String getOutputProjectName(IProject srcProject)
 	{
 		if( JTUtils.useSameProjectNameSuffix() )
 		{
-			String outputProjectName = project.getName() + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
+			String outputProjectName = srcProject.getName() + JTConstants.OUTPUT_PROJECT_NAME_SUFFIX;
 			if( outputProjectName == null )
 			{
 				System.err.println("************************ schmatz: outputProjectName is null");
