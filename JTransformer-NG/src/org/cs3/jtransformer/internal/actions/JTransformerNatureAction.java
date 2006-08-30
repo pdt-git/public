@@ -72,8 +72,8 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		        }
 		        	
 				/*
-				 *  Schmatz:
-				 *  Moved from LogicAJPlugin
+				 *  Mark Schmatz:
+				 *  Moved from LogicAJPlugin and modified
 				 */
 				IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 				JTUtils.copyAllNeededFiles(project, destProject);
