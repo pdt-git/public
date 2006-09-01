@@ -29,6 +29,9 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 		}
 		IResource resource = (IResource)element;
 		IProject project = resource.getProject();
+		if(!project.isOpen()){
+			return;
+		}
 		try {
 			if(!project.hasNature(PDTCore.NATURE_ID)){
 				return;
