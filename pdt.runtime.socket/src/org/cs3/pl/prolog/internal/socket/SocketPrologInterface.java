@@ -198,7 +198,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			SocketClient client = new SocketClient(socket);
 			client.setParanoiaEnabled(false);
 			client.setPool(pool);
-			AsyncPrologSession s = new AsyncSocketSession(client, this);
+			PrologSession controlSession = getSession_impl();
+			AsyncPrologSession s = new AsyncSocketSession(client, this,controlSession);
 
 			return s;
 		} catch (Throwable e) {

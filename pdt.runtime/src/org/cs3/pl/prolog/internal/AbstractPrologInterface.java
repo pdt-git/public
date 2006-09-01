@@ -158,17 +158,17 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
-	protected static final int DOWN = 0;
+	public static final int DOWN = 0;
 
-	protected static final int ERROR = -1;
+	public static final int ERROR = -1;
 
-	protected static final int SHUT_DOWN = 3;
+	public static final int SHUT_DOWN = 3;
 
-	protected static final int START_UP = 1;
+	public static final int START_UP = 1;
 
-	protected static final int UP = 2;
+	public static final int UP = 2;
 
-	private HookHelper hookHelper = new HookHelper(this);
+	protected HookHelper hookHelper = new HookHelper(this);
 
 	protected Collection sessions = new LinkedList();
 

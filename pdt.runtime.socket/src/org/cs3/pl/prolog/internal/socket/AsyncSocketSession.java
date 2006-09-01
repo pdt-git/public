@@ -62,10 +62,12 @@ import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
+import org.cs3.pl.prolog.AsyncPrologSessionListener2;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class AsyncSocketSession implements AsyncPrologSession {
 	private static final String OPT_CANONICAL = "socketsession.canonical";
@@ -96,6 +98,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private HashMap queries= new HashMap();
 
+	private PrologSession controlSession;
+
+	private Exception batchError;
+
 	public void addBatchListener(AsyncPrologSessionListener l) {
 		synchronized (listeners) {
 			if(!listeners.contains(l)){
@@ -116,9 +122,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 	
-	public AsyncSocketSession(SocketClient client, SocketPrologInterface pif) throws IOException {
+	public AsyncSocketSession(SocketClient client, SocketPrologInterface pif, PrologSession controlSession) throws IOException {
 		this.client = client;
-		this.pif = pif;	
+		this.pif = pif;
+		this.controlSession=controlSession;
 		ctermFactory=new ATermFactory();
 		this.dispatcher = new Thread("Async Query Result Dispatcher"){
 			public void run() {
@@ -158,12 +165,34 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			}
 			
 		} catch (IOException e) {
+			handleBatchError(e);
+			
 			pif.handleException(e);
 			return false;
 		}
 		return true;
 	}
 	
+	
+
+	private void handleBatchError(Exception e) {
+		this.batchError=e;
+		Vector cloned = new Vector();
+		synchronized (tickets) {			
+			cloned.addAll(tickets.values());
+			tickets.clear();
+			queries.clear();
+		}
+		for (Iterator it = cloned.iterator(); it.hasNext();) {
+			Object ticket = (Object) it.next();
+			synchronized (ticket) {
+				ticket.notifyAll();	
+			}
+			
+		}
+		fireBatchError(e);		
+	}
+
 	private void dispatchBatchComplete() {
 		fireBatchComplete();
 		
@@ -353,7 +382,20 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 		
 	}
-
+	private void fireBatchError(Exception e2) {
+		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this);
+		e.exception=e2;
+		synchronized (listeners) {
+			for (Iterator it = listeners.iterator(); it.hasNext();) {
+				AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
+				if(l instanceof AsyncPrologSessionListener2){
+					((AsyncPrologSessionListener2)l).batchError(e);	
+				}
+				
+			}
+		}
+		
+	}
 	
 	private boolean read_solution(int id,Object ticket) throws IOException {
 		HashMap result = new HashMap();
@@ -641,6 +683,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				while(isPending(ticket)){
 					ticket.wait();
 				}
+				if(this.batchError!=null){
+					throw new PrologInterfaceException(batchError);
+				}
 			}
 			
 		} catch (IOException e) {
@@ -677,9 +722,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		lastAbortTicket=ticket;
 		int id = storeTicket(ticket,null);
 		Debug.info("abort ticket stored, id="+id);
-		PrologSession session = pif.getSession();
+		
 		try {
-			session.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
+			controlSession.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
 			Debug.info("async abort request queued, id="+id);
 			synchronized (ticket) {
 				if(!disposing){
@@ -702,9 +747,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			pif.handleException(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
-		}finally{
-			
-			session.dispose();
 		}
 		
 	}
@@ -717,7 +759,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		disposing=true;
 		client.lock();
 		try {
-			exitBatch();
+			if(pif.getState()!=AbstractPrologInterface.ERROR){
+				exitBatch();
+				controlSession.dispose();
+			}			
 			client.close();
 		} catch (IOException e) {
 			try {
@@ -729,6 +774,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			Debug.report(e);
 		} finally {
 			client.unlock();
+			
+			controlSession=null;
 			client = null;
 			disposing=false;
 		}
