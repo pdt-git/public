@@ -474,6 +474,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @see org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console.ConsoleModelEvent)
 	 */
 	public void beforeDisconnect(final ConsoleModelEvent e) {
+		if(control.isDisposed()){
+			return;
+		}
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
