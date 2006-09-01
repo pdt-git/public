@@ -166,6 +166,12 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 					}
 				}
+				@Override
+				public void batchError(AsyncPrologSessionEvent e) {
+					//XXX: not sure if this is the right way to do it...
+					monitor.setCanceled(true);
+					
+				}
 			});
 			try {
 				String value = plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS, "false");
