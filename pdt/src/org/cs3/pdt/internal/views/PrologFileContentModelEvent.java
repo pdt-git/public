@@ -6,7 +6,7 @@ public class PrologFileContentModelEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;
 	
-	public ContentModel model;
+	public PrologFileContentModel model;
 	public Object parent;
 	public Object[] children;
 
@@ -15,6 +15,11 @@ public class PrologFileContentModelEvent extends EventObject {
 		this.model=model;
 		this.parent=parent;
 		this.children=children;
+	}
+
+	public PrologFileContentModelEvent(ContentModel model) {
+		super(model);
+		this.model=model;
 	}
 
 }

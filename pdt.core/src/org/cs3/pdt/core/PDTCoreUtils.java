@@ -42,6 +42,7 @@
 package org.cs3.pdt.core;
 
 import org.cs3.pl.common.Util;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -93,12 +94,27 @@ public final class PDTCoreUtils {
 			project.setDescription(ipd, null);
 		}
 	}
-	
-	public static int convertCharacterOffset(String data, int offset){
-		String value = PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_CONVERT_CHARACTER_OFFSETS, "true");
-		if("true".equalsIgnoreCase(value)){
+
+	public static int convertCharacterOffset(String data, int offset) {
+		String value = PDTCorePlugin.getDefault().getPreferenceValue(
+				PDTCore.PREF_CONVERT_CHARACTER_OFFSETS, "true");
+		if ("true".equalsIgnoreCase(value)) {
 			return Util.logicalToPhysicalOffset(data, offset);
 		}
 		return offset;
+	}
+
+	public static IPrologProject getPrologProject(IResource file) throws CoreException {
+		if (file == null) {
+			return null;
+		}
+		IProject project = file.getProject();
+
+		if (project != null && project.hasNature(PDTCore.NATURE_ID)) {
+			return (IPrologProject) project.getNature(PDTCore.NATURE_ID);
+		}
+		else{
+			return null;
+		}
 	}
 }

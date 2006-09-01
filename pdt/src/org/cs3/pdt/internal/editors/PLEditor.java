@@ -314,9 +314,7 @@ public class PLEditor extends TextEditor {
 					// fOutlinePage= new PrologOutline(this,
 					// ((IFileEditorInput)getEditorInput()).getFile());
 					fOutlinePage = new PrologOutline(this);
-					
-					if (getEditorInput() != null)
-						fOutlinePage.setInput(getEditorInput());
+					fOutlinePage.setInput(getEditorInput());
 				}
 				return fOutlinePage;
 			}
@@ -728,6 +726,9 @@ public class PLEditor extends TextEditor {
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		checkForPrologNature(input);
+		if(fOutlinePage!=null){
+			fOutlinePage.setInput(input);
+		}
 		super.doSetInput(input);
 
 	}

@@ -10,5 +10,10 @@ public interface PrologFileContentModelListener {
 	public void childrenAdded(PrologFileContentModelEvent e);
 	public void childrenRemoved(PrologFileContentModelEvent e);
 	public void childrenChanged(PrologFileContentModelEvent e);
+	/**
+	 * fired if the whole view should be updated.
+	 * @param e
+	 */
+	public void contentModelChanged(PrologFileContentModelEvent e);
 
 }

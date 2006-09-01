@@ -49,6 +49,8 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private HashMap specificListeners = new HashMap();
 
+
+
 	public ContentModel(){
 		Debug.debug("debug");
 	}
@@ -352,7 +354,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			session = null;
 		}
 		if (this.pif != null) {
-			this.pif.removeLifeCycleHook(HOOK_ID);
+			((PrologInterface2)this.pif).removeLifeCycleHook(this,HOOK_ID);
 		}
 		this.pif = pif;
 		if (this.pif != null) {
@@ -389,10 +391,11 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			cache.clear();
 
 		}
-		fireChildrenRemoved(root,children.toArray());
+		fireContentModelChanged();
 	}
 
 	
+
 
 	private void addChildren(Object parent, Collection collection) {
 		Vector children=null;
@@ -477,6 +480,29 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		}
 		
 	}
+	
+	
+	private void fireContentModelChanged() {
+		
+		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this);
+		HashSet clone = new HashSet();
+		synchronized (listeners) {
+			clone.addAll(listeners);
+		}
+		synchronized (specificListeners) {
+			for (Iterator iter = specificListeners.values().iterator(); iter.hasNext();) {
+				Collection c = (Collection) iter.next();
+				clone.addAll(c);
+			}			
+		}
+		for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
+					.next();
+			l.contentModelChanged(e);
+		}
+	}
+
+	
 	public void addPrologFileContentModelListener(
 			PrologFileContentModelListener l) {
 		if (!listeners.contains(l)) {
@@ -562,6 +588,24 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			throws PrologInterfaceException {
 		;
 
+	}
+
+	public void dispose() {
+				
+		try {
+			setPif(null);
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
+		cache.clear();
+		cache=null;	
+		listeners.clear();
+		listeners=null;
+		specificListeners.clear();
+		specificListeners=null;
+		file=null;
+		root=null;
+		
 	}
 
 }
