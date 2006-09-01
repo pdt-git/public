@@ -132,8 +132,12 @@ public interface PrologInterface {
     public PrologInterfaceFactory getFactory();
 
     /**
-     * unregister a lifeCycleHook
+     * unregister a lifeCycleHook.
+     * 
+     * this will remove ALL hooks registered for this id.
+     * 
      * @param reconfigureHookId
+     * @deprecated If possible please use PrologInterface2.removeLifeCycleHook(LifeCycleHook2,String)
      */
     public abstract void removeLifeCycleHook(String hookId);
 

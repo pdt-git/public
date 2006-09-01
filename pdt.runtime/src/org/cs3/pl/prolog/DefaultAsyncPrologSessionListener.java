@@ -44,7 +44,7 @@ package org.cs3.pl.prolog;
 import org.cs3.pl.common.Debug;
 
 public class DefaultAsyncPrologSessionListener implements
-		AsyncPrologSessionListener {
+		AsyncPrologSessionListener2 {
 
 	public void joinComplete(AsyncPrologSessionEvent e) {
 		;
@@ -83,6 +83,11 @@ public class DefaultAsyncPrologSessionListener implements
 
 	public void batchComplete(AsyncPrologSessionEvent e) {
 		;
+	}
+
+	public void batchError(AsyncPrologSessionEvent e) {
+		Debug.error("Fatal error during batch processing (probably the connection to the server was lost).");
+		
 	}
 
 }
