@@ -108,7 +108,7 @@ public class PrologOutline extends ContentOutlinePage {
 		}
 	}
 
-	IEditorInput input;
+	
 
 	// private TreeViewer viewer;
 	private ITreeContentProvider contentProvider;
@@ -122,6 +122,8 @@ public class PrologOutline extends ContentOutlinePage {
 	private PrologElementLabelProvider labelProvider;
 
 	private PrologOutlineFilter[] filters;
+
+	private IEditorInput input;
 
 	public PrologOutline(PLEditor editor) {
 		this.editor = editor;
@@ -146,6 +148,7 @@ public class PrologOutline extends ContentOutlinePage {
 
 			
 		viewer.addSelectionChangedListener(this);
+		
 		initFilters();
 		
 		IActionBars actionBars= getSite().getActionBars();
@@ -154,8 +157,8 @@ public class PrologOutline extends ContentOutlinePage {
 		toolBarManager.add(action);
 		action = new FilterActionMenu(this);
 		toolBarManager.add(action);
-		
-		setInput(input);
+		viewer.setInput(getInput());
+
 
 	}
 
@@ -164,7 +167,7 @@ public class PrologOutline extends ContentOutlinePage {
 	}
 
 	public void setInput(IEditorInput input) {
-		this.input = input;
+		this.input=input;
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			viewer.setInput(input);
@@ -173,6 +176,8 @@ public class PrologOutline extends ContentOutlinePage {
 	}
 
 	public IEditorInput getInput() {
+		TreeViewer viewer = getTreeViewer();
+		
 		return input;
 	}
 
@@ -249,6 +254,11 @@ public class PrologOutline extends ContentOutlinePage {
 									;
 								}
 
+								public void contentModelChanged(PrologFileContentModelEvent e) {
+									;
+									
+								}
+
 							});
 					return;
 				}
@@ -263,7 +273,7 @@ public class PrologOutline extends ContentOutlinePage {
 						getInput());
 				if(doc==null){
 					//wunder, grübel,...
-					Debug.debug("Debug: input="+input);
+					Debug.debug("Debug: input="+getInput());
 				}
 				try {
 					startOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
@@ -316,5 +326,13 @@ public class PrologOutline extends ContentOutlinePage {
 				getTreeViewer().addFilter(filter);
 			}
 		}
+	}
+
+	@Override
+	public void dispose() {
+
+		super.dispose();
+		contentProvider.dispose();
+		model.dispose();
 	}
 }

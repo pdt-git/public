@@ -47,6 +47,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -56,6 +57,7 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -71,7 +73,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	private IFile file;
 
-	private IPrologProject plProject;
+	
 
 	
 
@@ -139,38 +141,34 @@ public class CTermContentProvider implements ITreeContentProvider,
 		try {
 			IFileEditorInput editorInput = null;
 			IFile file = null;
-			IProject project = null;
-			plProject = null;
+			IPrologProject plProject = null;
+			
 			if (input instanceof IFileEditorInput) {
 				editorInput = (IFileEditorInput) input;
-
 			}
 			if (editorInput != null) {
 				file = editorInput.getFile();
-				project = file.getProject();
+				plProject=PDTCoreUtils.getPrologProject(file);
 			}
-			if (project != null && project.hasNature(PDTCore.NATURE_ID)) {
-				plProject = (IPrologProject) project
-						.getNature(PDTCore.NATURE_ID);
-			}
+			
 			if (plProject == null) {
 				setFile(null);
-				return;
+				
+			}else{				
+				setFile(file);
+				backend.setRoot(input);
+				viewer.refresh();
 			}
-
-			setFile(file);
-			backend.setRoot(input);
-			viewer.refresh();
 
 		} catch (Exception e) {
 			Debug.report(e);
 		}
 	}
 
-	private void setFile(IFile file) {
+	private void setFile(IFile file) throws CoreException {
 		try {
 			if (this.file!= null) {
-				IPrologProject prologProject = getPrologProject();
+				IPrologProject prologProject = PDTCoreUtils.getPrologProject(this.file);
 				PrologEventDispatcher metaDataEventDispatcher = prologProject.getMetaDataEventDispatcher();
 					metaDataEventDispatcher
 						.removePrologInterfaceListener(
@@ -178,9 +176,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 				backend.setPif(null);
 			}
 			this.file=file;
-			backend.setFile(file.getLocation().toFile());
+			backend.setFile(file==null?null:file.getLocation().toFile());
 			if (file != null) {
-				IPrologProject prologProject = getPrologProject();
+				IPrologProject prologProject = PDTCoreUtils.getPrologProject(this.file);
 				PrologEventDispatcher metaDataEventDispatcher = prologProject.getMetaDataEventDispatcher();
 				metaDataEventDispatcher
 						.addPrologInterfaceListener(
@@ -205,10 +203,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		return file==null?null:Util.prologFileName(file.getLocation().toFile());
 	}
 
-	private IPrologProject getPrologProject() {
-		return this.plProject;
-
-	}
+	
 
 	
 
@@ -286,6 +281,23 @@ public class CTermContentProvider implements ITreeContentProvider,
 			return;
 		}
 		viewer.remove(e.children);
+		
+	}
+
+	public void contentModelChanged(final PrologFileContentModelEvent e) {
+		if (viewer == null || viewer.getControl().isDisposed()) {
+			return;
+		}
+		Display display = viewer.getControl().getDisplay();
+		if (Display.getCurrent() != display) {
+			display.asyncExec(new Runnable() {
+				public void run() {
+					contentModelChanged(e);
+				}
+			});
+			return;
+		}
+		viewer.refresh();
 		
 	}
 

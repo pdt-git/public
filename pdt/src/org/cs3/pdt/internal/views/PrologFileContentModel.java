@@ -30,4 +30,6 @@ public interface PrologFileContentModel {
 	public void removePrologFileContentModelListener(Object parent,PrologFileContentModelListener l);
 
 	public abstract void setRoot(Object input);
+
+	public abstract void dispose();
 }
