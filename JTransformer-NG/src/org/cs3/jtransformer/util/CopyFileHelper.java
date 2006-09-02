@@ -1,5 +1,8 @@
 package org.cs3.jtransformer.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * Encapsulates some data used during file copy.
@@ -11,24 +14,29 @@ public class CopyFileHelper
 {
 	private String fileName;
 	private boolean needsAdaptation;
-	private String regexPattern;
-	private String newString;
+	private Map regexPatternsWithNewStrings;
 	
 	
 	public CopyFileHelper(String fileName)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = false;
-		this.regexPattern = null;
-		this.newString = null;
+		this.regexPatternsWithNewStrings = null;
 	}
 	
 	public CopyFileHelper(String fileName, String regexPattern, String newString)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = true;
-		this.regexPattern = regexPattern;
-		this.newString = newString;
+		regexPatternsWithNewStrings = new HashMap();
+		regexPatternsWithNewStrings.put(regexPattern, newString);
+	}
+
+	public CopyFileHelper(String fileName, Map regexPatternWithNewString)
+	{
+		this.fileName = fileName;
+		this.needsAdaptation = true;
+		this.regexPatternsWithNewStrings = regexPatternWithNewString;
 	}
 
 	public String getFileName()
@@ -41,13 +49,14 @@ public class CopyFileHelper
 		return needsAdaptation;
 	}
 
-	public String getRegexPattern()
+	/**
+	 * Returns the Map which contains for each key (the pattern which is to
+	 * be searched) a replacement value.
+	 * 
+	 * @return Map
+	 */
+	public Map getRegexPatternsWithNewStrings()
 	{
-		return regexPattern;
-	}
-
-	public String getNewString()
-	{
-		return newString;
+		return regexPatternsWithNewStrings;
 	}
 }

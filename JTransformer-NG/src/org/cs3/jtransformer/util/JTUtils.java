@@ -2,12 +2,17 @@ package org.cs3.jtransformer.util;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -125,26 +130,40 @@ public class JTUtils
 	{
 		if( !srcProject.isOpen() )
 			srcProject.open(null);
-		if( !destProject.isOpen() )
+		if( !destProject.isOpen() && destProject.exists() )
 			destProject.open(null);
 		
-		String srcProjectName = srcProject.getName();
-		String destProjectName = destProject.getName();
-		
-		List neededFileForCopying = new ArrayList();
-		neededFileForCopying.add(new CopyFileHelper("/.classpath"));
-		neededFileForCopying.add(new CopyFileHelper("/bundle.manifest"));
-		neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
-		neededFileForCopying.add(new CopyFileHelper("/bundle-pack", srcProjectName, destProjectName));
-		
-		Iterator iterator = neededFileForCopying.iterator();
-		while( iterator.hasNext() )
+		if( destProject.isOpen() )
 		{
-			CopyFileHelper cfh = (CopyFileHelper) iterator.next();
-			copyFile(srcProject, destProject, cfh.getFileName());
-			if( cfh.needsAdaptation() )
+			String srcProjectName = srcProject.getName();
+			String destProjectName = destProject.getName();
+			
+			List neededFileForCopying = new ArrayList();
+			neededFileForCopying.add(new CopyFileHelper("/.classpath"));
+			neededFileForCopying.add(new CopyFileHelper("/bundle.manifest"));
+			neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
+			
+			Map regexPatternsWithNewStrings = new HashMap();
+			regexPatternsWithNewStrings.put(srcProjectName, destProjectName);
+			regexPatternsWithNewStrings.put(
+					"pattern=\"(.*?)\"",
+					"pattern=\"" +
+					"${CAPT_GROUP=1}" +
+					"|.*" + File.separator + "\\.pl" +
+					"|.*" + File.separator + "\\.aj" +
+					"\""
+			);
+			neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
+			
+			Iterator iterator = neededFileForCopying.iterator();
+			while( iterator.hasNext() )
 			{
-				adaptOutputProjectName(destProject, cfh);
+				CopyFileHelper cfh = (CopyFileHelper) iterator.next();
+				copyFile(srcProject, destProject, cfh.getFileName());
+				if( cfh.needsAdaptation() )
+				{
+					adaptOutputProjectName(destProject, cfh);
+				}
 			}
 		}
 	}
@@ -191,7 +210,29 @@ public class JTUtils
 		{
 			String fileContent = getFileContent(file);
 			
-			fileContent = fileContent.replaceAll(cfh.getRegexPattern(), cfh.getNewString());
+			Map regexPatternsWithNewStrings = cfh.getRegexPatternsWithNewStrings();
+			Iterator iterator = regexPatternsWithNewStrings.keySet().iterator();
+			while( iterator.hasNext() )
+			{
+				String key = (String) iterator.next();
+				String val = (String) regexPatternsWithNewStrings.get(key);
+				
+				Pattern pattern = Pattern.compile(key);
+				Matcher matcher = pattern.matcher(fileContent);
+				if( matcher.find() )
+				{
+					if( matcher.groupCount() > 0 )
+					{
+						for( int cpc=1 ; cpc <=matcher.groupCount() ; cpc++ )
+						{
+							String captGroup = matcher.group(cpc);
+							captGroup = captGroup.replace("\\", "\\\\\\\\");
+							val = val.replaceAll("\\$\\{CAPT_GROUP=" + cpc + "\\}", captGroup);
+						}
+					}
+					fileContent = fileContent.replaceAll(key, val);
+				}
+			}
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);
