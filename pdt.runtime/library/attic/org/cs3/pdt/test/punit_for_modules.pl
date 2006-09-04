@@ -32,14 +32,20 @@ print_failed_module_tests(Module, FailedTests) :-
 runTestsInModules([], 0, 0, []).
 
 runTestsInModules(FailedTests, Failed, All, [Module|Tail]) :-
-    current_module(Module),
-    assert(active_module(Module)),
-    failed_in_module(Module_FailedTests, Module_Failed, Module_All, Module),
-    retractall(active_module(_)),
+	process_module(Module, Module_FailedTests, Module_Failed, Module_All),
     runTestsInModules(Tail_FailedTests, Tail_Failed, Tail_All, Tail),
     append([Module_FailedTests], Tail_FailedTests, FailedTests),
     plus(Module_Failed, Tail_Failed, Failed),
     plus(Module_All, Tail_All, All).
+
+process_module(Module, FailedTests, Failed, All) :-
+    current_module(Module),
+    assert(active_module(Module)),
+    failed_in_module(FailedTests, Failed, All, Module),
+    retractall(active_module(_)).
+
+process_module(Module, '***Unknown module***', 1, 1) :-
+    not(current_module(Module)).
 
 /**
 * runTest(+Testname, +Module)
