@@ -105,17 +105,26 @@ public final class UIUtils {
 
 		abstract Object getRVal();
 	}
-	public static IFile getFileInActiveEditor() {
-		return (IFile) new _SyncReturn(){
-			Object getRVal() {
-				IEditorPart activeEditor = getActiveEditor();
-				FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
-						.getEditorInput());
-				IFile file = fileEditorInput.getFile();
-				return file;		
-			}
-		}.rval;
-		
+	
+	public static IFile getFileInActiveEditor()
+	{
+		// Modified by Mark Schmatz - added try-catch block
+		try
+		{
+			return (IFile) new _SyncReturn(){
+				Object getRVal() {
+					IEditorPart activeEditor = getActiveEditor();
+					FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
+							.getEditorInput());
+					IFile file = fileEditorInput.getFile();
+					return file;		
+				}
+			}.rval;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
 	}
 
 	public static Display getDisplay() {
