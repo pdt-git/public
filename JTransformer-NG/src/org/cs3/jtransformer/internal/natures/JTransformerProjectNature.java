@@ -33,6 +33,7 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -633,6 +634,32 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 			throw new RuntimeException(e);
 		}
 		
+	}
+
+	/**
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 */
+	static public void removeJTransformerNature(IProject project) throws CoreException {
+	    if(project.hasNature(JTransformer.NATURE_ID)) {
+	        IProjectDescription ipd = project.getDescription();
+	        String[] oldNIDs = ipd.getNatureIds();
+	        String[] newNIDs;
+	        newNIDs = new String[oldNIDs.length - 1];
+	        int j = 0;
+	        for (int i = 0; i < newNIDs.length; i++) {
+	        	if (oldNIDs[j].equals(JTransformer.NATURE_ID))
+	        		j++;
+	        	newNIDs[i] = oldNIDs[j];
+	        	j++;
+	        }
+			ipd.setNatureIds(newNIDs);
+			  if(!project.isSynchronized(IResource.DEPTH_ONE)){
+	                project.refreshLocal(IResource.DEPTH_ONE,null);
+	            }
+			project.setDescription(ipd, null);//TODO: add real
+	    }
 	}
 
 }
