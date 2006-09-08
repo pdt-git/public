@@ -1,5 +1,6 @@
 package org.cs3.jtransformer.internal.actions;
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
@@ -51,7 +52,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		try {
 			IProjectDescription ipd = project.getDescription();	
 			if (ipd.hasNature(JTransformer.NATURE_ID)) {
-				removeJTransformerNature(project);
+				JTransformerProjectNature.removeJTransformerNature(project);
 				action.setChecked(false);
 			} else {
 			    //removeNatureFromAllOtherProjects();
@@ -108,32 +109,6 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
     }
 
     /**
-     * @param project
-     * @return
-     * @throws CoreException
-     */
-    private void removeJTransformerNature(IProject project) throws CoreException {
-        if(project.hasNature(JTransformer.NATURE_ID)) {
-	        IProjectDescription ipd = project.getDescription();
-	        String[] oldNIDs = ipd.getNatureIds();
-	        String[] newNIDs;
-	        newNIDs = new String[oldNIDs.length - 1];
-	        int j = 0;
-	        for (int i = 0; i < newNIDs.length; i++) {
-	        	if (oldNIDs[j].equals(JTransformer.NATURE_ID))
-	        		j++;
-	        	newNIDs[i] = oldNIDs[j];
-	        	j++;
-	        }
-			ipd.setNatureIds(newNIDs);
-			  if(!project.isSynchronized(IResource.DEPTH_ONE)){
-	                project.refreshLocal(IResource.DEPTH_ONE,null);
-	            }
-			project.setDescription(ipd, null);//TODO: add real
-        }
-    }
-
-    /**
      * @param project2
      * @throws CoreException
      */
@@ -141,7 +116,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
         IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
         for (int i = 0; i < projects.length; i++)
             if(projects[i].isOpen()) 
-                removeJTransformerNature(projects[i]);
+                JTransformerProjectNature.removeJTransformerNature(projects[i]);
     }
 
     /* TODO CLEAN UP THIS METHOD! von ld, fuer ld :-)
