@@ -1,8 +1,10 @@
 package org.cs3.jtransformer.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,9 +13,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -32,7 +38,10 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JTUtils
 
 {
+	public static final String BUNDLE_MANIFEST_FILE = "/bundle.manifest";
+	
 	private static Boolean useSameProjectNameSuffix = null;
+	private static boolean isBundle;
 	
 	
 	/**
@@ -47,7 +56,7 @@ public class JTUtils
 		if( useSameProjectNameSuffix == null )
 		{
 			useSameProjectNameSuffix = new Boolean(
-				"true".equals(System.getProperty(JTConstants.SYSTEM_PROPERTY_USE_SAME_OUTDIR_WITH_SUFFIX, /*Default = */ "false")));
+				"true".equals(System.getProperty(JTConstants.SYSTEM_PROPERTY_USE_SAME_OUTDIR_WITH_SUFFIX, /*Default = */ "true")));
 		}
 
 		return useSameProjectNameSuffix.booleanValue();
@@ -137,23 +146,36 @@ public class JTUtils
 		{
 			String srcProjectName = srcProject.getName();
 			String destProjectName = destProject.getName();
+
+			/*
+			 * Check whether we have a OSGi bundle as source project...
+			 */
+			if( fileExists(srcProject, BUNDLE_MANIFEST_FILE) )
+				isBundle = true;
+
+			// ----
 			
 			List neededFileForCopying = new ArrayList();
 			neededFileForCopying.add(new CopyFileHelper("/.classpath"));
-			neededFileForCopying.add(new CopyFileHelper("/bundle.manifest"));
 			neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
+			if( isBundle )
+			{
+				neededFileForCopying.add(new CopyFileHelper(BUNDLE_MANIFEST_FILE));
+				
+				Map regexPatternsWithNewStrings = new HashMap();
+				regexPatternsWithNewStrings.put(srcProjectName, destProjectName);
+				regexPatternsWithNewStrings.put(
+						"pattern=\"(.*?)\"",
+						"pattern=\"" +
+						"${CAPT_GROUP=1}" +
+						"|.*" + File.separator + "\\.pl" +
+						"|.*" + File.separator + "\\.aj" +
+						"\""
+				);
+				neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
+			}
 			
-			Map regexPatternsWithNewStrings = new HashMap();
-			regexPatternsWithNewStrings.put(srcProjectName, destProjectName);
-			regexPatternsWithNewStrings.put(
-					"pattern=\"(.*?)\"",
-					"pattern=\"" +
-					"${CAPT_GROUP=1}" +
-					"|.*" + File.separator + "\\.pl" +
-					"|.*" + File.separator + "\\.aj" +
-					"\""
-			);
-			neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
+			// ----
 			
 			Iterator iterator = neededFileForCopying.iterator();
 			while( iterator.hasNext() )
@@ -196,8 +218,19 @@ public class JTUtils
 		}
 	}
 	
+	public static boolean fileExists(IProject srcProject, String filename)
+	{
+		IFile file = srcProject.getFile(new Path(filename));
+		if( file.exists() )
+			return true;
+		else
+			return false;
+	}
+	
 	/**
-	 * 
+	 * Adapts the encapsulated file in the given helper so that it
+	 * fits the needs in the output project.
+	 *  
 	 * @param destProject
 	 * @param fileName
 	 * @throws CoreException
@@ -274,5 +307,44 @@ public class JTUtils
 		}
 		
 		return null;
+	}
+
+	/**
+	 * Stores the given files in the comma separated String (ctNameList)
+	 * in a file into the given path.
+	 * 
+	 * @param ctNameList
+	 * @param destAbsolutePath
+	 */
+	public static void storeCTListInFile(String ctNameList, String destAbsolutePath)
+	{
+		try
+		{
+			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(destAbsolutePath + "/cts.list")));
+			StringTokenizer st = new StringTokenizer(ctNameList, ",");
+			while( st.hasMoreTokens() )
+			{
+				String token = st.nextToken().trim();
+				bw.write(token+"\n");
+			}
+			bw.flush();
+			bw.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Util method returning the Prolog interface.
+	 * 
+	 * @param srcProject
+	 * @return PrologInterface
+	 * @throws CoreException
+	 */
+	public static PrologInterface getPrologInterface(IProject srcProject) throws CoreException
+	{
+		return ((JTransformerProjectNature) srcProject.getNature(JTransformer.NATURE_ID)).getPrologInterface();
 	}
 }
