@@ -320,7 +320,8 @@ public class JTUtils
 	{
 		try
 		{
-			BufferedWriter bw = new BufferedWriter(new FileWriter(new File(destAbsolutePath + "/cts.list")));
+			BufferedWriter bw = new BufferedWriter(
+					new FileWriter(getFileInstance(destAbsolutePath + "/src/resources/filelists/", "cts.list")));
 			StringTokenizer st = new StringTokenizer(ctNameList, ",");
 			while( st.hasMoreTokens() )
 			{
@@ -336,6 +337,27 @@ public class JTUtils
 		}
 	}
 
+	/**
+	 * Returns a File instance for the given filename and path.
+	 * If the path does not exist it will be deep-created.
+	 * 
+	 * @param pathName
+	 * @param filename
+	 * @return File
+	 */
+	public static File getFileInstance(String pathName, String filename)
+	{
+		File path = new File(pathName);
+		if( !path.exists() )
+			path.mkdirs();
+		
+		if( !pathName.endsWith("/") && !pathName.endsWith("\\") )
+			pathName += File.separator;
+			
+		File file = new File(pathName + filename);
+		return file;
+	}
+	
 	/**
 	 * Util method returning the Prolog interface.
 	 * 
