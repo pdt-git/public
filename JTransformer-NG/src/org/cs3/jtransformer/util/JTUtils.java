@@ -385,8 +385,7 @@ public class JTUtils
 
 		// TODO: schmatz: implement this...
 		List list = prologSession.queryAll(
-				"fullQualifiedName(ResolvedServiceClassId, FqClassName)" + 
-				", not(externT(ResolvedServiceClassId)).");
+				"fullQualifiedName(ResolvedServiceClassId, FqClassName), not(externT(ResolvedServiceClassId)).");
 		if( list != null )
 		{
 			Iterator iterator = list.iterator();
