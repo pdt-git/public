@@ -302,6 +302,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
     public String getPreferenceValue(String key, String defaultValue) {        
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
+        // FIXME: schmatz: the next line throws a NPE when closing the Runtime Eclipse IDE!
         String value = service.getString(qualifier, key, defaultValue, null);
         
         return System.getProperty(key, value);
