@@ -309,6 +309,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         String value = null;
         try
 		{
+            // XXX: schmatz: Note: the next line has thrown a NPE everytime when closing the runtime Eclipse IDE!
         	value = service.getString(qualifier, key, defaultValue, null);	
 		}
         catch (Exception e)
