@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -314,14 +315,14 @@ public class JTUtils
 	 * in a file into the given path.
 	 * 
 	 * @param ctNameList
-	 * @param destAbsolutePath
+	 * @param absolutePathOfOutputProject
 	 */
-	public static void storeCTListInFile(String ctNameList, String destAbsolutePath)
+	public static void storeCTListInFile(String ctNameList, String absolutePathOfOutputProject)
 	{
 		try
 		{
 			BufferedWriter bw = new BufferedWriter(
-					new FileWriter(getFileInstance(destAbsolutePath + "/src/resources/filelists/", "cts.list")));
+					new FileWriter(getFileInstance(absolutePathOfOutputProject + "/src/resources/filelists/", "cts.list")));
 			StringTokenizer st = new StringTokenizer(ctNameList, ",");
 			while( st.hasMoreTokens() )
 			{
@@ -368,5 +369,35 @@ public class JTUtils
 	public static PrologInterface getPrologInterface(IProject srcProject) throws CoreException
 	{
 		return ((JTransformerProjectNature) srcProject.getNature(JTransformer.NATURE_ID)).getPrologInterface();
+	}
+
+	/**
+	 * Stores the list of full qualified Java class names in a
+	 * separate file in the output project.
+	 * 
+	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
+	 */
+	// New by Mark Schmatz
+	public static boolean storeJavaFileListInOutputProject(PrologSession prologSession) throws Exception
+	{
+		boolean error = false;
+
+		// TODO: schmatz: implement this...
+		List list = prologSession.queryAll(
+				"fullQualifiedName(ResolvedServiceClassId, FqClassName)" + 
+				", not(externT(ResolvedServiceClassId)).");
+		if( list != null )
+		{
+			Iterator iterator = list.iterator();
+			while( iterator.hasNext() )
+			{
+				HashMap map = (HashMap) iterator.next();
+				System.out.println("(schmatz: removeme) Line : " + map);
+			}
+		}
+		else
+			error = true;
+	
+		return error;
 	}
 }
