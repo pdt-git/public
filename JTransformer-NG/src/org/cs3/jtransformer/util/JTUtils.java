@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -378,7 +379,7 @@ public class JTUtils
 	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
 	 */
 	// New by Mark Schmatz
-	public static boolean storeJavaFileListInOutputProject(PrologSession prologSession) throws Exception
+	public static boolean storeJavaFileListInOutputProject(PrologSession prologSession) throws PrologInterfaceException
 	{
 		boolean error = false;
 
