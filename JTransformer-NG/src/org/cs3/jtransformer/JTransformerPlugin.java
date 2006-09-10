@@ -302,8 +302,19 @@ public class JTransformerPlugin extends AbstractUIPlugin {
     public String getPreferenceValue(String key, String defaultValue) {        
         IPreferencesService service = Platform.getPreferencesService();
         String qualifier = getBundle().getSymbolicName();
-        // FIXME: schmatz: the next line throws a NPE when closing the Runtime Eclipse IDE!
-        String value = service.getString(qualifier, key, defaultValue, null);
+
+        // XXX: schmatz: is the try-catch ok? returning default value ok?
+        
+        // schmatz: surrounded with try-catch
+        String value = null;
+        try
+		{
+        	value = service.getString(qualifier, key, defaultValue, null);	
+		}
+        catch (Exception e)
+		{
+			return defaultValue;
+		}
         
         return System.getProperty(key, value);
     }
