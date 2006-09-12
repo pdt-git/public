@@ -3,7 +3,7 @@ package org.cs3.jtransformer.tests;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.jtransformer.util.FileAdaptationHelper;
 
 import junit.framework.TestCase;
 
@@ -27,7 +27,7 @@ public class JTUtilsTest extends TestCase
 				"|.*\\\\.aj" +
 				"\""
 		);
-		String newContent = JTUtils.adaptContent(content, regexPatternsWithNewStrings);
+		String newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 		
 		// ---
@@ -41,7 +41,7 @@ public class JTUtilsTest extends TestCase
 				"${CAPT_GROUP=1}" +
 				"321Test"
 		);
-		newContent = JTUtils.adaptContent(content, regexPatternsWithNewStrings);
+		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 		
 		// ---
@@ -57,7 +57,7 @@ public class JTUtilsTest extends TestCase
 				"|**/fqcns.list" +
 				"\""
 		);
-		newContent = JTUtils.adaptContent(content, regexPatternsWithNewStrings);
+		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 
 	}
