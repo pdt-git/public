@@ -320,15 +320,75 @@ public class JTUtils
 	 */
 	public static void storeCTListInFile(String ctNameList, String absolutePathOfOutputProject)
 	{
+		List list = new ArrayList();
+		StringTokenizer st = new StringTokenizer(ctNameList, ",");
+		while( st.hasMoreTokens() )
+		{
+			String token = st.nextToken().trim();
+			list.add(token);
+		}
+		
+		storeListInFile(list, absolutePathOfOutputProject, "cts.list");
+	}
+
+	/**
+	 * Stores the list of full qualified Java class names in a
+	 * separate file in the output project.
+	 *
+	 * @param prologSession
+	 * @param absolutePathOfOutputProject
+	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
+	 */
+	// New by Mark Schmatz
+	public static boolean storeJavaFileListInOutputProject(PrologSession prologSession, String absolutePathOfOutputProject) throws PrologInterfaceException
+	{
+		boolean ok = true;
+
+		// Note: fullQualifiedName/2 requires that at least one argument is bound!
+		List queryList = prologSession.queryAll(
+				"class(ResolvedServiceClassId,_,_),not(externT(ResolvedServiceClassId)), fullQualifiedName(ResolvedServiceClassId, FqClassName)."
+		);
+		
+		if( queryList != null )
+		{
+			List list = new ArrayList();
+			
+			Iterator iterator = queryList.iterator();
+			while( iterator.hasNext() )
+			{
+				HashMap map = (HashMap) iterator.next();
+				// TODO: list.add(...);
+				
+				String fqClassName = (String) map.get("FqClassName");
+				list.add(fqClassName);
+			}
+			
+			storeListInFile(list, absolutePathOfOutputProject, "fqcns.list");
+		}
+		else
+			ok = false;
+	
+		return ok;
+	}
+
+	/**
+	 * Stores the Strings in the given list in the given file and path.
+	 * 
+	 * @param stringList
+	 * @param absolutePathOfOutputProject
+	 */
+	// New by Mark Schmatz
+	public static void storeListInFile(List stringList, String absolutePathOfOutputProject, String fileName)
+	{
 		try
 		{
 			BufferedWriter bw = new BufferedWriter(
-					new FileWriter(getFileInstance(absolutePathOfOutputProject + "/src/resources/filelists/", "cts.list")));
-			StringTokenizer st = new StringTokenizer(ctNameList, ",");
-			while( st.hasMoreTokens() )
+					new FileWriter(getFileInstance(absolutePathOfOutputProject + "/src/resources/filelists/", fileName)));
+			Iterator iterator = stringList.iterator();
+			while( iterator.hasNext() )
 			{
-				String token = st.nextToken().trim();
-				bw.write(token+"\n");
+				String elem = (String) iterator.next();
+				bw.write(elem + "\n");
 			}
 			bw.flush();
 			bw.close();
@@ -370,34 +430,5 @@ public class JTUtils
 	public static PrologInterface getPrologInterface(IProject srcProject) throws CoreException
 	{
 		return ((JTransformerProjectNature) srcProject.getNature(JTransformer.NATURE_ID)).getPrologInterface();
-	}
-
-	/**
-	 * Stores the list of full qualified Java class names in a
-	 * separate file in the output project.
-	 * 
-	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
-	 */
-	// New by Mark Schmatz
-	public static boolean storeJavaFileListInOutputProject(PrologSession prologSession) throws PrologInterfaceException
-	{
-		boolean error = false;
-
-		// TODO: schmatz: implement this...
-		List list = prologSession.queryAll(
-				"fullQualifiedName(ResolvedServiceClassId, FqClassName), not(externT(ResolvedServiceClassId)).");
-		if( list != null )
-		{
-			Iterator iterator = list.iterator();
-			while( iterator.hasNext() )
-			{
-				HashMap map = (HashMap) iterator.next();
-				System.out.println("(schmatz: removeme) Line : " + map);
-			}
-		}
-		else
-			error = true;
-	
-		return error;
 	}
 }
