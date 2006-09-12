@@ -14,8 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
@@ -40,8 +38,6 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JTUtils
 
 {
-	private static final String REGEX_BACKSLASH_TOKEN = "\\\\\\\\";
-
 	public static final String BUNDLE_MANIFEST_FILE = "/bundle.manifest";
 	
 	private static Boolean useSameProjectNameSuffix = null;
@@ -272,50 +268,13 @@ public class JTUtils
 		{
 			String fileContent = getFileContent(file);
 			
-			fileContent = adaptContent(fileContent, cfh.getRegexPatternsWithNewStrings());
+			fileContent = CopyFileHelper.adaptContent(fileContent, cfh.getRegexPatternsWithNewStrings());
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);
 			
 			file.setContents(is, IFile.FORCE, null);
 		}
-	}
-	
-	/**
-	 * Adapts the given content due to the given regex patterns
-	 * and replacement Strings.
-	 * 
-	 * @param content
-	 * @param regexPatternsWithNewStrings
-	 * @return String
-	 */
-	// New by Mark Schmatz
-	public static String adaptContent(String content, Map regexPatternsWithNewStrings)
-	{
-		Iterator iterator = regexPatternsWithNewStrings.keySet().iterator();
-		while( iterator.hasNext() )
-		{
-			String key = (String) iterator.next();
-			String val = (String) regexPatternsWithNewStrings.get(key);
-			
-			Pattern pattern = Pattern.compile(key);
-			Matcher matcher = pattern.matcher(content);
-			if( matcher.find() )
-			{
-				if( matcher.groupCount() > 0 )
-				{
-					for( int cpc=1 ; cpc <=matcher.groupCount() ; cpc++ )
-					{
-						String captGroup = matcher.group(cpc);
-						captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
-						val = val.replaceAll("\\$\\{CAPT_GROUP=" + cpc + "\\}", captGroup);
-					}
-				}
-				content = content.replaceAll(key, val);
-			}
-		}
-		
-		return content;
 	}
 	
 	/**

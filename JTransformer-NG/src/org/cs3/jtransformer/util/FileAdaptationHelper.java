@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * @author Mark Schmatz
  *
  */
-public class CopyFileHelper
+public class FileAdaptationHelper
 {
 	public static final String REGEX_BACKSLASH_TOKEN = "\\\\\\\\";
 	
@@ -27,7 +27,7 @@ public class CopyFileHelper
 	 * 
 	 * @param fileName
 	 */
-	public CopyFileHelper(String fileName)
+	public FileAdaptationHelper(String fileName)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = false;
@@ -46,7 +46,7 @@ public class CopyFileHelper
 	 * @param regexPattern 
 	 * @param newString
 	 */
-	public CopyFileHelper(String fileName, String regexPattern, String newString)
+	public FileAdaptationHelper(String fileName, String regexPattern, String newString)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = true;
@@ -62,7 +62,7 @@ public class CopyFileHelper
 	 * @param fileName
 	 * @param regexPatternWithNewString
 	 */
-	public CopyFileHelper(String fileName, Map regexPatternWithNewString)
+	public FileAdaptationHelper(String fileName, Map regexPatternWithNewString)
 	{
 		this.fileName = fileName;
 		this.needsAdaptation = true;
