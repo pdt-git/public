@@ -43,5 +43,22 @@ public class JTUtilsTest extends TestCase
 		);
 		newContent = JTUtils.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
+		
+		// ---
+		
+		content = "<classpathentry including=\"**/*.java|**/*.pl\"";
+		expContent = "<classpathentry including=\"**/*.java|**/*.pl|**/cts.list|**/fqcns.list\"";
+		regexPatternsWithNewStrings = new HashMap();
+		regexPatternsWithNewStrings.put(
+				"\\<classpathentry\\s+?including=\"(.*?)\"",
+				"<classpathentry including=\"" +
+				"${CAPT_GROUP=1}" +
+				"|**/cts.list" +
+				"|**/fqcns.list" +
+				"\""
+		);
+		newContent = JTUtils.adaptContent(content, regexPatternsWithNewStrings);
+		assertEquals(newContent, expContent);
+
 	}
 }
