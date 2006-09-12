@@ -357,8 +357,6 @@ public class JTUtils
 			while( iterator.hasNext() )
 			{
 				HashMap map = (HashMap) iterator.next();
-				// TODO: list.add(...);
-				
 				String fqClassName = (String) map.get("FqClassName");
 				list.add(fqClassName);
 			}
