@@ -158,16 +158,16 @@ public class JTUtils
 			List neededFileForCopying = new ArrayList();
 			if( !isBundle )
 			{
-				neededFileForCopying.add(new CopyFileHelper("/.classpath"));
+				neededFileForCopying.add(new FileAdaptationHelper("/.classpath"));
 			}
-			neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
+			neededFileForCopying.add(new FileAdaptationHelper("/.project", srcProjectName, destProjectName));
 
 			/*
 			 * Do the following only if we have a bundle
 			 */
 			if( isBundle )
 			{
-				neededFileForCopying.add(new CopyFileHelper(BUNDLE_MANIFEST_FILE));
+				neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_MANIFEST_FILE));
 
 				{
 					Map regexPatternsWithNewStrings = new HashMap();
@@ -182,7 +182,7 @@ public class JTUtils
 							"|.*fqcns\\\\.list" +
 							"\""
 					);
-					neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
+					neededFileForCopying.add(new FileAdaptationHelper("/.bundle-pack", regexPatternsWithNewStrings));
 				}	
 
 				{
@@ -196,7 +196,7 @@ public class JTUtils
 							"|**/fqcns.list" +
 							"\""
 					);
-					neededFileForCopying.add(new CopyFileHelper("/.classpath", regexPatternsWithNewStrings2));
+					neededFileForCopying.add(new FileAdaptationHelper("/.classpath", regexPatternsWithNewStrings2));
 				}
 			}
 			
@@ -205,7 +205,7 @@ public class JTUtils
 			Iterator iterator = neededFileForCopying.iterator();
 			while( iterator.hasNext() )
 			{
-				CopyFileHelper cfh = (CopyFileHelper) iterator.next();
+				FileAdaptationHelper cfh = (FileAdaptationHelper) iterator.next();
 				copyFile(srcProject, destProject, cfh.getFileName());
 				if( cfh.needsAdaptation() )
 				{
@@ -261,14 +261,14 @@ public class JTUtils
 	 * @throws CoreException
 	 */
 	// New by Mark Schmatz
-	private static void adaptFile(IProject destProject, CopyFileHelper cfh) throws CoreException
+	private static void adaptFile(IProject destProject, FileAdaptationHelper cfh) throws CoreException
 	{
 		IFile file = destProject.getFile(new Path(cfh.getFileName()));
 		if( file.exists() )
 		{
 			String fileContent = getFileContent(file);
 			
-			fileContent = CopyFileHelper.adaptContent(fileContent, cfh.getRegexPatternsWithNewStrings());
+			fileContent = FileAdaptationHelper.adaptContent(fileContent, cfh.getRegexPatternsWithNewStrings());
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);

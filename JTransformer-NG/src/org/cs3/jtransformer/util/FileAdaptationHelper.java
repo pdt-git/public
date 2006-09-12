@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * Encapsulates some data used during file copy.
+ * Encapsulates some data used for adapting file contents.
  * 
  * @author Mark Schmatz
  *
