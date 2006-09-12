@@ -164,6 +164,9 @@ public class JTUtils
 			}
 			neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
 
+			/*
+			 * Do the following only if we have a bundle
+			 */
 			if( isBundle )
 			{
 				neededFileForCopying.add(new CopyFileHelper(BUNDLE_MANIFEST_FILE));
