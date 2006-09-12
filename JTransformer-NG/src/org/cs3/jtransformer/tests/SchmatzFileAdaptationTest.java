@@ -12,7 +12,7 @@ import junit.framework.TestCase;
  * @author Mark Schmatz
  *
  */
-public class JTUtilsTest extends TestCase
+public class SchmatzFileAdaptationTest extends TestCase
 {
 	public void testAdaptFile()
 	{
