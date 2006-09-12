@@ -158,23 +158,45 @@ public class JTUtils
 			// ----
 			
 			List neededFileForCopying = new ArrayList();
-			neededFileForCopying.add(new CopyFileHelper("/.classpath"));
+			if( !isBundle )
+			{
+				neededFileForCopying.add(new CopyFileHelper("/.classpath"));
+			}
 			neededFileForCopying.add(new CopyFileHelper("/.project", srcProjectName, destProjectName));
+
 			if( isBundle )
 			{
 				neededFileForCopying.add(new CopyFileHelper(BUNDLE_MANIFEST_FILE));
-				
-				Map regexPatternsWithNewStrings = new HashMap();
-				regexPatternsWithNewStrings.put(srcProjectName, destProjectName);
-				regexPatternsWithNewStrings.put(
-						"pattern=\"(.*?)\"",
-						"pattern=\"" +
-						"${CAPT_GROUP=1}" +
-						"|.*" + File.separator + "\\.pl" +
-						"|.*" + File.separator + "\\.aj" +
-						"\""
-				);
-				neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
+
+				{
+					Map regexPatternsWithNewStrings = new HashMap();
+					regexPatternsWithNewStrings.put(srcProjectName, destProjectName);
+					regexPatternsWithNewStrings.put(
+							"pattern=\"(.*?)\"",
+							"pattern=\"" +
+							"${CAPT_GROUP=1}" +
+							"|.*\\\\.pl" +
+							"|.*\\\\.aj" +
+							"|.*cts\\\\.list" +
+							"|.*fqcns\\\\.list" +
+							"\""
+					);
+					neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
+				}	
+				// ---
+				{
+					Map regexPatternsWithNewStrings2 = new HashMap();
+					regexPatternsWithNewStrings2.put(srcProjectName, destProjectName);
+					regexPatternsWithNewStrings2.put(
+							"\\<classpathentry\\s+?including=\"(.*?)\"",
+							"<classpathentry including=\"" +
+							"${CAPT_GROUP=1}" +
+							"|**/cts.list" +
+							"|**/fqcns.list" +
+							"\""
+					);
+					neededFileForCopying.add(new CopyFileHelper("/.classpath", regexPatternsWithNewStrings2));
+				}
 			}
 			
 			// ----
@@ -186,7 +208,7 @@ public class JTUtils
 				copyFile(srcProject, destProject, cfh.getFileName());
 				if( cfh.needsAdaptation() )
 				{
-					adaptOutputProjectName(destProject, cfh);
+					adaptFile(destProject, cfh);
 				}
 			}
 		}
@@ -238,42 +260,57 @@ public class JTUtils
 	 * @throws CoreException
 	 */
 	// New by Mark Schmatz
-	private static void adaptOutputProjectName(IProject destProject, CopyFileHelper cfh) throws CoreException
+	private static void adaptFile(IProject destProject, CopyFileHelper cfh) throws CoreException
 	{
 		IFile file = destProject.getFile(new Path(cfh.getFileName()));
 		if( file.exists() )
 		{
 			String fileContent = getFileContent(file);
 			
-			Map regexPatternsWithNewStrings = cfh.getRegexPatternsWithNewStrings();
-			Iterator iterator = regexPatternsWithNewStrings.keySet().iterator();
-			while( iterator.hasNext() )
-			{
-				String key = (String) iterator.next();
-				String val = (String) regexPatternsWithNewStrings.get(key);
-				
-				Pattern pattern = Pattern.compile(key);
-				Matcher matcher = pattern.matcher(fileContent);
-				if( matcher.find() )
-				{
-					if( matcher.groupCount() > 0 )
-					{
-						for( int cpc=1 ; cpc <=matcher.groupCount() ; cpc++ )
-						{
-							String captGroup = matcher.group(cpc);
-							captGroup = captGroup.replace("\\", "\\\\\\\\");
-							val = val.replaceAll("\\$\\{CAPT_GROUP=" + cpc + "\\}", captGroup);
-						}
-					}
-					fileContent = fileContent.replaceAll(key, val);
-				}
-			}
+			fileContent = adaptContent(fileContent, cfh.getRegexPatternsWithNewStrings());
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);
 			
 			file.setContents(is, IFile.FORCE, null);
 		}
+	}
+	
+	/**
+	 * Adapts the given content due to the given regex patterns
+	 * and replacement Strings.
+	 * 
+	 * @param content
+	 * @param regexPatternsWithNewStrings
+	 * @return String
+	 */
+	// New by Mark Schmatz
+	public static String adaptContent(String content, Map regexPatternsWithNewStrings)
+	{
+		Iterator iterator = regexPatternsWithNewStrings.keySet().iterator();
+		while( iterator.hasNext() )
+		{
+			String key = (String) iterator.next();
+			String val = (String) regexPatternsWithNewStrings.get(key);
+			
+			Pattern pattern = Pattern.compile(key);
+			Matcher matcher = pattern.matcher(content);
+			if( matcher.find() )
+			{
+				if( matcher.groupCount() > 0 )
+				{
+					for( int cpc=1 ; cpc <=matcher.groupCount() ; cpc++ )
+					{
+						String captGroup = matcher.group(cpc);
+						captGroup = captGroup.replace("\\", "\\\\\\\\");
+						val = val.replaceAll("\\$\\{CAPT_GROUP=" + cpc + "\\}", captGroup);
+					}
+				}
+				content = content.replaceAll(key, val);
+			}
+		}
+		
+		return content;
 	}
 	
 	/**
