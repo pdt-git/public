@@ -15,7 +15,13 @@ import java.util.regex.Pattern;
  */
 public class FileAdaptationHelper
 {
+	private static final String START_TEMPLATE_VAR_TOKENS = "\\$\\{";
+	private static final String END_TEMPLATE_VAR_TOKENS = "\\}";
+	private static final String CAPT_GROUP_TOKEN = "CAPT_GROUP";
+	
 	public static final String REGEX_BACKSLASH_TOKEN = "\\\\\\\\";
+	
+	
 	
 	private String fileName;
 	private boolean needsAdaptation;
@@ -118,11 +124,15 @@ public class FileAdaptationHelper
 			{
 				if( matcher.groupCount() > 0 )
 				{
-					for( int cpc=1 ; cpc <=matcher.groupCount() ; cpc++ )
+					for( int groupCount=1 ; groupCount <=matcher.groupCount() ; groupCount++ )
 					{
-						String captGroup = matcher.group(cpc);
+						String captGroup = matcher.group(groupCount);
 						captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
-						val = val.replaceAll("\\$\\{CAPT_GROUP=" + cpc + "\\}", captGroup);
+						val = val.replaceAll(
+								START_TEMPLATE_VAR_TOKENS + 
+								CAPT_GROUP_TOKEN + "=" + groupCount +
+								END_TEMPLATE_VAR_TOKENS,
+								captGroup);
 					}
 				}
 				content = content.replaceAll(key, val);
