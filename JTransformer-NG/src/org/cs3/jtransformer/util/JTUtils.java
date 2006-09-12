@@ -40,6 +40,8 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JTUtils
 
 {
+	private static final String REGEX_BACKSLASH_TOKEN = "\\\\\\\\";
+
 	public static final String BUNDLE_MANIFEST_FILE = "/bundle.manifest";
 	
 	private static Boolean useSameProjectNameSuffix = null;
@@ -186,7 +188,7 @@ public class JTUtils
 					);
 					neededFileForCopying.add(new CopyFileHelper("/.bundle-pack", regexPatternsWithNewStrings));
 				}	
-				// ---
+
 				{
 					Map regexPatternsWithNewStrings2 = new HashMap();
 					regexPatternsWithNewStrings2.put(srcProjectName, destProjectName);
@@ -305,7 +307,7 @@ public class JTUtils
 					for( int cpc=1 ; cpc <=matcher.groupCount() ; cpc++ )
 					{
 						String captGroup = matcher.group(cpc);
-						captGroup = captGroup.replace("\\", "\\\\\\\\");
+						captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
 						val = val.replaceAll("\\$\\{CAPT_GROUP=" + cpc + "\\}", captGroup);
 					}
 				}
