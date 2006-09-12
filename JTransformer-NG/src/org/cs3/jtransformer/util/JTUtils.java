@@ -36,8 +36,14 @@ import org.eclipse.jdt.core.JavaModelException;
  *
  */
 public class JTUtils
-
 {
+	private static final String RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
+	private static final String FQCN_LIST_FILENAME = "fqcn.list";
+	private static final String CT_LIST_FILENAME = "ct.list";
+	
+	private static final String DOT_PROJECT_FILE = "/.project";
+	private static final String DOT_CLASSPATH_FILE = "/.classpath";
+	private static final String BUNDLE_PACK_FILE = "/.bundle-pack";
 	public static final String BUNDLE_MANIFEST_FILE = "/bundle.manifest";
 	
 	private static Boolean useSameProjectNameSuffix = null;
@@ -156,11 +162,12 @@ public class JTUtils
 			// ----
 			
 			List neededFileForCopying = new ArrayList();
+			
 			if( !isBundle )
 			{
-				neededFileForCopying.add(new FileAdaptationHelper("/.classpath"));
+				neededFileForCopying.add(new FileAdaptationHelper(DOT_CLASSPATH_FILE));
 			}
-			neededFileForCopying.add(new FileAdaptationHelper("/.project", srcProjectName, destProjectName));
+			neededFileForCopying.add(new FileAdaptationHelper(DOT_PROJECT_FILE, srcProjectName, destProjectName));
 
 			/*
 			 * Do the following only if we have a bundle
@@ -182,7 +189,7 @@ public class JTUtils
 							"|.*fqcns\\\\.list" +
 							"\""
 					);
-					neededFileForCopying.add(new FileAdaptationHelper("/.bundle-pack", regexPatternsWithNewStrings));
+					neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_PACK_FILE, regexPatternsWithNewStrings));
 				}	
 
 				{
@@ -196,7 +203,7 @@ public class JTUtils
 							"|**/fqcns.list" +
 							"\""
 					);
-					neededFileForCopying.add(new FileAdaptationHelper("/.classpath", regexPatternsWithNewStrings2));
+					neededFileForCopying.add(new FileAdaptationHelper(DOT_CLASSPATH_FILE, regexPatternsWithNewStrings2));
 				}
 			}
 			
@@ -214,6 +221,148 @@ public class JTUtils
 			}
 		}
 	}
+	
+	/**
+	 * Returns <tt>true</tt> if the file for the given <tt>filename</tt> exists in
+	 * <tt>srcProject</tt>; <tt>false</tt> otherwise.
+	 * 
+	 * @param srcProject
+	 * @param filename
+	 * @return boolean
+	 */
+	public static boolean fileExists(IProject srcProject, String filename)
+	{
+		IFile file = srcProject.getFile(new Path(filename));
+		if( file.exists() )
+			return true;
+		else
+			return false;
+	}
+
+	/**
+	 * Stores the given CT names in the comma separated String <tt>ctNameList</tt>
+	 * into a file in the given path (<tt>absolutePathOfOutputProject</tt>).
+	 * 
+	 * @param ctNameList
+	 * @param absolutePathOfOutputProject
+	 */
+	// New by Mark Schmatz
+	public static void storeCTList(String ctNameList, String absolutePathOfOutputProject)
+	{
+		List list = new ArrayList();
+		StringTokenizer st = new StringTokenizer(ctNameList, ",");
+		while( st.hasMoreTokens() )
+		{
+			String token = st.nextToken().trim();
+			list.add(token);
+		}
+		
+		storeListInFile(list, absolutePathOfOutputProject, CT_LIST_FILENAME);
+	}
+
+	/**
+	 * Stores the list of full qualified Java class names of all not-extern
+	 * classes of the bundle (except the bundle activator) into a
+	 * file in the given path (<tt>absolutePathOfOutputProject</tt>).
+	 *
+	 * @param prologSession
+	 * @param absolutePathOfOutputProject
+	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
+	 */
+	// New by Mark Schmatz
+	// TODO: schmatz: don't store the bundle activator
+	public static boolean storeJavaFileList(PrologSession prologSession, String absolutePathOfOutputProject) throws PrologInterfaceException
+	{
+		boolean ok = true;
+
+		// Note: fullQualifiedName/2 requires that at least one argument is bound!
+		List queryList = prologSession.queryAll(
+				"class(ResolvedServiceClassId,_,_),not(externT(ResolvedServiceClassId)), fullQualifiedName(ResolvedServiceClassId, FqClassName)."
+		);
+		
+		if( queryList != null )
+		{
+			List list = new ArrayList();
+			
+			Iterator iterator = queryList.iterator();
+			while( iterator.hasNext() )
+			{
+				HashMap map = (HashMap) iterator.next();
+				String fqClassName = (String) map.get("FqClassName");
+				list.add(fqClassName);
+			}
+			
+			storeListInFile(list, absolutePathOfOutputProject, FQCN_LIST_FILENAME);
+		}
+		else
+			ok = false;
+	
+		return ok;
+	}
+
+	/**
+	 * Stores the Strings in the given list into the given file and path.
+	 * 
+	 * @param stringList
+	 * @param absolutePath
+	 */
+	// New by Mark Schmatz
+	public static void storeListInFile(List stringList, String absolutePath, String fileName)
+	{
+		try
+		{
+			BufferedWriter bw = new BufferedWriter(
+					new FileWriter(getFileInstance(absolutePath + RESOURCES_FILELISTS_FOLDER, fileName)));
+			Iterator iterator = stringList.iterator();
+			while( iterator.hasNext() )
+			{
+				String elem = (String) iterator.next();
+				bw.write(elem + "\n");
+			}
+			bw.flush();
+			bw.close();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Returns a File instance for the given filename and path.
+	 * If the path does not exist it will be deep-created.<br>
+	 * The file may exist or not.
+	 * 
+	 * @param pathName
+	 * @param filename
+	 * @return File
+	 */
+	public static File getFileInstance(String pathName, String filename)
+	{
+		File path = new File(pathName);
+		if( !path.exists() )
+			path.mkdirs();
+		
+		if( !pathName.endsWith("/") && !pathName.endsWith("\\") )
+			pathName += File.separator;
+			
+		File file = new File(pathName + filename);
+		return file;
+	}
+	
+	/**
+	 * Util method returning the Prolog interface.
+	 * 
+	 * @param srcProject
+	 * @return PrologInterface
+	 * @throws CoreException
+	 */
+	public static PrologInterface getPrologInterface(IProject srcProject) throws CoreException
+	{
+		return ((JTransformerProjectNature) srcProject.getNature(JTransformer.NATURE_ID)).getPrologInterface();
+	}
+	
+	// ------------------------------------------------------------------
 
 	/**
 	 * Copies the file for <tt>fileName</tt> from the
@@ -242,16 +391,7 @@ public class JTUtils
 			destProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 		}
 	}
-	
-	public static boolean fileExists(IProject srcProject, String filename)
-	{
-		IFile file = srcProject.getFile(new Path(filename));
-		if( file.exists() )
-			return true;
-		else
-			return false;
-	}
-	
+
 	/**
 	 * Adapts the encapsulated file in the given helper so that it
 	 * fits the needs in the output project.
@@ -276,7 +416,7 @@ public class JTUtils
 			file.setContents(is, IFile.FORCE, null);
 		}
 	}
-	
+
 	/**
 	 * Returns the content of the file as String.
 	 * 
@@ -310,125 +450,5 @@ public class JTUtils
 		}
 		
 		return null;
-	}
-
-	/**
-	 * Stores the given files in the comma separated String (ctNameList)
-	 * in a file into the given path.
-	 * 
-	 * @param ctNameList
-	 * @param absolutePathOfOutputProject
-	 */
-	// New by Mark Schmatz
-	public static void storeCTListInFile(String ctNameList, String absolutePathOfOutputProject)
-	{
-		List list = new ArrayList();
-		StringTokenizer st = new StringTokenizer(ctNameList, ",");
-		while( st.hasMoreTokens() )
-		{
-			String token = st.nextToken().trim();
-			list.add(token);
-		}
-		
-		storeListInFile(list, absolutePathOfOutputProject, "cts.list");
-	}
-
-	/**
-	 * Stores the list of full qualified Java class names in a
-	 * separate file in the output project.
-	 *
-	 * @param prologSession
-	 * @param absolutePathOfOutputProject
-	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
-	 */
-	// New by Mark Schmatz
-	public static boolean storeJavaFileListInOutputProject(PrologSession prologSession, String absolutePathOfOutputProject) throws PrologInterfaceException
-	{
-		boolean ok = true;
-
-		// Note: fullQualifiedName/2 requires that at least one argument is bound!
-		List queryList = prologSession.queryAll(
-				"class(ResolvedServiceClassId,_,_),not(externT(ResolvedServiceClassId)), fullQualifiedName(ResolvedServiceClassId, FqClassName)."
-		);
-		
-		if( queryList != null )
-		{
-			List list = new ArrayList();
-			
-			Iterator iterator = queryList.iterator();
-			while( iterator.hasNext() )
-			{
-				HashMap map = (HashMap) iterator.next();
-				String fqClassName = (String) map.get("FqClassName");
-				list.add(fqClassName);
-			}
-			
-			storeListInFile(list, absolutePathOfOutputProject, "fqcns.list");
-		}
-		else
-			ok = false;
-	
-		return ok;
-	}
-
-	/**
-	 * Stores the Strings in the given list in the given file and path.
-	 * 
-	 * @param stringList
-	 * @param absolutePathOfOutputProject
-	 */
-	// New by Mark Schmatz
-	public static void storeListInFile(List stringList, String absolutePathOfOutputProject, String fileName)
-	{
-		try
-		{
-			BufferedWriter bw = new BufferedWriter(
-					new FileWriter(getFileInstance(absolutePathOfOutputProject + "/src/resources/filelists/", fileName)));
-			Iterator iterator = stringList.iterator();
-			while( iterator.hasNext() )
-			{
-				String elem = (String) iterator.next();
-				bw.write(elem + "\n");
-			}
-			bw.flush();
-			bw.close();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Returns a File instance for the given filename and path.
-	 * If the path does not exist it will be deep-created.
-	 * 
-	 * @param pathName
-	 * @param filename
-	 * @return File
-	 */
-	public static File getFileInstance(String pathName, String filename)
-	{
-		File path = new File(pathName);
-		if( !path.exists() )
-			path.mkdirs();
-		
-		if( !pathName.endsWith("/") && !pathName.endsWith("\\") )
-			pathName += File.separator;
-			
-		File file = new File(pathName + filename);
-		return file;
-	}
-	
-	/**
-	 * Util method returning the Prolog interface.
-	 * 
-	 * @param srcProject
-	 * @return PrologInterface
-	 * @throws CoreException
-	 */
-	public static PrologInterface getPrologInterface(IProject srcProject) throws CoreException
-	{
-		return ((JTransformerProjectNature) srcProject.getNature(JTransformer.NATURE_ID)).getPrologInterface();
 	}
 }
