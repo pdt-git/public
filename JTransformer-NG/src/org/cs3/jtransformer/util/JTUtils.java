@@ -318,6 +318,7 @@ public class JTUtils
 	 * @param ctNameList
 	 * @param absolutePathOfOutputProject
 	 */
+	// New by Mark Schmatz
 	public static void storeCTListInFile(String ctNameList, String absolutePathOfOutputProject)
 	{
 		List list = new ArrayList();
