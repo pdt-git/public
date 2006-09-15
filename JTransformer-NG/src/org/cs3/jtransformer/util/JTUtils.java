@@ -247,14 +247,16 @@ public class JTUtils
 	 * @param absolutePathOfOutputProject
 	 */
 	// New by Mark Schmatz
-	public static void storeCTList(String ctNameList, String absolutePathOfOutputProject)
+	public static void storeCTList(String ctNameList, List ctFilenameList, String absolutePathOfOutputProject)
 	{
+		int i=0;
+		
 		List list = new ArrayList();
 		StringTokenizer st = new StringTokenizer(ctNameList, ",");
 		while( st.hasMoreTokens() )
 		{
 			String token = st.nextToken().trim();
-			list.add(token);
+			list.add(token + " ### " + ctFilenameList.get(i++));
 		}
 		
 		storeListInFile(list, absolutePathOfOutputProject, CT_LIST_FILENAME);
