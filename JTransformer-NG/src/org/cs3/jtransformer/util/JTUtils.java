@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class JTUtils
 {
+	public static final String CTNAME_FILENAME_SEPARATOR = " ##--## ";
 	private static final String RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
 	private static final String FQCN_LIST_FILENAME = "fqcn.list";
 	private static final String CT_LIST_FILENAME = "ct.list";
@@ -256,7 +257,7 @@ public class JTUtils
 		while( st.hasMoreTokens() )
 		{
 			String token = st.nextToken().trim();
-			list.add(token + " ### " + ctFilenameList.get(i++));
+			list.add(token + CTNAME_FILENAME_SEPARATOR + ctFilenameList.get(i++));
 		}
 		
 		storeListInFile(list, absolutePathOfOutputProject, CT_LIST_FILENAME);
