@@ -21,4 +21,16 @@ public interface JTConstants
 	 * version of the project.
 	 */
 	public static final String OUTPUT_PROJECT_NAME_SUFFIX = "-output";
+
+	public static final String CTNAME_FILENAME_SEPARATOR = " ##--## ";
+
+	public static final String RESOURCES_FILELISTS_PACKAGE = "resources.filelists";
+
+	public static final String BUNDLE_MANIFEST_FILE = "/bundle.manifest";
+
+	public static final String COMPLETE_RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
+
+	public static final String FQCN_LIST_FILENAME = "fqcn.list";
+
+	public static final String CT_LIST_FILENAME = "ct.list";
 }
