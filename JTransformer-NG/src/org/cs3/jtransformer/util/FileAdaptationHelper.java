@@ -26,6 +26,7 @@ public class FileAdaptationHelper
 	private String fileName;
 	private boolean needsAdaptation;
 	private Map regexPatternsWithNewStrings;
+	private String tabuString;
 	
 	
 	/**
@@ -75,6 +76,22 @@ public class FileAdaptationHelper
 		this.regexPatternsWithNewStrings = regexPatternWithNewString;
 	}
 
+	/**
+	 * Like <tt>CopyFileHelper(String, String, String)</tt> but here
+	 * you can define more pattern/replacement string pairs.
+	 * 
+	 * @see CopyFileHelper(String, String, String)
+	 * @param fileName
+	 * @param regexPatternWithNewString
+	 */
+	public FileAdaptationHelper(String fileName, Map regexPatternWithNewString, String tabuString)
+	{
+		this.fileName = fileName;
+		this.needsAdaptation = true;
+		this.regexPatternsWithNewStrings = regexPatternWithNewString;
+		this.tabuString = tabuString;
+	}
+
 	public String getFileName()
 	{
 		return fileName;
@@ -102,6 +119,16 @@ public class FileAdaptationHelper
 		return regexPatternsWithNewStrings;
 	}
 
+	public String adaptContent(String content)
+	{
+		return adaptContent(content, this.regexPatternsWithNewStrings, this.tabuString);
+	}
+	
+	public static String adaptContent(String content, Map regexPatternsWithNewStrings)
+	{
+		return adaptContent(content, regexPatternsWithNewStrings, null);
+	}
+	
 	/**
 	 * Adapts the given content String due to the given regex patterns
 	 * and replacement Strings in the Map.
@@ -110,7 +137,7 @@ public class FileAdaptationHelper
 	 * @param regexPatternsWithNewStrings Map containing regex pattern as key and replacement String as value
 	 * @return String The adapted content
 	 */
-	public static String adaptContent(String content, Map regexPatternsWithNewStrings)
+	public static String adaptContent(String content, Map regexPatternsWithNewStrings, String tabuString)
 	{
 		Iterator iterator = regexPatternsWithNewStrings.keySet().iterator();
 		while( iterator.hasNext() )
@@ -118,24 +145,27 @@ public class FileAdaptationHelper
 			String key = (String) iterator.next();
 			String val = (String) regexPatternsWithNewStrings.get(key);
 			
-			Pattern pattern = Pattern.compile(key);
+			Pattern pattern = Pattern.compile(key, Pattern.DOTALL&Pattern.UNIX_LINES);
 			Matcher matcher = pattern.matcher(content);
 			if( matcher.find() )
 			{
-				if( matcher.groupCount() > 0 )
+				if ( tabuString == null || matcher.group().indexOf(tabuString) == -1 )
 				{
-					for( int groupCount=1 ; groupCount <=matcher.groupCount() ; groupCount++ )
+					if( matcher.groupCount() > 0 )
 					{
-						String captGroup = matcher.group(groupCount);
-						captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
-						val = val.replaceAll(
-								START_TEMPLATE_VAR_TOKENS + 
-								CAPT_GROUP_TOKEN + "=" + groupCount +
-								END_TEMPLATE_VAR_TOKENS,
-								captGroup);
+						for( int groupCount=1 ; groupCount <=matcher.groupCount() ; groupCount++ )
+						{
+							String captGroup = matcher.group(groupCount);
+							captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
+							val = val.replaceAll(
+									START_TEMPLATE_VAR_TOKENS + 
+									CAPT_GROUP_TOKEN + "=" + groupCount +
+									END_TEMPLATE_VAR_TOKENS,
+									captGroup);
+						}
 					}
+					content = content.replaceAll(key, val);
 				}
-				content = content.replaceAll(key, val);
 			}
 		}
 		

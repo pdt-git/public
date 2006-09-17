@@ -175,7 +175,16 @@ public class JTUtils
 			 */
 			if( isBundle )
 			{
-				neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_MANIFEST_FILE));
+				{
+					Map regexPatternsWithNewStrings = new HashMap();
+					regexPatternsWithNewStrings.put(
+							"Export-Package:(.*)",
+							"Export-Package: " +
+							"resources.filelists," +
+							"${CAPT_GROUP=1}"
+					);
+					neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, "resources.filelists"));
+				}	
 
 				{
 					Map regexPatternsWithNewStrings = new HashMap();
