@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.cs3.jtransformer.util.FileAdaptationHelper;
-import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.jtransformer.util.JTConstants;
 
 import junit.framework.TestCase;
 
@@ -80,17 +80,17 @@ public class SchmatzFileAdaptationTest extends TestCase
 			"Bundle-Version: 1.0.0\n" +
 			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
 			"Import-Package: org.osgi.framework\n" +
-			"Export-Package: "+JTUtils.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 			"de.test123\n";
 
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"Export-Package:(.*)",
 				"Export-Package: " +
-				JTUtils.RESOURCES_FILELISTS_PACKAGE + "," +
+				JTConstants.RESOURCES_FILELISTS_PACKAGE + "," +
 				"${CAPT_GROUP=1}"
 		);
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings, JTUtils.RESOURCES_FILELISTS_PACKAGE + ",");
+		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE + ",");
 		assertEquals(newContent, expContent);
 		
 		// ---
@@ -102,7 +102,7 @@ public class SchmatzFileAdaptationTest extends TestCase
 			"Bundle-Version: 1.0.0\n" +
 			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
 			"Import-Package: org.osgi.framework\n" +
-			"Export-Package: "+JTUtils.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 			"de.test123\n";
 
 		expContent =
@@ -112,17 +112,17 @@ public class SchmatzFileAdaptationTest extends TestCase
 			"Bundle-Version: 1.0.0\n" +
 			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
 			"Import-Package: org.osgi.framework\n" +
-			"Export-Package: "+JTUtils.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 			"de.test123\n";
 
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"Export-Package:(.*)",
 				"Export-Package: " +
-				JTUtils.RESOURCES_FILELISTS_PACKAGE + "," +
+				JTConstants.RESOURCES_FILELISTS_PACKAGE + "," +
 				"${CAPT_GROUP=1}"
 		);
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings, JTUtils.RESOURCES_FILELISTS_PACKAGE);
+		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		assertEquals(newContent, expContent);
 
 		// ---
@@ -134,7 +134,7 @@ public class SchmatzFileAdaptationTest extends TestCase
 			"Bundle-Version: 1.0.0\n" +
 			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
 			"Import-Package: org.osgi.framework\n" +
-			"Export-Package: "+JTUtils.RESOURCES_FILELISTS_PACKAGE+", "+JTUtils.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 			"de.test123\n";
 		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent2);

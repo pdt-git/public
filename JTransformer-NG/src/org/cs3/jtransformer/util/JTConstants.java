@@ -33,4 +33,10 @@ public interface JTConstants
 	public static final String FQCN_LIST_FILENAME = "fqcn.list";
 
 	public static final String CT_LIST_FILENAME = "ct.list";
+
+	public static final String DOT_PROJECT_FILE = "/.project";
+
+	public static final String DOT_CLASSPATH_FILE = "/.classpath";
+
+	public static final String BUNDLE_PACK_FILE = "/.bundle-pack";
 }

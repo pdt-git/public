@@ -37,10 +37,6 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class JTUtils
 {
-	private static final String DOT_PROJECT_FILE = "/.project";
-	private static final String DOT_CLASSPATH_FILE = "/.classpath";
-	private static final String BUNDLE_PACK_FILE = "/.bundle-pack";
-
 	private static Boolean useSameProjectNameSuffix = null;
 	private static boolean isBundle;
 	
@@ -160,9 +156,9 @@ public class JTUtils
 			
 			if( !isBundle )
 			{
-				neededFileForCopying.add(new FileAdaptationHelper(DOT_CLASSPATH_FILE));
+				neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE));
 			}
-			neededFileForCopying.add(new FileAdaptationHelper(DOT_PROJECT_FILE, srcProjectName, destProjectName));
+			neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_PROJECT_FILE, srcProjectName, destProjectName));
 
 			/*
 			 * Do the following only if we have a bundle
@@ -193,7 +189,7 @@ public class JTUtils
 							"|.*fqcns\\\\.list" +
 							"\""
 					);
-					neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_PACK_FILE, regexPatternsWithNewStrings));
+					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.BUNDLE_PACK_FILE, regexPatternsWithNewStrings));
 				}	
 
 				{
@@ -207,7 +203,7 @@ public class JTUtils
 							"|**/fqcns.list" +
 							"\""
 					);
-					neededFileForCopying.add(new FileAdaptationHelper(DOT_CLASSPATH_FILE, regexPatternsWithNewStrings2));
+					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE, regexPatternsWithNewStrings2));
 				}
 			}
 			
