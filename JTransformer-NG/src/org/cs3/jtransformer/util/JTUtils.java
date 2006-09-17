@@ -37,17 +37,10 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class JTUtils
 {
-	public static final String CTNAME_FILENAME_SEPARATOR = " ##--## ";
-	public static final String RESOURCES_FILELISTS_PACKAGE = "resources.filelists";
-	private static final String COMPLETE_RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
-	private static final String FQCN_LIST_FILENAME = "fqcn.list";
-	private static final String CT_LIST_FILENAME = "ct.list";
-	
 	private static final String DOT_PROJECT_FILE = "/.project";
 	private static final String DOT_CLASSPATH_FILE = "/.classpath";
 	private static final String BUNDLE_PACK_FILE = "/.bundle-pack";
-	public static final String BUNDLE_MANIFEST_FILE = "/bundle.manifest";
-	
+
 	private static Boolean useSameProjectNameSuffix = null;
 	private static boolean isBundle;
 	
@@ -158,7 +151,7 @@ public class JTUtils
 			/*
 			 * Check whether we have a OSGi bundle as source project...
 			 */
-			if( fileExists(srcProject, BUNDLE_MANIFEST_FILE) )
+			if( fileExists(srcProject, JTConstants.BUNDLE_MANIFEST_FILE) )
 				isBundle = true;
 
 			// ----
@@ -181,10 +174,10 @@ public class JTUtils
 					regexPatternsWithNewStrings.put(
 							"Export-Package:(.*)",
 							"Export-Package: " +
-							RESOURCES_FILELISTS_PACKAGE+"," +
+							JTConstants.RESOURCES_FILELISTS_PACKAGE+"," +
 							"${CAPT_GROUP=1}"
 					);
-					neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, RESOURCES_FILELISTS_PACKAGE));
+					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE));
 				}	
 
 				{
@@ -267,10 +260,10 @@ public class JTUtils
 		while( st.hasMoreTokens() )
 		{
 			String token = st.nextToken().trim();
-			list.add(token + CTNAME_FILENAME_SEPARATOR + ctFilenameList.get(i++));
+			list.add(token + JTConstants.CTNAME_FILENAME_SEPARATOR + ctFilenameList.get(i++));
 		}
 		
-		storeListInFile(list, absolutePathOfOutputProject, CT_LIST_FILENAME);
+		storeListInFile(list, absolutePathOfOutputProject, JTConstants.CT_LIST_FILENAME);
 	}
 
 	/**
@@ -305,7 +298,7 @@ public class JTUtils
 				list.add(fqClassName);
 			}
 			
-			storeListInFile(list, absolutePathOfOutputProject, FQCN_LIST_FILENAME);
+			storeListInFile(list, absolutePathOfOutputProject, JTConstants.FQCN_LIST_FILENAME);
 		}
 		else
 			ok = false;
@@ -325,7 +318,7 @@ public class JTUtils
 		try
 		{
 			BufferedWriter bw = new BufferedWriter(
-					new FileWriter(getFileInstance(absolutePath + COMPLETE_RESOURCES_FILELISTS_FOLDER, fileName)));
+					new FileWriter(getFileInstance(absolutePath + JTConstants.COMPLETE_RESOURCES_FILELISTS_FOLDER, fileName)));
 			Iterator iterator = stringList.iterator();
 			while( iterator.hasNext() )
 			{
