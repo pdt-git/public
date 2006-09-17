@@ -1,7 +1,9 @@
 package org.cs3.jtransformer.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +29,16 @@ public class FileAdaptationHelper
 	private boolean needsAdaptation;
 	private Map regexPatternsWithNewStrings;
 	private String tabuString;
+	private List notAdaptedPatterns = new ArrayList();
 	
+	
+	/**
+	 * Only for testing
+	 *
+	 */
+	public FileAdaptationHelper()
+	{
+	}
 	
 	/**
 	 * Use this constructor if no adaptation is needed.
@@ -83,6 +94,7 @@ public class FileAdaptationHelper
 	 * @see CopyFileHelper(String, String, String)
 	 * @param fileName
 	 * @param regexPatternWithNewString
+	 * @param tabuString Don't do anything if the tabu string exists in the matched String
 	 */
 	public FileAdaptationHelper(String fileName, Map regexPatternWithNewString, String tabuString)
 	{
@@ -124,9 +136,9 @@ public class FileAdaptationHelper
 		return adaptContent(content, this.regexPatternsWithNewStrings, this.tabuString);
 	}
 	
-	public static String adaptContent(String content, Map regexPatternsWithNewStrings)
+	public String adaptContent(String content, Map regexPatternsWithNewStrings)
 	{
-		return adaptContent(content, regexPatternsWithNewStrings, null);
+		return adaptContent(content, regexPatternsWithNewStrings, this.tabuString);
 	}
 	
 	/**
@@ -137,7 +149,7 @@ public class FileAdaptationHelper
 	 * @param regexPatternsWithNewStrings Map containing regex pattern as key and replacement String as value
 	 * @return String The adapted content
 	 */
-	public static String adaptContent(String content, Map regexPatternsWithNewStrings, String tabuString)
+	public String adaptContent(String content, Map regexPatternsWithNewStrings, String tabuString)
 	{
 		Iterator iterator = regexPatternsWithNewStrings.keySet().iterator();
 		while( iterator.hasNext() )
@@ -166,6 +178,10 @@ public class FileAdaptationHelper
 					}
 					content = content.replaceAll(key, val);
 				}
+			}
+			else
+			{
+				notAdaptedPatterns.add(key);
 			}
 		}
 		
