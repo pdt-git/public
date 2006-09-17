@@ -167,7 +167,7 @@ public class SchmatzTest extends TestCase
 
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
-				"(.*)",
+				"^(.*)$",
 				"${CAPT_GROUP=1}\n" +
 				"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 				"de.test123\n"

@@ -186,7 +186,7 @@ public class JTUtils
 						 * The manifest has no 'Export-Package:' line => add it...
 						 */
 
-						pattern = "(.*)";
+						pattern = "^(.*)$";
 						replaceString =
 							"${CAPT_GROUP=1}\n" +
 							"Export-Package: " +
