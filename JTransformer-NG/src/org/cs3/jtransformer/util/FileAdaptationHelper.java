@@ -157,7 +157,7 @@ public class FileAdaptationHelper
 			String key = (String) iterator.next();
 			String val = (String) regexPatternsWithNewStrings.get(key);
 			
-			Pattern pattern = Pattern.compile(key, Pattern.DOTALL&Pattern.UNIX_LINES);
+			Pattern pattern = Pattern.compile(key, Pattern.DOTALL & Pattern.UNIX_LINES);
 			Matcher matcher = pattern.matcher(content);
 			if( matcher.find() )
 			{

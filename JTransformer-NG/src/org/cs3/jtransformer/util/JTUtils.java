@@ -490,6 +490,7 @@ public class JTUtils
 			}
 			file.copy(new Path(destProject.getFullPath() + fileName), true, null);
 			destProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
+			old.refreshLocal(IResource.DEPTH_INFINITE, null);
 		}
 	}
 
