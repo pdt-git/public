@@ -60,5 +60,36 @@ public class SchmatzFileAdaptationTest extends TestCase
 		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 
+		// ---
+
+		content =
+			"Manifest-Version: 1.0\n" +
+			"Bundle-Name: MarksTestAspectBundle\n" +
+			"Bundle-SymbolicName: MarksTestAspectBundle\n" +
+			"Bundle-Version: 1.0.0\n" +
+			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
+			"Import-Package: org.osgi.framework\n" +
+			"Export-Package: org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"de.test123\n";
+
+		expContent =
+			"Manifest-Version: 1.0\n" +
+			"Bundle-Name: MarksTestAspectBundle\n" +
+			"Bundle-SymbolicName: MarksTestAspectBundle\n" +
+			"Bundle-Version: 1.0.0\n" +
+			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
+			"Import-Package: org.osgi.framework\n" +
+			"Export-Package: resources.filelists, org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"de.test123\n";
+
+		regexPatternsWithNewStrings = new HashMap();
+		regexPatternsWithNewStrings.put(
+				"Export-Package:(.*)",
+				"Export-Package: " +
+				"resources.filelists," +
+				"${CAPT_GROUP=1}"
+		);
+		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
+		assertEquals(newContent, expContent);
 	}
 }
