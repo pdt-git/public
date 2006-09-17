@@ -316,6 +316,8 @@ public class JTUtils
 					String ctPackage = m.group(1);
 					// Delete trailing dot
 					ctPackage = ctPackage.substring(0, ctPackage.length()-1);
+					// Add the prefixing resources package
+					ctPackage = JTConstants.RESOURCES_FOLDER + "." + ctPackage;
 					buffer.append(ctPackage).append(", ");
 				}
 			}
