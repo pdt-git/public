@@ -190,4 +190,11 @@ public class SchmatzTest extends TestCase
 		
 		assertEquals(exp, str);
 	}
+	
+	public void testEmptyLine()
+	{
+		String str = "\ntest1\n\ntest2\n\n\ntest3\n\n\n\n";
+		
+		assertEquals("\ntest1\ntest2\ntest3\n", JTUtils.removeEmptyLines(str));
+	}
 }
