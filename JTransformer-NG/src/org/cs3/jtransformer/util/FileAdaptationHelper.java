@@ -147,6 +147,7 @@ public class FileAdaptationHelper
 	 * 
 	 * @param content The content as String
 	 * @param regexPatternsWithNewStrings Map containing regex pattern as key and replacement String as value
+	 * @param tabuString Don't do anything if the tabu string exists in the matched String
 	 * @return String The adapted content
 	 */
 	public String adaptContent(String content, Map regexPatternsWithNewStrings, String tabuString)
@@ -157,7 +158,7 @@ public class FileAdaptationHelper
 			String key = (String) iterator.next();
 			String val = (String) regexPatternsWithNewStrings.get(key);
 			
-			Pattern pattern = Pattern.compile(key, Pattern.DOTALL & Pattern.UNIX_LINES);
+			Pattern pattern = Pattern.compile(key, Pattern.DOTALL);
 			Matcher matcher = pattern.matcher(content);
 			if( matcher.find() )
 			{
@@ -169,6 +170,7 @@ public class FileAdaptationHelper
 						{
 							String captGroup = matcher.group(groupCount);
 							captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
+							// FIXME: use Pattern class go for all lines!
 							val = val.replaceAll(
 									START_TEMPLATE_VAR_TOKENS + 
 									CAPT_GROUP_TOKEN + "=" + groupCount +
@@ -176,7 +178,9 @@ public class FileAdaptationHelper
 									captGroup);
 						}
 					}
-					content = content.replaceAll(key, val);
+					// schmatz: Note: replaceAll is much more convenient but does not work yet!
+					// Anyway, by now replaceAll is not needed!
+					content = matcher.replaceFirst(val);
 				}
 			}
 			else
