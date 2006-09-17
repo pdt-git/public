@@ -184,9 +184,7 @@ public class FileAdaptationHelper
 									captGroup);
 						}
 					}
-					// schmatz: Note: replaceAll is much more convenient but does not work yet!
-					// Anyway, by now replaceAll is not needed!
-					content = matcher.replaceFirst(val);
+					content = matcher.replaceAll(val);
 				}
 			}
 			else
