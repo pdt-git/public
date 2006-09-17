@@ -250,7 +250,7 @@ public class JTUtils
 				copyFile(srcProject, destProject, fah.getFileName());
 				if( fah.needsAdaptation() )
 				{
-					adaptFile(destProject, fah);
+					adaptFile(destProject, fah, false);
 				}
 			}
 		}
@@ -270,7 +270,7 @@ public class JTUtils
 		FileAdaptationHelper fah =
 			new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		copyFile(srcProject, destProject, fah.getFileName());
-		adaptFile(destProject, fah);
+		adaptFile(destProject, fah, true);
 		return fah;
 	}
 	
@@ -517,7 +517,7 @@ public class JTUtils
 	 * @throws CoreException
 	 */
 	// New by Mark Schmatz
-	private static void adaptFile(IProject destProject, FileAdaptationHelper cfh) throws CoreException
+	private static void adaptFile(IProject destProject, FileAdaptationHelper cfh, boolean deleteInnerEmptyLines) throws CoreException
 	{
 		IFile file = destProject.getFile(new Path(cfh.getFileName()));
 		if( file.exists() )
@@ -525,12 +525,27 @@ public class JTUtils
 			String fileContent = getFileContent(file);
 			
 			fileContent = cfh.adaptContent(fileContent);
+		
+			if( deleteInnerEmptyLines )
+				fileContent = removeEmptyLines(fileContent);
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);
 			
 			file.setContents(is, IFile.FORCE, null);
 		}
+	}
+
+	public static String removeEmptyLines(String str)
+	{
+		String tmp = "";
+		while( !tmp.equals(str) )
+		{
+			tmp = str;
+			str = str.replaceAll("\n\n", "\n");
+			str = str.replaceAll("\r\n\r\n", "\r\n");
+		}
+		return str;
 	}
 
 	/**
