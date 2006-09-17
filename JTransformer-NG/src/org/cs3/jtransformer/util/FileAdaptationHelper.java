@@ -8,9 +8,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.cs3.jtransformer.tests.SchmatzTest;
+
 
 /**
- * Encapsulates some data used for adapting file contents.
+ * Encapsulates some data used for adapting file contents.<br><br>
+ * 
+ * Test this class with <tt>SchmatzTest.java</tt>
+ * 
+ * @see SchmatzTest
  * 
  * @author Mark Schmatz
  *
