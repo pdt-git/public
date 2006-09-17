@@ -38,7 +38,8 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JTUtils
 {
 	public static final String CTNAME_FILENAME_SEPARATOR = " ##--## ";
-	private static final String RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
+	public static final String RESOURCES_FILELISTS_PACKAGE = "resources.filelists";
+	private static final String COMPLETE_RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
 	private static final String FQCN_LIST_FILENAME = "fqcn.list";
 	private static final String CT_LIST_FILENAME = "ct.list";
 	
@@ -180,10 +181,10 @@ public class JTUtils
 					regexPatternsWithNewStrings.put(
 							"Export-Package:(.*)",
 							"Export-Package: " +
-							"resources.filelists," +
+							RESOURCES_FILELISTS_PACKAGE+"," +
 							"${CAPT_GROUP=1}"
 					);
-					neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, "resources.filelists"));
+					neededFileForCopying.add(new FileAdaptationHelper(BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, RESOURCES_FILELISTS_PACKAGE));
 				}	
 
 				{
@@ -324,7 +325,7 @@ public class JTUtils
 		try
 		{
 			BufferedWriter bw = new BufferedWriter(
-					new FileWriter(getFileInstance(absolutePath + RESOURCES_FILELISTS_FOLDER, fileName)));
+					new FileWriter(getFileInstance(absolutePath + COMPLETE_RESOURCES_FILELISTS_FOLDER, fileName)));
 			Iterator iterator = stringList.iterator();
 			while( iterator.hasNext() )
 			{
