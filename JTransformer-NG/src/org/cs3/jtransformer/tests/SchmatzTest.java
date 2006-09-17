@@ -35,7 +35,7 @@ public class SchmatzTest extends TestCase
 				"\""
 		);
 		String newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
-		assertEquals(newContent, expContent);
+		assertEquals(expContent, newContent);
 		
 		// ---
 		
@@ -49,7 +49,7 @@ public class SchmatzTest extends TestCase
 				"321Test"
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
-		assertEquals(newContent, expContent);
+		assertEquals(expContent, newContent);
 		
 		// ---
 		
@@ -65,7 +65,7 @@ public class SchmatzTest extends TestCase
 				"\""
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
-		assertEquals(newContent, expContent);
+		assertEquals(expContent, newContent);
 
 		// ---
 
@@ -97,7 +97,7 @@ public class SchmatzTest extends TestCase
 				"${CAPT_GROUP=1}"
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE + ",");
-		assertEquals(newContent, expContent);
+		assertEquals(expContent, newContent);
 		
 		// ---
 
@@ -129,7 +129,7 @@ public class SchmatzTest extends TestCase
 				"${CAPT_GROUP=1}"
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
-		assertEquals(newContent, expContent);
+		assertEquals(expContent, newContent);
 
 		// ---
 		
@@ -143,7 +143,7 @@ public class SchmatzTest extends TestCase
 			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 			"de.test123\n";
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
-		assertEquals(newContent, expContent2);
+		assertEquals(expContent2, newContent);
 	}
 	
 	public void testCTPackageExtractor()
