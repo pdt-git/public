@@ -205,7 +205,7 @@ public class JTUtils
 							"${CAPT_GROUP=1}\n" +
 							"Export-Package: " +
 							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-							getCTPackagesAsCSV(getTmpCTList());
+							getCTPackagesAsCSV(getTmpCTList()) + "\n\n";
 						adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					}
 				}	
