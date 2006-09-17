@@ -151,7 +151,7 @@ public class SchmatzTest extends TestCase
 		
 		String exp = "org.cs3.roots.test.schmatz.demo1.aspects, org.cs3.roots.test.schmatz.demo1.aspects";
 			
-		String str = JTUtils.addCTPackagesToManifest(list);
+		String str = JTUtils.getCTPackagesAsCSV(list);
 		
 		assertEquals(exp, str);
 	}

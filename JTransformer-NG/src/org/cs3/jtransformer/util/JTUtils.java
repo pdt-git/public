@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
@@ -38,7 +40,9 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JTUtils
 {
 	private static Boolean useSameProjectNameSuffix = null;
-	private static boolean isBundle;
+	
+	// FIXME: schmatz: use thread local pattern here
+	private static List tmpCTList;
 	
 	
 	/**
@@ -134,6 +138,8 @@ public class JTUtils
 	// New by Mark Schmatz
 	public static void copyAllNeededFiles(IProject srcProject, IProject destProject) throws CoreException
 	{
+		boolean isBundle = false;
+		
 		if( !srcProject.isOpen() )
 			srcProject.open(null);
 		if( !destProject.isOpen() && destProject.exists() )
@@ -170,7 +176,8 @@ public class JTUtils
 					regexPatternsWithNewStrings.put(
 							"Export-Package:(.*)",
 							"Export-Package: " +
-							JTConstants.RESOURCES_FILELISTS_PACKAGE+"," +
+							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
+							getCTPackagesAsCSV(tmpCTList) + ", " +
 							"${CAPT_GROUP=1}"
 					);
 					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE));
@@ -220,6 +227,10 @@ public class JTUtils
 				}
 			}
 		}
+		
+		// ---
+		
+		
 	}
 	
 	/**
@@ -259,7 +270,61 @@ public class JTUtils
 			list.add(token + JTConstants.CTNAME_FILENAME_SEPARATOR + ctFilenameList.get(i++));
 		}
 		
+		/*
+		 * After the CT list is created and stored
+		 * save it in a temp list so that after copying
+		 * the manifest it can be extended by exporting
+		 * the CT packages.
+		 * 
+		 */
+		tmpCTList = list;
+		
 		storeListInFile(list, absolutePathOfOutputProject, JTConstants.CT_LIST_FILENAME);
+	}
+
+	public String getCTPackagesAsCSV()
+	{
+		return getCTPackagesAsCSV(this.tmpCTList);
+	}
+	
+	/**
+	 * Returns the CT packages from the temp CT list
+	 * as comma separated values String in order that
+	 * it can be inserted in the manifest file.
+	 *  
+	 * @return Stirng
+	 */
+	public static String getCTPackagesAsCSV(List tmpCTList)
+	{
+		StringBuffer buffer = new StringBuffer();
+		String str = "";
+		
+		if( tmpCTList != null )
+		{
+			Iterator iterator = tmpCTList.iterator();
+			while( iterator.hasNext() )
+			{
+				String ctLine = (String) iterator.next();
+				StringTokenizer st = new StringTokenizer(ctLine, JTConstants.CTNAME_FILENAME_SEPARATOR);
+				String ctName = st.nextToken().trim().replaceAll("/", ".");
+				String ctFilename = st.nextToken().trim();
+				
+				Pattern p = Pattern.compile("'(.*?)"+ctFilename+"'\\(.*?\\)");
+				Matcher m = p.matcher(ctName);
+				if( m.find() )
+				{
+					String ctPackage = m.group(1);
+					// Delete trailing dot
+					ctPackage = ctPackage.substring(0, ctPackage.length()-1);
+					buffer.append(ctPackage).append(", ");
+				}
+			}
+			
+			if( buffer.length() > 2)
+				str = buffer.substring(0, buffer.length()-2);
+		}
+		
+		return str;
 	}
 
 	/**
@@ -410,7 +475,7 @@ public class JTUtils
 		{
 			String fileContent = getFileContent(file);
 			
-			fileContent = FileAdaptationHelper.adaptContent(fileContent, cfh.getRegexPatternsWithNewStrings());
+			fileContent = cfh.adaptContent(fileContent);
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);
