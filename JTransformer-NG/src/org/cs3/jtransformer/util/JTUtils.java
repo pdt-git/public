@@ -173,13 +173,26 @@ public class JTUtils
 			{
 				{
 					String pattern = "Export-Package:(.*)";
-					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern);
+					String replaceString =
+						"Export-Package: " +
+						JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
+						getCTPackagesAsCSV(tmpCTList) + ", " +
+						"${CAPT_GROUP=1}";
+
+					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					if( fah.getNotAdaptedPatterns().contains(pattern) )
 					{
 						/*
 						 * The manifest has no 'Export-Package:' line => add it...
 						 */
-						adaptManifestFile(srcProject, destProject, "(.*)");
+
+						pattern = "(.*)";
+						replaceString =
+							"${CAPT_GROUP=1}\n" +
+							"Export-Package: " +
+							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
+							getCTPackagesAsCSV(tmpCTList);
+						adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					}
 				}	
 
@@ -233,15 +246,12 @@ public class JTUtils
 		
 	}
 
-	private static FileAdaptationHelper adaptManifestFile(IProject srcProject, IProject destProject, String pattern) throws CoreException
+	private static FileAdaptationHelper adaptManifestFile(IProject srcProject, IProject destProject, String pattern, String replaceString) throws CoreException
 	{
 		Map regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				pattern,
-				"Export-Package: " +
-				JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-				getCTPackagesAsCSV(tmpCTList) + ", " +
-				"${CAPT_GROUP=1}"
+				replaceString
 		);
 		FileAdaptationHelper fah =
 			new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
