@@ -39,4 +39,6 @@ public interface JTConstants
 	public static final String DOT_CLASSPATH_FILE = "/.classpath";
 
 	public static final String BUNDLE_PACK_FILE = "/.bundle-pack";
+	
+	public static final String RESOURCES_FOLDER = "resources";
 }
