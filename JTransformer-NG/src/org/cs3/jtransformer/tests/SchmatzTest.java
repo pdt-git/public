@@ -144,6 +144,36 @@ public class SchmatzTest extends TestCase
 			"de.test123\n";
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(expContent2, newContent);
+		
+		// ---
+
+		content =
+			"Manifest-Version: 1.0\n" +
+			"Bundle-Name: MarksTestAspectBundle\n" +
+			"Bundle-SymbolicName: MarksTestAspectBundle\n" +
+			"Bundle-Version: 1.0.0\n" +
+			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
+			"Import-Package: org.osgi.framework\n";
+
+		expContent =
+			"Manifest-Version: 1.0\n" +
+			"Bundle-Name: MarksTestAspectBundle\n" +
+			"Bundle-SymbolicName: MarksTestAspectBundle\n" +
+			"Bundle-Version: 1.0.0\n" +
+			"Bundle-Activator: org.cs3.roots.test.schmatz.demo1.Activator\n" +
+			"Import-Package: org.osgi.framework\n\n" +
+			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+			"de.test123\n";
+
+		regexPatternsWithNewStrings = new HashMap();
+		regexPatternsWithNewStrings.put(
+				"(.*)",
+				"${CAPT_GROUP=1}\n" +
+				"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
+				"de.test123\n"
+		);
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
+		assertEquals(expContent, newContent);
 	}
 	
 	public void testCTPackageExtractor()
