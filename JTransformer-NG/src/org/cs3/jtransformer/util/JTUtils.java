@@ -527,7 +527,7 @@ public class JTUtils
 			fileContent = cfh.adaptContent(fileContent);
 		
 			if( deleteInnerEmptyLines )
-				fileContent = removeEmptyLines(fileContent);
+				fileContent = removeEmptyLines(fileContent) + "\n";
 			
 			byte[] buffer = fileContent.getBytes();
 			InputStream is = new ByteArrayInputStream(buffer);
