@@ -18,6 +18,9 @@ import junit.framework.TestCase;
  */
 public class SchmatzTest extends TestCase
 {
+	private FileAdaptationHelper fah = new FileAdaptationHelper();
+	
+	
 	public void testAdaptFile()
 	{
 		String content = "agregoiuh pattern=\"test123\"";
@@ -31,7 +34,7 @@ public class SchmatzTest extends TestCase
 				"|.*\\\\.aj" +
 				"\""
 		);
-		String newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
+		String newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 		
 		// ---
@@ -45,7 +48,7 @@ public class SchmatzTest extends TestCase
 				"${CAPT_GROUP=1}" +
 				"321Test"
 		);
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 		
 		// ---
@@ -61,7 +64,7 @@ public class SchmatzTest extends TestCase
 				"|**/fqcns.list" +
 				"\""
 		);
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent);
 
 		// ---
@@ -93,7 +96,7 @@ public class SchmatzTest extends TestCase
 				JTConstants.RESOURCES_FILELISTS_PACKAGE + "," +
 				"${CAPT_GROUP=1}"
 		);
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE + ",");
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE + ",");
 		assertEquals(newContent, expContent);
 		
 		// ---
@@ -125,7 +128,7 @@ public class SchmatzTest extends TestCase
 				JTConstants.RESOURCES_FILELISTS_PACKAGE + "," +
 				"${CAPT_GROUP=1}"
 		);
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		assertEquals(newContent, expContent);
 
 		// ---
@@ -139,7 +142,7 @@ public class SchmatzTest extends TestCase
 			"Import-Package: org.osgi.framework\n" +
 			"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 			"de.test123\n";
-		newContent = FileAdaptationHelper.adaptContent(content, regexPatternsWithNewStrings);
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(newContent, expContent2);
 	}
 	

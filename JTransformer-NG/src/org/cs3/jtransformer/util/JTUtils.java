@@ -172,15 +172,15 @@ public class JTUtils
 			if( isBundle )
 			{
 				{
-					Map regexPatternsWithNewStrings = new HashMap();
-					regexPatternsWithNewStrings.put(
-							"Export-Package:(.*)",
-							"Export-Package: " +
-							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-							getCTPackagesAsCSV(tmpCTList) + ", " +
-							"${CAPT_GROUP=1}"
-					);
-					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE));
+					String pattern = "Export-Package:(.*)";
+					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern);
+					if( fah.getNotAdaptedPatterns().contains(pattern) )
+					{
+						/*
+						 * The manifest has no 'Export-Package:' line => add it...
+						 */
+						adaptManifestFile(srcProject, destProject, "(.*)");
+					}
 				}	
 
 				{
@@ -219,11 +219,11 @@ public class JTUtils
 			Iterator iterator = neededFileForCopying.iterator();
 			while( iterator.hasNext() )
 			{
-				FileAdaptationHelper cfh = (FileAdaptationHelper) iterator.next();
-				copyFile(srcProject, destProject, cfh.getFileName());
-				if( cfh.needsAdaptation() )
+				FileAdaptationHelper fah = (FileAdaptationHelper) iterator.next();
+				copyFile(srcProject, destProject, fah.getFileName());
+				if( fah.needsAdaptation() )
 				{
-					adaptFile(destProject, cfh);
+					adaptFile(destProject, fah);
 				}
 			}
 		}
@@ -231,6 +231,23 @@ public class JTUtils
 		// ---
 		
 		
+	}
+
+	private static FileAdaptationHelper adaptManifestFile(IProject srcProject, IProject destProject, String pattern) throws CoreException
+	{
+		Map regexPatternsWithNewStrings = new HashMap();
+		regexPatternsWithNewStrings.put(
+				pattern,
+				"Export-Package: " +
+				JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
+				getCTPackagesAsCSV(tmpCTList) + ", " +
+				"${CAPT_GROUP=1}"
+		);
+		FileAdaptationHelper fah =
+			new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
+		copyFile(srcProject, destProject, fah.getFileName());
+		adaptFile(destProject, fah);
+		return fah;
 	}
 	
 	/**
