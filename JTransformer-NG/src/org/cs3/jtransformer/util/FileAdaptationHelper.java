@@ -187,4 +187,9 @@ public class FileAdaptationHelper
 		
 		return content;
 	}
+
+	public List getNotAdaptedPatterns()
+	{
+		return notAdaptedPatterns;
+	}
 }
