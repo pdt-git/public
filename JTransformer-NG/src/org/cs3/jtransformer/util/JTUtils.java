@@ -41,9 +41,23 @@ public class JTUtils
 {
 	private static Boolean useSameProjectNameSuffix = null;
 	
-	// FIXME: schmatz: use thread local pattern here
-	private static List tmpCTList;
-	
+	private static ThreadLocal tmpCTList = new ThreadLocal()
+	{
+		protected synchronized Object initialValue()
+		{
+			return new ArrayList();
+		}
+	};
+	public static List getTmpCTList()
+	{
+		return (List) tmpCTList.get();
+	}
+	public static synchronized void setTmpCTList(List list)
+	{
+		getTmpCTList().clear();
+		getTmpCTList().addAll(list);
+	}
+
 	
 	/**
 	 * Returns true if the output project (the adapted version of the original)
@@ -176,7 +190,7 @@ public class JTUtils
 					String replaceString =
 						"Export-Package: " +
 						JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-						getCTPackagesAsCSV(tmpCTList) + ", " +
+						getCTPackagesAsCSV(getTmpCTList()) + ", " +
 						"${CAPT_GROUP=1}";
 
 					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
@@ -191,7 +205,7 @@ public class JTUtils
 							"${CAPT_GROUP=1}\n" +
 							"Export-Package: " +
 							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-							getCTPackagesAsCSV(tmpCTList);
+							getCTPackagesAsCSV(getTmpCTList());
 						adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					}
 				}	
@@ -304,14 +318,14 @@ public class JTUtils
 		 * the CT packages.
 		 * 
 		 */
-		tmpCTList = list;
+		setTmpCTList(list);
 		
 		storeListInFile(list, absolutePathOfOutputProject, JTConstants.CT_LIST_FILENAME);
 	}
 
 	public String getCTPackagesAsCSV()
 	{
-		return getCTPackagesAsCSV(this.tmpCTList);
+		return getCTPackagesAsCSV(getTmpCTList());
 	}
 	
 	/**
