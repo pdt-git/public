@@ -44,5 +44,6 @@ public interface JTConstants
 
 	public static final String BUNDLE_PACK_FILE = "/.bundle-pack";
 	
+	// not null
 	public static final String SUBDIR_FOR_CTS = "";  // was: 'resources'
 }
