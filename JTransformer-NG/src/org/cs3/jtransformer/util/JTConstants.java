@@ -30,9 +30,13 @@ public interface JTConstants
 
 	public static final String COMPLETE_RESOURCES_FILELISTS_FOLDER = "/src/resources/filelists/";
 
-	public static final String FQCN_LIST_FILENAME = "fqcn.list";
+	public static final String FQCN_LIST_FILENAME_WITHOUT_SUFFIX = "fqcn";
+	public static final String FQCN_LIST_SUFFIX = "list";
+	public static final String FQCN_LIST_FILENAME = FQCN_LIST_FILENAME_WITHOUT_SUFFIX  + "." + FQCN_LIST_SUFFIX;
 
-	public static final String CT_LIST_FILENAME = "ct.list";
+	public static final String CT_LIST_FILENAME_WITHOUT_SUFFIX = "ct";
+	public static final String CT_LIST_SUFFIX = "list";
+	public static final String CT_LIST_FILENAME= CT_LIST_FILENAME_WITHOUT_SUFFIX + "." + CT_LIST_SUFFIX;
 
 	public static final String DOT_PROJECT_FILE = "/.project";
 

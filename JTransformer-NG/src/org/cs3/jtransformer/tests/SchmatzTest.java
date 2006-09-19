@@ -54,14 +54,14 @@ public class SchmatzTest extends TestCase
 		// ---
 		
 		content = "<classpathentry including=\"**/*.java|**/*.pl\"";
-		expContent = "<classpathentry including=\"**/*.java|**/*.pl|**/cts.list|**/fqcns.list\"";
+		expContent = "<classpathentry including=\"**/*.java|**/*.pl|**/" + JTConstants.CT_LIST_FILENAME + "|**/"+ JTConstants.FQCN_LIST_FILENAME +"\"";
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"\\<classpathentry\\s+?including=\"(.*?)\"",
 				"<classpathentry including=\"" +
 				"${CAPT_GROUP=1}" +
-				"|**/cts.list" +
-				"|**/fqcns.list" +
+				"|**/" + JTConstants.CT_LIST_FILENAME +
+				"|**/" + JTConstants.FQCN_LIST_FILENAME +
 				"\""
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
