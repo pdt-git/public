@@ -14,8 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
@@ -190,7 +188,7 @@ public class JTUtils
 					String replaceString =
 						"Export-Package: " +
 						JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-						getCTPackagesAsCSV(getTmpCTList()) + ", " +
+						//getCTPackagesAsCSV(getTmpCTList()) + ", " +
 						"${CAPT_GROUP=1}";
 
 					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
@@ -205,7 +203,8 @@ public class JTUtils
 							"${CAPT_GROUP=1}\n" +
 							"Export-Package: " +
 							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-							getCTPackagesAsCSV(getTmpCTList()) + "\n\n";
+							//getCTPackagesAsCSV(getTmpCTList()) +
+							"\n\n";
 						adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					}
 				}	
@@ -254,10 +253,6 @@ public class JTUtils
 				}
 			}
 		}
-		
-		// ---
-		
-		
 	}
 
 	private static FileAdaptationHelper adaptManifestFile(IProject srcProject, IProject destProject, String pattern, String replaceString) throws CoreException
@@ -322,11 +317,6 @@ public class JTUtils
 		
 		storeListInFile(list, absolutePathOfOutputProject, JTConstants.CT_LIST_FILENAME);
 	}
-
-	public String getCTPackagesAsCSV()
-	{
-		return getCTPackagesAsCSV(getTmpCTList());
-	}
 	
 	/**
 	 * Returns the CT packages from the temp CT list
@@ -334,7 +324,7 @@ public class JTUtils
 	 * it can be inserted in the manifest file.
 	 *  
 	 * @return Stirng
-	 */
+	 *
 	public static String getCTPackagesAsCSV(List tmpCTList)
 	{
 		StringBuffer buffer = new StringBuffer();
@@ -358,24 +348,13 @@ public class JTUtils
 					// Delete trailing dot
 					ctPackage = ctPackage.substring(0, ctPackage.length()-1);
 					// Add the prefixing resources package
-					
-					String subDirForCts = "";
-					if( JTConstants.SUBDIR_FOR_CTS != null && !"".equals(JTConstants.SUBDIR_FOR_CTS) )
-						subDirForCts = JTConstants.SUBDIR_FOR_CTS + ".";
-					String ctPackageWithResourcesFolder = subDirForCts + ctPackage;
+					String subDirForCts = makeItAPackagePart(JTConstants.SUBDIR_FOR_CTS);
+					ctPackage = subDirForCts + ctPackage;
 
-					//TODO: schmatz: no duplicates 
-					/*
 					if( buffer.indexOf(ctPackage) == -1 )
 					{
 						// We don't want duplicates...
 						buffer.append(ctPackage).append(", ");
-					}
-					*/
-					if( buffer.indexOf(ctPackageWithResourcesFolder) == -1 )
-					{
-						// We don't want duplicates...
-						buffer.append(ctPackageWithResourcesFolder).append(", ");
 					}
 				}
 			}
@@ -387,6 +366,15 @@ public class JTUtils
 		return str;
 	}
 
+	public static String makeItAPackagePart(String subDirForCts)
+	{
+		if( JTConstants.SUBDIR_FOR_CTS != null && !"".equals(JTConstants.SUBDIR_FOR_CTS) )
+			return JTConstants.SUBDIR_FOR_CTS + ".";
+		else
+			return "";
+	}
+	*/
+	
 	/**
 	 * Stores the list of full qualified Java class names of all not-extern
 	 * classes of the bundle (except the bundle activator) into a
