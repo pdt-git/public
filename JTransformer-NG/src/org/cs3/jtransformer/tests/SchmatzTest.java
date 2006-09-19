@@ -184,7 +184,7 @@ public class SchmatzTest extends TestCase
 		list.add("'org/cs4711/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
 		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
 		
-		String exp = JTConstants.RESOURCES_FOLDER + ".org.cs3.roots.test.schmatz.demo1.aspects, "+JTConstants.RESOURCES_FOLDER + ".org.cs4711.roots.test.schmatz.demo1.aspects";
+		String exp = JTConstants.SUBDIR_FOR_CTS + ".org.cs3.roots.test.schmatz.demo1.aspects, "+JTConstants.SUBDIR_FOR_CTS + ".org.cs4711.roots.test.schmatz.demo1.aspects";
 			
 		String str = JTUtils.getCTPackagesAsCSV(list);
 		
