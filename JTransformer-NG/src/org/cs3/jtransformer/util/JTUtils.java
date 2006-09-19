@@ -358,7 +358,11 @@ public class JTUtils
 					// Delete trailing dot
 					ctPackage = ctPackage.substring(0, ctPackage.length()-1);
 					// Add the prefixing resources package
-					String ctPackageWithResourcesFolder = JTConstants.SUBDIR_FOR_CTS + "." + ctPackage;
+					
+					String subDirForCts = "";
+					if( JTConstants.SUBDIR_FOR_CTS != null && !"".equals(JTConstants.SUBDIR_FOR_CTS) )
+						subDirForCts = JTConstants.SUBDIR_FOR_CTS + ".";
+					String ctPackageWithResourcesFolder = subDirForCts + ctPackage;
 
 					//TODO: schmatz: no duplicates 
 					/*
