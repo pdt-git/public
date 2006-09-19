@@ -359,12 +359,15 @@ public class JTUtils
 					ctPackage = ctPackage.substring(0, ctPackage.length()-1);
 					// Add the prefixing resources package
 					String ctPackageWithResourcesFolder = JTConstants.RESOURCES_FOLDER + "." + ctPackage;
-					
+
+					//TODO: schmatz: no duplicates 
+					/*
 					if( buffer.indexOf(ctPackage) == -1 )
 					{
 						// We don't want duplicates...
 						buffer.append(ctPackage).append(", ");
 					}
+					*/
 					if( buffer.indexOf(ctPackageWithResourcesFolder) == -1 )
 					{
 						// We don't want duplicates...
