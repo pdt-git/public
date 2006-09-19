@@ -219,8 +219,8 @@ public class JTUtils
 							"${CAPT_GROUP=1}" +
 							"|.*\\\\.pl" +
 							"|.*\\\\.aj" +
-							"|.*cts\\\\.list" +
-							"|.*fqcns\\\\.list" +
+							"|.*" + JTConstants.CT_LIST_FILENAME_WITHOUT_SUFFIX + "\\\\." + JTConstants.CT_LIST_SUFFIX +
+							"|.*" + JTConstants.FQCN_LIST_FILENAME_WITHOUT_SUFFIX + "\\\\." + JTConstants.FQCN_LIST_SUFFIX +
 							"\""
 					);
 					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.BUNDLE_PACK_FILE, regexPatternsWithNewStrings));
@@ -233,8 +233,8 @@ public class JTUtils
 							"\\<classpathentry\\s+?including=\"(.*?)\"",
 							"<classpathentry including=\"" +
 							"${CAPT_GROUP=1}" +
-							"|**/cts.list" +
-							"|**/fqcns.list" +
+							"|**/" + JTConstants.CT_LIST_FILENAME + 
+							"|**/" + JTConstants.FQCN_LIST_FILENAME + 
 							"\""
 					);
 					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE, regexPatternsWithNewStrings2));
