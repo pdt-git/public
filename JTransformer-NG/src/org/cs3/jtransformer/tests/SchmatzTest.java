@@ -1,15 +1,13 @@
 package org.cs3.jtransformer.tests;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import junit.framework.TestCase;
 
 import org.cs3.jtransformer.util.FileAdaptationHelper;
 import org.cs3.jtransformer.util.JTConstants;
 import org.cs3.jtransformer.util.JTUtils;
-
-import junit.framework.TestCase;
 
 /**
  * 
@@ -176,21 +174,21 @@ public class SchmatzTest extends TestCase
 		assertEquals(expContent, newContent);
 	}
 	
-	public void testCTPackageExtractor()
-	{ 
-		List list = new ArrayList();
-		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/DemoAspect__default__37_i'(Jp0) ##--## org.cs3.roots.test.schmatz.demo1.aspects.DemoAspect__default__37_i");
-		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
-		list.add("'org/cs4711/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
-		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
-		
-		String subDirForCts = JTUtils.makeItAPackagePart(JTConstants.SUBDIR_FOR_CTS);
-		String exp = subDirForCts + "org.cs3.roots.test.schmatz.demo1.aspects, " + subDirForCts + "org.cs4711.roots.test.schmatz.demo1.aspects";
-			
-		String str = JTUtils.getCTPackagesAsCSV(list);
-		
-		assertEquals(exp, str);
-	}
+//	public void testCTPackageExtractor()
+//	{ 
+//		List list = new ArrayList();
+//		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/DemoAspect__default__37_i'(Jp0) ##--## org.cs3.roots.test.schmatz.demo1.aspects.DemoAspect__default__37_i");
+//		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
+//		list.add("'org/cs4711/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
+//		list.add("'org/cs3/roots/test/schmatz/demo1/aspects/org/cs3/roots/test/schmatz/demo1/aspects/Flip_reverese_103_i'(Jp1) ##--## org.cs3.roots.test.schmatz.demo1.aspects.Flip_reverese_103_i");
+//		
+//		String subDirForCts = JTUtils.makeItAPackagePart(JTConstants.SUBDIR_FOR_CTS);
+//		String exp = subDirForCts + "org.cs3.roots.test.schmatz.demo1.aspects, " + subDirForCts + "org.cs4711.roots.test.schmatz.demo1.aspects";
+//			
+//		String str = JTUtils.getCTPackagesAsCSV(list);
+//		
+//		assertEquals(exp, str);
+//	}
 	
 	public void testEmptyLine()
 	{
