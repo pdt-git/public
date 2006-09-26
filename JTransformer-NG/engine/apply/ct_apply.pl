@@ -31,6 +31,24 @@ CT's:
 :- dynamic ct/3.
 :- multifile test/1.
 
+
+/**
+ * advice_cache(?VariableBindings, ?AdviceClass)
+ *
+ * Relation between the ct action variable bindings
+ * and cached advice classes.
+ */
+:- dynamic advice_cache/2.
+
+/**
+ * advice_generated_from_ct(?CTNameTerm,?AdviceMethodId)
+ * 
+ * Holds advice classes generated in
+ * the last application of the ct CTNameTerm.
+ * 
+ */
+:- dynamic advice_generated_from_ct/2.
+
 /**
  * t_i(+Id,+Goal)
  *
@@ -111,27 +129,63 @@ apply(_action) :- call(_action).
 %    write('action1:\n'),write(_action).
 
 % check and apply work independend
-apply_ct(_name) :-
-    ct(_name, _preConditionDA, _action),
+apply_ct(Name) :-
+    ct(Name, PreConditionDA, Action),
     retractall(pointcut(_)),
-    removeDependencyInstructions(_preConditionDA, _preCondition),
-    findall( [_name, _action],apply_pre(_preCondition,_action),_allActions),
+    retractall(advice_generated_from_ct(Name,_)),
+    removeDependencyInstructions(PreConditionDA, PreCondition),
+    term_variables(Action,Variables),
+    findall( [Name, Variables, Action],call(PreCondition),AllActions),
     %quicksort(_allActions,_uniqueActions,[]),
-    apply_all_post(_allActions),
-    add_apply_info_(_name,_allActions),
-    assert1T(applied(_name)).
+    apply_all_post(AllActions),
+    add_apply_info_(Name,AllActions),
+    assert1T(applied(Name)).
 
 
 apply_all_post([]):-!.
-apply_all_post([[Info,_h]|_t]) :-
-    debug_apply_all_post(Info),
+apply_all_post([[Name,ActionVariables,Head]|Tail]) :-
+    debug_apply_all_post(Name),
    % format('~n~w',[_h]),
-    comma2list(_h,_l),
-    apply_post(_l),
+    comma2list(Head,List),
+    ( 
+      advice_cache(ActionVariables,Cached)
+        ->
+         assert(current_advice(Cached))
+       ;
+       (
+         apply_post(List),
+         update_laj_advice_cache(Name,ActionVariables)
+       ) 
+    ),
     retractall(pointcut(_)),
-    apply_all_post(_t),
+    apply_all_post(Tail),
     !.
 apply_all_post(_).
+
+/**
+ * update_laj_advice_cache(+CTNameTerm,-ActionVariables)
+ *
+ * Extracts the AdviceMethod id of a ctname term.
+ * If the ct is not an advice ct the predicate fails.
+ */
+
+update_laj_advice_cache(CTNameTerm,ActionVariables):-
+   laj_advice_method(CTNameTerm,AdviceMethod),
+   !,
+   assert(advice_cache(ActionVariables,AdviceMethod)),
+   assert(advice_generated_from_ct(CTNameTerm,AdviceMethod)).
+   
+update_laj_advice_cache(__Name,__ActionVariables).
+
+/**
+ * laj_advice_method(+CTNameTerm,-AdviceMethod)
+ *
+ * Extracts the AdviceMethod id of a ctname term.
+ * If the ct is not an advice ct the predicate fails.
+ */
+ 
+laj_advice_method(CTNameTerm,AdviceMethod) :-
+    CTNameTerm =.. [__CTname,__jp,advicemethod(AdviceMethod)].
 
 debug_apply_all_post(Info):-
     debug_apply_action_output,
@@ -196,9 +250,9 @@ add_apply_info_(_name,_allActions):-
  
 
 /** check if all preconditions can be applied on fact base **/
-apply_pre(_pre,_action) :-
+apply_pre(Pre) :-
 % if call succeeds, unification
-        call(_pre).
+        call(Pre).
 
 % effekts of apply may cause check to backtrack -> may express recursion
 applyCTbacktrack(_name/*, (_preCondition)*/) :-
