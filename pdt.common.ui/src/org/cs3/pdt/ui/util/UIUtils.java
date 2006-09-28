@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.ui.util;
 
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -55,38 +54,35 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
-
-
 /**
- * most of the methods in this class include code that needs to run on the ui thread.
+ * most of the methods in this class include code that needs to run on the ui
+ * thread.
  * 
- * If the calling thread is not the ui thread, this methods will take care of scheduling
- * the respective code using Diplay.asyncExec() for void methods and Display.syncExec for 
- * all others.
- *
+ * If the calling thread is not the ui thread, this methods will take care of
+ * scheduling the respective code using Diplay.asyncExec() for void methods and
+ * Display.syncExec for all others.
+ * 
  */
 public final class UIUtils {
-	
+
 	/**
 	 * hint for file option. if true, option values should be in the workspace
 	 */
 	public final static String IS_WORKSPACE_RESOURCE = "is_workspace_resource";
-	
+
 	/**
-	 * hint for file options. if set, only files/folders below the given container 
-	 * should be legal option values.
+	 * hint for file options. if set, only files/folders below the given
+	 * container should be legal option values.
 	 */
 	public final static String ROOT_CONTAINER = "root_container";
-	
+
 	/**
-	 * hint for file options. if set to true, values should be interpreted
-	 * as relative paths.
-	 * This typically involves ROOT_CONTAINER, too.
+	 * hint for file options. if set to true, values should be interpreted as
+	 * relative paths. This typically involves ROOT_CONTAINER, too.
 	 * 
 	 */
 	public final static String RELATIVE = "relative";
-	
-	
+
 	private abstract static class _SyncReturn implements Runnable {
 		public Object rval;
 
@@ -98,65 +94,60 @@ public final class UIUtils {
 				run();
 			}
 		}
-		
+
 		public void run() {
-			rval=getRVal();
+			rval = getRVal();
 		}
 
 		abstract Object getRVal();
 	}
-	
-	public static IFile getFileInActiveEditor()
-	{
+
+	public static IFile getFileInActiveEditor() {
 		// Modified by Mark Schmatz - added try-catch block
-		try
-		{
-			return (IFile) new _SyncReturn(){
+		try {
+			return (IFile) new _SyncReturn() {
 				Object getRVal() {
 					IEditorPart activeEditor = getActiveEditor();
 					FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
 							.getEditorInput());
 					IFile file = fileEditorInput.getFile();
-					return file;		
+					return file;
 				}
 			}.rval;
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			return null;
 		}
 	}
 
 	public static Display getDisplay() {
-	    return PlatformUI.getWorkbench().getDisplay();
+		return PlatformUI.getWorkbench().getDisplay();
 	}
 
 	public static IWorkbenchPage getActivePage() {
-		return (IWorkbenchPage) new _SyncReturn(){
+		return (IWorkbenchPage) new _SyncReturn() {
 			Object getRVal() {
-				return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();		
+				return PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+						.getActivePage();
 			}
 		}.rval;
-	    
+
 	}
 
-	
 	public static IEditorPart getActiveEditor() {
-		return (IEditorPart) new _SyncReturn(){
+		return (IEditorPart) new _SyncReturn() {
 			Object getRVal() {
 				IWorkbenchPage page = getActivePage();
-		        if(page==null){
-		        	return null;
-		        }
-		        return page.getActiveEditor();		
+				if (page == null) {
+					return null;
+				}
+				return page.getActiveEditor();
 			}
 		}.rval;
-	        
-	    
+
 	}
 
-	public static void displayMessageDialog(final Shell shell, final String title,
-			final String msg) {
+	public static void displayMessageDialog(final Shell shell,
+			final String title, final String msg) {
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
@@ -166,11 +157,11 @@ public final class UIUtils {
 			return;
 		}
 		MessageDialog.openInformation(shell, title, msg);
-	
+
 	}
-	
-	public static void displayErrorDialog(final Shell shell, final String title,
-			final String msg) {
+
+	public static void displayErrorDialog(final Shell shell,
+			final String title, final String msg) {
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
@@ -180,55 +171,65 @@ public final class UIUtils {
 			return;
 		}
 		MessageDialog.openError(shell, title, msg);
-	
+
 	}
-	
-	public static void displayErrorDialog(final ErrorMessageProvider provider, final Shell shell, final int code, final int context, final Exception x){
-		
+
+	public static void displayErrorDialog(final ErrorMessageProvider provider,
+			final Shell shell, final int code, final int context,
+			final Exception x) {
+
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
-					displayErrorDialog(provider,shell, code,context, x);
+					displayErrorDialog(provider, shell, code, context, x);
 				}
 			});
 			return;
 		}
 		IStatus status = createErrorStatus(provider, x, code);
-		String cxMsg=provider.getContextMessage(context);		
-		ErrorDialog.openError(shell,"Problem encountered", cxMsg, status);
+		String cxMsg = provider.getContextMessage(context);
+		ErrorDialog.openError(shell, "Problem encountered", cxMsg, status);
 	}
-	public static IStatus createErrorStatus(ErrorMessageProvider provider, Throwable e, int errCode){
-		Status status = new Status(Status.ERROR,provider.getId(),errCode,provider.getErrorMessage(errCode),e);
-		
+
+	public static IStatus createErrorStatus(ErrorMessageProvider provider,
+			Throwable e, int errCode) {
+		Status status = new Status(Status.ERROR, provider.getId(), errCode,
+				provider.getErrorMessage(errCode), e);
+
 		return status;
 	}
 
-	public static void logError(final ErrorMessageProvider provider, final int code, final int context, final Exception x){
-		IStatus status = createErrorStatus(provider, x, code);		
-		Plugin plugin =provider.getPlugin();
+	public static void logError(final ErrorMessageProvider provider,
+			final int code, final int context, final Exception x) {
+		IStatus status = createErrorStatus(provider, x, code);
+		Plugin plugin = provider.getPlugin();
 		plugin.getLog().log(status);
 	}
-	public static void logAndDisplayError(final ErrorMessageProvider provider, final Shell shell, final int code, final int context, final Exception x){
+
+	public static void logAndDisplayError(final ErrorMessageProvider provider,
+			final Shell shell, final int code, final int context,
+			final Exception x) {
 		logError(provider, code, context, x);
 		displayErrorDialog(provider, shell, code, context, x);
 	}
+
 	public static void setStatusErrorMessage(final String string) {
-	    getDisplay().asyncExec(new Runnable() {
-	        public void run() {
-	            getActiveEditor().getEditorSite().getActionBars()
-	                    .getStatusLineManager().setErrorMessage(string);
-	        }
-	    });
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				getActiveEditor().getEditorSite().getActionBars()
+						.getStatusLineManager().setErrorMessage(string);
+			}
+		});
 	}
 
 	public static void setStatusMessage(final String string) {
-	    getDisplay().asyncExec(new Runnable() {
-	        public void run() {
-	            getActiveEditor().getEditorSite().getActionBars()
-	                    .getStatusLineManager().setMessage(string);
-	        }
-	    });
-	
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				getActiveEditor().getEditorSite().getActionBars()
+						.getStatusLineManager().setMessage(string);
+			}
+		});
+
 	}
 
 }
