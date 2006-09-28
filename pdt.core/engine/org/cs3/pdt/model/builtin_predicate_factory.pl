@@ -48,7 +48,7 @@
 :- use_module(library('org/cs3/pdt/model/pdt_index')).
 :- use_module(library('org/cs3/pdt/model/pdt_handle')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_hashtable')).
+
 
 
 :- pdt_add_property_factory(builtin_predicate,builtin_predicate_factory).
