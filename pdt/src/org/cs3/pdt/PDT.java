@@ -108,6 +108,10 @@ public final  class PDT {
 	public static final String PREF_OUTLINE_FILTERS = "pdt.outline.filters";
 	
 	public static final String PREF_OUTLINE_SORT = "pdt.outline.sort";
+
+	public static final int ERR_NO_ACTIVE_FILE = -11;
+
+	public static final int CX_FIND_PREDICATE = -10;
 	
 	
 
