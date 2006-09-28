@@ -170,7 +170,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private void fetchClauses(PredicateNode p) throws PrologInterfaceException {
 		String file = "'" + getPlFile() + "'";
-		String signature = p.getModule() + ":" + p.getName() + "/"
+		String signature = p.getModule() + ": (" + p.getName() + ")	/"
 				+ p.getArity();
 		AsyncPrologSession session = getSession();
 		String query = "pdt_predicate_clause(" + file + ", " + signature
