@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
@@ -96,14 +97,19 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		try {
 			final Goal data = ((PLEditor) editor)
 					.getSelectedPrologElement();
+			Shell shell = editor.getEditorSite().getShell();
 			if (data == null) {
-				UIUtils.displayMessageDialog(editor.getEditorSite().getShell(),
+				
+				UIUtils.displayMessageDialog(shell,
 						"PDT Plugin",
 						"Cannot locate a predicate at the specified location.");
 				return;
 			}
 			final IFile file = UIUtils.getFileInActiveEditor();
-			
+			if(file==null){
+				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), shell, 
+						PDT.ERR_NO_ACTIVE_FILE, PDT.CX_FIND_PREDICATE, null);
+			}
 			
 			Job j = new Job("Searching predicate definition") {
 				protected IStatus run(IProgressMonitor monitor) {
