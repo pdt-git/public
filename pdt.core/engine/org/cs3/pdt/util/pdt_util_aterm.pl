@@ -66,7 +66,7 @@ pdt_source_term:source_term_hook(ATerm,pdt_util_aterm):-
     nonvar(ATerm),
     pdt_aterm(ATerm).
     
-source_term_expansion_hook(ATerm,Term):-
+source_term_expand_hook(ATerm,Term):-
 	pdt_strip_annotation(ATerm,Term,_).
 	
 source_term_functor_hook(ATerm,Name,Arity):-
