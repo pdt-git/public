@@ -593,7 +593,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	public void stop(BundleContext context) throws Exception {
 		try {
 			PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-			Set keys = r.getRegisteredKeys();
+			Set keys = new HashSet(r.getRegisteredKeys()); //clone this. see PDT-194
 			for (Iterator it = keys.iterator(); it.hasNext();) {
 				String key = (String) it.next();
 				PrologInterface pif = r.getPrologInterface(key);
