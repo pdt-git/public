@@ -141,8 +141,7 @@ pdt_multimap_add(In,Key,Value,Out):-
 	pdt_map_put(In,Key,OutValues,Out).
 
 get_values(In,Key,Values):-
-    pdt_map_get(In,Key,Values),
-    !.
+    pdt_map_get(In,Key,Values). %do NOT CUT!
 get_values(_,_,Values):-
 	pdt_set_empty(Values).
 
