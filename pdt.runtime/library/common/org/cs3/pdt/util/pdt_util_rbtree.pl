@@ -136,11 +136,15 @@ pdt_rbtree_next(At,Key,Val,Tree):-
 	lookup_next(Cmp,At,Key,Val,Tree).
 
 %introduce an artificial lower bound
-my_compare(<,'',_):-
+my_compare(<,A,_):-
+	A=='',
 	!.
-my_compare(>,_,''):-
+my_compare(>,_,A):-
+	A=='',
 	!.
-my_compare(=,'',''):-
+my_compare(=,A,B):-
+   	A=='',
+   	B==A,
 	!.
 my_compare(=,A,B):-
     unifiable(A,B,_),
@@ -362,6 +366,10 @@ pretty_print(black(L,K,_,R),D) :-
 	pretty_print(R,DN).
 
 
+pdt_rbtree_delete(T, _K, _NT) :-
+    pdt_rbtree_empty(T),
+    !,
+    fail.
 pdt_rbtree_delete(T, K, NT) :-
 	delete(T, K, NT, _).
 
