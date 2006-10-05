@@ -1,7 +1,10 @@
 % Author: Tobias
 % Date: 29.08.02
 
+% TRHO: TODO: replace this with the generic version.
 
+:- multifile deleteTree/1.
+:- multifile retractTree/1.
 /*
     garbageCollection
     
