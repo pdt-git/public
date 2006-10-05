@@ -1,3 +1,7 @@
+%TRHO: TODO: make generic:
+:- multifile set_parent/2.
+:- multifile set_encl_method/3.
+
 /*
  * This module provides predicates for 
  * the traversal of the PEFs and general 
