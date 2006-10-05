@@ -13,10 +13,10 @@ import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
+import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
@@ -46,7 +46,12 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaProject;
 
 /**
  * @see IProjectNature
@@ -142,19 +147,34 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 
 	}
 
+    public IClasspathEntry getFirstSourceFolder(IJavaProject javaProject) throws JavaModelException {
+        IClasspathEntry[] cp = javaProject.getResolvedClasspath(true);
+        for(int i=0;i<cp.length;i++){
+            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
+               return cp[i];
+            }
+        }
+        return null;
+    }	
 	/**
 	 * 
 	 */
 	private void initOptions() {
+        try {
+
+        	String outputProject = JTUtils.getOutputProjectName(project);
+        
+			JavaProject javaProject = (JavaProject)project.getNature(JavaCore.NATURE_ID);
+			String firstSourceFolder = getFirstSourceFolder(javaProject).getPath().removeFirstSegments(1).toPortableString();
 		options = new Option[] {
 				new SimpleOption(
 						JTransformer.PROP_OUTPUT_PROJECT,
 						"Output Project",
 						"The project to which generated sourcecode is written."
 								+ "This option is ignored if JTransformer is operating in place.",
-						Option.STRING, JTransformerPlugin.getDefault()
-								.getPreferenceValue(
-										JTransformer.PREF_DEFAULT_OUTPUT_PROJECT, null)),
+						Option.STRING, 
+						 outputProject
+										),
 				new SimpleOption(
 						JTransformer.PROP_OUTPUT_FOLDER,
 						"Output source folder",
@@ -162,9 +182,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 								+ "This should be a relative path - it is eather appended to the"
 								+ "path of the output project, or - if JTransformer operates inplace -"
 								+ " to that of the original project",
-						Option.STRING, JTransformerPlugin.getDefault()
-								.getPreferenceValue(
-										JTransformer.PREF_DEFAULT_OUTPUT_FOLDER, null)),
+						Option.STRING,  firstSourceFolder),
 				new SimpleOption(
 						JTransformer.PROP_INPLACE,
 						"Try inplace operation",
@@ -184,6 +202,11 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 										JTransformer.PREF_DEFAULT_PEF_STORE_FILE, null)),
 
 		};
+		} catch (CoreException e) {
+			e.printStackTrace();
+			
+		}
+
 
 	}
 
@@ -286,7 +309,6 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	            for (int i = 0; i < jtransformerProjects.length; i++) {
 	                // XXX: ld: i don't like that cast. Any idee?
 	                JTransformerProjectNature jtransformerProject = (JTransformerProjectNature) jtransformerProjects[i];
-
 	                jtransformerProject.reconfigure(initSession);
 
 	            }
@@ -299,7 +321,10 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 			
 					PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),
 						initSession, new String[] {JTransformer.LIB_ENGINE});
-					
+
+					PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), initSession, new String[]{PrologRuntime.LIB_ATTIC});
+					initSession.queryOnce("use_module(library('org/cs3/pdt/metadata/pdtplugin'))");						
+
 					initSession.queryOnce(
 							"[library('jt_engine.pl')],"+
 							"[library('org/cs3/pdt/test/main.pl')],"+
@@ -564,10 +589,11 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 */
 	public void reconfigure(PrologSession s) throws PrologException, PrologInterfaceException {
 		String projectName = getProject().getName();
+		
 		String outputFolder = Util.prologFileName(new File(
 				getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
 		String outputProject = Util.prologFileName(new File(
-				getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
+				getPreferenceValue(JTransformer.PROP_OUTPUT_PROJECT, null)));
 		boolean inplace = Boolean.valueOf(
 				Util.prologFileName(new File(getPreferenceValue(
 						JTransformer.PROP_INPLACE, "false")))).booleanValue();

@@ -91,22 +91,22 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      *  
      */
     private void initOptions() throws CoreException {
-        IJavaProject dummyOutput = getDummyOutput();
-        IClasspathEntry firstSourceFolder = getFirstSourceFolder(dummyOutput);
-        IResource r= ResourcesPlugin.getWorkspace().getRoot().findMember(firstSourceFolder.getPath());
-        String src= r.getLocation().toOSString();
+//        IJavaProject dummyOutput = getDummyOutput();
+//        IClasspathEntry firstSourceFolder = getFirstSourceFolder(dummyOutput);
+//        IResource r= ResourcesPlugin.getWorkspace().getRoot().findMember(firstSourceFolder.getPath());
+//        String src= r.getLocation().toOSString();
         String storeFile = getResourceLocator("").resolve("global_pef_store.pl").toString(); //$NON-NLS-1$ //$NON-NLS-2$
         options = new Option[] { 
-                new SimpleOption(
-                JTransformer.PREF_DEFAULT_OUTPUT_PROJECT,
-                "Default output source folder", //$NON-NLS-1$
-                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
-                Option.STRING, src),
-                new SimpleOption(
-                JTransformer.PREF_DEFAULT_OUTPUT_FOLDER,
-                "Default output source folder", //$NON-NLS-1$
-                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
-                Option.STRING, src),
+//                new SimpleOption(
+//                JTransformer.PREF_DEFAULT_OUTPUT_PROJECT,
+//                "Default output source folder", //$NON-NLS-1$
+//                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
+//                Option.STRING, src),
+//                new SimpleOption(
+//                JTransformer.PREF_DEFAULT_OUTPUT_FOLDER,
+//                "Default output source folder", //$NON-NLS-1$
+//                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
+//                Option.STRING, src),
                 new SimpleOption(
                         JTransformer.PREF_USE_PEF_STORE,
                         "Use PEF store (EXPERIMENTAL)", //$NON-NLS-1$
@@ -132,33 +132,33 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         return null;
     }
 
-    /**
-     * @return
-     * @throws CoreException
-     */
-    private IJavaProject getDummyOutput() throws CoreException {
-        String projectName = "JTransformer-dummy_output"; //$NON-NLS-1$
-        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-        if(!project.exists()){
-            project=createProject(projectName);
-        }
-        if(!project.isOpen()){
-            project.open(null);
-        }
-        IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
-        if(!project.hasNature(JavaCore.NATURE_ID)){            
-            addNature(project, JavaCore.NATURE_ID);            
-            IClasspathEntry[] cp = new IClasspathEntry[] {
-                    JavaCore.newSourceEntry(project.getFullPath()),
-                    JavaRuntime.getDefaultJREContainerEntry(),
-
-            };
-            javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
-            javaProject.setRawClasspath(cp, project.getFullPath(),
-                    null);
-        }
-        return javaProject;
-    }
+//    /**
+//     * @return
+//     * @throws CoreException
+//     */
+//    private IJavaProject getDummyOutput() throws CoreException {
+//        String projectName = "test-output"; //$NON-NLS-1$
+//        IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+//        if(!project.exists()){
+//            project=createProject(projectName);
+//        }
+//        if(!project.isOpen()){
+//            project.open(null);
+//        }
+//        IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+//        if(!project.hasNature(JavaCore.NATURE_ID)){            
+//            addNature(project, JavaCore.NATURE_ID);            
+//            IClasspathEntry[] cp = new IClasspathEntry[] {
+//                    JavaCore.newSourceEntry(project.getFullPath()),
+//                    JavaRuntime.getDefaultJREContainerEntry(),
+//
+//            };
+//            javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+//            javaProject.setRawClasspath(cp, project.getFullPath(),
+//                    null);
+//        }
+//        return javaProject;
+//    }
     /*
      * Create simple project.
      */

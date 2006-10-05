@@ -88,13 +88,13 @@ public final class JTransformer {
      */
     public final static String RELOAD_HOOK_ID = "ReloadHook";
 
-    /**
-     * The preference identified by this key contains the default value for the
-     * per-project output source folder.
-     * 
-     *  value should be an absolute workspace path string to an existing folder. 
-     */
-    public static final String PREF_DEFAULT_OUTPUT_FOLDER = "jtransformer.default.output.folder";
+//    /**
+//     * The preference identified by this key contains the default value for the
+//     * per-project output source folder.
+//     * 
+//     *  value should be an absolute workspace path string to an existing folder. 
+//     */
+//    public static final String PREF_DEFAULT_OUTPUT_FOLDER = "jtransformer.default.output.folder";
 
     /**
      * Project property containing the the output source fodler for generated source code.
@@ -120,7 +120,7 @@ public final class JTransformer {
     public static final String PREF_DEFAULT_PEF_STORE_FILE = "jtransformer.default.pef.store.file";
 
     public static final String PROP_OUTPUT_PROJECT = "jtransformer.output.project";
-    public static final String PREF_DEFAULT_OUTPUT_PROJECT = "jtransformer.default.output.project";
+ //   public static final String PREF_DEFAULT_OUTPUT_PROJECT = "jtransformer.default.output.project";
     
     public static final String PROP_LAST_BUILD = "jtransformer.last.build";
 
