@@ -6,6 +6,10 @@ cond(setField(_assignT, _parent, _encl, _Receiver, _field, _value)).
 subTreeArg(setField, 4).
 subTreeArg(setField, 6).
 
+/**
+ * setField(SetField, RealParent, RealEncl, Receiver, Field,Value)
+ *
+ */
 setField(SetField, RealParent, RealEncl, Receiver, Field,Value) :-
     assignT(SetField, Parent, Encl, GetField, Value),
     getFieldT(GetField, _, _, Receiver, _, Field),
