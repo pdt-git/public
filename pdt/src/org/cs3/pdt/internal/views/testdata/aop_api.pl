@@ -42,11 +42,11 @@ action( around(JoinPoint, _aroundStmts,_forwMethod,_forwBody)):-    around(JoinP
 action( add_unboxing_return(_return, _parent, _encl, _expr)):-      add_unboxing_return(_return, _parent, _encl, _expr).
 %action( add_advice_param_ref(_pc,_adviceParam,_id,_parent,_encl)):- add_advice_param_ref(_pc,_adviceParam,_id,_parent,_encl).
 %malte
-%action( add_proceed_call(_pc,_call,_parent, _enclMethod,_adviceArgs,_proceedArgs)):-add_proceed_call(_pc,_call, _parent, _enclMethod,_adviceArgs,_proceedArgs).
+action( add_proceed_call(_pc,_call,_parent, _enclMethod,_adviceArgs,_proceedArgs)):-add_proceed_call(_pc,_call, _parent, _enclMethod,_adviceArgs,_proceedArgs).
 action(add_advice_instance_method_parameters(AdviceInstanceMethod, JP, AdviceParametersAndKinds,Parameters)) :-
 add_advice_instance_method_parameters(AdviceInstanceMethod, JP, AdviceParametersAndKinds,Parameters).
 
-action(get_join_point_exceptions(JP,Exception)):-get_join_point_exceptions(JP,Exception).
+action(join_point_exceptions(JP,Exception)):-join_point_exceptions(JP,Exception).
 action( concat_lists(A,B)):-    concat_lists(A,B).
 action( addArgList(FnArgs, PcArgs, Idents, Parent, ForwMethod)):-   addArgList(FnArgs, PcArgs, Idents, Parent, ForwMethod).
 action( addArg(FnArg,PcArgs,Ident,Parent,ForwMethod)):-             addArg(FnArg,PcArgs,Ident,Parent,ForwMethod).	    
@@ -220,18 +220,18 @@ get_join_point_arguments(JP, [Arg]) :-
   
  get_join_point_arguments(_, []).  
 /**
-  * get_join_point_exceptions(+JP, -Exceptions)
+  * join_point_exceptions(+JP, -Exceptions)
   *
   */
 
-get_join_point_exceptions(JP,Exceptions):-
+join_point_exceptions(JP,Exceptions):-
   methodDefT(JP,_,_,_,_,Exceptions,_).
   
-get_join_point_exceptions(JP,Exceptions):-
+join_point_exceptions(JP,Exceptions):-
 	methodCall(JP,_,_,_,_,MID,_),
 	methodDefT(MID,_,_,_,_,Exceptions,_).
  
-get_join_point_exceptions(_,[]).
+join_point_exceptions(_,[]).
 
 
 
