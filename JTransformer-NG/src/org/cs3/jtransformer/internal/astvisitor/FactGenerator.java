@@ -721,9 +721,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 
 		List defList = new ArrayList();
 
-		if(pckg != null) {
-			if(pckg.equals("wikiviewer.gui.internal"))
-					System.err.println("DEBUG");
+		if(node.getPackage() != null) {
 			writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
 					idResolver.getID(node),
 					"package",
