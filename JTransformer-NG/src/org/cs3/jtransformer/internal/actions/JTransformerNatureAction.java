@@ -3,14 +3,17 @@ import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -79,8 +82,16 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 				IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 				JTUtils.copyAllNeededFiles(project, destProject);
 				// End - Schmatz
-
+				
+				
 			    addJTransformerNature(project);
+			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+				IClasspathEntry sourceFolder = jtNature.getFirstSourceFolder((JavaProject)project.getNature(JavaCore.NATURE_ID));
+				IFolder folder = destProject.getFolder(sourceFolder.getPath().removeFirstSegments(1));
+				if(!folder.exists()) {
+					folder.create(true, true, null);
+				}
+				destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 			    action.setChecked(true);
 			}
 			action.setChecked(project.getDescription().hasNature(
