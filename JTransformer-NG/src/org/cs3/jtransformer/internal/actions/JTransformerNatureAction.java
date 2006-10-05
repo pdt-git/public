@@ -86,11 +86,16 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 				
 			    addJTransformerNature(project);
 			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
-				IClasspathEntry sourceFolder = jtNature.getFirstSourceFolder((JavaProject)project.getNature(JavaCore.NATURE_ID));
-				IFolder folder = destProject.getFolder(sourceFolder.getPath().removeFirstSegments(1));
-				if(!folder.exists()) {
-					folder.create(true, true, null);
-				}
+		        IClasspathEntry[] cp = ((JavaProject)project.getNature(JavaCore.NATURE_ID)).getResolvedClasspath(true);
+		        for(int i=0;i<cp.length;i++){
+		            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
+						IFolder folder = destProject.getFolder(cp[i].getPath().removeFirstSegments(1));
+						if(!folder.exists()) {
+							folder.create(true, true, null);
+						}
+		            }
+		        }
+
 				destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 			    action.setChecked(true);
 			}
