@@ -3,6 +3,7 @@ package org.cs3.jtransformer.tests;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -20,8 +21,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.BadLocationException;
-
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 public class SourceLocationArgumentTest extends PseudoRoundTripTest {
 
