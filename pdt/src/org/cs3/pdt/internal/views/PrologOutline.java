@@ -328,7 +328,6 @@ public class PrologOutline extends ContentOutlinePage {
 		}
 	}
 
-	@Override
 	public void dispose() {
 
 		super.dispose();
