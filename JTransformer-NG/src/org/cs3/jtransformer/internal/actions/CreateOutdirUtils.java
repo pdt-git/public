@@ -1,16 +1,25 @@
 package org.cs3.jtransformer.internal.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 /**
@@ -40,21 +49,52 @@ public class CreateOutdirUtils
 		{
 			destProject.open(null);
 		}
-		IJavaProject destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
+		//IJavaProject destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
 		if (!destProject.hasNature(JavaCore.NATURE_ID))
 		{
+			JTUtils.copyAllNeededFiles(srcProject, destProject);
+	        destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 			addNature(destProject, JavaCore.NATURE_ID);
-			
-			IClasspathEntry[] cp = new IClasspathEntry[] {
-					JavaCore.newSourceEntry(destProject.getFullPath()),
-					JavaRuntime.getDefaultJREContainerEntry(),
 
-			};
-			destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
-			destJavaProject.setRawClasspath(cp, destProject.getFullPath(), null);
+	        IClasspathEntry[] cp = ((JavaProject)srcProject.getNature(JavaCore.NATURE_ID)).getResolvedClasspath(true);
+	        
+	        for(int i=0;i<cp.length;i++){
+	            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
+					IFolder folder = destProject.getFolder(cp[i].getPath().removeFirstSegments(1));
+					if(!folder.exists()) {
+						folder.create(true, true, null);
+					}
+	            }
+	        }
+			//destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
+			//destJavaProject.setRawClasspath(cp, destProject.getFullPath(), null);
+			// End - Schmatz
+			IJavaProject javaProject = (IJavaProject) srcProject.getNature(JavaCore.NATURE_ID);
+
+			IPath outPath = new Path("/"+destProject.getName());
+
+			// temporary remove class path reference to the output project (if necessary)
+			List filteredClassPath = JTUtils.getFilteredClasspath(outPath, javaProject);
+
+			javaProject.setRawClasspath(
+					(IClasspathEntry[])filteredClassPath.toArray(new IClasspathEntry[0]),
+					null);
+
+			// copyAllNeededFiles by Mark Schmatz
+			JTUtils.copyAllNeededFiles(srcProject, destProject);
+
+			if( destProject.exists() && !destProject.isOpen())
+				destProject.open(null);
+			
+			// FIXME: schmatz: The next line consumes much time!!!
+			JTransformerProjectNature.removeJTransformerNature(destProject);
+
+			destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 		}
 		return destProject;
 	}
+
+
 
 	/*
 	 * Create simple project.

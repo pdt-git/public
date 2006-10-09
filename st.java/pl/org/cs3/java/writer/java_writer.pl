@@ -55,32 +55,14 @@ generate_synthetic_methods(Generate) :-
 
 gen_toplevels :-
   	retractall(sourcePath(_)),
-    appendDir('/gen_classfile_names.txt', _dirfile),
-    createDirsIfNeeded(_dirfile),
-    write_if_fileoutput(_dirfile),
-    open(_dirfile, write, _fileStream),
-    assert(gen_classfile_names(_fileStream)),
-    forall(toplevelT(_id,_,_,_), gen_toplevel(_id)),
-    close(_fileStream),
-    retract(gen_classfile_names(_fileStream)).
-%    write_classpath.
-
-/**
- * write_classpath
- *
- * Reset the current classpath in the output project to
- * an default classpath containing all sourcefolders.
- */
-
-write_classpath :-
-    outdir(OutDir),
-    sformat(S, '~a/.classpath',[OutDir]),
-    string_to_atom(S,Classpath),
-    open(Classpath, write, FileStream),
-    format(FileStream,'<?xml version=\"1.0\" encoding=\"UTF-8\"?>~n<classpath>~n<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>~n<classpathentry kind=\"output\" path=\"bin\"/>~n',[]),
-    forall(sourcePath(Path),format(FileStream, '<classpathentry kind=\"src\" path=\"~a\"/>~n',[Path])),
-    format(FileStream,'</classpath>',[]),
-    close(FileStream).
+%  	appendDir('/gen_classfile_names.txt', _dirfile),
+ %   createDirsIfNeeded(_dirfile),
+%    write_if_fileoutput(_dirfile),
+%    open(_dirfile, write, _fileStream),
+%    assert(gen_classfile_names(_fileStream)),
+    forall(toplevelT(_id,_,_,_), gen_toplevel(_id)).
+%    close(_fileStream),
+%    retract(gen_classfile_names(_fileStream)).
 
 /**
  * gen_toplevel(+ToplevelId)
@@ -93,14 +75,15 @@ gen_toplevel(_toplevel) :-
     toplevelT(_toplevel, _packg, _filename, _defs),
     !,
     projectLocationT(_toplevel,Project,_),
+    projectT(Project,_,_,OutProjectPath),
     concat('/',Project,FilenameWOProject, _filename),
-    appendDir(FilenameWOProject, _dirfile),
+    appendDir(OutProjectPath, FilenameWOProject, _dirfile),
     retractall(align(_)),
     assert(align(0)),
 	(
 	   sourceFolder(_toplevel,SourcePath) ->
 	    assert1T(sourcePath(SourcePath));true),
-    (add_to_gen_classfile_names(_dirfile);true),
+%    (add_to_gen_classfile_names(_dirfile);true),
     createDirsIfNeeded(_dirfile),
     write_if_fileoutput(_dirfile),
     open(_dirfile, write, _fileStream),
@@ -538,12 +521,11 @@ print_if_not_null(_test,_s) :-
     _test \= 'null' -> printf(_s) ; true.
 
 
-
-
+/**
 add_to_gen_classfile_names(_filename) :-
     gen_classfile_names(_fileStream),
     format(_fileStream, '~a~n',_filename).
-
+*/
 
 
 createDirsIfNeeded(_filename) :-
@@ -618,9 +600,8 @@ print_anonymous_class('null') :- !.
 print_anonymous_class(_def) :-
     gen_class_body(_def).
 
-% uwe neu
-appendDir(Filename, Dirfile) :-
-    outdir(OutDirNoSlash),
+appendDir(OutDirNoSlash, Filename, Dirfile) :-
+%    outdir(OutDirNoSlash),
     !,
     remove_leading_slash_if_needed(Filename,Clean_Filename),
     add_suffix_slash_if_needed(OutDirNoSlash,OutDir),

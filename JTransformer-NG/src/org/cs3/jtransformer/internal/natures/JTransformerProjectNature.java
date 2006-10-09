@@ -10,11 +10,14 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProjcetEvent;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectListener;
+import org.cs3.jtransformer.internal.actions.CreateOutdirUtils;
+import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -41,7 +44,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
@@ -87,7 +89,6 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 		} catch (PrologInterfaceException e1)
 		{
 			JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e1);
-			
 		}
 		Debug.debug("configure was called");
 		IProjectDescription descr = project.getDescription();
@@ -156,6 +157,12 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
         }
         return null;
     }	
+    
+	private String getRuntimePrologInterfaceKey() {
+		return getPreferenceValue(JTransformer.PROLOG_RUNTIME_KEY,
+				project.getName());
+	}
+
 	/**
 	 * 
 	 */
@@ -167,6 +174,16 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 			JavaProject javaProject = (JavaProject)project.getNature(JavaCore.NATURE_ID);
 			String firstSourceFolder = getFirstSourceFolder(javaProject).getPath().removeFirstSegments(1).toPortableString();
 		options = new Option[] {
+				
+				new SimpleOption(
+						JTransformer.PROLOG_RUNTIME_KEY,
+						"Key for sharing prolog instance",
+						"The key identifying the PrologInterface instance that"
+						+ "will be used by default to consult prolog files into it. Any occurance of the string %project% will be"
+						+ " replaced with the project name.",
+						Option.STRING, 
+						project.getName()
+										),
 				new SimpleOption(
 						JTransformer.PROP_OUTPUT_PROJECT,
 						"Output Project",
@@ -275,6 +292,8 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	
 	PrologInterface pif = null;
 	Object pifMonitor = new Object();
+
+	private JTransformerSubscription pifSubscription;
 	
 	class JTransformerSubscription extends DefaultSubscription implements LifeCycleHook {
 		
@@ -356,9 +375,6 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	            if (!wd.isAutoBuilding()) {
 	                return;
 	            }
-	            IProgressMonitor monitor = new NullProgressMonitor();
-	            IProject[] projects = workspace.getRoot()
-	                    .getProjects();
 	            // final JTransformerProject[] jtransformerProjects = JTransformer.getJTransformerProjects(pif);
 	            Job j = new Job("Building workspace") {
 	                public IStatus run(IProgressMonitor monitor) {
@@ -409,18 +425,58 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	    }
 	}
 	
+	private void pifKeysChanged() {
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
+		if (pifSubscription != null) {
+			synchronized (pifMonitor) {
+				reg.removeSubscription(pifSubscription);
+				pif = null;
+				Job j = new Job("building PEFs for project " + project.getName()) {
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							getFactBaseBuilder().clean(monitor);
+							project.build(IncrementalProjectBuilder.FULL_BUILD,monitor);
+						} catch (OperationCanceledException opc) {
+							return Status.CANCEL_STATUS;
+						} catch (CoreException e) {
+							return new Status(Status.ERROR, JTransformer.PLUGIN_ID, -1,
+									"exception caught during build", e);
+						} catch (PrologInterfaceException e) {
+							Debug.report(e);
+						}
+						return Status.OK_STATUS;
+					}
+
+					public boolean belongsTo(Object family) {
+						return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+					}
+
+				};
+				j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+				j.schedule();
+			}
+		}
+
+
+	}
+	
 	public PrologInterface getPrologInterface() {
 		synchronized (pifMonitor) {
 			if(pif != null) {
 				return pif;
 			}
-			pif = PrologRuntimePlugin.getDefault().getPrologInterface(
-					new JTransformerSubscription(
-							getProject().getName(),
-					        getProject().getName(),
-					        "JTransformer factbase of project " + getProject().getName(),
-					        "JTransformer")
-					);
+			String projectInterfaceKey = getRuntimePrologInterfaceKey();
+
+			pifSubscription = new JTransformerSubscription(
+					projectInterfaceKey,
+					projectInterfaceKey,
+//					getProject().getName(),
+//			        getProject().getName(),
+			        "JTransformer factbase of project " + getProject().getName(),
+			        "JTransformer");
+			pif = PrologRuntimePlugin.getDefault().getPrologInterface(pifSubscription); 
+					
 	
 			return pif;
 		}
@@ -588,28 +644,60 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 * @see org.cs3.jtransformer.JTransformerProject#reconfigure()
 	 */
 	public void reconfigure(PrologSession s) throws PrologException, PrologInterfaceException {
-		String projectName = getProject().getName();
-		
-		String outputFolder = Util.prologFileName(new File(
-				getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
-		String outputProject = Util.prologFileName(new File(
-				getPreferenceValue(JTransformer.PROP_OUTPUT_PROJECT, null)));
-		boolean inplace = Boolean.valueOf(
-				Util.prologFileName(new File(getPreferenceValue(
-						JTransformer.PROP_INPLACE, "false")))).booleanValue();
+		updateProjectLocationInFactbase(s);
+		try {
+			//CreateOutdirUtils.getInstance().createOutputProject(project);
+			JavaProject javaProject = (JavaProject)project.getNature(JavaCore.NATURE_ID);
 
-		s.queryOnce("retractall(project_option('" + projectName + "'))");
-		s.queryOnce("assert(project_option('" + projectName
-				+ "', output_project('" + outputProject + "')))");
-		s.queryOnce("assert(project_option('" + projectName
-				+ "', output_folder('" + outputFolder + "')))");
-		if (inplace) {
-			s.queryOnce("assert(project_option('" + projectName
-					+ "',inplace))");
+		} catch (CoreException e) {
+			Debug.report(e);
 		}
+//		String projectName = getProject().getName();
+//		
+//		String outputFolder = Util.prologFileName(new File(
+//				getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER, null)));
+//		String outputProject = Util.prologFileName(new File(
+//				getPreferenceValue(JTransformer.PROP_OUTPUT_PROJECT, null)));
+//		boolean inplace = Boolean.valueOf(
+//				Util.prologFileName(new File(getPreferenceValue(
+//						JTransformer.PROP_INPLACE, "false")))).booleanValue();
+//
+//		s.queryOnce("retractall(project_option('" + projectName + "'))");
+//		s.queryOnce("assert(project_option('" + projectName
+//				+ "', output_project('" + outputProject + "')))");
+//		s.queryOnce("assert(project_option('" + projectName
+//				+ "', output_folder('" + outputFolder + "')))");
+//		if (inplace) {
+//			s.queryOnce("assert(project_option('" + projectName
+//					+ "',inplace))");
+//		}
 
 	}
+	
+	/**
+	 * updates the projectT/4 fact
+	 * @param nature
+	 * @throws PrologInterfaceException 
+	 * @throws PrologException 
+	 */
+	private void updateProjectLocationInFactbase(PrologSession session) throws PrologException, PrologInterfaceException {
+			String projectName = quote(getProject().getName());
+			String query = 
+				    "retractall("+Names.PROJECT_T + "(" + projectName + ",_,_,_ ))" +
+					"," +
+					"assert("    +Names.PROJECT_T + "(" + projectName + ", " +
+						quote(getProject().getLocation().toPortableString()) + "," +
+						quote(JTUtils.getOutputProjectName(getProject())) + ", " +
+						quote(JTUtils.getOutputProjectPath(getProject())) + "))";
+			session.queryOnce(query);
+			
+					
+	}
 
+	
+	static private String quote(String str) {
+		return "'" + str + "'";
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -655,6 +743,9 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	public void setPreferenceValue(String id, String value) {
 		try {
 			getProject().setPersistentProperty(new QualifiedName("", id), value);
+			if(id.equals(JTransformer.PROLOG_RUNTIME_KEY)){
+				pifKeysChanged();
+			}
 		} catch (CoreException e) {
 			Debug.report(e);
 			throw new RuntimeException(e);

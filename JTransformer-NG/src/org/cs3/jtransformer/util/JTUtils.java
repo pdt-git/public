@@ -25,8 +25,12 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
@@ -95,8 +99,11 @@ public class JTUtils
 	 * @throws JavaModelException
 	 */
 	public static String getOutputProjectPath(IProject project)
-	{
-		return getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName(project);
+	{	
+		IProject outputProject= ResourcesPlugin.getWorkspace().getRoot().getProject(JTUtils.getOutputProjectName(project));
+		return outputProject.getLocation().toPortableString();
+//		return getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName(project);
+
 	}
 
 	/**
@@ -581,5 +588,50 @@ public class JTUtils
 		}
 		
 		return null;
+	}
+	/**
+	 * Remove the output project from the class path.
+	 * @param outPath
+	 * @param javaProject
+	 * @return
+	 * @throws JavaModelException
+	 */
+	static public List getFilteredClasspath(IPath outPath, IJavaProject javaProject) throws JavaModelException {
+		IClasspathEntry[] classpath = javaProject.getRawClasspath();
+		
+		List filteredClassPath = new ArrayList();
+		for (int i = 0; i < classpath.length; i++) {
+			IPath path= classpath[i].getPath();
+			if(!path.equals(outPath)) {
+				filteredClassPath.add(classpath[i]);
+			}
+		}
+		return filteredClassPath;
+	}
+	/**
+	 * 
+	 * @param javaProject
+	 * @param destProject
+	 * @throws CoreException 
+	 */
+	public static void addReferenceToOutputProjectIfNecessary(IJavaProject javaProject, IProject destProject) throws CoreException {
+		IPath outPath = new Path("/"+destProject.getName());
+		List filteredClassPath = JTUtils.getFilteredClasspath(outPath, javaProject);
+		// add reference to output project
+		filteredClassPath.add(JavaCore.newProjectEntry(outPath));
+
+		javaProject.setRawClasspath(
+				(IClasspathEntry[])filteredClassPath.toArray(new IClasspathEntry[0]), null);
+
+		javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);		
+	}
+	
+	/**
+	 * 
+	 * @param lajProject
+	 * @return
+	 */
+	public static IProject getOutputProject(IProject project) {
+			return ResourcesPlugin.getWorkspace().getRoot().getProject(JTUtils.getOutputProjectName(project));
 	}
 }

@@ -55,6 +55,7 @@
 :- dynamic output_to_memory_key/1.
 
 
+/*
 outdir(A):-
     project_option(_,output_project(A)).
 
@@ -68,6 +69,7 @@ set_outdir(Dir):-
 		      assert(project_option(Project,output_project(Dir)))
 		      ),_).
 
+*/
 output_to_file.
 
 toggle_out :-

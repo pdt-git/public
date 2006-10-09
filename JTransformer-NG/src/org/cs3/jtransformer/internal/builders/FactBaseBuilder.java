@@ -24,6 +24,7 @@ import org.cs3.jtransformer.internal.astvisitor.FactGenerationToolBox;
 import org.cs3.jtransformer.internal.astvisitor.FactGenerator;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
+import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
@@ -75,7 +76,7 @@ public class FactBaseBuilder {
 
     private IProject project;
 
-    private PrologInterface pif;
+//    private PrologInterface pif;
 
     private Vector listeners = new Vector();
 
@@ -89,7 +90,7 @@ public class FactBaseBuilder {
     public FactBaseBuilder(JTransformerProject jtransformerProject) {
         this.jtransformerProject = jtransformerProject;
         this.project = jtransformerProject.getProject();
-        this.pif = jtransformerProject.getPrologInterface();
+//        this.setPif(jtransformerProject.getPrologInterface());
     }
 
     /**
@@ -198,7 +199,7 @@ public class FactBaseBuilder {
             // method.
             // Question is wether we should throw some exception, or
             // just quietly return? XXX: simple return for now.
-            if (!pif.isUp()) {
+            if (!getPif().isUp()) {
                 return;
             }
 
@@ -206,11 +207,10 @@ public class FactBaseBuilder {
 //            getMetaDataSRC();
 
             monitor.beginTask(project.getName() + " - building PEFs", 100);
-            session = pif.getSession();
+            session = getPif().getSession();
             final Collection toProcess = new Vector();
             final Collection toDelete = new Vector();
 
-            boolean loadedJavaFile = false;
             session.queryOnce("retractall(errors_in_java_code)");
 
             Debug.info("Resource delta recieved: " + delta);
@@ -267,7 +267,7 @@ public class FactBaseBuilder {
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
             throws IOException, CoreException, PrologInterfaceException {
         monitor.beginTask(project.getName() + " - generating new PEFs", toProcess.size());
-        AsyncPrologSession session = ((PrologInterface2)pif).getAsyncSession();
+        AsyncPrologSession session = ((PrologInterface2)getPif()).getAsyncSession();
         try {
 	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
 	            if (monitor.isCanceled()) {
@@ -392,7 +392,7 @@ public class FactBaseBuilder {
          * done
          */
 
-        PrologSession session = pif.getSession();
+        PrologSession session = getPif().getSession();
         try {
             if (removeGlobalIdsFacts)
                 session
@@ -495,7 +495,7 @@ public class FactBaseBuilder {
     }
 
     public List getUnresolvedTypes() throws PrologInterfaceException {
-        PrologSession session = pif.getSession();
+        PrologSession session = getPif().getSession();
         try {
             return getUnresolvedTypes(session, new HashSet());
         } finally {
@@ -524,8 +524,8 @@ public class FactBaseBuilder {
         Debug.debug("enter loadExternalFacts");
         monitor.beginTask(project.getName() + " - creating external PEFs", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
-        PrologSession session = pif.getSession();
-		AsyncPrologSession asyncSession = ((PrologInterface2)pif).getAsyncSession();
+        PrologSession session = getPif().getSession();
+		AsyncPrologSession asyncSession = ((PrologInterface2)getPif()).getAsyncSession();
         try {
             List unresolved = getUnresolvedTypes(session, failed);
 
@@ -750,9 +750,9 @@ public class FactBaseBuilder {
         Debug.info("clean called on project " + project);
         project.deleteMarkers(JTransformer.PROBLEM_MARKER_ID, true,
                 IResource.DEPTH_INFINITE);
-        PrologSession session = pif.getSession();
+        PrologSession session = getPif().getSession();
         try {
-            session.queryOnce("clearTreeFactbase");
+            session.queryOnce("clearTreeFactbase('" + project.getName() + "')");
             // getMetaDataSRC().clearRecords();
             String storeName = jtransformerProject.getPreferenceValue(
                     JTransformer.PROP_PEF_STORE_FILE, null);
@@ -830,6 +830,20 @@ public class FactBaseBuilder {
 			}
 		}
 		return false;
+	}
+
+
+	/**
+	 * 
+	 * @return
+	 */
+	private PrologInterface getPif() {
+		try {
+			return ((JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID)).getPrologInterface();
+		} catch (CoreException e) {
+			Debug.report(e);
+		}
+		throw new RuntimeException("Prolog Interface ca not be resolved.");
 	}
 
 }

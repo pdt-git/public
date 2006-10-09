@@ -282,7 +282,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		 */
 		
 		writer.writeFact(NEW_ARRAY_T, arr);
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -410,7 +410,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			writer.addIndention();
 			writer.writeFact(EXEC_T, execArgs);
 			writer.writeFact(APPLY_T, applyArgs);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(sci),
 					Integer.toString(sci.getStartPosition()),
 					Integer.toString(sci.getLength())
@@ -465,7 +465,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			writer.addIndention();
 			writer.writeFact(EXEC_T, execArgs);
 			writer.writeFact(APPLY_T, applyArgs);	
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(sci),
 					Integer.toString(sci.getStartPosition()),
 					Integer.toString(sci.getLength())
@@ -745,7 +745,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 				quote(iCompilationUnit.getResource().getProject().getName()),
 			    quote(pfr.getResource().getProjectRelativePath().toString())};
 		writer.writeFact(PROJECT_LOCATION_T, args);
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -950,7 +950,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			writer.writeFact(FIELD_DEF_T, args);
 			createAnnotationFact(node, id);
 			
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					id,
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -1027,7 +1027,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		importName = idResolver.getID(binding);
 		String[] args = new String[] { id, topLevel, importName };
 		writer.writeFact(IMPORT_T, args);
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -1052,7 +1052,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		importName = idResolver.getID(binding);
 		String[] args = new String[] { id, topLevel, importName };
 		writer.writeFact(IMPORT_T, args);
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -1134,7 +1134,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(METHOD_DEF_T, args);
 		createAnnotationFact(node, id);
 
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -1206,7 +1206,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(METHOD_DEF_T, args);
 		createAnnotationFact(node, id);
 
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -1611,7 +1611,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					superClassID		
 			};
 			writer.writeFact(IDENT_T, identArgs);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(node),
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -1630,7 +1630,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					superClassID
 			};
 			writer.writeFact(SELECT_T, selectArgs);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(node),
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -1715,7 +1715,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					superClassID		
 			};
 			writer.writeFact(IDENT_T, identArgs);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(node),
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -1735,7 +1735,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					superClassID
 			};
 			writer.writeFact(SELECT_T, selectArgs);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(node),
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -1947,7 +1947,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		if (node.isInterface())
 			writer.writeFact(INTERFACE_T, new String[] { id });
 		writeModifiers(node, node.getModifiers());
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
@@ -2179,7 +2179,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					typeResolver.getTypeTerm(node.resolveBinding().getType()), // FIXME: resolve binding is only neces. for native methods 
 					quote(node.getName().getIdentifier())};
 			writer.writeFact(PARAM_DEF_T, args);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(node),
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -2194,7 +2194,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					typeResolver.getTypeTerm(node.resolveBinding().getType()),
 					quote(node.getName().getIdentifier())};
 			writer.writeFact(PARAM_DEF_T, args);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(node),
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
@@ -2239,7 +2239,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					idResolver.getID(fragment.getInitializer())};
 
 			writer.writeFact(LOCAL_DEF_T, args);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(fragment),
 					Integer.toString(fragment.getStartPosition()),
 					Integer.toString(fragment.getLength())
@@ -2289,7 +2289,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					idResolver.getID(theInitializer)};
 
 			writer.writeFact(LOCAL_DEF_T, args);
-			writer.writeFact(SOURCE_LOCATION, new String [] {
+			writer.writeFact(SOURCE_LOCATION_T, new String [] {
 					idResolver.getID(theNode),
 					Integer.toString(theNode.getStartPosition()),
 					Integer.toString(theNode.getLength())
@@ -2643,7 +2643,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		
 		System.arraycopy(args, 0, toPass, 3, args.length);
 		writer.writeFact(name, toPass);
-		writer.writeFact(SOURCE_LOCATION, new String [] {
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				toPass[0],
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
