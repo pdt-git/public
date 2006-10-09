@@ -1,19 +1,25 @@
 package org.cs3.jtransformer.internal.actions;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -31,6 +37,7 @@ import org.eclipse.ui.PlatformUI;
 public class JTransformerNatureAction implements IObjectActionDelegate {
 	public final static String ACTION_ID = "org.cs3.pl.JTransformer.JTransformerNatureAction";
 	private IProject project;
+	private IWorkbenchPart targetPart;
 	
 	/*
 	 * (non-Javadoc)
@@ -39,7 +46,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 *           org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-
+		this.targetPart = targetPart;
 	}
 	
 	/*
@@ -74,37 +81,51 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 							"Please change the source compatibility to 1.4 in the project preferences.");
 					return;
 		        }
-		        	
+		        
+		        
 				/*
 				 *  Mark Schmatz:
 				 *  Moved from LogicAJPlugin and modified
 				 */
 				IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
-				JTUtils.copyAllNeededFiles(project, destProject);
-				// End - Schmatz
 				
 				
+			    Set allKeys = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getAllKeys();
+			    selectAlternativePrologInterface(allKeys);
 			    addJTransformerNature(project);
-			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
-		        IClasspathEntry[] cp = ((JavaProject)project.getNature(JavaCore.NATURE_ID)).getResolvedClasspath(true);
-		        for(int i=0;i<cp.length;i++){
-		            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
-						IFolder folder = destProject.getFolder(cp[i].getPath().removeFirstSegments(1));
-						if(!folder.exists()) {
-							folder.create(true, true, null);
-						}
-		            }
-		        }
+//			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+//			    	jtNature.setPreferenceValue(JTransformer.PROLOG_RUNTIME_KEY, key);
+//			    }
 
 				destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 			    action.setChecked(true);
+
+				JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
+			    
 			}
-			action.setChecked(project.getDescription().hasNature(
-					JTransformer.NATURE_ID));
+			action.setChecked(project.getDescription().hasNature(JTransformer.NATURE_ID));
 		} catch (CoreException e) {
 			Debug.report(e);
 		}
 	}
+
+	private void selectAlternativePrologInterface(Set allKeys) throws CoreException {
+		if(allKeys.size() > 0) {
+		    List keyList = new ArrayList();
+		    for (Iterator iter = allKeys.iterator(); iter.hasNext();) {
+				keyList.add(iter.next());
+			}
+			PrologRuntimeSelectionDialog dialog = new PrologRuntimeSelectionDialog(
+		    		UIUtils.getDisplay().getActiveShell(),keyList,project.getName());
+		    String key = dialog.open();
+		    
+		    if(key != null) {
+		    	project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),key);
+		    }
+		}
+	}
+
+
 	
 	/**
      * @param ipd
@@ -112,6 +133,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 * @throws CoreException
      */
     private void addJTransformerNature(IProject project) throws CoreException {
+    	
         IProjectDescription ipd = project.getDescription();
         String[] oldNIDs = ipd.getNatureIds();
         String[] newNIDs = new String[oldNIDs.length + 1];
@@ -175,4 +197,6 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			}
 		}
 	}
+	
+
 }

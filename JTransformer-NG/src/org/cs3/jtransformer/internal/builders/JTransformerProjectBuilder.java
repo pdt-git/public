@@ -2,8 +2,11 @@ package org.cs3.jtransformer.internal.builders;
 import java.util.Map;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -100,6 +103,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 			int flags = FactBaseBuilder.IS_ECLIPSE_BUILD;
 			switch (kind) {
 				case FULL_BUILD :
+					//updateProjectLocationInFactbase(nature);
 					nature.getFactBaseBuilder().build(null, flags, monitor);
 					break;
 				case INCREMENTAL_BUILD :
@@ -121,7 +125,31 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 		}
 		return null;
 	}
-	
+//	/**
+//	 * updates the projectT/4 fact
+//	 * @param nature
+//	 */
+//	private void updateProjectLocationInFactbase(JTransformerProjectNature nature) {
+//		PrologSession session = null;
+//		try {
+//			session = nature.getPrologInterface().getSession();
+//			String projectName = quote(getProject().getName());
+//			String query = 
+//				    "retractall("+Names.PROJECT_T + "(" + projectName + ",_,_,_ ))" +
+//					"," +
+//					"assert("    +Names.PROJECT_T + "(" + projectName + ", " +
+//						quote(getProject().getLocation().toPortableString()) + "," +
+//						quote(JTUtils.getOutputProjectName(getProject())) + ", " +
+//						quote(JTUtils.getOutputProjectPath(getProject())) + "))";
+//			session.queryOnce(query);
+//					
+//		} catch(Exception ex){
+//			if(session != null) {
+//				session.dispose();
+//			}
+//		}
+//	}
+
 	/* (non-Javadoc)
      * @see org.eclipse.core.resources.IncrementalProjectBuilder#clean(org.eclipse.core.runtime.IProgressMonitor)
      */

@@ -70,7 +70,9 @@ public interface Names {
 	  public String NEW_ARRAY_T = "newArrayT";
 	  public String INDEXED_T = "indexedT";
 	  public String CLASS_DEF_T = "classDefT";
-	  public String SOURCE_LOCATION = "slT";
+	  public String SOURCE_LOCATION_T = "slT";
+	  public String PROJECT_T = "projectT";
+
 
 	  public String SOURCE_LOCATION_ARGUMENT = "sl_argT";
 	  public String ARGUMENT_IDENTIFIER = "identifier";

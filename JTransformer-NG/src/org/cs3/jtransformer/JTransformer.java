@@ -125,7 +125,9 @@ public final class JTransformer {
     public static final String PROP_LAST_BUILD = "jtransformer.last.build";
 
     public static final String PREF_USE_PEF_STORE = "jtransformer.use.pef.store";
-    
+
+    public static final String PROLOG_RUNTIME_KEY = "project.prolog.runtime.key";
+
     /**
      * @return all open JTransformerProjects that operate on the given PrologInterface instance.
      * @throws CoreException
@@ -154,6 +156,7 @@ public final class JTransformer {
  * @deprecated use ResourcesPlugin.getWorkspace().getRoot() instead.
  */	
 public static final ISchedulingRule JTransformer_BUILDER_SCHEDULING_RULE = new ProxyRule();
+
 
 
 

@@ -4,11 +4,21 @@ annotationT(name,[annotations list])
 :-dynamic annotationT/2.
 :-multifile annotationT/2.
 
-/*
-projectLocationT(#toplevel,Project,SourceFolder)
-*/
+/**
+ * projectLocationT(#toplevel,Project,SourceFolder)
+ *
+ */
 :-dynamic projectLocationT/3.
 :-multifile projectLocationT/3.
+
+/**
+ * projectT(projectName, localPath,outputProjectName, outputProjectLocalPath)
+ *
+ * @param localPath absolute path in the local file system as a portable string 
+ */
+:-dynamic projectT/4.
+:-multifile projectT/4.
+
 
 /*
 fieldDefT(#id, #class, TYPE, 'name', #init)

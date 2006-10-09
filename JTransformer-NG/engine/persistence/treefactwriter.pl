@@ -1,6 +1,7 @@
 :- module(treefactwriter,[
 writeTreeFacts/1,
 clearPersistantFacts/0,
+clearTreeFactbase/1,
 clearTreeFactbase/0
 ]).
 
@@ -55,8 +56,14 @@ treeFact(Fact) :-
     uniqueArgumentList(Arity,Arguments),
     Fact =.. [Head|Arguments].
 
-clearTreeFactbase :-
-   forall((treeFact(A),user:call(A)),user:retract(A)).
+clearTreeFactbase :- 
+	clearTreeFactbase(_Project).
+	
+
+clearTreeFactbase(Project) :-
+%   forall((treeFact(A),user:call(A)),user:retract(A)).
+	forall((toplevelT(TL,_,_,_),projectLocationT(TL,Project,_)),
+	        delete_toplevel(TL)).
 
 clearPersistantFacts :-
    persistant(A),
