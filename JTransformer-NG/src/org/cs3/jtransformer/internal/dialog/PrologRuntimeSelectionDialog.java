@@ -56,9 +56,9 @@ public class PrologRuntimeSelectionDialog {
 	
 	public PrologRuntimeSelectionDialog(Shell shell, List runtimes,String projectRuntime) {
 		this.shell = shell;
-		init();
 		this.runtimes = runtimes;
 		this.projectRuntime = projectRuntime;
+		init();
 	}
 	
 	/**
@@ -77,12 +77,12 @@ public class PrologRuntimeSelectionDialog {
 		cancelButton.setText("Cancel");
 
 		FormData formDataNew = new FormData();
-		formDataNew.left = new FormAttachment(1, 30,10);
+		formDataNew.left = new FormAttachment(1, 40,1);
 
 		FormData formDataJoin = new FormData();
 		formDataJoin.left = new FormAttachment(4, 10,10);
 		FormData formDataCancel = new FormData();
-		formDataCancel.left = new FormAttachment(6, 10,10);
+		formDataCancel.left = new FormAttachment(8, 12,10);
 		newButton.setLayoutData(formDataNew);
 		joinButton.setLayoutData(formDataJoin);
 		cancelButton.setLayoutData(formDataCancel);
@@ -201,14 +201,14 @@ public class PrologRuntimeSelectionDialog {
 		formData.height = 200;
 
 		Label label = new Label(dialogShell, SWT.WRAP);
-		label.setText("Do you want to have a dedicated factbase for this project or do you want to join the factbase of another project?");
+		label.setText("Do you want to have a dedicated factbase named '"+ projectRuntime + "' for this project or do you want to join the factbase of another project?");
 
 		FormData formDataLabel = new FormData();
-		formDataLabel.width = 300;
+		formDataLabel.width = 250;
 		formDataLabel.left = new FormAttachment(1,10);
 		
 		formDataLabel.top = new FormAttachment(availablePrologRuntimes,5);
-		formDataLabel.height = 30;
+		formDataLabel.height = 40;
 		label.setLayoutData(formDataLabel);
 
 		
@@ -238,7 +238,7 @@ public class PrologRuntimeSelectionDialog {
 
 		dialogShell.setText("Add JTransformer Nature");
 		dialogShell.setLayout(new FormLayout());
-		dialogShell.setSize(new Point(330, 340));
+		dialogShell.setSize(new Point(280, 340));
 		newButton.setFocus();
 		dialogShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
 			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
