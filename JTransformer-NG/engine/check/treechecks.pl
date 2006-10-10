@@ -49,7 +49,12 @@ assertErrorMsgs(ErrorMsg):-
     Testet alle trees auf korrekte Referenzierung durch den parent tree.
 */
 
-checkTreeLinks :- findall(_id, checkTreeLinks(_id,write), _l).
+checkTreeLinks :- 
+   findall(Tree, checkTreeLinks(Tree,write), ListTree),
+   length(ListTree,NumTrees),
+   findall(Class, class(Class,_,_), ListClasses),
+   length(ListClasses,NumClasses),
+   format('checked ~w trees in ~w classes.',[NumTrees,NumClasses]).
 
 /*
     checkTreeLinks(+Id, +ErrorHandler)
