@@ -101,8 +101,11 @@ public class JTUtils
 	public static String getOutputProjectPath(IProject project)
 	{	
 		IProject outputProject= ResourcesPlugin.getWorkspace().getRoot().getProject(JTUtils.getOutputProjectName(project));
+		if(outputProject.getLocation() == null) { // TODO: only necessary for the test framework
+			return ResourcesPlugin.getWorkspace().getRoot()
+			.getLocation().toPortableString() + "/" + JTUtils.getOutputProjectName(project); 
+		}
 		return outputProject.getLocation().toPortableString();
-//		return getWorkspaceRootLocation() + java.io.File.separator + JTUtils.getOutputProjectName(project);
 
 	}
 
