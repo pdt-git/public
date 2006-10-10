@@ -16,7 +16,7 @@ import org.cs3.pl.prolog.PrologSession;
 import junit.framework.TestCase;
 
 public class CTermContentProviderTest extends TestCase {
-	final static String testdata = "testdata/aop_api.pl";
+	final static String testdata = "testdata/testdata_00.pl";
 	private File file;
 	private PrologInterface pif;
 	
