@@ -25,7 +25,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+
+import sun.security.krb5.internal.s;
 
 public class PrologRuntimeSelectionDialog {
 
@@ -53,10 +56,13 @@ public class PrologRuntimeSelectionDialog {
 	private List runtimes;
 
 	private String projectRuntime;
+
+	private List subscriptions;
 	
-	public PrologRuntimeSelectionDialog(Shell shell, List runtimes,String projectRuntime) {
+	public PrologRuntimeSelectionDialog(Shell shell, List runtimes,List subscriptions, String projectRuntime) {
 		this.shell = shell;
 		this.runtimes = runtimes;
+		this.subscriptions = subscriptions;
 		this.projectRuntime = projectRuntime;
 		init();
 	}
@@ -82,7 +88,7 @@ public class PrologRuntimeSelectionDialog {
 		FormData formDataJoin = new FormData();
 		formDataJoin.left = new FormAttachment(4, 10,10);
 		FormData formDataCancel = new FormData();
-		formDataCancel.left = new FormAttachment(8, 12,10);
+		formDataCancel.right = new FormAttachment(9, 10,10);
 		newButton.setLayoutData(formDataNew);
 		joinButton.setLayoutData(formDataJoin);
 		cancelButton.setLayoutData(formDataCancel);
@@ -95,6 +101,7 @@ public class PrologRuntimeSelectionDialog {
 
 			public void widgetSelected(SelectionEvent e) {
 				selected = projectRuntime;
+				lastRuntime = selected;
 				doExit();
 			}
 			
@@ -137,9 +144,13 @@ public class PrologRuntimeSelectionDialog {
 		List list = new ArrayList();
 		list.add("runtime1"); list.add("runtime2"); list.add("runtime3"); list.add("runtime4"); list.add("runtime5"); 
 		list.add("runtime2"); list.add("runtime1"); list.add("runtime2");
+		
+		List subs = new ArrayList();
+		subs.add("runtime1"); subs.add("runtime2"); subs.add("runtime3"); subs.add("runtime4"); subs.add("runtime5"); 
+		subs.add("runtime2"); subs.add("runtime1"); subs.add("runtime2");
 		PrologRuntimeSelectionDialog thisClass = new PrologRuntimeSelectionDialog(
 				shell,
-				list, "new.runtime");
+				list,subs, "new.runtime");
 		//lastRuntime = "runtime3";
 		String selected = thisClass.open();
 		
@@ -159,12 +170,14 @@ public class PrologRuntimeSelectionDialog {
 		
 		dialogShell.open();
 
+		Iterator iter2 = subscriptions.iterator();
 		for (Iterator iter = runtimes.iterator(); iter.hasNext();) {
 			String runtime = (String) iter.next();
 			
 			TableItem item = new TableItem(availablePrologRuntimes, 
-					SWT.NONE  );
-			item.setText(0,runtime);
+					SWT.SINGLE);
+			
+			item.setText(new String[] {runtime,(String)iter2.next()});
 		}
 		if(runtimes.size() > 0) {
 			int indexOfLast = runtimes.indexOf(lastRuntime);
@@ -188,23 +201,30 @@ public class PrologRuntimeSelectionDialog {
 		dialogShell = new org.eclipse.swt.widgets.Shell(shell, SWT.DIALOG_TRIM);
 		
 		availablePrologRuntimes = new Table(dialogShell, SWT.BORDER | SWT.SINGLE);
-		//availablePrologRuntimes.setHeaderVisible(true);
+		availablePrologRuntimes.setHeaderVisible(true);
 		//availablePrologRuntimes.setLinesVisible(true);
-		//final TableColumn column = new TableColumn(availablePrologRuntimes,SWT.RIGHT);
+		final TableColumn column = new TableColumn(availablePrologRuntimes,SWT.NONE);
+		column.setText("Name");
+		column.setResizable(true);
+		column.setWidth(100);
+		final TableColumn column2 = new TableColumn(availablePrologRuntimes,SWT.NONE);
+		column2.setText("Subscriptions");
+		column2.setResizable(true);
+		column2.setWidth(237);
 		buttons = new Composite(dialogShell, SWT.NONE);
 		buttons.setLayout(new FormLayout());
 		
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(1,1);
 		formData.left = new FormAttachment(1,10);
-		formData.width = 220;
+		formData.width = 320;
 		formData.height = 200;
 
 		Label label = new Label(dialogShell, SWT.WRAP);
 		label.setText("Do you want to have a dedicated factbase named '"+ projectRuntime + "' for this project or do you want to join the factbase of another project?");
 
 		FormData formDataLabel = new FormData();
-		formDataLabel.width = 250;
+		formDataLabel.width = 330;
 		formDataLabel.left = new FormAttachment(1,10);
 		
 		formDataLabel.top = new FormAttachment(availablePrologRuntimes,5);
@@ -213,7 +233,7 @@ public class PrologRuntimeSelectionDialog {
 
 		
 		FormData formDataComposite = new FormData();
-		formDataComposite.width = 300;
+		formDataComposite.width = 380;
 		formDataComposite.top = new FormAttachment(label,3);
 		formDataComposite.height = 30;
 		//formDataComposite.bottom = new FormAttachment(80,100,5);
@@ -238,7 +258,7 @@ public class PrologRuntimeSelectionDialog {
 
 		dialogShell.setText("Add JTransformer Nature");
 		dialogShell.setLayout(new FormLayout());
-		dialogShell.setSize(new Point(280, 340));
+		dialogShell.setSize(new Point(380, 340));
 		newButton.setFocus();
 		dialogShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
 			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
