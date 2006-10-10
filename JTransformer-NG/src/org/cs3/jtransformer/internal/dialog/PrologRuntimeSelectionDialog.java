@@ -204,11 +204,11 @@ public class PrologRuntimeSelectionDialog {
 		availablePrologRuntimes.setHeaderVisible(true);
 		//availablePrologRuntimes.setLinesVisible(true);
 		final TableColumn column = new TableColumn(availablePrologRuntimes,SWT.NONE);
-		column.setText("Name");
+		column.setText("Factbase");
 		column.setResizable(true);
 		column.setWidth(100);
 		final TableColumn column2 = new TableColumn(availablePrologRuntimes,SWT.NONE);
-		column2.setText("Subscriptions");
+		column2.setText("Used / Shared by");
 		column2.setResizable(true);
 		column2.setWidth(237);
 		buttons = new Composite(dialogShell, SWT.NONE);
