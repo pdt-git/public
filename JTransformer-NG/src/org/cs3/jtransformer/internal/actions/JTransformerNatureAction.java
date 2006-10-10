@@ -9,6 +9,7 @@ import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
@@ -87,42 +88,62 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 				 *  Mark Schmatz:
 				 *  Moved from LogicAJPlugin and modified
 				 */
-				IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
-				
-				
 			    Set allKeys = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getAllKeys();
-			    selectAlternativePrologInterface(allKeys);
-			    addJTransformerNature(project);
-//			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
-//			    	jtNature.setPreferenceValue(JTransformer.PROLOG_RUNTIME_KEY, key);
-//			    }
+			    boolean notCanceled = selectAlternativePrologInterface(allKeys);
+			    if (notCanceled) {
+					IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 
-				destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-			    action.setChecked(true);
-
-				JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
+				    addJTransformerNature(project);
+	//			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+	//			    	jtNature.setPreferenceValue(JTransformer.PROLOG_RUNTIME_KEY, key);
+	//			    }
+	
+					destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+				    action.setChecked(true);
+	
+					JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
+					
+			    }
+			    
 			    
 			}
-			action.setChecked(project.getDescription().hasNature(JTransformer.NATURE_ID));
+//			action.setChecked(project.getDescription().hasNature(JTransformer.NATURE_ID));
 		} catch (CoreException e) {
 			Debug.report(e);
 		}
 	}
 
-	private void selectAlternativePrologInterface(Set allKeys) throws CoreException {
+	private boolean selectAlternativePrologInterface(Set allKeys) throws CoreException {
 		if(allKeys.size() > 0) {
 		    List keyList = new ArrayList();
+		    List subscriptionsList = new ArrayList();
 		    for (Iterator iter = allKeys.iterator(); iter.hasNext();) {
-				keyList.add(iter.next());
+		    	String key = (String)iter.next();
+				keyList.add(key);
+				Set subscriptions = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getSubscriptionsForPif(key);
+				StringBuffer subscriptionsString = new StringBuffer();
+				for (Iterator iterator = subscriptions.iterator(); iterator
+						.hasNext();) {
+					Subscription element = (Subscription) iterator.next();
+					if(subscriptionsString.length() > 0) {
+						subscriptionsString.append(",");
+					}
+					subscriptionsString.append(element.getName());
+				}
+				
+				subscriptionsList.add(subscriptionsString.toString());
 			}
 			PrologRuntimeSelectionDialog dialog = new PrologRuntimeSelectionDialog(
-		    		UIUtils.getDisplay().getActiveShell(),keyList,project.getName());
+		    		UIUtils.getDisplay().getActiveShell(),keyList,subscriptionsList,project.getName());
 		    String key = dialog.open();
 		    
 		    if(key != null) {
 		    	project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),key);
+		    	return true;
 		    }
+		    return false;
 		}
+		return true;
 	}
 
 
