@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="statusBar" columns="1" gap="4" top="4" left="2" right="2" bottom="4">
+    <label name="statusTextField" weightx="1" weighty="1"/>
+</panel>

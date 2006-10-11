@@ -1,0 +1,35 @@
+
+module org {
+    module alice {
+        module tuprologx {
+            module runtime {
+                module corba {
+
+                    struct SolveInfo {
+                        boolean success;
+                        string  solution;
+                        boolean halt;
+                        long    haltCode;
+                    };
+
+                  interface Prolog {
+
+                    void clearTheory();
+                    string getTheory();
+                    void setTheory(in string theory);
+
+                    SolveInfo  solve(in string g);
+                    boolean    hasOpenAlternatives();
+                    SolveInfo  solveNext();
+                    void solveHalt();
+                    void solveEnd();
+
+                    void loadLibrary(in string className);
+                    void unloadLibrary(in string className);
+
+                  };
+                };
+            };
+        };
+    };
+};
