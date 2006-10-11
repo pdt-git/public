@@ -1,6 +1,6 @@
 %TRHO: TODO: make generic:
 :- multifile set_parent/2.
-:- multifile set_encl_method/3.
+:- multifile set_encl_method/2.
 
 /*
  * This module provides predicates for 
