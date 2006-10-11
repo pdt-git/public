@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="toolBar" columns="8" gap="4" top="4" left="2" right="2" bottom="4">
+    <button name="newTheoryButton" text="" icon="img/New24.png"
+        tooltip="New Theory" enabled="true" action="newTheory"/>
+    <button name="loadTheoryButton" text="" icon="img/Open24.png"
+        tooltip="Load Theory" enabled="true" action="loadTheory"/>
+    <button name="saveTheoryButton" text="" icon="img/Save24.png"
+        tooltip="Save Theory" enabled="true" action="saveTheory"/>
+    <button name="saveTheoryAsButton" text="" icon="img/SaveAs24.png"
+        tooltip="Save Theory As..." enabled="true" action="saveTheoryAs"/>
+    <button name="openLibraryManagerButton" text="" icon="img/Library.png"
+        tooltip="Open Library Manager" enabled="true" action="openLibraryManager"/>
+    <button name="debugButton" text="" icon="img/Debugger.png"
+        tooltip="View Debug Information" enabled="true" action="viewDebugInformation"/>
+    <button name="aboutButton" text="" icon="img/Help24.png"
+        tooltip="About..." enabled="true" action="viewAboutInformation"/>
+    <!-- an empty label to make the separator as long as the panel -->
+    <label text=""/>
+    <separator colspan="8" weightx="1"/>
+</panel>
