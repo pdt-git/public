@@ -221,6 +221,14 @@ ast_node_def('Java',packageT,[
      ast_arg(name,    mult(1,1,no ),  attr,  [atom])
 ]).
 
+%tree_constraints(projectLocationT ,[[projectT],[atom],[atom],[atom]]).
+ast_node_def('Java',projectT,[
+     ast_arg(id,   mult(1,1,no ), id,   [projectT]),
+     ast_arg(file, mult(1,1,no ), attr, [atom]),
+     ast_arg(name, mult(1,1,no ), attr, [atom]),
+     ast_arg(file, mult(1,1,no ), attr, [atom])
+]).
+
 % tree_constraints(classDefT ,[[execT,packageT,classDefT,newClassT,blockT,nullType],[atom],[methodDefT,fieldDefT,classDefT]]).
 ast_node_def('Java',classDefT,[
      ast_arg(id,      mult(1,1,no ), id,  [classDefT]), % <-- convention!!!
@@ -593,54 +601,6 @@ ast_node_def('Java',whileLoopT,[
 ]).
 
 
-% tree_constraints(implementsT,[[],[classDefT]]).
-% tree_constraints(interfaceT ,[[]]).
-% tree_constraints(modifierT,[[atom]]).
-% tree_constraints(extendsT,[[],[classDefT]]).
-% tree_constraints(externT,[[]]).
-
-/*
-treeSignature(paramDefT, 4).
-treeSignature(fieldDefT, 5).
-treeSignature(methodDefT, 7).
-treeSignature(classDefT, 4).
-treeSignature(packageT, 2).
-treeSignature(identT,5).
-treeSignature(literalT,5).
-treeSignature(execT,4).
-treeSignature(operationT,6).
-treeSignature(applyT,7).
-treeSignature(blockT,4).
-treeSignature(selectT,6).<
-treeSignature(conditionalT,6).
-treeSignature(ifT,6).
-treeSignature(assignT,5).
-treeSignature(importT,3).
-treeSignature(newArrayT,6).
-treeSignature(toplevelT,4).
-treeSignature(newClassT,8).
-treeSignature(returnT,4).
-treeSignature(switchT,5).
-treeSignature(typeCastT,5).
-treeSignature(tryT,6).
-treeSignature(whileLoopT,5).
-treeSignature(continueT,5).
-treeSignature(doLoopT,5).
-treeSignature(indexedT,5).
-treeSignature(throwT,4).
-treeSignature(forLoopT,7).
-treeSignature(synchronizedT,5).
-treeSignature(labelT,5).
-treeSignature(breakT,5).
-treeSignature(typeTestT,5).
-treeSignature(assignopT,6).
-treeSignature(caseT,4).
-treeSignature(catchT,5).
-treeSignature(assertT,5).
-treeSignature(getFieldT,6).
-treeSignature(precedenceT,4).
-*/
-
 %tree_constraints(extendsT,[[],[classDefT]]).
 ast_node_def('JavaAttributes',extendsT,[
      ast_arg(sub,     mult(1,1,no ), id,   [classDefT]), 
@@ -665,3 +625,11 @@ ast_node_def('JavaAttributes',externT,[
 ast_node_def('JavaAttributes',interfaceT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
+
+%tree_constraints(projectLocationT ,[[toplevelT],[projectT],[atom]]).
+ast_node_def('JavaAttributes',projectT,[
+     ast_arg(id,    mult(1,1,no ), id,   [toplevelT]),
+     ast_arg(id,    mult(1,1,no ), id,   [projectT]),
+     ast_arg(path,  mult(1,1,no ), attr, [atom])
+]).
+
