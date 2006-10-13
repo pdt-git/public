@@ -10,7 +10,6 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProjcetEvent;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectListener;
-import org.cs3.jtransformer.internal.actions.CreateOutdirUtils;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
@@ -61,6 +60,7 @@ import org.eclipse.jdt.internal.core.JavaProject;
 public class JTransformerProjectNature implements IProjectNature, JTransformerProject,
 		JTransformerProjectListener {
 
+	boolean buildTriggered = false;
 	
 	// The project for which this nature was requested,
 	// see IProject.getNature(String)
@@ -72,6 +72,8 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 
 	private Vector listeners = new Vector();
 
+	private Object configureMonitor = new Object();
+
 	/**
 	 * 
 	 */
@@ -80,16 +82,27 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	}
 
 	/**
+	 * You MUST NOT directly or indirectly retrieve this nature via the
+	 * IProject.getNature(..) method. This will instantiate this class again
+	 * and will at least result in a second execution of configure, getProject and 
+	 * the afterInit hook will be called twice on the first
+	 * on nature instantiated. 
+	 * 
 	 * @see IProjectNature#configure
+	 * 
 	 */
 	public void configure() throws CoreException {
-		try
-		{
-			getFactBaseBuilder().clean(null);
-		} catch (PrologInterfaceException e1)
-		{
-			JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e1);
-		}
+
+		// just to be sure that afterInit is not called before the pif is started
+		synchronized (configureMonitor) {
+			
+//		try
+//		{
+//			getFactBaseBuilder().clean(null);
+//		} catch (PrologInterfaceException e1)
+//		{
+//			JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e1);
+//		}
 		Debug.debug("configure was called");
 		IProjectDescription descr = project.getDescription();
 		ICommand sheepBuilder = descr.newCommand();
@@ -105,45 +118,56 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 		newBuilders[builders.length] = sheepBuilder;
 		descr.setBuildSpec(newBuilders);
 
+		buildTriggered = true;
 		project.setDescription(descr, null);
+			try {
+				if (pif.isDown()) {
+					pif.start();
+				}
+			} catch (PrologInterfaceException e1) {
+				JTransformerPlugin.getDefault()
+						.createPrologInterfaceExceptionCoreExceptionWrapper(e1);
+			}
 
 		// important: touch the ConsultServices NOW if the pif is already
 		// running.
 		// otherwise recorded facts might be reloaded to late! (i.e. by the
 		// builder AFTER it has
 		// "found" unresolved types
-		PrologInterface pif = getPrologInterface();
-		if (pif.isUp()) {
-			Job j = new Job("building PEFs for project " + project.getName()) {
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						IWorkspaceDescription wd = ResourcesPlugin
-								.getWorkspace().getDescription();
-						if (wd.isAutoBuilding()) {
-							project.build(IncrementalProjectBuilder.FULL_BUILD,
-									monitor);
-						}
-					} catch (OperationCanceledException opc) {
-						return Status.CANCEL_STATUS;
-					} catch (CoreException e) {
-						return new Status(Status.ERROR, JTransformer.PLUGIN_ID, -1,
-								"exception caught during build", e);
-					}
-					return Status.OK_STATUS;
-				}
-
-				public boolean belongsTo(Object family) {
-					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
-				}
-
-			};
-			j.setRule(ResourcesPlugin.getWorkspace().getRoot());
-			j.schedule();
-		} else {
-			// if the pif is not up yet, this is no problem at all: the reload
-			// hook will
-			// take care of the due build in its afterInit method.
-			;
+//		PrologInterface pif = getPrologInterface();
+//		if (pif.isUp()) {
+//			Job j = new Job("building PEFs for project " + project.getName()) {
+//				protected IStatus run(IProgressMonitor monitor) {
+//					try {
+//						IWorkspaceDescription wd = ResourcesPlugin
+//								.getWorkspace().getDescription();
+//						if (wd.isAutoBuilding()) {
+//							project.build(IncrementalProjectBuilder.FULL_BUILD,
+//									monitor);
+//						}
+//					} catch (OperationCanceledException opc) {
+//						return Status.CANCEL_STATUS;
+//					} catch (CoreException e) {
+//						return new Status(Status.ERROR, JTransformer.PLUGIN_ID, -1,
+//								"exception caught during build", e);
+//					}
+//					return Status.OK_STATUS;
+//				}
+//
+//				public boolean belongsTo(Object family) {
+//					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+//				}
+//
+//			};
+//			j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+//			j.schedule();
+//		} else {
+//			// if the pif is not up yet, this is no problem at all: the reload
+//			// hook will
+//			// take care of the due build in its afterInit method.
+//			;
+//		}
+		
 		}
 
 	}
@@ -308,11 +332,11 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 		public void configure(PrologInterface pif) {
 			pif.addLifeCycleHook(this, getId(), new String[0]);
 			if (pif.isUp()) {
-				try {
-					afterInit(pif);
-				} catch (PrologInterfaceException e) {
-					Debug.rethrow(e);
-				}
+//				try {
+//					afterInit(pif);
+//				} catch (PrologInterfaceException e) {
+//					Debug.rethrow(e);
+//				}
 			}
 		}
 
@@ -367,7 +391,6 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	     */
 	    public void afterInit(PrologInterface pif) throws PrologInterfaceException{
 
-	    	
 	        try {
 	            IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				IWorkspaceDescription wd = workspace
@@ -401,9 +424,15 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 					
 	            };
 
-				//j.setRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
-				j.setRule(workspace.getRoot());
-				j.schedule();
+	            synchronized (configureMonitor) {
+		    		if(!buildTriggered) {
+		    			buildTriggered = true;
+	    				j.setRule(workspace.getRoot());
+	    				j.schedule();
+		    		} 
+		    		buildTriggered = false;
+				}
+
 				
 	        } catch (Throwable e) {
 	            Debug.report(e);
