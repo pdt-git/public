@@ -28,7 +28,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-import sun.security.krb5.internal.s;
 
 public class PrologRuntimeSelectionDialog {
 
