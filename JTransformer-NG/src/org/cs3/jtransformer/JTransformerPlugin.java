@@ -5,9 +5,12 @@ package org.cs3.jtransformer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
@@ -16,6 +19,8 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.OptionProviderEvent;
+import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
@@ -36,12 +41,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -61,7 +65,10 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 
     private Vector projectlisteners = new Vector();
 
+  
     private Option[] options;
+
+    private Hashtable listenerSet = new Hashtable();
 
     public JTransformerPlugin() {
         super();
@@ -330,6 +337,28 @@ public class JTransformerPlugin extends AbstractUIPlugin {
     }
 
     /**
+     * conveniance method. should propably be inlined. --lu
+     * @throws CoreException 
+     */
+    public void setPreferenceValue(IProject project, String key, String value) throws CoreException{
+		project.setPersistentProperty(new QualifiedName("", key), value);
+   		fireValueChanged(project,key);
+    }    
+    
+	public String getPreferenceValue(IProject project, String key, String defaultValue) {
+		try {
+			String value = project.getPersistentProperty(new QualifiedName("", key));
+			if(value != null) {
+				return value;
+			}
+			return defaultValue;
+		} catch (CoreException e) {
+			Debug.report(e);
+			throw new RuntimeException(e);
+		}
+	}
+
+    /**
      * reload preferences and configure components.
      * <br><b>NOTE:</b> clients should not call this method directly.
      */
@@ -418,6 +447,45 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 			return plugin;
 		}
 		
-	};
+	}
+
+	public void addOptionProviderListener(IProject project, OptionProviderListener listener) {
+		synchronized (listenerSet) {
+			Set set = getListenerSet(project);
+			set.add(listener);	
+		}
+	}
+
+	public void removeOptionProviderListener(IProject project, OptionProviderListener listener) {
+		synchronized (listenerSet) {
+			Set set = getListenerSet(project);
+			set.remove(listener);	
+		}
+
+	}
+	private Set getListenerSet(IProject project) {
+		Set set = (Set)listenerSet.get(project);
+		if(set == null) {
+			set = new HashSet();
+			listenerSet.put(project, set);
+		}
+		return set;
+	}
+
+	public void fireValueChanged(IProject project, String id) {
+		Set clone = new HashSet();
+		OptionProviderEvent e = new OptionProviderEvent(this, id);
+
+		synchronized (listenerSet) {
+			Set set = getListenerSet(project);
+			clone.addAll(set);
+		}
+		for (Iterator it = clone.iterator(); it.hasNext();) {
+			OptionProviderListener l = (OptionProviderListener) it.next();
+			l.valuesChanged(e);
+		}
+		
+	}
+
 
 }

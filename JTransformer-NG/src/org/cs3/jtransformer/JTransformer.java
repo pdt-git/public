@@ -45,6 +45,10 @@ public final class JTransformer {
      */
     public static final int ERR_CONTEXT_EXCEPTION = 5;
 
+    public static final int ERR_UNKNOWN = 6;
+
+    public static final int CX_UNKNOWN = 10;
+
     /**
      * key that is used to identify the consultservice for external PEFs.
      */
@@ -128,6 +132,20 @@ public final class JTransformer {
 
     public static final String PROLOG_RUNTIME_KEY = "project.prolog.runtime.key";
 
+    public static final String FACTBASE_STATE_KEY = "factbase.state";
+
+    public static final String FACTBASE_STATE_DISABLED = "factbase.state.disabled";
+
+    /**
+     * JTransformer nature is assigned, but the facts are not generated, yet.
+     */
+    public static final String FACTBASE_STATE_IN_PROCESS = "factbase.state.in.process";
+    
+    /**
+     * Facts are generated.
+     */
+    public static final String FACTBASE_STATE_READY = "factbase.state.ready";
+
     /**
      * @return all open JTransformerProjects that operate on the given PrologInterface instance.
      * @throws CoreException
@@ -156,6 +174,8 @@ public final class JTransformer {
  * @deprecated use ResourcesPlugin.getWorkspace().getRoot() instead.
  */	
 public static final ISchedulingRule JTransformer_BUILDER_SCHEDULING_RULE = new ProxyRule();
+
+
 
 
 
