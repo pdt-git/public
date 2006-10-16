@@ -16,7 +16,7 @@ import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.JTransformerProjcetEvent;
+import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.astvisitor.DefaultGenerationToolbox;
@@ -52,7 +52,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -228,7 +230,7 @@ public class FactBaseBuilder {
 
             submon = new SubProgressMonitor(monitor, 10,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-            forgetFacts(submon, toDelete);
+            forgetFacts(submon, toDelete,session);
 
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
@@ -250,7 +252,7 @@ public class FactBaseBuilder {
         }
     }
 
-    private void forgetFacts(IProgressMonitor monitor, final Collection toDelete)
+    private void forgetFacts(IProgressMonitor monitor, final Collection toDelete,PrologSession session)
             throws PrologInterfaceException {
         monitor.beginTask(project.getName() + " - deleting obsolete PEFs", toDelete.size());
         for (Iterator i = toDelete.iterator(); i.hasNext();) {
@@ -258,7 +260,7 @@ public class FactBaseBuilder {
                 throw new OperationCanceledException("Canceled");
             }
             IFile file = (IFile) i.next();
-            forgetFacts(file, true);
+            forgetFacts(file, true,session);
             monitor.worked(1);
         }
         monitor.done();
@@ -267,23 +269,26 @@ public class FactBaseBuilder {
     private void buildFacts(IProgressMonitor monitor, final Collection toProcess)
             throws IOException, CoreException, PrologInterfaceException {
         monitor.beginTask(project.getName() + " - generating new PEFs", toProcess.size());
-        AsyncPrologSession session = ((PrologInterface2)getPif()).getAsyncSession();
+        AsyncPrologSession asyncSession = ((PrologInterface2)getPif()).getAsyncSession();
+        PrologSession syncSession = getPif().getSession(); 
         try {
 	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
 	            if (monitor.isCanceled()) {
 	                throw new OperationCanceledException("Canceled");
 	            }
 	            IFile file = (IFile) i.next();
-	            forgetFacts(file, false);
+	            forgetFacts(file, false,syncSession);
 	            monitor.subTask(" - processing " + file.getName());
-	            buildFacts(session, file);
+	            buildFacts(asyncSession, file);
 	            monitor.worked(1);
 	        }
         } finally {
             monitor.subTask(" - write source file facts");
         	
-        	if(session != null)
-        		session.dispose();
+        	if(asyncSession != null)
+        		asyncSession.dispose();
+        	if(syncSession != null)
+        		syncSession.dispose();
         	monitor.done();
         }
 	        
@@ -380,7 +385,7 @@ public class FactBaseBuilder {
         });
     }
 
-    private void forgetFacts(IFile file, boolean removeGlobalIdsFacts)
+    private void forgetFacts(IFile file, boolean removeGlobalIdsFacts, PrologSession session)
             throws PrologInterfaceException {
         Debug.debug("Forgetting (possible) previous version of " + file);
 
@@ -392,18 +397,35 @@ public class FactBaseBuilder {
          * done
          */
 
-        PrologSession session = getPif().getSession();
-        try {
             if (removeGlobalIdsFacts)
                 session
                         .queryOnce("remove_contained_global_ids('" + path
                                 + "')");
 
-            session.queryOnce("delete_toplevel('" + path + "')");
-
-        } finally {
-            session.dispose();
-        }
+            
+            Map ret = session.queryOnce("toplevelT(Toplevel, _,'" + path +  "', _),deepRetract(Toplevel)");//"delete_toplevel('" + path + "')");
+            if( ret == null) {
+	            IJavaProject javaProject;
+				try {
+					javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+		            ICompilationUnit compUnit = (ICompilationUnit)javaProject.findElement(file.getProjectRelativePath());
+		            if(compUnit != null) {
+			            IType[] types = compUnit.getAllTypes();
+			            for (int i = 0; i < types.length; i++) {
+			                session
+		                    .queryOnce("globalIds(" +
+		                    		"'"+ types[i].getFullyQualifiedName('.')+ "'" +
+		                    		", CID), externT(CID), deepRetract(CID)");
+	//		                if(success == null) {
+	//		                	Debug.error("could not delete external class " + types[i].getFullyQualifiedName());
+	//		                }
+						}
+		            }
+				} catch (CoreException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
     }
 
     /**
@@ -797,7 +819,7 @@ public class FactBaseBuilder {
     }
 
     protected void fireFactBaseUpdated() {
-        JTransformerProjcetEvent e = new JTransformerProjcetEvent(this);
+        JTransformerProjectEvent e = new JTransformerProjectEvent(this);
         Vector cloned = null;
         synchronized (listeners) {
             cloned = (Vector) listeners.clone();
