@@ -7,7 +7,7 @@ import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.JTransformerProjcetEvent;
+import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.astvisitor.Names;
@@ -572,7 +572,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 
 		Runnable r = new Runnable() {
 			public void run() {
-				JTransformerProjcetEvent e = new JTransformerProjcetEvent(currentProject);
+				JTransformerProjectEvent e = new JTransformerProjectEvent(currentProject);
 
 				JTransformerPlugin.getDefault().fireFactBaseUpdated(e);
 
@@ -609,7 +609,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 * 
 	 * @see org.cs3.jtransformer.JTransformerProjectListener#factBaseUpdated(org.cs3.jtransformer.JTransformerProjcetEvent)
 	 */
-	public void factBaseUpdated(JTransformerProjcetEvent e) {
+	public void factBaseUpdated(JTransformerProjectEvent e) {
 		fireFactBaseUpdated();
 	}
 

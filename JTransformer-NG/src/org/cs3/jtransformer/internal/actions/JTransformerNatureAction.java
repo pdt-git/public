@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
+import org.cs3.jtransformer.internal.dialog.RemoveJTransformerNatureDialog;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -15,10 +17,16 @@ import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.action.IAction;
@@ -38,7 +46,6 @@ import org.eclipse.ui.PlatformUI;
 public class JTransformerNatureAction implements IObjectActionDelegate {
 	public final static String ACTION_ID = "org.cs3.pl.JTransformer.JTransformerNatureAction";
 	private IProject project;
-	private IWorkbenchPart targetPart;
 	
 	/*
 	 * (non-Javadoc)
@@ -47,7 +54,6 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 *           org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		this.targetPart = targetPart;
 	}
 	
 	/*
@@ -61,14 +67,35 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			return;
 		}
 		try {
-			IProjectDescription ipd = project.getDescription();	
+			IProjectDescription ipd = project.getDescription();
+	        final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+			
 			if (ipd.hasNature(JTransformer.NATURE_ID)) {
+				
+				RemoveJTransformerNatureDialog dialog = new RemoveJTransformerNatureDialog(
+			    		UIUtils.getDisplay().getActiveShell());
+			    boolean ok = dialog.open();
+			    
+			    if(!ok) {
+			    	return;
+			    }
+			    
+			    
 				JTransformerProjectNature.removeJTransformerNature(project);
+				final IProject outputProject = JTUtils.getOutputProject(project);
+				if(dialog.isRemoveOutputProjectReference()) {
+					removeOutputProjectReference(javaProject, outputProject);
+				}
+				if(dialog.isDeleteOutputProject()) {
+		            deleteOutputProject(outputProject);					
+				}
 				action.setChecked(false);
 			} else {
 			    //removeNatureFromAllOtherProjects();
 			    //PrologManager.getInstance().restart();
-		        final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+				
+		        String[] requiredProjects = javaProject.getRequiredProjectNames();
+		        
 		        if(javaProject == null) {
 		    		final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 					MessageDialog.openError(shell,"JTransformer", 
@@ -112,6 +139,45 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			Debug.report(e);
 		}
 	}
+
+	private void removeOutputProjectReference(final IJavaProject javaProject, final IProject outputProject) {
+		Job j = new Job("Building workspace") {
+		    public IStatus run(IProgressMonitor monitor) {
+				try {
+					JTUtils.removeReferenceToOutputProjectIfNecessary(javaProject, outputProject,monitor);
+				} catch (CoreException e) {
+					return new Status(
+							Status.ERROR,JTransformer.PLUGIN_ID,Status.OK,"could not delete output project of project " + project.getName(),e);
+				}
+		        return Status.OK_STATUS;
+		    }
+		      public boolean belongsTo(Object family) {
+			         return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+		      }
+		};
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.schedule();
+	}
+	
+	private void deleteOutputProject(final IProject outputProject) {
+		Job j = new Job("Building workspace") {
+		    public IStatus run(IProgressMonitor monitor) {
+				try {
+					outputProject.delete(true, monitor);
+				} catch (CoreException e) {
+					return new Status(
+							Status.ERROR,JTransformer.PLUGIN_ID,Status.OK,"could not delete output project of project " + project.getName(),e);
+				}
+		        return Status.OK_STATUS;
+		    }
+		      public boolean belongsTo(Object family) {
+			         return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+		      }
+		};
+		j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+		j.schedule();
+	}
+
 
 	private boolean selectAlternativePrologInterface(Set allKeys) throws CoreException {
 		if(allKeys.size() > 0) {

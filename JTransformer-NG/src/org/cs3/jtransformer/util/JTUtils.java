@@ -26,6 +26,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -627,6 +628,19 @@ public class JTUtils
 				(IClasspathEntry[])filteredClassPath.toArray(new IClasspathEntry[0]), null);
 
 		javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, null);		
+	}
+	
+	/**
+	 * 
+	 * @param javaProject
+	 * @param destProject
+	 * @throws CoreException 
+	 */
+	public static void removeReferenceToOutputProjectIfNecessary(IJavaProject javaProject, IProject destProject, IProgressMonitor monitor) throws CoreException {
+		IPath outPath = new Path("/"+destProject.getName());
+		javaProject.setRawClasspath(
+				(IClasspathEntry[])JTUtils.getFilteredClasspath(outPath, javaProject).toArray(new IClasspathEntry[0]), monitor);
+		javaProject.getProject().refreshLocal(IResource.DEPTH_INFINITE, monitor);		
 	}
 	
 	/**

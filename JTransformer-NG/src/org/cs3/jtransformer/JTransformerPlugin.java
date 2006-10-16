@@ -273,7 +273,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      * @param e
      *                the update event.
      */
-    public void fireFactBaseUpdated(JTransformerProjcetEvent e) {
+    public void fireFactBaseUpdated(JTransformerProjectEvent e) {
         Vector cloned = null;
         synchronized (projectlisteners) {
             cloned = (Vector) projectlisteners.clone();
