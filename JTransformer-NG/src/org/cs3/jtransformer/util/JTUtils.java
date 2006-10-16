@@ -651,4 +651,7 @@ public class JTUtils
 	public static IProject getOutputProject(IProject project) {
 			return ResourcesPlugin.getWorkspace().getRoot().getProject(JTUtils.getOutputProjectName(project));
 	}
+	public static JTransformerProjectNature getNature(IProject project) throws CoreException {
+		return (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+	}
 }

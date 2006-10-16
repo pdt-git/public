@@ -16,8 +16,8 @@ import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProject;
+import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.astvisitor.DefaultGenerationToolbox;
 import org.cs3.jtransformer.internal.astvisitor.FactGenerationToolBox;
@@ -25,6 +25,7 @@ import org.cs3.jtransformer.internal.astvisitor.FactGenerator;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
@@ -52,7 +53,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
@@ -118,9 +118,11 @@ public class FactBaseBuilder {
     public synchronized void build(final IResourceDelta delta, final int flags,
             IProgressMonitor monitor) throws CoreException {
     	// FIXME: Expensive?
-    	clearAllMarkersWithJTransformerFlag();
-		IJobManager jobManager = Platform.getJobManager();
+    	
         try {
+   			JTUtils.getNature(project).setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+        	clearAllMarkersWithJTransformerFlag();
+
             if (building) {
                 Debug.warning("skipping build");
                 return;
@@ -154,8 +156,15 @@ public class FactBaseBuilder {
 //            marker.setAttribute(IMarker.MESSAGE,
 //                    "Could not create PEFs for Project.");
             Debug.report(t);
+
         } finally {
 			//jobManager.endRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
+        	try {
+    			JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
+    		} catch (CoreException e1) {
+    			e1.printStackTrace();
+    		}
+
             building = false;
             monitor.done();
             fireFactBaseUpdated();
@@ -828,6 +837,7 @@ public class FactBaseBuilder {
             JTransformerProjectListener l = (JTransformerProjectListener) it.next();
             l.factBaseUpdated(e);
         }
+
     }
 
 	/**

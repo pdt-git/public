@@ -39,58 +39,62 @@ public class CreateOutdirUtils
 	
 	public IProject createOutputProject(IProject srcProject) throws CoreException
 	{
-		String destProjectName = JTUtils.getOutputProjectName(srcProject);
-		IProject destProject = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjectName);
-		if ( !destProject.exists() )
-		{
-			destProject = createProject(destProjectName);
-		}
-		if ( !destProject.isOpen() )
-		{
-			destProject.open(null);
-		}
-		//IJavaProject destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
-		if (!destProject.hasNature(JavaCore.NATURE_ID))
-		{
-			JTUtils.copyAllNeededFiles(srcProject, destProject);
-	        destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-			addNature(destProject, JavaCore.NATURE_ID);
-
-	        IClasspathEntry[] cp = ((JavaProject)srcProject.getNature(JavaCore.NATURE_ID)).getResolvedClasspath(true);
-	        
-	        for(int i=0;i<cp.length;i++){
-	            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
-					IFolder folder = destProject.getFolder(cp[i].getPath().removeFirstSegments(1));
-					if(!folder.exists()) {
-						folder.create(true, true, null);
-					}
-	            }
-	        }
-			//destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
-			//destJavaProject.setRawClasspath(cp, destProject.getFullPath(), null);
-			// End - Schmatz
-			IJavaProject javaProject = (IJavaProject) srcProject.getNature(JavaCore.NATURE_ID);
-
-			IPath outPath = new Path("/"+destProject.getName());
-
-			// temporary remove class path reference to the output project (if necessary)
-			List filteredClassPath = JTUtils.getFilteredClasspath(outPath, javaProject);
-
-			javaProject.setRawClasspath(
-					(IClasspathEntry[])filteredClassPath.toArray(new IClasspathEntry[0]),
-					null);
-
-			// copyAllNeededFiles by Mark Schmatz
-			JTUtils.copyAllNeededFiles(srcProject, destProject);
-
-			if( destProject.exists() && !destProject.isOpen())
+		IProject destProject = null;
+			String destProjectName = JTUtils.getOutputProjectName(srcProject);
+			destProject = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjectName);
+			if ( !destProject.exists() )
+			{
+				destProject = createProject(destProjectName);
+			}
+			if ( !destProject.isOpen() )
+			{
 				destProject.open(null);
-			
-			// FIXME: schmatz: The next line consumes much time!!!
-			JTransformerProjectNature.removeJTransformerNature(destProject);
+			}
+			//IJavaProject destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
+			if (!destProject.hasNature(JavaCore.NATURE_ID))
+			{
+				JTUtils.copyAllNeededFiles(srcProject, destProject);
+		        destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+				addNature(destProject, JavaCore.NATURE_ID);
+	
+		        IClasspathEntry[] cp = ((JavaProject)srcProject.getNature(JavaCore.NATURE_ID)).getResolvedClasspath(true);
+		        
+		        for(int i=0;i<cp.length;i++){
+		            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
+		            	if(cp[i].getPath().segmentCount() > 1 ) {
+							IFolder folder = destProject.getFolder(cp[i].getPath().removeFirstSegments(1));
+							if(!folder.exists()) {
+								folder.create(true, true, null);
+							}
+		            	}
+		            }
+		        }
+				//destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
+				//destJavaProject.setRawClasspath(cp, destProject.getFullPath(), null);
+				// End - Schmatz
+				IJavaProject javaProject = (IJavaProject) srcProject.getNature(JavaCore.NATURE_ID);
+	
+				IPath outPath = new Path("/"+destProject.getName());
+	
+				// temporary remove class path reference to the output project (if necessary)
+				List filteredClassPath = JTUtils.getFilteredClasspath(outPath, javaProject);
+	
+				javaProject.setRawClasspath(
+						(IClasspathEntry[])filteredClassPath.toArray(new IClasspathEntry[0]),
+						null);
+	
+				// copyAllNeededFiles by Mark Schmatz
+				JTUtils.copyAllNeededFiles(srcProject, destProject);
+	
+				if( destProject.exists() && !destProject.isOpen())
+					destProject.open(null);
+				
+				// FIXME: schmatz: The next line consumes much time!!!
+				JTransformerProjectNature.removeJTransformerNature(destProject);
+	
+				destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
+			}
 
-			destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
-		}
 		return destProject;
 	}
 

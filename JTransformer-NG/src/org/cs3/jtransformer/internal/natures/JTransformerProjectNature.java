@@ -7,8 +7,8 @@ import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProject;
+import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
@@ -22,6 +22,7 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -61,7 +62,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 		JTransformerProjectListener {
 
 	boolean buildTriggered = false;
-	
+		
 	// The project for which this nature was requested,
 	// see IProject.getNature(String)
 	private IProject project;
@@ -72,6 +73,8 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 
 	private Vector listeners = new Vector();
 
+	private Vector optionsListener = new Vector();
+	
 	private Object configureMonitor = new Object();
 
 	/**
@@ -307,6 +310,12 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	 */
 	public void setProject(IProject project){
 		this.project = project;
+		try {
+			JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+		} catch (CoreException e) {
+			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
+					JTransformer.ERR_UNKNOWN, JTransformer.CX_UNKNOWN, e);
+		}
 		PrologInterface pif = getPrologInterface();
 		if (pif.isUp()) {
 			reconfigure();
@@ -771,7 +780,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 
 	public void setPreferenceValue(String id, String value) {
 		try {
-			getProject().setPersistentProperty(new QualifiedName("", id), value);
+			JTransformerPlugin.getDefault().setPreferenceValue(getProject(), id, value);
 			if(id.equals(JTransformer.PROLOG_RUNTIME_KEY)){
 				pifKeysChanged();
 			}
@@ -806,6 +815,23 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	            }
 			project.setDescription(ipd, null);//TODO: add real
 	    }
+	}
+
+	public void addOptionProviderListener(OptionProviderListener l) {
+		synchronized (optionsListener) {
+			if (!optionsListener.contains(l)) {
+				optionsListener.add(l);
+			}
+		}
+	}
+
+	public void removeOptionProviderListener(OptionProviderListener l) {
+		synchronized (optionsListener) {
+			if (optionsListener.contains(l)) {
+				optionsListener.remove(l);
+			}
+		}
+
 	}
 
 }

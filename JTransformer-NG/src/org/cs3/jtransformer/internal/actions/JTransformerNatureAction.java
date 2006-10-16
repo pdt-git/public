@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
 import org.cs3.jtransformer.internal.dialog.RemoveJTransformerNatureDialog;
@@ -71,7 +72,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	        final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 			
 			if (ipd.hasNature(JTransformer.NATURE_ID)) {
-				
+
 				RemoveJTransformerNatureDialog dialog = new RemoveJTransformerNatureDialog(
 			    		UIUtils.getDisplay().getActiveShell());
 			    boolean ok = dialog.open();
@@ -90,9 +91,13 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		            deleteOutputProject(outputProject);					
 				}
 				action.setChecked(false);
+				JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_DISABLED);
+
 			} else {
 			    //removeNatureFromAllOtherProjects();
 			    //PrologManager.getInstance().restart();
+				
+				//javaProject.set
 				
 		        String[] requiredProjects = javaProject.getRequiredProjectNames();
 		        
@@ -119,6 +124,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			    boolean notCanceled = selectAlternativePrologInterface(allKeys);
 			    if (notCanceled) {
 					IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
+			    	JTransformerPlugin.getDefault().setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
 
 				    addJTransformerNature(project);
 	//			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
@@ -139,6 +145,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			Debug.report(e);
 		}
 	}
+
 
 	private void removeOutputProjectReference(final IJavaProject javaProject, final IProject outputProject) {
 		Job j = new Job("Building workspace") {

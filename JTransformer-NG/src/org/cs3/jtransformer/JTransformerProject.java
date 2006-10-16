@@ -84,26 +84,26 @@ public interface JTransformerProject extends OptionProvider{
      */
     public Option[] getOptions();
     
-    /**
-     * look up a preference value.
-     * <p>
-     * tries the following values in the given order and returns the first
-     * non-null result. If everything returns null, the given defaultValue is
-     * returned.
-     * <ul>
-     * <li>System.getProperty(key)</li>
-     * <li>getProject().getPersistentProperty(key)</li>
-     * <li>if an option with the given id exists in the array returned by
-     * getOptions(), take its default value</li>
-     * <li>the given default value
-     * </ul>
-     * 
-     * @param key
-     * @return the value or specified default if no such key exists..
-     * @throws CoreException
-     * @throws CoreException
-     */
-    public String getPreferenceValue(String key, String defaultValue) ;
+//    /**
+//     * look up a preference value.
+//     * <p>
+//     * tries the following values in the given order and returns the first
+//     * non-null result. If everything returns null, the given defaultValue is
+//     * returned.
+//     * <ul>
+//     * <li>System.getProperty(key)</li>
+//     * <li>getProject().getPersistentProperty(key)</li>
+//     * <li>if an option with the given id exists in the array returned by
+//     * getOptions(), take its default value</li>
+//     * <li>the given default value
+//     * </ul>
+//     * 
+//     * @param key
+//     * @return the value or specified default if no such key exists..
+//     * @throws CoreException
+//     * @throws CoreException
+//     */
+//    public String getPreferenceValue(String key, String defaultValue) ;
 
     /**
      * 
