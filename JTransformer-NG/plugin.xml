@@ -194,7 +194,7 @@
   <extension point="org.eclipse.ui.decorators"> 
         <decorator
               adaptable="true"
-              class="org.cs3.jtransformer.internal.JTransformerProjectDecoratorContributor"
+              class="org.cs3.jtransformer.internal.decorators.JTransformerProjectDecoratorContributor"
               icon="icons/JTransformerSmall.gif"
               id="org.cs3.jtransformer.project.decorator"
               label="JTransformer Project Decorator"
