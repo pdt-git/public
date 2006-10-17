@@ -54,6 +54,7 @@ generate_synthetic_methods(Generate) :-
  */
 
 gen_toplevels :-
+    close_all_printf_to_memory,
   	retractall(sourcePath(_)),
 %  	appendDir('/gen_classfile_names.txt', _dirfile),
  %   createDirsIfNeeded(_dirfile),
