@@ -10,7 +10,7 @@
  */
 :- dynamic debug_rollback_output/0.
 :- dynamic tmp_rollback_file/1.
-debug_rollback_output.
+%debug_rollback_output.
 
 
 markEnclAsDirty(Elem):-
