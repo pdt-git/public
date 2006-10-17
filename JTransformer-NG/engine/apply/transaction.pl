@@ -6,7 +6,7 @@
 /**
  * debug_rollback_output
  * 
- * activated by default.
+ * deactivated by default.
  */
 :- dynamic debug_rollback_output/0.
 :- dynamic tmp_rollback_file/1.
