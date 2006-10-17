@@ -311,7 +311,7 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 	public void setProject(IProject project){
 		this.project = project;
 		try {
-			JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+			JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 		} catch (CoreException e) {
 			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
 					JTransformer.ERR_UNKNOWN, JTransformer.CX_UNKNOWN, e);

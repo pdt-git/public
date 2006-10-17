@@ -124,7 +124,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			    boolean notCanceled = selectAlternativePrologInterface(allKeys);
 			    if (notCanceled) {
 					IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
-			    	JTransformerPlugin.getDefault().setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+			    	JTransformerPlugin.getDefault().setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 
 				    addJTransformerNature(project);
 	//			    JTransformerProjectNature jtNature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);

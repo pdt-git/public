@@ -66,6 +66,8 @@ public class JTransformerImageRepository {
 	public final static String JTRANSFORMER_PROJECT_DECORATION = "JTransformerSmall.gif";
 
 	public static final String JTRANSFORMER_PROJECT_DECORATION_GREY = "JTransformerSmallGrey.gif";
+		
+	public static final String JTRANSFORMER_PROJECT_DECORATION_ORANGE = "JTransformerSmallOrange.gif";
 
 	
     public static final ImageDescriptor getImageDescriptor(String icon) {

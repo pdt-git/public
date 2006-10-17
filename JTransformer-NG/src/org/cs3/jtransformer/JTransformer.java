@@ -139,6 +139,11 @@ public final class JTransformer {
     /**
      * JTransformer nature is assigned, but the facts are not generated, yet.
      */
+    public static final String FACTBASE_STATE_ACTIVATED = "factbase.state.activated";
+
+    /**
+     * JTransformer nature is assigned and the fact generation is in progress.
+     */
     public static final String FACTBASE_STATE_IN_PROCESS = "factbase.state.in.process";
     
     /**
