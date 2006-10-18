@@ -1,3 +1,13 @@
+%%%%
+%
+% For Ditrios
+% Mark Schmatz
+%
+:- dynamic dynamic_logicaj_mode/1.
+:- multifile dynamic_logicaj_mode/1. 
+%
+%%%%
+
 :-multifile cond/1.
 :-multifile action/1.
 :-multifile subTreeArg/2.
