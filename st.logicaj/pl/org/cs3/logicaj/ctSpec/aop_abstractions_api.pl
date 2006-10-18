@@ -98,12 +98,23 @@ cond(execution(_execution, _class, _execution, null, _execution, _params)).
 subTreeArg(execution, 6).
 execution(_execution, _class, _execution, null, _execution, _params) :-
     methodDefT(_execution, _class, _, _params, _, _exceptions, _),
-%
-% schmatz: rausgenommen, weil sonst keine CT mehr angewandt wird!
-% => anders loesen!
-%
-%    not(interfaceT(_class)),
-%
+    
+    %
+    % Mark Schmatz:
+    %
+    % The 'dynamic_logicaj_mode(true)' fact is only
+    % existent if LogicAJ is dynamically used.
+    % Ditrios sets this flag.
+    % The default is that this flag is not existent!
+    %
+    (
+    	dynamic_logicaj_mode(true);
+		not(interfaceT(_class)),
+	)
+	%
+	% end - Mark Schmatz
+	%
+	
     not(externT(_class)).
 
 
