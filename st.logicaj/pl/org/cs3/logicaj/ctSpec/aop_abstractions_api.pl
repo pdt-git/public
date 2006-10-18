@@ -98,7 +98,12 @@ cond(execution(_execution, _class, _execution, null, _execution, _params)).
 subTreeArg(execution, 6).
 execution(_execution, _class, _execution, null, _execution, _params) :-
     methodDefT(_execution, _class, _, _params, _, _exceptions, _),
-    not(interfaceT(_class)),
+%
+% schmatz: rausgenommen, weil sonst keine CT mehr angewandt wird!
+% => anders loesen!
+%
+%    not(interfaceT(_class)),
+%
     not(externT(_class)).
 
 
