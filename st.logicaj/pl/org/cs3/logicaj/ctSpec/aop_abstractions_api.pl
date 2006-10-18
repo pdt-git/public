@@ -109,8 +109,8 @@ execution(_execution, _class, _execution, null, _execution, _params) :-
     %
     (
     	dynamic_logicaj_mode(true);
-		not(interfaceT(_class)),
-	)
+		not(interfaceT(_class))
+	),
 	%
 	% end - Mark Schmatz
 	%
