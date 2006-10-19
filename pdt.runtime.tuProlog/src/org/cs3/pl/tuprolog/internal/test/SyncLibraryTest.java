@@ -1,9 +1,15 @@
 package org.cs3.pl.tuprolog.internal.test;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.cs3.pl.prolog.PrologEventDispatcher;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
@@ -17,6 +23,7 @@ import junit.framework.TestCase;
 
 public class SyncLibraryTest extends TestCase {
 	private PrologInterface pif = null;
+	private PrologSession session = null;
 
 
 	
@@ -34,12 +41,7 @@ public class SyncLibraryTest extends TestCase {
 											"add(X):- nonvar(X),assert(X).\n" +
 											"remove(X):- nonvar(X),retract(X).");
 			((TuPrologPrologInterface)pif).getEngine().addTheory(sync_test);
-			
-			Theory threads_test = new Theory(
-					"counter(0).\n" +
-					"counterInc :- counter(X), Addition is X+1, assert(counter(Addition)).\n" +
-					"counterDec :- counter(X), Subtraction is X-1, assert(counter(Subtraction)).");
-			((TuPrologPrologInterface)pif).getEngine().addTheory(threads_test);
+			session = pif.getSession();
 		}
 		
 		super.setUp();
@@ -50,27 +52,32 @@ public class SyncLibraryTest extends TestCase {
 	}
 
 	public void testSync_0() throws Exception {
-		
-		PrologSession session = pif.getSession();
-		
+				
 		assertNotNull(session.queryOnce("sync(test)."));
 	}
 
 	public void testWith_mutex_2() throws Exception {
+				
+		Map sync = session.queryOnce("with_mutex(ne,sync(X)).");
+		assertEquals("X should be bind to test", "test", sync.get("X"));
+
+		session.queryOnce("with_mutex(ne,add(jail(new_jail))).");
+		sync = session.queryOnce("jail(X).");
+		assertEquals("X should be bind to new_jail", "new_jail", sync.get("X"));
 		
-		PrologSession session = pif.getSession();
-		
-		assertNotNull(session.queryOnce("with_mutex(ne,sync(X))."));		
+		session.queryOnce("with_mutex(ne,remove(jail(new_jail))).");
+		sync = session.queryOnce("jail(X).");
+		assertNull("Should be Null since there is no jail predicate.", sync);
+				
 	}
 	
 	Object monitor = new Object();
 	int counter=0;
 	
 	public void testThreading() throws Exception {
-	
-		PrologSession session = pif.getSession();
+			
 		/*
-		 * TODO create PrologInterface2 or wait till it get integerated
+		 * TODO create PrologInterface2 by creating AsyncSession or wait till it get integerated
 		 * 		in PrologInterface.
 		 */
 		
@@ -97,14 +104,68 @@ public class SyncLibraryTest extends TestCase {
 		dispatcher.addPrologInterfaceListener("with_mutex(Key,Goal)", locationListener );
 		*/
 		
-		session.queryOnce("with_mutex(ne,add(test(9))).");
-		assertNotNull("There should be a result return.",session.queryOnce("test(9)."));
-		session.queryOnce("with_mutex(ne,remove(test(9))).");
-		assertNull("There should be no result return.", session.queryOnce("test(9)."));
-		session.queryOnce("with_mutex(ne,counterInc).");
-		session.queryOnce("counter(X)");
-		session.queryOnce("with_mutex(ne,counterDec).");
+		Thread first = new Thread("firstThread"){
+			public void run() {
+				try {
+					
+					System.err.println(getName()+" Adding first message");
+					session.queryOnce("with_mutex('thread_test',add(first(message))).");
+					
+					System.err.println(getName()+" sleep : Started ");
+					sleep(200);
+					System.err.println(getName()+" sleep : ended ");
+					
+					System.err.println(getName()+" Query for second message");
+					session.queryOnce("with_mutex('thread_test',second(message))");
+					
+					System.err.println(getName()+" Removing first message");
+					session.queryOnce("with_mutex('thread_test',remove(first(message))).");
+					
+				} catch (PrologException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (PrologInterfaceException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+		};
+
+		Thread second = new Thread("secondThread"){
+			public void run() {
+				try {
+					
+					System.err.println(getName()+" Query for first message");
+					session.queryOnce("with_mutex('thread_test',first(message)).");
+					
+					System.err.println(getName()+" Added second message");
+					session.queryOnce("with_mutex('thread_test',add(second(message))).");
+					
+					System.err.println(getName()+" sleep : Started ");
+					sleep(300);
+					System.err.println(getName()+" sleep : ended ");
+					
+					System.err.println(getName()+" Query for first message");
+					session.queryOnce("with_mutex('thread_test',first(message)).");
+					
+				} catch (PrologException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (PrologInterfaceException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InterruptedException e){
+					e.printStackTrace();
+				}
+			}
+		};
+
+		first.start();
+		second.start();
 		
+		Thread.sleep(1000);
 		session.dispose();
 	}
 	
