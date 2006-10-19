@@ -2,9 +2,11 @@ package org.cs3.jtransformer.internal.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -64,7 +66,8 @@ public class CreateOutdirUtils
 		            	if(cp[i].getPath().segmentCount() > 1 ) {
 							IFolder folder = destProject.getFolder(cp[i].getPath().removeFirstSegments(1));
 							if(!folder.exists()) {
-								folder.create(true, true, null);
+								mkdirs(folder);
+								//folder.create(true, true, null);
 							}
 		            	}
 		            }
@@ -83,6 +86,7 @@ public class CreateOutdirUtils
 						(IClasspathEntry[])filteredClassPath.toArray(new IClasspathEntry[0]),
 						null);
 	
+				IClasspathEntry[] newRaw = javaProject.getRawClasspath();
 				// copyAllNeededFiles by Mark Schmatz
 				JTUtils.copyAllNeededFiles(srcProject, destProject);
 	
@@ -97,6 +101,26 @@ public class CreateOutdirUtils
 
 		return destProject;
 	}
+	
+    /**
+     * @param dstFolder
+     * @throws CoreException
+     */
+    private void mkdirs(IFolder dstFolder) throws CoreException {
+        IContainer c = dstFolder;
+        Stack v = new Stack();
+        while (!c.exists()) {
+            if (c.getType() != IResource.FOLDER) {
+                throw new RuntimeException("Should not happen??!");
+            }
+            v.push(c);
+            c = c.getParent();
+        }
+        while (!v.isEmpty()) {
+            IFolder folder = (IFolder) v.pop();
+            folder.create(true, true, null);
+        }
+    }
 
 
 
