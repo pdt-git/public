@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import alice.tuprolog.InvalidLibraryException;
 import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
@@ -92,7 +93,18 @@ public class TuProlog {
     			new BufferedInputStream(
     					engine.getClass().getClassLoader().getResourceAsStream("./resources/"+ library)
     			)));
-	}	
+	}
+	
+	/**
+	 * Load Java-based prolog library to the current engine.
+	 * 
+	 * @author Hasan Abdel Halim
+	 * @param className name of the Java class containing the library to be loaded.
+	 * @throws InvalidLibraryException
+	 */
+	public void loadLibraryClass(String className) throws InvalidLibraryException{
+		engine.loadLibrary(className);
+	}
 
 	/**
 	 * Answers a stream on a resource found by looking up resName
