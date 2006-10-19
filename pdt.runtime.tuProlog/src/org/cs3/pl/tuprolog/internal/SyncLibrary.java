@@ -25,28 +25,17 @@ public class SyncLibrary extends Library {
 	 * @param goal
 	 * @return
 	 */
-	public Term with_mutex_2(Struct key, Term goal) {
-		Term result = null;
+	public boolean with_mutex_2(Struct key, Term goal) {
+		
 		Object monitor = monitors.get(key.getName());
+
 		if(monitor == null) {
 			monitor = new Object();
 			monitors.put(key.getName(), monitor);
 		}
 		synchronized (monitor) {
-			//TODO : shall I check for a successfull query? 
-			// Note: with_mutex/2 (SWI-PROLOG) does not. 
 			SolveInfo info = this.getEngine().solve(goal);
-			if (!info.isSuccess())
-				result = null;
-			else {
-				try {
-					result = info.getSolution();
-				} catch (NoSolutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-			}
-			return result;	
+			return (info.isSuccess())?true:false;
 		}
 	}
 }
