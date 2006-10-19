@@ -69,7 +69,16 @@ ast_node_term(Lang, Head) :-
     ast_node_signature(Lang, NodeType, Arity),
     functor(Head,NodeType,Arity).
   
+
+% Obsolete, but calls to this predicate still exist in code that is
+% itself obsolete or has been started long ago and still waits to be
+% completed (e.g. factbase migration to normalized representation,
+% see ast_alternative/migration/intern*.pl):
+
+astNodeSignature(NodeType, Arity) :- 
+    ast_node_signature(_Lang, NodeType, Arity).
     
+        
 /**
  *  ast_node_signature(?Language, ?NodeType, ?Arity)
  *
@@ -87,20 +96,24 @@ ast_node_signature_REAL(Lang, NodeType, Arity) :-
  
 ast_node_signature(Lang, NodeType, Arity) :-
    ast_node_signature_REAL(Lang, NodeType, N),
-   /* The hack in the following lines accounts for the integration
-      of attributes as normal arguments in the new syntax. In a few
-      cases it leads to longer parameter lists compared to the old
-      syntax. These cases are 'corrected' by hand in the following.
-      The real correction would be an adaptation of the PEF syntax.
+   /* The hack in the following lines accounts for a mismatch between the 
+      Java language description in ast_node_def/3 and the current
+      JT PEFs. JT represents 'attributes' es extra facts, in addition
+      to its PEFs, whereas the language description threats them as
+      arguments of the PEFs. In a few cases this leads to longer
+      expected PEF parameter lists than really supported by JT. 
+      These cases are 'corrected' by hand in the following.
+      The better correction would be an adaptation of the JT syntax.
    */
    (Lang = 'Java' 
     -> hackTreeSignature(NodeType,N,Arity)
-     ; true).
+     ; Arity=N).
   
 hackTreeSignature(Functor,N,Arity) :- 
    ( (Functor = classDefT,  Arity = 4, !) 
    ; (Functor = methodDefT, Arity = 7, !)
    ; (Functor = fieldDefT,  Arity = 5, !)
+   ; (Functor = paramDefT,  Arity = 4, !)
    ; (Arity = N)
    ).   
        
