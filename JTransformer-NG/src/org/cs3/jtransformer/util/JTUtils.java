@@ -185,7 +185,14 @@ public class JTUtils
 			
 			if( !isBundle )
 			{
-				neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE));
+				Map classPathReplace = new HashMap();
+				//classPathReplace.put(srcProjectName, destProjectName);
+				//FIXME: TRHO only if the path does not start with \
+//				classPathReplace.put("(<classpathentry kind=\"lib\" path=\")[a-zA-Z_]", "<classpathentry kind=\"lib\" path=\"/" + 
+				classPathReplace.put("<classpathentry kind=\"lib\" path=\"", "<classpathentry kind=\"lib\" path=\"/" + 
+						srcProjectName.substring(1) + "/");
+
+				neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE,classPathReplace,1));
 			}
 			neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_PROJECT_FILE, srcProjectName, destProjectName));
 
@@ -609,6 +616,7 @@ public class JTUtils
 			if(!path.equals(outPath)) {
 				filteredClassPath.add(classpath[i]);
 			}
+
 		}
 		return filteredClassPath;
 	}

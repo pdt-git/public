@@ -200,7 +200,14 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
         	String outputProject = JTUtils.getOutputProjectName(project);
         
 			JavaProject javaProject = (JavaProject)project.getNature(JavaCore.NATURE_ID);
-			String firstSourceFolder = getFirstSourceFolder(javaProject).getPath().removeFirstSegments(1).toPortableString();
+			IClasspathEntry firstSourceFolderCP = getFirstSourceFolder(javaProject);
+			String firstSourceFolder;
+			if(firstSourceFolderCP != null) {
+				firstSourceFolder = firstSourceFolderCP.getPath().removeFirstSegments(1).toPortableString();
+			}else {
+				firstSourceFolder = "dummySrc"; // FIXME: TRHO: Was tun?
+			}
+			
 		options = new Option[] {
 				
 				new SimpleOption(
