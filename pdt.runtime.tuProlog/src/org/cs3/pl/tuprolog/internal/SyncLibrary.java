@@ -1,6 +1,6 @@
 package org.cs3.pl.tuprolog.internal;
 
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+import java.util.Hashtable;
 
 import alice.tuprolog.Library;
 import alice.tuprolog.Struct;
@@ -12,25 +12,26 @@ public class SyncLibrary extends Library {
 	 * 
 	 */
 	private static final long serialVersionUID = 476854551154694310L;
+	/**
+	 * A hashtable which stores all synchornization keys.
+	 */
 	private Hashtable monitors = new Hashtable();
 
-	public boolean sync_0() {
-		System.out.println("Sync was Called");
-		return true;
-	}
 	/**
 	 * 
-	 * @param permissions key to synchronize on.
+	 * @param key key to synchronize on.
 	 * @param goal
 	 * @return
 	 */
-	public boolean with_mutex_2(Struct permissions, Term goal) {
-		Object monitor = monitors.get(permissions.getName());
+	public boolean with_mutex_2(Struct key, Term goal) {
+		Object monitor = monitors.get(key.getName());
 		if(monitor == null) {
 			monitor = new Object();
-			monitors.put(permissions.getName(), monitor);
+			monitors.put(key.getName(), monitor);
 		}
 		synchronized (monitor) {
+			//TODO : shall I check for a successfull query? 
+			// Note: with_mutex/2 (SWI-PROLOG) does not. 
 			this.getEngine().solve(goal);
 			return true;
 		}
