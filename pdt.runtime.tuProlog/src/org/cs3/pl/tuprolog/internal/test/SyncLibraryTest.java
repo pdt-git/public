@@ -39,7 +39,9 @@ public class SyncLibraryTest extends TestCase {
 			Theory sync_test = new Theory(
 											"sync(test).\n" +
 											"add(X):- nonvar(X),assert(X).\n" +
-											"remove(X):- nonvar(X),retract(X).");
+											"remove(X):- nonvar(X),retract(X).\n" +
+											"sleep(X) :- current_thread <- sleep(X).\n" +
+											"thread_name(Name) :- var(Name), current_thread <- getName returns Name.");
 			((TuPrologPrologInterface)pif).getEngine().addTheory(sync_test);
 			session = pif.getSession();
 		}
@@ -107,7 +109,7 @@ public class SyncLibraryTest extends TestCase {
 		Thread first = new Thread("firstThread"){
 			public void run() {
 				try {
-					
+					/*
 					System.err.println(getName()+" Adding first message");
 					session.queryOnce("with_mutex('thread_test',add(first(message))).");
 					
@@ -120,6 +122,13 @@ public class SyncLibraryTest extends TestCase {
 					
 					System.err.println(getName()+" Removing first message");
 					session.queryOnce("with_mutex('thread_test',remove(first(message))).");
+					*/
+					System.err.println(getName()+" Started");
+					Map info = session.queryOnce("with_mutex(test(threads),(assert(f(1)), sleep(5000), f(1))).");
+					assertNotNull(info);
+					info = session.queryOnce("with_mutex(second_test(threads),f(1)).");
+					assertNotNull(info);
+					System.err.println(getName()+" Ended");
 					
 				} catch (PrologException e) {
 					// TODO Auto-generated catch block
@@ -127,16 +136,14 @@ public class SyncLibraryTest extends TestCase {
 				} catch (PrologInterfaceException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				} catch (InterruptedException e){
-					e.printStackTrace();
-				}
+				} 
 			}
 		};
 
 		Thread second = new Thread("secondThread"){
 			public void run() {
 				try {
-					
+					/*
 					System.err.println(getName()+" Query for first message");
 					session.queryOnce("with_mutex('thread_test',first(message)).");
 					
@@ -149,14 +156,19 @@ public class SyncLibraryTest extends TestCase {
 					
 					System.err.println(getName()+" Query for first message");
 					session.queryOnce("with_mutex('thread_test',first(message)).");
+					*/
+					System.err.println(getName()+" Started");
+					Map info = session.queryOnce("with_mutex(test(threads),(assert(f(1)), retract(f(2)))).");
+					assertNull(info);
+					info = session.queryOnce("thread_name(Name).");
+					assertEquals("secondThread", info.get("Name"));
 					
+					System.err.println(getName()+" Ended");
 				} catch (PrologException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (PrologInterfaceException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InterruptedException e){
 					e.printStackTrace();
 				}
 			}
@@ -165,7 +177,7 @@ public class SyncLibraryTest extends TestCase {
 		first.start();
 		second.start();
 		
-		Thread.sleep(1000);
+		Thread.sleep(6000);
 		session.dispose();
 	}
 	
