@@ -1,5 +1,6 @@
 package org.cs3.jtransformer.internal.actions;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -70,6 +71,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	 */
 	
 	Hashtable vertexes;
+	private boolean includeReferencedProjects = false;
 
 	public void run(IAction action) {
 		if (projects.size() == 0){
@@ -78,13 +80,12 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		}
 		try {
 //			if(projects.size() > 1) {
-				List sortedProjects = topoSortProjects(projects);
 //			}
 				if(!allProjectsHaveJTNature(projects)) {
-					addNatures(action, sortedProjects);
+					addNatures(projects,action);
 				} else {
-					for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
-						IProject project = (IProject)((VertexImpl) iter.next()).getObject();
+					for (Iterator iter = projects.iterator(); iter.hasNext();) {
+						IProject project = (IProject)iter.next();
 						removeNature(project, action);
 					}
 				}
@@ -98,14 +99,16 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		}
 	}
 
-	private void addNatures(IAction action, List sortedProject) throws CoreException, JavaModelException {
+	private void addNatures(List projects,IAction action) throws Exception {
 		Set allKeys = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getAllKeys();
 		String factbaseName = selectAlternativePrologInterface(((IProject)projects.get(0)).getName(),allKeys);
 		if(factbaseName == null) {
 						return;
 		}
-		
-		for (Iterator iter = sortedProject.iterator(); iter.hasNext();) {
+		List sortedProjects = topoSortProjects(projects);
+		includeReferencedProjects = false;
+
+		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
 			IProject project = (IProject)((VertexImpl) iter.next()).getObject();
 			final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 		    addNature(project,action, javaProject,factbaseName);
@@ -113,11 +116,13 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	}
 
 	private List topoSortProjects(List projects) throws Exception {
+		List toProcess = new ArrayList(projects);
 		DirectedAcyclicGraph dag = new DirectedAcyclicGraphImpl();
 		vertexes = new Hashtable();
-		for (Iterator iter = projects.iterator(); iter.hasNext();) {
-			IProject project = (IProject)iter.next();
-			Vertex vertex = getVertexForProject(project);
+		while(toProcess.size() > 0) {
+			IProject project = (IProject)toProcess.get(0);
+			toProcess.remove(project);
+			Vertex vertex = getVertexForProject(toProcess,project);
 			dag.add(vertex);
 			final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 			IClasspathEntry[] referenced = javaProject.getResolvedClasspath(true);
@@ -131,10 +136,10 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 					if(refProject.getName().endsWith("-output")) {
 						continue;
 					}
-					if(!projects.contains(refProject)) {
+					if(!includeReferencedProjects && !projects.contains(refProject)) {
 						continue;
 					}
-					Vertex refVertex = getVertexForProject(refProject);
+					Vertex refVertex = getVertexForProject(toProcess,refProject);
 					dag.addEdge(new DirectedEdgeImpl(vertex, refVertex));
 				}
 				
@@ -145,14 +150,20 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 //			}
 		}
 		TopologicalSorting topoSort = new TopologicalSorting(dag);
-		return topoSort.traverse();
+		List sorted = topoSort.traverse();
+		Collections.reverse(sorted);
+		return sorted;
 	}
 
-	private Vertex getVertexForProject(IProject project) {
+	private Vertex getVertexForProject(List projects, IProject project) {
 		Vertex vertex = (Vertex)vertexes.get(project);
 		if(vertex != null) {
 			return vertex;
 		}
+		if(!projects.contains(project)) {
+			projects.add(project);
+		}
+
 		vertex = new VertexImpl(project);
 		vertexes.put(project, vertex);
 		return vertex;
@@ -286,7 +297,10 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		    
 		    if(key.length() > 0) {
 		    	//project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),key);
+		    	includeReferencedProjects = dialog.isIncludeReferencedProjects();
 		    	return key;
+		    } else {
+		    	includeReferencedProjects = false;
 		    }
 		    return null;
 //		}

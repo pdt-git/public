@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.viewers.CellEditor.LayoutData;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -39,7 +40,7 @@ public class PrologRuntimeSelectionDialog {
 
 	private static final String DEFAULT_TITLE = "Add JTransformer Nature";
 
-	private String selected = "";
+	private String selected = "";  //  @jve:decl-index=0:
 
 	private Shell dialogShell = null;  //  @jve:decl-index=0:visual-constraint="67,7"
 
@@ -71,6 +72,13 @@ public class PrologRuntimeSelectionDialog {
 	private String projectRuntime;
 
 	private List subscriptions;
+
+	private Button addReferencedProjects = null;
+
+	/**
+	 * Transfer variable for the state of the addReferencedProjects check box.
+	 */
+	private boolean includeReferencedProjects = false;
 	
 	private void updateSelection(String newSelection) {
 		updateSelection(newSelection,true);
@@ -127,7 +135,7 @@ public class PrologRuntimeSelectionDialog {
 		});
 				
 		GridData data = new GridData();
-		data.widthHint = 150;
+		data.widthHint = 230;
 		data.grabExcessHorizontalSpace = true;
 		name.setLayoutData(data);
 		//name.setSize(220, 16);
@@ -142,20 +150,20 @@ public class PrologRuntimeSelectionDialog {
 		radioSelect.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioSelect));
 				
 		okButton = new Button(buttons, SWT.NONE);
-		okButton.setText("   OK   ");
+		okButton.setText("     OK     ");
 		
 		okButton.setSelection(true);
 		cancelButton = new Button(buttons, SWT.NONE);
-		cancelButton.setText("Cancel");
+		cancelButton.setText("  Cancel  ");
 
-		FormData formDataNew = new FormData();
-		formDataNew.left = new FormAttachment(3, 40,100);
+		FormData formDataOK = new FormData();
+		formDataOK.left = new FormAttachment(3, 40,100);
 
 		FormData formDataJoin = new FormData();
 		formDataJoin.left = new FormAttachment(4, 10,10);
 		FormData formDataCancel = new FormData();
 		formDataCancel.right = new FormAttachment(6, 10,10);
-		okButton.setLayoutData(formDataNew);
+		okButton.setLayoutData(formDataOK);
 		cancelButton.setLayoutData(formDataCancel);
 
 		
@@ -281,10 +289,21 @@ public class PrologRuntimeSelectionDialog {
 		radioButtons = new Composite(dialogShell, SWT.NONE);
 		GridLayout gridLayout = new GridLayout(2,false);
 		radioButtons.setLayout(gridLayout);
+		FormData layoutRadioButtons = new FormData();
+		layoutRadioButtons.left = new FormAttachment(1,100, 8);
+		radioButtons.setLayoutData(layoutRadioButtons);
 
 		availablePrologRuntimes = new Table(dialogShell, SWT.BORDER | SWT.SINGLE);
 		availablePrologRuntimes.setHeaderVisible(true);
 		
+		addReferencedProjects = new Button(dialogShell, SWT.CHECK);
+		addReferencedProjects.setText("include all referenced projects");
+
+		FormData referencedProjectsLayout = new FormData();
+		referencedProjectsLayout.top = new FormAttachment(availablePrologRuntimes,10);
+		referencedProjectsLayout.left = new FormAttachment(1, 100, 10);
+//		referencedProjectsLayout.right = new FormAttachment(99, 100, 0);
+		addReferencedProjects.setLayoutData(referencedProjectsLayout);
 		
 		availablePrologRuntimes.addSelectionListener(new SelectionListener() {
 
@@ -305,14 +324,21 @@ public class PrologRuntimeSelectionDialog {
 		final TableColumn column2 = new TableColumn(availablePrologRuntimes,SWT.NONE);
 		column2.setText("Used / Shared by");
 		column2.setResizable(true);
-		column2.setWidth(237);
+		column2.setWidth(337);
+		Label line = new Label(dialogShell,SWT.HORIZONTAL|SWT.SEPARATOR);
+		
+		FormData formDataLine = new FormData();
+		formDataLine.width = 580;
+
+		formDataLine.top = new FormAttachment(addReferencedProjects,5);//new FormAttachment(label,3);
+		line.setLayoutData(formDataLine);
 		buttons = new Composite(dialogShell, SWT.NONE);
 		buttons.setLayout(new FormLayout());
 		
 		FormData formData = new FormData();
 		formData.top = new FormAttachment(radioButtons,1);
 		formData.left = new FormAttachment(1,10);
-		formData.width = 320;
+		formData.width = 420;
 		formData.height = 200;
 
 //		Label label = new Label(dialogShell, SWT.WRAP);
@@ -326,8 +352,9 @@ public class PrologRuntimeSelectionDialog {
 //		label.setLayoutData(formDataLabel);
 		
 		FormData formDataComposite = new FormData();
-		formDataComposite.width = 480;
-		formDataComposite.top = new FormAttachment(availablePrologRuntimes,5);//new FormAttachment(label,3);
+		formDataComposite.width = 580;
+
+		formDataComposite.top = new FormAttachment(line,5);//new FormAttachment(label,3);
 		formDataComposite.height = 30;
 		//formDataComposite.bottom = new FormAttachment(80,100,5);
 		
@@ -338,7 +365,7 @@ public class PrologRuntimeSelectionDialog {
 		createButtons();
 
 		dialogShell.setLayout(new FormLayout());
-		dialogShell.setSize(new Point(480, 360));
+		dialogShell.setSize(new Point(480, 400));
 		okButton.setFocus();
 		dialogShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
 			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
@@ -359,11 +386,17 @@ public class PrologRuntimeSelectionDialog {
 			} else {
 				lastRuntime = selected;
 			}
+			includeReferencedProjects = addReferencedProjects.getSelection();
+
 		} 
 		isClosing = true;
 		dialogShell.close();
 		dialogShell.dispose();
 		return true;
+	}
+	
+	public boolean isIncludeReferencedProjects() {
+		return includeReferencedProjects; 
 	}
 	
 	public class ToggleRadioButtonSelection implements SelectionListener {
@@ -381,13 +414,17 @@ public class PrologRuntimeSelectionDialog {
 
 		public void widgetSelected(SelectionEvent e) {
 			if(selectedButton == radioSelect) {
-				availablePrologRuntimes.setEnabled(selectedButton == radioSelect);
-				if(availablePrologRuntimes.getSelection().length > 0){
-					updateSelection(availablePrologRuntimes.getSelection()[0].getText());
-				} else {
+				if(availablePrologRuntimes.getItemCount() > 0){
+					availablePrologRuntimes.setEnabled(selectedButton == radioSelect);
+					
+					if(availablePrologRuntimes.getSelection().length > 0){
+						updateSelection(availablePrologRuntimes.getSelection()[0].getText());
+					} 
+				}else {
 					return;
 				}
 			}
+			availablePrologRuntimes.setEnabled(selectedButton == radioSelect);
 			name.setEnabled(selectedButton == radioNamed);
 
 
