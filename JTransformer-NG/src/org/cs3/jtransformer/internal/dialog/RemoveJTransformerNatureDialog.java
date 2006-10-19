@@ -21,7 +21,7 @@ public class RemoveJTransformerNatureDialog {
 	protected boolean cancelDialog = false;
 	private boolean deleteProject = true;
 	private boolean removeReference = true;
-	
+	private String projectName;
 	/**
 	 * @param args
 	 */
@@ -29,13 +29,14 @@ public class RemoveJTransformerNatureDialog {
 
 		Display display = Display.getDefault();
 		Shell shell = new Shell(display);
-		RemoveJTransformerNatureDialog thisClass = new RemoveJTransformerNatureDialog(shell);
+		RemoveJTransformerNatureDialog thisClass = new RemoveJTransformerNatureDialog(shell, "project name");
 		thisClass.open();
 		display.dispose();
 	}
 
-	public RemoveJTransformerNatureDialog(Shell shell) {
+	public RemoveJTransformerNatureDialog(Shell shell,String projectName) {
 		this.shell = shell;
+		this.projectName = projectName;
 		createSShell();
 	}
 
@@ -49,11 +50,12 @@ public class RemoveJTransformerNatureDialog {
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 2;
 		sShell = new Shell();
+		sShell.setSize(new Point(380, 122));
 		sShell.setText("JTransformer");
 		sShell.setLayout(gridLayout);
-		sShell.setSize(new Point(285, 135));
+		sShell.setSize(new Point(489, 126));
 		question = new Label(sShell, SWT.NONE);
-		question.setText("Do you want to remove the JTransformer Nature?");
+		question.setText("Do you want to remove the JTransformer Nature from '" + projectName+ "'?");
 		question.setLayoutData(gridData);
 		removeOutputProjectReference = new Button(sShell, SWT.CHECK);
 		removeOutputProjectReference.setText("remove reference to output Project");

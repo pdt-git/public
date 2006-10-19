@@ -14,12 +14,16 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -27,29 +31,39 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.Text;
+
 
 
 public class PrologRuntimeSelectionDialog {
 
+	private static final String DEFAULT_TITLE = "Add JTransformer Nature";
+
+	private String selected = "";
 
 	private Shell dialogShell = null;  //  @jve:decl-index=0:visual-constraint="67,7"
 
-	private static String lastRuntime = null;
+	private static String lastRuntime;
 
 	private boolean isClosing = false;
 
-	private String selected = null;
+	//private String selected = null;
 
 	private Table availablePrologRuntimes = null;
 
 	private Composite buttons = null;
 
-	private Button newButton = null;
-
-	private Button joinButton = null;
+	private Button okButton = null;
 
 	private Button cancelButton = null;
 
+	private Composite radioButtons = null;
+	
+	private Button radioDefault = null;
+	private Button radioNamed = null;
+	private Button radioSelect = null;
+	private Text name = null;
+	
 	private Shell shell;
 
 	private List runtimes;
@@ -58,11 +72,16 @@ public class PrologRuntimeSelectionDialog {
 
 	private List subscriptions;
 	
+	private void updateSelection(String newSelection) {
+		updateSelection(newSelection,true);
+	}
+	
 	public PrologRuntimeSelectionDialog(Shell shell, List runtimes,List subscriptions, String projectRuntime) {
 		this.shell = shell;
 		this.runtimes = runtimes;
 		this.subscriptions = subscriptions;
 		this.projectRuntime = projectRuntime;
+//		this.selected = projectRuntime;
 		init();
 	}
 	
@@ -74,61 +93,132 @@ public class PrologRuntimeSelectionDialog {
 	
 	private void createButtons() {
 
-		newButton = new Button(buttons, SWT.NONE);
-		newButton.setText("Dedicated Factbase");
-		joinButton = new Button(buttons, SWT.NONE);
-		joinButton.setText("Join");
+		
+		radioDefault = new Button(radioButtons, SWT.RADIO);
+		radioDefault.setText("use project name as factbase name");
+		radioDefault.addSelectionListener(new SelectionListener() {
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+			public void widgetSelected(SelectionEvent e) {
+				updateSelection(projectRuntime);		
+			}
+			
+		});
+		
+		Label filler1 = new Label(radioButtons, SWT.NONE);
+		//defaultRuntimeLabel.setText(projectRuntime);
+		radioNamed = new Button(radioButtons, SWT.RADIO);
+		radioNamed.setText("explicitly name factbase");
+		name = new Text(radioButtons, SWT.BORDER);
+		name.addKeyListener(new KeyListener() {
+
+			public void keyReleased(KeyEvent e) {
+				if(e.character == '\r' || e.character == '\n') {
+					doExit();
+				}else {
+					updateSelection(name.getText(),false);
+				}
+			}
+
+			public void keyPressed(KeyEvent e) {
+			}
+			
+		});
+				
+		GridData data = new GridData();
+		data.widthHint = 150;
+		data.grabExcessHorizontalSpace = true;
+		name.setLayoutData(data);
+		//name.setSize(220, 16);
+		name.setEnabled(false);
+		
+		radioSelect = new Button(radioButtons, SWT.RADIO);
+		radioSelect.setText("select existing factbase");
+		Label filler3 = new Label(radioButtons, SWT.NONE);
+
+		radioDefault.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioDefault));
+		radioNamed.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioNamed));
+		radioSelect.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioSelect));
+				
+		okButton = new Button(buttons, SWT.NONE);
+		okButton.setText("   OK   ");
+		
+		okButton.setSelection(true);
 		cancelButton = new Button(buttons, SWT.NONE);
 		cancelButton.setText("Cancel");
 
 		FormData formDataNew = new FormData();
-		formDataNew.left = new FormAttachment(1, 40,1);
+		formDataNew.left = new FormAttachment(3, 40,100);
 
 		FormData formDataJoin = new FormData();
 		formDataJoin.left = new FormAttachment(4, 10,10);
 		FormData formDataCancel = new FormData();
-		formDataCancel.right = new FormAttachment(9, 10,10);
-		newButton.setLayoutData(formDataNew);
-		joinButton.setLayoutData(formDataJoin);
+		formDataCancel.right = new FormAttachment(6, 10,10);
+		okButton.setLayoutData(formDataNew);
 		cancelButton.setLayoutData(formDataCancel);
 
 		
-		newButton.addSelectionListener(new SelectionListener() {
+		okButton.addSelectionListener(new SelectionListener() {
 
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
-
+			
 			public void widgetSelected(SelectionEvent e) {
-				selected = projectRuntime;
-				lastRuntime = selected;
+				//updateSelection(projectRuntime);
 				doExit();
 			}
 			
 		});
-		
-		joinButton.addSelectionListener(new SelectionListener() {
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-
-			public void widgetSelected(SelectionEvent e) {
-				selected = availablePrologRuntimes.getSelection()[0].getText();
-				doExit();
-			}
-			
-		});
-		
+				
 		cancelButton.addSelectionListener(new SelectionListener() {
 
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 
 			public void widgetSelected(SelectionEvent e) {
-				selected = null;
-				doExit();
+				cancelled();
 			}
+
 			
 		});
+	}
+	protected void updateSelection(String newSelection, boolean updateNameTextField) {
+		selected = newSelection;
+		dialogShell.setText(DEFAULT_TITLE + " to project " + projectRuntime );//" - factbase name: \"" + newSelection+ "\"");
+		if(updateNameTextField) {
+			name.setText(newSelection);
+		}
+	}
+
+
+	private boolean cancelled() {
+		updateSelection("");		
+		return doExit();
+	}
+
+	private void initSelection() {
+		
+		if(lastRuntime != null) {
+			updateSelection(lastRuntime);
+		// selected runtime
+			if(runtimes.size() > 0 && runtimes.indexOf(lastRuntime) > 0) {
+				availablePrologRuntimes.select(runtimes.indexOf(lastRuntime));
+				radioSelect.setSelection(true);
+				availablePrologRuntimes.setEnabled(true);
+
+		// named runtime				
+			} else {
+				name.setEnabled(true);
+				availablePrologRuntimes.select(0);
+				radioNamed.setSelection(true);
+			}	
+		// default runtime				
+		} else {		
+			updateSelection(projectRuntime);
+			radioDefault.setSelection(true);
+		}
+		//name.setla
 	}
 
 	public static void main(String[] args) {
@@ -155,10 +245,6 @@ public class PrologRuntimeSelectionDialog {
 		
 		System.out.println(selected);
 
-//		while (!thisClass.dialogShell.isDisposed()) {
-//			if (!display.readAndDispatch())
-//				display.sleep();
-//		}
 		display.dispose();
 	}
 
@@ -178,14 +264,7 @@ public class PrologRuntimeSelectionDialog {
 			
 			item.setText(new String[] {runtime,(String)iter2.next()});
 		}
-		if(runtimes.size() > 0) {
-			int indexOfLast = runtimes.indexOf(lastRuntime);
-			if(indexOfLast > 0) {
-				availablePrologRuntimes.select(indexOfLast);
-			} else {
-				availablePrologRuntimes.select(0);
-			}
-		}
+		initSelection();
 		System.out.println("ic: "+availablePrologRuntimes.getItemCount());
 		while (!dialogShell.isDisposed()) {
 			if (!shell.getDisplay().readAndDispatch())
@@ -198,9 +277,26 @@ public class PrologRuntimeSelectionDialog {
 
 	private void init() {
 		dialogShell = new org.eclipse.swt.widgets.Shell(shell, SWT.DIALOG_TRIM);
-		
+
+		radioButtons = new Composite(dialogShell, SWT.NONE);
+		GridLayout gridLayout = new GridLayout(2,false);
+		radioButtons.setLayout(gridLayout);
+
 		availablePrologRuntimes = new Table(dialogShell, SWT.BORDER | SWT.SINGLE);
 		availablePrologRuntimes.setHeaderVisible(true);
+		
+		
+		availablePrologRuntimes.addSelectionListener(new SelectionListener() {
+
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+
+			public void widgetSelected(SelectionEvent e) {
+				updateSelection(availablePrologRuntimes.getSelection()[0].getText());
+			}
+			
+		});
+		
 		//availablePrologRuntimes.setLinesVisible(true);
 		final TableColumn column = new TableColumn(availablePrologRuntimes,SWT.NONE);
 		column.setText("Factbase");
@@ -214,67 +310,95 @@ public class PrologRuntimeSelectionDialog {
 		buttons.setLayout(new FormLayout());
 		
 		FormData formData = new FormData();
-		formData.top = new FormAttachment(1,1);
+		formData.top = new FormAttachment(radioButtons,1);
 		formData.left = new FormAttachment(1,10);
 		formData.width = 320;
 		formData.height = 200;
 
-		Label label = new Label(dialogShell, SWT.WRAP);
-		label.setText("Do you want to have a dedicated factbase named '"+ projectRuntime + "' for this project or do you want to join the factbase of another project?");
-
+//		Label label = new Label(dialogShell, SWT.WRAP);
+//		label.setText("Do you want to have a dedicated factbase named '"+ projectRuntime + "' for this project or do you want to join the factbase of another project?");
 		FormData formDataLabel = new FormData();
 		formDataLabel.width = 330;
 		formDataLabel.left = new FormAttachment(1,10);
 		
 		formDataLabel.top = new FormAttachment(availablePrologRuntimes,5);
 		formDataLabel.height = 40;
-		label.setLayoutData(formDataLabel);
-
+//		label.setLayoutData(formDataLabel);
 		
 		FormData formDataComposite = new FormData();
-		formDataComposite.width = 380;
-		formDataComposite.top = new FormAttachment(label,3);
+		formDataComposite.width = 480;
+		formDataComposite.top = new FormAttachment(availablePrologRuntimes,5);//new FormAttachment(label,3);
 		formDataComposite.height = 30;
 		//formDataComposite.bottom = new FormAttachment(80,100,5);
 		
 		availablePrologRuntimes.setLayoutData(formData);
+		availablePrologRuntimes.setEnabled(false);
 		buttons.setLayoutData(formDataComposite);
-//		availablePrologRuntimes.addSelectionListener(new SelectionListener() {
-//
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//
-//			public void widgetSelected(SelectionEvent e) {
-//				selected = ((TableItem)e.item).getText(); 
-//				
-//			}
-//			
-//		});
 		
 		createButtons();
 
-		dialogShell.setText("Add JTransformer Nature");
 		dialogShell.setLayout(new FormLayout());
-		dialogShell.setSize(new Point(380, 340));
-		newButton.setFocus();
+		dialogShell.setSize(new Point(480, 360));
+		okButton.setFocus();
 		dialogShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
 			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
 				if (!isClosing) {
-					e.doit = doExit();
+					
+					e.doit = cancelled();
 				}
 			}
 		});
 	}
 
 
-
 	private boolean doExit() {
+		// in the default case
+		if(selected.length() > 0) {
+			if( radioDefault.getSelection()){
+				lastRuntime = null;
+			} else {
+				lastRuntime = selected;
+			}
+		} 
 		isClosing = true;
 		dialogShell.close();
 		dialogShell.dispose();
-		//shell.close();
 		return true;
 	}
+	
+	public class ToggleRadioButtonSelection implements SelectionListener {
+
+		private Button selectedButton;
+		private Composite radioButtons;
+
+		public ToggleRadioButtonSelection(Composite radioButtons, Button selectedButton) {
+			this.radioButtons = radioButtons;
+			this.selectedButton = selectedButton; 
+		}
+
+		public void widgetDefaultSelected(SelectionEvent e) {
+		}
+
+		public void widgetSelected(SelectionEvent e) {
+			if(selectedButton == radioSelect) {
+				availablePrologRuntimes.setEnabled(selectedButton == radioSelect);
+				if(availablePrologRuntimes.getSelection().length > 0){
+					updateSelection(availablePrologRuntimes.getSelection()[0].getText());
+				} else {
+					return;
+				}
+			}
+			name.setEnabled(selectedButton == radioNamed);
+
+
+			for (int i = 0; i < radioButtons.getChildren().length; i++) {
+				if(radioButtons.getChildren()[i] instanceof Button) {
+					Button button = (Button)radioButtons.getChildren()[i];
+					button.setSelection(button == selectedButton);
+				}
+			}
+		}
+
+	}
+
 }

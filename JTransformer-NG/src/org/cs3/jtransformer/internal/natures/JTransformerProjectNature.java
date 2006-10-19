@@ -33,6 +33,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.ICommand;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
@@ -832,6 +833,34 @@ public class JTransformerProjectNature implements IProjectNature, JTransformerPr
 			}
 		}
 
+	}
+
+	/**
+	 * @throws CoreException
+	 * @throws PrologInterfaceException 
+	 * @throws PrologException 
+	 */
+	public void clearAllMarkersWithJTransformerFlag() throws CoreException
+	{
+		// Modified Dec 21, 2004 (AL)
+		// Clearing all Markers from current Workspace
+		// that have got LogicAJPlugin "Nature"
+		IMarker[] currentMarkers = project
+				.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+		if (currentMarkers != null)
+		{
+			for (int i = 0; i < currentMarkers.length; i++)
+			{
+				if (currentMarkers[i].getAttribute(JTransformer.PROBLEM_MARKER_ID) != null)
+				{
+					// Hier k�nnte in Zukunft noch eine Abfrage hinzu
+					// um welchen Aspekt es sich gerade handelt.
+					// Gibts im Moment aber nicht. Deswegen
+					// l�sche ich einfach alle
+					currentMarkers[i].delete();
+				}
+			}
+		}
 	}
 
 }
