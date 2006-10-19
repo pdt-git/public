@@ -120,8 +120,9 @@ public class FactBaseBuilder {
     	// FIXME: Expensive?
     	
         try {
-   			JTUtils.getNature(project).setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
-        	clearAllMarkersWithJTransformerFlag();
+   			JTransformerProjectNature nature = JTUtils.getNature(project);
+   			nature.setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+        	nature.clearAllMarkersWithJTransformerFlag();
 
             if (building) {
                 Debug.warning("skipping build");
@@ -171,33 +172,7 @@ public class FactBaseBuilder {
         }
     }
 
-	/**
-	 * @throws CoreException
-	 * @throws PrologInterfaceException 
-	 * @throws PrologException 
-	 */
-	protected void clearAllMarkersWithJTransformerFlag() throws CoreException
-	{
-		// Modified Dec 21, 2004 (AL)
-		// Clearing all Markers from current Workspace
-		// that have got LogicAJPlugin "Nature"
-		IMarker[] currentMarkers = project
-				.findMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-		if (currentMarkers != null)
-		{
-			for (int i = 0; i < currentMarkers.length; i++)
-			{
-				if (currentMarkers[i].getAttribute(JTransformer.PROBLEM_MARKER_ID) != null)
-				{
-					// Hier k�nnte in Zukunft noch eine Abfrage hinzu
-					// um welchen Aspekt es sich gerade handelt.
-					// Gibts im Moment aber nicht. Deswegen
-					// l�sche ich einfach alle
-					currentMarkers[i].delete();
-				}
-			}
-		}
-	}
+
     
     synchronized private void build_impl(IResourceDelta delta, int flags,
             IProgressMonitor monitor) throws IOException, CoreException, PrologInterfaceException {
@@ -550,7 +525,7 @@ public class FactBaseBuilder {
         return typeNames;
     }
 
-    public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
+ public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
             CoreException, PrologInterfaceException {
         Debug.debug("enter loadExternalFacts");
         monitor.beginTask(project.getName() + " - creating external PEFs", IProgressMonitor.UNKNOWN);

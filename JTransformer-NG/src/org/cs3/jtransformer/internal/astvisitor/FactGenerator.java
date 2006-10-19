@@ -623,7 +623,6 @@ public class FactGenerator extends ASTVisitor implements Names {
 		//char cvalue = node.charValue();
 		String contents = getTextForNode(node).substring(1,node.getLength()-1);
 		//ld: carefull: we have to escape escape chars, like a backslash
-				
 		String value = contents.replaceAll("\\\\","\\\\\\\\");
 		value = value.replaceAll("'","\\\\'");
 

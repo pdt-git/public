@@ -268,12 +268,15 @@ public class ByteCodeFactGeneratorIType {
 			else {
 				String newId = idManager.newID();
 				init =""+newId;
+				String value = field.getConstant().toString();
+				value = value.replaceAll("\\\\","\\\\\\\\");
+				value = value.replaceAll("'","\\\\'");
 				String [] args = new String [] {
 						newId, 
 						id,
 						id,
 						type,
-						"'" + field.getConstant()+"'"
+						"'" + value +"'"
 				};
 				writer.writeFact("literalT", args);
 				
