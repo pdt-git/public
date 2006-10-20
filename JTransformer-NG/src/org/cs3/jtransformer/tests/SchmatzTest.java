@@ -53,6 +53,7 @@ public class SchmatzTest extends TestCase
 		
 		content = "<classpathentry including=\"**/*.java|**/*.pl\"";
 		expContent = "<classpathentry including=\"**/*.java|**/*.pl|**/" + JTConstants.CT_LIST_FILENAME + "|**/"+ JTConstants.FQCN_LIST_FILENAME +"\"";
+
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"\\<classpathentry\\s+?including=\"(.*?)\"",
@@ -172,6 +173,17 @@ public class SchmatzTest extends TestCase
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		assertEquals(expContent, newContent);
+		
+		content = "<classpathentry kind=\"lib\" path=\"lib/DaffodilDB_Common.jar\"/>";
+		expContent = "<classpathentry kind=\"lib\" path=\"/MarksTestAspectBundle/lib/DaffodilDB_Common.jar\"/>";
+
+		regexPatternsWithNewStrings = new HashMap();
+		regexPatternsWithNewStrings.put(
+				"(<classpathentry kind=\"lib\" path=\")([^/].*?\"/>)",
+						"${CAPT_GROUP=1}/" + "MarksTestAspectBundle" + "/${CAPT_GROUP=2}");
+		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
+		assertEquals(expContent, newContent);
+
 	}
 	
 //	public void testCTPackageExtractor()
