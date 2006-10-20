@@ -36,7 +36,6 @@ public class FileAdaptationHelper
 	private Map regexPatternsWithNewStrings;
 	private String tabuString;
 	private List notAdaptedPatterns = new ArrayList();
-	private int group = 0;
 	
 	
 	/**
@@ -94,13 +93,6 @@ public class FileAdaptationHelper
 		this.regexPatternsWithNewStrings = regexPatternWithNewString;
 	}
 
-	public FileAdaptationHelper(String fileName, Map regexPatternWithNewString, int group) {
-		this.fileName = fileName;
-		this.needsAdaptation = true;
-		this.regexPatternsWithNewStrings = regexPatternWithNewString;
-		this.group = group;
-	}
-	
 	/**
 	 * Like <tt>CopyFileHelper(String, String, String)</tt> but here
 	 * you can define more pattern/replacement string pairs.
@@ -117,8 +109,6 @@ public class FileAdaptationHelper
 		this.regexPatternsWithNewStrings = regexPatternWithNewString;
 		this.tabuString = tabuString;
 	}
-
-
 
 	public String getFileName()
 	{
@@ -186,7 +176,15 @@ public class FileAdaptationHelper
 						{
 							String captGroup = matcher.group(groupCount);
 							captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
-							// FIXME: use Pattern class go for all lines!
+							Pattern p = Pattern.compile(
+									START_TEMPLATE_VAR_TOKENS + 
+									CAPT_GROUP_TOKEN + "=" + groupCount +
+									END_TEMPLATE_VAR_TOKENS,
+									Pattern.DOTALL);
+//							p.matcher(val).replaceAll(captGroup);
+							
+//							// FIXME: use Pattern class go for all lines!
+//							// XXX: HOPEFULLY FIXED
 							val = val.replaceAll(
 									START_TEMPLATE_VAR_TOKENS + 
 									CAPT_GROUP_TOKEN + "=" + groupCount +
