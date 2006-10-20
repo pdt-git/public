@@ -97,8 +97,8 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		} catch (Exception e) {
 			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
 					JTransformer.ERR_UNKNOWN, JTransformer.CX_UNKNOWN, e);
-
 			Debug.report(new Error(e));
+			e.printStackTrace();
 		}
 	}
 
@@ -207,7 +207,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 		    action.setChecked(true);
 
-			// JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
+			JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
 	}
 
 	private void removeNature(IProject project, IAction action) throws CoreException {
