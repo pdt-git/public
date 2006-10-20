@@ -182,17 +182,14 @@ public class JTUtils
 			// ----
 			
 			List neededFileForCopying = new ArrayList();
-			
+
+			Map classPathReplacement = new HashMap();
+			classPathReplacement.put("(<classpathentry kind=\"lib\" path=\")([^/].*?\"/>)",
+					"${CAPT_GROUP=1}/" + srcProject.getName() + "/${CAPT_GROUP=2}");
+
 			if( !isBundle )
 			{
-				Map classPathReplace = new HashMap();
-				//classPathReplace.put(srcProjectName, destProjectName);
-				//FIXME: TRHO only if the path does not start with \
-//				classPathReplace.put("(<classpathentry kind=\"lib\" path=\")[a-zA-Z_]", "<classpathentry kind=\"lib\" path=\"/" + 
-				classPathReplace.put("<classpathentry kind=\"lib\" path=\"", "<classpathentry kind=\"lib\" path=\"/" + 
-						srcProjectName.substring(1) + "/");
-
-				neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE,classPathReplace,1));
+				neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE,classPathReplacement));
 			}
 			neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_PROJECT_FILE, srcProjectName, destProjectName));
 
@@ -254,6 +251,7 @@ public class JTUtils
 							"|**/" + JTConstants.FQCN_LIST_FILENAME + 
 							"\""
 					);
+					regexPatternsWithNewStrings2.putAll(classPathReplacement);
 					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE, regexPatternsWithNewStrings2));
 				}
 			}
@@ -312,18 +310,13 @@ public class JTUtils
 	 * @param absolutePathOfOutputProject
 	 */
 	// New by Mark Schmatz
-	public static void storeCTList(String ctNameList, List ctFilenameList, String absolutePathOfOutputProject)
+	public static void storeCTList(Map ctNamesAndFiles, String absolutePathOfOutputProject)
 	{
-		int i=0;
-		
 		List list = new ArrayList();
-		StringTokenizer st = new StringTokenizer(ctNameList, ",");
-		while( st.hasMoreTokens() )
-		{
-			String token = st.nextToken().trim();
-			list.add(token + JTConstants.CTNAME_FILENAME_SEPARATOR + ctFilenameList.get(i++));
-		}
-		
+		for (Iterator iter = ctNamesAndFiles.keySet().iterator(); iter.hasNext();) {
+			String ctName = (String) iter.next();
+			list.add(ctName + JTConstants.CTNAME_FILENAME_SEPARATOR + ctNamesAndFiles.get(ctName));
+		}		
 		/*
 		 * After the CT list is created and stored
 		 * save it in a temp list so that after copying
@@ -616,7 +609,6 @@ public class JTUtils
 			if(!path.equals(outPath)) {
 				filteredClassPath.add(classpath[i]);
 			}
-
 		}
 		return filteredClassPath;
 	}
