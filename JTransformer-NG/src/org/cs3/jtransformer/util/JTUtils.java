@@ -318,7 +318,7 @@ public class JTUtils
 			String ctFilename = (String) ctNamesAndFiles.get(ctName);
 			
 			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')')+1);
-			String first = "'" + ctFilename + variableBinding;
+			String first = "'" + ctFilename + "'" + variableBinding;
 			String second = ctName.substring(1, ctName.lastIndexOf("'"));
 			
 			list.add(first + JTConstants.CTNAME_FILENAME_SEPARATOR + second);

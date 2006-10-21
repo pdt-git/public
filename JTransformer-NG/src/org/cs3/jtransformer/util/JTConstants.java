@@ -22,7 +22,7 @@ public interface JTConstants
 	 */
 	public static final String OUTPUT_PROJECT_NAME_SUFFIX = "-output";
 
-	public static final String CTNAME_FILENAME_SEPARATOR = " ##--## ";
+	public static final String CTNAME_FILENAME_SEPARATOR = "  ;  ";
 
 	public static final String RESOURCES_FILELISTS_PACKAGE = "resources.filelists";
 
