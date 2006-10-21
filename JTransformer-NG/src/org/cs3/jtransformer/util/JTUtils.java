@@ -317,11 +317,10 @@ public class JTUtils
 			String ctName = (String) iter.next();
 			String ctFilename = (String) ctNamesAndFiles.get(ctName);
 			
-			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')'));
+			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')')+1);
 			String first = "'" + ctFilename + variableBinding;
 			String second = ctName.substring(1, ctName.lastIndexOf("'"));
 			
-			//list.add(ctName + JTConstants.CTNAME_FILENAME_SEPARATOR + ctFilename);
 			list.add(first + JTConstants.CTNAME_FILENAME_SEPARATOR + second);
 		}		
 		/*
