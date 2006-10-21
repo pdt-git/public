@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
@@ -312,10 +311,18 @@ public class JTUtils
 	// New by Mark Schmatz
 	public static void storeCTList(Map ctNamesAndFiles, String absolutePathOfOutputProject)
 	{
+		int i=0;
 		List list = new ArrayList();
-		for (Iterator iter = ctNamesAndFiles.keySet().iterator(); iter.hasNext();) {
+		for (Iterator iter = ctNamesAndFiles.keySet().iterator(); iter.hasNext();)
+		{
 			String ctName = (String) iter.next();
-			list.add(ctName + JTConstants.CTNAME_FILENAME_SEPARATOR + ctNamesAndFiles.get(ctName));
+			String ctFilename = (String) ctNamesAndFiles.get(ctName);
+			
+			String first = "'" + ctFilename + "'(Jp" + (i++) + ")";
+			String second = ctName.substring(1, ctName.lastIndexOf("'"));
+			
+			//list.add(ctName + JTConstants.CTNAME_FILENAME_SEPARATOR + ctFilename);
+			list.add(first + JTConstants.CTNAME_FILENAME_SEPARATOR + second);
 		}		
 		/*
 		 * After the CT list is created and stored
@@ -330,6 +337,8 @@ public class JTUtils
 	}
 	
 	/**
+	 * OBSOLETE:
+	 * 
 	 * Returns the CT packages from the temp CT list
 	 * as comma separated values String in order that
 	 * it can be inserted in the manifest file.
@@ -377,6 +386,7 @@ public class JTUtils
 		return str;
 	}
 
+	// OBSOLETE
 	public static String makeItAPackagePart(String subDirForCts)
 	{
 		if( JTConstants.SUBDIR_FOR_CTS != null && !"".equals(JTConstants.SUBDIR_FOR_CTS) )
