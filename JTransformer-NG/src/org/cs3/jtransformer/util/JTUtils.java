@@ -309,19 +309,23 @@ public class JTUtils
 	 * @param absolutePathOfOutputProject
 	 */
 	// New by Mark Schmatz
-	public static void storeCTList(Map ctNamesAndFiles, String absolutePathOfOutputProject)
+	public static void storeCTList(Map ctNamesAndFiles, Map adviceKinds, String absolutePathOfOutputProject)
 	{
 		List list = new ArrayList();
 		for (Iterator iter = ctNamesAndFiles.keySet().iterator(); iter.hasNext();)
 		{
 			String ctName = (String) iter.next();
 			String ctFilename = (String) ctNamesAndFiles.get(ctName);
+			String adviceKind = (String) adviceKinds.get(ctName);
 			
 			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')')+1);
 			String first = "'" + ctFilename + "'" + variableBinding;
 			String second = ctName.substring(1, ctName.lastIndexOf("'"));
 			
-			list.add(first + JTConstants.CTNAME_FILENAME_SEPARATOR + second);
+			list.add(
+					adviceKind + JTConstants.CTNAME_FILENAME_SEPARATOR + 
+					first + JTConstants.CTNAME_FILENAME_SEPARATOR + 
+					second);
 		}		
 		/*
 		 * After the CT list is created and stored
