@@ -1,5 +1,5 @@
 % unit tests for module pdt_util_context
-:- module(pdt_test_context, []).
+:- module(test_pdt_util_context, []).
 
 :- use_module(pdt_util_context).
 

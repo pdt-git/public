@@ -1,4 +1,7 @@
-%% this module is intended to make working with context terms more simple.
+%% 
+% <module> Utillities for dealing with context terms
+%
+% This module is intended to make working with context terms more simple
 :-module(pdt_util_context,[
 	pdt_define_context/1,
 	pdt_undefine_context/1,
@@ -59,7 +62,8 @@ pdt_define_context(Module,Term):-
 check_exists(Module,Name):-
     context_pred(Module,Name,_),
     !,
-    throw(error(context_exists(Module:Name),bla)).
+    %throw(error(context_exists(Module:Name),bla)).
+    pdt_undefine_context(Module,Name).
 check_exists(_,_).    
 
 

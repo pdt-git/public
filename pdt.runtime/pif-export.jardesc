@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jardesc>
-<jar path="Z:/testen/deploy/prolog_interface-0.2M5-00.jar"/>
-<options buildIfNeeded="true" compress="true" descriptionLocation="/pdt.runtime/pif-export.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" useSourceFolders="false"/>
+<jar path="/home/lukas/eclipse/workspace/SocialMap/lib/prolog_interface-0.2M6pre.jar"/>
+<options buildIfNeeded="true" compress="true" descriptionLocation="/pdt.runtime/pif-export.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
+<storedRefactorings deprecationInfo="true" structuralOnly="false"/>
+<selectedProjects/>
 <manifest generateManifest="true" manifestLocation="" manifestVersion="1.0" reuseManifest="false" saveManifest="false" usesManifest="true">
 <sealing sealJar="false">
 <packagesToSeal/>
@@ -15,7 +17,10 @@
 <javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.prolog"/>
 <folder path="/pdt.runtime/library/pif"/>
 <folder path="/pdt.runtime/library/common"/>
+<javaElement handleIdentifier="=pdt.common/src"/>
 <javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.prolog.internal"/>
+<folder path="/pdt.runtime.tuProlog/doc"/>
 <javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.cterm.internal.parser"/>
+<javaElement handleIdentifier="=pdt.runtime.tuProlog/src"/>
 </selectedElements>
 </jardesc>
