@@ -2,6 +2,7 @@ package org.cs3.jtransformer.internal.natures;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -447,10 +448,10 @@ public class JTransformerProjectNature implements IProjectNature,
 							// jtransformerProjects[i];
 							// IProject project =
 							// jtransformerProject.getProject();
-							project.build(IncrementalProjectBuilder.FULL_BUILD,
+							project.build(IncrementalProjectBuilder.FULL_BUILD, 
+									JTransformer.BUILDER_ID,
+									new HashMap(),
 									monitor);
-
-							// }
 						} catch (OperationCanceledException opc) {
 							return Status.CANCEL_STATUS;
 						} catch (Exception e) {

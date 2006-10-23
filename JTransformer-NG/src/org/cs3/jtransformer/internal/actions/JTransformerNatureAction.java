@@ -72,6 +72,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	
 	Hashtable vertexes;
 	private boolean includeReferencedProjects = false;
+	private boolean addReferenceToOutputProject = false;
 
 	public void run(IAction action) {
 		if (projects.size() == 0){
@@ -207,7 +208,9 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 			destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 		    action.setChecked(true);
 
-			JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
+		    if(addReferenceToOutputProject) {
+		    	JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
+		    }
 	}
 
 	private void removeNature(IProject project, IAction action) throws CoreException {
@@ -301,9 +304,11 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 		    if(key.length() > 0) {
 		    	//project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),key);
 		    	includeReferencedProjects = dialog.isIncludeReferencedProjects();
+		    	addReferenceToOutputProject = dialog.isAddReferenceToOutputProject();
 		    	return key;
 		    } else {
 		    	includeReferencedProjects = false;
+		    	addReferenceToOutputProject = false;
 		    }
 		    return null;
 //		}

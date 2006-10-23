@@ -40,6 +40,12 @@ public class PrologRuntimeSelectionDialog {
 
 	private static final String DEFAULT_TITLE = "Add JTransformer Nature";
 
+	private static final int DIALOG_WIDTH = 480;
+
+	private static final int DIALOG_HEIGHT = 420;
+
+	private static final int TABLE_WIDTH = DIALOG_WIDTH-60;
+
 	private String selected = "";  //  @jve:decl-index=0:
 
 	private Shell dialogShell = null;  //  @jve:decl-index=0:visual-constraint="67,7"
@@ -73,10 +79,14 @@ public class PrologRuntimeSelectionDialog {
 
 	private List subscriptions;
 
-	private Button addReferencedProjects = null;
+	private Button referencedProjectsButton = null;
+
+	private Button referenceToOutputProjectButton = null;
+
+	private boolean addReferenceToOutputProject = false;
 
 	/**
-	 * Transfer variable for the state of the addReferencedProjects check box.
+	 * Transfer variable for the state of the referencedProjectsButton check box.
 	 */
 	private boolean includeReferencedProjects = false;
 	
@@ -144,10 +154,6 @@ public class PrologRuntimeSelectionDialog {
 		radioSelect = new Button(radioButtons, SWT.RADIO);
 		radioSelect.setText("select existing factbase");
 		Label filler3 = new Label(radioButtons, SWT.NONE);
-
-		radioDefault.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioDefault));
-		radioNamed.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioNamed));
-		radioSelect.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioSelect));
 				
 		okButton = new Button(buttons, SWT.NONE);
 		okButton.setText("     OK     ");
@@ -165,8 +171,16 @@ public class PrologRuntimeSelectionDialog {
 		formDataCancel.right = new FormAttachment(6, 10,10);
 		okButton.setLayoutData(formDataOK);
 		cancelButton.setLayoutData(formDataCancel);
-
 		
+		addButtonListeners();
+	}
+
+	private void addButtonListeners() {
+		radioDefault.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioDefault));
+		radioNamed.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioNamed));
+		radioSelect.addSelectionListener(new ToggleRadioButtonSelection(radioButtons,radioSelect));
+
+	
 		okButton.addSelectionListener(new SelectionListener() {
 
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -286,24 +300,97 @@ public class PrologRuntimeSelectionDialog {
 	private void init() {
 		dialogShell = new org.eclipse.swt.widgets.Shell(shell, SWT.DIALOG_TRIM);
 
+		addRadioButtonsComposite();
+		
+		addTable();
+		
+		Label line = new Label(dialogShell,SWT.HORIZONTAL|SWT.SEPARATOR);
+		
+		createRadioButtonsComposite();
+		
+
+//		FormData formDataLabel = new FormData();
+//		formDataLabel.width = 330;
+//		formDataLabel.left = new FormAttachment(1,10);
+//		
+//		formDataLabel.top = new FormAttachment(availablePrologRuntimes,5);
+//		formDataLabel.height = 40;
+		
+		//formDataComposite.bottom = new FormAttachment(80,100,5);
+		
+		layoutTable();
+		
+		layoutLine(line);
+		
+		layoutRadioButtonComposite(line);
+		
+		createButtons();
+
+		addDialogShell();
+	}
+
+	private void layoutLine(Label line) {
+		FormData formDataLine = new FormData();
+		formDataLine.width = DIALOG_WIDTH;
+
+		formDataLine.top = new FormAttachment(referencedProjectsButton,5);//new FormAttachment(label,3);
+		line.setLayoutData(formDataLine);
+	}
+
+	private void createRadioButtonsComposite() {
+		buttons = new Composite(dialogShell, SWT.NONE);
+		buttons.setLayout(new FormLayout());
+	}
+
+	private void layoutTable() {
+		FormData formData = new FormData();
+		formData.top = new FormAttachment(radioButtons,1);
+		formData.left = new FormAttachment(1,10);
+		formData.width = TABLE_WIDTH;
+		formData.height = 200;
+
+		availablePrologRuntimes.setLayoutData(formData);
+		availablePrologRuntimes.setEnabled(false);
+	}
+
+	private void layoutRadioButtonComposite(Label line) {
+		FormData formDataComposite = new FormData();
+		formDataComposite.width = DIALOG_WIDTH;
+
+		formDataComposite.top = new FormAttachment(line,5);//new FormAttachment(label,3);
+		formDataComposite.height = 30;
+
+		buttons.setLayoutData(formDataComposite);
+	}
+
+	private void addDialogShell() {
+		dialogShell.setLayout(new FormLayout());
+		dialogShell.setSize(new Point(DIALOG_WIDTH, DIALOG_HEIGHT));
+		okButton.setFocus();
+		dialogShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
+			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
+				if (!isClosing) {
+					
+					e.doit = cancelled();
+				}
+			}
+		});
+	}
+
+	private void addRadioButtonsComposite() {
 		radioButtons = new Composite(dialogShell, SWT.NONE);
 		GridLayout gridLayout = new GridLayout(2,false);
 		radioButtons.setLayout(gridLayout);
 		FormData layoutRadioButtons = new FormData();
 		layoutRadioButtons.left = new FormAttachment(1,100, 8);
 		radioButtons.setLayoutData(layoutRadioButtons);
+	}
 
+	private void addTable() {
 		availablePrologRuntimes = new Table(dialogShell, SWT.BORDER | SWT.SINGLE);
 		availablePrologRuntimes.setHeaderVisible(true);
 		
-		addReferencedProjects = new Button(dialogShell, SWT.CHECK);
-		addReferencedProjects.setText("include all referenced projects");
-
-		FormData referencedProjectsLayout = new FormData();
-		referencedProjectsLayout.top = new FormAttachment(availablePrologRuntimes,10);
-		referencedProjectsLayout.left = new FormAttachment(1, 100, 10);
-//		referencedProjectsLayout.right = new FormAttachment(99, 100, 0);
-		addReferencedProjects.setLayoutData(referencedProjectsLayout);
+		referencedProjectsButton();
 		
 		availablePrologRuntimes.addSelectionListener(new SelectionListener() {
 
@@ -316,65 +403,37 @@ public class PrologRuntimeSelectionDialog {
 			
 		});
 		
-		//availablePrologRuntimes.setLinesVisible(true);
-		final TableColumn column = new TableColumn(availablePrologRuntimes,SWT.NONE);
-		column.setText("Factbase");
-		column.setResizable(true);
-		column.setWidth(100);
-		final TableColumn column2 = new TableColumn(availablePrologRuntimes,SWT.NONE);
-		column2.setText("Used / Shared by");
-		column2.setResizable(true);
-		column2.setWidth(337);
-		Label line = new Label(dialogShell,SWT.HORIZONTAL|SWT.SEPARATOR);
-		
-		FormData formDataLine = new FormData();
-		formDataLine.width = 580;
+		final TableColumn factbaseColumn = new TableColumn(availablePrologRuntimes,SWT.NONE);
+		factbaseColumn.setText("Factbase");
+		factbaseColumn.setResizable(true);
+		factbaseColumn.setWidth(100);
+		final TableColumn sharedColumn = new TableColumn(availablePrologRuntimes,SWT.NONE);
+		sharedColumn.setText("Used / Shared by");
+		sharedColumn.setResizable(true);
+		sharedColumn.setWidth(337);
+	}
 
-		formDataLine.top = new FormAttachment(addReferencedProjects,5);//new FormAttachment(label,3);
-		line.setLayoutData(formDataLine);
-		buttons = new Composite(dialogShell, SWT.NONE);
-		buttons.setLayout(new FormLayout());
-		
-		FormData formData = new FormData();
-		formData.top = new FormAttachment(radioButtons,1);
-		formData.left = new FormAttachment(1,10);
-		formData.width = 420;
-		formData.height = 200;
 
-//		Label label = new Label(dialogShell, SWT.WRAP);
-//		label.setText("Do you want to have a dedicated factbase named '"+ projectRuntime + "' for this project or do you want to join the factbase of another project?");
-		FormData formDataLabel = new FormData();
-		formDataLabel.width = 330;
-		formDataLabel.left = new FormAttachment(1,10);
+	private void referencedProjectsButton() {
 		
-		formDataLabel.top = new FormAttachment(availablePrologRuntimes,5);
-		formDataLabel.height = 40;
-//		label.setLayoutData(formDataLabel);
 		
-		FormData formDataComposite = new FormData();
-		formDataComposite.width = 580;
+		referenceToOutputProjectButton = new Button(dialogShell, SWT.CHECK);
+		referenceToOutputProjectButton.setText("add reference to output project");
 
-		formDataComposite.top = new FormAttachment(line,5);//new FormAttachment(label,3);
-		formDataComposite.height = 30;
-		//formDataComposite.bottom = new FormAttachment(80,100,5);
-		
-		availablePrologRuntimes.setLayoutData(formData);
-		availablePrologRuntimes.setEnabled(false);
-		buttons.setLayoutData(formDataComposite);
-		
-		createButtons();
+		FormData referenceToOutputProjectLayout = new FormData();
+		referenceToOutputProjectLayout.top = new FormAttachment(availablePrologRuntimes,10);
+		referenceToOutputProjectLayout.left = new FormAttachment(1, 100, 10);
+		referenceToOutputProjectButton.setLayoutData(referenceToOutputProjectLayout);
 
-		dialogShell.setLayout(new FormLayout());
-		dialogShell.setSize(new Point(480, 400));
-		okButton.setFocus();
-		dialogShell.addShellListener(new org.eclipse.swt.events.ShellAdapter() {
-			public void shellClosed(org.eclipse.swt.events.ShellEvent e) {
-				if (!isClosing) {
-					
-					e.doit = cancelled();
-				}
-			}
-		});
+		
+		
+		referencedProjectsButton = new Button(dialogShell, SWT.CHECK);
+		referencedProjectsButton.setText("include all referenced projects");
+
+		FormData referencedProjectsLayout = new FormData();
+		referencedProjectsLayout.top = new FormAttachment(referenceToOutputProjectButton,10);
+		referencedProjectsLayout.left = new FormAttachment(1, 100, 10);
+		referencedProjectsButton.setLayoutData(referencedProjectsLayout);
 	}
 
 
@@ -386,7 +445,8 @@ public class PrologRuntimeSelectionDialog {
 			} else {
 				lastRuntime = selected;
 			}
-			includeReferencedProjects = addReferencedProjects.getSelection();
+			includeReferencedProjects = referencedProjectsButton.getSelection();
+			addReferenceToOutputProject = referenceToOutputProjectButton.getSelection();
 
 		} 
 		isClosing = true;
@@ -397,6 +457,10 @@ public class PrologRuntimeSelectionDialog {
 	
 	public boolean isIncludeReferencedProjects() {
 		return includeReferencedProjects; 
+	}
+	
+	public boolean isAddReferenceToOutputProject() {
+		return addReferenceToOutputProject; 
 	}
 	
 	public class ToggleRadioButtonSelection implements SelectionListener {
