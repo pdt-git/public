@@ -48,7 +48,7 @@ public class JTransformerProjectDecoratorContributor implements ILightweightLabe
 			if(state.equals(JTransformer.FACTBASE_STATE_ACTIVATED)) {
 				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION_GREY));
 			}else if(state.equals(JTransformer.FACTBASE_STATE_IN_PROCESS)) {
-				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION_ORANGE));
+				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION_GREEN));
 			}else if(state.equals(JTransformer.FACTBASE_STATE_READY)){
 				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION));
 			}
