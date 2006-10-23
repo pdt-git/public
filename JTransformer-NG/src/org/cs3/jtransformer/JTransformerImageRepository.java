@@ -63,11 +63,11 @@ public class JTransformerImageRepository {
 
 	private static HashMap cache = new HashMap();
 	
-	public final static String JTRANSFORMER_PROJECT_DECORATION = "JTransformerSmall.gif";
+	public final static String JTRANSFORMER_PROJECT_DECORATION = "JTransformerSmallGreen.gif";
 
 	public static final String JTRANSFORMER_PROJECT_DECORATION_GREY = "JTransformerSmallGrey.gif";
 		
-	public static final String JTRANSFORMER_PROJECT_DECORATION_ORANGE = "JTransformerSmallOrange.gif";
+	public static final String JTRANSFORMER_PROJECT_DECORATION_GREEN = "JTransformerSmallYellow.gif";
 
 	
     public static final ImageDescriptor getImageDescriptor(String icon) {
