@@ -43,69 +43,171 @@
 %%
 % A namespace is a partial mapping from the set of names into the set of named objects.
 %
-%names are resolved as follows. First the name is split into parts delimited by the namespace separator ":".
-% The leftmost part is resolved locally. If there are remaining parts, the resolved object is used to find 
-% another namespace that is registered for that object. This namespace is used to recursively resolve the 
-% remaining part of the name.
+% Names are terms of the form <term>:<term>: ... : <term>
+% The terms between the colons are called fragments.
+% A name with principal functor :/2 is a non-local name.
+% All other terms are concidered as single fragments and this local names.
+% There is no notion of absolute names, all names are only meaningfull relative to a given namespace.
 %
+% A name is resolved recursively by first resolving the leftmost fragment to an object. If the name has 
+% any remaining fragments, the object will be regarded as some kind of reference to another namespace.
+% pdt_namespace_for_object/2 is used to look it up. This other namespace is then used to
+% resolve the remainder of the name recursively.
 %
-% Within the pdt, named objects are predicates and modules. (Variables may be added later)
-% A predicate is a tuppel (Signature,Clauses,DefinitionModule) where
-% - Signature is an unqualified predicate name
-% - Clauses is a list of aterm references (i.e. elements point to "physical" terms in source files.)
-% - DefinitionModule is a reference to a module definition.
-%
-% Namespace can be organized in fall-back hierarchies. Each namespace has a list of Namespace IDs that are 
-% querried if a local search for a name fails. This way, the name bindings in the fall-back name spaces are
-% effectively inherited in the local namespace. Inherited bindings can be overidden locally, if they are not 
-% marked as final.
+% A namespace consists of a set of local bindings, and an ordered list of base namespaces.
 % 
-% A module definition is a tupel (Name,Directive), where Directive is a reference to a physical directive 
-% that constitutes the creation of a new module. Currently, only explicit :-module/2 directives are recognized.
+% Local bindings are managed in a table and are used to resolve name fragments to objects.
 %
-% A (module-)qualified predicate name is a term of the form module:name/arity.
-% An unqualified (also refered to as "local") predicate name is a term of the form name/arity. 
-%
-% Currently there is one namespace per source file + one namespace that binds system builtins. 
-% 
-:- module(pdt_namespace,[]).
+% A base namespace is used as a fallback if a name fragment cannot be resolved. Thus, a namespace effectively
+% inherits all bindings from its base namespaces. Note that a local binding of a name fragment always
+% overrides any bindings to the same name in any of the base namespaces. 
 
-pdt_namespace_new(ns(Local,Contrib,[])):-
-	pdt_map_empty(Local),
-	pdt_map_empty(Sub).
+
+:- module(pdt_namespace,[
+	pdt_namespace_resolve/3,
+	pdt_namespace_add_base/4,
+	pdt_namespace_base/2,
+	pdt_namespace_bind/4,
+	pdt_namespace_for_object/2,
+	pdt_namespace_load/2,
+	pdt_namespace_new/2,
+	pdt_namespace_set_base/3,
+	pdt_namespace_store/1,
+	pdt_namespace_unstore/1,	
+	pdt_namespace_unbind/3
+]).
+
+:- use_module(library('org/cs3/pdt/util/pdt_util_context')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_map')).
+
+:- pdt_define_context(ns(id,local,base)).
+
+
+pdt_namespace_new(Id,Ns):-
+    ns_new(Ns),
+    ns_id(Ns,Id),
+    pdt_map_empty(Local),
+    ns_local(Ns,Local),
+    ns_base(Ns,[]).
+
 
 %% pdt_namespace_resolve(+NameSpace, ?Name,?Object).
 %
 % succeeds if NameSpace binds Object to the name Name.
-pdt_namespace_resolve(NS,Name,Object):-
+pdt_namespace_resolve(Ns,Name,Object):-
+	resolve(Ns,Name,Object).
+
+resolve(Ns,Fragment:Fragments,Object):-
+    !,
+    resolve_local(Ns,Fragment,X),
+    pdt_namespace_for_object(X,NextNs),
+    resolve(NextNs,Fragments,Object).
+resolve(Ns,Fragment,Object):-
+	resolve_local(Ns,Fragment,Object).
+	
+resolve_local(Ns,Fragment,Object):-
+	ns_local(Ns,Local),
+	pdt_map_get(Local,Fragment,Object),
+	!.
+resolve_local(Ns,Fragment,Object):-
+	ns_base(Ns,Base),
+	resolve_base(Base,Fragment,Object).
+	
+resolve_base([NsId|_],Fragment,Object):-
+    pdt_namespace_for_object(NsId,Ns),
+    resolve_local(Ns,Fragment,Object),
+    !.
+resolve_base([_|NsIds],Fragment,Object):-
+    resolve_base(NsIds,Fragment,Object).
     
 %% pdt_namespace_bind(+NsIn, +Name, +Object, -NsOut)
 % Add a new binding to a namespace.
 %
-% If name is not local, sub-namespaces will be created as neccessary. 
-% No external namespaces will be modified. 
-pdt_namespace_bind(NsIn,Name, Object,NsOut).
+% Only local bindings may be modified. If the name contains more than one fragment,
+% an exception is thrown.
+pdt_namespace_bind(NsIn,Name, Object,NsOut):-
+    (	functor(Name,:,2)
+    ->	throw(error(no_local_name(Name),bla))
+    ;	ns_local(NsIn,LocalIn),
+    	pdt_map_put(LocalIn,Name,Object,LocalOut),
+    	ns_set_local(NsIn,LocalOut,NsOut)
+    ).
+    	
 
 %% pdt_namespace_unbind(+NsIn, +Name, -NsOut)
 % remove a binding from a namespace.
-% Non-local names will only be resolved in subnamespaces. 
-% If the name is not bound locally, the predicate throws an exception.
-% No external namespace will be modified. 
-pdt_namespace_unbind(NsIn,Name,NsOut).
+% Only local bindings may be modified. If the name contains more than one fragment,
+% an exception is thrown.
+pdt_namespace_unbind(NsIn,Name,NsOut):-
+    (	functor(Name,:,2)
+    ->	throw(error(no_local_name(Name),bla))
+    ;	ns_local(NsIn,LocalIn),
+    	pdt_map_remove(LocalIn,Name,LocalOut),
+		ns_set_local(NsIn,LocalOut,NsOut)
+    ).
 
-%% pdt_namespace_fallback_list(+Ns,-FallBacks)
-% The second argument is unified with the fallback list of the namespace ns.
-pdt_namespace_fallback_list(Ns,FallBacks).
+%% pdt_namespace_base(+Ns,-Base)
+% The second argument is unified with the base list of the namespace ns.
+pdt_namespace_base(Ns,Base):-
+	ns_base(Ns,Base).
 
-%% pdt_namespace_set_fallback_list(+NsIn,+FallBacks,-NsOut).
-% Replace the fallback list of NsIn with FallBacks and unify the result with NsOut.
-pdt_namespace_set_fallback_list(NsIn,FallBacks,NsOut).
+%% pdt_namespace_set_base(+NsIn,+Base,-NsOut).
+% Replace the fallback list of NsIn with Base and unify the result with NsOut.
+pdt_namespace_set_base(NsIn,Base,NsOut):-
+    ns_set_base(NsIn,Base,NsOut).
 
 %% pdt_namespace_add_fallback(+NsIn,+FallBackId,+StartEnd,-NsOut).
-% add 
-pdt_namespace_add_fallback(NsIn,FallBackId,StartEnd,NsOut).
+% add a Namespace reference to the list of base namespaces of NsIn.
+% @param StartEnd must be either start or end. It determines wether the 
+% 	reference is added to the start or to the end of the list.
+pdt_namespace_add_base(NsIn,FallBackId,start,NsOut):-
+    !,
+    ns_base(NsIn,BaseIn),
+    ns_set_base(NsIn,[FallBackId|BaseIn],NsOut).
+pdt_namespace_add_base(NsIn,FallBackId,end,NsOut):-
+    ns_base(NsIn,BaseIn),
+    append(BaseIn,[FallBackId],BaseOut),
+    ns_set_base(NsIn,BaseOut,NsOut).
 
-pdt_namespace_load(NsId,NameSpace).
-pdt_namespace_store(NsId,NameSpace).
+:-dynamic namespace/2.
 
-pdt_namespace_for_object(Object,NsId).
+
+%% pdt_namespace_load(+NsId,-NameSpace).
+% Load the namespace with the id NsId from the heap and unify it with NameSpace
+% if there is no namespace stored with this id, an empty one is created.
+pdt_namespace_load(NsId,NameSpace):-
+    namespace(NsId,NameSpace),
+    !.
+pdt_namespace_load(_NsId,NameSpace):-
+	pdt_namespace_new(NameSpace).    
+	
+%% pdt_namespace_store(+NsId).	
+% store a NameSpace on the heap.
+%
+% if another namespace is already stored with the same id, it is overwritten.
+pdt_namespace_store(NameSpace):-
+    ns_id(NameSpace,NsId),
+    retractall(namespace(NsId,_)),
+    assert(namespace(NsId,NameSpace)).
+
+%% pdt_unstore(+NsId).	
+% remove a namespace from heap
+%
+% if a namespace with the given id exists on the heap, it is removed. Otherwise, this predicate just succeeds.
+pdt_namespace_unstore(NsId):-
+    retractall(namespace(NsId,_)).
+
+
+
+%% pdt_namespace_for_object(+Object,-NameSpace)
+%
+% Hook predicate. Called during the resolution of qualified names to look up namespace ids for 
+% arbitrary objects.
+% The default implementation covers native namespace terms aswell as namespace ids.
+% Add clauses to support namespace associations for custom objects.
+pdt_namespace_for_object(Ns,Ns):-
+	ns_new(Template),
+    functor(Template,Name,Arity),
+    functor(Ns,Name,Arity),!.
+pdt_namespace_for_object(NsId,Ns):-
+	namespace(NsId,Ns),!.    
