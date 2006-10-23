@@ -71,6 +71,9 @@
 ]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_map')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_set')).
+:- use_module(library('org/cs3/pdt/model/pdt_namespace')).
 
 :- pdt_define_context(scope(id,local_ns,contribs,local_xprts,global_xprts)).
 
@@ -89,7 +92,7 @@ pdt_scope_new(Id,SOut):-
     ],SOut).
 
 pdt_scope_resolve(S,Name,Object):-
-	scope_contrib(S,C),    
+	scope_contribs(S,C),    
     resolve_contrib(C,Name,Object),
     !.
 pdt_scope_resolve(S,Name,Object):-
@@ -112,9 +115,9 @@ pdt_scope_bind(Sin,Name,Object,Sout):-
 	split_name(Name,Parent,Local),
 	!,
 	%resolve the parent locally to find out if it is an indirect reference to our local ns
-	(	pdt_scope_resolve(S,Parent,Key),
+	(	pdt_scope_resolve(Sin,Parent,Key),
 		pdt_namespace_for_object(Key,Ns),
-		scope_local_ns(S,LocalNs),
+		scope_local_ns(Sin,LocalNs),
 		pdt_namespace_id(LocalNs,Id),
 		pdt_namespace_id(Ns,Id)
 	->	bind_local(Sin,Local,Object,Sout)
@@ -126,7 +129,7 @@ pdt_scope_bind(Sin,Name,Object,Sout):-
 	
 bind_local(Sin,Name,Object,Sout):-
 	scope_local_ns(Sin,NsIn),
-	resolve_conflict(Sin,NsIn,Name,Object,Result),
+	resolve_conflict(Sin,NsIn,'',Name,Object,Result),
 	(	Result=resolved(Resolution)
 	->	pdt_namespace_bind(NsIn,Name,Resolution,NsOut),
 		scope_set_local_ns(Sin,NsOut,Sout)
@@ -136,11 +139,23 @@ bind_local(Sin,Name,Object,Sout):-
 bind_contrib(Sin,Parent,Local,Object,Sout):-
     scope_contribs(Sin,ContribsIn),
     ensure_contrib_exists(ContribsIn,Parent,ContribIn,ContribsOut),
-    resolve_conflict(Sin,ContribIn,Local,Object,Result),
+    resolve_conflict(Sin,ContribIn,Parent,Local,Object,Result),
     	(	Result=resolved(Resolution)
 	->	pdt_namespace_bind(ContribIn,Local,Resolution,ContribOut),
 		pdt_map_put(ContribsIn,Parent,ContribOut,ContribsOut),
 		scope_set_contribs(Sin,ContribsOut,Sout)
 	;	throw(Result)
 	).
-    
+
+ensure_contrib_exists(Contribs,Parent,ContribIn,Contribs):-
+    pdt_map_get(Contribs,Parent,ContribIn),!.
+ensure_contrib_exists(ContribsIn,Parent,ContribIn,ContribsOut):-
+	create_contrib(
+resolve_conflict(Sin,NsIn,Parent,Name,Object,Result):-
+	pdt_namespace_resolve(NsIn,Name,OldObject),
+	!,
+	do_resolve_conflict(Sin,NsIn,Parent,Name,OldObject,Object,Result).    
+resolve_conflict(_Sin,_NsIn,_Parent,_Name,Object,resolved(Object)).
+
+do_resolve_conflict(Sin,_NsIn,Parent,Name,OldObject,Object,error(unresolved_nameing_conflict(Sin,Parent:Name,OldObject,Object))).	
+	
