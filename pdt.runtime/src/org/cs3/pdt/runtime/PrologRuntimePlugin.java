@@ -692,8 +692,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				IPath location = lastState.lookup(new Path("registry"));
 				location = getStateLocation().append(location);
 				File file = location.toFile();
-				Reader r = new BufferedReader(new FileReader(file));
-				registry.load(r);
+				if(file.canRead()){
+					Debug.info("Reading registry file "+file.getCanonicalPath());
+					Reader r = new BufferedReader(new FileReader(file));
+					registry.load(r);
+				}
+				else{
+					Debug.warning("Regestry file "+file.getCanonicalPath()+" could not be read. A new file will be created on exit.");
+				}
 			}
 		} catch (CoreException e) {
 			Debug.rethrow(e);
@@ -736,7 +742,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				// thrown and we do not update the path
 				Writer w = null;
 				try {
-
+					Debug.info("writing regestry to "+f.getCanonicalPath());
 					w = new BufferedWriter(new FileWriter(f));
 					myPluginInstance.registry.save(w);
 					w.close();
