@@ -58,11 +58,14 @@
 
 %FIXME: Jan said this probably all subject to changes, but that the predicates
 % with relevance to the PDT will eventually become public api.
-:- ensure_loaded(library('test_wiki')). 
-:- ensure_loaded(library('html')).
-:- ensure_loaded(library('pldoc')).
-:- ensure_loaded(library('wiki')).
-:- ensure_loaded(library('modes')).
+%:- ensure_loaded(library('test_wiki')). 
+:- use_module(library('pldoc/doc_html')).
+%:- use_module(my_pldoc_html). %temporary workaround. I need an extra pred not in the public api
+:- use_module(library('pldoc/doc_process')).
+:- use_module(library('pldoc/doc_wiki')).
+:- use_module(library('pldoc/doc_modes')).
+:- use_module(library('http/html_write')).
+
 	
 %attach_comments(+ATermIn,+InputStream,+CPositions, -RemainingPositions, -ATermOut)
 %
@@ -223,7 +226,20 @@ pdt_comment_dom(FileSpec,Pos,CommentString,Dom):-
     pdt_file_spec(FileSpec,File),
     process_comment(File, Pos-CommentString, Dom).
 
-
+process_comment(File, Pos-String, DOM) :-
+	stream_position_data(line_count, Pos, Line),
+	FilePos = File:Line,
+	is_structured_comment(String, Prefixes),
+	indented_lines(String, Prefixes, Lines),
+	(   section_comment_header(Lines, Header, Lines1)
+	->  DOM = [Header|DOM1],
+	    Args = []
+	;   process_modes(Lines, FilePos, Modes, Args, Lines1)
+	->  DOM = [\pred_dt(Modes,pred,[]), dd(class=defbody, DOM1)]
+	),
+	wiki_lines_to_dom(Lines1, Args, DOM0),
+	strip_leading_par(DOM0, DOM1).
+	
 %% pdt_comment_summary(+CommentString, -Summary)
 % Extract summary line from a source comment.
 %
@@ -244,7 +260,7 @@ pdt_comment_summary(FileSpec,Pos,String,Head,Summary):-
 	copy_term(Modes0,Modes),
 	member(mode(Head,Args),Modes),
 	execute_elms(Args),	
-	summary(Lines1,SummaryString),
+	summary_from_lines(Lines1,SummaryString),
 	string_to_atom(SummaryString,Summary).
 
 
@@ -270,4 +286,9 @@ pdt_dom_html(_File,Dom,HTML):-
 	    doc_write_html(Out,  Dom),
     	close(Out)
     ),
-    memory_file_to_atom(MF,HTML).        
+    memory_file_to_atom(MF,HTML).       
+    
+doc_write_html(Out, DOM) :-
+	pldoc_html:phrase(html(DOM), Tokens),
+	print_html(Out, Tokens).
+     

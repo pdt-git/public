@@ -49,14 +49,12 @@
              alias="library"
              id="pdt.runtime.library.common"
              path="library/common/"/>
-  <library
-        alias="library"
-        id="pdt.runtime.library.swipl"
-        path="library/swipl/"/>
+ 
   <library
         alias="library"
         id="pdt.runtime.library.attic"
-        path="library/attic/"/>             
+        path="library/attic/"/>   
+                  
     </extension>
  
 </plugin>

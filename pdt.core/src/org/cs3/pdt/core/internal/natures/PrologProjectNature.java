@@ -443,9 +443,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 					new SimpleOption(
 							PDTCore.PROP_PARSE_COMMENTS,
 							"Parse Comments",
-							"If true, the pdt core will parse and process comments in prolog source files."
-									+ "This is disabled by default because of a bug in the current SWI-Prolog release. (5.6.17)",
-							Option.FLAG, "false"),
+							"If true, the pdt core will parse and process comments in prolog source files.",
+							Option.FLAG, "true"),
 					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
 							"Metadata PrologInterface",
