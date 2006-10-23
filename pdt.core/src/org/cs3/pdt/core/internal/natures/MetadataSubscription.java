@@ -91,6 +91,18 @@ public class MetadataSubscription extends DefaultSubscription implements
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
 		if (pif.isUp()) {
+			PrologSession session=null;
+			try {
+				session = pif.getSession();
+				onInit(pif,session);
+			} catch (PrologInterfaceException e) {
+				Debug.rethrow(e);
+			}finally {
+				if (session != null) {
+					session.dispose();
+				}
+			}
+
 			afterInit(pif);
 		}
 	}
@@ -134,22 +146,11 @@ public class MetadataSubscription extends DefaultSubscription implements
 		return this.projectName;
 	}
 
-	public void onInit(PrologInterface pif, PrologSession initSession) {
-		;
-
-	}
-
-	public void afterInit(PrologInterface pif) {
+	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
-		PrologSession s=null;;
-		try {
-			s = pif.getSession();
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		}
-		try{
-			PLUtil.configureFileSearchPath(mgr,s,new String[]{PDTCore.ENGINE_ID});
-			Map map = s.queryOnce(
+		
+			PLUtil.configureFileSearchPath(mgr,initSession,new String[]{PDTCore.ENGINE_ID});
+			Map map = initSession.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/cache'))," +
 					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
@@ -163,7 +164,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 				throw new RuntimeException("could not load annotator framework");
 			}
 			map=null;
-			map = s.queryOnce(
+			map = initSession.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/op_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/export_annotator'))," +
@@ -185,12 +186,23 @@ public class MetadataSubscription extends DefaultSubscription implements
 			// see PDT-186
 			File cacheDir = getProject().getWorkingLocation(PDTCore.PLUGIN_ID).append(PDTCore.CACHE_DIR).toFile();
 			String plCacheDir = Util.prologFileName(cacheDir);
-			map=s.queryOnce("pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
+			map=initSession.queryOnce("pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
 			Debug.info("setting cache dir to "+plCacheDir);
 			if(map==null){
 				throw new RuntimeException("could not configure cache dir: query failed.");
 			}
-			map=null;
+
+	}
+
+	public void afterInit(PrologInterface pif) {
+		PrologSession s=null;;
+		try {
+			s = pif.getSession();
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
+		try{
+			Map map=null;
 
 			map=s.queryOnce("pdt_read_cache_index");
 			if(map==null){
