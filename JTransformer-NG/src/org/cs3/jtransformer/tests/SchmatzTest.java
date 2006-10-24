@@ -27,7 +27,7 @@ public class SchmatzTest extends TestCase
 		regexPatternsWithNewStrings.put(
 				"pattern=\"(.*?)\"",
 				"pattern=\"" +
-				"${CAPT_GROUP=1}" +
+				"$1" +
 				"|.*\\\\.pl" +
 				"|.*\\\\.aj" +
 				"\""
@@ -43,7 +43,7 @@ public class SchmatzTest extends TestCase
 		regexPatternsWithNewStrings.put(
 				"Test(.*?)Test",
 				"Test123"+
-				"${CAPT_GROUP=1}" +
+				"$1" +
 				"321Test"
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
@@ -58,7 +58,7 @@ public class SchmatzTest extends TestCase
 		regexPatternsWithNewStrings.put(
 				"\\<classpathentry\\s+?including=\"(.*?)\"",
 				"<classpathentry including=\"" +
-				"${CAPT_GROUP=1}" +
+				"$1" +
 				"|**/" + JTConstants.CT_LIST_FILENAME +
 				"|**/" + JTConstants.FQCN_LIST_FILENAME +
 				"\""
@@ -93,7 +93,7 @@ public class SchmatzTest extends TestCase
 				"Export-Package:(.*)",
 				"Export-Package: " +
 				JTConstants.RESOURCES_FILELISTS_PACKAGE + "," +
-				"${CAPT_GROUP=1}"
+				"$1"
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE + ",");
 		assertEquals(expContent, newContent);
@@ -125,7 +125,7 @@ public class SchmatzTest extends TestCase
 				"Export-Package:(.*)",
 				"Export-Package: " +
 				JTConstants.RESOURCES_FILELISTS_PACKAGE + "," +
-				"${CAPT_GROUP=1}"
+				"$1"
 		);
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		assertEquals(expContent, newContent);
@@ -167,7 +167,7 @@ public class SchmatzTest extends TestCase
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"^(.*)$",
-				"${CAPT_GROUP=1}\n" +
+				"$1\n" +
 				"Export-Package: "+JTConstants.RESOURCES_FILELISTS_PACKAGE+", org.cs3.roots.test.schmatz.demo1.aspects,\n" +
 				"de.test123\n"
 		);
@@ -182,7 +182,7 @@ public class SchmatzTest extends TestCase
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"(<classpathentry kind=\"lib\" path=\")([^/].*?\"/>)",
-						"${CAPT_GROUP=1}/" + "MarksTestAspectBundle" + "/${CAPT_GROUP=2}");
+						"$1/" + "MarksTestAspectBundle" + "/$2");
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(expContent, newContent);
 
