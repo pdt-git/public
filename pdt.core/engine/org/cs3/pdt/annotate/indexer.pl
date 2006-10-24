@@ -70,8 +70,8 @@ file_annotation_hook([File|_],_,Annos,[indexed(IxTime)|Annos]):-
 cleanup_hook(File):-
     pdt_clear_index(File).
 
-cleanup_hook(File,Annos,Terms):-
-    pdt_clear_index(File,Annos,Terms).
+cleanup_hook(File,Annos):-
+    pdt_clear_index(File,Annos).
 
     
 pdt_update_index(FileSpec):-
@@ -86,7 +86,7 @@ pdt_clear_index(FileSpec):-
     pdt_file_annotation(File,Annos,_),
     clear_index(File,Annos).
 
-pdt_clear_index(FileSpec,Annos,_):-
+pdt_clear_index(FileSpec,Annos):-
     pdt_file_spec(FileSpec,File),
     clear_index(File,Annos).
 
