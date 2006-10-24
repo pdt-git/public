@@ -59,7 +59,7 @@ public class FileAdaptationHelper
 	 * Means that it is searched for any String matching <tt>regexPattern</tt>
 	 * which is then replaced with <tt>newString</tt>.<br>
 	 * Capturing groups are allowed. They are refrenced via
-	 * <tt>${CAPT_GROUP=n}</tt> (<tt>n</tt> is number of the capturing
+	 * <tt>$n</tt> (<tt>n</tt> is number of the capturing
 	 * group starting with <tt>1</tt>)
 	 * 
 	 * @param fileName
@@ -174,9 +174,7 @@ public class FileAdaptationHelper
 							captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
 
 //							Pattern p = Pattern.compile(
-//									START_TEMPLATE_VAR_TOKENS + 
-//									CAPT_GROUP_TOKEN + "=" + groupCount +
-//									END_TEMPLATE_VAR_TOKENS,
+//									"$" + groupCount,
 //									Pattern.DOTALL);
 //							p.matcher(val).replaceAll(captGroup);
 
