@@ -23,10 +23,6 @@ import org.cs3.jtransformer.tests.SchmatzTest;
  */
 public class FileAdaptationHelper
 {
-	private static final String START_TEMPLATE_VAR_TOKENS = "\\$\\{";
-	private static final String END_TEMPLATE_VAR_TOKENS = "\\}";
-	private static final String CAPT_GROUP_TOKEN = "CAPT_GROUP";
-	
 	public static final String REGEX_BACKSLASH_TOKEN = "\\\\\\\\";
 	
 	
@@ -176,19 +172,18 @@ public class FileAdaptationHelper
 						{
 							String captGroup = matcher.group(groupCount);
 							captGroup = captGroup.replace("\\", REGEX_BACKSLASH_TOKEN);
-							Pattern p = Pattern.compile(
-									START_TEMPLATE_VAR_TOKENS + 
-									CAPT_GROUP_TOKEN + "=" + groupCount +
-									END_TEMPLATE_VAR_TOKENS,
-									Pattern.DOTALL);
+
+//							Pattern p = Pattern.compile(
+//									START_TEMPLATE_VAR_TOKENS + 
+//									CAPT_GROUP_TOKEN + "=" + groupCount +
+//									END_TEMPLATE_VAR_TOKENS,
+//									Pattern.DOTALL);
 //							p.matcher(val).replaceAll(captGroup);
-							
-//							// FIXME: use Pattern class go for all lines!
+
+							// FIXME: use Pattern class go for all lines!
 //							// XXX: HOPEFULLY FIXED
 							val = val.replaceAll(
-									START_TEMPLATE_VAR_TOKENS + 
-									CAPT_GROUP_TOKEN + "=" + groupCount +
-									END_TEMPLATE_VAR_TOKENS,
+									"$"+ groupCount,
 									captGroup);
 						}
 					}
