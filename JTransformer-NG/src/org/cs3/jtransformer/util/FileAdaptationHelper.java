@@ -181,7 +181,7 @@ public class FileAdaptationHelper
 							// FIXME: use Pattern class go for all lines!
 //							// XXX: HOPEFULLY FIXED
 							val = val.replaceAll(
-									"$"+ groupCount,
+									"$" + groupCount,
 									captGroup);
 						}
 					}
