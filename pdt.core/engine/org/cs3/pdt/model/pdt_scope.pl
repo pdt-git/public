@@ -147,10 +147,14 @@ bind_contrib(Sin,Parent,Local,Object,Sout):-
 	;	throw(Result)
 	).
 
-ensure_contrib_exists(Contribs,Parent,ContribIn,Contribs):-
-    pdt_map_get(Contribs,Parent,ContribIn),!.
-ensure_contrib_exists(ContribsIn,Parent,ContribIn,ContribsOut):-
-	create_contrib(
+ensure_contrib_exists(S,Parent,Contrib,S):-
+    scope_contribs(S,Contribs),
+    pdt_map_get(Contribs,Parent,Contrib),!.
+ensure_contrib_exists(Sin,Parent,Contrib,Sout):-
+    scope_contribs(Sin,Contribs),
+	create_contrib(Sin,Parent,Contrib),
+	
+	
 resolve_conflict(Sin,NsIn,Parent,Name,Object,Result):-
 	pdt_namespace_resolve(NsIn,Name,OldObject),
 	!,
