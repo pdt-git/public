@@ -184,7 +184,7 @@ public class JTUtils
 
 			Map classPathReplacement = new HashMap();
 			classPathReplacement.put("(<classpathentry kind=\"lib\" path=\")([^/].*?\"/>)",
-					"${CAPT_GROUP=1}/" + srcProject.getName() + "/${CAPT_GROUP=2}");
+					"$1/" + srcProject.getName() + "/$2");
 
 			if( !isBundle )
 			{
@@ -203,7 +203,7 @@ public class JTUtils
 						"Export-Package: " +
 						JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
 						//getCTPackagesAsCSV(getTmpCTList()) + ", " +
-						"${CAPT_GROUP=1}";
+						"$1}";
 
 					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					if( fah.getNotAdaptedPatterns().contains(pattern) )
@@ -214,7 +214,7 @@ public class JTUtils
 
 						pattern = "^(.*)$";
 						replaceString =
-							"${CAPT_GROUP=1}\n" +
+							"$1\n" +
 							"Export-Package: " +
 							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
 							//getCTPackagesAsCSV(getTmpCTList()) +
@@ -229,7 +229,7 @@ public class JTUtils
 					regexPatternsWithNewStrings.put(
 							"pattern=\"(.*?)\"",
 							"pattern=\"" +
-							"${CAPT_GROUP=1}" +
+							"$1" +
 							"|.*\\\\.pl" +
 							"|.*\\\\.aj" +
 							"|.*" + JTConstants.CT_LIST_FILENAME_WITHOUT_SUFFIX + "\\\\." + JTConstants.CT_LIST_SUFFIX +
@@ -245,7 +245,7 @@ public class JTUtils
 					regexPatternsWithNewStrings2.put(
 							"\\<classpathentry\\s+?including=\"(.*?)\"",
 							"<classpathentry including=\"" +
-							"${CAPT_GROUP=1}" +
+							"$1" +
 							"|**/" + JTConstants.CT_LIST_FILENAME + 
 							"|**/" + JTConstants.FQCN_LIST_FILENAME + 
 							"\""
