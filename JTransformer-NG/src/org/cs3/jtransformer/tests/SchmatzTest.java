@@ -174,8 +174,10 @@ public class SchmatzTest extends TestCase
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		assertEquals(expContent, newContent);
 		
-		content = "<classpathentry kind=\"lib\" path=\"lib/DaffodilDB_Common.jar\"/>";
-		expContent = "<classpathentry kind=\"lib\" path=\"/MarksTestAspectBundle/lib/DaffodilDB_Common.jar\"/>";
+		content = "<classpathentry kind=\"lib\" path=\"lib/DaffodilDB_Common.jar\"/>\n" +
+				  "<classpathentry kind=\"lib\" path=\"lib/lib2.jar\"/>";
+		expContent = "<classpathentry kind=\"lib\" path=\"/MarksTestAspectBundle/lib/DaffodilDB_Common.jar\"/>\n" +
+				     "<classpathentry kind=\"lib\" path=\"/MarksTestAspectBundle/lib/lib2.jar\"/>";
 
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
