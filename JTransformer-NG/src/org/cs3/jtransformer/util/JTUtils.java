@@ -203,7 +203,7 @@ public class JTUtils
 						"Export-Package: " +
 						JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
 						//getCTPackagesAsCSV(getTmpCTList()) + ", " +
-						"$1}";
+						"$1";
 
 					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					if( fah.getNotAdaptedPatterns().contains(pattern) )
