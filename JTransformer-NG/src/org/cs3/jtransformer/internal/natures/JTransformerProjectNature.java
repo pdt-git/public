@@ -287,27 +287,27 @@ public class JTransformerProjectNature implements IProjectNature,
 					builders.length - index - 1);
 			descr.setBuildSpec(newBuilders);
 		}
-		PrologInterface pif = getPrologInterface();
-		PrologSession s = null;
-
-		try {
-			if (pif.isUp()) {
-				s = pif.getSession();
-				String projectName = getProject().getName();
-				String sourceFolder = Util.prologFileName(new File(
-						getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER,
-								null)));
-				s.queryOnce("retractall(project_option('" + projectName
-						+ "', _))");
+			PrologInterface pif = getPrologInterface();
+			PrologSession s = null;
+	
+			try {
+				if (pif.isUp()) {
+					s = pif.getSession();
+					String projectName = getProject().getName();
+					String sourceFolder = Util.prologFileName(new File(
+							getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER,
+									null)));
+					s.queryOnce("retractall(project_option('" + projectName
+							+ "', _))");
+					getFactBaseBuilder().clean(null);
+				}
+			} catch (PrologInterfaceException e) {
+				JTransformerPlugin.getDefault()
+						.createPrologInterfaceExceptionCoreExceptionWrapper(e);
+			} finally {
+				if (s != null)
+					s.dispose();
 			}
-			getFactBaseBuilder().clean(null);
-		} catch (PrologInterfaceException e) {
-			JTransformerPlugin.getDefault()
-					.createPrologInterfaceExceptionCoreExceptionWrapper(e);
-		} finally {
-			if (s != null)
-				s.dispose();
-		}
 
 	}
 

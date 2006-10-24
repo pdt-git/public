@@ -667,4 +667,14 @@ public class JTUtils
 	public static JTransformerProjectNature getNature(IProject project) throws CoreException {
 		return (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
 	}
+	
+	public static boolean allProjectsHaveJTNature(List projects) throws CoreException {
+		for (Iterator iter = projects.iterator(); iter.hasNext();) {
+			IProject project = (IProject) iter.next();	
+			if(!project.getDescription().hasNature(JTransformer.NATURE_ID)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }
