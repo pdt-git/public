@@ -65,10 +65,12 @@
 
 :- module(pdt_namespace,[
 	pdt_namespace_resolve/3,
+	pdt_namespace_resolve/4,
 	pdt_namespace_add_base/4,
 	pdt_namespace_base/2,
 	pdt_namespace_bind/4,
 	pdt_namespace_for_object/2,
+	pdt_namespace_for_object/3,	
 	pdt_namespace_load/2,
 	pdt_namespace_new/2,
 	pdt_namespace_set_base/3,
@@ -91,34 +93,41 @@ pdt_namespace_new(Id,Ns):-
     ns_base(Ns,[]).
 
 
-%% pdt_namespace_resolve(+NameSpace, ?Name,?Object).
+%% pdt_namespace_resolve(+NameSpace, +Context, ?Name,?Object).
 %
 % succeeds if NameSpace binds Object to the name Name.
+% Context is used to resolve found objects to other name spaces when resolving remote names.
+% @see pdt_namespace_for_object/3
+pdt_namespace_resolve(Ns,Cx,Name,Object):-
+	resolve(Ns,Cx,Name,Object).
+%% pdt_namespace_resolve(+NameSpace, ?Name,?Object).
+% equivalent to pdt_namespace_resolve(NameSpace,[], Name,Object).
 pdt_namespace_resolve(Ns,Name,Object):-
-	resolve(Ns,Name,Object).
+	resolve(Ns,[],Name,Object).
 
-resolve(Ns,Fragment:Fragments,Object):-
+
+resolve(Ns,Cx,Fragment:Fragments,Object):-
     !,
-    resolve_local(Ns,Fragment,X),
-    pdt_namespace_for_object(X,NextNs),
-    resolve(NextNs,Fragments,Object).
-resolve(Ns,Fragment,Object):-
-	resolve_local(Ns,Fragment,Object).
+    resolve_local(Ns,Cx,Fragment,X),
+    pdt_namespace_for_object(X,Cx,NextNs),
+    resolve(NextNs,Cx,Fragments,Object).
+resolve(Ns,Cx,Fragment,Object):-
+	resolve_local(Ns,Cx,Fragment,Object).
 	
-resolve_local(Ns,Fragment,Object):-
+resolve_local(Ns,_Cx,Fragment,Object):-
 	ns_local(Ns,Local),
 	pdt_map_get(Local,Fragment,Object),
 	!.
-resolve_local(Ns,Fragment,Object):-
+resolve_local(Ns,Cx,Fragment,Object):-
 	ns_base(Ns,Base),
-	resolve_base(Base,Fragment,Object).
+	resolve_base(Base,Cx,Fragment,Object).
 	
-resolve_base([NsId|_],Fragment,Object):-
-    pdt_namespace_for_object(NsId,Ns),
-    resolve_local(Ns,Fragment,Object),
+resolve_base([NsId|_],Cx,Fragment,Object):-
+    pdt_namespace_for_object(NsId,Cx,Ns),
+    resolve_local(Ns,Cx,Fragment,Object),
     !.
-resolve_base([_|NsIds],Fragment,Object):-
-    resolve_base(NsIds,Fragment,Object).
+resolve_base([_|NsIds],Cx,Fragment,Object):-
+    resolve_base(NsIds,Cx,Fragment,Object).
     
 %% pdt_namespace_bind(+NsIn, +Name, +Object, -NsOut)
 % Add a new binding to a namespace.
@@ -199,15 +208,26 @@ pdt_namespace_unstore(NsId):-
 
 
 
-%% pdt_namespace_for_object(+Object,-NameSpace)
+:- multifile pdt_namespace_for_object/3.
+:- dynamic pdt_namespace_for_object/3.
+
+%% pdt_namespace_for_object(+Object,+Context,-NameSpace)
 %
-% Hook predicate. Called during the resolution of qualified names to look up namespace ids for 
+% Hook predicate. Called during the resolution of qualified names to look up namespaces for 
 % arbitrary objects.
-% The default implementation covers native namespace terms aswell as namespace ids.
-% Add clauses to support namespace associations for custom objects.
-pdt_namespace_for_object(Ns,Ns):-
+
+% The default implementation covers native namespace terms aswell as namespace ids stored on the heap.
+% (both ignoring the Context argument)
+%
+% @param Context can be used to provide additional information about the context in which the name should be 
+% resolved. Add clauses to support namespace associations for custom objects.
+pdt_namespace_for_object(Ns,_,Ns):-
 	ns_new(Template),
     functor(Template,Name,Arity),
     functor(Ns,Name,Arity),!.
-pdt_namespace_for_object(NsId,Ns):-
-	namespace(NsId,Ns),!.    
+pdt_namespace_for_object(NsId,_,Ns):-
+	namespace(NsId,Ns),!.
+%%	pdt_namespace_for_object(+Object,-Context).
+% equivalent to pdt_namespace_for_object(Objecte,[],Context).
+pdt_namespace_for_object(Object,Context):-
+	pdt_namespace_for_object(Object,[],Context).

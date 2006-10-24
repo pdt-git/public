@@ -92,17 +92,17 @@ pdt_scope_new(Id,SOut):-
     ],SOut).
 
 pdt_scope_resolve(S,Name,Object):-
-	scope_contribs(S,C),    
-    resolve_contrib(C,Name,Object),
-    !.
+	scope_contribs(S,Contribs),    
+    split_name(Name,Parent,Local),
+    pdt_map_get(Contribs,Parent,Contrib),
+    !,
+    resolve_contrib(Contrib,S,Local,Object).
 pdt_scope_resolve(S,Name,Object):-
 	scope_local_ns(S,Ns),
-	pdt_namespace_resolve(Ns,Name,Object).    
+	pdt_namespace_resolve(Ns,S,Name,Object).    
 
-resolve_contrib(C,Name,Object):-
-    split_name(Name,Parent,Local),
-	pdt_map_get(C,Parent,Ns),
-	pdt_namespace_resolve(Ns,Local,Object).
+resolve_contrib(Ns,S,Name,Object):-
+	pdt_namespace_resolve(Ns,S,Name,Object).
 
 split_name(Fragment:Fragments,Fragment:Parent,Local):-
     functor(Fragments,:,2),
@@ -137,13 +137,13 @@ bind_local(Sin,Name,Object,Sout):-
 	).
 	
 bind_contrib(Sin,Parent,Local,Object,Sout):-
-    scope_contribs(Sin,ContribsIn),
-    ensure_contrib_exists(ContribsIn,Parent,ContribIn,ContribsOut),
-    resolve_conflict(Sin,ContribIn,Parent,Local,Object,Result),
+    ensure_contrib_exists(Sin,Parent,ContribIn,S1),
+    resolve_conflict(S1,ContribIn,Parent,Local,Object,Result),
     	(	Result=resolved(Resolution)
 	->	pdt_namespace_bind(ContribIn,Local,Resolution,ContribOut),
+		scope_contribs(S1,ContribsIn),
 		pdt_map_put(ContribsIn,Parent,ContribOut,ContribsOut),
-		scope_set_contribs(Sin,ContribsOut,Sout)
+		scope_set_contribs(S1,ContribsOut,Sout)
 	;	throw(Result)
 	).
 
@@ -153,13 +153,24 @@ ensure_contrib_exists(S,Parent,Contrib,S):-
 ensure_contrib_exists(Sin,Parent,Contrib,Sout):-
     scope_contribs(Sin,Contribs),
 	create_contrib(Sin,Parent,Contrib),
+	pdt_map_put(Contribs,Parent,Contrib,ContribsNew),
+	scope_set_contribs(Sin,ContribsNew,Sout).
+	
+create_contrib(Sin,Parent,ContribOut):-
+    scope_id(Sin,Sid),
+	pdt_namespace_new(contrib(Sid,Parent),Contrib0),
+	pdt_namespace_add_base(Contrib0,lookup(Parent),start,ContribOut).
 	
 	
 resolve_conflict(Sin,NsIn,Parent,Name,Object,Result):-
-	pdt_namespace_resolve(NsIn,Name,OldObject),
+	pdt_namespace_resolve(NsIn,Sin,Name,OldObject),
 	!,
 	do_resolve_conflict(Sin,NsIn,Parent,Name,OldObject,Object,Result).    
 resolve_conflict(_Sin,_NsIn,_Parent,_Name,Object,resolved(Object)).
 
 do_resolve_conflict(Sin,_NsIn,Parent,Name,OldObject,Object,error(unresolved_nameing_conflict(Sin,Parent:Name,OldObject,Object))).	
-	
+
+pdt_namespace:pdt_namespace_for_object(lookup(Name),Context,Ns):-
+    pdt_scope_resolve(Context,Name,Object),
+    !,
+    pdt_namespace_for_object(Object,Context,Ns).

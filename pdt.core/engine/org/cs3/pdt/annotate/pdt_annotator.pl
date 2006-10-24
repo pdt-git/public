@@ -132,7 +132,7 @@ pdt_maybe(Goal):-
 %will make sure that all of the listed annotators are registered and get executed before the
 %declaring annotator is executed.
 %
-%annotators can optionaly define a prediceate cleanup_hook/2 which will be called
+%annotators can optionaly define a prediceate cleanup_hook/3 which will be called
 %when the annotation of a file is about to be forgotten. These clean_up hooks will always be executed
 %independently of what is listed in the hooks list above. They will be called in no particualr order,
 %i.e. dependencies will not be respected.
