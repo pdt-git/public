@@ -321,11 +321,14 @@ public class JTUtils
 			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')')+1);
 			String first = "'" + ctFilename + "'" + variableBinding;
 			String second = ctName.substring(1, ctName.lastIndexOf("'"));
-			
+			String third = ctName + variableBinding;
+				
 			list.add(
 					adviceKind + JTConstants.CTNAME_FILENAME_SEPARATOR + 
 					first + JTConstants.CTNAME_FILENAME_SEPARATOR + 
-					second);
+					second + JTConstants.CTNAME_FILENAME_SEPARATOR +
+					third
+			);
 		}		
 		/*
 		 * After the CT list is created and stored
