@@ -76,7 +76,8 @@
 	pdt_namespace_set_base/3,
 	pdt_namespace_store/1,
 	pdt_namespace_unstore/1,	
-	pdt_namespace_unbind/3
+	pdt_namespace_unbind/3,
+	pdt_namespace_id/2
 ]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
@@ -84,6 +85,9 @@
 
 :- pdt_define_context(ns(id,local,base)).
 
+
+pdt_namespace_id(Ns,Id):-
+    ns_id(Ns,Id).
 
 pdt_namespace_new(Id,Ns):-
     ns_new(Ns),
