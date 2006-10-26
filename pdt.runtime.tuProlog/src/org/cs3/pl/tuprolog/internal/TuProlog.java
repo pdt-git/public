@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import alice.tuprolog.InvalidLibraryException;
 import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Library;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.Prolog;
@@ -102,10 +103,17 @@ public class TuProlog {
 	 * @param className name of the Java class containing the library to be loaded.
 	 * @throws InvalidLibraryException
 	 */
-	public void loadLibraryClass(String className) throws InvalidLibraryException{
-		engine.loadLibrary(className);
+	public Library loadLibraryClass(String className) throws InvalidLibraryException{
+		return engine.loadLibrary(className);
 	}
 
+	/**
+	 * TODO add predicates for =@=.
+	 * TODO add predicate to ignore module:-
+	 * TODO add predicate to ignore model:functor and execute functor
+	 * TODO create ObserverLibrary in the same way as PrologEventDispatcher 
+	 */
+	
 	/**
 	 * Answers a stream on a resource found by looking up resName
 	 * in the resource folder.
