@@ -28,6 +28,8 @@ import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
+import org.cs3.pl.prolog.AsyncPrologSessionListener;
+import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
@@ -254,6 +256,7 @@ public class FactBaseBuilder {
             throws IOException, CoreException, PrologInterfaceException {
         monitor.beginTask(project.getName() + " - generating new PEFs", toProcess.size());
         AsyncPrologSession asyncSession = ((PrologInterface2)getPif()).getAsyncSession();
+        asyncSession.addBatchListener(new DefaultAsyncPrologSessionListener());
         PrologSession syncSession = getPif().getSession(); 
         try {
 	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
@@ -540,6 +543,9 @@ public class FactBaseBuilder {
 
                     for (Iterator iter = unresolved.iterator(); iter.hasNext();) {
                         String typeName = (String) iter.next();
+//                        if( typeName.equals("java.lang.Class")) {
+//                        	System.err.println("DEBUG");
+//                        }
                         if (seen.contains(typeName)) {
                             throw new RuntimeException(
                                     "saw type before, so something seems broken. "
@@ -635,6 +641,11 @@ public class FactBaseBuilder {
 		// }
 		// });
 		StringBuffer buf = new StringBuffer();
+		//		"inTeArray(term(" + 
+
+		session.queryOnce( TICKET, "retractLocalSymtab");
+
+		int num = 0;
 		for (Iterator iter = clauses.iterator(); iter.hasNext();)
 		{
 			if (buf.length() > 0)
@@ -642,9 +653,21 @@ public class FactBaseBuilder {
 				buf.append(",");
 			}
 			buf.append(iter.next());
+			num++;
+			if(num == 1000) {
+				String out = buf.toString();
+				session.queryOnce( TICKET, out);
+				buf = new StringBuffer();
+				num = 0;
+			}
+
 		}
 		//writeToFile(buf.toString());
-		session.queryOnce( TICKET, "inTeArray(term(" + buf.toString() + "))");
+		if(buf.length() > 0) {
+			session.queryOnce( TICKET, buf.toString());
+		}
+		session.queryOnce( TICKET, "retractLocalSymtab");
+
 	}
 
 	private void writeToFile(String str)

@@ -16,9 +16,11 @@ import java.util.Map;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -183,7 +185,7 @@ public class JTUtils
 			List neededFileForCopying = new ArrayList();
 
 			Map classPathReplacement = new HashMap();
-			classPathReplacement.put("(<classpathentry kind=\"lib\" path=\")([^/].*?\"/>)",
+			classPathReplacement.put("(<classpathentry .*?kind=\"lib\" .*?path=\")([^/].*?\"/>)",
 					"$1/" + srcProject.getName() + "/$2");
 
 			if( !isBundle )
@@ -321,14 +323,11 @@ public class JTUtils
 			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')')+1);
 			String first = "'" + ctFilename + "'" + variableBinding;
 			String second = ctName.substring(1, ctName.lastIndexOf("'"));
-			String third = ctName;
-				
+			
 			list.add(
 					adviceKind + JTConstants.CTNAME_FILENAME_SEPARATOR + 
 					first + JTConstants.CTNAME_FILENAME_SEPARATOR + 
-					second + JTConstants.CTNAME_FILENAME_SEPARATOR +
-					third
-			);
+					second);
 		}		
 		/*
 		 * After the CT list is created and stored
@@ -520,18 +519,23 @@ public class JTUtils
 	private static void copyFile(IProject srcProject, IProject destProject, final String fileName) throws CoreException
 	{
 		IFile file = srcProject.getFile(new Path(fileName));
-		if( file.exists() )
-		{
-			IFile old = destProject.getFile(new Path(fileName));
-			if( old.exists() )
+		try {
+			if( file.exists() )
 			{
-				// Just to be sure: delete the file if it exists...
+				IFile old = destProject.getFile(new Path(fileName));
+				if( old.exists() )
+				{
+					// Just to be sure: delete the file if it exists...
+					old.refreshLocal(IResource.DEPTH_INFINITE, null);
+					old.delete(true, false, null);
+					old.refreshLocal(IResource.DEPTH_INFINITE, null);
+				}
+				file.copy(new Path(destProject.getFullPath() + fileName), true, null);
+				destProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
 				old.refreshLocal(IResource.DEPTH_INFINITE, null);
-				old.delete(true, true, null);
 			}
-			file.copy(new Path(destProject.getFullPath() + fileName), true, null);
-			destProject.refreshLocal(IResource.DEPTH_INFINITE, new NullProgressMonitor());
-			old.refreshLocal(IResource.DEPTH_INFINITE, null);
+		} catch(ResourceException ex) {
+			Debug.error(ex.getLocalizedMessage());
 		}
 	}
 
