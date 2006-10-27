@@ -1450,6 +1450,10 @@ public class FactGenerator extends ASTVisitor implements Names {
 					 node.getParent().getParent().getNodeType() == ASTNode.VARIABLE_DECLARATION_EXPRESSION) &&
 					 	((VariableDeclarationFragment)node.getParent()).getName() == node)
 						return false;
+//				if(node.getIdentifier().equals("SuperInvocation")) {
+//					System.err.println("DEBUG");
+//				}
+
 				String[] args = {			
 						quote(node.getIdentifier()),
 						idResolver.getID(node.resolveBinding())
@@ -1634,7 +1638,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
 			});
-			handleSelectsIdents(node.getQualifier(), selectedFrom);
+			//handleSelectsIdents(node.getQualifier(), selectedFrom);
 		}
 	
 	
@@ -1739,7 +1743,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 					Integer.toString(node.getStartPosition()),
 					Integer.toString(node.getLength())
 			});
-			handleSelectsIdents(node.getQualifier(), selectedFrom);
+			//handleSelectsIdents(node.getQualifier(), selectedFrom);
 		}
 		
 		String[] args =
@@ -2143,6 +2147,10 @@ public class FactGenerator extends ASTVisitor implements Names {
 		});
 
 		String fqn = quote(node.getType().resolveBinding().getQualifiedName());
+//		if(fqn.equals("SuperInvocation")) {
+//			System.err.println("DEBUG");
+//		}
+
 		writer.writeFact(IDENT_T, new String [] {
 				identId,
 				idResolver.getID(node),
@@ -2429,6 +2437,10 @@ public class FactGenerator extends ASTVisitor implements Names {
 					quote((SimpleName)name),
 					idResolver.getID(name.resolveBinding())
 			};
+//			if(name.toString().equals("SuperInvocation")) {
+//				System.err.println("DEBUG");
+//			}
+
 			writer.writeFact(IDENT_T, args);
 			writeSourceLocationArgumentIdentifier(name, name);
 
