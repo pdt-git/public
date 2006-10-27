@@ -112,11 +112,13 @@ pif_observe:pif_unobserve_hook(_,Subject,_):-
 	unregister_observer(Subject). 
 	
 	
+:- dynamic depends_fact/2.	
+	
 depends_fact(Term, Term).
 
 depends(Var, _):-
   var(Var),
-  throw('sync:depdends_fact/2: first argument must be bound.').
+  throw('sync:depends_fact/2: first argument must be bound.').
 
 depends(Master, Slave) :-
   depends_fact(Master, Slave).
