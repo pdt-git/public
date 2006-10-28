@@ -17,14 +17,17 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -691,5 +694,49 @@ public class JTUtils
 			}
 		}
 		return true;
+	}
+	/**
+	 * @param project the project on which to delete the markers 
+	 * @throws CoreException 
+	 * @throws PrologInterfaceException
+	 * @throws PrologException
+	 */
+	// Modified Dec 21, 2004 (AL)
+	// Clearing all Markers from current Workspace
+	// that have got LogicAJPlugin "Nature"
+	public static void clearAllMarkersWithJTransformerFlag(IProject project) throws CoreException {
+			IMarker[] currentMarkers = project.findMarkers(IMarker.PROBLEM, true,
+					IResource.DEPTH_INFINITE);
+			if (currentMarkers != null) {
+				for (int i = 0; i < currentMarkers.length; i++) {
+					if (currentMarkers[i]
+							.getAttribute(JTransformer.PROBLEM_MARKER_ID) != null) {
+						// Hier k�nnte in Zukunft noch eine Abfrage hinzu
+						// um welchen Aspekt es sich gerade handelt.
+						// Gibts im Moment aber nicht. Deswegen
+						// l�sche ich einfach alle
+						currentMarkers[i].delete();
+					}
+				}
+
+		}
+		
+	}
+	public static List getProjectsWithPifKey(String key) throws CoreException {
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		
+		List sharingProjects = new ArrayList();
+		for (int i = 0; i < projects.length; i++) {
+			String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
+					JTransformer.PROLOG_RUNTIME_KEY, null);
+			if(runtimeKey != null && runtimeKey.equals(key) &&
+					projects[i].hasNature(JTransformer.NATURE_ID) &&
+					JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(projects[i],
+							JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED)
+							.equals(JTransformer.FACTBASE_STATE_ACTIVATED)){
+				sharingProjects.add(projects[i]);
+			}
+		}
+		return sharingProjects;
 	}
 }

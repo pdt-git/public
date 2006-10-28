@@ -44,12 +44,12 @@ import salvo.jesus.graph.VertexImpl;
 import salvo.jesus.graph.algorithm.TopologicalSorting;
 
 public class JTransformerNatureAssigner {
-	
+
+
 	public static final int STATUS_REMOVED = 0;
 	public static final int STATUS_CANCELLED = 1;
 	public static final int STATUS_ADDED = 0;
 	private List projects;
-	Hashtable vertexes;
 	private boolean includeReferencedProjects = false;
 	private boolean addReferenceToOutputProject = false;
 
@@ -103,13 +103,17 @@ public class JTransformerNatureAssigner {
 			return false;
 		}
 
+		removeNatures(dialog);
+		return true;
+	}
+
+	private void removeNatures(RemoveJTransformerNatureDialog dialog) throws CoreException {
 		for (Iterator iter = projects.iterator(); iter.hasNext();) {
 			IProject project = (IProject) iter.next();
 			removeNature(project, dialog
 					.isDeleteOutputProject(), dialog
 					.isRemoveOutputProjectReference());
 		}
-		return true;
 	}
 
 	public boolean askAndAddNatures() throws Exception {
@@ -118,73 +122,21 @@ public class JTransformerNatureAssigner {
 		if(factbaseName == null) {
 			return false;
 		}
-		List sortedProjects = topoSortProjects(projects);
+		TopoSortProjects sorter = new TopoSortProjects();
+		List sortedProjects = sorter.sort(includeReferencedProjects,projects);
 		includeReferencedProjects = false;
 
 		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
-			IProject project = (IProject)((VertexImpl) iter.next()).getObject();
+			IProject project = (IProject)iter.next();
 			final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
 		    addNature(project,javaProject,factbaseName);
 		}
 		return true;
 	}
 
-	private List topoSortProjects(List projects) throws Exception {
-		List toProcess = new ArrayList(projects);
-		DirectedAcyclicGraph dag = new DirectedAcyclicGraphImpl();
-		vertexes = new Hashtable();
-		while(toProcess.size() > 0) {
-			IProject project = (IProject)toProcess.get(0);
-			toProcess.remove(project);
-			Vertex vertex = getVertexForProject(toProcess,project);
-			dag.add(vertex);
-			final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
-			if(javaProject == null) {
-				System.err.println("DEBUG");
-			}
-			IClasspathEntry[] referenced = javaProject.getResolvedClasspath(true);
-			for (int i = 0; i < referenced.length; i++) {
-				IClasspathEntry entry = referenced[i];
-				if(entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
-					if(entry.getPath().segmentCount() > 1) {
-						throw new Error("NOT A PROJECT" + entry);
-					}
-					IProject refProject = ResourcesPlugin.getWorkspace().getRoot().getProject(entry.getPath().segment(0));
-					if(refProject.getName().endsWith("-output")) {
-						continue;
-					}
-					if(!includeReferencedProjects && !projects.contains(refProject)) {
-						continue;
-					}
-					Vertex refVertex = getVertexForProject(toProcess,refProject);
-					dag.addEdge(new DirectedEdgeImpl(vertex, refVertex));
-				}
-				
-			}
-//			for (int i = 0; i < referenced.length; i++) {
-//				Vertex refVertex = getVertexForProject(referenced[i]);
-//				dag.addEdge(new DirectedEdgeImpl(vertex, refVertex));
-//			}
-		}
-		TopologicalSorting topoSort = new TopologicalSorting(dag);
-		List sorted = topoSort.traverse();
-		Collections.reverse(sorted);
-		return sorted;
-	}
 
-	private Vertex getVertexForProject(List projects, IProject project) {
-		Vertex vertex = (Vertex)vertexes.get(project);
-		if(vertex != null) {
-			return vertex;
-		}
-		if(!projects.contains(project)) {
-			projects.add(project);
-		}
 
-		vertex = new VertexImpl(project);
-		vertexes.put(project, vertex);
-		return vertex;
-	}
+
 
 	/**
 	 * 
@@ -213,7 +165,7 @@ public class JTransformerNatureAssigner {
 			IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 	    	project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),factbaseName);
 
-			JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
+			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 
 		    addJTransformerNature(project);
 
@@ -228,7 +180,7 @@ public class JTransformerNatureAssigner {
 
 	private void removeNature(IProject project, boolean deleteOutputProject, boolean removeOutputProjectReference) throws CoreException {
 
-		JTUtils.getNature(project).clearAllMarkersWithJTransformerFlag();
+		JTUtils.clearAllMarkersWithJTransformerFlag(project);
 		JTransformerProjectNature.removeJTransformerNature(project);
 		final IProject outputProject = JTUtils.getOutputProject(project);
 		if(removeOutputProjectReference) {
@@ -238,7 +190,7 @@ public class JTransformerNatureAssigner {
 		    deleteOutputProject(project,outputProject);					
 		}
 		//action.setChecked(false);
-		JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_DISABLED);
+		JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_DISABLED);
 	}
 
 	private void removeOutputProjectReference(final IProject project, final IProject outputProject) {

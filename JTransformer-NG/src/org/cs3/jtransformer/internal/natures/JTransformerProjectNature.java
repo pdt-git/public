@@ -2,8 +2,12 @@ package org.cs3.jtransformer.internal.natures;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
@@ -11,6 +15,7 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProjectListener;
+import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
@@ -34,7 +39,6 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.ICommand;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
@@ -57,6 +61,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 
+import salvo.jesus.graph.VertexImpl;
+
 /**
  * @see IProjectNature
  */
@@ -64,6 +70,10 @@ public class JTransformerProjectNature implements IProjectNature,
 		JTransformerProject, JTransformerProjectListener {
 
 	boolean buildTriggered = false;
+	
+	static private Set toBeBuilt = new HashSet();
+
+	static private Object toBeBuiltMonitor = new Object();
 
 	// The project for which this nature was requested,
 	// see IProject.getNature(String)
@@ -324,7 +334,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	public void setProject(IProject project) {
 		this.project = project;
 		try {
-			JTransformerPlugin.getDefault().setPreferenceValue(project,
+			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,
 					JTransformer.FACTBASE_STATE_KEY,
 					JTransformer.FACTBASE_STATE_ACTIVATED);
 		} catch (CoreException e) {
@@ -430,56 +440,106 @@ public class JTransformerProjectNature implements IProjectNature,
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
 
+			buildAllProjectsOfPif();
+		}
+
+		private void buildAllProjectsOfPif() {
 			try {
+
+				List tmpProjects = null;
+				synchronized (toBeBuiltMonitor) {
+
+					if (toBeBuilt.contains(project)) {
+						// built triggered by other project
+						return;
+					}
+					tmpProjects = getSortedListOfNotYetJTBuildProjects();
+					
+					toBeBuilt.addAll(tmpProjects);
+				}
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				IWorkspaceDescription wd = workspace.getDescription();
 				if (!wd.isAutoBuilding()) {
 					return;
 				}
-				// final JTransformerProject[] jtransformerProjects =
-				// JTransformer.getJTransformerProjects(pif);
-				Job j = new Job("Building workspace") {
-					public IStatus run(IProgressMonitor monitor) {
-						try {
-							// for (int i = 0; i < jtransformerProjects.length;
-							// i++) {
-
-							// JTransformerProject jtransformerProject =
-							// jtransformerProjects[i];
-							// IProject project =
-							// jtransformerProject.getProject();
-							project.build(IncrementalProjectBuilder.FULL_BUILD, 
-									JTransformer.BUILDER_ID,
-									new HashMap(),
-									monitor);
-						} catch (OperationCanceledException opc) {
-							return Status.CANCEL_STATUS;
-						} catch (Exception e) {
-							return new Status(IStatus.ERROR,
-									JTransformer.PLUGIN_ID, -1,
-									"Problems during build", e);
-						}
-						return Status.OK_STATUS;
+				final List projects = tmpProjects;
+				try {
+					for (Iterator iter = projects.iterator(); iter.hasNext();) {
+						buildProject((IProject) iter.next());
 					}
-
-					public boolean belongsTo(Object family) {
-						return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
-					}
-
-				};
-
-				synchronized (configureMonitor) {
-					if (!buildTriggered) {
-						buildTriggered = true;
-						j.setRule(workspace.getRoot());
-						j.schedule();
-					}
-					buildTriggered = false;
+				} finally {
+					finalizeProjectBuilding(projects);
 				}
 
 			} catch (Throwable e) {
 				Debug.report(e);
 				throw new RuntimeException(e);
+			}
+		}
+
+		private List getSortedListOfNotYetJTBuildProjects() throws CoreException, Exception {
+			String key = pifSubscription.getPifKey();
+			List unsortedProjectsList = JTUtils.getProjectsWithPifKey(key);
+			TopoSortProjects topoSorter = new TopoSortProjects();
+			return topoSorter.sort(false, unsortedProjectsList);
+		}
+
+		private void finalizeProjectBuilding(final List projects) {
+			Job j = new Job("Finalize building of projects") {
+				public IStatus run(IProgressMonitor monitor) {
+					synchronized (toBeBuiltMonitor) {
+						toBeBuilt.removeAll(projects);
+					}
+					return Status.OK_STATUS;
+				}
+
+				public boolean belongsTo(Object family) {
+					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+				}
+
+			};
+
+			synchronized (configureMonitor) {
+//							if (!buildTriggered) {
+//								buildTriggered = true;
+					j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+					j.schedule();
+//							}
+//							buildTriggered = false;
+			}
+		}
+
+		private void buildProject(final IProject project) {
+			Job j = new Job("Building JTransformer PEFs for project " + project.getName()) {
+				public IStatus run(IProgressMonitor monitor) {
+					try {
+						project.build(IncrementalProjectBuilder.FULL_BUILD, 
+								JTransformer.BUILDER_ID,
+								new HashMap(),
+								monitor);
+					} catch (OperationCanceledException opc) {
+						return Status.CANCEL_STATUS;
+					} catch (Exception e) {
+						return new Status(IStatus.ERROR,
+								JTransformer.PLUGIN_ID, -1,
+								"Problems during build", e);
+					}
+					return Status.OK_STATUS;
+				}
+
+				public boolean belongsTo(Object family) {
+					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
+				}
+
+			};
+
+			synchronized (configureMonitor) {
+//					if (!buildTriggered) {
+//						buildTriggered = true;
+					j.setRule(ResourcesPlugin.getWorkspace().getRoot());
+					j.schedule();
+//					}
+//					buildTriggered = false;
 			}
 		}
 
@@ -557,6 +617,11 @@ public class JTransformerProjectNature implements IProjectNature,
 							+ getProject().getName(), "JTransformer");
 			pif = PrologRuntimePlugin.getDefault().getPrologInterface(
 					pifSubscription);
+
+			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+			.getPrologInterfaceRegistry();
+			Set subscriptions = reg.getSubscriptionsForPif(projectInterfaceKey);
+			
 			setInitializingPif(false);
 			return pif;
 
@@ -888,29 +953,5 @@ public class JTransformerProjectNature implements IProjectNature,
 
 	}
 
-	/**
-	 * @throws CoreException
-	 * @throws PrologInterfaceException
-	 * @throws PrologException
-	 */
-	public void clearAllMarkersWithJTransformerFlag() throws CoreException {
-		// Modified Dec 21, 2004 (AL)
-		// Clearing all Markers from current Workspace
-		// that have got LogicAJPlugin "Nature"
-		IMarker[] currentMarkers = project.findMarkers(IMarker.PROBLEM, true,
-				IResource.DEPTH_INFINITE);
-		if (currentMarkers != null) {
-			for (int i = 0; i < currentMarkers.length; i++) {
-				if (currentMarkers[i]
-						.getAttribute(JTransformer.PROBLEM_MARKER_ID) != null) {
-					// Hier k�nnte in Zukunft noch eine Abfrage hinzu
-					// um welchen Aspekt es sich gerade handelt.
-					// Gibts im Moment aber nicht. Deswegen
-					// l�sche ich einfach alle
-					currentMarkers[i].delete();
-				}
-			}
-		}
-	}
 
 }

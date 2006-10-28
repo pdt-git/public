@@ -43,10 +43,11 @@ public class JTransformerProjectDecoratorContributor implements ILightweightLabe
 			//JTransformerProjectNature jtransformerProject = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
 			
 			//  TODO: this is a bit ugly, or isn't it`?
-			String state = JTransformerPlugin.getDefault().getPreferenceValue(project, JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_DISABLED);
+			String state = JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(project, JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 			
 			if(state.equals(JTransformer.FACTBASE_STATE_ACTIVATED)) {
 				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION_GREY));
+				//JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project, JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 			}else if(state.equals(JTransformer.FACTBASE_STATE_IN_PROCESS)) {
 				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION_GREEN));
 			}else if(state.equals(JTransformer.FACTBASE_STATE_READY)){

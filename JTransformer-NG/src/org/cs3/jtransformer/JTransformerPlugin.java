@@ -5,9 +5,11 @@ package org.cs3.jtransformer;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -337,7 +339,6 @@ public class JTransformerPlugin extends AbstractUIPlugin {
     }
 
     /**
-     * conveniance method. should propably be inlined. --lu
      * @throws CoreException 
      */
     public void setPreferenceValue(IProject project, String key, String value) throws CoreException{
@@ -357,8 +358,41 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 			throw new RuntimeException(e);
 		}
 	}
-
+    
     /**
+     * conveniance method. should propably be inlined. --lu
+     * @throws CoreException 
+     */
+    public void setNonPersistantPreferenceValue(IProject project, String key, String value) throws CoreException{
+    	Map projectPref = getProjectPreference(project);
+    	projectPref.put(key,value);
+   		fireValueChanged(project,key);
+    }    
+    
+    Map nonPersistantPreference = new Hashtable();
+    
+	public String getNonPersistantPreferenceValue(IProject project, String key, String defaultValue) {
+    	Map projectPref = getProjectPreference(project);
+		String value = (String)projectPref.get(key);
+		if(value != null) {
+			return value;
+		}
+		return defaultValue;
+	}
+
+    private Map getProjectPreference(IProject project) {
+    	synchronized (nonPersistantPreference) {
+			Map projectPref = (Map)nonPersistantPreference.get(project);
+			if(projectPref == null) {
+				projectPref = new HashMap();
+				nonPersistantPreference.put(project,projectPref);
+			}
+			return projectPref;
+		}
+
+	}
+
+	/**
      * reload preferences and configure components.
      * <br><b>NOTE:</b> clients should not call this method directly.
      */
