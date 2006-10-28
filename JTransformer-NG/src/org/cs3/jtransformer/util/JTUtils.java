@@ -16,6 +16,7 @@ import java.util.Map;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -153,7 +154,9 @@ public class JTUtils
 	}
 	
 	/**
-	 * Copies all needed files like the class path.
+	 * Copies all needed files like the class path, etc.
+	 * 
+	 * @see FileAdaptationHelperTest
 	 * 
 	 * @param srcProject
 	 * @param destProject

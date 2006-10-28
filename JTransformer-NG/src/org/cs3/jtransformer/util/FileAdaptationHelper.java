@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.cs3.jtransformer.tests.SchmatzTest;
+import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
 
 
 /**
@@ -16,7 +16,7 @@ import org.cs3.jtransformer.tests.SchmatzTest;
  * 
  * Test this class with <tt>SchmatzTest.java</tt>
  * 
- * @see SchmatzTest
+ * @see FileAdaptationHelperTest
  * 
  * @author Mark Schmatz
  *
