@@ -10,9 +10,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
@@ -414,7 +416,6 @@ public class JTUtils
 	 * @return <tt>true</tt> if everything went right; <tt>false</tt> otherwise
 	 */
 	// New by Mark Schmatz
-	// TODO: schmatz: don't store the bundle activator
 	public static boolean storeJavaFileList(PrologSession prologSession, String absolutePathOfOutputProject) throws PrologInterfaceException
 	{
 		boolean ok = true;
@@ -426,17 +427,21 @@ public class JTUtils
 		
 		if( queryList != null )
 		{
-			List list = new ArrayList();
+			Set set = new HashSet();
 			
 			Iterator iterator = queryList.iterator();
 			while( iterator.hasNext() )
 			{
 				HashMap map = (HashMap) iterator.next();
 				String fqClassName = (String) map.get("FqClassName");
-				list.add(fqClassName);
+				set.add(fqClassName);
 			}
+
+			set.add("org.cs3.ditrios.facade.cslogicaj.DitriosFacade");
+			set.add("org.aspectj.lang.JoinPoint");
+			set.add("org.aspectj.lang.JoinPoint.StaticPart");
 			
-			storeListInFile(list, absolutePathOfOutputProject, JTConstants.FQCN_LIST_FILENAME);
+			storeListInFile(new ArrayList(set), absolutePathOfOutputProject, JTConstants.FQCN_LIST_FILENAME);
 		}
 		else
 			ok = false;
