@@ -122,9 +122,8 @@ public class FactBaseBuilder {
     	// FIXME: Expensive?
     	
         try {
-   			JTransformerProjectNature nature = JTUtils.getNature(project);
-   			nature.setPreferenceValue(JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
-        	nature.clearAllMarkersWithJTransformerFlag();
+   			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+        	JTUtils.clearAllMarkersWithJTransformerFlag(project);
 
             if (building) {
                 Debug.warning("skipping build");
@@ -163,7 +162,7 @@ public class FactBaseBuilder {
         } finally {
 			//jobManager.endRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
         	try {
-    			JTransformerPlugin.getDefault().setPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
+    			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
     		} catch (CoreException e1) {
     			e1.printStackTrace();
     		}
