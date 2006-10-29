@@ -62,20 +62,20 @@
           <separator name="separator2"/>
        </menu>
        <action
-             label="restart"
+             label="Restart"
              class="org.cs3.pdt.internal.actions.RestartAction"
              accelerator="Ctrl+F9"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.restart"/>
        <action
-             label="dump debug info"
+             label="Dump Debug Info"
              class="org.cs3.pdt.internal.actions.DumpDebugInfoAction"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.dump"/>
        <action
-             label="consult"
+             label="Consult"
              class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
              accelerator="F9"
              style="push"

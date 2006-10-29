@@ -159,19 +159,19 @@
           <separator name="separator2"/>
        </menu>
        <action
-             label="selection to clipboard"
+             label="Selection to Clipboard"
              class="org.cs3.jtransformer.internal.actions.FactsToClipboard"
              style="push"
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
        <action
-             label="regenerate classes"
+             label="Regenerate Classes"
              class="org.cs3.jtransformer.internal.actions.RegenAction"
              style="push"
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              id="org.cs3.jtransformer.internal.actions.regenerateclasses"/>
        <action
-             label="remove all JTransformer natures"
+             label="Remove all JTransformer Natures"
              class="org.cs3.jtransformer.internal.actions.RemoveAllNaturesAction"
              style="push"
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
@@ -179,7 +179,7 @@
        <action
              class="org.cs3.jtransformer.internal.actions.AddingFactsToClipboard"
              id="org.cs3.pdt.internal.actions.addingfactstoclipboard"
-             label="adding selection to clipboard"
+             label="Adding Selection to Clipboard"
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              style="push"/>
     </actionSet>
