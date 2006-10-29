@@ -331,11 +331,13 @@ public class JTUtils
 			String variableBinding = ctName.substring(ctName.indexOf('('), ctName.indexOf(')')+1);
 			String first = "'" + ctFilename + "'" + variableBinding;
 			String second = ctName.substring(1, ctName.lastIndexOf("'"));
+			String third = ctName;
 			
 			list.add(
 					adviceKind + JTConstants.CTNAME_FILENAME_SEPARATOR + 
 					first + JTConstants.CTNAME_FILENAME_SEPARATOR + 
-					second);
+					second + JTConstants.CTNAME_FILENAME_SEPARATOR +
+					third);
 		}		
 		/*
 		 * After the CT list is created and stored
@@ -443,6 +445,7 @@ public class JTUtils
 			set.add("org.cs3.ditrios.facade.cslogicaj.DitriosFacade");
 			set.add("org.aspectj.lang.JoinPoint");
 			set.add("org.aspectj.lang.JoinPoint.StaticPart");
+			set.add("org.cs3.ditrios.facade.core.DitriosClientService");
 			
 			storeListInFile(new ArrayList(set), absolutePathOfOutputProject, JTConstants.FQCN_LIST_FILENAME);
 		}
