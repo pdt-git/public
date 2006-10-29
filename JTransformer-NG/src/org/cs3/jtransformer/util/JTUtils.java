@@ -449,7 +449,6 @@ public class JTUtils
 			 */
 			set.add("org.cs3.ditrios.facade.cslogicaj.DitriosFacade");
 			set.add("org.aspectj.lang.JoinPoint");
-			set.add("org.aspectj.lang.JoinPoint.StaticPart");
 			set.add("org.cs3.ditrios.facade.core.DitriosClientService");
 			// end - Ditry
 			
