@@ -73,14 +73,22 @@
  
 :- module(sync,
   [
-    add/1,
-    delete/1,
-    deleteAll/1,
-    query/1,
-    commit/0,
-    rollback/0,
-    rollback/1,
-    depends/2
+%
+% Schmatz (2006-10-29):
+%
+% Commented out! 
+%
+% Prefix explicitly all calls to this module with 'sync:'
+% end - Schmatz
+%
+%    add/1,
+%    delete/1,
+%    deleteAll/1,
+%    query/1,
+%    commit/0,
+%    rollback/0,
+%    rollback/1,
+%    depends/2
   ]).
   
 :- dynamic depends/2.
