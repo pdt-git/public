@@ -76,9 +76,14 @@
 %
 % Schmatz (2006-10-29):
 %
-% Commented out! 
+% I've commented out all predicates from the public list
+% because otherwise name clashes occur!
 %
-% Prefix explicitly all calls to this module with 'sync:'
+% You now have to prefix explicitly all 'calls' to this
+% module with 'sync:'.
+% Anyway, that's no problem so far because all accesses
+% to this module are performed explicitly with 'sync:'.
+%
 % end - Schmatz
 %
 %    add/1,
