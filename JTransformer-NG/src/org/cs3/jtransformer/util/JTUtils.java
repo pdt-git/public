@@ -442,10 +442,16 @@ public class JTUtils
 				set.add(fqClassName);
 			}
 
+			/*
+			 * Dirty
+			 * Needed to be sure that all needed classes are consulted
+			 * during the first consult process...
+			 */
 			set.add("org.cs3.ditrios.facade.cslogicaj.DitriosFacade");
 			set.add("org.aspectj.lang.JoinPoint");
 			set.add("org.aspectj.lang.JoinPoint.StaticPart");
 			set.add("org.cs3.ditrios.facade.core.DitriosClientService");
+			// end - Ditry
 			
 			storeListInFile(new ArrayList(set), absolutePathOfOutputProject, JTConstants.FQCN_LIST_FILENAME);
 		}
