@@ -443,7 +443,9 @@ public class JTUtils
 			}
 
 			/*
-			 * Dirty
+			 * Dirty (because I have to adapt the Strings when I
+			 * rename a class or package)
+			 * 
 			 * Needed to be sure that all needed classes are consulted
 			 * during the first consult process...
 			 */
