@@ -655,7 +655,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		
 		String arg1 = idResolver.getIDs(node.arguments()); 
 		String typeName = idResolver.getID(name);
-		handleSelectsIdents(name,null);
+		handleSelectsIdents(name,idResolver.getID(node));
 //		String[] identTargs = new String [] {
 //				typeIdent,
 //				idResolver.getID(node),
@@ -2437,9 +2437,6 @@ public class FactGenerator extends ASTVisitor implements Names {
 					quote((SimpleName)name),
 					idResolver.getID(name.resolveBinding())
 			};
-//			if(name.toString().equals("SuperInvocation")) {
-//				System.err.println("DEBUG");
-//			}
 
 			writer.writeFact(IDENT_T, args);
 			writeSourceLocationArgumentIdentifier(name, name);
