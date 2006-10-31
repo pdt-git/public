@@ -236,6 +236,10 @@ public class IDManagerIType {
 //			}
 			String[] bounds = tp.getBounds();
 			if(bounds.length > 0) {
+				int typeParamPos = bounds[0].indexOf("<");
+				if(typeParamPos > 0) {
+					return bounds[0].substring(0, typeParamPos);
+				}
 				return bounds[0]; // convert to raw type
 			}
 			return "java.lang.Object";
