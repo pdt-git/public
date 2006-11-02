@@ -74,6 +74,7 @@ A typical life cycle of a source term would look like this:
 	source_term_set_property/4,
 	source_term_copy_properties/3,
 	source_term_create/3,
+	source_term_unifiable/3,
 	implements_source_term/0
 /*	source_term_update/2,
 	source_term_commit/2,
@@ -196,3 +197,29 @@ source_term_copy_properties(From,To,Out):-
     Module:source_term_copy_properties_hook(From,To,Out),
     !.
 source_term_copy_properties(_From,To,To).
+
+source_term_unifiable(A,B,Unifier):-
+	source_term_expand(A,AA),
+	source_term_expand(B,BB),
+	unifiable(AA,BB,Unifier).
+
+
+%% source_term_subterm(+Term,+Path,?Subterm).
+%
+%succeeds if Term is a term or an annotated term and Path is a list of integers
+%such that if each element of Path is interpreted as an argument position, Path induces a
+%path from Term to the (plain or annotated) sub term SubTerm.
+source_term_subterm(Term,[], Term). %Do NOT cut this clause!!!
+source_term_subterm(Term,[ArgNum|ArgNums],SubTerm):-
+	source_term_compound(Term),
+	source_term_arg(ArgNum,Term,ArgVal),
+	source_term_subterm(ArgVal,ArgNums,SubTerm).
+
+
+%source_term_variable_occurance(Term,Variable,Path,Occurance):-
+%    source_term_subterm(Term,Path,Occurance),
+%    source_term_var(Occurance),
+ 
+ 
+
+	

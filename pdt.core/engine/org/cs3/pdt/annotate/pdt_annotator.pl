@@ -522,15 +522,21 @@ do_process_term_rf(_Options,_MemFileAtom,_IAs,FileStack,N,_Term,Error,N):-
     nonvar(Error),!,
 	record_error(FileStack,Error).
 do_process_term_rf(Options,MemFileAtom,IAs,FileStack,N,Term0,_Error,M):-    
-    member(subterm_positions(Positions),Options),	
 	%FileStack=[File|_],
 	%pdt_file_ref(File,FileRef),
 	%experiment: leave file ref unbound. bind it on checkout.
-	wrap_term(Term0,Positions,_FileRef,N,Term1,M),   
+
+	%generate variable ids
+    term_variables(Term0,Vars),
+    var_ids(Vars,N,FileRef,Ids,0),
+    member(subterm_positions(Positions),Options),	
+		
+	wrap_term(Term0,Positions,FileRef,N,Term1,M),   
 	pdt_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
-	pdt_term_annotation(ProcessedTerm0,T,[variable_names(Names),singletons(Singletons)|A]),
+
+	pdt_term_annotation(ProcessedTerm0,T,[variable_ids(Ids),variable_names(Names),singletons(Singletons)|A]),
 	(	memberchk(comments(TermComments),Options)
     ->	comments_map(TermComments,CommentsMap),
     	process_comments(MemFileAtom,CommentsMap,ProcessedTerm0,Options,ProcessedTerm1),
@@ -540,7 +546,23 @@ do_process_term_rf(Options,MemFileAtom,IAs,FileStack,N,Term0,_Error,M):-
 	memberchk(module(OpModule),Options),
 	execute_interleaved_hooks(IAs,FileStack,OpModule,ProcessedTerm1,ProcessedTerm),
     record_term(FileStack,ProcessedTerm).
-		
+
+var_ids([],_,_,[],_).
+var_ids([Var|Vars],N,F,[Var=var_id(F,N,I)|Ids],I):-
+    J is I +1,
+
+	/*FIXME: not ISO-compatible. 
+	  this is currently used by the abstract unification routine
+	  but could probably be done in a "clean" way.
+	*/
+    put_attr(Var,pdt_annotator,var_id(F,N,I)),
+    
+	var_ids(Vars,N,F,Ids,J).
+
+%need this, otherwise attr vars could not be bound.
+attr_unify_hook(_,_).		
+
+
 record_error([File|_],Error):-
     file_key(error,File,Key),
     recordz(Key,Error).
