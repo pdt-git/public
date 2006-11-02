@@ -51,7 +51,8 @@
 	pdt_set_remove/3,
 	pdt_set_element/2,
 	pdt_set_to_list/2,
-	pdt_set_findall/3
+	pdt_set_findall/3,
+	pdt_set_addall/4
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
@@ -72,6 +73,17 @@ pdt_set_findall(Elm,Goal,Set):-
 	nb_getval(U,Set),
 	nb_delete(U).
 
+pdt_set_addall(Set0,Elm,Goal,Set):-
+	pdt_util:pdt_unique(pdt_set_addall,U),
+	nb_setval(U,Set0),
+	forall(Goal,
+		(	nb_getval(U,SetIn),
+			pdt_set_add(SetIn,Elm,SetOut),
+			nb_setval(U,SetOut)
+		)
+	),
+	nb_getval(U,Set),
+	nb_delete(U).
 
 
 pdt_set_empty(Set):-
