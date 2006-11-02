@@ -71,7 +71,7 @@ public interface PrologInterfaceRegistry {
 	public Set getRegisteredKeys();
 
 	/**
-	 * @return all keys that are known to the registry, including keys for which
+	 * @return all pif keys that are known to the registry, including keys for which
 	 *         no pif is registered.
 	 */
 	public Set getAllKeys();
