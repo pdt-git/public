@@ -19,6 +19,8 @@ package alice.tuprolog;
 
 import java.io.*;
 
+import alice.tuprolog.event.OutputEvent;
+import alice.tuprolog.event.OutputListener;
 import alice.util.Tools;
 
 /**
@@ -28,141 +30,144 @@ import alice.util.Tools;
  *
  * @see alice.tuprolog.Prolog
  *
- *
- *
  */
 public class Agent {
-
-    private Prolog core;
-    private String      theoryText;
-    private InputStream theoryInputStream;
-    private String      goalText;
-
-    private OutputListener defaultOutputListener = new OutputListener() {
-            public void onOutput(OutputEvent ev) {
-                System.out.print(ev.getMsg());
-    }};
-
-
-    /**
-     * Builds a prolog agent providing it a theory
-     *
-     * @param theory the text representing the theory
-     */
-    public Agent(String theory){
-        theoryText=theory;
-        core=new Prolog();
-        core.addOutputListener(defaultOutputListener);
-    }
-
-    /**
-     * Builds a prolog agent providing it a theory and a goal
-     */
-    public Agent(String theory,String goal){
-        theoryText=theory;
-        goalText=goal;
-        core=new Prolog();
-        core.addOutputListener(defaultOutputListener);
-    }
-
-    /**
-     * Constructs the Agent with a theory provided
-     * by an input stream
-     */
-    public Agent(InputStream is){
-        theoryInputStream=is;
-        core=new Prolog();
-        core.addOutputListener(defaultOutputListener);
-    }
-
-    /**
-     * Constructs the Agent with a theory provided
-     * by an input stream and a goal
-     */
-    public Agent(InputStream is,String goal){
-        theoryInputStream=is;
-        goalText=goal;
-        core=new Prolog();
-        core.addOutputListener(defaultOutputListener);
-    }
-
-    /**
-     * Starts agent execution
-     */
-    final  public void spawn(){
-        new Agent.AgentThread(this).start();
-    }
-
-    /**
-     * Adds a listener to ouput events
-     *
-     * @param l the listener
-     */
-    public synchronized void addOutputListener(OutputListener l) {
-        core.addOutputListener(l);
-    }
-
-    /**
-     * Removes a listener to ouput events
-     *
-     * @param l the listener
-     */
-    public synchronized void removeOutputListener(OutputListener l) {
-        core.removeOutputListener(l);
-    }
-
-    /**
-     * Removes all output event listeners
-     */
-    public void removeAllOutputListener(){
-       core.removeAllOutputListeners();
-    }
-
-
-
-    private void body(){
-        try {
-            if (theoryText==null){
-                core.setTheory(new Theory(theoryInputStream));
-            }  else {
-                core.setTheory(new Theory(theoryText));
-            }
-            if (goalText!=null){
-                core.solve(goalText);
-            }
-        } catch (Exception ex){
-            System.err.println("invalid theory or goal.");
-            ex.printStackTrace();
-        }
-    }
-
-    final class AgentThread extends Thread {
-        Agent agent;
-        AgentThread(Agent agent){
-            this.agent=agent;
-        }
-        final public void run(){
-            agent.body();
-        }
-    }
-
-    public static void main(String args[]){
-        if (args.length==1 || args.length==2){
-            
-            FileReader fr;
-            try {
+	
+	private Prolog core;
+	private String theoryText;
+	private InputStream theoryInputStream;
+	private String goalText;
+	
+	private OutputListener defaultOutputListener = new OutputListener() {
+		public void onOutput(OutputEvent ev) {
+			System.out.print(ev.getMsg());
+		}
+	};
+	
+	
+	/**
+	 * Builds a prolog agent providing it a theory
+	 *
+	 * @param theory the text representing the theory
+	 */
+	public Agent(String theory){
+		theoryText=theory;
+		core=new Prolog();
+		core.addOutputListener(defaultOutputListener);
+	}
+	
+	/**
+	 * Builds a prolog agent providing it a theory and a goal
+	 */
+	public Agent(String theory,String goal){
+		theoryText=theory;
+		goalText=goal;
+		core=new Prolog();
+		core.addOutputListener(defaultOutputListener);
+	}
+	
+	/**
+	 * Constructs the Agent with a theory provided
+	 * by an input stream
+	 */
+	public Agent(InputStream is){
+		theoryInputStream=is;
+		core=new Prolog();
+		core.addOutputListener(defaultOutputListener);
+	}
+	
+	/**
+	 * Constructs the Agent with a theory provided
+	 * by an input stream and a goal
+	 */
+	public Agent(InputStream is,String goal){
+		theoryInputStream=is;
+		goalText=goal;
+		core=new Prolog();
+		core.addOutputListener(defaultOutputListener);
+	}
+	
+	/**
+	 * Starts agent execution
+	 */
+	final  public void spawn(){
+		new Agent.AgentThread(this).start();
+	}
+	
+	/**
+	 * Adds a listener to ouput events
+	 *
+	 * @param l the listener
+	 */
+	public synchronized void addOutputListener(OutputListener l) {
+		core.addOutputListener(l);
+	}
+	
+	/**
+	 * Removes a listener to ouput events
+	 *
+	 * @param l the listener
+	 */
+	public synchronized void removeOutputListener(OutputListener l) {
+		core.removeOutputListener(l);
+	}
+	
+	/**
+	 * Removes all output event listeners
+	 */
+	public void removeAllOutputListener(){
+		core.removeAllOutputListeners();
+	}
+	
+	
+	private void body(){
+		try {
+			if (theoryText==null){
+				core.setTheory(new Theory(theoryInputStream));
+			} else {
+				core.setTheory(new Theory(theoryText));
+			}
+			if (goalText!=null){
+				core.solve(goalText);
+			}
+		} catch (Exception ex){
+			System.err.println("invalid theory or goal.");
+			ex.printStackTrace();
+		}
+	}
+	
+	
+	final class AgentThread extends Thread {
+		Agent agent;
+		AgentThread(Agent agent){
+			this.agent=agent;
+		}
+		final public void run(){
+			agent.body();
+		}
+	}
+	
+	
+	public static void main(String args[]){
+		if (args.length==1 || args.length==2){
+			
+			//FileReader fr;
+			try {
 				String text = Tools.loadText(args[0]);
-                if (args.length==1){
-                    new Agent(text).spawn();
-                } else {
-                    new Agent(text,args[1]).spawn();
-                }
-            } catch (Exception ex){
-                System.err.println("invalid theory.");
-            }
-        } else {
-            System.err.println("args: <theory file> { goal }");
-            System.exit(-1);
-        }
-    }
+				if (args.length==1){
+					new Agent(text).spawn();
+				} else {
+					new Agent(text,args[1]).spawn();
+				}
+				System.out.println("program terminated");
+			} catch (Exception ex){
+				System.err.println("invalid theory.");
+			}
+		} else {
+			System.err.println("args: <theory file> { goal }");
+			System.exit(-1);
+		}
+	}
+	
+	
 }

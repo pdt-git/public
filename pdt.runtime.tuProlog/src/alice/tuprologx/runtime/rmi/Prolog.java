@@ -1,6 +1,5 @@
 package alice.tuprologx.runtime.rmi;
-import  java.io.*;
-import  alice.tuprolog.*;
+import alice.tuprolog.*;
 
 public interface Prolog extends java.rmi.Remote {
 

@@ -2,7 +2,8 @@ package alice.tuprologx.runtime.tcp;
 
 import  java.io.*;
 import  java.util.*;
-import  alice.tuprolog.*;
+
+import alice.tuprolog.*;
 
 public interface Prolog {
 

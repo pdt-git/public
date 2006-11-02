@@ -22,27 +22,25 @@ package alice.tuprolog;
  *
  * @see Struct
  *
- *
- *
  */
 class StructIterator implements java.util.Iterator, java.io.Serializable {
-
-    Struct t;
-
-    StructIterator(Struct t){
-        this.t=t;
-    }
-
-    public boolean hasNext(){
-        return !t.isEmptyListRaw();
-    }
-
-    public Object next(){
-        Term co=t.getTerm(0);
-        t=(Struct)(t.getTerm(1));
-        return co;
-    }
-
-    public void remove(){
-    }
+	
+	Struct t;
+	
+	StructIterator(Struct t) {
+		this.t=t;
+	}
+	
+	public boolean hasNext() {
+		return !t.isEmptyListRaw();
+	}
+	
+	public Object next() {
+		Term co = t.getTerm(0);
+		t = (Struct) t.getTerm(1);
+		return co;
+	}
+	
+	public void remove() {}
+	
 }

@@ -17,89 +17,116 @@
  */
 package alice.tuprolog;
 import java.io.*;
+import java.util.*;
+
 
 /**
  *
  * SolveInfo class represents the result of a solve
  * request made to the engine, providing information
  * about the solution
- *
+ * 
+ * @author Alex Benini
  */
 public class SolveInfo implements Serializable  {
-
-	private boolean isSuccess;
-
-    /** goal variable state after demonstration */
-    private Var[] bindings;
-
-    /** goal subject of demonstration */
-    private Term goal;
-    
-    private Term query;
 	
-    SolveInfo(Term query,Var[] vars,Term g){
-	   this.query=query;
-        isSuccess=true;
-        bindings=vars;
-        goal=g;
-    }
-
-	SolveInfo(Term query){
-	    this.query = query; 
-		isSuccess=false;
+	/*
+	 * possible values returned by step functions
+	 * and used as eval state flags
+	 */
+	static final int HALT    = EngineManager.HALT;
+	static final int FALSE   = EngineManager.FALSE;
+	static final int TRUE    = EngineManager.TRUE;
+	static final int TRUE_CP = EngineManager.TRUE_CP;
+	
+	private int     endState;
+	private boolean isSuccess;
+	
+	private Term query;
+	private Struct goal;
+	private List   bindings;
+	
+	
+	/**
+	 * 
+	 */
+	SolveInfo(Term initGoal){
+		query = initGoal;
+		isSuccess = false;
 	}
 	
-    /**
-     * Checks if the solve request was successful
-     *
-     * @return true if the solve was successful
-     */
-    public boolean isSuccess(){
-        return isSuccess;
-    }
-
-    
-    /**
-     * Gets the value of a variable
-     * in the substitution
-     */
-    public Term getTerm(String varName) throws NoSolutionException, UnknownVarException  {
-        if (isSuccess){        
-            for (int i=0; i<bindings.length; i++){
-                if (bindings[i]!=null && bindings[i].getName().equals(varName)){
-                    return bindings[i].getTerm();
-                }
-            }
-            throw new UnknownVarException();
-        }else {
-            throw new NoSolutionException();
-        }
-    }
-    
-    /**
-     * Gets the query
-     * 
-     * @return the query
-     */
-    public Term getQuery(){
-        return query;
-    }
-    
-    /**
-     *  Gets the solution of the request
-     *
-     *  @exception NoSolutionException if the solve request has not
-     *             solution
-     */
-    public Term  getSolution() throws NoSolutionException {
-        if (isSuccess){
-            return goal;
-        } else {
-            throw new NoSolutionException();
-        }
-    }
-
-
+	/**
+	 * 
+	 * @param initGoal
+	 * @param resultGoal
+	 * @param resultDemo
+	 * @param resultVars
+	 */
+	SolveInfo(Term initGoal, Struct resultGoal, int resultDemo, List resultVars) {
+		query = initGoal;
+		goal = resultGoal;
+		bindings = resultVars;
+		endState = resultDemo;
+		isSuccess = (endState > FALSE);
+	}
+	
+	
+	
+	/**
+	 * Checks if the solve request was successful
+	 *
+	 * @return true if the solve was successful
+	 */
+	public boolean isSuccess() {
+		return isSuccess;
+	}
+	
+	
+	/**
+	 * Checks if the solve request was halted
+	 *
+	 * @return true if the solve was successful
+	 */
+	public boolean isHalted() {
+		return (endState == HALT);
+	}
+	
+	
+	/**
+	 * Checks if the solve request was halted
+	 *
+	 * @return true if the solve was successful
+	 */
+	public boolean hasOpenAlternatives() {
+		return (endState == TRUE_CP);
+	}
+	
+	
+	/**
+	 * Gets the query
+	 * 
+	 * @return the query
+	 */
+	public Term getQuery() {
+		return query;
+	}
+	
+	
+	/**
+	 *  Gets the solution of the request
+	 *
+	 *  @exception NoSolutionException if the solve request has not
+	 *             solution
+	 */
+	public Term  getSolution() throws NoSolutionException {
+		if (isSuccess){
+			return goal;
+		} else {
+			throw new NoSolutionException();
+		}
+	}
+	
+	
 	/**
 	 * Gets the list of the variables in the solution.
 	 * @return the array of variables.
@@ -107,38 +134,44 @@ public class SolveInfo implements Serializable  {
 	 * @throws NoSolutionException if current solve information
 	 * does not concern a successful 
 	 */
-    public Var[]  toVarArray() throws NoSolutionException {
-        if (isSuccess){
-            return bindings;
-        }else {
-            throw new NoSolutionException();
-        }
-    }
-    
-    
-    /**
-     * 
-     * Gets the term value bound to a variable
-     * 
-     * @param name the variable name
-     * @return the term value bound to the variable or null if the variable is not found
-     * @throws NoSolutionException if the solve request has no solution
-     */
-	public Term getVarValue(String name) throws NoSolutionException {
+	public List getBindingVars() throws NoSolutionException {
 		if (isSuccess){
-			String st="";
-			for (int i=0; i<bindings.length; i++){
-				if (bindings[i]!=null && bindings[i].getName().equals(name)){
-					return bindings[i].getTerm();
+			return bindings;
+		}else {
+			throw new NoSolutionException();
+		}
+	}
+	
+	/**
+	 * Gets the value of a variable in the substitution.
+	 * @throws NoSolutionException if the solve request has no solution
+	 * @throws UnknownVarException if the variable does not appear in the substitution.
+	 */
+	public Term getTerm(String varName) throws NoSolutionException, UnknownVarException {
+		Term t = getVarValue(varName);
+		if (t == null)
+			throw new UnknownVarException();
+		return t;
+	}
+	
+	/**
+	 * Gets the value of a variable in the substitution. Returns <code>null</code
+	 * if the variable does not appear in the substitution.
+	 */
+	public Term getVarValue(String varName) throws NoSolutionException {
+		if (isSuccess) {
+			Iterator it = bindings.iterator();
+			while (it.hasNext()) {
+				Var v = (Var)it.next();
+				if (v!=null && v.getName().equals(varName)) {
+					return v.getTerm();
 				}
 			}
 			return null;
-		} else {
+		} else
 			throw new NoSolutionException();
-		}
-   }
-   
-    
+	}
+	
 	/**
 	 * Returns the string representation of the result of the demonstration.
 	 * 
@@ -146,27 +179,28 @@ public class SolveInfo implements Serializable  {
 	 * variables with bindings.  For failed demo, the method returns false string.
 	 * 
 	 */    
-    public String toString(){
-        if (isSuccess){
-            StringBuffer st=new StringBuffer("yes");
-            if (bindings.length>0){
-                st.append(".\n");
-            } else {
-                st.append(". ");
-            }
-            for (int i=0; i<bindings.length; i++){
-                if (bindings[i]!=null && !bindings[i].isAnonymous() &&
-                        bindings[i].isBound() &&
-                        (!bindings[i].getTerm().isVar() ||
-                          (!((Var)(bindings[i].getTerm())).getName().startsWith("_")))){
-                    st.append(bindings[i]);
-                    st.append("  ");
-                }
-            }
-            return st.toString();
-        } else {
-            return "no";
-        }
-    }
-    
+	public String toString() {
+		if (isSuccess) {
+			StringBuffer st=new StringBuffer("yes");
+			if (bindings.size()>0) {
+				st.append(".\n");
+			} else {
+				st.append(". ");
+			}
+			Iterator it = bindings.iterator();
+			while(it.hasNext()) {
+				Var v = (Var)it.next();
+				if (v!=null && !v.isAnonymous() && v.isBound() &&
+						(!v.getTerm().isVar() || (!((Var)(v.getTerm())).getName().startsWith("_")))){
+					st.append(v);
+					st.append("  ");
+				}
+			}
+			return st.toString();
+		} else {
+			return "no";
+		}
+	}
+	
+	
 }

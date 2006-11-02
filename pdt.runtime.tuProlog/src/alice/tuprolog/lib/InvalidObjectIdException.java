@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog.lib;
-
+import alice.tuprolog.PrologException;
 
 /**
  * This exception is raised when a not valid identifier is used
@@ -28,5 +28,5 @@ package alice.tuprolog.lib;
  *
  *
  */
-public class InvalidObjectIdException extends alice.tuprolog.PrologException {
+public class InvalidObjectIdException extends PrologException {
 }

@@ -1,7 +1,6 @@
 package alice.tuprologx.runtime.tcp;
 import alice.tuprolog.*;
 import  java.io.*;
-import  java.util.*;
 import  java.net.*;
 
 public class Proxy implements alice.tuprologx.runtime.tcp.Prolog {

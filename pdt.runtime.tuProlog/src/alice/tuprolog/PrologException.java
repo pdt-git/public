@@ -22,8 +22,11 @@ package alice.tuprolog;
  * also for representing generic 2P exceptions.
  */
 public class PrologException extends Exception {
-    public PrologException(){}
-    public PrologException(String st){
-        super(st);
-    }
+	
+	public PrologException() {}
+	
+	public PrologException(String st) {
+		super(st);
+	}
+	
 }

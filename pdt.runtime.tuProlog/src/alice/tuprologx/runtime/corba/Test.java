@@ -3,6 +3,7 @@ package alice.tuprologx.runtime.corba;
 import org.omg.CosNaming.*;
 import org.omg.CosNaming.NamingContextPackage.*;
 import org.omg.CORBA.*;
+
 import alice.tuprolog.*;
 
 public class Test{

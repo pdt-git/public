@@ -17,6 +17,7 @@
  */
 package alice.tuprolog;
 import	java.io.*;
+;
 
 /**
  * This class represents prolog theory which can be provided
@@ -29,86 +30,84 @@ import	java.io.*;
  *
  */
 public class Theory implements Serializable {
-
-    private String theory;
-    private Struct clauseList;
-
-    /**
-     * Creates a theory getting its source text from an input stream
-     *
-     * @param is the input stream acting as source
-     */
-    public Theory(InputStream is) throws IOException, InvalidTheoryException {
-        byte[] info=new byte[is.available()];
-        is.read(info);
-        theory=new String(info);
-    }
-
-    /**
-     * Creates a theory from its source text
-     *
-     * @param theory the source text
-     * @throws s InvalidTheoryException if theory is null
-     */
-    public Theory(String theory) throws InvalidTheoryException {
-        if (theory==null){
-            throw new InvalidTheoryException();
-        }
-        this.theory=theory;
-    }
-
-    /**
-     * Creates a theory from a clause list
-     *
-     * @param clauseList the source text
-     * @throws s InvalidTheoryException if clauseList is null or is not a prolog list
-     */
-    public Theory(Struct clauseList) throws InvalidTheoryException{
-        if (clauseList==null || !clauseList.isList()){
-            throw new InvalidTheoryException();
-        }
-        this.clauseList=clauseList;
-    }
-
-    /**
-     * Adds (appends) a theory to this.
-     *
-     * @param th is the theory to be appended
-     * @throws s InvalidTheoryException if the theory object are not compatibles (they are
-     *  compatibles when both have been built from texts or both from clause lists)
-     */
-    public void append(Theory th) throws InvalidTheoryException {
-        if (th.isTextual() && isTextual()){
-            theory=theory+th.theory;
-        } else if (!th.isTextual() && !isTextual()){
-            clauseList.append(th.getClauseListRepresentation());
-        } else {
-            throw new InvalidTheoryException();
-        }
-
-    }
-
-    /**
-     * Checks if the theory has been built
-     * from a text or a clause list
-     *
-     */
-    boolean isTextual(){
-        return theory!=null;
-    }
-
-    Struct getClauseListRepresentation(){
-        return clauseList;
-    }
-
-    public String toString(){
-        if (theory!=null){
-            return theory;
-        } else {
-            return clauseList.toString();
-        }
-    }
-
-
-
+	
+	private String theory;
+	private Struct clauseList;
+	
+	/**
+	 * Creates a theory getting its source text from an input stream
+	 *
+	 * @param is the input stream acting as source
+	 */
+	public Theory(InputStream is) throws IOException, InvalidTheoryException {
+		byte[] info = new byte[is.available()];
+		is.read(info);
+		theory = new String(info);
+	}
+	
+	/**
+	 * Creates a theory from its source text
+	 *
+	 * @param theory the source text
+	 * @throws s InvalidTheoryException if theory is null
+	 */
+	public Theory(String theory) throws InvalidTheoryException {
+		if (theory==null) {
+			throw new InvalidTheoryException();
+		}
+		this.theory=theory;
+	}
+	
+	/**
+	 * Creates a theory from a clause list
+	 *
+	 * @param clauseList the source text
+	 * @throws s InvalidTheoryException if clauseList is null or is not a prolog list
+	 */
+	public Theory(Struct clauseList) throws InvalidTheoryException {
+		if (clauseList==null || !clauseList.isList()) {
+			throw new InvalidTheoryException();
+		}
+		this.clauseList = clauseList;
+	}
+	
+	/**
+	 * Adds (appends) a theory to this.
+	 *
+	 * @param th is the theory to be appended
+	 * @throws s InvalidTheoryException if the theory object are not compatibles (they are
+	 *  compatibles when both have been built from texts or both from clause lists)
+	 */
+	public void append(Theory th) throws InvalidTheoryException {
+		if (th.isTextual() && isTextual()) {
+			theory = theory + th.theory;
+		} else if (!th.isTextual() && !isTextual()) {
+			clauseList.append(th.getClauseListRepresentation());
+		} else {
+			throw new InvalidTheoryException();
+		}
+	}
+	
+	/**
+	 * Checks if the theory has been built
+	 * from a text or a clause list
+	 *
+	 */
+	boolean isTextual() {
+		return theory != null;
+	}
+	
+	Struct getClauseListRepresentation() {
+		return clauseList;
+	}
+	
+	public String toString() {
+		if (theory!=null) {
+			return theory;
+		} else {
+			return clauseList.toString();
+		}
+	}
+	
+	
 }

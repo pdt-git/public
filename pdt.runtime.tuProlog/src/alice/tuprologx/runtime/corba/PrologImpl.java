@@ -1,7 +1,6 @@
 package alice.tuprologx.runtime.corba;
-import  alice.tuprolog.*;
+import alice.tuprolog.*;
 import  java.io.*;
-import  java.util.*;
 
 
 public class PrologImpl extends _PrologImplBase {

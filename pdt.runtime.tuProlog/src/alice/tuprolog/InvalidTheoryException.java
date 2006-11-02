@@ -22,17 +22,17 @@ package alice.tuprolog;
  *
  * @see Theory
  *
- *
- *
  */
 public class InvalidTheoryException extends PrologException {
-    public int line=-1;
-    public int pos=-1;
-
-    public InvalidTheoryException(){}
-
-    public InvalidTheoryException(int line,int pos){
-        this.line=line;
-        this.pos=pos;
-    }
+	
+	public int line=-1;
+	public int pos=-1;
+	
+	public InvalidTheoryException() {}
+	
+	public InvalidTheoryException(int line,int pos) {
+		this.line=line;
+		this.pos=pos;
+	}
+	
 }
