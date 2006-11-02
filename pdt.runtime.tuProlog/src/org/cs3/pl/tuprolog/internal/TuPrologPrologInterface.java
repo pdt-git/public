@@ -58,7 +58,7 @@ import alice.tuprolog.InvalidLibraryException;
 import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.Theory;
-import alice.tuprolog.WarningListener;
+import alice.tuprolog.event.WarningListener;
 
 public class TuPrologPrologInterface extends AbstractPrologInterface {
 

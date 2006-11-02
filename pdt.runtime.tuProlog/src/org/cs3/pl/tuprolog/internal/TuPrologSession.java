@@ -171,15 +171,22 @@ public class TuPrologSession implements PrologSession2 {
 	}
 
 	private Map toMap(SolveInfo result) throws PrologInterfaceException {
-		Var[] vars;
+		List vars;
 		Map map = new HashMap();
 		try {
-			vars = result.toVarArray();
+			vars = result.getBindingVars();
+			for (Iterator iter = vars.iterator(); iter.hasNext();) {
+				Var var = (Var) iter.next();
+				map.put(var.getName(), 
+						termToListOrString(result.getTerm(var.getName())));
+			}
+			/*
 			for (int i = 0; i < vars.length; i++) {
 				Term term = result.getTerm(vars[i].getName());
 				Object value;
 				map.put(vars[i].getName(),termToListOrString(term));
 			}
+			*/
 		} catch (NoSolutionException e) {
 			throw new PrologException(e);
 		} catch (UnknownVarException e) {
