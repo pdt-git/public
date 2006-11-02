@@ -53,21 +53,23 @@
 
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
 	pdt_term_annotation(InTerm,_,Annos),
-    pdt_member(variable_names(Variables),Annos),
-	propagate_variable_names(InTerm,Variables,OutTerm).
+    pdt_member(variable_names(VariableNames),Annos),
+    pdt_member(variable_ids(VariableIds),Annos),    
+	propagate_variable_names(InTerm,VariableNames,NextTerm),
+	propagate_variable_ids(NextTerm,VariableIds,OutTerm).
 
     
 
 	
 
-propagate_variable_names(In,Variables,Out):-
+propagate_variable_names(In,VariableNames,Out):-
 	pdt_cs(CS),
 	pdt_cs_subterm(CS,T),
-	pdt_cs_carrier(CS,Variables),
+	pdt_cs_carrier(CS,VariableNames),
 	pdt_cs_condition(CS,
 		(	pdt_term_annotation(T,Var,Annos),
 			var(Var),
-			member(Name=XVar,Variables),
+			member(Name=XVar,VariableNames),
 			Var==XVar,
 			pdt_term_annotation(TT,Var,[variable_name(Name)|Annos])
 		)
@@ -75,5 +77,19 @@ propagate_variable_names(In,Variables,Out):-
 	pdt_cs_substitution(CS,TT),
 	pdt_cs_apply(In,CS,Out).
 
+propagate_variable_ids(In,VariableIds,Out):-
+	pdt_cs(CS),
+	pdt_cs_subterm(CS,T),
+	pdt_cs_carrier(CS,VariableIds),
+	pdt_cs_condition(CS,
+		(	pdt_term_annotation(T,Var,Annos),
+			var(Var),
+			member(XVar=Id,VariableIds),
+			Var==XVar,
+			pdt_term_annotation(TT,Var,[variable_id(Id)|Annos])
+		)
+	),
+	pdt_cs_substitution(CS,TT),
+	pdt_cs_apply(In,CS,Out).
 
 
