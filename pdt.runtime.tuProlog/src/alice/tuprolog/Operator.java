@@ -22,24 +22,21 @@ import java.io.Serializable;
  * This class defines a tuProlog operator, in terms of a name,
  * a type, and a  priority.
  *
- *
- *
- *
  */
 final public class Operator implements Serializable {
-
-    /** operator name */
-    public String name;
-
-    /** type(xf,yf,fx,fy,xfx,xfy,yfy,yfx */
-    public String type;
-
-    /** priority */
-    public int prio;
-
-    Operator(String name_,String type_,int prio_) {
-        name = name_;
-        type = type_;
-        prio = prio_;
-    }
+	
+	/** operator name */
+	public String name;
+	
+	/** type(xf,yf,fx,fy,xfx,xfy,yfy,yfx */
+	public String type;
+	
+	/** priority */
+	public int prio;
+	
+	Operator(String name_,String type_,int prio_) {
+		name = name_;
+		type = type_;
+		prio = prio_;
+	}
 }

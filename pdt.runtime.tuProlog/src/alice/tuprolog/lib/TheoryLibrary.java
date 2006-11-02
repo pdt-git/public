@@ -17,27 +17,26 @@
  */
 package alice.tuprolog.lib;
 import alice.tuprolog.*;
-import alice.tuprolog.Number;
 
 /**
  * Library built from Prolog theory.
  * 
  */
 public class TheoryLibrary extends Library {
-
-    private Theory th;
-    private String name;
-    
-    public TheoryLibrary(String name, Theory theory){
-        this.th = th;
-        this.name = name;
-    }
-
-    public String getTheory(){
-        return th.toString();
-    }
-    
-    public String getName(){
-        return name;
-    }
+	
+	private Theory th;
+	private String name;
+	
+	public TheoryLibrary(String name, Theory theory){
+		this.th = theory;
+		this.name = name;
+	}
+	
+	public String getTheory(){
+		return th.toString();
+	}
+	
+	public String getName(){
+		return name;
+	}
 }

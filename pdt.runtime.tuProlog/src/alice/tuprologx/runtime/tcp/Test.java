@@ -1,6 +1,7 @@
 package alice.tuprologx.runtime.tcp;
 
 import alice.tuprolog.*;
+
 import java.io.*;
 
 public class Test

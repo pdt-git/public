@@ -17,7 +17,6 @@
  */
 package alice.tuprolog.lib;
 import alice.tuprolog.*;
-import alice.tuprolog.Number;
 
 /**
  * Library for managing DCGs.
@@ -28,26 +27,26 @@ import alice.tuprolog.Number;
  *
  */
 public class DCGLibrary extends Library {
-
-    public DCGLibrary(){
-    }
-
-    public String getTheory(){
-        return
-            //
-            // operators defined by the BasicLibrary theory
-            //
-            ":- op( 1200, xfx,  '-->'). \n"+
-            "dcg_nonterminal(X) :- list(X),!,fail.  \n"+
-            "dcg_nonterminal(_).                    \n"+
-            "dcg_terminals(Xs) :- list(Xs).         \n"+
-            "phrase(Category,String,Left) :- dcg_parse(Category,String\\Left).      \n"+
-            "phrase(Category,[H|T]) :- dcg_parse(Category,[H|T]\\[]).      \n"+
-            "dcg_parse(A,Tokens) :- dcg_nonterminal(A), (A --> B), dcg_parse(B,Tokens).            \n"+
-            "dcg_parse((A,B),(Tokens \\ Xs)) :- dcg_parse(A,(Tokens \\ Tokens1)), dcg_parse(B,(Tokens1 \\ Xs)).    \n"+
-            "dcg_parse(A,Tokens) :- dcg_terminals(A), dcg_connect(A,Tokens).    \n"+
-            "dcg_parse({A},(Xs \\ Xs)) :- A. \n"+
-            "dcg_connect([],(Xs \\ Xs)). \n"+
-            "dcg_connect([W|Ws],([W|Xs] \\ Ys)) :- dcg_connect(Ws,(Xs \\ Ys)). \n";
-    }
+	
+	public DCGLibrary(){
+	}
+	
+	public String getTheory(){
+		return
+		//
+		// operators defined by the BasicLibrary theory
+		//
+		":- op( 1200, xfx,  '-->'). \n"+
+		"dcg_nonterminal(X) :- list(X),!,fail.  \n"+
+		"dcg_nonterminal(_).                    \n"+
+		"dcg_terminals(Xs) :- list(Xs).         \n"+
+		"phrase(Category,String,Left) :- dcg_parse(Category,String\\Left).      \n"+
+		"phrase(Category,[H|T]) :- dcg_parse(Category,[H|T]\\[]).      \n"+
+		"dcg_parse(A,Tokens) :- dcg_nonterminal(A), (A --> B), dcg_parse(B,Tokens).            \n"+
+		"dcg_parse((A,B),(Tokens \\ Xs)) :- dcg_parse(A,(Tokens \\ Tokens1)), dcg_parse(B,(Tokens1 \\ Xs)).    \n"+
+		"dcg_parse(A,Tokens) :- dcg_terminals(A), dcg_connect(A,Tokens).    \n"+
+		"dcg_parse({A},(Xs \\ Xs)) :- A. \n"+
+		"dcg_connect([],(Xs \\ Xs)). \n"+
+		"dcg_connect([W|Ws],([W|Xs] \\ Ys)) :- dcg_connect(Ws,(Xs \\ Ys)). \n";
+	}
 }

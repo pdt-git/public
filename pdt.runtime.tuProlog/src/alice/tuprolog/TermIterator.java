@@ -26,28 +26,30 @@ package alice.tuprolog;
  *
  */
 class TermIterator implements java.util.Iterator, java.io.Serializable{
-    TermIterator(String text){
-        parser=new Parser(text);
-        hasNext=(parser.readTerm(true)==Parser.TERM);
-    }
-
-    public Object next() {
-        if (hasNext){
-            Term term=parser.getCurrentTerm();
-            hasNext=(parser.readTerm(true)==Parser.TERM);
-            return term;
-        } else {
-            return null;
-        }
-    }
-
-    public boolean hasNext() {
-        return hasNext;
-    }
-
-    public void remove(){
-    }
-
-    private Parser parser;
-    private boolean hasNext;
+	
+	
+	TermIterator(String text){
+		parser=new Parser(text);
+		hasNext=(parser.readTerm(true)==Parser.TERM);
+	}
+	
+	public Object next() {
+		if (hasNext) {
+			Term term=parser.getCurrentTerm();
+			hasNext=(parser.readTerm(true)==Parser.TERM);
+			return term;
+		} else {
+			return null;
+		}
+	}
+	
+	public boolean hasNext() {
+		return hasNext;
+	}
+	
+	public void remove() {
+	}
+	
+	private Parser parser;
+	private boolean hasNext;
 }

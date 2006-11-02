@@ -26,23 +26,23 @@ package alice.tuprolog;
  *
  */
 class StructKey implements java.io.Serializable {
-
-    int hash;
-    String key;
-
-    public StructKey(String key, int arity) {
-        hash=(key+arity).hashCode();
-    }
-
-    public int hashCode() {
-        return hash;
-    }
-
-    public boolean equals(Object t) {
-        try {
-            return (((StructKey)t).hash==hash);
-        } catch (Exception ex){
-            return false;
-        }
-    }
+	
+	int hash;
+	String key;
+	
+	public StructKey(String key, int arity) {
+		hash=(key+arity).hashCode();
+	}
+	
+	public int hashCode() {
+		return hash;
+	}
+	
+	public boolean equals(Object t) {
+		try {
+			return (((StructKey)t).hash==hash);
+		} catch (Exception ex){
+			return false;
+		}
+	}
 }

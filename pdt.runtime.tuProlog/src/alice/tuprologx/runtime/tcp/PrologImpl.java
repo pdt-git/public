@@ -1,7 +1,6 @@
 package alice.tuprologx.runtime.tcp;
 import alice.tuprolog.*;
 import  java.io.*;
-import  java.util.*;
 
 public class PrologImpl implements Serializable {
 

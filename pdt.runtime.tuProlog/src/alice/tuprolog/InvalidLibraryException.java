@@ -23,26 +23,33 @@ package alice.tuprolog;
  * @see Library
  */
 public class InvalidLibraryException extends PrologException {
-    private String libraryName;
-    private int line;
-    private int pos;
-    
-    public InvalidLibraryException(){}
-    public InvalidLibraryException(String libName, int line, int pos){
-        libraryName=libName;
-        this.pos=pos;
-        this.line=line;
-    }
-    public String getLibraryName(){
-        return libraryName;
-    }
-    public int getLine(){
-        return line;
-    }
-    public int getPos(){
-        return pos;
-    }
-    public String toString(){
-        return "InvalidLibraryException: "+libraryName+" at "+line+":"+pos;
-    }
+	
+	private String libraryName;
+	private int line;
+	private int pos;
+	
+	public InvalidLibraryException() {}
+	
+	public InvalidLibraryException(String libName, int line, int pos) {
+		libraryName=libName;
+		this.pos=pos;
+		this.line=line;
+	}
+	
+	public String getLibraryName() {
+		return libraryName;
+	}
+	
+	public int getLine() {
+		return line;
+	}
+	
+	public int getPos() {
+		return pos;
+	}
+	
+	public String toString() {
+		return "InvalidLibraryException: "+libraryName+" at "+line+":"+pos;
+	}
+	
 }

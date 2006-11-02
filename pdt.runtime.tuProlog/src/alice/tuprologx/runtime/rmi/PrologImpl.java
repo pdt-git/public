@@ -1,5 +1,5 @@
 package alice.tuprologx.runtime.rmi;
-import  alice.tuprolog.*;
+import alice.tuprolog.*;
 import  java.io.*;
 
 import java.rmi.*;

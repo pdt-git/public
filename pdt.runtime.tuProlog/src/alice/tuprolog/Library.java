@@ -17,9 +17,9 @@
  */
 package alice.tuprolog;
 
-import java.lang.reflect.*;
 import java.io.Serializable;
 import java.util.*;
+
 
 /**
  *
@@ -38,22 +38,19 @@ import java.util.*;
  *   is considered a built-in functors provided by the library
  * </ul>
  * <p>
- *
- *
- *
  */
-public abstract class Library  implements Serializable {
-
-    /** prolog core which loaded the library */
-    private Prolog engine;
-
-    /** operator mapping*/
-    private String[][] opMappingCached;
-
-    public Library(){
-        opMappingCached = getOperatorSynonymMap();
-    }
-
+public abstract class Library implements Serializable, IPrimitives {
+	
+	/** prolog core which loaded the library */
+	protected Prolog engine;
+	
+	/** operator mapping*/
+	private String[][] opMappingCached;
+	
+	public Library(){
+		opMappingCached = getSynonymMap();
+	}
+	
 	/**
 	 * Gets the name of the library. 
 	 * 
@@ -61,261 +58,226 @@ public abstract class Library  implements Serializable {
 	 * 
 	 * @return the library name
 	 */
-	public String getName(){
+	public String getName() {
 		return getClass().getName();
 	}
 	
-    /**
-     * Gets the theory provided with the library
-     *
-     * Empty theory is provided by default.
-     */
-    public String getTheory(){
-        return "";
-    }
-    
-    /**
-     * Gets the operator synonym mapping, as array of
-     * elements like  { synonym, original operator name}
-     */
-    public String[][] getOperatorSynonymMap(){
-        return null;
-    }
-
-    /**
-     * Gets the engine to which the library is bound
-     *
-     * @return the engine
-     */
-    public Prolog getEngine(){
-        return engine;
-    }
-
-    void setEngine(Prolog en){
-        engine=en;
-    }
-
-    /**
-     * tries to unify two terms
-     *
-     * The runtime (demonstration) context currently used by the engine
-     * is deployed and altered.
-     */
-    protected boolean unify(Term a0,Term a1){
-        return engine.unify(a0,a1);
-    }
-
-    /**
-     * Evaluates an expression. Returns null value if the argument
-     * is not an evaluable expression
-     *
-     * The runtime (demo) context currently used by the engine
-     * is deployed and altered.
-     */
-    protected Term evalExpression(Term term){
-        if (term==null){
-            return null;
-        }
-
-        term=term.getTerm();
-        if (term.isNumber()){
-            return term;
-        }
-        
-        if (term.isVar()){
-            return null;
-        }
-        
-        Struct t=(Struct)term;
-        if (!t.isBuiltIn()){
-            return null;
-        }
-
-        
-        BuiltIn bt=t.getBuiltIn();
-        // check for library functors
-        if (bt.isLibraryFunctor()){
-            return (bt.evalAsFunctor());
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * tries to unify two terms
-     *
-     * The runtime (demo) context currently used by the engine
-     * is deployed and altered.
-     */
-    protected Term getRenamedCopy(Term term){
-        return engine.getRenamedCopy(term);
-    }
-
-    /**
-     * gets the list of predicates defined in the library
-     */
-    public List getPredicates(){
-        try {
-            java.lang.reflect.Method[] mlist=this.getClass().getMethods();
-            ArrayList list=new ArrayList();
-            for (int i=0; i<mlist.length; i++){
-                String name=mlist[i].getName();
-                
-                Class[] clist=mlist[i].getParameterTypes();
-                Class   rclass=mlist[i].getReturnType();
-                if (rclass.getName().equals("boolean")){
-                    int index=name.lastIndexOf('_');
-                    if (index!=-1){
-                        try {
-                            int arity=Integer.parseInt(name.substring(index+1,name.length()));
-                            // check arg number
-                            if (clist.length==arity){
-                            	boolean valid=true;
-                            	for (int j=0; j<arity; j++){
-									if (!(Term.class.isAssignableFrom(clist[j]))){
-                            			valid=false;
-                            			break;
-                            		}
-                            	}
-                            	if (valid){
-                            		list.add(name);
-                            	}
-                            }
-                        } catch (Exception ex){
-                        }
-                    }
-                }
-            }
-            return list;
-        } catch (Exception ex){
-            return null;
-        }
-    }
-
-    /**
-     * gets the list of functors defined in the library
-     */
-    public List getFunctors(){
-        try {
-            java.lang.reflect.Method[] mlist=this.getClass().getMethods();
-            ArrayList list=new ArrayList();
-            for (int i=0; i<mlist.length; i++){
-                String name=mlist[i].getName();
-                Class[] clist=mlist[i].getParameterTypes();
-                Class   rclass=mlist[i].getReturnType();
-                if (rclass.getName().endsWith(".Term")){
-                    int index=name.lastIndexOf('_');
-                    if (index!=-1){
-                        try {
-                            String arityPart=name.substring(index+1,name.length());
-                            int arity=Integer.parseInt(arityPart);
-							if (clist.length==arity){
-								boolean valid=true;
-								for (int j=0; j<arity; j++){
-									if (!(Term.class.isAssignableFrom(clist[j]))){
-										valid=false;
-										break;
-									}
-								}
-								if (valid){
-                            		   list.add(name);
-		                            //
-		                            // adding also or synonims
-		                            //
-		                            if (opMappingCached!=null){
-		                                String rawName=name.substring(0,index);
-		                                for (int j=0; j<opMappingCached.length; j++){
-		                                    String[] map=opMappingCached[j];
-		                                    if (map[1].equals(rawName)){
-		                                        list.add(map[0]+"_"+arityPart);
-		                                    }
-		                                }
-		                            }
-								}
-							}
-                        } catch (Exception ex){
-                            ex.printStackTrace();
-                            return null;
-                        }
-                    }
-                }
-            }
-            return list;
-        } catch (Exception ex){
-            return null;
-        }
-    }
-    
-    /**
-     * Gets the method linked to a builtin (null value if
-     * the builtin has not any linked service)
-     *
-     */
-    public Method getLinkedMethod(Struct s){
-			//System.out.println("get linked for "+s);         
-		
-			int arity = s.getArity();
-			String name = s.getName()+"_"+arity; 
-
-			// NOT found, Try with synonims
-			Method m = findMethod(name,arity);	
-	        if (m!=null){
-	        	return m;
-	        }
-
-            // try with synonims
-            if (opMappingCached!=null){
-                String rawName=s.getName();
-                for (int j=0; j<opMappingCached.length; j++){
-                    String[] map=opMappingCached[j];
-                    if (map[0].equals(rawName)){
-                    	return findMethod(map[1]+"_"+s.getArity(),s.getArity());
-                    }
-                }
-            }
-            return null;
-    }
-
-	private Method findMethod(String name, int arity){
-		Method[] mlist = this.getClass().getMethods();
-		for (int i=0; i<mlist.length; i++){
-			if (mlist[i].getName().equals(name)){
-				Class[] parms=mlist[i].getParameterTypes();
-				if (parms.length==arity){
-					boolean valid=true;
-					for (int j=0; j<parms.length; j++){
-						if (!Term.class.isAssignableFrom(parms[j])){
-							valid=false;
-						}
-					}
-					if (valid){
-						return mlist[i];
-					}
-				}
+	/**
+	 * Gets the theory provided with the library
+	 *
+	 * Empty theory is provided by default.
+	 */
+	public String getTheory() {
+		return "";
+	}
+	
+	/**
+	 * Gets the synonym mapping, as array of
+	 * elements like  { synonym, original name}
+	 */
+	public String[][] getSynonymMap() {
+		return null;
+	}
+	
+	/**
+	 * Gets the engine to which the library is bound
+	 *
+	 * @return the engine
+	 */
+	public Prolog getEngine() {
+		return engine;
+	}
+	
+	void setEngine(Prolog en) {
+		engine = en;
+	}
+	
+	/**
+	 * tries to unify two terms
+	 *
+	 * The runtime (demonstration) context currently used by the engine
+	 * is deployed and altered.
+	 */
+	protected boolean unify(Term a0,Term a1) {
+		return engine.unify(a0,a1);
+	}
+	
+	/**
+	 * tries to unify two terms
+	 *
+	 * The runtime (demonstration) context currently used by the engine
+	 * is deployed and altered.
+	 */
+	protected boolean match(Term a0,Term a1) {
+		return engine.match(a0,a1);
+	}
+	
+	
+	/**
+	 * Evaluates an expression. Returns null value if the argument
+	 * is not an evaluable expression
+	 *
+	 * The runtime (demo) context currently used by the engine
+	 * is deployed and altered.
+	 */
+	protected Term evalExpression(Term term) {
+		if (term == null)
+			return null;
+		Term val = term.getTerm();
+		if (val.isStruct()) {
+			Struct t = (Struct) val;
+			if (term != t)
+				if (!t.isPrimitive())
+					engine.identifyFunctor(t);
+			if (t.isPrimitive()) {
+				PrimitiveInfo bt = t.getPrimitive();
+				// check for library functors
+				if (bt.isFunctor())
+					return bt.evalAsFunctor(t);
 			}
+		} else if (val.isNumber()) {
+			return val;
 		}
 		return null;
 	}
-
-    /**
-     * method invoked by prolog engine when library is
-     * going to be removed
-     */
-    public void dismiss(){
-    }
-
-    /**
-     * method invoked when the engine is going
-     * to demonstrate a goal
-     */
-    public void onSolveBegin(Term goal){
-    }
-
-    /**
-     * method invoked when the engine has
-     * finished a demostration
-     */
-    public void onSolveEnd(){
-    }
-
+	
+	
+	/**
+	 * method invoked by prolog engine when library is
+	 * going to be removed
+	 */
+	public void dismiss() {}
+	
+	/**
+	 * method invoked when the engine is going
+	 * to demonstrate a goal
+	 */
+	public void onSolveBegin(Term goal) {}
+	
+	/**
+	 * method invoked when the engine has
+	 * finished a demostration
+	 */
+	public void onSolveEnd() {}
+	
+	/**
+	 * gets the list of predicates defined in the library
+	 */
+	public List[] getPrimitives() {
+		try {
+			java.lang.reflect.Method[] mlist = this.getClass().getMethods();
+			ArrayList[] tablePrimitives = {new ArrayList(), new ArrayList(), new ArrayList()};
+			
+			for (int i = 0; i < mlist.length; i++) {
+				String name = mlist[i].getName();
+				
+				Class[] clist = mlist[i].getParameterTypes();
+				Class rclass = mlist[i].getReturnType();
+				String returnTypeName = rclass.getName();
+				
+				int type;
+				if (returnTypeName.equals("boolean")) type = PrimitiveInfo.PREDICATE;
+				else if (returnTypeName.equals("alice.tuprolog.Term")) type = PrimitiveInfo.FUNCTOR;
+				else if (returnTypeName.equals("void")) type = PrimitiveInfo.DIRECTIVE;
+				else continue;
+				
+				int index=name.lastIndexOf('_');
+				if (index!=-1) {
+					try {
+						int arity = Integer.parseInt(name.substring(index + 1, name.length()));
+						// check arg number
+						if (clist.length == arity) {
+							boolean valid = true;
+							for (int j=0; j<arity; j++) {
+								if (!(Term.class.isAssignableFrom(clist[j]))) {
+									valid = false;
+									break;
+								}
+							}
+							if (valid) {
+								String rawName = name.substring(0,index);
+								StructKey key = new StructKey(rawName,arity);
+								PrimitiveInfo prim = 
+									new PrimitiveInfo(type,key,this,mlist[i],arity);
+								tablePrimitives[type].add(prim);
+								//
+								// adding also or synonims
+								//
+								String[] stringFormat = {"directive","predicate","functor"};
+								if (opMappingCached != null) {
+									for (int j=0; j<opMappingCached.length; j++){
+										String[] map = opMappingCached[j];
+										if (map[2].equals(stringFormat[type]) && map[1].equals(rawName)){
+											key = new StructKey(map[0],arity);
+											prim = 
+												new PrimitiveInfo(type,key,this,mlist[i],arity);
+											tablePrimitives[type].add(prim);
+										}
+									}
+								}
+							}
+						}
+					} catch (Exception ex) {}
+				}
+				
+			}
+			return tablePrimitives;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Gets the method linked to a builtin (null value if
+	 * the builtin has not any linked service)
+	 */
+	/*	public Method getLinkedMethod(Struct s){
+	 //System.out.println("get linked for "+s);         
+	  
+	  int arity = s.getArity();
+	  String name = s.getName()+"_"+arity; 
+	  
+	  // NOT found, Try with synonims
+	   Method m = findMethod(name,arity);	
+	   if (m!=null){
+	   return m;
+	   }
+	   
+	   // try with synonims
+	    if (opMappingCached!=null){
+	    String rawName=s.getName();
+	    for (int j=0; j<opMappingCached.length; j++){
+	    String[] map=opMappingCached[j];
+	    if (map[0].equals(rawName)){
+	    return findMethod(map[1]+"_"+s.getArity(),s.getArity());
+	    }
+	    }
+	    }
+	    return null;
+	    }
+	    
+	    private Method findMethod(String name, int arity){
+	    Method[] mlist = this.getClass().getMethods();
+	    for (int i=0; i<mlist.length; i++){
+	    if (mlist[i].getName().equals(name)){
+	    Class[] parms=mlist[i].getParameterTypes();
+	    if (parms.length==arity){
+	    boolean valid=true;
+	    for (int j=0; j<parms.length; j++){
+	    if (!Term.class.isAssignableFrom(parms[j])){
+	    valid=false;
+	    }
+	    }
+	    if (valid){
+	    return mlist[i];
+	    }
+	    }
+	    }
+	    }
+	    return null;
+	    }
+	    */
+	
+	
 }
