@@ -10,12 +10,12 @@ import alice.tuprolog.Library;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.Prolog;
-import alice.tuprolog.QueryListener;
+import alice.tuprolog.event.QueryListener;
 import alice.tuprolog.SolveInfo;
-import alice.tuprolog.SpyListener;
+import alice.tuprolog.event.SpyListener;
 import alice.tuprolog.Theory;
-import alice.tuprolog.WarningEvent;
-import alice.tuprolog.WarningListener;
+import alice.tuprolog.event.WarningEvent;
+import alice.tuprolog.event.WarningListener;
 
 /**
  * Global PrologInterface TuProlog properties. 
@@ -38,7 +38,7 @@ public class TuProlog {
     
     public TuProlog() throws InvalidTheoryException, IOException {
     	engine = new Prolog();
-    	//initEngine();
+    	initEngine();
     }
     
     /**
@@ -49,29 +49,29 @@ public class TuProlog {
      * @throws IOException
      */
 	public void initEngine() throws InvalidTheoryException, IOException {
-		Theory theory = new Theory(
-				":- op(1150, fx, dynamic). \n" +
-				":- op(1150, fx, multifile).\n"+
-				
-				"dynamic(A) :- is_dynamic(A),!.\n" +
-				"dynamic(A) :- assert(is_dynamic(A)).\n" + 
-				"multifile(A) :- is_multifile(A),!.\n" +
-				"multifile(A) :- assert(is_multifile(A)).\n"
-				);
-		engine.addTheory(theory);
-		
-		theory = new Theory(
-				":- dynamic is_dynamic/1.\n"+
-				":- dynamic is_multifile/1.\n"+
+//		Theory theory = new Theory(
+//				":- op(1150, fx, dynamic). \n" +
+//				":- op(1150, fx, multifile).\n"+
+//				
+//				"dynamic(A) :- is_dynamic(A),!.\n" +
+//				"dynamic(A) :- assert(is_dynamic(A)).\n" + 
+//				"multifile(A) :- is_multifile(A),!.\n" +
+//				"multifile(A) :- assert(is_multifile(A)).\n"
+//				);
+//		engine.addTheory(theory);
+//		
+//		theory = new Theory(
+//				":- dynamic is_dynamic/1.\n"+
+//				":- dynamic is_multifile/1.\n"+
 //				":- dynamic member/2.\n"+
-				":- dynamic apppend/3.\n"
-			);
-		engine.addTheory(theory);
-		loadLibrary("compatiblitySWI.pl");
-		loadLibrary("compatiblityTU.pl");
-		loadLibrary("javaFactbase.pl");
-		
-//		engine.setWarning(true);
+//				":- dynamic apppend/3.\n"
+//			);
+//		engine.addTheory(theory);
+//		//loadLibrary("compatiblitySWI.pl");
+//		//loadLibrary("compatiblityTU.pl");
+//		//loadLibrary("javaFactbase.pl");
+//		
+		engine.setWarning(true);
 		engine.addWarningListener(new WarningListener() {
 			public void onWarning(WarningEvent e) {
 				System.out.println(e.getMsg());

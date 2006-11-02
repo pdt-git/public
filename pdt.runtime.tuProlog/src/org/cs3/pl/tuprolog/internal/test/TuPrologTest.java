@@ -19,10 +19,10 @@ import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.SolveInfo;
-import alice.tuprolog.SpyEvent;
-import alice.tuprolog.SpyListener;
 import alice.tuprolog.Struct;
 import alice.tuprolog.Theory;
+import alice.tuprolog.event.SpyEvent;
+import alice.tuprolog.event.SpyListener;
 
 public class TuPrologTest extends TestCase {
 

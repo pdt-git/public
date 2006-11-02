@@ -59,8 +59,8 @@ import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.tuprolog.internal.TuProlog;
 import org.cs3.pl.tuprolog.internal.TuPrologPrologInterface;
 
-import alice.tuprolog.WarningEvent;
-import alice.tuprolog.WarningListener;
+import alice.tuprolog.event.WarningEvent;
+import alice.tuprolog.event.WarningListener;
 
 /**
  * @author terra
