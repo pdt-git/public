@@ -5,7 +5,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 
 :- pdt_define_context(post(contains,warm,hot)).
-:- pdt_define_context(asubst(post)).
+:- pdt_define_context(asubst(post_map)).
 
 /*
 expand known meta predicates
@@ -94,39 +94,36 @@ be exactly one instance - the one corresponding to the predicates definition mod
 For module-transparent predicates, there will be several instances.
 */
 
-do_goal(Base,In,Goal,Out):-
-	lub([Base,In],Base1),
-	asubst_new(In1),
-	pdt_map_empty(Post),
-	asubst_post(In1,Post),  	
-    mark_hot(In1,Goal,In2),
-    resolve_predicate(In2,Goal,Predicate),
-    (	known(Predicate,Goal,Base1,In2,Out)
+do_goal(In,Goal,Delta):-
+	mark_hot(In,Goal,In1),
+    resolve_predicate(In1,Goal,Predicate),
+    (	known(Predicate,Goal,In1,Out)
     ->	true
-    ;	findall(OutN,
+    ;	findall(Delta1,
 			(
 				predicate_clause(Predicate,Clause),
-				do_clause(Base1,In2,Clause,OutN)
+				do_clause(In1,Clause,Delta1)
 			),
-			Outs
+			Deltas
 		),
-		lub([In|Outs],Out),
-		remember(Predicate,Goal,Base1,In2,Out)
+		lub(Deltas,Delta),
+		remember(Predicate,Goal,In1,Delta)
 	).
 
 
 	
-do_clause(Base,In,Goal,Clause,Out):-
+do_clause(In,Goal,Clause,Delta):-
 	clause_head(Clause,Head),
-	do_unify(Base,In,Head,Goal,Next),
+	do_unify(In,Head,Goal,Delta1),
+	lub([In,Delta1],In1),
     clause_body(Clause,Body),
-    do_goal(Base,Next,Body,Out).
+    do_goal(In1,Body,Delta2),
+    lub([Delta1,Delta2],Delta).
 
 known(builtin(system,true,0),_,In,In).
 known(builtin(system,':',2),Goal,In,Out):-
-    match(Goal,(A:B)),
-    mark_context(In,B,A,Next),
-    do_goal(Next,B,Out).
+    match(Goal,(_A:B)),
+    do_goal(In,B,Out).
 known(builtin(system,',',2),Goal,In,Out):-
     match(Goal,(A,B)),
     do_goal(In,A,Next),
@@ -142,37 +139,6 @@ clause_head(Clause,Head):-
     !.
 clause_head(Clause,Clause).
 
-mark_hot(In,Goal,Out):-
-    term_temperature(Goal,Temp),
-    (	Temp==hot
-    ->	In=Out
-    ;	term_ref(Goal,Ref),
-    	ctx_heatmap(In,Map0),
-	    pdt_map_put(Map0,Ref,hot,Map1),
-	    ctx_set_heatmap(In,Map1,Next),
-    	(	Temp==cold
-	    ->	term_parent(Goal,Parent),
-	    	mark_warm(Next,Parent,Out)
-    	;	Next=Out
-    	)
-    ).
-
-mark_warm(In,Goal,Out):-
-    term_temperature(Goal,Temp),
-    (	(	Temp==hot
-    	;	Temp==warm
-    	)
-    ->	In=Out
-    ;	term_ref(Goal,Ref),
-    	ctx_heatmap(In,Map0),
-	    pdt_map_put(Map0,Ref,warm,Map1),
-	    ctx_set_heatmap(In,Map1,Next),
-    	(	Temp==cold
-	    ->	term_parent(Goal,Parent),
-	    	mark_warm(Next,Parent,Out)
-    	;	Next=Out
-    	)
-    ).
 
     
 %FIXME: very simplistic implementation for now
@@ -203,21 +169,23 @@ predicate_clause(Predicate,Clause):-
     member(Clause,Clauses).
     
 
-
-do_unify(Base,In,A,B,Out):-
+    
+do_unify(In,A,B,Delta):-
     source_term_unifiable(A,B,Unifier),
-    process_unifier(Unifier,Base,In,Out).
+    process_unifier(Unifier,In,Delta).
 
 
-process_unifier([],_Base,Post,Post).
-process_unifier([Var=Value|Unifier],Base,In,Out):-
-    process_binding(Base,In,Var,Value,Next),
-    process_unifier(Unifier,Base,Next,Out).
+process_unifier([],Post,Post).
+process_unifier([Var=Value|Unifier],In,Delta):-
+    process_binding(In,Var,Value,Delta1),
+    lub([In,Delta1),In1),
+    process_unifier(Unifier,In1,Delta2),
+    lub([Delta1,Delta2],Delta).
 
-process_binding(Base,In,Var,Value,Out):-
+process_binding(In,Var,Value,Delta):-
 	var_node(Var,VarNode),
 	term_node(Value,ValueNode),
-	connect(Base,In,VarNode,ValueNode,Out).
+	connect(In,VarNode,ValueNode,Delta).
 	
 
 var_node(Var,VarNode):-
@@ -232,27 +200,37 @@ term_node(Term,term_id(F,N)):-
 	source_term_property(Term,n,N).
     
     
-connect(Base,In,A,B,OutPost):-
-	get_post(InPost,A,PostA),
-	get_post(InPost,B,PostB),
+connect(In,A,B,Delta):-
+	get_post(In,A,PostA),
+	get_post(In,B,PostB),
 	findall(C,connection(A,B,PostB,C),ABs),
 	findall(C,connection(B,A,PostA,C),BAs),
-	add_connections(ABs,PostA,PostAOut),
-	add_connections(BAs,PostB,PostBOut),
-	pdt_map_put(InPost,A,PostAOut,NextPost),
-	pdt_map_put(NextPost,B,PostBOut,OutPost).
+	generate_post(ABs,PostADelta),
+	generate_post(BAs,PostBDelta),
+	asubst_new(Delta0),	
+	pdt_map_empty(PostMap),
+	asubst_post_map(Delta0,PostMap),
+	set_post(Delta0,A,PostAOut,Delta1),
+	set_post(Delta1,B,PostBOut,Delta).
 
-get_post(Map,Node,Post):-
+
+get_post(In,Node,Post):-
+    asubst_post_map(In,Map),
     pdt_map_get(Map,Node,Post),
     !.
 get_post(_,_,Post):-
-    post_new(Post),
+    generate_post([],Post).
+
+generate_post(ABs,Post):-
+    post_new(Post0),
     pdt_set_empty(Contains),
     pdt_set_empty(Warm),
     pdt_set_empty(Hot),
-    post_contains(Post,Contains),
-    post_warm(Post,Warm),
-    post_hot(Post,Hot).
+    post_contains(Post0,Contains),
+    post_warm(Post0,Warm),
+    post_hot(Post0,Hot),
+    add_connections(ABs,Post0,Post).
+
     
 connection(A,B,PostB,connection(warm,A,B)):-
     post_contains(PostB,Contains),
@@ -271,8 +249,31 @@ add_connections([connection(Label,_From,To)|Connections],InPost,OutPost):-
     post_set(InPost,[Label=OutSet],NextPost),
     add_connections(Connections,NextPost,OutPost).
     
-lub(Base,Deltas,Out):-
+lub([],Out):-
+	asubst_new(Out),
+	pdt_map_empty(Map),
+	asubst_post_map(Map).
+lub([A],A):-
+	!.	
+lub([A|As],Out):-
+    merge_all(As,A,Out).
+
+merge_all([],In,In).
+merge_all([A|As],In,Out):-
+    merge(In,A,Next),
+    merge_all(Next,As,Out).
+
+
+merge(In,Add,Out):-
+    asubst_post_map(In,Map0),
+    asubst_post_map(Add,AddMap),
+
+    pdt_map_get(AddMap,Node,Post),
     
-remember(Predicate,Goal,In,Out)
-mark_context(In,B,A,Next),
-term_ref(Goal,Ref),				
+    
+%TODO    
+remember(Predicate,Goal,In,Out).
+%TODO
+mark_context(In,B,A,In).
+
+term_ref(Goal,Ref):-		
