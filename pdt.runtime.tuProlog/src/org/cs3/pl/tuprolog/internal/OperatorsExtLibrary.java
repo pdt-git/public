@@ -13,6 +13,22 @@ public class OperatorsExtLibrary extends Library {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * method invoked when the engine is going
+	 * to demonstrate a goal
+	 */
+	public void onSolveBegin(Term goal) {
+		hsh = new Hashtable();
+	}
+	
+	/**
+	 * method invoked when the engine has
+	 * finished a demostration
+	 */
+	public void onSolveEnd() {
+		hsh = null;
+	}
+	
 	public boolean structEq_2(Term x,Term y){
 		/*
 		 * Extracts real Terms from TuProlog bindings.
