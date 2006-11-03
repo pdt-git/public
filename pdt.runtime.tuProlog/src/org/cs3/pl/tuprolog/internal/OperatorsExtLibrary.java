@@ -84,7 +84,9 @@ public class OperatorsExtLibrary extends Library {
 	
 	public String getTheory(){
 		 return ":- op(700, xfx, '=@='). \n" +
+		 		":- op(700, xfx, '\\=@='). \n" +
 		 		"'=@='(X,Y):- structEq(X,Y).\n" +
+		 		"'\\=@='(X,Y):- not structEq(X,Y).\n" +
 		 		"check(X):-nonvar(X), assert(X).";
 	}
 }

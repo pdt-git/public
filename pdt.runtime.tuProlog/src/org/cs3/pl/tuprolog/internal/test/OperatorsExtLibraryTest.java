@@ -56,6 +56,13 @@ public class OperatorsExtLibraryTest extends TestCase {
 		assertFalse("Failed to Query engine", info.isSuccess());
 	}
 
+	public void testStructeqCompoud0() throws	MalformedGoalException,
+												NoSolutionException {
+		
+		SolveInfo info = engine.solve("x(B,3,a,B)\\=@=x(A,3,b,A).");
+		assertTrue("Failed to Query engine", info.isSuccess());
+	}
+	
 	public void testStructeqCompoud1() throws	MalformedGoalException,
 												NoSolutionException {
 		
