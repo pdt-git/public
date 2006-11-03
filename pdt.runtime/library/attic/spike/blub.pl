@@ -97,7 +97,7 @@ For module-transparent predicates, there will be several instances.
 do_goal(In,Goal,Delta):-
 	mark_hot(In,Goal,In1),
     resolve_predicate(In1,Goal,Predicate),
-    (	known(Predicate,Goal,In1,Out)
+    (	known(Predicate,Goal,In1,Delta)
     ->	true
     ;	findall(Delta1,
 			(
@@ -158,9 +158,9 @@ match_args(Goal,Template,N,Arity):-
 
 %FIXME: this is an "aproximation" for now
 % it only "resoves" predicates in the module "testmodule"
-resolve_predicate(In,Goal,Predicate):-
+resolve_predicate(_In,Goal,Predicate):-
     source_term_functor(Goal,Name,Arity),
-    term_context(In,Goal,Module),
+    %term_context(In,Goal,Module),
     pdt_find_predicate(testmodule:Name/Arity,Predicate).
     
 	    
@@ -178,7 +178,7 @@ do_unify(In,A,B,Delta):-
 process_unifier([],Post,Post).
 process_unifier([Var=Value|Unifier],In,Delta):-
     process_binding(In,Var,Value,Delta1),
-    lub([In,Delta1),In1),
+    lub([In,Delta1],In1),
     process_unifier(Unifier,In1,Delta2),
     lub([Delta1,Delta2],Delta).
 
@@ -210,8 +210,8 @@ connect(In,A,B,Delta):-
 	asubst_new(Delta0),	
 	pdt_map_empty(PostMap),
 	asubst_post_map(Delta0,PostMap),
-	set_post(Delta0,A,PostAOut,Delta1),
-	set_post(Delta1,B,PostBOut,Delta).
+	set_post(Delta0,A,PostADelta,Delta1),
+	set_post(Delta1,B,PostBDelta,Delta).
 
 
 get_post(In,Node,Post):-
@@ -267,13 +267,48 @@ merge_all([A|As],In,Out):-
 merge(In,Add,Out):-
     asubst_post_map(In,Map0),
     asubst_post_map(Add,AddMap),
+	pdt_map_putall(Map0,Node,Post,
+		(	pdt_map_get(AddMap,Node,AddPost),
+			merge_post(Map0,Node,AddPost,Post)
+		),
+		Map
+	),
+	asubst_set_post_map(In,Map,Out).
+    
+merge_post(Map0,Node,AddPost,Post):-
+	pdt_map_get(Map0,Node,Post0),
+	!,
+	merge_args(Post0,AddPost,Post).
+merge_post(_Map0,_Node,AddPost,AddPost).
 
-    pdt_map_get(AddMap,Node,Post),
-    
-    
+merge_args(Post0,AddPost,Post):-
+    post_new(Post),
+    functor(Post,_,Arity),
+    merge_args(1,Post0,AddPost,Arity,Post).
+
+merge_args(N,_Post0,_AddPost,Arity,_Post):-
+    N>Arity,
+    !.
+merge_args(N,Post0,AddPost,Arity,Post):-   
+	arg(N,Post0,Set0),
+	arg(N,AddPost,Set),  
+	merge_sets(Set0,Set,NewSet),
+	arg(N,Post,NewSet),
+    M is N+1,
+    merge_args(M,Post0,AddPost,Arity,Post).
+
+
+merge_sets(Set0,Set,Set):-
+    pdt_set_empty(Set0),
+    !.
+merge_sets(Set0,Set,NewSet):-    
+	pdt_set_addall(Set0,Elm,pdt_set_element(Set,Elm),NewSet).
+
 %TODO    
 remember(Predicate,Goal,In,Out).
+%TODO    
+known(Predicate,Goal,In1,Delta):-
+    fail.
 %TODO
 mark_context(In,B,A,In).
 
-term_ref(Goal,Ref):-		

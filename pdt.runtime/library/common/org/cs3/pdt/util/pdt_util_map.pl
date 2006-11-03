@@ -52,7 +52,7 @@
 	pdt_map_get/3,
 	pdt_map_next/4,
 	pdt_map_findall/4,
-	pdt_map_addall/5
+	pdt_map_putall/5
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util_rbtree')).
@@ -75,8 +75,8 @@ pdt_map_findall(Key,Value,Goal,Map):-
 	nb_getval(U,Map),
 	nb_delete(U).
 
-pdt_map_addall(Map0,Key,Value,Goal,Map):-
-	pdt_unique(pdt_map_findall,U),
+pdt_map_putall(Map0,Key,Value,Goal,Map):-
+	pdt_unique(pdt_map_putall,U),
 	nb_setval(U,Map0),
 	forall(Goal,
 		(	nb_getval(U,MapIn),
