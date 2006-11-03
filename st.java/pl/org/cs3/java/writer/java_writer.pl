@@ -166,14 +166,14 @@ gen_komma_list_inits_rec([]).
 gen_komma_list_inits_rec([_H | _T]) :-
     localDefT(_H, _, _, _, _name, _init),
     printf(', '),
-    printf('~a',[_name]),
+    printf('~w',[_name]),
     gen_init(_init),
     gen_komma_list_inits_rec(_T).
 
 gen_komma_list_inits_rec([_H | _T]) :-
     fieldDefT(_H,_, _, _name, _init),
     printf(', '),
-    printf(' ~a',[_name]),
+    printf(' ~w',[_name]),
     gen_init(_init),
     gen_komma_list_inits_rec(_T).
 
@@ -225,7 +225,7 @@ gen_type_list(Where,[_head|_tail]) :-
     gen_type_list(Where,_tail).
 
 gen_type_list(_,L) :-
-    throwMsg('gen_type_list failed for List: ~a',L).
+    throwMsg('gen_type_list failed for List: ~w',L).
 
 gen_type(Where,Type):-	
     type_name(Where,Type,Name),
@@ -268,7 +268,7 @@ gen_type(_typeID) :-
 %    printf(' ').
 
 gen_type(TypeID) :-
-    throwMsg('can not find Type for id: ~a.',TypeID).
+    throwMsg('can not find Type for id: ~w.',TypeID).
    */ 
 gen_trees_in_square_brackets([]).
 gen_trees_in_square_brackets([_H | _T]) :-
@@ -328,7 +328,7 @@ gen_class(_id, _name) :-
     not(interfaceT(_id)),
     !,
     gen_modifier(_id),
-    printf('class ~a ',[_name]),
+    printf('class ~w ',[_name]),
     gen_extends(_id),
     gen_implements(_id),
 	gen_class_body(_id).
@@ -338,7 +338,7 @@ gen_class(_id, _name) :-
     interfaceT(_id),
     !,
     gen_modifier(_id),
-    printf('interface ~a ',[_name]),
+    printf('interface ~w ',[_name]),
     gen_extends_interface(_id),
     classDefT(_id, _, _, _defs),
 
@@ -382,7 +382,7 @@ gen_modifier(_id) :-
     findall(_modifier, modifierT(_id, _modifier), _modifiers),
     filter_modifieres(_modifiers,_filtered),
     concat_atom(_filtered, ' ', _str),
-    printf('~a ',[_str]).
+    printf('~w ',[_str]).
 
 
 filter_modifieres([],[]).
@@ -408,7 +408,7 @@ gen_extends(_id) :-
     findall(_extName, (extendsT(_id, _ext), fullQualifiedName(_ext, _extName), not(_extName='java.lang.Object')), List),%[_head|_tail]),
     List\=[]->
     (List=[_head|_tail],concat_atom([_head|_tail], ', ', _str),
-    printf('extends ~a ',[_str]));true.
+    printf('extends ~w ',[_str]));true.
 
 gen_implements(_id) :-
     not(implementsT(_id, _)),
@@ -417,14 +417,14 @@ gen_implements(_id) :-
 gen_implements(_id) :-
     findall(_implName, (implementsT(_id, _impl), fullQualifiedName(_impl, _implName)), [_head|_tail]),
     concat_atom([_head|_tail], ', ', _str),
-    printf('implements ~a ',[_str]).
+    printf('implements ~w ',[_str]).
 
 gen_extends_interface(_id) :-
     findall(_impl, (implementsT(_id, _impl)), []).
 gen_extends_interface(_id) :-
     findall(_implName, (implementsT(_id, _impl), fullQualifiedName(_impl, _implName)), [_head|_tail]),
     concat_atom([_head|_tail], ', ', _str),
-    printf('extends ~a ',[_str]).
+    printf('extends ~w ',[_str]).
 
 
 gen_exceptions(_,[]).
@@ -525,7 +525,7 @@ print_if_not_null(_test,_s) :-
 /**
 add_to_gen_classfile_names(_filename) :-
     gen_classfile_names(_fileStream),
-    format(_fileStream, '~a~n',_filename).
+    format(_fileStream, '~w~n',_filename).
 */
 
 
@@ -561,13 +561,13 @@ make_dirs_rec([_dirname | _T]) :-
     make_dirs_rec(_T).
 % PREDEC - put operator before expr
 gen_operation([_head | _], _,_name, -1) :-
-    printf('~a',[_name]),
+    printf('~w',[_name]),
     gen_tree(_head).
 
 % POSTDEC - put operator after expr
 gen_operation([_head | _], _,_name, 1) :-
     gen_tree(_head),
-    printf('~a',[_name]).
+    printf('~w',[_name]).
 
 % else - put operator between exprs
 gen_operation([_head | _tail], _parent, _name, 0) :-
@@ -578,7 +578,7 @@ gen_operation([_head | _tail], _parent, _name, 0) :-
 	 gen_operation_rec(_tail, _parent,_name,0).
 	 
 gen_operation_rec([_head | _tail],_parent,_name,0):-
-    printf(' ~a ',[_name]),
+    printf(' ~w ',[_name]),
     gen_tree(_head),
     gen_operation_rec(_tail,_parent,_name,_0).
     
@@ -623,7 +623,7 @@ add_suffix_slash_if_needed(Filename,Clean_Filename):-
 write_if_fileoutput(X) :-
     output_to_file,
     !,
-    format('writing ~a~n',[X]).
+    format('writing ~w~n',[X]).
 write_if_fileoutput(_).
 
 
@@ -701,20 +701,20 @@ gen_tree(_toplevel) :-
 gen_tree(_id) :-
     packageT(_id, _packName),
     !,
-    printf('package ~a;~n~n', [_packName]).
+    printf('package ~w;~n~n', [_packName]).
 
 gen_tree(_id) :-
     importT(_id, _pid, _class),
     classDefT(_class,_,_,_),
     fullQualifiedName(_class,_name),
     !,
-    printf('import ~a;~n', [_name]).
+    printf('import ~w;~n', [_name]).
 
 gen_tree(_id) :-
     importT(_id, _pid, PackageId),
     packageT(PackageId,_name),
     !,
-    printf('import ~a.*;~n', [_name]).
+    printf('import ~w.*;~n', [_name]).
 
 gen_tree(_id) :-
     classDefT(_id, _pid, _name, _),
@@ -769,7 +769,7 @@ gen_tree(_id) :-
     ),
     gen_modifier(_id),
     gen_type(Scope,_type),
-    printf(' ~a',[_name]),
+    printf(' ~w',[_name]),
     gen_semicolon(_pid).
 
 gen_tree(_id) :-
@@ -782,7 +782,7 @@ gen_tree(_id) :-
     	);(
 		    gen_modifier(_id),
 			gen_type(_pid,_type),
-		    printf(' ~a',[_name]),
+		    printf(' ~w',[_name]),
 		    gen_init(_init),
 		    gen_semicolon(_pid)
 		)
@@ -793,7 +793,7 @@ gen_tree(_id) :-
     !,
     gen_modifier(_id),
     gen_type(_id,_type),
-    printf(' ~a',[_name]),
+    printf(' ~w',[_name]),
     gen_init(_init),
     gen_semicolon(_pid).
 
@@ -1069,7 +1069,7 @@ gen_tree(_ID) :-
 gen_tree(_ID) :-
     labelT(_ID, _, _,_body, _name),
     !,
-    printf('~a : ',[_name]),
+    printf('~w : ',[_name]),
     gen_tree(_body).
 
 gen_tree(_ID) :-
@@ -1088,7 +1088,7 @@ gen_tree(_ID) :-
 %    gen_tree_error_location(_ID),
 %	prolog_choice_attribute(parent,Out),
 %	prolog_choice_attribute(type,Out),
-    throwMsg('~nERROR: cannot find tree with id ~a~n', _ID).
+    throwMsg('~nERROR: cannot find tree with id ~w~n', _ID).
 
 gen_tree_error_location(ID) :-
     prolog_current_frame(F0),
@@ -1125,11 +1125,11 @@ gen_tree_error_location(_ID):-
  
 
 gen_literal(type(basic, char, _), _value) :-
-    printf('\'~a\'',[_value]),
+    printf('\'~w\'',[_value]),
     !.
 
 gen_literal(type(basic, _, _), Value) :-
-    printf('~a', [Value]).
+    printf('~w', [Value]).
 
 %% ld: just in case i wonder again: the second arg implies that the first one be class
 gen_literal(_, type(class,ID,Dim)) :-
@@ -1148,6 +1148,6 @@ gen_literal(type(class, _classID, 0), _value) :-
     is_java_lang_string(_classID),
     concat_atom(_list6, '~', _value),
     concat_atom(_list6, '~~', _value7),
-    printf('\"~a\"',[_value7]).
+    printf('\"~w\"',[_value7]).
 
 
