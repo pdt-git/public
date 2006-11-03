@@ -95,18 +95,22 @@ For module-transparent predicates, there will be several instances.
 */
 
 do_goal(In,Goal,Delta):-
-	mark_hot(In,Goal,In1),
-    resolve_predicate(In1,Goal,Predicate),
-    (	known(Predicate,Goal,In1,Delta)
+	mark_hot(In,Goal,Delta1),
+	lub([In,Delta1],In1)
+	propagate_variable_heat(In1,Delta2),
+	lub([In1,Delta2],In2),
+    resolve_predicate(In2,Goal,Predicate),
+    (	known(Predicate,Goal,In2,Delta)
     ->	true
-    ;	findall(Delta1,
+    ;	findall(Delta3,
 			(
 				predicate_clause(Predicate,Clause),
-				do_clause(In1,Clause,Delta1)
+				do_clause(In2,Clause,Delta3)
 			),
 			Deltas
 		),
-		lub(Deltas,Delta),
+		%TODO: order deltas by size descending.
+		lub([Delta1,Delta2|Deltas],Delta),
 		remember(Predicate,Goal,In1,Delta)
 	).
 
@@ -128,6 +132,28 @@ known(builtin(system,',',2),Goal,In,Out):-
     match(Goal,(A,B)),
     do_goal(In,A,Next),
     do_goal(Next,B,Out).
+
+
+propagate_variable_heat(_In,Term,Delta):-
+    (	source_term_var(Term)
+    ;    source_term_functor(Term,_,0)
+    ),
+    !,
+   	empty_asubst(Delta).
+propagate_variable_heat(In,Term,Delta):-
+    source_term_functor(Term,_,Arity),
+    %here
+	propagate_variable_heat_args(1,In,Arity,Term,Delta1),
+	lub([In,Delta1],In1),
+	propagate_variable_heat_local(1,In1,Arity,Term,Delta2),
+	lub([Delta1,Delta2],Delta).
+    
+propagate_variable_heat_args(I,In,Arity,Term,Delta1):-
+    I>Arity,!.
+propagate_variable_heat_args(I,In,Arity,Term,Delta1):-
+	arg(I,Term,Arg),
+    propagate_variable_heat(In,Arg,Delta1)
+    
    
 clause_body(Clause,Body):-
 	match(Clause,':-'(_Head,Body)),
@@ -231,6 +257,10 @@ generate_post(ABs,Post):-
     post_hot(Post0,Hot),
     add_connections(ABs,Post0,Post).
 
+empty_asubst(S):-
+    asubst_new(S),
+    asubst_post_map(S,Map),
+    pdt_map_empty(Map).
     
 connection(A,B,PostB,connection(warm,A,B)):-
     post_contains(PostB,Contains),
