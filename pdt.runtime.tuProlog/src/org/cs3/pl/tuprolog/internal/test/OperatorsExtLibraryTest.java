@@ -75,6 +75,8 @@ public class OperatorsExtLibraryTest extends TestCase {
 
 		SolveInfo info = engine.solve("x(A,A,C,D)=@=x(A,C,D,D).");
 		assertFalse("Failed to Query engine", info.isSuccess());
+		info = engine.solve("x(A,A,C,D)=@=x(D,D,C,B).");
+		assertTrue("Failed to Query engine", info.isSuccess());
 	}
 	
 	public void testStructeqCompoud3() throws	MalformedGoalException,
