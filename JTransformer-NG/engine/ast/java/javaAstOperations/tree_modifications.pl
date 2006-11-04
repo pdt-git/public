@@ -511,7 +511,7 @@ discard_permanently(Id):-
         (
                 globalIds(FQN,Type),            
                 retractall(globalIds(FQN,Type))
-                %%format('i would retract ~a, but...~n',FQN)
+                %%format('i would retract ~w, but...~n',FQN)
         )
     ),
     deepDelete(Id).
@@ -525,7 +525,7 @@ discard_permanently(_fileName):-
         (
                 globalIds(FQN,Type),
                 retractall(globalIds(FQN,Type)) 
-                %%format('i would retract ~a, but...~n',FQN)
+                %%format('i would retract ~w, but...~n',FQN)
         )
     ),
     deepDelete(Id).

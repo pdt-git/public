@@ -160,7 +160,7 @@ test(double_fact):-
     	(
     	t(Term),
       term_to_atom(Term,Atom),
-      format('~a~n',[Atom])),_),
+      format('~w~n',[Atom])),_),
       retractall(t(_)).
     	
 remove_dirty_flags :-

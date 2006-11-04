@@ -82,7 +82,7 @@ checkTreeLinks(_pid, _ptype, [_h|_t],ErrorHandler) :-
     checkTreeLinks(_pid, _ptype, _t,ErrorHandler).
 
 checkTreeLinks(_pid, _ptype, [_h|_t],ErrorHandler) :-
-     sformat(Msg,'referenced subtree ~a from ~a ~a does not exist.~n',[_h, _ptype, _pid]),
+     sformat(Msg,'referenced subtree ~w from ~w ~w does not exist.~n',[_h, _ptype, _pid]),
 	 Term =.. [ErrorHandler,Msg], 
 	 call(Term),
      checkTreeLinks(_pid, _ptype, _t,ErrorHandler).
@@ -106,7 +106,7 @@ checkParentLink(Node,Child,_):-
     !.
 
 checkParentLink(Node,Child,ErrorHandler):-
-    sformat(Msg,'node ~a is not a subtree of its parent ~a.~n',[Child,Node]),
+    sformat(Msg,'node ~w is not a subtree of its parent ~w.~n',[Child,Node]),
 	 Term =.. [ErrorHandler,Msg], 
 	 call(Term).
 
@@ -117,7 +117,7 @@ vars_bound(_id,[_sub|_subs],ErrorHandler):-
     vars_bound(_id,_subs,ErrorHandler).
     
 vars_bound(_id,[_sub|_],ErrorHandler):-
-    sformat(Msg,'referenced id ~a from ~a is not bound.~n',[_sub, _id]),
+    sformat(Msg,'referenced id ~w from ~w is not bound.~n',[_sub, _id]),
 	 Term =.. [ErrorHandler,Msg], 
 	 call(Term),
     fail.
@@ -126,7 +126,7 @@ subtreeError(_id, _,   _pid, _pid, _,_) :- !.
 % sonderfall, classen haben als parent packages statt toplevel, die sie eigentlich referenzieren
 subtreeError(_id, classDefT,   _, _, toplevelT,_) :- !.
 subtreeError(_id, _stype, _p, _pid, _ptype,ErrorHandler) :-
-    sformat(Msg,'referenced ~a ~a has ~a as parent instead of ~a ~a.~n',[_stype, _id, _p, _ptype, _pid]),
+    sformat(Msg,'referenced ~w ~w has ~w as parent instead of ~w ~w.~n',[_stype, _id, _p, _ptype, _pid]),
 	 Term =.. [ErrorHandler,Msg], 
 	 call(Term).
 
@@ -164,7 +164,7 @@ checkEncl(_id):-tryT(_id,_pid,_encl,_v1,_v2,_v3),notMethodOrField(_encl),printFa
 checkEncl(_id):-catchT(_id,_pid,_encl,_v1,_v2),notMethodOrField(_encl),printFailure(_id,_encl).
 checkEncl(_id):-ifT(_id,_pid,_encl,_v1,_v2,_v3), notMethodOrField(_encl),printFailure(_id,_encl).
 checkEncl(_id):-conditionalT(_id,_pid,_encl,_v1,_v2,_v3),notMethodOrField(_encl),printFailure(_id,_encl).
-//format('rt:exec: ~a~n', [_id])
+//format('rt:exec: ~w~n', [_id])
 checkEncl(_id):-execT(_id,_pid,_encl,_v1), notMethodOrField(_encl),printFailure(_id,_encl).
 checkEncl(_id):-returnT(_id,_pid,_encl,_v1), notMethodOrField(_encl),printFailure(_id,_encl).
 checkEncl(_id):-breakT(_id,_pid,_encl,_v1,_v2),notMethodOrField(_encl),printFailure(_id,_encl).
@@ -185,7 +185,7 @@ checkEncl(_id):-assertT(_id,_pid,_encl,_v1,_v2),notMethodOrField(_encl),printFai
 checkEncl(_id).
 
 printFailure(_id,_encl):-
-        format('encl elem of ~a is ~a but not a method or field (for method: class)~n',[_id,_encl]).
+        format('encl elem of ~w is ~w but not a method or field (for method: class)~n',[_id,_encl]).
 */
 
 printErrorIfNotMethodAndNotField(_encl):-
@@ -199,7 +199,7 @@ printErrorIfNotExpressionOrNull(_id):-
     not(isExpression(_id)),
     not(_id = 'null'),
     tree(_id,_p,_type),
-    format('the id ~a should bei an expression or null, but it is an ~a~n',[_id,_type]).
+    format('the id ~w should bei an expression or null, but it is an ~w~n',[_id,_type]).
 printErrorIfNotExpressionOrNull(_).
 
 /**
@@ -230,7 +230,7 @@ printCheckError(Term,Constraints,Arg,Pos,ErrorHandler):-
     term_to_atom(Term,TermAtom),
     term_to_atom(Constraints,ConstraintsAtom),
     term_to_atom(Arg,ArgAtom),
-    sformat(Msg,'ERROR in term: ~a, argument ~a (\'~a\') does not fullfill constraints:~n  ~a~n',
+    sformat(Msg,'ERROR in term: ~w, argument ~w (\'~w\') does not fullfill constraints:~n  ~a~n',
  	  [TermAtom,Pos,ArgAtom,ConstraintsAtom]),
 	 MsgTerm =.. [ErrorHandler,Msg], 
 	 call(MsgTerm),
@@ -286,7 +286,7 @@ checkConstraintList(Constraints,Arg):-
     member(Constraint,Constraints),
     not(treeSignature(Constraint,_)),
 %    term_to_atom(Arg,Atom),
-%    format('check2: ~a,~a~n',[Constraint,Atom]),
+%    format('check2: ~w,~w~n',[Constraint,Atom]),
     Predicate =.. [Constraint, PLASTFact],
     call(Predicate),
     !.
@@ -299,7 +299,7 @@ checkConstraintList(Constraints,Arg):-
     member(Constraint,Constraints),
     not(treeSignature(Constraint,_)),
 %    term_to_atom(Arg,Atom),
-%    format('check3: ~a,~a~n',[Constraint,Atom]),
+%    format('check3: ~w,~w~n',[Constraint,Atom]),
     Predicate =.. [Constraint, Arg],
     call(Predicate),
     !.

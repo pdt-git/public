@@ -253,14 +253,14 @@ action(replace(class(_id, _owner, _name))) :-
 
 /*    
 action(delete(class(_id, _owner, _name))) :-
-    %format('defs ~a~n',[_defs]),
+    %format('defs ~w~n',[_defs]),
 %    classDefT(_id, _owner, _name, _defs),
     action_all(delete(method(_, _id, _, _, _, _, _))),
     action_all(delete(field(_, _id, _, _, _))),
     action_all(delete(interface(_id))),
     action_all(delete(extends(_id, _))),
 %    classDefT(_id, _owner, _name, _alteredDefs),
-    %format('defs ~a~n',[_alteredDefs]),
+    %format('defs ~w~n',[_alteredDefs]),
     delete(classDefT(_id, _owner, _name, [])).
 % todo ??? inner classes
 %    action(delete(class(_, _id, _, _, _))),
@@ -459,7 +459,7 @@ action(replace(_tree)) :-
 action(replaceDiffTree(_tree)) :-
     !,
     arg(1, _tree, _id),
-  %  format('rdt: ~a ~a', [_id, _tree]),
+  %  format('rdt: ~w ~w', [_id, _tree]),
     deleteTree(_id),
     add(_tree).
 
@@ -662,7 +662,7 @@ new_id(New) :-
         New = [_|_],
         !,
         term_to_atom(New,Term),
-        sformat(Msg,'new_id: variable is a list: ~a~n',Term),
+        sformat(Msg,'new_id: variable is a list: ~w~n',Term),
         debugme,
         print(Msg),
         flush_output,

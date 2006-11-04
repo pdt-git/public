@@ -21,7 +21,7 @@ deepDeleteIfNotReferenced(_id, 'null') :-
 deepDeleteIfNotReferenced(_id, _parent) :-
     not(sub_trees(_parent, _subtrees)),
     !,
-    format('gc: deleted ~a, _parent ~a has no subtrees~n', [_id, _parent]),
+    format('gc: deleted ~w, _parent ~w has no subtrees~n', [_id, _parent]),
     deepDeleteIfParentCorrect(_id, _parent).
 
 deepDeleteIfNotReferenced(_id, _parent) :-
@@ -29,7 +29,7 @@ deepDeleteIfNotReferenced(_id, _parent) :-
     equals(_subtrees, 'null'),
     !,
     tree(_id, _, _t),
-    format('gc: deleted ~a, sub_trees of parent ~a is null~n', [_id, _parent]),
+    format('gc: deleted ~w, sub_trees of parent ~w is null~n', [_id, _parent]),
     deepDeleteIfParentCorrect(_id, _parent).
     
 deepDeleteIfNotReferenced(_id, _parent) :-
@@ -39,7 +39,7 @@ deepDeleteIfNotReferenced(_id, _parent) :-
     not(member(_id, _subtrees)),
     !,
     tree(_id, _, _t),
-    format('gc: deleted ~a, not a member of the subtrees of parent ~a~n', [_id, _parent]),
+    format('gc: deleted ~w, not a member of the subtrees of parent ~w~n', [_id, _parent]),
     deepDeleteIfParentCorrect(_id, _parent).
 
 
@@ -116,7 +116,7 @@ deleteTree(_id):-tryT(_id,_pid,_encl,_v1,_v2,_v3),!,delete(tryT(_id,_pid,_encl,_
 deleteTree(_id):-catchT(_id,_pid,_encl,_v1,_v2),!,delete(catchT(_id,_pid,_encl,_v1,_v2)).
 deleteTree(_id):-ifT(_id,_pid,_encl,_v1,_v2,_v3),!,delete(ifT(_id,_pid,_encl,_v1,_v2,_v3)).
 deleteTree(_id):-conditionalT(_id,_pid,_encl,_v1,_v2,_v3),!,delete(conditionalT(_id,_pid,_encl,_v1,_v2,_v3)).
-/*format('rt:exec: ~a~n', [_id]),*/
+/*format('rt:exec: ~w~n', [_id]),*/
 deleteTree(_id):-execT(_id,_pid,_encl,_v1),!,delete(execT(_id,_pid,_encl,_v1)).
 deleteTree(_id):-returnT(_id,_pid,_encl,_v1),!,delete(returnT(_id,_pid,_encl,_v1)).
 deleteTree(_id):-breakT(_id,_pid,_encl,_v1,_v2),!,delete(breakT(_id,_pid,_encl,_v1,_v2)).
@@ -140,7 +140,7 @@ deleteTree(_id):-nopT(_id,_pid,_encl),!,delete(nopT(_id,_pid,_encl)).
 deleteTree(_id):-precedenceT(_id,_pid,_encl,_v1),!,delete(precedenceT(_id,_pid,_encl,_v1)). 
 deleteTree(_id) :-
     not(tree(_id, _,_)),
-    format('could not retract id: ~a~n', [_id]), !.
+    format('could not retract id: ~w~n', [_id]), !.
 
 /*
     Löscht eine tree definiert durch seine id.
@@ -168,7 +168,7 @@ retractTree(_id):-tryT(_id,_pid,_encl,_v1,_v2,_v3),!,retract(tryT(_id,_pid,_encl
 retractTree(_id):-catchT(_id,_pid,_encl,_v1,_v2),!,retract(catchT(_id,_pid,_encl,_v1,_v2)).
 retractTree(_id):-ifT(_id,_pid,_encl,_v1,_v2,_v3),!,retract(ifT(_id,_pid,_encl,_v1,_v2,_v3)).
 retractTree(_id):-conditionalT(_id,_pid,_encl,_v1,_v2,_v3),!,retract(conditionalT(_id,_pid,_encl,_v1,_v2,_v3)).
-/*format('rt:exec: ~a~n', [_id]),*/
+/*format('rt:exec: ~w~n', [_id]),*/
 retractTree(_id):-execT(_id,_pid,_encl,_v1),!,retract(execT(_id,_pid,_encl,_v1)).
 retractTree(_id):-returnT(_id,_pid,_encl,_v1),!,retract(returnT(_id,_pid,_encl,_v1)).
 retractTree(_id):-breakT(_id,_pid,_encl,_v1,_v2),!,retract(breakT(_id,_pid,_encl,_v1,_v2)).
@@ -192,7 +192,7 @@ retractTree(_id):-nopT(_id,_pid,_encl),!,retract(nopT(_id,_pid,_encl)).
 retractTree(_id):-precedenceT(_id,_pid,_encl,_v1),!,retract(precedenceT(_id,_pid,_encl,_v1)). 
 retractTree(_id) :-
     not(tree(_id, _,_)),
-    format('could not retract id: ~a~n', [_id]), !.
+    format('could not retract id: ~w~n', [_id]), !.
 
 
 retractTrees([]).

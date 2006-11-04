@@ -45,7 +45,7 @@ internal_writeTreeFacts(File, Mode) :-
 			call(Fact),
 			term_to_atom(Fact, Atom)
 		),	
-		format(Stream, '~a.~n', Atom)
+		format(Stream, '~w.~n', Atom)
 	),
 	% END - For Ditrios (Schmatz)
 
@@ -53,15 +53,15 @@ internal_writeTreeFacts(File, Mode) :-
     		 call(Fact),
     		 term_to_atom(Fact, Atom)
     	    ),
-    		format(Stream, '~a.~n',Atom)
+    		format(Stream, '~w.~n',Atom)
     ),
     		
     forall(globalIds(FQN,Id),
-    	   format(Stream, 'globalIds(''~a'',~a).~n',[FQN,Id])
+    	   format(Stream, 'globalIds(''~w'',~w).~n',[FQN,Id])
     ),
     
     lastID(LastID),
-    format(Stream, ':- retractall(lastID(_)),assert(lastID(~a)).',[LastID]),
+    format(Stream, ':- retractall(lastID(_)),assert(lastID(~w)).',[LastID]),
     close(Stream).
 
 /**

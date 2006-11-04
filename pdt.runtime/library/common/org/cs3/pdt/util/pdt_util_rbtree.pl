@@ -357,12 +357,12 @@ pretty_print(black([],[],[],[]),_) :- !.
 pretty_print(red(L,K,_,R),D) :-
 	DN is D+6,
 	pretty_print(L,DN),
-	format("~t~a: ~*|~n",[r,K,D]),
+	format("~t~w: ~*|~n",[r,K,D]),
 	pretty_print(R,DN).
 pretty_print(black(L,K,_,R),D) :-
 	DN is D+6,
 	pretty_print(L,DN),
-	format("~t~a: ~*|~n",[b,K,D]),
+	format("~t~w: ~*|~n",[b,K,D]),
 	pretty_print(R,DN).
 
 

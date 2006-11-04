@@ -283,13 +283,13 @@ sub_trees(_id, _subtrees) :-
     toplevelT(_id,_,_,_subtrees),!.
 sub_trees(_id, _subtrees) :-
     classDefT(_id,_,_,_subtrees),!.
-%    format('sub_trees:classDef: ~a~a~n', [_id, _name]),
+%    format('sub_trees:classDef: ~w~w~n', [_id, _name]),
 %    classMembersT(_id, _subtrees),!.
 
 sub_trees(_id, _subtrees) :-
     methodDefT(_id,_,_name,_params,_,_,_body),
     !,
-%    format('sub_trees:methodDef: ~a~a~n', [_id, _name]),
+%    format('sub_trees:methodDef: ~w~w~n', [_id, _name]),
     listOrEmptyListIfNull(_body, _bodyList),
     append(_bodyList, _params, _subtrees).
 
@@ -427,7 +427,7 @@ sub_trees(_id, _subtrees) :-
 
 sub_trees(_id, []) :-
     importT(_id,_,_),!.
-%    format('sub_trees:import: ~a, ~a~n', [_id, _imp]).
+%    format('sub_trees:import: ~w, ~w~n', [_id, _imp]).
 
 sub_trees(_id, []) :-
     literalT(_id,_,_,_,_),!.
@@ -442,7 +442,7 @@ sub_trees(_id, []) :-
 sub_trees(_id, []) :-
     tree(_id, _p, _name),
     !,
-    format('ERROR: sub_trees: ~a, ~a, ~a~n', [_id, _p, _name]).
+    format('ERROR: sub_trees: ~w, ~w, ~w~n', [_id, _p, _name]).
 
 sub_trees(_id, 'null') :-
     not(tree(_id, _, _)),!.

@@ -49,7 +49,7 @@ add_new_class_and_file(_id, _owner, _name, Defs) :-
        print(' added new toplevel: '),       
        print(FullPath),
 	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
-       sformat(S, '/~a/~a.java',[FullSourceFolder,FullPath]),
+       sformat(S, '/~w/~w.java',[FullSourceFolder,FullPath]),
        string_to_atom(S,Filename),
        new_id(TID),
        add(toplevelT(TID, PID,Filename,[_id])),

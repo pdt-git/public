@@ -224,7 +224,7 @@ print_list([_head|[]]) :-
     write(_head).
 
 print_list([_head|_tail]) :-
-    format('~a, ',_head),
+    format('~w, ',_head),
     print_list(_tail).
 
 listOrEmptyListIfNull(_elem, []) :-

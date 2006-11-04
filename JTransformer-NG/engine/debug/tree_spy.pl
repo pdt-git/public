@@ -7,7 +7,7 @@ spy_history([]).
 
 
 tree_spy(type(_kind, _id, _dim)) :-
-    format('type: ~a~a~n',[_kind,_dim]),
+    format('type: ~w~w~n',[_kind,_dim]),
     tree_spy(_id).
 
 tree_spy([_h|_t]) :-
@@ -22,7 +22,7 @@ tree_spy([_h|_t]) :-
 tree_spy(_id) :-
     not(getTerm(_id,_term)),
     !,
-    format('no tree node: ~a~n', [_id]),
+    format('no tree node: ~w~n', [_id]),
     next(b,_id,_term).
 
 tree_spy(_id) :-
@@ -96,7 +96,7 @@ printTerm(_term) :-
     functor(_term, _,_arity),
     succ(_arity_minus_1,_arity),
     printAlign,
-    format('term: ~a: edges: ~a~n',[_atom,_arity_minus_1]).
+    format('term: ~w: edges: ~w~n',[_atom,_arity_minus_1]).
 
 
 printTermList([]).
