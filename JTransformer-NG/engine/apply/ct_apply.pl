@@ -104,13 +104,13 @@ apply_ctlist(List) :-
 	retractall(lastApplyListInfo(_)),
 	assert(lastApplyListInfo(ApplyInfo)),
 	length(ApplyInfo,Num),
-	format('~n===========================~n~napplied ~a CT:~n',[Num]),
+	format('~n===========================~n~napplied ~w CT:~n',[Num]),
 	forall(member(M,ApplyInfo),format('~w~n',M)).
 
 showApplyListInfo :-
     lastApplyListInfo(ApplyInfo),
 	length(ApplyInfo,Num),
-	format('~n===========================~n~napplied ~a CT:~n',[Num]),
+	format('~n===========================~n~napplied ~w CT:~n',[Num]),
     forall(member(M,ApplyInfo),format('~w~n',M)).
     
 	
@@ -207,19 +207,19 @@ apply_post([]).
 apply_post([_head| _tail]) :-
     clause(action(_head),_),
     !,
-    error_handling(action(_head),'apply_post action failed: ~a',[_head]),
+    error_handling(action(_head),'apply_post action failed: ~w',[_head]),
     !,
     apply_post(_tail).
     
 apply_post([t_i(Id,Action)| _tail]) :-
     clause(action(Action),_),
     !,
-    error_handling(t_i(Id,action(Action)),'apply_post action failed: ~a',[Action]),
+    error_handling(t_i(Id,action(Action)),'apply_post action failed: ~w',[Action]),
     !,
     apply_post(_tail).
 
 apply_post([_head| _tail]) :-
-    error_handling(fail,'apply_post action failed: could not find action ~a~n',[_head]),
+    error_handling(fail,'apply_post action failed: could not find action ~w~n',[_head]),
     !.
 
 /*
