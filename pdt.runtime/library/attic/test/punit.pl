@@ -127,9 +127,9 @@ test_case(Name,Prefix):-
    atom_concat(Prefix,_,Atom).
    
 testfailed(Testname) :- 
-%    format('the test case ~a does not exist.',[Testname]),
+%    format('the test case ~w does not exist.',[Testname]),
     not(clause(test(Testname), _)),
-    format('the test case ~a does not exist.',[Testname]),
+    format('the test case ~w does not exist.',[Testname]),
     !.
 
 testfailed(Testname) :- 
@@ -201,7 +201,7 @@ assert_true(Comment, Goal) :-
 		%term_to_atom(Info,StackTrace),
 %		list_to_line_sep_string(Info,StackTrace),
 		term_to_atom(Goal, AtomGoal),
-    	sformat(FormattedComment, 'The goal ~n  ~a~n failed:~n~a.~n~a~n', [AtomGoal, Comment,StackTrace]),
+    	sformat(FormattedComment, 'The goal ~n  ~w~n failed:~n~w.~n~w~n', [AtomGoal, Comment,StackTrace]),
    		throw(assertion_failed(FormattedComment))
    	  ).
    	  
@@ -221,7 +221,7 @@ assert_fail(Comment, Goal) :-
   (call(Goal)
     ->  (
 		term_to_atom(Goal, AtomGoal),
-    	sformat(FormattedComment, 'The goal ~n   ~a~n unexpectedly succeeded:~n~a.', [AtomGoal, Comment]),
+    	sformat(FormattedComment, 'The goal ~n   ~w~n unexpectedly succeeded:~n~w.', [AtomGoal, Comment]),
    		throw(assertion_failed( FormattedComment))
    	);
    	true).
@@ -249,7 +249,7 @@ assert_ground(Comment, Term):-
 	% numbervars(Term,0,Num),
 	% Num > 0,
     term_to_atom(Term,Atom),
-    sformat(Msg, 'The term ~a contains variables.~n~a~n',[Atom,Comment]),
+    sformat(Msg, 'The term ~w contains variables.~n~w~n',[Atom,Comment]),
     write(Msg),
     flush_output,
     throw(assertion_failed(Msg)).

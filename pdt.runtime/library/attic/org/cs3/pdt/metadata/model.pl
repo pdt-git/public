@@ -267,7 +267,7 @@ write_tree(Id):-
 	write_tree(Id,'','').
 	   	
 write_tree(Id,Indent,Arrow):-
-    format("~a~a<<~w>>~n",[Indent,Arrow,Id]),
+    format("~w~w<<~w>>~n",[Indent,Arrow,Id]),
     atom_concat(Indent,'|    ',ChildIndent),
     forall(child(Id,Child),write_tree(Child,ChildIndent,'|--')).    
 

@@ -159,7 +159,7 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
     has_property(_pred,dynamic,_dyn),
     has_property(_pred,multifile,_mul).
 %   assert(pdtplugin_get_pred_exists(_name,_arity)),
-%   format('~a , ~a , ~a , ~a , ~a~n',[_name,_arity,_file,_dyn,_mul]).
+%   format('~w , ~w , ~w , ~w , ~w~n',[_name,_arity,_file,_dyn,_mul]).
     
 
 
@@ -173,7 +173,7 @@ term_for_signature(Name,0,Term):-
 term_for_signature(Name,Arity,Term):-
     not(Arity = 0),
     freeVariables(Arity, '', Vars),
-    sformat(S,'~a(~a)',[Name,Vars]),
+    sformat(S,'~w(~w)',[Name,Vars]),
     atom_to_term(S, Term,_).
     %functor(Term, Name, Arity).
 
@@ -198,7 +198,7 @@ write_reference(Pred,Name, Arity, Nth):-
     clause_property(Ref,file(FileName)),
     clause_property(Ref,line_count(Count)),
     term_to_atom(Pred,Atom),
-    format('REFERENCE: ~a:~a: (~a)\n',[FileName,Count,Atom]),
+    format('REFERENCE: ~w:~w: (~w)\n',[FileName,Count,Atom]),
     flush_output.
 
 

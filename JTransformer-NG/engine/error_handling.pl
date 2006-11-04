@@ -150,14 +150,14 @@ frame_info(Frame,Info):-
 %    functor(Pred,Name,Arity),
 %    term_to_atom(Pred,Atom),
 %    write(Atom),
-    sformat(Info,'~a:~a ~a level: ~a~n',[File,Line,GoalAtom,Level]).
+    sformat(Info,'~w:~w ~w level: ~w~n',[File,Line,GoalAtom,Level]).
        
        
 list_to_line_sep_string([],'').
 
 list_to_line_sep_string([Head|Tail],String):-
 	list_to_line_sep_string(Tail,StringTail),
-	sformat(String,'~a~n~a',[Head,StringTail]).
+	sformat(String,'~w~n~w',[Head,StringTail]).
 	
 	
 /********* Currently still unused (speculative generality): ************ */

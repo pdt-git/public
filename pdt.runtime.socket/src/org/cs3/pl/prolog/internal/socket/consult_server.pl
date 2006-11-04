@@ -234,11 +234,11 @@ handle_command(_,_,'',continue).
 handle_command(_,OutStream,'PING',continue):-
 		current_prolog_flag(pid,Pid),
     thread_self(Alias),
-	my_format(OutStream,"PONG ~a:~a~n",[Pid,Alias]).
+	my_format(OutStream,"PONG ~w:~w~n",[Pid,Alias]).
 handle_command(InStream,OutStream,'CONSULT',continue):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
 	undelete_symbol(Symbol),
-	my_format(OutStream,"USING_SYMBOL: ~a~n",[Symbol]),	
+	my_format(OutStream,"USING_SYMBOL: ~w~n",[Symbol]),	
 	my_format(OutStream,"GO_AHEAD~n",[]),
 	load_stream(Symbol,InStream).
 handle_command(InStream,OutStream,'UNCONSULT',continue):-
@@ -260,7 +260,7 @@ handle_command(InStream,OutStream,'LIST_CONSULTED',continue):-
 			consulted_symbol(Symbol),
 			atom_concat(Prefix,_,Symbol)
 		),
-		my_format(OutStream,"~a~n",Symbol)
+		my_format(OutStream,"~w~n",Symbol)
 	).
 handle_command(InStream,OutStream,'IS_CONSULTED',continue):-
 	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
@@ -315,7 +315,7 @@ my_read_command(InStream,Term):-
 %    read_line_to_codes(InStream,Codes),
 %    atom_codes(Atom,Codes),
 %    thread_self(Self),
-%	format("~a: <<< (goal) >~a~n<",[Self,Atom]),
+%	format("~w: <<< (goal) >~w~n<",[Self,Atom]),
 %    atom_to_term(Atom,Term,Vars).
 
 my_read_goal(InStream,Term,Vars):-
@@ -362,7 +362,7 @@ aborting:-
     abort_requested(async,_).
 
 send_abort_complete(Id,OutStream):-    
-   	my_format(OutStream, "ABORT_COMPLETE: ~a~n",[Id]),
+   	my_format(OutStream, "ABORT_COMPLETE: ~w~n",[Id]),
    	my_debug(abort_complete(Id)).
     
 handle_batch_message(abort(Id),OutStream):-    
@@ -384,7 +384,7 @@ handle_batch_command(abort(Id),_,OutStream):-
 		my_debug(recorded_abort_sync(Id))
 	).
 handle_batch_command(join(Id),_,OutStream):-
-	my_format(OutStream, "JOIN_COMPLETE: ~a~n",[Id]).
+	my_format(OutStream, "JOIN_COMPLETE: ~w~n",[Id]).
 handle_batch_command(end_of_batch,InStream,OutStream):-
 	forall(abort_requested(async,Id),handle_batch_command(abort(Id),InStream,OutStream)),
 	forall(abort_requested(sync,Id),handle_batch_message(abort(Id),OutStream)),
@@ -393,22 +393,22 @@ handle_batch_command(query_once(Id,_),InStream,OutStream):-
 	aborting,
     !,
     my_read_goal(InStream,_,_),    
-    my_format(OutStream, "SKIPPING_QUERY: ~a~n",[Id]).
+    my_format(OutStream, "SKIPPING_QUERY: ~w~n",[Id]).
 handle_batch_command(query_all(Id,_),InStream,OutStream):-
     aborting,
     !,
     my_read_goal(InStream,_,_),
-    my_format(OutStream, "SKIPPING_QUERY: ~a~n",[Id]).
+    my_format(OutStream, "SKIPPING_QUERY: ~w~n",[Id]).
     
 handle_batch_command(query_once(Id,Mode),InStream,OutStream):-
-    my_format(OutStream, "RESULTS_FOR_QUERY: ~a~n",[Id]),
+    my_format(OutStream, "RESULTS_FOR_QUERY: ~w~n",[Id]),
     call_save(OutStream,(
     		my_read_goal(InStream,Goal,Vars),
     		one_solution(OutStream,Goal,Vars,Mode)
     		)
     	).
 handle_batch_command(query_all(Id,Mode),InStream,OutStream):-
-    my_format(OutStream, "RESULTS_FOR_QUERY: ~a~n",[Id]),
+    my_format(OutStream, "RESULTS_FOR_QUERY: ~w~n",[Id]),
     call_save(OutStream,(
     		my_read_goal(InStream,Goal,Vars),
     		solutions_weak_until_cut(OutStream,Goal,Vars,Mode)
@@ -607,7 +607,7 @@ count_thread(Prefix,Count):-
 	findall(A,(
 			current_thread(A,_),
 			atom_concat(Prefix,_,A),
-			format("There is e.g. a thread named ~a~n",[A])
+			format("There is e.g. a thread named ~w~n",[A])
 		),
 		Bag
 	),	 
@@ -629,7 +629,7 @@ unused_thread_name(Prefix,Suffix,Try,Name):-
 	
 	
 request_line(InStream, OutStream, Prompt, Line):-
-	my_format(OutStream,"~a~n",[Prompt]),
+	my_format(OutStream,"~w~n",[Prompt]),
 	read_line_to_codes(InStream,LineCodes),
 	codes_or_eof_to_atom(LineCodes,Line).
 	

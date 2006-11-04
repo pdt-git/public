@@ -85,7 +85,7 @@ test_case_in_module(Name, Module):-
 
 testfailed(Testname, Module) :- 
     not(clause(':'(Module, test(Testname)), _)),
-    format('the test case ~a does not exist.',[Testname]),
+    format('the test case ~w does not exist.',[Testname]),
     !.
 
 testfailed(Testname, Module) :- 
@@ -112,5 +112,5 @@ reportException(Module, Pred,Testname):-
     ).
     
 reportException(Module, Pred, Testname):-
-    format('predicate ~a for test ~a in module ~a failed~n',[Pred, Testname, Module]),
+    format('predicate ~w for test ~w in module ~w failed~n',[Pred, Testname, Module]),
     assert(failed).

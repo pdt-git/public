@@ -462,7 +462,7 @@ clone(_id, _parent, _encl, _new) :-
 clone(_id, _, _, _) :-
     tree(_id, _p, _name),
     !,
-    format('ERROR: clone: ~a, ~a, ~a~n', [_id, _p, _name]).
+    format('ERROR: clone: ~w, ~w, ~w~n', [_id, _p, _name]).
 
 clone(_id, _, _, 'null') :-
     not(tree(_id, _, _)),!.

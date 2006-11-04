@@ -101,7 +101,7 @@ share_static_modifier(_EnclMethod,_ForwMethod):-
     true.
 
 debugme(_id):-
-    format('~ndebug: ~a',[_id]),
+    format('~ndebug: ~w',[_id]),
     flush_output.
 
 forwardingMethodName(_stat, _prefix, _origName, _ForwName) :-
@@ -642,7 +642,7 @@ constructor(_constructor,_class,_params):-
 
 
 lookupForwParameter(Arg,_,[],[],_, _):-
-    format('forwarding parameter lookup failed: ~a~n',[Arg]).
+    format('forwarding parameter lookup failed: ~w~n',[Arg]).
 lookupForwParameter(_,FnArg,[FnArg|_],[Param|_],Param, Name):-
     paramDefT(Param,_,_,Name).
 lookupForwParameter(ForwMethod,FnArg,[_|PcArgs],[_|ArgParams],Param, Name):-

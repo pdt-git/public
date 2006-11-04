@@ -99,7 +99,7 @@ open_printf_to_memory(Key) :-
     close(Stream),
     free_memory_file(Handle)),
     Exception,true),
-    format('EXCEPTION: catched Exception in open_printf_to_memory. Possible reason: trying to create an existing stream~nSTREAM: ~w ~n~a ~n', [Key,Exception]),
+    format('EXCEPTION: catched Exception in open_printf_to_memory. Possible reason: trying to create an existing stream~nSTREAM: ~w ~n~w ~n', [Key,Exception]),
     fail.
 
 open_printf_to_memory(Key) :-

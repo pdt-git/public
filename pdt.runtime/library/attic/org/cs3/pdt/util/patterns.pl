@@ -81,7 +81,7 @@ pattern(_pattStr, _varList, _ValStr) :-
     atom_chars(_pattStr, _pattList),
     replaceWildCards(_pattList, _varList, _valList),
     flatten( _valList, _ValList),
-    %format('out: ~a',_ValList),
+    %format('out: ~w',_ValList),
     atom_chars(_ValStr, _ValList).
 
 

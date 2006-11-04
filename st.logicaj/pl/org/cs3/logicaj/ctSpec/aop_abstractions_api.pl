@@ -179,9 +179,9 @@ action(replace(methodCall(_apply, _parent, _encl, _recv, _name, _method, _args))
     new_id(_newIdSelect),
     add(applyT(_apply, _parent, _encl, _recv,_name, _args, _method)).
 
-%    format("replace start ~a,~a,~a,~a,~a,~a~n", [_newIdSelect, _apply, _encl, _name, _recv, ]),
+%    format("replace start ~w,~w,~w,~w,~w,~w~n", [_newIdSelect, _apply, _encl, _name, _recv, ]),
 %    action(replaceDiffTree(applyT(_apply, _parent, _encl, _newIdSelect, _Args))).
-%    format("replace end ~a,~a,~a,~a,~a,~a~n", [_newIdSelect, _apply, _encl, _name, _recv, ]).
+%    format("replace end ~w,~w,~w,~w,~w,~w~n", [_newIdSelect, _apply, _encl, _name, _recv, ]).
 %    action(replace(applyT(_apply, _parent, _encl, _newIdSelect, _Args))).
 
 action(delete(methodCall(_apply, _, _, _, _, _, _))) :-

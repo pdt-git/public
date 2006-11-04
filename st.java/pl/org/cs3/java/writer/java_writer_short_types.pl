@@ -731,7 +731,7 @@ gen_tree(_ID) :-
 
 
 gen_tree(_ID) :-
-    format('ERROR: ~a~n', [_ID]).
+    format('ERROR: ~w~n', [_ID]).
 
 /**
  * Query

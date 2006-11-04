@@ -115,7 +115,7 @@ checkArgumentNumber(Term):-
 checkArgumentNumber(Term):-
     Term =.. [Functor|Args],    
     term_to_atom(Args,Atom),
-    sformat(S,'~a(~a) is not a valid java AST.', [Functor,Atom]),
+    sformat(S,'~w(~w) is not a valid java AST.', [Functor,Atom]),
     error_occured(S).
 	
 
