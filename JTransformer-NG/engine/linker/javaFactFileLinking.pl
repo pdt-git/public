@@ -124,7 +124,7 @@ inTe(_term) :-
  	_translated =.. AsList,
 	not(member(lId(_), AsList)),
 	!,
-	assert(_translated).
+	assert1T(_translated).
 
 inTe(_term) :-
 	inTe(_term, _translated),
