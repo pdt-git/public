@@ -6,13 +6,16 @@ import java.util.Vector;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerImageRepository;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
+import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderListener;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
@@ -37,10 +40,22 @@ public class JTransformerProjectDecoratorContributor implements ILightweightLabe
 			JTransformerPlugin.getDefault().addOptionProviderListener(project,this);
 
 			if(!project.hasNature(JTransformer.NATURE_ID)){
-
 				return;
 			}
-			//JTransformerProjectNature jtransformerProject = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+			
+//			String projectInterfaceKey = project.getPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY));
+//
+//			JTransformerSubscription pifSubscription = new JTransformerSubscription(project,
+//					 projectInterfaceKey + "_tempory_project_key",
+//					 projectInterfaceKey,
+//					// getProject().getName(),
+//					// getProject().getName(),
+//					"JTransformer factbase of project "
+//							+ project.getName(), "JTransformer-tbb");
+//			PrologRuntimePlugin.getDefault().getPrologInterface(
+//					pifSubscription);
+//			
+//			JTransformerPlugin.getDefault().setTemporaryProjectSubscription(project,pifSubscription);
 			
 			//  TODO: this is a bit ugly, or isn't it`?
 			String state = JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(project, JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
@@ -54,8 +69,7 @@ public class JTransformerProjectDecoratorContributor implements ILightweightLabe
 				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION));
 			}
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
-					JTransformer.ERR_UNKNOWN, JTransformer.CX_UNKNOWN, e);
+			JTUtils.logAndDisplayUnknownError(e);
 		}
 		
 		

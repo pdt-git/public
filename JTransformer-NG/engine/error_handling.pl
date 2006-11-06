@@ -5,6 +5,7 @@
 
 :- dynamic errorhandling/0.
 :- dynamic halt_on_error/0.
+:- dynamic error_stack_trace/2.
 
 % temporary necessary while aspects are not 
 % completely represented in prolog factbase:
@@ -177,5 +178,6 @@ throw_exception_upon_failure(Pred,Msg):-
      concat(Msg,Msg2,ExtMsg),
      write(ExtMsg),
         % ExceptionTerm =..[ExceptionType,ExtMsg],
+     assert(error_stack_trace(Pred,ExtMsg)),
      throw(Pred/*ExceptionTerm*/).
        

@@ -81,7 +81,7 @@ public class JTransformerNatureAssigner {
 			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
 					.getErrorMessageProvider(), UIUtils.getDisplay()
 					.getActiveShell(), JTransformer.ERR_UNKNOWN,
-					JTransformer.CX_UNKNOWN, e);
+					JTransformer.ERR_CONTEXT_EXCEPTION, e);
 			Debug.report(new Error(e));
 			e.printStackTrace();
 		}
@@ -194,7 +194,7 @@ public class JTransformerNatureAssigner {
 	}
 
 	private void removeOutputProjectReference(final IProject project, final IProject outputProject) {
-		Job j = new Job("Building workspace") {
+		Job j = new Job("Removing Reference to JTransformer Output Project.") {
 		    public IStatus run(IProgressMonitor monitor) {
 				try {
 					JTUtils.removeReferenceToOutputProjectIfNecessary(
@@ -216,7 +216,7 @@ public class JTransformerNatureAssigner {
 	}
 	
 	private void deleteOutputProject(final IProject project, final IProject outputProject) {
-		Job j = new Job("Building workspace") {
+		Job j = new Job("Deleting JTransformer Output Project.") {
 		    public IStatus run(IProgressMonitor monitor) {
 				try {
 					outputProject.delete(true, monitor);

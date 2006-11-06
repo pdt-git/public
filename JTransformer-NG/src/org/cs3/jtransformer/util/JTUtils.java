@@ -20,6 +20,7 @@ import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
@@ -40,6 +41,15 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
  * Some util methods.
@@ -515,13 +525,17 @@ public class JTUtils
 	/**
 	 * Util method returning the Prolog interface.
 	 * 
-	 * @param srcProject
+	 * @param project
 	 * @return PrologInterface
 	 * @throws CoreException
 	 */
-	public static PrologInterface getPrologInterface(IProject srcProject) throws CoreException
+	public static PrologInterface getPrologInterface(IProject project) throws CoreException
 	{
-		return ((JTransformerProjectNature) srcProject.getNature(JTransformer.NATURE_ID)).getPrologInterface();
+		JTransformerProjectNature nature = (JTransformerProjectNature) project.getNature(JTransformer.NATURE_ID);
+		if(nature == null) {
+			throw new IllegalArgumentException("project does not have a JTransformer nature: " + project.getName());
+		}
+		return nature.getPrologInterface();
 	}
 	
 	// ------------------------------------------------------------------
@@ -715,23 +729,29 @@ public class JTUtils
 	// Clearing all Markers from current Workspace
 	// that have got LogicAJPlugin "Nature"
 	public static void clearAllMarkersWithJTransformerFlag(IProject project) throws CoreException {
-			IMarker[] currentMarkers = project.findMarkers(IMarker.PROBLEM, true,
-					IResource.DEPTH_INFINITE);
-			if (currentMarkers != null) {
-				for (int i = 0; i < currentMarkers.length; i++) {
-					if (currentMarkers[i]
-							.getAttribute(JTransformer.PROBLEM_MARKER_ID) != null) {
-						// Hier k�nnte in Zukunft noch eine Abfrage hinzu
-						// um welchen Aspekt es sich gerade handelt.
-						// Gibts im Moment aber nicht. Deswegen
-						// l�sche ich einfach alle
-						currentMarkers[i].delete();
-					}
-				}
+		removeJTProblemsMarkers(project);	
 
-		}
 		
 	}
+	private static void removeJTProblemsMarkers(IProject project) throws CoreException {
+		IMarker[] currentMarkers = project.findMarkers(IMarker.PROBLEM, true,
+				IResource.DEPTH_INFINITE);
+
+		if (currentMarkers != null) {
+			for (int i = 0; i < currentMarkers.length; i++) {
+				if (currentMarkers[i]
+						.getAttribute(JTransformer.PROBLEM_MARKER_ID) != null) {
+					// Hier k�nnte in Zukunft noch eine Abfrage hinzu
+					// um welchen Aspekt es sich gerade handelt.
+					// Gibts im Moment aber nicht. Deswegen
+					// l�sche ich einfach alle
+					currentMarkers[i].delete();
+				}
+			}
+
+		}
+	}
+
 	public static List getProjectsWithPifKey(String key) throws CoreException {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		
@@ -749,4 +769,76 @@ public class JTUtils
 		}
 		return sharingProjects;
 	}
+	public static String quote(String str) {
+		return "'" + str + "'";
+	}
+	
+	static public void setStatusErrorMessage(final String string) {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				getActiveEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(string);
+			}
+		});
+	}
+	
+	/**
+	 * Select a text region in file filename which starts at offset start with length length.
+	 * @param start
+	 * @param length
+	 * @param filename
+	 * @throws PartInitException
+	 */
+	static public void selectInEditor(int start, int length, String filename) throws PartInitException {
+		Path path = new Path(filename);
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
+		if (file == null) {
+			setStatusErrorMessage("could not find the file: '" + filename + "' in the workspace.");
+			return;
+		}
+		openInEditor(file, true);
+		IDocument document = ((AbstractTextEditor)getActiveEditor()).getDocumentProvider().getDocument(getActiveEditor().getEditorInput());
+		ISelection selection = new TextSelection(document,start,length);
+		getActiveEditor().getEditorSite().getSelectionProvider().setSelection(selection);
+	}
+
+	static public IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
+		if (file != null) {
+			IWorkbenchPage p= getActivePage();
+			if (p != null) {
+				IEditorPart editorPart= IDE.openEditor(p, file, activate);
+				return editorPart;
+			}
+		}
+		return null; 
+	} 
+
+	static public IEditorPart getActiveEditor() {
+		return getActivePage().getActiveEditor();
+	}
+
+	static public IWorkbenchPage getActivePage() {
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().
+		getActivePage();
+	}
+	public static void logAndDisplayUnknownError(Exception e) {
+		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
+				JTransformer.ERR_UNKNOWN,
+				JTransformer.ERR_CONTEXT_EXCEPTION,
+				e);
+	}
+	
+	public static void logAndDisplayError(Exception e,int code,int context) {
+		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
+				code,
+				context,
+				e);
+	}
+	
+	public static void logError(Exception e,int code,int context) {
+		UIUtils.logError(JTransformerPlugin.getDefault().getErrorMessageProvider(),  
+				code,
+				context,
+				e);
+	}
+
 }

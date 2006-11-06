@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -370,6 +371,8 @@ public class JTransformerPlugin extends AbstractUIPlugin {
     }    
     
     Map nonPersistantPreference = new Hashtable();
+
+	private Map tempSubscription = new Hashtable();
     
 	public String getNonPersistantPreferenceValue(IProject project, String key, String defaultValue) {
     	Map projectPref = getProjectPreference(project);
@@ -463,7 +466,8 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 
 		public String getErrorMessage(int errCode)
 		{
-			return Messages.getString("JTransformerPlugin." + errCode); //$NON-NLS-1$
+			return Messages.getString("JTransformerPlugin." + errCode) + 
+			"Please inform the JTransformer developers and include the stack trace below."; //$NON-NLS-1$
 		}
 
 		public String getContextMessage(int cxCode)
@@ -521,5 +525,12 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 		
 	}
 
+	public void setTemporaryProjectSubscription(IProject project, JTransformerSubscription pifSubscription) {
+		tempSubscription.put(project,pifSubscription);
+	}
+
+	public JTransformerSubscription getTemporaryProjectSubscription(IProject project) {
+		return (JTransformerSubscription)tempSubscription.get(project);
+	}
 
 }
