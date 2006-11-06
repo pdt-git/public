@@ -44,10 +44,18 @@ public final class JTransformer {
      * Any exception occurred.
      */
     public static final int ERR_CONTEXT_EXCEPTION = 5;
-
+    
     public static final int ERR_UNKNOWN = 6;
+    
+    /**
+     * Errors occured while weaving.
+     */
+    public static final int ERR_WEAVING_FAILED = 7;
 
-    public static final int CX_UNKNOWN = 10;
+    /**
+     * gen toplevels failed and raised an exception.
+     */
+    public static final int ERR_WRITING_WOVEN_CODE = 8;
 
     /**
      * key that is used to identify the consultservice for external PEFs.
@@ -78,7 +86,6 @@ public final class JTransformer {
      * Type constant identifying the JTransformer Problem marker type.
      */
     public static final String PROBLEM_MARKER_ID = "org.cs3.jtransformer.jtransformerproblem";
-    
     /**
      * The id of the JTransformer Project Listener extension point.
      */
@@ -91,6 +98,10 @@ public final class JTransformer {
      * hooks as required.
      */
     public final static String RELOAD_HOOK_ID = "ReloadHook";
+    
+    
+    public final static String ADVICE_WEAVING_MARKER = "org.cs3.LogicAJ.advice.marker";
+//    public final static String ADVICE_WEAVING_MARKER = "org.cs3.logicaj.advice.weaving.marker";
 
 //    /**
 //     * The preference identified by this key contains the default value for the
@@ -179,6 +190,8 @@ public final class JTransformer {
  * @deprecated use ResourcesPlugin.getWorkspace().getRoot() instead.
  */	
 public static final ISchedulingRule JTransformer_BUILDER_SCHEDULING_RULE = new ProxyRule();
+
+
 
 
 

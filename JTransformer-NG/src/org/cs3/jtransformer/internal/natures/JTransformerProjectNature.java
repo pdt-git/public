@@ -3,10 +3,8 @@ package org.cs3.jtransformer.internal.natures;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -15,15 +13,12 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProjectListener;
-import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -32,8 +27,6 @@ import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -43,8 +36,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -71,13 +62,10 @@ public class JTransformerProjectNature implements IProjectNature,
 
 	boolean buildTriggered = false;
 	
-	static private Set toBeBuilt = new HashSet();
-
-	static private Object toBeBuiltMonitor = new Object();
 
 	// The project for which this nature was requested,
 	// see IProject.getNature(String)
-	private IProject project;
+	IProject project;
 
 	private Option[] options;
 
@@ -86,8 +74,13 @@ public class JTransformerProjectNature implements IProjectNature,
 	private Vector listeners = new Vector();
 
 	private Vector optionsListener = new Vector();
+	
+	private Object pefInitializationMonitor = new Object();
 
-	private Object configureMonitor = new Object();
+	private boolean pefInitializationDone = false;
+
+
+//	Object configureMonitor = new Object();
 
 	/**
 	 * 
@@ -110,7 +103,7 @@ public class JTransformerProjectNature implements IProjectNature,
 
 		// just to be sure that afterInit is not called before the pif is
 		// started
-		synchronized (configureMonitor) {
+		//synchronized (configureMonitor) {
 
 			// try
 			// {
@@ -187,7 +180,7 @@ public class JTransformerProjectNature implements IProjectNature,
 			// ;
 			// }
 
-		}
+		//}
 
 	}
 
@@ -341,7 +334,7 @@ public class JTransformerProjectNature implements IProjectNature,
 			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
 					.getErrorMessageProvider(), UIUtils.getDisplay()
 					.getActiveShell(), JTransformer.ERR_UNKNOWN,
-					JTransformer.CX_UNKNOWN, e);
+					JTransformer.ERR_CONTEXT_EXCEPTION, e);
 		}
 		getPrologInterface();
 		if (pif.isUp()) {
@@ -354,210 +347,9 @@ public class JTransformerProjectNature implements IProjectNature,
 
 	Object pifMonitor = new Object();
 
-	private JTransformerSubscription pifSubscription;
+	JTransformerSubscription pifSubscription;
 
 	private boolean initializingPif = false;
-
-	class JTransformerSubscription extends DefaultSubscription implements
-			LifeCycleHook {
-
-		public JTransformerSubscription(String id, String pifID,
-				String descritpion, String name) {
-			super(id, pifID, descritpion, name);
-		}
-
-		public void configure(PrologInterface pif) {
-			pif.addLifeCycleHook(this, getId(), new String[0]);
-			if (pif.isUp()) {
-				PrologSession session = null;
-				try {
-					session = pif.getSession();
-					onInit(pif, session);
-
-					afterInit(pif);
-
-				} catch (PrologInterfaceException e) {
-					Debug.rethrow(e);
-				} finally {
-					if (session != null) {
-						session.dispose();
-					}
-				}
-			}
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.cs3.pl.prolog.LifeCycleHook#onInit(org.cs3.pl.prolog.PrologSession)
-		 */
-		public void onInit(PrologInterface pif, final PrologSession initSession) {
-			try {
-//				JTransformerProject[] jtransformerProjects = JTransformer
-//						.getJTransformerProjects(pif);
-//				for (int i = 0; i < jtransformerProjects.length; i++) {
-//					// XXX: ld: i don't like that cast. Any idee?
-//					JTransformerProjectNature jtransformerProject = (JTransformerProjectNature) jtransformerProjects[i];
-//					jtransformerProject.reconfigure(initSession);
-//
-//				}
-	    		updateProjectLocationInFactbase(initSession);
-
-				JTransformerPlugin plugin = JTransformerPlugin.getDefault();
-				String v = plugin.getPreferenceValue(
-						JTransformer.PREF_USE_PEF_STORE, "false");
-				if (Boolean.valueOf(v).booleanValue()) {
-					plugin.reload(initSession);
-				}
-
-				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
-						.getLibraryManager(), initSession,
-						new String[] { JTransformer.LIB_ENGINE });
-
-				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
-						.getLibraryManager(), initSession,
-						new String[] { PrologRuntime.LIB_ATTIC });
-				initSession
-						.queryOnce("use_module(library('org/cs3/pdt/metadata/pdtplugin'))");
-
-				initSession.queryOnce("[library('jt_engine.pl')],"
-						+ "[library('org/cs3/pdt/test/main.pl')],"
-						+ "[library('org/cs3/pdt/util/main.pl')],"
-						+ "[library('org/cs3/pdt/compatibility/main.pl')]");
-				initSession.queryOnce("update_java_lang");
-
-			} catch (Throwable e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			}
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
-		 */
-		public void afterInit(PrologInterface pif)
-				throws PrologInterfaceException {
-
-			buildAllProjectsOfPif();
-		}
-
-		private void buildAllProjectsOfPif() {
-			try {
-
-				List tmpProjects = null;
-				synchronized (toBeBuiltMonitor) {
-
-					if (toBeBuilt.contains(project)) {
-						// built triggered by other project
-						return;
-					}
-					tmpProjects = getSortedListOfNotYetJTBuildProjects();
-					
-					toBeBuilt.addAll(tmpProjects);
-				}
-				IWorkspace workspace = ResourcesPlugin.getWorkspace();
-				IWorkspaceDescription wd = workspace.getDescription();
-				if (!wd.isAutoBuilding()) {
-					return;
-				}
-				final List projects = tmpProjects;
-				try {
-					for (Iterator iter = projects.iterator(); iter.hasNext();) {
-						buildProject((IProject) iter.next());
-					}
-				} finally {
-					finalizeProjectBuilding(projects);
-				}
-
-			} catch (Throwable e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			}
-		}
-
-		private List getSortedListOfNotYetJTBuildProjects() throws CoreException, Exception {
-			String key = pifSubscription.getPifKey();
-			List unsortedProjectsList = JTUtils.getProjectsWithPifKey(key);
-			TopoSortProjects topoSorter = new TopoSortProjects();
-			return topoSorter.sort(false, unsortedProjectsList);
-		}
-
-		private void finalizeProjectBuilding(final List projects) {
-			Job j = new Job("Finalize building of projects") {
-				public IStatus run(IProgressMonitor monitor) {
-					synchronized (toBeBuiltMonitor) {
-						toBeBuilt.removeAll(projects);
-					}
-					return Status.OK_STATUS;
-				}
-
-				public boolean belongsTo(Object family) {
-					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
-				}
-
-			};
-
-			synchronized (configureMonitor) {
-//							if (!buildTriggered) {
-//								buildTriggered = true;
-					j.setRule(ResourcesPlugin.getWorkspace().getRoot());
-					j.schedule();
-//							}
-//							buildTriggered = false;
-			}
-		}
-
-		private void buildProject(final IProject project) {
-			Job j = new Job("Building JTransformer PEFs for project " + project.getName()) {
-				public IStatus run(IProgressMonitor monitor) {
-					try {
-						project.build(IncrementalProjectBuilder.FULL_BUILD, 
-								JTransformer.BUILDER_ID,
-								new HashMap(),
-								monitor);
-					} catch (OperationCanceledException opc) {
-						return Status.CANCEL_STATUS;
-					} catch (Exception e) {
-						return new Status(IStatus.ERROR,
-								JTransformer.PLUGIN_ID, -1,
-								"Problems during build", e);
-					}
-					return Status.OK_STATUS;
-				}
-
-				public boolean belongsTo(Object family) {
-					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
-				}
-
-			};
-
-			synchronized (configureMonitor) {
-//					if (!buildTriggered) {
-//						buildTriggered = true;
-					j.setRule(ResourcesPlugin.getWorkspace().getRoot());
-					j.schedule();
-//					}
-//					buildTriggered = false;
-			}
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
-		 */
-		public void beforeShutdown(PrologInterface pif, PrologSession session)
-				throws PrologException, PrologInterfaceException {
-			JTransformerPlugin plugin = JTransformerPlugin.getDefault();
-			String v = plugin.getPreferenceValue(
-					JTransformer.PREF_USE_PEF_STORE, "false");
-			if (Boolean.valueOf(v).booleanValue()) {
-				JTransformerPlugin.getDefault().save(session);
-			}
-		}
-	}
 
 	private void pifKeysChanged() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
@@ -609,18 +401,21 @@ public class JTransformerProjectNature implements IProjectNature,
 			setInitializingPif(true);
 			String projectInterfaceKey = getRuntimePrologInterfaceKey();
 
-			pifSubscription = new JTransformerSubscription(projectInterfaceKey,
+			pifSubscription = new JTransformerSubscription(project, projectInterfaceKey,
 					projectInterfaceKey,
 					// getProject().getName(),
 					// getProject().getName(),
-					"JTransformer factbase of project "
-							+ getProject().getName(), "JTransformer");
+					"JTransformer factbase of project " + getProject().getName(), "JTransformer");
 			pif = PrologRuntimePlugin.getDefault().getPrologInterface(
 					pifSubscription);
+//			JTransformerSubscription tmpPif = JTransformerPlugin.getDefault().getTemporaryProjectSubscription(project);
+//			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+//			.getPrologInterfaceRegistry();
 
-			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
-			.getPrologInterfaceRegistry();
-			Set subscriptions = reg.getSubscriptionsForPif(projectInterfaceKey);
+			//if(tmpPif != null) {
+			//	reg.removeSubscription(projectInterfaceKey + "_tempory_project_key");
+			//}
+
 			
 			setInitializingPif(false);
 			return pif;
@@ -832,25 +627,7 @@ public class JTransformerProjectNature implements IProjectNature,
 
 	}
 
-	/**
-	 * updates the projectT/4 fact
-	 * 
-	 * @param nature
-	 * @throws PrologInterfaceException
-	 * @throws PrologException
-	 */
-	private void updateProjectLocationInFactbase(PrologSession session)
-			throws PrologException, PrologInterfaceException {
-		String projectName = quote(getProject().getName());
-		String query = "retractall(" + Names.PROJECT_T + "(" + projectName
-				+ ",_,_,_ ))" + "," + "assert(" + Names.PROJECT_T + "("
-				+ projectName + ", "
-				+ quote(getProject().getLocation().toPortableString()) + ","
-				+ quote(JTUtils.getOutputProjectName(getProject())) + ", "
-				+ quote(JTUtils.getOutputProjectPath(getProject())) + "))";
-		session.queryOnce(query);
 
-	}
 
 	static private String quote(String str) {
 		return "'" + str + "'";
@@ -951,6 +728,25 @@ public class JTransformerProjectNature implements IProjectNature,
 			}
 		}
 
+	}
+
+	public void pefInitializationDone() {
+		synchronized (pefInitializationMonitor) {
+			pefInitializationDone = true;
+			pefInitializationMonitor.notifyAll();
+		}
+	}
+	
+	public void ensurePefInitializationFinished() throws InterruptedException {
+		
+		synchronized (pefInitializationMonitor) {
+			if(pefInitializationDone) {
+				return;
+			} else {
+				pefInitializationMonitor.wait();
+			}
+		}
+		
 	}
 
 
