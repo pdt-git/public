@@ -79,7 +79,14 @@ public class DefaultSubscription implements PersistableSubscription {
 	public DefaultSubscription(){
 		
 	};
-	
+
+	/**
+	 * Only for non-persistant subscriptions
+	 * @param id
+	 * @param pifID
+	 * @param descritpion
+	 * @param name
+	 */
 	public DefaultSubscription(String id,
 			   String pifID,  
 			   String descritpion, 
@@ -160,7 +167,7 @@ public class DefaultSubscription implements PersistableSubscription {
 
 
 
-	public boolean isPersistent() {
+	final public boolean isPersistent() {
 		return persistent;
 	}
 
