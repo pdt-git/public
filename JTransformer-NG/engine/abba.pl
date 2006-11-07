@@ -9,6 +9,9 @@
 :- multifile within/2.
 :- dynamic within/2.
 
+:- multifile ri_within/2.
+:- dynamic ri_within/2.
+
 :- multifile node/3.
 :- dynamic node/3.
 
