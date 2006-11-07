@@ -812,4 +812,23 @@ stringClass(_ID) :-
     packageT(_syspid, 'java.lang'),
     classDefT(_ID, _syspid, 'String', _).               
 
-    
+/**
+ * param_names(ParamList,ParamNameList)
+ */
+param_names([],[]).
+param_names([Param|Params],[Name|Names]) :- 
+    paramDefT(Param, _, _, Name),
+	param_names(Params,Names).
+
+	
+/**
+ * param_typenames(ParamList,ParamTypeNameList)
+ */
+param_typenames([],[]).
+param_typenames([Param|Params],[Type|Types]) :- 
+    java_fq(paramDefT(Param, _, Type, _)),
+	param_typenames(Params,Types).
+	
+	
+	
+	
