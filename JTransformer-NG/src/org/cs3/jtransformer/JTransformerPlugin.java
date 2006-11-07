@@ -525,12 +525,4 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 		
 	}
 
-	public void setTemporaryProjectSubscription(IProject project, JTransformerSubscription pifSubscription) {
-		tempSubscription.put(project,pifSubscription);
-	}
-
-	public JTransformerSubscription getTemporaryProjectSubscription(IProject project) {
-		return (JTransformerSubscription)tempSubscription.get(project);
-	}
-
 }

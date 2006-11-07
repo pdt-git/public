@@ -45,16 +45,19 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		 * still needed?
 		 */
 		Object configureMonitor = new Object();
+
+		private JTransformerProjectNature nature;
 		
 		static Set toBeBuilt = new HashSet();
 
 		static Object toBeBuiltMonitor = new Object();
 
 		
-		public JTransformerSubscription(IProject project, String id, String pifID,
+		public JTransformerSubscription(JTransformerProjectNature nature, IProject project, String id, String pifID,
 				String descritpion, String name) {
 			super(id, pifID, descritpion, name, JTransformer.PLUGIN_ID, true);
 			this.project = project;
+			this.nature = nature;
 		}
 
 		public void configure(PrologInterface pif) {
@@ -177,6 +180,12 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		private List getSortedListOfNotYetBuildJTProjects() throws CoreException, Exception {
 			String key = getPifKey();
 			List unsortedProjectsList = JTUtils.getProjectsWithPifKey(key);
+			if(unsortedProjectsList.size() == 0) {
+				Debug.error("JTransformerSubscription.getSortedListOfNotYetBuildJTProjects(): project list ist empty!");
+				unsortedProjectsList.add(project);
+			} else {
+				Debug.info("JT:getSortedListOfNotYetBuildJTProjects: first project name: " + ((IProject)unsortedProjectsList.get(0)).getName());
+			}
 			TopoSortProjects topoSorter = new TopoSortProjects();
 			return topoSorter.sort(false, unsortedProjectsList);
 		}
@@ -206,7 +215,11 @@ public class JTransformerSubscription extends DefaultSubscription implements
 //							}
 //							buildTriggered = false;
 			}
-			Debug.info("finalizeProjectBuilding: after scheduling job - " + ((IProject)projects.get(0)).getName());
+			if(projects.size() == 0) {
+				Debug.error("finalizeProjectBuilding: projects size equals 0");
+			} else {
+				Debug.info("finalizeProjectBuilding: after scheduling job - " + ((IProject)projects.get(0)).getName());
+			}
 			
 		}
 		
@@ -215,7 +228,11 @@ public class JTransformerSubscription extends DefaultSubscription implements
 					.hasNext();) {
 				IProject project = (IProject) iter.next();
 				try {
-					JTUtils.getNature(project).pefInitializationDone();
+					if(project == this.project) {
+						nature.pefInitializationDone();
+					} else {
+						JTUtils.getNature(project).pefInitializationDone();
+					}
 				} catch (CoreException e) {
 					JTUtils.logAndDisplayUnknownError(e);
 				}
