@@ -2,10 +2,9 @@ package org.cs3.jtransformer.internal.natures;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.jtransformer.JTransformer;
@@ -13,7 +12,6 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.JTransformerProjectEvent;
 import org.cs3.jtransformer.JTransformerProjectListener;
-import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.regenerator.ISourceRegenerator;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
@@ -52,8 +50,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
 
-import salvo.jesus.graph.VertexImpl;
-
 /**
  * @see IProjectNature
  */
@@ -80,7 +76,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	private boolean pefInitializationDone = false;
 
 
-//	Object configureMonitor = new Object();
+	static private Map projectNatureMap = new Hashtable();
 
 	/**
 	 * 
@@ -101,17 +97,6 @@ public class JTransformerProjectNature implements IProjectNature,
 	 */
 	public void configure() throws CoreException {
 
-		// just to be sure that afterInit is not called before the pif is
-		// started
-		//synchronized (configureMonitor) {
-
-			// try
-			// {
-			// getFactBaseBuilder().clean(null);
-			// } catch (PrologInterfaceException e1)
-			// {
-			// JTransformerPlugin.getDefault().createPrologInterfaceExceptionCoreExceptionWrapper(e1);
-			// }
 			Debug.debug("configure was called");
 			IProjectDescription descr = project.getDescription();
 			ICommand sheepBuilder = descr.newCommand();
@@ -139,48 +124,6 @@ public class JTransformerProjectNature implements IProjectNature,
 						.createPrologInterfaceExceptionCoreExceptionWrapper(e1);
 			}
 
-			// important: touch the ConsultServices NOW if the pif is already
-			// running.
-			// otherwise recorded facts might be reloaded to late! (i.e. by the
-			// builder AFTER it has
-			// "found" unresolved types
-			// PrologInterface pif = getPrologInterface();
-			// if (pif.isUp()) {
-			// Job j = new Job("building PEFs for project " + project.getName())
-			// {
-			// protected IStatus run(IProgressMonitor monitor) {
-			// try {
-			// IWorkspaceDescription wd = ResourcesPlugin
-			// .getWorkspace().getDescription();
-			// if (wd.isAutoBuilding()) {
-			// project.build(IncrementalProjectBuilder.FULL_BUILD,
-			// monitor);
-			// }
-			// } catch (OperationCanceledException opc) {
-			// return Status.CANCEL_STATUS;
-			// } catch (CoreException e) {
-			// return new Status(Status.ERROR, JTransformer.PLUGIN_ID, -1,
-			// "exception caught during build", e);
-			// }
-			// return Status.OK_STATUS;
-			// }
-			//
-			// public boolean belongsTo(Object family) {
-			// return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
-			// }
-			//
-			// };
-			// j.setRule(ResourcesPlugin.getWorkspace().getRoot());
-			// j.schedule();
-			// } else {
-			// // if the pif is not up yet, this is no problem at all: the
-			// reload
-			// // hook will
-			// // take care of the due build in its afterInit method.
-			// ;
-			// }
-
-		//}
 
 	}
 
@@ -273,6 +216,12 @@ public class JTransformerProjectNature implements IProjectNature,
 	 * @see IProjectNature#deconfigure
 	 */
 	public void deconfigure() throws CoreException {
+		
+		// just to make sure waiting threads are notified
+		pefInitializationDone();
+		
+		removeNatureFromRegistry();
+		
 		IProjectDescription descr = project.getProject().getDescription();
 		Debug.debug("deconfigure was called");
 		ICommand builders[] = descr.getBuildSpec();
@@ -314,6 +263,12 @@ public class JTransformerProjectNature implements IProjectNature,
 
 	}
 
+	private void removeNatureFromRegistry() {
+		synchronized (projectNatureMap) {
+			projectNatureMap.remove(project);
+		}		
+	}
+
 	/**
 	 * @see IProjectNature#getProject
 	 */
@@ -326,6 +281,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	 */
 	public void setProject(IProject project) {
 		this.project = project;
+		checkIfNatureIsAlreadyAssignedToProject(project);
 		try {
 			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,
 					JTransformer.FACTBASE_STATE_KEY,
@@ -341,6 +297,19 @@ public class JTransformerProjectNature implements IProjectNature,
 			reconfigure();
 		}
 
+	}
+
+	private void checkIfNatureIsAlreadyAssignedToProject(IProject project) {
+		synchronized (projectNatureMap) {
+			if(projectNatureMap.containsKey(project)) {
+				RuntimeException ex = new RuntimeException(
+						"Internal error: second creation of a JT nature for the project "+project.getName());
+				JTUtils.logAndDisplayUnknownError(ex);
+				throw ex;
+			}
+			projectNatureMap.put(project,this);
+		}
+		
 	}
 
 	PrologInterface pif = null;
@@ -401,7 +370,7 @@ public class JTransformerProjectNature implements IProjectNature,
 			setInitializingPif(true);
 			String projectInterfaceKey = getRuntimePrologInterfaceKey();
 
-			pifSubscription = new JTransformerSubscription(project, projectInterfaceKey,
+			pifSubscription = new JTransformerSubscription(this,project, projectInterfaceKey,
 					projectInterfaceKey,
 					// getProject().getName(),
 					// getProject().getName(),
