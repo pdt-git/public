@@ -75,6 +75,8 @@ delete_logicaj_abba_model :-
     ),(
       retract(abba:node(ID, Kind, Name)),
       retractall(abba:property(ID, _)),
+      retractall(abba:within(ID, _)),
+      retractall(abba:ri_within(ID, _)),
       retractall(abba:edge(_,_,ID, _)),
       retractall(abba:edge(_,_,_, ID))
     )).
