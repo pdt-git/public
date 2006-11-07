@@ -820,11 +820,15 @@ public class JTUtils
 		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().
 		getActivePage();
 	}
-	public static void logAndDisplayUnknownError(Exception e) {
+	public static void logAndDisplayUnknownError(final Exception e) {
+		UIUtils.getDisplay().asyncExec(new Runnable() {
+			public void run() {
 		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
 				JTransformer.ERR_UNKNOWN,
 				JTransformer.ERR_CONTEXT_EXCEPTION,
 				e);
+			}
+		});
 	}
 	
 	public static void logAndDisplayError(Exception e,int code,int context) {

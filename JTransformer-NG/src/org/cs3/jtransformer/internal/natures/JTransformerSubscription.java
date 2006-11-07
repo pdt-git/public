@@ -136,16 +136,20 @@ public class JTransformerSubscription extends DefaultSubscription implements
 
 		private void buildAllProjectsOfPif() {
 			try {
+				Debug.info("JT: buildAllProjectsOfPif: start");
 
 				List tmpProjects = null;
 				synchronized (toBeBuiltMonitor) {
 
 					if (toBeBuilt.contains(project)) {
 						// built triggered by other project
+						Debug.info("JT: buildAllProjectsOfPif: toBeBuilt.contains(project)");
+
 						return;
 					}
 					tmpProjects = getSortedListOfNotYetBuildJTProjects();
 					
+					Debug.info("JT: buildAllProjectsOfPif: toBeBuilt.addAll");
 					toBeBuilt.addAll(tmpProjects);
 				}
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -153,6 +157,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				if (!wd.isAutoBuilding()) {
 					return;
 				}
+				Debug.info("JT: finalizeProjectBuilding: before");
+
 				final List projects = tmpProjects;
 				try {
 					for (Iterator iter = projects.iterator(); iter.hasNext();) {
@@ -189,7 +195,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				}
 
 			};
-
+			Debug.info("finalizeProjectBuilding: before scheduling job");
 			synchronized (configureMonitor) {
 //							if (!buildTriggered) {
 //								buildTriggered = true;
@@ -200,6 +206,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 //							}
 //							buildTriggered = false;
 			}
+			Debug.info("finalizeProjectBuilding: after scheduling job - " + ((IProject)projects.get(0)).getName());
+			
 		}
 		
 		private void notifyJTNaturesAboutEndOfInitialization(final List projects) {

@@ -86,7 +86,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	 * 
 	 */
 	public JTransformerProjectNature() {
-
+		Debug.info("TJ: JTNature ID: " + this.hashCode());
 	}
 
 	/**
@@ -731,10 +731,13 @@ public class JTransformerProjectNature implements IProjectNature,
 	}
 
 	public void pefInitializationDone() {
+		Debug.info("pefInitializationDone before monitor: " + project.getName());
 		synchronized (pefInitializationMonitor) {
 			pefInitializationDone = true;
 			pefInitializationMonitor.notifyAll();
 		}
+		Debug.info("pefInitializationDone after monitor: " + project.getName());
+
 	}
 	
 	public void ensurePefInitializationFinished() throws InterruptedException {
