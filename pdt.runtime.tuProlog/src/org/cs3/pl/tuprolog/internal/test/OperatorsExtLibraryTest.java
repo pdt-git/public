@@ -93,4 +93,14 @@ public class OperatorsExtLibraryTest extends TestCase {
 		info = engine.solve("hasan(x).");
 		assertTrue("Failed to Query Engine ", info.isSuccess());
 	}
+	
+	public void testThrow() {
+		try{
+			SolveInfo info = engine.solve("catch(throw('my_prolog_exception'),my_prolog_exception,true).");
+			assertTrue("Failed to throw an exception", info.isSuccess());
+		}catch(Exception ex){
+			System.err.println("hi there:");
+			ex.printStackTrace();
+		}
+	}
 }
