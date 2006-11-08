@@ -90,7 +90,7 @@ public class SelfTest extends FactGenerationTest {
 		System.err.println("done");
 		
 		System.err.print("   writing facts...");
-		JTransformerProject jtransformerProject = (JTransformerProject) getTestProject().getNature(JTransformer.NATURE_ID);
+		JTransformerProject jtransformerProject = JTransformerPlugin.getNature( getTestProject());
 		AsyncPrologSession session = ((PrologInterface2)jtransformerProject.getPrologInterface()).getAsyncSession();
 		try {
 			IFile outFile = writeFactsToFile(session,sourceUnit);

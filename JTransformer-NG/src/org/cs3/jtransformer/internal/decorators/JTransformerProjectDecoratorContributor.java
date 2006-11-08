@@ -71,8 +71,7 @@ public class JTransformerProjectDecoratorContributor implements ILightweightLabe
 		} catch (CoreException e) {
 			JTUtils.logAndDisplayUnknownError(e);
 		}
-		
-		
+
 	}
 
 	public void addListener(ILabelProviderListener l) {

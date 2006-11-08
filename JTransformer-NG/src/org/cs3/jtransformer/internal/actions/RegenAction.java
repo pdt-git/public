@@ -46,7 +46,7 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 			for (int i = 0; i < projects.length; i++) {
 				if(projects[i].isAccessible() && projects[i].hasNature(JTransformer.NATURE_ID)){
-					nature = (JTransformerProjectNature)projects[i].getNature(JTransformer.NATURE_ID);
+					nature = JTransformerPlugin.getNature(projects[i]);
 					break;
 				}
 			}

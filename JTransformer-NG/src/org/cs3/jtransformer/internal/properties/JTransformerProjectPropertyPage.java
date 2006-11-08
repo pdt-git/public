@@ -3,6 +3,7 @@
 package org.cs3.jtransformer.internal.properties;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pdt.ui.util.OptionProviderPropertyPage;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.OptionProvider;
@@ -22,7 +23,7 @@ public class JTransformerProjectPropertyPage extends OptionProviderPropertyPage 
 			IProject project = (IProject) element;
 			try{
 			if(project.hasNature(JTransformer.NATURE_ID)){
-				return (OptionProvider) project.getNature(JTransformer.NATURE_ID);
+				return JTransformerPlugin.getNature( project);
 			}
 			}
 			catch (CoreException e){

@@ -161,11 +161,6 @@ public class FactBaseBuilder {
 
         } finally {
 			//jobManager.endRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
-        	try {
-    			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
-    		} catch (CoreException e1) {
-    			e1.printStackTrace();
-    		}
 
             building = false;
             monitor.done();
@@ -224,9 +219,10 @@ public class FactBaseBuilder {
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             loadExternalFacts(submon);
-            JTransformerPlugin plugin = JTransformerPlugin.getDefault();
-            String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE,
-                    "false");
+   			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
+
+//   			JTransformerPlugin plugin = JTransformerPlugin.getDefault();
+//            String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE, "false");
 //            if (Boolean.valueOf(v).booleanValue()) {
 //                JTransformerPlugin.getDefault().save(session);
 //            }
@@ -868,7 +864,7 @@ public class FactBaseBuilder {
 	 */
 	private PrologInterface getPif() {
 		try {
-			return ((JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID)).getPrologInterface();
+			return JTransformerPlugin.getNature(project).getPrologInterface();
 		} catch (CoreException e) {
 			Debug.report(e);
 		}

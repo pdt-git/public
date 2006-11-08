@@ -1422,8 +1422,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     public JTransformerProject getTestJTransformerProject() {
         if (testJTransformerProject == null) {
             try {
-                testJTransformerProject = (JTransformerProject) getTestProject()
-                        .getNature(JTransformer.NATURE_ID);
+                testJTransformerProject = JTransformerPlugin.getNature(getTestProject());
             } catch (CoreException e) {
                 throw new RuntimeException(e);
             }
