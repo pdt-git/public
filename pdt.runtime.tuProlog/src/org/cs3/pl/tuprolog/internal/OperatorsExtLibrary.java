@@ -98,6 +98,24 @@ public class OperatorsExtLibrary extends Library {
 		return false;
 	}
 	
+	public boolean throw_1(Term msg) throws Exception, TuPrologThrowable {
+		
+		if ( msg.getTerm().isAtomic())
+			throw new TuPrologThrowable( msg.toString());
+		
+		return true;
+	}
+	
+	
+	public boolean catch_3(Term goal, Term catcher, Term recover){
+		
+		try{
+			engine.solve(goal);
+		}catch(Throwable ex){
+			System.err.println("Prolog Exception occured ..!"+ex.getMessage());
+		}
+		return true;
+	}
 	/*
 	 * The default Theory which will be used by OperatorsExtLibrary once loaded.
 	 * @see alice.tuprolog.Library#getTheory()
