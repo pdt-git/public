@@ -17,7 +17,7 @@ import java.util.NoSuchElementException;
  */
 public class EngineManager implements java.io.Serializable {
 	
-	private Prolog			mediator;
+	Prolog			mediator;
 	private TheoryManager    theoryManager;
 	private PrimitiveManager primitiveManager;
 	private LibraryManager   libraryManager;

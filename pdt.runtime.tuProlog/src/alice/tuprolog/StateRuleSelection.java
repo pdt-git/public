@@ -17,11 +17,13 @@
  */
 package alice.tuprolog;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ArrayList;
 
 import alice.tuprolog.ClauseInfo;
 import alice.tuprolog.Struct;
+import alice.tuprolog.event.WarningEvent;
 import alice.util.OneWayList;
 
 /**
@@ -31,6 +33,43 @@ import alice.util.OneWayList;
 public class StateRuleSelection extends State {
 	
 	
+	/**
+     * checks for existance
+     * 
+     * @autor Tobias Rho
+     * @param t
+     * @param m
+     * @param goal
+     * @param functor
+     */
+	private void checkDynamic(Struct goal) {
+		
+		if(!goal.getName().equals("is_dynamic")) {
+			
+			SolveInfo result = c.solve(
+				new Struct("is_dynamic", 
+					new Struct("/",  new Term[] {
+						new Struct(goal.getName()), 
+						new Int(goal.getArity())
+			}
+			)));
+			if(!result.isSuccess()) {
+				List list = new ArrayList();
+				for(int i=0; i <goal.getArity();i++) {
+					list.add(new Var());
+				}
+				Struct head = new Struct(goal.getName(), 
+						(Term[])list.toArray(new Term[0]));
+				LinkedList clauses = c.find(head);
+				
+				if(clauses.size() == 0) {
+					c.mediator.notifyWarning(
+				        new WarningEvent(goal,
+				        		         "could not find compatible goals: " + goal));
+				}
+			}
+         }
+	}
 	
 	public StateRuleSelection(EngineManager c) {
 		this.c = c;
@@ -55,11 +94,28 @@ public class StateRuleSelection extends State {
 			List varsList = new ArrayList();
 			e.currentContext.trailingVars = new OneWayList(varsList,e.currentContext.trailingVars);
 			clauseStore = ClauseStore.build(goal, varsList, c.find(goal));
+			
 			if (clauseStore == null){
+				try {
+					/*
+	                 * trho:
+	                 * warn if the goal if no clause with a compatible 
+	                 * signature is defined and it is not declared dynamic
+	                 * 
+	                 * @author Tobias Rho 
+	                 */
+            		 if (true){
+            			 checkDynamic(goal);
+            		 }
+            	} catch(Exception ex) {
+            		ex.printStackTrace();
+            	}
 				e.nextState = c.BACKTRACK;
 				return;
 			}
 		}
+		
+		
 		
 		/*-----------------------------------------------------
 		 * Scelgo una regola fra quelle potenzialmente compatibili.

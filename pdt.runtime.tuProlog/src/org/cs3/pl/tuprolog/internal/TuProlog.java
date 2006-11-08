@@ -49,27 +49,27 @@ public class TuProlog {
      * @throws IOException
      */
 	public void initEngine() throws InvalidTheoryException, IOException {
-//		Theory theory = new Theory(
-//				":- op(1150, fx, dynamic). \n" +
-//				":- op(1150, fx, multifile).\n"+
-//				
-//				"dynamic(A) :- is_dynamic(A),!.\n" +
-//				"dynamic(A) :- assert(is_dynamic(A)).\n" + 
-//				"multifile(A) :- is_multifile(A),!.\n" +
-//				"multifile(A) :- assert(is_multifile(A)).\n"
-//				);
-//		engine.addTheory(theory);
-//		
-//		theory = new Theory(
-//				":- dynamic is_dynamic/1.\n"+
-//				":- dynamic is_multifile/1.\n"+
-//				":- dynamic member/2.\n"+
-//				":- dynamic apppend/3.\n"
-//			);
-//		engine.addTheory(theory);
-//		//loadLibrary("compatiblitySWI.pl");
-//		//loadLibrary("compatiblityTU.pl");
-//		//loadLibrary("javaFactbase.pl");
+		Theory theory = new Theory(
+				":- op(1150, fx, dynamic). \n" +
+				":- op(1150, fx, multifile).\n"+
+				
+				"dynamic(A) :- is_dynamic(A),!.\n" +
+				"dynamic(A) :- assert(is_dynamic(A)).\n" + 
+				"multifile(A) :- is_multifile(A),!.\n" +
+				"multifile(A) :- assert(is_multifile(A)).\n"
+				);
+		engine.addTheory(theory);
+		
+		theory = new Theory(
+				":- dynamic is_dynamic/1.\n"+
+				":- dynamic is_multifile/1.\n"+
+				":- dynamic member/2.\n"+
+				":- dynamic apppend/3.\n"
+			);
+		engine.addTheory(theory);
+		loadLibrary("compatiblitySWI.pl");
+		loadLibrary("compatiblityTU.pl");
+		loadLibrary("javaFactbase.pl");
 //		
 		engine.setWarning(true);
 		engine.addWarningListener(new WarningListener() {
