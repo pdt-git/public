@@ -8,9 +8,14 @@ import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
 
 public class RecordLibraryTest extends TestCase {
+	private Prolog engine = null ;
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		if ( engine == null ){
+			engine = new Prolog();
+			engine.loadLibrary(new RecordLibrary());
+		}
 	}
 
 	protected void tearDown() throws Exception {
@@ -18,41 +23,60 @@ public class RecordLibraryTest extends TestCase {
 	}
 
 	public void testRecorda_2() throws Exception {
-		Prolog engine = new Prolog();
-		engine.loadLibrary(new RecordLibrary());
+
+		SolveInfo info = engine.solve("recorda(hasan,ops).");
+		assertTrue(info.isSuccess());
+	}
+
+	public void testRecorda_3() throws Exception {
 		
-		SolveInfo info = engine.solve("recorda(hasan,ops,Ref).");
+		SolveInfo info = engine.solve("recorda(hasan,ops, Ref).");
 		assertTrue(info.isSuccess());
-		System.err.print(info.getBindingVars());
-		//info = engine.solve("recorded(Y,X).");
-		info = engine.solve("recorda(hasan,opss,Ref).");
-		assertTrue(info.isSuccess());
-		System.err.print(info.getBindingVars());
+		System.err.println("Ref :" + info.getVarValue("Ref"));
+	}
+
+	public void testRecordz_2() throws Exception {
 		
-		info = engine.solve("recorded(hasan,ops,Ref).");
+		SolveInfo info = engine.solve("recordz(hasan,ops).");
+		assertTrue(info.isSuccess());		
+	}
+
+	public void testRecordz_3() throws Exception {
+
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
 		assertTrue(info.isSuccess());
-		System.err.print(info.getBindingVars());
-
+		System.err.println("Ref :" + info.getVarValue("Ref"));
 	}
 
-	public void testRecorda_3() {
-		fail("Not yet implemented");
+	public void testRecorded_2() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops).");
+		assertTrue(info.isSuccess());
+		info = engine.solve("recorded(hasan,ops).");
+		assertTrue(info.isSuccess());
 	}
 
-	public void testRecordz_2() {
-		fail("Not yet implemented");
+	public void testRecorded_3() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		assertTrue(info.isSuccess());
+		SolveInfo info2 = engine.solve("recorded(hasan,ops, Ref).");
+		assertTrue(info2.isSuccess());	
+		
+		assertEquals(info.getVarValue("Ref"), info2.getVarValue("Ref"));
+		System.err.println("Ref:"+ info.getVarValue("Ref"));
 	}
-
-	public void testRecordz_3() {
-		fail("Not yet implemented");
-	}
-
-	public void testRecorded_2() {
-		fail("Not yet implemented");
-	}
-
-	public void testRecorded_3() {
-		fail("Not yet implemented");
+	
+	public void testErase_1() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		assertTrue(info.isSuccess());
+		
+		SolveInfo info2 = engine.solve("recorded(hasan,ops, Ref), erase(Ref).");
+		assertTrue(info2.isSuccess());	
+		
+		info2 = engine.solve("recorded(hasan,ops, Ref).");
+		assertFalse(info2.isSuccess());	
 	}
 
 }

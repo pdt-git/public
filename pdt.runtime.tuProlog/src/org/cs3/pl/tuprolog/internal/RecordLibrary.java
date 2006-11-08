@@ -7,7 +7,9 @@ import java.util.List;
 
 import alice.tuprolog.Int;
 import alice.tuprolog.Library;
+import alice.tuprolog.Number;
 import alice.tuprolog.Term;
+import alice.tuprolog.Var;
 
 public class RecordLibrary extends Library {
 
@@ -17,6 +19,12 @@ public class RecordLibrary extends Library {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	
+	public boolean recorda_2(Term key, Term value){
+		Term ref = new Var();
+		
+		return ( recorda_3(key, value, ref) );
+	}	
 	
 	public boolean recorda_3(Term key, Term value, Term ref){
 		Term _key = key.getTerm();
@@ -35,21 +43,55 @@ public class RecordLibrary extends Library {
 		{
 			values = new ArrayList();
 			tmp = _key;
-			System.err.println("Key was found.");
-		}else {
+		}else 
 			values = (ArrayList) rcds_db.get(tmp);
-		}
-		
-		values.add(_value);
+				
+		RecordEntry entry = new RecordEntry(_value);
+		values.add(0, entry);
 		rcds_db.put(tmp, values);
 		
-		int index = values.indexOf(_value);
-		
-		System.err.println("HashTabel: "  + rcds_db );
-		return unify(ref, new Int(index));
-		
+		return unify(ref, new Int(entry.getRef()));
 	}
 
+	public boolean recordz_2(Term key, Term value){
+		Term ref = new Var();
+		
+		return ( recordz_3(key, value, ref) );
+	}		
+	
+	public boolean recordz_3(Term key, Term value, Term ref){
+		Term _key = key.getTerm();
+		Term _value = value.getTerm();
+		
+		/*
+		 * Key & Value should be bound to store a record
+		 */
+		if ( _key.isVar() || _value.isVar() )
+			return false;
+		
+		Term tmp = containsKey(_key);
+		List values = null ;
+		
+		if ( tmp == null )
+		{
+			values = new ArrayList();
+			tmp = _key;
+		}else 
+			values = (ArrayList) rcds_db.get(tmp);
+		
+		RecordEntry entry = new RecordEntry(_value);
+		values.add(entry);
+		rcds_db.put(tmp, values);
+		
+		return unify(ref, new Int(entry.getRef()));		
+	}
+	
+	public boolean recorded_2(Term key, Term value){
+		Term ref = new Var();
+		
+		return ( recorded_3(key, value, ref) );
+	}	
+	
 	public boolean recorded_3(Term key, Term value, Term ref){
 		Term _key = key.getTerm();
 		Term _value = value.getTerm();
@@ -65,7 +107,14 @@ public class RecordLibrary extends Library {
 		
 		List values = (ArrayList) rcds_db.get(tmp);
 		
-		int index = values.indexOf(_value);
+		
+		int index = -1;
+		
+		for (Iterator it = values.iterator(); it.hasNext();) {
+			RecordEntry en = (RecordEntry) it.next();
+			if ( en.getTerm().equals(_value) )
+				index = en.getRef();
+		}
 		// Value was not found.
 		if ( index == -1 )
 			return false;
@@ -90,6 +139,29 @@ public class RecordLibrary extends Library {
 		
 		return _result;
 		
+	}
+
+	public boolean erase_1(Term ref){
+		
+		if ( ! ref.getTerm().isNumber() )
+			return false;
+		
+		Number _ref = (Number) ref.getTerm() ;		
+		
+		for (Iterator keys = rcds_db.keySet().iterator(); keys.hasNext();) {
+			Term key = (Term) keys.next();
+			
+			for (Iterator values = ((ArrayList)rcds_db.get(key)).iterator(); values.hasNext();) {
+				RecordEntry en = (RecordEntry) values.next();
+				
+				if ( en.getRef() == _ref.intValue() ){
+					values.remove();
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	/*
 	 * (non-Javadoc)
