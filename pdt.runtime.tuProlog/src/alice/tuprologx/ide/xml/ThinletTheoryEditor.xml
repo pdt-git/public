@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="editor" columns="4" gap="4" top="4" left="2" right="2" bottom="4">
+    <label text="Line: "/>
+    <textfield name="lineField" editable="false" columns="8"/>
+    <!-- an empty label to make the buttons panel really right-aligned -->
+    <label text="" weightx="1"/>
+    <panel columns="4" gap="4" halign="right">
+        <button name="getTheoryButton" icon="img/GetTheory20.png"
+            tooltip="Get Theory" action="getEngineTheory"/>
+        <button name="setTheoryButton" icon="img/SetTheory20.png"
+            tooltip="Set Theory" action="setEngineTheory"/>
+        <button name="undoButton" icon="img/Redo20.png"
+            tooltip="Undo Edit Action" action="undo"/>
+        <button name="redoButton" icon="img/Undo20.png"
+            tooltip="Redo Edit Action" action="redo"/>
+    </panel>
+</panel>

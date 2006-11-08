@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="libraryManager" columns="1" gap="4" top="4" left="2" right="2" bottom="4">
+    <panel name="addLibraryPanel" columns="2" gap="4" top="2" left="2" right="2" bottom="2" weightx="1">
+        <textfield name="libraryClassname" weightx="1"/>
+        <button text="Add" action="addLibrary(libraryClassname.text)"/>
+    </panel>
+    <panel name="librariesDisplay" columns="2" gap="0" top="2" left="2" right="2" bottom="2" weightx="1">
+        <!-- An empty panel: its content will be dinamically generated -->
+    </panel>
+    <!-- an empty label to make the panels fill the frame -->
+    <label text="" weighty="1"/>
+    <panel columns="2" gap="10" top="2" left="2" right="2" bottom="2" weightx="1">
+        <button text="OK" weightx="57" action="setLibraryManagerStatus"/>
+        <button text="Cancel" weightx="43" action="closeLibraryDialog"/>
+    </panel>
+    <label name="statusTextField" weightx="1"/>
+</panel>
