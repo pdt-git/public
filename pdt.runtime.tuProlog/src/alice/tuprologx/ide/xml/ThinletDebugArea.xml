@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="debugPanel" columns="1" gap="4" top="4" left="2" right="2" bottom="4">
+    <textarea name="debugArea" weightx="1" weighty="1" editable="false"/>
+    <button name="clearButton" text=" Clear" weightx="1" action="clear" icon="img/Clear16.png"/>
+</panel>

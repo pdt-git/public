@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="aboutDialog" columns="2" gap="4" top="4" left="2" right="2" bottom="4">
+    <label icon="tuProlog.gif" rowspan="2"/>
+    <label name="tuPrologIDE" text="tuProlog IDE version 2.0"/>
+    <label name="tuPrologSystem" text=""/>
+    <label text="" colspan="2"/>
+    <label text="tuProlog is (C) Copyright 2001-2006 aliCE team" colspan="2"/>
+    <label text="at DEIS, University of Bologna and Cesena, Italy." colspan="2"/>
+    <label text="URL: http://lia.deis.unibo.it/Research/2P" colspan="2"/>
+</panel>

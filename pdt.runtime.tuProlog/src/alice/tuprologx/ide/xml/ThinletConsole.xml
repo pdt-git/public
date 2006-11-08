@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<panel name="console" columns="1" gap="4" top="4" left="2" right="2" bottom="4">
+    <tabbedpane name="areas" selected="0" weighty="1" weightx="1" action="enableClearOutput">
+        <tab text="Solution"/>
+        <textarea name="solutionArea" editable="false"/>
+        <tab text="Output"/>
+        <textarea name="outputArea" editable="false"/>
+    </tabbedpane>
+    <panel columns="4" gap="4" halign="center">
+        <button name="nextButton" text=" Next" icon="img/Next16.png"
+            tooltip="Ask for next solution" enabled="false" action="getNextSolution"/>
+        <button name="acceptButton" text="Accept" icon="img/Accept16.png"
+            tooltip="Accept current solution" enabled="false" action="acceptSolution"/>
+        <button name="stopButton" text=" Stop" icon="img/Stop16.png"
+            tooltip="Stop tuProlog engine" enabled="false" action="stopEngine"/>
+        <button name="clearOutputButton" text=" Clear" icon="img/Clear16.png"
+            tooltip="Clear Output" enabled="false" action="clearOutput"/>
+    </panel>
+</panel>
