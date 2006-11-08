@@ -360,7 +360,7 @@ public class JTransformerProjectNature implements IProjectNature,
 
 	public PrologInterface getPrologInterface() {
 		synchronized (pifMonitor) {
-			if (pif != null) {
+			if (pif  != null) {
 				return pif;
 			}
 			if (isInitializingPif()) {

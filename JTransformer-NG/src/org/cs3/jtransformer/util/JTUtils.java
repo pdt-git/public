@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -531,7 +532,7 @@ public class JTUtils
 	 */
 	public static PrologInterface getPrologInterface(IProject project) throws CoreException
 	{
-		JTransformerProjectNature nature = (JTransformerProjectNature) project.getNature(JTransformer.NATURE_ID);
+		JTransformerProjectNature nature = JTransformerPlugin.getNature( project);
 		if(nature == null) {
 			throw new IllegalArgumentException("project does not have a JTransformer nature: " + project.getName());
 		}
@@ -707,7 +708,7 @@ public class JTUtils
 			return ResourcesPlugin.getWorkspace().getRoot().getProject(JTUtils.getOutputProjectName(project));
 	}
 	public static JTransformerProjectNature getNature(IProject project) throws CoreException {
-		return (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+		return JTransformerPlugin.getNature(project);
 	}
 	
 	public static boolean allProjectsHaveJTNature(List projects) throws CoreException {
@@ -760,10 +761,11 @@ public class JTUtils
 			String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
 					JTransformer.PROLOG_RUNTIME_KEY, null);
 			if(runtimeKey != null && runtimeKey.equals(key) &&
-					projects[i].hasNature(JTransformer.NATURE_ID) &&
-					JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(projects[i],
-							JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED)
-							.equals(JTransformer.FACTBASE_STATE_ACTIVATED)){
+					projects[i].hasNature(JTransformer.NATURE_ID) 
+//					&& JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(projects[i],
+//							JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED)
+//							.equals(JTransformer.FACTBASE_STATE_ACTIVATED)
+							){
 				sharingProjects.add(projects[i]);
 			}
 		}
@@ -823,7 +825,13 @@ public class JTUtils
 	public static void logAndDisplayUnknownError(final Exception e) {
 		UIUtils.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
+				Shell shell;
+				if(UIUtils.getDisplay().getActiveShell() != null){
+					shell=UIUtils.getDisplay().getActiveShell();
+				} else {
+					shell = UIUtils.getDisplay().getShells()[0];
+				}
+		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), shell, 
 				JTransformer.ERR_UNKNOWN,
 				JTransformer.ERR_CONTEXT_EXCEPTION,
 				e);

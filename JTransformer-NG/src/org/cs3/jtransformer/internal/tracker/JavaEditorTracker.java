@@ -1,6 +1,7 @@
 package org.cs3.jtransformer.internal.tracker;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.pdt.runtime.AbstractEditorTracker;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -48,7 +49,7 @@ public class JavaEditorTracker extends AbstractEditorTracker
 		JTransformerProjectNature jtNature =null;
 		try {
 			if(project.hasNature(JTransformer.NATURE_ID)){
-				jtNature=(JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+				jtNature=JTransformerPlugin.getNature(project);
 			}
 		} catch (CoreException e) {
 			Debug.report(e);

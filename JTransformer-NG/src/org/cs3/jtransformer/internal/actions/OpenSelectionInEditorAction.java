@@ -3,6 +3,7 @@ package org.cs3.jtransformer.internal.actions;
 import java.util.Map;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
@@ -36,7 +37,7 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 		JTransformerProjectNature nature = null;
 		for (int i = 0; i < projects.length; i++) {
 			if(projects[i].isAccessible() && projects[i].hasNature(JTransformer.NATURE_ID)){
-				nature = (JTransformerProjectNature)projects[i].getNature(JTransformer.NATURE_ID);
+				nature = JTransformerPlugin.getNature(projects[i]);
 				break;
 			}
 		}

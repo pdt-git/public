@@ -15,6 +15,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
@@ -407,10 +408,8 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 				IProject project = projects[i];
 
 				if (project.isAccessible() && project.hasNature(JTransformer.NATURE_ID)) {
-					JTransformerProject jtransformerProject = (JTransformerProject) project
-							.getNature(JTransformer.NATURE_ID);
 					
-					jtransformerProject.reconfigure();
+					getNature(project).reconfigure();
 					
 				}
 			}
@@ -523,6 +522,24 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 			l.valuesChanged(e);
 		}
 		
+	}
+
+	/**
+	 * Do not use project.getNature(JTransformer.NATURE_ID) anywhere
+	 * in you project. This entry point is important to avoid
+	 * the creation of more than one JT nature for project.
+	 * 
+	 * This method is synchronized on the IProject instance.
+	 * 
+	 * 
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 */
+	static public JTransformerProjectNature getNature(IProject project) throws CoreException {
+		synchronized (project) {
+			return (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+		}
 	}
 
 }

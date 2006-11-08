@@ -187,6 +187,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				Debug.info("JT:getSortedListOfNotYetBuildJTProjects: first project name: " + ((IProject)unsortedProjectsList.get(0)).getName());
 			}
 			TopoSortProjects topoSorter = new TopoSortProjects();
+			JTUtils.getProjectsWithPifKey(key);
 			return topoSorter.sort(false, unsortedProjectsList);
 		}
 

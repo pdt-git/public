@@ -2,6 +2,7 @@ package org.cs3.jtransformer.internal.builders;
 import java.util.Map;
 
 import org.cs3.jtransformer.JTransformer;
+import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
@@ -93,7 +94,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 				Debug.warning("Project does not have a JTransformer nature!");
 				return null;
 			}
-			JTransformerProjectNature nature = (JTransformerProjectNature) getProject().getNature(JTransformer.NATURE_ID);
+			JTransformerProjectNature nature = JTransformerPlugin.getNature(getProject());
 			if(nature==null){
 				Debug.warning("JTransformer Nature is NULL!!");
 				return null;
@@ -155,7 +156,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
      */
     protected void clean(IProgressMonitor monitor) throws CoreException {
         try {
-            JTransformerProjectNature nature = (JTransformerProjectNature) getProject().getNature(JTransformer.NATURE_ID);
+            JTransformerProjectNature nature = JTransformerPlugin.getNature( getProject());
             nature.getFactBaseBuilder().clean(monitor);
         }
             catch (Throwable e) {

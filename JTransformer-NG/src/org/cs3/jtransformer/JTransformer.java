@@ -173,7 +173,7 @@ public final class JTransformer {
         for (int i = 0; i < projects.length; i++) {
             IProject project = projects[i];            
             if(project.isAccessible()&&project.hasNature(JTransformer.NATURE_ID)){
-                JTransformerProject jtransformerProject = (JTransformerProject) project.getNature(JTransformer.NATURE_ID);
+                JTransformerProject jtransformerProject = JTransformerPlugin.getNature( project);
                 if(jtransformerProject.getPrologInterface()==pif){
                     l.add(jtransformerProject);
                 }

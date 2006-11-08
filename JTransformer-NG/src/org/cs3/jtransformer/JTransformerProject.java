@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * <pre>
  * 
  *     IProject project = .....
- *     JTransformerProject jtransformerProject = (JTransformerProject)project.getNature(JTransformer.NATURE_ID);
+ *     JTransformerProject jtransformerProject = JTransformerPlugin.getNature(project);
  *  
  * </pre>
  * </code><br>
