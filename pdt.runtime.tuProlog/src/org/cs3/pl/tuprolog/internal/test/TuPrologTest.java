@@ -48,7 +48,7 @@ public class TuPrologTest extends TestCase {
 	public void testWriteToFile() throws Exception {
 		String compare = "written by tuProlog";
 		writeAndCompare("print('"+compare+"')", compare);
-		writeAndCompare("A = 123, print(A), print(B)", "123B");
+		writeAndCompare("A = 123, print(A), print('B')", "123B");
 	}
 
 	private void writeAndCompare(String write, String compare) throws MalformedGoalException, FileNotFoundException, IOException {
@@ -99,7 +99,16 @@ public class TuPrologTest extends TestCase {
 	    	assertEquals("arg1",engine.solve("testpredicate(Arg).").getTerm("Arg").toString());
 //	    	printClauses();
 	    	
-	}	
+	}
+	
+	public void testNonDefinedPredicate() throws Exception {
+		Theory theory = new Theory("factbase(arg1).");
+    	engine.addTheory(theory);
+//		engine.solve("assert(testpredicate(a)).");
+    	SolveInfo info = engine.solve("factbase1(Arg).");
+//    	printClauses();
+    	
+    }
 //	public void testCall() throws Exception{
 //	Theory theory = new Theory("a(a).\n :- a(a).");
 //	engine.addTheory(theory);
@@ -171,7 +180,7 @@ public class TuPrologTest extends TestCase {
     	engine.addTheory(theoryFacts);
     	engine.addTheory(theoryClause);
     	SolveInfo result = engine.solve("findall_pred(L).");
-    	assertEquals("[a,b]", ((Struct)result.getSolution()).getArg(0).toString());
+    	assertEquals("[a,b]", result.getVarValue("L").toString());
 	}
 	
 	public void testInvalidTheory() throws Exception{

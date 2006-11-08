@@ -582,12 +582,33 @@ public class TheoryManager implements Serializable {
 				primitiveManager.identifyDirective(dir);
 				try {
 					PrimitiveInfo directive = dir.getPrimitive();
-					if (directive != null)
+					if (directive != null) {
 						directive.evalAsDirective(dir);
-					else {
-						String msg = "The directive " + dir.getName() + "/" + dir.getArity() + " is unknown.";
-						engine.notifyWarning(new WarningEvent(engine, msg));
+				} else {
+                    // unknown directive -> consider like a simple predicate
+                	/* 
+                	 * trho: 
+                	 * 
+                	 * tuProlog only accepts directives (e.g. op) here.
+                	 * We also allow arbitrary literals.
+                	 * 
+                	 * @autor Tobias Rho
+                	 */
+                	Term[] terms = new Term[co.getArity()];
+                	for (int i = 0; i < terms.length; i++) {
+						terms[i] = co.getArg(i);
 					}
+                	if(terms.length == 1)
+                		engine.solve(co.getArg(0));
+                	else
+                		engine.solve(new Struct(",",terms));
+                }
+
+// trho: removed the following four lines					
+//					else {
+//						String msg = "The directive " + dir.getName() + "/" + dir.getArity() + " is unknown.";
+//						engine.notifyWarning(new WarningEvent(engine, msg));
+//					}
 				} catch (Exception e) {
 					String msg = "An exception has been thrown during the execution of the " + dir.getName() + "/" + dir.getArity() + " directive.";
 					msg += "\n" + e.getMessage();
