@@ -98,11 +98,15 @@ public class OperatorsExtLibrary extends Library {
 		return false;
 	}
 	
+	/*
+	 * The default Theory which will be used by OperatorsExtLibrary once loaded.
+	 * @see alice.tuprolog.Library#getTheory()
+	 */
 	public String getTheory(){
 		 return ":- op(700, xfx, '=@='). \n" +
 		 		":- op(700, xfx, '\\=@='). \n" +
+		 		"Module:Predicate :- call(Predicate).\n"+
 		 		"'=@='(X,Y):- structEq(X,Y).\n" +
-		 		"'\\=@='(X,Y):- not structEq(X,Y).\n" +
-		 		"check(X):-nonvar(X), assert(X).";
+		 		"'\\=@='(X,Y):- not structEq(X,Y).\n" ;
 	}
 }

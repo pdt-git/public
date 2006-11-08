@@ -108,7 +108,7 @@ public class TuProlog {
 	}
 
 	/**
-	 * TODO add predicates for =@=.
+	 * 
 	 * TODO add predicate to ignore module:-
 	 * TODO add predicate to ignore model:functor and execute functor
 	 * TODO create ObserverLibrary in the same way as PrologEventDispatcher 
