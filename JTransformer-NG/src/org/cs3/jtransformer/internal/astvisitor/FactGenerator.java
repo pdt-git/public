@@ -2139,12 +2139,13 @@ public class FactGenerator extends ASTVisitor implements Names {
 
 		createBodyFact(node, SELECT_T, args);
 
-		// trho: very ugly!
-		writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
-				idResolver.getID(node),
-				Integer.toString(node.getStartPosition()+ node.getLength()-5),
-				Integer.toString(node.getLength())
-		});
+//		// FIXME: trho: very ugly! Why?
+//		writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
+//				idResolver.getID(node),
+//				ARGUMENT_IDENTIFIER + "(" + fqn + ")",
+//				Integer.toString(node.getStartPosition()+ node.getLength()-5),
+//				Integer.toString(node.getLength())
+//		});
 
 		String fqn = quote(node.getType().resolveBinding().getQualifiedName());
 //		if(fqn.equals("SuperInvocation")) {
@@ -2159,7 +2160,10 @@ public class FactGenerator extends ASTVisitor implements Names {
 				typeResolver.getTypeTerm(node.getType())
 				
 		});
-		writeSourceLocationArgumentRaw(node, ARGUMENT_IDENTIFIER + "(" + fqn + ")", node.getStartPosition(),node.getLength());
+		writeSourceLocationArgumentRaw(node, 
+				ARGUMENT_IDENTIFIER + "(" + fqn + ")", 
+				node.getStartPosition(),
+				node.getLength()-6); // - ".class".length()
 
 		return true;
 		
