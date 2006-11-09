@@ -52,7 +52,7 @@ public class StateGoalEvaluation extends State {
 				 *  Ugly Solution, but it works for the moment ;).
 				 */
 				if ( ex.getCause() instanceof TuPrologThrowable )
-					throw new TuPrologThrowable(ex.getMessage());
+					throw (TuPrologThrowable)(ex.getCause());
 				
 				ex.printStackTrace();
 				e.nextState = c.END_HALT;

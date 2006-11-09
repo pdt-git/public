@@ -199,7 +199,7 @@ public class SWICompatibilityLibrary extends Library {
 			if ( ex.getMessage().contains( catcher.getTerm().toString()) )
 				engine.solve(recover);
 			else
-				throw new TuPrologThrowable(ex.getMessage());
+				throw ex;
 			
 		}
 		return true;
