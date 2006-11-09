@@ -195,8 +195,12 @@ public class SWICompatibilityLibrary extends Library {
 		
 		try{
 			engine.solve(goal);
-		}catch(Throwable ex){
-			System.err.println("Prolog Exception occured ..!"+ex.getMessage());
+		}catch(TuPrologThrowable ex){
+			if ( ex.getMessage().contains( catcher.getTerm().toString()) )
+				engine.solve(recover);
+			else
+				throw new TuPrologThrowable(ex.getMessage());
+			
 		}
 		return true;
 	}
@@ -366,12 +370,16 @@ public class SWICompatibilityLibrary extends Library {
 		
 		for (Iterator it = values.iterator(); it.hasNext();) {
 			RecordEntry en = (RecordEntry) it.next();
-			if ( en.getTerm().equals(_value) )
+			if ( en.getTerm().equals(_value) ) 
 				index = en.getRef();
 		}
 		// Value was not found.
 		if ( index == -1 )
-			return false;
+			if ( _value.isVar() ) 
+				// TODO: incase of multiple values return a list.
+				unify( value, ( (RecordEntry)values.get(0) ).getTerm() );
+			else
+				return false;
 		
 		return unify( ref, new Int(index) );
 	}

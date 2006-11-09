@@ -17,6 +17,8 @@
  */
 package alice.tuprolog;
 
+import org.cs3.pl.tuprolog.internal.TuPrologThrowable;
+
 /**
  * @author Alex Benini
  */
@@ -40,6 +42,18 @@ public class StateGoalEvaluation extends State {
 							c.GOAL_SELECTION : c.BACKTRACK;
 			} catch (Exception ex) {
 				//TODO Gestire le eccezioni in prolog
+				
+				/**
+				 *	@author hasan abdel halim
+				 *  
+				 *  Introduced a new Error class in order to acheive
+				 *  Exception Handling at prolog level.
+			   	 * 
+				 *  Ugly Solution, but it works for the moment ;).
+				 */
+				if ( ex.getCause() instanceof TuPrologThrowable )
+					throw new TuPrologThrowable(ex.getMessage());
+				
 				ex.printStackTrace();
 				e.nextState = c.END_HALT;
 			}
