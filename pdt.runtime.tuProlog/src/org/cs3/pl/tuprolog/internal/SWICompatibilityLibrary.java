@@ -1,18 +1,59 @@
 package org.cs3.pl.tuprolog.internal;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
+import alice.tuprolog.Int;
 import alice.tuprolog.Library;
+import alice.tuprolog.Number;
+import alice.tuprolog.SolveInfo;
 import alice.tuprolog.Struct;
 import alice.tuprolog.Term;
+import alice.tuprolog.Var;
 
 public class SWICompatibilityLibrary extends Library {
-	Hashtable hsh = new Hashtable();
+	
+	// A hashtable which stores the records of recorda,recordz, and recorded predicates.
+	private Hashtable records_db = new Hashtable();
+
+	// Temperary Hashtable used while evaluating structural equality.
+	private Hashtable hsh = new Hashtable();
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 *  Overloaded method to fix HashTable.containsKey since it checks the 
+	 *  equality for both hashCode() and equals(). 
+	 */
+	private Term containsKey(Term key){
+		Term _result = null;
+		
+		for (Iterator it = records_db.keySet().iterator(); it.hasNext();) {
+			Term element = (Term) it.next();
+			
+			if ( key.equals(element)){
+				_result = element;
+				break;
+			}
+		}
+		
+		return _result;
+		
+	}
+	
+
+	/*
+	 * 
+	 * 	Implementation of Operators Extensions.
+	 * 
+	 * 
+	 */	
+	
 	/**
 	 * method invoked when the engine is going
 	 * to demonstrate a goal
@@ -29,6 +70,18 @@ public class SWICompatibilityLibrary extends Library {
 		hsh = null;
 	}
 	
+	
+	/**
+	 * Structural Equality '=@=': TuProlog does not support structural
+	 * equality yet.  
+	 * 
+	 * Two terms are structurally equal if  their tree representation is identical,
+	 * and they  have the  same `pattern' of variables.
+	 * 
+	 * @param x The first term to be compared.
+	 * @param y The second term to be compared.
+	 * @return true if both terms are structurally equal, otherwise false.
+	 */
 	public boolean structEq_2(Term x,Term y){
 		/*
 		 * Extracts real Terms from TuProlog bindings.
@@ -98,15 +151,46 @@ public class SWICompatibilityLibrary extends Library {
 		return false;
 	}
 	
-	public boolean throw_1(Term msg) throws Exception, TuPrologThrowable {
+
+	
+	/*
+	 * 
+	 * 	Implementation of Exceptions Handling.
+	 * 	- throw/1
+	 * 	- catch/3
+	 * 
+	 */
+	
+	/**
+	 * TuProlog does not support Exceptions yet.
+	 * 
+	 * throw(Exception): 
+	 * 	Raise  an exception.
+	 * 
+	 * @param exception An exception to be thrown.
+	 * @return
+	 * @throws Exception
+	 * @throws TuPrologThrowable
+	 */
+	public boolean throw_1(Term exception) throws Exception, TuPrologThrowable {
 		
-		if ( msg.getTerm().isAtomic())
-			throw new TuPrologThrowable( msg.toString());
+		if ( exception.getTerm().isAtomic())
+			throw new TuPrologThrowable( exception.toString());
 		
 		return true;
 	}
 	
-	
+	/**
+	 * TuProlog does not support Exceptions yet.
+	 * 
+	 * catch(goal, catcher, recover): 
+	 * 	Catch an exception thrown by throw/1 predicate.
+	 * 
+	 * @param goal A goal to execute.
+	 * @param catcher An exception expected to be caught.
+	 * @param recover A goal to execute in case of an exception.
+	 * @return
+	 */
 	public boolean catch_3(Term goal, Term catcher, Term recover){
 		
 		try{
@@ -116,7 +200,256 @@ public class SWICompatibilityLibrary extends Library {
 		}
 		return true;
 	}
+
+	
 	/*
+	 * 
+	 * 	Implementation of Recorded DB.
+	 * 	- recorda/2
+	 * 	- recorda/3
+	 * 	- recordz/2
+	 * 	- recordz/3
+	 * 	- recorded/2
+	 * 	- recorded/3 
+	 * 
+	 */		
+	
+	/**
+	 * TODO: The current implementation is not efficient, it needs to be optimized.
+	 */
+
+	/**
+	 * recorda(+Key, +Term) :
+	 * 	Equivalent to recorda(Key, Value,  _).
+	 * 
+	 * @param key A key to store values under.
+	 * @param value A value to be stored under key.
+	 * @return
+	 */
+	public boolean recorda_2(Term key, Term value){
+		Term ref = new Var();
+		
+		return ( recorda_3(key, value, ref) );
+	}	
+
+	/**
+	 * recorda(+Key, +Term, -Reference) :
+	 * 	Assert  Term  in the  recorded  database under key  Key. Key  is an  integer,
+	 *  atom or  term. Reference  is unified  with a  unique reference to the record
+	 *  (see erase/1).
+	 *   
+	 * @param key	A key to store values under.
+	 * @param value	 A value to be stored under key.
+	 * @param ref	A unique integer used as reference to the value stored.
+	 * @return
+	 */
+	public boolean recorda_3(Term key, Term value, Term ref){
+		Term _key = key.getTerm();
+		Term _value = value.getTerm();
+		
+		/*
+		 * Key & Value should be bound to store a record
+		 */
+		if ( _key.isVar() || _value.isVar() )
+			return false;
+		
+		Term tmp = containsKey(_key);
+		List values = null ;
+		
+		if ( tmp == null )
+		{
+			values = new ArrayList();
+			tmp = _key;
+		}else 
+			values = (ArrayList) records_db.get(tmp);
+				
+		RecordEntry entry = new RecordEntry(_value);
+		values.add(0, entry);
+		records_db.put(tmp, values);
+		
+		return unify(ref, new Int(entry.getRef()));
+	}
+	
+	/**
+	 * recordz(+Key, +Term):
+	 * 	Equivalent to recordz(Key, Value,  _).
+	 * 
+	 * @param key A key to store values under.
+	 * @param value A value to be stored under key.
+	 * @return
+	 */
+	public boolean recordz_2(Term key, Term value){
+		Term ref = new Var();
+		
+		return ( recordz_3(key, value, ref) );
+	}	
+	
+	/**
+	 * recordz(+Key, +Term, -Reference):
+	 * 	Equivalent to recorda/3, but  puts the Term at the tail of the terms
+	 *  recorded under Key.
+	 *  
+	 * @param key	A key to store values under.
+	 * @param value	 A value to be stored under key.
+	 * @param ref	A unique integer used as reference to the value stored.
+	 * @return
+	 */
+	public boolean recordz_3(Term key, Term value, Term ref){
+		Term _key = key.getTerm();
+		Term _value = value.getTerm();
+		
+		/*
+		 * Key & Value should be bound to store a record
+		 */
+		if ( _key.isVar() || _value.isVar() )
+			return false;
+		
+		Term tmp = containsKey(_key);
+		List values = null ;
+		
+		if ( tmp == null )
+		{
+			values = new ArrayList();
+			tmp = _key;
+		}else 
+			values = (ArrayList) records_db.get(tmp);
+		
+		RecordEntry entry = new RecordEntry(_value);
+		values.add(entry);
+		records_db.put(tmp, values);
+		
+		return unify(ref, new Int(entry.getRef()));		
+	}
+	
+	/**
+	 * recorded(+Key, -Value):
+	 * 	Equivalent to recorded(Key, Value,  _).
+	 * 
+	 * @param key A key to store values under.
+	 * @param value A value to be stored under key.
+	 * @return
+	 */
+	public boolean recorded_2(Term key, Term value){
+		Term ref = new Var();
+		
+		return ( recorded_3(key, value, ref) );
+	}	
+	
+	/**
+	 * recorded(+Key, -Value, -Reference):
+	 * 	Unify  Value  with the  first  term recorded  under Key  which  does
+	 *  unify.    Reference  is  unified with  the  memory location  of  the
+	 *  record.
+	 *  
+	 * @param key	A key to store values under.
+	 * @param value	 A value to be stored under key.
+	 * @param ref	A unique integer used as reference to the value stored.
+	 * @return
+	 */
+	public boolean recorded_3(Term key, Term value, Term ref){
+		Term _key = key.getTerm();
+		Term _value = value.getTerm();
+
+		// Key should be bound
+		if ( _key.isVar() )
+			return false;
+		
+		Term tmp = containsKey(_key);
+		
+		if ( tmp == null )
+			return false;
+		
+		List values = (ArrayList) records_db.get(tmp);
+		
+		
+		int index = -1;
+		
+		for (Iterator it = values.iterator(); it.hasNext();) {
+			RecordEntry en = (RecordEntry) it.next();
+			if ( en.getTerm().equals(_value) )
+				index = en.getRef();
+		}
+		// Value was not found.
+		if ( index == -1 )
+			return false;
+		
+		return unify( ref, new Int(index) );
+	}
+	
+	/**
+	 * erase(+Reference):
+	 * 	Erase  a  record or  clause from  recorded  database. Reference  is  an
+	 *  integer  returned by  recorda/3 or  recorded/3. Erase can only be called
+	 *  once on  a record or clause. 
+	 *  
+	 * @param ref	A unique integer used as reference to a value stored in recorded_db.
+	 * @return
+	 */
+	public boolean erase_1(Term ref){
+		
+		if ( ! ref.getTerm().isNumber() )
+			return false;
+		
+		Number _ref = (Number) ref.getTerm() ;		
+		
+		for (Iterator keys = records_db.keySet().iterator(); keys.hasNext();) {
+			Term key = (Term) keys.next();
+			
+			for (Iterator values = ((ArrayList)records_db.get(key)).iterator(); values.hasNext();) {
+				RecordEntry en = (RecordEntry) values.next();
+				
+				if ( en.getRef() == _ref.intValue() ){
+					values.remove();
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}	
+	
+	/*
+	 * 
+	 * 	Implemenation of MultiThreading .
+	 * 	- with_mutex/2
+	 *  
+	 */		
+	
+	/**
+	 * A hashtable which stores all synchornization keys.
+	 */
+	private Hashtable monitors = new Hashtable();
+
+	/**
+	 * 
+	 * @param key key to synchronize on.
+	 * @param goal
+	 * @return
+	 */
+	public boolean with_mutex_2(Struct key, Term goal) {
+		
+		Object monitor = monitors.get(key.getName());
+
+		if(monitor == null) {
+			monitor = new Object();
+			monitors.put(key.getName(), monitor);
+		}
+		synchronized (monitor) {
+			SolveInfo info = this.getEngine().solve(goal);
+			return (info.isSuccess())?true:false;
+		}
+	}
+	
+	
+	/*
+	 * 
+	 * 	Implemenation of the default theory .
+	 * 
+	 * 
+	 */		
+	
+	
+	/**
 	 * The default Theory which will be used by SWICompatibilityLibrary once loaded.
 	 * @see alice.tuprolog.Library#getTheory()
 	 */

@@ -103,4 +103,67 @@ public class SWICompatibilityLibraryTest extends TestCase {
 			ex.printStackTrace();
 		}
 	}
+	
+	public void testRecorda_2() throws Exception {
+
+		SolveInfo info = engine.solve("recorda(hasan,ops).");
+		assertTrue(info.isSuccess());
+	}
+
+	public void testRecorda_3() throws Exception {
+		
+		SolveInfo info = engine.solve("recorda(hasan,ops, Ref).");
+		assertTrue(info.isSuccess());
+		System.err.println("Ref :" + info.getVarValue("Ref"));
+	}
+
+	public void testRecordz_2() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops).");
+		assertTrue(info.isSuccess());		
+	}
+
+	public void testRecordz_3() throws Exception {
+
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		assertTrue(info.isSuccess());
+		System.err.println("Ref :" + info.getVarValue("Ref"));
+	}
+
+	public void testRecorded_2() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops).");
+		assertTrue(info.isSuccess());
+		info = engine.solve("recorded(hasan,ops).");
+		assertTrue(info.isSuccess());
+	}
+
+	public void testRecorded_3() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		assertTrue(info.isSuccess());
+		SolveInfo info2 = engine.solve("recorded(hasan,ops, Ref).");
+		assertTrue(info2.isSuccess());	
+		
+		assertEquals(info.getVarValue("Ref"), info2.getVarValue("Ref"));
+		System.err.println("Ref:"+ info.getVarValue("Ref"));
+	}
+	
+	public void testErase_1() throws Exception {
+		
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		assertTrue(info.isSuccess());
+		
+		SolveInfo info2 = engine.solve("recorded(hasan,ops, Ref), erase(Ref).");
+		assertTrue(info2.isSuccess());	
+		
+		info2 = engine.solve("recorded(hasan,ops, Ref).");
+		assertFalse(info2.isSuccess());	
+	}
+	
+	public void testWithMutex() throws Exception{
+		SolveInfo info = engine.solve("with_mutex('mutex_test',recordz(hasan,ops, Ref)).");
+		assertTrue(info.isSuccess());
+
+	}
 }
