@@ -129,18 +129,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		this.pif = pif;
 		this.controlSession=controlSession;
 		ctermFactory=new ATermFactory();
-		this.dispatcher = new Thread("Async Query Result Dispatcher"){
-			public void run() {
-				try{
-					while(readAndDispatch());
-				} catch(Exception e){
-					//there is little we can do here.
-					Debug.report(e);
-				}
-			}
-
-			
-		};
+		
 		enterBatch();
 		
 		
@@ -546,7 +535,18 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	
 
 	private void enterBatch() throws IOException {
+		this.dispatcher = new Thread("Async Query Result Dispatcher"){
+			public void run() {
+				try{
+					while(readAndDispatch());
+				} catch(Exception e){
+					//there is little we can do here.
+					Debug.report(e);
+				}
+			}
 
+			
+		};
 		client.lock();
 		try {
 			client.readUntil(SocketClient.GIVE_COMMAND);
@@ -835,7 +835,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 
 	public void setPreferenceValue(String id, String value) {
-
+		try{
 		if (OPT_CANONICAL.equals(id)) {
 			canonical = Boolean.valueOf(value).booleanValue();
 			setProtocolOption("canonical", value);
@@ -845,14 +845,20 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		} else {
 			throw new IllegalArgumentException("unkown option id: " + id);
 		}
+		}
+		catch(PrologInterfaceException e){
+			throw new RuntimeException("error while setting property",e);
+		}
 	}
-	public void setProtocolOption(String id, String value) {
+	public void setProtocolOption(String id, String value) throws PrologInterfaceException {
 		if (!isIdle()) {
 			throw new RuntimeException(
 					"Cannot set protocol option while there are requests enqueued.");
 		}
 		client.lock();
+		
 		try {
+			exitBatch();
 			client.readUntil(SocketClient.GIVE_COMMAND);
 			client.writeln(SocketClient.SET_OPTION);
 			client.readUntil(SocketClient.GIVE_SYMBOL);
@@ -860,8 +866,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.readUntil(SocketClient.GIVE_TERM);
 			client.writeln(value);
 			client.readUntil(SocketClient.OK);
+			enterBatch();
 		} catch (IOException e) {
-			throw new RuntimeException("IO Error while setting protocol option");
+			pif.handleException(e);
 		} finally {
 			client.unlock();
 		}
