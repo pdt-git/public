@@ -182,6 +182,7 @@ accept_loop_impl_X(ServerSocket,Slave,Peer):-
 	accept_loop_impl(ServerSocket).
 	
 handle_client(InStream, OutStream):-    
+	thread_at_exit(byebye(InStream,OutStream)),
 	repeat,
 	my_debug(start_hanlde_client),
 	catch(
@@ -277,13 +278,13 @@ handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 		Term=end_of_batch,!.
 handle_command(InStream,OutStream,'QUERY',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
+	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
 	( iterate_solutions(InStream,OutStream,Term,Vars,default)
 	; true
 	).
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
+	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
 	(
 		all_solutions(OutStream,Term,Vars,default)
 	;
@@ -291,13 +292,13 @@ handle_command(InStream,OutStream,'QUERY_ALL',continue):-
 	).
 handle_command(InStream,OutStream,'QUERY_CANONICAL',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),
+	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
 	( iterate_solutions(InStream,OutStream,Term,Vars,canonical)
 	; true
 	).
 handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
-	my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/]),		
+	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
 	(
 		all_solutions(OutStream,Term,Vars,canonical)
 	;
@@ -571,9 +572,19 @@ report_error(OutStream, Error):-
 	
 		
 byebye(InStream,OutStream):-
-	my_format(OutStream,"BYE~n",[]),
-	close(InStream),
-	close(OutStream).
+	my_debug('byebye called'),
+	(	is_stream(OutStream)
+	->	my_debug('closing downstream'),
+		my_format(OutStream,"BYE~n",[]),
+		close(OutStream)
+	;	true
+	),
+	(	is_stream(InStream)
+	->	my_debug('closing upstream'),
+		close(InStream)
+	;	true
+	).
+	
 	
 
 	
@@ -717,9 +728,9 @@ write_escaped_char(Out,'\''):-
 write_escaped_char(Out,C):-
 	put_char(Out,C).	
 		
-%my_debug(A):-
-%	thread_self(Self),
-%	write(Self),write(': >>> '),writeln(A).
+my_debug(A):-
+	thread_self(Self),
+	write(Self),write(': >>> '),writeln(A).
 
-my_debug(_).
+%my_debug(_).
 		

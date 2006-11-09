@@ -214,7 +214,9 @@ public class SocketSession implements PrologSession2 {
 			pif.handleException(e);
 			return null;
 		} finally {
-			client.unlock();
+			if(client!=null){
+				client.unlock();
+			}
 		}
 	}
 

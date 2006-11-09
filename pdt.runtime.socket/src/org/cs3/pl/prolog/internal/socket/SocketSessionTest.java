@@ -71,7 +71,7 @@ public class SocketSessionTest extends TestCase {
      
       //pif=PrologInterfaceFactory.newInstance("org.cs3.pl.prolog.internal.xml.Factory").create();
       pif=PrologInterfaceFactory.newInstance().create();
-      //pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+     // pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
 	  //pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		
       pif.start();
@@ -170,6 +170,31 @@ public class SocketSessionTest extends TestCase {
         assertTrue(v.contains("wahr(wahrheit)"));
     }
 	
+	/**
+	 * PDT-205
+	 * @throws PrologInterfaceException
+	 */
+	public void testSyntaxError() throws PrologInterfaceException {
+		PrologSession s = pif.getSession();
+		try{
+			s.queryAll("test(''asdf'')");
+			//s.queryOnce("guitracer");
+			//s.queryOnce("spy(handle_command)");
+			//s.queryAll("test ( bla )");
+		}
+		catch(PrologException e){
+			;
+		}
+	}
+	public void testIOProblem() throws PrologInterfaceException {
+		PrologSession s = pif.getSession();
+		try{
+			s.queryAll("thread_exit(krawumms)");
+		}
+		catch(PrologInterfaceException e){
+			;
+		}
+	}
 	/**
      * this one fails if the pif impl does not support lists
 	 * @throws PrologInterfaceException 
