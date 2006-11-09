@@ -6,7 +6,7 @@ import alice.tuprolog.Library;
 import alice.tuprolog.Struct;
 import alice.tuprolog.Term;
 
-public class OperatorsExtLibrary extends Library {
+public class SWICompatibilityLibrary extends Library {
 	Hashtable hsh = new Hashtable();
 	/**
 	 * 
@@ -117,7 +117,7 @@ public class OperatorsExtLibrary extends Library {
 		return true;
 	}
 	/*
-	 * The default Theory which will be used by OperatorsExtLibrary once loaded.
+	 * The default Theory which will be used by SWICompatibilityLibrary once loaded.
 	 * @see alice.tuprolog.Library#getTheory()
 	 */
 	public String getTheory(){
