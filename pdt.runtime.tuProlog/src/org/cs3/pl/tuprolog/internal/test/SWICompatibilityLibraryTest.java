@@ -94,14 +94,19 @@ public class SWICompatibilityLibraryTest extends TestCase {
 		assertTrue("Failed to Query Engine ", info.isSuccess());
 	}
 	
-	public void testThrow() {
-		try{
-			SolveInfo info = engine.solve("catch(throw('my_prolog_exception'),my_prolog_exception,true).");
+	public void testThrow() throws Exception {
+		
+			SolveInfo info = engine.solve(" catch( " +
+										  "throw('my_prolog_exception')," +
+										  "my_prolog_exception," +
+										  "recorda('throw_test',testing)" +
+										  ").");
 			assertTrue("Failed to throw an exception", info.isSuccess());
-		}catch(Exception ex){
-			System.err.println("hi there:");
-			ex.printStackTrace();
-		}
+			
+			info = engine.solve("recorded('throw_test',X).");
+			assertTrue("Failed to find a record with throw_test", info.isSuccess());
+			assertEquals("testing",info.getVarValue("X").toString());
+		
 	}
 	
 	public void testRecorda_2() throws Exception {

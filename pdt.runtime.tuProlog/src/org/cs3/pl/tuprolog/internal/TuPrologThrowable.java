@@ -1,6 +1,6 @@
 package org.cs3.pl.tuprolog.internal;
 
-public class TuPrologThrowable extends Throwable {
+public class TuPrologThrowable extends Error {
 
 	/**
 	 * 
