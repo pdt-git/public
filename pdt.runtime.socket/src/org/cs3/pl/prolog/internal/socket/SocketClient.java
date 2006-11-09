@@ -309,6 +309,7 @@ public class SocketClient {
 	public static final String CUT = "CUT";
 	
 	private static final String RESET = "RESET";
+	public static final String SET_OPTION = "SET_OPTION";
 	
 	private int lockCounter = 0;
 
@@ -331,6 +332,8 @@ public class SocketClient {
 	private long pid;
 
 	private static final long TIMEOUT = 1000;
+
+	
 
 
 
@@ -419,6 +422,10 @@ public class SocketClient {
 
 	}
 
+	
+	
+	
+	
 	// /**
 	// * @return
 	// */

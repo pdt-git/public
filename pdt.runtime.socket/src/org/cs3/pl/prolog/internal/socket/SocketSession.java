@@ -74,6 +74,8 @@ public class SocketSession implements PrologSession2 {
 
 	private static final String OPT_CANONICAL = "socketsession.canonical";
 
+	private static final String OPT_INTERPRETE_LISTS = "socketsession.interprete_lists";
+
 	// socketsession.canonical
 
 	private SocketClient client;
@@ -133,11 +135,8 @@ public class SocketSession implements PrologSession2 {
 		client.lock();
 		try {
 			client.readUntil(SocketClient.GIVE_COMMAND);
-			if (canonical) {
-				client.writeln(SocketClient.QUERY_CANONICAL);
-			} else {
-				client.writeln(SocketClient.QUERY);
-			}
+
+			client.writeln(SocketClient.QUERY);
 
 			client.readUntil(SocketClient.GIVE_TERM);
 			query = query.trim();
@@ -187,11 +186,7 @@ public class SocketSession implements PrologSession2 {
 		try {
 			client.readUntil(SocketClient.GIVE_COMMAND);
 
-			if (canonical) {
-				client.writeln(SocketClient.QUERY_ALL_CANONICAL);
-			} else {
-				client.writeln(SocketClient.QUERY_ALL);
-			}
+			client.writeln(SocketClient.QUERY_ALL);
 
 			client.readUntil(SocketClient.GIVE_TERM);
 			query = query.trim();
@@ -214,7 +209,7 @@ public class SocketSession implements PrologSession2 {
 			pif.handleException(e);
 			return null;
 		} finally {
-			if(client!=null){
+			if (client != null) {
 				client.unlock();
 			}
 		}
@@ -278,11 +273,9 @@ public class SocketSession implements PrologSession2 {
 					throw new PrologException("don't know what to do.");
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
-					lastError = new PrologException(
-												"Peer reported an error:"
-														+ line.substring(SocketClient.ERROR
-																.length()) + "\n"
-														+ "Last query was: " + lastQuery);
+					lastError = new PrologException("Peer reported an error:"
+							+ line.substring(SocketClient.ERROR.length())
+							+ "\n" + "Last query was: " + lastQuery);
 					throw lastError;
 				}
 				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
@@ -421,9 +414,9 @@ public class SocketSession implements PrologSession2 {
 		if (!queryActive) {
 			return;
 		}
-		if(lastError!=null){
-			lastError=null;
-			queryActive=false;
+		if (lastError != null) {
+			lastError = null;
+			queryActive = false;
 			return;
 		}
 		client.lock();
@@ -468,6 +461,8 @@ public class SocketSession implements PrologSession2 {
 
 	private PrologException lastError;
 
+	private boolean interpreteLists;
+
 	/**
 	 * @return Returns the dispatcher.
 	 */
@@ -504,10 +499,14 @@ public class SocketSession implements PrologSession2 {
 
 	public Option[] getOptions() {
 		if (options == null) {
-			options = new Option[] { new SimpleOption(OPT_CANONICAL,
-					"canonical values",
-					"if set, the session will answer canonical terms",
-					Option.FLAG, "false") };
+			options = new Option[] {
+					new SimpleOption(OPT_CANONICAL, "canonical values",
+							"if set, the session will answer canonical terms",
+							Option.FLAG, "false"),
+					new SimpleOption(OPT_INTERPRETE_LISTS, "interprete lists",
+							"if set, the session will use (nested) java.util.List instances to represent"
+									+ " prolog list terms.", Option.FLAG,
+							"true") };
 		}
 		return options;
 	}
@@ -523,13 +522,20 @@ public class SocketSession implements PrologSession2 {
 	public String getPreferenceValue(String id, String string) {
 		if (OPT_CANONICAL.equals(id)) {
 			return canonical ? "true" : "false";
+		}else if(OPT_INTERPRETE_LISTS.equals(id)){
+			return interpreteLists ? "true" :"false";
 		}
 		throw new IllegalArgumentException("unkown option id: " + id);
 	}
 
 	public void setPreferenceValue(String id, String value) {
+
 		if (OPT_CANONICAL.equals(id)) {
 			canonical = Boolean.valueOf(value).booleanValue();
+			setProtocolOption("canonical", value);
+		} else if (OPT_INTERPRETE_LISTS.equals(id)) {
+			interpreteLists = Boolean.valueOf(value).booleanValue();
+			setProtocolOption("interprete_lists", value);
 		} else {
 			throw new IllegalArgumentException("unkown option id: " + id);
 		}
@@ -537,6 +543,27 @@ public class SocketSession implements PrologSession2 {
 
 	public SocketClient getClient() {
 		return client;
+	}
+
+	public void setProtocolOption(String id, String value) {
+		if (queryActive) {
+			throw new RuntimeException(
+					"Cannot set protocol option while query is active.");
+		}
+		client.lock();
+		try {
+			client.readUntil(SocketClient.GIVE_COMMAND);
+			client.writeln(SocketClient.SET_OPTION);
+			client.readUntil(SocketClient.GIVE_SYMBOL);
+			client.writeln(id);
+			client.readUntil(SocketClient.GIVE_TERM);
+			client.writeln(value);
+			client.readUntil(SocketClient.OK);
+		} catch (IOException e) {
+			throw new RuntimeException("IO Error while setting protocol option");
+		} finally {
+			client.unlock();
+		}
 	}
 
 }

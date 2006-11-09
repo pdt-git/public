@@ -46,6 +46,31 @@
 	consulted_symbol/1,
 	starts_at/2
 	]). 
+
+
+option_default(interprete_lists,true).
+option_default(canonical,false).
+
+:- dynamic option_value/2.
+:- thread_local option_value/2.
+option(Name,Value):-
+    option_value(Name,AValue),
+    !,
+    Value=AValue.
+option(Name,Value):-
+	option_default(Name,Value).
+	
+set_option(Name,Value):-
+	retractall(option_value(Name,_)),
+	assert(option_value(Name,Value)).
+
+unset_option(Name):-	
+	retractall(option_value(Name,_)).
+	
+clear_options:-
+	retractall(option_value(_,_)).	
+		    
+
 % Author: Lukas
 % Date: 23.10.2004
 :- use_module(library(socket)).
@@ -231,7 +256,8 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	writeln(shutdown(4)),
 	tcp_close_socket(Socket),
 	writeln(shutdown(5)).
-handle_command(_,_,'',continue).
+handle_command(_,_,'',continue):-
+	clear_options.
 handle_command(_,OutStream,'PING',continue):-
 		current_prolog_flag(pid,Pid),
     thread_self(Alias),
@@ -279,33 +305,28 @@ handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 handle_command(InStream,OutStream,'QUERY',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),	
 	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
-	( iterate_solutions(InStream,OutStream,Term,Vars,default)
+	( iterate_solutions(InStream,OutStream,Term,Vars)
 	; true
 	).
 handle_command(InStream,OutStream,'QUERY_ALL',continue):-
 	my_format(OutStream,"GIVE_TERM~n",[]),
 	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
 	(
-		all_solutions(OutStream,Term,Vars,default)
+		all_solutions(OutStream,Term,Vars)
 	;
 		true
 	).
-handle_command(InStream,OutStream,'QUERY_CANONICAL',continue):-
-	my_format(OutStream,"GIVE_TERM~n",[]),	
-	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),
-	( iterate_solutions(InStream,OutStream,Term,Vars,canonical)
-	; true
+handle_command(InStream,OutStream,'SET_OPTION',continue):-
+	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
+	request_line(InStream,OutStream,'GIVE_TERM',Term),
+	call_save(OutStream,set_option(Symbol,Term)).
+handle_command(InStream,OutStream,'GET_OPTION',continue):-
+	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
+	call_save(OutStream,
+		(	option(Symbol,Term),
+			my_format(OutStream,"~w~n",[Term])
+		)
 	).
-handle_command(InStream,OutStream,'QUERY_ALL_CANONICAL',continue):-
-	my_format(OutStream,"GIVE_TERM~n",[]),
-	call_save(OutStream,my_read_term(InStream,Term,[variable_names(Vars)/*,double_quotes(string)*/])),		
-	(
-		all_solutions(OutStream,Term,Vars,canonical)
-	;
-		true
-	).
-
-	
 
 
 my_read_command(InStream,Term):-
@@ -390,29 +411,29 @@ handle_batch_command(end_of_batch,InStream,OutStream):-
 	forall(abort_requested(async,Id),handle_batch_command(abort(Id),InStream,OutStream)),
 	forall(abort_requested(sync,Id),handle_batch_message(abort(Id),OutStream)),
 	my_format(OutStream, "END_OF_BATCH_COMPLETE~n",[]).
-handle_batch_command(query_once(Id,_),InStream,OutStream):-
+handle_batch_command(query_once(Id),InStream,OutStream):-
 	aborting,
     !,
     my_read_goal(InStream,_,_),    
     my_format(OutStream, "SKIPPING_QUERY: ~w~n",[Id]).
-handle_batch_command(query_all(Id,_),InStream,OutStream):-
+handle_batch_command(query_all(Id),InStream,OutStream):-
     aborting,
     !,
     my_read_goal(InStream,_,_),
     my_format(OutStream, "SKIPPING_QUERY: ~w~n",[Id]).
     
-handle_batch_command(query_once(Id,Mode),InStream,OutStream):-
+handle_batch_command(query_once(Id),InStream,OutStream):-
     my_format(OutStream, "RESULTS_FOR_QUERY: ~w~n",[Id]),
     call_save(OutStream,(
     		my_read_goal(InStream,Goal,Vars),
-    		one_solution(OutStream,Goal,Vars,Mode)
+    		one_solution(OutStream,Goal,Vars)
     		)
     	).
-handle_batch_command(query_all(Id,Mode),InStream,OutStream):-
+handle_batch_command(query_all(Id),InStream,OutStream):-
     my_format(OutStream, "RESULTS_FOR_QUERY: ~w~n",[Id]),
     call_save(OutStream,(
     		my_read_goal(InStream,Goal,Vars),
-    		solutions_weak_until_cut(OutStream,Goal,Vars,Mode)
+    		solutions_weak_until_cut(OutStream,Goal,Vars)
     		)
     	).
 
@@ -422,17 +443,17 @@ call_save(OutStream, Goal):-
     		report_error(OutStream,Error)
     	).
 
-solutions_weak_until_cut(OutStream,Term,Vars,Mode):-
-	(	solutions_until_cut(OutStream,Term,Vars,Mode)
+solutions_weak_until_cut(OutStream,Term,Vars):-
+	(	solutions_until_cut(OutStream,Term,Vars)
 	->	my_format(OutStream, "CUT~n",[])
 	;	solutions_yes_or_no(OutStream)
 	).
 
 
-solutions_until_cut(OutStream,Term,Vars,Mode):-
+solutions_until_cut(OutStream,Term,Vars):-
 	user:Term,
 	nb_setval(hasSolutions,1),
-	print_solution(OutStream,Vars,Mode),
+	print_solution(OutStream,Vars),
 	goal_was_cut(OutStream),!.	
 
 goal_was_cut(OutStream):-
@@ -450,19 +471,19 @@ solutions_yes_or_no(OutStream):-
 	
 
 
-one_solution(OutStream,Term,Vars,Mode):-
+one_solution(OutStream,Term,Vars):-
 	( 	user:Term
-	->	consult_server:print_solution(OutStream,Vars,Mode),
+	->	consult_server:print_solution(OutStream,Vars),
 		my_format(OutStream,"YES~n",[])
 	; 	my_format(OutStream,"NO~n",[])
 	).
 	
 	
-all_solutions(OutStream,Term,Vars,Mode):-
+all_solutions(OutStream,Term,Vars):-
 	user:forall(
 		catch(Term,E,throw(wrapped(E))),
 		(
-			consult_server:print_solution(OutStream,Vars,Mode),
+			consult_server:print_solution(OutStream,Vars),
 			nb_setval(hasSolutions,1)
 		)		
 	),
@@ -473,11 +494,11 @@ all_solutions(OutStream,Term,Vars,Mode):-
 	).
 	
 	
-iterate_solutions(InStream,OutStream,Term,Vars,Mode):-
+iterate_solutions(InStream,OutStream,Term,Vars):-
 	( user:forall(
 			catch(Term,E,throw(wrapped(E))),
 			(
-				consult_server:print_solution(OutStream,Vars,Mode),
+				consult_server:print_solution(OutStream,Vars),
 				consult_server:request_line(InStream,OutStream,'MORE?','YES')											
 			)
 		)
@@ -488,42 +509,46 @@ iterate_solutions(InStream,OutStream,Term,Vars,Mode):-
 	
 	
 	
-print_solution(OutStream,Vars,Mode):-
+print_solution(OutStream,Vars):-
 	forall(
 		member(Key=Val,Vars),
 	%%			my_write_term(OutStream,Elm,[quoted(true)])		
-		print_binding(OutStream,Key,Val,Mode)
+		print_binding(OutStream,Key,Val)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
 	
-print_binding(Out,Key,Val,Mode):-
+print_binding(Out,Key,Val):-
 		write(Out,'<'),
-		(write_escaped(Out,Key,default);true),
+		(write(Out,Key);true),
 		write(Out, '>'),		
-		(print_value(Out,Val,Mode);true),		
+		(print_value(Out,Val);true),		
 		nl(Out).
 
-print_values(_,[],_):-
+print_values(_,[]):-
 	!. 
-print_values(Out,[Head|Tail],Mode):-
+print_values(Out,[Head|Tail]):-
 	!,
-	print_value(Out,Head,Mode),		
-	print_values(Out,Tail,Mode).
+	print_value(Out,Head),		
+	print_values(Out,Tail).
 	
-print_value(Out,Val,default):-    	
-	( 	is_list(Val)
+
+print_value(Out,Val):-    	
+	option(canonical,true),
+	!,
+	write(Out,'<'),
+	(write_escaped(Out,Val);true),
+	write(Out, '>').
+print_value(Out,Val):-    	
+	( 	is_list(Val),
+		option(interprete_lists,true)
  	->	write(Out,'{'),
-		(print_values(Out,Val,default);true),
+		(print_values(Out,Val);true),
 		write(Out, '}')		
 	;	write(Out,'<'),
-		(write_escaped(Out,Val,default);true),
+		(write_escaped(Out,Val);true),
 		write(Out, '>')
 	).
 
-print_value(Out,Val,canonical):-    	
-		write(Out,'<'),
-		(write_escaped(Out,Val,canonical);true),
-		write(Out, '>').
 
 	
 handle_exception(InStream,OutStream,Error,Action):-
@@ -666,12 +691,10 @@ my_format(OutStream,Format,Args):-
 	format(current_output,Format,Args),
 	flush_output(current_output)*/.
 	
-write_escaped(Out,Term):-
-	write_escaped(Out,Term,canonical).
 	
 
-write_escaped(Out,Term,Mode):-
-    write_term_to_memfile(Term,Mode,Memfile),
+write_escaped(Out,Term):-
+    write_term_to_memfile(Term,Memfile),
     new_memory_file(TmpFile),
     open_memory_file(Memfile,read,In),
     open_memory_file(TmpFile,write,Tmp),
@@ -683,15 +706,13 @@ write_escaped(Out,Term,Mode):-
     free_memory_file(Memfile),
     write(Out,Atom).
 
-write_term_to_memfile(Term,canonical,Memfile):-
+write_term_to_memfile(Term,Memfile):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
-	write_canonical(Stream,Term),
-	close(Stream).
-write_term_to_memfile(Term,_,Memfile):-
-	new_memory_file(Memfile),
-	open_memory_file(Memfile,write,Stream),
-	write(Stream,Term),
+	(	option(canonical,true)
+	->	write_canonical(Stream,Term)
+	;	write(Stream,Term)
+	),
 	close(Stream).
 
 escape_stream(In,Out):-

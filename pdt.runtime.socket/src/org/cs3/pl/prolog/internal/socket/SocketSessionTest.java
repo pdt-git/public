@@ -51,11 +51,13 @@ import java.util.Vector;
 import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.PrologSession2;
 
 /**
  * @author terra
@@ -109,6 +111,60 @@ public class SocketSessionTest extends TestCase {
 		assertNull(ss.next());
 		
 		ss.dispose();
+	}
+	
+	public void testCTerm() throws PrologException, PrologInterfaceException{
+		PrologSession2 s = (PrologSession2) pif.getSession();
+		s.setPreferenceValue("socketsession.canonical", "true");
+		Map map = s.queryOnce("A=[1,2]");
+		assertNotNull(map);
+		Object a = map.get("A");
+		assertTrue(a instanceof CCompound);
+		
+	}
+	public void testListProcessingDisabled() throws PrologException, PrologInterfaceException{
+		PrologSession2 s = (PrologSession2) pif.getSession();
+		s.setPreferenceValue("socketsession.interprete_lists", "false");
+		Map map = s.queryOnce("A=[1,2]");
+		assertNotNull(map);
+		Object a = map.get("A");
+		assertTrue(a instanceof String);
+		String actual = (String)a;
+		assertEquals("[1, 2]", actual);
+		
+	}
+	
+	public void testResetSettings() throws Throwable{
+		//generate a couple of sessions, manipulate their settings, dispose them
+		//the corresponding connections should now be on the pool.
+		//next, request another couple of sessions. 
+		//the corresponding connections should be taken from the pool
+		//see if all properties are correctly reset.
+		PrologSession2[] sessions = new PrologSession2[5];
+		for (int i = 0; i < sessions.length; i++) {
+			sessions[i]=(PrologSession2) pif.getSession();
+			sessions[i].setPreferenceValue("socketsession.canonical", "true");
+		}
+		for (int i = 0; i < sessions.length; i++) {
+			sessions[i].dispose();
+		}
+		for (int i = 0; i < sessions.length; i++) {
+			sessions[i]=(PrologSession2) pif.getSession();
+		}
+		for (int i = 0; i < sessions.length; i++) {
+			Map m = sessions[i].queryOnce("A=[1,2,3,"+i+"]");
+			assertNotNull(m);
+			Object o = m.get("A");
+			assertNotNull(o);
+			assertTrue(o.getClass().getName()+": "+o.toString(),o instanceof List);
+			List l = (List)o;
+			Object o2=l.get(2);
+			assertNotNull(o2);
+			assertEquals("3",o2);
+		}
+		for (int i = 0; i < sessions.length; i++) {
+			sessions[i].dispose();
+		}
 	}
 	
 	public void _testConsult() throws Exception{

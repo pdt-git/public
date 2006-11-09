@@ -69,7 +69,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = Factory.newInstance();
 		pif = (PrologInterface2) factory.create();
-		//pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+		pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
 		//pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		pif.start();
 		rec = new Recorder();
@@ -191,7 +191,7 @@ public class AsyncSocketSessionTest extends TestCase {
 						+ "goalSucceeded(1,null,null), "
 						+ "goalHasSolution(2,null,()), "
 						+ "goalSucceeded(2,null,null), "
-						+ "goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 140)),null), "
+						+ "goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 116)),null), "
 						+ "goalFailed(4,null,null), "
 						+ "batchComplete(null,null,null)", rec.toString());
 	}
@@ -212,7 +212,7 @@ public class AsyncSocketSessionTest extends TestCase {
 						+ "goalSucceeded(2,null,null), "
 						+
 
-						"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 137)),null), "
+						"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 113)),null), "
 						+ "goalFailed(4,null,null), "
 						+ "batchComplete(null,null,null)", rec.toString());
 	}
@@ -259,11 +259,23 @@ public class AsyncSocketSessionTest extends TestCase {
 		assertEquals("pending after queryall",false,pending2);
 	}
 	
+	/*
+	 * have one query with a blocking io call.
+	 * queue a second one, which serves as a dummy.
+	 * abort the batch. 
+	 * the processor cannot recieve the async abort request while
+	 * the first query blocks.
+	 * unlock the first query.
+	 * the processor should now recieve the async abort request, it should
+	 * skip the second goal.
+	 */
 	public void test_abort01() throws Throwable {
 		session.queryOnce("1", "thread_self(Alias)");
 		session.join();
 		Record r = (Record) rec.records.get(0);
 		final String alias = (String) r.event.bindings.get("Alias");
+		//session.queryOnce("debug", "guitracer");
+		//session.queryOnce("debug", "spy(handle_batch_command)");
 		session.queryAll("2", "repeat,thread_get_message(test(M))");
 		final PrologSession syncSession = pif.getSession();
 
@@ -274,6 +286,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 
 		rec.clear();
+		assertFalse(session.isIdle());
 		session.queryOnce("3", "should_be_skipped");
 		final Object lock = new Object();
 
@@ -284,8 +297,13 @@ public class AsyncSocketSessionTest extends TestCase {
 					// we need to make sure that test(2) (see below) is send
 					// AFTER
 					// the abort call, otherwise, abort will lock up forever.
+					Debug.debug("enter 3");
 					synchronized (lock) {
+					Debug.debug("enter 5");						
 						try {
+							
+							
+							Debug.debug("enter 6");
 							syncSession.queryOnce("thread_send_message('" + alias
 									+ "',test(2))");
 						} catch (PrologException e) {
@@ -293,17 +311,22 @@ public class AsyncSocketSessionTest extends TestCase {
 							
 						} catch (PrologInterfaceException e) {
 							Debug.report(e);
-						}
+						} 
 					}
-
+						
 				}
 			};
+			Debug.debug("enter 0");
 			thread.start();
+			Debug.debug("enter 1");
+			session.abort(lock);
+			Debug.debug("enter 7");	
+		}
 			// session.queryOnce("toggle uitracer","guitracer");
 			// session.queryOnce("start tracer","trace");
 
-			session.abort(lock);
-		}
+
+		
 		
 		session.dispose();
 		assertEquals("goalHasSolution(2,null,(M-->2)), "

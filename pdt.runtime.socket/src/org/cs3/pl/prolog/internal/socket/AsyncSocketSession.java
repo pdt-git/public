@@ -71,6 +71,7 @@ import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class AsyncSocketSession implements AsyncPrologSession {
 	private static final String OPT_CANONICAL = "socketsession.canonical";
+	private static final String OPT_INTERPRETE_LISTS = "socketsession.interprete_lists";
 
 	private Option[] options;
 
@@ -101,6 +102,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	private PrologSession controlSession;
 
 	private Exception batchError;
+	private boolean interpreteLists;
 
 	public void addBatchListener(AsyncPrologSessionListener l) {
 		synchronized (listeners) {
@@ -592,14 +594,14 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");
 		}
-		String mode=canonical?"canonical":"default";
+		
 		
 		if (!query.endsWith(".")) {
 			query=query+".";
 		} 
 		int id = storeTicket(ticket,query);
 		try {
-			String command = "query_once("+id+","+mode+").";
+			String command = "query_once("+id+").";
 			client.writeln(command);
 			client.writeln(query);
 		} catch (IOException e) {
@@ -611,13 +613,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");
 		}
-		String mode=canonical?"canonical":"default";
 		if (!query.endsWith(".")) {
 			query=query+".";
 		} 
 		int id = storeTicket(ticket,query);
 		try {
-			client.writeln("query_all("+id+","+mode+").");
+			client.writeln("query_all("+id+").");
 			client.writeln(query);
 		} catch (IOException e) {
 			pif.handleException(e);
@@ -701,6 +702,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		abort(new _AbortTicket());
 	}
 	public void abort(Object ticket) throws PrologInterfaceException {
+		Debug.debug("enter 2");
 		if(ticket==null){
 			throw new IllegalArgumentException("null ticket!");
 		}
@@ -737,6 +739,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 					if(id==8){
 						Debug.debug("debug");
 					}
+					Debug.debug("enter 4");
 					ticket.wait();
 				}
 				Debug.info("abort ticket is not/no longer pending, id="+id);
@@ -804,7 +807,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			options = new Option[] { new SimpleOption(OPT_CANONICAL,
 					"canonical values",
 					"if set, the session will answer canonical terms",
-					Option.FLAG, "false") };
+					Option.FLAG, "false") ,
+					new SimpleOption(OPT_INTERPRETE_LISTS,
+							"interprete lists",
+							"if set, the session will use (nested) java.util.List instances to represent" +
+							" prolog list terms.",
+							Option.FLAG, "true")};
 		}
 		return options;
 	}
@@ -820,18 +828,44 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	public String getPreferenceValue(String id, String string) {
 		if (OPT_CANONICAL.equals(id)) {
 			return canonical ? "true" : "false";
+		}else if(OPT_INTERPRETE_LISTS.equals(id)){
+			return interpreteLists ? "true" :"false";
 		}
 		throw new IllegalArgumentException("unkown option id: " + id);
 	}
 
 	public void setPreferenceValue(String id, String value) {
+
 		if (OPT_CANONICAL.equals(id)) {
 			canonical = Boolean.valueOf(value).booleanValue();
+			setProtocolOption("canonical", value);
+		} else if (OPT_INTERPRETE_LISTS.equals(id)) {
+			interpreteLists = Boolean.valueOf(value).booleanValue();
+			setProtocolOption("interprete_lists", value);
 		} else {
 			throw new IllegalArgumentException("unkown option id: " + id);
 		}
 	}
-
+	public void setProtocolOption(String id, String value) {
+		if (!isIdle()) {
+			throw new RuntimeException(
+					"Cannot set protocol option while there are requests enqueued.");
+		}
+		client.lock();
+		try {
+			client.readUntil(SocketClient.GIVE_COMMAND);
+			client.writeln(SocketClient.SET_OPTION);
+			client.readUntil(SocketClient.GIVE_SYMBOL);
+			client.writeln(id);
+			client.readUntil(SocketClient.GIVE_TERM);
+			client.writeln(value);
+			client.readUntil(SocketClient.OK);
+		} catch (IOException e) {
+			throw new RuntimeException("IO Error while setting protocol option");
+		} finally {
+			client.unlock();
+		}
+	}
 	public String getProcessorThreadAlias() {
 		
 		return client.getProcessorThread();
