@@ -2,21 +2,21 @@ package org.cs3.pl.tuprolog.internal.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.tuprolog.internal.OperatorsExtLibrary;
+import org.cs3.pl.tuprolog.internal.SWICompatibilityLibrary;
 
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoSolutionException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
 
-public class OperatorsExtLibraryTest extends TestCase {
+public class SWICompatibilityLibraryTest extends TestCase {
 	private Prolog engine;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		if ( engine==null){
 			engine = new Prolog();
-			engine.loadLibrary(new OperatorsExtLibrary());
+			engine.loadLibrary(new SWICompatibilityLibrary());
 		}
 	}
 
