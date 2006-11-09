@@ -341,4 +341,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.dispose();
 
 	}
+	
+	public void test_setProtocolOption() throws Exception{
+		session.setPreferenceValue("socketsession.canonical", "true");
+
+	}
 }
