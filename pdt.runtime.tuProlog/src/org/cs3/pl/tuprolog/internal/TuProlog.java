@@ -49,6 +49,13 @@ public class TuProlog {
      * @throws IOException
      */
 	public void initEngine() throws InvalidTheoryException, IOException {
+		try {
+			engine.loadLibrary(new SWICompatibilityLibrary());
+		} catch (InvalidLibraryException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		Theory theory = new Theory(
 				":- op(1150, fx, dynamic). \n" +
 				":- op(1150, fx, multifile).\n"+
@@ -70,7 +77,7 @@ public class TuProlog {
 		loadLibrary("compatiblitySWI.pl");
 		loadLibrary("compatiblityTU.pl");
 		loadLibrary("javaFactbase.pl");
-//		
+		
 		engine.setWarning(true);
 		engine.addWarningListener(new WarningListener() {
 			public void onWarning(WarningEvent e) {
@@ -105,6 +112,16 @@ public class TuProlog {
 	 */
 	public Library loadLibraryClass(String className) throws InvalidLibraryException{
 		return engine.loadLibrary(className);
+	}
+	
+	/**
+	 * Load Java-based prolog library using Library Object.
+	 * @author Hasan Abdel Halim
+	 * @param libName 
+	 * @throws InvalidLibraryException
+	 */
+	public void loadLibrary(Library libName) throws InvalidLibraryException {
+		 engine.loadLibrary(libName);
 	}
 
 	/**

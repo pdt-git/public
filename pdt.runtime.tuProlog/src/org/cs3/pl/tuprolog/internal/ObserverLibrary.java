@@ -10,13 +10,13 @@ public class ObserverLibrary extends Library {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public boolean observer_2(Term subject, Term key) {
+	public boolean observe_2(Term subject, Term key) {
 		
 		
 		return true;
 	}
 	
-	public boolean unobserver_2(Term first, Term second) {
+	public boolean unobserve_2(Term first, Term second) {
 		
 		return true;
 	}
