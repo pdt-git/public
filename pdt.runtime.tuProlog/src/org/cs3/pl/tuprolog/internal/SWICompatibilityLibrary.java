@@ -15,7 +15,8 @@ import alice.tuprolog.Var;
 
 public class SWICompatibilityLibrary extends Library {
 	
-	// A hashtable which stores the records of recorda,recordz, and recorded predicates.
+	
+//	 A hashtable which stores the records of recorda,recordz, and recorded predicates.
 	private Hashtable records_db = new Hashtable();
 
 	// Temperary Hashtable used while evaluating structural equality.
@@ -447,6 +448,27 @@ public class SWICompatibilityLibrary extends Library {
 			return (info.isSuccess())?true:false;
 		}
 	}
+
+	/*
+	 * 
+	 * 	Implemenation of Formations .
+	 * 	- format/2
+	 *  - sformat/3
+	 * 
+	 */		
+	
+	public boolean format_2(Term msg, Term values){
+		Term string = new Struct();
+		sformat_3(string, msg, values);
+		System.out.println(string.toString());
+		return true;
+	}
+	
+	public boolean sformat_3(Term string_name, Term msg, Term values){
+		//TODO: implement format.
+		return true;
+		
+	}
 	
 	
 	/*
@@ -462,10 +484,11 @@ public class SWICompatibilityLibrary extends Library {
 	 * @see alice.tuprolog.Library#getTheory()
 	 */
 	public String getTheory(){
-		 return ":- op(700, xfx, '=@='). \n" +
-		 		":- op(700, xfx, '\\=@='). \n" +
-		 		"Module:Predicate :- call(Predicate).\n"+
-		 		"'=@='(X,Y):- structEq(X,Y).\n" +
-		 		"'\\=@='(X,Y):- not structEq(X,Y).\n" ;
+		 return 
+		 	":-	op( 700, xfx, '=@=').				\n" +
+	 		":-	op( 700, xfx, '\\=@=').				\n" +
+	 		"'=@='(X,Y):-  structEq(X,Y).			\n" +
+	 		"'\\=@='(X,Y):-  not structEq(X,Y). 	\n" +
+	 		"Module:Predicate :- call(Predicate).	\n" ;
 	}
 }
