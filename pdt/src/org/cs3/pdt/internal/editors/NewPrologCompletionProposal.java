@@ -167,7 +167,7 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 		Map map = null;
 		try {
 			s= pif.getSession();	
-			map = s.queryOnce("pdt_help_html("+predicate.getModule()+":"+predicate.getName()+"/"+predicate.getArity()+",_,Help)");
+			map = s.queryOnce("pdt_help_html('"+predicate.getModule()+"':'"+predicate.getName()+"'/"+predicate.getArity()+",_,Help)");
 			
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
