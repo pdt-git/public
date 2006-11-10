@@ -29,24 +29,75 @@ gewährleistet.
 
 */
 
-:- module(pdt_oop,[/*pdt_define_class/1*/]).
+%:- module(pdt_oop,[pdt_define_class/1]).
 
-pdt_define_abstract(Module,Name/Arity,ThisPos):-
-    add_forward(Module,Name,Arity,ThisPos).
+:- module_transparent '<-'/2.
 
-pdt_define_abstract(Name/Arity):-
-	context_module(Module),
-	add_forward(Module,Name,Arity,1).
+pdt_class(Fields):-
+    context_module(Cx),
+    pdt_class(Cx,Fields).
+
+pdt_class(user,_):-
+    throw(error(doofheit(module_user_as_class))).    
+pdt_class(Cx,Fields):-
+    Template=..[$data|Fields],
+    pdt_define_context(Cx,Template),
+	assert(current_class(Cx,Fields)).
 	
-/*add_forward(Module,Name,Arity,ThisPos):-
-	functor(Head,Name,Arity),
-	arg(ThisPos,Head,$pdt_object(Target,_)),
-	Forwarder=':-'(Head,
-	*/
-	
-%pdt_define_class(Template):-
+pdt_inherit(Cx,Module):-
+    (	current_class(Module,InheritedFields)
+    ->	true
+    ;	throw(error(existence_error(class,Module)))
+    ),
+    (	current_class(Cx,NewFields)
+    ->	true
+    ;	throw(error(existence_error(class,Cx)))
+    ),
+    append(InheritedFields,NewFields,Fields),
+    retractall(current_class(Cx,_)),
+    assert(current_class(Cx,Fields)),
+	Template=..[$data|Fields],
+   	pdt_define_context(Cx,Template),	
+	assert(class_inherits(Cx,Module)).	
     
-%   my_mode:foo_new(foo(_,_,_,_)).
+
+'<-'($pdt_object(Module,Data),Goal):-
+    context_module(Context),
+    Goal=..[Name|Args],
+    append(Args,[$pdt_object(Module,Data),Context],Args2),
+    Goal2=..[Name|Args2],    
+	Module:Goal2.
+
+forward_accessors(Module):-
+    current_class(Module,Fields),
+    forall(member(Field,Fields),(    	
+    	forward_getter(Module,Field),
+    	forward_setter(Module,Field)    	
+    )).
+	forward_multigetter(Module,Fields),
+	forward_multisetter(Module,Fields).
+
+
+
+forward_getter(Module,Field):-
+    functor(Head,Field,2),
+    arg(1,Head,Value),
+    atom_concat('$data_',Field,GetterName),
+    functor(Getter,GetterName,1),
+    arg(1,Getter,Value),
+    Module:assert(':-'(Head,Getter)).
+
+forward_setter(Module,Field):-
+    functor(Head,Field,1),
+    arg(1,Head,Value),
+    atom_concat('$data_set_',Field,SetterName),
+    functor(Setter,SetterName,1),
+    arg(1,Setter,Value),
+    Module:assert(':-'(Head,Getter)).
+
+
+% 
+% 	my_mode:foo_new(foo(_,_,_,_)).
 % 	my_mode:foo_bar(foo(B,_,_,_),B).
 % 	my_mode:foo_baz(foo(_,B,_,_),B).
 % 	my_mode:foo_rumpel(foo(_,_,B,_),B).
@@ -61,3 +112,5 @@ pdt_define_abstract(Name/Arity):-
 % 
 % 	my_mode:foo_set(FooIn,FieldValueList,FooOut):-
 %   	pdt_util_context:pdt_context_set_values(my_mode,FooIn,FieldValueList,FooOut).
+%
+	
