@@ -526,6 +526,11 @@ abstraction(fullQualifiedName(_id, _Fqn)).
   */
 
 fullQualifiedName(Id, Fqn) :-
+	var(Id),
+	var(Fqn),
+	throw('ERROR: fullQualifiedName: at least on of the arguments must be bound').
+	
+fullQualifiedName(Id, Fqn) :-
 	nonvar(Fqn),
 	globalIds(Fqn,Id),
 	!.
@@ -533,16 +538,23 @@ fullQualifiedName(Id, Fqn) :-
 %   Tobias: DONT DO THIS!!!! At this time the index may NOT be up to date.
 %   Especially when I use the java_fq abstraction !!! 
 
-fullQualifiedName(_id, Fqn) :-
-    nonvar(_id),
-    classDefT(_id, null, Fqn,_),
+fullQualifiedName(Id, Fqn) :-
+    nonvar(Id),
+    ri_globalIds(Id,Fqn),
     !.
+%    classDefT(_id, null, Fqn,_),
+%    !.
 
-fullQualifiedName(_id, _Fqn) :-
-    nonvar(_id),
-    classDefT(_id, _parent, _name,_),
-    packageT(_parent, _pckgname),
-    stringAppend(_pckgname, '.', _name, _Fqn),
+%fullQualifiedName(Id, Fqn) :-
+%    debugme,
+%    !,
+%   throw('fqn: no ri_globalIds available').
+
+fullQualifiedNameReal(Id, Fqn) :-
+    nonvar(Id),
+    classDefT(Id, Parent, Name,_),
+    packageT(Parent, Pckgname),
+    stringAppend(Pckgname, '.', Name, Fqn),
     !.
 	
 /*	
@@ -555,7 +567,7 @@ fullQualifiedName(_id, _Fqn) :-
     stringAppend(_pckgname, '.', _name, _Fqn).
 */
 
-fullQualifiedName(_id, _Fqn) :-
+fullQualifiedNameReal(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     classDefT(_parent, _, _,_),
 %    !,
@@ -563,7 +575,7 @@ fullQualifiedName(_id, _Fqn) :-
     stringAppend(_OuterFqn, '.', _name, _Fqn).
 
 % enclosing class is anomynous
-fullQualifiedName(_id, _Fqn) :-
+fullQualifiedNameReal(_id, _Fqn) :-
     classDefT(_id, _parent, _name,_),
     not(classDefT(_parent, _, _,_)),
     not(packageT(_parent,_)),
@@ -572,7 +584,7 @@ fullQualifiedName(_id, _Fqn) :-
     fullQualifiedName(ParentClass, _OuterFqn),
     stringAppend(_OuterFqn, '.', _name, _Fqn).
 
-fullQualifiedName(_id, _name) :-
+fullQualifiedNameReal(_id, _name) :-
     classDefT(_id, 'null', _name,_),
     !.
 

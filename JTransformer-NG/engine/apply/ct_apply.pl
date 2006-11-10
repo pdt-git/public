@@ -313,12 +313,26 @@ add(Elem) :-
 	error_handling(fail, 'ERROR: element is not a tree: ~w~n.',[Elem]).
 */	
 
-add(_elem) :-  
-    nonvar(_elem), 
-    assert(_elem),
-    asserta(rollback(retract(_elem))),
-    markEnclAsDirty(_elem).
-
+add(Element) :-  
+    nonvar(Element), 
+    assert(Element),
+    asserta(rollback(retract(Element))),
+    addTreeReverseIndexes(Element),
+    markEnclAsDirty(Element)
+    .
+    
+    
+/*
+	assert1T(+Term)
+	Asserts term Term. If Term already
+	exists it will not be asserted.
+	The predicate is always true.
+*/
+add1(Element) :- 
+	call(Element),
+	!.
+add1(Element) :- 
+	add(Element).
     
 /*
 	delete(+pef)
@@ -332,11 +346,14 @@ delete(java_fq(Elem)):-
     java_fq_to_pef(Elem,PEF),
     delete(PEF).
     
-delete(_elem) :- 
-        nonvar(_elem), 
-        retract(_elem), 
-        markEnclAsDirty(_elem),
-        asserta(rollback(assert(_elem))).
+delete(Element) :- 
+        nonvar(Element), 
+        retract(Element), 
+        markEnclAsDirty(Element),
+        deleteTreeReverseIndexes(Element),
+        asserta(rollback(assert(Element)))
+        .
+        
 
 /*
 	replace(+Pef1,+Pef2)
@@ -352,7 +369,7 @@ replace(java_fq(Elem1),java_fq(Elem2)):-
     java_fq_to_pef(Elem2,PEF2),
     replace(PEF1,PEF2).
 
-replace(_elem1, _elem2) :- delete(_elem1), add(_elem2).
+replace(Element1, Element2) :- delete(Element1), add(Element2).
 
 replace(Elem) :- 
     Elem =.. [_|[ID|_]],

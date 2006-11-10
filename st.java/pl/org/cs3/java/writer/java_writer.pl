@@ -47,21 +47,34 @@ generate_synthetic_methods(Generate) :-
  ***********************************************************/
 
 /**
- * gen_toplevels
+ * gen_all_toplevels
  *
  * Write all toplevels to the current output project (outdir).
  * Uses gen_toplevel/1.
  */
-
+ gen_all_toplevels :-
+    close_all_printf_to_memory,
+  	retractall(sourcePath(_)),
+    forall(toplevelT(_id,_,_,_), gen_toplevel(_id)).
+/**
+ * gen_toplevels
+ *
+ * Write all modified toplevels to the current output project (outdir)
+ * and delete all deleted files.
+ * Uses gen_toplevel/1.
+ */
 gen_toplevels :-
     close_all_printf_to_memory,
   	retractall(sourcePath(_)),
-%  	appendDir('/gen_classfile_names.txt', _dirfile),
- %   createDirsIfNeeded(_dirfile),
-%    write_if_fileoutput(_dirfile),
-%    open(_dirfile, write, _fileStream),
-%    assert(gen_classfile_names(_fileStream)),
-    forall(toplevelT(_id,_,_,_), gen_toplevel(_id)).
+    forall(sorted_modified_toplevels(Toplevel), gen_toplevel(Toplevel)),
+    delete_deleted_files,
+    retract_api_meta_data.
+
+delete_deleted_files :-
+    forall(deleted_file(File),
+       catch((format('deleting file: ~w~n',[File]),delete_file(File))
+          ,Exception,write(Exception))).
+    
 %    close(_fileStream),
 %    retract(gen_classfile_names(_fileStream)).
 
@@ -72,17 +85,14 @@ gen_toplevels :-
  * The source folders will be preserved.
  */
 
-gen_toplevel(_toplevel) :-
-    toplevelT(_toplevel, _packg, _filename, _defs),
+gen_toplevel(Toplevel) :-
+    toplevelT(Toplevel, _packg, _filename, _defs),
     !,
-    projectLocationT(_toplevel,Project,_),
-    projectT(Project,_,_,OutProjectPath),
-    concat('/',Project,FilenameWOProject, _filename),
-    appendDir(OutProjectPath, FilenameWOProject, _dirfile),
+    file_on_disk(Toplevel,_dirfile),
     retractall(align(_)),
     assert(align(0)),
 	(
-	   sourceFolder(_toplevel,SourcePath) ->
+	   sourceFolder(Toplevel,SourcePath) ->
 	    assert1T(sourcePath(SourcePath));true),
 %    (add_to_gen_classfile_names(_dirfile);true),
     createDirsIfNeeded(_dirfile),
@@ -96,6 +106,7 @@ gen_toplevel(_toplevel) :-
     gen_stats(_defs),
     retract(file_output(_fileStream)),
     close(_fileStream).
+
 
 /*****************************************
  *********  local predicates *************
@@ -691,8 +702,8 @@ gen_tree('null'):-
 %    assert(lasttree(_id)).
 
 
-gen_tree(_toplevel) :-
-    toplevelT(_toplevel, _packg, _filename, _defs),
+gen_tree(Toplevel) :-
+    toplevelT(Toplevel, _packg, _filename, _defs),
     !,
     gen_tree(_packg),
     gen_stats(_defs).

@@ -5,6 +5,8 @@
 :- dynamic created_file/1.
 :- multifile created_file/1.
 
+:- dynamic modified_toplevel/1.
+:- multifile modified_toplevel/1.
 
 /**
  * delete_toplevel(+Path)
@@ -33,26 +35,27 @@ delete_toplevel(_).
 	deepRetract(ID).
 	
 	
-add_new_class_and_file(_id, _owner, _name, Defs) :-
-    add(classDefT(_id, _owner, _name, Defs)),
+add_new_class_and_file(Id, Owner, Name, Defs) :-
+    add(classDefT(Id, Owner, Name, Defs)),
     ((
-       (globalIds(FQN,_id)->
+       (globalIds(FQN,Id)->
        		true;
-       		(fullQualifiedName(_id,FQN)->
-       		add(globalIds(FQN,_id));true)
+       		(fullQualifiedNameReal(Id,FQN)->
+       		(add(globalIds(FQN,Id)),
+       		 add(ri_globalIds(Id,FQN)));true)
        		),
-       modifierT(_id,'public'),
-       not(getToplevel(_id,_)),
-       getPackage(_id,PID),
-       (_owner = null;_owner = PID),
-       fullPathOfClass(_id,FullPath),
+       modifierT(Id,'public'),
+       not(getToplevel(Id,_)),
+       getPackage(Id,PID),
+       (Owner = null;Owner = PID),
+       fullPathOfClass(Id,FullPath),
        print(' added new toplevel: '),       
        print(FullPath),
 	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
        sformat(S, '/~w/~w.java',[FullSourceFolder,FullPath]),
        string_to_atom(S,Filename),
        new_id(TID),
-       add(toplevelT(TID, PID,Filename,[_id])),
+       add(toplevelT(TID, PID,Filename,[Id])),
        assert(created_file(Filename)),
        add(projectLocationT(TID, Project,SourceFolder))
      );true).
@@ -81,6 +84,17 @@ modified_file(Filename,Src):-
     toplevelT(Toplevel,_,Filename,_),
     not(created_file(Filename)),
     gen_tree(Toplevel,Src).
+    
+modified_or_dirty_toplevel(Toplevel):-
+    dirty_class(Class),
+    getToplevel(Class,Toplevel).
+
+modified_or_dirty_toplevel(Toplevel):-
+	modified_toplevel(Toplevel).	 
+	
+sorted_modified_toplevels(Toplevel):-
+	setof(Toplevel, (modified_or_dirty_toplevel(Toplevel),toplevelT(Toplevel,_,_,_)),TLs),
+	member(Toplevel,TLs).
 
 /*
 	dirty_class(-Class)
@@ -93,9 +107,6 @@ dirty_class(Class):-
     bagof(Tree,(dirty_tree(Tree),enclClass(Tree,Class)),Tree).
 
 
-    
-
-
 /*
 	retract_api_meta_data.
 */
@@ -105,6 +116,19 @@ retract_api_meta_data :-
     retractall(created_file(_)),
     retractall(dirty_tree(_)),
     retractall(rollback(_)),
+    retractall(modified_toplevel(_)),
     retractall(changed(_)).
     
     
+/**
+ * file_on_disk(+Toplevel,-Dirfile)
+ *
+ * Retrieve the absolute file on disk of Toplevel.
+ *
+ */
+file_on_disk(Toplevel,Dirfile) :-
+    toplevelT(Toplevel, _Package,Filename, _Defs),
+    projectLocationT(Toplevel,Project,_),
+    projectT(Project,_,_,OutProjectPath),
+    concat('/',Project,FilenameWOProject, Filename),
+    appendDir(OutProjectPath, FilenameWOProject, Dirfile).

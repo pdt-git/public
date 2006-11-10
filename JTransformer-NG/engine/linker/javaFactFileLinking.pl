@@ -32,6 +32,15 @@
  */
 :- multifile globalIds/2.
 :- dynamic globalIds/2.
+
+/**
+ * ri_globalIds(+Id, +full qualfied type name)
+ *
+ * reverse index for globalIds.
+ */
+:- multifile ri_globalIds/2.
+:- dynamic ri_globalIds/2.
+
 /**
  * globalIds(+full qualfied type name, +field name, +Id)
  */
@@ -118,22 +127,23 @@ inTe(':'(abba,Term)) :-
 %    assert(packageT(_id,_name)),
 %    !.
 
-inTe(_term) :-
-  inTe(_term,_translated),
- 	checkExistance(_translated),
- 	_translated =.. AsList,
+inTe(Term) :-
+  inTe(Term,Translated),
+ 	checkExistance(Translated),
+ 	Translated =.. AsList,
 	not(member(lId(_), AsList)),
 	!,
-	assert1T(_translated).
+	assert1T(Translated),
+	assertTreeReverseIndexes(Translated).
 
-inTe(_term) :-
-	inTe(_term, _translated),
-	checkExistance(_translated),
-	_translated =.. AsList,
+inTe(Term) :-
+	inTe(Term, Translated),
+	checkExistance(Translated),
+	Translated =.. AsList,
 	member(lId(LID), AsList),
 	!,
 	printf('Local ID ~a is in the term', [LID]),
-	print(_translated),
+	print(Translated),
 	printf('~n'),
 	fail.
 
@@ -248,10 +258,9 @@ globalFqn(_fqn, _globalid) :-
     globalIds(_fqn, _globalid),
     !.
 
-globalFqn(_fqn, _globalid) :-
-    new_id(_globalid),
-    _term =..[globalIds, _fqn, _globalid],
-    assert(_term).
+globalFqn(Fqn, GlobalId) :-
+    new_id(GlobalId),  
+    assertGlobalIds(Fqn,GlobalId).
 %    add_to_new(_fqn).
     
 
@@ -378,7 +387,7 @@ addToGlobalIds(Fqn):-
 
 addToGlobalIds(Fqn):-
     new_id(Id),
-    assert(globalIds(Fqn,Id)).
+    assertGlobalIds(Fqn,Id).
 	
 addToGlobalIdsAndFacts(Fqn):-
     globalIds(Fqn,_),
@@ -389,7 +398,7 @@ addToGlobalIdsAndFacts(Fqn):-
 		printf('creating synthetic package '),
 		print(Fqn),
 		printf('~n'),
-    assert(globalIds(Fqn,Id)),
+    assertGlobalIds(Fqn,Id),
     assert(packageT(Id,Fqn)).		
 
 /**
@@ -402,4 +411,105 @@ addToGlobalIdsAndFacts(Fqn):-
 remove_contained_global_ids(Path):-
 	toplevelT(_, _, Path, Defs), 
 	forall((member(M,Defs),classDefT(M,_,_,_)),
-	       retractall(globalIds(_,M))).
+	       (retractall(globalIds(_,M)),
+	       retractall(ri_globalIds(M,_))
+	       )).	       
+
+/*	       
+assertTree(Translated) :-
+	assert1T(Translated),
+	Translated =.. [Functor,Id | Args],
+	ast_node_def('Java',Functor,[_|ArgDefs]),
+	!,
+	assert_reverse_indexes(assert,Functor,Id, Args, ArgDefs).
+assertTree(_Translated).
+*/
+assertTreeReverseIndexes(Translated) :-
+	actionOnTreeReverseIndexes(assert,Translated).
+
+retractTreeReverseIndexes(Translated) :-
+	actionOnTreeReverseIndexes(retract,Translated).
+
+addTreeReverseIndexes(Translated) :-
+	actionOnTreeReverseIndexes(add,Translated).
+
+deleteTreeReverseIndexes(Translated) :-
+	actionOnTreeReverseIndexes(delete,Translated).
+
+actionOnTreeReverseIndexes(Action,Translated) :-
+	Translated =.. [Functor,Id | Args],
+	ast_node_def('Java',Functor,[_|ArgDefs]),
+	!,
+	assert_reverse_indexes(Action,Functor,Id, Args, ArgDefs).
+actionOnTreeReverseIndexes(_Action,_Translated).
+
+
+
+/**
+ * assert_reverse_indexes(+AssertAdd,+Id, +Args, ArgDefs)
+ *
+ * Creates a reverse index ri_kind for every
+ * arg kind of type id and mult(1,1,no ).
+ * See ast_node_def/3 for details on arg kinds.
+ * If AssertAdd equals 'assert' the fact will be asserted
+ * if it equals 'add' it will be added.
+ */
+ 
+assert_reverse_indexes(_AssertAdd,_Functor,_Id, [], __RestDefs).
+
+assert_reverse_indexes(AssertAdd, Functor,Id, [Arg|Args],
+	[ast_arg(Kind,  mult(1,1,no ), id,  _)|RestDefs]):-
+    !,
+    ri_functor_kind(Functor,Kind,RiKind),
+    RiTerm =.. [RiKind,Arg,Id],
+    assert_or_add(AssertAdd,RiTerm),
+	assert_reverse_indexes(AssertAdd,Functor,Id, Args, RestDefs).
+
+assert_reverse_indexes(AssertAdd,Functor,Id, [_Arg|Args],
+	[_Def|RestDefs]):-
+	assert_reverse_indexes(AssertAdd,Functor,Id, Args, RestDefs).
+
+
+assert_or_add(add,RiTerm) :-
+	add(RiTerm).
+assert_or_add(delete,RiTerm) :-
+	delete(RiTerm).
+assert_or_add(assert,RiTerm) :-
+	assert1T(RiTerm).
+assert_or_add(retract,RiTerm) :-
+	retract(RiTerm).
+
+/**
+ * create_ast_arg_id_kind
+ * 
+ * First retract and then create ast_arg_id_kind
+ * facts from the ast_node_def clauses.
+ */
+create_dynamic_directive_for_arg_id_kinds :-
+	forall((
+	   ast_node_def('Java',Functor,Defs),
+      member(ast_arg(Kind,  mult(1,1,no ), id,  _),Defs),
+      ri_functor_kind(Functor,Kind,Ri)),
+	  dynamic(Ri/2)).
+
+create_ri_functor_kind :-
+    retractall(ri_functor_kind(_,_,_)),
+	forall((
+	    ast_node_def('Java',Functor,Defs),
+        member(ast_arg(Kind,  mult(1,1,no ), id,  _),Defs),
+        ri_functor_kind_functor(Functor,Kind,RiFunctor)
+      ),
+	  assert(ri_functor_kind(Functor,Kind,RiFunctor))).
+
+ri_functor_kind_functor(Functor,Kind,RiFunctorKind):-
+	  atom_concat('ri_', Functor,RiFunctor),
+	  atom_concat(RiFunctor,'_',RiFunctorDash),
+	  atom_concat(RiFunctorDash,Kind,RiFunctorKind).
+
+:- create_ri_functor_kind.
+:- create_dynamic_directive_for_arg_id_kinds.
+
+
+assertGlobalIds(Fqn,Id):-
+    assert(globalIds(Fqn,Id)),
+    assert(ri_globalIds(Id,Fqn)).

@@ -20,7 +20,7 @@ markEnclAsDirty(Elem):-
     	(enclosing(ID,Encl), not(Encl = 'null'),not(packageT(Encl,_)));
      	Encl = ID
     ),
-    assert1T(dirty_tree(Encl)),
+    add1(dirty_tree(Encl)),
     !.
 
 markEnclAsDirty(_).

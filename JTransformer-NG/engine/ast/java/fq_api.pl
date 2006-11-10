@@ -86,8 +86,38 @@ java_fq(Term):-
          ast_node_def('Java',Functor,[_|ArgDefs]),
          bindArgs(ArgDefs, Args, JavaASTArgs),
      JavaAST =.. [Functor,Id|JavaASTArgs],
+     bind_unbound_args(Functor, Id,JavaASTArgs,ArgDefs),
      call(JavaAST),
      mapArgs(JavaASTArgs,Args).
+
+
+bind_unbound_args(_Functor,_Id,[],_ArgDefs).
+
+bind_unbound_args(Functor,Id,[Arg|JavaASTArgs],
+       [ast_arg(Kind,  mult(1,1,no ), id,  _)| ArgDefs]) :-
+     %var(Id),
+     nonvar(Arg),
+     ri_functor_kind(Functor,Kind,Ri),
+     Term =.. [Ri,Arg,Id],
+     !,
+     call(Term),
+     bind_unbound_args(Functor,Id,JavaASTArgs,ArgDefs).
+     
+     
+bind_unbound_args(Functor,Id,[_|JavaASTArgs], [_| ArgDefs]) :-
+	 bind_unbound_args(Functor,Id,JavaASTArgs,ArgDefs).	  
+
+/*
+bind_unbound_parent(_Id,_JavaArgs,_ArgDefs).
+    
+bind_unbound_encl(Id,[Encl|_JavaASTArgs],
+       [ast_arg(parent,  mult(1,1,no ), id,  _),ast_arg(encl,  mult(1,1,no ), id,  _)| _ArgDefs]) :-
+     %var(Id),
+     nonvar(Encl),
+     ri_encl(Encl,Id).
+
+bind_unbound_encl(_Id,_JavaArgs,_ArgDefs).    
+*/    
     
 % clause for uninstantiated Id
 /*
@@ -413,8 +443,8 @@ getTypeIfNullEnclClass_fq(Id, _, FQN) :-
  */
     
 getType_fq(Id,FQN):-
-    getType(Id, _Type),
-    map_type_term(_Type,FQN).
+    getType(Id, Type),
+    map_type_term(Type,FQN).
 
 /**
  * enclClass_fq(Id,FQN)
