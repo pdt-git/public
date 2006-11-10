@@ -29,7 +29,7 @@ gewährleistet.
 
 */
 
-:- module(pdt_oop,[pdt_define_class/1]).
+:- module(pdt_oop,[/*pdt_define_class/1*/]).
 
 pdt_define_abstract(Module,Name/Arity,ThisPos):-
     add_forward(Module,Name,Arity,ThisPos).
@@ -38,13 +38,13 @@ pdt_define_abstract(Name/Arity):-
 	context_module(Module),
 	add_forward(Module,Name,Arity,1).
 	
-add_forward(Module,Name,Arity,ThisPos):-
+/*add_forward(Module,Name,Arity,ThisPos):-
 	functor(Head,Name,Arity),
 	arg(ThisPos,Head,$pdt_object(Target,_)),
 	Forwarder=':-'(Head,
+	*/
 	
-	
-pdt_define_class(Template):-
+%pdt_define_class(Template):-
     
 %   my_mode:foo_new(foo(_,_,_,_)).
 % 	my_mode:foo_bar(foo(B,_,_,_),B).
