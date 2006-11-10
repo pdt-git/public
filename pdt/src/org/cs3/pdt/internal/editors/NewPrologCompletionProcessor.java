@@ -351,11 +351,11 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 	}
 
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return new char[] { ':' };
+		return new char[0];
 	}
 
 	public char[] getContextInformationAutoActivationCharacters() {
-		return new char[] { ':' };
+		return new char[0];
 	}
 
 	public String getErrorMessage() {
