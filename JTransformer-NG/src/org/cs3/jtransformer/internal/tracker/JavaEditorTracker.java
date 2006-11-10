@@ -48,6 +48,10 @@ public class JavaEditorTracker extends AbstractEditorTracker
 		IProject project = fileInput.getFile().getProject();
 		JTransformerProjectNature jtNature =null;
 		try {
+			if(!project.isOpen()) {
+				return null;
+			}
+
 			if(project.hasNature(JTransformer.NATURE_ID)){
 				jtNature=JTransformerPlugin.getNature(project);
 			}

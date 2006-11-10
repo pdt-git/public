@@ -135,6 +135,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 	private void ifProjectAddToList(List projects, Object obj) {
 		try {
 			if (obj instanceof IProject
+					&& ((IProject) obj).isOpen() 
 					&& ((IProject) obj).getDescription().hasNature(
 							JavaCore.NATURE_ID)) {
 				// the plugin.xml file should make sure it is indeed
@@ -146,6 +147,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 				IResource r = (IResource) a.getAdapter(IResource.class);
 				if (r != null
 						&& IResource.PROJECT == r.getType()
+						&& ((IProject) r).isOpen()
 						&& ((IProject) r).getDescription().hasNature(
 								JavaCore.NATURE_ID)) {
 					projects.add(r);

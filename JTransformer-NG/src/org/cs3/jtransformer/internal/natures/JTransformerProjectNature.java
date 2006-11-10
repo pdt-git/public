@@ -218,10 +218,8 @@ public class JTransformerProjectNature implements IProjectNature,
 	public void deconfigure() throws CoreException {
 		
 		// just to make sure waiting threads are notified
-		pefInitializationDone();
-		
-		removeNatureFromRegistry();
-		
+		onClose();
+
 		IProjectDescription descr = project.getProject().getDescription();
 		Debug.debug("deconfigure was called");
 		ICommand builders[] = descr.getBuildSpec();
@@ -260,7 +258,16 @@ public class JTransformerProjectNature implements IProjectNature,
 				if (s != null)
 					s.dispose();
 			}
+	}
 
+	public void onClose() {
+		pefInitializationDone();
+		
+		removeNatureFromRegistry();
+		
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		.getPrologInterfaceRegistry();
+		reg.removeSubscription(pifSubscription);
 	}
 
 	private void removeNatureFromRegistry() {
@@ -302,6 +309,12 @@ public class JTransformerProjectNature implements IProjectNature,
 	private void checkIfNatureIsAlreadyAssignedToProject(IProject project) {
 		synchronized (projectNatureMap) {
 			if(projectNatureMap.containsKey(project)) {
+				projectNatureMap.remove(project);
+				if (pifSubscription != null) {
+					PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+					.getPrologInterfaceRegistry();
+					reg.removeSubscription(pifSubscription);
+				}
 				RuntimeException ex = new RuntimeException(
 						"Internal error: second creation of a JT nature for the project "+project.getName());
 				JTUtils.logAndDisplayUnknownError(ex);
@@ -369,8 +382,8 @@ public class JTransformerProjectNature implements IProjectNature,
 			}
 			setInitializingPif(true);
 			String projectInterfaceKey = getRuntimePrologInterfaceKey();
-
-			pifSubscription = new JTransformerSubscription(this,project, projectInterfaceKey,
+			String id = "JTransformerSubscription_" + project.getName();
+			pifSubscription = new JTransformerSubscription(this,project, id,
 					projectInterfaceKey,
 					// getProject().getName(),
 					// getProject().getName(),
