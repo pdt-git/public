@@ -58,7 +58,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 
-:-module_transparent pdt_set_findall/3.
+:-module_transparent pdt_set_findall/3,pdt_set_addall/4.
 
 pdt_set_findall(Elm,Goal,Set):-
 	pdt_set_empty(Set0),

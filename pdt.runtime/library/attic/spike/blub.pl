@@ -1,8 +1,10 @@
-:-module(blub,[]).
+:-module(blub,[test_goal/3, edge/4,print_subst/2  ]).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('org/cs3/pdt/util/pdt_source_term')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_map')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_set')).
 
 :- pdt_define_context(post(contains,warm,hot)).
 :- pdt_define_context(asubst(post_map)).
@@ -93,11 +95,47 @@ predicate by its respective context module. For non-transparent predicates, ther
 be exactly one instance - the one corresponding to the predicates definition module.
 For module-transparent predicates, there will be several instances.
 */
+edge(S,From,contains,To):-
+    asubst_post_map(S,M),
+    pdt_map_get(M,From,Post),
+    post_contains(Post,Set),
+    pdt_set_element(Set,To).
+edge(S,From,warm,To):-
+    asubst_post_map(S,M),
+    pdt_map_get(M,From,Post),
+    post_warm(Post,Set),
+    pdt_set_element(Set,To).
+edge(S,From,hot,To):-
+    asubst_post_map(S,M),    
+    pdt_map_get(M,From,Post),
+    post_hot(Post,Set),
+    pdt_set_element(Set,To).
+
+test_goal(FileRef,TermRef,Delta):-
+    pdt_lookup_aterm(file_ref(FileRef),TermRef,Goal),
+    empty_asubst(In),
+    do_goal(In,Goal,Delta).
+known(_Predicate,_Goal,_In2,_Delta):-
+    fail.
+
 
 do_goal(In,Goal,Delta):-
+    match(Goal,(A,B)),
+    !,
+    do_goal(In,B,Delta1),
+    lub([In,Delta1],In1),    
+    do_goal(In1,A,Delta2),
+    lub([Delta1,Delta2],Delta).
+
+
+do_goal(In,Goal,Delta):-
+    source_term_var(Goal),
+    !,
+    mark_hot(In,Goal,Delta).
+do_goal(In,Goal,Delta):-
 	mark_hot(In,Goal,Delta1),
-	lub([In,Delta1],In1)
-	propagate_variable_heat(In1,Delta2),
+	lub([In,Delta1],In1),
+	propagate_variable_heat(In1,Goal,Delta2),
 	lub([In1,Delta2],In2),
     resolve_predicate(In2,Goal,Predicate),
     (	known(Predicate,Goal,In2,Delta)
@@ -105,7 +143,7 @@ do_goal(In,Goal,Delta):-
     ;	findall(Delta3,
 			(
 				predicate_clause(Predicate,Clause),
-				do_clause(In2,Clause,Delta3)
+				do_clause(In2,Goal,Clause,Delta3)
 			),
 			Deltas
 		),
@@ -115,6 +153,13 @@ do_goal(In,Goal,Delta):-
 	).
 
 
+mark_hot(_In,Goal,Delta):-
+    empty_asubst(Asubst),
+    term_node(Goal,Node),
+    generate_post([connection(hot,Node,Node)],Post),
+    asubst_post_map(Asubst,Map),
+    pdt_map_put(Map,Node,Post,Map2),
+    asubst_set_post_map(Asubst,Map2,Delta).
 	
 do_clause(In,Goal,Clause,Delta):-
 	clause_head(Clause,Head),
@@ -124,14 +169,7 @@ do_clause(In,Goal,Clause,Delta):-
     do_goal(In1,Body,Delta2),
     lub([Delta1,Delta2],Delta).
 
-known(builtin(system,true,0),_,In,In).
-known(builtin(system,':',2),Goal,In,Out):-
-    match(Goal,(_A:B)),
-    do_goal(In,B,Out).
-known(builtin(system,',',2),Goal,In,Out):-
-    match(Goal,(A,B)),
-    do_goal(In,A,Next),
-    do_goal(Next,B,Out).
+
 
 
 propagate_variable_heat(_In,Term,Delta):-
@@ -141,19 +179,43 @@ propagate_variable_heat(_In,Term,Delta):-
     !,
    	empty_asubst(Delta).
 propagate_variable_heat(In,Term,Delta):-
-    source_term_functor(Term,_,Arity),
-    %here
-	propagate_variable_heat_args(1,In,Arity,Term,Delta1),
-	lub([In,Delta1],In1),
-	propagate_variable_heat_local(1,In1,Arity,Term,Delta2),
-	lub([Delta1,Delta2],Delta).
+    % siblings do not affect each other. We can use the original 
+    % In subst for all sibllings.
+	findall(Delta2, 
+		(	source_term_arg(_,Term,Arg),
+			propagate_variable_heat(In,Arg,Delta1),
+			lub([In,Delta1],In1),
+			propagate_variable_heat_local(In1,Term,Arg,Delta2)
+		),
+		Deltas
+	),
+	lub(Deltas,Delta).
     
-propagate_variable_heat_args(I,In,Arity,Term,Delta1):-
-    I>Arity,!.
-propagate_variable_heat_args(I,In,Arity,Term,Delta1):-
-	arg(I,Term,Arg),
-    propagate_variable_heat(In,Arg,Delta1)
-    
+propagate_variable_heat_local(In,Term,Arg,Delta):-
+    term_node(Term,TermNode),
+    term_node(Arg,ArgNode),
+    connect_child(In,TermNode,ArgNode,Delta).
+
+connect_child(In,Parent,Child,Delta):-
+	get_post(In,Child,ChildPost),
+	findall(C,child_connection(Parent,Child,ChildPost,C),Connections),
+	generate_post(Connections,ParentPostDelta),
+	asubst_new(Delta0),	
+	pdt_map_empty(PostMap),
+	asubst_post_map(Delta0,PostMap),
+	set_post(Delta0,Parent,ParentPostDelta,Delta).
+
+child_connection(Parent,_Child,ChildPost,connection(contains,Parent,Elm)):-
+    post_contains(ChildPost,Contains),
+	pdt_set_element(Contains,Elm).
+child_connection(Parent,Child,ChildPost,connection(contains,Parent,Child)):-
+    post_warm(ChildPost,Contains),
+    \+ pdt_set_empty(Contains).
+child_connection(Parent,Child,ChildPost,connection(contains,Parent,Child)):-
+    post_hot(ChildPost,Contains),
+    \+ pdt_set_empty(Contains).
+
+
    
 clause_body(Clause,Body):-
 	match(Clause,':-'(_Head,Body)),
@@ -168,6 +230,11 @@ clause_head(Clause,Clause).
 
     
 %FIXME: very simplistic implementation for now
+match(Goal,Template):-
+    source_term_var(Goal),
+    !,
+    var(Template),
+    Template=Goal.
 match(Goal,Template):-
     source_term_functor(Goal,Name,Arity),
     functor(Template,Name,Arity),
@@ -192,13 +259,16 @@ resolve_predicate(_In,Goal,Predicate):-
 	    
 predicate_clause(Predicate,Clause):-
     pdt_property(Predicate,clauses,Clauses),
-    member(Clause,Clauses).
+    arg(_,Clauses,Clause).
     
 
-    
+
+	
+	
 do_unify(In,A,B,Delta):-
     source_term_unifiable(A,B,Unifier),
-    process_unifier(Unifier,In,Delta).
+    process_unifier(Unifier,In,Delta),
+    print_subst(Delta,do_unify).
 
 
 process_unifier([],Post,Post).
@@ -247,6 +317,12 @@ get_post(In,Node,Post):-
 get_post(_,_,Post):-
     generate_post([],Post).
 
+set_post(In,Node,Post,Out):-
+    asubst_post_map(In,Map),
+    pdt_map_put(Map,Node,Post,Map1),
+    asubst_set_post_map(In,Map1,Out).
+    
+
 generate_post(ABs,Post):-
     post_new(Post0),
     pdt_set_empty(Contains),
@@ -287,14 +363,19 @@ lub([A],A):-
 	!.	
 lub([A|As],Out):-
     merge_all(As,A,Out).
+	
+print_subst(Subst,Label):-
+    format("<~w>~n",[Label]),
+    forall(edge(Subst,From,Kind,To),format("~w -- ~w --> ~w~n",[From,Kind,To])),
+    format("</~w>~n",[Label]).
 
 merge_all([],In,In).
 merge_all([A|As],In,Out):-
-    merge(In,A,Next),
-    merge_all(Next,As,Out).
+    my_merge(In,A,Next),
+    merge_all(As,Next,Out).
 
 
-merge(In,Add,Out):-
+my_merge(In,Add,Out):-
     asubst_post_map(In,Map0),
     asubst_post_map(Add,AddMap),
 	pdt_map_putall(Map0,Node,Post,
@@ -335,10 +416,10 @@ merge_sets(Set0,Set,NewSet):-
 	pdt_set_addall(Set0,Elm,pdt_set_element(Set,Elm),NewSet).
 
 %TODO    
-remember(Predicate,Goal,In,Out).
+remember(_Predicate,_Goal,_In,_Out).
 %TODO    
-known(Predicate,Goal,In1,Delta):-
-    fail.
+%known(_Predicate,_Goal,_In1,_Delta):-
+%    fail.
 %TODO
-mark_context(In,B,A,In).
+mark_context(In,_B,_A,In).
 

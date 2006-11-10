@@ -60,7 +60,7 @@
 
 
 
-:-module_transparent pdt_map_findall/4.
+:-module_transparent pdt_map_findall/4,pdt_map_putall/5.
 
 pdt_map_findall(Key,Value,Goal,Map):-
 	pdt_map_empty(Map0),
