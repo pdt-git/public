@@ -825,17 +825,13 @@ public class JTUtils
 	public static void logAndDisplayUnknownError(final Exception e) {
 		UIUtils.getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				Shell shell;
-				if(UIUtils.getDisplay().getActiveShell() != null){
-					shell=UIUtils.getDisplay().getActiveShell();
-				} else {
-					shell = UIUtils.getDisplay().getShells()[0];
-				}
+				Shell shell = getShell(true);
 		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), shell, 
 				JTransformer.ERR_UNKNOWN,
 				JTransformer.ERR_CONTEXT_EXCEPTION,
 				e);
 			}
+
 		});
 	}
 	
@@ -851,6 +847,26 @@ public class JTUtils
 				code,
 				context,
 				e);
+	}
+
+	/**
+	 * Returns the active shell.
+	 * 
+	 * @param force if the active shell from the current display
+	 * is null get the first shell from the getDisplay().getShells()
+	 * array. 
+	 * @return
+	 */
+	public static Shell getShell( boolean force) {
+		Shell shell = null;
+		if(UIUtils.getDisplay().getActiveShell() != null){
+			shell=UIUtils.getDisplay().getActiveShell();
+		} else {
+			if(force && UIUtils.getDisplay().getShells().length > 0) {
+				shell = UIUtils.getDisplay().getShells()[0];
+			}
+		}
+		return shell;
 	}
 
 }

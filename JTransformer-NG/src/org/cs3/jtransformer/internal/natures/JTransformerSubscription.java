@@ -3,10 +3,12 @@
  */
 package org.cs3.jtransformer.internal.natures;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
@@ -14,9 +16,11 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
@@ -33,6 +37,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -52,6 +57,10 @@ public class JTransformerSubscription extends DefaultSubscription implements
 
 		static Object toBeBuiltMonitor = new Object();
 
+		public JTransformerSubscription() {
+			super();
+		}
+
 		
 		public JTransformerSubscription(JTransformerProjectNature nature, IProject project, String id, String pifID,
 				String descritpion, String name) {
@@ -60,6 +69,18 @@ public class JTransformerSubscription extends DefaultSubscription implements
 			this.nature = nature;
 		}
 
+		public void restoreState(Map params) {
+			super.restoreState(params);
+			project = ResourcesPlugin.getWorkspace().
+				getRoot().getProject((String) params.get("project"));
+		}
+
+		public Map saveState() {
+			Map map = super.saveState();
+			map.put("project", project.getName());
+			return map;
+		}
+		
 		public void configure(PrologInterface pif) {
 			pif.addLifeCycleHook(this, getId(), new String[0]);
 			if (pif.isUp()) {
@@ -151,6 +172,9 @@ public class JTransformerSubscription extends DefaultSubscription implements
 						return;
 					}
 					tmpProjects = getSortedListOfNotYetBuildJTProjects();
+					if(tmpProjects == null) {
+						return;
+					}
 					
 					Debug.info("JT: buildAllProjectsOfPif: toBeBuilt.addAll");
 					toBeBuilt.addAll(tmpProjects);
@@ -182,7 +206,10 @@ public class JTransformerSubscription extends DefaultSubscription implements
 			List unsortedProjectsList = JTUtils.getProjectsWithPifKey(key);
 			if(unsortedProjectsList.size() == 0) {
 				Debug.error("JTransformerSubscription.getSortedListOfNotYetBuildJTProjects(): project list ist empty!");
-				unsortedProjectsList.add(project);
+				PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().removeSubscription(getId());
+				UIUtils.displayMessageDialog(JTUtils.getShell(true), "JTransformer", "Factbase " + key + " referenced by subscription " + getId() + "is not used by any project. Removing subscription.");
+				return null;
+				//unsortedProjectsList.add(project);
 			} else {
 				Debug.info("JT:getSortedListOfNotYetBuildJTProjects: first project name: " + ((IProject)unsortedProjectsList.get(0)).getName());
 			}
@@ -230,7 +257,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				IProject project = (IProject) iter.next();
 				try {
 					if(project == this.project) {
-						nature.pefInitializationDone();
+						JTransformerPlugin.getNature(project).pefInitializationDone();
 					} else {
 						JTUtils.getNature(project).pefInitializationDone();
 					}
@@ -292,7 +319,6 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		/**
 		 * updates the projectT/4 fact
 		 * 
-		 * @param nature
 		 * @throws PrologInterfaceException
 		 * @throws PrologException
 		 */

@@ -210,6 +210,15 @@ ast_node_subtype('Java',Label,statementType) :-
   * spezifischeres ersetzen (oder erg�nzen), wie z.B. 'identifier'. -- GK
   */
 
+/**
+ * ast_arg_id_kind(Name)
+ * 
+ * The name of all ast arguments
+ * of type id.
+ * E.g. parent, encl, body, ...
+ */
+:- dynamic ast_arg_id_kind/1.
+
 
 % ****************** Interface PEF ******************************
 
@@ -633,3 +642,19 @@ ast_node_def('JavaAttributes',projectT,[
      ast_arg(path,  mult(1,1,no ), attr, [atom])
 ]).
 
+/**
+ * create_ast_arg_id_kind
+ * 
+ * First retract and then create ast_arg_id_kind
+ * facts from the ast_node_def clauses.
+ */
+create_ast_arg_id_kind :-
+    retractall(ast_arg_id_kind(_)),
+	setof(Kind, all_ast_arg_id_kind(Kind),Kinds),
+	forall(member(Kind,Kinds),assert(ast_arg_id_kind(Kind))).
+	
+all_ast_arg_id_kind(Kind):-
+    ast_node_def('Java',_,Defs),
+    member(ast_arg(Kind,  mult(1,1,no ), id,  _),Defs).
+
+:- create_ast_arg_id_kind.

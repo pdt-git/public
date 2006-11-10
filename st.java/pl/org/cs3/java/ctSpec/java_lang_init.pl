@@ -87,6 +87,7 @@ update_java_lang :-
 		(
 		    new_id(Id),
     		assert(user:globalIds(Class,Id)),
+    		assert(user:ri_globalIds(Id,Class)),
     		writeln(globalIds(Class,Id))
     	)).
 %%ld: we MUST NOT call this here! see JT-147

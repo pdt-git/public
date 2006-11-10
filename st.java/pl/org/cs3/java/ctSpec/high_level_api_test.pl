@@ -6,6 +6,7 @@
 setUp(fullQualifiedName_class_in_default_package) :- 
     add(classDefT(c1,null,'DummyClassX',[])),
     add(globalIds(c1,'DummyClassX')).
+    add(ri_globalIds('DummyClassX',c1)).
 test(fullQualifiedName_class_in_default_package):-
     fullQualifiedName(c1,FQN),
     assert_true((FQN = 'DummyClassX')).
@@ -16,6 +17,7 @@ tearDown(fullQualifiedName_class_in_default_package) :-
 setUp(fullQualifiedName_class_in_package) :- 
     add(classDefT(c2,p2,'DummyClassX',[])),
     add(globalIds(c2,'testpckg.DummyClassX')),
+    add(ri_globalIds('testpckg.DummyClassX',c2)),
     add(packageT(p2,'testpckg')).    
 test(fullQualifiedName_class_in_package):-
     fullQualifiedName(c2,FQN),

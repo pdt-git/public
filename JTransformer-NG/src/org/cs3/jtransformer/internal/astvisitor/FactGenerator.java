@@ -734,6 +734,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 
 		String[] args = new String[] { id, pckg, quote(fileName), defs };
 		writer.writeFact(TOPLEVEL_T, args);
+		writer.writeFact("modified_toplevel",new String[] { id });
+		
 			
 		IJavaElement pfr = iCompilationUnit.getParent();
 		while(pfr.getElementType()!=IJavaElement.PACKAGE_FRAGMENT_ROOT){

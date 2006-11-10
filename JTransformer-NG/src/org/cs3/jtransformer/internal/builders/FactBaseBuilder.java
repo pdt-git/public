@@ -384,9 +384,18 @@ public class FactBaseBuilder {
                         .queryOnce("remove_contained_global_ids('" + path
                                 + "')");
 
+
+            String retractKind;
+            if(removeGlobalIdsFacts) { //delete finally, a delete_file(File) fact will be added
+            	retractKind = "deepRetractToplevel(Toplevel)";
+
+            } else {
+            	retractKind = "deepRetract(Toplevel)";
+            }
             
-            Map ret = session.queryOnce("toplevelT(Toplevel, _,'" + path +  "', _),deepRetract(Toplevel)");//"delete_toplevel('" + path + "')");
-            if( ret == null) {
+            Map ret = session.queryOnce("toplevelT(Toplevel, _,'" + path +  "', _)," + retractKind);	
+
+            if( ret == null) { // TRHO: TODO: When does this happen?
 	            IJavaProject javaProject;
 				try {
 					javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
@@ -397,10 +406,7 @@ public class FactBaseBuilder {
 			                session
 		                    .queryOnce("globalIds(" +
 		                    		"'"+ types[i].getFullyQualifiedName('.')+ "'" +
-		                    		", CID), externT(CID), deepRetract(CID)");
-	//		                if(success == null) {
-	//		                	Debug.error("could not delete external class " + types[i].getFullyQualifiedName());
-	//		                }
+		                    		", CID), externT(CID), deepRetractToplevel(CID)");
 						}
 		            }
 				} catch (CoreException e) {

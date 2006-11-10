@@ -454,8 +454,10 @@ deepDelete([]).
 deepDelete([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepDelete(_subtrees),
+    getTerm(_head,Term),
+    deleteTreeReverseIndexes(Term),
     deleteTree(_head),
-        removeTags(delete, _head),      
+    removeTags(delete, _head),      
     deepDelete(_tail).
 
 deepDelete(_id) :-
@@ -482,6 +484,8 @@ deepRetract([Tree | _]) :-
 deepRetract([_head | _tail]) :-
     sub_trees(_head, _subtrees),
     deepRetract(_subtrees),
+    getTerm(_head,Term),
+    retractTreeReverseIndexes(Term),
     retractTree(_head),
         removeTags(retract, _head),     
     deepRetract(_tail).
@@ -510,21 +514,23 @@ discard_permanently(Id):-
         contains_type(Id,Type),
         (
                 globalIds(FQN,Type),            
-                retractall(globalIds(FQN,Type))
+                retractall(globalIds(FQN,Type)),
+                retractall(globalIds(Type,FQN))
                 %%format('i would retract ~w, but...~n',FQN)
         )
     ),
     deepDelete(Id).
 
     
-discard_permanently(_fileName):-
-    toplevelT(Id,_,_fileName,_),
+discard_permanently(FileName):-
+    toplevelT(Id,_,FileName,_),
     !,
     forall(
         contains_type(Id,Type),
         (
                 globalIds(FQN,Type),
-                retractall(globalIds(FQN,Type)) 
+                retractall(globalIds(FQN,Type)),
+                retractall(ri_globalIds(Type,FQN)) 
                 %%format('i would retract ~w, but...~n',FQN)
         )
     ),
@@ -564,8 +570,7 @@ createReturnOrExec(_parent, _encl, _type, _stat, _return) :-
 /**
  * deleteToplevelOfClass(+Toplevel)
  * 
- * delete the complete toplevel with all
- * descendants.
+ * delete the complete toplevel and all imports.
  * The deletion operation is logged and
  * will be undone in the next rollback/0 operation.
  */
@@ -577,7 +582,25 @@ deleteToplevelOfClass(Id) :-
     findall(Import,(importT(Import,Tl,ClassPckg),delete(importT(Import,Tl,ClassPckg))),_),
 %    findall(Class,(classDefT(Class,Package,Name,List),delete(classDefT(Class,Package,Name,List))),_),
     toplevelT(Tl,TlPackage,Filename, Defs),
-    assert(deleted_file(Filename)),
+    file_on_disk(Tl,RealFilename),
+    assert(deleted_file(RealFilename)),
     delete(toplevelT(Tl,TlPackage,Filename, Defs)).
 
 deleteToplevelOfClass(_).   
+
+/**
+ * deepRetractToplevel(+Toplevel)
+ * 
+ * delete the complete toplevel with all
+ * descendant classes and Files.
+ * The deletion operation is logged and
+ * will be undone in the next rollback/0 operation.
+ */
+
+deepRetractToplevel(Toplevel) :-
+%    findall(Class,(classDefT(Class,Package,Name,List),delete(classDefT(Class,Package,Name,List))),_),
+    toplevelT(Toplevel,_TlPackage,_Filename, _Defs),
+    file_on_disk(Toplevel,RealFilename),
+    assert(deleted_file(RealFilename)),
+    retractall(modified_toplevel(Toplevel)),
+    deepRetract(Toplevel).
