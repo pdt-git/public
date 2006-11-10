@@ -61,6 +61,7 @@ import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.PrologSession2;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -289,8 +290,11 @@ public class NewPrologCompletionProcessor implements IContentAssistProcessor {
 		plProject = (IPrologProject) editorInput.getFile().getProject()
 				.getNature(PDTCore.NATURE_ID);
 
-		PrologSession session = plProject.getMetadataPrologInterface()
+		PrologSession2 session = (PrologSession2) plProject.getMetadataPrologInterface()
 				.getSession();
+		
+		
+		session.setPreferenceValue("socketsession.interprete_lists", "false");
 		Predicate[] elms = null;
 		try {
 			String query = null;
