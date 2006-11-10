@@ -39,7 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	:- consult(library(memfile)).
+:- consult(library(memfile)).
 :- multifile test/1.
 
 /**
