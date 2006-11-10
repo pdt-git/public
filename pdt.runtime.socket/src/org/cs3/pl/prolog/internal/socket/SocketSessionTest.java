@@ -69,12 +69,13 @@ public class SocketSessionTest extends TestCase {
      * @see junit.framework.TestCase#setUp()
      */
     protected void setUp() throws Exception {
-              
+        Debug.setDebugLevel("DEBUG");      
      
       //pif=PrologInterfaceFactory.newInstance("org.cs3.pl.prolog.internal.xml.Factory").create();
       pif=PrologInterfaceFactory.newInstance().create();
      // pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
-	  //pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+      pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
+	  pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		
       pif.start();
     }
@@ -91,7 +92,31 @@ public class SocketSessionTest extends TestCase {
 		assertNotNull(ss);
 		ss.dispose();
 	}
-	
+	public void testRepeatedStartup() throws Throwable{
+		
+		class _Thread extends Thread{
+				Exception e = null;
+					public void run() {
+						for(int i=0;i<20;i++){
+							try {
+								pif.stop();
+								pif.start();
+							} catch (PrologInterfaceException e) {
+								this.e=e;
+							}
+							
+						}				
+					}
+				};
+		//_Thread t = new _Thread();
+		//t.start();
+//		for(int i=0;i<20;i++){
+//			pif.stop();
+//			pif.start();
+//		}
+		//t.join();
+		//assertNull(t.e);
+	}
 	public void testQueries() throws PrologException, PrologInterfaceException{
 		PrologSession ss = pif.getSession();
 		
@@ -365,6 +390,18 @@ public class SocketSessionTest extends TestCase {
 		PrologSession s = pif.getSession();
 		assertNotNull(s.queryOnce("atom("+atom+")"));
 		
+	}
+	/**
+	 * PDT-195
+	 */
+	public void testTurkish() throws Exception {
+		PrologSession session = pif.getSession();
+		session.queryOnce("guitracer");
+		session.queryOnce("trace");
+		String query="A=kad\u0000n(nurhan)";
+		Map map = session.queryOnce(query);
+		String actual=(String) map.get("A");
+		assertEquals("kad\u0000n(nurhan)", actual);
 	}
 	
 	public void testException() throws Exception {
