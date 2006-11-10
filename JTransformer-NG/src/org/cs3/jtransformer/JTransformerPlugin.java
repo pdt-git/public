@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
-import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -31,9 +30,11 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.internal.events.LifecycleEvent;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -62,6 +63,8 @@ import org.osgi.framework.BundleContext;
 public class JTransformerPlugin extends AbstractUIPlugin {
 
     private static JTransformerPlugin plugin;
+
+	private static Map natures = new Hashtable();
 
     private ResourceBundle resourceBundle;
 
@@ -95,6 +98,11 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         initOptions();
         getPluginPreferences();
         collectListeners();
+        ResourcesPlugin.getWorkspace().addResourceChangeListener(
+        		new JTransformerProjectChangeListener(),
+//        		LifecycleEvent.PRE_PROJECT_CLOSE);
+        		IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE |
+        		IResourceChangeEvent.POST_CHANGE);
     }
 
     /**
@@ -537,9 +545,30 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	 * @throws CoreException
 	 */
 	static public JTransformerProjectNature getNature(IProject project) throws CoreException {
-		synchronized (project) {
-			return (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+		
+		synchronized (JTransformerPlugin.class) {
+			JTransformerProjectNature nature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+			natures.put(project.getName(),nature);
+			return nature;
 		}
 	}
 
+	/**
+	 * FIXME: rename and document!
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 */
+	static public JTransformerProjectNature getNatureIfAvailable(IProject project) throws CoreException {
+		return (JTransformerProjectNature)natures.get(project.getName());
+	}
+	/**
+	 * FIXME: rename and document!
+	 * @param project
+	 * @return
+	 * @throws CoreException
+	 */
+	public static void removeNatureFromRegistry(IProject project) {
+		natures.remove(project.getName());
+	}
 }

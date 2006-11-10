@@ -256,8 +256,12 @@ public class JTransformerSubscription extends DefaultSubscription implements
 					.hasNext();) {
 				IProject project = (IProject) iter.next();
 				try {
-					if(project == this.project) {
-						JTransformerPlugin.getNature(project).pefInitializationDone();
+					if(project.getName().equals(this.project.getName())) {
+						if(nature == null) { // only happens on 
+							nature = JTransformerPlugin.getNature(project);
+						} 
+						nature.pefInitializationDone();
+						//nature = JTransformerPlugin.getNature(project);
 					} else {
 						JTUtils.getNature(project).pefInitializationDone();
 					}
