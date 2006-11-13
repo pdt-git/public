@@ -461,11 +461,11 @@ pdt_ensure_annotated([FileSpec|Stack]):-%case 3: cannot use cache, rebuild from 
     gen_op_module(Abs,OpModule),
     clear_ops(OpModule),
 	update_timestamp(Abs), %important to do it BEFORE the actual annotations (avoid redundant nested builds)
-    copy_file_to_memfile(FileSpec,utf8,MemFile),
+    pdt_preference_value(default_encoding,Enc),
+    copy_file_to_memfile(FileSpec,Enc,MemFile),
     memory_file_to_atom(MemFile,MemFileAtom),
     open_memory_file(MemFile,read,Input),
-    pdt_preference_value(default_encoding,Enc),
-    set_stream(Input,encoding(Enc)),
+
     call_cleanup(
     	(    read_terms(MemFileAtom,[Abs|Stack],OpModule,Input),
 		    execute_annotators([Abs|Stack],OpModule,[],FileAnnos1),	
