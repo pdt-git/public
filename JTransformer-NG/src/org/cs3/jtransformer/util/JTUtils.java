@@ -758,15 +758,13 @@ public class JTUtils
 		
 		List sharingProjects = new ArrayList();
 		for (int i = 0; i < projects.length; i++) {
-			String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
-					JTransformer.PROLOG_RUNTIME_KEY, null);
-			if(runtimeKey != null && runtimeKey.equals(key) &&
-					projects[i].hasNature(JTransformer.NATURE_ID) 
-//					&& JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(projects[i],
-//							JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED)
-//							.equals(JTransformer.FACTBASE_STATE_ACTIVATED)
-							){
-				sharingProjects.add(projects[i]);
+			if(projects[i].isOpen()){
+				String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
+						JTransformer.PROLOG_RUNTIME_KEY, null);
+				if(runtimeKey != null && runtimeKey.equals(key) &&
+				   projects[i].hasNature(JTransformer.NATURE_ID) ){
+					sharingProjects.add(projects[i]);
+				}
 			}
 		}
 		return sharingProjects;
