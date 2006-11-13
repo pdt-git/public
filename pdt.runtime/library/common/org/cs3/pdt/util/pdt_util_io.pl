@@ -41,6 +41,7 @@
 
 :- module(pdt_util_io,[
 	copy_file_to_memfile/2,
+	copy_file_to_memfile/3,	
 	copy_memfile_to_file/2,
 	pretty_print/3,
 	pretty_print/2,
@@ -66,6 +67,21 @@ copy_file_to_memfile(File,MemFile):-
     	(	open(Abs,read,Stream),
     		call_cleanup(
 			    copy_stream_data(Stream,MemStream),
+			    close(Stream)
+			)
+		),
+	    close(MemStream)
+	).
+
+copy_file_to_memfile(File,Enc,MemFile):-
+    pdt_file_spec(File,Abs),
+    open_memory_file(MemFile,write,MemStream),  
+    call_cleanup(  
+    	(	open(Abs,read,Stream),
+    		call_cleanup(
+    			(	set_stream(Stream,encoding(Enc)),
+				    copy_stream_data(Stream,MemStream)
+				),
 			    close(Stream)
 			)
 		),

@@ -104,6 +104,8 @@ public final class PDTCoreUtils {
 		return offset;
 	}
 
+	
+	
 	public static IPrologProject getPrologProject(IResource file) throws CoreException {
 		if (file == null) {
 			return null;

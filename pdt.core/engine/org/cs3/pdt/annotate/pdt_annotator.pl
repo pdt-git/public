@@ -86,6 +86,12 @@
 	false
 ).
 
+:- pdt_add_preference(
+	default_encoding,
+	'Default Encoding of Source files', 
+	'The character encoding that will be used by default for all source files.',
+	utf8
+).
 
 
 :- module_transparent pdt_maybe/1.
@@ -455,9 +461,11 @@ pdt_ensure_annotated([FileSpec|Stack]):-%case 3: cannot use cache, rebuild from 
     gen_op_module(Abs,OpModule),
     clear_ops(OpModule),
 	update_timestamp(Abs), %important to do it BEFORE the actual annotations (avoid redundant nested builds)
-    copy_file_to_memfile(FileSpec,MemFile),
+    copy_file_to_memfile(FileSpec,utf8,MemFile),
     memory_file_to_atom(MemFile,MemFileAtom),
     open_memory_file(MemFile,read,Input),
+    pdt_preference_value(default_encoding,Enc),
+    set_stream(Input,encoding(Enc)),
     call_cleanup(
     	(    read_terms(MemFileAtom,[Abs|Stack],OpModule,Input),
 		    execute_annotators([Abs|Stack],OpModule,[],FileAnnos1),	

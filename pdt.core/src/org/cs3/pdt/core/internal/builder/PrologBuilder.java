@@ -97,7 +97,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
-		
+		file.getCharset();
 		as.queryOnce(file, "pdt_ensure_annotated('" + plFileName + "')");		
 		
 	}
@@ -173,8 +173,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				}
 			});
 			try {
-				String value = plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS, "false");
-				as.queryOnce("set parse_comments option", "pdt_annotator:pdt_set_preference_value(parse_comments,"+value+")");
+				String parse_comments = plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS, "false");
+				String default_encoding = plProject.getPreferenceValue(PDTCore.PROP_DEFAULT_ENCODING, "utf8");
+				as.queryOnce("set parse_comments option", "pdt_annotator:pdt_set_preference_value(parse_comments,"+parse_comments+")");
+				as.queryOnce("set default_encoding option", "pdt_annotator:pdt_set_preference_value(default_encoding,"+default_encoding+")");
 				
 //				File cacheDir = PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.CACHE_DIR).toFile();
 //				String plCacheDir = Util.prologFileName(cacheDir);

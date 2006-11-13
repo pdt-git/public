@@ -410,15 +410,16 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 											PDTCore.PREF_SOURCE_PATH_DEFAULT,
 											"/");
 						}
-						
+
 						public String getHint(String key) {
-							if(UIUtils.IS_WORKSPACE_RESOURCE.equals(key)){
+							if (UIUtils.IS_WORKSPACE_RESOURCE.equals(key)) {
 								return "true";
 							}
-							if(UIUtils.ROOT_CONTAINER.equals(key)){
-								return getProject().getFullPath().toPortableString();
+							if (UIUtils.ROOT_CONTAINER.equals(key)) {
+								return getProject().getFullPath()
+										.toPortableString();
 							}
-							if(UIUtils.RELATIVE.equals(key)){
+							if (UIUtils.RELATIVE.equals(key)) {
 								return "true";
 							}
 							return null;
@@ -436,15 +437,29 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 									+ "they match the inclusion pattern above.",
 							Option.STRING, ""),
 					new SimpleOption(
-									PDTCore.PROP_ADDITIONAL_LIBRARIES,
-									"Additional Libraries",
-									"A list of directories that should be included in the file search path.",
-									Option.DIRS, ""),							
+							PDTCore.PROP_ADDITIONAL_LIBRARIES,
+							"Additional Libraries",
+							"A list of directories that should be included in the file search path.",
+							Option.DIRS, ""),
 					new SimpleOption(
 							PDTCore.PROP_PARSE_COMMENTS,
 							"Parse Comments",
 							"If true, the pdt core will parse and process comments in prolog source files.",
 							Option.FLAG, "true"),
+					new SimpleOption(
+							PDTCore.PROP_DEFAULT_ENCODING,
+							"Default Encoding",
+							"The Encoding to use by default for all prolog source files.",
+							Option.ENUM, "utf8",new String[][] {
+									{ "octet", "octet" }, 
+									{ "ascii", "ascii" },
+									{ "iso_latin_1", "iso_latin" }, 
+									{ "text", "text" }	, 
+									{ "utf8", "utf8" },
+									{ "unicode_be", "unicode_be" }, 
+									{ "unicode_le", "unicode_le" } 
+									}),
+
 					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
 							"Metadata PrologInterface",
@@ -664,22 +679,22 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 						"library", Util.prologFileName(f)));
 			}
 		}
-		String string = getPreferenceValue(PDTCore.PROP_ADDITIONAL_LIBRARIES, "");
-		String[] strings = Util.split(string, System.getProperty("path.separator"));
+		String string = getPreferenceValue(PDTCore.PROP_ADDITIONAL_LIBRARIES,
+				"");
+		String[] strings = Util.split(string, System
+				.getProperty("path.separator"));
 		for (int i = 0; i < strings.length; i++) {
 			File f = new Path(strings[i]).toFile();
-			String key=null;
+			String key = null;
 			try {
 				key = f.getCanonicalPath();
 			} catch (IOException e) {
-			
+
 				e.printStackTrace();
 			}
 			libraries.put(key, new DefaultPrologLibrary(key, new String[0],
 					"library", Util.prologFileName(f)));
 		}
-		
-		
 
 	}
 

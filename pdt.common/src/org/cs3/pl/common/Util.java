@@ -262,7 +262,9 @@ public class Util {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-
+	public static String prologCharsetName(String javaName){
+		return null;
+	}
 	public static String toString(InputStream in) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024];

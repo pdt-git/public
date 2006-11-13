@@ -188,6 +188,8 @@ abstract public class OptionEditor implements PropertyEditor {
             return new FileListEditorAdapter(parent,o);            
         case Option.FLAG:
             return new FlagEditor(parent,o);
+        case Option.ENUM:
+            return new EnumEditor(parent,o);            
         default:
             return new StringEditor(parent,o);
         }
