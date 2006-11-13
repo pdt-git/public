@@ -453,7 +453,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							Option.ENUM, "utf8",new String[][] {
 									{ "octet", "octet" }, 
 									{ "ascii", "ascii" },
-									{ "iso_latin_1", "iso_latin" }, 
+									{ "iso_latin_1", "iso_latin_1" }, 
 									{ "text", "text" }	, 
 									{ "utf8", "utf8" },
 									{ "unicode_be", "unicode_be" }, 
