@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
@@ -346,8 +347,10 @@ public class SocketClient {
 	public SocketClient(ReusableSocket socket) throws IOException {
 		super();
 		this.socket = socket;
-		reader = new BufferedReader(new InputStreamReader(getInputStream()));
-		writer = new BufferedWriter(new PrintWriter(getOutputStream()));
+		reader = new BufferedReader(new InputStreamReader(getInputStream(),"UTF-8"));
+		PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(getOutputStream(),"UTF-8"));
+		
+		writer = new BufferedWriter(printWriter);
 		reset();
 		lock();
 		try{

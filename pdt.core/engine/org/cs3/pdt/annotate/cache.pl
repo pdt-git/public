@@ -123,6 +123,7 @@ pdt_write_cache(FileSpec):-
 	new_index_entry(File),
 	cache_file(File,CacheFile),
 	open(CacheFile,write,Stream),
+	set_stream(Stream,encoding(utf8)),
 	call_cleanup(pdt_write_file_annotation(Stream,File),close(Stream)),
 	update_index_entry(File).
 
@@ -132,6 +133,7 @@ pdt_read_cache(FileSpec):-
     Time > 0,
     cache_file(File,CacheFile),
     open(CacheFile,read,Stream),
+	set_stream(Stream,encoding(utf8)),
     call_cleanup(pdt_read_file_annotation(Stream),close(Stream)),
     pif_notify(file_annotation(File),update).
 	
@@ -190,12 +192,13 @@ pdt_write_cache_index:-
     cache_dir(Dir),
     atom_concat(Dir,'/cache_index',File),
     open(File,write,Stream),
+   	set_stream(Stream,encoding(utf8)),
     call_cleanup(
     	(    forall(
     			cache_index(Hk,CacheFile,Time,Serial),
 		    	portray_clause(Stream,cache_index(Hk,CacheFile,Time,Serial))
 		      )
-		 ), 
+		 ), 		 
 		 close(Stream)
 	).
 pdt_read_cache_index:-

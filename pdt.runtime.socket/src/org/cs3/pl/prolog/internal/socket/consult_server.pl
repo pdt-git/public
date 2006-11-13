@@ -223,6 +223,8 @@ handle_client(InStream, OutStream):-
 	thread_exit(0).    
 	
 handle_client_impl(InStream, OutStream):-
+    set_stream(InStream,encoding(utf8)),
+    set_stream(OutStream,encoding(utf8)),
     repeat,
 		request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 		( handle_command(InStream,OutStream,Command,Next)
