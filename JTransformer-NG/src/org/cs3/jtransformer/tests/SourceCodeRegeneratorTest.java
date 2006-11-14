@@ -55,8 +55,8 @@ public class SourceCodeRegeneratorTest extends FactGenerationTest {
 		"action(delete(class(class3,null,cname3))),"+
 		
 		
-			"action(add(modifierT(class,public)))," +
-				"action(add(class(class,null,cname))),"+
+		"action(add(modifierT(class,public)))," +
+		"action(add(class(class,null,cname))),"+
 	    "action(add(method(method1,class,name1,[],type(basic,int,0),[],null))),"+
 	    "action(add(method(method2,class,name2,[],type(basic,int,0),[],null))),"+
 //	    "action(add(dirty_tree(method1))),"+
@@ -101,4 +101,8 @@ public class SourceCodeRegeneratorTest extends FactGenerationTest {
 				
 	}
 	
+	public  void tearDownOnce(){
+		getTestJTransformerProject().onClose();
+	}
+
 }

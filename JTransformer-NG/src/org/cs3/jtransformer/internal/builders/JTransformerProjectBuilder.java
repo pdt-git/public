@@ -3,11 +3,8 @@ import java.util.Map;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
-import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IncrementalProjectBuilder;

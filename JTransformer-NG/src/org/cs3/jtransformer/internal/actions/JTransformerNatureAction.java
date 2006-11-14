@@ -1,52 +1,22 @@
 package org.cs3.jtransformer.internal.actions;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
-import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
-import org.cs3.jtransformer.internal.dialog.RemoveJTransformerNatureDialog;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
-
-import salvo.jesus.graph.DirectedAcyclicGraph;
-import salvo.jesus.graph.DirectedAcyclicGraphImpl;
-import salvo.jesus.graph.DirectedEdgeImpl;
-import salvo.jesus.graph.Vertex;
-import salvo.jesus.graph.VertexImpl;
-import salvo.jesus.graph.algorithm.TopologicalSorting;
 
 /**
  * Called by Eclipse to implement real-time updates and building of

@@ -1,6 +1,5 @@
 package org.cs3.jtransformer.internal.actions;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -20,9 +19,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jdt.launching.JavaRuntime;
 
 /**
  * Taken from LogicAJPlugin after refac

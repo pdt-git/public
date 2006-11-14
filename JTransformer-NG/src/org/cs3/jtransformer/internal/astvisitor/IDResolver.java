@@ -3,7 +3,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.cs3.pl.common.Debug;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;

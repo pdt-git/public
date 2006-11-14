@@ -114,5 +114,11 @@ public interface JTransformerProject extends OptionProvider{
      * @return a source code regenerator for this project.
      */
     public ISourceRegenerator getSourceRegenerator();
+
+    /**
+     * Cleanup nature and subscription after closing the project.
+     *
+     */
+	public void onClose();
     
 }
