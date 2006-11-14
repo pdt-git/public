@@ -300,9 +300,9 @@ public class JTransformerProjectNature implements IProjectNature,
 					JTransformer.ERR_CONTEXT_EXCEPTION, e);
 		}
 		getPrologInterface();
-		if (pif.isUp()) {
-			reconfigure();
-		}
+//		if (pif.isUp()) {
+//			reconfigure();
+//		}
 
 	}
 
@@ -385,43 +385,13 @@ public class JTransformerProjectNature implements IProjectNature,
 			String id = "JTransformerSubscription_" + project.getName();
 			pifSubscription = new JTransformerSubscription(this,project, id,
 					projectInterfaceKey,
-					// getProject().getName(),
-					// getProject().getName(),
 					"JTransformer factbase of project " + getProject().getName(), "JTransformer");
 			pif = PrologRuntimePlugin.getDefault().getPrologInterface(
 					pifSubscription);
-//			JTransformerSubscription tmpPif = JTransformerPlugin.getDefault().getTemporaryProjectSubscription(project);
-//			PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
-//			.getPrologInterfaceRegistry();
-
-			//if(tmpPif != null) {
-			//	reg.removeSubscription(projectInterfaceKey + "_tempory_project_key");
-			//}
-
 			
 			setInitializingPif(false);
 			return pif;
-
 		}
-
-		// if (!pif.isUp()) {
-		// try {
-		// pif.start();
-		// } catch (IOException e) {
-		// Debug.report(e);
-		// throw new RuntimeException(e);
-		// }
-		// }
-		// List libraries = pif.getBootstrapLibraries();
-		// ResourceFileLocator l =
-		// JTransformerPlugin.getDefault().getResourceLocator(JTransformer.ENGINE);
-		// String name = Util.prologFileName(l.resolve(JTransformer.MAIN_PL));
-		// if(!libraries.contains(name)){
-		// libraries.add(name);
-		// if(pif.isUp());
-		// PrologSession s = pif.getSession();
-		// s.queryOnce("['"+name+"']");
-		// }
 	}
 
 	private void setInitializingPif(boolean b) {
@@ -578,7 +548,8 @@ public class JTransformerProjectNature implements IProjectNature,
 	 */
 	public void reconfigure(PrologSession s) throws PrologException,
 			PrologInterfaceException {
-
+		
+		
 //		try {
 //			// CreateOutdirUtils.getInstance().createOutputProject(project);
 //			JavaProject javaProject = (JavaProject) project
@@ -621,22 +592,32 @@ public class JTransformerProjectNature implements IProjectNature,
 	 * @see org.cs3.jtransformer.JTransformerProject#reconfigure()
 	 */
 	public void reconfigure() {
-		PrologSession s = null;
+//		PrologSession s = null;
+//		try {
+//			s = getPrologInterface().getSession();
+//			reconfigure(s);
+//		} catch (PrologException e) {
+//			Debug.report(e);
+//			throw e;
+//		} catch (PrologInterfaceException e) {
+//			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getDisplay()
+//					.getActiveShell(),
+//					JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+//					JTransformer.ERR_CONTEXT_NATURE_INIT, e);
+//		} finally {
+//			if (s != null)
+//				s.dispose();
+//		}
 		try {
-			s = getPrologInterface().getSession();
-			reconfigure(s);
-		} catch (PrologException e) {
-			Debug.report(e);
-			throw e;
+			getPrologInterface().stop();
+			getPrologInterface().start();
 		} catch (PrologInterfaceException e) {
 			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
 					.getErrorMessageProvider(), UIUtils.getDisplay()
 					.getActiveShell(),
 					JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
 					JTransformer.ERR_CONTEXT_NATURE_INIT, e);
-		} finally {
-			if (s != null)
-				s.dispose();
 		}
 	}
 

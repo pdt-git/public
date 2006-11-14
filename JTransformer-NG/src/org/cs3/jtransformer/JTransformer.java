@@ -137,6 +137,8 @@ public final class JTransformer {
     public static final String PROP_OUTPUT_PROJECT = "jtransformer.output.project";
  //   public static final String PREF_DEFAULT_OUTPUT_PROJECT = "jtransformer.default.output.project";
     
+    public static final String PREF_REVERSE_INDEX = "jtransformer.reverse.indexes";
+
     public static final String PROP_LAST_BUILD = "jtransformer.last.build";
 
     public static final String PREF_USE_PEF_STORE = "jtransformer.use.pef.store";
@@ -190,6 +192,7 @@ public final class JTransformer {
  * @deprecated use ResourcesPlugin.getWorkspace().getRoot() instead.
  */	
 public static final ISchedulingRule JTransformer_BUILDER_SCHEDULING_RULE = new ProxyRule();
+
 
 
 

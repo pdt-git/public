@@ -41,12 +41,17 @@ public class SourceCodeRegeneratorTest extends FactGenerationTest {
 		PrologInterface pif = getTestJTransformerProject().getPrologInterface();
 		PrologSession session = pif.getSession();
 		try{
-	    String pred ="assert(projectLocationT(tlid,'project','')),"+
-		
-		"assert(toplevelT(t3,null,filename3,[class3])),"+
-		"assert(modifierT(class3,public)),"+
-		"assert(classDefT(class3,null,cname3,[method4])),"+
-	    "assert(methodDefT(method4,class2,name4,[],type(basic,int,0),[],null)),"+
+			session.queryOnce("win_window_pos([show(true)])");
+
+			
+	    String pred =
+	    		
+		"assert_tree(toplevelT(t3,null,'/Project1/src/class3.java',[class3])),"+
+		"assert_tree(projectLocationT(t3,'Project1',src)),"+
+		"assert_tree(projectT('Project1','c:/eclipse/ws/Project1','Project1-output','c:/eclipse/ws/Project1-output')),"+
+		"assert_tree(modifierT(class3,public)),"+
+		"assert_tree(classDefT(class3,null,cname3,[method4])),"+
+	    "assert_tree(methodDefT(method4,class2,name4,[],type(basic,int,0),[],null)),"+
 		"action(delete(class(class3,null,cname3))),"+
 		
 		
@@ -57,13 +62,13 @@ public class SourceCodeRegeneratorTest extends FactGenerationTest {
 //	    "action(add(dirty_tree(method1))),"+
 //	    "action(add(dirty_tree(method2))),"+
 
-		"assert(toplevelT(tl,null,filename2,[class2])),"+
-		"assert(classDefT(class2,null,cname2,[])),"+
+		"assert_tree(toplevelT(tl,null,filename2,[class2])),"+
+		"assert_tree(classDefT(class2,null,cname2,[])),"+
 	    "action(add(method(method3,class2,name3,[],type(basic,int,0),[],null))).";
 
 		
-//	    "action(add(dirty_tree(method3)))";
-		
+//	    "action(add(dirty_tree(method3)))";		
+	    
 		session.queryOnce(pred);
 		//session.queryOnce("prolog_server(1080,[])");
 		
@@ -73,10 +78,22 @@ public class SourceCodeRegeneratorTest extends FactGenerationTest {
 		assertEquals(IAffectedFile.REMOVED,files[0].getStatus());
 		assertEquals(IAffectedFile.CREATED,files[1].getStatus());
 		assertEquals(IAffectedFile.CHANGED,files[2].getStatus());
-		
+			
 		session.queryOnce("rollback");
+		
 		IAffectedFile[] files2= regen.getAffectedFiles();
 		assertEquals(3,files2.length);
+		session.queryOnce(
+				"retract_tree(toplevelT(t3,null,'/Project1/src/class3.java',[class3])),"+
+				"retract_tree(projectLocationT(t3,'Project1',src)),"+
+				"retract_tree(projectT('Project1','c:/eclipse/ws/Project1','Project1-output','c:/eclipse/ws/Project1-output')),"+
+				"retract_tree(modifierT(class3,public)),"+
+				"retract_tree(classDefT(class3,null,cname3,[method4])),"+
+			    "retract_tree(methodDefT(method4,class2,name4,[],type(basic,int,0),[],null)),"+
+				"retract_tree(toplevelT(tl,null,filename2,[class2])),"+
+				"retract_tree(classDefT(class2,null,cname2,[]))"
+				);
+
 		}
 		finally{
 		    session.dispose();

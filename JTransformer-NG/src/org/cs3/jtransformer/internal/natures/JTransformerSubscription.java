@@ -3,7 +3,6 @@
  */
 package org.cs3.jtransformer.internal.natures;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,7 +15,6 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -37,7 +35,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -139,6 +136,10 @@ public class JTransformerSubscription extends DefaultSubscription implements
 						+ "[library('org/cs3/pdt/test/main.pl')],"
 						+ "[library('org/cs3/pdt/util/main.pl')],"
 						+ "[library('org/cs3/pdt/compatibility/main.pl')]");
+				
+				if(JTransformerPlugin.getDefault().useReverseIndex()) {
+					initSession.queryOnce(Names.PRED_ACTIVATE_REVERSE_INDEXES);
+				} 
 				initSession.queryOnce("update_java_lang");
 
 			} catch (Throwable e) {

@@ -57,6 +57,11 @@ public class JTransformerNatureAssigner {
 		this.projects = projects;
 	}
 
+	public JTransformerNatureAssigner(IProject project) {
+		this.projects = new ArrayList();
+		projects.add(project);
+	}
+
 	/**
 	 * 
 	 * @return STATUS_CANCELLED, STATUS_ADDED or STATUS_REMOVED
@@ -127,9 +132,7 @@ public class JTransformerNatureAssigner {
 		includeReferencedProjects = false;
 
 		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
-			IProject project = (IProject)iter.next();
-			final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
-		    addNature(project,javaProject,factbaseName);
+		    addNature((IProject)iter.next(), factbaseName);
 		}
 		return true;
 	}
@@ -141,13 +144,14 @@ public class JTransformerNatureAssigner {
 	/**
 	 * 
 	 * @param project
-	 * @param javaProject
 	 * @param factbaseName
 	 * @return true if the natures were added
 	 * @throws JavaModelException
 	 * @throws CoreException
 	 */
-	private boolean addNature(IProject project, final IJavaProject javaProject,String factbaseName) throws JavaModelException, CoreException {
+	public boolean addNature(IProject project, String factbaseName) throws JavaModelException, CoreException {
+		final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+
 		if(javaProject == null) {
 			final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			MessageDialog.openError(shell,"JTransformer", 

@@ -223,6 +223,7 @@ defaultProjectSourceFolder(Project, Folder, FullPath) :-
     atom_concat(Tmp,Folder,FullPath).
 
 action(delete(class(_id, _owner, _name))) :-
+	!,
     deleteToplevelOfClass(_id),
     classDefT(_id, _owner, _name, Defs),
     delete(classDefT(_id, _owner, _name, Defs)),
