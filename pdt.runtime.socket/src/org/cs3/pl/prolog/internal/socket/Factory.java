@@ -77,7 +77,7 @@ public class Factory extends PrologInterfaceFactory {
 				new SimpleOption(SocketPrologInterface.KILLCOMMAND,
 								"command to kill processes", "eg. kill or /usr/bin/kill on most systems",
 								SimpleOption.FILE, null){
-					@Override
+				
 					public String getDefault() {
 						return guessKillCommandName();
 					}
