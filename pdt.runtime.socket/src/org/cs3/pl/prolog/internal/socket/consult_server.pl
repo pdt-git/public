@@ -751,9 +751,9 @@ write_escaped_char(Out,'\''):-
 write_escaped_char(Out,C):-
 	put_char(Out,C).	
 		
-my_debug(A):-
-	thread_self(Self),
-	write(Self),write(': >>> '),writeln(A).
+%my_debug(A):-
+%	thread_self(Self),
+%	write(Self),write(': >>> '),writeln(A).
 
-%my_debug(_).
+my_debug(_).
 		
