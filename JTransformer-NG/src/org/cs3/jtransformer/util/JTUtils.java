@@ -833,11 +833,16 @@ public class JTUtils
 		});
 	}
 	
-	public static void logAndDisplayError(Exception e,int code,int context) {
-		UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
-				code,
-				context,
-				e);
+	public static void logAndDisplayError(final Exception e,final int code,final int context) {
+		UIUtils.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				UIUtils.logAndDisplayError(JTransformerPlugin.getDefault().getErrorMessageProvider(),
+											UIUtils.getDisplay().getActiveShell(), 
+						code,
+						context,
+						e);
+			}
+		});
 	}
 	
 	public static void logError(Exception e,int code,int context) {

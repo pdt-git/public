@@ -22,6 +22,30 @@
  */
 
 
+/**
+ * use_reverse_indexes
+ *
+ * If this fact exists no reverse
+ * indexes are created.
+ */
+:- dynamic use_reverse_indexes/0.
+
+/**
+ * deactivate_reverse_indexes
+ *
+ * Deactivate generation of reverse indexes.
+ */
+deactivate_reverse_indexes :-
+	retractall(use_reverse_indexes).
+
+/**
+ * deactivate_reverse_indexes
+ *
+ * Activate generation of reverse indexes.
+ */
+activate_reverse_indexes :-
+	retractall(use_reverse_indexes),
+	assert(use_reverse_indexes).
 
 /**
  * globalIds(+full qualfied type name, +Id)
@@ -415,15 +439,25 @@ remove_contained_global_ids(Path):-
 	       retractall(ri_globalIds(M,_))
 	       )).	       
 
-/*	       
-assertTree(Translated) :-
-	assert1T(Translated),
+	       
+assert_tree(Translated) :-
+	assert(Translated),
 	Translated =.. [Functor,Id | Args],
 	ast_node_def('Java',Functor,[_|ArgDefs]),
 	!,
 	assert_reverse_indexes(assert,Functor,Id, Args, ArgDefs).
-assertTree(_Translated).
-*/
+assert_tree(_Translated).
+
+
+retract_tree(Translated) :-
+	assert(Translated),
+	Translated =.. [Functor,Id | Args],
+	ast_node_def('Java',Functor,[_|ArgDefs]),
+	!,
+	assert_reverse_indexes(retract,Functor,Id, Args, ArgDefs).
+retract_tree(_Translated).
+
+
 assertTreeReverseIndexes(Translated) :-
 	actionOnTreeReverseIndexes(assert,Translated).
 
@@ -455,6 +489,10 @@ actionOnTreeReverseIndexes(_Action,_Translated).
  * if it equals 'add' it will be added.
  */
  
+assert_reverse_indexes(_AssertAdd,_Functor,_Id, __Args, __RestDefs):-
+  \+ use_reverse_indexes,
+  !.
+  
 assert_reverse_indexes(_AssertAdd,_Functor,_Id, [], __RestDefs).
 
 assert_reverse_indexes(AssertAdd, Functor,Id, [Arg|Args],
@@ -475,7 +513,7 @@ assert_or_add(add,RiTerm) :-
 assert_or_add(delete,RiTerm) :-
 	delete(RiTerm).
 assert_or_add(assert,RiTerm) :-
-	assert1T(RiTerm).
+	assert(RiTerm).
 assert_or_add(retract,RiTerm) :-
 	retract(RiTerm).
 

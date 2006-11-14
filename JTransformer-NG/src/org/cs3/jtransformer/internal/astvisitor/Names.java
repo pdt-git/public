@@ -84,4 +84,6 @@ public interface Names {
 	  public String SUPER = "super";
 	  public String THIS = "this";
 	  public String CONSTRUCTOR_NAME = "<init>";
+	  
+	  public String PRED_ACTIVATE_REVERSE_INDEXES = "activate_reverse_indexes";
 }

@@ -100,7 +100,6 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         collectListeners();
         ResourcesPlugin.getWorkspace().addResourceChangeListener(
         		new JTransformerProjectChangeListener(),
-//        		LifecycleEvent.PRE_PROJECT_CLOSE);
         		IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE |
         		IResourceChangeEvent.POST_CHANGE);
     }
@@ -136,7 +135,13 @@ public class JTransformerPlugin extends AbstractUIPlugin {
                         "Default PEF store file", //$NON-NLS-1$
                         "Used as default value for JTransformer Projects " //$NON-NLS-1$
                                 + "that do not specify their own store file.", //$NON-NLS-1$
-                        Option.FILE, storeFile)};
+                        Option.FILE, storeFile),
+                new SimpleOption(
+                        JTransformer.PREF_REVERSE_INDEX,
+                        "Create Reverse Index", //$NON-NLS-1$
+                        "Reverse indexes are automatically created for every PEF.", //$NON-NLS-1$
+                        Option.FLAG, "false")
+                };
 
     }
 
@@ -570,5 +575,11 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	 */
 	public static void removeNatureFromRegistry(IProject project) {
 		natures.remove(project.getName());
+	}
+	
+	public boolean useReverseIndex() {
+		return Boolean.valueOf(
+			plugin.getPreferenceValue(JTransformer.PREF_REVERSE_INDEX, "false")).
+				  booleanValue();
 	}
 }

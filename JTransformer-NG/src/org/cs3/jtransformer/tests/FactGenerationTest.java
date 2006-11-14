@@ -25,6 +25,7 @@ import java.util.Vector;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
+import org.cs3.jtransformer.internal.actions.JTransformerNatureAssigner;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
@@ -119,8 +120,6 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
     private ResourceFileLocator testDataLocator;
 
-    private DefaultResourceFileLocator testWorkspaceLocator;
-
     //private static Object pifLock = new Object();
 
     /**
@@ -170,7 +169,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             IProject project = createProject("testproject");
             project.open(null);
             addNature(project, JavaCore.NATURE_ID);
-            addNature(project, JTransformer.NATURE_ID);
+
             IClasspathEntry[] cp = new IClasspathEntry[] {
                     JavaCore.newSourceEntry(project.getFullPath()),
                     JavaRuntime.getDefaultJREContainerEntry(),
@@ -181,9 +180,13 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 //            options.put("org.eclipse.jdt.core.compiler.compliance" /* "Source Compatibility Mode" */,
 //        		    JavaCore.VERSION_1_5);
             options.put(JavaCore.COMPILER_SOURCE /* "Source Compatibility Mode" */,
-        		    JavaCore.VERSION_1_5);
+        		    JavaCore.VERSION_1_4);
 
             getTestJavaProject().setOptions(options);
+            
+            JTransformerNatureAssigner assigner = new JTransformerNatureAssigner(project);
+            assigner.addNature(project,project.getName());
+            
             
 
         } catch (CoreException e) {
@@ -377,9 +380,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         super(name);
         setTestDataLocator(JTransformerPlugin.getDefault().getResourceLocator(
                 "testdata"));
-        IPath location = ResourcesPlugin.getWorkspace().getRoot().getLocation();
-        testWorkspaceLocator = new DefaultResourceFileLocator(new File(location
-                .toOSString()));
+//        IPath location = ResourcesPlugin.getWorkspace().getRoot().getLocation();
+//        testWorkspaceLocator = new DefaultResourceFileLocator(new File(location
+//                .toOSString()));
 
     }
 

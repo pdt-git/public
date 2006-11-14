@@ -90,6 +90,9 @@ java_fq(Term):-
      call(JavaAST),
      mapArgs(JavaASTArgs,Args).
 
+bind_unbound_args(_Functor,_Id,_Args,_ArgDefs) :-
+	\+ use_reverse_indexes,
+	!.
 
 bind_unbound_args(_Functor,_Id,[],_ArgDefs).
 

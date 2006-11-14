@@ -34,18 +34,6 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
      * @deprecated use JTransformer.BUILDER_ID instead.
      */
 	public static final String BUILDER_ID = "org.cs3.jtransformer.JTransformerProjectBuilder";
-	//whether we are doing a FULL, INCREMENTAL or AUTO build. set in
-	// build(int,Map,IProgressMonitor)
-	private int buildKind;
-	//the arguments to the current build. set in
-	// build(int,Map,IProgressMonitor)
-	private Map args;
-	
-	//true, if the user hit cancel on the monitor, or if anything particulary
-	// nasty happens
-	private boolean buildCanceled;
-	//hm. a prolog manager, what else. stupid.
-	
 	
 	/**
 	 * Default constructor. The builder is typicaly created by eclipse. There
@@ -69,15 +57,11 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 		
 		try {
 			
-			buildCanceled = false;
 			if (getProject() == null) {
 				Debug.warning("Project is NULL!!");
 				return null;
 			}
-			
-			this.buildKind = kind;
-			this.args = args;
-			
+						
 			if(! getProject().hasNature(JavaCore.NATURE_ID)){
 				Debug.warning("Project does not have a Java nature!");
 				return null;
