@@ -112,7 +112,7 @@ public final class PDTCoreUtils {
 		}
 		IProject project = file.getProject();
 
-		if (project != null && project.hasNature(PDTCore.NATURE_ID)) {
+		if (project != null &&project.isOpen()&& project.hasNature(PDTCore.NATURE_ID)) {
 			return (IPrologProject) project.getNature(PDTCore.NATURE_ID);
 		}
 		else{
