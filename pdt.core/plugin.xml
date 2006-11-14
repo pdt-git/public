@@ -109,11 +109,23 @@
           class="org.cs3.pdt.core.internal.properties.PrologProjectPropertyPage"
           icon="icons/sample.gif"
           name="Prolog Project Properties"
-          id="org.cs3.pdt.properties.samplePropertyPage">
+          id="org.cs3.pdt.properties.projectPropertyPage">
 		  <filter
                name="nature"
                value="org.cs3.pdt.core.PDTProjectNature"/>
     </page>
+    <!-- <page
+          adaptable="true"
+          category="org.cs3.pdt.properties.projectPropertyPage"
+          class="org.cs3.pdt.core.internal.properties.AnnotatorsPropertyPage"
+          icon="icons/sample.gif"
+          id="org.cs3.pdt.properties.annotatorsPropertyPage"
+          name="Parser Modules"
+          objectClass="org.eclipse.core.resources.IProject">
+		  <filter
+               name="nature"
+               value="org.cs3.pdt.core.PDTProjectNature"/>
+    </page> -->
  </extension>
   <extension
         point="org.cs3.pdt.runtime.prologLibrary">

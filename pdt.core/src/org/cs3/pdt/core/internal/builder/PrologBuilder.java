@@ -177,6 +177,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				String default_encoding = plProject.getPreferenceValue(PDTCore.PROP_DEFAULT_ENCODING, "utf8");
 				as.queryOnce("set parse_comments option", "pdt_annotator:pdt_set_preference_value(parse_comments,"+parse_comments+")");
 				as.queryOnce("set default_encoding option", "pdt_annotator:pdt_set_preference_value(default_encoding,"+default_encoding+")");
+				//setup annotator modules
+				//plProject.getAnnotatorsOptionProvider();
 				
 //				File cacheDir = PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.CACHE_DIR).toFile();
 //				String plCacheDir = Util.prologFileName(cacheDir);

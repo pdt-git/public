@@ -51,6 +51,8 @@
 	pdt_forget_annotation/1,
 	pdt_annotator/2,
 	pdt_annotator/3,
+	pdt_annotator_enabled/2,
+	pdt_set_annotator_enabled/2,
 	pdt_file_record_key/3,
 	pdt_file_record/2,
 	pdt_bind_file_ref/2,
@@ -67,6 +69,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_multimap')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_comments')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('org/cs3/pdt/util/pdt_preferences')).
 
 :- use_module(library('org/cs3/pdt/annotate/cache')).
@@ -74,11 +77,11 @@
 :- use_module(library('pif_observe')).
 
 :-dynamic file_annotation/2.
+
 :-dynamic annotator/2.
-:-dynamic annotator/3.
 
-
-
+:- pdt_define_context(annotator_data(module,hooks,dependencies,enabled)).
+    
 :- pdt_add_preference(
 	parse_comments,
 	'Parse Comments', 
@@ -143,17 +146,46 @@ pdt_maybe(Goal):-
 %independently of what is listed in the hooks list above. They will be called in no particualr order,
 %i.e. dependencies will not be respected.
 
+pdt_annotator_enabled(Module,Enabled):-
+    annotator(Module,Data),
+    annotator_data_enabled(Data,Enabled).
 
+pdt_set_annotator_enabled(Module,Enabled):-
+    annotator(Module,Data),
+    annotator_data_enabled(Data,Enabled),
+    !.  
+pdt_set_annotator_enabled(Module,Enabled):-
+    annotator(Module,Data),
+    annotator_data_set_enabled(Data,Enabled,NewData),
+    retractall(annotator(Module,_)),
+    assert(annotator(Module,NewData)),
+    pif_notify(annotator_enabled,Module-Enabled),
+    enforce_dependencies(Enabled,NewData).
 
+enforce_dependencies(true,Data):-
+
+	forall(annotator_data_depends(Data,Dependency),pdt_set_annotator_enabled(Dependency,true)).
+enforce_dependencies(false,Data):-	
+	annotator_data_module(Data,Module),
+	forall(
+		annotator_depends(DependingModule,Module),
+		pdt_set_annotator_enabled(DependingModule,false)
+	).
+	
 pdt_annotator(Hooks, Dependencies):-
     context_module(Module),
     pdt_annotator:pdt_annotator(Module,Hooks,Dependencies).
 
 pdt_annotator(Module,_Hooks, _Dependencies):-
-    annotator(Module,_,_),!.
+    annotator(Module,_),!.
 pdt_annotator(Module,Hooks, Dependencies):-
+    annotator_data_new(Data),
+    annotator_data_module(Data,Module),
+    annotator_data_hooks(Data,Hooks),
+    annotator_data_dependencies(Data,Dependencies),
+    annotator_data_enabled(Data,true),
     add_missing_hooks2(Module),
-    assert(annotator(Module,Hooks,Dependencies)),
+    assert(annotator(Module,Data)),
     pdt_add_node(annotator_process_order,Module),
     process_dependencies(Module,Dependencies).
 
@@ -191,7 +223,8 @@ interleaved_annotators(IAs):-
 filter_interleaved_annotators([],[]).
 
 filter_interleaved_annotators([A|As],[A|IAs]):-
-    annotator(A,Hooks,_),
+    annotator(A,Data),
+    annotator_data_hooks(Data,Hooks),
     member(interleaved,Hooks),
     !,
     filter_interleaved_annotators(As,IAs).
@@ -203,7 +236,10 @@ execute_interleaved_hooks([],_,_,Term,Term).
 execute_interleaved_hooks([Annotator|Annotators],FileStack,OpModule,TermIn,TermOut):-
 	execute_interleaved_hook(Annotator,FileStack,OpModule,TermIn,TermNext),
 	execute_interleaved_hooks(Annotators,FileStack,OpModule,TermNext,TermOut).
-	
+
+execute_interleaved_hook(Annotator,_FileStack,_OpModule,Term,Term):-
+	annotator_disabled(Annotator),
+	!.
 execute_interleaved_hook(Annotator,FileStack,OpModule,TermIn,TermOut):-
     pdt_maybe(Annotator:interleaved_annotation_hook(FileStack,OpModule,TermIn,TermTmp)),
 	(	var(TermTmp)
@@ -211,10 +247,24 @@ execute_interleaved_hook(Annotator,FileStack,OpModule,TermIn,TermOut):-
 	;	TermOut=TermTmp
 	).
 
-
-annotator_hooks(Annotator,Hooks):-
-    annotator(Annotator,Hooks,_),
+annotator_disabled(Annotator):-
+    annotator(Annotator,Data),
+    annotator_data_enabled(Data,false),
     !.
+annotator_hooks(Annotator,Hooks):-
+    annotator(Annotator,Data),
+    annotator_data_hooks(Data,Hooks),
+    !.
+annotator_depends(Annotator,Dependency):-
+    annotator(Annotator,Data),
+    annotator_data_depends(Data,Dependency).
+annotator_data_depends(Data,Dependency):-
+    annotator_data_dependencies(Data,Deps),
+    member(FileSpec,Deps),
+    pdt_file_spec(FileSpec,File),
+    current_module(Dependency,File).
+
+
 
 execute_annotators([],_FileStack,_OpModule,FileAnnos,FileAnnos):-
 	!.
@@ -222,6 +272,9 @@ execute_annotators([Annotator|Annotators],FileStack,OpModule,FileAnnosIn,FileAnn
     execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,FileAnnosTmp),
     execute_annotators(Annotators,FileStack,OpModule,FileAnnosTmp,FileAnnosOut).
 
+execute_annotator(Annotator,_FileStack,_OpModule,FileAnnos,FileAnnos):-
+    annotator_disabled(Annotator),
+    !.
 execute_annotator(Annotator,FileStack,OpModule,FileAnnosIn,FileAnnosOut):-
     annotator_hooks(Annotator,Hooks),
     execute_annotator_hooks(Annotator,Hooks,FileStack,OpModule,FileAnnosIn,FileAnnosOut).
@@ -288,7 +341,7 @@ pdt_forget_annotation(Spec):-
 
 
 call_cleanup_hook2(FileName):-
-    findall(Anotator,annotator(Anotator,_,_),Anotators),
+    findall(Anotator,pdt_annotator_enabled(Anotator,true),Anotators),
     get_annos_for_cleanup(FileName,Annos),
     call_cleanup_hook2(Anotators,FileName,Annos).
 
@@ -635,7 +688,6 @@ setup_options(Options):-
 		variable_names(_),
 		singletons(_),
     		module(_Module),
-    		double_quotes(string),
     		comments(_TermComments)
     	].
 
