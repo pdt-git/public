@@ -123,6 +123,18 @@ public final class UIUtils {
 		return PlatformUI.getWorkbench().getDisplay();
 	}
 
+	public static Shell getActiveShell() {
+		return (Shell) new _SyncReturn() {
+			Object getRVal() {
+				
+				return getDisplay().getActiveShell();
+			}
+		}.rval;
+
+	}
+
+	
+	
 	public static IWorkbenchPage getActivePage() {
 		return (IWorkbenchPage) new _SyncReturn() {
 			Object getRVal() {
@@ -146,6 +158,7 @@ public final class UIUtils {
 
 	}
 
+		
 	public static void displayMessageDialog(final Shell shell,
 			final String title, final String msg) {
 		if (Display.getCurrent() != shell.getDisplay()) {

@@ -47,26 +47,133 @@ import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
 
 public class PDTCorePlugin extends AbstractUIPlugin {
+	private void projectClosing(IProject project) {
+		try {
+			IPrologProject prologProject = PDTCoreUtils
+					.getPrologProject(project);
+			if (prologProject != null) {
+				PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+						.getPrologInterfaceRegistry();
+				r.removeSubscription(prologProject.getMetadataSubscription());
+				r.removeSubscription(prologProject.getRuntimeSubscription());
+			}
+		} catch (CoreException e) {
+			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+					.getErrorMessageProvider(), UIUtils.getActiveShell(),
+					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
+		}
+
+	}
+
+	private void projectOpened(IProject project) {
+		try {
+			IPrologProject prologProject = PDTCoreUtils
+					.getPrologProject(project);
+			if (prologProject != null) {
+				PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+						.getPrologInterfaceRegistry();
+				r.addSubscription(prologProject.getMetadataSubscription());
+				r.addSubscription(prologProject.getRuntimeSubscription());
+			}
+		} catch (CoreException e) {
+			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+					.getErrorMessageProvider(), UIUtils.getActiveShell(),
+					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
+		}
+
+	}
+
+	private final class _ResourceDeltaVisitor implements IResourceDeltaVisitor {
+
+		private IResourceChangeEvent event;
+
+		public _ResourceDeltaVisitor(IResourceChangeEvent event) {
+			this.event = event;
+		}
+
+		public boolean visit(IResourceDelta delta) throws CoreException {
+			switch (delta.getResource().getType()) {
+			case IResource.ROOT:
+				return true;
+			case IResource.PROJECT:
+				IProject project = (IProject) delta.getResource();
+				
+					if (0 < (delta.getFlags() & IResourceDelta.OPEN)
+							&& project.isOpen()){
+						projectOpened(project);
+					}
+				
+
+				return false;
+			default:
+				return false;
+			}
+		}
+	}
+
+	private final class _ResourceChangeListener implements
+			IResourceChangeListener {
+		public void resourceChanged(IResourceChangeEvent event) {
+			IResourceDelta delta = event.getDelta();
+			try {
+				if(event.getType()==IResourceChangeEvent.POST_CHANGE&&delta!=null){
+					delta.accept(new _ResourceDeltaVisitor(event));	
+				}
+				else if (event.getType()==IResourceChangeEvent.PRE_CLOSE){
+					IProject project = (IProject) event.getResource();
+					projectClosing(project);
+				}
+			} catch (CoreException e) {
+				UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+						.getErrorMessageProvider(), UIUtils.getActiveShell(),
+						PDTCore.ERR_UNKNOWN, PDTCore.CX_CHECK_PROJECTS, e);
+			}
+
+		}
+
+	}
 
 	private ErrorMessageProvider errorMessageProvider;
 
 	public ErrorMessageProvider getErrorMessageProvider() {
-		if(errorMessageProvider==null){
-			errorMessageProvider=new DefaultErrorMessageProvider(this);
+		if (errorMessageProvider == null) {
+			errorMessageProvider = new DefaultErrorMessageProvider(this);
 		}
 		return errorMessageProvider;
 	}
-	
+
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		
+		IWorkspace ws = ResourcesPlugin.getWorkspace();
+		
+		ws.addResourceChangeListener(
+				new _ResourceChangeListener());
+	}
+
 	private ResourceBundle resourceBundle;
 
 	private Option[] options;
@@ -190,14 +297,14 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						"Default Runtime PrologInterface",
 						"The default value for the Runtime PrologInterface property of prolog projects.",
 						Option.STRING, "%project%"),
-					new SimpleOption(
-								PDTCore.PREF_CONVERT_CHARACTER_OFFSETS,
-								"Convert character offsets",
-								"If true, character offsets read by the prolog core will be interpreted as " +
-								"logical offsets (e.g. windows line-endings counting as a single character), and " +
-								"will be converted to physical offsets by the ui.",
-								Option.FLAG, "true"),
-												
+				new SimpleOption(
+						PDTCore.PREF_CONVERT_CHARACTER_OFFSETS,
+						"Convert character offsets",
+						"If true, character offsets read by the prolog core will be interpreted as "
+								+ "logical offsets (e.g. windows line-endings counting as a single character), and "
+								+ "will be converted to physical offsets by the ui.",
+						Option.FLAG, "true"),
+
 				new SimpleOption(
 						PDTCore.PREF_AUTO_CONSULT,
 						"Enable Auto-Consult (EXPERIMENTAL)",
@@ -205,7 +312,6 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 								+ "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental "
 								+ "feature and defaults to \"false\" for 0.1.x",
 						Option.FLAG, "false")
-						
 
 		};
 

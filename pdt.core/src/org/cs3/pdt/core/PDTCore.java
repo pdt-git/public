@@ -143,6 +143,13 @@ public class PDTCore {
 	public static final int CX_TOGGLE_SOURCE_PATH_ENTRY = -3;
 
 
+	public static final int CX_REMOVE_SUBSCRIPTIONS = -4;
+	public static final int CX_ADD_SUBSCRIPTIONS = -5;
+
+
+	public static final int CX_CHECK_PROJECTS = -6;
+
+
 	
 
 
