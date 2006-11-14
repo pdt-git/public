@@ -12,15 +12,12 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.text.BadLocationException;
 
 public class SourceLocationArgumentTest extends PseudoRoundTripTest {
 

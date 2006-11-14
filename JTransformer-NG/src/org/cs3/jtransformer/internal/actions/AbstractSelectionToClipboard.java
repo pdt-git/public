@@ -1,14 +1,9 @@
 package org.cs3.jtransformer.internal.actions;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.astvisitor.IPrologWriter;
 import org.cs3.jtransformer.internal.astvisitor.SectionFactGenerator;
 import org.cs3.jtransformer.internal.astvisitor.VariableIdResolver;
 import org.cs3.jtransformer.internal.astvisitor.VariableTypeResolver;
-import org.cs3.jtransformer.internal.bytecode.ITypeFQNManager;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;

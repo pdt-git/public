@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
 import java.util.BitSet;
 import java.util.Map;
 
@@ -431,6 +430,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
     protected synchronized void tearDown() throws Exception {
         super.tearDown();
         PrologInterface pif = getTestJTransformerProject().getPrologInterface();
+        getTestJTransformerProject().onClose();
         synchronized (pif) {
 
             session.dispose();

@@ -30,7 +30,6 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.internal.events.LifecycleEvent;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -553,7 +552,9 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 		
 		synchronized (JTransformerPlugin.class) {
 			JTransformerProjectNature nature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
-			natures.put(project.getName(),nature);
+			if(nature != null) {
+				natures.put(project.getName(),nature);
+			}
 			return nature;
 		}
 	}

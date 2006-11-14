@@ -11,8 +11,6 @@ import java.util.Map;
 
 import org.cs3.jtransformer.internal.astvisitor.FQNTranslator;
 import org.cs3.jtransformer.internal.astvisitor.IIDGenerator;
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jdt.core.IField;
@@ -21,7 +19,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 /**
  * @author schulzs1

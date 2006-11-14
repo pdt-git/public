@@ -27,7 +27,6 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.internal.actions.JTransformerNatureAssigner;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
@@ -183,6 +182,15 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         		    JavaCore.VERSION_1_4);
 
             getTestJavaProject().setOptions(options);
+            
+            JTransformerProject nature = getTestJTransformerProject();
+            try {
+	            if(nature != null) {
+	            	nature.onClose();
+	            }
+            } catch(Exception ex) {
+            	ex.printStackTrace();
+            }
             
             JTransformerNatureAssigner assigner = new JTransformerNatureAssigner(project);
             assigner.addNature(project,project.getName());

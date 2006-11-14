@@ -1,8 +1,6 @@
 package org.cs3.jtransformer.internal.actions;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -27,21 +25,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-
-import salvo.jesus.graph.DirectedAcyclicGraph;
-import salvo.jesus.graph.DirectedAcyclicGraphImpl;
-import salvo.jesus.graph.DirectedEdgeImpl;
-import salvo.jesus.graph.Vertex;
-import salvo.jesus.graph.VertexImpl;
-import salvo.jesus.graph.algorithm.TopologicalSorting;
 
 public class JTransformerNatureAssigner {
 

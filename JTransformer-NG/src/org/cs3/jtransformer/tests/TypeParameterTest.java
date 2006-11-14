@@ -2,14 +2,9 @@
  */
 package org.cs3.jtransformer.tests;
 
-import java.io.File;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.pl.common.ResourceFileLocator;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
