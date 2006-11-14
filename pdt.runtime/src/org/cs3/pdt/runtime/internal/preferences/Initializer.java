@@ -101,9 +101,8 @@ public class Initializer extends AbstractPreferenceInitializer {
                 String def = System.getProperty(id, options[i].getDefault());
                 node.put(id, def);
             }
-            String pifImpl=plugin.getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION,null);
-            PrologInterfaceFactory factory = PrologInterfaceFactory
-                    .newInstance(pifImpl);            
+            PrologInterfaceFactory factory = plugin.getPrologInterfaceFactory();
+                                
              options = factory.getOptions();
             for (int i = 0; i < options.length; i++) {
                 String id = options[i].getId();
