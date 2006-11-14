@@ -688,7 +688,8 @@ setup_options(Options):-
 		variable_names(_),
 		singletons(_),
     		module(_Module),
-    		comments(_TermComments)
+    		comments(_TermComments),
+    		double_quotes(string)
     	].
 
 setup_options(Options):-
