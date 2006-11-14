@@ -92,7 +92,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	public PrologInterface getMetadataPrologInterface();
 	public Subscription getMetadataSubscription() ;
 	public IMetaInfoProvider getMetaInfoProvider() ;
-
+	public OptionProvider getAnnotatorsOptionProvider() throws PrologInterfaceException ;
 	public IProject getProject();
 
 	public PrologInterface getRuntimePrologInterface();

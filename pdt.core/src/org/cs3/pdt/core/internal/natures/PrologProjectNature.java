@@ -54,12 +54,14 @@ import java.util.Vector;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.internal.properties.AnnotatorsOptionProvider;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderListener;
 import org.cs3.pl.common.SimpleOption;
@@ -113,6 +115,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private PrologEventDispatcher metaDataEventDispatcher;
 
 	private Vector listeners = new Vector();
+
+	private AnnotatorsOptionProvider annotatorsOptionProvider;
 
 	/**
 	 * @see IProjectNature#configure
@@ -625,6 +629,14 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
+	public OptionProvider getAnnotatorsOptionProvider() throws PrologInterfaceException{
+		if(annotatorsOptionProvider==null){
+			annotatorsOptionProvider=new AnnotatorsOptionProvider(this);
+			getMetaDataEventDispatcher().addPrologInterfaceListener(AnnotatorsOptionProvider.SUBJECT,annotatorsOptionProvider);
+		}
+		return annotatorsOptionProvider;
+	}
+	
 	private void pifKeysChanged() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
