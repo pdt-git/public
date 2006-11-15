@@ -46,7 +46,7 @@
       <view
             allowMultiple="false"
             class="org.cs3.jtransformer.internal.views.PEFNavigatorView"
-            icon="icons/sample.gif"
+            icon="icons/JTransformerSmall.gif"
             category="console"
             name="PEF Navigator"
             id="org.cs3.jtransformer.internal.navigator.PEFNavigatorView"/>
@@ -137,7 +137,7 @@
     <page
           adaptable="true"
           objectClass="org.eclipse.core.resources.IProject"
-          icon="icons/sample.gif"
+          icon="icons/JTransformerSmall.gif"
           class="org.cs3.jtransformer.internal.properties.JTransformerProjectPropertyPage"
           name="JTransformer Project Properties"
           id="org.cs3.jtransformer.properties.jtransformerPropertyPage">
@@ -164,6 +164,12 @@
              style="push"
              menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
              id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
+       <action
+             label="Open PEF Navigator"
+             class="org.cs3.jtransformer.internal.actions.OpenPEFNavigatorAction"
+             style="push"
+             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
+             id="org.cs3.jtransformer.internal.actions.open.pef.navigator"/>
        <action
              label="Regenerate Classes"
              class="org.cs3.jtransformer.internal.actions.RegenAction"
