@@ -20,37 +20,38 @@ public class JTransformerProjectChangeListener implements
 		// Get all the affected Children. One of them would be the newly
 
 		// created project
-
-		IResourceDelta[] projectDeltas = root.getAffectedChildren();
-
-		for (int i = 0; i < projectDeltas.length; i++) {
-
-			// Get individual delta's
-
-			IResourceDelta delta = projectDeltas[i];
-
-			IResource resource = delta.getResource();
-
-			if (resource instanceof IProject &&
-				delta.getFlags() == IResourceDelta.OPEN) {
-
-				IProject project = (IProject) resource;
-				try {
-					if(!project.isOpen()){
-							if(JTransformerPlugin.getNatureIfAvailable(project) != null){
-								JTransformerPlugin.getNatureIfAvailable(project).onClose();
-								JTransformerPlugin.removeNatureFromRegistry(project);
+		if(root != null) {
+			IResourceDelta[] projectDeltas = root.getAffectedChildren();
+	
+			for (int i = 0; i < projectDeltas.length; i++) {
+	
+				// Get individual delta's
+	
+				IResourceDelta delta = projectDeltas[i];
+	
+				IResource resource = delta.getResource();
+	
+				if (resource instanceof IProject &&
+					delta.getFlags() == IResourceDelta.OPEN) {
+	
+					IProject project = (IProject) resource;
+					try {
+						if(!project.isOpen()){
+								if(JTransformerPlugin.getNatureIfAvailable(project) != null){
+									JTransformerPlugin.getNatureIfAvailable(project).onClose();
+									JTransformerPlugin.removeNatureFromRegistry(project);
+								}
+						} else {
+							if(project.hasNature(JTransformer.NATURE_ID)) {
+								JTransformerPlugin.getNature(project);
 							}
-					} else {
-						if(project.hasNature(JTransformer.NATURE_ID)) {
-							JTransformerPlugin.getNature(project);
 						}
+					} catch (CoreException e) {
+						e.printStackTrace();
 					}
-				} catch (CoreException e) {
-					e.printStackTrace();
 				}
+	
 			}
-
 		}
 	}
 
