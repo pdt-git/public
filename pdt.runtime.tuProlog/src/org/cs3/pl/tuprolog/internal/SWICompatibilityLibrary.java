@@ -469,7 +469,19 @@ public class SWICompatibilityLibrary extends Library {
 		return true;
 		
 	}
+
+	/*
+	 * 
+	 * Implementation of term_to_atom.
+	 * - term_to_atom/1
+	 * 
+	 */
 	
+	public boolean term_to_atom_2(Term term, Term atom) {
+		
+		return unify(term, atom);
+		
+	}
 	
 	/*
 	 * 
@@ -489,6 +501,6 @@ public class SWICompatibilityLibrary extends Library {
 	 		":-	op( 700, xfx, '\\=@=').				\n" +
 	 		"'=@='(X,Y):-  structEq(X,Y).			\n" +
 	 		"'\\=@='(X,Y):-  not structEq(X,Y). 	\n" +
-	 		"Module:Predicate :- call(Predicate).	\n" ;
+	 		"':'(Module,Predicate) :- call(Predicate).	\n" ;
 	}
 }
