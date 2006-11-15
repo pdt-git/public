@@ -19,7 +19,6 @@ import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.SolveInfo;
-import alice.tuprolog.Struct;
 import alice.tuprolog.Theory;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.SpyListener;
@@ -30,7 +29,7 @@ public class TuPrologTest extends TestCase {
 	TuProlog engine; 
 	protected void setUp() throws Exception {
     	engine = new TuProlog();
-    	engine.initEngine();
+   // 	engine.initEngine();
 		//TuProlog tuProlog = new TuProlog();
     	engine.addSpyListener(new SpyListener() {
 			public void onSpy(SpyEvent e) {
@@ -212,5 +211,34 @@ public class TuPrologTest extends TestCase {
 		Calendar calendar = Calendar.getInstance(Locale.GERMANY);
 		System.out.println(new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.UK).format(
 			new Date(1000)));
+	}
+	
+	public void testSync()throws Exception {
+		
+		engine.addSpyListener(new SpyListener() {
+
+			public void onSpy(SpyEvent e) {
+				System.err.println(e.getMsg());
+				
+			}
+			
+		});
+		
+		SolveInfo info = engine.solve("A=@=B.");
+		assertTrue(info.isSuccess());
+		engine.loadLibrary("sync.pl");
+		engine.loadLibrary("sync_test.pl");
+		info = engine.solve("setUp(term_ref).");
+		assertTrue(info.isSuccess());
+		engine.setSpy(true);
+		engine.loadLibrary("localisation.pl");
+		
+		info = engine.solve("test(init_idb).");
+		assertTrue(info.isSuccess());
+		
+		info = engine.solve("test(separate_functor_arity_module_safe).");
+		assertTrue(info.isSuccess());
+
+		
 	}
 }
