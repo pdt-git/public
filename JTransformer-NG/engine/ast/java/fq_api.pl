@@ -40,7 +40,7 @@ execT
      Term =.. [classDefT|[FQN|Args]],
      nonvar(FQN),
      !,
-     fullQualifiedName(Id,FQN),
+     fullQualifiedName_ri(Id,FQN),
      getTerm(Id,JavaAST),
      JavaAST =.. [classDefT,Id|JavaASTArgs],
      call(JavaAST),
@@ -54,7 +54,7 @@ execT
          bindArgs(ArgDefs, Args, JavaASTArgs),
      JavaAST =.. [classDefT,Id|JavaASTArgs],
      call(JavaAST),
-     fullQualifiedName(Id,FQN),
+     fullQualifiedName_ri(Id,FQN),
      mapArgs(JavaASTArgs,Args).
 
 % attributes (modifierT,interfaceT...)
@@ -161,7 +161,7 @@ mapArgs([],[]):- !.
 mapArgs( [JavaASTArg|JavaASTArgs],[FQN|Args]):-
     classDefT(JavaASTArg,_,_,_),
     !,
-    fullQualifiedName(JavaASTArg,FQN),
+    fullQualifiedName_ri(JavaASTArg,FQN),
     mapArgs(JavaASTArgs,Args),
     !.
     
@@ -215,10 +215,10 @@ map_type_term(TypeTerm, FQNBrackets):-
     map_to_basic_or_class(TypeName,Arity,TypeTerm),
     !.    
 map_type_term(type(class,Id,0), FQN):-
-    fullQualifiedName(Id,FQN),
+    fullQualifiedName_ri(Id,FQN),
     !.
 map_type_term(type(class,Id,Arity), FQNBrackets):-
-    fullQualifiedName(Id,FQN),
+    fullQualifiedName_ri(Id,FQN),
     type_with_brackets(FQN,Arity,FQNBrackets),
     !.
 
@@ -227,7 +227,7 @@ map_to_basic_or_class(TypeName,Arity,TypeTerm):-
     TypeTerm=type(basic,TypeName,Arity),
     !.    
 map_to_basic_or_class(TypeName,Arity,TypeTerm):-
-    fullQualifiedName(Id,TypeName),
+    fullQualifiedName_ri(Id,TypeName),
     TypeTerm=type(class,Id,Arity),
     !.    
 
@@ -314,7 +314,7 @@ bindArgs([ast_arg(_,_, id,  _)|ArgDefs], [null|Args], [null|JavaASTArgs]) :-
 
 % attribute is a classDefT
 bindArgs([ast_arg(_,_, _,  [classDefT])|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
-    fullQualifiedName(JavaASTArg, FQN),
+    fullQualifiedName_ri(JavaASTArg, FQN),
         bindArgs(ArgDefs, Args, JavaASTArgs),
     !.
     
@@ -355,7 +355,7 @@ bindArgs([ast_arg(_,_, id,  _Kind)|ArgDefs], [JavaASTArg|Args], [JavaASTArg|Java
 
 % id with several Kinds, and a classDefT - TODO: by now expensive!?
 bindArgs([ast_arg(_,_, id, _)|ArgDefs], [FQN|Args], [JavaASTArg|JavaASTArgs]) :-
-        fullQualifiedName(JavaASTArg,FQN),
+        fullQualifiedName_ri(JavaASTArg,FQN),
         bindArgs(ArgDefs, Args, JavaASTArgs),
         !.
 
@@ -373,7 +373,7 @@ replaceFQNsWithClassIds([],[]).
 replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
     nonvar(Id),
         !,
-        fullQualifiedName(Id,FQN),
+        fullQualifiedName_ri(Id,FQN),
         replaceFQNsWithClassIds(FQNsAndIds,Ids),
         !.
     
@@ -385,7 +385,7 @@ replaceFQNsWithClassIds([FQN|FQNsAndIds],[_|Ids]):-
         
         
 replaceFQNsWithClassIds([FQN|FQNsAndIds], [Id|Ids]):-
-        fullQualifiedName(Id,FQN),
+        fullQualifiedName_ri(Id,FQN),
         !,
         replaceFQNsWithClassIds(FQNsAndIds,Ids),
         !.
@@ -432,7 +432,7 @@ t_i_assert_bound(_FQ).
 
 getTypeIfNullEnclClass_fq(null, Stat, FQN) :-
     enclClass(Stat, Encl),
-    fullQualifiedName(Encl,FQN).
+    fullQualifiedName_ri(Encl,FQN).
     
 getTypeIfNullEnclClass_fq(Id, _, FQN) :-
     getType_fq(Id, FQN).
@@ -456,7 +456,7 @@ getType_fq(Id,FQN):-
  */
 enclClass_fq(Id,FQN):-
     enclClass(Id, Class),
-    fullQualifiedName(Class, FQN).
+    fullQualifiedName_ri(Class, FQN).
 
 /**
  * types_fq(+Exprs, ?FQNs)

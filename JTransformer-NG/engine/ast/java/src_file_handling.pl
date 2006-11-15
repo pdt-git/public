@@ -40,7 +40,7 @@ add_new_class_and_file(Id, Owner, Name, Defs) :-
     ((
        (globalIds(FQN,Id)->
        		true;
-       		(fullQualifiedNameReal(Id,FQN)->
+       		(fullQualifiedName(Id,FQN)->
        		(add(globalIds(FQN,Id)),
        		 add(ri_globalIds(Id,FQN)));true)
        		),
@@ -115,9 +115,12 @@ retract_api_meta_data :-
     retractall(deleted_file(_)),
     retractall(created_file(_)),
     retractall(dirty_tree(_)),
-    retractall(rollback(_)),
+%    retractall(rollback(_)),
     retractall(modified_toplevel(_)),
-    retractall(changed(_)).
+    retractall(changed(_)),
+    write('RETRACTED CLASS DELTA DATA'),
+    nl.
+    
     
     
 /**
