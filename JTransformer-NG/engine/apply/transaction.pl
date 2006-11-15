@@ -67,8 +67,12 @@ checkpoint_commit(Checkpoint) :-
  * This predicate deletes all rollback logging information.
  */
 commit :-
+    write('COMMIT - start'),
+    nl,
     retractall(rollback(_)),
-    retractall(changed(_)).
+    retractall(changed(_)),
+    write('COMMIT - end'),
+    nl.
     
 /**
  * checkpoint_rollback(+Checkpoint)
@@ -118,6 +122,8 @@ delete_checkpoint(rollback_checkpoint(Checkpoint)):-
  * 
  */
 rollback :-
+    write('ROLLBACK - start'),
+    nl,
     findall(Term, 
     (
       rollback(Term),
@@ -136,7 +142,10 @@ rollback :-
     % replace deleted with created files
     findall(File, (deleted_file(File),assert(tmp_rollback_file(File)),retract(deleted_file(File))),_),
     findall(File, (created_file(File),assert(deleted_file(File)),retract(created_file(File))),_),
-    findall(File, (tmp_rollback_file(File),assert(created_file(File)),retract(deleted_file(File))),_).    
+    findall(File, (tmp_rollback_file(File),assert(created_file(File)),retract(deleted_file(File))),_),
+    write('ROLLBACK - end'),
+    nl.
+    
     
 
 rollback_debug_format(FormatString,List):-
