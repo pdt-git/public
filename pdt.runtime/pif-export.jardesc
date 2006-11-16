@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jardesc>
-<jar path="/home/lukas/eclipse/workspace/SocialMap/lib/prolog_interface-0.2M6pre.jar"/>
+<jar path="V:/prolog_interface-0.2M6pre.jar"/>
 <options buildIfNeeded="true" compress="true" descriptionLocation="/pdt.runtime/pif-export.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="true" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
 <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
 <selectedProjects/>
@@ -12,6 +12,7 @@
 </manifest>
 <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
 <javaElement handleIdentifier="=pdt.runtime.socket/src"/>
+<folder path="/pdt.runtime.tuProlog/lib"/>
 <javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.cterm"/>
 <javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.cterm.internal"/>
 <javaElement handleIdentifier="=pdt.runtime/src&lt;org.cs3.pl.prolog"/>
