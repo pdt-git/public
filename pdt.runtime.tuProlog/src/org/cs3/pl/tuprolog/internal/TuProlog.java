@@ -51,6 +51,7 @@ public class TuProlog {
 	public void initEngine() throws InvalidTheoryException, IOException {
 		try {
 			engine.loadLibrary(new SWICompatibilityLibrary());
+			engine.loadLibrary(new ObserverLibrary());
 		} catch (InvalidLibraryException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -116,6 +117,7 @@ public class TuProlog {
 	
 	/**
 	 * Load Java-based prolog library using Library Object.
+	 * 
 	 * @author Hasan Abdel Halim
 	 * @param libName 
 	 * @throws InvalidLibraryException
@@ -123,7 +125,17 @@ public class TuProlog {
 	public void loadLibrary(Library libName) throws InvalidLibraryException {
 		 engine.loadLibrary(libName);
 	}
-
+	
+	/**
+	 * @author Hasan Abdel Halim
+	 * @param name complete class name of the java library to be fethced.
+	 * @return
+	 */
+	public Library getLibrary(String name) {
+		
+		return engine.getLibrary(name);
+	}
+	
 	/**
 	 * 
 	 * TODO add predicate to ignore module:-
@@ -249,4 +261,5 @@ public class TuProlog {
     public synchronized boolean isWarning() {
         return engine.isWarning();
     }
+
 }

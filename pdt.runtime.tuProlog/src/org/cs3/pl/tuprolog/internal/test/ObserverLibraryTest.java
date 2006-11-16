@@ -41,7 +41,7 @@ public class ObserverLibraryTest extends TestCase {
 		assertTrue(info.isSuccess());
 	}
 	
-	public void testNotify() throws MalformedGoalException{
+	public void testNotify() throws MalformedGoalException, InterruptedException{
 		SolveInfo info = engine.solve("observe(observe_test(_,Y), firstKey).");
 		assertTrue(info.isSuccess());
 
@@ -55,9 +55,18 @@ public class ObserverLibraryTest extends TestCase {
 		};
 		
 		lib.addListener("observe_test(X,_)", ls );
+		lib.addListener("observe_test(X,_)", ls );
+		
 
-		info = engine.solve("notify(observe_test(_,_), 'just test for messages').");
+		info = engine.solve("pif_notify(observe_test(_,_), 'first test for messages').");
 		assertTrue(info.isSuccess());
+		
+		Thread.sleep(300);
+		
+		lib.removeAllListeners("observe_test(_,_)");
+		info = engine.solve("pif_notify(observe_test(_,_), 'second test for messages').");
+		assertTrue(info.isSuccess());
+		
 	}
 
 }

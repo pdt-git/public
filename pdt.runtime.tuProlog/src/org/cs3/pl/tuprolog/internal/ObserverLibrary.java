@@ -139,6 +139,17 @@ public class ObserverLibrary extends Library {
 			return false;
 
 		observations.put(subject.toString(), new Listeners(key) );	
+		
+		try {
+			SolveInfo info = engine.solve("pif_observe_hook(_,"+subject.getTerm()+",_).");
+			if (info.isSuccess())
+				System.err.println("Observe hook was called successfully");
+			
+		} catch (MalformedGoalException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return  true;	
 	}
 	
@@ -151,7 +162,7 @@ public class ObserverLibrary extends Library {
 		return true;
 	}
 
-	public boolean notify_2(Term subject, Term msg){
+	public boolean pif_notify_2(Term subject, Term msg){
 		
 		Notifier thread = new Notifier(subject.toString(), msg.toString());
 		
@@ -171,6 +182,13 @@ public class ObserverLibrary extends Library {
 		if ( observations.containsKey(subject) ){
 			Listeners list = (Listeners) observations.get(subject);
 			list.remove(listener);
+		}
+	}
+
+	public void removeAllListeners( String subject ){
+		if ( observations.containsKey(subject) ){
+			Listeners list = (Listeners) observations.get(subject);
+			list.clear();
 		}
 	}
 
