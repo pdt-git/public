@@ -478,4 +478,26 @@ invalidSelectReference(_id, _selectedfrom, _pos, _validtypes, _actualtype) :-
    not(member(_actualtype, _validtypes)).
    
    
+jt_summary :-
+    write('JTransformer Summary:'),
+    nl,
+    findall(C,class(C,_,_),AllClasses),
+    length(AllClasses,NumAllClasses),
+    format('Number of all classes: ~w~n',[NumAllClasses]),
+
+    findall(C,(class(C,_,_),\+ externT(C)),AllSrcClasses),
+    length(AllSrcClasses,NumAllSrcClasses),
+    format('Number of all source classes: ~w~n',[NumAllSrcClasses]),
+    findall(M,(methodDefT(M,_,_,_,_,_,_)),AllMethods),
+    length(AllMethods,NumAllMethods),
+    format('Number of all methods: ~w~n',[NumAllMethods]).
     
+classes_with_same_fqn_and_diffent_id(A,B):-
+  class(A,_,Name),
+  class(B,_,Name),
+  \+ A == B,
+  fullQualifiedName(A,A_FQN),
+  fullQualifiedName(B,B_FQN),
+  A_FQN == B_FQN.
+  
+  
