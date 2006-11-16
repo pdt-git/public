@@ -6,6 +6,7 @@ import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -42,9 +43,29 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 			Map result = session.queryOnce("sourceLocation(" + getPefId()
 					+ ", File, Start, Length)");
 			if (result == null) {
-				JTUtils.setStatusErrorMessage(
-						"could not find source location for id '" + getPefId()
-								+ "'.");
+				result = session.queryOnce("tree(" + getPefId()
+						+ ", _,Kind)");
+				if (result == null) {
+					UIUtils.displayErrorDialog(JTUtils.getShell(true), "JTransformer", 
+						"'" + getPefId()
+								+ "' is not a tree element.");
+				} else {
+					String kind = (String)result.get("Kind");
+					result = session.queryOnce("enclClass(" + getPefId()
+							+ ", EnclClass), fullQualifiedName(EnclClass,FQN)");
+					if(result == null) {
+						UIUtils.displayErrorDialog(JTUtils.getShell(true), "JTransformer", 
+								"Could not find the source location for the tree '" + getPefId() + 
+								"' of type " + kind + ".\n");
+					} else {
+						UIUtils.displayErrorDialog(JTUtils.getShell(true), "JTransformer", 
+								"Could not find the source location for the tree '" + getPefId() + 
+								"'.\nIts enclosing class '" + result.get("FQN") + "' is an external byte code class.");
+						
+					}
+
+				}
+				
 			}
 			else {
 				String filename = result.get("File").toString();

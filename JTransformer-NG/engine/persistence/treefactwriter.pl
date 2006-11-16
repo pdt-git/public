@@ -36,16 +36,21 @@ writeTreeFacts(File, Mode) :-
 
 internal_writeTreeFacts(File, Mode) :-
     open(File, write, Stream,[]),
-
+    set_stream(Stream, encoding(utf8)),
+	write(Stream,'encoding(utf8).'),
+	nl(Stream),
 	% For Ditrios (Schmatz)
 	forall(
 		(
 			Mode = 'javalangfactsmode',
-			Fact = permanent_java_lang_class(Class),
+			Fact = permanent_java_lang_class(_Class),
 			call(Fact),
 			term_to_atom(Fact, Atom)
 		),	
-		format(Stream, '~w.~n', Atom)
+		catch(
+			format(Stream, '~w.~n', Atom),
+			Exception,
+			debugme)
 	),
 	% END - For Ditrios (Schmatz)
 
@@ -53,7 +58,12 @@ internal_writeTreeFacts(File, Mode) :-
     		 call(Fact),
     		 term_to_atom(Fact, Atom)
     	    ),
-    		format(Stream, '~w.~n',Atom)
+    	    catch(
+    	    
+    		format(Stream, '~w.~n',Atom),
+    				Exception,
+				debugme(Atom))
+    		
     ),
     		
     forall(globalIds(FQN,Id),
