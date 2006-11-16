@@ -57,9 +57,9 @@
  * The binding of observed predicates will be 
  * saved in idb/1 facts. So, these facts should
  * be queried with 
- * sync:query(idb(observed_predicate(A,B))) instead of
+ * query(idb(observed_predicate(A,B))) instead of
  *
- * sync:query(observed_predicate(A,B)).
+ * query(observed_predicate(A,B)).
  *
  * Details: The add/1 and delete/1 operation are temporarily
  * stored in a thread local predicate until 
@@ -107,18 +107,21 @@
 
 :- use_module(library(pif_observe)).
 
-pif_observe:pif_observe_hook(_,Subject,_):-
+pif_observe_hook(_,Subject,_):-
 	init_idb(Subject).
 
-pif_observe:pif_unobserve_hook(_,Subject,_):-
+pif_unobserve_hook(_,Subject,_):-
 	unregister_observer(Subject). 
 	
-	
+
+thread_self(ThreadID):-
+    	true.
+    	
 depends_fact(Term, Term).
 
 depends(Var, _):-
   var(Var),
-  throw('sync:depdends_fact/2: first argument must be bound.').
+  throw('depdends_fact/2: first argument must be bound.').
 
 depends(Master, Slave) :-
   depends_fact(Master, Slave).
@@ -466,7 +469,7 @@ evaluate_and_store_idb(Ref):-
 		     recover_from_non_existing_predicate(Ref, Term)
 		    ),
 	   AnyError,
-       (format('~nsync:evaluate_and_store_idb/1: IGNORING ERROR ~w~n IN EVALUATION OF the term: ~w~n~n',[AnyError, Term]),
+       (format('~nevaluate_and_store_idb/1: IGNORING ERROR ~w~n IN EVALUATION OF the term: ~w~n~n',[AnyError, Term]),
       % functor_module_safe(Term, Functor, Arity),
       % separate_functor_arity_module_safe(Signature, Functor, Arity),
        assert1(idb(Ref, instantiation_error(Term))))
@@ -588,7 +591,7 @@ open_local_host :-
                        open(once)
                      ]).
    
-sync:open_local_host.
+open_local_host.
 odbc_current_connection(Connection, DSN).                     
 odbc_query(postgres, 'SELECT (arg1) FROM switest', row(Arg)).
 
