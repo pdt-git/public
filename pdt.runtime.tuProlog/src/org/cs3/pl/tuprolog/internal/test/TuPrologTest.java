@@ -13,6 +13,8 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 
+import org.cs3.pl.tuprolog.internal.ObservationListener;
+import org.cs3.pl.tuprolog.internal.ObserverLibrary;
 import org.cs3.pl.tuprolog.internal.TuProlog;
 
 import alice.tuprolog.InvalidTheoryException;
@@ -226,7 +228,26 @@ public class TuPrologTest extends TestCase {
 		
 		SolveInfo info = engine.solve("A=@=B.");
 		assertTrue(info.isSuccess());
+		
 		engine.loadLibrary("sync.pl");
+		
+		ObserverLibrary lib = (ObserverLibrary) engine.getLibrary("org.cs3.pl.tuprolog.internal.ObserverLibrary");
+		ObservationListener ls = new ObservationListener(){
+
+			public void onUpdate(String msg) {
+				System.err.println(msg);				
+			}
+			
+		};
+		
+		lib.addListener("query(_)", ls );
+
+		
+		info = engine.solve("observe(query(_), key).");
+		assertTrue(info.isSuccess());
+		info = engine.solve("query(A=@=B).");
+		assertTrue(info.isSuccess());
+/*
 		engine.loadLibrary("sync_test.pl");
 		info = engine.solve("setUp(term_ref).");
 		assertTrue(info.isSuccess());
@@ -238,7 +259,7 @@ public class TuPrologTest extends TestCase {
 		
 		info = engine.solve("test(separate_functor_arity_module_safe).");
 		assertTrue(info.isSuccess());
-
+*/
 		
 	}
 }
