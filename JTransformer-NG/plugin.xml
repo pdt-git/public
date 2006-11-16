@@ -104,7 +104,7 @@
 		<action
 		       class="org.cs3.jtransformer.internal.actions.OpenSelectionInEditorAction"
                id="jtransformer.action.open_in_java_editor"
-               label="Open in Java editor"
+               label="Open in Java Editor"
                menubarPath="additions"/>
 
 
@@ -157,13 +157,9 @@
              label="&amp;JTransformer"
              id="org.cs3.jtransformer.menus.jtransformer">
           <separator name="separator2"/>
+          <separator name="separator3"/>
+          <groupMarker name="group1"/>
        </menu>
-       <action
-             label="Selection to Clipboard"
-             class="org.cs3.jtransformer.internal.actions.FactsToClipboard"
-             style="push"
-             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
-             id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
        <action
              label="Open PEF Navigator"
              class="org.cs3.jtransformer.internal.actions.OpenPEFNavigatorAction"
@@ -185,9 +181,21 @@
        <action
              class="org.cs3.jtransformer.internal.actions.AddingFactsToClipboard"
              id="org.cs3.pdt.internal.actions.addingfactstoclipboard"
-             label="Adding Selection to Clipboard"
-             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator2"
+             label="Selection to Clipboard - Generate Actions"
+             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator3"
              style="push"/>
+       <action
+             label="Selection to Clipboard - Generate Condtions"
+             class="org.cs3.jtransformer.internal.actions.FactsToClipboard"
+             style="push"
+             menubarPath="org.cs3.jtransformer.menus.jtransformer/separator3"
+             id="org.cs3.pdt.internal.actions.selectiontoclipboard"/>
+       <menu
+             id="org.cs3.jtransformer.menus.jtransformer.selection.to.clipboard"
+             label="Selection to Clipboard"
+             path="org.cs3.jtransformer.menus.jtransformer/separator3">
+          <separator name="separator1"/>
+       </menu>
     </actionSet>
  </extension>
  <extension
