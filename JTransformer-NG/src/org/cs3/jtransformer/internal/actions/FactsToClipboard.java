@@ -11,12 +11,7 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 /**
  * @see IWorkbenchWindowActionDelegate
  */
-public class FactsToClipboard extends AbstractSelectionToClipboard  {
-	/**
-	 *
-	 */
-	public FactsToClipboard() {
-	}
+public class FactsToClipboard extends AbstractSelectionToClipboard {
 
 	AbstractStringBufferWriter getStringBufferWriter() {
 		Set filter = new HashSet();
@@ -25,8 +20,8 @@ public class FactsToClipboard extends AbstractSelectionToClipboard  {
 	}
 
 	VariableTypeResolver getTypeResolver(VariableIdResolver idResolver) {
-		return new VariableTypeResolver(new ITypeFQNManager(idResolver), idResolver);
+		return new VariableTypeResolver(new ITypeFQNManager(idResolver),
+				idResolver);
 	}
-
 
 }

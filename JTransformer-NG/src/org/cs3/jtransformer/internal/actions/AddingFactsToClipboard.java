@@ -6,7 +6,11 @@ import java.util.Set;
 import org.cs3.jtransformer.internal.astvisitor.VariableIdResolver;
 import org.cs3.jtransformer.internal.astvisitor.VariableTypeResolver;
 import org.cs3.jtransformer.internal.bytecode.ITypeFQNManager;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
+/**
+ * @see IWorkbenchWindowActionDelegate
+ */
 public class AddingFactsToClipboard extends AbstractSelectionToClipboard {
 
 	AbstractStringBufferWriter getStringBufferWriter() {
@@ -16,7 +20,8 @@ public class AddingFactsToClipboard extends AbstractSelectionToClipboard {
 	}
 
 	VariableTypeResolver getTypeResolver(VariableIdResolver idResolver) {
-		return new AddingVariableTypeResolver(new ITypeFQNManager(idResolver), idResolver);
+		return new AddingVariableTypeResolver(new ITypeFQNManager(idResolver),
+				idResolver);
 	}
 
 }
