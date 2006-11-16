@@ -8,8 +8,10 @@ import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
+import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -18,6 +20,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
@@ -35,29 +39,26 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 	private class RegenExecution implements IRunnableWithProgress {
 		
 
+
 		/**
 		 * Iterates through the dirty classes, and generate a new java sourcefile
 		 * for each that has been changed. Mark them as processed if all files
 		 * are successfully replaced.
 		 */
 		
-		public JTransformerProjectNature getProjectWithJTransformerNature() throws CoreException {
-			JTransformerProjectNature nature = null;
-			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-			for (int i = 0; i < projects.length; i++) {
-				if(projects[i].isAccessible() && projects[i].hasNature(JTransformer.NATURE_ID)){
-					nature = JTransformerPlugin.getNature(projects[i]);
-					break;
-				}
-			}
-			return nature;
-		}
+
 
 		public void run(IProgressMonitor monitor)  {
 			
 			SourceCodeRegenerator scr;
 			try {
-				scr = new SourceCodeRegenerator(getProjectWithJTransformerNature().getPrologInterface());
+				PrologInterface pif = JTUtils.getPrologInterface(project);
+				if(pif == null) {
+					UIUtils.displayErrorDialog(JTUtils.getShell(true), "JTransformer",
+							"The enclosing project of the currently opened file has no JTransformer Nature");
+					return;
+				}
+				scr = new SourceCodeRegenerator(pif);
 				scr.generateDirtyClasses();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -80,6 +81,7 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 	}
 	
 	private IWorkbenchWindow window;
+	private IProject project;
 	/**
 	 * constructs a new RegenButton
 	 */
@@ -94,6 +96,23 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 	public void run(IAction action)  {
 		
 		try {
+			try {
+				
+				project = ((IFileEditorInput)JTUtils.getActiveEditor().getEditorInput()).getFile().getProject();
+			} catch(final Exception ex) {
+				ex.printStackTrace();
+				UIUtils.getDisplay().asyncExec(new Runnable() {
+
+					public void run() {
+						UIUtils.displayErrorDialog(JTUtils.getShell(true), "JTransformer", 
+								"This operation cannot proceed.\nNo source file associated with workspace project is opened.\n"+
+								ex.getLocalizedMessage());							
+					}
+				
+				});
+				return;
+			}
+
 			window.run(true,true, new RegenExecution());
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block

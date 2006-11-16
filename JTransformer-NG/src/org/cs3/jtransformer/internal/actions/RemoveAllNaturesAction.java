@@ -33,7 +33,7 @@ public class RemoveAllNaturesAction implements IWorkbenchWindowActionDelegate {
 		List projectsWithNature = new ArrayList();
 		try {
 			for (int i = 0; i < projects.length; i++) {
-				if (projects[i].hasNature(JTransformer.NATURE_ID)) {
+				if (projects[i].isOpen() && projects[i].hasNature(JTransformer.NATURE_ID)) {
 					projectsWithNature.add(projects[i]);
 				}
 			}

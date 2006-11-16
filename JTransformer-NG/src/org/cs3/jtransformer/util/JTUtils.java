@@ -761,6 +761,14 @@ public class JTUtils
 			if(projects[i].isOpen()){
 				String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
 						JTransformer.PROLOG_RUNTIME_KEY, null);
+				if(runtimeKey == null && projects[i].hasNature(JTransformer.NATURE_ID)) {
+					String msg = "Factbase '" + key + "' is not correctly configured for the project '" +projects[i].getName()+"'. "+
+					"This happens if you import a project with an assigned JTransformer nature."+
+					"This problem will be fixed in the next release. By now use the following workaround:\n"+
+					"Please remove the JTransformer nature from project '" + projects[i].getName() + "' and reassign it.";
+					UIUtils.displayMessageDialog(JTUtils.getShell(true), "JTransformer", msg);
+					return null;
+				}
 				if(runtimeKey != null && runtimeKey.equals(key) &&
 				   projects[i].hasNature(JTransformer.NATURE_ID) ){
 					sharingProjects.add(projects[i]);
@@ -862,6 +870,9 @@ public class JTUtils
 	 */
 	public static Shell getShell( boolean force) {
 		Shell shell = null;
+		if (UIUtils.getDisplay().getThread() != Thread.currentThread()) {
+			return getShellFromUIThread(force);
+		}
 		if(UIUtils.getDisplay().getActiveShell() != null){
 			shell=UIUtils.getDisplay().getActiveShell();
 		} else {
@@ -870,6 +881,17 @@ public class JTUtils
 			}
 		}
 		return shell;
+	}
+	private static Shell getShellFromUIThread(final boolean force) {
+		final Shell[] shell = new Shell[1];
+		UIUtils.getDisplay().syncExec(new Runnable() {
+
+			public void run() {
+				shell[0] = getShell(force);
+			}
+			
+		});
+		return shell[0];
 	}
 
 }

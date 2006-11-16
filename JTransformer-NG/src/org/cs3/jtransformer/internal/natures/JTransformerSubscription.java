@@ -205,17 +205,22 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		private List getSortedListOfNotYetBuildJTProjects() throws CoreException, Exception {
 			String key = getPifKey();
 			List unsortedProjectsList = JTUtils.getProjectsWithPifKey(key);
+			if(unsortedProjectsList == null) {
+				return null;
+			}
 			if(unsortedProjectsList.size() == 0) {
 				Debug.error("JTransformerSubscription.getSortedListOfNotYetBuildJTProjects(): project list ist empty!");
 				PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().removeSubscription(getId());
-				UIUtils.displayMessageDialog(JTUtils.getShell(true), "JTransformer", "Factbase " + key + " referenced by subscription " + getId() + "is not used by any project. Removing subscription.");
-				return null;
+				String msg = "Factbase " + key + " referenced by " + getId() + " cannot be configured correctly. " +
+					"Please remove the JTransformer nature from all sharing projects and reassign it.";
+				UIUtils.displayMessageDialog(JTUtils.getShell(true), "JTransformer", msg);
+				throw new RuntimeException(msg);
 				//unsortedProjectsList.add(project);
 			} else {
 				Debug.info("JT:getSortedListOfNotYetBuildJTProjects: first project name: " + ((IProject)unsortedProjectsList.get(0)).getName());
 			}
 			TopoSortProjects topoSorter = new TopoSortProjects();
-			JTUtils.getProjectsWithPifKey(key);
+			//JTUtils.getProjectsWithPifKey(key);
 			return topoSorter.sort(false, unsortedProjectsList);
 		}
 
