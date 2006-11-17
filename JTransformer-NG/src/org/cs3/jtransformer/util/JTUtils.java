@@ -753,30 +753,6 @@ public class JTUtils
 		}
 	}
 
-	public static List getProjectsWithPifKey(String key) throws CoreException {
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		
-		List sharingProjects = new ArrayList();
-		for (int i = 0; i < projects.length; i++) {
-			if(projects[i].isOpen()){
-				String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
-						JTransformer.PROLOG_RUNTIME_KEY, null);
-				if(runtimeKey == null && projects[i].hasNature(JTransformer.NATURE_ID)) {
-					String msg = "Factbase '" + key + "' is not correctly configured for the project '" +projects[i].getName()+"'. "+
-					"This happens if you import a project with an assigned JTransformer nature."+
-					"This problem will be fixed in the next release. By now use the following workaround:\n"+
-					"Please remove the JTransformer nature from project '" + projects[i].getName() + "' and reassign it.";
-					UIUtils.displayMessageDialog(JTUtils.getShell(true), "JTransformer", msg);
-					return null;
-				}
-				if(runtimeKey != null && runtimeKey.equals(key) &&
-				   projects[i].hasNature(JTransformer.NATURE_ID) ){
-					sharingProjects.add(projects[i]);
-				}
-			}
-		}
-		return sharingProjects;
-	}
 	public static String quote(String str) {
 		return "'" + str + "'";
 	}
