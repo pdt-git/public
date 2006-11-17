@@ -3,6 +3,7 @@
  */
 package org.cs3.jtransformer.internal.natures;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,8 +13,10 @@ import java.util.Set;
 
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
+import org.cs3.jtransformer.internal.actions.JTransformerNatureAssigner;
 import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
+import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
@@ -70,6 +73,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 			super.restoreState(params);
 			project = ResourcesPlugin.getWorkspace().
 				getRoot().getProject((String) params.get("project"));
+			
 		}
 
 		public Map saveState() {
@@ -113,6 +117,16 @@ public class JTransformerSubscription extends DefaultSubscription implements
 //					jtransformerProject.reconfigure(initSession);
 //
 //				}
+				try {
+					if(	JTransformerPlugin.getDefault().getPreferenceValue(project, 
+							JTransformer.PROLOG_RUNTIME_KEY, null) == null) {
+						JTransformerPlugin.getDefault().setPreferenceValue(project, 
+						JTransformer.PROLOG_RUNTIME_KEY, getPifKey());
+					}
+				} catch (CoreException e) {
+					JTUtils.logAndDisplayUnknownError(e);			
+				}
+
 	    		updateProjectLocationInFactbase(initSession);
 
 				JTransformerPlugin plugin = JTransformerPlugin.getDefault();
@@ -204,7 +218,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 
 		private List getSortedListOfNotYetBuildJTProjects() throws CoreException, Exception {
 			String key = getPifKey();
-			List unsortedProjectsList = JTUtils.getProjectsWithPifKey(key);
+			List unsortedProjectsList = getProjectsWithPifKey(key);
 			if(unsortedProjectsList == null) {
 				return null;
 			}
@@ -349,5 +363,75 @@ public class JTransformerSubscription extends DefaultSubscription implements
 			return "'" + str + "'";
 		}
 
-		
+		private List getProjectsWithPifKey(String key) throws CoreException {
+			final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+			
+			List sharingProjects = new ArrayList();
+			for (int i = 0; i < projects.length; i++) {
+				if(projects[i].isOpen()){
+					String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
+							JTransformer.PROLOG_RUNTIME_KEY, null);
+					// TODO: this is an awkward place for this operation. This reset the factbase key
+					//       in the project description after an project with a JT nature is imported   
+//					if(runtimeKey == null && projects[i].hasNature(JTransformer.NATURE_ID) && projects[i] == project) {
+//						runtimeKey = key;
+//						JTransformerPlugin.getDefault().setPreferenceValue(projects[i], 
+//						JTransformer.PROLOG_RUNTIME_KEY, runtimeKey);
+						
+						
+//						final JTransformerNatureAssigner assigner = new JTransformerNatureAssigner(projects[i]);
+//
+//						final String[] newRuntimeKey = new String[1];
+//						final String projectName = projects[i].getName();
+//						final String[] errorOccured = new String[1];
+//						while(newRuntimeKey[0] == null) {
+//						    UIUtils.getDisplay().syncExec(new Runnable() {
+//
+//								public void run() {
+//							    	try {
+//										newRuntimeKey[0] = assigner.selectAlternativePrologInterface(projectName);
+//									} catch (CoreException e) {	
+//										JTUtils.logAndDisplayUnknownError(e);
+//										errorOccured[0] = e.getLocalizedMessage();
+//									}
+//								}
+//						    });
+//						}
+//						if(errorOccured[0] == null){
+//							continue;
+//						}
+//						JTransformerPlugin.getDefault().setPreferenceValue(projects[i], 
+//								JTransformer.PROLOG_RUNTIME_KEY, newRuntimeKey[0]);
+//						runtimeKey = newRuntimeKey[0];
+//						PrologRuntimeSelectionDialog dialog = new PrologRuntimeSelectionDialog(
+//					    		UIUtils.getDisplay().getActiveShell(),keyList,subscriptionsList,defaultName);
+//					    String key = dialog.open();
+//					    
+//					    if(key.length() > 0) {
+//					    	//project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),key);
+//					    	includeReferencedProjects = dialog.isIncludeReferencedProjects();
+//					    	addReferenceToOutputProject = dialog.isAddReferenceToOutputProject();
+//					    	return key;
+//					    } else {
+//					    	includeReferencedProjects = false;
+//					    	addReferenceToOutputProject = false;
+//					    }
+//					    return null;
+
+//						String msg = "Factbase '" + key + "' is not correctly configured for the project '" +projects[i].getName()+"'. "+
+//						"This happens if you import a project with an assigned JTransformer nature."+
+//						"This problem will be fixed in the next release. By now use the following workaround:\n"+
+//						"Please remove the JTransformer nature from project '" + projects[i].getName() + "' and reassign it.";
+//						UIUtils.displayMessageDialog(JTUtils.getShell(true), "JTransformer", msg);
+//						return null;
+//					}
+					if(runtimeKey != null && runtimeKey.equals(key) &&
+					   projects[i].hasNature(JTransformer.NATURE_ID) ){
+						sharingProjects.add(projects[i]);
+					}
+				}
+			}
+			return sharingProjects;
+		}
+
 	}

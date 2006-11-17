@@ -111,8 +111,8 @@ public class JTransformerNatureAssigner {
 	}
 
 	public boolean askAndAddNatures() throws Exception {
-		Set allKeys = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getAllKeys();
-		String factbaseName = selectAlternativePrologInterface(((IProject)projects.get(0)).getName(),allKeys);
+	
+		String factbaseName = selectAlternativePrologInterface(((IProject)projects.get(0)).getName());
 		if(factbaseName == null) {
 			return false;
 		}
@@ -227,8 +227,18 @@ public class JTransformerNatureAssigner {
 		j.schedule();
 	}
 
-	private String selectAlternativePrologInterface(String defaultName, Set allKeys) throws CoreException {
+	/**
+	 * Auxiliary method that can be used to
+	 * selet a prolog interface key based on the existing
+	 * prolog interface registry.
+	 * 
+	 * @param defaultName
+	 * @return
+	 * @throws CoreException
+	 */
+	public String selectAlternativePrologInterface(String defaultName) throws CoreException {
 //		if(allKeys.size() > 0) {
+		Set allKeys = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getAllKeys();
 		    List keyList = new ArrayList();
 		    List subscriptionsList = new ArrayList();
 		    for (Iterator iter = allKeys.iterator(); iter.hasNext();) {
