@@ -291,7 +291,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			return;
 		}
 		Debug.debug("outline remove "+Util.prettyPrint(e.children));
-//		viewer.remove(e.children);
+		viewer.remove(e.children);
 		
 	}
 
