@@ -35,7 +35,7 @@ final class LexicalPrologOutlineSorter extends ViewerSorter {
 		if (e1 instanceof Clause && e2 instanceof Clause) {
 			return ((Comparable) e1).compareTo(e2);
 		}
-		if (e2 instanceof CTermNode && e2 instanceof CTermNode) {
+		if (e1 instanceof CTermNode && e2 instanceof CTermNode) {
 			CTerm t1 = ((CTermNode) e1).term;
 			CTerm t2 = ((CTermNode) e2).term;
 			CCompound pos1 = (CCompound) t1.getAnotation("position");
