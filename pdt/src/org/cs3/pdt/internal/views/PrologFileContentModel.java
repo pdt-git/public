@@ -32,4 +32,6 @@ public interface PrologFileContentModel {
 	public abstract void setRoot(Object input);
 
 	public abstract void dispose();
+
+	public abstract long getLastResetTime();
 }

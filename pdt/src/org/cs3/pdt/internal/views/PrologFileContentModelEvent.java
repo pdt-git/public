@@ -10,16 +10,34 @@ public class PrologFileContentModelEvent extends EventObject {
 	public Object parent;
 	public Object[] children;
 
+	private long timestamp=Long.MAX_VALUE;
+
 	public PrologFileContentModelEvent(ContentModel model, Object parent, Object[] children) {
 		super(model);
 		this.model=model;
 		this.parent=parent;
 		this.children=children;
 	}
+	public PrologFileContentModelEvent(ContentModel model, Object parent, Object[] children,long timestamp) {
+		super(model);
+		this.model=model;
+		this.parent=parent;
+		this.children=children;
+		this.timestamp=timestamp;
+	}
 
 	public PrologFileContentModelEvent(ContentModel model) {
 		super(model);
 		this.model=model;
+	}
+	public PrologFileContentModelEvent(ContentModel model,long timestamp) {
+		super(model);
+		this.model=model;
+		this.timestamp=timestamp;
+	}
+
+	public boolean isObsolet() {
+		return timestamp<model.getLastResetTime();
 	}
 
 }
