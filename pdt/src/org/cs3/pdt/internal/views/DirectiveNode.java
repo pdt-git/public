@@ -69,10 +69,10 @@ public class DirectiveNode implements Directive, IAdaptable,Positional {
 	private Map properties;
 
 	public int compareTo(Object arg0) {
-		if (!(arg0 instanceof Clause)) {
+		if (!(arg0 instanceof Directive)) {
 			return -1;
 		}
-		Clause other = (Clause) arg0;
+		Directive other = (Directive) arg0;
 		return getSourceLocation().compareTo(other.getSourceLocation());
 	}
 

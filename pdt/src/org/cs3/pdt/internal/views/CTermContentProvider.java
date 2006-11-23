@@ -211,26 +211,30 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	
 	public void update(final PrologInterfaceEvent e) {
-		if (viewer == null || viewer.getControl().isDisposed()) {
-			return;
-		}
-		Display display = viewer.getControl().getDisplay();
-		if (Display.getCurrent() != display) {
-			display.asyncExec(new Runnable() {
-				public void run() {
-					update(e);
-				}
-			});
-			return;
-		}
+		
 		try {
 			backend.reset();
-		} catch (PrologInterfaceException e1) {
+		} catch (final PrologInterfaceException e1) {
+			if (viewer == null || viewer.getControl().isDisposed()) {
+				return;
+			}
+			Display display = viewer.getControl().getDisplay();
+			if (Display.getCurrent() != display) {
+				display.asyncExec(new Runnable() {
+					public void run() {
+						UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+								.getErrorMessageProvider(), viewer.getControl().getShell(),
+								PDT.ERR_PIF, PDT.CX_OUTLINE, e1);
+					}
+				});
+				return;
+			}
 			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
 					.getErrorMessageProvider(), viewer.getControl().getShell(),
 					PDT.ERR_PIF, PDT.CX_OUTLINE, e1);
 		}
-		viewer.refresh();
+//		Debug.debug("outline refresh (update)");
+//		viewer.refresh();
 
 	}
 
@@ -240,6 +244,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
+			Debug.debug("outline enqueue on ui thread: add "+Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					childrenAdded(e);
@@ -247,8 +252,10 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		//viewer.refresh();//TODO: fine grained viewer updates
+		
+		Debug.debug("outline add "+Util.prettyPrint(e.children));
 		viewer.add(e.parent, e.children);
+		
 	}
 
 	public void childrenChanged(final PrologFileContentModelEvent e) {
@@ -257,6 +264,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
+			Debug.debug("outline enqueue on ui thread: update "+Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					childrenChanged(e);
@@ -264,6 +272,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
+		Debug.debug("outline update "+Util.prettyPrint(e.children));
 		viewer.update(e.children, null);
 	}
 
@@ -273,6 +282,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
+			Debug.debug("outline enqueue on ui thread: remove "+Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					childrenRemoved(e);
@@ -280,16 +290,18 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		viewer.remove(e.children);
+		Debug.debug("outline remove "+Util.prettyPrint(e.children));
+//		viewer.remove(e.children);
 		
 	}
 
 	public void contentModelChanged(final PrologFileContentModelEvent e) {
-		if (viewer == null || viewer.getControl().isDisposed()) {
+		if (viewer == null || viewer.getControl().isDisposed()||e.isObsolet()) {
 			return;
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
+			Debug.debug("outline enqueue on ui thread: refresh (contentModelChanged) "+Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					contentModelChanged(e);
@@ -297,6 +309,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
+		Debug.debug("outline refresh (contentModelChanged)");
 		viewer.refresh();
 		
 	}

@@ -49,12 +49,12 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private HashMap specificListeners = new HashMap();
 
+	private long timestamp = Long.MIN_VALUE;
 
-
-	public ContentModel(){
+	public ContentModel() {
 		Debug.debug("debug");
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -76,11 +76,12 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	 */
 	public Object[] getChildren(Object parentElement)
 			throws PrologInterfaceException {
-
+		Debug.debug("outline getChildren for " + parentElement);
 		Vector children = null;
 		synchronized (cache) {
 			children = getCachedChildren(parentElement);
 			if (children.isEmpty()) {
+				Debug.debug("outline no children cached for " + parentElement);
 				if (parentElement instanceof CTermNode) {
 					// FIXME: handle partial fetched terms (not implemented yet)
 					CTerm term = ((CTermNode) parentElement).term;
@@ -92,9 +93,15 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 						}
 					}
 				} else if (pif != null && pif.isUp()) {
+					Debug.debug("outline adding oneMomentPlease to "
+							+ parentElement);
 					children.add(oneMomentPlease);
+
 					fetchChildren(parentElement);
 				}
+			} else {
+				Debug.debug("outline found cached children "
+						+ Util.prettyPrint(children));
 			}
 		}
 		return children.toArray();
@@ -102,16 +109,22 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private void fetchChildren(Object parentElement)
 			throws PrologInterfaceException {
+		Debug.debug("outline fetch children of " + parentElement);
 		if (pif == null) {
 			return;
 		}
 		if (getSession().isPending(parentElement)) {
+			Debug.debug("outline fetch request already pending for "
+					+ parentElement);
 			return;
 		}
 
 		if (root == parentElement) {
+			Debug.debug("outline: parent is root");
 			if (getSession().isPending(directiveTicket)
 					|| getSession().isPending(fileAnnosTicket)) {
+				Debug
+						.debug("outline: request for root (fileAnnos or directive ticket) is already pending");
 				return;
 			} else {
 				fetchPredicates();
@@ -170,7 +183,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private void fetchClauses(PredicateNode p) throws PrologInterfaceException {
 		String file = "'" + getPlFile() + "'";
-		String signature = p.getModule() + ": (" + p.getName() + ")	/"
+		String signature = "'"+p.getModule() + "': (" + p.getName() + ")	/"
 				+ p.getArity();
 		AsyncPrologSession session = getSession();
 		String query = "pdt_predicate_clause(" + file + ", " + signature
@@ -184,6 +197,9 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	}
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
+		Debug.debug("goal has solution: ");
+		Debug.debug("  ticket: " + e.ticket);
+		Debug.debug("  	query: " + e.query);
 		if (e.ticket == directiveTicket) {
 			addDirective(e);
 		} else if (e.ticket == fileAnnosTicket) {
@@ -277,6 +293,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		Map properties = PLUtil.listAsMap((CTerm) e.bindings.get("Properties"));
 		try {
 			DirectiveNode directive = new DirectiveNode(properties, file);
+
 			addChild(root, directive);
 		} catch (IOException ex) {
 			// UIUtils.logError(PDTPlugin.getDefault().getErrorMessageProvider(),
@@ -354,7 +371,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 			session = null;
 		}
 		if (this.pif != null) {
-			((PrologInterface2)this.pif).removeLifeCycleHook(this,HOOK_ID);
+			((PrologInterface2) this.pif).removeLifeCycleHook(this, HOOK_ID);
 		}
 		this.pif = pif;
 		if (this.pif != null) {
@@ -382,55 +399,45 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#reset()
 	 */
 	public void reset() throws PrologInterfaceException {
+		synchronized (this) {
+			timestamp = System.currentTimeMillis();
+		}
 		if (session != null) {
 			session.abort();
-			
+
 		}
 		Vector children = getCachedChildren(root);
 		synchronized (cache) {
 			cache.clear();
 
 		}
+
 		fireContentModelChanged();
 	}
 
-	
-
-
 	private void addChildren(Object parent, Collection collection) {
-		Vector children=null;
-		Object[] removed=null;
+		Vector children = null;
+		Object[] removed = null;
 		synchronized (cache) {
 			children = getCachedChildren(parent);
 			if (children.contains(oneMomentPlease)) {
-				removed=children.toArray();
+				removed = children.toArray();
 				children.clear();
-				
+
 			}
 			children.addAll(collection);
 		}
-		if(removed!=null){
+		fireChildrenAdded(parent, collection.toArray());
+		if (removed != null) {
 			fireChildrenRemoved(parent, removed);
 		}
-		fireChildrenAdded(parent, collection.toArray());
+
 	}
 
 	private void addChild(Object parent, Object child) {
-		Vector children=null;
-		Object[] removed=null;
-		synchronized (cache) {
-			children = getCachedChildren(parent);
-			if (children.contains(oneMomentPlease)) {
-				removed=children.toArray();
-				children.clear();
-				
-			}
-			children.add(child);
-		}
-		if(removed!=null){
-			fireChildrenRemoved(parent, removed);
-		}
-		fireChildrenAdded(parent, new Object[] { child });
+		Vector children = new Vector();
+		children.add(child);
+		addChildren(parent, children);
 	}
 
 	private Vector getCachedChildren(Object parent) {
@@ -448,7 +455,7 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 
 	private void fireChildrenAdded(Object parent, Object[] children) {
 		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
-				parent, children);
+				parent, children, getLastResetTime());
 		HashSet clone = new HashSet();
 		synchronized (listeners) {
 			clone.addAll(listeners);
@@ -463,9 +470,10 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		}
 
 	}
+
 	private void fireChildrenRemoved(Object parent, Object[] children) {
 		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
-				parent, children);
+				parent, children, getLastResetTime());
 		HashSet clone = new HashSet();
 		synchronized (listeners) {
 			clone.addAll(listeners);
@@ -478,22 +486,23 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 					.next();
 			l.childrenRemoved(e);
 		}
-		
+
 	}
-	
-	
+
 	private void fireContentModelChanged() {
-		
-		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this);
+
+		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
+				getLastResetTime());
 		HashSet clone = new HashSet();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
 		synchronized (specificListeners) {
-			for (Iterator iter = specificListeners.values().iterator(); iter.hasNext();) {
+			for (Iterator iter = specificListeners.values().iterator(); iter
+					.hasNext();) {
 				Collection c = (Collection) iter.next();
 				clone.addAll(c);
-			}			
+			}
 		}
 		for (Iterator iter = clone.iterator(); iter.hasNext();) {
 			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
@@ -502,7 +511,6 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 		}
 	}
 
-	
 	public void addPrologFileContentModelListener(
 			PrologFileContentModelListener l) {
 		if (!listeners.contains(l)) {
@@ -591,21 +599,25 @@ public class ContentModel extends DefaultAsyncPrologSessionListener implements
 	}
 
 	public void dispose() {
-				
+
 		try {
 			setPif(null);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		}
 		cache.clear();
-		cache=null;	
+		cache = null;
 		listeners.clear();
-		listeners=null;
+		listeners = null;
 		specificListeners.clear();
-		specificListeners=null;
-		file=null;
-		root=null;
-		
+		specificListeners = null;
+		file = null;
+		root = null;
+
+	}
+
+	public synchronized long getLastResetTime() {
+		return timestamp;
 	}
 
 }

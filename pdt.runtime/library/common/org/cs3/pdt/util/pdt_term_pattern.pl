@@ -99,7 +99,7 @@ arg_match(Pattern,Input,Module,N):-
 arg_match($(Data),Input,Module):-
     !,
     input_expand(Input,Module,Data).
-arg_match(§(Data),Input,Module):-
+arg_match(a(Data),Input,Module):-
     !,
     input_annotation(Input,Module,Data).
 arg_match(#(Input),Input,_Module):-
