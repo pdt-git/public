@@ -1,4 +1,5 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
+:- use_module(library('/org/cs3/pdt/util/pdt_util_set')).
 
 %maps integers to current functors 
 create_functor_table(Tbl, Count):-
@@ -84,6 +85,42 @@ create_random_file(File):-
     close(Stream).
 
 
+
+gen_test_term(Term):-
+    repeat,
+   	create_random_clause([_A,_B,_C,_A,_B,_C,a,b,c,2,3,4,'aj caramba'],5,Term),
+   	nonvar(Term),
+   	!.
+
+benchmark_assert(N):-
+    flag(clause_counter,_,0),
+    repeat,
+    	gen_test_term(Term),
+    	assert(benchmark(Term)),
+    	flag(clause_counter,C,C+1),
+    	C>N,
+    !.
+benchmark_record(N):-
+    flag(clause_counter,_,0),
+    repeat,
+    	gen_test_term(Term),
+       	recorda(benchmark,Term),
+    	flag(clause_counter,C,C+1),
+    	C>N,
+    !.
+benchmark_rbtree(O):-
+    pdt_set_empty(S0),
+    benchmark_rbtree(1,O,S0,_).    
+benchmark_rbtree(N,O,S,S):-    
+    N>O,
+    !.
+benchmark_rbtree(N,O,S0,S2):-        
+   	gen_test_term(Term),
+   	pdt_set_add(S0,Term,S1),
+   	M is N +1,
+   	benchmark_rbtree(M,O,S1,S2).
+   	
+   	
 load_test:-
     flag(file_counter,_,0),
 	repeat,
