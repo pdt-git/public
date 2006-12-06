@@ -716,6 +716,7 @@ new_id(New) :-
 new_id(New) :-
         nonvar(New),
         !,
+        debugme,
         sformat(Msg,'new_id: variable already bound: ~w~n',[New]),
         print(Msg),
         flush_output,
