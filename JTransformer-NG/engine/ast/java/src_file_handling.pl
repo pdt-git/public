@@ -104,8 +104,15 @@ sorted_modified_toplevels(Toplevel):-
 */
 
 dirty_class(Class):-
-    bagof(Tree,(dirty_tree(Tree),enclClass(Tree,Class)),Tree).
+    bagof(Tree,(dirty_tree(Tree),dirty_class_(Tree,Class)),Tree).
 
+dirty_class_(Tree,Class):-
+%    enclosing(Tree,Encl),
+    aopT(Jp,_,Tree),
+    enclClass(Jp,Class),
+    !.
+dirty_class_(Tree,Class):-
+	enclClass(Tree,Class).	
 
 /*
 	retract_api_meta_data.
