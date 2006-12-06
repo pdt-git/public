@@ -303,6 +303,9 @@ print_square_brackets(_dim) :-
     succ(_dimDec, _dim),
     print_square_brackets(_dimDec).
 
+/**
+ * gen_new_array_elemtype(+Scope,+Dims, +Elemtype, +Elems)
+ */
 gen_new_array_elemtype(_,_, 'null', _) :-!.
 
 gen_new_array_elemtype(Scope,[], type(Kind,Ref,Dim), _elems) :-
