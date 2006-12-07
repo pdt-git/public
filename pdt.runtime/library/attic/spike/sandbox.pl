@@ -16,6 +16,52 @@ init_layout_cx(Cx1):-
     	module=user,
     	stream=current_output
     ], Cx1 ).
+    
+do_term(Term,CxIn,CxOut):-
+    source_term_functor(Term,':-',1),
+    !,
+    do_directive(Term,CxIn,CxOut).
+do_term(Term,CxIn,CxOut):-
+    source_term_functor(Term,':-',2),
+    !,
+    do_clause(Term,CxIn,CxOut).
+do_term(Term,CxIn,CxOut):-
+    do_fact(Term,CxIn,CxOut).
+
+
+
+do_directive(Term,CxIn,CxOut):-
+    output_op(':-',CxIn,Cx1),
+    output(' ',Cx1,Cx2),
+    inc_indent(Cx2,Cx3),
+	push_mode(body,Cx3,Cx4),
+	source_term_arg(1,Term,Body),
+    do_body(Body,Cx4,Cx5),
+    dec_indent(Cx5,CxOut).
+
+do_clause(Term,CxIn,CxOut):-
+    source_term_arg(1,Term,Head),
+    source_term_arg(2,Term,Body),
+    push_mode(head,CxIn,Cx1),
+    do_head(Head,Cx1,Cx2),
+    pop_mode(Cx2,Cx3),
+	output_op(':-',Cx3,Cx4),
+	inc_indent(Cx4,Cx5),
+	new_line(Cx5,Cx6),
+	align(0,Cx6,Cx7),
+	push_mode(body,Cx7,Cx8),
+	do_body(Body,Cx8,Cx9),
+	pop_mode(Cx9,Cx10),
+	dec_indent(Cx10,CxOut).
+
+do_head(Term,CxIn,CxOut):-
+    push_mode(head,CxIn,Cx1),
+    output(Head,Cx1,Cx2),
+    pop_mode(Cx2,CxOut).
+
+do_body(Term,CxIn,CxOut) :-
+    do_goal(Term,CxIn,CxOut).
+    
 do_goal(Goal,CxIn, CxOut):-
 	meta_call(CxIn,Goal),
 	!,
@@ -107,7 +153,9 @@ goal_left_paren(Goal,CxIn,CxOut):-
 	align(0,Cx2,Cx3),
     push_functor(Goal,Cx3,Cx4),
     push_mode(operands,Cx4,CxOut).
-goal_left_paren(_,Cx,Cx).
+goal_left_paren(Goal,CxIn,CxOut):-
+	push_functor(Goal,CxIn,Cx1),
+    push_mode(operands,Cx1,CxOut).
 
 goal_right_paren(Goal,CxIn,CxOut):-    	
 	pop_functor(CxIn,Cx0),
@@ -118,7 +166,9 @@ goal_right_paren(Goal,CxIn,CxOut):-
 	new_line(Cx2,Cx3),
 	align(0,Cx3,Cx4),
 	output(')',Cx4,CxOut).
-goal_right_paren(_,Cx,Cx).
+goal_right_paren(_,CxIn,CxOut):-
+	pop_functor(CxIn,Cx1),
+    pop_mode(Cx1,CxOut).
 
 
 conjunction(Goal,_CxIn,Goals):-
@@ -241,7 +291,7 @@ inc_indent(CxIn,CxOut):-
     layout_indent_base(CxIn,Old),
     New is Old + 1,
     layout_set_indent_base(CxIn,New,CxOut).
-dec_indent(CxOut,CxOut):-
+dec_indent(CxIn,CxOut):-
     layout_indent_base(CxIn,Old),
     New is Old - 1,
     layout_set_indent_base(CxIn,New,CxOut).
@@ -261,9 +311,11 @@ align(Pos,CxIn,CxOut):-
     ).
 
 
-n_times(0,_Goal).
+n_times(0,_Goal):-
+    !.
 n_times(N,_Goal):-
     N<0,
+    !,
     throw(domain_error(positive_integer,N)).
 n_times(N,Goal):-
     Goal,
@@ -273,14 +325,26 @@ n_times(N,Goal):-
 needs_parenthesis(Goal,Cx):-
     term_op(Goal,Cx,Op),
     (	peek_mode(Cx,arguments)
-    ->	arg_needs_parenthesis
+    ->	arg_needs_parenthesis(Goal,Cx)
     ;	op_needs_parenthesis(Op,Cx)
     ).
-    
+
+
+op_needs_parenthesis(op(_,T,_),Cx):-
+    infix_op_X(T),
+	(	peek_mode(Cx,Mode)
+	->	mode_needs_parenthesis(Mode)
+	;	true
+	),
+    !.
 op_needs_parenthesis(op(P,_T,_O),Cx):-
 	peek_op(Cx,op(NP,_NT,_NO)),
 	P>NP. % No? YES! ;-)
-	
+arg_needs_parenthesis(Goal,_):-
+    source_term_functor(Goal,',',2).
+mode_needs_parenthesis(clause_body).
+mode_needs_parenthesis(directive_body).
+
 new_line(CxIn,CxOut):-
     output_raw('\n',CxIn),
     layout_set_indent_current(CxIn,0,CxOut).

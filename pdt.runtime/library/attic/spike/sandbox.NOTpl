@@ -1,7 +1,11 @@
 /* 1 left comment */
-goal:1 ',' % 1 right comment
-/* goal 1 left comment */
+goal:1',' % 1 right comment
+/* 2 left comment */
 goal:2	% 2 right comment.
+
+
+
+
 	/* 1 left comment */
 	goal:1 % 1 right comment
 	/* 2 left comment */
@@ -13,9 +17,28 @@ imc	goal:2 % 1 right comment.
 head:- % clause right comment
     body.
     
-metacall( simple_goal ).    
+metacall( simple_goal, etc ).    
 metacall(
 	/* 1 left comment */
 	goal:1 % 1 right comment
 ).    
 
+/* 1 left comment */
+lp	goal:1 % 1 right comment
+rp.
+
+.(data:1,rec:2) --> [data:1,etc:2]
+
+bla:-
+	(	a 
+	; 	b
+	).
+	
+a + b:-
+	(	a
+	+	b
+	).
+:- (	a
+	+	n
+	)
+			
