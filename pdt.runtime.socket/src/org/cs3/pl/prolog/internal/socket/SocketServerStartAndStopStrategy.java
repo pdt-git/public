@@ -44,22 +44,21 @@
 package org.cs3.pl.prolog.internal.socket;
 
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
-import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
@@ -94,6 +93,50 @@ public class SocketServerStartAndStopStrategy implements
 
 	}
 
+	/**
+	 * @author Hasan Abdel Halim
+	 * @param executable_name
+	 * @return The first path that contains the executable name.
+	 * @throws IOException
+	 */
+	public static String AbsolutePath(String executable_name) throws IOException{
+		Process process = null ;
+		Runtime runtime = Runtime.getRuntime();
+		
+		if (Util.isWindoze()){
+			process = runtime.exec("cmd.exe /c echo %PATH%");
+			BufferedReader br = new BufferedReader(
+					new InputStreamReader(process.getInputStream()));
+			
+			String path;
+			path = br.readLine();
+			if (path!=null){
+				String[] paths = Util.split(path, ";");
+
+				File exeFile;
+				for (int i = 0; i < paths.length; i++) {
+					//TODO check executable name, it should be single word.
+					String currPath = paths[i]+ "\\" + "plwin.exe";
+					exeFile = new File(currPath);
+					if(exeFile.exists())
+						return currPath;
+				}		
+			}
+			
+		}else {
+			// We assume the rest to be Linux/Unix based.
+			process = runtime.exec("which "+ executable_name);
+			BufferedReader br = new BufferedReader(
+					new InputStreamReader(process.getInputStream()));
+			String path;
+			path = br.readLine();
+			if (path!=null)
+				return path;
+		}
+		
+		return "";
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -120,7 +163,15 @@ public class SocketServerStartAndStopStrategy implements
 		String envstring = pif.getOption(SocketPrologInterface.ENVIRONMENT);
 		String engineDir = Util.prologFileName(pif.getFactory()
 				.getResourceLocator().resolve("/"));
-
+/*	//FIXME Disabled Temp. 
+		try {
+			System.err.println(AbsolutePath(executable));
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		
+		*/
 		File tmpFile = null;
 		try {
 			tmpFile = File.createTempFile("socketPif", null);
@@ -182,7 +233,7 @@ public class SocketServerStartAndStopStrategy implements
 				process = Runtime.getRuntime().exec(commandArray, envarray);
 			}
 			
-
+			
 			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
 			// TR: Do not change this constructor call!
 			// J2ME requirement: FileWriter(File,boolean) -> FileWriter(String, boolean)
