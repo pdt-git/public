@@ -215,11 +215,19 @@ map_type_term(TypeTerm, FQNBrackets):-
     map_to_basic_or_class(TypeName,Arity,TypeTerm),
     !.    
 map_type_term(type(class,Id,0), FQN):-
+%    resolve_class(FQN),
     fullQualifiedName_ri(Id,FQN),
     !.
 map_type_term(type(class,Id,Arity), FQNBrackets):-
+    nonvar(Id),
     fullQualifiedName_ri(Id,FQN),
     type_with_brackets(FQN,Arity,FQNBrackets),
+    !.
+
+map_type_term(type(class,Id,Arity), FQNBrackets):-
+    nonvar(FQNBrackets),
+    type_with_brackets(FQN,Arity,FQNBrackets),
+    fullQualifiedName_ri(Id,FQN),
     !.
 
 map_to_basic_or_class(TypeName,Arity,TypeTerm):-
