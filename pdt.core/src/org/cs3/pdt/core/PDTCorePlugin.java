@@ -311,7 +311,16 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						"If this flag is set, the PDT will automaticaly (re-)consult any source file,"
 								+ "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental "
 								+ "feature and defaults to \"false\" for 0.1.x",
-						Option.FLAG, "false")
+						Option.FLAG, "false"),
+				new SimpleOption(
+						PDTCore.PREF_IGNORE_HIDDEN_LIBS,
+						"Ignore Hidden Libraries",
+						"If this flag is set, the PDT will ignore files that are marked as hidden when looking up " +
+						"predicates and the like. For example, the PDT marks all of its own source code libraries as hidden. " +
+						"Enabling this flag is usefull if you want to edit different versions of the PDT source " +
+						"files than the once the PDT is currently using itself.",
+						Option.FLAG,
+						"false")
 
 		};
 

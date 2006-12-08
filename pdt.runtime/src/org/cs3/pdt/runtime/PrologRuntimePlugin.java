@@ -369,14 +369,24 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				File file = new File(url.getFile());
 				String path = Util.prologFileName(file);
 
-				IConfigurationElement[] depElms = elm.getChildren();
+				IConfigurationElement[] childElms = elm.getChildren();
+				Map libAttrs = new HashMap();
 				Set deps = new HashSet();
-				for (int k = 0; k < depElms.length; k++) {
-					IConfigurationElement depElm = depElms[k];
-					deps.add(depElm.getAttribute("library"));
+				for (int k = 0; k < childElms.length; k++) {
+					IConfigurationElement childElm = childElms[k];
+					if("dependency".equals(childElm.getName())){
+						deps.add(childElm.getAttribute("library"));
+					}
+					else if("attribute".equals(childElm.getName())){
+						libAttrs.put(childElm.getAttribute("id"), childElm.getAttribute("value"));
+					}
+					else {
+						Debug.warning("within <library> element, i found an unexpected child element: "+childElm.getName());
+					}
 				}
+				
 				PrologLibrary lib = new DefaultPrologLibrary(id, deps, alias,
-						path);
+						path,libAttrs);
 				getLibraryManager().addLibrary(lib);
 
 			}

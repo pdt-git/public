@@ -128,7 +128,7 @@ public class PDTCore {
 	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
 	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
 	public static final String PREF_CONVERT_CHARACTER_OFFSETS = "pdt.convert.character.offsets";
-	
+	public static final String PREF_IGNORE_HIDDEN_LIBS = "pdt.ignore.hidden.libs";
 
 	public static final String BUILTIN_INDEX_FILE = "builtin_predicates.idx";
 	public static final String CACHE_DIR = "cache";
@@ -148,6 +148,9 @@ public class PDTCore {
 
 
 	public static final int CX_CHECK_PROJECTS = -6;
+
+
+	
 
 
 	

@@ -44,16 +44,29 @@
        <library
              alias="library"
              id="pdt.runtime.library.pif"
-             path="library/pif/"/>
+             path="library/pif/">
+          <attribute
+                id="hidden"
+                value="true"/>
+             
+             </library>
 		<library
-             alias="library"
-             id="pdt.runtime.library.common"
-             path="library/common/"/>
+        alias="library"
+        id="pdt.runtime.library.common"
+        path="library/common/">
+     <attribute
+           id="hidden"
+           value="true"/>
+  </library>
  
   <library
         alias="library"
         id="pdt.runtime.library.attic"
-        path="library/attic/"/>   
+        path="library/attic/">
+     <attribute
+           id="hidden"
+           value="true"/>
+  </library>   
                   
     </extension>
  

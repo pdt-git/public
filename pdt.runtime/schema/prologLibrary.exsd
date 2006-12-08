@@ -55,7 +55,10 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="dependency" minOccurs="0" maxOccurs="unbounded"/>
+            <choice minOccurs="0" maxOccurs="unbounded">
+               <element ref="dependency"/>
+               <element ref="attribute"/>
+            </choice>
          </sequence>
          <attribute name="id" type="string">
             <annotation>
@@ -95,6 +98,30 @@
             <annotation>
                <documentation>
                   Id of a library
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="attribute">
+      <annotation>
+         <documentation>
+            Used to add a application-specific attribute to this library
+         </documentation>
+      </annotation>
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  attribute name
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="value" type="string" use="default" value="true">
+            <annotation>
+               <documentation>
+                  Attribute value. Defaults to true.
                </documentation>
             </annotation>
          </attribute>

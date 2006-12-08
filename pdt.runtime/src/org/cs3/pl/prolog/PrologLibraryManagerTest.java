@@ -318,6 +318,9 @@ public class PrologLibraryManagerTest extends TestCase {
 		public Set getDependencies() {
 			return deps;
 		}
+		public String getAttributeValue(String attr) {
+			return null;
+		}
 		
 	}
 	

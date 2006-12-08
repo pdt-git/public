@@ -191,7 +191,18 @@ public class MetadataSubscription extends DefaultSubscription implements
 			if(map==null){
 				throw new RuntimeException("could not configure cache dir: query failed.");
 			}
+			
+			//forward value of the "ignore_hidden_libs" flag
+			String value =  PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_IGNORE_HIDDEN_LIBS, "false");
+			map=initSession.queryOnce("pdt_util:pdt_set_preference_value(ignore_hidden_libs,"+value+")");
+			Debug.info("setting ignore_hidden_libs to "+value);
+					
+			if(map==null){
+				throw new RuntimeException("could not configure ignore_hidden_libs: query failed.");
+			}
+			
 
+			
 	}
 
 	public void afterInit(PrologInterface pif) {
