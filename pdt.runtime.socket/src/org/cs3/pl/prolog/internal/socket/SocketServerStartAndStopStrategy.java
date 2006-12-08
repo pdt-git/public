@@ -94,47 +94,101 @@ public class SocketServerStartAndStopStrategy implements
 	}
 
 	/**
+	 * 	Checks whether SWI-Prolog's executable exists or not, If it was found then it returns
+	 *  the absolute path of the executable.
+	 * 
 	 * @author Hasan Abdel Halim
 	 * @param executable_name
 	 * @return The first path that contains the executable name.
 	 * @throws IOException
 	 */
-	public static String AbsolutePath(String executable_name) throws IOException{
+	
+	public static String[] findAbsolutePath(String[] command) throws IOException{
+		int execPos = 0;
+		boolean useWhich;
 		Process process = null ;
 		Runtime runtime = Runtime.getRuntime();
+		String execName = "";
+		String pathCmd;
+		String match;
+		String[] execCommand = (String[]) command.clone();
 		
+		//FIXME We need to decide on pattern for the command line.		
 		if (Util.isWindoze()){
-			process = runtime.exec("cmd.exe /c echo %PATH%");
-			BufferedReader br = new BufferedReader(
-					new InputStreamReader(process.getInputStream()));
-			
-			String path;
-			path = br.readLine();
-			if (path!=null){
-				String[] paths = Util.split(path, ";");
-
-				File exeFile;
-				for (int i = 0; i < paths.length; i++) {
-					//TODO check executable name, it should be single word.
-					String currPath = paths[i]+ "\\" + "plwin.exe";
-					exeFile = new File(currPath);
-					if(exeFile.exists())
-						return currPath;
-				}		
-			}
-			
-		}else {
-			// We assume the rest to be Linux/Unix based.
-			process = runtime.exec("which "+ executable_name);
-			BufferedReader br = new BufferedReader(
-					new InputStreamReader(process.getInputStream()));
-			String path;
-			path = br.readLine();
-			if (path!=null)
-				return path;
+			match = "plwin";
+			pathCmd = "cmd.exe /c echo %PATH%";
+			useWhich = false;			
+		}else{
+			// We assume the rest to be Unix/Linux based.
+			match = "xpce";
+			pathCmd = "";
+			useWhich = true;
 		}
 		
-		return "";
+		if (execCommand.length < 1)
+			return null;
+		
+		if (execCommand.length == 1)
+			execName = execCommand[0];
+		else{
+			boolean found = false;
+			
+			for (int i = 0; i < execCommand.length; i++) {
+				if(execCommand[i].indexOf(match) != -1){
+					found = true;
+					execName = match;
+					execPos = i;
+					break;
+				}
+			}
+			
+			/*
+			 * FIXME it is hard to predict the executable name if we didn't decide on pattern.
+			 * So temperary, we return null for all commands other than match.
+			 */ 
+			if (!found) return null;
+		}
+		
+		if(useWhich)
+			//TODO shall we look for the env. variables as we do for Windows ?
+			process = runtime.exec("which "+ execName);
+		else
+			process = runtime.exec(pathCmd);
+		
+		BufferedReader br = new BufferedReader( 
+					new InputStreamReader(process.getInputStream()));
+		String path = br.readLine();
+		
+		if (path == null)
+			return null;
+		
+		if(useWhich)
+			execCommand[execPos] = path;
+		else{
+			//Searches recursively within the directories found under PATH env. variable.
+			String[] paths = Util.split(path, ";");
+			File exeFile;
+			boolean found = false;
+			
+			for (int i = 0; i < paths.length; i++) {
+				
+				if (execName.indexOf(".exe")== -1)
+					execName += ".exe";
+				
+				String currPath = paths[i]+ "\\" + execName;
+				exeFile = new File(currPath);
+				
+				if(exeFile.exists()){
+					execCommand[execPos] = currPath;
+					found = true;
+					break;
+				}
+			}
+			
+			if(!found) return null;
+		}
+		
+		return execCommand;
 	}
 	
 	/*
@@ -163,15 +217,7 @@ public class SocketServerStartAndStopStrategy implements
 		String envstring = pif.getOption(SocketPrologInterface.ENVIRONMENT);
 		String engineDir = Util.prologFileName(pif.getFactory()
 				.getResourceLocator().resolve("/"));
-/*	//FIXME Disabled Temp. 
-		try {
-			System.err.println(AbsolutePath(executable));
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		
-		*/
+
 		File tmpFile = null;
 		try {
 			tmpFile = File.createTempFile("socketPif", null);
@@ -201,6 +247,23 @@ public class SocketServerStartAndStopStrategy implements
 				"['" + Util.prologFileName(tmpFile) + "']",
 
 		};
+
+		/*
+		 * Checks whether the SWI-Prolog exists 
+		 * @author Hasan Abdel Halim
+		 * 
+		 */
+		try {
+			command = findAbsolutePath(command);
+			if(command==null)
+				throw new RuntimeException("SWI-Prolog executable was not found.");
+			
+		} catch (IOException e2) {
+			e2.printStackTrace();
+			return null;
+		}
+		
+	
 		String[] commandArray = new String[command.length + args.length];
 		System.arraycopy(command, 0, commandArray, 0, command.length);
 		System.arraycopy(args, 0, commandArray, command.length, args.length);
