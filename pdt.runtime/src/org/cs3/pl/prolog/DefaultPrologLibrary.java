@@ -41,7 +41,9 @@
 
 package org.cs3.pl.prolog;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -51,6 +53,7 @@ public class DefaultPrologLibrary implements PrologLibrary {
 	private Set deps;
 	private String alias;
 	private String path;
+	private HashMap attributes= new HashMap();
 
 	public DefaultPrologLibrary(String id, String[] deps, String alias, String path) {
 		super();
@@ -71,6 +74,11 @@ public class DefaultPrologLibrary implements PrologLibrary {
 		this.path = path;
 	}
 
+	public DefaultPrologLibrary(String id, Set deps, String alias, String path, Map libAttrs) {
+		this(id,deps,alias,path);
+		this.attributes.putAll(libAttrs);
+	}
+
 	public String getId() {		
 		return this.id;
 	}
@@ -85,6 +93,10 @@ public class DefaultPrologLibrary implements PrologLibrary {
 
 	public Set getDependencies() {
 		return this.deps;
+	}
+
+	public String getAttributeValue(String attr) {
+		return (String) attributes.get(attr);
 	}
 
 }

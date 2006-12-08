@@ -78,7 +78,11 @@ public class PLUtil {
 			sb.append("(	user:file_search_path(" + lib.getAlias() + ", '"
 					+ lib.getPath() + "')" + "->	true"
 					+ ";	user:assert(file_search_path(" + lib.getAlias()
-					+ ", '" + lib.getPath() + "'))" + ")");
+					+ ", '" + lib.getPath() + "'))");
+			if("true".equals(lib.getAttributeValue("hidden"))){
+				sb.append(", pdt_util:assert(pdt_hidden_path('"+lib.getPath()+"'))");
+			}
+			sb.append(")");
 		}
 
 		session.queryOnce(sb.toString());

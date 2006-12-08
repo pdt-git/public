@@ -73,4 +73,16 @@ public interface PrologLibrary {
 	 * @return a list of identifiers of libraries this library depends on.
 	 */
 	public Set getDependencies();
+	
+	/**
+	 * retrieve application-specific data from the library.
+	 * 
+	 * Clients may attach additional, string valued attributes to the library that are relevant 
+	 * to the respective application.
+	 * The pdt core for example adds a flag "hidden" which is set for all and runtime libraries.
+	 *  
+	 * @param attr the attribute name
+	 * @return the attribute value or null if not set.
+	 */
+	public String getAttributeValue(String attr);
 }

@@ -72,6 +72,7 @@
              alias="library"
              id="pdt.console.library"
              path="pl">
+                     <attribute id="hidden" value="true"/>
        </library>
     </extension>
     <extension

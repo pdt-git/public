@@ -51,10 +51,11 @@
 	pdt_chop_after/4,
 	pdt_remove_duplicates/2,
 	pdt_count/2,
-	pdt_unique/2
+	pdt_unique/2,
+	pdt_hidden_path/1
 ]).
 
-
+:- use_module(library('/org/cs3/pdt/util/pdt_preferences')).
 
 :-module_transparent pdt_count/2.
 pdt_count(Goal,N):-
@@ -105,7 +106,31 @@ pdt_file_spec(FileSpec, Abs):-
 	filespec(FileSpec, Abs).
 
 filespec(FileSpec, Abs):-
-	absolute_file_name(FileSpec,[file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs).
+	absolute_file_name(FileSpec,[solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
+	\+ hidden(Abs).
+
+
+
+:- pdt_add_preference(
+	ignore_hidden_libs,
+	'Hide PDT libraries', 
+	'If true, pdt_file_spec will not retrieve any absolute paths starting with a prefix marked as hidden.
+	 To mark a particular prefix as hidden, add clauses to the dynamic predicate pdt_hidden_path/1.
+	 The PDT by default marks all its libraries as hidden. In situations when you are working
+	 with PDT source code and do not want to mix it up with the code loaded by the PDT core, it may be usefull 
+	 to turn on this option. By default it is set to false.',
+	false
+).
+
+
+:- dynamic pdt_hidden_path/1.
+:- multifile pdt_hidden_path/1.
+
+hidden(Abs):-
+	pdt_preference_value(ignore_hidden_libs,true),
+	pdt_hidden_path(Prefix),
+	atom_concat(Prefix,_,Abs),
+	!.    
 	
 :-dynamic fileref/2.
 :-index(fileref(1,1)).
