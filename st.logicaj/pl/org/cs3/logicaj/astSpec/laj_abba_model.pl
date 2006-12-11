@@ -69,17 +69,18 @@ abba:property(laj_aspect, propertytype(position(int, int))).
 abba:property(laj_aspect, propertytype(file(string))).
 
 delete_logicaj_abba_model :-
-  forall((
-      abba:node(ID, Kind, Name), 
-      logicaj_abba_node_type(Kind)
-    ),(
-      retract(abba:node(ID, Kind, Name)),
+%  forall((
+%      abba:node(ID, Kind, Name), 
+%      logicaj_abba_node_type(Kind)
+%    ),(
+      retractall(abba:node(ID, Kind, Name)),
       retractall(abba:property(ID, _)),
       retractall(abba:within(ID, _)),
       retractall(abba:ri_within(ID, _)),
       retractall(abba:edge(_,_,ID, _)),
-      retractall(abba:edge(_,_,_, ID))
-    )).
+      retractall(aspect_construct(_,_,_,_,ID)),
+      retractall(abba:edge(_,_,_, ID)).
+%    )).
       
 logicaj_abba_node_type(laj_effect).
 logicaj_abba_node_type(laj_analysis).
