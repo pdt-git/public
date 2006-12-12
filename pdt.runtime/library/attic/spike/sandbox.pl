@@ -1,7 +1,10 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_source_term')).
+
+:- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 
-:- pdt_define_context(layout(mode,op,offset,row,col,indent_base,indent_current,module,stream)).
+
+:- pdt_define_context(layout(mode,op,offset,row,col,indent_base,indent_current,module,stream,last_pred)).
 
 init_layout_cx(Cx1):-
     layout_new(Cx0),
@@ -14,24 +17,54 @@ init_layout_cx(Cx1):-
     	indent_base=0,
     	indent_current=0,
     	module=user,
-    	stream=current_output
+    	stream=current_output,
+    	last_pred=[]
     ], Cx1 ).
+
+
+do_members(Terms):-
+    init_layout_cx(Cx0),
+	do_members(Terms,Cx0,_).    
+
+do_members([],Cx,Cx).
+do_members([Member|Members],CxIn,CxOut):-
+    do_member(Member,CxIn,CxNext),
+    do_members(Members,CxNext,CxOut).
     
-do_term(Term,CxIn,CxOut):-
-    source_term_functor(Term,':-',1),
+do_member(Term,CxIn,CxOut):-
+    (	source_term_property(Term,clause_of,Pred)
+    ->	do_clause(Pred,Term,CxIn,Cx1)
+    ;	do_directive(Term,CxIn,Cx1)
+    ),
+    output('.',Cx1,CxOut).
+    
+do_clause(Pred,Term,CxIn,CxOut):-
+    layout_last_pred(CxIn,Pred),
     !,
-    do_directive(Term,CxIn,CxOut).
-do_term(Term,CxIn,CxOut):-
+    new_line(CxIn,Cx1),
+    do_clauseX(Term,Cx1,CxOut).
+do_clause(Pred,Term,CxIn,CxOut):-
+    layout_set_last_pred(CxIn,Pred,Cx1),
+    new_line(Cx1,Cx2),
+    new_line(Cx2,Cx3),
+    do_clauseX(Term,Cx3,CxOut).
+
+do_clauseX(Term,CxIn,CxOut):-
+    \+ source_term_var(Term),
     source_term_functor(Term,':-',2),
     !,
-    do_clause(Term,CxIn,CxOut).
-do_term(Term,CxIn,CxOut):-
+    do_rule(Term,CxIn,CxOut).
+do_clauseX(Term,CxIn,CxOut):-
     do_fact(Term,CxIn,CxOut).
 
 
+do_fact(Term,CxIn,CxOut):-
+    do_head(Term,CxIn,CxOut).
 
 do_directive(Term,CxIn,CxOut):-
-    output_op(':-',CxIn,Cx1),
+    layout_set_last_pred(CxIn,[],Cx0),
+    new_line(Cx0,Cx05),
+    output_op(':-',Cx05,Cx1),
     output(' ',Cx1,Cx2),
     inc_indent(Cx2,Cx3),
 	push_mode(body,Cx3,Cx4),
@@ -39,7 +72,7 @@ do_directive(Term,CxIn,CxOut):-
     do_body(Body,Cx4,Cx5),
     dec_indent(Cx5,CxOut).
 
-do_clause(Term,CxIn,CxOut):-
+do_rule(Term,CxIn,CxOut):-
     source_term_arg(1,Term,Head),
     source_term_arg(2,Term,Body),
     push_mode(head,CxIn,Cx1),
@@ -54,9 +87,9 @@ do_clause(Term,CxIn,CxOut):-
 	pop_mode(Cx9,Cx10),
 	dec_indent(Cx10,CxOut).
 
-do_head(Term,CxIn,CxOut):-
+do_head(Head,CxIn,CxOut):-
     push_mode(head,CxIn,Cx1),
-    output(Head,Cx1,Cx2),
+    output_term(Head,Cx1,Cx2),
     pop_mode(Cx2,CxOut).
 
 do_body(Term,CxIn,CxOut) :-
@@ -109,7 +142,7 @@ do_meta_call(Goal,CxIn, CxOut):-
 	align(0,Cx7,Cx8),
 	source_term_arg(2,Goal,Arg2),	
 	output_goal(Arg2,Cx8,CxOut).
-do_meta_call(Goal,CxIn, CxOut):-
+do_meta_call(Goal,CxIn, CxOut):-    
 	source_term_functor(Goal,Name,Arity),
 	output_functor(Name,CxIn,Cx1),
 	output_args(Arity,Goal,Cx1,CxOut).	
@@ -179,10 +212,11 @@ conjunction(Goal,_CxIn,Goals):-
 
 do_conjunction([],Cx,Cx).
 do_conjunction([Goal],CxIn,CxOut):-
+    !,
     do_goal(Goal,CxIn,CxOut).
 do_conjunction([Goal|Goals],CxIn,CxOut):-
 	output_goal(Goal,CxIn,Cx1),
-	output(',',Cx1,Cx2),
+	output_op(',',Cx1,Cx2),
 	new_line(Cx2,Cx3),
 	align(0,Cx3,Cx4),
 	do_conjunction(Goals,Cx4,CxOut).
@@ -218,11 +252,11 @@ flatten_right(Goal,[Left,Right]):-
 
 meta_call(_CxIn,Goal):-
     source_term_expand(Goal,Term),
+    \+ var(Term),
 	xref_meta(Term,_Terms).
 	
-do_data(Goal,Cx1,Cx2):-
-    source_term_expand(Goal,Term),
-    output(Term,Cx1,Cx2).
+do_data(Term,Cx1,Cx2):-
+    output_term(Term,Cx1,Cx2).
     
 push_mode(NewMode,CxIn,CxOut):-
     layout_mode(CxIn,Modes),
@@ -236,6 +270,8 @@ pop_mode(CxIn,CxOut):-
 push_functor(Goal,CxIn,CxOut):-
     (	term_op(Goal,CxIn,Op)
     ->	push_operator(Op,CxIn,CxOut)
+    ;	source_term_var(Goal)
+    ->	push_operator(var,CxIn,CxOut)
     ;	source_term_functor(Goal,Name,Arity),
     	push_operator(Name/Arity,CxIn,CxOut)
     ).
@@ -274,6 +310,7 @@ postfix_op_X(xf).
 postfix_op_X(yf).    
 
 term_op(Goal,Cx,op(P,T,Name)):-
+    \+ source_term_var(Goal),
     layout_module(Cx,Module),
     source_term_functor(Goal,Name, Arity),
     Module:current_op(P,T,Name),
@@ -329,6 +366,7 @@ needs_parenthesis(Goal,Cx):-
     ;	op_needs_parenthesis(Op,Cx)
     ).
 
+    
 
 op_needs_parenthesis(op(_,T,_),Cx):-
     infix_op_X(T),
@@ -341,6 +379,7 @@ op_needs_parenthesis(op(P,_T,_O),Cx):-
 	peek_op(Cx,op(NP,_NT,_NO)),
 	P>NP. % No? YES! ;-)
 arg_needs_parenthesis(Goal,_):-
+    \+ source_term_var(Goal),
     source_term_functor(Goal,',',2).
 mode_needs_parenthesis(clause_body).
 mode_needs_parenthesis(directive_body).
@@ -351,15 +390,63 @@ new_line(CxIn,CxOut):-
 
 output(Term,Cx,Cx):-
 	output_raw(Term,Cx).    
+
+output_functor(F,Cx,Cx):-
+	output_term(F,Cx,Cx).
 	
 output_raw(Term,Cx):-
     layout_stream(Cx,Out),
     write(Out,Term).
 	%format("output_raw(~w, ~w)~n",[Term,Cx]).
+output_term(Term,Cx,Cx):-
+    source_term_var(Term),
+    !,
+    source_term_property(Term,variable_name,Name),
+    write(Name).
+output_term(Term,CxIn,CxOut):-
+    layout_stream(CxIn,Out),
+    source_term_functor(Term,Name,Arity),
+    (	Arity=0    	
+    ->	write_term(Out,Name, [quoted(true),character_escapes(true)])
+    ;	term_op(Term,CxIn,Op)
+    ->	output_op_term(Op,Term,CxIn,CxOut)
+    ;	output_compound_term(Term,CxIn,CxOut)	
+    ).
 
-
+output_op_term(op(_P,T,N),Term,CxIn,CxOut):-
+    term_left_paren(Term,CxIn,Cx1),
+    (	prefix_op_X(T)
+    ->	output_op(N,Cx1,Cx2),
+    	output(' ',Cx2,Cx3),
+    	source_term_arg(1,Term,Arg),
+    	output_term(Arg,Cx3,CxNext)
+    ;	infix_op_X(T)
+    ->	source_term_arg(1,Term,Arg1),
+    	output_term(Arg1,Cx1,Cx2),
+    	(	N=','
+    	->	Cx2=Cx3
+    	;	output(' ',Cx2,Cx3)
+    	),
+    	output_op(N,Cx3,Cx4),
+    	output(' ',Cx4,Cx5),
+    	source_term_arg(2,Term,Arg2),
+    	output_term(Arg2,Cx5,CxNext)
+	;	/*postfix_op*/
+    	source_term_arg(1,Term,Arg),
+    	output_term(Arg,Cx1,Cx2),
+    	output(' ',Cx2,Cx3),
+		output_op(N,Cx3,CxNext)  	
+    ),
+    term_left_paren(Term,CxNext,CxOut).
+/*
+output_compound_term(Term,CxIn,CxOut):-
+	source_term_functor(Term,Name,Arity),
+	output_functor(Name,CxIn,CxNext),
+	output_*/
 peek_op(Cx,Op):-
 	layout_op(Cx,[Op|_]).    
 	
 peek_mode(Cx,Mode):-
 	layout_mode(Cx,[Mode|_]).    	
+	
+	debugme.
