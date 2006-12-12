@@ -2,11 +2,13 @@
 
 :- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_map')).
 
 
-:- pdt_define_context(layout(mode,op,offset,row,col,indent_base,indent_current,module,stream,last_pred)).
+:- pdt_define_context(layout(mode,op,offset,row,col,indent_base,indent_current,module,stream,last_pred,comments)).
 
 init_layout_cx(Cx1):-
+    pdt_map_empty(Cmts),
     layout_new(Cx0),
     layout_set(Cx0, [
     	mode=[],
@@ -18,7 +20,8 @@ init_layout_cx(Cx1):-
     	indent_current=0,
     	module=user,
     	stream=current_output,
-    	last_pred=[]
+    	last_pred=[],
+    	comments=Cmts
     ], Cx1 ).
 
 
@@ -93,7 +96,9 @@ do_head(Head,CxIn,CxOut):-
     pop_mode(Cx2,CxOut).
 
 do_body(Term,CxIn,CxOut) :-
-    do_goal(Term,CxIn,CxOut).
+    push_operator(op(1000,xfy,','),CxIn,Cx1),
+    do_goal(Term,Cx1,Cx2),
+    push_operator(op(1000,xfy,','),Cx2,CxOut).
     
 do_goal(Goal,CxIn, CxOut):-
 	meta_call(CxIn,Goal),
@@ -147,6 +152,9 @@ do_meta_call(Goal,CxIn, CxOut):-
 	output_functor(Name,CxIn,Cx1),
 	output_args(Arity,Goal,Cx1,CxOut).	
 
+do_comments(LeftRight,Term,CxIn,CxOut).
+mark_comments_done(left,Term,CxIn,CxOut):-
+	source_term_property(Term,CommentId).
 
 
 output_args(0,_,Cx,Cx).
@@ -173,7 +181,7 @@ output_args(I,Arity,Goal,CxIn,CxOut):-
 	output(',',CxIn,Cx1),
 	new_line(Cx1,Cx2),
 	align(0,Cx2,Cx3),
-	source_term_arg(1,Goal,Arg),
+	source_term_arg(I,Goal,Arg),
 	output_goal(Arg,Cx3,Cx4),
 	output_args(J,Arity,Goal,Cx4,CxOut).
 	
@@ -221,7 +229,9 @@ do_conjunction([Goal|Goals],CxIn,CxOut):-
 	align(0,Cx3,Cx4),
 	do_conjunction(Goals,Cx4,CxOut).
     
-
+list(Term,_,_):-
+    source_term_var(Term),!,fail.
+    
 list(Term,_,[]):-
 	source_term_functor(Term,[],0),
 	!.
@@ -231,8 +241,18 @@ list(Term,Cx,[Elm|Elms]):-
     source_term_arg(2,Term,Tail),
     list(Tail,Cx,Elms).
 
-
-
+list_tail(Term,[],Term):-
+    source_term_var(Term),
+    !.
+list_tail(Term,[],[]):-
+	source_term_functor(Term,[],0),
+	!.
+list_tail(Term,[Elm|Elms],Tail):-
+	source_term_functor(Term,'.',2),
+	!,
+	source_term_arg(1,Term,Elm),
+	source_term_arg(2,Term,Next),
+	list_tail(Next,Elms,Tail).
     
 flatten_right(Goal,[Left|RightGoals]):-
     source_term_arg(2,Goal,Right),
@@ -391,23 +411,36 @@ new_line(CxIn,CxOut):-
 output(Term,Cx,Cx):-
 	output_raw(Term,Cx).    
 
-output_functor(F,Cx,Cx):-
-	output_term(F,Cx,Cx).
+output_functor(Name,Cx,Cx):-
+    layout_stream(Cx,Out),   
+	write_term(Out,Name, [quoted(true),character_escapes(true)]).
 	
 output_raw(Term,Cx):-
     layout_stream(Cx,Out),
     write(Out,Term).
 	%format("output_raw(~w, ~w)~n",[Term,Cx]).
-output_term(Term,Cx,Cx):-
+output_term(Term,CxIn,CxOut):-
     source_term_var(Term),
     !,
-    source_term_property(Term,variable_name,Name),
-    write(Name).
+    (	source_term_property(Term,variable_name,Name)
+    ->	output(Name,CxIn,CxOut)
+    ;	output('_',CxIn,CxOut)
+    ).
+output_term(List,CxIn,CxOut):-  
+	list_tail(List,Elms,Tail),
+	!,
+	output('[',CxIn,Cx1),
+	output_elms(Elms,Cx1,Cx2),	
+	(	Tail=[]
+	->	Cx2=CxNext
+	;	output_op('|',Cx2,Cx3),
+		output_term(Tail,Cx3,CxNext)
+	),
+	output(']',CxNext,CxOut).		
 output_term(Term,CxIn,CxOut):-
-    layout_stream(CxIn,Out),
     source_term_functor(Term,Name,Arity),
     (	Arity=0    	
-    ->	write_term(Out,Name, [quoted(true),character_escapes(true)])
+    ->	output_functor(Name,CxIn,CxOut)
     ;	term_op(Term,CxIn,Op)
     ->	output_op_term(Op,Term,CxIn,CxOut)
     ;	output_compound_term(Term,CxIn,CxOut)	
@@ -437,12 +470,74 @@ output_op_term(op(_P,T,N),Term,CxIn,CxOut):-
     	output(' ',Cx2,Cx3),
 		output_op(N,Cx3,CxNext)  	
     ),
-    term_left_paren(Term,CxNext,CxOut).
-/*
+    term_right_paren(Term,CxNext,CxOut).
+
+term_left_paren(Term,CxIn,CxOut):-
+    needs_parenthesis(Term,CxIn),
+    !,
+	output('(',CxIn,Cx1),
+
+    push_functor(Term,Cx1,Cx2),
+    push_mode(operands,Cx2,CxOut).
+term_left_paren(Term,CxIn,CxOut):-
+	push_functor(Term,CxIn,Cx1),
+    push_mode(operands,Cx1,CxOut).
+
+term_right_paren(Term,CxIn,CxOut):-    	
+	pop_functor(CxIn,Cx0),
+	pop_mode(Cx0,Cx1),
+    needs_parenthesis(Term,Cx1),
+    !,
+	output(')',Cx1,CxOut).
+term_right_paren(_,CxIn,CxOut):-
+	pop_functor(CxIn,Cx1),
+    pop_mode(Cx1,CxOut).
+
+output_elms([],Cx,Cx).	
+output_elms([Elm],CxIn,CxOut):-
+	!,
+	output_term(Elm,CxIn,CxOut).
+output_elms([Elm|Elms],CxIn,CxOut):-
+	output_term(Elm,CxIn,Cx1),
+	output_op(', ',Cx1,Cx2),
+	output_elms(Elms,Cx2,CxOut).
+	
 output_compound_term(Term,CxIn,CxOut):-
 	source_term_functor(Term,Name,Arity),
 	output_functor(Name,CxIn,CxNext),
-	output_*/
+	output_args2(Arity,Term,CxNext,CxOut).
+	
+output_args2(0,_,Cx,Cx).
+output_args2(Arity,Term,CxIn,CxOut):-
+    push_mode(arguments,CxIn,Cx0),
+	output('(',Cx0,Cx1),
+	inc_indent(Cx1,Cx2),	
+	output_args2(1,Arity,Term,Cx2,Cx3),
+	dec_indent(Cx3,Cx4),	
+	Cx4=Cx6,%new_line(Cx4,Cx5),
+	%align(0,Cx5,Cx6),
+	output(')',Cx6,Cx7),
+	pop_mode(Cx7,CxOut).
+	
+output_args2(I,Arity,_,Cx,Cx):-
+    I>Arity,
+    !.
+output_args2(1,Arity,Term,CxIn,CxOut):-
+    !,
+	source_term_arg(1,Term,Arg),
+	output_term(Arg,CxIn,Cx1),
+	output_args2(2,Arity,Term,Cx1,CxOut).
+output_args2(I,Arity,Term,CxIn,CxOut):-
+	J is I+1,
+	output(', ',CxIn,Cx1),
+%	new_line(Cx1,Cx2),
+%	align(0,Cx2,Cx3),
+	Cx1=Cx3,
+	source_term_arg(I,Term,Arg),
+	output_term(Arg,Cx3,Cx4),
+	output_args2(J,Arity,Term,Cx4,CxOut).	
+	
+	
 peek_op(Cx,Op):-
 	layout_op(Cx,[Op|_]).    
 	

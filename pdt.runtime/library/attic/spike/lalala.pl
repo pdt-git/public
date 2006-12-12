@@ -1,19 +1,6 @@
-%:- module(testmodule,[]).
-
-mf:-
-    new_memory_file(MF),
-    open_memory_file(MF,write,S),
-    stream_property(S,encoding(E)),
-    writeln(E),
-    close(S),
-    free_memory_file(MF).
-    
-cool(me).
-be_cool:-cool(A),A.
+a(Cx1):-
+    c=Cx1,b=c.
 
 
-umf([]).
-umf([A|As]):-
-    A,
-    umf(As).
-    
+:- umf + bla("jawol lja") %abc
+ .
