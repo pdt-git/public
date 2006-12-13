@@ -98,7 +98,7 @@ public class SocketServerStartAndStopStrategy implements
 	 *  the absolute path of the executable.
 	 * 
 	 * @author Hasan Abdel Halim
-	 * @param executable_name
+	 * @param command
 	 * @return The first path that contains the executable name.
 	 * @throws IOException
 	 */
