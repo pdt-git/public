@@ -152,36 +152,48 @@ do_meta_call(Goal,CxIn, CxOut):-
 	output_functor(Name,CxIn,Cx1),
 	output_args(Arity,Goal,Cx1,CxOut).	
 
-do_comments(LeftRight,Term,CxIn,CxOut).
-	
-	
-mark_comments_done(LeftRight,Term,CxIn,CxOut):-
-    atom_concat(comments_,LeftRight,Key),
-	(	source_term_property(Term,Key,CommentIds)
-	->	layout_comments(CxIn,CMapIn),
-		map_remove_all(CommentIds,CMapIn,CMapOut),
-		layout_set_comments(CxIn,CMapOut,CxOut)
-	;	CxIn=CxOut
-	).
+do_comments(LeftRight,Term,CxIn,CxOut):-
+	term_comments_todo(LeftRight,Term,CxIn,Ids,Comments),
+	mark_comments_done(Ids,CxIn,Cx1),
+	do_comments(Comments,Cx1,CxOut).
 
-term_comments_todo(LeftRight,Term,Cx,IdsAndComments):-
+do_comments([],Cx,Cx).
+do_comments([Comment|Comments],CxIn,CxOut):-
+	do_comment(Comment,CxIn,CxNext),
+	do_comments(Comments,CxNext,CxOut).
+
+do_comment(Comment,CxIn,CxOut):-
+    output_codes(Comments,CxIn,CxOut),
+    
+
+mark_comments_done(LeftRight,Term,CxIn,CxOut):-
+	term_comments_todo(LeftRight,Term,CxIn,Ids,_),
+	mark_comments_done(Ids,CxIn,CxOut).
+	
+mark_comments_done(Ids,CxIn,CxOut):-
+	layout_comments(CxIn,CMapIn),
+	map_remove_all(Ids,CMapIn,CMapOut),
+	layout_set_comments(CxIn,CMapOut,CxOut).
+
+term_comments_todo(LeftRight,Term,Cx,Ids,Comments):-
     atom_concat(comments_,LeftRight,Key),
    	(	source_term_property(Term,Key,CommentIds)
    	->	layout_comments(Cx,Map),
-   		map_get_all(CommentIds,Map,IdsAndComments)
-   	;	IdsAndComments=[]
+   		map_get_all(CommentIds,Map,Ids,Comments)
+   	;	Ids=[],Comments=[]
    	).
-map_get_all([],_,[]).
-map_get_all([Key|Keys],Map,[Key-Value|KeyValuePairs]):-
+map_get_all([],_,[],[]).
+map_get_all([Key|Keys],Map,[Key|FoundKeys],[Value|Values]):-
     pdt_map_get(Map,Key,Value),
     !,
-    map_get_all(Keys,Map,KeyValuePairs).
-map_get_all([_Key|Keys],Map,KeyValuePairs):-
-    map_get_all(Keys,Map,KeyValuePairs).
+    map_get_all(Keys,Map,FoundKeys,Values).
+map_get_all([_Key|Keys],Map,FoundKeys,Values):-
+    map_get_all(Keys,Map,FoundKeys,Values).
     
 map_remove_all([],Map,Map).
 map_remove_all([Key|Keys],MapIn,MapOut):-
-    pdt_map_remove(MapIn,Key,MapNext),
+    (pdt_map_remove(MapIn,Key,MapNext);true),
+    !,
     map_remove_all(Keys,MapNext,MapOut).
 
 output_args(0,_,Cx,Cx).
