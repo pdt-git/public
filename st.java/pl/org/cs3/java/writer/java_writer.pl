@@ -892,10 +892,10 @@ gen_tree(_ID) :-
 	),
     printf(_name).
 
-gen_tree(_ID) :-
-    identT(_ID,_,_,_name,_),
+gen_tree(ID) :-
+    identT(ID,_,_,Name,Symbol),
     !,
-    printf(_name).
+    gen_ident(Name,Symbol).
 
 gen_tree(_ID) :-
     literalT(_ID,_,_,_type, _value),
@@ -1165,3 +1165,28 @@ gen_literal(type(class, _classID, 0), _value) :-
     printf('\"~w\"',[_value7]).
 
 
+/**
+ * gen_ident(+Identifier, +Symbol)
+ *
+ * If the symbol is a class and Identifier is not super or this
+ * the full qualified name is printed. Otherwise the identifier
+ * is printed.
+ */
+gen_ident(this,_Symbol):-
+    !,
+    printf(this).
+
+gen_ident(super,_Symbol):-
+    !,
+    printf(super).
+
+gen_ident(_Name,Class) :-
+    classDefT(Class,_,_,_),
+    !,
+    fullQualifiedName(Class,FQN),
+    write(FQN),
+    printf(FQN).
+
+gen_ident(Name,_Symbol):-
+    !,
+    printf(Name).
