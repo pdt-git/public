@@ -171,7 +171,11 @@ public class FileAdaptationHelper
 						for( int groupCount=1 ; groupCount <=matcher.groupCount() ; groupCount++ )
 						{
 							String captGroup = matcher.group(groupCount);
-							captGroup = captGroup.replaceAll("\\", REGEX_BACKSLASH_TOKEN);
+							try {
+								captGroup = captGroup.replaceAll("\\\\", REGEX_BACKSLASH_TOKEN);
+							} catch(Exception ex) {
+								captGroup.replaceAll("\\", REGEX_BACKSLASH_TOKEN);
+							}
 
 //							Pattern p = Pattern.compile(
 //									"$" + groupCount,
