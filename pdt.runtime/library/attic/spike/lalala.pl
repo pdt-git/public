@@ -3,4 +3,4 @@ a(Cx1):-
 
 
 :- umf + bla("jawol lja") %abc
- .
+/*umf*/ .
