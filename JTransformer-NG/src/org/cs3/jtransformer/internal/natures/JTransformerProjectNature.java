@@ -287,6 +287,8 @@ public class JTransformerProjectNature implements IProjectNature,
 	 * @see IProjectNature#setProject
 	 */
 	public void setProject(IProject project) {
+		Debug.info("JTransformerProjectNature.setProject: " + project.getName());
+
 		this.project = project;
 		checkIfNatureIsAlreadyAssignedToProject(project);
 		try {
