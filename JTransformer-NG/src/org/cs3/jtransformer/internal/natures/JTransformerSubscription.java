@@ -197,7 +197,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				IWorkspaceDescription wd = workspace.getDescription();
 				if (!wd.isAutoBuilding()) {
-					return;
+					Debug.warning("JT: auto building is deactivated. PEFs will not be updated!" );
+//					wd.setAutoBuilding(true);
 				}
 				Debug.info("JT: finalizeProjectBuilding: before");
 
