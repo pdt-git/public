@@ -17,8 +17,10 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
 import java.util.ArrayList;
+
+import alice.tuprolog.InvalidLibraryException;
+import alice.tuprolog.Prolog;
 
 /**
  * A dynamic manager for tuProlog libraries.

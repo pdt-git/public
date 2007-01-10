@@ -20,7 +20,8 @@ package alice.tuprolog;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.List;
 
 
 /**
@@ -91,7 +92,7 @@ public class BuiltIn extends Library {
 	 * @return
 	 */
 	public boolean $restore_db_0() {
-		theoryManager.transRestore(engineManager.restoreLastTheoryStatus());
+		theoryManager.transRestore();
 		return true;
 	}
 	

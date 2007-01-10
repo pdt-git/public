@@ -17,14 +17,21 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import alice.tuprolog.Prolog;
 import alice.tuprolog.event.OutputEvent;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.WarningEvent;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
 
 /**
  * The tuProlog IDE to be run on a Java2 platform. Makes use of Thinlet and

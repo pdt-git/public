@@ -17,7 +17,6 @@
  */
 package alice.tuprolog;
 
-import alice.tuprolog.Struct;
 
 /**
  * @author Alex Benini

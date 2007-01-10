@@ -16,8 +16,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog.lib;
-import alice.tuprolog.*;
+import alice.tuprolog.Agent;
+import alice.tuprolog.Int;
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Library;
 import alice.tuprolog.Number;
+import alice.tuprolog.Operator;
+import alice.tuprolog.Struct;
+import alice.tuprolog.Term;
+import alice.tuprolog.Theory;
 
 /**
  * This class defines a set of basic built-in
@@ -650,7 +657,7 @@ public class BasicLibrary extends Library {
 		"functor(T,F,A):- var(T),!,atom(F),I is A,integer(I),I>=0,newlist([],I,L),T=..[F|L]. \n                   " +
 		"functor(T,F,A):- var(A),!,T=..[F|L],length(L,A). \n                                                      " +
 		"functor(T,F,A):- T=..[F|L],length(L,I),I is A. \n                                                        " +
-		"arg(N,C,T):- C =.. [_|Args], element(N,Args,T).\n"+
+		"arg(N,C,T):- nonvar(N), C =.. [_|Args], element(N,Args,T).\n"+
 		"clause(H,B)   :- L=[],'$find'(H,L),member((':-'(H,B)),L). \n                                            " +
 		"copy_term(T,V):-'$copy'(T,V). \n                                                                        " +
 		//

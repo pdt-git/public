@@ -46,15 +46,7 @@ public class SWICompatibilityLibrary extends Library {
 		return _result;
 		
 	}
-	
 
-	/*
-	 * 
-	 * 	Implementation of Operators Extensions.
-	 * 
-	 * 
-	 */	
-	
 	/**
 	 * method invoked when the engine is going
 	 * to demonstrate a goal
@@ -71,7 +63,13 @@ public class SWICompatibilityLibrary extends Library {
 		hsh = null;
 	}
 	
-	
+
+	/*
+	 * 
+	 * 	Implementation of Operators Extensions.
+	 * 
+	 * 
+	 */		
 	/**
 	 * Structural Equality '=@=': TuProlog does not support structural
 	 * equality yet.  
@@ -94,16 +92,16 @@ public class SWICompatibilityLibrary extends Library {
 		if (first_term.isEqual(second_term))
 			return true;
 
-		if (first_term.isVar() && second_term.isVar() )
+		if (first_term.isVar() && second_term.isVar())
 			return true;
 		
-		if(first_term.isCompound() && second_term.isCompound() ) {
+		if(first_term.isCompound() && second_term.isCompound()) {
 			Struct frst =((Struct)first_term);
 			Struct scnd =((Struct)second_term);
 			/*
 			 * checks the functor name
 			 */
-			if ( frst.getName() != scnd.getName() )
+			if (!frst.getName().equals(scnd.getName()))
 				return false;
 			
 			int arity = frst.getArity();
@@ -119,19 +117,19 @@ public class SWICompatibilityLibrary extends Library {
 					/*
 					 * Calls recursivelly structural equality between subterms.
 					 */
-					if (!structEq_2(arg_1 , arg_2 ))
+					if (!structEq_2(arg_1 , arg_2))
 						return false;
 					/*
 					 * Hashtable which stores the position of occurance for each 
 					 * Var subterm.
 					 */
 					if (arg_1.isVar())
-						if ( hsh.containsKey(arg_1) || hsh.containsValue(arg_2)){
-							if ( ((Term)hsh.get(arg_1)) != arg_2)
+						if (hsh.containsKey(arg_1) || hsh.containsValue(arg_2)){
+							if (((Term)hsh.get(arg_1)) != arg_2)
 								return false;
-						} else{
+						} else
 							hsh.put(arg_1, arg_2);
-						}
+						
 				}
 				
 				/*
@@ -336,7 +334,6 @@ public class SWICompatibilityLibrary extends Library {
 	 */
 	public boolean recorded_2(Term key, Term value){
 		Term ref = new Var();
-		
 		return ( recorded_3(key, value, ref) );
 	}	
 	
@@ -363,26 +360,29 @@ public class SWICompatibilityLibrary extends Library {
 		
 		if ( tmp == null )
 			return false;
-		
-		List values = (ArrayList) records_db.get(tmp);
+
+		List values = (ArrayList)records_db.get(tmp);
 		
 		
 		int index = -1;
 		
 		for (Iterator it = values.iterator(); it.hasNext();) {
 			RecordEntry en = (RecordEntry) it.next();
-			if ( en.getTerm().equals(_value) ) 
+			if (en.getTerm().equals(_value)) 
 				index = en.getRef();
 		}
 		// Value was not found.
 		if ( index == -1 )
-			if ( _value.isVar() ) 
+			if ( _value.isVar() ) {
 				// TODO: incase of multiple values return a list.
-				unify( value, ( (RecordEntry)values.get(0) ).getTerm() );
-			else
+				unify(value, ((RecordEntry)values.get(0)).getTerm());
+				boolean result = unify(ref, new Int(((RecordEntry)values.get(0)).getRef()));
+				return result;
+			}else
 				return false;
-		
-		return unify( ref, new Int(index) );
+
+		boolean result = unify( ref, new Int(index) );
+		return result;
 	}
 	
 	/**
@@ -407,7 +407,7 @@ public class SWICompatibilityLibrary extends Library {
 			for (Iterator values = ((ArrayList)records_db.get(key)).iterator(); values.hasNext();) {
 				RecordEntry en = (RecordEntry) values.next();
 				
-				if ( en.getRef() == _ref.intValue() ){
+				if (en.getRef() == _ref.intValue()){
 					values.remove();
 					return true;
 				}
@@ -466,7 +466,8 @@ public class SWICompatibilityLibrary extends Library {
 	
 	public boolean sformat_3(Term string_name, Term msg, Term values){
 		//TODO: implement format.
-		return true;
+		
+		return unify(string_name, new Struct(msg.toString()+values.toString()));
 		
 	}
 
@@ -482,6 +483,7 @@ public class SWICompatibilityLibrary extends Library {
 		return unify(term, atom);
 		
 	}
+	
 	
 	/*
 	 * 
@@ -501,6 +503,8 @@ public class SWICompatibilityLibrary extends Library {
 	 		":-	op( 700, xfx, '\\=@=').				\n" +
 	 		"'=@='(X,Y):-  structEq(X,Y).			\n" +
 	 		"'\\=@='(X,Y):-  not structEq(X,Y). 	\n" +
+	 		"forall(A,B):- findall(_, forall-call(A,B), _). \n"+
+	 		"forall-call(A,B):- A, B. 				\n"+
 	 		"':'(Module,Predicate) :- call(Predicate).	\n" ;
 	}
 }

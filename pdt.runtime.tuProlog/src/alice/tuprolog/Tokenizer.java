@@ -16,13 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog;
-import	java.io.*;
+
+import java.util.LinkedList;
 
 /**
  *  This class defines the tokenizer for prolog terms
  *
  */
-class Tokenizer implements Serializable {
+class Tokenizer implements java.io.Serializable {
 	
 	public static final int    TYPEMASK    = 0x00FF;
 	public static final int    ATTRMASK    = 0xFF00;
@@ -51,16 +52,16 @@ class Tokenizer implements Serializable {
 	private alice.util.StringInputStream   inputStream;
 	
 	/** where to store unread characters */
-	private alice.util.LinkedList     charList;
+	private LinkedList charList;
 	
 	/** where to store unread tokens */
-	private alice.util.LinkedList     tokenList;
+	private LinkedList tokenList;
 	
 	/** current token type */
-	private int         type;
+	private int type;
 	
 	/** current token text */
-	private String      seq;
+	private String seq;
 	
 	/** last token type */
 	int lastTokenType;
@@ -71,24 +72,23 @@ class Tokenizer implements Serializable {
 	 */
 	public Tokenizer(alice.util.StringInputStream is) {
 		inputStream    = is;
-		charList = new alice.util.LinkedList();
+		charList = new LinkedList();
 		// token list to be consumed
-		tokenList = new alice.util.LinkedList();
+		tokenList = new LinkedList();
 	}
 	
 	/**
 	 * reads next available token
 	 */
 	public Token readToken() {
-		if(tokenList.isEmptyList()) {
+		if (tokenList.isEmpty()) {
 			nextToken();
-			lastTokenType=type;
-			return(new Token(seq,type));
+			lastTokenType = type;
+			return new Token(seq,type);
 		} else {
-			Token token = (Token)tokenList.head;
-			tokenList = tokenList.tail;
-			lastTokenType=token.getType();
-			return(token);
+			Token token = (Token) tokenList.removeFirst();
+			lastTokenType = token.getType();
+			return token;
 		}
 	}
 	
@@ -96,7 +96,7 @@ class Tokenizer implements Serializable {
 	 * puts back token to be read again
 	 */
 	public void unreadToken(Token token) {
-		tokenList = new alice.util.LinkedList(token,tokenList);
+		tokenList.addFirst(token);
 	}
 	
 	/**
@@ -120,95 +120,94 @@ class Tokenizer implements Serializable {
 	 * from the beginning of the source
 	 */
 	public void reset() throws Exception {
-		charList = new alice.util.LinkedList();
-		tokenList = new alice.util.LinkedList();
+		charList.clear();
+		tokenList.clear();
 		inputStream.reset();
 	}
 	
 	/** is the string a prolog atom? */
 	public static boolean isAtom(String s) {
-		if(s.length() == 0){
-			return(false);
+		if (s.length() == 0) {
+			return false;
 		}
-		if(!isLLt((int)s.charAt(0))){
-			return(false);
+		if (!isLLt((int) s.charAt(0))) {
+			return false;
 		}
-		for(int c = 1;c < s.length();c++){
-			if(!isLtr((int)s.charAt(c))){
-				return(false);
+		for (int c = 1;c < s.length();c++) {
+			if (!isLtr((int) s.charAt(c))) {
+				return false;
 			}
 		}
-		return(true);
+		return true;
 	}
 	
 	//
 	
 	private static boolean isTer(int c) {
-		return(c==-1 || c=='\n' || c=='\r');
+		return (c == -1 || c == '\n' || c == '\r');
 	}
 	
 	private static boolean isWht(int c) {
-		return(c==' ' || c=='\t' || isTer(c));
+		return (c == ' ' || c == '\t' || isTer(c));
 	}
 	
 	private static boolean isCmt(int c) {
-		return(c=='%');
+		return c =='%';
 	}
 	
 	private static boolean isDgt(int c) {
-		return(c>='0' && c<='9');
+		return (c >= '0' && c <= '9');
 	}
 	
 	private static boolean isLLt(int c) {
-		return(c=='!' || c>='a' && c<='z');
+		return (c == '!' || c >= 'a' && c <= 'z');
 	}
 	
 	private static boolean isULt(int c) {
-		return(c=='_' || c>='A' && c<='Z');
+		return (c == '_' || c >= 'A' && c <= 'Z');
 	}
 	
 	private static boolean isLtr(int c) {
-		return(isLLt(c) || isULt(c) || isDgt(c));
+		return (isLLt(c) || isULt(c) || isDgt(c));
 	}
 	
 	private static boolean isExp(int c) {
-		return(c=='e' || c=='E');
+		return (c == 'e' || c == 'E');
 	}
 	
 	private static boolean isSym(int c) {
-		return(SYMCHAR.indexOf(String.valueOf((char)c))!=-1);
+		return SYMCHAR.indexOf(String.valueOf((char) c)) != -1;
 	}
 	
 	private boolean isNum(int c) {
-		if(isDgt(c)) {
-			seq += String.valueOf((char)c);
-			while(isDgt(c = readChar())){
-				seq += String.valueOf((char)c);
+		if (isDgt(c)) {
+			seq += String.valueOf((char) c);
+			while (isDgt(c = readChar())) {
+				seq += String.valueOf((char) c);
 			}
 			unreadChar(c);
-			return(true);
+			return true;
 		}
-		return(false);
+		return false;
 	}
 	
 	private int readChar() {
-		if(charList.isEmptyList()){
+		if(charList.isEmpty()){
 			try {
-				int value=inputStream.read();
-				return(value);
+				int value = inputStream.read();
+				return value;
 				
 			} catch(Exception e) {
-				return(-1);
+				return -1;
 			}
 		} else {
-			int ch = ((Integer)charList.head).intValue();
-			charList = charList.tail;
-			return(ch);
+			int ch = ((Integer) charList.removeFirst()).intValue();
+			return ch;
 		}
 	}
 	
 	private void unreadChar(int ch) {
-		charList = new alice.util.LinkedList(new Integer(ch),charList);
+		charList.addFirst(new Integer(ch));
 	}
 	
 	private int skip() {

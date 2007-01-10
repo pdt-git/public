@@ -43,19 +43,10 @@
  */
 package org.cs3.pl.tuprolog.internal;
 
-import java.io.File;
-import java.io.IOException;
-
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
-
-import alice.tuprolog.InvalidTheoryException;
-import alice.tuprolog.PrologException;
 
 /**
  */

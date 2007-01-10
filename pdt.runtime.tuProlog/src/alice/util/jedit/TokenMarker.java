@@ -9,7 +9,6 @@
 package alice.util.jedit;
 
 import javax.swing.text.Segment;
-import java.util.*;
 
 /**
  * A token marker that splits lines of text into tokens. Each token carries

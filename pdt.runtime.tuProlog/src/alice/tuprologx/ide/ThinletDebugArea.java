@@ -17,12 +17,11 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.SpyListener;
 import alice.tuprolog.event.WarningEvent;
 import alice.tuprolog.event.WarningListener;
-import alice.util.thinlet.*;
+import alice.util.thinlet.Thinlet;
 
 /**
  * A simple area where to show debug messages.

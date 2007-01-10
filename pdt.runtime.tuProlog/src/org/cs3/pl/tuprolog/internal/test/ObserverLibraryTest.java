@@ -1,10 +1,11 @@
 package org.cs3.pl.tuprolog.internal.test;
 
+import junit.framework.TestCase;
+
 import org.cs3.pl.tuprolog.internal.ObservationListener;
 import org.cs3.pl.tuprolog.internal.ObserverLibrary;
 import org.cs3.pl.tuprolog.internal.SWICompatibilityLibrary;
 
-import junit.framework.TestCase;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;

@@ -17,11 +17,12 @@
  */
 package alice.tuprolog;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ArrayList;
 
 import alice.tuprolog.ClauseInfo;
+import alice.tuprolog.Int;
 import alice.tuprolog.Struct;
 import alice.tuprolog.event.WarningEvent;
 import alice.util.OneWayList;
@@ -63,6 +64,7 @@ public class StateRuleSelection extends State {
 				LinkedList clauses = c.find(head);
 				
 				if(clauses.size() == 0) {
+					
 					c.mediator.notifyWarning(
 				        new WarningEvent(goal,
 				        		         "could not find compatible goals: " + goal));
@@ -94,7 +96,6 @@ public class StateRuleSelection extends State {
 			List varsList = new ArrayList();
 			e.currentContext.trailingVars = new OneWayList(varsList,e.currentContext.trailingVars);
 			clauseStore = ClauseStore.build(goal, varsList, c.find(goal));
-			
 			if (clauseStore == null){
 				try {
 					/*
@@ -114,8 +115,6 @@ public class StateRuleSelection extends State {
 				return;
 			}
 		}
-		
-		
 		
 		/*-----------------------------------------------------
 		 * Scelgo una regola fra quelle potenzialmente compatibili.
@@ -145,7 +144,7 @@ public class StateRuleSelection extends State {
 		if (ec.haveAlternatives && !fromBacktracking) {
 			ChoicePointContext cpc = new ChoicePointContext();
 			cpc.compatibleGoals = clauseStore;
-			cpc.theoryTransientClauses = c.saveLastTheoryStatus();
+			c.saveLastTheoryStatus();
 			cpc.executionContext = curCtx;
 			cpc.indexSubGoal = curCtx.goalsToEval.getCurrentGoalId();
 			cpc.varsToDeunify = e.currentContext.trailingVars;

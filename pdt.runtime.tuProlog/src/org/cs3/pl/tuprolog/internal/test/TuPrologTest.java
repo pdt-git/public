@@ -240,13 +240,32 @@ public class TuPrologTest extends TestCase {
 			
 		};
 		
-		lib.addListener("query(_)", ls );
-
 		
-		info = engine.solve("observe(query(_), key).");
+
+		engine.setSpy(true);
+		info = engine.solve("observe(observation(s)).");
 		assertTrue(info.isSuccess());
+		
+//		info = engine.solve("sync:query(assert(observation(s))).");
+//		assertTrue(info.isSuccess());
+		info = engine.solve("sync:del(observation(s)).");
+		assertTrue(info.isSuccess());
+		System.err.println(info.getBindingVars());
+/*		info = engine.solve("sync:query(assert(observation(d))).");
+		info = engine.solve("sync:query(assert(observation(y))).");
+		assertTrue(info.isSuccess());
+		info = engine.solve("sync:query(observe(observation(X))).");
+		assertTrue(info.isSuccess());
+		
+		lib.addListener("observation(X)", ls );
+		
+		info = engine.solve("sync:query(pif_notify(observation(X), 'notification_test')).");
+		assertTrue(info.isSuccess());
+		
+		Thread.sleep(100);
 		info = engine.solve("query(A=@=B).");
 		assertTrue(info.isSuccess());
+*/
 /*
 		engine.loadLibrary("sync_test.pl");
 		info = engine.solve("setUp(term_ref).");

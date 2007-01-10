@@ -17,8 +17,9 @@
  */
 package alice.tuprologx.ide;
 
-import javax.swing.JApplet;
 import java.awt.event.WindowListener;
+
+import javax.swing.JApplet;
 
 /**
  * A class for serving tuProlog as an applet.

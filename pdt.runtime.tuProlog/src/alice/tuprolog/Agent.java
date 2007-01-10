@@ -17,7 +17,7 @@
  */
 package alice.tuprolog;
 
-import java.io.*;
+import java.io.InputStream;
 
 import alice.tuprolog.event.OutputEvent;
 import alice.tuprolog.event.OutputListener;

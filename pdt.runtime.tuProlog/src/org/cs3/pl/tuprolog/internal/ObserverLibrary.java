@@ -7,6 +7,7 @@ import java.util.Iterator;
 import alice.tuprolog.Library;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Struct;
 import alice.tuprolog.Term;
 
 public class ObserverLibrary extends Library {
@@ -70,31 +71,6 @@ public class ObserverLibrary extends Library {
 		
 	}
 
-	/**
-	 * Listeners class is a linkedlist which stores a key we are interested in,
-	 * along with its observers.
-	 * 
-	 * @author Hasan Abdel Halim
-	 *
-	 */
-	private class Listeners extends ArrayList{
-
-		private static final long serialVersionUID = 1L;
-		private Term key;
-
-		public Listeners(Term key) {
-			super();
-			this.key = key;
-		}
-		
-		public Term getKey() {
-			return key;
-		}
-
-		public void setKey(Term key) {
-			this.key = key;
-		}		
-	}
 	
 	/**
 	 * Notifier Thread is a thread used to inform all observers related to a specific subject
@@ -118,7 +94,7 @@ public class ObserverLibrary extends Library {
 			
 			if ( observations.containsKey(subject) ){
 				
-				Listeners list = (Listeners) observations.get(subject);
+				ArrayList list = (ArrayList) observations.get(subject);
 				
 				if (list == null )
 					return;
@@ -133,15 +109,16 @@ public class ObserverLibrary extends Library {
 	
 	private Observations observations = new Observations();
 	
-	public boolean observe_2(Term subject, Term key) {
+	public boolean observe_1(Term sub) {
+		Term subject = sub.getTerm();
 		
 		if ( observations.containsKey( subject.toString() ) )
 			return false;
 
-		observations.put(subject.toString(), new Listeners(key) );	
+		observations.put(subject.toString(), new ArrayList() );	
 		
 		try {
-			SolveInfo info = engine.solve("pif_observe_hook(_,"+subject.getTerm()+",_).");
+			SolveInfo info = engine.solve("sync:init_idb("+subject.getTerm()+").");
 			if (info.isSuccess())
 				System.err.println("Observe hook was called successfully");
 			
@@ -149,45 +126,42 @@ public class ObserverLibrary extends Library {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		return  true;	
 	}
 	
 	public boolean unobserve_1(Term subject) {
-
 		if ( !observations.containsKey( subject.toString() ))
 			return false;
-		
+
 		observations.remove(subject.toString());
 		return true;
 	}
 
 	public boolean pif_notify_2(Term subject, Term msg){
-		
-		Notifier thread = new Notifier(subject.toString(), msg.toString());
-		
+		Notifier thread = new Notifier(subject.toString(), msg.toString());		
 		thread.start();
 		
 		return true;
 	}
 	
 	public void addListener(String subject, ObservationListener listener){
-		if ( observations.containsKey(subject) ){
-			Listeners list = (Listeners) observations.get(subject);
+		if (observations.containsKey(subject)){
+			ArrayList list = (ArrayList) observations.get(subject);
 			list.add(listener);
-		}
+		}else
+			observe_1(new Struct(subject.toString()));
 	}
 	
 	public void removeListener(String subject, ObservationListener listener){
-		if ( observations.containsKey(subject) ){
-			Listeners list = (Listeners) observations.get(subject);
+		if (observations.containsKey(subject)){
+			ArrayList list = (ArrayList) observations.get(subject);
 			list.remove(listener);
 		}
 	}
 
 	public void removeAllListeners( String subject ){
-		if ( observations.containsKey(subject) ){
-			Listeners list = (Listeners) observations.get(subject);
+		if (observations.containsKey(subject)){
+			ArrayList list = (ArrayList) observations.get(subject);
 			list.clear();
 		}
 	}

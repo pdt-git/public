@@ -1,12 +1,12 @@
 package org.cs3.pl.tuprolog.internal.test;
 
+import junit.framework.TestCase;
+
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.tuprolog.internal.TuProlog;
-
-import junit.framework.TestCase;
 
 public class LazyStartupRaceTest extends TestCase {
 	 private PrologInterface pif;

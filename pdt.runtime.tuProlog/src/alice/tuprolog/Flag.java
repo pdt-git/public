@@ -17,7 +17,7 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.HashMap;
 
 /**
  * This class represents a prolog Flag

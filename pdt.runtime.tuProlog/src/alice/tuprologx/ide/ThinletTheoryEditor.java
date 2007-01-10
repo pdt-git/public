@@ -17,9 +17,14 @@
  */
 package alice.tuprologx.ide;
 
-import alice.util.thinlet.*;
-import alice.tuprolog.*;
-import java.beans.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Prolog;
+import alice.tuprolog.Theory;
+import alice.util.thinlet.Thinlet;
 
 /**
  * A set of commands and facilities for components implementing an edit area.

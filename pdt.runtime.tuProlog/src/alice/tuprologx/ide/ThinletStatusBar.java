@@ -17,8 +17,10 @@
  */
 package alice.tuprologx.ide;
 
-import alice.util.thinlet.*;
-import java.beans.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import alice.util.thinlet.Thinlet;
 
 /**
  * A status bar for the tuProlog IDE.

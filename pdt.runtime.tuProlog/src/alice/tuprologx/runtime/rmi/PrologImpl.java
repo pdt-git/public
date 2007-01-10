@@ -1,9 +1,15 @@
 package alice.tuprologx.runtime.rmi;
-import alice.tuprolog.*;
-import  java.io.*;
-
-import java.rmi.*;
+import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+
+import alice.tuprolog.InvalidLibraryException;
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.MalformedGoalException;
+import alice.tuprolog.NoMoreSolutionException;
+import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Term;
+import alice.tuprolog.Theory;
 
 public class PrologImpl extends UnicastRemoteObject
     implements alice.tuprologx.runtime.rmi.Prolog, Serializable {

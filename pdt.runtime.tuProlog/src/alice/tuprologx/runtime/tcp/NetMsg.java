@@ -1,5 +1,5 @@
 package alice.tuprologx.runtime.tcp;
-import java.io.*;
+import java.io.Serializable;
 
 public class NetMsg implements Serializable {
     public String methodName;

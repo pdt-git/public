@@ -30,8 +30,7 @@ public class SubGoalStore {
 	
 	
 	public void pushSubGoal(SubGoalTree subGoals) {
-		subGoals.setParent(currentRoot);
-		subGoals.setPosition(index);
+		subGoals.setParentPosition(currentRoot,index);
 		tempId = new DefaultSubGoalId(currentRoot,index);
 		currentRoot = subGoals;
 		index = 0;

@@ -5,7 +5,6 @@
 package alice.tuprolog;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 
@@ -186,12 +185,8 @@ public class EngineManager implements java.io.Serializable {
 		primitiveManager.identifyPredicate(t);
 	}
 	
-	List saveLastTheoryStatus() {
-		return theoryManager.transStatus();
-	}
-	
-	List restoreLastTheoryStatus() {
-		return ((ChoicePointContext)env.choicePointSelector.fetch()).theoryTransientClauses;
+	void saveLastTheoryStatus() {
+		theoryManager.transFreeze();
 	}
 	
 	void pushSubGoal(SubGoalTree goals) {

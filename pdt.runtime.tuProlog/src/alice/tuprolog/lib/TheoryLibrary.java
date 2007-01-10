@@ -16,7 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog.lib;
-import alice.tuprolog.*;
+import alice.tuprolog.Library;
+import alice.tuprolog.Theory;
 
 /**
  * Library built from Prolog theory.

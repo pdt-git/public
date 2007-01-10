@@ -29,17 +29,10 @@ import alice.util.OneWayList;
  * @see Number
  */
 public abstract class Term implements java.io.Serializable {
-	
-	// build symbolMap (singleton pattern)
-	protected static SymbolMap symMap;
-	static {
-		if (symMap == null) symMap = new SymbolMap();
-	}
 
 	// true and false constants
-	public static final Term TRUE  = new Struct( symMap.getValidName("true") );
-	public static final Term FALSE = new Struct( symMap.getValidName("false") );
-	
+	public static final Term TRUE  = new Struct("true");
+	public static final Term FALSE = new Struct("false");	
 	
 	// checking type and properties of the Term
 	

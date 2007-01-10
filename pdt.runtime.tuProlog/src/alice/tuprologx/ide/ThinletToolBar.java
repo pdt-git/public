@@ -17,10 +17,12 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
-import alice.util.thinlet.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
-import java.beans.*;
+import alice.tuprolog.Prolog;
+import alice.tuprolog.Theory;
+import alice.util.thinlet.Thinlet;
 
 /**
  * A toolbar for the tuProlog IDE.

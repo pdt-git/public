@@ -17,7 +17,9 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class represents a variable term.

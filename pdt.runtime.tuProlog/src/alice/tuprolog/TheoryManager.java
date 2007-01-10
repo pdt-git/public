@@ -16,8 +16,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog;
-import	java.io.*;
-import  java.util.*;
+import java.io.DataOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Stack;
 
 import alice.tuprolog.event.WarningEvent;
 
@@ -34,6 +42,12 @@ import alice.tuprolog.event.WarningEvent;
  */
 public class TheoryManager implements Serializable {
 	
+	/**
+	 * List of clauses contained in the TheoryManager before an assert/retract call,
+	 * to be managed within the context of backtrackable assert/retract
+	 */
+	List freezedClauseList;
+	
 	/** asserted or retracted clause list */
 	private   LinkedList   transientClauseList;
 	
@@ -48,9 +62,6 @@ public class TheoryManager implements Serializable {
 	
 	/**  engine owner of the manager*/
 	protected Prolog  engine;
-	
-	/** Manager of flags */
-	private FlagManager flagManager;
 	
 	/** Manager of primitives */
 	private PrimitiveManager primitiveManager;
@@ -79,7 +90,6 @@ public class TheoryManager implements Serializable {
 	 */
 	void initialize(Prolog vm) {
 		engine = vm;
-		flagManager = engine.getFlagManager();
 		primitiveManager = engine.getPrimitiveManager();    	
 	}
 	
@@ -281,7 +291,7 @@ public class TheoryManager implements Serializable {
 					//System.out.println("clause " + d.clause);
 					Iterator itBody = d.getBody().iterator();
 					while (itBody.hasNext()) {
-						Term t = (Struct) itBody.next();
+						Term t = ( (SubGoalElement) itBody.next() ).getValue();
 						primitiveManager.identifyPredicate(t);
 						//System.out.println("identifying " + t);
 					}
@@ -426,17 +436,17 @@ public class TheoryManager implements Serializable {
 	}
 	
 	/**
-	 * returns current liste of asserted/retracted clauses
+	 * Save current liste of asserted/retracted clauses
 	 */
-	public List transStatus() {
-		return(transientClauseList);
+	void transFreeze() {
+		freezedClauseList = transientClauseList;
 	}
 	
 	/**
 	 * rollbacks dbase to a state spcified by the retracted/asserted clauses list
 	 */
-	public void transRestore(List ol) {
-		while (!transientClauseList.equals(ol)) {
+	public void transRestore() {
+		while (!transientClauseList.equals(freezedClauseList)) {
 			ClauseInfo d = (ClauseInfo)transientClauseList.removeFirst();
 			if (d.stillValid) {
 				clauseNumber--;
@@ -582,9 +592,9 @@ public class TheoryManager implements Serializable {
 				primitiveManager.identifyDirective(dir);
 				try {
 					PrimitiveInfo directive = dir.getPrimitive();
-					if (directive != null) {
+					if (directive != null)
 						directive.evalAsDirective(dir);
-				} else {
+					else {
                     // unknown directive -> consider like a simple predicate
                 	/* 
                 	 * trho: 

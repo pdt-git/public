@@ -17,7 +17,7 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.AbstractMap;
 
 /**
  *

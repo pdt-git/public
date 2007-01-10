@@ -17,7 +17,7 @@
  */
 package alice.tuprolog.event;
 
-import java.util.*;
+import java.util.EventObject;
 
 import alice.tuprolog.Engine;
 
