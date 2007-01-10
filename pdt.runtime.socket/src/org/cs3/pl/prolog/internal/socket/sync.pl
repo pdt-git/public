@@ -562,7 +562,7 @@ separate_functor_arity_module_safe_(Module:Functor/Arity, Module:Functor, Arity)
 separate_functor_arity_module_safe_(Functor/Arity, Functor, Arity).
     
 functor_module_safe(Term, Module:Functor, Arity):-  
-  Term =.. [:, Module, UnqualifiedTerm],
+  Term =.. [':', Module, UnqualifiedTerm],
   !,
   functor(UnqualifiedTerm, Functor,Arity).
 
