@@ -61,6 +61,11 @@ concat_lists([List],[Head|Tail]):-
 	!.
 concat_lists([Elem],[Elem]) :- !.
 
+concat_lists([Head|Tail],[Head|TailFlat]) :-
+    var(Head),
+    !,
+	concat_lists(Tail,TailFlat).
+
 concat_lists([[HeadHead|HeadTail]|Tail],FlatList) :-
     !,
 	concat_lists(Tail,TailFlat),
@@ -83,6 +88,7 @@ test(concat_list_2):-
     	[a,b,c,d,e,f])),
     assert_true('[a,B],C,[d,e,f]',concat_lists([[a,B],C,[d,e,f]],
     	[a,B,C,d,e,f])),
+   assert_true(not(is_list(C))),
    assert_true('[a,B],C,[d,e,f]',(concat_lists([[a,B],C,[d,e,f]],
     	Flat2), !,Flat2=[a,B,C,d,e,f])),
    assert_true('[],[],[d,e,f]',(concat_lists([[],[],[d,e,f]],Flat3),
