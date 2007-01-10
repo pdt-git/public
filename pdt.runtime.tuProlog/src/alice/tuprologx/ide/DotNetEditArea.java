@@ -17,10 +17,16 @@
  */
 package alice.tuprologx.ide;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import java.beans.*;
+import java.awt.Font;
+import java.awt.Panel;
+import java.awt.TextArea;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.Vector;
 
 /**
  * An edit area for the .NET platform. Makes use of a plain

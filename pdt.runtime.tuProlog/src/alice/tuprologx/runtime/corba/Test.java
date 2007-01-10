@@ -1,10 +1,9 @@
 package alice.tuprologx.runtime.corba;
 
-import org.omg.CosNaming.*;
-import org.omg.CosNaming.NamingContextPackage.*;
-import org.omg.CORBA.*;
-
-import alice.tuprolog.*;
+import org.omg.CORBA.ORB;
+import org.omg.CosNaming.NameComponent;
+import org.omg.CosNaming.NamingContext;
+import org.omg.CosNaming.NamingContextHelper;
 
 public class Test{
     public static void main(String args[]){

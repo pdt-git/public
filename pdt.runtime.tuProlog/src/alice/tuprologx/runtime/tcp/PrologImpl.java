@@ -1,6 +1,15 @@
 package alice.tuprologx.runtime.tcp;
-import alice.tuprolog.*;
-import  java.io.*;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
+import alice.tuprolog.InvalidLibraryException;
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.MalformedGoalException;
+import alice.tuprolog.NoMoreSolutionException;
+import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Term;
+import alice.tuprolog.Theory;
 
 public class PrologImpl implements Serializable {
 

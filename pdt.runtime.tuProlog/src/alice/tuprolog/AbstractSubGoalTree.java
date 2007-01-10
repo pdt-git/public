@@ -11,16 +11,9 @@ public abstract class AbstractSubGoalTree {
 		this.position = position;
 	}
 	
-	public boolean setParent(SubGoalTree parent) {
+	public boolean setParentPosition(SubGoalTree parent, int position) {
 		if (this.parent == null) {
 			this.parent = parent;
-			return true;
-		}
-		return false;
-	}
-	
-	public boolean setPosition(int position) {
-		if (this.parent == null) {
 			this.position = position;
 			return true;
 		}

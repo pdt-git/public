@@ -6,7 +6,6 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
 import alice.tuprolog.InvalidTheoryException;
-import alice.tuprolog.Prolog;
 
 public class TuPrologServerStartAndStopStrategy implements ServerStartAndStopStrategy {
 

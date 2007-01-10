@@ -17,9 +17,8 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
-
-import alice.tuprolog.Struct;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Alex Benini

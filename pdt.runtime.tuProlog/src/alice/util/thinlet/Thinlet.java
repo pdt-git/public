@@ -20,17 +20,39 @@
 package alice.util.thinlet; //java
 //midp package thinlet.midp;
 
-import java.applet.*; //java
-import java.awt.*; //java
-import java.awt.datatransfer.*; //java
-import java.awt.image.*; //java
-import java.awt.event.*; //java
-import java.lang.reflect.*; //java
-import java.io.*;
-import java.net.*; //java
-import java.util.*;
-//midp import javax.microedition.lcdui.*;
-//midp import javax.microedition.midlet.*;
+import java.awt.AWTEvent;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ComponentEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.image.MemoryImageSource;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  *

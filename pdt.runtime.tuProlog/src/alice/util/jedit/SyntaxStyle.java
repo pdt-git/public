@@ -8,8 +8,11 @@
  */
 package alice.util.jedit;
 
-import java.awt.*;
-import java.util.StringTokenizer;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Toolkit;
 
 /**
  * A simple text style class. It can specify the color, italic flag,

@@ -16,7 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog;
-import java.io.*;
+
+import java.util.LinkedList;
 
 /**
  * This class defines a parser of
@@ -25,7 +26,7 @@ import java.io.*;
  *
  *
  */
-public class Parser implements Serializable {
+public class Parser implements java.io.Serializable {
 	
 	public static final int TERM  = 0;
 	public static final int EOF   = 1;
@@ -358,7 +359,7 @@ public class Parser implements Serializable {
 				// reading open par
 				Token tok=tokenizer.readToken();
 				
-				alice.util.LinkedList a = expr0_arglist();
+				LinkedList a = expr0_arglist();
 				if(tokenizer.readToken().getType() != Tokenizer.RPAR){
 					throw(new Exception());
 				}
@@ -436,15 +437,19 @@ public class Parser implements Serializable {
 	
 	// RICCI 030227 end
 	
-	private alice.util.LinkedList expr0_arglist() throws Exception {
+	private LinkedList expr0_arglist() throws Exception {
 		Term head = exprA_inStruct(OperatorManager.OP_HIGH);
-		Token tok=tokenizer.readToken();
-		if (tok.seq.equals(",")){
-			return(new alice.util.LinkedList(head,expr0_arglist()));
+		Token tok = tokenizer.readToken();
+		if (tok.seq.equals(",")) {
+			LinkedList l = expr0_arglist();
+			l.addFirst(head);
+			return l;
 		}
-		if (tok.seq.equals(")")){
+		if (tok.seq.equals(")")) {
 			tokenizer.unreadToken(tok);
-			return(new alice.util.LinkedList(head,new alice.util.LinkedList()));
+			LinkedList l = new LinkedList();
+			l.add(head);
+			return l;
 		}
 		throw(new Exception());
 	}

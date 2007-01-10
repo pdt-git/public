@@ -17,7 +17,10 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Struct class represents both compound prolog term
@@ -32,7 +35,7 @@ public class Struct extends Term {
 	/** arity **/
 	private int arity;
 	/** to speedup hash map operation */
-	private StructKey hashKey;
+	private String hashKey;
 	/** primitive behaviour */
 	private transient PrimitiveInfo primitive;
 	/** it indicates if the term is resolved */
@@ -44,8 +47,6 @@ public class Struct extends Term {
 	public Struct(String f) {
 		this(f,0);
 	}
-	
-	
 	
 	/**
 	 * Builds a compound, with one argument
@@ -176,17 +177,15 @@ public class Struct extends Term {
 	/**
 	 * Builds a compound, with a linked list of arguments
 	 */
-	Struct(String f,alice.util.LinkedList al) {
+	Struct(String f, LinkedList al) {
 		name = f;
-		arity = al.length();
+		arity = al.size();
 		if (arity > 0) {
 			arg = new Term[arity];
-			for(int c = 0;c < arity;c++) {
-				arg[c] = (Term) al.head;
-				al = al.tail;
-			}
+			for(int c = 0;c < arity;c++)
+				arg[c] = (Term) al.removeFirst();
 		}
-		hashKey = new StructKey(name,arity);
+		hashKey = name + "/" + arity;
 		resolved = false;
 	}
 	
@@ -201,11 +200,11 @@ public class Struct extends Term {
 		if (arity > 0) {
 			arg = new Term[arity];
 		}
-		hashKey = new StructKey(name,arity);
+		hashKey = name + "/" + arity;
 		resolved = false;
 	}
 	
-	StructKey getHashKey() {
+	String getHashKey() {
 		return hashKey;
 	}
 	
@@ -389,7 +388,7 @@ public class Struct extends Term {
 		t = t.getTerm();
 		if (t.isStruct()) {
 			Struct ts = (Struct) t;
-			if (arity == ts.arity && name==(ts.name)) {
+			if (arity == ts.arity && name.equals(ts.name)) {
 				for (int c = 0;c < arity;c++) {
 					if (!arg[c].isEqual(ts.arg[c])) {
 						return false;
@@ -462,7 +461,6 @@ public class Struct extends Term {
 	 */
 	long resolveTerm(LinkedList vl,long count) {
 		long newcount=count;
-		name = symMap.getValidName(name);
 		for (int c = 0;c < arity;c++) {
 			Term term=arg[c];
 			if (term!=null) {
@@ -568,16 +566,16 @@ public class Struct extends Term {
 		if (!ft.isAtom()) {
 			return null;
 		}
-		Struct at = (Struct)arg[1].getTerm();
-		alice.util.LinkedList al = new alice.util.LinkedList();
+		Struct at = (Struct) arg[1].getTerm();
+		LinkedList al = new LinkedList();
 		while (!at.isEmptyList()) {
-			if(!at.isList()) {
+			if (!at.isList()) {
 				return null;
 			}
-			al.append(at.getTerm(0));
+			al.addLast(at.getTerm(0));
 			at = (Struct) at.getTerm(1);
 		}
-		return new Struct(((Struct)ft).name,al);
+		return new Struct(((Struct) ft).name, al);
 	}
 	
 	boolean isEmptyListRaw() {
@@ -627,7 +625,7 @@ public class Struct extends Term {
 		t = t.getTerm();
 		if (t.isStruct()) {
 			Struct ts = (Struct) t;
-			if ( arity == ts.arity && name == ts.name) {
+			if ( arity == ts.arity && name.equals(ts.name)) {
 				for (int c = 0;c < arity;c++) {
 					if (!arg[c].unify(vl1,vl2,ts.arg[c])) {
 						return false;

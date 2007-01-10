@@ -17,10 +17,17 @@
  */
 package alice.tuprolog.lib;
 
-import alice.tuprolog.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Random;
 
-import java.util.*;
-import java.io.*;
+import alice.tuprolog.Int;
+import alice.tuprolog.Library;
+import alice.tuprolog.Struct;
+import alice.tuprolog.Term;
 
 /**
  * This class provides basic I/O predicates.

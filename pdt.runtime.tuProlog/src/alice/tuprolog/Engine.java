@@ -17,10 +17,10 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
-
-import alice.tuprolog.Struct;
-import alice.tuprolog.Term;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 
 

@@ -17,7 +17,7 @@
  */
 package alice.tuprologx.ide;
 
-import java.awt.*;
+import java.awt.Component;
 
 /**
  * A common interface to launchers of frames built with a particular GUI

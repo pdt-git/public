@@ -17,10 +17,12 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.io.File;
+import java.io.FileInputStream;
 
-import java.awt.*;
-import java.io.*;
+import alice.tuprolog.Theory;
 
 /**
  * A manager for Input/Output file operations on the .NET platform. Note that

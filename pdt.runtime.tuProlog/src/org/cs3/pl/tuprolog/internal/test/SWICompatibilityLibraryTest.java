@@ -8,7 +8,6 @@ import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoSolutionException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
-import alice.tuprolog.Theory;
 
 public class SWICompatibilityLibraryTest extends TestCase {
 	private Prolog engine;
@@ -17,31 +16,7 @@ public class SWICompatibilityLibraryTest extends TestCase {
 		super.setUp();
 		if ( engine==null){
 			engine = new Prolog();
-			Theory record_theory = new Theory("ref(1). 		  \n" +
-					"recorda(Key, Value, Ref):- 				" +
-					"	var(Ref), ref(CrRef), Ref is CrRef+1,	" +
-					" 	asserta(record_db(Key, Value, Ref)),	" +
-					"	update_ref. 						  \n" +
-					"recordz(Key, Value, Ref):- 				" +
-					"	var(Ref), ref(CrRef), Ref is CrRef+1,	" +
-					"	assertz(record_db(Key, Value, Ref)),	" +
-					"	update_ref. 						  \n" +
-					"recorded(Key, Value, Ref):-				" +
-					"	var(Ref), record_db(Key, Value, Ref). \n" +
-					"erase(Ref):- 								" +
-					"	nonvar(Ref), 							" +
-					"	retract(record_db( _, _, Ref)). 	  \n" +
-					"recordz(Key, Value):- 						" +
-					"	recordz(Key, Value, _). 			  \n" +
-					"recorda(Key, Value):- 						" +
-					"	recorda(Key, Value, _). 			  \n" +
-					"recorded(Key, Value):- 					" +
-					"	recorded(Key, Value, _). 			  \n" +
-					"update_ref:-								" +
-					"	ref(CrRef), retract(ref(_)),			" +
-					"	NxtRef is CrRef+1, assert(ref(NxtRef)).	");
-			engine.addTheory(record_theory);
-			//engine.loadLibrary(new SWICompatibilityLibrary());
+			engine.loadLibrary(new SWICompatibilityLibrary());
 		}
 	}
 
@@ -113,9 +88,9 @@ public class SWICompatibilityLibraryTest extends TestCase {
 	
 	public void testModuleOperator() throws MalformedGoalException,
 											NoSolutionException {
-		SolveInfo info = engine.solve("geko:assert(test_assert(x)).");
+		SolveInfo info = engine.solve("geko:assert(hasan(x)).");
 		assertTrue("Failed to Query Engine ", info.isSuccess());
-		info = engine.solve("test_assert(x).");
+		info = engine.solve("hasan(x).");
 		assertTrue("Failed to Query Engine ", info.isSuccess());
 	}
 	
@@ -136,66 +111,72 @@ public class SWICompatibilityLibraryTest extends TestCase {
 	
 	public void testRecorda_2() throws Exception {
 
-		SolveInfo info = engine.solve("recorda(test_key, test_value).");
+		SolveInfo info = engine.solve("recorda(hasan,ops).");
 		assertTrue(info.isSuccess());
 	}
 
 	public void testRecorda_3() throws Exception {
 		
-		SolveInfo info = engine.solve("recorda(test_key,test_value, Ref).");
+		SolveInfo info = engine.solve("recorda(hasan,ops, Ref).");
 		assertTrue(info.isSuccess());
+		System.err.println("Ref :" + info.getVarValue("Ref"));
 	}
 
 	public void testRecordz_2() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(test_key, test_value).");
+		SolveInfo info = engine.solve("recordz(hasan,ops).");
 		assertTrue(info.isSuccess());		
 	}
 
 	public void testRecordz_3() throws Exception {
 
-		SolveInfo info = engine.solve("recordz(test_key, test_value, Ref).");
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
 		assertTrue(info.isSuccess());
+		System.err.println("Ref :" + info.getVarValue("Ref"));
 	}
 
 	public void testRecorded_2() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(test_key,test_value).");
+		SolveInfo info = engine.solve("recordz(hasan,ops).");
 		assertTrue(info.isSuccess());
-		info = engine.solve("recorded(test_key, test_value).");
+		info = engine.solve("recorded(hasan,ops).");
 		assertTrue(info.isSuccess());
 	}
 
 	public void testRecorded_3() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(test_key, test_value(1)).");
+		SolveInfo info = engine.solve("recordz(hasan,ops(d)).");
 		assertTrue(info.isSuccess());
-		info = engine.solve("recordz(test_key, test_value(2)).");
+		info = engine.solve("recordz(hasan,ops(s)).");
 		assertTrue(info.isSuccess());
-		SolveInfo info2 = engine.solve("recorded(test_key, X, Ref).");
+		SolveInfo info2 = engine.solve("recorded(hasan, X, Ref).");
 		assertTrue(info2.isSuccess());	
-		assertEquals("test_value(1)", info2.getVarValue("X").toString());
+		
+		System.err.println(info2.getBindingVars());
 		if ( info2.hasOpenAlternatives()) {
+			System.err.println("I am here");
 			info2 = engine.solveNext();
-			assertEquals("test_value(2)", info2.getVarValue("X").toString());
+			System.err.println(info2.getBindingVars());
 		}
-	
+		
+		//assertEquals(info.getVarValue("Ref"), info2.getVarValue("Ref"));
+		//System.err.println("Ref:"+ info.getVarValue("Ref"));
 	}
 	
 	public void testErase_1() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(test_key,test_value(1), Ref).");
+		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
 		assertTrue(info.isSuccess());
 		
-		SolveInfo info2 = engine.solve("recorded(test_key, test_value(1), Ref), erase(Ref).");
+		SolveInfo info2 = engine.solve("recorded(hasan,ops, Ref), erase(Ref).");
 		assertTrue(info2.isSuccess());	
 		
-		info2 = engine.solve("recorded(test_key,test_value(1), Ref).");
+		info2 = engine.solve("recorded(hasan,ops, Ref).");
 		assertFalse(info2.isSuccess());	
 	}
 	
 	public void testWithMutex() throws Exception{
-		SolveInfo info = engine.solve("with_mutex('mutex_test',recordz(test_key, test_value, Ref)).");
+		SolveInfo info = engine.solve("with_mutex('mutex_test',recordz(hasan,ops, Ref)).");
 		assertTrue(info.isSuccess());
 
 	}

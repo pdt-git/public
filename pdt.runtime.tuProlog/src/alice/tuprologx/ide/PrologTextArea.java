@@ -8,8 +8,13 @@
  */
 package alice.tuprologx.ide;
 
-import alice.util.jedit.*;
 import java.awt.Color;
+
+import alice.util.jedit.DefaultInputHandler;
+import alice.util.jedit.SyntaxDocument;
+import alice.util.jedit.SyntaxStyle;
+import alice.util.jedit.TextAreaDefaults;
+import alice.util.jedit.Token;
 
 public class PrologTextArea extends TextAreaDefaults
 {

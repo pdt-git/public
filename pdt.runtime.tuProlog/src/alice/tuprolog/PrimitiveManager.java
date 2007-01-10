@@ -17,7 +17,11 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -75,7 +79,7 @@ public class PrimitiveManager {
 	void deletePrimitiveInfo(IPrimitives src) {
 		Iterator it = ((List)libHashMap.remove(src)).iterator();
 		while(it.hasNext()) {
-			StructKey k = ((PrimitiveInfo)it.next()).invalidate();
+			String k = ((PrimitiveInfo)it.next()).invalidate();
 			directiveHashMap.remove(k);
 			predicateHashMap.remove(k);
 			functorHashMap.remove(k);
@@ -128,7 +132,7 @@ public class PrimitiveManager {
 		//------------------------------------------
 		//log.debug("Identification "+t);	
 		PrimitiveInfo prim = null;
-		StructKey key = new StructKey(name,arity);
+		String key = name + "/" + arity;
 		
 		switch (typeOfPrimitive) {
 		case PrimitiveInfo.DIRECTIVE :
@@ -150,7 +154,7 @@ public class PrimitiveManager {
 	
 	Library getLibraryDirective(String name, int nArgs) {
 		try {
-			return (Library)( (PrimitiveInfo)directiveHashMap.get(new StructKey(name,nArgs)) ).getSource();			
+			return (Library)( (PrimitiveInfo)directiveHashMap.get(name + "/" + nArgs)).getSource();			
 		} catch(NullPointerException e) {
 			return null;
 		}
@@ -158,7 +162,7 @@ public class PrimitiveManager {
 	
 	Library getLibraryPredicate(String name, int nArgs) {
 		try {
-			return (Library)( (PrimitiveInfo)predicateHashMap.get(new StructKey(name,nArgs)) ).getSource();			
+			return (Library)( (PrimitiveInfo)predicateHashMap.get(name + "/" + nArgs)).getSource();			
 		} catch(NullPointerException e) {
 			return null;
 		}
@@ -166,7 +170,7 @@ public class PrimitiveManager {
 	
 	Library getLibraryFunctor(String name, int nArgs) {
 		try {
-			return (Library)( (PrimitiveInfo)functorHashMap.get(new StructKey(name,nArgs)) ).getSource();
+			return (Library)( (PrimitiveInfo)functorHashMap.get(name + "/" + nArgs)).getSource();
 		} catch(NullPointerException e) {
 			return null;
 		}

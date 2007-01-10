@@ -1,6 +1,8 @@
 package alice.tuprologx.runtime.corba;
-import alice.tuprolog.*;
-import  java.io.*;
+import java.io.ByteArrayInputStream;
+
+import alice.tuprolog.InvalidLibraryException;
+import alice.tuprolog.Theory;
 
 
 public class PrologImpl extends _PrologImplBase {

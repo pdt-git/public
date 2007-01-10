@@ -17,7 +17,8 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import alice.util.OneWayList;
 
@@ -28,7 +29,6 @@ import alice.util.OneWayList;
 public class ChoicePointContext {
 	
 	ClauseStore compatibleGoals;
-	List theoryTransientClauses;
 	ExecutionContext executionContext;
 	ChoicePointContext prevChoicePointContext;
 	
@@ -48,10 +48,6 @@ public class ChoicePointContext {
 	
 	public ClauseStore getCompatibleGoals() {
 		return compatibleGoals;
-	}
-	
-	public List getTheoryTransientClauses() {
-		return theoryTransientClauses;
 	}
 	
 	public ExecutionContext getExecutionContext() {

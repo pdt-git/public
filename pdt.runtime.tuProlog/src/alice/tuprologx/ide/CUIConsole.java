@@ -1,15 +1,24 @@
 package alice.tuprologx.ide;
 
-import alice.util.*;
-import alice.tuprolog.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.MalformedGoalException;
+import alice.tuprolog.NoSolutionException;
+import alice.tuprolog.Prolog;
+import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Theory;
 import alice.tuprolog.event.OutputEvent;
 import alice.tuprolog.event.OutputListener;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.SpyListener;
 import alice.tuprolog.event.WarningEvent;
 import alice.tuprolog.event.WarningListener;
-
-import java.io.*;
+import alice.util.Automaton;
 
 public class CUIConsole extends Automaton implements Serializable, OutputListener, SpyListener, WarningListener {
 

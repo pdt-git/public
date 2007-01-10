@@ -17,8 +17,10 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
-import java.io.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import alice.tuprolog.event.LibraryEvent;
 import alice.tuprolog.event.LibraryListener;

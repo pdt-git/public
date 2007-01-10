@@ -17,7 +17,8 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
+import alice.tuprolog.MalformedGoalException;
+import alice.tuprolog.Prolog;
 
 /**
  * 

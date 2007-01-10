@@ -117,6 +117,9 @@ pif_unobserve_hook(_,Subject,_):-
 thread_self(ThreadID):-
     	true.
     	
+session_self(SessionID):-
+    true.
+    	
 depends_fact(Term, Term).
 
 depends(Var, _):-
@@ -144,8 +147,8 @@ depends(Master, Slave) :-
  */
 add(Term) :- 
   format('ADDED TERM: ~w~n',[Term]),
-  thread_self(ThreadID), 
-  assert(edb_local(ThreadID, Term, assert)). 
+  session_self(SessionID), 
+  assert(edb_local(SessionID, Term, assert)). 
 
 /**
  * delete(+Term)
@@ -154,8 +157,8 @@ add(Term) :-
  */
 delete(Term) :- 
   format('DELETED TERM: ~w~n',[Term]),
-  thread_self(ThreadID), 
-  assert(edb_local(ThreadID, Term, retract)).
+  session_self(SessionID), 
+  assert(edb_local(SessionID, Term, retract)).
   
 /**
  * delete(+Term)
@@ -164,8 +167,8 @@ delete(Term) :-
  */
 deleteAll(Term) :- 
   format('DELETED ALL TERMS: ~w~n',[Term]),
-  thread_self(ThreadID), 
-  assert(edb_local(ThreadID, Term, retractall)).
+  session_self(SessionID), 
+  assert(edb_local(SessionID, Term, retractall)).
 
 /**
  * query(+Term)
@@ -187,8 +190,8 @@ query(Term) :-
  * Die Transaktion wird zurueckgesetzt.
  */
 rollback :-
-  thread_self(ThreadID),
-  rollback(ThreadID).
+  session_self(SessionID),
+  rollback(SessionID).
 
 /********  internal *************/
 internal_notify(Functor, Term, Arity) :-
@@ -214,8 +217,8 @@ assert1(Term):-
 assert1(Term):-
     assert(Term).
     
-transact(ThreadID, Op, Term) :-
-  retract(edb_local(ThreadID, Term, Op)),
+transact(SessionID, Op, Term) :-
+  retract(edb_local(SessionID, Term, Op)),
   display(Op, Term),
   call(Op, Term),
   functor_module_safe(Term,ModuleFunctor, Arity),
@@ -224,10 +227,10 @@ transact(ThreadID, Op, Term) :-
       ( separate_functor_arity_module_safe(Dependant, DFunctor, DArity),
       internal_notify(DFunctor, Term, DArity))).
 
-internal_commit(ThreadID) :- 
+internal_commit(SessionID) :- 
   write('COMMIT'), nl, 
-  forall(edb_local(ThreadID, Term, Op), 
-         transact(ThreadID, Op, Term)),
+  forall(edb_local(SessionID, Term, Op), 
+         transact(SessionID, Op, Term)),
   forall(depends_local(Subject),
          notify_if_predicate_updated(Subject)),
   retractall(depends_local(_)).
@@ -257,26 +260,26 @@ notify_if_predicate_updated(_Subject).
    Faktenbasis uebernommen.
 */
 commit :- 
-  thread_self(ThreadID), 
-  with_mutex(readwrite, internal_commit(ThreadID)). 
+  session_self(SessionID), 
+  with_mutex(readwrite, internal_commit(SessionID)). 
   
 
 
 
-internal_rollback(ThreadID, Term, Op) :-
+internal_rollback(SessionID, Term, Op) :-
   display(Op, Term), 
-  retract(edb_local(ThreadID, Term, Op)).
+  retract(edb_local(SessionID, Term, Op)).
 
 
 /**
- * rollback(+ThreadID)
+ * rollback(+SessionID)
  *
  * Alle in edb_local/3 fuer den angegebenen Thread gespeicherten Daten werden
  *  entfernt.
  */
-rollback(ThreadID) :-
+rollback(SessionID) :-
   write('ROLLBACK'), nl,
-  forall(edb_local(ThreadID, Term, Op), internal_rollback(ThreadID, Term, Op)),
+  forall(edb_local(SessionID, Term, Op), internal_rollback(SessionID, Term, Op)),
   retractall(depends_local(_)).
 
 /**

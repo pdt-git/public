@@ -18,7 +18,6 @@
 package alice.tuprolog;
 
 import org.cs3.pl.tuprolog.internal.TuPrologThrowable;
-
 /**
  * @author Alex Benini
  */
@@ -40,9 +39,7 @@ public class StateGoalEvaluation extends State {
 				e.nextState =
 					(primitive.evalAsPredicate(e.currentContext.currentGoal)) ?
 							c.GOAL_SELECTION : c.BACKTRACK;
-			} catch (Exception ex) {
-				//TODO Gestire le eccezioni in prolog
-				
+			}catch (TuPrologThrowable t){
 				/**
 				 *	@author hasan abdel halim
 				 *  
@@ -51,10 +48,14 @@ public class StateGoalEvaluation extends State {
 			   	 * 
 				 *  Ugly Solution, but it works for the moment ;).
 				 */
-				if ( ex.getCause() instanceof TuPrologThrowable )
-					throw (TuPrologThrowable)(ex.getCause());
+				throw t;
 				
-				ex.printStackTrace();
+			}
+			catch (HaltException he) {
+				e.nextState = c.END_HALT;
+			} catch (Throwable t) {
+				//TODO Gestire le eccezioni in prolog
+				t.printStackTrace();
 				e.nextState = c.END_HALT;
 			}
 			//Incremento il counter dei passi di dimostrazione

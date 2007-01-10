@@ -1,13 +1,11 @@
 package org.cs3.pl.tuprolog.internal;
 
-import java.io.IOException;
+import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
-
-import junit.framework.TestCase;
 
 public class XpceTest extends TestCase {
 	public void testXpce() throws  PrologInterfaceException {

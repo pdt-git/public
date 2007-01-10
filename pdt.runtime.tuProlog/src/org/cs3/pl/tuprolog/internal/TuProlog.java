@@ -10,10 +10,10 @@ import alice.tuprolog.Library;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.Prolog;
-import alice.tuprolog.event.QueryListener;
 import alice.tuprolog.SolveInfo;
-import alice.tuprolog.event.SpyListener;
 import alice.tuprolog.Theory;
+import alice.tuprolog.event.QueryListener;
+import alice.tuprolog.event.SpyListener;
 import alice.tuprolog.event.WarningEvent;
 import alice.tuprolog.event.WarningListener;
 

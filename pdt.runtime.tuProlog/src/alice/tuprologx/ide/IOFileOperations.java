@@ -17,10 +17,10 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
-
-import java.io.IOException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+
+import alice.tuprolog.Theory;
 
 /**
  * A common interface to Input/Output file operations managers. Note that this

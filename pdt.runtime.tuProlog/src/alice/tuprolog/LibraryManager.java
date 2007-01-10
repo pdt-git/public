@@ -4,7 +4,8 @@
  */
 package alice.tuprolog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import alice.tuprolog.event.LibraryEvent;
 import alice.tuprolog.event.WarningEvent;

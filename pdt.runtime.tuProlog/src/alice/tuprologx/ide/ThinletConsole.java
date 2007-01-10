@@ -16,13 +16,18 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprologx.ide;
-import alice.tuprolog.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.Prolog;
+import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Theory;
 import alice.tuprolog.event.OutputEvent;
 import alice.tuprolog.event.OutputListener;
 import alice.tuprolog.event.QueryEvent;
 import alice.tuprolog.event.QueryListener;
-import alice.util.thinlet.*;
-import java.beans.*;
+import alice.util.thinlet.Thinlet;
 
 /**
  * A complete console for the tuProlog engine, featuring an input field for

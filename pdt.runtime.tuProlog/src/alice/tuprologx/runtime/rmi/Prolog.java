@@ -1,5 +1,11 @@
 package alice.tuprologx.runtime.rmi;
-import alice.tuprolog.*;
+import alice.tuprolog.InvalidLibraryException;
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.MalformedGoalException;
+import alice.tuprolog.NoMoreSolutionException;
+import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Term;
+import alice.tuprolog.Theory;
 
 public interface Prolog extends java.rmi.Remote {
 

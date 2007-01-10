@@ -17,7 +17,8 @@
  */
 package alice.tuprolog;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 
 /**
@@ -39,10 +40,10 @@ public class PrimitiveInfo {
 	private IPrimitives source;
 	/** for optimization purposes */
 	private Term[] primitive_args;
-	private StructKey primitive_key;
+	private String primitive_key;
 	
 	
-	public PrimitiveInfo(int type, StructKey key, Library lib, Method m, int arity) throws NoSuchMethodException {
+	public PrimitiveInfo(int type, String key, Library lib, Method m, int arity) throws NoSuchMethodException {
 		if (m==null) {
 			throw new NoSuchMethodException();
 		}
@@ -57,14 +58,14 @@ public class PrimitiveInfo {
 	/**
 	 * Method to invalidate primitives. It's called just mother library removed
 	 */
-	public StructKey invalidate() {
-		StructKey key = primitive_key;
+	public String invalidate() {
+		String key = primitive_key;
 		primitive_key = null;
 		return key;
 	}
 	
 	
-	public StructKey getKey() {
+	public String getKey() {
 		return primitive_key;
 	}
 	
@@ -110,14 +111,15 @@ public class PrimitiveInfo {
 	 * evaluates the primitive as a predicate
 	 * @throws Exception if invocation primitive failure
 	 */
-	public boolean evalAsPredicate(Struct g) throws Exception {
+	public boolean evalAsPredicate(Struct g) throws Throwable {
 		for (int i=0; i<primitive_args.length; i++) {
 			primitive_args[i] = g.getArg(i);
 		}
 		try {
 			return ((Boolean)method.invoke(source,primitive_args)).booleanValue();
 		} catch (InvocationTargetException e) {
-			throw new Exception(e.getCause());
+			// throw new Exception(e.getCause());
+			throw e.getCause();
 		}
 	}
 	

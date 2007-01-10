@@ -17,10 +17,17 @@
  */
 package alice.tuprologx.ide;
 
-import alice.tuprolog.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Panel;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import java.awt.*;
-import java.awt.event.*;
+import alice.tuprolog.Prolog;
 
 /**
  * The tuProlog IDE to be run on a .NET (i.e. Java 1.1) platform. Makes use of

@@ -16,8 +16,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package alice.tuprolog.lib;
-import alice.tuprolog.*;
+import alice.tuprolog.Int;
+import alice.tuprolog.Library;
 import alice.tuprolog.Number;
+import alice.tuprolog.Struct;
+import alice.tuprolog.Term;
 
 /**
  * This class represents a tuProlog library providing most of the built-ins

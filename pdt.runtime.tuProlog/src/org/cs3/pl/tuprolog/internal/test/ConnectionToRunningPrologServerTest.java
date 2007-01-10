@@ -41,8 +41,6 @@
 
 package org.cs3.pl.tuprolog.internal.test;
 
-import java.io.IOException;
-
 import junit.framework.TestCase;
 
 import org.cs3.pl.prolog.PrologEventDispatcher;

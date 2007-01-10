@@ -1,6 +1,9 @@
 package alice.tuprologx.ide;
-import alice.util.jedit.*;
 import javax.swing.text.Segment;
+
+import alice.util.jedit.KeywordMap;
+import alice.util.jedit.Token;
+import alice.util.jedit.TokenMarker;
 
 public class PrologTokenMarker extends TokenMarker
 {

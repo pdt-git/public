@@ -18,7 +18,8 @@
 package alice.tuprolog;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -196,9 +197,8 @@ public abstract class Library implements Serializable, IPrimitives {
 							}
 							if (valid) {
 								String rawName = name.substring(0,index);
-								StructKey key = new StructKey(rawName,arity);
-								PrimitiveInfo prim = 
-									new PrimitiveInfo(type,key,this,mlist[i],arity);
+								String key = rawName + "/" + arity;
+								PrimitiveInfo prim = new PrimitiveInfo(type, key, this, mlist[i], arity);
 								tablePrimitives[type].add(prim);
 								//
 								// adding also or synonims
@@ -208,9 +208,8 @@ public abstract class Library implements Serializable, IPrimitives {
 									for (int j=0; j<opMappingCached.length; j++){
 										String[] map = opMappingCached[j];
 										if (map[2].equals(stringFormat[type]) && map[1].equals(rawName)){
-											key = new StructKey(map[0],arity);
-											prim = 
-												new PrimitiveInfo(type,key,this,mlist[i],arity);
+											key = map[0] + "/" + arity;
+											prim = new PrimitiveInfo(type, key, this, mlist[i], arity);
 											tablePrimitives[type].add(prim);
 										}
 									}

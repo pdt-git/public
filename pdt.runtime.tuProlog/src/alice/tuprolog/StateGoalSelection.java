@@ -17,8 +17,6 @@
  */
 package alice.tuprolog;
 
-import alice.tuprolog.Struct;
-import alice.tuprolog.Term;
 
 /**
  * @author Alex Benini

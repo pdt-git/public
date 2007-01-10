@@ -8,7 +8,8 @@
  *
  */
 package alice.util;
-import	java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
