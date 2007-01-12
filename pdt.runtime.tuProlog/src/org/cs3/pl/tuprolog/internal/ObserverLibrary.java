@@ -151,7 +151,7 @@ public class ObserverLibrary extends Library {
 			ArrayList list = (ArrayList) observations.get(subject);
 			list.add(listener);
 		}else
-			observe_1(new Struct(subject.toString()));
+			observe_1(new Struct(subject));
 	}
 	
 	public void removeListener(String subject, ObservationListener listener){

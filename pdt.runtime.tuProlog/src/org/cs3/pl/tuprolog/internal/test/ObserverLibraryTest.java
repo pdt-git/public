@@ -6,6 +6,7 @@ import org.cs3.pl.tuprolog.internal.ObservationListener;
 import org.cs3.pl.tuprolog.internal.ObserverLibrary;
 import org.cs3.pl.tuprolog.internal.SWICompatibilityLibrary;
 
+import alice.tuprolog.InvalidTermException;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
@@ -42,7 +43,7 @@ public class ObserverLibraryTest extends TestCase {
 		assertTrue(info.isSuccess());
 	}
 	
-	public void testNotify() throws MalformedGoalException, InterruptedException{
+	public void testNotify() throws MalformedGoalException, InterruptedException, InvalidTermException{
 		SolveInfo info = engine.solve("observe(observe_test(_,Y), firstKey).");
 		assertTrue(info.isSuccess());
 
