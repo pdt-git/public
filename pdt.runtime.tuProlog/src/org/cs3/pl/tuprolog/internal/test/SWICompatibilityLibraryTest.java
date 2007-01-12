@@ -96,11 +96,14 @@ public class SWICompatibilityLibraryTest extends TestCase {
 	
 	public void testThrow() throws Exception {
 		
-			SolveInfo info = engine.solve(" catch( " +
-										  "throw('my_prolog_exception')," +
-										  "my_prolog_exception," +
+			SolveInfo inf = engine.solve("assert(example(1)).");
+			SolveInfo info = engine.solve(" example(A), catch( " +
+										  "throw('testing')," +
+										  "'testing'," +
 										  "recorda('throw_test',testing)" +
-										  ").");
+										  "), format('test: ', A).");
+			
+			System.err.println(info.getBindingVars());
 			assertTrue("Failed to throw an exception", info.isSuccess());
 			
 			info = engine.solve("recorded('throw_test',X).");
