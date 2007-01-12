@@ -199,13 +199,13 @@ query(Term) :-
 rollback :-
   session_self(SessionID),
   %@hasan: remove me, for debuging purpose only.
-  format('RollBack SessionID:~w~n', SessionID),
+  %format('RollBack SessionID:~w~n', SessionID),
   rollback(SessionID).
 
 /********  internal *************/
 internal_notify(Functor, Term, Arity) :-
   %@hasan: remove me, for debuging purpose only.
-  format('Internal notify Functor: ~w Term: ~w Arity: ~w~n', [Functor, Term, Arity]),
+  %format('Internal notify Functor: ~w Term: ~w Arity: ~w~n', [Functor, Term, Arity]),
   write('Notifying subject:'),
   sformat(Str,'~w/~w',[Functor,Arity]),
   string_to_atom(Str,Subject),
@@ -230,36 +230,37 @@ assert1(Term):-
     
 transact(SessionID, Op, Term) :-
   %@hasan: remove me, for debuging purpose only.
-  format('Transact SessionID:~w Op:~w Term:~w ~n', [SessionID, Op, Term]),
+  %format('Transact SessionID:~w Op:~w Term:~w ~n', [SessionID, Op, Term]),
   retract(edb_local(SessionID, Term, Op)),
   display(Op, Term),
   Goal =..[Op,Term],
   call(Goal),
   %@hasan: remove me, for debuging purpose only.
-  format('Transact Call successed with Goal:~w~n', Goal),
-  functor_module_safe(Term,ModuleFunctor, Arity),
+  %format('Transact Call successed with Goal:~w~n', Goal),
+  %format('Transact Calling functor_module_safe Term:~w ModuleFunctor:~w Arity:~w ~n', [Term, ModuleFunctor, Arity]),
+  functor_module_safe(Term, ModuleFunctor, Arity),
   %@hasan: remove me, for debuging purpose only.  
-  format('Transact Module safe successed Term:~w~n', Term),
+  %format('Transact Module safe successed Term:~w~n', Term),
   separate_functor_arity_module_safe(Signature,ModuleFunctor,Arity),
     %@hasan: remove me, for debuging purpose only.
-  format('Inside transact DArity:~w~n', DArity),
+  %format('Inside transact DArity:~w~n', DArity),
   forall(depends(Signature, Dependant),
       ( separate_functor_arity_module_safe(Dependant, DFunctor, DArity),
-      internal_notify(DFunctor, Term, DArity))),
+      internal_notify(DFunctor, Term, DArity))).
         %@hasan: remove me, for debuging purpose only.
-      format('transact fully successeded Goal:~w~n', Goal).
+      %format('transact fully successeded Goal:~w~n', Goal).
 
 internal_commit(SessionID) :- 
       %@hasan: remove me, for debuging purpose only.
-  format('internal commit SessionID:~w~n', SessionID),
+  %format('internal commit SessionID:~w~n', SessionID),
   write('COMMIT'), nl, 
   forall(edb_local(SessionID, Term, Op), 
            %@hasan: remove me, for debuging purpose only.
-         (format('internal commit step2 Term:~w Op:~w ~n', [Term, Op]),
+         (%format('internal commit step2 Term:~w Op:~w ~n', [Term, Op]),
           transact(SessionID, Op, Term))),  
   forall(depends_local(Subject),
   		  %@hasan: remove me, for debuging purpose only.
-         (format('internal commit step3 Subject:~w~n', Subject), 
+         (%format('internal commit step3 Subject:~w~n', Subject), 
           notify_if_predicate_updated(Subject))),  
   retractall(depends_local(_)).
     
@@ -269,7 +270,7 @@ internal_commit(SessionID) :-
  */
 notify_if_predicate_updated(Signature) :-
       %@hasan: remove me, for debuging purpose only.
-    format('notify if predicate updated start Signature:~w~n', Signature),
+    %format('notify if predicate updated start Signature:~w~n', Signature),
 	writeln(notify_if_predicate_updated(Signature)),
    term_to_signature(Term,Signature),
    writeln(term_to_signature(Term,Signature)),
@@ -281,9 +282,9 @@ notify_if_predicate_updated(Signature) :-
      (changed(Ref) ->
       pif_notify(Term, 'update');
      true)
-   )),
+   )).
    %@hasan: remove me, for debuging purpose only.
-   format('notify if predicate updated Signature:~w~n', Signature), writeln(succeed:forall).
+   %format('notify if predicate updated Signature:~w~n', Signature), writeln(succeed:forall).
 
 notify_if_predicate_updated(_Subject).
   
@@ -335,7 +336,7 @@ init_idb(AtomSubject):-
      %ensure, that this is the first evaluation:
     %atom_to_term(AtomSubject, Term,_),
       %@hasan: remove me, for debuging purpose only.
-    format('Init Idb AtomSubject:~w~n', AtomSubject),
+    %format('Init Idb AtomSubject:~w~n', AtomSubject),
     init_term_ref(AtomSubject,Ref),
     not(clause(idb(Ref,AtomSubject),_)),
     !,
@@ -393,14 +394,19 @@ gc_idb :-
  */
  
 term_ref(Term, Ref) :-
+  format('term_ref Term:~w Ref:~w~n', [Term,Ref]),
   nonvar(Ref),
   var(Term),
   !,
   recorded(term_ref,Term,Ref).
   
 term_ref(Term, Ref) :-
+  %@hasan remove me
+  %format('term_ref Term:~w Ref:~w~n', [Term,Ref]),
   recorded(term_ref,RecordedTerm,Ref),
   RecordedTerm =@= Term,
+    %@hasan remove me
+  %format('term_ref Term:~w Ref:~w found ~n', [Term,Ref]),
   !.
 
 /**
@@ -499,7 +505,7 @@ debugme :- true.
  
 evaluate_and_store_idb(Ref):-
       %@hasan: remove me, for debuging purpose only.
-    format('Evaluate and Store Ref:~w~n ', Ref),
+    %format('Evaluate and Store Ref:~w~n ', Ref),
     term_ref(Term, Ref),
     catch(
 	   catch(
@@ -517,12 +523,12 @@ evaluate_and_store_idb(Ref):-
 	    
 display(Op, Term) :-
       %@hasan: remove me, for debuging purpose only.
-  format('Display Op:~w Term:~w ~n ', [Op, Term]),
+  %format('Display Op:~w Term:~w ~n ', [Op, Term]),
   write(Op), write('('), write(Term), write(').'), nl.
 	    
 create_idb_facts(Ref,Term) :-
       %@hasan: remove me, for debuging purpose only.
-   	format('Create IDB facts Ref:~w Term:~w ~n', [Ref, Term]),
+   	%format('Create IDB facts Ref:~w Term:~w ~n', [Ref, Term]),
     forall(call(Term), assert(idb(Ref, Term))),
 	debugme,
 	(
@@ -546,7 +552,7 @@ recover_from_non_existing_predicate(Ref, Term):-
  */
 update_idb(Term,Ref):- 
       %@hasan: remove me, for debuging purpose only.
-    format('Update Idb Term:~w Ref:~w~n', [Term, Ref]),
+    %format('Update Idb Term:~w Ref:~w~n', [Term, Ref]),
     term_ref(Term,Ref),
     %Note: retractall(idb(Term)) will also delete the idb(Term):- fail fact.
     retractall(idb_copy(Ref,Term)),
@@ -569,7 +575,7 @@ update_idb(Term,Ref):-
 
 changed(Ref):-
       %@hasan: remove me, for debuging purpose only.
-    format('Changed Ref:~w~n', Ref),
+    %format('Changed Ref:~w~n', Ref),
     findall([Term,Body], clause(idb(Ref,Term),Body), IdbBinding),
     !,
     not(findall([Term,Body], clause(idb_copy(Ref,Term),Body), IdbBinding)).
@@ -609,24 +615,31 @@ separate_functor_arity_module_safe_(Functor/Arity, Functor, Arity).
  */    
 functor_module_safe(Term, Module:Functor, Arity):-
     %@hasan: remove me, for debuging purpose only.
-  format('started functor_module_safe with Term:~w Module:Functor:~w Arity:~w~n', [Term, Module:Functor, Arity]),
+  %format('functor_module_safe Term:~w~n', Term),
   Term =..[':', Module, UnqualifiedTerm],
     %@hasan: remove me, for debuging purpose only.  
-  format('functor_module_safe Term:~w~n', Term),
   !,
+    format('ended functor_module_safe with Term:~w~n', [Term]),
   functor(UnqualifiedTerm, Functor,Arity).
-/*
+
+
+
 functor_module_safe(Term, Functor, Arity):-  
-   functor(Term, Functor, Arity).
-*/
+   functor(Term, Functor, Arity),
+       format('ended functor_module_safe with Term:~w~n', [Term]).
+
 
 term_to_signature(Term, Signature):-
+        %@hasan: remove me, for debuging purpose only.  
+    %format('Term_to_signature Term:~w Signature:~w~n', [Term, Signature]),
     nonvar(Signature),
     !,
     separate_functor_arity_module_safe(Signature,Functor,Arity),
     functor_module_safe(Term, Functor, Arity).
  
 term_to_signature(Term, Signature):-
+        %@hasan: remove me, for debuging purpose only.  
+    %format('Term_to_signature Term:~w Signature:~w~n', [Term, Signature]),
     nonvar(Term),
     !,
     functor_module_safe(Term, Functor, Arity),

@@ -224,14 +224,14 @@ public class TuPrologTest extends TestCase {
 		engine.addOutputListener(new OutputListener(){
 
 			public void onOutput(OutputEvent e) {
-				System.out.print(e.getMsg());				
+				System.out.println(e.getMsg());				
 			}			
 		});
 		
 		engine.addSpyListener(new SpyListener() {
 
 			public void onSpy(SpyEvent e) {
-				System.err.println(e.getMsg());
+				System.out.println(e.getMsg());
 				
 			}
 			
@@ -251,15 +251,35 @@ public class TuPrologTest extends TestCase {
 		
 
 		//engine.setSpy(true);
+		info = engine.solve("sync:add(observation(d)).");
+		assertTrue(info.isSuccess());
 		
+		info = engine.solve("sync:commit.");
+		assertTrue(info.isSuccess());
+
+		lib.addListener("observation(X)", ls );
+
+
 		info = engine.solve("sync:add(observation(s)).");
 		assertTrue(info.isSuccess());
-		lib.addListener("observation(X)", ls );
-	
 
-		//info = engine.solve("observe(observation(s)).");
-		//assertTrue(info.isSuccess());
+		info = engine.solve("sync:commit.");
+		assertTrue(info.isSuccess());
 
+		/*
+		info = engine.solve("observe(observation(X)).");
+		assertTrue(info.isSuccess());
+
+		
+		
+
+		info = engine.solve("sync:add(observation(s)).");
+		assertTrue(info.isSuccess());
+
+		info = engine.solve("sync:commit.");
+		assertTrue(info.isSuccess());	
+*/
+		
 //		info = engine.solve("sync:query(observation(A)).");
 		
 		
@@ -269,12 +289,10 @@ public class TuPrologTest extends TestCase {
 		//assertTrue(info.isSuccess());
 		
 		//engine.setSpy(true);
-		info = engine.solve("sync:commit.");
-		assertTrue(info.isSuccess());
 		
 		
 		
-		info = engine.solve("sync:query(observation(s)).");
+//		info = engine.solve("sync:query(observation(s)).");
 		//assertTrue(info.isSuccess());
 //		System.err.println(info.getBindingVars());
 

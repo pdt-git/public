@@ -501,6 +501,7 @@ public class SWICompatibilityLibrary extends Library {
 			indx = result.indexOf('~', indx+1);
 		}
 		
+		output += result.substring(old_indx);
 		//System.out.println("Pattern :"+ result);
 		
 		if (string_name != null){
