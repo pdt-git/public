@@ -110,6 +110,7 @@ public class ObserverLibrary extends Library {
 	private Observations observations = new Observations();
 	
 	public boolean observe_1(Term sub) {
+		boolean result = false;
 		Term subject = sub.getTerm();
 		
 		if ( observations.containsKey( subject.toString() ) )
@@ -119,14 +120,13 @@ public class ObserverLibrary extends Library {
 		
 		try {
 			SolveInfo info = engine.solve("sync:init_idb("+subject.getTerm()+").");
-			if (info.isSuccess())
-				System.err.println("Observe hook was called successfully");
-			
+			result = info.isSuccess();
 		} catch (MalformedGoalException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return  true;	
+		
+		return  result;	
 	}
 	
 	public boolean unobserve_1(Term subject) {
@@ -138,6 +138,7 @@ public class ObserverLibrary extends Library {
 	}
 
 	public boolean pif_notify_2(Term subject, Term msg){
+		System.err.println("Calling pif_notify ... !");
 		Notifier thread = new Notifier(subject.toString(), msg.toString());		
 		thread.start();
 		
@@ -145,6 +146,7 @@ public class ObserverLibrary extends Library {
 	}
 	
 	public void addListener(String subject, ObservationListener listener){
+		System.err.println("A new listener was added . ");
 		if (observations.containsKey(subject)){
 			ArrayList list = (ArrayList) observations.get(subject);
 			list.add(listener);

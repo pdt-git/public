@@ -22,6 +22,8 @@ import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.SolveInfo;
 import alice.tuprolog.Theory;
+import alice.tuprolog.event.OutputEvent;
+import alice.tuprolog.event.OutputListener;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.SpyListener;
 
@@ -217,6 +219,15 @@ public class TuPrologTest extends TestCase {
 	
 	public void testSync()throws Exception {
 		
+		SolveInfo info ;
+
+		engine.addOutputListener(new OutputListener(){
+
+			public void onOutput(OutputEvent e) {
+				System.out.print(e.getMsg());				
+			}			
+		});
+		
 		engine.addSpyListener(new SpyListener() {
 
 			public void onSpy(SpyEvent e) {
@@ -225,47 +236,66 @@ public class TuPrologTest extends TestCase {
 			}
 			
 		});
-		
-		SolveInfo info = engine.solve("A=@=B.");
-		assertTrue(info.isSuccess());
-		
+	
 		engine.loadLibrary("sync.pl");
-		
+
+
 		ObserverLibrary lib = (ObserverLibrary) engine.getLibrary("org.cs3.pl.tuprolog.internal.ObserverLibrary");
 		ObservationListener ls = new ObservationListener(){
 
 			public void onUpdate(String msg) {
-				System.err.println(msg);				
+				System.err.println("Listener : " + msg);				
 			}
 			
 		};
 		
-		
 
-		engine.setSpy(true);
-		info = engine.solve("observe(observation(s)).");
-		assertTrue(info.isSuccess());
+		//engine.setSpy(true);
 		
-//		info = engine.solve("sync:query(assert(observation(s))).");
-//		assertTrue(info.isSuccess());
-		info = engine.solve("sync:del(observation(s)).");
+		info = engine.solve("sync:add(observation(s)).");
 		assertTrue(info.isSuccess());
-		System.err.println(info.getBindingVars());
-/*		info = engine.solve("sync:query(assert(observation(d))).");
-		info = engine.solve("sync:query(assert(observation(y))).");
-		assertTrue(info.isSuccess());
-		info = engine.solve("sync:query(observe(observation(X))).");
-		assertTrue(info.isSuccess());
-		
 		lib.addListener("observation(X)", ls );
+	
+
+		//info = engine.solve("observe(observation(s)).");
+		//assertTrue(info.isSuccess());
+
+//		info = engine.solve("sync:query(observation(A)).");
 		
-		info = engine.solve("sync:query(pif_notify(observation(X), 'notification_test')).");
+		
+//		assertTrue(info.isSuccess());
+
+		//info = engine.solve("sync:delete(observation(s)).");
+		//assertTrue(info.isSuccess());
+		
+		//engine.setSpy(true);
+		info = engine.solve("sync:commit.");
 		assertTrue(info.isSuccess());
 		
-		Thread.sleep(100);
-		info = engine.solve("query(A=@=B).");
-		assertTrue(info.isSuccess());
+		
+		
+		info = engine.solve("sync:query(observation(s)).");
+		//assertTrue(info.isSuccess());
+//		System.err.println(info.getBindingVars());
+
+/*		info = engine.solve("sync:add(observation(d)).");
+		info = engine.solve("sync:add(observation(y)).");
 */
+
+		//info = engine.solve("sync:query(observed_predicate(A,B)).");
+		//assertTrue(info.isSuccess());
+		
+		
+		//info = engine.solve("sync:query(pif_notify(observation(X), 'notification_test')).");
+/*		info = engine.solve("sync:deleteAll(observation(X)).");
+		assertTrue(info.isSuccess());
+	*/	
+
+//		info = engine.solve("sync:commit.");
+//		assertTrue(info.isSuccess());
+
+		Thread.sleep(100);
+
 /*
 		engine.loadLibrary("sync_test.pl");
 		info = engine.solve("setUp(term_ref).");

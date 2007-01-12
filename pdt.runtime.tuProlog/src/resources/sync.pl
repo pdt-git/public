@@ -85,14 +85,14 @@
   
 :- dynamic depends/2.
 :- multifile depends/2.
-/*
-:- thread_local edb_local/3.
-*/
+
+:- dynamic edb_local/3.
+
 :- dynamic idb/2.
 :- dynamic idb_copy/2.
-/*
-:- thread_local depends_local/1.
-*/
+
+:- dynamic depends_local/1.
+
 :- dynamic num_observers_for_term/2.
 
 /* depends_fact(a, b). */
@@ -113,12 +113,18 @@ pif_observe_hook(_,Subject,_):-
 pif_unobserve_hook(_,Subject,_):-
 	unregister_observer(Subject). 
 	
+string_to_atom(String, Atom):-
+    	unify(String, Atom).
 
-thread_self(ThreadID):-
-    	true.
+writeln(String):-
+	write(String), 
+	nl.
+	    	
+%thread_self(ThreadID):-
+%    	true.
     	
-session_self(SessionID):-
-    true.
+%session_self(SessionID):-
+%    true.
     	
 depends_fact(Term, Term).
 
@@ -181,6 +187,7 @@ deleteAll(Term) :-
  * wrapp the observed predicates with idb/1.
  */
 query(Term) :-
+  format('QUERY: ~w~n', [Term]),
   with_mutex(readwrite, call(Term)).
 
 /** 
@@ -191,10 +198,14 @@ query(Term) :-
  */
 rollback :-
   session_self(SessionID),
+  %@hasan: remove me, for debuging purpose only.
+  format('RollBack SessionID:~w~n', SessionID),
   rollback(SessionID).
 
 /********  internal *************/
 internal_notify(Functor, Term, Arity) :-
+  %@hasan: remove me, for debuging purpose only.
+  format('Internal notify Functor: ~w Term: ~w Arity: ~w~n', [Functor, Term, Arity]),
   write('Notifying subject:'),
   sformat(Str,'~w/~w',[Functor,Arity]),
   string_to_atom(Str,Subject),
@@ -218,21 +229,38 @@ assert1(Term):-
     assert(Term).
     
 transact(SessionID, Op, Term) :-
+  %@hasan: remove me, for debuging purpose only.
+  format('Transact SessionID:~w Op:~w Term:~w ~n', [SessionID, Op, Term]),
   retract(edb_local(SessionID, Term, Op)),
   display(Op, Term),
-  call(Op, Term),
+  Goal =..[Op,Term],
+  call(Goal),
+  %@hasan: remove me, for debuging purpose only.
+  format('Transact Call successed with Goal:~w~n', Goal),
   functor_module_safe(Term,ModuleFunctor, Arity),
+  %@hasan: remove me, for debuging purpose only.  
+  format('Transact Module safe successed Term:~w~n', Term),
   separate_functor_arity_module_safe(Signature,ModuleFunctor,Arity),
+    %@hasan: remove me, for debuging purpose only.
+  format('Inside transact DArity:~w~n', DArity),
   forall(depends(Signature, Dependant),
       ( separate_functor_arity_module_safe(Dependant, DFunctor, DArity),
-      internal_notify(DFunctor, Term, DArity))).
+      internal_notify(DFunctor, Term, DArity))),
+        %@hasan: remove me, for debuging purpose only.
+      format('transact fully successeded Goal:~w~n', Goal).
 
 internal_commit(SessionID) :- 
+      %@hasan: remove me, for debuging purpose only.
+  format('internal commit SessionID:~w~n', SessionID),
   write('COMMIT'), nl, 
   forall(edb_local(SessionID, Term, Op), 
-         transact(SessionID, Op, Term)),
+           %@hasan: remove me, for debuging purpose only.
+         (format('internal commit step2 Term:~w Op:~w ~n', [Term, Op]),
+          transact(SessionID, Op, Term))),  
   forall(depends_local(Subject),
-         notify_if_predicate_updated(Subject)),
+  		  %@hasan: remove me, for debuging purpose only.
+         (format('internal commit step3 Subject:~w~n', Subject), 
+          notify_if_predicate_updated(Subject))),  
   retractall(depends_local(_)).
     
 /**
@@ -240,6 +268,8 @@ internal_commit(SessionID) :-
  *
  */
 notify_if_predicate_updated(Signature) :-
+      %@hasan: remove me, for debuging purpose only.
+    format('notify if predicate updated start Signature:~w~n', Signature),
 	writeln(notify_if_predicate_updated(Signature)),
    term_to_signature(Term,Signature),
    writeln(term_to_signature(Term,Signature)),
@@ -251,7 +281,9 @@ notify_if_predicate_updated(Signature) :-
      (changed(Ref) ->
       pif_notify(Term, 'update');
      true)
-   )),   writeln(succeed:forall).
+   )),
+   %@hasan: remove me, for debuging purpose only.
+   format('notify if predicate updated Signature:~w~n', Signature), writeln(succeed:forall).
 
 notify_if_predicate_updated(_Subject).
   
@@ -302,6 +334,8 @@ init_idb(AtomSubject):-
 %    functor_module_safe(Term, Functor, Arity),
      %ensure, that this is the first evaluation:
     %atom_to_term(AtomSubject, Term,_),
+      %@hasan: remove me, for debuging purpose only.
+    format('Init Idb AtomSubject:~w~n', AtomSubject),
     init_term_ref(AtomSubject,Ref),
     not(clause(idb(Ref,AtomSubject),_)),
     !,
@@ -322,6 +356,7 @@ init_idb(_).
  */
 unregister_observer(Subject) :- 
   %atom_to_term(AtomSubject, Subject,_),
+  format('Unregister observer ~w~n', Subject),
   term_ref(Subject, Ref),
   dec_term_ref(Ref),
   gc_idb.
@@ -463,6 +498,8 @@ dec_term_ref(Ref) :-
 debugme :- true.
  
 evaluate_and_store_idb(Ref):-
+      %@hasan: remove me, for debuging purpose only.
+    format('Evaluate and Store Ref:~w~n ', Ref),
     term_ref(Term, Ref),
     catch(
 	   catch(
@@ -478,8 +515,14 @@ evaluate_and_store_idb(Ref):-
        assert1(idb(Ref, instantiation_error(Term))))
     ).
 	    
+display(Op, Term) :-
+      %@hasan: remove me, for debuging purpose only.
+  format('Display Op:~w Term:~w ~n ', [Op, Term]),
+  write(Op), write('('), write(Term), write(').'), nl.
 	    
 create_idb_facts(Ref,Term) :-
+      %@hasan: remove me, for debuging purpose only.
+   	format('Create IDB facts Ref:~w Term:~w ~n', [Ref, Term]),
     forall(call(Term), assert(idb(Ref, Term))),
 	debugme,
 	(
@@ -502,6 +545,8 @@ recover_from_non_existing_predicate(Ref, Term):-
  * and reevaluate idb/1 for this predicate.
  */
 update_idb(Term,Ref):- 
+      %@hasan: remove me, for debuging purpose only.
+    format('Update Idb Term:~w Ref:~w~n', [Term, Ref]),
     term_ref(Term,Ref),
     %Note: retractall(idb(Term)) will also delete the idb(Term):- fail fact.
     retractall(idb_copy(Ref,Term)),
@@ -509,6 +554,8 @@ update_idb(Term,Ref):-
            assert((idb_copy(Ref,Term):-Body))),
     retractall(idb(Ref,_)),
     evaluate_and_store_idb(Ref).
+
+
     
 /**
  * changed_idb(Term)
@@ -521,19 +568,22 @@ update_idb(Term,Ref):-
 %    !.
 
 changed(Ref):-
+      %@hasan: remove me, for debuging purpose only.
+    format('Changed Ref:~w~n', Ref),
     findall([Term,Body], clause(idb(Ref,Term),Body), IdbBinding),
     !,
     not(findall([Term,Body], clause(idb_copy(Ref,Term),Body), IdbBinding)).
    
+
+
 /******************************
  *    auxiliary predicates    * 
  ******************************/
     
+
 debug(Functor, Attribute) :-
     format('=========== ~w: ~w===============~n~n ',[Functor, Attribute]).   
 
-display(Op, Term) :-
-  write(Op), write('('), write(Term), write(').'), nl.
  
 
 /**
@@ -557,8 +607,12 @@ separate_functor_arity_module_safe_(Functor/Arity, Functor, Arity).
 /**
  * ':' causes a problem without quotes with tuProlog.
  */    
-functor_module_safe(Term, Module:Functor, Arity):-  
-  Term =.. [':', Module, UnqualifiedTerm],
+functor_module_safe(Term, Module:Functor, Arity):-
+    %@hasan: remove me, for debuging purpose only.
+  format('started functor_module_safe with Term:~w Module:Functor:~w Arity:~w~n', [Term, Module:Functor, Arity]),
+  Term =..[':', Module, UnqualifiedTerm],
+    %@hasan: remove me, for debuging purpose only.  
+  format('functor_module_safe Term:~w~n', Term),
   !,
   functor(UnqualifiedTerm, Functor,Arity).
 /*
@@ -577,7 +631,6 @@ term_to_signature(Term, Signature):-
     !,
     functor_module_safe(Term, Functor, Arity),
     separate_functor_arity_module_safe(Signature,Functor,Arity).
- 
 /*
 open_wordnet :-
         odbc_connect('WordNet', _,

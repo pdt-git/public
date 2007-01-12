@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import alice.tuprolog.Int;
+import alice.tuprolog.InvalidTermException;
 import alice.tuprolog.Library;
 import alice.tuprolog.Number;
 import alice.tuprolog.SolveInfo;
@@ -172,7 +173,9 @@ public class SWICompatibilityLibrary extends Library {
 	 * @throws TuPrologThrowable
 	 */
 	public boolean throw_1(Term exception) throws Exception, TuPrologThrowable {
-		
+		/*
+		 * TODO: throw the term, then try to unify it instead of simple string case. 
+		 */
 		if ( exception.getTerm().isAtomic())
 			throw new TuPrologThrowable( exception.toString());
 		
@@ -195,7 +198,7 @@ public class SWICompatibilityLibrary extends Library {
 		try{
 			engine.solve(goal);
 		}catch(TuPrologThrowable ex){
-			if ( ex.getMessage().contains( catcher.getTerm().toString()) )
+			if ( ex.getMessage().contentEquals( new StringBuffer(catcher.getTerm().toString()) ))
 				engine.solve(recover);
 			else
 				throw ex;
@@ -458,17 +461,68 @@ public class SWICompatibilityLibrary extends Library {
 	 */		
 	
 	public boolean format_2(Term msg, Term values){
-		Term string = new Struct();
-		sformat_3(string, msg, values);
-		System.out.println(string.toString());
+		sformat_3(null , msg, values);
 		return true;
 	}
 	
 	public boolean sformat_3(Term string_name, Term msg, Term values){
 		//TODO: implement format.
+		String result = msg.toString();
+		result = result.replace('\'', ' ');
+
+		String output= "";
+		int old_indx = 0;
+		int indx = result.indexOf('~');
+		Term temp_values = values.getTerm();		
 		
-		return unify(string_name, new Struct(msg.toString()+values.toString()));
+		while(indx != -1 ){
+			
+			output += result.substring(old_indx, indx);
+
+			switch(result.charAt(indx+1)){
+				case 'w':{
+				
+					if ( temp_values.isList() ){
+						Struct vals = (Struct) temp_values.getTerm();
+						output += vals.getArg(0).getTerm();
+						//if (cnt < vals.getArity()-1)
+						temp_values = vals.getArg(1);
+					}else
+						output += values.getTerm();
+					
+				}break;
+				case 'n':{
+					output += '\n';
+				}break;
+				
+			}
+
+			old_indx = indx + 2;
+			indx = result.indexOf('~', indx+1);
+		}
 		
+		//System.out.println("Pattern :"+ result);
+		
+		if (string_name != null){
+			boolean unified = false;
+			try {
+				unified = unify(string_name, Term.parse(output));
+	
+				if (unified)
+					System.out.println("Unified String is " + string_name.getTerm().toString() );
+	
+			} catch (InvalidTermException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+	
+			return unified;
+		}
+		
+		//TODO: move this functionality to format/2 instead of relying on null input for string name
+		engine.stdOutput(output);	
+		return false;		
 	}
 
 	/*
@@ -484,6 +538,15 @@ public class SWICompatibilityLibrary extends Library {
 		
 	}
 	
+	/*
+	 * 	Implemenation of the SessionId .
+	 */
+	public boolean session_self_1(Term sessionId){
+		/*
+		 * FIXME: for the current moment, I am using thread hashCode as sessionID. Will it be suitable ?
+		 */
+		return unify(sessionId, new Int(Thread.currentThread().hashCode()) );
+	}
 	
 	/*
 	 * 
@@ -503,7 +566,7 @@ public class SWICompatibilityLibrary extends Library {
 	 		":-	op( 700, xfx, '\\=@=').				\n" +
 	 		"'=@='(X,Y):-  structEq(X,Y).			\n" +
 	 		"'\\=@='(X,Y):-  not structEq(X,Y). 	\n" +
-	 		"forall(A,B):- findall(_, forall-call(A,B), _). \n"+
+	 		"forall(A,B):- findall(_,(A,B), _). \n"+
 	 		"forall-call(A,B):- A, B. 				\n"+
 	 		"':'(Module,Predicate) :- call(Predicate).	\n" ;
 	}

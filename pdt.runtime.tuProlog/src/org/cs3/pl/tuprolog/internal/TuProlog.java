@@ -12,6 +12,7 @@ import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
 import alice.tuprolog.Theory;
+import alice.tuprolog.event.OutputListener;
 import alice.tuprolog.event.QueryListener;
 import alice.tuprolog.event.SpyListener;
 import alice.tuprolog.event.WarningEvent;
@@ -192,6 +193,14 @@ public class TuProlog {
 	 */
 	public void addQueryListener(QueryListener listener) {
 		engine.addQueryListener(listener);	
+	}
+
+	/**
+	 * @see Prolog#addOutputListener(OutputListener)
+	 * @param listener
+	 */
+	public void addOutputListener(OutputListener listener){
+		engine.addOutputListener(listener);
 	}
 	
 	/**
