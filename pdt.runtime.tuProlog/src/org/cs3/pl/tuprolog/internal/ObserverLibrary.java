@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import alice.tuprolog.InvalidTermException;
 import alice.tuprolog.Library;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.SolveInfo;
@@ -61,6 +62,7 @@ public class ObserverLibrary extends Library {
 					if (info.isSuccess())
 						return super.get(subject);
 					
+					
 				} catch (MalformedGoalException e) {
 					e.printStackTrace();
 				}				
@@ -91,9 +93,8 @@ public class ObserverLibrary extends Library {
 		public void run(){
 			if ( subject == "" )
 				return;
-			
+
 			if ( observations.containsKey(subject) ){
-				
 				ArrayList list = (ArrayList) observations.get(subject);
 				
 				if (list == null )
@@ -138,20 +139,19 @@ public class ObserverLibrary extends Library {
 	}
 
 	public boolean pif_notify_2(Term subject, Term msg){
-		System.err.println("Calling pif_notify ... !");
-		Notifier thread = new Notifier(subject.toString(), msg.toString());		
+		Notifier thread = new Notifier(subject.getTerm().toString(), msg.toString());		
 		thread.start();
 		
 		return true;
 	}
 	
-	public void addListener(String subject, ObservationListener listener){
-		System.err.println("A new listener was added . ");
-		if (observations.containsKey(subject)){
-			ArrayList list = (ArrayList) observations.get(subject);
-			list.add(listener);
-		}else
-			observe_1(new Struct(subject));
+	public void addListener(String subject, ObservationListener listener) throws InvalidTermException {
+
+		if (!observations.containsKey(subject))
+			observe_1(Term.parse(subject));
+		
+		ArrayList list = (ArrayList) observations.get(subject);
+		list.add(listener);			
 	}
 	
 	public void removeListener(String subject, ObservationListener listener){
