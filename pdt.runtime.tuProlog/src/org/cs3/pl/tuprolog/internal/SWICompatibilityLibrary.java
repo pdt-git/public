@@ -371,7 +371,9 @@ public class SWICompatibilityLibrary extends Library {
 		
 		for (Iterator it = values.iterator(); it.hasNext();) {
 			RecordEntry en = (RecordEntry) it.next();
-			if (en.getTerm().equals(_value)) 
+			// TODO: Unification instead of equality
+			//if (en.getTerm().equals(_value))
+			if(unify(_value, en.getTerm()))
 				index = en.getRef();
 		}
 		// Value was not found.
@@ -508,9 +510,6 @@ public class SWICompatibilityLibrary extends Library {
 			boolean unified = false;
 			try {
 				unified = unify(string_name, Term.parse(output));
-	
-				if (unified)
-					System.out.println("Unified String is " + string_name.getTerm().toString() );
 	
 			} catch (InvalidTermException e) {
 				// TODO Auto-generated catch block

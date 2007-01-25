@@ -114,7 +114,7 @@ pif_unobserve_hook(_,Subject,_):-
 	unregister_observer(Subject). 
 	
 string_to_atom(String, Atom):-
-    	unify(String, Atom).
+    	unify(Atom, String).
 
 writeln(String):-
 	write(String), 
@@ -271,7 +271,7 @@ internal_commit(SessionID) :-
 notify_if_predicate_updated(Signature) :-
       %@hasan: remove me, for debuging purpose only.
     %format('notify if predicate updated start Signature:~w~n', Signature),
-	writeln(notify_if_predicate_updated(Signature)),
+   writeln(notify_if_predicate_updated(Signature)),
    term_to_signature(Term,Signature),
    writeln(term_to_signature(Term,Signature)),
    recorded(term_ref,Term),
@@ -619,14 +619,14 @@ functor_module_safe(Term, Module:Functor, Arity):-
   Term =..[':', Module, UnqualifiedTerm],
     %@hasan: remove me, for debuging purpose only.  
   !,
-    format('ended functor_module_safe with Term:~w~n', [Term]),
+    %format('ended functor_module_safe with Term:~w~n', [Term]),
   functor(UnqualifiedTerm, Functor,Arity).
 
 
 
 functor_module_safe(Term, Functor, Arity):-  
-   functor(Term, Functor, Arity),
-       format('ended functor_module_safe with Term:~w~n', [Term]).
+   functor(Term, Functor, Arity).
+%       format('ended functor_module_safe with Term:~w~n', [Term]).
 
 
 term_to_signature(Term, Signature):-
