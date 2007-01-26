@@ -51,7 +51,6 @@ public class NotAllPrologTests {
 		
 		// $JUnit-BEGIN$
 		suite.addTestSuite(SocketSessionTest.class);
-		suite.addTestSuite(SocketSessionThrowTest.class);
 		suite.addTestSuite(TuPrologTest.class);
 		//suite.addTestSuite(ConnectionToRunningPrologServerTest.class);
 		//suite.addTestSuite(LazyStartupRaceTest.class);

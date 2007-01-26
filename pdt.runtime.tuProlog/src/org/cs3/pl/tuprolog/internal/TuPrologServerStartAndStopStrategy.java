@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
+import alice.tuprolog.InvalidLibraryException;
 import alice.tuprolog.InvalidTheoryException;
 
 public class TuPrologServerStartAndStopStrategy implements ServerStartAndStopStrategy {
@@ -27,7 +28,10 @@ public class TuPrologServerStartAndStopStrategy implements ServerStartAndStopStr
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (InvalidLibraryException e) {
+			e.printStackTrace();
 		}
+		
 		return null; // TODO: TRHO: @Lukas: why is a Process returned here? 
 	}
 

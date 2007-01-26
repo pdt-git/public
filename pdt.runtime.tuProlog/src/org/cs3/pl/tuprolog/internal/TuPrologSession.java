@@ -100,7 +100,14 @@ public class TuPrologSession implements PrologSession2 {
 		disposed = true;
 	}
 
-	
+	/**
+	 * Set the currentActiveSessionID of TuPrologPrologInterface to 
+	 * the hashCode() of this session. The currentActiveSessionID needs 
+	 * to be changed at each query which helps concurrent 
+	 * sessions managements in Sync Library.
+	 *  
+	 * @author abdelhal
+	 */
 	private void setActiveSessionID(){
 		pif.setActiveSessionID(hashCode());
 	}
@@ -252,7 +259,11 @@ public class TuPrologSession implements PrologSession2 {
 		} catch (NoMoreSolutionException e) {
 			return null;
 		}
-		return toMap(result);
+		
+		//TODO next() now returns null incase of query failure instead of 
+		// throwing an exception. Which method should be to consider!!!.
+		return (result.isSuccess())? toMap(result): null;		 
+		//return toMap(result);
 
 	}
 
