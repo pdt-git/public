@@ -102,7 +102,7 @@ public class TuPrologSession implements PrologSession2 {
 
 	
 	private void setActiveSessionID(){
-		pif.currentActiveSession = hashCode();
+		pif.setActiveSessionID(hashCode());
 	}
 	
 	/*

@@ -356,6 +356,16 @@ public class TuPrologPrologInterface extends AbstractPrologInterface {
 		this.hidePlwin = hidePlwin;
 	}
 
+	/**
+	 * @author abdelhal
+	 * @param sessionID
+	 * 
+	 * Sets the current active session ID to sessionID. 
+	 */
+	public void setActiveSessionID(int sessionID){
+		currentActiveSession = sessionID;
+	}
+
 	public TuProlog getEngine() {
 		return engine;
 	}
