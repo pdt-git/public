@@ -112,7 +112,8 @@ pif_observe_hook(_,Subject,_):-
 
 pif_unobserve_hook(_,Subject,_):-
 	unregister_observer(Subject). 
-	
+
+% not logically true, fixme.	
 string_to_atom(String, Atom):-
     	unify(Atom, String).
 
@@ -277,12 +278,14 @@ notify_if_predicate_updated(Signature) :-
    recorded(term_ref,Term),
    writeln(succeed:recorded(term_ref,Term)),
    !,
-   forall(term_ref(Term,Ref), (
+   forall(term_ref(Term,Ref), 
+   (
      update_idb(Term,Ref),
      (changed(Ref) ->
       pif_notify(Term, 'update');
      true)
    )).
+   
    %@hasan: remove me, for debuging purpose only.
    %format('notify if predicate updated Signature:~w~n', Signature), writeln(succeed:forall).
 

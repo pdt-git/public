@@ -117,7 +117,13 @@ public class TuPrologPrologInterface extends AbstractPrologInterface {
 	public final static String TIMEOUT = "pif.timeout";
 
 	public static final String WARNING = "warning";
-
+	
+	/**
+	 * @author abdelhal
+	 * 
+	 * Sessions management for Sync Library.
+	 */
+	public static int currentActiveSession = 0;
 
 
 	private PrologInterfaceFactory factory;
@@ -136,7 +142,9 @@ public class TuPrologPrologInterface extends AbstractPrologInterface {
 		this.factory = factory;
 		Debug.setDebugLevel(Debug.LEVEL_ERROR);
     	engine = new TuProlog();
-		Theory theory = new Theory(
+/*
+ * FIXME Already loaded within TuProlog
+    	Theory theory = new Theory(
 				":- op(1150, fx, dynamic). \n" +
 				":- op(1150, fx, multifile).\n"+
 				
@@ -153,6 +161,7 @@ public class TuPrologPrologInterface extends AbstractPrologInterface {
 		engine.addTheory(theory);
 		engine.loadLibrary("compatiblitySWI.pl");
 		engine.loadLibrary("compatiblityTU.pl");
+	*/
 	}
 
 	

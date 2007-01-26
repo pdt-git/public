@@ -4,15 +4,22 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
+import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceListener;
+
 import alice.tuprolog.InvalidTermException;
 import alice.tuprolog.Library;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.SolveInfo;
-import alice.tuprolog.Struct;
 import alice.tuprolog.Term;
 
 public class ObserverLibrary extends Library {
 	private static final long serialVersionUID = 1L;
+	
+	public String getName() {
+		// TODO Auto-generated method stub
+		return "ObserverLibrary";
+	}
 	
 	/**
 	 * Observations class is a hashtable used to store 
@@ -101,8 +108,9 @@ public class ObserverLibrary extends Library {
 					return;
 				
 				for (Iterator iter = list.iterator(); iter.hasNext();) {
-					ObservationListener ls = (ObservationListener) iter.next();
-					ls.onUpdate(msg);					
+					PrologInterfaceListener ls = (PrologInterfaceListener) iter.next();
+					//ls.onUpdate(msg);
+					ls.update(new PrologInterfaceEvent(this, subject, msg));
 				}
 			}
 		}
@@ -145,7 +153,7 @@ public class ObserverLibrary extends Library {
 		return true;
 	}
 	
-	public void addListener(String subject, ObservationListener listener) throws InvalidTermException {
+	public void addListener(String subject, PrologInterfaceListener listener) throws InvalidTermException {
 
 		if (!observations.containsKey(subject))
 			observe_1(Term.parse(subject));
@@ -154,7 +162,7 @@ public class ObserverLibrary extends Library {
 		list.add(listener);			
 	}
 	
-	public void removeListener(String subject, ObservationListener listener){
+	public void removeListener(String subject, PrologInterfaceListener listener){
 		if (observations.containsKey(subject)){
 			ArrayList list = (ArrayList) observations.get(subject);
 			list.remove(listener);

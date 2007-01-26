@@ -100,6 +100,11 @@ public class TuPrologSession implements PrologSession2 {
 		disposed = true;
 	}
 
+	
+	private void setActiveSessionID(){
+		pif.currentActiveSession = hashCode();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -110,7 +115,7 @@ public class TuPrologSession implements PrologSession2 {
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
-		
+		setActiveSessionID();
 		SolveInfo result;
 		try {
 			result = pif.getEngine().solve(normalizeQuery(query));
@@ -144,6 +149,7 @@ public class TuPrologSession implements PrologSession2 {
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
+		setActiveSessionID();
 		synchronized (pif) {
 			SolveInfo result = null;
 			try {
