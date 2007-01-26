@@ -371,7 +371,6 @@ public class SWICompatibilityLibrary extends Library {
 		
 		for (Iterator it = values.iterator(); it.hasNext();) {
 			RecordEntry en = (RecordEntry) it.next();
-			// TODO: Unification instead of equality
 			//if (en.getTerm().equals(_value))
 			if(unify(_value, en.getTerm()))
 				index = en.getRef();
@@ -543,9 +542,10 @@ public class SWICompatibilityLibrary extends Library {
 	 */
 	public boolean session_self_1(Term sessionId){
 		/*
-		 * FIXME: for the current moment, I am using thread hashCode as sessionID. Will it be suitable ?
+		 * FIXME: for the current moment, I am using current session hashCode as sessionID. 
+		 * dirty solution.
 		 */
-		return unify(sessionId, new Int(Thread.currentThread().hashCode()) );
+		return unify(sessionId, new Int(TuPrologPrologInterface.currentActiveSession) );
 	}
 	
 	/*

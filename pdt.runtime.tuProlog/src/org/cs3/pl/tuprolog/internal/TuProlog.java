@@ -39,7 +39,11 @@ public class TuProlog {
     
     public TuProlog() throws InvalidTheoryException, IOException {
     	engine = new Prolog();
-    	initEngine();
+    	
+ /* Already done at TuPrologServerStartAndStop
+  *   	initEngine();
+  * 
+  */
     }
     
     /**
@@ -79,6 +83,8 @@ public class TuProlog {
 		loadLibrary("compatiblitySWI.pl");
 		loadLibrary("compatiblityTU.pl");
 		loadLibrary("javaFactbase.pl");
+		//TODO : sync library is not always loaded. It may need modifications to be loaded dynamically.
+		//loadLibrary("sync.pl");	
 		
 		engine.setWarning(true);
 		engine.addWarningListener(new WarningListener() {

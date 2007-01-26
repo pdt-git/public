@@ -2,7 +2,6 @@ package org.cs3.pl.tuprolog.internal.test;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.tuprolog.internal.ObservationListener;
 import org.cs3.pl.tuprolog.internal.ObserverLibrary;
 import org.cs3.pl.tuprolog.internal.SWICompatibilityLibrary;
 
@@ -48,10 +47,15 @@ public class ObserverLibraryTest extends TestCase {
 		assertTrue(info.isSuccess());
 
 		ObserverLibrary lib = (ObserverLibrary) engine.getLibrary("org.cs3.pl.tuprolog.internal.ObserverLibrary");
-		ObservationListener ls = new ObservationListener(){
+/*		ObservationListener ls = new ObservationListener(){
 
 			public void onUpdate(String msg) {
 				System.err.println(msg);				
+			}
+
+			public void update(PrologInterfaceEvent e) {
+				// TODO Auto-generated method stub
+				System.err.println(e);
 			}
 			
 		};
@@ -59,7 +63,7 @@ public class ObserverLibraryTest extends TestCase {
 		lib.addListener("observe_test(X,_)", ls );
 		lib.addListener("observe_test(X,_)", ls );
 		
-
+*/
 		info = engine.solve("pif_notify(observe_test(_,_), 'first test for messages').");
 		assertTrue(info.isSuccess());
 		

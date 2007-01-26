@@ -13,8 +13,6 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.tuprolog.internal.ObservationListener;
-import org.cs3.pl.tuprolog.internal.ObserverLibrary;
 import org.cs3.pl.tuprolog.internal.TuProlog;
 
 import alice.tuprolog.InvalidTheoryException;
@@ -22,8 +20,6 @@ import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.SolveInfo;
 import alice.tuprolog.Theory;
-import alice.tuprolog.event.OutputEvent;
-import alice.tuprolog.event.OutputListener;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.SpyListener;
 
@@ -215,121 +211,5 @@ public class TuPrologTest extends TestCase {
 		Calendar calendar = Calendar.getInstance(Locale.GERMANY);
 		System.out.println(new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.UK).format(
 			new Date(1000)));
-	}
-	
-	public void testSync()throws Exception {
-		
-		SolveInfo info ;
-
-		engine.addOutputListener(new OutputListener(){
-
-			public void onOutput(OutputEvent e) {
-				System.out.print(e.getMsg());				
-			}			
-		});
-		
-		engine.addSpyListener(new SpyListener() {
-
-			public void onSpy(SpyEvent e) {
-				System.out.println(e.getMsg());
-				
-			}
-			
-		});
-	
-		engine.loadLibrary("sync.pl");
-
-
-		ObserverLibrary lib = (ObserverLibrary) engine.getLibrary("org.cs3.pl.tuprolog.internal.ObserverLibrary");
-		ObservationListener ls = new ObservationListener(){
-
-			public void onUpdate(String msg) {
-				System.err.println("Listener : " + msg);				
-			}
-			
-		};
-		
-
-
-		info = engine.solve("sync:add(observation(d)).");
-		assertTrue(info.isSuccess());
-
-		info = engine.solve("sync:commit.");
-		assertTrue(info.isSuccess());
-
-		//engine.setSpy(true);
-		lib.addListener("observation(X)", ls );
-
-
-		//engine.setSpy(true);		
-		info = engine.solve("sync:add(observation(s)).");
-		assertTrue(info.isSuccess());
-
-		//engine.setSpy(false);
-		info = engine.solve("sync:commit.");
-		assertTrue(info.isSuccess());
-
-		/*
-		info = engine.solve("observe(observation(X)).");
-		assertTrue(info.isSuccess());
-
-		
-		
-
-		info = engine.solve("sync:add(observation(s)).");
-		assertTrue(info.isSuccess());
-
-		info = engine.solve("sync:commit.");
-		assertTrue(info.isSuccess());	
-*/
-		
-//		info = engine.solve("sync:query(observation(A)).");
-		
-		
-//		assertTrue(info.isSuccess());
-
-		info = engine.solve("sync:delete(observation(s)).");
-		assertTrue(info.isSuccess());
-		
-		//engine.setSpy(true);
-		
-		
-		
-//		info = engine.solve("sync:query(observation(s)).");
-		//assertTrue(info.isSuccess());
-//		System.err.println(info.getBindingVars());
-
-/*		info = engine.solve("sync:add(observation(d)).");
-		info = engine.solve("sync:add(observation(y)).");
-*/
-
-		//info = engine.solve("sync:query(observed_predicate(A,B)).");
-		//assertTrue(info.isSuccess());
-		
-		
-		//info = engine.solve("sync:query(pif_notify(observation(X), 'notification_test')).");
-/*		info = engine.solve("sync:deleteAll(observation(X)).");
-		assertTrue(info.isSuccess());
-	*/	
-
-		info = engine.solve("sync:commit.");
-		assertTrue(info.isSuccess());
-
-		Thread.sleep(100);
-
-/*
-		engine.loadLibrary("sync_test.pl");
-		info = engine.solve("setUp(term_ref).");
-		assertTrue(info.isSuccess());
-		engine.setSpy(true);
-		engine.loadLibrary("localisation.pl");
-		
-		info = engine.solve("test(init_idb).");
-		assertTrue(info.isSuccess());
-		
-		info = engine.solve("test(separate_functor_arity_module_safe).");
-		assertTrue(info.isSuccess());
-*/
-		
 	}
 }
