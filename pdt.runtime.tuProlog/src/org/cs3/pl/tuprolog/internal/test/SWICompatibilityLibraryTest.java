@@ -26,74 +26,96 @@ public class SWICompatibilityLibraryTest extends TestCase {
 		super.tearDown();
 	}
 	
-	public void testStructeqAtoms() throws	MalformedGoalException,
+	
+	private void structuralEqualityAtoms() throws	MalformedGoalException,
 											NoSolutionException {
 		SolveInfo info = engine.solve("a=@=b.");
-		assertFalse("Failed to Query engine", info.isSuccess());
+		assertFalse("Structural Equality between Atoms should be false.", info.isSuccess());
 	}
 
-	public void testStructeqVars() throws	MalformedGoalException,
+	private void structuralEqualityVars() throws	MalformedGoalException,
 											NoSolutionException {
 
 		SolveInfo info = engine.solve("_=@=_.");
-		assertTrue("Failed to Query engine", info.isSuccess());
+		assertTrue("Structural Equality between Atoms should be true.", info.isSuccess());
 	}
 	
-	public void testStructeqCompoud() throws	MalformedGoalException,
+	private void structuralEqualityCompoud() throws	MalformedGoalException,
 												NoSolutionException {
 
 		SolveInfo info = engine.solve("x(B,3,a,B)=@=x(A,3,b,A).");
-		assertFalse("Failed to Query engine", info.isSuccess());
+		assertFalse("Structural Equality between Compound should be false.", info.isSuccess());
 	}
 
-	public void testStructeqCompoud0() throws	MalformedGoalException,
+	private void structuralEqualityCompoud0() throws	MalformedGoalException,
 												NoSolutionException {
 		
 		SolveInfo info = engine.solve("x(B,3,a,B)\\=@=x(A,3,b,A).");
-		assertTrue("Failed to Query engine", info.isSuccess());
+		assertTrue("Structural Equality between Compound should be true.", info.isSuccess());
 	}
 	
-	public void testStructeqCompoud1() throws	MalformedGoalException,
+	private void structuralEqualityCompoud1() throws	MalformedGoalException,
 												NoSolutionException {
 		
 		SolveInfo info = engine.solve("x(B,C,B,B)=@=x(A,C,A,A).");
-		assertTrue("Failed to Query engine", info.isSuccess());
+		assertTrue("Structural Equality between Compound should be true.", info.isSuccess());
 	}
 
-	public void testStructeqCompoud2() throws	MalformedGoalException,
+	private void structuralEqualityCompoud2() throws	MalformedGoalException,
 												NoSolutionException {
-
+		
 		SolveInfo info = engine.solve("x(A,A,C,D)=@=x(A,C,D,D).");
-		assertFalse("Failed to Query engine", info.isSuccess());
+		assertFalse("Structural Equality between Compound should be false.", info.isSuccess());
+		
+		//FIXME SWI-Prolog answers no for the following queries.
 		info = engine.solve("x(A,A,C,D)=@=x(D,D,C,B).");
-		assertTrue("Failed to Query engine", info.isSuccess());
+		assertTrue("Structural Equality between Compound should be true.", info.isSuccess());
+		
+		info = engine.solve("x(A,A,C,D)=@=x(D,D,C,D).");
+		assertFalse("Structural Equality between Compound should be false.", info.isSuccess());
 	}
 	
-	public void testStructeqCompoud3() throws	MalformedGoalException,
+	private void structuralEqualityCompoud3() throws	MalformedGoalException,
 												NoSolutionException {
 		SolveInfo info = engine.solve("y(x(A,A),B)=@=y(x(B,B),A).");
-		assertTrue("Failed to Query engine", info.isSuccess());
+		assertTrue("Structural Equality between Compound should be true.", info.isSuccess());
 	}
-	public void testStructeqList() throws	MalformedGoalException,
+	
+	private void structuralEqualityList() throws	MalformedGoalException,
 												NoSolutionException {
 
 		SolveInfo info = engine.solve("[A,C,B,B]=@=[A,C,B,A].");
-		assertFalse("Failed to Query engine", info.isSuccess());
+		assertFalse("Structural Equality between List should be false.", info.isSuccess());
 	}
 
-	public void testStructeqList2() throws	MalformedGoalException,
+	private void structuralEqualityList2() throws	MalformedGoalException,
 											NoSolutionException {
 
 		SolveInfo info = engine.solve("[A,C,B,B]=@=[B,C,A,A].");
-		assertTrue("Failed to Query engine", info.isSuccess());
+		assertTrue("Structural Equality between List should be true.", info.isSuccess());
 	}
+	
+
+	public void testStructuralEquality() throws Exception{
+	
+		structuralEqualityAtoms();
+		structuralEqualityVars();
+		structuralEqualityCompoud();
+		structuralEqualityCompoud0();
+		structuralEqualityCompoud1();
+		structuralEqualityCompoud2();
+		structuralEqualityCompoud3();
+		structuralEqualityList();
+		structuralEqualityList2();		
+	}
+	
 	
 	public void testModuleOperator() throws MalformedGoalException,
 											NoSolutionException {
-		SolveInfo info = engine.solve("geko:assert(hasan(x)).");
-		assertTrue("Failed to Query Engine ", info.isSuccess());
-		info = engine.solve("hasan(x).");
-		assertTrue("Failed to Query Engine ", info.isSuccess());
+		SolveInfo info = engine.solve("testing_module:assert(first(x)).");
+		assertTrue("Calling Module failed.", info.isSuccess());
+		info = engine.solve("first(x).");
+		assertTrue("Calling Module Failed", info.isSuccess());
 	}
 	
 	public void testThrow() throws Exception {
@@ -105,7 +127,7 @@ public class SWICompatibilityLibraryTest extends TestCase {
 										  "recorda('throw_test',testing)" +
 										  "), format('test: ', A).");
 			
-			System.err.println(info.getBindingVars());
+//			System.err.println(info.getBindingVars());
 			assertTrue("Failed to throw an exception", info.isSuccess());
 			
 			info = engine.solve("recorded('throw_test',X).");
@@ -115,89 +137,104 @@ public class SWICompatibilityLibraryTest extends TestCase {
 	}
 	
 	public void testThrowBindings() throws Exception{
-		engine.addOutputListener(new OutputListener(){
 
-			public void onOutput(OutputEvent e) {
-				// TODO Auto-generated method stub
-				System.err.println(e.getMsg());
-			}
-			
-		});
-		
-		SolveInfo info = engine.solve("assert(session_id(22)).");
+		SolveInfo info = engine.solve("assert(example(2)).");
 		info = engine.solve("catch( " +
-				"throw(session_id(22))," +
-				"session_id(X)," +
-				"format('sessoin_id = ~w~n',X)).");
-		
-		assertTrue(info.isSuccess());
-		
+				"throw(example(2))," +
+				"example(X)," +
+				"format('example = ~w~n',X)).");
+
+		assertTrue(info.getTerm("X").toString().equals("2"));		
 	}
 	
-	public void testRecorda_2() throws Exception {
+	
+	
+	private void recorda_2() throws Exception {
 
-		SolveInfo info = engine.solve("recorda(hasan,ops).");
+		SolveInfo info = engine.solve("recorda(key_1, value_1).");
 		assertTrue(info.isSuccess());
 	}
 
-	public void testRecorda_3() throws Exception {
+	private void recorda_3() throws Exception {
 		
-		SolveInfo info = engine.solve("recorda(hasan,ops, Ref).");
+		SolveInfo info = engine.solve("recorda(key_2, value_2, Ref_1).");
 		assertTrue(info.isSuccess());
-		System.err.println("Ref :" + info.getVarValue("Ref"));
+//		System.err.println("Ref :" + info.getVarValue("Ref_1"));
 	}
 
-	public void testRecordz_2() throws Exception {
+	private void recordz_2() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(hasan,ops).");
+		SolveInfo info = engine.solve("recordz(key_3, value_3).");
 		assertTrue(info.isSuccess());		
 	}
 
-	public void testRecordz_3() throws Exception {
+	private void recordz_3() throws Exception {
 
-		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		SolveInfo info = engine.solve("recordz(key_4 ,value_4, Ref_2).");
 		assertTrue(info.isSuccess());
-		System.err.println("Ref :" + info.getVarValue("Ref"));
+//		System.err.println("Ref :" + info.getVarValue("Ref_2"));
 	}
 
-	public void testRecorded_2() throws Exception {
+	private void recorded_2() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(hasan,ops).");
+		SolveInfo info = engine.solve("recordz(key_5, value_5).");
 		assertTrue(info.isSuccess());
-		info = engine.solve("recorded(hasan,ops).");
+		
+		info = engine.solve("recorded(key_5, value_5).");
 		assertTrue(info.isSuccess());
 	}
 
-	public void testRecorded_3() throws Exception {
+	private void recorded_3() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(hasan,ops(d)).");
+		SolveInfo info = engine.solve("recordz(key_6, value_6(a)).");
 		assertTrue(info.isSuccess());
-		info = engine.solve("recordz(hasan,ops(s)).");
-		assertTrue(info.isSuccess());
-		SolveInfo info2 = engine.solve("recorded(hasan, X, Ref).");
-		assertTrue(info2.isSuccess());	
 		
-		System.err.println(info2.getBindingVars());
-		if ( info2.hasOpenAlternatives()) {
-			System.err.println("I am here");
-			info2 = engine.solveNext();
-			System.err.println(info2.getBindingVars());
+		info = engine.solve("recordz(key_6, value_6(b)).");
+		assertTrue(info.isSuccess());
+		
+		info = engine.solve("recorded(key_6, Values, Ref_3).");
+		assertTrue(info.isSuccess());	
+		
+		
+		//FIXME recorded should return all the records, now it only returns the first one.
+		if ( info.hasOpenAlternatives()) {
+			info = engine.solveNext();
+		//	System.err.println(info.getBindingVars());
 		}
 		
 		//assertEquals(info.getVarValue("Ref"), info2.getVarValue("Ref"));
 		//System.err.println("Ref:"+ info.getVarValue("Ref"));
 	}
 	
-	public void testErase_1() throws Exception {
+	private void erase_1() throws Exception {
 		
-		SolveInfo info = engine.solve("recordz(hasan,ops, Ref).");
+		SolveInfo info = engine.solve("recordz(key_7, value_7, Ref_7).");
 		assertTrue(info.isSuccess());
 		
-		SolveInfo info2 = engine.solve("recorded(hasan,ops, Ref), erase(Ref).");
+		SolveInfo info2 = engine.solve("recorded(key_7, value_7, Ref_7), erase(Ref_7).");
 		assertTrue(info2.isSuccess());	
 		
-		info2 = engine.solve("recorded(hasan,ops, Ref).");
+		info2 = engine.solve("recorded(key_7, value_7, Ref_7).");
 		assertFalse(info2.isSuccess());	
+	}
+	
+	
+	public void testRecorded() throws Exception{
+		engine.addOutputListener( new OutputListener(){
+
+			public void onOutput(OutputEvent e) {
+//				System.err.println(e.getMsg());				
+			}
+			
+		});
+		
+		recorda_2();
+		recorda_3();
+		recordz_2();
+		recordz_3();
+		recorded_2();
+		recorded_3();
+		erase_1();
 	}
 	
 	public void testWithMutex() throws Exception{

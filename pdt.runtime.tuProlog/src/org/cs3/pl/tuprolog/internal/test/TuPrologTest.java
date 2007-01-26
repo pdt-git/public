@@ -19,6 +19,8 @@ import alice.tuprolog.InvalidTheoryException;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoMoreSolutionException;
 import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Struct;
+import alice.tuprolog.Term;
 import alice.tuprolog.Theory;
 import alice.tuprolog.event.SpyEvent;
 import alice.tuprolog.event.SpyListener;
@@ -27,10 +29,11 @@ public class TuPrologTest extends TestCase {
 
 	private static final String TEMPDIR = "java.io.tmpdir";
 	TuProlog engine; 
+	
 	protected void setUp() throws Exception {
     	engine = new TuProlog();
-   // 	engine.initEngine();
-		//TuProlog tuProlog = new TuProlog();
+    	engine.initEngine();
+
     	engine.addSpyListener(new SpyListener() {
 			public void onSpy(SpyEvent e) {
 				File file = new File("c:/temp/tuProlog.log");
@@ -86,11 +89,13 @@ public class TuPrologTest extends TestCase {
     	assertTrue(result.isSuccess() );
 
 	}
+/*
 	public void testStruct() throws Exception {
-
-//    	engine.solve(new Struct())
+		Term query = new Struct();
+    	engine.solve(query);
 	}
-		
+*/
+	
 	public void testCall() throws Exception {
 			Theory theory = new Theory(":- assert(testpredicate(arg1)).");
 	    	engine.addTheory(theory);
@@ -108,6 +113,7 @@ public class TuPrologTest extends TestCase {
 //    	printClauses();
     	
     }
+	
 //	public void testCall() throws Exception{
 //	Theory theory = new Theory("a(a).\n :- a(a).");
 //	engine.addTheory(theory);

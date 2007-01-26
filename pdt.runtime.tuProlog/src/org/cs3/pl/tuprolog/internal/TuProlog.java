@@ -36,32 +36,28 @@ public class TuProlog {
      * @throws InvalidTheoryException
      * @throws IOException
      */
-    
+	
     public TuProlog() throws InvalidTheoryException, IOException {
     	engine = new Prolog();
     	
- /* Already done at TuPrologServerStartAndStop
-  *   	initEngine();
-  * 
-  */
+    	// Already done at TuPrologServerStartAndStop
+    	//initEngine();  
     }
     
     /**
-     * Make dynamic/1 and multifile/1 compatible
-     * and load swi and tu compatibility libraries.
+     * Loads SWI-Prolog compatiblity libraries.  
      * 
      * @throws InvalidTheoryException
      * @throws IOException
+     * @throws InvalidLibraryException
+     * 
+     * @author abdelhal
      */
-	public void initEngine() throws InvalidTheoryException, IOException {
-		try {
-			engine.loadLibrary(new SWICompatibilityLibrary());
-			engine.loadLibrary(new ObserverLibrary());
-		} catch (InvalidLibraryException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
+	public void initEngine() throws InvalidTheoryException, IOException, InvalidLibraryException {
+		
+		engine.loadLibrary(new SWICompatibilityLibrary());
+		engine.loadLibrary(new ObserverLibrary());
+		
 		Theory theory = new Theory(
 				":- op(1150, fx, dynamic). \n" +
 				":- op(1150, fx, multifile).\n"+
@@ -83,6 +79,7 @@ public class TuProlog {
 		loadLibrary("compatiblitySWI.pl");
 		loadLibrary("compatiblityTU.pl");
 		loadLibrary("javaFactbase.pl");
+
 		//TODO : sync library is not always loaded. It may need modifications to be loaded dynamically.
 		//loadLibrary("sync.pl");	
 		
@@ -115,7 +112,7 @@ public class TuProlog {
 	 * Load Java-based prolog library to the current engine.
 	 * 
 	 * @author Hasan Abdel Halim
-	 * @param className name of the Java class containing the library to be loaded.
+	 * @param className The name of the Java class containing the library to be loaded.
 	 * @throws InvalidLibraryException
 	 */
 	public Library loadLibraryClass(String className) throws InvalidLibraryException{
@@ -142,14 +139,7 @@ public class TuProlog {
 		
 		return engine.getLibrary(name);
 	}
-	
-	/**
-	 * 
-	 * TODO add predicate to ignore module:-
-	 * TODO add predicate to ignore model:functor and execute functor
-	 * TODO create ObserverLibrary in the same way as PrologEventDispatcher 
-	 */
-	
+
 	/**
 	 * Answers a stream on a resource found by looking up resName
 	 * in the resource folder.

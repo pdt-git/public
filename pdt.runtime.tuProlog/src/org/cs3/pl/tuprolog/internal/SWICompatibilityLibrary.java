@@ -209,6 +209,8 @@ public class SWICompatibilityLibrary extends Library {
 		return true;
 	}
 
+
+	
 	
 	/*
 	 * 
@@ -221,207 +223,239 @@ public class SWICompatibilityLibrary extends Library {
 	 * 	- recorded/3 
 	 * 
 	 */		
+	//FIXME record references always starts from one, it needs to be more random.
+	private String recorded_theory = "record_ref(1). \n" +
+			"recorda(Key, Value, Ref):- " +
+//			"	format('-------recorda---- ~w ~w ~w~n', [Key, Value, Ref])," +
+			"	var(Ref), record_ref(CurrRef), Ref is CurrRef+1," +
+			"	asserta(record_db(Key, Value, Ref)), " +
+			"	update_ref. \n" +
+			"recordz(Key, Value, Ref):- " +
+//			"	format('-------recordz---- ~w ~w ~w~n', [Key, Value, Ref])," +			
+			"	var(Ref), record_ref(CurrRef), Ref is CurrRef+1," +
+			"	assertz(record_db(Key, Value, Ref)), " +
+			"	update_ref. \n" +
+			"recorded(Key, Value, Ref):-" +
+//			"	format('-------recorded---- ~w ~w ~w~n', [Key, Value, Ref])," +			
+			"	record_db(Key, Value, Ref).\n" +
+			"erase(Ref):-" +
+//			"	format('-------erase---- ~w ~n',  Ref)," +			
+			"	nonvar(Ref), retract(record_db(_, _, Ref)).\n" +
+			"recordz(Key, Value):-" +
+			"	recordz(Key, Value, _). \n" +
+			"recorda(Key, Value):-" +
+			"	recorda(Key, Value, _). \n" +
+			"recorded(Key, Value):-" +
+			"	recorded(Key, Value, _). \n" +
+			"update_ref:-" +
+//			"	write('-------update_ref---- ')," +
+			"	record_ref(CurrRef), retract(record_ref(_))," +
+			"	NxtRef is CurrRef+1, assert(record_ref(NxtRef)).\n" ;
 	
-	/**
-	 * TODO: The current implementation is not efficient, it needs to be optimized.
-	 */
-
-	/**
-	 * recorda(+Key, +Term) :
-	 * 	Equivalent to recorda(Key, Value,  _).
-	 * 
-	 * @param key A key to store values under.
-	 * @param value A value to be stored under key.
-	 * @return
-	 */
-	public boolean recorda_2(Term key, Term value){
-		Term ref = new Var();
-		
-		return ( recorda_3(key, value, ref) );
-	}	
-
-	/**
-	 * recorda(+Key, +Term, -Reference) :
-	 * 	Assert  Term  in the  recorded  database under key  Key. Key  is an  integer,
-	 *  atom or  term. Reference  is unified  with a  unique reference to the record
-	 *  (see erase/1).
-	 *   
-	 * @param key	A key to store values under.
-	 * @param value	 A value to be stored under key.
-	 * @param ref	A unique integer used as reference to the value stored.
-	 * @return
-	 */
-	public boolean recorda_3(Term key, Term value, Term ref){
-		Term _key = key.getTerm();
-		Term _value = value.getTerm();
-		
-		/*
-		 * Key & Value should be bound to store a record
-		 */
-		if ( _key.isVar() || _value.isVar() )
-			return false;
-		
-		Term tmp = containsKey(_key);
-		List values = null ;
-		
-		if ( tmp == null )
-		{
-			values = new ArrayList();
-			tmp = _key;
-		}else 
-			values = (ArrayList) records_db.get(tmp);
-				
-		RecordEntry entry = new RecordEntry(_value);
-		values.add(0, entry);
-		records_db.put(tmp, values);
-		
-		return unify(ref, new Int(entry.getRef()));
-	}
-	
-	/**
-	 * recordz(+Key, +Term):
-	 * 	Equivalent to recordz(Key, Value,  _).
-	 * 
-	 * @param key A key to store values under.
-	 * @param value A value to be stored under key.
-	 * @return
-	 */
-	public boolean recordz_2(Term key, Term value){
-		Term ref = new Var();
-		
-		return ( recordz_3(key, value, ref) );
-	}	
-	
-	/**
-	 * recordz(+Key, +Term, -Reference):
-	 * 	Equivalent to recorda/3, but  puts the Term at the tail of the terms
-	 *  recorded under Key.
-	 *  
-	 * @param key	A key to store values under.
-	 * @param value	 A value to be stored under key.
-	 * @param ref	A unique integer used as reference to the value stored.
-	 * @return
-	 */
-	public boolean recordz_3(Term key, Term value, Term ref){
-		Term _key = key.getTerm();
-		Term _value = value.getTerm();
-		
-		/*
-		 * Key & Value should be bound to store a record
-		 */
-		if ( _key.isVar() || _value.isVar() )
-			return false;
-		
-		Term tmp = containsKey(_key);
-		List values = null ;
-		
-		if ( tmp == null )
-		{
-			values = new ArrayList();
-			tmp = _key;
-		}else 
-			values = (ArrayList) records_db.get(tmp);
-		
-		RecordEntry entry = new RecordEntry(_value);
-		values.add(entry);
-		records_db.put(tmp, values);
-		
-		return unify(ref, new Int(entry.getRef()));		
-	}
-	
-	/**
-	 * recorded(+Key, -Value):
-	 * 	Equivalent to recorded(Key, Value,  _).
-	 * 
-	 * @param key A key to store values under.
-	 * @param value A value to be stored under key.
-	 * @return
-	 */
-	public boolean recorded_2(Term key, Term value){
-		Term ref = new Var();
-		return ( recorded_3(key, value, ref) );
-	}	
-	
-	/**
-	 * recorded(+Key, -Value, -Reference):
-	 * 	Unify  Value  with the  first  term recorded  under Key  which  does
-	 *  unify.    Reference  is  unified with  the  memory location  of  the
-	 *  record.
-	 *  
-	 * @param key	A key to store values under.
-	 * @param value	 A value to be stored under key.
-	 * @param ref	A unique integer used as reference to the value stored.
-	 * @return
-	 */
-	public boolean recorded_3(Term key, Term value, Term ref){
-		Term _key = key.getTerm();
-		Term _value = value.getTerm();
-
-		// Key should be bound
-		if ( _key.isVar() )
-			return false;
-		
-		Term tmp = containsKey(_key);
-		
-		if ( tmp == null )
-			return false;
-
-		List values = (ArrayList)records_db.get(tmp);
-		
-		
-		int index = -1;
-		
-		for (Iterator it = values.iterator(); it.hasNext();) {
-			RecordEntry en = (RecordEntry) it.next();
-			//if (en.getTerm().equals(_value))
-			if(unify(_value, en.getTerm()))
-				index = en.getRef();
-		}
-		// Value was not found.
-		if ( index == -1 )
-			if ( _value.isVar() ) {
-				// TODO: incase of multiple values return a list.
-				unify(value, ((RecordEntry)values.get(0)).getTerm());
-				boolean result = unify(ref, new Int(((RecordEntry)values.get(0)).getRef()));
-				return result;
-			}else
-				return false;
-
-		boolean result = unify( ref, new Int(index) );
-		return result;
-	}
-	
-	/**
-	 * erase(+Reference):
-	 * 	Erase  a  record or  clause from  recorded  database. Reference  is  an
-	 *  integer  returned by  recorda/3 or  recorded/3. Erase can only be called
-	 *  once on  a record or clause. 
-	 *  
-	 * @param ref	A unique integer used as reference to a value stored in recorded_db.
-	 * @return
-	 */
-	public boolean erase_1(Term ref){
-		
-		if ( ! ref.getTerm().isNumber() )
-			return false;
-		
-		Number _ref = (Number) ref.getTerm() ;		
-		
-		for (Iterator keys = records_db.keySet().iterator(); keys.hasNext();) {
-			Term key = (Term) keys.next();
-			
-			for (Iterator values = ((ArrayList)records_db.get(key)).iterator(); values.hasNext();) {
-				RecordEntry en = (RecordEntry) values.next();
-				
-				if (en.getRef() == _ref.intValue()){
-					values.remove();
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}	
+//	
+//	
+//	/**
+//	 * TODO: The current implementation is not efficient, it needs to be optimized.
+//	 */
+//
+//	/**
+//	 * recorda(+Key, +Term) :
+//	 * 	Equivalent to recorda(Key, Value,  _).
+//	 * 
+//	 * @param key A key to store values under.
+//	 * @param value A value to be stored under key.
+//	 * @return
+//	 */
+//	public boolean recorda_2(Term key, Term value){
+//		Term ref = new Var();
+//		
+//		return ( recorda_3(key, value, ref) );
+//	}	
+//
+//	/**
+//	 * recorda(+Key, +Term, -Reference) :
+//	 * 	Assert  Term  in the  recorded  database under key  Key. Key  is an  integer,
+//	 *  atom or  term. Reference  is unified  with a  unique reference to the record
+//	 *  (see erase/1).
+//	 *   
+//	 * @param key	A key to store values under.
+//	 * @param value	 A value to be stored under key.
+//	 * @param ref	A unique integer used as reference to the value stored.
+//	 * @return
+//	 */
+//	public boolean recorda_3(Term key, Term value, Term ref){
+//		Term _key = key.getTerm();
+//		Term _value = value.getTerm();
+//		
+//		/*
+//		 * Key & Value should be bound to store a record
+//		 */
+//		if ( _key.isVar() || _value.isVar() )
+//			return false;
+//		
+//		Term tmp = containsKey(_key);
+//		List values = null ;
+//		
+//		if ( tmp == null )
+//		{
+//			values = new ArrayList();
+//			tmp = _key;
+//		}else 
+//			values = (ArrayList) records_db.get(tmp);
+//				
+//		RecordEntry entry = new RecordEntry(_value);
+//		values.add(0, entry);
+//		records_db.put(tmp, values);
+//		
+//		return unify(ref, new Int(entry.getRef()));
+//	}
+//	
+//	/**
+//	 * recordz(+Key, +Term):
+//	 * 	Equivalent to recordz(Key, Value,  _).
+//	 * 
+//	 * @param key A key to store values under.
+//	 * @param value A value to be stored under key.
+//	 * @return
+//	 */
+//	public boolean recordz_2(Term key, Term value){
+//		Term ref = new Var();
+//		
+//		return ( recordz_3(key, value, ref) );
+//	}	
+//	
+//	/**
+//	 * recordz(+Key, +Term, -Reference):
+//	 * 	Equivalent to recorda/3, but  puts the Term at the tail of the terms
+//	 *  recorded under Key.
+//	 *  
+//	 * @param key	A key to store values under.
+//	 * @param value	 A value to be stored under key.
+//	 * @param ref	A unique integer used as reference to the value stored.
+//	 * @return
+//	 */
+//	public boolean recordz_3(Term key, Term value, Term ref){
+//		Term _key = key.getTerm();
+//		Term _value = value.getTerm();
+//		
+//		/*
+//		 * Key & Value should be bound to store a record
+//		 */
+//		if ( _key.isVar() || _value.isVar() )
+//			return false;
+//		
+//		Term tmp = containsKey(_key);
+//		List values = null ;
+//		
+//		if ( tmp == null )
+//		{
+//			values = new ArrayList();
+//			tmp = _key;
+//		}else 
+//			values = (ArrayList) records_db.get(tmp);
+//		
+//		RecordEntry entry = new RecordEntry(_value);
+//		values.add(entry);
+//		records_db.put(tmp, values);
+//		
+//		return unify(ref, new Int(entry.getRef()));		
+//	}
+//	
+//	/**
+//	 * recorded(+Key, -Value):
+//	 * 	Equivalent to recorded(Key, Value,  _).
+//	 * 
+//	 * @param key A key to store values under.
+//	 * @param value A value to be stored under key.
+//	 * @return
+//	 */
+//	public boolean recorded_2(Term key, Term value){
+//		Term ref = new Var();
+//		return ( recorded_3(key, value, ref) );
+//	}	
+//	
+//	/**
+//	 * recorded(+Key, -Value, -Reference):
+//	 * 	Unify  Value  with the  first  term recorded  under Key  which  does
+//	 *  unify.    Reference  is  unified with  the  memory location  of  the
+//	 *  record.
+//	 *  
+//	 * @param key	A key to store values under.
+//	 * @param value	 A value to be stored under key.
+//	 * @param ref	A unique integer used as reference to the value stored.
+//	 * @return
+//	 */
+//	public boolean recorded_3(Term key, Term value, Term ref){
+//		Term _key = key.getTerm();
+//		Term _value = value.getTerm();
+//
+//		// Key should be bound
+//		if ( _key.isVar() )
+//			return false;
+//		
+//		Term tmp = containsKey(_key);
+//		
+//		if ( tmp == null )
+//			return false;
+//
+//		List values = (ArrayList)records_db.get(tmp);
+//		
+//		
+//		int index = -1;
+//		
+//		//FIXME in case of multiple solutions only the first one is unified.
+//		for (Iterator it = values.iterator(); it.hasNext();) {
+//			RecordEntry en = (RecordEntry) it.next();
+//			//if (en.getTerm().equals(_value))
+//			
+//			if(unify(_value, en.getTerm()))
+//				index = en.getRef();
+//		}
+//		// Value was not found.
+//		if ( index == -1 )
+//			if ( _value.isVar() ) {
+//				// TODO: incase of multiple values return a list.
+//				unify(value, ((RecordEntry)values.get(0)).getTerm());
+//				boolean result = unify(ref, new Int(((RecordEntry)values.get(0)).getRef()));
+//				return result;
+//			}else
+//				return false;
+//
+//		boolean result = unify( ref, new Int(index) );
+//		return result;
+//	}
+//	
+//	/**
+//	 * erase(+Reference):
+//	 * 	Erase  a  record or  clause from  recorded  database. Reference  is  an
+//	 *  integer  returned by  recorda/3 or  recorded/3. Erase can only be called
+//	 *  once on  a record or clause. 
+//	 *  
+//	 * @param ref	A unique integer used as reference to a value stored in recorded_db.
+//	 * @return
+//	 */
+//	public boolean erase_1(Term ref){
+//		
+//		if ( ! ref.getTerm().isNumber() )
+//			return false;
+//		
+//		Number _ref = (Number) ref.getTerm() ;		
+//		
+//		for (Iterator keys = records_db.keySet().iterator(); keys.hasNext();) {
+//			Term key = (Term) keys.next();
+//			
+//			for (Iterator values = ((ArrayList)records_db.get(key)).iterator(); values.hasNext();) {
+//				RecordEntry en = (RecordEntry) values.next();
+//				
+//				if (en.getRef() == _ref.intValue()){
+//					values.remove();
+//					return true;
+//				}
+//			}
+//		}
+//		
+//		return false;
+//	}	
 	
 	/*
 	 * 
@@ -557,7 +591,7 @@ public class SWICompatibilityLibrary extends Library {
 	 * 
 	 */		
 	
-	
+
 	/**
 	 * The default Theory which will be used by SWICompatibilityLibrary once loaded.
 	 * @see alice.tuprolog.Library#getTheory()
@@ -570,6 +604,7 @@ public class SWICompatibilityLibrary extends Library {
 	 		"'\\=@='(X,Y):-  not structEq(X,Y). 	\n" +
 	 		"forall(A,B):- findall(_,(A,B), _). \n"+
 	 		"forall-call(A,B):- A, B. 				\n"+
-	 		"':'(Module,Predicate) :- call(Predicate).	\n" ;
+	 		"':'(Module,Predicate) :- call(Predicate).	\n" 
+		   +		recorded_theory;
 	}
 }

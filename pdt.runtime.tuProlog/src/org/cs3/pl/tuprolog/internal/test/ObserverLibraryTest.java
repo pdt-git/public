@@ -2,23 +2,29 @@ package org.cs3.pl.tuprolog.internal.test;
 
 import junit.framework.TestCase;
 
+import org.cs3.pl.prolog.PrologInterfaceEvent;
+import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.tuprolog.internal.ObserverLibrary;
-import org.cs3.pl.tuprolog.internal.SWICompatibilityLibrary;
+import org.cs3.pl.tuprolog.internal.TuProlog;
 
 import alice.tuprolog.InvalidTermException;
 import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
 
+/*
+ *  Note : To test ObserverLibrary, you need to load sync.pl first.
+ */
+
 public class ObserverLibraryTest extends TestCase {
-	private Prolog engine = null ;
+	private TuProlog engine = null ;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		if ( engine == null ){
-			engine = new Prolog();
-			engine.loadLibrary(new SWICompatibilityLibrary());
-			engine.loadLibrary(new ObserverLibrary());
+			engine = new TuProlog();
+			engine.initEngine();
+			engine.loadLibrary("sync.pl");
 		}
 	}
 
@@ -27,50 +33,56 @@ public class ObserverLibraryTest extends TestCase {
 	}
 	
 	public void testObserve() throws MalformedGoalException {
-		SolveInfo info = engine.solve("observe(test, hi).");
+		engine.solve("assert(test).");
+		SolveInfo info = engine.solve("observe(test).");
 		assertTrue(info.isSuccess());
 	}
 	
 	public void testUnObserve() throws MalformedGoalException {
-		SolveInfo info = engine.solve("observe(observe_test(_,Y), firstKey).");
+		engine.solve("assert(observe_test(s)).");
+		SolveInfo info = engine.solve("observe(observe_test(X)).");
 		assertTrue(info.isSuccess());
 		
-		info = engine.solve("observe(observe_test(_,X), firstKey).");
-		assertFalse(info.isSuccess());
-		
-		info = engine.solve("unobserve(observe_test(_,_)).");
+		info = engine.solve("unobserve(observe_test(_)).");
 		assertTrue(info.isSuccess());
 	}
 	
+	private Object monitor = new Object();
+	private int counter = 0;
+	
 	public void testNotify() throws MalformedGoalException, InterruptedException, InvalidTermException{
-		SolveInfo info = engine.solve("observe(observe_test(_,Y), firstKey).");
+		
+		engine.solve("assert(observe_test(s)).");
+
+		SolveInfo info = engine.solve("observe(observe_test(X)).");
 		assertTrue(info.isSuccess());
+		ObserverLibrary lib = (ObserverLibrary) engine.getLibrary("ObserverLibrary");
 
-		ObserverLibrary lib = (ObserverLibrary) engine.getLibrary("org.cs3.pl.tuprolog.internal.ObserverLibrary");
-/*		ObservationListener ls = new ObservationListener(){
-
-			public void onUpdate(String msg) {
-				System.err.println(msg);				
-			}
+		lib.addListener("observe_test(_)", new PrologInterfaceListener(){
 
 			public void update(PrologInterfaceEvent e) {
-				// TODO Auto-generated method stub
-				System.err.println(e);
+				System.err.println(e.getSubject()+" "+e.getEvent());
+				synchronized (monitor) {
+					counter++;
+					if (counter == 2)
+						monitor.notifyAll();
+				}
 			}
 			
-		};
+		});
 		
-		lib.addListener("observe_test(X,_)", ls );
-		lib.addListener("observe_test(X,_)", ls );
-		
-*/
-		info = engine.solve("pif_notify(observe_test(_,_), 'first test for messages').");
+		info = engine.solve("pif_notify(observe_test(_), 'will be displayed .. 1').");
+		assertTrue(info.isSuccess());
+
+		info = engine.solve("pif_notify(observe_test(_), 'will be displayed .. 2').");
 		assertTrue(info.isSuccess());
 		
-		Thread.sleep(300);
+		synchronized (monitor) {
+			monitor.wait(500);
+		}
 		
-		lib.removeAllListeners("observe_test(_,_)");
-		info = engine.solve("pif_notify(observe_test(_,_), 'second test for messages').");
+		lib.removeAllListeners("observe_test(_)");
+		info = engine.solve("pif_notify(observe_test(_), 'will not be displayed .. 1').");
 		assertTrue(info.isSuccess());
 		
 	}

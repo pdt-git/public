@@ -117,6 +117,10 @@ public class ObserverLibrary extends Library {
 	
 	private Observations observations = new Observations();
 	
+	public void dismiss() {
+		observations.clear();
+	}
+	
 	public boolean observe_1(Term sub) {
 		boolean result = false;
 		Term subject = sub.getTerm();
@@ -127,6 +131,7 @@ public class ObserverLibrary extends Library {
 		observations.put(subject.toString(), new ArrayList() );	
 		
 		try {
+			//FIXME Observations depends on Sync Library.It should be loaded before usage.
 			SolveInfo info = engine.solve("sync:init_idb("+subject.getTerm()+").");
 			result = info.isSuccess();
 		} catch (MalformedGoalException e) {

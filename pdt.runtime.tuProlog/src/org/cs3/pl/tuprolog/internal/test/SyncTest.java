@@ -77,7 +77,7 @@ public class SyncTest extends TestCase {
 
 			public void onOutput(OutputEvent e) {
 				// TODO Auto-generated method stub
-				System.out.print(e.getMsg());
+//				System.out.print(e.getMsg());
 			}
 			
 		});
@@ -116,6 +116,27 @@ public class SyncTest extends TestCase {
 	public void testSyncNoModules() throws Exception {
 		
 		loadLibraries();
+		
+		((TuPrologPrologInterface)pif).getEngine().addSpyListener(new SpyListener(){
+
+			public void onSpy(SpyEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println(e.getMsg());
+			}
+			
+		});
+
+		((TuPrologPrologInterface)pif).getEngine().addOutputListener(new OutputListener(){
+
+			public void onOutput(OutputEvent e) {
+				// TODO Auto-generated method stub
+//				System.out.print(e.getMsg());
+			}
+			
+		});
+//		((TuPrologPrologInterface)pif).getEngine().setSpy(true);		
+		
+		
 		PrologSession session = pif.getSession();
 
 		session.queryOnce("sync:add(observation(d)).");
