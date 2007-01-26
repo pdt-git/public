@@ -8,6 +8,8 @@ import alice.tuprolog.MalformedGoalException;
 import alice.tuprolog.NoSolutionException;
 import alice.tuprolog.Prolog;
 import alice.tuprolog.SolveInfo;
+import alice.tuprolog.event.OutputEvent;
+import alice.tuprolog.event.OutputListener;
 
 public class SWICompatibilityLibraryTest extends TestCase {
 	private Prolog engine;
@@ -109,6 +111,26 @@ public class SWICompatibilityLibraryTest extends TestCase {
 			info = engine.solve("recorded('throw_test',X).");
 			assertTrue("Failed to find a record with throw_test", info.isSuccess());
 			assertEquals("testing",info.getVarValue("X").toString());
+		
+	}
+	
+	public void testThrowBindings() throws Exception{
+		engine.addOutputListener(new OutputListener(){
+
+			public void onOutput(OutputEvent e) {
+				// TODO Auto-generated method stub
+				System.err.println(e.getMsg());
+			}
+			
+		});
+		
+		SolveInfo info = engine.solve("assert(session_id(22)).");
+		info = engine.solve("catch( " +
+				"throw(session_id(22))," +
+				"session_id(X)," +
+				"format('sessoin_id = ~w~n',X)).");
+		
+		assertTrue(info.isSuccess());
 		
 	}
 	
