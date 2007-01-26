@@ -16,11 +16,6 @@ import alice.tuprolog.Term;
 public class ObserverLibrary extends Library {
 	private static final long serialVersionUID = 1L;
 	
-	public String getName() {
-		// TODO Auto-generated method stub
-		return "ObserverLibrary";
-	}
-	
 	/**
 	 * Observations class is a hashtable used to store 
 	 * observations that we are interested, along with their observers thread.
@@ -80,6 +75,10 @@ public class ObserverLibrary extends Library {
 		
 	}
 
+	public String getName() {
+		return "ObserverLibrary";
+	}
+	
 	
 	/**
 	 * Notifier Thread is a thread used to inform all observers related to a specific subject

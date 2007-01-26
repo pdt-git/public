@@ -176,10 +176,7 @@ public class SWICompatibilityLibrary extends Library {
 		/*
 		 * TODO: throw the term, then try to unify it instead of simple string case. 
 		 */
-		if ( exception.getTerm().isAtomic())
-			throw new TuPrologThrowable( exception.toString());
-		
-		return true;
+		throw new TuPrologThrowable( exception.toString(), exception.getTerm());
 	}
 	
 	/**
@@ -198,11 +195,16 @@ public class SWICompatibilityLibrary extends Library {
 		try{
 			engine.solve(goal);
 		}catch(TuPrologThrowable ex){
+/*
 			if ( ex.getMessage().contentEquals( new StringBuffer(catcher.getTerm().toString()) ))
 				engine.solve(recover);
 			else
 				throw ex;
-			
+*/
+			boolean unify = unify(ex.getExceptionTerm(), catcher);
+		
+			if (unify)
+				return (engine.solve(recover)).isSuccess();
 		}
 		return true;
 	}
