@@ -768,18 +768,28 @@ public class FactGenerator extends ASTVisitor implements Names {
 				} catch(IllegalArgumentException iae){}
 		}
 	}
-
+	/**
+	 * On the most outer expression is considered to be annotated
+	 * to avoid ambiguities.
+	 * @param node
+	 * @return
+	 */
 	private GenericAnnotation getCorrespondingGenericAnnotation(ASTNode node){
 		if(annotations == null) // TODO: quick fix for selection 2 clipboard 
 			return null;
-		return (GenericAnnotation)annotations.get(""+(node.getStartPosition()-1));
+		if(node.getStartPosition() != node.getParent().getStartPosition() 
+		   ||
+		   node.getParent() instanceof ExpressionStatement) {
+			return (GenericAnnotation)annotations.get(""+(node.getStartPosition()-1));
+		}
+		return null;
 	}
 
 	private GenericAnnotation parseAnnotation(String text) throws IllegalArgumentException {
 	
-		if(text.startsWith(" @@"))
+		if(text.startsWith(" @"))
 			text = text.substring(1);
-		if(!text.startsWith("@@"))
+		if(!text.startsWith("@"))
 			throw new IllegalArgumentException();
 		StringTokenizer tokenizer = new StringTokenizer(text,"@(,) \n\r\t");
 		String name;
@@ -2008,16 +2018,15 @@ public class FactGenerator extends ASTVisitor implements Names {
 	}
 
 	/**
-	 * 
 	 * @param name
 	 */
 	private void writeSourceLocationArgument(ASTNode node, String kind) {
-		writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
-				idResolver.getID(node),
-				kind,
-				Integer.toString(node.getStartPosition()),
-				Integer.toString(node.getLength())
-		});
+			writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
+					idResolver.getID(node),
+					kind,
+					Integer.toString(node.getStartPosition()),
+					Integer.toString(node.getLength())
+			});
 	}	
 	
 	/**
@@ -2028,6 +2037,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 //		if(name == null) {
 //			System.err.println("DEBUG");
 //		}
+		
 		writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
 				idResolver.getID(node),
 				ARGUMENT_IDENTIFIER+ "(" + quote(name.toString()) + ")",

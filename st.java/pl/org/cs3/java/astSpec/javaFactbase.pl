@@ -1244,6 +1244,7 @@ attribSignature(implementsT,2).
 attribSignature(modifierT,2).
 attribSignature(externT,1).
 attribSignature(interfaceT,1).
+attribSignature(annotationT,2).
 /**
  * sourceLocation(ID, ..,)
  */
@@ -1261,5 +1262,15 @@ attribSignature(sl_argT,4).              % :( nicht in ast_node_def :(
  */
 packageT(null,'').
 
+:- dynamic annotationT/2.
+:- multifile annotationT/2.
 
+%%% source location %%%
+:- dynamic sourceLocation/4.
+:- multifile sourceLocation/4.
 
+:- dynamic slT/3.
+:- multifile slT/3.
+
+:- dynamic sl_argT/4.
+:- multifile sl_argT/4.

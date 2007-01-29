@@ -49,15 +49,6 @@ createVarDefIdents          (_newParent, _oldList, _newList)
 
 %:- ['garbage_collect.pl'].
 
-:- dynamic sourceLocation/4.
-:- multifile sourceLocation/4.
-
-%%% source location %%%
-:- dynamic slT/3.
-:- multifile slT/3.
-
-:- dynamic sl_argT/4.
-:- multifile sl_argT/4.
 
 :- multifile subTreeArg/2.
 :- multifile forwards/4.
