@@ -830,5 +830,13 @@ param_typenames([Param|Params],[Type|Types]) :-
 	param_typenames(Params,Types).
 	
 	
-	
-	
+/**	
+ * type_exists(+Type)
+ *
+ * Type is a type term.
+ * This predicate checks if the type exists.
+ */
+type_exists(type(basic,Type,_)) :-
+    basicType(Type).
+type_exists(type(class,Type,_)) :-
+    classDefT(Type,_,_,_).
