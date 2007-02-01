@@ -390,8 +390,7 @@ public class PEFNavigatorView extends ViewPart {
 		}
 	}
 
-	public static void addId(String value) throws PrologInterfaceException {
-		pefNavigatorInstance.addNewNodeById(value,getPrologInterface());
-		
+	public static void addId(String value, PrologInterface prologInterface) throws PrologInterfaceException{
+		pefNavigatorInstance.addNewNodeById(value,prologInterface);
 	}
 }
