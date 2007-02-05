@@ -1043,6 +1043,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
+		createAnnotationFact(node, idResolver.getID(node));
 		return false;
 	}
 
@@ -1068,6 +1069,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
+		createAnnotationFact(node, idResolver.getID(node));
+
 		return false;
 	}
 	
