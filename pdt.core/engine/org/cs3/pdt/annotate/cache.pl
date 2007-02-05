@@ -10,7 +10,7 @@
 :- use_module(library('/org/cs3/pdt/util/pdt_preferences')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_cs')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_map')).
-:- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/util/pdt_source_term')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
 :- use_module(library('pif_observe')).
 :- pdt_add_preference(

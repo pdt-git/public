@@ -55,7 +55,7 @@
 
 term_annotation_hook(_,_,Annos,InTerm,OutTerm):-
     %% check if term is a module declaration
-    pdt_strip_annotation(InTerm,':-'(module(_Module,_Exports)),_),    
+    pdt_aterm_strip_annotation(InTerm,':-'(module(_Module,_Exports)),_),    
     pdt_member(defines(StatDefs),Annos),
     pdt_member(defines_dynamic(DynDefs),Annos),
     append(StatDefs,DynDefs,Defs),
@@ -65,11 +65,11 @@ term_annotation_hook(_,_,Annos,InTerm,OutTerm):-
 
     
 check_exports(In,Module,Defs,Out):-
-	pdt_subterm(In,[1,2],Exports),
+	pdt_aterm_subterm(In,[1,2],Exports),
 	%% find ill-formed elements in the exports list
 	findall(undefined(Path,AExport),
 		(	pdt_aterm_member(Exports,Path,AExport),
-			pdt_strip_annotation(AExport,Export,_),
+			pdt_aterm_strip_annotation(AExport,Export,_),
 			well_formed_export(Export),
 			\+ memberchk(Module:Export,Defs)
 		),
@@ -79,9 +79,9 @@ check_exports(In,Module,Defs,Out):-
 
 add_undefined_annos(In,[],In).
 add_undefined_annos(In,[undefined(Path,InExport)|IFEs],Out):-
-    pdt_term_annotation(InExport,Term,Annotation),
-    pdt_term_annotation(OutExport,Term,[problem(error(undefined_export))|Annotation]),
-    pdt_subst(In,[1,2|Path],OutExport,Next),
+    pdt_aterm_term_annotation(InExport,Term,Annotation),
+    pdt_aterm_term_annotation(OutExport,Term,[problem(error(undefined_export))|Annotation]),
+    pdt_aterm_subst(In,[1,2|Path],OutExport,Next),
     add_undefined_annos(Next,IFEs,Out).
 
 well_formed_export(Name/Arity):-

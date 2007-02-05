@@ -75,7 +75,10 @@ A typical life cycle of a source term would look like this:
 	source_term_copy_properties/3,
 	source_term_create/3,
 	source_term_unifiable/3,
-	implements_source_term/0
+	implements_source_term/0,
+	source_term_subterm/3,
+	source_term_all_properties/2,
+	source_term_member/3
 /*	source_term_update/2,
 	source_term_commit/2,
 	source_term_checkout/2*/
@@ -87,6 +90,7 @@ A typical life cycle of a source term would look like this:
 
 
 :-module_transparent implements_source_term/0.
+:-multifile implements_source_term/0.
 
 implements_source_term:-
 	dynamic 	
@@ -97,7 +101,8 @@ implements_source_term:-
 		source_term_property_hook/3,
 		source_term_set_property_hook/4,
 		source_term_copy_properties_hook/3,
-		source_term_create_hook/2.
+		source_term_create_hook/2,
+		source_term_all_properties_hook/2.
 :-implements_source_term.
 
 %% source_term(+SourceTerm,-Module)  
@@ -216,10 +221,51 @@ source_term_subterm(Term,[ArgNum|ArgNums],SubTerm):-
 	source_term_subterm(ArgVal,ArgNums,SubTerm).
 
 
-%source_term_variable_occurance(Term,Variable,Path,Occurance):-
-%    source_term_subterm(Term,Path,Occurance),
-%    source_term_var(Occurance),
- 
- 
+source_term_compound(Term):-
+    \+ source_term_var(Term),
+    source_term_functor(Term,_,Arity),
+    Arity>0.
 
-	
+%% source_term_all_properties(+Term,-Props)
+%
+% unifies Props with Terms property list
+% @deprecated only here to support legacy code. Will be removed until 0.2.
+source_term_all_properties(SourceTerm,Props):-
+    source_term(SourceTerm,Module),
+    Module:source_term_all_properties_hook(SourceTerm,Props),
+    !.
+    
+    
+match_elms(List,[1],Elm):-
+    source_term_subterm(List,[1],Elm).
+%match_elms(List,[2],Elm):-
+%    pdt_aterm_subterm(List,[2],Elm).
+match_elms(List,[2|T],Elm):-
+    source_term_subterm(List,[2],Elms),
+    match_elms(Elms,T,Elm).
+    	
+
+match_operand(Operator,ATerm,[],ATerm):-
+    \+ source_term_functor(ATerm,Operator),
+    !.
+match_operand(_Operator,ATerm,[1],Elm):-    
+    source_term_subterm(ATerm,[1],Elm).
+match_operand(Operator,ATerm,[2|T],Elm):-
+    source_term_subterm(ATerm,[2],Elms),
+    match_operand(Operator,Elms,T,Elm).
+
+%% pdt_aterm_member(+List,?Path,?Elm)
+% succeeds if Elm is a member of the annotated list List.
+%
+% @param List an annotated list term.
+% @param Path subterm path. See pdt_aterm_subterm/3.
+% @param Elm an annotated element of List.
+%
+source_term_member(List,Path, Elm):-
+    match_elms(List,Path,Elm).
+
+
+source_term_operand(Operator,List,Path, Elm):-
+    match_operand(Operator,List,Path,Elm).
+
+    

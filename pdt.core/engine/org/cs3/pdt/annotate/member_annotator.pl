@@ -58,23 +58,23 @@ term_annotation_hook(_,_,FileAnos,InTerm,OutTerm):-
 
 
 process_member(InTerm,FileModule,OutTerm):-
-    pdt_term_annotation(InTerm,Term,Annos),
-    pdt_strip_annotation(InTerm,Stripped,_),
+    pdt_aterm_term_annotation(InTerm,Term,Annos),
+    pdt_aterm_strip_annotation(InTerm,Stripped,_),
     has_head(Stripped,FileModule, Module, Functor, Arity),
     Functor\=(':-'),
     !,
-    pdt_term_annotation(OutTerm,Term,[clause_of(Module:Functor/Arity)|Annos]).
+    pdt_aterm_term_annotation(OutTerm,Term,[clause_of(Module:Functor/Arity)|Annos]).
 process_member(InTerm,FileModule,OutTerm):-
-    pdt_term_annotation(InTerm,':-'(InBody),DirectiveAnnos),
-    pdt_term_annotation(InBody,BodyTerm0,BodyAnnos),
+    pdt_aterm_term_annotation(InTerm,':-'(InBody),DirectiveAnnos),
+    pdt_aterm_term_annotation(InBody,BodyTerm0,BodyAnnos),
     BodyTerm0=..[Functor,InSigs],
     property_functor(Property,Functor),
     check_signatures(InSigs,Signatures,OutSigs),
     BodyTerm1=..[Functor,OutSigs],
 	module_qualified_signatures(FileModule,Signatures,ModuleQualifiedSignatures),    
     Annotation=..[Property,ModuleQualifiedSignatures],
-    pdt_term_annotation(OutBody,BodyTerm1,BodyAnnos),
-    pdt_term_annotation(OutTerm,':-'(OutBody),[Annotation|DirectiveAnnos]).
+    pdt_aterm_term_annotation(OutBody,BodyTerm1,BodyAnnos),
+    pdt_aterm_term_annotation(OutTerm,':-'(OutBody),[Annotation|DirectiveAnnos]).
 
 
 property_functor(defines_dynamic,dynamic).
@@ -84,16 +84,16 @@ property_functor(defines_module_transparent,module_transparent).
 check_signatures(InSigs,Signatures,OutSigs):-
 	findall(
 		ill_formed(Path,ASignature),
-		(	pdt_operand((,)/2,InSigs,Path,ASignature),
-			pdt_strip_annotation(ASignature,Signature,_),
+		(	pdt_aterm_operand((,)/2,InSigs,Path,ASignature),
+			pdt_aterm_strip_annotation(ASignature,Signature,_),
 			\+ well_formed_signature(Signature)
 		),
 		IllFormedSignatures
 	),
 	findall(
 		Signature,
-		(	pdt_operand((,)/2,InSigs,Path,ASignature),
-			pdt_strip_annotation(ASignature,Signature,_),
+		(	pdt_aterm_operand((,)/2,InSigs,Path,ASignature),
+			pdt_aterm_strip_annotation(ASignature,Signature,_),
 			well_formed_signature(Signature)
 		),
 		Signatures
@@ -102,9 +102,9 @@ check_signatures(InSigs,Signatures,OutSigs):-
 
 add_ill_formed_annos(In,[],In).
 add_ill_formed_annos(In,[ill_formed(Path,InExport)|IFEs],Out):-
-    pdt_term_annotation(InExport,Term,Annotation),
-    pdt_term_annotation(OutExport,Term,[problem(error(malformed_signature))|Annotation]),
-    pdt_subst(In,Path,OutExport,Next),
+    pdt_aterm_term_annotation(InExport,Term,Annotation),
+    pdt_aterm_term_annotation(OutExport,Term,[problem(error(malformed_signature))|Annotation]),
+    pdt_aterm_subst(In,Path,OutExport,Next),
     add_ill_formed_annos(Next,IFEs,Out).
 
 	
@@ -145,7 +145,7 @@ collect_properties([Property|Properties],RecordKey,In,[PropTerm|PropTerms]):-
 collect_property(Property,RecordKey,SortedSignatures):-    
 	findall(SignatureList,
 		(	pdt_file_record(RecordKey,ATerm),
-			pdt_term_annotation(ATerm,_,Annos),
+			pdt_aterm_term_annotation(ATerm,_,Annos),
 		    PropTerm=..[Property,SignatureList],
 	    	pdt_member(PropTerm,Annos)
 	    ),SignatureLists
@@ -156,7 +156,7 @@ collect_property(Property,RecordKey,SortedSignatures):-
 collect_definitions(Key,SortedDefinitions):-
     findall(Definition,
     	(	pdt_file_record(Key,ATerm),
-    		pdt_term_annotation(ATerm,_,Annos),
+    		pdt_aterm_term_annotation(ATerm,_,Annos),
     		pdt_member(clause_of(Definition),Annos)
     	), Definitions
     ),
@@ -165,7 +165,7 @@ collect_definitions(Key,SortedDefinitions):-
 collect_definitions2(RecordKey,Definitions2):-
 	pdt_multimap_findall(Key,Value,
 		(	pdt_file_record(RecordKey,ATerm),
-    		pdt_term_annotation(ATerm,_,Annos),
+    		pdt_aterm_term_annotation(ATerm,_,Annos),
     		pdt_member(clause_of(Key),Annos),
    		    pdt_member(n(Value),Annos)
 		), Map

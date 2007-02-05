@@ -71,7 +71,7 @@
 %
 %Attaches comment positions to the correct subterms of a term read with read_term.
 %
-%ATermIn should be an annotated term, as produced by wrap_term/6. It should at least 
+%ATermIn should be an annotated term, as produced by pdt_aterm_wrap_term/6. It should at least 
 %contain position annotations.
 %
 % CommentsMap is a pdt_map with character offsets as key and comment strings as value.
@@ -91,7 +91,7 @@ pdt_attach_comments(ATerm,_,_,[],[],ATerm):-
 pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATermOut):-
 	% read character start and end offsets of the term from the term annotations.	
 	/*
-	pdt_term_annotation(ATermIn,_,AnnosIn),
+	pdt_aterm_term_annotation(ATermIn,_,AnnosIn),
 	pdt_member(position(Start-End),AnnosIn),
 	*/
 	source_term_property(ATermIn,position,Start-End),
@@ -107,12 +107,12 @@ pdt_attach_comments(ATermIn,CommentsMap,Stream,CPositions,RemainingPositions,ATe
 	
 	% the middle must belong to the arguments of the term. Recurse on arguments.
 	/*	
-	pdt_term_annotation(ATerm1,Subterm1,Annos1),
+	pdt_aterm_term_annotation(ATerm1,Subterm1,Annos1),
 	(	nonvar(Subterm1)
 	->	Subterm1=..[Functor|Args1],
 		attach_arg_comments(Args1,CommentsMap,Stream,MidPositions,Args2),
 		Subterm2=..[Functor|Args2],
-		pdt_term_annotation(ATerm2,Subterm2,Annos1)
+		pdt_aterm_term_annotation(ATerm2,Subterm2,Annos1)
 	;	true
 	),
 	*/
@@ -156,15 +156,15 @@ do_attach_args(TermIn,Positions,CommentsMap,Stream,N,M,TermOut):-
 do_attach_left(ATermIn,Positions,ATermOut):-
 	source_term_set_property(ATermIn,comments_left,Positions,ATermOut).
 /*    
-	pdt_term_annotation(ATermIn,Term,Annos),
-    pdt_term_annotation(ATermOut,Term,[comments_left(Positions)|Annos]).
+	pdt_aterm_term_annotation(ATermIn,Term,Annos),
+    pdt_aterm_term_annotation(ATermOut,Term,[comments_left(Positions)|Annos]).
 */
 
 do_attach_right(ATermIn,Positions,ATermOut):-
 	source_term_set_property(ATermIn,comments_right,Positions,ATermOut).
 /*
-    pdt_term_annotation(ATermIn,Term,Annos),
-    pdt_term_annotation(ATermOut,Term,[comments_right(Positions)|Annos]).
+    pdt_aterm_term_annotation(ATermIn,Term,Annos),
+    pdt_aterm_term_annotation(ATermOut,Term,[comments_right(Positions)|Annos]).
 */
 
 next_token_position(Stream,End,CommentsMap,TPos):-

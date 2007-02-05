@@ -53,7 +53,8 @@
 :- use_module(library('org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
+%:- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
+:-use_module(library('org/cs3/pdt/util/pdt_source_term')).
 
 
 %This module registers itself as a property factory for handles of type 'predicate_definition'. See pdt_handle.
@@ -72,8 +73,9 @@ get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),clauses,
     pdt_file_record_key(term,File,Key),
     findall(Clause,
     	(	pdt_file_record(Key,Clause),
-    		pdt_term_annotation(Clause,_,Annos),
-    		pdt_member(clause_of(Module:Name/Arity),Annos)
+    		%pdt_aterm_term_annotation(Clause,_,Annos),
+    		%pdt_member(clause_of(Module:Name/Arity),Annos)
+    		source_term_property(Clause,clause_of,Module:Name/Arity)
     	),
     	Clauses
     ),
@@ -90,9 +92,11 @@ get_property(handle(id(File,Module:Name/Arity), predicate_definition,_),comments
 collect_comments(CommentsMap,Key,Sig,Comments):-
     findall(CommentTexts,
     	(	pdt_file_record(Key,Term),
-    		pdt_term_annotation(Term,_,Anns),
-		    pdt_memberchk(clause_of(Sig),Anns),
-    		pdt_memberchk(comments_left(CommentPositions),Anns),
+    		%pdt_aterm_term_annotation(Term,_,Anns),
+		    %pdt_memberchk(clause_of(Sig),Anns),
+    		%pdt_memberchk(comments_left(CommentPositions),Anns),
+    		source_term_property(Term,clause_of,Sig),
+    		source_term_property(Term,comments_left,CommentPositions),
 			comment_texts(CommentsMap,CommentPositions,CommentTexts)
 		), Comments
 	).

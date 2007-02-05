@@ -42,7 +42,7 @@
 :-module(export_annotator,[]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_util')).
-:- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:- use_module(library('/org/cs3/pdt/util/pdt_source_term')).
 :- use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :- use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
 
@@ -51,53 +51,64 @@
 file_annotation_hook([File|_],_,In,[defines_module(Module), exports(SortedExports)|In]):-
 	pdt_file_term(File,H),
 	!,
-    pdt_strip_annotation(H,':-'(module(Module,_)),_),   
+    source_term_expand(H,':-'(module(Module,_))),   
     collect_exports(H,Exports),
     sort(Exports,SortedExports).
 
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
     %% check if term is a module declaration
-    pdt_strip_annotation(InTerm,Stripped,_),    
+    source_term_expand(InTerm,Stripped),    
     Stripped==':-'(module(_Module,_Exports)),
 	%% check the exports list 
 	check_position(InTerm,TmpTerm),
 	check_exports(TmpTerm,OutTerm).
 
 check_position(InTerm,OutTerm):-
-    pdt_term_annotation(InTerm,Term,Annos),
-    pdt_member(n(N),Annos),
+    %pdt_aterm_term_annotation(InTerm,Term,Annos),
+	%   pdt_member(n(N),Annos),
+  	source_term_property(InTerm,n,N),
+
     (	N>1
-    ->	pdt_term_annotation(OutTerm,Term,[problem(error(module_definition_not_at_start))|Annos])
+    ->	%pdt_aterm_term_annotation(OutTerm,Term,[problem(error(module_definition_not_at_start))|Annos])
+    	source_term_set_property(InTerm,problem,error(module_definition_not_at_start),OutTerm)
     ;	OutTerm=InTerm
     ).
     
 
 collect_exports(In,ExportsOut):-
-    pdt_subterm(In,[1,2],Exports0),
-    findall(Elm,pdt_aterm_member(Exports0,_,Elm),Exports1),
+    source_term_subterm(In,[1,2],Exports0),
+    findall(Elm,source_term_member(Exports0,_,Elm),Exports1),
     collect_exports_x(Exports1,ExportsOut).
 
 collect_exports_x([],[]).
 collect_exports_x([ExportIn|ExportsIn],ExportsOut):-
-    pdt_term_annotation(ExportIn,_,Ann),
-    pdt_member(problem(error(_)),Ann), %skip malformed exports
+    source_term_property(ExportIn,problem,error(_)),
+%    pdt_aterm_term_annotation(ExportIn,_,Ann),
+%    pdt_member(problem(error(_)),Ann), %skip malformed exports
     !,
     collect_exports_x(ExportsIn,ExportsOut).
 collect_exports_x([ExportIn|ExportsIn],[ExportOut|ExportsOut]):-    
-    pdt_strip_annotation(ExportIn,ExportOut,_),
+    source_term_expand(ExportIn,ExportOut),
     collect_exports_x(ExportsIn,ExportsOut).
     
 check_exports(In,Out):-
-	pdt_subterm(In,[1,2],Exports),
+	source_term_subterm(In,[1,2],Exports),
 	%% find ill-formed elements in the exports list
-	findall(ill_formed(Path,AExport),(pdt_aterm_member(Exports,Path,AExport),pdt_strip_annotation(AExport,Export,_),\+ well_formed_export(Export)),IllFormedExports),
+	findall(
+		ill_formed(Path,AExport),
+		(	source_term_member(Exports,Path,AExport),
+			source_term_expand(AExport,Export),
+			\+ well_formed_export(Export)
+		),
+		IllFormedExports
+	),
 	add_ill_formed_annos(In,IllFormedExports,Out).
 
 add_ill_formed_annos(In,[],In).
 add_ill_formed_annos(In,[ill_formed(Path,InExport)|IFEs],Out):-
-    pdt_term_annotation(InExport,Term,Annotation),
-    pdt_term_annotation(OutExport,Term,[problem(error(malformed_export))|Annotation]),
-    pdt_subst(In,[1,2|Path],OutExport,Next),
+    pdt_aterm_term_annotation(InExport,Term,Annotation),
+    pdt_aterm_term_annotation(OutExport,Term,[problem(error(malformed_export))|Annotation]),
+    pdt_aterm_subst(In,[1,2|Path],OutExport,Next),
     add_ill_formed_annos(Next,IFEs,Out).
     
 well_formed_export(Name/Arity):-
