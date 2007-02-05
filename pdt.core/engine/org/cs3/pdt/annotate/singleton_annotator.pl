@@ -52,7 +52,7 @@
 
 
 term_annotation_hook(_,_,_,InTerm,OutTerm):-
-	pdt_term_annotation(InTerm,_,Annos),
+	pdt_aterm_term_annotation(InTerm,_,Annos),
     pdt_member(singletons(Singletons),Annos),
     pdt_member(variable_names(Variables),Annos),
 
@@ -66,12 +66,12 @@ check_singletons(In,Singletons,Out):-
 	pdt_cs_subterm(CS,T),
 	pdt_cs_carrier(CS,Singletons),
 	pdt_cs_condition(CS,
-		(	pdt_term_annotation(T,Var,Annos),
+		(	pdt_aterm_term_annotation(T,Var,Annos),
 			var(Var),
 			member(Name=XVar,Singletons),
 			Var==XVar,
 			\+atom_concat('_',_,Name),
-			pdt_term_annotation(TT,Var,[problem(warning(singleton(Name)))|Annos])
+			pdt_aterm_term_annotation(TT,Var,[problem(warning(singleton(Name)))|Annos])
 		)
 	),
 	pdt_cs_substitution(CS,TT),
@@ -87,7 +87,7 @@ check_no_singletons(In,[Variable|Variables],Out):-
 
 check_no_singleton(In,Name=Variable,Out):-
     atom_concat('_',_,Name),
-    pdt_count((pdt_subterm(In,_,ST),pdt_term_annotation(ST,Term,_),Term==Variable),Count),
+    pdt_count((pdt_aterm_subterm(In,_,ST),pdt_aterm_term_annotation(ST,Term,_),Term==Variable),Count),
     Count > 1, 
     !,
     
@@ -95,10 +95,10 @@ check_no_singleton(In,Name=Variable,Out):-
 	pdt_cs_subterm(CS,T),
 	pdt_cs_carrier(CS,Variable),
 	pdt_cs_condition(CS,
-		(	pdt_term_annotation(T,Var,Annos),
+		(	pdt_aterm_term_annotation(T,Var,Annos),
 			var(Var),			
 			Var==Variable,
-			pdt_term_annotation(TT,Var,[problem(warning(no_singleton))|Annos])
+			pdt_aterm_term_annotation(TT,Var,[problem(warning(no_singleton))|Annos])
 		)
 	),
 	pdt_cs_substitution(CS,TT),

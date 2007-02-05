@@ -40,45 +40,48 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- module(pdt_util_aterm,[
-	pdt_strip_annotation/3,
-	pdt_splice_annotation/3,
-	pdt_top_annotation/2,
-	pdt_term_annotation/3,
-	pdt_subterm/3,
+	pdt_aterm_strip_annotation/3,
+	pdt_aterm_splice_annotation/3,
+	pdt_aterm_top_annotation/2,
+	pdt_aterm_term_annotation/3,
+	pdt_aterm_subterm/3,
 /*	pdt_outer_match/4,
 	pdt_inner_match/4,*/
-	pdt_subst/4,
+	pdt_aterm_subst/4,
 	pdt_aterm/1,
 	pdt_aterm_member/3,
-	pdt_functor/3,
-	pdt_arg/3,
-	pdt_operand/4
+	pdt_aterm_functor/3,
+	pdt_aterm_arg/3,
+	pdt_aterm_operand/4,
+	pdt_aterm_wrap_term/6
 ]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 :- use_module(library('org/cs3/pdt/util/pdt_source_term')).
 
 :- multifile source_term_hook/2.
 :- dynamic source_term_hook/2.
 
-implements_source_term.
+pdt_source_term:implements_source_term.
+
 pdt_source_term:source_term_hook(ATerm,pdt_util_aterm):-
     nonvar(ATerm),
     pdt_aterm(ATerm).
     
 source_term_expand_hook(ATerm,Term):-
-	pdt_strip_annotation(ATerm,Term,_).
+	pdt_aterm_strip_annotation(ATerm,Term,_).
 	
 source_term_functor_hook(ATerm,Name,Arity):-
-	pdt_term_annotation(ATerm,Term,_),
+	pdt_aterm_term_annotation(ATerm,Term,_),
 	functor(Term,Name,Arity).
 
 source_term_arg_hook(ArgNum,ATerm,ArgVal):-
-	pdt_term_annotation(ATerm,Term,_),
+	pdt_aterm_term_annotation(ATerm,Term,_),
 	arg(ArgNum,Term,ArgVal).
 
 source_term_property_hook(ATerm,Key,Value):-
-	pdt_term_annotation(ATerm,_,Annos),
+	pdt_aterm_term_annotation(ATerm,_,Annos),
 	(	var(Annos)
 	->	fail
 	;	Property=..[Key,Value],
@@ -86,30 +89,32 @@ source_term_property_hook(ATerm,Key,Value):-
 	).
 	
 source_term_set_property_hook(ATerm,Key,Value,NewTerm):-	
-	pdt_term_annotation(ATerm,Term,Annos),
+	pdt_aterm_term_annotation(ATerm,Term,Annos),
 	(	var(Annos)
 	->	Annos=[]
 	;	true
 	),
 	Property=..[Key,Value],
-	pdt_term_annotation(NewTerm,Term,[Property|Annos]).
+	pdt_aterm_term_annotation(NewTerm,Term,[Property|Annos]).
 
+source_term_all_properties_hook(ATerm,Props):-
+    pdt_aterm_term_annotation(ATerm,_,Props).
 
 source_term_copy_properties_hook(From,To,Out):-	
-	pdt_term_annotation(From,_,FromProperties),
-	pdt_term_annotation(To,ToTerm,ToProperties),
+	pdt_aterm_term_annotation(From,_,FromProperties),
+	pdt_aterm_term_annotation(To,ToTerm,ToProperties),
 	(	var(ToProperties)
 	->	ToProperties=[]
 	;	true
 	),
 	append(ToProperties,FromProperties,OutProperties),
-	pdt_term_annotation(Out,ToTerm,OutProperties).
+	pdt_aterm_term_annotation(Out,ToTerm,OutProperties).
 
 source_term_create_hook(Term,ATerm):-
-    pdt_splice_annotation(Term,_,ATerm).
+    pdt_aterm_splice_annotation(Term,_,ATerm).
     
 source_term_var_hook(ATerm):-
-    pdt_term_annotation(ATerm,Term,_),
+    pdt_aterm_term_annotation(ATerm,Term,_),
     var(Term).
 
 %% pdt_aterm(?Term)
@@ -140,94 +145,94 @@ pdt_aterm_save(aterm(Annos,Term)):-
 % succeeds if Elm is a member of the annotated list List.
 %
 % @param List an annotated list term.
-% @param Path subterm path. See pdt_subterm/3.
+% @param Path subterm path. See pdt_aterm_subterm/3.
 % @param Elm an annotated element of List.
 %
 pdt_aterm_member(List,Path, Elm):-
     match_elms(List,Path,Elm).
 
 
-pdt_operand(Operator,List,Path, Elm):-
+pdt_aterm_operand(Operator,List,Path, Elm):-
     match_operand(Operator,List,Path,Elm).
 
 
 
 
 
-%% pdt_functor(?Term,?Functor,?Arity)
+%% pdt_aterm_functor(?Term,?Functor,?Arity)
 % An ATerm-transparent version of functor/3.
 % Note: this predicate can, like functor/3, be used to 
 % construct terms. To construct ATerms, use
 %
-%  pdt_aterm(T),pdt_functor(T,Name,Arity)
-pdt_functor(Var,Functor,Arity):-
-    pdt_functor(Var,Functor/Arity).
+%  pdt_aterm(T),pdt_aterm_functor(T,Name,Arity)
+pdt_aterm_functor(Var,Functor,Arity):-
+    pdt_aterm_functor(Var,Functor/Arity).
 
-pdt_functor(Var,Functor/Arity):-
+pdt_aterm_functor(Var,Functor/Arity):-
     var(Var),
     !,
     functor(Var,Functor,Arity).
-pdt_functor(Aterm,Functor/Arity):-
+pdt_aterm_functor(Aterm,Functor/Arity):-
     pdt_aterm(Aterm),
     !,
-    pdt_term_annotation(Aterm,Term,_),
+    pdt_aterm_term_annotation(Aterm,Term,_),
     functor(Term,Functor,Arity).
-pdt_functor(Term,Functor/Arity):-
+pdt_aterm_functor(Term,Functor/Arity):-
     functor(Term,Functor,Arity).
     
 
-%% pdt_arg(?ArgNum,+Term,?ArgVal)
+%% pdt_aterm_arg(?ArgNum,+Term,?ArgVal)
 % An ATerm-transparent version of arg/3
-pdt_arg(N,Var,Val):-
+pdt_aterm_arg(N,Var,Val):-
     var(Var),
     !,
     arg(N,Var,Val).
-pdt_arg(N,Aterm,Value):-
+pdt_aterm_arg(N,Aterm,Value):-
     pdt_aterm(Aterm),
     !,
-    pdt_term_annotation(Aterm,Term,_),
+    pdt_aterm_term_annotation(Aterm,Term,_),
     arg(N,Term,Value).
-pdt_arg(N,Term,Value):-
+pdt_aterm_arg(N,Term,Value):-
     arg(N,Term,Value).
 
 
 match_elms(List,[1],Elm):-
-    pdt_subterm(List,[1],Elm).
+    pdt_aterm_subterm(List,[1],Elm).
 %match_elms(List,[2],Elm):-
-%    pdt_subterm(List,[2],Elm).
+%    pdt_aterm_subterm(List,[2],Elm).
 match_elms(List,[2|T],Elm):-
-    pdt_subterm(List,[2],Elms),
+    pdt_aterm_subterm(List,[2],Elms),
     match_elms(Elms,T,Elm).
     	
 
 match_operand(Operator,ATerm,[],ATerm):-
-    \+ pdt_functor(ATerm,Operator),
+    \+ pdt_aterm_functor(ATerm,Operator),
     !.
 match_operand(_Operator,ATerm,[1],Elm):-    
-    pdt_subterm(ATerm,[1],Elm).
+    pdt_aterm_subterm(ATerm,[1],Elm).
 match_operand(Operator,ATerm,[2|T],Elm):-
-    pdt_subterm(ATerm,[2],Elms),
+    pdt_aterm_subterm(ATerm,[2],Elms),
     match_operand(Operator,Elms,T,Elm).
 
 
-%% pdt_subterm(+Term,+Path,?Subterm).
+%% pdt_aterm_subterm(+Term,+Path,?Subterm).
 %
 %succeeds if Term is a term or an annotated term and Path is a list of integers
 %such that if each element of Path is interpreted as an argument position, Path induces a
 %path from Term to the (plain or annotated) sub term SubTerm.
-pdt_subterm(Term,[], Term). %Do NOT cut this clause!!!
-pdt_subterm(ATerm,Path,SubTerm):-
+pdt_aterm_subterm(Term,[], Term). %Do NOT cut this clause!!!
+pdt_aterm_subterm(ATerm,Path,SubTerm):-
 	pdt_aterm(ATerm),
 	!,
-	pdt_term_annotation(ATerm,Term,_),
-	pdt_subterm_rec(Term,Path,SubTerm).
-pdt_subterm(Term,Path,SubTerm):-
-	pdt_subterm_rec(Term,Path,SubTerm).
+	pdt_aterm_term_annotation(ATerm,Term,_),
+	pdt_aterm_subterm_rec(Term,Path,SubTerm).
+pdt_aterm_subterm(Term,Path,SubTerm):-
+	pdt_aterm_subterm_rec(Term,Path,SubTerm).
 
-pdt_subterm_rec(Term,[ArgNum|ArgNums],SubTerm):-
+pdt_aterm_subterm_rec(Term,[ArgNum|ArgNums],SubTerm):-
 	compound(Term),
 	arg(ArgNum,Term,ArgVal),
-	pdt_subterm(ArgVal,ArgNums,SubTerm).
+	pdt_aterm_subterm(ArgVal,ArgNums,SubTerm).
 	
 /*	    
 :-module_transparent pdt_outer_match/4.
@@ -246,7 +251,7 @@ outer_match(Term,[], Term,Module,Goal):-
 outer_match(ATerm,Path,SubTerm,Module,Goal):-
 	pdt_aterm(ATerm),
 	!,
-	pdt_term_annotation(ATerm,Term,_),
+	pdt_aterm_term_annotation(ATerm,Term,_),
 	outer_match_rec(Term,Path,SubTerm,Module,Goal).
 outer_match(Term,Path,SubTerm,Module,Goal):-	
 	outer_match_rec(Term,Path,SubTerm,Module,Goal).
@@ -261,7 +266,7 @@ outer_match_rec(Term,[ArgNum|ArgNums],SubTerm,Module,Goal):-
 inner_match(ATerm,Path,SubTerm,Module,Goal):-
 	pdt_aterm(ATerm),
 	!,
-	pdt_term_annotation(ATerm,Term,_),
+	pdt_aterm_term_annotation(ATerm,Term,_),
 	inner_match_X(Term,Path,SubTerm,Module,Goal).
 inner_match_(Term,ArgNums,SubTerm,Module,Goal):-
     inner_match_X(Term,ArgNums,SubTerm,Module,Goal).
@@ -279,28 +284,28 @@ inner_match_local(Term,[], Term,Module,Goal):-
     Module:call(Goal).
 */
 
-%% pdt_subst(+InATerm,+Path,+SubATerm,-OutATerm)
+%% pdt_aterm_subst(+InATerm,+Path,+SubATerm,-OutATerm)
 % substitute a subterm.
 % Unfifies OutAterm with a modified version of InATerm, where the 
 % subterm described by Path is replaced by SubATerm.
-pdt_subst(_InTerm,[], OutTerm,OutTerm).
-pdt_subst(InATerm,Path,SubATerm,OutATerm):-
+pdt_aterm_subst(_InTerm,[], OutTerm,OutTerm).
+pdt_aterm_subst(InATerm,Path,SubATerm,OutATerm):-
 	pdt_aterm(InATerm),
 	pdt_aterm(SubATerm),
 	!,
-	pdt_term_annotation(InATerm,InTerm,Anno),
-	pdt_subst_X(InTerm,Path,SubATerm,OutTerm),
-	pdt_term_annotation(OutATerm,OutTerm,Anno).
-pdt_subst(InTerm,Path,SubTerm,OutTerm):-	
-	pdt_subst_X(InTerm,Path,SubTerm,OutTerm).
-	% Don't "inline" pdt_subst_X! This would _NOT_ be semantic-preserving! 
+	pdt_aterm_term_annotation(InATerm,InTerm,Anno),
+	pdt_aterm_subst_X(InTerm,Path,SubATerm,OutTerm),
+	pdt_aterm_term_annotation(OutATerm,OutTerm,Anno).
+pdt_aterm_subst(InTerm,Path,SubTerm,OutTerm):-	
+	pdt_aterm_subst_X(InTerm,Path,SubTerm,OutTerm).
+	% Don't "inline" pdt_aterm_subst_X! This would _NOT_ be semantic-preserving! 
 	% Think of what happens if the parsed file actually contains aterm/2 terms.
 
 	
-pdt_subst_X(InTerm,[ArgNum|ArgNums],SubTerm,OutTerm):-
+pdt_aterm_subst_X(InTerm,[ArgNum|ArgNums],SubTerm,OutTerm):-
 	compound(InTerm),
 	arg(ArgNum,InTerm,ArgVal),
-	pdt_subst(ArgVal,ArgNums,SubTerm,OutArg),
+	pdt_aterm_subst(ArgVal,ArgNums,SubTerm,OutArg),
 	InTerm=..[Functor|InArgs],
 	subst_nth_elm(InArgs,ArgNum,OutArg,OutArgs),
 	OutTerm=..[Functor|OutArgs].
@@ -315,16 +320,16 @@ subst_nth_elm([InArg|InArgs],ArgNum,SubstArg,[InArg|OutArgs]):-
     
     
     
-%% pdt_top_annotation(?ATerm,?Annotation).
-%@deprecated: use pdt_term_annotation/3
-pdt_top_annotation(aterm(A,_),A).
+%% pdt_aterm_top_annotation(?ATerm,?Annotation).
+%@deprecated: use pdt_aterm_term_annotation/3
+pdt_aterm_top_annotation(aterm(A,_),A).
 
-%% pdt_term_annotation(?AnnotatedTerm,?Term,?Annotation).
+%% pdt_aterm_term_annotation(?AnnotatedTerm,?Term,?Annotation).
 % succeeds if AnnotatedTerm is an annotated term, Annotation is the top annotation, and
 % Term is the unwrapped toplevel with annotated argument terms.
-pdt_term_annotation(aterm(A,T),T,A).
+pdt_aterm_term_annotation(aterm(A,T),T,A).
 
-%% pdt_strip_annotation(+AnotatedTerm,-Term,-Annotation)
+%% pdt_aterm_strip_annotation(+AnotatedTerm,-Term,-Annotation)
 % recirsively strip annotation from an annotated term.
 %
 % @param AnnotatedTerm the annotated term
@@ -335,17 +340,17 @@ pdt_term_annotation(aterm(A,T),T,A).
 % ==
 % 
 % @deprecated I would like to remove the third argument. 
-pdt_strip_annotation(AnotatedTerm,Term,Anotation):-
+pdt_aterm_strip_annotation(AnotatedTerm,Term,Anotation):-
     nonvar(AnotatedTerm),
     !,
     strip(AnotatedTerm,Term,Anotation).
 
 
-%% pdt_splice_annotation(-Term,+Anotation,+AnotatedTerm)
+%% pdt_aterm_splice_annotation(-Term,+Anotation,+AnotatedTerm)
 % creat an annotated term.
 %
 % @deprecated ATerms should not be constructed this way, it reveals to much about the data structure used.
-pdt_splice_annotation(Term,Anotation,AnotatedTerm):-
+pdt_aterm_splice_annotation(Term,Anotation,AnotatedTerm):-
     splice(Term,Anotation,AnotatedTerm).
 
 
@@ -385,4 +390,37 @@ splice_args([ArgsH|ArgsT],
 			[AnotatedArgsH|AnotatedArgsT]):-
     splice(ArgsH,ArgAnotationsH,AnotatedArgsH),
     splice_args(ArgsT,ArgAnotationsT,AnotatedArgsT).
-    
+   
+
+%% pdt_aterm_wrap_term(+Term,+Positions,+FileRef,+N,-ATerm,-LastN)
+% create an annotated Term.
+% 
+% @param Term the plain term
+% @param Positions the subterm_positions term obtained from read_term/3
+% @param FileRef the file reference number, see pdt_file_ref/2.
+% @param N an integer that should be used as the first subterm reference number in ATerm.
+% @param ATerm will be unified with an annotated version of Term
+% @param LastN will be unified with the last subterm reference number used in ATerm.
+pdt_aterm_wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(LastN),position(From-To),functor_type(FType)],SubTerm),LastN):-
+    compound(Term),
+    !,
+    Term=..[Functor|Args],
+    top_position(Positions, From,To),
+    sub_positions(Positions,SubPositions),
+    functor_type(Positions,FType),
+    functor(Term,Functor,Arity),
+    functor(SubTerm,Functor,Arity),
+    SubTerm=..[Functor|WrapedArgs],
+%	NextN is N+1,    
+    wrap_args(Args,SubPositions,FileRef,N,WrapedArgs,LastN).
+pdt_aterm_wrap_term(Term,Positions,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(N),position(From-To)],Term),N):-
+    \+ compound(Term),
+    top_position(Positions, From,To),!.
+pdt_aterm_wrap_term(Term,_,FileRef,N,aterm([file_ref(FileRef),n(N),last_n(N),implicit_nil],Term),N):-
+    \+ compound(Term).    
+  
+wrap_args([],[],_,N,[],N).
+wrap_args([H|T],[PH|PT],FileRef,N,[WH|WT],LastN):-
+    M is N+1,
+    pdt_aterm_wrap_term(H,PH,FileRef,M,WH,NextN),    
+    wrap_args(T,PT,FileRef,NextN,WT,LastN).    

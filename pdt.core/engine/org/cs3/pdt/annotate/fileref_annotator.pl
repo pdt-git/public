@@ -62,14 +62,14 @@ file_annotation_hook([File|_],_,InAnos,[references_files(Refs)|InAnos]):-
 
 
 file_refs(Stack,InTerm,OutTerm):-
-    pdt_strip_annotation(InTerm,:-Term,(Head,Tail)),
+    pdt_aterm_strip_annotation(InTerm,:-Term,(Head,Tail)),
     (	nonvar(Term)
     ->	find_file_refs(Term,Refs)
     ;	Refs=[]
     ),
     resolve_file_Refs(Refs,ResRefs),
     annotate_refered_files(Stack,ResRefs),
-    pdt_splice_annotation(:-Term,([file_refs(ResRefs)|Head],Tail),OutTerm).
+    pdt_aterm_splice_annotation(:-Term,([file_refs(ResRefs)|Head],Tail),OutTerm).
 
     
 find_file_refs([H,T],[H,T]).
@@ -119,7 +119,7 @@ collect_refs(File,SortedRefs):-
     pdt_file_record_key(term,File,Key),
     findall(RefList,
     	(	pdt_file_record(Key,ATerm),
-    		pdt_term_annotation(ATerm,_,Annos),
+    		pdt_aterm_term_annotation(ATerm,_,Annos),
     		pdt_member(file_refs(RefList),Annos)
     	), RefLists
     ),

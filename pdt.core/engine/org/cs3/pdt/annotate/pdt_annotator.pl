@@ -428,7 +428,7 @@ pdt_bind_file_ref(Spec,Term):-
     ->	Ref=Spec
     ;	pdt_file_ref(Spec,Ref)
     ),
-	pdt_term_annotation(Term,_,Annos),
+	pdt_aterm_term_annotation(Term,_,Annos),
 	pdt_memberchk(file_ref(Ref),Annos).
 
 
@@ -592,12 +592,12 @@ do_process_term_rf(Options,MemFileAtom,IAs,FileStack,N,Term0,_Error,M):-
     var_ids(Vars,N,FileRef,Ids,0),
     member(subterm_positions(Positions),Options),	
 		
-	wrap_term(Term0,Positions,FileRef,N,Term1,M),   
-	pdt_term_annotation(Term1,T,A),
+	pdt_aterm_wrap_term(Term0,Positions,FileRef,N,Term1,M),   
+	pdt_aterm_term_annotation(Term1,T,A),
 	memberchk(variable_names(Names),Options),
 	memberchk(singletons(Singletons),Options),	
 
-	pdt_term_annotation(ProcessedTerm0,T,[variable_ids(Ids),variable_names(Names),singletons(Singletons)|A]),
+	pdt_aterm_term_annotation(ProcessedTerm0,T,[variable_ids(Ids),variable_names(Names),singletons(Singletons)|A]),
 	(	memberchk(comments(TermComments),Options)
     ->	comments_map(TermComments,CommentsMap),
     	process_comments(MemFileAtom,CommentsMap,ProcessedTerm0,Options,ProcessedTerm1),

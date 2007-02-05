@@ -68,6 +68,7 @@ some predicate definitions for queries frequently used by the pdt.core
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_dfs')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_aterm')).
+:-use_module(library('/org/cs3/pdt/util/pdt_source_term')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_comments')).
 :-use_module(library('/org/cs3/pdt/annotate/pdt_annotator')).
 :-use_module(library('/org/cs3/pdt/model/pdt_index')).
@@ -106,9 +107,12 @@ pdt_lookup_aterm(FileSpec,N,ATerm):-
 lookup_aterm(FileRef,Key,N,Subterm,Member):-
     pdt_file_record(Key,Member),
    	pdt_bind_file_ref(FileRef,Member),
-    pdt_term_annotation(Member,_,Annos),
-    pdt_member(n(FirstN),Annos),
-    pdt_member(last_n(LastN),Annos),
+   
+   % pdt_aterm_term_annotation(Member,_,Annos),
+   % pdt_member(n(FirstN),Annos),
+   % pdt_member(last_n(LastN),Annos),
+   source_term_property(Member,n,FirstN),
+   source_term_property(Member,last_n,LastN),
 	(	% term is right off
 		N < FirstN	->	   
 		!, % this is not a bug. All other remaining terms will be right off.
@@ -121,16 +125,22 @@ lookup_aterm(FileRef,Key,N,Subterm,Member):-
 	).
 	
 lookup_subterm(ATerm,N,ATerm):-
-	pdt_term_annotation(ATerm,_,Annos),
-	pdt_member(n(N),Annos),
+	%pdt_aterm_term_annotation(ATerm,_,Annos),
+	%pdt_member(n(N),Annos),
+	source_term_property(ATerm,n,N),
 	!.
 lookup_subterm(Container,N,ATerm):-
-	pdt_term_annotation(Container,_,Annos),
-	pdt_member(n(Left),Annos),
-	pdt_member(last_n(Right),Annos),
+	%pdt_aterm_term_annotation(Container,_,Annos),
+	%pdt_member(n(Left),Annos),
+	%pdt_member(last_n(Right),Annos),
+   source_term_property(Container,n,Left),
+   source_term_property(Container,last_n,Right),
+
 	Left < N,
 	N =< Right,
-	pdt_subterm(Container,[_],SubContainer),
+	
+	%pdt_aterm_subterm(Container,[_],SubContainer),
+	source_term_subterm(Container,[_],SubContainer),
 	lookup_subterm(SubContainer,N,ATerm).
     
 %% pdt_file_directive(+FileSpec,-Annos)
@@ -154,9 +164,11 @@ pdt_file_directive(FileSpec,[label(Label)|Annos]):-
 	pdt_file_record(Key,Term),
 	pdt_file_ref(FileSpec,Ref),
 	pdt_bind_file_ref(Ref,Term),
-	pdt_term_annotation(Term,:-(_),Annos),
+	source_term_functor(Term,':-',1),
+	source_term_all_properties(Term,Annos),
+%	pdt_aterm_term_annotation(Term,:-(_),Annos),
 	pdt_op_module(FileSpec,OpModule),
-	pdt_subterm(Term,[1],Body),
+	source_term_subterm(Term,[1],Body),
 	render_term(Body,Term,OpModule,4,Label).
 
 %% pdt_predicate_clause(+FileSpec,+Signature,-Annos)
@@ -181,10 +193,11 @@ pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos])
 	pdt_file_record(Key,Term),
 	pdt_file_ref(FileSpec,Ref),
 	pdt_bind_file_ref(Ref,Term),
-	pdt_term_annotation(Term,TTerm,Annos),
+	%pdt_aterm_term_annotation(Term,TTerm,Annos),
+	source_term_all_properties(Term,Annos),
 	pdt_member(clause_of(Module:Name/Arity),Annos),
-	(	functor(TTerm,:-,2)
-	->	pdt_subterm(Term,[1],Head),
+	(	source_term_functor(Term,:-,2)
+	->	source_term_subterm(Term,[1],Head),
 		Type=rule
 	;	Head=Term,
 		Type=fact
@@ -205,10 +218,12 @@ pdt_file_problem(FileSpec,Problem,Pos):-
 	pdt_file_record(Key,Term),
 	pdt_file_ref(FileSpec,Ref),
 	pdt_bind_file_ref(Ref,Term),
-    pdt_subterm(Term,_,ATerm),
-    pdt_term_annotation(ATerm,_,Annos),
-    pdt_member(problem(Problem),Annos),
-    pdt_member(position(Pos),Annos).
+    source_term_subterm(Term,_,ATerm),
+    source_term_property(ATerm,problem,Problem),
+    source_term_property(ATerm,position,Pos).
+%    pdt_aterm_term_annotation(ATerm,_,Annos),
+%    pdt_member(problem(Problem),Annos),
+%    pdt_member(position(Pos),Annos).
 
 %% pdt_file_includes(?FileSpec,?IncludeSpec)
 % Explicit includes relation between source files.
@@ -348,8 +363,7 @@ pdt_find_first_clause(Context,Name/Arity,DefFile,Clause):-
 %                 integers representing the character start and end offsets of the clause.
 pdt_find_first_clause_position(Context,Name/Arity,DefFile,Position):-
 	pdt_find_first_clause(Context,Name/Arity,DefFile,Clause),
-	pdt_top_annotation(Clause,Anno),
-	memberchk(position(Position),Anno).
+	source_term_property(Clause,position,Position).
 
 
 visible_in_context(ContextModule,H):-
@@ -371,13 +385,14 @@ pdt_render_term(FileSpec,N,Depth,Out):-
 	render_term(ATerm,Clause,OpModule,Depth,Out).
 	
 render_term(ATerm,Clause,OpModule,Depth,Out):-
-
-	pdt_term_annotation(Clause,_,Annos),
-	pdt_member(variable_names(VarNames),Annos),
+	source_term_property(Clause,variable_names,VarNames),
+%	pdt_aterm_term_annotation(Clause,_,Annos),
+%	pdt_member(variable_names(VarNames),Annos),
 	execute_elms(VarNames),
 	term_variables(ATerm,Vars),
 	unify_with_underscores(Vars),
-	pdt_strip_annotation(ATerm,Term,_),
+	source_term_expand(ATerm,Term),
+%	pdt_aterm_strip_annotation(ATerm,Term,_),
 	new_memory_file(MemFile),	
 	open_memory_file(MemFile,write,Stream),	
 	call_cleanup(
