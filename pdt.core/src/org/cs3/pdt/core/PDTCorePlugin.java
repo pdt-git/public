@@ -291,12 +291,12 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						PDTCore.PREF_METADATA_PIF_KEY_DEFAULT,
 						"Default Meta Data PrologInterface",
 						"The default value for the Metadata PrologInterface property of prolog projects.",
-						Option.STRING, "%project%"),
+						Option.STRING, "%project%-meta"),
 				new SimpleOption(
 						PDTCore.PREF_RUNTIME_PIF_KEY_DEFAULT,
 						"Default Runtime PrologInterface",
 						"The default value for the Runtime PrologInterface property of prolog projects.",
-						Option.STRING, "%project%"),
+						Option.STRING, "%project%-runtime"),
 				new SimpleOption(
 						PDTCore.PREF_CONVERT_CHARACTER_OFFSETS,
 						"Convert character offsets",

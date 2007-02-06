@@ -476,7 +476,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 									.getDefault()
 									.getPreferenceValue(
 											PDTCore.PREF_METADATA_PIF_KEY_DEFAULT,
-											"%project%");
+											"%project%-meta");
 						}
 
 					},
@@ -492,7 +492,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 									.getDefault()
 									.getPreferenceValue(
 											PDTCore.PREF_RUNTIME_PIF_KEY_DEFAULT,
-											"%project%");
+											"%project%-runtime");
 						}
 					}, };
 		}
