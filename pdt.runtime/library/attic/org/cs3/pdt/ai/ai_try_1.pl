@@ -29,7 +29,7 @@ ai_annotate_call_sites(InTerm,InContext,[Path|Paths],OutTerm,OutContext):-
     ai_annotate_call_sites(NextTerm,NextContext,Paths,OutTerm,OutContext).
     
 ai_annotate_call_site(InTerm,InContext,Path,OutTerm,OutContext):-
-	pdt_subterm(InTerm,Path,InCallSite),
+	pdt_aterm_subterm(InTerm,Path,InCallSite),
 	ai_annotate_goal(InCallSite,InContext,OutCallSite,OutContext),
-	pdt_subst(InTerm,Path,OutCallSite,OutTerm).
+	pdt_aterm_subst(InTerm,Path,OutCallSite,OutTerm).
 	
