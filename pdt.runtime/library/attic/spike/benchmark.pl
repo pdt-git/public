@@ -1,7 +1,19 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_rbtree')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 
-:- pdt_define_context(bm_cx(method,initial_size,grow,task)).
+:- pdt_define_context(
+	bm_cx(
+		method,
+		initial_size,
+		grow,
+		task,
+		inferences,
+		time,
+		wall,
+		lips
+	)
+).
+
 
 bm_param(initial_size,0).	
 bm_param(min_grow,0).	
@@ -278,9 +290,9 @@ bm_assoc(I,Tin,Tout):-
 	bm_assoc(J,Tnext,Tout).
 %------------------------------
 
-:- dynamic bm_result/5.
+:- dynamic bm_result/2.
 
-my_time(Goal0,Cx) :-
+my_time(Goal0,Cx0) :-
 	expand_goal(Goal0, Goal),
 	get_time(OldWall),
 	statistics(cputime, OldTime), 
@@ -300,7 +312,16 @@ my_time(Goal0,Cx) :-
 	;   Lips is integer(UsedInf / UsedTime)
 	), 
 	%print_message(informational, time(UsedInf, UsedTime, Wall, Lips)),
-	assert(bm_result(Cx,UsedInf, UsedTime, Wall, Lips)),
+
+	bm_cx_set(Cx0,
+		[	inferences=UsedInf,
+			time=UsedTime,
+			wall=Wall,
+			lips=Lips
+		],
+		Cx
+	),
+	assert(bm_result(Cx)),
 	(   nonvar(E)
 	->  throw(E)
 	;   Result == yes
