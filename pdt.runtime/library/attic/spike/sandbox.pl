@@ -162,8 +162,8 @@ do_comments([Comment|Comments],CxIn,CxOut):-
 	do_comment(Comment,CxIn,CxNext),
 	do_comments(Comments,CxNext,CxOut).
 
-do_comment(Comment,CxIn,CxOut):-
-    output_codes(Comments,CxIn,CxOut),
+%do_comment(Comment,CxIn,CxOut):-
+%    output_codes(Comments,CxIn,CxOut),
     
 
 mark_comments_done(LeftRight,Term,CxIn,CxOut):-
