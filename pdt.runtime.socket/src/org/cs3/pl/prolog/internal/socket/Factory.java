@@ -190,7 +190,7 @@ public class Factory extends PrologInterfaceFactory {
 	private String guessExecutableName() {
 
 		if (Util.isWindoze()) {
-			return "cmd.exe /c start /min plwin";
+			return "cmd.exe /c start \"cmdwindow\" /min plwin";
 			// return "plwin";
 		}
 		return "xpce";

@@ -179,7 +179,7 @@ public class SocketServerStartAndStopStrategy implements
 				exeFile = new File(currPath);
 				
 				if(exeFile.exists()){
-					execCommand[execPos] = currPath;
+					execCommand[execPos] = "\""+currPath +"\"";
 					found = true;
 					break;
 				}
