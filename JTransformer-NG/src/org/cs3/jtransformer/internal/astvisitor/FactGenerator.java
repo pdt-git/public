@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -1433,7 +1435,10 @@ public class FactGenerator extends ASTVisitor implements Names {
 		
 		if (node.getParent().getNodeType() == ASTNode.TYPE_DECLARATION)
 			return false;
-		
+
+		if (node.getParent().getNodeType() == ASTNode.ENUM_DECLARATION)
+			return false;
+
 		if (node.getParent().getNodeType() == ASTNode.LABELED_STATEMENT)
 			return false;
 		
@@ -1893,6 +1898,17 @@ public class FactGenerator extends ASTVisitor implements Names {
 		return true;
 	}
 
+	public boolean visit(EnumDeclaration node) {
+		
+		visitAbstractTypeDeclaration(node, null);
+		String superClass = idResolver.getJavaLangObjectID();
+		String id = idResolver.getID(node);
+
+		writer.writeFact(EXTENDS_T, new String [] {id, superClass});
+		writer.writeFact(ENUM_T, new String [] { id });
+		return true;
+	}
+	
 	/** 
 	 * Generates prolog facts of type: classDefT, interfaceT, extendsT, implementsT. 
 	 * <p>
@@ -1909,9 +1925,19 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 * implementsT<a>}
 	 * @see FactGeneratorInterfaceTest#testTypeDeclaration()
 	 */
+	
 	public boolean visit(TypeDeclaration node) {
-	    String name = quote(node.getName());
-		String id = idResolver.getID(node);
+
+		String defaultConstructorId = handleDefaultConstructors(node);
+
+		visitAbstractTypeDeclaration(node, defaultConstructorId);
+
+		handleRelationships(node);
+		
+		return true;
+	}
+
+	private void visitAbstractTypeDeclaration(AbstractTypeDeclaration node, String defaultConstructorId) {
 		String parentId;
 		if (node.getParent().getNodeType() == ASTNode.COMPILATION_UNIT)
 			parentId =
@@ -1925,45 +1951,27 @@ public class FactGenerator extends ASTVisitor implements Names {
 		ArrayList expandedList = expandList(bodyIterator);
 
 		String prologList = idResolver.getIDs(expandedList);
-
-			
-		boolean foundConstructor = false;
 		
-		for (Iterator i = node.bodyDeclarations().iterator(); i.hasNext();){
-			BodyDeclaration bdd = (BodyDeclaration) i.next();
-			if (bdd.getNodeType() == ASTNode.METHOD_DECLARATION){
-				MethodDeclaration md = (MethodDeclaration) bdd;
-				if (md.isConstructor()){
-					foundConstructor = true;
-					break;
-				}
-			}
-		}
-		
-		// StS: We do not want a default constructor for an interface.
-		if (!foundConstructor && !node.isInterface()){
-			//System.out.println("No constructor found: " + prologList);
-			String synthConstrId=createSynteticConstructor(node);
+		if(defaultConstructorId != null ) {
 			prologList = prologList.substring(1);
 			
 			
-			String prefix = "[" + synthConstrId;
+			String prefix = "[" + defaultConstructorId;
 			if (prologList.equals("]"))
 				prologList = prefix + prologList;
 			else
 				prologList = prefix + ", " + prologList;
 		}
-
 		
+		String id = idResolver.getID(node);
 
-		String[] args = new String[] { id, parentId, name, prologList };
+		String[] args = new String[] { id, parentId, quote(node.getName()), prologList };
 		writer.addIndention();
 
 		writer.writeFact(CLASS_DEF_T, args);
 		createAnnotationFact(node, id);
 		
-		if (node.isInterface())
-			writer.writeFact(INTERFACE_T, new String[] { id });
+
 		writeModifiers(node, node.getModifiers());
 		writer.writeFact(SOURCE_LOCATION_T, new String [] {
 				idResolver.getID(node),
@@ -1971,8 +1979,13 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getLength())
 		});
 		writeSourceLocationArgumentIdentifier(node, node.getName(),node.modifiers());
-		
-		
+
+	}
+
+	private void handleRelationships(TypeDeclaration node) {
+		String id = idResolver.getID(node);
+		if (node.isInterface())
+			writer.writeFact(INTERFACE_T, new String[] { id });
 		
 		Type superClassTyper = node.getSuperclassType();
 		String superClass;
@@ -1998,8 +2011,30 @@ public class FactGenerator extends ASTVisitor implements Names {
 		if (!node.isLocalTypeDeclaration()){
 			syntheticConstructorIds = new Hashtable();
 		}
+	}
+
+	private String handleDefaultConstructors(TypeDeclaration node) {
+		boolean foundConstructor = false;
 		
-		return true;
+		for (Iterator i = node.bodyDeclarations().iterator(); i.hasNext();){
+			BodyDeclaration bdd = (BodyDeclaration) i.next();
+			if (bdd.getNodeType() == ASTNode.METHOD_DECLARATION){
+				MethodDeclaration md = (MethodDeclaration) bdd;
+				if (md.isConstructor()){
+					foundConstructor = true;
+					break;
+				}
+			}
+		}
+		
+		// StS: We do not want a default constructor for an interface.
+		if (!foundConstructor && !node.isInterface()){
+			
+			//System.out.println("No constructor found: " + prologList);
+			String synthConstrId=createSynteticConstructor(node);
+			return synthConstrId;
+		}
+		return null;
 	}
 
 
