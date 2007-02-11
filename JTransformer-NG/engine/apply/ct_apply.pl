@@ -318,8 +318,7 @@ add(Element) :-
     assert(Element),
     asserta(rollback(retract(Element))),
     addTreeReverseIndexes(Element),
-    markEnclAsDirty(Element)
-    .
+    markEnclAsDirty(Element).
     
     
 /*

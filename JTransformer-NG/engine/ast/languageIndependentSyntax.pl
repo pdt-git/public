@@ -95,7 +95,10 @@ ast_node_signature_REAL(Lang, NodeType, Arity) :-
 % Use the following hack during co-existence of old an new syntax version:
  
 ast_node_signature(Lang, NodeType, Arity) :-
-   ast_node_signature_REAL(Lang, NodeType, N),
+    ast_node_def(Lang, NodeType, ArgList),
+   length(ArgList,Arity).
+    
+%   ast_node_signature_REAL(Lang, NodeType, N),
    /* The hack in the following lines accounts for a mismatch between the 
       Java language description in ast_node_def/3 and the current
       JT PEFs. JT represents 'attributes' es extra facts, in addition
@@ -105,9 +108,9 @@ ast_node_signature(Lang, NodeType, Arity) :-
       These cases are 'corrected' by hand in the following.
       The better correction would be an adaptation of the JT syntax.
    */
-   (Lang = 'Java' 
-    -> hackTreeSignature(NodeType,N,Arity)
-     ; Arity=N).
+%   (Lang = 'Java' 
+%    -> hackTreeSignature(NodeType,N,Arity)
+%     ; Arity=N).
   
 hackTreeSignature(Functor,N,Arity) :- 
    ( (Functor = classDefT,  Arity = 4, !) 
@@ -311,4 +314,80 @@ ast_node_subtype(_,T1,id) :-
 ast_node_subtype(L,T1,T2) :- 
     ast_node_subtype(L,T1,T),
     ast_node_subtype(L,T,T2).
+    
+
+/** 
+ * treeSignature(?Functor, ?Arity)
+ *    Obsolete, Java-AST specific definition. 
+ *    Use ast_node_signature(?Language, ?Functor, ?Arity) instead. 
+ */
+treeSignature(Functor, Arity) :-
+   ast_node_signature('Java', Functor, Arity).
+   
+astNodeSignature(NodeType, Arity) :- 
+    ast_node_signature(_Lang, NodeType, Arity).
+
+/** 
+ * attribSignature(?Functor, ?Arity)
+ *    Obsolete, use ast_node_signature(?Language, ?Functor, ?Arity) instead. 
+ *    See "ast_specs/java/astSpec/java_syntax.pl"
+ */
+% So sollte es implementiert sein. Leider ist die ast_node_def/3
+% Deklaration nicht konsistent mit dem weiter unten stehenden
+% attribSignature aus JT:
+%
+attribSignature(Functor, Arity) :-
+   ast_node_signature('JavaAttributes', Functor, Arity).
+ 
+
+/**
+ * tree(?Pef, ?Parent, ?Functor)
+ * 
+ * Functor is the type of Pef. 
+ *
+ * e.g. tree(10001, 10002, classDefT)
+ */
+:- dynamic tree/3.
+:- multifile tree/3.
+
+/**
+ * generateDerivedPredicates(Lang)
+ *
+ * Must be called in load files.
+ * 
+ * Is responsible creating tree/3 facts
+ * and declaring all PEFs dynamic and multifile.
+ * 
+ * TODO: export when converting this file to a module.
+ */
+generateDerivedPredicates(Lang) :-
+   generateJavaTreePredicates(Lang),
+   generateDynamicMultifiles(Lang).
+
+generateDynamicMultifiles(Lang) :-
+   generateDynamicMultifile(Lang),
+   concat(Lang,'Attributes',LangAttributes),
+   generateDynamicMultifile(LangAttributes).
+   
+generateDynamicMultifile(Lang):-
+   forall(
+     ast_node_signature(Lang,Kind, Arity),
+     generateDynamicMultifile(Kind,Arity)
+   ).
+
+generateDynamicMultifile(Kind,Arity) :-
+    dynamic(Kind/Arity),
+    multifile(Kind/Arity).
+         
+generateJavaTreePredicates(Lang) :-
+	forall(generateJavaTreePredicate(Lang),true).
+	  
+generateJavaTreePredicate(Lang) :-
+    ast_node_def(Lang,Kind, List),
+    length(List,Arity),
+    functor(Term,Kind,Arity),
+    Term =.. [Kind,Id,Pid|_Rest],
+    not(clause(tree(Id,Pid,Kind),_)),
+	assert(    
+     (tree(Id, Pid, Kind) :- Term)).
     

@@ -1104,7 +1104,6 @@ ID of the enclosing method declaration.
 :- multifile nopT/3.
 
 %temporary hack: -- TR 03.11.2005
-:- multifile tree/3.
 /**
  * tree(?Pef, ?Parent, ?Functor)
  * 
@@ -1244,11 +1243,18 @@ attribSignature(implementsT,2).
 attribSignature(modifierT,2).
 attribSignature(externT,1).
 attribSignature(interfaceT,1).
+
+/********** Java 5 ************/
 attribSignature(annotationT,2).
+
+attribSignature(enumT,1).
+:- dynamic enumT/1.
+:- multifile enumT/1.
+
+%attribSignature(sourceLocation,4).   % :( nicht in ast_node_def :(  
 /**
- * sourceLocation(ID, ..,)
+ * projectLocationT(ID, ..,)
  */
-attribSignature(sourceLocation,4).   % :( nicht in ast_node_def :(  
 attribSignature(projectLocationT,3). % :( nicht in ast_node_def :(
 /**
  * slT(ID, File)
@@ -1260,17 +1266,18 @@ attribSignature(sl_argT,4).              % :( nicht in ast_node_def :(
 /**
  * Represents the default package in Java.
  */
-packageT(null,'').
 
 :- dynamic annotationT/2.
 :- multifile annotationT/2.
 
 %%% source location %%%
-:- dynamic sourceLocation/4.
-:- multifile sourceLocation/4.
+%:- dynamic sourceLocation/4.
+%:- multifile sourceLocation/4.
 
 :- dynamic slT/3.
 :- multifile slT/3.
 
 :- dynamic sl_argT/4.
 :- multifile sl_argT/4.
+     
+%:- generateMetaData('Java').

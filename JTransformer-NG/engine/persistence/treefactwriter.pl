@@ -101,8 +101,11 @@ treeFact(Fact) :-
     uniqueArgumentList(Arity,Arguments),
     Fact =.. [Head|Arguments].
 
-clearTreeFactbase :- 
-	clearTreeFactbase(_Project).
+clearTreeFactbase :-
+    catch( 
+	clearTreeFactbase(_Project),
+	Exception,
+	(write(Exception), write(' Deleting all PEFs. '),clearPersistantFacts)).
 	
 
 clearTreeFactbase(Project) :-
@@ -113,6 +116,7 @@ clearTreeFactbase(Project) :-
 clearPersistantFacts :-
    persistant(A),
    call(A),
+   retract(A),
    fail.
    
 clearPersistantFacts.
