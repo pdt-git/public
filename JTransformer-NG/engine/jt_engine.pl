@@ -76,3 +76,11 @@ debugme.
 % :- [astAlternative/...].         % Future AST representation ???
 
 %:- ['java_lang_init']. 
+
+tree(_id, null, packageT) :- packageT(_id,_).
+tree(_id, null, projectT) :- fail.
+
+:- generateDerivedPredicates('Java').
+% Non generic code:
+packageT(null,'').
+

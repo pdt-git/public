@@ -238,18 +238,19 @@ ast_node_def('Java',projectT,[
      ast_arg(file, mult(1,1,no ), attr, [atom])
 ]).
 
+
 % tree_constraints(classDefT ,[[execT,packageT,classDefT,newClassT,blockT,nullType],[atom],[methodDefT,fieldDefT,classDefT]]).
 ast_node_def('Java',classDefT,[
      ast_arg(id,      mult(1,1,no ), id,  [classDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [execT,packageT, classDefT, newClassT, blockT]), 
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
-     ast_arg(defs,    mult(0,*,ord), id,  [methodDefT,fieldDefT,classDefT]),
-%     ast_arg(expr,   mult(1,1,no ), id,  [expressionType]),
-     ast_arg(extends, mult(1,1,no ), id,  [classDefT]),
-     ast_arg(implems, mult(0,*,no ), id,  [classDefT]),
-     ast_arg(hasModif,mult(0,*,no ), attr,[atom]),
-     ast_arg(isInterf,mult(0,1,no ),  flag,[]),
-     ast_arg(isExtern,mult(0,1,no ),  flag,[])
+     ast_arg(defs,    mult(0,*,ord), id,  [methodDefT,fieldDefT,classDefT])
+%     ast_arg(expr,   mult(1,1,no ), id,  [expressionType])
+%     ast_arg(extends, mult(1,1,no ), id,  [classDefT]),
+%     ast_arg(implems, mult(0,*,no ), id,  [classDefT]),
+%     ast_arg(hasModif,mult(0,*,no ), attr,[atom]),
+%     ast_arg(isInterf,mult(0,1,no ),  flag,[]),
+%     ast_arg(isExtern,mult(0,1,no ),  flag,[])
 ]).
 
 % tree_constraints(methodDefT ,[[classDefT],[atom],[paramDefT],[typeTermType,nullType],[classDefT],[blockT,nullType]]).
@@ -260,8 +261,8 @@ ast_node_def('Java',methodDefT,[
      ast_arg(params,  mult(0,*,ord), id,  [paramDefT]),
      ast_arg(type,    mult(0,1,no),  attr,[typeTermType,nullType]),  % 0, if constructor definition
      ast_arg(excepts, mult(0,*,ord), id,  [classDefT]), %ord, only for compatibility with current PEF represenation: detection of lists
-     ast_arg(body,    mult(0,1,no),  id,  [blockT]),
-     ast_arg(hasModif,mult(0,*,no),  attr,[atom])     
+     ast_arg(body,    mult(0,1,no),  id,  [blockT])
+%     ast_arg(hasModif,mult(0,*,no),  attr,[atom])     
 ]).
 
 % tree_constraints(fieldDefT ,[[classDefT],[typeTermType],[atom],[expressionType,nullType]]).
@@ -270,8 +271,8 @@ ast_node_def('Java',fieldDefT,[
      ast_arg(parent,  mult(1,1,no ), id,  [classDefT]),
      ast_arg(type,    mult(1,1,no ), attr,[typeTermType]), % <-- dieser typ ist noch undefined
      ast_arg(name,    mult(1,1,no ), attr,[atom]),
-     ast_arg(expr,    mult(0,1,no ), id,  [expressionType]),
-     ast_arg(hasModif,mult(0,*,no ), attr,[atom])
+     ast_arg(expr,    mult(0,1,no ), id,  [expressionType])
+%     ast_arg(hasModif,mult(0,*,no ), attr,[atom])
 ]).
 
 % tree_constraints(paramDefT ,[[methodDefT,catchT],[typeTermType],[atom]]).
@@ -279,8 +280,8 @@ ast_node_def('Java',paramDefT,[
      ast_arg(id,      mult(1,1,no ),  id,  [paramDefT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ),  id,  [methodDefT,catchT]), 
      ast_arg(type,    mult(1,1,no ),  attr,[typeTermType]), 
-     ast_arg(name,    mult(1,1,no ),  attr,[atom]),
-     ast_arg(hasModif,mult(0,*,no ),  attr,[atom])     
+     ast_arg(name,    mult(1,1,no ),  attr,[atom])
+%     ast_arg(hasModif,mult(0,*,no ),  attr,[atom])     
 ]).
 
 % ****************** Body PEF ******************************
@@ -609,6 +610,14 @@ ast_node_def('Java',whileLoopT,[
      ast_arg(body,   mult(1,1,no ), id,   [statementType])
 ]).
 
+%tree_constraints(projectLocationT ,[[toplevelT],[projectT],[atom]]).
+ast_node_def('Java',projectT,[
+     ast_arg(id,    mult(1,1,no ), id,   [toplevelT]),
+     ast_arg(path,  mult(1,1,no ), attr, [atom]),
+     ast_arg(id,    mult(1,1,no ), id,   [projectT]),
+     ast_arg(path,  mult(1,1,no ), attr, [atom])
+]).
+
 
 %tree_constraints(extendsT,[[],[classDefT]]).
 ast_node_def('JavaAttributes',extendsT,[
@@ -635,11 +644,41 @@ ast_node_def('JavaAttributes',interfaceT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
 
-%tree_constraints(projectLocationT ,[[toplevelT],[projectT],[atom]]).
-ast_node_def('JavaAttributes',projectT,[
-     ast_arg(id,    mult(1,1,no ), id,   [toplevelT]),
-     ast_arg(id,    mult(1,1,no ), id,   [projectT]),
-     ast_arg(path,  mult(1,1,no ), attr, [atom])
+%tree_constraints(interfaceT ,[[]]).
+ast_node_def('JavaAttributes',slT,[
+     ast_arg(id,     mult(1,1,no ), id,   [id]),
+     ast_arg(pos, mult(1,1,no ), attr, [atom]),
+     ast_arg(length, mult(1,1,no ), attr, [atom])
+]).
+
+ast_node_def('JavaAttributes',sl_argT,[
+     ast_arg(id,     mult(1,1,no ), id,   [id]),
+     ast_arg(kind, mult(1,1,no ), attr, [atom]),
+     ast_arg(pos, mult(1,1,no ), attr, [atom]),
+     ast_arg(length, mult(1,1,no ), attr, [atom])
+]).
+
+ast_node_def('JavaAttributes',projectLocationT,[
+     ast_arg(id,   mult(1,1,no ), id,   [projectT]),
+     ast_arg(name, mult(1,1,no ), attr, [atom]),
+     ast_arg(file, mult(1,1,no ), attr, [atom])
+]).
+
+/*********** JAVA 5 *************/
+%tree_constraints(enumT ,[[]]).
+ast_node_def('JavaAttributes',enumT,[
+     ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
+]).
+
+%tree_constraints(annotationT ,[[atom]]).
+ast_node_def('JavaAttributes',annotationT,[
+     ast_arg(id,     mult(1,1,no ), id,   [id]),
+     ast_arg(file, mult(1,1,no ), attr, [atom])
+]).
+
+%tree_constraints(aspect ,[[atom]]).
+ast_node_def('JavaAttributes',aspect,[
+     ast_arg(id,     mult(1,1,no ), id,   [classDefT])
 ]).
 
 /**
@@ -658,3 +697,24 @@ all_ast_arg_id_kind(Kind):-
     member(ast_arg(Kind,  mult(1,1,no ), id,  _),Defs).
 
 :- create_ast_arg_id_kind.
+
+checkSyntax(Name) :- 
+	attribSignature(Name,SigLen),
+	not(ast_node_def('JavaAttributes',Name,List)).
+checkSyntax(Name) :- 
+	not(ast_node_def('JavaAttributes',Name,List)),
+	attribSignature(Name,SigLen).
+checkSyntax(Name) :- 
+	treeSignature(Name,SigLen),
+	not(ast_node_def('Java',Name,List)).
+checkSyntax(Name) :- 
+	not(ast_node_def('Java',Name,List)),
+	treeSignature(Name,SigLen).
+checkSyntax(Name) :- 
+	ast_node_def('Java',Name,List),
+	treeSignature(Name,SigLen),
+	not(length(List,SigLen)).
+checkSyntax(Name) :- 
+	ast_node_def('JavaAttributes',Name,List),
+	attribSignature(Name,SigLen),
+	not(length(List,SigLen)).	

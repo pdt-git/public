@@ -9,17 +9,24 @@
 :- multifile modified_toplevel/1.
 
 /**
- * delete_toplevel(+Path)
+ * delete_toplevel(+Path|+ID)
  * 
  * Deletes all facts related to the toplevel 
- * specified by Path.
+ * specified by Path or ID.
  * Path is the full path to the toplevel: 
  * /Project/OptionalSourcepaths/Package1/../Classname.java"
  */
 
-delete_toplevel(Path):-
+delete_toplevel(PathId):-
 	rollback, 
-	toplevelT(ID, _, Path, _), 
+	(
+    	toplevelT(ID, _, PathId, _)
+	 ;
+	   (
+	     toplevelT(PathId, _, _, _),
+	     PathId = ID
+	    )
+	),
 	deepRetract(ID).
 
 delete_toplevel(_).

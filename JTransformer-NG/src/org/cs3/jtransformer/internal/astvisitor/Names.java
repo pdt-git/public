@@ -32,6 +32,7 @@ public interface Names {
 	  public String IMPLEMENTS_T = "implementsT";
 	  public String EXTENDS_T = "extendsT";
 	  public String INTERFACE_T = "interfaceT";
+	  public String ENUM_T = "enumT";
 	  public String TRY_T = "tryT";
 	  public String THROW_T = "throwT";
 	  public String SYNCHRONIZED_T = "synchronizedT";
