@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -35,6 +36,8 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -52,10 +55,13 @@ import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -69,6 +75,7 @@ import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -84,10 +91,12 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 /**
  * Translates a java source file into Prolog facts. This class
@@ -1970,7 +1979,6 @@ public class FactGenerator extends ASTVisitor implements Names {
 
 		writer.writeFact(CLASS_DEF_T, args);
 		createAnnotationFact(node, id);
-		
 
 		writeModifiers(node, node.getModifiers());
 		writer.writeFact(SOURCE_LOCATION_T, new String [] {
@@ -2723,5 +2731,61 @@ public class FactGenerator extends ASTVisitor implements Names {
 		}
 	}
 
-}
+	/***
+	 * JLS3 - Java5 
+	 */
+	
+	
+    /******* For Each ********/
+	
+	public boolean visit(EnhancedForStatement node) {
+		return true;
+	}
+	/******** Enum *******/
 
+	public boolean visit(EnumConstantDeclaration node) {
+		return true;
+	}
+
+	
+	/******* Annotations **********/
+	public boolean visit(SingleMemberAnnotation node) {
+		return true;
+	}
+
+	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		return true;
+	}
+	
+
+	public boolean visit(MemberValuePair node) {
+		return true;
+	}
+	public boolean visit(MarkerAnnotation node) {
+		return true;
+	}
+
+	public boolean visit(NormalAnnotation node) {
+		return true;
+	}
+	
+	/********** Generics ********/
+	public boolean visit(ParameterizedType node) {
+		return true;
+	}
+	
+	public boolean visit(QualifiedType node) {
+		return true;
+	}
+	
+	public boolean visit(TypeParameter node) {
+		return true;
+	}
+	public boolean visit(WildcardType node) {
+		return true;
+	}
+	
+	
+	
+
+}
