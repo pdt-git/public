@@ -721,7 +721,12 @@ ast_node_def('JavaAttributes',enumT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
 
-%TODO: Malte
+%tree_constraints(enumT ,[[]]).
+ast_node_def('JavaAttributes',enumConstantsT,[
+     ast_arg(id,     mult(1,1,no ), id,   [enumConstantsT]),
+     ast_arg(parent, mult(1,1,no ), id,   [enumT]),
+     ast_arg(name,    mult(1,1,no ), attr,  [atom])
+]).
 
 /*********** Annotations JSR-175 ***************/
 
