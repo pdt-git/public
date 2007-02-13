@@ -384,9 +384,24 @@ public class IDResolver implements IIDResolver {
 	 * 
 	 * @see org.cs3.jtransformer.internal.astvisitor.IIDResolver#getJavaLangObjectID()
 	 */
-	
+
+
 	public String getJavaLangClassID() {
 		return fqnManager.transformFQN("fqn('java.lang.Class')");
+	}
+	
+	/**
+	 * returns the ID given to the class <code>java.lang.Object</code>. 
+	 * This method is used because of the many and varied codings for
+	 * globally unique names we have used up till now, so the other
+	 * classes need not assume any specific implementation
+	 * 
+	 * @see org.cs3.jtransformer.internal.astvisitor.IIDResolver#getJavaLangObjectID()
+	 */
+
+
+	public String getJavaLangAnnotationAnnotationID() {
+		return fqnManager.transformFQN("fqn('java.lang.annotation.Annotation')");
 	}
 
     /* (non-Javadoc)
