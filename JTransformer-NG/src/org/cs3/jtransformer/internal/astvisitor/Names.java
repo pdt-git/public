@@ -19,7 +19,11 @@ public interface Names {
 	/**
 	 * Java 5
 	 */
+	  public String ANNOTATION_TYPE_T = "annotationTypeT";
 	  public String ANNOTATION_T = "annotationT";
+	  public String ENUM_T = "enumT";
+	  public String ANNOTATION_MEMBER_T = "annotationMemberT";
+ 	  public String MEMBER_VALUE_T = "memberValueT";
 	
 	/**
 	 * Java 1.4
@@ -32,7 +36,7 @@ public interface Names {
 	  public String IMPLEMENTS_T = "implementsT";
 	  public String EXTENDS_T = "extendsT";
 	  public String INTERFACE_T = "interfaceT";
-	  public String ENUM_T = "enumT";
+
 	  public String TRY_T = "tryT";
 	  public String THROW_T = "throwT";
 	  public String SYNCHRONIZED_T = "synchronizedT";
@@ -87,4 +91,5 @@ public interface Names {
 	  public String CONSTRUCTOR_NAME = "<init>";
 	  
 	  public String PRED_ACTIVATE_REVERSE_INDEXES = "activate_reverse_indexes";
+	public String MARKER_ANNOTATION_T = "markerAnnotationT";
 }

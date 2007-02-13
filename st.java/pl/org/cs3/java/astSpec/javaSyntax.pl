@@ -67,9 +67,12 @@ ast_reference_type('Java', Label) :-
     expression_type('Java',Label).
 ast_reference_type('Java',Label) :- 
     statement_type('Java',Label).
+ast_reference_type('Java',Label) :- 
+    annotation_expression_type('Java',Label).
 
- % expression_type needs the first argument since it is an
- % abstraction (from file languageAbstractions.pl).
+
+% expression_type needs the first argument since it is an
+% abstraction (from file languageAbstractions.pl).
 
 :- multifile expression_type/2.
 
@@ -89,10 +92,47 @@ expression_type('Java',selectT).
 expression_type('Java',typeCastT).
 expression_type('Java',typeTestT).
 
- % same comments as for expression_type_ above
- 
-:- multifile statement_type/2.
 
+% annotation_expression_type needs the first argument since it is an
+% abstraction (from file languageAbstractions.pl).
+
+:- multifile annotation_expression_type/2.
+
+% From JSR 175:
+% Member types
+% ============
+% The Type is restricted to 
+% primitive types, String, Class, enum types,
+% annotation types, and arrays of the preceding types. 
+% It is permissible to use bounded wildcards to parameterize the Class return type, 
+% and the compiler must enforce such bounds on annotations. 
+%
+% Annotations
+% ===========
+% If the member type is not an annotation type or an array type, 
+% MemberValue must be a ConditionalExpression (JLS 15.25) whose 
+% type is assignment compatible (JLS 5.2) with the member type. 
+% (A ConditionalExprression is simply an expression without assignments, 
+% and not necessarily an expression involving the conditional operator (? :).) 
+% If member type is a primitive type or String, the ConditionalExpression 
+% must be a constant expression (JLS 15.28). If the member type is Class, 
+% the value must be a class literal (JLS 15.8.2). 
+% If the member type is an enum type, the value must be the simple 
+% (unqualified) name of an enum constant. Loosely speaking, 
+% no matter what the member type, the value must be a compile-time constant. 
+% Note that null is not a legal member value for any member type.
+
+ % same comments as for expression_type_ above
+
+annotation_expression_type('Java',literalT).
+annotation_expression_type('Java',newArrayT).
+annotation_expression_type('Java',identT). %TODO only allow typeExpr typeExprT
+annotation_expression_type('Java',conditionalT). 
+ 
+
+% statment_expression_type needs the first argument since it is an
+% abstraction (from file languageAbstractions.pl).
+:- multifile statement_type/2.
 statement_type('Java',assertT).
 statement_type('Java',assignopT).
 statement_type('Java',assignT).
@@ -114,6 +154,8 @@ statement_type('Java',synchronizedT).
 statement_type('Java',throwT).
 statement_type('Java',tryT).
 statement_type('Java',whileLoopT).
+
+
 
 /** 
   * ast_node_subtype(?Language, ?SubType, ?SuperType)   
@@ -138,6 +180,9 @@ statement_type('Java',whileLoopT).
  
 ast_node_subtype('Java',Label,expressionType) :- 
     expression_type('Java',Label).
+
+ast_node_subtype('Java',Label,annotationExpressionType) :- 
+    annotation_expression_type('Java',Label).
     
 ast_node_subtype('Java',Label,statementType) :- 
     statement_type('Java',Label).
@@ -536,7 +581,7 @@ ast_node_def('Java',identT,[
      ast_arg(name,    mult(1,1,no ), attr,  [atom]),
      ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT,localDefT,paramDefT]) 
       %FIXME: currently also typeTermType, this breaks java_fq!
-      %solution: introduce new PEF typeExpr(ID,PARENT,ENCL,NAME, TYPETERM).
+      %solution: introduce new PEF typeExprT(ID,PARENT,ENCL,NAME, TYPETERM).
 ]).
 
 % tree_constraints(switchT,[[allType],[methodDefT],[expressionType],[statementType]]).
@@ -665,21 +710,57 @@ ast_node_def('JavaAttributes',projectLocationT,[
 ]).
 
 /*********** JAVA 5 *************/
+
+/*********** Foreach ***************/
+%TODO: Malte
+
+/*********** Enum ***************/
+
 %tree_constraints(enumT ,[[]]).
 ast_node_def('JavaAttributes',enumT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
 
-%tree_constraints(annotationT ,[[atom]]).
-ast_node_def('JavaAttributes',annotationT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]),
-     ast_arg(file, mult(1,1,no ), attr, [atom])
-]).
+%TODO: Malte
 
-%tree_constraints(aspect ,[[atom]]).
-ast_node_def('JavaAttributes',aspect,[
+/*********** Annotations JSR-175 ***************/
+
+%tree_constraints(annotationTypeT ,[[classDefT]]).
+ast_node_def('JavaAttributes',annotationTypeT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT])
 ]).
+
+%tree_constraints(markerAnnotationT ,[[#id]).
+ast_node_def('JavaAttributes',markerAnnotationT,[
+     ast_arg(id,     mult(1,1,no ), id,   [#classDefT])
+]).
+
+ast_node_def('Java',annotationT,[
+     ast_arg(id,     mult(1,1,no ), id,       [id]),
+     ast_arg(parent, mult(1,1,no ), id,       [id]),
+     ast_arg(encl,   mult(1,1,no ), id,       [id]),
+     ast_arg(annotationType, mult(1,1,no ),id,[classDefT]),
+     ast_arg(values, mult(0,*,ord ),id,       [memberValueT]) % <- a general redundancy problem of our current AST
+]).
+
+ast_node_def('Java',memberValueT,[
+     ast_arg(id,     mult(1,1,no ), id,   [id]),
+     ast_arg(parent, mult(1,1,no ), id,   [id]), 
+     ast_arg(name,   mult(1,1,no ), attr, [atom]),
+     ast_arg(value,  mult(1,1,no ), id,   [nullType, annotationExpressionType]),
+     ast_arg(ref, mult(1,1,no ), id,   [annotationMemberT])
+]).
+
+ast_node_def('Java',annotationMemberT,[
+     ast_arg(id,     mult(1,1,no ), id,   [id]),
+     ast_arg(parent, mult(1,1,no ), id,   [id]), 
+     ast_arg(name,   mult(1,1,no ), attr, [atom]),
+     ast_arg(expr, mult(1,1,no ), id, [annotationExpressionType,nullType])
+]).
+
+/*********** Generics JSR-014 ***************/
+
+% TODO
 
 /**
  * create_ast_arg_id_kind
@@ -717,4 +798,14 @@ checkSyntax(Name) :-
 checkSyntax(Name) :- 
 	ast_node_def('JavaAttributes',Name,List),
 	attribSignature(Name,SigLen),
-	not(length(List,SigLen)).	
+	not(length(List,SigLen)).
+checkSyntax(Name) :- 
+	clause(
+	  ast_node_def('JavaAttributes',Name,List),
+	  _,
+	  Ref),
+	clause(
+	  ast_node_def('JavaAttributes',Name,List2),
+	  _,
+	  Ref2),
+	not(Ref = Ref2).		

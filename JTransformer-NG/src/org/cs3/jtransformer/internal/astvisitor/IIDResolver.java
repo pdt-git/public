@@ -86,6 +86,15 @@ public interface IIDResolver extends IIDGenerator {
 	
 	public String getJavaLangClassID();
     
+	/**
+	 * Helper method, returns the String representation of the java.lang.annotation.Annotation
+	 * class. This method is necessary to accomodate our many and varied 
+	 * encodings for fully qualified names.
+	 * 
+	 * @return a String, appropriate for the resolver, representing java.lang.Class
+	 */
+	
+	public String getJavaLangAnnotationAnnotationID();
     /**
      * returns the id for a synthetic (default) constructor of a given type.
      * 

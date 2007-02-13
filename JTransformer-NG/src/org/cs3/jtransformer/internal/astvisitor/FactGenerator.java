@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.cs3.pl.common.Debug;
@@ -14,6 +15,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -45,6 +48,8 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -97,6 +102,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
+import org.eclipse.jdt.internal.core.search.matching.DeclarationOfAccessedFieldsPattern;
 
 /**
  * Translates a java source file into Prolog facts. This class
@@ -111,8 +117,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  */
 
 public class FactGenerator extends ASTVisitor implements Names {
-	
-	
+		
 	
 	private Hashtable labels = new Hashtable();
 	private Hashtable packages = new Hashtable(); 
@@ -194,7 +199,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		String[] args =
 			new String[] {
 				idResolver.getID(node),
-				idResolver.getID(node.getParent()),
+				getParentId(node.getParent()),
 				"'ANONYMOUS$" + idResolver.getID() + "'",
 				idResolver.getIDs(expandList(node.bodyDeclarations().iterator()))
 			};
@@ -280,7 +285,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		if (node.getParent().getNodeType() == ASTNode.ARRAY_CREATION)
 			parent = idResolver.getID(node.getParent().getParent());
 		else
-			parent = idResolver.getID(node.getParent());
+			parent = getParentId(node.getParent());
 		String enclosing = idResolver.getID(getEnclosingNode(node));
 		String dims = getEmptyList();
 		String init = idResolver.getIDs(node.expressions());
@@ -766,6 +771,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	}
 
 	Hashtable annotations;
+	private Map relinkedParents = new Hashtable();
 	private void initComments(CompilationUnit node) {
 		annotations = new Hashtable();
 		for (Iterator iter = node.getCommentList().iterator(); iter.hasNext();) {
@@ -961,7 +967,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			VariableDeclarationFragment fragment =
 				(VariableDeclarationFragment) list.get(i);
 			String id = idResolver.getID(fragment);
-			String parentId = idResolver.getID(node.getParent());
+			String parentId = getParentId(node.getParent());
 			
 			String type = typeResolver.getTypeTerm(fragment.resolveBinding().getType());
 			String name = quote(fragment.getName().toString());
@@ -1041,7 +1047,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 */
 	public boolean _visit(ImportDeclaration node) {
 		String id = idResolver.getID(node);
-		String topLevel = idResolver.getID(node.getParent());
+		String topLevel = getParentId(node.getParent());
 		String importName = idResolver.getID(node.resolveBinding());
 		IBinding binding =  node.resolveBinding();
 		if (binding.getKind() == IBinding.PACKAGE) 
@@ -1067,7 +1073,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 */
 	public boolean visit(ImportDeclaration node) {
 		String id = idResolver.getID(node);
-		String topLevel = idResolver.getID(node.getParent());
+		String topLevel = getParentId(node.getParent());
 		IBinding binding =  node.resolveBinding();
 		String importName = idResolver.getID(binding);
 		if (binding.getKind() == IBinding.PACKAGE) 
@@ -1146,7 +1152,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	public boolean visit(Initializer node) {
 
 		String id = idResolver.getID(node);
-		String parentId = idResolver.getID(node.getParent());
+		String parentId = getParentId(node.getParent());
 		String name = quote(INITIALIZER_NAME);
 		String param = getEmptyList();
 		//		Type nodetype = ((TypeDeclaration)node.getParent()).
@@ -1205,7 +1211,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	public boolean visit(MethodDeclaration node) {
 
 		String id = idResolver.getID(node);
-		String parentId = idResolver.getID(node.getParent());
+		String parentId = getParentId(node.getParent());
 
 		String name =
 			quote(
@@ -1405,7 +1411,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 /*			String[] args =
 				new String[] {
 					idResolver.getID(node),
-					idResolver.getID(node.getParent()),
+					getParentId(node.getParent()),
 					idResolver.getID(getEnclosingNode(node)),
 					quote(name),
 					idResolver.getID(node.getQualifier()),
@@ -1442,10 +1448,7 @@ public class FactGenerator extends ASTVisitor implements Names {
    */
 	public boolean visit(SimpleName node) {
 		
-		if (node.getParent().getNodeType() == ASTNode.TYPE_DECLARATION)
-			return false;
-
-		if (node.getParent().getNodeType() == ASTNode.ENUM_DECLARATION)
+		if (node.getParent() instanceof AbstractTypeDeclaration)
 			return false;
 
 		if (node.getParent().getNodeType() == ASTNode.LABELED_STATEMENT)
@@ -1592,7 +1595,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 //		args =
 //			new String[] {
 //				idResolver.getID(node),
-//				idResolver.getID(node.getParent()),
+//				getParentId(node.getParent()),
 //				idResolver.getID(getEnclosingNode(node)),
 //				typeResolver.getTypeTerm(node),
 //				quote(s) };
@@ -1953,7 +1956,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 				idResolver.getID(
 					((CompilationUnit) node.getParent()).getPackage());
 		else
-			parentId = idResolver.getID(node.getParent());
+			parentId = getParentId(node.getParent());
 		
 
 		Iterator bodyIterator = node.bodyDeclarations().iterator();
@@ -2103,13 +2106,19 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writeSourceLocationArgumentIdentifier(node, name);
 
 		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			Modifier modifier = (Modifier) iter.next();
-			writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
-					idResolver.getID(node),
-					ARGUMENT_MODIFIER + "(" + modifier.getKeyword().toString() + ")",
-					Integer.toString(modifier.getStartPosition()),
-					Integer.toString(modifier.getLength())
-			});
+			Object element = iter.next();
+			if(element instanceof Modifier) {
+				Modifier modifier = (Modifier) element;
+
+				writer.writeFact(SOURCE_LOCATION_ARGUMENT, new String [] {
+						idResolver.getID(node),
+						ARGUMENT_MODIFIER + "(" + modifier.getKeyword().toString() + ")",
+						Integer.toString(modifier.getStartPosition()),
+						Integer.toString(modifier.getLength())
+				});
+			}
+//			NormalAnnotation
+
 		}
 	}
 
@@ -2244,7 +2253,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			String[] args =
 				new String[] {
 					idResolver.getID(node),
-					idResolver.getID(node.getParent()),
+					getParentId(node.getParent()),
 					typeResolver.getTypeTerm(node.resolveBinding().getType()), // FIXME: resolve binding is only neces. for native methods 
 					quote(node.getName().getIdentifier())};
 			writer.writeFact(PARAM_DEF_T, args);
@@ -2259,7 +2268,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			String[] args =
 				new String[] {
 					idResolver.getID(node),
-					idResolver.getID(node.getParent()),
+					getParentId(node.getParent()),
 					typeResolver.getTypeTerm(node.resolveBinding().getType()),
 					quote(node.getName().getIdentifier())};
 			writer.writeFact(PARAM_DEF_T, args);
@@ -2301,7 +2310,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			String[] args =
 				new String[] {
 					idResolver.getID(fragment),
-					idResolver.getID(node.getParent()),
+					getParentId(node.getParent()),
 					idResolver.getID(getEnclosingNode(fragment)),
 					typeResolver.getTypeTerm(fragment.resolveBinding().getType()),
 					"'" + fragment.getName().getIdentifier() + "'",
@@ -2413,6 +2422,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 		if (a instanceof MethodDeclaration
 		 || (a instanceof VariableDeclarationFragment && a.getParent() instanceof FieldDeclaration)
 		 || a instanceof FieldDeclaration
+		 || a instanceof AbstractTypeDeclaration
+		 || a instanceof AnnotationTypeMemberDeclaration
 		 || a instanceof Initializer)
 			return a;
 		return getEnclosingNode(a.getParent());
@@ -2708,7 +2719,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		String [] toPass = new String [args.length + 3];
 		
 		toPass[0] = idResolver.getID(node);
-		toPass[1] = idResolver.getID(node.getParent());
+		toPass[1] = getParentId(node.getParent());
 		toPass[2] = idResolver.getID(getEnclosingNode(node));
 		
 		System.arraycopy(args, 0, toPass, 3, args.length);
@@ -2718,7 +2729,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
-		if(!name.equals(EXEC_T))
+		if(!name.equals(EXEC_T) )
 			createAnnotationFact(node, toPass[0]);
 	}
 
@@ -2749,24 +2760,198 @@ public class FactGenerator extends ASTVisitor implements Names {
 
 	
 	/******* Annotations **********/
-	public boolean visit(SingleMemberAnnotation node) {
+
+	
+	/**
+	 * Generates prolog facts for type annotation types.
+	 * A classDefT marked with annotationTypeT.
+	 * 
+	 * annotationTypeT(#id)
+	 * <p>
+	 * classDefT(#id,#owner,name,[def_1,...]) 
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=annotationTypeT">
+	 * memberValueT<a>}
+	 * 
+	 * @see FactGenerator#visit(TypeDeclaration)
+   	 */	
+	public boolean visit(AnnotationTypeDeclaration node) {
+		visitAbstractTypeDeclaration(node, null);
+		String superClass = idResolver.getJavaLangAnnotationAnnotationID();
+		String id = idResolver.getID(node);
+		
+		writer.writeFact(EXTENDS_T, new String [] {id, superClass});
+		writer.writeFact(ANNOTATION_TYPE_T, new String [] { id });
+
 		return true;
 	}
 
+	/**
+	 * Generates prolog facts for type annotation members.
+	 * A classDefT marked with annotationTypeT.
+	 * 
+	 * annotationMemberT(#id,#parent,'name', #default | 'null')
+	 * <p>
+	 * classDefT(#id,#owner,name,[def_1,...]) 
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=annotationMemberT">
+	 * annotationMemberT<a>}
+	 * 
+	 * @see FactGenerator#visit(AnnotationTypeDeclaration)
+   	 */
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		writer.writeFact(Names.ANNOTATION_MEMBER_T,
+				new String[] {
+					quote(node.getName()),
+					idResolver.getID(node.getDefault())
+				}
+		);
 		return true;
+	}
+
+	/**
+	 * Generates prolog facts of type annotationT.
+	 * 
+	 * annotationT(#id, #parent, #encl, #annotationType, #expression)
+	 * <p>
+	 * Complete annotationT syntax
+	 * annotationT(#id, #parent, #encl, #annotationType, #expression, [] ) 
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=AnnotationT">
+	 * annotationT<a>}
+	 * @see FactGenerator#visit(NormalAnnotation)
+	 * @see FactGenerator#visit(MarkerAnnotation)
+   	 */
+	public boolean visit(SingleMemberAnnotation node) {
+		
+		String valueId = idResolver.getID();
+		setRelinkedParentId(node.getValue(), valueId);
+		writer.writeFact(Names.MEMBER_VALUE_T,
+			new String[] {
+				valueId,
+				getParentId(node.getParent()),
+				quote("null"), // 'null' stands for no name given (single member)
+				idResolver.getID(node.getValue()),
+				idResolver.getID(node.resolveAnnotationBinding().
+					getDeclaredMemberValuePairs()[0].getMethodBinding())
+			}
+		);
+		visitAnnotation(node,"[" + valueId + "]");
+		return true;
+	}
+
+	/**
+	 * Use this method to assign a different parent id to
+	 * an AST node. 
+	 * Everytime the id for a parent is request with getParentId(ASTNode)
+	 * this id is returned. If on id was assigned by this method
+	 * idResolver.getID(node.getParent()) is used instead to resolve
+	 * the id of the regular AST parent. 
+	 * 
+	 * @param obj
+	 * @param valueId
+	 */
+	private void setRelinkedParentId(ASTNode obj, String valueId) {
+		relinkedParents.put(obj, valueId);
 	}
 	
-
-	public boolean visit(MemberValuePair node) {
-		return true;
+	/**
+	 * Returns the id of the parent node.
+	 * Considers relinked parents (setRelinkedParentId(..)).
+	 *  
+	 *  
+	 * @param obj
+	 * @return
+	 * @see FactGenerator#setRelinkedParentId(ASTNode, String)
+	 */
+	private String getParentId(ASTNode obj ) {
+		String parent = (String)relinkedParents.get(obj);
+		if(parent == null) {
+			return idResolver.getID(obj);
+		}
+		return parent;
 	}
+
+	/**
+	 * Generates prolog facts of type annotationT.
+	 * 
+	 * annotationT(#id, #parent, #encl, #annotationType, 'null', [])
+	 * <p>
+	 * Complete annotationT syntax
+	 * annotationT(#id, #parent, #encl, #annotationType, 'null' | #expression,[#keyValue_1,...]) 
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=AnnotationT">
+	 * annotationT<a>}
+	 * @see FactGenerator#visit(NormalAnnotation)
+	 * @see FactGenerator#visit(SingleMemberAnnotation)
+   	 */
 	public boolean visit(MarkerAnnotation node) {
+		visitAnnotation(node,"[]");
+		writer.writeFact(Names.MARKER_ANNOTATION_T, 
+				new String[] {
+		  			idResolver.getID(node)
+		});
 		return true;
 	}
 
+	/**
+	 * Generates prolog facts of type annotationT.
+	 * 
+	 * annotationT(#id, #parent, #encl, #annotationType, 'null',[#keyValue_1,...])
+	 * <p>
+	 * Complete annotationT syntax
+	 * annotationT(#id, #parent, #encl, #annotationType, 'null' | #expression,[#keyValue_1,...]) 
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=AnnotationT">
+	 * annotationT<a>}
+	 * @see FactGenerator#visit(SingleMemberAnnotation)
+	 * @see FactGenerator#visit(MarkerAnnotation)
+   	 */
 	public boolean visit(NormalAnnotation node) {
+		visitAnnotation(node,idResolver.getIDs(node.values()));
 		return true;
+	}
+
+
+	/**
+	 * Generates prolog facts of type memberValueT.
+	 * 
+	 * memberValueT(#id, #parent, #encl, 'memberName', #valueLiteral, #annotationMember) 
+	 * <p>
+	 * {@link <a href="http://roots.iai.uni-bonn.de/lehre/xp2004a1/Wiki.jsp?page=memberValueT">
+	 * memberValueT<a>}
+		 */
+	public boolean visit(MemberValuePair node) {
+		Annotation annotation = (Annotation)node.getParent();
+		IMethodBinding[] methods = annotation.resolveTypeBinding().getDeclaredMethods();
+		String binding = null;
+		for (int i = 0; i < methods.length; i++) {
+			if(methods[i].equals(node.getName())) {
+				binding = idResolver.getID(methods[i]);
+			}
+		}
+		writer.writeFact(Names.MEMBER_VALUE_T,
+				new String[] {
+					idResolver.getID(node),
+					getParentId(node.getParent()),
+					idResolver.getID(node.getName()),
+					idResolver.getID(node.getValue()),
+					binding  //idResolver.getID(node.resolveMemberValuePairBinding().getMethodBinding())
+				}
+		);
+		return true;
+	}
+
+	private void visitAnnotation(Annotation node,String values) {
+		writer.writeFact(Names.ANNOTATION_T,
+				new String[] {
+					idResolver.getID(node),
+					getParentId(node.getParent()),
+					idResolver.getID(getEnclosingNode(node)),
+					idResolver.getID(node.resolveAnnotationBinding().getAnnotationType()),
+					values
+				}
+		);
 	}
 	
 	/********** Generics ********/

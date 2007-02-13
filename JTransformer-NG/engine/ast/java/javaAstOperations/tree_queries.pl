@@ -45,7 +45,7 @@ enclClass(_, 'null').
   
   TODO: reimplement as a meta-predicate
 */
- 
+/*
 enclosing(_id, _Encl):- fieldDefT(_id, _Encl, _, _, _).
 enclosing(_id, _Encl):-identT(_id, _,_Encl,_,_), !.
 enclosing(_id, _Encl):-getFieldT(_id, _,_Encl,_,_,_), !.
@@ -87,6 +87,34 @@ enclosing(_id, _Encl):-synchronizedT(_id, _,_Encl,_,_), !.
 enclosing(_id, _Encl):-assertT(_id, _,_Encl,_,_), !.
 enclosing(_id, _Encl):-precedenceT(_id, _,_Encl,_), !.
 enclosing(_id, _Encl):-nopT(_id, _,_Encl), !.
+*/
+
+enclosing(ID,Encl):-
+    ast_node_def('Java',Name,List),
+    length(List,Len),
+    functor(Term,Name,Len),
+    arg(1,Term,ID),
+	resolve_enclosing(List,Encl,Term),
+	call(Term).
+
+resolve_enclosing(
+     [ast_arg(id, _, id, _), 
+      ast_arg(parent,_,id, _), 
+      ast_arg(encl, _,id, _)|_],
+     Encl,
+     Term):-
+     !,
+     arg(3,Term,Encl).
+resolve_enclosing(
+     [ast_arg(id, _, id, _), 
+      ast_arg(parent,_,id, _)|_],
+     Encl,
+     [_,Encl|_]):-
+     !,
+     arg(2,Term,Encl).
+resolve_enclosing(_,Encl, [Encl|_]):-
+     !,
+     arg(1,Term,Encl).
 
 
 /**
@@ -96,6 +124,21 @@ enclosing(_id, _Encl):-nopT(_id, _,_Encl), !.
  *
  * getTerm(1, classDefT(1,2,'Test',[3,4])
  */
+
+	 
+getTerm(ID,Term):-
+    nonvar(Term),
+    arg(1, Term,ID),
+    nonvar(ID).  
+ 
+getTerm(ID,Term):-
+    tree(ID,_,Functor),
+    ast_node_def('Java',Functor,List),
+    length(List,Len),
+    functor(Term,Functor,Len),
+    arg(1,Term,ID).
+
+/*
 getTerm(_id,packageT(_id,_name)) :-                           packageT(_id,_name).
 getTerm(_id,getFieldT(_id,_pid,_encl,_v1,_v2,_v3)) :-         getFieldT(_id,_pid,_encl,_v1,_v2,_v3).
 getTerm(_id,selectT(_id,_pid,_encl,_v1,_v2,_v3)) :-           selectT(_id,_pid,_encl,_v1,_v2,_v3).
@@ -137,7 +180,7 @@ getTerm(_id,assertT(_id,_pid,_encl,_v1,_v2)) :-               assertT(_id,_pid,_
 getTerm(_id,importT(_id,_pid,_v1)) :-                         importT(_id,_pid,_v1).
 getTerm(_id,precedenceT(_id,_pid,_encl,_v1)) :-                   precedenceT(_id,_pid,_encl,_v1).
 getTerm(_id,nopT(_id,_pid,_encl)) :-                                              nopT(_id,_pid,_encl).
-
+*/
 test(getTermT01) :-
     assert(methodDefT(testId,1,2,3,type(1,class, 0),5,6)),
     getTerm(testId, methodDefT(testId,1,2,3,type(1,class, 0),5,6)),
