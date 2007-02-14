@@ -199,7 +199,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		String[] args =
 			new String[] {
 				idResolver.getID(node),
-				getParentId(node.getParent()),
+				getParentId(node),
 				"'ANONYMOUS$" + idResolver.getID() + "'",
 				idResolver.getIDs(expandList(node.bodyDeclarations().iterator()))
 			};
@@ -285,7 +285,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		if (node.getParent().getNodeType() == ASTNode.ARRAY_CREATION)
 			parent = idResolver.getID(node.getParent().getParent());
 		else
-			parent = getParentId(node.getParent());
+			parent = getParentId(node);
 		String enclosing = idResolver.getID(getEnclosingNode(node));
 		String dims = getEmptyList();
 		String init = idResolver.getIDs(node.expressions());
@@ -967,7 +967,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			VariableDeclarationFragment fragment =
 				(VariableDeclarationFragment) list.get(i);
 			String id = idResolver.getID(fragment);
-			String parentId = getParentId(node.getParent());
+			String parentId = getParentId(node);
 			
 			String type = typeResolver.getTypeTerm(fragment.resolveBinding().getType());
 			String name = quote(fragment.getName().toString());
@@ -1047,7 +1047,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 */
 	public boolean _visit(ImportDeclaration node) {
 		String id = idResolver.getID(node);
-		String topLevel = getParentId(node.getParent());
+		String topLevel = getParentId(node);
 		String importName = idResolver.getID(node.resolveBinding());
 		IBinding binding =  node.resolveBinding();
 		if (binding.getKind() == IBinding.PACKAGE) 
@@ -1073,7 +1073,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 */
 	public boolean visit(ImportDeclaration node) {
 		String id = idResolver.getID(node);
-		String topLevel = getParentId(node.getParent());
+		String topLevel = getParentId(node);
 		IBinding binding =  node.resolveBinding();
 		String importName = idResolver.getID(binding);
 		if (binding.getKind() == IBinding.PACKAGE) 
@@ -1152,7 +1152,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	public boolean visit(Initializer node) {
 
 		String id = idResolver.getID(node);
-		String parentId = getParentId(node.getParent());
+		String parentId = getParentId(node);
 		String name = quote(INITIALIZER_NAME);
 		String param = getEmptyList();
 		//		Type nodetype = ((TypeDeclaration)node.getParent()).
@@ -1211,7 +1211,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	public boolean visit(MethodDeclaration node) {
 
 		String id = idResolver.getID(node);
-		String parentId = getParentId(node.getParent());
+		String parentId = getParentId(node);
 
 		String name =
 			quote(
@@ -1411,7 +1411,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 /*			String[] args =
 				new String[] {
 					idResolver.getID(node),
-					getParentId(node.getParent()),
+					getParentId(node),
 					idResolver.getID(getEnclosingNode(node)),
 					quote(name),
 					idResolver.getID(node.getQualifier()),
@@ -1463,9 +1463,15 @@ public class FactGenerator extends ASTVisitor implements Names {
 		//ld: if the qn belongs to a throw decl. of a method decl. ...
 		if (node.getParent().getNodeType() == ASTNode.METHOD_DECLARATION)
 			return false;
-		
+
+		if (node.getParent().getNodeType() == ASTNode.MEMBER_VALUE_PAIR)
+			return false;
+
 		generatePackageFactIfNecessary(node.resolveBinding());
 		
+		if(node.resolveBinding() == null) {
+			System.err.println("ERROR");
+		}
 		if (node.resolveBinding().getKind() == IBinding.TYPE){
 			if(((ITypeBinding)node.resolveBinding()).isTypeVariable())
 				return false;
@@ -1595,7 +1601,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 //		args =
 //			new String[] {
 //				idResolver.getID(node),
-//				getParentId(node.getParent()),
+//				getParentId(node),
 //				idResolver.getID(getEnclosingNode(node)),
 //				typeResolver.getTypeTerm(node),
 //				quote(s) };
@@ -1955,7 +1961,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 				idResolver.getID(
 					((CompilationUnit) node.getParent()).getPackage());
 		else
-			parentId = getParentId(node.getParent());
+			parentId = getParentId(node);
 		
 
 		Iterator bodyIterator = node.bodyDeclarations().iterator();
@@ -2252,7 +2258,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			String[] args =
 				new String[] {
 					idResolver.getID(node),
-					getParentId(node.getParent()),
+					getParentId(node),
 					typeResolver.getTypeTerm(node.resolveBinding().getType()), // FIXME: resolve binding is only neces. for native methods 
 					quote(node.getName().getIdentifier())};
 			writer.writeFact(PARAM_DEF_T, args);
@@ -2267,7 +2273,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			String[] args =
 				new String[] {
 					idResolver.getID(node),
-					getParentId(node.getParent()),
+					getParentId(node),
 					typeResolver.getTypeTerm(node.resolveBinding().getType()),
 					quote(node.getName().getIdentifier())};
 			writer.writeFact(PARAM_DEF_T, args);
@@ -2309,7 +2315,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 			String[] args =
 				new String[] {
 					idResolver.getID(fragment),
-					getParentId(node.getParent()),
+					getParentId(node),
 					idResolver.getID(getEnclosingNode(fragment)),
 					typeResolver.getTypeTerm(fragment.resolveBinding().getType()),
 					"'" + fragment.getName().getIdentifier() + "'",
@@ -2718,7 +2724,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		String [] toPass = new String [args.length + 3];
 		
 		toPass[0] = idResolver.getID(node);
-		toPass[1] = getParentId(node.getParent());
+		toPass[1] = getParentId(node);
 		toPass[2] = idResolver.getID(getEnclosingNode(node));
 		
 		System.arraycopy(args, 0, toPass, 3, args.length);
@@ -2832,7 +2838,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(Names.MEMBER_VALUE_T,
 			new String[] {
 				valueId,
-				getParentId(node.getParent()),
+				getParentId(node),
 				quote("null"), // 'null' stands for no name given (single member)
 				idResolver.getID(node.getValue()),
 				idResolver.getID(node.resolveAnnotationBinding().
@@ -2936,7 +2942,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(Names.MEMBER_VALUE_T,
 				new String[] {
 					idResolver.getID(node),
-					getParentId(node.getParent()),
+					getParentId(node),
 //					idResolver.getID(node.getName()),
 					binding,  //idResolver.getID(node.resolveMemberValuePairBinding().getMethodBinding())
 					idResolver.getID(node.getValue())
@@ -2949,7 +2955,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(Names.ANNOTATION_T,
 				new String[] {
 					idResolver.getID(node),
-					getParentId(node.getParent()),
+					getParentId(node),
 					idResolver.getID(getEnclosingNode(node)),
 					idResolver.getID(node.resolveAnnotationBinding().getAnnotationType()),
 					values
