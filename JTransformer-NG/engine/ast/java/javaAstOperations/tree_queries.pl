@@ -136,7 +136,8 @@ getTerm(ID,Term):-
     ast_node_def('Java',Functor,List),
     length(List,Len),
     functor(Term,Functor,Len),
-    arg(1,Term,ID).
+    arg(1,Term,ID),
+    call(Term).
 
 /*
 getTerm(_id,packageT(_id,_name)) :-                           packageT(_id,_name).
@@ -480,6 +481,19 @@ sub_trees(_id, []) :-
 
 sub_trees(_id, []) :-
     nopT(_id,_,_),
+    !.
+
+/** JAVA 5 **/
+sub_trees(_id, List) :-
+    annotationT(_id,_,_,_,List),
+    !.
+
+sub_trees(_id, [Element]) :-
+    memberValueT(_id,_,Element,_),
+    !.
+
+sub_trees(_id, [Element]) :-
+	annotationMemberT(_id,_,_, Default'),
     !.
 
 sub_trees(_id, []) :-
