@@ -2802,6 +2802,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(Names.ANNOTATION_MEMBER_T,
 				new String[] {
 				idResolver.getID(node),
+				//idResolver.getID(node.getParent()),
 				getParentId(node),
 				typeResolver.getTypeTerm(node.getType()),
 				quote(node.getName()),
@@ -2869,7 +2870,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	private String getParentId(ASTNode obj ) {
 		String parent = (String)relinkedParents.get(obj);
 		if(parent == null) {
-			return idResolver.getID(obj);
+			return idResolver.getID(obj.getParent());
 		}
 		return parent;
 	}
@@ -2928,7 +2929,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		IMethodBinding[] methods = annotation.resolveTypeBinding().getDeclaredMethods();
 		String binding = null;
 		for (int i = 0; i < methods.length; i++) {
-			if(methods[i].equals(node.getName())) {
+			if(methods[i].getName().equals(node.getName().getIdentifier())) {
 				binding = idResolver.getID(methods[i]);
 			}
 		}
