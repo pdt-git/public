@@ -10,14 +10,14 @@
   * -- gk, 17.06.2005
   */
   
-:- multifile attribSignature/2.
+%:- multifile attribSignature/2.
 
-attribSignature(aspect,1).
+% attribSignature(aspect,1).
 
 
 /*
   aspect(#aspectClass)
 */
-:-dynamic aspect/1.
-:-multifile aspect/1.
+%:-dynamic aspect/1.
+%:-multifile aspect/1.
 

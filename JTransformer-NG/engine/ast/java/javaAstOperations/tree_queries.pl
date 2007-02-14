@@ -36,158 +36,7 @@ enclClass(Id, Encl) :-
     !.
 enclClass(_, 'null').
 
-/**
-  enclosing(?Id, ?EnclId)
-  
-  Unifies EnclId with the enclosing class
-  element (method, constructor, initializer or field)
-  of the tree Id.
-  
-  TODO: reimplement as a meta-predicate
-*/
-/*
-enclosing(_id, _Encl):- fieldDefT(_id, _Encl, _, _, _).
-enclosing(_id, _Encl):-identT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-getFieldT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-selectT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-localDefT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-paramDefT(_id,_Encl,_,_), !.
-enclosing(_id, _Encl):-applyT(_id, _,_Encl,_,_,_,_), !.
-enclosing(_id, _Encl):-methodDefT(_id, _Encl,_,_,_,_,_), !.
-enclosing(_id, _Encl):-execT(_id, _,_Encl,_), !.
-enclosing(_id, _Encl):-operationT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-literalT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-blockT(_id, _,_Encl,_), !.
-enclosing(_id, _Encl):-assignT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-conditionalT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-returnT(_id, _,_Encl,_), !.
-enclosing(_id, _Encl):-ifT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-caseT(_id, _,_Encl,_), !.
-enclosing(_id, _Encl):-indexedT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-typeCastT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-newClassT(_id, _,_Encl,_,_,_,_,_), !.
-enclosing(_id, _Encl):-classDefT(_id, _Encl,_,_), !.
-enclosing(_id, _id)  :- packageT(_id, _), !.
-enclosing(_id, _Encl):-forLoopT(_id, _,_Encl,_,_,_,_), !.
-enclosing(_id, _Encl):-breakT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-importT(_id, _,_Encl), !.
-enclosing(_id, _Encl):-whileLoopT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-newArrayT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-throwT(_id, _,_Encl,_), !.
-enclosing(_id, _Encl):-switchT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-toplevelT(_id, _Encl,_,_), !.
-enclosing(_id, _Encl):-assignopT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-catchT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-tryT(_id, _,_Encl,_,_,_), !.
-enclosing(_id, _Encl):-typeTestT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-doLoopT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-labelT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-continueT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-synchronizedT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-assertT(_id, _,_Encl,_,_), !.
-enclosing(_id, _Encl):-precedenceT(_id, _,_Encl,_), !.
-enclosing(_id, _Encl):-nopT(_id, _,_Encl), !.
-*/
-
-enclosing(ID,Encl):-
-    ast_node_def('Java',Name,List),
-    length(List,Len),
-    functor(Term,Name,Len),
-    arg(1,Term,ID),
-	resolve_enclosing(List,Encl,Term),
-	call(Term).
-
-resolve_enclosing(
-     [ast_arg(id, _, id, _), 
-      ast_arg(parent,_,id, _), 
-      ast_arg(encl, _,id, _)|_],
-     Encl,
-     Term):-
-     !,
-     arg(3,Term,Encl).
-resolve_enclosing(
-     [ast_arg(id, _, id, _), 
-      ast_arg(parent,_,id, _)|_],
-     Encl,
-     [_,Encl|_]):-
-     !,
-     arg(2,Term,Encl).
-resolve_enclosing(_,Encl, [Encl|_]):-
-     !,
-     arg(1,Term,Encl).
-
-
-/**
- * getTerm(?Id, ?Term)
- *
- * binds Term to the fact represented by the id, e.g.:
- *
- * getTerm(1, classDefT(1,2,'Test',[3,4])
- */
-
-	 
-getTerm(ID,Term):-
-    nonvar(Term),
-    arg(1, Term,ID),
-    nonvar(ID).  
- 
-getTerm(ID,Term):-
-    tree(ID,_,Functor),
-    ast_node_def('Java',Functor,List),
-    length(List,Len),
-    functor(Term,Functor,Len),
-    arg(1,Term,ID),
-    call(Term).
-
-/*
-getTerm(_id,packageT(_id,_name)) :-                           packageT(_id,_name).
-getTerm(_id,getFieldT(_id,_pid,_encl,_v1,_v2,_v3)) :-         getFieldT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,selectT(_id,_pid,_encl,_v1,_v2,_v3)) :-           selectT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,identT(_id,_pid,_encl,_v1,_v2)) :-                identT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5)) :-      methodDefT(_id,_pid,_v1,_v2,_v3,_v4,_v5).
-getTerm(_id,localDefT(_id,_pid,_encl,_v1,_v2,_v3)) :-         localDefT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,fieldDefT(_id,_pid,_v1,_v2,_v3)) :-                   fieldDefT(_id,_pid,_v1,_v2,_v3).
-getTerm(_id,paramDefT(_id,_pid,_v1,_v2)) :-                   paramDefT(_id,_pid,_v1,_v2).
-getTerm(_id,classDefT(_id,_pid,_v1,_v2)) :-                   classDefT(_id,_pid,_v1,_v2).
-getTerm(_id,toplevelT(_id,_pid,_v1,_v2)) :-                   toplevelT(_id,_pid,_v1,_v2).
-getTerm(_id,blockT(_id,_pid,_encl,_v1)) :-                    blockT(_id,_pid,_encl,_v1).
-getTerm(_id,doLoopT(_id,_pid,_encl,_v1,_v2)) :-               doLoopT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,whileLoopT(_id,_pid,_encl,_v1,_v2)) :-            whileLoopT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4)) :-      forLoopT(_id,_pid,_encl,_v1,_v2,_v3,_v4).
-getTerm(_id,labelT(_id,_pid,_encl,_v1,_v2)) :-             labelT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,switchT(_id,_pid,_encl,_v1,_v2)) :-               switchT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,caseT(_id,_pid,_encl,_v1)) :-                     caseT(_id,_pid,_encl,_v1).
-getTerm(_id,synchronizedT(_id,_pid,_encl,_v1,_v2)) :-         synchronizedT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,tryT(_id,_pid,_encl,_v1,_v2,_v3)) :-              tryT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,catchT(_id,_pid,_encl,_v1,_v2)) :-                catchT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,ifT(_id,_pid,_encl,_v1,_v2,_v3)) :-               ifT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,conditionalT(_id,_pid,_encl,_v1,_v2,_v3)) :-      conditionalT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,execT(_id,_pid,_encl,_v1)) :-                     execT(_id,_pid,_encl,_v1).
-getTerm(_id,returnT(_id,_pid,_encl,_v1)) :-                   returnT(_id,_pid,_encl,_v1).
-getTerm(_id,breakT(_id,_pid,_encl,_v1,_v2)) :-                breakT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,continueT(_id,_pid,_encl,_v1,_v2)) :-             continueT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,throwT(_id,_pid,_encl,_v1)) :-                    throwT(_id,_pid,_encl,_v1).
-getTerm(_id,applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4)) :-        applyT(_id,_pid,_encl,_v1,_v2,_v3,_v4).
-getTerm(_id,newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5)) :- newClassT(_id,_pid,_encl,_v1,_v2,_v3,_v4,_v5).
-getTerm(_id,newArrayT(_id,_pid,_encl,_v1,_v2,_v3)) :-         newArrayT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,assignT(_id,_pid,_encl,_v1,_v2)) :-               assignT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,assignopT(_id,_pid,_encl,_v1,_v2,_v3)) :-         assignopT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,operationT(_id,_pid,_encl,_v1,_v2,_v3)) :-        operationT(_id,_pid,_encl,_v1,_v2,_v3).
-getTerm(_id,typeCastT(_id,_pid,_encl,_v1,_v2)) :-             typeCastT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,typeTestT(_id,_pid,_encl,_v1,_v2)) :-             typeTestT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,indexedT(_id,_pid,_encl,_v1,_v2)) :-              indexedT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,literalT(_id,_pid,_encl,_v1,_v2)) :-              literalT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,assertT(_id,_pid,_encl,_v1,_v2)) :-               assertT(_id,_pid,_encl,_v1,_v2).
-getTerm(_id,importT(_id,_pid,_v1)) :-                         importT(_id,_pid,_v1).
-getTerm(_id,precedenceT(_id,_pid,_encl,_v1)) :-                   precedenceT(_id,_pid,_encl,_v1).
-getTerm(_id,nopT(_id,_pid,_encl)) :-                                              nopT(_id,_pid,_encl).
-*/
-test(getTermT01) :-
-    assert(methodDefT(testId,1,2,3,type(1,class, 0),5,6)),
-    getTerm(testId, methodDefT(testId,1,2,3,type(1,class, 0),5,6)),
-    retract(methodDefT(testId,1,2,3,type(1,class, 0),5,6)).
-
-    
+   
 /**
  * getToplevel(+Tree, ?Toplevel)
  *
@@ -489,11 +338,15 @@ sub_trees(_id, List) :-
     !.
 
 sub_trees(_id, [Element]) :-
-    memberValueT(_id,_,Element,_),
+    memberValueT(_id,_,_,Element),
     !.
 
-sub_trees(_id, [Element]) :-
-	annotationMemberT(_id,_,_, Default'),
+sub_trees(_id, []) :-
+	annotationMemberT(_id,_,_, _,null),
+    !.
+
+sub_trees(_id, [Default]) :-
+	annotationMemberT(_id,_,_, _,Default),
     !.
 
 sub_trees(_id, []) :-
