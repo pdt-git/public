@@ -1245,9 +1245,9 @@ attribSignature(externT,1).
 attribSignature(interfaceT,1).
 
 /********** Java 5 ************/
-attribSignature(annotationT,2).
+%attribSignature(annotationT,2).
 
-attribSignature(enumT,1).
+%attribSignature(enumT,1).
 :- dynamic enumT/1.
 :- multifile enumT/1.
 
@@ -1255,20 +1255,20 @@ attribSignature(enumT,1).
 /**
  * projectLocationT(ID, ..,)
  */
-attribSignature(projectLocationT,3). % :( nicht in ast_node_def :(
+%attribSignature(projectLocationT,3). % :( nicht in ast_node_def :(
 /**
  * slT(ID, File)
  */
-attribSignature(slT,3).              % :( nicht in ast_node_def :(
-attribSignature(sl_argT,4).              % :( nicht in ast_node_def :(
+%attribSignature(slT,3).              % :( nicht in ast_node_def :(
+%attribSignature(sl_argT,4).              % :( nicht in ast_node_def :(
 
 
 /**
  * Represents the default package in Java.
  */
 
-:- dynamic annotationT/2.
-:- multifile annotationT/2.
+%:- dynamic annotationT/2.
+%:- multifile annotationT/2.
 
 %%% source location %%%
 %:- dynamic sourceLocation/4.

@@ -114,8 +114,8 @@ public class IDResolver implements IIDResolver {
 		if (node instanceof PackageDeclaration) {
 			PackageDeclaration pd = (PackageDeclaration) node;
 			rv = getID(pd.resolveBinding());
-		} else if (node instanceof TypeDeclaration) {
-			TypeDeclaration td = (TypeDeclaration) node;
+		} else if (node instanceof AbstractTypeDeclaration) {
+			AbstractTypeDeclaration td = (AbstractTypeDeclaration) node;
 			ITypeBinding binding = td.resolveBinding();
             if (td.getParent() instanceof AnonymousClassDeclaration) {
 				rv = provider.getID();

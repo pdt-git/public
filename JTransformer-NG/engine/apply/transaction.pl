@@ -122,8 +122,9 @@ delete_checkpoint(rollback_checkpoint(Checkpoint)):-
  * 
  */
 rollback :-
-    write('ROLLBACK - start'),
-    nl,
+    (debug_rollback_output ->
+      write('ROLLBACK - start'),
+      nl;true),
     findall(Term, 
     (
       rollback(Term),
@@ -143,9 +144,9 @@ rollback :-
     findall(File, (deleted_file(File),assert(tmp_rollback_file(File)),retract(deleted_file(File))),_),
     findall(File, (created_file(File),assert(deleted_file(File)),retract(created_file(File))),_),
     findall(File, (tmp_rollback_file(File),assert(created_file(File)),retract(deleted_file(File))),_),
-    write('ROLLBACK - end'),
-    nl.
-    
+    (debug_rollback_output ->
+	  write('ROLLBACK - end'),
+      nl;true).    
     
 
 rollback_debug_format(FormatString,List):-
