@@ -155,8 +155,14 @@ statement_type('Java',throwT).
 statement_type('Java',tryT).
 statement_type('Java',whileLoopT).
 
+statementType(Kind):-
+    statement_type('Java',Kind).
 
+expressionType(Kind):-
+    expression_type('Java',Kind).
 
+annotationExpressionType(Kind):-
+     annotation_expression_type('Java',Kind).
 /** 
   * ast_node_subtype(?Language, ?SubType, ?SuperType)   
   * 
@@ -397,7 +403,7 @@ ast_node_def('Java',caseT,[
 ast_node_def('Java',conditionalT,[
      ast_arg(id,      mult(1,1,no ), id,  [conditionalT]),
      ast_arg(parent,  mult(1,1,no ), id,  [id]),
-     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
+     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT,classDefT]),
      ast_arg(cond,    mult(1,1,no ), id,  [expressionType]),
      ast_arg(thenexpr,mult(1,1,no ), id,  [expressionType]),
      ast_arg(elseexpr,mult(0,1,no), id,  [expressionType])
@@ -492,7 +498,7 @@ ast_node_def('Java',labelT,[
 ast_node_def('Java',literalT,[
      ast_arg(id,      mult(1,1,no ), id,  [literalT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
-     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
+     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT,classDefT]),
      ast_arg(type,    mult(1,1,no ), attr,  [typeTermType]),
      ast_arg(value,   mult(1,1,no ), attr,  [atom]) % TODO: hier stand vorher: atom,typeTermType, type literals are now represented as selectT / identTs selectT(....,class,ident(...,Classname,type(class,java.lang.Class,.))
 ]).
@@ -512,7 +518,7 @@ ast_node_def('Java',localDefT,[
 ast_node_def('Java',newArrayT,[
      ast_arg(id,      mult(1,1,no ), id,  [newArrayT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
-     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
+     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT,classDefT]),
      ast_arg(dims,    mult(1,*,ord), id,  [expressionType]),
      ast_arg(elems,   mult(0,*,ord), id,  [expressionType]), % <-- elems wird momentan im FactGenerator immer auf [] gesetzt, warum???
      ast_arg(type,    mult(1,1,no ), attr,  [typeTermType])
@@ -541,7 +547,7 @@ ast_node_def('Java',nopT,[
 ast_node_def('Java',operationT,[
      ast_arg(id,     mult(1,1,no ), id,  [operationT]), % <-- convention!!!
      ast_arg(parent, mult(1,1,no ), id,  [id]), % <-- convention!!!
-     ast_arg(encl,   mult(1,1,no ), id,  [methodDefT,fieldDefT]),
+     ast_arg(encl,   mult(1,1,no ), id,  [methodDefT,fieldDefT,classDefT]), % classDefT if used in an memberValueT
      ast_arg(args,   mult(1,1,ord), id,  [expressionType]),
      ast_arg(op,     mult(1,1,no ), attr,  [atom]),
      ast_arg(pos,    mult(1,1,no ), id,  [number])
@@ -577,7 +583,7 @@ ast_node_def('Java',selectT,[
 ast_node_def('Java',identT,[
      ast_arg(id,      mult(1,1,no ), id,  [identT]), % <-- convention!!!
      ast_arg(parent,  mult(1,1,no ), id,  [id]), % <-- convention!!!
-     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT]),
+     ast_arg(encl,    mult(1,1,no ), id,  [methodDefT,fieldDefT,classDefT]), % classDefT if used in an memberValueT (this will be moved to typeExprT
      ast_arg(name,    mult(1,1,no ), attr,  [atom]),
      ast_arg(ref,     mult(1,1,no ), id,  [classDefT,packageT,localDefT,paramDefT]) 
       %FIXME: currently also typeTermType, this breaks java_fq!
@@ -749,18 +755,18 @@ ast_node_def('Java',annotationT,[
 ]).
 
 ast_node_def('Java',memberValueT,[
-     ast_arg(id,     mult(1,1,no ), id,   [id]),
-     ast_arg(parent, mult(1,1,no ), id,   [id]), 
-     ast_arg(name,   mult(1,1,no ), attr, [atom]),
-     ast_arg(value,  mult(1,1,no ), id,   [nullType, annotationExpressionType]),
-     ast_arg(ref, mult(1,1,no ), id,   [annotationMemberT])
+     ast_arg(id,     mult(1,1,no ), id,   [memberValueT]),
+     ast_arg(parent, mult(1,1,no ), id,   [annotationT]), 
+     ast_arg(member, mult(1,1,no ), id,   [annotationMemberT]),
+     ast_arg(value,  mult(1,1,no ), id,   [nullType, annotationExpressionType])
 ]).
 
 ast_node_def('Java',annotationMemberT,[
      ast_arg(id,     mult(1,1,no ), id,   [id]),
      ast_arg(parent, mult(1,1,no ), id,   [id]), 
+     ast_arg(type,   mult(1,1,no ), attr, [typeTermType]),
      ast_arg(name,   mult(1,1,no ), attr, [atom]),
-     ast_arg(expr, mult(1,1,no ), id, [annotationExpressionType,nullType])
+     ast_arg(default,mult(1,1,no ), id, [annotationExpressionType,nullType])
 ]).
 
 /*********** Generics JSR-014 ***************/

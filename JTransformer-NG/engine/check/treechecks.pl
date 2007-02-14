@@ -325,7 +325,7 @@ test('tree_constraints_ident'):-
 
 
 
-
+/*
 tree_constraints(applyT ,[[allType],[methodDefT,fieldDefT],[expressionType,nullType],[atomType],[expressionType],[methodDefT]]).
 tree_constraints(assertT ,[[allType],[methodDefT],[expressionType]]).
 tree_constraints(assignopT,[[allType],[methodDefT,fieldDefT],[getFieldT,identT,indexedT],[atomType],[expressionType]]).
@@ -372,26 +372,22 @@ tree_constraints(tryT,[[allType],[methodDefT],[blockT],[catchT],[blockT,nullType
 tree_constraints(typeCastT,[[allType],[methodDefT,fieldDefT],[typeTermType],[expressionType]]).
 tree_constraints(typeTestT,[[allType],[methodDefT,fieldDefT],[typeTermType],[expressionType]]).
 tree_constraints(whileLoopT,[[allType],[methodDefT],[expressionType],[statementType]]).
+*/
+tree_constraints(Kind,ConstraintsList):-
+	ast_node_def('Java',Kind,List),
+	extract_constraints(List,ConstraintsList).
+	
+extract_constraints([],[]).
+extract_constraints(
+   [ast_arg(_,_,_,Constraints)|Rest],
+   [Constraints|RestConstraints]):-
+   extract_constraints(Rest,RestConstraints).
+    
 
-expressionType(applyT).
-expressionType(assignT).
-expressionType(assignopT).
-expressionType(conditionalT).
-expressionType(getFieldT).
-expressionType(identT).
-expressionType(indexedT).
-expressionType(literalT).
-expressionType(newArrayT).
-expressionType(newClassT).
-expressionType(operationT).
-expressionType(precedenceT).
-expressionType(selectT).
-expressionType(typeCastT).
-expressionType(typeTestT).
 
 expression(Id) :- tree(Id, _, Type), expressionType(Type). 
 
-allType(ID):-
+id(ID):-
 	tree(ID,_,_).  
 
 atomType(Atom):-atom(Atom).
@@ -418,27 +414,6 @@ typeTermType(type(class,Type,_)):-
 
 nullType('null').
 
-statementType(assertT).
-statementType(assignopT).
-statementType(assignT).
-statementType(blockT).
-statementType(breakT).
-statementType(caseT).
-statementType(catchT).
-statementType(continueT).
-statementType(doLoopT).
-statementType(execT).
-statementType(forLoopT).
-statementType(ifT).
-statementType(labelT).
-statementType(localDefT).
-statementType(nopT).
-statementType(returnT).
-statementType(switchT).
-statementType(synchronizedT).
-statementType(throwT).
-statementType(tryT).
-statementType(whileLoopT).
 
 
 statement(Id) :- tree(Id, _, Type), statementType(Type). 

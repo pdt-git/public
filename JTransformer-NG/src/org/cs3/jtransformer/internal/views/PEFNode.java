@@ -136,6 +136,9 @@ public class PEFNode implements IPEFNode,IAdaptable,/*IPropertySource,*/IWorkben
 					labelPrefix = kind.toUpperCase() + ": ";
 	        	node = new PEFNode(site, labelPrefix+result.get("Term"), argMap,argNames, parent,pef);
 	        	node.setErrors(errors);
+    		}catch(Exception ex) {
+    			ex.printStackTrace();
+    			throw new RuntimeException(ex);
     		} finally {
     			if (session != null)
     				session.dispose();

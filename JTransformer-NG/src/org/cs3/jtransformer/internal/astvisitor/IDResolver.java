@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -174,10 +175,10 @@ public class IDResolver implements IIDResolver {
 	 */
 	private boolean isMemberOfLocalClass(ASTNode member) {
 		
-		if(member.getParent() instanceof TypeDeclaration)
-			return ((TypeDeclaration)member.getParent()).isLocalTypeDeclaration();
 		if(member.getParent() instanceof AnonymousClassDeclaration)
 			return true;
+		if(member.getParent() instanceof AbstractTypeDeclaration)
+			return ((AbstractTypeDeclaration)member.getParent()).isLocalTypeDeclaration();
 		throw new IllegalArgumentException("Not implemented for node " + member +".");
 	}
 	

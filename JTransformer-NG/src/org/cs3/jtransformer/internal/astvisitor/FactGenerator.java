@@ -1939,7 +1939,6 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 */
 	
 	public boolean visit(TypeDeclaration node) {
-
 		String defaultConstructorId = handleDefaultConstructors(node);
 
 		visitAbstractTypeDeclaration(node, defaultConstructorId);
@@ -2802,8 +2801,11 @@ public class FactGenerator extends ASTVisitor implements Names {
 	public boolean visit(AnnotationTypeMemberDeclaration node) {
 		writer.writeFact(Names.ANNOTATION_MEMBER_T,
 				new String[] {
-					quote(node.getName()),
-					idResolver.getID(node.getDefault())
+				idResolver.getID(node),
+				getParentId(node),
+				typeResolver.getTypeTerm(node.getType()),
+				quote(node.getName()),
+				idResolver.getID(node.getDefault())
 				}
 		);
 		return true;
@@ -2934,9 +2936,9 @@ public class FactGenerator extends ASTVisitor implements Names {
 				new String[] {
 					idResolver.getID(node),
 					getParentId(node.getParent()),
-					idResolver.getID(node.getName()),
-					idResolver.getID(node.getValue()),
-					binding  //idResolver.getID(node.resolveMemberValuePairBinding().getMethodBinding())
+//					idResolver.getID(node.getName()),
+					binding,  //idResolver.getID(node.resolveMemberValuePairBinding().getMethodBinding())
+					idResolver.getID(node.getValue())
 				}
 		);
 		return true;
