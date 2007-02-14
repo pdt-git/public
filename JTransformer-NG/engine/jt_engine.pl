@@ -84,3 +84,4 @@ tree(_id, null, projectT) :- fail.
 % Non generic code:
 packageT(null,'').
 
+:- use_module(jt_facade).

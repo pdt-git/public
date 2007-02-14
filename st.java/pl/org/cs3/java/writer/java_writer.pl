@@ -241,6 +241,13 @@ gen_type_list(_,L) :-
 gen_type(Where,Type):-	
     type_name(Where,Type,Name),
     printf(Name).
+    
+gen_optional_default(null):-
+    !.
+gen_optional_default(Value):-
+    printf(' default '),
+    gen_tree(Value).
+    
 /*
 gen_type_name(type(class, _typeID, _dim)) :-
     !,
@@ -337,6 +344,10 @@ gen_array_elems(_elem) :-
  * Helper
  */
 
+gen_class(_id, _name) :-
+	annotationTypeT(_id),
+    printf('@interface ~w ',[_name]),
+	gen_class_body(_id).
 
 gen_class(_id, _name) :-
     not(interfaceT(_id)),
@@ -697,6 +708,12 @@ gen_tree(ID):-
 gen_tree('null'):-
 %    write('n'),
     !.
+
+gen_tree(ID):-
+    not(memberValueT(ID,_,_,_)),
+	forall(annotationT(Annotation,ID,_,_,_),
+	gen_tree(Annotation)),
+	fail.
 
 %gen_tree(_id):-
 %    not(lasttree(_id)),
@@ -1092,6 +1109,38 @@ gen_tree(_ID) :-
 	printf('('),
     gen_tree(_expr),
 	printf(')').
+
+gen_tree(ID):-
+	annotationT(ID,_,_,Class,ValuePairs),
+	printf('@'),
+	fullQualifiedName(Class,Type),
+	printf(Type),
+	printf('('),
+    gen_komma_list(ValuePairs),
+	printf(')').
+
+gen_tree(ID):-
+	memberValueT(ID,_,Member,Value),
+	annotationMemberT(Member,_,_,Name,_),
+	!,
+	printf(Name),
+	printf(' = '),
+    gen_tree(Value).
+
+gen_tree(ID):-
+	memberValueT(ID,_,null,Value),
+    gen_tree(Value).
+
+gen_tree(ID):-
+    annotationMemberT(ID,AnnotationType,Type,Name,Default),
+    !,
+	gen_type(AnnotationType,Type),
+	printf(' '),
+	printf(Name),
+	printf('() '),
+	gen_optional_default(Default),
+	printf(';').
+
 
 gen_tree(_ID) :-
     not(tree(_ID,_,_)),
