@@ -188,7 +188,7 @@ public class FactBaseBuilder {
             final Collection toProcess = new Vector();
             final Collection toDelete = new Vector();
 
-            session.queryOnce("retractall(errors_in_java_code)");
+            session.queryOnce("removeJavaErrorMarker");
 
             Debug.info("Resource delta recieved: " + delta);
             SubProgressMonitor submon = new SubProgressMonitor(monitor, 10,
@@ -196,7 +196,6 @@ public class FactBaseBuilder {
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             project.refreshLocal(IResource.DEPTH_INFINITE, null);
             if (delta == null) {
-                //session.queryOnce("delete_source_facts");
                 collectAll(toProcess);
             } else {
                 collectDelta(delta, toProcess, toDelete);
@@ -382,13 +381,13 @@ public class FactBaseBuilder {
 
             String retractKind;
             if(removeGlobalIdsFacts) { //delete finally, a delete_file(File) fact will be added
-            	retractKind = "deepRetractToplevel(Toplevel)";
+            	retractKind = "removeFileAndTrackDeletion";
 
             } else {
-            	retractKind = "deepRetract(Toplevel)";
+            	retractKind = "removeFile";
             }
             
-            Map ret = session.queryOnce("toplevelT(Toplevel, _,'" + path +  "', _)," + retractKind);	
+            Map ret = session.queryOnce(retractKind + "('" + path + "')");	
 
             if( ret == null) { // TRHO: TODO: When does this happen?
 	            IJavaProject javaProject;
@@ -399,9 +398,9 @@ public class FactBaseBuilder {
 			            IType[] types = compUnit.getAllTypes();
 			            for (int i = 0; i < types.length; i++) {
 			                session
-		                    .queryOnce("globalIds(" +
-		                    		"'"+ types[i].getFullyQualifiedName('.')+ "'" +
-		                    		", CID), externT(CID), deepRetractToplevel(CID)");
+		                    .queryOnce(
+		                    		"deepRetractExternFQN("+
+		                    		"'"+ types[i].getFullyQualifiedName('.')+ "')" );
 						}
 		            }
 				} catch (CoreException e) {
@@ -490,7 +489,7 @@ public class FactBaseBuilder {
             IMarker marker = file.createMarker(JTransformer.PROBLEM_MARKER_ID);
             marker.setAttribute(IMarker.MESSAGE,
                     "There seem to be problems in the java code.");
-            session.queryOnce(TICKET,"assert(errors_in_java_code)");
+            session.queryOnce(TICKET,"addJavaErrorMarker");
             throw new CoreException(new Status(IStatus.CANCEL, JTransformer.PLUGIN_ID,
                     IResourceStatus.BUILD_FAILED,
                     "build canceled due to problems in the java code.", jme));

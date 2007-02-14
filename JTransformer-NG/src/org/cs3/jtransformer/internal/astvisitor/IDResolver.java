@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -153,6 +154,19 @@ public class IDResolver implements IIDResolver {
 				localBindings.put(((MethodDeclaration)node).resolveBinding(), rv);
 			} else {
 				MethodDeclaration md = (MethodDeclaration) node;
+				try {
+					rv = getID(md.resolveBinding());
+				} catch(IllegalArgumentException iae)
+				{
+					System.err.println("DEBUG");
+				}
+			}
+		} else if (node instanceof AnnotationTypeMemberDeclaration) {
+			if(isMemberOfLocalClass(node)) {
+				rv = provider.getID();
+				localBindings.put(((AnnotationTypeMemberDeclaration)node).resolveBinding(), rv);
+			} else {
+				AnnotationTypeMemberDeclaration md = (AnnotationTypeMemberDeclaration) node;
 				try {
 					rv = getID(md.resolveBinding());
 				} catch(IllegalArgumentException iae)
