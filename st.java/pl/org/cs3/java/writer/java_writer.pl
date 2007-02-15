@@ -357,6 +357,12 @@ gen_class(_id, _name) :-
 	gen_class_body(_id).
 
 gen_class(_id, _name) :-
+	enumT(_id),
+    gen_modifier(_id),
+    printf('enum ~w ',[_name]),
+	gen_class_body(_id).
+
+gen_class(_id, _name) :-
     not(interfaceT(_id)),
     !,
     gen_modifier(_id),
@@ -754,6 +760,8 @@ gen_tree(_id) :-
     !,
     printf('import ~w.*;~n', [_name]).
 
+
+
 gen_tree(_id) :-
     classDefT(_id, _pid, _name, _),
 %    write('DEBUG - class: '),
@@ -804,6 +812,7 @@ gen_tree(_id) :-
     !,
     (	methodDefT(_pid,Scope,_,_,_,_,_)
     ;	catchT(_pid,_,Scope,_,_)
+    ;   foreachT(_pid,_,_,_,_,_)
     ),
     gen_modifier(_id),
     gen_type(Scope,_type),
@@ -915,6 +924,9 @@ gen_tree(_ID) :-
 	    printf('.')
 	),
     printf(_name).
+    
+    
+    
 
 gen_tree(ID) :-
     identT(ID,_,_,Name,Symbol),
@@ -1048,6 +1060,17 @@ gen_tree(_ID) :-
     if_null_semicolon_else_gen_tree(_body).
 
 gen_tree(_ID) :-
+    foreachT(ID, _,_,Init, Expression, Body),
+    !,
+    printf('for('),
+    gen_tree(Init),
+    printf(':'),
+    gen_tree(Expression),
+    printf(')'),
+    printAlign_if_not_a_block(Body),
+    if_null_semicolon_else_gen_tree(Body).
+
+gen_tree(_ID) :-
     switchT(_ID, _,_, _selector, _cases),
     !,
     printf('switch('),
@@ -1147,6 +1170,17 @@ gen_tree(ID):-
 	printf('() '),
 	gen_optional_default(Default),
 	printf(';').
+
+
+gen_tree(ID):-
+    enumConstantT(ID,_,_,Name,Args),
+    !,
+	printf(Name),
+		printf('( '),
+	gen_komma_list(Args),
+	printf(') '),
+	printf(';').
+    
 
 
 gen_tree(_ID) :-

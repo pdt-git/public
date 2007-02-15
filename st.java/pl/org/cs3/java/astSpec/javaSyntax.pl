@@ -35,6 +35,7 @@ ast_sub_tree('Java',lhs).
 ast_sub_tree('Java',stmts).
 ast_sub_tree('Java',target).
 ast_sub_tree('Java',body).
+ast_sub_tree('Java',values).
 
 
  /** 
@@ -722,20 +723,27 @@ ast_node_def('JavaAttributes',projectLocationT,[
 /*********** JAVA 5 *************/
 
 /*********** Foreach ***************/
-%TODO: Malte
+ast_node_def('Java',foreachT,[
+     ast_arg(id,          mult(1,1,no ), id,  [foreachT]), % <-- convention!!!
+     ast_arg(parent,      mult(1,1,no ), id,  [id]), % <-- convention!!!
+     ast_arg(encl,        mult(1,1,no ), id,  [methodDefT]),
+     ast_arg(init,        mult(1,1,no),  id,  [localDefT]), 
+     ast_arg(expression,  mult(1,1,no),  id,  [expressionType]),
+     ast_arg(body,        mult(1,1,no ), id,  [blockT])
+]).
 
 /*********** Enum ***************/
 
-%tree_constraints(enumT ,[[]]).
 ast_node_def('JavaAttributes',enumT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
 
-%tree_constraints(enumT ,[[]]).
-ast_node_def('JavaAttributes',enumConstantsT,[
-     ast_arg(id,     mult(1,1,no ), id,   [enumConstantsT]),
-     ast_arg(parent, mult(1,1,no ), id,   [enumT]),
-     ast_arg(name,    mult(1,1,no ), attr,  [atom])
+ast_node_def('Java',enumConstantT,[
+     ast_arg(id,     mult(1,1,no ),  id,   [enumConstantT]),
+     ast_arg(parent, mult(1,1,no ),  id,   [enumT]),  
+     ast_arg(encl,   mult(1,1,no ),  id,   [id]),   
+     ast_arg(name,   mult(1,1,no ),  attr, [atom]),
+     ast_arg(args,   mult(0,*,ord ), id,   [expressionType])
 ]).
 
 /*********** Annotations JSR-175 ***************/

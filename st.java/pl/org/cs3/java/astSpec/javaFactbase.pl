@@ -1251,6 +1251,11 @@ attribSignature(interfaceT,1).
 :- dynamic enumT/1.
 :- multifile enumT/1.
 
+%attribSignature(foreachT,6).
+:- dynamic foreachT/6.
+:- multifile foreachT/6.
+
+
 %attribSignature(sourceLocation,4).   % :( nicht in ast_node_def :(  
 /**
  * projectLocationT(ID, ..,)
