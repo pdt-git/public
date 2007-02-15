@@ -215,6 +215,13 @@ sub_trees(_id, [_body | _subtrees]) :-
     append(_initList, _stepList, _dummyList),
     append(_condList, _dummyList, _subtrees).
 
+sub_trees(_id, [Body |Subtrees]) :-
+    foreachT(ID,_,_,Init,Expression,Body),
+    append(Init,Expression, Subtrees).
+
+
+
+
 sub_trees(_id, [_body]) :-
     labelT(_id,_,_,_body,_),!.
 
@@ -348,6 +355,11 @@ sub_trees(_id, []) :-
 sub_trees(_id, [Default]) :-
 	annotationMemberT(_id,_,_, _,Default),
     !.
+
+sub_trees(_id, Args) :-
+	enumConstantT(_id,_,_, _,Args),
+    !.
+
 
 sub_trees(_id, []) :-
     tree(_id, _p, _name),

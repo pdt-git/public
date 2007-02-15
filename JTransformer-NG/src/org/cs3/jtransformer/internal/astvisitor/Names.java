@@ -22,6 +22,7 @@ public interface Names {
 	  public String ANNOTATION_TYPE_T = "annotationTypeT";
 	  public String ANNOTATION_T = "annotationT";
 	  public String ENUM_T = "enumT";
+	  public String ENUM_CONSTANT_T = "enumConstantT";
 	  public String ANNOTATION_MEMBER_T = "annotationMemberT";
  	  public String MEMBER_VALUE_T = "memberValueT";
 	  public String MARKER_ANNOTATION_T = "markerAnnotationT";
@@ -54,6 +55,7 @@ public interface Names {
 	  public String IMPORT_T = "importT";
 	  public String IF_T = "ifT";
 	  public String FOR_LOOP_T = "forLoopT";
+	  public String FOR_EACH_T = "foreachT";
 	  public String FIELD_DEF_T = "fieldDefT";
 	  public String GET_FIELD_T = "getFieldT";
 	  public String NOP_T = "nopT";
