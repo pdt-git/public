@@ -1917,16 +1917,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		return true;
 	}
 
-	public boolean visit(EnumDeclaration node) {
-		
-		visitAbstractTypeDeclaration(node, null);
-		String superClass = idResolver.getJavaLangObjectID();
-		String id = idResolver.getID(node);
 
-		writer.writeFact(EXTENDS_T, new String [] {id, superClass});
-		writer.writeFact(ENUM_T, new String [] { id });
-		return true;
-	}
 	
 	/** 
 	 * Generates prolog facts of type: classDefT, interfaceT, extendsT, implementsT. 
@@ -1948,14 +1939,14 @@ public class FactGenerator extends ASTVisitor implements Names {
 	public boolean visit(TypeDeclaration node) {
 		String defaultConstructorId = handleDefaultConstructors(node);
 
-		visitAbstractTypeDeclaration(node, defaultConstructorId);
-
+		visitAbstractTypeDeclaration(node, defaultConstructorId,null);
+		
 		handleRelationships(node);
 		
 		return true;
-	}
+	} 
 
-	private void visitAbstractTypeDeclaration(AbstractTypeDeclaration node, String defaultConstructorId) {
+	private void visitAbstractTypeDeclaration(AbstractTypeDeclaration node, String defaultConstructorId, List additionalMembers) {
 		String parentId;
 		if (node.getParent().getNodeType() == ASTNode.COMPILATION_UNIT)
 			parentId =
@@ -1968,6 +1959,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		Iterator bodyIterator = node.bodyDeclarations().iterator();
 		ArrayList expandedList = expandList(bodyIterator);
 
+
 		String prologList = idResolver.getIDs(expandedList);
 		
 		if(defaultConstructorId != null ) {
@@ -1975,11 +1967,23 @@ public class FactGenerator extends ASTVisitor implements Names {
 			
 			
 			String prefix = "[" + defaultConstructorId;
+			
+
+			
 			if (prologList.equals("]"))
 				prologList = prefix + prologList;
 			else
 				prologList = prefix + ", " + prologList;
 		}
+		
+		if(additionalMembers != null && additionalMembers.size()>1 ){
+			String additionalMemberList = idResolver.getIDs(additionalMembers);
+			prologList = additionalMemberList.substring(0,additionalMemberList.length()-1)+
+			              ", "+ prologList.substring(1); 
+		}
+	
+		
+		
 		
 		String id = idResolver.getID(node);
 
@@ -1996,6 +2000,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getLength())
 		});
 		writeSourceLocationArgumentIdentifier(node, node.getName(),node.modifiers());
+		
+	
 
 	}
 
@@ -2254,7 +2260,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 		 * if i understood the javadoc correctly, no matter if we have a
 		 * fragmented or an single variable declaration, this is always added!
 		 */
-		if (node.getParent().getNodeType() == ASTNode.METHOD_DECLARATION) {
+		if (  (node.getParent().getNodeType() == ASTNode.METHOD_DECLARATION) ||
+				(node.getParent().getNodeType() == ASTNode.ENHANCED_FOR_STATEMENT)){
 			
 			String[] args =
 				new String[] {
@@ -2756,13 +2763,54 @@ public class FactGenerator extends ASTVisitor implements Names {
     /******* For Each ********/
 	
 	public boolean visit(EnhancedForStatement node) {
+		
+		node.getExpression();
+        String[] args =
+			new String[] {
+		     	idResolver.getID(node.getParameter()),				
+				idResolver.getID(node.getExpression()),
+				idResolver.getID(node.getBody())};
+
+	   createBodyFact(node,FOR_EACH_T, args);		
 		return true;
 	}
 	/******** Enum *******/
-
-	public boolean visit(EnumConstantDeclaration node) {
+	
+	public boolean visit(EnumDeclaration node) {
+		
+		visitAbstractTypeDeclaration(node, null,node.enumConstants());
+		String superClass = idResolver.getJavaLangObjectID();
+		String id = idResolver.getID(node);
+		
+		writer.writeFact(EXTENDS_T, new String [] {id, superClass});
+		writer.writeFact(ENUM_T, new String [] { id });
 		return true;
 	}
+
+	public boolean visit(EnumConstantDeclaration node) {
+		String id = idResolver.getID(node);
+		String parentId = getParentId(node);
+		String encl = idResolver.getID(getEnclosingNode(node));
+		String name =  quote(node.getName());		
+		String enumArgs = idResolver.getIDs(node.arguments());		
+
+		String[] args =
+			new String[] { id, parentId,encl,name,enumArgs  };
+		writer.writeFact(ENUM_CONSTANT_T, args);
+		//createAnnotationFact(node, id);
+
+		writer.writeFact(SOURCE_LOCATION_T, new String [] {
+				idResolver.getID(node),
+				Integer.toString(node.getStartPosition()),
+				Integer.toString(node.getLength())
+		});
+
+		return true;
+	}
+		
+	
+	
+	
 
 	
 	/******* Annotations **********/
@@ -2782,7 +2830,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 * @see FactGenerator#visit(TypeDeclaration)
    	 */	
 	public boolean visit(AnnotationTypeDeclaration node) {
-		visitAbstractTypeDeclaration(node, null);
+		visitAbstractTypeDeclaration(node, null,null);
 		String superClass = idResolver.getJavaLangAnnotationAnnotationID();
 		String id = idResolver.getID(node);
 		
