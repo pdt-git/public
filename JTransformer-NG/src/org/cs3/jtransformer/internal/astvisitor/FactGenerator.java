@@ -132,7 +132,6 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 * @param tb
 	 * @param plw
 	 */
-	
 	public FactGenerator(ICompilationUnit icu, String file, FactGenerationToolBox tb, IPrologWriter plw){
 		this(icu, file, tb.getIDResolver(), tb.getTypeResolver(), plw, tb.getFQNTranslator());
 	}
@@ -279,7 +278,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 * Only for arrays that have an explicit initializer  
 	 */
 	public boolean visit(ArrayInitializer node) {
-				
+		
 		String id = idResolver.getID(node);
 		String parent;
 		if (node.getParent().getNodeType() == ASTNode.ARRAY_CREATION)
@@ -303,7 +302,9 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
-				
+		if(!(node.getParent() instanceof ArrayCreation)) {
+			writer.writeFact(Names.OMIT_ARRAY_DECLARATION_T, new String[]{id});
+		}
 		return true;
 	}
 	

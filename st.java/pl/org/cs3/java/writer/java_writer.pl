@@ -311,18 +311,17 @@ print_square_brackets(_dim) :-
     print_square_brackets(_dimDec).
 
 /**
- * gen_new_array_elemtype(+Scope,+Dims, +Elemtype, +Elems)
+ * gen_new_array_elemtype(+ID,+Scope,+Dims, +Elemtype, +Elems)
  */
-gen_new_array_elemtype(_,_, 'null', _) :-!.
+gen_new_array_elemtype(_,_,_, 'null', _) :-!.
 
-gen_new_array_elemtype(Scope,[], type(Kind,Ref,Dim), _elems) :-
-    printf('new '),
-    gen_type(Scope,type(Kind,Ref,Dim)),
+gen_new_array_elemtype(ID,Scope,[], type(Kind,Ref,Dim), _elems) :-
+    gen_optional_array_declaration(ID,Scope,Kind,Ref,Dim),
 	%%print_square_brackets(Dim), ld: covered in gen_type
 	gen_komma_list_in_curly_brackets(_elems),
     !.
 
-gen_new_array_elemtype(Scope,_dims, type(Kind,Ref,TotalDim), _) :-
+gen_new_array_elemtype(_ID,Scope,_dims, type(Kind,Ref,TotalDim), _) :-
     printf('new '),
     gen_type(Scope,type(Kind,Ref,0)),
     gen_trees_in_square_brackets(_dims),
@@ -335,6 +334,14 @@ gen_new_array_elemtype(Scope,_dims, type(Kind,Ref,TotalDim), _) :-
 	Diff is TotalDim - DimCount,
 	print_square_brackets(Diff).
 	
+gen_optional_array_declaration(ID,Scope,Kind,Ref,Dim):-
+  not(omitArrayDeclarationT(ID)),
+  printf('new '),
+  gen_type(Scope,type(Kind,Ref,Dim)),
+  !.
+gen_optional_array_declaration(_ID,_Scope,_Kind,_Ref,_Dim).
+
+
 
 gen_array_elems('null'):-!.
 
@@ -858,10 +865,10 @@ gen_tree(_ID) :-
     gen_tree(_rhs),
     gen_right_bracket_if_parent_not_exec(_parent).
 
-gen_tree(_ID) :-
-    newArrayT(_ID, _p,Scope, _dims, _elems, _elemtype),
+gen_tree(ID) :-
+    newArrayT(ID, _p,Scope, _dims, _elems, _elemtype),
     !,
-    gen_new_array_elemtype(Scope,_dims, _elemtype, _elems).
+    gen_new_array_elemtype(ID, Scope,_dims, _elemtype, _elems).
 %    gen_komma_list_in_curly_brackets(_elems).
 
 gen_tree(_ID) :-

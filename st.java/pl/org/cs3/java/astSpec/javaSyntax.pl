@@ -695,6 +695,10 @@ ast_node_def('JavaAttributes',interfaceT,[
      ast_arg(id,     mult(1,1,no ), id,   [classDefT]) 
 ]).
 
+ast_node_def('JavaAttributes',omitArrayDeclarationT,[
+     ast_arg(id,     mult(1,1,no ), id,   [newArrayT]) 
+]).
+
 %tree_constraints(interfaceT ,[[]]).
 ast_node_def('JavaAttributes',slT,[
      ast_arg(id,     mult(1,1,no ), id,   [id]),
@@ -743,7 +747,7 @@ ast_node_def('JavaAttributes',annotationTypeT,[
 
 %tree_constraints(markerAnnotationT ,[[#id]).
 ast_node_def('JavaAttributes',markerAnnotationT,[
-     ast_arg(id,     mult(1,1,no ), id,   [#classDefT])
+     ast_arg(id,     mult(1,1,no ), id,   [classDefT])
 ]).
 
 ast_node_def('Java',annotationT,[
