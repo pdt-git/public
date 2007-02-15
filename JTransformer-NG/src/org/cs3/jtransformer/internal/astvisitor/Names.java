@@ -24,6 +24,7 @@ public interface Names {
 	  public String ENUM_T = "enumT";
 	  public String ANNOTATION_MEMBER_T = "annotationMemberT";
  	  public String MEMBER_VALUE_T = "memberValueT";
+	  public String MARKER_ANNOTATION_T = "markerAnnotationT";
 	
 	/**
 	 * Java 1.4
@@ -77,6 +78,9 @@ public interface Names {
 	  public String CLASS_DEF_T = "classDefT";
 	  public String SOURCE_LOCATION_T = "slT";
 	  public String PROJECT_T = "projectT";
+	  
+	  public String OMIT_ARRAY_DECLARATION_T = "omitArrayDeclarationT";
+
 
 
 	  public String SOURCE_LOCATION_ARGUMENT = "sl_argT";
@@ -91,5 +95,4 @@ public interface Names {
 	  public String CONSTRUCTOR_NAME = "<init>";
 	  
 	  public String PRED_ACTIVATE_REVERSE_INDEXES = "activate_reverse_indexes";
-	public String MARKER_ANNOTATION_T = "markerAnnotationT";
 }
