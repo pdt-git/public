@@ -531,7 +531,7 @@ pdt_ensure_annotated([FileSpec|Stack]):-%case 3: cannot use cache, rebuild from 
 
 	%format("writing cache...~n",[]),
 	%format("done~n",[]),
-	pdt_write_cache(Abs),
+	%pdt_write_cache(Abs),
 	pif_notify(file_annotation(Abs),update),!.
 pdt_ensure_annotated([FileSpec|_]):-    
     pdt_file_spec(FileSpec,Abs),
