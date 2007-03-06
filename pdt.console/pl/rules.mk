@@ -19,6 +19,9 @@ LIBDIR=$(PLBASE)\lib
 INCDIR=$(PLBASE)\include
 PLCUSTOM=$(PLBASE)\custom
 
+# since 5.6.28(?) we also need unistd.h. On Gorbag, it can be found here: 
+EXTINCL=z:\MinGW\include\system
+
 # We get pthreadVC.dll, pthreadVC.lib, pthread.h, sched.h and semaphore.h
 # from the locations below
 WINDLLDIR=$(WINDIR)\system32
@@ -133,9 +136,9 @@ CFLAGS=/DO_PLMT /D_REENTRANT $(CFLAGS)
 !ENDIF
 
 .c.obj:
-	@$(CC) -I. -Irc -I $(PLHOME)\include $(CFLAGS) /Fo$@ $<
+	@$(CC) -I. -Irc -I $(PLHOME)\include -I $(EXTINCL) $(CFLAGS) /D__WINDOWS__ /Fo$@ $<
 .cxx.obj:
-	@$(CC) -I. -Irc -I $(PLHOME)\include $(CFLAGS) /Fo$@ $<
+	@$(CC) -I. -Irc -I $(PLHOME)\include -I $(EXTINCL) $(CFLAGS) /D__WINDOWS__ /Fo$@ $<
 
 ################################################################
 # Used to update the library INDEX.pl after adding or deleing
