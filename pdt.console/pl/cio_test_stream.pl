@@ -40,7 +40,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-:- module(cio_test_stream,[create_test_stream/2,delete_test_stream/2]).
+:- module(cio_test_stream,[create_test_stream/3]).
 :- load_foreign_library(custom_io).
 
 cio_read(S,stream_args(MF,MemStream,read),Size,no_tty,Chars):-
@@ -58,13 +58,13 @@ cio_write(S,stream_args(MF,MemStream,write),Chars,[]):-
     recordz(cio_callbacks,cio_write(S,stream_args(MF,MemStream,write),Chars,[])),
     concat_atom(Chars,Atom),
     write(MemStream,Atom),
-    flush_output(MemStream).
+    flush_output(MemStream). 
 
 cio_close(S,stream_args(MF,MemStream,Mode)):-
     recordz(cio_callbacks,cio_close(S,stream_args(MF,MemStream,Mode))),
     writeln(closing),
     close(MemStream),
-    writeln(closed).
+    writeln(closed). 
     
     
 
