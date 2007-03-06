@@ -43,7 +43,7 @@ SO= $(shell xpce -qt [libname],full_name)
 BASE= $(shell xpce -qt [libname],base_name)
 OBJ= $(BASE).o
 SRC= $(OBJ:.o=.c)
-SWI_HOME="/usr/local/lib/pl-5.6.11"
+SWI_HOME="/usr/local/lib/pl-5.6.29"
 
 all: $(SO)
 clean: 
