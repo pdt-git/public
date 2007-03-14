@@ -83,6 +83,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		}
 		
 		public void configure(PrologInterface pif) {
+	    	Debug.debug("JT: JTransformerSubscription.configure: for project '" + project.getName() + "' (begin)");
+
 			pif.addLifeCycleHook(this, getId(), new String[0]);
 			if (pif.isUp()) {
 				PrologSession session = null;
@@ -100,6 +102,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 					}
 				}
 			}
+	    	Debug.debug("JT: JTransformerSubscription.configure: for project '" + project.getName() + "' (end)");
 		}
 
 		/*
@@ -108,6 +111,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		 * @see org.cs3.pl.prolog.LifeCycleHook#onInit(org.cs3.pl.prolog.PrologSession)
 		 */
 		public void onInit(PrologInterface pif, final PrologSession initSession) {
+	    	Debug.debug("JT: JTransformerSubscription.onInit: for project '" + project.getName() + "' (begin)");
+
 			try {
 //				JTransformerProject[] jtransformerProjects = JTransformer
 //						.getJTransformerProjects(pif);
@@ -160,6 +165,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
+	    	Debug.debug("JT: JTransformerSubscription.onInit: for project '" + project.getName() + "' (end)");
+
 		}
 
 		/*
@@ -170,19 +177,22 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
 
+	    	Debug.debug("JT: JTransformerSubscription.afterInit: for project '" + project.getName() + "' (begin)");
+
 			buildAllProjectsOfPif();
+	    	Debug.debug("JT: JTransformerSubscription.afterInit: for project '" + project.getName() + "' (end)");
 		}
 
 		private void buildAllProjectsOfPif() {
 			try {
-				Debug.info("JT: buildAllProjectsOfPif: start");
+				Debug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: start");
 
 				List tmpProjects = null;
 				synchronized (toBeBuiltMonitor) {
 
 					if (toBeBuilt.contains(project)) {
 						// built triggered by other project
-						Debug.info("JT: buildAllProjectsOfPif: toBeBuilt.contains(project)");
+						Debug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: toBeBuilt.contains(project)");
 
 						return;
 					}
@@ -191,7 +201,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 						return;
 					}
 					
-					Debug.info("JT: buildAllProjectsOfPif: toBeBuilt.addAll");
+					Debug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: toBeBuilt.addAll");
 					toBeBuilt.addAll(tmpProjects);
 				}
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
@@ -200,7 +210,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 					Debug.warning("JT: auto building is deactivated. PEFs will not be updated!" );
 //					wd.setAutoBuilding(true);
 				}
-				Debug.info("JT: finalizeProjectBuilding: before");
+				Debug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: finalizeProjectBuilding: before");
 
 				final List projects = tmpProjects;
 				try {

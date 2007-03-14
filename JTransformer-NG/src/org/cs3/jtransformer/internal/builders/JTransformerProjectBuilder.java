@@ -86,6 +86,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 			switch (kind) {
 				case FULL_BUILD :
 					//updateProjectLocationInFactbase(nature);
+			    	Debug.debug("JT: started full build for project: " + getProject().getName());
 					nature.getFactBaseBuilder().build(null, flags, monitor);
 					break;
 				case INCREMENTAL_BUILD :
@@ -93,6 +94,9 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 					//ld: i currently don't see any reason to
 					//differantiate here.					
 					//builder.incrementalBuild(getDelta(getProject()),monitor);
+			    	Debug.debug("JT: started "+ 
+			    			(kind == INCREMENTAL_BUILD ? "incremental" : "auto")
+			    			+ " build for project: " + getProject().getName());
 				    nature.getFactBaseBuilder().build(getDelta(getProject()),flags,monitor);
 					break;
 			}

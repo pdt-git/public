@@ -82,7 +82,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	 * 
 	 */
 	public JTransformerProjectNature() {
-		Debug.info("TJ: JTNature ID: " + this.hashCode());
+		Debug.debug("TJ: Nature.<init>: JTNature ID: " + this.hashCode());
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	 */
 	public void configure() throws CoreException {
 
-			Debug.debug("configure was called");
+			Debug.debug("JT: Nature.configure was called");
 			IProjectDescription descr = project.getDescription();
 			ICommand sheepBuilder = descr.newCommand();
 			sheepBuilder.setBuilderName(JTransformer.BUILDER_ID);
@@ -221,7 +221,7 @@ public class JTransformerProjectNature implements IProjectNature,
 		onClose();
 
 		IProjectDescription descr = project.getProject().getDescription();
-		Debug.debug("deconfigure was called");
+		Debug.debug("JT: nature.deconfigure was called");
 		ICommand builders[] = descr.getBuildSpec();
 		int index = -1;
 		for (int i = 0; i < builders.length; i++) {
@@ -287,7 +287,7 @@ public class JTransformerProjectNature implements IProjectNature,
 	 * @see IProjectNature#setProject
 	 */
 	public void setProject(IProject project) {
-		Debug.info("JTransformerProjectNature.setProject: " + project.getName());
+		Debug.debug("JT: JTransformerProjectNature.setProject: " + project.getName() + " (begin)");
 
 		this.project = project;
 		checkIfNatureIsAlreadyAssignedToProject(project);
@@ -305,6 +305,7 @@ public class JTransformerProjectNature implements IProjectNature,
 //		if (pif.isUp()) {
 //			reconfigure();
 //		}
+		Debug.debug("JT: JTransformerProjectNature.setProject: " + project.getName() + " (end)");
 
 	}
 
@@ -696,12 +697,12 @@ public class JTransformerProjectNature implements IProjectNature,
 	}
 
 	public void pefInitializationDone() {
-		Debug.info("pefInitializationDone before monitor: " + project.getName());
+		Debug.debug("JT: Nature.pefInitializationDone before monitor: " + project.getName());
 		synchronized (pefInitializationMonitor) {
 			pefInitializationDone = true;
 			pefInitializationMonitor.notifyAll();
 		}
-		Debug.info("pefInitializationDone after monitor: " + project.getName());
+		Debug.debug("JT: Nature.pefInitializationDone after monitor: " + project.getName());
 
 	}
 	
