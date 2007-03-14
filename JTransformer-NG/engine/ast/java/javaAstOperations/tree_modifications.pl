@@ -302,9 +302,17 @@ addToMethodArgs(_method, _id) :-
 */
 
 removeTags(DeletionKind, ID):-
-    forall((attribSignature(Functor,Arity),
-            functor(Term, Functor, Arity), Term =.. [Functor, ID|_]),
-    removeTagKind(DeletionKind, Term)).
+    forall(
+      (
+         attribSignature(Functor,Arity),
+         functor(Term, Functor, Arity), Term =.. [Functor, ID|_]
+      ),
+      (
+         forall(sub_tree_of_attributes(Functor, ID, Subs), 
+                deepDeleteOrRetract(DeletionKind,Subs)),
+         removeTagKind(DeletionKind, Term)
+      )
+     ).
 /*
     removeTagKind(DeletionKind, slT(ID,_start,_length)),
     removeTagKind(DeletionKind, modifierT(ID,_mod)),
@@ -323,6 +331,14 @@ removeTagKind(DeletionKind,Tag) :-
                    call(Call)
                 )
         ).
+
+/**
+ * deepDeleteOrRetract(delete|retract, ID(s))
+ */
+deepDeleteOrRetract(delete, ToDelete):-
+    deepDelete(ToDelete).
+deepDeleteOrRetract(retract, ToRetract):-
+    deepDelete(ToRetract).
 
 /**
  * deepDelete(+Pef | +[Pef1,...])

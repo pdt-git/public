@@ -353,6 +353,7 @@ gen_array_elems(_elem) :-
 
 gen_class(_id, _name) :-
 	annotationTypeT(_id),
+    gen_modifier(_id),
     printf('@interface ~w ',[_name]),
 	gen_class_body(_id).
 
@@ -723,9 +724,11 @@ gen_tree('null'):-
     !.
 
 gen_tree(ID):-
-    not(memberValueT(ID,_,_,_)),
-	forall(annotationT(Annotation,ID,_,_,_),
-	gen_tree(Annotation)),
+%    not(memberValueT(ID,_,_,_)),
+	forall(
+	    (annotatedT(ID,Annotation),annotationT(Annotation,ID,_,_,_)),
+	    (gen_tree(Annotation),println)
+	),
 	fail.
 
 %gen_tree(_id):-
@@ -759,8 +762,6 @@ gen_tree(_id) :-
     packageT(PackageId,_name),
     !,
     printf('import ~w.*;~n', [_name]).
-
-
 
 gen_tree(_id) :-
     classDefT(_id, _pid, _name, _),
@@ -924,9 +925,6 @@ gen_tree(_ID) :-
 	    printf('.')
 	),
     printf(_name).
-    
-    
-    
 
 gen_tree(ID) :-
     identT(ID,_,_,Name,Symbol),
@@ -1176,11 +1174,15 @@ gen_tree(ID):-
     enumConstantT(ID,_,_,Name,Args),
     !,
 	printf(Name),
-		printf('( '),
-	gen_komma_list(Args),
-	printf(') '),
+	( Args == [] ->
+	  true;
+	  (
+	    printf('( '),
+	    gen_komma_list(Args),
+	    printf(') ')
+	  )
+	),
 	printf(';').
-    
 
 
 gen_tree(_ID) :-

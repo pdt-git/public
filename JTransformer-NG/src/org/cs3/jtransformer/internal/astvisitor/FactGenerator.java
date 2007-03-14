@@ -1451,6 +1451,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 		
 		if (node.getParent() instanceof AbstractTypeDeclaration)
 			return false;
+		if (node.getParent() instanceof Annotation)
+			return false;
 
 		if (node.getParent().getNodeType() == ASTNode.LABELED_STATEMENT)
 			return false;
@@ -1979,7 +1981,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		if(additionalMembers != null && additionalMembers.size()>1 ){
 			String additionalMemberList = idResolver.getIDs(additionalMembers);
 			prologList = additionalMemberList.substring(0,additionalMemberList.length()-1)+
-			              ", "+ prologList.substring(1); 
+			((prologList.length()> 2)?", ":"") + prologList.substring(1); 
 		}
 	
 		
@@ -2786,7 +2788,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(ENUM_T, new String [] { id });
 		return true;
 	}
-
+	
 	public boolean visit(EnumConstantDeclaration node) {
 		String id = idResolver.getID(node);
 		String parentId = getParentId(node);
@@ -2887,11 +2889,12 @@ public class FactGenerator extends ASTVisitor implements Names {
 		writer.writeFact(Names.MEMBER_VALUE_T,
 			new String[] {
 				valueId,
-				getParentId(node),
+				idResolver.getID(node),
 				quote("null"), // 'null' stands for no name given (single member)
-				idResolver.getID(node.getValue()),
-				idResolver.getID(node.resolveAnnotationBinding().
-					getDeclaredMemberValuePairs()[0].getMethodBinding())
+				idResolver.getID(node.getValue())
+//				idResolver.getID(node.resolveAnnotationBinding().
+//					getDeclaredMemberValuePairs()[0].getMethodBinding()),
+					
 			}
 		);
 		visitAnnotation(node,"[" + valueId + "]");
@@ -3001,6 +3004,13 @@ public class FactGenerator extends ASTVisitor implements Names {
 	}
 
 	private void visitAnnotation(Annotation node,String values) {
+		
+		writer.writeFact("annotatedT",
+			new String[] {
+				getParentId(node),
+				idResolver.getID(node)
+			});
+
 		writer.writeFact(Names.ANNOTATION_T,
 				new String[] {
 					idResolver.getID(node),

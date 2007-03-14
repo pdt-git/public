@@ -219,9 +219,6 @@ sub_trees(_id, [Body |Subtrees]) :-
     foreachT(ID,_,_,Init,Expression,Body),
     append(Init,Expression, Subtrees).
 
-
-
-
 sub_trees(_id, [_body]) :-
     labelT(_id,_,_,_body,_),!.
 
@@ -361,13 +358,24 @@ sub_trees(_id, Args) :-
     !.
 
 
-sub_trees(_id, []) :-
-    tree(_id, _p, _name),
-    !,
-    format('ERROR: sub_trees: ~w, ~w, ~w~n', [_id, _p, _name]).
+%sub_trees(_id, []) :-
+%    tree(_id, _p, _name),
+%    !,
+%    format('ERROR: sub_trees: ~w, ~w, ~w~n', [_id, _p, _name]).
 
 sub_trees(_id, 'null') :-
     not(tree(_id, _, _)),!.
+
+/**
+ * sub_tree_of_attributes(AttributesFunctor, Id, TreeList)
+ *
+ * e.g. sub_tree_of_attributes(annotatedT, Id, [Annotation]) 
+ * TODO: convert to generic version
+ */
+sub_tree_of_attributes(annotatedT, Id, [Annotation]) :-
+	annotatedT(Id,Annotation),
+    !.
+    
 % ld:
 % contains_type tests wether a classDefT is declared 
 % in the respective topLevelT,named file or definition list.
