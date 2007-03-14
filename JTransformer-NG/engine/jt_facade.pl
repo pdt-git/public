@@ -38,3 +38,21 @@ removeJavaErrorMarker :-
   
 addJavaErrorMarker :-
   assert(errors_in_java_code).
+  
+/**
+ * inlinedAnnotation(AnnotationID, annotation(AnnotationTypeFQN, Args)) *<p>
+ * e.g.
+ * annotation('org.cs3.AnnotationX', [(Name=Value),...]).
+ * <p>
+ * Allowed Values: 
+ *  </menu>
+ *  <li>annotation(AnnotationID | [AnnotationID1,...])</li>
+ *  <li>literal(Atom| [Atom1,...],ValueType) </li>
+ *  <li>type(FQN|[FQN1,...])               </li>
+ * </menu>
+ */  
+inlinedAnnotation(AnnotatedID, annotation(AnnotationTypeFQN, InlinedMemberValues)):-
+    inlined_annotation(AnnotatedID, annotation(AnnotationTypeFQN, InlinedMemberValues)).
+		      
+
+      
