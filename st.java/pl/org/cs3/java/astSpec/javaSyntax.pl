@@ -35,8 +35,8 @@ ast_sub_tree('Java',lhs).
 ast_sub_tree('Java',stmts).
 ast_sub_tree('Java',target).
 ast_sub_tree('Java',body).
+ast_sub_tree('Java',annotation).
 ast_sub_tree('Java',values).
-
 
  /** 
   * ast_reference_type(?Language, ?Type)   
@@ -755,7 +755,12 @@ ast_node_def('JavaAttributes',annotationTypeT,[
 
 %tree_constraints(markerAnnotationT ,[[#id]).
 ast_node_def('JavaAttributes',markerAnnotationT,[
-     ast_arg(id,     mult(1,1,no ), id,   [classDefT])
+     ast_arg(id,     mult(1,1,no ), id,   [annotationT])
+]).
+
+ast_node_def('JavaAttributes',annotatedT,[
+     ast_arg(id,     mult(1,1,no ), id,   [id]),
+     ast_arg(annotation,     mult(1,1,no ), id,   [annotationT])
 ]).
 
 ast_node_def('Java',annotationT,[
