@@ -105,70 +105,88 @@ public class SocketServerStartAndStopStrategy implements
 	
 	public static String[] findAbsolutePath(String[] command) throws IOException{
 		int execPos = 0;
-		boolean useWhich;
-		Process process = null ;
 		Runtime runtime = Runtime.getRuntime();
 		String execName = "";
-		String pathCmd;
-		String match;
 		String[] execCommand = (String[]) command.clone();
 		
-		//FIXME We need to decide on pattern for the command line.		
-		if (Util.isWindoze()){
-			match = "plwin";
-			pathCmd = "cmd.exe /c echo %PATH%";
-			useWhich = false;			
-		}else{
-			// We assume the rest to be Unix/Linux based.
-			match = "xpce";
-			pathCmd = "";
-			useWhich = true;
-		}
 		
-		if (execCommand.length < 1)
+		if ( execCommand.length == 0)
 			return null;
 		
-		if (execCommand.length == 1)
-			execName = execCommand[0];
-		else{
-			boolean found = false;
-			
-			for (int i = 0; i < execCommand.length; i++) {
+		/*
+		 *  Locate the executable's name within the command array.
+		 *  It is needed in order to replace it with its absolute path.
+		 */ 
+		
+		
+		/*
+		 * TODO right now executable names are hardcoded for all platforms. 
+		 * Make them more configurable. 
+		 */
+		String match = "xpce"; 		// We assume the rest to be Unix/Linux/BSD based.
+				
+		if (Util.isWindoze())
+			match = "plwin";
+		
+		boolean found = false;
+		
+		for (int i = 0; i < execCommand.length; i++) {
 				if(execCommand[i].indexOf(match) != -1){
 					found = true;
-					execName = match;
+					execName = execCommand[i];
 					execPos = i;
 					break;
 				}
 			}
 			
-			/*
-			 * FIXME it is hard to predict the executable name if we didn't decide on pattern.
-			 * So temperary, we return null for all commands other than match.
-			 */ 
-			if (!found) return null;
-		}
-		
-		if(useWhich)
-			//TODO shall we look for the env. variables as we do for Windows ?
-			process = runtime.exec("which "+ execName);
-		else
-			process = runtime.exec(pathCmd);
-		
-		BufferedReader br = new BufferedReader( 
-					new InputStreamReader(process.getInputStream()));
-		String path = br.readLine();
-		
-		if (path == null)
+		if (!found) 
 			return null;
 		
-		if(useWhich)
-			execCommand[execPos] = path;
-		else{
-			//Searches recursively within the directories found under PATH env. variable.
+		// Check the executable whether it is absolute or simple
+		String pathSep = System.getProperty("file.separator");
+		if (execName.indexOf(pathSep) != -1) {
+			//Absolute 
+			
+			// executable was found. Hence, there is no need to replace it.
+			if(new File(execName).exists())
+				return execCommand;
+			else{
+				// was not found. We extract its simple name then try to locate it.
+				int index = execName.lastIndexOf(pathSep);
+				
+				if (index != -1)
+					execName = execName.substring(index);
+				else
+					//It should never happen
+					return null;
+			}
+		}
+		
+		/*
+		 * Locate the executable within PATH 
+		 */
+		
+		//TODO find an easier way to find the current path of WindowsOS
+		if ( Util.isWindoze() ) {
+		//WINDOWS	
+			Process process = runtime.exec("cmd.exe /c echo %PATH%");
+			
+			if (process == null)
+				return null;
+				
+			BufferedReader br = new BufferedReader( 
+				new InputStreamReader(process.getInputStream()));
+			String path = br.readLine();
+			
+			if (path == null) 
+				return null;
+
+			// Looks for the executable within the current path
+			
+			//TODO just search in case of executable was not found.
 			String[] paths = Util.split(path, ";");
-			File exeFile;
-			boolean found = false;
+			File exeFile = null;
+			found = false;
 			
 			for (int i = 0; i < paths.length; i++) {
 				
@@ -185,7 +203,26 @@ public class SocketServerStartAndStopStrategy implements
 				}
 			}
 			
-			if(!found) return null;
+			if(!found) 
+				return null;
+		
+		} else {
+		//OTHERS ( LINUX / UNIX / MACOS /BSD )
+			
+			//TODO shall we look for the env. variables as we do for Windows ?
+			Process process = runtime.exec("which "+ execName);
+			
+			if (process == null)
+				return null;
+			
+			BufferedReader br = new BufferedReader( 
+					new InputStreamReader(process.getInputStream()));
+			String path = br.readLine();
+			
+			if ( path == null || path.startsWith("no "+execName)) 
+				return null;
+			
+			execCommand[execPos] = path;
 		}
 		
 		return execCommand;
@@ -256,7 +293,7 @@ public class SocketServerStartAndStopStrategy implements
 		try {
 			command = findAbsolutePath(command);
 			if(command==null)
-				throw new RuntimeException("SWI-Prolog executable was not found.");
+				throw new RuntimeException("SWI-Prolog's executable was not found.");
 			
 		} catch (IOException e2) {
 			e2.printStackTrace();
