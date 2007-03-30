@@ -94,33 +94,35 @@ public class SocketServerStartAndStopStrategy implements
 	}
 
 	/**
-	 * 	Checks whether SWI-Prolog's executable exists or not, If it was found then it returns
-	 *  the absolute path of the executable.
+	 * 	Checks whether SWI-Prolog's executable exists or not in PATH, then it will return the
+	 *  Absolute path for the executable once it is found. Otherwise, null is returned.
+	 *  
 	 * 
 	 * @author Hasan Abdel Halim
 	 * @param command
-	 * @return The first path that contains the executable name.
+	 * @return The Absoulte path for the default swi-prolog's executable.
 	 * @throws IOException
 	 */
 	
 	public static String[] findAbsolutePath(String[] command) throws IOException{
-		int execPos = 0;
-		Runtime runtime = Runtime.getRuntime();
-		String execName = "";
-		String[] execCommand = (String[]) command.clone();
 		
+		Runtime runtime = Runtime.getRuntime();
+		//String execName = "";
+		//TODO don't use close but use System.ArrayCopy instead.
+		String[] execCommand = (String[]) command.clone();
+		int execPos = 0;
 		
 		if ( execCommand.length == 0)
 			return null;
 		
 		/*
-		 *  Locate the executable's name within the command array.
+		 *  Locates executable's name within the command array.
 		 *  It is needed in order to replace it with its absolute path.
 		 */ 
 		
 		
 		/*
-		 * TODO right now executable names are hardcoded for all platforms. 
+		 * TODO right now matches for executable names are hardcoded for all platforms. 
 		 * Make them more configurable. 
 		 */
 		String match = "xpce"; 		// We assume the rest to be Unix/Linux/BSD based.
@@ -133,7 +135,7 @@ public class SocketServerStartAndStopStrategy implements
 		for (int i = 0; i < execCommand.length; i++) {
 				if(execCommand[i].indexOf(match) != -1){
 					found = true;
-					execName = execCommand[i];
+//					execName = execCommand[i];
 					execPos = i;
 					break;
 				}
@@ -144,18 +146,18 @@ public class SocketServerStartAndStopStrategy implements
 		
 		// Check the executable whether it is absolute or simple
 		String pathSep = System.getProperty("file.separator");
-		if (execName.indexOf(pathSep) != -1) {
+		if (execCommand[execPos].indexOf(pathSep) != -1) {
 			//Absolute 
 			
 			// executable was found. Hence, there is no need to replace it.
-			if(new File(execName).exists())
+			if(new File(execCommand[execPos]).exists())
 				return execCommand;
 			else{
 				// was not found. We extract its simple name then try to locate it.
-				int index = execName.lastIndexOf(pathSep);
+				int index = execCommand[execPos].lastIndexOf(pathSep);
 				
 				if (index != -1)
-					execName = execName.substring(index);
+					execCommand[execPos] = execCommand[execPos].substring(index);
 				else
 					//It should never happen
 					return null;
@@ -190,10 +192,10 @@ public class SocketServerStartAndStopStrategy implements
 			
 			for (int i = 0; i < paths.length; i++) {
 				
-				if (execName.indexOf(".exe")== -1)
-					execName += ".exe";
+				if (execCommand[execPos].indexOf(".exe")== -1)
+					execCommand[execPos] += ".exe";
 				
-				String currPath = paths[i]+ "\\" + execName;
+				String currPath = paths[i]+ "\\" + execCommand[execPos];
 				exeFile = new File(currPath);
 				
 				if(exeFile.exists()){
@@ -210,7 +212,13 @@ public class SocketServerStartAndStopStrategy implements
 		//OTHERS ( LINUX / UNIX / MACOS /BSD )
 			
 			//TODO shall we look for the env. variables as we do for Windows ?
-			Process process = runtime.exec("which "+ execName);
+			String appendPath = "";
+			
+			//Hack to resolve the issue of locating xpce in MacOS
+			if (Util.isMacOS())
+				appendPath = "PATH=$PATH:/opt/local/bin";
+			
+			Process process = runtime.exec(appendPath+" which "+ execCommand[execPos]);
 			
 			if (process == null)
 				return null;
@@ -219,7 +227,7 @@ public class SocketServerStartAndStopStrategy implements
 					new InputStreamReader(process.getInputStream()));
 			String path = br.readLine();
 			
-			if ( path == null || path.startsWith("no "+execName)) 
+			if ( path == null || path.startsWith("no "+execCommand[execPos])) 
 				return null;
 			
 			execCommand[execPos] = path;
@@ -286,13 +294,14 @@ public class SocketServerStartAndStopStrategy implements
 		};
 
 		/*
-		 * Checks whether the SWI-Prolog exists 
+		 * Checks whether the SWI-Prolog exists or not 
 		 * @author Hasan Abdel Halim
 		 * 
 		 */
 		try {
 			command = findAbsolutePath(command);
 			if(command==null)
+				//TODO create special Exception type 
 				throw new RuntimeException("SWI-Prolog's executable was not found.");
 			
 		} catch (IOException e2) {
