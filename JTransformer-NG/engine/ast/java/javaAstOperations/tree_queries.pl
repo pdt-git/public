@@ -215,9 +215,8 @@ sub_trees(_id, [_body | _subtrees]) :-
     append(_initList, _stepList, _dummyList),
     append(_condList, _dummyList, _subtrees).
 
-sub_trees(_id, [Body |Subtrees]) :-
-    foreachT(ID,_,_,Init,Expression,Body),
-    append(Init,Expression, Subtrees).
+sub_trees(_id, [Init,Expression,Body]) :-
+    foreachT(ID,_,_,Init,Expression,Body).
 
 sub_trees(_id, [_body]) :-
     labelT(_id,_,_,_body,_),!.
@@ -363,7 +362,7 @@ sub_trees(_id, Args) :-
 %    !,
 %    format('ERROR: sub_trees: ~w, ~w, ~w~n', [_id, _p, _name]).
 
-sub_trees(_id, 'null') :-
+sub_trees(_id, []) :-
     not(tree(_id, _, _)),!.
 
 /**
