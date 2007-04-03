@@ -217,6 +217,7 @@ gen_list_rec([_H | _T]) :-
 
 
 gen_stats([]).
+
 gen_stats([_H | _T]) :-
     printAlign,
     (
@@ -361,7 +362,7 @@ gen_class(_id, _name) :-
 	enumT(_id),
     gen_modifier(_id),
     printf('enum ~w ',[_name]),
-	gen_class_body(_id).
+	gen_enum_body(_id).
 
 gen_class(_id, _name) :-
     not(interfaceT(_id)),
@@ -389,6 +390,43 @@ gen_class(_id, _name) :-
     undent,
     printfa('}').
 
+
+%enum
+gen_enum_body(_id):-
+    enumT(_id),
+    classDefT(_id, _, _, _defs),
+    
+    %AOPHook instead of gen_block(_defs)
+    printf(' {~n'),
+    indent,
+    gen_enum_constants(_defs),   
+    (gen_class_after(_id);true),
+    undent,
+    printfa('}').
+
+
+ gen_enum_constants([H|T]):-
+     enumConstantT(H,_,_,_,_),
+     printAlign,
+     gen_tree(H),     
+     (  
+        (
+           T = [Next| Rest],
+           enumConstantT(Next,_,_,_,_)
+         ) ->
+             printf(',')
+          ;  printf(';')
+     ),
+     println,
+     gen_enum_constants(T)
+     .
+     
+ gen_enum_constants([H|T]):-
+     not(enumConstantT(H,_,_,_,_)),
+     gen_stats([H|T]).
+ 
+ gen_enum_constants([]).
+     
 
 gen_class_body(_id):-
     classDefT(_id, _, _, _defs),
@@ -809,11 +847,13 @@ gen_tree(_id) :-
 	).
 
 gen_tree(_id) :-
+    debugme,
     paramDefT(_id, _pid, _type, _name),
     !,
-    (	methodDefT(_pid,Scope,_,_,_,_,_)
-    ;	catchT(_pid,_,Scope,_,_)
-    ;   foreachT(_pid,_,_,_,_,_)
+    (	
+        methodDefT(_pid,Scope,_,_,_,_,_)
+      ; catchT(_pid,_,Scope,_,_)          
+      ; foreachT(_pid,_,Scope,_,_,_)
     ),
     gen_modifier(_id),
     gen_type(Scope,_type),
@@ -1058,7 +1098,7 @@ gen_tree(_ID) :-
     if_null_semicolon_else_gen_tree(_body).
 
 gen_tree(_ID) :-
-    foreachT(ID, _,_,Init, Expression, Body),
+    foreachT(_ID, _,_,Init, Expression, Body),
     !,
     printf('for('),
     gen_tree(Init),
@@ -1177,12 +1217,12 @@ gen_tree(ID):-
 	( Args == [] ->
 	  true;
 	  (
-	    printf('( '),
+	    printf('('),
 	    gen_komma_list(Args),
-	    printf(') ')
+	    printf(')')
 	  )
-	),
-	printf(';').
+	)
+	.
 
 
 gen_tree(_ID) :-
