@@ -1,3 +1,4 @@
+:- use_module(delta).
 % Author: Tobias
 % Date: 14.11.2002
 /**
@@ -93,13 +94,7 @@ activate_reverse_indexes :-
 :- dynamic cache_file/1.
 :- multifile cache_file/1.
 
-/*
-interpret([_factname | _atomlist]) :-
-   exchangeLocalWithGlobalIds(_atomlist, [ID|Rest]),
-    Term =.. [_factname | [ID|Rest]],
-% 	checkExistance(ID,Term),
-    assert1T(Term).
-*/
+
 
 checkExistance(Term) :-
     Term =.. [Functor | [ID | _]],
@@ -114,25 +109,6 @@ checkExistance(Term) :-
     
 checkExistance(_).
 
-/*
-Sts: Seem totally obsolete, removing them does not generate more errors then
-having them ;-) Also, caused a bug (the first clase was added to circumvent it)
-inTe(importT(_,_, lId(X))) :-
-		local2FQN(X, FQN),
-		not(globalIds(FQN, _),
-		new_id(X),
-		assert(packageT(X, FQN)),
-		fail.
-
-inTe(importT(_,_,Fqn)) :-
-    not(fqn(_) = Fqn),
-    not(globalIds(Fqn, _)),
-		not(lId(_) = Fqn),
-    new_id(X),
-    assert(packageT(X, Fqn)),
-    fail.
-*/
-
 
 inTeArray(Term) :-
 	forall(arg(_, Term, Value),
@@ -146,18 +122,13 @@ inTe(':'(abba,Term)) :-
 	':'(abba,Term),
 	!.
     
-%inTe(packageT(_,_name)) :-
-%    new_id(_id),
-%    assert(packageT(_id,_name)),
-%    !.
-
 inTe(Term) :-
   inTe(Term,Translated),
  	checkExistance(Translated),
  	Translated =.. AsList,
 	not(member(lId(_), AsList)),
 	!,
-	assert1T(Translated),
+	exec_with_delta(assert1T,Translated),
 	assertTreeReverseIndexes(Translated).
 
 inTe(Term) :-
@@ -172,10 +143,10 @@ inTe(Term) :-
 	fail.
 
 
-inTe(_term, _Translated) :-
-    _term =.. [_name | _args],
+inTe(Term, Translated) :-
+    Term =.. [_name | _args],
     exchangeLocalWithGlobalIds(_args, _translatedArgs),
-    _Translated =.. [_name | _translatedArgs].
+    Translated =.. [_name | _translatedArgs].
 
 exchangeLocalWithGlobalIds([], []) :- !.
 exchangeLocalWithGlobalIds([_var | _t], [_var | _rest]) :-
@@ -258,7 +229,8 @@ globalFqn(_fqn, _methName, _paramTypes, _globalid) :-
     new_id(_globalid),
     _term =..[globalIds, _fqn, _methName, _paramTypes, _globalid],
 %    add_to_new(_fqn),
-    assert(_term).
+	assert(_term).
+%    exec_with_delta(assert,_term).
 
 
 globalFqn(_fqn, _fieldName,_globalid) :-
@@ -269,7 +241,8 @@ globalFqn(_fqn, _fieldName,_globalid) :-
     new_id(_globalid),
     _term =..[globalIds, _fqn, _fieldName,_globalid],
 %    add_to_new(_fqn),
-    assert(_term).
+	assert(_term).
+%    exec_with_delta(assert,_term).
 
 /*
   globalFqn(+Name,-Id)
@@ -288,65 +261,16 @@ globalFqn(Fqn, GlobalId) :-
 %    add_to_new(_fqn).
     
 
-/*
-add_to_new(_fqn):-
-    unresolved_types(_fqn),
-	packageT(_,_fqn),
-	!.
 
-add_to_new(_fqn):-
-    unresolved_types(_fqn),
-    !.
-
-add_to_new(_fqn):-
-	packageT(_,_fqn),
-	!.
-	    
-add_to_new(_fqn):-
-    assert(unresolved_types(_fqn)).
-*/
-/*
-consultIfNewWriteCache([_H|_T]) :-
-    _term =..[consultIfNew, [_H |_T]],
-    write_cache_clause(_term),
-    close_cache_file,
-    consultIfNew([_H| _T]).
-    
-consultIfNew([]).
-consultIfNew([_H|_T]) :-
-    consultIfNew(_H),
-    consultIfNew(_T).
-consultIfNew(_filename) :-
-    appendDir(_filename, _dirname),
-    not(consulted(_filename)),
-    !,
-    assert(consulted(_filename)),
-    consult(_dirname).
-    %consultCacheOrOriginal(_filename).
-consultIfNew(_).
-
-consultCacheOrOriginal(_filename) :-
-    removeExt(_filename, _noExt),
-    concat_atom([_noExt,'.cache.pl'], _cacheFilename),
-    exists_file(_cacheFilename),
-    consult(_cacheFilename),!.
-
-consultCacheOrOriginal(_filename) :-
-    consult(_filename).
-*/
-
-
-removeExt(_filename, _NoExt) :-
-    atom_length(_filename, _size),
-    plus(3, _sizeNoExt, _size),
-    sub_atom(_filename, 0, _sizeNoExt, _,_NoExt).
+removeExt(Filename, NoExt) :-
+    atom_length(Filename, Size),
+    plus(3, SizeNoExt, Size),
+    sub_atom(Filename, 0, SizeNoExt, _,NoExt).
 
 open_cache_file :-
     open_cache_file('cache.pl').
 
-open_cache_file(_name).
-%    open(_name, write, _fileStream),
-%    assert(cache_file(_fileStream)).
+open_cache_file(__name).
 
 close_cache_file.
 %    cache_file(_fileStream),
@@ -389,7 +313,7 @@ localSymtab(_id, _globalid) :-
 localSymtab(_id, _globalid) :-
     new_id(_globalid),
     _term =..[symtab, _id, _globalid],
-    assert(_term).
+    assert(_term).  % <- temporary, not delta relevant
 
 
 retractLocalSymtab :-
@@ -423,7 +347,7 @@ addToGlobalIdsAndFacts(Fqn):-
 		print(Fqn),
 		printf('~n'),
     assertGlobalIds(Fqn,Id),
-    assert(packageT(Id,Fqn)).		
+    exec_with_delta(assert,packageT(Id,Fqn)).
 
 /**
  * remove_contained_global_ids(+ToplevelPath)
@@ -441,16 +365,15 @@ remove_contained_global_ids(Path):-
 
 	       
 assert_tree(Translated) :-
-	assert(Translated),
+    exec_with_delta(assert,Translated),
 	Translated =.. [Functor,Id | Args],
 	ast_node_def('Java',Functor,[_|ArgDefs]),
 	!,
 	assert_reverse_indexes(assert,Functor,Id, Args, ArgDefs).
 assert_tree(_Translated).
 
-
 retract_tree(Translated) :-
-	assert(Translated),
+	retract(Translated),
 	Translated =.. [Functor,Id | Args],
 	ast_node_def('Java',Functor,[_|ArgDefs]),
 	!,
@@ -461,8 +384,8 @@ retract_tree(_Translated).
 assertTreeReverseIndexes(Translated) :-
 	actionOnTreeReverseIndexes(assert,Translated).
 
-retractTreeReverseIndexes(Translated) :-
-	actionOnTreeReverseIndexes(retract,Translated).
+%retractTreeReverseIndexes(Translated) :-
+%	actionOnTreeReverseIndexes(retract,Translated).
 
 addTreeReverseIndexes(Translated) :-
 	actionOnTreeReverseIndexes(add,Translated).
@@ -500,7 +423,8 @@ assert_reverse_indexes(AssertAdd, Functor,Id, [Arg|Args],
     !,
     ri_functor_kind(Functor,Kind,RiKind),
     RiTerm =.. [RiKind,Arg,Id],
-    assert_or_add(AssertAdd,RiTerm),
+    
+    exec_with_delta(AssertAdd,RiTerm),
 	assert_reverse_indexes(AssertAdd,Functor,Id, Args, RestDefs).
 
 assert_reverse_indexes(AssertAdd,Functor,Id, [_Arg|Args],
