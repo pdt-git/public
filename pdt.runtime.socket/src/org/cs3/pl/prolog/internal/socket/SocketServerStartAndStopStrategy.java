@@ -108,7 +108,7 @@ public class SocketServerStartAndStopStrategy implements
 		
 		Runtime runtime = Runtime.getRuntime();
 		//String execName = "";
-		//TODO don't use close but use System.ArrayCopy instead.
+		//TODO don't use clone but use System.ArrayCopy instead.
 		String[] execCommand = (String[]) command.clone();
 		int execPos = 0;
 		
@@ -165,12 +165,11 @@ public class SocketServerStartAndStopStrategy implements
 		}
 		
 		/*
-		 * Locate the executable within PATH 
+		 * Locate the executable within PATH ( Simple case )
 		 */
 		
 		//TODO find an easier way to find the current path of WindowsOS
 		if ( Util.isWindoze() ) {
-		//WINDOWS	
 			Process process = runtime.exec("cmd.exe /c echo %PATH%");
 			
 			if (process == null)
@@ -183,8 +182,6 @@ public class SocketServerStartAndStopStrategy implements
 			if (path == null) 
 				return null;
 
-			// Looks for the executable within the current path
-			
 			//TODO just search in case of executable was not found.
 			String[] paths = Util.split(path, ";");
 			File exeFile = null;
@@ -212,13 +209,15 @@ public class SocketServerStartAndStopStrategy implements
 		//OTHERS ( LINUX / UNIX / MACOS /BSD )
 			
 			//TODO shall we look for the env. variables as we do for Windows ?
-			String appendPath = "";
+			String[] appendPath = null;
 			
 			//Hack to resolve the issue of locating xpce in MacOS
-			if (Util.isMacOS())
-				appendPath = "PATH=$PATH:/opt/local/bin";
+			if (Util.isMacOS()){
+				appendPath = new String[1];
+				appendPath[0] = "PATH=PATH:/opt/local/bin";
+			}
 			
-			Process process = runtime.exec(appendPath+" which "+ execCommand[execPos]);
+			Process process = runtime.exec("which "+ execCommand[execPos], appendPath);
 			
 			if (process == null)
 				return null;
