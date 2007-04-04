@@ -288,7 +288,7 @@ addToMethodArgs(_method, _id) :-
     
        
 /** 
- * removeTags(DeletionKind, ID)
+ * walkTags(Predicate, ID)
     Deletes rekursively all sub trees of a tree, or of a list of trees.
     Exceptions are the targets of break and continue.
 
@@ -301,7 +301,7 @@ addToMethodArgs(_method, _id) :-
 	interfaceT - exists if the PEF reprecents an interface 
 */
 
-removeTags(DeletionKind, ID):-
+walkTags(Predicate, ID):-
     forall(
       (
          attribSignature(Functor,Arity),
@@ -309,36 +309,48 @@ removeTags(DeletionKind, ID):-
       ),
       (
          forall(sub_tree_of_attributes(Functor, ID, Subs), 
-                deepDeleteOrRetract(DeletionKind,Subs)),
-         removeTagKind(DeletionKind, Term)
+                walkTree(Predicate,Subs)),
+         walkTagKind(Predicate, Term)
       )
      ).
 /*
-    removeTagKind(DeletionKind, slT(ID,_start,_length)),
-    removeTagKind(DeletionKind, modifierT(ID,_mod)),
-    removeTagKind(DeletionKind, implementsT(ID,_iface)),
-    removeTagKind(DeletionKind, extendsT(ID,_super)),
-    removeTagKind(DeletionKind, externT(ID)),
-    removeTagKind(DeletionKind, projectLocationT(ID,_,_)),
-    removeTagKind(DeletionKind, sourceLocation(ID,_,_,_)),
-    removeTagKind(DeletionKind, interfaceT(ID)).
+    walkTagKind(DeletionKind, slT(ID,_start,_length)),
+    walkTagKind(DeletionKind, modifierT(ID,_mod)),
+    walkTagKind(DeletionKind, implementsT(ID,_iface)),
+    walkTagKind(DeletionKind, extendsT(ID,_super)),
+    walkTagKind(DeletionKind, externT(ID)),
+    walkTagKind(DeletionKind, projectLocationT(ID,_,_)),
+    walkTagKind(DeletionKind, sourceLocation(ID,_,_,_)),
+    walkTagKind(DeletionKind, interfaceT(ID)).
 */    
-removeTagKind(DeletionKind,Tag) :-
+walkTagKind(Predicate,Tag) :-
     forall(
                 Tag,
                 (
-                   Call =.. [DeletionKind,Tag],
+                   Call =.. [Predicate,Tag],
                    call(Call)
                 )
         ).
 
 /**
- * deepDeleteOrRetract(delete|retract, ID(s))
+ * walkTree(predicate, ID(s))
  */
-deepDeleteOrRetract(delete, ToDelete):-
-    deepDelete(ToDelete).
-deepDeleteOrRetract(retract, ToRetract):-
-    deepDelete(ToRetract).
+walkTree(_Kind, []):-
+    !.
+
+walkTree(Kind, [Head | Tail]) :-
+    !,
+    walkTree(Kind,Head),
+    walkTree(Kind,Tail).
+
+walkTree(Kind,Tree) :-
+    sub_trees(Tree, Subtrees),
+    walkTree(Kind,Subtrees),
+    getTerm(Tree,Term),
+    actionOnTreeReverseIndexes(Kind, Term),
+    Call=..[Kind,Term],
+    call(Call),
+    walkTags(Kind, Tree).    
 
 /**
  * deepDelete(+Pef | +[Pef1,...])
@@ -356,7 +368,7 @@ deepDelete([_head | _tail]) :-
     getTerm(_head,Term),
     deleteTreeReverseIndexes(Term),
     deleteTree(_head),
-    removeTags(delete, _head),      
+    walkTags(delete, _head),      
     deepDelete(_tail).
 
 deepDelete(_id) :-
@@ -386,7 +398,7 @@ deepRetract([_head | _tail]) :-
     getTerm(_head,Term),
     retractTreeReverseIndexes(Term),
     retractTree(_head),
-        removeTags(retract, _head),     
+        walkTags(retract, _head),     
     deepRetract(_tail).
 
 deepRetract(_id) :-
@@ -484,7 +496,6 @@ deleteToplevelOfClass(Id) :-
     file_on_disk(Tl,RealFilename),
     assert(deleted_file(RealFilename)),
     delete(toplevelT(Tl,TlPackage,Filename, Defs)).
-
 deleteToplevelOfClass(_).   
 
 /**
@@ -495,11 +506,12 @@ deleteToplevelOfClass(_).
  * The deletion operation is logged and
  * will be undone in the next rollback/0 operation.
  */
-
 deepRetractToplevel(Toplevel) :-
 %    findall(Class,(classDefT(Class,Package,Name,List),delete(classDefT(Class,Package,Name,List))),_),
+	assert(deleted_toplevel(Toplevel)),
     toplevelT(Toplevel,_TlPackage,_Filename, _Defs),
     file_on_disk(Toplevel,RealFilename),
-    assert(deleted_file(RealFilename)),
-    retractall(modified_toplevel(Toplevel)),
-    deepRetract(Toplevel).
+	exec_with_delta(assert,deleted_file(RealFilename)),
+	exec_with_delta(retractall,modified_toplevel(Toplevel)),
+	walkTree(retract_with_delta, Toplevel).
+%    deepRetract(Toplevel).
