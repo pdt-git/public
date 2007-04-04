@@ -67,7 +67,8 @@ flattenExpr(Expr, FlattenedElements:array):-
     maplist(flattenExpr,Elements,FlattenedElements).
 
 flattenExpr(Expr, FQN:type):-
-    selectT(Expr,_,_,class,_Ident,TypeTerm),
+    selectT(Expr,_,_,class,Ident,_),
+    identT(Ident,_,_,_Name,TypeTerm),
     map_type_term(TypeTerm,FQN).
   
 flattenExpr(Expr, ConstantName:enum(EnumTypeFQN)):-
