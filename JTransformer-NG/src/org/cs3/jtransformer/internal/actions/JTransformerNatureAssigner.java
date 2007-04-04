@@ -147,13 +147,13 @@ public class JTransformerNatureAssigner {
 					"Project '" + project.getName() + "':\nYou can only assign the JTransformer nature to Java projects.");
 						return false;
 		}
-		if(javaProject.getOption(JavaCore.COMPILER_SOURCE,true).equals(JavaCore.VERSION_1_5)) {
-			final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			MessageDialog.openError(shell,"JTransformer", 
-					"Project '" + project.getName() + "':\nJTransformer is not yet compatible with Java 5.0 source code.\n" +
-					"Please change the source compatibility to 1.4 in the project preferences.");
-						return false;
-		}
+//		if(javaProject.getOption(JavaCore.COMPILER_SOURCE,true).equals(JavaCore.VERSION_1_5)) {
+//			final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+//			MessageDialog.openError(shell,"JTransformer", 
+//					"Project '" + project.getName() + "':\nJTransformer is not yet compatible with Java # source code.\n" +
+//					"Please change the source compatibility to 1.4 in the project preferences.");
+//						return false;
+//		}
 		
 			IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 	    	project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),factbaseName);
