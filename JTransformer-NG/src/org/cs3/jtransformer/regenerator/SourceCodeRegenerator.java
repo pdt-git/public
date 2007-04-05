@@ -160,6 +160,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
                 generateClass(((Integer) i.next()).intValue());
             }
             s.queryOnce("retractall(dirty_tree(_))");
+            rollback();
         } catch (CoreException e) {
             Debug.report(e);
             throw new RuntimeException (e);
