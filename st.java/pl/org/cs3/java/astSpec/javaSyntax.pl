@@ -330,7 +330,7 @@ ast_node_def('Java',fieldDefT,[
 % tree_constraints(paramDefT ,[[methodDefT,catchT],[typeTermType],[atom]]).
 ast_node_def('Java',paramDefT,[
      ast_arg(id,      mult(1,1,no ),  id,  [paramDefT]), % <-- convention!!!
-     ast_arg(parent,  mult(1,1,no ),  id,  [methodDefT,catchT]), 
+     ast_arg(parent,  mult(1,1,no ),  id,  [methodDefT,catchT,foreachT]), 
      ast_arg(type,    mult(1,1,no ),  attr,[typeTermType]), 
      ast_arg(name,    mult(1,1,no ),  attr,[atom])
 %     ast_arg(hasModif,mult(0,*,no ),  attr,[atom])     
