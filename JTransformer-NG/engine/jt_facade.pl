@@ -6,6 +6,8 @@
   addJavaErrorMarker/0,
   jt_facade/1]).
 
+:- use_module(delta).
+
 jt_facade(removeFileAndTrackDeletion/1).
 jt_facade(removeFile/1).
 jt_facade(deepRetractExternFQN/1).
@@ -27,11 +29,14 @@ deepRetractExternFQN(FQN) :-
 	
 removeFileAndTrackDeletion(Path):-
   toplevelT(Toplevel, _,Path, _),
-  deepRetractToplevel(Toplevel).
+  deepRetractToplevel(Toplevel),
+  walkTree(retract_with_delta, Toplevel).
   
 removeFile(Path):-
+
   toplevelT(Toplevel, _,Path, _),
-  deepRetract(Toplevel).
+  walkTree(retract_with_delta, Toplevel).
+
 
 removeJavaErrorMarker :-
   retractall(errors_in_java_code).
@@ -55,4 +60,9 @@ inlinedAnnotation(AnnotatedID, annotation(AnnotationTypeFQN, InlinedMemberValues
     inlined_annotation(AnnotatedID, annotation(AnnotationTypeFQN, InlinedMemberValues)).
 		      
 
-      
+activate_delta :-
+    delta:activate.
+
+deactivate_delta :-
+    delta:deactivate.
+    
