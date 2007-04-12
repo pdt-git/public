@@ -102,13 +102,16 @@ treeFact(Fact) :-
     Fact =.. [Head|Arguments].
 
 clearTreeFactbase :-
-    catch( 
-	clearTreeFactbase(_Project),
-	Exception,
-	(write(Exception), write(' Deleting all PEFs. '),clearPersistantFacts)).
+    rollback,
+    clearPersistantFacts.
+%    catch( 
+%	clearTreeFactbase(_Project),
+%	Exception,
+%	(write(Exception), write(' Deleting all PEFs. '),clearPersistantFacts)).
 	
 
 clearTreeFactbase(Project) :-
+    rollback,
 %   forall((treeFact(A),user:call(A)),user:retract(A)).
 	forall((toplevelT(TL,_,_,_),projectLocationT(TL,Project,_)),
 	        delete_toplevel(TL)).

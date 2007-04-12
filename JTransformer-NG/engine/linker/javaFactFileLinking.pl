@@ -384,8 +384,8 @@ retract_tree(_Translated).
 assertTreeReverseIndexes(Translated) :-
 	actionOnTreeReverseIndexes(assert,Translated).
 
-%retractTreeReverseIndexes(Translated) :-
-%	actionOnTreeReverseIndexes(retract,Translated).
+retractTreeReverseIndexes(Translated) :-
+	actionOnTreeReverseIndexes(retract,Translated).
 
 addTreeReverseIndexes(Translated) :-
 	actionOnTreeReverseIndexes(add,Translated).

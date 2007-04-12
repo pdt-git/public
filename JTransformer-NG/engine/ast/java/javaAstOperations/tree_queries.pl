@@ -215,8 +215,8 @@ sub_trees(_id, [_body | _subtrees]) :-
     append(_initList, _stepList, _dummyList),
     append(_condList, _dummyList, _subtrees).
 
-sub_trees(_id, [Init,Expression,Body]) :-
-    foreachT(ID,_,_,Init,Expression,Body).
+sub_trees(Id, [Init,Expression,Body]) :-
+    foreachT(Id,_,_,Init,Expression,Body).
 
 sub_trees(_id, [_body]) :-
     labelT(_id,_,_,_body,_),!.
@@ -372,8 +372,7 @@ sub_trees(_id, []) :-
  * TODO: convert to generic version
  */
 sub_tree_of_attributes(annotatedT, Id, [Annotation]) :-
-	annotatedT(Id,Annotation),
-    !.
+	annotatedT(Id,Annotation).
     
 % ld:
 % contains_type tests wether a classDefT is declared 

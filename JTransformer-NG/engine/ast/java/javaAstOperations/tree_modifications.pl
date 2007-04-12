@@ -344,6 +344,7 @@ walkTree(Kind, [Head | Tail]) :-
     walkTree(Kind,Tail).
 
 walkTree(Kind,Tree) :-
+    !,
     sub_trees(Tree, Subtrees),
     walkTree(Kind,Subtrees),
     getTerm(Tree,Term),
@@ -515,3 +516,9 @@ deepRetractToplevel(Toplevel) :-
 	exec_with_delta(retractall,modified_toplevel(Toplevel)),
 	walkTree(retract_with_delta, Toplevel).
 %    deepRetract(Toplevel).
+
+writeFormated(annotationT(Id,A,B,C,D)):-
+    !,
+    debugme,
+    writeln(annotationT(Id,A,B,C,D)).
+writeFormated(Id).
