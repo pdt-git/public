@@ -7,35 +7,45 @@ package org.cs3.jtransformer.util;
  *
  */
 public class CtProperties {
-	private String ctNamesAndFiles;
-	private String adviceKinds; 
+	private String name;
+	private String file;
+	private String adviceKind; 
 	private boolean dynamic;
 	
 	
 	
-	public CtProperties(String ctNamesAndFiles, String adviceKinds, boolean dynamic) {
-		this.ctNamesAndFiles = ctNamesAndFiles;
-		this.adviceKinds = adviceKinds;
+	public CtProperties(String ctName, String file, String adviceKinds, boolean dynamic) {
+		this.name = ctName;
+		this.file = file;
+		this.adviceKind = adviceKinds;
 		this.dynamic = dynamic;
 	}
 	
-	public String getAdviceKinds() {
-		return adviceKinds;
+	public String getAdviceKind() {
+		return adviceKind;
 	}
-	public void setAdviceKinds(String adviceKinds) {
-		this.adviceKinds = adviceKinds;
+	public void setAdviceKind(String adviceKind) {
+		this.adviceKind = adviceKind;
 	}
-	public String getCtNamesAndFiles() {
-		return ctNamesAndFiles;
+	public String getName() {
+		return name;
 	}
-	public void setCtNamesAndFiles(String ctNamesAndFiles) {
-		this.ctNamesAndFiles = ctNamesAndFiles;
+	public void setName(String ctNamesAndFiles) {
+		this.name = ctNamesAndFiles;
 	}
 	public boolean isDynamic() {
 		return dynamic;
 	}
 	public void setDynamic(boolean dynamic) {
 		this.dynamic = dynamic;
+	}
+
+	public String getFileName() {
+		return file;
+	}
+
+	public void setFile(String file) {
+		this.file = file;
 	}
 	
 }
