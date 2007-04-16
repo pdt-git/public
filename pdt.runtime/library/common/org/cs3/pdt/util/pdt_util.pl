@@ -152,6 +152,10 @@ pdt_file_ref(FileSpec,Ref):-
 	filespec(FileSpec,Abs),
 	gen_fileref(Ref),
 	assert(fileref(Abs,Ref)).
+
+
+pdt_gen_virtual_file_ref(Ref):-
+    gen_fileref(Ref).
 	
 gen_fileref(Ref):-
     flag(pdt_annotator_current_file_ref,Ref,Ref+1).

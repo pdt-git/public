@@ -30,6 +30,7 @@
 
 :- pdt_define_context(term(id,parent,order,toplevel,name,arity)).
 :- pdt_define_context(var_info(name)).
+:- pdt_define_context(pefdiff(id, changes)).
 
 :- index(term(1,1,0,1,1,0)).
 :- dynamic term/6.	
@@ -49,9 +50,27 @@ pef_set_property(ID,Prop,Val):-
     forall(term_property(ID,Prop,O),retract(term_property(ID,Prop,O))),
 	assert(term_property(ID,Prop,Val)).
 
+
+
+
+
 %
 %---------------------------------------------------------------
 % 
+
+/* note: this
+
+p(X):-
+    X=x(A,b).
+
+should be compiled to this
+
+p(x(A,b)).
+
+
+
+
+*/
 	
 	
 pef_file_toplevel(FileSpec,Term):-
@@ -64,7 +83,8 @@ pef_file_toplevel(FileSpec,Term):-
     pef_term_toplevel(Term,Term),
     pef_term_parent(Term,Ref),
     pdt_file_ref(FileSpec,Ref).
-    
+
+pef_term_file(ID,File):-    
 pef_term_file(ID,File):-
     nonvar(ID),
     !,
