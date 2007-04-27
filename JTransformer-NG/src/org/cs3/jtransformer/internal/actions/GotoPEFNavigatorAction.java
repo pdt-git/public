@@ -6,7 +6,6 @@ import org.cs3.jtransformer.internal.views.PEFNavigatorView;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;

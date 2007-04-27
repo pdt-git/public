@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -97,7 +97,7 @@ public class JTransformerNatureAction implements IObjectActionDelegate {
 				action.setChecked(true);
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 		}
 
 	}

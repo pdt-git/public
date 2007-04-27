@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -83,7 +83,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
             s.dispose();
         }
         if (ht == null) {
-            Debug.error("Error occured while (re-)generating type with ID "
+            JTDebug.error("Error occured while (re-)generating type with ID "
                     + id + ". Probably the toplevel fact was not be found.");
             return;
         }
@@ -162,7 +162,7 @@ public class SourceCodeRegenerator implements ISourceRegenerator {
             s.queryOnce("retractall(dirty_tree(_))");
             rollback();
         } catch (CoreException e) {
-            Debug.report(e);
+            JTDebug.report(e);
             throw new RuntimeException (e);
         } finally {
             s.dispose();

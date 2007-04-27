@@ -4,8 +4,8 @@ package org.cs3.jtransformer.internal.preferences;
 
 import java.io.IOException;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.core.runtime.preferences.DefaultScope;
@@ -27,7 +27,7 @@ public class Initializer extends AbstractPreferenceInitializer {
         try {
             initializeDefaultPreferences_impl();
         } catch (Throwable t) {
-            Debug.report(t);
+            JTDebug.report(t);
             throw new RuntimeException(t.getMessage(), t);
         }
     }
@@ -43,7 +43,7 @@ public class Initializer extends AbstractPreferenceInitializer {
 
         IEclipsePreferences node = context.getNode(qualifier);
         if (node == null) {
-            Debug.error("Häh?!");
+            JTDebug.error("Häh?!");
         } else {
             Option[] options = plugin.getOptions();
             for (int i = 0; i < options.length; i++) {
@@ -54,7 +54,7 @@ public class Initializer extends AbstractPreferenceInitializer {
             
             String[] strings = node.keys();
             for (int i = 0; i < strings.length; i++) {
-                Debug.info(strings[i] + " --> " + node.get(strings[i], "n.a."));
+                JTDebug.info(strings[i] + " --> " + node.get(strings[i], "n.a."));
             }
         }
         

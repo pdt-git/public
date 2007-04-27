@@ -3,7 +3,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.jtransformer.JTDebug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -63,7 +63,7 @@ public class CompilationUnitProvider
 			project.accept(this);
 			this.initialized = true;
 		} catch (CoreException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 		}
 		this.hash = sourceFiles.hashCode();
 	}
@@ -202,7 +202,7 @@ public class CompilationUnitProvider
 			description = project.getDescription();
 			natureIds = project.getDescription().getNatureIds();
 		} catch (CoreException e2) {
-			Debug.report(e2);
+			JTDebug.report(e2);
 		}
 		boolean hasJavaNature = false;
 		for (int i = 0; i < natureIds.length; i++) {
@@ -213,7 +213,7 @@ public class CompilationUnitProvider
 		}
 		IJavaProject javaProject = JavaCore.create(project);
 		if (!hasJavaNature) {
-			Debug.info("adding Java nature to project: "
+			JTDebug.info("adding Java nature to project: "
 					+ JavaCore.NATURE_ID);
 			String[] newNatureIds = new String[natureIds.length + 1];
 			System.arraycopy(natureIds, 0, newNatureIds, 0, natureIds.length);
@@ -225,7 +225,7 @@ public class CompilationUnitProvider
 				//project.build(IncrementalProjectBuilder.FULL_BUILD,monitor);
 				root.refreshLocal(IResource.DEPTH_INFINITE, internalMonitor);
 			} catch (CoreException e3) {
-				Debug.report(e3);
+				JTDebug.report(e3);
 			}
 			IPath magicSrcPath = srcPath.makeAbsolute();
 			IPath magicBinPath = binPath.makeAbsolute();
@@ -237,13 +237,13 @@ public class CompilationUnitProvider
 						"org.eclipse.jdt.launching.JRE_CONTAINER"));
 				//newClasspath[0] = JavaCore.newSourceEntry(magicBinPath);
 			} catch (Exception ex) {
-				Debug.report(ex);
+				JTDebug.report(ex);
 			}
 			try {
 				javaProject.setRawClasspath(newClasspath, internalMonitor);
 				javaProject.setOutputLocation(magicBinPath, internalMonitor);
 			} catch (JavaModelException e4) {
-				Debug.report(e4);
+				JTDebug.report(e4);
 			}
 		}
 		ICompilationUnit icu = (ICompilationUnit) JavaCore.create(file);

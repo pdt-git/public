@@ -1,11 +1,11 @@
 package org.cs3.jtransformer.internal.tracker;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.pdt.runtime.AbstractEditorTracker;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -46,7 +46,7 @@ public class JavaEditorTracker extends AbstractEditorTracker
 			return null;
 		}
 		IProject project = fileInput.getFile().getProject();
-		JTransformerProjectNature jtNature =null;
+		JTransformerNature jtNature =null;
 		try {
 			if(!project.isOpen()) {
 				return null;
@@ -56,7 +56,7 @@ public class JavaEditorTracker extends AbstractEditorTracker
 				jtNature=JTransformerPlugin.getNature(project);
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 			throw new RuntimeException(e);
 		}
 		if(jtNature==null){

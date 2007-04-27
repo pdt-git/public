@@ -2,10 +2,10 @@
  */
 package org.cs3.jtransformer.internal.properties;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pdt.ui.util.OptionProviderPropertyPage;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.OptionProvider;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -27,7 +27,7 @@ public class JTransformerProjectPropertyPage extends OptionProviderPropertyPage 
 			}
 			}
 			catch (CoreException e){
-				Debug.report(e);
+				JTDebug.report(e);
 				throw new RuntimeException(e);
 			}
 		}

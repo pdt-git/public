@@ -5,11 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -371,7 +371,7 @@ public class PEFNavigatorView extends ViewPart {
 		try {
 			createPartControl_impl(parent);
 		} catch (Throwable t) {
-			Debug.report(t);
+			JTDebug.report(t);
 			throw new RuntimeException(t);
 		}
 	}
@@ -385,7 +385,7 @@ public class PEFNavigatorView extends ViewPart {
 		try {
 			setFocus_impl();
 		} catch (Throwable t) {
-			Debug.report(t);
+			JTDebug.report(t);
 			throw new RuntimeException(t);
 		}
 	}

@@ -11,7 +11,7 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -56,7 +56,7 @@ public class SourceLocationArgumentTest extends PseudoRoundTripTest {
 
 			}
 		} catch (Exception e) {
-			Debug.report(e);
+			JTDebug.report(e);
 		} finally {
 			if (session != null) {
 				session.dispose();

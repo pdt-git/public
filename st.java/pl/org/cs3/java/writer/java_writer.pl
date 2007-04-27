@@ -847,7 +847,6 @@ gen_tree(_id) :-
 	).
 
 gen_tree(_id) :-
-    debugme,
     paramDefT(_id, _pid, _type, _name),
     !,
     (	

@@ -3,7 +3,7 @@ package org.cs3.jtransformer.internal.astvisitor;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.jtransformer.JTDebug;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -65,7 +65,7 @@ public class VariableTypeResolver extends TypeResolver {
 					buf.append("packageT(Pckg" + var +", '" +
 							typeBinding.getPackage().getName()+"'),\n");
 				else 
-					Debug.warning("VariableTypeResolver: The nested class '" + typeBinding.getQualifiedName() + "' will not be fully qualified.");
+					JTDebug.warning("VariableTypeResolver: The nested class '" + typeBinding.getQualifiedName() + "' will not be fully qualified.");
 				buf.append("classDefT("+var+", Pckg" + var +", '" +typeBinding.getName()+"',_),\n");
 			}
 			buf.append("\n%%% selection %%%\n");

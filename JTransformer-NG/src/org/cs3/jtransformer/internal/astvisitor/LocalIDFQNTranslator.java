@@ -36,7 +36,7 @@ public class LocalIDFQNTranslator implements FQNTranslator {
 		synchronized (fqnToIDTable){
 			if (!fqnToIDTable.containsKey(string)){
 //			    if(string.indexOf("Subroutine")>-1){
-//			        Debug.debug("debug");
+//			        JTDebug.debug("debug");
 //			    }
 				fqnToIDTable.put(string, provider.getID());
 			}

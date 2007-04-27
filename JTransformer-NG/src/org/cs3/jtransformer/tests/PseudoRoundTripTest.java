@@ -10,9 +10,9 @@ import java.util.Map;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologException;
@@ -113,7 +113,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                                         + i + ": " + orig.getName(),
                                 origR == genR);
                     } catch (IOException e) {
-                        org.cs3.pl.common.Debug.report(e);
+                        JTDebug.report(e);
                     }
                 }
                 try {
@@ -123,7 +123,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                     throw new RuntimeException(e);
                 }
 
-                org.cs3.pl.common.Debug.info("compared " + i
+                JTDebug.info("compared " + i
                         + " chars succsessfully.");
                 return false;
 
@@ -149,7 +149,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             case IResource.FILE:
                 IFile file = (IFile) resource;
                 if (!file.isAccessible()) {
-                    Debug.warning("RENAMER:not accsessible: "
+                    JTDebug.warning("RENAMER:not accsessible: "
                             + file.getFullPath());
                     break;
                 }
@@ -165,7 +165,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                             file.move(file.getFullPath().addFileExtension(
                                     suffix), true, null);
                         } catch (Throwable t) {
-                            Debug.report(t);
+                            JTDebug.report(t);
                         }
 
                         break;
@@ -196,7 +196,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
      */
     public PseudoRoundTripTest(String name) {
         super(name);
-        Debug.setOutputStream(System.err);
+        JTDebug.setOutputStream(System.err);
         this.packageName = name;
     }
 
@@ -206,7 +206,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
      */
     public PseudoRoundTripTest(String name, String packageName) {
         super(name);
-        Debug.setOutputStream(System.err);
+        JTDebug.setOutputStream(System.err);
         this.packageName = packageName;
     }
 
@@ -258,7 +258,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
         Util.startTime("untilBuild");
         IProject project = getTestProject();
 
-        org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
+        JTDebug.info("Running (Pseudo)roundtrip in "
                 + packageName);
         //retrieve all cus in package
         ICompilationUnit[] cus = getCompilationUnitsRecursive(packageName);
@@ -288,7 +288,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                 .queryOnce("toplevelT(_,_,_,_)");
 
         if(r==null){
-            Debug.debug("debug");
+            JTDebug.debug("debug");
         }
         
         assertNotNull(packageName + ": no toplevelT????", r);
@@ -375,7 +375,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                 try {
                     folder.accept(comparator);
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }
@@ -397,7 +397,7 @@ public class PseudoRoundTripTest extends FactGenerationTest {
                     root.accept(renamer);
                     root.refreshLocal(IResource.DEPTH_INFINITE, null);
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }

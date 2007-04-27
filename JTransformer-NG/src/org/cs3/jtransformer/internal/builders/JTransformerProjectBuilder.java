@@ -1,10 +1,10 @@
 package org.cs3.jtransformer.internal.builders;
 import java.util.Map;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
-import org.cs3.pl.common.Debug;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -50,55 +50,57 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 	 */
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
-		Debug.debug("JTransformerPRojectBuilder triggered.");
+		JTDebug.debug("JTransformerPRojectBuilder triggered.");
 		
 		try {
 			
 			if (getProject() == null) {
-				Debug.warning("Project is NULL!!");
+				JTDebug.warning("Project is NULL!!");
 				return null;
 			}
 						
 			if(! getProject().hasNature(JavaCore.NATURE_ID)){
-				Debug.warning("Project does not have a Java nature!");
+				JTDebug.warning("Project does not have a Java nature!");
 				return null;
 			}
 			IJavaProject javaProject = (IJavaProject) getProject().getNature(
 					JavaCore.NATURE_ID);
 			
 			if(javaProject==null){
-				Debug.warning("Java Project is NULL!!");
+				JTDebug.warning("Java Project is NULL!!");
 				return null;
 			}
 			
 			if(! getProject().hasNature(JTransformer.NATURE_ID)){
-				Debug.warning("Project does not have a JTransformer nature!");
+				JTDebug.warning("Project does not have a JTransformer nature!");
 				return null;
 			}
-			JTransformerProjectNature nature = JTransformerPlugin.getNature(getProject());
+			JTransformerNature nature = JTransformerPlugin.getNature(getProject());
 			if(nature==null){
-				Debug.warning("JTransformer Nature is NULL!!");
+				JTDebug.warning("JTransformer Nature is NULL!!");
 				return null;
 			}
 			
 			
 			int flags = FactBaseBuilder.IS_ECLIPSE_BUILD;
-			switch (kind) {
-				case FULL_BUILD :
-					//updateProjectLocationInFactbase(nature);
-			    	Debug.debug("JT: started full build for project: " + getProject().getName());
-					nature.getFactBaseBuilder().build(null, flags, monitor);
-					break;
-				case INCREMENTAL_BUILD :
-				case AUTO_BUILD :
-					//ld: i currently don't see any reason to
-					//differantiate here.					
-					//builder.incrementalBuild(getDelta(getProject()),monitor);
-			    	Debug.debug("JT: started "+ 
-			    			(kind == INCREMENTAL_BUILD ? "incremental" : "auto")
-			    			+ " build for project: " + getProject().getName());
-				    nature.getFactBaseBuilder().build(getDelta(getProject()),flags,monitor);
-					break;
+			if(!JTransformerPlugin.getDefault().ignoreThisBuild(getProject())) {
+				switch (kind) {
+					case FULL_BUILD :
+						//updateProjectLocationInFactbase(nature);
+				    	JTDebug.debug("JT: started full build for project: " + getProject().getName());
+						nature.getFactBaseBuilder().build(null, flags, monitor);
+						break;
+					case INCREMENTAL_BUILD :
+					case AUTO_BUILD :
+						//ld: i currently don't see any reason to
+						//differantiate here.					
+						//builder.incrementalBuild(getDelta(getProject()),monitor);
+				    	JTDebug.debug("JT: started "+ 
+				    			(kind == INCREMENTAL_BUILD ? "incremental" : "auto")
+				    			+ " build for project: " + getProject().getName());
+					    nature.getFactBaseBuilder().build(getDelta(getProject()),flags,monitor);
+						break;
+				}
 			}
 			monitor.done();
 		}
@@ -106,7 +108,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 		    throw e;
 		}
 		catch (Throwable e) {
-			Debug.report(e);		
+			JTDebug.report(e);		
 			throw new CoreException(new Status(IStatus.ERROR,JTransformer.PLUGIN_ID,IResourceStatus.BUILD_FAILED,"Problems during build",e));
 		}
 		return null;
@@ -115,7 +117,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 //	 * updates the projectT/4 fact
 //	 * @param nature
 //	 */
-//	private void updateProjectLocationInFactbase(JTransformerProjectNature nature) {
+//	private void updateProjectLocationInFactbase(JTransformerNature nature) {
 //		PrologSession session = null;
 //		try {
 //			session = nature.getPrologInterface().getSession();
@@ -141,11 +143,11 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
      */
     protected void clean(IProgressMonitor monitor) throws CoreException {
         try {
-            JTransformerProjectNature nature = JTransformerPlugin.getNature( getProject());
+            JTransformerNature nature = JTransformerPlugin.getNature( getProject());
             nature.getFactBaseBuilder().clean(monitor);
         }
             catch (Throwable e) {
-                Debug.report(e);
+                JTDebug.report(e);
     			throw new CoreException(new Status(IStatus.ERROR,JTransformer.PLUGIN_ID,IResourceStatus.BUILD_FAILED,"Problems during clean",e));
             }
 		}

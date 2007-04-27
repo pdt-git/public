@@ -5,16 +5,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
 import org.cs3.jtransformer.internal.dialog.RemoveJTransformerNatureDialog;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
+import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -76,7 +77,7 @@ public class JTransformerNatureAssigner {
 					.getErrorMessageProvider(), UIUtils.getDisplay()
 					.getActiveShell(), JTransformer.ERR_UNKNOWN,
 					JTransformer.ERR_CONTEXT_EXCEPTION, e);
-			Debug.report(new Error(e));
+			JTDebug.report(new Error(e));
 			e.printStackTrace();
 		}
 		return STATUS_CANCELLED;
@@ -96,7 +97,6 @@ public class JTransformerNatureAssigner {
 		if (!ok) {
 			return false;
 		}
-
 		removeNatures(dialog);
 		return true;
 	}
@@ -104,9 +104,18 @@ public class JTransformerNatureAssigner {
 	private void removeNatures(RemoveJTransformerNatureDialog dialog) throws CoreException {
 		for (Iterator iter = projects.iterator(); iter.hasNext();) {
 			IProject project = (IProject) iter.next();
-			removeNature(project, dialog
-					.isDeleteOutputProject(), dialog
-					.isRemoveOutputProjectReference());
+			try {
+				removeNature(project, dialog
+						.isDeleteOutputProject(), dialog
+						.isRemoveOutputProjectReference());
+			} catch(CoreException core) {
+				core.printStackTrace();
+				final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				MessageDialog.openError(shell,"JTransformer", 
+						"Could not remove the JTransformer nature for project'" + project.getName() +
+						"' because the following exception occurred:\n" + core.getLocalizedMessage());
+
+			}
 		}
 	}
 
@@ -119,10 +128,11 @@ public class JTransformerNatureAssigner {
 		TopoSortProjects sorter = new TopoSortProjects();
 		List sortedProjects = sorter.sort(includeReferencedProjects,projects);
 		includeReferencedProjects = false;
-
+		
 		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
 		    addNature((IProject)iter.next(), factbaseName);
 		}
+		JTransformerPlugin.getNature((IProject)projects.get(0)).getPrologInterface().start();
 		return true;
 	}
 
@@ -154,12 +164,33 @@ public class JTransformerNatureAssigner {
 //					"Please change the source compatibility to 1.4 in the project preferences.");
 //						return false;
 //		}
-		
 			IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 	    	project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),factbaseName);
-
 			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
+			
+//			final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+//			
+//			List sharingProjects = new ArrayList();
+//			for (int i = 0; i < projects.length; i++) {
+//				if(projects[i].isOpen()){
+//					String runtimeKey = JTransformerPlugin.getDefault().getPreferenceValue(projects[i], 
+//							JTransformer.PROLOG_RUNTIME_KEY, null);
+//					if(runtimeKey != null && runtimeKey.equals(factbaseName) &&
+//					   projects[i].hasNature(JTransformer.NATURE_ID) ){
+//						sharingProjects.add(projects[i]);
+//					}
+//				}
+//			}
 
+//			if(sharingProjects.size() > 0 && 
+//			   JTransformerPlugin.getNature(((IProject)sharingProjects.get(0))).getPrologInterface().isDown())
+			
+			JTransformerSubscription subcription = JTransformerPlugin.getJTransformerSubscription(factbaseName);
+			if(subcription != null && subcription.isPrologInterfaceUp())
+			{
+		    	JTransformerPlugin.getDefault().setIgnoreThisBuild(project);
+			}
+			
 		    addJTransformerNature(project);
 
 			destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
@@ -171,10 +202,10 @@ public class JTransformerNatureAssigner {
 		    return true;
 	}
 
-	private void removeNature(IProject project, boolean deleteOutputProject, boolean removeOutputProjectReference) throws CoreException {
+	public void removeNature(IProject project, boolean deleteOutputProject, boolean removeOutputProjectReference) throws CoreException {
 
 		JTUtils.clearAllMarkersWithJTransformerFlag(project);
-		JTransformerProjectNature.removeJTransformerNature(project);
+		JTransformerNature.removeJTransformerNature(project);
 		final IProject outputProject = JTUtils.getOutputProject(project);
 		if(removeOutputProjectReference) {
 			removeOutputProjectReference(project, outputProject);
@@ -281,7 +312,6 @@ public class JTransformerNatureAssigner {
 	 * @throws CoreException
      */
     private void addJTransformerNature(IProject project) throws CoreException {
-    	
         IProjectDescription ipd = project.getDescription();
         String[] oldNIDs = ipd.getNatureIds();
         String[] newNIDs = new String[oldNIDs.length + 1];

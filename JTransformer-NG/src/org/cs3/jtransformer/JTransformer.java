@@ -70,7 +70,7 @@ public final class JTransformer {
     /**
      * the id of the JTransformer Project Nature
      */
-    public final static String NATURE_ID = "org.cs3.jtransformer.JTransformerProjectNature";
+    public final static String NATURE_ID = "org.cs3.jtransformer.JTransformerNature";
     
     /**
      * the id of the JTransformer Project Builder 
@@ -193,15 +193,11 @@ public final class JTransformer {
  */	
 public static final ISchedulingRule JTransformer_BUILDER_SCHEDULING_RULE = new ProxyRule();
 
+public static final String PREF_CLIENT_LOG_FILE = "jtransformer.logfile";
 
+public static final String PREF_DEBUG_LEVEL = "jtransformer.debug.level";
 
-
-
-
-
-
-
-
+public static final String SUBSCRIPTION_PREFIX = "JTransformerSubscription_";
 
 /**
  * the idea is to keep the classloader from instantiating the resources plugin.

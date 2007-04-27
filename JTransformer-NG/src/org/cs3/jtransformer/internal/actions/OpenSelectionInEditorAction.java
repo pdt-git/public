@@ -2,17 +2,12 @@ package org.cs3.jtransformer.internal.actions;
 
 import java.util.Map;
 
-import org.cs3.jtransformer.JTransformer;
-import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
 
@@ -25,7 +20,7 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 //	 */
 //	static PrologSession getPrologSession() throws CoreException, PrologInterfaceException {
 //		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-//		JTransformerProjectNature nature = null;
+//		JTransformerNature nature = null;
 //		for (int i = 0; i < projects.length; i++) {
 //			if(projects[i].isAccessible() && projects[i].hasNature(JTransformer.NATURE_ID)){
 //				nature = JTransformerPlugin.getNature(projects[i]);
@@ -77,10 +72,10 @@ public class OpenSelectionInEditorAction extends ConsoleSelectionAction{
 				JTUtils.selectInEditor(start, length, filename);
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 		} catch (PrologInterfaceException e)
 		{
-			Debug.report(e);
+			JTDebug.report(e);
 		} finally {
 			if(session != null) {
 				session.dispose();

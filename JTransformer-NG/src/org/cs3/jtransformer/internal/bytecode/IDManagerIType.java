@@ -208,7 +208,7 @@ public class IDManagerIType {
 		case 'Z':
 			return "boolean";
 		case 'Q':
-			//Debug.warning("The class " + envClass.getFullyQualifiedName() + " is available in SC.");
+			//JTDebug.warning("The class " + envClass.getFullyQualifiedName() + " is available in SC.");
 			String simpleClassName = Signature.getTypeErasure(s);
 			return resolveClassNameFromSimpleName(Signature.toString(simpleClassName));
 		case 'T':

@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -52,7 +52,7 @@ public class InitializerTest extends FactGenerationTest {
      * @see org.cs3.jtransformer.tests.SuiteOfTestCases#setUp()
      */
     protected void setUp() throws Exception {
-        Debug.debug("setting up testPEFS");
+        JTDebug.debug("setting up testPEFS");
         setTestDataLocator(JTransformerPlugin.getDefault().getResourceLocator(
                 "testdata-facts"));
         super.setUp();
@@ -85,7 +85,7 @@ public class InitializerTest extends FactGenerationTest {
     }
 
     public void tearDown() {
-        Debug.debug("tearing down testPEFS: " + (passed ? "passed" : "failed"));
+        JTDebug.debug("tearing down testPEFS: " + (passed ? "passed" : "failed"));
     }
 
     public void testPEFs() throws CoreException, IOException, PrologInterfaceException {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.cs3.pl.common.Debug;
+import org.cs3.jtransformer.JTDebug;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -102,7 +101,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
-import org.eclipse.jdt.internal.core.search.matching.DeclarationOfAccessedFieldsPattern;
 
 /**
  * Translates a java source file into Prolog facts. This class
@@ -622,7 +620,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 				buffer = iCompilationUnit.getBuffer();
 		} catch (JavaModelException e) {
 			// TODO Auto-generated catch block
-			Debug.report(e);
+			JTDebug.report(e);
 		}
 		return buffer.getText(startPos+ offsetdiff,length+lendiff-offsetdiff);		
 	}
@@ -2368,9 +2366,6 @@ public class FactGenerator extends ASTVisitor implements Names {
             ASTNode theEnc = getEnclosingNode(theNode);
             ITypeBinding theType = theNode.resolveBinding().getType();
             String theName = "'" + theNode.getName().getIdentifier() + "'";
-            if(theName.equals("'sub'")){
-                Debug.debug("debug");
-            }
             Expression theInitializer = theNode.getInitializer();
             String[] args =
 				new String[] {
@@ -2613,7 +2608,7 @@ public class FactGenerator extends ASTVisitor implements Names {
 	 */
 	private void generatePackageFactIfNecessary(IBinding binding) {
 		if (binding == null){
-			Debug.warning("generatePackageFactIfNecessary called on null binding");
+			JTDebug.warning("generatePackageFactIfNecessary called on null binding");
 			return;
 		}
 		String fullName = binding.getName();

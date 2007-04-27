@@ -4,23 +4,20 @@ package org.cs3.jtransformer.internal.actions;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
 import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -62,10 +59,10 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 				scr.generateDirtyClasses();
 			} catch (IOException e) {
 				e.printStackTrace();
-				Debug.report(e);
+				JTDebug.report(e);
 			} catch (CoreException e) {
 				e.printStackTrace();
-				Debug.report(e);
+				JTDebug.report(e);
 			} catch (PrologInterfaceException e)
 			{
 				UIUtils.logAndDisplayError(
@@ -116,10 +113,10 @@ public class RegenAction implements IWorkbenchWindowActionDelegate {
 			window.run(true,true, new RegenExecution());
 		} catch (InvocationTargetException e) {
 			// TODO Auto-generated catch block
-			Debug.report(e);
+			JTDebug.report(e);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
-			Debug.report(e);
+			JTDebug.report(e);
 		}
 		
 	}

@@ -9,9 +9,9 @@ import java.util.BitSet;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -106,10 +106,10 @@ public class WindoofTest extends FactGenerationTest {
                                         + i + ": " + orig.getName(),
                                 origR == genR);
                     } catch (IOException e) {
-                        org.cs3.pl.common.Debug.report(e);
+                        JTDebug.report(e);
                     }
                 }
-                org.cs3.pl.common.Debug.info("compared " + i
+                JTDebug.info("compared " + i
                         + " chars succsessfully.");
                 return false;
 
@@ -135,7 +135,7 @@ public class WindoofTest extends FactGenerationTest {
             case IResource.FILE:
                 IFile file = (IFile) resource;
                 if (!file.isAccessible()) {
-                    Debug.warning("RENAMER:not accsessible: "
+                    JTDebug.warning("RENAMER:not accsessible: "
                             + file.getFullPath());
                     break;
                 }
@@ -151,7 +151,7 @@ public class WindoofTest extends FactGenerationTest {
                             file.move(file.getFullPath().addFileExtension(
                                     suffix), true, null);
                         } catch (Throwable t) {
-                            Debug.report(t);
+                            JTDebug.report(t);
                         }
 
                         break;
@@ -201,7 +201,7 @@ public class WindoofTest extends FactGenerationTest {
         ResourceFileLocator l = JTransformerPlugin.getDefault().getResourceLocator("");
         File r = l.resolve("testdata-roundtrip.zip");
         Util.unzip(r);
-        org.cs3.pl.common.Debug.info("setUpOnce caled for key  " + getKey());
+        JTDebug.info("setUpOnce caled for key  " + getKey());
         setAutoBuilding(false);
         PrologInterface pif = getTestJTransformerProject().getPrologInterface();
         if(!pif.isUp()){
@@ -223,7 +223,7 @@ public class WindoofTest extends FactGenerationTest {
         IProject project = getTestProject();
         IJavaProject javaProject = getTestJavaProject();
 
-        org.cs3.pl.common.Debug.info("Running (Pseudo)roundtrip in "
+        JTDebug.info("Running (Pseudo)roundtrip in "
                 + packageName);
         //retrieve all cus in package
         ICompilationUnit[] cus = getCompilationUnitsInFolder(packageName);
@@ -308,7 +308,7 @@ public class WindoofTest extends FactGenerationTest {
                 try {
                     folder.accept(comparator);
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }
@@ -330,7 +330,7 @@ public class WindoofTest extends FactGenerationTest {
                     root.accept(renamer);
                     root.refreshLocal(IResource.DEPTH_INFINITE, null);
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }
