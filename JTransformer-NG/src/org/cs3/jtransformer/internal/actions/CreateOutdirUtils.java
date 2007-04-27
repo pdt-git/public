@@ -3,7 +3,7 @@ package org.cs3.jtransformer.internal.actions;
 import java.util.List;
 import java.util.Stack;
 
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -91,7 +91,7 @@ public class CreateOutdirUtils
 					destProject.open(null);
 				
 				// FIXME: schmatz: The next line consumes much time!!!
-				JTransformerProjectNature.removeJTransformerNature(destProject);
+				JTransformerNature.removeJTransformerNature(destProject);
 	
 				destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 			}

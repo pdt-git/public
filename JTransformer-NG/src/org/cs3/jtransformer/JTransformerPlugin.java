@@ -2,8 +2,12 @@
  */
 package org.cs3.jtransformer;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,11 +19,13 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
+import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProviderEvent;
@@ -93,14 +99,17 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
      */
     public void start(BundleContext context) throws Exception {
-        super.start(context);        
+        super.start(context);
         initOptions();
+        reconfigureDebugOutput();
         getPluginPreferences();
         collectListeners();
         ResourcesPlugin.getWorkspace().addResourceChangeListener(
         		new JTransformerProjectChangeListener(),
         		IResourceChangeEvent.PRE_CLOSE | IResourceChangeEvent.PRE_DELETE |
         		IResourceChangeEvent.POST_CHANGE);
+        PrologInterfaceRegistry pir = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+        JTDebug.debug("Prolog Interface keys found: " + pir.getAllKeys());
     }
 
     /**
@@ -108,11 +117,16 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      *  
      */
     private void initOptions() throws CoreException {
-//        IJavaProject dummyOutput = getDummyOutput();
-//        IClasspathEntry firstSourceFolder = getFirstSourceFolder(dummyOutput);
-//        IResource r= ResourcesPlugin.getWorkspace().getRoot().findMember(firstSourceFolder.getPath());
-//        String src= r.getLocation().toOSString();
         String storeFile = getResourceLocator("").resolve("global_pef_store.pl").toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		String fileSep = File.separator;
+		String location = "";
+		try {
+			location = getLocation();
+		} catch (IOException e) {
+			JTDebug.report(e);
+			JTDebug.error("Could not find plugin installation dir.");
+		}
+        
         options = new Option[] { 
 //                new SimpleOption(
 //                JTransformer.PREF_DEFAULT_OUTPUT_PROJECT,
@@ -124,6 +138,17 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 //                "Default output source folder", //$NON-NLS-1$
 //                "Used as default value for JTransformer Projects that do not specify their own output folder.", //$NON-NLS-1$
 //                Option.STRING, src),
+				new SimpleOption(JTransformer.PREF_DEBUG_LEVEL, "Debug Level",
+						"Determines the verbosity of the debug log file.",
+						Option.ENUM, "WARNING", new String[][] {
+								{ "error", "ERROR" }, { "warning", "WARNING" },
+								{ "info", "INFO" }, { "debug", "DEBUG" } }),
+				new SimpleOption(
+						JTransformer.PREF_CLIENT_LOG_FILE,
+						"Log file location",
+						"A file to which debug output of JTransformer will be writen",
+						Option.FILE, location + fileSep + "jtransformer.log"),
+        		
                 new SimpleOption(
                         JTransformer.PREF_USE_PEF_STORE,
                         "Use PEF store (EXPERIMENTAL)", //$NON-NLS-1$
@@ -144,16 +169,26 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 
     }
 
+	private String getLocation() throws IOException {
+		URL url = JTransformerPlugin.getDefault().getBundle().getEntry("/");
+		String location = null;
+		location = new File(Platform.asLocalURL(url).getFile())
+				.getAbsolutePath();
+		if (location.charAt(location.length() - 1) == File.separatorChar)
+			location = location.substring(0, location.length() - 1);
+		return location;
+	}
+
     
-    public IClasspathEntry getFirstSourceFolder(IJavaProject javaProject) throws JavaModelException {
-        IClasspathEntry[] cp = javaProject.getResolvedClasspath(true);
-        for(int i=0;i<cp.length;i++){
-            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
-               return cp[i];
-            }
-        }
-        return null;
-    }
+//    public IClasspathEntry getFirstSourceFolder(IJavaProject javaProject) throws JavaModelException {
+//        IClasspathEntry[] cp = javaProject.getResolvedClasspath(true);
+//        for(int i=0;i<cp.length;i++){
+//            if(cp[i].getEntryKind()==IClasspathEntry.CPE_SOURCE){
+//               return cp[i];
+//            }
+//        }
+//        return null;
+//    }
 
 //    /**
 //     * @return
@@ -246,7 +281,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
             try {
                 location = new File(Platform.asLocalURL(url).getFile());
             } catch (IOException t) {
-                Debug.report(t);
+                JTDebug.report(t);
                 throw new RuntimeException(t);
             }
 
@@ -260,7 +295,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         IExtensionPoint point = registry.getExtensionPoint("org.cs3.jtransformer", //$NON-NLS-1$
                 JTransformer.EP_PROJECT_LISTENER);
         if (point == null) {
-            Debug.error("could not find the extension point " //$NON-NLS-1$
+            JTDebug.error("could not find the extension point " //$NON-NLS-1$
                     + JTransformer.EP_PROJECT_LISTENER);
             return;
         }
@@ -272,7 +307,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
                 for (int j = 0; j < celem.length; j++) {
 
                     if (!celem[j].getName().equals("listener")) { //$NON-NLS-1$
-                        Debug.warning("hmmm... asumed a listener, but got a " //$NON-NLS-1$
+                        JTDebug.warning("hmmm... asumed a listener, but got a " //$NON-NLS-1$
                                 + celem[j].getName());
                     } else {
                         JTransformerProjectListener listener = (JTransformerProjectListener) celem[j]
@@ -282,7 +317,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
                 }
             }
         } catch (CoreException e) {
-            Debug.report(e);
+            JTDebug.report(e);
         }
     }
 
@@ -368,7 +403,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 			}
 			return defaultValue;
 		} catch (CoreException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -420,13 +455,14 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 				IProject project = projects[i];
 
 				if (project.isAccessible() && project.hasNature(JTransformer.NATURE_ID)) {
-					
 					getNature(project).reconfigure();
 					
 				}
 			}
+			reconfigureDebugOutput();
+
 		} catch (Throwable e) {
-			Debug.report(e);
+			JTDebug.report(e);
 			throw new RuntimeException(e);
 		}
     }
@@ -548,10 +584,10 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	 * @return
 	 * @throws CoreException
 	 */
-	static public JTransformerProjectNature getNature(IProject project) throws CoreException {
+	static public JTransformerNature getNature(IProject project) throws CoreException {
 		
 		synchronized (JTransformerPlugin.class) {
-			JTransformerProjectNature nature = (JTransformerProjectNature)project.getNature(JTransformer.NATURE_ID);
+			JTransformerNature nature = (JTransformerNature)project.getNature(JTransformer.NATURE_ID);
 			if(nature != null) {
 				natures.put(project.getName(),nature);
 			}
@@ -565,8 +601,8 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	 * @return
 	 * @throws CoreException
 	 */
-	static public JTransformerProjectNature getNatureIfAvailable(IProject project) throws CoreException {
-		return (JTransformerProjectNature)natures.get(project.getName());
+	static public JTransformerNature getNatureIfAvailable(IProject project) throws CoreException {
+		return (JTransformerNature)natures.get(project.getName());
 	}
 	/**
 	 * FIXME: rename and document!
@@ -583,4 +619,57 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 			plugin.getPreferenceValue(JTransformer.PREF_REVERSE_INDEX, "false")).
 				  booleanValue();
 	}
+	
+	private void reconfigureDebugOutput() throws FileNotFoundException {
+		String debugLevel = getPreferenceValue(JTransformer.PREF_DEBUG_LEVEL, "WARNING");
+		JTDebug.setDebugLevel(debugLevel);
+		String logFileName = getPreferenceValue(JTransformer.PREF_CLIENT_LOG_FILE, null);
+		if (logFileName != null && !logFileName.equals("")) {
+			System.out.println("debug output is written to: " + logFileName);
+			File logFile = new File(logFileName);
+			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
+					new FileOutputStream(logFile, true));
+			JTDebug.setOutputStream(new PrintStream(bufferedOutputStream));
+		} else {
+			JTDebug.setOutputStream(System.err);
+		}
+	}
+
+	Set ignoreBuild = new HashSet();
+	/**
+	 * Make sure that the next build process is ignored.
+	 * 
+	 * @param project
+	 * @return
+	 */
+	synchronized public boolean ignoreThisBuild(IProject project) {
+		if(ignoreBuild.contains(project.getName())){
+			ignoreBuild.remove(project.getName());
+			return true;
+		}
+		return false;
+	}
+	
+	synchronized public void setIgnoreThisBuild(IProject project) {
+		if(ignoreBuild.contains(project.getName())){
+			JTDebug.error("unexpected error in JTransformerPlugin.setIgnoreThisBuild");
+		}
+		ignoreBuild.add(project.getName());
+	}
+	
+	/**
+	 * Returns the subscription associated with the prolog runtime key <i>key</i>.
+	 * The JTransformerSubscription is created by the first JTransformerNature requesting the Subscription.
+	 *
+	 * 
+	 * @return returns the subscription associated with the prolog runtime key <i>key</i>. If there is no
+	 *  subscription, yet the method return null.
+	 */
+	public static JTransformerSubscription getJTransformerSubscription(String key) {
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		synchronized (reg) {
+			return (JTransformerSubscription)reg.getSubscription(JTransformer.SUBSCRIPTION_PREFIX + key);
+		}
+	}
+
 }

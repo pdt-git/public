@@ -1,10 +1,6 @@
 package org.cs3.jtransformer.internal.actions;
 
-import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;

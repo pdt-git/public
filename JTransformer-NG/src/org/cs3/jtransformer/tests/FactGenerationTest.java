@@ -22,11 +22,11 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Vector;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
 import org.cs3.jtransformer.internal.actions.JTransformerNatureAssigner;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
@@ -221,7 +221,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                         install_impl(string);
                     }
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }
@@ -240,7 +240,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 try {
                     install_impl(string);
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }
@@ -325,7 +325,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                         uninstall_impl(string);
                     }
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
 
@@ -829,7 +829,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 
             public boolean visit(IResource resource) throws CoreException {
 
-                Debug.debug("Visiting: " + resource);
+                JTDebug.debug("Visiting: " + resource);
 
                 if (resource.getType() == IResource.ROOT)
                     return true;
@@ -846,7 +846,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 if (resource.getType() == IResource.FILE) {
                     if (resource.getFileExtension() != null
                             && resource.getFileExtension().equals("java")) {
-                        Debug.debug("FactGenerationTest.collectAll: Adding " + resource + " to toProcess");
+                        JTDebug.debug("FactGenerationTest.collectAll: Adding " + resource + " to toProcess");
                         toProcess.add(resource);
                     }
                 }
@@ -1062,7 +1062,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     /**
      * convenience method.
      * 
-     * @see JTransformerProjectNature.writeFacts()
+     * @see JTransformerNature.writeFacts()
      * @param icu
      * @param outFile
      * @return
@@ -1083,7 +1083,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     /**
      * convenience method.
      * 
-     * @see JTransformerProjectNature.writeFacts()
+     * @see JTransformerNature.writeFacts()
      * @param icu
      * @param outFile
      * @return
@@ -1341,7 +1341,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 try {
                     createFile_impl(filename, content);
                 } catch (Throwable e) {
-                    Debug.report(e);
+                    JTDebug.report(e);
                     throw new RuntimeException(e);
                 }
             }
@@ -1378,7 +1378,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
             }
 
         } catch (Throwable dummeNuttenScheisse) {
-            Debug.debug("bla bla:" + file.getFullPath());
+            JTDebug.debug("bla bla:" + file.getFullPath());
             throw new RuntimeException(dummeNuttenScheisse);
         }
         if (!file.isSynchronized(IResource.DEPTH_INFINITE)) {
@@ -1505,10 +1505,10 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
 			Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD,null);
 			Platform.getJobManager().join(ResourcesPlugin.FAMILY_MANUAL_BUILD,null);
 		} catch (OperationCanceledException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 			throw new RuntimeException(e);
 		} catch (InterruptedException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -1526,7 +1526,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         try {
 			disableGenerationOfSyntheticConstructors();
 		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
+			JTDebug.rethrow(e);
 		}
         
 //        _ProgressMonitor m = new _ProgressMonitor();

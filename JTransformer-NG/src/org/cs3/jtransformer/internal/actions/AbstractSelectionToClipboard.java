@@ -1,11 +1,11 @@
 package org.cs3.jtransformer.internal.actions;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.astvisitor.SectionFactGenerator;
 import org.cs3.jtransformer.internal.astvisitor.VariableIdResolver;
 import org.cs3.jtransformer.internal.astvisitor.VariableTypeResolver;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -73,7 +73,7 @@ public abstract class AbstractSelectionToClipboard implements IWorkbenchWindowAc
 					"Error occurred while generating facts", e
 							.getLocalizedMessage());
 			e.printStackTrace();
-			Debug.report(e);
+			JTDebug.report(e);
 		}
 	}
 	

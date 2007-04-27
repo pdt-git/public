@@ -148,7 +148,7 @@ private List clauses;
 //			out.write(string);
 //		} catch (IOException e)
 //		{
-//			Debug.report(e);
+//			JTDebug.report(e);
 //			throw new RuntimeException(e);
 //		}
 //
@@ -192,7 +192,7 @@ private List clauses;
 //       try {
 //        out.close();
 //    } catch (IOException e) {
-//        Debug.report(e);
+//        JTDebug.report(e);
 //        throw new RuntimeException(e);
 //    }
 
@@ -207,7 +207,7 @@ private List clauses;
 //        try {
 //            out.flush();
 //        } catch (IOException e) {
-//            Debug.report(e);
+//            JTDebug.report(e);
 //            throw new RuntimeException(e);
 //        }
 

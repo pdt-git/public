@@ -1,10 +1,10 @@
 package org.cs3.jtransformer.internal.bytecode;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.internal.astvisitor.FQNTranslator;
 import org.cs3.jtransformer.internal.astvisitor.FactGenerationToolBox;
 import org.cs3.jtransformer.internal.astvisitor.IPrologWriter;
 import org.cs3.jtransformer.internal.astvisitor.IdentityFQNTranslator;
-import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.Flags;
@@ -128,7 +128,7 @@ public class ByteCodeFactGeneratorIType {
 	
 	public void writeAllFacts() throws JavaModelException{
 		if (targetClass == null){
-			Debug.error("Bad Class");
+			JTDebug.error("Bad Class");
 		}
 		
 		IType [] inner = targetClass.getTypes();
@@ -282,7 +282,7 @@ public class ByteCodeFactGeneratorIType {
 			}
 		} catch(NumberFormatException nfe){
 		    //This seems to be a bug in  org.eclipse.jdt.internal.core.SourceField.getConstant()
-		    Debug.report(nfe);
+		    JTDebug.report(nfe);
 		}
 		String [] args = new String [] {
 				id, 

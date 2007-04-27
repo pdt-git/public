@@ -7,9 +7,9 @@ import java.io.IOException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
@@ -70,7 +70,7 @@ public class BuilderTest extends FactGenerationTest {
 		try{
 			pif.stop();
 		}catch(Throwable t){
-			Debug.report(t);
+			JTDebug.report(t);
 		}
 	}
 	/**
@@ -79,7 +79,7 @@ public class BuilderTest extends FactGenerationTest {
 	 *  
 	 */
 	public void testRestart_with_pef_store() throws Throwable {
-		Debug.setDebugLevel("DEBUG");
+		JTDebug.setDebugLevel("DEBUG");
 	    JTransformerPlugin.getDefault().setPreferenceValue(JTransformer.PREF_USE_PEF_STORE,"true");
 	    PrologInterface pif = getTestJTransformerProject().getPrologInterface();
 		PrologSession session = pif.getSession();

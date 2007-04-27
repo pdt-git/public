@@ -2,10 +2,10 @@ package org.cs3.jtransformer.internal.actions;
 
 import java.util.Iterator;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.internal.astvisitor.FQNTranslator;
 import org.cs3.jtransformer.internal.astvisitor.IIDResolver;
 import org.cs3.jtransformer.internal.astvisitor.VariableTypeResolver;
-import org.cs3.pl.common.Debug;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -34,7 +34,7 @@ public class AddingVariableTypeResolver extends VariableTypeResolver {
 					buf.append("add(packageT(Pckg" + var +", '" +
 							typeBinding.getPackage().getName()+"')),\n");
 				else 
-					Debug.warning("VariableTypeResolver: The nested class '" + typeBinding.getQualifiedName() + "' will not be fully qualified.");
+					JTDebug.warning("VariableTypeResolver: The nested class '" + typeBinding.getQualifiedName() + "' will not be fully qualified.");
 				buf.append("add(classDefT("+var+", Pckg" + var +", '" +typeBinding.getName()+"',_)),\n");
 			}
 			buf.append("\n%%% selection %%%\n");

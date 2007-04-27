@@ -53,12 +53,12 @@
    </extension>
 
  <extension
-         id="JTransformerProjectNature"
+         id="JTransformerNature"
          name="JTransformer Nature"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="org.cs3.jtransformer.internal.natures.JTransformerProjectNature">
+               class="org.cs3.jtransformer.internal.natures.JTransformerNature">
          </run>
       </runtime>
       <builder
@@ -143,7 +143,7 @@
           id="org.cs3.jtransformer.properties.jtransformerPropertyPage">
 		  <filter
                name="nature"
-               value="org.cs3.jtransformer.JTransformerProjectNature"/>
+               value="org.cs3.jtransformer.JTransformerNature"/>
     </page>
  </extension> 
       <extension-point id="projectlistener" name="JTransformer Project Listener" schema="schema/projectlistener.exsd"/>

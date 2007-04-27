@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
@@ -22,12 +23,13 @@ import org.cs3.jtransformer.JTransformerProjectListener;
 import org.cs3.jtransformer.internal.astvisitor.DefaultGenerationToolbox;
 import org.cs3.jtransformer.internal.astvisitor.FactGenerationToolBox;
 import org.cs3.jtransformer.internal.astvisitor.FactGenerator;
+import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -121,10 +123,10 @@ public class FactBaseBuilder {
         	JTUtils.clearAllMarkersWithJTransformerFlag(project);
 
             if (building) {
-                Debug.warning("skipping build");
+                JTDebug.warning("skipping build");
                 return;
             } else {
-                Debug.warning("doing build");
+                JTDebug.warning("doing build");
             }
             building = true;
             if (monitor == null) {
@@ -152,7 +154,7 @@ public class FactBaseBuilder {
             //IMarker marker = project.createMarker(IMarker.SEVERITY_ERROR);//JTransformer.PROBLEM_MARKER_ID);
 //            marker.setAttribute(IMarker.MESSAGE,
 //                    "Could not create PEFs for Project.");
-            Debug.report(t);
+            JTDebug.report(t);
 
         } finally {
 			//jobManager.endRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
@@ -190,13 +192,14 @@ public class FactBaseBuilder {
 
             session.queryOnce("removeJavaErrorMarker");
 
-            Debug.info("Resource delta recieved: " + delta);
+            JTDebug.info("Resource delta recieved: " + delta);
             SubProgressMonitor submon = new SubProgressMonitor(monitor, 10,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             project.refreshLocal(IResource.DEPTH_INFINITE, null);
             if (delta == null) {
                 collectAll(toProcess);
+                updateProjectLocationInFactbase(session);
             } else {
                 collectDelta(delta, toProcess, toDelete);
             }
@@ -227,6 +230,26 @@ public class FactBaseBuilder {
         }
     }
 
+	/**
+	 * updates the projectT/4 fact
+	 * 
+	 * @throws PrologInterfaceException
+	 * @throws PrologException
+	 */
+	void updateProjectLocationInFactbase(PrologSession session)
+			throws PrologException, PrologInterfaceException {
+		String projectName = JTUtils.quote(project.getName());
+		String query = "retractall(" + Names.PROJECT_T + "(" + projectName
+				+ ",_,_,_ ))" + "," + "assert(" + Names.PROJECT_T + "("
+				+ projectName + ", "
+				+ JTUtils.quote(project.getLocation().toPortableString()) + ","
+				+ JTUtils.quote(JTUtils.getOutputProjectName(project)) + ", "
+				+ JTUtils.quote(JTUtils.getOutputProjectPath(project)) + "))";
+		session.queryOnce(query);
+
+	}
+	
+    
     private void forgetFacts(IProgressMonitor monitor, final Collection toDelete,PrologSession session)
             throws PrologInterfaceException {
         monitor.beginTask(project.getName() + " - deleting obsolete PEFs", toDelete.size());
@@ -302,7 +325,7 @@ public class FactBaseBuilder {
                             break;
                         case IResourceDelta.CHANGED:
                             if (!isStoreUpToDate((IFile) (resource))) { // added,...???
-                                Debug.debug("Adding " + resource
+                                JTDebug.debug("Adding " + resource
                                         + " to toProcess");
 									toProcess.add(resource);
                             }
@@ -332,7 +355,7 @@ public class FactBaseBuilder {
 
             public boolean visit(IResource resource) throws CoreException {
 
-                Debug.debug("Visiting: " + resource);
+                JTDebug.debug("Visiting: " + resource);
 
                 if (resource.getType() == IResource.ROOT)
                     return true;
@@ -350,7 +373,7 @@ public class FactBaseBuilder {
                     if (resource.getFileExtension() != null
                             && resource.getFileExtension().equals("java")
                             && !isStoreUpToDate((IFile) resource)) {
-                        Debug.debug("Adding " + resource + " to toProcess");
+                        JTDebug.debug("Adding " + resource + " to toProcess");
 						
 						if(!inExclusionPattern(resource))
 							toProcess.add(resource);
@@ -363,7 +386,7 @@ public class FactBaseBuilder {
 
     private void forgetFacts(IFile file, boolean removeGlobalIdsFacts, PrologSession session)
             throws PrologInterfaceException {
-        Debug.debug("Forgetting (possible) previous version of " + file);
+        JTDebug.debug("Forgetting (possible) previous version of " + file);
 
         String path = file.getFullPath().toString();
         // ld: an unconsult is not enough due to the multifile-ness of the
@@ -420,8 +443,8 @@ public class FactBaseBuilder {
     private boolean isStoreUpToDate(IFile file) {
         long recordTS = getStoreTimeStamp();
         long fileTS = file.getLocalTimeStamp();
-        Debug.debug("store ts: " + recordTS);
-        Debug.debug("file ts: " + fileTS);
+        JTDebug.debug("store ts: " + recordTS);
+        JTDebug.debug("file ts: " + fileTS);
         // ld:no need to create facts that are already known
         /*
          * FIXME: currently we only ensure that the record is up-to-date. in
@@ -436,10 +459,10 @@ public class FactBaseBuilder {
          * second, which is literaly nothing during test runs.
          */
         if (recordTS > fileTS) {
-            Debug.debug("store is up to date");
+            JTDebug.debug("store is up to date");
             return true;
         }
-        Debug.debug("store is outdated");
+        JTDebug.debug("store is outdated");
         return false;
     }
 
@@ -525,7 +548,7 @@ public class FactBaseBuilder {
 
  public void loadExternalFacts(IProgressMonitor monitor) throws IOException,
             CoreException, PrologInterfaceException {
-        Debug.debug("enter loadExternalFacts");
+        JTDebug.debug("enter loadExternalFacts");
         monitor.beginTask(project.getName() + " - creating external PEFs", IProgressMonitor.UNKNOWN);
         HashSet failed = new HashSet();
         PrologSession session = getPif().getSession();
@@ -553,12 +576,15 @@ public class FactBaseBuilder {
                                     IProgressMonitor.UNKNOWN,
                                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
                             submon.subTask(" - processing " + typeName);
+                            JTDebug.debug("Processing binary type " + typeName + "(begin)");
                             //submon.subTask(" - processing " + typeName);
                             if (submon.isCanceled()) {
                                 throw new OperationCanceledException();
                             }
                             writeFacts(asyncSession, typeName);
+                            JTDebug.debug("Processing binary type " + typeName + "(end)");
                             submon.done();
+                            
                         } catch (ClassNotFoundException e) {
                             failed.add(typeName);
                         }
@@ -572,7 +598,7 @@ public class FactBaseBuilder {
             session.dispose();
             asyncSession.dispose();
             monitor.done();
-            Debug.debug("exit loadExternalFacts");
+            JTDebug.debug("exit loadExternalFacts");
         }
     }
 
@@ -628,7 +654,7 @@ public class FactBaseBuilder {
 		// new Thread(){
 		// public void run() {
 		// as.abort();
-		// Debug.debug("JTransformer builder aborted ");
+		// JTDebug.debug("JTransformer builder aborted ");
 		// }
 		// }.start();
 		//					
@@ -649,7 +675,7 @@ public class FactBaseBuilder {
 			}
 			buf.append(iter.next());
 			num++;
-			if(num == 1000) {
+			if(num == 100) {
 				String out = buf.toString();
 				session.queryOnce( TICKET, out);
 				buf = new StringBuffer();
@@ -705,6 +731,9 @@ public class FactBaseBuilder {
         FactGenerationToolBox box = new DefaultGenerationToolbox();
         new ByteCodeFactGeneratorIType(project, plw, typeName, box)
                 .writeAllFacts();
+        if(typeName.equals("com.sun.image.codec.jpeg.JPEGEncodeParam")){
+        	System.err.println("DEBUG");
+        }
         writeSymtabAndClauses(session, project, clauses, plw, box);
     }
 
@@ -771,7 +800,7 @@ public class FactBaseBuilder {
      * @throws PrologInterfaceException 
      */
     public void clean(IProgressMonitor monitor) throws CoreException, PrologInterfaceException {
-        Debug.info("clean called on project " + project);
+        JTDebug.info("clean called on project " + project);
         project.deleteMarkers(JTransformer.PROBLEM_MARKER_ID, true,
                 IResource.DEPTH_INFINITE);
         PrologSession session = getPif().getSession();
@@ -786,9 +815,9 @@ public class FactBaseBuilder {
                 monitor.done();
             }
         } catch(Throwable t) {
-        	Debug.error(t.getLocalizedMessage());
-        	Debug.dumpStackTrace();
-        	Debug.rethrow(t);
+        	JTDebug.error(t.getLocalizedMessage());
+        	JTDebug.dumpStackTrace();
+        	JTDebug.rethrow(t);
         } finally {
             session.dispose();
         } 
@@ -866,7 +895,7 @@ public class FactBaseBuilder {
 		try {
 			return JTransformerPlugin.getNature(project).getPrologInterface();
 		} catch (CoreException e) {
-			Debug.report(e);
+			JTDebug.report(e);
 		}
 		throw new RuntimeException("Prolog Interface ca not be resolved.");
 	}

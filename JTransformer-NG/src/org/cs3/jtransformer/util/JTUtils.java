@@ -16,12 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
-import org.cs3.jtransformer.internal.natures.JTransformerProjectNature;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
 import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -204,7 +204,7 @@ public class JTUtils
 			List neededFileForCopying = new ArrayList();
 
 			Map classPathReplacement = new HashMap();
-			classPathReplacement.put("(<classpathentry .*?kind=\"lib\" .*?path=\")([^/].*?\"/>)",
+			classPathReplacement.put("(<classpathentry \\s*?kind=\"lib\" \\s*?path=\")([^/].*?\"/>)",
 					"$1/" + srcProject.getName() + "/$2");
 
 			if( !isBundle )
@@ -536,7 +536,7 @@ public class JTUtils
 	 */
 	public static PrologInterface getPrologInterface(IProject project) throws CoreException
 	{
-		JTransformerProjectNature nature = JTransformerPlugin.getNature( project);
+		JTransformerNature nature = JTransformerPlugin.getNature( project);
 		if(nature == null) {
 			throw new IllegalArgumentException("project does not have a JTransformer nature: " + project.getName());
 		}
@@ -575,7 +575,7 @@ public class JTUtils
 				old.refreshLocal(IResource.DEPTH_INFINITE, null);
 			}
 		} catch(ResourceException ex) {
-			Debug.error(ex.getLocalizedMessage());
+			JTDebug.error(ex.getLocalizedMessage());
 		}
 	}
 
@@ -711,7 +711,7 @@ public class JTUtils
 	public static IProject getOutputProject(IProject project) {
 			return ResourcesPlugin.getWorkspace().getRoot().getProject(JTUtils.getOutputProjectName(project));
 	}
-	public static JTransformerProjectNature getNature(IProject project) throws CoreException {
+	public static JTransformerNature getNature(IProject project) throws CoreException {
 		return JTransformerPlugin.getNature(project);
 	}
 	
