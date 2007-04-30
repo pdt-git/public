@@ -4,13 +4,15 @@
 % This module is intended to make working with context terms more simple
 :-module(pdt_util_context,[
 	pdt_define_context/1,
+	pdt_export_context/1,
+	pdt_export_context/2,
 	pdt_undefine_context/1,
 	pdt_undefine_context/2,
 	pdt_context_set_values/4,
 	pdt_context_get_values/3
 ]).
 
-:- module_transparent pdt_define_context/1, pdt_undefine_context/1.
+:- module_transparent pdt_export_context/1,pdt_define_context/1, pdt_undefine_context/1.
 :- dynamic context_pred/3.
 
 
@@ -59,6 +61,17 @@ pdt_define_context(Module,Term):-
     forall(arg(N,Term,ArgName),create_setter(Module,Name,Arity,N,ArgName)),
     create_multi_setter(Module,Term),
     create_multi_getter(Module,Term).
+pdt_export_context(Name):-
+	context_module(Module),
+	pdt_export_context(Module,Name).
+
+pdt_export_context(Module,Name):-
+    forall(context_pred(Module,Name,Ref),
+    	(	clause(Head,_,Ref),
+    		Module:export(Head)
+    	)
+    ).
+	
 check_exists(Module,Name):-
     context_pred(Module,Name,_),
     !,
@@ -80,7 +93,7 @@ pdt_undefine_context(Term):-
 % the calling module.
 pdt_undefine_context(Module,Term):-
 	functor(Term,Name,_),
-	forall(context_pred(Module,Name,Rule),Module:retract(Rule)),
+	forall(context_pred(Module,Name,Ref),Module:erase(Ref)),
 	retractall(context_pred(Module,Name,_)).    
     
 create_constructor(Module,Name,Arity):-
@@ -88,8 +101,8 @@ create_constructor(Module,Name,Arity):-
 	functor(Template,Name,Arity),
 	functor(Constructor,CName,1),
 	arg(1,Constructor,Template),
-	Module:assert(Constructor),
-	assert(context_pred(Module,Name,Constructor)).
+	Module:assert(Constructor,Ref),
+	assert(context_pred(Module,Name,Ref)).
 	
 create_getter(Module,Name,Arity,N,ArgName):-
 	concat_atom([Name,'_',ArgName],GName),
@@ -98,8 +111,8 @@ create_getter(Module,Name,Arity,N,ArgName):-
 	functor(Getter,GName,2),
 	arg(1,Getter,Template),
 	arg(2,Getter,Value),
-	Module:assert(Getter),
-	assert(context_pred(Module,Name,Getter)).
+	Module:assert(Getter,Ref),
+	assert(context_pred(Module,Name,Ref)).
 	
 create_setter(Module,Name,Arity,N,ArgName):-
 	concat_atom([Name,'_set_',ArgName],SName),	
@@ -111,8 +124,8 @@ create_setter(Module,Name,Arity,N,ArgName):-
 	arg(1,Setter,InTemplate),
 	arg(2,Setter,Value),
 	arg(3,Setter,OutTemplate),
-	Module:assert(Setter),
-	assert(context_pred(Module,Name,Setter)).
+	Module:assert(Setter,Ref),
+	assert(context_pred(Module,Name,Ref)).
 	
 bind_other_args(N,InTemplate,OutTemplate,N,Arity):-
     !,
@@ -134,8 +147,8 @@ create_multi_getter(Module,Term):-
     arg(1,Head,Context),
     arg(2,Head,ArgNameValues),
     MultiGetter=':-'(Head,pdt_util_context:pdt_context_get_values(Module,Context,ArgNameValues)),
-	Module:assert(MultiGetter),
-	assert(context_pred(Module,Name,MultiGetter)).
+	Module:assert(MultiGetter,Ref),
+	assert(context_pred(Module,Name,MultiGetter,Ref)).
 
 create_multi_setter(Module,Term):-
     functor(Term,Name,_Arity),  
@@ -145,8 +158,8 @@ create_multi_setter(Module,Term):-
     arg(2,Head,ArgNameValues),
     arg(3,Head,OutContext),
     MultiSetter=':-'(Head,pdt_util_context:pdt_context_set_values(Module,InContext,ArgNameValues,OutContext)),
-	Module:assert(MultiSetter),
-	assert(context_pred(Module,Name,MultiSetter)).
+	Module:assert(MultiSetter,Ref),
+	assert(context_pred(Module,Name,Ref)).
 
 %% pdt_context_get_values(+Module, +Context, NameValuePairs)
 % convenience method to access several fields of a context at the same time.
