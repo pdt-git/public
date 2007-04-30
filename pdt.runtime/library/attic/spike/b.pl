@@ -1,2 +1,1 @@
-:- ensure_loaded(a).
-:- writeln('ich bin b').
+:- module(b,[op(60,xfy,my_op)]).

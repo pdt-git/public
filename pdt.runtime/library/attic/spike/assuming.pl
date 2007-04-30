@@ -1,4 +1,4 @@
-:- module(assuming,[assuming/2]).
+%:- module(assuming,[assuming/2]).
 
 /*
 warning:
@@ -31,4 +31,4 @@ assume(Module, Changes, Query):-
 assume(Module, Changes, Query):-
     asserted(Module,Changes,Query).
     
-asserted    
+%asserted    
