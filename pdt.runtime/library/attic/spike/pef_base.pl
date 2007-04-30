@@ -1,4 +1,4 @@
-:- module(pef_base,[]).
+:- module(pef_base,[pef_reserve_id/2]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).	
 
@@ -33,6 +33,23 @@ define_query(Template):-
     assert((Head:-Constructor,Getter,call(Cx))),
     export(Head).
 
+define_query2(Template):-
+    functor(Template,Name,_),
+    atom_concat(Name,'_query',HeadName),
+    functor(Head,HeadName,2),
+    arg(1,Head,List),
+    arg(2,Head,Cx),
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+    atom_concat(Name,'_new',ConstructorName),
+    functor(Constructor,ConstructorName,1),
+    arg(1,Constructor,Cx),
+    assert((Head:-Constructor,Getter,call(Cx))),
+    export(Head).
+
+
 define_retractall(Template):-
     functor(Template,Name,_),
     atom_concat(Name,'_retractall',HeadName),
@@ -51,6 +68,7 @@ define_retractall(Template):-
 
 
 
+
 %%
 % define_pef(+Template).
 %
@@ -63,12 +81,22 @@ define_retractall(Template):-
 % @param Template should be a ground compound term like in pdt_define_context/1.
 
 define_pef(Template):-
-	pdt_define_context(Template),
+    functor(Template,Name,Arity),
+    dynamic(Name/Arity),
+	pdt_define_context(Template),	
+	pdt_export_context(Name),
     define_assert(Template),
     define_retractall(Template),
-    define_query(Template).
+    define_query(Template),
+    define_query2(Template).
+
+pef_reserve_id(Type,Id):-
+    flag(pef_next_id,Id,Id + 1),
+    assert(pef_type(Id,Type)). 
 
 :- define_pef(pef_module_definition(id,name,file_ref,toplevel_ref)).
+
+:- define_pef(pef_op_definition(id,priority,type,name,file_ref,toplevel_ref)).
 
 :- define_pef(pef_file_dependency(id,file_ref,dep_ref,toplevel_ref)).
 
