@@ -84,7 +84,7 @@ pef_file_toplevel(FileSpec,Term):-
     pef_term_parent(Term,Ref),
     pdt_file_ref(FileSpec,Ref).
 
-pef_term_file(ID,File):-    
+    
 pef_term_file(ID,File):-
     nonvar(ID),
     !,
