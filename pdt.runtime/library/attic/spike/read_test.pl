@@ -9,7 +9,7 @@
 :- use_module(library('spike/pef_base')).
 
 :- pdt_define_context(parse_cx(file_ref,toplevel_ref,term,expanded)).
-:- pdt_define_context(toplevel_record(file_ref,term,expanded)).
+
 
 
 
@@ -20,8 +20,38 @@ pdt_forget(Spec):-
     my_forget(Spec).
 
 
-my_forget(_Spec):-
-    true. %TODO: forget module and op definitions, erase toplevel records, retract error pefs.
+my_forget(Spec):-
+    pdt_file_ref(Spec,FileRef),
+    
+	forall(
+		pef_module_definition_query([id=Id,file_ref=FileRef]),
+		pef_property_retractall([id=Id])
+	),
+	pef_module_definition_retractall([file_ref=FileRef]),	
+    
+    forall(
+		pef_op_definition_query([id=Id,file_ref=FileRef]),
+		pef_property_retractall([id=Id])
+	),
+	pef_op_definition_retractall([file_ref=FileRef]),	
+	
+	forall(
+		pef_file_dependency_query([id=Id,file_ref=FileRef]),
+		pef_property_retractall([id=Id])
+	),
+	pef_file_dependency_retractall([file_ref=FileRef]),
+	
+	forall(
+		pef_problem_query([id=Id,type=parser,file_ref=FileRef]),
+		pef_property_retractall([id=Id])
+	),
+	pef_problem_retractall([file_ref=FileRef]),
+    
+    atom_concat(terms_,FileRef,Key),
+    forall(
+    	recorded(Key,_,Ref),
+    	erase(Ref)
+    ).
 
 my_read(Spec):-
     pdt_file_spec(Spec,F),
@@ -47,19 +77,11 @@ do_read(F,In):-
     		writeln(Error) %TODO: add syntax error pef
     	),
     	var(Error),
-    	parse_cx_get(Cx,[term=Term,expanded=Expanded]),
-    	record_toplevel(Key,Cx),    	
+    	pef_toplevel_recordz(Key,[file_ref=Ref,term=Term,expanded=Expanded],TlRef),
+    	parse_cx_get(Cx,[term=Term,expanded=Expanded,toplevel_ref=TlRef]),
     	preprocess(Expanded,Cx),
     	Term==end_of_file,
     !.
-
-
-record_toplevel(Key,Cx):-
-    toplevel_record_new(Record),
-    parse_cx_get(Cx,[file_ref=FileRef,toplevel_ref=TlRef,term=Term,expanded=Expanded]),
-    toplevel_record_get(Record,[file_ref=FileRef,term=Term,expanded=Expanded]),
-    recordz(Key,Record,TlRef).
-
 
 	    
 preprocess((:-module(Name,_Exports)), Cx):-
@@ -83,8 +105,12 @@ process_module_definition(Name,Cx):-
 
 process_inclusion(F,Cx):-
 	format("resolving ~w~n", [F]),
-	pdt_file_spec(F,File),
+	parse_cx_file_ref(Cx,MyRef),
+	pdt_file_spec(file_ref(MyRef),MyFile),
+	file_directory_name(MyFile,MyDir),
+	pdt_file_spec(F,MyDir,File),
 	!,
+	pdt_parse(File),
 	pdt_file_ref(File,Ref),
 	format("including ~w~n", [File]),
 	(	pef_module_definition_query([file_ref=Ref],Module)
@@ -92,21 +118,20 @@ process_inclusion(F,Cx):-
 	;	process_file_inclusion(Ref,Cx)
 	).
 process_inclusion(F,_Cx):-
-    writeln(blablabla),
     format("could not resolve: ~w~n",[F]). %TODO: add file not found error.
 
-process_module_inclusion(Module,_Cx):-
-    pef_module_toplevel_ref(Module,Ref),
-    recorded(_,(:- module(_,Exports)),Ref),
+process_module_inclusion(Module,Cx):-
+    pef_module_definition_toplevel_ref(Module,Ref),
+    pef_toplevel_recorded(_,[expanded=(:- module(_,Exports))],Ref),
     forall(	
     	member(op(Pr,Tp,Nm),Exports),
-    	push_op(Pr,Tp,Nm)
+    	my_push_op(Pr,Tp,Nm,Cx)
     ).
 
-process_file_inclusion(FileRef,_Cx):-
+process_file_inclusion(FileRef,Cx):-
 	forall(
 		pef_op_definition_query([file_ref=FileRef,priority=Pr,type=Tp,name=Nm]),
-		push_op(Pr,Tp,Nm)
+		my_push_op(Pr,Tp,Nm,Cx)
 	).
 
 process_op(Priority,Type,Op, Cx):-
@@ -133,4 +158,9 @@ find_file_refs(use_module(H),[H]):-
 find_file_refs(use_module([H|T],_),[H|T]).
 find_file_refs(use_module(H),_,[H]):-
     \+ is_list(H).
-    
+
+
+my_push_op(Pr,Tp,Nm,_Cx):-
+    '$set_source_module'(SM, SM),
+     push_op(Pr,Tp,SM:Nm).
+	    

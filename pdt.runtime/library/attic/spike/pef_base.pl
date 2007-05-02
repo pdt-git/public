@@ -65,7 +65,56 @@ define_retractall(Template):-
     assert((Head:-Constructor,Getter,retractall(Cx))),
     export(Head).
 
+define_recorda(Template):-
+    functor(Template,Name,_),
+    atom_concat(Name,'_recorda',HeadName),
+    functor(Head,HeadName,3),
+    arg(1,Head,Key),
+    arg(2,Head,List),
+    arg(3,Head,Ref),    
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+    atom_concat(Name,'_new',ConstructorName),
+    functor(Constructor,ConstructorName,1),
+    arg(1,Constructor,Cx),
+    assert((Head:-Constructor,Getter,recorda(Key,Cx,Ref))),
+    export(Head).
 
+define_recordz(Template):-
+    functor(Template,Name,_),
+    atom_concat(Name,'_recordz',HeadName),
+    functor(Head,HeadName,3),
+    arg(1,Head,Key),
+    arg(2,Head,List),
+    arg(3,Head,Ref),    
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+    atom_concat(Name,'_new',ConstructorName),
+    functor(Constructor,ConstructorName,1),
+    arg(1,Constructor,Cx),
+    assert((Head:-Constructor,Getter,recordz(Key,Cx,Ref))),
+    export(Head).
+
+define_recorded(Template):-
+    functor(Template,Name,_),
+    atom_concat(Name,'_recorded',HeadName),
+    functor(Head,HeadName,3),
+    arg(1,Head,Key),
+    arg(2,Head,List),
+    arg(3,Head,Ref),    
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+    atom_concat(Name,'_new',ConstructorName),
+    functor(Constructor,ConstructorName,1),
+    arg(1,Constructor,Cx),
+    assert((Head:-Constructor,Getter,recorded(Key,Cx,Ref))),
+    export(Head).
 
 
 
@@ -88,7 +137,10 @@ define_pef(Template):-
     define_assert(Template),
     define_retractall(Template),
     define_query(Template),
-    define_query2(Template).
+    define_query2(Template),
+    define_recorded(Template),
+    define_recorda(Template),
+    define_recordz(Template).
 
 pef_reserve_id(Type,Id):-
     flag(pef_next_id,Id,Id + 1),
@@ -103,3 +155,5 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_property(id,key,value)).
 
 :- define_pef(pef_problem(id,severity,file_ref,start,end,type,data)).
+
+:- define_pef(pef_toplevel(file_ref,term,expanded)).
