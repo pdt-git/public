@@ -42,6 +42,7 @@
 :-module(pdt_util,[
 	pdt_call_cleanup/2,
 	pdt_file_spec/2,
+	pdt_file_spec/3,
 	pdt_file_ref/2,
 	pdt_member/2,
 	pdt_memberchk/2,	
@@ -104,6 +105,15 @@ pdt_file_spec(file_ref(Ref), Abs):-
 	fileref(Abs,Ref).
 pdt_file_spec(FileSpec, Abs):-
 	filespec(FileSpec, Abs).
+
+
+pdt_file_spec(FileSpec,Base, Abs):-
+	filespec(FileSpec,Base, Abs).
+
+
+filespec(FileSpec,Base, Abs):-
+	absolute_file_name(FileSpec,[relative_to(Base),solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
+	\+ hidden(Abs).
 
 filespec(FileSpec, Abs):-
 	absolute_file_name(FileSpec,[solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
