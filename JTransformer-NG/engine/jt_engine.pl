@@ -1,3 +1,5 @@
+:- style_check(-singleton).
+
 :- multifile ct/3.
 :- dynamic ct/3.
 :- multifile test/1.
@@ -70,7 +72,6 @@ debugme.
 :- [library('org/cs3/pdt/test/main.pl')].
 :- [library('org/cs3/pdt/util/main.pl')].
 :- [library('org/cs3/pdt/compatibility/main.pl')].
-%:- use_module(library(pdtplugin)).
 
 % :- ['facade/main'].              % --> src_file_handling     (gk&tr, 20.10.05)
 % :- [astAlternative/...].         % Future AST representation ???

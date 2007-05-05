@@ -144,6 +144,8 @@ public class ByteCodeFactGeneratorIType {
 			
 		}
 		
+//		if(targetClass.getElementName().contains("Licences"))
+//			System.err.println("DEBUG");
 		for (int i = 0; i < fields.length; i++) {
 			if (syntheticOrPrivate(fields[i].getFlags()))
 				continue;
@@ -268,7 +270,10 @@ public class ByteCodeFactGeneratorIType {
 				String newId = idManager.newID();
 				init =""+newId;
 				String value = field.getConstant().toString();
-				value = value.replaceAll("\\\\","\\\\\\\\");
+				value = value.replaceAll("\\n","\\\\\\\\n");
+				value = value.replaceAll("\\r","\\\\\\\\r");
+				value = value.replaceAll("\\t","\\\\\\\\t");
+				value = value.replaceAll("\"","\\\\\\\\\"");
 				value = value.replaceAll("'","\\\\'");
 				String [] args = new String [] {
 						newId, 

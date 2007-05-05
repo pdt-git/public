@@ -67,7 +67,7 @@ internal_writeTreeFacts(File, Mode) :-
     ),
     		
     forall(globalIds(FQN,Id),
-    	   format(Stream, 'globalIds(''~w'',~w).~n',[FQN,Id])
+    	   format(Stream, 'globalIds(''~w'',~w).~nri_globalIds(~w,''~w'').~n',[FQN,Id,Id,FQN])
     ),
     
     lastID(LastID),

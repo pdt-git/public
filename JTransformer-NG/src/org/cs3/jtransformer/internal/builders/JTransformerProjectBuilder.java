@@ -108,7 +108,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 		    throw e;
 		}
 		catch (Throwable e) {
-			JTDebug.report(e);		
+			JTDebug.report(e);
 			throw new CoreException(new Status(IStatus.ERROR,JTransformer.PLUGIN_ID,IResourceStatus.BUILD_FAILED,"Problems during build",e));
 		}
 		return null;

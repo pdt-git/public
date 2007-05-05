@@ -611,6 +611,8 @@ public class PseudoRoundTripTest extends FactGenerationTest {
             	}
             }
         }
+//        s.addTest(new PseudoRoundTripTest("testIt",
+//              generatePackageName(600)));
         s.setName("PseudoRoundtripTest");
         return s;
     }

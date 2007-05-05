@@ -2744,12 +2744,13 @@ public class FactGenerator extends ASTVisitor implements Names {
 	}
 
 	private void createAnnotationFact(ASTNode node, String nodeID) {
-		GenericAnnotation annotation = getCorrespondingGenericAnnotation(node);
-		if(annotation != null) {
-			writer.writeFact(ANNOTATION_T,new String[]{
-					nodeID, annotation.getPredicate()
-			});
-		}
+		//FIXME: port needed to Java 5 compatible variant!
+//		GenericAnnotation annotation = getCorrespondingGenericAnnotation(node);
+//		if(annotation != null) {
+//			writer.writeFact(ANNOTATION_T,new String[]{
+//					nodeID, annotation.getPredicate()
+//			});
+//		}
 	}
 
 	/***
