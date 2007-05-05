@@ -147,8 +147,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
 						.getLibraryManager(), initSession,
 						new String[] { PrologRuntime.LIB_ATTIC });
-				initSession
-						.queryOnce("use_module(library('org/cs3/pdt/metadata/pdtplugin'))");
+//				initSession
+//						.queryOnce("use_module(library('org/cs3/pdt/metadata/pdtplugin'))");
 
 				initSession.queryOnce("[library('jt_engine.pl')],"
 						+ "[library('org/cs3/pdt/test/main.pl')],"

@@ -89,7 +89,6 @@ public class JTransformerProjectChangeListener implements
 							JTDebug.report(ex);
 						}
 					}
-					
 				});
 				
 //				String name = assigner.selectAlternativePrologInterface(project.getName());

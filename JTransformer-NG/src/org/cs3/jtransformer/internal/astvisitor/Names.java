@@ -80,6 +80,8 @@ public interface Names {
 	  public String CLASS_DEF_T = "classDefT";
 	  public String SOURCE_LOCATION_T = "slT";
 	  public String PROJECT_T = "projectT";
+	  public char BRACKET_OPEN = '[';
+	  public char BRACKET_CLOSE = ']';
 	  
 	  public String OMIT_ARRAY_DECLARATION_T = "omitArrayDeclarationT";
 

@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,11 +50,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -165,17 +169,14 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
     public void setUpOnce() throws Exception {
         super.setUpOnce();
         try {
-            IProject project = createProject("testproject");
+            final IProject project = createProject("testproject");
             project.open(null);
             addNature(project, JavaCore.NATURE_ID);
+            setClasspath(project);
 
-            IClasspathEntry[] cp = new IClasspathEntry[] {
-                    JavaCore.newSourceEntry(project.getFullPath()),
-                    JavaRuntime.getDefaultJREContainerEntry(),
-
-            };
-            getTestJavaProject().setRawClasspath(cp, project.getFullPath(),null);
-            		Map options = new HashMap();
+            
+     		Map options = new HashMap();
+            		
 //            options.put("org.eclipse.jdt.core.compiler.compliance" /* "Source Compatibility Mode" */,
 //        		    JavaCore.VERSION_1_5);
             options.put(JavaCore.COMPILER_SOURCE /* "Source Compatibility Mode" */,
@@ -202,15 +203,66 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
         }
     }
 
+	private void setClasspath(final IProject project) throws CoreException,
+			JavaModelException {
+		final List cpEntries = new ArrayList();
+
+		cpEntries.add(JavaCore.newSourceEntry(project.getFullPath()));
+		cpEntries.add(JavaRuntime.getDefaultJREContainerEntry());
+
+		IResourceVisitor visitor = new IResourceVisitor() {
+			public boolean visit(IResource resource) {
+				if (resource instanceof IFile) {
+					IFile file = (IFile) resource;
+					if (file.getName().endsWith(".jar")) {
+						cpEntries.add(JavaCore.newLibraryEntry(file
+								.getFullPath(), null, null));
+						return false;
+					}
+				}
+				return true;
+
+			}
+		};
+
+		project.accept(visitor, IResource.DEPTH_INFINITE, IResource.FILE);
+//		Job job = new Job("Make Files") {
+//			public IStatus run(IProgressMonitor monitor) {
+//				try {
+					getTestJavaProject().setRawClasspath(
+							(IClasspathEntry[]) cpEntries
+									.toArray(new IClasspathEntry[0]),
+							project.getFullPath(), null);
+//
+//				} catch (CoreException e) {
+//					return e.getStatus();
+//				} finally {
+//					monitor.done();
+//				}
+//				return Status.OK_STATUS;
+//			}
+//		};
+//		job.setRule(ResourcesPlugin.getWorkspace().getRoot());
+//		JTDebug.debug("updating project classpath ...");
+//		job.schedule();
+//		try {
+//			job.join();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+		JTDebug.debug("finished updating project classpath");
+
+	}
+
     /**
-     * install testdata into the runtime workspace.
-     * 
-     * @param strings
-     *                pathnames relative to the testdata location. Directories will
-     *                be copied recursively.
-     * @throws IOException
-     * @throws CoreException
-     */
+	 * install testdata into the runtime workspace.
+	 * 
+	 * @param strings
+	 *            pathnames relative to the testdata location. Directories will
+	 *            be copied recursively.
+	 * @throws IOException
+	 * @throws CoreException
+	 */
     public void install(final String[] strings) throws CoreException,
             IOException {
         IWorkspaceRunnable r = new IWorkspaceRunnable() {
@@ -226,7 +278,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 }
             }
         };
-        ResourcesPlugin.getWorkspace().run(r, getTestProject(),
+        ResourcesPlugin.getWorkspace().run(r, ResourcesPlugin.getWorkspace().getRoot(),//getTestProject(),
                 IWorkspace.AVOID_UPDATE, null);
     }
 
@@ -245,7 +297,7 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 }
             }
         };
-        ResourcesPlugin.getWorkspace().run(r, getTestProject(),
+        ResourcesPlugin.getWorkspace().run(r, ResourcesPlugin.getWorkspace().getRoot(),//getTestProject(),
                 IWorkspace.AVOID_UPDATE, null);
     }
 
@@ -281,7 +333,9 @@ public abstract class FactGenerationTest extends SuiteOfTestCases {
                 dstFile.create(in, true, null);
                 dstFile.refreshLocal(IResource.DEPTH_ZERO, null);
             }
-
+            //Platform.getJobManager().beginRule(project,null);
+            setClasspath(project);
+            
         } catch (CoreException e) {
             throw new RuntimeException(e);
         }

@@ -84,6 +84,8 @@ public class FactBaseBuilder {
     private boolean building = false;
 
     private long storeTimeStamp;
+
+	private Set postponed = new HashSet();
     
     /**
      *  
@@ -271,15 +273,38 @@ public class FactBaseBuilder {
         asyncSession.addBatchListener(new DefaultAsyncPrologSessionListener());
         PrologSession syncSession = getPif().getSession(); 
         try {
+        	List remove = new ArrayList();
+        	for (Iterator iter = postponed.iterator(); iter.hasNext();) {
+				IFile file = (IFile) iter.next();
+				if(!file.exists()) {
+					remove.add(file);
+				} else {
+					if(!containsErrors(file)) {
+						remove.add(file);
+						if(!toProcess.contains(file)) {
+							toProcess.add(file);
+						}
+					}
+				}
+			}
+        	postponed.removeAll(remove);
 	        for (Iterator i = toProcess.iterator(); i.hasNext();) {
 	            if (monitor.isCanceled()) {
 	                throw new OperationCanceledException("Canceled");
 	            }
 	            IFile file = (IFile) i.next();
-	            forgetFacts(file, false,syncSession);
-	            monitor.subTask(" - processing " + file.getName());
-	            buildFacts(asyncSession, file);
+	            
+	            
+	            if(containsErrors(file)){
+	            	postponed.add(file);
+		            monitor.subTask(" - postponing " + file.getName() + " because it contains errors");
+	            } else {
+		            forgetFacts(file, false,syncSession);
+		            monitor.subTask(" - processing " + file.getName());
+		            buildFacts(asyncSession, file);
+	            }
 	            monitor.worked(1);
+	            
 	        }
         } finally {
             monitor.subTask(" - write source file facts");
@@ -292,6 +317,19 @@ public class FactBaseBuilder {
         }
 	        
     }
+
+	private boolean containsErrors(IFile file) throws CoreException {
+		IMarker[] currentMarkers = file.findMarkers(IMarker.PROBLEM, true,
+				IResource.DEPTH_INFINITE);
+		if (currentMarkers != null) {
+			for (int j = 0; j < currentMarkers.length; j++) {
+				if (MarkerUtilities.getSeverity(currentMarkers[j]) == IMarker.SEVERITY_ERROR) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
     private void collectDelta(IResourceDelta delta, final Collection toProcess,
             final Collection toDelete) throws CoreException {
@@ -324,6 +362,7 @@ public class FactBaseBuilder {
                             toDelete.add(resource);
                             break;
                         case IResourceDelta.CHANGED:
+                        case IResourceDelta.ADDED:
                             if (!isStoreUpToDate((IFile) (resource))) { // added,...???
                                 JTDebug.debug("Adding " + resource
                                         + " to toProcess");
@@ -667,15 +706,20 @@ public class FactBaseBuilder {
 		session.queryOnce( TICKET, "retractLocalSymtab");
 
 		int num = 0;
+		
 		for (Iterator iter = clauses.iterator(); iter.hasNext();)
 		{
 			if (buf.length() > 0)
 			{
 				buf.append(",");
+			} 
+			else {
+				buf.append("style_check(-atom), ");
+
 			}
 			buf.append(iter.next());
 			num++;
-			if(num == 100) {
+			if(num == 500) {
 				String out = buf.toString();
 				session.queryOnce( TICKET, out);
 				buf = new StringBuffer();
