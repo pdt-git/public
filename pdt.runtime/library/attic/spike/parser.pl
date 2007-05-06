@@ -1,4 +1,4 @@
-:- module(pdt_parser,
+:- module(parser,
 	[	pdt_parse/1,
 		pdt_forget/1
 	]

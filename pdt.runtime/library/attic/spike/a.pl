@@ -1,6 +1,6 @@
 
 
-
+:- use_module(library('org/cs3/pdt/util/pdt_util_cs')).
 
 
 
@@ -60,10 +60,35 @@ fix_right(N,N1,not_done):-
     
 
 
-/* color ist speziell insofern es den Funktor des Terms festlegt. nicht schlimm, backtracking erschlägt das. */
+
+    
+/* there is a special type of 
+functions are really just named path fragments */
 color(node(C,_,_,_,_),C).
 left(node(_,L,_,_,_),L).
 right(node(_,_,_,_,R),R).
+
+swapxy(f(X,Y,V),f(Y,X,V)).
+
+swapxy(F,FS):-
+    x(F) = y(FS),
+    y(F) = y(FS),
+    v(F) = v(FS).
+    
+swapxy(F,FS):-
+    FS = subst(F,[x,y],[y,x]).
+    
+/*
+  N.B. the "functions" x and y are not applied. We are interested
+  in the functions themselfs, as they can be seen as 
+  relative positions or paths. Or maybe even pointers.
+*/    
+
+
+subst(F,[P|Ps],[Q|Qs],FF):-
+
+    
+    
 
 
 derive(O,D):-
