@@ -157,3 +157,11 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_problem(id,severity,file_ref,start,end,type,data)).
 
 :- define_pef(pef_toplevel(file_ref,term,expanded)).
+
+:- define_pef(pef_term(id,name,arity)).
+
+:- define_pef(pef_variable_occurance(id,variable_ref)).
+
+:- define_pef(pef_variable(id,toplevel_ref)).
+
+:- define_pef(pef_arg(num,parent,child)).
