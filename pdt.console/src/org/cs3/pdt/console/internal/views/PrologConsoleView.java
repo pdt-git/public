@@ -226,6 +226,73 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		}
 	}
 
+	// by Hasan Abdel Halim
+	private final class GuiTracerAction extends Action {
+		private String[] queries;
+		private String[] texts;
+		private String[] tooltips;
+		private ImageDescriptor[] icons;
+		private String current_query ;
+
+		public GuiTracerAction(String[] query, String[] text, String[] tooltip,
+				ImageDescriptor[] icon) {
+
+			super(null, Action.AS_CHECK_BOX);
+			
+			this.queries = query;
+			this.texts = text;
+			this.tooltips = tooltip;
+			this.icons = icon;
+			updateInfo();
+		}
+
+		private void updateInfo(){
+			int index = isChecked()? 1:0;
+			
+			setText(texts[index]);
+			setToolTipText(tooltips[index]);
+			setImageDescriptor(icons[index]);
+			current_query = queries[index];
+			current_query = current_query.trim().endsWith(".") ? current_query : current_query + ".";
+			
+		}
+
+		public void run() {
+			try {		
+				
+				Job j = new Job(getToolTipText()) {
+					
+					
+					protected IStatus run(IProgressMonitor monitor) {
+						try {
+							PrologConsole c = getConsole();
+							ConsoleModel model = c.getModel();
+							model.setLineBuffer(" ");
+							model.commitLineBuffer();
+							model.setLineBuffer(current_query);
+							model.commitLineBuffer();
+						} catch (Throwable e) {
+							Debug.report(e);
+							return Status.CANCEL_STATUS;
+						} finally {
+							updateInfo();
+							monitor.done();
+						}
+						return Status.OK_STATUS;
+					}
+
+					private PrologConsole getConsole() {
+						return PrologConsoleView.this;
+					}
+
+				};
+				j.schedule();
+			} catch (Throwable t) {
+				Debug.report(t);
+			}
+		}
+	}
+	
 	private final class RestartAction extends Action {
 		public void run() {
 			try {
@@ -297,11 +364,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private Action selectAllAction;
 
-	private ConsoleAction activateGuiTracerAction;
+//	private ConsoleAction activateGuiTracerAction;
 
 	private ClearAction clearAction;
 
-	private ConsoleAction deactivateGuiTracerAction;
+//	private ConsoleAction deactivateGuiTracerAction;
+	
+	private GuiTracerAction guiTracerAction;
 
 	private PasteAction pasteFileNameAction;
 
@@ -410,12 +479,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		};
 		clearAction = new ClearAction("Clear", "clear console output",
 				ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
-		activateGuiTracerAction = new ConsoleAction("guitracer",
-				"activate guitracer", "activate GUI tracer", ImageRepository
-						.getImageDescriptor(ImageRepository.GUITRACER));
-		deactivateGuiTracerAction = new ConsoleAction("noguitracer",
-				"deactivate guitracer", "deactivate GUI tracer",
-				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
+		guiTracerAction = new GuiTracerAction(new String[] {"guitracer", "noguitracer"},
+				new String[] {"activate guitracer", "deactivate guitracer"},  
+				new String[] {"activate GUI tracer", "deactivate GUI tracer"}, 
+				new ImageDescriptor[] {
+				ImageRepository.getImageDescriptor(ImageRepository.GUITRACER),
+				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER)});
+//		activateGuiTracerAction = new ConsoleAction("guitracer",
+//				"activate guitracer", "activate GUI tracer", ImageRepository
+//						.getImageDescriptor(ImageRepository.GUITRACER));
+//		deactivateGuiTracerAction = new ConsoleAction("noguitracer",
+//				"deactivate guitracer", "deactivate GUI tracer",
+//				ImageRepository.getImageDescriptor(ImageRepository.NOGUITRACER));
 		pasteFileNameAction = new PasteAction("paste filename",
 				"paste the name of the current editor file", ImageRepository
 						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
@@ -520,17 +595,19 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private void addContributions(IContributionManager manager) {
 		IWorkbenchWindow window = getSite().getWorkbenchWindow();
+		manager.add(new Separator("#System"));
+		manager.add(restartAction);		
 		manager.add(new Separator("#ConsoleInternal"));
-		manager.add(clearAction);
-		manager.add(activateGuiTracerAction);
-		manager.add(deactivateGuiTracerAction);
-		manager.add(restartAction);
+		manager.add(guiTracerAction);
+//		manager.add(activateGuiTracerAction);
+//		manager.add(deactivateGuiTracerAction);
 		manager.add(new Separator("#ConsoleInternal-end"));
 		manager.add(new Separator("#Clipboard"));
 		IWorkbenchAction sall = ActionFactory.SELECT_ALL.create(window);
 		sall.setImageDescriptor(ImageRepository
 				.getImageDescriptor(ImageRepository.SELECT_ALL));
 		manager.add(sall);
+		manager.add(clearAction);
 		manager.add(ActionFactory.COPY.create(window));
 		manager.add(ActionFactory.CUT.create(window));
 		manager.add(ActionFactory.PASTE.create(window));
