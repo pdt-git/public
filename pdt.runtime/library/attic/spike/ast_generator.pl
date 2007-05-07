@@ -22,7 +22,7 @@ pdt_generate_ast(TlRef, Id):-
     cx_toplevel_ref(Cx,TlRef),
     pef_toplevel_recorded(_,[expanded=Expanded],TlRef),
     term_variables(Expanded,Variables),
-    process_variables(Variables),
+    process_variables(Variables,Cx),
     generate_ast(Expanded, Id,Cx).
     
 process_variables([],_Cx).

@@ -1,50 +1,43 @@
-/*implement the source_term interface using pefs
+:- use_module(library('spike/pef_base')).
 
-terms are backed by pefs on the heap. each term has an ID, 
-aswell as a list of changes affecting it.
-*/
-
-:- use_module(library('org/cs3/pdt/util/pdt_util')).
-:- use_module(library('org/cs3/pdt/util/pdt_source_term')).
-:- use_module(library('org/cs3/pdt/util/pdt_util_context')).
-
-:- pdt_define_context(pefterm(id, facts)).
-
-
-pdt_source_term:implements_source_term.
-
-source_term_hook(T,pdt_pef_term):-
-    non_var(T),
-    pefterm_new(T).
-    
-source_term_expand_hook(T,Exp):-
-    pef_term_expand(T,Exp).
-	
-source_term_functor_hook(T,Name,Arity):-
-	pef_term_functor(T,Name,Arity).
-	
-source_term_arg_hook(ArgNum,T,ArgVal):-
-	pef_term_arg(ArgNum,T,ArgVal).
-
-source_term_property_hook(T,Key,Value):-
-	pef_term_property(T,Key,Value).
-	
-source_term_set_property_hook(T,Key,Value,TT):-	
-	pef_term_set_property(T,Key,Value,TT).
-
-source_term_all_properties_hook(_T,_Props):-
-   !,fail.
-
-source_term_copy_properties_hook(_From,_To,_Out):-	
-	!,fail.
-	
-source_term_create_hook(Term,PefTerm):-
-    pef_term_create(Term,PefTerm).
-    
-source_term_var_hook(T):-
-    pef_term_var(T).
-
-pef_term_create(Term,PefTerm):-
-    var(Term),
+peft_term(Id,_):-
+	pef_variable_occurance_query([id=Id]),
+	!.
+peft_term(Id,Term):-
+    nonvar(Term),
     !,
+   	functor(Term,Name,Arity),
+	pef_term_query([id=Id,name=Name,arity=Arity]),
+	peft_term_args(1,Arity,Id,Term).  
+peft_term(Id,Term):-
+	pef_term_query([id=Id,name=Name,arity=Arity]),
+	functor(Term,Name,Arity),
+	peft_term_args(1,Arity,Id,Term).  
+
+peft_term_args(I,N,_Id,_Term):-
+    I>N,!.
+peft_term_args(I,N,Id,Term):-    
+    peft_arg(I,Id,ArgId),
+    peft_term(ArgId,Arg),
+    arg(I,Term,Arg),
+    J is I + 1,
+    peft_term_args(J,N,Id,Term).
     
+peft_arg(I,Id,ArgId):-    
+    pef_arg_query([num=I,parent=Id,child=ArgId]).
+    
+peft_unifiable(A,B,[A=B]):-
+	peft_var(A),
+	!.
+peft_unifiable(A,B,[B=A]):-
+	peft_var(B),
+	!.	
+peft_unifiable(A,B,Unifier):-
+	peft_functor(A,Name,Arity),
+	peft_functor(B,Name,Arity),
+	peft_unifiable_args(1,Arity,A,B,[],Unifier).		
+
+peft_unifiable_args(I,N,_A,_B,Unifier,Unifier):-
+	I>N,
+	!.
+peft_unifiable_args(I,N,A,B,In,Out):-	

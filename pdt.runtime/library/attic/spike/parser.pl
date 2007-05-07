@@ -110,9 +110,10 @@ process_inclusion(F,Cx):-
 	file_directory_name(MyFile,MyDir),
 	pdt_file_spec(F,MyDir,File),
 	!,
+	format("including ~w~n", [File]),
 	pdt_parse(File),
 	pdt_file_ref(File,Ref),
-	format("including ~w~n", [File]),
+
 	(	pef_module_definition_query([file_ref=Ref],Module)
 	->  process_module_inclusion(Module,Cx)
 	;	process_file_inclusion(Ref,Cx)
