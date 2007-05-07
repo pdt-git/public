@@ -1,7 +1,7 @@
 :- module(pef_base,[pef_reserve_id/2]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).	
-
+:- dynamic pef_pred/2.
 
 define_assert(Template):-
     functor(Template,Name,_),
@@ -15,7 +15,8 @@ define_assert(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,assert(Cx))),
+    assert((Head:-Constructor,Getter,assert(Cx)),Ref),
+    assert(pef_pred(Name,Ref)),
     export(Head).
 
 define_query(Template):-
@@ -30,7 +31,8 @@ define_query(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,call(Cx))),
+    assert((Head:-Constructor,Getter,call(Cx)),Ref),
+    assert(pef_pred(Name,Ref)),
     export(Head).
 
 define_query2(Template):-
@@ -46,7 +48,8 @@ define_query2(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,call(Cx))),
+    assert((Head:-Constructor,Getter,call(Cx)),Ref),
+    assert(pef_pred(Name,Ref)),
     export(Head).
 
 
@@ -62,7 +65,8 @@ define_retractall(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,retractall(Cx))),
+    assert((Head:-Constructor,Getter,retractall(Cx)),Ref),
+    assert(pef_pred(Name,Ref)),
     export(Head).
 
 define_recorda(Template):-
@@ -79,7 +83,8 @@ define_recorda(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,recorda(Key,Cx,Ref))),
+    assert((Head:-Constructor,Getter,recorda(Key,Cx,Ref)),PefRef),
+    assert(pef_pred(Name,PefRef)),    
     export(Head).
 
 define_recordz(Template):-
@@ -96,7 +101,8 @@ define_recordz(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,recordz(Key,Cx,Ref))),
+    assert((Head:-Constructor,Getter,recordz(Key,Cx,Ref)),PefRef),
+    assert(pef_pred(Name,PefRef)),
     export(Head).
 
 define_recorded(Template):-
@@ -113,7 +119,8 @@ define_recorded(Template):-
     atom_concat(Name,'_new',ConstructorName),
     functor(Constructor,ConstructorName,1),
     arg(1,Constructor,Cx),
-    assert((Head:-Constructor,Getter,recorded(Key,Cx,Ref))),
+    assert((Head:-Constructor,Getter,recorded(Key,Cx,Ref)),PefRef),
+    assert(pef_pred(Name,PefRef)),
     export(Head).
 
 
@@ -131,6 +138,7 @@ define_recorded(Template):-
 
 define_pef(Template):-
     functor(Template,Name,Arity),
+    undefine_pef(Name),
     dynamic(Name/Arity),
 	pdt_define_context(Template),	
 	pdt_export_context(Name),
@@ -141,6 +149,10 @@ define_pef(Template):-
     define_recorded(Template),
     define_recorda(Template),
     define_recordz(Template).
+
+undefine_pef(Name):-
+    forall(pef_pred(Name,Ref),erase(Ref)),
+    retractall(pef_pred(Name,_)).
 
 pef_reserve_id(Type,Id):-
     flag(pef_next_id,Id,Id + 1),
