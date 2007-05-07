@@ -148,7 +148,7 @@ create_multi_getter(Module,Term):-
     arg(2,Head,ArgNameValues),
     MultiGetter=':-'(Head,pdt_util_context:pdt_context_get_values(Module,Context,ArgNameValues)),
 	Module:assert(MultiGetter,Ref),
-	assert(context_pred(Module,Name,MultiGetter,Ref)).
+	assert(context_pred(Module,Name,Ref)).
 
 create_multi_setter(Module,Term):-
     functor(Term,Name,_Arity),  
