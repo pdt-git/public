@@ -85,7 +85,7 @@ swapxy(F,FS):-
 */    
 
 
-subst(F,[P|Ps],[Q|Qs],FF):-
+%subst(F,[P|Ps],[Q|Qs],FF):-
 
     
     

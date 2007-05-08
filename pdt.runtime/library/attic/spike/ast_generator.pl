@@ -11,6 +11,9 @@
 
 :- pdt_define_context(cx(toplevel_ref)).
 
+
+
+
 %%
 % pdt_generate_ast(+ToplevelRef, Id).
 % 
@@ -26,11 +29,11 @@ pdt_generate_ast(TlRef, Id):-
     generate_ast(Expanded, Id,Cx).
     
 process_variables([],_Cx).
-process_variables([Variable|Variables],_Cx):-
+process_variables([Variable|Variables],Cx):-
     pef_reserve_id(pef_variable,Id),
     pef_variable_assert([id=Id]),
     Variable='$var'(Id),
-	process_variables(Variables).
+	process_variables(Variables,Cx).
     
 generate_ast('$var'(VarId), Id,_Cx):-
     !,

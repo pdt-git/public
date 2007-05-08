@@ -1,1 +1,1 @@
-:- module(b,[op(60,xfy,my_op)]).
+b(X,X).
