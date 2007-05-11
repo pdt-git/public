@@ -117,14 +117,30 @@ start_arbiter:-
 run_arbiter:-
 	repeat,
 	thread_get_message(msg(Target,Event)),
-	process_message(Target,Event),
+	catch(
+		process_message(Target,Event),
+		Error,
+		(	report_error(Error),
+			retract_all(target_staqte(_,_)),
+			throw(Error)
+		)
+	),		
 	fail.
+report_error(Error):-
+    forall(
+    	current_target_state(_,state(_,_,_,Threads)),
+    	report_error(Threads,Error)
+    ).
 
+report_error([],_Error).
+report_error([Thread|Threads],Error):-
+    thread_send_message(Thread,arbiter_error(Error)),
+    report_error(Threads,Error).
+    
 
 process_message(Target,Event):-
-    current_target_state(Target,State),
-    
-    (	target_transition(State,Event,Action,NewState)
+    current_target_state(Target,State),    
+    (	target_transition(State,Event,Action,NewState,Target)
     ->  format("Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
     	update_target_state(Target,NewState),
 	    execute_action(Action,Target)
@@ -148,29 +164,69 @@ execute_action(report_error([]),_Target).
 execute_action(report_error([Thread|Threads],E),Target):-
     thread_send_message(Thread,errpr(Target,E)),
     execute_action(report_error(Threads,E),Target).
-
-
 execute_action(propagate_dirty,Target):-
     forall(invalidate_hook(Target),true).
 execute_action(rebuild(Thread),Target):-
 	thread_send_message(Thread,rebuild(Target)).
 
+target_transition(state(A, outdated, C,W),		 		request(T), 	report_cycle(T),	state(A, outdated, C,W) ,Target):-
+    closes_cycle(T,Target).
+target_transition(state(A, pending, C,W),		 		request(T), 	report_cycle(T),	state(A, pending, C,W) ,Target):-
+    closes_cycle(T,Target).
+target_transition(state(idle, available, [],[]), 		request(T), 	grant([T]), 		state(reading, available, [T],[]) ,_Target).
+target_transition(state(reading, available, Ts,[]),		request(T), 	grant([T]), 		state(reading, available, [T|Ts],[]),_Target).
+target_transition(state(reading, S, [_,T|Ts],Ws),		release, 		[], 				state(reading, S, [T|Ts],Ws),_Target).
+target_transition(state(reading, available, [_],[]), 	release,		[], 				state(idle, available, [],[]),_Target).
+target_transition(state(idle, pending(_) , [],Ts), 		fail,		 	report_failure(Ts),	state(idle, outdated, [],[]),_Target).
+target_transition(state(idle, pending(_) , [],Ts), 		error(E),	 	report_error(Ts,E),	state(idle, outdated, [],[]),_Target).
+target_transition(state(idle, _ , [],[]), 				mark_clean, 	[],					state(idle, available, [],[]),_Target).
+target_transition(state(idle, _ , [],Ts), 				mark_clean, 	grant(Ts), 			state(reading, available, Ts,[]),_Target).
+target_transition(state(A, available, [],[]), 			mark_dirty, 	invalidate,			state(A, outdated , [],[]),_Target).
+target_transition(state(A, outdated, [],[]), 			mark_dirty, 	[], 				state(A, outdated , [],[]),_Target).
+target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),			state(idle, pending(T) , [], []),_Target). 
+target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],					state(reading, outdated , Ls, [T|Ts]),_Target).
+target_transition(state(reading, outdated, [_,L|Ls],Ts),release,	 	[],					state(reading, outdated , [L|Ls], Ts),_Target).
+target_transition(state(reading, outdated, [_],[T|Ts]),	release,	 	rebuild(T),			state(idle, pending(T) , [], Ts),_Target).
+target_transition(state(idle, pending(P) , [], Ts),		request(T), 	[], 				state(idle, pending(P) , [], [T|Ts]),_Target).
+
+
+/*
+
+Cycle checkking:
+A thread depends on a target if it waits for it, or if it requests it.
+A target depends on a thread if it is pending, and if the thread is working on providing the target.
+
+Invariant: the graph induced by the above relations is always acyclic.
+requesting a target constitutes adding an edge. If that edge would close a cylce, an error is reported to the requesting thread.
+*/
+
+target_depends_thread(Target,Thread):-
+    target_state(Target,state(_,pending(Thread2),_,_)),
+    thread_depends_thread(Thread2,Thread).    
     
-target_transition(state(idle, available, [],[]), 		request(T), 	grant([T]), 		state(reading, available, [T],[])).
-target_transition(state(reading, available, Ts,[]),		request(T), 	grant([T]), 		state(reading, available, [T|Ts],[])).
-target_transition(state(reading, S, [_,T|Ts],Ws),		release, 		[], 				state(reading, S, [T|Ts],Ws)).
-target_transition(state(reading, available, [_],[]), 	release,		[], 				state(idle, available, [],[])).
-target_transition(state(idle, pending , [],Ts), 		fail,		 	report_failure(Ts),	state(idle, outdated, [],[])).
-target_transition(state(idle, pending , [],Ts), 		error(E),	 	report_error(Ts,E),	state(idle, outdated, [],[])).
-target_transition(state(idle, _ , [],[]), 				mark_clean, 	[],					state(idle, available, [],[])).
-target_transition(state(idle, _ , [],Ts), 				mark_clean, 	grant(Ts), 			state(reading, available, Ts,[])).
-target_transition(state(A, available, [],[]), 			mark_dirty, 	invalidate,			state(A, outdated , [],[])).
-target_transition(state(A, outdated, [],[]), 			mark_dirty, 	[], 				state(A, outdated , [],[])).
-target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),			state(idle, pending , [], [])).
-target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],					state(reading, outdated , Ls, [T|Ts])).
-target_transition(state(reading, outdated, [_,L|Ls],Ts),release,	 	[],					state(reading, outdated , [L|Ls], Ts)).
-target_transition(state(reading, outdated, [_],[T|Ts]),	release,	 	rebuild(T),			state(idle, pending , [], Ts)).
-target_transition(state(idle, pending , [], Ts),		request(T), 	[], 				state(idle, pending , [], [T|Ts])).
+thread_depends_target(Thread,Target):-
+    target_state(Target2,state(_,_,_,Waiting)),
+    member(Thread,Waiting),
+    target_depends_target(Target2,Target).
+
+
+target_depends_target(Target,Target).
+target_depends_target(Target1,Target2):-
+    target_depends_thread(Target1,Thread),
+    thread_depends_target(Thread,Target2).
+
+thread_depends_thread(Thread,Thread).
+thread_depends_thread(Thread1,Thread2):-
+    thread_depends_target(Thread1,Target),
+    target_depends_thread(Target,Thread2).
+
+    
+closes_cycle(Thread,Target):-  
+    target_depends_thread(Target,Thread),
+    !.
+
+
+
 
 
 
