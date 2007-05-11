@@ -1,77 +1,179 @@
 :- module(pdt_builder,
-	[	pdt_target_request/1, 
-		pdt_target_invalidate/1
+	[	pdt_request_target/1, 
+		pdt_release_target/1,		
+		pdt_invalidate_target/1,
+		pdt_with_targets/2
 	]
 ).
 
 /* hooks */
-:- dynamic current_target_hook/1.
-:- dynamic up_to_date_hook/1.
-:- dynamic build_hook/1.
-:- dynamic invalidate_hook/1.
+:- dynamic 
+	build_hook/1,
+	invalidate_hook/1,
+	delete_hook/1.
+:- multifile
+	build_hook/1,
+	invalidate_hook/1,
+	delete_hook/1.
+
+/* associate state with targets */
+:- dynamic target_state/2.
 
 
-
-pdt_target_request(T):-
-    \+ current_target(T),
-    !,
-	throw(error(invalid_arguement,unknown_target(T))).
-pdt_target_request(T):-
-	copy_term(T,TT),
-	up_to_date(TT),
-	T==TT, %the up-to-date target is at least as general as T
-	!.
-pdt_target_request(T):-
-    forall(
-    	current_target(T),
-	    target_request(T)
-	).
-
-
-
-
-
-
-
-
-
-pdt_target_request(T):-
-    \+ current_target(T),
-    !,
-	throw(error(invalid_arguement,unknown_target(T))).
-pdt_target_request(T):-
-    forall(
-    	current_target(T),
-	    target_invalidate(T)
-	).
-
-
-
-target_request(T):-
-    up_to_date(T),
-    !.
-target_request(T):-
-	build(T).
-
-
-
-target_invalidate(T):-
-	up_to_date(T),    
-	!,
+:- module_transparent pdt_with_targets/2.
+pdt_with_targets([],Goal):-
+	call(Goal).
+pdt_with_targets([Target|Targets],Goal):-
+    pdt_request_target(Target),
+    call_cleanup(
+    	pdt_with_targets(Targets,Goal),
+    	pdt_release_target(Target)
+    ).
 	
 
 
+%%
+% pdt_request_target(+Target)
+% request a target.
+% 
+% Make sure the information associated with Target is present and up to date.
+% If necessary, the calling thread will wait until the information is built.
+%
+% The calling thread obtains a "read lock" on the specified target.
+% As long as a target is locked, it can not be built.
+% The lock can be released using pdt_release_target/1.
+%
+pdt_request_target(Target):-
+    thread_self(Me),
+   	thread_send_message(build_arbiter,msg(Target,request(Me))),
+	thread_get_message(Msg),
+    (	Msg==grant(Target)
+    ->	true
+    ;	Msg==rebuild(Target)
+    ->  build_target(Target),
+    	pdt_request_target(Target)
+    ;	Msg=error(Target,E)
+    ->	throw(error(target_error(Target,E)))
+    ;	Msg=fail(Target)
+    ->	throw(error(target_failed(Target)))
+    ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
+    ).
+
+
+build_target(Target):-
+    (	catch(
+    		forall(build_hook(Target),true),
+    		E,
+    		(	thread_send_message(build_arbiter,msg(Target,error(E))),
+    			throw(E)
+    		)
+    	)    		
+    ->	thread_send_message(build_arbiter,msg(Target,mark_clean))
+    ;	thread_send_message(build_arbiter,msg(Target,fail))
+    ).
+
+%%
+% pdt_release_target(+Target)
+% release a target.
+% 
+% Release a read lock the current thread holds on the Target.
+% TODO: currently we do not check wether the thread actually has a lock.
+pdt_release_target(Target):-
+	thread_send_message(build_arbiter,msg(Target,release)).
+
+%%
+% pdt_invalidate_target(+Target)
+% invalidate a target.
+% 
+% Marks the information associated with Target as obsolete.
+pdt_invalidate_target(Target):-
+	thread_send_message(build_arbiter,msg(Target,mark_dirty)).
 
 
 
-
-
-build(T):-
-    build_hook(T),
+current_target_state(Target,State):-
+    target_state(Target,State),
     !.
+current_target_state(_Target,state(idle,outdated,[],[])).
+
+update_target_state(Target,state(idle,outdated,[],[])):-
+    !,
+    retractall(target_state(Target,_)).
+update_target_state(Target,NewState):-
+    retractall(target_state(Target,_)),
+    assert(target_state(Target,NewState)).
+
     
-current_target(T):-
-	current_target_hook(T).    
-	
-up_to_date(T):-
-	up_to_date_hook(T).	
+
+start_arbiter:-
+    current_thread(build_arbiter,running),
+    !.
+start_arbiter:-    
+    thread_create(run_arbiter,_,[alias(build_arbiter),detached(true)]).
+
+
+
+
+run_arbiter:-
+	repeat,
+	thread_get_message(msg(Target,Event)),
+	process_message(Target,Event),
+	fail.
+
+
+process_message(Target,Event):-
+    current_target_state(Target,State),
+    
+    (	target_transition(State,Event,Action,NewState)
+    ->  format("Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
+    	update_target_state(Target,NewState),
+	    execute_action(Action,Target)
+	;	throw(error(no_transition(Target,State,Event)))
+	).
+ 
+
+execute_action([],_).
+execute_action([Action|Actions],Target):-
+    execute_action(Action,Target),
+    exectue_action(Actions,Target).
+execute_action(grant([]),_Target).
+execute_action(grant([Thread|Threads]),Target):-
+    thread_send_message(Thread,grant(Target)),
+    execute_action(grant(Threads),Target).
+execute_action(report_failure([]),_Target).
+execute_action(report_failure([Thread|Threads]),Target):-
+    thread_send_message(Thread,fail(Target)),
+    execute_action(report_failure(Threads),Target).
+execute_action(report_error([]),_Target).
+execute_action(report_error([Thread|Threads],E),Target):-
+    thread_send_message(Thread,errpr(Target,E)),
+    execute_action(report_error(Threads,E),Target).
+
+
+execute_action(propagate_dirty,Target):-
+    forall(invalidate_hook(Target),true).
+execute_action(rebuild(Thread),Target):-
+	thread_send_message(Thread,rebuild(Target)).
+
+    
+target_transition(state(idle, available, [],[]), 		request(T), 	grant([T]), 		state(reading, available, [T],[])).
+target_transition(state(reading, available, Ts,[]),		request(T), 	grant([T]), 		state(reading, available, [T|Ts],[])).
+target_transition(state(reading, S, [_,T|Ts],Ws),		release, 		[], 				state(reading, S, [T|Ts],Ws)).
+target_transition(state(reading, available, [_],[]), 	release,		[], 				state(idle, available, [],[])).
+target_transition(state(idle, pending , [],Ts), 		fail,		 	report_failure(Ts),	state(idle, outdated, [],[])).
+target_transition(state(idle, pending , [],Ts), 		error(E),	 	report_error(Ts,E),	state(idle, outdated, [],[])).
+target_transition(state(idle, _ , [],[]), 				mark_clean, 	[],					state(idle, available, [],[])).
+target_transition(state(idle, _ , [],Ts), 				mark_clean, 	grant(Ts), 			state(reading, available, Ts,[])).
+target_transition(state(A, available, [],[]), 			mark_dirty, 	invalidate,			state(A, outdated , [],[])).
+target_transition(state(A, outdated, [],[]), 			mark_dirty, 	[], 				state(A, outdated , [],[])).
+target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),			state(idle, pending , [], [])).
+target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],					state(reading, outdated , Ls, [T|Ts])).
+target_transition(state(reading, outdated, [_,L|Ls],Ts),release,	 	[],					state(reading, outdated , [L|Ls], Ts)).
+target_transition(state(reading, outdated, [_],[T|Ts]),	release,	 	rebuild(T),			state(idle, pending , [], Ts)).
+target_transition(state(idle, pending , [], Ts),		request(T), 	[], 				state(idle, pending , [], [T|Ts])).
+
+
+
+
+
+

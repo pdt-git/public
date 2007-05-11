@@ -177,3 +177,5 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_variable(id,toplevel_ref)).
 
 :- define_pef(pef_arg(num,parent,child)).
+
+:- define_pef(pef_toplevel_root(root,toplevel_ref,file_ref)).

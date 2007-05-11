@@ -9,7 +9,7 @@
 :- pdt_define_context(peft_term_cx(subst,invars,outvars)).
 
 setup_test_data:-
-	pdt_file_ref('z:/workspace/pdt.runtime/library/attic/spike/b.pl',Ref),
+	pdt_file_ref(library('spike/b.pl'),Ref),
 	pdt_parse(file_ref(Ref)),
 	atom_concat(terms_,Ref,Key),
 	forall(pef_toplevel_recorded(Key,_,TL),
