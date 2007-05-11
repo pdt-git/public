@@ -7,11 +7,26 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('spike/pef_base')).
+:- use_module(library('spike/builder')).
 
 :- pdt_define_context(parse_cx(file_ref,toplevel_ref,term,expanded)).
 
+pdt_builder:build_hook(parse(AbsFile)):-
+    parser:my_build_hook(AbsFile).
+my_build_hook(AbsFile):-    
+	pdt_forget(AbsFile),
+   	pdt_parse(AbsFile).
 
-
+pdt_builder:invalidate_hook(parse(AbsFile)):-
+    parser:
+    (	pdt_file_ref(AbsFile,DepRef),
+	    forall(
+	    	pef_file_dependency_query([dep_ref=DepRef,file_ref=FileRef] ),
+	    	(	pdt_file_ref(File,FileRef),
+	    		pdt_invalidate_target(parse(File))
+	    	)
+	    )
+	).
 
 pdt_parse(Spec):-
     my_read(Spec).
@@ -111,12 +126,13 @@ process_inclusion(F,Cx):-
 	pdt_file_spec(F,MyDir,File),
 	!,
 	format("including ~w~n", [File]),
-	pdt_parse(File),
-	pdt_file_ref(File,Ref),
-
-	(	pef_module_definition_query([file_ref=Ref],Module)
-	->  process_module_inclusion(Module,Cx)
-	;	process_file_inclusion(Ref,Cx)
+	pdt_with_targets([parse(File)],
+		(	pdt_file_ref(File,Ref),
+			(	pef_module_definition_query([file_ref=Ref],Module)
+			->  process_module_inclusion(Module,Cx)
+			;	process_file_inclusion(Ref,Cx)
+			)
+		)		
 	).
 process_inclusion(F,_Cx):-
     format("could not resolve: ~w~n",[F]). %TODO: add file not found error.

@@ -8,11 +8,51 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('spike/pef_base')).
+:- use_module(library('spike/builder')).
+:- use_module(library('spike/parser')).
 
 :- pdt_define_context(cx(toplevel_ref)).
 
+pdt_builder:build_hook(ast(AbsFile)):-
+    ast_generator:my_build_hook(AbsFile).
+
+my_build_hook(AbsFile):-    
+	pdt_forget_asts(AbsFile),
+	pdt_generate_asts(AbsFile).
+
+pdt_builder:invalidate_hook(parse(AbsFile)):-
+    pdt_invalidate_target(ast(AbsFile)).
 
 
+%%
+% pdt_generate_ast(+ToplevelRef, Id).
+% 
+% generate ast facts for all toplevel terms in File.
+% @param ToplevellRef the reference of the toplevel record.
+% @param Id is unified with the id of root of the generated syntax tree.
+
+pdt_generate_asts(FileSpec):-
+    pdt_file_spec(FileSpec, File),
+    pdt_file_ref(File,Ref),
+    atom_concat(terms_,Ref,Key),
+    pdt_with_targets([parse(File)],
+    	(	forall(    			
+    			pef_toplevel_recorded(Key,[],TlRef),
+    			(	pdt_generate_ast(TlRef,Id),
+    				pef_toplevel_root_assert([root=Id,toplevel_ref=TlRef,file_ref=Ref])
+    			)
+    		)
+    	)
+    ).
+    			
+pdt_forget_asts(FileSpec):-
+    pdt_file_spec(FileSpec, File),
+    pdt_file_ref(File,Ref),
+    forall(
+    	pef_toplevel_root_query([file_ref=Ref,root=Id]),
+    	pdt_forget_ast(Id)
+    ),
+    pef_toplevel_root_retractall([file_ref=Ref]).
 
 %%
 % pdt_generate_ast(+ToplevelRef, Id).
