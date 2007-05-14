@@ -96,6 +96,10 @@
 %    depends/2
   ]).
   
+/**
+ * enable debugging of the sync messages via debug(sync).
+ */
+  
 :- dynamic depends/2.
 :- multifile depends/2.
 
@@ -153,7 +157,7 @@ depends(Master, Slave) :-
  *
  */
 add(Term) :- 
-  format('ADDED TERM: ~w~n',[Term]),
+  debug(sync,'ADDED TERM: ~w~n',[Term]),
   thread_self(ThreadID), 
   assert(edb_local(ThreadID, Term, assert)). 
 
@@ -163,7 +167,7 @@ add(Term) :-
  * im Format edb_local/3 aufgenommen.
  */
 delete(Term) :- 
-  format('DELETED TERM: ~w~n',[Term]),
+  debug(sync,'DELETED TERM: ~w~n',[Term]),
   thread_self(ThreadID), 
   assert(edb_local(ThreadID, Term, retract)).
   
@@ -173,7 +177,7 @@ delete(Term) :-
  * im Format edb_local/3 aufgenommen.
  */
 deleteAll(Term) :- 
-  format('DELETED ALL TERMS: ~w~n',[Term]),
+  debug(sync,'DELETED ALL TERMS: ~w~n',[Term]),
   thread_self(ThreadID), 
   assert(edb_local(ThreadID, Term, retractall)).
 
@@ -200,22 +204,14 @@ rollback :-
   thread_self(ThreadID),
   rollback(ThreadID).
 
+
+
 /********  internal *************/
 internal_notify(Functor, Term, Arity) :-
-  write('Notifying subject:'),
   sformat(Str,'~w/~w',[Functor,Arity]),
   string_to_atom(Str,Subject),
-  nl,
-  write(Subject),
-  nl,
-  write(';Term:'),
-  write(Term),
-  write(')'),
-  nl,
-%  atom_concat(Functor,'/',FuncSlash),
-%  atom_concat(FuncSlash,Arity,Subject),
-   assert1(depends_local(Subject)).
-%  consult_server:notify(Subject, Term).
+  debug(sync,'Notifying subject: ~w~nTerm: ~w~n',[Subject,Term]),
+  assert1(depends_local(Subject)).
 
 
 assert1(Term):-
@@ -235,7 +231,7 @@ transact(ThreadID, Op, Term) :-
       internal_notify(DFunctor, Term, DArity))).
 
 internal_commit(ThreadID) :- 
-  write('COMMIT'), nl, 
+  debug(sync,'COMMIT~n',[]),
   forall(edb_local(ThreadID, Term, Op), 
          transact(ThreadID, Op, Term)),
   forall(depends_local(Subject),
@@ -247,18 +243,19 @@ internal_commit(ThreadID) :-
  *
  */
 notify_if_predicate_updated(Signature) :-
-	writeln(notify_if_predicate_updated(Signature)),
+
+   debug(sync,'~w~n',[notify_if_predicate_updated(Signature)]),
    term_to_signature(Term,Signature),
-   writeln(term_to_signature(Term,Signature)),
+   debug(sync,'~w~n',[term_to_signature(Term,Signature)]),
    recorded(term_ref,Term),
-   writeln(succeed:recorded(term_ref,Term)),
+   debug(sync,'~w~n',[succeed:recorded(term_ref,Term)]),
    !,
    forall(term_ref(Term,Ref), (
      update_idb(Term,Ref),
      (changed(Ref) ->
       pif_notify(Term, 'update');
      true)
-   )),   writeln(succeed:forall).
+   )),   debug(sync,'~w~n',[succeed:forall]).
 
 notify_if_predicate_updated(_Subject).
   
@@ -285,7 +282,7 @@ internal_rollback(ThreadID, Term, Op) :-
  *  entfernt.
  */
 rollback(ThreadID) :-
-  write('ROLLBACK'), nl,
+  debug(sync,'ROLLBACK~n',[]),
   forall(edb_local(ThreadID, Term, Op), internal_rollback(ThreadID, Term, Op)),
   retractall(depends_local(_)).
 
@@ -540,7 +537,7 @@ debug(Functor, Attribute) :-
     format('=========== ~w: ~w===============~n~n ',[Functor, Attribute]).   
 
 display(Op, Term) :-
-  write(Op), write('('), write(Term), write(').'), nl.
+  debug(sync,'~w(~w).~n',[Op,Term]).
  
 
 /**
@@ -581,7 +578,7 @@ term_to_signature(Term, Signature):-
     !,
     functor_module_safe(Term, Functor, Arity),
     separate_functor_arity_module_safe(Signature,Functor,Arity).
- 
+
 /*
 open_wordnet :-
         odbc_connect('WordNet', _,
