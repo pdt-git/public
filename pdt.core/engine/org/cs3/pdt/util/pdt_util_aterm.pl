@@ -157,7 +157,8 @@ pdt_aterm_operand(Operator,List,Path, Elm):-
 
 
 
-
+pdt_aterm_var(aterm(_,Var)):-
+	var(Var).
 
 %% pdt_aterm_functor(?Term,?Functor,?Arity)
 % An ATerm-transparent version of functor/3.

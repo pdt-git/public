@@ -1,0 +1,49 @@
+All files in this directory will be consulted when the build system is loaded.
+
+To take part in the build process, targets should contribute clauses to the
+multifile and dynamic predicates
+
+pdt_builder:build_hook/1 - called if a target needs to be rebuild
+pdt_builder:invalidate_hook/1 - called if a target is marked as outdated
+
+
+Note on invalidation: this predicate typically executes on the build system arbiter thread.
+For the build system to stay responsive, avoid doing any real work on this thread.
+In particular, don't wait for IO, or request another target on this thread.
+
+The invalidate_hook is intended for target definitions to propagate the invalidation 
+to dependend targets.
+
+
+
+Current target definitions:
+
+parse(<absolute file name>)
+- Will read the specified file and all files it includes.
+- Creates records for each toplevel.
+- creates 
+	- file dependency graph, 
+	- module definition pefs, 
+	- operator definition pefs
+	- "unresolvable file reference" problem pefs
+	- "syntax error" problem pefs
+
+
+ast(<toplevel_ref>)
+- Will walk through the toplevel term and create
+	- ast pefs: terms, variable occurances, 
+		- including property position
+	- variable pefs
+		- including property variable_name
+
+ast(<absolute file name>)		
+- "virtual" target, depending on ast(<toplevel_ref>) for each toplevel in the file
+
+singleton_check(<toplevel_ref>)
+- checks the toplevel for singletons, aswell as variable names starting with an
+  underscore that are not really singletons.
+- if a problem is found, the ast for the toplevel is requested, and problem pefs are
+  created for each occurance of the respective variable   
+
+singleton_check(<absolute file name>)		  
+- "virtual" target, depending on singleton_check(<toplevel_ref>) for each toplevel in the file

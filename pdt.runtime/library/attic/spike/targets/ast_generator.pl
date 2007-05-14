@@ -34,9 +34,10 @@ pdt_builder:invalidate_hook(parse(AbsFile)):-
 pdt_generate_asts(FileSpec):-
     pdt_file_spec(FileSpec, File),
     pdt_file_ref(File,Ref),
-    atom_concat(terms_,Ref,Key),
+
     pdt_with_targets([parse(File)],
-    	(	forall(    			
+    	(	pef_file_query([file_ref=Ref,toplevel_key=Key]),
+    		forall(    			
     			pef_toplevel_recorded(Key,[],TlRef),
     			(	pdt_generate_ast(TlRef,Id),
     				pef_toplevel_root_assert([root=Id,toplevel_ref=TlRef,file_ref=Ref])

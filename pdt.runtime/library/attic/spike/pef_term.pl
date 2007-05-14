@@ -3,20 +3,12 @@
 :- use_module(library('spike/ast_generator')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
-
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
+
+:- use_module(library('org/cs3/pdt/util/pdt_util_aterm')).
 
 :- pdt_define_context(peft_term_cx(subst,invars,outvars)).
 
-setup_test_data:-
-	pdt_file_ref(library('spike/b.pl'),Ref),
-	pdt_parse(file_ref(Ref)),
-	atom_concat(terms_,Ref,Key),
-	forall(pef_toplevel_recorded(Key,_,TL),
-		(	pdt_generate_ast(TL,Id),
-			assert(testdata_root(Id))
-		)
-	).
 	
 
 apply_subst(Id,Subst,RealId):-
@@ -119,3 +111,54 @@ unifier_append(Unifier,A=B,MergedUnifier):-
 	peft_unifiable(B,BB,Unifier,MergedUnifier).
 unifier_append(Unifier,A=B,MergedUnifier):-
 	pdt_map_put(Unifier,A,B,MergedUnifier).	
+	
+	
+	
+peft_aterm(Id,Term):-
+    pdt_map_empty(Subst),
+    pdt_map_empty(Vars),
+    peft_term_cx_new(Cx),
+    peft_term_cx_subst(Cx,Subst),
+    peft_term_cx_invars(Cx,Vars),    
+    peft_aterm(Id,Cx,Term).
+    
+peft_aterm(Id,Cx,Var):-
+    peft_term_cx_get(Cx,[subst=Subst,invars=Vars,outvars=OutVars]),    
+    apply_subst(Id,Subst,RealId),
+	pef_variable_occurance_query([id=RealId,variable_ref=VarRef]),
+	!,
+	(	pdt_map_get(Vars,VarRef,Var)
+	->	InVars=OutVars
+	;	pdt_map_put(InVars,VarRef,Var,OutVars)
+	),
+	pdt_aterm_var(Var).
+	
+peft_aterm(Id,Cx,Term):-
+    peft_term_cx_subst(Cx,Subst),    
+    apply_subst(Id,Subst,RealId),
+	pef_term_query([id=RealId,name=Name,arity=Arity]),
+	pdt_aterm_functor(Term,Name,Arity),
+	peft_aterm_args(1,Arity,RealId,Cx,Term).  
+
+peft_aterm_args(I,N,_Id,Cx,_Term):-
+    I>N,
+    !,
+    peft_term_cx_get(Cx,[invars=Vars,outvars=Vars]).
+peft_aterm_args(I,N,Id,Cx,Term):-        
+    peft_arg(I,Id,ArgId),
+    peft_term_cx_set(Cx,[outvars=ArgOutVars],ArgCx),
+    peft_aterm(ArgId,ArgCx,Arg),
+    pdt_aterm_arg(I,Term,Arg),
+    J is I + 1,
+    peft_term_cx_set(Cx,[invars=ArgOutVars],NextCx),
+    peft_aterm_args(J,N,Id,NextCx,Term).
+	
+peft_get_annos(Id,Annos):-
+	findall(Anno,peft_get_anno(Id,Anno),Annos).
+peft_get_anno(Id,Anno):-
+	pef_property_query([id=Id,key=Key,value=Value]),
+	(	atom(Key)
+	->  Anno=..[Key,Value]
+	;	throw(type_error(property_key,Key))
+	).
+		
