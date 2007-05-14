@@ -79,8 +79,8 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 
 		try {
 			SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
-			parser.setProperty("http://xml.org/sax/features/namespaces", new Boolean(true));
-			boolean b = parser.isNamespaceAware();
+			//parser.setProperty("http://xml.org/sax/features/namespaces", new Boolean(true));
+			//boolean b = parser.isNamespaceAware();
 			parser.parse(new InputSource(reader),new RegistryHandler());
 			
 		} catch (SAXException e) {
@@ -102,7 +102,7 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 		
 		public void startElement(String uri, String localName, String qName,
 				Attributes attributes) throws SAXException {
-			if (localName.equals("subscription")) {
+			if (qName.equals("subscription")) {
 
 				String bundle = attributes.getValue("bundle");
 				String className = attributes.getValue("class");
