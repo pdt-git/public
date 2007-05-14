@@ -132,3 +132,40 @@ first_char_up(Name, UName) :-
         atom_concat(LowerFirstChar,Rest,Name),
         !.      
         
+
+/**
+ * atom_concat(?a,?b,?c,?d)
+ *
+ * concats the atoms ?a, ?b and ?c to the atom ?d.
+ *
+ * Uses the buildin atom_concat/3:
+ * atom_concat(_1,_tmp,_4),
+ * atom_concat(_2,_3,_tmp).
+ */
+%measure:
+
+atom_concat(_1,_2,_3,_4) :-
+    atom_concat(_1,_tmp,_4),
+    atom_concat(_2,_3,_tmp).
+
+atom_concat(_1,_2,_3,_4,_5) :-
+    atom_concat(_1,_2,_tmp,_5),
+    atom_concat(_3,_4,_tmp).
+
+atom_concat(_1,_2,_3,_4,_5,_6) :-
+    atom_concat(_1,_2,_3,_tmp,_6),
+    atom_concat(_4,_5,_tmp).
+
+
+atom_concat(_1,_2,_3,_4,_5,_6,_7) :-
+    atom_concat(_1,_2,_3,_4,_tmp,_7),
+    atom_concat(_5,_6, _tmp).
+
+atom_concat(_1,_2,_3,_4,_5,_6,_7,_8) :-
+    atom_concat(_1,_2,_3,_4,_5,_tmp,_8),
+    atom_concat(_6,_7, _tmp).
+
+atom_concat(_1,_2,_3,_4,_5,_6,_7,_8,_9) :-
+    atom_concat(_1,_2,_3,_4,_5,_6,_tmp,_9),
+    atom_concat(_7,_8, _tmp).
+        
