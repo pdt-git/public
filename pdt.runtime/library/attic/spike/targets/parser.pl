@@ -62,11 +62,12 @@ my_forget(Spec):-
 	),
 	pef_problem_retractall([file_ref=FileRef]),
     
-    atom_concat(terms_,FileRef,Key),
+    pef_file_query([file_ref=FileRef,toplevel_key=Key]),
     forall(
     	recorded(Key,_,Ref),
     	erase(Ref)
-    ).
+    ),
+    pef_file_retractall([file_ref=FileRef]).
 
 my_read(Spec):-
     pdt_file_spec(Spec,F),
@@ -85,14 +86,15 @@ do_read(F,In):-
     pdt_file_ref(F,Ref),
     parse_cx_file_ref(Cx,Ref),    
     atom_concat(terms_,Ref,Key),
+    pef_file_assert([file_ref=Ref,toplevel_key=Key]),
     repeat,
     	catch(
-    		prolog_read_source_term(In,Term,Expanded,[]),    	
+    		prolog_read_source_term(In,Term,Expanded,[variable_names(VarNames),singletons(Singletons),subterm_positions(Positions)]),    	
     		Error,
     		writeln(Error) %TODO: add syntax error pef
     	),
     	var(Error),
-    	pef_toplevel_recordz(Key,[file_ref=Ref,term=Term,expanded=Expanded],TlRef),
+    	pef_toplevel_recordz(Key,[file_ref=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions],TlRef),
     	parse_cx_get(Cx,[term=Term,expanded=Expanded,toplevel_ref=TlRef]),
     	preprocess(Expanded,Cx),
     	Term==end_of_file,
@@ -121,11 +123,26 @@ process_module_definition(Name,Cx):-
 process_inclusion(F,Cx):-
 	format("resolving ~w~n", [F]),
 	parse_cx_file_ref(Cx,MyRef),
+	parse_cx_toplevel_ref(Cx,TlRef),
 	pdt_file_spec(file_ref(MyRef),MyFile),
 	file_directory_name(MyFile,MyDir),
 	pdt_file_spec(F,MyDir,File),
 	!,
-	format("including ~w~n", [File]),
+	pdt_file_ref(File,Ref),
+	pef_reserve_id(pef_file_dependency,Id),
+	pef_file_dependency_assert([id=Id,file_ref=MyRef,toplevel_ref=TlRef,dep_ref=Ref]),
+	catch(
+		do_inclusion(File,Cx),
+		error(cycle(parse(File))),
+		format("dependency cycle: ~w~n",[File])
+	).
+process_inclusion(F,_Cx):-
+    format("could not resolve: ~w~n",[F]). %TODO: add file not found error.
+
+
+
+
+do_inclusion(File,Cx):-	
 	pdt_with_targets([parse(File)],
 		(	pdt_file_ref(File,Ref),
 			(	pef_module_definition_query([file_ref=Ref],Module)
@@ -134,8 +151,7 @@ process_inclusion(F,Cx):-
 			)
 		)		
 	).
-process_inclusion(F,_Cx):-
-    format("could not resolve: ~w~n",[F]). %TODO: add file not found error.
+
 
 process_module_inclusion(Module,Cx):-
     pef_module_definition_toplevel_ref(Module,Ref),

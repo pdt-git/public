@@ -2,7 +2,7 @@
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_cs')).
 
-
+:- use_module(b).
 
 fix_right(
 	blackx(

@@ -2,9 +2,12 @@
 	[	pdt_request_target/1, 
 		pdt_release_target/1,		
 		pdt_invalidate_target/1,
-		pdt_with_targets/2
+		pdt_with_targets/2,
+		pdt_restart_arbiter/0
 	]
 ).
+
+
 
 /* hooks */
 :- dynamic 
@@ -47,6 +50,7 @@ pdt_request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
 	thread_get_message(Msg),
+	writeln(received(Me,Msg)),
     (	Msg==grant(Target)
     ->	true
     ;	Msg==rebuild(Target)
@@ -56,6 +60,8 @@ pdt_request_target(Target):-
     ->	throw(error(target_error(Target,E)))
     ;	Msg=fail(Target)
     ->	throw(error(target_failed(Target)))
+    ;	Msg=cycle(Target)
+    ->	throw(error(cycle(Target)))    
     ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
     ).
 
@@ -92,8 +98,9 @@ pdt_invalidate_target(Target):-
 
 
 current_target_state(Target,State):-
-    target_state(Target,State),
-    !.
+    target_state(Target,_),
+    !,
+    target_state(Target,State).
 current_target_state(_Target,state(idle,outdated,[],[])).
 
 update_target_state(Target,state(idle,outdated,[],[])):-
@@ -105,30 +112,45 @@ update_target_state(Target,NewState):-
 
     
 
+stop_arbiter:-
+    current_thread(build_arbiter,running),
+    !,
+    thread_send_message(build_arbiter,msg(all,stop)),
+    thread_join(build_arbiter,_).
+stop_arbiter.    
+    
 start_arbiter:-
     current_thread(build_arbiter,running),
     !.
 start_arbiter:-    
-    thread_create(run_arbiter,_,[alias(build_arbiter),detached(true)]).
+    thread_create(run_arbiter,_,[alias(build_arbiter)]).
+
+pdt_restart_arbiter:-
+    stop_arbiter,
+    start_arbiter.
 
 
 
-
-run_arbiter:-
+run_arbiter:-   
 	repeat,
-	thread_get_message(msg(Target,Event)),
-	catch(
-		process_message(Target,Event),
-		Error,
-		(	report_error(Error),
-			retract_all(target_staqte(_,_)),
-			throw(Error)
-		)
-	),		
-	fail.
+		thread_get_message(msg(Target,Event)),
+		catch(
+			process_message(Target,Event),
+			Error,
+			(	%trace,
+				report_error(Error),
+				retractall(target_state(_,_)),
+				throw(Error)
+			)
+		),		
+		Event==stop,
+	!,
+	report_error(arbiter_quits),
+	retractall(target_state(_,_)).
+	
 report_error(Error):-
     forall(
-    	current_target_state(_,state(_,_,_,Threads)),
+    	target_state(_,state(_,_,_,Threads)),
     	report_error(Threads,Error)
     ).
 
@@ -137,13 +159,16 @@ report_error([Thread|Threads],Error):-
     thread_send_message(Thread,arbiter_error(Error)),
     report_error(Threads,Error).
     
-
+process_message(all,stop):-!.
 process_message(Target,Event):-
     current_target_state(Target,State),    
     (	target_transition(State,Event,Action,NewState,Target)
     ->  format("Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
     	update_target_state(Target,NewState),
-	    execute_action(Action,Target)
+	    (	execute_action(Action,Target)
+	    ->	true
+	    ;	throw(error(action_failed(Target,State,Event,Action)))
+	    )
 	;	throw(error(no_transition(Target,State,Event)))
 	).
  
@@ -160,18 +185,42 @@ execute_action(report_failure([]),_Target).
 execute_action(report_failure([Thread|Threads]),Target):-
     thread_send_message(Thread,fail(Target)),
     execute_action(report_failure(Threads),Target).
-execute_action(report_error([]),_Target).
+execute_action(report_error([],_E),_Target).
 execute_action(report_error([Thread|Threads],E),Target):-
-    thread_send_message(Thread,errpr(Target,E)),
+    thread_send_message(Thread,error(Target,E)),
     execute_action(report_error(Threads,E),Target).
-execute_action(propagate_dirty,Target):-
+/*
+ FIXME: 
+ Probably it would be best to make sure that all
+ cascading invalidation messages get processed before any
+ other messages, (requests in particular).
+ 
+ This is not that difficult. 
+ when starting to invalidate, perform a state change into some
+ state invalidating. within this state, all incoming messages are frozen.
+  After calling the invalidate_hook, enqueue some "invalidation_done" marker.
+  When this marker is read, the waiting messages are unfrozen.
+  
+  Problem is, that this cuts through all the target states.
+  We have to add a global state component. So
+  I decided to ignore the "problem", as long as possible.
+  
+  Possible workaround: when invalidation is requested, check if the 
+  request comes in from the arbiter thread. IN this case, process it right away, 
+  i.e. without using the message loop. This way we make sure that cascading 
+  invalidation requests are processed before any other requests.
+  I don't know how to moddel this in our state chart diagram...
+*/
+execute_action(invalidate,Target):-
     forall(invalidate_hook(Target),true).
 execute_action(rebuild(Thread),Target):-
 	thread_send_message(Thread,rebuild(Target)).
+execute_action(report_cycle(Thread),Target):-
+	thread_send_message(Thread,	cycle(Target)).
 
 target_transition(state(A, outdated, C,W),		 		request(T), 	report_cycle(T),	state(A, outdated, C,W) ,Target):-
     closes_cycle(T,Target).
-target_transition(state(A, pending, C,W),		 		request(T), 	report_cycle(T),	state(A, pending, C,W) ,Target):-
+target_transition(state(A, pending(P), C,W),		 		request(T), 	report_cycle(T),	state(A, pending(P), C,W) ,Target):-
     closes_cycle(T,Target).
 target_transition(state(idle, available, [],[]), 		request(T), 	grant([T]), 		state(reading, available, [T],[]) ,_Target).
 target_transition(state(reading, available, Ts,[]),		request(T), 	grant([T]), 		state(reading, available, [T|Ts],[]),_Target).
@@ -227,7 +276,7 @@ closes_cycle(Thread,Target):-
 
 
 
-
+:- pdt_restart_arbiter.
 
 
 

@@ -168,7 +168,7 @@ pef_reserve_id(Type,Id):-
 
 :- define_pef(pef_problem(id,severity,file_ref,start,end,type,data)).
 
-:- define_pef(pef_toplevel(file_ref,term,expanded)).
+:- define_pef(pef_toplevel(file_ref,term,expanded,positions,varnames,singletons)).
 
 :- define_pef(pef_term(id,name,arity)).
 
@@ -179,3 +179,5 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_arg(num,parent,child)).
 
 :- define_pef(pef_toplevel_root(root,toplevel_ref,file_ref)).
+
+:- define_pef(pef_file(file_ref,toplevel_key)).
