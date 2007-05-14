@@ -182,7 +182,7 @@ public class Debug {
         if (t instanceof Error && debugLevel != LEVEL_NONE) {
             write(LEVEL_ERROR, "The following Error was caught:");
             t.printStackTrace(out);
-        } else if (debugLevel >= LEVEL_WARNING) {
+        } else if (debugLevel >= LEVEL_ERROR) {
             write(LEVEL_WARNING, "The following Exception was caught:");
             t.printStackTrace(out);
         }
