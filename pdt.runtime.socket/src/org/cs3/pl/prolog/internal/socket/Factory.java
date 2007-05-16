@@ -193,6 +193,7 @@ public class Factory extends PrologInterfaceFactory {
 			return "cmd.exe /c start \"cmdwindow\" /min plwin";
 			// return "plwin";
 		}
+//		return "xterm -e xpce";  // For Mac and Linux with console
 		return "xpce";
 	}
 
