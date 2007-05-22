@@ -24,6 +24,15 @@
 
 
 :- module_transparent pdt_with_targets/2.
+
+%% pdt_with_targets(+Targets,+Goal).
+% holds read locks for the specified list of Targets while executing Goal.
+%
+% IMPORTANT NOTE: This predicate uses call_cleanup/2 to take care of releasing 
+% the locks. Bear in mind that as long as there are any choice points left in Goal, 
+% the locks are NOT released. 
+%
+
 pdt_with_targets([],Goal):-
 	call(Goal).
 pdt_with_targets([Target|Targets],Goal):-
@@ -38,7 +47,9 @@ pdt_with_targets([Target|Targets],Goal):-
 %%
 % pdt_request_target(+Target)
 % request a target.
-% 
+%
+% @deprecated: In most situations, you really want to use pdt_with_targets/2. 
+%
 % Make sure the information associated with Target is present and up to date.
 % If necessary, the calling thread will wait until the information is built.
 %
@@ -79,9 +90,11 @@ build_target(Target):-
     ).
 
 %%
-% pdt_release_target(+Target)
+% pdt_release_target(+Target).
 % release a target.
 % 
+% @deprecated: In most situations, you really want to use pdt_with_targets/2.
+%
 % Release a read lock the current thread holds on the Target.
 % TODO: currently we do not check wether the thread actually has a lock.
 pdt_release_target(Target):-
