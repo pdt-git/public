@@ -158,26 +158,63 @@ pef_reserve_id(Type,Id):-
     flag(pef_next_id,Id,Id + 1),
     assert(pef_type(Id,Type)). 
 
+% A module definition. Also represents the defined module.
 :- define_pef(pef_module_definition(id,name,file_ref,toplevel_ref)).
 
+% An operator definition. 
 :- define_pef(pef_op_definition(id,priority,type,name,file_ref,toplevel_ref)).
 
+% A file dependency definition. Also represents the defined dependency.
 :- define_pef(pef_file_dependency(id,file_ref,dep_ref,toplevel_ref)).
 
+% A named property of any pef. Id is the PEFs Id. The property itself is a weak entity,
+% it does not have an Id of its own.
 :- define_pef(pef_property(id,key,value)).
 
+% TODO
 :- define_pef(pef_problem(id,severity,file_ref,start,end,type,data)).
 
+% A parsed toplevel term. 
 :- define_pef(pef_toplevel(file_ref,term,expanded,positions,varnames,singletons)).
 
+% An AST node representing a non-var program term.
 :- define_pef(pef_term(id,name,arity)).
 
+% An AST node representing a program variable occurence.
 :- define_pef(pef_variable_occurance(id,variable_ref)).
 
+% A program variable.
 :- define_pef(pef_variable(id,toplevel_ref)).
 
+% The relation between a compound term and its arguments.
 :- define_pef(pef_arg(num,parent,child)).
 
+% The relation between a toplevel record and the root of corresponding AST.
 :- define_pef(pef_toplevel_root(root,toplevel_ref,file_ref)).
 
+% A recorded file.
 :- define_pef(pef_file(file_ref,toplevel_key)).
+
+% The mapping of names to modules within a program
+% there currently is no separate pef for programs.
+% Instead, file references are used to identify the program that results from
+% loading that file into a new runtime.
+:- define_pef(pef_program_module(program,name,module)).
+
+% A predicate
+% note that module is a module identifier, not a module name.
+:- define_pef(pef_predicate(module,name,arity)).
+
+% The mapping of names to predicates within a module
+:- define_pef(pef_imported_predicate(module,name,arity,predicate)).
+
+% The relation between a predicate and its clauses
+:- define_pef(pef_clause(predicate,number,toplevel_ref)).
+
+% A special Module that results from extending an existing module definition,
+% e.g. by adding clauses to multifile predicates.
+:- define_pef(pef_module_extension(id,base,program)).
+
+% A special Module that is defined "ad hoc", i.e. there is no file
+% associated to it.
+:- define_pef(pef_ad_hoc_module(id,name,program)).

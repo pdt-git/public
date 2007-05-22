@@ -219,23 +219,13 @@ unify_with_underscores([Var|Vars]):-
 % @param FileSpec the file containing the directive
 % @param Signature the module-qualified signature of the predicate
 % @param Annos The term annotations of the directive.
-pdt_predicate_clause(FileSpec,Module:Name/Arity,[label(Label),type(Type)|Annos]):-
-	pdt_file_record_key(term,FileSpec,Key),
-	pdt_file_record(Key,Term),
+pdt_predicate_clause(FileSpec,Module:Name/Arity,[clause_of(Module:Name/Arity),label(Label),file_ref(FileRef),n(N),position(Start-End)]):-    
 	pdt_file_ref(FileSpec,Ref),
-	pdt_bind_file_ref(Ref,Term),
-	%pdt_aterm_term_annotation(Term,TTerm,Annos),
-	source_term_all_properties(Term,Annos),
-	pdt_member(clause_of(Module:Name/Arity),Annos),
-	(	source_term_functor(Term,:-,2)
-	->	source_term_subterm(Term,[1],Head),
-		Type=rule
-	;	Head=Term,
-		Type=fact
-	),
-	
-	pdt_op_module(FileSpec,OpModule),
-	render_term(Head,Term,OpModule,4,Label).
+	predicate_clause(FileRef,Module:Name/Arity,Label,Start,End).
+
+predicate_clause(FileRef,Module:Name/Arity,Label,Start,End):-
+    
+
 	
 %% pdt_file_problem(+FileSpec,-Problem, -Pos)
 %  find problems in asource file.
