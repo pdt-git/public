@@ -1,4 +1,4 @@
-:- module(pef_base,[pef_reserve_id/2]).
+:- module(pef_base,[pef_reserve_id/2, pef_type/2]).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).	
 :- dynamic pef_pred/2.

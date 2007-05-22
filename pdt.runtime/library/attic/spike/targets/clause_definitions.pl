@@ -145,12 +145,29 @@ import_predicate_binding(Name/Arity,MID,Cx):-
     ). %TODO: multifile predicates
     
 check_for_module_name_conflict(Name,Id,Cx,Outcome):-
-    get_module(Name,MID,Cx),
+    % if a module by that name exist, we have to differentiate between the following cases
+    % 1) the existing module is identical to the new one 
+    % 2) the existing module is an ad-hoc definition that should be merged into the new one.
+    % 3) the existing module is a module extension, it is based on on the new module or 
+    %    the module the new module is based on.
+    % 4) the existing module is a module or an extension of a module that is different
+    %    from the new one or the module the new one is based on
+    %
+    %
+    % ad 1) nothing to do
+    % ad 2) the existing module should be merged into the new one.
+    % ad 3) the 
+    %
+    %
+    %
+    get_module(Name,OldMID,Cx),
     !,
-    (	MID \== Id
-	->	Outcome=conflict
-	;	Outcome=redundant
-	). %TODO:  merging in ad-hoc modules
+    (	OldMID == Id
+	->	Outcome=redundant
+	;	pef_ad_hoc_module_query([id=OldMID])
+	->	Outcome=merge(OldMID)
+	;	Outcome=conflict(OldMID)
+	). %TODO: if the existing module is an ad-hoc module, it should be merged into the new one.
 check_for_module_name_conflict(_Module,_Cx,ok).    
 
 
@@ -227,8 +244,19 @@ get_or_create_predicate(Name,Arity,CX,PredID):-
     pef_reserve_id(pef_predicate,PredID),
     pef_predicate_assert([module=MID,name=Name,arity=Arity]).
 
+%%
+% rebind_module_name(+Name,+MID,+Cx)
+% binds a module to a module name.
+% If another module was bound to this name before, this binding is removed. The module
+% itself however will remain defined.
 rebind_module_name(Name,MID,Cx):-
     cx_program(Cx,PID),
+    
+    (	pef_program_module_query([program=PID,name=Name,id=OldMID]),
+    	module_owner(OldMID,PID)
+    ->	delete_module(OldMID)
+    ;	true
+    ),
     pef_program_module_retractall([program=PID,name=Name]),
     pef_program_module_assert([program=PID,name=Name,module=MID]).
     
@@ -269,4 +297,82 @@ add_clause(PredID,CX):-
 		do_add_clause(NewPredID,Cx)
     ).
 		
+merge_modules(Name,OldMID,NewMID,Cx,MID):-
+    pef_type(OldMID,OldType),
+    pef_type(NewMID,NewType),
+    (	module_base(OldMID,Base), module_base(NewMID,Base)
+    ->	SameBase=true
+    ;	SameBase=false
+    ),
+    merge_modules(OldType,NewType,SameBase,Name,OldMID,NewMID,Cx,MID).
+
+merge_modules(Type,Type,true,_Name,MID,MID,Cx,MID):-
+	!.
+merge_modules(pef_module_definition,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):-
+    throw(module_name_conflict(OldMID,NewMID)).
+merge_modules(pef_module_definition,pef_module_extension,true,Name,_OldMid,NewMid,Cx,NewMid):-
+	rebind_module_name(Name,NewMid,Cx). 
+merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):-
+    throw(module_name_conflict(OldMID,NewMID)).
+merge_modules(pef_module_definition,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,MID):-
+    cx_program(Cx,PID),
+    (	module_owner(OldMID,PID)
+    ->	MID=OldMID
+    ;	extend_module(OldMID,MID,Cx)
+    ),
+    merge_ad_hoc_module(NewMID,MID,Cx),
+    rebind_module_name(Name,MID,Cx).
+merge_modules(pef_module_extension,pef_module_definition,true,_Name,MID,_New,Cx,MID).
+merge_modules(pef_module_extension,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):-
+    throw(module_name_conflict(OldMID,NewMID)).
+merge_modules(pef_module_extension,pef_module_extension,true,Name,OldMid,NewMid,Cx,NewMid):-
+    cx_program(Cx,PID),
+    (	module_owner(OldMID,PID)
+    ->	MID=OldMID, MergeMID=NewMID
+    ;	module_owner(NewMID,PID)
+    ->	MID=NewMID, MergeMID=OldMID
+    ;	copy_module(OldMID,MID,Cx),
+    	MergeMID=NewMID
+    ),
+    merge_module_extension(MergeMID,MID,Cx),
+    rebind_module_name(Name,MID,Cx).
+merge_modules(pef_module_extension,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):-
+    throw(module_name_conflict(OldMID,NewMID)).
+merge_modules(pef_module_extension,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,MID):-
+    cx_program(Cx,PID),
+    (	module_owner(OldMID,PID)
+    ->	MID=OldMID
+    ;	copy_module(OldMID,MID,Cx)
+    ),
+    merge_ad_hoc_module(NewMID,MID,Cx),
+    rebind_module_name(Name,MID,Cx).
+merge_modules(pef_ad_hoc_module,pef_module_definition,_SameBase,Name,OldMID,NewMID,_Cx,_MID):-
+    cx_program(Cx,PID),
+    (	module_owner(NewMID,PID)
+    ->	MID=NewMID
+    ;	extend_module(NewMID,MID,Cx)
+    ),
+    merge_ad_hoc_module(OldMID,MID,Cx),
+    rebind_module_name(Name,Mid,Cx).
+merge_modules(pef_ad_hoc_module,pef_module_extension,_SameBase,Name,OldMID,NewMID,_Cx,_MID):-
+    cx_program(Cx,PID),
+    (	module_owner(NewMID,PID)
+    ->	MID=NewMID
+    ;	copy_module(NewMID,MID,Cx)
+    ),
+    merge_module_extension(OldMID,MID,Cx),
+    rebind_module_name(Name,Mid,Cx).
+merge_modules(pef_ad_hoc_module,pef_ad_hoc_module,_SameBase,Name,OldMid,NewMid,Cx,NewMid):-
+    cx_program(Cx,PID),
+    (	module_owner(OldMID,PID)
+    ->	MID=OldMID, MergeMID=NewMID
+    ;	module_owner(NewMID,PID)
+    ->	MID=NewMID, MergeMID=OldMID
+    ;	copy_module(OldMID,MID,Cx),
+    	MergeMID=NewMID
+    ),
+    merge_ad_hoc_module(MergeMID,MID,Cx),
+    rebind_module_name(Name,MID,Cx).
     
+
+		
