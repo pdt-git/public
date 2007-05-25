@@ -39,6 +39,11 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+/**
+ * to activate debugging for this module, uncomment:
+ */
+% :- debug(pif_observe).
+
 :- module(pif_observe,[
 	pif_observe/3,
 	pif_observe/2,	
@@ -46,6 +51,7 @@
 	pif_notify/2,
 	pif_dispatch/3
 ]).
+
 
 :-dynamic pif_observe_hook/3,pif_unobserve_hook/3.
 :-multifile pif_observe_hook/3,pif_unobserve_hook/3.
@@ -136,7 +142,7 @@ pif_notify(Subject,Event) :-
     	(	current_thread(Thread,running)
     	->	(    	      
     	      thread_send_message(Thread,notify(Subject,Event)),
-   	      writeln(thread_send_message(Thread,notify(Subject,Event)))
+   	      debug(pif_observe,'~w~n',[thread_send_message(Thread,notify(Subject,Event))])
     	   
     	);	erase(Ref)
     	)

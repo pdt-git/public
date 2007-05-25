@@ -77,8 +77,7 @@ ast_node_term(Lang, Head) :-
 
 astNodeSignature(NodeType, Arity) :- 
     ast_node_signature(_Lang, NodeType, Arity).
-    
-        
+            
 /**
  *  ast_node_signature(?Language, ?NodeType, ?Arity)
  *
@@ -324,9 +323,6 @@ ast_node_subtype(L,T1,T2) :-
 treeSignature(Functor, Arity) :-
    ast_node_signature('Java', Functor, Arity).
    
-astNodeSignature(NodeType, Arity) :- 
-    ast_node_signature(_Lang, NodeType, Arity).
-
 /** 
  * attribSignature(?Functor, ?Arity)
  *    Obsolete, use ast_node_signature(?Language, ?Functor, ?Arity) instead. 

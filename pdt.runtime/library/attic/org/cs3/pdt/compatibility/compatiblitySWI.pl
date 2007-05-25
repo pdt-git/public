@@ -363,3 +363,28 @@ disable_tty_control :-
   set_prolog_flag(tty_control,false). 
 
 :- disable_tty_control.
+
+
+read_term_atom(Atom,Term,Options):-
+	atom_to_memory_file(Atom,Handle),
+	open_memory_file(Handle, read, Stream),
+	catch(read_term(Stream,Term,Options),
+	      Exception,
+	      write(Exception)),
+	close(Stream),free_memory_file(Handle),
+	( nonvar(Exception) ->
+	   throw(Exception);
+	   true
+	).
+	
+test(read_term_atom):-
+	catch(read_term_atom('asdf("asdf)', Term, [variable_names(Vars)]),
+	      Exception,_),
+	assert_true(nonvar(Exception)).
+	
+test(read_term_atom2):-
+	catch(read_term_atom('asdf(Var,''asdf'')', Term, [variable_names(Vars)]),
+	      Exception,_),
+	assert_true(Vars==['Var'=A]).
+	
+
