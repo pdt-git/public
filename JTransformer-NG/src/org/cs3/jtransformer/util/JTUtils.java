@@ -442,7 +442,7 @@ public class JTUtils
 
 		// Note: fullQualifiedName/2 requires that at least one argument is bound!
 		List queryList = prologSession.queryAll(
-				"class(ResolvedServiceClassId,_,_),not(externT(ResolvedServiceClassId)), fullQualifiedName(ResolvedServiceClassId, FqClassName)."
+				"class(ResolvedServiceClassId,_,_),not(local(ResolvedServiceClassId)), not(anonymousClass(ResolvedServiceClassId)), not(externT(ResolvedServiceClassId)), fullQualifiedName(ResolvedServiceClassId, FqClassName)."
 		);
 		
 		if( queryList != null )

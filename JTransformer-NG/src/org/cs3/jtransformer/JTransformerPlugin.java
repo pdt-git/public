@@ -575,7 +575,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	/**
 	 * Do not use project.getNature(JTransformer.NATURE_ID) anywhere
 	 * in you project. This entry point is important to avoid
-	 * the creation of more than one JT nature for project.
+	 * the creation of more than one JT nature for a project.
 	 * 
 	 * This method is synchronized on the IProject instance.
 	 * 
