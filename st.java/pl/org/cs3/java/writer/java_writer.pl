@@ -1315,7 +1315,6 @@ gen_ident(_Name,Class) :-
     classDefT(Class,_,_,_),
     !,
     fullQualifiedName(Class,FQN),
-    write(FQN),
     printf(FQN).
 
 gen_ident(Name,_Symbol):-
