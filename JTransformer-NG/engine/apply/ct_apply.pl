@@ -1,17 +1,20 @@
-/*
-Interpretor for the following language
-
-Conditions:
-    C = EC | C‘, ‘C | C‘; ‘C | ‘not((‘C‘))‘
-    EC = tree | true | false
-    
-Actions:
-    T = ET | ET‘, ‘T
-    ET = add(tree) | delete(tree) | replace(tree1, tree2) | empty
-    
-CT's:
-    ct(_name, _preCond, _action).
-*/
+/**
+ * Interpretor for the following language
+ * 
+ * Conditions:
+ *     C = EC | C‘, ‘C | C‘; ‘C | ‘not((‘C‘))‘
+ *     EC = tree | true | false
+ *     
+ * Actions:
+ *     T = ET | ET‘, ‘T
+ *     ET = add(tree) | delete(tree) | replace(tree1, tree2) | empty
+ *     
+ * CT's:
+ *     ct(_name, _preCond, _action).
+ *     
+ * Debugging for this module can be deactivated with nodebug(applyct).
+ *   
+ */
 
 /**
  * debug_apply_action_output
@@ -19,6 +22,10 @@ CT's:
  * deactivated by default.
  */
 :- dynamic debug_apply_action_output/0.
+
+% activate: debugging for this module:
+:- debug(applyct).
+
 :- dynamic applied/1.
 
 :- dynamic lastApplyInfo/1.
@@ -104,14 +111,14 @@ apply_ctlist(List) :-
 	retractall(lastApplyListInfo(_)),
 	assert(lastApplyListInfo(ApplyInfo)),
 	length(ApplyInfo,Num),
-	format('~n===========================~n~napplied ~w CT:~n',[Num]),
-	forall(member(M,ApplyInfo),format('~w~n',M)).
+	debug(applyct,'~n===========================~n~napplied ~w CT:~n',[Num]),
+	forall(member(M,ApplyInfo),debug(applyct,'~w~n',M)).
 
 showApplyListInfo :-
     lastApplyListInfo(ApplyInfo),
 	length(ApplyInfo,Num),
-	format('~n===========================~n~napplied ~w CT:~n',[Num]),
-    forall(member(M,ApplyInfo),format('~w~n',M)).
+	debug(applyct,'~n===========================~n~napplied ~w CT:~n',[Num]),
+    forall(member(M,ApplyInfo),debug(applyct,'~w~n',M)).
     
 	
 apply_ctlist_([],[]).
@@ -145,7 +152,6 @@ apply_ct(Name) :-
 apply_all_post([]):-!.
 apply_all_post([[Name,ActionVariables,Head]|Tail]) :-
     debug_apply_all_post(Name),
-   % format('~n~w',[_h]),
     comma2list(Head,List),
     ( 
       advice_cache(ActionVariables,Cached)
@@ -189,17 +195,17 @@ laj_advice_method(CTNameTerm,AdviceMethod) :-
 
 debug_apply_all_post(Info):-
     debug_apply_action_output,
-    format('action:~w~n',[Info]).
+    debug(applyct,'action:~w~n',[Info]).
 debug_apply_all_post(_Info).
     
 toggle_apply_action_debug :-
     debug_apply_action_output,
     !,
-    format('no apply action debug output ~n',[]),
+    debug(applyct,'no apply action debug output ~n',[]),
     retractall(debug_apply_action_output).
     
 toggle_apply_action_debug  :-
-    format('apply action debug output ~n',[]),
+    debug(applyct,'apply action debug output ~n',[]),
         assert(debug_apply_action_output).
         
     
@@ -242,8 +248,9 @@ apply_post([_head| _tail]) :-
  */
 add_apply_info_(_name,_allActions):-
     length(_allActions,Num),
-	sformat(S,'applied ~w actions for the ct "~w"',[Num,_name]),
-	format('~w~n================================================~n', [S]),
+    debug(applyct, 'applied ~w actions for the ct "~w"~n================================================~n',[Num,_name]),
+%	sformat(S,'applied ~w actions for the ct "~w"',[Num,_name]),
+%	format('~w~n================================================~n', [S]),
 	retractall(lastApplyInfo(_)),
 	assert(lastApplyInfo(S)).
 	
