@@ -6,7 +6,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.jtransformer.JTDebug;
@@ -21,7 +20,6 @@ import org.cs3.jtransformer.regenerator.SourceCodeRegenerator;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProviderListener;
@@ -55,7 +53,6 @@ import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.menus.SBar;
 
 /**
  * @see IProjectNature
