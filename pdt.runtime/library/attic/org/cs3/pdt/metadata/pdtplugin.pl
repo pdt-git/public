@@ -47,8 +47,8 @@
     get_file_pos/7,
     get_pred/6,
     find_pred/6,
-    atom_concat/4,atom_concat/5,
-    atom_concat/6,atom_concat/7,
+%    atom_concat/4,atom_concat/5,
+%    atom_concat/6,atom_concat/7,
     get_references/5,
     manual_entry/3,
     pef_and_spec/5]).
@@ -77,8 +77,7 @@ meta_data_help(?Module,?Name,?Arity,?Comment)
     atom_concat(_2,_3,_tmp).
  
 */
-%measure:
-
+/*
 atom_concat(_1,_2,_3,_4) :-
     atom_concat(_1,_tmp,_4),
     atom_concat(_2,_3,_tmp).
@@ -103,7 +102,7 @@ atom_concat(_1,_2,_3,_4,_5,_6,_7,_8) :-
 atom_concat(_1,_2,_3,_4,_5,_6,_7,_8,_9) :-
     atom_concat(_1,_2,_3,_4,_5,_6,_tmp,_9),
     atom_concat(_7,_8, _tmp).
-
+*/
 
 
 % get_file_pos(+Context, +Name, +Arity, -File, -Position, -Dynamic, -Multifile)
