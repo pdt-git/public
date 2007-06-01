@@ -43,8 +43,10 @@
  */
 package org.cs3.pl.prolog.internal.socket;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
@@ -190,11 +192,104 @@ public class Factory extends PrologInterfaceFactory {
 	private String guessExecutableName() {
 
 		if (Util.isWindoze()) {
-			return "cmd.exe /c start \"cmdwindow\" /min plwin";
+			return "cmd.exe /c start \"cmdwindow\" /min " + findWindowsExecutable();
 			// return "plwin";
 		}
 //		return "xterm -e xpce";  // For Mac and Linux with console
-		return "xpce";
+		return findUnixExecutable();
+	}
+
+	/**
+	 * @author Hasan Abdel Halim
+	 * 
+	 * Finds the current SWI-Prolog executable for UNIX/BSD-BASED OS 
+	 * 	@return the complete path of the executable otherwise it will return xpce
+	 */	
+	private String findUnixExecutable() {
+		String default_exec = "xpce";
+		String xpce = default_exec;
+
+
+		//TODO shall we look for the env. variables as we do for Windows ?
+		String[] appendPath = null;
+		
+		//Hack to resolve the issue of locating xpce in MacOS
+		if (Util.isMacOS()){
+			appendPath = new String[1];
+			appendPath[0] = "PATH=PATH:/opt/local/bin";
+		}
+		
+		try {
+			Process process = Runtime.getRuntime().exec("which "+ default_exec, appendPath);
+			
+			if (process == null)
+				return null;
+			
+			BufferedReader br = new BufferedReader( new InputStreamReader(process.getInputStream()));
+			String path = br.readLine();
+			
+			if ( path == null  ||  path.startsWith("no "+ default_exec) ) 
+				return default_exec;
+			
+			xpce = path;		
+
+			return xpce;
+			
+		} catch (IOException e) {
+			
+			return default_exec;
+		}
+	}
+
+	/**
+	 * @author Hasan Abdel Halim
+	 * 
+	 * Finds the current SWI-Prolog executable for Windoze OS 
+	 * 	@return the complete path of the executable otherwise it will return plwin
+	 */
+	private String findWindowsExecutable() {
+		String default_exec = "plwin";
+		String plwin = default_exec;
+		
+		String path;
+		try {
+			
+			Process process = Runtime.getRuntime().exec("cmd.exe /c echo %PATH%");
+			
+			if (process == null)
+				return default_exec;
+				
+			BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			path = br.readLine();
+			
+			if (path == null) 
+				return default_exec;
+			
+		
+			//TODO just search in case of executable was not found.
+			String[] paths = Util.split(path, ";");
+			File exeFile = null;
+			
+			for (int i = 0; i < paths.length; i++) {
+				
+				if (default_exec.indexOf(".exe")== -1)
+					default_exec += ".exe";
+				
+				String currPath = paths[i]+ "\\" + default_exec;
+				exeFile = new File(currPath);
+				
+				if(exeFile.exists()){
+					plwin = "\""+currPath +"\"";
+					break;
+				}
+			}
+			
+			return plwin;
+			
+		} catch (IOException e) {
+			
+			return default_exec;	
+		}
 	}
 
 	/*
@@ -205,4 +300,7 @@ public class Factory extends PrologInterfaceFactory {
 	public Option[] getOptions() {
 		return options;
 	}
+	
+	
+	
 }

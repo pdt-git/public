@@ -93,147 +93,6 @@ public class SocketServerStartAndStopStrategy implements
 
 	}
 
-	/**
-	 * 	Checks whether SWI-Prolog's executable exists or not in PATH, then it will return the
-	 *  Absolute path for the executable once it is found. Otherwise, null is returned.
-	 *  
-	 * 
-	 * @author Hasan Abdel Halim
-	 * @param command
-	 * @return The Absoulte path for the default swi-prolog's executable.
-	 * @throws IOException
-	 */
-	
-	public static String[] findAbsolutePath(String[] command) throws IOException{
-		
-		Runtime runtime = Runtime.getRuntime();
-		//String execName = "";
-		//TODO don't use clone but use System.ArrayCopy instead.
-		String[] execCommand = (String[]) command.clone();
-		int execPos = 0;
-		
-		if ( execCommand.length == 0)
-			return null;
-		
-		/*
-		 *  Locates executable's name within the command array.
-		 *  It is needed in order to replace it with its absolute path.
-		 */ 
-		
-		
-		/*
-		 * TODO right now matches for executable names are hardcoded for all platforms. 
-		 * Make them more configurable. 
-		 */
-		String match = "xpce"; 		// We assume the rest to be Unix/Linux/BSD based.
-				
-		if (Util.isWindoze())
-			match = "plwin";
-		
-		boolean found = false;
-		
-		for (int i = 0; i < execCommand.length; i++) {
-				if(execCommand[i].indexOf(match) != -1){
-					found = true;
-//					execName = execCommand[i];
-					execPos = i;
-					break;
-				}
-			}
-			
-		if (!found) 
-			return null;
-		
-		// Check the executable whether it is absolute or simple
-		String pathSep = System.getProperty("file.separator");
-		if (execCommand[execPos].indexOf(pathSep) != -1) {
-			//Absolute 
-			
-			// executable was found. Hence, there is no need to replace it.
-			if(new File(execCommand[execPos]).exists())
-				return execCommand;
-			else{
-				// was not found. We extract its simple name then try to locate it.
-				int index = execCommand[execPos].lastIndexOf(pathSep);
-				
-				if (index != -1)
-					execCommand[execPos] = execCommand[execPos].substring(index);
-				else
-					//It should never happen
-					return null;
-			}
-		}
-		
-		/*
-		 * Locate the executable within PATH ( Simple case )
-		 */
-		
-		//TODO find an easier way to find the current path of WindowsOS
-		if ( Util.isWindoze() ) {
-			Process process = runtime.exec("cmd.exe /c echo %PATH%");
-			
-			if (process == null)
-				return null;
-				
-			BufferedReader br = new BufferedReader( 
-				new InputStreamReader(process.getInputStream()));
-			String path = br.readLine();
-			
-			if (path == null) 
-				return null;
-
-			//TODO just search in case of executable was not found.
-			String[] paths = Util.split(path, ";");
-			File exeFile = null;
-			found = false;
-			
-			for (int i = 0; i < paths.length; i++) {
-				
-				if (execCommand[execPos].indexOf(".exe")== -1)
-					execCommand[execPos] += ".exe";
-				
-				String currPath = paths[i]+ "\\" + execCommand[execPos];
-				exeFile = new File(currPath);
-				
-				if(exeFile.exists()){
-					execCommand[execPos] = "\""+currPath +"\"";
-					found = true;
-					break;
-				}
-			}
-			
-			if(!found) 
-				return null;
-		
-		} else {
-		//OTHERS ( LINUX / UNIX / MACOS /BSD )
-			
-			//TODO shall we look for the env. variables as we do for Windows ?
-			String[] appendPath = null;
-			
-			//Hack to resolve the issue of locating xpce in MacOS
-			if (Util.isMacOS()){
-				appendPath = new String[1];
-				appendPath[0] = "PATH=PATH:/opt/local/bin";
-			}
-			
-			Process process = runtime.exec("which "+ execCommand[execPos], appendPath);
-			
-			if (process == null)
-				return null;
-			
-			BufferedReader br = new BufferedReader( 
-					new InputStreamReader(process.getInputStream()));
-			String path = br.readLine();
-			
-			if ( path == null || path.startsWith("no "+execCommand[execPos])) 
-				return null;
-			
-			execCommand[execPos] = path;
-		}
-		
-		return execCommand;
-	}
 	
 	/*
 	 * (non-Javadoc)
@@ -292,21 +151,21 @@ public class SocketServerStartAndStopStrategy implements
 
 		};
 
-		/*
-		 * Checks whether the SWI-Prolog exists or not 
-		 * @author Hasan Abdel Halim
-		 * 
-		 */
-		try {
-			command = findAbsolutePath(command);
-			if(command==null)
-				//TODO create special Exception type 
-				throw new RuntimeException("SWI-Prolog's executable was not found.");
-			
-		} catch (IOException e2) {
-			e2.printStackTrace();
-			return null;
-		}
+//		/*
+//		 * Checks whether the SWI-Prolog exists or not 
+//		 * @author Hasan Abdel Halim
+//		 * 
+//		 */
+//		try {
+//			command = findAbsolutePath(command);
+//			if(command==null)
+//				//TODO create special Exception type 
+//				throw new RuntimeException("SWI-Prolog's executable was not found.");
+//			
+//		} catch (IOException e2) {
+//			e2.printStackTrace();
+//			return null;
+//		}
 		
 	
 		String[] commandArray = new String[command.length + args.length];
