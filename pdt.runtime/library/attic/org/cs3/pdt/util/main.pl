@@ -1,3 +1,4 @@
+:- style_check(-singleton).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is part of the Prolog Development Tool (PDT)
 % 
