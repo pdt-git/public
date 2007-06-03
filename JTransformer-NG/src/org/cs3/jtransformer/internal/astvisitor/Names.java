@@ -99,4 +99,6 @@ public interface Names {
 	  public String CONSTRUCTOR_NAME = "<init>";
 	  
 	  public String PRED_ACTIVATE_REVERSE_INDEXES = "activate_reverse_indexes";
+	  
+	  public String PERSISTANT_FACTS_FILE_PREFIX = "persistance/factbase_";
 }

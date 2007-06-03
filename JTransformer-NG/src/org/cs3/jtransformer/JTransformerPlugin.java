@@ -40,6 +40,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -53,9 +54,6 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -110,6 +108,9 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         		IResourceChangeEvent.POST_CHANGE);
         PrologInterfaceRegistry pir = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
         JTDebug.debug("Prolog Interface keys found: " + pir.getAllKeys());
+		ISavedState lastState = ResourcesPlugin.getWorkspace()
+		.addSaveParticipant(this, new JTransformerSaveParticipant());
+
     }
 
     /**
@@ -449,16 +450,16 @@ public class JTransformerPlugin extends AbstractUIPlugin {
      */
     public void reconfigure() {
         try {
-			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-					.getProjects();
-			for (int i = 0; i < projects.length; i++) {
-				IProject project = projects[i];
-
-				if (project.isAccessible() && project.hasNature(JTransformer.NATURE_ID)) {
-					getNature(project).reconfigure();
-					
-				}
-			}
+//			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
+//					.getProjects();
+//			for (int i = 0; i < projects.length; i++) {
+//				IProject project = projects[i];
+//
+//				if (project.isAccessible() && project.hasNature(JTransformer.NATURE_ID)) {
+//					getNature(project).reconfigure();
+//					
+//				}
+//			}
 			reconfigureDebugOutput();
 
 		} catch (Throwable e) {

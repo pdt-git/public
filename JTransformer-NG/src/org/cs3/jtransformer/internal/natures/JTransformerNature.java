@@ -153,6 +153,7 @@ public class JTransformerNature implements IProjectNature,
 				.getName());
 	}
 
+	
 	/**
 	 * 
 	 */

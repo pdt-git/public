@@ -16,6 +16,7 @@ import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -84,7 +85,7 @@ public class JTransformerNatureAssigner {
 
 	}
 
-	public boolean askAndRemoveNatures() throws CoreException {
+	public boolean askAndRemoveNatures() throws CoreException, PrologInterfaceException {
 		String projectNames;
 		if(projects.size() == 1) {
 			projectNames = "project " + ((IProject) projects.get(0)).getName();
@@ -101,7 +102,7 @@ public class JTransformerNatureAssigner {
 		return true;
 	}
 
-	private void removeNatures(RemoveJTransformerNatureDialog dialog) throws CoreException {
+	private void removeNatures(RemoveJTransformerNatureDialog dialog) throws CoreException, PrologInterfaceException {
 		for (Iterator iter = projects.iterator(); iter.hasNext();) {
 			IProject project = (IProject) iter.next();
 			try {
@@ -202,10 +203,12 @@ public class JTransformerNatureAssigner {
 		    return true;
 	}
 
-	public void removeNature(IProject project, boolean deleteOutputProject, boolean removeOutputProjectReference) throws CoreException {
+	public void removeNature(IProject project, boolean deleteOutputProject, boolean removeOutputProjectReference) throws CoreException, PrologInterfaceException {
 
 		JTUtils.clearAllMarkersWithJTransformerFlag(project);
 		JTransformerNature.removeJTransformerNature(project);
+		JTDebug.info("JTransformerNatureAssigner.removeNature: called clearing persistant factbase");
+		JTUtils.clearPersistantFacts(JTUtils.getFactbaseKeyForProject(project));
 		final IProject outputProject = JTUtils.getOutputProject(project);
 		if(removeOutputProjectReference) {
 			removeOutputProjectReference(project, outputProject);
