@@ -54,17 +54,20 @@ internal_writeTreeFacts(File, Mode) :-
 	),
 	% END - For Ditrios (Schmatz)
 
-    forall((persistant(Fact), %Fact = sourceLocation(_,_,_,_), 
+      forall((persistant(Fact), %Fact = sourceLocation(_,_,_,_), 
     		 call(Fact),
     		 term_to_atom(Fact, Atom)
     	    ),
     	    catch(
-    	    
-    		format(Stream, '~w.~n',Atom),
-    				Exception,
-				debugme(Atom))
-    		
+    		(
+    		  write_canonical(Stream, Fact),
+    		  format(Stream,'.~n',[])
+    		),
+    		  Exception,
+			  debugme(Atom)
+			)
     ),
+
     		
     forall(globalIds(FQN,Id),
     	   format(Stream, 'globalIds(''~w'',~w).~nri_globalIds(~w,''~w'').~n',[FQN,Id,Id,FQN])
@@ -123,3 +126,4 @@ clearPersistantFacts :-
    fail.
    
 clearPersistantFacts.
+

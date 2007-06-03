@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,8 +12,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
 
 import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
@@ -27,6 +30,8 @@ import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.jtransformer.util.JTUtils;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PrologException;
@@ -48,19 +53,26 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.texteditor.MarkerUtilities;
+
+//import com.sun.xml.internal.fastinfoset.sax.Properties;
 
 public class FactBaseBuilder {
 
@@ -194,19 +206,28 @@ public class FactBaseBuilder {
 
             session.queryOnce("removeJavaErrorMarker");
 
-            JTDebug.info("Resource delta recieved: " + delta);
+            JTDebug.info("Received resource delta for project '"+ project.getName() + "': " + delta);
             SubProgressMonitor submon = new SubProgressMonitor(monitor, 10,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             project.refreshLocal(IResource.DEPTH_INFINITE, null);
             if (delta == null) {
+            	if(loadPersistantFactbase(submon))
+            	{
+           			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
+            		return;
+            	}
+            	loadOrBuildJavaLang(submon);
+            	
                 collectAll(toProcess);
                 updateProjectLocationInFactbase(session);
             } else {
+        		JTDebug.info("FactbaseBuilder.build_impl: called clearing persistant factbase for project: " + project.getName());
+            	JTUtils.clearPersistantFacts(getPifKey());
                 collectDelta(delta, toProcess, toDelete);
             }
             submon.done();
-
+            
             submon = new SubProgressMonitor(monitor, 10,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             forgetFacts(submon, toDelete,session);
@@ -231,6 +252,97 @@ public class FactBaseBuilder {
             }
         }
     }
+
+	private boolean loadPersistantFactbase(SubProgressMonitor submon) {
+        try {
+
+	        IPath init = JTUtils.getPersistantFactbaseFileForPif(getPifKey());
+			JTDebug.info("looking for persistant facts: " + init );
+
+	        File directory = init.removeLastSegments(1).toFile();
+	        if(!directory.isDirectory()){
+	        	directory.mkdirs();
+	        }
+	        String fileName = JTUtils.iPathToPrologFilename(init);
+
+	        if(init.toFile().isFile()){
+	        	if(JTUtils.queryOnceSimple(getPif(),"jt_facade:unmodifiedPersistantFactbase") != null) 
+	        	{
+	        		JTDebug.info("factbase already loaded for project: " + project.getName());
+	        		return true;
+	        	}
+	        	if(!pefFactbaseEmpty())
+	        	{
+	        		JTDebug.info("ignoring persistant factbase loading in the full build process of project " + project.getName()+"." +
+	        				"Classes have already been loaded for the factbase: " + getPifKey());
+	        		return false;
+	        	}
+	            submon.beginTask("loading persistant factbase: " + getPifKey()+
+	            		         " loaded on full build of project " + project.getName(), 90);
+	            JTUtils.queryOnceSimple(getPif(),
+	            		"consult('"+fileName+ "'), " +
+	            		"jt_facade:setUnmodifiedPersistantFactbase(true)");
+	            submon.worked(90);
+        		return true;
+	        } 
+        } catch(Exception ex){
+        	JTDebug.report(ex);
+        }
+        return false;
+        
+	}
+
+	private boolean pefFactbaseEmpty() throws PrologInterfaceException {
+		return JTUtils.queryOnceSimple(getPif(), "classDefT(_,_,_,_)") == null;
+	}
+
+    
+	private void loadOrBuildJavaLang(SubProgressMonitor submon) {
+        
+        try {
+        	if(pefFactbaseEmpty())
+        	{
+        		JTDebug.info("No class found in factbase - starting java lang initialization.");
+	            final IJavaProject javaProject = (IJavaProject) project
+	            .getNature(JavaCore.NATURE_ID);
+	
+				String implementationVersion = getJDKImplementationVersion(javaProject);
+				if(implementationVersion == null){
+					JTDebug.error("No 'Implementation-Version' attribute found in the manifest file of the jar containing java.lang.Object.");
+					return;
+				}
+				JTDebug.info("looking for factbase init file for JDK " + implementationVersion );
+		        IPath init = JTransformerPlugin.getDefault().getStateLocation().append(
+								new Path("initfactbase/java.lang" + implementationVersion + ".pl"));
+		        File directory = init.removeLastSegments(1).toFile();
+		        if(!directory.isDirectory()){
+		        	directory.mkdirs();
+		        }
+		        String fileName = init.toOSString().replace('\\', '/');
+	    	        if(init.toFile().isFile()){
+	            		JTDebug.info("Consulting java lang factbase");
+	    	        	JTUtils.queryOnceSimple(getPif(),"consult('"+fileName+ "')");
+	    	        } else {
+	    	        	loadExternalFacts(submon);
+	            		JTDebug.info("Writing java lang factbase to: "+ init.toOSString());
+	    	        	JTUtils.queryOnceSimple(getPif(),"writeTreeFacts('"+fileName+ "')");
+	    	        }
+            }
+        } catch(Exception ex){
+        	JTDebug.report(ex);
+        }
+        
+	}
+
+	private String getJDKImplementationVersion(final IJavaProject javaProject) throws JavaModelException, CoreException, IOException {
+		IType targetClass = javaProject.findType("java.lang.Object");
+		JarPackageFragmentRoot fragmentRoot = (JarPackageFragmentRoot)targetClass.getClassFile().getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		ZipEntry entry = fragmentRoot.getJar().getEntry("META-INF/MANIFEST.MF");
+		Properties manifestProperties = new Properties();
+		manifestProperties.load(fragmentRoot.getJar().getInputStream(entry));
+		String implementationVersion = manifestProperties.getProperty("Implementation-Version");
+		return implementationVersion;
+	}
 
 	/**
 	 * updates the projectT/4 fact
@@ -660,12 +772,13 @@ public class FactBaseBuilder {
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 		try {
 			cu.accept(visitor);
-		} catch(IllegalArgumentException iae){
+		} catch(final IllegalArgumentException iae){
 			JTransformerPlugin.getDefault().getWorkbench().getDisplay().asyncExec(new Runnable() {
 				public void run() {
 					MessageDialog.openError(JTransformerPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow().getShell(),
-							"Build Error", "Could not update factbase, compile (?) error in file: "+icu.getResource().getFullPath()+". " +
-					 				"\nIf the class name equals the package name you found an Eclipse bug.");
+							"Build Error", "Could not update factbase, parser error in file: "+icu.getResource().getFullPath()+":\n " +
+							iae.getLocalizedMessage()
+					 				);
 
 				}
 			});
@@ -847,9 +960,10 @@ public class FactBaseBuilder {
         JTDebug.info("clean called on project " + project);
         project.deleteMarkers(JTransformer.PROBLEM_MARKER_ID, true,
                 IResource.DEPTH_INFINITE);
-        PrologSession session = getPif().getSession();
         try {
-            session.queryOnce("clearTreeFactbase('" + project.getName() + "')");
+        	JTUtils.queryOnceSimple(getPif(),"clearTreeFactbase('" + project.getName() + "')");
+    		JTDebug.info("FactbaseBuilder.clear: called clearing persistant factbase for project: " + project.getName());
+            JTUtils.clearPersistantFacts(getPifKey());
             // getMetaDataSRC().clearRecords();
             String storeName = jtransformerProject.getPreferenceValue(
                     JTransformer.PROP_PEF_STORE_FILE, null);
@@ -862,12 +976,17 @@ public class FactBaseBuilder {
         	JTDebug.error(t.getLocalizedMessage());
         	JTDebug.dumpStackTrace();
         	JTDebug.rethrow(t);
-        } finally {
-            session.dispose();
         } 
     }
 
-    /*
+	private String getPifKey() {
+		return JTUtils.getKeyForPrologInterface(getPif());
+	}
+
+
+
+
+	/*
      * (non-Javadoc)
      * 
      * @see org.cs3.jtransformer.JTransformerProject#addJTransformerProjectListener(org.cs3.jtransformer.JTransformerProjectListener)

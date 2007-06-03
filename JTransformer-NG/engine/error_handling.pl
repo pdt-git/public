@@ -181,3 +181,19 @@ throw_exception_upon_failure(Pred,Msg):-
      assert(error_stack_trace(Pred,ExtMsg)),
      throw(Pred/*ExceptionTerm*/).
        
+
+:- multifile
+	user:message_hook/3.
+:- dynamic
+	user:message_hook/3.
+
+:- dynamic startup_error/2.
+
+
+message_hook(Term, Level, Lines) :-
+%  Term = error(syntax_error(Error),File),
+  get_time(Stamp),
+  stamp_date_time(Stamp, Time, 0),
+%  date_time_value(time, DateTime,Time),
+  assert(startup_error(Time, Term)),
+  fail.

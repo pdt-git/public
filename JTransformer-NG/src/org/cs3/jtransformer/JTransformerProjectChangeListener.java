@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.cs3.jtransformer.internal.actions.JTransformerNatureAssigner;
+import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -58,11 +63,15 @@ public class JTransformerProjectChangeListener implements
 						} else if (delta.getKind() == IResourceDelta.REMOVED) {
 							removeNatureIfAssigned(project);
 							deleteOutputProject(project);
+							
 
 						}
 					} catch (CoreException e) {
 						 JTUtils.logAndDisplayUnknownError(e);
 					}
+				} else if(resource instanceof IWorkspace )
+				{
+					System.err.println("WORKSPACE CHANGED: " + delta.getFlags() + ", " + delta.getKind());
 				}
 
 			}
@@ -200,9 +209,19 @@ public class JTransformerProjectChangeListener implements
 
 	private void removeNatureIfAssigned(IProject project) throws CoreException {
 		if (JTransformerPlugin.getNatureIfAvailable(project) != null) {
-			JTransformerPlugin.getNatureIfAvailable(project).onClose();
+			JTransformerNature nature = JTransformerPlugin.getNatureIfAvailable(project);
+			nature.onClose();
+	    	try {
+	    		JTDebug.info("JTransformerProjectChangeListener.removeNatureIfAssgined: called clearing persistant factbase");
+				JTUtils.clearPersistantFacts(JTUtils.getFactbaseKeyForProject(project));
+			} catch (PrologInterfaceException e) {
+				JTDebug.report(e);
+			}
+
 			JTransformerPlugin.removeNatureFromRegistry(project);
 		}
+
 	}
+
 
 }

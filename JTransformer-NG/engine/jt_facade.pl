@@ -4,9 +4,13 @@
   removeFile/1,
   removeJavaErrorMarker/0,
   addJavaErrorMarker/0,
-  jt_facade/1]).
+  jt_facade/1,
+  unmodifiedPersistantFactbase/0,
+  setUnmodifiedPersistantFactbase/1
+  ]).
 
-:- use_module(delta).
+% will not work if linker is not in build path
+:- use_module(library('linker/delta.pl')).
 
 jt_facade(removeFileAndTrackDeletion/1).
 jt_facade(removeFile/1).
@@ -65,4 +69,29 @@ activate_delta :-
 
 deactivate_delta :-
     delta:deactivate.
+    
+
+/**
+ * unmodifiedPersistantFactbase/0
+ *
+ * This flag is used on the Java side
+ * to track the status of the factbase.
+ * When loaded from disk, this flag is set.
+ * If the factbase is modified this flag is removed.
+ *
+ * The flag is set via the convinient predicate setUnmodifiedPersistantFactbase/1.
+ */
+:- dynamic unmodifiedPersistantFactbase/0.
+
+/**
+ * setUnmodifiedPersistantFactbase(true|false)
+ *
+ * See unmodifiedPersistantFactbase/0.
+ */
+setUnmodifiedPersistantFactbase(true):-
+  retractall(unmodifiedPersistantFactbase),
+  assert(unmodifiedPersistantFactbase).
+ 
+setUnmodifiedPersistantFactbase(false):-
+  retractall(unmodifiedPersistantFactbase).
     

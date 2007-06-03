@@ -300,7 +300,6 @@ removeDependencyInstruction(_command,_command):- !.
  *	exists the predicate is ignored. The pef is not 
  *	added to the factbase, no rollback information is added.
  */
-
 add(java_fq(Elem)):-
     !,
     java_fq_to_pef(Elem,PEF),

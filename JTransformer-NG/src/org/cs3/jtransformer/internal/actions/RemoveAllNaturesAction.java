@@ -49,7 +49,7 @@ public class RemoveAllNaturesAction implements IWorkbenchWindowActionDelegate {
 			JTransformerNatureAssigner assigner = new JTransformerNatureAssigner(
 					projectsWithNature);
 			assigner.askAndRemoveNatures();
-		} catch (CoreException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

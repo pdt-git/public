@@ -19,8 +19,10 @@ import java.util.Set;
 import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
+import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
@@ -872,6 +874,67 @@ public class JTUtils
 			
 		});
 		return shell[0];
+	}
+
+	static public IPath getPersistantFactbaseFileForPif(String key) {
+
+		return JTransformerPlugin.getDefault().getStateLocation().append(
+						new Path(Names.PERSISTANT_FACTS_FILE_PREFIX + key + ".pl"));
+	}
+	public static String iPathToPrologFilename(IPath init) {
+		return init.toOSString().replace('\\', '/');
+	}
+	
+	/**
+	 * Create a temporary sessions
+	 * runs query and disposes the session.
+	 * 
+	 * @param pif
+	 * @param query
+	 * @throws PrologInterfaceException
+	 */
+	public static Map queryOnceSimple(PrologInterface pif, String query) throws PrologInterfaceException {
+		PrologSession session = null;
+    	try {
+    		session = pif.getSession();
+       		return session.queryOnce(query);
+
+    	} finally {
+    		if(session != null){
+    			session.dispose();
+    		}
+    	}
+	}
+	public static String getKeyForPrologInterface(PrologInterface pif) {
+		return PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getKey(pif);
+	}
+	
+	
+    /**
+     * Removes the associates factbase file and
+     * removes the jt_facade:unmodifiedPersistantFactbase flag.   
+     * @throws PrologInterfaceException 
+     * 
+     * @throws PrologInterfaceException
+     */
+
+	public static void clearPersistantFacts(String key) throws PrologInterfaceException  {
+		JTDebug.info("clearing persistant factbase: "+ key);
+		if( key != null) {
+			IPath location = JTUtils.getPersistantFactbaseFileForPif(key);
+			if(location.toFile().isFile()){
+				JTDebug.info("removed persistant factbase file for factbase: "+ key);
+				location.toFile().delete();
+			}
+			
+			PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getPrologInterface(key);
+			if(pif != null && pif.isUp()){
+				JTUtils.queryOnceSimple(pif,"jt_facade:setUnmodifiedPersistantFactbase(false)");
+			}
+		}
+	}
+	public static String getFactbaseKeyForProject(IProject project) {
+		return JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(project, JTransformer.PROLOG_RUNTIME_KEY, null);
 	}
 
 }
