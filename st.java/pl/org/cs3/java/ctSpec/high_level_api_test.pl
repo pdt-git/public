@@ -5,7 +5,7 @@
 /*******************fullQualifiedName *********************/
 setUp(fullQualifiedName_class_in_default_package) :- 
     add(classDefT(c1,null,'DummyClassX',[])),
-    add(globalIds(c1,'DummyClassX')).
+    add(globalIds(c1,'DummyClassX')),
     add(ri_globalIds('DummyClassX',c1)).
 test(fullQualifiedName_class_in_default_package):-
     fullQualifiedName(c1,FQN),
