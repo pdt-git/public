@@ -229,3 +229,10 @@ pef_reserve_id(Type,Id):-
 % force_reload is true if file was loaded using consult/1 rather than ensure_loaded/1 or use_module/1.
 % otherwise it is false.
 :- define_pef(pef_program_file(program,file_ref,module_name,force_reload)).
+
+% The relation between predicates and their property definitions.
+% Don't confuse this with normal pef_properties:
+% pef_properties can be attached to any pef. In particular, they have no direct relation to source code.
+% predicate property definitions are more like clauses - they are attached to toplevel terms.
+% When predicates are merged or copied, so are the property definitions.
+:- define_pef(pef_predicate_property_definition(predicate,toplevel_ref,property)).

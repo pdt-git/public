@@ -52,7 +52,7 @@ toplevel_term(TlRef,Term):-
     pef_toplevel_recorded(_,[expanded=Term],TlRef).
 
 predicate_file(PredId,none):-
-    pef_property_query([id=PredId,key=(multifile),value=true]),
+    pef_predicate_property_definition_query([predicate=PredId,property=(multifile)]),
 	!.
 predicate_file(PredId,FileRef):-
 	pef_clause_query([predicate=PredId, toplevel_ref=TlRef]),

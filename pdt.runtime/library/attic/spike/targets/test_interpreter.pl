@@ -4,10 +4,12 @@
 :- use_module(library('spike/pef_api')).
 :- use_module(library('spike/builder')).
 :- use_module(library('spike/targets/program_interpreter')).
+:- nospyall.
 :- guitracer.
-:- debug(parser(todo)).
+%:- debug(parser(todo)).
 :- debug(interpreter(_)).
-:- spy(debugme).
+%:- spy(program_interpreter:unload_file/2).
+%:- spy(debugme).
 %:- spy(create_program).
 %:- spy(rebind_module_name).
 %:- spy(my_build_hook).
@@ -173,3 +175,6 @@ pefs_subset_reality(Abs,'TODO'(pefs_subset_reality(Abs))).
 user:prolog_exception_hook(error(instantiation_error, context(system:functor/3, _)),
                                _, _, _) :-
             trace, fail.
+user:prolog_exception_hook(error(instantiation_error, context(system:is/2, _)),
+                               _, _, _) :-
+            trace, fail.            
