@@ -68,12 +68,14 @@ delete_module(MID):-
 delete_predicate(PredID):-
     pef_clause_retractall([predicate=PredID]),
     pef_property_retractall([id=PredID]),
+    pef_predicate_property_definition_retractall([predicate=PredID]),
     pef_predicate_retractall([id=PredID]).
 
 %% clear_predicate(PredID,Cx).
 % like delete, but leaves the predicate defined.
 clear_predicate(PredID):-
     pef_clause_retractall([predicate=PredID]),
+    pef_predicate_property_definition_retractall([predicate=PredID]),    
     pef_property_retractall([id=PredID]).
     
 
@@ -134,7 +136,7 @@ interprete_toplevel( (:-Body) , Cx):-
     cx_toplevel_ref(Cx,TlRef),
     %pef_file_dependency_query([toplevel_ref=TlRef]),
     !,
-    debugme,
+
     functor(Body,Name,_Arity),
     forall(
     	pef_file_dependency_query([toplevel_ref=TlRef,dep_ref=DepRef]),
@@ -164,7 +166,8 @@ interprete_property_definition((Module:Name)/Arity,Property,Cx):-
 	interprete_property_definition(Name/Arity,Property,Cx1).
 interprete_property_definition(Name/Arity,Property,Cx):-	
     get_or_create_predicate(Name,Arity,Cx,PredID),
-    pef_property_assert([id=PredID,key=Property,value=true]).
+    cx_toplevel_ref(Cx,TlRef),
+    pef_predicate_property_definition_assert([predicate=PredID,property=Property,toplevel_ref=TlRef]).
     
 interprete_file_dependency(Type,Ref,Cx):-
     pdt_file_ref(File,Ref),
@@ -222,21 +225,47 @@ process_module_inclusion(use_module,Ref,MID,Cx):-
 	module_name(MID,ModName),
 	pef_program_file_query([program=PID,file_ref=Ref,module_name=ModName]),
 	!.
-process_module_inclusion(Type,Ref,MID,Cx):-
+process_module_inclusion(Type,_Ref,MID,Cx):-
     module_owner(MID,OtherPID),
     unload_obsolete_files(OtherPID,Cx),
     merge_program(OtherPID,Cx),
-    cx_program(Cx,PID),
-	module_name(MID,ModName),
 	(	(	Type==ensure_loaded 
 		; 	Type==use_module
 		)
-    ->	pef_program_file_assert([program=PID,module_name=ModName,file_ref=Ref, force_reload=false])
-    %	here we record the file only *after* we did the actual merge, because when merging predicates,
-    % 	we avoid redundant lookups by checking whether the file is loaded in the program.
-    ;	pef_program_file_assert([program=PID,module_name=ModName,file_ref=Ref, force_reload=true])    
+    ->	merge_files(false,OtherPID,Cx)
+    ;	merge_files(true,OtherPID,Cx)
     ),
     import_public_predicates(MID,Cx).
+
+
+merge_files(LocalForce,PID,Cx):-
+    forall(
+    	pef_program_file_query([program=PID,module_name=NewModName,file_ref=FileRef,force_reload=Force]),
+    	(	merge_file(PID,FileRef,NewModName,Force,LocalForce,Cx)
+    	->	true
+    	;	throw(failed(merge_file(PID,FileRef,NewModName,Force,LocalForce,Cx)))
+    	)
+    ).
+
+
+merge_file(FileRef,FileRef,NewModName,Force,LocalForce,Cx):-
+	% File a module file. This predicate is only called by process_module_inclusion/4.
+    cx_program(Cx,PID),
+    merge_force(Force,LocalForce,NewForce),
+    pef_program_file_retractall([program=PID,file_ref=FileRef]),
+    pef_program_file_assert([program=PID,file_ref=FileRef,module_name=NewModName,force_reload=NewForce]).
+merge_file(_PID,FileRef,NewModName,Force,_LocalForce,Cx):-
+	% File a module file. This predicate is only called by process_module_inclusion/4.
+    cx_program(Cx,MyPID),
+	(	pef_program_file_query([program=MyPID,file_ref=FileRef,force_reload=MyForce])
+    ->	pef_program_file_retractall([program=MyPID,file_ref=FileRef]),
+	    merge_force(Force,MyForce,NewForce)
+	;	NewForce=Force
+	),
+    pef_program_file_assert([program=MyPID,file_ref=FileRef,module_name=NewModName,force_reload=NewForce]).
+
+merge_force(false,false,false):- !.    
+merge_force(_,_,true).
 
 unload_obsolete_files(NewPID,Cx):-
     cx_program(Cx,OldPID),
@@ -253,7 +282,9 @@ obsolete_file(OldPID,NewPID,FileRef):-
     ;	OldModName \== NewModName
     ).
 merge_program(PID,Cx):-
-    import_module_bindings(PID,Cx).
+    import_module_bindings(PID, Cx).
+
+
 
 import_module_bindings(PID,Cx):-
     forall(
@@ -399,6 +430,7 @@ copy_predicate(PredID,Cx,NewPredID):-
 
 
 set_num_clauses(PredID,N):-
+    ( PredID == 38 -> debugme ; true ),
 	pef_property_retractall([id=PredID,key=number_of_clauses]),
 	pef_property_assert([id=PredID,key=number_of_clauses,value=N]).
     
@@ -563,8 +595,8 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
     cx_set_module(Cx,MID,Cx1),    
     forall(
     	pef_predicate_query([id=PredId,name=Name, arity=Arity,module=MergeMID]),
-    	(	(	pef_property_query([id=PredId,key=(multifile),value=true])
-    		;	pef_property_query([id=PredId,key=(dynamic),value=true])
+    	(	(	pef_predicate_property_definition_query([predicate=PredId,property=(multifile)])
+    		;	pef_predicate_property_definition_query([predicate=PredId,property=(dynamic)])
     		)
     	->	get_or_create_predicate(Name,Arity,Cx1,MergedPredId),	
 	    	merge_predicates(prepend,PredId,MergedPredId,Cx/* Not a typo! Cx1 is only used for looking up the predicate */),
@@ -602,18 +634,14 @@ merge_predicates(Order,SourcePred,TargetPred,Cx):-
 
 merge_predicates(none,_,Order,SourcePred,TargetPred,Cx):-
     !,
-    merge_clauses(Order,SourcePred,TargetPred,Cx),
-    merge_properties(Order,SourcePred,TargetPred).
+    merge_properties(Order,SourcePred,TargetPred),
+    merge_clauses(Order,SourcePred,TargetPred,Cx).
 merge_predicates(_,none,Order,SourcePred,TargetPred,Cx):-
     !,
-    merge_clauses(Order,SourcePred,TargetPred,Cx),
-    merge_properties(Order,SourcePred,TargetPred).
+    merge_properties(Order,SourcePred,TargetPred),
+    merge_clauses(Order,SourcePred,TargetPred,Cx).
 merge_predicates(File,File,_Order,_SourcePred,_TargetPred,_Cx):-
-    !.
-    % same file and not multifile --> the predicates are identical.
-    /*
-    merge_clauses(Order,SourcePred,TargetPred),
-    merge_properties(SourcePred,TargetPred).*/
+    !.% same file and not multifile --> the predicates are identical.
 merge_predicates(_,_,prepend,SourcePred,_TargetPred,CX):-
     !,
    	debug(interpreter(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined : (prepend, context: ~w)~n",
@@ -622,9 +650,9 @@ merge_predicates(_,_,prepend,SourcePred,_TargetPred,CX):-
 merge_predicates(_,_,append,SourcePred,TargetPred,CX):-    
 	debug(interpreter(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined: (append, context: ~w)~n",
    			[TargetPred,CX]),
-	clear_predicate(TargetPred), 
-    merge_clauses(append,SourcePred,TargetPred,CX),
-    merge_properties(append,SourcePred,TargetPred).
+	clear_predicate(TargetPred),
+    merge_properties(append,SourcePred,TargetPred), 
+    merge_clauses(append,SourcePred,TargetPred,CX).
 
 append_clauses([],_TargetPred,N,N).
 append_clauses([C|Cs],TargetPred,N,M):-
@@ -640,7 +668,7 @@ merge_clauses(append,SourcePred,TargetPred,CX):-
 	nb_setval(program_interpreter_clause_number,0),
 	num_clauses(TargetPred,N),
 
-
+	( TargetPred==38 -> debugme ; true),
     debug(interpreter(debug),"appending clauses of ~w after ~w. ~w~n",[SourcePred,TargetPred,CX]),
 
     findall( C,
@@ -692,19 +720,12 @@ merge_clauses(prepend,SourcePred,TargetPred,CX):-
     	
 merge_properties(_,Source,Source):-
 	!.
-merge_properties(append,Source,Target):-
+merge_properties(_,Source,Target):-
 	forall(
-		pef_property_query([id=Source,key=Key,value=Value]),
-		(	pef_property_retractall([id=Target,key=Key]),
-		    pef_property_assert([id=Target,key=Key,value=Value])
-		)
-	).
-merge_properties(prepend,Source,Target):-
-	forall(
-		pef_property_query([id=Source,key=Key,value=Value]),
-		(	pef_property_query([id=Target,key=Key])
+		pef_predicate_property_definition_query([predicate=Source,property=Key,toplevel_ref=TlRef]),
+		(	pef_predicate_property_definition_query([predicate=Target,toplevel_ref=TlRef])		
 		->	true
-		;   pef_property_assert([id=Target,key=Key,value=Value])
+		;	pef_predicate_property_definition_assert([predicate=Target,property=Key,toplevel_ref=TlRef])
 		)
 	).
 
@@ -743,22 +764,6 @@ extend_module(OldMID,NewMID,Cx):-
 
 
 :-prolog_load_context(source,Me),assert(me_source(Me)).
-interpreter_test:-
-    me_source(Me),
-    guitracer,
-    %spy(program_interpreter:my_build_hook/1),
-    %spy(interprete_toplevel),
-%    spy(do_inclusion_X),
-	spy(debugme),
-%    spy(process_module_inclusion),    
-%    spy(import_public_predicates), 
-%    spy(import_predicate_binding), 
-    pdt_file_spec(Me,Abs),
-    pdt_invalidate_target(interprete(Abs)),
-    pdt_with_targets([interprete(Abs)],true).
-
-
-
 
 
 
@@ -822,8 +827,11 @@ unload_file(FileRef, Cx):-
     	(	first_clause(Key,PID,Clause)
     	->	pef_clause_get(Clause,[predicate=OldPredID,number=Num]),
 	    	create_my_own_predicate_version(OldPredID,PredID,Cx),
-	    	(	pef_property_query([id=PredID,key=(multifile), value=true])
-	    	->	delete_or_shift_clauses(PredID,FileRef,Num,0)
+	    	(	pef_predicate_property_definition_query([predicate=PredID,property=(multifile)])
+	    	->	delete_or_shift_clauses(PredID,FileRef,Num,Deleted),
+	    		num_clauses(PredID,NumClauses),
+	    		NewNumClauses is NumClauses - Deleted,
+	    		set_num_clauses(PredID,NewNumClauses)
 	    	;	delete_predicate(PredID)
 	    	),
 	    	fail
