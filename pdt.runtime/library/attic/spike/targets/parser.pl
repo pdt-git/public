@@ -9,6 +9,7 @@
 :- use_module(library('spike/pef_base')).
 :- use_module(library('spike/builder')).
 
+
 :- pdt_define_context(parse_cx(file_ref,toplevel_ref,term,expanded)).
 
 pdt_builder:build_hook(parse(AbsFile)):-
@@ -40,7 +41,9 @@ my_forget(Spec):-
     
 	forall(
 		pef_module_definition_query([id=Id,file_ref=FileRef]),
-		pef_property_retractall([id=Id])
+		(	pef_property_retractall([id=Id]),
+			pef_exports_retractall([module=Id])
+		)
 	),
 	pef_module_definition_retractall([file_ref=FileRef]),	
     
@@ -62,12 +65,14 @@ my_forget(Spec):-
 	),
 	pef_problem_retractall([file_ref=FileRef]),
     
-    pef_file_query([file_ref=FileRef,toplevel_key=Key]),
-    forall(
-    	recorded(Key,_,Ref),
-    	erase(Ref)
-    ),
-    pef_file_retractall([file_ref=FileRef]).
+    (	pef_file_query([file_ref=FileRef,toplevel_key=Key])
+    ->	forall(
+	    	recorded(Key,_,Ref),
+	    	erase(Ref)
+	    ),
+	    pef_file_retractall([file_ref=FileRef])
+ 	;	true
+ 	).
 
 my_read(Spec):-
     pdt_file_spec(Spec,F),
@@ -91,7 +96,7 @@ do_read(F,In):-
     	catch(
     		prolog_read_source_term(In,Term,Expanded,[variable_names(VarNames),singletons(Singletons),subterm_positions(Positions)]),    	
     		Error,
-    		writeln(Error) %TODO: add syntax error pef
+    		debug(parser(todo),"TODO: add an error marker for ~w.~n",[Error])
     	),
     	var(Error),
     	pef_toplevel_recordz(Key,[file_ref=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions],TlRef),
@@ -101,9 +106,9 @@ do_read(F,In):-
     !.
 
 	    
-preprocess((:-module(Name,_Exports)), Cx):-
+preprocess((:-module(Name,Exports)), Cx):-
     !,
-    process_module_definition(Name,Cx).
+    process_module_definition(Name,Exports,Cx).
 preprocess((:-op(Priority,Type,Op)), Cx):-
     !,
     process_op(Priority,Type,Op, Cx).
@@ -114,14 +119,18 @@ preprocess((:-Term), Cx):-
 preprocess(_Term, _Cx).
 
 
-process_module_definition(Name,Cx):-
+process_module_definition(Name,Exports,Cx):-
     pef_reserve_id(pef_module_definition,Id),
     parse_cx_get(Cx,[file_ref=FileRef,toplevel_ref=TLRef]),
-    pef_module_definition_assert([id=Id,name=Name,file_ref=FileRef,toplevel_ref=TLRef]).
+    pef_module_definition_assert([id=Id,name=Name,file_ref=FileRef,toplevel_ref=TLRef]),
+    forall(
+    	member(Export,Exports),
+    	pef_exports_assert([module=Id,signature=Export])
+    ).
 
 
 process_inclusion(F,Cx):-
-	format("resolving ~w~n", [F]),
+	debug(parser(debug),"resolving ~w~n", [F]),
 	parse_cx_file_ref(Cx,MyRef),
 	parse_cx_toplevel_ref(Cx,TlRef),
 	pdt_file_spec(file_ref(MyRef),MyFile),
@@ -133,11 +142,11 @@ process_inclusion(F,Cx):-
 	pef_file_dependency_assert([id=Id,file_ref=MyRef,toplevel_ref=TlRef,dep_ref=Ref]),
 	catch(
 		do_inclusion(File,Cx),
-		error(cycle(parse(File))),
-		format("dependency cycle: ~w~n",[File])
+		error(cycle(T)),
+		debug(parser(todo),"TODO: add a warning about dependency cycle: ~w~n",[T])
 	).
 process_inclusion(F,_Cx):-
-    format("could not resolve: ~w~n",[F]). %TODO: add file not found error.
+    debug(parser(todo),"TODO add error marker - could not resolve: ~w~n",[F]). 
 
 
 
@@ -154,10 +163,8 @@ do_inclusion(File,Cx):-
 
 
 process_module_inclusion(Module,Cx):-
-    pef_module_definition_toplevel_ref(Module,Ref),
-    pef_toplevel_recorded(_,[expanded=(:- module(_,Exports))],Ref),
     forall(	
-    	member(op(Pr,Tp,Nm),Exports),
+    	pef_exports_query([module=Module,signature=op(Pr,Tp,Nm)]),
     	my_push_op(Pr,Tp,Nm,Cx)
     ).
 

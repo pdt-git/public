@@ -9,7 +9,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('spike/pef_base')).
 :- use_module(library('spike/builder')).
-:- use_module(library('spike/parser')).
+:- use_module(library('spike/targets/parser')).
 
 :- pdt_define_context(cx(toplevel_ref)).
 

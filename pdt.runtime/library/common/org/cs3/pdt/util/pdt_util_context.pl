@@ -175,8 +175,10 @@ pdt_context_get_values(Module,Template,[ArgName=Value|ArgNameValues]):-
 	 pdt_context_get_value(Module,Template,ArgName,Value),
 	 pdt_context_get_values(Module,Template,ArgNameValues).
 
+
 pdt_context_get_value(Module,Template,ArgName,Value):-
     functor(Template,Name,_),
+    (	var(ArgName) -> pdt_builder:debugme ; true),
     concat_atom([Name,'_',ArgName],GName),
 	functor(Getter,GName,2),
 	arg(1,Getter,Template),
@@ -202,6 +204,7 @@ pdt_context_set_values(Module,InTemplate,[ArgName=Value|ArgNameValues],OutTempla
     
 pdt_context_set_value(Module,InTemplate,ArgName,Value,OutTemplate):-
 	functor(InTemplate,Name,_),	
+    (	var(ArgName) -> debugme ; true),	
     concat_atom([Name,'_set_',ArgName],SName),	
 	functor(Setter,SName,3),
 	arg(1,Setter,InTemplate),
