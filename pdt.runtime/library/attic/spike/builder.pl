@@ -1,9 +1,10 @@
 :- module(pdt_builder,
-	[	pdt_request_target/1, 
-		pdt_release_target/1,		
+	[	%pdt_request_target/1, 
+		%pdt_release_target/1,		
 		pdt_invalidate_target/1,
 		pdt_with_targets/2,
-		pdt_restart_arbiter/0
+		pdt_restart_arbiter/0,
+		debugme/0
 	]
 ).
 
@@ -36,10 +37,10 @@
 pdt_with_targets([],Goal):-
 	call(Goal).
 pdt_with_targets([Target|Targets],Goal):-
-    pdt_request_target(Target),
+    pdt_builder:pdt_request_target(Target),
     call_cleanup(
     	pdt_with_targets(Targets,Goal),
-    	pdt_release_target(Target)
+    	pdt_builder:pdt_release_target(Target)
     ).
 	
 
@@ -61,7 +62,7 @@ pdt_request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
 	thread_get_message(Msg),
-	writeln(received(Me,Msg)),
+	debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
     ->	true
     ;	Msg==rebuild(Target)
@@ -126,10 +127,14 @@ update_target_state(Target,NewState):-
     
 
 stop_arbiter:-
-    current_thread(build_arbiter,running),
+    current_thread(build_arbiter,Status),
     !,
-    thread_send_message(build_arbiter,msg(all,stop)),
-    thread_join(build_arbiter,_).
+    (	Status==running	
+    ->  thread_send_message(build_arbiter,msg(all,stop))
+    ;	true
+    ),
+    thread_join(build_arbiter,ExitStatus),
+    debug(builder(info),"build_arbiter stopped with status ~w~n",[ExitStatus]).
 stop_arbiter.    
     
 start_arbiter:-
@@ -145,6 +150,8 @@ pdt_restart_arbiter:-
 
 
 run_arbiter:-   
+    guitracer,
+    spy(debugme),
 	repeat,
 		thread_get_message(msg(Target,Event)),
 		catch(
@@ -163,8 +170,11 @@ run_arbiter:-
 	
 report_error(Error):-
     forall(
-    	target_state(_,state(_,_,_,Threads)),
-    	report_error(Threads,Error)
+    	target_state(_,state(_,TargetStatus,_,Threads)),
+    	(	TargetStatus=pending(Thread)
+    	->	report_error([Thread|Threads],Error)
+    	;	report_error(Threads,Error)
+    	)
     ).
 
 report_error([],_Error).
@@ -176,15 +186,18 @@ process_message(all,stop):-!.
 process_message(Target,Event):-
     current_target_state(Target,State),    
     (	target_transition(State,Event,Action,NewState,Target)
-    ->  format("Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
+    ->  debug(builder(debug),"Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
     	update_target_state(Target,NewState),
 	    (	execute_action(Action,Target)
 	    ->	true
 	    ;	throw(error(action_failed(Target,State,Event,Action)))
 	    )
-	;	throw(error(no_transition(Target,State,Event)))
+	;	debugme,
+		throw(error(no_transition(Target,State,Event)))
 	).
  
+debugme:-
+	debug(builder(debug),"ouch~n",[]).
 
 execute_action([],_).
 execute_action([Action|Actions],Target):-
@@ -241,9 +254,11 @@ target_transition(state(reading, S, [_,T|Ts],Ws),		release, 		[], 				state(read
 target_transition(state(reading, available, [_],[]), 	release,		[], 				state(idle, available, [],[]),_Target).
 target_transition(state(idle, pending(_) , [],Ts), 		fail,		 	report_failure(Ts),	state(idle, outdated, [],[]),_Target).
 target_transition(state(idle, pending(_) , [],Ts), 		error(E),	 	report_error(Ts,E),	state(idle, outdated, [],[]),_Target).
+%FIXME: do we need to react some way when invalidation is requested during pending?
+target_transition(state(idle, pending(_) , [],Ts), 		mark_dirty,	 	[],					state(idle, pending(_) , [],Ts),_Target).
 target_transition(state(idle, _ , [],[]), 				mark_clean, 	[],					state(idle, available, [],[]),_Target).
 target_transition(state(idle, _ , [],Ts), 				mark_clean, 	grant(Ts), 			state(reading, available, Ts,[]),_Target).
-target_transition(state(A, available, [],[]), 			mark_dirty, 	invalidate,			state(A, outdated , [],[]),_Target).
+target_transition(state(A, available, Ls,[]), 			mark_dirty, 	invalidate,			state(A, outdated , Ls,[]),_Target).
 target_transition(state(A, outdated, [],[]), 			mark_dirty, 	[], 				state(A, outdated , [],[]),_Target).
 target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),			state(idle, pending(T) , [], []),_Target). 
 target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],					state(reading, outdated , Ls, [T|Ts]),_Target).

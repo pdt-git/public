@@ -2,6 +2,7 @@
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).	
 :- dynamic pef_pred/2.
+:- dynamic pef_type/2.
 
 define_assert(Template):-
     functor(Template,Name,_),
@@ -203,7 +204,7 @@ pef_reserve_id(Type,Id):-
 
 % A predicate
 % note that module is a module identifier, not a module name.
-:- define_pef(pef_predicate(module,name,arity)).
+:- define_pef(pef_predicate(id,module,name,arity)).
 
 % The mapping of names to predicates within a module
 :- define_pef(pef_imported_predicate(module,name,arity,predicate)).
@@ -218,3 +219,13 @@ pef_reserve_id(Type,Id):-
 % A special Module that is defined "ad hoc", i.e. there is no file
 % associated to it.
 :- define_pef(pef_ad_hoc_module(id,name,program)).
+
+% The relation between modules and the signatures they export
+% signature may be either Name/Arity or op(Pr,Tp,Nm)
+:- define_pef(pef_exports(module,signature)).
+
+
+% The relation between programs and files
+% force_reload is true if file was loaded using consult/1 rather than ensure_loaded/1 or use_module/1.
+% otherwise it is false.
+:- define_pef(pef_program_file(program,file_ref,module_name,force_reload)).
