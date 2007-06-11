@@ -299,7 +299,11 @@ import_module_binding(Name,NewMID,Cx):-
 	->	catch(
 			merge_modules(Name,OldMID,NewMID,Cx,_MergedMID),
 			module_name_conflict(OldMID,NewMID),
-			debug(interpreter(todo),"TODO: create problem pef for ~w (context: ~n",[module_name_conflict(OldMID,NewMID),Cx])
+			%debug(interpreter(todo),"TODO: create problem pef for ~w (context: ~n",[module_name_conflict(OldMID,NewMID),Cx])
+			(	pef_reserve_id(pef_module_name_clash,ID),
+				cx_get(Cx,[program=PID,toplevel_ref=TlRef]),
+				pef_module_name_clash_assert([id=ID,program=PID,toplevel_ref=TlRef,first=OldMID,second=NewMID])
+			)
 		)
 	;	rebind_module_name(Name,NewMID,Cx)
 	).	
@@ -315,17 +319,23 @@ import_predicate_binding(Name,Arity,MID,Cx):-
     module_owner(MID,PID),
     cx_set(Cx,[module=MID,program=PID],Cx1),
     get_predicate(Name,Arity,Cx1,PredId),
+    !,
     (	get_predicate(Name,Arity,Cx,OldPredId)    
     ->	(	OldPredId==PredId
     	->	true
-	    ;	cx_toplevel_ref(Cx,TlRef),
-		debug(interpreter(todo),"TODO: add an error marker. Predicate name conflict at toplevel ~w:~n existing predicate: ~w, new predicate ~w~n I will stick with the existing definition.~n",[TlRef,OldPredId,PredId])
+	    ;	cx_get(Cx,[toplevel_ref=TlRef,program=CurrentPID]),
+	    	pef_reserve_id(predicate_name_clash,ID),
+	%		debug(interpreter(todo),"TODO: add an error marker. Predicate name conflict at toplevel ~w:~n existing predicate: ~w, new predicate ~w~n I will stick with the existing definition.~n",[TlRef,OldPredId,PredId])
+			pef_predicate_name_clash_assert([id=ID,program=CurrentPID,toplevel_ref=TlRef,module=MID,first=OldPredId,second=PredId])
 		)
     ;	cx_module(Cx,ContextModuleID),
     	pef_imported_predicate_retractall([module=ContextModuleID,name=Name,arity=Arity]),
     	pef_imported_predicate_assert([module=ContextModuleID,name=Name,arity=Arity,predicate=PredId])
     ).
-    
+import_predicate_binding(Name,Arity,MID,Cx):-
+	pef_reserve_id(pef_unresolved_export,ID),
+	cx_get(Cx,[program=PID,toplevel_ref=TlRef]),
+	pef_unresolved_export_assert([id=ID,program=PID,toplevel_ref=TlRef,name=Name,arity=Arity,module=MID,export=todo]).    
 
     
     
@@ -393,21 +403,12 @@ unbind_module_name(Name,Cx):-
     debug(interpreter(debug),"binding of module name \"~w\" removed from program ~w. ~w~n",[Name,PID,Cx]).
 
 
-    
-get_predicate(Name,Arity,Cx,PredID):-% look for local predicate
-	cx_module(Cx,MID),
-	pef_predicate_query([module=MID,name=Name,arity=Arity,id=PredID]),
-	!.
-get_predicate(Name,Arity,Cx,PredID):-% look for imported predicate
-	cx_module(Cx,MID),
-	pef_imported_predicate_query([module=MID,name=Name,arity=Arity,predicate=PredID]),
-	!.
 
-get_predicate(Name,Arity,Cx,PredID):- % module extension: fall back to base
+get_predicate(Name,Arity,Cx,PredID):-
 	cx_module(Cx,MID),
-	pef_module_extension_query([id=MID,base=BaseID]),
-	cx_set_module(Cx,BaseID,Cx1),
-	get_predicate(Name,Arity,Cx1,PredID).
+	cx_program(Cx,PID),
+	resolve_predicate(PID,MID,Name,Arity,PredID).
+
 
 add_clause(PredID,Cx):-
    create_my_own_predicate_version(PredID,MyPredID,Cx),
@@ -439,10 +440,10 @@ do_add_clause(PredID,Cx):-
     cx_file_ref(Cx,CurrentFile),
     do_add_clause(PredFile,CurrentFile,PredID,Cx).
     
-do_add_clause(none,_,PredId,Cx):-    
+do_add_clause([],_,PredId,Cx):-    
     !,
     really_do_add_clause(PredId,Cx).
-do_add_clause(_,none,PredId,Cx):-    
+do_add_clause(_,[],PredId,Cx):-    
     !,
     really_do_add_clause(PredId,Cx).
 do_add_clause(F,F,PredId,Cx):-    
@@ -498,7 +499,7 @@ merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID
 	). 
 merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,Cx,_MID):- %04
 	debug(interpreter(debug),"case 04~n",[]),
-	debug(interpreter(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
+%	debug(interpreter(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
 	debug(interpreter(info),"Our model may be incorrect now!!!",[]),
 	throw(module_name_conflict(OldMID,NewMID)).
     
@@ -601,7 +602,10 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
     	->	get_or_create_predicate(Name,Arity,Cx1,MergedPredId),	
 	    	merge_predicates(prepend,PredId,MergedPredId,Cx/* Not a typo! Cx1 is only used for looking up the predicate */),
     		merge_properties(prepend,PredId,MergedPredId)
-    	;	debug(interpreter(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
+    	;	%debug(interpreter(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
+    		pef_reserve_id(pef_predicate_abolished,ID),
+    		cx_get(Cx,[program=PID,toplevel_ref=TlRef]),
+    		pef_predicate_abolished_assert([id=ID,program=PID,toplevel_ref=TlRef,module=MID,predicate=PredId])
     	)    	
     ).
 
@@ -632,11 +636,11 @@ merge_predicates(Order,SourcePred,TargetPred,Cx):-
 	predicate_file(TargetPred,TargetFile),    
 	merge_predicates(SourceFile,TargetFile,Order,SourcePred,TargetPred,Cx).
 
-merge_predicates(none,_,Order,SourcePred,TargetPred,Cx):-
+merge_predicates([],_,Order,SourcePred,TargetPred,Cx):-
     !,
     merge_properties(Order,SourcePred,TargetPred),
     merge_clauses(Order,SourcePred,TargetPred,Cx).
-merge_predicates(_,none,Order,SourcePred,TargetPred,Cx):-
+merge_predicates(_,[],Order,SourcePred,TargetPred,Cx):-
     !,
     merge_properties(Order,SourcePred,TargetPred),
     merge_clauses(Order,SourcePred,TargetPred,Cx).

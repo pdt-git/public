@@ -33,7 +33,7 @@
 % 
 % 
 pdt_test_interpreter(Spec,Result):-
-    consult(Spec),
+    user:consult(Spec),
     pdt_file_spec(Spec,Abs),    
     assert(test_file(Abs)),
     pdt_invalidate_target(interprete(Abs)),
@@ -133,13 +133,13 @@ module_exists_in_program(Name,File,PID):-
     
 predicate_exists_in_program(Context,Name/Arity,Module,PID):-
     resolve_module(PID,Context,CxMID),
-   	resolve_predicate(CxMID,Name,Arity,PredID),
+   	resolve_predicate(PID,CxMID,Name,Arity,PredID),
     pef_predicate_query([id=PredID,module=DefMID]),
     module_name(DefMID,Module).
     
 clauses_exists_in_program(Module,Name/Arity,PID,Result):-
     resolve_module(PID,Module,MID),
-    resolve_predicate(MID,Name,Arity,PredID),
+    resolve_predicate(PID,MID,Name,Arity,PredID),
     functor(Head,Name,Arity),
 
 	Module:nth_clause(Head,N,ClauseRef),
@@ -169,12 +169,49 @@ normalize_clause_X(Fact,StripedFact:-true):-
     strip_module(Fact,_,StripedFact).
 
     
-pefs_subset_reality(Abs,'TODO'(pefs_subset_reality(Abs))).
 
+pefs_subset_reality(Abs,Result):- %modules
+	pdt_file_ref(Abs,PID),
+    pef_program_module_query([program=PID,name=MName,module=MID]),
+    module_file(MID,FileRef),
+    pdt_file_ref(ModFile,FileRef),
+    (	real_current_module(Abs,MName,ModFile)
+    ->	Result = passed(real_current_module(Abs,MName,ModFile))
+    ;	Result = failed(real_current_module(Abs,MName,ModFile))
+    ).
+    
+pefs_subset_reality(Abs,Result):- %visible predicates
+   	pdt_file_ref(Abs,PID),
+    pef_program_module_query([program=PID,name=DefMName,module=DefMID]),
+    module_predicate(DefMID,PredID),
+    pef_predicate_query([id=PredID,name=Name,arity=Arity]),
+    pef_program_module_query([program=PID,module=ContextMID]),
+	resolve_predicate(PID,ContextMID,Name,Arity,PredID),
+	(	real_current_predicate(Abs,ContextMName,DefMName,Name/Arity)
+	->	Result = passed(real_current_predicate(Abs,ContextMName,DefMName,Name/Arity))
+	;	Result = failed(real_current_predicate(Abs,ContextMName,DefMName,Name/Arity))
+	).
+	
+pefs_subset_reality(Abs,Result):- %clauses
+   	pdt_file_ref(Abs,PID),
+    pef_program_module_query([program=PID,name=DefMName,module=DefMID]),
+    module_predicate(DefMID,PredID),
+    pef_predicate_query([id=PredID,name=Name,arity=Arity]),
+	pef_clause_query([predicate=PredID,number=Num,toplevel_ref=TlRef]),
+	pef_toplevel_recorded(_,[expanded=PefTerm],TlRef),
+	normalize_clause(PefTerm,NormPefTerm),
+	functor(Head,Name,Arity),
+	(	real_clause(DefMName,Head,Num,NormPefTerm)
+	->	Result = passed(real_clause(DefMName,Head,Num,NormPefTerm))
+	;	Result = failed(real_clause(DefMName,Head,Num,NormPefTerm))
+	).
 
-user:prolog_exception_hook(error(instantiation_error, context(system:functor/3, _)),
+real_clause(DefMName,Head,N,PefTerm):-
+    DefMName:nth_clause(Head,N,ClauseRef),
+    clause(RealHead,RealBody,ClauseRef),
+    normalize_clause((RealHead:-RealBody),RealTerm),
+    RealTerm =@= PefTerm.
+
+user:prolog_exception_hook(error(instantiation_error, context(system:'$concat_atom'/2, _)),
                                _, _, _) :-
-            trace, fail.
-user:prolog_exception_hook(error(instantiation_error, context(system:is/2, _)),
-                               _, _, _) :-
-            trace, fail.            
+            writeln(arsch),trace, fail.
