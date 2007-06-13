@@ -59,12 +59,12 @@ my_forget(Spec):-
 	),
 	pef_file_dependency_retractall([file_ref=FileRef]),
 	
-	forall(
+	/*forall(
 		pef_problem_query([id=Id,type=parser,file_ref=FileRef]),
 		pef_property_retractall([id=Id])
 	),
 	pef_problem_retractall([file_ref=FileRef]),
-    
+    */
     (	pef_file_query([file_ref=FileRef,toplevel_key=Key])
     ->	forall(
 	    	recorded(Key,_,Ref),
