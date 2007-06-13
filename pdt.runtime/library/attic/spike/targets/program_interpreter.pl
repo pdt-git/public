@@ -235,7 +235,12 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
     ->	merge_files(false,OtherPID,Cx)
     ;	merge_files(true,OtherPID,Cx)
     ),
-    import_public_predicates(MID,Cx).
+    % we have to resolve the module name in the current program
+    % it may have been extended
+    module_name(MID,MName),
+    cx_program(Cx,PID),
+    resolve_module(PID,MName,LocalMID),
+    import_public_predicates(LocalMID,Cx).
 
 
 merge_files(LocalForce,PID,Cx):-
@@ -310,7 +315,7 @@ import_module_binding(Name,NewMID,Cx):-
 
 import_public_predicates(MID,Cx):-
     forall(
-    	pef_exports_query([module=MID,signature=Name/Arity]),
+    	module_exports(MID,Name/Arity),
     	import_predicate_binding(Name,Arity,MID,Cx)
     ).
 
@@ -497,7 +502,7 @@ merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID
 	;	rebind_module_name(Name,NewMID,Cx),
 		MID=NewMID
 	). 
-merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,Cx,_MID):- %04
+merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):- %04
 	debug(interpreter(debug),"case 04~n",[]),
 %	debug(interpreter(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
 	debug(interpreter(info),"Our model may be incorrect now!!!",[]),

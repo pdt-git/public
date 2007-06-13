@@ -18,7 +18,8 @@
 	predicate_listing/1,
 	module_file/2,
 	module_predicate/2,
-	import_list/2
+	import_list/2,
+	module_exports/2
 	]).
 
 :- use_module(library('spike/pef_base')).
@@ -77,7 +78,7 @@ import_list(MID,Imports):-
     !.
 import_list(MID,Imports):-
     pef_module_extension_query([id=MID,base=Base]),
-    pef_import_list_query([module=MID,list=Imports]),
+    pef_import_list_query([module=Base,list=Imports]),
     !.
 import_list(MID,[system]):-
 	module_name(MID,user),
@@ -178,7 +179,13 @@ module_file(MID,FileRef):-
     !.
 module_file(_MID,[]).
 
-
+%%
+% module_exports(+MID,-Signatures).
+module_exports(MID,Signature):-
+	pef_exports_query([module=MID,signature=Signature]).
+module_exports(MID,Signature):-
+	pef_module_extension_query([id=MID,base=Base]),
+	pef_exports_query([module=Base,signature=Signature]).		
 %%
 % module_predicate(+DefMID,-PredID)
 % true if module DefMID defines (not imports!) predicate PredID .
