@@ -12,7 +12,7 @@
             name="PEF Graph View"
             icon="icons/sample.gif"
             category="pdt.pefgraph"
-            class="pdt.pefgraph.views.PEFGraphView"
+            class="pdt.pefgraph.internal.views.PEFGraphView"
             id="pdt.pefgraph.views.PEFGraphView">
       </view>
    </extension>
