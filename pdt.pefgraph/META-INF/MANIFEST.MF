@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pefgraph Plug-in
+Bundle-SymbolicName: pdt.pefgraph; singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: pdt.pefgraph.Activator
+Bundle-Vendor: http://roots.iai.uni-bonn.de
+Bundle-Localization: plugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Eclipse-LazyStart: true
