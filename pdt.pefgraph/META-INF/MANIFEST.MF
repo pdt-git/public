@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Pefgraph Plug-in
 Bundle-SymbolicName: pdt.pefgraph; singleton:=true
 Bundle-Version: 1.0.0
-Bundle-Activator: pdt.pefgraph.Activator
+Bundle-Activator: pdt.pefgraph.internal.Activator
 Bundle-Vendor: http://roots.iai.uni-bonn.de
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
@@ -11,5 +11,6 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.common,
  org.cs3.pdt.runtime,
  org.cs3.svf,
- org.cs3.svf.hyperbolic
+ org.cs3.svf.hyperbolic,
+ org.cs3.svf.core
 Eclipse-LazyStart: true

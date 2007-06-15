@@ -156,7 +156,7 @@ peft_aterm_args(I,N,Id,Cx,Term):-
 peft_get_annos(Id,Annos):-
 	findall(Anno,peft_get_anno(Id,Anno),Annos).
 peft_get_anno(Id,Anno):-
-	pef_property_query([id=Id,key=Key,value=Value]),
+	pef_property_query([pef=Id,key=Key,value=Value]),
 	(	atom(Key)
 	->  Anno=..[Key,Value]
 	;	throw(type_error(property_key,Key))

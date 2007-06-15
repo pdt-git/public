@@ -41,7 +41,7 @@ my_forget(Spec):-
     
 	forall(
 		pef_module_definition_query([id=Id,file_ref=FileRef]),
-		(	pef_property_retractall([id=Id]),
+		(	pef_property_retractall([pef=Id]),
 			pef_exports_retractall([module=Id])
 		)
 	),
@@ -49,19 +49,19 @@ my_forget(Spec):-
     
     forall(
 		pef_op_definition_query([id=Id,file_ref=FileRef]),
-		pef_property_retractall([id=Id])
+		pef_property_retractall([pef=Id])
 	),
 	pef_op_definition_retractall([file_ref=FileRef]),	
 	
 	forall(
 		pef_file_dependency_query([id=Id,file_ref=FileRef]),
-		pef_property_retractall([id=Id])
+		pef_property_retractall([pef=Id])
 	),
 	pef_file_dependency_retractall([file_ref=FileRef]),
 	
 	/*forall(
 		pef_problem_query([id=Id,type=parser,file_ref=FileRef]),
-		pef_property_retractall([id=Id])
+		pef_property_retractall([pef=Id])
 	),
 	pef_problem_retractall([file_ref=FileRef]),
     */

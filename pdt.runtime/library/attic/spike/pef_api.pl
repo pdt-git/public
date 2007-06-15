@@ -89,7 +89,7 @@ import_list(_MID,[user]).
 % num_clauses(+PredID,-N)
 % succeeds if the predicate has N clauses.
 num_clauses(PredID,N):-
-    pef_property_query([id=PredID,key=number_of_clauses,value=N]),
+    pef_property_query([pef=PredID,key=number_of_clauses,value=N]),
     !.
 num_clauses(_PredId,0).
 %%

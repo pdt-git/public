@@ -58,7 +58,7 @@ delete_module(MID):-
 %    pef_module_definition_retractall([id=MID]),
     pef_module_extension_retractall([id=MID]),
     pef_ad_hoc_module_retractall([id=MID]),
-    pef_property_retractall([id=MID]).
+    pef_property_retractall([pef=MID]).
 
 %% delete_predicate(+PredID)
 % extinguish predicate PredID.
@@ -67,7 +67,7 @@ delete_module(MID):-
 % Does NOT check for dangling references to the predicate. 
 delete_predicate(PredID):-
     pef_clause_retractall([predicate=PredID]),
-    pef_property_retractall([id=PredID]),
+    pef_property_retractall([pef=PredID]),
     pef_predicate_property_definition_retractall([predicate=PredID]),
     pef_predicate_retractall([id=PredID]).
 
@@ -76,7 +76,7 @@ delete_predicate(PredID):-
 clear_predicate(PredID):-
     pef_clause_retractall([predicate=PredID]),
     pef_predicate_property_definition_retractall([predicate=PredID]),    
-    pef_property_retractall([id=PredID]).
+    pef_property_retractall([pef=PredID]).
     
 
 pdt_interprete_program(Abs):-
@@ -437,8 +437,8 @@ copy_predicate(PredID,Cx,NewPredID):-
 
 set_num_clauses(PredID,N):-
     ( PredID == 38 -> debugme ; true ),
-	pef_property_retractall([id=PredID,key=number_of_clauses]),
-	pef_property_assert([id=PredID,key=number_of_clauses,value=N]).
+	pef_property_retractall([pef=PredID,key=number_of_clauses]),
+	pef_property_assert([pef=PredID,key=number_of_clauses,value=N]).
     
 do_add_clause(PredID,Cx):-
     predicate_file(PredID,PredFile),
@@ -466,9 +466,9 @@ really_do_add_clause(PredID,Cx):-
     M is N + 1,
     pef_clause_assert([predicate=PredID,number=M,toplevel_ref=TlRef]),
     (	M == 1
-    ->	(	pef_property_query([id=PredID,key=file])
+    ->	(	pef_property_query([pef=PredID,key=file])
     	->	throw(something_wrong_with_clause_order)
-    	;  	pef_property_assert([id=PredID,key=file,value=FileRef])
+    	;  	pef_property_assert([pef=PredID,key=file,value=FileRef])
     	)
     ;	true
     ),
