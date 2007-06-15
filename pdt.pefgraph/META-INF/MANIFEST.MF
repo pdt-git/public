@@ -7,5 +7,9 @@ Bundle-Activator: pdt.pefgraph.Activator
 Bundle-Vendor: http://roots.iai.uni-bonn.de
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.cs3.pdt.common,
+ org.cs3.pdt.runtime,
+ org.cs3.svf,
+ org.cs3.svf.hyperbolic
 Eclipse-LazyStart: true
