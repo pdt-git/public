@@ -277,13 +277,13 @@ pef_reserve_id(Type,Id):-
     assert(pef_type(Id,Type)). 
 
 % A module definition. Also represents the defined module.
-:- define_pef(pef_module_definition(id,name,file_ref:file_ref,toplevel_ref:toplevel):module).
+:- define_pef(pef_module_definition(id,name,file:pef_file,toplevel:pef_toplevel):module).
 
 % An operator definition. 
-:- define_pef(pef_op_definition(id,priority,type,name,file_ref:file_ref,toplevel_ref:toplevel)).
+:- define_pef(pef_op_definition(id,priority,type,name,file:pef_file,toplevel:pef_toplevel)).
 
 % A file dependency definition. Also represents the defined dependency.
-:- define_pef(pef_file_dependency(id,file_ref:file_ref,dep_ref:file_ref,toplevel_ref:toplevel)).
+:- define_pef(pef_file_dependency(id,depending:pef_file,dependency:pef_file,toplevel:pef_toplevel)).
 
 % A named property of any pef. Id is the PEFs Id. The property itself is a weak entity,
 % it does not have an Id of its own.
@@ -292,31 +292,29 @@ pef_reserve_id(Type,Id):-
 
 
 % A parsed toplevel term. 
-:- define_pef(pef_toplevel(file_ref,term,expanded,positions,varnames,singletons)).
+:- define_pef(pef_toplevel(id,file:pef_file,term,expanded,positions,varnames,singletons)).
 
 % An AST node representing a non-var program term.
 :- define_pef(pef_term(id,name,arity):ast_node).
 
 % An AST node representing a program variable occurence.
-:- define_pef(pef_variable_occurance(id,variable_ref:pef_variable):ast_node).
+:- define_pef(pef_variable_occurance(id,variable:pef_variable):ast_node).
 
 % A program variable.
-:- define_pef(pef_variable(id,toplevel_ref:toplevel)).
+:- define_pef(pef_variable(id,toplevel:pef_toplevel)).
 
 % The relation between a compound term and its arguments.
 :- define_pef(pef_arg(num,parent:pef_term,child:ast_node)).
 
 % The relation between a toplevel record and the root of corresponding AST.
-:- define_pef(pef_toplevel_root(root:ast_node,toplevel_ref:toplevel,file_ref:file_ref)).
+:- define_pef(pef_toplevel_root(root:ast_node,toplevel:pef_toplevel,file:pef_file)).
 
-% A recorded file.
-:- define_pef(pef_file(file_ref:file_ref,toplevel_key)).
 
 % The mapping of names to modules within a program
 % there currently is no separate pef for programs.
 % Instead, file references are used to identify the program that results from
 % loading that file into a new runtime.
-:- define_pef(pef_program_module(program:program,name,module:module)).
+:- define_pef(pef_program_module(program:pef_program,name,module:module)).
 
 % A predicate
 % note that module is a module identifier, not a module name.
@@ -326,15 +324,15 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_imported_predicate(module:module,name,arity,predicate:pef_predicate)).
 
 % The relation between a predicate and its clauses
-:- define_pef(pef_clause(predicate:pef_predicate,number,toplevel_ref:toplevel)).
+:- define_pef(pef_clause(predicate:pef_predicate,number,toplevel:pef_toplevel)).
 
 % A special Module that results from extending an existing module definition,
 % e.g. by adding clauses to multifile predicates.
-:- define_pef(pef_module_extension(id,base:pef_module_definition,program:program):module).
+:- define_pef(pef_module_extension(id,base:pef_module_definition,program:pef_program):module).
 
 % A special Module that is defined "ad hoc", i.e. there is no file
 % associated to it.
-:- define_pef(pef_ad_hoc_module(id,name,program:program):module).
+:- define_pef(pef_ad_hoc_module(id,name,program:pef_program):module).
 
 % The relation between modules and the signatures they export
 % signature may be either Name/Arity or op(Pr,Tp,Nm)
@@ -344,14 +342,14 @@ pef_reserve_id(Type,Id):-
 % The relation between programs and files
 % force_reload is true if file was loaded using consult/1 rather than ensure_loaded/1 or use_module/1.
 % otherwise it is false.
-:- define_pef(pef_program_file(program:program,file_ref:file_ref,module_name,force_reload)).
+:- define_pef(pef_program_file(program:pef_program,file:pef_file,module_name,force_reload)).
 
 % The relation between predicates and their property definitions.
 % Don't confuse this with normal pef_properties:
 % pef_properties can be attached to any pef. In particular, they have no direct relation to source code.
 % predicate property definitions are more like clauses - they are attached to toplevel terms.
 % When predicates are merged or copied, so are the property definitions.
-:- define_pef(pef_predicate_property_definition(predicate:pef_predicate,toplevel_ref:toplevel,property)).
+:- define_pef(pef_predicate_property_definition(predicate:pef_predicate,toplevel:pef_toplevel,property)).
 
 % The relation between a module and its import list
 % The import list is a list of module NAMES.
@@ -362,20 +360,22 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_import_list(module:module,list)).
 
 % various problem pefs produced by the interpreter
-:- define_pef(pef_module_name_clash(id,program:program,toplevel_ref:toplevel,first:module,second:module):interpreter_problem).
-:- define_pef(pef_predicate_name_clash(id,program:program,toplevel_ref:toplevel,module:module,first:predicate,second:predicate):interpreter_problem).
-:- define_pef(pef_predicate_redefinition(id,program:program,toplevel_ref:toplevel,first:predicate,second:predicate):interpreter_problem). %TODO
-:- define_pef(pef_predicate_abolished(id,program:program,toplevel_ref:toplevel,module:module,abolished:predicate):interpreter_problem).
-:- define_pef(pef_unresolved_export(id,program:program,toplevel_ref:toplevel,module:module,name,arity,export:ast_node/*TODO*/):interpreter_problem).
+:- define_pef(pef_module_name_clash(id,program:pef_program,toplevel:pef_toplevel,first:module,second:module):interpreter_problem).
+:- define_pef(pef_predicate_name_clash(id,program:pef_program,toplevel:pef_toplevel,module:module,first:pef_predicate,second:pef_predicate):interpreter_problem).
+:- define_pef(pef_predicate_redefinition(id,program:pef_program,toplevel:pef_toplevel,first:pef_predicate,second:pef_predicate):interpreter_problem). %TODO
+:- define_pef(pef_predicate_abolished(id,program:pef_program,toplevel:pef_toplevel,module:module,abolished:pef_predicate):interpreter_problem).
+:- define_pef(pef_unresolved_export(id,program:pef_program,toplevel:pef_toplevel,module:module,name,arity,export:ast_node/*TODO*/):interpreter_problem).
 
 % problem pefs generated by the singleton checker (TODO)
-:- define_pef(pef_singleton(toplevel_ref:toplevel,variable:pef_variable):singleton_problem).
-:- define_pef(pef_no_singleton(toplevel_ref:toplevel,variable:pef_variable):singleton_problem).
+:- define_pef(pef_singleton(id,toplevel:pef_toplevel,variable:pef_variable):singleton_problem).
+:- define_pef(pef_no_singleton(id,toplevel:pef_toplevel,variable:pef_variable):singleton_problem).
 
 % problem pefs generated by the parser
-:- define_pef(pef_syntax_error(file_ref:file_ref,start,end,message):parser_problem).
-:- define_pef(pef_file_not_found(toplevel_ref:toplevel,file_spec):parser_problem).
+:- define_pef(pef_syntax_error(file:pef_file,start,end,message):parser_problem).
+:- define_pef(pef_file_not_found(toplevel:pef_toplevel,file_spec):parser_problem).
 
 :- define_pef(pef_program(id,file:pef_file)).
 :- define_pef(pef_file(id,file_ref,path)).
+
+
 :- process_meta_edges.

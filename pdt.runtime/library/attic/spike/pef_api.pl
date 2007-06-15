@@ -36,7 +36,24 @@ predicate_listing(PredID):-
     	)
     ).
 
+%% pdt_file_ref(?Spec,?Id).
+% wrapper simulating the behaviour of old pdt_util:pdt_file_ref/2.
+% WARNING: both ids are NOT compatible. This implementation uses the pef_base.
+pdt_file_ref(Abs,Id):-
+    nonvar(Id),
+    !,
+    pef_file_query([id=Id,path=Abs]).
+pdt_file_ref(Spec,Id):-
+    
+    
+filespec(FileSpec,Base, Abs):-
+	absolute_file_name(FileSpec,[relative_to(Base),solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
+	\+ hidden(Abs).
 
+filespec(FileSpec, Abs):-
+	absolute_file_name(FileSpec,[solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
+	\+ hidden(Abs).
+    
     
 %%
 % resolve_module(+PID,+Name,-MID)
