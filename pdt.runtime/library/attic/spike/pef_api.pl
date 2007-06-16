@@ -14,12 +14,12 @@
 	resolve_predicate/5,
 	resolve_module/3,
 	toplevel_term/2,
-	file_key/2,
 	predicate_listing/1,
 	module_file/2,
 	module_predicate/2,
 	import_list/2,
-	module_exports/2
+	module_exports/2,
+	get_pef_file/2
 	]).
 
 :- use_module(library('spike/pef_base')).
@@ -29,31 +29,26 @@
 % print all clauses of a predicate to current output.
 predicate_listing(PredID):-
     forall(
-    	pef_clause_query([predicate=PredID,number=Num,toplevel_ref=TlRef]),
-    	(	pef_toplevel_recorded(_,[expanded=Term],TlRef),
+    	pef_clause_query([predicate=PredID,number=Num,toplevel=TlRef]),
+    	(	pef_toplevel_query([id=TlRef,expanded=Term]),
     		format("% clause ~w~n",[Num]),
     		portray_clause(Term)
     	)
     ).
 
-%% pdt_file_ref(?Spec,?Id).
-% wrapper simulating the behaviour of old pdt_util:pdt_file_ref/2.
-% WARNING: both ids are NOT compatible. This implementation uses the pef_base.
-pdt_file_ref(Abs,Id):-
+%% get_pef_file(?Spec,?Id).
+% wrapper intended as a drop-in replacement for pdt_util:pdt_file_ref/2.
+% WARNING: ids and file_refs are NOT compatible! 
+get_pef_file(Abs,Id):-
     nonvar(Id),
     !,
     pef_file_query([id=Id,path=Abs]).
-pdt_file_ref(Spec,Id):-
-    
-    
-filespec(FileSpec,Base, Abs):-
-	absolute_file_name(FileSpec,[relative_to(Base),solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
-	\+ hidden(Abs).
-
-filespec(FileSpec, Abs):-
-	absolute_file_name(FileSpec,[solutions(all),file_errors(fail),extensions(['.pl','.ct','']),access(read)],Abs),
-	\+ hidden(Abs).
-    
+get_pef_file(Abs,Id):-
+	pef_file_query([id=Id,path=Abs]),
+	!.
+get_pef_file(Abs,Id):-
+	pef_reserve_id(pef_file,Id),	
+    pef_file_assert([id=Id,path=Abs]).
     
 %%
 % resolve_module(+PID,+Name,-MID)
@@ -113,7 +108,7 @@ num_clauses(_PredId,0).
 % toplevel_term(+TlRef,-Term)
 % succeeds if Term is the expanded version of the source term recorded as toplevel TlRef.
 toplevel_term(TlRef,Term):-
-    pef_toplevel_recorded(_,[expanded=Term],TlRef).
+    pef_toplevel_query([id=TlRef,expanded=Term]).
 
 %%
 % predicate_file(+PredId,-FileRef)
@@ -124,9 +119,9 @@ predicate_file(PredId,[]):-
     pef_predicate_property_definition_query([predicate=PredId,property=(multifile)]),
 	!.
 predicate_file(PredId,FileRef):-
-	pef_clause_query([predicate=PredId, toplevel_ref=TlRef]),
+	pef_clause_query([predicate=PredId, toplevel=TlRef]),
 	!,
-	pef_toplevel_recorded(_,[file_ref=FileRef],TlRef).
+	pef_toplevel_query([id=TlRef,file=FileRef]).
 predicate_file(_PredId,[]).
 
 %%
@@ -160,10 +155,10 @@ module_base(MID,MID).
 %% module_owner(+MID,-PID)
 % find the program that owns a module.
 module_owner(MID,PID):-	
-	% currently the file that is the entry point of a program and the program
-	% itself are identical
-	pef_module_definition_query([id=MID,file_ref=PID]),
-	!.
+	% a module definition always belongs to the program that has the defining file as its entry point
+	pef_module_definition_query([id=MID,file=FID]),
+	!,
+	pef_program_query([file=FID,id=PID]).
 module_owner(MID,PID):-	
 	pef_module_extension_query([id=MID,program=PID]),
 	!.
@@ -174,17 +169,17 @@ module_owner(MID,PID):-
 % nondeterministic version of module_owner/2.
 % can be used to find all modules owned by a program.
 module_owner_nondet(MID,PID):-	
-	pef_module_definition_query([id=MID,file_ref=PID]).
+	(	nonvar(MID)
+	->	pef_module_definition_query([id=MID,file=FID]),
+		pef_program_query([file=FID,id=PID])
+	;	pef_program_query([file=FID,id=PID]),
+		pef_module_definition_query([id=MID,file=FID])
+	).
 module_owner_nondet(MID,PID):-	
 	pef_module_extension_query([id=MID,program=PID]).
 module_owner_nondet(MID,PID):-	
 	pef_ad_hoc_module_query([id=MID,program=PID]).
 
-%% 
-% file_key(+FileRef,-Key)	
-% unify Key with the record key that is used to store toplevel records for a given file.
-file_key(FileRef,Key):-
-	pef_file_query([file_ref=FileRef,toplevel_key=Key]).	
 
 %%
 % module_file(+MID,-FileRef)
@@ -192,7 +187,7 @@ file_key(FileRef,Key):-
 % @param FileRef is unified with the file reference number or with [] if the module is ad-hoc defined.
 module_file(MID,FileRef):-
     module_base(MID,Base),
-    pef_module_definition_query([id=Base,file_ref=FileRef]),
+    pef_module_definition_query([id=Base,file=FileRef]),
     !.
 module_file(_MID,[]).
 

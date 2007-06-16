@@ -232,9 +232,6 @@ pef_edge(From,FromT,ArgName,To,ToT):-
     '$pef_edge'(From,FromT,ArgName,To,ToT),
     valid_target(ToT,To).
 
-valid_target(program,_To):-!.
-valid_target(toplevel,_To):-!.
-valid_target(file_ref,_To):-!.
 valid_target(ToT,To):-
     pef_type(To,ToT).
 process_meta_edge(FromT,ArgNum,ToT):-
@@ -375,7 +372,7 @@ pef_reserve_id(Type,Id):-
 :- define_pef(pef_file_not_found(toplevel:pef_toplevel,file_spec):parser_problem).
 
 :- define_pef(pef_program(id,file:pef_file)).
-:- define_pef(pef_file(id,file_ref,path)).
+:- define_pef(pef_file(id,path)).
 
 
 :- process_meta_edges.

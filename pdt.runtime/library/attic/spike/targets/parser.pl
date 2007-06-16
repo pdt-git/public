@@ -7,10 +7,11 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('spike/pef_base')).
+:- use_module(library('spike/pef_api')).
 :- use_module(library('spike/builder')).
 
 
-:- pdt_define_context(parse_cx(file_ref,toplevel_ref,term,expanded)).
+:- pdt_define_context(parse_cx(file,toplevel,term,expanded)).
 
 pdt_builder:build_hook(parse(AbsFile)):-
     parser:my_build_hook(AbsFile).
@@ -20,10 +21,10 @@ my_build_hook(AbsFile):-
 
 pdt_builder:invalidate_hook(parse(AbsFile)):-
     parser:
-    (	pdt_file_ref(AbsFile,DepRef),
+    (	get_pef_file(AbsFile,DepRef),
 	    forall(
-	    	pef_file_dependency_query([dep_ref=DepRef,file_ref=FileRef] ),
-	    	(	pdt_file_ref(File,FileRef),
+	    	pef_file_dependency_query([dependency=DepRef,depending=FileRef] ),
+	    	(	get_pef_file(File,FileRef),
 	    		pdt_invalidate_target(parse(File))
 	    	)
 	    )
@@ -37,27 +38,28 @@ pdt_forget(Spec):-
 
 
 my_forget(Spec):-
-    pdt_file_ref(Spec,FileRef),
+	pdt_file_spec(Spec,AbsFile),
+    get_pef_file(AbsFile,FileRef),
     
 	forall(
-		pef_module_definition_query([id=Id,file_ref=FileRef]),
+		pef_module_definition_query([id=Id,file=FileRef]),
 		(	pef_property_retractall([pef=Id]),
 			pef_exports_retractall([module=Id])
 		)
 	),
-	pef_module_definition_retractall([file_ref=FileRef]),	
+	pef_module_definition_retractall([file=FileRef]),	
     
     forall(
-		pef_op_definition_query([id=Id,file_ref=FileRef]),
+		pef_op_definition_query([id=Id,file=FileRef]),
 		pef_property_retractall([pef=Id])
 	),
-	pef_op_definition_retractall([file_ref=FileRef]),	
+	pef_op_definition_retractall([file=FileRef]),	
 	
 	forall(
-		pef_file_dependency_query([id=Id,file_ref=FileRef]),
+		pef_file_dependency_query([id=Id,depending=FileRef]),
 		pef_property_retractall([pef=Id])
 	),
-	pef_file_dependency_retractall([file_ref=FileRef]),
+	pef_file_dependency_retractall([depending=FileRef]),
 	
 	/*forall(
 		pef_problem_query([id=Id,type=parser,file_ref=FileRef]),
@@ -65,14 +67,7 @@ my_forget(Spec):-
 	),
 	pef_problem_retractall([file_ref=FileRef]),
     */
-    (	pef_file_query([file_ref=FileRef,toplevel_key=Key])
-    ->	forall(
-	    	recorded(Key,_,Ref),
-	    	erase(Ref)
-	    ),
-	    pef_file_retractall([file_ref=FileRef])
- 	;	true
- 	).
+    pef_toplevel_retractall([file=FileRef]).
 
 my_read(Spec):-
     pdt_file_spec(Spec,F),
@@ -88,10 +83,9 @@ do_read(F):-
 
 do_read(F,In):-
     parse_cx_new(Cx),
-    pdt_file_ref(F,Ref),
-    parse_cx_file_ref(Cx,Ref),    
-    atom_concat(terms_,Ref,Key),
-    pef_file_assert([file_ref=Ref,toplevel_key=Key]),
+    get_pef_file(F,Ref),
+    parse_cx_file(Cx,Ref),    
+
     repeat,
     	catch(
     		prolog_read_source_term(In,Term,Expanded,[variable_names(VarNames),singletons(Singletons),subterm_positions(Positions)]),    	
@@ -99,8 +93,9 @@ do_read(F,In):-
     		debug(parser(todo),"TODO: add an error marker for ~w.~n",[Error])
     	),
     	var(Error),
-    	pef_toplevel_recordz(Key,[file_ref=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions],TlRef),
-    	parse_cx_get(Cx,[term=Term,expanded=Expanded,toplevel_ref=TlRef]),
+    	pef_reserve_id(pef_toplevel,TID),
+    	pef_toplevel_assert([id=TID,file=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions]),
+    	parse_cx_get(Cx,[term=Term,expanded=Expanded,toplevel=TID]),
     	preprocess(Expanded,Cx),
     	Term==end_of_file,
     !.
@@ -121,8 +116,8 @@ preprocess(_Term, _Cx).
 
 process_module_definition(Name,Exports,Cx):-
     pef_reserve_id(pef_module_definition,Id),
-    parse_cx_get(Cx,[file_ref=FileRef,toplevel_ref=TLRef]),
-    pef_module_definition_assert([id=Id,name=Name,file_ref=FileRef,toplevel_ref=TLRef]),
+    parse_cx_get(Cx,[file=FileRef,toplevel=TLRef]),
+    pef_module_definition_assert([id=Id,name=Name,file=FileRef,toplevel=TLRef]),
     forall(
     	member(Export,Exports),
     	pef_exports_assert([module=Id,signature=Export])
@@ -131,15 +126,16 @@ process_module_definition(Name,Exports,Cx):-
 
 process_inclusion(F,Cx):-
 	debug(parser(debug),"resolving ~w~n", [F]),
-	parse_cx_file_ref(Cx,MyRef),
-	parse_cx_toplevel_ref(Cx,TlRef),
-	pdt_file_spec(file_ref(MyRef),MyFile),
+	parse_cx_file(Cx,MyRef),
+	parse_cx_toplevel(Cx,TlRef),
+%	pdt_file_spec(file_ref(MyRef),MyFile),
+	get_pef_file(MyFile,MyRef),
 	file_directory_name(MyFile,MyDir),
 	pdt_file_spec(F,MyDir,File),
 	!,
-	pdt_file_ref(File,Ref),
+	get_pef_file(File,Ref),
 	pef_reserve_id(pef_file_dependency,Id),
-	pef_file_dependency_assert([id=Id,file_ref=MyRef,toplevel_ref=TlRef,dep_ref=Ref]),
+	pef_file_dependency_assert([id=Id,depending=MyRef,toplevel=TlRef,dependency=Ref]),
 	catch(
 		do_inclusion(File,Cx),
 		error(cycle(T)),
@@ -153,8 +149,8 @@ process_inclusion(F,_Cx):-
 
 do_inclusion(File,Cx):-	
 	pdt_with_targets([parse(File)],
-		(	pdt_file_ref(File,Ref),
-			(	pef_module_definition_query([file_ref=Ref],Module)
+		(	get_pef_file(File,Ref),
+			(	pef_module_definition_query([file=Ref],Module)
 			->  process_module_inclusion(Module,Cx)
 			;	process_file_inclusion(Ref,Cx)
 			)
@@ -170,14 +166,14 @@ process_module_inclusion(Module,Cx):-
 
 process_file_inclusion(FileRef,Cx):-
 	forall(
-		pef_op_definition_query([file_ref=FileRef,priority=Pr,type=Tp,name=Nm]),
+		pef_op_definition_query([file=FileRef,priority=Pr,type=Tp,name=Nm]),
 		my_push_op(Pr,Tp,Nm,Cx)
 	).
 
 process_op(Priority,Type,Op, Cx):-
     pef_reserve_id(pef_op_definition,Id),
-    parse_cx_get(Cx,[file_ref=FileRef,toplevel_ref=TLRef]),
-    pef_op_definition_assert([id=Id,priority=Priority,type=Type,name=Op,file_ref=FileRef,toplevel_ref=TLRef]).
+    parse_cx_get(Cx,[file=FileRef,toplevel=TLRef]),
+    pef_op_definition_assert([id=Id,priority=Priority,type=Type,name=Op,file=FileRef,toplevel=TLRef]).
     
 
 find_file_refs([H|T],[H|T]).

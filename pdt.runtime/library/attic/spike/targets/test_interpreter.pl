@@ -96,14 +96,16 @@ relevant_property((thread_local),(thread_local)).
 
 
 reality_subset_pefs(TestFile,Result):-
-    pdt_file_ref(TestFile,PID),
+    get_pef_file(TestFile,FID),
+    pef_program_query([file=FID,id=PID]),
    	real_current_module(TestFile,Name,File),
     (	module_exists_in_program(Name,File,PID)
 	->	Result=passed(module_exists_in_program(Name,File,PID))
 	;	Result=failed(module_exists_in_program(Name,File,PID))
 	).
 reality_subset_pefs(TestFile,Result):-
-    pdt_file_ref(TestFile,PID),
+    get_pef_file(TestFile,FID),
+    pef_program_query([file=FID,id=PID]),
 	real_current_predicate(TestFile,Context,Module,Name/Arity),
 	(	predicate_exists_in_program(Context,Name/Arity,Module,PID)
 	->	Result=passed(predicate_exists_in_program(Context,Name/Arity,Module,PID))
@@ -111,7 +113,8 @@ reality_subset_pefs(TestFile,Result):-
 	).
 
 reality_subset_pefs(TestFile,Result):-
-    pdt_file_ref(TestFile,PID),
+    get_pef_file(TestFile,FID),
+    pef_program_query([file=FID,id=PID]),
 	real_current_predicate(TestFile,_Context,Module,Name/Arity),
 	clauses_exists_in_program(Module,Name/Arity,PID,Result).
      %TODO predicate properties.
@@ -121,15 +124,15 @@ module_exists_in_program(Name,[],PID):-
     pef_program_module_query([program=PID,name=Name,module=MID]),
     pef_ad_hoc_module_query([name=Name,id=MID]).
 module_exists_in_program(Name,File,PID):-    
-    pdt_file_ref(File,Ref),
+    get_pef_file(File,Ref),
     pef_program_module_query([program=PID,name=Name,module=MID]),
-    pef_module_definition_query([file_ref=Ref,id=MID,name=Name]),
+    pef_module_definition_query([file=Ref,id=MID,name=Name]),
     !.
 module_exists_in_program(Name,File,PID):-        
-    pdt_file_ref(File,Ref),
+    get_pef_file(File,Ref),
     pef_program_module_query([program=PID,name=Name,module=MID]),
     pef_module_extension_query([base=Base,id=MID]),
-    pef_module_definition_query([file_ref=Ref,id=Base,name=Name]).
+    pef_module_definition_query([file=Ref,id=Base,name=Name]).
     
 predicate_exists_in_program(Context,Name/Arity,Module,PID):-
     resolve_module(PID,Context,CxMID),
@@ -152,8 +155,8 @@ clauses_exists_in_program(Module,Name/Arity,PID,Result):-
 clause_exists_in_program(ClauseRef,N,PredID):-
     clause(Head,Body,ClauseRef),
 	normalize_clause(Head:-Body,RealClause),
-    pef_clause_query([predicate=PredID,number=N,toplevel_ref=TlRef]),
-    pef_toplevel_recorded(_,[expanded=Exp],TlRef),
+    pef_clause_query([predicate=PredID,number=N,toplevel=TlRef]),
+    pef_toplevel_query([id=TlRef,expanded=Exp]),
     normalize_clause(Exp,PefClause),
     RealClause =@= PefClause.
 
@@ -171,17 +174,19 @@ normalize_clause_X(Fact,StripedFact:-true):-
     
 
 pefs_subset_reality(Abs,Result):- %modules
-	pdt_file_ref(Abs,PID),
+    get_pef_file(Abs,FID),
+    pef_program_query([file=FID,id=PID]),
     pef_program_module_query([program=PID,name=MName,module=MID]),
     module_file(MID,FileRef),
-    pdt_file_ref(ModFile,FileRef),
+    get_pef_file(ModFile,FileRef),
     (	real_current_module(Abs,MName,ModFile)
     ->	Result = passed(real_current_module(Abs,MName,ModFile))
     ;	Result = failed(real_current_module(Abs,MName,ModFile))
     ).
     
 pefs_subset_reality(Abs,Result):- %visible predicates
-   	pdt_file_ref(Abs,PID),
+    get_pef_file(Abs,FID),
+    pef_program_query([file=FID,id=PID]),
     pef_program_module_query([program=PID,name=DefMName,module=DefMID]),
     module_predicate(DefMID,PredID),
     pef_predicate_query([id=PredID,name=Name,arity=Arity]),
@@ -193,12 +198,13 @@ pefs_subset_reality(Abs,Result):- %visible predicates
 	).
 	
 pefs_subset_reality(Abs,Result):- %clauses
-   	pdt_file_ref(Abs,PID),
+    get_pef_file(Abs,FID),
+    pef_program_query([file=FID,id=PID]),
     pef_program_module_query([program=PID,name=DefMName,module=DefMID]),
     module_predicate(DefMID,PredID),
     pef_predicate_query([id=PredID,name=Name,arity=Arity]),
-	pef_clause_query([predicate=PredID,number=Num,toplevel_ref=TlRef]),
-	pef_toplevel_recorded(_,[expanded=PefTerm],TlRef),
+	pef_clause_query([predicate=PredID,number=Num,toplevel=TlRef]),
+	pef_toplevel_query([id=TlRef,expanded=PefTerm]),
 	normalize_clause(PefTerm,NormPefTerm),
 	functor(Head,Name,Arity),
 	(	real_clause(DefMName,Head,Num,NormPefTerm)

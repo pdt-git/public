@@ -9,7 +9,7 @@
 
 
 
-:- pdt_define_context(cx(program,module,file_ref,toplevel_ref,file_stack)).
+:- pdt_define_context(cx(program,module,file,toplevel,file_stack)).
 
 pdt_builder:build_hook(interprete(AbsFile)):-
     program_interpreter:my_build_hook(AbsFile).
@@ -21,15 +21,18 @@ my_build_hook(AbsFile):-
 pdt_builder:invalidate_hook(parse(AbsFile)):-
     pdt_invalidate_target(interprete(AbsFile)).
 pdt_builder:invalidate_hook(interprete(DepFile)):-
-    pdt_file_ref(DepFile,DepRef),
-    pef_file_dependency_query([dep_ref=DepRef,file_ref=FileRef]),
-    pdt_file_ref(File,FileRef),
+    get_pef_file(DepFile,DepRef),
+    pef_file_dependency_query([dependency=DepRef,depending=FileRef]),
+    get_pef_file(File,FileRef),
     pdt_invalidate_target(interprete(File)).
 
 pdt_forget_program(AbsFile):-
     pdt_invalidate_target(interprete(AbsFile)),
-    pdt_file_ref(AbsFile,Ref),
-    forget_program(Ref).
+    get_pef_file(AbsFile,Ref),
+    (	pef_program_query([file=Ref,id=PID])
+    ->	forget_program(PID)
+    ;	true
+    ).
 
 
 %% forget_program(+PID)
@@ -80,15 +83,15 @@ clear_predicate(PredID):-
     
 
 pdt_interprete_program(Abs):-
-    pdt_file_ref(Abs,FileRef),
+    get_pef_file(Abs,FileRef),
 	pdt_with_targets([parse(Abs)],interprete_program(FileRef)).
 
 interprete_program(FileRef):-    
     create_program(FileRef,Cx),
-    pef_file_query([file_ref=FileRef,toplevel_key=Key]),
+
     forall(
-    	pef_toplevel_recorded(Key,[file_ref=FileRef,expanded=Expanded],TlRef),
-    	(	cx_toplevel_ref(Cx,TlRef),
+    	pef_toplevel_query([file=FileRef,id=TlRef,expanded=Expanded]),
+    	(	cx_toplevel(Cx,TlRef),
     		(	interprete_toplevel(Expanded,Cx)
     		->	true
     		;	throw(failed(interprete_toplevel(Expanded,Cx)))
@@ -133,13 +136,13 @@ interprete_toplevel( (:-thread_local Signatures) , Cx):-
     !,
     interprete_property_definition(Signatures,(thread_local),Cx).
 interprete_toplevel( (:-Body) , Cx):-    
-    cx_toplevel_ref(Cx,TlRef),
+    cx_toplevel(Cx,TlRef),
     %pef_file_dependency_query([toplevel_ref=TlRef]),
     !,
 
     functor(Body,Name,_Arity),
     forall(
-    	pef_file_dependency_query([toplevel_ref=TlRef,dep_ref=DepRef]),
+    	pef_file_dependency_query([toplevel=TlRef,dependency=DepRef]),
     	interprete_file_dependency(Name,DepRef,Cx)
     ).
 interprete_toplevel( Head , CX):-
@@ -166,11 +169,11 @@ interprete_property_definition((Module:Name)/Arity,Property,Cx):-
 	interprete_property_definition(Name/Arity,Property,Cx1).
 interprete_property_definition(Name/Arity,Property,Cx):-	
     get_or_create_predicate(Name,Arity,Cx,PredID),
-    cx_toplevel_ref(Cx,TlRef),
-    pef_predicate_property_definition_assert([predicate=PredID,property=Property,toplevel_ref=TlRef]).
+    cx_toplevel(Cx,TlRef),
+    pef_predicate_property_definition_assert([predicate=PredID,property=Property,toplevel=TlRef]).
     
 interprete_file_dependency(Type,Ref,Cx):-
-    pdt_file_ref(File,Ref),
+    get_pef_file(File,Ref),
 	catch(
 		do_inclusion(Type,File,Ref,Cx),
 		error(cycle(T)),
@@ -181,7 +184,7 @@ do_inclusion(Type,File,Ref,Cx):-
 	pdt_with_targets([parse(File)], do_inclusion_X(Type,File,Ref,Cx)).
 
 do_inclusion_X(Type,File,Ref,Cx):-
-    (	pef_module_definition_query([file_ref=Ref,id=MID])
+    (	pef_module_definition_query([file=Ref,id=MID])
 	->  catch(
 			pdt_with_targets([interprete(File)],process_module_inclusion(Type,Ref,MID,Cx)),
 			error(cycle(T)),
@@ -196,7 +199,7 @@ do_inclusion_X(Type,File,Ref,Cx):-
 process_file_inclusion(ensure_loaded,Ref,Cx):- %The file was already loaded in this context.
 	cx_get(Cx,[program=PID,module=MID]),
 	module_name(MID,ModName),
-	pef_program_file_query([program=PID,file_ref=Ref,module_name=ModName]),
+	pef_program_file_query([program=PID,file=Ref,module_name=ModName]),
 	!.
 process_file_inclusion(_,Ref,Cx):-
     cx_file_stack(Cx,Stack),
@@ -207,23 +210,22 @@ process_file_inclusion(Type,Ref,Cx):- %The file was not yet loaded in this conte
     unload_file(Ref,Cx),
 	cx_get(Cx,[program=PID,module=MID,file_stack=Stack]),
 	module_name(MID,ModName),
-    cx_set(Cx,[file_ref=Ref,toplevel_ref=_,file_stack=[Ref|Stack]],Cx1),
-    pef_file_query([file_ref=Ref,toplevel_key=Key]),
+    cx_set(Cx,[file=Ref,toplevel=_,file_stack=[Ref|Stack]],Cx1),
     forall(
-    	pef_toplevel_recorded(Key,[file_ref=Ref,expanded=Expanded],TlRef),
-    	(	cx_toplevel_ref(Cx1,TlRef),
+    	pef_toplevel_query([id=TlRef,file=Ref,expanded=Expanded]),
+    	(	cx_toplevel(Cx1,TlRef),
     		interprete_toplevel(Expanded,Cx1)
     	)
     ),
 	(	Type==ensure_loaded
-    ->	pef_program_file_assert([program=PID,module_name=ModName,file_ref=Ref, force_reload=false])
-    ;	pef_program_file_assert([program=PID,module_name=ModName,file_ref=Ref, force_reload=true])    
+    ->	pef_program_file_assert([program=PID,module_name=ModName,file=Ref, force_reload=false])
+    ;	pef_program_file_assert([program=PID,module_name=ModName,file=Ref, force_reload=true])    
     ).
     
 process_module_inclusion(use_module,Ref,MID,Cx):-    
    	cx_program(Cx,PID),
 	module_name(MID,ModName),
-	pef_program_file_query([program=PID,file_ref=Ref,module_name=ModName]),
+	pef_program_file_query([program=PID,file=Ref,module_name=ModName]),
 	!.
 process_module_inclusion(Type,_Ref,MID,Cx):-
     module_owner(MID,OtherPID),
@@ -245,7 +247,7 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
 
 merge_files(LocalForce,PID,Cx):-
     forall(
-    	pef_program_file_query([program=PID,module_name=NewModName,file_ref=FileRef,force_reload=Force]),
+    	pef_program_file_query([program=PID,module_name=NewModName,file=FileRef,force_reload=Force]),
     	(	merge_file(PID,FileRef,NewModName,Force,LocalForce,Cx)
     	->	true
     	;	throw(failed(merge_file(PID,FileRef,NewModName,Force,LocalForce,Cx)))
@@ -257,17 +259,17 @@ merge_file(FileRef,FileRef,NewModName,Force,LocalForce,Cx):-
 	% File a module file. This predicate is only called by process_module_inclusion/4.
     cx_program(Cx,PID),
     merge_force(Force,LocalForce,NewForce),
-    pef_program_file_retractall([program=PID,file_ref=FileRef]),
-    pef_program_file_assert([program=PID,file_ref=FileRef,module_name=NewModName,force_reload=NewForce]).
+    pef_program_file_retractall([program=PID,file=FileRef]),
+    pef_program_file_assert([program=PID,file=FileRef,module_name=NewModName,force_reload=NewForce]).
 merge_file(_PID,FileRef,NewModName,Force,_LocalForce,Cx):-
 	% File a module file. This predicate is only called by process_module_inclusion/4.
     cx_program(Cx,MyPID),
-	(	pef_program_file_query([program=MyPID,file_ref=FileRef,force_reload=MyForce])
-    ->	pef_program_file_retractall([program=MyPID,file_ref=FileRef]),
+	(	pef_program_file_query([program=MyPID,file=FileRef,force_reload=MyForce])
+    ->	pef_program_file_retractall([program=MyPID,file=FileRef]),
 	    merge_force(Force,MyForce,NewForce)
 	;	NewForce=Force
 	),
-    pef_program_file_assert([program=MyPID,file_ref=FileRef,module_name=NewModName,force_reload=NewForce]).
+    pef_program_file_assert([program=MyPID,file=FileRef,module_name=NewModName,force_reload=NewForce]).
 
 merge_force(false,false,false):- !.    
 merge_force(_,_,true).
@@ -280,8 +282,8 @@ unload_obsolete_files(NewPID,Cx):-
     ).
 
 obsolete_file(OldPID,NewPID,FileRef):-
-    pef_program_file_query([program=OldPID,module_name=OldModName,file_ref=FileRef]),
-    pef_program_file_query([program=NewPID,module_name=NewModName,file_ref=FileRef,force_reload=Force]),    
+    pef_program_file_query([program=OldPID,module_name=OldModName,file=FileRef]),
+    pef_program_file_query([program=NewPID,module_name=NewModName,file=FileRef,force_reload=Force]),    
     (	Force==true
     ->	true
     ;	OldModName \== NewModName
@@ -306,8 +308,8 @@ import_module_binding(Name,NewMID,Cx):-
 			module_name_conflict(OldMID,NewMID),
 			%debug(interpreter(todo),"TODO: create problem pef for ~w (context: ~n",[module_name_conflict(OldMID,NewMID),Cx])
 			(	pef_reserve_id(pef_module_name_clash,ID),
-				cx_get(Cx,[program=PID,toplevel_ref=TlRef]),
-				pef_module_name_clash_assert([id=ID,program=PID,toplevel_ref=TlRef,first=OldMID,second=NewMID])
+				cx_get(Cx,[program=PID,toplevel=TlRef]),
+				pef_module_name_clash_assert([id=ID,program=PID,toplevel=TlRef,first=OldMID,second=NewMID])
 			)
 		)
 	;	rebind_module_name(Name,NewMID,Cx)
@@ -328,10 +330,10 @@ import_predicate_binding(Name,Arity,MID,Cx):-
     (	get_predicate(Name,Arity,Cx,OldPredId)    
     ->	(	OldPredId==PredId
     	->	true
-	    ;	cx_get(Cx,[toplevel_ref=TlRef,program=CurrentPID]),
+	    ;	cx_get(Cx,[toplevel=TlRef,program=CurrentPID]),
 	    	pef_reserve_id(predicate_name_clash,ID),
 	%		debug(interpreter(todo),"TODO: add an error marker. Predicate name conflict at toplevel ~w:~n existing predicate: ~w, new predicate ~w~n I will stick with the existing definition.~n",[TlRef,OldPredId,PredId])
-			pef_predicate_name_clash_assert([id=ID,program=CurrentPID,toplevel_ref=TlRef,module=MID,first=OldPredId,second=PredId])
+			pef_predicate_name_clash_assert([id=ID,program=CurrentPID,toplevel=TlRef,module=MID,first=OldPredId,second=PredId])
 		)
     ;	cx_module(Cx,ContextModuleID),
     	pef_imported_predicate_retractall([module=ContextModuleID,name=Name,arity=Arity]),
@@ -339,8 +341,8 @@ import_predicate_binding(Name,Arity,MID,Cx):-
     ).
 import_predicate_binding(Name,Arity,MID,Cx):-
 	pef_reserve_id(pef_unresolved_export,ID),
-	cx_get(Cx,[program=PID,toplevel_ref=TlRef]),
-	pef_unresolved_export_assert([id=ID,program=PID,toplevel_ref=TlRef,name=Name,arity=Arity,module=MID,export=todo]).    
+	cx_get(Cx,[program=PID,toplevel=TlRef]),
+	pef_unresolved_export_assert([id=ID,program=PID,toplevel=TlRef,name=Name,arity=Arity,module=MID,export=todo]).    
 
     
     
@@ -360,15 +362,17 @@ get_module(Name,MID,Cx):-
 
 create_program(FileRef,Cx):-
 	cx_new(Cx),
-	cx_program(Cx,FileRef),
-	(	pef_module_definition_query([file_ref=FileRef,id=MID,name=Name])
+	pef_reserve_id(pef_program,PID),
+	pef_program_assert([id=PID,file=FileRef]),
+	cx_program(Cx,PID),
+	(	pef_module_definition_query([file=FileRef,id=MID,name=Name])
 	->	rebind_module_name(Name,MID,Cx),
-		pef_program_file_assert([program=FileRef,module_name=Name,file_ref=FileRef, force_reload=false]),
+		pef_program_file_assert([program=PID,module_name=Name,file=FileRef, force_reload=false]),
 		get_or_create_module(user,_,Cx) % a module user should exist in every program.
 	;	get_or_create_module(user,MID,Cx),
-		pef_program_file_assert([program=FileRef,module_name=user,file_ref=FileRef, force_reload=false])
+		pef_program_file_assert([program=PID,module_name=user,file=FileRef, force_reload=false])
 	),
-	cx_get(Cx,[file_ref=FileRef,file_stack=[FileRef],module=MID]).
+	cx_get(Cx,[file=FileRef,file_stack=[FileRef],module=MID]).
 	
 get_or_create_module(Name,MID,Cx):-
     cx_program(Cx,PID),
@@ -442,7 +446,7 @@ set_num_clauses(PredID,N):-
     
 do_add_clause(PredID,Cx):-
     predicate_file(PredID,PredFile),
-    cx_file_ref(Cx,CurrentFile),
+    cx_file(Cx,CurrentFile),
     do_add_clause(PredFile,CurrentFile,PredID,Cx).
     
 do_add_clause([],_,PredId,Cx):-    
@@ -461,10 +465,10 @@ do_add_clause(_,_,PredID,Cx):-
 
 
 really_do_add_clause(PredID,Cx):-
-	cx_get(Cx,[toplevel_ref=TlRef,file_ref=FileRef]),
+	cx_get(Cx,[toplevel=TlRef,file=FileRef]),
     num_clauses(PredID,N),
     M is N + 1,
-    pef_clause_assert([predicate=PredID,number=M,toplevel_ref=TlRef]),
+    pef_clause_assert([predicate=PredID,number=M,toplevel=TlRef]),
     (	M == 1
     ->	(	pef_property_query([pef=PredID,key=file])
     	->	throw(something_wrong_with_clause_order)
@@ -609,8 +613,8 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
     		merge_properties(prepend,PredId,MergedPredId)
     	;	%debug(interpreter(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
     		pef_reserve_id(pef_predicate_abolished,ID),
-    		cx_get(Cx,[program=PID,toplevel_ref=TlRef]),
-    		pef_predicate_abolished_assert([id=ID,program=PID,toplevel_ref=TlRef,module=MID,predicate=PredId])
+    		cx_get(Cx,[program=PID,toplevel=TlRef]),
+    		pef_predicate_abolished_assert([id=ID,program=PID,toplevel=TlRef,module=MID,predicate=PredId])
     	)    	
     ).
 
@@ -666,8 +670,8 @@ merge_predicates(_,_,append,SourcePred,TargetPred,CX):-
 append_clauses([],_TargetPred,N,N).
 append_clauses([C|Cs],TargetPred,N,M):-
     I is N +1,
-    pef_clause_get(C,[toplevel_ref=TlRef]),
-    pef_clause_assert([predicate=TargetPred,number=I,toplevel_ref=TlRef]),
+    pef_clause_get(C,[toplevel=TlRef]),
+    pef_clause_assert([predicate=TargetPred,number=I,toplevel=TlRef]),
     toplevel_term(TlRef,Term),
     debug(interpreter(debug),"appending toplevel ~w (~w) as clause ~w to predicate ~w. ~n",[TlRef,Term,I,TargetPred]),
     append_clauses(Cs,TargetPred,I,M).
@@ -681,9 +685,9 @@ merge_clauses(append,SourcePred,TargetPred,CX):-
     debug(interpreter(debug),"appending clauses of ~w after ~w. ~w~n",[SourcePred,TargetPred,CX]),
 
     findall( C,
-    	(	pef_clause_query([predicate=SourcePred,toplevel_ref=TlRef],C),
+    	(	pef_clause_query([predicate=SourcePred,toplevel=TlRef],C),
     		% only add the clause if the toplevel isn't already used!
-    		(	pef_clause_query([predicate=TargetPred,toplevel_ref=TlRef,number=I])	
+    		(	pef_clause_query([predicate=TargetPred,toplevel=TlRef,number=I])	
     		->	debug(interpreter(debug),
     				"Toplevel ~w already apears as clause number ~w in predicate ~w. Will not be added. ~w~n",
     				[TlRef,I,TargetPred,CX]
@@ -703,8 +707,8 @@ merge_clauses(prepend,SourcePred,TargetPred,CX):-
     debug(interpreter(debug),"prepending clauses of ~w before ~w. ~w~n",[SourcePred,TargetPred,Cx]),
    	
     findall( C,
-    	(	pef_clause_query([predicate=TargetPred,toplevel_ref=TlRef],C),
-    		(	pef_clause_query([predicate=SourcePred,toplevel_ref=TlRef,number=I])	
+    	(	pef_clause_query([predicate=TargetPred,toplevel=TlRef],C),
+    		(	pef_clause_query([predicate=SourcePred,toplevel=TlRef,number=I])	
     		->	debug(interpreter(debug),
     				"Toplevel ~w already apears as clause number ~w in predicate ~w. Will not be added. ~w~n",
     				[TlRef,I,SourcePred,CX]
@@ -718,7 +722,7 @@ merge_clauses(prepend,SourcePred,TargetPred,CX):-
     debug(interpreter(debug),"removing all clauses from predicate ~w. ~w~n",[TargetPred,Cx]),
    	pef_clause_retractall([predicate=TargetPred]),
     findall( C,   
-    	pef_clause_query([predicate=SourcePred,toplevel_ref=TlRef],C),
+    	pef_clause_query([predicate=SourcePred,toplevel=TlRef],C),
  		SourceClauses
     ),
     append_clauses(SourceClauses,TargetPred,0,SourceCount),
@@ -731,10 +735,10 @@ merge_properties(_,Source,Source):-
 	!.
 merge_properties(_,Source,Target):-
 	forall(
-		pef_predicate_property_definition_query([predicate=Source,property=Key,toplevel_ref=TlRef]),
-		(	pef_predicate_property_definition_query([predicate=Target,toplevel_ref=TlRef])		
+		pef_predicate_property_definition_query([predicate=Source,property=Key,toplevel=TlRef]),
+		(	pef_predicate_property_definition_query([predicate=Target,toplevel=TlRef])		
 		->	true
-		;	pef_predicate_property_definition_assert([predicate=Target,property=Key,toplevel_ref=TlRef])
+		;	pef_predicate_property_definition_assert([predicate=Target,property=Key,toplevel=TlRef])
 		)
 	).
 
@@ -796,13 +800,13 @@ delete_or_shift_clauses(PredID,FileRef,Start,Deleted):-
 
 delete_or_shift_clauses_X([],_FileRef,TotalDeleted,TotalDeleted).
 delete_or_shift_clauses_X([C|Cs],FileRef,AlreadyDeleted,TotalDeleted):-
-	pef_clause_get(C,[predicate=PredID,number=I,toplevel_ref=TlRef]),
+	pef_clause_get(C,[predicate=PredID,number=I,toplevel=TlRef]),
 	pef_clause_retractall([predicate=PredID,number=I]),	
-    (	pef_toplevel_recorded(_,[file_ref=FileRef],TlRef)
+    (	pef_toplevel_query([id=TlRef,file=FileRef])
 	-> 	Deleted is AlreadyDeleted + 1
 	;	Deleted = AlreadyDeleted,
 		J is I - Deleted,
-		pef_clause_assert([predicate=PredID,number=J,toplevel_ref=TlRef])
+		pef_clause_assert([predicate=PredID,number=J,toplevel=TlRef])
 	),
 	delete_or_shift_clauses_X(Cs,FileRef,Deleted,TotalDeleted).
 	
@@ -814,9 +818,9 @@ delete_or_shift_clauses_X([C|Cs],FileRef,AlreadyDeleted,TotalDeleted):-
 % @param Key the toplevel record key.
 % @param PID the program id.
 % @param Clause the clause.
-first_clause(Key, PID, Clause):-
-	pef_toplevel_recorded(Key,[],TlRef),
-	pef_clause_query([toplevel_ref=TlRef,predicate=PredID],Clause),
+first_clause(FID, PID, Clause):-
+	pef_toplevel_query([file=FID,id=TlRef]),
+	pef_clause_query([toplevel=TlRef,predicate=PredID],Clause),
 	pef_predicate_query([id=PredID,module=MID]),
 	pef_program_module_query([program=PID,module=MID]),
 	!.
@@ -827,13 +831,13 @@ first_clause(Key, PID, Clause):-
 % delete all predicates defined in the file that are not multifile.
 unload_file(FileRef, Cx):-
     cx_program(Cx,PID),
-    (	pef_module_definition_query([id=MID,name=MName,file_ref=FileRef])
+    (	pef_module_definition_query([id=MID,name=MName,file=FileRef])
     ->	unload_module(MName,MID,Cx)
     ;	true
     ),
-    file_key(FileRef,Key),
+
     repeat,
-    	(	first_clause(Key,PID,Clause)
+    	(	first_clause(FileRef,PID,Clause)
     	->	pef_clause_get(Clause,[predicate=OldPredID,number=Num]),
 	    	create_my_own_predicate_version(OldPredID,PredID,Cx),
 	    	(	pef_predicate_property_definition_query([predicate=PredID,property=(multifile)])
