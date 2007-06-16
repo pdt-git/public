@@ -8,10 +8,11 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('spike/pef_base')).
+:- use_module(library('spike/pef_api')).
 :- use_module(library('spike/builder')).
 :- use_module(library('spike/targets/parser')).
 
-:- pdt_define_context(cx(toplevel_ref)).
+:- pdt_define_context(cx(toplevel)).
 
 pdt_builder:build_hook(ast(AbsFile)):-
     ast_generator:my_build_hook(AbsFile).
@@ -33,14 +34,13 @@ pdt_builder:invalidate_hook(parse(AbsFile)):-
 
 pdt_generate_asts(FileSpec):-
     pdt_file_spec(FileSpec, File),
-    pdt_file_ref(File,Ref),
+    get_pef_file(File,Ref),
 
     pdt_with_targets([parse(File)],
-    	(	pef_file_query([file_ref=Ref,toplevel_key=Key]),
-    		forall(    			
-    			pef_toplevel_recorded(Key,[],TlRef),
-    			(	pdt_generate_ast(TlRef,Id),
-    				pef_toplevel_root_assert([root=Id,toplevel_ref=TlRef,file_ref=Ref])
+    	(	forall(    			
+    			pef_toplevel_query([file=Ref,id=TID]),
+    			(	pdt_generate_ast(TID,Id),
+    				pef_toplevel_root_assert([root=Id,toplevel=TID,file=Ref])
     			)
     		)
     	)
@@ -48,12 +48,12 @@ pdt_generate_asts(FileSpec):-
     			
 pdt_forget_asts(FileSpec):-
     pdt_file_spec(FileSpec, File),
-    pdt_file_ref(File,Ref),
+    get_pef_file(File,Ref),
     forall(
-    	pef_toplevel_root_query([file_ref=Ref,root=Id]),
+    	pef_toplevel_root_query([file=Ref,root=Id]),
     	pdt_forget_ast(Id)
     ),
-    pef_toplevel_root_retractall([file_ref=Ref]).
+    pef_toplevel_root_retractall([file=Ref]).
 
 %%
 % pdt_generate_ast(+ToplevelRef, Id).
@@ -61,10 +61,10 @@ pdt_forget_asts(FileSpec):-
 % generate ast facts for a toplevel term.
 % @param ToplevellRef the reference of the toplevel record.
 % @param Id is unified with the id of root of the generated syntax tree.
-pdt_generate_ast(TlRef, Id):-
+pdt_generate_ast(TID, Id):-
     cx_new(Cx),
-    cx_toplevel_ref(Cx,TlRef),
-    pef_toplevel_recorded(_,[expanded=Expanded],TlRef),
+    cx_toplevel(Cx,TID),
+    pef_toplevel_query([id=TID,expanded=Expanded]),
     term_variables(Expanded,Variables),
     process_variables(Variables,Cx),
     generate_ast(Expanded, Id,Cx).
@@ -79,7 +79,7 @@ process_variables([Variable|Variables],Cx):-
 generate_ast('$var'(VarId), Id,_Cx):-
     !,
     pef_reserve_id(pef_variable_occurance,Id),
-    pef_variable_occurance_assert([id=Id,variable_ref=VarId]).
+    pef_variable_occurance_assert([id=Id,variable=VarId]).
     
 generate_ast(Term, Id,Cx):-
     functor(Term,Name,Arity),
@@ -105,11 +105,11 @@ generate_args(I,N,Term,Id,Cx):-
 % variables that only occur in this subtree are also deleted.
 % 	
 pdt_forget_ast(Id):-
-    pef_variable_occurance_query([id=Id,variable_ref=Ref]),
+    pef_variable_occurance_query([id=Id,variable=Ref]),
     !,
     pef_variable_occurance_retractall([id=Id]),
     % if this was the last occurance, remove the variable.
-	(	pef_variable_occurance_query([variable_ref=Ref])
+	(	pef_variable_occurance_query([variable=Ref])
 	->	true
 	;	pef_variable_retractall([id=Ref])
 	),
