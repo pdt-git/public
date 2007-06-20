@@ -7,6 +7,7 @@
 	]
 ).
 
+
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_term_position')).
 :-use_module(library('pef/pef_base')).
@@ -16,6 +17,12 @@
 :-use_module(library('builder/targets/parser')).
 :-use_module(library('builder/targets/program_interpreter')).
 
+%define a pseudo build target for the outline to refer to.
+
+pdt_builder:build_hook(outline(AbsFile)):-
+    pdt_with_targets([interprete(AbsFile)],true).
+pdt_builder:invalidate_hook(interprete(AbsFile)):-
+	pdt_invalidate_target(outline(AbsFile)).
 
 %%
 % pdt_outline_child(+File,+ParentType,+ParentID,-ChildType,-ChildID).
@@ -29,12 +36,12 @@ pdt_outline_child(FID,ParT,ParID,ChT,ChID):-
     integer(FID),
     !,
     get_pef_file(File,FID),
-	pdt_with_targets([interprete(File)],
+	pdt_with_targets([outline(File)],
 		outline_child(ParT,ParID,ChT,FID,ChID)		
 	).
 pdt_outline_child(File,ParT,ParID,ChT,ChID):-
     get_pef_file(File,FID),
-	pdt_with_targets([interprete(File)],
+	pdt_with_targets([outline(File)],
 		outline_child(ParT,ParID,ChT,FID,ChID)		
 	).
 
@@ -72,12 +79,12 @@ pdt_outline_label(FID,Type,ID,Label):-
     integer(FID),
     !,
     get_pef_file(File,FID),	
-	pdt_with_targets([interprete(File)],
+	pdt_with_targets([outline(File)],
 		outline_label(Type,ID,FID,Label)		
 	).
 pdt_outline_label(File,Type,ID,Label):-
     get_pef_file(File,FID),	
-	pdt_with_targets([interprete(File)],
+	pdt_with_targets([outline(File)],
 		outline_label(Type,ID,FID,Label)		
 	).
     
@@ -119,12 +126,12 @@ pdt_outline_tag(FID,Type,ID, Tag):-
     integer(FID),
     !,
     get_pef_file(File,FID),
-    pdt_with_targets([interprete(File)],
+    pdt_with_targets([outline(File)],
 		outline_tag(Type,ID,FID,Tag)		
 	).
 pdt_outline_tag(File,Type,ID, Tag):-
     get_pef_file(File,FID),
-    pdt_with_targets([interprete(File)],
+    pdt_with_targets([outline(File)],
 		outline_tag(Type,ID,FID,Tag)		
 	).
     
@@ -149,12 +156,12 @@ pdt_outline_position(FID,Type,ID, From,To):-
     integer(FID),
     !,
     get_pef_file(File,FID),    
-	pdt_with_targets([interprete(File)],
+	pdt_with_targets([outline(File)],
 		outline_position(Type,ID,FID,From,To)	
 	).
 pdt_outline_position(File,Type,ID, From,To):-
     get_pef_file(File,FID),    
-	pdt_with_targets([interprete(File)],
+	pdt_with_targets([outline(File)],
 		outline_position(Type,ID,FID,From,To)	
 	).
 

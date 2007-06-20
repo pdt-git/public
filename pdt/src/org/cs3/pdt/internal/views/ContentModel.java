@@ -22,6 +22,7 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
@@ -32,8 +33,9 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.views.properties.IPropertySource;
 
-public abstract class ContentModel extends DefaultAsyncPrologSessionListener implements
-		PrologFileContentModel, LifeCycleHook2, PrologInterfaceListener {
+public abstract class ContentModel extends DefaultAsyncPrologSessionListener
+		implements PrologFileContentModel, LifeCycleHook2,
+		PrologInterfaceListener {
 
 	private static final String HOOK_ID = "PrologFileContentModelHook";
 
@@ -45,7 +47,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 
 	private String oneMomentPlease = "one moment please...";
 
-	private AsyncPrologSession session;
+	
 
 	private Vector listeners = new Vector();
 
@@ -53,15 +55,24 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 
 	private long timestamp = Long.MIN_VALUE;
 
+	private PrologEventDispatcher dispatcher;
+
+	private String subject;
+
 	public void update(PrologInterfaceEvent e) {
-		CTerm term =PLUtil.createCTerm(e.getEvent());
-		String functor = term.getFunctorValue();
-		File file = null;
-		if(term instanceof CCompound){
-			CCompound c = (CCompound) term;
-			file=new File(c.getArgument(0).getFunctorValue());
+
+		String subject = e.getSubject();
+		String event = e.getEvent();
+
+		Debug.debug("ContentModel received event: subject=" + subject
+				+ ", event=" + event);
+		if("invalid".equals(event)){
+			try {
+				reset();
+			} catch (PrologInterfaceException e1) {
+				Debug.rethrow(e1);
+			}
 		}
-		Debug.debug("ContentModel received event: functor="+functor+", file="+file);
 	}
 
 	/*
@@ -128,7 +139,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	}
 
 	private void fetchChildren(File file) throws PrologInterfaceException {
-		AsyncPrologSession session = getSession();
+		final AsyncPrologSession session = getSession();
 		String query = "get_pef_file('"
 				+ Util.prologFileName(file)
 				+ "',FID),"
@@ -137,7 +148,21 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 				+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
 				+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
 		session.queryAll(input, query);
+		disposeWhenDone(session);
+	}
 
+	private void disposeWhenDone(final AsyncPrologSession session) {
+		new Thread(){
+			@Override
+			public void run() {
+				try {
+					session.join();
+				} catch (PrologInterfaceException e) {
+					Debug.report(e);
+				}
+				session.dispose();
+			}
+		}.start();
 	}
 
 	private void fetchChildren(PEFNode parent) throws PrologInterfaceException {
@@ -154,10 +179,10 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 				+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
 				+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
 		session.queryAll(parent, query);
-
+		disposeWhenDone(session);
 	}
 
-	private static class _PEFNode implements PEFNode,IAdaptable {
+	private static class _PEFNode implements PEFNode, IAdaptable {
 
 		private int endPosition;
 
@@ -185,12 +210,12 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 		}
 
 		public Object getAdapter(Class adapter) {
-			if(IPropertySource.class.isAssignableFrom(adapter)){
+			if (IPropertySource.class.isAssignableFrom(adapter)) {
 				return new PEFNodePropertySource(this);
 			}
 			return null;
 		}
-		
+
 		@Override
 		public String toString() {
 			return label;
@@ -234,32 +259,15 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 		addChild(parent, p);
 	}
 
-	private void setPredicateProperty(Map defines, Map fileAnnos,
-			String module, String key, String property) {
-		CTerm sigterm = (CTerm) fileAnnos.get(key);
-		if (sigterm != null) {
-			CTerm[] sigs = PLUtil.listAsArray(sigterm);
-			for (int i = 0; i < sigs.length; i++) {
-				PredicateNode predicate = ((PredicateNode) defines.get(PLUtil
-						.renderSignature(sigs[i], module)));
-				if (predicate != null) {
-					predicate.setPredicateProperty(property, "true");
-				}
-
-			}
-		}
-	}
-
 	private AsyncPrologSession getSession() throws PrologInterfaceException {
-		if (session == null && pif != null) {
-			session = ((PrologInterface2) pif).getAsyncSession();
+		if ( pif != null) {
+			AsyncPrologSession session = ((PrologInterface2) pif).getAsyncSession();
 			// session.setPreferenceValue("socketsession.canonical", "true");
 			session.addBatchListener(this);
+			return session;
 		}
-		return session;
+		return null;
 	}
-
-	
 
 	/*
 	 * (non-Javadoc)
@@ -275,28 +283,27 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setPif(org.cs3.pl.prolog.PrologInterface)
 	 */
-	public void setPif(PrologInterface pif) throws PrologInterfaceException {
-		if (this.session != null) {
-			session.removeBatchListener(this);
-			session.dispose();
-			session = null;
+	public void setPif(PrologInterface pif, PrologEventDispatcher d)
+			throws PrologInterfaceException {
+		
+		if (this.dispatcher != null&&this.subject!=null) {
+			this.dispatcher.removePrologInterfaceListener(this.subject, this);
 		}
 		if (this.pif != null) {
 			((PrologInterface2) this.pif).removeLifeCycleHook(this, HOOK_ID);
 		}
 		this.pif = pif;
+		this.dispatcher=d;
 		if (this.pif != null) {
 			this.pif.addLifeCycleHook(this, HOOK_ID, new String[0]);
 			if (pif.isUp()) {
 				afterInit(pif);
 			}
 		}
+		if (this.dispatcher != null&&this.subject!=null) {
+			this.dispatcher.addPrologInterfaceListener(this.subject, this);
+		}
 		reset();
-	}
-
-	private String getPlFile() {
-		File file = getFile();
-		return file == null ? null : Util.prologFileName(file);
 	}
 
 	/*
@@ -307,10 +314,12 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	public PrologInterface getPif() {
 		return pif;
 	}
+
 	public Object getInput() {
 
 		return input;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -320,10 +329,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 		synchronized (this) {
 			timestamp = System.currentTimeMillis();
 		}
-		if (session != null) {
-			session.abort();
-
-		}
+		
 
 		synchronized (cache) {
 			cache.clear();
@@ -446,7 +452,25 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	}
 
 	public void setInput(Object input) {
-		this.input=input;
+		this.input = input;
+		try {
+			if (this.dispatcher != null && this.subject != null) {
+
+				this.dispatcher.removePrologInterfaceListener(this.subject,
+						this);
+
+			}
+			this.subject = "builder(outline('" + Util.prologFileName(getFile())
+					+ "'))";
+			if (this.dispatcher != null && this.subject != null) {
+
+				this.dispatcher.addPrologInterfaceListener(this.subject, this);
+
+			}
+
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
 	}
 
 	public Vector getListenersForParent(Object parent) {
@@ -500,20 +524,13 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 
 	public void beforeShutdown(PrologInterface pif, PrologSession s)
 			throws PrologInterfaceException {
-		if (this.session != null) {
-			session.removeBatchListener(this);
-			session.dispose();
-			session = null;
-		}
+		
 		reset();
 
 	}
 
 	public void onError(PrologInterface pif) {
-		if (this.session != null) {
-			session.removeBatchListener(this);
-			session = null;
-		}
+		
 		try {
 			reset();
 		} catch (PrologInterfaceException e) {
@@ -530,12 +547,11 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	public void dispose() {
 
 		try {
-			setPif(null);
+			setPif(null, null);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		}
 		cache.clear();
-		cache = null;
 		listeners.clear();
 		listeners = null;
 		specificListeners.clear();

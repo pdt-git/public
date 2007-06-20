@@ -1,7 +1,5 @@
 :- module(parser,
-	[	pdt_parse/1,
-		pdt_forget/1
-	]
+	[]
 ).
 :- use_module(library('prolog_source')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
@@ -17,8 +15,12 @@ pdt_builder:build_hook(parse(AbsFile)):-
     parser:my_build_hook(AbsFile).
 my_build_hook(AbsFile):-    
 	pdt_forget(AbsFile),
-   	pdt_parse(AbsFile).
-
+	(	exists_file(AbsFile)
+   	->	pdt_with_targets([file(AbsFile)],pdt_parse(AbsFile))
+   	;	true
+   	).
+pdt_builder:invalidate_hook(file(AbsFile)):-
+    pdt_invalidate_target(parse(AbsFile)).
 pdt_builder:invalidate_hook(parse(AbsFile)):-
     parser:
     (	get_pef_file(AbsFile,DepRef),

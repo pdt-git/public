@@ -150,7 +150,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
 		
 			PLUtil.configureFileSearchPath(mgr,initSession,new String[]{PDTCore.ENGINE_ID});
-			Map map = initSession.queryOnce(
+			/*Map map = initSession.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
 					"use_module(library('/org/cs3/pdt/annotate/cache'))," +
 					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
@@ -159,7 +159,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"use_module(library('/org/cs3/pdt/model/pdt_index'))," +
 					"use_module(library('/org/cs3/pdt/model/pdt_handle'))");/*," +
 					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +					
-					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");*/
+					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
 			if(map==null){
 				throw new RuntimeException("could not load annotator framework");
 			}
@@ -177,14 +177,14 @@ public class MetadataSubscription extends DefaultSubscription implements
 				throw new RuntimeException("could not load annotator modules: query failed.");
 			}
 			map=null;
-
+			*/
 			//setup cache directory 
 			//FIXME: what if several projects share one pif?
 			//then there are multiple subscriptions to the same pif
 			//then there are conflicting cache_dir settings.
 			//possible resolution: make this a per pif property.
 			// see PDT-186
-			File cacheDir = getProject().getWorkingLocation(PDTCore.PLUGIN_ID).append(PDTCore.CACHE_DIR).toFile();
+			/*File cacheDir = getProject().getWorkingLocation(PDTCore.PLUGIN_ID).append(PDTCore.CACHE_DIR).toFile();
 			String plCacheDir = Util.prologFileName(cacheDir);
 			map=initSession.queryOnce("pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
 			Debug.info("setting cache dir to "+plCacheDir);
@@ -201,7 +201,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 				throw new RuntimeException("could not configure ignore_hidden_libs: query failed.");
 			}
 			
-
+*/
 			
 	}
 
@@ -214,7 +214,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		}
 		try{
 			Map map=null;
-
+/*
 			map=s.queryOnce("pdt_read_cache_index");
 			if(map==null){
 				Debug.warning("could not read cache index");
@@ -225,7 +225,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 			if(map==null){
 				Debug.warning("could not read index tables");
 			}			
-			
+	*/		
 			
 		}catch(Throwable t){
 			Debug.rethrow(t);
