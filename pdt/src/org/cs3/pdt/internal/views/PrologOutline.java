@@ -47,45 +47,34 @@
  */
 package org.cs3.pdt.internal.views;
 
+import java.io.File;
 import java.util.HashSet;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.cterm.CInteger;
-import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.metadata.Clause;
-import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.metadata.SourceLocation;
-import org.cs3.pl.prolog.PrologInterfaceException;
-
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IElementComparer;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.texteditor.AbstractTextEditor;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 public class PrologOutline extends ContentOutlinePage {
@@ -108,8 +97,6 @@ public class PrologOutline extends ContentOutlinePage {
 		}
 	}
 
-	
-
 	// private TreeViewer viewer;
 	private ITreeContentProvider contentProvider;
 
@@ -119,7 +106,7 @@ public class PrologOutline extends ContentOutlinePage {
 
 	private PLEditor editor;
 
-	private PrologElementLabelProvider labelProvider;
+	private ILabelProvider labelProvider;
 
 	private PrologOutlineFilter[] filters;
 
@@ -133,32 +120,58 @@ public class PrologOutline extends ContentOutlinePage {
 		super.createControl(parent);
 
 		TreeViewer viewer = getTreeViewer();
-		model = new ContentModel();
+		model = new ContentModel() {
+
+			public File getFile() {
+				try {
+					IFileEditorInput editorInput = null;
+					IFile file = null;
+					IPrologProject plProject = null;
+
+					if (input instanceof IFileEditorInput) {
+						editorInput = (IFileEditorInput) input;
+					}
+					if (editorInput != null) {
+						file = editorInput.getFile();
+						plProject = PDTCoreUtils.getPrologProject(file);
+					}
+
+					if (plProject == null) {
+						file = null;
+					}
+					return file == null ? null : file.getLocation().toFile();
+				} catch (Exception e) {
+					ErrorMessageProvider emp = PDTPlugin.getDefault()
+							.getErrorMessageProvider();
+					UIUtils.logAndDisplayError(emp, getSite().getShell(),
+							PDT.ERR_FILENAME_CONVERSION_PROBLEM,
+							PDT.CX_OUTLINE, e);
+					return null;
+				}
+			}
+
+		};
 
 		contentProvider = new CTermContentProvider(viewer, model);
-		labelProvider = new PrologElementLabelProvider();
+		labelProvider = new PEFLabelProvider();
 		viewer.setContentProvider(contentProvider);
 		viewer.setLabelProvider(labelProvider);
-		
-		
+
 		this.convertPositions = true;
 
 		viewer.setComparer(new Comparer());
-		
 
-			
 		viewer.addSelectionChangedListener(this);
-		
+
 		initFilters();
-		
-		IActionBars actionBars= getSite().getActionBars();
-		IToolBarManager toolBarManager= actionBars.getToolBarManager();
+
+		IActionBars actionBars = getSite().getActionBars();
+		IToolBarManager toolBarManager = actionBars.getToolBarManager();
 		Action action = new ToggleSortAction(this);
 		toolBarManager.add(action);
 		action = new FilterActionMenu(this);
 		toolBarManager.add(action);
 		viewer.setInput(getInput());
-
 
 	}
 
@@ -167,7 +180,7 @@ public class PrologOutline extends ContentOutlinePage {
 	}
 
 	public void setInput(IEditorInput input) {
-		this.input=input;
+		this.input = input;
 		TreeViewer viewer = getTreeViewer();
 		if (viewer != null) {
 			viewer.setInput(input);
@@ -177,7 +190,7 @@ public class PrologOutline extends ContentOutlinePage {
 
 	public IEditorInput getInput() {
 		TreeViewer viewer = getTreeViewer();
-		
+
 		return input;
 	}
 
@@ -189,114 +202,52 @@ public class PrologOutline extends ContentOutlinePage {
 
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
-		if (!((StructuredSelection) event.getSelection()).isEmpty()) {
-			final Object elm = ((StructuredSelection) event.getSelection())
-					.getFirstElement();
-
-			int startOffset = -1;
-			int endOffset = -1;
-
-			SourceLocation loc;
-			if (elm instanceof CTermNode) {
-				CTerm term = ((CTermNode) elm).term;
-				CCompound posterm = (CCompound) term.getAnotation("position");
-				if (posterm != null) { // can be null, e.g. for implicit NILs
-					startOffset = ((CInteger) posterm.getArgument(0))
-							.getIntValue();
-					endOffset = ((CInteger) posterm.getArgument(1))
-							.getIntValue();
-				}
-			} else if (elm instanceof Clause) {
-				Clause c = (Clause) elm;
-				loc = c.getSourceLocation();
-				startOffset = loc.offset;
-				endOffset = loc.endOffset;
+		
+		if(event.getSelection().isEmpty()){
+			return;
+		}
+		if(!(event.getSelection() instanceof IStructuredSelection)){
+			return;
+		}
+		IStructuredSelection selection = (IStructuredSelection) event.getSelection();
+		Object elm = selection.getFirstElement();
+		if(elm==null||!(elm instanceof PEFNode)){
+			return;
+		}
+		PEFNode node = (PEFNode)elm;
+		int startOffset = node.getStartPosition();
+		int endOffset = node.getEndPosition();
+		if (convertPositions) {
+			IDocument doc = editor.getDocumentProvider()
+					.getDocument(getInput());
+			if (doc == null) {
+				// wunder, grï¿½bel,...
+				Debug.debug("Debug: input=" + getInput());
 			}
-			if (elm instanceof Directive) {
-				Directive c = (Directive) elm;
-				loc = c.getSourceLocation();
-				startOffset = loc.offset;
-				endOffset = loc.endOffset;
-			} else if (elm instanceof Predicate) {
-				Object[] children = getContentProvider().getChildren(elm);
-				if (children == null || children.length == 0) {
-					return;
-				}
-				if (!(children[0] instanceof Clause)) {
-					// children exist, the backend is currently fetching them.
-					model.addPrologFileContentModelListener(elm,
-							new PrologFileContentModelListener() {
-
-								public void childrenAdded(
-										final PrologFileContentModelEvent e) {
-									
-									model.removePrologFileContentModelListener(	elm,this);
-									Display display = getTreeViewer().getControl().getDisplay();
-									if (Display.getCurrent() != display) {
-										display.asyncExec(new Runnable() {
-											public void run() {
-												childrenAdded(e);
-											}
-										});
-										return;
-									}
-									//refire selection event
-									selectionChanged(event);
-								}
-
-								public void childrenChanged(
-										PrologFileContentModelEvent e) {
-									;
-								}
-
-								public void childrenRemoved(
-										PrologFileContentModelEvent e) {
-									;
-								}
-
-								public void contentModelChanged(PrologFileContentModelEvent e) {
-									;
-									
-								}
-
-							});
-					return;
-				}
-				Clause c = (Clause) children[0];
-				loc = c.getSourceLocation();
-				startOffset = loc.offset;
-				endOffset = loc.endOffset;
+			try {
+				startOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
+						startOffset);
+				endOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
+						endOffset);
+				Debug.debug(">>"
+						+ doc.get(startOffset, endOffset - startOffset) + "<<");
+				Debug.debug(">>>" + doc.get().substring(startOffset, endOffset)
+						+ "<<<");
+			} catch (BadLocationException e) {
+				Debug.warning("bad location: "+startOffset+", "+endOffset);
+				ErrorMessageProvider emp = PDTPlugin.getDefault()
+				.getErrorMessageProvider();
+				UIUtils.logAndDisplayError(emp, getSite().getShell(),
+				PDT.ERR_OUTLINE_BAD_LOCATION,
+				PDT.CX_OUTLINE, e);
 			}
+		}
 
-			if (convertPositions) {
-				IDocument doc = editor.getDocumentProvider().getDocument(
-						getInput());
-				if(doc==null){
-					//wunder, grübel,...
-					Debug.debug("Debug: input="+getInput());
-				}
-				try {
-					startOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
-							startOffset);
-					endOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
-							endOffset);
-					Debug.debug(">>"
-							+ doc.get(startOffset, endOffset - startOffset)
-							+ "<<");
-					Debug.debug(">>>"
-							+ doc.get().substring(startOffset, endOffset)
-							+ "<<<");
-				} catch (BadLocationException e) {
-					Debug.rethrow(e);
-				}
-			}
+		if (startOffset >= 0 && endOffset >= 0) {
+			PLEditor editor = ((PLEditor) UIUtils.getActiveEditor());
+			editor.selectAndReveal(startOffset, endOffset - startOffset);
+			// editor.selectAndReveal(0,1);
 
-			if (startOffset >= 0 && endOffset >= 0) {
-				PLEditor editor = ((PLEditor) UIUtils.getActiveEditor());
-				editor.selectAndReveal(startOffset, endOffset - startOffset);
-				// editor.selectAndReveal(0,1);
-
-			}
 		}
 	}
 
@@ -305,24 +256,26 @@ public class PrologOutline extends ContentOutlinePage {
 	}
 
 	public PrologOutlineFilter[] getAvailableFilters() {
-		if(filters==null){
-			filters=new PrologOutlineFilter[]{
-				new HideDirectivesFilter("hide_directives","Hide Directives"),
-				new HidePrivatePredicatesFilter("hide_private_predicates","Hide Private Predicates"),
-				new HideSubtermsFilter("hide_subterms","Hide Subterms")
-			};
+		if (filters == null) {
+			filters = new PrologOutlineFilter[] {
+					new HideDirectivesFilter("hide_directives",
+							"Hide Directives"),
+					new HidePrivatePredicatesFilter("hide_private_predicates",
+							"Hide Private Predicates"),
+					new HideSubtermsFilter("hide_subterms", "Hide Subterms") };
 		}
 		return filters;
 	}
-	
-	protected void initFilters(){
-		String value=PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_OUTLINE_FILTERS, "");
+
+	protected void initFilters() {
+		String value = PDTPlugin.getDefault().getPreferenceValue(
+				PDT.PREF_OUTLINE_FILTERS, "");
 		HashSet enabledIds = new HashSet();
-		Util.split(value, ",",enabledIds);
+		Util.split(value, ",", enabledIds);
 		PrologOutlineFilter[] filters = getAvailableFilters();
 		for (int i = 0; i < filters.length; i++) {
 			PrologOutlineFilter filter = filters[i];
-			if(enabledIds.contains(filter.getId())){
+			if (enabledIds.contains(filter.getId())) {
 				getTreeViewer().addFilter(filter);
 			}
 		}

@@ -7,11 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
@@ -24,26 +21,27 @@ import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.ui.views.properties.IPropertySource;
 
-public abstract class ContentModel extends DefaultAsyncPrologSessionListener implements
-		PrologFileContentModel, LifeCycleHook2, PrologInterfaceListener {
+public class CopyOfContentModel extends DefaultAsyncPrologSessionListener implements
+		PrologFileContentModel, LifeCycleHook2 {
 
 	private static final String HOOK_ID = "PrologFileContentModelHook";
 
-	private Object input;
+	private File file;
 
 	private PrologInterface pif;
 
 	private HashMap cache = new HashMap();
 
 	private String oneMomentPlease = "one moment please...";
+
+	private Object directiveTicket = "directiveTicket";
+
+	private Object fileAnnosTicket = "fileAnnosTicket";
+
+	private Object root = "root";
 
 	private AsyncPrologSession session;
 
@@ -53,15 +51,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 
 	private long timestamp = Long.MIN_VALUE;
 
-	public void update(PrologInterfaceEvent e) {
-		CTerm term =PLUtil.createCTerm(e.getEvent());
-		String functor = term.getFunctorValue();
-		File file = null;
-		if(term instanceof CCompound){
-			CCompound c = (CCompound) term;
-			file=new File(c.getArgument(0).getFunctorValue());
-		}
-		Debug.debug("ContentModel received event: functor="+functor+", file="+file);
+	public CopyOfContentModel() {
+		Debug.debug("debug");
 	}
 
 	/*
@@ -70,11 +61,11 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#hasChildren(java.lang.Object)
 	 */
 	public boolean hasChildren(Object parentElement) {
-		if (parentElement instanceof PEFNode) {
-			String type = ((PEFNode) parentElement).getType();
-			return "pef_file".equals(type) || "pef_predicate".equals(type);
-		}
-		return parentElement == input;
+		return (parentElement instanceof CTermNode && ((CTermNode) parentElement).term instanceof CCompound)
+				|| parentElement instanceof Predicate
+				|| parentElement instanceof ClauseNode
+				&& ((ClauseNode) parentElement).hasBody()
+				|| parentElement instanceof DirectiveNode;
 
 	}
 
@@ -118,120 +109,201 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 
 	private void fetchChildren(Object parentElement)
 			throws PrologInterfaceException {
-
-		if (parentElement instanceof PEFNode) {
-			fetchChildren((PEFNode) parentElement);
-
-		} else if (parentElement == input) {
-			fetchChildren(getFile());
+		Debug.debug("outline fetch children of " + parentElement);
+		if (pif == null) {
+			return;
 		}
-	}
-
-	private void fetchChildren(File file) throws PrologInterfaceException {
-		AsyncPrologSession session = getSession();
-		String query = "get_pef_file('"
-				+ Util.prologFileName(file)
-				+ "',FID),"
-				+ "pdt_outline_child(FID,pef_file,FID,ChildT,Child),"
-				+ "pdt_outline_label(FID,ChildT,Child,Label),"
-				+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
-				+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
-		session.queryAll(input, query);
-
-	}
-
-	private void fetchChildren(PEFNode parent) throws PrologInterfaceException {
-		AsyncPrologSession session = getSession();
-		String query = "get_pef_file('"
-				+ Util.prologFileName(getFile())
-				+ "',FID),"
-				+ "pdt_outline_child(FID,"
-				+ parent.getType()
-				+ ","
-				+ parent.getId()
-				+ ",ChildT,Child),"
-				+ "pdt_outline_label(FID,ChildT,Child,Label),"
-				+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
-				+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
-		session.queryAll(parent, query);
-
-	}
-
-	private static class _PEFNode implements PEFNode,IAdaptable {
-
-		private int endPosition;
-
-		private File file;
-
-		private int id;
-
-		private String label;
-
-		private int startPosition;
-
-		private Set tags;
-
-		private String type;
-
-		public _PEFNode(AsyncPrologSessionEvent e, File file) {
-			type = (String) e.bindings.get("ChildT");
-			id = Integer.parseInt((String) e.bindings.get("Child"));
-			startPosition = Integer.parseInt((String) e.bindings.get("Start"));
-			endPosition = Integer.parseInt((String) e.bindings.get("End"));
-			this.file = file;
-			label = (String) e.bindings.get("Label");
-			tags = new HashSet();
-			tags.addAll((Collection) e.bindings.get("Tags"));
+		if (getSession().isPending(parentElement)) {
+			Debug.debug("outline fetch request already pending for "
+					+ parentElement);
+			return;
 		}
 
-		public Object getAdapter(Class adapter) {
-			if(IPropertySource.class.isAssignableFrom(adapter)){
-				return new PEFNodePropertySource(this);
+		if (root == parentElement) {
+			Debug.debug("outline: parent is root");
+			if (getSession().isPending(directiveTicket)
+					|| getSession().isPending(fileAnnosTicket)) {
+				Debug
+						.debug("outline: request for root (fileAnnos or directive ticket) is already pending");
+				return;
+			} else {
+				fetchPredicates();
+				fetchDirectives();
 			}
-			return null;
-		}
-		
-		@Override
-		public String toString() {
-			return label;
-		}
+		} else if (parentElement instanceof CTermNode) {
+			fetchArguments((CTermNode) parentElement);
 
-		public int getEndPosition() {
-			return endPosition;
+		} else if (parentElement instanceof PredicateNode) {
+			PredicateNode p = (PredicateNode) parentElement;
+			fetchClauses(p);
+		} else if (parentElement instanceof ClauseNode) {
+			ClauseNode c = (ClauseNode) parentElement;
+			if (c.hasBody()) {
+				fetchBody(c);
+			}
+		} else if (parentElement instanceof DirectiveNode) {
+			DirectiveNode d = (DirectiveNode) parentElement;
+			fetchBody(d);
 		}
+	}
 
-		public File getFile() {
-			return this.file;
-		}
+	private void fetchDirectives() throws PrologInterfaceException {
+		AsyncPrologSession session = getSession();
+		String query = "pdt_file_directive('" + Util.prologFileName(file)
+				+ "',Properties)";
+		session.queryAll(directiveTicket, query);
+	}
 
-		public int getId() {
+	private void fetchPredicates() throws PrologInterfaceException {
+		AsyncPrologSession session = getSession();
+		String query = "pdt_file_annotation('" + Util.prologFileName(file)
+				+ "',FileAnnos)";
+		session.queryOnce(fileAnnosTicket, query);
 
-			return this.id;
-		}
+	}
 
-		public String getLabel() {
-			return this.label;
-		}
+	private void fetchBody(DirectiveNode d) throws PrologInterfaceException {
+		String fileref = d.getProperty("file_ref");
+		String n = d.getProperty("n");
+		AsyncPrologSession session = getSession();
+		String query = "pdt_lookup_aterm(file_ref(" + fileref + "), " + n
+				+ ", Term)";
+		session.queryOnce(d, query);
+	}
 
-		public int getStartPosition() {
-			return this.startPosition;
-		}
+	private void fetchBody(ClauseNode c) throws PrologInterfaceException {
+		String fileref = c.getProperty("file_ref");
+		String n = c.getProperty("n");
+		AsyncPrologSession session = getSession();
+		String query = "pdt_lookup_aterm(file_ref(" + fileref + "), " + n
+				+ ", Term)";
+		session.queryOnce(c, query);
 
-		public Set getTags() {
+	}
 
-			return this.tags;
-		}
+	private void fetchClauses(PredicateNode p) throws PrologInterfaceException {
+		String file = "'" + getPlFile() + "'";
+		String signature = "'"+p.getModule() + "': (" + p.getName() + ")	/"
+				+ p.getArity();
+		AsyncPrologSession session = getSession();
+		String query = "pdt_predicate_clause(" + file + ", " + signature
+				+ ", Properties)";
+		session.queryAll(p, query);
+	}
 
-		public String getType() {
-			return this.type;
-		}
+	private void fetchArguments(CTermNode node) {
+		// TODO
 
 	}
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
-		Object parent = e.ticket;
-		PEFNode p = new _PEFNode(e, getFile());
-		addChild(parent, p);
+		Debug.debug("goal has solution: ");
+		Debug.debug("  ticket: " + e.ticket);
+		Debug.debug("  	query: " + e.query);
+		if (e.ticket == directiveTicket) {
+			addDirective(e);
+		} else if (e.ticket == fileAnnosTicket) {
+			addPredicates(e);
+		} else if (e.ticket instanceof PredicateNode) {
+			addClause(e);
+		} else if (e.ticket instanceof DirectiveNode) {
+			addDirectiveBody(e);
+		} else if (e.ticket instanceof ClauseNode) {
+			addClauseBody(e);
+		}
+	}
+
+	private void addClauseBody(AsyncPrologSessionEvent e) {
+		ClauseNode clause = (ClauseNode) e.ticket;
+		CCompound term = (CCompound) e.bindings.get("Term");
+		CTerm body = term.getArgument(1);
+		clause.term = term;
+		addChild(e.ticket, new CTermNode(body));
+
+	}
+
+	private void addDirectiveBody(AsyncPrologSessionEvent e) {
+		DirectiveNode directive = (DirectiveNode) e.ticket;
+		CCompound term = (CCompound) e.bindings.get("Term");
+		directive.term = term;
+		CTerm body = term.getArgument(0);
+		addChild(e.ticket, new CTermNode(body));
+
+	}
+
+	private void addClause(AsyncPrologSessionEvent e) {
+		PredicateNode predicate = (PredicateNode) e.ticket;
+		Map properties = PLUtil.listAsMap((CTerm) e.bindings.get("Properties"));
+		try {
+			ClauseNode clause = new ClauseNode(properties, file);
+			addChild(predicate, clause);
+		} catch (IOException ex) {
+			// UIUtils.logError(PDTPlugin.getDefault().getErrorMessageProvider(),
+			// PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_OUTLINE, ex);
+			// the actual problem happend earlier and should have already raised
+			// an exception.
+			// At the current position, there is not much we can do.
+			Debug.rethrow(ex);
+		}
+	}
+
+	private void addPredicates(AsyncPrologSessionEvent e) {
+
+		String module = null;
+
+		CTerm annosTerm = (CTerm) e.bindings.get("FileAnnos");
+
+		Map fileAnnos = PLUtil.listAsMap(annosTerm);
+
+		CTerm moduleTerm = (CTerm) fileAnnos.get("defines_module");
+		module = moduleTerm == null ? "user" : moduleTerm.getFunctorValue();
+
+		CTerm sigterm = (CTerm) fileAnnos.get("defines2");
+		HashMap defines = new HashMap();
+		if (sigterm != null) {
+			CTerm[] assocs = PLUtil.listAsArray(sigterm);
+			for (int i = 0; i < assocs.length; i++) {
+				CTerm sig = ((CCompound) assocs[i]).getArgument(0);
+				CTerm[] refTerms = PLUtil.listAsArray(((CCompound) assocs[i])
+						.getArgument(1));
+				String refString = Util.splice(refTerms, ",");
+
+				PredicateNode predicateNode = new PredicateNode(
+						(CCompound) sig, module);
+				predicateNode.setPredicateProperty("clause_refs", refString);
+				defines.put(PLUtil.renderSignature(sig, module), predicateNode);
+			}
+
+		}
+
+		setPredicateProperty(defines, fileAnnos, module, "exports",
+				Predicate.EXPORTED);
+		setPredicateProperty(defines, fileAnnos, module, "defines_dynamic",
+				Predicate.DYNAMIC);
+		setPredicateProperty(defines, fileAnnos, module, "defines_multifile",
+				Predicate.MULTIFILE);
+		setPredicateProperty(defines, fileAnnos, module,
+				"defines_module_transparent", Predicate.MODULE_TRANSPARENT);
+
+		addChildren(root, defines.values());
+	}
+
+	private void addDirective(AsyncPrologSessionEvent e) {
+
+		Map properties = PLUtil.listAsMap((CTerm) e.bindings.get("Properties"));
+		try {
+			DirectiveNode directive = new DirectiveNode(properties, file);
+
+			addChild(root, directive);
+		} catch (IOException ex) {
+			// UIUtils.logError(PDTPlugin.getDefault().getErrorMessageProvider(),
+			// PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_OUTLINE, ex);
+			// the actual problem happend earlier and should have already raised
+			// an exception.
+			// At the current position, there is not much we can do.
+			Debug.rethrow(ex);
+		}
+
 	}
 
 	private void setPredicateProperty(Map defines, Map fileAnnos,
@@ -253,13 +325,20 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	private AsyncPrologSession getSession() throws PrologInterfaceException {
 		if (session == null && pif != null) {
 			session = ((PrologInterface2) pif).getAsyncSession();
-			// session.setPreferenceValue("socketsession.canonical", "true");
+			session.setPreferenceValue("socketsession.canonical", "true");
 			session.addBatchListener(this);
 		}
 		return session;
 	}
 
-	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#getFile()
+	 */
+	public File getFile() {
+		return file;
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -267,6 +346,16 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setFile(java.io.File)
 	 */
 	public void setFile(File file) throws IOException, PrologInterfaceException {
+		if (file != null) {
+			// check if the file name can be resolved.
+			// if there is a problem, throw now.
+			// We want to avoid exceptions during lazy update() calls.
+			file.getCanonicalPath();
+		}
+
+		this.file = file;
+
+		reset();
 
 	}
 
@@ -287,15 +376,11 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 		this.pif = pif;
 		if (this.pif != null) {
 			this.pif.addLifeCycleHook(this, HOOK_ID, new String[0]);
-			if (pif.isUp()) {
-				afterInit(pif);
-			}
 		}
 		reset();
 	}
 
 	private String getPlFile() {
-		File file = getFile();
 		return file == null ? null : Util.prologFileName(file);
 	}
 
@@ -307,10 +392,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	public PrologInterface getPif() {
 		return pif;
 	}
-	public Object getInput() {
 
-		return input;
-	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -324,7 +406,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 			session.abort();
 
 		}
-
+		Vector children = getCachedChildren(root);
 		synchronized (cache) {
 			cache.clear();
 
@@ -446,7 +528,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	}
 
 	public void setInput(Object input) {
-		this.input=input;
+		this.root = input;
+
 	}
 
 	public Vector getListenersForParent(Object parent) {
@@ -482,20 +565,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 	}
 
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
-				.getLibraryManager();
-		PrologSession s = pif.getSession();
-		try {
-			PLUtil.configureFileSearchPath(mgr, s,
-					new String[] { PrologRuntime.LIB_PDT });
-			s.queryOnce("use_module(library('facade/pdt_outline'))");
-			s.queryOnce("use_module(library('pef/pef_api'))");
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-		}
-		reset();
+		;
+
 	}
 
 	public void beforeShutdown(PrologInterface pif, PrologSession s)
@@ -540,12 +611,18 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener imp
 		listeners = null;
 		specificListeners.clear();
 		specificListeners = null;
-		input = null;
+		file = null;
+		root = null;
 
 	}
 
 	public synchronized long getLastResetTime() {
 		return timestamp;
+	}
+
+	public Object getInput() {
+
+		return root;
 	}
 
 }

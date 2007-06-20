@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.views;
 
-import org.cs3.pl.metadata.Directive;
 import org.eclipse.jface.viewers.Viewer;
 
 public class HideDirectivesFilter extends PrologOutlineFilter {
@@ -11,8 +10,11 @@ public class HideDirectivesFilter extends PrologOutlineFilter {
 	}
 
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if(element instanceof Directive){
-			return false;
+		if(element instanceof PEFNode){
+			PEFNode p = (PEFNode) element;
+			if("pef_toplevel".equals(p.getType()) && p.getTags().contains("directive")){			
+				return false;
+			}
 		}
 		return true;
 	}
