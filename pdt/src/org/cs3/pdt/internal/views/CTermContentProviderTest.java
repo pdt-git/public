@@ -17,37 +17,38 @@ import junit.framework.TestCase;
 
 public class CTermContentProviderTest extends TestCase {
 	final static String testdata = "testdata/testdata_00.pl";
+
 	private File file;
+
 	private PrologInterface pif;
-	
-	
-	
+
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
 		pif = PrologRuntimePlugin.getDefault().getPrologInterface("test");
-		PrologInterfaceFactory factory=pif.getFactory();
+		PrologInterfaceFactory factory = pif.getFactory();
 		PrologSession s = pif.getSession();
 		factory.ensureInstalled(testdata, CTermContentProviderTest.class);
 		file = factory.getResourceLocator().resolve(testdata);
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
-		PLUtil.configureFileSearchPath(mgr,s,new String[]{PDTCore.ENGINE_ID});
-		s.queryOnce(
-				"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
-				"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
-				"use_module(library('/org/cs3/pdt/model/predicate_definition_factory'))," +
-				"use_module(library('/org/cs3/pdt/model/builtin_predicate_factory'))," +
-				"use_module(library('/org/cs3/pdt/model/pdt_index'))," +
-				"use_module(library('/org/cs3/pdt/model/pdt_handle'))," +
-				"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))" 				
-				);
-		s.queryOnce(
-				"register_annotator(library('/org/cs3/pdt/annotate/op_annotator'))," +
-				"register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
-				"register_annotator(library('/org/cs3/pdt/annotate/export_annotator'))," +
-				"register_annotator(library('/org/cs3/pdt/annotate/member_annotator'))," +
-				"register_annotator(library('/org/cs3/pdt/annotate/indexer'))");
-	
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+				.getLibraryManager();
+		PLUtil.configureFileSearchPath(mgr, s,
+				new String[] { PDTCore.ENGINE_ID });
+		s
+				.queryOnce("use_module(library('/org/cs3/pdt/annotate/pdt_annotator')),"
+						+ "use_module(library('/org/cs3/pdt/core/pdt_meta_info')),"
+						+ "use_module(library('/org/cs3/pdt/model/predicate_definition_factory')),"
+						+ "use_module(library('/org/cs3/pdt/model/builtin_predicate_factory')),"
+						+ "use_module(library('/org/cs3/pdt/model/pdt_index')),"
+						+ "use_module(library('/org/cs3/pdt/model/pdt_handle')),"
+						+ "use_module(library('/org/cs3/pdt/metadata/pdtplugin'))");
+		s
+				.queryOnce("register_annotator(library('/org/cs3/pdt/annotate/op_annotator')),"
+						+ "register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator')),"
+						+ "register_annotator(library('/org/cs3/pdt/annotate/export_annotator')),"
+						+ "register_annotator(library('/org/cs3/pdt/annotate/member_annotator')),"
+						+ "register_annotator(library('/org/cs3/pdt/annotate/indexer'))");
+
 		s.queryOnce("win_window_pos([show(true)])");
 		s.dispose();
 	}
@@ -56,18 +57,25 @@ public class CTermContentProviderTest extends TestCase {
 		super.tearDown();
 	}
 
-	
-	
-	public void testMalte() throws Exception{
-		PrologFileContentModel backend = new ContentModel();
-		backend.setFile(file);
+	public void testMalte() throws Exception {
+		PrologFileContentModel backend = new ContentModel() {
+
+			public File getFile() {
+				return (File) getInput();
+			}
+
+		};
+		backend.setInput(file);
 		backend.setPif(pif);
 		PrologSession s = pif.getSession();
-		s.queryOnce("pdt_ensure_annotated('"+Util.prologFileName(file)+"')");
-		
-		//FIXME
-		/*Object[] data = backend.getData();
-		assertNotNull(data);
-		assertTrue(data.length>0);*/
+		s
+				.queryOnce("pdt_ensure_annotated('" + Util.prologFileName(file)
+						+ "')");
+
+		// FIXME
+		/*
+		 * Object[] data = backend.getData(); assertNotNull(data);
+		 * assertTrue(data.length>0);
+		 */
 	}
 }

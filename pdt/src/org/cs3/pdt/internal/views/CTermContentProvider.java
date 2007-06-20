@@ -41,23 +41,15 @@
 
 package org.cs3.pdt.internal.views;
 
-import java.io.IOException;
-
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PrologEventDispatcher;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -66,30 +58,24 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
 
 public class CTermContentProvider implements ITreeContentProvider,
-		PrologFileContentModelListener, PrologInterfaceListener {
-	//TODO: actually the content model should be a pif listener, not the content provider.
-
-	
-
-	private IFile file;
-
-	
-
-	
+		PrologFileContentModelListener {
 
 	private TreeViewer viewer;
 
 	private PrologFileContentModel backend;
+
 	
-	public CTermContentProvider(Viewer outline,PrologFileContentModel backend) {
+
+	public CTermContentProvider(Viewer outline, PrologFileContentModel backend) {
 		this.viewer = (TreeViewer) outline;
 		this.backend = backend;
 		this.backend.addPrologFileContentModelListener(this);
-		
+
 	}
 
 	public Object[] getChildren(Object parentElement) {
 		try {
+			
 			return backend.getChildren(parentElement);
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
@@ -105,11 +91,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	public boolean hasChildren(Object parentElement) {
-		//XXX a hack.
-		if(parentElement instanceof DirectiveNode||parentElement instanceof ClauseNode){
+		// XXX a hack.
+		if (parentElement instanceof DirectiveNode
+				|| parentElement instanceof ClauseNode) {
 			ViewerFilter[] filters = viewer.getFilters();
 			for (int i = 0; i < filters.length; i++) {
-				if(filters[i] instanceof HideSubtermsFilter){
+				if (filters[i] instanceof HideSubtermsFilter) {
 					return false;
 				}
 			}
@@ -137,114 +124,46 @@ public class CTermContentProvider implements ITreeContentProvider,
 	 *      Object, Object)
 	 */
 	public void inputChanged(final Viewer viewer, Object oldInput, Object input) {
-
+		
 		try {
 			IFileEditorInput editorInput = null;
 			IFile file = null;
 			IPrologProject plProject = null;
-			
+
 			if (input instanceof IFileEditorInput) {
 				editorInput = (IFileEditorInput) input;
 			}
 			if (editorInput != null) {
 				file = editorInput.getFile();
-				plProject=PDTCoreUtils.getPrologProject(file);
-			}
-			
-			if (plProject == null) {
-				setFile(null);
-				
-			}else{				
-				setFile(file);
-				backend.setRoot(input);
-				viewer.refresh();
+				plProject = PDTCoreUtils.getPrologProject(file);
 			}
 
-		} catch (Exception e) {
-			Debug.report(e);
-		}
-	}
-
-	private void setFile(IFile file) throws CoreException {
-		try {
-			if (this.file!= null) {
-				IPrologProject prologProject = PDTCoreUtils.getPrologProject(this.file);
-				PrologEventDispatcher metaDataEventDispatcher = prologProject.getMetaDataEventDispatcher();
-					metaDataEventDispatcher
-						.removePrologInterfaceListener(
-								"file_annotation('" + getPlFile() + "')", this);
+			if (plProject != null) {
+				backend.setPif(plProject.getMetadataPrologInterface());
+			} else {
 				backend.setPif(null);
 			}
-			this.file=file;
-			backend.setFile(file==null?null:file.getLocation().toFile());
-			if (file != null) {
-				IPrologProject prologProject = PDTCoreUtils.getPrologProject(this.file);
-				PrologEventDispatcher metaDataEventDispatcher = prologProject.getMetaDataEventDispatcher();
-				metaDataEventDispatcher
-						.addPrologInterfaceListener(
-								"file_annotation('" + getPlFile() + "')", this);
-				backend.setPif(prologProject.getMetadataPrologInterface());
-			}
-			
-		} catch (PrologInterfaceException e) {
+
+			backend.setInput(input);
+			viewer.refresh();
+
+		} catch (Exception e) {
 			Debug.report(e);
 			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
 					.getErrorMessageProvider(), viewer.getControl().getShell(),
 					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
-		} catch (IOException e) {
-			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getControl().getShell(),
-					PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_OUTLINE, e);
 		}
 	}
 
-	private String getPlFile() {
-		return file==null?null:Util.prologFileName(file.getLocation().toFile());
-	}
-
 	
-
-	
-
-	
-
-	
-	public void update(final PrologInterfaceEvent e) {
-		
-		try {
-			backend.reset();
-		} catch (final PrologInterfaceException e1) {
-			if (viewer == null || viewer.getControl().isDisposed()) {
-				return;
-			}
-			Display display = viewer.getControl().getDisplay();
-			if (Display.getCurrent() != display) {
-				display.asyncExec(new Runnable() {
-					public void run() {
-						UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-								.getErrorMessageProvider(), viewer.getControl().getShell(),
-								PDT.ERR_PIF, PDT.CX_OUTLINE, e1);
-					}
-				});
-				return;
-			}
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getControl().getShell(),
-					PDT.ERR_PIF, PDT.CX_OUTLINE, e1);
-		}
-//		Debug.debug("outline refresh (update)");
-//		viewer.refresh();
-
-	}
-
 	public void childrenAdded(final PrologFileContentModelEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed()) {
 			return;
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
-			Debug.debug("outline enqueue on ui thread: add "+Util.prettyPrint(e.children));
+			Debug.debug("outline enqueue on ui thread: add "
+					+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					childrenAdded(e);
@@ -252,10 +171,11 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		
-		Debug.debug("outline add "+Util.prettyPrint(e.children));
+
+		Debug.debug("outline add (parent=" + e.parent + "): "
+				+ Util.prettyPrint(e.children));
 		viewer.add(e.parent, e.children);
-		
+
 	}
 
 	public void childrenChanged(final PrologFileContentModelEvent e) {
@@ -264,7 +184,8 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
-			Debug.debug("outline enqueue on ui thread: update "+Util.prettyPrint(e.children));
+			Debug.debug("outline enqueue on ui thread: update "
+					+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					childrenChanged(e);
@@ -272,7 +193,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		Debug.debug("outline update "+Util.prettyPrint(e.children));
+		Debug.debug("outline update " + Util.prettyPrint(e.children));
 		viewer.update(e.children, null);
 	}
 
@@ -282,7 +203,8 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
-			Debug.debug("outline enqueue on ui thread: remove "+Util.prettyPrint(e.children));
+			Debug.debug("outline enqueue on ui thread: remove "
+					+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					childrenRemoved(e);
@@ -290,18 +212,20 @@ public class CTermContentProvider implements ITreeContentProvider,
 			});
 			return;
 		}
-		Debug.debug("outline remove "+Util.prettyPrint(e.children));
+		Debug.debug("outline remove " + Util.prettyPrint(e.children));
 		viewer.remove(e.children);
-		
+
 	}
 
 	public void contentModelChanged(final PrologFileContentModelEvent e) {
-		if (viewer == null || viewer.getControl().isDisposed()||e.isObsolet()) {
+		if (viewer == null || viewer.getControl().isDisposed() || e.isObsolet()) {
 			return;
 		}
 		Display display = viewer.getControl().getDisplay();
 		if (Display.getCurrent() != display) {
-			Debug.debug("outline enqueue on ui thread: refresh (contentModelChanged) "+Util.prettyPrint(e.children));
+			Debug
+					.debug("outline enqueue on ui thread: refresh (contentModelChanged) "
+							+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
 				public void run() {
 					contentModelChanged(e);
@@ -311,7 +235,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Debug.debug("outline refresh (contentModelChanged)");
 		viewer.refresh();
-		
+
 	}
 
 }

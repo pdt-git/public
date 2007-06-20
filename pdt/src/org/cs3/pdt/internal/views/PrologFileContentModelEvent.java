@@ -12,13 +12,13 @@ public class PrologFileContentModelEvent extends EventObject {
 
 	private long timestamp=Long.MAX_VALUE;
 
-	public PrologFileContentModelEvent(ContentModel model, Object parent, Object[] children) {
+	public PrologFileContentModelEvent(PrologFileContentModel model, Object parent, Object[] children) {
 		super(model);
 		this.model=model;
 		this.parent=parent;
 		this.children=children;
 	}
-	public PrologFileContentModelEvent(ContentModel model, Object parent, Object[] children,long timestamp) {
+	public PrologFileContentModelEvent(PrologFileContentModel model, Object parent, Object[] children,long timestamp) {
 		super(model);
 		this.model=model;
 		this.parent=parent;
@@ -26,11 +26,11 @@ public class PrologFileContentModelEvent extends EventObject {
 		this.timestamp=timestamp;
 	}
 
-	public PrologFileContentModelEvent(ContentModel model) {
+	public PrologFileContentModelEvent(PrologFileContentModel model) {
 		super(model);
 		this.model=model;
 	}
-	public PrologFileContentModelEvent(ContentModel model,long timestamp) {
+	public PrologFileContentModelEvent(PrologFileContentModel model,long timestamp) {
 		super(model);
 		this.model=model;
 		this.timestamp=timestamp;

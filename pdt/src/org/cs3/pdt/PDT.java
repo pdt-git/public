@@ -112,6 +112,8 @@ public final  class PDT {
 	public static final int ERR_NO_ACTIVE_FILE = -11;
 
 	public static final int CX_FIND_PREDICATE = -10;
+
+	public static final int ERR_OUTLINE_BAD_LOCATION = -12;
 	
 	
 
