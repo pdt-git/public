@@ -66,7 +66,7 @@ public class CTermContentProviderTest extends TestCase {
 
 		};
 		backend.setInput(file);
-		backend.setPif(pif);
+		backend.setPif(pif,null);
 		PrologSession s = pif.getSession();
 		s
 				.queryOnce("pdt_ensure_annotated('" + Util.prologFileName(file)

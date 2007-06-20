@@ -135,6 +135,7 @@ pif_unobserve(Thread,Subject) :-
 % it will be removed.
 % 
 pif_notify(Subject,Event) :-
+   debug(pif_observe,'~w~n',[pif_notify(Subject,Event)]),
    forall(
     	( 
     	  recorded(pif_observer,observation(Thread,Subject,_),Ref)

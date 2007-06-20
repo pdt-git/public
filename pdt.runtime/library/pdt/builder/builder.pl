@@ -6,8 +6,8 @@
 		pdt_restart_arbiter/0,
 		debugme/0
 	]
-).
-
+). 
+ 
 :- use_module(library(pif_observe)).
 
 
@@ -150,9 +150,7 @@ pdt_restart_arbiter:-
 
 
 
-run_arbiter:-   
-    guitracer,
-    spy(debugme),
+run_arbiter:-       
 	repeat,
 		thread_get_message(msg(Target,Event)),
 		catch(
@@ -191,9 +189,10 @@ process_message(Target,Event):-
     	update_target_state(Target,NewState),
 	    (	execute_action(Action,Target)
 	    ->	true
-	    ;	throw(error(action_failed(Target,State,Event,Action)))
+	    ;	debug(builder(error),"action failed ~w (target: ~w)~n",[Action,Target]),
+	    	throw(error(action_failed(Target,State,Event,Action)))
 	    )
-	;	debugme,
+	;	debug(builder(error),"no transition for state ~w, event ~w (target: ~w)~n",[State,Event,Target]),
 		throw(error(no_transition(Target,State,Event)))
 	).
  
@@ -203,7 +202,7 @@ debugme:-
 execute_action([],_).
 execute_action([Action|Actions],Target):-
     execute_action(Action,Target),
-    exectue_action(Actions,Target).
+    execute_action(Actions,Target).
 execute_action(grant([]),_Target).
 execute_action(grant([Thread|Threads]),Target):-
     thread_send_message(Thread,grant(Target)),
@@ -239,15 +238,18 @@ execute_action(report_error([Thread|Threads],E),Target):-
   I don't know how to moddel this in our state chart diagram...
 */
 execute_action(invalidate,Target):-
-    pif_notify(builder,invalid(Target)),
+	debug(builder(debug),"invalidating target: ~w~n",[Target]),
+    pif_notify(builder(Target),invalid),
     forall(invalidate_hook(Target),true).
 execute_action(rebuild(Thread),Target):-
-	pif_notify(builder,start(Target,Thread)),
+	debug(builder(debug),"rebuilding target: ~w~n",[Target]),
+	pif_notify(builder(Target),start(Thread)),
 	thread_send_message(Thread,rebuild(Target)).
 execute_action(report_cycle(Thread),Target):-
 	thread_send_message(Thread,	cycle(Target)).
 execute_action(notify_done,Target):-
-    pif_notify(builder,done(Target)).
+	debug(builder(debug),"target done: ~w~n",[Target]),
+    pif_notify(builder(Target),done).
 
 target_transition(state(A, outdated, C,W),		 		request(T), 	report_cycle(T),		state(A, outdated, C,W) ,Target):-
     closes_cycle(T,Target).
@@ -270,6 +272,7 @@ target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),				st
 target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],						state(reading, outdated , Ls, [T|Ts]),_Target).
 target_transition(state(reading, outdated, [_,L|Ls],Ts),release,	 	[],						state(reading, outdated , [L|Ls], Ts),_Target).
 target_transition(state(reading, outdated, [_],[T|Ts]),	release,	 	rebuild(T),				state(idle, pending(T) , [], Ts),_Target).
+target_transition(state(reading, outdated, [_],[]),		release,	 	[],						state(idle, outdated , [], []),_Target).
 target_transition(state(idle, pending(P) , [], Ts),		request(T), 	[], 					state(idle, pending(P) , [], [T|Ts]),_Target).
 
 

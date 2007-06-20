@@ -47,6 +47,7 @@
 	starts_at/2
 	]). 
 
+:- debug(consult_server).
 
 option_default(interprete_lists,true).
 option_default(canonical,false).
@@ -81,7 +82,7 @@ clear_options:-
 
 create_lock_file(Filename):-
 	(	exists_file(Filename)
-	->	write('Found existing lockfile, exiting...'),write(Filename),nl,thread_signal(main,halt)
+	->	my_debug('Found existing lockfile, exiting...'),my_debug(Filename),nl,thread_signal(main,halt)
 	;	open(Filename, write, Stream),
 		write(Stream,Filename),
 		nl(Stream),
@@ -139,7 +140,7 @@ accept_loop(ServerSocket):-
 		accept_loop_impl(ServerSocket),
 		Error,
 		(
-			write('AAAaaaAAAaaaAAAaaaAAA:'),write(Error),nl,thread_signal(main,halt)
+			my_debug('AAAaaaAAAaaaAAAaaaAAA:'),my_debug(Error),nl,thread_signal(main,halt)
 		)
 	),
 %	thread_self(Me),
@@ -149,9 +150,9 @@ accept_loop(ServerSocket):-
 	% It would probably be best to run the accept loop itself on main, but
 	% otoh it is also nice to leave a debugging console if everything else breaks.
 	% So atm, we have to -reluctantly- use thread_signal/2 to do the job.
-	writeln(before_signaling_main),
+	my_debug(before_signaling_main),
 	thread_signal(main,do_shutdown),
-	writeln(after_signaling_main),
+	my_debug(after_signaling_main),
 	thread_exit(0).
 
 
@@ -164,21 +165,21 @@ call_shutdown_hook:-
     forall(pif_shutdown_hook,true).
     
 do_shutdown:-
-   	writeln(do_shutdown_0),
+   	my_debug(do_shutdown_0),
    	call_shutdown_hook,
     %join any thread that is not main.
     (	current_thread(Id,_),
-       	writeln(do_shutdown_1),
+       	my_debug(do_shutdown_1),
 	    do_shutdown_X(Id),
-       	writeln(do_shutdown_2),
+       	my_debug(do_shutdown_2),
        	fail
-	;	writeln(shutdown_done),threads,halt
+	;	my_debug(shutdown_done),threads,halt
 	).
 do_shutdown_X(Id):-
     Id\==main,
-    writeln(joining(Id)),
+    my_debug(joining(Id)),
     thread_join(Id,Status),
-    writeln(done_joining(Id,Status)).
+    my_debug(done_joining(Id,Status)).
     
 	
 accept_loop_impl(ServerSocket) :-
@@ -247,17 +248,17 @@ handle_command(_,_,'SHUTDOWN',stop):-
 	% we set the shutdown flag (which is read by the accept loop)
 	% then we have to kick the accept loop out of the tcp_accept/3 call.
 	% we do this by simply opening a connection to the listen port.
-	writeln(shutdown(0)),
+	my_debug(shutdown(0)),
 	recordz(pif_flag,shutdown),
-	writeln(shutdown(1)),
+	my_debug(shutdown(1)),
 	recorded(pif_flag,port(Port)),
-	writeln(shutdown(2)),
+	my_debug(shutdown(2)),
 	tcp_socket(Socket),
-	writeln(shutdown(3)),
+	my_debug(shutdown(3)),
 	tcp_connect(Socket,localhost:Port),
-	writeln(shutdown(4)),
+	my_debug(shutdown(4)),
 	tcp_close_socket(Socket),
-	writeln(shutdown(5)).
+	my_debug(shutdown(5)).
 handle_command(_,_,'',continue):-
 	clear_options.
 handle_command(_,OutStream,'PING',continue):-
@@ -601,10 +602,14 @@ report_error(OutStream, Error):-
 byebye(InStream,OutStream):-
 	my_debug('byebye called'),
 	(	is_stream(OutStream)
-	->	my_debug('closing downstream'),
+	->	my_format("Downstream is a stream: ~w~n",[OutStream]),
+		my_debug('sending BYE downstream'),
 		my_format(OutStream,"BYE~n",[]),
-		close(OutStream)
-	;	true
+		my_debug('closing downstream'),		
+		catch(close(OutStream),E,
+			my_format("Problem closing downstream: ~w~n",[E])
+		)
+	;	my_format("Downstream is no stream: ~w~n",[OutStream])
 	),
 	(	is_stream(InStream)
 	->	my_debug('closing upstream'),
@@ -645,7 +650,7 @@ count_thread(Prefix,Count):-
 	findall(A,(
 			current_thread(A,_),
 			atom_concat(Prefix,_,A),
-			format("There is e.g. a thread named ~w~n",[A])
+			my_format("There is e.g. a thread named ~w~n",[A])
 		),
 		Bag
 	),	 
@@ -687,12 +692,12 @@ my_write_term(OutStream,Elm,Options):-
 	
 my_format(OutStream,Format,Args):-
 	format(OutStream,Format,Args),
-	flush_output(OutStream)/*,
-	thread_self(Self),
-	write(Self),write(': >>> '),
-	format(current_output,Format,Args),
-	flush_output(current_output)*/.
-	
+	flush_output(OutStream),
+	debug(consult_server,">>>",[]),
+	debug(consult_server,Format,Args).
+
+my_format(Format,Args):-
+    my_format(current_output,Format,Args).
 	
 
 write_escaped(Out,Term):-
@@ -751,9 +756,8 @@ write_escaped_char(Out,'\''):-
 write_escaped_char(Out,C):-
 	put_char(Out,C).	
 		
-%my_debug(A):-
-%	thread_self(Self),
-%	write(Self),write(': >>> '),writeln(A).
+my_debug(A):-
+	debug(consult_server,"~w~n",[A]).
 
-my_debug(_).
+
 		

@@ -57,15 +57,19 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -98,8 +102,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 		file.getCharset();
-		as.queryOnce(file, "pdt_ensure_annotated('" + plFileName + "')");		
-		
+		as.queryOnce(file, "pdt_file_changed('" + plFileName + "')");
+
 	}
 
 	/*
@@ -110,6 +114,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 */
 	protected IProject[] build(int kind, Map args,
 			final IProgressMonitor monitor) throws CoreException {
+		// if(true) return null;
 		try {
 
 			Debug.debug("PrologBuilder.build(...) was triggered");
@@ -117,6 +122,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			;
 			Set forgetList = new HashSet();
 			Set buildList = new HashSet();
+
 			switch (kind) {
 			case IncrementalProjectBuilder.AUTO_BUILD:
 			case IncrementalProjectBuilder.INCREMENTAL_BUILD:
@@ -137,22 +143,20 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				Debug.error("Wasn das f�r ein Buil kind jetzt?");
 				return null;
 			}
-			
-			Debug.debug("PrologBuilder.build(...) wants to forget: "
-					+ forgetList.toString());
-			Debug.debug("PrologBuilder.build(...) wants to build: "
-					+ buildList.toString());
 
 			IPrologProject plProject = (IPrologProject) getProject().getNature(
 					PDTCore.NATURE_ID);
 
-			final AsyncPrologSession as = ((PrologInterface2) plProject
-					.getMetadataPrologInterface()).getAsyncSession();
+			PrologInterface2 pif = ((PrologInterface2) plProject
+					.getMetadataPrologInterface());
+			setupPif(pif);
+			final AsyncPrologSession as = pif.getAsyncSession();
 
-			monitor.beginTask(taskname, forgetList.size() + buildList.size());
+			buildList.addAll(forgetList);
+			monitor.beginTask(taskname, buildList.size());
 			as.addBatchListener(new DefaultAsyncPrologSessionListener() {
 				public void goalSucceeded(AsyncPrologSessionEvent e) {
-					if(e.ticket instanceof IFile){
+					if (e.ticket instanceof IFile) {
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()) {
@@ -166,26 +170,37 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 					}
 				}
+
 				public void batchError(AsyncPrologSessionEvent e) {
-					//XXX: not sure if this is the right way to do it...
+					// XXX: not sure if this is the right way to do it...
 					monitor.setCanceled(true);
-					
+
 				}
 			});
 			try {
-				String parse_comments = plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS, "false");
-				String default_encoding = plProject.getPreferenceValue(PDTCore.PROP_DEFAULT_ENCODING, "utf8");
-				as.queryOnce("set parse_comments option", "pdt_annotator:pdt_set_preference_value(parse_comments,"+parse_comments+")");
-				as.queryOnce("set default_encoding option", "pdt_annotator:pdt_set_preference_value(default_encoding,"+default_encoding+")");
-				//setup annotator modules
-				//plProject.getAnnotatorsOptionProvider();
-				
-//				File cacheDir = PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.CACHE_DIR).toFile();
-//				String plCacheDir = Util.prologFileName(cacheDir);
-//				as.queryOnce("set cache dir option", "pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
-				forget(forgetList, as, monitor);
+				// String parse_comments =
+				// plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS,
+				// "false");
+				// String default_encoding =
+				// plProject.getPreferenceValue(PDTCore.PROP_DEFAULT_ENCODING,
+				// "utf8");
+				// as.queryOnce("set parse_comments option",
+				// "pdt_annotator:pdt_set_preference_value(parse_comments,"+parse_comments+")");
+				// as.queryOnce("set default_encoding option",
+				// "pdt_annotator:pdt_set_preference_value(default_encoding,"+default_encoding+")");
+				// setup annotator modules
+				// plProject.getAnnotatorsOptionProvider();
+
+				// File cacheDir =
+				// PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.CACHE_DIR).toFile();
+				// String plCacheDir = Util.prologFileName(cacheDir);
+				// as.queryOnce("set cache dir option",
+				// "pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
+				// forget(forgetList, as, monitor);
+
 				build(buildList, as, monitor);
-				if(!monitor.isCanceled()){
+
+				if (!monitor.isCanceled()) {
 					as.join();
 				}
 			} finally {
@@ -194,20 +209,15 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 				}
 			}
-			if(monitor.isCanceled()){
+			if (monitor.isCanceled()) {
 				return null;
 			}
-			PrologSession s = plProject.getMetadataPrologInterface()
-					.getSession();
-			try {
-				update_markers(buildList, s);
-				s.queryOnce("pdt_write_cache_index");
-				s.queryOnce("pdt_index_save_to_disk");
-			} finally {
-				if (s != null) {
-					s.dispose();
-				}
-			}
+			/*
+			 * try { update_markers(buildList, s);
+			 * s.queryOnce("pdt_write_cache_index");
+			 * s.queryOnce("pdt_index_save_to_disk"); } finally { if (s != null) {
+			 * s.dispose(); } }
+			 */
 			Debug.debug("PrologBuilder.build(...) is done.");
 			monitor.done();
 			return null;
@@ -227,13 +237,38 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
+	private void setupPif(PrologInterface2 pif) throws CoreException {
+		PrologSession s = null;
+		try {
+			s = pif.getSession();
+
+			PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+					.getLibraryManager();
+			PLUtil.configureFileSearchPath(mgr, s,
+					new String[] { PrologRuntime.LIB_PDT });
+
+			s.queryOnce("use_module(library('facade/pdt_workspace'))");
+		} catch (PrologInterfaceException e) {
+			IStatus status = UIUtils
+					.createErrorStatus(PDTCorePlugin.getDefault()
+							.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
+			throw new CoreException(status);
+		} finally {
+			if (s != null) {
+				s.dispose();
+			}
+		}
+
+	}
+
 	private void update_markers(Set buildList, PrologSession s)
-			throws CoreException, PrologException, PrologInterfaceException, IOException {
+			throws CoreException, PrologException, PrologInterfaceException,
+			IOException {
 		StringBuffer sb = new StringBuffer();
 		sb.append('[');
 		boolean first = true;
 		Map wsFiles = new HashMap();
-		Map fileContents = new HashMap(); //plFile as key
+		Map fileContents = new HashMap(); // plFile as key
 		for (Iterator it = buildList.iterator(); it.hasNext();) {
 			if (!first) {
 				sb.append(',');
@@ -244,7 +279,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFileName = Util.prologFileName(ioFile);
 			wsFiles.put(plFileName, file);
 			InputStream stream = file.getContents();
-			String data=Util.toString(stream);
+			String data = Util.toString(stream);
 			stream.close();
 			fileContents.put(plFileName, data);
 			sb.append('\'');
@@ -265,9 +300,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String data = (String) fileContents.get(plFile);
 			int line = Integer.parseInt((String) map.get("Line"));
 			int column = Integer.parseInt((String) map.get("Column"));
-			int offset = PDTCoreUtils.convertCharacterOffset(data, Integer.parseInt((String) map.get("CharOffset")));
+			int offset = PDTCoreUtils.convertCharacterOffset(data, Integer
+					.parseInt((String) map.get("CharOffset")));
 			String message = (String) map.get("Message");
-			
+
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
 			MarkerUtilities.setMessage(attributes, message);
@@ -288,8 +324,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFile = (String) map.get("File");
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			String data = (String) fileContents.get(plFile);
-			int start = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("From")));
-			int end = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("To")));
+			int start = PDTCoreUtils.convertCharacterOffset(data, Integer
+					.parseInt((String) map.get("From")));
+			int end = PDTCoreUtils.convertCharacterOffset(data, Integer
+					.parseInt((String) map.get("To")));
 			String message = getMessage((String) map.get("Error"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
@@ -310,9 +348,11 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String plFile = (String) map.get("File");
 			IFile wsFile = (IFile) wsFiles.get(plFile);
 			String data = (String) fileContents.get(plFile);
-			int start = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("From")));
-			int end = PDTCoreUtils.convertCharacterOffset(data,Integer.parseInt((String) map.get("To")));
-			
+			int start = PDTCoreUtils.convertCharacterOffset(data, Integer
+					.parseInt((String) map.get("From")));
+			int end = PDTCoreUtils.convertCharacterOffset(data, Integer
+					.parseInt((String) map.get("To")));
+
 			String message = getMessage((String) map.get("Warning"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
 			HashMap attributes = new HashMap();
@@ -321,31 +361,33 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			MarkerUtilities.setCharStart(attributes, start);
 			MarkerUtilities.setCharEnd(attributes, end);
 
-			attributes.put(IMarker.SEVERITY,
-					new Integer(IMarker.SEVERITY_WARNING));
+			attributes.put(IMarker.SEVERITY, new Integer(
+					IMarker.SEVERITY_WARNING));
 			marker.setAttributes(attributes);
 		}
 	}
 
 	private String getMessage(String string) {
-		if(string.startsWith("singleton(")){
-			String varname = string.substring("singleton(".length(), string.length()-1);
-			return "[singleton] Variable "+varname+" apears only once in clause.";
+		if (string.startsWith("singleton(")) {
+			String varname = string.substring("singleton(".length(), string
+					.length() - 1);
+			return "[singleton] Variable " + varname
+					+ " apears only once in clause.";
 		}
-		if("no_singleton".equals(string)){
+		if ("no_singleton".equals(string)) {
 			return "[no_singleton] Variable is not a singleton.";
 		}
-		if("malformed_export".equals(string)){
+		if ("malformed_export".equals(string)) {
 			return "[malformed_export] Malformed signature in export list.";
 		}
-		if("undefined_export".equals(string)){
+		if ("undefined_export".equals(string)) {
 			return "[undefined_export] Predicate is exported but not defined by the module.";
-		}		
-		if("malformed_signature".equals(string)){
+		}
+		if ("malformed_signature".equals(string)) {
 			return "[malformed_signature] Malformed signature in property definition.";
 		}
-		
-		return "[unknown error] "+string;
+
+		return "[unknown error] " + string;
 	}
 
 	/**
@@ -466,7 +508,6 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		String plFileName = Util.prologFileName(ioFile);
 
 		as.queryOnce(file, "pdt_forget_annotation('" + plFileName + "')");
-		
 
 	}
 
@@ -479,7 +520,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 */
 	private void forget(Set v, AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, PrologInterfaceException {
-		for (Iterator it = v.iterator(); it.hasNext()&& ! monitor.isCanceled();) {
+		for (Iterator it = v.iterator(); it.hasNext() && !monitor.isCanceled();) {
 			IFile file = (IFile) it.next();
 			forget(file, as);
 

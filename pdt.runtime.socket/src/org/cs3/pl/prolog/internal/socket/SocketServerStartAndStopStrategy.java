@@ -131,6 +131,7 @@ public class SocketServerStartAndStopStrategy implements
 						.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))"
 								+ "->win_window_pos([show(false)])" + ";true).");
 			}
+			//p.println(":- asserta((message_hook(_,_,_):-!),Ref),assert('$pdt_message_hook'(Ref)).");
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
 				String s = (String) it.next();

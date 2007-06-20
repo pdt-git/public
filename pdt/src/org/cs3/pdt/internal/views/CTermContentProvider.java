@@ -139,9 +139,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 			}
 
 			if (plProject != null) {
-				backend.setPif(plProject.getMetadataPrologInterface());
+				backend.setPif(plProject.getMetadataPrologInterface(),plProject.getMetaDataEventDispatcher());
 			} else {
-				backend.setPif(null);
+				backend.setPif(null,null);
 			}
 
 			backend.setInput(input);
