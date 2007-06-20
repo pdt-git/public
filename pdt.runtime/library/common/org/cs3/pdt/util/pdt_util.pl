@@ -53,7 +53,8 @@
 	pdt_remove_duplicates/2,
 	pdt_count/2,
 	pdt_unique/2,
-	pdt_hidden_path/1
+	pdt_hidden_path/1,
+	pdt_first/2	
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_preferences')).
@@ -254,4 +255,14 @@ pdt_remove_duplicates([Elm|Elms],[Elm|DupFreeElms]):-
 pdt_unique(Prefix,Unique):-
 	atom_concat(unique,Prefix,Counter),
 	flag(Counter,N,N+1),
-	atom_concat(Prefix,N,Unique).    
+	atom_concat(Prefix,N,Unique).  
+	
+
+:- module_transparent pdt_first/2.
+pdt_first(Goal,Vars):-
+	copy_term(Goal-Vars,GoalC-VarsC),
+	Vars=VarsC,
+	call(Goal),
+	once(GoalC),
+	Goal=@=GoalC.
+

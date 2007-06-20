@@ -43,7 +43,7 @@ public class InterpreterTest extends TestCase {
 		for (int i = 0; i < codebase.length; i++) {
 			s.queryOnce("assert(file_search_path(library,'"+codebase[i]+"'))");	
 		}
-		s.queryOnce("use_module(library('spike/targets/test_interpreter'))");
+		s.queryOnce("use_module(library('builder/targets/test_interpreter'))");
 //		s.queryOnce("spy(interprete_toplevel)");
 		s.queryOnce("nospyall");
 		s.dispose();

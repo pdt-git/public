@@ -56,6 +56,8 @@ pdt_define_context(Term):-
 pdt_define_context(Module,Term):-
 	functor(Term,Name,Arity),
     check_exists(Module,Name),
+	Module:assert('$context_template'(Name,Term),Ref),
+	assert(context_pred(Module,Name,Ref)),     
     create_constructor(Module,Name,Arity),
     forall(arg(N,Term,ArgName),create_getter(Module,Name,Arity,N,ArgName)),
     forall(arg(N,Term,ArgName),create_setter(Module,Name,Arity,N,ArgName)),
@@ -169,14 +171,16 @@ create_multi_setter(Module,Term):-
 % @param Context the context term
 % @param NameValuePairs a list of terms of the form =|name=value|=.
 %        For each element, =value= will be unified with the value of the context field =name=.
-pdt_context_get_values(_Module,_Template,[]):-
-    !.
-pdt_context_get_values(Module,Template,[ArgName=Value|ArgNameValues]):-
+pdt_context_get_values(Module,Template,NameValuePairs):-
+    context_get_values(NameValuePairs,Module,Template).
+
+context_get_values([],_Module,_Template).
+context_get_values([ArgName=Value|ArgNameValues],Module,Template):-
 	 pdt_context_get_value(Module,Template,ArgName,Value),
-	 pdt_context_get_values(Module,Template,ArgNameValues).
+	 context_get_values(ArgNameValues,Module,Template).
 
 
-pdt_context_get_value(Module,Template,ArgName,Value):-
+pdt_context_get_value_alternative(Module,Template,ArgName,Value):-
     functor(Template,Name,_),
     (	var(ArgName) -> pdt_builder:debugme ; true),
     concat_atom([Name,'_',ArgName],GName),
@@ -184,6 +188,15 @@ pdt_context_get_value(Module,Template,ArgName,Value):-
 	arg(1,Getter,Template),
 	arg(2,Getter,Value),
 	Module:Getter.
+pdt_context_get_value(Module,CxTerm,ArgName,Value):-
+    functor(CxTerm,Name,_),
+	Module:'$context_template'(Name,Tmpl),
+	arg(I,Tmpl,ArgName),
+	!,
+	arg(I,CxTerm,Value).
+
+
+
 
 %%pdt_context_get_values(+Module, +Context, NameValuePairs)
 % convenience method to replace several field values of a context at the same time.
