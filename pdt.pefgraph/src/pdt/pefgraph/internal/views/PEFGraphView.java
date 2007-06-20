@@ -9,6 +9,7 @@ import java.util.Vector;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
@@ -21,7 +22,6 @@ import org.cs3.svf.hyperbolic.HyperbolicGraphView;
 import org.cs3.svf.hyperbolic.model.DefaultEdge;
 import org.cs3.svf.hyperbolic.model.DefaultGraph;
 import org.cs3.svf.hyperbolic.model.DefaultNode;
-import org.cs3.svf.hyperbolic.model.Edge;
 import org.cs3.svf.hyperbolic.model.Graph;
 import org.cs3.svf.hyperbolic.model.Node;
 import org.cs3.svf.hyperbolic.model.RandomGraphModelCreator;
@@ -35,10 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
-import pdt.pefgraph.internal.Activator;
 import pdt.pefgraph.internal.ImageRepository;
-
-import sun.rmi.server.Activation.DefaultExecPolicy;
 
 public class PEFGraphView extends HyperbolicGraphView {
 
@@ -212,7 +209,21 @@ public class PEFGraphView extends HyperbolicGraphView {
 			Debug.rethrow(e);
 		}
 		try {
-			List list = s
+			List list = s.queryAll("pef_base:pef_node(Id,Type,Labels)");
+			for (Iterator iter = list.iterator(); iter.hasNext();) {
+				Map m = (Map) iter.next();
+				String id= (String)m.get("Id");
+				String type= (String)m.get("Type");
+				List labels=(List)m.get("Labels");
+				String key = id+":"+type;
+				String label = key+" "+Util.splice(labels, ", ");
+				Node node = new DefaultNode(graph,label);
+				
+				
+				nodes.put(key, node);
+			}
+			
+			list = s
 					.queryAll("pef_base:pef_edge(From,FromType,Label,To,ToType)");
 
 			for (Iterator it = list.iterator(); it.hasNext();) {
@@ -225,15 +236,9 @@ public class PEFGraphView extends HyperbolicGraphView {
 				String toType = (String) m.get("ToType");
 				String toLabel = to + ":" + toType;
 				Node fromNode = (Node) nodes.get(fromLabel);
-				if (fromNode == null) {
-					fromNode = new DefaultNode(graph, fromLabel);
-					nodes.put(fromLabel, fromNode);
-				}
+				
 				Node toNode = (Node) nodes.get(toLabel);
-				if (toNode == null) {
-					toNode = new DefaultNode(graph, toLabel);
-					nodes.put(toLabel, toNode);
-				}
+				
 				_DefaultEdge edge = new _DefaultEdge(graph, fromNode, toNode,
 						label);
 				edges.add(edge);
@@ -258,9 +263,9 @@ public class PEFGraphView extends HyperbolicGraphView {
 		PrologSession s = PEFGraphView.this.pif.getSession();
 		try {
 			PLUtil.configureFileSearchPath(manager, s,
-					new String[] { PrologRuntime.LIB_ATTIC });
-			s.queryOnce("use_module(library('spike/pef_base'))");
-			s.queryOnce("use_module(library('spike/pef_api'))");
+					new String[] { PrologRuntime.LIB_PDT });
+			s.queryOnce("use_module(library('pef/pef_base'))");
+			s.queryOnce("use_module(library('pef/pef_api'))");
 		} finally {
 			if (s != null) {
 				s.dispose();
