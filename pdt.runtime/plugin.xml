@@ -66,6 +66,22 @@
      <attribute
            id="hidden"
            value="true"/>
+  </library>
+  <library
+        alias="library"
+        id="pdt.runtime.library.pdt"
+        path="library/pdt/">
+     <attribute
+           id="hidden"
+           value="true"/>
+  </library>   
+  <library
+        alias="library"
+        id="pdt.runtime.library.testdata"
+        path="library/testdata/">
+     <attribute
+           id="hidden"
+           value="true"/>
   </library>   
                   
     </extension>

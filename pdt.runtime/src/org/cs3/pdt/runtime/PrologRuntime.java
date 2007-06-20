@@ -48,6 +48,8 @@ public class PrologRuntime {
 	public static final String LIB_COMMON = "pdt.runtime.library.common";
 	//public static final String LIB_SWIPL = "pdt.runtime.library.swipl";
 	public static final String LIB_ATTIC = "pdt.runtime.library.attic";
+	public static final String LIB_PDT = "pdt.runtime.library.pdt";
+	public static final String LIB_TESTDATA = "pdt.runtime.library.testdata";
 	
 	/**
      * The fully-qualified classname of a class that extends
