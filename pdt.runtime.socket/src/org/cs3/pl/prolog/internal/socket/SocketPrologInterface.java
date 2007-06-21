@@ -125,6 +125,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	public static final String PORT = "pif.port";
 
+	public static final String CREATE_LOGS = "pif.create_logs";
+
 	private String host;
 
 	private String engineDir;
@@ -146,6 +148,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	private String environment;
 
 	private String killcommand;
+
+	private boolean createLogs;
 
 	public SocketPrologInterface(PrologInterfaceFactory factory) {
 		super();
@@ -258,6 +262,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			this.timeout = Integer.parseInt(value);
 		} else if (HIDE_PLWIN.equals(opt)) {
 			this.hidePlwin = Boolean.valueOf(value).booleanValue();
+		} else if (CREATE_LOGS.equals(opt)) {
+			this.createLogs = Boolean.valueOf(value).booleanValue();
 		} else if (USE_POOL.equals(opt)) {
 			setUseSessionPooling(Boolean.valueOf(value).booleanValue());
 		} else if (HOST.equals(opt)) {
@@ -294,6 +300,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			return "" + useSessionPooling;
 		} else if (HIDE_PLWIN.equals(opt)) {
 			return "" + hidePlwin;
+		}  else if (CREATE_LOGS.equals(opt)) {
+			return "" + createLogs;
 		} else if (TIMEOUT.equals(opt)) {
 			return "" + timeout;
 		} else if (HOST.equals(opt)) {
