@@ -553,10 +553,10 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 		cache.clear();
 		listeners.clear();
-		listeners = null;
+		//listeners = null;
 		specificListeners.clear();
-		specificListeners = null;
-		input = null;
+		//specificListeners = null;
+		//input = null;
 
 	}
 

@@ -93,7 +93,6 @@ public class SocketServerStartAndStopStrategy implements
 
 	}
 
-	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -126,12 +125,23 @@ public class SocketServerStartAndStopStrategy implements
 			tmpFile = File.createTempFile("socketPif", null);
 			PrintWriter p = new PrintWriter(new BufferedOutputStream(
 					new FileOutputStream(tmpFile)));
-			if (pif.isHidePlwin()) {
+			if ("true".equals(pif.getOption(SocketPrologInterface.HIDE_PLWIN))) {
 				p
 						.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))"
 								+ "->win_window_pos([show(false)])" + ";true).");
 			}
-			//p.println(":- asserta((message_hook(_,_,_):-!),Ref),assert('$pdt_message_hook'(Ref)).");
+
+			if ("true".equals(pif.getOption(SocketPrologInterface.CREATE_LOGS))) {
+				p.println(":- multifile consult_server:'$log_dir'/1.");
+				p.println(":- dynamic consult_server:'$log_dir'/1.");
+				File logDir = new File(System
+												.getProperty("java.io.tmpdir"),"pif_server_logs");
+				logDir.mkdirs();
+				
+				p.println("consult_server:'$log_dir'('"
+						+ Util.prologFileName(logDir) + "').");
+				p.println(":- debug(consult_server).");
+			}
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
 				String s = (String) it.next();
@@ -152,66 +162,66 @@ public class SocketServerStartAndStopStrategy implements
 
 		};
 
-//		/*
-//		 * Checks whether the SWI-Prolog exists or not 
-//		 * @author Hasan Abdel Halim
-//		 * 
-//		 */
-//		try {
-//			command = findAbsolutePath(command);
-//			if(command==null)
-//				//TODO create special Exception type 
-//				throw new RuntimeException("SWI-Prolog's executable was not found.");
-//			
-//		} catch (IOException e2) {
-//			e2.printStackTrace();
-//			return null;
-//		}
-		
-	
+		// /*
+		// * Checks whether the SWI-Prolog exists or not
+		// * @author Hasan Abdel Halim
+		// *
+		// */
+		// try {
+		// command = findAbsolutePath(command);
+		// if(command==null)
+		// //TODO create special Exception type
+		// throw new RuntimeException("SWI-Prolog's executable was not found.");
+		//			
+		// } catch (IOException e2) {
+		// e2.printStackTrace();
+		// return null;
+		// }
+
 		String[] commandArray = new String[command.length + args.length];
 		System.arraycopy(command, 0, commandArray, 0, command.length);
 		System.arraycopy(args, 0, commandArray, command.length, args.length);
-		
-		Map env=new HashMap();
-//		if(Util.isJava5()){
-//			env.putAll(System.getenv());
-//		}
-//		
+
+		Map env = new HashMap();
+		// if(Util.isJava5()){
+		// env.putAll(System.getenv());
+		// }
+		//		
 		String[] envarray = Util.split(envstring, ",");
 		for (int i = 0; i < envarray.length; i++) {
-			String[] mapping = Util.split(envarray[i],"=");
-			env.put(mapping[0],mapping[1]);
+			String[] mapping = Util.split(envarray[i], "=");
+			env.put(mapping[0], mapping[1]);
 		}
 		envarray = new String[env.size()];
-		int i=0;
+		int i = 0;
 		for (Iterator it = env.keySet().iterator(); it.hasNext();) {
 			String key = (String) it.next();
 			String value = (String) env.get(key);
-			envarray[i++]=key+"="+value;
+			envarray[i++] = key + "=" + value;
 		}
-		Process process=null;
+		Process process = null;
 		try {
-			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
-			if(envarray.length==0){
-				Debug.info("inheriting system environment");		
+			Debug
+					.info("Starting server with "
+							+ Util.prettyPrint(commandArray));
+			if (envarray.length == 0) {
+				Debug.info("inheriting system environment");
 				process = Runtime.getRuntime().exec(commandArray);
-			}else{
-				Debug.info("using environment: " + Util.prettyPrint(envarray));		
+			} else {
+				Debug.info("using environment: " + Util.prettyPrint(envarray));
 				process = Runtime.getRuntime().exec(commandArray, envarray);
 			}
-			
-			
+
 			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
 			// TR: Do not change this constructor call!
-			// J2ME requirement: FileWriter(File,boolean) -> FileWriter(String, boolean)
-			BufferedWriter writer = new BufferedWriter(new FileWriter(
-					logFile.getAbsolutePath(),
-					true));
+			// J2ME requirement: FileWriter(File,boolean) -> FileWriter(String,
+			// boolean)
+			BufferedWriter writer = new BufferedWriter(new FileWriter(logFile
+					.getAbsolutePath(), true));
 			writer.write("\n---8<-----------------------8<---\n");
 			writer.write(new Date().toString() + "\n");
 			writer.write("---8<-----------------------8<---\n\n");
-			
+
 			new _InputStreamPump(process.getErrorStream(), writer).start();
 			new _InputStreamPump(process.getInputStream(), writer).start();
 
@@ -248,7 +258,8 @@ public class SocketServerStartAndStopStrategy implements
 				}
 			}
 			// The process should be up now.
-			SocketClient c = new SocketClient(pif.getOption(SocketPrologInterface.HOST), port);
+			SocketClient c = new SocketClient(pif
+					.getOption(SocketPrologInterface.HOST), port);
 			long pid = c.getServerPid();
 			c.close();
 			String cmd = pipi.getOption(SocketPrologInterface.KILLCOMMAND)
@@ -285,9 +296,10 @@ public class SocketServerStartAndStopStrategy implements
 						.info("There is no server running, afaics. So i wont stop anything.");
 				return;
 			}
-			
+
 			try {
-				SocketClient c = new SocketClient(pif.getOption(SocketPrologInterface.HOST), port);
+				SocketClient c = new SocketClient(pif
+						.getOption(SocketPrologInterface.HOST), port);
 				c.readUntil(SocketClient.GIVE_COMMAND);
 				c.writeln(SocketClient.SHUTDOWN);
 				c.readUntil(SocketClient.BYE);
@@ -295,7 +307,7 @@ public class SocketServerStartAndStopStrategy implements
 			} catch (Exception e) {
 				Debug.warning("There was a problem during server shutdown.");
 				Debug.report(e);
-				
+
 			}
 
 			pif.getLockFile().delete();
