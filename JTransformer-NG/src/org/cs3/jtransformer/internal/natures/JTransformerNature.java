@@ -57,11 +57,10 @@ import org.eclipse.ui.PlatformUI;
 /**
  * @see IProjectNature
  */
-public class JTransformerNature implements IProjectNature,
-		JTransformerProject, JTransformerProjectListener {
+public class JTransformerNature implements IProjectNature, JTransformerProject,
+		JTransformerProjectListener {
 
 	boolean buildTriggered = false;
-	
 
 	// The project for which this nature was requested,
 	// see IProject.getNature(String)
@@ -74,7 +73,7 @@ public class JTransformerNature implements IProjectNature,
 	private Vector listeners = new Vector();
 
 	private Vector optionsListener = new Vector();
-	
+
 	static private Map projectNatureMap = new Hashtable();
 
 	/**
@@ -91,49 +90,44 @@ public class JTransformerNature implements IProjectNature,
 	 * the afterInit hook will be called twice on the first on nature
 	 * instantiated.
 	 * 
-	 * TODO: replace builder configuration by nature property, like:
-	 *    <extension id="snowNature" name="Snow Nature" point="org.eclipse.core.resources.natures">
-       <runtime>
-           <run class="com.xyz.natures.Snow">
-               <parameter name="installBuilder" value="true"/>
-           </run>
-       </runtime>
-       <requires-nature id="com.xyz.coolplugin.waterNature"/>
-       <builder id="com.xyz.snowMaker"/>
-     </extension>
+	 * TODO: replace builder configuration by nature property, like: <extension
+	 * id="snowNature" name="Snow Nature"
+	 * point="org.eclipse.core.resources.natures"> <runtime> <run
+	 * class="com.xyz.natures.Snow"> <parameter name="installBuilder"
+	 * value="true"/> </run> </runtime> <requires-nature
+	 * id="com.xyz.coolplugin.waterNature"/> <builder id="com.xyz.snowMaker"/>
+	 * </extension>
 	 * 
 	 * @see IProjectNature#configure
 	 * 
 	 */
 	public void configure() throws CoreException {
 
-			JTDebug.debug("JT: Nature.configure was called");
-			IProjectDescription descr = project.getDescription();
-			ICommand jtBuilder = descr.newCommand();
-			jtBuilder.setBuilderName(JTransformer.BUILDER_ID);
-			ICommand builders[] = descr.getBuildSpec();
-			for (int i = 0; i < builders.length; i++) {
-				if (builders[i].getBuilderName()
-						.equals(JTransformer.BUILDER_ID)) {
-					return;
-				}
+		JTDebug.debug("JT: Nature.configure was called");
+		IProjectDescription descr = project.getDescription();
+		ICommand jtBuilder = descr.newCommand();
+		jtBuilder.setBuilderName(JTransformer.BUILDER_ID);
+		ICommand builders[] = descr.getBuildSpec();
+		for (int i = 0; i < builders.length; i++) {
+			if (builders[i].getBuilderName().equals(JTransformer.BUILDER_ID)) {
+				return;
 			}
-			ICommand newBuilders[] = new ICommand[builders.length + 1];
-			System.arraycopy(builders, 0, newBuilders, 0, builders.length);
-			newBuilders[builders.length] = jtBuilder;
-			descr.setBuildSpec(newBuilders);
+		}
+		ICommand newBuilders[] = new ICommand[builders.length + 1];
+		System.arraycopy(builders, 0, newBuilders, 0, builders.length);
+		newBuilders[builders.length] = jtBuilder;
+		descr.setBuildSpec(newBuilders);
 
-			buildTriggered = true;
-			project.setDescription(descr, null);
-//			try {
-//				if (pif.isDown()) {
-//					pif.start();
-//				}
-//			} catch (PrologInterfaceException e1) {
-//				JTransformerPlugin.getDefault()
-//						.createPrologInterfaceExceptionCoreExceptionWrapper(e1);
-//			}
-
+		buildTriggered = true;
+		project.setDescription(descr, null);
+		// try {
+		// if (pif.isDown()) {
+		// pif.start();
+		// }
+		// } catch (PrologInterfaceException e1) {
+		// JTransformerPlugin.getDefault()
+		// .createPrologInterfaceExceptionCoreExceptionWrapper(e1);
+		// }
 
 	}
 
@@ -153,7 +147,10 @@ public class JTransformerNature implements IProjectNature,
 				.getName());
 	}
 
-	
+	public String getSubscriptionID() {
+		return JTransformer.SUBSCRIPTION_PREFIX + getPrologRuntimeKey();
+	}
+
 	/**
 	 * 
 	 */
@@ -227,7 +224,7 @@ public class JTransformerNature implements IProjectNature,
 	 * @see IProjectNature#deconfigure
 	 */
 	public void deconfigure() throws CoreException {
-		
+
 		// just to make sure waiting threads are notified
 		onClose();
 
@@ -248,38 +245,45 @@ public class JTransformerNature implements IProjectNature,
 					builders.length - index - 1);
 			descr.setBuildSpec(newBuilders);
 		}
-			if(pif != null) {
-	//			pif = getPrologInterface();
-				PrologSession s = null;
-		
-				try {
-					if (pif.isUp()) {
-						s = pif.getSession();
-						String projectName = getProject().getName();
-						String sourceFolder = Util.prologFileName(new File(
-								getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER,
-										null)));
-						s.queryOnce("retractall(project_option('" + projectName
-								+ "', _))");
-						getFactBaseBuilder().clean(null);
-					}
-				} catch (Exception e) {
-					final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-					MessageDialog.openError(shell,"JTransformer", 
-							"Failed to deconfigure JTransformer nature for project'" + project.getName() +
-							"' because the following exception occurred:\n" + e.getLocalizedMessage() + "\n\nProceeding anyway.");
-	//				JTransformerPlugin.getDefault()
-	//						.createPrologInterfaceExceptionCoreExceptionWrapper(e);
-				} finally {
-					if (s != null)
-						s.dispose();
+		if (pif != null) {
+			// pif = getPrologInterface();
+			PrologSession s = null;
+
+			try {
+				if (pif.isUp()) {
+					s = pif.getSession();
+					String projectName = getProject().getName();
+					String sourceFolder = Util.prologFileName(new File(
+							getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER,
+									null)));
+					s.queryOnce("retractall(project_option('" + projectName
+							+ "', _))");
+					getFactBaseBuilder().clean(null);
 				}
+			} catch (Exception e) {
+				final Shell shell = PlatformUI.getWorkbench()
+						.getActiveWorkbenchWindow().getShell();
+				MessageDialog
+						.openError(
+								shell,
+								"JTransformer",
+								"Failed to deconfigure JTransformer nature for project'"
+										+ project.getName()
+										+ "' because the following exception occurred:\n"
+										+ e.getLocalizedMessage()
+										+ "\n\nProceeding anyway.");
+				// JTransformerPlugin.getDefault()
+				// .createPrologInterfaceExceptionCoreExceptionWrapper(e);
+			} finally {
+				if (s != null)
+					s.dispose();
 			}
-			
+		}
+
 	}
 
 	public void onClose() {
-		if(pifSubscription == null)
+		if (pifSubscription == null)
 			pifSubscription = getOrCreateJTransformerSubscription();
 		removeSubscriptionIfLastProjectAssociatedToKey();
 		pifSubscription.pefInitializationDone();
@@ -290,24 +294,27 @@ public class JTransformerNature implements IProjectNature,
 	private void removeSubscriptionIfLastProjectAssociatedToKey() {
 		try {
 			List projects = pifSubscription.getAssociatedProjects();
-			if(projects == null || projects.size() == 0 ||
-			   projects.size() == 1 && 
-			   ((IProject)projects.get(0)).getName().equals(project.getName()))
-			{
+			if (projects == null
+					|| projects.size() == 0
+					|| projects.size() == 1
+					&& ((IProject) projects.get(0)).getName().equals(
+							project.getName())) {
 				PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
-				.getPrologInterfaceRegistry();
+						.getPrologInterfaceRegistry();
 				reg.removeSubscription(pifSubscription);
 			}
 
 		} catch (CoreException e) {
-			JTDebug.error("could not determine associated JTransformer projects to the key: " + pifSubscription.getPifKey());
+			JTDebug
+					.error("could not determine associated JTransformer projects to the key: "
+							+ pifSubscription.getPifKey());
 		}
-	}	
-	
+	}
+
 	private void removeNatureFromRegistry() {
 		synchronized (projectNatureMap) {
 			projectNatureMap.remove(project);
-		}		
+		}
 	}
 
 	/**
@@ -321,13 +328,14 @@ public class JTransformerNature implements IProjectNature,
 	 * @see IProjectNature#setProject
 	 */
 	public void setProject(IProject project) {
-		JTDebug.debug("JT: JTransformerNature.setProject: " + project.getName() + " (begin)");
+		JTDebug.debug("JT: JTransformerNature.setProject: " + project.getName()
+				+ " (begin)");
 
 		this.project = project;
-		//checkIfNatureIsAlreadyAssignedToProject(project);
+		// checkIfNatureIsAlreadyAssignedToProject(project);
 		try {
-			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,
-					JTransformer.FACTBASE_STATE_KEY,
+			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(
+					project, JTransformer.FACTBASE_STATE_KEY,
 					JTransformer.FACTBASE_STATE_ACTIVATED);
 		} catch (CoreException e) {
 			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
@@ -336,44 +344,47 @@ public class JTransformerNature implements IProjectNature,
 					JTransformer.ERR_CONTEXT_EXCEPTION, e);
 		}
 
-		//getPrologInterface();
-		
-		
-//			setInitializingPif(true);
-//			
-//			pifSubscription = getOrCreateJTransformerSubscription();
-//			pif = PrologRuntimePlugin.getDefault().getPrologInterface(pifSubscription);
-//			
-//			setInitializingPif(false);
-		
-		
-//		if (pif.isUp()) {
-//			reconfigure();
-//		}
-		JTDebug.debug("JT: JTransformerNature.setProject: " + project.getName() + " (end)");
+		// getPrologInterface();
+
+		// setInitializingPif(true);
+		//			
+		// pifSubscription = getOrCreateJTransformerSubscription();
+		// pif =
+		// PrologRuntimePlugin.getDefault().getPrologInterface(pifSubscription);
+		//			
+		// setInitializingPif(false);
+
+		// if (pif.isUp()) {
+		// reconfigure();
+		// }
+		JTDebug.debug("JT: JTransformerNature.setProject: " + project.getName()
+				+ " (end)");
 
 	}
 
 	private void checkIfNatureIsAlreadyAssignedToProject(IProject project) {
 		synchronized (projectNatureMap) {
-			if(projectNatureMap.containsKey(project)) {
+			if (projectNatureMap.containsKey(project)) {
 				projectNatureMap.remove(project);
 				if (pifSubscription != null) {
 					removeSubscriptionIfLastProjectAssociatedToKey();
-//
-//					//TODO: only if it is the last project with this subscription
-//					PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
-//					.getPrologInterfaceRegistry();
-//					reg.removeSubscription(pifSubscription);
+					//
+					// //TODO: only if it is the last project with this
+					// subscription
+					// PrologInterfaceRegistry reg =
+					// PrologRuntimePlugin.getDefault()
+					// .getPrologInterfaceRegistry();
+					// reg.removeSubscription(pifSubscription);
 				}
 				RuntimeException ex = new RuntimeException(
-						"Internal error: second creation of a JT nature for the project "+project.getName());
+						"Internal error: second creation of a JT nature for the project "
+								+ project.getName());
 				JTUtils.logAndDisplayUnknownError(ex);
 				throw ex;
 			}
-			projectNatureMap.put(project,this);
+			projectNatureMap.put(project, this);
 		}
-		
+
 	}
 
 	PrologInterface pif = null;
@@ -385,14 +396,14 @@ public class JTransformerNature implements IProjectNature,
 	private boolean initializingPif = false;
 
 	private void pifKeysChanged() {
-//		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
-//			.getPrologInterfaceRegistry();
+		// PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		// .getPrologInterfaceRegistry();
 		if (pifSubscription != null) {
 			synchronized (pifMonitor) {
-				//TODO: only if it is the last project with this subscription
+				// TODO: only if it is the last project with this subscription
 				removeSubscriptionIfLastProjectAssociatedToKey();
-//
-//				reg.removeSubscription(pifSubscription);
+				//
+				// reg.removeSubscription(pifSubscription);
 				pif = null;
 				Job j = new Job("building PEFs for project "
 						+ project.getName()) {
@@ -427,7 +438,7 @@ public class JTransformerNature implements IProjectNature,
 
 	public PrologInterface getPrologInterface() {
 		synchronized (pifMonitor) {
-			if (pif  != null) {
+			if (pif != null) {
 				return pif;
 			}
 			if (isInitializingPif()) {
@@ -435,11 +446,12 @@ public class JTransformerNature implements IProjectNature,
 						"nested call to JTransformerNature.getPrologInterface()");
 			}
 			setInitializingPif(true);
-			
+
 			pifSubscription = getOrCreateJTransformerSubscription();
-			//JTransformerPlugin.getJTransformerSubscription(getPrologRuntimeKey());
-			pif = PrologRuntimePlugin.getDefault().getPrologInterface(pifSubscription);
-			
+			// JTransformerPlugin.getJTransformerSubscription(getPrologRuntimeKey());
+			pif = PrologRuntimePlugin.getDefault().getPrologInterface(
+					pifSubscription);
+
 			setInitializingPif(false);
 			return pif;
 		}
@@ -448,25 +460,29 @@ public class JTransformerNature implements IProjectNature,
 	/**
 	 * Check for an existing Subscription or create a new one.
 	 * 
-	 * Id for the subscription:
-	 * "JTransformerSubscription_" + getRuntimePrologInterfaceKey()
+	 * Id for the subscription: "JTransformerSubscription_" +
+	 * getRuntimePrologInterfaceKey()
 	 * 
 	 * @return
 	 */
 	private JTransformerSubscription getOrCreateJTransformerSubscription() {
 
-		synchronized (PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry()) {
-			JTransformerSubscription subscription = JTransformerPlugin.getJTransformerSubscription(getPrologRuntimeKey());
-			if(subscription == null){
-				JTDebug.debug("Creating new JTransformerSubscription for pif: " + getPrologRuntimeKey() + ", from project: " + getProject().getName() + " ... ");
-				subscription = new JTransformerSubscription(
-						project, 
-						JTransformer.SUBSCRIPTION_PREFIX + getPrologRuntimeKey(),
-						getPrologRuntimeKey(),
-						"JTransformer factbase for the key " + getPrologRuntimeKey(),
-						"JTransformer");
+		synchronized (PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry()) {
+			JTransformerSubscription subscription = JTransformerPlugin
+					.getJTransformerSubscription(getPrologRuntimeKey());
+			if (subscription == null) {
+				JTDebug.debug("Creating new JTransformerSubscription for pif: "
+						+ getPrologRuntimeKey() + ", from project: "
+						+ getProject().getName() + " ... ");
+				subscription = new JTransformerSubscription(project,
+						getSubscriptionID(), getPrologRuntimeKey(),
+						"JTransformer factbase for the key "
+								+ getPrologRuntimeKey(), "JTransformer");
 			}
-			JTDebug.debug("Created new JTransformerSubscription for pif: " + getPrologRuntimeKey() + ", from project: " + getProject().getName());
+			JTDebug.debug("Created new JTransformerSubscription for pif: "
+					+ getPrologRuntimeKey() + ", from project: "
+					+ getProject().getName());
 			return subscription;
 		}
 	}
@@ -476,7 +492,7 @@ public class JTransformerNature implements IProjectNature,
 	}
 
 	private boolean isInitializingPif() {
-		return initializingPif ;
+		return initializingPif;
 	}
 
 	/**
@@ -625,16 +641,15 @@ public class JTransformerNature implements IProjectNature,
 	 */
 	public void reconfigure(PrologSession s) throws PrologException,
 			PrologInterfaceException {
-		
-		
-//		try {
-//			// CreateOutdirUtils.getInstance().createOutputProject(project);
-//			JavaProject javaProject = (JavaProject) project
-//					.getNature(JavaCore.NATURE_ID);
-//
-//		} catch (CoreException e) {
-//			JTDebug.report(e);
-//		}
+
+		// try {
+		// // CreateOutdirUtils.getInstance().createOutputProject(project);
+		// JavaProject javaProject = (JavaProject) project
+		// .getNature(JavaCore.NATURE_ID);
+		//
+		// } catch (CoreException e) {
+		// JTDebug.report(e);
+		// }
 		// String projectName = getProject().getName();
 		//		
 		// String outputFolder = Util.prologFileName(new File(
@@ -657,8 +672,6 @@ public class JTransformerNature implements IProjectNature,
 
 	}
 
-
-
 	static private String quote(String str) {
 		return "'" + str + "'";
 	}
@@ -669,23 +682,23 @@ public class JTransformerNature implements IProjectNature,
 	 * @see org.cs3.jtransformer.JTransformerProject#reconfigure()
 	 */
 	public void reconfigure() {
-//		PrologSession s = null;
-//		try {
-//			s = getPrologInterface().getSession();
-//			reconfigure(s);
-//		} catch (PrologException e) {
-//			JTDebug.report(e);
-//			throw e;
-//		} catch (PrologInterfaceException e) {
-//			UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
-//					.getErrorMessageProvider(), UIUtils.getDisplay()
-//					.getActiveShell(),
-//					JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
-//					JTransformer.ERR_CONTEXT_NATURE_INIT, e);
-//		} finally {
-//			if (s != null)
-//				s.dispose();
-//		}
+		// PrologSession s = null;
+		// try {
+		// s = getPrologInterface().getSession();
+		// reconfigure(s);
+		// } catch (PrologException e) {
+		// JTDebug.report(e);
+		// throw e;
+		// } catch (PrologInterfaceException e) {
+		// UIUtils.logAndDisplayError(JTransformerPlugin.getDefault()
+		// .getErrorMessageProvider(), UIUtils.getDisplay()
+		// .getActiveShell(),
+		// JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
+		// JTransformer.ERR_CONTEXT_NATURE_INIT, e);
+		// } finally {
+		// if (s != null)
+		// s.dispose();
+		// }
 		try {
 			getPrologInterface().stop();
 			getPrologInterface().start();
@@ -770,7 +783,6 @@ public class JTransformerNature implements IProjectNature,
 
 	}
 
-
 	public void ensurePefInitializationFinished() throws InterruptedException {
 		pifSubscription.ensurePefInitializationFinished();
 	}
@@ -778,6 +790,5 @@ public class JTransformerNature implements IProjectNature,
 	public boolean isBuild() {
 		return buildTriggered;
 	}
-
 
 }
