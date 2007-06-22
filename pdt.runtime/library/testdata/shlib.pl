@@ -28,6 +28,8 @@
     invalidate any other reasons why the executable file might be covered by
     the GNU General Public License.
 */
+bla.
+bla.
 
 :- module(shlib,
 	  [ load_foreign_library/1,	% :LibFile

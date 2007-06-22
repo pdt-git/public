@@ -138,6 +138,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	private boolean readAndDispatch() throws PrologInterfaceException {
 		try {
 			String line=client.readln().trim();
+			Thread.currentThread().setName("async result dispatcher ("+client.getProcessorThread()+")");
 			if(SocketClient.EOB_COMPLETE.equals(line)){
 				dispatchBatchComplete();
 				return false;
@@ -538,6 +539,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		this.dispatcher = new Thread("Async Query Result Dispatcher"){
 			public void run() {
 				try{
+					
 					while(readAndDispatch());
 				} catch(Exception e){
 					//there is little we can do here.

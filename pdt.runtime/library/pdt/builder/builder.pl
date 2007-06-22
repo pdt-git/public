@@ -10,7 +10,6 @@
  
 :- use_module(library(pif_observe)).
 
-
 /* hooks */
 :- dynamic 
 	build_hook/1,
@@ -20,6 +19,9 @@
 	build_hook/1,
 	invalidate_hook/1,
 	delete_hook/1.
+
+:- dynamic '$has_lock'/1.
+:- thread_local '$has_lock'/1.
 
 /* associate state with targets */
 :- dynamic target_state/2.
@@ -60,12 +62,18 @@ pdt_with_targets([Target|Targets],Goal):-
 % The lock can be released using pdt_release_target/1.
 %
 pdt_request_target(Target):-
+    '$has_lock'(Target),
+    !,
+    %keep counting!
+    assert('$has_lock'(Target)).
+pdt_request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
+	debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
 	thread_get_message(builder_msg(Msg)),
 	debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
-    ->	true
+    ->	assert('$has_lock'(Target))
     ;	Msg==rebuild(Target)
     ->  build_target(Target),
     	pdt_request_target(Target)
@@ -100,7 +108,12 @@ build_target(Target):-
 % Release a read lock the current thread holds on the Target.
 % TODO: currently we do not check wether the thread actually has a lock.
 pdt_release_target(Target):-
-	thread_send_message(build_arbiter,msg(Target,release)).
+	debug(builder(debug),"sending release to arbiter:~w.~n",[msg(Target,release)]),
+	retract('$has_lock'(Target)),
+	(	'$has_lock'(Target) %% only release if "counter" is zero
+	->	true
+	;	thread_send_message(build_arbiter,msg(Target,release))
+	).
 
 %%
 % pdt_invalidate_target(+Target)
@@ -150,7 +163,29 @@ pdt_restart_arbiter:-
 
 
 
-run_arbiter:-       
+open_log(LogDir,Alias,Stream):-
+    concat_atom([LogDir,'/',Alias,'.log'],'',Path),
+    debug(builder,"trying to open log file for writing: ~w~n",[Path]),
+	flush,
+    open(Path,write,Stream),
+    debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
+	flush.
+
+
+run_arbiter:-   
+    (	'$log_dir'(LogDir)
+	->	thread_self(Me),
+		open_null_stream(NullStream),
+		open_log(LogDir,Me,LogStream),
+		thread_at_exit(
+			(	close(NullStream),
+				close(LogStream)
+			)
+		),
+		set_prolog_IO(NullStream,LogStream,LogStream)
+	;	true
+	),
+    
 	repeat,
 		thread_get_message(msg(Target,Event)),
 		catch(

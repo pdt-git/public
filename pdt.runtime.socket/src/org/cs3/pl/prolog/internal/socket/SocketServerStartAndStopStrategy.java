@@ -132,15 +132,16 @@ public class SocketServerStartAndStopStrategy implements
 			}
 
 			if ("true".equals(pif.getOption(SocketPrologInterface.CREATE_LOGS))) {
-				p.println(":- multifile consult_server:'$log_dir'/1.");
-				p.println(":- dynamic consult_server:'$log_dir'/1.");
+				p.println(":- multifile user:'$log_dir'/1.");
+				p.println(":- dynamic user:'$log_dir'/1.");
 				File logDir = new File(System
 												.getProperty("java.io.tmpdir"),"pif_server_logs");
 				logDir.mkdirs();
 				
-				p.println("consult_server:'$log_dir'('"
+				p.println("user:'$log_dir'('"
 						+ Util.prologFileName(logDir) + "').");
 				p.println(":- debug(consult_server).");
+				p.println(":- debug(builder(_)).");//TODO remove me
 			}
 			List bootstrapLIbraries = pif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {

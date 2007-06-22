@@ -151,10 +151,10 @@ consult_server(Port,Lockfile):-
 
 
 	
-accept_loop(ServerSocket):-
-    open_null_stream(NullStream),
+accept_loop(ServerSocket):-    
     (	'$log_dir'(LogDir)
-	->	open_log(LogDir,accept_loop,LogStream),
+	->	open_null_stream(NullStream),
+		open_log(LogDir,accept_loop,LogStream),
 		thread_at_exit(
 			(	close(NullStream),
 				close(LogStream)
@@ -222,8 +222,8 @@ accept_loop_impl_X(ServerSocket,Slave,_):-
     tcp_close_socket(Slave),
     % that's it, we are closing down business.
     tcp_close_socket(ServerSocket).
-:- multifile '$log_dir'/1.
-:- dynamic '$log_dir'/1.
+:- multifile user:'$log_dir'/1.
+:- dynamic user:'$log_dir'/1.
 
 accept_loop_impl_X(ServerSocket,Slave,Peer):-
 	tcp_open_socket(Slave, InStream, OutStream),
@@ -266,7 +266,7 @@ accept_loop_impl_X(ServerSocket,Slave,Peer):-
 				)
 			),
 			handle_client(InStream, OutStream)
-		), _ , [alias(Alias)]
+		), _ , [alias(Alias),detached(true)]
 	),
 	debug(consult_server,"successfully created thread ~w.~n",[Alias]),
 	flush,	
