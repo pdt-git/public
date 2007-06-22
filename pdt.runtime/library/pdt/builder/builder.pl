@@ -62,7 +62,7 @@ pdt_with_targets([Target|Targets],Goal):-
 pdt_request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
-	thread_get_message(Msg),
+	thread_get_message(builder_msg(Msg)),
 	debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
     ->	true
@@ -178,7 +178,7 @@ report_error(Error):-
 
 report_error([],_Error).
 report_error([Thread|Threads],Error):-
-    thread_send_message(Thread,arbiter_error(Error)),
+    thread_send_message(Thread,builder_msg(arbiter_error(Error))),
     report_error(Threads,Error).
     
 process_message(all,stop):-!.
@@ -205,15 +205,15 @@ execute_action([Action|Actions],Target):-
     execute_action(Actions,Target).
 execute_action(grant([]),_Target).
 execute_action(grant([Thread|Threads]),Target):-
-    thread_send_message(Thread,grant(Target)),
+    thread_send_message(Thread,builder_msg(grant(Target))),
     execute_action(grant(Threads),Target).
 execute_action(report_failure([]),_Target).
 execute_action(report_failure([Thread|Threads]),Target):-
-    thread_send_message(Thread,fail(Target)),
+    thread_send_message(Thread,builder_msg(fail(Target))),
     execute_action(report_failure(Threads),Target).
 execute_action(report_error([],_E),_Target).
 execute_action(report_error([Thread|Threads],E),Target):-
-    thread_send_message(Thread,error(Target,E)),
+    thread_send_message(Thread,builder_msg(error(Target,E))),
     execute_action(report_error(Threads,E),Target).
 /*
  FIXME: 
@@ -244,9 +244,9 @@ execute_action(invalidate,Target):-
 execute_action(rebuild(Thread),Target):-
 	debug(builder(debug),"rebuilding target: ~w~n",[Target]),
 	pif_notify(builder(Target),start(Thread)),
-	thread_send_message(Thread,rebuild(Target)).
+	thread_send_message(Thread,builder_msg(rebuild(Target))).
 execute_action(report_cycle(Thread),Target):-
-	thread_send_message(Thread,	cycle(Target)).
+	thread_send_message(Thread,	builder_msg(cycle(Target))).
 execute_action(notify_done,Target):-
 	debug(builder(debug),"target done: ~w~n",[Target]),
     pif_notify(builder(Target),done).
