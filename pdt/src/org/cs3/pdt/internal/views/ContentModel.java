@@ -47,8 +47,6 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	private String oneMomentPlease = "one moment please...";
 
-	
-
 	private Vector listeners = new Vector();
 
 	private HashMap specificListeners = new HashMap();
@@ -59,6 +57,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	private String subject;
 
+	private AsyncPrologSession session;
+
 	public void update(PrologInterfaceEvent e) {
 
 		String subject = e.getSubject();
@@ -66,7 +66,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 		Debug.debug("ContentModel received event: subject=" + subject
 				+ ", event=" + event);
-		if("invalid".equals(event)){
+		if ("invalid".equals(event)) {
 			try {
 				reset();
 			} catch (PrologInterfaceException e1) {
@@ -139,47 +139,38 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	}
 
 	private void fetchChildren(File file) throws PrologInterfaceException {
-		final AsyncPrologSession session = getSession();
-		String query = "get_pef_file('"
-				+ Util.prologFileName(file)
-				+ "',FID),"
-				+ "pdt_outline_child(FID,pef_file,FID,ChildT,Child),"
-				+ "pdt_outline_label(FID,ChildT,Child,Label),"
-				+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
-				+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
-		session.queryAll(input, query);
-		disposeWhenDone(session);
+		synchronized (sessionLock) {
+			final AsyncPrologSession session = getSession();
+			String query = "get_pef_file('"
+					+ Util.prologFileName(file)
+					+ "',FID),"
+					+ "pdt_outline_child(FID,pef_file,FID,ChildT,Child),"
+					+ "pdt_outline_label(FID,ChildT,Child,Label),"
+					+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
+					+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
+			session.queryAll(input, query);
+		}
+
 	}
 
-	private void disposeWhenDone(final AsyncPrologSession session) {
-		new Thread(){
-			@Override
-			public void run() {
-				try {
-					session.join();
-				} catch (PrologInterfaceException e) {
-					Debug.report(e);
-				}
-				session.dispose();
-			}
-		}.start();
-	}
+	private Object sessionLock = new Object();
 
 	private void fetchChildren(PEFNode parent) throws PrologInterfaceException {
-		AsyncPrologSession session = getSession();
-		String query = "get_pef_file('"
-				+ Util.prologFileName(getFile())
-				+ "',FID),"
-				+ "pdt_outline_child(FID,"
-				+ parent.getType()
-				+ ","
-				+ parent.getId()
-				+ ",ChildT,Child),"
-				+ "pdt_outline_label(FID,ChildT,Child,Label),"
-				+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
-				+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
-		session.queryAll(parent, query);
-		disposeWhenDone(session);
+		synchronized (sessionLock) {
+			AsyncPrologSession session = getSession();
+			String query = "get_pef_file('"
+					+ Util.prologFileName(getFile())
+					+ "',FID),"
+					+ "pdt_outline_child(FID,"
+					+ parent.getType()
+					+ ","
+					+ parent.getId()
+					+ ",ChildT,Child),"
+					+ "pdt_outline_label(FID,ChildT,Child,Label),"
+					+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
+					+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
+			session.queryAll(parent, query);
+		}
 	}
 
 	private static class _PEFNode implements PEFNode, IAdaptable {
@@ -260,21 +251,29 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	}
 
 	private AsyncPrologSession getSession() throws PrologInterfaceException {
-		if ( pif != null) {
-			AsyncPrologSession session = ((PrologInterface2) pif).getAsyncSession();
-			// session.setPreferenceValue("socketsession.canonical", "true");
-			session.addBatchListener(this);
+		synchronized (sessionLock) {
+			if (session == null && pif != null) {
+				session = ((PrologInterface2) pif).getAsyncSession();
+				// session.setPreferenceValue("socketsession.canonical",
+				// "true");
+				session.addBatchListener(this);
+
+			}
 			return session;
 		}
-		return null;
+
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setFile(java.io.File)
-	 */
-	public void setFile(File file) throws IOException, PrologInterfaceException {
+	private void disposeSession() throws PrologInterfaceException {
+		synchronized (sessionLock) {
+			if (session == null) {
+				return;
+			}
+			session.removeBatchListener(this);
+			session.abort();
+			session.dispose();
+			session = null;
+		}
 
 	}
 
@@ -285,22 +284,24 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 */
 	public void setPif(PrologInterface pif, PrologEventDispatcher d)
 			throws PrologInterfaceException {
+
+		disposeSession();
 		
-		if (this.dispatcher != null&&this.subject!=null) {
+		if (this.dispatcher != null && this.subject != null) {
 			this.dispatcher.removePrologInterfaceListener(this.subject, this);
 		}
 		if (this.pif != null) {
 			((PrologInterface2) this.pif).removeLifeCycleHook(this, HOOK_ID);
 		}
 		this.pif = pif;
-		this.dispatcher=d;
+		this.dispatcher = d;
 		if (this.pif != null) {
 			this.pif.addLifeCycleHook(this, HOOK_ID, new String[0]);
 			if (pif.isUp()) {
 				afterInit(pif);
 			}
 		}
-		if (this.dispatcher != null&&this.subject!=null) {
+		if (this.dispatcher != null && this.subject != null) {
 			this.dispatcher.addPrologInterfaceListener(this.subject, this);
 		}
 		reset();
@@ -329,8 +330,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (this) {
 			timestamp = System.currentTimeMillis();
 		}
-		
-
+		disposeSession();
 		synchronized (cache) {
 			cache.clear();
 
@@ -524,13 +524,13 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	public void beforeShutdown(PrologInterface pif, PrologSession s)
 			throws PrologInterfaceException {
-		
+
 		reset();
 
 	}
 
 	public void onError(PrologInterface pif) {
-		
+
 		try {
 			reset();
 		} catch (PrologInterfaceException e) {
@@ -553,10 +553,10 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 		cache.clear();
 		listeners.clear();
-		//listeners = null;
+		// listeners = null;
 		specificListeners.clear();
-		//specificListeners = null;
-		//input = null;
+		// specificListeners = null;
+		// input = null;
 
 	}
 
