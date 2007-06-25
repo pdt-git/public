@@ -69,8 +69,8 @@ public class AsyncSocketSessionTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = Factory.newInstance();
 		pif = (PrologInterface2) factory.create();
-		pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
-		//pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+		//pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
+		pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		pif.start();
 		rec = new Recorder();
 		session = pif.getAsyncSession();
@@ -345,5 +345,16 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void test_setProtocolOption() throws Exception{
 		session.setPreferenceValue("socketsession.canonical", "true");
 
+	}
+	
+	public void test_manyAsyncSessions() throws Throwable{
+		int N= 50;
+		AsyncPrologSession[] sessions = new AsyncPrologSession[N];
+		for(int i=0;i<N;i++){
+			sessions[i]=pif.getAsyncSession();
+		}
+		for(int i=0;i<N;i++){
+			sessions[i].dispose();
+		}
 	}
 }
