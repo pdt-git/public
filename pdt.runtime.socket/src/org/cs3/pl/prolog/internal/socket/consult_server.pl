@@ -205,12 +205,14 @@ accept_loop_impl_X(ServerSocket,Slave,_):-
     tcp_close_socket(ServerSocket).
 
 accept_loop_impl_X(ServerSocket,Slave,Peer):-
+
 	tcp_open_socket(Slave, InStream, OutStream),
 	term_to_atom(Peer, Host),
 	debug(consult_server,"connect from host ~w~n",[Host]),
 	unused_thread_name(handle_client,'',Alias),
 	debug(consult_server,"handler thread alias: ~w~n",[Alias]),	
 	flush,
+	garbage_collect,
 	thread_create(
 		(	(	'$log_dir'(LogDir)
 			->	open_log(LogDir,Alias,LogStream),
@@ -254,8 +256,11 @@ open_log(LogDir,Alias,Stream):-
     
 	
 handle_client(InStream, OutStream):-    
-	
+    set_stream(InStream,encoding(utf8)),
+    set_stream(OutStream,encoding(utf8)),
+
 	repeat,
+
 	debug(consult_server,"start hanlde_client~n",[]),
 	catch(
 		handle_client_impl(InStream,OutStream),
@@ -269,8 +274,6 @@ handle_client(InStream, OutStream):-
 	thread_exit(0).    
 	
 handle_client_impl(InStream, OutStream):-
-    set_stream(InStream,encoding(utf8)),
-    set_stream(OutStream,encoding(utf8)),
     repeat,
 		request_line(InStream,OutStream,'GIVE_COMMAND',Command),
 		( handle_command(InStream,OutStream,Command,Next)
