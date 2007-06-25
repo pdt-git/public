@@ -60,6 +60,7 @@ import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -83,7 +84,7 @@ public class SocketSessionTest extends TestCase {
       pif=PrologInterfaceFactory.newInstance().create();
      // pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
       //pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
-	  //pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+	  pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		
       pif.start();
     }
@@ -444,5 +445,14 @@ public class SocketSessionTest extends TestCase {
 	           e.printStackTrace();
 	       }
 	   }
-
+	public void test_manySessions() throws Throwable{
+		int N= 50;
+		PrologSession[] sessions = new PrologSession[N];
+		for(int i=0;i<N;i++){
+			sessions[i]=pif.getSession();
+		}
+		for(int i=0;i<N;i++){
+			sessions[i].dispose();
+		}
+	}
 }

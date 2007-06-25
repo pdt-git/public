@@ -8,9 +8,9 @@ import java.util.Vector;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 
-public class AsyncPrologSessionProxi implements AsyncPrologSession {
+public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
-	private WeakReference<AsyncPrologSession> target;
+	private AsyncPrologSession targetSession;
 
 	private Vector<AsyncPrologSessionListener> listeners = new Vector<AsyncPrologSessionListener>();
 
@@ -24,9 +24,9 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 
 	protected Object targetLock = new Object();
 
-	private boolean hasTarget() {
+	private boolean hasTargetSession() {
 
-		return target != null && target.get() != null;
+		return targetSession != null;
 	}
 
 	private Thread watchdog = new Thread() {
@@ -39,14 +39,14 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 					Debug.report(e);
 				}
 				synchronized (targetLock) {
-					if (hasTarget() && getTarget().isIdle()) {
-						getTarget().dispose();
+					if (hasTargetSession() && getTargetSession().isIdle()) {
+						getTargetSession().dispose();
 						for (Iterator it = listeners.iterator(); it
 								.hasNext();) {
 							AsyncPrologSessionListener l = (AsyncPrologSessionListener) it.next();
-							getTarget().removeBatchListener(l);
+							getTargetSession().removeBatchListener(l);
 						}
-						target = null;
+						targetSession = null;
 						threadAlias=null;
 					}
 				}
@@ -56,9 +56,9 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 
 	private long timeout;
 
-	private AsyncPrologSession getTarget() {
+	private AsyncPrologSession getTargetSession() {
 		synchronized (targetLock) {
-			if (!hasTarget()) {
+			if (!hasTargetSession()) {
 				try {
 					AsyncPrologSession s = pif.getAsyncSession();
 					for (Iterator it = listeners.iterator(); it.hasNext();) {
@@ -77,7 +77,7 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 					s.reconfigure();
 					disposed = false;
 					threadAlias = s.getProcessorThreadAlias();
-					target = new WeakReference<AsyncPrologSession>(s);
+					targetSession = s;
 
 				} catch (PrologInterfaceException e) {
 					Debug.rethrow(e);
@@ -86,13 +86,13 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 			}
 		}
 
-		return target.get();
+		return targetSession;
 	}
 
 	public void abort() throws PrologInterfaceException {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				getTarget().abort();
+			if (hasTargetSession()) {
+				getTargetSession().abort();
 			}
 		}
 
@@ -100,16 +100,16 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 
 	public void abort(Object monitor) throws PrologInterfaceException {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				getTarget().abort(monitor);
+			if (hasTargetSession()) {
+				getTargetSession().abort(monitor);
 			}
 		}
 	}
 
 	public void addBatchListener(AsyncPrologSessionListener l) {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				getTarget().addBatchListener(l);
+			if (hasTargetSession()) {
+				getTargetSession().addBatchListener(l);
 			}
 			listeners.add(l);
 		}
@@ -117,8 +117,8 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 
 	public void dispose() {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				getTarget().dispose();
+			if (hasTargetSession()) {
+				getTargetSession().dispose();
 			}
 			disposed = true;
 		}
@@ -126,8 +126,8 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 
 	public Object getLastAbortTicket() {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				return getTarget().getLastAbortTicket();
+			if (hasTargetSession()) {
+				return getTargetSession().getLastAbortTicket();
 			}
 			return null;
 		}
@@ -142,44 +142,44 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 
 	public boolean isDisposed() {
 		synchronized (targetLock) {
-			if (!hasTarget()) {
+			if (!hasTargetSession()) {
 				return disposed;
 			}
-			return getTarget().isDisposed();
+			return getTargetSession().isDisposed();
 		}
 	}
 
 	public boolean isIdle() {
 		synchronized (targetLock) {
-			if (!hasTarget()) {
+			if (!hasTargetSession()) {
 				return true;
 			}
-			return getTarget().isIdle();
+			return getTargetSession().isIdle();
 		}
 	}
 
 	public boolean isPending(Object ticket) {
 		synchronized (targetLock) {
-			if (!hasTarget()) {
+			if (!hasTargetSession()) {
 				return false;
 			}
-			return getTarget().isPending(ticket);
+			return getTargetSession().isPending(ticket);
 		}
 	}
 
 	public void join() throws PrologInterfaceException {
 		synchronized (targetLock) {
-			if (!hasTarget()) {
+			if (!hasTargetSession()) {
 				return;
 			}
-			getTarget().join();
+			getTargetSession().join();
 		}
 	}
 
 	public void queryAll(Object ticket, String query)
 			throws PrologInterfaceException {
 		synchronized (targetLock) {
-			getTarget().queryAll(ticket, query);
+			getTargetSession().queryAll(ticket, query);
 		}
 
 	}
@@ -187,7 +187,7 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 	public void queryOnce(Object ticket, String query)
 			throws PrologInterfaceException {
 		synchronized (targetLock) {
-			getTarget().queryOnce(ticket, query);
+			getTargetSession().queryOnce(ticket, query);
 		}
 
 	}
@@ -195,8 +195,8 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 	public void removeBatchListener(AsyncPrologSessionListener l) {
 		synchronized (targetLock) {
 			listeners.remove(l);
-			if (hasTarget()) {
-				getTarget().removeBatchListener(l);
+			if (hasTargetSession()) {
+				getTargetSession().removeBatchListener(l);
 			}
 		}
 	}
@@ -204,44 +204,44 @@ public class AsyncPrologSessionProxi implements AsyncPrologSession {
 	public Option[] getOptions() {
 
 		synchronized (targetLock) {
-			return getTarget().getOptions();
+			return getTargetSession().getOptions();
 		}
 	}
 
 	public String getPreferenceValue(String id, String string) {
 		synchronized (targetLock) {
-			if (!hasTarget()) {
+			if (!hasTargetSession()) {
 				return prefs.get(id);
 			}
-			return getTarget().getPreferenceValue(id, string);
+			return getTargetSession().getPreferenceValue(id, string);
 		}
 	}
 
 	public void reconfigure() {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				getTarget().reconfigure();
+			if (hasTargetSession()) {
+				getTargetSession().reconfigure();
 			}
 		}
 	}
 
 	public void setPreferenceValue(String id, String value) {
 		synchronized (targetLock) {
-			if (hasTarget()) {
-				getTarget().setPreferenceValue(id, value);
+			if (hasTargetSession()) {
+				getTargetSession().setPreferenceValue(id, value);
 			}
 			prefs.put(id, value);
 		}
 	}
 
-	public AsyncPrologSessionProxi(PrologInterface2 pif) {
+	public AsyncPrologSessionProxy(PrologInterface2 pif) {
 		super();
 		this.pif = pif;
 		timeout=1000;
 		watchdog.start();
 	}
 
-	public AsyncPrologSessionProxi(PrologInterface2 pif,long timeout) {
+	public AsyncPrologSessionProxy(PrologInterface2 pif,long timeout) {
 		super();
 		this.pif = pif;
 		this.timeout=timeout;

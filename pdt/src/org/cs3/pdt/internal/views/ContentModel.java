@@ -19,7 +19,7 @@ import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
-import org.cs3.pl.prolog.AsyncPrologSessionProxi;
+import org.cs3.pl.prolog.AsyncPrologSessionProxy;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
@@ -169,8 +169,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			AsyncPrologSession session = getSession();
 			String query = "pdt_outline(" +
 			"'" +Util.prologFileName(getFile())+"'," +
-					"'"+parent.getType()+"'," +
-					"'"+parent.getId()+"'," +
+					parent.getType()+"," +
+					parent.getId()+"," +
 					"ChildT," +
 					"Child," +
 					"Label," +
@@ -263,7 +263,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (sessionLock) {
 			if (session == null && pif != null) {
 				//session = ((PrologInterface2) pif).getAsyncSession();
-				session=new AsyncPrologSessionProxi((PrologInterface2) pif);
+				session=new AsyncPrologSessionProxy((PrologInterface2) pif);
 				// session.setPreferenceValue("socketsession.canonical",
 				// "true");
 				session.addBatchListener(this);
@@ -280,7 +280,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 				return;
 			}
 			session.removeBatchListener(this);
-			session.abort();
+			session.join();
 			session.dispose();
 			session = null;
 		}
@@ -340,7 +340,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (this) {
 			timestamp = System.currentTimeMillis();
 		}
-		//disposeSession();
+		disposeSession();
 		synchronized (cache) {
 			cache.clear();
 

@@ -40,17 +40,22 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Author: Lukas
+% Date: 23.10.2004
+
 :- module(consult_server,[
 	consult_server/1,
-		consult_server/2,
-	consulted_symbol/1,
-	starts_at/2
+	consult_server/2
 	]). 
 
 
+:- use_module(library(socket)).
+:- use_module(library(memfile)).
 
 option_default(interprete_lists,true).
 option_default(canonical,false).
+
+
 
 :- dynamic option_value/2.
 :- thread_local option_value/2.
@@ -72,22 +77,18 @@ clear_options:-
 	retractall(option_value(_,_)).	
 		    
 
-% Author: Lukas
-% Date: 23.10.2004
-:- use_module(library(socket)).
-:- use_module(library(memfile)).
-
-:- dynamic zombie_symbol/1.
-:- dynamic offset/2.
 
 create_lock_file(Filename):-
 	(	exists_file(Filename)
 	->	debug(consult_server,"Found existing lock file ~w.~n Shutting down...~n",[Filename]),		
 		thread_signal(main,halt)
 	;	open(Filename, write, Stream),
-		write(Stream,Filename),
-		nl(Stream),
-		close(Stream)
+		call_cleanup(
+			(	write(Stream,Filename),
+				nl(Stream)
+			),
+			close(Stream)
+		)
 	).
 	
 delete_lock_file(Filename):-
@@ -98,21 +99,6 @@ delete_lock_file(Filename):-
 
 
 
-starts_at(Symbol,Line):-	
-		(	offset(Symbol,Line)
-		->	true
-		;	Line is 0
-		).
-	
-consulted_symbol(Symbol) :-
-	source_file(Symbol),
-	\+zombie_symbol(Symbol).
-	
-delete_symbol(Symbol) :-
-	assert(zombie_symbol(Symbol)).	
-	
-undelete_symbol(Symbol) :-
-	retractall(zombie_symbol(Symbol)).
 	
 consult_server(Port):- 
 	tcp_socket(ServerSocket),
@@ -172,13 +158,6 @@ accept_loop(ServerSocket):-
 			thread_signal(main,halt)
 		)
 	),
-%	thread_self(Me),
-%	thread_detach(Me),
-	% at this point we need to signal main that the server is going down and the
-	% process may be terminated when all threads besids main are gone.
-	% It would probably be best to run the accept loop itself on main, but
-	% otoh it is also nice to leave a debugging console if everything else breaks.
-	% So atm, we have to -reluctantly- use thread_signal/2 to do the job.
 	debug(consult_server,"signaling main to shutdown... ~n",[]),
 	thread_signal(main,do_shutdown),
 	debug(consult_server,"shutdown signal send, exit current thread. ~n",[]),
@@ -187,6 +166,8 @@ accept_loop(ServerSocket):-
 
 :- multifile pif_shutdown_hook/0.
 :- dynamic pif_shutdown_hook/0.
+:- multifile user:'$log_dir'/1.
+:- dynamic user:'$log_dir'/1.
 
 pif_shutdown_hook.
 
@@ -222,23 +203,13 @@ accept_loop_impl_X(ServerSocket,Slave,_):-
     tcp_close_socket(Slave),
     % that's it, we are closing down business.
     tcp_close_socket(ServerSocket).
-:- multifile user:'$log_dir'/1.
-:- dynamic user:'$log_dir'/1.
 
 accept_loop_impl_X(ServerSocket,Slave,Peer):-
 	tcp_open_socket(Slave, InStream, OutStream),
-% The following line is evil. It will crash connection initiated from a IAI WLAN IP, because the host name can not be resolved:
-%	 tcp_host_to_address(Host,Peer),
-% replaced by
 	term_to_atom(Peer, Host),
 	debug(consult_server,"connect from host ~w~n",[Host]),
-	%thread_self(Self),
-	%atom_concat(Self,'_handle_client_',Prefix),	
-	%atom_concat('@',Host,Suffix),
 	unused_thread_name(handle_client,'',Alias),
-	debug(consult_server,"handler thread alias: ~w~n",[Alias]),
-	
-	debug(consult_server,"creating thread.~n",[]),
+	debug(consult_server,"handler thread alias: ~w~n",[Alias]),	
 	flush,
 	thread_create(
 		(	(	'$log_dir'(LogDir)
@@ -276,7 +247,8 @@ open_log(LogDir,Alias,Stream):-
     concat_atom([LogDir,'/',Alias,'.log'],'',Path),
     debug(consult_server,"trying to open log file for writing: ~w~n",[Path]),
 	flush,
-    open(Path,write,Stream),
+    open(Path,append,Stream),
+    format(Stream,"~n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~n",[]),
     debug(consult_server,"successfully opened log file for writing: ~w~n",[Path]),
 	flush.
     
@@ -310,10 +282,6 @@ handle_client_impl(InStream, OutStream):-
 	!.
 		
 
-handle_next(_,_,stop):-
-    !.
-handle_next(InStream,OutStream,continue):-
-	handle_client_impl(InStream, OutStream).
 		
 handle_command(_,_,'BYE',stop).	
 handle_command(_,_,'SHUTDOWN',stop):-	
@@ -333,39 +301,6 @@ handle_command(_,OutStream,'PING',continue):-
 		current_prolog_flag(pid,Pid),
     thread_self(Alias),
 	my_format(OutStream,"PONG ~w:~w~n",[Pid,Alias]).
-handle_command(InStream,OutStream,'CONSULT',continue):-
-	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
-	undelete_symbol(Symbol),
-	my_format(OutStream,"USING_SYMBOL: ~w~n",[Symbol]),	
-	my_format(OutStream,"GO_AHEAD~n",[]),
-	load_stream(Symbol,InStream).
-handle_command(InStream,OutStream,'UNCONSULT',continue):-
-	(
-	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
-	consulted_symbol(Symbol),
-	new_memory_file(MemFile),
-	open_memory_file(MemFile,read,NullStream),
-	load_stream(Symbol,NullStream),
-	close(NullStream),
-	free_memory_file(MemFile),	
-	delete_symbol(Symbol)
-	)
-	;true.
-handle_command(InStream,OutStream,'LIST_CONSULTED',continue):-
-	request_line(InStream,OutStream,'GIVE_PREFIX',Prefix),
-	forall(
-		(
-			consulted_symbol(Symbol),
-			atom_concat(Prefix,_,Symbol)
-		),
-		my_format(OutStream,"~w~n",Symbol)
-	).
-handle_command(InStream,OutStream,'IS_CONSULTED',continue):-
-	request_line(InStream,OutStream,'GIVE_SYMBOL',Symbol),
-	( consulted_symbol(Symbol) 
-	->my_format(OutStream,"YES~n",[])	
-	; my_format(OutStream,"NO~n",[])
-	).
 handle_command(InStream,OutStream,'ENTER_BATCH',continue):-
 	my_format(OutStream,"GO_AHEAD~n",[]),
 	repeat,
@@ -402,13 +337,6 @@ handle_command(InStream,OutStream,'GET_OPTION',continue):-
 
 my_read_command(InStream,Term):-
     my_read_term(InStream,Term,[]).
-
-%my_read_goal(InStream,Term,Vars):-
-%    read_line_to_codes(InStream,Codes),
-%    atom_codes(Atom,Codes),
-%    thread_self(Self),
-%	format("~w: <<< (goal) >~w~n<",[Self,Atom]),
-%    atom_to_term(Atom,Term,Vars).
 
 my_read_goal(InStream,Term,Vars):-
     my_read_term(InStream,Term,[variable_names(Vars)]).
@@ -465,8 +393,6 @@ handle_batch_message(abort(Id),OutStream):-
 	;	record_abort_request(async,Id),
 		debug(consult_server,"recorded abort (async, id=~w)~n",[Id])
 	).
-	
-
 handle_batch_command(abort(Id),_,OutStream):-
     debug(consult_server,"recieved abort (sync, id=~w)~n",[Id]),
 	(	abort_requested(async,Id)
@@ -582,24 +508,21 @@ iterate_solutions(InStream,OutStream,Term,Vars):-
 print_solution(OutStream,Vars):-
 	forall(
 		member(Key=Val,Vars),
-	%%			my_write_term(OutStream,Elm,[quoted(true)])		
 		print_binding(OutStream,Key,Val)
 	),
 	my_format(OutStream,"END_OF_SOLUTION~n",[]).
 	
 print_binding(Out,Key,Val):-
 		my_write(Out,'<'),
-		(write(Out,Key);true),
+		write(Out,Key),
 		my_write(Out, '>'),		
-		(print_value(Out,Val);true),		
+		print_value(Out,Val),		
 		nl(Out).
 
-print_values(_,[]):-
-	!. 
-print_values(Out,[Head|Tail]):-
-	!,
+print_values([],_). 
+print_values([Head|Tail],Out):-
 	print_value(Out,Head),		
-	print_values(Out,Tail).
+	print_values(Tail,Out).
 	
 
 print_value(Out,Val):-    	
@@ -609,13 +532,12 @@ print_value(Out,Val):-
 	(write_escaped(Out,Val);true),
 	my_write(Out, '>').
 print_value(Out,Val):-    	
-	( 	is_list(Val),
-		option(interprete_lists,true)
+	( 	is_list(Val), option(interprete_lists,true)
  	->	my_write(Out,'{'),
-		(print_values(Out,Val);true),
+		print_values(Val,Out),
 		my_write(Out, '}')		
 	;	my_write(Out,'<'),
-		(write_escaped(Out,Val);true),
+		write_escaped(Out,Val),
 		my_write(Out, '>')
 	).
 
@@ -703,27 +625,10 @@ codes_or_eof_to_atom(end_of_file,_):-
 codes_or_eof_to_atom(Codes,Atom):-
 	atom_codes(Atom,Codes).
 	
-load_stream(Symbol,Stream):-    
-		(	
-			retractall(offset(Symbol,_)),
-			line_count(Stream,Line),
-			assert(offset(Symbol,Line)),
-			user:load_files(Symbol,[stream(Stream)])
-			%new_memory_file(Handle),
-			%open_memory_file(Handle, write, WriteStream),
-			%copy_stream_data(Stream,WriteStream),
-			%close(WriteStream),
-			%open_memory_file(Handle, read, ReadStream),
-			%user:load_files(Symbol,[stream(ReadStream)]),
-			%close(ReadStream),
-			%free_memory_file(Handle)
-	->	true
-	; 	throw(error(pipi,kaka))
-	).
 	
 count_thread(Prefix,Count):-
-	findall(A,(
-			current_thread(A,_),
+	findall(A,
+		(	current_thread(A,_),
 			atom_concat(Prefix,_,A),
 			my_format("There is e.g. a thread named ~w~n",[A])
 		),
@@ -736,9 +641,8 @@ unused_thread_name(Prefix,Suffix,Name):-
 	
 unused_thread_name(Prefix,Suffix,Try,Name):-
 	concat_atom([Prefix,Try,Suffix],A),
-
 	(	current_thread(A,_)
-	->plus(Try,1,Next),
+	->	plus(Try,1,Next),
 		unused_thread_name(Prefix,Suffix,Next,Name)
 	;	Name=A			
 	).
@@ -793,44 +697,39 @@ write_escaped(Out,Term):-
 write_term_to_memfile(Term,Memfile):-
 	new_memory_file(Memfile),
 	open_memory_file(Memfile,write,Stream),
-	(	option(canonical,true)
-	->	write_canonical(Stream,Term)
-	;	write(Stream,Term)
-	),
-	close(Stream).
+	call_cleanup(
+		(	option(canonical,true)
+		->	write_canonical(Stream,Term)
+		;	write(Stream,Term)
+		),
+		close(Stream)
+	).
 
 escape_stream(In,Out):-
     repeat,	    
     (	at_end_of_stream(In)
-    ->	!,true
+    ->	!
     ;   get_char(In,Char),    	
-	    write_escaped_char(Out,Char),
+	    write_escaped_char(Char,Out),
 	    fail
 	).
 	
 
-write_escaped_char(Out,'<'):-
-	write(Out,'&lt;'),
-	!.
-write_escaped_char(Out,'>'):-
-	write(Out,'&gt;'),
-	!.
-write_escaped_char(Out,'{'):-
-	write(Out,'&cbo;'),
-	!.
-write_escaped_char(Out,'}'):-
-	write(Out,'&cbc;'),
-	!.
-write_escaped_char(Out,'&'):-
-	write(Out,'&amp;'),
-	!.
-write_escaped_char(Out,'"'):-
-	write(Out,'&quot;'),
-	!.
-write_escaped_char(Out,'\''):-
-	write(Out,'&apos;'),
-	!.
-write_escaped_char(Out,C):-
+write_escaped_char('<',Out):-
+	write(Out,'&lt;').
+write_escaped_char('>',Out):-
+	write(Out,'&gt;').
+write_escaped_char('{',Out):-
+	write(Out,'&cbo;').
+write_escaped_char('}',Out):-
+	write(Out,'&cbc;').
+write_escaped_char('&',Out):-
+	write(Out,'&amp;').
+write_escaped_char('"',Out):-
+	write(Out,'&quot;').
+write_escaped_char('\'',Out):-
+	write(Out,'&apos;').
+write_escaped_char(C,Out):-
 	put_char(Out,C).	
 		
 

@@ -43,20 +43,27 @@ pdt_with_targets(Goal):-
     pdt_with_targets([],Goal).
 
 pdt_with_targets(Ts,Goal):-
+    debug(builder(debug),"pdt_with_targets(~w, ~w): ~n",[Ts, Goal]),
     pdt_builder:asserta('$has_lock'('$mark'),Ref),
+    debug(builder(debug),"added mark clause, ref= ~w ~n",[Ref]),
     pdt_request_targets(Ts),
     call_cleanup(Goal,pdt_builder:release_targets(Ref)).
     
 release_targets(Ref):-
+    debug(builder(debug),"erasing all locks until marker ~w~n",[Ref]),
     clause('$has_lock'(T),_,LockRef),
     (	LockRef==Ref
-    ->	erase(Ref),
+    ->	debug(builder(debug),"~t found marker, erasing it: ~w~n",[Ref]),
+    	erase(Ref),
     	!
-    ;	erase(LockRef),
+    ;  	debug(builder(debug),"~t found lock ~w, ref=~w, erasing it. ~n",[T,LockRef]),
+    	erase(LockRef),
+		debug(builder(debug),"~t sending release message to arbiter (target: ~w) ~n",[T]),
 		thread_send_message(build_arbiter,msg(T,release)),
 		fail
     ).
-
+release_targets(Ref):-
+    throw(failed(error(release_targets(Ref)))).
 
 %%
 % pdt_request_target(+Target)
@@ -73,13 +80,14 @@ release_targets(Ref):-
 
 pdt_request_target(T):-
     (	'$has_lock'('$mark')
-    ->	request_target(Target)
+    ->	request_target(T)
     ;	throw(error(not_within_pdt_with_targets))
     ).
 
 request_target(Target):-
     '$has_lock'(Target),
-    !.
+    !,
+    debug(builder(debug),"target already granted: ~w ~n",[Target]).
 request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
@@ -87,7 +95,8 @@ request_target(Target):-
 	thread_get_message(builder_msg(Msg)),
 	debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
-    ->	assert('$has_lock'(Target))
+    ->	asserta('$has_lock'(Target),Ref),
+	    debug(builder(debug),"added lock for target ~w, ref=~w~n",[Target,Ref]) 	
     ;	Msg==rebuild(Target)
     ->  build_target(Target),
     	pdt_request_target(Target)
@@ -176,7 +185,8 @@ open_log(LogDir,Alias,Stream):-
     concat_atom([LogDir,'/',Alias,'.log'],'',Path),
     debug(builder,"trying to open log file for writing: ~w~n",[Path]),
 	flush,
-    open(Path,write,Stream),
+    open(Path,append,Stream),
+    format(Stream,"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~n",[]),
     debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
 	flush.
 
