@@ -7,4 +7,4 @@
 :-use_module(library('builder/targets/parser')).
 :-use_module(library('builder/targets/program_interpreter')).
 
-eta(F,ETA):-
+% eta(F,ETA):-

@@ -3,7 +3,9 @@
 		pdt_outline_child/5,
 		pdt_outline_label/4,
 		pdt_outline_tag/4,		
-		pdt_outline_position/5
+		pdt_outline_position/5,
+		pdt_outline/7,
+		pdt_outline/9
 	]
 ).
 
@@ -194,3 +196,25 @@ print_outline_X(Type, ID, FID, Prefix):-
     		print_outline_X(CType,CID,FID,CPrefix)
     	)
     ).
+
+pdt_outline(Abs,ChildT,Child,Label,Tags,Start,End):-    
+	get_pef_file(Abs,FID),
+	pdt_outline_child(FID,pef_file,FID,ChildT,Child),
+	pdt_outline_label(FID,ChildT,Child,Label),
+	findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),
+	(	pdt_outline_position(FID,ChildT,Child,Start,End)
+	->	true
+	;	Start= -1,
+		End= -1
+	).    
+	
+pdt_outline(Abs,ParT,Par,ChildT,Child,Label,Tags,Start,End):-    
+	get_pef_file(Abs,FID),
+	pdt_outline_child(FID,ParT,Par,ChildT,Child),
+	pdt_outline_label(FID,ChildT,Child,Label),
+	findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),
+	(	pdt_outline_position(FID,ChildT,Child,Start,End)
+	->	true
+	;	Start= -1,
+		End= -1
+	).    	

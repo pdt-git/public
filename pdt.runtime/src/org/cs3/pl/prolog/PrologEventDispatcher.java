@@ -171,7 +171,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 
 	private void enableSubject(String subject) throws PrologInterfaceException {
 		if (session == null) {
-			session = pif.getAsyncSession();
+			session = new AsyncPrologSessionProxi(pif);
 			session.addBatchListener(this);
 		} else {
 			abort();

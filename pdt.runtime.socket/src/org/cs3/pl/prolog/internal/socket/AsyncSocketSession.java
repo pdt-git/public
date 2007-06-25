@@ -99,7 +99,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private HashMap queries= new HashMap();
 
-	private PrologSession controlSession;
+	//private PrologSession controlSession;
 
 	private Exception batchError;
 	private boolean interpreteLists;
@@ -124,10 +124,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		
 	}
 	
-	public AsyncSocketSession(SocketClient client, SocketPrologInterface pif, PrologSession controlSession) throws IOException {
+	public AsyncSocketSession(SocketClient client, SocketPrologInterface pif/*, PrologSession controlSession*/) throws IOException {
 		this.client = client;
 		this.pif = pif;
-		this.controlSession=controlSession;
+		//this.controlSession=controlSession;
 		ctermFactory=new ATermFactory();
 		
 		enterBatch();
@@ -726,8 +726,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		lastAbortTicket=ticket;
 		int id = storeTicket(ticket,null);
 		Debug.info("abort ticket stored, id="+id);
-		
+		PrologSession controlSession = null;
 		try {
+			controlSession=pif.getSession();
 			controlSession.queryOnce("thread_send_message('"+client.getProcessorThread()+"', batch_message(abort("+id+")))");
 			Debug.info("async abort request queued, id="+id);
 			synchronized (ticket) {
@@ -752,6 +753,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			pif.handleException(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
+		}finally{
+			if(controlSession!=null){
+				controlSession.dispose();
+				
+			}
 		}
 		
 	}
@@ -766,7 +772,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		try {
 			if(pif.getState()!=AbstractPrologInterface.ERROR){
 				exitBatch();
-				controlSession.dispose();
+				//controlSession.dispose();
 			}			
 			client.close();
 		} catch (IOException e) {
@@ -780,7 +786,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		} finally {
 			client.unlock();
 			
-			controlSession=null;
+			//controlSession=null;
 			client = null;
 			disposing=false;
 		}
