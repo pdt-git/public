@@ -181,17 +181,19 @@ interprete_file_dependency(Type,Ref,Cx):-
 	).
     
 do_inclusion(Type,File,Ref,Cx):-	
-	pdt_with_targets([parse(File)], do_inclusion_X(Type,File,Ref,Cx)).
+	pdt_request_target(parse(File)), 
+	do_inclusion_X(Type,File,Ref,Cx).
 
 do_inclusion_X(Type,File,Ref,Cx):-
     (	pef_module_definition_query([file=Ref,id=MID])
 	->  catch(
-			pdt_with_targets([interprete(File)],process_module_inclusion(Type,Ref,MID,Cx)),
+			pdt_request_target(interprete(File)),
 			error(cycle(T)),
 			(	debug(interpreter(todo),"TODO: warn about dependency cycle: ~w~nWe try to go on with incomplete information.",[T]),
 				process_module_inclusion(Type,Ref,MID,Cx)
 			)
-		)			
+		),
+		process_module_inclusion(Type,Ref,MID,Cx)			
 	;	process_file_inclusion(Type,Ref,Cx)
 	).
 

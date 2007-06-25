@@ -150,13 +150,11 @@ process_inclusion(F,_Cx):-
 
 
 do_inclusion(File,Cx):-	
-	pdt_with_targets([parse(File)],
-		(	get_pef_file(File,Ref),
-			(	pef_module_definition_query([file=Ref],Module)
-			->  process_module_inclusion(Module,Cx)
-			;	process_file_inclusion(Ref,Cx)
-			)
-		)		
+	pdt_request_target(parse(File)),
+	get_pef_file(File,Ref),
+	(	pef_module_definition_query([file=Ref],Module)
+	->  process_module_inclusion(Module,Cx)
+	;	process_file_inclusion(Ref,Cx)
 	).
 
 

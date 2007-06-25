@@ -1,8 +1,9 @@
 :- module(pdt_builder,
-	[	%pdt_request_target/1, 
-		%pdt_release_target/1,		
+	[	pdt_request_target/1, 
+		pdt_request_targets/1, 
 		pdt_invalidate_target/1,
-		pdt_with_targets/2,
+		pdt_with_targets/1,
+		pdt_with_targets/2,		
 		pdt_restart_arbiter/0,
 		debugme/0
 	]
@@ -27,7 +28,7 @@
 :- dynamic target_state/2.
 
 
-:- module_transparent pdt_with_targets/2.
+:- module_transparent pdt_with_targets/2, pdt_with_targets/1.
 
 %% pdt_with_targets(+Targets,+Goal).
 % holds read locks for the specified list of Targets while executing Goal.
@@ -37,36 +38,49 @@
 % the locks are NOT released. 
 %
 
-pdt_with_targets([],Goal):-
-	call(Goal).
-pdt_with_targets([Target|Targets],Goal):-
-    pdt_builder:pdt_request_target(Target),
-    call_cleanup(
-    	pdt_with_targets(Targets,Goal),
-    	pdt_builder:pdt_release_target(Target)
+
+pdt_with_targets(Goal):-
+    pdt_with_targets([],Goal).
+
+pdt_with_targets(Ts,Goal):-
+    pdt_builder:asserta('$has_lock'('$mark'),Ref),
+    pdt_request_targets(Ts),
+    call_cleanup(Goal,pdt_builder:release_targets(Ref)).
+    
+release_targets(Ref):-
+    clause('$has_lock'(T),_,LockRef),
+    (	LockRef==Ref
+    ->	erase(Ref),
+    	!
+    ;	erase(LockRef),
+		thread_send_message(build_arbiter,msg(T,release)),
+		fail
     ).
-	
 
 
 %%
 % pdt_request_target(+Target)
 % request a target.
+% May only be called within a pdt_with_targets/1 or pdt_with_targets/2 call.
 %
-% @deprecated: In most situations, you really want to use pdt_with_targets/2. 
-%
-% Make sure the information associated with Target is present and up to date.
+%  Make sure the information associated with Target is present and up to date.
 % If necessary, the calling thread will wait until the information is built.
 %
 % The calling thread obtains a "read lock" on the specified target.
 % As long as a target is locked, it can not be built.
-% The lock can be released using pdt_release_target/1.
+% The targets are released once the surrounding pdt_with_targets/1 or pdt_with_targets/2 call exits.
 %
-pdt_request_target(Target):-
+
+pdt_request_target(T):-
+    (	'$has_lock'('$mark')
+    ->	request_target(Target)
+    ;	throw(error(not_within_pdt_with_targets))
+    ).
+
+request_target(Target):-
     '$has_lock'(Target),
-    !,
-    %keep counting!
-    assert('$has_lock'(Target)).
-pdt_request_target(Target):-
+    !.
+request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
 	debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
@@ -86,6 +100,15 @@ pdt_request_target(Target):-
     ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
     ).
 
+pdt_request_targets(Ts):-
+	(	'$has_lock'('$mark')
+    ->	request_targets(Ts)
+    ;	throw(error(not_within_pdt_with_targets))
+    ).
+request_targets([]).
+request_targets([T|Ts]):-
+	request_target(T),
+	request_targets(Ts).
 
 build_target(Target):-
     (	catch(
@@ -99,21 +122,7 @@ build_target(Target):-
     ;	thread_send_message(build_arbiter,msg(Target,fail))
     ).
 
-%%
-% pdt_release_target(+Target).
-% release a target.
-% 
-% @deprecated: In most situations, you really want to use pdt_with_targets/2.
-%
-% Release a read lock the current thread holds on the Target.
-% TODO: currently we do not check wether the thread actually has a lock.
-pdt_release_target(Target):-
-	debug(builder(debug),"sending release to arbiter:~w.~n",[msg(Target,release)]),
-	retract('$has_lock'(Target)),
-	(	'$has_lock'(Target) %% only release if "counter" is zero
-	->	true
-	;	thread_send_message(build_arbiter,msg(Target,release))
-	).
+
 
 %%
 % pdt_invalidate_target(+Target)
@@ -302,7 +311,7 @@ target_transition(state(idle, available , [],[]), 		mark_clean, 	[],						state(
 target_transition(state(idle, _ , [],[]), 				mark_clean, 	[notify_done],			state(idle, available, [],[]),_Target).
 target_transition(state(idle, _ , [],Ts), 				mark_clean, 	[notify_done,grant(Ts)],state(reading, available, Ts,[]),_Target).
 target_transition(state(A, available, Ls,[]), 			mark_dirty, 	invalidate,				state(A, outdated , Ls,[]),_Target).
-target_transition(state(A, outdated, [],[]), 			mark_dirty, 	[], 					state(A, outdated , [],[]),_Target).
+target_transition(state(A, outdated, Ls,Ws), 			mark_dirty, 	[], 					state(A, outdated , Ls,Ws),_Target).
 target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),				state(idle, pending(T) , [], []),_Target). 
 target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],						state(reading, outdated , Ls, [T|Ts]),_Target).
 target_transition(state(reading, outdated, [_,L|Ls],Ts),release,	 	[],						state(reading, outdated , [L|Ls], Ts),_Target).
