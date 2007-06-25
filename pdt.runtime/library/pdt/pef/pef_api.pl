@@ -21,7 +21,8 @@
 	module_exports/2,
 	get_pef_file/2,
 	first_clause/3,
-	first_clause/4	
+	first_clause/4,
+	file_depends_star/2
 	]).
 
 :- use_module(library('pef/pef_base')).
@@ -231,3 +232,19 @@ first_clause(FID, PID, PredID,Clause):-
 	pef_program_module_query([program=PID,module=MID]),
 	!.
     
+    
+file_depends_star(D,D).
+file_depends_star(A,C):-
+    nonvar(A),
+    !,
+    file_depends(A,B),
+    file_depends_star(B,C).
+file_depends_star(A,C):-
+    nonvar(C),
+    !,
+    file_depends(B,C),
+    file_depends_star(A,B).
+    
+file_depends(A,B):-
+	pef_file_dependency_query([depending=A,dependency=B]).    
+	    
