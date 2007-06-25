@@ -99,6 +99,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	private void build(IFile file, AsyncPrologSession as) throws CoreException,
 			PrologInterfaceException {
 
+		Debug.debug("builder processing file "+file);
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 		file.getCharset();
