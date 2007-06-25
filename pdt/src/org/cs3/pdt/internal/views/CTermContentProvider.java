@@ -234,6 +234,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			return;
 		}
 		Debug.debug("outline refresh (contentModelChanged)");
+		
 		viewer.refresh();
 
 	}

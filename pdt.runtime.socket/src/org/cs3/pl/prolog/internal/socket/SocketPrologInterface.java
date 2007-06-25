@@ -203,7 +203,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			client.setParanoiaEnabled(false);
 			client.setPool(pool);
 			PrologSession controlSession = getSession_impl();
-			AsyncPrologSession s = new AsyncSocketSession(client, this,controlSession);
+			AsyncPrologSession s = new AsyncSocketSession(client, this/*,controlSession*/);
 
 			return s;
 		} catch (Throwable e) {

@@ -28,5 +28,4 @@ pdt_file_removed(Abs):-
     pdt_invalidate_target(file(Abs)).
     
 pdt_builder:invalidate_hook(file(_)):-
-    update_file(Abs),
 	pdt_invalidate_target(workspace).    

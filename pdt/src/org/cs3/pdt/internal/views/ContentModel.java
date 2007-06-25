@@ -19,6 +19,7 @@ import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
+import org.cs3.pl.prolog.AsyncPrologSessionProxi;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
@@ -58,7 +59,14 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private String subject;
 
 	private AsyncPrologSession session;
-
+/*
+	private Thread collector = new Thread(){
+			while(true)
+			while(! shouldDispose()){
+				this.wait(2000);
+			}
+	};
+	*/
 	public void update(PrologInterfaceEvent e) {
 
 		String subject = e.getSubject();
@@ -141,13 +149,14 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private void fetchChildren(File file) throws PrologInterfaceException {
 		synchronized (sessionLock) {
 			final AsyncPrologSession session = getSession();
-			String query = "get_pef_file('"
-					+ Util.prologFileName(file)
-					+ "',FID),"
-					+ "pdt_outline_child(FID,pef_file,FID,ChildT,Child),"
-					+ "pdt_outline_label(FID,ChildT,Child,Label),"
-					+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
-					+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
+			String query = "pdt_outline(" +
+					"'" +Util.prologFileName(file)+"'," +
+							"ChildT," +
+							"Child," +
+							"Label," +
+							"Tags," +
+							"Start," +
+							"End)";
 			session.queryAll(input, query);
 		}
 
@@ -158,17 +167,17 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private void fetchChildren(PEFNode parent) throws PrologInterfaceException {
 		synchronized (sessionLock) {
 			AsyncPrologSession session = getSession();
-			String query = "get_pef_file('"
-					+ Util.prologFileName(getFile())
-					+ "',FID),"
-					+ "pdt_outline_child(FID,"
-					+ parent.getType()
-					+ ","
-					+ parent.getId()
-					+ ",ChildT,Child),"
-					+ "pdt_outline_label(FID,ChildT,Child,Label),"
-					+ "findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),"
-					+ "(	pdt_outline_position(FID,ChildT,Child,Start,End)->true;Start= -1,End= -1)";
+			String query = "pdt_outline(" +
+			"'" +Util.prologFileName(getFile())+"'," +
+					"'"+parent.getType()+"'," +
+					"'"+parent.getId()+"'," +
+					"ChildT," +
+					"Child," +
+					"Label," +
+					"Tags," +
+					"Start," +
+					"End)";
+	
 			session.queryAll(parent, query);
 		}
 	}
@@ -253,7 +262,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private AsyncPrologSession getSession() throws PrologInterfaceException {
 		synchronized (sessionLock) {
 			if (session == null && pif != null) {
-				session = ((PrologInterface2) pif).getAsyncSession();
+				//session = ((PrologInterface2) pif).getAsyncSession();
+				session=new AsyncPrologSessionProxi((PrologInterface2) pif);
 				// session.setPreferenceValue("socketsession.canonical",
 				// "true");
 				session.addBatchListener(this);
@@ -330,7 +340,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (this) {
 			timestamp = System.currentTimeMillis();
 		}
-		disposeSession();
+		//disposeSession();
 		synchronized (cache) {
 			cache.clear();
 
