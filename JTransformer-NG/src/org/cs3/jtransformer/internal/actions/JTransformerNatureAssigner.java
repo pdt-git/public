@@ -122,6 +122,14 @@ public class JTransformerNatureAssigner {
 
 	public boolean askAndAddNatures() throws Exception {
 	
+		if(!autoBuildTurnedOn()) {
+			final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			MessageDialog.openError(shell,"JTransformer", 
+					"Auto-build is not turned on. JTransformer will not work properly when auto-build is turned off.\n" +
+					"Please change this setting via the menu item \"Project->Build Automatically\" an try again.");
+						return false;
+		}
+
 		String factbaseName = selectAlternativePrologInterface(((IProject)projects.get(0)).getName());
 		if(factbaseName == null) {
 			return false;
@@ -130,6 +138,10 @@ public class JTransformerNatureAssigner {
 		List sortedProjects = sorter.sort(includeReferencedProjects,projects);
 		includeReferencedProjects = false;
 		
+		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
+			JTDebug.info("JTransformerNatureAssigner.askAndAddNatures: " + (IProject)iter.next() + ", factbase: " + factbaseName);
+		}
+
 		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
 		    addNature((IProject)iter.next(), factbaseName);
 		}
@@ -151,13 +163,16 @@ public class JTransformerNatureAssigner {
 	 */
 	public boolean addNature(IProject project, String factbaseName) throws JavaModelException, CoreException {
 		final IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+		JTDebug.info("JTransformerNatureAssigner.addNature to project: " + project + ", factbase: " + factbaseName);
 
 		if(javaProject == null) {
 			final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			MessageDialog.openError(shell,"JTransformer", 
-					"Project '" + project.getName() + "':\nYou can only assign the JTransformer nature to Java projects.");
+					"Project '" + project.getName() + "':\nYou can assign the JTransformer nature only to Java projects.");
 						return false;
 		}
+
+			 
 //		if(javaProject.getOption(JavaCore.COMPILER_SOURCE,true).equals(JavaCore.VERSION_1_5)) {
 //			final Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 //			MessageDialog.openError(shell,"JTransformer", 
@@ -201,6 +216,11 @@ public class JTransformerNatureAssigner {
 		    	JTUtils.addReferenceToOutputProjectIfNecessary(javaProject, destProject);
 		    }
 		    return true;
+	}
+
+	private boolean autoBuildTurnedOn() {
+		 String key = ResourcesPlugin.PREF_AUTO_BUILDING;
+		 return ResourcesPlugin.getPlugin().getPluginPreferences().getBoolean(key);
 	}
 
 	public void removeNature(IProject project, boolean deleteOutputProject, boolean removeOutputProjectReference) throws CoreException, PrologInterfaceException {

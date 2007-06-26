@@ -16,6 +16,7 @@ import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
+import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
@@ -28,6 +29,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -176,14 +178,20 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
 			
-	    	JTDebug.debug("JT: JTransformerSubscription.afterInit: for project '" + getId() + "' (begin)");
+	    	JTDebug.debug("JT: JTransformerSubscription.afterInit ("+hashCode()+"): for project '" + getId() + "' (begin)");
 
 			buildAllProjectsOfPif();
-	    	JTDebug.debug("JT: JTransformerSubscription.afterInit: for project '" + getId() + "' (end)");
+	    	JTDebug.debug("JT: JTransformerSubscription.afterInit ("+hashCode()+"): for project '" + getId() + "' (end)");
 		}
 
 		private void buildAllProjectsOfPif() {
 			try {
+				synchronized (toBeBuiltMonitor) {
+					JTDebug.info("JT: Deactivating auto-building");
+					 ResourcesPlugin.getPlugin().getWorkspace().getDescription().setAutoBuilding(false);
+
+				}
+
 				JTDebug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: start");
 
 				List tmpProjects = null;
@@ -262,6 +270,8 @@ public class JTransformerSubscription extends DefaultSubscription implements
 				public IStatus run(IProgressMonitor monitor) {
 					synchronized (toBeBuiltMonitor) {
 						toBeBuilt.removeAll(projects);
+						JTDebug.info("JT: Re-activating auto-building");
+ 					    ResourcesPlugin.getPlugin().getWorkspace().getDescription().setAutoBuilding(true);
 					}
 					return Status.OK_STATUS;
 				}
@@ -346,10 +356,25 @@ public class JTransformerSubscription extends DefaultSubscription implements
 			Job j = new Job("Building JTransformer PEFs for project " + project.getName()) {
 				public IStatus run(IProgressMonitor monitor) {
 					try {
+						if(!project.isSynchronized(IResource.DEPTH_INFINITE))
+						{
+							JTUtils.clearPersistantFacts(getPifKey());
+							JTDebug.debug("JTransformerSubscription.buildProject: project " + project.getName() +
+									" is not up-to-date. Refreshing project.");
+							project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+//							project.build(
+//									IncrementalProjectBuilder.FULL_BUILD, 
+//									JTransformer.BUILDER_ID,
+//									new HashMap(),
+//									monitor);
+						} 
+//						FactBaseBuilder builder = new FactBaseBuilder(project);
+//						builder.build(null, 0, monitor);
 						project.build(IncrementalProjectBuilder.FULL_BUILD, 
 								JTransformer.BUILDER_ID,
 								new HashMap(),
 								monitor);
+						
 					} catch (OperationCanceledException opc) {
 						return Status.CANCEL_STATUS;
 					} catch (Exception e) {

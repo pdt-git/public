@@ -22,6 +22,7 @@ import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.prolog.PrologException;
@@ -532,6 +533,11 @@ public class JTUtils
 	/**
 	 * Util method returning the Prolog interface.
 	 * 
+	 * Uses the method {@link JTransformerNature#getPrologInterface()}.
+	 * 
+	 * To ensure that the prolog interface nature is correctly loaded this method MUST be called.
+	 * It is not sufficient to get a PrologInterface via its key from the {@link PrologInterfaceRegistry}.
+	 * 
 	 * @param project
 	 * @return PrologInterface
 	 * @throws CoreException
@@ -935,6 +941,16 @@ public class JTUtils
 	}
 	public static String getFactbaseKeyForProject(IProject project) {
 		return JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(project, JTransformer.PROLOG_RUNTIME_KEY, null);
+	}
+	
+	/**
+	 * Returns the corresponding subscription key for a runtime (factbase) key. 
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static String getSubscriptionIDForRuntimeKey(String key) {
+		return JTransformer.SUBSCRIPTION_PREFIX + key;
 	}
 
 }
