@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,8 +29,6 @@ import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
 import org.cs3.jtransformer.util.JTUtils;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PrologException;
@@ -47,6 +44,7 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,18 +54,23 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.JarPackageFragmentRoot;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -85,7 +88,7 @@ public class FactBaseBuilder {
 
 	private static final Object TICKET = "TICKET";
 
-    private JTransformerProject jtransformerProject;
+    //private JTransformerProject jtransformerProject;
 
     private IProject project;
 
@@ -95,16 +98,16 @@ public class FactBaseBuilder {
 
     private boolean building = false;
 
-    private long storeTimeStamp;
+//    private long storeTimeStamp;
 
 	private Set postponed = new HashSet();
     
     /**
      *  
      */
-    public FactBaseBuilder(JTransformerProject jtransformerProject) {
-        this.jtransformerProject = jtransformerProject;
-        this.project = jtransformerProject.getProject();
+    public FactBaseBuilder(IProject project) {
+        //this.jtransformerProject = jtransformerProject;
+        this.project = project;//jtransformerProject.getProject();
 //        this.setPif(jtransformerProject.getPrologInterface());
     }
 
@@ -136,13 +139,15 @@ public class FactBaseBuilder {
    			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
         	JTUtils.clearAllMarkersWithJTransformerFlag(project);
 
-            if (building) {
-                JTDebug.warning("skipping build");
-                return;
-            } else {
-                JTDebug.warning("doing build");
-            }
-            building = true;
+        	String kind=delta == null ? "full" : "incremental";
+        	
+//            if (building) {
+//                JTDebug.warning("skipping "+kind+" build for project " +project.getName());
+//                return;
+//            } else {
+                JTDebug.info("doing "+kind+" build for project " + project.getName());
+//            }
+//            building = true;
             if (monitor == null) {
                 monitor = new NullProgressMonitor();
             }
@@ -150,8 +155,19 @@ public class FactBaseBuilder {
             build_impl(delta, flags, monitor);
 
         } catch (OperationCanceledException e) {
+        	try {
+				JTUtils.clearPersistantFacts(getPifKey());
+			} catch (PrologInterfaceException e1) {
+				e1.printStackTrace();
+			}
             throw e;
         } catch (Throwable t) {
+        	try {
+				JTUtils.clearPersistantFacts(getPifKey());
+			} catch (PrologInterfaceException e1) {
+				e1.printStackTrace();
+			}
+
 			HashMap attributes = new HashMap();
 
 			attributes.put(IMarker.MESSAGE, "Could not create PEFs for project: " + project.getName() + " - " +t.getLocalizedMessage());
@@ -184,7 +200,7 @@ public class FactBaseBuilder {
     synchronized private void build_impl(IResourceDelta delta, int flags,
             IProgressMonitor monitor) throws IOException, CoreException, PrologInterfaceException {
         PrologSession session = null;
-        storeTimeStamp = -1;
+//        storeTimeStamp = -1;
         try {
 
             // ld: if pif is not currently up, this is no problem:
@@ -210,8 +226,8 @@ public class FactBaseBuilder {
             SubProgressMonitor submon = new SubProgressMonitor(monitor, 10,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
-            project.refreshLocal(IResource.DEPTH_INFINITE, null);
-            if (delta == null) {
+            project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
+            if (flags == IncrementalProjectBuilder.FULL_BUILD) {
             	if(loadPersistantFactbase(submon))
             	{
            			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
@@ -221,10 +237,12 @@ public class FactBaseBuilder {
             	
                 collectAll(toProcess);
                 updateProjectLocationInFactbase(session);
-            } else {
+            } else if(delta != null) {
         		JTDebug.info("FactbaseBuilder.build_impl: called clearing persistant factbase for project: " + project.getName());
             	JTUtils.clearPersistantFacts(getPifKey());
                 collectDelta(delta, toProcess, toDelete);
+            } else {
+        		JTDebug.warning("FactbaseBuilder.build_impl: no full build ("+flags+"), but delta is null: " + project.getName());
             }
             submon.done();
             
@@ -284,7 +302,10 @@ public class FactBaseBuilder {
 	            		"jt_facade:setUnmodifiedPersistantFactbase(true)");
 	            submon.worked(90);
         		return true;
-	        } 
+	        } else {
+				JTDebug.info("persistant facts file not found: " + init);
+
+	        }
         } catch(Exception ex){
         	JTDebug.report(ex);
         }
@@ -298,6 +319,7 @@ public class FactBaseBuilder {
 
     
 	private void loadOrBuildJavaLang(SubProgressMonitor submon) {
+		PrologSession session = null;
         
         try {
         	if(pefFactbaseEmpty())
@@ -312,26 +334,71 @@ public class FactBaseBuilder {
 					return;
 				}
 				JTDebug.info("looking for factbase init file for JDK " + implementationVersion );
+
+				String filenamePrefix = "initfactbase/java.lang" + implementationVersion;
+	    		session = getPif().getSession();
+
+				if(swingClassesReferencedInProject(javaProject)) {
+					JTDebug.info("including swing classes in the class init cache: " + implementationVersion +"_swing");
+					
+					session.queryOnce("update_javax_swing");
+					filenamePrefix += "_swing";
+				}
+				
 		        IPath init = JTransformerPlugin.getDefault().getStateLocation().append(
-								new Path("initfactbase/java.lang" + implementationVersion + ".pl"));
+								new Path(filenamePrefix + ".pl"));
 		        File directory = init.removeLastSegments(1).toFile();
 		        if(!directory.isDirectory()){
 		        	directory.mkdirs();
 		        }
 		        String fileName = init.toOSString().replace('\\', '/');
 	    	        if(init.toFile().isFile()){
-	            		JTDebug.info("Consulting java lang factbase");
-	    	        	JTUtils.queryOnceSimple(getPif(),"consult('"+fileName+ "')");
+	            		JTDebug.info("Consulting java lang factbase: " + fileName);
+	    	        	session.queryOnce("consult('"+fileName+ "')");
 	    	        } else {
 	    	        	loadExternalFacts(submon);
 	            		JTDebug.info("Writing java lang factbase to: "+ init.toOSString());
-	    	        	JTUtils.queryOnceSimple(getPif(),"writeTreeFacts('"+fileName+ "')");
+	            		session.queryOnce("writeTreeFacts('"+fileName+ "')");
 	    	        }
             }
         } catch(Exception ex){
         	JTDebug.report(ex);
-        }
+        } finally {
+    		if(session != null){
+    			session.dispose();
+    		}
+    	}
         
+	}
+
+	private boolean swingClassesReferencedInProject(final IJavaProject javaProject) throws JavaModelException {
+//		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {javaProject});
+//		final boolean foundSwing[] = new boolean[1];
+//		foundSwing[0] = false;
+//		IType jpanel = javaProject.findType("javax.swing.JPanel");
+//		if(jpanel == null) {
+//			return false;
+//		}
+//	    // Create search pattern
+//	    SearchPattern pattern = SearchPattern.createPattern(jpanel.getPackageFragment(), IJavaSearchConstants.REFERENCES);
+//
+//
+//	    // Get the search requestor
+//	    SearchRequestor requestor = new SearchRequestor() {
+//			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+//				foundSwing[0] = true;
+//			}
+//	    };
+//		
+////	  Search
+//	    try {
+//			searchEngine.search(pattern, new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()}, scope, requestor, null);
+//		} catch (CoreException e) {
+//			e.printStackTrace();
+//		}
+//	    return foundSwing[0];
+		return javaProject.findType("javax.swing.JPanel") != null || 
+		   javaProject.findType("javax.swing.JFrame")!= null;
 	}
 
 	private String getJDKImplementationVersion(final IJavaProject javaProject) throws JavaModelException, CoreException, IOException {
@@ -475,11 +542,11 @@ public class FactBaseBuilder {
                             break;
                         case IResourceDelta.CHANGED:
                         case IResourceDelta.ADDED:
-                            if (!isStoreUpToDate((IFile) (resource))) { // added,...???
+//                            if (!isStoreUpToDate((IFile) (resource))) { // added,...???
                                 JTDebug.debug("Adding " + resource
                                         + " to toProcess");
 									toProcess.add(resource);
-                            }
+//                            }
                             break;
                         default://added, moved, etc
 
@@ -523,7 +590,9 @@ public class FactBaseBuilder {
                 if (resource.getType() == IResource.FILE) {
                     if (resource.getFileExtension() != null
                             && resource.getFileExtension().equals("java")
-                            && !isStoreUpToDate((IFile) resource)) {
+//                            && !isStoreUpToDate((IFile) resource)
+                       )
+                    {
                         JTDebug.debug("Adding " + resource + " to toProcess");
 						
 						if(!inExclusionPattern(resource))
@@ -584,62 +653,62 @@ public class FactBaseBuilder {
             }
     }
 
-    /**
-     * 
-     * @param file
-     * @return false if the building failed
-     * @throws IOException
-     * @throws CoreException
-     */
-    private boolean isStoreUpToDate(IFile file) {
-        long recordTS = getStoreTimeStamp();
-        long fileTS = file.getLocalTimeStamp();
-        JTDebug.debug("store ts: " + recordTS);
-        JTDebug.debug("file ts: " + fileTS);
-        // ld:no need to create facts that are already known
-        /*
-         * FIXME: currently we only ensure that the record is up-to-date. in
-         * theory, so should be the consulted facts, but it might be better to
-         * check. otoh, this would be quite expensive if there are many
-         * resources to check.
-         * 
-         * 
-         * ld: note that the up-to-date check HAS to be pessimistic if both time
-         * stamps are equal - this is a more commen the case as one might think -
-         * e.g. on my system, time stamps are as coarse grained as one whole
-         * second, which is literaly nothing during test runs.
-         */
-        if (recordTS > fileTS) {
-            JTDebug.debug("store is up to date");
-            return true;
-        }
-        JTDebug.debug("store is outdated");
-        return false;
-    }
+//    /**
+//     * 
+//     * @param file
+//     * @return false if the building failed
+//     * @throws IOException
+//     * @throws CoreException
+//     */
+//    private boolean isStoreUpToDate(IFile file) {
+//        long recordTS = getStoreTimeStamp();
+//        long fileTS = file.getLocalTimeStamp();
+//        JTDebug.debug("store ts: " + recordTS);
+//        JTDebug.debug("file ts: " + fileTS);
+//        // ld:no need to create facts that are already known
+//        /*
+//         * FIXME: currently we only ensure that the record is up-to-date. in
+//         * theory, so should be the consulted facts, but it might be better to
+//         * check. otoh, this would be quite expensive if there are many
+//         * resources to check.
+//         * 
+//         * 
+//         * ld: note that the up-to-date check HAS to be pessimistic if both time
+//         * stamps are equal - this is a more commen the case as one might think -
+//         * e.g. on my system, time stamps are as coarse grained as one whole
+//         * second, which is literaly nothing during test runs.
+//         */
+//        if (recordTS > fileTS) {
+//            JTDebug.debug("store is up to date");
+//            return true;
+//        }
+//        JTDebug.debug("store is outdated");
+//        return false;
+//    }
 
-    /**
-     * @return
-     */
-    private long getStoreTimeStamp() {
-        JTransformerPlugin plugin = JTransformerPlugin.getDefault();
-        String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE, "false");
-        if (!Boolean.valueOf(v).booleanValue()) {
-            return -1;
-        }
-        if (storeTimeStamp == -1) {
-            String filename = jtransformerProject.getPreferenceValue(
-			        JTransformer.PROP_PEF_STORE_FILE, "");
-			File file = new File(filename);
-			if (file.canRead()) {
-			    storeTimeStamp = file.lastModified();
-			} else {
-			    storeTimeStamp = -1;
-			}
-
-        }
-
-        return storeTimeStamp;
-    }
+//    /**
+//     * @return
+//     */
+//    private long getStoreTimeStamp() {
+//        JTransformerPlugin plugin = JTransformerPlugin.getDefault();
+//        String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE, "false");
+//        if (!Boolean.valueOf(v).booleanValue()) {
+//            return -1;
+//        }
+//        if (storeTimeStamp == -1) {
+//            String filename = jtransformerProject.getPreferenceValue(
+//			        JTransformer.PROP_PEF_STORE_FILE, "");
+//			File file = new File(filename);
+//			if (file.canRead()) {
+//			    storeTimeStamp = file.lastModified();
+//			} else {
+//			    storeTimeStamp = -1;
+//			}
+//
+//        }
+//
+//        return storeTimeStamp;
+//    }
 
     private void buildFacts(AsyncPrologSession session, IFile file) throws IOException, CoreException, PrologInterfaceException {
 
@@ -965,10 +1034,10 @@ public class FactBaseBuilder {
     		JTDebug.info("FactbaseBuilder.clear: called clearing persistant factbase for project: " + project.getName());
             JTUtils.clearPersistantFacts(getPifKey());
             // getMetaDataSRC().clearRecords();
-            String storeName = jtransformerProject.getPreferenceValue(
-                    JTransformer.PROP_PEF_STORE_FILE, null);
-            new File(storeName).delete();
-            storeTimeStamp = -1;
+//            String storeName = jtransformerProject.getPreferenceValue(
+//                    JTransformer.PROP_PEF_STORE_FILE, null);
+//            new File(storeName).delete();
+//            storeTimeStamp = -1;
             if (monitor != null) {
                 monitor.done();
             }

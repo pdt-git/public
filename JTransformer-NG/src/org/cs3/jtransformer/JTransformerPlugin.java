@@ -44,6 +44,7 @@ import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -173,7 +174,8 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	private String getLocation() throws IOException {
 		URL url = JTransformerPlugin.getDefault().getBundle().getEntry("/");
 		String location = null;
-		location = new File(Platform.asLocalURL(url).getFile())
+		// replaced Platform.asLocalURL(url) with FileLocator.toFileURL(url) 
+		location = new File(FileLocator.toFileURL(url).getFile())
 				.getAbsolutePath();
 		if (location.charAt(location.length() - 1) == File.separatorChar)
 			location = location.substring(0, location.length() - 1);

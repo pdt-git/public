@@ -1999,6 +1999,8 @@ public class FactGenerator extends ASTVisitor implements Names {
 				Integer.toString(node.getStartPosition()),
 				Integer.toString(node.getLength())
 		});
+		
+		
 		writeSourceLocationArgumentIdentifier(node, node.getName(),node.modifiers());
 		
 	

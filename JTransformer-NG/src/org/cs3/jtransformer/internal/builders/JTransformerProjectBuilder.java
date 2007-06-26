@@ -82,13 +82,12 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 			}
 			
 			
-			int flags = FactBaseBuilder.IS_ECLIPSE_BUILD;
 			if(!JTransformerPlugin.getDefault().ignoreThisBuild(getProject())) {
 				switch (kind) {
 					case FULL_BUILD :
 						//updateProjectLocationInFactbase(nature);
 				    	JTDebug.debug("JT: started full build for project: " + getProject().getName());
-						nature.getFactBaseBuilder().build(null, flags, monitor);
+						nature.getFactBaseBuilder().build(null, kind, monitor);
 						break;
 					case INCREMENTAL_BUILD :
 					case AUTO_BUILD :
@@ -98,7 +97,7 @@ public class JTransformerProjectBuilder extends IncrementalProjectBuilder{
 				    	JTDebug.debug("JT: started "+ 
 				    			(kind == INCREMENTAL_BUILD ? "incremental" : "auto")
 				    			+ " build for project: " + getProject().getName());
-					    nature.getFactBaseBuilder().build(getDelta(getProject()),flags,monitor);
+					    nature.getFactBaseBuilder().build(getDelta(getProject()),kind,monitor);
 						break;
 				}
 			}

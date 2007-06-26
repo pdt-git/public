@@ -237,7 +237,7 @@ public class JTDebug {
 		//String loc = "("+stackFrame.getFileName()+":"+stackFrame.getLineNumber()+")";
         //String loc = stackFrame.toString();
         Date d = new Date();
-        out.println(prefix+":"+tn+": "/*+ loc+": "*/+ msg);
+        out.println("JT: " +prefix+":"+tn+": "/*+ loc+": "*/+ msg);
         out.flush();
 
     }
