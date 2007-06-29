@@ -446,7 +446,7 @@ public class SocketSessionTest extends TestCase {
 	       }
 	   }
 	public void test_manySessions() throws Throwable{
-		int N= 50;
+		int N= 24;
 		PrologSession[] sessions = new PrologSession[N];
 		for(int i=0;i<N;i++){
 			sessions[i]=pif.getSession();
