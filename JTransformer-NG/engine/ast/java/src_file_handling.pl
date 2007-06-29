@@ -56,8 +56,8 @@ add_new_class_and_file(Id, Owner, Name, Defs) :-
        getPackage(Id,PID),
        (Owner = null;Owner = PID),
        fullPathOfClass(Id,FullPath),
-       print(' added new toplevel: '),       
-       print(FullPath),
+       debug(applyct, ' added new toplevel:~w~n',[FullPath]),       
+       
 	   defaultProjectSourceFolder(Project,SourceFolder,FullSourceFolder),
        sformat(S, '/~w/~w.java',[FullSourceFolder,FullPath]),
        string_to_atom(S,Filename),

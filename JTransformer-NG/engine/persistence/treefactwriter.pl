@@ -70,7 +70,10 @@ internal_writeTreeFacts(File, Mode) :-
 
     		
     forall(globalIds(FQN,Id),
-    	   format(Stream, 'globalIds(''~w'',~w).~nri_globalIds(~w,''~w'').~n',[FQN,Id,Id,FQN])
+    	   format(Stream, 'globalIds(''~w'',~w).~n',[FQN,Id])
+    ),
+    forall(globalIds(FQN,Id),
+    	   format(Stream, 'ri_globalIds(~w,''~w'').~n',[Id,FQN])
     ),
     
     lastID(LastID),
@@ -99,11 +102,15 @@ persistant(Fact) :-
 treeFact(Fact) :-
     (
       treeSignature(Head,Arity);
-      attribSignature(Head,Arity)
+      attribSignature(Head,Arity);
+      reverseIndexSignature(Head,Arity)
     ),
     uniqueArgumentList(Arity,Arguments),
     Fact =.. [Head|Arguments].
 
+reverseIndexSignature(Head,Arity):-
+  (ri_functor_kind(_,_,Head),Arity=2).
+  
 clearTreeFactbase :-
     rollback,
     clearPersistantFacts.

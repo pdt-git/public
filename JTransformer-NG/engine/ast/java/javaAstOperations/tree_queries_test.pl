@@ -2,7 +2,7 @@ setUp(walkTree1):-
 applyT(17905, 17904, 10113, null, super, [], 10090).
 execT(17904, 17903, 10113, 17905).
 blockT(17903, 10113, 10113, [17904]).
-methodDefT(10113, 10110, <init>, [], type(basic, void, 0), [], 17903).
+methodDefT(10113, 10110, '<init>', [], type(basic, void, 0), [], 17903).
 modifierT(10113, public).
 modifierT(10113, synthetic).
 fieldDefT(10117, 10110, type(class, 10133, 0), inbox, null).
@@ -43,7 +43,7 @@ paramDefT(17929, 17922, type(class, 10001, 0), ob).
 identT(17930, 17922, 10119, a, 17921).
 
 
-identT(17936, 17934, 10119, System, 10023).
+identT(17936, 17934, 10119, 'System', 10023).
 
 getFieldT(17934, 17933, 10119, 17936, out, 10156).
 
@@ -71,13 +71,13 @@ modifierT(10119, static).
 
 
 
-classDefT(10110, 10080, MailClient, [10113, 10117, 10118, 10119]).
+classDefT(10110, 10080, 'MailClient', [10113, 10117, 10118, 10119]).
 extendsT(10110, 10001).
 modifierT(10110, public).
 
 
 
-identT(17909, 17908, 10110, org.cs3.pimpro.Activator, type(class, 10124, 0)).
+identT(17909, 17908, 10110, 'org.cs3.pimpro.Activator', type(class, 10124, 0)).
 selectT(17908, 17906, 10110, class, 17909, type(class, 10002, 0)).
 
 

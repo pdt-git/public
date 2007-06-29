@@ -45,8 +45,12 @@ getTerm(ID,Term):-
     nonvar(ID).  
  
 getTerm(ID,Term):-
-    tree(ID,_,Functor),
-    ast_node_def('Java',Functor,List),
+    (	nonvar(ID) 
+    ->  tree(ID,_,Functor),
+	!
+    ;	tree(ID,_,Functor)
+    ),
+    ast_node_def_Java(Functor,List),
     length(List,Len),
     functor(Term,Functor,Len),
     arg(1,Term,ID),
@@ -64,7 +68,7 @@ getTerm(ID,Term):-
 */
 
 enclosing(ID,Encl):-
-    ast_node_def('Java',Name,List),
+    ast_node_def_Java(Name,List),
     length(List,Len),
     functor(Term,Name,Len),
     arg(1,Term,ID),
@@ -125,7 +129,7 @@ set_encl_method(ID,NewEncl):-
     
 set_pef_arg_(ID, ArgName, NewArg):-
     tree(ID,_,Functor),
-    ast_node_def('Java',Functor,List),
+    ast_node_def_Java(Functor,List),
 	build_arg_terms_(ArgName,_OldArg,NewArg,List,OldArgs,NewArgs),
 	OldTerm =.. [Functor|OldArgs],
 	NewTerm =.. [Functor|NewArgs],
@@ -171,7 +175,7 @@ tearDown(set_parent):-
     rollback.
 
 test(build_arg_terms_):-
-    ast_node_def('Java',applyT,List),
+    ast_node_def_Java(applyT,List),
     build_arg_terms_(encl, old,new,List,OldArgs,NewArgs),
 	OldArgs = [G2865, G2871, old, G2883, G2889, G2895, G2901],
 	NewArgs = [G2865, G2871, new, G2883, G2889, G2895, G2901].    

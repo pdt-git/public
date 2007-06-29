@@ -77,6 +77,11 @@ activate_reverse_indexes :-
 :- multifile globalIds/4.
 :- dynamic globalIds/4.
 
+/**
+ * ri_functor_kind(Pef, Argument, ReverseIndexFunctor)
+ *
+ */
+:- dynamic ri_functor_kind/3.
 
 /**
  * symtab(+Id, +fullQualifiedName)
@@ -395,7 +400,7 @@ deleteTreeReverseIndexes(Translated) :-
 
 actionOnTreeReverseIndexes(Action,Translated) :-
 	Translated =.. [Functor,Id | Args],
-	ast_node_def('Java',Functor,[_|ArgDefs]),
+	ast_node_def_Java(Functor,[_|ArgDefs]),
 	!,
 	assert_reverse_indexes(Action,Functor,Id, Args, ArgDefs).
 actionOnTreeReverseIndexes(_Action,_Translated).
@@ -416,7 +421,8 @@ assert_reverse_indexes(_AssertAdd,_Functor,_Id, __Args, __RestDefs):-
   \+ use_reverse_indexes,
   !.
   
-assert_reverse_indexes(_AssertAdd,_Functor,_Id, [], __RestDefs).
+assert_reverse_indexes(_AssertAdd,_Functor,_Id, [], __RestDefs):-
+  !.
 
 assert_reverse_indexes(AssertAdd, Functor,Id, [Arg|Args],
 	[ast_arg(Kind,  mult(1,1,no ), id,  _)|RestDefs]):-
@@ -461,7 +467,8 @@ create_ri_functor_kind :-
         member(ast_arg(Kind,  mult(1,1,no ), id,  _),Defs),
         ri_functor_kind_functor(Functor,Kind,RiFunctor)
       ),
-	  assert(ri_functor_kind(Functor,Kind,RiFunctor))).
+	  (assert(ri_functor_kind(Functor,Kind,RiFunctor)),
+	   dynamic(RiFunctor/2))).
 
 ri_functor_kind_functor(Functor,Kind,RiFunctorKind):-
 	  atom_concat('ri_', Functor,RiFunctor),

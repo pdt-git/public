@@ -14,7 +14,10 @@
 
 
 markEnclAsDirty(Elem):-
-    getTerm(ID,Elem),
+%    getTerm(ID,Elem),
+    
+    arg(1,Elem, ID),
+    
     not(packageT(ID,_)),
     (
     	(enclosing(ID,Encl), not(Encl = 'null'),not(packageT(Encl,_)));
