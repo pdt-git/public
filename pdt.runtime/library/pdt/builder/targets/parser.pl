@@ -83,14 +83,22 @@ do_read(F):-
     	prolog_close_source(In)
     ).
 
+spyme.
+
 do_read(F,In):-
     parse_cx_new(Cx),
     get_pef_file(F,Ref),
     parse_cx_file(Cx,Ref),    
-
     repeat,
+    	
     	catch(
-    		prolog_read_source_term(In,Term,Expanded,[variable_names(VarNames),singletons(Singletons),subterm_positions(Positions)]),    	
+    		prolog_read_source_term(In,Term,Expanded,
+    			[	variable_names(VarNames),
+    				singletons(Singletons),
+    				subterm_positions(Positions)/*,
+    				module(parser)*/
+    			]
+    		),    	
     		Error,
     		debug(parser(todo),"TODO: add an error marker for ~w.~n",[Error])
     	),
@@ -159,8 +167,9 @@ do_inclusion(File,Cx):-
 
 
 process_module_inclusion(Module,Cx):-
+	pef_module_definition_id(Module,MID),
     forall(	
-    	pef_exports_query([module=Module,signature=op(Pr,Tp,Nm)]),
+    	pef_exports_query([module=MID,signature=op(Pr,Tp,Nm)]),
     	my_push_op(Pr,Tp,Nm,Cx)
     ).
 
@@ -196,7 +205,9 @@ find_file_refs(use_module(H),_,[H]):-
     \+ is_list(H).
 
 
-my_push_op(Pr,Tp,Nm,_Cx):-
+my_push_op(Pr,Tp,Nm,Cx):-
+    
+    
     '$set_source_module'(SM, SM),
      push_op(Pr,Tp,SM:Nm).
 	    
