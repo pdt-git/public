@@ -47,7 +47,7 @@ import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderExtension;
 import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.prolog.PrologEventDispatcher;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
@@ -108,7 +108,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	 */
 	public String[] getPrologLibraryKeys() throws CoreException;
 
-	public PrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
+	public IPrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
     
     
 }

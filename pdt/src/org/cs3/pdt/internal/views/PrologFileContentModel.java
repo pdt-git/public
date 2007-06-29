@@ -2,7 +2,7 @@ package org.cs3.pdt.internal.views;
 
 import java.io.File;
 
-import org.cs3.pl.prolog.PrologEventDispatcher;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
@@ -18,7 +18,7 @@ public interface PrologFileContentModel {
 
 	
 
-	public abstract void setPif(PrologInterface pif,PrologEventDispatcher d) throws PrologInterfaceException;
+	public abstract void setPif(PrologInterface pif,IPrologEventDispatcher d) throws PrologInterfaceException;
 
 	public abstract PrologInterface getPif();
 

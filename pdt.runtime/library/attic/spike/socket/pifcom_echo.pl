@@ -1,10 +1,10 @@
 %:- module(pifcom_echo,[pifcom_echo/0, pifcom_echo_raw/0]).
 :- use_module(library(memfile)).
-
+:- use_module(library(socket)).
 :- use_module(pifcom_codec).
 
 
-
+boing.
 
 %%
 % pifcom_echo.
@@ -34,13 +34,44 @@ pifcom_echo_raw:-
     set_stream(current_input,tty(false)),
     set_stream(current_output,encoding(octet)),
     set_stream(current_output,tty(false)),    
+    call_cleanup(
+	   	pifcom_echo_raw(current_input,current_output),
+   		halt
+   	).
+    
+
+	
+    
+
+pifcom_echo_raw(Port):-
+    tcp_socket(ServerSocket),    
+	tcp_setopt(ServerSocket, reuseaddr),
+	tcp_bind(ServerSocket, Port),
+	tcp_listen(ServerSocket, 5),
+	udp_socket(USocket),
+	udp_send(USocket, "listining", localhost:Port, []),
+	tcp_accept(ServerSocket,Slave,_),
+
+   	tcp_open_socket(Slave, In, Out),
+   	set_stream(In,encoding(octet)),
+    set_stream(In,tty(false)),
+    set_stream(Out,encoding(octet)),
+    set_stream(Out,tty(false)),    
+   	call_cleanup(
+   		pifcom_echo_raw(In,Out),
+   		(	close(In),
+   			close(Out),
+   			halt
+   		)
+   	).
+   	
+    
+pifcom_echo_raw(In,Out):-    
 	call_cleanup(
-		(	pifcom_read_message(current_input,OpC,Ticket,Body),
-			pifcom_write_message(current_output,OpC,Ticket,Body)
+		(	pifcom_read_message(In,OpC,Ticket,Body),
+			pifcom_write_message(Out,OpC,Ticket,Body)
 		),
-		(	free_memory_file(Body),
-			halt
-		)
+		free_memory_file(Body)		
 	).
 
 test_file:-
@@ -150,4 +181,4 @@ test_code(Byte):-
 	size_memory_file(MF,Size),
 	free_memory_file(MF),
 	Pos==Size.
-	
+

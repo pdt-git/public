@@ -9,7 +9,7 @@
 	]
 ). 
  
-:- use_module(library(pif_observe)).
+:- use_module(library(pif_observe2)).
 
 /* hooks */
 :- dynamic 
@@ -183,11 +183,11 @@ pdt_restart_arbiter:-
 
 open_log(LogDir,Alias,Stream):-
     concat_atom([LogDir,'/',Alias,'.log'],'',Path),
-    debug(builder,"trying to open log file for writing: ~w~n",[Path]),
-	flush,
+    %debug(builder,"trying to open log file for writing: ~w~n",[Path]),
+	%flush,
     open(Path,append,Stream),
-    format(Stream,"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~n",[]),
-    debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
+    %format(Stream,"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~n",[]),
+    %debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
 	flush.
 
 
@@ -239,14 +239,14 @@ process_message(all,stop):-!.
 process_message(Target,Event):-
     current_target_state(Target,State),    
     (	target_transition(State,Event,Action,NewState,Target)
-    ->  debug(builder(debug),"Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
+    ->  debug(builder(Target),"Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
     	update_target_state(Target,NewState),
 	    (	execute_action(Action,Target)
 	    ->	true
-	    ;	debug(builder(error),"action failed ~w (target: ~w)~n",[Action,Target]),
+	    ;	debug(builder(Target),"action failed ~w (target: ~w)~n",[Action,Target]),
 	    	throw(error(action_failed(Target,State,Event,Action)))
 	    )
-	;	debug(builder(error),"no transition for state ~w, event ~w (target: ~w)~n",[State,Event,Target]),
+	;	debug(builder(Target),"no transition for state ~w, event ~w (target: ~w)~n",[State,Event,Target]),
 		throw(error(no_transition(Target,State,Event)))
 	).
  
@@ -375,6 +375,6 @@ user:prolog_exception_hook(error(resource_error(stack), local),
             writeln(arsch),trace, fail.
 
             
-             
+:-debug(builder),debug(builder(_)),debug(pif_observe).             
 
 
