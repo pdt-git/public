@@ -262,7 +262,9 @@ public class ByteCodeFactGeneratorIType {
 		String type = typeForClass(null, field.getTypeSignature());
 		String name = "'" + field.getElementName() + "'";
 		String init = "'null'";
-		
+//		if(name.equals("JEM_ESCAPE")){
+//			System.err.println("DEBUG");
+//		}
 		try {
 			if(field.getConstant() == null)
 				init = "'null'";
@@ -270,11 +272,16 @@ public class ByteCodeFactGeneratorIType {
 				String newId = idManager.newID();
 				init =""+newId;
 				String value = field.getConstant().toString();
-				value = value.replaceAll("\\n","\\\\\\\\n");
-				value = value.replaceAll("\\r","\\\\\\\\r");
-				value = value.replaceAll("\\t","\\\\\\\\t");
-				value = value.replaceAll("\"","\\\\\\\\\"");
+				if(value.equals("\\")){
+					value = "\\\\";
+				} else {
+					value = value.replaceAll("\\n","\\\\\\\\n");
+					value = value.replaceAll("\\r","\\\\\\\\r");
+					value = value.replaceAll("\\t","\\\\\\\\t");
+					value = value.replaceAll("\"","\\\\\\\\\"");
+				}
 				value = value.replaceAll("'","\\\\'");
+				
 				String [] args = new String [] {
 						newId, 
 						id,

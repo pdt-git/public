@@ -179,10 +179,10 @@ public class JTDebug {
     public static void report(Throwable t) {
         if (debugLevel == LEVEL_NONE)
             return;
-        if (t instanceof Error && debugLevel != LEVEL_NONE) {
+//        if (t instanceof Error && debugLevel != LEVEL_NONE) {
             write(LEVEL_ERROR, "The following Error was caught:");
             t.printStackTrace(out);
-        } 
+//        } 
 //        else if (debugLevel >= LEVEL_ERROR) {
 //            write(LEVEL_WARNING, "The following Exception was caught:");
 //            t.printStackTrace(out);
@@ -211,7 +211,8 @@ public class JTDebug {
 	public static PrintStream getOutputStream(){
 		return out;
 	}
-    private static void write(int level, String msg) {
+    
+	public static void write(int level, String msg) {
         if (level > debugLevel)
             return;
         String prefix;
@@ -237,7 +238,7 @@ public class JTDebug {
 		//String loc = "("+stackFrame.getFileName()+":"+stackFrame.getLineNumber()+")";
         //String loc = stackFrame.toString();
         Date d = new Date();
-        out.println("JT: " +prefix+":"+tn+": "/*+ loc+": "*/+ msg);
+        out.println("JT: " +prefix+": "+tn+": "/*+ loc+": "*/+ msg);
         out.flush();
 
     }

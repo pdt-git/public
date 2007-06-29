@@ -34,6 +34,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -44,15 +45,19 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
@@ -207,7 +212,10 @@ public class JTUtils
 			List neededFileForCopying = new ArrayList();
 
 			Map classPathReplacement = new HashMap();
-			classPathReplacement.put("(<classpathentry \\s*?kind=\"lib\" \\s*?path=\")([^/].*?\"/>)",
+			classPathReplacement.put("(<classpathentry .*?kind=\"lib\" \\s*?path=\")([^/].*?\"/>)",
+					"$1/" + srcProject.getName() + "/$2");
+
+			classPathReplacement.put("(<classpathentry .*?sourcepath=\")([^/].*?)",
 					"$1/" + srcProject.getName() + "/$2");
 
 			if( !isBundle )
@@ -769,12 +777,64 @@ public class JTUtils
 		return "'" + str + "'";
 	}
 	
-	static public void setStatusErrorMessage(final String string) {
+	/**
+	 * Open view "viewId" and set its  status line to "message".
+	 * 
+	 * If viewId is null the message is set for the currenly active view. 
+	 * 
+	 * @param viewId
+	 * @param message
+	 */
+	static public void setStatusMessage(final String viewId, final String message) {
 		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 			public void run() {
-				getActiveEditor().getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(string);
+				if(viewId != null)
+					showView(viewId);
+				getActionBarContributor().setMessage(message);
 			}
+
 		});
+	}	
+	
+	/**
+	 * 
+	 * Open view "viewId" and set its  status line to "message".
+	 * 
+	 * If viewId is null the message is set for the currenly active view. 
+	 * 
+	 * @param viewId
+	 * @param message
+	 */
+	static public void setStatusErrorMessage(final String viewId, final String message) {
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if(viewId != null)
+					showView(viewId);
+				getActionBarContributor().setErrorMessage(message);
+			}
+
+		});
+	}
+
+	
+	static private void showView(final String viewId) {
+		try {
+			JTUtils.getActivePage().showView(viewId);
+		} catch (PartInitException e) {
+			JTDebug.report(e);
+		}
+	}
+
+	/**
+	 * Must be run in sync with the display thread.
+	 * 
+	 * E.g. PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() { ...});
+	 * @return
+	 */
+	static private IStatusLineManager getActionBarContributor() {
+		IViewSite site=(IViewSite)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite();
+		System.err.println("DEBUG: " + site.getClass().getName());
+		return site.getActionBars().getStatusLineManager();
 	}
 	
 	/**
@@ -788,7 +848,7 @@ public class JTUtils
 		Path path = new Path(filename);
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(path);
 		if (file == null) {
-			setStatusErrorMessage("could not find the file: '" + filename + "' in the workspace.");
+			setStatusErrorMessage(null, "could not find the file: '" + filename + "' in the workspace.");
 			return;
 		}
 		openInEditor(file, true);
@@ -808,13 +868,30 @@ public class JTUtils
 		return null; 
 	} 
 
+	
+
+	/**
+	 * Must be run in sync with the display thread.
+	 * 
+	 * E.g. PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() { ...});
+	 * 
+	 * @return
+	 * @throws NullPointerException if not synchronized with the Display
+	 */
 	static public IEditorPart getActiveEditor() {
 		return getActivePage().getActiveEditor();
 	}
 
+	/**
+	 * Must be run in sync with the display thread.
+	 * 
+	 * E.g. PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() { ...});
+	 * 
+	 * @return
+	 * @throws NullPointerException if not synchronized with the Display
+	 */
 	static public IWorkbenchPage getActivePage() {
-		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-		getActivePage();
+		return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
 	public static void logAndDisplayUnknownError(final Exception e) {
 		UIUtils.getDisplay().asyncExec(new Runnable() {
@@ -882,7 +959,7 @@ public class JTUtils
 		return shell[0];
 	}
 
-	static public IPath getPersistantFactbaseFileForPif(String key) {
+	static public IPath getPersistentFactbaseFileForPif(String key) {
 
 		return JTransformerPlugin.getDefault().getStateLocation().append(
 						new Path(Names.PERSISTANT_FACTS_FILE_PREFIX + key + ".pl"));
@@ -924,12 +1001,12 @@ public class JTUtils
      * @throws PrologInterfaceException
      */
 
-	public static void clearPersistantFacts(String key) throws PrologInterfaceException  {
-		JTDebug.info("clearing persistant factbase: "+ key);
+	public static void clearPersistentFacts(String key) throws PrologInterfaceException  {
+		JTDebug.info("clearing persistent factbase: "+ key);
 		if( key != null) {
-			IPath location = JTUtils.getPersistantFactbaseFileForPif(key);
+			IPath location = JTUtils.getPersistentFactbaseFileForPif(key);
 			if(location.toFile().isFile()){
-				JTDebug.info("removed persistant factbase file for factbase: "+ key);
+				JTDebug.info("removed persistent factbase file for factbase: "+ key);
 				location.toFile().delete();
 			}
 			
@@ -940,7 +1017,7 @@ public class JTUtils
 		}
 	}
 	public static String getFactbaseKeyForProject(IProject project) {
-		return JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(project, JTransformer.PROLOG_RUNTIME_KEY, null);
+		return JTransformerPlugin.getDefault().getPreferenceValue(project, JTransformer.PROLOG_RUNTIME_KEY, null);
 	}
 	
 	/**
@@ -951,6 +1028,24 @@ public class JTUtils
 	 */
 	public static String getSubscriptionIDForRuntimeKey(String key) {
 		return JTransformer.SUBSCRIPTION_PREFIX + key;
+	}
+	/**
+	 * (De)activates Eclipse auto-building.
+	 * @param autoBuilding
+	 * @see IWorkspaceDescription#setAutoBuilding(boolean)
+	 */
+	public static void setAutoBuilding(boolean autoBuilding) {
+		ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(autoBuilding);
+		JTDebug.info(autoBuilding ? "Deactivated" : "Activated" + " auto-building.");
+	}
+	/**
+	 * Persistent factbase exists for PrologInterface key "key".
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static boolean persistentFactbaseFileExistsForPifKey(String key) {
+		return getPersistentFactbaseFileForPif(key).toFile().exists();
 	}
 
 }

@@ -6,17 +6,21 @@ import java.util.List;
 import java.util.Set;
 
 import org.cs3.jtransformer.JTDebug;
+import org.cs3.jtransformer.JTPrologFacade;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.dialog.PrologRuntimeSelectionDialog;
 import org.cs3.jtransformer.internal.dialog.RemoveJTransformerNatureDialog;
 import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
+import org.cs3.jtransformer.internal.natures.TimeMeasurement;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
@@ -43,6 +47,7 @@ public class JTransformerNatureAssigner {
 	private List projects;
 	private boolean includeReferencedProjects = false;
 	private boolean addReferenceToOutputProject = false;
+	private TimeMeasurement timeAssignNatures;
 
 	public JTransformerNatureAssigner(List projects) {
 		this.projects = projects;
@@ -80,6 +85,8 @@ public class JTransformerNatureAssigner {
 					JTransformer.ERR_CONTEXT_EXCEPTION, e);
 			JTDebug.report(new Error(e));
 			e.printStackTrace();
+			// reset to previous state:
+			JTUtils.setAutoBuilding(true);
 		}
 		return STATUS_CANCELLED;
 
@@ -103,6 +110,9 @@ public class JTransformerNatureAssigner {
 	}
 
 	private void removeNatures(RemoveJTransformerNatureDialog dialog) throws CoreException, PrologInterfaceException {
+		if(projects.size() > 0){
+			JTUtils.clearPersistentFacts(JTUtils.getFactbaseKeyForProject((IProject)projects.get(0)));
+		}
 		for (Iterator iter = projects.iterator(); iter.hasNext();) {
 			IProject project = (IProject) iter.next();
 			try {
@@ -134,6 +144,15 @@ public class JTransformerNatureAssigner {
 		if(factbaseName == null) {
 			return false;
 		}
+		
+		JTUtils.clearPersistentFacts(factbaseName);
+
+		// Auto building is deactivated while the nature is assigned to avoid unexpected build runs
+		// FIXME: I do not fully understand the consequences in case that the project is not in sync with the file system.  
+		JTUtils.setAutoBuilding(false);
+
+		timeAssignNatures = new TimeMeasurement("Assign nature(s) for factbase: " + factbaseName,JTDebug.LEVEL_INFO);
+
 		TopoSortProjects sorter = new TopoSortProjects();
 		List sortedProjects = sorter.sort(includeReferencedProjects,projects);
 		includeReferencedProjects = false;
@@ -145,6 +164,7 @@ public class JTransformerNatureAssigner {
 		for (Iterator iter = sortedProjects.iterator(); iter.hasNext();) {
 		    addNature((IProject)iter.next(), factbaseName);
 		}
+		timeAssignNatures.logTimeDiff();
 		JTransformerPlugin.getNature((IProject)projects.get(0)).getPrologInterface().start();
 		return true;
 	}
@@ -182,7 +202,7 @@ public class JTransformerNatureAssigner {
 //		}
 			IProject destProject = CreateOutdirUtils.getInstance().createOutputProject(project);
 	    	project.setPersistentProperty(new QualifiedName("", JTransformer.PROLOG_RUNTIME_KEY),factbaseName);
-			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
+			JTransformerPlugin.getDefault().setNonPersistentPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 			
 //			final IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 //			
@@ -227,8 +247,8 @@ public class JTransformerNatureAssigner {
 
 		JTUtils.clearAllMarkersWithJTransformerFlag(project);
 		JTransformerNature.removeJTransformerNature(project);
-		JTDebug.info("JTransformerNatureAssigner.removeNature: called clearing persistant factbase");
-		JTUtils.clearPersistantFacts(JTUtils.getFactbaseKeyForProject(project));
+		JTDebug.info("JTransformerNatureAssigner.removeNature: called clearing persistent factbase");
+		JTUtils.clearPersistentFacts(JTUtils.getFactbaseKeyForProject(project));
 		final IProject outputProject = JTUtils.getOutputProject(project);
 		if(removeOutputProjectReference) {
 			removeOutputProjectReference(project, outputProject);
@@ -237,7 +257,7 @@ public class JTransformerNatureAssigner {
 		    deleteOutputProject(project,outputProject);					
 		}
 		//action.setChecked(false);
-		JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_DISABLED);
+		JTransformerPlugin.getDefault().setNonPersistentPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_DISABLED);
 	}
 
 	private void removeOutputProjectReference(final IProject project, final IProject outputProject) {
@@ -347,7 +367,33 @@ public class JTransformerNatureAssigner {
 		project.setDescription(ipd, null);
     }
 
+	static public void removeAllNatures() throws CoreException, PrologInterfaceException {
+		IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot()
+				.getProjects();
+		List projectsWithNature = new ArrayList();
+		for (int i = 0; i < allProjects.length; i++) {
+				if (allProjects[i].isOpen()
+						&& allProjects[i].hasNature(JTransformer.NATURE_ID)) {
+					projectsWithNature.add(allProjects[i]);
+					String key = JTransformerPlugin.getDefault().getPreferenceValue(allProjects[i], JTransformer.PROLOG_RUNTIME_KEY, null);
+					if(key != null){
+						PrologInterface pif = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry().getPrologInterface(key);
+						if(pif != null && pif.isUp()){
+							JTUtils.queryOnceSimple(pif,JTPrologFacade.CLEAR_TREE_FACTBASE);
+						}
+					}
+					
+				}
+		}
 
+		if (projectsWithNature.size() == 0) {
+			return;
+		}
+		JTransformerNatureAssigner assigner = new JTransformerNatureAssigner(projectsWithNature);
+		assigner.askAndRemoveNatures();
+		
+		
+	}
 
 
 }

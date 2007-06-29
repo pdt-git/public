@@ -21,6 +21,7 @@ import java.util.Vector;
 
 import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
+import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
@@ -412,20 +413,26 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	}
     
     /**
+     * Only used for setting nonpersistant state for the JTransformer icon decorations.
+     * 
      * conveniance method. should propably be inlined. --lu
      * @throws CoreException 
      */
-    public void setNonPersistantPreferenceValue(IProject project, String key, String value) throws CoreException{
+    public void setNonPersistentPreferenceValue(IProject project, String key, String value) throws CoreException{
     	Map projectPref = getProjectPreference(project);
     	projectPref.put(key,value);
    		fireValueChanged(project,key);
     }    
     
-    Map nonPersistantPreference = new Hashtable();
+    Map nonPersistentPreference = new Hashtable();
 
-	private Map tempSubscription = new Hashtable();
+//	private Map tempSubscription = new Hashtable();
     
-	public String getNonPersistantPreferenceValue(IProject project, String key, String defaultValue) {
+	/**
+	 * Only used for getting nonpersistant state for the JTransformer icon decorations.
+     * 
+	 */
+    public String getNonPersistentPreferenceValue(IProject project, String key, String defaultValue) {
     	Map projectPref = getProjectPreference(project);
 		String value = (String)projectPref.get(key);
 		if(value != null) {
@@ -435,11 +442,11 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	}
 
     private Map getProjectPreference(IProject project) {
-    	synchronized (nonPersistantPreference) {
-			Map projectPref = (Map)nonPersistantPreference.get(project);
+    	synchronized (nonPersistentPreference) {
+			Map projectPref = (Map)nonPersistentPreference.get(project);
 			if(projectPref == null) {
 				projectPref = new HashMap();
-				nonPersistantPreference.put(project,projectPref);
+				nonPersistentPreference.put(project,projectPref);
 			}
 			return projectPref;
 		}
@@ -671,7 +678,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 	public static JTransformerSubscription getJTransformerSubscription(String key) {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		synchronized (reg) {
-			return (JTransformerSubscription)reg.getSubscription(JTransformer.SUBSCRIPTION_PREFIX + key);
+			return (JTransformerSubscription)reg.getSubscription(JTUtils.getSubscriptionIDForRuntimeKey(key));
 		}
 	}
 

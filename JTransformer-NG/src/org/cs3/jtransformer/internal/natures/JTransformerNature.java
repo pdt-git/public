@@ -250,17 +250,16 @@ public class JTransformerNature implements IProjectNature,
 		}
 			if(pif != null) {
 	//			pif = getPrologInterface();
-				PrologSession s = null;
+				//PrologSession s = null;
 		
 				try {
 					if (pif.isUp()) {
-						s = pif.getSession();
+						//s = pif.getSession();
 						String projectName = getProject().getName();
 						String sourceFolder = Util.prologFileName(new File(
 								getPreferenceValue(JTransformer.PROP_OUTPUT_FOLDER,
 										null)));
-						s.queryOnce("retractall(project_option('" + projectName
-								+ "', _))");
+						//s.queryOnce("retractall(project_option('" + projectName+ "', _))");
 						getFactBaseBuilder().clean(null);
 					}
 				} catch (Exception e) {
@@ -270,10 +269,11 @@ public class JTransformerNature implements IProjectNature,
 							"' because the following exception occurred:\n" + e.getLocalizedMessage() + "\n\nProceeding anyway.");
 	//				JTransformerPlugin.getDefault()
 	//						.createPrologInterfaceExceptionCoreExceptionWrapper(e);
-				} finally {
-					if (s != null)
-						s.dispose();
 				}
+//				} finally {
+//					if (s != null)
+//						s.dispose();
+//				}
 			}
 			
 	}
@@ -326,7 +326,7 @@ public class JTransformerNature implements IProjectNature,
 		this.project = project;
 		//checkIfNatureIsAlreadyAssignedToProject(project);
 		try {
-			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,
+			JTransformerPlugin.getDefault().setNonPersistentPreferenceValue(project,
 					JTransformer.FACTBASE_STATE_KEY,
 					JTransformer.FACTBASE_STATE_ACTIVATED);
 		} catch (CoreException e) {
@@ -469,7 +469,7 @@ public class JTransformerNature implements IProjectNature,
 				JTDebug.debug("Creating new JTransformerSubscription for pif: " + getPrologRuntimeKey() + ", from project: " + getProject().getName() + " ... ");
 				subscription = new JTransformerSubscription(
 						project, 
-						JTransformer.SUBSCRIPTION_PREFIX + getPrologRuntimeKey(),
+						JTUtils.getSubscriptionIDForRuntimeKey(getPrologRuntimeKey()),
 						getPrologRuntimeKey(),
 						"JTransformer factbase for the key " + getPrologRuntimeKey(),
 						"JTransformer");

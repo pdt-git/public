@@ -17,6 +17,7 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 
 import org.cs3.jtransformer.JTDebug;
+import org.cs3.jtransformer.JTPrologFacade;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.JTransformerProject;
@@ -28,6 +29,7 @@ import org.cs3.jtransformer.internal.astvisitor.FactGenerator;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.astvisitor.PrologWriter;
 import org.cs3.jtransformer.internal.bytecode.ByteCodeFactGeneratorIType;
+import org.cs3.jtransformer.internal.natures.TimeMeasurement;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
@@ -96,7 +98,7 @@ public class FactBaseBuilder {
 
     private Vector listeners = new Vector();
 
-    private boolean building = false;
+//    private boolean building = false;
 
 //    private long storeTimeStamp;
 
@@ -136,7 +138,7 @@ public class FactBaseBuilder {
     	// FIXME: Expensive?
     	
         try {
-   			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
+   			JTransformerPlugin.getDefault().setNonPersistentPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_IN_PROCESS);
         	JTUtils.clearAllMarkersWithJTransformerFlag(project);
 
         	String kind=delta == null ? "full" : "incremental";
@@ -156,14 +158,14 @@ public class FactBaseBuilder {
 
         } catch (OperationCanceledException e) {
         	try {
-				JTUtils.clearPersistantFacts(getPifKey());
+				JTUtils.clearPersistentFacts(getPifKey());
 			} catch (PrologInterfaceException e1) {
 				e1.printStackTrace();
 			}
             throw e;
         } catch (Throwable t) {
         	try {
-				JTUtils.clearPersistantFacts(getPifKey());
+				JTUtils.clearPersistentFacts(getPifKey());
 			} catch (PrologInterfaceException e1) {
 				e1.printStackTrace();
 			}
@@ -189,7 +191,7 @@ public class FactBaseBuilder {
         } finally {
 			//jobManager.endRule(JTransformer.JTransformer_BUILDER_SCHEDULING_RULE);
 
-            building = false;
+//            building = false;
             monitor.done();
             fireFactBaseUpdated();
         }
@@ -228,9 +230,9 @@ public class FactBaseBuilder {
             submon.beginTask("Collecting Files", IProgressMonitor.UNKNOWN);
             project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
             if (flags == IncrementalProjectBuilder.FULL_BUILD) {
-            	if(loadPersistantFactbase(submon))
+            	if(loadPersistentFactbase(submon))
             	{
-           			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
+           			JTransformerPlugin.getDefault().setNonPersistentPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
             		return;
             	}
             	loadOrBuildJavaLang(submon);
@@ -238,8 +240,8 @@ public class FactBaseBuilder {
                 collectAll(toProcess);
                 updateProjectLocationInFactbase(session);
             } else if(delta != null) {
-        		JTDebug.info("FactbaseBuilder.build_impl: called clearing persistant factbase for project: " + project.getName());
-            	JTUtils.clearPersistantFacts(getPifKey());
+        		JTDebug.info("FactbaseBuilder.build_impl: called clearing persistent factbase for project: " + project.getName());
+            	JTUtils.clearPersistentFacts(getPifKey());
                 collectDelta(delta, toProcess, toDelete);
             } else {
         		JTDebug.warning("FactbaseBuilder.build_impl: no full build ("+flags+"), but delta is null: " + project.getName());
@@ -257,7 +259,7 @@ public class FactBaseBuilder {
             submon = new SubProgressMonitor(monitor, 40,
                     SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
             loadExternalFacts(submon);
-   			JTransformerPlugin.getDefault().setNonPersistantPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
+   			JTransformerPlugin.getDefault().setNonPersistentPreferenceValue(project,JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_READY);
 
 //   			JTransformerPlugin plugin = JTransformerPlugin.getDefault();
 //            String v = plugin.getPreferenceValue(JTransformer.PREF_USE_PEF_STORE, "false");
@@ -271,11 +273,11 @@ public class FactBaseBuilder {
         }
     }
 
-	private boolean loadPersistantFactbase(SubProgressMonitor submon) {
+	private boolean loadPersistentFactbase(SubProgressMonitor submon) {
         try {
 
-	        IPath init = JTUtils.getPersistantFactbaseFileForPif(getPifKey());
-			JTDebug.info("looking for persistant facts: " + init );
+	        IPath init = JTUtils.getPersistentFactbaseFileForPif(getPifKey());
+			JTDebug.info("looking for persistent facts: " + init.toOSString() );
 
 	        File directory = init.removeLastSegments(1).toFile();
 	        if(!directory.isDirectory()){
@@ -291,19 +293,22 @@ public class FactBaseBuilder {
 	        	}
 	        	if(!pefFactbaseEmpty())
 	        	{
-	        		JTDebug.info("ignoring persistant factbase loading in the full build process of project " + project.getName()+"." +
+	        		JTDebug.info("ignoring persistent factbase loading in the full build process of project " + project.getName()+"." +
 	        				"Classes have already been loaded for the factbase: " + getPifKey());
 	        		return false;
 	        	}
-	            submon.beginTask("loading persistant factbase: " + getPifKey()+
+	            submon.beginTask("loading persistent factbase: " + getPifKey()+
 	            		         " loaded on full build of project " + project.getName(), 90);
+				TimeMeasurement time = new TimeMeasurement("Load persistent factbase " + fileName,JTDebug.LEVEL_INFO);
+				
 	            JTUtils.queryOnceSimple(getPif(),
 	            		"consult('"+fileName+ "'), " +
 	            		"jt_facade:setUnmodifiedPersistantFactbase(true)");
 	            submon.worked(90);
+				time.logTimeDiff();
         		return true;
 	        } else {
-				JTDebug.info("persistant facts file not found: " + init);
+				JTDebug.info("persistent facts file not found: " + init);
 
 	        }
         } catch(Exception ex){
@@ -1030,9 +1035,9 @@ public class FactBaseBuilder {
         project.deleteMarkers(JTransformer.PROBLEM_MARKER_ID, true,
                 IResource.DEPTH_INFINITE);
         try {
-        	JTUtils.queryOnceSimple(getPif(),"clearTreeFactbase('" + project.getName() + "')");
-    		JTDebug.info("FactbaseBuilder.clear: called clearing persistant factbase for project: " + project.getName());
-            JTUtils.clearPersistantFacts(getPifKey());
+        	JTUtils.queryOnceSimple(getPif(),JTPrologFacade.CLEAR_TREE_FACTBASE + "('" + project.getName() + "')");
+    		JTDebug.info("FactbaseBuilder.clear: called clearing persistent factbase for project: " + project.getName());
+            JTUtils.clearPersistentFacts(getPifKey());
             // getMetaDataSRC().clearRecords();
 //            String storeName = jtransformerProject.getPreferenceValue(
 //                    JTransformer.PROP_PEF_STORE_FILE, null);
