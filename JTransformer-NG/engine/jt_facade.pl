@@ -21,6 +21,7 @@ jt_facade(removeJavaErrorMarker/0).
 jt_facade(addJavaErrorMarker/0).
 jt_facade(retractLocalSymtab/0).
 jt_facade(clearTreeFactbase/1).
+jt_facade(clearTreeFactbase/0).
 
 /**
  * deepRetractExternFQN(+FQN) 

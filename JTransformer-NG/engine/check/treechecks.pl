@@ -65,13 +65,13 @@ checkTreeLinks :-
 */
 
 
-checkTreeLinks(_id,ErrorHandler) :-
-    tree(_id, _p, _ptype),
-	checkConstraints(_id,ErrorHandler),    
-    checkParentLink(_p,_id,ErrorHandler),
-    sub_trees(_id, _subs),
-    vars_bound(_id,_subs,ErrorHandler),
-    checkTreeLinks(_id, _ptype, _subs,ErrorHandler).
+checkTreeLinks(Id,ErrorHandler) :-
+    tree(Id, _p, _ptype),
+	checkConstraints(Id,ErrorHandler),    
+    checkParentLink(_p,Id,ErrorHandler),
+    sub_trees(Id, _subs),
+    vars_bound(Id,_subs,ErrorHandler),
+    checkTreeLinks(Id, _ptype, _subs,ErrorHandler).
 
 checkTreeLinks(_, _, [],_).
 checkTreeLinks(_pid, _ptype, [_h|_t],ErrorHandler) :-
@@ -111,29 +111,29 @@ checkParentLink(Node,Child,ErrorHandler):-
 	 call(Term).
 
 vars_bound(_,[],_).
-vars_bound(_id,[_sub|_subs],ErrorHandler):-
+vars_bound(Id,[_sub|_subs],ErrorHandler):-
     nonvar(_sub),
     !,
-    vars_bound(_id,_subs,ErrorHandler).
+    vars_bound(Id,_subs,ErrorHandler).
     
-vars_bound(_id,[_sub|_],ErrorHandler):-
-    sformat(Msg,'referenced id ~w from ~w is not bound.~n',[_sub, _id]),
+vars_bound(Id,[_sub|_],ErrorHandler):-
+    sformat(Msg,'referenced id ~w from ~w is not bound.~n',[_sub, Id]),
 	 Term =.. [ErrorHandler,Msg], 
 	 call(Term),
     fail.
 
-subtreeError(_id, _,   _pid, _pid, _,_) :- !.
+subtreeError(_Id, _,   _pid, _pid, _,_) :- !.
 % sonderfall, classen haben als parent packages statt toplevel, die sie eigentlich referenzieren
-subtreeError(_id, classDefT,   _, _, toplevelT,_) :- !.
-subtreeError(_id, _stype, _p, _pid, _ptype,ErrorHandler) :-
-    sformat(Msg,'referenced ~w ~w has ~w as parent instead of ~w ~w.~n',[_stype, _id, _p, _ptype, _pid]),
+subtreeError(_Id, classDefT,   _, _, toplevelT,_) :- !.
+subtreeError(Id, _stype, _p, _pid, _ptype,ErrorHandler) :-
+    sformat(Msg,'referenced ~w ~w has ~w as parent instead of ~w ~w.~n',[_stype, Id, _p, _ptype, _pid]),
 	 Term =.. [ErrorHandler,Msg], 
 	 call(Term).
 
 
 /*
-checkTree(_id):-
-   getFieldT(_id,_pid,_encl,_expr,_v2,_v3), 
+checkTree(Id):-
+   getFieldT(Id,_pid,_encl,_expr,_v2,_v3), 
    printErrorIfNotMethodAndNotField(_encl),
    printErrorIfNotExpressionOrNull(_expr).
 
@@ -188,18 +188,18 @@ printFailure(_id,_encl):-
         format('encl elem of ~w is ~w but not a method or field (for method: class)~n',[_id,_encl]).
 */
 
-printErrorIfNotMethodAndNotField(_encl):-
-	not(methodDefT(_encl,_,_,_,_,_,_)), 
-	not(fieldDefT(_encl,_,_,_,_)),
-	printFailure(_id,_encl),
+printErrorIfNotMethodAndNotField(Encl):-
+	not(methodDefT(Encl,_,_,_,_,_,_)), 
+	not(fieldDefT(Encl,_,_,_,_)),
+	printFailure(__id,Encl),
 	!.
 printErrorIfNotMethodAndNotField(_).
 
-printErrorIfNotExpressionOrNull(_id):-
-    not(isExpression(_id)),
-    not(_id = 'null'),
-    tree(_id,_p,_type),
-    format('the id ~w should bei an expression or null, but it is an ~w~n',[_id,_type]).
+printErrorIfNotExpressionOrNull(Id):-
+    not(isExpression(Id)),
+    not(Id = 'null'),
+    tree(Id,__p,_type),
+    format('the id ~w should bei an expression or null, but it is an ~w~n',[Id,_type]).
 printErrorIfNotExpressionOrNull(_).
 
 /**
@@ -446,7 +446,7 @@ declaration(Id) :- tree(Id, _, Type), declarationType(Type).
 /* Statt mit pos könnte man auch den Parametern Namen verpassen. */
 /* den Knoten mittels tree. */
     
-invalidSelectReference(_id, _selectedfrom, _pos, _validtypes, _actualtype) :- 
+invalidSelectReference(_id, _selectedfrom, __pos, _validtypes, _actualtype) :- 
    selectT(_id, _, _, _, _selectedfrom, _), 
    validReferenceType(selectT, 5, _validtypes), 
    tree(_selectedfrom, _, _actualtype), 
@@ -466,6 +466,19 @@ jt_summary :-
     findall(M,(methodDefT(M,_,_,_,_,_,_)),AllMethods),
     length(AllMethods,NumAllMethods),
     format('Number of all methods: ~w~n',[NumAllMethods]).
+
+jt_summary(Summary):-
+    findall(C,class(C,_,_),AllClasses),
+    length(AllClasses,NumAllClasses),
+
+    findall(C,(class(C,_,_),\+ externT(C)),AllSrcClasses),
+    length(AllSrcClasses,NumAllSrcClasses),
+    
+    findall(M,(methodDefT(M,_,_,_,_,_,_)),AllMethods),
+    length(AllMethods,NumAllMethods),
+    
+    sformat(String, '~w classes, ~w src classes, ~w methods',[NumAllClasses,NumAllSrcClasses,NumAllMethods]),
+    string_to_atom(String,Summary).
     
 classes_with_same_fqn_and_diffent_id(A,B):-
   class(A,_,Name),

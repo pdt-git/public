@@ -100,5 +100,5 @@ public interface Names {
 	  
 	  public String PRED_ACTIVATE_REVERSE_INDEXES = "activate_reverse_indexes";
 	  
-	  public String PERSISTANT_FACTS_FILE_PREFIX = "persistance/factbase_";
+	  public String PERSISTANT_FACTS_FILE_PREFIX = "persistence/factbase_";
 }

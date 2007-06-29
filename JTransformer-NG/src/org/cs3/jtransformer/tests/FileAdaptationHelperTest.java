@@ -175,14 +175,21 @@ public class FileAdaptationHelperTest extends TestCase
 		assertEquals(expContent, newContent);
 		
 		content = "<classpathentry exported=\"true\" kind=\"lib\" path=\"lib/DaffodilDB_Common.jar\"/>\n" +
-				  "<classpathentry kind=\"lib\" path=\"lib/lib2.jar\"/>";
+				  "<classpathentry kind=\"lib\" path=\"lib/lib2.jar\"/>\n"+
+				  "<classpathentry sourcepath=\"lib/lib3.jar\" kind=\"lib\" path=\"lib/lib3.jar\"/>";
 		expContent = "<classpathentry exported=\"true\" kind=\"lib\" path=\"/MarksTestAspectBundle/lib/DaffodilDB_Common.jar\"/>\n" +
-				     "<classpathentry kind=\"lib\" path=\"/MarksTestAspectBundle/lib/lib2.jar\"/>";
+				     "<classpathentry kind=\"lib\" path=\"/MarksTestAspectBundle/lib/lib2.jar\"/>\n"+
+				     "<classpathentry sourcepath=\"/MarksTestAspectBundle/lib/lib3.jar\" kind=\"lib\" path=\"/MarksTestAspectBundle/lib/lib3.jar\"/>";
 
 		regexPatternsWithNewStrings = new HashMap();
 		regexPatternsWithNewStrings.put(
 				"(<classpathentry .*?kind=\"lib\" .*?path=\")([^/].*?\"/>)",
 						"$1/" + "MarksTestAspectBundle" + "/$2");
+
+		
+		regexPatternsWithNewStrings.put("(<classpathentry .*?sourcepath=\")([^/].*?)",
+				"$1/" + "MarksTestAspectBundle" + "/$2");
+
 		newContent = fah.adaptContent(content, regexPatternsWithNewStrings);
 		assertEquals(expContent, newContent);
 

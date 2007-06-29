@@ -212,8 +212,8 @@ public class JTransformerProjectChangeListener implements
 			JTransformerNature nature = JTransformerPlugin.getNatureIfAvailable(project);
 			nature.onClose();
 	    	try {
-	    		JTDebug.info("JTransformerProjectChangeListener.removeNatureIfAssgined: called clearing persistant factbase");
-				JTUtils.clearPersistantFacts(JTUtils.getFactbaseKeyForProject(project));
+	    		JTDebug.info("JTransformerProjectChangeListener.removeNatureIfAssgined: called clearing persistent factbase");
+				JTUtils.clearPersistentFacts(JTUtils.getFactbaseKeyForProject(project));
 			} catch (PrologInterfaceException e) {
 				JTDebug.report(e);
 			}

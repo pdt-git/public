@@ -55,7 +55,7 @@ public class JTransformerProjectDecoratorContributor implements ILightweightLabe
 //			JTransformerPlugin.getDefault().setTemporaryProjectSubscription(project,pifSubscription);
 			
 			//  TODO: this is a bit ugly, or isn't it`?
-			String state = JTransformerPlugin.getDefault().getNonPersistantPreferenceValue(project, JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
+			String state = JTransformerPlugin.getDefault().getNonPersistentPreferenceValue(project, JTransformer.FACTBASE_STATE_KEY, JTransformer.FACTBASE_STATE_ACTIVATED);
 			
 			if(state.equals(JTransformer.FACTBASE_STATE_ACTIVATED)) {
 				decoration.addOverlay(JTransformerImageRepository.getImageDescriptor(JTransformerImageRepository.JTRANSFORMER_PROJECT_DECORATION_GREY));

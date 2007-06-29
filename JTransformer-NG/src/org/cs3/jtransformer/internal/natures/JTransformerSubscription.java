@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.jtransformer.JTDebug;
+import org.cs3.jtransformer.JTPrologFacade;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.jtransformer.internal.actions.TopoSortProjects;
 import org.cs3.jtransformer.internal.astvisitor.Names;
-import org.cs3.jtransformer.internal.builders.FactBaseBuilder;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
@@ -34,12 +34,19 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 public class JTransformerSubscription extends DefaultSubscription implements
 			LifeCycleHook {
@@ -51,6 +58,9 @@ public class JTransformerSubscription extends DefaultSubscription implements
 		 */
 		Object configureMonitor = new Object();
 
+		
+		TimeMeasurement timeJTBuild;
+		
 		private PrologInterface pif;
 
 //		private JTransformerNature nature;
@@ -186,32 +196,30 @@ public class JTransformerSubscription extends DefaultSubscription implements
 
 		private void buildAllProjectsOfPif() {
 			try {
-				synchronized (toBeBuiltMonitor) {
-					JTDebug.info("JT: Deactivating auto-building");
-					 ResourcesPlugin.getPlugin().getWorkspace().getDescription().setAutoBuilding(false);
-
-				}
-
-				JTDebug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: start");
+				timeJTBuild = new TimeMeasurement("JTransformer build of factbase " + getPifKey(),JTDebug.LEVEL_INFO);
 
 				List tmpProjects = null;
-				synchronized (toBeBuiltMonitor) {
+
+//				synchronized (toBeBuiltMonitor) {
+					JTUtils.setAutoBuilding(false);
+
+					JTDebug.info("JTransformerSubscription.buildAllProjectsOfPif: start");
+
 					tmpProjects = getSortedListOfNotYetBuildJTProjects();
 
 					if(tmpProjects == null) {
 						return;
 					}
 					
-					JTDebug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: toBeBuilt.addAll");
+					JTDebug.info("JTransformerSubscription.buildAllProjectsOfPif: toBeBuilt.addAll");
 					toBeBuilt.addAll(tmpProjects);
-				}
+//				}
 				IWorkspace workspace = ResourcesPlugin.getWorkspace();
 				IWorkspaceDescription wd = workspace.getDescription();
 				if (!wd.isAutoBuilding()) {
-					JTDebug.warning("JT: auto building is deactivated. PEFs will not be updated!" );
-//					wd.setAutoBuilding(true);
+					JTDebug.warning("auto building is deactivated. PEFs will not be updated!" );
 				}
-				JTDebug.info("JT: JTransformerSubscription.buildAllProjectsOfPif: finalizeProjectBuilding: before");
+				JTDebug.info("JTransformerSubscription.buildAllProjectsOfPif: finalizeProjectBuilding: before");
 
 				final List projects = tmpProjects;
 				try {
@@ -265,26 +273,77 @@ public class JTransformerSubscription extends DefaultSubscription implements
 //			return filteredUnsortedProjectsList;
 //		}
 
+
 		private void finalizeProjectBuilding(final List projects) {
-			Job j = new Job("Finalize building of projects") {
-				public IStatus run(IProgressMonitor monitor) {
-					synchronized (toBeBuiltMonitor) {
-						toBeBuilt.removeAll(projects);
-						JTDebug.info("JT: Re-activating auto-building");
- 					    ResourcesPlugin.getPlugin().getWorkspace().getDescription().setAutoBuilding(true);
+			WorkspaceJob j = new WorkspaceJob("Finalize building of projects") {
+				
+				/**
+				 * "Real" job is done in the Job listeners done() Method below.
+				 */
+				@Override
+				public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+					timeJTBuild.logTimeDiff();
+					try {
+						Map map = JTUtils.queryOnceSimple(pif, JTPrologFacade.JT_SUMMARY + "(Summary)");
+						StringBuffer projectNames = new StringBuffer();
+						for (Iterator iter = projects.iterator(); iter
+								.hasNext();) {
+							IProject project = (IProject) iter.next();
+							if(projectNames.length() > 0) 
+								projectNames.append(",");
+							projectNames.append(project.getName());
+							
+						}
+						
+						//String prefix;
+						
+//						if(JTUtils.persistentFactbaseFileExistsForPifKey(getPifKey())){
+//							prefix = "loaded factbase '" + getPifKey() + "' from cache";
+//						} else {
+//							prefix = "finished building factbase '" + getPifKey() + "'";
+//						}
+							
+						PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+							public void run() {
+								try {
+									//refs = JTUtils.getActivePage()).getViewReferences();
+									JTUtils.getActivePage().showView("org.eclipse.ui.views.ProgressView");
+								} catch (PartInitException e) {
+									e.printStackTrace();
+								}
+							} 
+						});
+						JTUtils.setStatusMessage("org.eclipse.ui.views.ProgressView",
+							"Finished building factbase '" + getPifKey() + "'" + 
+							" in " + timeJTBuild.getTimeDiff()+" seconds - " + map.get("Summary") +
+							" - the factbase contains the following projects: " + projectNames );
+					} catch (PrologInterfaceException e) {
+						JTDebug.report(e);
 					}
+
 					return Status.OK_STATUS;
 				}
 
 				public boolean belongsTo(Object family) {
 					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
 				}
+				
+				
 
 			};
 			JTDebug.info("finalizeProjectBuilding: before scheduling job");
-			synchronized (configureMonitor) {
+//			synchronized (configureMonitor) {
 //							if (!buildTriggered) {
 //								buildTriggered = true;
+				    j.addJobChangeListener(new DefaultJobChangeListener() {
+
+						public void done(IJobChangeEvent event) {
+//							synchronized (toBeBuiltMonitor) {
+								toBeBuilt.removeAll(projects);
+								JTUtils.setAutoBuilding(true);
+//							}
+						}
+				    });
 					j.setRule(ResourcesPlugin.getWorkspace().getRoot());
 					j.schedule();
 					pefInitializationDone();
@@ -293,15 +352,19 @@ public class JTransformerSubscription extends DefaultSubscription implements
 
 //							}
 //							buildTriggered = false;
-			}
+//			}
 			if(projects.size() == 0) {
 				JTDebug.error("finalizeProjectBuilding: projects size equals 0");
 			} else {
 				JTDebug.info("finalizeProjectBuilding: after scheduling job - " + ((IProject)projects.get(0)).getName());
 			}
-			
 		}
 		
+private IJobChangeListener IJobChangeListener() {
+	// TODO Auto-generated method stub
+	return null;
+}
+
 //		private void notifyJTNaturesAboutEndOfInitialization(final List projects) {
 //			pefInitializationDone();
 //
@@ -358,7 +421,7 @@ public class JTransformerSubscription extends DefaultSubscription implements
 					try {
 						if(!project.isSynchronized(IResource.DEPTH_INFINITE))
 						{
-							JTUtils.clearPersistantFacts(getPifKey());
+							JTUtils.clearPersistentFacts(getPifKey());
 							JTDebug.debug("JTransformerSubscription.buildProject: project " + project.getName() +
 									" is not up-to-date. Refreshing project.");
 							project.refreshLocal(IResource.DEPTH_INFINITE, monitor);
@@ -390,14 +453,14 @@ public class JTransformerSubscription extends DefaultSubscription implements
 
 			};
 
-			synchronized (configureMonitor) {
+//			synchronized (configureMonitor) {
 //					if (!buildTriggered) {
 //						buildTriggered = true;
 					j.setRule(ResourcesPlugin.getWorkspace().getRoot());
 					j.schedule();
 //					}
 //					buildTriggered = false;
-			}
+//			}
 		}
 
 		/*

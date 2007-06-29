@@ -3,7 +3,10 @@ package org.cs3.jtransformer;
 import java.io.File;
 import java.util.Set;
 
+import javax.swing.Icon;
+
 import org.cs3.jtransformer.internal.natures.JTransformerSubscription;
+import org.cs3.jtransformer.internal.natures.TimeMeasurement;
 import org.cs3.jtransformer.util.JTUtils;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -14,25 +17,22 @@ import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.IContext;
 
 public class JTransformerSaveParticipant implements ISaveParticipant {
 
 	public void doneSaving(ISaveContext context) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void prepareToSave(ISaveContext context) throws CoreException {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void rollback(ISaveContext context) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void saving(ISaveContext context) throws CoreException {
+		if(context.getKind() == ISaveContext.FULL_SAVE) {
+		JTDebug.info("full save triggered, saving all open factbases have not been made persistent, yet.");
 		PrologInterfaceRegistry pir = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
 
@@ -48,10 +48,11 @@ public class JTransformerSaveParticipant implements ISaveParticipant {
 					if (pif == null) {
 						continue;
 					}
-					IPath init = JTUtils.getPersistantFactbaseFileForPif(key);
-					if (pif.isDown() || init.toFile().isFile()) {
+					
+					if (pif.isDown() || JTUtils.persistentFactbaseFileExistsForPifKey(key)) {
 						continue;
 					}
+					IPath init = JTUtils.getPersistentFactbaseFileForPif(key);
 					File directory = init.removeLastSegments(1).toFile();
 					if (!directory.isDirectory()) {
 						directory.mkdirs();
@@ -59,9 +60,14 @@ public class JTransformerSaveParticipant implements ISaveParticipant {
 					String fileName = JTUtils.iPathToPrologFilename(init);
 					PrologSession session = null;
 					try {
+						TimeMeasurement time = new TimeMeasurement("Save factbase " + fileName,JTDebug.LEVEL_INFO);
+
 						session = pif.getSession();
-						//	        	            submon.beginTask("load persistant factbase", 90);
+						//	        	            submon.beginTask("load persistent factbase", 90);
 						session.queryOnce("rollback, writeTreeFacts('" + fileName+ "')");
+						
+						time.logTimeDiff();
+
 						//	        	            submon.worked(90);
 					} catch (Exception ex) {
 						JTDebug.report(ex);
@@ -74,6 +80,7 @@ public class JTransformerSaveParticipant implements ISaveParticipant {
 					// your code goes here: Jetzt hast du alle Projekte und den zugehörigen Key
 				}
 			}
+		}
 		}
 	}
 
