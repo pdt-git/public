@@ -51,7 +51,7 @@ import java.util.Vector;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 
-public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
+public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener implements IPrologEventDispatcher {
 
 	private HashMap listenerLists = new HashMap();
 
@@ -129,6 +129,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
+	 */
 	public void addPrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
@@ -150,6 +153,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener {
 	 * 
 	 * @see org.cs3.pl.prolog.IPrologInterface#removePrologInterfaceListener(java.lang.String,
 	 *      org.cs3.pl.prolog.PrologInterfaceListener)
+	 */
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
 	public void removePrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {

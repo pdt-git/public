@@ -50,8 +50,8 @@ import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
@@ -110,7 +110,7 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 			if(!listeners.contains(l)){
 				if(listeners.isEmpty()&&project!=null){
 					
-					PrologEventDispatcher dispatch = project.getMetaDataEventDispatcher();
+					IPrologEventDispatcher dispatch = project.getMetaDataEventDispatcher();
 					dispatch.addPrologInterfaceListener(constructHandleTerm(),this);
 				}
 				listeners.add(l);
@@ -125,7 +125,7 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 			if(listeners.contains(l)){
 				listeners.remove(l);
 				if(listeners.isEmpty()&&project!=null){
-					PrologEventDispatcher dispatch = project.getMetaDataEventDispatcher();
+					IPrologEventDispatcher dispatch = project.getMetaDataEventDispatcher();
 					dispatch.removePrologInterfaceListener(constructHandleTerm(),this);
 				}
 			}

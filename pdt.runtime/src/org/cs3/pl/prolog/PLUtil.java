@@ -299,7 +299,7 @@ public class PLUtil {
 		if(term instanceof CVariable){
 			sb.append(((CVariable)term).getVariableName());
 		}else{
-			sb.append(term.getFunctorValue());
+			sb.append(term.getFunctorImage());
 		}
 		if(term.getArity()>0){
 			sb.append('(');

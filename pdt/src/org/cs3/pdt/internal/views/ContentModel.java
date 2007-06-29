@@ -21,9 +21,9 @@ import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionProxy;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
@@ -54,7 +54,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	private long timestamp = Long.MIN_VALUE;
 
-	private PrologEventDispatcher dispatcher;
+	private IPrologEventDispatcher dispatcher;
 
 	private String subject;
 
@@ -292,7 +292,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setPif(org.cs3.pl.prolog.PrologInterface)
 	 */
-	public void setPif(PrologInterface pif, PrologEventDispatcher d)
+	public void setPif(PrologInterface pif, IPrologEventDispatcher d)
 			throws PrologInterfaceException {
 
 		disposeSession();

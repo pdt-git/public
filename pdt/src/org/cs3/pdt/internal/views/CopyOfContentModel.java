@@ -17,9 +17,9 @@ import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -365,7 +365,7 @@ public class CopyOfContentModel extends DefaultAsyncPrologSessionListener implem
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setPif(org.cs3.pl.prolog.PrologInterface)
 	 */
-	public void setPif(PrologInterface pif, PrologEventDispatcher d) throws PrologInterfaceException {
+	public void setPif(PrologInterface pif, IPrologEventDispatcher d) throws PrologInterfaceException {
 		if (this.session != null) {
 			session.removeBatchListener(this);
 			session.dispose();

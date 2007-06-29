@@ -69,12 +69,13 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.MetaInfoProviderFactory;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
-import org.cs3.pl.prolog.PrologEventDispatcher;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
+import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -112,7 +113,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private HashMap libraries;
 
-	private PrologEventDispatcher metaDataEventDispatcher;
+	private IPrologEventDispatcher metaDataEventDispatcher;
 
 	private Vector listeners = new Vector();
 
@@ -710,10 +711,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
-	public PrologEventDispatcher getMetaDataEventDispatcher()
+	public IPrologEventDispatcher getMetaDataEventDispatcher()
 			throws PrologInterfaceException {
 		if (metaDataEventDispatcher == null) {
-			metaDataEventDispatcher = new PrologEventDispatcher(
+			metaDataEventDispatcher = new UDPEventDispatcher(
 					(PrologInterface2) getMetadataPrologInterface());
 		}
 		return metaDataEventDispatcher;
