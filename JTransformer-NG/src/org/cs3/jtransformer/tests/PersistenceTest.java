@@ -5,6 +5,7 @@ package org.cs3.jtransformer.tests;
 import java.io.File;
 import java.io.FileInputStream;
 
+import org.cs3.jtransformer.JTPrologFacade;
 import org.cs3.jtransformer.JTransformerPlugin;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
@@ -50,7 +51,7 @@ public class PersistenceTest extends FactGenerationTest {
          //this caused problems in the past:
          //there was a forgotten deleteSourceFacts in the builder        
          build();
-         s.queryOnce("writeTreeFacts('"+Util.prologFileName(file)+"')");
+         s.queryOnce(JTPrologFacade.WRITE_TREE_FACTS +"('"+Util.prologFileName(file)+"')");
          FileInputStream fis = new FileInputStream(file);
          String data = Util.toString(fis);
          fis.close();

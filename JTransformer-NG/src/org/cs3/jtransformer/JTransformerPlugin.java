@@ -497,7 +497,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         String storeName = JTransformerPlugin.getDefault().getPreferenceValue(JTransformer.PREF_DEFAULT_PEF_STORE_FILE,null);
         File storeFile = new File(storeName);
         
-            shutdownSession.queryOnce("writeTreeFacts('"+Util.prologFileName(storeFile)+"')"); //$NON-NLS-1$ //$NON-NLS-2$
+            shutdownSession.queryOnce(JTPrologFacade.WRITE_TREE_FACTS +"('"+Util.prologFileName(storeFile)+"')"); //$NON-NLS-1$ //$NON-NLS-2$
         
     }
 
@@ -624,6 +624,11 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 		natures.remove(project.getName());
 	}
 	
+	/**
+	 * Check if the preference value "Create Reverse Index" is set.
+	 * 
+	 * @return
+	 */
 	public boolean useReverseIndex() {
 		return Boolean.valueOf(
 			plugin.getPreferenceValue(JTransformer.PREF_REVERSE_INDEX, "false")).

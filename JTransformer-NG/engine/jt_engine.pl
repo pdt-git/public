@@ -7,7 +7,7 @@
 :- multifile setUp/1.
 
 debugme.
-
+debugme(_,_,_).
 /**
  * JTT (JTransfomer transitional version)
  *
@@ -82,6 +82,9 @@ tree(_id, null, packageT) :- packageT(_id,_).
 tree(_id, null, projectT) :- fail.
 
 :- generateDerivedPredicates('Java').
+
+:- generateDerivedMetaPefs('Java').
+:- generateDerivedMetaPefs('JavaAttributes').
 % Non generic code:
 packageT(null,'').
 

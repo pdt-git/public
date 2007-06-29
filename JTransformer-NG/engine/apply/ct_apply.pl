@@ -112,13 +112,13 @@ apply_ctlist(List) :-
 	assert(lastApplyListInfo(ApplyInfo)),
 	length(ApplyInfo,Num),
 	debug(applyct,'~n===========================~n~napplied ~w CT:~n',[Num]),
-	forall(member(M,ApplyInfo),debug(applyct,'~w~n',M)).
+	forall(member(M,ApplyInfo),debug(applyct,'~w',M)).
 
 showApplyListInfo :-
     lastApplyListInfo(ApplyInfo),
 	length(ApplyInfo,Num),
 	debug(applyct,'~n===========================~n~napplied ~w CT:~n',[Num]),
-    forall(member(M,ApplyInfo),debug(applyct,'~w~n',M)).
+    forall(member(M,ApplyInfo),debug(applyct,'~w',M)).
     
 	
 apply_ctlist_([],[]).
@@ -246,13 +246,13 @@ apply_post([_head| _tail]) :-
 /**
  *  add_apply_info_(+_name,+_allActions)
  */
-add_apply_info_(_name,_allActions):-
+add_apply_info_(Name,_allActions):-
     length(_allActions,Num),
-    debug(applyct, 'applied ~w actions for the ct "~w"~n================================================~n',[Num,_name]),
-%	sformat(S,'applied ~w actions for the ct "~w"',[Num,_name]),
+    debug(applyct, 'APPLY_CT: applied ~w actions for the ct "~w"~n',[Num,Name]),
+	sformat(String,'applied ~w actions for the ct "~w"',[Num,Name]),
 %	format('~w~n================================================~n', [S]),
 	retractall(lastApplyInfo(_)),
-	assert(lastApplyInfo(S)).
+	assert(lastApplyInfo(String)).
 	
  
 
@@ -262,10 +262,10 @@ apply_pre(Pre) :-
         call(Pre).
 
 % effekts of apply may cause check to backtrack -> may express recursion
-applyCTbacktrack(_name/*, (_preCondition)*/) :-
-    ct(_name, (_preCondition), (_action)),
-    check((_preCondition)),
-    apply((_action)).
+applyCTbacktrack(Name/*, (_preCondition)*/) :-
+    ct(Name, (PreCondition), (Action)),
+    check((PreCondition)),
+    apply((Action)).
 
 
 /*
@@ -309,7 +309,7 @@ add(Elem) :-
     nonvar(Elem), 
 	call(Elem),
 	!,
-	format('~nWARNING: element: already exists: ~w~n.',[Elem]).
+	debug(applyct,'~nWARNING: element: already exists: ~w~n.',[Elem]).
 
 /*
 add(Elem) :-
@@ -324,6 +324,10 @@ add(Element) :-
     assert(Element),
     asserta(rollback(retract(Element))),
     addTreeReverseIndexes(Element),
+    (  deterministic(false)
+    -> debugme(1,2,3)
+    ;
+    true),
     markEnclAsDirty(Element).
     
     

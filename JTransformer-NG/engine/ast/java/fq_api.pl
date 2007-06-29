@@ -50,7 +50,7 @@ execT
      Term =.. [classDefT|[FQN|Args]],
      var(FQN),
      !,
-         ast_node_def('Java',classDefT,[_|ArgDefs]),
+         ast_node_def_Java(classDefT,[_|ArgDefs]),
          bindArgs(ArgDefs, Args, JavaASTArgs),
      JavaAST =.. [classDefT,Id|JavaASTArgs],
      call(JavaAST),
@@ -62,7 +62,7 @@ java_fq(Term):-
      Term =.. [Functor|Args],
      attribSignature(Functor,_),
      !,
-         ast_node_def('JavaAttributes',Functor,ArgDefs),
+         ast_node_def_JavaAttributes(Functor,ArgDefs),
          bindArgs(ArgDefs, Args, JavaASTArgs),
      JavaAST =.. [Functor|JavaASTArgs],
      call(JavaAST),
@@ -83,7 +83,8 @@ java_fq(Term):-
  java_fq(Term):-
      Term =.. [Functor|[Id|Args]],
      !,
-         ast_node_def('Java',Functor,[_|ArgDefs]),
+     	 ast_node_def_Java(Functor,[_|ArgDefs]),
+%         ast_node_def_Java('Java',Functor,[_|ArgDefs]),
          bindArgs(ArgDefs, Args, JavaASTArgs),
      JavaAST =.. [Functor,Id|JavaASTArgs],
      bind_unbound_args(Functor, Id,JavaASTArgs,ArgDefs),
@@ -411,7 +412,7 @@ error_occured(S):-
 java_fq_to_pef(FQ, PEF):-
      t_i_assert_bound(FQ),
      FQ =.. [Functor|Args],
-         ast_node_def('Java',Functor,ArgDefs),
+         ast_node_def_Java(Functor,ArgDefs),
          !,
          bindArgs(ArgDefs, Args, JavaASTArgs),
      PEF =.. [Functor|JavaASTArgs].
@@ -420,7 +421,7 @@ java_fq_to_pef(FQ, PEF):-
      FQ =.. [Functor|Args],
      attribSignature(Functor,_),
      !,
-         ast_node_def('JavaAttributes',Functor,ArgDefs),
+         ast_node_def_JavaAttributes(Functor,ArgDefs),
          bindArgs(ArgDefs, Args, JavaASTArgs),
      PEF =.. [Functor|JavaASTArgs].
      

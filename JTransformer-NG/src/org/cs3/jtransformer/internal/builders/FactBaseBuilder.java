@@ -343,12 +343,17 @@ public class FactBaseBuilder {
 				String filenamePrefix = "initfactbase/java.lang" + implementationVersion;
 	    		session = getPif().getSession();
 
-				if(swingClassesReferencedInProject(javaProject)) {
-					JTDebug.info("including swing classes in the class init cache: " + implementationVersion +"_swing");
-					
-					session.queryOnce("update_javax_swing");
-					filenamePrefix += "_swing";
+//				if(swingClassesReferencedInProject(javaProject)) {
+//					JTDebug.info("including swing classes in the class init cache: " + implementationVersion +"_swing");
+//					
+//					session.queryOnce("update_javax_swing");
+//					filenamePrefix += "_swing";
+//				}
+				
+				if(JTransformerPlugin.getDefault().useReverseIndex()) {
+					filenamePrefix += "_reverse_indexes";
 				}
+
 				
 		        IPath init = JTransformerPlugin.getDefault().getStateLocation().append(
 								new Path(filenamePrefix + ".pl"));
@@ -363,7 +368,7 @@ public class FactBaseBuilder {
 	    	        } else {
 	    	        	loadExternalFacts(submon);
 	            		JTDebug.info("Writing java lang factbase to: "+ init.toOSString());
-	            		session.queryOnce("writeTreeFacts('"+fileName+ "')");
+	            		session.queryOnce(JTPrologFacade.WRITE_TREE_FACTS +"('"+fileName+ "')");
 	    	        }
             }
         } catch(Exception ex){

@@ -64,7 +64,9 @@ public class JTransformerSaveParticipant implements ISaveParticipant {
 
 						session = pif.getSession();
 						//	        	            submon.beginTask("load persistent factbase", 90);
-						session.queryOnce("rollback, writeTreeFacts('" + fileName+ "')");
+						session.queryOnce(
+								JTPrologFacade.ROLLBACK + ","+
+								JTPrologFacade.WRITE_TREE_FACTS +"('" + fileName+ "')");
 						
 						time.logTimeDiff();
 

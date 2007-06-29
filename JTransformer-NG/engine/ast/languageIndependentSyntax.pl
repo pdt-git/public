@@ -250,8 +250,8 @@ ast_node_type(_Lang,atom).
 ast_node_type(_Lang,number).
 ast_node_type(_Lang,compound). 
 ast_node_type(_Lang,nonRef).
-ast_node_type(_Lang,_Type) :-
-    ast_reference_type(_Lang,_Type).
+ast_node_type(Lang,Type) :-
+    ast_reference_type(Lang,Type).
 
  /** 
   * ast_reference_type(?Language, ?Type)   
@@ -335,6 +335,12 @@ treeSignature(Functor, Arity) :-
 attribSignature(Functor, Arity) :-
    ast_node_signature('JavaAttributes', Functor, Arity).
  
+/**
+ * reverseIndexSignature(Head,Arity)
+ */
+reverseIndexSignature(Head,Arity):-
+  (ri_functor_kind(_,_,Head),Arity=2).
+
 
 /**
  * tree(?Pef, ?Parent, ?Functor)
@@ -359,6 +365,23 @@ attribSignature(Functor, Arity) :-
 generateDerivedPredicates(Lang) :-
    generateJavaTreePredicates(Lang),
    generateDynamicMultifiles(Lang).
+
+generateDerivedMetaPefs(Kind):-
+   generateDerivedAstNodeDef(Kind).
+
+generateDerivedAstNodeDef(Lang):-
+   forall(
+    	ast_node_def(Lang,Functor,Args),
+	    (
+	      atom_concat(ast_node_def_,Lang,NewFunctor),
+    	  Term =.. [NewFunctor, Functor, Args],
+    	  (   not(clause(Term,_))
+    	  ->  assert(Term)
+	      ;   true  
+	      )
+	    )
+		
+	).
 
 generateDynamicMultifiles(Lang) :-
    generateDynamicMultifile(Lang),
