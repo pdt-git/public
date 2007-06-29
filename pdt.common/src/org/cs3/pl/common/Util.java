@@ -61,8 +61,6 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-
-
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
@@ -87,16 +85,17 @@ public class Util {
 		}
 		return physical + logical;
 	}
-	
+
 	public static String generateFingerPrint() {
 		long l = System.currentTimeMillis();
 		double m = Math.random();
 		return "fp_" + l + "_" + m;
 	}
 
-	public static  boolean isJava5(){
+	public static boolean isJava5() {
 		return System.getProperty("java.version").startsWith("1.5");
 	}
+
 	public static File getLockFile() {
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		return new File(tmpdir, generateFingerPrint());
@@ -125,16 +124,16 @@ public class Util {
 
 	public static String prettyPrint(Map r) {
 		if (r != null) {
-			boolean first=true;
+			boolean first = true;
 			StringBuffer sb = new StringBuffer();
 			for (Iterator it = r.keySet().iterator(); it.hasNext();) {
-				if(!first){
+				if (!first) {
 					sb.append(", ");
 				}
 				String key = (String) it.next();
 				String val = (String) r.get(key);
 				sb.append(key + "-->" + val);
-				first=false;
+				first = false;
 
 			}
 			return sb.toString();
@@ -147,14 +146,14 @@ public class Util {
 			return "";
 		}
 		StringBuffer sb = new StringBuffer();
-		//sb.append("{");
+		// sb.append("{");
 		for (int i = 0; i < a.length; i++) {
 			if (i > 0) {
 				sb.append(", ");
 			}
 			sb.append(a[i].toString());
 		}
-		//sb.append("}");
+		// sb.append("}");
 		return sb.toString();
 	}
 
@@ -230,6 +229,8 @@ public class Util {
 		}
 	}
 
+	
+
 	public static String normalizeOnWindoze(String s) {
 		boolean windowsPlattform = isWindoze();
 		if (windowsPlattform) {
@@ -251,10 +252,10 @@ public class Util {
 	 * @return
 	 */
 	public static boolean isMacOS() {
-		boolean mac = System.getProperty("os.name").indexOf(
-				"Mac") > -1;
+		boolean mac = System.getProperty("os.name").indexOf("Mac") > -1;
 		return mac;
 	}
+
 	public static String prologFileName(File f) {
 		try {
 			return normalizeOnWindoze(f.getCanonicalPath());
@@ -262,9 +263,11 @@ public class Util {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	public static String prologCharsetName(String javaName){
+
+	public static String prologCharsetName(String javaName) {
 		return null;
 	}
+
 	public static String toString(InputStream in) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024];
@@ -499,7 +502,7 @@ public class Util {
 		HashMap map = new HashMap();
 		for (Iterator it = l.iterator(); it.hasNext();) {
 			String elm = (String) it.next();
-            String[] s = splitKeyValue(elm);
+			String[] s = splitKeyValue(elm);
 			String key = s[0];
 			String val = s[1];
 			Object o = map.get(key);
@@ -523,20 +526,19 @@ public class Util {
 		int l = 0;
 		StringBuffer key = new StringBuffer();
 		String value;
-		while(l < LEN-1){
-			if(elm.charAt(l) == '-' &&
-			   elm.charAt(l+1) == '>') {
-				value = elm.substring(l+2,LEN);
+		while (l < LEN - 1) {
+			if (elm.charAt(l) == '-' && elm.charAt(l + 1) == '>') {
+				value = elm.substring(l + 2, LEN);
 				return new String[] { key.toString(), value };
 			} else {
 				key.append(elm.charAt(l));
 			}
 			l++;
 		}
-		
+
 		throw new IllegalArgumentException(elm);
 	}
-	
+
 	public static long parsePrologTimeStamp(String input) {
 		long l = 1000 * (long) Double.parseDouble(input);
 		return l;
@@ -552,15 +554,15 @@ public class Util {
 	public static String prettyPrint(Collection c) {
 		if (c != null && !c.isEmpty()) {
 			StringBuffer sb = new StringBuffer();
-			boolean first=true;
+			boolean first = true;
 			for (Iterator it = c.iterator(); it.hasNext();) {
-				if(!first){
+				if (!first) {
 					sb.append(", ");
 				}
 				Object next = it.next();
 				String elm = next == null ? "<null>" : next.toString();
 				sb.append(elm);
-				first=false;
+				first = false;
 			}
 			return sb.toString();
 		}
@@ -568,24 +570,23 @@ public class Util {
 
 	}
 
+	public static String quoteAtom(String term) {
 
-	public static String quoteAtom(String term){
-		
-		return "'"+replaceAll(term,"'","\\'")+"'";
+		return "'" + replaceAll(term, "'", "\\'") + "'";
 	}
-	
-	public static String replaceAll(String string,String search,String replace){
-		int i=-1;
-		StringBuffer sb=new StringBuffer();
-		while((i =string.indexOf(search,0))>=0){
-			sb.append(string.substring(0,i));
+
+	public static String replaceAll(String string, String search, String replace) {
+		int i = -1;
+		StringBuffer sb = new StringBuffer();
+		while ((i = string.indexOf(search, 0)) >= 0) {
+			sb.append(string.substring(0, i));
 			sb.append(replace);
-			string=string.substring(i+search.length());			
+			string = string.substring(i + search.length());
 		}
 		sb.append(string);
 		return sb.toString();
 	}
-	
+
 	public static String splice(Collection c, String delim) {
 		if (c != null && !c.isEmpty()) {
 			StringBuffer sb = new StringBuffer();
@@ -603,12 +604,12 @@ public class Util {
 	}
 
 	public static String unquoteAtom(String image) {
-		
-		image=image.trim();
-		if(image.length()==0 ||image.charAt(0)!='\''){
+
+		image = image.trim();
+		if (image.length() == 0 || image.charAt(0) != '\'') {
 			return image;
 		}
-		image = image.substring(1,image.length()-1);
+		image = image.substring(1, image.length() - 1);
 		StringBuffer sb = new StringBuffer();
 
 		for (int i = 0; i < image.length(); i++) {
@@ -622,14 +623,14 @@ public class Util {
 		}
 		return sb.toString();
 	}
-	
-public static String unquoteString(String image) {
-		
-		image=image.trim();
-		if(image.length()==0 ||image.charAt(0)!='\"'){
+
+	public static String unquoteString(String image) {
+
+		image = image.trim();
+		if (image.length() == 0 || image.charAt(0) != '\"') {
 			return image;
 		}
-		image = image.substring(1,image.length()-1);
+		image = image.substring(1, image.length() - 1);
 		StringBuffer sb = new StringBuffer();
 
 		for (int i = 0; i < image.length(); i++) {
@@ -682,93 +683,90 @@ public static String unquoteString(String image) {
 		default:
 			sb.append(c);
 			return 2;
-		}		
+		}
 	}
+
 	private static int appendUnescapedOctalCharSpec(String image, int i,
 			StringBuffer sb) {
 		String val = "";
-		int j=i+2;
-		while(j<image.length()&&j<i+4&&isOctDigit(image.charAt(j))){
-			val+=image.charAt(j);
+		int j = i + 2;
+		while (j < image.length() && j < i + 4 && isOctDigit(image.charAt(j))) {
+			val += image.charAt(j);
 			j++;
 		}
-		sb.append((char) Integer.parseInt(val,8));
-		if(j<image.length()&&image.charAt(j)=='\\'){
-			return 1+j-i;
+		sb.append((char) Integer.parseInt(val, 8));
+		if (j < image.length() && image.charAt(j) == '\\') {
+			return 1 + j - i;
 		}
-		return j-i;
+		return j - i;
 	}
+
 	private static int appendUnescapedHexCharSpec(String image, int i,
 			StringBuffer sb) {
-		
+
 		String val = "";
-		int j=i+2;
-		while(j<image.length()&&j<i+4&&isHexDigit(image.charAt(j))){
-			val+=image.charAt(j);
+		int j = i + 2;
+		while (j < image.length() && j < i + 4 && isHexDigit(image.charAt(j))) {
+			val += image.charAt(j);
 			j++;
 		}
-		sb.append((char)Byte.parseByte(val));
-		if(j<image.length()&&image.charAt(j)=='\\'){
-			return 1+j-i;
+		sb.append((char) Byte.parseByte(val));
+		if (j < image.length() && image.charAt(j) == '\\') {
+			return 1 + j - i;
 		}
-		return j-i;
+		return j - i;
 	}
 
 	private static boolean isHexDigit(char c) {
 
-		return Character.isDigit(c)
-		||'a'<=Character.toLowerCase(c)
-		  &&Character.toLowerCase(c)<='f';
+		return Character.isDigit(c) || 'a' <= Character.toLowerCase(c)
+				&& Character.toLowerCase(c) <= 'f';
 	}
 
 	private static boolean isOctDigit(char c) {
 
-		return Character.isDigit(c)
-		||'0'<=c
-		  &&c<='7';
+		return Character.isDigit(c) || '0' <= c && c <= '7';
 	}
 
-	public static void split(String string, String search, Collection results)
-	{
+	public static void split(String string, String search, Collection results) {
 		if (string == null) {
 			return;
 		}
-		int i=-1;
-		while((i =string.indexOf(search,0))>=0){
-			results.add(string.substring(0,i).trim());			
-			string=string.substring(i+search.length());			
+		int i = -1;
+		while ((i = string.indexOf(search, 0)) >= 0) {
+			results.add(string.substring(0, i).trim());
+			string = string.substring(i + search.length());
 		}
 		String rest = string.trim();
-		if(rest.length()>0){
+		if (rest.length() > 0) {
 			results.add(rest);
 		}
 
-		
 	}
 
-	
 	public static String[] split(String string, String search) {
 		Vector v = new Vector();
-		split(string,search,v);
-		return (String[])v.toArray(new String[v.size()]);
-		
+		split(string, search, v);
+		return (String[]) v.toArray(new String[v.size()]);
+
 	}
 
 	/**
 	 * fascilate testing by replacing things like $stream(1760696) with
 	 * <replace>
+	 * 
 	 * @param message
 	 * @return
 	 */
-	public static String hideStreamHandles(String string,String replace) {
-		int i=-1;
-		String search="$stream(";
-		StringBuffer sb=new StringBuffer();
-		while((i =string.indexOf(search,0))>=0){
-			sb.append(string.substring(0,i));
+	public static String hideStreamHandles(String string, String replace) {
+		int i = -1;
+		String search = "$stream(";
+		StringBuffer sb = new StringBuffer();
+		while ((i = string.indexOf(search, 0)) >= 0) {
+			sb.append(string.substring(0, i));
 			sb.append(replace);
-			int j=string.indexOf(')',i+search.length());
-			string=string.substring(j+1);			
+			int j = string.indexOf(')', i + search.length());
+			string = string.substring(j + 1);
 		}
 		sb.append(string);
 		return sb.toString();
@@ -776,22 +774,19 @@ public static String unquoteString(String image) {
 	}
 
 	public static String splice(Object[] c, String delim) {
-		if (c != null && c.length>0) {
+		if (c != null && c.length > 0) {
 			StringBuffer sb = new StringBuffer();
-			for (int i=0;i<c.length;i++) {
-				if (i>0) {
+			for (int i = 0; i < c.length; i++) {
+				if (i > 0) {
 					sb.append(delim);
 				}
-				Object next =c[i];
+				Object next = c[i];
 				sb.append(next);
-				
+
 			}
 			return sb.toString();
 		}
 		return "";
 	}
 
-	
-
-	
 }
