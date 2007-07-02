@@ -4,7 +4,7 @@
 :-use_module(library('pef/pef_api')).
 :-use_module(library('util/pdt_render_term')).
 :-use_module(library('builder/builder')).
-:-use_module(library('builder/targets/parser')).
-:-use_module(library('builder/targets/program_interpreter')).
+:-use_module(library('builder/targets/parse')).
+:-use_module(library('builder/targets/interprete')).
 
 % eta(F,ETA):-

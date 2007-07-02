@@ -17,12 +17,12 @@ import java.util.Iterator;
 
 import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
-import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
-import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
+import org.eclipse.jface.internal.text.html.HTML2TextReader;
+import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension3;
+import org.eclipse.jface.text.IInformationControlExtension4;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;

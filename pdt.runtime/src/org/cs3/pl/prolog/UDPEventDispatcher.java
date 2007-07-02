@@ -22,15 +22,21 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 		private DatagramSocket socket;
 
 		private DatagramPacket packet;
+		private int port;
 
 		private _Dispatcher(int port) {
 			
 			super("UDP Event Dispatchher" + port);
+			
+			this.port=port;
 			try {
 				socket = new DatagramSocket(port);
 				byte[] buf = new byte[255];
 				packet = new DatagramPacket(buf, 255);
 				socket.setSoTimeout(1000);
+				if(socket.getLocalPort()==-1){
+					Debug.debug("debug");
+				}
 			} catch (SocketException e) {
 				Debug.rethrow(e);
 			}
@@ -47,6 +53,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 					} catch (SocketTimeoutException e) {
 						; // this is anticipated.
 					}
+					
 				}
 				socket.close();				
 			} catch (IOException e) {
@@ -59,7 +66,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 		public int getPort() {
 			
-			return socket.getLocalPort();
+			return port;
 		}
 	}
 	private void dispatch(DatagramPacket p) {
@@ -210,6 +217,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 			this.dispatcher.shouldBeRunning=false;
 			try {
 				this.dispatcher.join();
+				this.dispatcher=null;
 			} catch (InterruptedException e) {
 				Debug.rethrow(e);
 			}
@@ -223,7 +231,13 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 		try {
 			if (this.dispatcher == null) {
-				this.dispatcher = new _Dispatcher(Util.findFreePort());
+				int port = Util.findFreePort();
+				if(port==-1){
+					Debug.debug("debug");
+				}
+				this.dispatcher = new _Dispatcher(port);
+				
+				
 				this.dispatcher.shouldBeRunning=true;
 				this.dispatcher.start();
 			}
@@ -232,7 +246,11 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 		}
 		try {
 			s = pif.getSession();
-			String query = "pif_subscribe(localhost:" + dispatcher.getPort()
+			int port = dispatcher.getPort();
+			if(port==-1){
+				Debug.debug("debug");
+			}
+			String query = "pif_subscribe(localhost:" + port
 					+ "," + subject + ")";
 			s.queryOnce(query);
 		} catch (PrologInterfaceException e) {

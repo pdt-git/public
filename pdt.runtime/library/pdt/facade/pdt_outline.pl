@@ -8,7 +8,7 @@
 		pdt_outline/9
 	]
 ).
-
+ 
 
 :-use_module(library('/org/cs3/pdt/util/pdt_util')).
 :-use_module(library('/org/cs3/pdt/util/pdt_util_term_position')).
@@ -16,8 +16,8 @@
 :-use_module(library('pef/pef_api')).
 :-use_module(library('util/pdt_render_term')).
 :-use_module(library('builder/builder')).
-:-use_module(library('builder/targets/parser')).
-:-use_module(library('builder/targets/program_interpreter')).
+:-use_module(library('builder/targets/parse')).
+:-use_module(library('builder/targets/interprete')).
 
 %define a pseudo build target for the outline to refer to.
 
