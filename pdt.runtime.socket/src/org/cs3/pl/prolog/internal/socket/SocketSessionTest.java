@@ -428,6 +428,22 @@ public class SocketSessionTest extends TestCase {
 		
 		assertEquals(expected, actual);
 	}
+
+	
+
+	public void testEscapePDT245() throws Exception {
+	       PrologSession session = pif.getSession();
+	       Map map = null;
+	       try{
+	           //map = session.queryOnce("A = 'package test0001;\n\nimport java.util.*;\n\npublic class Test  {\n'");
+	    	   map=session.queryOnce("atom_codes(A,[123,10])");
+	           assertEquals("{\n",map.get("A"));
+	       } catch(Exception e){
+	           session.dispose();
+	           fail();
+	           e.printStackTrace();
+	       }
+	}
 	
 	public void testException() throws Exception {
 	       PrologSession session = pif.getSession();
