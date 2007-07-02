@@ -8,10 +8,16 @@ public class ExternalKillProcessWrapper implements ProcessWrapper {
 	private Process process;	
 	private String[] killCommandArray;
 
-	public ExternalKillProcessWrapper(Process process, String killCommand) {
+	public ExternalKillProcessWrapper(Process process, String[] strings) {
 		this.process=process;		
-		this.killCommandArray=Util.split(killCommand," ");
+		this.killCommandArray=strings;//Util.split(killCommand," ");
 	}
+/*
+	public ExternalKillProcessWrapper(Process process, String[] strings) {
+		this.process=process;		
+		this.killCommandArray=strings;//Util.split(strings," ");
+	}
+*/	
 	
 	public void destroy() {
 		try{
