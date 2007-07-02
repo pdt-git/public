@@ -1,4 +1,11 @@
-:- module(pef_base,[pef_reserve_id/2, pef_type/2]).
+:- module(pef_base,
+	[	pef_reserve_id/2, 
+		pef_type/2,
+		pef_start_recording/1,
+		pef_stop_recording/0,
+		pef_clear_record/1
+	]
+).
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).	
 :- dynamic pef_pred/2.
@@ -11,6 +18,36 @@
 :- dynamic '$metapef_attribute_tag'/3.
 :- dynamic '$metapef_type_tag'/2.
 
+
+:- thread_local '$recording'/1.
+:- dynamic '$recording'/1.
+:- dynamic '$record_key'/2.
+
+
+pef_start_recording(Term):-
+	record_key(Term,Key),
+	asserta('$recording'(Key)).
+	
+pef_stop_recording:-
+	retract('$recording'(_)),
+	!.
+pef_stop_recording:-
+    throw(not_recording).
+
+pef_clear_record(Term):-
+    record_key(Term,Key),
+    forall(
+    	recorded(Key,ClauseRef,RecordRef),
+    	(	erase(ClauseRef),
+    		erase(RecordRef)
+    	)
+    ).
+record_key(Term,Key):-
+    '$record_key'(Term,Key),
+    !.
+record_key(Term,Key):-
+	pef_reserve_id('$record_key',Key),
+	assert('$record_key'(Term,Key)).
 % use @ to attach "tags" to attributes
 % note that @ binds stronger than :, so you do not need parenthesis.
 % you can "chain" several tags to one attribute.
@@ -370,8 +407,9 @@ strip_types(T1,T2):-
     T2=..[F|Args2].
 
 strip_types_args([],[]).
-strip_types_args([Arg:_|Args1],[Arg|Args2]):-
+strip_types_args([Arg:_|Args1],[StrippedArg|Args2]):-
     !,
+    strip_types(Arg,StrippedArg),
     strip_types_args(Args1,Args2).
 strip_types_args([Arg @ _|Args1],[Arg|Args2]):-
     !,

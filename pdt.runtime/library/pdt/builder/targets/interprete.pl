@@ -1,18 +1,18 @@
-:- module(program_interpreter,[]).
+:- module(interprete,[]).
  
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('pef/pef_base')).
 :- use_module(library('pef/pef_api')).
 :- use_module(library('builder/builder')).
-:- use_module(library('builder/targets/parser')).
+:- use_module(library('builder/targets/parse')).
 
 
 
 :- pdt_define_context(cx(program,module,file,toplevel,file_stack)).
 
 pdt_builder:build_hook(interprete(AbsFile)):-
-    program_interpreter:my_build_hook(AbsFile).
+    interprete:my_build_hook(AbsFile).
 
 my_build_hook(AbsFile):-    
 	pdt_forget_program(AbsFile),
@@ -176,8 +176,8 @@ interprete_file_dependency(Type,Ref,Cx):-
     get_pef_file(File,Ref),
 	catch(
 		do_inclusion(Type,File,Ref,Cx),
-		error(cycle(T)),
-		debug(interpreter(todo),"TODO: warn about dependency cycle: ~w~n",[T])
+		cycle(T),
+		debug(interprete(todo),"TODO: warn about dependency cycle: ~w~n",[T])
 	).
     
 do_inclusion(Type,File,Ref,Cx):-	
@@ -188,8 +188,8 @@ do_inclusion_X(Type,File,Ref,Cx):-
     (	pef_module_definition_query([file=Ref,id=MID])
 	->  catch(
 			pdt_request_target(interprete(File)),
-			error(cycle(T)),
-			(	debug(interpreter(todo),"TODO: warn about dependency cycle: ~w~nWe try to go on with incomplete information.",[T]),
+			cycle(T),
+			(	debug(interprete(todo),"TODO: warn about dependency cycle: ~w~nWe try to go on with incomplete information.",[T]),
 				process_module_inclusion(Type,Ref,MID,Cx)
 			)
 		),
@@ -207,7 +207,7 @@ process_file_inclusion(_,Ref,Cx):-
     cx_file_stack(Cx,Stack),
     memberchk(Ref,Stack),
     !,
-	debug(interpreter(todo),"TODO: warn about dependency cycle. We will not process ~w inline.~nWe try to go on with incomplete information.~n",[Ref]).
+	debug(interprete(todo),"TODO: warn about dependency cycle. We will not process ~w inline.~nWe try to go on with incomplete information.~n",[Ref]).
 process_file_inclusion(Type,Ref,Cx):- %The file was not yet loaded in this context, or reinterpretation is explicitly requested.
     unload_file(Ref,Cx),
 	cx_get(Cx,[program=PID,module=MID,file_stack=Stack]),
@@ -308,7 +308,7 @@ import_module_binding(Name,NewMID,Cx):-
 	->	catch(
 			merge_modules(Name,OldMID,NewMID,Cx,_MergedMID),
 			module_name_conflict(OldMID,NewMID),
-			%debug(interpreter(todo),"TODO: create problem pef for ~w (context: ~n",[module_name_conflict(OldMID,NewMID),Cx])
+			%debug(interprete(todo),"TODO: create problem pef for ~w (context: ~n",[module_name_conflict(OldMID,NewMID),Cx])
 			(	pef_reserve_id(pef_module_name_clash,ID),
 				cx_get(Cx,[program=PID,toplevel=TlRef]),
 				pef_module_name_clash_assert([id=ID,program=PID,toplevel=TlRef,first=OldMID,second=NewMID])
@@ -334,7 +334,7 @@ import_predicate_binding(Name,Arity,MID,Cx):-
     	->	true
 	    ;	cx_get(Cx,[toplevel=TlRef,program=CurrentPID]),
 	    	pef_reserve_id(predicate_name_clash,ID),
-	%		debug(interpreter(todo),"TODO: add an error marker. Predicate name conflict at toplevel ~w:~n existing predicate: ~w, new predicate ~w~n I will stick with the existing definition.~n",[TlRef,OldPredId,PredId])
+	%		debug(interprete(todo),"TODO: add an error marker. Predicate name conflict at toplevel ~w:~n existing predicate: ~w, new predicate ~w~n I will stick with the existing definition.~n",[TlRef,OldPredId,PredId])
 			pef_predicate_name_clash_assert([id=ID,program=CurrentPID,toplevel=TlRef,module=MID,first=OldPredId,second=PredId])
 		)
     ;	cx_module(Cx,ContextModuleID),
@@ -382,7 +382,7 @@ get_or_create_module(Name,MID,Cx):-
     ->	true
     ;	pef_reserve_id(pef_ad_hoc_module,MID),
     	pef_ad_hoc_module_assert([id=MID,name=Name,program=PID]),
-    	debug(interpreter(debug), "Created ad-hoc module ~w. ~w~n",[MID,Cx]),
+    	debug(interprete(debug), "Created ad-hoc module ~w. ~w~n",[MID,Cx]),
     	rebind_module_name(Name,MID,Cx)
     ).
     
@@ -395,7 +395,7 @@ get_or_create_predicate(Name,Arity,Cx,PredID):-
     cx_module(Cx,MID),
     pef_reserve_id(pef_predicate,PredID),
     pef_predicate_assert([id=PredID,module=MID,name=Name,arity=Arity]),
-    debug(interpreter(debug),"created predicate ~w (~w/~w) in module ~w. ~w~n",[PredID,Name,Arity,MID,Cx]).
+    debug(interprete(debug),"created predicate ~w (~w/~w) in module ~w. ~w~n",[PredID,Name,Arity,MID,Cx]).
 
 %%
 % rebind_module_name(+Name,+MID,+Cx)
@@ -406,12 +406,12 @@ rebind_module_name(Name,MID,Cx):-
     cx_program(Cx,PID),
     pef_program_module_retractall([program=PID,name=Name]),
     pef_program_module_assert([program=PID,name=Name,module=MID]),
-    debug(interpreter(debug),"Program ~w now binds name \"~w\" to module ~w. ~w~n",[PID,Name,MID,Cx]).
+    debug(interprete(debug),"Program ~w now binds name \"~w\" to module ~w. ~w~n",[PID,Name,MID,Cx]).
 
 unbind_module_name(Name,Cx):-
     cx_program(Cx,PID),
     pef_program_module_retractall([program=PID,name=Name]),
-    debug(interpreter(debug),"binding of module name \"~w\" removed from program ~w. ~w~n",[Name,PID,Cx]).
+    debug(interprete(debug),"binding of module name \"~w\" removed from program ~w. ~w~n",[Name,PID,Cx]).
 
 
 
@@ -433,7 +433,7 @@ copy_predicate(PredID,Cx,NewPredID):-
 	(	pef_predicate_query([id=NewPredID,name=Name, arity=Arity,module=NewMID])
 	->	throw(conflicting_predicate_exists(NewPredID))
 	;	pef_reserve_id(pef_predicate,NewPredID),
-		debug(interpreter(debug),"creating a copy(~w) of predicated(~w) in module ~w. ~w~n",[NewPredID,PredID,NewMID,Cx]),
+		debug(interprete(debug),"creating a copy(~w) of predicated(~w) in module ~w. ~w~n",[NewPredID,PredID,NewMID,Cx]),
 		pef_predicate_assert([id=NewPredID,name=Name, arity=Arity,module=NewMID]),				
 		merge_predicates(append,PredID,NewPredID,Cx)
 		
@@ -461,7 +461,7 @@ do_add_clause(F,F,PredId,Cx):-
     !,
     really_do_add_clause(PredId,Cx).
 do_add_clause(_,_,PredID,Cx):-    
-	debug(interpreter(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined (context: ~w)~n",[PredID,Cx]),
+	debug(interprete(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined (context: ~w)~n",[PredID,Cx]),
 	clear_predicate(PredID),
     really_do_add_clause(PredID,Cx).
 
@@ -479,11 +479,11 @@ really_do_add_clause(PredID,Cx):-
     ;	true
     ),
     toplevel_term(TlRef,Term),
-    debug(interpreter(debug),"added toplevel ~w (~w) as clause ~w to predicate ~w. ~w~n",[TlRef,Term,M,PredID,Cx]),
+    debug(interprete(debug),"added toplevel ~w (~w) as clause ~w to predicate ~w. ~w~n",[TlRef,Term,M,PredID,Cx]),
     set_num_clauses(PredID,M).    
 		
 merge_modules(Name,OldMID,NewMID,Cx,MID):-
-    debug(interpreter(info),"trying to merge modules ~w and ~w. (context: ~w)~n",[OldMID,NewMID,Cx]),
+    debug(interprete(info),"trying to merge modules ~w and ~w. (context: ~w)~n",[OldMID,NewMID,Cx]),
     pef_type(OldMID,OldType),
     pef_type(NewMID,NewType),
     (	module_base(OldMID,Base), module_base(NewMID,Base)
@@ -495,12 +495,12 @@ merge_modules(Name,OldMID,NewMID,Cx,MID):-
 
 merge_modules(Type,Type,true,_Name,MID,MID,_Cx,MID):- % 01
 	!,
-	debug(interpreter(debug),"case 01~n",[]).
+	debug(interprete(debug),"case 01~n",[]).
 merge_modules(pef_module_definition,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):- %02
-	debug(interpreter(debug),"case 02~n",[]),
+	debug(interprete(debug),"case 02~n",[]),
     throw(module_name_conflict(OldMID,NewMID)).
 merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID,Cx,MID):- %03
-	debug(interpreter(debug),"case 03~n",[]),
+	debug(interprete(debug),"case 03~n",[]),
 	cx_program(Cx,PID),
 	(	module_owner(OldMID,PID)
 	->	merge_module(append,NewMID,OldMID,Cx),
@@ -509,13 +509,13 @@ merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID
 		MID=NewMID
 	). 
 merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):- %04
-	debug(interpreter(debug),"case 04~n",[]),
-%	debug(interpreter(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
-	debug(interpreter(info),"Our model may be incorrect now!!!",[]),
+	debug(interprete(debug),"case 04~n",[]),
+%	debug(interprete(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
+	debug(interprete(info),"Our model may be incorrect now!!!",[]),
 	throw(module_name_conflict(OldMID,NewMID)).
     
 merge_modules(pef_module_definition,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,MID):- %05
-	debug(interpreter(debug),"case 05~n",[]),
+	debug(interprete(debug),"case 05~n",[]),
     cx_program(Cx,PID),
     (	module_owner(OldMID,PID)
     ->	MID=OldMID
@@ -525,12 +525,12 @@ merge_modules(pef_module_definition,pef_ad_hoc_module,_SameBase,Name,OldMID,NewM
     rebind_module_name(Name,MID,Cx).
     
 merge_modules(pef_module_extension,pef_module_definition,true,_Name,MID,_New,_Cx,MID):-
-	debug(interpreter(debug),"case 06~n",[]). %06
+	debug(interprete(debug),"case 06~n",[]). %06
 merge_modules(pef_module_extension,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):- %07
-	debug(interpreter(debug),"case 07~n",[]),
+	debug(interprete(debug),"case 07~n",[]),
     throw(module_name_conflict(OldMID,NewMID)).
 merge_modules(pef_module_extension,pef_module_extension,true,Name,OldMID,NewMID,Cx,NewMID):- %08
-	debug(interpreter(debug),"case 08~n",[]),
+	debug(interprete(debug),"case 08~n",[]),
 
     cx_program(Cx,PID),
     (	module_owner(OldMID,PID)
@@ -543,12 +543,12 @@ merge_modules(pef_module_extension,pef_module_extension,true,Name,OldMID,NewMID,
     merge_module(Order,MergeMID,MID,Cx),
     rebind_module_name(Name,MID,Cx).
 merge_modules(pef_module_extension,pef_module_extension,false,_Name,OldMID,NewMID,Cx,_MID):- %09
-	debug(interpreter(debug),"case 09",[]),
-   	debug(interpreter(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
-	debug(interpreter(info),"Our model may be incorrect now!!!",[]),
+	debug(interprete(debug),"case 09",[]),
+   	debug(interprete(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
+	debug(interprete(info),"Our model may be incorrect now!!!",[]),
 	throw(module_name_conflict(OldMID,NewMID)).
 merge_modules(pef_module_extension,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,MID):- %10
-	debug(interpreter(debug),"case 10~n",[]),
+	debug(interprete(debug),"case 10~n",[]),
     cx_program(Cx,PID),
     (	module_owner(OldMID,PID)
     ->	MID=OldMID
@@ -558,7 +558,7 @@ merge_modules(pef_module_extension,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMI
     merge_module(append,NewMID,MID,Cx).
     
 merge_modules(pef_ad_hoc_module,pef_module_definition,_SameBase,Name,OldMID,NewMID,Cx,MID):-%11
-	debug(interpreter(debug),"case 11~n",[]),
+	debug(interprete(debug),"case 11~n",[]),
     cx_program(Cx,PID),
     /*(	module_owner(NewMID,PID)
     ->	MID=NewMID
@@ -571,7 +571,7 @@ merge_modules(pef_ad_hoc_module,pef_module_definition,_SameBase,Name,OldMID,NewM
     ;	true
    	).
 merge_modules(pef_ad_hoc_module,pef_module_extension,_SameBase,Name,OldMID,NewMID,Cx,MID):-%12
-	debug(interpreter(debug),"case 12~n",[]),
+	debug(interprete(debug),"case 12~n",[]),
     cx_program(Cx,PID),
   /*  (	module_owner(NewMID,PID)
     ->	MID=NewMID
@@ -584,7 +584,7 @@ merge_modules(pef_ad_hoc_module,pef_module_extension,_SameBase,Name,OldMID,NewMI
     ;	true
    	).
 merge_modules(pef_ad_hoc_module,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,NewMID):-%13
-	debug(interpreter(debug),"case 13~n",[]),
+	debug(interprete(debug),"case 13~n",[]),
     cx_program(Cx,PID),
     (	module_owner(OldMID,PID)
     ->	MID=OldMID, MergeMID=NewMID,Order=append
@@ -598,7 +598,7 @@ merge_modules(pef_ad_hoc_module,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,C
     
 
 merge_module(prepend_abolish,MergeMID,MID,Cx):-
-    debug(interpreter(debug),"prepending module ~w before ~w (prepend_abolish). ~w~n",[MergeMID,MID,Cx]),
+    debug(interprete(debug),"prepending module ~w before ~w (prepend_abolish). ~w~n",[MergeMID,MID,Cx]),
     %special case. only prepend predicates that are multifile or dynamic
     % this is used in cases 11 and 12: when a module definition is encountered and an ad-hoc definition
     % for this module already exists, the interpreter abolishes all predictes that are neither dynamic
@@ -613,7 +613,7 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
     	->	get_or_create_predicate(Name,Arity,Cx1,MergedPredId),	
 	    	merge_predicates(prepend,PredId,MergedPredId,Cx/* Not a typo! Cx1 is only used for looking up the predicate */),
     		merge_properties(prepend,PredId,MergedPredId)
-    	;	%debug(interpreter(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
+    	;	%debug(interprete(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
     		pef_reserve_id(pef_predicate_abolished,ID),
     		cx_get(Cx,[program=PID,toplevel=TlRef]),
     		pef_predicate_abolished_assert([id=ID,program=PID,toplevel=TlRef,module=MID,predicate=PredId])
@@ -623,7 +623,7 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
 
 merge_module(Order,MergeMID,MID,Cx):-
 
-    debug(interpreter(debug),"merging module ~w into ~w (~w). ~w~n",[MergeMID,MID,Order,Cx]),
+    debug(interprete(debug),"merging module ~w into ~w (~w). ~w~n",[MergeMID,MID,Order,Cx]),
     cx_set_module(Cx,MID,Cx1),    
     forall(
     	pef_predicate_query([id=PredId,name=Name, arity=Arity,module=MergeMID]),
@@ -659,11 +659,11 @@ merge_predicates(File,File,_Order,_SourcePred,_TargetPred,_Cx):-
     !.% same file and not multifile --> the predicates are identical.
 merge_predicates(_,_,prepend,SourcePred,_TargetPred,CX):-
     !,
-   	debug(interpreter(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined : (prepend, context: ~w)~n",
+   	debug(interprete(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined : (prepend, context: ~w)~n",
    			[SourcePred,CX]),
     true. %nothing to merge, target overrides source.
 merge_predicates(_,_,append,SourcePred,TargetPred,CX):-    
-	debug(interpreter(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined: (append, context: ~w)~n",
+	debug(interprete(todo),"TODO: problem marker informing us that a \"static\" predicate ~w is redifined: (append, context: ~w)~n",
    			[TargetPred,CX]),
 	clear_predicate(TargetPred),
     merge_properties(append,SourcePred,TargetPred), 
@@ -675,7 +675,7 @@ append_clauses([C|Cs],TargetPred,N,M):-
     pef_clause_get(C,[toplevel=TlRef]),
     pef_clause_assert([predicate=TargetPred,number=I,toplevel=TlRef]),
     toplevel_term(TlRef,Term),
-    debug(interpreter(debug),"appending toplevel ~w (~w) as clause ~w to predicate ~w. ~n",[TlRef,Term,I,TargetPred]),
+    debug(interprete(debug),"appending toplevel ~w (~w) as clause ~w to predicate ~w. ~n",[TlRef,Term,I,TargetPred]),
     append_clauses(Cs,TargetPred,I,M).
 
 	
@@ -684,13 +684,13 @@ merge_clauses(append,SourcePred,TargetPred,CX):-
 	num_clauses(TargetPred,N),
 
 	( TargetPred==38 -> debugme ; true),
-    debug(interpreter(debug),"appending clauses of ~w after ~w. ~w~n",[SourcePred,TargetPred,CX]),
+    debug(interprete(debug),"appending clauses of ~w after ~w. ~w~n",[SourcePred,TargetPred,CX]),
 
     findall( C,
     	(	pef_clause_query([predicate=SourcePred,toplevel=TlRef],C),
     		% only add the clause if the toplevel isn't already used!
     		(	pef_clause_query([predicate=TargetPred,toplevel=TlRef,number=I])	
-    		->	debug(interpreter(debug),
+    		->	debug(interprete(debug),
     				"Toplevel ~w already apears as clause number ~w in predicate ~w. Will not be added. ~w~n",
     				[TlRef,I,TargetPred,CX]
     			),
@@ -706,12 +706,12 @@ merge_clauses(append,SourcePred,TargetPred,CX):-
 merge_clauses(prepend,SourcePred,TargetPred,CX):-
 	nb_setval(program_interpreter_clause_number,0),
    	
-    debug(interpreter(debug),"prepending clauses of ~w before ~w. ~w~n",[SourcePred,TargetPred,Cx]),
+    debug(interprete(debug),"prepending clauses of ~w before ~w. ~w~n",[SourcePred,TargetPred,Cx]),
    	
     findall( C,
     	(	pef_clause_query([predicate=TargetPred,toplevel=TlRef],C),
     		(	pef_clause_query([predicate=SourcePred,toplevel=TlRef,number=I])	
-    		->	debug(interpreter(debug),
+    		->	debug(interprete(debug),
     				"Toplevel ~w already apears as clause number ~w in predicate ~w. Will not be added. ~w~n",
     				[TlRef,I,SourcePred,CX]
     			),
@@ -721,7 +721,7 @@ merge_clauses(prepend,SourcePred,TargetPred,CX):-
     	),    	
     	TargetClauses
     ),
-    debug(interpreter(debug),"removing all clauses from predicate ~w. ~w~n",[TargetPred,Cx]),
+    debug(interprete(debug),"removing all clauses from predicate ~w. ~w~n",[TargetPred,Cx]),
    	pef_clause_retractall([predicate=TargetPred]),
     findall( C,   
     	pef_clause_query([predicate=SourcePred,toplevel=TlRef],C),
@@ -756,14 +756,14 @@ copy_module(pef_module_extension,OldMID,NewMID,Cx):-
     pef_module_extension_query([id=OldMID,base=Base]),
     pef_module_extension_assert([id=NewMID,base=Base,program=PID]),
     merge_module(append,OldMID,NewMID,Cx),
-    debug(interpreter(debug),"Program ~w created a copy ~w of module extension ~w.~w~n",[PID,NewMID,OldMID,Cx]).
+    debug(interprete(debug),"Program ~w created a copy ~w of module extension ~w.~w~n",[PID,NewMID,OldMID,Cx]).
 copy_module(pef_ad_hoc_module,OldMID,NewMID,Cx):-
     cx_program(Cx,PID),
     pef_reserve_id(pef_ad_hoc_module,NewMID),
     pef_ad_hoc_module_query([id=OldMID,name=Name]),
     pef_ad_hoc_module_assert([id=NewMID,name=Name,program=PID]),   
     merge_module(append,OldMID,NewMID,Cx),
-    debug(interpreter(debug),"Program ~w created a copy ~w of ad-hoc module ~w.~w~n",[PID,NewMID,OldMID,Cx]).
+    debug(interprete(debug),"Program ~w created a copy ~w of ad-hoc module ~w.~w~n",[PID,NewMID,OldMID,Cx]).
 	
     
 extend_module(OldMID,NewMID,Cx):-
@@ -772,7 +772,7 @@ extend_module(OldMID,NewMID,Cx):-
 	->	cx_program(Cx,PID),
 		pef_reserve_id(pef_module_extension,NewMID),
 	    pef_module_extension_assert([id=NewMID,base=OldMID,program=PID]),
-	    debug(interpreter(debug),"Program ~w created an extension ~w of module ~w.~w~n",[PID,NewMID,OldMID,Cx])
+	    debug(interprete(debug),"Program ~w created an extension ~w of module ~w.~w~n",[PID,NewMID,OldMID,Cx])
 	;	throw(cannot_extend_virtual_module(OldMID))
 	).
 
@@ -848,7 +848,7 @@ unload_module(MName,MID,Cx):-
     % if the current program uses an extensions of the module, we convert it to an ad-hoc module.
     pef_module_extension_query([program=PID,base=MID,id=ExtID]),
     !,
-    debug(interpreter(debug), "turning module extension ~w into an ad-hoc module. ~w~n",[ExtID,Cx]),    
+    debug(interprete(debug), "turning module extension ~w into an ad-hoc module. ~w~n",[ExtID,Cx]),    
 	pef_module_extension_retractall([id=ExtID]),
 	pef_ad_hoc_module_assert([id=ExtID,name=MName,program=PID]),
 	pef_base:retract(pef_type(ExtID,_)),

@@ -1,6 +1,4 @@
-:- module(parser,
-	[]
-).
+:- module(parse,[]).
 :- use_module(library('prolog_source')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
@@ -12,7 +10,7 @@
 :- pdt_define_context(parse_cx(file,toplevel,term,expanded)).
 
 pdt_builder:build_hook(parse(AbsFile)):-
-    parser:my_build_hook(AbsFile).
+    parse:my_build_hook(AbsFile).
 my_build_hook(AbsFile):-    
 	pdt_forget(AbsFile),
 	(	exists_file(AbsFile)
@@ -22,7 +20,7 @@ my_build_hook(AbsFile):-
 pdt_builder:invalidate_hook(file(AbsFile)):-
     pdt_invalidate_target(parse(AbsFile)).
 pdt_builder:invalidate_hook(parse(AbsFile)):-
-    parser:
+    parse:
     (	get_pef_file(AbsFile,DepRef),
 	    forall(
 	    	pef_file_dependency_query([dependency=DepRef,depending=FileRef] ),
@@ -96,11 +94,11 @@ do_read(F,In):-
     			[	variable_names(VarNames),
     				singletons(Singletons),
     				subterm_positions(Positions)/*,
-    				module(parser)*/
+    				module(parse)*/
     			]
     		),    	
     		Error,
-    		debug(parser(todo),"TODO: add an error marker for ~w.~n",[Error])
+    		debug(parse(todo),"TODO: add an error marker for ~w.~n",[Error])
     	),
     	var(Error),
     	pef_reserve_id(pef_toplevel,TID),
@@ -135,7 +133,7 @@ process_module_definition(Name,Exports,Cx):-
 
 
 process_inclusion(F,Cx):-
-	debug(parser(debug),"resolving ~w~n", [F]),
+	debug(parse(debug),"resolving ~w~n", [F]),
 	parse_cx_file(Cx,MyRef),
 	parse_cx_toplevel(Cx,TlRef),
 %	pdt_file_spec(file_ref(MyRef),MyFile),
@@ -149,10 +147,10 @@ process_inclusion(F,Cx):-
 	catch(
 		do_inclusion(File,Cx),
 		error(cycle(T)),
-		debug(parser(todo),"TODO: add a warning about dependency cycle: ~w~n",[T])
+		debug(parse(todo),"TODO: add a warning about dependency cycle: ~w~n",[T])
 	).
 process_inclusion(F,_Cx):-
-    debug(parser(todo),"TODO add error marker - could not resolve: ~w~n",[F]). 
+    debug(parse(todo),"TODO add error marker - could not resolve: ~w~n",[F]). 
 
 
 
@@ -205,7 +203,7 @@ find_file_refs(use_module(H),_,[H]):-
     \+ is_list(H).
 
 
-my_push_op(Pr,Tp,Nm,Cx):-
+my_push_op(Pr,Tp,Nm,_Cx):-
     
     
     '$set_source_module'(SM, SM),

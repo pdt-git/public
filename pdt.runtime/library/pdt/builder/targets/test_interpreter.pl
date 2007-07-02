@@ -3,11 +3,11 @@
 :- use_module(library('pef/pef_base')).
 :- use_module(library('pef/pef_api')).
 :- use_module(library('builder/builder')).
-:- use_module(library('builder/targets/program_interpreter')).
+:- use_module(library('builder/targets/interprete')).
 :- nospyall.
 :- guitracer.
 %:- debug(parser(todo)).
-:- debug(interpreter(_)).
+:- debug(interprete(_)).
 %:- spy(program_interpreter:unload_file/2).
 %:- spy(debugme).
 %:- spy(create_program).
