@@ -98,10 +98,10 @@ public class SocketServerStartAndStopStrategy implements
 	 * 
 	 * @see org.cs3.pl.prolog.ServerStartAndStopStrategy#startServer(org.cs3.pl.prolog.IPrologInterface)
 	 */
-	public Process startServer(PrologInterface pipi) {
-		SocketPrologInterface pif = (SocketPrologInterface) pipi;
-		pif.setLockFile(Util.getLockFile());
-		if (Boolean.valueOf(pif.getOption(SocketPrologInterface.STANDALONE))
+	public Process startServer(PrologInterface pif) {
+		SocketPrologInterface socketPif = (SocketPrologInterface) pif;
+		socketPif.setLockFile(Util.getLockFile());
+		if (Boolean.valueOf(socketPif.getOption(SocketPrologInterface.STANDALONE))
 				.booleanValue()) {
 			Debug.warning("Will not start server; the option "
 					+ SocketPrologInterface.STANDALONE + " is set.");
@@ -110,14 +110,14 @@ public class SocketServerStartAndStopStrategy implements
 		int port;
 		try {
 			port = Util.findFreePort();
-			pif.setPort(port);
+			socketPif.setPort(port);
 		} catch (IOException e) {
 			Debug.report(e);
 			throw new RuntimeException(e.getMessage());
 		}
-		String executable = pif.getOption(SocketPrologInterface.EXECUTABLE);
-		String envstring = pif.getOption(SocketPrologInterface.ENVIRONMENT);
-		String engineDir = Util.prologFileName(pif.getFactory()
+		String executable = socketPif.getOption(SocketPrologInterface.EXECUTABLE);
+		String envstring = socketPif.getOption(SocketPrologInterface.ENVIRONMENT);
+		String engineDir = Util.prologFileName(socketPif.getFactory()
 				.getResourceLocator().resolve("/"));
 
 		File tmpFile = null;
@@ -125,13 +125,13 @@ public class SocketServerStartAndStopStrategy implements
 			tmpFile = File.createTempFile("socketPif", null);
 			PrintWriter p = new PrintWriter(new BufferedOutputStream(
 					new FileOutputStream(tmpFile)));
-			if ("true".equals(pif.getOption(SocketPrologInterface.HIDE_PLWIN))) {
+			if ("true".equals(socketPif.getOption(SocketPrologInterface.HIDE_PLWIN))) {
 				p
 						.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))"
 								+ "->win_window_pos([show(false)])" + ";true).");
 			}
 
-			if ("true".equals(pif.getOption(SocketPrologInterface.CREATE_LOGS))) {
+			if ("true".equals(socketPif.getOption(SocketPrologInterface.CREATE_LOGS))) {
 				p.println(":- multifile user:'$log_dir'/1.");
 				p.println(":- dynamic user:'$log_dir'/1.");
 				File logDir = new File(System
@@ -144,14 +144,14 @@ public class SocketServerStartAndStopStrategy implements
 				p.println(":- debug(builder(_)).");//TODO remove me
 				p.println(":- debug(builder).");//TODO remove me				
 			}
-			List bootstrapLIbraries = pif.getBootstrapLibraries();
+			List bootstrapLIbraries = socketPif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
 				String s = (String) it.next();
 				p.println(":- ['" + s + "'].");
 			}
 			p.println("file_search_path(library,'" + engineDir + "').");
 			p.println(":-consult_server(" + port + ",'"
-					+ Util.prologFileName(pif.getLockFile()) + "').");
+					+ Util.prologFileName(socketPif.getLockFile()) + "').");
 			p.close();
 		} catch (IOException e) {
 			Debug.report(e);
@@ -227,9 +227,9 @@ public class SocketServerStartAndStopStrategy implements
 			new _InputStreamPump(process.getErrorStream(), writer).start();
 			new _InputStreamPump(process.getInputStream(), writer).start();
 
-			long timeout = pif.getTimeout();
+			long timeout = socketPif.getTimeout();
 			long startTime = System.currentTimeMillis();
-			while (!pif.getLockFile().exists()) {
+			while (!socketPif.getLockFile().exists()) {
 				try {
 					long now = System.currentTimeMillis();
 					if (now - startTime > timeout) {
@@ -260,14 +260,15 @@ public class SocketServerStartAndStopStrategy implements
 				}
 			}
 			// The process should be up now.
-			SocketClient c = new SocketClient(pif
+			SocketClient c = new SocketClient(socketPif
 					.getOption(SocketPrologInterface.HOST), port);
 			long pid = c.getServerPid();
 			c.close();
-			String cmd = pipi.getOption(SocketPrologInterface.KILLCOMMAND)
+			String cmd = pif.getOption(SocketPrologInterface.KILLCOMMAND)
 					+ " " + pid;
 			// an experiment
-			this.serverProcess = new ExternalKillProcessWrapper(process, cmd);
+			this.serverProcess = new ExternalKillProcessWrapper(process, 
+					new String[] {pif.getOption(SocketPrologInterface.KILLCOMMAND),""+pid});
 			JackTheProcessRipper.getInstance().registerProcess(serverProcess);
 			return process;
 		} catch (IOException e) {
