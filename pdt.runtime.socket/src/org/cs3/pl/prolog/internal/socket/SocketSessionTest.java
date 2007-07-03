@@ -436,6 +436,7 @@ public class SocketSessionTest extends TestCase {
 	       Map map = null;
 	       try{
 	           //map = session.queryOnce("A = 'package test0001;\n\nimport java.util.*;\n\npublic class Test  {\n'");
+	    	   //session.queryOnce("guitracer");
 	    	   map=session.queryOnce("atom_codes(A,[123,10])");
 	           assertEquals("{\n",map.get("A"));
 	       } catch(Exception e){
