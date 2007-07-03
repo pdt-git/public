@@ -12,7 +12,7 @@
 update_file(Abs):-
 	(	exists_file(Abs)
     ->	get_pef_file(Abs,_)
-    ;	pef_file_retractall(path=Abs)
+    ;	pef_file_retractall([path=Abs])
     ).
 
 pdt_file_added(Abs):-
