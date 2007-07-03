@@ -719,18 +719,25 @@ escape_stream(In,Out):-
 	
 
 write_escaped_char('<',Out):-
+	!,
 	write(Out,'&lt;').
 write_escaped_char('>',Out):-
+	!,
 	write(Out,'&gt;').
 write_escaped_char('{',Out):-
+	!,
 	write(Out,'&cbo;').
 write_escaped_char('}',Out):-
+	!,
 	write(Out,'&cbc;').
 write_escaped_char('&',Out):-
+	!,
 	write(Out,'&amp;').
 write_escaped_char('"',Out):-
+	!,
 	write(Out,'&quot;').
 write_escaped_char('\'',Out):-
+	!,
 	write(Out,'&apos;').
 write_escaped_char(C,Out):-
 	put_char(Out,C).	
