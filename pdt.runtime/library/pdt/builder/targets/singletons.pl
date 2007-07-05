@@ -8,7 +8,9 @@
 pdt_builder:build_hook(singletons(Abs)):-
     pdt_with_targets([parse(Abs)],
     	(	singletons:forget_singletons(Abs),
-    		singletons:check_singletons(Abs)).
+    		singletons:check_singletons(Abs)
+    	)
+    ).
 
 pdt_builder:invalidate_hook(parse(Abs)):-
 	pdt_invalidate_target(singletons(Abs)).
@@ -18,10 +20,13 @@ pdt_builder:invalidate_hook(parse(Abs)):-
 forget_singletons(Abs):-
     get_pef_file(Abs,FID),
     forall(
-    	(	pef_toplevel_query([file=FID,id=TlID])
-    		
+    	(	pef_toplevel_query([file=FID,id=TlID]),
+    		pef_ast_query([toplevel=TlID,id=Ast]),
+    		pef_variable_query([ast=Ast,id=VID])
+    	),
+    	(	pef_singleton_retractall([variable=VID]),
+    		pef_no_singleton_retractall([variable=VID])
     	)
-    	(	pef_singelton_retractall([toplevel=TlID])
     ).
     
 check_singletons(Abs):-
@@ -36,7 +41,8 @@ check_singletons(Abs):-
 check_singletons([],_).
 check_singletons([Name=_Var|Singletons],Tl):-
     pdt_request_target(ast(Tl)),
-    pef_variable_query([toplevel=Tl,name=Name,id=VarId]),
+    pef_ast_query([toplevel=Tl,id=Ast]),
+    pef_variable_query([ast=Ast,name=Name,id=VarId]),
     pef_reserve_id(pef_singleton,ID),
     pef_singleton_assert([id=ID,variable=VarId]),
     check_singletons(Singletons,Tl).
@@ -47,9 +53,10 @@ check_no_singletons([Name=_Var|VarNames],Singletons,Tl):-
     	\+ atom_prefix(Name,'__'),
     	\+ memberchk(Name=_,Singletons)
     ->	pdt_request_target(ast(Tl)),
-	    pef_variable_query([toplevel=Tl,name=Name,id=VarId]),
+    	pef_ast_query([toplevel=Tl,id=Ast]),
+	    pef_variable_query([ast=Ast,name=Name,id=VarId]),
 	    pef_reserve_id(pef_singleton,ID),
-	    pef_singleton_assert([id=ID,variable=VarId])
+	    pef_no_singleton_assert([id=ID,variable=VarId])
 	;	true
 	),
     check_no_singletons(VarNames,Singletons,Tl).

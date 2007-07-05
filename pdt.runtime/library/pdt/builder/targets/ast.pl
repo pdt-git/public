@@ -9,7 +9,7 @@
 :- use_module(library('builder/builder')).
 :- use_module(library('builder/targets/parse')).
 
-:- pdt_define_context(cx(toplevel,positions)).
+:- pdt_define_context(cx(toplevel,positions,root)).
 
 pdt_builder:build_hook(asts(AbsFile)):-
     get_pef_file(AbsFile,FID),
@@ -39,17 +39,23 @@ rebuild(Tl):-
     forget_ast(Tl),
     build_ast(Tl).
 
-
+/*
 forget_ast(TL):-
-    pef_toplevel_root_query([toplevel=TL,root=Root]),
+    pef_ast_query([toplevel=TL,root=Root]),
     !,
     forget_subtree(Root),
-    pef_toplevel_root_retractall([toplevel=TL,root=Root]).
+    pef_ast_retractall([toplevel=TL,root=Root]).
 forget_ast(_TL).
+*/
+
+forget_ast(TL):-
+    pef_ast_cleanupall([toplevel=TL]).
+    
 
 build_ast(Tl):-
-    build_ast(Tl,Root),
-    pef_toplevel_root_assert([toplevel=Tl,root=Root]).
+    pef_reserve_id(pef_ast,Id),
+    build_ast(Tl,Id,Root),    
+    pef_ast_assert([id=Id,toplevel=Tl,root=Root]).
 
 %%
 % pdt_generate_ast(+ToplevelRef, Id).
@@ -57,8 +63,9 @@ build_ast(Tl):-
 % generate ast facts for a toplevel term.
 % @param ToplevellRef the reference of the toplevel record.
 % @param Id is unified with the id of root of the generated syntax tree.
-build_ast(TID, Id):-
+build_ast(TID, RootId,Id):-
     cx_new(Cx),
+    cx_root(Cx,RootId),
     cx_toplevel(Cx,TID),
     cx_positions(Cx,Positions),
     pef_toplevel_query([id=TID,expanded=Expanded,varnames=VarNames,positions=Positions]),    
@@ -68,8 +75,8 @@ build_ast(TID, Id):-
 process_variables([],_Cx).
 process_variables([Name=Variable|Variables],Cx):-
     pef_reserve_id(pef_variable,Id),
-    cx_toplevel(Cx,Tl),
-    pef_variable_assert([id=Id,name=Name,toplevel=Tl]),
+    cx_root(Cx,Root),
+    pef_variable_assert([id=Id,name=Name,ast=Root]),
     Variable='$var'(Id),
 	process_variables(Variables,Cx).
     

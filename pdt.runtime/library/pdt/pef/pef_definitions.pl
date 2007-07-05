@@ -72,7 +72,7 @@
 	pef_toplevel(
 		id,
 		file @index :pef_file,
-		term,
+		term @index,
 		expanded,
 		positions,
 		varnames,
@@ -101,8 +101,8 @@
 :- define_pef(
 	pef_variable(
 		id,
-		name,
-		toplevel @index :pef_toplevel
+		name @label,
+		ast @index :pef_ast
 	)
 ).
 
@@ -117,11 +117,11 @@
 
 % The relation between a toplevel record and the root of corresponding AST.
 :- define_pef(
-	pef_toplevel_root(
+	pef_ast(
+		id,
 		root @cascade :ast_node,
-		toplevel:pef_toplevel,
-		file:pef_file
-	) @weak @edge
+		toplevel:pef_toplevel
+	) 
 ).
 
 
