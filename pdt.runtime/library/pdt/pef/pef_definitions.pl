@@ -111,14 +111,14 @@
 	pef_arg(
 		num @label,
 		parent:pef_term,
-		child:ast_node
+		child @cascade :ast_node
 	) @edge @weak
 ).
 
 % The relation between a toplevel record and the root of corresponding AST.
 :- define_pef(
 	pef_toplevel_root(
-		root:ast_node,
+		root @cascade :ast_node,
 		toplevel:pef_toplevel,
 		file:pef_file
 	) @weak @edge
