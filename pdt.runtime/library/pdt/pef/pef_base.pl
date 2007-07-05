@@ -494,6 +494,17 @@ add_attribute_tags(Tag,Name,Num):-
 process_meta_edges:-
     forall('$metapef_edge'(FromT,ArgNum,ToT),process_meta_edge(FromT,ArgNum,ToT)).
 
+metapef_ref(Type,RefType,RefArg):-
+    metapef_is_a(Type,TargetType),
+    '$metapef_edge'(RefType,RefArg,TargetType).
+metapef_cascade(Type,Arg,ArgType):-
+    '$metapef_attribute_tag'(Type,Arg,cascade),
+    '$metapef_edge'(Type,Arg,TargetType),
+    metapef_is_a(ArgType,TargetType),
+    '$metapef_concrete'(ArgType).
+
+metapef_index_arg(Type,Arg):-
+    '$metapef_attribute_tag'(Type,Arg,index).
 
 pef_edge(From,FromT,ArgName,To,ToT):-
     '$pef_edge'(From,FromT,ArgName,To,ToT),
@@ -579,11 +590,29 @@ pef_reserve_id(Type,Id):-
     assert(pef_type(Id,Type)). 
 
 
+create_cleanup_preds:-
+    forall('$concrete'(Type), create_cleanupall(Type)).
+
+create_cleanupall(Type):-
+    '$metapef_template'(Type,Template),
+    /*find_id(*/
+    findall(ref(RType,RArg),metapef_ref(Type,RType,RArg),Refs)
+
+    
+	    
+postprocess_pefs:-
+   process_meta_edges,
+   process_meta_nodes,
+   create_cleanup_preds.
+    
+
+    
+    
 :- include(pef_definitions).
 
 
     
-% IMPORTANT: the following lines should stay at the end of the file. 
+% IMPORTANT: the following line should stay at the end of the file. 
 % They trigger the post-processing of the meta pefs that require a global perspective.
-:- process_meta_edges.
-:- process_meta_nodes.
+
+:- postprocess_pefs.
