@@ -17,6 +17,8 @@ gen_problems:-
 	).			
 	    
     
+pdt_builder:invalidate_hook(file(_)):-
+	pdt_invalidate_target(problems).
 pdt_builder:invalidate_hook(interprete(_)):-
 	pdt_invalidate_target(problems).
 pdt_builder:invalidate_hook(parse(_)):-
@@ -40,7 +42,8 @@ problem(File,Start,End,error,Message):-%syntax error
     get_pef_file(File,FID).
 problem(File,Start,End,error,Message):-%singleton
     pef_singleton_query([variable=VID]),
-    pef_variable_query([id=VID,name=Name,toplevel=TlID]),
+    pef_variable_query([id=VID,name=Name,ast=Ast]),
+    pef_ast_query([id=Ast,toplevel=TlID]),
     pef_toplevel_query([id=TlID,file=FID]),
     pef_variable_occurance_query([variable=VID,id=OccID]),
     pef_property_query([pef=OccID,key=start,value=Start]),
@@ -49,7 +52,8 @@ problem(File,Start,End,error,Message):-%singleton
     with_output_to(string(Message),format("Variable ~w only apears once in this clause.",[Name])).    
 problem(File,Start,End,error,Message):-%no singleton
     pef_no_singleton_query([variable=VID]),
-    pef_variable_query([id=VID,name=Name,toplevel=TlID]),
+    pef_variable_query([id=VID,name=Name,ast=Ast]),
+    pef_ast_query([id=Ast,toplevel=TlID]),
     pef_toplevel_query([id=TlID,file=FID]),
     pef_variable_occurance_query([variable=VID,id=OccID]),
     pef_property_query([pef=OccID,key=start,value=Start]),

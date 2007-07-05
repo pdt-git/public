@@ -34,8 +34,11 @@ pdt_parse(Spec):-
     my_read(Spec).
 
 pdt_forget(Spec):-
-    my_forget(Spec).
-
+   % my_forget(Spec).
+	pdt_file_spec(Spec,AbsFile),
+    get_pef_file(AbsFile,FID),
+    pef_toplevel_cleanupall([file=FID]),
+    pef_syntax_error_cleanupall([file=FID]).
 
 my_forget(Spec):-
 	pdt_file_spec(Spec,AbsFile),

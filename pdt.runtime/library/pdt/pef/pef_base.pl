@@ -590,13 +590,27 @@ pef_reserve_id(Type,Id):-
     assert(pef_type(Id,Type)). 
 
 
+:- ensure_loaded(pef_generic).
+
 create_cleanup_preds:-
-    forall('$concrete'(Type), create_cleanupall(Type)).
+    forall('$metapef_concrete'(Type), create_cleanupall(Type)).
 
 create_cleanupall(Type):-
     '$metapef_template'(Type,Template),
-    /*find_id(*/
-    findall(ref(RType,RArg),metapef_ref(Type,RType,RArg),Refs)
+    functor(Template,Name,Arity),
+    functor(Cx,Name,Arity),        
+    atom_concat(Name,'_cleanupall',HeadName),
+    functor(Head,HeadName,1),
+    arg(1,Head,List),
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+    Clause=(Head:-Getter,cleanall(Cx)),
+    assert(Clause,Ref),
+    assert(pefpred(Type,Ref)),
+    export(Head).
+    
 
     
 	    
@@ -607,7 +621,8 @@ postprocess_pefs:-
     
 
     
-    
+%:- define_pef(dummy(a)).
+   
 :- include(pef_definitions).
 
 

@@ -25,7 +25,7 @@ pdt_builder:invalidate_hook(interprete(DepFile)):-
     pef_file_dependency_query([dependency=DepRef,depending=FileRef]),
     get_pef_file(File,FileRef),
     pdt_invalidate_target(interprete(File)).
-
+/*
 pdt_forget_program(AbsFile):-
     pdt_invalidate_target(interprete(AbsFile)),
     get_pef_file(AbsFile,Ref),
@@ -33,8 +33,11 @@ pdt_forget_program(AbsFile):-
     ->	forget_program(PID)
     ;	true
     ).
-
-
+*/
+pdt_forget_program(AbsFile):-
+    get_pef_file(AbsFile,Ref),
+    pef_program_cleanupall([file=Ref]).
+    
 %% forget_program(+PID)
 % Anihilate program PID.
 % forget all modules owned by the program PID.

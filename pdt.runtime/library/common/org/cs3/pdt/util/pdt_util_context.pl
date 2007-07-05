@@ -56,7 +56,7 @@ pdt_define_context(Term):-
 pdt_define_context(Module,Term):-
 	functor(Term,Name,Arity),
     check_exists(Module,Name),
-	Module:assert('$context_template'(Name,Term),Ref),
+	assert('$context_template'(Module,Name,Term),Ref),
 	assert(context_pred(Module,Name,Ref)),     
     create_constructor(Module,Name,Arity),
     forall(arg(N,Term,ArgName),create_getter(Module,Name,Arity,N,ArgName)),
@@ -190,7 +190,7 @@ pdt_context_get_value_alternative(Module,Template,ArgName,Value):-
 	Module:Getter.
 pdt_context_get_value(Module,CxTerm,ArgName,Value):-
     functor(CxTerm,Name,_),
-	Module:'$context_template'(Name,Tmpl),
+	'$context_template'(Module,Name,Tmpl),
 	arg(I,Tmpl,ArgName),
 	!,
 	arg(I,CxTerm,Value).
