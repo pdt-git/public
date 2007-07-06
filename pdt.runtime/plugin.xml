@@ -74,6 +74,9 @@
      <attribute
            id="hidden"
            value="true"/>
+     <dependency
+           library="pdt.runtime.library.common">
+     </dependency>
   </library>   
   <library
         alias="library"

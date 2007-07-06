@@ -15,11 +15,13 @@
 :- dynamic 
 	build_hook/1,
 	invalidate_hook/1,
-	delete_hook/1.
+	delete_hook/1,
+	target_group/2.
 :- multifile
 	build_hook/1,
 	invalidate_hook/1,
-	delete_hook/1.
+	delete_hook/1,
+	target_group/2.
 
 :- dynamic '$has_lock'/1.
 :- thread_local '$has_lock'/1.
@@ -83,7 +85,10 @@ pdt_request_target(T):-
     ->	request_target(T)
     ;	throw(error(not_within_pdt_with_targets))
     ).
-
+request_target(Group):-
+    setof(Target,target_group(Target,Group),Targets),
+    !,
+    pdt_request_targets(Targets).
 request_target(Target):-
     '$has_lock'(Target),
     !,
@@ -138,6 +143,10 @@ build_target(Target):-
 % invalidate a target.
 % 
 % Marks the information associated with Target as obsolete.
+pdt_invalidate_target(Group):-
+	target_group(Target,Group),
+	!,
+	throw(cannot_invalidate_group(Group)).
 pdt_invalidate_target(Target):-
 	thread_send_message(build_arbiter,msg(Target,mark_dirty)).
 
@@ -293,8 +302,14 @@ execute_action(report_error([Thread|Threads],E),Target):-
 */
 execute_action(invalidate,Target):-
 	debug(builder(debug),"invalidating target: ~w~n",[Target]),
-    pif_notify(builder(Target),invalid),
-    forall(invalidate_hook(Target),true).
+    pif_notify(builder(Target),invalid),    
+    forall(invalidate_hook(Target),true),
+    forall(
+    	(	target_group(Target,Group)
+    		invalidate_hook(Group)
+    	),
+    	true
+    ).
 execute_action(rebuild(Thread),Target):-
 	debug(builder(debug),"rebuilding target: ~w~n",[Target]),
 	pif_notify(builder(Target),start(Thread)),

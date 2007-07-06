@@ -27,5 +27,5 @@ pdt_file_removed(Abs):-
     update_file(Abs),
     pdt_invalidate_target(file(Abs)).
     
-pdt_builder:invalidate_hook(file(_)):-
-	pdt_invalidate_target(workspace).    
+pdt_builder:target_group(file(F),workspace):-
+	pef_file_query([path=F]).    

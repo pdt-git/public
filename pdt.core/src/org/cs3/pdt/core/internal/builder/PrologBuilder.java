@@ -121,8 +121,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			Debug.debug("PrologBuilder.build(...) was triggered");
 			String taskname = "updating prolog metadata";
 			;
-			Set forgetList = new HashSet();
-			Set buildList = new HashSet();
+			Set<IFile> forgetList = new HashSet<IFile>();
+			Set<IFile> buildList = new HashSet<IFile>();
 
 			switch (kind) {
 			case IncrementalProjectBuilder.AUTO_BUILD:
@@ -221,6 +221,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			 */
 			Debug.debug("PrologBuilder.build(...) is done.");
 			monitor.done();
+			new UpdateMarkersJob(plProject,buildList).schedule();
+			
 			return null;
 		} catch (OperationCanceledException e) {
 			throw e;
@@ -268,8 +270,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		StringBuffer sb = new StringBuffer();
 		sb.append('[');
 		boolean first = true;
-		Map wsFiles = new HashMap();
-		Map fileContents = new HashMap(); // plFile as key
+		Map<String, IFile> wsFiles = new HashMap<String, IFile>();
+		Map<String, String> fileContents = new HashMap<String, String>(); // plFile as key
 		for (Iterator it = buildList.iterator(); it.hasNext();) {
 			if (!first) {
 				sb.append(',');
@@ -297,8 +299,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
-			IFile wsFile = (IFile) wsFiles.get(plFile);
-			String data = (String) fileContents.get(plFile);
+			IFile wsFile = wsFiles.get(plFile);
+			String data = fileContents.get(plFile);
 			int line = Integer.parseInt((String) map.get("Line"));
 			int column = Integer.parseInt((String) map.get("Column"));
 			int offset = PDTCoreUtils.convertCharacterOffset(data, Integer
@@ -306,7 +308,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			String message = (String) map.get("Message");
 
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
-			HashMap attributes = new HashMap();
+			HashMap<String, Integer> attributes = new HashMap<String, Integer>();
 			MarkerUtilities.setMessage(attributes, message);
 			MarkerUtilities.setLineNumber(attributes, line);
 
@@ -323,15 +325,15 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
-			IFile wsFile = (IFile) wsFiles.get(plFile);
-			String data = (String) fileContents.get(plFile);
+			IFile wsFile = wsFiles.get(plFile);
+			String data = fileContents.get(plFile);
 			int start = PDTCoreUtils.convertCharacterOffset(data, Integer
 					.parseInt((String) map.get("From")));
 			int end = PDTCoreUtils.convertCharacterOffset(data, Integer
 					.parseInt((String) map.get("To")));
 			String message = getMessage((String) map.get("Error"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
-			HashMap attributes = new HashMap();
+			HashMap<String, Integer> attributes = new HashMap<String, Integer>();
 			MarkerUtilities.setMessage(attributes, message);
 
 			MarkerUtilities.setCharStart(attributes, start);
@@ -347,8 +349,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator it = list.iterator(); it.hasNext();) {
 			Map map = (Map) it.next();
 			String plFile = (String) map.get("File");
-			IFile wsFile = (IFile) wsFiles.get(plFile);
-			String data = (String) fileContents.get(plFile);
+			IFile wsFile = wsFiles.get(plFile);
+			String data = fileContents.get(plFile);
 			int start = PDTCoreUtils.convertCharacterOffset(data, Integer
 					.parseInt((String) map.get("From")));
 			int end = PDTCoreUtils.convertCharacterOffset(data, Integer
@@ -356,7 +358,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 			String message = getMessage((String) map.get("Warning"));
 			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
-			HashMap attributes = new HashMap();
+			HashMap<String, Integer> attributes = new HashMap<String, Integer>();
 			MarkerUtilities.setMessage(attributes, message);
 
 			MarkerUtilities.setCharStart(attributes, start);
@@ -413,7 +415,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @see org.eclipse.core.resources.IncrementalProjectBuilder#clean(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void clean(IProgressMonitor monitor) throws CoreException {
-		Set forgetList = new HashSet();
+		Set<IFile> forgetList = new HashSet<IFile>();
 		collect(getProject(), forgetList);
 		getProject().deleteMarkers(IMarker.PROBLEM, true,
 				IResource.DEPTH_INFINITE);
@@ -443,7 +445,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @return
 	 * @throws CoreException
 	 */
-	private void collect(IProject project, final Set buildList)
+	private void collect(IProject project, final Set<IFile> buildList)
 			throws CoreException {
 		final IPrologProject plProject = (IPrologProject) project
 				.getNature(PDTCore.NATURE_ID);
@@ -455,7 +457,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 					try {
 						if (resource.getType() == IResource.FILE
 								&& isCanidate(resource)) {
-							buildList.add(resource);
+							buildList.add((IFile) resource);
 						}
 						return true;
 					} catch (Throwable t) {
