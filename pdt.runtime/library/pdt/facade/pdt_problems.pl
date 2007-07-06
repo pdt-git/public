@@ -7,24 +7,17 @@
 :-use_module(library('builder/targets/interprete')).
 
 
-pdt_builder:build_hook(problems):-
-    pdt_with_targets([],pdt_problems:gen_problems).
+
+pdt_builder:target_group(file(F),problems):-
+    pef_file_query([path=F]).
+pdt_builder:target_group(parse(F),problems):-
+    pef_file_query([path=F]).
+pdt_builder:target_group(interprete(F),problems):-
+    pef_file_query([path=F]).
+pdt_builder:target_group(singletons(F),problems):-
+    pef_file_query([path=F]).
+
     
-gen_problems:-
-	forall(
-		pef_file_query([path=AbsFile]),
-		pdt_request_targets([parse(AbsFile),interprete(AbsFile),singletons(AbsFile)])
-	).			
-	    
-    
-pdt_builder:invalidate_hook(file(_)):-
-	pdt_invalidate_target(problems).
-pdt_builder:invalidate_hook(interprete(_)):-
-	pdt_invalidate_target(problems).
-pdt_builder:invalidate_hook(parse(_)):-
-	pdt_invalidate_target(problems).
-pdt_builder:invalidate_hook(singletons(_)):-
-	pdt_invalidate_target(problems).
 
 
 
