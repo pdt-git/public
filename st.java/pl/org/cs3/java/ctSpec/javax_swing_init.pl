@@ -1,0 +1,140 @@
+%%%%%%%%%%%%
+%%
+%% Mark Schmatz:
+%% 
+%% These are the IBM J9 1.1 classes taken from the
+%% classes.zip archive of the J9 installation
+%% 
+%%%%%%%%%%%%
+
+javax_swing_class('javax.swing.AbstractAction').
+javax_swing_class('javax.swing.AbstractButton').
+javax_swing_class('javax.swing.AbstractCellEditor').
+javax_swing_class('javax.swing.AbstractListModel').
+javax_swing_class('javax.swing.AbstractSpinnerModel').
+javax_swing_class('javax.swing.ActionMap').
+javax_swing_class('javax.swing.BorderFactory').
+javax_swing_class('javax.swing.Box').
+javax_swing_class('javax.swing.Box.Filler').
+javax_swing_class('javax.swing.BoxLayout').
+javax_swing_class('javax.swing.ButtonGroup').
+javax_swing_class('javax.swing.CellRendererPane').
+javax_swing_class('javax.swing.ComponentInputMap').
+javax_swing_class('javax.swing.DebugGraphics').
+javax_swing_class('javax.swing.DefaultBoundedRangeModel').
+javax_swing_class('javax.swing.DefaultButtonModel').
+javax_swing_class('javax.swing.DefaultCellEditor').
+javax_swing_class('javax.swing.DefaultComboBoxModel').
+javax_swing_class('javax.swing.DefaultDesktopManager').
+javax_swing_class('javax.swing.DefaultFocusManager').
+javax_swing_class('javax.swing.DefaultListCellRenderer').
+javax_swing_class('javax.swing.DefaultListCellRenderer.UIResource').
+javax_swing_class('javax.swing.DefaultListModel').
+javax_swing_class('javax.swing.DefaultListSelectionModel').
+javax_swing_class('javax.swing.DefaultSingleSelectionModel').
+javax_swing_class('javax.swing.FocusManager').
+javax_swing_class('javax.swing.GrayFilter').
+javax_swing_class('javax.swing.ImageIcon').
+javax_swing_class('javax.swing.InputMap').
+javax_swing_class('javax.swing.InputVerifier').
+javax_swing_class('javax.swing.InternalFrameFocusTraversalPolicy').
+javax_swing_class('javax.swing.JApplet').
+javax_swing_class('javax.swing.JButton').
+javax_swing_class('javax.swing.JCheckBox').
+javax_swing_class('javax.swing.JCheckBoxMenuItem').
+javax_swing_class('javax.swing.JColorChooser').
+javax_swing_class('javax.swing.JComboBox').
+javax_swing_class('javax.swing.JComponent').
+javax_swing_class('javax.swing.JDesktopPane').
+javax_swing_class('javax.swing.JDialog').
+javax_swing_class('javax.swing.JEditorPane').
+javax_swing_class('javax.swing.JFileChooser').
+javax_swing_class('javax.swing.JFormattedTextField').
+javax_swing_class('javax.swing.JFormattedTextField.AbstractFormatter').
+javax_swing_class('javax.swing.JFormattedTextField.AbstractFormatterFactory').
+javax_swing_class('javax.swing.JFrame').
+javax_swing_class('javax.swing.JInternalFrame').
+javax_swing_class('javax.swing.JInternalFrame.JDesktopIcon').
+javax_swing_class('javax.swing.JLabel').
+javax_swing_class('javax.swing.JLayeredPane').
+javax_swing_class('javax.swing.JList').
+javax_swing_class('javax.swing.JMenu').
+javax_swing_class('javax.swing.JMenuBar').
+javax_swing_class('javax.swing.JMenuItem').
+javax_swing_class('javax.swing.JOptionPane').
+javax_swing_class('javax.swing.JPanel').
+javax_swing_class('javax.swing.JPasswordField').
+javax_swing_class('javax.swing.JPopupMenu').
+javax_swing_class('javax.swing.JPopupMenu.Separator').
+javax_swing_class('javax.swing.JProgressBar').
+javax_swing_class('javax.swing.JRadioButton').
+javax_swing_class('javax.swing.JRadioButtonMenuItem').
+javax_swing_class('javax.swing.JRootPane').
+javax_swing_class('javax.swing.JScrollBar').
+javax_swing_class('javax.swing.JScrollPane').
+javax_swing_class('javax.swing.JSeparator').
+javax_swing_class('javax.swing.JSlider').
+javax_swing_class('javax.swing.JSpinner').
+javax_swing_class('javax.swing.JSpinner.DateEditor').
+javax_swing_class('javax.swing.JSpinner.DefaultEditor').
+javax_swing_class('javax.swing.JSpinner.ListEditor').
+javax_swing_class('javax.swing.JSpinner.NumberEditor').
+javax_swing_class('javax.swing.JSplitPane').
+javax_swing_class('javax.swing.JTabbedPane').
+javax_swing_class('javax.swing.JTable').
+javax_swing_class('javax.swing.JTextArea').
+javax_swing_class('javax.swing.JTextField').
+javax_swing_class('javax.swing.JTextPane').
+javax_swing_class('javax.swing.JToggleButton').
+javax_swing_class('javax.swing.JToggleButton.ToggleButtonModel').
+javax_swing_class('javax.swing.JToolBar').
+javax_swing_class('javax.swing.JToolBar.Separator').
+javax_swing_class('javax.swing.JToolTip').
+javax_swing_class('javax.swing.JTree').
+javax_swing_class('javax.swing.JTree.DynamicUtilTreeNode').
+javax_swing_class('javax.swing.JTree.EmptySelectionModel').
+javax_swing_class('javax.swing.JViewport').
+javax_swing_class('javax.swing.JWindow').
+javax_swing_class('javax.swing.KeyStroke').
+javax_swing_class('javax.swing.LayoutFocusTraversalPolicy').
+javax_swing_class('javax.swing.LookAndFeel').
+javax_swing_class('javax.swing.MenuSelectionManager').
+javax_swing_class('javax.swing.OverlayLayout').
+javax_swing_class('javax.swing.Popup').
+javax_swing_class('javax.swing.PopupFactory').
+javax_swing_class('javax.swing.ProgressMonitor').
+javax_swing_class('javax.swing.ProgressMonitorInputStream').
+javax_swing_class('javax.swing.RepaintManager').
+javax_swing_class('javax.swing.ScrollPaneLayout').
+javax_swing_class('javax.swing.ScrollPaneLayout.UIResource').
+javax_swing_class('javax.swing.SizeRequirements').
+javax_swing_class('javax.swing.SizeSequence').
+javax_swing_class('javax.swing.SortingFocusTraversalPolicy').
+javax_swing_class('javax.swing.SpinnerDateModel').
+javax_swing_class('javax.swing.SpinnerListModel').
+javax_swing_class('javax.swing.SpinnerNumberModel').
+javax_swing_class('javax.swing.Spring').
+javax_swing_class('javax.swing.SpringLayout').
+javax_swing_class('javax.swing.SpringLayout.Constraints').
+javax_swing_class('javax.swing.SwingUtilities').
+javax_swing_class('javax.swing.Timer').
+javax_swing_class('javax.swing.ToolTipManager').
+javax_swing_class('javax.swing.TransferHandler').
+javax_swing_class('javax.swing.UIDefaults').
+javax_swing_class('javax.swing.UIDefaults.LazyInputMap').
+javax_swing_class('javax.swing.UIDefaults.ProxyLazyValue').
+javax_swing_class('javax.swing.UIManager').
+javax_swing_class('javax.swing.UIManager.LookAndFeelInfo').
+javax_swing_class('javax.swing.ViewportLayout').
+
+update_javax_swing :-
+  forall(
+    (javax_swing_class(Class), 
+     not(globalIds(Class,_))),
+    (
+        new_id(Id),
+        assert(user:globalIds(Class,Id)),
+        writeln(globalIds(Class,Id))
+      )).
+%%ld: we MUST NOT call this here! see JT-147
+%%:- update_java_lang.
