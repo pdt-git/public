@@ -163,7 +163,7 @@
 	pef_clause(
 		predicate:pef_predicate,
 		number @label,
-		toplevel:pef_toplevel
+		toplevel @index:pef_toplevel
 	) @weak @edge
 ).
 
@@ -176,6 +176,7 @@
 		program:pef_program
 	):module
 ).
+ 
 
 % A special Module that is defined "ad hoc", i.e. there is no file
 % associated to it.
@@ -273,7 +274,7 @@
 		program:pef_program,
 		toplevel:pef_toplevel,
 		module:module,
-		abolished:pef_predicate
+		predicate:pef_predicate
 	):interpreter_problem
 ).
 

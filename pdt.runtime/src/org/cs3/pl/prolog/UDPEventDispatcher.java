@@ -7,12 +7,14 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CTerm;
 
 public class UDPEventDispatcher implements IPrologEventDispatcher {
 
@@ -72,31 +74,37 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 	private void dispatch(DatagramPacket p) {
 		String data = new String(p.getData(),p.getOffset(),p.getLength());
 		CCompound term = (CCompound) PLUtil.createCTerm(data);
-		String subject = PLUtil.renderTerm(term.getArgument(0));
-		String event = PLUtil.renderTerm(term.getArgument(1));
-		fireUpdate(subject, event);
+		String ticket = PLUtil.renderTerm(term.getArgument(0));
+		String subject = PLUtil.renderTerm(term.getArgument(1));
+		String event = PLUtil.renderTerm(term.getArgument(2));
+		fireUpdate(ticket,subject, event);
 	}
 	
-	private void fireUpdate(String subject,  String event) {
-		Vector listeners = (Vector) listenerLists.get(subject);
+	private void fireUpdate(String ticket,  String subject, String event) {
+		Vector<PrologInterfaceListener> listeners = listenerLists.get(ticket);
 		if (listeners == null) {
 			return;
 		}
-		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, subject,
+		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, ticket,
 				event);
+		
 
-		Vector cloned = null;
+		Vector<PrologInterfaceListener> cloned = null;
 		synchronized (listeners) {
-			cloned = (Vector) listeners.clone();
+			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
 		}
-		for (Iterator it = cloned.iterator(); it.hasNext();) {
-			PrologInterfaceListener l = (PrologInterfaceListener) it.next();
+		for (Iterator<PrologInterfaceListener> it = cloned.iterator(); it.hasNext();) {
+			PrologInterfaceListener l = it.next();
 			l.update(e);
 		}
 	}
-	
-	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
 
+	/** maps tickets to lists of listeners. needed for dispatching */
+	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
+ 
+	/** maps subjects to tickets. needed for subscribing/unsubscribing */
+	private HashMap<String,String> tickets = new HashMap<String, String>();
+	
 	private PrologInterface2 pif;
 
 	private _Dispatcher dispatcher;
@@ -118,9 +126,9 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 			public void afterInit(PrologInterface pif)
 					throws PrologInterfaceException {
-				Set subjects = listenerLists.keySet();
-				for (Iterator it = subjects.iterator(); it.hasNext();) {
-					String subject = (String) it.next();
+				Set<String> subjects = listenerLists.keySet();
+				for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
+					String subject = it.next();
 					enableSubject(subject);
 				}
 
@@ -163,11 +171,12 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		String csubject = canonical(subject);
 		synchronized (listenerLists) {
-			Vector<PrologInterfaceListener> list = listenerLists.get(csubject);
+			String ticket = enableSubject(csubject);
+			Vector<PrologInterfaceListener> list = listenerLists.get(ticket);
 			if (list == null) {
 				list = new Vector<PrologInterfaceListener>();
-				listenerLists.put(csubject, list);
-				enableSubject(csubject);
+				listenerLists.put(ticket, list);
+				
 			}
 			if (!list.contains(l)) {
 				list.add(l);
@@ -180,7 +189,8 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		String csubject = canonical(subject);
 		synchronized (listenerLists) {
-			Vector list = listenerLists.get(csubject);
+			String ticket = tickets.get(csubject);
+			Vector list = listenerLists.get(ticket);
 			if (list == null) {
 				return;
 			}
@@ -188,7 +198,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 				list.remove(l);
 			}
 			if (list.isEmpty()) {				
-				listenerLists.remove(csubject);
+				listenerLists.remove(ticket);
 				disableSubject(csubject);
 			}
 		}
@@ -197,14 +207,18 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 	private void disableSubject(String subject) {
 		PrologSession s = null;
-
+		
+		String ticket = tickets.remove(subject);
+		if(ticket==null){
+			return;
+		}
+		
 		if (this.dispatcher == null) {
 			return;
 		}
 		try {
 			s = pif.getSession();
-			String query = "pif_unsubscribe(localhost:" + dispatcher.getPort()
-					+ "," + Util.quoteAtom(subject) + ")";
+			String query = "pif_unsubscribe("+ticket+ ")";
 			s.queryOnce(query);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
@@ -226,9 +240,13 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 	}
 
-	private void enableSubject(String subject) {
+	private String enableSubject(String subject) {
 		PrologSession s = null;
-
+		String ticket = tickets.get(subject);
+		if(ticket!=null){
+			return ticket;
+		}
+		
 		try {
 			if (this.dispatcher == null) {
 				int port = Util.findFreePort();
@@ -251,8 +269,10 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 				Debug.debug("debug");
 			}
 			String query = "pif_subscribe(localhost:" + port
-					+ "," + subject + ")";
-			s.queryOnce(query);
+					+ "," + subject + ",Ticket)";
+			ticket= (String) s.queryOnce(query).get("Ticket");
+			tickets.put(subject, ticket);
+			
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		} finally {
@@ -260,6 +280,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 				s.dispose();
 			}
 		}
+		return ticket;
 
 	}
 

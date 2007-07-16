@@ -191,7 +191,7 @@ do_inclusion_X(Type,File,Ref,Cx):-
     (	pef_module_definition_query([file=Ref,id=MID])
 	->  catch(
 			pdt_request_target(interprete(File)),
-			cycle(T),
+			error(cycle(T)),
 			(	debug(interprete(todo),"TODO: warn about dependency cycle: ~w~nWe try to go on with incomplete information.",[T]),
 				process_module_inclusion(Type,Ref,MID,Cx)
 			)
@@ -301,7 +301,10 @@ merge_program(PID,Cx):-
 import_module_bindings(PID,Cx):-
     forall(
     	pef_program_module_query([program=PID,name=Name,module=NewMID]),
-    	import_module_binding(Name,NewMID,Cx)
+    	(	import_module_binding(Name,NewMID,Cx)
+    	->	true
+    	;	throw(failed(import_module_binding(Name,NewMID,Cx)))
+    	)
     ).
 
 
@@ -493,7 +496,10 @@ merge_modules(Name,OldMID,NewMID,Cx,MID):-
     ->	SameBase=true
     ;	SameBase=false
     ),
-    merge_modules(OldType,NewType,SameBase,Name,OldMID,NewMID,Cx,MID).
+    (	merge_modules(OldType,NewType,SameBase,Name,OldMID,NewMID,Cx,MID)
+    ->	true
+    ;	throw(failed(merge_modules(OldType,NewType,SameBase,Name,OldMID,NewMID,Cx,MID)))
+    ).
 
 
 merge_modules(Type,Type,true,_Name,MID,MID,_Cx,MID):- % 01
@@ -562,6 +568,7 @@ merge_modules(pef_module_extension,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMI
     
 merge_modules(pef_ad_hoc_module,pef_module_definition,_SameBase,Name,OldMID,NewMID,Cx,MID):-%11
 	debug(interprete(debug),"case 11~n",[]),
+	spyme,
     cx_program(Cx,PID),
     /*(	module_owner(NewMID,PID)
     ->	MID=NewMID
@@ -635,7 +642,7 @@ merge_module(Order,MergeMID,MID,Cx):-
     	)    	
     ).
 
-
+spyme.
 
 %%
 % merge_predicates(+Order,+SourcePred,+TargetPred)
