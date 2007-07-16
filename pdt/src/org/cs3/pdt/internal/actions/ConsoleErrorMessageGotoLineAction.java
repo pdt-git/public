@@ -44,7 +44,7 @@ package org.cs3.pdt.internal.actions;
 import java.io.File;
 import java.io.IOException;
 
-import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -166,7 +166,7 @@ public class ConsoleErrorMessageGotoLineAction extends Action {
 //		IPath path = new Path(filename);
 //		FileLocationRetriever retriever  = new FileLocationRetriever(PDTPlugin.getDefault());
 		try {
-			IFile file = PDTUtils.findFileForLocation(filename);
+			IFile file = PDTCoreUtils.findFileForLocation(filename);
 	//		file = retriever.fileForLocation(path);
 			
 			IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();

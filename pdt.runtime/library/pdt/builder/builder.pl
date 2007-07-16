@@ -82,7 +82,8 @@ release_targets(Ref):-
 
 pdt_request_target(T):-
     (	'$has_lock'('$mark')
-    ->	request_target(T)
+    ->	ensure_builder_is_running,
+    	request_target(T)
     ;	throw(error(not_within_pdt_with_targets))
     ).
 request_target(Group):-
@@ -116,7 +117,8 @@ request_target(Target):-
 
 pdt_request_targets(Ts):-
 	(	'$has_lock'('$mark')
-    ->	request_targets(Ts)
+    ->	ensure_builder_is_running,
+    	request_targets(Ts)
     ;	throw(error(not_within_pdt_with_targets))
     ).
 request_targets([]).
@@ -144,10 +146,11 @@ build_target(Target):-
 % 
 % Marks the information associated with Target as obsolete.
 pdt_invalidate_target(Group):-
-	target_group(Target,Group),
+	target_group(_Target,Group),
 	!,
 	throw(cannot_invalidate_group(Group)).
 pdt_invalidate_target(Target):-
+    ensure_builder_is_running,
 	thread_send_message(build_arbiter,msg(Target,mark_dirty)).
 
 
@@ -178,6 +181,18 @@ stop_arbiter:-
     debug(builder(info),"build_arbiter stopped with status ~w~n",[ExitStatus]).
 stop_arbiter.    
     
+
+ensure_builder_is_running:-
+    current_thread(build_arbiter,Status),
+    !,
+    (	Status==running
+    ->	true
+    ;	stop_arbiter, 
+    	start_arbiter
+    ).
+ensure_builder_is_running:-
+	start_arbiter.    
+
 start_arbiter:-
     current_thread(build_arbiter,running),
     !.
@@ -305,7 +320,7 @@ execute_action(invalidate,Target):-
     pif_notify(builder(Target),invalid),    
     forall(invalidate_hook(Target),true),
     forall(
-    	(	target_group(Target,Group)
+    	(	target_group(Target,Group),
     		invalidate_hook(Group)
     	),
     	true
@@ -382,7 +397,8 @@ closes_cycle(Thread,Target):-
 
 
 
-:- pdt_restart_arbiter.
+
+    
 
 
 user:prolog_exception_hook(error(resource_error(stack), local),
@@ -390,6 +406,6 @@ user:prolog_exception_hook(error(resource_error(stack), local),
             writeln(arsch),trace, fail.
 
             
-:-debug(builder),debug(builder(_)),debug(pif_observe).             
+%:-debug(builder),debug(builder(_)),debug(pif_observe).             
 
 

@@ -45,8 +45,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.IMetaInfoProvider;
@@ -126,7 +126,7 @@ public class PrologSearchQuery implements ISearchQuery {
 					ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(location.file));
 				}
 				else{
-					file = PDTUtils.findFileForLocation(location.file);
+					file = PDTCoreUtils.findFileForLocation(location.file);
 				}
 				if(file==null||! file.isAccessible()){
 					String msg = "Not found in workspace: "+location.file;

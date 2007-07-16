@@ -65,7 +65,8 @@ import org.cs3.pl.cterm.internal.ATermFactory;
 public class PLUtil {
 
 	public static void configureFileSearchPath(PrologLibraryManager mgr,
-			PrologSession session, String[] libIds) throws PrologException, PrologInterfaceException {
+			PrologSession session, String[] libIds) throws PrologException,
+			PrologInterfaceException {
 
 		StringBuffer sb = new StringBuffer();
 		PrologLibrary[] required = getRequiredLibs(mgr, libIds);
@@ -79,8 +80,9 @@ public class PLUtil {
 					+ lib.getPath() + "')" + "->	true"
 					+ ";	user:assert(file_search_path(" + lib.getAlias()
 					+ ", '" + lib.getPath() + "'))");
-			if("true".equals(lib.getAttributeValue("hidden"))){
-				sb.append(", pdt_util:assert(pdt_hidden_path('"+lib.getPath()+"'))");
+			if ("true".equals(lib.getAttributeValue("hidden"))) {
+				sb.append(", pdt_util:assert(pdt_hidden_path('" + lib.getPath()
+						+ "'))");
 			}
 			sb.append(")");
 		}
@@ -136,18 +138,21 @@ public class PLUtil {
 		}
 		return (CTerm[]) v.toArray(new CTerm[v.size()]);
 	}
-	
+
 	/**
 	 * Converts a property list term to a Map.
 	 * 
-	 * The argument should be list containing elements of the form property(value).
-	 * Atomic elements are interpreted as if they were of the form property(true).
-	 * The returned map will contain a single value for each property found.
-	 * If the same property name is encountered more than once, the returned map will
-	 * reflect only the last occurance.
+	 * The argument should be list containing elements of the form
+	 * property(value) or =(Property,Value). Atomic elements are interpreted as
+	 * if they were of the form property(true). The returned map will contain a
+	 * single value for each property found. If the same property name is
+	 * encountered more than once, the returned map will reflect only the last
+	 * occurance.
+	 * 
 	 * @see listAsMultiMap(CTerm) TODO
-	 * @param term a term with functor "./2"
-	 *  
+	 * @param term
+	 *            a term with functor "./2"
+	 * 
 	 * @return a map with keytype string, value type CTerm
 	 */
 	public static Map listAsMap(CTerm term) {
@@ -156,173 +161,186 @@ public class PLUtil {
 				&& 2 == term.getArity()) {
 			CCompound compound = (CCompound) term;
 			CTerm propertyTerm = compound.getArgument(0);
-			if(propertyTerm instanceof CCompound && propertyTerm.getArity()==1){
-				m.put(propertyTerm.getFunctorValue(), ((CCompound)propertyTerm).getArgument(0));
-			}
-			else if(propertyTerm.getArity()==0){
+			if (propertyTerm instanceof CCompound) {
+				if (propertyTerm.getFunctorValue().equals("=")
+						&& propertyTerm.getArity() == 2) {
+					m.put(
+							(renderTerm(((CCompound) propertyTerm)
+									.getArgument(0))),
+							((CCompound) propertyTerm).getArgument(1));
+				} else if (propertyTerm.getArity() == 1) {
+					m.put(propertyTerm.getFunctorValue(),
+							((CCompound) propertyTerm).getArgument(0));
+				}
+
+			} else if (propertyTerm.getArity() == 0) {
 				m.put(propertyTerm.getFunctorValue(), "true");
 			}
-			
+
 			term = compound.getArgument(1);
 		}
 		return m;
 	}
-	
+
 	/**
 	 * lookup an entry in a red-black tree.
 	 * 
-	 * See module org/cs3/pdt/util/pdt_util_rbtree for details on the expected datastructure.
-	 * This method does NOT call prolog. It performs a binary search on the CTerm 
-	 * data structure passed as first argument. 
+	 * See module org/cs3/pdt/util/pdt_util_rbtree for details on the expected
+	 * datastructure. This method does NOT call prolog. It performs a binary
+	 * search on the CTerm data structure passed as first argument.
 	 * 
-	 * Note that only the functor name of key terms is compared. (I do not want to 
-	 * implement deep standard-order term comparision in java). 
+	 * Note that only the functor name of key terms is compared. (I do not want
+	 * to implement deep standard-order term comparision in java).
 	 * 
 	 * @param tree
 	 * @param key
 	 * @return the first match found or null if none found.
 	 * 
 	 */
-	public static CTerm rbtreeLookup(CTerm tree,String key){
-		while(tree instanceof CCompound){//if it's a compound, it's not NIL.
-			CTerm keyTerm = ((CCompound)tree).getArgument(1);
+	public static CTerm rbtreeLookup(CTerm tree, String key) {
+		while (tree instanceof CCompound) {// if it's a compound, it's not NIL.
+			CTerm keyTerm = ((CCompound) tree).getArgument(1);
 			String keyString = keyTerm.getFunctorValue();
 			int c = key.compareTo(keyString);
-			if(c<0){
-				tree=((CCompound)tree).getArgument(0);
-			}else if(c==0){
-				return tree=((CCompound)tree).getArgument(2);
-			}else if (c>0){
-				tree=((CCompound)tree).getArgument(3);
+			if (c < 0) {
+				tree = ((CCompound) tree).getArgument(0);
+			} else if (c == 0) {
+				return tree = ((CCompound) tree).getArgument(2);
+			} else if (c > 0) {
+				tree = ((CCompound) tree).getArgument(3);
 			}
 		}
-		//in a correctly formed rbtree, the invariant only fails if tree is NIL.  
+		// in a correctly formed rbtree, the invariant only fails if tree is
+		// NIL.
 		return null;
 	}
-	
-	private static class _rbTreeNodeIterator implements Iterator{
-		
-		/* invariance: the left-most node that was not yet returned is top on stack.
+
+	private static class _rbTreeNodeIterator implements Iterator {
+
+		/*
+		 * invariance: the left-most node that was not yet returned is top on
+		 * stack.
 		 */
-		
+
 		private LinkedList stack = new LinkedList();
-		
+
 		public _rbTreeNodeIterator(CTerm root) {
 			diveLeft(root);
 		}
 
-		public boolean hasNext() {		
-			return ! stack.isEmpty();
+		public boolean hasNext() {
+			return !stack.isEmpty();
 		}
-		
+
 		public Object next() {
-			//climb up
+			// climb up
 			CCompound top = (CCompound) stack.removeLast();
-			//left subtree is already done. ->dive right 
-			if(hasRightChild(top)){
+			// left subtree is already done. ->dive right
+			if (hasRightChild(top)) {
 				CCompound right = (CCompound) top.getArgument(3);
 				diveLeft(right);
 			}
-			
+
 			return top;
 		}
-				
+
 		private void diveLeft(CTerm node) {
-			while(!isEmptyTree(node)){				
+			while (!isEmptyTree(node)) {
 				stack.addLast(node);
-				node=((CCompound)node).getArgument(0);
-				
+				node = ((CCompound) node).getArgument(0);
+
 			}
-			
-			
+
 		}
 
-		private boolean isEmptyTree(CTerm c){
-			return isEmptyTree((CCompound)c);
+		private boolean isEmptyTree(CTerm c) {
+			return isEmptyTree((CCompound) c);
 		}
-		private boolean isEmptyTree(CCompound c){
+
+		private boolean isEmptyTree(CCompound c) {
 			return "black".equals(c.getFunctorValue())
-			&& c.getArgument(0) instanceof CNil
-			&& c.getArgument(1) instanceof CNil
-			&& c.getArgument(2) instanceof CNil
-			&& c.getArgument(3) instanceof CNil;
+					&& c.getArgument(0) instanceof CNil
+					&& c.getArgument(1) instanceof CNil
+					&& c.getArgument(2) instanceof CNil
+					&& c.getArgument(3) instanceof CNil;
 		}
+
 		private boolean hasLeftChild(CTerm node) {
-			if(!(node instanceof CCompound)){
+			if (!(node instanceof CCompound)) {
 				return false;
 			}
-			CCompound c = (CCompound)node;
-			
+			CCompound c = (CCompound) node;
+
 			return !isEmptyTree((CCompound) c.getArgument(0));
 		}
+
 		private boolean hasRightChild(CTerm node) {
-			if(!(node instanceof CCompound)){
+			if (!(node instanceof CCompound)) {
 				return false;
 			}
-			CCompound c = (CCompound)node;
-			
+			CCompound c = (CCompound) node;
+
 			return !isEmptyTree((CCompound) c.getArgument(3));
 		}
-		
-		
 
 		public void remove() {
 			throw new UnsupportedOperationException();
-			
+
 		}
-		
-	
 
 	}
-	public static Iterator rbtreeIterateNodes(CTerm tree){
+
+	public static Iterator rbtreeIterateNodes(CTerm tree) {
 		return new _rbTreeNodeIterator(tree);
 
 	}
-	
+
 	private static ATermFactory factory = new ATermFactory();
-	
+
 	/**
-	 * @deprecated this is an ad-hoc solution. I am not sure yet where to put this stuff.
+	 * @deprecated this is an ad-hoc solution. I am not sure yet where to put
+	 *             this stuff.
 	 */
-	public static CTerm createCTerm(Object input){
+	public static CTerm createCTerm(Object input) {
 		return factory.createCTerm(input);
 	}
-	
-	public static String renderTerm(CTerm term){
+
+	public static String renderTerm(CTerm term) {
 		StringBuffer sb = new StringBuffer();
-		renderTerm(term,sb);
+		renderTerm(term, sb);
 		return sb.toString();
 	}
 
 	private static void renderTerm(CTerm term, StringBuffer sb) {
-		
-		if(term instanceof CVariable){
-			sb.append(((CVariable)term).getVariableName());
-		}else{
+
+		if (term instanceof CVariable) {
+			sb.append(((CVariable) term).getVariableName());
+		} else {
 			sb.append(term.getFunctorImage());
 		}
-		if(term.getArity()>0){
+		if (term.getArity() > 0) {
 			sb.append('(');
 			CCompound compound = (CCompound) term;
-			for(int i=0;i<compound.getArity();i++){
-				if(i>0){
-					sb.append(", ");					
+			for (int i = 0; i < compound.getArity(); i++) {
+				if (i > 0) {
+					sb.append(", ");
 				}
-				renderTerm(compound.getArgument(i),sb);
+				renderTerm(compound.getArgument(i), sb);
 			}
 			sb.append(')');
 		}
-		
+
 	}
-	public static String renderSignature(CTerm sig,String defaultModule){
+
+	public static String renderSignature(CTerm sig, String defaultModule) {
 		CCompound term = (CCompound) sig;
 		String module = defaultModule;
-		if(":".equals(term.getFunctorValue())){
-			module=term.getArgument(0).getFunctorValue();
-			term=(CCompound) term.getArgument(1);
+		if (":".equals(term.getFunctorValue())) {
+			module = term.getArgument(0).getFunctorValue();
+			term = (CCompound) term.getArgument(1);
 		}
 		String name = term.getArgument(0).getFunctorValue();
-		int arity = ((CInteger)term.getArgument(1)).getIntValue();
-		return module+":"+name+"/"+arity;
+		int arity = ((CInteger) term.getArgument(1)).getIntValue();
+		return module + ":" + name + "/" + arity;
 	}
 }
