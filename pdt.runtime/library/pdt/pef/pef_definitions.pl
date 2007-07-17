@@ -284,7 +284,7 @@
 		program:pef_program,
 		toplevel:pef_toplevel,
 		module:module,
-		name @lalbel,
+		name @label,
 		arity @label,
 		export:ast_node/*TODO*/
 	):interpreter_problem

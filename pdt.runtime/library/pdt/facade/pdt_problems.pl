@@ -5,6 +5,7 @@
 :-use_module(library('builder/targets/parse')).
 :-use_module(library('builder/targets/singletons')).
 :-use_module(library('builder/targets/interprete')).
+:-use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
 
 
 
@@ -31,6 +32,48 @@ pdt_problem(File,Start,End,Severity,Msg):-
     	problem(File,Start,End,Severity,Msg)
     ).
 
+problem(File,Start,End,error,Message):-%module name clash
+	pef_module_name_clash_query([toplevel=TLID,first=MID]),
+	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
+	top_position(Positions,Start,End),
+	module_name(MID,MName),
+	module_file(MID,FirstFID),
+	get_pef_file(FirstFile,FirstFID),
+	get_pef_file(File,FID),
+	with_output_to(string(Message),format("A module named ~w was already loaded from ~w.",[MName,FirstFile])).
+
+problem(File,Start,End,error,Message):-%predicate name clash
+	pef_predicate_name_clash_query([toplevel=TLID,first=PRID]),
+	pef_predicate_query([id=PRID,name=PName,arity=Arity,module=MID]),
+	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
+	top_position(Positions,Start,End),
+	module_name(MID,MName),	
+	get_pef_file(File,FID),
+	with_output_to(string(Message),format("A predicate ~w was already importet from module ~w.",[PName/Arity,MName])).
+
+problem(File,Start,End,warning,Message):-%predicate redefinition
+	pef_predicate_name_clash_query([toplevel=TLID,first=PRID]),
+	predicate_file(PRID,FirstFID),
+	pef_predicate_query([id=PRID,name=PName,arity=Arity,module=MID]),
+	module_name(MID,MName),
+	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
+	top_position(Positions,Start,End),
+	get_pef_file(FirstFile,FirstFID),
+	get_pef_file(File,FID),
+	with_output_to(string(Message),format("Redefinition of predicate ~w originally defined in ~w.",[MName:PName/Arity,FirstFile])).
+	
+problem(File,Start,End,warning,Message):-%predicate abolished
+	pef_predicate_abolished_query([toplevel=TLID,module=MID,predicate=PRID]),
+	predicate_file(PRID,FirstFID),
+	pef_predicate_query([id=PRID,name=PName,arity=Arity]),
+	module_name(MID,MName),
+	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
+	top_position(Positions,Start,End),
+	get_pef_file(FirstFile,FirstFID),
+	get_pef_file(File,FID),
+	with_output_to(string(Message),format("Loading module ~w abolishes predicate ~w originally defined in ~w.",[MName,MName:PName/Arity,FirstFile])).
+
+	
 problem(File,Start,End,error,Message):-%syntax error
     pef_syntax_error_query([file=FID,error=Error]),
     message_to_string(Error,Message),
