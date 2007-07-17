@@ -101,7 +101,8 @@ do_read(F,In):-
     			]
     		),    	
     		Error,
-    		debug(parse(todo),"TODO: add an error marker for ~w.~n",[Error])
+    		add_error_marker(Error,Cx)
+    		%debug(parse(todo),"TODO: add an error marker for ~w.~n",[Error])
     	),
     	var(Error),
     	pef_reserve_id(pef_toplevel,TID),
@@ -111,6 +112,10 @@ do_read(F,In):-
     	Term==end_of_file,
     !.
 
+add_error_marker(Error,Cx):-
+    parse_cx_file(Cx,File),
+    pef_reserve_id(pef_syntax_error,ID),
+    pef_syntax_error_assert([id=ID,file=File,error=Error]).
 	    
 preprocess((:-module(Name,Exports)), Cx):-
     !,
