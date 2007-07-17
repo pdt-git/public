@@ -18,7 +18,9 @@ pdt_builder:target_group(singletons(F),problems):-
     pef_file_query([path=F]).
 
     
-
+syntax_error_position(error(_, stream(_, _, _, Offset)),Offset,Offset).
+syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
+    
 
 
 %% pdt_problem(File,Start,End,Severity,Msg)
@@ -30,10 +32,11 @@ pdt_problem(File,Start,End,Severity,Msg):-
     ).
 
 problem(File,Start,End,error,Message):-%syntax error
-    pef_syntax_error_query([file=FID,start=Start,end=End,message=Msg]),
-    message_to_string(Msg,Message),
+    pef_syntax_error_query([file=FID,error=Error]),
+    message_to_string(Error,Message),
+    syntax_error_position(Error,Start,End),
     get_pef_file(File,FID).
-problem(File,Start,End,error,Message):-%singleton
+problem(File,Start,End,warning,Message):-%singleton
     pef_singleton_query([variable=VID]),
     pef_variable_query([id=VID,name=Name,ast=Ast]),
     pef_ast_query([id=Ast,toplevel=TlID]),
@@ -43,7 +46,7 @@ problem(File,Start,End,error,Message):-%singleton
 	pef_property_query([pef=OccID,key=end,value=End]),
     get_pef_file(File,FID),
     with_output_to(string(Message),format("Variable ~w only apears once in this clause.",[Name])).    
-problem(File,Start,End,error,Message):-%no singleton
+problem(File,Start,End,warning,Message):-%no singleton
     pef_no_singleton_query([variable=VID]),
     pef_variable_query([id=VID,name=Name,ast=Ast]),
     pef_ast_query([id=Ast,toplevel=TlID]),

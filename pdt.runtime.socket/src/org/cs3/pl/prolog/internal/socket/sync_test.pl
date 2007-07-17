@@ -52,7 +52,7 @@ test(separate_functor_arity_module_safe):-
     sync:separate_functor_arity_module_safe(f/2, f, 2).
     
 test(evaluate_and_store_idb):-
-    sync:evaluate_and_store_idb(mymodule:non_existing(_t)),
+    sync:evaluate_and_store_idb(mymodule:non_existing(_T)),
     clause(sync:idb(mymodule:non_existing(_A)),fail).
 
 tearDown(evaluate_and_store_idb):-

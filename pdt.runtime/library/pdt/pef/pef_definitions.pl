@@ -310,9 +310,7 @@
 	pef_syntax_error(
 		id,
 		file:pef_file,
-		start,
-		end,
-		message @label
+		error @label
 	):parser_problem
 ).
 

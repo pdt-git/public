@@ -150,6 +150,9 @@ public class PDTCore {
 	public static final int CX_CHECK_PROJECTS = -6;
 
 
+	public static final String PROBLEM = "org.cs3.pdt.core.problem";
+
+
 	
 
 

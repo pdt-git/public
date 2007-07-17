@@ -74,9 +74,9 @@ pe((A;B),Subst,GoalOut,SubstOut,CutOut):-
 	).
 	
 
-parteval(Goal,PEGoal)
+parteval(Goal,PEGoal):-
 	copy_term(Goal,GGoal),
-	clause(evaluated(GGoal),PEGoal)
+	clause(evaluated(GGoal),PEGoal).
  numbervars(Term):-
      numbervars(Term,0,_,[]).
  varsnumber(Term,Term2):-
