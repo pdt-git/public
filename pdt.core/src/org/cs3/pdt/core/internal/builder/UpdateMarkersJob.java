@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
@@ -111,8 +112,14 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			return;
 		}
 		IMarker marker = file.createMarker(PDTCore.PROBLEM);
-		MarkerUtilities.setCharEnd(marker, end);
+		IDocument doc = PDTCoreUtils.getDocument(file);
+		start = PDTCoreUtils.convertCharacterOffset(doc, start);
+		end = Math.max(start + 1, PDTCoreUtils.convertCharacterOffset(doc, end));
+		end = Math.min(doc.getLength(),end);
+		
 		MarkerUtilities.setCharStart(marker, start);
+		MarkerUtilities.setCharEnd(marker, end);
+		
 		marker.setAttribute(IMarker.SEVERITY, mapSeverity(severity));
 		marker.setAttribute(IMarker.MESSAGE, message);
 	}

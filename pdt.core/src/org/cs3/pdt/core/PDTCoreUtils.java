@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.core;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,6 +49,10 @@ import java.util.List;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -58,6 +63,8 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.text.FindReplaceDocumentAdapter;
+import org.eclipse.jface.text.IDocument;
 
 public final class PDTCoreUtils {
 	/**
@@ -115,6 +122,34 @@ public final class PDTCoreUtils {
 		return offset;
 	}
 
+	public static int convertCharacterOffset(IDocument doc, int offset) {		
+		return convertCharacterOffset(doc.get(), offset);
+	}
+	
+	public static IDocument getDocument(IFile file) throws CoreException{
+		IPath path = file.getFullPath();
+		return getDocument(path,LocationKind.IFILE);
+	}
+	
+	public static IDocument getDocument(File file) throws CoreException{
+		IPath path = new Path(file.getAbsolutePath());
+		return getDocument(path,LocationKind.NORMALIZE);
+	}
+	
+	public static IDocument getDocument(IPath location, LocationKind kind) throws CoreException{
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+		   manager.connect(location, kind,null);
+		   ITextFileBuffer buffer= manager.getTextFileBuffer(location,kind);
+		    // note: could be null
+		   return buffer.getDocument();
+		}
+		finally {
+		   manager.disconnect(location, kind,null);
+		}
+	}
+	
+		
 	
 	
 	public static IPrologProject getPrologProject(IResource file) throws CoreException {
