@@ -49,7 +49,7 @@ problem(File,Start,End,error,Message):-%predicate name clash
 	top_position(Positions,Start,End),
 	module_name(MID,MName),	
 	get_pef_file(File,FID),
-	with_output_to(string(Message),format("A predicate ~w was already importet from module ~w.",[PName/Arity,MName])).
+	with_output_to(string(Message),format("A predicate ~w was already imported from module ~w.",[PName/Arity,MName])).
 
 problem(File,Start,End,warning,Message):-%predicate redefinition
 	pef_predicate_name_clash_query([toplevel=TLID,first=PRID]),
