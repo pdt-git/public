@@ -238,7 +238,9 @@ public class PEFGraphView extends HyperbolicGraphView {
 				Node fromNode = (Node) nodes.get(fromLabel);
 				
 				Node toNode = (Node) nodes.get(toLabel);
-				
+				if(toNode==null){
+					Debug.debug("Debug");
+				}
 				_DefaultEdge edge = new _DefaultEdge(graph, fromNode, toNode,
 						label);
 				edges.add(edge);

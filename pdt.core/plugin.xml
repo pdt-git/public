@@ -139,6 +139,9 @@
         <!--<dependency library="pdt.runtime.library.swipl"/>-->
         <dependency library="pdt.runtime.library.attic"/>
         <attribute id="hidden" value="true"/>
+        <dependency
+              library="pdt.runtime.library.pdt">
+        </dependency>
      </library>
   </extension>
   <extension
