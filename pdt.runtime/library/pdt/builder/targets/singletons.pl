@@ -32,7 +32,7 @@ forget_singletons(Abs):-
 check_singletons(Abs):-
 	get_pef_file(Abs,FID),
 	forall(
-		pef_toplevel_query([file=FID,id=TL,singletons=Singletons,varnames=VarNames]),
+		pef_toplevel_query([file=FID,id=TL,singletons=Singletons/*,varnames=VarNames*/]),
 		(	check_singletons(Singletons,TL)/*,
 			check_no_singletons(VarNames,Singletons,TL)*/
 		)

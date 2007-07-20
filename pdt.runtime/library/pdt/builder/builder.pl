@@ -321,6 +321,7 @@ execute_action(invalidate,Target):-
     forall(invalidate_hook(Target),true),
     forall(
     	(	target_group(Target,Group),
+    		pif_notify(builder(Group),invalid),
     		invalidate_hook(Group)
     	),
     	true

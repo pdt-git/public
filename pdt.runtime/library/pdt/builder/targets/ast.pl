@@ -54,8 +54,10 @@ forget_ast(TL):-
 
 build_ast(Tl):-
     pef_reserve_id(pef_ast,Id),
-    build_ast(Tl,Id,Root),    
-    pef_ast_assert([id=Id,toplevel=Tl,root=Root]).
+    (	build_ast(Tl,Id,Root)    
+    ->	pef_ast_assert([id=Id,toplevel=Tl,root=Root])
+    ;	throw(failed(build_ast(Tl,Id,Root)))
+    ).
 
 %%
 % pdt_generate_ast(+ToplevelRef, Id).
@@ -85,18 +87,24 @@ generate_ast('$var'(VarId), Id,Cx):-
     pef_reserve_id(pef_variable_occurance,Id),    
     pef_variable_occurance_assert([id=Id,variable=VarId]),
     cx_positions(Cx,Positions),
-    top_position(Positions,From,To),
-    pef_property_assert([pef=Id,key=start,value=From]),
-    pef_property_assert([pef=Id,key=end,value=To]).
+    (	Positions==none
+    ->	pef_property_assert([pef=Id,key=implicit,value=true])
+    ;	top_position(Positions,From,To),
+    	pef_property_assert([pef=Id,key=start,value=From]),
+    	pef_property_assert([pef=Id,key=end,value=To])
+    ).
     
 generate_ast(Term, Id,Cx):-
     functor(Term,Name,Arity),
 	pef_reserve_id(pef_term,Id),
 	pef_term_assert([id=Id,name=Name,arity=Arity]),
 	cx_positions(Cx,Positions),
-    top_position(Positions,From,To),
-    pef_property_assert([pef=Id,key=start,value=From]),
-    pef_property_assert([pef=Id,key=end,value=To]),
+    (	Positions==none
+    ->	pef_property_assert([pef=Id,key=implicit,value=true])
+    ;	top_position(Positions,From,To),
+    	pef_property_assert([pef=Id,key=start,value=From]),
+    	pef_property_assert([pef=Id,key=end,value=To])
+    ),
 	generate_args(1,Arity,Term,Id,Cx).
 
 generate_args(I,N,_Term,_Id,_Cx):-

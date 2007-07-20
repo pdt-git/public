@@ -149,7 +149,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
 		
-			PLUtil.configureFileSearchPath(mgr,initSession,new String[]{PrologRuntime.LIB_PDT});
+			PLUtil.configureFileSearchPath(mgr,initSession,new String[]{PDTCore.ENGINE_ID});
 			initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
 			/*Map map = initSession.queryOnce(
 					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
