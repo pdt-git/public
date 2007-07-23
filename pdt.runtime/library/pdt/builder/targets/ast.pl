@@ -70,17 +70,28 @@ build_ast(TID, RootId,Id):-
     cx_root(Cx,RootId),
     cx_toplevel(Cx,TID),
     cx_positions(Cx,Positions),
-    pef_toplevel_query([id=TID,expanded=Expanded,varnames=VarNames,positions=Positions]),    
-    process_variables(VarNames,Cx),
-    generate_ast(Expanded, Id,Cx).
+    pef_toplevel_query([id=TID,term=Term,varnames=VarNames,positions=Positions]),    
+    process_variables(VarNames,Term,Cx),
+    generate_ast(Term, Id,Cx).
     
-process_variables([],_Cx).
-process_variables([Name=Variable|Variables],Cx):-
+process_variables([],Term,Cx):-
+	term_variables(Term,DCs),
+	process_dcs(DCs,Cx).
+process_variables([Name=Variable|Variables],Term,Cx):-
     pef_reserve_id(pef_variable,Id),
     cx_root(Cx,Root),
     pef_variable_assert([id=Id,name=Name,ast=Root]),
     Variable='$var'(Id),
-	process_variables(Variables,Cx).
+	process_variables(Variables,Term,Cx).
+
+
+process_dcs([],_Cx).
+process_dcs([Var|Vars],Cx):-
+    pef_reserve_id(pef_variable,Id),
+    cx_root(Cx,Root),
+    pef_variable_assert([id=Id,name='_',ast=Root]),
+    Var='$var'(Id),
+	process_dcs(Vars,Cx).
     
 generate_ast('$var'(VarId), Id,Cx):-
     !,
