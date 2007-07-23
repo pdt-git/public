@@ -3,7 +3,8 @@
 		pef_type/2,
 		pef_start_recording/1,
 		pef_stop_recording/0,
-		pef_clear_record/1
+		pef_clear_record/1,
+		pef_count/2
 	]
 ).
 
@@ -23,6 +24,23 @@
 :- dynamic '$recording'/1.
 :- dynamic '$record_key'/2.
 
+pef_count(Type,Count):-
+    findall(CType,
+    	(    metapef_is_a(CType,Type),
+    		'$metapef_concrete'(CType)
+    	),
+    	CTypes
+    ),
+    pef_count_X(CTypes,0,Count).
+
+pef_count_X([],C,C).
+pef_count_X([Type|Types],C1,C3):-
+	'$metapef_template'(Type,Template),
+	functor(Template,Type,Arity),
+	functor(Head,Type,Arity),
+	predicate_property(Head,number_of_clauses(Count)),
+	C2 is C1 + Count,
+	pef_count_X(Types,C2,C3).
 
 pef_start_recording(Term):-
 	record_key(Term,Key),
