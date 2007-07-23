@@ -332,6 +332,7 @@ import_public_predicates(MID,Cx):-
 
 import_predicate_binding(Name,Arity,MID,Cx):-
     module_owner(MID,PID),
+    module_name(MID,FromName),
     cx_set(Cx,[module=MID,program=PID],Cx1),
     get_predicate(Name,Arity,Cx1,PredId),
     !,
@@ -345,7 +346,7 @@ import_predicate_binding(Name,Arity,MID,Cx):-
 		)
     ;	cx_module(Cx,ContextModuleID),
     	pef_imported_predicate_retractall([module=ContextModuleID,name=Name,arity=Arity]),
-    	pef_imported_predicate_assert([module=ContextModuleID,name=Name,arity=Arity,predicate=PredId])
+    	pef_imported_predicate_assert([module=ContextModuleID,name=Name,arity=Arity,from_name=FromName])
     ).
 import_predicate_binding(Name,Arity,MID,Cx):-
 	pef_reserve_id(pef_unresolved_export,ID),

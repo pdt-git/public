@@ -70,9 +70,11 @@ resolve_predicate(PID,MID,Name,Arity,PredID):-
 resolve_predicate_X(_PID,MID,_,Name,Arity,PredID):-% look for local predicate
 	pef_predicate_query([module=MID,name=Name,arity=Arity,id=PredID]),
 	!.
-resolve_predicate_X(_PID,MID,_,Name,Arity,PredID):-% look for imported predicate
-	pef_imported_predicate_query([module=MID,name=Name,arity=Arity,predicate=PredID]),
-	!.
+resolve_predicate_X(PID,MID,_,Name,Arity,PredID):-% look for imported predicate
+	pef_imported_predicate_query([module=MID,name=Name,arity=Arity,from_name=FromName]),
+	!,
+	resolve_module(PID,FromName,FromMID),
+	resolve_predicate(PID,FromMID,Name,Arity,PredID).
 resolve_predicate_X(PID,MID,Imports,Name,Arity,PredID):- % module extension: fall back to base
 	pef_module_extension_query([id=MID,base=BaseID]),
 	resolve_predicate_X(PID,BaseID,Imports,Name,Arity,PredID),
