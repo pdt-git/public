@@ -54,6 +54,7 @@ import java.util.Vector;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.internal.builder.UpdateMarkersJob;
 import org.cs3.pdt.core.internal.properties.AnnotatorsOptionProvider;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -118,6 +119,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private Vector listeners = new Vector();
 
 	private AnnotatorsOptionProvider annotatorsOptionProvider;
+
+	private boolean updatingMarkers;
 
 	/**
 	 * @see IProjectNature#configure
@@ -455,15 +458,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							PDTCore.PROP_DEFAULT_ENCODING,
 							"Default Encoding",
 							"The Encoding to use by default for all prolog source files.",
-							Option.ENUM, "utf8",new String[][] {
-									{ "octet", "octet" }, 
-									{ "ascii", "ascii" },
-									{ "iso_latin_1", "iso_latin_1" }, 
-									{ "text", "text" }	, 
-									{ "utf8", "utf8" },
-									{ "unicode_be", "unicode_be" }, 
-									{ "unicode_le", "unicode_le" } 
-									}),
+							Option.ENUM, "utf8", new String[][] {
+									{ "octet", "octet" }, { "ascii", "ascii" },
+									{ "iso_latin_1", "iso_latin_1" },
+									{ "text", "text" }, { "utf8", "utf8" },
+									{ "unicode_be", "unicode_be" },
+									{ "unicode_le", "unicode_le" } }),
 
 					new SimpleOption(
 							PDTCore.PROP_METADATA_PIF_KEY,
@@ -630,14 +630,16 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
-	public OptionProvider getAnnotatorsOptionProvider() throws PrologInterfaceException{
-		if(annotatorsOptionProvider==null){
-			annotatorsOptionProvider=new AnnotatorsOptionProvider(this);
-			getMetaDataEventDispatcher().addPrologInterfaceListener(AnnotatorsOptionProvider.SUBJECT,annotatorsOptionProvider);
+	public OptionProvider getAnnotatorsOptionProvider()
+			throws PrologInterfaceException {
+		if (annotatorsOptionProvider == null) {
+			annotatorsOptionProvider = new AnnotatorsOptionProvider(this);
+			getMetaDataEventDispatcher().addPrologInterfaceListener(
+					AnnotatorsOptionProvider.SUBJECT, annotatorsOptionProvider);
 		}
 		return annotatorsOptionProvider;
 	}
-	
+
 	private void pifKeysChanged() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
@@ -760,6 +762,20 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 			l.valuesChanged(e);
 		}
 
+	}
+
+	public void updateMarkers(Set<IFile> buildList) {
+		if (updatingMarkers) {
+			return;
+		}
+		updatingMarkers = true;
+		new UpdateMarkersJob(this, buildList, new Runnable() {
+
+			public void run() {
+				updatingMarkers = false;
+
+			}
+		}).schedule();
 	}
 
 }

@@ -221,7 +221,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			 */
 			Debug.debug("PrologBuilder.build(...) is done.");
 			monitor.done();
-			new UpdateMarkersJob(plProject,buildList).schedule();
+			plProject.updateMarkers(buildList);
+			
 			
 			return null;
 		} catch (OperationCanceledException e) {

@@ -109,6 +109,8 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	public String[] getPrologLibraryKeys() throws CoreException;
 
 	public IPrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
+
+	public void updateMarkers(Set<IFile> buildList);
     
     
 }
