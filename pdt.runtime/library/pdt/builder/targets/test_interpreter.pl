@@ -86,8 +86,13 @@ ignored_predicate(user,Head,TestFile):-
 	file_directory_name(TestFile,Dir),
 	\+ atom_concat(Dir,_,File). 		
 	
+ignored_predicate(user,Head,_):-
+	functor(Head,Name,_),
+	atom_prefix(Name,'$').
+	
 ignored_predicate(Module,Head,_):-
 	Module:predicate_property(Head,built_in).
+
 	
 relevant_property((dynamic),(dynamic)).
 relevant_property((transparent),(module_transparent)).
