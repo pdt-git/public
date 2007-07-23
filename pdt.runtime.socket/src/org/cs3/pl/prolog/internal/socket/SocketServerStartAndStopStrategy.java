@@ -141,8 +141,7 @@ public class SocketServerStartAndStopStrategy implements
 				p.println("user:'$log_dir'('"
 						+ Util.prologFileName(logDir) + "').");
 				p.println(":- debug(consult_server).");
-				p.println(":- debug(builder(_)).");//TODO remove me
-				p.println(":- debug(builder).");//TODO remove me				
+								
 			}
 			List bootstrapLIbraries = socketPif.getBootstrapLibraries();
 			for (Iterator it = bootstrapLIbraries.iterator(); it.hasNext();) {
