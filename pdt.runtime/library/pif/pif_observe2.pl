@@ -52,7 +52,7 @@
 	pif_notify/2
 ]).
 
-:- debug(pif_observe).
+%:- debug(pif_observe).
 
 :- use_module(library(socket)).
 
