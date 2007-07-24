@@ -313,7 +313,7 @@ execute_action(report_error([Thread|Threads],E),Target):-
   request comes in from the arbiter thread. IN this case, process it right away, 
   i.e. without using the message loop. This way we make sure that cascading 
   invalidation requests are processed before any other requests.
-  I don't know how to moddel this in our state chart diagram...
+  I don't know how to model this in our state chart diagram...
 */
 execute_action(invalidate,Target):-
 	debug(builder(debug),"invalidating target: ~w~n",[Target]),
