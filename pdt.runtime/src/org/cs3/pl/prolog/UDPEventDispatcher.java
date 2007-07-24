@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -77,6 +78,9 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 		String ticket = PLUtil.renderTerm(term.getArgument(0));
 		String subject = PLUtil.renderTerm(term.getArgument(1));
 		String event = PLUtil.renderTerm(term.getArgument(2));
+		if(event.equals("invalid")){
+			Debug.debug("debug");
+		}
 		fireUpdate(ticket,subject, event);
 	}
 	
@@ -124,15 +128,19 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 			}
 
-			public void afterInit(PrologInterface pif)
-					throws PrologInterfaceException {
-				Set<String> subjects = listenerLists.keySet();
-				for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
-					String subject = it.next();
-					enableSubject(subject);
+				public void afterInit(PrologInterface pif)
+						throws PrologInterfaceException {
+					Set<String> subjects = new HashSet<String>(tickets.keySet());
+					for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
+						String subject = it.next();
+						String ticket = tickets.remove(subject);
+						Vector listeners = listenerLists.remove(ticket);
+						ticket = enableSubject(subject);
+						tickets.put(subject, ticket);
+						listenerLists.put(ticket, listeners);
+					}
+	
 				}
-
-			}
 
 			public void beforeShutdown(PrologInterface pif,
 					PrologSession session) throws PrologException,
