@@ -125,6 +125,7 @@ public class SocketServerStartAndStopStrategy implements
 			tmpFile = File.createTempFile("socketPif", null);
 			PrintWriter p = new PrintWriter(new BufferedOutputStream(
 					new FileOutputStream(tmpFile)));
+			p.println(":- guitracer.");
 			if ("true".equals(socketPif.getOption(SocketPrologInterface.HIDE_PLWIN))) {
 				p
 						.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))"
