@@ -39,7 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
+/* 
     The module pdtplugin provides helper predicates
     for the PDT Eclipse Plugin  */
 
@@ -54,6 +54,7 @@
     pef_and_spec/5]).
 
 :- use_module(library(help)).
+:- doc_collect(false).
 %:- [library('org/cs3/pdt/compatibility/compatiblitySWI')].
 /*
 meta_data(?Filename,?Module,?Name,?Arity,?Public,Position,?Length,?Dynamic,?Multifile)
@@ -164,7 +165,7 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
 
  
 /*
-   term_for_signature(+Name, +Arity, -Term)
+   term_for_signature(+Name, +Arity, -Term) 
 */
 term_for_signature(Name,0,Term):-
     atom_to_term(Name,Term,_).

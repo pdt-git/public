@@ -66,6 +66,7 @@
 :- use_module(library('pldoc/doc_modes')).
 :- use_module(library('http/html_write')).
 
+:- doc_collect(false).
 	
 %attach_comments(+ATermIn,+InputStream,+CPositions, -RemainingPositions, -ATermOut)
 %
