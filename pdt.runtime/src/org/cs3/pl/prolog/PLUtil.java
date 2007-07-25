@@ -94,8 +94,8 @@ public class PLUtil {
 	public static PrologLibrary[] getRequiredLibs(PrologLibraryManager mgr,
 			String[] libIds) {
 
-		Stack todo = new Stack();
-		Set required = new HashSet();
+		Stack<String> todo = new Stack<String>();
+		Set<PrologLibrary> required = new HashSet<PrologLibrary>();
 		for (int i = 0; i < libIds.length; i++) {
 			if (mgr.resolveLibrary(libIds[i]) == null) {
 				throw new IllegalArgumentException("library id " + libIds[i]
@@ -110,7 +110,7 @@ public class PLUtil {
 		}
 
 		while (!todo.isEmpty()) {
-			String key = (String) todo.pop();
+			String key = todo.pop();
 			PrologLibrary lib = mgr.resolveLibrary(key);
 			if (lib == null) {
 				// this should not happen
@@ -124,7 +124,7 @@ public class PLUtil {
 
 		}
 
-		return (PrologLibrary[]) required.toArray(new PrologLibrary[required
+		return required.toArray(new PrologLibrary[required
 				.size()]);
 	}
 
@@ -155,8 +155,8 @@ public class PLUtil {
 	 * 
 	 * @return a map with keytype string, value type CTerm
 	 */
-	public static Map listAsMap(CTerm term) {
-		Map m = new HashMap();
+	public static Map<String,Object> listAsMap(CTerm term) {
+		Map<String,Object> m = new HashMap<String,Object>();
 		while (term instanceof CCompound && ".".equals(term.getFunctorValue())
 				&& 2 == term.getArity()) {
 			CCompound compound = (CCompound) term;
@@ -222,7 +222,7 @@ public class PLUtil {
 		 * stack.
 		 */
 
-		private LinkedList stack = new LinkedList();
+		private LinkedList<CTerm> stack = new LinkedList<CTerm>();
 
 		public _rbTreeNodeIterator(CTerm root) {
 			diveLeft(root);
