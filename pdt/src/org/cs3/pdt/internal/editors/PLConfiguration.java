@@ -45,9 +45,11 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.internal.contentassistant.PrologContentAssistProcessor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IAutoIndentStrategy;
@@ -66,6 +68,8 @@ import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IFileEditorInput;
 
 public class PLConfiguration extends SourceViewerConfiguration {
 	private PLDoubleClickStrategy doubleClickStrategy;
@@ -187,10 +191,26 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		
 			assistant = new ContentAssistant();
 			assistant.setContentAssistProcessor(
-					new NewPrologCompletionProcessor(),
+					new PrologContentAssistProcessor(){
+
+						protected IFile getFile() {
+							if(editor==null){
+								return null;
+							}
+							IEditorInput input = editor.getEditorInput();
+							if(input==null){
+								return null;
+							}
+							if(!(input instanceof IFileEditorInput)){
+								return null;
+							}
+							IFileEditorInput input2 = (IFileEditorInput)input;
+							IFile file = input2.getFile();
+							return file;
+						}},
 					IDocument.DEFAULT_CONTENT_TYPE);
 		
-
+			
 		assistant.enableAutoActivation(true);
 		assistant.setAutoActivationDelay(500);
 		assistant.install(sourceViewer);

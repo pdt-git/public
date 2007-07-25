@@ -96,7 +96,8 @@ do_read(F,In):-
     		prolog_read_source_term(In,Term,Expanded,
     			[	variable_names(VarNames),
     				singletons(Singletons),
-    				subterm_positions(Positions)/*,
+    				subterm_positions(Positions),
+    				comments(Comments)/*,
     				module(parse)*/
     			]
     		),    	
@@ -106,12 +107,22 @@ do_read(F,In):-
     	),
     	var(Error),
     	pef_reserve_id(pef_toplevel,TID),
-    	pef_toplevel_assert([id=TID,file=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions]),
+    	pef_toplevel_assert([id=TID,file=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions]),    	
     	parse_cx_get(Cx,[term=Term,expanded=Expanded,toplevel=TID]),
     	preprocess(Expanded,Cx),
+    	add_comments(Comments,Cx),
     	Term==end_of_file,
     !.
 
+add_comments([],_Cx).
+add_comments([StreamPos-Text|Comments],Cx):-
+    parse_cx_file(Cx,File),
+    parse_cx_toplevel(Cx,Toplevel),    
+    pef_reserve_id(pef_comment,Id),
+    pef_comment_assert([id=Id,toplevel=Toplevel,file=File,text=Text]),
+    pef_property_assert([pef=Id,key=position,value=StreamPos]),
+    add_comments(Comments,Cx).
+    
 add_error_marker(Error,Cx):-
     parse_cx_file(Cx,File),
     pef_reserve_id(pef_syntax_error,ID),

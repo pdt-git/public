@@ -49,6 +49,7 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.contentassistant.BrowserInformationControl;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;

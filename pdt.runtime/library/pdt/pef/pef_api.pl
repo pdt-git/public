@@ -60,7 +60,7 @@ resolve_module(PID,Name,MID):-
     pef_program_module_query([program=PID,name=Name,module=MID]).
 
 %%
-% resolve_predicate(+PID,+MID,+Name,+Arity,-PredID)
+% resolve_predicate(+PID,+MID,+Name,+Arity,-PredID).
 % Resolve a predicate signature in the context of a given program and context module.
 resolve_predicate(PID,MID,Name,Arity,PredID):-
 	import_list(MID,Imports),    

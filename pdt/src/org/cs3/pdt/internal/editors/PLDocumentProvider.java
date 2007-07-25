@@ -44,7 +44,7 @@ package org.cs3.pdt.internal.editors;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
+import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 public class PLDocumentProvider extends FileDocumentProvider {
@@ -53,7 +53,7 @@ public class PLDocumentProvider extends FileDocumentProvider {
 		IDocument document = super.createDocument(element);
 		if (document != null) {
 			IDocumentPartitioner partitioner =
-				new DefaultPartitioner(
+				new FastPartitioner(
 					new PLPartitionScanner(),
 					new String[] {
 						PLPartitionScanner.PL_MULTI_COMMENT,
