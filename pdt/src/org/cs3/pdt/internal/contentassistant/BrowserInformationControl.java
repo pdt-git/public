@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.cs3.pdt.internal.editors;
+package org.cs3.pdt.internal.contentassistant;
 
 import java.io.IOException;
 import java.io.StringReader;

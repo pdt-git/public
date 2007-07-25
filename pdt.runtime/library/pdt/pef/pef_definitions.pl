@@ -80,6 +80,15 @@
 	)
 ).
 
+:- define_pef(
+	pef_comment(
+		id,
+		file @index :pef_file,
+		toplevel @index :pef_toplevel,
+		text
+	)
+).
+
 % An AST node representing a non-var program term.
 :- define_pef(
 	pef_term(

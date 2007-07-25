@@ -130,7 +130,8 @@ public class PEFGraphView extends HyperbolicGraphView {
 				}
 			}
 		};
-		refreshAction.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.RESTART));
+		refreshAction.setImageDescriptor(ImageRepository
+				.getImageDescriptor(ImageRepository.RESTART));
 	}
 
 	LifeCycleHook2 hook = new LifeCycleHook2() {
@@ -157,6 +158,10 @@ public class PEFGraphView extends HyperbolicGraphView {
 		}
 
 	};
+
+	private HashMap nodes;
+
+	private List edges;
 
 	private void clearGraph() {
 		setModel(new DefaultGraph());
@@ -212,6 +217,78 @@ public class PEFGraphView extends HyperbolicGraphView {
 			List list = s.queryAll("pef_base:pef_node(Id,Type,Labels)");
 			for (Iterator iter = list.iterator(); iter.hasNext();) {
 				Map m = (Map) iter.next();
+				String id = (String) m.get("Id");
+				String type = (String) m.get("Type");
+				List labels = (List) m.get("Labels");
+				String key = id + ":" + type;
+				String label = key + " " + Util.splice(labels, ", ");
+				Node node = new DefaultNode(graph, label);
+
+				nodes.put(key, node);
+			}
+
+			list = s
+					.queryAll("pef_base:pef_edge(From,FromType,Label,To,ToType)");
+
+			for (Iterator it = list.iterator(); it.hasNext();) {
+				Map m = (Map) it.next();
+				String from = (String) m.get("From");
+				String fromType = (String) m.get("FromType");
+				String fromLabel = from + ":" + fromType;
+				String label = (String) m.get("Label");
+				String to = (String) m.get("To");
+				String toType = (String) m.get("ToType");
+				String toLabel = to + ":" + toType;
+				Node fromNode = (Node) nodes.get(fromLabel);
+
+				Node toNode = (Node) nodes.get(toLabel);
+				if (toNode == null) {
+					Debug.debug("Debug");
+				}
+				_DefaultEdge edge = new _DefaultEdge(graph, fromNode, toNode,
+						label);
+				edges.add(edge);
+			}
+			graph.addElements(nodes.values(), edges);
+
+		} catch (PrologException e) {
+			Debug.rethrow(e);
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		} finally {
+			if (s != null) {
+				s.dispose();
+			}
+		}
+
+	}
+/*
+	private void createGraph(String id) {
+		Graph graph = getModel();
+		if(nodes==null){
+			nodes = new HashMap();
+		}
+		if(edges==null){
+			edges = new Vector();	
+		}
+		
+		//if the node is not yet represented, create it.
+		Node node = (Node) nodes.get(id);
+		if(node==null){
+			addNode(id);
+		}
+		
+		PrologSession s = null;
+		try {
+			s = pif.getSession();
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}
+		
+		try {
+			List list = s.queryAll("pef_base:pef_node(Id,Type,Labels)");
+			for (Iterator iter = list.iterator(); iter.hasNext();) {
+				Map m = (Map) iter.next();
 				String id= (String)m.get("Id");
 				String type= (String)m.get("Type");
 				List labels=(List)m.get("Labels");
@@ -259,6 +336,11 @@ public class PEFGraphView extends HyperbolicGraphView {
 
 	}
 
+	private void addNode(String id) {
+		// TODO Auto-generated method stub
+		
+	}
+*/
 	private void setupPif() throws PrologInterfaceException {
 		PrologLibraryManager manager = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();

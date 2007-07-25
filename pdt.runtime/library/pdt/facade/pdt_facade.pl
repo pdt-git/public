@@ -2,3 +2,4 @@
 :- use_module(pdt_outline).
 :- use_module(pdt_problems).
 :- use_module(pdt_workspace).
+:- use_module(pdt_content_assistant).
