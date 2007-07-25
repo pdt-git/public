@@ -95,12 +95,17 @@ interprete_program(FileRef):-
     forall(
     	pef_toplevel_query([file=FileRef,id=TlRef,expanded=Expanded]),
     	(	cx_toplevel(Cx,TlRef),
-    		(	interprete_toplevel(Expanded,Cx)
+    		(	interprete_toplevelXXX(Expanded,Cx)
     		->	true
-    		;	throw(failed(interprete_toplevel(Expanded,Cx)))
+    		;	throw(failed(interprete_toplevelXXX(Expanded,Cx)))
     		)
     	)
     ).
+
+
+interprete_toplevelXXX(Expanded,Cx):-
+    
+	interprete_toplevel(Expanded,Cx).    
 
 interprete_toplevel(end_of_file,_):-
 	!.    
@@ -138,12 +143,11 @@ interprete_toplevel( (:-multifile Signatures) , Cx):-
 interprete_toplevel( (:-thread_local Signatures) , Cx):-
     !,
     interprete_property_definition(Signatures,(thread_local),Cx).
-interprete_toplevel( (:-Body) , Cx):-    
-    cx_toplevel(Cx,TlRef),
-    %pef_file_dependency_query([toplevel_ref=TlRef]),
+interprete_toplevel( (:-Body) , Cx):-        
     !,
-
+	cx_toplevel(Cx,TlRef),    
     functor(Body,Name,_Arity),
+    
     forall(
     	pef_file_dependency_query([toplevel=TlRef,dependency=DepRef]),
     	interprete_file_dependency(Name,DepRef,Cx)
@@ -188,6 +192,7 @@ do_inclusion(Type,File,Ref,Cx):-
 	do_inclusion_X(Type,File,Ref,Cx).
 
 do_inclusion_X(Type,File,Ref,Cx):-
+    
     (	pef_module_definition_query([file=Ref,id=MID])
 	->  catch(
 			pdt_request_target(interprete(File)),
@@ -246,8 +251,10 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
     % it may have been extended
     module_name(MID,MName),
     cx_program(Cx,PID),
-    resolve_module(PID,MName,LocalMID),
-    import_public_predicates(LocalMID,Cx).
+    (	resolve_module(PID,MName,LocalMID)
+    ->	import_public_predicates(LocalMID,Cx)	
+    ;	spyme,throw(fickpisse)
+    ).
 
 
 merge_files(LocalForce,PID,Cx):-
@@ -569,7 +576,7 @@ merge_modules(pef_module_extension,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMI
     
 merge_modules(pef_ad_hoc_module,pef_module_definition,_SameBase,Name,OldMID,NewMID,Cx,MID):-%11
 	debug(interprete(debug),"case 11~n",[]),
-	spyme,
+	
     cx_program(Cx,PID),
     /*(	module_owner(NewMID,PID)
     ->	MID=NewMID
