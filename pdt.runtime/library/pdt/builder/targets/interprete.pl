@@ -236,7 +236,11 @@ process_module_inclusion(use_module,Ref,MID,Cx):-
    	cx_program(Cx,PID),
 	module_name(MID,ModName),
 	pef_program_file_query([program=PID,file=Ref,module_name=ModName]),
-	!.
+	!,
+	(	resolve_module(PID,ModName,LocalMID)
+    ->	import_public_predicates(LocalMID,Cx)	
+    ;	spyme,throw(fickpisse)
+    ).
 process_module_inclusion(Type,_Ref,MID,Cx):-
     module_owner(MID,OtherPID),
     unload_obsolete_files(OtherPID,Cx),
@@ -257,6 +261,11 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
     ).
 
 
+
+%% merge_files(+LocalForce,+PID,+Cx).
+% merge program <--> file bindings of PID into the current program.
+% LocalForce is either true or false, indicating whether PID is merged through a 
+% directive like consult,i.e. one that forces reloading itself.  
 merge_files(LocalForce,PID,Cx):-
     forall(
     	pef_program_file_query([program=PID,module_name=NewModName,file=FileRef,force_reload=Force]),
@@ -266,13 +275,15 @@ merge_files(LocalForce,PID,Cx):-
     	)
     ).
 
+/* there is somethig wrong with this clause. I do not completely understand what it was meant for
 
 merge_file(FileRef,FileRef,NewModName,Force,LocalForce,Cx):-
 	% File a module file. This predicate is only called by process_module_inclusion/4.
-    cx_program(Cx,PID),
+    cx_program(Cx,MyPID),
     merge_force(Force,LocalForce,NewForce),
-    pef_program_file_retractall([program=PID,file=FileRef]),
-    pef_program_file_assert([program=PID,file=FileRef,module_name=NewModName,force_reload=NewForce]).
+    pef_program_file_retractall([program=MyPID,file=FileRef]),
+    pef_program_file_assert([program=MyPID,file=FileRef,module_name=NewModName,force_reload=NewForce]).
+*/
 merge_file(_PID,FileRef,NewModName,Force,_LocalForce,Cx):-
 	% File a module file. This predicate is only called by process_module_inclusion/4.
     cx_program(Cx,MyPID),
@@ -286,13 +297,17 @@ merge_file(_PID,FileRef,NewModName,Force,_LocalForce,Cx):-
 merge_force(false,false,false):- !.    
 merge_force(_,_,true).
 
+
+%% unload_obsolete_files(NewPID,Cx).
+% unload all files that are obsoleted by merging NewPID with the current program.
 unload_obsolete_files(NewPID,Cx):-
     cx_program(Cx,OldPID),
     forall(
     	obsolete_file(OldPID,NewPID,FileRef),
     	unload_file(FileRef,Cx)
     ).
-
+%% obsolete_file(+OldPID,+NewPID, -FileRef)
+% succeeds if mergin NewPID into OldPID obsoletes the information collected for FileRef in OldPID. 
 obsolete_file(OldPID,NewPID,FileRef):-
     pef_program_file_query([program=OldPID,module_name=OldModName,file=FileRef]),
     pef_program_file_query([program=NewPID,module_name=NewModName,file=FileRef,force_reload=Force]),    
@@ -300,6 +315,7 @@ obsolete_file(OldPID,NewPID,FileRef):-
     ->	true
     ;	OldModName \== NewModName
     ).
+
 merge_program(PID,Cx):-
     import_module_bindings(PID, Cx).
 
