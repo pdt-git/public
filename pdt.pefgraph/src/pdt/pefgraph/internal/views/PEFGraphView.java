@@ -272,15 +272,12 @@ public class PEFGraphView extends HyperbolicGraphView {
 			edges = new Vector();	
 		}
 		
-		//if the node is not yet represented, create it.
-		Node node = (Node) nodes.get(id);
-		if(node==null){
-			addNode(id);
-		}
+		
 		
 		PrologSession s = null;
 		try {
 			s = pif.getSession();
+			Node n = ensureNodeExists(id);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		}
@@ -336,7 +333,8 @@ public class PEFGraphView extends HyperbolicGraphView {
 
 	}
 
-	private void addNode(String id) {
+	private Node ensureNodeExists(String id) {
+		return null;
 		// TODO Auto-generated method stub
 		
 	}
