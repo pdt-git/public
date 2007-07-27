@@ -29,10 +29,11 @@ syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
     
 
 
-%% pdt_problem(File,Start,End,Severity,Msg)
-% successively finds all problems found by build targets.
 pdt_problem_count(C):-
     pef_count(problem,C).    
+
+%% pdt_problem(File,Start,End,Severity,Msg)
+% successively finds all problems found by build targets.
 pdt_problem(File,Start,End,Severity,Msg):-
     pdt_with_targets([problems],
     	problem(_,File,Start,End,Severity,Msg)
