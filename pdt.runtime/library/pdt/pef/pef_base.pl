@@ -24,6 +24,8 @@
 :- dynamic '$recording'/1.
 :- dynamic '$record_key'/2.
 
+%% pef_count(+Type,-Count)
+% true if count is the number of pefs of type Type.
 pef_count(Type,Count):-
     findall(CType,
     	(    metapef_is_a(CType,Type),
