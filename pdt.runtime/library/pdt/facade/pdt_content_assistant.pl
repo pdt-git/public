@@ -34,11 +34,11 @@ pdt_completion(File,ContextName,Prefix,ModuleName:PredName/Arity,Tags):-
     ->	guess_module(PID,FID,ContextMID)
     ;	resolve_module(PID,ContextName,ContextMID)
     ),
-    pef_predicate_query([id=Id,name=Name,arity=Arity,module=MID]),	
-	atom_prefix(Name,Prefix),
+    pef_predicate_query([id=Id,name=PredName,arity=Arity,module=MID]),	
+	atom_prefix(PredName,Prefix),
 	resolve_predicate(PID,ContextMID,PredName,Arity,Id),
 	module_name(MID,ModuleName),
-	findall(Tag,completion_tag(Id,MID,ModuleName,Name,Arity,Tag),Tags).
+	findall(Tag,completion_tag(Id,MID,ModuleName,PredName,Arity,Tag),Tags).
 	
 guess_module(_PID,FID,ContextMID):-
     pef_module_definition_query([id=ContextMID,file=FID]),

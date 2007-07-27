@@ -18,7 +18,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
-public class PrologCompletionProposal implements Comparable<PrologCompletionProposal>,ICompletionProposal,ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
+public class PredicateCompletionProposal implements Comparable<PredicateCompletionProposal>,ICompletionProposal,ICompletionProposalExtension5,ICompletionProposalExtension3, IInformationControlCreator{
 	private int offset;
 	private int length;
 	private String name;	
@@ -87,7 +87,7 @@ public class PrologCompletionProposal implements Comparable<PrologCompletionProp
 
 	
 
-	public PrologCompletionProposal(int offset, int length, String module,
+	public PredicateCompletionProposal(int offset, int length, String module,
 			String name, int arity, Map<String,Object> tags) {
 		this.offset = offset;
 		this.length = length;
@@ -101,7 +101,7 @@ public class PrologCompletionProposal implements Comparable<PrologCompletionProp
 
 	
 
-	public int compareTo(PrologCompletionProposal o) {
+	public int compareTo(PredicateCompletionProposal o) {
 		
 		return getLabel().compareTo(o.getLabel());
 	}
