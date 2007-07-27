@@ -144,7 +144,7 @@ public abstract class PrologContentAssistProcessor implements
 																 */) {
 							unique.add(proposal);
 							int cursorPos = proposal.length();
-							proposals.add(new CompletionProposal(proposal,
+							proposals.add(new VariableCompletionProposal(proposal,
 									begin, len, cursorPos, image, proposal,
 									null, null));
 						}
@@ -178,7 +178,7 @@ public abstract class PrologContentAssistProcessor implements
 																 */) {
 							unique.add(proposal);
 							int cursorPos = proposal.length();
-							proposals.add(new CompletionProposal(proposal,
+							proposals.add(new VariableCompletionProposal(proposal,
 									begin, len, cursorPos, image, proposal,
 									null, null));
 						}
@@ -217,7 +217,7 @@ public abstract class PrologContentAssistProcessor implements
 			List<Map> l = s.queryAll(query);
 
 			for (Map map : l) {
-				PrologCompletionProposal p = new PrologCompletionProposal(
+				PredicateCompletionProposal p = new PredicateCompletionProposal(
 						begin, len, ((CTerm) map.get("Module"))
 								.getFunctorValue(), ((CTerm) map.get("Name"))
 								.getFunctorValue(), Integer
