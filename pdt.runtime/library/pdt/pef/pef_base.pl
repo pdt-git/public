@@ -18,11 +18,17 @@
 :- dynamic '$metapef_is_a'/2.
 :- dynamic '$metapef_attribute_tag'/3.
 :- dynamic '$metapef_type_tag'/2.
+:- dynamic '$option'/1.
+
+:- dynamic pef_before_assert_hook/2, pef_before_retract_hook/2, pef_after_assert_hook/2, pef_after_retract_hook/2.
+:- multifile pef_before_assert_hook/2, pef_before_retract_hook/2, pef_after_assert_hook/2, pef_after_retract_hook/2.
 
 
 :- thread_local '$recording'/1.
 :- dynamic '$recording'/1.
 :- dynamic '$record_key'/2.
+
+
 
 %% pef_count(+Type,-Count)
 % true if count is the number of pefs of type Type.
@@ -100,12 +106,23 @@ define_assert(Template):-
     functor(Getter,GetterName,2),
     arg(1,Getter,Cx),
     arg(2,Getter,List),
-    create_index_asserts(Cx,Asserts),    
-    assert((Head:-Getter,Asserts),Ref),
+    create_index_asserts(Cx,Asserts,PefRef),
+    (	'$option'(hooks)
+    ->	(	find_id(Template,IdNum)
+    	->	arg(IdNum,Cx,Id)
+    	;	Id=PefRef
+    	),
+    	assert((Head:-Getter,Asserts,forall(pef_assert_hook(Id,Name),true)),Ref)
+    ;   assert((Head:-Getter,Asserts),Ref)
+    ),
     assert(pef_pred(Name,Ref)),
     export(Head).
 
+
 create_index_asserts(Cx,Asserts):-
+    create_index_asserts(Cx,Asserts,_).
+    
+create_index_asserts(Cx,Asserts,Ref):-
     functor(Cx,Name,Arity),
     create_index_asserts_args(Arity,Name,Cx,Ref,assert(Cx,Ref),Asserts).
 
@@ -229,7 +246,14 @@ define_retractall_unindexed(Template):-
     functor(Getter,GetterName,2),
     arg(1,Getter,Cx),
     arg(2,Getter,List),
-    assert((Head:-Getter,retractall(Cx)),Ref),
+    (	'$option'(hooks)
+    ->	(	find_id(Template,IdNum)
+    	->	arg(IdNum,Cx,Id),
+    		assert((Head:-Getter,forall((Cx,pef_retract_hook(Id,Name)),true),retractall(Cx)),Ref)
+    	;	assert((Head:-Getter,forall((clause(Cx,_,Id),pef_retract_hook(Id,Name)),true),retractall(Cx)),Ref)
+    	)
+    ;	assert((Head:-Getter,retractall(Cx)),Ref)
+    ),
     assert(pef_pred(Name,Ref)),
     export(Head).
 define_retractall_indexed(Template):- 	
@@ -274,7 +298,15 @@ define_retractall_indexed(Template):-
 create_retract(Cx,Retract):-
     functor(Cx,Name,Arity),
     create_retract_action(Cx,Ref,Action),
-    create_retract_args(Arity,Cx,Name,Ref,Action,forall(clause(Cx,_,Ref),Action),Retract).
+    (	'$option'(hooks)
+    ->	'$metapef_template'(Name,Tmpl),
+    	(	find_id(Tmpl,Num),
+    		arg(Num,Cx,Id)
+    	;	Id=Ref
+    	),
+    	create_retract_args(Arity,Cx,Name,Ref,Action,forall(clause(Cx,_,Ref),(Action,forall(pef_retract_hook(Id,Name),true))),Retract)
+    ;	create_retract_args(Arity,Cx,Name,Ref,Action,forall(clause(Cx,_,Ref),Action),Retract)
+    ).
 
 
 

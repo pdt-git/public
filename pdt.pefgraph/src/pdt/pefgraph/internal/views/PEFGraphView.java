@@ -205,6 +205,7 @@ public class PEFGraphView extends HyperbolicGraphView {
 
 	private void createGraph() {
 		Graph graph = getModel();
+		graph.removeElements(nodes, edges)
 		HashMap nodes = new HashMap();
 		List edges = new Vector();
 		PrologSession s = null;
@@ -214,7 +215,7 @@ public class PEFGraphView extends HyperbolicGraphView {
 			Debug.rethrow(e);
 		}
 		try {
-			List list = s.queryAll("pef_base:pef_node(Id,Type,Labels)");
+			List list = s.queryAll("pef_graph_node(Id,Type,Labels)");
 			for (Iterator iter = list.iterator(); iter.hasNext();) {
 				Map m = (Map) iter.next();
 				String id = (String) m.get("Id");
@@ -228,7 +229,7 @@ public class PEFGraphView extends HyperbolicGraphView {
 			}
 
 			list = s
-					.queryAll("pef_base:pef_edge(From,FromType,Label,To,ToType)");
+					.queryAll("pef_graph_edge(From,FromType,To,ToType,Label)");
 
 			for (Iterator it = list.iterator(); it.hasNext();) {
 				Map m = (Map) it.next();
