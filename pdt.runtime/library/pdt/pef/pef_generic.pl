@@ -27,7 +27,7 @@ pef_base:cleanall(Data):-
 pef_base:pef_retract(IxArgs,Data):-    
     pef_query(IxArgs,Data,Ref),
 	pef_retract_ixs(IxArgs,Data,Ref),
-	erase(Ref),
+	
 	(	pef_base:'$option'(hooks)
 	->	functor(Data,Name,_),
 		pef_base:'$metapef_template'(Name,Tmpl),
@@ -35,8 +35,10 @@ pef_base:pef_retract(IxArgs,Data):-
 		->	arg(Num,Data,Id)
 		;	Id=Ref
 		),
-		pef_base:forall(pef_retract_hook(Id,Name),true)
-	;	true
+		pef_base:forall(pef_before_retract_hook(Id,Name),true),
+		erase(Ref),
+		pef_base:forall(pef_after_retract_hook(Id,Name),true)
+	;	erase(Ref)
 	).
 	
 pef_base:pef_retract_ixs([],_Data,_Ref).

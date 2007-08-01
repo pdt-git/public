@@ -45,9 +45,12 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -139,7 +142,10 @@ public class CTermContentProvider implements ITreeContentProvider,
 			}
 
 			if (plProject != null) {
-				backend.setPif(plProject.getMetadataPrologInterface(),plProject.getMetaDataEventDispatcher());
+				
+				PrologInterface pif = plProject.getMetadataPrologInterface();
+				IPrologEventDispatcher d = PrologRuntimePlugin.getDefault().getPrologEventDispatcher(pif);
+				backend.setPif(pif,d);
 			} else {
 				backend.setPif(null,null);
 			}

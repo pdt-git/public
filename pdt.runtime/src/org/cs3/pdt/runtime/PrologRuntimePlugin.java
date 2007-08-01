@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
@@ -69,12 +70,15 @@ import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
+import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
+import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
@@ -138,6 +142,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private Map bootStrapLists;
 
 	private PrologInterfaceFactory factory;
+
+	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 
 	private final static Object contextTrackerMux = new Object();
 
@@ -613,6 +619,17 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 
+	
+	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif){
+		IPrologEventDispatcher r = dispatchers.get(pif);
+		if(r==null){
+			r=new UDPEventDispatcher(pif);
+			dispatchers.put(pif,r);
+		}
+		return r;
+		
+	}
+		
 	/**
 	 * get a PrologInterface to a given key. This is a convenience method to
 	 * "just get the darn thing". This will use create the PrologInterface if

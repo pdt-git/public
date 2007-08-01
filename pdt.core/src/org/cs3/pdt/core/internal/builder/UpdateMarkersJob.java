@@ -11,6 +11,7 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CCompound;
@@ -55,12 +56,13 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			String message = (String) m.get("Msg");
 			try {
 				addMarker(filename, start, end, severity, message);
-				if(markerMonitor==null){
-					markerMonitor = new SubProgressMonitor(monitor,50,SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
+				if (markerMonitor == null) {
+					markerMonitor = new SubProgressMonitor(monitor, 50,
+							SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 					int work = Integer.parseInt((String) m.get("Count"));
 					markerMonitor.beginTask("Creating Markers", work);
 				}
-				if(!problemIds.contains(id)){
+				if (!problemIds.contains(id)) {
 					problemIds.add(id);
 					markerMonitor.worked(1);
 				}
@@ -70,9 +72,10 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 						PDTCore.CX_UPDATE_MARKERS, e1);
 			}
 		}
+
 		@Override
 		public void goalSucceeded(AsyncPrologSessionEvent e) {
-			if(markerMonitor!=null){
+			if (markerMonitor != null) {
 				markerMonitor.done();
 			}
 		}
@@ -102,8 +105,9 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		try {
 			plProject.getProject().deleteMarkers(PDTCore.PROBLEM, true,
 					IResource.DEPTH_INFINITE);
-			IPrologEventDispatcher dispatcher = plProject
-					.getMetaDataEventDispatcher();
+			IPrologEventDispatcher dispatcher = PrologRuntimePlugin
+					.getDefault().getPrologEventDispatcher(
+							plProject.getMetadataPrologInterface());
 			dispatcher.addPrologInterfaceListener("builder(interprete(_))",
 					this);
 			dispatcher.addPrologInterfaceListener("builder(problems)", this);

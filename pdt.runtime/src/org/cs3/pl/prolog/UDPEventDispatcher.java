@@ -8,16 +8,14 @@ import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.cterm.CTerm;
 
-public class UDPEventDispatcher implements IPrologEventDispatcher {
+public class UDPEventDispatcher implements IPrologEventDispatcher{
 
 	private final class _Dispatcher extends Thread {
 		
@@ -109,11 +107,11 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 	/** maps subjects to tickets. needed for subscribing/unsubscribing */
 	private HashMap<String,String> tickets = new HashMap<String, String>();
 	
-	private PrologInterface2 pif;
+	private PrologInterface pif;
 
 	private _Dispatcher dispatcher;
 
-	public UDPEventDispatcher(PrologInterface2 pif) {
+	public UDPEventDispatcher(PrologInterface pif) {
 		this.pif = pif;
 		// make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook2() {
@@ -175,6 +173,9 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 		return PLUtil.renderTerm(PLUtil.createCTerm(in));
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.PrologInterfaceEventDispatcher#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
+	 */
 	public void addPrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		String csubject = canonical(subject);
@@ -193,6 +194,9 @@ public class UDPEventDispatcher implements IPrologEventDispatcher {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.cs3.pl.prolog.PrologInterfaceEventDispatcher#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
+	 */
 	public void removePrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		String csubject = canonical(subject);
