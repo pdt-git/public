@@ -245,6 +245,9 @@ public class PrologOutline extends ContentOutlinePage {
 
 		if (startOffset >= 0 && endOffset >= 0) {
 			PLEditor editor = ((PLEditor) UIUtils.getActiveEditor());
+			if(editor==null){
+				return ;
+			}
 			editor.selectAndReveal(startOffset, endOffset - startOffset);
 			// editor.selectAndReveal(0,1);
 

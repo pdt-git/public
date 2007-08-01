@@ -1,3 +1,27 @@
+
+% Option "hooks".
+%
+% This will cause the pef base to call hook predicates for any fact it asserts or retracts.
+% This facility is mainly intended for debugging. E.g. the PEF-graph uses it to update itself. 
+% 
+% NOTE: this will *noticably* slow down the build process!
+% 	Only enable this option for debugging!
+%
+%'$option'(hooks).
+
+
+% Option "index_foreign_keyes" (enabled by default).
+%
+% If enabled, the tag "index" is implicitly assumed for all attributes 
+% that are "typed", i.e. are references to pefs. The "type" tag causes the
+% automatic generation/maintainance/use of reverse indices for that attribute.
+%  
+% You may not need all the indices, unless you intend to use the pef graph a lot.
+% Nevertheless, a redundant index will not hurt performance as much as a missing one.
+% If you are unsure, you should probably just enable this flag.
+'$option'(index_foreign_keyes).
+
+
 :- op(550,xfy,@).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %

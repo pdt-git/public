@@ -114,7 +114,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private HashMap libraries;
 
-	private IPrologEventDispatcher metaDataEventDispatcher;
+	
 
 	private Vector listeners = new Vector();
 
@@ -713,13 +713,11 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
+	
+	/**@deprecated use PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface) instead.*/
 	public IPrologEventDispatcher getMetaDataEventDispatcher()
 			throws PrologInterfaceException {
-		if (metaDataEventDispatcher == null) {
-			metaDataEventDispatcher = new UDPEventDispatcher(
-					(PrologInterface2) getMetadataPrologInterface());
-		}
-		return metaDataEventDispatcher;
+		return PrologRuntimePlugin.getDefault().getPrologEventDispatcher(getMetadataPrologInterface());		
 	}
 
 	public void addOptionProviderListener(OptionProviderListener l) {

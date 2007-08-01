@@ -112,7 +112,13 @@ define_assert(Template):-
     	->	arg(IdNum,Cx,Id)
     	;	Id=PefRef
     	),
-    	assert((Head:-Getter,Asserts,forall(pef_assert_hook(Id,Name),true)),Ref)
+    	assert(
+    		(	Head:-
+    				Getter,
+    				forall(pef_before_assert_hook(Id,Name),true),
+    				Asserts,
+    				forall(pef_after_assert_hook(Id,Name),true)
+    		),Ref)
     ;   assert((Head:-Getter,Asserts),Ref)
     ),
     assert(pef_pred(Name,Ref)),
@@ -249,8 +255,28 @@ define_retractall_unindexed(Template):-
     (	'$option'(hooks)
     ->	(	find_id(Template,IdNum)
     	->	arg(IdNum,Cx,Id),
-    		assert((Head:-Getter,forall((Cx,pef_retract_hook(Id,Name)),true),retractall(Cx)),Ref)
-    	;	assert((Head:-Getter,forall((clause(Cx,_,Id),pef_retract_hook(Id,Name)),true),retractall(Cx)),Ref)
+    		assert(
+    			(	Head:-
+    					Getter,
+    					forall(
+    						clause(Cx,_,CRef),
+    						(	forall(pef_before_retract_hook(Id,Name),true),
+    							erase(CRef),
+    							forall(pef_after_retract_hook(Id,Name),true)
+    						)
+    					)
+    			),Ref)
+    	;	assert(
+    			(	Head:-
+    					Getter,
+    					forall(
+    						clause(Cx,_,Id),
+    						(	forall(pef_before_retract_hook(Id,Name),true),
+    							erase(Id),
+    							forall(pef_after_retract_hook(Id,Name),true)
+    						)
+    					)
+    			),Ref)
     	)
     ;	assert((Head:-Getter,retractall(Cx)),Ref)
     ),
@@ -272,28 +298,6 @@ define_retractall_indexed(Template):-
     export(Head).
 
 
-/*
-	pef_predicate_retractall(A) :-
-		pef_predicate_get(pef_predicate(B, C, D, E), A),
-		(	nonvar(D)
-		->	forall(
-				(	'pef_predicate$revix$name'(D,F),
-					clause(pef_predicate(B, C, D, E), _, F)
-				), 
-				(	retractall('pef_predicate$revix$name'(D, F)), 
-					erase(F)
-				)
-			)
-		;	forall(
-				clause(pef_predicate(B, C, D, E), _, F), 
-				(	retractall('pef_predicate$revix$name'(D, F)), 
-					erase(F)
-				)
-			)
-		).
-	
-*/
-
 
 create_retract(Cx,Retract):-
     functor(Cx,Name,Arity),
@@ -304,7 +308,12 @@ create_retract(Cx,Retract):-
     		arg(Num,Cx,Id)
     	;	Id=Ref
     	),
-    	create_retract_args(Arity,Cx,Name,Ref,Action,forall(clause(Cx,_,Ref),(Action,forall(pef_retract_hook(Id,Name),true))),Retract)
+    	AAction = 
+    		(	forall(pef_before_retract_hook(Id,Name),true),
+    			Action,
+    			forall(pef_after_retract_hook(Id,Name),true)
+    		),
+    	create_retract_args(Arity,Cx,Name,Ref,Action,forall(clause(Cx,_,Ref),AAction),Retract)
     ;	create_retract_args(Arity,Cx,Name,Ref,Action,forall(clause(Cx,_,Ref),Action),Retract)
     ).
 
@@ -516,6 +525,17 @@ process_types_arg_X(Arg:ArgT,I,Name,Arity,Tmpl,Stripped):-
     !,
 	assert('$metapef_edge'(Name,I,ArgT),Ref),
 	assert(pef_pred(Name,Ref)),
+	
+	
+	/* implicit inverse index on all foreign key columns */
+	
+	(	'$option'(index_foreign_keys),
+		'$metapef_attribute_tag'(Name,I,index)
+    ->	true
+    ;	assert('$metapef_attribute_tag'(Name,I,index),Ref2),
+		assert(pef_pred(Name,Ref2))
+	),
+	
 	process_types_arg_X(Arg,I,Name,Arity,Tmpl,Stripped).
 process_types_arg_X(Arg @ Tags,I,Name,Arity,Tmpl,Stripped):-
     !,
@@ -536,15 +556,24 @@ add_type_tags(Tag,Name):-
 
 add_attribute_tags(Tag@Tags,Name,Num):-
     !,
-    assert('$metapef_attribute_tag'(Name,Num,Tag),Ref),
-	assert(pef_pred(Name,Ref)),
+    (	'$metapef_attribute_tag'(Name,Num,Tag)
+    ->	true
+    ;	assert('$metapef_attribute_tag'(Name,Num,Tag),Ref),
+		assert(pef_pred(Name,Ref))
+	),
 	add_attribute_tags(Tags,Name,Num).
 add_attribute_tags(Tag,Name,Num):-
-    assert('$metapef_attribute_tag'(Name,Num,Tag),Ref),
-	assert(pef_pred(Name,Ref)).
+    (	'$metapef_attribute_tag'(Name,Num,Tag)
+    ->	true
+    ;	assert('$metapef_attribute_tag'(Name,Num,Tag),Ref),
+		assert(pef_pred(Name,Ref))
+	).
 
 process_meta_edges:-
     forall('$metapef_edge'(FromT,ArgNum,ToT),process_meta_edge(FromT,ArgNum,ToT)).
+
+process_inverse_meta_edges:-
+    forall('$metapef_edge'(FromT,ArgNum,ToT),process_inverse_meta_edge(FromT,ArgNum,ToT)).
 
 metapef_ref(Type,RefType,RefArg):-
     metapef_is_a(Type,TargetType),
@@ -559,8 +588,10 @@ metapef_index_arg(Type,Arg):-
     '$metapef_attribute_tag'(Type,Arg,index).
 
 pef_edge(From,FromT,ArgName,To,ToT):-
-    '$pef_edge'(From,FromT,ArgName,To,ToT),
-    valid_target(ToT,To).
+    (	var(From),nonvar(To)
+    ->	'$pef_inverse_edge'(To,ToT,ArgName,From,FromT)
+    ;	'$pef_edge'(From,FromT,ArgName,To,ToT)
+    ).
 pef_node(Id,Type,Labels):-
     '$pef_node'(Id,Type,Labels).
 valid_target(ToT,To):-
@@ -579,18 +610,51 @@ process_meta_edge(FromT,ArgNum,ToT):-
 		    ->	arg(IdNum,FromHead,From),
 		    	Clause=
 		    		(	'$pef_edge'(From,FromT,ArgName,To,SubT):-
-		        			call(FromHead)
+		        			call(FromHead),
+		        			pef_type(To,SubT)
 		        	)
 			;   Clause =
 					(	'$pef_edge'(From,FromT,ArgName,To,SubT):-
-		        			clause(FromHead,_,FromRef),
-		        			From=FromRef
+		        			clause(FromHead,_,From),
+		        			pef_type(To,SubT)
 		        	)
 		    ),
 		    assert(Clause,Ref),
 		    assert(pef_pred(FromT,Ref))
 		)
 	).
+
+process_inverse_meta_edge(FromT,ArgNum,ToT):-
+    '$metapef_template'(FromT,FromTemplate),
+    functor(FromTemplate,_,Arity),
+    functor(FromHead,FromT,Arity),
+    arg(ArgNum,FromTemplate,ArgName),
+    arg(ArgNum,FromHead,To),
+   	
+   	% use reverse index, if available.
+   	(	'$metapef_attribute_tag'(FromT,ArgNum,index)
+   	->	index_name(FromT,ArgNum,IxName),
+    	IndexQuery=..[IxName,To,FromRef],
+    	Query=(IndexQuery,clause(FromHead,_,FromRef))
+    ;	Query=clause(FromHead,_,FromRef)
+    ),
+    forall(
+    	(	metapef_is_a(SubT,ToT),
+    		'$metapef_concrete'(SubT)
+    	),
+		(	(	find_id(FromTemplate,IdNum)  
+		    ->	arg(IdNum,FromHead,From)	    	
+			;   From=FromRef
+		    ),
+		    Clause= (	'$pef_inverse_edge'(To,SubT,ArgName,From,FromT):-
+		        			Query
+		        	),
+		    assert(Clause,Ref),
+		    assert(pef_pred(FromT,Ref))
+		)
+	).
+
+
 
 find_id(Tmpl,Num):-
     arg(Num,Tmpl,id),
@@ -668,6 +732,7 @@ create_cleanupall(Type):-
 	    
 postprocess_pefs:-
    process_meta_edges,
+   process_inverse_meta_edges,
    process_meta_nodes,
    create_cleanup_preds.
     
