@@ -97,7 +97,11 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 		}
 		for (Iterator<PrologInterfaceListener> it = cloned.iterator(); it.hasNext();) {
 			PrologInterfaceListener l = it.next();
-			l.update(e);
+			try{
+				l.update(e);
+			}catch(Throwable t){
+				Debug.report(t);
+			}
 		}
 	}
 
