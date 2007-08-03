@@ -806,6 +806,13 @@ extend_module(OldMID,NewMID,Cx):-
 	->	cx_program(Cx,PID),
 		pef_reserve_id(pef_module_extension,NewMID),
 	    pef_module_extension_assert([id=NewMID,base=OldMID,program=PID]),
+	    
+	    % BEGIN debug 
+	    % I wonder where those empty extensions come frome...
+	    cx_toplevel(Cx,TlID),
+	    pef_property_assert([pef=NewMID,key=toplevel,value=TlID]),
+	    %END debug
+	    
 	    debug(interprete(debug),"Program ~w created an extension ~w of module ~w.~w~n",[PID,NewMID,OldMID,Cx])
 	;	throw(cannot_extend_virtual_module(OldMID))
 	).
