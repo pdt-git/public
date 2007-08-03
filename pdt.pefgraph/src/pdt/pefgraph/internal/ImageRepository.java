@@ -61,6 +61,7 @@ public class ImageRepository {
 	public static final String RESTART = "restart.gif";	
 	
 	public static final String SELECT_PIF = "console_view.gif";
+	public static final String SET_VISIBILITY = "sample.gif";
 	
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = Activator.getDefault().getBundle().getEntry("/icons/" + icon);
