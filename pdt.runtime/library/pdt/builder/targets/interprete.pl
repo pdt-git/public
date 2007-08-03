@@ -239,7 +239,7 @@ process_module_inclusion(use_module,Ref,MID,Cx):-
 	!,
 	(	resolve_module(PID,ModName,LocalMID)
     ->	import_public_predicates(LocalMID,Cx)	
-    ;	spyme,throw(fickpisse)
+    ;	spyme,throw(failed(resolve_module(PID,ModName,LocalMID)))
     ).
 process_module_inclusion(Type,_Ref,MID,Cx):-
     module_owner(MID,OtherPID),
@@ -257,7 +257,7 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
     cx_program(Cx,PID),
     (	resolve_module(PID,MName,LocalMID)
     ->	import_public_predicates(LocalMID,Cx)	
-    ;	spyme,throw(fickpisse)
+    ;	spyme,throw(failed(resolve_module(PID,MName,LocalMID)))
     ).
 
 
@@ -391,18 +391,36 @@ get_module(Name,MID,Cx):-
 
 
 
-
 create_program(FileRef,Cx):-
+    create_program_XXX(FileRef,Cx),
+    !.
+create_program(FileRef,Cx):-
+	throw(failed(create_program(FileRef,Cx))).    
+    
+create_program_XXX(FileRef,Cx):-
 	cx_new(Cx),
 	pef_reserve_id(pef_program,PID),
 	pef_program_assert([id=PID,file=FileRef]),
 	cx_program(Cx,PID),
 	(	pef_module_definition_query([file=FileRef,id=MID,name=Name])
-	->	rebind_module_name(Name,MID,Cx),
+	->	%begin DEBUG 
+		pef_property_assert([pef=PID,key=trying,value=rebind_module_name(Name,MID,Cx)]),
+		%end DEBUG
+		rebind_module_name(Name,MID,Cx),
+		%begin DEBUG 
+		pef_property_assert([pef=PID,key=success,value=rebind_module_name(Name,MID,Cx)]),
+		%end DEBUG
+	
 		pef_program_file_assert([program=PID,module_name=Name,file=FileRef, force_reload=false]),
-		get_or_create_module(user,_,Cx) % a module user should exist in every program.
+		get_or_create_module(user,_,Cx), % a module user should exist in every program.
+		%begin DEBUG 
+		pef_property_assert([pef=PID,key=program_type,value=module])
+		%end DEBUG
 	;	get_or_create_module(user,MID,Cx),
-		pef_program_file_assert([program=PID,module_name=user,file=FileRef, force_reload=false])
+		pef_program_file_assert([program=PID,module_name=user,file=FileRef, force_reload=false]),
+		%begin DEBUG 
+		pef_property_assert([pef=PID,key=program_type,value=non_module])
+		%end DEBUG
 	),
 	cx_get(Cx,[file=FileRef,file_stack=[FileRef],module=MID]).
 	
