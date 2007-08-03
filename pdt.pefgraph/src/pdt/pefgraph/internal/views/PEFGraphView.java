@@ -32,6 +32,7 @@ import org.cs3.svf.hyperbolic.model.Graph;
 import org.cs3.svf.hyperbolic.model.Node;
 import org.cs3.svf.hyperbolic.model.RandomGraphModelCreator;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -41,7 +42,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 
@@ -55,6 +60,10 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	private Action selectPifAction;
 
 	private Action refreshAction;
+	
+	private Action clearAction;
+	
+	private Action setVisibilityAction;
 
 	// private Action action2;
 	private final static String HOOK_ID = "PefGraphViewHook";
@@ -139,11 +148,15 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
+		manager.add(clearAction);
+		manager.add(setVisibilityAction);
 		manager.add(selectPifAction);
 		manager.add(refreshAction);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
+		manager.add(clearAction);
+		manager.add(setVisibilityAction);
 		manager.add(selectPifAction);
 		manager.add(refreshAction);
 
@@ -152,12 +165,54 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	}
 
 	private void fillLocalToolBar(IToolBarManager manager) {
+		manager.add(clearAction);
+		manager.add(setVisibilityAction);
 		manager.add(selectPifAction);
 		manager.add(refreshAction);
 		// manager.add(action2);
 	}
 
 	private void makeActions() {
+		clearAction = new Action(){
+			@Override
+			public void run() {
+				if(pif==null){
+					return;
+				}
+				PrologSession session= null;
+				try {
+					
+					session = pif.getSession();
+					session.queryOnce("pef_graph_clear");
+				} catch (PrologInterfaceException e) {
+					Debug.rethrow(e);
+				}finally{
+					if(session!=null){
+						session.dispose();
+					}
+				}
+			}
+			
+		};
+		setVisibilityAction = new SetVisibilityAction(){
+
+			@Override
+			protected PrologInterface getPrologInterface() {
+				
+				return pif;
+			}
+
+			@Override
+			protected Shell getShell() {
+
+				return PEFGraphView.this.getSite().getShell();
+			}
+
+						
+		};
+		setVisibilityAction.setText("Modify Node Visibility");
+		setVisibilityAction.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.SET_VISIBILITY));
+		
 		selectPifAction = new SelectPifAction() {
 
 			@Override
@@ -432,7 +487,8 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			String query = "pef_graph_node("+id+", "+type+", Labels)";
 			Map m = s.queryOnce(query);
 			if(m==null){
-				throw new RuntimeException("query failed: "+query);
+				Debug.error("Query failed: "+query);
+				return;
 			}
 			List labels = (List) m.get("Labels");
 			String key = id + ":" + type;
