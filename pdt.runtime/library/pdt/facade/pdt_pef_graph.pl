@@ -1,7 +1,10 @@
 :- module(pdt_pef_graph,
 	[	pef_graph_node/3,
+		pef_graph_node/4,
 		pef_graph_edge/5,
-		pef_graph_set_interesting/2
+		pef_graph_set_interesting/2,
+		pef_graph_set_visibility/3,
+		pef_graph_clear/0
 	]
 ).
 
@@ -32,7 +35,7 @@ in a push-style and is always starting with a fixed node.
 %%
 % visible_distance(-Distance).
 % Unifies distance with the current visible distance.
-visible_distance(3).
+visible_distance(2).
 
 :- use_module(library('pef/pef_base')).
 :- use_module(library(pif_observe2)).
@@ -54,8 +57,27 @@ pef_base:pef_before_retract_hook(Id,Type):-
     delete(Id-Type).
     
 
+pef_graph_set_visibility(0,Id,Type):-
+    !,
+    node_value(Id-Type,OldValue),
+    set_node_data(Id-Type,0,Id-Type),    
+    propagate_neighbours(Id-Type,0),       
+    delete(Id-Type),
+    calculate(Id-Type),
+    node_value(Id-Type,NewValue),
+    fire_value_changed(NewValue,OldValue,Id-Type),
+    propagate_neighbours(Id-Type,NewValue).
+pef_graph_set_visibility(NewValue,Id,Type):-    
+	node_value(Id-Type,OldValue),
+    set_node_data(Id-Type,NewValue,Id-Type),
+    fire_value_changed(NewValue,OldValue,Id-Type),
+    propagate_neighbours(Id-Type,NewValue). 
 
 :- dynamic '$node_data'/4.
+
+pef_graph_clear:-
+    retractall('$node_data'(_,_,_,_)).
+
 
 node_data((Id-Type),Value,Source):-
     '$node_data'(Id,Type,Value,Source),
@@ -220,6 +242,14 @@ fire_edge_removed(FId-FType,TId-TType):-
 pef_graph_node(Id,Type,Labels):-
     pef_base:pef_node(Id,Type,Labels),
     node_visible(Id-Type).
+
+pef_graph_node(Id,Type,Labels,Opacity):-
+    pef_base:pef_node(Id,Type,Labels),
+    node_value(Id-Type,Value),    
+    Value > 0,
+    visible_distance(Dist),
+    Opacity is Value / Dist.
+
 
 pef_graph_set_interesting(Id,Type):-
 	visible_distance(NewValue),

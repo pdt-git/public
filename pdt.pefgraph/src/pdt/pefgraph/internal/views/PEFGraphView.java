@@ -1,5 +1,6 @@
 package pdt.pefgraph.internal.views;
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +37,10 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -63,9 +68,58 @@ public class PEFGraphView extends HyperbolicGraphView implements
 		makeActions();
 		hookContextMenu();
 		contributeToActionBars();
-		RandomGraphModelCreator modelCreator = new RandomGraphModelCreator();
-		setModel(modelCreator.createGraph(40));
+		addSelectionChangedListener(new ISelectionChangedListener(){
+
+			public void selectionChanged(SelectionChangedEvent event) {
+				ISelection s = event.getSelection();
+				IStructuredSelection ss = null;
+				if(!(s instanceof IStructuredSelection)){
+					return;
+				}
+				ss=(IStructuredSelection) s;
+				Object[] array = ss.toArray();
+				for (int i = 0; i < array.length; i++) {
+					if(array[i] instanceof Node){
+						Node node = (Node)array[i];
+						makeInteresting(node);
+					}
+				}
+				
+			}
+			
+		});
+		
 	}
+
+
+	private void makeInteresting(Node node) {
+		Map m = (Map)node.getData();
+		String id = (String) m.get("Id");
+		String type = (String) m.get("Type");
+		makeInteresting(id,type);
+	}
+
+	
+	
+	private void makeInteresting(String id, String type) {
+		if(pif==null){
+			return;
+		}
+		PrologSession s = null;
+		try{
+			s=pif.getSession();
+			s.queryOnce("pef_graph_set_interesting("+id+","+type+")");
+		} catch (PrologException e) {
+			Debug.rethrow(e);
+		} catch (PrologInterfaceException e) {
+			Debug.rethrow(e);
+		}finally{
+			if(s!=null){
+				s.dispose();
+			}
+		}
+	}
+
 
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
@@ -230,7 +284,7 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			Debug.rethrow(e);
 		}
 		try {
-			List list = s.queryAll("pef_graph_node(Id,Type,Labels)");
+			List list = s.queryAll("pef_graph_node(Id,Type,Labels,Opacity)");
 			for (Iterator iter = list.iterator(); iter.hasNext();) {
 				Map m = (Map) iter.next();
 				String id = (String) m.get("Id");
@@ -238,8 +292,9 @@ public class PEFGraphView extends HyperbolicGraphView implements
 				List labels = (List) m.get("Labels");
 				String key = id + ":" + type;
 				String label = key + " " + Util.splice(labels, ", ");
-				Node node = new DefaultNode(graph, label);
-
+				Node node = new DefaultNode(graph, label);				
+				node.setBackgroundColor(getNodeColor(type));
+				node.setData(m);
 				nodes.put(key, node);
 			}
 
@@ -324,7 +379,8 @@ public class PEFGraphView extends HyperbolicGraphView implements
 		if(fromNode==null||toNode==null){
 			return;
 		}
-		List<Edge> edges = fromNode.getSourceConnections();
+		List sourceConnections = fromNode.getSourceConnections();
+		Edge[] edges = (Edge[]) sourceConnections.toArray(new Edge[sourceConnections.size()]);
 		for (Edge edge : edges) {
 			if (edge.getTarget() == toNode) {
 				Vector<Edge> l = new Vector<Edge>();
@@ -336,7 +392,7 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	}
 
 	private void removeNode(String id, String type) {
-		Node node = (Node) nodes.get(id+ ":" + type);
+		Node node = (Node) nodes.remove(id+ ":" + type);
 		if(node!=null){
 			Vector<Node> l = new Vector<Node>();
 			l.add(node);
@@ -382,6 +438,12 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			String key = id + ":" + type;
 			String label = key + " " + Util.splice(labels, ", ");
 			node = new DefaultNode(graph,label);
+			
+			node.setBackgroundColor(getNodeColor(type));
+			m.put("Id", id);
+			m.put("Type", type);
+			node.setData(m);
+			
 			Vector<Node> l = new Vector<Node>();
 			l.add(node);
 			graph.addElements(l, new Vector());
@@ -394,6 +456,13 @@ public class PEFGraphView extends HyperbolicGraphView implements
 				s.dispose();
 			}
 		}
+		
+	}
+	
+	Color getNodeColor(String type){
+		int offset = 0xFF808080;
+		int color = (type.hashCode()>>8)|offset;
+		return new Color(color);
 		
 	}
 
