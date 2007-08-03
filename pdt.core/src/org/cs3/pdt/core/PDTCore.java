@@ -136,6 +136,9 @@ public class PDTCore {
 	public static final int ERR_UNKNOWN = -1;
 	public static final int ERR_PIF = -2;
 
+	public static final int ERR_QUERY_FAILED = -3;
+	public static final int ERR_RAISED_EXCEPTION = -4;
+	
 	public static final int CX_UNKNOWN = -1;
 	public static final int CX_START_PIF = -2;
 
@@ -151,6 +154,9 @@ public class PDTCore {
 	public static final int CX_UPDATE_MARKERS = -7;
 
 	public static final String PROBLEM = "org.cs3.pdt.core.problem";
+
+
+	
 
 
 	

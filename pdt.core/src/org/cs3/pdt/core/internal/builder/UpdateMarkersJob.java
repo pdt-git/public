@@ -57,7 +57,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			try {
 				addMarker(filename, start, end, severity, message);
 				if (markerMonitor == null) {
-					markerMonitor = new SubProgressMonitor(monitor, 50,
+					markerMonitor = new SubProgressMonitor(monitor, 25,
 							SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 					int work = Integer.parseInt((String) m.get("Count"));
 					markerMonitor.beginTask("Creating Markers", work);
@@ -78,6 +78,17 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			if (markerMonitor != null) {
 				markerMonitor.done();
 			}
+		}
+		
+		@Override
+		public void goalFailed(AsyncPrologSessionEvent e) {
+			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Query failed: "+e.query));
+		}
+		
+		@Override
+		public void goalRaisedException(AsyncPrologSessionEvent e) {
+		
+			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Goal raised exception: "+e.message+"\n query: "+e.query +"\n ticket: "+e.ticket));
 		}
 	}
 
@@ -116,7 +127,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			final AsyncPrologSession s = pif.getAsyncSession();
 			s.addBatchListener(new _Listener());
 			monitor.beginTask("updating", 100);
-			buildMonitor = new SubProgressMonitor(monitor, 50,
+			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 			buildMonitor.beginTask("Searching for problems", files.size());
 			s

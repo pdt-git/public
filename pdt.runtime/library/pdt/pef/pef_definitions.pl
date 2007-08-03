@@ -162,7 +162,7 @@
 
 :- define_pef(
 	pef_program_module(
-		program:pef_program,
+		program @cascade :pef_program,
 		name @label,
 		module:module
 	)@weak @edge
@@ -193,7 +193,7 @@
 % The relation between a predicate and its clauses
 :- define_pef(
 	pef_clause(
-		predicate:pef_predicate,
+		predicate @cascade :pef_predicate,
 		number @label,
 		toplevel @index:pef_toplevel
 	) @weak @edge
@@ -235,7 +235,7 @@
 % otherwise it is false.
 :- define_pef(
 	pef_program_file(
-		program:pef_program,
+		program @cascade :pef_program,
 		file:pef_file,
 		module_name,
 		force_reload
