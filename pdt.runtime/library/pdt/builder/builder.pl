@@ -5,9 +5,12 @@
 		pdt_with_targets/1,
 		pdt_with_targets/2,		
 		pdt_restart_arbiter/0,
+		pdt_thread_activity/2,
 		debugme/0
 	]
-). 
+).     
+
+
  
 :- use_module(library(pif_observe2)).
 
@@ -17,6 +20,9 @@
 	invalidate_hook/1,
 	delete_hook/1,
 	target_group/2.
+
+
+
 :- multifile
 	build_hook/1,
 	invalidate_hook/1,
@@ -29,6 +35,8 @@
 /* associate state with targets */
 :- dynamic target_state/2.
 
+ 
+  
 
 :- module_transparent pdt_with_targets/2, pdt_with_targets/1.
 
@@ -47,9 +55,13 @@ pdt_with_targets(Goal):-
 pdt_with_targets(Ts,Goal):-
     debug(builder(debug),"pdt_with_targets(~w, ~w): ~n",[Ts, Goal]),
     pdt_builder:asserta('$has_lock'('$mark'),Ref),
-    debug(builder(debug),"added mark clause, ref= ~w ~n",[Ref]),
-    pdt_request_targets(Ts),
-    call_cleanup(Goal,pdt_builder:release_targets(Ref)).
+    debug(builder(debug),"added mark clause, ref= ~w ~n",[Ref]),    
+    call_cleanup(
+    	(	pdt_request_targets(Ts),
+    		Goal
+    	),
+    	pdt_builder:release_targets(Ref)
+    ).
     
 release_targets(Ref):-
     debug(builder(debug),"erasing all locks until marker ~w~n",[Ref]),
@@ -61,7 +73,8 @@ release_targets(Ref):-
     ;  	debug(builder(debug),"~t found lock ~w, ref=~w, erasing it. ~n",[T,LockRef]),
     	erase(LockRef),
 		debug(builder(debug),"~t sending release message to arbiter (target: ~w) ~n",[T]),
-		thread_send_message(build_arbiter,msg(T,release)),
+		thread_self(Me),
+		thread_send_message(build_arbiter,msg(T,release(Me))),
 		fail
     ).
 release_targets(Ref):-
@@ -98,7 +111,19 @@ request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
 	debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
-	thread_get_message(builder_msg(Msg)),
+	repeat,
+		pdt_check_locks(Target),
+		catch(
+			call_with_time_limit(2,	thread_get_message(builder_msg(Msg))),
+			time_limit_exceeded,
+			fail
+		),
+	!,
+	
+	
+	%thread_get_message(builder_msg(Msg)),
+	
+	
 	debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
     ->	asserta('$has_lock'(Target),Ref),
@@ -108,6 +133,8 @@ request_target(Target):-
     	pdt_request_target(Target)
     ;	Msg=error(Target,E)
     ->	throw(error(target_error(Target,E)))
+    ;	Msg=obsolete(Target,Targets)
+    ->	throw(error(target_obsolete(Target,Targets)))
     ;	Msg=fail(Target)
     ->	throw(error(target_failed(Target)))
     ;	Msg=cycle(Target)
@@ -125,6 +152,47 @@ request_targets([]).
 request_targets([T|Ts]):-
 	request_target(T),
 	request_targets(Ts).
+
+
+%%  
+% pdt_check_locks.
+% Verify that all targets locked by the current thread are up to date.
+% If the current thread holds a lock for a target that is outdated,
+% this predicate will throw the exception "obsolete".
+pdt_check_locks(WaitTarget):-
+    current_target_state(WaitTarget, S),
+    debug(builder(debug),"checking locks while waiting for target ~w, state: ~w, ~n",[WaitTarget,S]),  
+    forall(
+    	(	'$has_lock'(Target),
+    		Target \== '$mark'
+    	),
+    	current_target_state(Target, state(_Activity, available, _Locks,_SleepLocks,_Waits))
+    ),
+    !.    
+pdt_check_locks(Target):-
+    debug(builder(debug),"found obsolete locks while waiting for target ~w, ~n",[Target]),
+    handle_obsolete_locks(Target).
+    
+handle_obsolete_locks(Target):-    
+    thread_self(Me),
+    
+    % tell the arbiter to remove us from the targets wait list.
+    debug(builder(debug),"sending remove request: ~w, ~n",[msg(Target,remove(Me))]),
+    thread_send_message(build_arbiter,msg(Target,remove(Me))),
+    % skip all message until receiving acknowlegement.
+    
+    repeat,
+    	thread_get_message(builder_msg(Msg)),
+    	debug(builder(debug),"skipping: ~w, ~n",[builder_msg(Msg)]),
+    	Msg==removed(Target),
+    !,
+    debug(builder(debug),"received: ~w, ~n",[builder_msg(Msg)]),
+	throw(obsolete).    
+
+
+
+
+
 
 build_target(Target):-
     (	catch(
@@ -159,9 +227,9 @@ current_target_state(Target,State):-
     target_state(Target,_),
     !,
     target_state(Target,State).
-current_target_state(_Target,state(idle,outdated,[],[])).
+current_target_state(_Target,state(idle,outdated,[],[],[])).
 
-update_target_state(Target,state(idle,outdated,[],[])):-
+update_target_state(Target,state(idle,outdated,[],[],[])):-
     !,
     retractall(target_state(Target,_)).
 update_target_state(Target,NewState):-
@@ -335,30 +403,64 @@ execute_action(report_cycle(Thread),Target):-
 execute_action(notify_done,Target):-
 	debug(builder(debug),"target done: ~w~n",[Target]),
     pif_notify(builder(Target),done).
+execute_action(ackn_remove(W),Target):-
+    debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
+	thread_send_message(W,builder_msg(removed(Target))).    
 
-target_transition(state(A, outdated, C,W),		 		request(T), 	report_cycle(T),		state(A, outdated, C,W) ,Target):-
+
+
+% state(Activity, Status, Locks,SleepLocks,Waits)
+% Activity: idle - there are no locks 
+%		or reading - there is at least one read lock 
+%
+% Status: available(TimeStamp) - the target is up to date, Timestamp is the build time
+%		  outdated - the target is outdated
+%		  pending(Thread) - the target is beeing rebuild by Thread
+%
+% Locks: A list of threads that were granted a read lock on this target
+%
+% SleepLocks: (not used right now) A list of targets that were granted a read lock, but that are currently asleep. 
+%
+% Waits: A list of threads that are waiting for the target to become available.
+
+target_transition(state(A, outdated, Ls,SLs,Ws), 				request(T), 	report_cycle(T),		state(A, outdated, Ls, SLs, Ws) ,Target):-
     closes_cycle(T,Target).
-target_transition(state(A, pending(P), C,W),		 		request(T), 	report_cycle(T),	state(A, pending(P), C,W) ,Target):-
-    closes_cycle(T,Target).
-target_transition(state(idle, available, [],[]), 		request(T), 	grant([T]), 			state(reading, available, [T],[]) ,_Target).
-target_transition(state(reading, available, Ts,[]),		request(T), 	grant([T]), 			state(reading, available, [T|Ts],[]),_Target).
-target_transition(state(reading, S, [_,T|Ts],Ws),		release, 		[], 					state(reading, S, [T|Ts],Ws),_Target).
-target_transition(state(reading, available, [_],[]), 	release,		[], 					state(idle, available, [],[]),_Target).
-target_transition(state(idle, pending(_) , [],Ts), 		fail,		 	report_failure(Ts),		state(idle, outdated, [],[]),_Target).
-target_transition(state(idle, pending(_) , [],Ts), 		error(E),	 	report_error(Ts,E),		state(idle, outdated, [],[]),_Target).
+target_transition(state(A, pending(T1), Ls,SLs,Ws),				request(T2), 	report_cycle(T2),		state(A, pending(T1), Ls, SLs ,Ws) ,Target):-
+    closes_cycle(T2,Target).
+target_transition(state(idle, available,[], SLs,Ws), 			request(T), 	grant([T]), 				state(reading, available,[T],SLs,Ws) ,_Target).
+target_transition(state(reading, available, Ls, SLs,Ws), 		request(T), 	grant([T]), 			state(reading, available, [T|Ls],SLs,Ws) ,_Target).
+target_transition(state(idle, outdated, [],SLs,[]), 			request(T), 	rebuild(T),				state(idle, pending(T) , [],SLs, []),_Target). 
+target_transition(state(reading, outdated, Ls,SLs,Ws), 			request(T), 	[],						state(reading, outdated , Ls, SLs,[T|Ws]),_Target).
+target_transition(state(idle, pending(P) , [],SLs, Ws),			request(W), 	[],		 				state(idle, pending(P) , [], SLs,[W|Ws]),_Target).
+
+target_transition(state(idle, pending(_) , Ls,SLs,Ws),			fail,		 	report_failure(Ws),		state(idle, outdated, Ls,SLs,[]),_Target).
+target_transition(state(idle, pending(_) , Ls,SLs,Ws), 			error(E),	 	report_error(Ws,E),		state(idle, outdated, Ls,SLs,[]),_Target).
+
 %FIXME: do we need to react some way when invalidation is requested during pending?
-target_transition(state(idle, pending(P) , [],Ts), 		mark_dirty,	 	[],						state(idle, pending(P) , [],Ts),_Target).
-target_transition(state(idle, available , [],[]), 		mark_clean, 	[],						state(idle, available, [],[]),_Target).
-target_transition(state(idle, _ , [],[]), 				mark_clean, 	[notify_done],			state(idle, available, [],[]),_Target).
-target_transition(state(idle, _ , [],Ts), 				mark_clean, 	[notify_done,grant(Ts)],state(reading, available, Ts,[]),_Target).
-target_transition(state(A, available, Ls,[]), 			mark_dirty, 	invalidate,				state(A, outdated , Ls,[]),_Target).
-target_transition(state(A, outdated, Ls,Ws), 			mark_dirty, 	[], 					state(A, outdated , Ls,Ws),_Target).
-target_transition(state(idle, outdated, [],[]), 		request(T), 	rebuild(T),				state(idle, pending(T) , [], []),_Target). 
-target_transition(state(reading, outdated, Ls,Ts), 		request(T), 	[],						state(reading, outdated , Ls, [T|Ts]),_Target).
-target_transition(state(reading, outdated, [_,L|Ls],Ts),release,	 	[],						state(reading, outdated , [L|Ls], Ts),_Target).
-target_transition(state(reading, outdated, [_],[T|Ts]),	release,	 	rebuild(T),				state(idle, pending(T) , [], Ts),_Target).
-target_transition(state(reading, outdated, [_],[]),		release,	 	[],						state(idle, outdated , [], []),_Target).
-target_transition(state(idle, pending(P) , [], Ts),		request(T), 	[], 					state(idle, pending(P) , [], [T|Ts]),_Target).
+target_transition(state(idle, pending(P) , Ls,SLs,Ws), 			mark_dirty,	 	[],						state(idle, pending(P) , Ls,SLs,Ws),_Target).
+target_transition(state(A, available, Ls,SLs,[]), 				mark_dirty, 	invalidate,				state(A, outdated , Ls,SLs,[]),_Target).
+target_transition(state(A, outdated, Ls,SLs,Ws),				mark_dirty, 	[], 					state(A, outdated , Ls,SLs,Ws),_Target).
+
+target_transition(state(idle, available , [],SLs,[]),			mark_clean, 	[],						state(idle, available, [],SLs,[]),_Target).
+target_transition(state(idle, _ , [],SLs,[]), 					mark_clean, 	[notify_done],			state(idle, available, [],SLs,[]),_Target).
+target_transition(state(idle, _ , [],SLs,Ts), 					mark_clean, 	[notify_done,grant(Ts)],state(reading, available, Ts,SLs,[]),_Target).
+
+target_transition(state(reading, available, Ls,SLs,Ws),					release(T), 	[], 					state(Act, available, Ls2,SLs,Ws),_Target):-
+    select(T,Ls,Ls2), 
+    (	Ls2 == []
+    ->	Act=idle
+    ;	Act=reading
+    ).
+target_transition(state(reading, outdated, [T],SLs,[W|Ws]),		release(T),		rebuild(W),				state(idle, pending(W) , [],SLs, Ws),_Target).
+target_transition(state(reading, outdated, Ls,SLs,Ws),			release(T),	 	[],						state(reading, outdated , Ls2,SLs,Ws),_Target):-
+    select(T,Ls,Ls2), Ls2 \== [].
+target_transition(state(reading, outdated, [L],SLs,[]),			release(L),	 	[],						state(idle, outdated , [],SLs,[]),_Target).
+
+target_transition(state(Act, St, Ls,SLs,Ws),					remove(W),	 	[ackn_remove(W)],		state(Act, St , Ls,SLs,Ws2),_Target):-
+    (	select(W,Ws,Ws2)
+    ;	Ws2=Ws
+    ).
+
 
 
 /*
@@ -372,11 +474,11 @@ requesting a target constitutes adding an edge. If that edge would close a cylce
 */
 
 target_depends_thread(Target,Thread):-
-    target_state(Target,state(_,pending(Thread2),_,_)),
+    target_state(Target,state(_,pending(Thread2),_,_,_)),
     thread_depends_thread(Thread2,Thread).    
     
 thread_depends_target(Thread,Target):-
-    target_state(Target2,state(_,_,_,Waiting)),
+    target_state(Target2,state(_,_,_,_,Waiting)),
     member(Thread,Waiting),
     target_depends_target(Target2,Target).
 
@@ -397,16 +499,39 @@ closes_cycle(Thread,Target):-
     !.
 
 
+pdt_thread_activity(Thread,status(A)):-
+    current_thread(Thread,A).
+pdt_thread_activity(Thread,build(Target)):-
+	current_target_state(Target,state(_,pending(Thread),_,_,_)).    
+pdt_thread_activity(Thread,lock(Target)):-
+	current_target_state(Target,state(_,_,Ls,_,_)),
+	memberchk(Thread,Ls).
+pdt_thread_activity(Thread,wait(Target)):-
+	current_target_state(Target,state(_,_,_,_,Ws)),
+	memberchk(Thread,Ws).
 
 
     
+%:-tdebug.
+%myspy.
+%:-tspy(myspy).
+%user:prolog_exception_hook(error(target_error(_, _)),
+%                               _, _, _) :-
+%            writeln(arsch),trace, fail.
 
+%user:prolog_exception_hook(E, _, _, _) :- 
+%            writeln(arsch),
+%            var(E),
+%            myspy,
+%            trace, fail.
 
-user:prolog_exception_hook(error(resource_error(stack), local),
-                               _, _, _) :-
-            writeln(arsch),trace, fail.
+%user:prolog_exception_hook(E, _, _, _) :- 
+%            writeln(arsch),
+%            attvar(E),
+%            myspy,
+%            trace, fail.
 
             
-%:-debug(builder),debug(builder(_)),debug(pif_observe).             
+:-debug(builder),debug(builder(_)).             
 
 

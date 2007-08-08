@@ -14,7 +14,8 @@ pdt_builder:build_hook(parse(AbsFile)):-
 my_build_hook(AbsFile):-    
 	pdt_forget(AbsFile),
 	(	exists_file(AbsFile)
-   	->	pdt_with_targets([file(AbsFile)],pdt_parse(AbsFile))
+   	->	pdt_request_target(file(AbsFile)),
+   		pdt_parse(AbsFile)
    	;	true
    	).
 pdt_builder:invalidate_hook(file(AbsFile)):-

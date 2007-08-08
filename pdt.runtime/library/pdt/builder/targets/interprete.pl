@@ -87,7 +87,8 @@ clear_predicate(PredID):-
 
 pdt_interprete_program(Abs):-
     get_pef_file(Abs,FileRef),
-	pdt_with_targets([parse(Abs)],interprete_program(FileRef)).
+	pdt_request_target(parse(Abs)),
+	interprete_program(FileRef).
 
 interprete_program(FileRef):-    
     create_program(FileRef,Cx),
