@@ -194,6 +194,10 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			}
 			
 		};
+		clearAction.setText("Clear Graph");
+		clearAction.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
+		
+		
 		setVisibilityAction = new SetVisibilityAction(){
 
 			@Override
