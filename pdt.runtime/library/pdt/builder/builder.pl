@@ -6,7 +6,8 @@
 		pdt_with_targets/2,		
 		pdt_restart_arbiter/0,
 		pdt_thread_activity/2,
-		debugme/0
+		debugme/0,
+		redirect/2
 	]
 ).     
 
@@ -160,33 +161,53 @@ request_targets([T|Ts]):-
 % If the current thread holds a lock for a target that is outdated,
 % this predicate will throw the exception "obsolete".
 pdt_check_locks(WaitTarget):-
-    current_target_state(WaitTarget, S),
-    debug(builder(debug),"checking locks while waiting for target ~w, state: ~w, ~n",[WaitTarget,S]),  
+    debug(builder(obsolete),"checking locks while waiting for target ~w ~n",[WaitTarget]),      
+    (	check_locks
+    ->	debug(builder(obsolete),"All locks are up to date. (waiting for ~w)~n",[WaitTarget])
+    ;	debug(builder(obsolete),"found obsolete locks while waiting for target ~w, ~n",[Target]),
+    	handle_obsolete_locks(Target)
+    ).
+    
+
+
+
+check_locks:-
     forall(
     	(	'$has_lock'(Target),
     		Target \== '$mark'
     	),
-    	current_target_state(Target, state(_Activity, available, _Locks,_SleepLocks,_Waits))
-    ),
-    !.    
-pdt_check_locks(Target):-
-    debug(builder(debug),"found obsolete locks while waiting for target ~w, ~n",[Target]),
-    handle_obsolete_locks(Target).
+    	(	current_target_state(Target,State),
+    		debug(builder(obsolete),"checking lock ~w: state is ~w ~n",[Target,State]),
+    		(	State=state(_Activity, available, _Locks,_SleepLocks,_Waits)
+    		->	debug(builder(obsolete),"ok~n",[])
+    		;	debug(builder(obsolete),"obsolete~n",[]),
+    			fail
+    		)
+    	)    	
+    ).
     
-handle_obsolete_locks(Target):-    
+handle_obsolete_locks(WTarget):-    
     thread_self(Me),
     
     % tell the arbiter to remove us from the targets wait list.
-    debug(builder(debug),"sending remove request: ~w, ~n",[msg(Target,remove(Me))]),
-    thread_send_message(build_arbiter,msg(Target,remove(Me))),
+    debug(builder(obsolete),"sending remove request: ~w, ~n",[msg(WTarget,remove(Me))]),
+    thread_send_message(build_arbiter,msg(WTarget,remove(Me))),
     % skip all message until receiving acknowlegement.
     
     repeat,
     	thread_get_message(builder_msg(Msg)),
-    	debug(builder(debug),"skipping: ~w, ~n",[builder_msg(Msg)]),
-    	Msg==removed(Target),
+    	(	Msg==removed(WTarget)
+    	->	debug(builder(obsolete),"remove ackn. received: ~w, ~n",[builder_msg(Msg)])
+    	;	Msg=grant(T)
+    	->	asserta('$has_lock'(T),Ref),
+	    	debug(builder(obsolete),"received grant, added lock for target ~w, ref=~w~n",[T,Ref]),
+	    	fail
+    	;	debug(builder(obsolete),"skipping: ~w, ~n",[builder_msg(Msg)]),
+    		fail
+    	),
+    	
     !,
-    debug(builder(debug),"received: ~w, ~n",[builder_msg(Msg)]),
+    
 	throw(obsolete).    
 
 
@@ -282,6 +303,20 @@ open_log(LogDir,Alias,Stream):-
     %debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
 	flush.
 
+:- module_transparent redirect/2.
+
+redirect(File,Goal):-
+    open(File,write,Out),
+    open_null_stream(In),
+    stream_property(OldIn,alias(current_input)),
+    stream_property(OldOut,alias(current_output)),
+    set_prolog_IO(In,Out,Out),
+    call_cleanup(Goal,
+    	(  	set_prolog_IO(OldIn,OldOut,OldOut),
+    		close(In),
+    		close(Out)
+    	)
+    ).
 
 run_arbiter:-   
     (	'$log_dir'(LogDir)
@@ -445,7 +480,7 @@ target_transition(state(idle, available , [],SLs,[]),			mark_clean, 	[],						st
 target_transition(state(idle, _ , [],SLs,[]), 					mark_clean, 	[notify_done],			state(idle, available, [],SLs,[]),_Target).
 target_transition(state(idle, _ , [],SLs,Ts), 					mark_clean, 	[notify_done,grant(Ts)],state(reading, available, Ts,SLs,[]),_Target).
 
-target_transition(state(reading, available, Ls,SLs,Ws),					release(T), 	[], 					state(Act, available, Ls2,SLs,Ws),_Target):-
+target_transition(state(reading, available, Ls,SLs,Ws),			release(T), 	[], 					state(Act, available, Ls2,SLs,Ws),_Target):-
     select(T,Ls,Ls2), 
     (	Ls2 == []
     ->	Act=idle
@@ -499,15 +534,15 @@ closes_cycle(Thread,Target):-
     !.
 
 
-pdt_thread_activity(Thread,status(A)):-
-    current_thread(Thread,A).
+%pdt_thread_activity(Thread,status(A)):-
+%    current_thread(Thread,A).
 pdt_thread_activity(Thread,build(Target)):-
-	current_target_state(Target,state(_,pending(Thread),_,_,_)).    
+	target_state(Target,state(_,pending(Thread),_,_,_)).    
 pdt_thread_activity(Thread,lock(Target)):-
-	current_target_state(Target,state(_,_,Ls,_,_)),
+	target_state(Target,state(_,_,Ls,_,_)),
 	memberchk(Thread,Ls).
 pdt_thread_activity(Thread,wait(Target)):-
-	current_target_state(Target,state(_,_,_,_,Ws)),
+	target_state(Target,state(_,_,_,_,Ws)),
 	memberchk(Thread,Ws).
 
 
@@ -532,6 +567,6 @@ pdt_thread_activity(Thread,wait(Target)):-
 %            trace, fail.
 
             
-:-debug(builder),debug(builder(_)).             
+%:-debug(builder),debug(builder(_)).             
 
 

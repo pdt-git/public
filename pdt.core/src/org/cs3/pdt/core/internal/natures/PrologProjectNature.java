@@ -763,9 +763,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public void updateMarkers(Set<IFile> buildList) {
-		if (updatingMarkers) {
-			return;
-		}
+//		if (updatingMarkers) {
+//			return;
+//		}
 		updatingMarkers = true;
 		new UpdateMarkersJob(this, buildList, new Runnable() {
 

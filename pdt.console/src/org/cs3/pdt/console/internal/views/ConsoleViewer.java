@@ -41,6 +41,8 @@
 
 package org.cs3.pdt.console.internal.views;
 
+import javax.swing.text.StyledEditorKit.StyledTextAction;
+
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
@@ -145,7 +147,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	private ModifyListener modifyListener = new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
-			ui_inputModified(ui_getLineBuffer());
+			if(!thatWasMe){
+				ui_inputModified(ui_getLineBuffer());
+			}
 		}
 	};
 
@@ -175,7 +179,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
-
+		
 		control.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				e.doit = false;
@@ -548,8 +552,13 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		int p = 0;
 		try {
 			p = control.getCaretOffset() - startOfInput;
+			
+			
+			
+			
 			control.replaceTextRange(startOfInput, 0, output);
-			startOfInput += output.length();
+			startOfInput += output.length();	
+			
 			control.setCaretOffset(startOfInput + p);
 			control.showSelection();
 		} catch (Throwable e) {
