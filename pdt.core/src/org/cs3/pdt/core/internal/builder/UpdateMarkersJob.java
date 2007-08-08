@@ -80,14 +80,16 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			}
 		}
 		
-		@Override
-		public void goalFailed(AsyncPrologSessionEvent e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Query failed: "+e.query));
-		}
+//		@Override
+//		public void goalFailed(AsyncPrologSessionEvent e) {
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Query failed: "+e.query));
+//		}
 		
 		@Override
 		public void goalRaisedException(AsyncPrologSessionEvent e) {
-		
+			if("obsolete".equals(e.message)){
+				return;
+			}
 			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Goal raised exception: "+e.message+"\n query: "+e.query +"\n ticket: "+e.ticket));
 		}
 	}

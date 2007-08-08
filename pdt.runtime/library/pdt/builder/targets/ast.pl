@@ -13,12 +13,11 @@
 
 pdt_builder:build_hook(asts(AbsFile)):-
     get_pef_file(AbsFile,FID),
-    pdt_with_targets([parse(AbsFile)],
-    	forall(
-	    	pef_toplevel_query([file=FID,id=Tl]),
-	    	pdt_request_target(ast(Tl))
-	    )
-	).
+    pdt_request_targets(parse(AbsFile)),
+	forall(
+    	pef_toplevel_query([file=FID,id=Tl]),
+    	pdt_request_target(ast(Tl))
+    ).
 pdt_builder:build_hook(ast(Tl)):-
     ast:rebuild(Tl).
 

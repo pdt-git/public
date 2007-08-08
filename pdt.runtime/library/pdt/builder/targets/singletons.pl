@@ -6,11 +6,9 @@
 :-use_module(library('builder/targets/ast')).
 
 pdt_builder:build_hook(singletons(Abs)):-
-    pdt_with_targets([parse(Abs)],
-    	(	singletons:forget_singletons(Abs),
-    		singletons:check_singletons(Abs)
-    	)
-    ).
+    pdt_request_target(parse(Abs)),
+	singletons:forget_singletons(Abs),
+	singletons:check_singletons(Abs).
 
 pdt_builder:invalidate_hook(parse(Abs)):-
 	pdt_invalidate_target(singletons(Abs)).
