@@ -7,7 +7,8 @@
 		pdt_restart_arbiter/0,
 		pdt_thread_activity/2,
 		debugme/0,
-		redirect/2
+		redirect/2,
+		my_debug/3
 	]
 ).     
 
@@ -23,6 +24,7 @@
 	target_group/2.
 
 
+ 
 
 :- multifile
 	build_hook/1,
@@ -37,7 +39,12 @@
 :- dynamic target_state/2.
 
  
-  
+  my_debug(Topic,Msg,Args):-
+      append("[~w:~w:~w] ",Msg,Msg2),
+      get_time(Stamp),
+      stamp_date_time(Stamp,DT,local),
+      date_time_value(time,DT,time(H,M,S)),
+      debug(Topic,Msg2,[H,M,S|Args]).
 
 :- module_transparent pdt_with_targets/2, pdt_with_targets/1.
 
@@ -54,9 +61,9 @@ pdt_with_targets(Goal):-
     pdt_with_targets([],Goal).
 
 pdt_with_targets(Ts,Goal):-
-    debug(builder(debug),"pdt_with_targets(~w, ~w): ~n",[Ts, Goal]),
+    my_debug(builder(debug),"pdt_with_targets(~w, ~w): ~n",[Ts, Goal]),
     pdt_builder:asserta('$has_lock'('$mark'),Ref),
-    debug(builder(debug),"added mark clause, ref= ~w ~n",[Ref]),    
+    my_debug(builder(debug),"added mark clause, ref= ~w ~n",[Ref]),    
     call_cleanup(
     	(	pdt_request_targets(Ts),
     		Goal
@@ -65,15 +72,15 @@ pdt_with_targets(Ts,Goal):-
     ).
     
 release_targets(Ref):-
-    debug(builder(debug),"erasing all locks until marker ~w~n",[Ref]),
+    my_debug(builder(debug),"erasing all locks until marker ~w~n",[Ref]),
     clause('$has_lock'(T),_,LockRef),
     (	LockRef==Ref
-    ->	debug(builder(debug),"~t found marker, erasing it: ~w~n",[Ref]),
+    ->	my_debug(builder(debug),"~t found marker, erasing it: ~w~n",[Ref]),
     	erase(Ref),
     	!
-    ;  	debug(builder(debug),"~t found lock ~w, ref=~w, erasing it. ~n",[T,LockRef]),
+    ;  	my_debug(builder(debug),"~t found lock ~w, ref=~w, erasing it. ~n",[T,LockRef]),
     	erase(LockRef),
-		debug(builder(debug),"~t sending release message to arbiter (target: ~w) ~n",[T]),
+		my_debug(builder(debug),"~t sending release message to arbiter (target: ~w) ~n",[T]),
 		thread_self(Me),
 		thread_send_message(build_arbiter,msg(T,release(Me))),
 		fail
@@ -107,28 +114,29 @@ request_target(Group):-
 request_target(Target):-
     '$has_lock'(Target),
     !,
-    debug(builder(debug),"target already granted: ~w ~n",[Target]).
+    my_debug(builder(debug),"target already granted: ~w ~n",[Target]).
 request_target(Target):-
     thread_self(Me),
    	thread_send_message(build_arbiter,msg(Target,request(Me))),
-	debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
-	repeat,
-		pdt_check_locks(Target),
+	my_debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
+	repeat,		
 		catch(
-			call_with_time_limit(2,	thread_get_message(builder_msg(Msg))),
+			call_with_time_limit(5,	thread_get_message(builder_msg(Msg))),
 			time_limit_exceeded,
-			fail
+			(	pdt_check_locks(Target),
+				fail
+			)
 		),
 	!,
-	
+	  
 	
 	%thread_get_message(builder_msg(Msg)),
 	
 	
-	debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
+	my_debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
     ->	asserta('$has_lock'(Target),Ref),
-	    debug(builder(debug),"added lock for target ~w, ref=~w~n",[Target,Ref]) 	
+	    my_debug(builder(debug),"added lock for target ~w, ref=~w~n",[Target,Ref]) 	
     ;	Msg==rebuild(Target)
     ->  build_target(Target),
     	pdt_request_target(Target)
@@ -161,11 +169,11 @@ request_targets([T|Ts]):-
 % If the current thread holds a lock for a target that is outdated,
 % this predicate will throw the exception "obsolete".
 pdt_check_locks(WaitTarget):-
-    debug(builder(obsolete),"checking locks while waiting for target ~w ~n",[WaitTarget]),      
+    my_debug(builder(obsolete),"checking locks while waiting for target ~w ~n",[WaitTarget]),      
     (	check_locks
-    ->	debug(builder(obsolete),"All locks are up to date. (waiting for ~w)~n",[WaitTarget])
-    ;	debug(builder(obsolete),"found obsolete locks while waiting for target ~w, ~n",[Target]),
-    	handle_obsolete_locks(Target)
+    ->	my_debug(builder(obsolete),"All locks are up to date. (waiting for ~w)~n",[WaitTarget])
+    ;	my_debug(builder(obsolete),"found obsolete locks while waiting for target ~w, ~n",[WaitTarget]),
+    	handle_obsolete_locks(WaitTarget)
     ).
     
 
@@ -177,10 +185,10 @@ check_locks:-
     		Target \== '$mark'
     	),
     	(	current_target_state(Target,State),
-    		debug(builder(obsolete),"checking lock ~w: state is ~w ~n",[Target,State]),
+    		my_debug(builder(obsolete),"checking lock ~w: state is ~w ~n",[Target,State]),
     		(	State=state(_Activity, available, _Locks,_SleepLocks,_Waits)
-    		->	debug(builder(obsolete),"ok~n",[])
-    		;	debug(builder(obsolete),"obsolete~n",[]),
+    		->	my_debug(builder(obsolete),"ok~n",[])
+    		;	my_debug(builder(obsolete),"obsolete~n",[]),
     			fail
     		)
     	)    	
@@ -190,19 +198,19 @@ handle_obsolete_locks(WTarget):-
     thread_self(Me),
     
     % tell the arbiter to remove us from the targets wait list.
-    debug(builder(obsolete),"sending remove request: ~w, ~n",[msg(WTarget,remove(Me))]),
+    my_debug(builder(obsolete),"sending remove request: ~w, ~n",[msg(WTarget,remove(Me))]),
     thread_send_message(build_arbiter,msg(WTarget,remove(Me))),
     % skip all message until receiving acknowlegement.
     
     repeat,
     	thread_get_message(builder_msg(Msg)),
     	(	Msg==removed(WTarget)
-    	->	debug(builder(obsolete),"remove ackn. received: ~w, ~n",[builder_msg(Msg)])
+    	->	my_debug(builder(obsolete),"remove ackn. received: ~w, ~n",[builder_msg(Msg)])
     	;	Msg=grant(T)
     	->	asserta('$has_lock'(T),Ref),
-	    	debug(builder(obsolete),"received grant, added lock for target ~w, ref=~w~n",[T,Ref]),
+	    	my_debug(builder(obsolete),"received grant, added lock for target ~w, ref=~w~n",[T,Ref]),
 	    	fail
-    	;	debug(builder(obsolete),"skipping: ~w, ~n",[builder_msg(Msg)]),
+    	;	my_debug(builder(obsolete),"skipping: ~w, ~n",[builder_msg(Msg)]),
     		fail
     	),
     	
@@ -267,7 +275,7 @@ stop_arbiter:-
     ;	true
     ),
     thread_join(build_arbiter,ExitStatus),
-    debug(builder(info),"build_arbiter stopped with status ~w~n",[ExitStatus]).
+    my_debug(builder(info),"build_arbiter stopped with status ~w~n",[ExitStatus]).
 stop_arbiter.    
     
 
@@ -296,11 +304,11 @@ pdt_restart_arbiter:-
 
 open_log(LogDir,Alias,Stream):-
     concat_atom([LogDir,'/',Alias,'.log'],'',Path),
-    %debug(builder,"trying to open log file for writing: ~w~n",[Path]),
+    %my_debug(builder,"trying to open log file for writing: ~w~n",[Path]),
 	%flush,
     open(Path,append,Stream),
     %format(Stream,"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~n",[]),
-    %debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
+    %my_debug(builder,"successfully opened log file for writing: ~w~n",[Path]),
 	flush.
 
 :- module_transparent redirect/2.
@@ -366,19 +374,19 @@ process_message(all,stop):-!.
 process_message(Target,Event):-
     current_target_state(Target,State),    
     (	target_transition(State,Event,Action,NewState,Target)
-    ->  debug(builder(Target),"Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
+    ->  my_debug(builder(transition(Target)),"Target: ~w, Transition: ~w, ~w ---> ~w,~w~n",[Target,State,Event,Action,NewState]),
     	update_target_state(Target,NewState),
 	    (	execute_action(Action,Target)
 	    ->	true
-	    ;	debug(builder(Target),"action failed ~w (target: ~w)~n",[Action,Target]),
+	    ;	my_debug(builder(transition(Target)),"action failed ~w (target: ~w)~n",[Action,Target]),
 	    	throw(error(action_failed(Target,State,Event,Action)))
 	    )
-	;	debug(builder(Target),"no transition for state ~w, event ~w (target: ~w)~n",[State,Event,Target]),
+	;	my_debug(builder(transition(Target)),"no transition for state ~w, event ~w (target: ~w)~n",[State,Event,Target]),
 		throw(error(no_transition(Target,State,Event)))
 	).
  
 debugme:-
-	debug(builder(debug),"ouch~n",[]).
+	my_debug(builder(debug),"ouch~n",[]).
 
 execute_action([],_).
 execute_action([Action|Actions],Target):-
@@ -419,7 +427,7 @@ execute_action(report_error([Thread|Threads],E),Target):-
   I don't know how to model this in our state chart diagram...
 */
 execute_action(invalidate,Target):-
-	debug(builder(debug),"invalidating target: ~w~n",[Target]),
+	my_debug(builder(debug),"invalidating target: ~w~n",[Target]),
     pif_notify(builder(Target),invalid),    
     forall(invalidate_hook(Target),true),
     forall(
@@ -430,16 +438,16 @@ execute_action(invalidate,Target):-
     	true
     ).
 execute_action(rebuild(Thread),Target):-
-	debug(builder(debug),"rebuilding target: ~w~n",[Target]),
+	my_debug(builder(debug),"rebuilding target: ~w~n",[Target]),
 	pif_notify(builder(Target),start(Thread)),
 	thread_send_message(Thread,builder_msg(rebuild(Target))).
 execute_action(report_cycle(Thread),Target):-
 	thread_send_message(Thread,	builder_msg(cycle(Target))).
 execute_action(notify_done,Target):-
-	debug(builder(debug),"target done: ~w~n",[Target]),
+	my_debug(builder(debug),"target done: ~w~n",[Target]),
     pif_notify(builder(Target),done).
 execute_action(ackn_remove(W),Target):-
-    debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
+    my_debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
 	thread_send_message(W,builder_msg(removed(Target))).    
 
 

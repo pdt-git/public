@@ -22,7 +22,8 @@
 	get_pef_file/2,
 	first_clause/3,
 	first_clause/4,
-	file_depends_star/2
+	file_depends_star/2,
+	related_file/2 
 	]).
 
 :- use_module(library('pef/pef_base')).
@@ -249,4 +250,9 @@ file_depends_star(A,C):-
     
 file_depends(A,B):-
 	pef_file_dependency_query([depending=A,dependency=B]).    
-	    
+	
+related_file(A,B):-
+    get_pef_file(A,AID),
+    pef_program_file_query([file=AID,program=PID]),
+    pef_program_file_query([program=PID,file=BID]),
+    get_pef_file(B,BID).
