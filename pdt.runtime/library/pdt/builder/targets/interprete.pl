@@ -15,7 +15,7 @@ pdt_builder:build_hook(interprete(AbsFile)):-
     interprete:my_build_hook(AbsFile).
 
 my_build_hook(AbsFile):-    
-	pdt_forget_program(AbsFile),
+	%pdt_forget_program(AbsFile),
 	pdt_interprete_program(AbsFile).
 
 pdt_builder:invalidate_hook(parse(AbsFile)):-
@@ -34,7 +34,7 @@ pdt_forget_program(AbsFile):-
     ;	true
     ).
 */
-pdt_forget_program(AbsFile):-
+/*pdt_forget_program(AbsFile):-
     get_pef_file(AbsFile,Ref),
     pef_program_cleanupall([file=Ref]).
     
@@ -48,7 +48,7 @@ pdt_forget_program(AbsFile):-
 forget_program(PID):-
 	 pef_program_module_retractall([program=PID]),	 
 	 forall(module_owner_nondet(MID,PID),delete_module(MID)).
-
+*/
 %% delete_module(+MID)
 % Rid the world of module MID.
 % delete all predicates defined by the module.%

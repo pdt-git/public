@@ -12,7 +12,7 @@
 pdt_builder:build_hook(parse(AbsFile)):-
     parse:my_build_hook(AbsFile).
 my_build_hook(AbsFile):-    
-	pdt_forget(AbsFile),
+	%pdt_forget(AbsFile),
 	(	exists_file(AbsFile)
    	->	pdt_request_target(file(AbsFile)),
    		pdt_parse(AbsFile)
@@ -33,7 +33,7 @@ pdt_builder:invalidate_hook(parse(AbsFile)):-
 
 pdt_parse(Spec):-
     my_read(Spec).
-
+/*
 pdt_forget(Spec):-
    % my_forget(Spec).
 	pdt_file_spec(Spec,AbsFile),
@@ -72,7 +72,7 @@ my_forget(Spec):-
 	pef_problem_retractall([file_ref=FileRef]),
     */
     pef_toplevel_retractall([file=FileRef]).
-
+*/
 my_read(Spec):-
     pdt_file_spec(Spec,F),
     %TODO: check timestamp
