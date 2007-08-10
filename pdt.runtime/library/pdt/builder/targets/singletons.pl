@@ -7,14 +7,14 @@
 
 pdt_builder:build_hook(singletons(Abs)):-
     pdt_request_target(parse(Abs)),
-	singletons:forget_singletons(Abs),
+	%singletons:forget_singletons(Abs),
 	singletons:check_singletons(Abs).
 
 pdt_builder:invalidate_hook(parse(Abs)):-
 	pdt_invalidate_target(singletons(Abs)).
 
 
-
+/*
 forget_singletons(Abs):-
     get_pef_file(Abs,FID),
     forall(
@@ -26,7 +26,8 @@ forget_singletons(Abs):-
     		pef_no_singleton_retractall([variable=VID])
     	)
     ).
-    
+  
+ */  
 check_singletons(Abs):-
 	get_pef_file(Abs,FID),
 	forall(

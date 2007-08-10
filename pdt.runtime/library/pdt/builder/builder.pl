@@ -15,6 +15,7 @@
 
  
 :- use_module(library(pif_observe2)).
+:- use_module(library('pef/pef_base')).
 
 /* hooks */
 :- dynamic 
@@ -224,10 +225,16 @@ handle_obsolete_locks(WTarget):-
 
 
 build_target(Target):-
+    pef_clear_record(Target),
+    pef_start_recording(Target),
     (	catch(
-    		forall(build_hook(Target),true),
+    		call_cleanup(
+    			forall(build_hook(Target),true),
+    			pef_stop_recording
+    		),
     		E,
-    		(	thread_send_message(build_arbiter,msg(Target,error(E))),
+    		(	
+    			thread_send_message(build_arbiter,msg(Target,error(E))),
     			throw(E)
     		)
     	)    		

@@ -35,21 +35,13 @@ pdt_builder:invalidate_hook(ast(Tl)):-
 
 
 rebuild(Tl):-    
-    forget_ast(Tl),
+    %forget_ast(Tl),
     build_ast(Tl).
 
 /*
 forget_ast(TL):-
-    pef_ast_query([toplevel=TL,root=Root]),
-    !,
-    forget_subtree(Root),
-    pef_ast_retractall([toplevel=TL,root=Root]).
-forget_ast(_TL).
-*/
-
-forget_ast(TL):-
     pef_ast_cleanupall([toplevel=TL]).
-    
+  */  
 
 build_ast(Tl):-
     pef_reserve_id(pef_ast,Id),

@@ -21,6 +21,21 @@
 % If you are unsure, you should probably just enable this flag.
 '$option'(index_foreign_keyes).
 
+% Option "implicit_ids" (enabled by default).
+%
+% If enabled, an implicit attribute "id @index" will be added to 
+% each pef type that has no explicit id. Note that the <pef>_assert
+% predicates will automatically generate an identifier if it is 
+% not explicitly set.
+%  
+% The rational behind this is that refering to PEFs via their clause ref
+% is dangerous if that clause may have been removed. 
+% On the other hand there are several situations where we want to
+% explicitly reference individual weak PEFs. So I decided that 
+% ANY PEF should have a unique identifier. Just leave this enabled.
+'$option'(implicit_ids).
+
+
 
 :- op(550,xfy,@).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -365,6 +380,6 @@
 	pef_file(
 		id,
 		path @label
-	)
+	) @no_cleanup
 ).
 

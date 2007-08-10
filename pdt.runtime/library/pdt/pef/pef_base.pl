@@ -63,8 +63,8 @@ pef_stop_recording:-
 pef_clear_record(Term):-
     record_key(Term,Key),
     forall(
-    	recorded(Key,ClauseRef,RecordRef),
-    	(	erase(ClauseRef),
+    	recorded(Key,CleanupGoal,RecordRef),
+    	(	call(CleanupGoal),
     		erase(RecordRef)
     	)
     ).
@@ -95,7 +95,7 @@ define_assert_old(Template):-
     assert((Head:-Constructor,Getter,assert(Cx)),Ref),
     assert(pef_pred(Name,Ref)),
     export(Head).
-
+/*
 define_assert(Template):-
     functor(Template,Name,Arity),
     functor(Cx,Name,Arity),
@@ -123,7 +123,68 @@ define_assert(Template):-
     ),
     assert(pef_pred(Name,Ref)),
     export(Head).
+*/
+define_assert(Template):-
+    functor(Template,Name,Arity),
+    functor(Cx,Name,Arity),
+    atom_concat(Name,'_assert',HeadName),
+    functor(Head,HeadName,1),
+    arg(1,Head,List),
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+    create_id_check(Template,Cx,IdCheck),
+    create_index_asserts(Cx,Asserts,PefRef),
+    
+    (	'$metapef_type_tag'(Name,no_cleanup)
+    ->	AssertsRecord = Asserts
+    ;	create_record(Template,Cx,Record),
+    	AssertsRecord = (Asserts,Record)
+    ),
+    (	'$option'(hooks)
+    ->	(	find_id(Template,IdNum)
+    	->	arg(IdNum,Cx,Id)
+    	;	Id=PefRef
+    	),
+    	assert(
+    		(	Head:-
+    				Getter,
+    				IdCheck,
+    				forall(pef_before_assert_hook(Id,Name),true),
+    				AssertsRecord,
+    				forall(pef_after_assert_hook(Id,Name),true)
+    		),Ref)
+    ;   assert((Head:-Getter,IdCheck,AssertsRecord),Ref)
+    ),
+    assert(pef_pred(Name,Ref)),
+    export(Head).
 
+create_id_check(Template,Cx,IdCheck):-
+    find_id(Template,IdNum),
+    arg(IdNum,Cx,Id),
+    functor(Template,Name,_),
+    !,
+    IdCheck=
+		(	var(Id)
+		->	pef_reserve_id(Name,Id)
+		;	true
+		).
+create_id_check(_Template,_Cx,true).    
+
+create_record(Template,Cx,Record):-
+    find_id(Template,IdNum),
+    arg(IdNum,Cx,Id),
+    functor(Template,Name,_),
+    atom_concat(Name,'_retractall',RetractName),
+    RetractGoal=..[RetractName,[id=Id]],
+    !,
+    Record=
+		(	'$recording'(Key)
+		->	recordz(Key,RetractGoal)
+		;	true
+		).
+    
 
 create_index_asserts(Cx,Asserts):-
     create_index_asserts(Cx,Asserts,_).
@@ -434,7 +495,11 @@ process_indices(Name):-
 % a bar of bang.
 % @param Template should be a ground compound term like in pdt_define_context/1.
 
-define_pef(TypedTemplate):-
+define_pef(TypedTemplate0):-
+    (	'$option'(implicit_ids)
+    ->	ensure_has_id(TypedTemplate0,TypedTemplate)
+    ;	TypedTemplate=TypedTemplate0
+    ),
     strip_types(TypedTemplate,Template),
     functor(Template,Name,Arity),
     undefine_pef(Name),
@@ -454,6 +519,26 @@ define_pef(TypedTemplate):-
     define_recorded(Template),
     define_recorda(Template),
     define_recordz(Template).
+
+
+
+ensure_has_id(In,Out):-
+    strip_types(In,Stripped),
+    (	find_id(Stripped,_)
+    ->	Out=In
+    ;	add_id(In,Out)    	
+    ).
+
+add_id(In:Type,Out:Type):-
+    !,
+    add_id(In,Out).
+add_id(In @Tags,Out @Tags):-
+    !,
+    add_id(In,Out).
+add_id(In,Out):-
+	In =.. InX,
+    append(InX,[id @index],OutX),
+    Out =.. OutX.
 
 % remove type identifier from a template
 strip_types(T1:_,T2):-
@@ -729,17 +814,23 @@ create_cleanupall(Type):-
     
 
     
-	    
+	   
 postprocess_pefs:-
    process_meta_edges,
    process_inverse_meta_edges,
    process_meta_nodes,
    create_cleanup_preds.
-    
+
+%'$option'(implicit_ids).
+
+%:- define_pef(
+%	pef_program(
+%		id,
+%		file:pef_file
+%	)
+%).
 
     
-%:- define_pef(dummy(a)).
-   
 :- include(pef_definitions).
 
 
