@@ -185,6 +185,7 @@ public class JTUtils
 	 * @param srcProject
 	 * @param destProject
 	 * @throws CoreException
+	 * @throws IOException 
 	 */
 	// New by Mark Schmatz
 	public static void copyAllNeededFiles(IProject srcProject, IProject destProject) throws CoreException
@@ -237,6 +238,7 @@ public class JTUtils
 						//getCTPackagesAsCSV(getTmpCTList()) + ", " +
 						"$1";
 
+					
 					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
 					if( fah.getNotAdaptedPatterns().contains(pattern) )
 					{
@@ -275,9 +277,13 @@ public class JTUtils
 					Map regexPatternsWithNewStrings2 = new HashMap();
 					regexPatternsWithNewStrings2.put(srcProjectName, destProjectName);
 					regexPatternsWithNewStrings2.put(
-							"\\<classpathentry\\s+?including=\"(.*?)\"",
-							"<classpathentry including=\"" +
-							"$1" +
+							"\\<classpathentry\\s+?(.*?)including=\"(.*?)\"",
+							"<classpathentry kind=\"lib\" path=\"" +
+							JTransformerPlugin.getDefault().getLocation().replace('\\', '/')+
+							//FIXME: TR: Move this class or most parts of it to LogicAJ
+							"/../LogicAJ-NG/lib/ditrios-facade.jar\"/>" +
+							"<classpathentry $1 including=\"" +
+							"$2" +
 							"|**/" + JTConstants.CT_LIST_FILENAME + 
 							"|**/" + JTConstants.FQCN_LIST_FILENAME + 
 							"\""
@@ -309,6 +315,9 @@ public class JTUtils
 				pattern,
 				replaceString
 		);
+		regexPatternsWithNewStrings.put("Import-Package: ", 
+				"Import-Package: org.cs3.ditrios.facade.advice, org.cs3.ditrios.facade.cslogicaj, ");
+		
 		FileAdaptationHelper fah =
 			new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
 		copyFile(srcProject, destProject, fah.getFileName());

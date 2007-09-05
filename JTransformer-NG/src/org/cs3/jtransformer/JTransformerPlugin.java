@@ -123,12 +123,7 @@ public class JTransformerPlugin extends AbstractUIPlugin {
         String storeFile = getResourceLocator("").resolve("global_pef_store.pl").toString(); //$NON-NLS-1$ //$NON-NLS-2$
 		String fileSep = File.separator;
 		String location = "";
-		try {
-			location = getLocation();
-		} catch (IOException e) {
-			JTDebug.report(e);
-			JTDebug.error("Could not find plugin installation dir.");
-		}
+		location = getLocation();
         
         options = new Option[] { 
 //                new SimpleOption(
@@ -172,15 +167,20 @@ public class JTransformerPlugin extends AbstractUIPlugin {
 
     }
 
-	private String getLocation() throws IOException {
-		URL url = JTransformerPlugin.getDefault().getBundle().getEntry("/");
-		String location = null;
-		// replaced Platform.asLocalURL(url) with FileLocator.toFileURL(url) 
-		location = new File(FileLocator.toFileURL(url).getFile())
-				.getAbsolutePath();
-		if (location.charAt(location.length() - 1) == File.separatorChar)
-			location = location.substring(0, location.length() - 1);
-		return location;
+	public String getLocation()  {
+		try {
+			URL url = JTransformerPlugin.getDefault().getBundle().getEntry("/");
+			String location = null;
+			// replaced Platform.asLocalURL(url) with FileLocator.toFileURL(url) 
+				location = new File(FileLocator.toFileURL(url).getFile())
+						.getAbsolutePath();
+			if (location.charAt(location.length() - 1) == File.separatorChar)
+				location = location.substring(0, location.length() - 1);
+			return location;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
     
