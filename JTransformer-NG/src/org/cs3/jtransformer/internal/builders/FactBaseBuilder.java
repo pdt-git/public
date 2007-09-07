@@ -539,7 +539,7 @@ public class FactBaseBuilder {
                     return resource.getProject().hasNature(JTransformer.NATURE_ID);
                 }
                 if (resource.getType() == IResource.FOLDER) {
-                    return javaProject.isOnClasspath(resource);
+                    return true;//javaProject.isOnClasspath(resource);
                 }
                 if (resource.getType() == IResource.FILE) {
                     String fext = resource.getFileExtension();
@@ -595,7 +595,7 @@ public class FactBaseBuilder {
                  */
 
                 if (resource.getType() == IResource.FOLDER) {
-                    return javaProject.isOnClasspath(resource);
+                    return true;
                 }
                 if (resource.getType() == IResource.FILE) {
                     if (resource.getFileExtension() != null
