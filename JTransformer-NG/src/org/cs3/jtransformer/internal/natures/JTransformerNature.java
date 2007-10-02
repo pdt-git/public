@@ -206,6 +206,12 @@ public class JTransformerNature implements IProjectNature,
 									+ "Newly created source files however "
 									+ "will still be created in the specified output folder.",
 							Option.FLAG, "false"),
+							new SimpleOption(
+									JTransformer.PROP_REWRITE_PROJECT_FILES_WHEN_WEAVING,
+									"Rewrite .project .classpath and manifest on every weave",
+									"If this option is set, everytime you click the [a] button " +
+									".project .classpath and manifest are rebuild based on the original project's files.",
+									Option.FLAG, "true"),
 					new SimpleOption(
 							JTransformer.PROP_PEF_STORE_FILE,
 							"PEF store file",
@@ -213,7 +219,8 @@ public class JTransformerNature implements IProjectNature,
 							Option.FILE,
 							JTransformerPlugin.getDefault().getPreferenceValue(
 									JTransformer.PREF_DEFAULT_PEF_STORE_FILE,
-									null)),
+									null)
+									),
 
 			};
 		} catch (CoreException e) {
@@ -383,6 +390,9 @@ public class JTransformerNature implements IProjectNature,
 	JTransformerSubscription pifSubscription;
 
 	private boolean initializingPif = false;
+
+
+	private boolean reconfigureJTransformerProject = true;
 
 	private void pifKeysChanged() {
 //		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
@@ -694,6 +704,8 @@ public class JTransformerNature implements IProjectNature,
 //			if (s != null)
 //				s.dispose();
 //		}
+		if(reconfigureJTransformerProject){
+			reconfigureJTransformerProject = false;
 		try {
 			getPrologInterface().stop();
 			getPrologInterface().start();
@@ -703,6 +715,7 @@ public class JTransformerNature implements IProjectNature,
 					.getActiveShell(),
 					JTransformer.ERR_PROLOG_INTERFACE_EXCEPTION,
 					JTransformer.ERR_CONTEXT_NATURE_INIT, e);
+		}
 		}
 	}
 
@@ -724,8 +737,10 @@ public class JTransformerNature implements IProjectNature,
 		try {
 			JTransformerPlugin.getDefault().setPreferenceValue(getProject(),
 					id, value);
-			if (id.equals(JTransformer.PROLOG_RUNTIME_KEY)) {
+			if (id.equals(JTransformer.PROLOG_RUNTIME_KEY) &&
+				!JTransformerPlugin.getDefault().getPreferenceValue(getProject(), id, null).equals(value)) {
 				pifKeysChanged();
+				reconfigureJTransformerProject  = true;
 			}
 		} catch (CoreException e) {
 			JTDebug.report(e);
