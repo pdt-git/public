@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.jtransformer"
    name="JTransformer"
-   version="2.3.0.qualifier"
+   version="2.3.0.1"
    provider-name="http://roots.iai.uni-bonn.de"
    class="org.cs3.jtransformer.JTransformerPlugin">
 
@@ -147,6 +147,7 @@
     </page>
  </extension> 
       <extension-point id="projectlistener" name="JTransformer Project Listener" schema="schema/projectlistener.exsd"/>
+      <extension-point id="outputProjectCreation" name="Output Project Creation" schema="schema/outputProjectCreation.exsd"/>
  <extension
        point="org.eclipse.ui.actionSets">
     <actionSet

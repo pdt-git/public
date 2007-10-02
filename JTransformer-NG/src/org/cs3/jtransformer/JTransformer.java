@@ -199,6 +199,8 @@ public static final String PREF_DEBUG_LEVEL = "jtransformer.debug.level";
 
 public static final String SUBSCRIPTION_PREFIX = "JTransformerSubscription_";
 
+public static final String PROP_REWRITE_PROJECT_FILES_WHEN_WEAVING = "jtransformer.rewrite.project.files";
+
 /**
  * the idea is to keep the classloader from instantiating the resources plugin.
  * 

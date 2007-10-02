@@ -40,7 +40,7 @@ public class CreateOutdirUtils
 	{
 		IProject destProject = null;
 			String destProjectName = JTUtils.getOutputProjectName(srcProject);
-			destProject = ResourcesPlugin.getWorkspace().getRoot().getProject(destProjectName);
+			destProject = JTUtils.getOutputProject(srcProject);
 			if ( !destProject.exists() )
 			{
 				destProject = createProject(destProjectName);
@@ -52,7 +52,7 @@ public class CreateOutdirUtils
 			//IJavaProject destJavaProject = (IJavaProject) destProject.getNature(JavaCore.NATURE_ID);
 			if (!destProject.hasNature(JavaCore.NATURE_ID))
 			{
-				JTUtils.copyAllNeededFiles(srcProject, destProject);
+				JTUtils.copyAllNeededFiles(srcProject);
 		        destProject.refreshLocal(IResource.DEPTH_INFINITE, null);
 				addNature(destProject, JavaCore.NATURE_ID);
 	
@@ -85,7 +85,7 @@ public class CreateOutdirUtils
 	
 				IClasspathEntry[] newRaw = javaProject.getRawClasspath();
 				// copyAllNeededFiles by Mark Schmatz
-				JTUtils.copyAllNeededFiles(srcProject, destProject);
+				JTUtils.copyAllNeededFiles(srcProject);
 	
 				if( destProject.exists() && !destProject.isOpen())
 					destProject.open(null);

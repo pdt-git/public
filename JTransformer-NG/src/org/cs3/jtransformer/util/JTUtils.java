@@ -19,6 +19,7 @@ import java.util.Set;
 import org.cs3.jtransformer.JTDebug;
 import org.cs3.jtransformer.JTransformer;
 import org.cs3.jtransformer.JTransformerPlugin;
+import org.cs3.jtransformer.OutputProjectCreationContributor;
 import org.cs3.jtransformer.internal.astvisitor.Names;
 import org.cs3.jtransformer.internal.natures.JTransformerNature;
 import org.cs3.jtransformer.tests.FileAdaptationHelperTest;
@@ -37,10 +38,15 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.InvalidRegistryObjectException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -51,13 +57,12 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.internal.texteditor.quickdiff.compare.equivalence.Hash;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 /**
@@ -188,8 +193,9 @@ public class JTUtils
 	 * @throws IOException 
 	 */
 	// New by Mark Schmatz
-	public static void copyAllNeededFiles(IProject srcProject, IProject destProject) throws CoreException
+	public static void copyAllNeededFiles(IProject srcProject) throws CoreException
 	{
+		IProject destProject = JTUtils.getOutputProject(srcProject);
 		boolean isBundle = false;
 		
 		if( !srcProject.isOpen() )
@@ -205,7 +211,7 @@ public class JTUtils
 			/*
 			 * Check whether we have a OSGi bundle as source project...
 			 */
-			if( fileExists(srcProject, JTConstants.BUNDLE_MANIFEST_FILE) )
+			if( isBundle(srcProject) )
 				isBundle = true;
 
 			// ----
@@ -223,75 +229,23 @@ public class JTUtils
 			{
 				neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE,classPathReplacement));
 			}
-			neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_PROJECT_FILE, srcProjectName, destProjectName));
+			
+			Map projectFileReplacement = new HashMap();
+			projectFileReplacement.put(
+					"<nature>org.cs3.jtransformer.JTransformerNature</nature>",
+					""
+			);
 
-			/*
-			 * Do the following only if we have a bundle
-			 */
-			if( isBundle )
-			{
-				{
-					String pattern = "Export-Package:(.*)";
-					String replaceString =
-						"Export-Package: " +
-						JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-						//getCTPackagesAsCSV(getTmpCTList()) + ", " +
-						"$1";
+			neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_PROJECT_FILE, projectFileReplacement));
 
-					
-					FileAdaptationHelper fah = adaptManifestFile(srcProject, destProject, pattern, replaceString);
-					if( fah.getNotAdaptedPatterns().contains(pattern) )
-					{
-						/*
-						 * The manifest has no 'Export-Package:' line => add it...
-						 */
-
-						pattern = "^(.*)$";
-						replaceString =
-							"$1\n" +
-							"Export-Package: " +
-							JTConstants.RESOURCES_FILELISTS_PACKAGE + ", " +
-							//getCTPackagesAsCSV(getTmpCTList()) +
-							"\n\n";
-						adaptManifestFile(srcProject, destProject, pattern, replaceString);
-					}
-				}	
-
-				{
-					Map regexPatternsWithNewStrings = new HashMap();
-					regexPatternsWithNewStrings.put(srcProjectName, destProjectName);
-					regexPatternsWithNewStrings.put(
-							"pattern=\"(.*?)\"",
-							"pattern=\"" +
-							"$1" +
-							"|.*\\\\.pl" +
-							"|.*\\\\.aj" +
-							"|.*" + JTConstants.CT_LIST_FILENAME_WITHOUT_SUFFIX + "\\\\." + JTConstants.CT_LIST_SUFFIX +
-							"|.*" + JTConstants.FQCN_LIST_FILENAME_WITHOUT_SUFFIX + "\\\\." + JTConstants.FQCN_LIST_SUFFIX +
-							"\""
-					);
-					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.BUNDLE_PACK_FILE, regexPatternsWithNewStrings));
-				}	
-
-				{
-					Map regexPatternsWithNewStrings2 = new HashMap();
-					regexPatternsWithNewStrings2.put(srcProjectName, destProjectName);
-					regexPatternsWithNewStrings2.put(
-							"\\<classpathentry\\s+?(.*?)including=\"(.*?)\"",
-							"<classpathentry kind=\"lib\" path=\"" +
-							JTransformerPlugin.getDefault().getLocation().replace('\\', '/')+
-							//FIXME: TR: Move this class or most parts of it to LogicAJ
-							"/../LogicAJ-NG/lib/ditrios-facade.jar\"/>" +
-							"<classpathentry $1 including=\"" +
-							"$2" +
-							"|**/" + JTConstants.CT_LIST_FILENAME + 
-							"|**/" + JTConstants.FQCN_LIST_FILENAME + 
-							"\""
-					);
-					regexPatternsWithNewStrings2.putAll(classPathReplacement);
-					neededFileForCopying.add(new FileAdaptationHelper(JTConstants.DOT_CLASSPATH_FILE, regexPatternsWithNewStrings2));
-				}
+			
+			List<OutputProjectCreationContributor> contributors = loadExtensions("outputProjectCreation");
+			
+			for (OutputProjectCreationContributor contributor : contributors) {
+				neededFileForCopying.addAll(contributor.getFileAdaptionHelpers(srcProject, projectFileReplacement));
 			}
+//			neededFileForCopying.addAll(getFileAdaptionHelpers(srcProject, destProject,
+//					classPathReplacement));
 			
 			// ----
 			
@@ -307,23 +261,36 @@ public class JTUtils
 			}
 		}
 	}
-
-	private static FileAdaptationHelper adaptManifestFile(IProject srcProject, IProject destProject, String pattern, String replaceString) throws CoreException
-	{
-		Map regexPatternsWithNewStrings = new HashMap();
-		regexPatternsWithNewStrings.put(
-				pattern,
-				replaceString
-		);
-		regexPatternsWithNewStrings.put("Import-Package: ", 
-				"Import-Package: org.cs3.ditrios.facade.advice, org.cs3.ditrios.facade.cslogicaj, ");
-		
-		FileAdaptationHelper fah =
-			new FileAdaptationHelper(JTConstants.BUNDLE_MANIFEST_FILE, regexPatternsWithNewStrings, JTConstants.RESOURCES_FILELISTS_PACKAGE);
-		copyFile(srcProject, destProject, fah.getFileName());
-		adaptFile(destProject, fah, true);
-		return fah;
+	
+	public static boolean isBundle(IProject srcProject) {
+		return fileExists(srcProject, JTConstants.BUNDLE_MANIFEST_FILE);
 	}
+	
+	static public List<OutputProjectCreationContributor> loadExtensions(String id)
+    
+ {
+    IExtensionRegistry registry = Platform.getExtensionRegistry();
+    IExtensionPoint extensionPoint =
+       registry.getExtensionPoint(JTransformer.PLUGIN_ID + "." + id);
+       
+    IConfigurationElement[] extensions = registry
+	.getConfigurationElementsFor(JTransformer.PLUGIN_ID + "." + id);
+    List<OutputProjectCreationContributor> contributors = new ArrayList<OutputProjectCreationContributor>();
+    for(int i = 0;i < extensions.length;i++)
+    {
+    	try {
+			contributors.add((OutputProjectCreationContributor)
+					extensions[i].createExecutableExtension("class"));
+		} catch (InvalidRegistryObjectException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+    
+    }
+    return contributors;
+ }
+	
 	
 	/**
 	 * Returns <tt>true</tt> if the file for the given <tt>filename</tt> exists in
@@ -581,7 +548,7 @@ public class JTUtils
 	 * @throws CoreException
 	 */
 	// Modified by Mark Schmatz
-	private static void copyFile(IProject srcProject, IProject destProject, final String fileName) throws CoreException
+	public static void copyFile(IProject srcProject, IProject destProject, final String fileName) throws CoreException
 	{
 		IFile file = srcProject.getFile(new Path(fileName));
 		try {
@@ -613,7 +580,7 @@ public class JTUtils
 	 * @throws CoreException
 	 */
 	// New by Mark Schmatz
-	private static void adaptFile(IProject destProject, FileAdaptationHelper cfh, boolean deleteInnerEmptyLines) throws CoreException
+	public static void adaptFile(IProject destProject, FileAdaptationHelper cfh, boolean deleteInnerEmptyLines) throws CoreException
 	{
 		IFile file = destProject.getFile(new Path(cfh.getFileName()));
 		if( file.exists() )
@@ -1057,4 +1024,5 @@ public class JTUtils
 		return getPersistentFactbaseFileForPif(key).toFile().exists();
 	}
 
+	
 }
