@@ -26,7 +26,7 @@
 pdt_resolve_predicate(CxFile,CxModule,Name,Arity,PredId):-
     
 
-%%
+%%     
 % pdt_predicate_contribution(+PredId,-File,-Start,-End).
 % find source code contributing to a given predicate.
 %
