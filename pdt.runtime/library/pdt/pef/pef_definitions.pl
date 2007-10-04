@@ -383,3 +383,16 @@
 	) @no_cleanup
 ).
 
+%%
+% The relation between formulars and their maximal sub-formulars
+%
+% It is assumed that subformula is a variable contained in formula.
+:- define_pef(
+	pef_msf(
+		formula,
+		context,
+		program :pef_program,
+		sub_formula,
+		sub_context
+	)
+).
