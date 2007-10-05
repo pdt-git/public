@@ -825,8 +825,12 @@ public class FactBaseBuilder {
                 unresolved = getUnresolvedTypes(session, failed);
             }
         } finally {
-            session.dispose();
-            asyncSession.dispose();
+        	if(session != null) {
+        		session.dispose();
+        	}
+        	if(asyncSession != null) {
+        		asyncSession.dispose();
+        	}
             monitor.done();
             JTDebug.debug("exit loadExternalFacts");
         }
