@@ -534,6 +534,12 @@ fullQualifiedName_ri(Id, Fqn) :-
     nonvar(Id),
     ri_globalIds(Id,Fqn),
     !.
+    
+fullQualifiedName_ri(Id, Fqn) :-
+    nonvar(Fqn),
+    Fqn = anonymous(Id,_),    
+    !. 
+    
 %    classDefT(_id, null, Fqn,_),
 %    !.
 
@@ -573,6 +579,21 @@ fullQualifiedName(_id, Fqn) :-
     classDefT(_id, null, Fqn,_),
     !.
 
+fullQualifiedName(_id, anonymous(_id,Fqn)) :-
+    nonvar(_id),
+	anonymous(_id),
+    classDefT(_id, Newclass, _,_),
+	newClassT(Newclass,_,_,_,_,Ident,_,_),
+	identT(Ident,_,_,_,EnclClass),
+	fullQualifiedName(EnclClass,Fqn),
+	!.
+
+    
+fullQualifiedName(Id, Fqn) :-
+    nonvar(Fqn),
+    Fqn = anonymous(Id,_),    
+    !. 
+    
 fullQualifiedName(_id, _Fqn) :-
     nonvar(_id),
     classDefT(_id, _parent, _name,_),
