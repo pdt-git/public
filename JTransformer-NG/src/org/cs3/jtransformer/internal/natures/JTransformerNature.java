@@ -291,6 +291,7 @@ public class JTransformerNature implements IProjectNature,
 		removeSubscriptionIfLastProjectAssociatedToKey();
 		pifSubscription.pefInitializationDone();
 		removeNatureFromRegistry();
+		
 
 	}
 
@@ -301,6 +302,9 @@ public class JTransformerNature implements IProjectNature,
 			   projects.size() == 1 && 
 			   ((IProject)projects.get(0)).getName().equals(project.getName()))
 			{
+				if(pif != null) {
+					pif.removeLifeCycleHook(pifSubscription.getId());
+				}
 				PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
 				reg.removeSubscription(pifSubscription);
