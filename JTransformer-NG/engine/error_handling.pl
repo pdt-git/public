@@ -24,7 +24,18 @@ add_error_term_based_on_t_i(AbbaId, Msg) :-
     abba:node(AbbaId,_,_),
     abba:property(AbbaId,position(Start,Length)),
     abba:get_defining_file(AbbaId,File),
-	error_handling_add_error_term(sourceLocation(File,Start,Length),fail, Msg).
+	error_handling_add_error_term(sourceLocation(File,Start,Length),fail, Msg),
+	!.
+
+add_error_term_based_on_t_i(AbbaId, Msg) :-
+    abba:node(AbbaId,_,Name),
+    not(abba:property(AbbaId,position(Start,Length))),
+    sformat(Msg2,'cannot find position of the (abba) element with id ~w and name: ~w',[AbbaId,Name]),
+    throw(abba_property_not_found(Msg,Msg2)).
+
+add_error_term_based_on_t_i(AbbaId, Msg) :-
+    sformat(Msg2,'cannot find the (abba) element with id ~w and name: ~w',[AbbaId,Name]),
+    throw(abba_node_not_found(Msg,Msg2)).
     
 /**
  * abba:get_defining_file(AbbaId,File)
