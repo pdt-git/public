@@ -13,6 +13,28 @@ enclMethod(_id, _Encl) :-
     enclMethod(_encl, _Encl),
     !.
 enclMethod(_id, 'null').
+   
+/**
+ *  enclPackage(?TreeID, ?PackageID)
+ * 
+ * Unifies PackageID with the 
+ * enclosing Package of the tree Id.
+ * Fails if Id is a package id.
+ */
+
+enclPackage(TreeId, _) :-
+    var(TreeId),
+    throw(illegal_argument_exception('first argument in enclPackage must be bound')). 
+
+enclPackage(TreeId, TreeId) :-
+	packageT(TreeId,_),
+	!.
+	    
+enclPackage(TreeId, PackageID) :-
+    enclClass(TreeId,ClassID),
+    classDefT(ClassID,EnclID,_,_),
+    enclPackage(EnclID,PackageID).
+    
     
 /**
   enclClass(?Id, ?ClassId)
