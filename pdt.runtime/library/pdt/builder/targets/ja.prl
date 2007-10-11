@@ -1,0 +1,54 @@
+bla.
+
+node(F-T,Term,node(Type,F,T)):-
+    (	atom(Term)
+    ->	Type=atom(Term)
+    ;	integer(Term)
+    ->	Type=integer(Term)
+    ;	rational(Term)
+    ->	Type=rational(Term)
+    ;	float(Term)
+    ->  Type=float(Term)
+    ;   string(Term)
+    ->	Type=string(Term)
+    ;	var(Term)
+    ->	Type=var(Term)
+    ;	Term==[]
+    ->	Type=[]	
+    ;   Type=unknown(Term)
+    ).
+node(string_position(From,To),_,node(string,From,To)).
+node(brace_term_position(From,To),_,node(brace_term,From,To)).
+node(list_position(From, To, [], none),_,node([],From,To)).
+node(list_position(_, _, Elms, _),Term,Node):-
+	element_node(Elms,Term,Node).
+node(list_position(_, _, _, Tail),Term,Node):-
+	last(Term,Last),	
+	node(Tail,Last,Node).
+node(term_position(_,_, FFrom, FTo, SubPos),Term,Node):-
+	 Term=..[Name|Args],	 
+	 term_node(Name,FFrom,FTo,SubPos,Args,Node).
+	 
+element_node([Position|Positions],[Term|Terms],Node):-
+	(	node(Position,Term,Node)
+	;	element_node(Positions,Terms,Node)
+	).
+
+term_node(Functor,FFrom,FTo,[Position|Positions],[Arg|Args],OutNode):-
+	top_position(Position,AFrom,_),	
+	(	FFrom < AFrom
+	->	(	OutNode=node(functor(Functor),FFrom,FTo)
+		;	node(Position,Arg,OutNode)
+		;	element_node(Positions,Args,OutNode)
+		)
+	;	(	node(Position,Arg,OutNode)
+		;	term_node(Functor,FFrom,FTo,Positions,Args,OutNode)
+		)
+	).
+	
+
+top_position(From-To,From,To).
+top_position(string_position(From,To),From,To).
+top_position(brace_term_position(From,To,_),From,To).
+top_position(list_position(From,To,_,_),From,To).	
+top_position(term_position(From,To,_,_,_),From,To).		

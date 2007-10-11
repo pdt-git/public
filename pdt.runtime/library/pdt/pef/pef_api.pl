@@ -23,10 +23,16 @@
 	first_clause/3,
 	first_clause/4,
 	file_depends_star/2,
-	related_file/2 
+	related_file/2, 
+	ast_match/3,
+	ast_equivalent/2,
+	ast_head_body/4,
+	ast_strip_module/3,
+	has_tail/2
 	]).
 
 :- use_module(library('pef/pef_base')).
+:- use_module(library('org/cs3/pdt/util/pdt_util')).
 
 %%
 % predicate_listing(+PredID)
@@ -269,21 +275,24 @@ file_depends(A,B):-
 % Subst is an open list of <Id> = <value> pairs. If the matched AST is more general
 % then the pattern, this list contains the bindings for the variables occuring in AST.
 ast_match('$var'([Head|Tail]),AST,_):-
+    !,
     ast_equivalent(Head,AST),
     (	AST==Head
     ->  true
     ;	has_tail([AST|_],Tail)
     ).
 ast_match('$var'('$var'(Pattern)),AST,Subst):-
+    !,
     ast_match_X('$var'(Pattern),AST,Subst).
 ast_match('$var'(AST:Var),AST,_):-
+    !,
     pef_variable_occurance_query([id=AST,variable=Var]).
 ast_match(Pattern,AST,Subst):-
     ast_match_X(Pattern,AST,Subst).
 
 %pattern's principle functor is nonvar and unescaped.
 ast_match_X(Pattern,AST,Subst):-   
-    pef_variable_occurance([id=AST,variable=Var]),
+    pef_variable_occurance_query([id=AST,variable=Var]),
     !,
     memberchk(Var=PatternX,Subst),
     PatternX=Pattern.    
@@ -301,9 +310,6 @@ ast_match_args(I,N,Pattern,AST,Subst):-
 	J is I +1,
 	ast_match_args(J,N,Pattern,AST,Subst).
     
-has_tail(Tail,Tail):-!.
-has_tail(Tail,[_|Mid]):-
-	has_tail(Tail,Mid).
 	
 %% ast_equivalent(+A,+B).
 % succeeds if A and B point to equivalent ASTs.
@@ -337,3 +343,35 @@ related_file(A,B):-
     pef_program_file_query([file=AID,program=PID]),
     pef_program_file_query([program=PID,file=BID]),
     get_pef_file(B,BID).
+    
+    
+ast_head_body(Ast,Module,Head,Body):-
+	ast_strip_module(Ast,OuterModule,StrippedAst),
+	(	ast_match( (H:-B) ,StrippedAst, [])
+	->	H='$var'([HH|_]),
+		B='$var'([Body|_]),
+		ast_strip_module(HH,InnerModule,Head)
+	;	ast_match( (:-B) ,StrippedAst, [])
+	->	Head=[],
+		InnerModule=[],
+		B='$var'([Body|_])
+	;	Head=StrippedAst,
+		Body=[],
+		InnerModule=[]
+	),
+	(	InnerModule==[]
+	->	Module=OuterModule
+	;	Module=InnerModule
+	).
+
+ast_strip_module(Ast,Module,Stripped):-
+	ast_match( (M:T) ,Ast, []),
+	!,
+	T='$var'([TT|_]),
+	M='$var'([OuterModule|_]),
+	ast_strip_module(TT,InnerModule,Stripped),
+	(	InnerModule==[]
+	->	Module=OuterModule
+	;	Module=InnerModule
+	).
+ast_strip_module(Ast,[],Ast).	
