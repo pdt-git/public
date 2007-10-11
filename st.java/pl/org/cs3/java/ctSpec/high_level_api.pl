@@ -464,12 +464,21 @@ inner(_id) :-
     class(_parent,_,_).
 
 cond(local(_id)).
+
+unqualified(Id):-
+    local(Id).
+unqualified(Id):-
+    anonymous(Id).
+    
 local(_id) :-
     class(_id,_parent,_),
-    (
-      blockT(_parent,_,_,_);
-      forLoopT(_parent,_,_,_,_,_,_)
-    ).
+%    (
+      execT(_parent,_,_,_)
+% can not reproduce this case:
+%      ;
+%      forLoopT(_parent,_,_,_,_,_,_)
+%    )
+.
 
 cond(anonymous(_id)).
 anonymous(_id)  :-
@@ -514,9 +523,10 @@ abstraction(fullQualifiedName(_id, _Fqn)).
  /**
   * fullQualifiedName_ri(?Id, ?Fqn)
   *
+  * reverse index for fullQualifiedName. Automatically updated by JTransformer
+  * on add/delete operations.
   * at least one of the arguments must be bound.
   */
-
 fullQualifiedName_ri(Id, Fqn) :-
 	var(Id),
 	var(Fqn),
@@ -534,14 +544,20 @@ fullQualifiedName_ri(Id, Fqn) :-
     nonvar(Id),
     ri_globalIds(Id,Fqn),
     !.
+
+fullQualifiedName_ri(Id, Fqn) :-
+    nonvar(Id),
+    unqualified(Id),
+    enclClass(Id,EnclClassId),
+    fullQualifiedName(EnclClassId,EnclFqn),
+    Fqn = unqualified(Id,EnclFqn),    
+    !.
     
 fullQualifiedName_ri(Id, Fqn) :-
     nonvar(Fqn),
-    Fqn = anonymous(Id,_),    
+    Fqn = unqualified(Id,_),    
     !. 
     
-%    classDefT(_id, null, Fqn,_),
-%    !.
 
 %fullQualifiedName_ri(Id, Fqn) :-
 %    debugme,
@@ -552,9 +568,15 @@ fullQualifiedName_ri(Id, Fqn) :-
  /**
   * fullQualifiedName(?Id, ?Fqn)
   *
+  *
+  * Binds ?Fqn to the fullQualified Name of?Id. 
+  * If the class is a local or anonymous class
+  * ?Fqn is bound to unqualified(<Id of Sub>, <FQN Super>)
+  *
+  * TODO: Nested local classes are NOT supported here!
+  *
   * at least one of the arguments must be bound.
   */
-  
 fullQualifiedName(Id, Fqn) :-
 	var(Id),
 	var(Fqn),
@@ -579,19 +601,27 @@ fullQualifiedName(_id, Fqn) :-
     classDefT(_id, null, Fqn,_),
     !.
 
-fullQualifiedName(_id, anonymous(_id,Fqn)) :-
+fullQualifiedName(_id, unqualified(_id,Fqn)) :-
     nonvar(_id),
-	anonymous(_id),
+%	anonymous(_id),
     classDefT(_id, Newclass, _,_),
 	newClassT(Newclass,_,_,_,_,Ident,_,_),
 	identT(Ident,_,_,_,EnclClass),
 	fullQualifiedName(EnclClass,Fqn),
 	!.
 
+fullQualifiedName(_id, unqualified(_id,Fqn)) :-
+    nonvar(_id),
+%	local(_id),
+    classDefT(_id, Newclass, _,_),
+	execT(Newclass,_,Encl,_),
+	enclClass(Encl,EnclClass),
+	fullQualifiedName(EnclClass,Fqn),
+	!.
     
 fullQualifiedName(Id, Fqn) :-
     nonvar(Fqn),
-    Fqn = anonymous(Id,_),    
+    Fqn = unqualified(Id,_),    
     !. 
     
 fullQualifiedName(_id, _Fqn) :-
