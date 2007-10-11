@@ -39,7 +39,8 @@ My approach is different from the others I examined so far in two things:
 		context,
 		subformula,
 		subcontext,
-		bound
+		bound,
+		id %id of the fact this rule is based on, or 'builtin'
 	)
 ).
 
@@ -63,7 +64,10 @@ My approach is different from the others I examined so far in two things:
 		initial_context,
 		
 		% The boundary that is currently exanded. (Either 'upper' or 'lower')
-		bound
+		bound,
+		
+		% the id of the last matched rule
+		last_rule
 	)
 ).
     
@@ -86,15 +90,20 @@ find_literal(Goal,Cx,Rule):-
 	% We will add a new msf rule.
 	make_rule(Var,Cx,[VarId=Var|_],Rule).
 find_literal(Goal,Cx0,Literal):-        
-	
+	cx_bound(Cx0,Bound),	    	
 	(	match(Goal,Cx0,Subst,SubGoal,Cx1)
-	*-> % soft cut, since we DO want backtracking in the condition part.
-	    % actually it may even make sense to have no cut at all. In this case
-	    % all meta-calls would be reported as calls aswell. 
-	    find_literal__match_found(Subst,SubGoal,Cx1,Literal)
+	*-> % Soft cut, since we DO want backtracking in the condition part.
+	    % If there is a match *at all*, and if it is due to a user-defined 
+	    % meta-predicate, we have 
+	    (	cx_last_rule(Cx1,Id),
+	    	Id \== builtin,
+	    	Literal=meta_call(Goal,Bound)
+	    ;	find_literal__match_found(Subst,SubGoal,Cx1,Literal)
+	    )
+	    	    
 	;	% if there is no match, then Goal is an atomic formular
 	    % i.e. a literal.
-	    Literal=literal(Goal)
+		Literal=literal(Goal,Bound)
 	).
 	
 find_literal__match_found(Subst,SubGoal,Cx,Rule):-    
@@ -161,7 +170,8 @@ match(Goal,Cx0,Subst,Subformula,CxOut):-
 		Bound2=Bound1,
 		memberchk(ModTerm,ModBindings),
 		apply(ModTerm,_,Subcontext)		
-	;	true %subcontext is a new variable.
+	;	Subcontext=Subcontext2,
+		Bound2=upper
 	),
 	cx_set(Cx1,[bound=Bound2,context=Subcontext],CxOut).
 
@@ -174,7 +184,8 @@ find_rule(Goal,Cx0,Rule,Cx1):-
 						context=Context,
     					subformula=Subformula2,
     					subcontext=Subcontext,
-    					bound=Bound
+    					bound=Bound,
+    					id=RuleId
     	    		]
     ),
     functor(Pattern,Name,Arity),
@@ -191,7 +202,7 @@ find_rule(Goal,Cx0,Rule,Cx1):-
     						])
     	
     ;	call(Rule) % FIXME: this my ad hoc way to specify builtins. A hack, sorry.
-    *-> Cx1=Cx0
+    *-> cx_set_last_rule(Cx0,RuleId,Cx1)
     ;	throw(unresolved_predicate_reference(Goal,Cx0))
     ).	    	
 
@@ -203,7 +214,8 @@ find_rule(Program,Name,Arity,Context, Bound0, Rule,Bound1):-
 						context=Context,
     					subformula=Subformula2,
     					subcontext=Subcontext,
-    					bound=Bound
+    					bound=Bound,
+    					id=Id
     	    		]
     ),
     functor(Pattern,Name,Arity),
@@ -214,7 +226,8 @@ find_rule(Program,Name,Arity,Context, Bound0, Rule,Bound1):-
     							context=Context,
     							subformula=Subformula2,
     							subcontext=Subcontext,
-    							bound=Bound					
+    							bound=Bound,
+    							id=Id					
     						])
     	
     ;	call(Rule) % FIXME: this my ad hoc way to specify builtins. A hack, sorry.
@@ -304,40 +317,40 @@ msf(Program,Context,Formula,Bound0,Subcontext,Subformula,BoundOut):-
 	;	BoundOut=Bound1
 	).
 
-rule( (A , _),	M, A, M,lower).
-rule( (_ , A),	M, A, M,lower).
-rule( (A ; _),	M, A, M,lower).
-rule( (_ ; A),	M, A, M,lower).
-rule( (A | _),	M, A, M,lower).
-rule( (_ | A),	M, A, M,lower).
-rule( (A -> _),	M, A, M,lower).
-rule( (_ -> A),	M, A, M,lower).
-rule( ( \+ A ),	M, A, M,lower).
-rule( ( call(A) ),	M, A, M,lower).
-rule( ( not(A) ),	M, A, M,lower).
-rule( ( once(A) ),	M, A, M,lower).
-rule( ( ignore(A) ),	M, A, M,lower).
-rule( ( call_with_depth_limit(A,_,_) ),	M, A, M,lower).
-rule( ( call_cleanup(A,_,_) ),	M, A, M,lower).
-rule( ( call_cleanup(_,_,A) ),	M, A, M,lower).
-rule( ( call_cleanup(A,_) ),	M, A, M,lower).
-rule( ( call_cleanup(_,A) ),	M, A, M,lower).
-rule( ( setup_and_call_cleanup(A,_,_) ),	M, A, M,lower).
-rule( ( setup_and_call_cleanup(_,A,_) ),	M, A, M,lower).
-rule( ( setup_and_call_cleanup(_,_,A) ),	M, A, M,lower).
-rule( ( catch(A,_,_) ),	M, A, M,lower).
-rule( ( catch(_,_,A) ),	M, A, M,lower).
-rule( (A *-> _),	M, A, M,lower).
-rule( (_ *-> A),	M, A, M,lower).
-rule( (M : A),	_, A, M,lower).
-rule( forall(A,_),	M, A, M,lower).
-rule( forall(_,A),	M, A, M,lower).
-rule( findall(_,A,_),	M, A, M,lower).
-rule( findall(_,A,_,_),	M, A, M,lower).
-rule( setof(_,A,_),	M, A, M,lower).
-rule( bagof(_,A,_),	M, A, M,lower).
+rule( (A , _),	M, A, M,lower,builtin).
+rule( (_ , A),	M, A, M,lower,builtin).
+rule( (A ; _),	M, A, M,lower,builtin).
+rule( (_ ; A),	M, A, M,lower,builtin).
+rule( (A | _),	M, A, M,lower,builtin).
+rule( (_ | A),	M, A, M,lower,builtin).
+rule( (A -> _),	M, A, M,lower,builtin).
+rule( (_ -> A),	M, A, M,lower,builtin).
+rule( ( \+ A ),	M, A, M,lower,builtin).
+rule( ( call(A) ),	M, A, M,lower,builtin).
+rule( ( not(A) ),	M, A, M,lower,builtin).
+rule( ( once(A) ),	M, A, M,lower,builtin).
+rule( ( ignore(A) ),	M, A, M,lower,builtin).
+rule( ( call_with_depth_limit(A,_,_) ),	M, A, M,lower,builtin).
+rule( ( call_cleanup(A,_,_) ),	M, A, M,lower,builtin).
+rule( ( call_cleanup(_,_,A) ),	M, A, M,lower,builtin).
+rule( ( call_cleanup(A,_) ),	M, A, M,lower,builtin).
+rule( ( call_cleanup(_,A) ),	M, A, M,lower,builtin).
+rule( ( setup_and_call_cleanup(A,_,_) ),	M, A, M,lower,builtin).
+rule( ( setup_and_call_cleanup(_,A,_) ),	M, A, M,lower,builtin).
+rule( ( setup_and_call_cleanup(_,_,A) ),	M, A, M,lower,builtin).
+rule( ( catch(A,_,_) ),	M, A, M,lower,builtin).
+rule( ( catch(_,_,A) ),	M, A, M,lower,builtin).
+rule( (A *-> _),	M, A, M,lower,builtin).
+rule( (_ *-> A),	M, A, M,lower,builtin).
+rule( (M : A),	_, A, M,lower,builtin).
+rule( forall(A,_),	M, A, M,lower,builtin).
+rule( forall(_,A),	M, A, M,lower,builtin).
+rule( findall(_,A,_),	M, A, M,lower,builtin).
+rule( findall(_,A,_,_),	M, A, M,lower,builtin).
+rule( setof(_,A,_),	M, A, M,lower,builtin).
+rule( bagof(_,A,_),	M, A, M,lower,builtin).
 
-rule( test(M+A),	_, A, M,lower).
+rule( test(M+A),	_, A, M,lower,no_id_0815).
 
 
 test_find_literals(Tl,Prog,Lit):-
