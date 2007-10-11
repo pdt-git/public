@@ -54,7 +54,8 @@
 	pdt_count/2,
 	pdt_unique/2,
 	pdt_hidden_path/1,
-	pdt_first/2	
+	pdt_first/2,	
+	has_tail/2
 ]).
 
 :- use_module(library('/org/cs3/pdt/util/pdt_preferences')).
@@ -87,6 +88,10 @@ pdt_call_cleanup(_,Cleanup):-
     Cleanup,
     fail.
 
+
+has_tail(Tail,Tail):-!.
+has_tail(Tail,[_|Mid]):-
+	has_tail(Tail,Mid).
 
 
 
