@@ -476,3 +476,87 @@ types_fq([Expr|Exprs], [FQN|FQNs]):-
     getType_fq(Expr,FQN),
     types_fq(Exprs, FQNs).
    
+/**
+ * subtype_fq(Sub, Super)
+ * 
+ * implements the subtype_laj_pointcut(Subtype,SuperType).
+ */
+subtype_fq(Sub, Super):-
+    nonvar(Sub),
+    nonvar(Super),
+    !,
+    map_type_term(type(TypeTermKind,SubId,Arity),Sub),
+    map_type_term(type(TypeTermKind,SuperId,Arity),Super),
+    subtype(SubId,SuperId).
+ 
+subtype_fq(Sub, Sup):-
+    direct_subtype_fq(Sub,Sup).
+
+subtype_fq(Sub, Sub).
+subtype_fq(Sub, Super) :-
+    java_fq(extendsT(Sub,Subsuper)),
+    subtype_fq(Subsuper, Super).
+subtype_fq(Sub, Super) :-
+    java_fq(implementsT(Sub,Subsuper)),
+    subtype_fq(Subsuper, Super).
+    
+
+  
+/**
+ * direct_subtype_fq(Sub, Super)
+ * 
+ * Binds Sub to the fullQualified Name of the direct subtypes
+ * Super. If these classes are local or anonymous classes
+ * Sub is bound to unqualified(<Id of Sub>, <FQN Super>)
+ *
+ * TODO: Nested local classes are NOT supported here! 
+ *
+ * implements the subtype_laj_pointcut(Subtype,SuperType).
+ */
+
+direct_subtype_fq(Class,Super):-
+    java_fq(extendsT(Class,Super)).
+direct_subtype_fq(Class,Super):-
+    java_fq(implementsT(Class,Super)).
+
+direct_subtype_fq(Sub, Sup):-
+    nonvar(Sub),
+    Sub = unqualified(_Id,Sup). 
+
+direct_subtype_fq(Sub, Sup):-
+    var(Sub),
+	nonvar(Sup),
+    fullQualifiedName(SupId, Sup),
+	identT(Ident,_,_,_,SupId),
+	newClassT(Newclass,_,_,_,_,Ident,_,_),
+    classDefT(SubId, Newclass, _,_),
+    Sub = unqualified(SubId, Sup).
+
+direct_subtype_fq(Sub, Sup):-
+    var(Sub),
+	nonvar(Sup),
+    fullQualifiedName(SupId, Sup),
+    (
+     extendsT(SubId,SupId);
+     implementsT(SubId,SupId)
+    ),
+    local(SubId),
+    Sub = unqualified(SubId, Sup).
+
+
+direct_subtype_fq(Sub, Sup):-
+    direct_basic_subtype(Sub, Sup).
+
+
+
+/*
+direct_basic_subtype_fq('void','void').
+direct_basic_subtype_fq('int','int').
+direct_basic_subtype_fq('float','float').
+direct_basic_subtype_fq('double','double').
+direct_basic_subtype_fq('byte','byte').
+direct_basic_subtype_fq('char','char').
+direct_basic_subtype_fq('short','short').
+direct_basic_subtype_fq('long','long').
+direct_basic_subtype_fq('boolean','boolean').
+*/
