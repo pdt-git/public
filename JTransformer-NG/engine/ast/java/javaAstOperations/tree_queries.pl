@@ -728,15 +728,18 @@ types([Expr|Exprs], [Type|Types]):-
  */
    
 subtype(_sub, _sub).
-subtype(_sub, _super) :-
-    extendsT(_sub,_super).
-subtype(_sub, _super) :-
-    implementsT(_sub,_super).
+%subtype(_sub, _super) :-
+%    extendsT(_sub,_super).
+%subtype(_sub, _super) :-
+%    implementsT(_sub,_super).
 subtype(_sub, _super) :-
     extendsT(_sub,_subsuper),
     subtype(_subsuper, _super).
 subtype(_sub, _super) :-
     implementsT(_sub,_subsuper),
+    subtype(_subsuper, _super).
+subtype(_sub, _super) :-
+    direct_basic_subtype(_sub,_subsuper),
     subtype(_subsuper, _super).
 subtype(Var, _):-
     nonvar(Var),
