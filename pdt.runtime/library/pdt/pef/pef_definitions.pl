@@ -389,12 +389,20 @@
 % It is assumed that subformula is a variable contained in formula.
 :- define_pef(
 	pef_msf_rule(
-		predicate,
+		predicate :pef_predicate,
 		pattern,
 		context,
 		program :pef_program,
 		subformula,
 		subcontext,
 		bound
+	)
+).
+
+:- define_pef(
+	pef_call(
+		predicate :pef_predicate,
+		goal :ast_node,
+		cx
 	)
 ).
