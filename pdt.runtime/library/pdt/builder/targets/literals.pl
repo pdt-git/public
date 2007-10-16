@@ -406,30 +406,14 @@ fp_init_todo(Cx,Goal):-
     cx_bound(Cx,lower).
 
 
-fp_init_todo_test(Cx,Goal):-
-    get_pef_file(library('pdt/builder/targets/literals-test_input.pl'),FID),
-    pef_clause_query([predicate=Pred,toplevel=Tl]),
-    pef_toplevel_query([id=Tl,file=FID]),
-    predicate_owner(Pred,Prog),
-	(	pef_predicate_property_definition_query([predicate=Pred,property=module_transparent])
-    ->	true
-    ;	pef_predicate_query([id=Pred,module=MID]),
-    	module_name(MID,Context)
-    ),
-    pef_ast_query([toplevel=Tl,root=Root]),
-    ast_head_body(Root,_,Head,Goal),	
-    cx_new(Cx),
-	cx_program(Cx,Prog),
-	cx_predicate(Cx,Pred),
-	cx_initial_context(Cx,_),
-	cx_context(Cx,Context),
-    cx_head(Cx,Head),
-    cx_bound(Cx,lower).
 
     
 fp_init_todos:-
-    forall(fp_init_todo_test(Cx,Goal),recordz(fp_todo,todo(Cx,Goal))).
+    forall(fp_init_todo(Cx,Goal),recordz(fp_todo,todo(Cx,Goal))).
+
     
+%fp_run(File):-
+%	pdt_with_targets([interprete(File),)
 fp_run:-
     fp_init_todos,
 	forall(
@@ -468,16 +452,16 @@ fp_process_result(meta_call(Cx,Goal)):-
 
 	/*
 	-----------
-	Initialisiere TODO = alle Prädikate im Programm
+	Initialisiere TODO = alle Prï¿½dikate im Programm
 	
 	while TODO nicht leer:
-	  für jedes Predikat in TODO,
-  	    - binde gefundene literale an aufgerufene Prädikate 
+	  fï¿½r jedes Predikat in TODO,
+  	    - binde gefundene literale an aufgerufene Prï¿½dikate 
 	    - sammele neue MSF-Regeln
 	  Lege neue Regeln an.
-	  Ersetze TODO <- alle Prädikate, die in neuen Regeln auftauchen.
+	  Ersetze TODO <- alle Prï¿½dikate, die in neuen Regeln auftauchen.
 	------------
 	
 	Fragen: 
-	 - kann ich beide Phasen zusammenfassen? (würde Algo vereinfachen)
+	 - kann ich beide Phasen zusammenfassen? (wï¿½rde Algo vereinfachen)
 	*/	
