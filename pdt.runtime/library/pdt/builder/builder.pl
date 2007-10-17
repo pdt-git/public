@@ -16,6 +16,7 @@
  
 :- use_module(library(pif_observe2)).
 :- use_module(library('pef/pef_base')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 
 /* hooks */
 :- dynamic 
@@ -33,8 +34,15 @@
 	delete_hook/1,
 	target_group/2.
 
-:- dynamic '$has_lock'/1.
-:- thread_local '$has_lock'/1.
+/* these are only accessed by client threads
+'$has_lock'(Target) 
+  remember which locks are hold by the calling thread.
+'$building'(Target) 
+  keep track of the targets beeing build by the calling thread.
+  This one is managed as a stack, first fact beeing the stack's top.  
+ */
+:- dynamic '$has_lock'/1,'$building'/1.
+:- thread_local '$has_lock'/1,'$building'/1.
 
 /* associate state with targets */
 :- dynamic target_state/2.
@@ -48,6 +56,89 @@
       debug(Topic,Msg2,[H,M,S|Args]).
 
 :- module_transparent pdt_with_targets/2, pdt_with_targets/1.
+
+
+:- pdt_define_context(
+	state(		
+		% Activity: idle - there are no locks 
+		%		or reading - there is at least one read lock 
+		activity,
+		
+		% Status: available(TimeStamp) - the target is up to date, Timestamp is the build time
+		%		  outdated - the target is outdated
+		%		  pending(Thread) - the target is beeing rebuild by Thread
+		status,
+		
+		% Locks: A list of threads that were granted a read lock on this target
+		locks,
+		
+		% pre: A list of targets depending on this target.
+		pre,
+		
+		% post: A list of targets this target depends on.  
+		post,
+		
+		% Waits: A list of threads that are waiting for the target to become available.
+		wait
+	)
+).
+
+/*
+some notes on dependencies 
+
+invariants:
+If a target is up to date, all the targets it depends are known and up to date.
+If a target is read-locked, so are all its dependendcies.
+If a target depends on any other target, it is up to date.
+Target dependency is an acyclic relation.
+
+
+
+
+
+*/
+
+target_transition(state(A, outdated, Ls,Pre,Post,Ws), 				request(T), 	report_cycle(T),		state(A, outdated, Ls, Pre,Post, Ws) ,			Target):-
+    closes_cycle(T,Target).
+target_transition(state(A, pending(T1), Ls,Pre,Post,Ws),			request(T2), 	report_cycle(T2),		state(A, pending(T1), Ls, Pre,Post, Ws) ,		Target):-
+    closes_cycle(T2,Target).
+target_transition(state(idle, available,[], Pre,Post,Ws), 			request(T), 	grant([T]), 			state(reading, available,[T],Pre,Post,Ws) ,		_Target).
+target_transition(state(reading, available, Ls, Pre,Post,Ws), 		request(T), 	grant([T]), 			state(reading, available, [T|Ls],Pre,Post,Ws) ,	_Target).
+target_transition(state(idle, outdated, [],Pre,Post,[]), 			request(T), 	rebuild(T),				state(idle, pending(T) , [],Pre,Post, []),		_Target). 
+target_transition(state(reading, outdated, Ls,Pre,Post,Ws), 		request(T), 	[],						state(reading, outdated , Ls, Pre,Post,[T|Ws]),	_Target).
+target_transition(state(idle, pending(P) , [],Pre,Post, Ws),		request(W), 	[],		 				state(idle, pending(P) , [], Pre,Post,[W|Ws]),	_Target).
+
+target_transition(state(idle, pending(_) , Ls,Pre,Post,Ws),			fail,		 	report_failure(Ws),		state(idle, outdated, Ls,Pre,Post,[]),			_Target).
+target_transition(state(idle, pending(_) , Ls,Pre,Post,Ws), 		error(E),	 	report_error(Ws,E),		state(idle, outdated, Ls,Pre,Post,[]),			_Target).
+
+%FIXME: do we need to react some way when invalidation is requested during pending?
+target_transition(state(idle, pending(P) , Ls,Pre,Post,Ws), 		mark_dirty,	 	[],						state(idle, pending(P) , Ls,Pre,Post,Ws),		_Target).
+target_transition(state(A, available, Ls,Pre,Post,[]), 				mark_dirty, 	invalidate,				state(A, outdated , Ls,Pre,Post,[]),			_Target).
+target_transition(state(A, outdated, Ls,Pre,Post,Ws),				mark_dirty, 	[], 					state(A, outdated , Ls,Pre,Post,Ws),			_Target).
+
+target_transition(state(idle, available , [],Pre,Post,[]),			mark_clean, 	[],						state(idle, available, [],Pre,Post,[]),			_Target).
+target_transition(state(idle, _ , [],Pre,Post,[]), 					mark_clean, 	[notify_done],			state(idle, available, [],Pre,Post,[]),			_Target).
+target_transition(state(idle, _ , [],Pre,Post,Ts), 					mark_clean, 	[notify_done,grant(Ts)],state(reading, available, Ts,Pre,Post,[]),		_Target).
+
+target_transition(state(reading, available, Ls,Pre,Post,Ws),		release(T), 	[], 					state(Act, available, Ls2,Pre,Post,Ws),			_Target):-
+    select(T,Ls,Ls2), 
+    (	Ls2 == []
+    ->	Act=idle
+    ;	Act=reading
+    ).
+target_transition(state(reading, outdated, [T],Pre,Post,[W|Ws]),	release(T),		rebuild(W),				state(idle, pending(W) , [],Pre,Post, Ws),		_Target).
+target_transition(state(reading, outdated, Ls,Pre,Post,Ws),			release(T),	 	[],						state(reading, outdated , Ls2,Pre,Post,Ws),		_Target):-
+    select(T,Ls,Ls2), Ls2 \== [].
+target_transition(state(reading, outdated, [L],Pre,Post,[]),		release(L),	 	[],						state(idle, outdated , [],Pre,Post,[]),			_Target).
+
+target_transition(state(Act, St, Ls,Pre,Post,Ws),					remove(W),	 	[ackn_remove(W)],		state(Act, St , Ls,Pre,Post,Ws2),				_Target):-
+    (	select(W,Ws,Ws2)
+    ;	Ws2=Ws
+    ).
+
+
+
+
 
 %% pdt_with_targets(+Targets,+Goal).
 % holds read locks for the specified list of Targets while executing Goal.
@@ -185,9 +276,9 @@ check_locks:-
     	(	'$has_lock'(Target),
     		Target \== '$mark'
     	),
-    	(	current_target_state(Target,State),
+    	(	current_target_state(Target,State), %FIXME: this should only be called from the arbiter thread!
     		my_debug(builder(obsolete),"checking lock ~w: state is ~w ~n",[Target,State]),
-    		(	State=state(_Activity, available, _Locks,_SleepLocks,_Waits)
+    		(	state_status(State,Status), Status==available
     		->	my_debug(builder(obsolete),"ok~n",[])
     		;	my_debug(builder(obsolete),"obsolete~n",[]),
     			fail
@@ -263,9 +354,26 @@ current_target_state(Target,State):-
     target_state(Target,_),
     !,
     target_state(Target,State).
-current_target_state(_Target,state(idle,outdated,[],[],[])).
+current_target_state(_Target,State):-
+    state_new(State),
+    state_activity(State,idle),
+	state_status(State,outdated),
+	state_locks(State,[]),
+	state_pre(State,[]),
+	state_post(State,[]),
+	state_wait(State,[]).
 
-update_target_state(Target,state(idle,outdated,[],[],[])):-
+update_target_state(Target,State):-
+    \+ ground(State-Target),
+    !,
+    throw(not_ground(State-Target)).
+update_target_state(Target,State):-
+    state_activity(State,idle),
+	state_status(State,outdated),
+	state_locks(State,[]),
+	state_pre(State,[]),
+	state_post(State,[]),
+	state_wait(State,[]),
     !,
     retractall(target_state(Target,_)).
 update_target_state(Target,NewState):-
@@ -365,7 +473,10 @@ run_arbiter:-
 	
 report_error(Error):-
     forall(
-    	target_state(_,state(_,TargetStatus,_,Threads)),
+    	(	target_state(_,State),
+    		state_status(State,TargetStatus),
+    		state_wait(State,Threads)
+    	),
     	(	TargetStatus=pending(Thread)
     	->	report_error([Thread|Threads],Error)
     	;	report_error(Threads,Error)
@@ -459,57 +570,6 @@ execute_action(ackn_remove(W),Target):-
 
 
 
-% state(Activity, Status, Locks,SleepLocks,Waits)
-% Activity: idle - there are no locks 
-%		or reading - there is at least one read lock 
-%
-% Status: available(TimeStamp) - the target is up to date, Timestamp is the build time
-%		  outdated - the target is outdated
-%		  pending(Thread) - the target is beeing rebuild by Thread
-%
-% Locks: A list of threads that were granted a read lock on this target
-%
-% SleepLocks: (not used right now) A list of targets that were granted a read lock, but that are currently asleep. 
-%
-% Waits: A list of threads that are waiting for the target to become available.
-
-target_transition(state(A, outdated, Ls,SLs,Ws), 				request(T), 	report_cycle(T),		state(A, outdated, Ls, SLs, Ws) ,Target):-
-    closes_cycle(T,Target).
-target_transition(state(A, pending(T1), Ls,SLs,Ws),				request(T2), 	report_cycle(T2),		state(A, pending(T1), Ls, SLs ,Ws) ,Target):-
-    closes_cycle(T2,Target).
-target_transition(state(idle, available,[], SLs,Ws), 			request(T), 	grant([T]), 				state(reading, available,[T],SLs,Ws) ,_Target).
-target_transition(state(reading, available, Ls, SLs,Ws), 		request(T), 	grant([T]), 			state(reading, available, [T|Ls],SLs,Ws) ,_Target).
-target_transition(state(idle, outdated, [],SLs,[]), 			request(T), 	rebuild(T),				state(idle, pending(T) , [],SLs, []),_Target). 
-target_transition(state(reading, outdated, Ls,SLs,Ws), 			request(T), 	[],						state(reading, outdated , Ls, SLs,[T|Ws]),_Target).
-target_transition(state(idle, pending(P) , [],SLs, Ws),			request(W), 	[],		 				state(idle, pending(P) , [], SLs,[W|Ws]),_Target).
-
-target_transition(state(idle, pending(_) , Ls,SLs,Ws),			fail,		 	report_failure(Ws),		state(idle, outdated, Ls,SLs,[]),_Target).
-target_transition(state(idle, pending(_) , Ls,SLs,Ws), 			error(E),	 	report_error(Ws,E),		state(idle, outdated, Ls,SLs,[]),_Target).
-
-%FIXME: do we need to react some way when invalidation is requested during pending?
-target_transition(state(idle, pending(P) , Ls,SLs,Ws), 			mark_dirty,	 	[],						state(idle, pending(P) , Ls,SLs,Ws),_Target).
-target_transition(state(A, available, Ls,SLs,[]), 				mark_dirty, 	invalidate,				state(A, outdated , Ls,SLs,[]),_Target).
-target_transition(state(A, outdated, Ls,SLs,Ws),				mark_dirty, 	[], 					state(A, outdated , Ls,SLs,Ws),_Target).
-
-target_transition(state(idle, available , [],SLs,[]),			mark_clean, 	[],						state(idle, available, [],SLs,[]),_Target).
-target_transition(state(idle, _ , [],SLs,[]), 					mark_clean, 	[notify_done],			state(idle, available, [],SLs,[]),_Target).
-target_transition(state(idle, _ , [],SLs,Ts), 					mark_clean, 	[notify_done,grant(Ts)],state(reading, available, Ts,SLs,[]),_Target).
-
-target_transition(state(reading, available, Ls,SLs,Ws),			release(T), 	[], 					state(Act, available, Ls2,SLs,Ws),_Target):-
-    select(T,Ls,Ls2), 
-    (	Ls2 == []
-    ->	Act=idle
-    ;	Act=reading
-    ).
-target_transition(state(reading, outdated, [T],SLs,[W|Ws]),		release(T),		rebuild(W),				state(idle, pending(W) , [],SLs, Ws),_Target).
-target_transition(state(reading, outdated, Ls,SLs,Ws),			release(T),	 	[],						state(reading, outdated , Ls2,SLs,Ws),_Target):-
-    select(T,Ls,Ls2), Ls2 \== [].
-target_transition(state(reading, outdated, [L],SLs,[]),			release(L),	 	[],						state(idle, outdated , [],SLs,[]),_Target).
-
-target_transition(state(Act, St, Ls,SLs,Ws),					remove(W),	 	[ackn_remove(W)],		state(Act, St , Ls,SLs,Ws2),_Target):-
-    (	select(W,Ws,Ws2)
-    ;	Ws2=Ws
-    ).
 
 
 
@@ -524,11 +584,13 @@ requesting a target constitutes adding an edge. If that edge would close a cylce
 */
 
 target_depends_thread(Target,Thread):-
-    target_state(Target,state(_,pending(Thread2),_,_,_)),
+    target_state(Target,State),
+    state_activity(State,pending(Thread2)),
     thread_depends_thread(Thread2,Thread).    
     
 thread_depends_target(Thread,Target):-
-    target_state(Target2,state(_,_,_,_,Waiting)),
+    target_state(Target2,State), %FIXME: this doesn't look very performant
+    state_wait(State,Waiting),    
     member(Thread,Waiting),
     target_depends_target(Target2,Target).
 
@@ -552,12 +614,15 @@ closes_cycle(Thread,Target):-
 %pdt_thread_activity(Thread,status(A)):-
 %    current_thread(Thread,A).
 pdt_thread_activity(Thread,build(Target)):-
-	target_state(Target,state(_,pending(Thread),_,_,_)).    
+	target_state(Target,State),
+    state_activity(State,pending(Thread)).    
 pdt_thread_activity(Thread,lock(Target)):-
-	target_state(Target,state(_,_,Ls,_,_)),
+	target_state(Target,State),
+	state_locks(State,Ls),
 	memberchk(Thread,Ls).
 pdt_thread_activity(Thread,wait(Target)):-
-	target_state(Target,state(_,_,_,_,Ws)),
+	target_state(Target,State),
+	state_wait(State,Ws),
 	memberchk(Thread,Ws).
 
 
