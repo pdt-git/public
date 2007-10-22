@@ -105,7 +105,10 @@ interprete_program(FileRef):-
 
 
 interprete_toplevelXXX(Expanded,Cx):-
-    
+    (	\+ \+ Expanded = (pdt_builder:build_hook(parse(_)):-_)
+    -> 	spyme
+    ;	true
+    ),
 	interprete_toplevel(Expanded,Cx).    
 
 interprete_toplevel(end_of_file,_):-
@@ -125,11 +128,12 @@ interprete_toplevel( ((MName:Head):-Body) , Cx):-
     get_or_create_module(MName,MID,Cx),    
     cx_set_module(Cx,MID,Cx1),
     interprete_toplevel((Head:-Body),Cx1).    
-interprete_toplevel( (Head:-_Body) , CX):-
+interprete_toplevel( (Head:-_Body) , Cx):-
     !,
-    functor(Head,Name,Arity),
-    get_or_create_predicate(Name,Arity,CX,PredID),
-    add_clause(PredID,CX).
+    functor(Head,Name,Arity),    
+    create_my_own_predicate_version(Name,Arity,MyPredID,Cx,Cx1),
+   do_add_clause(MyPredID,Cx1).
+    
 interprete_toplevel( (:-module(_,_)) , _Cx):-
 	!.%already dealt with.
 interprete_toplevel( (:-dynamic Signatures) , Cx):-
@@ -153,11 +157,11 @@ interprete_toplevel( (:-Body) , Cx):-
     	pef_file_dependency_query([toplevel=TlRef,dependency=DepRef]),
     	interprete_file_dependency(Name,DepRef,Cx)
     ).
-interprete_toplevel( Head , CX):-
+interprete_toplevel( Head , Cx):-
     !,
     functor(Head,Name,Arity),
-    get_or_create_predicate(Name,Arity,CX,PredID),
-    add_clause(PredID,CX).
+    create_my_own_predicate_version(Name,Arity,MyPredID,Cx,Cx1),
+   do_add_clause(MyPredID,Cx1).
 interprete_toplevel(T,Cx):-
      throw(interprete_toplevel_failed(T,Cx)).
 %TODO: handle modifications of the module import lists.
@@ -176,8 +180,8 @@ interprete_property_definition((Module:Name)/Arity,Property,Cx):-
     cx_set_module(Cx,MID,Cx1),
 	interprete_property_definition(Name/Arity,Property,Cx1).
 interprete_property_definition(Name/Arity,Property,Cx):-	
-    get_or_create_predicate(Name,Arity,Cx,PredID),
-    cx_toplevel(Cx,TlRef),
+    create_my_own_predicate_version(Name,Arity,PredID,Cx,Cx1),
+    cx_toplevel(Cx1,TlRef),
     pef_predicate_property_definition_assert([predicate=PredID,property=Property,toplevel=TlRef]).
     
 interprete_file_dependency(Type,Ref,Cx):-
@@ -270,12 +274,31 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
 merge_files(LocalForce,PID,Cx):-
     forall(
     	pef_program_file_query([program=PID,module_name=NewModName,file=FileRef,force_reload=Force]),
-    	(	merge_file(PID,FileRef,NewModName,Force,LocalForce,Cx)
+    	(	merge_file(FileRef,NewModName,Force,LocalForce,Cx)
     	->	true
     	;	throw(failed(merge_file(PID,FileRef,NewModName,Force,LocalForce,Cx)))
     	)
     ).
-
+%%merge_force(+Current,+Local,+Merge,-New).
+merge_force(true,_Local,_Merge,true):-!.
+merge_force(false,true,true,true):-!.
+merge_force(_,_,_,false).    
+    
+merge_file(FileRef,NewModName,Force,LocalForce,Cx):-
+    /*
+    Force is true iff the program beeing merged(PID) forces reload of the file (FileRef).
+    LocalForce is true iff the directive inducing the merge of PID forces reload.
+    CurrentForce is true iff the current program forces reload of the file
+    NewForce should be CurrentForce || (LocalForce && Force)          
+    */
+	cx_program(Cx,CurrentPID),
+	(	pef_program_file_query([program=CurrentPID,file=FileRef,force_reload=CurrentForce])
+    ->	pef_program_file_retractall([program=CurrentPID,file=FileRef])
+	;	CurrentForce=false
+	),
+	merge_force(CurrentForce,LocalForce,Force,NewForce),
+	pef_program_file_assert([program=CurrentPID,file=FileRef, module_name=NewModName,force_reload=NewForce]).
+	
 /* there is somethig wrong with this clause. I do not completely understand what it was meant for
 
 merge_file(FileRef,FileRef,NewModName,Force,LocalForce,Cx):-
@@ -284,7 +307,7 @@ merge_file(FileRef,FileRef,NewModName,Force,LocalForce,Cx):-
     merge_force(Force,LocalForce,NewForce),
     pef_program_file_retractall([program=MyPID,file=FileRef]),
     pef_program_file_assert([program=MyPID,file=FileRef,module_name=NewModName,force_reload=NewForce]).
-*/
+
 merge_file(_PID,FileRef,NewModName,Force,_LocalForce,Cx):-
 	% File a module file. This predicate is only called by process_module_inclusion/4.
     cx_program(Cx,MyPID),
@@ -295,9 +318,9 @@ merge_file(_PID,FileRef,NewModName,Force,_LocalForce,Cx):-
 	),
     pef_program_file_assert([program=MyPID,file=FileRef,module_name=NewModName,force_reload=NewForce]).
 
-merge_force(false,false,false):- !.    
-merge_force(_,_,true).
-
+merge_force(true,true,true):- !.    
+merge_force(_,_,false).
+*/
 
 %% unload_obsolete_files(NewPID,Cx).
 % unload all files that are obsoleted by merging NewPID with the current program.
@@ -353,7 +376,8 @@ import_public_predicates(MID,Cx):-
     	import_predicate_binding(Name,Arity,MID,Cx)
     ).
 
-
+% establishes a "forwarding" of the symbol Name/Arity so that it is resolved
+% in the context of MID. 
 import_predicate_binding(Name,Arity,MID,Cx):-
     module_owner(MID,PID),
     module_name(MID,FromName),
@@ -437,14 +461,6 @@ get_or_create_module(Name,MID,Cx):-
     
 
 	
-get_or_create_predicate(Name,Arity,Cx,PredID):-
-	get_predicate(Name,Arity,Cx,PredID),
-	!.    
-get_or_create_predicate(Name,Arity,Cx,PredID):-
-    cx_module(Cx,MID),
-    pef_reserve_id(pef_predicate,PredID),
-    pef_predicate_assert([id=PredID,module=MID,name=Name,arity=Arity]),
-    debug(interprete(debug),"created predicate ~w (~w/~w) in module ~w. ~w~n",[PredID,Name,Arity,MID,Cx]).
 
 %%
 % rebind_module_name(+Name,+MID,+Cx)
@@ -463,31 +479,7 @@ unbind_module_name(Name,Cx):-
     debug(interprete(debug),"binding of module name \"~w\" removed from program ~w. ~w~n",[Name,PID,Cx]).
 
 
-
-get_predicate(Name,Arity,Cx,PredID):-
-	cx_module(Cx,MID),
-	cx_program(Cx,PID),
-	resolve_predicate(PID,MID,Name,Arity,PredID).
-
-
-add_clause(PredID,Cx):-
-   create_my_own_predicate_version(PredID,MyPredID,Cx),
-   do_add_clause(MyPredID,Cx).
-   
-
-	
-copy_predicate(PredID,Cx,NewPredID):-
-    cx_module(Cx,NewMID),    
-	pef_predicate_query([id=PredID,name=Name, arity=Arity]),
-	(	pef_predicate_query([id=NewPredID,name=Name, arity=Arity,module=NewMID])
-	->	throw(conflicting_predicate_exists(NewPredID))
-	;	pef_reserve_id(pef_predicate,NewPredID),
-		debug(interprete(debug),"creating a copy(~w) of predicated(~w) in module ~w. ~w~n",[NewPredID,PredID,NewMID,Cx]),
-		pef_predicate_assert([id=NewPredID,name=Name, arity=Arity,module=NewMID]),				
-		merge_predicates(append,PredID,NewPredID,Cx)
-		
-	).
-	
+   	
 
 
 set_num_clauses(PredID,N):-
@@ -663,7 +655,8 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
     	(	(	pef_predicate_property_definition_query([predicate=PredId,property=(multifile)])
     		;	pef_predicate_property_definition_query([predicate=PredId,property=(dynamic)])
     		)
-    	->	get_or_create_predicate(Name,Arity,Cx1,MergedPredId),	
+    	->	% we can savely discard the changed context, since the module will not change (we own it already) 
+    		create_my_own_predicate_version(Name,Arity,MergedPredId,Cx1,_),    		
 	    	merge_predicates(prepend,PredId,MergedPredId,Cx/* Not a typo! Cx1 is only used for looking up the predicate */),
     		merge_properties(prepend,PredId,MergedPredId)
     	;	%debug(interprete(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
@@ -675,12 +668,11 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
 
 
 merge_module(Order,MergeMID,MID,Cx):-
-
     debug(interprete(debug),"merging module ~w into ~w (~w). ~w~n",[MergeMID,MID,Order,Cx]),
     cx_set_module(Cx,MID,Cx1),    
     forall(
     	pef_predicate_query([id=PredId,name=Name, arity=Arity,module=MergeMID]),
-    	(	get_or_create_predicate(Name,Arity,Cx1,MergedPredId),	
+    	(	create_my_own_predicate_version(Name,Arity,MergedPredId,Cx1,_),	
 	    	merge_predicates(Order,PredId,MergedPredId,Cx)  		
     	)    	
     ).
@@ -694,7 +686,11 @@ spyme.
 % two predicates can only be merged if at least one of them is multifile or has no clauses.
 % otherwise the one that is encountered first is abolished.
 % This predicate does never modify SourcePred.
-
+%
+% TODO: name clashes involving imported predicates.
+% conflict and target comes after source (prepend): clear target and merges source
+% conflict and target comes before source (append): no change.
+%
 merge_predicates(Order,SourcePred,TargetPred,Cx):-
     predicate_file(SourcePred,SourceFile),
 	predicate_file(TargetPred,TargetFile),    
@@ -890,7 +886,14 @@ unload_file(FileRef, Cx):-
     repeat,
     	(	first_clause(FileRef,PID,Clause)
     	->	pef_clause_get(Clause,[predicate=OldPredID,number=Num]),
-	    	create_my_own_predicate_version(OldPredID,PredID,Cx),
+	    	%create_my_own_predicate_version(OldPredID,PredID,Cx),
+	    	% as far as I can tell, the predicate should belong to the current program anyway at this point.
+	    	% Let's see if I am wrong
+	    	(	predicate_owner(OldPredID,PID)
+	    	->	OldPredID=PredID
+	    	;	spyme,
+	    		throw(i_am_wrong(predicate_owner(OldPredID,PID),unload_file(FileRef,Cx)))
+	    	),
 	    	(	pef_predicate_property_definition_query([predicate=PredID,property=(multifile)])
 	    	->	delete_or_shift_clauses(PredID,FileRef,Num,Deleted),
 	    		num_clauses(PredID,NumClauses),
@@ -917,6 +920,70 @@ unload_module(MName,_MID,Cx):-
     % if the current program use the original module, unbind it.
     unbind_module_name(MName,Cx).
 
+
+
+create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
+    %try to resolve the pred symbol
+    get_predicate(Name,Arity,Cx,PredID),
+    !,    
+	cx_program(Cx,Program),
+	cx_module(Cx,CurrentMID),
+	module_name(CurrentMID,ModuleName),
+	pef_predicate_query([id=PredID,module=DefMID]),
+	
+	(	DefMID==CurrentMID
+	->	(	module_owner(CurrentMID,Program)
+		->	NewPredID=PredID,
+			Cx=Cx1
+		;	pef_type(CurrentMID,pef_module_definition)
+		->	extend_module(CurrentMID,NewMID,Cx),
+			cx_set_module(Cx,NewMID,Cx1),
+			copy_predicate(PredID,Cx1,NewPredID),
+			rebind_module_name(ModuleName,NewMID,Cx1)
+		;	copy_module(CurrentMID,NewMID,Cx),
+			cx_set_module(Cx,NewMID,Cx1),
+			rebind_module_name(ModuleName,NewMID,Cx1),
+			get_predicate(Name,Arity,Cx1,NewPredID)
+		)
+	% If the modules are not identical, we must make sure they are based on the
+	% same original definition. Otherwise we have a name clash.
+	;	module_base(CurrentMID,Base), 
+		module_base(DefMID,Base2),
+		Base \== Base2
+	->	throw(predicate_already_imported(PredID,Cx))
+	% If the modules are not identical, but share the same base,
+	% the current module must be an extension of 
+	% the definition module, which must be a module definition.
+	;	(	module_owner(CurrentMID,Program)
+		->	Cx1 = Cx
+		;	copy_module(CurrentMID,NewMID,Cx),
+			cx_set_module(Cx,NewMID,Cx1),
+			rebind_module_name(ModuleName,NewMID,Cx1)
+		),
+		copy_predicate(PredID,Cx1,NewPredID)
+	).
+create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
+    % the predicate symbol is currently not bound, so we can 
+    % start a new predicate.
+    cx_module(Cx,CurrentMID),
+    cx_program(Cx,Program),
+    module_name(CurrentMID,ModuleName),
+    (	module_owner(CurrentMID,Program)
+    ->	NewMID=CurrentMID,
+    	Cx=Cx1
+    ;   pef_type(CurrentMID,pef_module_definition)
+    ->	extend_module(CurrentMID,NewMID,Cx),
+		cx_set_module(Cx,NewMID,Cx1),		
+		rebind_module_name(ModuleName,NewMID,Cx1)
+	;	copy_module(CurrentMID,NewMID,Cx),
+		cx_set_module(Cx,NewMID,Cx1),
+		rebind_module_name(ModuleName,NewMID,Cx1)		
+	),
+	pef_reserve_id(pef_predicate,NewPredID),
+    pef_predicate_assert([id=NewPredID,module=CurrentMID,name=Name,arity=Arity]).
+
+
+%deprecated		  
 create_my_own_predicate_version(PredID,NewPredID,Cx):-
     pef_predicate_query([id=PredID,name=Name, arity=Arity,module=MID]),
     cx_program(Cx,Program),    
@@ -930,12 +997,38 @@ create_my_own_predicate_version(PredID,NewPredID,Cx):-
     ->	extend_module(MID,NewMID,Cx),
     	cx_set_module(Cx,NewMID,Cx1),
 		rebind_module_name(ModuleName,NewMID,Cx1),    	
-    	copy_predicate(PredID,Cx1,NewPredID)
+    	%copy_predicate(PredID,Cx1,NewPredID)
+    	pef_predicate_query([id=PredID,name=Name, arity=Arity]),
+
+    	cx_module(Cx1,MID1),
+    	pef_reserve_id(pef_predicate,NewPredID),
+    	pef_predicate_assert([id=NewPredID,module=MID1,name=Name,arity=Arity]),
+    	debug(interprete(debug),"created predicate ~w (~w/~w) in module ~w. ~w~n",[NewPredID,Name,Arity,MID1,Cx1])
 	;	% if the module is ad-hoc defined,or a module extension, clone it.
 		copy_module(MID,NewMID,Cx),
 		pef_predicate_query([id=NewPredID,name=Name, arity=Arity,module=NewMID]),
     	cx_set_module(Cx,NewMID,Cx1),	
 		rebind_module_name(ModuleName,NewMID,Cx1)
     ).
+
+copy_predicate(PredID,Cx,NewPredID):-
+    pef_predicate_query([id=PredID,name=Name, arity=Arity]),
+    cx_module(Cx,NewMID),    
+	pef_predicate_query([id=PredID,name=Name, arity=Arity]),
+	(	pef_predicate_query([id=NewPredID,name=Name, arity=Arity,module=NewMID])
+	->	throw(conflicting_predicate_exists(NewPredID))
+	;	pef_reserve_id(pef_predicate,NewPredID),
+		debug(interprete(debug),"creating a copy(~w) of predicated(~w) in module ~w. ~w~n",[NewPredID,PredID,NewMID,Cx]),
+		pef_predicate_assert([id=NewPredID,name=Name, arity=Arity,module=NewMID]),				
+		merge_predicates(append,PredID,NewPredID,Cx)
+		
+	).
+	
     	
+
+
+get_predicate(Name,Arity,Cx,PredID):-
+	cx_module(Cx,MID),
+	cx_program(Cx,PID),
+	resolve_predicate(PID,MID,Name,Arity,PredID).
     

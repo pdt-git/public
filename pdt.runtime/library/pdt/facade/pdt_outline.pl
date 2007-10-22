@@ -21,7 +21,8 @@
 
 %define a pseudo build target for the outline to refer to.
 
-pdt_builder:target_group(interprete(F),outline(F)).
+pdt_builder:build_hook(outline(F)):-
+	pdt_with_targets([interprete(F)],true).
 
 %%
 % pdt_outline_child(+File,+ParentType,+ParentID,-ChildType,-ChildID).
