@@ -32,6 +32,7 @@
 	]).
 
 :- use_module(library('pef/pef_base')).
+:- use_module(library('builder/builder')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 
 %%
@@ -46,6 +47,11 @@ predicate_listing(PredID):-
     	)
     ).
 
+
+pdt_builder:build_hook(file(Abs)):-
+    exists_file(Abs),
+    pef_file_assert([path=Abs]).
+
 %% get_pef_file(?Spec,?Id).
 % wrapper intended as a drop-in replacement for pdt_util:pdt_file_ref/2.
 % WARNING: ids and file_refs are NOT compatible! 
@@ -54,12 +60,12 @@ get_pef_file(Abs,Id):-
     !,
     pef_file_query([id=Id,path=Abs]).
 get_pef_file(Abs,Id):-
-	pef_file_query([id=Id,path=Abs]),
-	!.
-get_pef_file(Abs,Id):-
+	pdt_request_target(file(Abs)),
+	pef_file_query([id=Id,path=Abs]).
+/* get_pef_file(Abs,Id):-
 	pef_reserve_id(pef_file,Id),	
     pef_file_assert([id=Id,path=Abs]).
-    
+   */ 
 %%
 % resolve_module(+PID,+Name,-MID)
 % Resolve a module name in the context of a given program.

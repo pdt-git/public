@@ -383,6 +383,22 @@
 	) @no_cleanup
 ).
 
+:- define_pef(
+	pef_source_path(
+		project:pef_project,
+		path @index,
+		include_pattern,
+		exclude_pattern
+	)
+).
+
+:- define_pef(
+	pef_project(
+		id,
+		name @index
+	)
+).
+
 %%
 % The relation between formulars and their maximal sub-formulars
 %
@@ -406,3 +422,4 @@
 		cx
 	)
 ).
+

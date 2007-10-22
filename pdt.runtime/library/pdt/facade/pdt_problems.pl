@@ -11,8 +11,12 @@
 :-use_module(library('builder/targets/singletons')).
 :-use_module(library('builder/targets/interprete')).
 :-use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
+:-use_module(library('util/pdt_regex')).
 
 
+/*
+
+pdt_builder
 
 pdt_builder:target_group(file(F),problems):-
     pef_file_query([path=F]).
@@ -22,8 +26,50 @@ pdt_builder:target_group(interprete(F),problems):-
     pef_file_query([path=F]).
 pdt_builder:target_group(singletons(F),problems):-
     pef_file_query([path=F]).
-
+*/
+exists_project(Name):-
+    pef_project_query([name=Name]).
     
+pdt_builder:build_hook(problems):-
+    setof(problems(ProjectName),pef_project_query([name=ProjectName]),Deps),
+    pdt_with_targets(Deps,true).
+pdt_builder:build_hook(problems(Resource)):-
+    (	exists_project(Resource)
+    ->	setof(problems(Path,IP,EP),
+    		(	pef_project_query([id=Project,name=Resource]),
+    			pef_source_path_query([project=Project,path=Path,include_pattern=IP,exclude_pattern=EP])
+    			
+    		),
+    		Deps
+    	),
+    	pdt_with_targets(Deps,true)	    
+    ;	exists_file(Resource)
+    ->	pdt_with_targets([parse(Resource),interprete(Resource),singletons(Resource)],true)
+    ;	true
+    ).   
+pdt_builder:build_hook(problems(Dir,IP,EP)):-
+	atom_concat(Dir,'/*',LsPattern),
+	expand_file_name(LsPattern,Files),
+	filter(Files,IP,EP,Deps),	
+	pdt_with_targets(Deps,true).
+	    
+
+
+
+filter([],_IP,_EP,[]).
+filter([File|Files],IP,EP,[problems(File,IP,EP)|FilteredFiles]):-
+    exists_directory(File),
+    !,
+    filter(Files,IP,EP,FilteredFiles).
+filter([File|Files],IP,EP,[problems(File)|FilteredFiles]):-
+    atom_codes(File,Codes),
+    pdt_regex_match(IP,Codes,[],_),
+    \+ pdt_regex_match(EP,Codes,[],_),
+    !,
+    filter(Files,IP,EP,FilteredFiles).
+filter([_|Files],IP,EP,[FilteredFiles]):-
+	filter(Files,IP,EP,FilteredFiles).
+
 syntax_error_position(error(_, stream(_, _, _, Offset)),Offset,Offset).
 syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
     
