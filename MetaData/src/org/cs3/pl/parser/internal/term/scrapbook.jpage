@@ -1,1 +1,0 @@
-"/some/test000.pl".matches(".*test.*")(boolean) true
