@@ -48,9 +48,8 @@ predicate_listing(PredID):-
     ).
 
 
-pdt_builder:build_hook(file(Abs)):-
-    exists_file(Abs),
-    pef_file_assert([path=Abs]).
+
+
 
 %% get_pef_file(?Spec,?Id).
 % wrapper intended as a drop-in replacement for pdt_util:pdt_file_ref/2.
