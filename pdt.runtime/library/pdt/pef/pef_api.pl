@@ -32,7 +32,6 @@
 	]).
 
 :- use_module(library('pef/pef_base')).
-:- use_module(library('builder/builder')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 
 %%
@@ -54,6 +53,11 @@ predicate_listing(PredID):-
 %% get_pef_file(?Spec,?Id).
 % wrapper intended as a drop-in replacement for pdt_util:pdt_file_ref/2.
 % WARNING: ids and file_refs are NOT compatible! 
+% Note: Other than the other predicates in this module, this one will
+% actually request the builder to provide the target file(<path>) before
+% looking up the file. If the target factory 'workspace' is loaded, this will
+% create the file pef if it does not exist yet. 
+%
 get_pef_file(Abs,Id):-
     nonvar(Id),
     !,

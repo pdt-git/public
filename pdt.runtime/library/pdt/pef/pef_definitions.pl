@@ -386,7 +386,7 @@
 :- define_pef(
 	pef_directory(
 		id,
-		source_path :pef_source_path
+		source_path :pef_source_path,
 		path @label @index
 	) :fs_node
 ).
