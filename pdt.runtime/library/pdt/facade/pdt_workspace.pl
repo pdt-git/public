@@ -30,7 +30,7 @@ pdt_remove_source_path(Project,Path):-
 	).
 pdt_add_source_path(Project,Path,Include,Exclude):-
 	(	pef_project_query([name=Project,id=PRJID])
-	->	pdt_invalidate_target(project(Project))
+	->	true
 	;	pef_reserve_id(pef_project,PRJID),
 		pef_project_assert([id=PRJID,name=Project])
 	),	
@@ -44,5 +44,6 @@ pdt_add_source_path(Project,Path,Include,Exclude):-
     	path=Path,
     	include_pattern=Include, 
     	exclude_pattern=Exclude
-    ]).
+    ]),
+    pdt_invalidate_target(project(Project)).
     
