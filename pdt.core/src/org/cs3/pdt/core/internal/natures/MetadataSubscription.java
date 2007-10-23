@@ -43,9 +43,12 @@ package org.cs3.pdt.core.internal.natures;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Set;
 
+import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -57,11 +60,13 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -79,25 +84,24 @@ public class MetadataSubscription extends DefaultSubscription implements
 		super();
 	}
 
-	public MetadataSubscription(String projectName, String id,String pifId) {
+	public MetadataSubscription(String projectName, String id, String pifId) {
 
-		super(id, pifId,
-				"used to store and process meta information on prolog"
-						+ "source code found in project " + projectName,
-				projectName + " - metadata", PDTCore.PLUGIN_ID, true);
+		super(id, pifId, "used to store and process meta information on prolog"
+				+ "source code found in project " + projectName, projectName
+				+ " - metadata", PDTCore.PLUGIN_ID, true);
 		setProjectName(projectName);
 	}
 
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
 		if (pif.isUp()) {
-			PrologSession session=null;
+			PrologSession session = null;
 			try {
 				session = pif.getSession();
-				onInit(pif,session);
+				onInit(pif, session);
 			} catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
-			}finally {
+			} finally {
 				if (session != null) {
 					session.dispose();
 				}
@@ -110,7 +114,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 	public void deconfigure(PrologInterface pif) {
 		pif.removeLifeCycleHook(getId());
 		if (pif.isUp()) {
-			PrologSession session=null;
+			PrologSession session = null;
 			try {
 				session = pif.getSession();
 			} catch (PrologInterfaceException e) {
@@ -136,8 +140,8 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	}
 
-	public Map saveState() {
-		Map map = super.saveState();
+	public Map<String, String> saveState() {
+		Map<String, String> map = super.saveState();
 		map.put("project", getProjectName());
 		return map;
 	}
@@ -146,95 +150,27 @@ public class MetadataSubscription extends DefaultSubscription implements
 		return this.projectName;
 	}
 
-	public void onInit(PrologInterface pif, PrologSession initSession) throws PrologInterfaceException {
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+	public void onInit(PrologInterface pif, PrologSession initSession)
+			throws PrologInterfaceException {
+		/* load pdt backend facade */
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+				.getLibraryManager();
+		PLUtil.configureFileSearchPath(mgr, initSession,
+				new String[] { PDTCore.ENGINE_ID });
+		initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
 		
-			PLUtil.configureFileSearchPath(mgr,initSession,new String[]{PDTCore.ENGINE_ID});
-			initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
-			/*Map map = initSession.queryOnce(
-					"use_module(library('/org/cs3/pdt/annotate/pdt_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/cache'))," +
-					"use_module(library('/org/cs3/pdt/core/pdt_meta_info'))," +
-					"use_module(library('/org/cs3/pdt/model/predicate_definition_factory'))," +
-					"use_module(library('/org/cs3/pdt/model/builtin_predicate_factory'))," +
-					"use_module(library('/org/cs3/pdt/model/pdt_index'))," +
-					"use_module(library('/org/cs3/pdt/model/pdt_handle'))");/*," +
-					"use_module(library('/org/cs3/pdt/metadata/pdtplugin'))," +					
-					"use_module(library('/org/cs3/pdt/metadata/abba_graph_generator'))");
-			if(map==null){
-				throw new RuntimeException("could not load annotator framework");
-			}
-			map=null;
-			map = initSession.queryOnce(
-					"use_module(library('/org/cs3/pdt/annotate/op_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/fileref_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/export_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/member_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/undefined_exports_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/singleton_annotator'))," +
-					"use_module(library('/org/cs3/pdt/annotate/variable_name_annotator')),"+ 
-					"use_module(library('/org/cs3/pdt/annotate/indexer'))");
-			if(map==null){
-				throw new RuntimeException("could not load annotator modules: query failed.");
-			}
-			map=null;
-			*/
-			//setup cache directory 
-			//FIXME: what if several projects share one pif?
-			//then there are multiple subscriptions to the same pif
-			//then there are conflicting cache_dir settings.
-			//possible resolution: make this a per pif property.
-			// see PDT-186
-			/*File cacheDir = getProject().getWorkingLocation(PDTCore.PLUGIN_ID).append(PDTCore.CACHE_DIR).toFile();
-			String plCacheDir = Util.prologFileName(cacheDir);
-			map=initSession.queryOnce("pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
-			Debug.info("setting cache dir to "+plCacheDir);
-			if(map==null){
-				throw new RuntimeException("could not configure cache dir: query failed.");
-			}
-			
-			//forward value of the "ignore_hidden_libs" flag
-			String value =  PDTCorePlugin.getDefault().getPreferenceValue(PDTCore.PREF_IGNORE_HIDDEN_LIBS, "false");
-			map=initSession.queryOnce("pdt_util:pdt_set_preference_value(ignore_hidden_libs,"+value+")");
-			Debug.info("setting ignore_hidden_libs to "+value);
-					
-			if(map==null){
-				throw new RuntimeException("could not configure ignore_hidden_libs: query failed.");
-			}
-			
-*/
-			
+		/* setup project source paths */
+		
+		try {
+			IPrologProject project = getPrologProject();
+			project.updateBuildPath(initSession);
+		} catch (CoreException e) {
+			Debug.rethrow(e);
+		}
 	}
 
 	public void afterInit(PrologInterface pif) {
-		PrologSession s=null;;
-		try {
-			s = pif.getSession();
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		}
-		try{
-			Map map=null;
-/*
-			map=s.queryOnce("pdt_read_cache_index");
-			if(map==null){
-				Debug.warning("could not read cache index");
-			}
-			
-			map=null;
-			map=s.queryOnce("pdt_index_load_from_disk");
-			if(map==null){
-				Debug.warning("could not read index tables");
-			}			
-	*/		
-			
-		}catch(Throwable t){
-			Debug.rethrow(t);
-		}finally{
-			if(s!=null){
-				s.dispose();
-			}
-		}
+		
 		scheduleInitialBuild(pif);
 	}
 
@@ -280,19 +216,23 @@ public class MetadataSubscription extends DefaultSubscription implements
 		return project;
 	}
 
+	private IPrologProject getPrologProject() throws CoreException{
+		IProject project = getProject();
+		return PDTCoreUtils.getPrologProject(project);
+		
+	}
+	
 	private IStatus runBuildJob(IProgressMonitor monitor) {
 		try {
 			Debug.debug("runBuildJob: job started");
 
 			IProject project = getProject();
 			Debug.debug("lets build project " + project);
-//			project.build(IncrementalProjectBuilder.FULL_BUILD,
-//					PDTCore.METADATA_BUILDER_ID, null, monitor);
+			// project.build(IncrementalProjectBuilder.FULL_BUILD,
+			// PDTCore.METADATA_BUILDER_ID, null, monitor);
 			project.build(IncrementalProjectBuilder.FULL_BUILD,
 					PDTCore.PROLOG_BUILDER_ID, null, monitor);
-			Debug
-					.debug("runBuildJob: done: "
-							+ project);
+			Debug.debug("runBuildJob: done: " + project);
 
 		} catch (OperationCanceledException opc) {
 			return Status.CANCEL_STATUS;

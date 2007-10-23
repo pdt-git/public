@@ -50,6 +50,7 @@ import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -112,6 +113,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	public IPrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
 
 	public void updateMarkers(Set<IFile> buildList);
+	public void updateBuildPath(PrologSession s) throws CoreException, PrologInterfaceException;
     
     
 }

@@ -76,6 +76,7 @@ import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
+import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IContainer;
@@ -113,8 +114,6 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private Subscription metadataPifSubscription;
 
 	private HashMap libraries;
-
-	
 
 	private Vector listeners = new Vector();
 
@@ -500,12 +499,38 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return options;
 	}
 
+	public void updateBuildPath(PrologSession initSession)
+			throws CoreException, PrologInterfaceException {
+		String include = getPreferenceValue(
+				PDTCore.PROP_SOURCE_INCLUSION_PATTERN, ".*\\.pl");
+		String exclude = getPreferenceValue(
+				PDTCore.PROP_SOURCE_EXCLUSION_PATTERN, "");
+		String projectName = getProject().getName();
+		
+		Set<IContainer> sourcePathEntries = getExistingSourcePathEntries();		
+		for (IContainer entry : sourcePathEntries) {
+			File osPath = entry.getLocation().toFile();
+			String plPath = Util.prologFileName(osPath);
+			initSession.queryOnce("pdt_add_source_path('" + projectName + "','"
+					+ plPath + "','" + include + "','" + exclude + "')");
+		}
+	}
+
 	public void reconfigure() {
 		Job j = new Job("Building Prolog Metadata") {
 			public IStatus run(IProgressMonitor monitor) {
 				try {
 
-					;
+					PrologInterface pif = getMetadataPrologInterface();
+					PrologSession s =null;
+					try{
+						s=pif.getSession();
+						updateBuildPath(s);
+					}finally{
+						if(s!=null){
+							s.dispose();
+						}
+					}
 					IProject project = getProject();
 					Debug.debug("PDTReloadHook.afterInit: lets build project "
 							+ project);
@@ -713,11 +738,15 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
-	
-	/**@deprecated use PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface) instead.*/
+	/**
+	 * @deprecated use
+	 *             PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface)
+	 *             instead.
+	 */
 	public IPrologEventDispatcher getMetaDataEventDispatcher()
 			throws PrologInterfaceException {
-		return PrologRuntimePlugin.getDefault().getPrologEventDispatcher(getMetadataPrologInterface());		
+		return PrologRuntimePlugin.getDefault().getPrologEventDispatcher(
+				getMetadataPrologInterface());
 	}
 
 	public void addOptionProviderListener(OptionProviderListener l) {
@@ -763,9 +792,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public void updateMarkers(Set<IFile> buildList) {
-//		if (updatingMarkers) {
-//			return;
-//		}
+		// if (updatingMarkers) {
+		// return;
+		// }
 		updatingMarkers = true;
 		new UpdateMarkersJob(this, buildList, new Runnable() {
 
