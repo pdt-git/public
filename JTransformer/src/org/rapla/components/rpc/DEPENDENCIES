@@ -1,4 +1,0 @@
-This component depends on the following packages (including subpackages):
-java.*
-javax.net.ssl.* (Only if you want SSL Support)
-org.apache.avalon.* (but you can safely delete the AvalonWrappers)

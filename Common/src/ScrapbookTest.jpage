@@ -1,9 +1,0 @@
-System.getProperty("os.name");
-System.out.println(System.getProperty("user.home"));
-System.out.println(org.cs3.pl.common.Util.exec("plwin -g source_file(A),concat(X,'/library/system.pl',A),format(\"~a~n\",[X]),halt.")[0] );
-System.out.println(org.cs3.pl.common.Util.exec("plcon -g source_file(A),concat(X,'/plwin.rc',A),format(\"~a~n\",[X]). -t halt.")[0] );
-org.cs3.pl.common.Util.exec("date")[0];
-
-new java.io.PipedOutputStream()
-System.out.println(new java.util.Date());
-Runtime.getRuntime().exec(new String[]{"plmin.lnk"});An exception occurred during evaluation:  java.io.IOException

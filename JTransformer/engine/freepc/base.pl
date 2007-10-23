@@ -1,1 +1,0 @@
-:- dynamic abstraction/1.
