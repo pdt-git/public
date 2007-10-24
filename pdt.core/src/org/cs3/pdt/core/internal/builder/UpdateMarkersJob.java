@@ -15,6 +15,7 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
@@ -39,6 +40,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
+
+import sun.security.provider.certpath.CertId;
 
 public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 
@@ -121,9 +124,8 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			IPrologEventDispatcher dispatcher = PrologRuntimePlugin
 					.getDefault().getPrologEventDispatcher(
 							plProject.getMetadataPrologInterface());
-			dispatcher.addPrologInterfaceListener("builder(interprete(_))",
-					this);
-			dispatcher.addPrologInterfaceListener("builder(problems)", this);
+			
+			dispatcher.addPrologInterfaceListener("builder(problems(workspace))", this);
 			PrologInterface2 pif = ((PrologInterface2) plProject
 					.getMetadataPrologInterface());
 			final AsyncPrologSession s = pif.getAsyncSession();
@@ -131,9 +133,8 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			monitor.beginTask("updating", 100);
 			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-			buildMonitor.beginTask("Searching for problems", files.size());
-			s
-					.queryAll(
+			//buildMonitor.beginTask("Searching for problems", files.size());
+			s.queryAll(
 							"update_markers",
 							"pdt_with_targets([problems],(pdt_problem_count(Count),pdt_problem(Id,File,Start,End,Severity,Msg)))");
 			while (!s.isIdle()) {
@@ -227,33 +228,24 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		if (buildMonitor == null) {
 			return;
 		}
-		Map unifier = e.getUnifier();
-		if (!e.getEvent().equals("done")) {
+		if (!e.getSubject().equals("builder(problems(workspace))")) {			
 			return;
 		}
-
-		if (e.getSubject().equals("builder(problems)")) {
+		
+		if (e.getEvent().equals("done")) {
 			buildMonitor.done();
 			return;
 		}
-		CCompound subject = (CCompound) PLUtil.createCTerm(e.getSubject());
-		String plFile = ((CCompound) subject.getArgument(0)).getArgument(0)
-				.getFunctorValue();
-
-		try {
-			IFile file = PDTCoreUtils.findFileForLocation(plFile);
-			if (file != null && files != null && files.contains(file)) {
-				buildMonitor.worked(1);
-			}
-		} catch (IllegalArgumentException iae) {
-			// ignore files that are not in the workspace.
-			// Debug.report(iae);
-			;
-		} catch (IOException e1) {
-			Debug.report(e1);
-			// don't rethrow... this is only for progress reporting anyway.
+				
+		CCompound event = (CCompound) PLUtil.createCTerm(e.getEvent());
+		if(event.getFunctorValue().equals("estimate")){
+			buildMonitor.beginTask("Searching for Problems", ((CInteger)event.getArgument(0)).getIntValue());
+			return;
 		}
-
+		if(event.getFunctorValue().equals("worked")){
+			buildMonitor.worked(((CInteger)event.getArgument(0)).getIntValue());
+			return;
+		}
 	}
 
 }
