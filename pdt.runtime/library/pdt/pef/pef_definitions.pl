@@ -386,7 +386,8 @@
 :- define_pef(
 	pef_directory(
 		id,
-		source_path :pef_source_path,
+		include_pattern,
+		exclude_pattern,
 		path @label @index
 	) :fs_node
 ).
@@ -403,7 +404,7 @@
 :- define_pef(
 	pef_source_path(
 		project:pef_project,
-		directory:pef_directory,
+		path,
 		include_pattern,
 		exclude_pattern
 	) 

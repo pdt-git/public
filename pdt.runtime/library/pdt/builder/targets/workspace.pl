@@ -16,7 +16,7 @@ pdt_builder:build_hook(file(Abs)):-
 	(	exists_file(Abs)
     ->	pef_reserve_id(pef_file,FID),
     	pef_file_assert([id=FID,path=Abs])    	
-    ;	throw(no_such_dir(Abs))
+    ;	throw(no_such_file(Abs))
     ).
 pdt_builder:build_hook(project(Name)):-
     (	pef_project_query([name=Name, id=Project])
@@ -49,8 +49,7 @@ process_entries([directory(Abs,IP,EP)|Entries],Dir,C,C2):-
     pef_directory_query([path=Abs,include_pattern=IP,exclude_pattern=EP,id=SubDir]),
     pef_property_query([pef=SubDir,key=file_count,value=SubC]),
     C1 is C + SubC,
-    pef_directory_entry_assert([parent=Dir,child=SubDir]),
-    pdt_request_target(file(Abs)),
+    pef_directory_entry_assert([parent=Dir,child=SubDir]),    
     process_entries(Entries,Dir,C1,C2).
     	
 find_entries(Abs,IP,EP,Deps):-
@@ -69,7 +68,7 @@ filter([File|Files],IP,EP,[file(File)|FilteredFiles]):-
     \+ pdt_regex_match(EP,Codes,[],_),
     !,
     filter(Files,IP,EP,FilteredFiles).
-filter([_|Files],IP,EP,[FilteredFiles]):-
+filter([_|Files],IP,EP,FilteredFiles):-
 	filter(Files,IP,EP,FilteredFiles).
 	    	
     

@@ -21,7 +21,8 @@
 :- dynamic 
 	build_hook/1,
 	invalidate_hook/1,
-	delete_hook/1.
+	estimate_hook/3,
+	report_progress/1.
 
 /* only used for debugging */
 :- dynamic touched/1.
@@ -29,8 +30,30 @@
 
 :- multifile
 	build_hook/1,
-	invalidate_hook/1,
-	delete_hook/1.
+	invalidate_hook/1, %FIXME: not used anymore.
+	estimate_hook/3,
+	report_progress/1.
+
+/* estimate_hook(Target,Dependency, Weight),
+   report_progress(Target)
+Used for progress monitoring. 
+Clients can request progress monitoring for a particular target. The builder will send progress information
+using the pif_observe api. Progress will be reported for a target iff report_progress(Target) succeeds.
+Target definition can add clauses to report_progress(Target).
+
+before rebuilding this target, the arbiter will call the report_progress(Target) hook to find out wheter
+progress should be reported for this target. If this is the case, it next   calls the estimate_hook to 
+get a list of known "sub-problems" of the target. It will automatically filter out the once that are already up-to-date.
+For each of the remaining entries, progress will be reported as soon as each entry becomes available. 
+
+*/
+
+/*  '$progress_subproblem'(SubTarget,Target,Weight)
+	'$progress_subproblem_inv'(Target,SubTarget)
+	'$progress_total'(Target,Sum)
+*/
+:- dynamic '$progress_subproblem'/3, '$progress_subproblem_inv'/2, '$progress_total'/2.
+
 
 :- dynamic '$has_lock'/1,'$building'/1.
 :- thread_local '$has_lock'/1,'$building'/1.
@@ -288,6 +311,10 @@ build_target(Target):-
     (	catch(
     		call_cleanup(
     			(	debug(builder(build(Target)),"Building target ~w~n.",[Target]),
+    				(	setof(step(S,W),estimate_hook(Target,S,W),Steps)
+    				->	thread_send_message(build_arbiter,msg(Target,estimate(Steps)))
+    				;	true
+    				),
     				forall(build_hook(Target),true),
     				debug(builder(build(Target)),"Done with target ~w~n.",[Target])
     			),
@@ -475,7 +502,8 @@ execute_action([],_).
 execute_action([Action|Actions],Target):-
     execute_action(Action,Target),
     execute_action(Actions,Target).
-execute_action(grant([]),_Target).
+execute_action(grant([]),Target):-
+    progress_report_worked(Target).
 execute_action(grant([Thread|Threads]),Target):-
     thread_send_message(Thread,builder_msg(grant(Target))),
     execute_action(grant(Threads),Target).
@@ -487,28 +515,6 @@ execute_action(report_error([],_E),_Target).
 execute_action(report_error([Thread|Threads],E),Target):-
     thread_send_message(Thread,builder_msg(error(Target,E))),
     execute_action(report_error(Threads,E),Target).
-/*
- FIXME: 
- Probably it would be best to make sure that all
- cascading invalidation messages get processed before any
- other messages, (requests in particular).
- 
- This is not that difficult. 
- when starting to invalidate, perform a state change into some
- state invalidating. within this state, all incoming messages are frozen.
-  After calling the invalidate_hook, enqueue some "invalidation_done" marker.
-  When this marker is read, the waiting messages are unfrozen.
-  
-  Problem is, that this cuts through all the target states.
-  We have to add a global state component. So
-  I decided to ignore the "problem", as long as possible.
-  
-  Possible workaround: when invalidation is requested, check if the 
-  request comes in from the arbiter thread. IN this case, process it right away, 
-  i.e. without using the message loop. This way we make sure that cascading 
-  invalidation requests are processed before any other requests.
-  I don't know how to model this in our state chart diagram...
-*/
 execute_action(invalidate,Target):-
 	my_debug(builder(debug),"invalidating target: ~w~n",[Target]),
     pif_notify(builder(Target),invalid),    
@@ -521,11 +527,14 @@ execute_action(rebuild(Thread),Target):-
 	pif_notify(builder(Target),start(Thread)),
 	clear_dependencies(Target),	
 	thread_send_message(Thread,builder_msg(rebuild(Target))).
+execute_action(progress_prepare(Ts),Target):-
+	progress_report_prepare(Target,Ts).	
 execute_action(report_cycle(Thread),Target):-
 	thread_send_message(Thread,	builder_msg(cycle(Target))).
 execute_action(notify_done,Target):-
 	my_debug(builder(debug),"target done: ~w~n",[Target]),
-    pif_notify(builder(Target),done).
+    pif_notify(builder(Target),done),
+    progress_report_cleanup(Target).
 execute_action(ackn_remove(W),Target):-
     my_debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
 	thread_send_message(W,builder_msg(removed(Target))).    
@@ -618,6 +627,7 @@ target_transition(state(idle, pending(P) , [],SLs, Ws),		request(W), 	[],		 				
 
 target_transition(state(idle, pending(_) , Ls,SLs,Ws),		fail,		 	report_failure(Ws),		state(idle, outdated, Ls,SLs,[]),			_Target).
 target_transition(state(idle, pending(_) , Ls,SLs,Ws), 		error(E),	 	report_error(Ws,E),		state(idle, outdated, Ls,SLs,[]),			_Target).
+target_transition(state(idle, pending(P) , Ls,SLs,Ws),		estimate(Ts),	progress_prepare(Ts),	state(idle, pending(P) , Ls,SLs,Ws),		_Target).	
 
 %FIXME: do we need to react some way when invalidation is requested during pending?
 target_transition(state(idle, pending(P) , Ls,SLs,Ws), 		mark_dirty,	 	[],						state(idle, pending(P) , Ls,SLs,Ws),		_Target).
@@ -709,27 +719,32 @@ pdt_thread_activity(Thread,wait(Target)):-
 	memberchk(Thread,Ws).
 
 
+available(Target):-
+    current_target_state(Target,state(_, available, _, _, _)).
     
-%:-tdebug.
-%myspy.
-%:-tspy(myspy).
-%user:prolog_exception_hook(error(target_error(_, _)),
-%                               _, _, _) :-
-%            writeln(arsch),trace, fail.
+progress_report_prepare(Target,Steps):-    
+    progress_report_prepare_X(Steps,Target,0,Sum),
+    assert('$progress_total'(Target,Sum)),
+    pif_notify(builder(Target),estimate(Sum)).
+    
+progress_report_prepare_X([],_Target,Sum,Sum).
+progress_report_prepare_X([step(S,W)|Steps],Target,Sum0,Sum):-
+    Sum1 is Sum0 + W,
+    assert('$progress_subproblem'(S,Target,W),Ref),
+    assert('$progress_subproblem_inv'(Target,Ref)),
+    progress_report_prepare_X(Steps,Target,Sum1,Sum).
 
-%user:prolog_exception_hook(E, _, _, _) :- 
-%            writeln(arsch),
-%            var(E),
-%            myspy,
-%            trace, fail.
-
-%user:prolog_exception_hook(E, _, _, _) :- 
-%            writeln(arsch),
-%            attvar(E),
-%            myspy,
-%            trace, fail.
-
-            
-%:-debug(builder),debug(builder(_)).             
-
-
+progress_report_worked(SubTarget):-
+	forall(
+		'$progress_subproblem'(SubTarget,Target,W),
+		pif_notify(builder(Target),worked(W))
+	).
+	
+progress_report_cleanup(Target):-
+	forall(
+		clause('$progress_subproblem_inv'(Target,Ref),_,InvRef),
+		(	erase(Ref),
+			erase(InvRef)
+		)
+	),
+	retractall('$progress_total'(Target,_)).	

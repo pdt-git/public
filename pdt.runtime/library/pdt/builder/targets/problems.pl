@@ -7,16 +7,21 @@
 :-use_module(library('builder/targets/singletons')).
 :-use_module(library('builder/targets/interprete')).
 
+:- use_module(library('facade/pdt_workspace')).
 
 
-exists_project(Name):-
-    pef_project_query([name=Name]).
+pdt_builder:estimate_hook(problems(Resource),problems(file(Path)),1):-
+    pdt_contains(Resource,file(Path)).
+
+pdt_builder:report_progress(problems(workspace)).
     
 pdt_builder:build_hook(problems(workspace)):-
+    spyme,
     setof(problems(project(ProjectName)),pef_project_query([name=ProjectName]),Deps),
     pdt_with_targets([workspace|Deps],true).
 pdt_builder:build_hook(problems(project(Resource))):-
-    setof(problems(Path,IP,EP),
+    spyme,
+    setof(problems(directory(Path,IP,EP)),
     	(	pef_project_query([id=Project,name=Resource]),
     		pef_source_path_query([project=Project,path=Path,include_pattern=IP,exclude_pattern=EP])
     		
@@ -25,16 +30,19 @@ pdt_builder:build_hook(problems(project(Resource))):-
     ),
     pdt_with_targets([project(Resource)|Deps],true).
 pdt_builder:build_hook(problems(file(Resource))):-    	    
+    spyme,
     pdt_with_targets([file(Resource),parse(Resource),interprete(Resource),singletons(Resource)],true).
 pdt_builder:build_hook(problems(directory(Dir,IP,EP))):-
+    spyme,
 	pdt_request_target(directory(Dir,IP,EP)),
 	pef_directory_query([path=Dir,include_pattern=IP,exclude_pattern=EP,id=Parent]),
 	forall(
-		pef_directory_entry([parent=Parent,child=Child]),
-		(	pef_type(Child,directory)
+		pef_directory_entry_query([parent=Parent,child=Child]),
+		(	pef_type(Child,pef_directory)
 		->	pef_directory_query([id=Child,path=CPath,exclude_pattern=CIP,include_pattern=CEP]),
 			pdt_request_target(problems(directory(CPath,CIP,CEP)))
 		;	pef_file_query([id=Child,path=CPath]),
 			pdt_request_target(problems(file(CPath)))
 		)
 	).	
+spyme.
