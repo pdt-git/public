@@ -118,26 +118,6 @@ release_targets(Ref):-
 
 spyme.
 
-%%
-% pdt_request_target(+Target)
-% request a target.
-% 
-%
-%  Make sure the information associated with Target is present and up to date.
-% If necessary, the calling thread will wait until the information is built.
-%
-% 
-% The calling thread obtains a "read lock" on the specified target.
-% As long as a target is locked, it can not be built.
-% The targets are released once the surrounding pdt_with_targets/1 or pdt_with_targets/2 call exits.
-% If no such call exists, this predicate behaves as pdt_with_targets( [Target],true).
-
-pdt_request_target(T):-
-    (	'$has_lock'('$mark')
-    ->	ensure_builder_is_running,
-    	request_target(T)
-    ;	pdt_with_targets( [T],true)
-    ).
     
 
     
@@ -200,6 +180,28 @@ request_target(Target):-
     ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target2))))
     ).
 
+
+%%
+% pdt_request_target(+Target)
+% request a target.
+% 
+%
+%  Make sure the information associated with Target is present and up to date.
+% If necessary, the calling thread will wait until the information is built.
+%
+% 
+% The calling thread obtains a "read lock" on the specified target.
+% As long as a target is locked, it can not be built.
+% The targets are released once the surrounding pdt_with_targets/1 or pdt_with_targets/2 call exits.
+% If no such call exists, this predicate behaves as pdt_with_targets( [Target],true).
+
+pdt_request_target(T):-
+    (	'$has_lock'('$mark')
+    ->	ensure_builder_is_running,
+    	request_target(T)
+    ;	pdt_with_targets( [T],true)
+    ).
+
 pdt_request_targets(Ts):-
 	(	'$has_lock'('$mark')
     ->	ensure_builder_is_running,
@@ -208,7 +210,8 @@ pdt_request_targets(Ts):-
     ).
 request_targets([]).
 request_targets([T|Ts]):-
-	request_target(T),
+	profile_push(request(T)),
+	call_cleanup( request_target(T), profile_pop ),
 	request_targets(Ts).
 
 
@@ -307,7 +310,8 @@ add_dependency(Target,Dep):-
 build_target(Target):-
     pef_clear_record(Target),
     pef_start_recording(Target),
-    push_target(Target),    
+    push_target(Target),
+    profile_push(build(Target)),    
     (	catch(
     		call_cleanup(
     			(	debug(builder(build(Target)),"Building target ~w~n.",[Target]),
@@ -318,7 +322,8 @@ build_target(Target):-
     				forall(build_hook(Target),true),
     				debug(builder(build(Target)),"Done with target ~w~n.",[Target])
     			),
-    			(	pop_target,
+    			(	profile_pop,
+    				pop_target,
     				pef_stop_recording
     			)
     		),
@@ -747,4 +752,63 @@ progress_report_cleanup(Target):-
 			erase(InvRef)
 		)
 	),
-	retractall('$progress_total'(Target,_)).	
+	retractall('$progress_total'(Target,_)).
+	
+
+
+:-thread_local '$profile'/2,'$profile_contains'/2,'$profile_starts'/2,'$profile_ends'/2,'$profile_current'/1.
+:-dynamic '$profile'/2,'$profile_contains'/2,'$profile_starts'/2,'$profile_ends'/2,'$profile_current'/1.
+	
+profile_push(Target):-
+    get_time(Now),
+    pef_reserve_id('$profile',T),
+    assert('$profile'(Target,T)),
+    (	'$profile_current'(CurrentT)
+    ->	assert('$profile_contains'(CurrentT,T))
+    ;	true
+    ),
+    assert('$profile_start'(T,Now)),    
+    asserta('$profile_current'(T)).
+    
+profile_pop:-
+	get_time(Now),
+	retract('$profile_current'(T)),
+	assert('$profile_end'(T,Now)).
+
+profile_clear:-
+	retractall('$profile'(_,_)),
+	retractall('$profile_current'(_)),
+	retractall('$profile_contains'(_,_)),
+	retractall('$profile_start'(_,_)),
+	retractall('$profile_end'(_,_)).
+	
+target_profile(Target,Count,Brutto,Netto):-
+    findall(Time,
+    	(	'$profile'(Target,T),
+    		'$profile_start'(T,Start),
+    		'$profile_end'(T,End),
+    		Time is End - Start
+    	),
+    	Times
+    ),
+    sum(Times,Brutto),
+    length(Times,Count),
+    findall(Time,
+    	(	'$profile'(Target,T),
+    		'$profile_contains'(T,TT),
+    		'$profile_start'(TT,Start),
+    		'$profile_end'(TT,End),
+    		Time is End - Start
+    	),
+    	ChildrenTimes
+    ),
+    sum(ChildrenTimes,ChildrenTime),
+    Netto is Brutto - ChildrenTime.
+
+sum(Times,Brutto):-
+	sum(Times,0,Brutto).
+
+sum([],Sum,Sum).
+sum([Time|Times],Sum0,Sum):-
+    Sum1 is Time + Sum0,
+    sum(Times,Sum1,Sum).
