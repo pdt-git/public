@@ -11,12 +11,10 @@
 		my_debug/3
 	]
 ).     
-
-
- 
+x(A).
 :- use_module(library(pif_observe2)).
 :- use_module(library('pef/pef_base')).
-
+ 
 /* hooks */
 :- dynamic 
 	build_hook/1,
@@ -292,21 +290,6 @@ building_target(Target):-
     '$building'(Target),
     !.
 
-clear_dependencies(Target):-
-    forall(
-    	clause('$target_depends'(Target,Dep),_,Ref),
-    	(	retract('$target_depends_inv'(Dep,Target)),
-    		erase(Ref)
-    	)
-    ).
-
-add_dependency(Target,Dep):-
-    '$target_depends'(Target,Dep),
-    !.
-add_dependency(Target,Dep):-    
-	assert('$target_depends'(Target,Dep)),
-	assert('$target_depends_inv'(Dep,Target)).
-
 build_target(Target):-
     pef_clear_record(Target),
     pef_start_recording(Target),
@@ -362,7 +345,7 @@ update_target_state(Target,NewState):-
     retractall(target_state(Target,_)),
     assert(target_state(Target,NewState)).
 
-    
+   
 
 stop_arbiter:-
     current_thread(build_arbiter,Status),
@@ -482,8 +465,8 @@ process_message(meta,check_available(Thread,Targets)):-
     	
 process_message(meta,propagate_dependencies(From,To)):-
 	!,
-	add_dependency(To,From), %FIXME: misleading variable names...
-	forall(net_dependency(From,Dep),add_dependency(To,Dep)).    	
+	add_dependency(To,From). %FIXME: misleading variable names...
+	%forall(net_dependency(From,Dep),add_dependency(To,Dep)).    	
 
 
 process_message(Target,Event):-
@@ -524,7 +507,7 @@ execute_action(invalidate,Target):-
 	my_debug(builder(debug),"invalidating target: ~w~n",[Target]),
     pif_notify(builder(Target),invalid),    
     %forall(invalidate_hook(Target),true),
-    forall(target_depends(Dependent,Target),
+    forall(net_dependency(Dependent,Target),
     	process_message(Dependent,mark_dirty) %FIXME: hm... hope this works.
     ).
 execute_action(rebuild(Thread),Target):-
@@ -586,15 +569,66 @@ execute_action(unlock_deps([T|Ts]),_Target):-
 %
 % Waits: A list of threads that are waiting for the target to become available.
 
+add_dependency(Target,Dep):-
+    target_key(Target,TargetKey),
+    target_key(Dep,DepKey),
+    (	'$target_depends'(Target,Dep)
+    ->	true
+    ;   assert('$target_depends'(TargetKey,DepKey)),
+		assert('$target_depends_inv'(DepKey,TargetKey))
+    ).
+    
+	
+
 
 target_depends(T1,T2):-
     (	nonvar(T1)
-    ->	'$target_depends'(T1,T2)
-	;	'$target_depends_inv'(T2,T1)
+    ->	target_key(T1,K1),
+    	'$target_depends'(K1,K2),
+    	target_key(T2,K2)
+	;	target_key(T2,K2),
+		'$target_depends_inv'(T2,T1),
+		target_key(T1,K1)
 	).
-	
+
+
+clear_dependencies(Target):-
+    forall(
+    	clause('$target_depends'(Target,Dep),_,Ref),
+    	(	retract('$target_depends_inv'(Dep,Target)),
+    		erase(Ref)
+    	)
+    ).
+
+
+
+:- thread_local '$visited'/1.
+:- dynamic '$visited'/1.	
 net_dependency(T1,T2):-
-	target_depends(T1,T2).
+    (	nonvar(T1)
+	->	target_key(T1,K1),
+		call_cleanup(net_dependency_X(K1,K2),retractall('$visited'(_))),
+		target_key(T2,K2)
+	;	target_key(T2,K2),
+		call_cleanup(net_dependency_X_inv(K2,K1),retractall('$visited'(_))),
+		target_key(T1,K1)
+	).
+net_dependency_X(T1,T3):-
+	'$target_depends'(T1,T2),
+	\+ '$visited'(T2),
+	assert('$visited'(T2)),
+	(	T3=T2
+	;	net_dependency_X(T2,T3)
+	).
+
+net_dependency_X_inv(T1,T3):-
+	'$target_depends_inv'(T1,T2),
+	\+ '$visited'(T2),
+	assert('$visited'(T2)),
+	(	T3=T2
+	;	net_dependency_X_inv(T2,T3)
+	).
+
 
 net_dependencies(L,R):-
     (	nonvar(L)
@@ -607,6 +641,16 @@ net_dependencies(L,R):-
     ->	R=[]
     ;	L=[]
     ).
+
+
+:- dynamic '$target'/1.
+
+target_key(T,K):-
+    (	clause('$target'(T),_,K)
+    ->	true
+    ;	assert('$target'(T),K)
+    ).
+    
 
 check_available(Targets):-
     forall(member(Target,Targets),current_target_state(Target,state(_,available,_,_,_))).
@@ -782,29 +826,30 @@ profile_clear:-
 	retractall('$profile_start'(_,_)),
 	retractall('$profile_end'(_,_)).
 	
-target_profile(Target,Count,Brutto,Netto):-
-    findall(Time,
-    	(	'$profile'(Target,T),
-    		'$profile_start'(T,Start),
-    		'$profile_end'(T,End),
-    		Time is End - Start
+target_profile(Target,Time,Netto):-
+    '$profile'(Target,T),
+    '$profile_start'(T,Start),
+    '$profile_end'(T,End),
+    Time is End - Start,
+    
+    findall(CTime,
+    	(	'$profile_contains'(T,C),
+    		'$profile_start'(C,CStart),
+    		'$profile_end'(C,CEnd),
+    		CTime is CEnd - CStart
     	),
-    	Times
+    	CTimes
     ),
-    sum(Times,Brutto),
-    length(Times,Count),
-    findall(Time,
-    	(	'$profile'(Target,T),
-    		'$profile_contains'(T,TT),
-    		'$profile_start'(TT,Start),
-    		'$profile_end'(TT,End),
-    		Time is End - Start
-    	),
-    	ChildrenTimes
-    ),
-    sum(ChildrenTimes,ChildrenTime),
-    Netto is Brutto - ChildrenTime.
+    sum(CTimes,TimeChildren),
+    Netto is Time - TimeChildren.
 
+target_profile(Target,Count,STime,SNetto):-
+    findall(Time,target_profile(Target,Time,_),Times),
+    findall(Netto,target_profile(Target,_,Netto),Nettos),
+    length(Times,Count),
+    sum(Times,STime),
+    sum(Nettos,SNetto).
+    
 sum(Times,Brutto):-
 	sum(Times,0,Brutto).
 
