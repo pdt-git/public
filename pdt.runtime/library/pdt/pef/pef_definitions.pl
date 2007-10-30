@@ -111,7 +111,7 @@
 	pef_toplevel(
 		id,
 		file @index :pef_file,
-		term @index,
+		term,
 		expanded,
 		positions,
 		varnames,

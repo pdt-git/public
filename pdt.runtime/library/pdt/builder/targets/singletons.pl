@@ -5,6 +5,8 @@
 :-use_module(library('builder/targets/parse')).
 :-use_module(library('builder/targets/ast')).
 
+pdt_builder:target_file(singletons(F),F).
+
 pdt_builder:build_hook(singletons(Abs)):-
     pdt_request_target(parse(Abs)),
 	%singletons:forget_singletons(Abs),
@@ -36,10 +38,14 @@ check_singletons(Abs):-
 			check_no_singletons(VarNames,Singletons,TL)*/
 		)
 	).    
-	
+spyme.
+%:-tspy(singletons:spyme).	
 check_singletons([],_).
 check_singletons([Name=_Var|Singletons],Tl):-
-    pdt_request_target(ast(Tl)),
+    pef_toplevel_query([id=Tl,file=File]),
+    get_pef_file(Path,File),
+    spyme,    
+    pdt_request_target(ast(file(Path))),
     pef_ast_query([toplevel=Tl,id=Ast]),
     pef_variable_query([ast=Ast,name=Name,id=VarId]),
     pef_reserve_id(pef_singleton,ID),
@@ -51,7 +57,9 @@ check_no_singletons([Name=_Var|VarNames],Singletons,Tl):-
     (	atom_prefix(Name,'_'),
     	\+ atom_prefix(Name,'__'),
     	\+ memberchk(Name=_,Singletons)
-    ->	pdt_request_target(ast(Tl)),
+    ->	pef_toplevel_query([id=Tl,file=File]),
+    	get_pef_file(Path,File),
+    	pdt_request_target(ast(file(Path))),
     	pef_ast_query([toplevel=Tl,id=Ast]),
 	    pef_variable_query([ast=Ast,name=Name,id=VarId]),
 	    pef_reserve_id(pef_singleton,ID),

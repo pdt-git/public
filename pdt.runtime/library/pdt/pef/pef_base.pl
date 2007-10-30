@@ -4,7 +4,8 @@
 		pef_start_recording/1,
 		pef_stop_recording/0,
 		pef_clear_record/1,
-		pef_count/2
+		pef_count/2,
+		pef_record_key/2
 	]
 ).
 
@@ -30,6 +31,54 @@
 
 
 
+/* 2007-10-25 NOTE TO MYSELF: Before thinking about performance improvements, read this first!!
+'$erased'/1, my_erase/2 and stuff:
+
+
+trying to speed up the auto-clean (see pef_clear_record/1).
+
+The  assert predicates will record the clauses the are adding to records typically associated
+to build targets. When the targets are rebuild, all those clauses are erased first.
+
+This introduces one problem, though:
+When clauses are removed using one of the retract predicates, the record contains dangling references.
+SWI-Prolog does not offer a save way to test wether a reference is still valid or not.
+
+Until now I solved the problem by not erasing the clauses directly, but by calling the retractall predicates
+instead. This is save, but slow: the cleanup phase, in particular the lookup involved in the retract/retractall calls
+becomes a dominant factor in the time requirements of builds. (up to 60% in recent profilings)
+
+I suspect the reason for this to be that the first argument of the index clause is often not atomic, which 
+seems to make hashing more expansive. My theory is supported by the fact that the 
+pef_toplevel reverse indices are by far the most expensive ones in this respect. In fact, the term argument is
+indexed. Its values are probably the most complex argument terms currently represented in the pef base.
+
+I will try two things:
+1) remove the index. I don't think it is really used. 
+2) if a need should arise to index complex arguments, I can try the following:
+
+- assert predicates record references to created predicates.
+- retractall predicates keep track of the clauses they retract. (the '$erase'/1 predicate)
+- during auto-cleanup, run through the recorded references, using the '$erase'/1 predicate to filter out
+  those that are already deleted. The  '$erase'/1 lookups should be much cheaper than the "real" index lookups,
+  since we are only hashing atomic values here.
+
+:- dynamic '$erased'/1.
+my_erase(Ref,Refs):-
+    (	clause('$erased'(Ref),_,ERef)
+    ->	erase(ERef)
+    ;	erase_elms([Ref|Refs])
+    ).
+erase_elms([]).
+erase_elms([Ref|Refs]):-
+    erase(Ref),
+    erase_elms(Refs).
+
+*/
+
+
+
+    
 %% pef_count(+Type,-Count)
 % true if count is the number of pefs of type Type.
 pef_count(Type,Count):-
@@ -68,6 +117,9 @@ pef_clear_record(Term):-
     		erase(RecordRef)
     	)
     ).
+pef_record_key(Term,Key):-
+    record_key(Term,Key).
+    
 record_key(Term,Key):-
     '$record_key'(Term,Key),
     !.
@@ -414,7 +466,7 @@ create_retract_action_args(I,Name,Cx,Ref,Retracts,RetractsOut):-
 	index_name(Name,I,IxName),
     IndexClause=..[IxName,Arg,Ref],
 	J is I - 1,
-	create_retract_action_args(J,Name,Cx,Ref, (retractall(IndexClause),Retracts),RetractsOut).  
+	create_retract_action_args(J,Name,Cx,Ref, (retract(IndexClause),Retracts),RetractsOut).  
 create_retract_action_args(I,Name,Cx,Ref,Retracts,RetractsOut):-
     J is I - 1,
 	create_retract_action_args(J,Name,Cx,Ref,Retracts,RetractsOut).  

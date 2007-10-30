@@ -10,17 +10,20 @@
 :- use_module(library('builder/targets/parse')).
 
 :- pdt_define_context(cx(toplevel,positions,root)).
-
-pdt_builder:build_hook(asts(AbsFile)):-
+spyme.
+%:-tspy(ast:spyme).
+pdt_builder:build_hook(ast(file(AbsFile))):-
+    spyme,
     get_pef_file(AbsFile,FID),
-    pdt_request_targets(parse(AbsFile)),
+    pdt_request_target(parse(AbsFile)),
 	forall(
-    	pef_toplevel_query([file=FID,id=Tl]),
-    	pdt_request_target(ast(Tl))
+    	pef_toplevel_query([file=FID,id=Tl]),    	
+    	ast:rebuild(Tl)
     ).
-pdt_builder:build_hook(ast(Tl)):-
-    ast:rebuild(Tl).
 
+   
+
+pdt_builder:target_file(ast(file(F)),F).
 
 pdt_builder:invalidate_hook(parse(AbsFile)):-
     get_pef_file(AbsFile,FID),
@@ -83,8 +86,15 @@ process_dcs([Var|Vars],Cx):-
     pef_variable_assert([id=Id,name='_',ast=Root]),
     Var='$var'(Id),
 	process_dcs(Vars,Cx).
+
+generate_ast(Term,Id,Cx):-
+    generate_ast2(Term,Id,Cx),
+    !.
+generate_ast(Term,Id,Cx):-
+    throw(failed(generate_ast2(Term,Id,Cx))).
+
     
-generate_ast('$var'(VarId), Id,Cx):-
+generate_ast2('$var'(VarId), Id,Cx):-
     !,
     pef_reserve_id(pef_variable_occurance,Id),    
     pef_variable_occurance_assert([id=Id,variable=VarId]),
@@ -96,7 +106,7 @@ generate_ast('$var'(VarId), Id,Cx):-
     	pef_property_assert([pef=Id,key=end,value=To])
     ).
     
-generate_ast(Term, Id,Cx):-
+generate_ast2(Term, Id,Cx):-
     functor(Term,Name,Arity),
 	pef_reserve_id(pef_term,Id),
 	pef_term_assert([id=Id,name=Name,arity=Arity]),

@@ -3,6 +3,11 @@
 :-use_module(library('pef/pef_base')).
 :-use_module(library('util/pdt_regex')).
 
+
+pdt_builder:target_file(file(F),F).
+pdt_builder:target_file(directory(F),F).
+pdt_builder:target_mutable(workspace,true).
+pdt_builder:target_mutable(project(_),true).
 pdt_builder:build_hook(directory(Abs,Include,Exclude)):-
     (	exists_directory(Abs)
     ->	pef_reserve_id(pef_directory,Dir),

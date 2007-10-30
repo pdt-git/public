@@ -96,14 +96,25 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		super();
 	}
 
-	private void build(IFile file, AsyncPrologSession as) throws CoreException,
-			PrologInterfaceException {
+	private void contentsChanged(IFile file, AsyncPrologSession as)
+			throws CoreException, PrologInterfaceException {
 
-		Debug.debug("builder processing file "+file);
+		Debug.debug("builder processing file " + file);
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 		file.getCharset();
-		as.queryOnce(file, "pdt_file_changed('" + plFileName + "')");
+		as.queryOnce(file, "pdt_file_contents_changed('" + plFileName + "')");
+
+	}
+
+	private void existenceChanged(IFile file, AsyncPrologSession as)
+			throws CoreException, PrologInterfaceException {
+
+		Debug.debug("builder processing file " + file);
+		File ioFile = file.getLocation().toFile();
+		String plFileName = Util.prologFileName(ioFile);
+		file.getCharset();
+		as.queryOnce(file, "pdt_file_existence_changed('" + plFileName + "')");
 
 	}
 
@@ -121,24 +132,29 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			Debug.debug("PrologBuilder.build(...) was triggered");
 			String taskname = "updating prolog metadata";
 			;
-			Set<IFile> forgetList = new HashSet<IFile>();
-			Set<IFile> buildList = new HashSet<IFile>();
+
+			/*
+			 * from the pdt's pov there are two ways a file may change its
+			 * existence may be affected (add/remove) its contents may change
+			 */
+			Set<IFile> existenceList = new HashSet<IFile>();
+			Set<IFile> contentList = new HashSet<IFile>();
 
 			switch (kind) {
 			case IncrementalProjectBuilder.AUTO_BUILD:
 			case IncrementalProjectBuilder.INCREMENTAL_BUILD:
 
-				collect(getDelta(getProject()), buildList, forgetList);
+				collect(getDelta(getProject()), contentList, existenceList);
 				break;
 			case IncrementalProjectBuilder.FULL_BUILD:
 				getProject().deleteMarkers(IMarker.PROBLEM, true,
 						IResource.DEPTH_INFINITE);
-				collect(getProject(), buildList);
+				collect(getProject(), existenceList);
 				break;
 			case IncrementalProjectBuilder.CLEAN_BUILD:
 				getProject().deleteMarkers(IMarker.PROBLEM, true,
 						IResource.DEPTH_INFINITE);
-				collect(getProject(), forgetList);
+				collect(getProject(), existenceList);
 				break;
 			default:
 				Debug.error("Wasn das f�r ein Buil kind jetzt?");
@@ -153,8 +169,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			setupPif(pif);
 			final AsyncPrologSession as = pif.getAsyncSession();
 
-			buildList.addAll(forgetList);
-			monitor.beginTask(taskname, buildList.size());
+			monitor.beginTask(taskname, contentList.size()
+					+ existenceList.size());
 			as.addBatchListener(new DefaultAsyncPrologSessionListener() {
 				public void goalSucceeded(AsyncPrologSessionEvent e) {
 					if (e.ticket instanceof IFile) {
@@ -179,27 +195,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				}
 			});
 			try {
-				// String parse_comments =
-				// plProject.getPreferenceValue(PDTCore.PROP_PARSE_COMMENTS,
-				// "false");
-				// String default_encoding =
-				// plProject.getPreferenceValue(PDTCore.PROP_DEFAULT_ENCODING,
-				// "utf8");
-				// as.queryOnce("set parse_comments option",
-				// "pdt_annotator:pdt_set_preference_value(parse_comments,"+parse_comments+")");
-				// as.queryOnce("set default_encoding option",
-				// "pdt_annotator:pdt_set_preference_value(default_encoding,"+default_encoding+")");
-				// setup annotator modules
-				// plProject.getAnnotatorsOptionProvider();
 
-				// File cacheDir =
-				// PDTCorePlugin.getDefault().getStateLocation().append(PDTCore.CACHE_DIR).toFile();
-				// String plCacheDir = Util.prologFileName(cacheDir);
-				// as.queryOnce("set cache dir option",
-				// "pdt_annotator_cache:pdt_set_preference_value(cache_dir,'"+plCacheDir+"')");
-				// forget(forgetList, as, monitor);
-
-				build(buildList, as, monitor);
+				build(contentList,existenceList, as, monitor);
 
 				if (!monitor.isCanceled()) {
 					as.join();
@@ -213,17 +210,11 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			if (monitor.isCanceled()) {
 				return null;
 			}
-			/*
-			 * try { update_markers(buildList, s);
-			 * s.queryOnce("pdt_write_cache_index");
-			 * s.queryOnce("pdt_index_save_to_disk"); } finally { if (s != null) {
-			 * s.dispose(); } }
-			 */
+
 			Debug.debug("PrologBuilder.build(...) is done.");
 			monitor.done();
-			plProject.updateMarkers(buildList);
-			
-			
+			plProject.updateMarkers(contentList);
+
 			return null;
 		} catch (OperationCanceledException e) {
 			throw e;
@@ -265,147 +256,25 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 	}
 
-	private void update_markers(Set buildList, PrologSession s)
-			throws CoreException, PrologException, PrologInterfaceException,
-			IOException {
-		StringBuffer sb = new StringBuffer();
-		sb.append('[');
-		boolean first = true;
-		Map<String, IFile> wsFiles = new HashMap<String, IFile>();
-		Map<String, String> fileContents = new HashMap<String, String>(); // plFile as key
-		for (Iterator it = buildList.iterator(); it.hasNext();) {
-			if (!first) {
-				sb.append(',');
-			}
-			IFile file = (IFile) it.next();
-			file.deleteMarkers(IMarker.PROBLEM, true, 0);
-			File ioFile = file.getLocation().toFile();
-			String plFileName = Util.prologFileName(ioFile);
-			wsFiles.put(plFileName, file);
-			InputStream stream = file.getContents();
-			String data = Util.toString(stream);
-			stream.close();
-			fileContents.put(plFileName, data);
-			sb.append('\'');
-			sb.append(plFileName);
-			sb.append('\'');
-			first = false;
-		}
-		sb.append(']');
-		String fileList = sb.toString();
-		List list = s.queryAll("member(File," + fileList
-				+ "),pdt_file_error(File,"
-				+ "error(Type, stream(_, Line, Column, CharOffset))),"
-				+ "message_to_string(error(Type, _),Message)");
-		for (Iterator it = list.iterator(); it.hasNext();) {
-			Map map = (Map) it.next();
-			String plFile = (String) map.get("File");
-			IFile wsFile = wsFiles.get(plFile);
-			String data = fileContents.get(plFile);
-			int line = Integer.parseInt((String) map.get("Line"));
-			int column = Integer.parseInt((String) map.get("Column"));
-			int offset = PDTCoreUtils.convertCharacterOffset(data, Integer
-					.parseInt((String) map.get("CharOffset")));
-			String message = (String) map.get("Message");
-
-			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
-			HashMap<String, Integer> attributes = new HashMap<String, Integer>();
-			MarkerUtilities.setMessage(attributes, message);
-			MarkerUtilities.setLineNumber(attributes, line);
-
-			MarkerUtilities.setCharStart(attributes, offset);
-			MarkerUtilities.setCharEnd(attributes, offset + 1);
-
-			attributes.put(IMarker.SEVERITY,
-					new Integer(IMarker.SEVERITY_ERROR));
-			marker.setAttributes(attributes);
-		}
-
-		list = s.queryAll("member(File," + fileList
-				+ "),pdt_file_problem(File," + "error(Error),From-To)");
-		for (Iterator it = list.iterator(); it.hasNext();) {
-			Map map = (Map) it.next();
-			String plFile = (String) map.get("File");
-			IFile wsFile = wsFiles.get(plFile);
-			String data = fileContents.get(plFile);
-			int start = PDTCoreUtils.convertCharacterOffset(data, Integer
-					.parseInt((String) map.get("From")));
-			int end = PDTCoreUtils.convertCharacterOffset(data, Integer
-					.parseInt((String) map.get("To")));
-			String message = getMessage((String) map.get("Error"));
-			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
-			HashMap<String, Integer> attributes = new HashMap<String, Integer>();
-			MarkerUtilities.setMessage(attributes, message);
-
-			MarkerUtilities.setCharStart(attributes, start);
-			MarkerUtilities.setCharEnd(attributes, end);
-
-			attributes.put(IMarker.SEVERITY,
-					new Integer(IMarker.SEVERITY_ERROR));
-			marker.setAttributes(attributes);
-		}
-
-		list = s.queryAll("member(File," + fileList
-				+ "),pdt_file_problem(File," + "warning(Warning),From-To)");
-		for (Iterator it = list.iterator(); it.hasNext();) {
-			Map map = (Map) it.next();
-			String plFile = (String) map.get("File");
-			IFile wsFile = wsFiles.get(plFile);
-			String data = fileContents.get(plFile);
-			int start = PDTCoreUtils.convertCharacterOffset(data, Integer
-					.parseInt((String) map.get("From")));
-			int end = PDTCoreUtils.convertCharacterOffset(data, Integer
-					.parseInt((String) map.get("To")));
-
-			String message = getMessage((String) map.get("Warning"));
-			IMarker marker = wsFile.createMarker(IMarker.PROBLEM);
-			HashMap<String, Integer> attributes = new HashMap<String, Integer>();
-			MarkerUtilities.setMessage(attributes, message);
-
-			MarkerUtilities.setCharStart(attributes, start);
-			MarkerUtilities.setCharEnd(attributes, end);
-
-			attributes.put(IMarker.SEVERITY, new Integer(
-					IMarker.SEVERITY_WARNING));
-			marker.setAttributes(attributes);
-		}
-	}
-
-	private String getMessage(String string) {
-		if (string.startsWith("singleton(")) {
-			String varname = string.substring("singleton(".length(), string
-					.length() - 1);
-			return "[singleton] Variable " + varname
-					+ " apears only once in clause.";
-		}
-		if ("no_singleton".equals(string)) {
-			return "[no_singleton] Variable is not a singleton.";
-		}
-		if ("malformed_export".equals(string)) {
-			return "[malformed_export] Malformed signature in export list.";
-		}
-		if ("undefined_export".equals(string)) {
-			return "[undefined_export] Predicate is exported but not defined by the module.";
-		}
-		if ("malformed_signature".equals(string)) {
-			return "[malformed_signature] Malformed signature in property definition.";
-		}
-
-		return "[unknown error] " + string;
-	}
-
 	/**
 	 * @param v
 	 * @throws IOException
 	 * @throws CoreException
 	 * @throws PrologInterfaceException
 	 */
-	private void build(Set v, AsyncPrologSession as, IProgressMonitor monitor)
+	private void build(Set contentsSet, Set existenceSet,
+			AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, IOException, PrologInterfaceException {
 
-		for (Iterator it = v.iterator(); !monitor.isCanceled() && it.hasNext();) {
+		for (Iterator it = existenceSet.iterator(); !monitor.isCanceled()
+				&& it.hasNext();) {
 			IFile file = (IFile) it.next();
-			build(file, as);
+			existenceChanged(file, as);
+		}
+		for (Iterator it = contentsSet.iterator(); !monitor.isCanceled()
+				&& it.hasNext();) {
+			IFile file = (IFile) it.next();
+			contentsChanged(file, as);
 		}
 
 	}
@@ -472,13 +341,13 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 	/**
 	 * @param delta
-	 * @param forgetList
-	 * @param buildList
+	 * @param existenceList
+	 * @param contentsList
 	 * @return
 	 * @throws CoreException
 	 */
-	private void collect(IResourceDelta delta, final Set buildList,
-			final Set forgetList) throws CoreException {
+	private void collect(IResourceDelta delta, final Set contentsList,
+			final Set existenceList) throws CoreException {
 		final IPrologProject plProject = (IPrologProject) getProject()
 				.getNature(PDTCore.NATURE_ID);
 
@@ -488,11 +357,14 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 					IResource resource = delta.getResource();
 					boolean isCanidate = isCanidate(resource);
 					if (isCanidate && resource.getType() == IResource.FILE) {
-						if (delta.getKind() == IResourceDelta.REMOVED) {
-							forgetList.add(resource);
-						} else {
-							buildList.add(resource);
+						switch (delta.getKind()) {
+						case IResourceDelta.ADDED:
+						case IResourceDelta.REMOVED:
+							existenceList.add(resource);
+						default:
+							contentsList.add(resource);
 						}
+
 						return false;
 					}
 					return isCanidate;

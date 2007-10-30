@@ -9,6 +9,8 @@
 
 :- pdt_define_context(parse_cx(file,toplevel,term,expanded)).
 
+pdt_builder:target_file(parse(F),F).
+
 pdt_builder:build_hook(parse(AbsFile)):-
     parse:my_build_hook(AbsFile).
 my_build_hook(AbsFile):-    
@@ -98,7 +100,8 @@ do_read(F,In):-
     			[	variable_names(VarNames),
     				singletons(Singletons),
     				subterm_positions(Positions),
-    				comments(Comments)/*,
+    				comments(Comments),
+    				double_quotes(string)/*,
     				module(parse)*/
     			]
     		),    	
