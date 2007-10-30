@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.ui.util;
 
+import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -223,7 +224,9 @@ public final class UIUtils {
 			final Shell shell, final int code, final int context,
 			final Exception x) {
 		logError(provider, code, context, x);
-		displayErrorDialog(provider, shell, code, context, x);
+		if(shell!=null){
+			displayErrorDialog(provider, shell, code, context, x);
+		}
 	}
 
 	public static void setStatusErrorMessage(final String string) {
