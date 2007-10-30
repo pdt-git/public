@@ -9,6 +9,11 @@
 
 :- use_module(library('facade/pdt_workspace')).
 
+pdt_builder:target_file(problems(directory(Path,_,_)),Path).
+pdt_builder:target_file(problems(file(Path)),Path).
+pdt_builder:target_mutable(problems(workspace),true).
+pdt_builder:target_mutable(problems(project(_)),true).
+
 
 pdt_builder:estimate_hook(problems(Resource),problems(file(Path)),1):-
     pdt_contains(Resource,file(Path)).
@@ -39,7 +44,7 @@ pdt_builder:build_hook(problems(directory(Dir,IP,EP))):-
 	forall(
 		pef_directory_entry_query([parent=Parent,child=Child]),
 		(	pef_type(Child,pef_directory)
-		->	pef_directory_query([id=Child,path=CPath,exclude_pattern=CIP,include_pattern=CEP]),
+		->	pef_directory_query([id=Child,path=CPath,exclude_pattern=CEP,include_pattern=CIP]),
 			pdt_request_target(problems(directory(CPath,CIP,CEP)))
 		;	pef_file_query([id=Child,path=CPath]),
 			pdt_request_target(problems(file(CPath)))

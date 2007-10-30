@@ -1,7 +1,6 @@
 :-module(pdt_workspace,[
-	pdt_file_added/1,
-	pdt_file_changed/1,
-	pdt_file_removed/1,
+	pdt_file_contents_changed/1,
+	pdt_file_existence_changed/1,
 	pdt_add_source_path/4,
 	pdt_remove_source_path/2,
 	pdt_contains/2,
@@ -11,6 +10,7 @@
 
 :-use_module(library('builder/builder')).
 :-use_module(library('builder/targets/workspace')).
+:-use_module(library('builder/targets/parse')).
 :-use_module(library('pef/pef_base')).
 :-use_module(library('pef/pef_api')).
 
@@ -70,14 +70,18 @@ belongs_to_edge(directory(Path,IP,EP),project(Name)):-
 belongs_to_edge(project(Name),workspace):-
 	pef_project_query([name=Name]).	
 
-pdt_file_added(Abs):-
-    pdt_invalidate_target(file(Abs)).    
+        
     
-pdt_file_changed(Abs):-
-    pdt_invalidate_target(file(Abs)).
+pdt_file_contents_changed(Abs):-
+    pdt_invalidate_target(parse(Abs)).
+    
 	
-pdt_file_removed(Abs):-
+pdt_file_existence_changed(Abs):-
     pdt_invalidate_target(file(Abs)).
+    
+
+
+    
 pdt_remove_source_path(Project,Path):-
 	(	pef_project_query([name=Project,id=PRJID])
 	->	pef_source_path_retractall([project=PRJID,path=Path]),

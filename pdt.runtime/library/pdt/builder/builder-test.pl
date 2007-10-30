@@ -1,10 +1,13 @@
 :- use_module(builder).
 :- dynamic target_ts/2,current_ts/1.
-:- tspy(pdt_builder:spyme).
+%:- tspy(pdt_builder:spyme).
 :- debug(builder(transition(_))).
 
 % t1 --> t2 --> t3
-
+pdt_builder:target_mutable(t1,true).
+pdt_builder:target_mutable(t2,true).
+pdt_builder:target_mutable(t3,true).
+pdt_builder:target_mutable(t4,true).
 pdt_builder:build_hook(t1):-
     pdt_with_targets([t2],
     	(	current_ts(Ts),
@@ -33,8 +36,11 @@ pdt_builder:build_hook(t3):-
     	)
     ).    
 
+do_test2(S):-
+    thread_create(do_test(S),_,[]).
     
 do_test(S):-
+    pdt_invalidate_target(t3),
     retractall(current_ts(_)),
     assert(current_ts(S)),
     pdt_with_targets([t1],true),

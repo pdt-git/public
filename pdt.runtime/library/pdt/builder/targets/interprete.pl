@@ -11,6 +11,8 @@
 
 :- pdt_define_context(cx(program,module,file,toplevel,file_stack)).
 
+pdt_builder:target_file(interprete(F),F).
+
 pdt_builder:build_hook(interprete(AbsFile)):-
     interprete:my_build_hook(AbsFile).
 
