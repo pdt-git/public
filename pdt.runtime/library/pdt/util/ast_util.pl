@@ -10,7 +10,8 @@ ast_head_body/4,
 ast_strip_module/3,
 ast_apply/3,
 ast_root/2,
-ast_node/2
+ast_node/2,
+ast_var/1
 ]).
 :- use_module(library('pef/pef_base')).    
 %% 	ast_match(+Pattern,+AST,-Subst)
@@ -84,7 +85,8 @@ ast_equivalent(A,B):-
     ast_variable_occurance(A,V),
     %pef_variable_occurance_query([id=A,variable=V]),
     !,
-    ast_variable_occurance(B,V).
+    ast_variable_occurance(B,W),
+    V==W.
 	%pef_variable_occurance_query([id=B,variable=V]).    
 ast_equivalent(A,B):-
     ast_functor(A,Name,Arity),
@@ -115,10 +117,16 @@ ast_arg(I,A,AA):-
 	;	arg(I,A,AA)
     ).    
 ast_variable_occurance(A,V):-
-    attvar(A),
-    get_attr(A,ast_match,AST),
-    pef_variable_occurance_query([id=AST,variable=V]).
+    (	attvar(A)
+    ->	get_attr(A,ast_match,AST),
+    	pef_variable_occurance_query([id=AST,variable=V])
+    ;	var(A)
+    ->	A=V
+    ;	fail
+    ).
 
+ast_var(A):-
+    ast_variable_occurance(A,_).
 
 ast_root(Toplevel,AST):-
     pef_ast_query([toplevel=Toplevel,root=Root]),
@@ -151,7 +159,7 @@ ast_attach([A=B|Subst]):-
 		get_attr(BB,ast_match,Id),
 		put_attr(A,ast_match,Id)
 	;	var(A),var(B)
-	->	true		
+	->	fail %find_literal__match_found/6 relies on this behaviour!		
 	;	spyme,
 		throw(expected_list_of_var_int_pairs([A=B|Subst]))
 	),
