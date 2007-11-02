@@ -112,7 +112,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	/**@deprecated use PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface) instead.*/
 	public IPrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
 
-	public void updateMarkers(Set<IFile> buildList);
+	public void updateMarkers() throws CoreException;
 	public void updateBuildPath(PrologSession s) throws CoreException, PrologInterfaceException;
     
     

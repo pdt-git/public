@@ -55,8 +55,10 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.CVariable;
 import org.cs3.pl.cterm.internal.ATermFactory;
+import org.cs3.pl.cterm.internal.ParserCTermFactory;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.
@@ -295,13 +297,14 @@ public class PLUtil {
 
 	}
 
-	private static ATermFactory factory = new ATermFactory();
+	//private static CTermFactory factory = new ParserCTermFactory();
 
 	/**
 	 * @deprecated this is an ad-hoc solution. I am not sure yet where to put
 	 *             this stuff.
 	 */
 	public static CTerm createCTerm(Object input) {
+		ATermFactory factory = new ATermFactory();
 		return factory.createCTerm(input);
 	}
 

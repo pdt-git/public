@@ -12,18 +12,25 @@
 :- pdt_define_context(cx(toplevel,positions,root)).
 spyme.
 %:-tspy(ast:spyme).
-pdt_builder:build_hook(ast(file(AbsFile))):-
-    spyme,
-    get_pef_file(AbsFile,FID),
-    pdt_request_target(parse(AbsFile)),
-	forall(
-    	pef_toplevel_query([file=FID,id=Tl]),    	
-    	ast:rebuild(Tl)
-    ).
+pdt_builder:build_hook(ast(Resource)):-
+    pdt_request_target(Resource),
+	(	Resource=file(AbsFile)    
+	->  get_pef_file(AbsFile,FID),
+	    pdt_request_target(parse(AbsFile)),
+		forall(
+	    	pef_toplevel_query([file=FID,id=Tl]),    	
+	    	ast:rebuild(Tl)
+	    )
+	;	forall(pdt_contains(Resource,Element),pdt_request_target(ast(Element)))
+	).
 
    
 
 pdt_builder:target_file(ast(file(F)),F).
+pdt_builder:target_file(ast(directory(F,_,_)),F).
+pdt_builder:target_mutable(ast(workspace),true).
+pdt_builder:target_mutable(ast(project(_)),true).
+
 
 pdt_builder:invalidate_hook(parse(AbsFile)):-
     get_pef_file(AbsFile,FID),

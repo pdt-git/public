@@ -1,9 +1,7 @@
 package org.cs3.pdt.core.internal.builder;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,21 +28,17 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
-import sun.security.provider.certpath.CertId;
-
 public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
-
+	
 	private final class _Listener extends DefaultAsyncPrologSessionListener {
 		HashSet<Object> problemIds = new HashSet<Object>();
 
@@ -63,7 +57,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 					markerMonitor = new SubProgressMonitor(monitor, 25,
 							SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 					int work = Integer.parseInt((String) m.get("Count"));
-					markerMonitor.beginTask("Creating Markers", work);
+					markerMonitor.beginTask("Creating Markers ("+tag+")", work);
 				}
 				if (!problemIds.contains(id)) {
 					problemIds.add(id);
@@ -97,19 +91,20 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		}
 	}
 
-	private final Set<IFile> files;
+	
 	private final IPrologProject plProject;
 	private IProgressMonitor monitor;
 	private IProgressMonitor buildMonitor;
 	private IProgressMonitor markerMonitor;
 	private Runnable finnish;
+	private String tag;
 
-	public UpdateMarkersJob(IPrologProject plProject, Set<IFile> files,
+	public UpdateMarkersJob(IPrologProject plProject, String tag,
 			Runnable finnish) {
 		super("Updating Prolog Markers for project "
 				+ plProject.getProject().getName());
 		this.plProject = plProject;
-		this.files = files;
+		this.tag=tag;
 		this.finnish = finnish;
 	}
 
@@ -119,24 +114,23 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		PrologSession session = null;
 
 		try {
-			plProject.getProject().deleteMarkers(PDTCore.PROBLEM, true,
-					IResource.DEPTH_INFINITE);
+			
 			IPrologEventDispatcher dispatcher = PrologRuntimePlugin
 					.getDefault().getPrologEventDispatcher(
 							plProject.getMetadataPrologInterface());
 			
-			dispatcher.addPrologInterfaceListener("builder(problems(workspace))", this);
+			dispatcher.addPrologInterfaceListener("builder(problems(workspace,'.'("+tag+",[])))", this);
 			PrologInterface2 pif = ((PrologInterface2) plProject
 					.getMetadataPrologInterface());
 			final AsyncPrologSession s = pif.getAsyncSession();
 			s.addBatchListener(new _Listener());
-			monitor.beginTask("updating", 100);
+			monitor.beginTask("updating "+this.tag, 100);
 			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 			//buildMonitor.beginTask("Searching for problems", files.size());
 			s.queryAll(
 							"update_markers",
-							"pdt_with_targets([problems],(pdt_problem_count(Count),pdt_problem(Id,File,Start,End,Severity,Msg)))");
+							"pdt_with_targets([problems(workspace,["+tag+"])],(pdt_problem_count("+tag+",Count),pdt_problem(Id,File,"+tag+",Start,End,Severity,Msg)))");
 			while (!s.isIdle()) {
 				if (UpdateMarkersJob.this.monitor.isCanceled()) {
 					try {
@@ -166,9 +160,6 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		} catch (PrologInterfaceException e) {
 			return UIUtils.createErrorStatus(PDTCorePlugin.getDefault()
 					.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
-		} catch (CoreException e) {
-			return UIUtils.createErrorStatus(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), e, PDTCore.ERR_UNKNOWN);
 		} finally {
 			if (session != null) {
 				session.dispose();
@@ -228,22 +219,37 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		if (buildMonitor == null) {
 			return;
 		}
-		if (!e.getSubject().equals("builder(problems(workspace))")) {			
+	/*	if (!e.getSubject().equals("builder(problems(workspace))")) {			
 			return;
 		}
-		
+		*/
 		if (e.getEvent().equals("done")) {
 			buildMonitor.done();
 			return;
 		}
-				
-		CCompound event = (CCompound) PLUtil.createCTerm(e.getEvent());
-		if(event.getFunctorValue().equals("estimate")){
-			buildMonitor.beginTask("Searching for Problems", ((CInteger)event.getArgument(0)).getIntValue());
+			
+		CTerm term = PLUtil.createCTerm(e.getEvent());
+		if(!(term instanceof CCompound)){
+			Debug.warning("wunder, wunder: term ist kein Compound:"+e.getEvent());
+			Debug.warning("Subject: " +e.getSubject()+" , Event: "+e.getEvent());
 			return;
 		}
-		if(event.getFunctorValue().equals("worked")){
-			buildMonitor.worked(((CInteger)event.getArgument(0)).getIntValue());
+		CCompound event = (CCompound) term;
+		CTerm argTerm = event.getArgument(0);
+		if(!(argTerm instanceof CInteger)){
+			Debug.warning("wunder, wunder: argterm ist kein Integer:"+PLUtil.renderTerm(argTerm));
+			Debug.warning("Subject: " +e.getSubject()+" , Event: \""+e.getEvent()+"\"");
+			return;
+		}
+		int arg = ((CInteger)argTerm).getIntValue();
+		String functor = event.getFunctorValue();
+		//Debug.debug("progress: "+functor+", "+arg);
+		if(functor.equals("estimate")){
+			buildMonitor.beginTask("Searching for Problems ("+tag+")", arg);
+			return;
+		}
+		if(functor.equals("worked")){
+			buildMonitor.worked(arg);
 			return;
 		}
 	}
