@@ -95,6 +95,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 
 /**
@@ -791,18 +792,46 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
-	public void updateMarkers(Set<IFile> buildList) {
+	private static class Mutex implements ISchedulingRule {
+	      public boolean isConflicting(ISchedulingRule rule) {
+	         return rule == this;
+	      }
+	      public boolean contains(ISchedulingRule rule) {
+	         return rule == this;
+	      }
+	   }
+	
+	private static Mutex mux = new Mutex();
+	
+	public void updateMarkers() throws CoreException {
 		// if (updatingMarkers) {
 		// return;
 		// }
 		updatingMarkers = true;
-		new UpdateMarkersJob(this, buildList, new Runnable() {
+		getProject().deleteMarkers(PDTCore.PROBLEM, true,
+				IResource.DEPTH_INFINITE);
+		
+		UpdateMarkersJob job = new UpdateMarkersJob(this, "cheap", new Runnable() {
 
 			public void run() {
-				updatingMarkers = false;
+				;
 
 			}
-		}).schedule();
+		});
+		job.setPriority(Job.INTERACTIVE);
+		job.setRule(mux);
+		job.schedule();
+		
+		job=new UpdateMarkersJob(this, "expensive", new Runnable() {
+
+			public void run() {
+				updatingMarkers=false;
+
+			}
+		});
+		job.setPriority(Job.BUILD);
+		job.setRule(mux);
+		job.schedule();
 	}
 
 }

@@ -14,7 +14,7 @@
 		my_debug/3
 	]
 ).     
- t(  A). 
+  
 :- use_module(library(pif_observe2)).
 :- use_module(library('pef/pef_base')).
  
@@ -290,7 +290,12 @@ build_target(Target):-
     (	catch(
     		call_cleanup(
     			(	debug(builder(build(TargetTerm)),"Building target ~w~n.",[TargetTerm]),
-    				(	setof(step(S,W),estimate_hook(TargetTerm,S,W),Steps)
+    				(	findall(step(S,W),
+    						(	estimate_hook(TargetTerm,StepTerm,W),
+    							target_key(StepTerm,S)
+    						),
+    						Steps
+    					)
     				->	thread_send_message(build_arbiter,msg(Target,estimate(Steps)))
     				;	true
     				),
@@ -344,7 +349,8 @@ update_target_state(Target,NewState):-
     ;   retractall('$target_state'(Target,_)),
     	assert('$target_state'(Target,NewState))
     ),
-    recorda(Target,NewState).
+    atom_number(Atom,Target), % keys >= 2^24 seem to be a problem.
+    recorda(Atom,NewState).
 
    
 
@@ -490,8 +496,8 @@ process_message(meta,run(Goal)):-
 
 process_message(Target,Event):-
     
-    
-    recorda(Target,Event),
+    atom_number(Atom,Target), %prob with keys>2^24
+    recorda(Atom,Event),
     
     current_target_state(Target,State),
     (	ground(State)
@@ -968,15 +974,20 @@ progress_report_prepare_X([step(S,W)|Steps],Target,Sum0,Sum):-
     assert('$progress_subproblem_inv'(Target,Ref)),
     progress_report_prepare_X(Steps,Target,Sum1,Sum).
 
+
+
 progress_report_worked(SubTarget):-
 	forall(
 		'$progress_subproblem'(SubTarget,Target,W),
 		
-		(	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
+		(	spyme,
+			target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
 			pif_notify(builder(TargetName),worked(W))
 		)
 	).
 	
+	
+
 progress_report_cleanup(Target):-
 	forall(
 		clause('$progress_subproblem_inv'(Target,Ref),_,InvRef),

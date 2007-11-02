@@ -213,7 +213,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 			Debug.debug("PrologBuilder.build(...) is done.");
 			monitor.done();
-			plProject.updateMarkers(contentList);
+			plProject.updateMarkers();
 
 			return null;
 		} catch (OperationCanceledException e) {

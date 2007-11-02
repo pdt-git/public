@@ -5,7 +5,9 @@
 		pef_stop_recording/0,
 		pef_clear_record/1,
 		pef_count/2,
-		pef_record_key/2
+		pef_record_key/2,
+		pef_type_tag/2,
+		pef_type_is_a/2
 	]
 ).
 
@@ -89,6 +91,15 @@ pef_count(Type,Count):-
     	CTypes
     ),
     pef_count_X(CTypes,0,Count).
+%% pef_type_tag(?Type,?Tag).
+% succeeds if type Type is tagged with Tag.
+pef_type_tag(Type,Tag):-
+    '$metapef_type_tag'(Type,Tag).
+%% pef_type_is_a(?Type1, ?Type2).
+% succeeds if Type1 is a subtype of Type2.
+pef_type_is_a(Type1,Type2):-
+    '$metapef_is_a'(Type1,Type2).
+
 
 pef_count_X([],C,C).
 pef_count_X([Type|Types],C1,C3):-

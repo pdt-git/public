@@ -48,12 +48,16 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CString;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CTermFactory;
+import org.cs3.pl.prolog.PLUtil;
 
 public class CTermFactoryTest extends TestCase {
-	private ParserCTermFactory factory;
+	
+	private CTermFactory factory;
+	@Override
 	protected void setUp() throws Exception {
 		this.factory = new ParserCTermFactory();
-		super.setUp();
+		//this.factory = new ATermFactory();
 	}
 	public void testUnquotedAtom00() throws Throwable {
 		CTerm term = factory.createCTerm("hola");		
@@ -91,11 +95,11 @@ public class CTermFactoryTest extends TestCase {
 				
 	}
 	public void testUnquotedAtom04() throws Throwable {
-		CTerm term = factory.createCTerm("söben");		
+		CTerm term = factory.createCTerm("sï¿½ben");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
-		assertEquals("functor value","söben",atom.getFunctorValue());
-		assertEquals("functor image","söben",atom.getFunctorImage());
+		assertEquals("functor value","sï¿½ben",atom.getFunctorValue());
+		assertEquals("functor image","sï¿½ben",atom.getFunctorImage());
 		assertEquals("arity",0,atom.getArity());		
 	}
 	
@@ -140,9 +144,27 @@ public class CTermFactoryTest extends TestCase {
 		assertEquals("arity",0,integer.getArity());	
 	}
 	
+	public void testInteger02() throws Throwable{
+		CCompound c = (CCompound) factory.createCTerm("worked(1)");
+		CTerm term = c.getArgument(0);
+		assertTrue("type",term instanceof CInteger);
+		CInteger integer= (CInteger)term;		
+		assertEquals(1,integer.getIntValue());
+		assertEquals("arity",0,integer.getArity());	
+	}
+	
+	public void testInteger03() throws Throwable{
+		CCompound c = (CCompound) factory.createCTerm("worked(23)");
+		CTerm term = c.getArgument(0);
+		assertTrue("type",term instanceof CInteger);
+		CInteger integer= (CInteger)term;		
+		assertEquals(23,integer.getIntValue());
+		assertEquals("arity",0,integer.getArity());	
+	}
+	
 	public void testCompound01() throws Throwable{
 		CTerm term = factory.createCTerm("aterm(annos,t)");		
-		assertTrue("type",term instanceof CCompound);
+		assertTrue("type: "+term.getClass().getName(),term instanceof CCompound);
 		CCompound aterm= (CCompound)term;
 		assertEquals("functor value","aterm",aterm.getFunctorValue());
 		assertEquals("functor image","aterm",aterm.getFunctorImage());

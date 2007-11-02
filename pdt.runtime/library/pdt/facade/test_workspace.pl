@@ -1,6 +1,7 @@
 :- ensure_loaded(pdt_facade).
 :- ensure_loaded(library('pef/pef_base')).
 :- ensure_loaded(library('pef/pef_api')).
+:- ensure_loaded(library('builder/targets/literals')).
 
 
 create_test_project(Path):-
@@ -11,7 +12,7 @@ create_test_project(Path):-
 
 
 %use the pdt library as test source path
-test_path(testproject,'..').
+test_path(testproject,'testws').
     
 :- prolog_load_context(directory,Dir),
 	format("current directory: ~w~n",[Dir]),

@@ -3,6 +3,8 @@
 	pdt_file_existence_changed/1,
 	pdt_add_source_path/4,
 	pdt_remove_source_path/2,
+	pdt_contains_star/2,
+	pdt_belongs_to_star/2,
 	pdt_contains/2,
 	pdt_belongs_to/2
 	]
@@ -17,36 +19,41 @@
 
 	
 
-pdt_contains(Container,Resource):-
+pdt_contains_star(Container,Resource):-
 	(	ground(Container)
-	->	pdt_with_targets([Container],contains(Container,Resource))
+	->	pdt_with_targets([Container],contains_star(Container,Resource))
 	;	ground(Resource)
-	->	pdt_with_targets([workspace],belongs_to(Resource,Container))
-	;	throw(error(instantiation_error, context(pdt_workspace:pdt_contains/2,_)))
+	->	pdt_with_targets([workspace],belongs_to_star(Resource,Container))
+	;	throw(error(instantiation_error, context(pdt_workspace:pdt_contains_star/2,_)))
 	).
 
-pdt_belongs_to(Resource,Container):-
-    pdt_contains(Container,Resource).
+pdt_belongs_to_star(Resource,Container):-
+    pdt_contains_star(Container,Resource).
 	
-contains(A,C):-
-	contains_edge(A,B),
+contains_star(A,C):-
+	contains(A,B),
 	(	B=C
-	;	contains(B,C)
+	;	contains_star(B,C)
 	).
 	
-belongs_to(A,C):-
-	belongs_to_edge(A,B),
+belongs_to_star(A,C):-
+	belongs_to(A,B),
 	(	B=C
-	;	belongs_to(B,C)
+	;	belongs_to_star(B,C)
 	).
 
-	
-contains_edge(workspace,project(Name)):-
+pdt_contains(A,B):-
+    contains(A,B).
+
+pdt_belongs_to(A,B):-
+	belongs_to(A,B).
+		
+contains(workspace,project(Name)):-
     pef_project_query([name=Name]).
-contains_edge(project(Name),directory(Path,IP,EP)):-
+contains(project(Name),directory(Path,IP,EP)):-
 	pef_project_query([name=Name,id=Project]),
 	pef_source_path_query([project=Project,path=Path,include_pattern=IP,exclude_pattern=EP]).
-contains_edge(directory(Path,IP,EP),Resource):-
+contains(directory(Path,IP,EP),Resource):-
     pef_directory_query([path=Path,include_pattern=IP,exclude_pattern=EP, id=Parent]),
     pef_directory_entry_query([parent=Parent,child=Child]),
     (	pef_type(Child,pef_directory)
@@ -56,18 +63,18 @@ contains_edge(directory(Path,IP,EP),Resource):-
 		Resource=file(CPath)
 	).
 
-belongs_to_edge(file(CPath),directory(Path,IP,EP)):-
+belongs_to(file(CPath),directory(Path,IP,EP)):-
     pef_file_query([id=Child,path=CPath]),
     pef_directory_entry_query([parent=Parent,child=Child]),
     pef_directory_query([path=Path,include_pattern=IP,exclude_pattern=EP, id=Parent]).
-belongs_to_edge(directory(CPath,CIP,CEP),directory(Path,IP,EP)):-
+belongs_to(directory(CPath,CIP,CEP),directory(Path,IP,EP)):-
     pef_directory_query([id=Child,path=CPath,include_pattern=CIP,exclude_pattern=CEP]),
     pef_directory_entry_query([parent=Parent,child=Child]),
     pef_directory_query([path=Path,include_pattern=IP,exclude_pattern=EP, id=Parent]).
-belongs_to_edge(directory(Path,IP,EP),project(Name)):-    
+belongs_to(directory(Path,IP,EP),project(Name)):-    
 	pef_source_path_query([project=Project,path=Path,include_pattern=IP,exclude_pattern=EP]),
 	pef_project_query([name=Name,id=Project]).
-belongs_to_edge(project(Name),workspace):-
+belongs_to(project(Name),workspace):-
 	pef_project_query([name=Name]).	
 
         

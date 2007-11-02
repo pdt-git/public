@@ -8,6 +8,7 @@
 :- use_module(library('builder/targets/ast')).
 :- use_module(library('builder/targets/interprete')).
 :- use_module(library('builder/targets/parse')).
+:- use_module(library('util/ast_util')).
 
 /*
 This module tries to find all literals (i.e. atomic formulas) occuring in the program.
@@ -39,6 +40,7 @@ My approach is different from the others I examined so far in two things:
 		context,
 		subformula,
 		subcontext,
+		substitution,
 		bound,
 		id %id of the fact this rule is based on, or 'builtin'
 	)
@@ -71,7 +73,10 @@ My approach is different from the others I examined so far in two things:
 		
 		% either the id of a predicate
 		% or 'builtin', or 'unresolved'
-		binding
+		binding,
+		
+		% not really required. I currently use it for debugging.
+		toplevel
 	)
 ).
     
@@ -88,45 +93,50 @@ My approach is different from the others I examined so far in two things:
 % @param Literal will be unified either with literal(Id) where Id is the Id of a subtree of Goal,
 %                or with msf_rule(Prog,Module0,Formula0,Module1,Formula1,Bound)
 find_literal(Goal,Cx,rule(Rule)):-
-	pef_variable_occurance_query([id=Goal,variable=VarId]),
+    ast_variable_occurance(Goal,VarId),
+	%pef_variable_occurance_query([id=Goal,variable=VarId]),
 	!,	
 	% Goal represents a variable. 
 	% We will add a new msf rule.
 	make_rule(Var,Cx,[VarId=Var|_],Rule).
 find_literal(Goal,Cx0,Literal):-        	
 	resolve(Goal,Cx0,Cx1),	    	
-	(	match(Goal,Cx1,Subst,SubGoal,Cx2)
+	(	cx_binding(Cx1,unresolved)
+	->	Literal=unresolved(Cx1,Goal)	
+	;	match(Goal,Cx1,Subst,SubGoal,Cx2)
 	*-> % Soft cut, since we DO want backtracking in the condition part.
 	    % If there is a match *at all*, and if it is due to a user-defined 
 	    % meta-predicate, we have 
 	    (	cx_last_rule(Cx2,Id),
 	    	Id \== builtin,
 	    	Literal=meta_call(Cx2,Goal)
-	    ;	find_literal__match_found(Subst,SubGoal,Cx2,Literal)
+	    ;	find_literal__match_found(Goal,Subst,SubGoal,Cx2,Literal)
 	    )
 	    	    
 	;	% if there is no match, then Goal is an atomic formular
 	    % i.e. a literal.
-		Literal=literal(Cx2,Goal)
+		Literal=literal(Cx1,Goal)
 	).
 	
-find_literal__match_found(Subst,SubGoal,Cx,rule(Rule)):-    
-    var(SubGoal),
-    !,
-    % If subgoal is unbound, this means that there was a match,
-    % but that the pattern is NOT more general than the matched goal.
-    % We cannot continue, (there is nothing to continue with!) 
-    % but we can add a new MSF-Rule to the upper bound.
-    make_rule(SubGoal,Cx,Subst,Rule).
-find_literal__match_found(Subst,SubGoal,Cx1,Literal):-        
-    % Subgoal is bound, we can continue.
-    % Depending on whether Subst is empty or not, we are either
-    % extending the lower or the upper bound.
-    (	var(Subst) % (an open list is empty, if it is a variable)
-    ->  Cx2 = Cx1
-    ;	cx_set_bound(Cx1,upper,Cx2)
-    ),
-    find_literal(SubGoal,Cx2,Literal).
+find_literal__match_found(Goal,_Subst,SubGoal,Cx,Literal):-    
+    (	var(SubGoal),\+ attvar(SubGoal)
+	->    % If subgoal is unbound, this means that there was a match,
+	    % but that the pattern is NOT more general than the matched goal.
+	    % We cannot continue, (there is nothing to continue with!) 
+	    % but we can add a new MSF-Rule to the upper bound.
+	    ast_apply(Goal,Subst,GoalTerm),	   
+	    make_rule(GoalTerm,Cx,Subst,Rule),
+	    Literal=rule(Rule)
+        
+	;   % Subgoal is bound, we can continue.
+	    % Depending on whether Subst is empty or not, we are either
+	    % extending the lower or the upper bound.
+	    (	var(Subst) % (an open list is empty, if it is a variable)
+	    ->  Cx2 = Cx
+	    ;	cx_set_bound(Cx,upper,Cx2)
+	    ),
+	    find_literal(SubGoal,Cx2,Literal)
+	).
     
 %% match(+Goal,+Cx0,-Subst,-SubGoal,-Cx1)
 % Try to find and apply a matching MSF-Rule for a given Goal.
@@ -140,7 +150,8 @@ find_literal__match_found(Subst,SubGoal,Cx1,Literal):-
 % @param Cx1 will be unified with possibly updated context. Fields that may have changed
 %        are module and bound
 match(Goal,Cx,[],Goal,Cx):-
-    pef_variable_occurance_query([id=Goal]),
+    ast_variable_occurance(Goal,_),
+    %pef_variable_occurance_query([id=Goal]),
     !.
 match(Goal,Cx0,Subst,Subformula,CxOut):-
     find_rule(Goal,Cx0,Rule,Cx1),    
@@ -148,10 +159,15 @@ match(Goal,Cx0,Subst,Subformula,CxOut):-
     	[	pattern=Pattern,    		
     		subformula=Subformula2,
     		subcontext=Subcontext2,
+    		substitution=RuleSubst,
     		bound=Bound
 		]
-	),    	
+	),    
+	ast_apply(Goal,_,GoalTerm),
+	format("matching pattern:~w, goal:~w~n",[Pattern,GoalTerm]),	
 	ast_match(Pattern,Goal,Subst),
+	format("success! pattern:~w, subst:~w~n",[Pattern,Subst]),
+	ast_attach(RuleSubst),
 	(	Bound==lower
 	->	cx_bound(Cx1,Bound0)
 	;	Bound0=upper
@@ -182,11 +198,13 @@ match(Goal,Cx0,Subst,Subformula,CxOut):-
 
 
 find_rule(Goal,Cx0,Rule,Cx1):-
-	pef_term_query([id=Goal,name=Name,arity=Arity]),
+    ast_functor(Goal,Name,Arity),
+	%pef_term_query([id=Goal,name=Name,arity=Arity]),
     rule_new(Rule),
     rule_get(Rule,	[	pattern=Pattern,	
 						context=Context,
     					subformula=Subformula2,
+    					substitution=RuleSubst,
     					subcontext=Subcontext,
     					bound=Bound,
     					id=RuleId
@@ -195,9 +213,10 @@ find_rule(Goal,Cx0,Rule,Cx1):-
     functor(Pattern,Name,Arity),
     cx_binding(Cx0,Binding),
 	(	Binding==unresolved
-	->	throw(unresolved_predicate_reference(Goal,Cx0))
+	->  throw(unresolved(Goal,Cx0))		
 	;	Binding==builtin
-	->  call(Rule)
+	->  cx_context(Cx0,Context),
+		call(Rule)
 	;	cx_binding(Cx0,Pred),
 		cx_context(Cx0,Context),
     	cx_program(Cx0,Program),
@@ -206,6 +225,7 @@ find_rule(Goal,Cx0,Rule,Cx1):-
     							pattern=Pattern,	
     							context=Context,
     							subformula=Subformula2,
+    							substitution=RuleSubst,
     							subcontext=Subcontext,
     							bound=Bound					
     						])	
@@ -217,28 +237,6 @@ find_rule(Goal,Cx0,Rule,Cx1):-
 
     
 
-%% apply(+Ast,+Subst,-Term)
-% renders an ast into a term, applying a given variable substitution.
-%
-% @param Ast the pef id of an AST node.
-% @param Subst an __open__ list of VarId=Value pairs.
-% @param Term will be unified with the rendered term.
-apply(Ast,Subst,Term):-
-    pef_variable_occurance_query([id=Ast,variable=Var]),
-    !,
-    memberchk(Var=Term,Subst).
-apply(Ast,Subst,Term):-
-    pef_term_query([id=Ast,name=Name,arity=Arity]),
-    functor(Term,Name,Arity),
-    apply_args(Arity,Ast,Subst,Term).
-
-apply_args(0,_,_,_).
-apply_args(I,Ast,Subst,Term):-
-	pef_arg_query([num=I,parent=Ast,child=ArgAst]),
-	arg(I,Term,ArgTerm),
-	apply(ArgAst,Subst,ArgTerm),
-	J is I -1,
-	apply_args(J,Ast,Subst,Term).
 
 
 %% make_rule(+Goal,+Cx,+Subst, -Rule) 
@@ -254,11 +252,16 @@ make_rule(Goal,Cx,Subst,  Rule):-
     cx_context(Cx,Subcontext),
     cx_bound(Cx,Bound),
     cx_initial_context(Cx,InitialContext),
-    apply(Head,Subst,Pattern),       
+    ast_apply(Head,Subst,Pattern),   
+    !,
+    term_variables(Goal,GoalVars),
+    copy_term(Goal-GoalVars,Goal2-GoalVars2),
+    unifiable(GoalVars,GoalVars2,RuleSubst),
     pef_msf_rule_program(Rule,Program),
     pef_msf_rule_predicate(Rule,Predicate),
     pef_msf_rule_pattern(Rule,Pattern),
-    pef_msf_rule_subformula(Rule,Goal),
+    pef_msf_rule_subformula(Rule,Goal2),
+    pef_msf_rule_substitution(Rule,RuleSubst),
     pef_msf_rule_context(Rule,InitialContext),
     pef_msf_rule_subcontext(Rule,Subcontext),
     pef_msf_rule_bound(Rule,Bound).
@@ -266,15 +269,27 @@ make_rule(Goal,Cx,Subst,  Rule):-
 
 
 assert_rule(Rule):-
-    pef_reserve_id(pef_msf_rule,Id),
+    
     pef_msf_rule_program(Rule,Program),
     pef_msf_rule_predicate(Rule,Predicate),
     pef_msf_rule_pattern(Rule,Pattern),
     pef_msf_rule_subformula(Rule,Goal),
+    pef_msf_rule_substitution(Rule,RuleSubst),
     pef_msf_rule_context(Rule,InitialContext),
     pef_msf_rule_subcontext(Rule,Subcontext),
     pef_msf_rule_bound(Rule,Bound),
-    pef_msf_rule_assert([
+    (	\+ pef_msf_rule_query([    				
+    				program=Program,
+    				predicate=Predicate,
+    				pattern=Pattern,
+    				subformula=Goal,
+    				context=InitialContext,
+    				subcontext=Subcontext,
+    				bound=Bound,
+    				substitution=RuleSubst
+    			 ])
+	->  pef_reserve_id(pef_msf_rule,Id),
+    	pef_msf_rule_assert([
     				id=Id,
     				program=Program,
     				predicate=Predicate,
@@ -282,8 +297,11 @@ assert_rule(Rule):-
     				subformula=Goal,
     				context=InitialContext,
     				subcontext=Subcontext,
-    				bound=Bound
-    			 ]).
+    				bound=Bound,
+    				substitution=RuleSubst
+    	])
+    ;	fail
+    ).
 
 
 
@@ -291,11 +309,12 @@ resolve(Goal,Cx0,Cx1):-
 	cx_program(Cx0,Program),
 	cx_context(Cx0,Context),
 	cx_bound(Cx0,Bound0),
-	pef_term_query([id=Goal,name=Name,arity=Arity]),
+	ast_functor(Goal,Name,Arity),
+	%pef_term_query([id=Goal,name=Name,arity=Arity]),
 	(	resolve(Program,Context,Name,Arity,Bound0,Pred,Bound1)
 	*-> cx_set(Cx0,[bound=Bound1,binding=Pred],Cx1)
 	;	functor(Head,Name,Arity),
-		predicate_property(Head,imported_from(system))
+		predicate_property(Head,built_in)
 	->	cx_set(Cx0,[bound=Bound0,binding=builtin],Cx1)
 	;	cx_set(Cx0,[bound=Bound0,binding=unresolved],Cx1)
 	).    
@@ -325,38 +344,38 @@ msf(Program,Context,Formula,Bound0,Subcontext,Subformula,BoundOut):-
 	;	BoundOut=Bound1
 	).
 
-rule( (A , _),	M, A, M,lower,builtin).
-rule( (_ , A),	M, A, M,lower,builtin).
-rule( (A ; _),	M, A, M,lower,builtin).
-rule( (_ ; A),	M, A, M,lower,builtin).
-rule( (A | _),	M, A, M,lower,builtin).
-rule( (_ | A),	M, A, M,lower,builtin).
-rule( (A -> _),	M, A, M,lower,builtin).
-rule( (_ -> A),	M, A, M,lower,builtin).
-rule( ( \+ A ),	M, A, M,lower,builtin).
-rule( ( call(A) ),	M, A, M,lower,builtin).
-rule( ( not(A) ),	M, A, M,lower,builtin).
-rule( ( once(A) ),	M, A, M,lower,builtin).
-rule( ( ignore(A) ),	M, A, M,lower,builtin).
-rule( ( call_with_depth_limit(A,_,_) ),	M, A, M,lower,builtin).
-rule( ( call_cleanup(A,_,_) ),	M, A, M,lower,builtin).
-rule( ( call_cleanup(_,_,A) ),	M, A, M,lower,builtin).
-rule( ( call_cleanup(A,_) ),	M, A, M,lower,builtin).
-rule( ( call_cleanup(_,A) ),	M, A, M,lower,builtin).
-rule( ( setup_and_call_cleanup(A,_,_) ),	M, A, M,lower,builtin).
-rule( ( setup_and_call_cleanup(_,A,_) ),	M, A, M,lower,builtin).
-rule( ( setup_and_call_cleanup(_,_,A) ),	M, A, M,lower,builtin).
-rule( ( catch(A,_,_) ),	M, A, M,lower,builtin).
-rule( ( catch(_,_,A) ),	M, A, M,lower,builtin).
-rule( (A *-> _),	M, A, M,lower,builtin).
-rule( (_ *-> A),	M, A, M,lower,builtin).
-rule( (M : A),	_, A, M,lower,builtin).
-rule( forall(A,_),	M, A, M,lower,builtin).
-rule( forall(_,A),	M, A, M,lower,builtin).
-rule( findall(_,A,_),	M, A, M,lower,builtin).
-rule( findall(_,A,_,_),	M, A, M,lower,builtin).
-rule( setof(_,A,_),	M, A, M,lower,builtin).
-rule( bagof(_,A,_),	M, A, M,lower,builtin).
+rule( (A , _),	M, AA, M,[A=AA],lower,builtin).
+rule( (_ , A),	M, AA, M,[A=AA],lower,builtin).
+rule( (A ; _),	M, AA, M,[A=AA],lower,builtin).
+rule( (_ ; A),	M, AA, M,[A=AA],lower,builtin).
+rule( (A | _),	M, AA, M,[A=AA],lower,builtin).
+rule( (_ | A),	M, AA, M,[A=AA],lower,builtin).
+rule( (A -> _),	M, AA, M,[A=AA],lower,builtin).
+rule( (_ -> A),	M, AA, M,[A=AA],lower,builtin).
+rule( ( \+ A ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( call(A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( not(A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( once(A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( ignore(A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( call_with_depth_limit(A,_,_) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( call_cleanup(A,_,_) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( call_cleanup(_,_,A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( call_cleanup(A,_) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( call_cleanup(_,A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( setup_and_call_cleanup(A,_,_) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( setup_and_call_cleanup(_,A,_) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( setup_and_call_cleanup(_,_,A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( catch(A,_,_) ),	M, AA, M,[A=AA],lower,builtin).
+rule( ( catch(_,_,A) ),	M, AA, M,[A=AA],lower,builtin).
+rule( (A *-> _),	M, AA, M,[A=AA],lower,builtin).
+rule( (_ *-> A),	M, AA, M,[A=AA],lower,builtin).
+rule( (M : A),	_, AA, M,[A=AA],lower,builtin).
+rule( forall(A,_),	M, AA, M,[A=AA],lower,builtin).
+rule( forall(_,A),	M, AA, M,[A=AA],lower,builtin).
+rule( findall(_,A,_),	M, AA, M,[A=AA],lower,builtin).
+rule( findall(_,A,_,_),	M, AA, M,[A=AA],lower,builtin).
+rule( setof(_,A,_),	M, AA, M,[A=AA],lower,builtin).
+rule( bagof(_,A,_),	M, AA, M,[A=AA],lower,builtin).
 
 
 
@@ -387,6 +406,8 @@ test_find_literals(Tl,Prog,Lit):-
     ).
 
 
+
+
 fp_init_todo(Cx,Goal):-
     pef_clause_query([predicate=Pred,toplevel=Tl]),
     predicate_owner(Pred,Prog),
@@ -395,9 +416,11 @@ fp_init_todo(Cx,Goal):-
     ;	pef_predicate_query([id=Pred,module=MID]),
     	module_name(MID,Context)
     ),
-    pef_ast_query([toplevel=Tl,root=Root]),
-    ast_head_body(Root,_,Head,Goal),	
+    ast_root(Tl,Root),
+    ast_head_body(Root,_,Head,Goal),
+    Goal \== [], Head \== [],	
     cx_new(Cx),
+    cx_toplevel(Cx,Tl),
 	cx_program(Cx,Prog),
 	cx_predicate(Cx,Pred),
 	cx_initial_context(Cx,_),
@@ -411,52 +434,108 @@ fp_init_todo(Cx,Goal):-
 fp_init_todos:-
     forall(fp_init_todo(Cx,Goal),recordz(fp_todo,todo(Cx,Goal))).
 
-    
-%fp_run(File):-
-%	pdt_with_targets([interprete(File),)
+
 fp_run:-
     fp_init_todos,
-	forall(
-		recorded(fp_todo,todo(Cx,Goal),Ref),
-		(	(	erase(Ref)
-			->	true
-			;	throw(failed(erase(Ref)))
-			),
-			(	find_literal(Goal,Cx,Result)
-			->	true
-			;	throw(failed(find_literal(Goal,Cx,Result)))
-			),
-			(	fp_process_result(Result)
-			->	true
-			;	throw(failed(fp_process_result(Result)))
-			)
-		)
-	).  
-    
+	repeat,
+		fp_step,
+		fp_done,
+	!.
 
-fp_process_result(rule(Rule)):-
-    assert_rule(Rule),
-    pef_msf_rule_predicate(Rule,Predicate),
+fp_step:-fp_step1,fp_step2,fp_step3.
+    
+fp_step1:-
     forall(
+		recorded(fp_todo,Todo,Ref),
+		(	erase(Ref),
+			format("processing: ~w~n",[Todo]),
+			fp_process_todo(Todo)
+		)
+	).
+fp_step2:-	
+	forall(
+		recorded(fp_result,Result,Ref),
+		(	erase(Ref),
+			format("processing: ~w~n",[Result]),
+			fp_process_result(Result)
+		)
+	).
+fp_step3:-
+	forall(
+		recorded(fp_touched,Predicate,Ref),
+		(	erase(Ref),
+			format("processing: ~w~n",[Predicate]),
+			fp_process_touched(Predicate)
+		)
+	).
+    
+    
+fp_done:- \+ recorded(fp_todo,_).
+
+fp_process_todo(todo(Cx,Goal)):-
+    format("processing: ~w~n",[todo(Cx,Goal)]),
+    forall(
+    	find_literal(Goal,Cx,Result),
+		recordz(fp_result,Result)	
+	).
+
+
+fp_process_touched(Predicate):-
+	forall(
     	pef_call_query([predicate=Predicate,goal=Goal, cx=Cx]),
-    	recordz(fp_todo,todo(Cx,Goal))
+    	(	cx_head(Cx,Head),
+    		ast_attach([Goal=GoalAst,Head=HeadAST]),
+    		cx_set_head(Cx,HeadAST,Cx1),
+    		recordz(fp_todo,todo(Cx1,GoalAst))
+    	)
     ).
+	
+fp_process_result(rule(Rule)):-
+    (	assert_rule(Rule)
+    ->	pef_msf_rule_predicate(Rule,Predicate),
+    	recordz(fp_touched,Predicate)
+    ;	true
+    ).
+    
 fp_process_result(literal(Cx,Goal)):-
     pef_reserve_id(pef_call,Id),
-    cx_predicate(Cx,Predicate),
-    pef_call_assert([id=Id,goal=Goal,cx=Cx,predicate=Predicate]).
+    cx_binding(Cx,Predicate),
+    cx_head(Cx,Head),
+    ast_node(Head,HeadNode),
+    (	ast_node(Goal,GoalNode)
+    ->	cx_set_head(Cx,HeadNode,Cx1), 
+    	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
+    ;	throw(cannot_add_call_for_pseudo_goal)
+    ).
+    
+   
 fp_process_result(meta_call(Cx,Goal)):-
 	pef_reserve_id(pef_call,Id),
-    cx_predicate(Cx,Predicate),
-    pef_call_assert([id=Id,goal=Goal,cx=Cx,predicate=Predicate]).
+    cx_binding(Cx,Predicate),
+    cx_head(Cx,Head),
+    ast_node(Head,HeadNode),
+    (	ast_node(Goal,GoalNode)
+    ->	cx_set_head(Cx,HeadNode,Cx1), 
+    	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
+    ;	throw(cannot_add_call_for_pseudo_goal)
+    ).
+fp_process_result(unresolved(Cx,Goal)):-
+    ast_node(Goal,Node),
+	cx_context(Cx,Context),
+	cx_toplevel(Cx,Tl),
+	pef_toplevel_query([id=Tl,file=File]),
+	ast_functor(Goal,Name,Arity),	
+	get_pef_file(Path,File),			
+	format("~w (~w): cannot resolve predicate: ~w/~w, context ~w~n",[Path,Node,Name,Arity,Context]).
 
+spyme.
 	/*
 	-----------
 	Initialisiere TODO = alle Pr�dikate im Programm
 	
 	while TODO nicht leer:
 	  f�r jedes Predikat in TODO,
-  	    - binde gefundene literale an aufgerufene Pr�dikate 
+  	    - binde gefundene literale an aufgerufene Pr�dikate  
 	    - sammele neue MSF-Regeln
 	  Lege neue Regeln an.
 	  Ersetze TODO <- alle Pr�dikate, die in neuen Regeln auftauchen.

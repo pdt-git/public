@@ -49,10 +49,9 @@ import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
 
 public class ATermFactoryTest extends TestCase {
-	private ATermFactory factory;
-
+	private static ATermFactory factory = new ATermFactory();
 	protected void setUp() throws Exception {
-		this.factory = new ATermFactory();
+		
 		super.setUp();
 	}
 	
@@ -65,4 +64,25 @@ public class ATermFactoryTest extends TestCase {
 		assertEquals("arity",0,atom.getArity());
 		assertTrue("has no anno",atom.hasAnnotation("anno"));
 	}
+	
+	
+	public void testInteger01() throws Throwable{
+		CTerm term = factory.createCTerm("42");		
+		assertTrue("type",term instanceof CInteger);
+		CInteger integer= (CInteger)term;
+		assertEquals("functor image","42",integer.getFunctorImage());
+		assertEquals("functor value","42",integer.getFunctorValue());
+		assertEquals(42,integer.getIntValue());
+		assertEquals("arity",0,integer.getArity());	
+	}
+	
+	public void testInteger02() throws Throwable{
+		CCompound c = (CCompound) factory.createCTerm("worked(1)");
+		CTerm term = c.getArgument(0);
+		assertTrue("type",term instanceof CInteger);
+		CInteger integer= (CInteger)term;		
+		assertEquals(1,integer.getIntValue());
+		assertEquals("arity",0,integer.getArity());	
+	}
+	
 }
