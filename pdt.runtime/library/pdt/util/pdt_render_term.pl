@@ -26,27 +26,34 @@ find_visible_operators(TlRef,Ops):-
 %case 3: toplevel is in a file that imports the op from another module, and this import
 % 		  takes place before the toplevel is parsed.
 visible_op(TlRef,op(Pr,Tp,Nm)):-
-	pef_toplevel_query([id=TlRef,file=FileRef,positions=Positions]),
+	%pef_toplevel_query([id=TlRef,file=FileRef,positions=Positions]),
+	toplevel_source_position(TlRef,FileRef,TermStart,_),
 	pef_op_definition_query([file=FileRef,toplevel=DefRef,priority=Pr,type=Tp,name=Nm]),
 	\+ TlRef= DefRef, % op definition do not affect the toplevel they are defined in.
-	pef_toplevel_query([id=DefRef,positions=DefPositions]),	
-	top_position(Positions,TermStart,_),
-	top_position(DefPositions,_,DefEnd),
+	%pef_toplevel_query([id=DefRef,positions=DefPositions]),
+	toplevel_source_position(DefRef,_,_,DefEnd),	
+	%top_position(Positions,TermStart,_),
+	%top_position(DefPositions,_,DefEnd),
 	DefEnd =< TermStart.% end pos is exclusive
 visible_op(TlRef,op(Pr,Tp,Nm)):-
-    pef_toplevel_query([id=TlRef,file=FileRef]),
-    pef_module_definition_query([file=FileRef,toplevel=DefRef]),
-    pef_toplevel_query([id=DefRef,expanded=(:-module(_,Exports))]),
-    member(op(Pr,Tp,Nm),Exports).
+    %pef_toplevel_query([id=TlRef,file=FileRef]),
+    toplevel_source_position(TlRef,FileRef,_,_),
+    pef_module_definition_query([file=FileRef,id=ModDef]),
+    %pef_toplevel_query([id=DefRef,expanded=(:-module(_,Exports))]),
+    %member(op(Pr,Tp,Nm),Exports),
+    pef_exports_query([module=ModDef,signature=op(Pr,Tp,Nm)]).
 visible_op(TlRef,op(Pr,Tp,Nm)):-
-	pef_toplevel_query([id=TlRef,file=FileRef,positions=Positions]),
+	%pef_toplevel_query([id=TlRef,file=FileRef,positions=Positions]),
+	toplevel_source_position(TlRef,FileRef,TermStart,_),
 	pef_file_dependency_query([depending=FileRef, toplevel=IncRef, dependency=DepRef]),
-	pef_module_definition_query([file=DepRef,toplevel=DefRef]),
-    pef_toplevel_query([id=DefRef,expanded=(:-module(_,Exports))]),
-    member(op(Pr,Tp,Nm),Exports),    
-    pef_toplevel_query([id=IncRef,positions=IncPositions]),	
-	top_position(Positions,TermStart,_),
-	top_position(IncPositions,_,IncEnd),
+	pef_module_definition_query([module=ModDef,file=DepRef]),
+    %pef_toplevel_query([id=DefRef,expanded=(:-module(_,Exports))]),
+    %member(op(Pr,Tp,Nm),Exports),    
+    pef_exports_query([id=ModDef,signature=op(Pr,Tp,Nm)]),        
+    %pef_toplevel_query([id=IncRef,positions=IncPositions]),
+    toplevel_source_position(IncRef,_,_,IncEnd),	
+	%top_position(Positions,TermStart,_),
+	%top_position(IncPositions,_,IncEnd),
 	IncEnd =< TermStart.% end pos is exclusive
 
 

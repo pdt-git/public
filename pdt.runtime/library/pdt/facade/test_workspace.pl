@@ -12,7 +12,7 @@ create_test_project(Path):-
 
 
 %use the pdt library as test source path
-test_path(testproject,'testws').
+test_path(testproject,'../').
     
 :- prolog_load_context(directory,Dir),
 	format("current directory: ~w~n",[Dir]),

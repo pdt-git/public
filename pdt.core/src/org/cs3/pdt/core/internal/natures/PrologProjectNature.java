@@ -832,6 +832,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		job.setPriority(Job.BUILD);
 		job.setRule(mux);
 		job.schedule();
+		
 	}
 
 }

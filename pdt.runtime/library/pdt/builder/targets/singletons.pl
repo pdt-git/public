@@ -29,11 +29,15 @@ forget_singletons(Abs):-
     	)
     ).
   
- */  
+ */ 
+toplevel_with_singletons(FID,TL,Singletons):-
+ 	pef_toplevel_query([file=FID,id=TL,singletons=Singletons/*,varnames=VarNames*/]),
+	\+ pef_term_expansion_query([expanded=TL]). %for expansion: ignore expanded term.
+
 check_singletons(Abs):-
 	get_pef_file(Abs,FID),
 	forall(
-		pef_toplevel_query([file=FID,id=TL,singletons=Singletons/*,varnames=VarNames*/]),
+		toplevel_with_singletons(FID,TL,Singletons),
 		(	check_singletons(Singletons,TL)/*,
 			check_no_singletons(VarNames,Singletons,TL)*/
 		)

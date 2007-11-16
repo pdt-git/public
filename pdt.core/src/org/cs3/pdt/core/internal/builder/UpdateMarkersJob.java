@@ -111,7 +111,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		this.monitor = monitor;
-		PrologSession session = null;
+		
 
 		try {
 			
@@ -124,7 +124,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 					.getMetadataPrologInterface());
 			final AsyncPrologSession s = pif.getAsyncSession();
 			s.addBatchListener(new _Listener());
-			monitor.beginTask("updating "+this.tag, 100);
+			monitor.beginTask("updating "+this.tag+" "+s.getProcessorThreadAlias(), 100);
 			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 			//buildMonitor.beginTask("Searching for problems", files.size());
@@ -161,9 +161,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			return UIUtils.createErrorStatus(PDTCorePlugin.getDefault()
 					.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
 		} finally {
-			if (session != null) {
-				session.dispose();
-			}
+			
 			finnish.run();
 		}
 		return new Status(IStatus.OK, PDTCore.PLUGIN_ID, "done");

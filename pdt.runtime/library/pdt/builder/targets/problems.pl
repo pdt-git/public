@@ -6,6 +6,7 @@
 :-use_module(library('builder/targets/parse')).
 :-use_module(library('builder/targets/singletons')).
 :-use_module(library('builder/targets/interprete')).
+:-use_module(library('builder/targets/literals')).
 
 :- use_module(library('facade/pdt_workspace')).
 

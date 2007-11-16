@@ -11,27 +11,76 @@
 :- use_module(library('util/ast_util')).
 
 /*
-This module tries to find all literals (i.e. atomic formulas) occuring in the program.
-It does so matching a set of so called MSF-Rules (MSF= maximal sub-formula) against each
-known formula, possibly revealing subformulas in within this formula.
-This process is repeated until no more formulas are found. In particula any formula for which 
-there is no matching MSF-Rule  is considered atomic, i.e., a literal.
+the target literals(Resource) provides the facts of type pef_msf_rule and pef_call.
 
-A MSF-Rule is basically a tupel (Mod0,Pattern,Mod1,Subgoal) stating that
-any formula encountered in the context of Mod0 and matching Pattern has a maximal 
-subformula Subgoal that is to be interpreted in the context of Mod1.   
+pef_call describes the relation between literals and the predicates they call.
+pef_msf_rule describes the "behaviour" of user-defined meta-predicates.
+A meta-predicate is a predicate that decides whether some formula can be proved.
+Each rule associates a call pattern of the predicate with the formula the predicate will try to prove.
+'MSF' is means "Maximul Sub-Formula", although by now i generalized the approach to allow cases where
+the formula is not explicitly occuring int the call.  
 
-
-
-)
-My approach is different from the others I examined so far in two things:
-- instead of claiming to solve an unsolveable(?) problem, I explicitly compute 
-  an upper and lower bound to the correct solution of this problem. 
-- By employing a necessary and a sufficient criterion for the detection of UDMPs, I
-  can dynamically expand the rule sets for both upper and lower bound, thus coming 
-  to a much more precise result through a simple fix point iteration.
-- Other than most (not all) other solutions I saw so far, my approach is aware of modules.  
+the targets defined in this file require fix point calculations.
+the granularity of dependencies is that of predicates.
 */
+
+pdt_builder:fix_point_target(literals(predicate(_))).
+pdt_builder:target_file(literals(directory(Path,_,_)),Path).
+pdt_builder:target_file(literals(file(Path)),Path).
+pdt_builder:target_mutable(literals(workspace),true).
+pdt_builder:target_mutable(literals(project(_)),true).
+pdt_builder:target_mutable(literals(predicate(_)),true).
+
+pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
+    cx_head(Cx,Head),
+    ast_attach([Goal=GoalAst,Head=HeadAST]),
+    cx_set_head(Cx,HeadAST,Cx1),  
+    findall(
+    	Result,
+    	find_literal(GoalAst,Cx1,Result),    	
+    	Results
+    ),
+    process_results(Results).
+pdt_builder:fp_seed_hook(literals(predicate(Id))):-
+	seed_predicate(Id).    
+pdt_builder:build_hook(literals(Resource)):-
+    (	Resource=file(Path)
+    ->	request_file_literals(Path)    
+    ;   pdt_request_target(Resource),
+    	pdt_contains(Resource,Element),
+    	pdt_request_target(literals(Element))
+    ).
+
+file_predicate(F,P):-
+    pef_toplevel_query([file=F,id=Tl]),
+    \+ pef_term_expansion_query([original=Tl]), %for expansion: ignore original.
+    pef_clause_query([toplevel=Tl,predicate=P]).
+    
+request_file_literals(Path):-
+    pdt_request_targets([parse(Path),interprete(Path)]),
+    get_pef_file(Path,F),
+    forall(
+		file_predicate(F,P),    		    
+    	pdt_request_target(literals(predicate(P)))
+    ).
+
+seed_predicate(Pred):-    
+    %begin debug
+    pef_predicate_query([id=Pred,name=Name,arity=Arity,module=Module]),
+    module_name(Module,ModuleName),
+    debug(literals,"seeding ~w:~w/~w~n",[ModuleName,Name,Arity]),    
+    forall(
+    	fp_init_todo2(Pred,Cx,Goal),
+    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(predicate(Pred)))
+    ),
+
+process_results([]).
+process_results([Result|Results]):-
+    debug(literals,"process result: ~w~n",[Result]),
+    fp_process_result(Result),
+    process_results(Results).
+
+
 
 
 :- pdt_define_context(
@@ -95,7 +144,7 @@ My approach is different from the others I examined so far in two things:
 find_literal(Goal,Cx,rule(Rule)):-
     ast_variable_occurance(Goal,VarId),
 	ast_apply(Goal,_,Dbg),
-	format("looking at a variable: ~w~n",[Dbg]),
+	debug(literals,"looking at a variable: ~w~n",[Dbg]),
     
 	%pef_variable_occurance_query([id=Goal,variable=VarId]),
 	!,	
@@ -104,7 +153,7 @@ find_literal(Goal,Cx,rule(Rule)):-
 	make_rule(Var,Cx,[VarId=Var|_],Rule).
 find_literal(Goal,Cx0,Literal):- 
 	ast_apply(Goal,_,Dbg),
-	format("looking at ~w~n",[Dbg]),       	
+	debug(literals,"looking at ~w~n",[Dbg]),       	
 	resolve(Goal,Cx0,Cx1),	    	
 	(	cx_binding(Cx1,unresolved)
 	->	Literal=unresolved(Cx1,Goal)	
@@ -150,7 +199,7 @@ find_literal__match_found(Goal,Subst,RuleSubst,SubGoal,Cx,Literal):-
 	    ),
 	    find_literal(SubGoal,Cx2,Literal)
 	;   ast_apply(SubGoal,_,Dbg),
-		format("stoped here: ~w~n",[Dbg]),
+		debug(literals,"stoped here: ~w~n",[Dbg]),
 		% Subgoal is not sufficiently instantiated.
 	    % We cannot continue, (there is nothing to continue with!) 
 	    % but we can add a new MSF-Rule .
@@ -211,11 +260,12 @@ match(Goal,Cx0,Subst,RuleSubst,Subformula,CxOut):-
 	->  has_tail([],ModBindings),
 		Bound2=Bound1,
 		memberchk(ModTerm,ModBindings),
-		apply(ModTerm,_,Subcontext)		
+		ast_apply(ModTerm,_,Subcontext)		
 	;	Subcontext=Subcontext2,
 		Bound2=upper
 	),
 	cx_set(Cx1,[bound=Bound2,context=Subcontext],CxOut).
+
 
 
 
@@ -239,10 +289,10 @@ find_rule(Goal,Cx0,Rule,Cx1):-
 	;	Binding==builtin
 	->  cx_context(Cx0,Context),
 		call(Rule)
-	;	cx_binding(Cx0,Pred),
+	;	pdt_request_target(literals(predicate(Binding))),
 		cx_context(Cx0,Context),
     	cx_program(Cx0,Program),
-    	pef_msf_rule_query([	predicate=Pred,
+    	pef_msf_rule_query([	predicate=Binding,
     							program=Program,    
     							pattern=Pattern,	
     							context=Context,
@@ -307,6 +357,34 @@ assert_rule(Rule):-
     ->	pef_msf_rule_retractall([id=Id])
     ;	rule_exists(Rule,Id,more_general)
     ->	fail
+    ;   pef_msf_rule_program(Rule,Program),
+	    pef_msf_rule_predicate(Rule,Predicate),
+	    pef_msf_rule_pattern(Rule,Pattern),
+	    pef_msf_rule_subformula(Rule,Goal),
+	    pef_msf_rule_substitution(Rule,RuleSubst),
+	    pef_msf_rule_context(Rule,InitialContext),
+	    pef_msf_rule_subcontext(Rule,Subcontext),
+	    pef_msf_rule_bound(Rule,Bound),
+    	pef_reserve_id(pef_msf_rule,Id),
+    	pef_msf_rule_assert([
+    				id=Id,
+    				program=Program,
+    				predicate=Predicate,
+    				pattern=Pattern,
+    				subformula=Goal,
+    				context=InitialContext,
+    				subcontext=Subcontext,
+    				bound=Bound,
+    				substitution=RuleSubst
+    	])    
+    ).
+
+
+assert_rule2(Rule):-
+    (	rule_exists(Rule,Id,more_special)
+    ->	pef_msf_rule_retractall([id=Id])
+    ;	rule_exists(Rule,Id,more_general)
+    ->	true
     ;   pef_msf_rule_program(Rule,Program),
 	    pef_msf_rule_predicate(Rule,Predicate),
 	    pef_msf_rule_pattern(Rule,Pattern),
@@ -416,6 +494,37 @@ fp_init_todo(Cx,Goal):-
     cx_head(Cx,Head),
     cx_bound(Cx,lower).
 
+fp_init_todo2(Pred,Cx,GoalNode):-
+    pef_clause_query([predicate=Pred,toplevel=Tl]),
+    % need to add a dependency to the interpretation of the file including the clause.
+    % This is a bit awkward since the very fact that we can to refer to a predicate implies
+    % that we already have interpeted that file. 
+    % We could also refer to the predicate by its name and the file the clause apears in. 
+    % But than we would have to do more lookups. 
+    % FIXME: think of a better solution.
+    pef_toplevel_query([id=Tl,file=File]),
+    \+ pef_term_expansion_query([original=Tl]), %for expansion: ignore original.
+    get_pef_file(Path,File),
+    pdt_request_targets([interprete(Path),ast(file(Path))]),
+	%    
+    predicate_owner(Pred,Prog),
+	(	pef_predicate_property_definition_query([predicate=Pred,property=module_transparent])
+    ->	cx_initial_context(Cx,Context)
+    ;	pef_predicate_query([id=Pred,module=MID]),
+    	module_name(MID,Context)
+    ),
+    ast_root(Tl,Root),
+    ast_head_body(Root,_,Head,Goal),
+    Goal \== [], Head \== [],	
+    ast_node(Head,HeadNode),
+    ast_node(Goal,GoalNode),    
+    cx_new(Cx),
+    cx_toplevel(Cx,Tl),
+	cx_program(Cx,Prog),
+	cx_predicate(Cx,Pred),	
+	cx_context(Cx,Context),
+    cx_head(Cx,HeadNode),
+    cx_bound(Cx,lower).
 
 
     
@@ -435,7 +544,7 @@ fp_step:-fp_step1,fp_step2,fp_step3.
 fp_step1:-
     forall(
 		recorded(fp_todo,Todo,Ref),
-		(	format("processing: ~w~n",[Todo]),
+		(	debug(literals,"processing: ~w~n",[Todo]),
 			fp_process_todo(Todo),
 			erase(Ref)			
 		)
@@ -443,7 +552,7 @@ fp_step1:-
 fp_step2:-	
 	forall(
 		recorded(fp_result,Result,Ref),
-		(	format("processing: ~w~n",[Result]),
+		(	debug(literals,"processing: ~w~n",[Result]),
 			fp_process_result(Result),
 			erase(Ref)			
 		)
@@ -451,7 +560,7 @@ fp_step2:-
 fp_step3:-
 	forall(
 		recorded(fp_touched,Predicate,Ref),
-		(	format("processing: ~w~n",[Predicate]),
+		(	debug(literals,"processing: ~w~n",[Predicate]),
 			fp_process_touched(Predicate),
 			erase(Ref)
 		)
@@ -461,7 +570,7 @@ fp_step3:-
 fp_done:- \+ recorded(fp_todo,_).
 
 fp_process_todo(todo(Cx,Goal)):-
-    format("processing: ~w~n",[todo(Cx,Goal)]),
+    debug(literals,"processing: ~w~n",[todo(Cx,Goal)]),
     forall(
     	find_literal(Goal,Cx,Result),
 		recordz(fp_result,Result)	
@@ -478,10 +587,63 @@ fp_process_touched(Predicate):-
     	)
     ).
 	
-fp_process_result(rule(Rule)):-
+fp_process_result_bak(rule(Rule)):-
     (	assert_rule(Rule)
     ->	pef_msf_rule_predicate(Rule,Predicate),
     	recordz(fp_touched,Predicate)
+    ;	true
+    ).
+    
+fp_process_result_bak(literal(Cx,Goal)):-
+    pef_reserve_id(pef_call,Id),
+    cx_binding(Cx,Predicate),
+    cx_head(Cx,Head),
+    ast_node(Head,HeadNode),
+    (	ast_node(Goal,GoalNode)
+    ->	true
+    ;	GoalNode=[]
+    ),
+    cx_set_head(Cx,HeadNode,Cx1),
+    (	pef_call_query([goal=GoalNode,predicate=Predicate])
+    ->  true
+    ;	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
+    ).
+    
+   
+fp_process_result_bak(meta_call(Cx,Goal)):-
+	pef_reserve_id(pef_call,Id),
+    cx_binding(Cx,Predicate),
+    cx_head(Cx,Head),
+    ast_node(Head,HeadNode),
+    (	ast_node(Goal,GoalNode)
+    ->	true
+    ;	GoalNode=[]
+    ),
+    cx_set_head(Cx,HeadNode,Cx1),
+    (	pef_call_query([goal=GoalNode,predicate=Predicate])
+    ->  true
+    ;	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
+    ).
+fp_process_result_bak(unresolved(Cx,Goal)):-
+    ast_node(Goal,Node),
+	cx_context(Cx,Context),
+	cx_toplevel(Cx,Tl),
+	pef_toplevel_query([id=Tl,file=File]),
+	ast_functor(Goal,Name,Arity),	
+	get_pef_file(Path,File),			
+	debug(literals,"~w (~w): cannot resolve predicate: ~w/~w, context ~w~n",[Path,Node,Name,Arity,Context]).
+
+
+
+fp_process_result(rule(Rule)):-
+    (	assert_rule(Rule)
+    ->	pef_msf_rule_predicate(Rule,Callee),
+    	forall(
+    		pef_call_query([predicate=Callee,goal=Goal, cx=Cx]),
+    		(	cx_predicate(Cx,Caller),
+    			pdt_fp_enqueue(find_literals(Goal,Cx),literals(predicate(Caller)))
+    		)    	
+    	)
     ;	true
     ).
     
@@ -515,14 +677,16 @@ fp_process_result(meta_call(Cx,Goal)):-
     ->  true
     ;	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
     ).
-fp_process_result(unresolved(Cx,Goal)):-
-    ast_node(Goal,Node),
-	cx_context(Cx,Context),
-	cx_toplevel(Cx,Tl),
-	pef_toplevel_query([id=Tl,file=File]),
-	ast_functor(Goal,Name,Arity),	
-	get_pef_file(Path,File),			
-	format("~w (~w): cannot resolve predicate: ~w/~w, context ~w~n",[Path,Node,Name,Arity,Context]).
+fp_process_result(unresolved(_Cx,Goal)):-
+    ast_node(Goal,Node),	
+	(	pef_unresolved_predicate_symbol_query([goal=Node])
+	->	true
+	;	pef_reserve_id(pef_unresolved_predicate_symbol,Id),
+		pef_unresolved_predicate_symbol_assert([id=Id,goal=Node])
+	).
+	
+
+
 
 spyme.
 		
@@ -546,4 +710,5 @@ rule_test_term(Rule,t(Context,Pattern,Subcontext,Goal,Bound)):-
 
 apply_subst([]).
 apply_subst([S|Ss]):-call(S),apply_subst(Ss).    
-    		
+
+
