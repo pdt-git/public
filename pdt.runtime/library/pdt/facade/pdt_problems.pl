@@ -9,7 +9,7 @@
 :-use_module(library('pef/pef_api')).
 :-use_module(library('builder/builder')).
 :-use_module(library('builder/targets/problems')).
-:-use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
+
 
 syntax_error_position(error(_, stream(_, _, _, Offset)),Offset,Offset).
 syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
@@ -17,6 +17,7 @@ syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
 problems:kind(cheap,Path,parse(Path)).
 problems:kind(cheap,Path,singletons(Path)).
 problems:kind(expensive,Path,interprete(Path)).
+%problems:kind(expensive,Path,literals(file(Path))).
 
 sum(Times,Brutto):-
 	sum(Times,0,Brutto).
@@ -53,8 +54,7 @@ pdt_problem(Id,File,Tag,Start,End,Severity,Msg):-
 
 problem(Id,File,expensive,Start,End,error,Message):-%module name clash
 	pef_module_name_clash_query([id=Id,toplevel=TLID,first=MID]),
-	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
-	top_position(Positions,Start,End),
+	toplevel_source_position(TLID,FID,Start,End),
 	module_name(MID,MName),
 	module_file(MID,FirstFID),
 	get_pef_file(FirstFile,FirstFID),
@@ -64,8 +64,7 @@ problem(Id,File,expensive,Start,End,error,Message):-%module name clash
 problem(Id,File,expensive,Start,End,error,Message):-%predicate name clash
 	pef_predicate_name_clash_query([id=Id,toplevel=TLID,first=PRID]),
 	pef_predicate_query([id=PRID,name=PName,arity=Arity,module=MID]),
-	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
-	top_position(Positions,Start,End),
+	toplevel_source_position(TLID,FID,Start,End),
 	module_name(MID,MName),	
 	get_pef_file(File,FID),
 	with_output_to(string(Message),format("A predicate ~w was already imported from module ~w.(~w)",[PName/Arity,MName,Id])).
@@ -75,8 +74,7 @@ problem(Id,File,expensive,Start,End,warning,Message):-%predicate redefinition
 	predicate_file(PRID,FirstFID),
 	pef_predicate_query([id=PRID,name=PName,arity=Arity,module=MID]),
 	module_name(MID,MName),
-	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
-	top_position(Positions,Start,End),
+	toplevel_source_position(TLID,FID,Start,End),
 	get_pef_file(FirstFile,FirstFID),
 	get_pef_file(File,FID),
 	with_output_to(string(Message),format("Redefinition of predicate ~w originally defined in ~w.(~w)",[MName:PName/Arity,FirstFile,Id])).
@@ -86,8 +84,7 @@ problem(Id,File,expensive,Start,End,warning,Message):-%predicate abolished
 	predicate_file(PRID,FirstFID),
 	pef_predicate_query([id=PRID,name=PName,arity=Arity]),
 	module_name(MID,MName),
-	pef_toplevel_query([id=TLID,file=FID,positions=Positions]),
-	top_position(Positions,Start,End),
+	toplevel_source_position(TLID,FID,Start,End),
 	get_pef_file(FirstFile,FirstFID),
 	get_pef_file(File,FID),
 	with_output_to(string(Message),format("Loading module ~w abolishes predicate ~w originally defined in ~w.(~w)",[MName,MName:PName/Arity,FirstFile,Id])).
@@ -103,7 +100,8 @@ problem(Id,File,cheap,Start,End,warning,Message):-%singleton
     pef_singleton_query([id=Id,variable=VID]),
     pef_variable_query([id=VID,name=Name,ast=Ast]),
     pef_ast_query([id=Ast,toplevel=TlID]),
-    pef_toplevel_query([id=TlID,file=FID]),
+    %pef_toplevel_query([id=TlID,file=FID]),
+    toplevel_source_position(TlID,FID,_,_),
     pef_variable_occurance_query([variable=VID,id=OccID]),
     pef_property_query([pef=OccID,key=start,value=Start]),
 	pef_property_query([pef=OccID,key=end,value=End]),
@@ -113,9 +111,21 @@ problem(Id,File,cheap,Start,End,warning,Message):-%no singleton
     pef_no_singleton_query([id=Id,variable=VID]),
     pef_variable_query([id=VID,name=Name,ast=Ast]),
     pef_ast_query([id=Ast,toplevel=TlID]),
-    pef_toplevel_query([id=TlID,file=FID]),
+    %pef_toplevel_query([id=TlID,file=FID]),
+    toplevel_source_position(TlID,FID,_,_),
     pef_variable_occurance_query([variable=VID,id=OccID]),
     pef_property_query([pef=OccID,key=start,value=Start]),
 	pef_property_query([pef=OccID,key=end,value=End]),
     get_pef_file(File,FID),
-    with_output_to(string(Message),format("Variable ~w apears more than once in this clause.(~w)",[Name,Id])).        
+    with_output_to(string(Message),format("Variable ~w apears more than once in this clause.(~w)",[Name,Id])).
+problem(Id,File,expensive,Start,End,warning,Message):-%unresolved predicate symbol
+    pef_unresolved_predicate_symbol_query([id=Id,goal=Term]),
+    ast_toplevel(Term,TlID),
+    %pef_toplevel_query([id=TlID,file=FID]),
+    toplevel_source_position(TlID,FID,_,_),
+    pef_term_query([id=Term,name=Name,arity=Arity]),
+    pef_property_query([pef=Term,key=start,value=Start]),
+	pef_property_query([pef=Term,key=end,value=End]),
+    get_pef_file(File,FID),
+    with_output_to(string(Message),format("Cannot resolve ~w/~w in this context.(~w)",[Name,Arity,Id])).    
+            

@@ -102,7 +102,7 @@ functor_type(string_position(_,_),string).
 
 
 sub_position(brace_term_position(_,_,T),1,T).
-
+sub_position(none,_,none).
 
 
 sub_position(term_position(_,_,_,_,ArgPositions),N,SubPos):-

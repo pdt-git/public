@@ -1,3 +1,13 @@
+/*
+some helper predicates to work with mixed ast/term structures.
+
+An AST as expected by these predicates is a prolog term which contains variables that are 
+attached to ast_node pefs. The attachment currently is realized through attributed variables. 
+
+This module is mostly used by the literals target of the builder.
+
+*/
+
 :- module(ast_util,[
 ast_arg/3,
 ast_attach/1,
@@ -13,7 +23,8 @@ ast_root/2,
 ast_node/2,
 ast_var/1
 ]).
-:- use_module(library('pef/pef_base')).    
+:- use_module(library('pef/pef_base')).
+:- use_module(library('org/cs3/pdt/util/pdt_util')).    
 %% 	ast_match(+Pattern,+AST,-Subst)
 % match an ast against a term pattern.
 % The pattern is just a usual prolog term + the following conventions: 

@@ -612,7 +612,7 @@ report_error(Error):-
 
 report_error([],_Error).
 report_error([Thread|Threads],Error):-
-    (	Thread=target(Target)
+    (	Thread=target(_,Target)
     ->	throw(cannot_report_to_target(Error,Target))
     ;	arbiter_send_message(Thread,meta,arbiter_error(Error))
     ),
@@ -679,7 +679,7 @@ execute_action([Action|Actions],Target):-
 execute_action(grant([]),Target):-
     progress_report_worked(Target).
 execute_action(grant([Thread|Threads]),Target):-
-    (	functor(Thread,target,1)
+    (	functor(Thread,target,_)
     ->	true
     ;	arbiter_send_message(Thread,Target,grant(Target))
     ),
@@ -703,7 +703,7 @@ execute_action(invalidate,Target):-
     
 execute_action(obsolete([]),_).    
 execute_action(obsolete([L|Ls]),Target):-
-	(	functor(L,target,1)
+	(	functor(L,target,_)
 	->	true
 	;	'$obsolete'(L,Target)
 	->	true
@@ -717,7 +717,7 @@ execute_action(obsolete([L|Ls]),Target):-
 	
 	execute_action(obsolete(Ls),Target).
 execute_action(clear_obsolete(Thread),Target):-
-	(	functor(Thread,target,1)
+	(	functor(Thread,target,_)
 	->	true
 	;	retract('$obsolete'(Thread,Target))
 	).
@@ -933,6 +933,32 @@ target_key(T,K):-
 check_available(Targets):-
     forall(member(Target,Targets),current_target_state(Target,state(_,available,_,_,_))).
 
+
+
+strong_lock(Client):-
+    functor(Client,F,_)
+    (	F==weak_target
+    ->	fail
+    ;	F==strong_target
+    ->	true    
+    ;	fail
+    ).
+strong_locks(Clients):-
+	strong_locks(Clients,0).
+
+strong_locks([],C):-
+	C>1.
+strong_locks([Client|Clients],C):-
+	(	strong_lock(Client)
+	->	CC is C + 1
+	;	CC = C
+	),
+	(	CC > 1
+	->	true
+	;	strong_locks(Clients,CC)
+	).		
+    
+
     
 target_transition(state(A, S, Ls,SLs,Ws),		 			request(T), 	report_error([T],obsolete_lock(OT)),		
 																									state(A, S, Ls, SLs, Ws),					_Target):-
@@ -948,11 +974,15 @@ target_transition(state(building(T1), A, Ls,SLs,Ws),		request(T2), 	report_cycle
 target_transition(state(idle, available,[], SLs,Ws), 		request(T), 	[lock_deps(Deps),
 																			grant([T])], 			state(reading, available,[T],SLs,Ws) ,		Target):-
 	dependencies(Target,Deps).	
-target_transition(state(reading, available, Ls, SLs,Ws),	request(T), 	grant([T]), 			state(reading, available, [T|Ls],SLs,Ws) ,	_Target).
-
+target_transition(state(reading, available, Ls, SLs,Ws),	request(T), 	Action,		 			state(reading, available, [T|Ls],SLs,Ws) ,	Target):-
+    (	\+ strong_locks(Ls), strong_locks([T|Ls])
+    ->	dependencies(Target,Deps),
+    	Action=[strong_deps(Deps),grant([T])]
+	;	Action=grant([T])
+	).
 %enter building
 target_transition(state(idle, outdated, [],SLs,[]), 		request(T), 	rebuild(T),				state(building(T), pending(T) , [],SLs, []),Target):-
-	(	functor(T,target,1)
+	(	functor(T,target,_)
 	->	throw(target_requests_outdated_dep(T,Target))
 	;	true
 	)/*,
@@ -961,7 +991,7 @@ target_transition(state(idle, outdated, [],SLs,[]), 		request(T), 	rebuild(T),		
 	;	Status=wait_mux(T)
 	)*/. 
 target_transition(state(reading, outdated, Ls,SLs,Ws), 		request(T), 	Action,					state(reading, outdated , Ls, SLs,Ws2),	Target):-
-	(	functor(T,target,1)
+	(	functor(T,target,_)
 	->	throw(target_requests_outdated_dep(T,Target))
 	;	'$fp_target'(Target), Ws=[_|_]
 	->	Ws2=Ws,
@@ -971,7 +1001,7 @@ target_transition(state(reading, outdated, Ls,SLs,Ws), 		request(T), 	Action,			
 		Action=[]
 	).
 target_transition(state(building(P), A , [],SLs, Ws),		request(W), 	Action,	 				state(building(P), A , [], SLs,Ws2),	Target):-
-	(	functor(W,target,1)
+	(	functor(W,target,_)
 	->	throw(target_requests_dep_beeing_build(W,Target))
 	;	'$fp_target'(Target)
 	->	Ws2=Ws,
@@ -1015,10 +1045,15 @@ target_transition(state(building(_), outdated,[],SLs,Ws),	mark_clean(_), 	[],			
 
 %enter reading
 % exit building
-target_transition(state(building(_), pending(_),[],SLs,Ts),	mark_clean(_), 	[lock_deps(Deps),
+target_transition(state(building(_), pending(_),[],SLs,Ts),	mark_clean(_), 	[lock_deps(Deps,X),
 																			notify_done,
 																			grant(Ts)],				state(reading, available, Ts,SLs,[]),		Target):-
-	net_dependencies(Target,Deps),
+	length(Ts,Ln),
+	(	Ln > 1
+	->	DoDeps = [lock_deps(Deps),strong_deps(Deps)]
+	;	X = weak
+	),    																			
+	dependencies(Target,Deps),
 	forall(member(T,Ts),retract('$thread_waits'(T,Target))).    																			
 
 % exit reading
@@ -1030,8 +1065,10 @@ target_transition(state(reading, available, Ls,SLs,Ws),		release(T), 	Do, 					s
 	dependencies(Target,Deps),
     select(T,Ls,Ls2), 
     (	Ls2 == []
-    ->	Act=idle,Do=[unlock_deps(Deps)]
-    ;	Act=reading,Do=[]
+    ->	Act=idle,Do=[clear_obsolete(T),unlock_deps(Deps)]
+    ;	strong_locks(Ls), \+ strong_locks(Ls2)
+    ->	Act=reading,Do=[clear_obsolete(T),weaken_locks(Deps)]
+    ;	Act=reading,Do=[clear_obsolete(T)]
     ).
 % exit reading
 % enter building
@@ -1044,8 +1081,12 @@ target_transition(state(reading, outdated, [T],SLs,[W|Ws]),	release(T),		[clear_
 	).*/
 	dependencies(Target,Deps),
 	retract('$thread_waits'(W,Target)).
-target_transition(state(reading, outdated, Ls,SLs,Ws),		release(T),	 	[clear_obsolete(T)],	state(reading, outdated , Ls2,SLs,Ws),		_Target):-    
-    select(T,Ls,Ls2), Ls2 \== [].
+target_transition(state(reading, outdated, Ls,SLs,Ws),		release(T),	 	Do,						state(reading, outdated , Ls2,SLs,Ws),		_Target):-    
+    select(T,Ls,Ls2), Ls2 \== [],
+    (	strong_locks(Ls), \+ strong_locks(Ls2)
+    ->	Do=[clear_obsolete(T),weaken_locks(Deps)]
+    ;	Do=[clear_obsolete(T)]
+    ).
 % exit reading
 target_transition(state(reading, outdated, [L],SLs,[]),		release(L),	 	[clear_obsolete(L),
 																			unlock_deps(Deps)],		state(idle, outdated , [],SLs,[]),			Target):-

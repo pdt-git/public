@@ -21,6 +21,8 @@
 
 %define a pseudo build target for the outline to refer to.
 
+pdt_builder:target_file(outline(F),F).
+
 pdt_builder:build_hook(outline(F)):-
 	pdt_with_targets([interprete(F)],true).
 
@@ -143,7 +145,7 @@ outline_tag(pef_predicate,ID,FID,public):-
 outline_tag(pef_predicate,ID,_FID,Prop):-
     pef_predicate_property_definition_query([predicate=ID,property=Prop]).
 outline_tag(pef_toplevel,ID,_FID,directive):-
-    pef_toplevel_query([id=ID,expanded=(:-_)]).
+    pef_toplevel_query([id=ID,term=(:-_)]).
 
 public_predicate(user,_Name,_Arity,_FID):-!.
 public_predicate(system,_Name,_Arity,_FID):-!.
@@ -176,8 +178,7 @@ outline_position(pef_predicate,ID,FID,From,To):-
 	top_position(Positions,From,To).*/
 
 outline_position(pef_toplevel,ID,_FID,From,To):-
-    pef_toplevel_query([id=ID,positions=Positions]),
-	top_position(Positions,From,To).    
+    toplevel_source_position(ID,_,From,To).    
 	
 	
 pdt_print_outline(File):-

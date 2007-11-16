@@ -96,11 +96,13 @@ interprete_program(FileRef):-
     create_program(FileRef,Cx),
 
     forall(
-    	pef_toplevel_query([file=FileRef,id=TlRef,expanded=Expanded]),
+    	(	pef_toplevel_query([file=FileRef,id=TlRef,term=Term]),
+    		\+ pef_term_expansion_query([original=TlRef]) %for expansion: ignore original.
+    	),
     	(	cx_toplevel(Cx,TlRef),
-    		(	interprete_toplevelXXX(Expanded,Cx)
+    		(	interprete_toplevelXXX(Term,Cx)
     		->	true
-    		;	throw(failed(interprete_toplevelXXX(Expanded,Cx)))
+    		;	throw(failed(interprete_toplevelXXX(Term,Cx)))
     		)
     	)
     ).
@@ -229,9 +231,11 @@ process_file_inclusion(Type,Ref,Cx):- %The file was not yet loaded in this conte
 	module_name(MID,ModName),
     cx_set(Cx,[file=Ref,toplevel=_,file_stack=[Ref|Stack]],Cx1),
     forall(
-    	pef_toplevel_query([id=TlRef,file=Ref,expanded=Expanded]),
+    	(	pef_toplevel_query([id=TlRef,file=Ref,term=Term]),
+    		\+ pef_term_expansion_query([original=TlRef]) %for expansion: ignore original.
+    	),
     	(	cx_toplevel(Cx1,TlRef),
-    		interprete_toplevel(Expanded,Cx1)
+    		interprete_toplevel(Term,Cx1)
     	)
     ),
 	(	Type==ensure_loaded

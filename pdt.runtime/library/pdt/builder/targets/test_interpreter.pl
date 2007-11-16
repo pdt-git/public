@@ -161,7 +161,7 @@ clause_exists_in_program(ClauseRef,N,PredID):-
     clause(Head,Body,ClauseRef),
 	normalize_clause(Head:-Body,RealClause),
     pef_clause_query([predicate=PredID,number=N,toplevel=TlRef]),
-    pef_toplevel_query([id=TlRef,expanded=Exp]),
+    pef_toplevel_query([id=TlRef,term=Exp]),
     normalize_clause(Exp,PefClause),
     RealClause =@= PefClause.
 
@@ -209,7 +209,7 @@ pefs_subset_reality(Abs,Result):- %clauses
     module_predicate(DefMID,PredID),
     pef_predicate_query([id=PredID,name=Name,arity=Arity]),
 	pef_clause_query([predicate=PredID,number=Num,toplevel=TlRef]),
-	pef_toplevel_query([id=TlRef,expanded=PefTerm]),
+	pef_toplevel_query([id=TlRef,term=PefTerm]),
 	normalize_clause(PefTerm,NormPefTerm),
 	functor(Head,Name,Arity),
 	(	real_clause(DefMName,Head,Num,NormPefTerm)

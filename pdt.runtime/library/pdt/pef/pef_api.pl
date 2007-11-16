@@ -14,6 +14,7 @@
 	resolve_predicate/5,
 	resolve_module/3,
 	toplevel_term/2,
+	toplevel_source_position/4,
 	predicate_listing/1,
 	module_file/2,
 	module_predicate/2,
@@ -24,11 +25,28 @@
 	first_clause/4,
 	file_depends_star/2,
 	related_file/2, 	
-	has_tail/2
+	has_tail/2,
+	ast_toplevel/2
 	]).
 
 :- use_module(library('pef/pef_base')).
+:- use_module(library('builder/builder')).
+:- use_module(library('builder/targets/workspace')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_term_position')).
+
+
+%%
+% ast_toplevel(+Ast, -Toplevel).
+% find the toplevel continaing the given AST node.
+% (assumes that there can at most be one such toplevel)
+ast_toplevel(Ast, Toplevel):-
+    (	pef_ast_query([root=Ast,toplevel=Toplevel])
+    -> 	true
+    ;	pef_arg_query([child=Ast,parent=Parent ]),
+    	ast_toplevel(Parent,Toplevel)
+    ).
+    	
 
 %%
 % predicate_listing(+PredID)
@@ -36,7 +54,7 @@
 predicate_listing(PredID):-
     forall(
     	pef_clause_query([predicate=PredID,number=Num,toplevel=TlRef]),
-    	(	pef_toplevel_query([id=TlRef,expanded=Term]),
+    	(	pef_toplevel_query([id=TlRef,term=Term]),
     		format("% clause ~w~n",[Num]),
     		portray_clause(Term)
     	)
@@ -126,7 +144,7 @@ num_clauses(_PredId,0).
 % toplevel_term(+TlRef,-Term)
 % succeeds if Term is the expanded version of the source term recorded as toplevel TlRef.
 toplevel_term(TlRef,Term):-
-    pef_toplevel_query([id=TlRef,expanded=Term]).
+    pef_toplevel_query([id=TlRef,term=Term]).
 
 %%
 % predicate_file(+PredId,-FileRef)
@@ -270,4 +288,9 @@ related_file(A,B):-
     pef_program_file_query([program=PID,file=BID]),
     get_pef_file(B,BID).
     
-    
+toplevel_source_position(Tl,File,Start,End):-
+	(	pef_term_expansion_query([expanded=Tl,source=Orig])
+	->	pef_toplevel_query([id=Orig,file=File,positions=Positions])
+	;	pef_toplevel_query([id=Tl,file=File,positions=Positions])
+	),
+	top_position(Positions,Start,End).

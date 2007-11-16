@@ -7,7 +7,7 @@
 :- use_module(library('builder/builder')).
 
 
-:- pdt_define_context(parse_cx(file,toplevel,term)).
+:- pdt_define_context(parse_cx(file,toplevel,term,expanded)).
 
 pdt_builder:target_file(parse(F),F).
 
@@ -96,7 +96,7 @@ do_read(F,In):-
     repeat,
     	
     	catch(
-    		prolog_read_source_term(In,Original,Expanded,
+    		prolog_read_source_term(In,Term,Expanded,
     			[	variable_names(VarNames),
     				singletons(Singletons),
     				subterm_positions(Positions),
@@ -110,38 +110,13 @@ do_read(F,In):-
     		%debug(parse(todo),"TODO: add an error marker for ~w.~n",[Error])
     	),
     	var(Error),
-    	
-    	pef_reserve_id(pef_toplevel,OrigID),   
-    	(	pef_toplevel_assert([id=OrigID,file=Ref,term=Original,varnames=VarNames,singletons=Singletons,positions=Positions]),    	
-    		parse_cx_get(Cx,[term=Original,toplevel=OrigID]),
-    		Term=Original,
-    		add_comments(Comments,Cx)
-    	;	Expanded\==Original,
-    		(	is_list(Expanded)
-    		->	Terms=Expanded
-    		;	Terms=[Expanded]
-    		),
-    		member(Term,Terms),
-    		pef_reserve_id(pef_toplevel,ExpID),  
-    		gen_varnames(Term,GenVarnames),  		
-    		pef_toplevel_assert([id=ExpID,file=Ref,term=Term,varnames=GenVarnames,singletons=[],positions=none]),
-    		pef_term_expansion_assert([source=OrigID,expanded=ExpID]),    	
-    		parse_cx_get(Cx,[term=Term,toplevel=ExpID])
-    	), 
-    	preprocess(Term,Cx),
-    	
+    	pef_reserve_id(pef_toplevel,TID),
+    	pef_toplevel_assert([id=TID,file=Ref,term=Term,expanded=Expanded,varnames=VarNames,singletons=Singletons,positions=Positions]),    	
+    	parse_cx_get(Cx,[term=Term,expanded=Expanded,toplevel=TID]),
+    	preprocess(Expanded,Cx),
+    	add_comments(Comments,Cx),
     	Term==end_of_file,
     !.
-
-gen_varnames(Term,VarNames):-
-    copy_term(Term,Term2),
-    numbervars(Term2,0,_),
-    unifiable(Term,Term2,VarNames0),
-    reverse_varnames(VarNames0,VarNames).
-
-reverse_varnames([],[]).
-reverse_varnames([X=Y|VarNames0],[Y=X|VarNames]):-
-    reverse_varnames(VarNames0,VarNames).
 
 add_comments([],_Cx).
 add_comments([StreamPos-Text|Comments],Cx):-

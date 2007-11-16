@@ -6,7 +6,7 @@
 
 
 pdt_builder:target_file(file(F),F).
-pdt_builder:target_file(directory(F),F).
+pdt_builder:target_file(directory(F,_,_),F).
 pdt_builder:target_mutable(workspace,true).
 pdt_builder:target_mutable(project(_),true).
 pdt_builder:build_hook(directory(Abs,Include,Exclude)):-
@@ -41,6 +41,8 @@ pdt_builder:build_hook(workspace):-
     
     
 
+atom_suffix(Atom,Suffix):-
+    sub_atom(Atom,_,_,0,Suffix).
 
 process_entries([],_,C,C).
 process_entries([file(Abs)|Entries],Dir,C,C2):-
@@ -59,7 +61,10 @@ process_entries([directory(Abs,IP,EP)|Entries],Dir,C,C2):-
     process_entries(Entries,Dir,C1,C2).
     	
 find_entries(Abs,IP,EP,Deps):-
-	atom_concat(Abs,'/*',LsPattern),
+    (	atom_suffix(Abs,'/')
+	->	atom_concat(Abs,'*',LsPattern)
+	;	atom_concat(Abs,'/*',LsPattern)
+	),
 	expand_file_name(LsPattern,Files),
 	filter(Files,IP,EP,Deps).
 	
