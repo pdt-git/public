@@ -203,6 +203,11 @@ public abstract class PrologContentAssistProcessor implements
 			return;
 		}
 		Predicate[] elems = null;
+		if(getProject() == null) {
+			Debug.warning("Stopped completion proposal creation. No associated Prolog project found for project '" + getFile().getProject().getName() + "'.");
+			return;
+		}
+
 		PrologInterface pif = getProject().getMetadataPrologInterface();
 		PrologSession2 s = null;
 		try {

@@ -1,12 +1,10 @@
 package org.cs3.pdt.internal.views;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -16,7 +14,6 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionProxy;
@@ -32,6 +29,7 @@ import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 public abstract class ContentModel extends DefaultAsyncPrologSessionListener
@@ -470,6 +468,12 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 						this);
 
 			}
+			if(getFile() == null) {
+				Debug.warning("Stopped setting the PDT outline content for file '"
+						+((FileEditorInput)input).getFile().getFullPath()+"'. The ContentModel has not been initialized. Probably the associated project does not have the PDT nature.");
+				return;
+			}
+			
 			this.subject = "builder(outline('" + Util.prologFileName(getFile())
 					+ "'))";
 			if (this.dispatcher != null && this.subject != null) {
