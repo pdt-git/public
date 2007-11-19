@@ -469,8 +469,13 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 			}
 			if(getFile() == null) {
-				Debug.warning("Stopped setting the PDT outline content for file '"
-						+((FileEditorInput)input).getFile().getFullPath()+"'. The ContentModel has not been initialized. Probably the associated project does not have the PDT nature.");
+				String fileSpecificTest = "";
+				if(input != null) {
+					fileSpecificTest =  " for file '"+((FileEditorInput)input).getFile().getFullPath()+"'";
+				}
+				Debug.warning("Stopped setting the PDT outline content"+fileSpecificTest+". " +
+					"The ContentModel has not been initialized. Probably the associated project does not have the PDT nature.");
+				
 				return;
 			}
 			
