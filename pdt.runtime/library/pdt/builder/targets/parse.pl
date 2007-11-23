@@ -197,8 +197,11 @@ process_inclusion(F,Cx):-
 		error(cycle(T)),
 		debug(parse(todo),"TODO: add a warning about dependency cycle: ~w~n",[T])
 	).
-process_inclusion(F,_Cx):-
-    debug(parse(todo),"TODO add error marker - could not resolve: ~w~n",[F]). 
+process_inclusion(F,Cx):-
+    pef_reserve_id(pef_file_not_found,Id),
+    parse_cx_toplevel(Cx,Tl),
+    pef_file_not_found_assert([id=Id,file_spec=F,toplevel=Tl]).
+     
 
 
 

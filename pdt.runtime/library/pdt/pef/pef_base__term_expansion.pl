@@ -78,7 +78,13 @@ create_record(Template,Cx,Record):-
     
 create_index_asserts(Template,Cx,Decls,Asserts,Ref):-
     functor(Cx,Name,Arity),
-    create_index_asserts_args(Arity,Name,Template,Cx,Decls,Ref,assert(Cx,Ref),Asserts).
+    (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
+    ->	cmpix_assert(Names,Template,Cx,Ref,CmpixAsserts),
+    	Asserts0=(assert(Cx,Ref),CmpixAsserts)
+    ;	Asserts0=assert(Cx,Ref)
+    ),
+    create_index_asserts_args(Arity,Name,Template,Cx,Decls,Ref,Asserts0,Asserts).
+    
 
 create_index_asserts_args(0,_Name,_Template,_Cx,_Decls,_Ref,Asserts,Asserts):-!.
 create_index_asserts_args(I,Name,Template,Cx,Decls,Ref,Asserts,AssertsOut):-
@@ -110,9 +116,30 @@ define_query(Template,Decls):-
     memberchk((Head:-Getter,Query),Decls),
     memberchk((:- export(Head)),Decls).
 
-create_index_query(Template,Cx,Decls,Query):-
+define_query2(Template,Decls):-
+    functor(Template,Name,Arity),
     functor(Cx,Name,Arity),
-    create_index_query_args(Arity,Name,Template,Cx,Decls,call(Cx),Query).
+    atom_concat(Name,'_query',HeadName),
+    functor(Head,HeadName,2),
+    arg(1,Head,List),
+    arg(2,Head,Cx),
+    atom_concat(Name,'_get',GetterName),
+    functor(Getter,GetterName,2),
+    arg(1,Getter,Cx),
+    arg(2,Getter,List),
+	create_index_query(Template,Cx,Decls,Query),
+    memberchk((Head:-Getter,Query),Decls),
+    memberchk((:- export(Head)),Decls).
+
+
+create_index_query(Template,Cx,Decls,QueryOut):-
+    functor(Cx,Name,Arity),
+    create_index_query_args(Arity,Name,Template,Cx,Decls,call(Cx),Query),
+    (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
+    ->	cmpix_query(Names,Template,Cx,CmpixQuery),
+    	QueryOut=(CmpixQuery;Query)
+    ;	QueryOut=Query
+    ).
 
 create_index_query_args(0,_Name,_Template,_Cx,_Decls,Query,Query):-!.
 create_index_query_args(I,Name,Template,Cx,Decls,Query,QueryOut):-
@@ -134,27 +161,61 @@ index_name(Tmpl,ArgNum,IxName):-
     functor(Tmpl,Type,_),
     arg(ArgNum,Tmpl,ArgName),
     concat_atom([Type,revix,ArgName],'$',IxName).
-index_name(Tmpl,ArgName,IxName):-
+index_name(Tmpl,[ArgName|ArgNames],IxName):-  
+	!,  
+    functor(Tmpl,Type,_),
+    concat_atom([Type,cmpix|[ArgName|ArgNames]],'$',IxName).
+index_name(Tmpl,ArgName,IxName):-    
     functor(Tmpl,Type,_),
     concat_atom([Type,revix,ArgName],'$',IxName).
     
-define_query2(Template,Decls):-
-    functor(Template,Name,_),
-    atom_concat(Name,'_query',HeadName),
-    functor(Head,HeadName,2),
-    arg(1,Head,List),
-    arg(2,Head,Cx),
-    atom_concat(Name,'_get',GetterName),
-    functor(Getter,GetterName,2),
-    arg(1,Getter,Cx),
-    arg(2,Getter,List),
-    atom_concat(Name,'_new',ConstructorName),
-    functor(Constructor,ConstructorName,1),
-    arg(1,Constructor,Cx),
-    memberchk((Head:-Constructor,Getter,call(Cx)),Decls),    
-    memberchk((:- export(Head)),Decls).
 
+cmpix_hashable(Names,Tmpl,Data,Hashable):-
+    map_names_to_args(Names,Tmpl,Data,Args),
+    Hashable=..[h|Args].
 
+cmpix_query(Names,Tmpl,Data,Query):-
+    index_name(Tmpl,Names,IxName),
+    IxClause =..[IxName,Hash,Ref],
+    cmpix_hashable(Names,Tmpl,Data,Hashable),
+    Query=(ground(Hashable) -> hash_term(Hashable,Hash),IxClause,clause(Data,_,Ref)).
+    
+cmpix_assert(Names,Tmpl,Data,Ref,Assert):-
+    index_name(Tmpl,Names,IxName),
+    IxClause =..[IxName,Hash,Ref],
+    cmpix_hashable(Names,Tmpl,Data,Hashable),
+    Assert=(hash_term(Hashable,Hash),assert(IxClause)).
+    
+
+cmpix_retractall(Names,Tmpl,Data,Action,Ref,Retract):-
+    index_name(Tmpl,Names,IxName),
+    IxClause =..[IxName,Hash,Ref],
+    cmpix_hashable(Names,Tmpl,Data,Hashable),
+    Retract=
+    	(	ground(Hashable) 
+    	->  hash_term(Hashable,Hash),
+    		forall(
+    			(	IxClause,
+    				clause(Data,_,Ref)
+    			),
+    			Action
+    		)
+    	).
+
+cmpix_retract_action(Names,Tmpl,Data,Ref,Action):-
+	index_name(Tmpl,Names,IxName),
+    IxClause =..[IxName,Hash,Ref],
+    cmpix_hashable(Names,Tmpl,Data,Hashable),
+    Action=(hash_term(Hashable,Hash),retract(IxClause)).
+
+    
+map_names_to_args([],_,_,[]).
+map_names_to_args([Name|Names],Tmpl,Data,[Arg|Args]):-
+    arg(I,Tmpl,Name),
+    arg(I,Data,Arg),
+    map_names_to_args(Names,Tmpl,Data,Args).
+
+   
 /*
 there are two versions of retractall:
  one for pefs that don't use reverse indexing at all
@@ -229,7 +290,7 @@ define_retractall_indexed(Template,Decls):-
 
 
 
-create_retract(Template,Cx,Decls,Retract):-
+create_retract(Template,Cx,Decls,RetractOut):-
     functor(Cx,Name,Arity),
     create_retract_action(Template,Cx,Decls,Ref,Action),
     (	'$option'(hooks)
@@ -237,13 +298,18 @@ create_retract(Template,Cx,Decls,Retract):-
     		arg(Num,Cx,Id)
     	;	Id=Ref
     	),
-    	AAction = 
+    	Action2 = 
     		(	forall(pef_before_retract_hook(Id,Name),true),
     			Action,
     			forall(pef_after_retract_hook(Id,Name),true)
-    		),
-    	create_retract_args(Arity,Template,Cx,Decls,Name,Ref,Action,forall(clause(Cx,_,Ref),AAction),Retract)
-    ;	create_retract_args(Arity,Template,Cx,Decls,Name,Ref,Action,forall(clause(Cx,_,Ref),Action),Retract)
+    		)    	
+    ;	Action2=Action
+    ),
+    create_retract_args(Arity,Template,Cx,Decls,Name,Ref,Action,forall(clause(Cx,_,Ref),Action2),Retract),
+    (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
+    ->	cmpix_retractall(Names,Template,Cx,Action2,Ref,CmpixRetract),
+    	RetractOut=(CmpixRetract;Retract)
+    ;	RetractOut=Retract
     ).
 
 
@@ -270,9 +336,14 @@ create_retract_args(I,Template,Cx,Decls,Name,Ref,Action,Retract,RetractOut):-
    	J is I - 1,    	 
   	create_retract_args(J,Template,Cx,Decls,Name,Ref,Action,Retract,RetractOut).
 
-create_retract_action(Template,Cx,Decls,Ref,Action):-
+create_retract_action(Template,Cx,Decls,Ref,ActionOut):-
     functor(Cx,Name,Arity),
-    create_retract_action_args(Arity,Name,Template,Cx,Decls,Ref,erase(Ref),Action).
+    create_retract_action_args(Arity,Name,Template,Cx,Decls,Ref,erase(Ref),Action),
+    (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
+    ->  cmpix_retract_action(Names,Template,Cx,Ref,CmpxAction),
+    	ActionOut=(Action,CmpxAction)
+    ;	ActionOut=Action    
+    ).
 
 create_retract_action_args(0,_Name,_Template,_Cx,_Decls,_Ref,Retracts,Retracts):-!.
 create_retract_action_args(I,Name,Template,Cx,Decls,Ref,Retracts,RetractsOut):-
@@ -299,6 +370,13 @@ process_indices(['$metapef_attribute_tag'(Name,Num,index)|Decls],Tmpl):-
     index_name(Tmpl,Num,IxName),
     memberchk((:- dynamic IxName/2),Decls),
     process_indices(Decls,Tmpl).
+process_indices(['$metapef_type_tag'(Name,composite_index(Names))|Decls],Tmpl):-
+    functor(Tmpl,Name,_),
+    !,
+    index_name(Tmpl,Names,IxName),
+    memberchk((:- dynamic IxName/2),Decls),
+    process_indices(Decls,Tmpl).
+
 process_indices([_|Decls],Tmpl):-    
     process_indices(Decls,Tmpl).
 

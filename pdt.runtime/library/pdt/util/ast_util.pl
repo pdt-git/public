@@ -15,6 +15,7 @@ ast_attach/2,
 ast_equivalent/2,
 ast_match/3,
 ast_variable_occurance/2,
+ast_occurs/2,
 ast_functor/3,
 ast_head_body/4,
 ast_strip_module/3,
@@ -142,6 +143,13 @@ ast_var(A):-
 ast_root(Toplevel,AST):-
     pef_ast_query([toplevel=Toplevel,root=Root]),
 	ast_attach(Root,AST).    
+
+ast_occurs(Ast,Variable):-
+    (	ast_variable_occurance(Ast,Variable)
+    ->	true
+    ;	ast_arg(_,Ast,Arg),
+    	ast_occurs(Arg,Variable)
+    ).
         
 ast_attach(A,B):-
 	ast_attach([A=B]).

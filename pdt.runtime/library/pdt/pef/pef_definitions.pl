@@ -198,9 +198,9 @@
 :- define_pef(
 	pef_predicate(
 		id,
-		module:module,
 		name @label @index,
-		arity @label
+		arity @label,
+		module:module		
 	)
 ).
 
@@ -208,11 +208,11 @@
 % they where imported from.
 :- define_pef(
 	pef_imported_predicate(
-		module:module, %importing module
-		name @label,
+		name @label @index,
 		arity @label,
+		module:module, %importing module		
 		from_name @label
-	) @weak @edge
+	) @weak @edge @composite_index([name,module])
 ).
 
 % The relation between a predicate and its clauses
@@ -383,16 +383,19 @@
 :- define_pef(
 	pef_unresolved_predicate_symbol(
 		id,
-		goal:ast_node
+		goal:ast_node,
+		cx
 	)@expensive :problem
 ).
 
 :- define_pef(
-	pef_cannot_see_formula(
+	pef_cannot_infer_rule(
 		id,
-		goal:ast_node
+		goal:ast_node,
+		cx
 	)@expensive :problem
 ).
+
 
 
 

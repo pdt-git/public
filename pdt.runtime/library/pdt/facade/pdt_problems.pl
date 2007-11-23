@@ -90,12 +90,18 @@ problem(Id,File,expensive,Start,End,warning,Message):-%predicate abolished
 	with_output_to(string(Message),format("Loading module ~w abolishes predicate ~w originally defined in ~w.(~w)",[MName,MName:PName/Arity,FirstFile,Id])).
 
 	
+problem(Id,File,cheap,Start,End,error,SMessage):-%file not found
+    pef_file_not_found_query([id=Id,file_spec=Spec,toplevel=Tl]),        
+    toplevel_source_position(Tl,FID,Start,End),
+    with_output_to(string(SMessage),format("Cannot resolve file spec: ~w (~w)",[Spec,Id])),  
+    get_pef_file(File,FID).
 problem(Id,File,cheap,Start,End,error,SMessage):-%syntax error
     pef_syntax_error_query([id=Id,file=FID,error=Error]),
     message_to_string(Error,Message),
     with_output_to(string(SMessage),format("~s (~w)",[Message,Id])),
     syntax_error_position(Error,Start,End),
     get_pef_file(File,FID).
+
 problem(Id,File,cheap,Start,End,warning,Message):-%singleton
     pef_singleton_query([id=Id,variable=VID]),
     pef_variable_query([id=VID,name=Name,ast=Ast]),
@@ -119,7 +125,7 @@ problem(Id,File,cheap,Start,End,warning,Message):-%no singleton
     get_pef_file(File,FID),
     with_output_to(string(Message),format("Variable ~w apears more than once in this clause.(~w)",[Name,Id])).
 problem(Id,File,expensive,Start,End,warning,Message):-%unresolved predicate symbol
-    pef_unresolved_predicate_symbol_query([id=Id,goal=Term]),
+    pef_unresolved_predicate_symbol_query([id=Id,goal=Term,cx=Cx]),
     ast_toplevel(Term,TlID),
     %pef_toplevel_query([id=TlID,file=FID]),
     toplevel_source_position(TlID,FID,_,_),
@@ -127,5 +133,25 @@ problem(Id,File,expensive,Start,End,warning,Message):-%unresolved predicate symb
     pef_property_query([pef=Term,key=start,value=Start]),
 	pef_property_query([pef=Term,key=end,value=End]),
     get_pef_file(File,FID),
-    with_output_to(string(Message),format("Cannot resolve ~w/~w in this context.(~w)",[Name,Arity,Id])).    
+    literals:cx_predicate(Cx,Pred),
+    predicate_owner(Pred,Program),
+    pef_program_query([id=Program,file=PFile]),
+    get_pef_file(PPath,PFile),
+    literals:cx_context(Cx,Context),
+    with_output_to(string(Message),format("Cannot resolve ~w:~w/~w (entry point: ~w) .(~w)",[Context,Name,Arity,PPath,Id])).    
+problem(Id,File,expensive,Start,End,warning,Message):-%cannot infer rule
+    pef_cannot_infer_rule_query([id=Id,goal=Term,cx=Cx]),
+    ast_toplevel(Term,TlID),
+    %pef_toplevel_query([id=TlID,file=FID]),
+    toplevel_source_position(TlID,FID,_,_),    
+    pef_property_query([pef=Term,key=start,value=Start]),
+	pef_property_query([pef=Term,key=end,value=End]),
+    get_pef_file(File,FID),
+    literals:cx_predicate(Cx,Pred),
+    predicate_owner(Pred,Program),
+    pef_program_query([id=Program,file=PFile]),
+    get_pef_file(PPath,PFile),    
+    with_output_to(string(Message),format("Cannot infer rule  (entry point: ~w) .(~w)",[PPath,Id])).    
+
+
             

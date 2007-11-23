@@ -5,3 +5,4 @@ p(A):-test(la+A).
 p(A):-test(B+A).
 
 test(M+A):- M:A.
+
