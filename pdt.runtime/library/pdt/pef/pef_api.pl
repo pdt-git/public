@@ -24,6 +24,7 @@
 	first_clause/3,
 	first_clause/4,
 	file_depends_star/2,
+	file_depends/2,
 	related_file/2, 	
 	has_tail/2,
 	ast_toplevel/2

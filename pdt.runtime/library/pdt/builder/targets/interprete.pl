@@ -140,6 +140,23 @@ interprete_toplevel( (Head:-_Body) , Cx):-
     
 interprete_toplevel( (:-module(_,_)) , _Cx):-
 	!.%already dealt with.
+interprete_toplevel( (:-export(Head)) , Cx):-
+	!,
+	cx_program(Cx,Program),
+	cx_module(Cx,Module),
+	module_name(Module,ModuleName),
+	module_owner(Module,Owner),
+	(	Owner==Program
+	->	Module2=Module
+	;	pef_type(Module,pef_module_definition)
+	->	extend_module(Module,Module2,Cx),
+		rebind_module_name(ModuleName,Module2,Cx)	
+	;	copy_module(Module,Module2,Cx),
+		rebind_module_name(ModuleName,Module2,Cx)
+	),
+	functor(Head,Name,Arity),
+	pef_exports_assert([module=Module2,signature=Name/Arity]).
+	
 interprete_toplevel( (:-dynamic Signatures) , Cx):-
     !,
     interprete_property_definition(Signatures,(dynamic),Cx).

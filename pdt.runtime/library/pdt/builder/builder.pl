@@ -76,13 +76,14 @@ These predicates should only be accessed by the arbiter thread.
 :- dynamic '$target_state'/2, '$target_depends'/2,'$target_depends_inv'/2,'$thread_waits'/2.
 %:- dynamic '$net_depends_cache'/2, '$net_depends_inv_cache'/2.
 
- 
+ /*
   my_debug(Topic,Msg,Args):-
       append("[~w:~w:~w] ",Msg,Msg2),
       get_time(Stamp),
       stamp_date_time(Stamp,DT,local),
       date_time_value(time,DT,time(H,M,S)),
-      debug(Topic,Msg2,[H,M,S|Args]).
+      debug(Topic,Msg2,[H,M,S|Args]).*/
+my_debug(_Topic,_Msg,_Args).
 
 :- module_transparent pdt_with_targets/2, pdt_with_targets/1.
 
@@ -120,7 +121,7 @@ release_targets(Ref):-
     	erase(LockRef),
 		my_debug(builder(debug),"~t sending release message to arbiter (target: ~w) ~n",[T]),
 		thread_self(Me),		
-		client_send_message(T,release(Me)),
+		client_send_message(T,release(lock(Me,[]))),
 		fail
     ).
 release_targets(Ref):-
@@ -172,13 +173,14 @@ fp_request_target(Target):-
 	;	true
 	),
     
-    client_send_message(Target,request(Me)),
-	my_debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
+    client_send_message(Target,request(lock(Me,[]))),	
 	client_get_message(Msg),	
 	my_debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
     ->	asserta('$has_lock'(Target),Ref),
 	    my_debug(builder(debug),"added lock for target ~w, ref=~w~n",[Target,Ref]) 		    
+    ;	Msg==implied(Target)
+    ->	true 		    
     ;	Msg==rebuild(Target)
     ->  fp_build_target(Target)
     ;	Msg=error(Target,E)
@@ -314,12 +316,13 @@ request_target(Target):-
     ->	client_send_message(Building,depend(Target))	    	
 	;	true
 	),
-   	client_send_message(Target,request(Me)),
-	my_debug(builder(debug),"sending request to arbiter:~w.~n",[msg(Target,request(Me))]),   	
+   	client_send_message(Target,request(lock(Me,[]))),
 	client_get_message(Msg),
 	my_debug(builder(debug),"Thread ~w received message ~w.~n",[Me,Msg]),
     (	Msg==grant(Target)
     ->	asserta('$has_lock'(Target))	    
+    ;	Msg==implied(Target)
+    ->	true	    
     ;	Msg==rebuild(Target)
     ->  build_target(Target),
     	request_target(Target)
@@ -672,90 +675,7 @@ process_message(Target,Event):-
 debugme:-
 	my_debug(builder(debug),"ouch~n",[]).
 
-execute_action([],_).
-execute_action([Action|Actions],Target):-
-    execute_action(Action,Target),
-    execute_action(Actions,Target).
-execute_action(grant([]),Target):-
-    progress_report_worked(Target).
-execute_action(grant([Thread|Threads]),Target):-
-    (	functor(Thread,target,1)
-    ->	true
-    ;	arbiter_send_message(Thread,Target,grant(Target))
-    ),
-    execute_action(grant(Threads),Target).
-execute_action(report_failure([]),_Target).
-execute_action(report_failure([Thread|Threads]),Target):-
-    arbiter_send_message(Thread,Target,fail(Target)),
-    execute_action(report_failure(Threads),Target).
-execute_action(report_error([],_E),_Target).
-execute_action(report_error([Thread|Threads],E),Target):-
-    arbiter_send_message(Thread,Target,error(Target,E)),
-    execute_action(report_error(Threads,E),Target).
-execute_action(invalidate,Target):-
-	my_debug(builder(debug),"invalidating target: ~w~n",[Target]),
-	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
-    pif_notify(builder(TargetName),invalid),     %FIXME   
-    forall(target_depends(Dependent,Target),
-    	arbiter_send_message(fast_lane(Dependent),Target,mark_dirty(target(Target)))
-    	
-    ).
-    
-execute_action(obsolete([]),_).    
-execute_action(obsolete([L|Ls]),Target):-
-	(	functor(L,target,1)
-	->	true
-	;	'$obsolete'(L,Target)
-	->	true
-	;	assert('$obsolete'(L,Target)),
-		forall(
-			'$thread_waits'(L,OtherTarget),
-			%assert('$fast_lane'(OtherTarget,kick_obsolete(L,Target)))
-			arbiter_send_message(fast_lane(OtherTarget),Target,kick_obsolete(L,Target))
-		)	
-	),
-	
-	execute_action(obsolete(Ls),Target).
-execute_action(clear_obsolete(Thread),Target):-
-	(	functor(Thread,target,1)
-	->	true
-	;	retract('$obsolete'(Thread,Target))
-	).
-execute_action(rebuild(Thread),Target):-
-	my_debug(builder(debug),"rebuilding target: ~w~n",[Target]),
-	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
-	pif_notify(builder(TargetName),start(Thread)), %FIXME
-	clear_dependencies(Target),	
-	arbiter_send_message(Thread,Target,rebuild(Target)).
-execute_action(progress_prepare(Ts),Target):-
-	progress_report_prepare(Target,Ts).	
-execute_action(report_cycle(Thread),Target):-
-	arbiter_send_message(Thread,Target, cycle(Target)).
-execute_action(notify_done,Target):-
-	my_debug(builder(debug),"target done: ~w~n",[Target]),
-	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
-    pif_notify(builder(TargetName),done),
-    progress_report_cleanup(Target).
-execute_action(ackn_remove(W),Target):-
-    my_debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
-	arbiter_send_message(W,Target,removed(Target)).    
-execute_action(lock_deps([]),_Target).
-execute_action(lock_deps([T|Ts]),Target):-  
-	%assert('$fast_lane'(T,request(target(Target)))),
-	arbiter_send_message(fast_lane(T),Target,request(target(Target))),        
-	execute_action(lock_deps(Ts),Target).
-execute_action(unlock_deps([]),_Target).
-execute_action(unlock_deps([T|Ts]),Target):-    		
-	%assert('$fast_lane'(T,release(target(Target)))),
-	arbiter_send_message(fast_lane(T),Target,release(target(Target))),        
-	execute_action(unlock_deps(Ts),Target).	
-execute_action(unlock_deps([T|Ts]),_Target):-
-    writeln([T|Ts]),
-    spyme.
-execute_action(add_dependency(Dep),Target):-
-    add_dependency(Target,Dep).
-execute_action(report_fp_busy(Thread),Target):-
-    arbiter_send_message(Thread,Target,fp_busy(Target)).
+
 
 % state(Activity, Status, Locks,SleepLocks,Waits)
 % Activity: idle - there are no locks 
@@ -779,7 +699,7 @@ execute_action(report_fp_busy(Thread),Target):-
    This is rather expensive, I yet have to find out
    whether it is worth the effort.
  */
-add_dependency(Target,Dep):-    
+add_dependency__expensive(Target,Dep):-    
     (	net_dependency(Target,Dep)
     ->	true
     ;  	erase_redundant_edge(Target,Dep),
@@ -787,6 +707,12 @@ add_dependency(Target,Dep):-
 		assert('$target_depends_inv'(Dep,Target))
     ).
   
+add_dependency__cheap(Target,Dep):-    
+    assert('$target_depends'(Target,Dep)),
+	assert('$target_depends_inv'(Dep,Target)).
+    
+add_dependency(Target,Dep):-
+	add_dependency__cheap(Target,Dep).    
     
 	
 
@@ -933,52 +859,65 @@ target_key(T,K):-
 check_available(Targets):-
     forall(member(Target,Targets),current_target_state(Target,state(_,available,_,_,_))).
 
+waits2locks([],_,[]).
+waits2locks([W|Ws],Target,[lock(W,[])|Ls]):-
+   retract('$thread_waits'(W,Target)),
+   waits2locks(Ws,Target,Ls).
     
-target_transition(state(A, S, Ls,SLs,Ws),		 			request(T), 	report_error([T],obsolete_lock(OT)),		
+target_transition(state(A, S, Ls,SLs,Ws),		 			request(lock(Cl,_)), report_error([Cl],obsolete_lock(OTarget)),		
 																									state(A, S, Ls, SLs, Ws),					_Target):-
-    '$obsolete'(T,OT).
+    '$obsolete'(Cl,OTarget).
 	    																									
 
-target_transition(state(A, outdated, Ls,SLs,Ws), 			request(T), 	report_cycle(T),		state(A, outdated, Ls, SLs, Ws),			Target):-
-    closes_cycle(T,Target).
-target_transition(state(building(T1), A, Ls,SLs,Ws),		request(T2), 	report_cycle(T2),		state(building(T1), A, Ls, SLs,Ws) ,		Target):-
-    closes_cycle(T2,Target).
+target_transition(state(A, outdated, Ls,SLs,Ws), 			request(Lock), 	report_cycle(Client),	state(A, outdated, Ls, SLs, Ws),			Target):-
+    Lock=lock(Client,_),
+    closes_cycle(Client,Target).
+target_transition(state(building(T1), A, Ls,SLs,Ws),		request(Lock), 	report_cycle(Client),	state(building(T1), A, Ls, SLs,Ws) ,		Target):-
+    Lock=lock(Client,_),
+    closes_cycle(Client,Target).
 
 %enter reading
-target_transition(state(idle, available,[], SLs,Ws), 		request(T), 	[lock_deps(Deps),
-																			grant([T])], 			state(reading, available,[T],SLs,Ws) ,		Target):-
-	dependencies(Target,Deps).	
-target_transition(state(reading, available, Ls, SLs,Ws),	request(T), 	grant([T]), 			state(reading, available, [T|Ls],SLs,Ws) ,	_Target).
+target_transition(state(idle, available,[], SLs,Ws), 		request(Lock), 	Action,		 			state(reading, available,[Lock],SLs,Ws) ,		_Target):-
+    Lock=lock(Client,_),
+    Action=[lock_deps(Client), grant(Lock)].	
+target_transition(state(reading, available, Ls, SLs,Ws),	request(Lock), 	Action, 				state(reading, available, Ls2,SLs,Ws) ,		_Target):-
+    Lock=lock(Client,_),
+    (	memberchk(lock(Client,_),Ls)
+    ->	Ls2=Ls,
+    	Action=implied(Lock)
+    ;	Ls2=[Lock|Ls],
+    	Action=[lock_deps(Client),grant(Lock)]
+    ).
+    
 
 %enter building
-target_transition(state(idle, outdated, [],SLs,[]), 		request(T), 	rebuild(T),				state(building(T), pending(T) , [],SLs, []),Target):-
-	(	functor(T,target,1)
-	->	throw(target_requests_outdated_dep(T,Target))
-	;	true
-	)/*,
-	(	try_mux(T,Mux)
-	->	Status=pending(T)
-	;	Status=wait_mux(T)
-	)*/. 
-target_transition(state(reading, outdated, Ls,SLs,Ws), 		request(T), 	Action,					state(reading, outdated , Ls, SLs,Ws2),	Target):-
-	(	functor(T,target,1)
-	->	throw(target_requests_outdated_dep(T,Target))
+target_transition(state(idle, outdated, [],SLs,Ws), 		request(Lock), 	rebuild(Client),		state(building(Client), pending(Client) , [],SLs, Ws),Target):-
+    Lock=lock(Client,Target2),
+	(	Target2==[]
+	->	true
+	;	throw(target_requests_outdated_dep(Lock,Target))	
+	). 
+target_transition(state(reading, outdated, Ls,SLs,Ws), 		request(Lock), 	Action,					state(reading, outdated , Ls, SLs,Ws2),	Target):-
+	Lock=lock(Client,Target2),
+	(	Target2 \== []
+	->	throw(target_requests_outdated_dep(Lock,Target))
 	;	'$fp_target'(Target), Ws=[_|_]
 	->	Ws2=Ws,
-		Action=[report_fp_busy(T)]
-	;	assert('$thread_waits'(T,Target)),
-		Ws2=[T|Ws],		
+		Action=[report_fp_busy(Client)]
+	;	assert('$thread_waits'(Client,Target)),
+		Ws2=[Client|Ws],		
 		Action=[]
 	).
-target_transition(state(building(P), A , [],SLs, Ws),		request(W), 	Action,	 				state(building(P), A , [], SLs,Ws2),	Target):-
-	(	functor(W,target,1)
-	->	throw(target_requests_dep_beeing_build(W,Target))
+target_transition(state(building(P), A , [],SLs, Ws),		request(Lock), 	Action,	 				state(building(P), A , [], SLs,Ws2),	Target):-
+    Lock=lock(Client,Target2),
+	(	Target2 \== []
+	->	throw(target_requests_dep_beeing_build(Lock,Target))
 	;	'$fp_target'(Target)
 	->	Ws2=Ws,
-		Action=[report_fp_busy(W)]
-	;	Ws2=[W|Ws],
+		Action=[report_fp_busy(Client)]
+	;	Ws2=[Client|Ws],
 		Action=[],
-		assert('$thread_waits'(W,Target))
+		assert('$thread_waits'(Client,Target))
 	).
 
 target_transition(state(building(_), _ , Ls,SLs,Ws),		fail,		 	report_failure(Ws),		state(idle, outdated, Ls,SLs,[]),		Target):-
@@ -1015,57 +954,177 @@ target_transition(state(building(_), outdated,[],SLs,Ws),	mark_clean(_), 	[],			
 
 %enter reading
 % exit building
-target_transition(state(building(_), pending(_),[],SLs,Ts),	mark_clean(_), 	[lock_deps(Deps),
+target_transition(state(building(_), pending(_),[],SLs,Ws),	mark_clean(_), 	[lock_deps_all(Ws),
 																			notify_done,
-																			grant(Ts)],				state(reading, available, Ts,SLs,[]),		Target):-
-	net_dependencies(Target,Deps),
-	forall(member(T,Ts),retract('$thread_waits'(T,Target))).    																			
+																			grant_all(Ws)],		state(reading, available, Ls,SLs,[]),		Target):-
+	waits2locks(Ws,Target,Ls).	
+														
 
 % exit reading
-target_transition(state(reading, available, Ls,SLs,Ws),		release(T), 	Do, 					state(Act, available, Ls2,SLs,Ws),			Target):-
-    /*(	functor(T,target,1)
-	->	Deps=[]    																			
-	;	net_dependencies(Target,Deps)
-	),*/
-	dependencies(Target,Deps),
-    select(T,Ls,Ls2), 
+target_transition(state(reading, available, Ls,SLs,Ws),		release(Lock), 	Action, 				state(Actv, available, Ls2,SLs,Ws),			_Target):-
+    (	select(Lock,Ls,Ls2)
+	->  Lock=lock(Client,_),
+		Action=[unlock_deps(Client)]	
+	;	Ls2=Ls,		
+		Action=[]	
+	), 
     (	Ls2 == []
-    ->	Act=idle,Do=[unlock_deps(Deps)]
-    ;	Act=reading,Do=[]
+    ->	Actv=idle
+    ;	Actv=reading
     ).
-% exit reading
-% enter building
-target_transition(state(reading, outdated, [T],SLs,[W|Ws]),	release(T),		[clear_obsolete(T),
-																			unlock_deps(Deps),
-																			rebuild(W)],			state(building(W), pending(W) , [],SLs, Ws),Target):-
-    /*(	functor(T,target,1)
-	->	Deps=[]    																			
-	;	net_dependencies(Target,Deps)
-	).*/
-	dependencies(Target,Deps),
-	retract('$thread_waits'(W,Target)).
-target_transition(state(reading, outdated, Ls,SLs,Ws),		release(T),	 	[clear_obsolete(T)],	state(reading, outdated , Ls2,SLs,Ws),		_Target):-    
-    select(T,Ls,Ls2), Ls2 \== [].
-% exit reading
-target_transition(state(reading, outdated, [L],SLs,[]),		release(L),	 	[clear_obsolete(L),
-																			unlock_deps(Deps)],		state(idle, outdated , [],SLs,[]),			Target):-
-    /*(	functor(L,target,1)
-	->	Deps=[]    																			
-	;	net_dependencies(Target,Deps)
-	).*/
-	dependencies(Target,Deps).
+% reading/outdated --> idle/outdated
+target_transition(state(reading, outdated, Ls,SLs,[]),	release(Lock),	Action,			state(Actv, Sts , Ls2,SLs, []),_Target):-
+ 	(	select(Lock,Ls,Ls2)
+	->  Lock=lock(Client,_),
+		Action=[unlock_deps(Client),clear_obsolete(Lock)]	
+	;	Ls2=Ls,		
+		Action=[]	
+	), 
+    (	Ls2 == []
+    ->	Actv=idle, Sts=outdated    	
+    ;	Actv=reading, Sts=outdated
+    ).   
+% reading/outdated --> building
+target_transition(state(reading, outdated, Ls,SLs,[W|Ws]),	release(Lock),	Action,			state(Actv, Sts , Ls2,SLs, Ws2),Target):-
+ 	(	select(Lock,Ls,Ls2)
+	->  Lock=lock(Client,_),
+		Action0=[unlock_deps(Client),clear_obsolete(Lock)]	
+	;	Ls2=Ls,		
+		Action0=[]	
+	), 
+    (	Ls2 == []
+    ->	Actv=building(W), Sts=pending(W),Ws2=Ws,Action=[rebuild(W)|Action0],
+    	retract('$thread_waits'(W,Target))
+    ;	Actv=reading, Sts=outdated,Ws2=[W|Ws],Action=Action0
+    ).   
+    
+% FIXME other targets may send release messages for implied locks. Ignore this for now.
+target_transition(state(A, S, Ls,SLs,Ws),					release(_),		[],						state(A, S , Ls,SLs, Ws),					_Target).	
+
 target_transition(state(Act, St, Ls,SLs,Ws),				remove(W),	 	[ackn_remove(W)],		state(Act, St , Ls,SLs,Ws2),				Target):-
     (	retract('$thread_waits'(W,Target))
     ->	select(W,Ws,Ws2)	
     ;	Ws2=Ws
     ).
-target_transition(state(Act, St, Ls,SLs,Ws),				kick_obsolete(W,T),	
-																			[report_error([W],obsolete_lock(T))],		
-																									state(Act, St , Ls,SLs,Ws2),				Target):-
-    retract('$thread_waits'(W,Target)),
-    select(W,Ws,Ws2).
+target_transition(state(Act, St, Ls,SLs,Ws),				kick_obsolete(W,T),	Action,				state(Act, St , Ls,SLs,Ws2),				Target):-
+    (	select(W,Ws,Ws2)
+    ->  retract('$thread_waits'(W,Target)),
+    	Action = [report_error([W],obsolete_lock(T))]
+    ;	Ws2=Ws,
+    	Action = []    
+    ).
+    
+    
 
 
+
+
+
+execute_action([],_).
+execute_action([Action|Actions],Target):-
+    execute_action(Action,Target),
+    execute_action(Actions,Target).
+    
+execute_action(implied(lock(Client,Target2)),Target):-
+	(	Target2==[]
+    ->	arbiter_send_message(Client,Target,implied(Target))
+    ;	true    
+    ).
+execute_action(grant(lock(Client,Target2)),Target):-
+	do_grant(lock(Client,Target2),Target),
+	progress_report_worked(Target).
+execute_action(grant_all([]),Target):-
+    progress_report_worked(Target).
+execute_action(grant_all([Client|Clients]),Target):-
+    do_grant(lock(Client,[]),Target),
+	execute_action(grant_all(Clients),Target).
+execute_action(report_failure([]),_Target).
+execute_action(report_failure([Thread|Threads]),Target):-
+    arbiter_send_message(Thread,Target,fail(Target)),
+    execute_action(report_failure(Threads),Target).
+execute_action(report_error([],_E),_Target).
+execute_action(report_error([Thread|Threads],E),Target):-
+    arbiter_send_message(Thread,Target,error(Target,E)),
+    execute_action(report_error(Threads,E),Target).
+execute_action(invalidate,Target):-
+	my_debug(builder(debug),"invalidating target: ~w~n",[Target]),
+	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
+    pif_notify(builder(TargetName),invalid),     %FIXME   
+    forall(target_depends(Dependent,Target),
+    	arbiter_send_message(fast_lane(Dependent),Target,mark_dirty(target(Target)))
+    	
+    ).
+    
+execute_action(obsolete([]),_).    
+execute_action(obsolete([L|Ls]),Target):-
+    L=lock(Client,Target2),
+	(	Target2 \== []
+	->	true
+	;	'$obsolete'(Client,Target)
+	->	true
+	;	assert('$obsolete'(Client,Target)),
+		forall(
+			'$thread_waits'(Client,OtherTarget),			
+			arbiter_send_message(fast_lane(OtherTarget),Target,kick_obsolete(Client,Target))
+		)	
+	),	
+	execute_action(obsolete(Ls),Target).
+execute_action(clear_obsolete(lock(Client,Target2)),Target):-
+	(	Target2 \== []
+	->	true
+	;	retract('$obsolete'(Client,Target))
+	).
+execute_action(rebuild(Thread),Target):-
+	my_debug(builder(debug),"rebuilding target: ~w~n",[Target]),
+	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
+	pif_notify(builder(TargetName),start(Thread)), %FIXME
+	clear_dependencies(Target),	
+	arbiter_send_message(Thread,Target,rebuild(Target)).
+execute_action(progress_prepare(Ts),Target):-
+	progress_report_prepare(Target,Ts).	
+execute_action(report_cycle(Thread),Target):-
+	arbiter_send_message(Thread,Target, cycle(Target)).
+execute_action(notify_done,Target):-
+	my_debug(builder(debug),"target done: ~w~n",[Target]),
+	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
+    pif_notify(builder(TargetName),done),
+    progress_report_cleanup(Target).
+execute_action(ackn_remove(W),Target):-
+    my_debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
+	arbiter_send_message(W,Target,removed(Target)).    
+
+execute_action(lock_deps_all([]),_).
+execute_action(lock_deps_all([Client|Clients]),Target):-
+    execute_action(lock_deps(Client),Target),
+    execute_action(lock_deps_all(Clients),Target).
+    
+execute_action(lock_deps(Client),Target):-  
+	forall(
+		target_depends(Target,Dep),
+		arbiter_send_message(fast_lane(Dep),Target,request(lock(Client,Target)))
+	).
+execute_action(unlock_deps(Client),Target):-    		
+	forall(
+		target_depends(Target,Dep),
+		arbiter_send_message(fast_lane(Dep),Target,release(lock(Client,Target)))
+	).	
+execute_action(add_dependency(Dep),Target):-
+    add_dependency(Target,Dep).
+execute_action(report_fp_busy(Thread),Target):-
+    arbiter_send_message(Thread,Target,fp_busy(Target)).
+execute_action(request_again([]),_Target).
+execute_action(request_again([Client|Clients]),Target):-
+    arbiter_send_message(fast_lane(Target),Target,request(lock(Client,Target))),
+    execute_action(request_again(Clients),Target).    
+
+
+
+
+do_grant(lock(Client,Target2),Target):-
+    (	Target2==[]
+    ->	arbiter_send_message(Client,Target,grant(Target))
+    ;	true    
+    ).
 
 /*
 
@@ -1212,62 +1271,4 @@ progress_report_cleanup(Target):-
 	retractall('$progress_total'(Target,_)).
 	
 
-
-:-thread_local '$profile'/2,'$profile_contains'/2,'$profile_starts'/2,'$profile_ends'/2,'$profile_current'/1.
-:-dynamic '$profile'/2,'$profile_contains'/2,'$profile_starts'/2,'$profile_ends'/2,'$profile_current'/1.
-	
-profile_push(Target):-
-    get_time(Now),
-    pef_reserve_id('$profile',T),
-    assert('$profile'(Target,T)),
-    (	'$profile_current'(CurrentT)
-    ->	assert('$profile_contains'(CurrentT,T))
-    ;	true
-    ),
-    assert('$profile_start'(T,Now)),    
-    asserta('$profile_current'(T)).
-    
-profile_pop:-
-	get_time(Now),
-	retract('$profile_current'(T)),
-	assert('$profile_end'(T,Now)).
-
-profile_clear:-
-	retractall('$profile'(_,_)),
-	retractall('$profile_current'(_)),
-	retractall('$profile_contains'(_,_)),
-	retractall('$profile_start'(_,_)),
-	retractall('$profile_end'(_,_)).
-	
-target_profile(Target,Time,Netto):-
-    '$profile'(Target,T),
-    '$profile_start'(T,Start),
-    '$profile_end'(T,End),
-    Time is End - Start,
-    
-    findall(CTime,
-    	(	'$profile_contains'(T,C),
-    		'$profile_start'(C,CStart),
-    		'$profile_end'(C,CEnd),
-    		CTime is CEnd - CStart
-    	),
-    	CTimes
-    ),
-    sum(CTimes,TimeChildren),
-    Netto is Time - TimeChildren.
-
-target_profile(Target,Count,STime,SNetto):-
-    findall(Time,target_profile(Target,Time,_),Times),
-    findall(Netto,target_profile(Target,_,Netto),Nettos),
-    length(Times,Count),
-    sum(Times,STime),
-    sum(Nettos,SNetto).
-    
-sum(Times,Brutto):-
-	sum(Times,0,Brutto).
-
-sum([],Sum,Sum).
-sum([Time|Times],Sum0,Sum):-
-    Sum1 is Time + Sum0,
-    sum(Times,Sum1,Sum).
 
