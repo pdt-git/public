@@ -66,8 +66,8 @@ For each of the remaining entries, progress will be reported as soon as each ent
 :- dynamic '$progress_subproblem'/3, '$progress_subproblem_inv'/2, '$progress_total'/2.
 
 
-:- dynamic '$has_lock'/1,'$building'/1, '$fp_building_target'/1,'$fp_running'/0, '$fp_queue'/2.
-:- thread_local '$has_lock'/1,'$building'/1, '$fp_building_target'/1,'$fp_running'/0, '$fp_queue'/2.
+:- dynamic '$has_lock'/1,'$building'/1, '$fp_building_target'/1,'$fp_running'/0, '$fp_queue'/2,'$fp_queue_inv'/2.
+:- thread_local '$has_lock'/1,'$building'/1, '$fp_building_target'/1,'$fp_running'/0/*, '$fp_queue'/2*/.
 
 /* associate state with targets 
 These predicates should only be accessed by the arbiter thread.
@@ -222,16 +222,20 @@ pdt_fp_enqueue(Job,TargetName):-
     -> 	client_log(Target,ignore_already_enqueued(Job))  	
     ;	fp_enqueue(Job,Target)
     ).
-fp_enqueue(Job,Target):-        
-    assert('$fp_queue'(Job,Target)),
+fp_enqueue(Job,Target):-            
+    assert('$fp_queue'(Job,Target)),assert('$fp_queue_inv'(Target,Job)),
     client_log(Target,add_to_queue(Job)).    
 
 fp_dequeue(Job,Target):-
-    retract('$fp_queue'(Job,Target)),
+    fp_building_target(Target),
+    retract('$fp_queue_inv'(Target,Job)),retract('$fp_queue'(Job,Target)),
     !,    
     client_log(Target,removed_from_queue(Job)).
 fp_job_in_queue(Job):-
-    '$fp_queue'(Job,_).
+    (	var(Job)
+    ->	fp_building_target(Target),'$fp_queue_inv'(Target,Job)
+    ;  	'$fp_queue'(Job,Target), fp_building_target(Target)
+    ).
 
 
 fp_run(Target):-
@@ -268,7 +272,7 @@ fp_run__loop(Target):-
     client_log(Target,finished_fp_iteration).
     
 fp_done:-
-    \+ '$fp_queue'(_,_).
+    \+ fp_job_in_queue(_).
 	
 fp_run__cleanup(Target,Catcher):-
     client_log(Target,fp_cleanup(Catcher)),
