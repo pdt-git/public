@@ -41,8 +41,12 @@ pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
     	Results
     ),
     process_results(Results).
+
+
+
 pdt_builder:fp_seed_hook(literals(predicate(Name/Arity))):-
 	seed_predicate(Name/Arity).    
+	
 pdt_builder:build_hook(literals(Resource)):-
     (	Resource=file(Path)
     ->	request_file_literals(Path)    
@@ -50,7 +54,6 @@ pdt_builder:build_hook(literals(Resource)):-
     	pdt_contains(Resource,Element),
     	pdt_request_target(literals(Element))
     ).
-
 /*file_predicate(F,P):-
     pef_toplevel_query([file=F,id=Tl]),
     \+ pef_term_expansion_query([original=Tl]), %for expansion: ignore original.
