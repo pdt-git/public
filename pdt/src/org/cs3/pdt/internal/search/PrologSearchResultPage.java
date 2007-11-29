@@ -45,9 +45,12 @@
  */
 package org.cs3.pdt.internal.search;
 
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -112,15 +115,22 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	}
 	
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		IEditorPart editor= null;
+		
+		PLEditor editor= null;
 		IFile file = ((PredicateElement)match.getElement()).file;
 		try {
 			//editor= EditorUtility.openInEditor(file, false);
-		    editor = IDE.openEditor(UIUtils.getActivePage(),file);
+		    editor = (PLEditor) IDE.openEditor(UIUtils.getActivePage(),file);
 		} catch (PartInitException e1) {
 			return;
 		}
-
+		IDocument doc = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+		int endOffset=currentOffset+currentLength;
+		currentOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
+				currentOffset);
+		endOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
+				endOffset);
+		currentLength=endOffset-currentOffset;
 		if (editor != null && activate)
 			editor.getEditorSite().getPage().activate(editor);
 		if (editor instanceof ITextEditor) {
