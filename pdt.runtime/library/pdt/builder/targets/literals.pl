@@ -24,7 +24,13 @@ the targets defined in this file require fix point calculations.
 the granularity of dependencies is that of predicates.
 */
 
-pdt_builder:fix_point_target(literals(predicate(_))).
+%!!!experimental!!! option.
+% either 'file' or 'predicate' 
+% Currently 'predicate' is known to work, I want to experiment with 'file'.
+granularity(file).
+
+pdt_builder:fix_point_target(literals(predicate(_))):-granularity(predicates).
+pdt_builder:fix_point_target(literals(file(_))):-granularity(file).
 pdt_builder:target_file(literals(directory(Path,_,_)),Path).
 pdt_builder:target_file(literals(file(Path)),Path).
 pdt_builder:target_mutable(literals(workspace),true).
@@ -46,6 +52,44 @@ pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
 
 pdt_builder:fp_seed_hook(literals(predicate(Name/Arity))):-
 	seed_predicate(Name/Arity).    
+
+pdt_builder:fp_seed_hook(literals(file(Path))):-
+	seed_file(Path).    
+	
+	
+	
+pdt_builder:build_hook(literals(inverse_search(FunctorName))):-	
+	% First use asts as search index to find all predicates with clauses 
+	% that continaining the predicates functor symbol.
+	% Then, run the cross referencer for all these predicates
+	% Finally, lookup the calls.
+	
+	% build ASTs
+	pdt_request_target(ast(workspace)),		
+	(	granularity(predicate)
+	->	% lookup predicate clauses
+		forall(
+			pef_term_query([name=FunctorName,id=Candidate]),
+			(	ast_toplevel(Candidate,Tl),
+				ast_root(Tl,Root),
+				ast_head_body(Root,_,H,_),
+				(	H==[]
+				->  true
+				;	ast_functor(H,SName,SArity),
+					pdt_request_target(literals(predicate(SName/SArity)))			
+				)
+			)
+		)
+	;	% lookup file clauses
+		forall(
+			pef_term_query([name=FunctorName,id=Candidate]),
+			(	ast_toplevel(Candidate,Tl),
+				pef_toplevel_query([id=Tl,file=File]),
+				get_pef_file(Path,File),
+				pdt_request_target(literals(file(Path)))							
+			)
+		)
+	).
 	
 pdt_builder:build_hook(literals(Resource)):-
     (	Resource=file(Path)
@@ -86,7 +130,22 @@ seed_predicate(Name/Arity):-
     forall(
     	fp_init_todo2(Pred,Cx,Goal),
     	pdt_fp_enqueue(find_literals(Goal,Cx),literals(predicate(Name/Arity)))
+    ).
+
+seed_file(Path):-
+    pdt_request_target([parse(Path),interprete(Path),ast(file(Path))]),
+    get_pef_file(Path,File),
+    forall(
+    	file_depends(File,Dep),
+    	(	get_pef_file(DepPath,Dep),
+    		pdt_request_target(literals(file(DepPath)))
+    	)
     ),
+    forall(
+    	fp_init_todo3(File,Cx,Goal),
+    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(file(Path)))
+    ).
+    
 
 process_results([]).
 process_results([Result|Results]):-
@@ -448,8 +507,10 @@ resolve(Goal,Cx0,Cx1,Pred):-
 	),
 	cx_bound(Cx0,Bound0),
 	ast_functor(Goal,Name,Arity),
-	pdt_request_target(literals(predicate(Name/Arity))),
-	%pef_term_query([id=Goal,name=Name,arity=Arity]),
+	(	granularity(predicates)
+	->	pdt_request_target(literals(predicate(Name/Arity)))
+	;	true
+	),	
 	(	resolve(Program,Context,Name,Arity,Bound0,Pred,Bound1)
 	*-> cx_set(Cx0,[bound=Bound1],Cx1)
 	;	library_pred(Name,Arity)
@@ -565,6 +626,30 @@ fp_init_todo2(Pred,Cx,GoalNode):-
     cx_head(Cx,HeadNode),
     cx_bound(Cx,lower).
 
+
+fp_init_todo3(File,Cx,GoalNode):-    
+    pef_directory_entry_query([child=File]),%ignore files outside the source path
+    pef_toplevel_query([id=Tl,file=File]),       
+    \+ pef_term_expansion_query([original=Tl]), %for expansion: ignore original.
+   	pef_clause_query([toplevel=Tl,predicate=Pred]),
+    predicate_owner(Pred,Prog),
+	(	pef_predicate_property_definition_query([predicate=Pred,property=module_transparent])
+    ->	Context=[]
+    ;	pef_predicate_query([id=Pred,module=MID]),
+    	module_name(MID,Context)
+    ),
+    ast_root(Tl,Root),
+    ast_head_body(Root,_,Head,Goal),
+    Goal \== [], Head \== [],	
+    ast_node(Head,HeadNode),
+    ast_node(Goal,GoalNode),    
+    cx_new(Cx),
+    cx_toplevel(Cx,Tl),
+	cx_program(Cx,Prog),
+	cx_predicate(Cx,Pred),	
+	cx_context(Cx,Context),
+    cx_head(Cx,HeadNode),
+    cx_bound(Cx,lower).
 
 
 

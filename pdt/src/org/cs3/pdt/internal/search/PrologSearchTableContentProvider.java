@@ -68,7 +68,12 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
  * TODO: this class should replace JavaSearchTableContentProvider
  * (must generalize type of fResult to AbstractTextSearchResult in JavaSearchContentProvider)
  */
-public class TextSearchTableContentProvider implements IStructuredContentProvider, ISearchResultListener {
+public class PrologSearchTableContentProvider extends PrologSearchContentProvider implements IStructuredContentProvider, ISearchResultListener {
+	PrologSearchTableContentProvider(PrologSearchResultPage page) {
+		super(page);
+		// TODO Auto-generated constructor stub
+	}
+
 	protected final Object[] EMPTY_ARRAY= new Object[0];
 	private AbstractTextSearchResult fSearchResult;
 	private TableViewer fTableViewer;

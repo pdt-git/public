@@ -43,15 +43,23 @@ package org.cs3.pdt.internal.search;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
+import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -69,17 +77,19 @@ import org.eclipse.search.ui.text.Match;
 
 public class PrologSearchQuery implements ISearchQuery {
 
-	private Predicate data;
+	private GoalData data;
 
 	private PrologSearchResult result;
 
 	private HashMap fSearchViewStates = new HashMap();
 
-	private IMetaInfoProvider metaInfoProvider;
+	private PrologInterface pif;
 
-	public PrologSearchQuery(IMetaInfoProvider provider, Predicate data) {
-		this.data = data;
-		this.metaInfoProvider=provider;
+	
+
+	public PrologSearchQuery(PrologInterface pif, Goal data) {
+		this.data = (GoalData) data;
+		this.pif=pif;
 		result = new PrologSearchResult(this, data);
 		
 
@@ -95,51 +105,54 @@ public class PrologSearchQuery implements ISearchQuery {
 	}
 
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
-			BadLocationException, IOException {
+			BadLocationException, IOException, PrologException, PrologInterfaceException {
+		result.removeAll();
 		if(data==null){
 			Debug.error("Data is null!");
 			throw new NullPointerException();
 		}
-		String title = data==null?"oops, data is null?!" : data.getSignature();
+		String title = data==null?"oops, data is null?!" : data.getModule()+":"+data.getName()+"/"+data.getArity();
 		if (false/*FIXME was: data.isModule()*/){
 			title += "  Search for modules not supported yet!";
 		}
 		else{
-			PrologSession session;
+			PrologSession session = null;
+			String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
 			
-			SourceLocation[] locations = metaInfoProvider.findReferences(data);
-			if(locations==null){
-				//FIXME: is it realy ok? --lu
-				return Status.OK_STATUS;
+			String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
+			+ "pdt_predicate_reference(Pred,File,Start,End,Caller)";
+			List l=null;
+			try{
+				session=pif.getSession();
+				l = session.queryAll(query);
 			}
-			for (int i = 0; i < locations.length; i++) {
-				SourceLocation location = locations[i];
-				if (location.isRowBased){
-					String msg = "Sorry, i currently can not handle row-based locations.";
-					Debug.warning(msg);
-					UIUtils.setStatusErrorMessage(msg);
-					continue;
+			finally{
+				if(session!=null){
+					session.dispose();
 				}
-				IRegion resultRegion = new Region(location.offset,location.endOffset-location.offset);
-				IFile file = null;
-				if(location.isWorkspacePath){
-					ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(location.file));
-				}
-				else{
-					file = PDTCoreUtils.findFileForLocation(location.file);
-				}
-				if(file==null||! file.isAccessible()){
-					String msg = "Not found in workspace: "+location.file;
-					Debug.warning(msg);
-					UIUtils.setStatusErrorMessage(msg);
-					continue;
-				}
+			}
+			for (Iterator iterator = l.iterator(); iterator.hasNext();) {
+				Map m = (Map) iterator.next();
 				
-				result.addMatch(new Match(file, resultRegion
-						.getOffset(), resultRegion.getLength()));
-				Debug.debug("Found reference: " + file + ", offset: "
-						+ resultRegion.getOffset() + ", length: "
-						+ resultRegion.getLength());				
+				int start = Integer.parseInt((String) m.get("Start"));
+				int end = Integer.parseInt((String) m.get("End"));
+				IFile file = PDTCoreUtils.findFileForLocation((String) m.get("File"));
+				
+				IRegion resultRegion = new Region(start,end-start);
+				
+				if(file==null||! file.isAccessible()){
+					String msg = "Not found in workspace: "+m.get("File");
+					Debug.warning(msg);
+					UIUtils.setStatusErrorMessage(msg);
+					continue;
+				}
+				PredicateElement pe = new PredicateElement();
+				pe.file=file;
+				pe.label=(String) m.get("Caller");
+				Match match = new Match(pe, resultRegion
+						.getOffset(), resultRegion.getLength());
+				result.addMatch(match);
+								
 			}
 		}
 		return Status.OK_STATUS;

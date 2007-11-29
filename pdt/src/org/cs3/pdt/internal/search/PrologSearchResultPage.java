@@ -48,8 +48,6 @@ package org.cs3.pdt.internal.search;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -63,13 +61,13 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 
-public class PrologSearchViewPage extends AbstractTextSearchViewPage {
+public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 
-	private TextSearchTableContentProvider fContentProvider;
+	private PrologSearchContentProvider fContentProvider;
 	protected static final Image IMAGE = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 
-	public PrologSearchViewPage(){
-		super(AbstractTextSearchViewPage.FLAG_LAYOUT_FLAT);
+	public PrologSearchResultPage(){
+		super(AbstractTextSearchViewPage.FLAG_LAYOUT_TREE);
 		init(NewSearchUI.getSearchResultView().getActivePage().getSite());
 	}
 	
@@ -94,41 +92,19 @@ public class PrologSearchViewPage extends AbstractTextSearchViewPage {
 	}
 
 	protected void configureTreeViewer(TreeViewer viewer) {
-		// TODO Auto-generated method stub
-		System.out.println("confTreeV");
-		throw new IllegalStateException("Doesn't support tree mode."); //$NON-NLS-1$
+		//viewer.setSorter(new JavaElementLineSorter());
+		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
+		fContentProvider= new PrologSearchTreeContentProvider(this);
+		viewer.setContentProvider(fContentProvider);
 	}
-
+	@Override
+	public StructuredViewer getViewer() {		
+		return super.getViewer();
+	}
 	protected void configureTableViewer(TableViewer viewer) {
 		//viewer.setSorter(new JavaElementLineSorter());
-		viewer.setLabelProvider(new ILabelProvider(){
-
-			public Image getImage(Object element) {
-				//TODO: correct image
-				return IMAGE;
-			}
-
-			public String getText(Object element) {
-				int count = PrologSearchViewPage.this.getDisplayedMatchCount(element);
-				String plural = (count==1)?"":"es";
-				return ((IFile)element).getFullPath().toString()+ " (" + count +" match"+plural+")";
-			}
-
-			public void addListener(ILabelProviderListener listener) {
-			}
-
-			public void dispose() {
-			}
-
-			public boolean isLabelProperty(Object element, String property) {
-				return false;
-			}
-
-			public void removeListener(ILabelProviderListener listener) {
-			}
-			
-		});
-		fContentProvider= new TextSearchTableContentProvider();
+		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
+		fContentProvider= new PrologSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 		
 		
@@ -137,7 +113,7 @@ public class PrologSearchViewPage extends AbstractTextSearchViewPage {
 	
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		IEditorPart editor= null;
-		IFile file = (IFile)match.getElement();
+		IFile file = ((PredicateElement)match.getElement()).file;
 		try {
 			//editor= EditorUtility.openInEditor(file, false);
 		    editor = IDE.openEditor(UIUtils.getActivePage(),file);

@@ -89,21 +89,11 @@ public void run() {
 							return;
 						}
 						
-						Predicate[] p = plProject.getMetaInfoProvider().findPredicates(data);
-						//FIXME: what about alternatives?
-						if(p==null||p.length==0){
-							return;
-						}
-						if(p.length>1){
-							UIUtils.displayMessageDialog(UIUtils.getActiveEditor().getEditorSite().getShell(),
-									"PDT Plugin", "Note: I found more than one predicate matching the signature \n" 
-									+ data.getName()+"/"+ data.getArity()
-											+ ".\nSorry, Code analysis is still work in progress. " +
-													"For now i will ignore all but the first match.");
-						}
-						ISearchQuery query = new PrologSearchQuery(plProject.getMetaInfoProvider(),p[0]);
+						
+						ISearchQuery query = new PrologSearchQuery(plProject.getMetadataPrologInterface(),data);
 						NewSearchUI.activateSearchResultView();
 						NewSearchUI.runQuery(query);
+						plProject.updateMarkers();
 
 				} catch (Exception e) {
 					Debug.report(e);

@@ -128,7 +128,7 @@
 		<viewPage
 			id="org.cs3.pl.search.PrologSearchViewPage"
 			searchResultClass="org.cs3.pdt.internal.search.PrologSearchResult"
-			class="org.cs3.pdt.internal.search.PrologSearchViewPage">
+			class="org.cs3.pdt.internal.search.PrologSearchResultPage">
 		</viewPage>
 	</extension>
 <extension
