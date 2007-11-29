@@ -27,7 +27,8 @@
 	file_depends/2,
 	related_file/2, 	
 	has_tail/2,
-	ast_toplevel/2
+	ast_toplevel/2,
+	predicate_entry_point/2
 	]).
 
 :- use_module(library('pef/pef_base')).
@@ -61,7 +62,11 @@ predicate_listing(PredID):-
     	)
     ).
 
-
+predicate_entry_point(PredId,Path):-
+    predicate_owner(PredId,Owner),
+    pef_program_query([id=Owner,file=File]),
+    get_pef_file(Path,File).
+    
 
 
 
