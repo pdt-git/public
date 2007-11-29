@@ -40,8 +40,7 @@ public class CTermContentProviderTest extends TestCase {
 						+ "use_module(library('/org/cs3/pdt/model/predicate_definition_factory')),"
 						+ "use_module(library('/org/cs3/pdt/model/builtin_predicate_factory')),"
 						+ "use_module(library('/org/cs3/pdt/model/pdt_index')),"
-						+ "use_module(library('/org/cs3/pdt/model/pdt_handle')),"
-						+ "use_module(library('/org/cs3/pdt/metadata/pdtplugin'))");
+						+ "use_module(library('/org/cs3/pdt/model/pdt_handle'))");
 		s
 				.queryOnce("register_annotator(library('/org/cs3/pdt/annotate/op_annotator')),"
 						+ "register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator')),"
