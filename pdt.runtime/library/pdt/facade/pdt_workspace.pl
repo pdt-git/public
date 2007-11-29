@@ -113,5 +113,10 @@ pdt_add_source_path(Project,Path,Include,Exclude):-
     	include_pattern=Include, 
     	exclude_pattern=Exclude
     ]),
+    %FIXME: file name resolution should be independent of file_search_path
+    (	file_search_path(library,Path)
+    ->	true
+    ;	assert(file_search_path(library,Path))
+    ),
     pdt_invalidate_target(project(Project)).
     
