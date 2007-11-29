@@ -109,10 +109,7 @@ interprete_program(FileRef):-
 
 
 interprete_toplevelXXX(Expanded,Cx):-
-    (	\+ \+ Expanded = (pdt_builder:build_hook(parse(_)):-_)
-    -> 	spyme
-    ;	true
-    ),
+    
 	interprete_toplevel(Expanded,Cx).    
 
 interprete_toplevel(end_of_file,_):-
@@ -537,7 +534,8 @@ really_do_add_clause(PredID,Cx):-
     pef_clause_assert([predicate=PredID,number=M,toplevel=TlRef]),
     (	M == 1
     ->	(	pef_property_query([pef=PredID,key=file])
-    	->	throw(something_wrong_with_clause_order)
+    	->	%throw(something_wrong_with_clause_order)
+    		true
     	;  	pef_property_assert([pef=PredID,key=file,value=FileRef])
     	)
     ;	true
@@ -986,6 +984,7 @@ create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
 		copy_predicate(PredID,Cx1,NewPredID)
 	).
 create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
+    
     % the predicate symbol is currently not bound, so we can 
     % start a new predicate.
     cx_module(Cx,CurrentMID),
@@ -1003,12 +1002,17 @@ create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
 		rebind_module_name(ModuleName,NewMID,Cx1)		
 	),
 	pef_reserve_id(pef_predicate,NewPredID),
-    pef_predicate_assert([id=NewPredID,module=CurrentMID,name=Name,arity=Arity]).
+	(	NewPredID==47
+		->	spyme
+		;	true
+		),
+    pef_predicate_assert([id=NewPredID,module=NewMID,name=Name,arity=Arity]).
 
 
 %deprecated		  
 create_my_own_predicate_version(PredID,NewPredID,Cx):-
     pef_predicate_query([id=PredID,name=Name, arity=Arity,module=MID]),
+    
     cx_program(Cx,Program),    
     module_name(MID,ModuleName),
     (	module_owner(MID,Program)
@@ -1025,6 +1029,10 @@ create_my_own_predicate_version(PredID,NewPredID,Cx):-
 
     	cx_module(Cx1,MID1),
     	pef_reserve_id(pef_predicate,NewPredID),
+    	(	NewPredID==47
+		->	spyme
+		;	true
+		),
     	pef_predicate_assert([id=NewPredID,module=MID1,name=Name,arity=Arity]),
     	debug(interprete(debug),"created predicate ~w (~w/~w) in module ~w. ~w~n",[NewPredID,Name,Arity,MID1,Cx1])
 	;	% if the module is ad-hoc defined,or a module extension, clone it.
@@ -1036,11 +1044,16 @@ create_my_own_predicate_version(PredID,NewPredID,Cx):-
 
 copy_predicate(PredID,Cx,NewPredID):-
     pef_predicate_query([id=PredID,name=Name, arity=Arity]),
+    
     cx_module(Cx,NewMID),    
 	pef_predicate_query([id=PredID,name=Name, arity=Arity]),
 	(	pef_predicate_query([id=NewPredID,name=Name, arity=Arity,module=NewMID])
 	->	throw(conflicting_predicate_exists(NewPredID))
 	;	pef_reserve_id(pef_predicate,NewPredID),
+		(	NewPredID==47
+		->	spyme
+		;	true
+		),
 		debug(interprete(debug),"creating a copy(~w) of predicated(~w) in module ~w. ~w~n",[NewPredID,PredID,NewMID,Cx]),
 		pef_predicate_assert([id=NewPredID,name=Name, arity=Arity,module=NewMID]),				
 		merge_predicates(append,PredID,NewPredID,Cx)
