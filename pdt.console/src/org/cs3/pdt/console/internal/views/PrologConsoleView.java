@@ -860,12 +860,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			PrologSession session = pif.getSession();
 			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
 					.getLibraryManager(), session,
-					new String[] { PDTConsole.PL_LIBRARY,PrologRuntime.LIB_ATTIC });
+					new String[] { PDTConsole.PL_LIBRARY });
 			Map m = null;
 			try {
 				m = session
 						.queryOnce("use_module(library(pdt_console_server))," +
-								"use_module(library('org/cs3/pdt/metadata/pdtplugin')),"
+								"use_module(library(pdtplugin)),"
 								+ "pdt_current_console_server(Port,LockFile)");
 
 				if (m == null) {
