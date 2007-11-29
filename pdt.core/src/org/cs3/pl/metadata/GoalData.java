@@ -42,19 +42,27 @@
 package org.cs3.pl.metadata;
 
 import org.cs3.pl.cterm.CTerm;
+import org.eclipse.core.resources.IFile;
 
 /**@deprecated*/
 public class GoalData extends PrologElementData implements Goal {
 
 	private static final long serialVersionUID = 1L;
+	private String file;
 
-	public GoalData(String module, String elementName, int arity) {
-		super(module, elementName, arity);	
+	
+	public GoalData(String file, String module, String elementName, int arity) {
+		super(module, elementName, arity);
+		this.file=file;
 	}
 
 	public CTerm getTerm() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public String getFile() {
+		return file;
 	}
 
 }

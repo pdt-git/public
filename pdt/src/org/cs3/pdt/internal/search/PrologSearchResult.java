@@ -45,6 +45,11 @@
  */
 package org.cs3.pdt.internal.search;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Vector;
+
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -58,22 +63,28 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
+import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
+
 /**
  * @author rho
- *
+ * 
  */
-public class PrologSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter  {
+public class PrologSearchResult extends AbstractTextSearchResult implements
+		IEditorMatchAdapter, IFileMatchAdapter {
 
 	private PrologSearchQuery query;
-	private Predicate data;
-	private final Match[] EMPTY_ARR= new Match[0];
+	private Goal data;
+	private final Match[] EMPTY_ARR = new Match[0];
+	private HashMap<IFile,PredicateElement[]> elementCache = new HashMap<IFile, PredicateElement[]>();
+	private HashSet<IFile> fileCache = new HashSet<IFile>();
+
 	/**
 	 * @param query
 	 * @param queryString
 	 */
-	public PrologSearchResult(PrologSearchQuery query, Predicate data) {
+	public PrologSearchResult(PrologSearchQuery query, Goal data2) {
 		this.query = query;
-		this.data = data;
+		this.data = data2;
 	}
 
 	public IEditorMatchAdapter getEditorMatchAdapter() {
@@ -84,18 +95,18 @@ public class PrologSearchResult extends AbstractTextSearchResult implements IEdi
 		return this;
 	}
 
-	public String getLabel() {
-		
-		return "Prolog Search: " + (data==null ? "oops, data is null?!" :data.getSignature());
+	public String getLabel() {		
+		return "Prolog Search: " + (data==null ? "oops, data is null?!" :data.getModule()+":"+data.getName()+"/"+data.getArity());
 	}
 
 	public String getTooltip() {
-		return "Prolog Search: " + data.getSignature();
+		return getLabel();
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-//		PrologElementAdaptable element = new PrologElementAdaptable(data);
-//		return ((IWorkbenchAdapter)element.getAdapter(IWorkbenchAdapter.class)).getImageDescriptor(null);
+		// PrologElementAdaptable element = new PrologElementAdaptable(data);
+		// return
+		// ((IWorkbenchAdapter)element.getAdapter(IWorkbenchAdapter.class)).getImageDescriptor(null);
 		return null;
 	}
 
@@ -104,40 +115,92 @@ public class PrologSearchResult extends AbstractTextSearchResult implements IEdi
 	}
 
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
-		IEditorInput ei= editor.getEditorInput();
+		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
-			FileEditorInput fi= (FileEditorInput) ei;
+			FileEditorInput fi = (FileEditorInput) ei;
 			return match.getElement().equals(fi.getFile());
 		}
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.ui.IEditorPart)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult,
+	 *      org.eclipse.ui.IEditorPart)
 	 */
-	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
-		IEditorInput ei= editor.getEditorInput();
+	public Match[] computeContainedMatches(AbstractTextSearchResult result,
+			IEditorPart editor) {
+		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
-			FileEditorInput fi= (FileEditorInput) ei;
+			FileEditorInput fi = (FileEditorInput) ei;
 			return result.getMatches(fi.getFile());
 		}
 		return EMPTY_ARR;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.search.ui.text.IFileMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult, org.eclipse.core.resources.IFile)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.eclipse.search.ui.text.IFileMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult,
+	 *      org.eclipse.core.resources.IFile)
 	 */
-	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
+	public Match[] computeContainedMatches(AbstractTextSearchResult result,
+			IFile file) {
 		return result.getMatches(file);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.search.ui.text.IFileMatchAdapter#getFile(java.lang.Object)
 	 */
 	public IFile getFile(Object element) {
-		if (element instanceof IFile)
-			return (IFile)element;
+		if (element instanceof IFile){
+			return (IFile) element;
+		}
+		if (element instanceof PredicateElement){
+			return ((PredicateElement) element).file;
+		}
+		if(element instanceof Match){
+			return ((PredicateElement) ((Match) element).getElement()).file;
+		}
 		return null;
 	}
 
+	
+	public Object[] getElements(IFile file) {
+		PredicateElement[] children = elementCache.get(file);
+		if(children==null){
+			Object[] elms = getElements();
+			Vector<PredicateElement> v = new Vector<PredicateElement>();
+			for (int i = 0; i < elms.length; i++) {
+				PredicateElement elm = (PredicateElement) elms[i];
+				if(elm.file.equals(file)){
+					v.add(elm);
+				}
+			}
+			children = v.toArray(new PredicateElement[v.size()]);
+			elementCache.put(file, children);
+		}
+		return children;
+	}
+
+	@Override
+	public void addMatch(Match match) {
+		PredicateElement elm = (PredicateElement) match.getElement();
+		fileCache.add(elm.file);
+		super.addMatch(match);
+	}
+	
+	public IFile[] getFiles() {
+		
+		return fileCache.toArray(new IFile[fileCache.size()]);
+	}
+	@Override
+	public void removeAll() {	
+		super.removeAll();
+		fileCache.clear();
+		elementCache.clear();
+	}
 }

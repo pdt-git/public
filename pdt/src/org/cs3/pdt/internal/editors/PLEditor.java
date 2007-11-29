@@ -55,6 +55,7 @@ import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
 import org.eclipse.core.resources.IFile;
@@ -106,8 +107,6 @@ public class PLEditor extends TextEditor {
 
 	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 
-	
-
 	private ColorManager colorManager;
 
 	private PrologOutline fOutlinePage;
@@ -129,7 +128,6 @@ public class PLEditor extends TextEditor {
 
 	}
 
-	
 	protected abstract class AbstractSelectionChangedListener implements
 			ISelectionChangedListener {
 
@@ -190,7 +188,7 @@ public class PLEditor extends TextEditor {
 
 	private IFile file;
 
-	private String filename;
+	
 
 	private static final String MATCHING_BRACKETS = "matching.brackets";
 
@@ -318,9 +316,9 @@ public class PLEditor extends TextEditor {
 				}
 				return fOutlinePage;
 			}
-//			if (required.equals(IPropertySheetPage.class)) {
-//	            return new PropertySheetPage();
-//	        }
+			// if (required.equals(IPropertySheetPage.class)) {
+			// return new PropertySheetPage();
+			// }
 			return super.getAdapter(required);
 		} catch (Throwable t) {
 			Debug.report(t);
@@ -333,13 +331,11 @@ public class PLEditor extends TextEditor {
 	 */
 	public void outlinePageClosed() {
 		if (fOutlinePage != null) {
-			
+
 			fOutlinePage = null;
 			resetHighlightRange();
 		}
 	}
-
-	
 
 	public PrologOutline getOutlinePage() {
 		return fOutlinePage;
@@ -425,7 +421,8 @@ public class PLEditor extends TextEditor {
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
 
-		return getPrologDataFromOffset(document, offset);
+		return getPrologDataFromOffset(Util.prologFileName(file.getLocation()
+				.toFile()), document, offset);
 	}
 
 	/**
@@ -433,16 +430,16 @@ public class PLEditor extends TextEditor {
 	 * @param offset
 	 * @return
 	 */
-	public static Goal getPrologDataFromOffset(IDocument document, int offset)
-			throws BadLocationException {
-		
+	public static Goal getPrologDataFromOffset(String file, IDocument document,
+			int offset) throws BadLocationException {
+
 		int start = offset;
 		int end = offset;
 		while (isPredicatenameChar(document.getChar(start)) && start > 0) {
 			start--; // scan left until first non-predicate char
 		}
 		start++; // start is now the position of the first predictate char
-					// (or module prefix char)
+		// (or module prefix char)
 
 		while (isPredicatenameChar(document.getChar(end))
 				&& end < document.getLength()) {
@@ -471,23 +468,23 @@ public class PLEditor extends TextEditor {
 			if (buf.length() == 0)
 				return null;
 			arity = Integer.parseInt(buf);
-			return new GoalData(null, elementName, arity);
+			return new GoalData(file, null, elementName, arity);
 
 		}
 		if (document.getLength() == endOfWhiteSpace
 				|| document.getChar(endOfWhiteSpace) != '(') {
 
 			if (elementName.endsWith(":")) {
-				return new GoalData(null, elementName.substring(0, 
-						elementName.length() - 1), -1);
+				return new GoalData(file,null, elementName.substring(0, elementName
+						.length() - 1), -1);
 			}
 			String[] fragments = elementName.split(":");
-			if(fragments.length==2){
-				return new GoalData(fragments[0], fragments[1], 0);
+			if (fragments.length == 2) {
+				return new GoalData(file,fragments[0], fragments[1], 0);
 			}
-			String module =null;
-	
-			return new GoalData(module, elementName, 0);
+			String module = null;
+
+			return new GoalData(file,module, elementName, 0);
 		}
 
 		end = endOfWhiteSpace + 1;
@@ -519,18 +516,16 @@ public class PLEditor extends TextEditor {
 
 				end++;
 		}
-		
-		String[] fragments = elementName.split(":");
-		if(fragments.length==2){
-			return new GoalData(fragments[0], fragments[1], arity);
-		}
-		String module =null;
-		
-		return new GoalData(module, elementName, arity);
-		
-	}
 
-	
+		String[] fragments = elementName.split(":");
+		if (fragments.length == 2) {
+			return new GoalData(file,fragments[0], fragments[1], arity);
+		}
+		String module = null;
+
+		return new GoalData(file,module, elementName, arity);
+
+	}
 
 	/**
 	 * @param document
@@ -726,11 +721,19 @@ public class PLEditor extends TextEditor {
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		checkForPrologNature(input);
-		if(fOutlinePage!=null){
+		if (fOutlinePage != null) {
 			fOutlinePage.setInput(input);
 		}
 		super.doSetInput(input);
+		IFileEditorInput editorInput = null;
+		if (input instanceof IFileEditorInput) {
+			editorInput = (IFileEditorInput) input;
 
+		}
+		if (editorInput == null) {
+			return;
+		}
+		file=editorInput.getFile();
 	}
 
 	private void checkForPrologNature(IEditorInput input) {

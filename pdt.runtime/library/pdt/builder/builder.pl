@@ -210,8 +210,17 @@ fp_build_target(Target):-
 	client_log(Target,add_to_build),   	       
     pef_clear_record(Target),    
     target_key(TargetName,Target),
-    forall(fp_seed_hook(TargetName),true),
-    fp_run(Target).
+    (	'$fp_running'
+    ->  push_target(Target),    
+    	forall(fp_seed_hook(TargetName),true),
+    	pop_target,
+    	client_log(Target,not_starting__already_running)
+    ;	assert('$fp_running'),
+    	push_target(Target),    
+    	forall(fp_seed_hook(TargetName),true),
+    	pop_target,
+    	fp_run(Target)
+    ).
 
 pdt_fp_enqueue(Job,TargetName):-    
     target_key(TargetName,Target),
@@ -238,10 +247,11 @@ fp_job_in_queue(Job):-
     ).
 
 
-fp_run(Target):-
+/*fp_run(Target):-
 	'$fp_running',
 	!,
 	client_log(Target,not_starting__already_running).
+	*/
 fp_run(Target):-
 	\+ fp_job_in_queue(_),
 	!,
@@ -251,8 +261,9 @@ fp_run(Target):-
     client_log(Target,removed_from_building),
     client_send_message(Target,mark_clean(Me)).
 fp_run(Target):-
-    assert('$fp_running'),
+    %assert('$fp_running'),
     call_cleanup(fp_run__loop(Target),Catcher,fp_run__cleanup(Target,Catcher)),
+    %client_log(Target,not_starting__queue_empty),
     fp_request_target(Target).
 
 fp_run__loop(Target):-       
@@ -293,8 +304,8 @@ fp_run__cleanup(Target,Catcher):-
     ),
     client_block_commit,
     !.
-fp_run__cleanup(Catcher):-
-	throw(failed(fp_run__cleanup(Catcher))).
+fp_run__cleanup(Target,Catcher):-
+	throw(failed(fp_run__cleanup(Target,Catcher))).
     
     
     
