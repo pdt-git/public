@@ -47,11 +47,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PredicateData;
 import org.cs3.pl.prolog.PLUtil;
@@ -241,8 +243,8 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		PrologSession s =null;
 		try{
 			s= pif.getSession();
-			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), s, new String[]{PrologRuntime.LIB_ATTIC});
-			s.queryOnce("use_module(library('org/cs3/pdt/metadata/pdtplugin'))");
+			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), s, new String[]{PDTConsole.PL_LIBRARY});
+			s.queryOnce("use_module(library(pdtplugin))");
 			
 		} catch (PrologException e) {
 			Debug.report(e);
