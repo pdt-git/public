@@ -77,7 +77,7 @@ public class PLAutoIndentStrategy extends DefaultAutoIndentStrategy implements I
 			int start= info.getOffset();
 					
 			if ((c.offset == start + info.getLength()) && isPredicateHead(d,info)) 
-				predicateIndent(c);
+				predicateIndent(d,c);
 			
 			// find white spaces
 			int end= findEndOfWhiteSpace(d, start, c.offset);
@@ -98,8 +98,9 @@ public class PLAutoIndentStrategy extends DefaultAutoIndentStrategy implements I
 	/**
 	 * 
 	 */
-	private void predicateIndent(DocumentCommand c) {
-		c.text = "\n    ";
+	private void predicateIndent(IDocument d,DocumentCommand c) {
+		String nl = TextUtilities.getDefaultLineDelimiter(d);
+		c.text=nl+"    ";
 		
 	}
 
