@@ -2,6 +2,7 @@
 :- ensure_loaded(library('pef/pef_base')).
 :- ensure_loaded(library('pef/pef_api')).
 :- ensure_loaded(library('builder/targets/literals')).
+:- ensure_loaded(library('builder/depgraph')).
 
 
 create_test_project(Path):-

@@ -4,11 +4,7 @@
 		pdt_invalidate_target/1,
 		pdt_with_targets/1,
 		pdt_with_targets/2,		
-		pdt_restart_arbiter/0,
-		pdt_builder_info/2,
-		pdt_builder_info/3,
-		pdt_print_builder_info/3,
-		pdt_print_builder_info/2,
+		pdt_restart_arbiter/0,		
 		pdt_fp_enqueue/2		
 	]
 ).     
@@ -27,7 +23,8 @@
 	target_mutable/2,
 	target_mux/2,
 	report_progress/1,
-	fix_point_target/1.
+	fix_point_target/1,
+	dump_hook/1.
 
 /* only used for debugging */
 :- dynamic touched/1,'$target_event'/2.
@@ -43,7 +40,8 @@
 	target_mutable/2,
 	target_mux/2,
 	report_progress/1,
-	fix_point_target/1.
+	fix_point_target/1,
+	dump_hook/1.
 
 /* estimate_hook(Target,Dependency, Weight),
    report_progress(Target)
@@ -252,6 +250,7 @@ fp_job_in_queue(Job):-
 	!,
 	client_log(Target,not_starting__already_running).
 	*/
+
 fp_run(Target):-
 	\+ fp_job_in_queue(_),
 	!,
@@ -259,6 +258,7 @@ fp_run(Target):-
 	thread_self(Me),
 	retract('$fp_building_target'(Target)),
     client_log(Target,removed_from_building),
+    spyme,
     client_send_message(Target,mark_clean(Me)).
 fp_run(Target):-
     %assert('$fp_running'),
@@ -381,7 +381,7 @@ pdt_request_targets(Ts):-
 request_targets([]).
 request_targets([T|Ts]):-
 	target_key(T,K),
-	(	fix_point_target(T)
+	(	'$fp_target'(K)
 	->	fp_request_target(K)
 	;	request_target(K)
 	),
@@ -727,7 +727,7 @@ add_dependency__cheap(Target,Dep):-
 	assert('$target_depends_inv'(Dep,Target)).
     
 add_dependency(Target,Dep):-
-	add_dependency__cheap(Target,Dep).    
+	add_dependency__expensive(Target,Dep).    
     
 	
 
@@ -1098,6 +1098,7 @@ execute_action(rebuild(Thread),Target):-
 execute_action(progress_prepare(Ts),Target):-
 	progress_report_prepare(Target,Ts).	
 execute_action(report_cycle(Thread),Target):-
+    dump(report_cycle(Thread,Target)),
 	arbiter_send_message(Thread,Target, cycle(Target)).
 execute_action(notify_done,Target):-
 	my_debug(builder(debug),"target done: ~w~n",[Target]),
@@ -1143,109 +1144,52 @@ do_grant(lock(Client,Target2),Target):-
 
 /*
 
-Cycle checkking:
-A thread depends on a target if it waits for it, or if it requests it.
-A target depends on a thread if it is pending, and if the thread is working on providing the target.
+Cycle checkking: Note that this has little to do with target dependencies or locks!
+  
+The edges we are looking at here represent the fact that one node (either a target, or a thread) has to 
+wait for another note. 
+A thread waits for a target if it is in its wait list, or if it requests it. (The second one is important!!)
+A target waits on a thread if it is pending, and if the thread is working on providing the target.
+A thread never *directly* waits on another thread.
+A target never *directly* waits on another target.
 
 Invariant: the graph induced by the above relations is always acyclic.
-requesting a target constitutes adding an edge. If that edge would close a cylce, an error is reported to the requesting thread.
+
+Though not represented in the database, requesting a target constitutes adding an edge. 
+If that edge would close a cylce, an error is reported to the requesting thread, because the requesting thread
+would wait forever for the lock. (It ultimately would wait for itself)
+
+So for each request, we check if the requested target is already (directly or indirectly) waiting for that thread.
+If this is the case, the request is rejected.
+
 */
 
-target_depends_thread(Target,Thread):-
+target_waits_thread(Target,Thread):-
     current_target_state(Target,state(building(Thread2),_,_,_,_)),
-    thread_depends_thread(Thread2,Thread).    
+    thread_waits_thread(Thread2,Thread).    
     
-thread_depends_target(Thread,Target):-
+thread_waits_target(Thread,Target):-
     current_target_state(Target2,state(_,_,_,_,Waiting)),
     member(Thread,Waiting),
-    target_depends_target(Target2,Target).
+    target_waits_target(Target2,Target).
 
 
-target_depends_target(Target,Target).
-target_depends_target(Target1,Target2):-
-    target_depends_thread(Target1,Thread),
-    thread_depends_target(Thread,Target2).
+target_waits_target(Target,Target).
+target_waits_target(Target1,Target2):-
+    target_waits_thread(Target1,Thread),
+    thread_waits_target(Thread,Target2).
 
-thread_depends_thread(Thread,Thread).
-thread_depends_thread(Thread1,Thread2):-
-    thread_depends_target(Thread1,Target),
-    target_depends_thread(Target,Thread2).
+thread_waits_thread(Thread,Thread).
+thread_waits_thread(Thread1,Thread2):-
+    thread_waits_target(Thread1,Target),
+    target_waits_thread(Target,Thread2).
 
     
 closes_cycle(Thread,Target):-  
-    target_depends_thread(Target,Thread),
+    target_waits_thread(Target,Thread),
     !.
 
 
-%pdt_thread_activity(Thread,status(A)):-
-%    current_thread(Thread,A).
-pdt_builder_info(Thread,build,Target):-
-	current_target_state(Target,state(building(Thread),_,_,_,_)).    
-pdt_builder_info(Thread,lock,Target):-
-	current_target_state(Target,state(_,_,Ls,_,_)),
-	memberchk(Thread,Ls).
-pdt_builder_info(Thread,wait,Target):-
-	current_target_state(Target,state(_,_,_,_,Ws)),
-	memberchk(Thread,Ws).
-pdt_builder_info(A,depend,B):-
-	target_depends(A,B).
-pdt_builder_info(Target,Activity+Status):-
-	current_target_state(Target,state(Activity, Status, _, _, _)).
-	
-pdt_print_builder_info(slice(T),File):-
-    pdt_print_builder_info(FT,
-    	(	T=FT
-    	;	net_dependency(T,FT)
-    	;	net_dependency(FT,T)	
-    	),
-    	File
-    ).
-pdt_print_builder_info(FT,F,File):-
-    thread_self(Me),
-    (	Me==build_arbiter
-    ->	print_builder_info(FT,F,File)
-    ;	thread_send_message(build_arbiter,msg(meta,run(print_builder_info(FT,F,File))))
-    ).
-
-print_builder_info(FT,F,File):-   
-	tell(File),
-	call_cleanup(print_builder_info(FT,F),told).
-
-print_builder_info(FT,F):-   	 
-    format("digraph G {~nnode [shape = \"record\"]~n",[]),
-    forall(
-    	current_thread(Thread,Status),
-    	format("\"~w\" [label=\"{~w|~w}\"]~n",[Thread,Thread,Status])
-    ),
-    forall(
-    	(	pdt_builder_info(Target,Activity+Status), 
-    		mutable(Target),
-    		\+ \+ (Target=FT,once(F))
-    	),
-    	format("\"~w\" [label=\"{~w|~w|~w}\"]~n",[Target,Target,Activity,Status])
-    ),
-    forall(
-    	(	pdt_builder_info(Thread,Edge,Node1),
-    		(	Thread=target(Node0)
-    		->	\+ \+ (Node0=FT,once(F))
-    		;	Node0=Thread
-    		),
-    		\+ \+ (Node1=FT,once(F))
-    	),
-    	(	(	Edge==depend
-    		->	Style=dashed,Color=black
-    		;	Edge==lock
-    		->	Style=solid,Color=green
-    		;	Edge==build
-    		->	Style=solid,Color=blue
-    		;	Edge==wait
-    		->	Style=solid,Color=red
-    		;	Style=solid,Color=black
-    		),
-    		format("\"~w\" -> \"~w\" [label=\"~w\",style=~w,color=~w]~n",[Node0,Node1,Edge,Style,Color])
-    	)
-    ),
-	format("}~n",[]).
 available(Target):-  
     current_target_state(Target,state(_, available, _, _, _)).
     
@@ -1285,5 +1229,6 @@ progress_report_cleanup(Target):-
 	),
 	retractall('$progress_total'(Target,_)).
 	
-
+dump(Data):-
+    forall(dump_hook(Data),true).
 
