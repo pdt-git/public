@@ -33,14 +33,14 @@
 %   framework. All java classes in packages containing the "pdt" package
 %   fragment in their name fall into this category.
 %   
-% ad 2: "Third-party code" means any code that was originaly written as
+% ad 2: "Third-party code" means any code that was originally written as
 %   part of a project other than the PDT. Files that contain or are based on
 %   such code contain a notice telling you so, and telling you the
 %   particular conditions under which they may be used, modified and/or
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- ['org/cs3/pdt/compatibility/main.pl'].
-:- ['org/cs3/pdt/util/main.pl'].
-:- ['org/cs3/pdt/test/main.pl'].
+%:- ['org/cs3/pdt/compatibility/main.pl'].
+%:- ['org/cs3/pdt/util/main.pl'].
+%:- ['org/cs3/pdt/test/main.pl'].
 :- ['org/cs3/pdt/metadata/main.pl'].
