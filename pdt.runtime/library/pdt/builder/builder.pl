@@ -126,7 +126,7 @@ release_targets(Ref):-
     throw(failed(error(release_targets(Ref)))).
 
 
-spyme.
+spyme:-dump(spyme).
 
 
 mutable(Target):-
@@ -180,7 +180,8 @@ fp_request_target(Target):-
     ;	Msg==implied(Target)
     ->	true 		    
     ;	Msg==rebuild(Target)
-    ->  fp_build_target(Target)
+    ->  spyme,
+    	fp_build_target(Target)
     ;	Msg=error(Target,E)
     ->	throw(error(target_error(Target,E)))
     ;	Msg=obsolete(Target,Targets)
@@ -255,11 +256,16 @@ fp_run(Target):-
 	\+ fp_job_in_queue(_),
 	!,
 	client_log(Target,not_starting__queue_empty),
-	thread_self(Me),
-	retract('$fp_building_target'(Target)),
-    client_log(Target,removed_from_building),
-    spyme,
-    client_send_message(Target,mark_clean(Me)).
+	thread_self(Me),	
+    spyme,    
+    forall(
+    	retract('$fp_building_target'(Target2)),
+    	(	client_log(Target2,removed_from_building),
+    		client_block_add_message(Target2,mark_clean(Me))
+    	)
+    ),    
+    client_block_commit,
+    retract('$fp_running').
 fp_run(Target):-
     %assert('$fp_running'),
     call_cleanup(fp_run__loop(Target),Catcher,fp_run__cleanup(Target,Catcher)),
@@ -280,6 +286,7 @@ fp_run__loop(Target):-
 		),		
     	fp_done,
     !,
+    spyme,
     client_log(Target,finished_fp_iteration).
     
 fp_done:-
