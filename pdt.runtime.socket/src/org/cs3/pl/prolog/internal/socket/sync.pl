@@ -234,8 +234,8 @@ internal_commit(ThreadID) :-
   debug(sync,'COMMIT~n',[]),
   forall(edb_local(ThreadID, Term, Op), 
          transact(ThreadID, Op, Term)),
-  forall(depends_local(Subject),
-         notify_if_predicate_updated(Subject)),
+  findall((Subject),(depends_local(Subject),
+         notify_if_predicate_updated(Subject)),_),
   retractall(depends_local(_)).
     
 /**
@@ -249,13 +249,13 @@ notify_if_predicate_updated(Signature) :-
    debug(sync,'~w~n',[term_to_signature(Term,Signature)]),
    recorded(term_ref,Term),
    debug(sync,'~w~n',[succeed:recorded(term_ref,Term)]),
-   !,
    forall(term_ref(Term,Ref), (
      update_idb(Term,Ref),
      (changed(Ref) ->
       pif_notify(Term, 'update');
      true)
-   )),   debug(sync,'~w~n',[succeed:forall]).
+   )),
+   debug(sync,'~w~n',[succeed:forall]).
 
 notify_if_predicate_updated(_Subject).
   
