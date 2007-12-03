@@ -84,7 +84,7 @@ pdt_predicate_reference(Pred,File,Start,End,CModule:CName/CArity):-
 		)
 	),
 	% make sure all clauses containing the functor symbol are up to date
-	pdt_request_target(literals(inverse_search(Name))),
+	pdt_request_target(inverse_search(Name)),
 	
 	% Now, finally, lookup the calls.
 	pef_call_query([predicate=Pred,goal=Goal,cx=Cx]),

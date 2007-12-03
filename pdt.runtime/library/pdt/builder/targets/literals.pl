@@ -35,7 +35,7 @@ pdt_builder:target_file(literals(directory(Path,_,_)),Path).
 pdt_builder:target_file(literals(file(Path)),Path).
 pdt_builder:target_mutable(literals(workspace),true).
 pdt_builder:target_mutable(literals(project(_)),true).
-pdt_builder:target_mutable(literals(predicate(_)),true).
+pdt_builder:target_mutable(inverse_search(_),true).
 
 pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
     cx_head(Cx,Head),
@@ -58,14 +58,16 @@ pdt_builder:fp_seed_hook(literals(file(Path))):-
 	
 	
 	
-pdt_builder:build_hook(literals(inverse_search(FunctorName))):-	
+pdt_builder:build_hook(inverse_search(FunctorName)):-	
 	% First use asts as search index to find all predicates with clauses 
 	% that continaining the predicates functor symbol.
 	% Then, run the cross referencer for all these predicates
 	% Finally, lookup the calls.
 	
 	% build ASTs
-	pdt_request_target(ast(workspace)),		
+	pdt_builder:dump(before),
+	pdt_request_target(ast(workspace)),	
+	pdt_builder:dump(after),	
 	(	granularity(predicate)
 	->	% lookup predicate clauses
 		forall(
@@ -133,7 +135,7 @@ seed_predicate(Name/Arity):-
     ).
 
 seed_file(Path):-
-    pdt_request_target([parse(Path),interprete(Path),ast(file(Path))]),
+    pdt_request_targets([parse(Path),interprete(Path),ast(file(Path))]),
     get_pef_file(Path,File),
     forall(
     	file_depends(File,Dep),
