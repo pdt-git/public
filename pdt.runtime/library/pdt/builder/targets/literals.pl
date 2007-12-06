@@ -29,12 +29,12 @@ the granularity of dependencies is that of predicates.
 % Currently 'predicate' is known to work, I want to experiment with 'file'.
 granularity(file).
 
-pdt_builder:fix_point_target(literals(predicate(_))):-granularity(predicates).
-pdt_builder:fix_point_target(literals(file(_))):-granularity(file).
-pdt_builder:target_file(literals(directory(Path,_,_)),Path).
-pdt_builder:target_file(literals(file(Path)),Path).
-pdt_builder:target_mutable(literals(workspace),true).
-pdt_builder:target_mutable(literals(project(_)),true).
+pdt_builder:fix_point_target(literals(_,predicate(_))):-granularity(predicates).
+pdt_builder:fix_point_target(literals(_,file(_))):-granularity(file).
+pdt_builder:target_file(literals(_,directory(Path,_,_)),Path).
+pdt_builder:target_file(literals(_,file(Path)),Path).
+pdt_builder:target_mutable(literals(_,workspace),true).
+pdt_builder:target_mutable(literals(_,project(_)),true).
 pdt_builder:target_mutable(inverse_search(_),true).
 
 pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
@@ -50,15 +50,23 @@ pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
 
 
 
-pdt_builder:fp_seed_hook(literals(predicate(Name/Arity))):-
+pdt_builder:fp_seed_hook(literals(first,predicate(Name/Arity))):-
 	seed_predicate(Name/Arity).    
-
-pdt_builder:fp_seed_hook(literals(file(Path))):-
+pdt_builder:fp_seed_hook(literals(full,predicate(Name/Arity))):-
+	pdt_request_target(literals(first,predicate(Name/Arity))).    
+pdt_builder:fp_seed_hook(literals(first,file(Path))):-
 	seed_file(Path).    
+pdt_builder:fp_seed_hook(literals(full,file(Path))):-	
+	get_pef_file(Path,File),    
+	pdt_request_target(literals(first,file(Path))),
+	forall(
+    	file_depends(File,Dep),
+    	(	get_pef_file(DepPath,Dep),
+    		pdt_request_target(literals(full,file(DepPath)))
+    	)
+    ).
 	
-	
-	
-pdt_builder:build_hook(inverse_search(FunctorName)):-	
+pdt_builder:build_hook(inverse_search(Prec,FunctorName)):-	
 	% First use asts as search index to find all predicates with clauses 
 	% that continaining the predicates functor symbol.
 	% Then, run the cross referencer for all these predicates
@@ -78,7 +86,7 @@ pdt_builder:build_hook(inverse_search(FunctorName)):-
 				(	H==[]
 				->  true
 				;	ast_functor(H,SName,SArity),
-					pdt_request_target(literals(predicate(SName/SArity)))			
+					pdt_request_target(literals(Prec,predicate(SName/SArity)))			
 				)
 			)
 		)
@@ -88,17 +96,17 @@ pdt_builder:build_hook(inverse_search(FunctorName)):-
 			(	ast_toplevel(Candidate,Tl),
 				pef_toplevel_query([id=Tl,file=File]),
 				get_pef_file(Path,File),
-				pdt_request_target(literals(file(Path)))							
+				pdt_request_target(literals(Prec,file(Path)))							
 			)
 		)
 	).
 	
-pdt_builder:build_hook(literals(Resource)):-
+pdt_builder:build_hook(literals(Precision,Resource)):-
     (	Resource=file(Path)
-    ->	request_file_literals(Path)    
+    ->	request_file_literals(Precision,Path)    
     ;   pdt_request_target(Resource),
     	pdt_contains(Resource,Element),
-    	pdt_request_target(literals(Element))
+    	pdt_request_target(literals(Precision,Element))
     ).
 /*file_predicate(F,P):-
     pef_toplevel_query([file=F,id=Tl]),
@@ -111,17 +119,12 @@ file_predicate(File,Name/Arity):-
 	module_predicate(Mod,Pred),
 	pef_predicate_query([id=Pred,name=Name,arity=Arity]).
 	
-request_file_literals(Path):-
+request_file_literals(Precision,Path):-
     pdt_request_targets([parse(Path),interprete(Path)]),
-    get_pef_file(Path,F),
-    /*forall(file_depends(F,OtherF),
-    	(	get_pef_file(OtherPath,OtherF),
-    		pdt_request_target(literals(file(OtherPath)))
-    	)
-    ),*/
+    get_pef_file(Path,F),    
     forall(
 		file_predicate(F,Signature),    		    
-    	pdt_request_target(literals(predicate(Signature)))
+    	pdt_request_target(literals(Precision,predicate(Signature)))
     ).
 
 seed_predicate(Name/Arity):-    
@@ -131,21 +134,21 @@ seed_predicate(Name/Arity):-
     debug(literals,"seeding ~w:~w/~w~n",[ModuleName,Name,Arity]),    
     forall(
     	fp_init_todo2(Pred,Cx,Goal),
-    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(predicate(Name/Arity)))
+    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(first,predicate(Name/Arity)))
     ).
 
 seed_file(Path):-
-    pdt_request_targets([parse(Path),interprete(Path),ast(file(Path))]),
+    pdt_request_targets([workspace,parse(Path),interprete(Path),ast(file(Path))]),
     get_pef_file(Path,File),
     forall(
     	file_depends(File,Dep),
     	(	get_pef_file(DepPath,Dep),
-    		pdt_request_target(literals(file(DepPath)))
+    		pdt_request_target(literals(first,file(DepPath)))
     	)
     ),
     forall(
     	fp_init_todo3(File,Cx,Goal),
-    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(file(Path)))
+    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(first,file(Path)))
     ).
     
 
@@ -216,7 +219,10 @@ find_literal(Goal,Cx,Literal):- %Case 1: Context is a variable
 	cx_head(Cx,Head),
 	(	ast_occurs(Head,VarId),
 		forall(ast_occurs(Goal,VarId2),ast_occurs(Head,VarId2))
-	->	make_rule(Var,Cx,[VarId=Var|_],Rule),
+	->	ast_apply(Goal,Subst,GoalTerm),
+		%ast_apply(Context,Subst,ContextTerm),
+		%cx_set_context(Cx,ContextTerm,Cx1),
+		make_rule(GoalTerm,Cx,Subst,Rule),
 		Literal=rule(Rule)
 	;	Literal=cannot_infer(Cx,Goal)
 	).
@@ -510,7 +516,7 @@ resolve(Goal,Cx0,Cx1,Pred):-
 	cx_bound(Cx0,Bound0),
 	ast_functor(Goal,Name,Arity),
 	(	granularity(predicates)
-	->	pdt_request_target(literals(predicate(Name/Arity)))
+	->	pdt_request_target(literals(full,predicate(Name/Arity)))%FIXME: granularity should not be constant!!
 	;	true
 	),	
 	(	resolve(Program,Context,Name,Arity,Bound0,Pred,Bound1)
@@ -677,12 +683,22 @@ fp_process_result(rule(Rule)):-
     (	assert_rule(Rule)
     ->	pef_msf_rule_predicate(Rule,Callee),
     	recordz(callee,Callee),
-    	forall(
-    		pef_call_query([predicate=Callee,goal=Goal, cx=Cx]),
-    		(	cx_predicate(Cx,Caller),
-    			pdt_fp_enqueue(find_literals(Goal,Cx),literals(predicate(Caller)))
-    		)    	
-    	)
+    	(	granularity(predicate)
+    	->	forall(
+	    		pef_call_query([predicate=Callee,goal=Goal, cx=Cx]),
+	    		(	cx_predicate(Cx,Caller),    		
+	    			pdt_fp_enqueue(find_literals(Goal,Cx),literals(full,predicate(Caller)))
+	    		)    	
+	    	)
+		;	forall(
+	    		pef_call_query([predicate=Callee,goal=Goal, cx=Cx]),
+	    		(	cx_toplevel(Cx,CallerTl),
+	    			pef_toplevel_query([id=CallerTl,file=CallerFile]),
+	    			get_pef_file(CallerPath,CallerFile),    		
+	    			pdt_fp_enqueue(find_literals(Goal,Cx),literals(full,file(CallerPath)))
+	    		)    	
+	    	)
+	    )	    	
     ;	true
     ).
     

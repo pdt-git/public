@@ -223,10 +223,7 @@ fp_build_target(Target):-
 
 pdt_fp_enqueue(Job,TargetName):-    
     target_key(TargetName,Target),
-    (	\+ '$fp_building_target'(Target)
-    ->	client_log(Target,ignore_not_building(Job)),
-    	true
-    ;	fp_job_in_queue(Job)
+    (	'$fp_queue'(Job,Target)
     -> 	client_log(Target,ignore_already_enqueued(Job))  	
     ;	fp_enqueue(Job,Target)
     ).
@@ -403,7 +400,8 @@ push_target(Target):-
     asserta('$building'(Target)).
 
 pop_target:-
-    retract('$building'(_)).
+    retract('$building'(_)),
+    !.
 
 building_target(Target):-
     '$building'(Target),

@@ -73,8 +73,10 @@ public class ImageRepository {
 	public final static String SORT = "alphab_sort_co.gif";
 	
     public final static String PE_PUBLIC = "public_co.gif";
+    public final static String VERIFIED_MATCH = "public_co.gif";
 
     public final static String PE_HIDDEN = "protected_co.gif";
+    public final static String POTENTIAL_MATCH = "protected_co.gif";
 
     public final static String PE_MULTIFILE = "multifile.gif";
 
@@ -88,11 +90,15 @@ public class ImageRepository {
 
     private static HashMap cache = new HashMap();
 
+	
+
     public static final String PE_ATOM = "atom.gif";
 
 	public static final String BREAK = "break.gif";
 
 	public static final String RESTART = "restart.gif";
+
+	public static final String UNRESOLVED_PRED_MATCH = "private_co.gif";
 
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PDTPlugin.getDefault().getBundle().getEntry("/icons/" + icon);

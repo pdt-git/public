@@ -8,6 +8,7 @@ import org.eclipse.core.resources.IFile;
 public class PredicateElement {
 	public IFile file;
 	public String label;
+	public String type;
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof PredicateElement){
