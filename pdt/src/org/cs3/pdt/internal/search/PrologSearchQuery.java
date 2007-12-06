@@ -73,7 +73,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.Match;
 
 public class PrologSearchQuery implements ISearchQuery {
 
@@ -103,7 +102,6 @@ public class PrologSearchQuery implements ISearchQuery {
 			return new Status(Status.ERROR,PDT.PLUGIN_ID,42,"Exception caught during search.",t);
 		}
 	}
-
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
 			BadLocationException, IOException, PrologException, PrologInterfaceException {
 		result.removeAll();
@@ -120,7 +118,7 @@ public class PrologSearchQuery implements ISearchQuery {
 			String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
 			
 			String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
-			+ "pdt_predicate_reference(Pred,File,Start,End,Caller)";
+			+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
 			List l=null;
 			try{
 				session=pif.getSession();
@@ -136,7 +134,15 @@ public class PrologSearchQuery implements ISearchQuery {
 				
 				int start = Integer.parseInt((String) m.get("Start"));
 				int end = Integer.parseInt((String) m.get("End"));
-				IFile file = PDTCoreUtils.findFileForLocation((String) m.get("File"));
+				IFile file=null;
+				try{
+					file = PDTCoreUtils.findFileForLocation((String) m.get("File"));
+				}catch(IllegalArgumentException iae){
+					//probably the file is not in the workspace. 
+					//nothing to worry about here.
+					Debug.report(iae);
+					continue;
+				}
 				
 				IRegion resultRegion = new Region(start,end-start);
 				
@@ -146,11 +152,16 @@ public class PrologSearchQuery implements ISearchQuery {
 					UIUtils.setStatusErrorMessage(msg);
 					continue;
 				}
+				String type = (String)m.get("Type");
 				PredicateElement pe = new PredicateElement();
 				pe.file=file;
 				pe.label=(String) m.get("Caller");
-				Match match = new Match(pe, resultRegion
+				pe.type=type;
+				
+				PrologMatch match = new PrologMatch(pe, resultRegion
 						.getOffset(), resultRegion.getLength());
+				
+				match.type=type;
 				result.addMatch(match);
 								
 			}

@@ -1,7 +1,7 @@
 :- module(pdt_find_declaration,
 	[	pdt_resolve_predicate/5,
 		pdt_predicate_contribution/4,
-		pdt_predicate_reference/5
+		pdt_predicate_reference/6
 	]).
 
 
@@ -9,6 +9,7 @@
 :-use_module(library('pef/pef_api')).
 :-use_module(library('util/ast_util')).
 :-use_module(library('builder/builder')).
+:-use_module(library('builder/targets/literals')).
 
 
 
@@ -63,15 +64,18 @@ pdt_predicate_contribution(PredId,File,Start,End):-
 	get_pef_file(File,FID).
 
 
-pdt_predicate_reference(Pred,File,Start,End,CModule:CName/CArity):-
-	pef_predicate_query([id=Pred,name=Name]),
+
+
+	 
+pdt_predicate_reference(Pred,File,Start,End,Element,Type):-
+	pef_predicate_query([id=Pred,name=Name,arity=Arity]),
 	% make sure already existing call edges are up to date
 	(	literals:granularity(predicate)
 	->	forall(
 			pef_call_query([predicate=Pred,cx=Cx]),
 			(	literals:cx_predicate(Cx,Caller),
 				pef_predicate_query([id=Caller,name=CName, arity=CArity]),
-				pdt_request_target(literals(predicate(CName/CArity)))
+				pdt_request_target(literals(full,predicate(CName/CArity)))
 			)
 		)
 	;	forall(
@@ -79,22 +83,48 @@ pdt_predicate_reference(Pred,File,Start,End,CModule:CName/CArity):-
 			(	literals:cx_toplevel(Cx,Tl),
 				pef_toplevel_query([id=Tl,file=FID]),
 				get_pef_file(PATH,FID),
-				pdt_request_target(literals(file(PATH)))
+				pdt_request_target(literals(full,file(PATH)))
 			)
 		)
 	),
 	% make sure all clauses containing the functor symbol are up to date
-	pdt_request_target(inverse_search(Name)),
+	pdt_request_target(inverse_search(full,Name)),
 	
-	% Now, finally, lookup the calls.
-	pef_call_query([predicate=Pred,goal=Goal,cx=Cx]),
-	literals:cx_predicate(Cx,Caller),
-	pef_predicate_query([id=Caller,name=CName, arity=CArity,module=CMID]),
-	module_name(CMID,CModule),
+	% Now, finally, lookup the references.
+	% start by finding all textual references, then categorize them into
+	% a) calls to the given predicate
+	% b) calls to another predicate
+	% c) references to predicates that cannot be resolved
+	% c) functor references, i.e. it does not look like the matching term constitutes a call.
+	pef_term_query([name=Name,arity=Arity,id=Goal]),	
 	pef_property_query([pef=Goal,key=start,value=Start]),
 	pef_property_query([pef=Goal,key=end,value=End]),
 	ast_toplevel(Goal,Tl),
 	pef_toplevel_query([id=Tl,file=FID]),
-	get_pef_file(File,FID).
-	 
-			
+		get_pef_file(File,FID),
+		
+	(	pef_call_query([predicate=Callee,goal=Goal,cx=Cx])
+	->	(	Callee==Pred -> Type=this_pred_ref; Type=other_pred_ref ),
+		literals:cx_predicate(Cx,Caller),
+		pef_predicate_query([id=Caller,name=CName, arity=CArity,module=CMID]),
+		module_name(CMID,CModule),
+		Element=CModule:CName/CArity
+	;	(	pef_unresolved_predicate_symbol_query([goal=Goal])
+		->	Type=unresolved_pred_ref
+		;	Type=functor_ref
+		),		
+		ast_root(Tl,Root),
+		ast_head_body(Root,Module,Head,_),
+		(	Head == []
+		->	Element=directive(Tl)
+		;	ast_functor(Head,CName,CArity),
+			(	Module == []
+			->	(	pef_module_definition_query([file=FID,name=CModule])
+				->	true
+				;	CModule=user
+				)
+			;	ast_apply(Module,_,CModule)
+			),
+			Element=CModule:CName/CArity
+		)
+	).

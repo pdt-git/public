@@ -17,7 +17,7 @@ syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
 problems:kind(cheap,Path,parse(Path)).
 problems:kind(cheap,Path,singletons(Path)).
 problems:kind(expensive,Path,interprete(Path)).
-%problems:kind(expensive,Path,literals(file(Path))).
+problems:kind(expensive,Path,literals(first,file(Path))).
 
 sum(Times,Brutto):-
 	sum(Times,0,Brutto).

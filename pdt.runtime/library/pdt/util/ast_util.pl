@@ -111,7 +111,7 @@ ast_equivalent_args(0,_A,_B):-!.
 ast_equivalent_args(I,A,B):-
     ast_arg(I,A,AA),
     ast_arg(I,B,BB),
-    ast_eqivalent(AA,BB),
+    ast_equivalent(AA,BB),
     J is I -1,
     ast_equivalent_args(J,A,B). 
     
