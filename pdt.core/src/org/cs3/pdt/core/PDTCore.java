@@ -121,12 +121,14 @@ public class PDTCore {
 	public static final String ENGINE_ID = "pdt.core.library";
 
 	public static final String PROP_METADATA_PIF_KEY = "pdt.metadata.pif_key";
+	public static final String PROP_ENTRY_POINTS = "pdt.entry_points";
 	public static final String PROP_RUNTIME_PIF_KEY = "pdt.runtime.pif_key";
 	public static final String PROP_PARSE_COMMENTS = "pdt.parse_comments";
 	public static final String PROP_ADDITIONAL_LIBRARIES = "pdt.additional_libraries";
 	public static final String PROP_DEFAULT_ENCODING = "pdt.default_encoding";
 	public static final String PREF_METADATA_PIF_KEY_DEFAULT = "pdt.metadata.pif_key.default";
 	public static final String PREF_RUNTIME_PIF_KEY_DEFAULT = "pdt.runtime.pif_key.default";
+	//public static final String PREF_ENTRY_POINTS_DEFAULT = "pdt.entry_points.default";
 	public static final String PREF_CONVERT_CHARACTER_OFFSETS = "pdt.convert.character.offsets";
 	public static final String PREF_IGNORE_HIDDEN_LIBS = "pdt.ignore.hidden.libs";
 
@@ -152,8 +154,18 @@ public class PDTCore {
 
 	public static final int CX_CHECK_PROJECTS = -6;
 	public static final int CX_UPDATE_MARKERS = -7;
-
+	public static final int CX_TOGGLE_ENTRY_POINT = -8;
+	
 	public static final String PROBLEM = "org.cs3.pdt.core.problem";
+
+
+	
+
+
+	
+
+
+	
 
 
 	

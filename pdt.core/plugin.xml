@@ -79,6 +79,18 @@
                style="toggle"
                tooltip="If checked, the fodler is included in the source lookup path"/>
       </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="pdt.core.EntryPointContribution"
+            objectClass="org.eclipse.core.resources.IFile">
+         <action
+               class="org.cs3.pdt.core.internal.actions.ToggleEntryPointAction"
+               id="pdt.core.toggle_entry_point.action"
+               label="Mark as Entry Point"
+               style="toggle"
+               tooltip="If checked, the file is considered as a &quot;main&quot; file.">
+         </action>
+      </objectContribution>
 
  </extension>	
  <extension
@@ -151,7 +163,7 @@
            class="org.cs3.pdt.core.internal.decorators.SourcePathDecorator"
            icon="icons/sample_decorator.gif"
            id="org.cs3.pdt.core.sourcepath.decorator"
-           label="Resource Decorator"
+           label="Prolog Source Path Decorator"
            lightweight="true"
            location="TOP_RIGHT"
            objectClass="org.eclipse.core.resources.IContainer"
@@ -164,6 +176,22 @@
                  <objectClass name="org.eclipse.core.resources.IFile"/>
               </or>
            </and>
+        </enablement>
+     </decorator>
+     <decorator
+           adaptable="true"
+           class="org.cs3.pdt.core.internal.decorators.EntryPointDecorator"
+           icon="icons/sample_decorator.gif"
+           id="org.cs3.pdt.core.entrypoints.decorator"
+           label="Prolog Entry Points Decorator"
+           lightweight="true"
+           location="TOP_RIGHT"
+           objectClass="org.eclipse.core.resources.IFile"
+           state="true">
+        <enablement>
+           <objectClass
+                 name="org.eclipse.core.resources.IFile">
+           </objectClass>
         </enablement>
      </decorator>
   </extension>

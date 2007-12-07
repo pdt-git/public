@@ -74,6 +74,15 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
     public Set getExistingSourcePathEntries() throws CoreException;
     
     /**
+     * parses the current value of the entry points property and returns
+     * a Set containing IFile objects that represent the
+     * entry points that actually exit
+     * @return
+     * @throws CoreException
+     */
+    public Set<IFile> getExistingEntryPoints() throws CoreException;
+    
+    /**
      * Checks if the given resource is part of the prolog  source.
      * <p>
      * A folder is regarded as part of the source tree if it exists and is either

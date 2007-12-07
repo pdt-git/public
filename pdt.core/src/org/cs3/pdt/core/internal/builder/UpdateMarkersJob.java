@@ -217,6 +217,9 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		if (buildMonitor == null) {
 			return;
 		}
+		if("expensive".equals(tag)){
+			System.out.println(e.getSubject()+" <-- "+e.getEvent());
+		}
 	/*	if (!e.getSubject().equals("builder(problems(workspace))")) {			
 			return;
 		}
@@ -225,7 +228,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			buildMonitor.done();
 			return;
 		}
-			
+		
 		CTerm term = PLUtil.createCTerm(e.getEvent());
 		if(!(term instanceof CCompound)){
 			Debug.warning("wunder, wunder: term ist kein Compound:"+e.getEvent());
