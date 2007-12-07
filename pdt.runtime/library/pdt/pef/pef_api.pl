@@ -269,8 +269,36 @@ first_clause(FID, PID, PredID,Clause):-
 	pef_predicate_query([id=PredID,module=MID]),
 	pef_program_module_query([program=PID,module=MID]),
 	!.
+  
+  
+file_depends_star(T1,T2):-
+    gensym('$visited',V),
+    dynamic( V/1),    
+    (	nonvar(T1)
+	->	call_cleanup(file_depends_star_X(T1,T2,V),abolish(V/1))		
+	;	call_cleanup(file_depends_star_X_inv(T2,T1,V),abolish(V/1))
+	).
+
+file_depends_star_X(T1,T3,V):-
+	VV=..[V,T1],
+	\+ VV,
+	assert(VV),
+	(	T1=T3
+	;	file_depends(T1,T2),		
+		file_depends_star_X(T2,T3,V)
+	).
+
+file_depends_star_X_inv(T1,T3,V):-
+	VV=..[V,T1],
+	\+ VV,
+	assert(VV),
+	(	T1=T3
+	;	file_depends_inv(T1,T2),	 	
+		file_depends_star_X_inv(T2,T3,V)
+	).
+
     
-    
+/*    
 file_depends_star(D,D).
 file_depends_star(A,C):-
     nonvar(A),
@@ -282,9 +310,12 @@ file_depends_star(A,C):-
     !,
     file_depends(B,C),
     file_depends_star(A,B).
-    
+ */  
 file_depends(A,B):-
 	pef_file_dependency_query([depending=A,dependency=B]).   
+
+file_depends_inv(A,B):-
+	file_depends(B,A).   
 
 
     

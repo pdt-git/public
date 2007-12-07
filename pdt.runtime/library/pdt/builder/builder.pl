@@ -180,8 +180,7 @@ fp_request_target(Target):-
     ;	Msg==implied(Target)
     ->	true 		    
     ;	Msg==rebuild(Target)
-    ->  spyme,
-    	fp_build_target(Target)
+    ->  fp_build_target(Target)
     ;	Msg=error(Target,E)
     ->	throw(error(target_error(Target,E)))
     ;	Msg=obsolete(Target,Targets)
@@ -254,7 +253,6 @@ fp_run(Target):-
 	!,
 	client_log(Target,not_starting__queue_empty),
 	thread_self(Me),	
-    spyme,    
     forall(
     	retract('$fp_building_target'(Target2)),
     	(	client_log(Target2,removed_from_building),
@@ -282,8 +280,7 @@ fp_run__loop(Target):-
 			)
 		),		
     	fp_done,
-    !,
-    spyme,
+    !,   
     client_log(Target,finished_fp_iteration).
     
 fp_done:-
@@ -1214,10 +1211,11 @@ progress_report_prepare_X([step(S,W)|Steps],Target,Sum0,Sum):-
 
 
 progress_report_worked(SubTarget):-
+    
 	forall(
 		'$progress_subproblem'(SubTarget,Target,W),
 		
-		(	spyme,
+		(	
 			target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
 			pif_notify(builder(TargetName),worked(W))
 		)
@@ -1237,3 +1235,4 @@ progress_report_cleanup(Target):-
 dump(Data):-
     forall(dump_hook(Data),true).
 
+:- tspy(pdt_builder:spyme).
