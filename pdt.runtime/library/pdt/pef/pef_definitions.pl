@@ -442,6 +442,14 @@
 ).
 
 :- define_pef(
+	pef_entry_point(
+		project:pef_project,
+		path @index
+	) 
+).
+
+
+:- define_pef(
 	pef_project(
 		id,
 		name @index

@@ -2,7 +2,9 @@
 	pdt_file_contents_changed/1,
 	pdt_file_existence_changed/1,
 	pdt_add_source_path/4,
+	pdt_add_entry_point/2,
 	pdt_remove_source_path/2,
+	pdt_remove_entry_point/2,
 	pdt_contains_star/2,
 	pdt_belongs_to_star/2,
 	pdt_contains/2,
@@ -119,4 +121,23 @@ pdt_add_source_path(Project,Path,Include,Exclude):-
     ;	assert(file_search_path(library,Path))
     ),
     pdt_invalidate_target(project(Project)).
-    
+
+
+pdt_add_entry_point(Project,Path):-
+    (	pef_project_query([name=Project,id=PRJID])
+	->	true
+	;	pef_reserve_id(pef_project,PRJID),
+		pef_project_assert([id=PRJID,name=Project])
+	),	
+	(	pef_entry_point_query([path=Path,project=PRJID])
+	->	true
+	;	pef_entry_point_assert([path=Path,project=PRJID])
+	),
+	pdt_invalidate_target(project(Project)).
+pdt_remove_entry_point(Project,Path):-    
+	(	pef_project_query([name=Project,id=PRJID])
+	->	pef_entry_point_retractall([project=PRJID,path=Path]),
+		pdt_invalidate_target(project(Project))
+	;	true
+	).
+	
