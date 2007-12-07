@@ -260,6 +260,30 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see org.cs3.pdt.IPrologProject#getExistingSourcePathEntries()
+	 */
+	public Set<IFile> getExistingEntryPoints() throws CoreException {
+		Set<IFile> r = new HashSet<IFile>();
+		String[] elms = getPreferenceValue(PDTCore.PROP_ENTRY_POINTS, "")
+				.split(System.getProperty("path.separator"));
+		for (int i = 0; i < elms.length; i++) {
+			if(elms[i]==null||elms[i].isEmpty()){
+				continue;
+			}
+			IProject p = getProject();
+
+			IFile folder = p.getFile(elms[i]);
+			if (folder.exists()) {
+				r.add(folder);
+			}
+
+		}
+		return r;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.cs3.pdt.IPrologProject#isPrologSource(org.eclipse.core.resources.IResource)
 	 */
 	public boolean isPrologSource(IResource resource) throws CoreException {
@@ -449,6 +473,24 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Additional Libraries",
 							"A list of directories that should be included in the file search path.",
 							Option.DIRS, ""),
+					new SimpleOption(PDTCore.PROP_ENTRY_POINTS,
+							"Program Entry Points", "List of 'main' files",
+							Option.FILES, "") {
+
+						public String getHint(String key) {
+							if (UIUtils.IS_WORKSPACE_RESOURCE.equals(key)) {
+								return "true";
+							}
+							if (UIUtils.ROOT_CONTAINER.equals(key)) {
+								return getProject().getFullPath()
+										.toPortableString();
+							}
+							if (UIUtils.RELATIVE.equals(key)) {
+								return "true";
+							}
+							return null;
+						}
+					},
 					new SimpleOption(
 							PDTCore.PROP_PARSE_COMMENTS,
 							"Parse Comments",
@@ -507,13 +549,21 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		String exclude = getPreferenceValue(
 				PDTCore.PROP_SOURCE_EXCLUSION_PATTERN, "");
 		String projectName = getProject().getName();
-		
-		Set<IContainer> sourcePathEntries = getExistingSourcePathEntries();		
+
+		Set<IContainer> sourcePathEntries = getExistingSourcePathEntries();
 		for (IContainer entry : sourcePathEntries) {
 			File osPath = entry.getLocation().toFile();
 			String plPath = Util.prologFileName(osPath);
 			initSession.queryOnce("pdt_add_source_path('" + projectName + "','"
 					+ plPath + "','" + include + "','" + exclude + "')");
+		}
+
+		Set<IFile> entryPoints = getExistingEntryPoints();
+		for (IFile entry : entryPoints) {
+			File osPath = entry.getLocation().toFile();
+			String plPath = Util.prologFileName(osPath);
+			initSession.queryOnce("pdt_add_entry_point('" + projectName + "','"
+					+ plPath + "')");
 		}
 	}
 
@@ -523,12 +573,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 				try {
 
 					PrologInterface pif = getMetadataPrologInterface();
-					PrologSession s =null;
-					try{
-						s=pif.getSession();
+					PrologSession s = null;
+					try {
+						s = pif.getSession();
 						updateBuildPath(s);
-					}finally{
-						if(s!=null){
+					} finally {
+						if (s != null) {
 							s.dispose();
 						}
 					}
@@ -793,16 +843,17 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private static class Mutex implements ISchedulingRule {
-	      public boolean isConflicting(ISchedulingRule rule) {
-	         return rule == this;
-	      }
-	      public boolean contains(ISchedulingRule rule) {
-	         return rule == this;
-	      }
-	   }
-	
+		public boolean isConflicting(ISchedulingRule rule) {
+			return rule == this;
+		}
+
+		public boolean contains(ISchedulingRule rule) {
+			return rule == this;
+		}
+	}
+
 	private static Mutex mux = new Mutex();
-	
+
 	public void updateMarkers() throws CoreException {
 		// if (updatingMarkers) {
 		// return;
@@ -810,29 +861,30 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		updatingMarkers = true;
 		getProject().deleteMarkers(PDTCore.PROBLEM, true,
 				IResource.DEPTH_INFINITE);
-		
-		UpdateMarkersJob job = new UpdateMarkersJob(this, "cheap", new Runnable() {
 
-			public void run() {
-				;
+		UpdateMarkersJob job = new UpdateMarkersJob(this, "cheap",
+				new Runnable() {
 
-			}
-		});
+					public void run() {
+						;
+
+					}
+				});
 		job.setPriority(Job.INTERACTIVE);
 		job.setRule(mux);
 		job.schedule();
-		
-		job=new UpdateMarkersJob(this, "expensive", new Runnable() {
+
+		job = new UpdateMarkersJob(this, "expensive", new Runnable() {
 
 			public void run() {
-				updatingMarkers=false;
+				updatingMarkers = false;
 
 			}
 		});
 		job.setPriority(Job.BUILD);
 		job.setRule(mux);
 		job.schedule();
-		
+
 	}
 
 }

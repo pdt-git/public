@@ -66,6 +66,8 @@ public class ImageRepository {
 	
 	public final static String SOURCEPATH_DECORATION = "sample_decorator.gif";
 
+	public static final String ENTRYPOINT_DECORATION = "sample_decorator.gif";
+
 	
     public static final ImageDescriptor getImageDescriptor(String icon) {
         URL url = PDTCorePlugin.getDefault().getBundle().getEntry("/icons/" + icon);
