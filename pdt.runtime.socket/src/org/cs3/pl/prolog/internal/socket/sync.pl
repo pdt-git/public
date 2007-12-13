@@ -94,6 +94,7 @@
 %    rollback/0,
 %    rollback/1,
 %    depends/2
+	increment_snapshot_count/1
   ]).
   
 /**
@@ -232,11 +233,25 @@ transact(ThreadID, Op, Term) :-
 
 internal_commit(ThreadID) :- 
   debug(sync,'COMMIT~n',[]),
+  increment_snapshot_count(NewSnapshotCount),
+  debug(sync,'new snapshot count ~n',[NewSnapshotCount]),
   forall(edb_local(ThreadID, Term, Op), 
          transact(ThreadID, Op, Term)),
   findall((Subject),(depends_local(Subject),
          notify_if_predicate_updated(Subject)),_),
   retractall(depends_local(_)).
+
+:- dynamic snapshot_count/1.
+
+increment_snapshot_count(NewSnapshotNumber) :-
+  snapshot_count(SnapshotNumber),
+  deleteAll(sync:snapshot_count(_)),
+  plus(SnapshotNumber,1,NewSnapshotNumber),
+  add(sync:snapshot_count(NewSnapshotNumber)),
+  !.
+increment_snapshot_count(NewSnapshotNumber) :-
+  add(sync:snapshot_count(1)).
+
     
 /**
  * notify_if_predicate_updated(+Signature)    
@@ -264,6 +279,7 @@ notify_if_predicate_updated(_Subject).
    Faktenbasis uebernommen.
 */
 commit :- 
+  
   thread_self(ThreadID), 
   with_mutex(readwrite, internal_commit(ThreadID)). 
   
