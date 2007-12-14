@@ -1,0 +1,138 @@
+<project name="Run automated Tests" default="run" basedir=".">
+	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="../pluginbuilder-anttasks.jar" />
+	<typedef resource="org/pluginbuilder/anttasks/pluginbuildertypes.properties" classpath="../pluginbuilder-anttasks.jar" />
+	
+	<property file="../../build_local.properties" />
+	<property file="run-tests.properties" />
+
+	<import file="../build_shared.xml" />
+
+	<target name="-init">
+		<antcall target="-purgeTestEclipseHost" />
+		<property name="eclipse.installation.dir" value="${test.eclipse.base}/eclipse" />
+		<property name="eclipse.local.tar.non.server" value="${test.eclipse.zip}" />
+		<antcall target="-installTestEclipseHost" />
+	</target>
+
+	<target name="-purgeTestEclipseHost">
+		<delete dir="${test.eclipse.base}" failOnError="false" />
+	</target>
+
+	<target name="-installTestEclipseHost" description="Install Eclipse and all required plug-ins for testing" unless="isEclipseInstallationAvailable">
+		<echo message="Installing plug-ins for testing" />
+		
+		<unzip dest="${test.eclipse.base}">
+			<fileset dir="." includes="eclipse-test-framework*.zip" />
+		</unzip>
+		<unzip dest="${test.eclipse.host}">
+			<fileset dir="." includes="org.pluginbuilder.autotestsuite*.zip" />
+		</unzip>
+		<condition property="buildResultZipDest" value="${test.eclipse.base}" else="${test.eclipse.host}">
+			<equals arg1="${archivePrefix}" arg2="eclipse" />
+		</condition>
+		<unzip dest="${buildResultZipDest}">
+			<fileset dir="${buildDirectory}" includes="${buildType}-**/*.zip" excludes="**/${archiveNamePrefix}-*"/>
+		</unzip>
+		<!-- unpack eclipse after the features because there might be product features extracted which contain a config.ini -->
+	 	<antcall target="unpack.eclipse">
+			<param name="unpack.eclipse" value="true"/>
+		</antcall>
+	</target>
+
+
+	<!-- Example target which demonstrates how to run a test suite with the Eclipse test fwk.
+		Note that it is not needed if you use the autotestsuite
+	
+	<target name="-runTestSuite" description="Should be called from allTests.xml only">
+		<ant target="ui-test" antfile="${test.library.xml}" dir="${test.eclipse.host}">
+			<comment use -clean because plug-ins have been unzipped into the eclipse folder comment>
+			<property name="data-dir" value="${test.workspace} -clean" />
+    		<property name="plugin-name" value="<your plugin id>" />
+    		<property name="classname" value="<the class which defines the suite>" />
+			<property name="eclipse-home" value="${test.eclipse.host}" />
+		</ant>
+	</target>
+	
+	<target name="run" depends="-init,-runTestSuite" description="Run manually defined tests and create a report.">
+		<delete dir="${test.result.dir}" />
+		<mkdir dir="${test.result.dir}/xml" />
+		<comment collect creates an aggregated report file in ${test.eclipse.host} comment>
+		<ant target="collect" antfile="${test.library.xml}" dir="${test.eclipse.host}">
+			<property name="includes" value="*.xml" />
+			<property name="output-file" value="${test.aggregated.report}" />
+		</ant>
+		<copy file="${test.eclipse.host}/${test.aggregated.report}" todir="${test.result.dir}/xml" />
+		<style style="${basedir}/JUNIT.XSL" basedir="${test.result.dir}/xml" destdir="${test.result.dir}/html" />
+
+	</target>
+	-->
+	
+	<target name="run" depends="-init,-runAutoTests" description="Run all tests using the autotestsuite and create xml and html reports.">
+
+		<junitreport todir="${test.result.dir}/xml" tofile="${test.aggregated.report}">
+			<fileset dir="${test.result.dir}/xml">
+				<include name="*.xml" />
+			</fileset>
+		</junitreport>
+
+		<BundleFileLocator eclipseInstallationRoot="${test.eclipse.host}" bundleId="org.pluginbuilder.autotestsuite.application" filePath="JUNIT.XSL" property="junit.xsl.file" />
+
+		<style style="${junit.xsl.file}" basedir="${test.result.dir}/xml" includes="${test.aggregated.report}" destdir="${test.result.dir}/html" />
+		<antcall target="checkTestResultFileForErrors"/>
+	</target>
+	
+	<target name="-markErrorOrFailure" if="isErrorOrFailure">
+		<!-- Write Message to stderr and continue build, do not call fail and let the
+		     build continue, e.g. packaging might take place after test execution -->
+		<echo level="error" message="TESTS FAILED"/>
+	</target>
+	
+	<target name="checkTestResultFileForErrors" unless="isErrorOrFailure">
+		<!-- the result coming from the eclipse test process is not reliable: 
+		 it can be 0 even if the suite has errors or failures.
+	     Therefore we check the test result file for errors if the result is 0.
+	     Many thanks to Bernd Kolb/openArchitectureWare for contributing the 
+	     hasErrorOrFailure task -->
+		
+		<echo message="Checke auf Fehler: ${test.aggregated.report}"/>
+
+        <condition property="isErrorOrFailure">
+                <hasErrorOrFailure reportFile="${test.result.dir}/xml/${test.aggregated.report}" />
+        </condition>
+
+        <antcall target="-markErrorOrFailure" />        
+	</target>
+
+	<target name="-runAutoTests">
+		<mkdir dir="${test.result.dir}/xml"/>
+		<java fork="true" dir="." logError="true" classname="org.eclipse.core.launcher.Main" resultproperty="autotestsuite.result"> 
+			<classpath>
+				<fileset dir="${test.eclipse.host}/plugins">
+					<include name="org.eclipse.equinox.launcher_*.jar" />
+				</fileset>
+			</classpath>
+			<arg line="-application org.pluginbuilder.autotestsuite.application.autotestapplication" />
+			<arg line="-data ${test.workspace}" />
+			<arg line="-os ${os}" />
+			<arg line="-ws ${ws}" />
+			<arg line="-arch ${arch}" />
+			<arg line="-consolelog" />
+
+			<sysproperty key="autotestsuite.results.directory" value="${test.result.dir}/xml" />
+			<sysproperty key="autotest.debug" value="${autotestsuite.trace}" />
+			<sysproperty key="autotestsuite.plugin.inclusions" value="${autotestsuite.plugin.inclusions}" />
+			<sysproperty key="autotestsuite.plugin.exclusions" value="${autotestsuite.plugin.exclusions}|^org.eclipse.test$" />
+			<sysproperty key="autotestsuite.class.inclusions" value="${autotestsuite.class.inclusions}" />
+			<sysproperty key="autotestsuite.class.exclusions" value="${autotestsuite.class.exclusions}" />
+
+		</java>
+		<condition property="isErrorOrFailure">
+			<not>
+				<equals arg1="${autotestsuite.result}" arg2="0"/>
+			</not>
+		</condition>
+
+		<antcall target="-markErrorOrFailure"/>
+	</target>
+
+</project>
