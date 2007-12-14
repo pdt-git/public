@@ -1,0 +1,50 @@
+<project name="Run as part of postBuild" default="main">
+    
+    <target name="main">
+        <property name="UpdateSiteStagingLocation" value="${buildResultsDirectory}/../updateSite"/>
+        <antcall target="-generateUpdateSite"/>
+    </target>
+    
+    <!--======================================================-->
+    <!-- UpdateSite Export target, to be called from allElements  -->
+    <!-- ==================================================== -->
+    <target name="updateSiteExport">
+        <ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
+            <property name="feature.destination" value="${UpdateSiteStagingLocation}/features"/>
+            <property name="plugin.destination" value="${UpdateSiteStagingLocation}/plugins"/>
+        </ant>
+    </target>
+    
+    <target name="-generateUpdateSite">
+        <!-- Create the directory structure -->
+        <mkdir dir="${UpdateSiteStagingLocation}"/>
+        <mkdir dir="${UpdateSiteStagingLocation}/features"/>
+        <mkdir dir="${UpdateSiteStagingLocation}/plugins"/>
+    	<condition property="jarProcessor.sign" value="true">
+    		<istrue value="${signJars}"/>
+    	</condition>
+        <!-- Build the jar files -->
+        <ant antfile="${builder}/customTargets.xml" target="allElements">
+            <property name="genericTargets" value="${builder}/postBuild.xml"/>
+            <property name="target" value="updateSiteExport"/>
+        </ant>
+        <!-- site.xml files for integration and release builds are handled elsewhere -->
+        <antcall target="-createNightlyBuildSiteXml"/>
+        <delete dir="${buildDirectory}/temp.updatesite"/>
+    </target>
+	
+    <!-- replace at least yourFeature, categoryName and categoryDef --> 
+    <target name="-createNightlyBuildSiteXml" if="isNightlyBuild">
+        <echo file="${UpdateSiteStagingLocation}/site.xml">&lt;?xml
+            version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+            &lt;site&gt; &lt;description&gt; Description. &lt;/description&gt; &lt;feature
+            url=&quot;features/yourFeature_${version.full}.jar&quot;
+            id=&quot;yourFeature&quot;
+            version=&quot;${version.full}&quot;&gt; &lt;category
+            name=&quot;categoryName&quot;/&gt; &lt;/feature&gt;
+            &lt;category-def name=&quot;categoryDef&quot;
+            label=&quot;Your Builds&quot;&gt; &lt;/category-def&gt;
+            &lt;/site&gt; </echo>
+    </target>
+    
+</project>

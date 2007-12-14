@@ -1,0 +1,8 @@
+feature@PDTFeature=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.feature
+plugin@org.cs3.pdt.common.ui=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.common.ui
+plugin@org.cs3.pdt=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt
+plugin@org.cs3.pdt.common=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.common
+plugin@org.cs3.pdt.console=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.console
+plugin@org.cs3.pdt.core=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.core
+plugin@org.cs3.pdt.runtime=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.runtime
+fragment@org.cs3.pdt.runtime.socket=COPY,L:/Work/cruisecontrol/checkout/pdt/trunk,pdt.runtime.socket
