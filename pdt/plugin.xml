@@ -31,7 +31,6 @@
       <import plugin="org.cs3.pdt.runtime"/>
       <import plugin="org.cs3.pdt.console"/>
       <import plugin="org.cs3.pdt.common.ui"/>
-      <import plugin="org.pluginbuilder.autotestsuite"/>    
    </requires>
    
    <extension
