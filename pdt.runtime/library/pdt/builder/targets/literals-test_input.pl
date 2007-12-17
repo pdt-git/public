@@ -12,3 +12,4 @@ why_oh_why:-test2([b(3),kjh,b(5),writeln(stop)]).
 
 test2([]).
 test2([C|Cs]):-C,test2(Cs).
+p(A).
