@@ -263,25 +263,8 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 		}
 
 		options = new Option[] {
-				new SimpleOption(
-						PDTCore.PREF_METADATA_ENGINE_DIR,
-						"Metadata Engine Dir",
-						"Directory containing the prolog implementation of the meta data engine,",
-						Option.DIR, location + fileSep + "engine") {
-
-					public String validate(String value) {
-						return ensureDirExists(value, "Metadata Engine Dir");
-					}
-
-				},
-				new SimpleOption(PDTCore.PREF_METADATA_STORE_DIR,
-						"Metadata Store Dir",
-						"Directory used to store metadata for prolog files.",
-						Option.DIR, location + fileSep + "store") {
-					public String validate(String value) {
-						return ensureDirExists(value, "Metadata Store Dir");
-					}
-				},
+				
+				
 				new SimpleOption(
 						PDTCore.PREF_SOURCE_PATH_DEFAULT,
 						"Default Source Path",
@@ -296,7 +279,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 						PDTCore.PREF_RUNTIME_PIF_KEY_DEFAULT,
 						"Default Runtime PrologInterface",
 						"The default value for the Runtime PrologInterface property of prolog projects.",
-						Option.STRING, "%project%-runtime"),
+						Option.STRING, "%project%-PDT"),
 				new SimpleOption(
 						PDTCore.PREF_CONVERT_CHARACTER_OFFSETS,
 						"Convert character offsets",
