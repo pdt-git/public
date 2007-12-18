@@ -84,6 +84,11 @@ public class MetadataSubscription extends DefaultSubscription implements
 		super();
 	}
 
+	@Override
+	public boolean isVisible() {
+		return false;
+	}
+
 	public MetadataSubscription(String projectName, String id, String pifId) {
 
 		super(id, pifId, "used to store and process meta information on prolog"
@@ -158,9 +163,9 @@ public class MetadataSubscription extends DefaultSubscription implements
 		PLUtil.configureFileSearchPath(mgr, initSession,
 				new String[] { PDTCore.ENGINE_ID });
 		initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
-		
+
 		/* setup project source paths */
-		
+
 		try {
 			IPrologProject project = getPrologProject();
 			project.updateBuildPath(initSession);
@@ -170,7 +175,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 	}
 
 	public void afterInit(PrologInterface pif) {
-		
+
 		scheduleInitialBuild(pif);
 	}
 
@@ -216,12 +221,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 		return project;
 	}
 
-	private IPrologProject getPrologProject() throws CoreException{
+	private IPrologProject getPrologProject() throws CoreException {
 		IProject project = getProject();
 		return PDTCoreUtils.getPrologProject(project);
-		
+
 	}
-	
+
 	private IStatus runBuildJob(IProgressMonitor monitor) {
 		try {
 			Debug.debug("runBuildJob: job started");
