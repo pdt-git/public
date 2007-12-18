@@ -38,7 +38,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
-	
+
 	private final class _Listener extends DefaultAsyncPrologSessionListener {
 		HashSet<Object> problemIds = new HashSet<Object>();
 
@@ -57,7 +57,8 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 					markerMonitor = new SubProgressMonitor(monitor, 25,
 							SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 					int work = Integer.parseInt((String) m.get("Count"));
-					markerMonitor.beginTask("Creating Markers ("+tag+")", work);
+					markerMonitor.beginTask("Creating Markers (" + tag + ")",
+							work);
 				}
 				if (!problemIds.contains(id)) {
 					problemIds.add(id);
@@ -76,22 +77,30 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 				markerMonitor.done();
 			}
 		}
-		
+
 		@Override
 		public void goalFailed(AsyncPrologSessionEvent e) {
-			//UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Query failed: "+e.query));
+			// UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(),
+			// UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED,
+			// PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Query failed:
+			// "+e.query));
 		}
-		
+
 		@Override
 		public void goalRaisedException(AsyncPrologSessionEvent e) {
-			if("obsolete".equals(e.message)){
+			if ("obsolete".equals(e.message)) {
 				return;
 			}
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getActiveShell(), PDTCore.ERR_QUERY_FAILED, PDTCore.CX_UPDATE_MARKERS, new RuntimeException("Goal raised exception: "+e.message+"\n query: "+e.query +"\n ticket: "+e.ticket));
+			UIUtils
+					.logError(PDTCorePlugin.getDefault()
+							.getErrorMessageProvider(), PDTCore.ERR_QUERY_FAILED,
+							PDTCore.CX_UPDATE_MARKERS, new RuntimeException(
+									"Goal raised exception: " + e.message
+											+ "\n query: " + e.query
+											+ "\n ticket: " + e.ticket));
 		}
 	}
 
-	
 	private final IPrologProject plProject;
 	private IProgressMonitor monitor;
 	private IProgressMonitor buildMonitor;
@@ -104,33 +113,36 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		super("Updating Prolog Markers for project "
 				+ plProject.getProject().getName());
 		this.plProject = plProject;
-		this.tag=tag;
+		this.tag = tag;
 		this.finnish = finnish;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		this.monitor = monitor;
-		
 
 		try {
-			
+
 			IPrologEventDispatcher dispatcher = PrologRuntimePlugin
 					.getDefault().getPrologEventDispatcher(
 							plProject.getMetadataPrologInterface());
-			
-			dispatcher.addPrologInterfaceListener("builder(problems(workspace,'.'("+tag+",[])))", this);
+
+			dispatcher.addPrologInterfaceListener(
+					"builder(problems(workspace,'.'(" + tag + ",[])))", this);
 			PrologInterface2 pif = ((PrologInterface2) plProject
 					.getMetadataPrologInterface());
 			final AsyncPrologSession s = pif.getAsyncSession();
 			s.addBatchListener(new _Listener());
-			monitor.beginTask("updating "+this.tag+" "+s.getProcessorThreadAlias(), 100);
+			monitor.beginTask("updating " + this.tag + " "
+					+ s.getProcessorThreadAlias(), 100);
 			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-			//buildMonitor.beginTask("Searching for problems", files.size());
-			s.queryAll(
-							"update_markers",
-							"pdt_with_targets([problems(workspace,["+tag+"])],(pdt_problem_count("+tag+",Count),pdt_problem(Id,File,"+tag+",Start,End,Severity,Msg)))");
+			// buildMonitor.beginTask("Searching for problems", files.size());
+			s.queryAll("update_markers",
+					"pdt_with_targets([problems(workspace,[" + tag
+							+ "])],(pdt_problem_count(" + tag
+							+ ",Count),pdt_problem(Id,File," + tag
+							+ ",Start,End,Severity,Msg)))");
 			while (!s.isIdle()) {
 				if (UpdateMarkersJob.this.monitor.isCanceled()) {
 					try {
@@ -161,7 +173,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			return UIUtils.createErrorStatus(PDTCorePlugin.getDefault()
 					.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
 		} finally {
-			
+
 			finnish.run();
 		}
 		return new Status(IStatus.OK, PDTCore.PLUGIN_ID, "done");
@@ -217,39 +229,42 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		if (buildMonitor == null) {
 			return;
 		}
-		if("expensive".equals(tag)){
-			System.out.println(e.getSubject()+" <-- "+e.getEvent());
+		if ("expensive".equals(tag)) {
+			System.out.println(e.getSubject() + " <-- " + e.getEvent());
 		}
-	/*	if (!e.getSubject().equals("builder(problems(workspace))")) {			
-			return;
-		}
-		*/
+		/*
+		 * if (!e.getSubject().equals("builder(problems(workspace))")) { return; }
+		 */
 		if (e.getEvent().equals("done")) {
 			buildMonitor.done();
 			return;
 		}
-		
+
 		CTerm term = PLUtil.createCTerm(e.getEvent());
-		if(!(term instanceof CCompound)){
-			Debug.warning("wunder, wunder: term ist kein Compound:"+e.getEvent());
-			Debug.warning("Subject: " +e.getSubject()+" , Event: "+e.getEvent());
+		if (!(term instanceof CCompound)) {
+			Debug.warning("wunder, wunder: term ist kein Compound:"
+					+ e.getEvent());
+			Debug.warning("Subject: " + e.getSubject() + " , Event: "
+					+ e.getEvent());
 			return;
 		}
 		CCompound event = (CCompound) term;
 		CTerm argTerm = event.getArgument(0);
-		if(!(argTerm instanceof CInteger)){
-			Debug.warning("wunder, wunder: argterm ist kein Integer:"+PLUtil.renderTerm(argTerm));
-			Debug.warning("Subject: " +e.getSubject()+" , Event: \""+e.getEvent()+"\"");
+		if (!(argTerm instanceof CInteger)) {
+			Debug.warning("wunder, wunder: argterm ist kein Integer:"
+					+ PLUtil.renderTerm(argTerm));
+			Debug.warning("Subject: " + e.getSubject() + " , Event: \""
+					+ e.getEvent() + "\"");
 			return;
 		}
-		int arg = ((CInteger)argTerm).getIntValue();
+		int arg = ((CInteger) argTerm).getIntValue();
 		String functor = event.getFunctorValue();
-		//Debug.debug("progress: "+functor+", "+arg);
-		if(functor.equals("estimate")){
-			buildMonitor.beginTask("Searching for Problems ("+tag+")", arg);
+		// Debug.debug("progress: "+functor+", "+arg);
+		if (functor.equals("estimate")) {
+			buildMonitor.beginTask("Searching for Problems (" + tag + ")", arg);
 			return;
 		}
-		if(functor.equals("worked")){
+		if (functor.equals("worked")) {
 			buildMonitor.worked(arg);
 			return;
 		}
