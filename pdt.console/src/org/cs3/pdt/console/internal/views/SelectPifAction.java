@@ -44,11 +44,14 @@ package org.cs3.pdt.console.internal.views;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -64,8 +67,8 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 
-public abstract  class SelectPifAction extends Action implements IMenuCreator,
-		IWorkbenchWindowPulldownDelegate2{
+public abstract class SelectPifAction extends Action implements IMenuCreator,
+		IWorkbenchWindowPulldownDelegate2 {
 
 	/**
 	 * Cascading menu
@@ -88,13 +91,12 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	 */
 	public SelectPifAction() {
 		super();
-		
+
 		setText(null);
-		setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.SELECT_PIF));
+		setImageDescriptor(ImageRepository
+				.getImageDescriptor(ImageRepository.SELECT_PIF));
 		setMenuCreator(this);
-		
-		
-		
+
 	}
 
 	/**
@@ -103,8 +105,6 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	public void run() {
 		// do nothing, this action just creates a cascading menu.
 	}
-
-	
 
 	/**
 	 * @see IMenuCreator#dispose()
@@ -142,76 +142,103 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	}
 
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
 		Set keys = reg.getAllKeys();
-		Menu menu=getCreatedMenu();
+		Menu menu = getCreatedMenu();
 		for (Iterator it = keys.iterator(); it.hasNext();) {
 			String key = (String) it.next();
+
 			createAction(menu, reg, key);
-		}	
-			
-		
+		}
+
 	}
-	public void update(){
-		if (window==null){
+
+	public void update() {
+		if (window == null) {
 			return;
 		}
 		Display display = window.getShell().getDisplay();
-		if(display!=Display.getCurrent()){
+		if (display != Display.getCurrent()) {
 			display.asyncExec(new Runnable() {
-			
+
 				public void run() {
 					update();
-			
+
 				}
-			
+
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+				.getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
-		if (pif==null){
+		if (pif == null) {
 			setToolTipText("no pif selected");
 			return;
 		}
 		String key = reg.getKey(pif);
-		if(key==null){
+		if (key == null) {
 			setToolTipText("unregisterd Prologinterface???");
 			return;
 		}
 		setToolTipText(key);
-		
+
 	}
-	private void createAction(Menu menu, final PrologInterfaceRegistry reg, final String key) {
-		IAction action = new Action(key,IAction.AS_RADIO_BUTTON){
+
+	private void createAction(Menu menu, final PrologInterfaceRegistry reg,
+			final String key) {
+
+		Set subs = reg.getSubscriptionsForPif(key);
+		// remove hidden subscriptions from the set
+		boolean showHidden = "true".equals(PrologConsolePlugin.getDefault().getPreferenceValue(
+				PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, "false"));
+		if (!showHidden) {
+			for (Iterator it = subs.iterator(); it.hasNext();) {
+				Subscription sub = (Subscription) it.next();
+				if (!sub.isVisible()) {
+					it.remove();
+				}
+			}
+			if(subs.isEmpty()){
+				return;
+			}
+		}
+		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
 			public void run() {
-				if(this.isChecked())
-				setPrologInterface(PrologRuntimePlugin.getDefault().getPrologInterface(key));
+				if (this.isChecked())
+					setPrologInterface(PrologRuntimePlugin.getDefault()
+							.getPrologInterface(key));
 			}
 
-			
 		};
 		action.setChecked(key.equals(reg.getKey(getPrologInterface())));
 		StringBuffer buf = new StringBuffer();
-		Set subs = reg.getSubscriptionsForPif(key);
+		
+
 		buf.append(key);
 		buf.append(": ");
 		for (Iterator it = subs.iterator(); it.hasNext();) {
 			Subscription sub = (Subscription) it.next();
+			if(!sub.isVisible() && !showHidden){
+				continue;
+			}
 			buf.append(sub.getName());
-			if(it.hasNext()){
+			if (it.hasNext()) {
 				buf.append(", ");
 			}
 		}
-		//action.setToolTipText(buf.toString());
+		// action.setToolTipText(buf.toString());
 		action.setText(buf.toString());
 		ActionContributionItem item = new ActionContributionItem(action);
-		
+
 		item.fill(menu, -1);
-		//menu.getItem(menu.getItemCount()-1).
+		// menu.getItem(menu.getItemCount()-1).
 	}
-	protected abstract void setPrologInterface(PrologInterface prologInterface) ;
-	protected abstract PrologInterface getPrologInterface() ;
+
+	protected abstract void setPrologInterface(PrologInterface prologInterface);
+
+	protected abstract PrologInterface getPrologInterface();
 
 	/**
 	 * Creates the menu for the action
@@ -231,8 +258,6 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 		});
 	}
 
-	
-
 	private Menu getCreatedMenu() {
 		return fCreatedMenu;
 	}
@@ -240,14 +265,13 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 	private void setCreatedMenu(Menu createdMenu) {
 		fCreatedMenu = createdMenu;
 	}
-	
-	
+
 	/**
 	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
 	 */
 	public void init(IWorkbenchWindow window) {
-		this.window=window;
-		
+		this.window = window;
+
 	}
 
 	/**
@@ -278,22 +302,22 @@ public abstract  class SelectPifAction extends Action implements IMenuCreator,
 
 	public void prologInterfaceAdded(PrologInterfaceRegistryEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void prologInterfaceRemoved(PrologInterfaceRegistryEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void subscriptionAdded(PrologInterfaceRegistryEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void subscriptionRemoved(PrologInterfaceRegistryEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

@@ -111,6 +111,11 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 						"Maximum time in milliseconds to wait for the console server to come up.",
 						SimpleOption.NUMBER, "15000"),
 				new SimpleOption(
+						PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,
+						"Show Hidden Processes",
+						"If this flag is set, processes will be shown in the console even if all subscriptions are marked as invisible.",
+						SimpleOption.FLAG, "false"),
+				new SimpleOption(
 						PDTConsole.PREF_CONTEXT_TRACKERS,
 						"active context trackers",
 						"comma-separated list of trackers the console does follow",
