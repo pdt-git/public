@@ -76,7 +76,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 	public RuntimeSubscription(String projectName, String id, String pifId) {
 
 		super(id, pifId, "used as default runtime for project" + projectName,
-				projectName + " - runtime", PDTCore.PLUGIN_ID, true);
+				projectName + " - PDT", PDTCore.PLUGIN_ID, true);
 		setProjectName(projectName);
 	}
 
