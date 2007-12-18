@@ -236,5 +236,10 @@ public class DefaultSubscription implements PersistableSubscription {
 	protected void setPifKey(String key) {
 		this.pifKey = key;
 	}
+
+	@Override
+	public boolean isVisible() {
+		return true;
+	}
 	
 }

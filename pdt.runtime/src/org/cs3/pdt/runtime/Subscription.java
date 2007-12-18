@@ -94,6 +94,13 @@ public interface Subscription {
 	public abstract String getName();
 
 	/**
+	 * @return true of the subscription should be visible by the user.
+	 *         false otherwise.
+	 */
+	public abstract boolean isVisible();
+
+	
+	/**
 	 * "configure-your-pif-here"-hook. Called by the runtime at the earliest
 	 * possible point in time that does satisfy both of the following
 	 * conditions:
