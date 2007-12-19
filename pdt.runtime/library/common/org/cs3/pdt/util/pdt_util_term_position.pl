@@ -206,18 +206,28 @@ compound_tokens_X([],_,From,To,Tokens):-
 	).
 compound_tokens_X([Arg|Args],Pos,From,To,TokensOut):-
     (	Arg=functor_position(ArgFrom,ArgTo)
-    ->	(	From == ArgFrom
-    	->	TokensOut = [token(functor,ArgFrom,ArgTo)|Tokens]
-    	;	TokensOut = [token(gap,From,ArgFrom),token(functor,ArgFrom,ArgTo)|Tokens]
+    ->	%Special treatment: any gap directly following the functor token belongs to the parent.
+    	(	Args=[NextArg|_],
+    		top_position(NextArg,NextArgFrom,_),
+    		NextArgFrom > ArgTo
+    	->	NextFrom = NextArgFrom,
+    	 	TokensX=[token(gap,ArgTo,NextArgFrom)|Tokens]
+    	;	NextFrom = ArgTo,
+    		TokensX = Tokens
+    	),
+    	(	From == ArgFrom
+    	->	TokensOut = [token(functor,ArgFrom,ArgTo)|TokensX]
+    	;	TokensOut = [token(gap,From,ArgFrom),token(functor,ArgFrom,ArgTo)|TokensX]
     	),    	
     	NextPos=Pos
     ;	top_position(Arg,_,ArgTo),
     	%second arg tells sub-call where to continue
     	%any leading gap is pushed down to the argument. 
     	TokensOut=[token(argument(Pos),From,ArgTo)|Tokens], 
-    	NextPos is Pos + 1
+    	NextPos is Pos + 1,
+    	NextFrom = ArgTo
     ),    
-    compound_tokens_X(Args,NextPos,ArgTo,To,Tokens).
+    compound_tokens_X(Args,NextPos,NextFrom,To,Tokens).
 
     
 
