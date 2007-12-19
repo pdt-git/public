@@ -237,7 +237,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		this.pifKey = key;
 	}
 
-	@Override
+
 	public boolean isVisible() {
 		return true;
 	}
