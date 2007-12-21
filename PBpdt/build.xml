@@ -184,7 +184,7 @@
 		<condition property="is.tests.failed" value="true">
 			<contains string="${build.stderr}" substring="TESTS FAILED"/>
 		</condition>
-		<fail message="Tests failed" if="is.tests.failed" status="2"/>		
+		<fail message="Tests failed" if="is.tests.failed" status="1"/>		
 	</target>
 
 	<target name="fetch" description="Run the fetch target of customTargets.xml.">
