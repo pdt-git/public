@@ -179,7 +179,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.addKeyListener(keyListener);
 		control.addVerifyListener(verifyListener);
 		control.addModifyListener(modifyListener);
-		
+		control.setTabs(4);
 		control.addTraverseListener(new TraverseListener() {
 			public void keyTraversed(TraverseEvent e) {
 				e.doit = false;

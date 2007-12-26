@@ -9,7 +9,7 @@
 :- use_module(library('builder/builder')).
 :- use_module(library('builder/targets/parse')).
 
-:- pdt_define_context(cx(toplevel,positions,root)).
+:- pdt_define_context(cx(toplevel,positions,root,tokens,start,end)).
 spyme.
 %:-tspy(ast:spyme).
 pdt_builder:build_hook(ast(Resource)):-
@@ -71,8 +71,15 @@ build_ast(TID, RootId,Id):-
     cx_root(Cx,RootId),
     cx_toplevel(Cx,TID),
     cx_positions(Cx,Positions),
+    cx_start(Cx,Start),
+    cx_end(Cx,End),
     pef_toplevel_query([id=TID,term=Term,varnames=VarNames,positions=Positions]),    
     process_variables(VarNames,Term,Cx),
+    (	Positions==none
+    ->	Start=[],
+    	End=[]
+    ;	top_position(Positions,Start,End)
+    ),
     generate_ast(Term, Id,Cx).
     
 process_variables([],Term,Cx):-
@@ -94,7 +101,7 @@ process_dcs([Var|Vars],Cx):-
     Var='$var'(Id),
 	process_dcs(Vars,Cx).
 
-generate_ast(Term,Id,Cx):-
+generate_ast(Term,Id,Cx):-    
     generate_ast2(Term,Id,Cx),
     !.
 generate_ast(Term,Id,Cx):-
@@ -110,7 +117,11 @@ generate_ast2('$var'(VarId), Id,Cx):-
     ->	pef_property_assert([pef=Id,key=implicit,value=true])
     ;	top_position(Positions,From,To),
     	pef_property_assert([pef=Id,key=start,value=From]),
-    	pef_property_assert([pef=Id,key=end,value=To])
+    	pef_property_assert([pef=Id,key=end,value=To]),
+    	cx_start(Cx,Start),
+    	cx_end(Cx,End),
+    	term_tokens(Positions,Start,End,Tokens),
+    	pef_property_assert([pef=Id,key=tokens,value=Tokens])
     ).
     
 generate_ast2(Term, Id,Cx):-
@@ -119,12 +130,18 @@ generate_ast2(Term, Id,Cx):-
 	pef_term_assert([id=Id,name=Name,arity=Arity]),
 	cx_positions(Cx,Positions),
     (	Positions==none
-    ->	pef_property_assert([pef=Id,key=implicit,value=true])
+    ->	pef_property_assert([pef=Id,key=implicit,value=true]),    	
+    	cx_set_tokens(Cx,[],CxArgs)
     ;	top_position(Positions,From,To),
     	pef_property_assert([pef=Id,key=start,value=From]),
-    	pef_property_assert([pef=Id,key=end,value=To])
+    	pef_property_assert([pef=Id,key=end,value=To]),
+    	cx_start(Cx,Start),
+    	cx_end(Cx,End),
+    	term_tokens(Positions,Start,End,Tokens),
+    	pef_property_assert([pef=Id,key=tokens,value=Tokens]),
+    	cx_set_tokens(Cx,Tokens,CxArgs)
     ),
-	generate_args(1,Arity,Term,Id,Cx).
+	generate_args(1,Arity,Term,Id,CxArgs).
 
 generate_args(I,N,_Term,_Id,_Cx):-
     I>N,
@@ -133,11 +150,19 @@ generate_args(I,N,Term,Id,Cx):-
 	arg(I,Term,Arg),
 	cx_positions(Cx,Positions),
 	sub_position(Positions,I,ArgPositions),
-	cx_set_positions(Cx,ArgPositions,ArgCx),
+	cx_tokens(Cx,Tokens),
+	(	has_tail([token(argument(I),Start,End)|NextTokens],Tokens)
+	->	cx_set(Cx,[positions=ArgPositions,start=Start,end=End],ArgCx),
+		cx_set_tokens(Cx,NextTokens,NextCx)
+	;	cx_set(Cx,[positions=ArgPositions],ArgCx),
+		NextCx=Cx		
+	),
 	generate_ast(Arg,ArgId,ArgCx),
 	pef_arg_assert([num=I,parent=Id,child=ArgId]),
 	J is I + 1,
-	generate_args(J,N,Term,Id,Cx).
+	generate_args(J,N,Term,Id,NextCx).
+
+
 
 forget_subtree(Id):-
     pef_variable_occurance_query([id=Id,variable=Ref]),
