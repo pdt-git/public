@@ -163,19 +163,46 @@ term_tokens(Pos,Tokens):-
     top_position(Pos,From,To),
     term_tokens(Pos,From,To,Tokens).
 
-    
-term_tokens(term_position(_From,_To,FFrom,FTo,Args0),From,To,Tokens):-
+spyme.
+%:- tspy(spyme).
+term_tokens(Pos,From,To,Tokens):-
+	(	var(Pos)
+	->	spyme
+	;	var(From)
+	->	spyme
+	;	var(To)
+	->	spyme
+	;	nonvar(Tokens)
+	->	spyme
+	;	catch(
+			term_tokens2(Pos,From,To,Tokens),
+			_E,
+			spyme
+		)
+	).    
+term_tokens2(term_position(_From,_To,FFrom,FTo,Args0),Start,End,Tokens):-
     inline_functor_position(Args0,FFrom,FTo,Args),
-    compound_tokens(Args,From,To,Tokens).
-term_tokens(list_position(_From,_To,Elms,Tail),From,To,Tokens):-	   
-    list_tokens(Elms,Tail,From,To,Tokens).
-term_tokens(sublist_position(_From,_To,Elms,Tail),From,To,Tokens):-	   
-    list_tokens(Elms,Tail,From,To,Tokens).
-term_tokens(none,_From,_To,[]).	   
-        
-
-
-term_tokens(From-To,RFrom,RTo,Tokens3):-	   
+    compound_tokens(Args,Start,End,Tokens).
+term_tokens2(list_position(_From,_To,Elms,Tail),Start,End,Tokens):-	   
+    list_tokens(Elms,Tail,Start,End,Tokens).
+term_tokens2(sublist_position(_From,_To,Elms,Tail),Start,End,Tokens):-	   
+    list_tokens(Elms,Tail,Start,End,Tokens).
+term_tokens2(none,_From,_To,[]).	   
+term_tokens2(functor_position(From,To),Start,End,Tokens):-
+    term_tokens(From-To,Start,End,Tokens).
+term_tokens2(string_position(From,To),Start,End,Tokens):-
+    term_tokens(From-To,Start,End,Tokens).
+term_tokens2(brace_term_position(_From,_To,Arg),Start,End,Tokens):-
+	top_position(Arg,ArgFrom,ArgTo),
+	(	ArgTo < End
+	->	Tokens0 = [token(argument(1),ArgFrom,ArgTo),token(gap,ArgTo,End)]
+	;	Tokens0 = [token(argument(1),ArgFrom,ArgTo)]
+	),
+	(	Start < ArgFrom
+	->	Tokens = [token(gap,Start,ArgFrom)|Tokens0]
+	;	Tokens = Tokens0
+	).	
+term_tokens2(From-To,RFrom,RTo,Tokens3):-	   
     Tokens0 = [],
     (	To < RTo
 	->	Tokens1 = [token(gap,To,RTo)|Tokens0]
@@ -187,7 +214,43 @@ term_tokens(From-To,RFrom,RTo,Tokens3):-
 	;	Tokens3 = Tokens2		
 	).
 
-compound_tokens(Args,From,To,TokensOut):-
+
+compound_tokens(Args,From,To,Tokens):-
+	(	var(Args)
+	->	spyme
+	;	var(From)
+	->	spyme
+	;	var(To)
+	->	spyme
+	;	nonvar(Tokens)
+	->	spyme
+	;	catch(
+			compound_tokens2(Args,From,To,Tokens),
+			_E,
+			spyme
+		)
+	).  
+
+list_tokens(Args,Tail,From,To,Tokens):-
+	(	var(Args)
+	->	spyme
+	;	var(Tail)
+	->	spyme
+	;	var(From)
+	->	spyme
+	;	var(To)
+	->	spyme
+	;	nonvar(Tokens)
+	->	spyme
+	;	catch(
+			list_tokens2(Args,Tail,From,To,Tokens),
+			_E,
+			spyme
+		)
+	).  
+
+
+compound_tokens2(Args,From,To,TokensOut):-
     % gaps before the first arg/functor belong to the parent.
     (	Args=[Arg|_]
     ->	top_position(Arg,ArgFrom,_),
@@ -231,7 +294,7 @@ compound_tokens_X([Arg|Args],Pos,From,To,TokensOut):-
 
     
 
-list_tokens(Args,Tail,From,To,TokensOut):-
+list_tokens2(Args,Tail,From,To,TokensOut):-
     % gaps before the first elm belong to the parent.
     Args=[Arg|_],
     top_position(Arg,ArgFrom,ArgTo),

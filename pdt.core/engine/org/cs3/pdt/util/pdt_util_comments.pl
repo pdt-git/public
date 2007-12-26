@@ -235,7 +235,8 @@ process_comment(File, Pos-String, DOM) :-
 	(   section_comment_header(Lines, Header, Lines1)
 	->  DOM = [Header|DOM1],
 	    Args = []
-	;   process_modes(Lines, FilePos, Modes, Args, Lines1)
+	;   %FIXME: second arg: what about exported ops?
+		process_modes(Lines, user,FilePos, Modes, Args, Lines1)
 	->  DOM = [\pred_dt(Modes,pred,[]), dd(class=defbody, DOM1)]
 	),
 	wiki_lines_to_dom(Lines1, Args, DOM0),
@@ -257,7 +258,8 @@ pdt_comment_summary(FileSpec,Pos,String,Head,Summary):-
 	FilePos = File:Line,
 	is_structured_comment(String, Prefixes),
 	indented_lines(String, Prefixes, Lines),
-	process_modes(Lines, FilePos, Modes0, _Args0, Lines1),
+	%FIXME: second arg: what about exported ops?
+	process_modes(Lines, user,FilePos, Modes0, _Args0, Lines1),
 	copy_term(Modes0,Modes),
 	member(mode(Head,Args),Modes),
 	execute_elms(Args),	
