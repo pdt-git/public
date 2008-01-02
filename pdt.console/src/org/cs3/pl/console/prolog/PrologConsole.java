@@ -49,8 +49,6 @@ public interface PrologConsole {
 	public ConsoleModel getModel();
 	public PrologInterface getPrologInterface();
 	public void setPrologInterface(PrologInterface pif);
-	public void addPrologConsoleListener(PrologConsoleListener l);
-	public void removePrologConsoleListener(PrologConsoleListener l);
 	public boolean isVisible();
 	public String getText();
 	public int getLineAtOffset(int offset);

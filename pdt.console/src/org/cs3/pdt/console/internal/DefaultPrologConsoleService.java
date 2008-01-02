@@ -42,6 +42,7 @@
 package org.cs3.pdt.console.internal;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -51,16 +52,21 @@ import org.cs3.pl.console.prolog.PrologConsoleService;
 
 public class DefaultPrologConsoleService implements PrologConsoleService, PrologConsoleListener {
 
+	private Vector listeners = new Vector();
+
 	private HashSet visibleConsoles=new HashSet();
 	private Vector consoles=new Vector();
 	private PrologConsole activeConsole;
+	
+	public DefaultPrologConsoleService() {
+		addPrologConsoleListener(this);
+	}
 	
 	public void registerPrologConsole(PrologConsole console) {
 		
 		synchronized (consoles) {
 			if(!consoles.contains(console)){
 				consoles.add(console);
-				console.addPrologConsoleListener(this);
 			}			
 		}
 		
@@ -71,7 +77,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 			if(consoles.contains(console)){
 				consoles.remove(console);
 				visibleConsoles.remove(console);
-				console.removePrologConsoleListener(this);
+//				removePrologConsoleListener(this);
 				if(console==activeConsole){
 					activeConsole=null;
 				}
@@ -113,6 +119,77 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 			visibleConsoles.remove(c);
 		}
 		
+	}
+
+	@Override
+	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
+		
+	}
+
+	public void addPrologConsoleListener(PrologConsoleListener l) {
+		synchronized (listeners) {
+			if (!listeners.contains(l)) {
+				listeners.add(l);
+			}
+		}
+
+	}
+
+	public void removePrologConsoleListener(PrologConsoleListener l) {
+		synchronized (listeners) {
+			if (listeners.contains(l)) {
+				listeners.remove(l);
+			}
+		}
+	}
+
+	public void fireConsoleRecievedFocus(PrologConsole console) {
+		Vector clone = null;
+		synchronized (listeners) {
+			clone = (Vector) listeners.clone();
+		}
+		PrologConsoleEvent e = new PrologConsoleEvent(console);
+		for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.consoleRecievedFocus(e);
+		}
+	}
+	
+
+	public void fireActivePrologInterfaceChanged(PrologConsole console) {
+		Vector clone = null;
+		synchronized (listeners) {
+			clone = (Vector) listeners.clone();
+		}
+		PrologConsoleEvent e = new PrologConsoleEvent(console);
+		for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.activePrologInterfaceChanged(e);
+		}		
+	}
+
+	public void fireConsoleLostFocus(PrologConsole console) {
+		Vector clone = null;
+		synchronized (listeners) {
+			clone = (Vector) listeners.clone();
+		}
+		PrologConsoleEvent e = new PrologConsoleEvent(console);
+		for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.consoleLostFocus(e);
+		}
+	}
+
+	public void fireConsoleVisibilityChanged(PrologConsole console) {
+		Vector clone = null;
+		synchronized (listeners) {
+			clone = (Vector) listeners.clone();
+		}
+		PrologConsoleEvent e = new PrologConsoleEvent(console);
+		for (Iterator iter = clone.iterator(); iter.hasNext();) {
+			PrologConsoleListener l = (PrologConsoleListener) iter.next();
+			l.consoleVisibilityChanged(e);
+		}
 	}
 
 }

@@ -52,6 +52,7 @@ import java.util.Vector;
 
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.runtime.PrologContextTracker;
@@ -350,8 +351,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private Composite partControl;
 
-	private Vector listeners = new Vector();
 
+	
 	private PrologInterface currentPif;
 
 	private Menu contextMenu;
@@ -408,13 +409,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 				switch (event.type) {
 				case SWT.Show:
 				case SWT.Hide:
-					fireConsoleVisibilityChanged();
+					getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
 					break;
 				case SWT.FocusOut:
-					fireConsoleLostFocus();
+					getDefaultPrologConsoleService().fireConsoleLostFocus(PrologConsoleView.this);
 				}
 
 			}
+
 
 		};
 		parent.addListener(SWT.Show, handler);
@@ -443,6 +445,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	}
 
+	private DefaultPrologConsoleService getDefaultPrologConsoleService() {
+		return ((DefaultPrologConsoleService) PrologConsolePlugin.getDefault().getPrologConsoleService());
+	}
+
+	
 	private void loadHistory(NewConsoleHistory history) {
 
 		try {
@@ -637,44 +644,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			return;
 		}
 		viewer.getControl().setFocus();
-		fireConsoleRecievedFocus();
+		getDefaultPrologConsoleService().fireConsoleRecievedFocus(this);
 	}
 
-	private void fireConsoleRecievedFocus() {
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		PrologConsoleEvent e = new PrologConsoleEvent(this);
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologConsoleListener l = (PrologConsoleListener) iter.next();
-			l.consoleRecievedFocus(e);
-		}
-	}
-
-	private void fireConsoleLostFocus() {
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		PrologConsoleEvent e = new PrologConsoleEvent(this);
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologConsoleListener l = (PrologConsoleListener) iter.next();
-			l.consoleLostFocus(e);
-		}
-	}
-
-	private void fireConsoleVisibilityChanged() {
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		PrologConsoleEvent e = new PrologConsoleEvent(this);
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologConsoleListener l = (PrologConsoleListener) iter.next();
-			l.consoleVisibilityChanged(e);
-		}
-	}
 
 	public void dispose() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
@@ -813,6 +785,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		if (currentPif != null) {
 			viewerStates.put(currentPif, viewer.saveState());
 		}
+		PrologInterface oldPif = currentPif;
 		currentPif = newPif;
 		if (currentPif != null) {
 			addHooks(currentPif);
@@ -826,6 +799,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 						PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
 			}
 			reconfigureViewer(currentPif);
+			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
 
 		} else {
 			Debug.debug("no pif (yet).");
@@ -834,6 +808,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			pifSelector.update();
 		}
 	}
+
 
 	/*
 	 * note: implementation should take into account, that this method might be
@@ -961,22 +936,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	}
 
-	public void addPrologConsoleListener(PrologConsoleListener l) {
-		synchronized (listeners) {
-			if (!listeners.contains(l)) {
-				listeners.add(l);
-			}
-		}
-
-	}
-
-	public void removePrologConsoleListener(PrologConsoleListener l) {
-		synchronized (listeners) {
-			if (listeners.contains(l)) {
-				listeners.remove(l);
-			}
-		}
-	}
 
 	public boolean isVisible() {
 		return partControl.isVisible();
