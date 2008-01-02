@@ -46,4 +46,7 @@ public interface PrologConsoleService {
 	public void unregisterPrologConsole(PrologConsole console);
 	public PrologConsole[] getRegisteredPrologConsoles();
 	public PrologConsole getActivePrologConsole();
+	public void addPrologConsoleListener(PrologConsoleListener l);
+	public void removePrologConsoleListener(PrologConsoleListener l);
+
 }
