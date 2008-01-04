@@ -64,6 +64,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
 /**
@@ -116,6 +117,9 @@ public class SocketServerStartAndStopStrategy implements
 			throw new RuntimeException(e.getMessage());
 		}
 		String executable = socketPif.getOption(SocketPrologInterface.EXECUTABLE);
+		if(!executable.contains(" -L")){
+			executable += " " +Factory.STACK_COMMMAND_LINE_PARAMETERS;
+		}
 		String envstring = socketPif.getOption(SocketPrologInterface.ENVIRONMENT);
 		String engineDir = Util.prologFileName(socketPif.getFactory()
 				.getResourceLocator().resolve("/"));

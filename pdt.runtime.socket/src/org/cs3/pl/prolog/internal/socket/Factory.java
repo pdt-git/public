@@ -64,6 +64,10 @@ public class Factory extends PrologInterfaceFactory {
 
 	public static final String FKILL_EXE = "fkill.exe";
 
+	public static final String STACK_COMMMAND_LINE_PARAMETERS = "-L4m -G4m -T4m -A1m";
+
+	private static final String WINDOWS_EXECUTABLE = "plwin";
+
 	private Option[] options;
 
 	public Factory() {
@@ -200,11 +204,11 @@ public class Factory extends PrologInterfaceFactory {
 
 		if (Util.isWindoze()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
-					+ findWindowsExecutable();
+					+ findWindowsExecutable() + " " + STACK_COMMMAND_LINE_PARAMETERS;
 			// return "plwin";
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable();
+		return findUnixExecutable() + " " + STACK_COMMMAND_LINE_PARAMETERS;
 	}
 
 	/**
@@ -258,7 +262,7 @@ public class Factory extends PrologInterfaceFactory {
 	 *         plwin
 	 */
 	private String findWindowsExecutable() {
-		String default_exec = "plwin";
+		String default_exec = WINDOWS_EXECUTABLE;
 		String plwin = default_exec;
 
 		String path;
