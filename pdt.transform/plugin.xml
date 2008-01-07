@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension point="org.eclipse.ui.popupMenus">
+    <!-- put a context menu item into the menu of standard text editors.
+         If the properties editor had an own context menu id, we could
+         target this more specifically. This way, we must have the
+         refactoring itself decide whether the operation can run.
+      -->
+    <viewerContribution targetID="org.cs3.pdt.internal.editors.PLEditor" 
+                        id="org.cs3.pdt.transform.apply_transformation">
+      <action label="Apply Transformation"
+              class="org.cs3.pdt.actions.ApplyTransformation" 
+              menubarPath="additions"
+              id="org.cs3.pdt.actions.apply_transformation"/>
+    </viewerContribution>
+  </extension>
+</plugin>
