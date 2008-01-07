@@ -235,13 +235,25 @@ process_comment(File, Pos-String, DOM) :-
 	(   section_comment_header(Lines, Header, Lines1)
 	->  DOM = [Header|DOM1],
 	    Args = []
-	;   %FIXME: second arg: what about exported ops?
-		process_modes(Lines, user,FilePos, Modes, Args, Lines1)
+	;   my_process_modes(Lines,FilePos, Modes, Args, Lines1)
 	->  DOM = [\pred_dt(Modes,pred,[]), dd(class=defbody, DOM1)]
 	),
 	wiki_lines_to_dom(Lines1, Args, DOM0),
 	strip_leading_par(DOM0, DOM1).
-	
+
+
+%wrapper around proces_modes/* to work around api changes between swi versions
+% 
+:- if(pdt_util_comments:current_predicate(process_modes/6)).
+my_process_modes(Lines,FilePos,Modes,Args,Lines1):-
+    %FIXME: second arg: what about exported ops?	
+    process_modes(Lines, user,FilePos, Modes, Args, Lines1).
+:- elif(pdt_util_comments:current_predicate(process_modes/5)).
+my_process_modes(Lines,FilePos,Modes,Args,Lines1):-
+    process_modes(Lines, FilePos, Modes, Args, Lines1).
+:- else.
+:- throw(missing(process_modes)).
+:- endif.	
 %% pdt_comment_summary(+CommentString, -Summary)
 % Extract summary line from a source comment.
 %
@@ -258,8 +270,7 @@ pdt_comment_summary(FileSpec,Pos,String,Head,Summary):-
 	FilePos = File:Line,
 	is_structured_comment(String, Prefixes),
 	indented_lines(String, Prefixes, Lines),
-	%FIXME: second arg: what about exported ops?
-	process_modes(Lines, user,FilePos, Modes0, _Args0, Lines1),
+	my_process_modes(Lines,FilePos, Modes0, _Args0, Lines1),
 	copy_term(Modes0,Modes),
 	member(mode(Head,Args),Modes),
 	execute_elms(Args),	

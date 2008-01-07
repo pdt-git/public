@@ -481,3 +481,32 @@
 	)
 ).
 
+:- define_pef(
+	pef_modified_file(
+		file:pef_file
+	)
+).
+
+:- define_pef(
+	pef_modified_toplevel(
+		toplevel:pef_toplevel
+	)
+).
+
+:- define_pef(
+	pef_resource_delta(
+		old_path,
+		new_path,
+		type
+		
+	)
+).
+
+:- define_pef(
+	pef_text_delta(		
+		file:pef_file,
+		start,
+		end,
+		text
+	)
+).

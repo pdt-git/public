@@ -253,8 +253,7 @@ find_literal(Goal,Cx0,Literal):-
 	*-> % Soft cut, since we DO want backtracking in the condition part.
 	    % If there is a match *at all*, and if it is due to a user-defined 
 	    % meta-predicate, we have 
-	    (	Pred \== builtin,
-	    	Literal=meta_call(Cx2,Goal,Pred)
+	    (	Literal=meta_call(Cx2,Goal,Pred)
 	    ;	find_literal__match_found(Goal,Subst,RuleSubst,SubGoal,Cx2,Literal)
 	    )
 	    	    
@@ -717,7 +716,18 @@ fp_process_result(literal(Cx,Goal,Predicate)):-
     ;	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
     ).
     
-   
+fp_process_result(meta_call(_Cx,Goal,builtin)):-
+	!,
+	(	ast_node(Goal,GoalNode)
+    ->	true
+    ;	GoalNode=[]
+    ),
+	(	GoalNode==[]
+	->	true
+	;	pef_property_query([pef=GoalNode,key=builtin_meta_call,value=true])
+	->	true
+	;	pef_property_assert([pef=GoalNode,key=builtin_meta_call,value=true])    
+    ). 
 fp_process_result(meta_call(Cx,Goal,Predicate)):-
 	pef_reserve_id(pef_call,Id),
     cx_head(Cx,Head),
@@ -729,8 +739,14 @@ fp_process_result(meta_call(Cx,Goal,Predicate)):-
     cx_set_head(Cx,HeadNode,Cx1),
     (	pef_call_query([goal=GoalNode,predicate=Predicate])
     ->  true
-    ;	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])
-    ).
+    ;	pef_call_assert([id=Id,goal=GoalNode,cx=Cx1,predicate=Predicate])    	
+    ),
+    (	GoalNode==[]
+    ->	true
+    ;	pef_property_query([pef=GoalNode,key=meta_call,value=true])
+    ->	true
+    ;	pef_property_assert([pef=GoalNode,key=meta_call,value=true])
+   	).
 fp_process_result(unresolved(Cx,Goal)):-
     cx_head(Cx,Head),
     ast_node(Head,HeadNode),

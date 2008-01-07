@@ -156,6 +156,22 @@ public class Util {
 		// sb.append("}");
 		return sb.toString();
 	}
+	
+	public static String prettyPrint(double[] a) {
+		if (a == null) {
+			return "";
+		}
+		StringBuffer sb = new StringBuffer();
+		// sb.append("{");
+		for (int i = 0; i < a.length; i++) {
+			if (i > 0) {
+				sb.append(", ");
+			}
+			sb.append(a[i]);
+		}
+		// sb.append("}");
+		return sb.toString();
+	}
 
 	public static File getLogFile(String name) throws IOException {
 		File logFile = new File(System.getProperty("java.io.tmpdir")
