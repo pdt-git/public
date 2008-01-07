@@ -30,7 +30,7 @@ inverse_meta_edge_clause(Clause):-
     arg(ArgNum,FromHead,To),   	
    	% use reverse index, if available.
    	(	'$metapef_attribute_tag'(FromT,ArgNum,index)
-   	->	index_name(FromT,ArgNum,IxName),
+   	->	index_name(FromTemplate,ArgNum,IxName),
     	IndexQuery=..[IxName,To,FromRef],
     	Query=(IndexQuery,clause(FromHead,_,FromRef))
     ;	Query=clause(FromHead,_,FromRef)

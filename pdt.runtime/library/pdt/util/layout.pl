@@ -1,3 +1,4 @@
+:- module(layout,[layout_node/2]).
 :- use_module(library('pef/pef_base')).
 :- use_module(library('pef/pef_api')).
 :- use_module(library('util/ast_util')).
@@ -6,13 +7,15 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 :- use_module(layout_rules).
 
+
+
 current_indent(File,Pos,Codes):-
     get_memory_file(File,SrcMemFile),
     open_memory_file(SrcMemFile,read,In),
     new_memory_file(TmpMemFile),
     open_memory_file(TmpMemFile,write,Out),
     call_cleanup(
-    	current_indent__copy_data(Pos,In,Out),
+    	current_indent__copy_data(File,Pos,In,Out),
     	(	close(In),
     		close(Out),
     		memory_file_to_codes(TmpMemFile,Codes0),
@@ -21,10 +24,10 @@ current_indent(File,Pos,Codes):-
     ),
     current_indent__process_codes(Codes0,Codes).
 
-current_indent__copy_data(Pos,In,Out):-    
-    pef_property_query([pef=File,newlines=NewLines]),
+current_indent__copy_data(File,Pos,In,Out):-    
+    pef_property_query([pef=File,key=newlines,value=NewLines]),
     SearchKey is 0 - Pos,
-    (	pdt_map_next(NewLines,SearchKey,FoundKey,NLStreamPos)
+    (	pdt_map_next(NewLines,SearchKey,_,NLStreamPos)
     ->	set_stream_position(In,NLStreamPos),
     	stream_position_data(char_count,NLStreamPos,NLCharPos)
     ;	NLCharPos=0
@@ -43,6 +46,7 @@ current_indent__process_codes([Code0|Codes0],[Code|Codes]):-
 	current_indent__process_codes(Codes0,Codes).
 	
 :- dynamic '$pef_file__memfile'/3.
+:- thread_local '$pef_file__memfile'/3.
 
 get_memory_file(File,SrcMemFile):-
 	get_pef_file(Path,File),
@@ -57,117 +61,163 @@ get_memory_file(File,SrcMemFile):-
 	
 clean_memory_file(File):-
     forall(
-    	retract('$pef_file__memfile'(File,Stamp,MemFile)),
+    	retract('$pef_file__memfile'(File,_Stamp,MemFile)),
     	free_memory_file(MemFile)
     ).
 
 :- pdt_define_context(
 	lt(
-		term,
-		indent,
-		child_indent,
-		precedence,
-		out
+		term, % the "term" to be layouted. uses the mixed representation from ast_util.
+		indent, % a list of whitespace codes that shifts the cariage from start of line to the current base position		
+		out, % stream to which output is written
+		class, % current layout class
+		hints, % a pdt_map term for keeping track of layout hints.
+		stop_at%the id of an ast node. Used when running dry to collect hints for a particular node.
 	)
 ).
 token_codes(cma,_,[44]).
 token_codes(tab,_,[9]).
 token_codes(lpr,_,[40]).
 token_codes(rpr,_,[41]).
-token_codes(nl,_,[10]).
+token_codes(lsb,_,[91]).
+token_codes(rsb,_,[93]).
+token_codes(mid,_,[124]).
+
 token_codes(spc,_,[32]).
 token_codes(eoc,_,[46]).
+token_codes(inc,_,[]):-
+token_codes(arg(_),_,[]).
+token_codes(arg_num(_),_,[]).    
+token_codes(raw(Codes),_,Codes).   
+token_codes(nl,L,[10|Indent]):-
+    lt_indent(L,Indent).
 token_codes(fun,L,Codes):-
     lt_term(L,Term),
-    functor(Term,Name,_),
+    (	ast_variable_occurance(Term,Var)
+    ->	pef_variable_query([id=Var,name=Name])
+    ;   ast_functor(Term,Name,_)
+    ),
     atom_codes(Name,Codes).
-token_codes(ind,L,Codes):-
-	lt_indent(L,Codes).
-token_codes(arg(_),_,[]).
-token_codes(arg_num(_),_,[]).       
+	
  
  
+%%
+% layout_ast(+Node,+Offset,+Out).
+% pretty-print a subtree.
+%
+% The layout engine ignores subterm positions attached to the ast, but otherwise
+% assumes that the database is in a consistent state. In particular this extends to the
+% set of operator definitions that are visible by the toplevel contitaining the 
+% term beeing processed.
+% Running the layout engine in the middle of a program transformation may lead to syntax errors
+% in the generated program text.
+%
+% Comments are currently not processed.
+%
+% To guess the current indent level and other context-dependend information, the engine will
+% examin the surrounding toplevel. 
+% For the base indent level this means:
+%  - Everything is fine aslong as the layout of the surrounding term follows similar indention rules 
+%    as the ones used by the engine.
+%  - Otherwise, the indention of the processed subterm will be inconsistent. Otherwise however the term 
+%    will be correct. 
+%  
+% here is a rather bad example of how this can go wrong:
+%  p:-(if -> then ; else).
+%
+% replacing 'if' by 'if,if2' and 'then' by 'then,then2' would yield something like
+%  p:-(if,
+%         if2 -> then,
+%         then2 ; else).
+%
+% More sophisticated analysis of the surrounding layout may help to to 
+% improve the results in this situations.
+% My impression however is, that in most situations this effort would be wasted. 
+% I will see how bad this limitations are when applied to real programs.
+%
+% @param Node an id of an ast node
+% @param Out the Stream to which the layouted term should be written.
+       
+layout_node(Node,Out):-
+    % prepare dry run down to Node to 
+    % guess indention levels and layout hints.
+    % Then continue producing actual output.      
+    open_null_stream(Null),
+	ast_toplevel(Node,Toplevel),
+	ast_root(Toplevel,Root),
+	lt_new(L),
+    lt_out(L,Null),    
+	lt_term(L,Root),
+	lt_class(L,toplevel),
+	lt_indent(L,""),	
+	pdt_map_empty(Hints),
+	lt_hints(L,Hints),
+	lt_stop_at(L,Node),
+	% dry run
+	call_cleanup(layout_ast(L,L1),close(Null)),
+	% no do it for real
+	lt_set(L1,[stop_at=[],out=Out],L2),
+	layout_ast(L2,_).
+	
+	
  
- 
-layout_ast(Ast0,File,Offset,Out):-
+layout_ast(Ast0,File,Offset,Class,Out):-
     ast_attach(Ast0,Ast),
     current_indent(File,Offset,Indent),
     lt_new(L),
-    lt_out(Out),    
+    lt_out(L,Out),    
 	lt_term(L,Ast),
-	lt_indent(L,[]),
-	lt_precedence(L,[2000]),
-	lt_child_indent(L,[]),
+	lt_class(L,Class),
+	lt_indent(L,Indent),	
+	pdt_map_empty(Hints),
+	lt_hints(L,Hints),
 	layout_ast(L,_).
 
-
-%child_class(ParentClass,Parent,Child,ChildClass).
-child_class(argument,_,Child,ChildClass):-
-    (	pef_call_query([goal=Child])
-    ->	ChildClass=formula
-    ;	ChildClass=term
-    ).
-child_class(formula,Parent,Child,ChildClass):-
-	(	pef_call_query([goal=Child])
-    ->	ChildClass=formula
-    ;	pef_call_query([goal=Parent])
-    ->	ChildClass=term
-    ;	ChildClass=formula
-    ).  
-child_class(toplevel,Parent,Child,ChildClass):-    
-    pef_term_query([id=Parent,arity=Arity]),
-    pef_arg_query([parent=Parent,child=Child,num=Num]),    
-    (	Num < Arity)
-    ->	ChildClass=head
-    ;	ChildClass=formula
-    ).
-child_class(head,_,_,head).
-    
+layout_ast(L,LStop):-
+	lt_term(L,Ast),
+	lt_stop_at(L,Node),
+	ast_node(Ast,Node),
+	!,
+	lt_set_stop_at(L,now,LStop).
 layout_ast(LIn,LOut):-
-    lt_term(LIn,Ast),    
-    term_precedence(Ast,Precedence,ArgPrecedence),
-    lt_precedence(LIn,[ParentPrecedence|_]),
+    lt_term(LIn,Ast),   
+    lt_hints(LIn,Hints0), 
+    term_precedence(Ast,Precedence),
+    parent_precedence(Ast,ParentPrecedence),
     (	Precedence >= ParentPrecedence
-    ->	HaveParenthesis = true
-    ;	HaveParenthesis = false
+    ->	pdt_map_put(Hints0,have_pars,true,Hints)
+    ;	pdt_map_put(Hints0,have_pars,false,Hints)
     ),
-    node_class(Ast,Class),
-    ast_functor(Ast,Name,Arity),
-    functor(Pattern,Name,Arity),
+    lt_class(LIn,Class),
+    (	ast_var(Ast)
+    ->	true
+    ;	ast_functor(Ast,Name,Arity),
+    	functor(Pattern,Name,Arity)
+    ),    
 	once(
-		(	layout_rule(Pattern,Class,HaveParenthesis,Tokens),
+		(	layout_rule(Pattern,Class,Hints,Tokens),
 			ast_match(Pattern,Ast,Subst),
 			var(Subst)
 		)
 	),	
-	lt_set_precedence(LIn,ArgPrecedence,LChild),    
-	layout_test_X(Tokens,LChild,LOut).
+	    
+	layout_ast_X(Tokens,LIn,LOut).
     
 
-    	
-
-layout_test(T):-    	
-	lt_new(L),
-	lt_term(L,T),
-	lt_indent(L,[]),
-	lt_precedence(L,[2000]),
-	lt_child_indent(L,[]),
-	layout_test(L,_).
-
-layout_test(LIn,LOut):-
-    lt_term(LIn,T),
-    term_precedence(T,Precedence,ArgPrecedence),
-    lt_precedence(LIn,[ParentPrecedence|_]),
-    (	Precedence >= ParentPrecedence
-    ->	HaveParenthesis = true
-    ;	HaveParenthesis = false
-    ),
-    lt_set_precedence(LIn,ArgPrecedence,LChild),
-	once(layout_rule(T,literal,HaveParenthesis,Tokens)),	
-	layout_test_X(Tokens,LChild,LOut).
 
 
 
+parent_precedence(T,Precedence):-
+    ast_node(T,ChildNode),
+    (	pef_arg_query([child=ChildNode,parent=ParentNode,num=Num])
+    ->	ast_attach(ParentNode,Parent),
+    	term_precedence(Parent,_,ArgPrecedence),
+    	nth1(Num,ArgPrecedence,Precedence)
+    ;	Precedence=2000
+    ).
+
+term_precedence(T,Precedence):-
+    term_precedence(T,Precedence,_).
 
 term_precedence(T,Precedence,Precedences):-
     ast_functor(T,Name,A),
@@ -178,7 +228,10 @@ term_precedence(T,Precedence,Precedences):-
     atom_chars(Type,TypeCodes),
     term_precedence__process_type(TypeCodes,Precedence,Precedences).
 term_precedence(T,0,Ps):-
-    ast_functor(T,_,Arity),
+    (	ast_var(T)
+    ->	Arity=0
+    ;   ast_functor(T,_,Arity)
+    ),
     term_precedence__default_type(Arity,Ps).
 
 term_precedence__process_type([],_,[]):-!.        
@@ -198,111 +251,67 @@ term_precedence__default_type(N,[1000|Ts]):-
     M is N - 1,
     term_precedence__default_type(M,Ts).
 
-layout_test_X([],L,L):-!.
-layout_test_X([arg(A)|Tokens],L,LOut):-
-	!,
-	lt_child_indent(L,Indent),
-	lt_set(L,[indent=Indent,term=A],LChild),	
-	layout_test(LChild,LChildOut),
-	lt_child_indent(LChildOut,ChildIndent),
-	lt_precedence(L,[_|NextPrecedence]),
-	lt_set(L,[child_indent=ChildIndent,precedence=NextPrecedence],LNext),
-	layout_test_X(Tokens,LNext,LOut).
-layout_test_X([arg_num(I)|Tokens],L,LOut):-
-	!,
-	lt_term(L,Term),
-	arg(I,Term,A),
-	lt_child_indent(L,Indent),
-	lt_set(L,[indent=Indent,term=A],LChild),
-	layout_test(LChild,LChildOut),
-	lt_child_indent(LChildOut,ChildIndent),
-	lt_set_child_indent(L,ChildIndent,LNext),
-	layout_test_X(Tokens,LNext,LOut).
-
-layout_test_X([nl|Tokens],L,LOut):-
-	!,	
-	token_codes(nl,L,Codes),
-	format("(~w)",[nl]),
-	format("~s",[Codes]),
-	lt_set_child_indent(L,[],NextL),
-	layout_test_X(Tokens,NextL,LOut). 
-layout_test_X([ind|Tokens],L,LOut):-
-	!,	
-	token_codes(ind,L,Codes),
-	format("(~w)",[ind]),
-	format("~s",[Codes]),
-	lt_indent(L,MyIndent),
-	lt_set_child_indent(L,MyIndent,NextL),
-	layout_test_X(Tokens,NextL,LOut).
-layout_test_X([Token|Tokens],L,LOut):-
-	token_codes(Token,L,Codes),
-	format("(~w)",[Token]),
-	format("~s",[Codes]),
-	lt_child_indent(L,ChildIndent),
-	(	Token==tab
-	->	append_indent(ChildIndent,Codes,NextChildIndent)
-	;	NextChildIndent=ChildIndent
-	),
-	lt_set_child_indent(L,NextChildIndent,NextL),
-	layout_test_X(Tokens,NextL,LOut).	
-
-
-
 layout_ast_X([],L,L):-!.
-layout_ast_X([arg($var([A|_]))|Tokens],L,LOut):-
+layout_ast_X([arg('$var'([A|_]))|Tokens],L,LOut):-
 	!,
-	lt_child_indent(L,Indent),		
 	lt_class(L,Class),
 	lt_term(L,Parent),
 	ast_node(A,ChildNode),
-	ast_node
+	ast_node(Parent,ParentNode),
+	child_class(Class,ParentNode,ChildNode,ChildClass), 	
+	lt_set(L,[term=A,class=ChildClass],LChild),	
 	
-	lt_set(L,[indent=Indent,term=A],LChild),	
 	layout_ast(LChild,LChildOut),
-	lt_child_indent(LChildOut,ChildIndent),
-	lt_precedence(L,[_|NextPrecedence]),
-	lt_set(L,[child_indent=ChildIndent,precedence=NextPrecedence],LNext),
-	layout_ast_X(Tokens,LNext,LOut).
+	
+	(	lt_stop_at(LChildOut,now)
+	->	LOut=LChildOut
+	;	lt_hints(LChildOut,NextHints),
+		lt_set(L,[hints=NextHints],LNext),
+		layout_ast_X(Tokens,LNext,LOut)
+	).
+
 layout_ast_X([arg_num(I)|Tokens],L,LOut):-
 	!,
 	lt_term(L,Term),
 	ast_arg(I,Term,A),
-	lt_child_indent(L,Indent),
-	lt_set(L,[indent=Indent,term=A],LChild),
+	lt_class(L,Class),
+	lt_term(L,Parent),
+	ast_node(A,ChildNode),
+	ast_node(Parent,ParentNode),
+	child_class(Class,ParentNode,ChildNode,ChildClass), 	
+	lt_set(L,[term=A,class=ChildClass],LChild),
+	
 	layout_ast(LChild,LChildOut),
-	lt_child_indent(LChildOut,ChildIndent),
-	lt_set_child_indent(L,ChildIndent,LNext),
-	layout_ast_X(Tokens,LNext,LOut).
-
-layout_ast_X([nl|Tokens],L,LOut):-
-	!,	
-	token_codes(nl,L,Codes),
-	format("(~w)",[nl]),
-	format("~s",[Codes]),
-	lt_set_child_indent(L,[],NextL),
-	layout_ast_X(Tokens,NextL,LOut). 
-layout_ast_X([ind|Tokens],L,LOut):-
-	!,	
-	token_codes(ind,L,Codes),
-	format("(~w)",[ind]),
-	format("~s",[Codes]),
-	lt_indent(L,MyIndent),
-	lt_set_child_indent(L,MyIndent,NextL),
+	
+	(	lt_stop_at(LChildOut,now)
+	->	LOut=LChildOut
+	;	lt_hints(LChildOut,NextHints),
+		lt_set(L,[hints=NextHints],LNext),
+		layout_ast_X(Tokens,LNext,LOut)
+	).
+layout_ast_X([inc|Tokens],L,LOut):-
+	!,		
+	lt_indent(L,Indent),
+	token_codes(tab,L,Tab),
+	append(Indent,Tab,NextIndent),
+	lt_set_indent(L,NextIndent,NextL),
 	layout_ast_X(Tokens,NextL,LOut).
+layout_ast_X([dec|Tokens],L,LOut):-
+	!,		
+	lt_indent(L,Indent),
+	token_codes(tab,L,Tab),
+	append(NextIndent,Tab,Indent),
+	lt_set_indent(L,NextIndent,NextL),
+	layout_ast_X(Tokens,NextL,LOut).
+
+layout_ast_X([Key=Value|Tokens],L,LOut):-
+    !,
+    lt_hints(L,Hints),
+    pdt_map_put(Hints,Key,Value,HintsNext),
+    lt_set_hints(L,HintsNext,LNext),
+    layout_ast_X(Tokens,LNext,LOut).
 layout_ast_X([Token|Tokens],L,LOut):-
 	token_codes(Token,L,Codes),
-	format("(~w)",[Token]),
-	format("~s",[Codes]),
-	lt_child_indent(L,ChildIndent),
-	(	Token==tab
-	->	append_indent(ChildIndent,Codes,NextChildIndent)
-	;	NextChildIndent=ChildIndent
-	),
-	lt_set_child_indent(L,NextChildIndent,NextL),
-	layout_ast_X(Tokens,NextL,LOut).	
-
-
-	
-append_indent(ChildIndent,Codes0,NextChildIndent):-
-    current_indent__process_codes(Codes0,Codes),
-    append(ChildIndent,Codes,NextChildIndent).    
+	lt_out(L,Out),
+	format(Out,"~s",[Codes]),	
+	layout_ast_X(Tokens,L,LOut).	

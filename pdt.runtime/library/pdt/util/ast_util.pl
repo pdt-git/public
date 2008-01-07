@@ -8,24 +8,39 @@ This module is mostly used by the literals target of the builder.
 
 */
 
-:- module(ast_util,[
-ast_arg/3,
-ast_attach/1,
-ast_attach/2,
-ast_equivalent/2,
-ast_match/3,
-ast_variable_occurance/2,
-ast_occurs/2,
-ast_functor/3,
-ast_head_body/4,
-ast_strip_module/3,
-ast_apply/3,
-ast_root/2,
-ast_node/2,
-ast_var/1
-]).
+:- module(ast_util, [	ast_arg/3,
+						ast_attach/1,
+						ast_attach/2,
+						ast_equivalent/2,
+						ast_match/3,
+						ast_variable_occurance/2,
+						ast_occurs/2,
+						ast_functor/3,
+						ast_head_body/4,
+						ast_strip_module/3,
+						ast_apply/3,
+						ast_root/2,
+						ast_node/2,
+						ast_var/1,
+						ast_simple_match/2
+					]).
 :- use_module(library('pef/pef_base')).
-:- use_module(library('org/cs3/pdt/util/pdt_util')).    
+:- use_module(library('org/cs3/pdt/util/pdt_util')).   
+
+
+ast_simple_match(Pattern,Ast):-
+    term_variables(Pattern,Vars),
+    copy_term(Pattern-Vars,PatternCopy-VarsCopy),
+    ast_match(PatternCopy,Ast,_),
+    simple_match__process_bindings(VarsCopy,Vars).
+
+simple_match__process_bindings([],[]).
+simple_match__process_bindings(['$var'([First|_])|InVars],[First|OutVars]):-
+	!,
+	simple_match__process_bindings(InVars,OutVars).
+simple_match__process_bindings([First|InVars],[First|OutVars]):-	
+	simple_match__process_bindings(InVars,OutVars).
+ 
 %% 	ast_match(+Pattern,+AST,-Subst)
 % match an ast against a term pattern.
 % The pattern is just a usual prolog term + the following conventions: 

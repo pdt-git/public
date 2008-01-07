@@ -8,7 +8,10 @@
 		pef_record_key/2,
 		pef_type_tag/2,
 		pef_type_is_a/2,
-		pef_last_record/2
+		pef_last_record/2,
+		pef_node/3,
+		pef_edge/3,
+		pef_delete/1
 	]
 ).
 
@@ -164,6 +167,24 @@ find_id(Tmpl,Num):-
     !.
 
 
+%% pef_delete(+Node).
+%  Delete a pef and all pefs (directly or indirectly) referencing it.
+%  This is a generic and slow implementation. Should not be used in "burst" situations.  
+%  A specialized version would be nice, i.e. one that avoids runtime construction of functors. 
+%  Maybe this could be achieved through partial evaluation?
+pef_delete(Node):-
+    forall(
+    	pef_edge(Referer,_,Node),
+    	pef_delete(Referer)
+    ),
+    delete_X(Node).    
+
+delete_X(Id):-
+    pef_type(Id,Type),
+    atom_concat(Type,'_retractall',Functor),
+    Goal =.. [Functor,[id=Id]],
+    call(Goal).
+
 
 metapef_is_a(A,A).
 metapef_is_a(A,B):-
@@ -179,12 +200,27 @@ metapef_is_a(A,any):-
 metapef_index_arg(Type,Arg):-
     '$metapef_attribute_tag'(Type,Arg,index).
 
+
+    
+    
+    
 metapef_ref(Type,RefType,RefArg):-
     metapef_is_a(Type,TargetType),
     '$metapef_edge'(RefType,RefArg,TargetType).
 
 
 
+pef_edge(From,ArgName,To):-
+    (	nonvar(To)
+    ->	pef_type(To,ToT)
+    ;	true
+    ),
+    (	nonvar(From)
+    ->	pef_type(From,FromT)
+    ;	true
+    ),
+    pef_edge(From,FromT,ArgName,To,ToT).
+    
 pef_edge(From,FromT,ArgName,To,ToT):-
     (	var(From),nonvar(To)
     ->	'$pef_inverse_edge'(To,ToT,ArgName,From,FromT)

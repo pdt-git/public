@@ -5,3 +5,5 @@
 :- use_module(pdt_content_assistant).
 :- use_module(pdt_pef_graph).
 :- use_module(pdt_find_declaration).
+:- use_module(pdt_delta).
+:- use_module(library('pef/pef_base')).
