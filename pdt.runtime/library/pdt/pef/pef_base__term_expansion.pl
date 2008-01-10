@@ -61,16 +61,12 @@ create_id_check(Template,Cx,IdCheck):-
 		).
 create_id_check(_Template,_Cx,true).    
 
-create_record(Template,Cx,Record):-
-    find_id(Template,IdNum),
-    arg(IdNum,Cx,Id),
-    functor(Template,Name,_),
-    atom_concat(Name,'_retractall',RetractName),
-    RetractGoal=..[RetractName,[id=Id]],
+create_record(_Template,Cx,Record):-
+    undo_assert_head(Cx,UndoGoal),
     !,
     Record=
-		(	'$recording'(Key)
-		->	recorda(Key,RetractGoal)
+		(	'$recording'(Key,_)
+		->	recorda(Key,UndoGoal)
 		;	true
 		).
     
@@ -282,7 +278,7 @@ define_retractall_indexed(Template,Decls):-
     functor(Getter,GetterName,2),
     arg(1,Getter,Cx),
     arg(2,Getter,List),
-    create_retract(Template,Cx,Decls,Retracts),
+    create_undoable_retract(Template,Cx,Decls,Retracts),
     Decl=(Head:-Getter,Retracts),    
     ExpDecl= (:- export(Head)),
     memberchk(Decl,Decls),
@@ -293,21 +289,27 @@ define_retractall_indexed(Template,Decls):-
 create_retract(Template,Cx,Decls,RetractOut):-
     functor(Cx,Name,Arity),
     create_retract_action(Template,Cx,Decls,Ref,Action),
-    (	'$option'(hooks)
-    ->	(	find_id(Cx,Num),
-    		arg(Num,Cx,Id)
-    	;	Id=Ref
-    	),
-    	Action2 = 
-    		(	forall(pef_before_retract_hook(Id,Name),true),
-    			Action,
-    			forall(pef_after_retract_hook(Id,Name),true)
-    		)    	
-    ;	Action2=Action
-    ),
-    create_retract_args(Arity,Template,Cx,Decls,Name,Ref,Action,forall(clause(Cx,_,Ref),Action2),Retract),
+    
+    create_retract_args(Arity,Template,Cx,Decls,Name,Ref,Action,forall(clause(Cx,_,Ref),Action),Retract),
     (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
-    ->	cmpix_retractall(Names,Template,Cx,Action2,Ref,CmpixRetract),
+    ->	cmpix_retractall(Names,Template,Cx,Action,Ref,CmpixRetract),
+    	RetractOut=(CmpixRetract;Retract)
+    ;	RetractOut=Retract
+    ).
+create_undoable_retract(Template,Cx,Decls,RetractOut):-
+    functor(Cx,Name,Arity),
+    create_retract_action(Template,Cx,Decls,Ref,Action0),
+    undo_retract_head(Cx,UndoGoal),
+    Action=
+    	(	Action0,
+    		(	'$recording'(Key,full)
+			->	recorda(Key,UndoGoal)
+			;	true
+			)
+		),
+    create_retract_args(Arity,Template,Cx,Decls,Name,Ref,Action,forall(clause(Cx,_,Ref),Action),Retract),
+    (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
+    ->	cmpix_retractall(Names,Template,Cx,Action,Ref,CmpixRetract),
     	RetractOut=(CmpixRetract;Retract)
     ;	RetractOut=Retract
     ).
@@ -360,6 +362,34 @@ create_retract_action_args(I,Name,Template,Cx,Decls,Ref,Retracts,RetractsOut):-
 
 
 
+create_inverse_retract_action(Template,Cx,Decls,Ref,ActionOut):-
+    functor(Cx,Name,Arity),
+    create_inverse_retract_action_args(Arity,Name,Template,Cx,Decls,Ref,assert(Cx,Ref),Action),
+    (	decls_query(Decls,'$metapef_type_tag'(Name,composite_index(Names)))
+    ->  inverse_cmpix_retract_action(Names,Template,Cx,Ref,CmpxAction),
+    	ActionOut=(Action,CmpxAction)
+    ;	ActionOut=Action    
+    ).
+
+create_inverse_retract_action_args(0,_Name,_Template,_Cx,_Decls,_Ref,Retracts,Retracts):-!.
+create_inverse_retract_action_args(I,Name,Template,Cx,Decls,Ref,Retracts,RetractsOut):-
+    decls_query(Decls,'$metapef_attribute_tag'(Name,I,index)),
+    !,
+    arg(I,Cx,Arg),
+	index_name(Template,I,IxName),
+    IndexClause=..[IxName,Arg,Ref],
+	J is I - 1,
+	create_inverse_retract_action_args(J,Name,Template,Cx,Decls,Ref, (assert(IndexClause),Retracts),RetractsOut).  
+create_inverse_retract_action_args(I,Name,Template,Cx,Decls,Ref,Retracts,RetractsOut):-
+    J is I - 1,
+	create_inverse_retract_action_args(J,Name,Template,Cx,Decls,Ref,Retracts,RetractsOut).  
+
+inverse_cmpix_retract_action(Names,Tmpl,Data,Ref,Action):-
+	index_name(Tmpl,Names,IxName),
+    IxClause =..[IxName,Hash,Ref],
+    cmpix_hashable(Names,Tmpl,Data,Hashable),
+    Action=(hash_term(Hashable,Hash),index(IxClause)).
+
 
 process_indices(Decls,_):-
     var(Decls),
@@ -379,6 +409,27 @@ process_indices(['$metapef_type_tag'(Name,composite_index(Names))|Decls],Tmpl):-
 
 process_indices([_|Decls],Tmpl):-    
     process_indices(Decls,Tmpl).
+
+
+undo_retract_head(Cx,Head):-
+    Cx=..[Name|Args],
+	concat_atom([undo,Name,retract],'_',UndoName),
+	Head=..[UndoName|Args].
+
+undo_assert_head(Cx,Head):-
+    Cx=..[Name|Args],
+	concat_atom([undo,Name,assert],'_',UndoName),
+	Head=..[UndoName|Args].
+
+
+undo_retract_clause(Template,Cx,Decls,(Head:-Asserts)):-
+    undo_retract_head(Cx,Head),
+    create_index_asserts(Template,Cx,Decls,Asserts,_).
+    
+undo_assert_clause(Template,Cx,Decls,(Head:-Retracts)):-
+    undo_assert_head(Cx,Head),
+    create_retract(Template,Cx,Decls,Retracts).
+
 
 %%
 % define_pef(+Template).
@@ -409,7 +460,16 @@ expand_definition(TypedTemplate0,Decls):-
     define_retractall(Template,Decls),
     define_query(Template,Decls),
     define_query2(Template,Decls),
-    expand_term((:-pdt_define_context(Template)),ContextDecls),	
+    %begin debug
+    functor(Cx,Name,Arity),
+    %create_inverse_retract_action(Template,Cx,Decls,Ref,ActionOut),
+    undo_retract_clause(Template,Cx,Decls,URC),
+    undo_assert_clause(Template,Cx,Decls,UAC),
+    memberchk(URC,Decls),
+    memberchk(UAC,Decls),
+    %end debug
+    expand_term((:-pdt_define_context(Template)),ContextDecls),
+	    	
 	findall(Decl,pdt_util_context:export_decl(Template,Decl),ContextExportDecls),	
     append(ContextDecls,ContextExportDecls,TailDecls),
     has_tail(['$metapef_concrete'(Name), '$metapef_template'(Name,Template)|TailDecls],Decls).

@@ -1,6 +1,6 @@
-:-['oho.pl'].
+:-['aha.pl'].
 :-[blabla].
 referer2(X):-
  	aha:ja(X).
  	
-:- ['oho.pl','oho.pl',blabla,'oho.pl']. 	 
+:- ['aha.pl','aha.pl',blabla,'aha.pl']. 	 

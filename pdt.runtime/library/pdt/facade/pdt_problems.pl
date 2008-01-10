@@ -90,7 +90,7 @@ problem(Id,File,expensive,Start,End,warning,Message):-%predicate abolished
 	with_output_to(string(Message),format("Loading module ~w abolishes predicate ~w originally defined in ~w.(~w)",[MName,MName:PName/Arity,FirstFile,Id])).
 
 	
-problem(Id,File,cheap,Start,End,error,SMessage):-%file not found
+problem(Id,File,cheap,Start,End,warning,SMessage):-%file not found
     pef_file_not_found_query([id=Id,file_spec=Spec,toplevel=Tl]),        
     toplevel_source_position(Tl,FID,Start,End),
     with_output_to(string(SMessage),format("Cannot resolve file spec: ~w (~w)",[Spec,Id])),  

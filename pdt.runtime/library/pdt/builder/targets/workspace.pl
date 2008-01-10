@@ -22,7 +22,7 @@ pdt_builder:build_hook(file(Abs)):-
 	(	exists_file(Abs)
     ->	pef_reserve_id(pef_file,FID),
     	pef_file_assert([id=FID,path=Abs])    	
-    ;	throw(no_such_file(Abs))
+    ;	true
     ).
 pdt_builder:build_hook(project(Name)):-
     (	pef_project_query([name=Name, id=Project])

@@ -2,7 +2,10 @@
 aha:ja(a).
 aha:ja(b).
 
-:- ['oho.pl','oho.pl',blabla,'oho.pl'].
+:-['oho.pl',
+	'oho.pl',
+		blabla,'oho.pl'
+	].
 referer(A):-
 	umf(aha:ja(A)). 
 	
