@@ -102,6 +102,7 @@ RefactoringStatus result = new RefactoringStatus();
 				l0 = s.queryAll("pdt_resource_delta(Old,New,Type)");
 				l1 =s.queryAll("pdt_modified_file(File,Path)");
 				l2 = s.queryAll("pdt_text_delta(File,Start,End,String)");
+				s.queryAll("pdt_cleanup_transformation("+info.getHead()+")");
 				
 		} catch (PrologInterfaceException e) {
 			status.addFatalError("Problems with Prolog Connection");
