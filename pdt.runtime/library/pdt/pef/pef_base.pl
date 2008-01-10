@@ -2,6 +2,7 @@
 	[	pef_reserve_id/2, 
 		pef_type/2,
 		pef_start_recording/1,
+		pef_start_recording/2,
 		pef_stop_recording/0,
 		pef_clear_record/1,
 		pef_count/2,
@@ -33,8 +34,8 @@
 :- multifile pef_before_assert_hook/2, pef_before_retract_hook/2, pef_after_assert_hook/2, pef_after_retract_hook/2.
 
 
-:- thread_local '$recording'/1.
-:- dynamic '$recording'/1.
+:- thread_local '$recording'/2.
+:- dynamic '$recording'/2.
 :- dynamic '$record_key'/2.
 
 :- dynamic pef_type/2.
@@ -130,7 +131,10 @@ pef_type_is_a(Type1,Type2):-
 
 pef_start_recording(Term):-
 	record_key(Term,Key),
-	asserta('$recording'(Key)).
+	asserta('$recording'(Key,asserts)).
+pef_start_recording(Term,Mode):-
+	record_key(Term,Key),
+	asserta('$recording'(Key,Mode)).
 
 pef_last_record(Term,Ref):-
     record_key(Term,Key),
@@ -139,7 +143,7 @@ pef_last_record(Term,Ref):-
 pef_last_record(_,[]).
 	
 pef_stop_recording:-
-	retract('$recording'(_)),
+	retract('$recording'(_,_)),
 	!.
 pef_stop_recording:-
     throw(not_recording).
