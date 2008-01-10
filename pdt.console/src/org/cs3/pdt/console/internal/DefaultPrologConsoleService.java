@@ -121,7 +121,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		
 	}
 
-	@Override
+	
 	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
 		
 	}

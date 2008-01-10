@@ -7,13 +7,28 @@
 :- ensure_loaded(library('org/cs3/pdt/util/pdt_util_term_position')).
 
 pdt_builder:build_hook(delta):-
+    build_resource_delta,
     forall(
     	pef_modified_toplevel_query([toplevel=Tl]),
-    	build_delta(Tl)
+    	build_text_delta(Tl)
     ).
 
 
-build_delta(Tl):-
+build_resource_delta:-
+    forall(
+    	(	pef_renamed_file_query([file=File,old_path=OldPath]),
+    		pef_file_query([id=File,path=NewPath])
+    	),
+    	(	file_directory_name(NewPath,NewDir),
+	    	file_directory_name(OldPath,OldDir),
+	    	(	OldDir==NewDir
+	    	->	file_base_name(NewPath,NewName),
+	    		pef_resource_delta_assert([old_path=OldPath,new_path=NewName,type=rename])
+	    	;	pef_resource_delta_assert([old_path=OldPath,new_path=NewPath,type=move])
+	    	)
+	    )    	
+    ).
+build_text_delta(Tl):-
     pef_ast_query([toplevel=Tl,root=Node]),
     pef_toplevel_query([id=Tl,file=File,positions=Pos]),
     top_position(Pos,Offset,_),    
@@ -30,16 +45,15 @@ build_delta(Tl):-
     open_memory_file(Buffer,write,BufferOut),
     cx_buffer_out(Cx,BufferOut),
     cx_node(Cx,Node),
-    call_cleanup(
-    	(	src_seek(Cx,Offset,Cx1),
-    		ast_tokens(Node,Tokens),
-    		s(Tokens,Cx1,_)
-    	),
-    	(	close(Null),
-    		close(In),
-    		close(BufferOut)
-    	)
-    ).
+    src_seek(Cx,Offset,Cx1),
+    ast_tokens(Node,Tokens),
+    s(Tokens,Cx1,Cx2),
+    cx_null(Cx2,Null2),
+    cx_in(Cx2,In2),
+    cx_buffer_out(Cx2,BufferOut2),
+    close(Null2),
+    close(In2),
+    close(BufferOut2).
 
 
 	
@@ -79,7 +93,9 @@ s([],Cx,Cx):-
 s([copy(N)|Ns],CxIn,CxOut):-
     !,
 	buf_clear(CxIn,Cx1),
-	c([N],Cx1,Cx2),
+	cx_buffer_out(Cx1,Out),
+	layout_node(N,Out),
+	cx_set_buffer_empty(Cx1,false,Cx2),
 	src_position(Cx2,P),
 	add_replace(P,P,Cx2,Cx3),
 	s(Ns,Cx3,CxOut).
@@ -125,6 +141,7 @@ c([t(T,_,_)|Ns],CxIn,CxOut):-
 
 src_position(Cx,Pos):-
     cx_in(Cx,In),
+    (var(In)->spyme;true),
     character_count(In,Pos).
     
 src_seek(Cx,NewPos,Cx):-
@@ -133,7 +150,8 @@ src_seek(Cx,NewPos,Cx):-
     src_position(Cx,CurrentPos),
     Skip is NewPos - CurrentPos,
     copy_stream_data(In,Null,Skip).
-	
+
+spyme.	
 %% add_replace(+Start,+End,+CxIn,-CxOut).
 % generate a replace instruction
 % replace(Start,End,String),
@@ -145,8 +163,7 @@ add_replace(I,J,CxIn,CxOut):-
     ->	CxOut=CxIn
     ;   cx_buffer(CxIn,Buf),
 	    cx_buffer_out(CxIn,BufOut),
-	    close(BufOut),    
-	    
+	    close(BufOut),	        	   
 	    memory_file_to_codes(Buf,Codes),
 	    open_memory_file(Buf,write,NewBufOut),
 	    cx_set_buffer_out(CxIn,NewBufOut,CxOut),
@@ -175,7 +192,9 @@ buf_clear(Cx,Cx1):-
 
 
 ast_tokens(Node,Tokens):-
-	(	pef_property_query([pef=Node,key=tokens,value=Tokens0])
+	(	pef_property_query([pef=Node,key=copy,value=true])
+	->	Tokens=[copy(Node)]		
+	;	pef_property_query([pef=Node,key=tokens,value=Tokens0])
 	->	process_ast_tokens(Tokens0,Node,Tokens)
 	;	Tokens=[]
 	).	

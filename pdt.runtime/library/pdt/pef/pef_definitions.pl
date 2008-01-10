@@ -488,6 +488,14 @@
 ).
 
 :- define_pef(
+	pef_renamed_file(
+		file:pef_file,
+		old_path
+	)
+).
+
+
+:- define_pef(
 	pef_modified_toplevel(
 		toplevel:pef_toplevel
 	)

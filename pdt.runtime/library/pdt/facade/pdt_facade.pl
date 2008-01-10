@@ -7,3 +7,5 @@
 :- use_module(pdt_find_declaration).
 :- use_module(pdt_delta).
 :- use_module(library('pef/pef_base')).
+:- use_module(library('transform/transform')).
+:- use_module(library('transform/rename_file')).

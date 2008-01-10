@@ -8,11 +8,11 @@
 pdt_builder:target_file(singletons(F),F).
 
 pdt_builder:build_hook(singletons(Abs)):-
-    pdt_request_target(parse(Abs)),
+    pdt_request_target(parse(file(Abs))),
 	%singletons:forget_singletons(Abs),
 	singletons:check_singletons(Abs).
 
-pdt_builder:invalidate_hook(parse(Abs)):-
+pdt_builder:invalidate_hook(parse(file(Abs))):-
 	pdt_invalidate_target(singletons(Abs)).
 
 
