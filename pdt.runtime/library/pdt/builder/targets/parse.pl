@@ -9,10 +9,23 @@
 
 :- pdt_define_context(parse_cx(file,toplevel,term)).
 
-pdt_builder:target_file(parse(F),F).
 
-pdt_builder:build_hook(parse(AbsFile)):-
-    parse:my_build_hook(AbsFile).
+
+pdt_builder:build_hook(parse(Resource)):-
+    pdt_request_target(Resource),
+	(	Resource=file(AbsFile)    
+	->  parse:my_build_hook(AbsFile)    
+	;	forall(pdt_contains(Resource,Element),pdt_request_target(parse(Element)))
+	).
+
+   
+
+pdt_builder:target_file(parse(file(F)),F).
+pdt_builder:target_file(parse(directory(F,_,_)),F).
+pdt_builder:target_mutable(parse(workspace),true).
+pdt_builder:target_mutable(parse(project(_)),true).
+
+
 my_build_hook(AbsFile):-    
 	%pdt_forget(AbsFile),
 	(	exists_file(AbsFile)
@@ -20,18 +33,6 @@ my_build_hook(AbsFile):-
    		pdt_parse(AbsFile)
    	;	true
    	).
-pdt_builder:invalidate_hook(file(AbsFile)):-
-    pdt_invalidate_target(parse(AbsFile)).
-pdt_builder:invalidate_hook(parse(AbsFile)):-
-    parse:
-    (	get_pef_file(AbsFile,DepRef),
-	    forall(
-	    	pef_file_dependency_query([dependency=DepRef,depending=FileRef] ),
-	    	(	get_pef_file(File,FileRef),
-	    		pdt_invalidate_target(parse(File))
-	    	)
-	    )
-	).
 
 pdt_parse(Spec):-
     my_read(Spec).
@@ -207,7 +208,7 @@ process_inclusion(F,Cx):-
 
 
 do_inclusion(File,Cx):-	
-	pdt_request_target(parse(File)),
+	pdt_request_target(parse(file(File))),
 	get_pef_file(File,Ref),
 	(	pef_module_definition_query([file=Ref],Module)
 	->  process_module_inclusion(Module,Cx)

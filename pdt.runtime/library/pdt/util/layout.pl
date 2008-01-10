@@ -5,6 +5,7 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_map')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_io')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
+:- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(layout_rules).
 
 
@@ -94,10 +95,12 @@ token_codes(nl,L,[10|Indent]):-
 token_codes(fun,L,Codes):-
     lt_term(L,Term),
     (	ast_variable_occurance(Term,Var)
-    ->	pef_variable_query([id=Var,name=Name])
-    ;   ast_functor(Term,Name,_)
-    ),
-    atom_codes(Name,Codes).
+    ->	pef_variable_query([id=Var,name=Name]),
+    	atom_codes(Name,Codes)
+    ;   ast_functor(Term,Name,_Arity),
+    	format(codes(Codes),"~q",[Name])    	
+    ).
+    
 	
  
  

@@ -20,7 +20,7 @@ my_build_hook(AbsFile):-
 	%pdt_forget_program(AbsFile),
 	pdt_interprete_program(AbsFile).
 
-pdt_builder:invalidate_hook(parse(AbsFile)):-
+pdt_builder:invalidate_hook(parse(file(AbsFile))):-
     pdt_invalidate_target(interprete(AbsFile)).
 pdt_builder:invalidate_hook(interprete(DepFile)):-
     get_pef_file(DepFile,DepRef),
@@ -89,7 +89,7 @@ clear_predicate(PredID):-
 
 pdt_interprete_program(Abs):-
     get_pef_file(Abs,FileRef),
-	pdt_request_target(parse(Abs)),
+	pdt_request_target(parse(file(Abs))),
 	interprete_program(FileRef).
 
 interprete_program(FileRef):-    
@@ -211,7 +211,7 @@ interprete_file_dependency(Type,Ref,Cx):-
 	).
     
 do_inclusion(Type,File,Ref,Cx):-	
-	pdt_request_target(parse(File)), 
+	pdt_request_target(parse(file(File))), 
 	do_inclusion_X(Type,File,Ref,Cx).
 
 do_inclusion_X(Type,File,Ref,Cx):-

@@ -120,7 +120,7 @@ file_predicate(File,Name/Arity):-
 	pef_predicate_query([id=Pred,name=Name,arity=Arity]).
 	
 request_file_literals(Precision,Path):-
-    pdt_request_targets([parse(Path),interprete(Path)]),
+    pdt_request_targets([parse(file(Path)),interprete(Path)]),
     get_pef_file(Path,F),    
     forall(
 		file_predicate(F,Signature),    		    
@@ -138,7 +138,7 @@ seed_predicate(Name/Arity):-
     ).
 
 seed_file(Path):-
-    pdt_request_targets([workspace,parse(Path),interprete(Path),ast(file(Path))]),
+    pdt_request_targets([workspace,parse(file(Path)),interprete(Path),ast(file(Path))]),
     get_pef_file(Path,File),
     forall(
     	file_depends(File,Dep),

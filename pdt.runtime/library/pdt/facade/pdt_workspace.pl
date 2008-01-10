@@ -8,7 +8,8 @@
 	pdt_contains_star/2,
 	pdt_belongs_to_star/2,
 	pdt_contains/2,
-	pdt_belongs_to/2
+	pdt_belongs_to/2,
+	pdt_relative_path/3
 	]
 ).
 
@@ -19,6 +20,10 @@
 :-use_module(library('pef/pef_api')).
 
 
+pdt_relative_path(Path,library,RelPath):-
+	pef_source_path_query([	path=SourcePath	]),
+	atom_concat(SourcePath,'/',Prefix),
+	atom_concat(Prefix,RelPath,Path).
 	
 
 pdt_contains_star(Container,Resource):-
@@ -82,7 +87,7 @@ belongs_to(project(Name),workspace):-
         
     
 pdt_file_contents_changed(Abs):-
-    pdt_invalidate_target(parse(Abs)).
+    pdt_invalidate_target(parse(file(Abs))).
     
 	
 pdt_file_existence_changed(Abs):-

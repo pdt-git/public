@@ -14,6 +14,10 @@
               class="org.cs3.pdt.actions.ApplyTransformation" 
               menubarPath="additions"
               id="org.cs3.pdt.actions.apply_transformation"/>
+	<action label="Rename File"
+              class="org.cs3.pdt.actions.RenameFile" 
+              menubarPath="additions"
+              id="org.cs3.pdt.actions.rename_file"/>              
     </viewerContribution>
   </extension>
 </plugin>

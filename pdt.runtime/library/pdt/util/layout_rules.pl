@@ -186,8 +186,9 @@ layout_rule( (:-module(Name,Exports)), toplevel, _, Tokens):-
 layout_rule( (:-A), toplevel,_,[fun,spc,where=directive,arg(A),eoc]).
 layout_rule( (A:-B), toplevel,_,[where=head,arg(A),spc,fun,nl,tab,where=body,arg(B),eoc]).
 layout_rule( A , toplevel,Hints,[where=head|Tokens]):-
-    pdt_map_put(Hints,where,head,Hints2),
-	layout_rule(A,literal,Hints2,Tokens).                     
+    pdt_map_put(Hints,where,head,Hints2),    
+	layout_rule(A,literal,Hints2,Tokens0),
+	append(Tokens0,eoc,Tokens).                     
 
     
 % special treatment for conjunction 

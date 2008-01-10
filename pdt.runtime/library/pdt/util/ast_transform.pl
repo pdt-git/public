@@ -197,14 +197,16 @@ occurances of variables that belong to the previously surrounding toplevel. When
 in a new context, repair_variables must be run on the containing toplevel to fix this.  
 */
 ast_unlink(Node):-
-	my_arg(N,Par,Node),
-	pef_arg_retractall([child=Node,parent=Par,num=N]),
-	pef_term_query([id=Par,name=Name,arity=Arity]),
-	pef_term_retractall([id=Par]),
-	NewArity is Arity - 1,
-	pef_term_assert([id=Par,name=Name,arity=NewArity]),
-	Start is N + 1,
-	shift_left(Start,Arity,Par).
+	(	my_arg(N,Par,Node)
+	->	pef_arg_retractall([child=Node,parent=Par,num=N]),
+		pef_term_query([id=Par,name=Name,arity=Arity]),
+		pef_term_retractall([id=Par]),
+		NewArity is Arity - 1,
+		pef_term_assert([id=Par,name=Name,arity=NewArity]),
+		Start is N + 1,
+		shift_left(Start,Arity,Par)
+	;	true %TODO: unlink root nodes that are linked to a toplevel.
+	).
 	
 shift_left(N,Arity,Par):-
 	(	N > Arity

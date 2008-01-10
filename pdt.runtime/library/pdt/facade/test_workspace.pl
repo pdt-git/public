@@ -10,6 +10,8 @@
 :- ensure_loaded(library('util/ast_util')).
 :- ensure_loaded(library('util/ast_transform')).
 :- ensure_loaded(library('org/cs3/pdt/util/pdt_util_term_position')).
+:- use_module(library('transform/transform')).
+:- use_module(library('transform/rename_file')).
 
 
 create_test_project(Path):-
@@ -43,8 +45,8 @@ concurrent_requests(F):-
     initial_request,
     gensym(outline,Outline),
     gensym(problems,Problems),    
-    format("invalidating: parse(~w)~n",[F]),
-	pdt_invalidate_target(parse(F)),
+    format("invalidating: parse(file(~w))~n",[F]),
+	pdt_invalidate_target(parse(file(F))),
 	writeln('done.'),
 	
 	thread_create(pdt_request_target(outline(F)),_,[alias(Outline)]),
@@ -67,6 +69,12 @@ my_layout(Path):-
 	pef_toplevel_query([file=File,id=Toplevel]),
 	pef_ast_query([toplevel=Toplevel,root=Root]),
 	layout_node(Root,current_output).
+my_layout2(Path):-
+	get_pef_file(Path,File),	
+	pef_toplevel_query([file=File,id=Toplevel]),
+	pef_ast_query([toplevel=Toplevel,root=Root]),
+	layout_node(Root,current_output).
+
 my_tokens(Path,Tokens):-
 	get_pef_file(Path,File),
 	pdt_request_targets([ast(file(Path)),newlines(file(Path)),literals(full,file(Path))]),
