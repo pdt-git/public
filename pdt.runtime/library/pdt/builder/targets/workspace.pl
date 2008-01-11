@@ -16,7 +16,7 @@ pdt_builder:build_hook(directory(Abs,Include,Exclude)):-
     	find_entries(Abs,Include,Exclude,Deps),
     	process_entries(Deps,Dir,0,Count),
     	pef_property_assert([pef=Dir,key=file_count,value=Count])
-    ;	throw(no_such_dir(Abs))
+    ;	true
     ).
 pdt_builder:build_hook(file(Abs)):-
 	(	exists_file(Abs)
@@ -34,7 +34,7 @@ pdt_builder:build_hook(project(Name)):-
     							),
     	    pdt_request_target(directory(Path,IP,EP))
     	)
-    ;	throw(no_such_project(Name))
+    ;	true
     ).
 pdt_builder:build_hook(workspace):-
     forall(pef_project_query([name=Name]),pdt_request_target(project(Name))).
