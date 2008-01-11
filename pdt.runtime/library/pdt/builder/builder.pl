@@ -179,8 +179,9 @@ fp_request_target(Target):-
 	    my_debug(builder(debug),"added lock for target ~w, ref=~w~n",[Target,Ref]) 		    
     ;	Msg==implied(Target)
     ->	true 		    
-    ;	Msg==rebuild(Target)
-    ->  fp_build_target(Target)
+    ;	Msg=rebuild(Target,OldDeps)
+    ->  request_target_keys(OldDeps),
+    	fp_build_target(Target)
     ;	Msg=error(Target,E)
     ->	throw(error(target_error(Target,E)))
     ;	Msg=obsolete(Target,Targets)
@@ -339,8 +340,9 @@ request_target(Target):-
     ->	asserta('$has_lock'(Target))	    
     ;	Msg==implied(Target)
     ->	true	    
-    ;	Msg==rebuild(Target)
-    ->  build_target(Target),
+    ;	Msg=rebuild(Target,OldDeps)
+    ->  request_target_keys(OldDeps),
+    	build_target(Target),    	
     	request_target(Target)
     ;	Msg=error(Target,E)
     ->	throw(error(target_error(Target,E)))
@@ -387,6 +389,13 @@ request_targets([T|Ts]):-
 	;	request_target(K)
 	),
 	request_targets(Ts).
+request_target_keys([]).
+request_target_keys([K|Ks]):-	
+	(	'$fp_target'(K)
+	->	fp_request_target(K)
+	;	request_target(K)
+	),
+	request_targets(Ks).
 
 
 
@@ -1095,8 +1104,9 @@ execute_action(rebuild(Thread),Target):-
 	my_debug(builder(debug),"rebuilding target: ~w~n",[Target]),
 	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
 	pif_notify(builder(TargetName),start(Thread)), %FIXME
+	findall(Dep,target_depends(Target,Dep),OldDeps),
 	clear_dependencies(Target),	
-	arbiter_send_message(Thread,Target,rebuild(Target)).
+	arbiter_send_message(Thread,Target,rebuild(Target,OldDeps)).
 execute_action(progress_prepare(Ts),Target):-
 	progress_report_prepare(Target,Ts).	
 execute_action(report_cycle(Thread),Target):-

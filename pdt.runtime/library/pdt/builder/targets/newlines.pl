@@ -14,8 +14,10 @@ pdt_builder:build_hook(newlines(Resource)):-
 
 find_newlines(Path):-
 	get_pef_file(Path,File),
+	!,
 	open(Path,read,In),
 	call_cleanup(find_newlines(In,File),close(In)).
+find_newlines(_).
 	    
 find_newlines(In,File):-
     pdt_map_empty(Assoc0),
