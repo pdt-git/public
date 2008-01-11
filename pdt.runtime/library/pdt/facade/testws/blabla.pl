@@ -1,11 +1,8 @@
-:- use_module('oho.pl').
+:- use_module('aha.pl').
 aha:ja(a).
 aha:ja(b).
 
-:-['oho.pl',
-	'oho.pl',
-		blabla,'oho.pl'
-	].
+:- ['aha.pl','aha.pl',blabla,'aha.pl'].
 referer(A):-
 	umf(aha:ja(A)). 
 	

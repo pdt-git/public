@@ -120,12 +120,13 @@ file_predicate(File,Name/Arity):-
 	pef_predicate_query([id=Pred,name=Name,arity=Arity]).
 	
 request_file_literals(Precision,Path):-
-    pdt_request_targets([parse(file(Path)),interprete(Path)]),
-    get_pef_file(Path,F),    
-    forall(
-		file_predicate(F,Signature),    		    
-    	pdt_request_target(literals(Precision,predicate(Signature)))
-    ).
+    (	get_pef_file(Path,F)
+    ->  pdt_request_targets([parse(file(Path)),interprete(Path)]),       
+	    forall(
+			file_predicate(F,Signature),    		    
+	    	pdt_request_target(literals(Precision,predicate(Signature)))
+	    )
+	).
 
 seed_predicate(Name/Arity):-    
     %begin debug
@@ -138,18 +139,20 @@ seed_predicate(Name/Arity):-
     ).
 
 seed_file(Path):-
-    pdt_request_targets([workspace,parse(file(Path)),interprete(Path),ast(file(Path))]),
-    get_pef_file(Path,File),
-    forall(
-    	file_depends(File,Dep),
-    	(	get_pef_file(DepPath,Dep),
-    		pdt_request_target(literals(first,file(DepPath)))
-    	)
-    ),
-    forall(
-    	fp_init_todo3(File,Cx,Goal),
-    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(first,file(Path)))
-    ).
+    (	get_pef_file(Path,File)
+    ->	pdt_request_targets([workspace,parse(file(Path)),interprete(Path),ast(file(Path))]),    
+	    forall(
+	    	file_depends(File,Dep),
+	    	(	get_pef_file(DepPath,Dep),
+	    		pdt_request_target(literals(first,file(DepPath)))
+	    	)
+	    ),
+	    forall(
+	    	fp_init_todo3(File,Cx,Goal),
+	    	pdt_fp_enqueue(find_literals(Goal,Cx),literals(first,file(Path)))
+	    )
+	 ;	true
+	 ).
     
 
 process_results([]).

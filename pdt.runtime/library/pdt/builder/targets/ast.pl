@@ -15,12 +15,14 @@ spyme.
 pdt_builder:build_hook(ast(Resource)):-
     pdt_request_target(Resource),
 	(	Resource=file(AbsFile)    
-	->  get_pef_file(AbsFile,FID),
-	    pdt_request_target(parse(file(AbsFile))),
-		forall(
-	    	pef_toplevel_query([file=FID,id=Tl]),    	
-	    	ast:rebuild(Tl)
-	    )
+	->  (	get_pef_file(AbsFile,FID)
+	    ->	pdt_request_target(parse(file(AbsFile))),
+			forall(
+		    	pef_toplevel_query([file=FID,id=Tl]),    	
+		    	ast:rebuild(Tl)
+		    )
+		;	true
+		)
 	;	forall(pdt_contains(Resource,Element),pdt_request_target(ast(Element)))
 	).
 

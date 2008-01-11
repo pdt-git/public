@@ -90,7 +90,7 @@ pdt_file_contents_changed(Abs):-
     pdt_invalidate_target(parse(file(Abs))).
     
 	
-pdt_file_existence_changed(Abs):-
+pdt_file_existence_changed(Abs):-    
     pdt_invalidate_target(file(Abs)).
     
 
