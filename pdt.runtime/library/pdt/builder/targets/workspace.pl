@@ -2,8 +2,34 @@
 :-use_module(library('builder/builder')).
 :-use_module(library('pef/pef_base')).
 :-use_module(library('util/pdt_regex')).
-
-
+pdt_builder:target_container(project(_),workspace).
+pdt_builder:target_container(file(F),directory(D,IP,EP)):-
+    pef_source_path_query(
+    	[	project=Project, 
+    		include_pattern=IP,
+    		exclude_pattern=EP,
+    		path=D
+    	]
+    ),
+    atom_prefix(F,D),
+    !,
+ 	atom_codes(F,Codes),
+    pdt_regex_match(IP,Codes,[],_),
+    \+ pdt_regex_match(EP,Codes,[],_).    							
+pdt_builder:target_container(directory(D,IP,EP),Container):-
+    (	pef_source_path_query(
+    		[	project=Project, 
+	    		include_pattern=IP,
+	    		exclude_pattern=EP,
+	    		path=D
+	    	]
+	    )        	
+    ->	pef_project_query([id=Project,name=ProjectName]),
+    	Container=project(ProjectName)
+    ;	file_directory_name(D,Path),
+    	Container=directory(Path,IP,EP)
+    ).
+    
 
 pdt_builder:target_file(file(F),F).
 pdt_builder:target_file(directory(F,_,_),F).

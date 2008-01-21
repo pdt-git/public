@@ -138,11 +138,12 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
 			// buildMonitor.beginTask("Searching for problems", files.size());
+			String query = "pdt_with_targets([problems(workspace,[" + tag
+					+ "])],(pdt_problem_count(" + tag
+					+ ",Count),pdt_problem(Id,File," + tag
+					+ ",Start,End,Severity,Msg)))";
 			s.queryAll("update_markers",
-					"pdt_with_targets([problems(workspace,[" + tag
-							+ "])],(pdt_problem_count(" + tag
-							+ ",Count),pdt_problem(Id,File," + tag
-							+ ",Start,End,Severity,Msg)))");
+					query);
 			while (!s.isIdle()) {
 				if (UpdateMarkersJob.this.monitor.isCanceled()) {
 					try {

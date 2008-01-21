@@ -36,6 +36,8 @@ pdt_builder:target_file(literals(_,file(Path)),Path).
 pdt_builder:target_mutable(literals(_,workspace),true).
 pdt_builder:target_mutable(literals(_,project(_)),true).
 pdt_builder:target_mutable(inverse_search(_),true).
+pdt_builder:target_container(literals(Mode,Resource),literals(Mode,Container)):-
+    pdt_builder:target_container(Resource,Container).
 
 pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
     cx_head(Cx,Head),
@@ -47,6 +49,7 @@ pdt_builder:fp_process_hook(find_literals(Goal,Cx)):-
     	Results
     ),
     process_results(Results).
+
 
 
 
@@ -121,7 +124,7 @@ file_predicate(File,Name/Arity):-
 	
 request_file_literals(Precision,Path):-
     (	get_pef_file(Path,F)
-    ->  pdt_request_targets([parse(file(Path)),interprete(Path)]),       
+    ->  pdt_request_targets([parse(file(Path)),interprete(file(Path))]),       
 	    forall(
 			file_predicate(F,Signature),    		    
 	    	pdt_request_target(literals(Precision,predicate(Signature)))
@@ -140,7 +143,7 @@ seed_predicate(Name/Arity):-
 
 seed_file(Path):-
     (	get_pef_file(Path,File)
-    ->	pdt_request_targets([workspace,parse(file(Path)),interprete(Path),ast(file(Path))]),    
+    ->	pdt_request_targets([workspace,parse(file(Path)),interprete(file(Path)),ast(file(Path))]),    
 	    forall(
 	    	file_depends(File,Dep),
 	    	(	get_pef_file(DepPath,Dep),
@@ -615,7 +618,7 @@ fp_init_todo2(Pred,Cx,GoalNode):-
     pef_directory_entry_query([child=File]),%ignore toplevels that belong to files outside the source path
     \+ pef_term_expansion_query([original=Tl]), %for expansion: ignore original.
     get_pef_file(Path,File),
-    pdt_request_targets([interprete(Path),ast(file(Path))]),
+    pdt_request_targets([interprete(file(Path)),ast(file(Path))]),
 	%    
     predicate_owner(Pred,Prog),
 	(	pef_predicate_property_definition_query([predicate=Pred,property=module_transparent])

@@ -11,46 +11,27 @@
 
 :- pdt_define_context(cx(program,module,file,toplevel,file_stack)).
 
-pdt_builder:target_file(interprete(F),F).
+pdt_builder:target_container(interprete(Resource),interprete(Container)):-
+    pdt_builder:target_container(Resource,Container).
 
-pdt_builder:build_hook(interprete(AbsFile)):-
-    interprete:my_build_hook(AbsFile).
+pdt_builder:target_file(interprete(file(F)),F).
+pdt_builder:target_file(interprete(directory(F,_,_)),F).
+pdt_builder:target_mutable(interprete(workspace),true).
+pdt_builder:target_mutable(interprete(project(_)),true).
+    
+
+pdt_builder:build_hook(interprete(Resource)):-
+    pdt_request_target(Resource),
+	(	Resource=file(AbsFile)    
+	->  interprete:my_build_hook(AbsFile) 
+	;	forall(pdt_contains(Resource,Element),pdt_request_target(interprete(Element)))
+	).
+
 
 my_build_hook(AbsFile):-    
 	%pdt_forget_program(AbsFile),
 	pdt_interprete_program(AbsFile).
 
-pdt_builder:invalidate_hook(parse(file(AbsFile))):-
-    pdt_invalidate_target(interprete(AbsFile)).
-pdt_builder:invalidate_hook(interprete(DepFile)):-
-    get_pef_file(DepFile,DepRef),
-    pef_file_dependency_query([dependency=DepRef,depending=FileRef]),
-    get_pef_file(File,FileRef),
-    pdt_invalidate_target(interprete(File)).
-/*
-pdt_forget_program(AbsFile):-
-    pdt_invalidate_target(interprete(AbsFile)),
-    get_pef_file(AbsFile,Ref),
-    (	pef_program_query([file=Ref,id=PID])
-    ->	forget_program(PID)
-    ;	true
-    ).
-*/
-/*pdt_forget_program(AbsFile):-
-    get_pef_file(AbsFile,Ref),
-    pef_program_cleanupall([file=Ref]).
-    
-%% forget_program(+PID)
-% Anihilate program PID.
-% forget all modules owned by the program PID.
-% Also forget all module name bindings within the program.
-% Finally, forget all problems associated with the program. (NOT IMPLEMENTED YET).
-%
-% Does NOT check for dangling references to the program or its components.
-forget_program(PID):-
-	 pef_program_module_retractall([program=PID]),	 
-	 forall(module_owner_nondet(MID,PID),delete_module(MID)).
-*/
 %% delete_module(+MID)
 % Rid the world of module MID.
 % delete all predicates defined by the module.%
@@ -218,7 +199,7 @@ do_inclusion_X(Type,File,Ref,Cx):-
     
     (	pef_module_definition_query([file=Ref,id=MID])
 	->  catch(
-			pdt_request_target(interprete(File)),
+			pdt_request_target(interprete(file(File))),
 			error(cycle(T)),
 			(	debug(interprete(todo),"TODO: warn about dependency cycle: ~w~nWe try to go on with incomplete information.",[T]),
 				process_module_inclusion(Type,Ref,MID,Cx)

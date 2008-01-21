@@ -19,6 +19,7 @@
 	fp_seed_hook/1,
 	invalidate_hook/1,
 	estimate_hook/3,
+	target_container/2,
 	target_file/2,
 	target_mutable/2,
 	target_mux/2,
@@ -36,6 +37,7 @@
 	fp_seed_hook/1,	
 	invalidate_hook/1, %FIXME: not used anymore.
 	estimate_hook/3,
+	target_container/2,
 	target_file/2,
 	target_mutable/2,
 	target_mux/2,
@@ -395,7 +397,7 @@ request_target_keys([K|Ks]):-
 	->	fp_request_target(K)
 	;	request_target(K)
 	),
-	request_targets(Ks).
+	request_target_keys(Ks).
 
 
 
@@ -860,6 +862,11 @@ then cache it on the heap.
 % The arbiter only reads them.
 :- dynamic '$fp_target'/1.
 
+% succeeds if the first argument is the key of a target 
+% is contained in the target with the second key
+% The arbiter only reads them.
+:- dynamic '$target_container'/2.
+
 
 target_key(T,K):-
     (	clause('$target'(T),_,K)
@@ -876,6 +883,12 @@ target_key(T,K):-
     	),
     	(	fix_point_target(T)
     	->	assert('$fp_target'(K))
+    	;	true
+    	),
+    	(	target_container(T,Container)
+    	->	target_key(Container,ContainerKey),
+    		%add_dependency(ContainerKey,K) %FIXME: dangerous! Should only be done by the arbiter.
+    		assert('$target_container'(K,ContainerKey)) 
     	;	true
     	)
     ;	throw(doof(T,K))	
@@ -973,14 +986,16 @@ target_transition(state(A, outdated, Ls,SLs,Ws),			mark_dirty(_), 	[], 					stat
 target_transition(state(idle, available , [],SLs,[]),		mark_clean(_), 	[],						state(idle, available, [],SLs,[]),			_Target).
 
 % exit building
-target_transition(state(building(P), pending(P),[],SLs,[]),	mark_clean(_), 	[notify_done],			state(idle, available, [],SLs,[]),			_Target).
+target_transition(state(building(P), pending(P),[],SLs,[]),	mark_clean(_), 	[add_container_deps,																			
+																			notify_done],	state(idle, available, [],SLs,[]),			_Target).
 
 % exit building
 target_transition(state(building(_), outdated,[],SLs,Ws),	mark_clean(_), 	[],						state(idle, outdated, [],SLs,Ws),			_Target).
 
 %enter reading
 % exit building
-target_transition(state(building(_), pending(_),[],SLs,Ws),	mark_clean(_), 	[lock_deps_all(Ws),
+target_transition(state(building(_), pending(_),[],SLs,Ws),	mark_clean(_), 	[add_container_deps,																			
+																			lock_deps_all(Ws),
 																			notify_done,
 																			grant_all(Ws)],		state(reading, available, Ls,SLs,[]),		Target):-
 	waits2locks(Ws,Target,Ls).	
@@ -1080,7 +1095,11 @@ execute_action(invalidate,Target):-
     	arbiter_send_message(fast_lane(Dependent),Target,mark_dirty(target(Target)))
     	
     ).
-    
+execute_action(add_container_deps,Target):-
+	forall(
+		'$target_container'(Target,Container),
+		add_dependency(Container,Target)
+	).    
 execute_action(obsolete([]),_).    
 execute_action(obsolete([L|Ls]),Target):-
     L=lock(Client,Target2),

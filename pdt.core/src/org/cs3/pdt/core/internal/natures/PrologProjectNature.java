@@ -289,9 +289,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public boolean isPrologSource(IResource resource) throws CoreException {
 		Set sourcePathEntries = getExistingSourcePathEntries();
 
-		if (!resource.exists()) {
-			return false;
-		}
+//		if (!resource.exists()) {
+//			return false;
+//		}
 		if (sourcePathEntries.contains(resource)) {
 			return true;
 		}

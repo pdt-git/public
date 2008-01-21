@@ -36,8 +36,8 @@ pdt_test_interpreter(Spec,Result):-
     user:consult(Spec),
     pdt_file_spec(Spec,Abs),    
     assert(test_file(Abs)),
-    pdt_invalidate_target(interprete(Abs)),
-    pdt_with_targets([interprete(Abs)],test_interpreter(Abs,Result)).
+    pdt_invalidate_target(interprete(file(Abs))),
+    pdt_with_targets([interprete(file(Abs))],test_interpreter(Abs,Result)).
 
 test_interpreter(Abs,Result):-
     reality_subset_pefs(Abs,Result).

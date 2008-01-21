@@ -12,7 +12,8 @@
 :- use_module(library('facade/pdt_workspace')).
 
 :-multifile kind/3.
-
+pdt_builder:target_container(problems(Resource,Filter),problems(Container,Filter)):-
+    pdt_builder:target_container(Resource,Container).
 pdt_builder:target_file(problems(directory(Path,_,_),_),Path).
 pdt_builder:target_file(problems(file(Path),_),Path).
 pdt_builder:target_mutable(problems(workspace,_),true).
@@ -34,7 +35,7 @@ pdt_builder:estimate_hook(problems(project(ProjectName),[expensive]),T,1):-
 	file_depends_star(File,Dep),
 	get_pef_file(DepPath,Dep),
 	(	T=literals(first,file(DepPath))
-	;	T=interprete(DepPath)
+	;	T=interprete(file(DepPath))
 	;	T=ast(file(DepPath))
 	).
 

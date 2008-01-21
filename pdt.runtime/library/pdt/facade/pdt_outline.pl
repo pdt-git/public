@@ -24,7 +24,7 @@
 pdt_builder:target_file(outline(F),F).
 
 pdt_builder:build_hook(outline(F)):-
-	pdt_with_targets([interprete(F)],true).
+	pdt_with_targets([interprete(file(F))],true).
 
 %%
 % pdt_outline_child(+File,+ParentType,+ParentID,-ChildType,-ChildID).
