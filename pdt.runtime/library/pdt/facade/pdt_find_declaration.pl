@@ -29,7 +29,7 @@
 % @param PredId will be unified with the PEF Identifier of the resolved predicate.
 pdt_resolve_predicate(CxFile,CxModule,Name,Arity,Pred):-
     get_pef_file(CxFile,FID),
-    pdt_request_target(interprete(CxFile)),
+    pdt_request_target(interprete(file(CxFile))),
     % if the module is not bound, try to guess it from the file.
     (	var(CxModule)
     ->	(	pef_module_definition_query([file=FID,name=CxModule])

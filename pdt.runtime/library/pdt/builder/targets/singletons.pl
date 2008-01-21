@@ -5,31 +5,30 @@
 :-use_module(library('builder/targets/parse')).
 :-use_module(library('builder/targets/ast')).
 
-pdt_builder:target_file(singletons(F),F).
 
-pdt_builder:build_hook(singletons(Abs)):-
+
+pdt_builder:build_hook(singletons(Resource)):-
+    pdt_request_target(Resource),
+	(	Resource=singletons(AbsFile)    
+	->  singletons:my_build_hook(AbsFile)    
+	;	forall(pdt_contains(Resource,Element),pdt_request_target(singletons(Element)))
+	).
+
+   
+pdt_builder:target_container(singletons(Resource),singletons(Container)):-
+    pdt_builder:target_container(Resource,Container).
+pdt_builder:target_file(singletons(file(F)),F).
+pdt_builder:target_file(singletons(directory(F,_,_)),F).
+pdt_builder:target_mutable(singletons(workspace),true).
+pdt_builder:target_mutable(singletons(project(_)),true).
+
+my_build_hook(Abs):-
     pdt_request_target(parse(file(Abs))),
-	%singletons:forget_singletons(Abs),
 	singletons:check_singletons(Abs).
 
-pdt_builder:invalidate_hook(parse(file(Abs))):-
-	pdt_invalidate_target(singletons(Abs)).
 
 
-/*
-forget_singletons(Abs):-
-    get_pef_file(Abs,FID),
-    forall(
-    	(	pef_toplevel_query([file=FID,id=TlID]),
-    		pef_ast_query([toplevel=TlID,id=Ast]),
-    		pef_variable_query([ast=Ast,id=VID])
-    	),
-    	(	pef_singleton_retractall([variable=VID]),
-    		pef_no_singleton_retractall([variable=VID])
-    	)
-    ).
-  
- */ 
+ 
 toplevel_with_singletons(FID,TL,Singletons):-
  	pef_toplevel_query([file=FID,id=TL,singletons=Singletons/*,varnames=VarNames*/]),
 	\+ pef_term_expansion_query([expanded=TL]). %for expansion: ignore expanded term.

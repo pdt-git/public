@@ -19,7 +19,8 @@ pdt_builder:build_hook(parse(Resource)):-
 	).
 
    
-
+pdt_builder:target_container(parse(Resource),parse(Container)):-
+    pdt_builder:target_container(Resource,Container).
 pdt_builder:target_file(parse(file(F)),F).
 pdt_builder:target_file(parse(directory(F,_,_)),F).
 pdt_builder:target_mutable(parse(workspace),true).
