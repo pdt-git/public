@@ -70,8 +70,6 @@ import org.eclipse.ui.ide.IDE;
 
 public final class PDTUtils {
 
-	
-
 	public static PrologInterface getActiveConsolePif() {
 		return PrologConsolePlugin.getDefault().getPrologConsoleService()
 				.getActivePrologConsole().getPrologInterface();
@@ -119,8 +117,13 @@ public final class PDTUtils {
 
 			if (loc.isRowBased)
 				editor.gotoLine(loc.line);
-			else
-				editor.gotoOffset(loc.offset);
+			else {
+				IDocument doc = editor.getDocumentProvider().getDocument(
+						editor.getEditorInput());
+
+				editor.gotoOffset(PDTCoreUtils.convertCharacterOffset(
+						doc.get(), loc.offset));
+			}
 		}
 
 	}
