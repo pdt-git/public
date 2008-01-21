@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -139,6 +140,7 @@ RefactoringStatus result = new RefactoringStatus();
 		//   pef_file --> TextFileChange
 		//HashMap<Object, IFile> files = new HashMap<Object, IFile>();
 		HashMap<Object, MultiTextEdit> fileChanges = new HashMap<Object, MultiTextEdit>();
+		HashMap<Object, IFile> files = new HashMap<Object, IFile>();
 		
 		for (Object object : l1) {
 			Map m = (Map)object;
@@ -158,6 +160,7 @@ RefactoringStatus result = new RefactoringStatus();
 		    textFileChange.setEdit(rootEdit);
 			//files.put(key, file);
 			fileChanges.put(key, rootEdit);
+			files.put(key, file);
 			change.add(textFileChange);
 		}
 		
@@ -167,9 +170,14 @@ RefactoringStatus result = new RefactoringStatus();
 			Object key = m.get("File");
 			int start = Integer.parseInt((String)m.get("Start"));
 			int end = Integer.parseInt((String)m.get("End"));
+			IDocument doc = PDTCoreUtils.getDocument(files.get(key));
+			start = PDTCoreUtils.convertCharacterOffset(doc, start);
+			end = PDTCoreUtils.convertCharacterOffset(doc, end);
 			String string = (String) m.get("String");
 			ReplaceEdit edit = new ReplaceEdit(start,end-start,string);
-			fileChanges.get(key).addChild(edit);
+			MultiTextEdit multiTextEdit = fileChanges.get(key);
+			
+			multiTextEdit.addChild(edit);
 		}
 		
 		return change;
