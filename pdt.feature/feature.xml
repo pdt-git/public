@@ -2,7 +2,7 @@
 <feature
       id="PDTFeature"
       label="PDT-Feature"
-      version="0.2.0"
+      version="0.2.0.qualifier"
       provider-name="http://roots.iai.uni-bonn.de">
 
    <description url="http://roots.iai.uni-bonn.de/research/pdt/">
@@ -46,63 +46,72 @@ particular conditions under which they may be used, modified
 and/or distributed.
    </license>
 
+   <url>
+      <update label="ROOTS Update Site" url="http://roots.iai.uni-bonn.de/research/jtransformer/downloads/JTransformerUpdateSite"/>
+   </url>
+
    <requires>
-      <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.junit"/>
+      <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.junit"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.search"/>
       <import plugin="org.eclipse.swt"/>
+      <import plugin="org.cs3.pdt.common"/>
+      <import plugin="org.cs3.pdt.core"/>
+      <import plugin="org.cs3.pdt.runtime"/>
+      <import plugin="org.cs3.pdt.console"/>
+      <import plugin="org.cs3.pdt.common.ui"/>
    </requires>
 
    <plugin
          id="org.cs3.pdt.common.ui"
          download-size="0"
          install-size="0"
-         version="0.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.cs3.pdt"
          download-size="0"
          install-size="0"
-         version="0.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.cs3.pdt.common"
          download-size="0"
          install-size="0"
-         version="0.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.cs3.pdt.console"
          download-size="0"
          install-size="0"
-         version="0.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.cs3.pdt.core"
          download-size="0"
          install-size="0"
-         version="0.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.cs3.pdt.runtime"
          download-size="0"
          install-size="0"
-         version="0.2.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.cs3.pdt.runtime.socket"
          download-size="0"
          install-size="0"
-         version="0.2.0"
+         version="0.0.0"
          fragment="true"/>
 
 </feature>

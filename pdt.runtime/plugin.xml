@@ -3,7 +3,7 @@
 <plugin
    id="org.cs3.pdt.runtime"
    name="PrologInterface"
-   version="0.2.0"
+   version="0.2.0.qualifier"
 
    class="org.cs3.pdt.runtime.PrologRuntimePlugin">
    <runtime>
