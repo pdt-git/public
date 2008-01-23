@@ -122,19 +122,23 @@ public class ReusablePool {
 			this.maxPoolSize = size;
 		}
 	}
-	
+	// TRHO: fixed PDT-262
 	public void clear(){
+		synchronized (pool) {
 		Collection collection = pool.values();
-		for (Iterator it = collection.iterator(); it.hasNext();) {
-			List list = (List) it.next();
-			for (Iterator it2 = list.iterator(); it2.hasNext();) {
-				Reusable s = (Reusable) it2.next();
-				s.destroy();
-				it2.remove();
+			for (Iterator it = collection.iterator(); it.hasNext();) {
+				List list = (List) it.next();
+				for (Iterator it2 = list.iterator(); it2.hasNext();) {
+					Reusable s = (Reusable) it2.next();
+					s.destroy();
+					//it2.remove();
+				}
+				list.clear();
+				//it.remove();
 			}
-			it.remove();
+			pool.clear();
+			poolSize=0;
 		}
-		poolSize=0;
 	}
 
 }
