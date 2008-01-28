@@ -1,7 +1,8 @@
 :- module(pdt_find_declaration,
 	[	pdt_resolve_predicate/5,
 		pdt_predicate_contribution/4,
-		pdt_predicate_reference/6
+		pdt_predicate_reference/6,
+		pdt_file_module/2
 	]).
 
 
@@ -12,7 +13,13 @@
 :-use_module(library('builder/targets/literals')).
 
 
-
+pdt_file_module(Path,Module):-
+    get_pef_file(Path,File),
+    (	pef_module_definition_query([file=File,name=Module])
+    ->	true
+    ;	Module=user
+    ).
+    
 %%
 % pdt_resolve_predicate(+CxFile,+CxModule,+Name,+Arity,-PredId).
 % resolve a predicate reference in a given context.
