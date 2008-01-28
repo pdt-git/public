@@ -9,7 +9,7 @@
 
 pdt_builder:build_hook(singletons(Resource)):-
     pdt_request_target(Resource),
-	(	Resource=singletons(AbsFile)    
+	(	Resource=file(AbsFile)    
 	->  singletons:my_build_hook(AbsFile)    
 	;	forall(pdt_contains(Resource,Element),pdt_request_target(singletons(Element)))
 	).
