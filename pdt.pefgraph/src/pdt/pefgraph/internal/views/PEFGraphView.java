@@ -60,10 +60,12 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	private Action selectPifAction;
 
 	private Action refreshAction;
-	
+
 	private Action clearAction;
-	
+
 	private Action setVisibilityAction;
+
+	private Menu contextMenu;
 
 	// private Action action2;
 	private final static String HOOK_ID = "PefGraphViewHook";
@@ -75,62 +77,35 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		makeActions();
-		hookContextMenu();
+		hookContextMenu(parent);
 		contributeToActionBars();
-		addSelectionChangedListener(new ISelectionChangedListener(){
-
-			public void selectionChanged(SelectionChangedEvent event) {
-				ISelection s = event.getSelection();
-				IStructuredSelection ss = null;
-				if(!(s instanceof IStructuredSelection)){
-					return;
-				}
-				ss=(IStructuredSelection) s;
-				Object[] array = ss.toArray();
-				for (int i = 0; i < array.length; i++) {
-					if(array[i] instanceof Node){
-						Node node = (Node)array[i];
-						makeInteresting(node);
-					}
-				}
-				
-			}
-			
-		});
 		
-	}
+		// addSelectionChangedListener(new ISelectionChangedListener(){
+		//
+		// public void selectionChanged(SelectionChangedEvent event) {
+		// ISelection s = event.getSelection();
+		// IStructuredSelection ss = null;
+		// if(!(s instanceof IStructuredSelection)){
+		// return;
+		// }
+		// ss=(IStructuredSelection) s;
+		// Object[] array = ss.toArray();
+		// for (int i = 0; i < array.length; i++) {
+		// if(array[i] instanceof Node){
+		// Node node = (Node)array[i];
+		// makeInteresting(node);
+		// }
+		// }
+		//				
+		// }
+		//			
+		// });
 
-
-	private void makeInteresting(Node node) {
-		Map m = (Map)node.getData();
-		String id = (String) m.get("Id");
-		String type = (String) m.get("Type");
-		makeInteresting(id,type);
 	}
 
 	
 	
-	private void makeInteresting(String id, String type) {
-		if(pif==null){
-			return;
-		}
-		PrologSession s = null;
-		try{
-			s=pif.getSession();
-			s.queryOnce("pef_graph_set_interesting("+id+","+type+")");
-		} catch (PrologException e) {
-			Debug.rethrow(e);
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		}finally{
-			if(s!=null){
-				s.dispose();
-			}
-		}
-	}
-
-
-	private void hookContextMenu() {
+	private void hookContextMenu(Composite parent) {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
@@ -138,9 +113,13 @@ public class PEFGraphView extends HyperbolicGraphView implements
 				PEFGraphView.this.fillContextMenu(manager);
 			}
 		});
-
+		getSite().registerContextMenu(menuMgr, this);
+		contextMenu = menuMgr.createContextMenu(parent);
+		getControl().setMenu(contextMenu);
 	}
-
+	
+		
+	
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
@@ -173,36 +152,36 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	}
 
 	private void makeActions() {
-		clearAction = new Action(){
+		clearAction = new Action() {
 			@Override
 			public void run() {
-				if(pif==null){
+				if (pif == null) {
 					return;
 				}
-				PrologSession session= null;
+				PrologSession session = null;
 				try {
-					
+
 					session = pif.getSession();
 					session.queryOnce("pef_graph_clear");
 				} catch (PrologInterfaceException e) {
 					Debug.rethrow(e);
-				}finally{
-					if(session!=null){
+				} finally {
+					if (session != null) {
 						session.dispose();
 					}
 				}
 			}
-			
+
 		};
 		clearAction.setText("Clear Graph");
-		clearAction.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.CLEAR));
-		
-		
-		setVisibilityAction = new SetVisibilityAction(){
+		clearAction.setImageDescriptor(ImageRepository
+				.getImageDescriptor(ImageRepository.CLEAR));
+
+		setVisibilityAction = new SetVisibilityAction() {
 
 			@Override
 			protected PrologInterface getPrologInterface() {
-				
+
 				return pif;
 			}
 
@@ -212,11 +191,11 @@ public class PEFGraphView extends HyperbolicGraphView implements
 				return PEFGraphView.this.getSite().getShell();
 			}
 
-						
 		};
 		setVisibilityAction.setText("Modify Node Visibility");
-		setVisibilityAction.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.SET_VISIBILITY));
-		
+		setVisibilityAction.setImageDescriptor(ImageRepository
+				.getImageDescriptor(ImageRepository.SET_VISIBILITY));
+
 		selectPifAction = new SelectPifAction() {
 
 			@Override
@@ -278,7 +257,9 @@ public class PEFGraphView extends HyperbolicGraphView implements
 
 	};
 
-	private HashMap nodes;
+	private HashMap<String, Node> nodes;
+
+	private HashMap<String, Edge> edges;
 
 	private void clearGraph() {
 		setModel(new DefaultGraph());
@@ -295,8 +276,8 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			}
 			IPrologEventDispatcher d = PrologRuntimePlugin.getDefault()
 					.getPrologEventDispatcher(pif);
-			d.addPrologInterfaceListener("pef_node(_,_)", this);
-			d.addPrologInterfaceListener("pef_edge(_,_,_,_)", this);
+			d.addPrologInterfaceListener("pef_node(_)", this);
+			d.addPrologInterfaceListener("pef_edge(_,_,_)", this);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		}
@@ -307,8 +288,8 @@ public class PEFGraphView extends HyperbolicGraphView implements
 		try {
 			IPrologEventDispatcher d = PrologRuntimePlugin.getDefault()
 					.getPrologEventDispatcher(pif);
-			d.removePrologInterfaceListener("pef_node(_,_)", this);
-			d.removePrologInterfaceListener("pef_edge(_,_,_,_)", this);
+			d.removePrologInterfaceListener("pef_node(_)", this);
+			d.removePrologInterfaceListener("pef_edge(_,_,_)", this);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		}
@@ -334,8 +315,8 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	private void createGraph() {
 		Graph graph = getModel();
 
-		nodes = new HashMap();
-		List edges = new Vector();
+		nodes = new HashMap<String, Node>();
+		edges = new HashMap<String, Edge>();
 		PrologSession s = null;
 		try {
 			s = pif.getSession();
@@ -343,42 +324,36 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			Debug.rethrow(e);
 		}
 		try {
-			List list = s.queryAll("pef_graph_node(Id,Type,Labels,Opacity)");
+			List list = s.queryAll("pef_graph_node(Id,Type,Labels)");
 			for (Iterator iter = list.iterator(); iter.hasNext();) {
 				Map m = (Map) iter.next();
 				String id = (String) m.get("Id");
 				String type = (String) m.get("Type");
 				List labels = (List) m.get("Labels");
-				String key = id + ":" + type;
-				String label = key + " " + Util.splice(labels, ", ");
-				Node node = new DefaultNode(graph, label);				
+				String key = id;
+				String label = key + ":" + type + " "
+						+ Util.splice(labels, ", ");
+				Node node = new DefaultNode(graph, label);
 				node.setBackgroundColor(getNodeColor(type));
 				node.setData(m);
 				nodes.put(key, node);
 			}
 
-			list = s.queryAll("pef_graph_edge(From,FromType,To,ToType,Label)");
+			list = s.queryAll("pef_graph_edge(From,Arg,To)");
 
 			for (Iterator it = list.iterator(); it.hasNext();) {
 				Map m = (Map) it.next();
 				String from = (String) m.get("From");
-				String fromType = (String) m.get("FromType");
-				String fromLabel = from + ":" + fromType;
 				String label = (String) m.get("Label");
 				String to = (String) m.get("To");
-				String toType = (String) m.get("ToType");
-				String toLabel = to + ":" + toType;
-				Node fromNode = (Node) nodes.get(fromLabel);
+				Node fromNode = (Node) nodes.get(from);
 
-				Node toNode = (Node) nodes.get(toLabel);
-				if (toNode == null) {
-					Debug.debug("Debug");
-				}
+				Node toNode = (Node) nodes.get(to);
 				_DefaultEdge edge = new _DefaultEdge(graph, fromNode, toNode,
 						label);
-				edges.add(edge);
+				edges.put(from + ":" + label + ":" + to, edge);
 			}
-			graph.addElements(nodes.values(), edges);
+			graph.addElements(nodes.values(), edges.values());
 
 		} catch (PrologException e) {
 			Debug.rethrow(e);
@@ -418,112 +393,103 @@ public class PEFGraphView extends HyperbolicGraphView implements
 		}
 		if (event.equals("added")) {
 			if (functor.equals("pef_node")) {
-				addNode(args[0], args[1]);
+				addNode(args[0]);
 			} else if (functor.equals("pef_edge")) {
-				addEdge(args[0], args[1], args[2], args[3]);
+				addEdge(args[0], args[1], args[2]);
 			}
 		} else if (event.equals("removed")) {
 			if (functor.equals("pef_node")) {
-				removeNode(args[0], args[1]);
+				removeNode(args[0]);
 			} else if (functor.equals("pef_edge")) {
-				removeEdge(args[0], args[1], args[2], args[3]);
+				removeEdge(args[0], args[1], args[2]);
 			}
 		}
 	}
 
-	private void removeEdge(String from, String fromType, String to,
-			String toType) {
-		Node fromNode = (Node) nodes.get(from + ":" + fromType);
-		Node toNode = (Node) nodes.get(to + ":" + toType);
-		if(fromNode==null||toNode==null){
-			return;
+	private void removeEdge(String from, String arg, String to) {
+		Edge edge = edges.get(from + ":" + arg + ":" + to);
+		if (edge != null) {
+			Vector<Edge> edges = new Vector<Edge>();
+			edges.add(edge);
+			edge.getGraph().removeElements(new Vector<Node>(), edges);
 		}
-		List sourceConnections = fromNode.getSourceConnections();
-		Edge[] edges = (Edge[]) sourceConnections.toArray(new Edge[sourceConnections.size()]);
-		for (Edge edge : edges) {
-			if (edge.getTarget() == toNode) {
-				Vector<Edge> l = new Vector<Edge>();
-				l.add(edge);
-				edge.getGraph().removeElements(new Vector(), l);
-			}
-		}
-
 	}
 
-	private void removeNode(String id, String type) {
-		Node node = (Node) nodes.remove(id+ ":" + type);
-		if(node!=null){
+	private void removeNode(String id) {
+		Node node = (Node) nodes.remove(id);
+		if (node != null) {
 			Vector<Node> l = new Vector<Node>();
 			l.add(node);
-			node.getGraph().removeElements(l, new Vector());
+			node.getGraph().removeElements(l, new Vector<Edge>());
 		}
 	}
 
-	private void addEdge(String from, String fromType, String to, String toType) {
-		Node fromNode = (Node) nodes.get(from + ":" + fromType);
-		if(fromNode==null){
-			throw new IllegalArgumentException("no such node: "+from+":"+fromType);
+	private void addEdge(String from, String label, String to) {
+		Node fromNode = (Node) nodes.get(from);
+		if (fromNode == null) {
+			throw new IllegalArgumentException("no such node: " + from);
 		}
-		Node toNode = (Node) nodes.get(to + ":" + toType);
-		if(toNode==null){
-			throw new IllegalArgumentException("no such node: "+to+":"+toType);
+		Node toNode = (Node) nodes.get(to );
+		if (toNode == null) {
+			throw new IllegalArgumentException("no such node: " + to );
 		}
-		Edge edge =  new _DefaultEdge(fromNode.getGraph(), fromNode, toNode,
-				"no_label");
+		Edge edge = new _DefaultEdge(fromNode.getGraph(), fromNode, toNode,
+				label);
+		edges.put(from+":"+label+":"+to, edge);
 		Vector<Edge> l = new Vector<Edge>();
 		l.add(edge);
-		edge.getGraph().addElements(new Vector(), l);
+		edge.getGraph().addElements(new Vector<Node>(), l);
 
 	}
 
-	private void addNode(String id, String type) {
+	private void addNode(String id) {
 		Graph graph = getModel();
-		Node node = (Node) nodes.get(id+ ":" + type);
-		if(node!=null){
+		Node node = (Node) nodes.get(id);
+		if (node != null) {
 			return;
 		}
-		if(pif==null){
+		if (pif == null) {
 			return;
 		}
 		PrologSession s = null;
-		try{
-			s=pif.getSession();
-			String query = "pef_graph_node("+id+", "+type+", Labels)";
+		try {
+			s = pif.getSession();
+			String query = "pef_graph_node(" + id + ", Type, Labels)";
 			Map m = s.queryOnce(query);
-			if(m==null){
-				Debug.error("Query failed: "+query);
+			if (m == null) {
+				Debug.error("Query failed: " + query);
 				return;
 			}
 			List labels = (List) m.get("Labels");
-			String key = id + ":" + type;
-			String label = key + " " + Util.splice(labels, ", ");
-			node = new DefaultNode(graph,label);
-			
+			String type = (String) m.get("Type");
+			String key = id;
+			String label = key + ":"+type+" " + Util.splice(labels, ", ");
+			node = new DefaultNode(graph, label);
+
 			node.setBackgroundColor(getNodeColor(type));
 			m.put("Id", id);
-			m.put("Type", type);
 			node.setData(m);
-			
+
 			Vector<Node> l = new Vector<Node>();
 			l.add(node);
-			graph.addElements(l, new Vector());
-			nodes.put(key,node);
-			
+			graph.addElements(l, new Vector<Edge>());
+			nodes.put(key, node);
+
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
-		}finally{
-			if(s!=null){
+		} finally {
+			if (s != null) {
 				s.dispose();
 			}
 		}
-		
+
 	}
-	
-	Color getNodeColor(String type){
+
+	Color getNodeColor(String type) {
 		int offset = 0xFF808080;
-		int color = (type.hashCode()>>8)|offset;
+		int color = (type.hashCode() >> 8) | offset;
 		return new Color(color);
-		
+
 	}
 
 }
