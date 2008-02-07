@@ -1,5 +1,7 @@
 package pdt.pefgraph.internal;
 
+import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
+import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -14,6 +16,8 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+
+	private ErrorMessageProvider errorMessageProvider;
 	
 	/**
 	 * The constructor
@@ -57,5 +61,12 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+
+	public ErrorMessageProvider getErrorMessageProvider() {
+		if(errorMessageProvider==null){
+			errorMessageProvider=new DefaultErrorMessageProvider(this);
+		}
+		return errorMessageProvider;
 	}
 }

@@ -1,38 +1,16 @@
 package pdt.pefgraph.internal.views;
 
-import java.awt.Color;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.core.PEFHandle;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.prolog.IPrologEventDispatcher;
-import org.cs3.pl.prolog.LifeCycleHook2;
-import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.svf.hyperbolic.HyperbolicGraphView;
-import org.cs3.svf.hyperbolic.model.DefaultEdge;
-import org.cs3.svf.hyperbolic.model.DefaultGraph;
-import org.cs3.svf.hyperbolic.model.DefaultNode;
-import org.cs3.svf.hyperbolic.model.Edge;
-import org.cs3.svf.hyperbolic.model.Graph;
-import org.cs3.svf.hyperbolic.model.Node;
-import org.cs3.svf.hyperbolic.model.RandomGraphModelCreator;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -42,21 +20,60 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.window.Window;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.mylyn.zest.core.viewers.GraphViewer;
+import org.eclipse.mylyn.zest.core.widgets.ZestStyles;
+import org.eclipse.mylyn.zest.layouts.LayoutStyles;
+import org.eclipse.mylyn.zest.layouts.algorithms.RadialLayoutAlgorithm;
+import org.eclipse.mylyn.zest.layouts.algorithms.SpringLayoutAlgorithm;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.part.ViewPart;
 
 import pdt.pefgraph.internal.ImageRepository;
 
-public class PEFGraphView extends HyperbolicGraphView implements
-		PrologInterfaceListener {
+public class PEFGraphView extends ViewPart{
 
-	private PrologInterface pif;
+	private final class QueryAction extends Action {
+		private final PrologInterface pif;
+		private final String action;
 
+		private QueryAction(String text, int style, PrologInterface pif,
+				String action) {
+			super(text, style);
+			this.pif = pif;
+			this.action = action;
+		}
+
+		@Override
+		public void run() {
+			PrologSession s=null;
+			try{
+				s=pif.getSession();
+				s.queryOnce("pef_graph_action_run("+action+")");
+			}catch (PrologInterfaceException e) {
+				Debug.rethrow(e);
+			}finally{
+				if(s!=null){
+					s.dispose();
+				}
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+	private PEFGraphContentProvider contentProvider;
+	
 	private Action selectPifAction;
 
 	private Action refreshAction;
@@ -67,15 +84,25 @@ public class PEFGraphView extends HyperbolicGraphView implements
 
 	private Menu contextMenu;
 
-	// private Action action2;
-	private final static String HOOK_ID = "PefGraphViewHook";
+	private GraphViewer viewer;
+
+	private PEFGraphLabelProvider labelProvider;
+
 
 	/**
 	 * This is a callback that will allow us to create the viewer and initialize
 	 * it.
 	 */
 	public void createPartControl(Composite parent) {
-		super.createPartControl(parent);
+		this.contentProvider=new PEFGraphContentProvider();
+		this.labelProvider=new PEFGraphLabelProvider();
+		this.viewer = new GraphViewer(parent,SWT.NONE);
+		viewer.setLabelProvider(labelProvider);
+		viewer.setContentProvider(contentProvider);
+		viewer.setLayoutAlgorithm(new SpringLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING));
+		viewer.setConnectionStyle(ZestStyles.CONNECTIONS_DIRECTED);
+		getSite().setSelectionProvider(viewer);
+		//viewer.setLayoutAlgorithm(new RadialLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING));
 		makeActions();
 		hookContextMenu(parent);
 		contributeToActionBars();
@@ -113,9 +140,9 @@ public class PEFGraphView extends HyperbolicGraphView implements
 				PEFGraphView.this.fillContextMenu(manager);
 			}
 		});
-		getSite().registerContextMenu(menuMgr, this);
+		getSite().registerContextMenu(menuMgr, viewer);
 		contextMenu = menuMgr.createContextMenu(parent);
-		getControl().setMenu(contextMenu);
+		viewer.getControl().setMenu(contextMenu);
 	}
 	
 		
@@ -134,15 +161,67 @@ public class PEFGraphView extends HyperbolicGraphView implements
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
+		
 		manager.add(clearAction);
 		manager.add(setVisibilityAction);
 		manager.add(selectPifAction);
 		manager.add(refreshAction);
-
+		
+		PrologInterface pif = (PrologInterface) viewer.getInput();
+		if(pif!=null&&pif.isUp()){
+			manager.add(new Separator());
+			
+			String selectionList = "["+Util.splice(getSelectedIds(), ",")+"]";
+			PrologSession s = null;
+			try{
+				s=pif.getSession();
+				List l = s.queryAll("pef_graph_action("+selectionList+",Action,Path,Label,Style)");
+				for (Object object : l) {
+					Map m = (Map) object;
+					String action = (String) m.get("Action");
+					String path = Util.splice((List) m.get("Path"),"/");
+					String label = (String)m.get("Label");
+					String style = (String)m.get("Style");
+					createContextMenuAction(pif,manager,action,path,label,style);
+				}
+			} catch (PrologInterfaceException e) {
+				Debug.rethrow(e);
+			}finally{
+				if(s!=null){
+					s.dispose();
+				}
+			}
+		}
+		
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 
+	private void createContextMenuAction(final PrologInterface pif,IMenuManager manager, final String action,
+			String path, String label, String style) {
+		IMenuManager where = manager.findMenuUsingPath(path);
+		where=(where==null)?manager:where;
+		if("menu".equals(style)){
+			where.add(new MenuManager(label,action));
+		}else if("action".equals(style)){
+			where.add(new QueryAction(label, Action.AS_PUSH_BUTTON, pif, action));
+		}
+		
+	}
+
+
+
+	private String[] getSelectedIds(){
+		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+		String[] result = new String[selection.size()];
+		int i=0;
+		for(Iterator it = selection.iterator();it.hasNext();){
+			PEFHandle handle = (PEFHandle) it.next();
+			result[i++]=handle.getId();
+		}
+		return result;
+	}
+	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(clearAction);
 		manager.add(setVisibilityAction);
@@ -155,6 +234,7 @@ public class PEFGraphView extends HyperbolicGraphView implements
 		clearAction = new Action() {
 			@Override
 			public void run() {
+				PrologInterface pif = (PrologInterface) viewer.getInput(); 
 				if (pif == null) {
 					return;
 				}
@@ -163,6 +243,7 @@ public class PEFGraphView extends HyperbolicGraphView implements
 
 					session = pif.getSession();
 					session.queryOnce("pef_graph_clear");
+					contentProvider.reset();
 				} catch (PrologInterfaceException e) {
 					Debug.rethrow(e);
 				} finally {
@@ -182,7 +263,7 @@ public class PEFGraphView extends HyperbolicGraphView implements
 			@Override
 			protected PrologInterface getPrologInterface() {
 
-				return pif;
+				return (PrologInterface) viewer.getInput();
 			}
 
 			@Override
@@ -200,296 +281,49 @@ public class PEFGraphView extends HyperbolicGraphView implements
 
 			@Override
 			protected PrologInterface getPrologInterface() {
-				return pif;
+				return (PrologInterface) viewer.getInput();
 			}
 
 			@Override
 			protected void setPrologInterface(PrologInterface prologInterface) {
-				if (pif != null) {
-					detachFromPif();
-					clearGraph();
-				}
-				pif = prologInterface;
-				if (pif != null) {
-					attachToPif();
-				}
-
-				createGraph();
+				viewer.setInput(prologInterface);
 
 			}
 
 		};
 		refreshAction = new Action() {
+			
+
 			@Override
 			public void run() {
-				if (pif != null && pif.isUp()) {
-					clearGraph();
-					createGraph();
-				}
+				contentProvider.reset();
 			}
 		};
 		refreshAction.setImageDescriptor(ImageRepository
 				.getImageDescriptor(ImageRepository.RESTART));
 	}
 
-	LifeCycleHook2 hook = new LifeCycleHook2() {
+	
 
-		public void onError(PrologInterface pif) {
-			clearGraph();
-
-		}
-
-		public void afterInit(PrologInterface pif)
-				throws PrologInterfaceException {
-			setupPif();
-			createGraph();
-		}
-
-		public void beforeShutdown(PrologInterface pif, PrologSession session)
-				throws PrologInterfaceException {
-			clearGraph();
-		}
-
-		public void onInit(PrologInterface pif, PrologSession initSession)
-				throws PrologInterfaceException {
-			;
-		}
-
-	};
-
-	private HashMap<String, Node> nodes;
-
-	private HashMap<String, Edge> edges;
-
-	private void clearGraph() {
-		setModel(new DefaultGraph());
-
+	
+	
+	
+	
+	
+	@Override
+	public void setFocus() {
+		// TODO Auto-generated method stub
+		
 	}
 
-	private void attachToPif() {
-		try {
-			pif.addLifeCycleHook(hook, HOOK_ID, new String[] {});
-			if (pif.isUp()) {
 
-				hook.afterInit(pif);
 
-			}
-			IPrologEventDispatcher d = PrologRuntimePlugin.getDefault()
-					.getPrologEventDispatcher(pif);
-			d.addPrologInterfaceListener("pef_node(_)", this);
-			d.addPrologInterfaceListener("pef_edge(_,_,_)", this);
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		}
+	public Viewer getViewer() {		
+		return viewer;
 	}
 
-	protected void detachFromPif() {
-		((PrologInterface2) pif).removeLifeCycleHook(hook, HOOK_ID);
-		try {
-			IPrologEventDispatcher d = PrologRuntimePlugin.getDefault()
-					.getPrologEventDispatcher(pif);
-			d.removePrologInterfaceListener("pef_node(_)", this);
-			d.removePrologInterfaceListener("pef_edge(_,_,_)", this);
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		}
 
-	}
 
-	private static class _DefaultEdge extends DefaultEdge {
-		public _DefaultEdge(Graph graph, Node fromNode, Node toNode,
-				String caption) {
-			super(graph, fromNode, toNode);
-			this.caption = caption;
-		}
-
-		@Override
-		public String getCaption() {
-
-			return caption;
-		}
-
-		String caption;
-	}
-
-	private void createGraph() {
-		Graph graph = getModel();
-
-		nodes = new HashMap<String, Node>();
-		edges = new HashMap<String, Edge>();
-		PrologSession s = null;
-		try {
-			s = pif.getSession();
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		}
-		try {
-			List list = s.queryAll("pef_graph_node(Id,Type,Labels)");
-			for (Iterator iter = list.iterator(); iter.hasNext();) {
-				Map m = (Map) iter.next();
-				String id = (String) m.get("Id");
-				String type = (String) m.get("Type");
-				List labels = (List) m.get("Labels");
-				String key = id;
-				String label = key + ":" + type + " "
-						+ Util.splice(labels, ", ");
-				Node node = new DefaultNode(graph, label);
-				node.setBackgroundColor(getNodeColor(type));
-				node.setData(m);
-				nodes.put(key, node);
-			}
-
-			list = s.queryAll("pef_graph_edge(From,Arg,To)");
-
-			for (Iterator it = list.iterator(); it.hasNext();) {
-				Map m = (Map) it.next();
-				String from = (String) m.get("From");
-				String label = (String) m.get("Label");
-				String to = (String) m.get("To");
-				Node fromNode = (Node) nodes.get(from);
-
-				Node toNode = (Node) nodes.get(to);
-				_DefaultEdge edge = new _DefaultEdge(graph, fromNode, toNode,
-						label);
-				edges.put(from + ":" + label + ":" + to, edge);
-			}
-			graph.addElements(nodes.values(), edges.values());
-
-		} catch (PrologException e) {
-			Debug.rethrow(e);
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-		}
-
-	}
-
-	private void setupPif() throws PrologInterfaceException {
-		PrologLibraryManager manager = PrologRuntimePlugin.getDefault()
-				.getLibraryManager();
-		PrologSession s = PEFGraphView.this.pif.getSession();
-		try {
-			PLUtil.configureFileSearchPath(manager, s,
-					new String[] { PrologRuntime.LIB_PDT });
-			s.queryOnce("use_module(library('facade/pdt_pef_graph'))");
-			// s.queryOnce("use_module(library('pef/pef_api'))");
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-		}
-	}
-
-	public void update(PrologInterfaceEvent e) {
-		String event = e.getEvent();
-		CCompound subject = (CCompound) PLUtil.createCTerm(e.getSubject());
-		String functor = subject.getFunctorValue();
-		String[] args = new String[subject.getArity()];
-		for (int i = 0; i < args.length; i++) {
-			args[i] = subject.getArgument(i).getFunctorValue();
-		}
-		if (event.equals("added")) {
-			if (functor.equals("pef_node")) {
-				addNode(args[0]);
-			} else if (functor.equals("pef_edge")) {
-				addEdge(args[0], args[1], args[2]);
-			}
-		} else if (event.equals("removed")) {
-			if (functor.equals("pef_node")) {
-				removeNode(args[0]);
-			} else if (functor.equals("pef_edge")) {
-				removeEdge(args[0], args[1], args[2]);
-			}
-		}
-	}
-
-	private void removeEdge(String from, String arg, String to) {
-		Edge edge = edges.get(from + ":" + arg + ":" + to);
-		if (edge != null) {
-			Vector<Edge> edges = new Vector<Edge>();
-			edges.add(edge);
-			edge.getGraph().removeElements(new Vector<Node>(), edges);
-		}
-	}
-
-	private void removeNode(String id) {
-		Node node = (Node) nodes.remove(id);
-		if (node != null) {
-			Vector<Node> l = new Vector<Node>();
-			l.add(node);
-			node.getGraph().removeElements(l, new Vector<Edge>());
-		}
-	}
-
-	private void addEdge(String from, String label, String to) {
-		Node fromNode = (Node) nodes.get(from);
-		if (fromNode == null) {
-			throw new IllegalArgumentException("no such node: " + from);
-		}
-		Node toNode = (Node) nodes.get(to );
-		if (toNode == null) {
-			throw new IllegalArgumentException("no such node: " + to );
-		}
-		Edge edge = new _DefaultEdge(fromNode.getGraph(), fromNode, toNode,
-				label);
-		edges.put(from+":"+label+":"+to, edge);
-		Vector<Edge> l = new Vector<Edge>();
-		l.add(edge);
-		edge.getGraph().addElements(new Vector<Node>(), l);
-
-	}
-
-	private void addNode(String id) {
-		Graph graph = getModel();
-		Node node = (Node) nodes.get(id);
-		if (node != null) {
-			return;
-		}
-		if (pif == null) {
-			return;
-		}
-		PrologSession s = null;
-		try {
-			s = pif.getSession();
-			String query = "pef_graph_node(" + id + ", Type, Labels)";
-			Map m = s.queryOnce(query);
-			if (m == null) {
-				Debug.error("Query failed: " + query);
-				return;
-			}
-			List labels = (List) m.get("Labels");
-			String type = (String) m.get("Type");
-			String key = id;
-			String label = key + ":"+type+" " + Util.splice(labels, ", ");
-			node = new DefaultNode(graph, label);
-
-			node.setBackgroundColor(getNodeColor(type));
-			m.put("Id", id);
-			node.setData(m);
-
-			Vector<Node> l = new Vector<Node>();
-			l.add(node);
-			graph.addElements(l, new Vector<Edge>());
-			nodes.put(key, node);
-
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-		}
-
-	}
-
-	Color getNodeColor(String type) {
-		int offset = 0xFF808080;
-		int color = (type.hashCode() >> 8) | offset;
-		return new Color(color);
-
-	}
+	
 
 }

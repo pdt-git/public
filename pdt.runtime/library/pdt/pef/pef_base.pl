@@ -12,7 +12,10 @@
 		pef_last_record/2,
 		pef_node/3,
 		pef_edge/3,
-		pef_delete/1
+		pef_delete/1,
+		metapef_template/2,
+		metapef_ref/3,
+		pef_generic_query/3
 	]
 ).
 
@@ -232,13 +235,20 @@ pef_edge(From,FromT,ArgName,To,ToT):-
     ).
 
 pef_node(Id,Type,Labels):-
-    '$pef_node'(Id,Type,Labels).
+    '$pef_node'(Type,Id,Labels).
 
 valid_target(ToT,To):-
     pef_type(To,ToT).
 
 
-
+metapef_template(Type,Template):-
+    '$metapef_template'(Type,Template).
+    
+pef_generic_query(Type,ArgList,Data):-
+    atom_concat(Type,'_query',F),
+    Query=..[F,ArgList,Data],
+    call(Query).
+	    
 
 
     

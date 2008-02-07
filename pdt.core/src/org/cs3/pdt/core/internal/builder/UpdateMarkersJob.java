@@ -45,14 +45,14 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		@Override
 		public void goalHasSolution(AsyncPrologSessionEvent e) {
 			Map m = e.bindings;
-			Object id = m.get("Id");
+			String id = (String)m.get("Id");
 			String filename = (String) m.get("File");
 			int start = Integer.parseInt(((String) m.get("Start")));
 			int end = Integer.parseInt(((String) m.get("End")));
 			String severity = (String) m.get("Severity");
 			String message = (String) m.get("Msg");
 			try {
-				addMarker(filename, start, end, severity, message);
+				addMarker(id,filename, start, end, severity, message);
 				if (markerMonitor == null) {
 					markerMonitor = new SubProgressMonitor(monitor, 25,
 							SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
@@ -180,7 +180,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		return new Status(IStatus.OK, PDTCore.PLUGIN_ID, "done");
 	}
 
-	private void addMarker(String filename, int start, int end,
+	private void addMarker(String id, String filename, int start, int end,
 			String severity, String message) throws CoreException {
 		IFile file = null;
 		try {
@@ -209,6 +209,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 
 		marker.setAttribute(IMarker.SEVERITY, mapSeverity(severity));
 		marker.setAttribute(IMarker.MESSAGE, message);
+		marker.setAttribute(PDTCore.PROBLEM_ID, id);
 	}
 
 	private int mapSeverity(String severity) {

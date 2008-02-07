@@ -159,6 +159,9 @@ public class PDTCore {
 	public static final String PROBLEM = "org.cs3.pdt.core.problem";
 
 
+	public static final String PROBLEM_ID = "org.cs3.pdt.core.problem_id";
+
+
 	
 
 

@@ -62,7 +62,11 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.IElementComparer;
@@ -72,10 +76,14 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
+
+
 
 public class PrologOutline extends ContentOutlinePage {
 	private final class Comparer implements IElementComparer {
@@ -97,6 +105,8 @@ public class PrologOutline extends ContentOutlinePage {
 		}
 	}
 
+	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
+
 	// private TreeViewer viewer;
 	private ITreeContentProvider contentProvider;
 
@@ -112,6 +122,10 @@ public class PrologOutline extends ContentOutlinePage {
 
 	private IEditorInput input;
 
+	private TreeViewer viewer;
+
+	private Menu contextMenu;
+
 	public PrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
@@ -119,7 +133,7 @@ public class PrologOutline extends ContentOutlinePage {
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
-		TreeViewer viewer = getTreeViewer();
+		viewer = getTreeViewer();
 		model = new ContentModel() {
 
 			public File getFile() {
@@ -171,10 +185,33 @@ public class PrologOutline extends ContentOutlinePage {
 		toolBarManager.add(action);
 		action = new FilterActionMenu(this);
 		toolBarManager.add(action);
+		
+		hookContextMenu(parent);
+		
 		viewer.setInput(getInput());
 
 	}
 
+
+	private void fillContextMenu(IMenuManager manager) {		
+		// Other plug-ins can contribute there actions here
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
+	
+	private void hookContextMenu(Composite parent) {
+		MenuManager menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				PrologOutline.this.fillContextMenu(manager);
+			}
+		});
+		getSite().registerContextMenu(MENU_ID,menuMgr, viewer);
+		contextMenu = menuMgr.createContextMenu(parent);
+		viewer.getControl().setMenu(contextMenu);
+	}
+	
+	
 	public TreeViewer getTreeViewer() {
 		return super.getTreeViewer();
 	}

@@ -49,6 +49,7 @@ import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 public class PredicateNode implements Predicate,IAdaptable,Positional{
@@ -150,10 +151,10 @@ public class PredicateNode implements Predicate,IAdaptable,Positional{
 	}
 
 	public Object getAdapter(Class adapter) {
-		if(IPropertySource.class.isAssignableFrom(adapter)){
-			return new SimplePropertySource(properties);
-		}
-		return null;
+//		if(IPropertySource.class.isAssignableFrom(adapter)){
+//			return new SimplePropertySource(properties);
+//		}
+		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
 
 	public String getPositionString() {
