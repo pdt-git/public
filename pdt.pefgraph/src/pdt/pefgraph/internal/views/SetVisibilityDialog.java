@@ -19,10 +19,7 @@ public class SetVisibilityDialog extends Dialog {
 	private PrologInterface pif;
 	private Label idLabel;
 	private Text idText;
-	private Label typeLabel;
-	private Text typeText;
-	private Label valueLabel;
-	private Text valueText;
+	
 
 	protected SetVisibilityDialog(Shell parentShell, PrologInterface pif) {
 		super(parentShell);
@@ -35,14 +32,7 @@ public class SetVisibilityDialog extends Dialog {
 		idLabel = new Label(composite, SWT.NONE);
 		idLabel.setText("PEF Identifier: ");
 		idText = new Text(composite, SWT.BORDER);
-		
-		typeLabel = new Label(composite, SWT.NONE);
-		typeLabel.setText("PEF Type: ");
-		typeText = new Text(composite, SWT.BORDER);
-		
-		valueLabel = new Label(composite, SWT.NONE);
-		valueLabel.setText("Visible Radius: ");
-		valueText = new Text(composite, SWT.BORDER);
+				
 		return composite;
 
 	}
@@ -52,7 +42,7 @@ public class SetVisibilityDialog extends Dialog {
 		PrologSession s=null;
 		try {
 			s=pif.getSession();
-			String query = "pef_graph_set_visibility("+valueText.getText()+","+idText.getText()+","+typeText.getText()+")";
+			String query = "pef_graph_set_visible("+idText.getText()+",true),pef_graph_refresh";
 			s.queryOnce(query);
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);

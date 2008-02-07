@@ -56,12 +56,14 @@ meta_node_clause(Clause):-
     args(ArgNums,Head,Labels),
     (	find_id(Tmpl,IdNum)  
     ->	arg(IdNum,Head,Id),
-    	Clause=
-    		(	'$pef_node'(Id,Name,Labels):-
-        			call(Head)
-        	)
+    	(	IdNum==1
+    	->	Clause=('$pef_node'(Name,Id,Labels):-Head)
+    	;	index_name(Tmpl,IdNum,IxName),
+    		IxQuery=..[IxName,Id,Ref],
+    		Clause=('$pef_node'(Name,Id,Labels):-IxQuery,clause(Head,_,Ref))
+    	)
 	;   Clause =
-			(	'$pef_node'(Id,Name,Labels):-
+			(	'$pef_node'(Name,Id,Labels):-
         			clause(Head,_,Ref),
         			Id=Ref
         	)

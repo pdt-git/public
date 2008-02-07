@@ -28,5 +28,49 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="pdt.pefgraph.PEFNodeActionContribution"
+            objectClass="org.cs3.pdt.core.PEFHandle">
+         <action
+               class="pdt.pefgraph.actions.NodeVisibleAction"
+               id="pdt.pefgraph.NodeVisibleAction"
+               label="Node Visible"
+               style="toggle">
+         </action>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.core.resources.IMarker"
+            class="pdt.pefgraph.internal.AdapterFactory">
+         <adapter
+               type="org.cs3.pdt.core.PEFHandle">
+         </adapter>
+         <adapter
+               type="org.eclipse.ui.views.properties.IPropertySource">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.core.resources.IResource"
+            class="pdt.pefgraph.internal.AdapterFactory">
+         <adapter
+               type="org.cs3.pdt.core.PEFHandle">
+         </adapter>
+         <adapter
+               type="org.eclipse.ui.views.properties.IPropertySource">
+         </adapter>
+      </factory>
+      <factory
+            adaptableType="org.cs3.pdt.core.PEFHandle"
+            class="pdt.pefgraph.internal.AdapterFactory">
+         <adapter
+               type="org.eclipse.ui.views.properties.IPropertySource">
+         </adapter>
+      </factory>
+   </extension>
 
 </plugin>

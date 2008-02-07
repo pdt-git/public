@@ -29,6 +29,7 @@ import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.views.properties.IPropertySource;
 
@@ -180,13 +181,13 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 	}
 
-	private static class _PEFNode implements PEFNode, IAdaptable {
+	private class _PEFNode implements PEFNode, IAdaptable {
 
 		private int endPosition;
 
 		private File file;
 
-		private int id;
+		private String id;
 
 		private String label;
 
@@ -198,7 +199,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 		public _PEFNode(AsyncPrologSessionEvent e, File file) {
 			type = (String) e.bindings.get("ChildT");
-			id = Integer.parseInt((String) e.bindings.get("Child"));
+			id = (String) e.bindings.get("Child");
 			startPosition = Integer.parseInt((String) e.bindings.get("Start"));
 			endPosition = Integer.parseInt((String) e.bindings.get("End"));
 			this.file = file;
@@ -208,10 +209,10 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 
 		public Object getAdapter(Class adapter) {
-			if (IPropertySource.class.isAssignableFrom(adapter)) {
-				return new PEFNodePropertySource(this);
-			}
-			return null;
+//			if (IPropertySource.class.isAssignableFrom(adapter)) {
+//				return new PEFNodePropertySource(this);
+//			}
+			return Platform.getAdapterManager().getAdapter(this, adapter);
 		}
 
 		@Override
@@ -227,7 +228,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			return this.file;
 		}
 
-		public int getId() {
+		public String getId() {
 
 			return this.id;
 		}
@@ -247,6 +248,11 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 		public String getType() {
 			return this.type;
+		}
+
+		public PrologInterface getPrologInterface() {
+			
+			return getPif();
 		}
 
 	}
