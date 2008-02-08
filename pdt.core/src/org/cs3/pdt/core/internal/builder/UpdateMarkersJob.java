@@ -232,7 +232,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			return;
 		}
 		if ("expensive".equals(tag)) {
-			System.out.println(e.getSubject() + " <-- " + e.getEvent());
+			Debug.debug(e.getSubject() + " <-- " + e.getEvent());
 		}
 		/*
 		 * if (!e.getSubject().equals("builder(problems(workspace))")) { return; }

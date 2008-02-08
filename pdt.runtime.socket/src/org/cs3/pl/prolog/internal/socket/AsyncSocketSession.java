@@ -887,6 +887,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 
 	public boolean isIdle() {
+		if(isDisposed()){
+			return true;
+		}
 		synchronized (tickets) {
 			return tickets.isEmpty();
 

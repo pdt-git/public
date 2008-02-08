@@ -41,6 +41,16 @@
                style="toggle">
          </action>
       </objectContribution>
+      <viewerContribution
+            id="pdt.pefgraph.PrologConsoleViewContribution"
+            targetID="org.cs3.pdt.console.internal.views.PrologConsoleView">
+         <action
+               class="pdt.pefgraph.ShowSelectionInPEFGraphAction"
+               id="pdt.pefgraph.ShowSelectionInPEFGraphAction"
+               label="Show in PEF Graph "
+               menubarPath="additions">
+         </action>
+      </viewerContribution>
    </extension>
    <extension
          point="org.eclipse.core.runtime.adapters">

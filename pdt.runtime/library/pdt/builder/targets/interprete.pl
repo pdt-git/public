@@ -888,14 +888,16 @@ unload_file(FileRef, Cx):-
     repeat,
     	(	first_clause(FileRef,PID,Clause)
     	->	pef_clause_get(Clause,[predicate=OldPredID,number=Num]),
-	    	%create_my_own_predicate_version(OldPredID,PredID,Cx),
 	    	% as far as I can tell, the predicate should belong to the current program anyway at this point.
 	    	% Let's see if I am wrong
-	    	(	predicate_owner(OldPredID,PID)
-	    	->	OldPredID=PredID
-	    	;	spyme,
-	    		throw(i_am_wrong(predicate_owner(OldPredID,PID),unload_file(FileRef,Cx)))
-	    	),
+	    	%
+	    	% UPDATE: How did I get to this conclusion?
+%	    	(	predicate_owner(OldPredID,PID)
+%	    	->	OldPredID=PredID
+%	    	;	spyme,
+%	    		throw(i_am_wrong(predicate_owner(OldPredID,PID),unload_file(FileRef,Cx)))
+%	    	),
+			create_my_own_predicate_version(OldPredID,PredID,Cx),
 	    	(	pef_predicate_property_definition_query([predicate=PredID,property=(multifile)])
 	    	->	delete_or_shift_clauses(PredID,FileRef,Num,Deleted),
 	    		num_clauses(PredID,NumClauses),
