@@ -51,7 +51,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 
@@ -247,5 +250,19 @@ public final class UIUtils {
 		});
 
 	}
+	public  static IViewPart showView(String viewId) throws PartInitException {
+		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI
+				.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null) {
+			return null;
+		}
 
+		final IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
+		if (activePage == null) {
+			return null;
+		}
+
+		return activePage.showView(viewId);
+
+	}
 }

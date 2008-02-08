@@ -41,34 +41,14 @@ public class NodeVisibleAction implements IObjectActionDelegate {
 
 	public void run(IAction action) {
 		PEFHandle node = selectedNodes.get(action);
-		boolean visible = !isVisible(node);
-		setVisible(node, visible);
-		if (visible = true) {
-			String viewId = "pdt.pefgraph.views.PEFGraphView";
-			PEFGraphView view = (PEFGraphView) showView(viewId);
-			view.getViewer().setInput(node.getPrologInterface());
-		}
-		action.setChecked(visible);
-	}
-
-	private static IViewPart showView(String viewId) {
-		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI
-				.getWorkbench().getActiveWorkbenchWindow();
-		if (activeWorkbenchWindow == null) {
-			return null;
-		}
-
-		final IWorkbenchPage activePage = activeWorkbenchWindow
-				.getActivePage();
-		if (activePage == null) {
-			return null;
-		}
-
+		boolean visible = !PEFGraph.isVisible(node);
+		PEFGraph.setVisible(node, visible);
 		try {
-			
-			return activePage
-					.showView(viewId);
-			
+			if (visible = true) {
+				PrologInterface prologInterface = node.getPrologInterface();
+				PEFGraph.showPEFGraph(prologInterface);
+			}
+			action.setChecked(visible);
 		} catch (PartInitException e) {
 			UIUtils.logAndDisplayError(Activator.getDefault()
 					.getErrorMessageProvider(), UIUtils.getDisplay()
@@ -76,7 +56,6 @@ public class NodeVisibleAction implements IObjectActionDelegate {
 					PEFGraph.CX_SHOWING_PART, e);
 
 		}
-		return null;
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
@@ -102,51 +81,10 @@ public class NodeVisibleAction implements IObjectActionDelegate {
 	private void updateActionState(IAction action, PEFHandle node) {
 		action.setEnabled(node != null);
 
-		action.setChecked(isVisible(node));
+		action.setChecked(PEFGraph.isVisible(node));
 	}
 
-	private boolean isVisible(PEFHandle node) {
-		PrologInterface pif = node.getPrologInterface();
-		if (pif == null || !pif.isUp()) {
-			return false;
-		}
-		PrologSession s = null;
-		try {
-			s = pif.getSession();
-			return null != s.queryOnce("pef_graph_node(" + node.getId()
-					+ ",_,_)");
+	
 
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-
-		}
-		return false;
-
-	}
-
-	private void setVisible(PEFHandle node, boolean visible) {
-		PrologInterface pif = node.getPrologInterface();
-		if (pif == null || !pif.isUp()) {
-			return;
-		}
-		PrologSession s = null;
-		try {
-			s = pif.getSession();
-			s.queryOnce("pef_graph_set_visible(" + node.getId() + "," + visible
-					+ "),pef_graph_refresh");
-
-		} catch (PrologInterfaceException e) {
-			Debug.rethrow(e);
-		} finally {
-			if (s != null) {
-				s.dispose();
-			}
-		}
-
-	}
-
+	
 }
