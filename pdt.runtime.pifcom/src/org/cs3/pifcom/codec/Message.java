@@ -33,7 +33,7 @@ public class Message {
 
 	public final static int OPC_ERROR = 0x0B;
 
-	public final static int OPC_MULTI_COMPLETE = 0x0C;
+	public final static int OPC_NAME = 0x0C;
 
 	public final static int OPC_BINDING = 0x0D;
 
@@ -105,7 +105,20 @@ public class Message {
 			in.readFully(buf, 0, bodylen);
 			out.write(buf, 0, bodylen);
 		}
-		return new Message(opc, ticket, out.toByteArray());
+		switch(opc){
+		case OPC_QUERY:
+		case OPC_BINDING:
+		case OPC_ERROR:
+			return new CTermMessage(opc, ticket, out.toByteArray());
+		case OPC_BEGIN_NAMES:
+		case OPC_BEGIN_SOLUTION:
+			return new UIntMessage(opc, ticket, out.toByteArray());
+		case OPC_NAME:
+			return new NameMessage(opc,ticket,out.toByteArray());
+		default:
+			return new Message(opc, ticket, out.toByteArray());	
+		}
+		
 	}
 
 	public Message(int opc, int ticket, byte[] body) {
@@ -116,10 +129,11 @@ public class Message {
 	}
 
 	public void write(DataOutputStream out) throws IOException {
+		byte[] body = getBody();
 		int todo = body.length;
 		int done = 0;
 
-		while (todo > 0) {
+		do {
 			int type = opc;
 			boolean haveTicket = true;
 			boolean haveLength = true;
@@ -146,6 +160,10 @@ public class Message {
 			out.write(body, done, bodyLength);
 			todo -= bodyLength;
 			done += bodyLength;
-		}
+		} while (todo > 0);
+	}
+
+	public int getTicket() {
+		return ticket;
 	}
 }

@@ -3,8 +3,8 @@
 		pifcom_write_message/4,
 		pifcom_read_and_decode_message/4,
 		pifcom_encode_and_write_message/4,		
-		pifcom_encode_body/3,
-		pifcom_decode_body/3,
+		pifcom_encode_body/2,
+		pifcom_decode_body/2,
 		pifcom_write_integer_bytes/3
 	]
 ).
@@ -26,8 +26,8 @@
 pifcom_read_and_decode_message(Stream,OpCode,Ticket,Data):-
     pifcom_read_message(Stream,OpCode,Ticket,Body),
     call_cleanup(
-    	(	opc(OpCode,_,Type),
-    		pifcom_decode_body(Type,Body,Data)
+    	(	opc(OpCode,_,Data),
+    		pifcom_decode_body(Data,Body)
     	),
     	free_memory_file(Body)
     ).
@@ -41,11 +41,13 @@ pifcom_read_and_decode_message(Stream,OpCode,Ticket,Data):-
 % if the body type is not supported by the codec, this predicate fails
 % silently.
 pifcom_encode_and_write_message(Stream,OpCode,Ticket,Data):-
-    opc(OpCode,_,Type),
-    pifcom_encode_body(Type,Data,Body),
+ 	pifcom_encode_body(Data,Body),
     call_cleanup(
     	pifcom_write_message(Stream,OpCode,Ticket,Body),
-    	free_memory_file(Body)
+    	(	Body==[]
+    	->	true
+    	;	free_memory_file(Body)
+    	)
     ).
 
 
@@ -99,52 +101,42 @@ pifcom_write_message(Stream,OpCode,Ticket,Body):-
 
 
 
-%% pifcom_encode_body(+Type,+Data,-Body).
+%% pifcom_encode_body(+Data,-Body).
 % encode data to a pifcom message body.
-% 
-% Currently supported data formats are
-
-% 	* cterm_image - Data is interpreted as a single term which is written 
-%	  				using write_canonical/2. The term is ALWAYS followed by a full-stop.
-%					Any data following the full-stop should be ignored.
-%	* tickets - Data is interpreted as a list of ticket identifiers. The list is encoded
-% 				as a sequence of 2-byte unsigned integers.
-%	* subst_header - Data is interpreted as a list of variable numbers.
-%					 The list is encoded as a sequence of single-byte unsigned integers.
-%					
-%   * protocol_error - expects Data to be of the form error(code,tickets), where code is an 
-%					   error code ande tickets is a list of ticket identifiers.
-%					 The information is encoded using a single byte unsigned integer to represent the 
-%					 error code followed by a sequence of 2-byte unsigned integers to represent the ticket numbers.
+% Currently the following data formats are supported:
 %
-% @param Type the body format to encode to.
-% @param Data the data to encode
+%  name(Name) - a single variable name.
+%  cterm(VarNames,Term) - a canonical representation of Term, using UTF-8 encoding.
+%                         VarNames is a list of Name=Var pairs which can be used to specify Variablenames.
+% uint(Integer) - represent Integer as 4-byte unsigned integer.
+% 
+% @param Data the data to encode.
 % @param Body a memfile containing the encoded body.
-pifcom_encode_body(Type,Data,Body):-
-    new_memory_file(Body),
-    open_memory_file(Body,write,Stream,[encoding(octet)]),
-    set_stream(Stream,encoding(octet)),
-    call_cleanup(
-    	encode_body(Type,Data,Stream),
-    	close(Stream)
-    ).
+pifcom_encode_body(Data,Body):-
+    encode_body(Data,Body).
     	
 
-%% pifcom_decode_body(+Type,+Body,-Data).
+%% pifcom_decode_body(+Template,+Body).
 % decode a pifcom message body.
 % 
-% See pifcom_encode_body/3 for supported encodings.
+% See pifcom_encode_body/2 for supported encodings.
 %
-% @param Type the body format to encode to.
+% @param Template a term of one of the following forms:
+%        name(Name), cterm(VarNames,Term), uint(Integer)
 % @param Body a memfile containing the encoded body.
-% @param Data the decoded data term.
-pifcom_decode_body(Type,Body,Data):-
-	open_memory_file(Body,read,Stream,[encoding(octet)]),
-    set_stream(Stream,encoding(octet)),
-    call_cleanup(
-    	decode_body(Type,Stream,Data),
-    	close(Stream)
-    ).
+pifcom_decode_body(Template,Body):-
+	decode_body(Template,Body).
+
+
+:- record header(flags=[],op=0,ticket=0,body_len=0).
+
+:- discontiguous opc/3,flc/2.
+
+% some convenience "macros" for dealing with header fields.
+
+user:term_expansion(opc(A,B,C),[opc(A,B,C),opc(B,A,C)]).
+user:term_expansion(flc(A,B),[flc(A,B),flc(B,A),(Head:-A is A /\ Type)]):-
+	Head=..[B,Type].
 
 
 opc(0x0, mark, []).
@@ -155,27 +147,14 @@ opc(0x4, complete, []).
 opc(0x5, timeout, []).
 opc(0x6, fail, []).
 opc(0x7, bye, []).
-opc(0x8, query, term_image).
-opc(0x9, begin_names, subst_header).
-opc(0xA, begin_solution, subst_header).
-opc(0xB, error, term_image).
-opc(0xC, multi_complete, tickets).
-opc(0xD, binding, term_image).
+opc(0x8, query, cterm(_,_)).
+opc(0x9, begin_names, uint(_)).
+opc(0xA, begin_solution, uint(_)).
+opc(0xB, error, cterm(_,_)).
+opc(0xC, name, name(_)).
+opc(0xD, binding, cterm(_,_)).
 opc(0xE, [], []).
-opc(0xF, protocol_error, protocol_error).
-
-:- forall(opc(A,B,C),
-	(	assert(opc(B,A,C),Ref),
-		assert(cleanup(Ref))
-	)
-).
-
-type_opc(Type,OpC):-
-    OpC is Type /\ 0xF.
-
-type_op(Type,Op,Body):-
-	type_opc(Type,OpC),
-	opc(OpC,Op,Body).
+opc(0xF, protocol_error, protocol_error(_,_)).
 
 flc(0x08,body).
 flc(0x10,reserved1).
@@ -183,21 +162,13 @@ flc(0x20,reserved2).
 flc(0x40,incomplete).
 flc(0x80,continuation).
 
-:- forall(flc(A,B),
-	(	Head=..[B,Type],
-		assert((Head:-A is A /\ Type),Ref),
-		assert(cleanup(Ref))
-	)
-).
 
-:- forall(flc(A,B),
-		(	assert(flc(B,A),Ref),
-			assert(cleanup(Ref))
-		)
-	).
+type_opc(Type,OpC):-
+    OpC is Type /\ 0xF.
 
-:- record header(flags=[],op=0,ticket=0,body_len=0).
-
+type_op(Type,Op,Body):-
+	type_opc(Type,OpC),
+	opc(OpC,Op,Body).
 
 
 sum_flags(Flags,Sum):-
@@ -348,17 +319,21 @@ read_message_continuation(Flags,Stream,OutStream):-
 read_message_continuation(_,_,_).
 
 write_message(Stream,Op,Ticket,MemFile):-
-    size_memory_file(MemFile,Size),
-    open_memory_file(MemFile,read,InStream,[encoding(octet)]),
-    set_stream(InStream,encoding(octet)),    
-    call_cleanup(
-		write_message_X(Size,Stream,Op,Ticket,InStream),
-		close(InStream)
-	).
-write_message_X(0,_Stream,_Op,_Ticket,_InStream):-
-    !.
+	(	MemFile==[]
+	->	Size=0,
+		write_message_X(0,Stream,Op,Ticket,[])
+	;	size_memory_file(MemFile,Size),
+    	open_memory_file(MemFile,read,InStream,[encoding(octet)]),
+    	set_stream(InStream,encoding(octet)),
+    	call_cleanup(
+			write_message_X(Size,Stream,Op,Ticket,InStream),
+			close(InStream)
+		)
+    ).
 write_message_X(Size,Stream,Op,Ticket,InStream):-
-    (	byte_count(InStream,0)
+    (	Size==0
+    ->	Flags0=[]
+    ;	byte_count(InStream,0)
     ->	Flags0=[]
     ;	Flags0=[continuation]
     ),        
@@ -372,54 +347,59 @@ write_message_X(Size,Stream,Op,Ticket,InStream):-
     ),
 	make_header([flags(Flags),op(Op),ticket(Ticket),body_len(BodyLen)],Header),
 	write_header(Stream,Header),
-	copy_stream_data(InStream,Stream,BodyLen),
-	write_message_X(Remaining,Stream,Op,Ticket,InStream).
+	(	BodyLen > 0
+	->	copy_stream_data(InStream,Stream,BodyLen)
+	;	true
+	),
+	(	Remaining > 0
+	->	write_message_X(Remaining,Stream,Op,Ticket,InStream)
+	;	true
+	).
 
 
-encode_tickets([],_Stream).
-encode_tickets([T|Ts],Stream):-
-    write_ticket(Stream,T),
-    encode_tickets(Ts,Stream).
-
-encode_vnums([],_Stream).
-encode_vnums([N|Ns],Stream):-
-    write_vnum(Stream,N),
-    encode_vnums(Ns,Stream).
-
-write_vnum(Stream,N):-
-    put_byte(Stream,N).
-
-encode_body(cterm_image,Data,Stream):-
-    write_canonical(Stream,Data),
-    write(Stream,'.').
-encode_body(tickets,Data,Stream):-	
-	encode_tickets(Data,Stream).
-encode_body(subst_header,Data,Stream):-	
-	encode_vnums(Data,Stream).	
-encode_body(protocol_error,error(Code,Tickets),Stream):-	
-	put_byte(Stream,Code),
-	encode_tickets(Tickets,Stream).		
 
 
-decode_tickets(Stream,[]):-
-	at_end_of_stream(Stream),
- 	!.  
-decode_tickets(Stream,[T|Ts]):-
-	read_ticket(Stream,T),
-	decode_tickets(Stream,Ts).
-decode_vnums(Stream,[]):-
-    at_end_of_stream(Stream),
- 	!.  
-decode_vnums(Stream,[N|Ns]):-
-    read_byte(N),
-    decode_vnums(Stream,Ns).
+unify([]).
+unify([Name=Var|VarNames]):-
+    Name=Var,
+    unify(VarNames).
+
+encode_body([],[]).
+encode_body(name(Name),Body):-
+    atom_to_memory_file(Name,Body).
+encode_body(cterm(VarNames,Term),Body):-
+    new_memory_file(Body),
+    open_memory_file(Body,write,Stream,[encoding(octet)]),
+    set_stream(Stream,encoding(octet)),
+    call_cleanup(
+    	( 	\+ \+ (unify(VarNames),write_canonical(Stream,Term)),
+    		write(Stream,'.')
+    	),
+    	close(Stream)
+    ).
+encode_body(uint(Integer),Body):-
+	new_memory_file(Body),
+    open_memory_file(Body,write,Stream,[encoding(octet)]),
+    set_stream(Stream,encoding(octet)),
+    call_cleanup(
+    	write_integer_bytes(Stream,4,Integer),
+    	close(Stream)
+    ).
 	
-decode_body(cterm_image,Stream,Term):-
-	read(Stream,Term).
-decode_body(tickets,Stream,Tickets):-
-	decode_tickets(Stream,Tickets).
-decode_body(subst_header,Stream,VNums):-
-	decode_vnums(Stream,VNums).	
-decode_body(protocol_error,Stream,error(Code,Tickets)):-
-    get_byte(Stream,Code),
-    decode_tickets(Stream,Tickets).
+decode_body([],_).
+decode_body(cterm(VarNames,Term),Body):-
+    open_memory_file(Body,read,Stream),
+	call_cleanup(
+		read_term(Stream,Term,[variable_names(VarNames)]),
+		close(Stream)
+	).
+decode_body(name(Name),Body):-
+    memoryfile_to_atom(Body,Name).
+decode_body(uint(Integer),Body):-	
+    open_memory_file(Body,read,Stream,[encoding(octet)]),
+    set_stream(Stream,encoding(octet)),
+    call_cleanup(
+    	read_bytes_to_integer(Stream,4,Integer),
+    	close(Stream)
+    ).
+    
