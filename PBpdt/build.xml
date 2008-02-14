@@ -1,6 +1,6 @@
-<!--  This script will not be uploaded to the server.
-      PLEASE DO NOT MODIFY 
-      If you modify this script it is likely that the build will not work on the server
+<!--   This script will not be uploaded to the server.
+       PLEASE DO NOT MODIFY 
+       If you modify this script it is likely that the build will not work on the server
 -->
 <project name="Build Facade" default="main">
 	<taskdef resource="org/pluginbuilder/anttasks/pluginbuildertasks.properties" classpath="build-files/pluginbuilder-anttasks.jar" />
