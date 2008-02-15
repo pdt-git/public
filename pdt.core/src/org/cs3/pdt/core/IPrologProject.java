@@ -67,7 +67,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
     /**
      * parses the current value of the sourcePath property and returns
      * a Set containing IContainer objects that represent the
-     * source folders that actualy exist within the project.
+     * source folders that actually exist within the project.
      * @return
      * @throws CoreException
      */
