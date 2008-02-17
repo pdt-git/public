@@ -1,8 +1,10 @@
-package org.cs3.pdt.actions;
+package org.cs3.pdt.transform.internal;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.transform.internal.wizards.MyWizard;
+import org.cs3.pdt.transform.internal.wizards.PrologRefactoringWizard;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
@@ -18,8 +20,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 
-import pdt.transform.wizards.MyWizard;
-import pdt.transform.wizards.PrologRefactoringWizard;
 
 public class RenameFile implements IEditorActionDelegate{
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.2"?>
 <plugin>
+   <extension-point id="prologRefactorings" name="Prolog Refactorings" schema="schema/prologRefactorings.exsd"/>
 
    <extension point="org.eclipse.ui.popupMenus">
     <!-- put a context menu item into the menu of standard text editors.
@@ -15,9 +16,38 @@
               menubarPath="additions"
               id="org.cs3.pdt.actions.apply_transformation"/>
 	<action label="Rename File"
-              class="org.cs3.pdt.actions.RenameFile" 
+              class="org.cs3.pdt.transform.internal.RenameFile" 
               menubarPath="additions"
               id="org.cs3.pdt.actions.rename_file"/>              
     </viewerContribution>
   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any">
+         <menu
+               id="prologRefactoringsMenu"
+               label="Refactorings">
+            <command
+                  commandId="pdt.transform.executeRefactoring"
+                  id="unfug"
+                  label="No Command">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.cs3.pdt.transform.handlers.ExecuteRefactoringHandler"
+            id="pdt.transform.executeRefactoring"
+            name="Execute Refactoring">
+         <commandParameter
+               id="pdt.transform.executeRefactoring.refactoring"
+               name="Refactoring"
+               optional="true"
+               values="org.cs3.pdt.transform.handlers.ExecuteRefactoringParameterValues">
+         </commandParameter>
+      </command>
+   </extension>
 </plugin>

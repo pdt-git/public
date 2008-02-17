@@ -1,8 +1,8 @@
-package pdt.transform.wizards;
+package org.cs3.pdt.transform.internal.wizards;
 
 import java.util.HashMap;
 
-import org.cs3.pdt.actions.PrologRefactoringInfo;
+import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
 import org.cs3.pdt.ui.util.OptionEditor;
 import org.cs3.pdt.ui.util.PropertyEditor;
 import org.cs3.pl.common.Debug;
