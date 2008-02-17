@@ -1,4 +1,4 @@
-package pdt.transform.wizards;
+package org.cs3.pdt.transform.internal.wizards;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;

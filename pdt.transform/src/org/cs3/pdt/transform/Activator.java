@@ -1,4 +1,4 @@
-package pdt.transform;
+package org.cs3.pdt.transform;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -10,7 +10,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "pdt.transform";
+	public static final String PLUGIN_ID = "org.cs3.pdt.transform";
 
 	// The shared instance
 	private static Activator plugin;
