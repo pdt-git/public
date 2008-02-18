@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:prologRefactoringsMenu">
+         <command
+               commandId="pdt.transform.executeRefactoring"
+               label="Rename Prolog File"
+               style="push">
+            <visibleWhen></visibleWhen>
+            <parameter
+                  name="pdt.transform.executeRefactoring.refactoring"
+                  value="sommer">
+            </parameter>
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.cs3.pdt.transform.prologRefactorings">
+      <refactoring
+            descriptor="org.cs3.pdt.internal.refactorings.RenameFileDescriptor"
+            id="pdt.refactorings.RenameFile"
+            label="Rename Prolog File">
+         <dependency
+               libraryId="pdt.runtime.library.pdt">
+         </dependency>
+         <definition
+               path="library/rename_file2.pl">
+         </definition>
+      </refactoring>
+   </extension>
+
+</plugin>
