@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.runtime;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -101,4 +102,6 @@ public interface PersistableSubscription extends Subscription {
 	 *         saveState() and restore it at next startup using restoreState().
 	 */
 	public abstract boolean isPersistent();
+	
+	public abstract List<String> getTags();
 }
