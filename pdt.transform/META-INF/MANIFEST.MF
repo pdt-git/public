@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Transform Plug-in
 Bundle-SymbolicName: org.cs3.pdt.transform;singleton:=true
 Bundle-Version: 1.0.0
-Bundle-Activator: org.cs3.pdt.transform.Activator
+Bundle-Activator: org.cs3.pdt.transform.PDTTransformationsPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ltk.core.refactoring,

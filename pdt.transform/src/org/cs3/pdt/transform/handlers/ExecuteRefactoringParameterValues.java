@@ -7,7 +7,6 @@ import org.eclipse.core.commands.IParameterValues;
 
 public class ExecuteRefactoringParameterValues implements IParameterValues {
 
-	@Override
 	public Map getParameterValues() {
 		HashMap<String,String> m = new HashMap<String, String>();
 		m.put("Hash mich.", "fruehling");
