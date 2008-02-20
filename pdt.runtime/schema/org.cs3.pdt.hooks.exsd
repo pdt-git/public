@@ -51,6 +51,9 @@ The connection between a particular pif and a particular set of tasks that is pe
 
    <element name="hook">
       <complexType>
+         <sequence>
+            <element ref="tag" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="class" type="string">
             <annotation>
                <documentation>
@@ -80,6 +83,18 @@ The connection between a particular pif and a particular set of tasks that is pe
                <documentation>
                   An optional key identifying a PrologInterface instance created by the PDT.&lt;p&gt;
 This hook will be registered with all PIF instance that are created using the &lt;code&gt; org.cs3.pdt.PDTPlugin.getPrologInterface(String key)&lt;/code&gt; method with a matching &lt;code&gt;key&lt;/code&gt; argument. If this attribute is ommited, the hook is registered with every PIF created by the PDT.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="tag">
+      <complexType>
+         <attribute name="name" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
                </documentation>
             </annotation>
          </attribute>
