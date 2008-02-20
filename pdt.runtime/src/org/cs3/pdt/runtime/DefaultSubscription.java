@@ -41,9 +41,13 @@
 
 package org.cs3.pdt.runtime;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
@@ -71,6 +75,8 @@ public class DefaultSubscription implements PersistableSubscription {
 	private boolean persistent;
 
 	private String pifKey;
+
+	private List<String> tags = new ArrayList<String>();
 	
 	/**
 	 * clients should not use this constructor. Its only called
@@ -81,7 +87,7 @@ public class DefaultSubscription implements PersistableSubscription {
 	};
 
 	/**
-	 * Only for non-persistant subscriptions
+	 * Only for non-persistent subscriptions
 	 * @param id
 	 * @param pifID
 	 * @param descritpion
@@ -180,7 +186,10 @@ public class DefaultSubscription implements PersistableSubscription {
 		setPifKey((String) params.get("pifkey"));
 		setId((String) params.get("id"));
 		setPersistent((String) params.get("persistent"));
-		
+		if(params.get("tags")!= null) {
+			setTags(Arrays.asList(Util.split((String)params.get("tags"),",")));
+		}
+
 	}
 
 
@@ -197,6 +206,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		m.put("pifkey",getPifKey());
 		m.put("id",getId());
 		m.put("persistent",String.valueOf(isPersistent()));
+		m.put("tags",Util.splice(tags, ","));
 		return m;
 	}
 
@@ -241,5 +251,15 @@ public class DefaultSubscription implements PersistableSubscription {
 	public boolean isVisible() {
 		return true;
 	}
+
+	public List<String> getTags() {
+		
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
 	
+
 }
