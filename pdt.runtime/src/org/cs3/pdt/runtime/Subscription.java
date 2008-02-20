@@ -111,31 +111,31 @@ public interface Subscription {
 	 * Note that this method is never called for anonymous subscriptions. This
 	 * is implied by the second condition.
 	 * 
-	 * Implementation should make no assumptions on the life cylce state of the pif
+	 * Implementation should make no assumptions on the life cycle state of the pif
 	 * argument. It should also not contain calls that would alter the
 	 * state. Note that a call to PrologInterface.getSession() DOES alter the state of the 
 	 * pif (it may start it, if it is not already up!).
 	 * 
 	 * Why not? 
-	 * - We do not want the pif to start up before it is actualy needed.
+	 * - We do not want the pif to start up before it is actual needed.
 	 * - We do not want to care about possible PrologInterfaceExceptions during configuration.
 	 * 
 	 * A commonly faced problem is the fact that when subscribing to a pif, you do not know 
 	 * whether it has already been started or even created. E.g. if you add startup hooks 
-	 * from within the configure callback, you do not know if they will be executed within the 
-	 * same life cycle period. A solution that seems convenient atfirst glance is to check 
-	 * the lifecycle state and, if the pif is already up, just call the hook methods "manualy".
+	 * from within the configure call back, you do not know if they will be executed within the 
+	 * same life cycle period. A solution that seems convenient at first glance is to check 
+	 * the life cycle state and, if the pif is already up, just call the hook methods "manually".
 	 * 
 	 * The problem however is, that any exceptions thrown by the hook code cannot be correctly 
-	 * propageated. You either have to catch them in the configure method, which only makes sense 
+	 * propagated. You either have to catch them in the configure method, which only makes sense 
 	 * if can locally recover from them (unlikely in the case of PrologInterfaceExceptions!),
-	 * or you have to throw a RuntimeException, which is rather unpolite because it leaves the
+	 * or you have to throw a RuntimeException, which is rather impolite because it leaves the
 	 * upper tiers little chance to handle the problem gracefully.
 	 * 
-	 * A better approach is to leave these "late" initialisation to the code that actually
+	 * A better approach is to leave these "late" initialization to the code that actually
 	 * requested to add the subscription, because it is typically part of the operation, whose 
-	 * context is finally vialoated by the thrown exceptions, and it is also more likely to have
-	 * access to enough context to adequatly handle the situation.  
+	 * context is finally violated by the thrown exceptions, and it is also more likely to have
+	 * access to enough context to adequately handle the situation.  
 	 * 
 	 * @param pif
 	 */
