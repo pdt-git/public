@@ -180,7 +180,7 @@
 		<!-- Ampel wird auf Rot gesetzt -->
 		<propertyfile file="${resultfile}">
 			<entry key="BUILD" type="string" value="FAILED"/>
-			<entry key="TESTS" type="string" value="FAILED"/>
+			<entry key="TESTS" type="string" value="OK"/>
 		</propertyfile>
 
 		<antcall target="-build"/>
