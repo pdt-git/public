@@ -5,6 +5,9 @@
 	<property file="../../build_local.properties" />
 	<property file="run-tests.properties" />
 
+	<!-- Propertyfile fuer den betrieb der Ampel --> 
+	<property name="resultfile" location="results.txt" />	
+	
 	<import file="../build_shared.xml" />
 
 	<target name="-init">
