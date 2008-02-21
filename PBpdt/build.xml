@@ -171,7 +171,6 @@
 		
 	</target>
 	
-	
 	<target name="main-cc"
 			description="This target is suited to be run from cruisecontrol. The property 'label' is expected to be set from cruisecontrol.">
 		<property name="version.full" value="${label}"/> 
