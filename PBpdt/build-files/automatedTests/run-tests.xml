@@ -85,6 +85,9 @@
 		<!-- Write Message to stderr and continue build, do not call fail and let the
 		     build continue, e.g. packaging might take place after test execution -->
 		<echo level="error" message="TESTS FAILED"/>
+		<propertyfile file="${resultfile}">
+			<entry key="TESTS" type="string" value="FAILED"/>
+		</propertyfile>
 	</target>
 	
 	<target name="checkTestResultFileForErrors" unless="isErrorOrFailure">

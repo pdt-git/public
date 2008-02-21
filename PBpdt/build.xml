@@ -10,6 +10,9 @@
 	<property name="eclipse.local.tar.non.server" value="${test.eclipse.zip}"/>
 	<import file="build-files/build_shared.xml"/>
 	
+	<!-- Propertyfile fuer den betrieb der Ampel --> 
+	<property name="resultfile" location="results.txt" />	
+	
 	<target name="-properties">		
 		
 		<!-- versioning -->
@@ -162,13 +165,26 @@
 		     return an exit status of 2 can only take place in main targets. --> 
 		<fail message="PDE Build failed" if="is.build.error" status="1"/>
 
+		<propertyfile file="${resultfile}">
+			<entry key="BUILD" type="string" value="OK"/>
+		</propertyfile>
+		
 	</target>
+	
+	
 	
 	<target name="main-cc"
 			description="This target is suited to be run from cruisecontrol. The property 'label' is expected to be set from cruisecontrol.">
 		<property name="version.full" value="${label}"/> 
 		<!-- TODO: extract qualifier correctly from label -->
-		<property name="version.qualifier" value="${label}"/>		
+		<property name="version.qualifier" value="${label}"/>	
+		
+		<!-- Ampel wird auf Rot gesetzt -->
+		<propertyfile file="${resultfile}">
+			<entry key="BUILD" type="string" value="FAILED"/>
+			<entry key="TESTS" type="string" value="FAILED"/>
+		</propertyfile>
+
 		<antcall target="-build"/>
 	</target>
 	
