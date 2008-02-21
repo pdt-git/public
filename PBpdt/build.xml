@@ -166,7 +166,7 @@
 		<fail message="PDE Build failed" if="is.build.error" status="1"/>
 
 		<propertyfile file="${resultfile}">
-			<entry key="BUILD" type="string" value="FAILED"/>
+			<entry key="BUILD" type="string" value="OK"/>
 		</propertyfile>
 		
 	</target>
