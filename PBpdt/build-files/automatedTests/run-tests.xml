@@ -6,7 +6,7 @@
 	<property file="run-tests.properties" />
 
 	<!-- Propertyfile fuer den betrieb der Ampel --> 
-	<property name="resultfile" location="results.txt" />	
+	<property name="resultfile" location="L:\Work\cruisecontrol_2.7.1\checkout\pdt\trunk\PBpdt\results.txt" />	
 	
 	<import file="../build_shared.xml" />
 
