@@ -140,7 +140,7 @@ public class Factory extends PrologInterfaceFactory {
 	}
 
 	private String guessKillCommandName() {
-		if (Util.isWindoze()) {
+		if (Util.isWindows()) {
 			try {
 				return getResourceLocator().resolve(Factory.FKILL_EXE)
 						.getCanonicalPath();
@@ -162,7 +162,7 @@ public class Factory extends PrologInterfaceFactory {
 	public PrologInterface create() {
 		ensureInstalled(SERVER_PL, Factory.class);
 		ensureInstalled(MAIN_PL, Factory.class);
-		if (Util.isWindoze()) {
+		if (Util.isWindows()) {
 			ensureInstalled(FKILL_EXE, Factory.class);
 		}
 
@@ -202,7 +202,7 @@ public class Factory extends PrologInterfaceFactory {
 
 	private String guessExecutableName() {
 
-		if (Util.isWindoze()) {
+		if (Util.isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
 					+ findWindowsExecutable() + " " + STACK_COMMMAND_LINE_PARAMETERS;
 			// return "plwin";
