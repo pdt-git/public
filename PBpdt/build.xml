@@ -249,7 +249,7 @@ version.qualifier: ${version.qualifier}</echo>
 		<mkdir dir="${buildDirectory}/doc"/>
 		<javadoc
 			destdir="${buildDirectory}/doc"
-			sourcepath="${buildDirectory}/plugins"
+			sourcepath="L:\Work\cruisecontrol_2.7.1\checkout\pdt\trunk"
 			packagenames="org.cs3.pdt.*">
 		</javadoc>
 	</target>
