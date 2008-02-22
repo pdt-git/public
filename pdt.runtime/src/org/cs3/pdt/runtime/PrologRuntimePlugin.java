@@ -84,6 +84,7 @@ import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -446,14 +447,17 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					URL url = BundleUtility.find(Platform.getBundle(namespace),
 							resName);
 					try {
-
 						// URL url = Platform.getBundle(namespace).getEntry(
 						// resName);
 						Debug.debug("trying to resolve this url: " + url);
-						url = Platform.asLocalURL(url);
+						url = FileLocator.toFileURL(url);
 					} catch (Exception e) {
-						Debug.rethrow("Problem resolving url: "
-								+ url.toString(), e);
+						if(url == null){
+							Debug.rethrow("Problem resolving url: is null",e);
+						} else {
+							Debug.rethrow("Problem resolving url: "
+									+ url.toString(), e);
+						}
 					}
 					// URI uri = URI.create(url.toString());
 					File file = new File(url.getFile());
