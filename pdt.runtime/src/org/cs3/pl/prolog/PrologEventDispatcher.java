@@ -100,9 +100,14 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				
 			}
 
-			
-			
+			@Override
+			public void setData(Object data) {
+				
+				
+			}
+
 		};
+		
 		pif.addLifeCycleHook(hook, null,null);
 		if(pif.isUp()){
 			PrologSession s =null;

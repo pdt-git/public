@@ -12,6 +12,9 @@
 
    <element name="extension">
       <annotation>
+         <appInfo>
+            <meta.element deprecated="true"/>
+         </appInfo>
          <documentation>
             Deprecated since 0.2M4. 
 Reason: 
@@ -48,6 +51,9 @@ The connection between a particular pif and a particular set of tasks that is pe
 
    <element name="contribution">
       <annotation>
+         <appInfo>
+            <meta.element deprecated="true"/>
+         </appInfo>
          <documentation>
             Contributes an entry (i.e. an absolute filename) to the list of files that will be consulted into any PrologInterface created by the PDT.
          </documentation>

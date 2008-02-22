@@ -41,6 +41,7 @@
 
 package org.cs3.pl.prolog.internal;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -54,14 +55,14 @@ public class LifeCycleHookWrapper implements LifeCycleHook2 {
 
 	String id;
 
-	/** things i depend on */
-	public Vector post = new Vector();
+	/** things I depend on */
+	public HashSet<LifeCycleHookWrapper> post = new HashSet<LifeCycleHookWrapper>();
 
 	/** things that depend on me */
-	public Vector pre = new Vector();
+	public HashSet<LifeCycleHookWrapper> pre = new HashSet<LifeCycleHookWrapper>();
 
 	// public LifeCycleHook hook;
-	public Vector hooks = new Vector();
+	public HashSet<LifeCycleHook> hooks = new HashSet<LifeCycleHook>();
 
 	public boolean flipflop = false;
 
@@ -178,6 +179,12 @@ public class LifeCycleHookWrapper implements LifeCycleHook2 {
 			}
 			Debug.info("exit onError() on hook " + id);
 		}
+	}
+
+	@Override
+	public void setData(Object data) {
+		throw new RuntimeException("Method should not be called on Wrapper. ");
+		
 	}
 
 }

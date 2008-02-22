@@ -62,4 +62,9 @@ public interface LifeCycleHook2 extends LifeCycleHook{
      * state DOWN. No other hook methods will be called in between.
      */		
 	public void onError(PrologInterface pif);
+	
+	/**
+	 * parameterize this hook instance with domain data.
+	 */
+	public void setData(Object data);
 }
