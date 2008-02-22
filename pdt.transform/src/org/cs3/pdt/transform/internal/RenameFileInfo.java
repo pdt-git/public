@@ -10,7 +10,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
 
-final class RenameFileInfo extends PrologRefactoringInfo {
+public final class RenameFileInfo extends PrologRefactoringInfo {
 
 	private IFile file;
 	private final PrologInterface prologInterface;

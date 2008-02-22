@@ -87,6 +87,16 @@ public abstract class PrologRefactoringDescriptor {
 	public abstract String getSelectionTerm(ISelection selection,
 			IWorkbenchPartReference activePart);
 
+	/**
+	 * generate a data term representing the parameters of the refactoring.
+	 * 
+	 * The exact format of the term is only known to the refactoring. It is however 
+	 * guaranteed to be a syntactical valid prolog term.
+	 * 
+	 *  Implementations should represent parameters for which the value is not yet
+	 *  known using meta variables with. The names of those variables should equal 
+	 *  the key of the respective Option returned by getParameters. 
+	 */
 	public abstract String getParametersTerm(Map<String,String> parameterValues);
 	
 	public abstract Option[] getParameters(ISelection selection, IWorkbenchPartReference activePart);
