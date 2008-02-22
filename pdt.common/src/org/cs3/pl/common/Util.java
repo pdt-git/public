@@ -247,8 +247,8 @@ public class Util {
 
 	
 
-	public static String normalizeOnWindoze(String s) {
-		boolean windowsPlattform = isWindoze();
+	public static String normalizeOnWindows(String s) {
+		boolean windowsPlattform = isWindows();
 		if (windowsPlattform) {
 			s = s.replace('\\', '/').toLowerCase();
 		}
@@ -258,7 +258,7 @@ public class Util {
 	/**
 	 * @return
 	 */
-	public static boolean isWindoze() {
+	public static boolean isWindows() {
 		boolean windowsPlattform = System.getProperty("os.name").indexOf(
 				"Windows") > -1;
 		return windowsPlattform;
@@ -274,7 +274,7 @@ public class Util {
 
 	public static String prologFileName(File f) {
 		try {
-			return normalizeOnWindoze(f.getCanonicalPath());
+			return normalizeOnWindows(f.getCanonicalPath());
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
