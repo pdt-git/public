@@ -184,7 +184,7 @@
 		</propertyfile>
 
 		<antcall target="-build"/>
-		<antcall target="generateJavadocs"/>
+		<!-- <antcall target="generateJavadocs"/> -->
 	</target>
 	
 	<target name="main" description="Run the main target of customTargets.xml. Return status 0,1,2 for Success, Build Failure and Test Failure">
