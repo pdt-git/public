@@ -184,6 +184,7 @@
 		</propertyfile>
 
 		<antcall target="-build"/>
+		<antcall target="generateJavadocs"/>
 	</target>
 	
 	<target name="main" description="Run the main target of customTargets.xml. Return status 0,1,2 for Success, Build Failure and Test Failure">
@@ -230,7 +231,7 @@
 			<contains string="${build.stderr}" substring="TESTS FAILED"/>
 		</condition>
 		<fail message="Tests failed" if="is.tests.failed" status="2"/>
-		<antcall target="generateJavadocs"/>
+
 	</target>
 	
 	<target name="buildProperties" description="Print out derived properties for the current build." depends="-properties">
