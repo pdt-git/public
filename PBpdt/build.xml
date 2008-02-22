@@ -230,6 +230,7 @@
 			<contains string="${build.stderr}" substring="TESTS FAILED"/>
 		</condition>
 		<fail message="Tests failed" if="is.tests.failed" status="2"/>
+		<antcall target="generateJavadocs"/>
 	</target>
 	
 	<target name="buildProperties" description="Print out derived properties for the current build." depends="-properties">
@@ -242,4 +243,14 @@ version.full: ${version.full}
 version.qualifier: ${version.qualifier}</echo>
 	</target>
 
+	<target name="generateJavadocs">
+		<delete dir="${buildDirectory}/doc"/>
+		<mkdir dir="${buildDirectory}/doc"/>
+		<javadoc
+			destdir="${buildDirectory}/doc"
+			sourcepath="${buildDirectory}/plugins"
+			packagenames="org.cs3.pdt.*">
+		</javadoc>
+	</target>
+	
 </project>
