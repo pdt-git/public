@@ -191,7 +191,7 @@ public class NewPrologCompletionProposal implements ICompletionProposal,IComplet
 
 			Bundle bundle= Platform.getBundle(PDT.PLUGIN_ID);
 			 
-			fStyleSheetURL= bundle.getEntry(Util.isWindoze()?"/css/pldoc_ie.css":"/css/pldoc.css"); //$NON-NLS-1$
+			fStyleSheetURL= bundle.getEntry(Util.isWindows()?"/css/pldoc_ie.css":"/css/pldoc.css"); //$NON-NLS-1$
 			if (fStyleSheetURL != null) {
 				try {
 					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
