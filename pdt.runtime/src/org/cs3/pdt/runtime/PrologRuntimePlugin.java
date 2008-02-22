@@ -63,6 +63,7 @@ import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
+import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
@@ -381,19 +382,20 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				Set deps = new HashSet();
 				for (int k = 0; k < childElms.length; k++) {
 					IConfigurationElement childElm = childElms[k];
-					if("dependency".equals(childElm.getName())){
+					if ("dependency".equals(childElm.getName())) {
 						deps.add(childElm.getAttribute("library"));
-					}
-					else if("attribute".equals(childElm.getName())){
-						libAttrs.put(childElm.getAttribute("id"), childElm.getAttribute("value"));
-					}
-					else {
-						Debug.warning("within <library> element, i found an unexpected child element: "+childElm.getName());
+					} else if ("attribute".equals(childElm.getName())) {
+						libAttrs.put(childElm.getAttribute("id"), childElm
+								.getAttribute("value"));
+					} else {
+						Debug
+								.warning("within <library> element, i found an unexpected child element: "
+										+ childElm.getName());
 					}
 				}
-				
+
 				PrologLibrary lib = new DefaultPrologLibrary(id, deps, alias,
-						path,libAttrs);
+						path, libAttrs);
 				getLibraryManager().addLibrary(lib);
 
 			}
@@ -447,17 +449,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					URL url = BundleUtility.find(Platform.getBundle(namespace),
 							resName);
 					try {
+
 						// URL url = Platform.getBundle(namespace).getEntry(
 						// resName);
 						Debug.debug("trying to resolve this url: " + url);
-						url = FileLocator.toFileURL(url);
+						url = Platform.asLocalURL(url);
 					} catch (Exception e) {
-						if(url == null){
-							Debug.rethrow("Problem resolving url: is null",e);
-						} else {
-							Debug.rethrow("Problem resolving url: "
-									+ url.toString(), e);
-						}
+						Debug.rethrow("Problem resolving url: "
+								+ url.toString(), e);
 					}
 					// URI uri = URI.create(url.toString());
 					File file = new File(url.getFile());
@@ -492,28 +491,85 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		IExtension[] extensions = point.getExtensions();
 		try {
 			for (int i = 0; i < extensions.length; i++) {
-				IConfigurationElement[] celem = extensions[i]
+				IExtension extension = extensions[i];
+				IConfigurationElement[] celems = extension
 						.getConfigurationElements();
-				for (int j = 0; j < celem.length; j++) {
+				for (int j = 0; j < celems.length; j++) {
 
-					if (!celem[j].getName().equals("hook")) {
+					IConfigurationElement celem = celems[j];
+					if (!celem.getName().equals("hook")) {
 						Debug.warning("hmmm... asumed a hook, but got a "
-								+ celem[j].getName());
+								+ celem.getName());
 					} else {
-						LifeCycleHook hook = (LifeCycleHook) celem[j]
+						LifeCycleHook hook = (LifeCycleHook) celem
 								.createExecutableExtension("class");
-						String dependsOn = celem[j]
-								.getAttributeAsIs("dependsOn");
+						String dependsOn = celem.getAttribute("dependsOn");
 						if (dependsOn == null) {
 							dependsOn = "";
 						}
 						String[] dependencies = Util.split(dependsOn, ",");
-						String id = celem[j].getAttributeAsIs("id");
-						String pifKey = celem[j].getAttributeAsIs("key");
-						if (pifKey == null) {
-							pifKey = "";
+						String id = celem.getAttribute("id");
+						String pifKey = celem.getAttribute("key");
+
+						IConfigurationElement[] children = celem
+								.getChildren("consult");
+						File[] consults = new File[children.length];
+						for (int k = 0; k < children.length; k++) {
+							String resName = children[k]
+									.getAttribute("resource");
+							Debug.debug("got this resname: " + resName);
+							String namespace = extension
+									.getNamespaceIdentifier();
+							Debug.debug("got this namespace: " + namespace);
+							URL url = FileLocator.find(Platform
+									.getBundle(namespace), new Path(resName),
+									null);
+							try {
+
+								// URL url =
+								// Platform.getBundle(namespace).getEntry(
+								// resName);
+								Debug.debug("trying to resolve this url: "
+										+ url);
+								url = FileLocator.toFileURL(url);
+							} catch (Exception e) {
+								Debug.rethrow("Problem resolving url: "
+										+ url.toString(), e);
+							}
+							// URI uri = URI.create(url.toString());
+							consults[k] = new File(url.getFile());
 						}
-						registerLifeCycleHook(pifKey, hook, id, dependencies);
+						children = celem.getChildren("hookDependency");
+						String[] hookDependencies = new String[children.length
+								+ dependencies.length];
+						for (int k = 0; k < children.length; k++) {
+							hookDependencies[k] = children[k]
+									.getAttribute("hook");
+						}
+						System.arraycopy(dependencies, 0, hookDependencies,
+								children.length, hookDependencies.length);
+
+						children = celem.getChildren("libraryDependency");
+						String[] libraryDependencies = new String[children.length];
+						for (int k = 0; k < libraryDependencies.length; k++) {
+							libraryDependencies[k] = children[k]
+									.getAttribute("library");
+						}
+
+						children = celem.getChildren("tag");
+						String[] tags = new String[children.length
+								+ (pifKey == null ? 0 : 1)];
+						for (int k = 0; k < tags.length; k++) {
+							tags[k] = children[k].getAttribute("name");
+						}
+						if (pifKey != null) {
+							tags[children.length] = pifKey;
+						}
+						LifeCycleHookDecorator decoratedHook = new LifeCycleHookDecorator(
+								hook, libraryDependencies, consults,
+								getLibraryManager());
+						registerLifeCycleHook(tags, decoratedHook, id,
+								hookDependencies);
 					}
 				}
 			}
@@ -604,7 +660,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		try {
 			PrologInterfaceRegistry r = getPrologInterfaceRegistry();
 			Set keys = new HashSet(r.getRegisteredKeys()); // clone this. see
-															// PDT-194
+			// PDT-194
 			for (Iterator it = keys.iterator(); it.hasNext();) {
 				String key = (String) it.next();
 				PrologInterface pif = r.getPrologInterface(key);
@@ -623,17 +679,16 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 
-	
-	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif){
+	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif) {
 		IPrologEventDispatcher r = dispatchers.get(pif);
-		if(r==null){
-			r=new UDPEventDispatcher(pif);
-			dispatchers.put(pif,r);
+		if (r == null) {
+			r = new UDPEventDispatcher(pif);
+			dispatchers.put(pif, r);
 		}
 		return r;
-		
+
 	}
-		
+
 	/**
 	 * get a PrologInterface to a given key. This is a convenience method to
 	 * "just get the darn thing". This will use create the PrologInterface if
@@ -843,25 +898,31 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * added emidiately. Otherwise it will be added the first time some client
 	 * requests a prolog interface for the given key.
 	 * 
-	 * Note that no attempt is made to actualy execute the code in the hook if
+	 * Note that no attempt is made to actually execute the code in the hook if
 	 * the pif is already running.
 	 * 
 	 * 
 	 */
-	private void registerLifeCycleHook(String pifKey, LifeCycleHook hook,
+	private void registerLifeCycleHook(String[] tags, LifeCycleHook hook,
 			String hookId, String[] deps) {
+		if(tags==null||tags.length==0){
+			tags= new String[]{"any"};
+		}
 		synchronized (globalHooksMux) {
-			Map hooks = (Map) getGlobalHooks().get(pifKey);
+			for (int i = 0; i < deps.length; i++) {
+				String pifKey=tags[i];
+				Map hooks = (Map) getGlobalHooks().get(pifKey);
 
-			if (hooks == null) {
-				hooks = new HashMap();
-				getGlobalHooks().put(pifKey, hooks);
-			}
-			hooks.put(hookId, new _HookRecord(hook, hookId, deps));
-			PrologInterface pif = getPrologInterfaceRegistry()
-					.getPrologInterface(pifKey);
-			if (pif != null) {
-				pif.addLifeCycleHook(hook, hookId, deps);
+				if (hooks == null) {
+					hooks = new HashMap();
+					getGlobalHooks().put(pifKey, hooks);
+				}
+				hooks.put(hookId, new _HookRecord(hook, hookId, deps));
+				PrologInterface pif = getPrologInterfaceRegistry()
+						.getPrologInterface(pifKey);
+				if (pif != null) {
+					pif.addLifeCycleHook(hook, hookId, deps);
+				}
 			}
 		}
 	}
@@ -921,7 +982,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			factory.setResourceLocator(new DefaultResourceFileLocator(new File(
 					bootStrapDir)));
 			factory.setLibraryManager(getLibraryManager());
-			
+
 		}
 		return factory;
 	}
