@@ -626,4 +626,10 @@ public class CopyOfContentModel extends DefaultAsyncPrologSessionListener implem
 		return root;
 	}
 
+	@Override
+	public void setData(Object data) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

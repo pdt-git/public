@@ -39,6 +39,13 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	private static final String HOOK_ID = "PrologFileContentModelHook";
 
+	protected Object hookData;
+	
+	@Override
+	public void setData(Object data) {
+		this.hookData=data;
+		
+	}
 	private Object input;
 
 	private PrologInterface pif;
