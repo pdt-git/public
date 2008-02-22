@@ -984,4 +984,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	}
 
+	@Override
+	public void setData(Object data) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
