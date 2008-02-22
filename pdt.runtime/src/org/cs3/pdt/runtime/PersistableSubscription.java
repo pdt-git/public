@@ -102,6 +102,5 @@ public interface PersistableSubscription extends Subscription {
 	 *         saveState() and restore it at next startup using restoreState().
 	 */
 	public abstract boolean isPersistent();
-	
-	public abstract List<String> getTags();
+		
 }

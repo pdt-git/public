@@ -155,4 +155,22 @@ public interface Subscription {
 	 * @param prologInterface
 	 */
 	public abstract void deconfigure(PrologInterface pif);
+	
+	/**
+	 * Return the tags associated with this Subscriptions.
+	 * 
+	 * Currently, the main use of tags is to associate hooks to the subscription that 
+	 * were defined in the plugin.xml file.^
+	 * 
+	 * See getData() on how to parametrize the hooks associated with this subscription.
+	 */
+	public abstract String[] getTags();
+	
+	/**
+	 * return the user data associated with this subscription.
+	 * 
+	 * The returned object will be used to parameterize hooks associated with this subscription.
+	 * @return
+	 */
+	public abstract Object getData();
 }

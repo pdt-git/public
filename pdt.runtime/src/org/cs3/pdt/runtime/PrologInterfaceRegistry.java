@@ -43,6 +43,7 @@ package org.cs3.pdt.runtime;
 
 import java.util.Set;
 
+import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
@@ -95,23 +96,7 @@ public interface PrologInterfaceRegistry {
 	 */
 	public Set getSubscriptionKeysForPif(String key);
 
-	/**
-	 * A short catchy name associated with a given pif. Maybe null if no such
-	 * pif, or no name.
-	 * 
-	 * @deprecated the method will be removed, due to its unclear semantics see
-	 *             PDT-108
-	 */
-	public String getName(String key);
-
-	/**
-	 * Set an optional name for a given pif identifier.
-	 * 
-	 * @deprecated the method will be removed, due to its unclear semantics see
-	 *             PDT-108
-	 */
-	public void setName(String key, String name);
-
+	
 	/**
 	 * retrieve the registry key of a registered PrologInterface. *
 	 */
@@ -141,6 +126,31 @@ public interface PrologInterfaceRegistry {
 	public void removePrologInterfaceRegistryListener(
 			PrologInterfaceRegistryListener l);
 
+	
+	
+	/**
+	 * Add a hook descriptor to the registry.
+	 * 
+	 * For each distinct tuple (PrologInterface, Data) where
+	 *   - PrologInterface is a registered Prolog Interface
+	 *   - and Data is the user data of a registered subscription refering to PrologInterface
+	 *   - that subscription has at least one tag in common with this hook descriptor.  
+	 * a hook will be created using the descriptor, it will be parameterized with 
+	 * the user data and will be registered with the prolog interface instance.
+	 * If the prolog interface instance is already running, both the onInit() and 
+	 * afterInit() methods will be called.  
+	 */
+	public void addHookDescriptor(LifeCycleHookDecorator descr);
+	
+	/**
+	 * Remove a hook descriptor from the registry.
+	 * 
+	 * In addition, this will remove ALL hooks with the given hook id
+	 * from ALL registered Prolog Interfaces.   
+	 */
+	public void removeHookDescriptor(String hookId);
+	
+	
 	/**
 	 * Register a PrologInterface with this registry.
 	 * 
@@ -153,6 +163,13 @@ public interface PrologInterfaceRegistry {
 	 * This method will cause a call to the method configure() on any waiting
 	 * subscriptions that are already registered for the given pifkey.
 	 * 
+	 * For each distinct tuple ( Data, Hook descriptor) where
+	 *  - Data is the return value of the getData() method called on a subscription 
+	 *    that is registered for the given key
+	 *  - Hook Descriptor is a registered hook descriptor that has at least one
+	 *    tag in common with this subscription
+	 * a hook will be created using named hook descriptor, it will be parameterized with 
+	 * the user data and will be registered with the prolog interface instance.
 	 * @param key
 	 * @param pif
 	 * @throws PrologInterfaceException 
@@ -168,7 +185,7 @@ public interface PrologInterfaceRegistry {
 	 * 
 	 * This method will cause a call to the method deconfigure() on any
 	 * subscription registered for the given pif key.
-	 * 
+	 * All hooks that were added by the registry are removed from the prolog interface.
 	 * @param key
 	 * 
 	 */
@@ -184,7 +201,11 @@ public interface PrologInterfaceRegistry {
 	 * 
 	 * If there is already a PrologInterface instance registered for the
 	 * subscriptions pifKey, this method will cause a call to the method
-	 * configure() on the argument Subscription instance.
+	 * configure() on the argument Subscription instance. 
+	 * In addition, for each registered Hook Descriptor that has at least one
+	 * tag in common with the subscription, said descriptor will be used to 
+	 * create a hook, parameterize it with the return value of the method
+	 * getData() called on the subscription and add register it with the pif. 
 	 * 
 	 * If the argument Subscription is an instance of PersistableSubscription,
 	 * the registry will take the neccesary steps to save the subscription on
@@ -201,6 +222,9 @@ public interface PrologInterfaceRegistry {
 	 * If there is currently a PrologInterface instance registered for the
 	 * subscriptions pifKey, this method will cause a call to the method
 	 * deconfigure() on the argument Subscription instance.
+	 * In addition all hooks that were registered to this prolog interface 
+	 * because of this subscription will be removed, unless they are still
+	 * required because of some other registered subscription.
 	 * 
 	 * @param s
 	 * @throws PrologInterfaceException 
@@ -217,7 +241,10 @@ public interface PrologInterfaceRegistry {
 	 * @throws PrologInterfaceException 
 	 */
 	public void removeSubscription(String id);
+	
+	
 
+	
 	/**
 	 * Find the Subscription for a given subscription id;
 	 * 

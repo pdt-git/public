@@ -76,7 +76,7 @@ public class DefaultSubscription implements PersistableSubscription {
 
 	private String pifKey;
 
-	private List<String> tags = new ArrayList<String>();
+	private String[] tags = new String[0];
 	
 	/**
 	 * clients should not use this constructor. Its only called
@@ -187,7 +187,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		setId((String) params.get("id"));
 		setPersistent((String) params.get("persistent"));
 		if(params.get("tags")!= null) {
-			setTags(Arrays.asList(Util.split((String)params.get("tags"),",")));
+			setTags(Util.split((String)params.get("tags"),","));
 		}
 
 	}
@@ -252,13 +252,18 @@ public class DefaultSubscription implements PersistableSubscription {
 		return true;
 	}
 
-	public List<String> getTags() {
+	public String[] getTags() {
 		
 		return tags;
 	}
 
-	public void setTags(List<String> tags) {
+	public void setTags(String[] tags) {
 		this.tags = tags;
+	}
+
+	@Override
+	public Object getData() {		
+		return null;
 	}
 	
 

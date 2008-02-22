@@ -454,4 +454,16 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 		return new HashSet(subscriptions.keySet());
 	}
 
+	@Override
+	public void addHookDescriptor(LifeCycleHookDecorator descr) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void removeHookDescriptor(String hookId) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
