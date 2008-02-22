@@ -356,6 +356,12 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 
 		}
 
+		@Override
+		public void setData(Object data) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	};
 
 	public void update(PrologInterfaceEvent e) {
