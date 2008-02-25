@@ -158,15 +158,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
-	public static final int DOWN = 0;
-
-	public static final int ERROR = -1;
-
-	public static final int SHUT_DOWN = 3;
-
-	public static final int START_UP = 1;
-
-	public static final int UP = 2;
+	
 
 	protected HookHelper hookHelper = new HookHelper(this);
 

@@ -51,7 +51,7 @@ import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
-public class LifeCycleHookWrapper implements LifeCycleHook2 {
+public class LifeCycleHookWrapper {
 
 	String id;
 
@@ -64,27 +64,31 @@ public class LifeCycleHookWrapper implements LifeCycleHook2 {
 	// public LifeCycleHook hook;
 	public HashSet<LifeCycleHook> hooks = new HashSet<LifeCycleHook>();
 
-	public boolean flipflop = false;
-
 	public LifeCycleHookWrapper(LifeCycleHook hook, String id) {
-		if(hook!=null){
+		if (hook != null) {
 			this.hooks.add(hook);
 		}
 		this.id = id;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.LifeCycleHook#onInit(org.cs3.pl.prolog.PrologSession)
-	 */
-	public void onInit(PrologInterface pif, PrologSession initSession) {
-		flipflop = !flipflop;
+	public LifeCycleHookWrapper(LifeCycleHookWrapper value) {
+
+		this.hooks = new HashSet<LifeCycleHook>(value.hooks);
+		this.id = value.id;
+		this.post = new HashSet<LifeCycleHookWrapper>(value.post);
+		this.pre = new HashSet<LifeCycleHookWrapper>(value.pre);
+	}
+
+	public void onInit(PrologInterface pif, PrologSession initSession,
+			HashSet<LifeCycleHookWrapper> done) {
+		if (done.contains(this)) {
+			return;
+		}
+		done.add(this);
 		for (Iterator it = post.iterator(); it.hasNext();) {
 			LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-			if (elm.flipflop != this.flipflop) {
-				elm.onInit(pif, initSession);
-			}
+			elm.onInit(pif, initSession, done);
+
 		}
 		if (!hooks.isEmpty()) {
 			Debug.info("enter onInit() on hook " + id);
@@ -108,13 +112,15 @@ public class LifeCycleHookWrapper implements LifeCycleHook2 {
 	 * 
 	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
 	 */
-	public void afterInit(PrologInterface pif) {
-		flipflop = !flipflop;
+	public void afterInit(PrologInterface pif,
+			HashSet<LifeCycleHookWrapper> done) {
+		if (done.contains(this)) {
+			return;
+		}
+		done.add(this);
 		for (Iterator it = post.iterator(); it.hasNext();) {
 			LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-			if (elm.flipflop != this.flipflop) {
-				elm.afterInit(pif);
-			}
+			elm.afterInit(pif, done);
 		}
 		if (!hooks.isEmpty()) {
 			Debug.info("enter afterInit() on hook " + id);
@@ -132,18 +138,16 @@ public class LifeCycleHookWrapper implements LifeCycleHook2 {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
-	 */
-	public void beforeShutdown(PrologInterface pif, PrologSession session) {
-		flipflop = !flipflop;
+	public void beforeShutdown(PrologInterface pif, PrologSession session,
+			HashSet<LifeCycleHookWrapper> done) {
+		if (done.contains(this)) {
+			return;
+		}
+		done.add(this);
 		for (Iterator it = pre.iterator(); it.hasNext();) {
 			LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-			if (elm.flipflop != this.flipflop) {
-				elm.beforeShutdown(pif, session);
-			}
+			elm.beforeShutdown(pif, session, done);
+
 		}
 		if (!hooks.isEmpty()) {
 			Debug.info("enter beforeShutdown() on hook " + id);
@@ -179,12 +183,6 @@ public class LifeCycleHookWrapper implements LifeCycleHook2 {
 			}
 			Debug.info("exit onError() on hook " + id);
 		}
-	}
-
-	@Override
-	public void setData(Object data) {
-		throw new RuntimeException("Method should not be called on Wrapper. ");
-		
 	}
 
 }

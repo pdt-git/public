@@ -44,12 +44,16 @@
 package org.cs3.pl.prolog.internal;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
+import java.util.Map.Entry;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.LifeCycleHook3;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -73,8 +77,9 @@ public class HookHelper {
 		}
 
 		public void run() {
-			HashMap cloned = null;
-			synchronized (hooks) {
+			HashMap<String, LifeCycleHookWrapper> cloned = null;
+			HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
+			synchronized (HookHelper.this) {
 				/*
 				 * why clone AND sync? ld: sync to make sure that hooks
 				 * operation is serialized clone to make it possible to
@@ -83,16 +88,19 @@ public class HookHelper {
 				 * would not be possible otherwise since the iterator would
 				 * throw a ConcurrentModificationException.
 				 */
-				batchUpdateHooks();
-				cloned = (HashMap) hooks.clone();
 
-				hookFilpFlop = !hookFilpFlop;
-				for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
-					LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned
-							.get(it.next());
-					if (h.flipflop != hookFilpFlop) {
-						h.afterInit(pif);
-					}
+				cloned = cloneHooks();
+				
+				for (LifeCycleHookWrapper h : cloned.values()) {
+					h.afterInit(pif, done);
+				}
+				HashSet<LifeCycleHook3> clonedLateHooks = new HashSet<LifeCycleHook3>();
+				synchronized (lateHooks) {
+					clonedLateHooks.addAll(lateHooks);
+					lateHooks.clear();
+				}
+				for (LifeCycleHook3 h : clonedLateHooks) {
+					h.lateInit(pif);
 				}
 			}
 		}
@@ -104,42 +112,29 @@ public class HookHelper {
 	}
 
 	private StartupThread startupThread;
+	
 
-	private boolean hookFilpFlop = false;
+	private HashMap<String, LifeCycleHookWrapper> hooks = new HashMap<String, LifeCycleHookWrapper>();
 
-	private HashMap hooks = new HashMap();
+	private HashSet<LifeCycleHook3> lateHooks = new HashSet<LifeCycleHook3>();
 
-	private Vector queue = new Vector();
-
-	private void batchUpdateHooks() {
-		synchronized (queue) {
-			for (Iterator it = queue.iterator(); it.hasNext();) {
-				Runnable r = (Runnable) it.next();
-				r.run();
-			}
-			queue.clear();
-		}
-	}
-
-	public void addLifeCycleHook(final LifeCycleHook hook, final String id,
-			final String[] dependencies) {
-		synchronized (queue) {
-			queue.add(new Runnable() {
-				public void run() {
-					addLifeCycleHook_impl(hook, id, dependencies);
-				}
-			});
-		}
-	}
-
-	/**
-	 * @param hook
-	 * @param id
-	 * @param dependsOn
-	 */
-	private void addLifeCycleHook_impl(LifeCycleHook hook, String id,
-			String[] dependencies) {
+	private HashMap<String, LifeCycleHookWrapper> cloneHooks() {
+		HashMap<String, LifeCycleHookWrapper> clone = new HashMap();
 		synchronized (hooks) {
+			for (Entry<String, LifeCycleHookWrapper> entry : hooks.entrySet()) {
+				LifeCycleHookWrapper wrapper = new LifeCycleHookWrapper(entry
+						.getValue());
+				clone.put(entry.getKey(), wrapper);
+			}
+		}
+		return clone;
+	}
+
+	public void addLifeCycleHook(LifeCycleHook hook, String id,
+			String[] dependencies) {
+		boolean isNew = false;
+		synchronized (hooks) {
+
 			if (id == null) {
 				id = "<<" + hooks.size() + ">>";
 			}
@@ -155,12 +150,14 @@ public class HookHelper {
 			if (node == null) {
 				Debug.debug("\t-> hook unknown, new wrapper created.");
 				node = new LifeCycleHookWrapper(hook, id);
-				node.flipflop = hookFilpFlop;
+
 				hooks.put(id, node);
+				isNew = true;
 			} else {
 				Debug
 						.debug("\t-> hook exists, reusing wrapper, but adding hook code..");
-				node.hooks.add(hook);
+				isNew = node.hooks.add(hook);
+
 			}
 			for (int i = 0; i < dependencies.length; i++) {
 				LifeCycleHookWrapper dep = (LifeCycleHookWrapper) hooks
@@ -170,7 +167,7 @@ public class HookHelper {
 				if (dep == null) {
 					Debug.debug("\t\t-> hook unknown, new wrapper created.");
 					dep = new LifeCycleHookWrapper(null, dependencies[i]);
-					dep.flipflop = hookFilpFlop;
+
 					hooks.put(dependencies[i], dep);
 				}
 				dep.pre.add(node);
@@ -178,31 +175,21 @@ public class HookHelper {
 				Debug.debug("\t-> edges added.");
 			}
 		}
+		if (isNew && hook instanceof LifeCycleHook3) {
+			synchronized (lateHooks) {
+				if (pif.getState() == PrologInterface.UP
+						&& !lateHooks.contains(hook)) {
+					((LifeCycleHook3) hook).lateInit(pif);
 
+				} else if (pif.getState() == PrologInterface.START_UP) {
+					lateHooks.add((LifeCycleHook3) hook);
+				}
+			}
+
+		}
 	}
 
 	public void removeLifeCycleHook(final String hookId) {
-		synchronized (queue) {
-			queue.add(new Runnable() {
-				public void run() {
-					removeLifeCycleHook_impl(hookId);
-				}
-			});
-		}
-	}
-
-	public void removeLifeCycleHook(final LifeCycleHook hook,
-			final String hookId) {
-		synchronized (queue) {
-			queue.add(new Runnable() {
-				public void run() {
-					removeLifeCycleHook_impl(hook, hookId);
-				}
-			});
-		}
-	}
-
-	private void removeLifeCycleHook_impl(String hookId) {
 		synchronized (hooks) {
 			LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(hookId);
 			if (h == null) {
@@ -221,7 +208,8 @@ public class HookHelper {
 		}
 	}
 
-	private void removeLifeCycleHook_impl(LifeCycleHook hook, String hookId) {
+	public void removeLifeCycleHook(final LifeCycleHook hook,
+			final String hookId) {
 		synchronized (hooks) {
 			LifeCycleHookWrapper wrapper = (LifeCycleHookWrapper) hooks
 					.get(hookId);
@@ -244,10 +232,10 @@ public class HookHelper {
 	}
 
 	public void onInit(PrologSession initSession) {
-		HashMap cloned = null;
-		synchronized (hooks) {
-			batchUpdateHooks();
-			cloned = (HashMap) hooks.clone();
+		HashMap<String, LifeCycleHookWrapper> cloned = null;
+		synchronized (this) {
+
+			cloned = cloneHooks();
 			/*
 			 * why clone AND sync? ld: sync to make sure that hooks operation is
 			 * serialized clone to make it possible to (un)register hooks in the
@@ -256,13 +244,9 @@ public class HookHelper {
 			 * the iterator would throw a ConcurrentModificationException.
 			 */
 
-			hookFilpFlop = !hookFilpFlop;
-			for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
-				LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned.get(it
-						.next());
-				if (h.flipflop != hookFilpFlop) {
-					h.onInit(pif, initSession);
-				}
+			HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
+			for (LifeCycleHookWrapper h : cloned.values()) {
+				h.onInit(pif, initSession, done);
 			}
 		}
 	}
@@ -284,26 +268,26 @@ public class HookHelper {
 		}
 
 		if (s != null) {
-			HashMap cloned = null;
-			synchronized (hooks) {
-				batchUpdateHooks();
-				cloned = (HashMap) hooks.clone();
+			HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
+			HashMap<String, LifeCycleHookWrapper> cloned = null;
+			synchronized (this) {
 
-				hookFilpFlop = !hookFilpFlop;
-				for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
-					String id = (String) it.next();
+				cloned = cloneHooks();
+
+				for (String id : cloned.keySet()) {
+
 					LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned
 							.get(id);
-					if (h.flipflop != hookFilpFlop) {
-						try {
-							h.beforeShutdown(pif, s);
-						} catch (Throwable t) {
-							Debug
-									.error("could not execute 'beforeShutdown' on hook '"
-											+ id + "'");
-							Debug.report(t);
-						}
+
+					try {
+						h.beforeShutdown(pif, s, done);
+					} catch (Throwable t) {
+						Debug
+								.error("could not execute 'beforeShutdown' on hook '"
+										+ id + "'");
+						Debug.report(t);
 					}
+
 				}
 			}
 
@@ -311,16 +295,13 @@ public class HookHelper {
 	}
 
 	public void onError(AbstractPrologInterface interface1) {
-		HashMap cloned = null;
-		synchronized (hooks) {
-			batchUpdateHooks();
-			cloned = (HashMap) hooks.clone();
+		HashMap<String, LifeCycleHookWrapper> cloned = null;
+		synchronized (this) {
 
-			for (Iterator it = cloned.keySet().iterator(); it.hasNext();) {
-				LifeCycleHookWrapper h = (LifeCycleHookWrapper) cloned.get(it
-						.next());
+			cloned = cloneHooks();
+
+			for (LifeCycleHookWrapper h : cloned.values()) {
 				h.onError(pif);
-
 			}
 		}
 	}

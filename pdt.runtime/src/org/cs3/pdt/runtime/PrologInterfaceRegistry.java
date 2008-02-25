@@ -44,6 +44,7 @@ package org.cs3.pdt.runtime;
 import java.util.Set;
 
 import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
+import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
@@ -69,32 +70,27 @@ public interface PrologInterfaceRegistry {
 	/**
 	 * @return all keys to which PrologInterfaces are registered.
 	 */
-	public Set getRegisteredKeys();
+	public Set<String> getRegisteredKeys();
 
 	/**
 	 * @return all pif keys that are known to the registry, including keys for which
 	 *         no pif is registered.
 	 */
-	public Set getAllKeys();
+	public Set<String> getAllKeys();
 
 	/**
 	 * @return the IDs of all subscriptions registered with the registry..
 	 */
-	public Set getAllSubscriptionIDs();
+	public Set<String> getAllSubscriptionIDs();
 
 	/**
 	 * return all subscriptions to a given pif key
 	 * 
 	 * @return null if no such pif, empty list if no subscriptions
 	 */
-	public Set getSubscriptionsForPif(String key);
+	public Set<Subscription> getSubscriptionsForPif(String key);
 
-	/**
-	 * return the keys of all subscriptions to a given pif key
-	 * 
-	 * @return null if no such pif, empty list if no subscriptions
-	 */
-	public Set getSubscriptionKeysForPif(String key);
+	
 
 	
 	/**
@@ -140,7 +136,7 @@ public interface PrologInterfaceRegistry {
 	 * If the prolog interface instance is already running, both the onInit() and 
 	 * afterInit() methods will be called.  
 	 */
-	public void addHookDescriptor(LifeCycleHookDecorator descr);
+	public void addHookDescriptor(LifeCycleHookDescriptor descr);
 	
 	/**
 	 * Remove a hook descriptor from the registry.
@@ -148,7 +144,7 @@ public interface PrologInterfaceRegistry {
 	 * In addition, this will remove ALL hooks with the given hook id
 	 * from ALL registered Prolog Interfaces.   
 	 */
-	public void removeHookDescriptor(String hookId);
+	public void removeHookDescriptor(LifeCycleHookDescriptor descr);
 	
 	
 	/**

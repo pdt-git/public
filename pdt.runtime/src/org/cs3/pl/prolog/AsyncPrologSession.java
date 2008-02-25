@@ -164,11 +164,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 */
 	public void abort(Object monitor) throws PrologInterfaceException;
 
-	/**
-	 * get the ticket used for the last abort request.
-	 * @return the ticket or null if there are no pending aborts.
-	 */
-	public Object getLastAbortTicket();
+	
 	
 	/**
 	 * check wether a request is on queue.
