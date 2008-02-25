@@ -64,6 +64,7 @@ import java.util.WeakHashMap;
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
 import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
+import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.Option;
@@ -73,6 +74,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -496,80 +498,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 						.getConfigurationElements();
 				for (int j = 0; j < celems.length; j++) {
 
-					IConfigurationElement celem = celems[j];
+					final IConfigurationElement celem = celems[j];
 					if (!celem.getName().equals("hook")) {
 						Debug.warning("hmmm... asumed a hook, but got a "
 								+ celem.getName());
 					} else {
-						LifeCycleHook hook = (LifeCycleHook) celem
-								.createExecutableExtension("class");
-						String dependsOn = celem.getAttribute("dependsOn");
-						if (dependsOn == null) {
-							dependsOn = "";
-						}
-						String[] dependencies = Util.split(dependsOn, ",");
-						String id = celem.getAttribute("id");
-						String pifKey = celem.getAttribute("key");
-
-						IConfigurationElement[] children = celem
-								.getChildren("consult");
-						File[] consults = new File[children.length];
-						for (int k = 0; k < children.length; k++) {
-							String resName = children[k]
-									.getAttribute("resource");
-							Debug.debug("got this resname: " + resName);
-							String namespace = extension
-									.getNamespaceIdentifier();
-							Debug.debug("got this namespace: " + namespace);
-							URL url = FileLocator.find(Platform
-									.getBundle(namespace), new Path(resName),
-									null);
-							try {
-
-								// URL url =
-								// Platform.getBundle(namespace).getEntry(
-								// resName);
-								Debug.debug("trying to resolve this url: "
-										+ url);
-								url = FileLocator.toFileURL(url);
-							} catch (Exception e) {
-								Debug.rethrow("Problem resolving url: "
-										+ url.toString(), e);
-							}
-							// URI uri = URI.create(url.toString());
-							consults[k] = new File(url.getFile());
-						}
-						children = celem.getChildren("hookDependency");
-						String[] hookDependencies = new String[children.length
-								+ dependencies.length];
-						for (int k = 0; k < children.length; k++) {
-							hookDependencies[k] = children[k]
-									.getAttribute("hook");
-						}
-						System.arraycopy(dependencies, 0, hookDependencies,
-								children.length, hookDependencies.length);
-
-						children = celem.getChildren("libraryDependency");
-						String[] libraryDependencies = new String[children.length];
-						for (int k = 0; k < libraryDependencies.length; k++) {
-							libraryDependencies[k] = children[k]
-									.getAttribute("library");
-						}
-
-						children = celem.getChildren("tag");
-						String[] tags = new String[children.length
-								+ (pifKey == null ? 0 : 1)];
-						for (int k = 0; k < tags.length; k++) {
-							tags[k] = children[k].getAttribute("name");
-						}
-						if (pifKey != null) {
-							tags[children.length] = pifKey;
-						}
-						LifeCycleHookDecorator decoratedHook = new LifeCycleHookDecorator(
-								hook, libraryDependencies, consults,
-								getLibraryManager());
-						registerLifeCycleHook(tags, decoratedHook, id,
-								hookDependencies);
+						LifeCycleHookDescriptor descr = createHookDescriptor(
+								celem, extension);
+						getPrologInterfaceRegistry().addHookDescriptor(descr);
 					}
 				}
 			}
@@ -577,6 +513,126 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			Debug.rethrow(e);
 		}
 
+	}
+
+	private LifeCycleHookDescriptor createHookDescriptor(
+			final IConfigurationElement celem, IExtension extension)
+			throws CoreException {
+		LifeCycleHook hook = (LifeCycleHook) celem
+				.createExecutableExtension("class");
+		String dependsOn = celem.getAttribute("dependsOn");
+		if (dependsOn == null) {
+			dependsOn = "";
+		}
+		String[] dependencies = Util.split(dependsOn, ",");
+		final String id = celem.getAttribute("id");
+		String pifKey = celem.getAttribute("key");
+
+		IConfigurationElement[] children = celem.getChildren("consult");
+		final File[] consults = new File[children.length];
+		for (int k = 0; k < children.length; k++) {
+			String resName = children[k].getAttribute("resource");
+			Debug.debug("got this resname: " + resName);
+			String namespace = extension.getNamespaceIdentifier();
+			Debug.debug("got this namespace: " + namespace);
+			URL url = FileLocator.find(Platform.getBundle(namespace), new Path(
+					resName), null);
+			try {
+
+				// URL url =
+				// Platform.getBundle(namespace).getEntry(
+				// resName);
+				Debug.debug("trying to resolve this url: " + url);
+				url = FileLocator.toFileURL(url);
+			} catch (Exception e) {
+				Debug.rethrow("Problem resolving url: " + url.toString(), e);
+			}
+			// URI uri = URI.create(url.toString());
+			consults[k] = new File(url.getFile());
+		}
+		children = celem.getChildren("hookDependency");
+		final String[] hookDependencies = new String[children.length
+				+ dependencies.length];
+		for (int k = 0; k < children.length; k++) {
+			hookDependencies[k] = children[k].getAttribute("hook");
+		}
+		System.arraycopy(dependencies, 0, hookDependencies, children.length,
+				hookDependencies.length);
+
+		children = celem.getChildren("libraryDependency");
+		final String[] libraryDependencies = new String[children.length];
+		for (int k = 0; k < libraryDependencies.length; k++) {
+			libraryDependencies[k] = children[k].getAttribute("library");
+		}
+
+		children = celem.getChildren("tag");
+		final String[] tags = new String[children.length
+				+ (pifKey == null ? 0 : 1)];
+		for (int k = 0; k < tags.length; k++) {
+			tags[k] = children[k].getAttribute("name");
+		}
+		if (pifKey != null) {
+			tags[children.length] = pifKey;
+		}
+
+		return createHookDescriptor(celem, id, consults, hookDependencies,
+				libraryDependencies, tags);
+	}
+
+	private LifeCycleHookDescriptor createHookDescriptor(
+			final IConfigurationElement celem, final String id,
+			final File[] consults, final String[] hookDependencies,
+			final String[] libraryDependencies, final String[] tags) {
+		LifeCycleHookDescriptor descr = new LifeCycleHookDescriptor() {
+
+			public LifeCycleHook getImplementation() {
+				if (celem.getAttribute("class") == null) {
+					try {
+						return (LifeCycleHook) celem
+								.createExecutableExtension("class");
+					} catch (CoreException e) {
+						Debug.rethrow(e);
+					}
+				}
+				return null;
+			}
+
+			@Override
+			public LifeCycleHook2 createHook(Object data) {
+				LifeCycleHook2 hook = new LifeCycleHookDecorator(
+						getImplementation(), libraryDependencies, consults,
+						getLibraryManager());
+				hook.setData(data);
+				return hook;
+			}
+
+			@Override
+			public File[] getConsults() {
+				return consults;
+			}
+
+			@Override
+			public String[] getHookDependencies() {
+				return hookDependencies;
+			}
+
+			@Override
+			public String getHookId() {
+				return id;
+			}
+
+			@Override
+			public String[] getLibraryDependencies() {
+				return libraryDependencies;
+			}
+
+			@Override
+			public String[] getTags() {
+				return tags;
+			}
+
+		};
+		return descr;
 	}
 
 	/**
@@ -905,12 +961,12 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 */
 	private void registerLifeCycleHook(String[] tags, LifeCycleHook hook,
 			String hookId, String[] deps) {
-		if(tags==null||tags.length==0){
-			tags= new String[]{"any"};
+		if (tags == null || tags.length == 0) {
+			tags = new String[] { "any" };
 		}
 		synchronized (globalHooksMux) {
 			for (int i = 0; i < deps.length; i++) {
-				String pifKey=tags[i];
+				String pifKey = tags[i];
 				Map hooks = (Map) getGlobalHooks().get(pifKey);
 
 				if (hooks == null) {

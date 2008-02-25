@@ -44,6 +44,7 @@ package org.cs3.pl.prolog;
 
 public interface LifeCycleHook2 extends LifeCycleHook{
 	
+	
 	/**
      * called by the PrologInterface  when it encounters a fatal error.
      * <br>
@@ -62,6 +63,7 @@ public interface LifeCycleHook2 extends LifeCycleHook{
      * state DOWN. No other hook methods will be called in between.
      */		
 	public void onError(PrologInterface pif);
+	
 	
 	/**
 	 * parameterize this hook instance with domain data.

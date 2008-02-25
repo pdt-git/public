@@ -124,14 +124,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
-	public Object getLastAbortTicket() {
-		synchronized (targetLock) {
-			if (hasTargetSession()) {
-				return getTargetSession().getLastAbortTicket();
-			}
-			return null;
-		}
-	}
+	
 
 	public String getProcessorThreadAlias() {
 		synchronized (targetLock) {

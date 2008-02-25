@@ -72,7 +72,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistry {
+public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceRegistry {
 
 	public void load(Reader reader) throws IOException {
 		//Element cpElement;
@@ -84,9 +84,9 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 			parser.parse(new InputSource(reader),new RegistryHandler());
 			
 		} catch (SAXException e) {
-			throw new _IOException(e);
+			throw new IOException(e);
 		} catch (ParserConfigurationException e) {
-			throw new _IOException(e);
+			throw new IOException(e);
 		} finally {
 			reader.close();
 		}
@@ -134,60 +134,14 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 	}
 
 	
-	public static class _IOException extends IOException{
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 2488611686137600862L;
-		private Throwable cause;
-		private String message;
-
-		public _IOException(Throwable e) {
-			this.cause = e;
-			message="wrapped exception";
-		}
-
-		public _IOException(String message,Throwable e) {
-			this.cause = e;
-			this.message = message;
-		}
-		
-		public Throwable fillInStackTrace() {
-			return cause.fillInStackTrace();
-		}
-
-		public String getLocalizedMessage() {
-			return message + " ("+cause.getLocalizedMessage()+")";
-		}
-
-		public String getMessage() {
-			return message + " ("+cause.getMessage()+")";
-		}
-
-		public void printStackTrace() {
-			cause.printStackTrace();
-		}
-
-		public void printStackTrace(PrintStream arg0) {
-			cause.printStackTrace(arg0);
-		}
-
-		public void printStackTrace(PrintWriter arg0) {
-			cause.printStackTrace(arg0);
-		}
-
-		public String toString() {
-			return cause.toString();
-		}
-    	
-    }
-
+	
 	public void save(Writer w) throws IOException {
 		w.write("<registry>\n");
 		try {
-			for (Iterator it = subscriptions.values().iterator(); it.hasNext();) {
-				Subscription s = (Subscription) it.next();
+					
+			for (Subscription s : getAllSubscriptions()) {
+				
+			
 				PersistableSubscription ps=null;
 				if (s instanceof PersistableSubscription) {
 					
@@ -215,255 +169,6 @@ public class DefaultSAXPrologInterfaceRegistry implements PrologInterfaceRegistr
 		}
 	}
 
-	private HashMap pifs = new HashMap();
-
-	private HashMap subscriptionLists = new HashMap();
-
-	private HashMap names = new HashMap();
-
-	private HashMap keys = new HashMap();
-
-	private HashMap subscriptions = new HashMap();
-
-	private Vector listeners = new Vector();
-
-	public Set getRegisteredKeys() {
-
-		return pifs.keySet();
-	}
-
-	public Set getSubscriptionsForPif(String key) {
-			Set l = getSubscriptionKeysForPif(key);
-			Set s = new HashSet();
-			for (Iterator it = l.iterator(); it.hasNext();) {
-				String id = (String) it.next();
-				s.add(getSubscription(id));
-			}
-			
-		return s;
-	}
-
-	public Set getSubscriptionKeysForPif(String key) {
-		Set l = (Set) subscriptionLists.get(key);
-		return l == null ? new HashSet() : l;		
-	}
-
-	public String getName(String key) {
-		return (String) names.get(key);
-	}
-
-	public void setName(String key, String name) {
-		names.put(key, name);
-	}
-
-	public String getKey(PrologInterface prologInterface) {
-		return (String) keys.get(prologInterface);
-	}
-
-	public PrologInterface getPrologInterface(String key) {
-		return (PrologInterface) pifs.get(key);
-	}
-
-	public void addPrologInterfaceRegistryListener(
-			PrologInterfaceRegistryListener l) {
-		synchronized (listeners) {
-			if (!listeners.contains(l)) {
-				listeners.add(l);
-			}
-		}
-
-	}
-
-	public void removePrologInterfaceRegistryListener(
-			PrologInterfaceRegistryListener l) {
-		synchronized (listeners) {
-			if (listeners.contains(l)) {
-				listeners.remove(l);
-			}
-		}
-
-	}
-
-	public void firePrologInterfaceAdded(String key) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
-				key);
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologInterfaceRegistryListener l = (PrologInterfaceRegistryListener) iter
-					.next();
-			l.prologInterfaceAdded(e);
-		}
-	}
-
-	public void firePrologInterfaceRemoved(String key) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
-				key);
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologInterfaceRegistryListener l = (PrologInterfaceRegistryListener) iter
-					.next();
-			l.prologInterfaceRemoved(e);
-		}
-	}
-
-	public void fireSubscriptionAdded(Subscription s) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
-				s);
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologInterfaceRegistryListener l = (PrologInterfaceRegistryListener) iter
-					.next();
-			l.subscriptionAdded(e);
-		}
-	}
-
-	public void fireSubscriptionRemoved(Subscription s) {
-		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
-				s);
-		Vector clone = null;
-		synchronized (listeners) {
-			clone = (Vector) listeners.clone();
-		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologInterfaceRegistryListener l = (PrologInterfaceRegistryListener) iter
-					.next();
-			l.subscriptionRemoved(e);
-		}
-	}
-
-	public void addPrologInterface(String key, PrologInterface pif) {
-		Object old=pifs.get(key);
-		if(old==pif){
-			return;
-		}
-		if(old!=null){
-			removePrologInterface(key);
-		}
-		pifs.put(key, pif);
-		keys.put(pif, key);
-		Set l = getSubscriptionsForPif(key);
-		for (Iterator it = l.iterator(); it.hasNext();) {
-			Subscription s = (Subscription) it.next();
-			s.configure(pif);
-
-		}
-		firePrologInterfaceAdded(key);
-	}
-
-	public void removePrologInterface(String key)  {
-		PrologInterface pif = (PrologInterface) pifs.get(key);
-		if (pif == null) {
-			return;
-		}
-		HashSet l =  ((HashSet) subscriptionLists.get(key));
-		if (l != null) {
-			l = (HashSet) l.clone();
-			for (Iterator iter = l.iterator(); iter.hasNext();) {
-				Subscription s = getSubscription((String) iter.next());
-				s.deconfigure(pif);
-			}
-		}
-
-		
-
-		firePrologInterfaceRemoved(key);
-		keys.remove(pif);
-		pifs.remove(key);
-		
-		names.remove(key);
-
-	}
-
-	public void addSubscription(Subscription s){
-		// do not add anonymous subscriptions
-		String sid = s.getId();
-		
-		if (sid == null) {
-			return;
-		}
-		Object old = subscriptions.get(sid);
-		if(old==s){
-			return;
-		}
-		if(old!=null){
-			removeSubscription(sid);
-		}
-		Set l = (Set) subscriptionLists.get(s.getPifKey());
-		if (l == null) {
-			l = new HashSet();
-			subscriptionLists.put(s.getPifKey(), l);
-		}
-		l.add(sid);
-		subscriptions.put(sid, s);
-		if (pifs.containsKey(s.getPifKey())) {
-			s.configure(getPrologInterface(s.getPifKey()));
-		}
-		fireSubscriptionAdded(s);
-	}
-
-	public void removeSubscription(String id) {
-		removeSubscription(getSubscription(id));
-	}
 	
-	public void removeSubscription(Subscription s){
-		// do not remove anonymous subscriptions
-		if (s.getId() == null) {
-			return;
-		}
-		if (!subscriptions.containsKey(s.getId())) {
-			return;
-		}
-		if (pifs.containsKey(s.getPifKey())) {
-			s.deconfigure(getPrologInterface(s.getPifKey()));
-		}
-		subscriptions.remove(s.getId());
-
-		Set l = (Set) subscriptionLists.get(s.getPifKey());
-		if (l == null) {
-			return;
-		}
-		if (l.contains(s.getId())) {
-			l.remove(s.getId());
-			fireSubscriptionRemoved(s);
-
-		}
-
-	}
-
-	public Subscription getSubscription(String key) {
-		return (Subscription) subscriptions.get(key);
-
-	}
-
-	public Set getAllKeys() {
-		Set s = new HashSet(getRegisteredKeys());
-		s.addAll(subscriptionLists.keySet());
-		return s;
-	}
-
-	public Set getAllSubscriptionIDs() {
-		return new HashSet(subscriptions.keySet());
-	}
-
-	@Override
-	public void addHookDescriptor(LifeCycleHookDecorator descr) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void removeHookDescriptor(String hookId) {
-		// TODO Auto-generated method stub
-		
-	}
 
 }
