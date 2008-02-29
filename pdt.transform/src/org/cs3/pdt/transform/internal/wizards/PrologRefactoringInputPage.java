@@ -16,71 +16,76 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-public class PrologRefactoringInputPage extends UserInputWizardPage  {
+public class PrologRefactoringInputPage extends UserInputWizardPage {
 
 	private PrologRefactoringInfo info;
 	private HashMap editors = new HashMap();
-	
+
 	public PrologRefactoringInputPage(PrologRefactoringInfo info) {
 		super(info.getName());
-		this.info=info;
+		this.info = info;
 	}
-	
+
 	public void createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
-		setControl( composite );
-        GridLayout layout = new GridLayout();
-        composite.setLayout(layout);
-        GridData data = new GridData(GridData.FILL);
-        data.grabExcessHorizontalSpace = true;
-        data.verticalAlignment = GridData.FILL;
-        data.horizontalAlignment = GridData.FILL;
-        composite.setLayoutData(data);
-        
-        OptionProvider jtransformerProject = info;
-        Option[] options = jtransformerProject.getOptions();
-        addEditorsForOptions(composite, options);
-        load();
-     
-		
+		setControl(composite);
+		GridLayout layout = new GridLayout();
+		composite.setLayout(layout);
+		GridData data = new GridData(GridData.FILL);
+		data.grabExcessHorizontalSpace = true;
+		data.verticalAlignment = GridData.FILL;
+		data.horizontalAlignment = GridData.FILL;
+		composite.setLayoutData(data);
+
+		OptionProvider jtransformerProject = info;
+		Option[] options = jtransformerProject.getOptions();
+		addEditorsForOptions(composite, options);
+		load();
+
 	}
 
 	private void addEditorsForOptions(Composite parent, Option[] options) {
-        
-        for (int i = 0; i < options.length; i++) {
-        	final PropertyEditor editor = OptionEditor.create(parent, options[i]);
-            //disable the editor, if the value is overridden per sys prop.
-            editor.setEnabled(System.getProperty(editor.getKey()) == null);
-            editors.put(editor.getKey(), editor);
-            editor.addPropertyChangeListener(new IPropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
-                    info.setPreferenceValue(editor.getKey(), editor.getValue());
-                }
-                
-            });
-            editor.getControl().setToolTipText(options[i].getDescription());
-        }
-    }
-	
-	 private void load() {
-	        Option[] options = info.getOptions();
-	        for (int i = 0; i < options.length; i++) {
-	            Option option = options[i];
-	            String id = option.getId();
-	            PropertyEditor editor = (PropertyEditor) editors.get(id);
 
-	            
-	            try {
-	                String value = info.getPreferenceValue(id,"");
-	                editor.setValue(value);
-	            } catch (Throwable e) {
-	                Debug.report(e);
-	                setErrorMessage("ERROR: could not read property " + id
-	                        + "\nSee log for details.");
-	                
-	            }
-	        }
+		for (int i = 0; i < options.length; i++) {
+			if (options[i].isVisible()) {
+				final PropertyEditor editor = OptionEditor.create(parent,
+						options[i]);
+				// disable the editor, if the value is overridden per sys prop.
+				editor.setEnabled(System.getProperty(editor.getKey()) == null);
+				editors.put(editor.getKey(), editor);
+				editor.addPropertyChangeListener(new IPropertyChangeListener() {
+					public void propertyChange(PropertyChangeEvent e) {
+						info.setPreferenceValue(editor.getKey(), editor
+								.getValue());
+					}
 
-	    }
-	
+				});
+				editor.getControl().setToolTipText(options[i].getDescription());
+				editor.setEnabled(options[i].isEditable());
+			}
+		}
+	}
+
+	private void load() {
+		Option[] options = info.getOptions();
+		for (int i = 0; i < options.length; i++) {
+			Option option = options[i];
+			String id = option.getId();
+			PropertyEditor editor = (PropertyEditor) editors.get(id);
+
+			if (options[i].isVisible()) {
+				try {
+					String value = info.getPreferenceValue(id, "");
+					editor.setValue(value);
+				} catch (Throwable e) {
+					Debug.report(e);
+					setErrorMessage("ERROR: could not read property " + id
+							+ "\nSee log for details.");
+
+				}
+			}
+		}
+
+	}
+
 }

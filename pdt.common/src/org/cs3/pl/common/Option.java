@@ -99,6 +99,13 @@ public interface Option {
 	public boolean isVisible();
 	
 	/**
+	 * options can be made read-only in the ui by letting this method return
+	 * false.
+	 * @return
+	 */
+	public boolean isEditable();
+	
+	/**
 	 * get the value of a custom property.
 	 * 
 	 * This method is intended to allow implementations to provide additional

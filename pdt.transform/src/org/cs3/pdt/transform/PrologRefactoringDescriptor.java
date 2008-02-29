@@ -1,37 +1,28 @@
 package org.cs3.pdt.transform;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
-import org.cs3.pl.common.OptionProvider;
-import org.cs3.pl.prolog.PrologLibrary;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
+import org.cs3.pl.prolog.PrologInterface;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 
 public abstract class PrologRefactoringDescriptor {
-	private PrologLibrary[] dependencies;
+	private String[] dependencies;
 	private File[] definitions;
 	private String id;
 	private String label;
 	private Class objectClass;
 	private boolean adaptable;
 	private String description;
-	
 
-	public final PrologLibrary[] getDependencies() {
+	public final String[] getDependencies() {
 		return dependencies;
 	}
 
-	public final void setDependencies(PrologLibrary[] dependencies) {
+	public final void setDependencies(String[] dependencies) {
 		this.dependencies = dependencies;
 	}
 
@@ -83,22 +74,28 @@ public abstract class PrologRefactoringDescriptor {
 		this.description = description;
 	}
 
-		
 	public abstract String getSelectionTerm(ISelection selection,
-			IWorkbenchPartReference activePart);
+			IWorkbenchPart activePart) throws CoreException;
 
+	
+	public abstract Option[] getParameters(ISelection selection,
+			IWorkbenchPart activePart)throws CoreException;
+
+	public abstract PrologInterface getPrologInterface(ISelection selection,
+			IWorkbenchPart activePart)throws CoreException;
+	
 	/**
 	 * generate a data term representing the parameters of the refactoring.
 	 * 
-	 * The exact format of the term is only known to the refactoring. It is however 
-	 * guaranteed to be a syntactical valid prolog term.
+	 * The exact format of the term is only known to the refactoring. It is
+	 * however guaranteed to be a syntactical valid prolog term.
 	 * 
-	 *  Implementations should represent parameters for which the value is not yet
-	 *  known using meta variables with. The names of those variables should equal 
-	 *  the key of the respective Option returned by getParameters. 
+	 * Implementations should represent parameters for which the value is not
+	 * yet known using meta variables with. The names of those variables should
+	 * equal the key of the respective Option returned by getParameters.
 	 */
-	public abstract String getParametersTerm(Map<String,String> parameterValues);
+	public abstract String getParametersTerm(Map<String, String> parameterValues);
+
 	
-	public abstract Option[] getParameters(ISelection selection, IWorkbenchPartReference activePart);
-	
+
 }

@@ -2,41 +2,45 @@ package org.cs3.pdt.internal.refactorings;
 
 import java.util.Map;
 
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.transform.PrologRefactoringDescriptor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 
-public class RenameFileDescriptor extends PrologRefactoringDescriptor {
+public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 	
 
 	@Override
 	public String getParametersTerm(Map<String, String> parameterValues) {
 
-		return parameterValues.get("name");
+		String newName = parameterValues.containsKey("NewName") ? "'"+parameterValues.get("NewName")+"'" : "NewName";
+		String file = parameterValues.containsKey("File") ? parameterValues.get("File") : "File";
+		return "params("+file+","+newName+")";
 	}
 
 	@Override
 	public String getSelectionTerm(ISelection selection,
-			IWorkbenchPartReference activePart) {
+			IWorkbenchPart activePart) {
 
 		IFile file = selectedFile(selection, activePart);
 		if(file==null){
 			return null;
 		}
-		return Util.prologFileName(file.getLocation().toFile());
+		return "file('"+Util.prologFileName(file.getLocation().toFile())+"')";
 	}
 
-	private IFile selectedFile(ISelection selection, IWorkbenchPartReference activePart) {
-		if(activePart.getId().equals("org.cs3.pdt.internal.editors.PLEditor")){
+	private IFile selectedFile(ISelection selection, IWorkbenchPart activePart) {
+		if(activePart.getSite().getId().equals("org.cs3.pdt.internal.editors.PLEditor")){
 			return UIUtils.getFileInActiveEditor();
 		}
 		IFile file=null;
@@ -59,19 +63,28 @@ public class RenameFileDescriptor extends PrologRefactoringDescriptor {
 
 	@Override
 	public Option[] getParameters(ISelection selection,
-			IWorkbenchPartReference activePart) {
-		IFile file = selectedFile(selection, activePart);
+			IWorkbenchPart activePart) {
+		
 		return new Option[] {
 
-				new SimpleOption("path", "CurrentPath", "", Option.FILE, Util
-						.prologFileName(file.getLocation().toFile())) {
+				new SimpleOption("File", "Id of the file to rename.", "", Option.NUMBER, null) {
 					@Override
 					public boolean isVisible() {
 						return false;
 					}
-
+					@Override
+					public boolean isEditable() {
+						return false;
+					}
 				},
-				new SimpleOption("name", "New Name", "the new file name",
-						Option.STRING, file.getName()) };
+				new SimpleOption("NewName", "New Name", "The new file name.",
+						Option.STRING, null) };
+	}
+	
+	@Override
+	public PrologInterface getPrologInterface(ISelection selection,IWorkbenchPart activePart) throws CoreException{
+		IFile file = selectedFile(selection, activePart);
+		return PDTCoreUtils.getPrologProject(file).getMetadataPrologInterface();
+		
 	}
 }

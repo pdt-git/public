@@ -7,7 +7,9 @@ import org.cs3.pl.prolog.PLUtil;
 
 public class CTermMessage extends Message {
 
-
+	public CTermMessage(int opc, int ticket, String query){
+		super(opc,ticket,query.getBytes(Charset.forName("UTF-8")));
+	}
 
 	public CTermMessage(int opc, int ticket, byte[] body) {
 		super(opc, ticket, body);
@@ -15,7 +17,8 @@ public class CTermMessage extends Message {
 	}
 	
 	public String getStringValue(){
-		return new String(this.getBody(),Charset.forName("UTF-8"));
+		String string = new String(this.getBody(),Charset.forName("UTF-8"));
+		return string.substring(0, string.lastIndexOf('.'));
 	}
 	
 	public CTerm getCTermValue(){

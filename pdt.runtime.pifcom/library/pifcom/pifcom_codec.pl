@@ -8,12 +8,14 @@
 		pifcom_write_integer_bytes/3
 	]
 ).
-:- dynamic opc/3, flc/2, cleanup/1.
+
 :- use_module(library(record)).
 :- use_module(library(memfile)).
 
-:- forall(cleanup(Ref),erase(Ref)).
-:- retractall(cleanup(_)).
+%:- guitracer.
+spyme.
+%:- tspy(pifcom_codec:spyme/0).
+
 
 %% pifcom_read_and_decode_message(+Stream,-OpCode,-Ticket,-Data).
 % read and decode a pifcom message.
@@ -27,7 +29,7 @@ pifcom_read_and_decode_message(Stream,OpCode,Ticket,Data):-
     pifcom_read_message(Stream,OpCode,Ticket,Body),
     call_cleanup(
     	(	opc(OpCode,_,Data),
-    		pifcom_decode_body(Data,Body)
+    		catch(pifcom_decode_body(Data,Body),E,throw(error(pifcom_error(E,decode_body(OpCode,Ticket)))))
     	),
     	free_memory_file(Body)
     ).
@@ -65,10 +67,9 @@ pifcom_encode_and_write_message(Stream,OpCode,Ticket,Data):-
 % @param Ticket the ticket this message refers to
 % @param Body a memory file containing the raw data of the message body.
 %
-spyme.
+
 
 close_memfile(Out,MF):-
-	spyme,
 	byte_count(Out,C),
 	flush_output(Out),    
 	byte_count(Out,C),
@@ -124,7 +125,7 @@ pifcom_encode_body(Data,Body):-
 % @param Template a term of one of the following forms:
 %        name(Name), cterm(VarNames,Term), uint(Integer)
 % @param Body a memfile containing the encoded body.
-pifcom_decode_body(Template,Body):-
+pifcom_decode_body(Template,Body):-	
 	decode_body(Template,Body).
 
 
@@ -144,7 +145,7 @@ opc(0x1, skip, []).
 opc(0x2, cut, []).
 opc(0x3, abort, []).
 opc(0x4, complete, []).
-opc(0x5, timeout, []).
+opc(0x5, empty, []).
 opc(0x6, fail, []).
 opc(0x7, bye, []).
 opc(0x8, query, cterm(_,_)).
@@ -154,7 +155,7 @@ opc(0xB, error, cterm(_,_)).
 opc(0xC, name, name(_)).
 opc(0xD, binding, cterm(_,_)).
 opc(0xE, [], []).
-opc(0xF, protocol_error, protocol_error(_,_)).
+opc(0xF, protocol_error, cterm(_,_)).
 
 flc(0x08,body).
 flc(0x10,reserved1).
@@ -211,6 +212,7 @@ ommit_length(Type):-
 read_header(Stream,Header):-
     make_header([flags(Flags),op(Op),ticket(Ticket),body_len(BodyLen)],Header),
 	get_byte(Stream,Type),
+	spyme,
 	type_op(Type,Op,_),
 	(	continuation(Type)
 	->	Flags0=[continuation],
@@ -313,8 +315,7 @@ read_message_continuation(Flags,Stream,OutStream):-
 	byte_count(OutStream,Before),
 	copy_stream_data(Stream,OutStream,BodyLen),
 	byte_count(OutStream,After),	
-	Before\==After,
-	spyme,
+	Before\==After,	
 	read_message_continuation(NextFlags,Stream,OutStream).
 read_message_continuation(_,_,_).
 
