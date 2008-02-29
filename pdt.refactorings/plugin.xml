@@ -12,7 +12,7 @@
             <visibleWhen></visibleWhen>
             <parameter
                   name="pdt.transform.executeRefactoring.refactoring"
-                  value="sommer">
+                  value="pdt.refactorings.RenameFile">
             </parameter>
          </command>
       </menuContribution>

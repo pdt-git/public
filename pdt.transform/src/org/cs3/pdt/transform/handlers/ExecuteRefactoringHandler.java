@@ -1,6 +1,8 @@
 package org.cs3.pdt.transform.handlers;
 
 import org.cs3.pdt.transform.PDTTransformationsPlugin;
+import org.cs3.pdt.transform.PrologRefactoringDescriptor;
+import org.cs3.pdt.transform.internal.DeclarativePrologRefactoringInfo;
 import org.cs3.pdt.transform.internal.PrologRefactoring;
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
 import org.cs3.pdt.transform.internal.PrologRefactoringProcessor;
@@ -11,7 +13,13 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.IShellProvider;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 public class ExecuteRefactoringHandler implements IHandler {
 
@@ -26,10 +34,24 @@ public class ExecuteRefactoringHandler implements IHandler {
 	}
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-	/*	String refactoringId= event.getParameter("pdt.transform.executeRefactoring.refactoring");
-		PDTTransformationsPlugin.getDefault().getPrologRefactoringDescriptor(refactoringId);
-		//event.getApplicationContext()
-		PrologRefactoringInfo info = new RenameFileInfo(getSelectedFile(),getCurrentPrologInterface());
+		ISelection selection=HandlerUtil.getCurrentSelectionChecked(event);
+		IWorkbenchPart activePart = HandlerUtil.getActivePartChecked(event);
+		Shell shell = HandlerUtil.getActiveShellChecked(event);
+		String refactoringId= event.getParameter("pdt.transform.executeRefactoring.refactoring");
+		PrologRefactoringDescriptor desc;
+		PrologRefactoringInfo info;
+		try {
+			desc = PDTTransformationsPlugin.getDefault().getPrologRefactoringDescriptor(refactoringId);
+			if(desc==null){
+				throw new RuntimeException();
+			}
+			
+			info = new DeclarativePrologRefactoringInfo(desc,selection,activePart);
+		} catch (Exception e) {
+			throw new ExecutionException("failed to obtain Refactoring Descriptor for id "+refactoringId,e);
+		}
+
+		
 		PrologRefactoringProcessor processor = new PrologRefactoringProcessor(info);
 		PrologRefactoring refac = new PrologRefactoring(processor);
 		PrologRefactoringWizard wizard = new PrologRefactoringWizard(refac,info);
@@ -37,11 +59,11 @@ public class ExecuteRefactoringHandler implements IHandler {
 	      = new RefactoringWizardOpenOperation( wizard );
 	    try {
 	      String titleForFailedChecks = ""; //$NON-NLS-1$
-	      op.run( editor.getSite().getShell(), titleForFailedChecks );
+	      op.run( shell, titleForFailedChecks );
 	    } catch( final InterruptedException irex ) {
-	      // operation was cancelled
+	      // operation was canceled
 	    }
-		*/
+		
 		return null;
 	}
 

@@ -7,6 +7,9 @@
 :- use_module(pifcom_codec).
 
 :- debug(pifcom_server).
+:- guitracer.
+spyme.
+:- tspy(pifcom_server:spyme/0).
 
 pifcom_run_server(Address):-
     tcp_socket(ServerSocket),    
@@ -32,20 +35,35 @@ accept_loop(TCPSocket,UDPSocket):-
 	repeat,
 		wait_for_input([TCPIn,UDPIn],ReadyList,5),
 	    (	memberchk(UDPIn,ReadyList)
-	    ->	true
+	    ->	udp_receive(UDPSocket,Data,From,[]),
+	    	debug(pifcom_server,"Received Datagram \"~s\" from  ~w.~n",[Data,From])
 	    ;	memberchk(TCPIn,ReadyList)
 	    ->	tcp_accept(TCPSocket, Slave, Peer),
 			unused_thread_name(handle_client,Alias),
-			debug(pifcom_server,"accepted connection from ~w. Starting new thread ~w.~n",[Peer,Alias]),
-			thread_create(handle_client(Slave), _ , [alias(Alias),detached(true)]),									
+			debug(pifcom_server,"accepted connection from ~w. Starting new thread ~w.~n",[Peer,Alias]),			
+			thread_create(handle_client(Slave), _ , [alias(Alias),detached(true)]),						
+			assert('$handler_thread'(Alias)),			
 			fail
 		;	fail
 		),
 	!,
-	close(UDPIn),
-	close(TCPIn),
-	tcp_close_socket(TCPSocket),
-	tcp_close_socket(UDPSocket).
+	debug(pifcom_server,"Exiting accept loop~n",[]),
+	debug(pifcom_server,"Asking handler threads to exit.~n",[]),
+	forall(
+		(	current_thread(Alias,running),
+			'$handler_thread'(Alias)
+		),
+		thread_send_message(Alias,pifcom_internal_event(exit))
+		
+	),
+	retractall('$handler_thread'(_)),
+	debug(pifcom_server,"Closing master sockets.~n",[]),
+	close(UDPIn),	
+	close(TCPIn),	
+	debug(pifcom_server,"done.~n",[]).
+
+
+:- dynamic '$handler_thread'/1.
 
 
 :- thread_local '$udp_io'/4,                 
@@ -61,7 +79,7 @@ accept_loop(TCPSocket,UDPSocket):-
 
 
 unused_thread_name(Base,Alias):-
-	flag(spike_client_num,N,N+1),
+	flag(pifcom_client_num,N,N+1),
 	atom_concat(Base,N,Alias).
 
 	
@@ -83,15 +101,16 @@ handle_client(SlaveSocket):-
     debug(pifcom_server,"Bound UDP socket to port ~w~n",[UDPPort]),
    	call_cleanup(
    		handle_client2,
-   		(	close(In),
+   		(	debug(pifcom_server,"Closing sockets ~n",[]),
+   			close(In),
    			close(Out),
-   			halt
+   			close(UDPIn),
+   			close(UDPOut)   			
    		)
-   	).
+   	),
+   	debug(pifcom_server,"done. ~n",[]).
 		
-handle_client2:-
-	
-	
+handle_client2:-    		
 	dispatch.
 	
 
@@ -119,18 +138,19 @@ dispatch_block:-
 		assert('$state'(NextState)),
 		NextState==stop
 	).
-spyme.
+
 
 next_event(idle,Event):-
-    
-	'$tcp_io'(_,TCPIn,_),
-	'$udp_io'(_,_,UDPIn,_),
-	wait_for_input([UDPIn,TCPIn],Ready,5),
-	(	memberchk(UDPIn,Ready)
-	->	next_control_event(Event)
-	;	memberchk(TCPIn,Ready)
-	->	next_batch_event(Event)
-	;	Event=timeout
+	(	check_internal_queue(Event)    
+	;	'$tcp_io'(_,TCPIn,_),
+		'$udp_io'(_,_,UDPIn,_),
+		wait_for_input([UDPIn,TCPIn],Ready,5),
+		(	memberchk(UDPIn,Ready)
+		->	next_control_event(Event)
+		;	memberchk(TCPIn,Ready)
+		->	next_batch_event(Event)
+		;	Event=timeout
+		)
 	).
 next_event(skipping,Event):-
 	next_event(idle,Event).
@@ -140,7 +160,8 @@ next_event(proving(_,G),Event):-
     % prove/2 has found a solution. 
     % before processing it, we check for any message
     % on the control queue.          
-	(	check_control_queue(Event)
+	(	check_internal_queue(Event)
+	;	check_control_queue(Event)
 	;	Event=Result
 	).
 
@@ -155,30 +176,73 @@ check_control_queue(Event):-
 		;	!,
 			fail
 		).
+
+/*
+Successively produces all pending events on the internal queue. 
+*/
+check_internal_queue(Event):-
+    repeat,
+    	(	thread_peek_message(pifcom_internal_event(_))	
+		->	thread_get_message(pifcom_internal_event(Event))
+		;	!,
+			fail
+		).
+
 	
 prove('$goal'(VarNames,Goal),Result):-
-	(	catch(Goal,Error,Result=error(Error)),
-		Result=success(VarNames)
+	(	catch(
+			(	Goal,
+				Result=success(VarNames)
+			),
+			Error,
+			Result=error(Error)
+		)		
 	;	Result=failure
 	).
 	
 	
 next_batch_event(Event):-
-	'$tcp_io'(_,In,_),
-	spyme,
-	pifcom_read_and_decode_message(In,OpCode,Ticket,Data),
-	message_event(OpCode,Ticket,Data,batch,Event).
+	'$tcp_io'(_,In,_),	
+	(	at_end_of_stream(In)
+	->	Event=end_of_stream
+	;	catch(
+			(	pifcom_read_and_decode_message(In,OpCode,Ticket,EventData),
+				message_event(OpCode,Ticket,EventData,batch,Event)
+			),
+			% this is the kind of decode error that *may* be non-fatal.
+			% example: syntax error in query. 
+			% we turn non-fatal errors into events so the state machiene can 
+			% decide how to deal with them.
+			% All other uncought errors will cause the handler to terminate the session.
+			% see dispatch/0 and friends. 
+			error(pifcom_error(E,decode_body(OpCode,Ticket))),		
+			Event=pifcom_error(E,decode_body(OpCode,Ticket))
+		)
+	).
 
-next_control_event(Event):-
+next_control_event(Event):-	   
 	'$udp_io'(UDPSocket,_,_,_),
 	udp_receive(UDPSocket,Data,_From,[]),
 	new_memory_file(MF),
 	open_memory_file(MF,write,Out,[encoding(octet)]),
 	format(Out,"~s",[Data]),
 	close(Out),
-	open_memory_file(MF,read,In,[encoding(octet)]),
-	pifcom_read_and_decode_message(In,OpCode,Ticket,Data),
-	message_event(OpCode,Ticket,Data,control,Event).
+	open_memory_file(MF,read,In,[encoding(octet)]),	
+	
+	catch(
+		(	pifcom_read_and_decode_message(In,OpCode,Ticket,EventData),
+			message_event(OpCode,Ticket,EventData,control,Event)
+		),
+		% this is the kind of decode error that *may* be non-fatal.
+		% example: syntax error in query. 
+		% we turn non-fatal errors into events so the state machiene can 
+		% decide how to deal with them.
+		% All other uncought errors will cause the handler to terminate the session.
+		% see dispatch/0 and friends. 
+		error(pifcom_error(E,decode_body(OpCode,Ticket))),		
+		Event=pifcom_error(E,decode_body(OpCode,Ticket))
+	).
+	
 	
 message_event(query,Ticket,cterm(VarNames,Goal),_,query(Ticket,'$goal'(VarNames,Goal))).
 message_event(abort,Ticket,[],Queue,Event):-
@@ -217,18 +281,21 @@ transition(skipping,abort_control(T),Action,NextState):-
     ;	Action=[aborting_control_add(T)],NextState=skipping
     ).
 
-transition(proving(T,G),abort_control(T),Action,NextState):-
-    (	'$aborting_batch'(T)
-    ->	Action=[aborting_batch_remove(T)], NextState=proving(T,G)
-    ;	Action=[aborting_control_add(T),report_cut(T)],NextState=skipping
+transition(proving(T,G),abort_control(AT),Action,NextState):-
+    (	'$aborting_batch'(AT)
+    ->	Action=[aborting_batch_remove(AT)], NextState=proving(T,G)
+    ;	Action=[aborting_control_add(AT),report_cut(T)],NextState=skipping
     ).
-transition(proving(T,G),success(Instance),[report_solution(T,G,Instance)],proving(T,G)).
+transition(proving(T,G),success(Bindings),[report_solution(T,Bindings)],proving(T,G)).
 transition(proving(T,_),failure,[report_failure(T)],idle).
 transition(proving(T,_),error(E),[report_error(T,E)],idle).
 
 
 transition(State,mark(T),[report_mark(T)],State).
-
+transition(_,bye(T),[report_bye(T)],stop).
+transition(_,end_of_stream,[],stop).
+transition(_,exit,[],stop).
+transition(_,pifcom_error(E,decode_body(_,Ticket)),[report_protocol_error(Ticket,E)],idle).
 
 
 execute_actions([]).
@@ -256,6 +323,10 @@ execute_action(report_mark(T)):-
     '$tcp_io'(_,_,Out),
     pifcom_encode_and_write_message(Out,mark,T,[]),
     flush_output(Out).    
+execute_action(report_bye(T)):-
+    '$tcp_io'(_,_,Out),
+    pifcom_encode_and_write_message(Out,bye,T,[]),
+    flush_output(Out).    
 execute_action(report_cut(T)):-
     '$tcp_io'(_,_,Out),
     pifcom_encode_and_write_message(Out,cut,T,[]).    
@@ -264,14 +335,17 @@ execute_action(report_skip(T)):-
     pifcom_encode_and_write_message(Out,skip,T,[]).
 execute_action(report_solution(T,Bindings)):-
     '$tcp_io'(_,_,Out),   
-    length(Bindings,Len),
-    pifcom_encode_and_write_message(Out,begin_bindings,T,uint(Len)),
-    write_bindings(Bindings,Out,T),
+    %length(Bindings,Len),
+    %pifcom_encode_and_write_message(Out,begin_solution,T,uint(Len)),
+    (	Bindings==[]
+    ->	pifcom_encode_and_write_message(Out,empty,T,[])
+    ;	write_bindings(Bindings,Out,T)
+    ),
     flush_output(Out).
 execute_action(report_names(T,Bindings)):-
     '$tcp_io'(_,_,Out),   
     length(Bindings,Len),
-    pifcom_encode_and_write_message(Out,begin_names,T,uint(Len)),
+    pifcom_encode_and_write_message(Out,begin_solution,T,uint(Len)),
     write_names(Bindings,Out,T).    
 execute_action(report_failure(T)):-
     '$tcp_io'(_,_,Out),    
@@ -279,7 +353,11 @@ execute_action(report_failure(T)):-
     flush_output(Out).
 execute_action(report_error(T,Error)):-
     '$tcp_io'(_,_,Out),    
-    pifcom_encode_and_write_message(Out,error,T,cterm(Error)),
+    pifcom_encode_and_write_message(Out,error,T,cterm([],Error)),
+    flush_output(Out).
+execute_action(report_protocol_error(T,Error)):-
+    '$tcp_io'(_,_,Out),    
+    pifcom_encode_and_write_message(Out,protocol_error,T,cterm([],Error)),
     flush_output(Out).
 
 	

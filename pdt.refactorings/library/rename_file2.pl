@@ -11,24 +11,36 @@
 :- use_module(library('builder/targets/parse')).
 :- use_module(library('builder/targets/ast')).
 
-:- use_module(transform).
+:- use_module(library('transform/transform')).
+
+transform:interprete_selection('pdt.refactorings.RenameFile',file(Path),params(File,Name)):-
+    get_pef_file(Path,File),
+    file_base_name(Path,Name).
 
 
 
-transform:check_conditions(rename_file(OldPath,NewPath),Severity,Message):-
-    pdt_with_targets(
-    	[parse(workspace)],
-    	do_check(OldPath,NewPath,Severity,Message)
-    ).
     
-transform:perform_change(rename_file(OldPath,NewPath)):-
+transform:perform_transformation('pdt.refactorings.RenameFile',params(File,NewName)):-
+    get_pef_file(OldPath,File),
+    file_directory_name(OldPath,OldDir),
+    concat_atom([OldDir,NewName],'/',NewPath),
 	pdt_with_targets(
     	[parse(workspace)],
-    	do_it(OldPath,NewPath)
+    	(	forall(
+    			do_check(OldPath,NewPath,Severity,Msg),
+    			(	(	string(Msg)
+    				->	Msg=MsgString
+    				;	string_to_list(MsgString,Msg)
+    				),
+    				pef_transformation_problem_assert([severity=Severity,message=MsgString])
+    			)
+    		),
+    		do_it(OldPath,NewPath)
+    	)
     ).
 
 
-do_check(OldPath,NewPath,warning, "Old and new path are equivalent."):-
+do_check(OldPath,NewPath,fatal, "Old and new path are equivalent."):-
     OldPath == NewPath,
     !.
 do_check(_,NewPath,fatal, "File exists in filesystem."):-    

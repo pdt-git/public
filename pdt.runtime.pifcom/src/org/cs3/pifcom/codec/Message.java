@@ -2,8 +2,12 @@ package org.cs3.pifcom.codec;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 import org.cs3.pifcom.PIFComException;
 
@@ -19,7 +23,7 @@ public class Message {
 
 	public final static int OPC_COMPLETE = 0x04;
 
-	public final static int OPC_TIMEOUT = 0x05;
+	public final static int OPC_EMPTY = 0x05;
 
 	public final static int OPC_FAIL = 0x06;
 
@@ -59,8 +63,44 @@ public class Message {
 
 	private final byte[] body;
 
-	public byte[] getBody(){
+	public byte[] getBody() {
 		return this.body;
+	}
+
+	public static Message mark(int ticket) {
+		return new Message(OPC_MARK, ticket, new byte[0]);
+	}
+
+	public static Message skip(int ticket) {
+		return new Message(OPC_SKIP, ticket, new byte[0]);
+	}
+
+	public static Message cut(int ticket) {
+		return new Message(OPC_CUT, ticket, new byte[0]);
+	}
+
+	public static Message abort(int ticket) {
+		return new Message(OPC_ABORT, ticket, new byte[0]);
+	}
+
+	public static Message complete(int ticket) {
+		return new Message(OPC_COMPLETE, ticket, new byte[0]);
+	}
+
+	public static Message empty(int ticket) {
+		return new Message(OPC_EMPTY, ticket, new byte[0]);
+	}
+
+	public static Message fail(int ticket) {
+		return new Message(OPC_FAIL, ticket, new byte[0]);
+	}
+
+	public static Message bye(int ticket) {
+		return new Message(OPC_BYE, ticket, new byte[0]);
+	}
+
+	public static CTermMessage query(int ticket, String query) {
+		return new CTermMessage(OPC_QUERY, ticket, query);
 	}
 
 	public static Message read(DataInput in) throws IOException {
@@ -105,20 +145,21 @@ public class Message {
 			in.readFully(buf, 0, bodylen);
 			out.write(buf, 0, bodylen);
 		}
-		switch(opc){
+		switch (opc) {
 		case OPC_QUERY:
 		case OPC_BINDING:
 		case OPC_ERROR:
+		case OPC_PROTOCOL_ERROR:
 			return new CTermMessage(opc, ticket, out.toByteArray());
 		case OPC_BEGIN_NAMES:
 		case OPC_BEGIN_SOLUTION:
 			return new UIntMessage(opc, ticket, out.toByteArray());
 		case OPC_NAME:
-			return new NameMessage(opc,ticket,out.toByteArray());
+			return new NameMessage(opc, ticket, out.toByteArray());
 		default:
-			return new Message(opc, ticket, out.toByteArray());	
+			return new Message(opc, ticket, out.toByteArray());
 		}
-		
+
 	}
 
 	public Message(int opc, int ticket, byte[] body) {
@@ -128,7 +169,7 @@ public class Message {
 
 	}
 
-	public void write(DataOutputStream out) throws IOException {
+	public void write(DataOutput out) throws IOException {
 		byte[] body = getBody();
 		int todo = body.length;
 		int done = 0;
@@ -163,7 +204,20 @@ public class Message {
 		} while (todo > 0);
 	}
 
+	public void send(DatagramSocket socket, InetAddress address, int port) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream out = new DataOutputStream(baos);
+		write(out);
+		out.close();		
+		DatagramPacket p = new DatagramPacket(baos.toByteArray(),baos.size(),address,port);		
+		socket.send(p);
+	}
+
 	public int getTicket() {
 		return ticket;
+	}
+
+	public int getOpCode() {
+		return opc;
 	}
 }

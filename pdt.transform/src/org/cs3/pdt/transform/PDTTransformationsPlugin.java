@@ -131,17 +131,18 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin {
 		desc.setDescription(celm.getAttribute("description"));
 		desc.setId(celm.getAttribute("id"));
 		desc.setLabel(celm.getAttribute("label"));
-		try {
-			desc
-					.setObjectClass(Class.forName(celm
-							.getAttribute("objectClass")));
-		} catch (ClassNotFoundException e) {
-			throw new CoreException(
-					new Status(
-							Status.ERROR,
-							PDTTransform.PLUGIN_ID,
-							"failed to create descriptor, objectClass could not be resolved",
-							e));
+		if (celm.getAttribute("objectClass") != null) {
+			try {
+				desc.setObjectClass(Class.forName(celm
+						.getAttribute("objectClass")));
+			} catch (ClassNotFoundException e) {
+				throw new CoreException(
+						new Status(
+								Status.ERROR,
+								PDTTransform.PLUGIN_ID,
+								"failed to create descriptor, objectClass could not be resolved",
+								e));
+			}
 		}
 		IConfigurationElement[] children = celm.getChildren("definition");
 		File[] definitions = new File[children.length];
@@ -168,12 +169,10 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin {
 		desc.setDefinitions(definitions);
 
 		children = celm.getChildren("dependency");
-		PrologLibrary[] dependencies = new PrologLibrary[children.length];
+		String[] dependencies = new String[children.length];
 		for (int i = 0; i < dependencies.length; i++) {
 
-			dependencies[i] = PrologRuntimePlugin.getDefault()
-					.getLibraryManager().resolveLibrary(
-							children[i].getAttribute("libraryId"));
+			dependencies[i] = children[i].getAttribute("libraryId");
 		}
 		desc.setDependencies(dependencies);
 		return desc;
