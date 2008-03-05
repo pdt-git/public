@@ -155,9 +155,12 @@ add_comments([StreamPos-Text|Comments],Cx):-
     add_comments(Comments,Cx).
     
 add_error_marker(Error,Cx):-
-    parse_cx_file(Cx,File),
-    pef_reserve_id(pef_syntax_error,ID),
-    pef_syntax_error_assert([id=ID,file=File,error=Error]).
+    (	\+ \+ Error = error(syntax_error(_),_)
+    ->	parse_cx_file(Cx,File),
+    	pef_reserve_id(pef_syntax_error,ID),
+    	pef_syntax_error_assert([id=ID,file=File,error=Error])
+    ;	spyme
+    ).
 	    
 preprocess((:-module(Name,Exports)), Cx):-
     !,

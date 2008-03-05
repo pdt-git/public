@@ -149,6 +149,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 
+	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
+
 	private final static Object contextTrackerMux = new Object();
 
 	private final static Object libraryManagerMux = new Object();
@@ -499,13 +501,17 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				for (int j = 0; j < celems.length; j++) {
 
 					final IConfigurationElement celem = celems[j];
-					if (!celem.getName().equals("hook")) {
-						Debug.warning("hmmm... asumed a hook, but got a "
-								+ celem.getName());
-					} else {
+					if (celem.getName().equals("hook")) {
 						LifeCycleHookDescriptor descr = createHookDescriptor(
 								celem, extension);
 						getPrologInterfaceRegistry().addHookDescriptor(descr);
+					}else if(celem.getName().equals("registryHook")){
+						RegistryHook hook = (RegistryHook) celem.createExecutableExtension("class");
+						registryHooks.add(hook);
+					} 
+					else{
+						Debug.warning("hmmm... asumed a hook, but got a "
+								+ celem.getName());
 					}
 				}
 			}
@@ -836,6 +842,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 									+ file.getCanonicalPath()
 									+ " could not be read. A new file will be created on exit.");
 				}
+			}
+			registerStaticHooks();
+			for (RegistryHook hook : registryHooks) {
+				hook.addSubscriptions(registry);
 			}
 		} catch (CoreException e) {
 			Debug.rethrow(e);
