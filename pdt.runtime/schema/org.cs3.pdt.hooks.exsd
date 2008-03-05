@@ -22,9 +22,10 @@ The connection between a particular pif and a particular set of tasks that is pe
          </documentation>
       </annotation>
       <complexType>
-         <sequence>
-            <element ref="hook" minOccurs="1" maxOccurs="unbounded"/>
-         </sequence>
+         <choice minOccurs="0" maxOccurs="unbounded">
+            <element ref="hook"/>
+            <element ref="regestryHook"/>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -149,6 +150,21 @@ See Extension Point org.cs3.pdt.runtime.prologLibrary.
                <documentation>
                   The id of another hook.
                </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="regestryHook">
+      <complexType>
+         <attribute name="class" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="java" basedOn=":org.cs3.pdt.runtime.RegistryHook"/>
+               </appInfo>
             </annotation>
          </attribute>
       </complexType>
