@@ -61,8 +61,8 @@ problem(Id,File,expensive,Start,End,error,Message):-%module name clash
 	get_pef_file(File,FID),
 	with_output_to(string(Message),format("A module named ~w was already loaded from ~w.(~w)",[MName,FirstFile,Id])).
 
-problem(Id,File,expensive,Start,End,error,Message):-%predicate name clash
-	pef_predicate_name_clash_query([id=Id,toplevel=TLID,first=PRID]),
+problem(Id,File,expensive,Start,End,error,Message):-%predicate already imported
+	pef_predicate_already_imported_query([id=Id,toplevel=TLID,predicate=PRID]),
 	pef_predicate_query([id=PRID,name=PName,arity=Arity,module=MID]),
 	toplevel_source_position(TLID,FID,Start,End),
 	module_name(MID,MName),	
@@ -70,7 +70,7 @@ problem(Id,File,expensive,Start,End,error,Message):-%predicate name clash
 	with_output_to(string(Message),format("A predicate ~w was already imported from module ~w.(~w)",[PName/Arity,MName,Id])).
 
 problem(Id,File,expensive,Start,End,warning,Message):-%predicate redefinition
-	pef_predicate_name_clash_query([id=Id,toplevel=TLID,first=PRID]),
+	pef_predicate_redefinition_query([id=Id,toplevel=TLID,first=PRID]),
 	predicate_file(PRID,FirstFID),
 	pef_predicate_query([id=PRID,name=PName,arity=Arity,module=MID]),
 	module_name(MID,MName),

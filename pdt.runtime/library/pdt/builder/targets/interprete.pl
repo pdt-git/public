@@ -112,9 +112,9 @@ interprete_toplevel( ((MName:Head):-Body) , Cx):-
     interprete_toplevel((Head:-Body),Cx1).    
 interprete_toplevel( (Head:-_Body) , Cx):-
     !,
-    functor(Head,Name,Arity),    
-    create_my_own_predicate_version(Name,Arity,MyPredID,Cx,Cx1),
-   do_add_clause(MyPredID,Cx1).
+    functor(Head,Name,Arity), 
+    interprete_clause(Name,Arity,Cx).   
+
     
 interprete_toplevel( (:-module(_,_)) , _Cx):-
 	!.%already dealt with.
@@ -159,13 +159,28 @@ interprete_toplevel( (:-Body) , Cx):-
 interprete_toplevel( Head , Cx):-
     !,
     functor(Head,Name,Arity),
-    create_my_own_predicate_version(Name,Arity,MyPredID,Cx,Cx1),
-   do_add_clause(MyPredID,Cx1).
+    interprete_clause(Name,Arity,Cx).
 interprete_toplevel(T,Cx):-
      throw(interprete_toplevel_failed(T,Cx)).
 %TODO: handle modifications of the module import lists.
 %TODO: todo markers :-).
     
+interprete_clause(Name,Arity,Cx):-
+	catch(
+		(	create_my_own_predicate_version(Name,Arity,MyPredID,Cx,Cx1),
+			do_add_clause(MyPredID,Cx1)
+		),
+		predicate_already_imported(ImportedPred),
+		(	cx_toplevel(Cx,Toplevel),
+			cx_program(Cx,Program),
+			cx_module(Cx,Module),
+			pef_predicate_already_imported_assert(
+				[	program=Program,toplevel=Toplevel,module=Module,predicate=ImportedPred
+				]
+			)
+		)
+	).
+
     
 interprete_property_definition((Head,Tail),Property,Cx):-
 	interprete_property_definition(Head,Property,Cx),
@@ -178,10 +193,22 @@ interprete_property_definition((Module:Name)/Arity,Property,Cx):-
     get_or_create_module(Module,MID,Cx),    
     cx_set_module(Cx,MID,Cx1),
 	interprete_property_definition(Name/Arity,Property,Cx1).
-interprete_property_definition(Name/Arity,Property,Cx):-	
-    create_my_own_predicate_version(Name,Arity,PredID,Cx,Cx1),
-    cx_toplevel(Cx1,TlRef),
-    pef_predicate_property_definition_assert([predicate=PredID,property=Property,toplevel=TlRef]).
+interprete_property_definition(Name/Arity,Property,Cx):-
+	catch(
+		(	create_my_own_predicate_version(Name,Arity,PredID,Cx,Cx1),
+    		cx_toplevel(Cx1,TlRef),
+    		pef_predicate_property_definition_assert([predicate=PredID,property=Property,toplevel=TlRef])
+		),
+		predicate_already_imported(ImportedPred),
+		(	cx_toplevel(Cx,Toplevel),
+			cx_program(Cx,Program),
+			cx_module(Cx,Module),
+			pef_predicate_already_imported_assert(
+				[	program=Program,toplevel=Toplevel,module=Module,predicate=ImportedPred
+				]
+			)
+		)
+	).
     
 interprete_file_dependency(Type,Ref,Cx):-
     get_pef_file(File,Ref),
@@ -484,7 +511,6 @@ unbind_module_name(Name,Cx):-
 
 
 set_num_clauses(PredID,N):-
-    ( PredID == 38 -> debugme ; true ),
 	pef_property_retractall([pef=PredID,key=number_of_clauses]),
 	pef_property_assert([pef=PredID,key=number_of_clauses,value=N]).
     
@@ -542,8 +568,12 @@ merge_modules(Name,OldMID,NewMID,Cx,MID):-
 merge_modules(Type,Type,true,_Name,MID,MID,_Cx,MID):- % 01
 	!,
 	debug(interprete(debug),"case 01~n",[]).
-merge_modules(pef_module_definition,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):- %02
+merge_modules(pef_module_definition,pef_module_definition,false,_Name,OldMID,NewMID,Cx,_MID):- %02
 	debug(interprete(debug),"case 02~n",[]),
+	cx_program(Cx,Program),
+	cx_toplevel(Cx,Toplevel),
+	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
+	%handled by caller.
     throw(module_name_conflict(OldMID,NewMID)).
 merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID,Cx,MID):- %03
 	debug(interprete(debug),"case 03~n",[]),
@@ -554,10 +584,14 @@ merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID
 	;	rebind_module_name(Name,NewMID,Cx),
 		MID=NewMID
 	). 
-merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):- %04
+merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,Cx,_MID):- %04
 	debug(interprete(debug),"case 04~n",[]),
 %	debug(interprete(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
 	debug(interprete(info),"Our model may be incorrect now!!!",[]),
+	cx_program(Cx,Program),
+	cx_toplevel(Cx,Toplevel),
+	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
+	%handled by caller.
 	throw(module_name_conflict(OldMID,NewMID)).
     
 merge_modules(pef_module_definition,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,MID):- %05
@@ -572,9 +606,13 @@ merge_modules(pef_module_definition,pef_ad_hoc_module,_SameBase,Name,OldMID,NewM
     
 merge_modules(pef_module_extension,pef_module_definition,true,_Name,MID,_New,_Cx,MID):-
 	debug(interprete(debug),"case 06~n",[]). %06
-merge_modules(pef_module_extension,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):- %07
+merge_modules(pef_module_extension,pef_module_definition,false,_Name,OldMID,NewMID,Cx,_MID):- %07
 	debug(interprete(debug),"case 07~n",[]),
-    throw(module_name_conflict(OldMID,NewMID)).
+	cx_program(Cx,Program),
+	cx_toplevel(Cx,Toplevel),
+	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
+	%handled by caller.
+	throw(module_name_conflict(OldMID,NewMID)).
 merge_modules(pef_module_extension,pef_module_extension,true,Name,OldMID,NewMID,Cx,NewMID):- %08
 	debug(interprete(debug),"case 08~n",[]),
 
@@ -592,6 +630,10 @@ merge_modules(pef_module_extension,pef_module_extension,false,_Name,OldMID,NewMI
 	debug(interprete(debug),"case 09",[]),
    	debug(interprete(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
 	debug(interprete(info),"Our model may be incorrect now!!!",[]),
+	cx_program(Cx,Program),
+	cx_toplevel(Cx,Toplevel),
+	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
+	%handled by caller.
 	throw(module_name_conflict(OldMID,NewMID)).
 merge_modules(pef_module_extension,pef_ad_hoc_module,_SameBase,Name,OldMID,NewMID,Cx,MID):- %10
 	debug(interprete(debug),"case 10~n",[]),
@@ -658,9 +700,22 @@ merge_module(prepend_abolish,MergeMID,MID,Cx):-
     		;	pef_predicate_property_definition_query([predicate=PredId,property=(dynamic)])
     		)
     	->	% we can savely discard the changed context, since the module will not change (we own it already) 
-    		create_my_own_predicate_version(Name,Arity,MergedPredId,Cx1,_),    		
-	    	merge_predicates(prepend,PredId,MergedPredId,Cx/* Not a typo! Cx1 is only used for looking up the predicate */),
-    		merge_properties(prepend,PredId,MergedPredId)
+    		catch(
+				(	create_my_own_predicate_version(Name,Arity,MergedPredId,Cx1,_),    		
+	    			merge_predicates(prepend,PredId,MergedPredId,Cx/* Not a typo! Cx1 is only used for looking up the predicate */),
+    				merge_properties(prepend,PredId,MergedPredId)
+				),
+				predicate_already_imported(ImportedPred),
+				(	cx_toplevel(Cx,Toplevel),
+					cx_program(Cx,Program),
+					cx_module(Cx,Module),
+					pef_predicate_already_imported_assert(
+						[	program=Program,toplevel=Toplevel,module=Module,predicate=ImportedPred
+						]
+					)
+				)
+			)
+    		
     	;	%debug(interprete(todo),"TODO: add problem marker \"loading module ~w abolishes predicate ~w.\" (context: ~w)~n",[MID,PredId,Cx])
     		pef_reserve_id(pef_predicate_abolished,ID),
     		cx_get(Cx,[program=PID,toplevel=TlRef]),
@@ -732,9 +787,7 @@ append_clauses([C|Cs],TargetPred,N,M):-
 	
 merge_clauses(append,SourcePred,TargetPred,CX):-
 	nb_setval(program_interpreter_clause_number,0),
-	num_clauses(TargetPred,N),
-
-	( TargetPred==38 -> debugme ; true),
+	num_clauses(TargetPred,N),	
     debug(interprete(debug),"appending clauses of ~w after ~w. ~w~n",[SourcePred,TargetPred,CX]),
 
     findall( C,
@@ -954,7 +1007,9 @@ create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
 	;	module_base(CurrentMID,Base), 
 		module_base(DefMID,Base2),
 		Base \== Base2
-	->	throw(predicate_already_imported(PredID,Cx))
+		
+	->	%this needs to be handeled by the caller. 
+		throw(predicate_already_imported(PredID))		
 	% If the modules are not identical, but share the same base,
 	% the current module must be an extension of 
 	% the definition module, which must be a module definition.
@@ -1031,7 +1086,10 @@ copy_predicate(PredID,Cx,NewPredID):-
     cx_module(Cx,NewMID),    
 	pef_predicate_query([id=PredID,name=Name, arity=Arity]),
 	(	pef_predicate_query([id=NewPredID,name=Name, arity=Arity,module=NewMID])
-	->	throw(conflicting_predicate_exists(NewPredID))
+	->	% I think if this happens, it has to be a bug in the interpreter.
+		% Currently, the only caller is create_my_own_predicate_version/5, and afaics 
+		% all boundary conditions are checked there.
+		throw(conflicting_predicate_exists(NewPredID))
 	;	pef_reserve_id(pef_predicate,NewPredID),
 		(	NewPredID==47
 		->	spyme
