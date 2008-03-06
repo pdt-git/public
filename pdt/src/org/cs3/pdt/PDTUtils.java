@@ -121,7 +121,7 @@ public final class PDTUtils {
 				IDocument doc = editor.getDocumentProvider().getDocument(
 						editor.getEditorInput());
 
-				editor.gotoOffset(PDTCoreUtils.convertCharacterOffset(
+				editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
 						doc.get(), loc.offset));
 			}
 		}

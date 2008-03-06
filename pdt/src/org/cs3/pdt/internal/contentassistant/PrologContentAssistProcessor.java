@@ -22,7 +22,6 @@ import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.PrologSession2;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -30,7 +29,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
-import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
@@ -64,7 +62,7 @@ public abstract class PrologContentAssistProcessor implements
 			documentOffset = documentOffset == 0 ? documentOffset
 					: documentOffset - 1;
 			int begin = documentOffset;
-
+//------------
 			while (PLEditor.isNonQualifiedPredicatenameChar(document
 					.getChar(begin))
 					&& begin > 0)
@@ -75,7 +73,7 @@ public abstract class PrologContentAssistProcessor implements
 
 			String module = retrievePrefixedModule(documentOffset - len - 1,
 					document, begin);
-
+//-----------
 			List proposals = new ArrayList();
 			if (module == null || module.equals("")) {
 				if (prefix.equals("")) {
