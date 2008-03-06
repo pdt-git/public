@@ -113,7 +113,7 @@ public final class PDTCoreUtils {
 		}
 	}
 
-	public static int convertCharacterOffset(String data, int offset) {
+	public static int convertLogicalToPhysicalOffset(String data, int offset) {
 		String value = PDTCorePlugin.getDefault().getPreferenceValue(
 				PDTCore.PREF_CONVERT_CHARACTER_OFFSETS, "true");
 		if ("true".equalsIgnoreCase(value)) {
@@ -122,8 +122,21 @@ public final class PDTCoreUtils {
 		return offset;
 	}
 
-	public static int convertCharacterOffset(IDocument doc, int offset) {		
-		return convertCharacterOffset(doc.get(), offset);
+	public static int convertPhysicalToLogicalOffset(String data, int offset) {
+		String value = PDTCorePlugin.getDefault().getPreferenceValue(
+				PDTCore.PREF_CONVERT_CHARACTER_OFFSETS, "true");
+		if ("true".equalsIgnoreCase(value)) {
+			return Util.physicalToLogicalOffset(data, offset);
+		}
+		return offset;
+	}
+	
+	public static int convertLogicalToPhysicalOffset(IDocument doc, int offset) {		
+		return convertLogicalToPhysicalOffset(doc.get(), offset);
+	}
+	
+	public static int convertPhysicalToLogicalOffset(IDocument doc, int offset) {		
+		return convertPhysicalToLogicalOffset(doc.get(), offset);
 	}
 	
 	public static IDocument getDocument(IFile file) throws CoreException{
