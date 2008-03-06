@@ -57,7 +57,9 @@ do_check(_,NewPath,error,Message):-
     pdt_relative_path(ExistingPath,Alias,RelPath),
     pef_file_query([path=ExistingPath]),
     format(string(Message), "Conflicting file in search path: ~a",[ExistingPath]).
-    
+do_check(_,_,warning,Message):-
+	pef_file_not_found_query([file_spec=Spec]),
+	format(string(Message), "Unresolved file reference: ~w",[Spec]).    
 	
 do_it(OldPath,NewPath):-
     get_pef_file(OldPath,File),
