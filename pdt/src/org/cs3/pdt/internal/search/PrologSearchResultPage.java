@@ -126,9 +126,9 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		}
 		IDocument doc = editor.getDocumentProvider().getDocument(editor.getEditorInput());
 		int endOffset=currentOffset+currentLength;
-		currentOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
+		currentOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
 				currentOffset);
-		endOffset = PDTCoreUtils.convertCharacterOffset(doc.get(),
+		endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
 				endOffset);
 		currentLength=endOffset-currentOffset;
 		if (editor != null && activate)
