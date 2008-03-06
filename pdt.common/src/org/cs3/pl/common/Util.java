@@ -85,6 +85,18 @@ public class Util {
 		}
 		return physical + logical;
 	}
+	
+	public static int physicalToLogicalOffset(String data, int physical) {
+		int logical = 0;
+		int nextPos = data.indexOf("\r\n");
+		while (nextPos >= 0 && nextPos < logical) {
+			physical -= (nextPos + 2);
+			logical += (nextPos + 1);
+			data = data.substring(nextPos + 2);
+			nextPos = data.indexOf("\r\n");
+		}
+		return physical + logical;
+	}
 
 	public static String generateFingerPrint() {
 		long l = System.currentTimeMillis();
