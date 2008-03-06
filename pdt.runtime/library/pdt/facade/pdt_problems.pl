@@ -41,7 +41,7 @@ pdt_problem_count(Tag,Sum):-
     ),
     sum(Cs,Sum).
 
-%% pdt_problem(File,Start,End,Severity,Msg)
+%% pdt_problem(File,Tag,Start,End,Severity,Msg)
 % successively finds all problems found by build targets.
 pdt_problem(File,Tag,Start,End,Severity,Msg):-
     pdt_with_targets([problems(workspace,[Tag])],
