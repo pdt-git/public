@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.views.properties.IPropertySource;
 
 public class AdapterFactory implements IAdapterFactory {
@@ -65,7 +66,10 @@ public class AdapterFactory implements IAdapterFactory {
 			IResource r = (IResource) o;
 			return createHandle(r);
 		} else if (o instanceof PEFHandle) {
-			return createPropertySource((PEFHandle) o);
+			return  o;
+		} else if (o instanceof ITextSelection){
+			ITextSelection sel = (ITextSelection)o;
+			//Debug.debug("got a text selection from "+sel.getOffset()+" to "+sel.getLength()+sel.getOffset());
 		}
 
 		return null;
@@ -92,7 +96,7 @@ public class AdapterFactory implements IAdapterFactory {
 		case IResource.FOLDER:
 
 			query = "pef_directory_query([path='" + path
-					+ "', include_pattern=IP,exclude_pattern=EP,id=ID),"
+					+ "', include_pattern=IP,exclude_pattern=EP,id=ID]),"
 					+ "pdt_belongs_to_star(directory('" + path
 					+ "',IP,EP),project('" + project.getName() + "'))";
 			break;
