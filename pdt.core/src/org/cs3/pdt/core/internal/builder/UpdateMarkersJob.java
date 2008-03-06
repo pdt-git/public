@@ -199,9 +199,9 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		}
 		IMarker marker = file.createMarker(PDTCore.PROBLEM);
 		IDocument doc = PDTCoreUtils.getDocument(file);
-		start = PDTCoreUtils.convertCharacterOffset(doc, start);
+		start = PDTCoreUtils.convertLogicalToPhysicalOffset(doc, start);
 		end = Math
-				.max(start + 1, PDTCoreUtils.convertCharacterOffset(doc, end));
+				.max(start + 1, PDTCoreUtils.convertLogicalToPhysicalOffset(doc, end));
 		end = Math.min(doc.getLength(), end);
 
 		MarkerUtilities.setCharStart(marker, start);
