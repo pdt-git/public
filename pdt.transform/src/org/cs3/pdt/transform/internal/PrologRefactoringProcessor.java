@@ -235,8 +235,8 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 			int start = Integer.parseInt((String) m.get("Start"));
 			int end = Integer.parseInt((String) m.get("End"));
 			IDocument doc = PDTCoreUtils.getDocument(files.get(key));
-			start = PDTCoreUtils.convertCharacterOffset(doc, start);
-			end = PDTCoreUtils.convertCharacterOffset(doc, end);
+			start = PDTCoreUtils.convertLogicalToPhysicalOffset(doc, start);
+			end = PDTCoreUtils.convertLogicalToPhysicalOffset(doc, end);
 			String string = (String) m.get("String");
 			ReplaceEdit edit = new ReplaceEdit(start, end - start, string);
 			MultiTextEdit multiTextEdit = fileChanges.get(key);
