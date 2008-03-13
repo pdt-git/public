@@ -1,8 +1,8 @@
 :- ensure_loaded(library('pef/pef_base')).
 :- ensure_loaded(library('pef/pef_api')).
 :- op(1100,xfy,'||').
-:- op(1100,xfy,'negseq').
-:- op(1050,xfy,'&>').
+:- op(1050,xfy,'&->').
+:- op(1050,xfy,'&+>').
 :- op(1000,xfy,'&&').
 
 /*
@@ -129,7 +129,7 @@ ct(pdt_internal__shift_left(N,Parent),
 	),
 	action(
 		pef_arg_retractall([child=Child,parent=Par,num=ArgNum]),
-		pef_arg_assert([child=Child,parent=Par,num=ArgNum2]),
+		pef_arg_assert([child=Child,parent=Par,num=ArgNum2])
 	)
 ).
     
@@ -140,7 +140,7 @@ ct(pdt_internal__increment_arity(Node),
 	),
 	action(
 		pef_term_retractall([id=Node]),
-		pef_term_assert([id=Node,name=Name,arity=NewArity]),
+		pef_term_assert([id=Node,name=Name,arity=NewArity])
 	)					
 ).
 
@@ -152,7 +152,7 @@ ct(pdt_internal__decrement_arity(Node),
 	),
 	action(
 		pef_term_retractall([id=Node]),
-		pef_term_assert([id=Node,name=Name,arity=NewArity]),
+		pef_term_assert([id=Node,name=Name,arity=NewArity])
 	)					
 ).
 
@@ -171,11 +171,6 @@ All variables occuring in the subtree of Node will be replaced by new Variaibles
 Both, the new and the old AST will be consistent after this transformation.  
 */
 
-ctseq(pdt_internal__ast_unlink__fix_parent(Child),
-	(	ct(condition(my_arg(ArgNumm,Parent,Child)
-	&+>	(	pdt_internal_decrement_arity(Parent) 
-		&+>	pdt_internal__shift_left(N,Arity,Parent)
-		)
 	
 % move node to pseudo-ast
 ct(pdt_internal__ast_unlink__move_child(Node,PseudoAST),
@@ -205,24 +200,29 @@ ctseq(pdt_internal__ast_unlink__ensure_root_of_pseudo_ast(Root,PseudoAST),
 			condition(pef_pseudo_ast_query([root=Root,id=PseudoAST])),
 			action(skip)
 		)
-	).
+	)
+).
+
+
+ 
 
 ctseq(pdt_ast_unlink(Node,PseudoAST),
 	(	%if Node is an inner Node:
-		ct(condition(my_arg(N,Par,Node)),action(skip))
-	&+>	(	ct(	% remove link to parent
-				condition(true),
-				action(
-					pef_arg_retractall([child=Node,parent=Par,num=N])						
-				)
-			) 
-		&+>	pdt_internal__ast_unlink__move_child(Node,PseudoAST) 
-		 
+		ct(condition(my_arg(N,Parent,Node)),action(skip))
+	&+>	(	%remove link to parent and fix parent.
+			ct(	condition(true),action(	pef_arg_retractall([child=Node]))) 
+		&+> pdt_internal__decrement_arity(Parent)
+		&+> pdt_internal__shift_left(N,Parent)
+			
+			%move node to pseudo toplevel.
+		&+>	pdt_internal__ast_unlink__move_child(Node,PseudoAST)
+			
+			%fix variables in both ASTs 		 
 		&+>	pdt_fix_variables(PseudoAST) 
 		&+>	pdt_delete_unused_variables(AST)
 		)							
 			
-	&-> %if Node is a root node:
+	&-> %if Node is a root node, make sure it is the root of a pseudo AST.
 		pdt_internal__ast_unlink__ensure_root_of_pseudo_ast(Node,PseudoAST)
 	)					
 ).
@@ -236,16 +236,21 @@ First, Old is unlinked, using pdt_ast_unlink.
 The first argument is unlinked but not deleted.
 */	
 ctseq(ast_replace_keep(Old,New),
-	%if Old is an inner Node:
-	ct(condition(my_arg(N,Par,Node)),action(skip))
-	&+>	(	ct(	% unlink old from its parent
-				condition(true),
-				action(
-					pef_arg_retractall([child=Node,parent=Par,num=N])						
-				)
-			)
-			pdt_internal__ast_unlink__move_child(Node,PseudoAST)
+	pdt_ast_unlink(New,_) &&
+	(	%if Old is an inner Node, remove it from its parent...
+		ct(condition(my_arg(M,OldParent,Old)),action(pef_arg_retractall([child=Old])))
+	&+>	(	%... and move it to a pseudo AST
+			pdt_internal__ast_unlink__move_child(Old,PseudoAST)
+			% Then link New to OldParent
+		&+>	ct(condition(true),action(pef_arg_assert([child=New,parent=OldParent,num=M])))			
+			% fix variables of the PseudoAST
+		&+> pdt_fix_variables(PseudoAST)
+			
 		)
+	&->	%if Old is a root node, replace it
+		pdt_internal__replace_root(Old,New)
+	). 
+	
 )
 
 
