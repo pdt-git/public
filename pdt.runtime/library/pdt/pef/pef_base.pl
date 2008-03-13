@@ -44,9 +44,8 @@
 :- dynamic pef_type/2.
 
 % use @ to attach "tags" to attributes
-% note that @ binds stronger than :, so you do not need parenthesis.
 % you can "chain" several tags to one attribute.
-:- op(550,xfy,@).
+:- op(600,xfy,@).
 
 /* 2007-10-25 NOTE TO MYSELF: Before thinking about performance improvements, read this first!!
 '$erased'/1, my_erase/2 and stuff:

@@ -37,7 +37,7 @@
 
 
 
-:- op(550,xfy,@).
+:- op(600,xfy,@).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Types:
@@ -51,7 +51,6 @@
 % Tags:
 % An arbitrary number of tags can be attached to
 % any pef type or attribute using the @ operator.
-% Note that @ binds stronger than :, so you do not need parenthesis.
 % you can "chain" several tags to one attribute or type.
 %
 % Example:
@@ -170,7 +169,7 @@
 	pef_variable(
 		id,
 		name @label,
-		ast @index :pef_ast
+		ast @index :ast
 	)
 ).
 
@@ -191,7 +190,17 @@
 		id,
 		root @cascade :ast_node,
 		toplevel:pef_toplevel
-	) 
+	):ast 
+).
+
+% A pseudo AST not connected to any toplevel. 
+% generated during transformation, not stable yet
+:- define_pef(
+	pef_pseudo_ast(
+		id,
+		root @cascade :ast_node,
+		file:pef_file		
+	):ast 
 ).
 
 
