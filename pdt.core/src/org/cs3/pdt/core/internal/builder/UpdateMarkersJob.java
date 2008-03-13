@@ -47,8 +47,14 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			Map m = e.bindings;
 			String id = (String)m.get("Id");
 			String filename = (String) m.get("File");
-			int start = Integer.parseInt(((String) m.get("Start")));
-			int end = Integer.parseInt(((String) m.get("End")));
+			int start=0;
+			int end=0;
+			try{
+			 start = Integer.parseInt(((String) m.get("Start")));
+			 end = Integer.parseInt(((String) m.get("End")));
+			}catch(NumberFormatException ee){
+				Debug.report(ee);
+			}
 			String severity = (String) m.get("Severity");
 			String message = (String) m.get("Msg");
 			try {
@@ -88,9 +94,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 
 		@Override
 		public void goalRaisedException(AsyncPrologSessionEvent e) {
-			if ("obsolete".equals(e.message)) {
-				return;
-			}
+			
 			UIUtils
 					.logError(PDTCorePlugin.getDefault()
 							.getErrorMessageProvider(), PDTCore.ERR_QUERY_FAILED,
@@ -107,6 +111,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 	private IProgressMonitor markerMonitor;
 	private Runnable finnish;
 	private String tag;
+	private String query;
 
 	public UpdateMarkersJob(IPrologProject plProject, String tag,
 			Runnable finnish) {
@@ -137,8 +142,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 					+ s.getProcessorThreadAlias(), 100);
 			buildMonitor = new SubProgressMonitor(monitor, 75,
 					SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK);
-			// buildMonitor.beginTask("Searching for problems", files.size());
-			String query = "pdt_with_targets([problems(workspace,[" + tag
+			query = "pdt_with_targets([problems(workspace,[" + tag
 					+ "])],(pdt_problem_count(" + tag
 					+ ",Count),pdt_problem(Id,File," + tag
 					+ ",Start,End,Severity,Msg)))";
