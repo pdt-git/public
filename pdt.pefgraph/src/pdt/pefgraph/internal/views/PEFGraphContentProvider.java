@@ -23,10 +23,9 @@ import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.mylyn.zest.core.viewers.GraphViewer;
-import org.eclipse.mylyn.zest.core.viewers.IGraphContentProvider;
-import org.eclipse.mylyn.zest.core.widgets.GraphConnection;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.zest.core.viewers.GraphViewer;
+import org.eclipse.zest.core.viewers.IGraphContentProvider;
 
 public class PEFGraphContentProvider implements IGraphContentProvider,
 		PrologInterfaceListener {
