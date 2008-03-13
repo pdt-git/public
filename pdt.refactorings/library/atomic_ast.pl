@@ -1,6 +1,9 @@
 :- ensure_loaded(library('pef/pef_base')).
 :- ensure_loaded(library('pef/pef_api')).
-
+:- op(1100,xfy,'||').
+:- op(1100,xfy,'negseq').
+:- op(1050,xfy,'&>').
+:- op(1000,xfy,'&&').
 
 /*
 predicates starting with astseq are ment to operate on elements of sequences.
@@ -167,47 +170,61 @@ All variables occuring in the subtree of Node will be replaced by new Variaibles
 
 Both, the new and the old AST will be consistent after this transformation.  
 */
-ctseq(pdt_ast_unlink(Node,PseudoAST),
-	negseq(
-		&>(%if there is a parent node...
-			ct(	% remove link to parent, update parent arity,
-				condition(	
-					my_arg(N,Par,Node)					
-					ast_node(Par,AST),
-					ast_file(AST,File),					
-					pef_reserve_id(pef_pseudo_ast,PseudoAST)
-				),
-				action(
-					pef_arg_retractall([child=Node,parent=Par,num=N]),						
-					pef_pseudo_ast_assert([id=PseudoAST,root=Node,file=File])
-				)
+
+ctseq(pdt_internal__ast_unlink__fix_parent(Child),
+	(	ct(condition(my_arg(ArgNumm,Parent,Child)
+	&+>	(	pdt_internal_decrement_arity(Parent) 
+		&+>	pdt_internal__shift_left(N,Arity,Parent)
+		)
+	
+% move node to pseudo-ast
+ct(pdt_internal__ast_unlink__move_child(Node,PseudoAST),
+	condition(	
+		ast_node(Node,AST),
+		ast_file(AST,File),					
+		pef_reserve_id(pef_pseudo_ast,PseudoAST)
+	),
+	action(
+		pef_arg_retractall([child=Node,parent=Par,num=N]),						
+		pef_pseudo_ast_assert([id=PseudoAST,root=Node,file=File])
+	)
+).
+
+ctseq(pdt_internal__ast_unlink__ensure_root_of_pseudo_ast(Root,PseudoAST),
+	(	ct(%if node is the root of an ast linkt to a toplevel, turn the ast into a Pseudo-AST
+			condition(
+				pef_ast_query([root=Root,id=PseudoAST,toplevel=Toplevel]),
+				pef_toplevel_query([id=Toplevel,file=File])
 			),
-			||(	pdt_internal_decrement_arity(Parent),			
-				||	pdt_internal__shift_left(N,Arity,Parent),
-					||(
-						pdt_fix_variables(PseudoAST),
-						pdt_delete_unused_variables(AST)
-					)
-				)
-			)
-		),		
-		negseq(
-			ct(%if node is the root of an ast linkt to a toplevel, turn the ast into a Pseudo-AST
-				condition(
-					pef_ast_query([root=Node,id=PseudoAST,toplevel=Toplevel]),
-					pef_toplevel_query([id=Toplevel,file=File])
-				),
-				action(
-					pef_ast_retract([id=Id]),
-					pef_pseudo_ast_assert([id=Id,root=Node,file=File])
-				)
-			),
-			ct(%if node is the root of an pseudo ast, do nothing.
-				condition(pef_pseudo_ast_query([root=Node,id=PseudoAST])),
-				action(skip)
+			action(
+				pef_ast_retract([id=Id]),
+				pef_pseudo_ast_assert([id=Id,root=Root,file=File])
 			)
 		)		
-	)
+	&-> ct(%if node is the root of an pseudo ast, do nothing.
+			condition(pef_pseudo_ast_query([root=Root,id=PseudoAST])),
+			action(skip)
+		)
+	).
+
+ctseq(pdt_ast_unlink(Node,PseudoAST),
+	(	%if Node is an inner Node:
+		ct(condition(my_arg(N,Par,Node)),action(skip))
+	&+>	(	ct(	% remove link to parent
+				condition(true),
+				action(
+					pef_arg_retractall([child=Node,parent=Par,num=N])						
+				)
+			) 
+		&+>	pdt_internal__ast_unlink__move_child(Node,PseudoAST) 
+		 
+		&+>	pdt_fix_variables(PseudoAST) 
+		&+>	pdt_delete_unused_variables(AST)
+		)							
+			
+	&-> %if Node is a root node:
+		pdt_internal__ast_unlink__ensure_root_of_pseudo_ast(Node,PseudoAST)
+	)					
 ).
 
 /*
@@ -218,11 +235,18 @@ First, Old is unlinked, using pdt_ast_unlink.
   
 The first argument is unlinked but not deleted.
 */	
-ast_replace_keep(Old,New):-
-	ast_unlink(New),
-	my_arg(Num,Par,Old),
-	pef_arg_retractall([child=Old,parent=Par]),
-	pef_arg_assert([child=New,num=Num,parent=Par]).
+ctseq(ast_replace_keep(Old,New),
+	%if Old is an inner Node:
+	ct(condition(my_arg(N,Par,Node)),action(skip))
+	&+>	(	ct(	% unlink old from its parent
+				condition(true),
+				action(
+					pef_arg_retractall([child=Node,parent=Par,num=N])						
+				)
+			)
+			pdt_internal__ast_unlink__move_child(Node,PseudoAST)
+		)
+)
 
 
 
