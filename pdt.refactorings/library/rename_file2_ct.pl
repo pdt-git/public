@@ -19,39 +19,39 @@ transform:interprete_selection('pdt.refactorings.RenameFile',file(Path),params(F
 
 
 transform:perform_transformation('pdt.refactorings.RenameFile',params(File,NewName)):-
-    get_pef_file(OldPath,File),
-    file_directory_name(OldPath,OldDir),
-    concat_atom([OldDir,NewName],'/',NewPath),
-    pdt_with_targets(
-        [parse(workspace)],
-        (   forall(
-                do_check(OldPath,NewPath,Severity,Msg),
-                (   (   string(Msg)
-                    ->  Msg=MsgString
-                    ;   string_to_list(MsgString,Msg)
-                    ),
-                    pef_transformation_problem_assert([severity=Severity,message=MsgString])
-                )
-            ),
-            do_it(OldPath,NewPath)
-        )
+    pdt_with_targets([],
+    	(	request_relevant_targets(File,NewName),
+    		execCTS(ctseq(pdt_rename_file(File,NewName)) )
+    	)
     ).
     
-    
-    execCTS(ctseq(pdt_rename_file(File,NewName)) ).
+request_relevant_targets(File,NewName):-
+	pdt_request_target(parse(workspace)),
+	forall(
+		pef_file_dependency_query([dependency=File,depending=ReferingFile,toplevel=Toplevel]),	
+		(	get_pef_file(ReferingPath,ReferingFile),
+			pdt_request_target(ast(file(ReferingPath)))
+		)
+	).
+	    
 
 ctseq(pdt_rename_file(File,NewName),
-      orseq( pdt_rename_file__generate_problems(File,NewName),
-             andseq(pdt_rename_file__do_rename(File,NewName),
-                    pdt_rename_file__update_dependencies(File,NewName )
-             )
-      )
+	negseq(
+		pdt_rename_file__generate_problems(File,NewName,fatal),
+		orseq( 
+			pdt_rename_file__generate_problems(File,NewName,_),
+			andseq(
+				pdt_rename_file__do_rename(File,NewName,OldPath),
+				pdt_rename_file__update_dependencies(File,OldPath )
+			)
+		)
+	)
 ).
 
 
-ct(pdt_rename_file__do_rename(File,NewName),
+ct(pdt_rename_file__do_rename(File,NewName,OldPath),
     condition(
-        get_pef_file(OldPath,File),
+        pef_file_query([file=File,path=OldPath]),
         file_directory_name(OldPath,OldDir),
         concat_atom([OldDir,NewName],'/',NewPath)
     ),
@@ -61,7 +61,7 @@ ct(pdt_rename_file__do_rename(File,NewName),
     )
 ).
 
-ct( pdt_rename_file__generate_problems(File,NewName), 
+ct( pdt_rename_file__generate_problems(File,NewName,Severity), 
       condition(
         get_pef_file(OldPath,File),
         file_directory_name(OldPath,OldDir),
@@ -77,25 +77,88 @@ ct( pdt_rename_file__generate_problems(File,NewName),
       )
 ).   
     
+ctseq( pdt_rename_file__update_dependencies(File,OldPath ),
+	andseq(
+		ct(
+			condition(
+		   		pef_file_dependency_query([dependency=File,depending=ReferingFile,toplevel=Toplevel]),	
+				%get_pef_file(ReferingPath,ReferingFile),
+				%pdt_request_target(ast(file(ReferingPath))),
+				find_file_reference(Toplevel,RefTerm,Reference),
+				resolve_reference(RefTerm,ReferingFile,OldPath)
+			),
+			action(skip)
+		),
+		andseq(
+			pdt_generate_file_reference(File,ReferingFile,NewReference),
+			pdt_ast_replace(Reference,NewReference)
+		)	
+		%pef_property_assert([pef=NewReference,key=copy,value=true]),	
+		%mark_toplevel_modified(Toplevel).
+	)
+).
+
+ctseq( pdt_generate_file_reference(File,ReferingFile,NewReference),
+	andseq(
+		ct(
+			condition(
+				pef_file_query([id=File,path=Path]),
+				pef_file([id=ReferingFile,path=ReferingPath]),
+				file_directory_name(ReferingPath,ContainerPath),
+				atom_concat(ContainerPath,'/',Prefix)
+			),
+			action(
+				skip
+			)
+		),
+		negseq(
+			&>( %if
+				ct(condition(atom_concat(Prefix,RelativePath,Path)),action(skip)), 
+				%then
+			    pdt_generate_plain_file_reference(RelativePath,NewReference)
+			),
+			negseq(
+				&>( %else if
+					ct(
+						condition(
+							pdt_relative_path(Path,Alias,RelativePath),
+							!
+						),
+						action(skip)
+					), 
+					%then
+			    	pdt_generate_alias_file_reference(Alias,RelativePath,NewReference)
+				),
+				% else
+				generate_plain_file_reference(Path,NewReference) 	
+			)
+		)
+	)
+).
+
+
+ct( pdt_generate_plain_file_reference(RelativePath,NewReference),
+	condition(pef_reserve_id(pef_term,NewReference)),
+    action(pef_term_assert([id=NewReference,arity=0,name=RelativePath]))
+).
+
+
+ct( pdt_generate_alias_file_reference(Alias,RelativePath,NewReference),
+	condition(
+		pef_reserve_id(pef_term,NewReference),
+		pef_reserve_id(pef_term,NewReference)
+	),    
+    action(
+    	pef_term_assert([id=NewReference,arity=1,name=Alias]),
+    	pef_term_assert([id=Child,arity=0,name=RelativePath]),
+    	pef_arg_assert([parent=NewReference,num=1,child=Child])
+    )
+).
+
+
     
-transform:perform_transformation('pdt.refactorings.RenameFile',params(File,NewName)):-
-    get_pef_file(OldPath,File),
-    file_directory_name(OldPath,OldDir),
-    concat_atom([OldDir,NewName],'/',NewPath),
-	pdt_with_targets(
-    	[parse(workspace)],
-    	(	forall(
-    			do_check(OldPath,NewPath,Severity,Msg),
-    			(	(	string(Msg)
-    				->	Msg=MsgString
-    				;	string_to_list(MsgString,Msg)
-    				),
-    				pef_transformation_problem_assert([severity=Severity,message=MsgString])
-    			)
-    		),
-    		do_it(OldPath,NewPath)
-    	)
-    ).
+    
+    
 
 
 do_check(OldPath,NewPath,fatal, "Old and new path are equivalent."):-
@@ -131,45 +194,21 @@ do_it(OldPath,NewPath):-
     
     
 find_dependency(File,OldPath,ReferingFile,Reference):-
-	
-	
     pef_file_dependency_query([dependency=File,toplevel=Toplevel]),
     pef_toplevel_query([id=Toplevel, file=ReferingFile]),
     pef_file_query([path=ReferingPath,file=ReferingFile]),
     %%FIXME
     %pdt_request_target(ast(file(ReferingPath))),
     find_file_reference(Toplevel,RefTerm,Reference),
-    resolve_reference(RefTerm,ReferingFile,OldPath),
+    resolve_reference(RefTerm,ReferingFile,OldPath).
   %  !, warum?
    % generate_file_reference(File,ReferingFile,NewReference),
    % ast_replace(Reference,NewReference),
    % pef_property_assert([pef=NewReference,key=copy,value=true]),    
    % mark_toplevel_modified(Toplevel).   	
 
-generate_file_reference(File,ReferingFile,NewReference):-
-	pef_file_query([id=File,path=Path]),
-	pef_file([id=ReferingFile,path=ReferingPath]),
-	file_directory_name(ReferingPath,ContainerPath),
-	atom_concat(ContainerPath,'/',Prefix),
-	%Referenced file is in same dir as refering, or in a subdirectory. use a plain, relative path.
-	(	atom_concat(Prefix,RelativePath,Path)
-	->  generate_plain_file_reference(RelativePath,NewReference)
-	%Referenced file is in file search path, use an aliased path.
-	;	pdt_relative_path(Path,Alias,RelativePath)
-	->	generate_alias_file_reference(Alias,RelativePath,NewReference)
-	%we need to use the full absolute path.
-	;	generate_plain_file_reference(Path,NewReference) 
-	).
-	
-generate_plain_file_reference(RelativePath,NewReference):-
-    pef_reserve_id(pef_term,NewReference),
-    pef_term_assert([id=NewReference,arity=0,name=RelativePath]).
-    
-generate_alias_file_reference(Alias,RelativePath,NewReference):-
-	pef_reserve_id(pef_term,NewReference),
-    pef_term_assert([id=NewReference,arity=1,name=Alias]),
-    generate_plain_file_reference(RelativePath,Child),
-    pef_arg_assert([parent=NewReference,num=1,child=Child]).
+
+
 
 
 find_file_reference(Toplevel,ReferenceTerm,ReferenceNode):-
