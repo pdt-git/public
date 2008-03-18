@@ -39,17 +39,15 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.tests;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
@@ -60,13 +58,13 @@ import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.PrologSession2;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 /**
  * @author terra
@@ -80,11 +78,7 @@ public class SocketSessionTest extends TestCase {
     protected void setUp() throws Exception {
         Debug.setDebugLevel("DEBUG");      
      
-      //pif=PrologInterfaceFactory.newInstance("org.cs3.pl.prolog.internal.xml.Factory").create();
       pif=PrologInterfaceFactory.newInstance().create();
-     // pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
-      //pif.setOption(SocketPrologInterface.EXECUTABLE, "plwin");
-	  pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
 		
       pif.start();
     }
@@ -126,24 +120,24 @@ public class SocketSessionTest extends TestCase {
 		t.join();
 		assertNull(t.e);
 	}
-	public void testQueries() throws PrologException, PrologInterfaceException{
+	public void testQueries() throws PrologException, PrologInterfaceException {
 		PrologSession ss = pif.getSession();
+
+		assertNotNull(ss.queryOnce("assert(a(b))"));
+		assertNotNull(ss.queryOnce("assert(a(v))"));
+		assertNotNull(ss.queryOnce("a(v)"));
+		assertNull(ss.queryOnce("a(j)"));
+
+		List<Map> tabs = ss.queryAll("a(X)");
+
+		assertEquals(2,tabs.size());
+		assertTrue(tabs.get(0).containsKey("X"));
+		assertTrue(tabs.get(1).containsKey("X"));
+
+		assertEquals("b",tabs.get(0).get("X"));
+		assertEquals("v",tabs.get(1).get("X"));
 		
-		assertNotNull(ss.query("assert(a(b))"));
-		assertNotNull(ss.query("assert(a(v))"));
-		assertNotNull(ss.query("a(v)"));
-		assertNull(ss.query("a(j)"));
-		
-		Map tab = ss.query("a(X)");
-		
-		assertTrue(tab.containsKey("X"));
-		
-		String str = (String) tab.get("X");
-		
-		assertTrue(str.equals("v") || str.equals("b"));
-		assertNotNull(ss.next());
-		assertNull(ss.next());
-		
+
 		ss.dispose();
 	}
 	
@@ -164,7 +158,7 @@ public class SocketSessionTest extends TestCase {
 		Object a = map.get("A");
 		assertTrue(a instanceof String);
 		String actual = (String)a;
-		assertEquals("[1, 2]", actual);
+		assertEquals("'.'(1, '.'(2, []))", actual);
 		
 	}
 	
@@ -220,46 +214,44 @@ public class SocketSessionTest extends TestCase {
 		assertNotNull(ss.query("v(x)"));
 	}
 	
-	public void testDispose() throws PrologException, PrologInterfaceException  {
+	public void testDispose() throws PrologException, PrologInterfaceException {
 		PrologSession ss = pif.getSession();
-		
+
 		ss.dispose();
-		
+
 		try {
-			ss.query("a(X).");
-		} catch (IllegalStateException e){
+			ss.queryOnce("a(X).");
+		} catch (IllegalStateException e) {
 			return;
 		}
-		
+
 		fail("Exception thrown on disposed object");
 	}
-	
-	public void testMultipleQuery() throws PrologException, PrologInterfaceException {
-		PrologSession server = pif.getSession(); 
+
+	public void testMultipleQuery() throws PrologException,
+			PrologInterfaceException {
+		PrologSession server = pif.getSession();
+
+		// ClientConnection connection= new ClientConnectionStub();
+		Map r = server.queryOnce("assert(wahr(wahrheit))");
+		assertNotNull("result should not be null", r);
+		assertTrue("result should be empty", r.isEmpty());
 		
-        //ClientConnection connection= new ClientConnectionStub();
-        Map r = server.query("assert(wahr(wahrheit))");
-        assertNotNull("result should not be null",r);
-        assertTrue("result should be empty",r.isEmpty());
-        assertNull("Threre should be no further solution",server.next());
-        r=server.query("assert(wahr(wahr(wahrheit)))");
-        assertNotNull("result should not be null",r);
-        assertTrue("result should be empty",r.isEmpty());
-        assertNull("Threre should be no further solution",server.next());
-        r=server.query("wahr(A)");
-        assertNotNull("result should not be null",r);
-        assertTrue("result should be not empty", !r.isEmpty());
-        
-        Vector v= new Vector(); 
-        while(r!=null){
-            v.add(r.get("A").toString());
-            r=server.next();
-        }
-        assertTrue("there should be exactly two solutions!",v.size()==2);
-        assertTrue(v.contains("wahrheit"));
-        assertTrue(v.contains("wahr(wahrheit)"));
-    }
-	
+		r = server.queryOnce("assert(wahr(wahr(wahrheit)))");
+		assertNotNull("result should not be null", r);
+		assertTrue("result should be empty", r.isEmpty());
+		
+		r = server.queryOnce("wahr(A)");
+		assertNotNull("result should not be null", r);
+		assertTrue("result should be not empty", !r.isEmpty());
+
+		List<Map> v =  server.queryAll("wahr(A)");
+		
+		assertEquals("there should be exactly two solutions!", 2,v.size());
+		assertEquals("wahrheit",v.get(0).get("A"));
+		assertEquals("wahr(wahrheit)",v.get(1).get("A"));
+		
+	}
 	/**
 	 * PDT-205
 	 * @throws PrologInterfaceException
@@ -276,14 +268,30 @@ public class SocketSessionTest extends TestCase {
 			;
 		}
 	}
-	public void testIOProblem() throws PrologInterfaceException {
-		PrologSession s = pif.getSession();
-		try{
-			s.queryAll("thread_exit(krawumms)");
-		}
-		catch(PrologInterfaceException e){
-			;
-		}
+	public void testIOProblem() throws Throwable {
+		final PrologSession s = pif.getSession();
+		final Throwable[] t = new Throwable[1];
+		Thread thread = new Thread() {
+			@Override
+			public void run() {
+				try {
+					s.queryAll("thread_get_message(knarst)");
+					t[0] = null;
+				} catch (PrologException e) {
+					t[0] = e;
+				} catch (PrologInterfaceException e) {
+					t[0] = e;
+				}
+			}
+		};
+		thread.start();
+		
+		//((PIFComPrologInterface)pif).process.destroy();
+		((AbstractPrologInterface)pif).getStartAndStopStrategy().stopServer(pif);
+		thread.join();
+		assertNotNull(t[0]);
+		assertEquals(PrologInterfaceException.class, t[0].getClass());
+		pif.restart();
 	}
 	/**
      * this one fails if the pif impl does not support lists
@@ -438,7 +446,7 @@ public class SocketSessionTest extends TestCase {
 	           //map = session.queryOnce("A = 'package test0001;\n\nimport java.util.*;\n\npublic class Test  {\n'");
 	    	   //session.queryOnce("guitracer");
 	    	   map=session.queryOnce("atom_codes(A,[123,10])");
-	           assertEquals("{\n",map.get("A"));
+	           assertEquals("'{\\n'",map.get("A"));
 	       } catch(Exception e){
 	           session.dispose();
 	           fail();

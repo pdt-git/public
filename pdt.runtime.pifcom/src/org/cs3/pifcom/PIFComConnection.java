@@ -11,7 +11,7 @@ public interface PIFComConnection {
 
 	public void flushBatch() throws IOException;
 
-	public void sendControlMessage(Message m);
+	public void sendControlMessage(Message m) throws IOException;
 
 	public boolean isDisposed();
 

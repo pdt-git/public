@@ -13,5 +13,12 @@
          <export name="*"/>
       </library>
    </runtime>
+   <extension
+         point="org.cs3.pdt.runtime.prologLibrary">
+      <library
+            id="pdt.runtime.socket.codebase"
+            path="library/socket/">
+      </library>
+   </extension>
 
 </fragment>

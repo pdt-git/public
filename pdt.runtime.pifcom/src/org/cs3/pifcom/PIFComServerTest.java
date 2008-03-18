@@ -22,7 +22,6 @@ import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.prolog.internal.pifcom.Factory;
 
 import junit.framework.TestCase;
 
@@ -31,7 +30,7 @@ import junit.framework.TestCase;
  * Runs several scenarios to see whether the server conforms to the 
  * protocol specification. 
  */
-public class PifcomServerTest extends TestCase {
+public class PIFComServerTest extends TestCase {
 
 	private final class _Pump extends InputStreamPump {
 		private _Pump(InputStream s) {
@@ -66,6 +65,8 @@ public class PifcomServerTest extends TestCase {
 	private int udpLocalPort;
 
 	private int udpSlavePort;
+
+	private String processorThreadAlias;
 
 	protected void setUp() throws IOException {
 		String executable = System.getProperty("pif.executable", Factory
@@ -113,6 +114,8 @@ public class PifcomServerTest extends TestCase {
 				new BufferedOutputStream(s.getOutputStream()));
 
 		udpSlavePort = in.readUnsignedShort();
+		NameMessage m = (NameMessage) Message.read(in);
+		processorThreadAlias = m.getStringValue();
 		isSetup = true;
 	}
 

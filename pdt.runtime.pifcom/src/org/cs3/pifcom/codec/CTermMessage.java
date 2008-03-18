@@ -18,7 +18,13 @@ public class CTermMessage extends Message {
 	
 	public String getStringValue(){
 		String string = new String(this.getBody(),Charset.forName("UTF-8"));
-		return string.substring(0, string.lastIndexOf('.'));
+		if(string.endsWith(".")){
+			return string.substring(0, string.lastIndexOf('.'));	
+		}
+		else{
+			return string;
+		}
+		
 	}
 	
 	public CTerm getCTermValue(){

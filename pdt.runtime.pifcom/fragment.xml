@@ -17,8 +17,8 @@
          point="org.cs3.pdt.runtime.prologLibrary">
       <library
             alias="library"
-            id="pdt.pifcom"
-            path="library/">
+            id="pdt.runtime.pifcom.codebase"
+            path="library/pifcom/">
       </library>
    </extension>
 

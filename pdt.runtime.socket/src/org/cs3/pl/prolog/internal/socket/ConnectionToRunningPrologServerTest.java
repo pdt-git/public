@@ -41,8 +41,6 @@
 
 package org.cs3.pl.prolog.internal.socket;
 
-import java.io.IOException;
-
 import junit.framework.TestCase;
 
 import org.cs3.pl.prolog.PrologEventDispatcher;
@@ -54,6 +52,8 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
+
+
 /**
  * 
  * Before running this test, please start an external prolog process and consult the file

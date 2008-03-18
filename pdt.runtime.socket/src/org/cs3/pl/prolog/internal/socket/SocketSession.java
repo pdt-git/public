@@ -106,14 +106,13 @@ public class SocketSession implements PrologSession2 {
 			client.lock();
 			client.close();
 		} catch (IOException e) {
-			try {
-				pif.handleException(e);
-			} catch (PrologInterfaceException e1) {
-				;
-			}
+			pif.error(e);
 		} finally {
-			client.unlock();
-			client = null;
+			if(client!=null){
+				client.unlock();
+				client = null;
+			}
+			
 		}
 	}
 
@@ -155,7 +154,7 @@ public class SocketSession implements PrologSession2 {
 		} catch (IOException e) {
 			client.unlock();
 			solution = null;
-			pif.handleException(e);
+			throw pif.error(e);
 
 		}
 		if (solution == null) {
@@ -206,8 +205,8 @@ public class SocketSession implements PrologSession2 {
 			}
 			return results;
 		} catch (IOException e) {
-			pif.handleException(e);
-			return null;
+			throw pif.error(e);
+			
 		} finally {
 			if (client != null) {
 				client.unlock();
@@ -249,7 +248,7 @@ public class SocketSession implements PrologSession2 {
 				endQuery();
 			}
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		} finally {
 			client.unlock();
 		}
@@ -270,7 +269,7 @@ public class SocketSession implements PrologSession2 {
 				String line = client.readln();
 				// Debug.debug("parsing: "+line);
 				if (line == null) {
-					throw new PrologException("don't know what to do.");
+					throw new IOException("don't know what to do.");
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
 					lastError = new PrologException("Peer reported an error:"
@@ -373,7 +372,7 @@ public class SocketSession implements PrologSession2 {
 				case '}':
 					// if the stack is empty at this point, we have a problem
 					if (stack.isEmpty()) {
-						throw new PrologException(
+						throw new IOException(
 								"Read a closing curly bracket (']') but there is no containing list!");
 					}
 					// pop container from stack.
@@ -424,8 +423,8 @@ public class SocketSession implements PrologSession2 {
 			while (true) {
 				String line = client.readln();
 				if (line == null) {
-					pif.handleException(new IllegalStateException(
-							"don't know what to do."));
+					throw pif.error(new IllegalStateException(
+					"don't know what to do."));
 				}
 				if (SocketClient.MORE.equals(line)) {
 					client.writeln(SocketClient.NO);
@@ -439,7 +438,7 @@ public class SocketSession implements PrologSession2 {
 				}
 			}
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		} finally {
 			// this is no typo!
 			// we need to release lock TWO times:

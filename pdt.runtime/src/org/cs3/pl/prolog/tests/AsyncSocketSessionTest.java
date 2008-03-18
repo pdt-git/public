@@ -39,18 +39,25 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.tests;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import junit.framework.TestCase;
 
+
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CInteger;
+import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -67,10 +74,9 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterfaceFactory factory = Factory.newInstance();
+		PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance();
 		pif = (PrologInterface2) factory.create();
-		//pif.setOption(SocketPrologInterface.EXECUTABLE, "konsole -e xpce");
-		pif.setOption(SocketPrologInterface.HIDE_PLWIN, "false");
+
 		pif.start();
 		rec = new Recorder();
 		session = pif.getAsyncSession();
@@ -89,6 +95,47 @@ public class AsyncSocketSessionTest extends TestCase {
 		public Record(String method, AsyncPrologSessionEvent event) {
 			this.method = method;
 			this.event = event;
+
+		}
+
+		public boolean isSyntaxError() {
+			// error(syntax_error(cannot_start_term), stream($stream(_), 9, 0,
+			// 116))
+			CTerm msg = PLUtil.createCTerm(event.message);
+			if (!(msg instanceof CCompound)) {
+				return false;
+			}
+			CCompound c = (CCompound) msg;
+			if (c.getArity() != 2 || !c.getFunctorValue().equals("error")) {
+				return false;
+			}
+			CTerm arg = c.getArgument(0);
+			if (arg.getArity() != 1
+					|| !arg.getFunctorValue().equals("syntax_error")) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append(method);
+			sb.append('(');
+			if (event.ticket instanceof String) {
+				sb.append(event.ticket == null ? "null" : event.ticket
+						.toString());
+			} else {
+				sb.append(event.ticket == null ? "null" : "dummy");
+			}
+			sb.append(',');
+			sb.append(event.message == null ? "null" : Util.hideStreamHandles(
+					event.message, "$stream(_)"));
+			sb.append(',');
+			sb.append(event.bindings == null ? "null" : "("
+					+ Util.prettyPrint(event.bindings) + ")");
+			sb.append(')');
+			return sb.toString();
 		}
 	}
 
@@ -101,6 +148,10 @@ public class AsyncSocketSessionTest extends TestCase {
 			return (Record) records.lastElement();
 		}
 
+		public Record get(int i) {
+			return records.get(i);
+		}
+
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			boolean first = true;
@@ -109,28 +160,13 @@ public class AsyncSocketSessionTest extends TestCase {
 				if (!first) {
 					sb.append(", ");
 				}
-				sb.append(r.method);
-				sb.append('(');
-				if (r.event.ticket instanceof String) {
-					sb.append(r.event.ticket == null ? "null" : r.event.ticket
-							.toString());
-				} else {
-					sb.append(r.event.ticket == null ? "null" : "dummy");
-				}
-				sb.append(',');
-				sb.append(r.event.message == null ? "null" : Util
-						.hideStreamHandles(r.event.message, "$stream(_)"));
-				sb.append(',');
-				sb.append(r.event.bindings == null ? "null" : "("
-						+ Util.prettyPrint(r.event.bindings) + ")");
-				sb.append(')');
-
+				sb.append(r.toString());
 				first = false;
 			}
 			return sb.toString();
 		}
 
-		Vector records = new Vector();
+		Vector<Record> records = new Vector<Record>();
 
 		public synchronized void joinComplete(AsyncPrologSessionEvent e) {
 			records.add(new Record("joinComplete", e));
@@ -177,8 +213,35 @@ public class AsyncSocketSessionTest extends TestCase {
 			notifyAll();
 		}
 
+		public int size() {
+
+			return records.size();
+		}
+
 	}
 
+	public void test_syntaxError() throws Throwable {
+		session.queryOnce("3", "member(a,[a,b,c)");
+		session.dispose();
+		assertTrue(rec.get(0).isSyntaxError());
+	}
+
+	public void test_syntaxError2() throws Throwable {
+		session.queryOnce("1", "member(a,[a,b,c)");
+		session.queryOnce("2", "member(a,[a,b,c)");
+		session.dispose();
+		assertEquals(3, rec.size());
+		assertTrue(rec.get(0).isSyntaxError());
+	}
+
+	public void test_queryOnce_failure01() throws Throwable{
+		session.queryOnce("4", "member(aA,[a,b,c])");
+		session.dispose();
+		assertEquals("goalFailed(4,null,null)", rec.get(0).toString());
+		assertEquals("batchComplete(null,null,null)", rec.get(1).toString());
+		assertEquals(2,rec.size());
+	}
+	
 	public void test_queryOnce_sequence01() throws Throwable {
 		// PrologSession session=pif.getSession();
 		session.queryOnce("1", "member(A,[a,b,c])");
@@ -186,14 +249,13 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.queryOnce("3", "member(a,[a,b,c)");
 		session.queryOnce("4", "member(aA,[a,b,c])");
 		session.dispose();
-		assertEquals(
-				"goalHasSolution(1,null,(A-->a)), "
-						+ "goalSucceeded(1,null,null), "
-						+ "goalHasSolution(2,null,()), "
-						+ "goalSucceeded(2,null,null), "
-						+ "goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 116)),null), "
-						+ "goalFailed(4,null,null), "
-						+ "batchComplete(null,null,null)", rec.toString());
+		assertEquals("goalHasSolution(1,null,(A-->a))", rec.get(0).toString());
+		assertEquals("goalSucceeded(1,null,null)", rec.get(1).toString());
+		assertEquals("goalHasSolution(2,null,())", rec.get(2).toString());
+		assertEquals("goalSucceeded(2,null,null)", rec.get(3).toString());
+		assertTrue(rec.get(4).isSyntaxError());				
+		assertEquals("goalFailed(4,null,null)", rec.get(5).toString());
+		assertEquals("batchComplete(null,null,null)", rec.get(6).toString());
 	}
 
 	public void test_queryAll_sequence01() throws Throwable {
@@ -203,20 +265,37 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.queryAll("3", "member(a,[a,b,c)");
 		session.queryAll("4", "member(aA,[a,b,c])");
 		session.dispose();
-		assertEquals(
-				"goalHasSolution(1,null,(A-->a)), "
-						+ "goalHasSolution(1,null,(A-->b)), "
-						+ "goalHasSolution(1,null,(A-->c)), "
-						+ "goalSucceeded(1,null,null), "
-						+ "goalHasSolution(2,null,()), "
-						+ "goalSucceeded(2,null,null), "
-						+
+		assertEquals("goalHasSolution(1,null,(A-->a))", rec.get(0).toString());
+		assertEquals("goalHasSolution(1,null,(A-->b))", rec.get(1).toString());
+		assertEquals("goalHasSolution(1,null,(A-->c))", rec.get(2).toString());
+		assertEquals("goalSucceeded(1,null,null)", rec.get(3).toString());
+		assertEquals("goalHasSolution(2,null,())", rec.get(4).toString());
+		assertEquals("goalSucceeded(2,null,null)", rec.get(5).toString());
 
-						"goalRaisedException(3,error(syntax_error(cannot_start_term), stream($stream(_), 9, 0, 113)),null), "
-						+ "goalFailed(4,null,null), "
-						+ "batchComplete(null,null,null)", rec.toString());
+		assertTrue(rec.get(6).isSyntaxError());
+				
+		assertEquals("goalFailed(4,null,null)", rec.get(7).toString());
+		assertEquals("batchComplete(null,null,null)", rec.get(8).toString());
 	}
 
+	public void testList()throws Throwable{
+		session.queryOnce("1", "A=[0,1,2]");
+		session.join();
+		Record last = rec.get(0);
+		AsyncPrologSessionEvent event = last.event;
+		Map bindings = event.bindings;
+		Object object = bindings.get("A");
+		assertNotNull(object);
+		assertTrue(object instanceof List);
+		List l = (List)object;
+		assertEquals(3,l.size());
+		for(int i=0;i<3;i++){
+			Object o = l.get(i);
+			assertEquals( (""+i),o);
+			
+		}
+	}
+	
 	public void test_longAtom() throws Throwable {
 		// session.queryOnce("0", "guitracer");
 		// session.queryOnce("0", "trace");
@@ -231,20 +310,24 @@ public class AsyncSocketSessionTest extends TestCase {
 
 		session.queryOnce("1", sb.toString());
 		session.join();
-		assertEquals(
-				"goalHasSolution(1,null,()), goalSucceeded(1,null,null), joinComplete(dummy,null,null)",
-				rec.toString());
+		assertEquals("goalHasSolution(1,null,())", rec.get(0).toString());
+		assertEquals("goalSucceeded(1,null,null)", rec.get(1).toString());
+		assertEquals("joinComplete(dummy,null,null)", rec.get(2).toString());
+
 	}
 
 	public void test_pending_during_queryall() throws Throwable {
 		String alias = session.getProcessorThreadAlias();
 		String ticket = "queryall";
-		session.queryAll(ticket, "repeat,writeln(waiting),thread_get_message(test(M)),writeln(got(M)),(M==stop,!;true)");
+		session
+				.queryAll(
+						ticket,
+						"repeat,writeln(waiting),thread_get_message(test(M)),writeln(got(M)),(M==stop,!;true)");
 		PrologSession syncSession = pif.getSession();
 		rec.clear();
 		synchronized (rec) {
-			syncSession.queryOnce("writeln('i am here'),thread_send_message('" + alias
-					+ "',test(1))");
+			syncSession.queryOnce("writeln('i am here'),thread_send_message('"
+					+ alias + "',test(1))");
 			rec.wait();
 		}
 		boolean pending1 = session.isPending(ticket);
@@ -255,27 +338,31 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 		session.join();
 		boolean pending2 = session.isPending(ticket);
-		assertEquals("not pending during queryall",true,pending1);
-		assertEquals("pending after queryall",false,pending2);
+		assertEquals("not pending during queryall", true, pending1);
+		assertEquals("pending after queryall", false, pending2);
 	}
-	
+
 	/*
-	 * have one query with a blocking io call.
-	 * queue a second one, which serves as a dummy.
-	 * abort the batch. 
-	 * the processor cannot recieve the async abort request while
-	 * the first query blocks.
-	 * unlock the first query.
-	 * the processor should now recieve the async abort request, it should
-	 * skip the second goal.
+	 * have one query with a blocking io call. queue a second one, which serves
+	 * as a dummy. abort the batch. the processor cannot recieve the async abort
+	 * request while the first query blocks. unlock the first query. the
+	 * processor should now recieve the async abort request, it should skip the
+	 * second goal.
+	 * 
+	 * Note: with the original implementation, cuts where reported after solutions,
+	 *  so the the first solution would be reported by the session.
+	 *  The current pifcom implementation checks for cut events first, so first solution is 
+	 *  NOT reported.
+	 *  I figured that this change in semantics would not be of much relevants in practical 
+	 *  applications, and it is much easier to realize on the server side.
 	 */
 	public void test_abort01() throws Throwable {
 		session.queryOnce("1", "thread_self(Alias)");
 		session.join();
 		Record r = (Record) rec.records.get(0);
 		final String alias = (String) r.event.bindings.get("Alias");
-		//session.queryOnce("debug", "guitracer");
-		//session.queryOnce("debug", "spy(handle_batch_command)");
+		// session.queryOnce("debug", "guitracer");
+		// session.queryOnce("debug", "spy(handle_batch_command)");
 		session.queryAll("2", "repeat,thread_get_message(test(M))");
 		final PrologSession syncSession = pif.getSession();
 
@@ -299,61 +386,63 @@ public class AsyncSocketSessionTest extends TestCase {
 					// the abort call, otherwise, abort will lock up forever.
 					Debug.debug("enter 3");
 					synchronized (lock) {
-					Debug.debug("enter 5");						
+						Debug.debug("enter 5");
 						try {
-							
-							
+
 							Debug.debug("enter 6");
-							syncSession.queryOnce("thread_send_message('" + alias
-									+ "',test(2))");
+							syncSession.queryOnce("thread_send_message('"
+									+ alias + "',test(2))");
 						} catch (PrologException e) {
 							Debug.report(e);
-							
+
 						} catch (PrologInterfaceException e) {
 							Debug.report(e);
-						} 
+						}
 					}
-						
+
 				}
 			};
 			Debug.debug("enter 0");
 			thread.start();
 			Debug.debug("enter 1");
 			session.abort(lock);
-			Debug.debug("enter 7");	
+			Debug.debug("enter 7");
 		}
-			// session.queryOnce("toggle uitracer","guitracer");
-			// session.queryOnce("start tracer","trace");
+		// session.queryOnce("toggle uitracer","guitracer");
+		// session.queryOnce("start tracer","trace");
 
-
-		
-		
 		session.dispose();
-		assertEquals("goalHasSolution(2,null,(M-->2)), "
-				+ "goalCut(2,null,null), " + "goalSkipped(3,null,null), "
+		assertEquals(/*"goalHasSolution(2,null,(M-->2)), "
+				+ */"goalCut(2,null,null), " + "goalSkipped(3,null,null), "
 				+ "abortComplete(dummy,null,null), "
 				+ "batchComplete(null,null,null)", rec.toString());
 
 	}
 
-	public void test_abort02() throws Exception{
+	public void test_abort02() throws Exception {
 		session.abort();
 		session.dispose();
 
 	}
-	
-	public void test_setProtocolOption() throws Exception{
+
+	public void test_setProtocolOption() throws Exception {
 		session.setPreferenceValue("socketsession.canonical", "true");
 
 	}
-	
-	public void test_manyAsyncSessions() throws Throwable{
-		int N= 50;
+
+	public void test_manyAsyncSessions() throws Throwable {
+		int N = 32;
 		AsyncPrologSession[] sessions = new AsyncPrologSession[N];
-		for(int i=0;i<N;i++){
-			sessions[i]=pif.getAsyncSession();
+		for (int i = 0; i < N; i++) {
+			sessions[i] = pif.getAsyncSession();
 		}
-		for(int i=0;i<N;i++){
+		try{ 
+			AsyncPrologSession session = pif.getAsyncSession();
+		
+		}catch(PrologInterfaceException e){
+			e.printStackTrace();
+		}
+		for (int i = 0; i < N; i++) {
 			sessions[i].dispose();
 		}
 	}

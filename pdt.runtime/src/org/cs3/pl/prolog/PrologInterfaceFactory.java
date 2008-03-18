@@ -65,7 +65,7 @@ public abstract class PrologInterfaceFactory {
 	private PrologLibraryManager libraryManager;
 
     public static PrologInterfaceFactory newInstance(){
-        return newInstance(DEFAULT);
+        return newInstance(System.getProperty("pif.implementation",DEFAULT));
     }
     
     public static PrologInterfaceFactory newInstance(String fqn) {
@@ -84,6 +84,7 @@ public abstract class PrologInterfaceFactory {
     }
     
     public abstract PrologInterface create();
+    public abstract PrologInterface create(String name);
     
     public abstract Option[] getOptions();
     
@@ -126,5 +127,17 @@ public abstract class PrologInterfaceFactory {
     
     protected String guessBootDirectory() {
 		return null;
+	}
+
+	protected String guessFileSearchPath(String libraryId) {
+		PrologLibraryManager mgr = getLibraryManager();
+		if(mgr==null){
+			return null;
+		}
+		PrologLibrary lib= mgr.resolveLibrary(libraryId);
+		if(lib==null){
+			return null;
+		}
+		return "library="+lib.getPath();
 	}
 }

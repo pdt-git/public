@@ -1,8 +1,5 @@
 package org.cs3.pifcom;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +12,8 @@ import org.cs3.pifcom.codec.NameMessage;
 import org.cs3.pifcom.codec.UIntMessage;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -22,12 +21,12 @@ import org.cs3.pl.prolog.PrologSession2;
 
 public class PIFComSession implements PrologSession2 {
 
-	private PrologInterface pif;
-	
+	private PIFComPrologInterface pif;
+
 	private Option[] options;
-	private boolean canonical;
-	private boolean interpreteLists;
-	private int nextTicket=0;
+	private boolean canonical = false;
+	private boolean interpreteLists = true;
+	private int nextTicket = 0;
 
 	private PIFComConnection connection;
 
@@ -35,7 +34,11 @@ public class PIFComSession implements PrologSession2 {
 
 	private static final String OPT_INTERPRETE_LISTS = "socketsession.interprete_lists";
 
-	
+	public PIFComSession(PIFComConnection connection,PIFComPrologInterface pif) {
+		this.connection = connection;
+		this.pif = pif;
+	}
+
 	public void endQuery() throws PrologException, PrologInterfaceException {
 		throw new PrologInterfaceException("not implemented");
 
@@ -56,6 +59,9 @@ public class PIFComSession implements PrologSession2 {
 
 	public List queryAll(String query) throws PrologException,
 			PrologInterfaceException {
+		if (isDisposed()) {
+			throw new IllegalStateException("Session is disposed.");
+		}
 		if (!query.endsWith(".")) {
 			query = query + ".";
 		}
@@ -104,30 +110,28 @@ public class PIFComSession implements PrologSession2 {
 					throw new PrologException(((CTermMessage) m)
 							.getStringValue());
 				default:
-					throw new PrologInterfaceException("unexpected Message");
+					throw pif.error(new PrologInterfaceException("unexpected Message"));
 				}
-				if(i==varNames.length){
-					solution=null;
-					i=0;
+				if (i == varNames.length) {
+					solution = null;
+					i = 0;
 				}
-				m=connection.readMessage();
+				m = connection.readMessage();
 			}
 		} catch (IOException e) {
-			throw new PrologInterfaceException(e);
-		}		
+			throw pif.error(e);
+			
+		}
 	}
-
-	
-	
 
 	public Map queryOnce(String query) throws PrologException,
 			PrologInterfaceException {
-		if(query.endsWith(".")){
-			query=query.substring(0,query.length()-1);
+		if (query.endsWith(".")) {
+			query = query.substring(0, query.length() - 1);
 		}
-		query="once("+query+").";
+		query = "once((" + query + ")).";
 		List<Map> l = queryAll(query);
-		if(l.isEmpty()){
+		if (l.isEmpty()) {
 			return null;
 		}
 		return l.get(0);
@@ -138,7 +142,7 @@ public class PIFComSession implements PrologSession2 {
 	}
 
 	public boolean isDisposed() {
-		return connection.isDisposed();
+		return connection == null || connection.isDisposed();
 	}
 
 	public Option[] getOptions() {
@@ -166,8 +170,8 @@ public class PIFComSession implements PrologSession2 {
 	public String getPreferenceValue(String id, String string) {
 		if (OPT_CANONICAL.equals(id)) {
 			return canonical ? "true" : "false";
-		}else if(OPT_INTERPRETE_LISTS.equals(id)){
-			return interpreteLists ? "true" :"false";
+		} else if (OPT_INTERPRETE_LISTS.equals(id)) {
+			return interpreteLists ? "true" : "false";
 		}
 		throw new IllegalArgumentException("unkown option id: " + id);
 	}
@@ -175,20 +179,47 @@ public class PIFComSession implements PrologSession2 {
 	public void setPreferenceValue(String id, String value) {
 
 		if (OPT_CANONICAL.equals(id)) {
-			canonical = Boolean.valueOf(value).booleanValue();			
+			canonical = Boolean.valueOf(value).booleanValue();
 		} else if (OPT_INTERPRETE_LISTS.equals(id)) {
-			interpreteLists = Boolean.valueOf(value).booleanValue();			
+			interpreteLists = Boolean.valueOf(value).booleanValue();
 		} else {
 			throw new IllegalArgumentException("unkown option id: " + id);
 		}
 	}
+
 	private Object processBinding(CTermMessage m) {
-		if(canonical){
-			return m.getCTermValue();
+		CTerm term = m.getCTermValue();
+		if (canonical) {
+			return term;
 		}
+		if (interpreteLists ) {
+			return interpreteLists_deep(term);
+		}
+
 		return m.getStringValue();
-		
-		//FIXME: handle lists
+
+		// FIXME: handle lists
+	}
+
+	protected static Object interpreteLists_deep(CTerm term){
+		if(isList(term)){
+			
+			Vector<CTerm> terms = PLUtil.listAsVector(term);
+
+			Vector result = new Vector();
+			for (CTerm t : terms) {
+				result.add(interpreteLists_deep(t));
+			}
+			return result;
+		}else{
+			return PLUtil.renderTerm(term);
+		}
+			
+	}
+	
+	private static boolean isList(CTerm term) {
+
+		return term.getFunctorValue().equals(".") && term.getArity() == 2;
 	}
 
 	private Message join(int ticket) throws IOException {
@@ -198,9 +229,5 @@ public class PIFComSession implements PrologSession2 {
 		}
 		return m;
 	}
-
-	
-
-	
 
 }

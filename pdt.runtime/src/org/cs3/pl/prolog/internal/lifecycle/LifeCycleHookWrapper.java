@@ -39,16 +39,18 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.prolog.internal.lifecycle;
 
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.concurrent.BlockingQueue;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
 public class LifeCycleHookWrapper {
@@ -64,7 +66,10 @@ public class LifeCycleHookWrapper {
 	// public LifeCycleHook hook;
 	public HashSet<LifeCycleHook> hooks = new HashSet<LifeCycleHook>();
 
-	public LifeCycleHookWrapper(LifeCycleHook hook, String id) {
+	private final LifeCycle context;
+
+	public LifeCycleHookWrapper(LifeCycle context,LifeCycleHook hook, String id) {
+		this.context = context;
 		if (hook != null) {
 			this.hooks.add(hook);
 		}
@@ -72,39 +77,33 @@ public class LifeCycleHookWrapper {
 	}
 
 	public LifeCycleHookWrapper(LifeCycleHookWrapper value) {
-
+		this.context = value.context;
 		this.hooks = new HashSet<LifeCycleHook>(value.hooks);
 		this.id = value.id;
 		this.post = new HashSet<LifeCycleHookWrapper>(value.post);
 		this.pre = new HashSet<LifeCycleHookWrapper>(value.pre);
 	}
 
-	public void onInit(PrologInterface pif, PrologSession initSession,
-			HashSet<LifeCycleHookWrapper> done) {
+	public void onInit(HashSet<LifeCycleHookWrapper> done) {
 		if (done.contains(this)) {
 			return;
 		}
 		done.add(this);
-		for (Iterator it = post.iterator(); it.hasNext();) {
-			LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-			elm.onInit(pif, initSession, done);
+		for (LifeCycleHookWrapper elm : post) {
+			elm.onInit( done);
 
 		}
-		if (!hooks.isEmpty()) {
-			Debug.info("enter onInit() on hook " + id);
-			try {
-				for (Iterator it = hooks.iterator(); it.hasNext();) {
-					LifeCycleHook hook = (LifeCycleHook) it.next();
-					hook.onInit(pif, initSession);
+
+		for (final LifeCycleHook hook : hooks) {
+			context.enqueueWork(new NamedWorkRunnable("onInit_on_"+id) {
+				@Override
+				public void run() throws PrologInterfaceException {
+					hook.onInit(context.getPrologInterface(), context.getInitialSession());
 				}
 
-			} catch (Throwable t) {
-				Debug.error("onInit() failed for hook: " + id
-						+ ", exception trace follows:");
-				Debug.report(t);
-			}
-			Debug.info("exit onInit() on hook " + id);
+			});
 		}
+
 	}
 
 	/*
@@ -112,77 +111,59 @@ public class LifeCycleHookWrapper {
 	 * 
 	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
 	 */
-	public void afterInit(PrologInterface pif,
-			HashSet<LifeCycleHookWrapper> done) {
+	public void afterInit(HashSet<LifeCycleHookWrapper> done) {
 		if (done.contains(this)) {
 			return;
 		}
 		done.add(this);
-		for (Iterator it = post.iterator(); it.hasNext();) {
-			LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-			elm.afterInit(pif, done);
+		for (LifeCycleHookWrapper elm : post) {
+			elm.afterInit( done);
 		}
-		if (!hooks.isEmpty()) {
-			Debug.info("enter afterInit() on hook " + id);
-			try {
-				for (Iterator it = hooks.iterator(); it.hasNext();) {
-					LifeCycleHook hook = (LifeCycleHook) it.next();
-					hook.afterInit(pif);
+
+		for (final LifeCycleHook hook : hooks) {
+			context.enqueueWork(new NamedWorkRunnable("afterInit_on_"+id) {
+				@Override
+				public void run() throws PrologInterfaceException {
+					hook.afterInit(context.getPrologInterface());
 				}
-			} catch (Throwable t) {
-				Debug.error("afterInit() failed for hook: " + id
-						+ ", exception trace follows:");
-				Debug.report(t);
-			}
-			Debug.info("exit afterInit() on hook " + id);
+
+			});
 		}
+
 	}
 
-	public void beforeShutdown(PrologInterface pif, PrologSession session,
-			HashSet<LifeCycleHookWrapper> done) {
+	public void beforeShutdown(HashSet<LifeCycleHookWrapper> done) {
 		if (done.contains(this)) {
 			return;
 		}
 		done.add(this);
-		for (Iterator it = pre.iterator(); it.hasNext();) {
-			LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-			elm.beforeShutdown(pif, session, done);
+		for (LifeCycleHookWrapper elm : pre) {
+			elm.beforeShutdown( done);
+		}
 
-		}
-		if (!hooks.isEmpty()) {
-			Debug.info("enter beforeShutdown() on hook " + id);
-			try {
-				for (Iterator it = hooks.iterator(); it.hasNext();) {
-					LifeCycleHook hook = (LifeCycleHook) it.next();
-					hook.beforeShutdown(pif, session);
+		for (final LifeCycleHook hook : hooks) {
+			context.enqueueWork(new NamedWorkRunnable("beforeShutdown_on_"+id) {
+				@Override
+				public void run() throws PrologInterfaceException {
+					hook.beforeShutdown(context.getPrologInterface(),context.getShutdownSession());
 				}
-			} catch (Throwable t) {
-				Debug.error("beforeShutdown() failed for hook: " + id
-						+ ", exception trace follows:");
-				Debug.report(t);
-			}
-			Debug.info("exit beforeShutdown() on hook " + id);
+
+			});
 		}
+
 	}
 
-	public void onError(PrologInterface pif) {
-		// ignore dependencies, just do it.
-		if (!hooks.isEmpty()) {
-			Debug.info("enter onError() on hook " + id);
-			try {
-				for (Iterator it = hooks.iterator(); it.hasNext();) {
-					LifeCycleHook hook = (LifeCycleHook) it.next();
-					if (hook instanceof LifeCycleHook2) {
-						((LifeCycleHook2) hook).onError(pif);
+	public void onError() {
+
+		for (final LifeCycleHook hook : hooks) {
+			if (hook instanceof LifeCycleHook2) {
+				context.enqueueWork(new NamedWorkRunnable("onError_on_"+id) {
+					@Override
+					public void run() throws PrologInterfaceException {
+						((LifeCycleHook2) hook).onError(context.getPrologInterface());
 					}
-				}
-			} catch (Throwable t) {
-				Debug.error("onError() failed for hook: " + id
-						+ ", exception trace follows:");
-				Debug.report(t);
+				});
 			}
-			Debug.info("exit onError() on hook " + id);
 		}
 	}
-
 }

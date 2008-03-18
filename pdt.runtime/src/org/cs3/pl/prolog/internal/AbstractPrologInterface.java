@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,6 +63,8 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
+import org.cs3.pl.prolog.internal.lifecycle.WorkRunnable;
+import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
 
 /**
  * convenience implementation of common infrastructure.
@@ -70,13 +73,13 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
  */
 public abstract class AbstractPrologInterface implements PrologInterface {
 	protected static final class PifShutdownHook extends Thread {
-		WeakHashMap pifs;
+		WeakHashMap<PrologInterface, Object> pifs;
 
 		private static PifShutdownHook instance;
 
 		private PifShutdownHook() {
 			super("PifShutdownHook");
-			pifs = new WeakHashMap();
+			pifs = new WeakHashMap<PrologInterface, Object>();
 			Runtime.getRuntime().addShutdownHook(this);
 		}
 
@@ -88,8 +91,9 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 
 		public void run() {
-			for (Iterator it = pifs.keySet().iterator(); it.hasNext();) {
-				PrologInterface pif = (PrologInterface) it.next();
+			for (Iterator<PrologInterface> it = pifs.keySet().iterator(); it
+					.hasNext();) {
+				PrologInterface pif = it.next();
 				if (pif != null) {
 					try {
 						pif.stop();
@@ -106,86 +110,92 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
-	private List bootstrapLibraries = new Vector();
+	protected class MyLifeCycle extends LifeCycle {
 
-	public List getBootstrapLibraries() {
+		public MyLifeCycle(String name) {
+			super(name);
+
+		}
+
+		@Override
+		public PrologSession getInitialSession()
+				throws PrologInterfaceException {
+
+			return AbstractPrologInterface.this.getInitialSession();
+		}
+
+		@Override
+		public PrologInterface getPrologInterface() {
+
+			return AbstractPrologInterface.this;
+		}
+
+		@Override
+		public PrologSession getShutdownSession()
+				throws PrologInterfaceException {
+			return AbstractPrologInterface.this.getShutdownSession();
+		}
+
+		public void startServer() throws Throwable {
+			getStartAndStopStrategy().startServer(AbstractPrologInterface.this);
+		}
+
+		public void stopServer() throws Throwable {
+			getStartAndStopStrategy().stopServer(AbstractPrologInterface.this);
+		}
+
+		public boolean isServerRunning() throws Throwable {
+			return getStartAndStopStrategy().isRunning(
+					AbstractPrologInterface.this);
+		}
+
+		public void disposeSessions() throws Throwable {
+			synchronized (sessions) {
+				HashSet<WeakReference<PrologSession>> cloned = new HashSet<WeakReference<PrologSession>>(
+						sessions);
+				for (WeakReference<PrologSession> ref : cloned) {
+					Disposable ps = ref.get();
+					if (ps != null && !ps.isDisposed()) {
+						try{
+							ps.dispose();
+						} catch(Throwable t){
+							Debug.report(t);
+						}
+
+					}
+				}
+				sessions.clear();
+			}
+		}
+
+	}
+
+	final MyLifeCycle lifecycle;
+
+	private List<String> bootstrapLibraries = new Vector();
+
+	public List<String> getBootstrapLibraries() {
 		return bootstrapLibraries;
 	}
 
-	public void setBootstrapLibraries(List l) {
+	public void setBootstrapLibraries(List<String> l) {
 		this.bootstrapLibraries = l;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#addPrologInterfaceListener(java.lang.String,
-	 *      org.cs3.pl.prolog.PrologInterfaceListener)
-	 */
-	public void addPrologInterfaceListener(String subject,
-			PrologInterfaceListener l) {
-		synchronized (listenerLists) {
-			Vector list = (Vector) listenerLists.get(subject);
-			if (list == null) {
-				list = new Vector();
-				listenerLists.put(subject, list);
-			}
-			if (!list.contains(l)) {
-				list.add(l);
-			}
-		}
+	protected HashSet<WeakReference<PrologSession>> sessions = new HashSet<WeakReference<PrologSession>>();
 
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#removePrologInterfaceListener(java.lang.String,
-	 *      org.cs3.pl.prolog.PrologInterfaceListener)
-	 */
-	public void removePrologInterfaceListener(String subject,
-			PrologInterfaceListener l) {
-		synchronized (listenerLists) {
-			Vector list = (Vector) listenerLists.get(subject);
-			if (list == null) {
-				return;
-			}
-			if (list.contains(l)) {
-				list.remove(l);
-			}
-
-		}
-
-	}
-
-	
-
-	protected HookHelper hookHelper = new HookHelper(this);
-
-	protected Collection sessions = new LinkedList();
-
-	private ServerStartAndStopStrategy startAndStopStrategy;
-
-	private int state = DOWN;
-
-	protected Object stateLock = new Object();
-
-	private HashMap listenerLists = new HashMap();
-
-	/*
-	 * Debug facility it was a common mistake in the past to call getSession()
-	 * during startup from the same thread that run the startup (i.e. during
-	 * init hooks) This field saves the thread triggereing the startup/shutdown.
-	 * In getsessoin, it checks wether it is the same thread, and throws a
-	 * helpfull exception to hint the blind, rather than just pissing everyone
-	 * of by locking the thread. :-)
-	 * 
-	 * This can propably be removed someday soon.
-	 */
-	Thread theThreadWhoDidIt = null;
+	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
 
 	public AbstractPrologInterface() {
 		PifShutdownHook.getInstance().add(this);
+		lifecycle = new MyLifeCycle(this.toString());
+
+	}
+
+	public AbstractPrologInterface(String string) {
+		PifShutdownHook.getInstance().add(this);
+
+		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
 	}
 
 	protected void finalize() throws Throwable {
@@ -200,7 +210,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 */
 	public void addLifeCycleHook(LifeCycleHook hook, String id,
 			String[] dependencies) {
-		hookHelper.addLifeCycleHook(hook, id, dependencies);
+		lifecycle.addLifeCycleHook(hook, id, dependencies);
 	}
 
 	/*
@@ -209,7 +219,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * @see org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
 	 */
 	public void removeLifeCycleHook(String hookId) {
-		hookHelper.removeLifeCycleHook(hookId);
+		lifecycle.removeLifeCycleHook(hookId);
 	}
 
 	/**
@@ -238,21 +248,16 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * override this if your subclass needs special initial Sessions
 	 * 
 	 * @return
-	 * @throws PrologInterfaceException 
+	 * @throws PrologInterfaceException
 	 */
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
-		synchronized (stateLock) {
-			if (getState() != START_UP) {
-				throw new IllegalStateException(
-						"cannot create initial session, not in START_UP state.");
-			}
-			try {
-				return getSession_internal();
-			} catch (Throwable t) {
-				Debug.rethrow(t);
-				return null;
-			}
+
+		try {
+			return getSession_internal();
+		} catch (Throwable t) {
+			throw new PrologInterfaceException(t);
 		}
+
 	}
 
 	/**
@@ -267,121 +272,106 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public abstract PrologSession getSession_impl() throws Throwable;
 
 	public PrologSession getSession() throws PrologInterfaceException {
-		synchronized (stateLock) {
-			if(DOWN==getState()){
-				start();
+
+		synchronized (lifecycle) {
+			if (getError() != null) {
+				throw new PrologInterfaceException(getError());
 			}
-			if (START_UP == getState()) {
-				if (theThreadWhoDidIt == Thread.currentThread()) {
-					Debug
-							.error("getSession() called from init thread. Please read the api docs for LifeCycleHook.onInit(PrologSession).");
-					throw new IllegalThreadStateException(
-							"You cannot call getSession() from the init thread during pif startup.");
+			if (!isUp()) {
+				try {
+					start();
+					waitUntilUp();
+				} catch (InterruptedException e) {
+					Debug.rethrow(e);
 				}
-				waitUntilUp();
-			}
-			if (UP != getState()) {
-				throw new IllegalStateException(
-						"Cannot create session. Not in UP state.");
 			}
 			try {
 				return getSession_internal();
 			} catch (Throwable t) {
-				throw new PrologInterfaceException("Failed to obtain session",t);
+				throw new PrologInterfaceException("Failed to obtain session",
+						t);
 			}
+
 		}
 	}
 
 	private PrologSession getSession_internal() throws Throwable {
-		synchronized (stateLock) {
-			PrologSession s = getSession_impl();
-			sessions.add(new WeakReference(s));
-			return s;
 
-		}
+		PrologSession s = getSession_impl();
+		sessions.add(new WeakReference<PrologSession>(s));
+		return s;
+
 	}
 
-	protected void waitUntilUp() throws IllegalStateException {
-		if (getState() != START_UP && getState() != UP) {
-			throw new IllegalStateException("Not in state START_UP or UP");
-		}
-		synchronized (stateLock) {
-			while (!isUp()) {
-				try {
-					stateLock.wait();
-				} catch (InterruptedException e) {
-					throw new IllegalStateException("interupted");
-				}
-				if (ERROR == getState()) {
-					throw new IllegalStateException(
-							"Error while waiting for pif to come up.");
-				}
-				if (DOWN == getState()) {
-					throw new IllegalStateException(
-							"PrologInterface did not come up.");
-				}
-			}
-		}
+	protected void waitUntilUp() throws InterruptedException,
+			PrologInterfaceException {
+		lifecycle.waitUntilUp();
 	}
 
 	/**
 	 * overide this if your subclass needs special shutdown sessions.
 	 * 
 	 * @return
-	 * @throws PrologInterfaceException 
+	 * @throws PrologInterfaceException
 	 */
-	protected PrologSession getShutdownSession() throws PrologInterfaceException {
-		synchronized (stateLock) {
-			if (getState() != SHUT_DOWN) {
-				throw new IllegalStateException(
-						"cannot create shutdown session, not in SHUT_DOWN state.");
-			}
-			try {
-				return getSession_internal();
-			} catch (Throwable t) {
-				Debug.rethrow(t);
-				return null;
-			}
+	protected PrologSession getShutdownSession()
+			throws PrologInterfaceException {
+		try {
+			return getSession_internal();
+		} catch (Throwable t) {
+			throw new PrologInterfaceException(t);
 		}
 	}
 
 	/**
 	 * @return Returns the startStrategy.
 	 */
-	public ServerStartAndStopStrategy getStartAndStopStrategy() {
-		return startAndStopStrategy;
-	}
-
-	/**
-	 * @return Returns the state.
-	 */
-	public int getState() {
-		synchronized (stateLock) {
-			return state;
-		}
-	}
+	public abstract ServerStartAndStopStrategy getStartAndStopStrategy();
 
 	public boolean isDown() {
-		return (getState() == DOWN);
+		return lifecycle.isDown();
 	}
 
 	/**
 	 * @return
 	 */
 	public boolean isUp() {
-		return getState() == UP;
+		return lifecycle.isUp();
+	}
+
+	public PrologInterfaceException getError() {
+		return lifecycle.getError();
 	}
 
 	/**
 	 * causes complete re-initialization of the Prolog system, and invalidates
 	 * all current sessions.
-	 * @throws PrologInterfaceException 
+	 * 
+	 * @throws PrologInterfaceException
 	 * 
 	 * @throws IOException
 	 */
-	public void restart() throws PrologInterfaceException  {
-		stop();
-		start();
+	public void restart() throws PrologInterfaceException {
+		synchronized (lifecycle) {
+			if (getError() != null) {
+				reset();
+			} else if (isUp()) {
+				stop();
+			}
+
+			start();
+		}
+	}
+
+	private void reset() throws PrologInterfaceException {
+		synchronized (lifecycle) {
+			lifecycle.reset();
+			try {
+				lifecycle.waitUntilDown(true);
+			} catch (InterruptedException e) {
+				throw error(e);
+			}
+		}
 	}
 
 	/**
@@ -393,222 +383,56 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		throw new IllegalArgumentException("option not supported: " + opt);
 	}
 
-	protected static String stateString(int state) {
-		switch (state) {
-		case DOWN:
-			return "DOWN";
-		case START_UP:
-			return "START_UP";
-		case UP:
-			return "UP";
-		case SHUT_DOWN:
-			return "SHUT_DOWN";
-		case ERROR:
-			return "ERROR";
-
-		default:
-			return "undefined";
-		}
-	}
-
-	/*
-	 * there is no real state machiene or something: This is just an attemp to
-	 * synchronize (and detect errors in) the state flow of the pif. Basicaly at
-	 * some point you say: "Now get to state XY" and this method will check if
-	 * this transition is legal (i.e. expected to happen) Otherwise this method
-	 * throws an exception. It is called by state-changing methods start()
-	 * stop() and emergencyStop()
-	 * 
-	 */
-	protected void setState(int newState) throws IllegalStateException {
-		synchronized (stateLock) {
-			if (state == newState) {
-				throw new IllegalStateException(
-						"transition not allowed. (no change!)");
-			}
-			// check if the transition is allowed.
-			String transitionMessage = stateString(this.state) + " --> "
-					+ stateString(newState);
-			switch (newState) {
-			case ERROR:
-				Debug.info("PLIF ERROR");
-				break;
-			case DOWN:
-				if (this.state != SHUT_DOWN && this.state != ERROR) {
-					throw new IllegalStateException("transition not allowed: "
-							+ transitionMessage);
-				}
-				Debug.info("PLIF DOWN");
-				break;
-			case START_UP:
-				if (this.state != DOWN) {
-					throw new IllegalStateException("transition not allowed: "
-							+ transitionMessage);
-				}
-				Debug.info("PLIF START_UP");
-				break;
-			case UP:
-				if (this.state != START_UP) {
-					throw new IllegalStateException("transition not allowed: "
-							+ transitionMessage);
-				}
-				Debug.info("PLIF UP");
-				break;
-			case SHUT_DOWN:
-				if (this.state == UP) {
-					Debug.info("PLIF SHUT_DOWN");
-				} else {
-					throw new IllegalStateException("transition not allowed: "
-							+ transitionMessage);
-				}
-				break;
-			default:
-				throw new IllegalArgumentException("Illegal state:" + newState);
-			}
-			this.state = newState;
-			theThreadWhoDidIt = Thread.currentThread();
-			stateLock.notifyAll();
-		}
-	}
-
 	public void start() throws PrologInterfaceException {
-		try {
-			setState(START_UP);
 
-		} catch (IllegalStateException e) {
-			Debug.warning("I will not start: not in DOWN state!");
-			return;
+		synchronized (lifecycle) {
+			if (getError() != null) {
+				throw new PrologInterfaceException(getError());
+			}
+			lifecycle.start();
+			try {
+				lifecycle.waitUntilUp();
+			} catch (InterruptedException e) {
+				throw new PrologInterfaceException(e);
+			}
 		}
-
-		if (startAndStopStrategy.isRunning(this)) {
-			Debug.warning("ahem... the port is in use. \n"
-					+ "Trying to connect & shutdown, but this may not work.");
-			startAndStopStrategy.stopServer(this);
-		}
-		startAndStopStrategy.startServer(this);
-		PrologSession initSession = getInitialSession();
-		hookHelper.onInit(initSession);
-		disposeInitialSession(initSession);
-		setState(UP);
-		hookHelper.afterInit();
 
 	}
 
-	public synchronized void stop() throws PrologInterfaceException {
-		try {
-			setState(SHUT_DOWN);
-		} catch (IllegalStateException e) {
-			Debug.warning("I will not shut down: not in UP state.");
-			return;
+	public void stop() throws PrologInterfaceException {
+		synchronized (lifecycle) {
+			if (getError() != null) {
+				throw new PrologInterfaceException(getError());
+			}
+			lifecycle.stop();
+			try {
+				lifecycle.waitUntilDown(false);
+			} catch (InterruptedException e) {
+				throw new PrologInterfaceException(e);
+			}
+
 		}
-		try {
-			PrologSession s = getShutdownSession();
-			if (s != null) {
-				hookHelper.beforeShutdown(s);
+
+	}
+
+	public PrologInterfaceException error(Throwable e) {
+
+		synchronized (lifecycle) {
+			if (getError() != null) {
+				return getError(); // avoid reentrant calls.
+			}
+			lifecycle.error(e);
+			while (getError() == null) {
 				try {
-					disposeShutdownSession(s);
-				} catch (Throwable t) {
-					Debug.error("could not dispose shutdown session.");
-					Debug.report(t);
+					lifecycle.waitUntilError();
+				} catch (InterruptedException e1) {
+					;
 				}
 			}
-			synchronized (sessions) {
-				for (Iterator i = sessions.iterator(); i.hasNext();) {
-					WeakReference element = (WeakReference) i.next();
-					Disposable ps = (Disposable) element.get();
-					if (ps != null && !ps.isDisposed())
-						try {
-							ps.dispose();
-						} catch (Throwable t) {
-							handleException(t);
-						}
-					i.remove();
-				}
-			}
-			startAndStopStrategy.stopServer(this);
-			setState(DOWN);
-		} catch (Throwable t) {
-
-			Debug
-					.error("Could not shut down because of uncaught exception(s).");
-			handleException(t);
 		}
+
+		return getError();
+
 	}
 
-	public synchronized void emergencyStop() {
-
-		try {
-			synchronized (sessions) {
-				for (Iterator i = sessions.iterator(); i.hasNext();) {
-					WeakReference element = (WeakReference) i.next();
-					Disposable ps = (Disposable) element.get();
-					if (ps != null && !ps.isDisposed())
-						try {
-							ps.dispose();
-						} catch (Throwable t) {
-							Debug.report(t);
-							Debug
-									.error("problem is ignored, pif already in state ERROR");
-						}
-					i.remove();
-				}
-			}
-			hookHelper.onError(this);
-			startAndStopStrategy.stopServer(this);
-			setState(DOWN);
-		} catch (Throwable t) {
-			Debug.error("Emergency stop failed! I don't know what to do now.");
-			Debug.rethrow(t);
-		}
-	}
-
-	/**
-	 * @param startAndStopStrategy
-	 *            The startAndStopStrategy to set.
-	 */
-	public void setStartAndStopStrategy(
-			ServerStartAndStopStrategy startAndStopStrategy) {
-		this.startAndStopStrategy = startAndStopStrategy;
-	}
-
-	/**
-	 * @param subject2
-	 * @param string
-	 */
-	public void fireUpdate(String subject, String event) {
-		Vector listeners = (Vector) listenerLists.get(subject);
-		if (listeners == null) {
-			return;
-		}
-		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, event);
-
-		Vector cloned = null;
-		synchronized (listeners) {
-			cloned = (Vector) listeners.clone();
-		}
-		for (Iterator it = cloned.iterator(); it.hasNext();) {
-			PrologInterfaceListener l = (PrologInterfaceListener) it.next();
-			l.update(e);
-		}
-	}
-
-	public void handleException(Throwable e) throws PrologInterfaceException {
-		if (getState() == ERROR) {
-			Debug.report(e);
-			Debug.error("ignoring problem, pif is already in state ERROR");
-			return;
-		}
-		if (getState() == DOWN) {
-			Debug.report(e);
-			Debug.error("ignoring problem, pif is down");
-			return;
-		}
-		setState(ERROR);
-		Debug.error("pif encountered fatal error.");
-		Debug.report(e);
-		Debug.error("performing emergency shutdown.");
-		emergencyStop();
-		Debug.error("rethrowing exception");
-		throw new PrologInterfaceException(e);
-	}
 }

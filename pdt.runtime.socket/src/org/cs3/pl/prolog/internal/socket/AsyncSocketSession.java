@@ -159,8 +159,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		} catch (IOException e) {
 			handleBatchError(e);
 			
-			pif.handleException(e);
-			return false;
+			throw pif.error(e);
+			
 		}
 		return true;
 	}
@@ -399,7 +399,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				String line = client.readln();
 				// Debug.debug("parsing: "+line);
 				if (line == null) {
-					throw new PrologException("don't know what to do.");
+					throw new IOException("don't know what to do.");
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
 					fireGoalRaisedException(id,ticket, line.substring(SocketClient.ERROR.length()));
@@ -430,7 +430,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				// then there should also be a variabe value.
 				Object value = readValue();
 				if (value == null) {
-					throw new PrologException(
+					throw new IOException(
 							"could not read value for variable " + varname);
 				}
 				if (canonical) {
@@ -504,7 +504,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				case '}':
 					// if the stack is empty at this point, we have a problem
 					if (stack.isEmpty()) {
-						throw new PrologException(
+						throw new IOException(
 								"Read a closing curly bracket (']') but there is no containing list!");
 					}
 					// pop container from stack.
@@ -607,7 +607,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.writeln(command);
 			client.writeln(query);
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		}
 	}
 	
@@ -623,7 +623,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.writeln("query_all("+id+").");
 			client.writeln(query);
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		}
 	}
 
@@ -692,7 +692,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			}
 			
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
 		}
@@ -750,7 +750,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			}
 			
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
 		}finally{
@@ -770,19 +770,13 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		disposing=true;
 		client.lock();
 		try {
-			if(pif.getState()!=AbstractPrologInterface.ERROR){
+			if(pif.getError()==null){
 				exitBatch();
 				//controlSession.dispose();
 			}			
 			client.close();
-		} catch (IOException e) {
-			try {
-				pif.handleException(e);
-			} catch (PrologInterfaceException e1) {
-				;
-			}
-		} catch (PrologInterfaceException e) {
-			Debug.report(e);
+		} catch (Exception e) {
+			pif.error(e);
 		} finally {
 			client.unlock();
 			
@@ -876,7 +870,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			client.readUntil(SocketClient.OK);
 			enterBatch();
 		} catch (IOException e) {
-			pif.handleException(e);
+			throw pif.error(e);
 		} finally {
 			client.unlock();
 		}

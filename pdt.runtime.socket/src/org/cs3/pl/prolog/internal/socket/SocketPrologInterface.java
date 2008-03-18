@@ -48,12 +48,10 @@ import java.util.HashMap;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
-import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface2;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
@@ -107,8 +105,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	public static final String KILLCOMMAND = "pif.killcommand";
 
-	public final static String BOOT_DIR = "pif.engine_dir";
-
+	
 	public final static String STANDALONE = "pif.standalone";
 
 	public static final String ENGINE_FILE = "pif.engine_file";
@@ -151,8 +148,12 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	private boolean createLogs;
 
-	public SocketPrologInterface(PrologInterfaceFactory factory) {
-		super();
+	private ServerStartAndStopStrategy startAndStopStrategy;
+
+	private String fileSearchPath;
+
+	public SocketPrologInterface(PrologInterfaceFactory factory, String name) {
+		super(name);
 		this.factory = factory;
 
 	}
@@ -174,15 +175,11 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			SocketClient client = new SocketClient(socket);
 			client.setPool(pool);
 			SocketSession s = new SocketSession(client, this);
-			s.setDispatcher(new PrologInterfaceListener() {
-				public void update(PrologInterfaceEvent e) {
-					fireUpdate(e.getSubject(), e.getEvent());
-				}
-			});
+
 			return s;
 		} catch (Throwable e) {
-			handleException(e);
-			return null;
+			throw error(e);
+			
 		}
 	}
 
@@ -203,12 +200,12 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			client.setParanoiaEnabled(false);
 			client.setPool(pool);
 			PrologSession controlSession = getSession_impl();
-			AsyncPrologSession s = new AsyncSocketSession(client, this/*,controlSession*/);
+			AsyncPrologSession s = new AsyncSocketSession(client, this/* ,controlSession */);
 
 			return s;
 		} catch (Throwable e) {
-			handleException(e);
-			return null;
+			throw error(e);
+			
 		}
 	}
 
@@ -250,7 +247,10 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 *      java.lang.String)
 	 */
 	public void setOption(String opt, String value) {
-		if (EXECUTABLE.equals(opt)) {
+		if (FILE_SEARCH_PATH.equals(opt)){
+			this.fileSearchPath=value;
+		}
+		else if (EXECUTABLE.equals(opt)) {
 			this.executable = value;
 		} else if (ENVIRONMENT.equals(opt)) {
 			this.environment = value;
@@ -288,7 +288,9 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 					+ " is overridden by System Property: " + s);
 			return s;
 		}
-		if (EXECUTABLE.equals(opt)) {
+		if(FILE_SEARCH_PATH.equals(opt)){
+			return fileSearchPath;
+		} else if (EXECUTABLE.equals(opt)) {
 			return executable;
 		} else if (ENVIRONMENT.equals(opt)) {
 			return environment;
@@ -300,7 +302,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			return "" + useSessionPooling;
 		} else if (HIDE_PLWIN.equals(opt)) {
 			return "" + hidePlwin;
-		}  else if (CREATE_LOGS.equals(opt)) {
+		} else if (CREATE_LOGS.equals(opt)) {
 			return "" + createLogs;
 		} else if (TIMEOUT.equals(opt)) {
 			return "" + timeout;
@@ -342,8 +344,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		try {
 			return new InitSession(new SocketClient(host, port), this);
 		} catch (Throwable e) {
-			handleException(e);
-			return null;
+			throw error(e);
+			
 		}
 	}
 
@@ -352,13 +354,13 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getShutdownSession()
 	 */
-	protected PrologSession getShutdownSession() throws PrologInterfaceException {
+	protected PrologSession getShutdownSession()
+			throws PrologInterfaceException {
 		try {
-			return new ShutdownSession(new SocketClient(host, port),
-					this);
+			return new ShutdownSession(new SocketClient(host, port), this);
 		} catch (Throwable e) {
-			handleException(e);
-			return null;
+			throw error(e);
+			
 		}
 	}
 
@@ -391,19 +393,25 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
-	public synchronized void stop() throws PrologInterfaceException {
-		super.stop();
-		if (pool != null) {
-			pool.clear();
+	public  void stop() throws PrologInterfaceException {
+		try {
+			super.stop();
+		} finally {
+			if (pool != null) {
+				pool.clear();
+			}
 		}
 	}
 
-	public synchronized void emergencyStop() {
-
-		super.emergencyStop();
-		if (pool != null) {
-			pool.clear();
+	public  PrologInterfaceException error(Throwable e) {
+		try {
+			super.error(e);
+		} finally {
+			if (pool != null) {
+				pool.clear();
+			}
 		}
+		return getError();
 	}
 
 	/*
@@ -411,7 +419,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
-	public synchronized void start() throws PrologInterfaceException {
+	public void start() throws PrologInterfaceException {
+		
 		if (pool != null) {
 			pool.clear();
 		}
@@ -441,6 +450,19 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	public void setHidePlwin(boolean hidePlwin) {
 		this.hidePlwin = hidePlwin;
+	}
+
+	@Override
+	public ServerStartAndStopStrategy getStartAndStopStrategy() {	
+		return this.startAndStopStrategy;
+	}
+
+	/**
+	 * @param startAndStopStrategy
+	 *            The startAndStopStrategy to set.
+	 */
+	public void setStartAndStopStrategy(ServerStartAndStopStrategy startAndStopStrategy) {
+		this.startAndStopStrategy = startAndStopStrategy;
 	}
 
 }
