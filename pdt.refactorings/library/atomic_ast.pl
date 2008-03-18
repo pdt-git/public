@@ -35,11 +35,10 @@ After deleting or moving subtrees, the variable set of the affected toplevels ma
 */
 
 
-ctseq(pdt_delete_unused_variables(Toplevel),
+ctseq(pdt_delete_unused_variables(Ast),
 	andseq(
 		ct(		
-			condition(
-				pef_ast_query([toplevel=Toplevel,id=Ast]),
+			condition(				
 				pef_variable_query([ast=Ast,id=Var]),
 				\+ pef_variable_occurance_query([variable=Var])
 			),
@@ -64,7 +63,7 @@ ctseq(pdt_delete_unused_variables(Toplevel),
 	)
 ).
 
-ctseq(pdt_fix_variables(Ast),
+ctseq(pdt_fix_variables(Ast,NewVars),
    andseq(
        ct(
            condition(               
@@ -75,7 +74,7 @@ ctseq(pdt_fix_variables(Ast),
        ),
        &>(
             % (2)
-           pdt_fix_variables__generate_local(Name,Ast,'rename',Var),
+           pdt_fix_variables__generate_local(Name,Ast,NewVars,Var),
            ct(
                condition(true),
                action( %(3)
@@ -87,7 +86,7 @@ ctseq(pdt_fix_variables(Ast),
    )
 ).
 
-ctseq(pdt_fix_variables__generate_local(Name,Ast,Mode,Var),
+ctseq(pdt_fix_variables__generate_local(Name,Ast,NewVars,Var),
 	negseq(
 		andseq(
 			ct(
@@ -99,7 +98,7 @@ ctseq(pdt_fix_variables__generate_local(Name,Ast,Mode,Var),
 			negseq(
 				ct(
 					condition(
-						Mode==rename,
+						NewVars==true,
 						fix_vars__unused_name(Ast,Name,NewName),
 						pef_reserve_id(pef_variable,Var)
 					),
@@ -132,6 +131,19 @@ ct(pdt_internal__shift_left(N,Parent),
 		pef_arg_assert([child=Child,parent=Par,num=ArgNum2])
 	)
 ).
+
+ct(pdt_internal__shift_right(N,Parent),
+	condition(
+		my_arg(ArgNum,Par,Child),
+		ArgNum >= N,
+		ArgNum2 is Argnum +1
+	),
+	action(
+		pef_arg_retractall([child=Child,parent=Par,num=ArgNum]),
+		pef_arg_assert([child=Child,parent=Par,num=ArgNum2])
+	)
+).
+
     
 ct(pdt_internal__increment_arity(Node),
 	condition(
@@ -157,19 +169,6 @@ ct(pdt_internal__decrement_arity(Node),
 ).
 
 
-/*
-pdt_ast_unlink(+Node)
-
-Unlink a subtree from its parent.
-Modify the parent node so it is consistent.
-
-The unlinked node will become the root of a pseudo AST that is not linked any toplevel. 
-In fact, if the node is the root of an AST, this AST will become a pseudo AST and the link to the toplevel
-will be removed.
-All variables occuring in the subtree of Node will be replaced by new Variaibles owned by the Pseudo AST.
-
-Both, the new and the old AST will be consistent after this transformation.  
-*/
 
 	
 % move node to pseudo-ast
@@ -184,6 +183,8 @@ ct(pdt_internal__ast_unlink__move_child(Node,PseudoAST),
 		pef_pseudo_ast_assert([id=PseudoAST,root=Node,file=File])
 	)
 ).
+
+
 
 ctseq(pdt_internal__ast_unlink__ensure_root_of_pseudo_ast(Root,PseudoAST),
 	(	ct(%if node is the root of an ast linkt to a toplevel, turn the ast into a Pseudo-AST
@@ -205,6 +206,19 @@ ctseq(pdt_internal__ast_unlink__ensure_root_of_pseudo_ast(Root,PseudoAST),
 
 
  
+/*
+pdt_ast_unlink(+Node)
+
+Unlink a subtree from its parent.
+Modify the parent node so it is consistent.
+
+The unlinked node will become the root of a pseudo AST that is not linked any toplevel. 
+In fact, if the node is the root of an AST, this AST will become a pseudo AST and the link to the toplevel
+will be removed.
+All variables occuring in the subtree of Node will be replaced by new Variaibles owned by the Pseudo AST.
+
+Both, the new and the old AST will be consistent after this transformation.  
+*/
 
 ctseq(pdt_ast_unlink(Node,PseudoAST),
 	(	%if Node is an inner Node:
@@ -218,7 +232,7 @@ ctseq(pdt_ast_unlink(Node,PseudoAST),
 		&+>	pdt_internal__ast_unlink__move_child(Node,PseudoAST)
 			
 			%fix variables in both ASTs 		 
-		&+>	pdt_fix_variables(PseudoAST) 
+		&+>	pdt_fix_variables(PseudoAST,false) 
 		&+>	pdt_delete_unused_variables(AST)
 		)							
 			
@@ -228,72 +242,185 @@ ctseq(pdt_ast_unlink(Node,PseudoAST),
 ).
 
 /*
-ast_replace_keep(+Old,+New)
-Replace one ast node with another.
-First, Old is unlinked, using pdt_ast_unlink.
+ctseq(pdt_ast_insert(+ParentNode,+Num,+ChildAST,+NewVars))
 
-  
-The first argument is unlinked but not deleted.
-*/	
-ctseq(ast_replace_keep(Old,New),
-	pdt_ast_unlink(New,_) &&
-	(	%if Old is an inner Node, remove it from its parent...
-		ct(condition(my_arg(M,OldParent,Old)),action(pef_arg_retractall([child=Old])))
-	&+>	(	%... and move it to a pseudo AST
-			pdt_internal__ast_unlink__move_child(Old,PseudoAST)
-			% Then link New to OldParent
-		&+>	ct(condition(true),action(pef_arg_assert([child=New,parent=OldParent,num=M])))			
-			% fix variables of the PseudoAST
-		&+> pdt_fix_variables(PseudoAST)
-			
+Insert the root of the AST ChildAST as the Num-th Argument of ParentNode.
+Former arguments at positions >= Num are shifted to the right.
+The variable set of the target AST will be adapted: If NewVars is true, this
+transformation will make sure that the inserted AST shares no Variables with the 
+rest of the Target AST. Otherwise, variables in the inserted AST, that have the same Name as
+Variables in the Target AST, will be replaced with the Variables existing in the target AST.
+
+Finally, ChildAST will be deleted, as it is not used anymore.
+The Target AST will be consistent after this transformation.
+*/
+ctseq(pdt_ast_insert(ParentNode,Num,ChildAST,NewVars),
+	(	pdt_internal__shift_right(Num,ParentNode) &&
+		pdt_internal__increment_arity(ParentNode) &&
+		ct(
+			condition(
+				pef_ast_query([id=ChildAST,root=ChildNode])
+			),
+			action(
+				pef_arg_query([child=ChildNode,parent=ParentNode,num=Num])
+			)
+		) 
+	&+>	(	ct(condition(ast_node(TargetAST,ParentNode)),action(skip)) && 
+		 	pdt_fix_variables(TargetAST,NewVars) 
+	    ||	ct( % the variables of the ChildAST can now be savely deleted
+				condition(
+					pef_variable_query([ast=ChildAST,id=Var])
+				),
+				action(
+					pef_variable_retractall([id=Var])
+				)
+			)
+		||	( % now we can delete the ChildAST
+				ct(
+					condition(pef_type(ChildAST,pef_ast)),
+					action(pef_ast_retractall([id=ChildAST]))
+				)
+			&->	ct(
+					condition(pef_type(ChildAST,pef_pseudo_ast)),
+					action(pef_pseudo_ast_retractall([id=ChildAST]))
+				)
+			)
 		)
-	&->	%if Old is a root node, replace it
-		pdt_internal__replace_root(Old,New)
-	). 
-	
+	)
+).
+
+
+/*
+ctseq(pdt_ast_replace_root(+TargetAST,+SourceAST,-TmpAST))
+
+- replaces the root node of TargetAST with that of SourceAST.
+- the old root of TargetAST will be attached to ta new pseudo AST TmpAST
+- the SourceAST is not used any more and is therefor removed.
+*/
+
+ctseq(pdt_ast_replace_root(TargetAST,NewAST,TmpAST),
+	(	(	% replace root of TargetAST.
+			ct(	% TargetAST is either attached to a toplevel....
+				condition(
+					pef_ast_query([id=TargetAST,root=OldRoot,toplevel=Toplevel]),
+					ast_root(NewAST,NewRoot)			
+				),
+				action(
+					pef_ast_retractall([id=TargetAST]),
+					pef_ast_assert([id=TargetAST,root=NewRoot,toplevel=Toplevel])
+				)
+			)
+		&-> ct(	%.... or it's a pseudo ast
+				condition(
+					pef_pseudo_ast_query([id=TargetAST,root=OldRoot,file=File]),
+					ast_root(NewAST,NewRoot)			
+				),
+				action(
+					pef_pseudo_ast_retractall([id=TargetAST]),
+					pef_pseudo_ast_assert([id=TargetAST,root=NewRoot,file=File])
+				)
+			)
+		) &&
+		ct(	% attach old root to a new pseudo AST TmpAST
+			condition(
+				pef_reserve_id(pef_pseudo_ast,TmpAST),
+				ast_file(TargetAST,TargetFile)
+			),
+			action(
+				pef_pseudo_ast_assert([id=TmpAST,file=TargetFile,root=OldRoot])
+			)
+		)
+	&+>	(	% Fix variable links in the TargetAST and TmpAST		 
+		 	pdt_fix_variables(TargetAST,NewVars) 
+	    ||	pdt_fix_variables(TmpAST,NewVars)
+	    ||	ct( % the variables of the SrcAST can now be savely deleted
+				condition(
+					pef_variable_query([ast=SrcAST,id=Var])
+				),
+				action(
+					pef_variable_retractall([id=Var])
+				)
+			)
+		||	( % next, we can delete the SrcAST
+				ct(
+					condition(pef_type(SrcAST,pef_ast)),
+					action(pef_ast_retractall([id=SrcAST]))
+				)
+			&->	ct(
+					condition(pef_type(SrcAST,pef_pseudo_ast)),
+					action(pef_pseudo_ast_retractall([id=SrcAST]))
+				)
+			)
+		||	%finally, delete variables that are not referenced any more
+			pdt_delete_unused_variables(TargetAST)
+		||	pdt_delete_unused_variables(TmpAST)
+		)
+	)
 )
+
+/*
+ast_replace(+Old,+New,+NewVars,-TmpAST)
+Replace one ast node with another.
+Unlink Old and New,
+insert the ast of NEW at original position of Old.
+
+If NewVars is true, this
+transformation will make sure that the inserted AST shares no Variables with the 
+rest of the Target AST. Otherwise, variables in the inserted AST, that have the same Name as
+Variables in the Target AST, will be replaced with the Variables existing in the target AST.
+
+TmpAST is unified with the pseudo ast created for Old.
+
+ 
+*/	
+ctseq(ast_replace(Old,New,NewVars,TmpAST),
+	pdt_ast_unlink(New,NewAST) &&
+	(	ct(condition(my_arg(ArgNum,ParentNode,Old)),action(skip)) 
+	&+>	%Old is an inner node
+		pdt_ast_unlink(Old,TmpAST) &&
+		pdt_ast_insert(ParentNode,ArgNum,NewAST,NewVars)
+	&-> %Old is a root node.
+		(	ct(condition(ast_root(TargetAST,Old)),action(skip))
+		&+>	pdt_ast_replace_root(TargetAST,NewAST,TmpAST)
+		)
+	)
+)
+
+
+
 
 
 
 /*
 remove an element from a sequence. 
 unlinks the element, but does not delete it.
+Expects the parent of Elm to be of arity 2. 
+Fails if it is not, or if Elm is a root node.
+Otherwise, replaces Elms parent with Elms sibling.
+The a temoprorary AST with Elms parent as its root and Elm as roots only child 
+will be created and returned in TmpAST.
+ 
 */
-astseq_remove_keep(Elm):-
-	my_arg(Num,Par,Elm),
-	my_functor(Par,_Name,2),
-	(	Num==1
-	->	my_arg(2,Par,Next),
-		ast_replace_keep(Par,Next)
-	;	my_arg(1,Par,Prev),
-		ast_replace_keep(Par,Prev)
-	),
-	ast_unlink(Elm),
-	ast_delete(Par).
+ctseq(pdt_ast_seq_remove(Elm,TmpAST),
+	ct(	condition(
+			my_arg(Num,Par,Elm),
+			my_functor(Par,_,2)
+		),
+		action(
+			skip
+		)
+	) &&	
+	(	ct(condition(Num==1,my_arg(2,Par,Next)),action(skip))
+	&+> ast_replace_keep(Par,Next,TmpAST)
+	&->	ct(condition(Num==2,my_arg(1,Par,Next)),action(skip))&&
+		ast_replace_keep(Par,Prev,TmpAST)
+	)	
+).
 
-astseq_remove(Elm):-
-	astseq_remove_keep(Elm),
-	ast_delete(Elm).	
+	
 /*
-Replace one node with another.
-First, the second argument is unlinked.
-Then unlink the first argument and replace it with the second.
-The first argument is unlinked but not deleted.
-*/	
-ast_replace_keep(Old,New):-
-	ast_unlink(New),
-	my_arg(Num,Par,Old),
-	pef_arg_retractall([child=Old,parent=Par]),
-	pef_arg_assert([child=New,num=Num,parent=Par]).
-
-/*
-Replace one node with another.
-Like replace_keep, but recursively deletes the first argument.
-*/	
-ast_replace(Old,New):-
-	ast_replace_keep(Old,New),
-	ast_delete(Old).
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%% Left Todo:
 	
 ast_delete(Node):-
 	forget_subtree(Node).	
@@ -362,7 +489,7 @@ ast_node(Ast,Node):-
     ).
 
 ast_file(Ast,File):-
-    (	pef_ast_query([id=Ast,toplevel=Toplevel]),
+    (	pef_ast_query([id=Ast,toplevel=Toplevel])
 	->	pef_toplevel_query([id=Toplevel,file=File])
 	;	pef_pseudo_ast_query([id=Ast,file=File])
 	).
