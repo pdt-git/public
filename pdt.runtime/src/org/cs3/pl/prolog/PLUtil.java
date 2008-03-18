@@ -131,14 +131,19 @@ public class PLUtil {
 	}
 
 	public static CTerm[] listAsArray(CTerm term) {
-		Vector v = new Vector();
+		Vector<CTerm> v = listAsVector(term);
+		return (CTerm[]) v.toArray(new CTerm[v.size()]);
+	}
+
+	public static Vector<CTerm> listAsVector(CTerm term) {
+		Vector<CTerm> v = new Vector<CTerm>();
 		while (term instanceof CCompound && ".".equals(term.getFunctorValue())
 				&& 2 == term.getArity()) {
 			CCompound compound = (CCompound) term;
 			v.add(compound.getArgument(0));
 			term = compound.getArgument(1);
 		}
-		return (CTerm[]) v.toArray(new CTerm[v.size()]);
+		return v;
 	}
 
 	/**
@@ -297,12 +302,9 @@ public class PLUtil {
 
 	}
 
-	//private static CTermFactory factory = new ParserCTermFactory();
+	
 
-	/**
-	 * @deprecated this is an ad-hoc solution. I am not sure yet where to put
-	 *             this stuff.
-	 */
+	
 	public static CTerm createCTerm(Object input) {
 		ATermFactory factory = new ATermFactory();
 		return factory.createCTerm(input);

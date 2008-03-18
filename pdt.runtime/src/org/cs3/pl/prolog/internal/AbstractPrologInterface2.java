@@ -52,46 +52,48 @@ import org.cs3.pl.prolog.PrologSession;
 
 public abstract class AbstractPrologInterface2 extends AbstractPrologInterface
 		implements PrologInterface2 {
+	public AbstractPrologInterface2(String name) {
+		super(name);
+	}
+
+	public AbstractPrologInterface2() {
+
+	}
+
 	public abstract AsyncPrologSession getAsyncSession_impl() throws Throwable;
 
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
-		if (DOWN == getState()) {
-			start();
-		}
-		synchronized (stateLock) {
-			if (START_UP == getState()) {
-				if (theThreadWhoDidIt == Thread.currentThread()) {
-					Debug
-							.error("getSession() called from init thread. Please read the api docs for LifeCycleHook.onInit(PrologSession).");
-					throw new IllegalThreadStateException(
-							"You cannot call getSession() from the init thread during pif startup.");
-				}
-				waitUntilUp();
+		synchronized (lifecycle) {
+			if(getError()!=null){
+				throw new PrologInterfaceException(getError());
 			}
-			if (UP != getState()) {
-				throw new IllegalStateException(
-						"Cannot create session. Not in UP state.");
+			if (!isUp()) {
+				try {
+					start();
+					waitUntilUp();
+				} catch (InterruptedException e) {
+					Debug.rethrow(e);
+				}
 			}
 			try {
 				return getAsyncSession_internal();
 			} catch (Throwable t) {
-				Debug.rethrow(t);
-				return null;
+				throw new PrologInterfaceException("Failed to obtain session",
+						t);
 			}
 		}
 	}
 
 	private AsyncPrologSession getAsyncSession_internal() throws Throwable {
-		synchronized (stateLock) {
-			AsyncPrologSession s = getAsyncSession_impl();
-			sessions.add(new WeakReference(s));
-			return s;
 
-		}
+		AsyncPrologSession s = getAsyncSession_impl();
+		sessions.add(new WeakReference(s));
+		return s;
+
 	}
 
 	public void removeLifeCycleHook(final LifeCycleHook hook,
 			final String hookId) {
-		hookHelper.removeLifeCycleHook(hook,hookId);
+		lifecycle.removeLifeCycleHook(hook, hookId);
 	}
 }

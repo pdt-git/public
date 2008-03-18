@@ -465,9 +465,9 @@ public class SocketClient {
 				.getLogBuffer());
 	}
 
-	/**
-	 * 
-	 */
+	public void unlock() {}
+	public void lock() {}
+	/*
 	public void lock() {
 		if (socket == null) {
 			throw new IllegalStateException("Socket is closed, go away. ");
@@ -491,7 +491,7 @@ public class SocketClient {
 		}
 
 	}
-
+*/
 	public String readln() throws IOException {
 		return reader.readLine();
 	}
@@ -550,7 +550,7 @@ public class SocketClient {
 				p.close();
 				Debug.warning("a connection log was saved to :"
 						+ logFile.getCanonicalPath());
-				throw new PrologException("EndOfStream read while waiting for "
+				throw new IOException("EndOfStream read while waiting for "
 						+ prefix);
 			}
 			
@@ -579,7 +579,7 @@ public class SocketClient {
 			return paranoid;
 		}
 	}
-
+/*
 	public void unlock() {
 
 		synchronized (ownerLock) {
@@ -590,7 +590,7 @@ public class SocketClient {
 			}
 			if (lockCounter <= 0) {
 				throw new IllegalStateException(
-						"Wer hat in mein Töpfchen geschissen?!");
+						"Wer hat in mein Tï¿½pfchen geschissen?!");
 			}
 			lockCounter--;
 			if (lockCounter == 0) {
@@ -599,7 +599,7 @@ public class SocketClient {
 			}
 		}
 	}
-
+*/
 	public void writeln(String line) throws IOException {
 		if (socket == null) {
 			throw new IllegalStateException("Socket is closed, go away. ");

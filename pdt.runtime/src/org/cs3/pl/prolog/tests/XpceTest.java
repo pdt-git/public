@@ -1,4 +1,4 @@
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.tests;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.tests;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;

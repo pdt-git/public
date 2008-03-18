@@ -16,9 +16,9 @@ import java.net.Socket;
 
 import junit.framework.TestCase;
 
+import org.cs3.pifcom.Factory;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.internal.pifcom.Factory;
 
 public class MessageTest extends TestCase {
 	private final class _Pump extends InputStreamPump {

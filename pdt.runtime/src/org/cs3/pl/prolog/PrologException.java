@@ -50,7 +50,7 @@ import org.cs3.pl.common.Debug;
  * executed through a PrologSession raised an exception in 
  * the prolog runtime.
  */
-public class PrologException extends Debug._RuntimeException {
+public class PrologException extends RuntimeException {
 
     /**
      * Comment for <code>serialVersionUID</code>

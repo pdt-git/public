@@ -41,6 +41,9 @@
 
 package org.cs3.pl.prolog;
 
+import java.io.IOException;
+import java.net.SocketException;
+
 
 /**
  * A pluggable strategy for starting and stopping a PIF server.
@@ -61,20 +64,22 @@ public interface ServerStartAndStopStrategy {
      * @param pif
      *                    the PrologInterface for which the server part should be
      *                    started.
+     *  
      */
-    public Process startServer(PrologInterface pif);
+    public Process startServer(PrologInterface pif) throws Throwable;
 
     /**
      * stop the server process
      * 
      * @param pif
      *                    the IPrologInterface for which the server should be stopped.
+     * @throws Throwable 
      */
-    public void stopServer(PrologInterface pif);
+    public void stopServer(PrologInterface pif) throws  Throwable;;
 
     /**
      * @param interface1
      * @return
      */
-    public boolean isRunning(PrologInterface pif);
+    public boolean isRunning(PrologInterface pif) throws Throwable;
 }

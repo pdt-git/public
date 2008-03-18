@@ -370,8 +370,8 @@ encode_body(name(Name),Body):-
     atom_to_memory_file(Name,Body).
 encode_body(cterm(VarNames,Term),Body):-
     new_memory_file(Body),
-    open_memory_file(Body,write,Stream,[encoding(octet)]),
-    set_stream(Stream,encoding(octet)),
+    open_memory_file(Body,write,Stream,[encoding(utf8)]),
+    set_stream(Stream,encoding(utf8)),
     call_cleanup(
     	( 	\+ \+ (unify(VarNames),write_canonical(Stream,Term)),
     		write(Stream,'.')
@@ -389,7 +389,7 @@ encode_body(uint(Integer),Body):-
 	
 decode_body([],_).
 decode_body(cterm(VarNames,Term),Body):-
-    open_memory_file(Body,read,Stream),
+    open_memory_file(Body,read,Stream,[encoding(utf8)]),
 	call_cleanup(
 		read_term(Stream,Term,[variable_names(VarNames)]),
 		close(Stream)

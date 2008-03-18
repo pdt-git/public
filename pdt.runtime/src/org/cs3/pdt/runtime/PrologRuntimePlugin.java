@@ -239,11 +239,12 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		return rootLocator.subLocator(key);
 	}
 
-	private PrologInterface createPrologInterface() {
+	private PrologInterface createPrologInterface(String name) {
 		PrologInterface prologInterface = null;
 
 		factory = getPrologInterfaceFactory();
-		prologInterface = factory.create();
+		
+		prologInterface = factory.create(name);
 
 		return prologInterface;
 	}
@@ -361,8 +362,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				String alias = elm.getAttribute("alias");
 				String resName = elm.getAttribute("path");
 				Debug.debug("got this resname: " + resName);
-				String namespace = ext.getNamespace();
+				String namespace = ext.getContributor().getName();
+				
 				Debug.debug("got this namespace: " + namespace);
+				
 				URL url = BundleUtility.find(Platform.getBundle(namespace),
 						resName);
 				try {
@@ -782,7 +785,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		String pifKey = s.getPifKey();
 		PrologInterface pif = r.getPrologInterface(pifKey);
 		if (pif == null) {
-			pif = createPrologInterface();
+			pif = createPrologInterface(pifKey);
 			reconfigurePrologInterface(pifKey, pif);
 			r.addPrologInterface(pifKey, pif);
 			addGlobalHooks(pifKey, pif);
@@ -1048,6 +1051,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			factory.setResourceLocator(new DefaultResourceFileLocator(new File(
 					bootStrapDir)));
 			factory.setLibraryManager(getLibraryManager());
+			
 
 		}
 		return factory;

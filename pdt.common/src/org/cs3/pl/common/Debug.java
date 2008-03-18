@@ -248,74 +248,18 @@ public class Debug {
         }
     }
 
-    public static class _RuntimeException extends RuntimeException{
-
-		private Throwable cause;
-		private String message;
-
-		public _RuntimeException(Throwable e) {
-			this.cause = e;
-			message="wrapped exception";
-		}
-
-		public _RuntimeException(String message,Throwable e) {
-			this.cause = e;
-			this.message = message;
-		}
-		
-		public _RuntimeException() {
-			cause=new RuntimeException();
-			message="wrapped exception";
-		}
-
-		public _RuntimeException(String message) {
-			cause=new RuntimeException(message);
-			this.message=message;
-		}
-
-		public Throwable fillInStackTrace() {
-			if(cause!=null){
-				cause.fillInStackTrace();
-			}
-			return this;
-		}
-
-		public String getLocalizedMessage() {
-			return message + " ("+cause.getLocalizedMessage()+")";
-		}
-
-		public String getMessage() {
-			return message + " ("+cause.getMessage()+")";
-		}
-
-		public void printStackTrace() {
-			cause.printStackTrace();
-		}
-
-		public void printStackTrace(PrintStream arg0) {
-			cause.printStackTrace(arg0);
-		}
-
-		public void printStackTrace(PrintWriter arg0) {
-			cause.printStackTrace(arg0);
-		}
-
-		public String toString() {
-			return cause.toString();
-		}
-    	
-    }
+    
 	public static void rethrow(String string, Throwable e) {
 		warning("wrapping an exception:"+string);
 		report(e);
-		throw new _RuntimeException(string, e);
+		throw new RuntimeException(string, e);
 		
 	}
 	
 	public static void rethrow( Throwable e) {
 		warning("wrapping an exception");
 		report(e);
-		throw new _RuntimeException(e);
+		throw new RuntimeException(e);
 		
 	}
 	

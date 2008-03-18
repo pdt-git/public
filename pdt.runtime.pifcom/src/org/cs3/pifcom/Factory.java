@@ -41,7 +41,7 @@
 
 /*
  */
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pifcom;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -58,51 +58,38 @@ import org.cs3.pl.prolog.PrologInterfaceFactory;
 /**
  */
 public class Factory extends PrologInterfaceFactory {
-	private static final String MAIN_PL = "main_socket.pl";
-
-	public static final String SERVER_PL = "consult_server.pl";
-
-	public static final String FKILL_EXE = "fkill.exe";
-
-	public static final String STACK_COMMMAND_LINE_PARAMETERS = "-L4m -G4m -T4m -A1m";
-
-	private static final String WINDOWS_EXECUTABLE = "plwin";
-
 	private Option[] options;
 
 	public Factory() {
 
 		options = new Option[] {
-				new SimpleOption(PrologInterface.FILE_SEARCH_PATH,"File Search Path",
-						"Will be passed to SWI-Prolog using the -p command line option.\n" +
-						"Make sure that the library(consult_server) can be resolved.",
-						SimpleOption.STRING,null){
-						@Override
-						public String getDefault() {
-						
-							return guessFileSearchPath("pdt.runtime.socket.codebase");
-						}
-				},
-				new SimpleOption(SocketPrologInterface.EXECUTABLE,
-						"SWI-Prolog executable", "eg. xpce or /usr/bin/xpce",
-						SimpleOption.FILE, guessExecutableName()),
-				new SimpleOption(SocketPrologInterface.ENVIRONMENT,
+				new SimpleOption("prolog.executable", "SWI-Prolog executable",
+						"eg. xpce or /usr/bin/xpce", SimpleOption.FILE,
+						guessExecutableName()),
+				new SimpleOption("prolog.environment",
 						"Extra environment variables",
 						"A comma-separated list of VARIABLE=VALUE pairs.",
 						SimpleOption.STRING, guessEnvironmentVariables()),
-
-				new SimpleOption(SocketPrologInterface.KILLCOMMAND,
-						"command to kill processes",
-						"eg. kill or /usr/bin/kill on most systems",
-						SimpleOption.FILE, null) {
-
+				new SimpleOption(PrologInterface.FILE_SEARCH_PATH,
+						"Prolog Library Path",
+						"Will be passed to prolog via the -p command line option." +
+						"The server will try to lookup the module library('pifcom_server').",
+						SimpleOption.STRING, null){
+					@Override
 					public String getDefault() {
-						return guessKillCommandName();
+						return guessFileSearchPath("pdt.runtime.pifcom.codebase");
 					}
-
 				},
+
 				new SimpleOption(
-						SocketPrologInterface.STANDALONE,
+						"prolog.hide_plwin",
+						"Hide plwin (windows only)",
+						"Usefull for windows users who are tired of plwin windows cluttering their system tray."
+								+ "\n Note: this only works with the plwin executable.",
+						SimpleOption.FLAG, "true"),
+
+				new SimpleOption(
+						"pif.standalone",
 						"stand-alone server",
 						"If true, the PIF will not try to start and stop its own server process.",
 						SimpleOption.FLAG, guessStandAlone()) {
@@ -110,88 +97,63 @@ public class Factory extends PrologInterfaceFactory {
 						return false;
 					}
 				},
-				new SimpleOption(SocketPrologInterface.HOST, "Server host",
-						"The host the PIF server is listening on",
+				new SimpleOption(
+						"pif.host",
+						"Server host",
+						"The host the PIF server is listening on. Only used in standalone mode.",
 						SimpleOption.STRING, "localhost") {
 					public boolean isVisible() {
 						return false;
 					}
 				},
-				new SimpleOption(SocketPrologInterface.PORT, "Server port",
-						"The port the PIF server is listening on",
+				new SimpleOption(
+						"pif.port",
+						"Server port",
+						"The port the PIF server is listening on. Only used in standalone mode.",
 						SimpleOption.NUMBER, "9944") {
 					public boolean isVisible() {
 						return false;
 					}
-				},
-				new SimpleOption(
-						SocketPrologInterface.TIMEOUT,
-						"Connect Timeout",
-						"Maximum time in milliseconds to wait for the prolog process to come up.",
-						SimpleOption.NUMBER, "15000"),
-				new SimpleOption(
-						SocketPrologInterface.USE_POOL,
-						"Use session pooling",
-						"If true, the PIF will try to pool and reuse disposed sessions to reduce connection overhead.",
-						SimpleOption.FLAG, guessUsePool()),
-				new SimpleOption(
-						SocketPrologInterface.HIDE_PLWIN,
-						"Hide plwin (windows only)",
-						"Usefull for windows users who are tired of plwin windows cluttering their system tray."
-								+ "\n Note: this only works with the plwin executable.",
-						SimpleOption.FLAG, "true"),
-
-				new SimpleOption(
-						SocketPrologInterface.CREATE_LOGS,
-						"Create server debug logs",
-						"When enabled, the server process will produce rather verbose log files below the systems temp directory.",
-						SimpleOption.FLAG, "false") 
-				};
-	}
-
-	private String guessKillCommandName() {
-		if (Util.isWindows()) {
-			try {
-				return getResourceLocator().resolve(Factory.FKILL_EXE)
-						.getCanonicalPath();
-			} catch (IOException e) {
-				Debug.report(e);
-				return "kill";
-			}
-		}
-
-		return "kill";
+				} ,new SimpleOption(
+						"pif.timeout",
+						"Timeout",
+						"Number of milliseconds to wait for the server to come up.",
+						SimpleOption.NUMBER, "2000") {
+					public boolean isVisible() {
+						return false;
+					}
+				} 
+				
+		};
 
 	}
 
-	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.PrologInterfaceFactory#create()
+	 */
 	public PrologInterface create() {
-		return create(null);
+		PIFComPrologInterface pif = new PIFComPrologInterface(this);
+
+		for (int i = 0; i < options.length; i++) {
+			pif.setOption(options[i].getId(), System.getProperty(options[i].getId(),options[i].getDefault()));
+		}
+		return pif;
 	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.prolog.PrologInterfaceFactory#create()
 	 */
 	public PrologInterface create(String name) {
-		if (Util.isWindows()) {
-			ensureInstalled(FKILL_EXE, Factory.class);
-		}
+		PIFComPrologInterface pif = new PIFComPrologInterface(this,name);
 
-		SocketPrologInterface pif = new SocketPrologInterface(this,name);
-		
-		pif.setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
 		for (int i = 0; i < options.length; i++) {
-			pif.setOption(options[i].getId(), options[i].getDefault());
+			pif.setOption(options[i].getId(), System.getProperty(options[i].getId(),options[i].getDefault()));
 		}
 		return pif;
-	}
-
-	/**
-	 * @return
-	 */
-	private static String guessUsePool() {
-		return "true";
 	}
 
 	/**
@@ -201,7 +163,7 @@ public class Factory extends PrologInterfaceFactory {
 		return "false";
 	}
 
-	private String guessEnvironmentVariables() {
+	public static String guessEnvironmentVariables() {
 		if (Util.isMacOS()) {
 			String home = System.getProperty("user.home");
 			return "DISPLAY=:0.0, HOME=" + home;
@@ -209,24 +171,25 @@ public class Factory extends PrologInterfaceFactory {
 		return "";
 	}
 
-	private String guessExecutableName() {
+	public static String guessExecutableName() {
 
 		if (Util.isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
-					+ findWindowsExecutable() + " " + STACK_COMMMAND_LINE_PARAMETERS;
+					+ findWindowsExecutable();
 			// return "plwin";
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable() + " " + STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable();
 	}
 
 	/**
 	 * @author Hasan Abdel Halim
 	 * 
 	 * Finds the current SWI-Prolog executable for UNIX/BSD-BASED OS
+	 * @return
 	 * @return the complete path of the executable otherwise it will return xpce
 	 */
-	private String findUnixExecutable() {
+	public static String findUnixExecutable() {
 		String default_exec = "xpce";
 		String xpce = default_exec;
 
@@ -270,8 +233,8 @@ public class Factory extends PrologInterfaceFactory {
 	 * @return the complete path of the executable otherwise it will return
 	 *         plwin
 	 */
-	private String findWindowsExecutable() {
-		String default_exec = WINDOWS_EXECUTABLE;
+	public static String findWindowsExecutable() {
+		String default_exec = "plwin";
 		String plwin = default_exec;
 
 		String path;

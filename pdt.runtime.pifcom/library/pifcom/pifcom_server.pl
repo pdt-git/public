@@ -6,8 +6,9 @@
 
 :- use_module(pifcom_codec).
 
-:- debug(pifcom_server).
-:- guitracer.
+%:- debug(pifcom_server).
+%:- guitracer.
+
 spyme.
 :- tspy(pifcom_server:spyme/0).
 
@@ -41,8 +42,25 @@ accept_loop(TCPSocket,UDPSocket):-
 	    ->	tcp_accept(TCPSocket, Slave, Peer),
 			unused_thread_name(handle_client,Alias),
 			debug(pifcom_server,"accepted connection from ~w. Starting new thread ~w.~n",[Peer,Alias]),			
-			thread_create(handle_client(Slave), _ , [alias(Alias),detached(true)]),						
-			assert('$handler_thread'(Alias)),			
+			catch(
+				(	
+					thread_create(handle_client(Slave), ThreadId , [alias(Alias),detached(true)]),						
+					assert('$handler_thread'(Alias))
+				),	
+				E,
+				(	tcp_close_socket(Slave),
+					debug(pifcom_server,"Could not create handler thread: ~w.~n",[E])
+				)
+			),
+
+			
+			(	nonvar(ThreadId),
+				thread_property(ThreadId,status(Status)),
+				Status==running
+			->	true
+			;	tcp_close_socket(Slave),
+				debug(pifcom_server,"Handler at ~w could not be created.~n",[Alias])
+			),
 			fail
 		;	fail
 		),
@@ -84,6 +102,7 @@ unused_thread_name(Base,Alias):-
 
 	
 handle_client(SlaveSocket):-    
+    debug(pifcom_server,"Starting client handler.~n",[]),
     tcp_open_socket(SlaveSocket, In, Out),
     udp_socket(UDPSocket),
 	tcp_bind(UDPSocket,UDPPort),
@@ -97,6 +116,8 @@ handle_client(SlaveSocket):-
     set_stream(Out,encoding(octet)),
     set_stream(Out,tty(false)),        
     pifcom_write_integer_bytes(Out,2,UDPPort),
+    thread_self(Alias),
+    pifcom_encode_and_write_message(Out,name,0,name(Alias)),
     flush_output(Out),
     debug(pifcom_server,"Bound UDP socket to port ~w~n",[UDPPort]),
    	call_cleanup(

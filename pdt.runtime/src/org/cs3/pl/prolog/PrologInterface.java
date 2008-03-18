@@ -45,15 +45,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PrologInterface {
-	public static final int DOWN = 0;
-
-	public static final int ERROR = -1;
-
-	public static final int SHUT_DOWN = 3;
-
-	public static final int START_UP = 1;
-
-	public static final int UP = 2;
+	
 	
     /**
      * consult event subject constant
@@ -63,6 +55,10 @@ public interface PrologInterface {
      */
     public final static String SUBJECT_CONSULTED = "consulted";
 
+    	
+	public static final String FILE_SEARCH_PATH = "pif.file_search_path";
+
+    
     
     /**
      * Returns a prolog session.<br>
@@ -88,16 +84,18 @@ public interface PrologInterface {
      */
     public abstract void start() throws PrologInterfaceException;
 
+    public abstract void restart() throws PrologInterfaceException;
+    
     /**
-     * checks wether the prologInterface is up and running.
+     * checks whether the prologInterface is up and running.
      * @return true if the prolog system is ready for battle.
      */
     public boolean isUp();
 
-    public int getState();
+    
     
     /**
-     * checks wether the prologInterface is down.
+     * checks whether the prologInterface is down.
      * <br>this is not the same as <code>!isUp()</code>. During startup and shutdown
      * both methods return false.
      * @return
@@ -129,13 +127,13 @@ public interface PrologInterface {
      * that will be consulted during startup of the pif.
      * @return the life list of bootstrap libraries
      */
-    public List getBootstrapLibraries();
+    public List<String> getBootstrapLibraries();
     
     /**
      * @see getBootStrapLibraries()
      * @param l
      */
-    public void setBootstrapLibraries(List l);
+    public void setBootstrapLibraries(List<String> l);
     /**
      * 
      * @return the factory instance that created this pif, or if this pif was not
