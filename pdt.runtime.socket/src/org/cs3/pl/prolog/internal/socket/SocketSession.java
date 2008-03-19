@@ -272,9 +272,7 @@ public class SocketSession implements PrologSession2 {
 					throw new IOException("don't know what to do.");
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
-					lastError = new PrologException("Peer reported an error:"
-							+ line.substring(SocketClient.ERROR.length())
-							+ "\n" + "Last query was: " + lastQuery);
+					lastError = new PrologException(line.substring(SocketClient.ERROR.length()));
 					throw lastError;
 				}
 				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
@@ -433,8 +431,7 @@ public class SocketSession implements PrologSession2 {
 					return;
 				}
 				if (line.startsWith(SocketClient.ERROR)) {
-					throw new PrologException("Peer reported an error:"
-							+ line.substring(SocketClient.ERROR.length()));
+					throw new PrologException(line.substring(SocketClient.ERROR.length()));
 				}
 			}
 		} catch (IOException e) {
