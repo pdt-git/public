@@ -191,12 +191,9 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 
 			file = PDTCoreUtils.findFileForLocation(filename);
 
-		} catch (IllegalArgumentException iae) {
-			// ignore files that are not in the workspace.
-			// Debug.report(iae);
-			;
-		} catch (IOException e) {
-			Debug.rethrow(e);
+		} catch (Throwable e) {
+			Debug.report(e);
+			Debug.warning("The following filename caused problems: "+filename);
 		}
 		if (file == null) {
 			return;
