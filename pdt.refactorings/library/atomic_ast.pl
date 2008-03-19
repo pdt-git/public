@@ -5,14 +5,6 @@
 :- op(1050,xfy,'&+>').
 :- op(1000,xfy,'&&').
 
-/*
-predicates starting with astseq are ment to operate on elements of sequences.
-
-Seqences are right-recursive chains of binary nodes of the same functor type, 
-terminated by an arbitrary other node that does not fit into this schema.
-Typical examples would lists or conjunctions. The type of the chain operator is determined
-by looking at the arguments parent node.
-*/
 
 
 /*
