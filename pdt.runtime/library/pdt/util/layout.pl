@@ -9,6 +9,33 @@
 :- use_module(layout_rules).
 
 
+%% node_indent(+Node,-Indent)
+% Detect base indention of a node representing existing code.
+%
+% We examine the code interval represented by the node, looking for the first 
+% that starts with tokens that belong to this node (not to its children!).
+% Any whitespace preceding this token will be assumed to be the nodes
+% base indention.
+%
+% If there is no such line, an empty indention is returned.
+% If the Node is not associated to any code interval, this predicate fails silently. 
+node_indent(Node,Indent):-
+    pef_property_query([pef=Node,key=tokens,value=Tokens]),
+    pef_property_query([pef=Node,key=start,value=Offset]),
+    relative_positions(Tokens,Offset,Tokens2),
+    node_to_memory_file(Node,MF),
+    open_memory_file(Mf,read,In),
+    call_cleanup(
+    	node_indent_X(Tokens2,In,Indent),
+    	(	close(In),
+    		free_memory_file(Mf)
+    	)
+    ).
+
+
+/*node_indent_X([],_,[]).
+node_indent_X([token(T,Start,End)|Tokens],In,Indent):-*/
+    
 
 current_indent(File,Pos,Codes):-
     get_memory_file(File,SrcMemFile),
