@@ -41,6 +41,8 @@
 
 package org.cs3.pl.console;
 
+import java.io.IOException;
+
 /**
  * Abstract model of a console.
  * 
@@ -103,8 +105,9 @@ public interface ConsoleModel {
 
 	/**
 	 * tell the model to connect to the underlying streams.
+	 * @throws IOException 
 	 */
-	abstract public void connect();
+	abstract public void connect() throws IOException;
 	
 	/**
 	 * tell the model to disconnect from the underlying streams.

@@ -45,6 +45,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -678,33 +682,29 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
 
-			int port = Util.findFreePort();
+			
 
-			File lockFile = Util.getLockFile();
-			String prologFileName = Util.prologFileName(lockFile);
+			
+			int port;
+			
 			String queryString = "use_module(library(pdt_console_server)), "
-					+ "pdt_start_console_server(" + port + ",'"
-					+ prologFileName + "')";
+					+ "pdt_start_console_server(Port)";
 			Debug.info("starting console server using: " + queryString);
+			
 			Map map = session.queryOnce(queryString);
 			if (map == null) {
 				Debug
 						.info("starting server failed, which may mean that it is actualy running already.");
 				map = session
-						.queryOnce("pdt_current_console_server(Port,LockFile)");
-				lockFile = new File((String) map.get("LockFile"));
-				Debug.info("Yep. got this lockfile: "
-						+ lockFile.getCanonicalPath());
-			}
-
-			while (!lockFile.exists()) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e1) {
-					Debug.report(e1);
+						.queryOnce("pdt_current_console_server(Port)");
+				if(map==null){
+					throw new RuntimeException("No Server running.");
 				}
+				
 			}
-			Debug.debug("Server thread created");
+			
+			port = Integer.parseInt((String) map.get("Port"));
+			Debug.debug("A server thread seems to be listinging at port "+port);
 
 		} catch (Throwable e) {
 			Debug.report(e);
@@ -841,12 +841,12 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 				m = session
 						.queryOnce("use_module(library(pdt_console_server))," +
 								"use_module(library(pdtplugin)),"
-								+ "pdt_current_console_server(Port,LockFile)");
+								+ "pdt_current_console_server(Port)");
 
 				if (m == null) {
 					startServer(pif, session);
 					m = session
-							.queryOnce("pdt_current_console_server(Port,LockFile)");
+							.queryOnce("pdt_current_console_server(Port)");
 					;
 				}
 				if (m == null) {
@@ -860,10 +860,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 				}
 			}
 			int port = Integer.parseInt(m.get("Port").toString());
-			File lockFile = new File((String) m.get("LockFile"));
+			
 
 			model.setPort(port);
-			model.setLockFile(lockFile);
+			
 			model.connect();
 		//}
 	}
