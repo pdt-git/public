@@ -89,15 +89,15 @@
    
 
 :- module(pdt_console_server,[
-	pdt_current_console_server/2,
-	pdt_start_console_server/2,
+	pdt_current_console_server/1,
+	pdt_start_console_server/1,
 	pdt_stop_console_server/0
 ]).
 :- use_module(library(socket)).
  
 
 
-prolog_server(Port, Options) :-
+prolog_server(Port,Options) :-
 	tcp_socket(ServerSocket),
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, Port),
@@ -168,29 +168,28 @@ allow(Peer, Options) :-
 % TODO make this dependency explicit!
 %:- use_module(library('org/cs3/pdt/runtime/consult_server')).
 
-% server(-Port,-Lockfile)
+% server(-Port)
 %
 % used internally to store information about running servers
-:- dynamic server/2.
+:- dynamic server/1.
 
 :- at_initialization(mutex_create(pdt_console_server_mux)).
 %:- at_halt(mutex_destroy(pdt_console_server_mux)).
 
 % pdt_current_console_server(-Port, -LockFile).
 % retrieve information about running servers
-pdt_current_console_server(Port,LockFile):-
+pdt_current_console_server(Port):-
     with_mutex(pdt_console_server_mux,
-	    server(Port,LockFile)
+	    server(Port)
     ).
     
 
-% pdt_start_console_server(+Port,+LockFile)
-% starts a new console server at a given port,
-% creating the specified lock file when done.
-% fails if a server is already running.
-pdt_start_console_server(Port,LockFile):-
+% pdt_start_console_server(?TCPPort)
+% starts a new console server.
+% UDPPort is used for sending back a sync when the server is up.
+pdt_start_console_server(Port):-
     with_mutex(pdt_console_server_mux,
-    	start_server(Port,LockFile)
+    	start_server(Port)
     ).
 
 % pdt_stop_console_server(+LockFile)
@@ -204,22 +203,20 @@ pdt_stop_console_server:-
 consult_server:pif_shutdown_hook:-
     pdt_stop_console_server.
 
-start_server(Port,LockFile):-
+start_server(Port):-
     \+ current_thread(pdt_console_server,_),
     prolog_server(Port, []),
-    assert(server(Port,LockFile)),
-    consult_server:create_lock_file(LockFile).
+    assert(server(Port)).
 
 stop_server:-
-	server(Port,LockFile),
+	server(Port),
 	!,
 	do_stop_server(Port,LockFile).
 stop_server.
 
-do_stop_server(Port,LockFile):-
+do_stop_server(Port):-
 	recordz(pdt_console_server_flag,shutdown),
 	tcp_socket(Socket),
 	tcp_connect(Socket,localhost:Port),
 	tcp_close_socket(Socket),
-	retractall(server(Port,LockFile)),
-    consult_server:delete_lock_file(LockFile).
+	retractall(server(Port)).

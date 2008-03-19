@@ -47,7 +47,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
@@ -176,7 +179,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 	private Vector expansions = new Vector();
 
-	private File serverLockFile;
+	//private File serverLockFile;
 
 	private boolean disconnecting;
 
@@ -319,13 +322,15 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		return singleCharMode;
 	}
 
-	public synchronized void connect() {
+	public synchronized void connect()  {
 		if (isConnected()) {
 			Debug.warning("Seems we are already connected?");
 			return;
 		}
-		long timeout = Long.parseLong(PrologConsolePlugin.getDefault()
-				.getPreferenceValue(PDTConsole.PREF_TIMEOUT, "5000"));
+		
+		
+		
+		/*
 		long startTime = System.currentTimeMillis();
 		while (!isServerActive()) {
 			try {
@@ -340,7 +345,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 				throw new RuntimeException(e);
 			}
 		}
-
+		 */
 		try {
 			Debug.info("connecting console to server at port " + port);
 			socket = new Socket((String) null, port);
@@ -519,9 +524,9 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		}
 	}
 
-	private boolean isServerActive() {
-		return serverLockFile.exists();
-	}
+//	private boolean isServerActive() {
+//		return serverLockFile.exists();
+//	}
 
 	public boolean isConnected() {
 		if (socket == null) {
@@ -545,8 +550,5 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 		this.port = port;
 	}
 
-	public void setLockFile(File lockFile) {
-		this.serverLockFile = lockFile;
-
-	}
+	
 }
