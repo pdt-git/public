@@ -555,10 +555,7 @@ public class SocketClient {
 			}
 			
 			if (string.startsWith(SocketClient.ERROR)) {
-				throw new PrologException(
-						"Peer reported an error while waiting for " + prefix
-								+ ": "
-								+ string.substring(SocketClient.ERROR.length()));
+				throw new PrologException(string.substring(SocketClient.ERROR.length()));
 			}
 		}
 		return string.substring(prefix.length());
