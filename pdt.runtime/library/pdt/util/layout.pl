@@ -9,6 +9,46 @@
 :- use_module(layout_rules).
 
 
+
+/*
+find_newlines(+InStream,-PDTMap).
+
+scans the input stream for new line characters and returns there
+position in a pdt_map.
+
+Keys are NEGATIVE character offsets.
+ (why negative? 
+ the current use case needs involves right to left traversal of the 
+
+Values are position terms returned by stream_property(_,position(Pos)). 
+
+*/
+find_newlines(In,Assoc):-
+    pdt_map_empty(Assoc0),
+	find_newlines(In,Assoc0,Assoc).
+	
+	   
+find_newlines(In,Assoc0,Assoc):-
+	(	at_end_of_stream(In)
+	->	Assoc=Assoc0
+	;	check_code(In,Assoc0,Assoc1),
+		find_newlines(In,Assoc1,Assoc)
+	).
+	
+check_code(In,Assoc0,Assoc):-
+    character_count(In,CharCount),
+    stream_property(In,position(Pos)), 
+    get_code(In,Code),      
+    (	code_type(Code,end_of_line)	
+	->	% rb tree traversal is currently only implemnted from left
+		% to right. We need it the other way arround. 
+		% Work arround: negate keys.
+		Key is -1 * CharCount,
+		pdt_map_put(Assoc0,Key,Pos,Assoc)
+	;	Assoc=Assoc0
+	).
+
+
 %% node_indent(+Node,-Indent)
 % Detect base indention of a node representing existing code.
 %
@@ -32,10 +72,12 @@ node_indent(Node,Indent):-
     	)
     ).
 
-
-/*node_indent_X([],_,[]).
-node_indent_X([token(T,Start,End)|Tokens],In,Indent):-*/
+/*
+node_indent_X([],_,[]).
+node_indent_X([Token|Tokens],In,Indent):-
+    token_codes(Token,In,Codes),
     
+  */  
 
 current_indent(File,Pos,Codes):-
     get_memory_file(File,SrcMemFile),
