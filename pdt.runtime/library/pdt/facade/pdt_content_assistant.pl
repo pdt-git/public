@@ -1,7 +1,8 @@
 :- module(pdt_content_assistant,
 	[	pdt_simple_completion/4,
 		pdt_simple_completion/5,
-		pdt_completion/5
+		pdt_completion/5,
+		pdt_var_completion/4
 	]
 ).
 
@@ -39,6 +40,25 @@ pdt_completion(File,ContextName,Prefix,ModuleName:PredName/Arity,Tags):-
 	resolve_predicate(PID,ContextMID,PredName,Arity,Id),
 	module_name(MID,ModuleName),
 	findall(Tag,completion_tag(Id,MID,ModuleName,PredName,Arity,Tag),Tags).
+
+spyme(_).
+	
+pdt_var_completion(Path,Offset,Prefix,Name):-
+	pdt_request_target(parse(file(Path))),
+	pef_file_query([path=Path,id=File]),
+	(	toplevel_at(File,Offset,Offset,Toplevel),
+	->	pef_toplevel_query([id=Toplevel,varnames=VarNames])			
+	;	between_toplevels(File,Offset,_Before,EndBefore,_After,StartAfter),
+		very_slow_hand_made_heuristic_parser(File,Offset,EndBefore,StartAfter,VarNames)
+		
+	%	once(
+	%		(	pef_toplevel_query([id=Toplevel
+	),
+	member(Name = _,VarNames),
+		atom_prefix(Name,Prefix).
+
+very_slow_hand_made_heuristic_parser(File,Offset,Begin,End,VarNames):-
+	VarNames = "Test".	
 	
 guess_module(_PID,FID,ContextMID):-
     pef_module_definition_query([id=ContextMID,file=FID]),
