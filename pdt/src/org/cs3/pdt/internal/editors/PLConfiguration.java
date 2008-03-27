@@ -43,9 +43,7 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCorePlugin;
-import org.cs3.pdt.internal.contentassistant.PrologContentAssistProcessor;
+import org.cs3.pdt.internal.contentassistant.NaivPrologContentAssistProcessor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -191,7 +189,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		
 			assistant = new ContentAssistant();
 			assistant.setContentAssistProcessor(
-					new PrologContentAssistProcessor(){
+					new NaivPrologContentAssistProcessor(){
 
 						protected IFile getFile() {
 							if(editor==null){
