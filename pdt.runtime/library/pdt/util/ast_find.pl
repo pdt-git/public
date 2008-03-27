@@ -1,5 +1,10 @@
 % helper predicates for adressing program elements through a source position.
-:- module(ast_find,[path_at/4]).
+:- module(ast_find,
+	[	path_at/4,
+		topleval_at/4,
+		between_toplevels/6
+	]
+).
 :- use_module(library('pef/pef_base')).
 :- use_module(library('pef/pef_api')).
 
@@ -63,3 +68,26 @@ overlapping(Start,End,From,To):-
 included(Start,End,From,To):-
 	Start >= From,
 	End =< To.    
+	
+	
+
+between_toplevels(File,Offset,Left,LeftEnd,Right,RightStart):-	
+	setof(c(Start,End,Toplevel),
+		File^End^(	
+			pef_toplevel_query([file=File,id=Toplevel]),
+			toplevel_source_position(Toplevel,File,Start,End)
+		),
+		Toplevels
+	),
+	between2(Toplevels,Offset,[],[],Left,LeftEnd,Right,RightStart).
+
+between2([],Offset,Last,LastEnd,Last,LastEnd,[],[]).
+between2([c(Start,End,Toplevel)|Tupels],Offset,Last,LastEnd,Left,LeftEnd,Right,RightStart):-
+	(	Start > Offset
+	->	RightStart = Start,
+		Right = Toplevel,
+		Left= LastLeft,
+		End=LastEnd		
+	;	between2(Tupels,Offset,Toplevel,End,Left,LeftEnd,Right,RightStart)
+	).
+	
