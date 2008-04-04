@@ -87,7 +87,7 @@ do_read(F):-
     	prolog_close_source(In)
     ).
 
-spyme.
+
 
 do_read(F,In):-
     parse_cx_new(Cx),

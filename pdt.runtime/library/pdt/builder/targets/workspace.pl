@@ -5,8 +5,7 @@
 pdt_builder:target_container(project(_),workspace).
 pdt_builder:target_container(file(F),directory(D,IP,EP)):-
     pef_source_path_query(
-    	[	project=Project, 
-    		include_pattern=IP,
+    	[	include_pattern=IP,
     		exclude_pattern=EP,
     		path=D
     	]

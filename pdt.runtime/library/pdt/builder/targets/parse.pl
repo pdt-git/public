@@ -89,7 +89,7 @@ do_read(F):-
     	prolog_close_source(In)
     ).
 
-spyme.
+
 
 do_read(F,In):-
     parse_cx_new(Cx),
@@ -159,7 +159,7 @@ add_error_marker(Error,Cx):-
     ->	parse_cx_file(Cx,File),
     	pef_reserve_id(pef_syntax_error,ID),
     	pef_syntax_error_assert([id=ID,file=File,error=Error])
-    ;	spyme
+    ;	debug(parse(warning),"not a syntax error??: ~w",[Error])
     ).
 	    
 preprocess((:-module(Name,Exports)), Cx):-

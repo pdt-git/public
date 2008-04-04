@@ -140,8 +140,7 @@ c([t(T,_,_)|Ns],CxIn,CxOut):-
 
 
 src_position(Cx,Pos):-
-    cx_in(Cx,In),
-    (var(In)->spyme;true),
+    cx_in(Cx,In),    
     character_count(In,Pos).
     
 src_seek(Cx,NewPos,Cx):-
@@ -151,7 +150,7 @@ src_seek(Cx,NewPos,Cx):-
     Skip is NewPos - CurrentPos,
     copy_stream_data(In,Null,Skip).
 
-spyme.	
+
 %% add_replace(+Start,+End,+CxIn,-CxOut).
 % generate a replace instruction
 % replace(Start,End,String),

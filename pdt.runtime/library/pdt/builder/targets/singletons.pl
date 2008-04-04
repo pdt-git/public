@@ -4,6 +4,7 @@
 :-use_module(library('builder/builder')).
 :-use_module(library('builder/targets/parse')).
 :-use_module(library('builder/targets/ast')).
+:-use_module(library('facade/pdt_workspace')).
 
 
 
@@ -41,13 +42,10 @@ check_singletons(Abs):-
 			check_no_singletons(VarNames,Singletons,TL)*/
 		)
 	).    
-spyme.
-%:-tspy(singletons:spyme).	
 check_singletons([],_).
 check_singletons([Name=_Var|Singletons],Tl):-
     pef_toplevel_query([id=Tl,file=File]),
     get_pef_file(Path,File),
-    spyme,    
     pdt_request_target(ast(file(Path))),
     pef_ast_query([toplevel=Tl,id=Ast]),
     pef_variable_query([ast=Ast,name=Name,id=VarId]),

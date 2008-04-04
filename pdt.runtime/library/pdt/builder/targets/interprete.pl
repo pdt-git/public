@@ -272,7 +272,7 @@ process_module_inclusion(use_module,Ref,MID,Cx):-
 	!,
 	(	resolve_module(PID,ModName,LocalMID)
     ->	import_public_predicates(LocalMID,Cx)	
-    ;	spyme,throw(failed(resolve_module(PID,ModName,LocalMID)))
+    ;	throw(failed(resolve_module(PID,ModName,LocalMID)))
     ).
 process_module_inclusion(Type,_Ref,MID,Cx):-
     module_owner(MID,OtherPID),
@@ -290,7 +290,7 @@ process_module_inclusion(Type,_Ref,MID,Cx):-
     cx_program(Cx,PID),
     (	resolve_module(PID,MName,LocalMID)
     ->	import_public_predicates(LocalMID,Cx)	
-    ;	spyme,throw(failed(resolve_module(PID,MName,LocalMID)))
+    ;	throw(failed(resolve_module(PID,MName,LocalMID)))
     ).
 
 
@@ -734,7 +734,7 @@ merge_module(Order,MergeMID,MID,Cx):-
     	)    	
     ).
 
-spyme.
+
 
 %%
 % merge_predicates(+Order,+SourcePred,+TargetPred)
@@ -947,8 +947,7 @@ unload_file(FileRef, Cx):-
 	    	% UPDATE: How did I get to this conclusion?
 %	    	(	predicate_owner(OldPredID,PID)
 %	    	->	OldPredID=PredID
-%	    	;	spyme,
-%	    		throw(i_am_wrong(predicate_owner(OldPredID,PID),unload_file(FileRef,Cx)))
+%	    	;	throw(i_am_wrong(predicate_owner(OldPredID,PID),unload_file(FileRef,Cx)))
 %	    	),
 			create_my_own_predicate_version(OldPredID,PredID,Cx),
 	    	(	pef_predicate_property_definition_query([predicate=PredID,property=(multifile)])

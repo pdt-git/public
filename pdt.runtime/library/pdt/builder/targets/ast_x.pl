@@ -10,8 +10,6 @@
 :- use_module(library('builder/targets/parse')).
 
 :- pdt_define_context(cx(toplevel,positions,root,gap)).
-spyme.
-%:-tspy(ast:spyme).
 pdt_builder:build_hook(ast(Resource)):-
     pdt_request_target(Resource),
 	(	Resource=file(AbsFile)    

@@ -18,13 +18,10 @@ pdt_builder:target_file(problems(directory(Path,_,_),_),Path).
 pdt_builder:target_file(problems(file(Path),_),Path).
 pdt_builder:target_mutable(problems(workspace,_),true).
 pdt_builder:target_mutable(problems(project(_),_),true).
-spyme.
-%:-tspy(problems:spyme).
 
 pdt_builder:estimate_hook(problems(Resource,[cheap]),parse(file(Path)),1):-
     pdt_contains_star(Resource,file(Path)).
 pdt_builder:estimate_hook(problems(workspace,[expensive]),T,W):-
-    spyme,
     pef_project_query([name=Project]),
     pdt_builder:estimate_hook(problems(project(Project),[expensive]),T,W).
 

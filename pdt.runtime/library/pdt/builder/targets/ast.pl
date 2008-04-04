@@ -10,8 +10,6 @@
 :- use_module(library('builder/targets/parse')).
 
 :- pdt_define_context(cx(toplevel,positions,root)).
-spyme.
-%:-tspy(ast:spyme).
 pdt_builder:target_container(ast(Resource),ast(Container)):-
     pdt_builder:target_container(Resource,Container).
 pdt_builder:build_hook(ast(Resource)):-
