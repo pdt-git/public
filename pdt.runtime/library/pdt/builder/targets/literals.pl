@@ -770,7 +770,7 @@ fp_process_result(unresolved(Cx,Goal)):-
 
 
 
-spyme.
+
 		
 		
 		
