@@ -210,7 +210,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			startPosition = Integer.parseInt((String) e.bindings.get("Start"));
 			endPosition = Integer.parseInt((String) e.bindings.get("End"));
 			this.file = file;
-			label = (String) e.bindings.get("Label");
+			label = Util.unquoteAtom((String) e.bindings.get("Label"));
 			tags = new HashSet();
 			tags.addAll((Collection) e.bindings.get("Tags"));
 		}

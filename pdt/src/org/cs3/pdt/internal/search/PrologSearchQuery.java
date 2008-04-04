@@ -52,6 +52,7 @@ import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.metadata.IMetaInfoProvider;
@@ -135,8 +136,10 @@ public class PrologSearchQuery implements ISearchQuery {
 				int start = Integer.parseInt((String) m.get("Start"));
 				int end = Integer.parseInt((String) m.get("End"));
 				IFile file=null;
+				String path =null; 
 				try{
-					file = PDTCoreUtils.findFileForLocation((String) m.get("File"));
+					path = Util.unquoteAtom((String) m.get("File"));
+					file = PDTCoreUtils.findFileForLocation(path);
 				}catch(IllegalArgumentException iae){
 					//probably the file is not in the workspace. 
 					//nothing to worry about here.
@@ -147,7 +150,7 @@ public class PrologSearchQuery implements ISearchQuery {
 				IRegion resultRegion = new Region(start,end-start);
 				
 				if(file==null||! file.isAccessible()){
-					String msg = "Not found in workspace: "+m.get("File");
+					String msg = "Not found in workspace: "+path;
 					Debug.warning(msg);
 					UIUtils.setStatusErrorMessage(msg);
 					continue;
