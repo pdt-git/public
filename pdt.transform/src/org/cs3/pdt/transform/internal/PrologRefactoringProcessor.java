@@ -12,6 +12,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -76,16 +77,16 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 			String selectionTerm = info.getSelectionTerm();
 			String parameterTerm = info.getParameterTerm();
 			String identifier = info.getRefactoringId();
-			Map<String, String> m = s.queryOnce("pdt_interprete_selection('"
+			Map<String, Object> m = s.queryOnce("pdt_interprete_selection('"
 					+ identifier + "'," + selectionTerm + "," + parameterTerm
 					+ ")");
 			if (m == null) {
 				result
 						.addFatalError("Refactoring cannot be applied to the current selection.");
 			}
-			for (Entry<String, String> entry : m.entrySet()) {
+			for (Entry<String, Object> entry : m.entrySet()) {
 				if (knownParameters.contains(entry.getKey())) {
-					info.setPreferenceValue(entry.getKey(), entry.getValue());
+					info.setPreferenceValue(entry.getKey(), (String) entry.getValue());
 				}
 			}
 
@@ -113,14 +114,14 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 
 			String parameterTerm = info.getParameterTerm();
 			String identifier = info.getRefactoringId();
-			Map<String, String> m = s.queryOnce("trace,pdt_perform_transformation('"
+			Map<String, Object> m = s.queryOnce("trace,pdt_perform_transformation('"
 					+ identifier + "'," + parameterTerm + ")");
 			if (m == null) {
 				result.addFatalError("Transformation failed.");
 			}
-			List<Map<String, String>> l = s
+			List<Map<String, Object>> l = s
 					.queryAll("pdt_transformation_problem(Id,Severity,Message)");
-			for (Map<String, String> m2 : l) {
+			for (Map<String, Object> m2 : l) {
 
 				String severity = (String) m2.get("Severity");
 				String message = (String) m2.get("Message");
@@ -181,8 +182,8 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 			Map m = (Map) object;
 			String type = (String) m.get("Type");
 			if ("rename".equals(type)) {
-				String oldPath = (String) m.get("Old");
-				String newName = (String) m.get("New");
+				String oldPath = Util.unquoteAtom((String) m.get("Old"));
+				String newName = Util.unquoteAtom((String) m.get("New"));
 				IFile file = null;
 				try {
 					file = PDTCoreUtils.findFileForLocation(oldPath);
@@ -208,7 +209,7 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 		for (Object object : l1) {
 			Map m = (Map) object;
 			Object key = m.get("File");
-			String path = (String) m.get("Path");
+			String path = Util.unquoteAtom( (String) m.get("Path"));
 			IFile file = null;
 			try {
 				file = PDTCoreUtils.findFileForLocation(path);

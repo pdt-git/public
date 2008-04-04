@@ -8,6 +8,7 @@ import java.util.Map;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -113,7 +114,7 @@ public class ApplyTransformationProcessor extends RefactoringProcessor {
 		for (Object object : l1) {
 			Map m = (Map)object;
 			Object key = m.get("File");
-			String path = (String) m.get("Path");
+			String path = Util.unquoteAtom((String) m.get("Path"));
 			IFile file=null;
 			try {
 				file = PDTCoreUtils.findFileForLocation(path);
