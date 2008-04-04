@@ -48,9 +48,7 @@
 	consult_server/2
 	]). 
 
-%:- guitracer.
- spyme.
-%:-spy(spyme).
+
 %:-debug(consult_server(startup)).
 %:-debug(consult_server(shutdown)).
 %:-debug(consult_server(accept_loop)).
