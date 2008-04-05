@@ -94,7 +94,7 @@ pdt_file_existence_changed(Abs):-
     pdt_invalidate_target(file(Abs)),
     file_directory_name(Abs,Dir),
     forall(
-    	pef_directory_query([path=Path,include_pattern=IP,exclude_pattern=EP]),
+    	pef_directory_query([path=Dir,include_pattern=IP,exclude_pattern=EP]),
     	pdt_invalidate_target(directory(Dir,IP,EP))
     ).
     
