@@ -89,6 +89,11 @@ problem(Id,File,expensive,Start,End,warning,Message):-%predicate abolished
 	get_pef_file(File,FID),
 	with_output_to(string(Message),format("Loading module ~w abolishes predicate ~w originally defined in ~w.(~w)",[MName,MName:PName/Arity,FirstFile,Id])).
 
+problem(Id,File,expensive,Start,End,warning,Message):-%malformed signature
+	pef_malformed_signature_query([id=Id,toplevel=TLID,signature=Signature]),
+	toplevel_source_position(TLID,FID,Start,End),
+	get_pef_file(File,FID),
+	with_output_to(string(Message),format("Malformed predicate signature: ~w.(~w)",[Signature,Id])).
 	
 problem(Id,File,cheap,Start,End,warning,SMessage):-%file not found
     pef_file_not_found_query([id=Id,file_spec=Spec,toplevel=Tl]),        
