@@ -2,6 +2,7 @@
 :- use_module(library('pef/pef_base')).
 :- use_module(library('pef/pef_api')).
 :- use_module(library('builder/builder')).
+:- use_module(library('builder/targets/tokens')).
 :- use_module(library('util/layout')).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- ensure_loaded(library('org/cs3/pdt/util/pdt_util_term_position')).
@@ -28,7 +29,7 @@ build_resource_delta:-
 	    	)
 	    )    	
     ).
-build_text_delta(Tl):-
+build_text_delta(Tl):-    
     pef_ast_query([toplevel=Tl,root=Node]),
     pef_toplevel_query([id=Tl,file=File,positions=Pos]),
     top_position(Pos,Offset,_),    
