@@ -128,7 +128,7 @@ public class SocketSessionTest extends TestCase {
 		assertNotNull(ss.queryOnce("a(v)"));
 		assertNull(ss.queryOnce("a(j)"));
 
-		List<Map> tabs = ss.queryAll("a(X)");
+		List<Map<String,Object>> tabs = ss.queryAll("a(X)");
 
 		assertEquals(2,tabs.size());
 		assertTrue(tabs.get(0).containsKey("X"));
@@ -245,7 +245,7 @@ public class SocketSessionTest extends TestCase {
 		assertNotNull("result should not be null", r);
 		assertTrue("result should be not empty", !r.isEmpty());
 
-		List<Map> v =  server.queryAll("wahr(A)");
+		List<Map<String,Object>> v =  server.queryAll("wahr(A)");
 		
 		assertEquals("there should be exactly two solutions!", 2,v.size());
 		assertEquals("wahrheit",v.get(0).get("A"));
