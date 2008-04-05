@@ -100,6 +100,14 @@ problem(Id,File,cheap,Start,End,warning,SMessage):-%file not found
     toplevel_source_position(Tl,FID,Start,End),
     with_output_to(string(SMessage),format("Cannot resolve file spec: ~w (~w)",[Spec,Id])),  
     get_pef_file(File,FID).
+problem(Id,File,cheap,Start,End,warning,SMessage):-%Parser dependency cycle
+    pef_parser_dependency_cycle_query([id=Id,action=Action,toplevel=Tl]),
+    toplevel_source_position(Tl,FID,Start,End),
+    with_output_to(string(SMessage),format("Parser ignored cyclic dependency: ~w (~w)",[Action,Id])),  
+    get_pef_file(File,FID).    
+    
+    
+    
 problem(Id,File,cheap,Start,End,error,SMessage):-%syntax error
     pef_syntax_error_query([id=Id,file=FID,error=Error]),
     message_to_string(Error,Message),
