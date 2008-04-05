@@ -81,9 +81,9 @@ public interface PrologSession extends Disposable{
 
     public Map query(String query) throws PrologException,PrologInterfaceException;
 
-    public Map queryOnce(String query) throws PrologException,PrologInterfaceException;
+    public Map<String,Object> queryOnce(String query) throws PrologException,PrologInterfaceException;
 
-    public List queryAll(String query) throws PrologException,PrologInterfaceException;
+    public List<Map<String,Object>> queryAll(String query) throws PrologException,PrologInterfaceException;
 
     /**
      * returns the next set of Bindings satisfying the last query.
@@ -125,6 +125,7 @@ public interface PrologSession extends Disposable{
 
     public void endQuery() throws PrologException,PrologInterfaceException;
 
+    public String getProcessorThreadAlias() throws PrologInterfaceException;
    
 
 }

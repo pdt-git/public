@@ -230,4 +230,9 @@ public class PIFComSession implements PrologSession2 {
 		return m;
 	}
 
+	@Override
+	public String getProcessorThreadAlias() throws PrologInterfaceException {		
+		return connection.getThreadAlias();
+	}
+
 }
