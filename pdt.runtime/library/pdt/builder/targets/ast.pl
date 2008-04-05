@@ -8,6 +8,7 @@
 :- use_module(library('pef/pef_api')).
 :- use_module(library('builder/builder')).
 :- use_module(library('builder/targets/parse')).
+:- use_module(library('facade/pdt_workspace')).
 
 :- pdt_define_context(cx(toplevel,positions,root)).
 pdt_builder:target_container(ast(Resource),ast(Container)):-
@@ -115,9 +116,7 @@ generate_ast2('$var'(VarId), Id,Cx):-
     ->	pef_property_assert([pef=Id,key=implicit,value=true])
     ;	top_position(Positions,From,To),
     	pef_property_assert([pef=Id,key=start,value=From]),
-    	pef_property_assert([pef=Id,key=end,value=To]),    
-    	term_tokens(Positions,Tokens),
-    	pef_property_assert([pef=Id,key=tokens,value=Tokens])
+    	pef_property_assert([pef=Id,key=end,value=To])
     ).
     
 generate_ast2(Term, Id,Cx):-
@@ -129,9 +128,7 @@ generate_ast2(Term, Id,Cx):-
     ->	pef_property_assert([pef=Id,key=implicit,value=true])
     ;	top_position(Positions,From,To),
     	pef_property_assert([pef=Id,key=start,value=From]),
-    	pef_property_assert([pef=Id,key=end,value=To]),
-    	term_tokens(Positions,Tokens),
-    	pef_property_assert([pef=Id,key=tokens,value=Tokens])
+    	pef_property_assert([pef=Id,key=end,value=To])    	
     ),
 %    node_type(Term,Type),
     %pef_property_assert([pef=Id,key=type,value=Type]),
