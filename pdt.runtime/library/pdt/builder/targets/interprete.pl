@@ -183,17 +183,21 @@ interprete_clause(Name,Arity,Cx):-
 
     
 interprete_property_definition((Head,Tail),Property,Cx):-
+	!,
 	interprete_property_definition(Head,Property,Cx),
 	interprete_property_definition(Tail,Property,Cx).
 interprete_property_definition(Module:Head,Property,Cx):-		
+    !,
     get_or_create_module(Module,MID,Cx),    
     cx_set_module(Cx,MID,Cx1),
 	interprete_property_definition(Head,Property,Cx1).
-interprete_property_definition((Module:Name)/Arity,Property,Cx):-		
+interprete_property_definition((Module:Name)/Arity,Property,Cx):-	
+	!,	
     get_or_create_module(Module,MID,Cx),    
     cx_set_module(Cx,MID,Cx1),
 	interprete_property_definition(Name/Arity,Property,Cx1).
 interprete_property_definition(Name/Arity,Property,Cx):-
+    !,
 	catch(
 		(	create_my_own_predicate_version(Name,Arity,PredID,Cx,Cx1),
     		cx_toplevel(Cx1,TlRef),
@@ -209,7 +213,10 @@ interprete_property_definition(Name/Arity,Property,Cx):-
 			)
 		)
 	).
-    
+interprete_property_definition(Sig,_Property,Cx):-
+    cx_toplevel(Cx,Tl),
+	pef_malformed_signature_assert([toplevel=Tl,signature=Sig]).
+	    
 interprete_file_dependency(Type,Ref,Cx):-
     get_pef_file(File,Ref),
 	catch(
@@ -568,10 +575,10 @@ merge_modules(Name,OldMID,NewMID,Cx,MID):-
 merge_modules(Type,Type,true,_Name,MID,MID,_Cx,MID):- % 01
 	!,
 	debug(interprete(debug),"case 01~n",[]).
-merge_modules(pef_module_definition,pef_module_definition,false,_Name,OldMID,NewMID,Cx,_MID):- %02
+merge_modules(pef_module_definition,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):- %02
 	debug(interprete(debug),"case 02~n",[]),
-	cx_program(Cx,Program),
-	cx_toplevel(Cx,Toplevel),
+	%cx_program(Cx,Program),
+	%cx_toplevel(Cx,Toplevel),
 	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
 	%handled by caller.
     throw(module_name_conflict(OldMID,NewMID)).
@@ -584,12 +591,12 @@ merge_modules(pef_module_definition,pef_module_extension,true,Name,OldMID,NewMID
 	;	rebind_module_name(Name,NewMID,Cx),
 		MID=NewMID
 	). 
-merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,Cx,_MID):- %04
+merge_modules(pef_module_definition,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):- %04
 	debug(interprete(debug),"case 04~n",[]),
 %	debug(interprete(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
 	debug(interprete(info),"Our model may be incorrect now!!!",[]),
-	cx_program(Cx,Program),
-	cx_toplevel(Cx,Toplevel),
+	%cx_program(Cx,Program),
+	%cx_toplevel(Cx,Toplevel),
 	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
 	%handled by caller.
 	throw(module_name_conflict(OldMID,NewMID)).
@@ -606,10 +613,10 @@ merge_modules(pef_module_definition,pef_ad_hoc_module,_SameBase,Name,OldMID,NewM
     
 merge_modules(pef_module_extension,pef_module_definition,true,_Name,MID,_New,_Cx,MID):-
 	debug(interprete(debug),"case 06~n",[]). %06
-merge_modules(pef_module_extension,pef_module_definition,false,_Name,OldMID,NewMID,Cx,_MID):- %07
+merge_modules(pef_module_extension,pef_module_definition,false,_Name,OldMID,NewMID,_Cx,_MID):- %07
 	debug(interprete(debug),"case 07~n",[]),
-	cx_program(Cx,Program),
-	cx_toplevel(Cx,Toplevel),
+	%cx_program(Cx,Program),
+	%cx_toplevel(Cx,Toplevel),
 	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
 	%handled by caller.
 	throw(module_name_conflict(OldMID,NewMID)).
@@ -626,12 +633,10 @@ merge_modules(pef_module_extension,pef_module_extension,true,Name,OldMID,NewMID,
     ),
     merge_module(Order,MergeMID,MID,Cx),
     rebind_module_name(Name,MID,Cx).
-merge_modules(pef_module_extension,pef_module_extension,false,_Name,OldMID,NewMID,Cx,_MID):- %09
-	debug(interprete(debug),"case 09",[]),
-   	debug(interprete(todo),"TODO: error marker: loadin module ~w failed, because a module ~w with the same name is already loaded. (context: ~w)~n",[NewMID,OldMID,Cx]),
-	debug(interprete(info),"Our model may be incorrect now!!!",[]),
-	cx_program(Cx,Program),
-	cx_toplevel(Cx,Toplevel),
+merge_modules(pef_module_extension,pef_module_extension,false,_Name,OldMID,NewMID,_Cx,_MID):- %09
+	debug(interprete(debug),"case 09",[]),   		
+	%cx_program(Cx,Program),
+	%cx_toplevel(Cx,Toplevel),
 	%pef_module_name_clash_assert([program=Program,toplevel=Toplevel,first=OldMID ,second=NewMID]).
 	%handled by caller.
 	throw(module_name_conflict(OldMID,NewMID)).
@@ -1039,10 +1044,7 @@ create_my_own_predicate_version(Name,Arity,NewPredID,Cx,Cx1):-
 		rebind_module_name(ModuleName,NewMID,Cx1)		
 	),
 	pef_reserve_id(pef_predicate,NewPredID),
-	(	NewPredID==47
-		->	spyme
-		;	true
-		),
+	
     pef_predicate_assert([id=NewPredID,module=NewMID,name=Name,arity=Arity]).
 
 
@@ -1066,10 +1068,7 @@ create_my_own_predicate_version(PredID,NewPredID,Cx):-
 
     	cx_module(Cx1,MID1),
     	pef_reserve_id(pef_predicate,NewPredID),
-    	(	NewPredID==47
-		->	spyme
-		;	true
-		),
+    	
     	pef_predicate_assert([id=NewPredID,module=MID1,name=Name,arity=Arity]),
     	debug(interprete(debug),"created predicate ~w (~w/~w) in module ~w. ~w~n",[NewPredID,Name,Arity,MID1,Cx1])
 	;	% if the module is ad-hoc defined,or a module extension, clone it.
@@ -1090,10 +1089,7 @@ copy_predicate(PredID,Cx,NewPredID):-
 		% all boundary conditions are checked there.
 		throw(conflicting_predicate_exists(NewPredID))
 	;	pef_reserve_id(pef_predicate,NewPredID),
-		(	NewPredID==47
-		->	spyme
-		;	true
-		),
+		
 		debug(interprete(debug),"creating a copy(~w) of predicated(~w) in module ~w. ~w~n",[NewPredID,PredID,NewMID,Cx]),
 		pef_predicate_assert([id=NewPredID,name=Name, arity=Arity,module=NewMID]),				
 		merge_predicates(append,PredID,NewPredID,Cx)
@@ -1108,3 +1104,5 @@ get_predicate(Name,Arity,Cx,PredID):-
 	cx_program(Cx,PID),
 	resolve_predicate(PID,MID,Name,Arity,PredID).
     
+    
+  
