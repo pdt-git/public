@@ -46,7 +46,7 @@ spyme(_).
 pdt_var_completion(Path,Offset,Prefix,Name):-
 	pdt_request_target(parse(file(Path))),
 	pef_file_query([path=Path,id=File]),
-	(	toplevel_at(File,Offset,Offset,Toplevel),
+	(	toplevel_at(File,Offset,Offset,Toplevel)
 	->	pef_toplevel_query([id=Toplevel,varnames=VarNames])			
 	;	between_toplevels(File,Offset,_Before,EndBefore,_After,StartAfter),
 		very_slow_hand_made_heuristic_parser(File,Offset,EndBefore,StartAfter,VarNames)
