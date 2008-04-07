@@ -19,13 +19,8 @@
 :-use_module(library('builder/targets/parse')).
 :-use_module(library('builder/targets/interprete')).
 
-%define a pseudo build target for the outline to refer to.
-
-pdt_builder:target_file(outline(F),F).
-
-pdt_builder:build_hook(outline(F)):-
-	pdt_with_targets([interprete(file(F))],true).
-
+with_outline(File,Goal):-
+    pdt_with_targets([interprete(file(File))],Goal).
 %%
 % pdt_outline_child(+File,+ParentType,+ParentID,-ChildType,-ChildID).
 % find children of a node in the outline tree view.
@@ -38,14 +33,10 @@ pdt_outline_child(FID,ParT,ParID,ChT,ChID):-
     integer(FID),
     !,
     get_pef_file(File,FID),
-	pdt_with_targets([outline(File)],
-		outline_child(ParT,ParID,ChT,FID,ChID)		
-	).
+	with_outline(File,outline_child(ParT,ParID,ChT,FID,ChID)	).
 pdt_outline_child(File,ParT,ParID,ChT,ChID):-
     get_pef_file(File,FID),
-	pdt_with_targets([outline(File)],
-		outline_child(ParT,ParID,ChT,FID,ChID)		
-	).
+	with_outline(File,outline_child(ParT,ParID,ChT,FID,ChID)).
 
 
 
@@ -81,14 +72,10 @@ pdt_outline_label(FID,Type,ID,Label):-
     integer(FID),
     !,
     get_pef_file(File,FID),	
-	pdt_with_targets([outline(File)],
-		outline_label(Type,ID,FID,Label)		
-	).
+	with_outline(File,outline_label(Type,ID,FID,Label)).
 pdt_outline_label(File,Type,ID,Label):-
     get_pef_file(File,FID),	
-	pdt_with_targets([outline(File)],
-		outline_label(Type,ID,FID,Label)		
-	).
+	with_outline(File,	outline_label(Type,ID,FID,Label)).
     
     
 outline_label(pef_file,FID,FID,Label):-
@@ -128,14 +115,10 @@ pdt_outline_tag(FID,Type,ID, Tag):-
     integer(FID),
     !,
     get_pef_file(File,FID),
-    pdt_with_targets([outline(File)],
-		outline_tag(Type,ID,FID,Tag)		
-	).
+    with_outline(File,outline_tag(Type,ID,FID,Tag)).
 pdt_outline_tag(File,Type,ID, Tag):-
     get_pef_file(File,FID),
-    pdt_with_targets([outline(File)],
-		outline_tag(Type,ID,FID,Tag)		
-	).
+    with_outline(File,outline_tag(Type,ID,FID,Tag)).
     
 
 outline_tag(pef_predicate,ID,FID,public):-
@@ -158,14 +141,10 @@ pdt_outline_position(FID,Type,ID, From,To):-
     integer(FID),
     !,
     get_pef_file(File,FID),    
-	pdt_with_targets([outline(File)],
-		outline_position(Type,ID,FID,From,To)	
-	).
+	with_outline(File,outline_position(Type,ID,FID,From,To)).
 pdt_outline_position(File,Type,ID, From,To):-
     get_pef_file(File,FID),    
-	pdt_with_targets([outline(File)],
-		outline_position(Type,ID,FID,From,To)	
-	).
+	with_outline(File,outline_position(Type,ID,FID,From,To)).
 
 outline_position(pef_predicate,ID,FID,From,To):-
     outline_child(pef_predicate,ID,pef_toplevel,FID,TLID),
@@ -182,8 +161,11 @@ outline_position(pef_toplevel,ID,_FID,From,To):-
 	
 	
 pdt_print_outline(File):-
-	get_pef_file(File,FID),
-	print_outline_X(pef_file, FID, FID, '').
+    with_outline(File,
+		(	get_pef_file(File,FID),
+			print_outline_X(pef_file, FID, FID, '')
+		)
+	).
 	
 print_outline_X(Type, ID, FID, Prefix):-
     pdt_outline_label(FID,Type,ID,Label),
@@ -196,24 +178,30 @@ print_outline_X(Type, ID, FID, Prefix):-
     	)
     ).
 
-pdt_outline(Abs,ChildT,Child,Label,Tags,Start,End):-    
-	get_pef_file(Abs,FID),
-	pdt_outline_child(FID,pef_file,FID,ChildT,Child),
-	pdt_outline_label(FID,ChildT,Child,Label),
-	findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),
-	(	pdt_outline_position(FID,ChildT,Child,Start,End)
-	->	true
-	;	Start= -1,
-		End= -1
+pdt_outline(Abs,ChildT,Child,Label,Tags,Start,End):-    	
+	with_outline(Abs,
+		(	get_pef_file(Abs,FID),	
+			pdt_outline_child(FID,pef_file,FID,ChildT,Child),
+			pdt_outline_label(FID,ChildT,Child,Label),
+			findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),
+			(	pdt_outline_position(FID,ChildT,Child,Start,End)
+			->	true
+			;	Start= -1,
+				End= -1
+			)	
+		)
 	).    
 	
 pdt_outline(Abs,ParT,Par,ChildT,Child,Label,Tags,Start,End):-    
-	get_pef_file(Abs,FID),
-	pdt_outline_child(FID,ParT,Par,ChildT,Child),
-	pdt_outline_label(FID,ChildT,Child,Label),
-	findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),
-	(	pdt_outline_position(FID,ChildT,Child,Start,End)
-	->	true
-	;	Start= -1,
-		End= -1
+	with_outline(Abs,
+		(	get_pef_file(Abs,FID),
+			pdt_outline_child(FID,ParT,Par,ChildT,Child),
+			pdt_outline_label(FID,ChildT,Child,Label),
+			findall(Tag,pdt_outline_tag(FID,ChildT,Child,Tag),Tags),
+			(	pdt_outline_position(FID,ChildT,Child,Start,End)
+			->	true
+			;	Start= -1,
+				End= -1
+			)
+		)
 	).    	
