@@ -11,19 +11,19 @@
   
 :- use_module(library(pif_observe2)).
 :- use_module(library('pef/pef_base')).
+:- use_module(library('util/progress')).
  
 /* hooks */
 :- dynamic 
 	build_hook/1,
 	fp_process_hook/1,
 	fp_seed_hook/1,
-	invalidate_hook/1,
-	estimate_hook/3,
+	invalidate_hook/1, %FIXME not used any more
+	estimate_hook/3,%FIXME not used any more
 	target_container/2,
 	target_file/2,
 	target_mutable/2,
 	target_mux/2,
-	report_progress/1,
 	fix_point_target/1,
 	dump_hook/1.
 
@@ -36,34 +36,14 @@
 	fp_process_hook/1,
 	fp_seed_hook/1,	
 	invalidate_hook/1, %FIXME: not used anymore.
-	estimate_hook/3,
+	estimate_hook/3, %FIXME: not used anymore
 	target_container/2,
 	target_file/2,
 	target_mutable/2,
 	target_mux/2,
-	report_progress/1,
 	fix_point_target/1,
 	dump_hook/1.
 
-/* estimate_hook(Target,Dependency, Weight),
-   report_progress(Target)
-Used for progress monitoring. 
-Clients can request progress monitoring for a particular target. The builder will send progress information
-using the pif_observe api. Progress will be reported for a target iff report_progress(Target) succeeds.
-Target definition can add clauses to report_progress(Target).
-
-before rebuilding this target, the arbiter will call the report_progress(Target) hook to find out wheter
-progress should be reported for this target. If this is the case, it next   calls the estimate_hook to 
-get a list of known "sub-problems" of the target. It will automatically filter out the once that are already up-to-date.
-For each of the remaining entries, progress will be reported as soon as each entry becomes available. 
-
-*/
-
-/*  '$progress_subproblem'(SubTarget,Target,Weight)
-	'$progress_subproblem_inv'(Target,SubTarget)
-	'$progress_total'(Target,Sum)
-*/
-:- dynamic '$progress_subproblem'/3, '$progress_subproblem_inv'/2, '$progress_total'/2.
 
 
 :- dynamic '$has_lock'/1,'$building'/1, '$fp_building_target'/1,'$fp_running'/0, '$fp_queue'/2,'$fp_queue_inv'/2.
@@ -128,7 +108,7 @@ release_targets(Ref):-
     throw(failed(error(release_targets(Ref)))).
 
 
-spyme:-dump(spyme).
+
 
 
 mutable(Target):-
@@ -319,7 +299,7 @@ fp_run__cleanup(Target,Catcher):-
     
 request_target(Target):-
     (	\+ ground(Target)
-    ->	spyme,throw(error(target_must_be_ground))
+    ->	throw(error(target_must_be_ground))
     ;	true
     ), 
     '$has_lock'(Target),
@@ -390,6 +370,7 @@ request_targets([T|Ts]):-
 	->	fp_request_target(K)
 	;	request_target(K)
 	),
+	pdt_report_progress(K),
 	request_targets(Ts).
 request_target_keys([]).
 request_target_keys([K|Ks]):-	
@@ -397,6 +378,7 @@ request_target_keys([K|Ks]):-
 	->	fp_request_target(K)
 	;	request_target(K)
 	),
+	pdt_report_progress(K),
 	request_target_keys(Ks).
 
 
@@ -424,15 +406,6 @@ build_target(Target):-
     (	catch(
     		call_cleanup(
     			(	debug(builder(build(TargetTerm)),"Building target ~w~n.",[TargetTerm]),
-    				(	findall(step(S,W),
-    						(	estimate_hook(TargetTerm,StepTerm,W),
-    							target_key(StepTerm,S)
-    						),
-    						Steps
-    					)
-    				->	client_send_message(Target,estimate(Steps))
-    				;	true
-    				),
     				forall(build_hook(TargetTerm),true),
     				debug(builder(build(TargetTerm)),"Done with target ~w~n.",[TargetTerm])
     			),
@@ -963,7 +936,6 @@ target_transition(state(building(_), _ , Ls,SLs,Ws),		fail,		 	report_failure(Ws
     forall(member(W,Ws),retract('$thread_waits'(W,Target))).
 target_transition(state(building(_), _ , Ls,SLs,Ws), 		error(E),	 	report_error(Ws,E),		state(idle, outdated, Ls,SLs,[]),		Target):-
     forall(member(W,Ws),retract('$thread_waits'(W,Target))).
-target_transition(state(building(P), A , Ls,SLs,Ws),		estimate(Ts),	progress_prepare(Ts),	state(building(P), A , Ls,SLs,Ws),			_Target).	
 
 
 target_transition(state(building(P),outdated,Ls,SLs,Ws),	depend(_Dep),	[], 					state(building(P), outdated, Ls,SLs,Ws),	_Target).
@@ -1072,10 +1044,8 @@ execute_action(implied(lock(Client,Target2)),Target):-
     ;	true    
     ).
 execute_action(grant(lock(Client,Target2)),Target):-
-	do_grant(lock(Client,Target2),Target),
-	progress_report_worked(Target).
-execute_action(grant_all([]),Target):-
-    progress_report_worked(Target).
+	do_grant(lock(Client,Target2),Target).
+execute_action(grant_all([]),_Target).
 execute_action(grant_all([Client|Clients]),Target):-
     do_grant(lock(Client,[]),Target),
 	execute_action(grant_all(Clients),Target).
@@ -1126,16 +1096,13 @@ execute_action(rebuild(Thread),Target):-
 	findall(Dep,target_depends(Target,Dep),OldDeps),
 	clear_dependencies(Target),	
 	arbiter_send_message(Thread,Target,rebuild(Target,OldDeps)).
-execute_action(progress_prepare(Ts),Target):-
-	progress_report_prepare(Target,Ts).	
 execute_action(report_cycle(Thread),Target):-
-    dump(report_cycle(Thread,Target)),
+    %dump(report_cycle(Thread,Target,Path)),
 	arbiter_send_message(Thread,Target, cycle(Target)).
 execute_action(notify_done,Target):-
 	my_debug(builder(debug),"target done: ~w~n",[Target]),
 	target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
-    pif_notify(builder(TargetName),done),
-    progress_report_cleanup(Target).
+    pif_notify(builder(TargetName),done).
 execute_action(ackn_remove(W),Target):-
     my_debug(builder(debug),"sending message to ~w:~w~n",[W,builder_msg(removed(Target))]),
 	arbiter_send_message(W,Target,removed(Target)).    
@@ -1224,44 +1191,7 @@ closes_cycle(Thread,Target):-
 available(Target):-  
     current_target_state(Target,state(_, available, _, _, _)).
     
-progress_report_prepare(Target,Steps):-    
-    progress_report_prepare_X(Steps,Target,0,Sum),
-    assert('$progress_total'(Target,Sum)),
-    target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
-    pif_notify(builder(TargetName),estimate(Sum)).
     
-progress_report_prepare_X([],_Target,Sum,Sum).
-progress_report_prepare_X([step(S,W)|Steps],Target,Sum0,Sum):-
-    Sum1 is Sum0 + W,
-    assert('$progress_subproblem'(S,Target,W),Ref),
-    assert('$progress_subproblem_inv'(Target,Ref)),
-    progress_report_prepare_X(Steps,Target,Sum1,Sum).
-
-
-
-progress_report_worked(SubTarget):-
-    
-	forall(
-		'$progress_subproblem'(SubTarget,Target,W),
-		
-		(	
-			target_key(TargetName,Target), %FIXME: should not be used by the arbiter!!
-			pif_notify(builder(TargetName),worked(W))
-		)
-	).
-	
-	
-
-progress_report_cleanup(Target):-
-	forall(
-		clause('$progress_subproblem_inv'(Target,Ref),_,InvRef),
-		(	erase(Ref),
-			erase(InvRef)
-		)
-	),
-	retractall('$progress_total'(Target,_)).
-	
 dump(Data):-
     forall(dump_hook(Data),true).
 
-:- tspy(pdt_builder:spyme).

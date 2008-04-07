@@ -2,22 +2,88 @@
 	[	pdt_problem/6,
 		pdt_problem/7,
 		pdt_problem_count/1,
-		pdt_problem_count/2
+		pdt_problem_count/2,
+		pdt_request_problems/1,
+		pdt_request_problems/0
 	]
 ).
 :-use_module(library('pef/pef_base')).
 :-use_module(library('pef/pef_api')).
 :-use_module(library('builder/builder')).
-:-use_module(library('builder/targets/problems')).
+:-use_module(library('builder/targets/parse')).
+:-use_module(library('builder/targets/singletons')).
+:-use_module(library('builder/targets/interprete')).
+:-use_module(library('builder/targets/literals')).
+:-use_module(library('facade/pdt_workspace')).
+:-use_module(library('util/progress')).
+:-use_module(library(pif_observe2)).
 
 
 syntax_error_position(error(_, stream(_, _, _, Offset)),Offset,Offset).
 syntax_error_position(error(_, file(_, _, _, Offset)),Offset,Offset).
     
-problems:kind(cheap,Path,parse(file(Path))).
-problems:kind(cheap,Path,singletons(file(Path))).
-problems:kind(expensive,Path,interprete(file(Path))).
-problems:kind(expensive,Path,literals(first,file(Path))).
+
+
+
+problem_target(cheap,global(Resource),parse(Resource)).
+problem_target(cheap,global(Resource),singletons(Resource)).
+problem_target(expensive,entry_point(Path),interprete(file(Path))).
+problem_target(expensive,entry_point(Path),literals(first,file(Path))).
+
+progress:report_start_hook(Group,Units):-
+    problem_target(Group,_,_),
+    !,
+    debug(pdt_problems,"Started: ~w, units: ~w",[Group,Units]),
+    Work is Units,
+    pif_notify(progress(Group),start(Work)).
+
+progress:report_done_hook(Group):-
+    problem_target(Group,_,_),
+    !,
+    debug(pdt_problems,"Done: ~w",[Group]),    
+    pif_notify(progress(Group),done).
+    
+progress:report_progress_hook(Task,Subtask,Units):-
+	problem_target(Task,_,_),
+    !,  
+    debug(pdt_problems,"Worked: Task ~w, Subtask ~w, units: ~w",[Task,Subtask,Units]),
+    Work is Units,
+    pif_notify(progress(Task),worked(Work)).
+    
+
+progress:estimate_hook(Group,Key,1):-
+    problem_target(Group,global(Resource),Target),
+    pdt_request_target(workspace),
+    pdt_contains_star(workspace,Resource),
+    pdt_builder:target_key(Target,Key),
+    \+ pdt_builder:available(Key).
+progress:estimate_hook(Group,Key,1):-
+    problem_target(Group,entry_point(Path),Target),
+    pdt_request_target(parse(workspace)),
+    pef_entry_point_query([path=EntryPointPath]),
+    get_pef_file(EntryPointPath,File),
+    file_depends_star(File,DependsFile),
+    get_pef_file(Path,DependsFile),    
+	pdt_builder:target_key(Target,Key),
+    \+ pdt_builder:available(Key).
+
+problem_targets(Group,Targets):-
+    findall(Target,
+    	(	problem_target(Group,Scope,Target),
+    		(	Scope=entry_point(Path)
+    		->	pef_entry_point_query([path=Path])
+    		;	Scope=global(workspace)
+    		)
+    	), 
+    	Targets
+    ).
+    
+pdt_request_problems(Group):-
+    problem_targets(Group,Targets),
+    pdt_request_targets(Targets).
+pdt_request_problems:-
+    problem_targets(_,Targets),
+    pdt_request_targets(Targets).    
 
 sum(Times,Brutto):-
 	sum(Times,0,Brutto).
@@ -29,9 +95,11 @@ sum([Time|Times],Sum0,Sum):-
 
 
 pdt_problem_count(C):-
+    pdt_request_problems,
     pef_count(problem,C).    
 
 pdt_problem_count(Tag,Sum):-
+    pdt_request_problems(Tag),
     findall(C,
     	(	pef_type_is_a(Type,problem),
     		pef_type_tag(Type,Tag),
@@ -44,13 +112,14 @@ pdt_problem_count(Tag,Sum):-
 %% pdt_problem(File,Tag,Start,End,Severity,Msg)
 % successively finds all problems found by build targets.
 pdt_problem(File,Tag,Start,End,Severity,Msg):-
-    pdt_with_targets([problems(workspace,[Tag])],
-    	problem(_,File,Tag,Start,End,Severity,Msg)
-    ).
+    pdt_with_progress(Tag,pdt_request_problems(Tag)),
+    %pdt_request_problems(Tag),
+    problem(_,File,Tag,Start,End,Severity,Msg).
 pdt_problem(Id,File,Tag,Start,End,Severity,Msg):-
-    pdt_with_targets([problems(workspace,[Tag])],
-    	problem(Id,File,Tag,Start,End,Severity,Msg)
-    ).
+    pdt_with_progress(Tag,pdt_request_problems(Tag)),
+    %pdt_request_problems(Tag),
+    problem(Id,File,Tag,Start,End,Severity,Msg).
+    
 
 problem(Id,File,expensive,Start,End,error,Message):-%module name clash
 	pef_module_name_clash_query([id=Id,toplevel=TLID,first=MID]),

@@ -202,6 +202,25 @@
      <super
            type="org.eclipse.core.resources.problemmarker">
      </super>
+     <attribute
+           name="org.cs3.pdt.core.problem_id">
+     </attribute>
+  </extension>
+  <extension
+        id="problem.cheap"
+        name="Cheap Prolog Problem"
+        point="org.eclipse.core.resources.markers">
+     <super
+           type="org.cs3.pdt.core.problem">
+     </super>
+  </extension>
+  <extension
+        id="problem.expensive"
+        name="Expensive Prolog Problem"
+        point="org.eclipse.core.resources.markers">
+     <super
+           type="org.cs3.pdt.core.problem">
+     </super>
   </extension>
  
  

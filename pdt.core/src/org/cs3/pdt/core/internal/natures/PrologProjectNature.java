@@ -120,7 +120,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private AnnotatorsOptionProvider annotatorsOptionProvider;
 
-	private boolean updatingMarkers;
+	
 
 	/**
 	 * @see IProjectNature#configure
@@ -855,36 +855,19 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	private static Mutex mux = new Mutex();
 
 	public void updateMarkers() throws CoreException {
-		// if (updatingMarkers) {
-		// return;
-		// }
-		updatingMarkers = true;
-		getProject().deleteMarkers(PDTCore.PROBLEM, true,
-				IResource.DEPTH_INFINITE);
 
-		UpdateMarkersJob job = new UpdateMarkersJob(this, "cheap",
-				new Runnable() {
+		
 
-					public void run() {
-						;
-
-					}
-				});
+		UpdateMarkersJob job = new UpdateMarkersJob(this,"cheap");
 		job.setPriority(Job.INTERACTIVE);
 		job.setRule(mux);
 		job.schedule();
-
-		job = new UpdateMarkersJob(this, "expensive", new Runnable() {
-
-			public void run() {
-				updatingMarkers = false;
-
-			}
-		});
+/*
+		job = new UpdateMarkersJob(this, "expensive");
 		job.setPriority(Job.BUILD);
 		job.setRule(mux);
 		job.schedule();
-
+*/
 	}
 
 }
