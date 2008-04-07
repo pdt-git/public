@@ -12,6 +12,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
@@ -46,7 +47,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		public void goalHasSolution(AsyncPrologSessionEvent e) {
 			Map m = e.bindings;
 			String id = (String)m.get("Id");
-			String filename = (String) m.get("File");
+			String filename = Util.unquoteAtom((String) m.get("File"));
 			int start=0;
 			int end=0;
 			try{
