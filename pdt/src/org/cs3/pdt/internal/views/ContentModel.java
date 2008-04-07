@@ -264,6 +264,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	}
 
+	
+	
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		Object parent = e.ticket;
 		PEFNode p = new _PEFNode(e, getFile());
@@ -492,8 +494,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 				return;
 			}
 			
-			this.subject = "builder(outline('" + Util.prologFileName(getFile())
-					+ "'))";
+			this.subject = "builder(interprete(file('" + Util.prologFileName(getFile())
+					+ "')))";
 			if (this.dispatcher != null && this.subject != null) {
 
 				this.dispatcher.addPrologInterfaceListener(this.subject, this);
