@@ -157,6 +157,8 @@ public class PDTCore {
 	public static final int CX_TOGGLE_ENTRY_POINT = -8;
 	
 	public static final String PROBLEM = "org.cs3.pdt.core.problem";
+	public static final String CHEAP_PROBLEM = "org.cs3.pdt.core.problem.cheap";
+	public static final String EXPENSIVE_PROBLEM = "org.cs3.pdt.core.problem.expensive";
 
 
 	public static final String PROBLEM_ID = "org.cs3.pdt.core.problem_id";

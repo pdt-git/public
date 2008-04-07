@@ -1,7 +1,115 @@
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- use_module(library('org/cs3/pdt/util/pdt_util')).
 
-:- op(550,xfy,@).
+:- op(600,xfy,@).
+
+
+
+%-------------------------------------- 
+% this section was backported from my last "spike".
+
+
+/*
+name is type name of the declared type
+attributes is a term arg(arg decl, arg decl,...., arg decl) where arg decl is an attribute declaration term, see below.
+supertypes is a list of type names.
+tags is a list of tags
+
+this data structure is for internal use in this module only.
+*/
+:- pdt_define_context(type_decl(name,attributes,supertypes,tags)).
+
+/*
+name is the name of the declared attribute.
+types is a list of type names
+tags is a list of tags
+
+this data structure is for internal use in this module only.
+*/
+:- pdt_define_context(attr_decl(num,name,types,tags)).
+
+
+parse_type_declaration(Type @ TagAndMore,TypeDecl):-
+    !,
+    type_decl_new(TypeDecl),
+    functor(Type,Name,_),
+    type_decl_name(TypeDecl,Name),
+    parse_tag_and_more(TagAndMore,Tags,SuperTypes),
+    parse_attribute_declarations(Type,Attributes),
+    type_decl_tags(TypeDecl,Tags),
+    type_decl_supertypes(TypeDecl,SuperTypes),
+    type_decl_attributes(TypeDecl,Attributes).
+parse_type_declaration(Type : TypeAndMore,TypeDecl):-
+    !,
+    type_decl_new(TypeDecl),
+    functor(Type,Name,_),
+    type_decl_name(TypeDecl,Name),
+    parse_type_and_more(TypeAndMore,Tags,SuperTypes),
+    parse_attribute_declarations(Type,Attributes),
+    type_decl_tags(TypeDecl,Tags),
+    type_decl_supertypes(TypeDecl,SuperTypes),
+    type_decl_attributes(TypeDecl,Attributes).
+parse_type_declaration(Type,TypeDecl):-
+    type_decl_new(TypeDecl),    
+    functor(Type,Name,_),
+    type_decl_name(TypeDecl,Name),
+    parse_attribute_declarations(Type,Attributes),
+    type_decl_tags(TypeDecl,[]),
+    type_decl_supertypes(TypeDecl,[]),
+    type_decl_attributes(TypeDecl,Attributes).
+
+parse_tag_and_more(Tag @ TagAndMore,[Tag|Tags],Types):-
+    !,
+    parse_tag_and_more(TagAndMore,Tags,Types).
+parse_tag_and_more(Tag : TypeAndMore,[Tag|Tags],Types):-
+    !,
+    parse_type_and_more(TypeAndMore,Tags,Types).
+parse_tag_and_more(Tag,[Tag],[]).
+
+parse_type_and_more(Type @ TagAndMore,Tags,[Type|Types]):-
+    !,
+    parse_tag_and_more(TagAndMore,Tags,Types).
+parse_type_and_more(Type : TypeAndMore,Tags,[Type|Types]):-
+    !,
+    parse_type_and_more(TypeAndMore,Tags,Types).
+parse_type_and_more(Type,[],[Type]).
+
+parse_attribute_declarations(Type,Attributes):-
+	functor(Type,_,Arity),
+	functor(Attributes,arg,Arity),
+	parse_attribute_declarations(Arity,Type,Attributes).
+
+parse_attribute_declarations(N,_Type,_Attributes):-    
+    N==0,!.
+parse_attribute_declarations(N,Type,Attributes):-
+    arg(N,Type,TypeArg),
+    arg(N,Attributes,AttributesArg),
+    parse_attribute_declaration(N,TypeArg,AttributesArg),
+    M is N - 1,
+    parse_attribute_declarations(M,Type,Attributes).
+    
+parse_attribute_declaration(N,Arg,Decl):-
+	attr_decl_new(Decl),
+	attr_decl_num(Decl,N),
+	(	Arg = Name @ TagAndMore
+	->	parse_tag_and_more(TagAndMore,Tags,Types),
+		attr_decl_name(Decl,Name),
+		attr_decl_tags(Decl,Tags),
+		attr_decl_types(Decl,Types)
+	;	Arg = Name : TypeAndMore
+	->	parse_type_and_more(TypeAndMore,Tags,Types),
+		attr_decl_name(Decl,Name),
+		attr_decl_tags(Decl,Tags),
+		attr_decl_types(Decl,Types)
+	;	attr_decl_name(Decl,Arg),
+		attr_decl_tags(Decl,[]),
+		attr_decl_types(Decl,[])
+	).
+	
+%--------------------------------------	
+
+
+
 
 
 
@@ -446,16 +554,86 @@ undo_assert_clause(Template,Cx,Decls,(Head:-Retracts)):-
 user:term_expansion((:- define_pef(TypedTemplate0)),Decls):-    	
 	pef_base:expand_definition(TypedTemplate0,Decls).
 
+metapef_clause(Decl,'$metapef_is_a'(Type,SuperType)):-
+    type_decl_name(Decl,Type),
+    type_decl_supertypes(Decl,SuperTypes),
+    member(SuperType,SuperTypes).
+metapef_clause(Decl,'$metapef_edge'(Type,I,AttrType)):-
+    type_decl_name(Decl,Type),
+	type_decl_attributes(Decl,Attrs),
+	arg(I,Attrs,AttrDecl),
+	attr_decl_types(AttrDecl,AttrTypes),
+	member(AttrType,AttrTypes).
+metapef_clause(Decl,'$metapef_type_tag'(Type,Tag)):-
+    type_decl_name(Decl,Type),
+	type_decl_tags(Decl,Tags),
+	member(Tag,Tags).
+metapef_clause(Decl,'$metapef_attribute_tag'(Type,I,AttrTag)):-
+    type_decl_name(Decl,Type),
+	type_decl_attributes(Decl,Attrs),
+	arg(I,Attrs,AttrDecl),
+	attr_decl_tags(AttrDecl,AttrTags),
+	member(AttrTag,AttrTags).
+
+
+
+type_decl_attribute_names(Decl,Names):-
+    type_decl_attributes(Decl,Attrs),
+    findall(Name,
+    	(	arg(_,Attrs,AttrDecl),
+    		attr_decl_name(AttrDecl,Name)
+    	),
+    	Names
+    ).
+
+type_decl_untyped_template(Decl,Tmpl):-
+    type_decl_name(Decl,Type),
+	type_decl_attribute_names(Decl,AttrNames),
+	Tmpl=..[Type|AttrNames].
+
+index_directive(Decl,	(:- dynamic IxName/2) ):-
+    type_decl_attributes(Decl,Attrs),
+    type_decl_untyped_template(Decl,Tmpl),
+    arg(I,Attrs,AttrDecl),
+    attr_decl_tags(AttrDecl,Tags),
+    memberchk(index,Tags),
+    index_name(Tmpl,I,IxName).
+index_directive(Decl,	(:- dynamic IxName/2) ):-
+	type_decl_tags(Decl,Tags),
+	type_decl_untyped_template(Decl,Tmpl),
+	member(composite_index(Names),Tags),
+	index_name(Tmpl,Names,IxName).
+    
+	
+%--------------	
 expand_definition(TypedTemplate0,Decls):-						  
+    parse_type_declaration(TypedTemplate0,TypeDecl0),
     (	'$option'(implicit_ids)
-    ->	ensure_has_id(TypedTemplate0,TypedTemplate)
-    ;	TypedTemplate=TypedTemplate0
+    ->	ensure_has_id(TypeDecl0,TypeDecl1)
+    ;	TypeDecl1=TypeDecl0
     ),
-    strip_types(TypedTemplate,Template),
-    functor(Template,Name,Arity),                    
+    
+    (	'$option'(index_foreign_keys)
+    ->	ensure_foreign_keys_are_indexed(TypeDecl1,TypeDecl)
+    ;	TypeDecl=TypeDecl1
+    ),
+    /*strip_types(TypedTemplate,Template),
+    functor(Template,Name,Arity),
+    */
+    type_decl_name(TypeDecl,Name),
+    type_decl_attributes(TypeDecl,Attrs),
+    type_decl_untyped_template(TypeDecl,Template),
+    functor(Attrs,_,Arity),
+    
+    /*                    
     process_types(TypedTemplate,Decls),    
-    process_indices(Decls,Template),
-    memberchk((:-dynamic(Name/Arity)),Decls),
+    process_indices(Decls,Template),*/
+    findall(Clause,metapef_clause(TypeDecl,Clause),Clauses),
+    findall(Directive,index_directive(TypeDecl,Directive),Directives),
+    flatten([(:-dynamic(Name/Arity)),Directives,Clauses],Decls0),
+    append(Decls0,_,Decls),
+    
+    
 	define_assert(Template,Decls),
     define_retractall(Template,Decls),
     define_query(Template,Decls),
@@ -475,12 +653,40 @@ expand_definition(TypedTemplate0,Decls):-
     has_tail(['$metapef_concrete'(Name), '$metapef_template'(Name,Template)|TailDecls],Decls).
 
 
-
+ensure_foreign_keys_are_indexed(In,Out):-
+	type_decl_attributes(In,AttrsIn),
+	AttrsIn=..[F|AttrDeclsIn],
+	ensure_foreign_keys_are_indexed2(AttrDeclsIn,AttrDeclsOut),
+	AttrsOut=..[F|AttrDeclsOut],
+	type_decl_set_attributes(In,AttrsOut,Out).
+	
+ensure_foreign_keys_are_indexed2([],[]).
+ensure_foreign_keys_are_indexed2([AttrDeclIn|AttrDeclsIn],[AttrDeclOut|AttrDeclsOut]):-
+	attr_decl_tags(AttrDeclIn,Tags),
+	attr_decl_types(AttrDeclIn,Types),
+	(	memberchk(index,Tags)
+	->	AttrDeclOut=AttrDeclIn
+	;	Types ==[]
+	->	AttrDeclOut=AttrDeclIn
+	;	attr_decl_set_tags(AttrDeclIn,[index|Tags],AttrDeclOut)
+	),
+	ensure_foreign_keys_are_indexed2(AttrDeclsIn,AttrDeclsOut).
+	
 ensure_has_id(In,Out):-
-    strip_types(In,Stripped),
-    (	find_id(Stripped,_)
+    type_decl_attribute_names(In,Names),
+    (	memberchk(id,Names)
     ->	Out=In
-    ;	add_id(In,Out)    	
+    ;	type_decl_attributes(In,AttrsIn),
+	AttrsIn=..[F|AttrDeclsIn],
+	attr_decl_new(IdDcl),
+	attr_decl_num(IdDcl,Num),
+        attr_decl_name(IdDcl,id),
+        attr_decl_types(IdDcl,[]),
+        attr_decl_tags(IdDcl,[index]),
+	append(AttrDeclsIn,[IdDcl],AttrDeclsOut),
+	AttrsOut=..[F|AttrDeclsOut],
+	functor(AttrsOut,_,Num),
+	type_decl_set_attributes(In,AttrsOut,Out)
     ).
 
 add_id(In:Type,Out:Type):-
