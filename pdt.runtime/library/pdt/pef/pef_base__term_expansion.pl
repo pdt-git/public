@@ -28,7 +28,10 @@ this data structure is for internal use in this module only.
 */
 :- pdt_define_context(attr_decl(num,name,types,tags)).
 
-
+%---------------------------------------
+% the predicates in this section are used to parse
+% type definition into a type_decl data structure.
+% 
 parse_type_declaration(Type @ TagAndMore,TypeDecl):-
     !,
     type_decl_new(TypeDecl),
@@ -76,7 +79,7 @@ parse_type_and_more(Type,[],[Type]).
 
 parse_attribute_declarations(Type,Attributes):-
 	functor(Type,_,Arity),
-	functor(Attributes,arg,Arity),
+	functor(Attributes,attrs,Arity),
 	parse_attribute_declarations(Arity,Type,Attributes).
 
 parse_attribute_declarations(N,_Type,_Attributes):-    
@@ -111,6 +114,8 @@ parse_attribute_declaration(N,Arg,Decl):-
 
 
 
+%--------------------------------------------------------
+% we should get rid of the predicates in this section.
 
 
 decls_query(Var,_Query):-
@@ -120,7 +125,30 @@ decls_query([A|_],Query):-
 decls_query([_|Decls],Query):-
     decls_query(Decls,Query).
     
+
+%% generate an assert clause from a a type_decl data structure.
+type_decl_assert_clause(TypeDecl,
+	(	Head:-
+			Getter,
+			IdCheck,
+			AssertAndRecord
+	)
+):-	type_decl_getter(TypeDecl,AttrList,Data,Getter),
+    type_decl_name(TypeDecl,Name),
+    atom_concat(Name,'_assert',HeadName),
+    Head=..[HeadName,AttrList],
+    type_decl_id_check(TypeDecl,Data,IdCheck),
+    type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord).
     
+type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord):-
+	type_decl_index_assert(TypeDecl,Data,Assert),
+	type_decl_tags(TypeDecl,Tags),
+	(	memberchk(no_cleanup,Tags)
+	->	AssertAndRecord=Assert
+	;	type_decl_record(TypeDecl,Data,Record),
+		AssertAndRecord=(Assert,Record)
+	).    
+    	
 define_assert(Template,Decls):-
     functor(Template,Name,Arity),
     functor(Cx,Name,Arity),
@@ -157,6 +185,16 @@ define_assert(Template,Decls):-
     memberchk(Decl,Decls),
     memberchk((:-export(Head)),Decls).
 
+type_decl_id_check(TypeDecl,Data,IdCheck):-
+    (	type_decl_attr_by_name(TypeDecl,id,AttrDecl)
+    ->	attr_decl_num(AttrDecl,IdNum),
+    	arg(IdNum,Data,Id),
+    	type_decl_name(TypeDecl,Type),
+    	IdCheck=(var(Id)->pef_reserve_id(Type,Id);true)
+    ;	IdCheck=true
+    ).
+    
+    
 create_id_check(Template,Cx,IdCheck):-
     find_id(Template,IdNum),
     arg(IdNum,Cx,Id),
@@ -169,6 +207,14 @@ create_id_check(Template,Cx,IdCheck):-
 		).
 create_id_check(_Template,_Cx,true).    
 
+type_decl_record(TypeDecl,Data,Record):-
+    type_decl_undo_assert_head(TypeDecl,Data,UndoGoal),
+    Record=
+    	(	'$recording'(Key,_)
+    	->	asserta('$undo'(Key,UndoGoal))
+    	;	true
+    	).
+    	
 create_record(_Template,Cx,Record):-
     undo_assert_head(Cx,UndoGoal),
     !,
@@ -179,6 +225,72 @@ create_record(_Template,Cx,Record):-
 		).
     
 
+type_decl_revix_assert(TypeDecl,Data,RevIxAsserts):-
+    (	bagof(RevIxAssert,type_decl_revix_assert(TypeDecl,Data,RevIxAssert),RevIxAsserts0)
+    ->	list_conjunction(RevIxAsserts0,RevIxAsserts)
+    ;	RevIxAsserts=true
+    ).
+
+list_conjunction([],true).
+list_conjunction([A|List],(A,Conjunction)):-
+    list_conjunction(List,Conjunction).
+
+type_decl_revix_assert(TypeDecl,Data,RevIxAssert):-
+    type_decl_revix_name(TypeDecl,RevIxAttrDecl,RevIxName),
+    type_decl_attr_by_name(TypeDecl,id,IdAttrDecl),
+    attr_decl_num(RevIxAttrDecl,RevIxNum),
+    attr_decl_num(IdAttrDecl,IdNum),
+    arg(IdNum,Data,Id),
+    arg(RevIxNum,Data,Key),
+    RevIxClause =.. [RevIxName,Key,Id],
+    RevIxAssert = assert(RevIxClause).
+ 
+ type_decl_cmpix_assert(TypeDecl,Data,Key,CmpixAssert):-
+ 	type_decl_cmpix_name(TypeDecl,CmpIxAttrDecls,CmpIxName),
+ 	type_decl_attr_by_name(TypeDecl,id,IdAttrDecl),
+    attr_decl_num(IdAttrDecl,IdNum),
+    arg(IdNum,Data,Id),
+    CmpIxClause =.. [CmpIxName,Key,Id],
+    CmpIxAssert = assert(CmpIxClause).
+ 
+ 
+ type_decl_revix_name(TypeDecl,AttrDecl,RevIxName):-
+    type_decl_name(TypeDecl,TypeName),
+ 	type_decl_attr_by_tag(TypeDecl,index,AttrDecl),
+ 	attr_decl_name(AttrDecl,AttrName),
+ 	concat_atom([TypeName,revix,AttrName],'$',RevIxName).   
+
+type_decl_cmpix_name(TypeDecl,AttrNames,CmpIxName):-
+    type_decl_tags(TypeDecl,Tags),
+    type_decl_name(TypeDecl,TypeName),
+    member(composite_index(AttrNames),Tags),
+    concat_atom([TypeName,cmpix|AttrNames],'$',CmpIxName).
+
+
+type_decl_cmpix_hashable(TypeDecl,AttrNames,Data,Hashable):-
+    type_decl_tags(TypeDecl,Tags),
+    member(composite_index(AttrNames),Tags),
+    type_decl_attrs_by_names(TypeDecl,AttrNames,AttrDecls),
+    concat_atom([TypeName,cmpix|AttrNames],'$',CmpIxName).
+
+type_decl_attr_by_tag(TypeDecl,Tag,AttrDecl):-
+    type_decl_attributes(TypeDecl,Attrs),
+    arg(_,Attrs,AttrDecl),
+    attr_decl_tags(AttrDecl,Tags),
+    memberchk(Tag,Tags).
+
+type_decl_attr_by_name(TypeDecl,Name,AttrDecl):-
+    type_decl_attributes(TypeDecl,Attrs),
+    arg(_,Attrs,AttrDecl),
+    attr_decl_name(AttrDecl,Name).
+
+type_decl_attr_by_type(TypeDecl,AttrType,AttrDecl):-
+    type_decl_attributes(TypeDecl,Attrs),
+    arg(_,Attrs,AttrDecl),
+    attr_decl_types(AttrDecl,Types),
+    memberchk(AttrType,Types).
+    
+ 
     
 create_index_asserts(Template,Cx,Decls,Asserts,Ref):-
     functor(Cx,Name,Arity),
