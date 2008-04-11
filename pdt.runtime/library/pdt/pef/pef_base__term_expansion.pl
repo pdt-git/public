@@ -256,6 +256,11 @@ list_conjunction([],true).
 list_conjunction([A|List],(A,Conjunction)):-
     list_conjunction(List,Conjunction).
 
+list_disjunction_or_true([],true).
+list_disjunction_or_true([A|As], (A;Disjunction)):-
+	list_disunction_or_true(As,Disjunction).
+
+
 type_decl_revix_assert(TypeDecl,Data,RevIxAssert):-
     type_decl_revix_name(TypeDecl,RevIxAttrDecl,RevIxName),
     type_decl_attr_by_name(TypeDecl,id,IdAttrDecl),
@@ -345,6 +350,58 @@ create_index_asserts_args(I,Name,Template,Cx,Decls,Ref,Asserts,AssertsOut):-
     J is I - 1,
 	create_index_asserts_args(J,Name,Template,Cx,Decls,Ref,Asserts,AssertsOut).  
     
+
+type_decl_query_clause(TypeDecl,
+	(	Head:-
+			Getter,			
+			IxQueries,
+			Data
+	)
+):-
+    type_decl_name(TypeDecl,TypeName),
+    type_decl_getter(TypeDecl,AttrList,Data,Getter),
+    type_decl_index_queries(TypeDecl,Data,IxQueries),
+    atom_concat(TypeName,'_query',HeadName),
+    (	Head=..[HeadName,AttrList]
+    ;	Head=..[HeadName,AttrList,Data]
+    ).
+
+type_decl_index_queries(TypeDecl,Data,IxQueries):-
+    (	bagof(CmpIxQuery,type_decl_cmpix_query(TypeDecl,Data,CmpIxQuery),CmpIxQueries)
+	->	true
+	;	CmpIxQueries=[]
+	),
+	(	bagof(RevIxQuery,type_decl_revix_query(TypeDecl,Data,RevIxQuery),RevIxQueries)
+	->	true
+	;	RevIxQueries=[]
+	),
+	append(CmpIxQueries,RevIxQueries,IxQueries0),
+	list_disjunction_or_true(IxQueries0,IxQueries).
+
+
+
+type_decl_cmpix_query(TypeDecl,Data,
+	(	ground(Hashable) 
+	-> 	hash_term(Hashable,Key),
+		CmpIxGoal
+	)
+):-    
+    type_decl_cmpix_name(TypeDecl,AttrNames,CmpIxName),
+    type_decl_cmpix_hashable(TypeDecl,AttrNames,Data,Hashable),
+    type_decl_attr_by_name(TypeDecl,id,IdDecl),
+    attr_decl_num(IdDecl,IdNum),
+    arg(IdNum,Data,Id),
+	CmpIxGoal =.. [CmpIxName,Key,Id].    
+    
+
+type_decl_revix_query(TypeDecl,Data,(nonvar(Key) -> RevIxGoal)):-    
+    type_decl_revix_name(TypeDecl,KeyDecl,RevIxName),    
+    type_decl_attr_by_name(TypeDecl,id,IdDecl),
+    attr_decl_num(IdDecl,IdNum),
+    attr_decl_num(KeyDecl,KeyNum),
+    arg(IdNum,Data,Id),
+    arg(KeyNum,Data,Key),
+	RevIxGoal =.. [RevIxName,Key,Id].    
 
 
 
@@ -461,7 +518,58 @@ map_names_to_args([Name|Names],Tmpl,Data,[Arg|Args]):-
     arg(I,Data,Arg),
     map_names_to_args(Names,Tmpl,Data,Args).
 
-   
+
+
+type_decl_retract_clause(TypeDecl,
+	(	Head:-
+			Getter,			
+			IxQueries,
+			retract(Data),
+			IxRetracts
+	)
+):-
+    type_decl_name(TypeDecl,TypeName),
+    type_decl_getter(TypeDecl,AttrList,Data,Getter),
+    type_decl_index_queries(TypeDecl,Data,IxQueries),
+    type_decl_index_retracts(TypeDecl,Data,IxRetracts),
+    atom_concat(TypeName,'_retract',HeadName),
+    (	Head=..[HeadName,AttrList]
+    ;	Head=..[HeadName,AttrList,Data]
+    ).
+
+
+type_decl_index_retracts(TypeDecl,Data,IxRetracts):-    
+    (	bagof(pair(CmpIxHash,CmpIxRetract),type_decl_cmpix_retract(TypeDecl,Data,CmpIxHash,CmpIxRetract),Pairs)
+    ->	split_pairs(Pairs,CmpIxHashes,CmpIxRetracts)
+    ;	CmpIxRetracts=[],
+    	CmpIxHashes=[]    
+    ),
+    (	bagof(RevIxRetract,type_decl_revix_retract(TypeDecl,Data,RevIxRetract),RevIxRetracts)
+    ->	true
+    ;	RevIxRetracts=[]
+    ),
+	append(CmpIxRetracts,RevIxRetracts,IxRetracts0),
+	append(CmpIxHashes,IxRetracts0,IxRetracts1),
+	list_conjunction(IxRetracts1,IxRetracts).
+	
+
+type_decl_cmpix_retract(TypeDecl,Data,hash_term(Hashable,Key),retract(CmpIxGoal)):-    
+    type_decl_cmpix_name(TypeDecl,AttrNames,CmpIxName),
+    type_decl_cmpix_hashable(TypeDecl,AttrNames,Data,Hashable),
+    type_decl_attr_by_name(TypeDecl,id,IdDecl),
+    attr_decl_num(IdDecl,IdNum),
+    arg(IdNum,Data,Id),
+	CmpIxGoal =.. [CmpIxName,Key,Id]. 
+	
+type_decl_revix_retract(TypeDecl,Data,retract(RevIxGoal)):-    
+    type_decl_revix_name(TypeDecl,KeyDecl,RevIxName),    
+    type_decl_attr_by_name(TypeDecl,id,IdDecl),
+    attr_decl_num(IdDecl,IdNum),
+    attr_decl_num(KeyDecl,KeyNum),
+    arg(IdNum,Data,Id),
+    arg(KeyNum,Data,Key),
+	RevIxGoal =.. [RevIxName,Key,Id].  	
+	
 /*
 there are two versions of retractall:
  one for pefs that don't use reverse indexing at all
