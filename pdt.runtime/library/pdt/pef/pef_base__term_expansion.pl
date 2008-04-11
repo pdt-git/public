@@ -126,6 +126,8 @@ decls_query([_|Decls],Query):-
     decls_query(Decls,Query).
     
 
+
+
 %% generate an assert clause from a a type_decl data structure.
 type_decl_assert_clause(TypeDecl,
 	(	Head:-
@@ -141,12 +143,14 @@ type_decl_assert_clause(TypeDecl,
     type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord).
     
 type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord):-
-	type_decl_index_assert(TypeDecl,Data,Assert),
+	type_decl_assert(TypeDecl,Assert),
+	type_decl_cmpix_asserts(TypeDecl,Data,CmpIxHashes,CmpIxAsserts),
+	type_decl_revix_asserts(TypeDecl,Data,RevIxAsserts),
 	type_decl_tags(TypeDecl,Tags),
 	(	memberchk(no_cleanup,Tags)
-	->	AssertAndRecord=Assert
+	->	AssertAndRecord=(CmpIxHashes,Assert,CmpIxAsserts,RevIxAsserts)
 	;	type_decl_record(TypeDecl,Data,Record),
-		AssertAndRecord=(Assert,Record)
+		AssertAndRecord=(CmpIxHashes,Assert,CmpIxAsserts,RevIxAsserts,Record)
 	).    
     	
 define_assert(Template,Decls):-
@@ -225,12 +229,29 @@ create_record(_Template,Cx,Record):-
 		).
     
 
-type_decl_revix_assert(TypeDecl,Data,RevIxAsserts):-
+type_decl_revix_asserts(TypeDecl,Data,RevIxAsserts):-
     (	bagof(RevIxAssert,type_decl_revix_assert(TypeDecl,Data,RevIxAssert),RevIxAsserts0)
     ->	list_conjunction(RevIxAsserts0,RevIxAsserts)
     ;	RevIxAsserts=true
     ).
+type_decl_cmpix_asserts(TypeDecl,Data,CmpIxHashes,CmpIxAsserts):-
+    (	bagof(
+    		pair(CmpIxHash,CmpIxAssert),
+    		type_decl_cmpix_assert(TypeDecl,Data,CmpIxHash,CmpIxAssert),
+    		Pairs
+    	)    	
+    ->	split_pairs(Pairs,CmpIxHashes0,CmpIxAsserts0),
+    	list_conjunction(CmpIxHashes0,CmpIxHashes),    	
+    	list_conjunction(CmpIxAsserts0,CmpIxAsserts)
+    ;	CmpIxAsserts=true,
+    	CmpIxHashes=true
+    ).
 
+
+split_pairs([],[],[]).
+split_pairs([pair(A,B)|Pairs],[A|As],[B|Bs]):-
+    split_pairs(Pairs,As,Bs).
+    
 list_conjunction([],true).
 list_conjunction([A|List],(A,Conjunction)):-
     list_conjunction(List,Conjunction).
@@ -245,11 +266,13 @@ type_decl_revix_assert(TypeDecl,Data,RevIxAssert):-
     RevIxClause =.. [RevIxName,Key,Id],
     RevIxAssert = assert(RevIxClause).
  
- type_decl_cmpix_assert(TypeDecl,Data,Key,CmpixAssert):-
- 	type_decl_cmpix_name(TypeDecl,CmpIxAttrDecls,CmpIxName),
+ type_decl_cmpix_assert(TypeDecl,Data,CmpIxHash,CmpIxAssert):-
+ 	type_decl_cmpix_name(TypeDecl,AttrNames,CmpIxName),
+ 	type_decl_cmpix_hashable(TypeDecl,AttrNames,Hashable),
  	type_decl_attr_by_name(TypeDecl,id,IdAttrDecl),
     attr_decl_num(IdAttrDecl,IdNum),
     arg(IdNum,Data,Id),
+    CmpIxHash = hash_term(Hashable,Key),
     CmpIxClause =.. [CmpIxName,Key,Id],
     CmpIxAssert = assert(CmpIxClause).
  
@@ -270,8 +293,15 @@ type_decl_cmpix_name(TypeDecl,AttrNames,CmpIxName):-
 type_decl_cmpix_hashable(TypeDecl,AttrNames,Data,Hashable):-
     type_decl_tags(TypeDecl,Tags),
     member(composite_index(AttrNames),Tags),
-    type_decl_attrs_by_names(TypeDecl,AttrNames,AttrDecls),
-    concat_atom([TypeName,cmpix|AttrNames],'$',CmpIxName).
+    type_decl_cmpix_hashable_X(AttrNames,TypeDecl,Data,AttrValues),
+    Hashable=..[h|AttrValues].
+
+type_decl_cmpix_hashable_X([],_,_,[]).
+type_decl_cmpix_hashable_X([AttrName|AttrNames],TypeDecl,Data,[AttrValue|AttrValues]):-
+    once(type_decl_attr_by_name(TypeDecl,AttrName,AttrDecl)),
+    attr_decl_num(AttrDecl,Num),
+    arg(Num,Data,AttrValue),
+    type_decl_cmpix_hashable_X(AttrNames,TypeDecl,Data,AttrValues).
 
 type_decl_attr_by_tag(TypeDecl,Tag,AttrDecl):-
     type_decl_attributes(TypeDecl,Attrs),
@@ -747,6 +777,7 @@ expand_definition(TypedTemplate0,Decls):-
     
     
 	define_assert(Template,Decls),
+	define_load_clause(Template,Decls),
     define_retractall(Template,Decls),
     define_query(Template,Decls),
     define_query2(Template,Decls),
@@ -894,3 +925,65 @@ add_attribute_tags(Tag@Tags,Name,Num,Decls):-
 add_attribute_tags(Tag,Name,Num,Decls):-
     memberchk('$metapef_attribute_tag'(Name,Num,Tag),Decls).
     
+
+    
+    
+    
+    
+/*
+generates clauses for the '$pef_interprete_undo_as_assert'/1 predicate.
+
+Currently we use the undo records for persistence. 
+This predicate intepretes them as assert operations.
+*/    
+define_load_clause(Template, Decls):-
+    functor(Template,Name,Arity),
+    functor(Cx,Name,Arity),
+    Cx =.. [Name|CxArgs],    
+    concat_atom([undo,Name,assert],'_',HeadName),    
+    UndoHead =..[HeadName|CxArgs],    
+    create_id_check(Template,Cx,IdCheck),
+    create_index_asserts(Template,Cx,Decls,Asserts,_),
+    
+    (	decls_query(Decls,'$metapef_type_tag'(Name,no_cleanup))
+    ->	AssertsRecord = Asserts
+    ;	create_record(Template,Cx,Record),
+    	AssertsRecord = (Asserts,Record)
+    ),
+    
+    Clause = 
+    	(	'$pef_interprete_undo_as_assert'(UndoHead):-
+    		IdCheck,
+    		AssertsRecord
+    	),
+    memberchk(Clause,Decls).
+       
+   
+   /* 
+assert_sequence(TypeDecl,
+	ct(Head,
+		condition(
+			Getter, %bind head variables
+			(	var(Id) %make sure the ID is set.
+			->	pef_reserve_id(Type,Id)
+			;	true
+			),
+			CmpIxCondition
+		),
+		transformation(
+			DataAssert,
+			IxAssert,
+			CmpIxAssert,
+			UndoAssert
+		)
+	)
+):-
+   type_decl_name(TypeDecl,Type),
+   atom_concat(Type,'_assert',HeadName),
+   Head=..[HeadName,AttrList],
+   type_decl_getter(TypeDecl,Getter,AttrList,Data),
+   type_decl_id(TypeDecl,Data,Id),
+   type_decl_cmpix_condition(TypeDecl,Data,CmpIxCondition),
+   type_decl_data_assert(TypeDecl,Data,DataAssert),
+   
+  */
