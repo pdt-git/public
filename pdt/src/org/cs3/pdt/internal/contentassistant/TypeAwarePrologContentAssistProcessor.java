@@ -46,7 +46,7 @@ IContentAssistProcessor  {
 			String query = "pdt_completion('" + path + "',"
 					+ (module != null ? "'" + module + "'" : "_") + ",'"
 					+ prefix + "',Module:Name/Arity,Tags)";
-			List<Map> l = s.queryAll(query);
+			List<Map<String, Object>> l = s.queryAll(query);
 
 			for (Map map : l) {
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
@@ -85,7 +85,7 @@ IContentAssistProcessor  {
 			String path = Util.prologFileName(file.getLocation().toFile());
 			int offset=PDTCoreUtils.convertPhysicalToLogicalOffset(document, begin);
 			String query = "trace,pdt_var_completion('" + path + "',"+offset+",'" + prefix + "',Name)";
-			List<Map> l = s.queryAll(query);
+			List<Map<String,Object>> l = s.queryAll(query);
 
 			for (Map map : l) {
 				String proposal = ((CTerm)map.get("Name")).getFunctorValue();

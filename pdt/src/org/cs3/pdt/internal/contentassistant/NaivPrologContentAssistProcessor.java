@@ -125,7 +125,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			String query = "pdt_completion('" + path + "',"
 					+ (module != null ? "'" + module + "'" : "_") + ",'"
 					+ prefix + "',Module:Name/Arity,Tags)";
-			List<Map> l = s.queryAll(query);
+			List<Map<String, Object>> l = s.queryAll(query);
 
 			for (Map map : l) {
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
