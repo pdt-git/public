@@ -434,5 +434,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return getError();
 
 	}
-
+	public void debug_wakeupPoledSessions(){
+		
+	}
 }

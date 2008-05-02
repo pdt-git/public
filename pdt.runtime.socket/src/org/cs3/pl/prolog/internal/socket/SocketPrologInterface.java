@@ -465,4 +465,22 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		this.startAndStopStrategy = startAndStopStrategy;
 	}
 
+	@Override
+	public void debug_wakeupPoledSessions() {
+		int S =pool.getMaxTotalSize();
+		PrologSession[] sessions = new PrologSession[S];
+		for(int i=0;i<sessions.length;i++){
+			try {
+				sessions[i]=getSession();
+			} catch (PrologInterfaceException e) {
+				;
+			}
+		}
+		for (PrologSession session : sessions) {
+			if(session!=null){
+				session.dispose();
+			}
+		}
+	}
+	
 }

@@ -162,7 +162,10 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 					.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
 		} catch (CoreException e) {
 			return e.getStatus();
-		} finally {
+		} catch(Throwable t){
+			return new Status(Status.ERROR,PDTCore.PLUGIN_ID,"Exception during build",t);
+		}
+		finally {
 			if (s != null) {
 				s.dispose();
 			}
