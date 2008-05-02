@@ -172,11 +172,11 @@ fp_request_target(Target):-
     ->	throw(error(target_failed(Target)))
     ;	Msg=fp_busy(Target)
     ->	throw(fp_busy(Target))
-    ;	Msg=cycle(Target) %only for debugging. this should be checked on the client side.
+    /*;	Msg=cycle(Target) %only for debugging. this should be checked on the client side.
     ->	(	building_target(Target)
     	->	throw(wie_komm_ich_denn_hier_hin)
     	;	throw(nicht_meins(Target))
-    	)
+    	)*/
     ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
     ).
 

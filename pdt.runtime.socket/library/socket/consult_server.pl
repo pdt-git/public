@@ -613,14 +613,14 @@ unused_thread_name(Prefix,Suffix,Try,Name):-
 	
 request_line(InStream, OutStream, Prompt, Line):-
 	my_format(OutStream,"~w~n",[Prompt]),
-	read_line_to_codes(InStream,LineCodes),
+	with_interrupts(5,read_line_to_codes(InStream,LineCodes)),
 	codes_or_eof_to_atom(LineCodes,Line),
 	debug(consult_server(traffic),"(Up:~w, read_line_to_codes)<<< ~w~n",[InStream,Line]).
 	
 	
 	
 my_read_term(InStream,Term,Options):-
-	read_term(InStream,Term,Options),
+	with_interrupts(5,read_term(InStream,Term,Options)),
 	debug(consult_server(traffic),"(Up:~w read_term) <<<~w~n",[InStream,Term]).
 	
 my_write_term(OutStream,Elm,Options):-
@@ -700,7 +700,26 @@ write_escaped_char('\'',Out):-
 	write(Out,'&apos;').
 write_escaped_char(C,Out):-
 	put_char(Out,C).	
-		
-
-
-		
+/*		
+with_interrupts(S,Goal):-
+	repeat,
+	    catch(
+	    	(	call_with_time_limit(S,Goal)
+	    	->	true
+	    	;	!, fail
+	    	),
+	    	time_limit_exceeded,
+	    	fail
+	    ),
+   !.
+*/
+with_interrupts(_,Goal):-Goal.
+/*
+user:prolog_exception_hook(In,_Out,_Frame,CFrame):-
+	(	CFrame == none
+	->	format("uncaught exception: ~w~n",[In]),
+		backtrace(50),
+		fail
+	;		
+	)
+	*/	

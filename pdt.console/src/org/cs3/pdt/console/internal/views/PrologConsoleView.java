@@ -78,6 +78,7 @@ import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -122,7 +123,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			getViewer().clearOutput();
 		}
 	}
-
+	
 	private abstract class PasteAction extends Action {
 		public PasteAction(String text, String tooltip, ImageDescriptor icon) {
 			super(text, icon);
@@ -361,6 +362,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private Menu contextMenu;
 
+	private Action debugAction;
+	
 	private Action cutAction;
 
 	private Action copyAction;
@@ -486,6 +489,19 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		selectAllAction = new Action() {
 			public void run() {
 				viewer.selectAll();
+			}
+		};
+		debugAction = new Action(){
+			@Override
+			public void run() {
+				PrologInterface pif = getPrologInterface();
+				if(pif==null){
+					return;
+				}
+				if (!(pif instanceof AbstractPrologInterface)){
+					return;
+				}
+				((AbstractPrologInterface)pif).debug_wakeupPoledSessions();
 			}
 		};
 		clearAction = new ClearAction("Clear", "clear console output",
@@ -623,7 +639,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		manager.add(ActionFactory.CUT.create(window));
 		manager.add(ActionFactory.PASTE.create(window));
 		manager.add(pasteFileNameAction);
-		
+		manager.add(debugAction);
 		manager.add(new Separator("#Clipboard-end"));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS
