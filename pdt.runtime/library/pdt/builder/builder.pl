@@ -12,6 +12,7 @@
 :- use_module(library(pif_observe2)).
 :- use_module(library('pef/pef_base')).
 :- use_module(library('util/progress')).
+:- use_module('debug/incidents').
  
 /* hooks */
 :- dynamic 
@@ -76,6 +77,21 @@ my_debug(_Topic,_Msg,_Args).
 %
 
 
+client_state(Reading:Building):-
+    (	'$has_lock'('$mark')
+	->	Reading=true
+	;	Reading=false
+	),
+	findall(Target,'$building'(Target),Building).
+
+client_log_transition:-
+    thread_self(Me),
+    client_state(State),
+    log_transition(client(Me),State).
+
+client_log_event(Event):-
+	thread_self(Me),
+	log_event(Me,Event).	
 pdt_with_targets(Goal):-
     pdt_with_targets([],Goal).
 
