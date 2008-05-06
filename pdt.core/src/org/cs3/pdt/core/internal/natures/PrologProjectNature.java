@@ -267,7 +267,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		String[] elms = getPreferenceValue(PDTCore.PROP_ENTRY_POINTS, "")
 				.split(System.getProperty("path.separator"));
 		for (int i = 0; i < elms.length; i++) {
-			if(elms[i]==null||elms[i].isEmpty()){
+			if(elms[i]==null||elms[i].length() == 0){
 				continue;
 			}
 			IProject p = getProject();

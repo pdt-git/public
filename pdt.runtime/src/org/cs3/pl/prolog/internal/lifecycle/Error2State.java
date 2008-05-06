@@ -14,17 +14,17 @@ public class Error2State extends AbstractState{
 	}
 	
 	
-	@Override
+	
 	public State error(Throwable e) {
 		return this; // ignore further errors.
 	}
 	
-	@Override
+	
 	public PrologInterfaceException getError() {	
 		return error;
 	}
 	
-	@Override
+	
 	public State reset() {
 	
 		return new DownState(context);

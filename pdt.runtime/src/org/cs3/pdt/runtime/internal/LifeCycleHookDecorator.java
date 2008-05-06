@@ -19,7 +19,7 @@ public class LifeCycleHookDecorator implements LifeCycleHook2{
 	private LifeCycleHookDescriptor descriptor;
 	private Object data;
 	
-	@Override
+	
 	public boolean equals(Object obj) {
 		if(!(obj instanceof LifeCycleHookDecorator)){
 			return false;
@@ -39,14 +39,14 @@ public class LifeCycleHookDecorator implements LifeCycleHook2{
 		this.consults=consults;
 	}
 
-	@Override
+	
 	public void onError(PrologInterface pif) {
 		if(target!=null&& (target instanceof LifeCycleHook2))
 		((LifeCycleHook2)target).onError(pif);
 		
 	}
 
-	@Override
+	
 	public void setData(Object data) {
 		if(target!=null&& (target instanceof LifeCycleHook2)){
 			((LifeCycleHook2)target).setData(data);
@@ -54,7 +54,7 @@ public class LifeCycleHookDecorator implements LifeCycleHook2{
 		
 	}
 
-	@Override
+	
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 		if(target!=null){
 			target.afterInit(pif);
@@ -62,7 +62,7 @@ public class LifeCycleHookDecorator implements LifeCycleHook2{
 		
 	}
 
-	@Override
+	
 	public void beforeShutdown(PrologInterface pif, PrologSession session)
 			throws PrologInterfaceException {
 		if(target!=null){
@@ -71,7 +71,7 @@ public class LifeCycleHookDecorator implements LifeCycleHook2{
 		
 	}
 
-	@Override
+	
 	public void onInit(PrologInterface pif, PrologSession initSession)
 			throws PrologInterfaceException {
 		PLUtil.configureFileSearchPath(libmgr, initSession, dependencies);

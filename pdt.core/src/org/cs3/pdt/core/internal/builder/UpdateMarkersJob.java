@@ -129,7 +129,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 				+ severity);
 	}
 
-	@Override
+	
 	protected IStatus run(IProgressMonitor monitor) {
 
 		this.monitor = monitor;

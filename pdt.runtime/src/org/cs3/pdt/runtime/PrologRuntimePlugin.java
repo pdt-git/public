@@ -606,7 +606,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				return null;
 			}
 
-			@Override
+			
 			public LifeCycleHook2 createHook(Object data) {
 				LifeCycleHook2 hook = new LifeCycleHookDecorator(
 						getImplementation(), libraryDependencies, consults,
@@ -615,27 +615,27 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				return hook;
 			}
 
-			@Override
+			
 			public File[] getConsults() {
 				return consults;
 			}
 
-			@Override
+			
 			public String[] getHookDependencies() {
 				return hookDependencies;
 			}
 
-			@Override
+			
 			public String getHookId() {
 				return id;
 			}
 
-			@Override
+			
 			public String[] getLibraryDependencies() {
 				return libraryDependencies;
 			}
 
-			@Override
+			
 			public String[] getTags() {
 				return tags;
 			}

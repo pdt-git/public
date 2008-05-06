@@ -19,8 +19,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 	
-
-	@Override
+	
 	public String getParametersTerm(Map<String, String> parameterValues) {
 
 		String newName = parameterValues.containsKey("NewName") ? "'"+parameterValues.get("NewName")+"'" : "NewName";
@@ -28,7 +27,7 @@ public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 		return "params("+file+","+newName+")";
 	}
 
-	@Override
+	
 	public String getSelectionTerm(ISelection selection,
 			IWorkbenchPart activePart) {
 
@@ -61,18 +60,17 @@ public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 		return file;
 	}
 
-	@Override
 	public Option[] getParameters(ISelection selection,
 			IWorkbenchPart activePart) {
 		
 		return new Option[] {
 
 				new SimpleOption("File", "Id of the file to rename.", "", Option.NUMBER, null) {
-					@Override
+					
 					public boolean isVisible() {
 						return false;
 					}
-					@Override
+					
 					public boolean isEditable() {
 						return false;
 					}
@@ -81,7 +79,7 @@ public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 						Option.STRING, null) };
 	}
 	
-	@Override
+	
 	public PrologInterface getPrologInterface(ISelection selection,IWorkbenchPart activePart) throws CoreException{
 		IFile file = selectedFile(selection, activePart);
 		return PDTCoreUtils.getPrologProject(file).getMetadataPrologInterface();

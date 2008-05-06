@@ -84,9 +84,13 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 			parser.parse(new InputSource(reader),new RegistryHandler());
 			
 		} catch (SAXException e) {
-			throw new IOException(e);
+			// TODO: changed this to new IOException(e) once Java 6 is supported on all target platforms
+			Debug.report(e);
+			throw new IOException(e.getLocalizedMessage());
 		} catch (ParserConfigurationException e) {
-			throw new IOException(e);
+			// TODO: changed this to new IOException(e) once Java 6 is supported on all target platforms
+			Debug.report(e);
+			throw new IOException(e.getLocalizedMessage());
 		} finally {
 			reader.close();
 		}

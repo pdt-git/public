@@ -452,7 +452,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		this.hidePlwin = hidePlwin;
 	}
 
-	@Override
+	
 	public ServerStartAndStopStrategy getStartAndStopStrategy() {	
 		return this.startAndStopStrategy;
 	}
@@ -465,7 +465,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		this.startAndStopStrategy = startAndStopStrategy;
 	}
 
-	@Override
+	
 	public void debug_wakeupPoledSessions() {
 		int S =pool.getMaxTotalSize();
 		PrologSession[] sessions = new PrologSession[S];

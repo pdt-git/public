@@ -41,7 +41,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	protected Object hookData;
 	
-	@Override
+	
 	public void setData(Object data) {
 		this.hookData=data;
 		

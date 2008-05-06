@@ -14,19 +14,19 @@ public class ErrorState extends AbstractState {
 		this.error = e;
 	}
 
-	@Override
+	
 	public PrologInterfaceException getError() {
 		return error;
 	}
 
 	
-	@Override
+	
 	public void enter() {		
 		for (LifeCycleHookWrapper w : context.getHooks().values()) {
 			w.onError();
 		}
 		context.enqueueWork(new NamedWorkRunnable("shutdown") {
-			@Override
+			
 			public void run() throws PrologInterfaceException {
 				try {
 					context.disposeSessions();
@@ -41,13 +41,13 @@ public class ErrorState extends AbstractState {
 		});
 	}
 
-	@Override
+	
 	public State reset() {
 		shouldReset=true;
 		return this;
 	}
 
-	@Override
+	
 	public State workDone() {
 		if(shouldReset){
 			return new DownState(context);
@@ -55,7 +55,7 @@ public class ErrorState extends AbstractState {
 		return new Error2State(context,error);
 	}
 
-	@Override
+	
 	public State error(Throwable e) {
 		return this; // ignore further errors.
 	}

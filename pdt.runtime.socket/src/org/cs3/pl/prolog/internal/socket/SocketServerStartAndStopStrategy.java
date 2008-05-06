@@ -173,7 +173,7 @@ public class SocketServerStartAndStopStrategy implements
 		String fileSearchPath = socketPif
 				.getOption(PrologInterface.FILE_SEARCH_PATH);
 		String[] args;
-		if (fileSearchPath != null && !fileSearchPath.trim().isEmpty()) {
+		if (fileSearchPath != null && !(fileSearchPath.trim().length() == 0)) {
 			args = new String[] { "-p",fileSearchPath,"-g",
 					"['" + Util.prologFileName(tmpFile) + "']" };
 		} else {

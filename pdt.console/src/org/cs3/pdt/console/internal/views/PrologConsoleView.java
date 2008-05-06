@@ -492,7 +492,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			}
 		};
 		debugAction = new Action(){
-			@Override
+			
 			public void run() {
 				PrologInterface pif = getPrologInterface();
 				if(pif==null){
@@ -1000,7 +1000,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	}
 
-	@Override
+	
 	public void setData(Object data) {
 		// TODO Auto-generated method stub
 		

@@ -100,7 +100,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				
 			}
 
-			@Override
+			
 			public void setData(Object data) {
 				
 				

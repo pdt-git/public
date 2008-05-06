@@ -84,7 +84,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		super();
 	}
 
-	@Override
+	
 	public boolean isVisible() {
 		return false;
 	}

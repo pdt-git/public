@@ -259,7 +259,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 
 	}
 
-	@Override
+	
 	public void addHookDescriptor(LifeCycleHookDescriptor descr) {
 
 		HashSet<LifeCycleHookDescriptor> l = hookDescriptors.get(descr.getHookId());
@@ -284,7 +284,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 
 	}
 
-	@Override
+	
 	public void removeHookDescriptor(LifeCycleHookDescriptor descr) {
 		Set<LifeCycleHookDescriptor> l = hookDescriptors.get(descr.getHookId());
 		if (l == null) {
