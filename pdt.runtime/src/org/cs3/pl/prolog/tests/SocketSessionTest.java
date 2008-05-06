@@ -272,7 +272,7 @@ public class SocketSessionTest extends TestCase {
 		final PrologSession s = pif.getSession();
 		final Throwable[] t = new Throwable[1];
 		Thread thread = new Thread() {
-			@Override
+			
 			public void run() {
 				try {
 					s.queryAll("thread_get_message(knarst)");

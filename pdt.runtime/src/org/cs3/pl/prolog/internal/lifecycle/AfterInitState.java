@@ -15,7 +15,7 @@ public class AfterInitState extends AbstractState {
 		super(context);
 	}
 
-	@Override
+	
 	public void enter() {
 		HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
 		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
@@ -24,7 +24,7 @@ public class AfterInitState extends AbstractState {
 			h.afterInit( done);
 		}
 		context.enqueueWork(new NamedWorkRunnable("workDoneAfterInit") {
-			@Override
+			
 			public void run() throws PrologInterfaceException {
 				context.workDone();
 
@@ -33,17 +33,17 @@ public class AfterInitState extends AbstractState {
 
 	}
 	
-	@Override
+	
 	public boolean isUp() {
 		return true;
 	}
 
-	@Override
+	
 	public State workDone() {
 		return new UpState(context);
 	}
 
-	@Override
+	
 	public State addLifeCycleHook(final LifeCycleHook hook, String id,
 			String[] dependencies) {
 		if (hook instanceof LifeCycleHook3 && isNewHook(hook, id)) {
@@ -62,7 +62,7 @@ public class AfterInitState extends AbstractState {
 		return w == null || !w.hooks.contains(hook);
 	}
 
-	@Override
+	
 	public State stop() {
 		return new ShutdownState(context);
 	}

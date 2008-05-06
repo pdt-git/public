@@ -117,20 +117,20 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 		}
 
-		@Override
+		
 		public PrologSession getInitialSession()
 				throws PrologInterfaceException {
 
 			return AbstractPrologInterface.this.getInitialSession();
 		}
 
-		@Override
+		
 		public PrologInterface getPrologInterface() {
 
 			return AbstractPrologInterface.this;
 		}
 
-		@Override
+		
 		public PrologSession getShutdownSession()
 				throws PrologInterfaceException {
 			return AbstractPrologInterface.this.getShutdownSession();

@@ -30,7 +30,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 	}
 
 	private Thread watchdog = new Thread() {
-		@Override
+		
 		public void run() {
 			while (!disposed) {
 				try {

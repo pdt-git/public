@@ -562,7 +562,7 @@ public class SocketSession implements PrologSession2 {
 		}
 	}
 
-	@Override
+	
 	public String getProcessorThreadAlias() throws PrologInterfaceException {
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");

@@ -77,7 +77,7 @@ public class Factory extends PrologInterfaceFactory {
 						"Will be passed to SWI-Prolog using the -p command line option.\n" +
 						"Make sure that the library(consult_server) can be resolved.",
 						SimpleOption.STRING,null){
-						@Override
+						
 						public String getDefault() {
 						
 							return guessFileSearchPath("pdt.runtime.socket.codebase");

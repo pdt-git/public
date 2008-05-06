@@ -261,7 +261,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		this.tags = tags;
 	}
 
-	@Override
+	
 	public Object getData() {		
 		return null;
 	}

@@ -9,11 +9,11 @@ public class UpState extends AbstractState {
 	protected UpState(LifeCycle context) {
 		super(context);
 	}
-	@Override
+	
 	public boolean isUp() {
 		return true;
 	}
-	@Override
+	
 	public State addLifeCycleHook(final LifeCycleHook hook, String id,
 			String[] dependencies) {
 		if (hook instanceof LifeCycleHook3 && isNewHook(hook,id)) {
@@ -31,7 +31,7 @@ public class UpState extends AbstractState {
 		return w==null || ! w.hooks.contains(hook);		
 	}
 	
-	@Override
+	
 	public State stop() {	
 		return new ShutdownState(context);
 	}

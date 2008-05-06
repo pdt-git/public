@@ -117,7 +117,7 @@ public class AsyncSocketSessionTest extends TestCase {
 			return true;
 		}
 
-		@Override
+		
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append(method);

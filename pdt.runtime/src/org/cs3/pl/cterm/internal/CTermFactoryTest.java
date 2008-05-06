@@ -54,7 +54,7 @@ import org.cs3.pl.prolog.PLUtil;
 public class CTermFactoryTest extends TestCase {
 	
 	private CTermFactory factory;
-	@Override
+	
 	protected void setUp() throws Exception {
 		this.factory = new ParserCTermFactory();
 		//this.factory = new ATermFactory();
