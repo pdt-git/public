@@ -163,7 +163,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 		PLUtil.configureFileSearchPath(mgr, initSession,
 				new String[] { PDTCore.ENGINE_ID });
 		initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
-
+		//begin debug
+		//initSession.queryOnce("tspy(build_hook)");
+		
+		//end debug
+		
+		
 		/* setup project source paths */
 
 		try {
