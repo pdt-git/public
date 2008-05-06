@@ -76,8 +76,8 @@ my_debug(_Topic,_Msg,_Args).
 % the locks are NOT released. 
 %
 
-
-client_state(Reading:Building):-
+/* begin debug predicates */
+client_state(Activity, state(Activity,Reading,Building)):-
     (	'$has_lock'('$mark')
 	->	Reading=true
 	;	Reading=false
@@ -92,6 +92,10 @@ client_log_transition:-
 client_log_event(Event):-
 	thread_self(Me),
 	log_event(Me,Event).	
+
+	
+/* end debug predicates */
+	
 pdt_with_targets(Goal):-
     pdt_with_targets([],Goal).
 

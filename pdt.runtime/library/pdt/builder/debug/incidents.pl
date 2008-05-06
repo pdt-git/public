@@ -5,6 +5,8 @@
 	log_receive/1,
 	log_send/4,
 	log_transition/2,
+	log_push_state/2,
+	log_pop_state/1,
 	write_incidents/2,
 	write_incidents/4
 ]).
@@ -32,6 +34,7 @@ The idea is to visualize this information in a graph that is somewhat dual to th
 
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- pdt_define_context(incident(sn,subject,object,cause,type,data,thread)).
+:- dynamic incident/7, '$stack'/2.
 
 incident_query(AttrList):-
 	incident_new(I),
@@ -150,6 +153,17 @@ log_transition(Subject,NewState):-
 	incident_cause(I,CauseSN),
 	incident_thread(I,Thread),
 	assert(I).
+
+
+log_push_state(Subject,State):-
+    asserta('$stack'(Subject,State)),
+    log_transition(Subject,NewState).
+    
+log_pop_state(Subject):-
+	retract('$stack'(Subject,_)),
+	'$stack'(Subject,State),
+	log_transition(Subject,State).    
+
     
 
 node(Incidents,NodeSN,Options):-
