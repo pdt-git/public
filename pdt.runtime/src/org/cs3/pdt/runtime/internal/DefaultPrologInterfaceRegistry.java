@@ -126,7 +126,12 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 	}
 	
 	public Set<Subscription> getSubscriptionsForPif(String key) {
-		return new HashSet<Subscription>(subscriptionLists.get(key));
+		Collection coll = subscriptionLists.get(key);
+		HashSet<Subscription> subscripitions = new HashSet<Subscription>();
+		if(coll != null){
+			subscripitions.addAll(coll);
+		}
+		return subscripitions;
 	}
 
 	public void addPrologInterface(String key, PrologInterface pif) {

@@ -84,9 +84,8 @@ public interface PrologInterfaceRegistry {
 	public Set<String> getAllSubscriptionIDs();
 
 	/**
-	 * return all subscriptions to a given pif key
 	 * 
-	 * @return null if no such pif, empty list if no subscriptions
+	 * @return all subscriptions to a given pif key
 	 */
 	public Set<Subscription> getSubscriptionsForPif(String key);
 
