@@ -14,6 +14,7 @@ import org.cs3.pifcom.codec.NameMessage;
 import org.cs3.pifcom.codec.UIntMessage;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
+import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
@@ -553,8 +554,12 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 		// FIXME: handle lists
 	}
 
+	
 	protected static Object interpreteLists_deep(CTerm term) {
-		if (isList(term)) {
+		if (term instanceof CNil){
+			return new Vector();
+		}
+		else if (isList(term)) {
 
 			Vector<CTerm> terms = PLUtil.listAsVector(term);
 
@@ -568,6 +573,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 		}
 
 	}
+
 
 	private static boolean isList(CTerm term) {
 

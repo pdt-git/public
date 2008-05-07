@@ -1,4 +1,4 @@
-:- module(pifcom_server,[pifcom_run_server/1]).
+:- module(pifcom_server,[pifcom_start_server/1]).
 
 :- use_module(library(socket)).
 :- use_module(library(record)).
@@ -9,10 +9,12 @@
 %:- debug(pifcom_server).
 %:- guitracer.
 
-spyme.
-:- tspy(pifcom_server:spyme/0).
+
+pifcom_start_server(Address):-
+    thread_create(pifcom_run_server(Address),_,[alias(pifcom_accept_loop)]).
 
 pifcom_run_server(Address):-
+    thread_at_exit(thread_signal(main,halt)),
     tcp_socket(ServerSocket),    
 	tcp_setopt(ServerSocket, reuseaddr),
 	tcp_bind(ServerSocket, TCPPort),

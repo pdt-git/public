@@ -4,7 +4,7 @@
 :- use_module(library(memfile)).
 :- debug(spike).
 
-:- record cx(state,in,out,ctrl,goal,ticket).
+:- record(cx(state,in,out,ctrl,goal,ticket)).
 
 server(Port):-
 	tcp_socket(Socket),

@@ -12,9 +12,6 @@
 :- use_module(library(record)).
 :- use_module(library(memfile)).
 
-%:- guitracer.
-spyme.
-%:- tspy(pifcom_codec:spyme/0).
 
 
 %% pifcom_read_and_decode_message(+Stream,-OpCode,-Ticket,-Data).
@@ -129,7 +126,7 @@ pifcom_decode_body(Template,Body):-
 	decode_body(Template,Body).
 
 
-:- record header(flags=[],op=0,ticket=0,body_len=0).
+:- record( header(flags=[],op=0,ticket=0,body_len=0)).
 
 :- discontiguous opc/3,flc/2.
 
@@ -211,8 +208,7 @@ ommit_length(Type):-
 
 read_header(Stream,Header):-
     make_header([flags(Flags),op(Op),ticket(Ticket),body_len(BodyLen)],Header),
-	get_byte(Stream,Type),
-	spyme,
+	get_byte(Stream,Type),	
 	type_op(Type,Op,_),
 	(	continuation(Type)
 	->	Flags0=[continuation],
