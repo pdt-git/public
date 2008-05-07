@@ -24,7 +24,7 @@ The connection between a particular pif and a particular set of tasks that is pe
       <complexType>
          <choice minOccurs="0" maxOccurs="unbounded">
             <element ref="hook"/>
-            <element ref="regestryHook"/>
+            <element ref="registryHook"/>
          </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -155,7 +155,7 @@ See Extension Point org.cs3.pdt.runtime.prologLibrary.
       </complexType>
    </element>
 
-   <element name="regestryHook">
+   <element name="registryHook">
       <complexType>
          <attribute name="class" type="string">
             <annotation>
