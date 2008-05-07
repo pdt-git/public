@@ -38,7 +38,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 
 	private HashMap<String, String> preferences = new HashMap();
 
-	@Override
+	
 	public void setOption(String opt, String value) {
 		Option[] options = factory.getOptions();
 		for (Option option : options) {
@@ -50,7 +50,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 		super.setOption(opt, value);
 	}
 
-	@Override
+	
 	public String getOption(String opt) {
 		Option[] options = factory.getOptions();
 		for (Option option : options) {
@@ -73,7 +73,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 
 	}
 
-	@Override
+	
 	public AsyncPrologSession getAsyncSession_impl() throws Throwable {
 		ReusablePIFComConnection connection = getConnection();
 		return new AsynchronousPIFComSession(connection,this);
@@ -90,7 +90,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 			connection = new ReusablePIFComConnection(udpSocket, host,
 					tcpMasterPort, pool) {
 
-				@Override
+				
 				protected void error(Throwable e)
 						throws PrologInterfaceException {
 					PIFComPrologInterface.this.error(e);
@@ -102,24 +102,23 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 		return connection;
 	}
 
-	@Override
+	
 	public PrologSession getSession_impl() throws Throwable {
 		ReusablePIFComConnection connection = getConnection();
 		return new PIFComSession(connection,this);
 	}
 
-	@Override
 	public PrologInterfaceFactory getFactory() {
 
 		return factory;
 	}
 
-	@Override
+	
 	public ServerStartAndStopStrategy getStartAndStopStrategy() {
 
 		return new ServerStartAndStopStrategy() {
 
-			@Override
+			
 			public boolean isRunning(PrologInterface pif) {
 				if(process==null){
 					return false;
@@ -132,7 +131,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 				return false;
 			}
 
-			@Override
+			
 			public Process startServer(PrologInterface pif) throws IOException {
 				if( isRunning(pif)){
 					Debug.warning("Server process appears to be already running, so I will not start it.");
@@ -192,7 +191,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 				int udpLocalPort = udpSocket.getLocalPort();
 				String[] command = Util.split(executable, " ");
 				String[] args;
-				if(path==null||path.trim().isEmpty()){
+				if(path==null||path.trim().length() == 0){
 					args = new String[] {
 							
 							"-g",
@@ -237,7 +236,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 				return process;
 			}
 
-			@Override
+			
 			public void stopServer(PrologInterface pif) throws Throwable {
 				if(! isRunning(pif)){
 					Debug.warning("Server process does not appear to running, so I will not stop it.");
@@ -260,7 +259,7 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 			super(s);
 		}
 
-		@Override
+		
 		protected void dataAvailable(char[] buffer, int length) {
 			System.err.print(new String(buffer, 0, length));
 			System.err.flush();

@@ -2,13 +2,14 @@ package org.cs3.pifcom.codec;
 
 import java.nio.charset.Charset;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.PLUtil;
 
 public class CTermMessage extends Message {
 
 	public CTermMessage(int opc, int ticket, String query){
-		super(opc,ticket,query.getBytes(Charset.forName("UTF-8")));
+		super(opc,ticket,Util.getUTF8Bytes(query));
 	}
 
 	public CTermMessage(int opc, int ticket, byte[] body) {
@@ -17,7 +18,7 @@ public class CTermMessage extends Message {
 	}
 	
 	public String getStringValue(){
-		String string = new String(this.getBody(),Charset.forName("UTF-8"));
+		String string = Util.encodeUTF8String(this.getBody());
 		if(string.endsWith(".")){
 			return string.substring(0, string.lastIndexOf('.'));	
 		}
