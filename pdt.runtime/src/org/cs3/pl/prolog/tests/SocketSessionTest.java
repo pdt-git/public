@@ -67,7 +67,9 @@ import org.cs3.pl.prolog.PrologSession2;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 /**
- * @author terra
+ * @author Lukas Degener
+ * 
+ * 
  */
 public class SocketSessionTest extends TestCase {
 	private PrologInterface pif;
@@ -438,8 +440,39 @@ public class SocketSessionTest extends TestCase {
 	}
 
 	
-
-	public void testEscapePDT245() throws Exception {
+	public void testPDT287_default() throws Exception {
+	       PrologSession session = pif.getSession();
+	       Map map = null;
+	       try{
+	           //map = session.queryOnce("A = 'package test0001;\n\nimport java.util.*;\n\npublic class Test  {\n'");
+	    	   //session.queryOnce("guitracer");
+	    	   map=session.queryOnce("atom_codes(A,[123,10])");
+	           assertEquals("{\n",map.get("A"));
+	       } catch(Exception e){
+	           session.dispose();
+	           fail();
+	           e.printStackTrace();
+	       }
+	}
+	
+	
+/*
+	public void testPDT287_unquoted() throws Exception {
+	       PrologSession session = pif.getSession(PrologInterface.UNQUOTE_ATOMS||);
+	       Map map = null;
+	       try{
+	           //map = session.queryOnce("A = 'package test0001;\n\nimport java.util.*;\n\npublic class Test  {\n'");
+	    	   //session.queryOnce("guitracer");
+	    	   map=session.queryOnce("atom_codes(A,[123,10])");
+	           assertEquals("{\n",map.get("A"));
+	       } catch(Exception e){
+	           session.dispose();
+	           fail();
+	           e.printStackTrace();
+	       }
+	}
+	
+	public void testPDT287_canonical() throws Exception {
 	       PrologSession session = pif.getSession();
 	       Map map = null;
 	       try{
@@ -447,6 +480,21 @@ public class SocketSessionTest extends TestCase {
 	    	   //session.queryOnce("guitracer");
 	    	   map=session.queryOnce("atom_codes(A,[123,10])");
 	           assertEquals("'{\\n'",map.get("A"));
+	       } catch(Exception e){
+	           session.dispose();
+	           fail();
+	           e.printStackTrace();
+	       }
+	}
+	*/
+	public void testEscapePDT245() throws Exception {
+	       PrologSession session = pif.getSession();
+	       Map map = null;
+	       try{
+	           //map = session.queryOnce("A = 'package test0001;\n\nimport java.util.*;\n\npublic class Test  {\n'");
+	    	   //session.queryOnce("guitracer");
+	    	   map=session.queryOnce("atom_codes(A,[123,10])");
+	           assertEquals("{\n",map.get("A"));
 	       } catch(Exception e){
 	           session.dispose();
 	           fail();
