@@ -190,6 +190,9 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 			final String key) {
 
 		Set subs = reg.getSubscriptionsForPif(key);
+		if(subs.size() == 0){
+			return;
+		}
 		// remove hidden subscriptions from the set
 		boolean showHidden = "true".equals(PrologConsolePlugin.getDefault().getPreferenceValue(
 				PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, "false"));
