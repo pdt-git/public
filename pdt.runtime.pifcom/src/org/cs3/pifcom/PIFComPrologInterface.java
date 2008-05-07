@@ -196,16 +196,16 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 					args = new String[] {
 							
 							"-g",
-							"[library('pifcom_server')],pifcom_run_server("
-									+ udpLocalPort + "),halt", };
+							"[library('pifcom_server')],pifcom_start_server("
+									+ udpLocalPort + ")", };
 				}
 				else{
 				args = new String[] {
 						"-p",
 						path,
 						"-g",
-						"[library('pifcom_server')],pifcom_run_server("
-								+ udpLocalPort + "),halt", };
+						"[library('pifcom_server')],pifcom_start_server("
+								+ udpLocalPort + ")", };
 				};
 				String[] commandArray = new String[command.length + args.length];
 				System.arraycopy(command, 0, commandArray, 0, command.length);
