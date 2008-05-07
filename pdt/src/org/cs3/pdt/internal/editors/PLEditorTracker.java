@@ -110,7 +110,8 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 		IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
 		IPartService partService = activeWorkbenchWindow.getPartService();
 		partService.addPartListener(this);
-		fireContextChanged();
+		//FIXME: TRHO: Do not fire context changed on startup. Results in an unavailable prolog interface although another tracker was successful! 
+		//fireContextChanged();
 	}
 	
 	private void check(IWorkbenchPartReference partRef)  {
