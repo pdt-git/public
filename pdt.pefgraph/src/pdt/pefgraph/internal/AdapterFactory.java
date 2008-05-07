@@ -2,6 +2,7 @@ package pdt.pefgraph.internal;
 
 import java.util.Map;
 
+import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.core.PEFHandle;
@@ -82,7 +83,11 @@ public class AdapterFactory implements IAdapterFactory {
 	}
 
 	private Object createHandle(IResource r) throws CoreException {
-		final PrologInterface pif = PDTCoreUtils.getPrologProject(r)
+		IPrologProject prologProject = PDTCoreUtils.getPrologProject(r);
+		if(prologProject==null){
+			return null;
+		}
+		final PrologInterface pif = prologProject
 				.getMetadataPrologInterface();
 		int type = r.getType();
 		IProject project = r.getProject();
