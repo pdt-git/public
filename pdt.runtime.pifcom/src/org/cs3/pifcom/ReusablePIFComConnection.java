@@ -61,7 +61,7 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 		processorThreadAlias = m.getStringValue();
 	}
 
-	@Override
+	
 	public void dispose() {
 		disposed = true;
 		if (pool != null) {
@@ -71,13 +71,13 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 		}
 	}
 
-	@Override
+	
 	public void flushBatch() throws IOException {
 		out.flush();
 
 	}
 
-	@Override
+	
 	public int getNewTicket() {
 		if (nextTicket == 0xFFFF) {
 			nextTicket = 0;
@@ -86,34 +86,34 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 		return nextTicket++;
 	}
 
-	@Override
+	
 	public String getThreadAlias() {
 		return processorThreadAlias;
 	}
 
-	@Override
+	
 	public boolean isDisposed() {
 
 		return disposed;
 	}
 
-	@Override
+	
 	public Message readMessage() throws IOException {
 
 		return Message.read(in);
 	}
 
-	@Override
+	
 	public void sendControlMessage(Message m) throws IOException {
 		m.send(udpSocket, host, udpSlavePort);
 	}
 
-	@Override
+	
 	public void writeBatchMessage(Message m) throws IOException {
 		m.write(out);
 	}
 
-	@Override
+	
 	public void destroy() {
 		try {
 			writeBatchMessage(Message.bye(getNewTicket()));
@@ -129,11 +129,11 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 
 	}
 
-	@Override
+	
 	public void recylce() {
 	}
 
-	@Override
+	
 	public void reuse() {
 		disposed = false;
 		try {

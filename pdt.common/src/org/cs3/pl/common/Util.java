@@ -50,7 +50,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -815,6 +817,41 @@ public class Util {
 			return sb.toString();
 		}
 		return "";
+	}
+
+	/**
+	 * To be deleted once Java 6 is supported on EVERY(?) target platform.
+	 * Currently MacOS <= 10.4. is not supported.
+	 * 
+	 *  name.getBytes(Charset.forName("UTF-8"))
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static byte[] getUTF8Bytes(String name) {
+		try {
+			return name.getBytes(Charset.forName("UTF-8").toString());
+		} catch (UnsupportedEncodingException e) {
+			Debug.rethrow(e);
+			return null;
+		}
+	}
+
+	/**
+	 * To be deleted once Java 6 is supported on EVERY(?) target platform.
+	 * Currently MacOS <= 10.4. is not supported.
+	 * 
+	 *  new String(byte[], Charset.forName("UTF-8"))
+	 * @param bytes
+	 * @return
+	 */
+	static public String encodeUTF8String(byte[] bytes) {
+		try {
+			return new String(bytes,Charset.forName("UTF-8").toString());
+		} catch (UnsupportedEncodingException e) {
+			Debug.rethrow(e);
+			return null;
+		}
 	}
 
 }
