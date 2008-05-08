@@ -52,78 +52,15 @@ public interface PrologSession extends Disposable{
 	public PrologInterface getPrologInterface();
 	
 
-    /**
-     * begins a query on the Prolog system. If there was an active query
-     * running, further results lost, so calls to next() will return results of
-     * this query. The resultant Hashtable contains keys equal to the unbound
-     * variables in the query, and values equal to their binding. If null is
-     * returned, no bindings could satisfy the query ("no"). If there were no
-     * unbound variables, an empty Hashtable is returned to signify "yes".
-     * <p>
-     * <b>please note: </b>
-     * <p>
-     * It seems that interactive queries imply quiet a deal of extra complexity
-     * in all the implementations i tried so far. They are also significantly
-     * slower due to the added "synchronisation points" and the resulting io
-     * overhead. At the moment i cannot think of any scenario that would require
-     * the interactive concept anyway, so i would like to get rid of it asap.
-     * 
-     * @deprecated use queryAll or queryOnce instead
-     * 
-     * @return a hashtable, containing the bindings generated.
-     * @param query
-     *                    a prolog query
-     * @throws IllegalStateException
-     *                    the session is disposed
-     * @throws PrologException
-     *                    an abnormal condition was detected
-     */
-
-    public Map query(String query) throws PrologException,PrologInterfaceException;
 
     public Map<String,Object> queryOnce(String query) throws PrologException,PrologInterfaceException;
 
     public List<Map<String,Object>> queryAll(String query) throws PrologException,PrologInterfaceException;
 
-    /**
-     * returns the next set of Bindings satisfying the last query.
-     * 
-     * <b>please note: </b>
-     * <p>
-     * It seems that interactive queries imply quiet a deal of extra complexity
-     * in all the implementations i tried so far. They are also significantly
-     * slower due to the added "synchronisation points" and the resulting io
-     * overhead. At the moment i cannot think of any scenario that would require
-     * the interactive concept anyway, so i would like to get rid of it asap.
-     * 
-     * @deprecated use queryAll or queryOnce instead
-     * @return another set of Bindings
-     * @throws IllegalStateException
-     *                    the session is disposed
-     * @throws PrologException
-     *                    an IO Error occured .
-     */
+    public Map<String,Object> queryOnce(String query,int flags) throws PrologException,PrologInterfaceException;
 
-    public Map next() throws PrologException,PrologInterfaceException;
-
-    /**
-     * explicitly ends the last query, discarding further results if any
-     * existed. If no query was active, this is a noop. <b>please note: </b>
-     * <p>
-     * It seems that interactive queries imply quiet a deal of extra complexity
-     * in all the implementations i tried so far. They are also significantly
-     * slower due to the added "synchronisation points" and the resulting io
-     * overhead. At the moment i cannot think of any scenario that would require
-     * the interactive concept anyway, so i would like to get rid of it asap.
-     * 
-     * @deprecated use queryAll or queryOnce instead
-     * @throws IllegalStateException
-     *                    the session is disposed
-     * @throws PrologException
-     *                    a lower-level failure has occured while killing the query.
-     */
-
-    public void endQuery() throws PrologException,PrologInterfaceException;
+    public List<Map<String,Object>> queryAll(String query,int flags) throws PrologException,PrologInterfaceException;
+    
 
     public String getProcessorThreadAlias() throws PrologInterfaceException;
    

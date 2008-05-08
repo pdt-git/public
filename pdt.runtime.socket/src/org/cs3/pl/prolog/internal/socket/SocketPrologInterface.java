@@ -48,6 +48,7 @@ import java.util.HashMap;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
@@ -58,9 +59,9 @@ import org.cs3.pl.prolog.internal.ReusablePool;
 public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	private class InitSession extends SocketSession {
-		public InitSession(SocketClient client, SocketPrologInterface pif)
+		public InitSession(SocketClient client, SocketPrologInterface pif,int flags)
 				throws IOException {
-			super(client, pif);
+			super(client, pif,flags);
 		}
 
 		public void dispose() {
@@ -75,9 +76,9 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	}
 
 	private class ShutdownSession extends SocketSession {
-		public ShutdownSession(SocketClient client, SocketPrologInterface pif)
+		public ShutdownSession(SocketClient client, SocketPrologInterface pif, int flags)
 				throws IOException {
-			super(client, pif);
+			super(client, pif,flags);
 		}
 
 		public void dispose() {
@@ -158,7 +159,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 	}
 
-	public PrologSession getSession_impl() throws Throwable {
+	public PrologSession getSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
 		try {
 			if (useSessionPooling) {
@@ -174,7 +175,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 
 			SocketClient client = new SocketClient(socket);
 			client.setPool(pool);
-			SocketSession s = new SocketSession(client, this);
+			SocketSession s = new SocketSession(client, this,flags);
 
 			return s;
 		} catch (Throwable e) {
@@ -183,7 +184,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		}
 	}
 
-	public AsyncPrologSession getAsyncSession_impl() throws Throwable {
+	public AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
 		try {
 			if (useSessionPooling) {
@@ -199,8 +200,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 			SocketClient client = new SocketClient(socket);
 			client.setParanoiaEnabled(false);
 			client.setPool(pool);
-			PrologSession controlSession = getSession_impl();
-			AsyncPrologSession s = new AsyncSocketSession(client, this/* ,controlSession */);
+			
+			AsyncPrologSession s = new AsyncSocketSession(client, this,flags);
 
 			return s;
 		} catch (Throwable e) {
@@ -342,7 +343,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	 */
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 		try {
-			return new InitSession(new SocketClient(host, port), this);
+			//FIXME: LEGACY for now, should be specified by client somehow.
+			return new InitSession(new SocketClient(host, port), this,LEGACY);
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -357,7 +359,8 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 	protected PrologSession getShutdownSession()
 			throws PrologInterfaceException {
 		try {
-			return new ShutdownSession(new SocketClient(host, port), this);
+			//FIXME: LEGACY for now, should be specified by client somehow.
+			return new ShutdownSession(new SocketClient(host, port), this,LEGACY);
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -471,7 +474,7 @@ public class SocketPrologInterface extends AbstractPrologInterface2 {
 		PrologSession[] sessions = new PrologSession[S];
 		for(int i=0;i<sessions.length;i++){
 			try {
-				sessions[i]=getSession();
+				sessions[i]=getSession(PrologInterface.NONE);
 			} catch (PrologInterfaceException e) {
 				;
 			}

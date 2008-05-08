@@ -22,6 +22,7 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -144,7 +145,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			dispatcher.addPrologInterfaceListener(subject, this);
 			PrologInterface2 pif = ((PrologInterface2) plProject
 					.getMetadataPrologInterface());
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 
 			query = "pdt_problem(Id,File," + tag + ",Start,End,Severity,Msg)";
 

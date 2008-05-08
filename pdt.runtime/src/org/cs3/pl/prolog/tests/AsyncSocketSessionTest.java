@@ -48,7 +48,6 @@ import java.util.Vector;
 
 import junit.framework.TestCase;
 
-
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
@@ -59,6 +58,7 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
@@ -117,7 +117,6 @@ public class AsyncSocketSessionTest extends TestCase {
 			return true;
 		}
 
-		
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append(method);
@@ -234,14 +233,14 @@ public class AsyncSocketSessionTest extends TestCase {
 		assertTrue(rec.get(0).isSyntaxError());
 	}
 
-	public void test_queryOnce_failure01() throws Throwable{
+	public void test_queryOnce_failure01() throws Throwable {
 		session.queryOnce("4", "member(aA,[a,b,c])");
 		session.dispose();
 		assertEquals("goalFailed(4,null,null)", rec.get(0).toString());
 		assertEquals("batchComplete(null,null,null)", rec.get(1).toString());
-		assertEquals(2,rec.size());
+		assertEquals(2, rec.size());
 	}
-	
+
 	public void test_queryOnce_sequence01() throws Throwable {
 		// PrologSession session=pif.getSession();
 		session.queryOnce("1", "member(A,[a,b,c])");
@@ -253,7 +252,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		assertEquals("goalSucceeded(1,null,null)", rec.get(1).toString());
 		assertEquals("goalHasSolution(2,null,())", rec.get(2).toString());
 		assertEquals("goalSucceeded(2,null,null)", rec.get(3).toString());
-		assertTrue(rec.get(4).isSyntaxError());				
+		assertTrue(rec.get(4).isSyntaxError());
 		assertEquals("goalFailed(4,null,null)", rec.get(5).toString());
 		assertEquals("batchComplete(null,null,null)", rec.get(6).toString());
 	}
@@ -273,12 +272,12 @@ public class AsyncSocketSessionTest extends TestCase {
 		assertEquals("goalSucceeded(2,null,null)", rec.get(5).toString());
 
 		assertTrue(rec.get(6).isSyntaxError());
-				
+
 		assertEquals("goalFailed(4,null,null)", rec.get(7).toString());
 		assertEquals("batchComplete(null,null,null)", rec.get(8).toString());
 	}
 
-	public void testList()throws Throwable{
+	public void testList() throws Throwable {
 		session.queryOnce("1", "A=[0,1,2]");
 		session.join();
 		Record last = rec.get(0);
@@ -287,12 +286,167 @@ public class AsyncSocketSessionTest extends TestCase {
 		Object object = bindings.get("A");
 		assertNotNull(object);
 		assertTrue(object instanceof List);
-		List l = (List)object;
-		assertEquals(3,l.size());
-		for(int i=0;i<3;i++){
+		List l = (List) object;
+		assertEquals(3, l.size());
+		for (int i = 0; i < 3; i++) {
 			Object o = l.get(i);
-			assertEquals( (""+i),o);
-			
+			assertEquals(("" + i), o);
+
+		}
+	}
+
+	public void testPDT287_0() throws Exception {
+		
+
+		// atoms should be quoted.
+		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.NONE);
+
+		// terms should be canonical.
+		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.NONE);
+
+		// lists should be ignored
+		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.NONE);
+
+		session.join();
+		assertEquals("'{\\n'", rec.get(0).event.bindings.get("A"));
+		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+		assertEquals("'.'(1, '.'(2, []))", rec.get(4).event.bindings.get("A"));
+
+	}
+
+	public void testPDT287_1() throws Exception {
+		
+		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.UNQUOTE_ATOMS);
+
+		session.join();
+		// atoms should be unquoted.
+		assertEquals("{\n", rec.get(0).event.bindings.get("A"));
+
+		// terms should be canonical.
+		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+
+		// lists should be ignored
+		assertEquals("'.'(1, '.'(2, []))", rec.get(4).event.bindings.get("A"));
+
+	}
+
+	public void testPDT287_2() throws Exception {
+		
+		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.PROCESS_LISTS);
+		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologInterface.PROCESS_LISTS);
+		session.join();
+		
+		// atoms should be quoted.
+		assertEquals("'{\\n'", rec.get(0).event.bindings.get("A"));
+
+		// terms should be canonical.
+		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+
+		// lists should be processed
+		Object o = rec.get(4).event.bindings.get("A");
+		assertTrue(o instanceof List);
+
+		// list elements should be processed recursively
+		List l = (List) o;
+		assertTrue(l.get(0) instanceof List);
+		assertEquals("'A'", l.get(1));
+
+	}
+
+	public void testPDT287_3() throws Exception {
+		
+		session.queryOnce("unquoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS
+				| PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("canonical", "A=('B'+'C')",PrologInterface.PROCESS_LISTS
+				| PrologInterface.UNQUOTE_ATOMS);
+		session.queryOnce("process_lists", "A=[[1,2],'A']",PrologInterface.PROCESS_LISTS
+				| PrologInterface.UNQUOTE_ATOMS);
+		session.join();
+		// atoms should be unquoted.
+		assertEquals("{\n", rec.get(0).event.bindings.get("A"));
+
+		// terms should be canonical.
+		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+
+		// lists should be processed
+		Object o = rec.get(4).event.bindings.get("A");
+		assertTrue(o instanceof List);
+
+		// list elements should be processed recursively
+		List l = (List) o;
+		assertTrue(l.get(0) instanceof List);
+		assertEquals("A", l.get(1));
+
+	}
+
+	public void testPDT287_4() throws Exception {
+		
+		// Everything should be CTerms, no list Processing.
+		session.queryOnce("bla", "A=[[1,2],'A']",PrologInterface.CTERMS);
+		session.join();
+		Object o = rec.get(0).event.bindings.get("A");
+		assertTrue(o instanceof CCompound);
+
+	}
+
+	public void testPDT287_illegal_session() throws Exception {
+		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
+		try {
+			AsyncPrologSession session = pif.getAsyncSession(PrologInterface.CTERMS
+					| PrologInterface.UNQUOTE_ATOMS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			;
+		}
+		// combination of CTERMS and PROCESS_LIST is illegal (for now).
+		try {
+			AsyncPrologSession session = pif.getAsyncSession(PrologInterface.CTERMS
+					| PrologInterface.PROCESS_LISTS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			;
+		}
+		
+		// naturally, combination of all three is illegal
+		try {
+			AsyncPrologSession session = pif.getAsyncSession(PrologInterface.CTERMS
+					| PrologInterface.UNQUOTE_ATOMS
+					| PrologInterface.PROCESS_LISTS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			;
+		}
+	}
+	
+	public void testPDT287_illegal_query() throws Exception {
+		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
+		try {
+			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
+					| PrologInterface.UNQUOTE_ATOMS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			;
+		}
+		// combination of CTERMS and PROCESS_LIST is illegal (for now).
+		try {
+			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
+					| PrologInterface.PROCESS_LISTS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			;
+		}
+		
+		// naturally, combination of all three is illegal
+		try {
+			session.queryOnce("bla","syntax error", PrologInterface.CTERMS
+					| PrologInterface.UNQUOTE_ATOMS
+					| PrologInterface.PROCESS_LISTS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			;
 		}
 	}
 	
@@ -349,12 +503,12 @@ public class AsyncSocketSessionTest extends TestCase {
 	 * processor should now recieve the async abort request, it should skip the
 	 * second goal.
 	 * 
-	 * Note: with the original implementation, cuts where reported after solutions,
-	 *  so the the first solution would be reported by the session.
-	 *  The current pifcom implementation checks for cut events first, so first solution is 
-	 *  NOT reported.
-	 *  I figured that this change in semantics would not be of much relevants in practical 
-	 *  applications, and it is much easier to realize on the server side.
+	 * Note: with the original implementation, cuts where reported after
+	 * solutions, so the the first solution would be reported by the session.
+	 * The current pifcom implementation checks for cut events first, so first
+	 * solution is NOT reported. I figured that this change in semantics would
+	 * not be of much relevants in practical applications, and it is much easier
+	 * to realize on the server side.
 	 */
 	public void test_abort01() throws Throwable {
 		session.queryOnce("1", "thread_self(Alias)");
@@ -412,8 +566,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		// session.queryOnce("start tracer","trace");
 
 		session.dispose();
-		assertEquals(/*"goalHasSolution(2,null,(M-->2)), "
-				+ */"goalCut(2,null,null), " + "goalSkipped(3,null,null), "
+		assertEquals(/*
+						 * "goalHasSolution(2,null,(M-->2)), " +
+						 */"goalCut(2,null,null), " + "goalSkipped(3,null,null), "
 				+ "abortComplete(dummy,null,null), "
 				+ "batchComplete(null,null,null)", rec.toString());
 
@@ -425,21 +580,18 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	}
 
-	public void test_setProtocolOption() throws Exception {
-		session.setPreferenceValue("socketsession.canonical", "true");
-
-	}
+	
 
 	public void test_manyAsyncSessions() throws Throwable {
-		int N = 32;
+		int N = 30;
 		AsyncPrologSession[] sessions = new AsyncPrologSession[N];
 		for (int i = 0; i < N; i++) {
 			sessions[i] = pif.getAsyncSession();
 		}
-		try{ 
+		try {
 			AsyncPrologSession session = pif.getAsyncSession();
-		
-		}catch(PrologInterfaceException e){
+
+		} catch (PrologInterfaceException e) {
 			e.printStackTrace();
 		}
 		for (int i = 0; i < N; i++) {

@@ -13,6 +13,7 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -71,7 +72,7 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 			knownParameters.add(options[i].getId());
 		}
 		try {
-			s = info.getPrologInterace().getSession();
+			s = info.getPrologInterace().getSession(PrologInterface.NONE);
 			info.configure(
 					PrologRuntimePlugin.getDefault().getLibraryManager(), s);
 			String selectionTerm = info.getSelectionTerm();
@@ -110,7 +111,7 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 		PrologSession s = null;
 
 		try {
-			s = info.getPrologInterace().getSession();
+			s = info.getPrologInterace().getSession(PrologInterface.NONE);
 
 			String parameterTerm = info.getParameterTerm();
 			String identifier = info.getRefactoringId();
@@ -157,7 +158,7 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 		List l0 = null;
 		try {
 			try {
-				s=info.getPrologInterace().getSession();
+				s=info.getPrologInterace().getSession(PrologInterface.NONE);
 				l0 = s.queryAll("pdt_resource_delta(Old,New,Type)");
 				l1 = s.queryAll("pdt_modified_file(File,Path)");
 				l2 = s.queryAll("pdt_text_delta(File,Start,End,String)");

@@ -22,7 +22,7 @@ public class PEFGraph {
 		}
 		PrologSession s = null;
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			return null != s.queryOnce("pef_graph_node(" + node.getId()
 					+ ",_,_)");
 
@@ -45,7 +45,7 @@ public class PEFGraph {
 		}
 		PrologSession s = null;
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			s.queryOnce("pef_graph_set_visible(" + node.getId() + "," + visible
 					+ "),pef_graph_refresh");
 

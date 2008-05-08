@@ -354,6 +354,8 @@ handle_batch_message(abort(Id),OutStream):-
 	;	record_abort_request(async,Id),
 		debug(consult_server(handler),"recorded abort (async, id=~w)~n",[Id])
 	).
+handle_batch_command(set_option(Option,Value),_,OutStream):-
+	call_save(OutStream,set_option(Option,Value)).
 handle_batch_command(abort(Id),_,OutStream):-
     debug(consult_server(handler),"recieved abort (sync, id=~w)~n",[Id]),
 	(	abort_requested(async,Id)

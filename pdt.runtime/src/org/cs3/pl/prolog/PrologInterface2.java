@@ -42,7 +42,14 @@
 package org.cs3.pl.prolog;
 
 public interface PrologInterface2 extends PrologInterface{
+	/**
+	 * 
+	 * @deprecated use getAsyncSession(int). Using the PrologInterface.LEGACY should
+	 * be compatible with legacy code.
+	 * 
+	 */
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
+	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
 	public void removeLifeCycleHook(final LifeCycleHook hook,
 			final String hookId);
 }

@@ -55,8 +55,10 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.Disposable;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -65,6 +67,8 @@ import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.lifecycle.WorkRunnable;
 import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * convenience implementation of common infrastructure.
@@ -253,7 +257,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 
 		try {
-			return getSession_internal();
+			return getSession_internal(LEGACY);//FIXME: a temporary solution. 
 		} catch (Throwable t) {
 			throw new PrologInterfaceException(t);
 		}
@@ -269,10 +273,15 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		throw new IllegalArgumentException("option not supported: " + opt);
 	}
 
-	public abstract PrologSession getSession_impl() throws Throwable;
+	public abstract PrologSession getSession_impl(int flags) throws Throwable;
 
-	public PrologSession getSession() throws PrologInterfaceException {
-
+	public PrologSession getSession() throws PrologInterfaceException{
+		return getSession(LEGACY);
+	}
+	
+	public PrologSession getSession(int flags) throws PrologInterfaceException {
+		
+		PLUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
 				throw new PrologInterfaceException(getError());
@@ -286,7 +295,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 				}
 			}
 			try {
-				return getSession_internal();
+				return getSession_internal(flags);
 			} catch (Throwable t) {
 				throw new PrologInterfaceException("Failed to obtain session",
 						t);
@@ -295,9 +304,11 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
-	private PrologSession getSession_internal() throws Throwable {
+	
 
-		PrologSession s = getSession_impl();
+	private PrologSession getSession_internal(int flags) throws Throwable {
+
+		PrologSession s = getSession_impl(flags);
 		sessions.add(new WeakReference<PrologSession>(s));
 		return s;
 
@@ -317,7 +328,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	protected PrologSession getShutdownSession()
 			throws PrologInterfaceException {
 		try {
-			return getSession_internal();
+			return getSession_internal(LEGACY); //FIXME: a temporary solution
 		} catch (Throwable t) {
 			throw new PrologInterfaceException(t);
 		}

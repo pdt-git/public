@@ -182,7 +182,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			PrologInterfaceException {
 		// return
 		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try {
 			if (module == null)
 				module = "_";
@@ -242,7 +242,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	private void load_libraries(PrologInterface pif) {
 		PrologSession s =null;
 		try{
-			s= pif.getSession();
+			s= pif.getSession(PrologInterface.NONE);
 			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), s, new String[]{PDTConsole.PL_LIBRARY});
 			s.queryOnce("use_module(library(pdtplugin))");
 			

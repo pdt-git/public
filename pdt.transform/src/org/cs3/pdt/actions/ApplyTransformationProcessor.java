@@ -9,6 +9,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -56,7 +57,7 @@ public class ApplyTransformationProcessor extends RefactoringProcessor {
 		PrologSession s = null;
 		Map m = null;
 		try{
-				s=info.pif.getSession();	
+				s=info.pif.getSession(PrologInterface.NONE);	
 				s.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
 				s.queryOnce("ensure_loaded(library('facade/pdt_delta'))");
 				s.queryOnce("ensure_loaded(library('pef/pef_base'))");
@@ -94,7 +95,7 @@ public class ApplyTransformationProcessor extends RefactoringProcessor {
 		List l1 = null;
 		List l2 = null;
 		try{
-				s=info.pif.getSession();				
+				s=info.pif.getSession(PrologInterface.NONE);				
 				l1 =s.queryAll("pdt_modified_file(File,Path)");
 				l2 = s.queryAll("pdt_text_delta(File,Start,End,String)");
 				

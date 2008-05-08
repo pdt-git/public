@@ -112,7 +112,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		if(pif.isUp()){
 			PrologSession s =null;
 			try{
-				s= pif.getSession();
+				s= pif.getSession(PrologInterface.NONE);
 				hook.onInit(pif,s);
 				
 			} catch (PrologInterfaceException e) {
@@ -182,12 +182,12 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	private void enableSubject(String subject) throws PrologInterfaceException {
 		if (session == null) {
-			session = pif.getAsyncSession();
+			session = pif.getAsyncSession(PrologInterface.NONE);
 			session.addBatchListener(this);
 		} else {
 			abort();
 		}
-		PrologSession s = pif.getSession();
+		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
 			String query = "pif_observe('" + session.getProcessorThreadAlias() + "',"
 					+ subject + ","+Util.quoteAtom(subject) +")";
@@ -217,7 +217,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	}
 
 	private void abort() throws PrologInterfaceException {
-		PrologSession s = pif.getSession();
+		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
 			abort(s);
 		} finally {
