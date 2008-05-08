@@ -575,7 +575,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 					PrologInterface pif = getMetadataPrologInterface();
 					PrologSession s = null;
 					try {
-						s = pif.getSession();
+						s = pif.getSession(PrologInterface.NONE);
 						updateBuildPath(s);
 					} finally {
 						if (s != null) {

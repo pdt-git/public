@@ -57,6 +57,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
@@ -111,7 +112,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
 				 * problem.
 				 */
 				try {
-					session = PDTUtils.getActiveConsolePif().getSession();
+					session = PDTUtils.getActiveConsolePif().getSession(PrologInterface.NONE);
 				} catch (PrologInterfaceException e) {
 					Debug.rethrow(e);
 				}

@@ -89,7 +89,7 @@ public class QueryAction extends Action {
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 
-						PrologSession session = pif.getSession();
+						PrologSession session = pif.getSession(PrologInterface.NONE);
 						try {
 							//	 Alternative                        	
 							//	                    		model.setLineBuffer(query + ".");

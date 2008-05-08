@@ -13,7 +13,7 @@ import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession2;
+import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
@@ -115,10 +115,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		}
 
 		PrologInterface pif = getProject().getMetadataPrologInterface();
-		PrologSession2 s = null;
+		PrologSession s = null;
 		try {
-			s = (PrologSession2) pif.getSession();
-			s.setPreferenceValue("socketsession.canonical","true");
+			s =  pif.getSession(PrologInterface.CTERMS);			
 			/* pdt_completion(File,ContextName,Prefix,ModuleName:PredName/Arity,Tags) */
 			IFile file = getFile();
 			String path = Util.prologFileName(file.getLocation().toFile());

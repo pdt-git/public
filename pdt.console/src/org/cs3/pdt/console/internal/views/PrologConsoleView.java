@@ -848,7 +848,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			return;
 		}
 		//if (pif.isUp()) {
-			PrologSession session = pif.getSession();
+			PrologSession session = pif.getSession(PrologInterface.NONE);
 			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
 					.getLibraryManager(), session,
 					new String[] { PDTConsole.PL_LIBRARY });

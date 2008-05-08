@@ -325,8 +325,7 @@ public class CopyOfContentModel extends DefaultAsyncPrologSessionListener implem
 
 	private AsyncPrologSession getSession() throws PrologInterfaceException {
 		if (session == null && pif != null) {
-			session = ((PrologInterface2) pif).getAsyncSession();
-			session.setPreferenceValue("socketsession.canonical", "true");
+			session = ((PrologInterface2) pif).getAsyncSession(PrologInterface.CTERMS);			
 			session.addBatchListener(this);
 		}
 		return session;

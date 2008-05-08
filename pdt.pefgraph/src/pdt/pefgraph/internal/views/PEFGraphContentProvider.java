@@ -94,7 +94,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 
 		PrologSession s = null;
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			List l = s.queryAll("pef_graph_node(Id, Type,Labels)");
 			for (Object o : l) {
 
@@ -131,7 +131,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 		PrologSession s = null;
 		PEFNode result=null;
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			Map m = s.queryOnce("pef_graph_node(" + id + ", Type,Labels)");
 			if (m == null) {
 				return null;
@@ -182,7 +182,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 		edges = new HashSet<PEFEdge>();
 		PrologSession s = null;
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			List l = s.queryAll("pef_graph_edge(From,Label,To)");
 
 			int i = 0;
@@ -288,7 +288,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 			pif.addLifeCycleHook(hook, HOOK_ID, new String[] {});
 			if (pif.isUp()) {
 
-				hook.onInit(pif, pif.getSession());
+				hook.onInit(pif, pif.getSession(PrologInterface.NONE));
 
 			}
 			IPrologEventDispatcher d = PrologRuntimePlugin.getDefault()
@@ -355,7 +355,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 
 		}
 
-		@Override
+		
 		public void setData(Object data) {
 			// TODO Auto-generated method stub
 			

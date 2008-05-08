@@ -54,17 +54,17 @@ import org.cs3.pl.cterm.CTerm;
 import junit.framework.TestCase;
 
 public class PLUtilTest extends TestCase {
-	private PrologSession2 session;
+	private PrologSession session;
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
 		PrologInterface pif = plugin.getPrologInterface("test");
-		this.session = (PrologSession2)pif.getSession();
+		this.session = pif.getSession(PrologInterface.CTERMS);
 		PLUtil.configureFileSearchPath(plugin.getLibraryManager(), session, new String[]{PrologRuntime.LIB_COMMON});
 		session.queryOnce("use_module(library('/org/cs3/pdt/util/pdt_util_rbtree'))");
 		
-		session.setPreferenceValue("socketsession.canonical", "true");
+
 	}
 	
 	public void testIterator() throws Throwable{

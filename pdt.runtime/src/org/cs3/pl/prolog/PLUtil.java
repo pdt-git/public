@@ -51,6 +51,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
+import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CNil;
@@ -65,7 +66,18 @@ import org.cs3.pl.cterm.internal.ParserCTermFactory;
  * 
  */
 public class PLUtil {
+	public static boolean isList(CTerm term) {
 
+		return term.getFunctorValue().equals(".") && term.getArity() == 2;
+	}
+	public static void checkFlags(int flags) {
+		if(Util.flagsSet(flags,PrologInterface.CTERMS | PrologInterface.UNQUOTE_ATOMS) ){
+			throw new IllegalArgumentException("cannot combine CTERMS and UNTQUOTE_ATOMS");
+		}
+		if(Util.flagsSet(flags, PrologInterface.CTERMS | PrologInterface.PROCESS_LISTS)){
+			throw new IllegalArgumentException("cannot combine CTERMS and PROCESS_LISTS (yet)");
+		}
+	}
 	public static void configureFileSearchPath(PrologLibraryManager mgr,
 			PrologSession session, String[] libIds) throws PrologException,
 			PrologInterfaceException {

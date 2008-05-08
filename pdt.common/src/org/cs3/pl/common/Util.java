@@ -854,4 +854,9 @@ public class Util {
 		}
 	}
 
+	public static boolean flagsSet(int flags, int set) {
+
+		return (flags & set) == set;
+	}
+
 }

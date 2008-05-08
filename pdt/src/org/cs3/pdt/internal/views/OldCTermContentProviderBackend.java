@@ -15,10 +15,9 @@ import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession2;
+import org.cs3.pl.prolog.PrologSession;
 
 public class OldCTermContentProviderBackend  {
 
@@ -118,10 +117,10 @@ public class OldCTermContentProviderBackend  {
 		HashSet dynamic = new HashSet();
 		HashSet multifile = new HashSet();
 		HashSet module_transparent = new HashSet();
-		PrologSession2 s = (PrologSession2) pif.getSession();
+		PrologSession s =  pif.getSession(PrologInterface.CTERMS);
 		try {
 			
-			s.setPreferenceValue("socketsession.canonical", "true");
+			
 			//s.queryOnce("guitracer");
 			String query = "pdt_file_annotation('" + plFile
 					+ "',Annos,Members)";

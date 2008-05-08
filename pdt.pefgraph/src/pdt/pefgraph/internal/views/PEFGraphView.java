@@ -49,7 +49,7 @@ public class PEFGraphView extends ViewPart{
 		public void run() {
 			PrologSession s=null;
 			try{
-				s=pif.getSession();
+				s=pif.getSession(PrologInterface.NONE);
 				s.queryOnce("pef_graph_action_run("+action+")");
 			}catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
@@ -170,7 +170,7 @@ public class PEFGraphView extends ViewPart{
 			String selectionList = "["+Util.splice(getSelectedIds(), ",")+"]";
 			PrologSession s = null;
 			try{
-				s=pif.getSession();
+				s=pif.getSession(PrologInterface.NONE);
 				List l = s.queryAll("pef_graph_action("+selectionList+",Action,Path,Label,Style)");
 				for (Object object : l) {
 					Map m = (Map) object;
@@ -237,7 +237,7 @@ public class PEFGraphView extends ViewPart{
 				PrologSession session = null;
 				try {
 
-					session = pif.getSession();
+					session = pif.getSession(PrologInterface.NONE);
 					session.queryOnce("pef_graph_clear");
 					contentProvider.reset();
 				} catch (PrologInterfaceException e) {

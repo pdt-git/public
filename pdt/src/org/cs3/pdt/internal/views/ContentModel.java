@@ -276,7 +276,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (sessionLock) {
 			if (session == null && pif != null) {
 				//session = ((PrologInterface2) pif).getAsyncSession();
-				session=new AsyncPrologSessionProxy((PrologInterface2) pif);
+				session=new AsyncPrologSessionProxy((PrologInterface2) pif,PrologInterface.PROCESS_LISTS);
 				// session.setPreferenceValue("socketsession.canonical",
 				// "true");
 				session.addBatchListener(this);
@@ -542,7 +542,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
-		PrologSession s = pif.getSession();
+		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
 			PLUtil.configureFileSearchPath(mgr, s,
 					new String[] { PrologRuntime.LIB_PDT });

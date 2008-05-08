@@ -46,6 +46,7 @@ import java.lang.ref.WeakReference;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.LifeCycleHook;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -60,9 +61,14 @@ public abstract class AbstractPrologInterface2 extends AbstractPrologInterface
 
 	}
 
-	public abstract AsyncPrologSession getAsyncSession_impl() throws Throwable;
-
+	public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable;
+	
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
+		return getAsyncSession(LEGACY);
+	}
+	
+	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException {
+		PLUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if(getError()!=null){
 				throw new PrologInterfaceException(getError());
@@ -76,7 +82,7 @@ public abstract class AbstractPrologInterface2 extends AbstractPrologInterface
 				}
 			}
 			try {
-				return getAsyncSession_internal();
+				return getAsyncSession_internal(flags);
 			} catch (Throwable t) {
 				throw new PrologInterfaceException("Failed to obtain session",
 						t);
@@ -84,9 +90,9 @@ public abstract class AbstractPrologInterface2 extends AbstractPrologInterface
 		}
 	}
 
-	private AsyncPrologSession getAsyncSession_internal() throws Throwable {
+	private AsyncPrologSession getAsyncSession_internal(int flags) throws Throwable {
 
-		AsyncPrologSession s = getAsyncSession_impl();
+		AsyncPrologSession s = getAsyncSession_impl(flags);
 		sessions.add(new WeakReference(s));
 		return s;
 

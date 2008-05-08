@@ -66,7 +66,7 @@ import org.cs3.pl.common.OptionProvider;
  * @author lukas
  * 
  */
-public interface AsyncPrologSession extends OptionProvider, Disposable {
+public interface AsyncPrologSession extends  Disposable {
 	public void addBatchListener(AsyncPrologSessionListener l);
 
 	public void removeBatchListener(AsyncPrologSessionListener l);
@@ -86,6 +86,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * @see AsyncPrologSessionListener
 	 */
 	public void queryAll(Object ticket, String query) throws PrologInterfaceException;
+	public void queryAll(Object ticket, String query,int flags) throws PrologInterfaceException;
 
 	/**
 	 * Enque a request for the first solution to a goal.
@@ -102,6 +103,7 @@ public interface AsyncPrologSession extends OptionProvider, Disposable {
 	 * @see AsyncPrologSessionListener
 	 */
 	public void queryOnce(Object ticket, String query) throws PrologInterfaceException;
+	public void queryOnce(Object ticket, String query,int flags) throws PrologInterfaceException;
 
 	/**
 	 * Wait for pending queries.

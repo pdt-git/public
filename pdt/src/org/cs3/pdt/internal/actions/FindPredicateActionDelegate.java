@@ -180,7 +180,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		+ "pdt_predicate_contribution(Pred,File,Start,End)";
 		Map m=null;
 		try{
-			session=pif.getSession();
+			session=pif.getSession(PrologInterface.NONE);
 			m = session.queryOnce(query);
 		}
 		finally{
@@ -205,7 +205,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			throw new RuntimeException(e);
 		}
 		String plFile = Util.prologFileName(file.getLocation().toFile());
-		PrologSession s = plprj.getMetadataPrologInterface().getSession();
+		PrologSession s = plprj.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 		SourceLocation loc =null;
 		try{
 			String contextModule = goal.getModule();

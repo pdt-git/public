@@ -119,7 +119,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			String filename) throws NumberFormatException, PrologException, PrologInterfaceException {
 		// return
 		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 
 		if (module == null)
 			module = "_";
@@ -153,7 +153,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	}
 
 	public Clause[] retrievePrologElements(String file) throws PrologException, PrologInterfaceException {
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 
 		List results = session.queryAll(/*
 										 * "bagof([Pos_,Len_]," +
@@ -186,7 +186,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 
 	public String getHelp(Predicate data) throws PrologInterfaceException {
 
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 		Map table = null;
 		try {
 			table = session.queryOnce("manual_entry(" + data.getName() + ","
@@ -207,7 +207,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	}
 
 	public Clause[] findClauses(Predicate p) throws PrologInterfaceException {
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try {
 			
 			String query= "meta_data(File,"
@@ -254,7 +254,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 */
 	public Predicate[] findPredicates(Goal g) throws PrologInterfaceException {
 		Set result = new HashSet();
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try{
 			String query= "meta_data(File,"
 				+"Module,"

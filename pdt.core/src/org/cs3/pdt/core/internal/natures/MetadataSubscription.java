@@ -102,7 +102,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		if (pif.isUp()) {
 			PrologSession session = null;
 			try {
-				session = pif.getSession();
+				session = pif.getSession(PrologInterface.NONE);
 				onInit(pif, session);
 			} catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
@@ -121,7 +121,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		if (pif.isUp()) {
 			PrologSession session = null;
 			try {
-				session = pif.getSession();
+				session = pif.getSession(PrologInterface.NONE);
 			} catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
 			}

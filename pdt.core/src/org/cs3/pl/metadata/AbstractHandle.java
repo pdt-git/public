@@ -52,10 +52,11 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologSession2;
+import org.cs3.pl.prolog.PrologSession;
 
 public abstract  class AbstractHandle implements Handle, PrologInterfaceListener {
 	IPrologProject project = null;
@@ -69,9 +70,8 @@ public abstract  class AbstractHandle implements Handle, PrologInterfaceListener
 			return;
 		}
 		String query="pdt_lookup("+constructHandleTerm()+")"; 
-		PrologSession2 session = (PrologSession2) project.getMetadataPrologInterface().getSession();		
-		try{
-			session.setPreferenceValue("socketsession.canonical", "true");
+		PrologSession session =  project.getMetadataPrologInterface().getSession(PrologInterface.CTERMS);		
+		try{		
 			List list = session.queryAll(query);
 			if(list.size()>1){
 				throw new InvalidHandleExcpetion("Handle is not unique! The following query produced more than one result: "+query);

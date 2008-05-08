@@ -61,7 +61,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 	private void updatePrologBackend(String[] ids, String[] values) {
 		itsMe=true;
 		try {
-			AsyncPrologSession s = ((PrologInterface2)prologProject.getMetadataPrologInterface()).getAsyncSession();
+			AsyncPrologSession s = ((PrologInterface2)prologProject.getMetadataPrologInterface()).getAsyncSession(PrologInterface.NONE);
 			s.addBatchListener(new DefaultAsyncPrologSessionListener());
 			for (int i = 0; i < values.length; i++) {
 				s.queryOnce("setup annotators", "pdt_set_annotator_enabled("+ids[i]+", "+values[i]+")");
@@ -96,7 +96,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		PrologInterface pif = prologProject.getMetadataPrologInterface();
 		
 		
-		PrologSession session = pif.getSession();
+		PrologSession session = pif.getSession(PrologInterface.NONE);
 		List l = session.queryAll("pdt_annotator_enabled(Annotator,Enabled)");
 		options = new Option[l.size()];
 		

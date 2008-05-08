@@ -22,13 +22,11 @@ import org.cs3.pl.prolog.AsyncPrologSessionListener;
 import org.cs3.pl.prolog.AsyncPrologSessionListener2;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class AsynchronousPIFComSession implements AsyncPrologSession {
-	private static final String OPT_CANONICAL = "socketsession.canonical";
-	private static final String OPT_INTERPRETE_LISTS = "socketsession.interprete_lists";
-
-	private final class ResultDispatcher extends Thread {
+		private final class ResultDispatcher extends Thread {
 		private int stopTicket = -1;
 
 		public ResultDispatcher(String string) {
@@ -50,17 +48,14 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 
 		public void stopDispatching() throws Throwable {
 			Object monitor = new Object();
-			stopTicket = storeTicket(monitor, null);
+			stopTicket = storeTicket(monitor, null,PrologInterface.NONE);
 			connection.writeBatchMessage(Message.mark(stopTicket));
 			connection.flushBatch();
 			join();
 		}
 	}
 
-	private Option[] options;
-
-	private boolean canonical=false;
-	private boolean interpreteLists=true;
+	
 	PIFComConnection connection;
 	BitSet successfull;
 	HashMap<Integer, Object> tickets = new HashMap<Integer, Object>();
@@ -70,11 +65,14 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 	private ResultDispatcher dispatcher;
 	private boolean disposed;
 	private PrologInterfaceException error;
+	private HashMap<Integer, Integer> queryFlags = new HashMap<Integer, Integer>();
+	private int flags;
 
 	public AsynchronousPIFComSession(PIFComConnection connection,
-			PIFComPrologInterface pif) {
+			PIFComPrologInterface pif, int flags) {
 		this.connection = connection;
 		this.pif = pif;
+		this.flags=flags;
 		dispatcher = new ResultDispatcher("Result Dispatcher "
 				+ connection.getThreadAlias());
 		dispatcher.start();
@@ -82,6 +80,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 
 	public void dispatchResult(Message m) throws PrologInterfaceException {
 		Object ticket = getTicket(m.getTicket());
+		int flags = getFlags(m.getTicket());
 		switch (m.getOpCode()) {
 		case Message.OPC_MARK:
 			fireJoinComplete(m.getTicket(), ticket);
@@ -96,7 +95,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 			fireGoalFailed(m.getTicket(), ticket);
 			break;
 		case Message.OPC_BEGIN_SOLUTION:
-			dispatchSolutions(m, ticket);
+			dispatchSolutions(m, ticket,flags);
 			break;
 		case Message.OPC_ERROR:
 			fireGoalRaisedException(m.getTicket(), ticket, getQuery(m
@@ -117,7 +116,9 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 		}
 	}
 
-	private void dispatchSolutions(Message m, Object ticket)
+	
+
+	private void dispatchSolutions(Message m, Object ticket,int flags)
 			throws PrologInterfaceException {
 
 		int size = ((UIntMessage) m).getIntValue();
@@ -141,7 +142,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 				}
 			} else {
 				while ((m = connection.readMessage()).getOpCode() == Message.OPC_BINDING) {
-					Object value = processBinding((CTermMessage) m);
+					Object value = PIFComUtils.processBinding((CTermMessage) m,flags);
 					map.put(names[i++], value);
 					if (i == size) {
 						i = 0;
@@ -183,13 +184,14 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 
 	}
 
-	private int storeTicket(Object ticket, String query) {
+	private int storeTicket(Object ticket, String query,int flags) {
 		int id = connection.getNewTicket();
 
 		synchronized (tickets) {
 			Integer key = new Integer(id);
 			tickets.put(key, ticket);
 			queries.put(key, query);
+			queryFlags.put(key, flags);
 		}
 		return id;
 	}
@@ -214,12 +216,20 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 			return ticket;
 		}
 	}
+	
+	private int getFlags(int id) {
+		synchronized(tickets){
+			return queryFlags.get(id);
+		}
+		
+	}
 
 	private void removeTicket(int id) {
 		synchronized (tickets) {
 			Integer key = new Integer(id);
 			tickets.remove(key);
 			queries.remove(key);
+			queryFlags.remove(key);
 		}
 	}
 
@@ -229,7 +239,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 	}
 
 	public void abort(Object monitor) throws PrologInterfaceException {
-		int ticket = storeTicket(monitor, null);
+		int ticket = storeTicket(monitor, null,PrologInterface.NONE);
 		Message m = Message.abort(ticket);
 
 		try {
@@ -298,7 +308,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 
 	public void join() throws PrologInterfaceException {
 		Object monitor = new Object();
-		int ticket = storeTicket(monitor, null);
+		int ticket = storeTicket(monitor, null,PrologInterface.NONE);
 		try {
 			connection.writeBatchMessage(Message.mark(ticket));
 			connection.flushBatch();
@@ -332,17 +342,29 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 	}
 
 	public void queryOnce(Object ticket, String query) throws PrologException,
+	PrologInterfaceException {
+		queryOnce(ticket,query,this.flags);
+	}
+	
+	public void queryOnce(Object ticket, String query,int flags) throws PrologException,
 			PrologInterfaceException {
+		PLUtil.checkFlags(flags);
 		if (query.endsWith(".")) {
 			query = query.substring(0, query.length() - 1);
 		}
 		query = "once((" + query + ")).";
-		queryAll(ticket, query);
+		queryAll(ticket, query,flags);
 
 	}
 
 	public void queryAll(Object ticket, String query) throws PrologException,
+	PrologInterfaceException {
+		queryAll(ticket,query,this.flags);
+	}
+	
+	public void queryAll(Object ticket, String query,int flags) throws PrologException,
 			PrologInterfaceException {
+		PLUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed.");
 		}
@@ -350,55 +372,13 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 			query = query + ".";
 		}
 		Vector<Map> result = new Vector<Map>();
-		int ticketNum = storeTicket(ticket, query);
+		int ticketNum = storeTicket(ticket, query,flags);
 
 		try {
 			connection.writeBatchMessage(Message.query(ticketNum, query));
 			connection.flushBatch();
 		} catch (IOException e) {
 			throw pif.error(e);
-		}
-	}
-
-	public Option[] getOptions() {
-		if (options == null) {
-			options = new Option[] {
-					new SimpleOption(OPT_CANONICAL, "canonical values",
-							"if set, the session will answer canonical terms",
-							Option.FLAG, "false"),
-					new SimpleOption(OPT_INTERPRETE_LISTS, "interprete lists",
-							"if set, the session will use (nested) java.util.List instances to represent"
-									+ " prolog list terms.", Option.FLAG,
-							"true") };
-		}
-		return options;
-	}
-
-	/**
-	 * this implementation does nothing.
-	 */
-	public void reconfigure() {
-		;
-
-	}
-
-	public String getPreferenceValue(String id, String string) {
-		if (OPT_CANONICAL.equals(id)) {
-			return canonical ? "true" : "false";
-		} else if (OPT_INTERPRETE_LISTS.equals(id)) {
-			return interpreteLists ? "true" : "false";
-		}
-		throw new IllegalArgumentException("unkown option id: " + id);
-	}
-
-	public void setPreferenceValue(String id, String value) {
-
-		if (OPT_CANONICAL.equals(id)) {
-			canonical = Boolean.valueOf(value).booleanValue();
-		} else if (OPT_INTERPRETE_LISTS.equals(id)) {
-			interpreteLists = Boolean.valueOf(value).booleanValue();
-		} else {
-			throw new IllegalArgumentException("unkown option id: " + id);
 		}
 	}
 
@@ -540,44 +520,5 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 
 	}
 
-	private Object processBinding(CTermMessage m) {
-		CTerm term = m.getCTermValue();
-		if (canonical) {
-			return term;
-		}
-		if (interpreteLists) {
-			return interpreteLists_deep(term);
-		}
-
-		return m.getStringValue();
-
-		// FIXME: handle lists
-	}
-
 	
-	protected static Object interpreteLists_deep(CTerm term) {
-		if (term instanceof CNil){
-			return new Vector();
-		}
-		else if (isList(term)) {
-
-			Vector<CTerm> terms = PLUtil.listAsVector(term);
-
-			Vector result = new Vector();
-			for (CTerm t : terms) {
-				result.add(interpreteLists_deep(t));
-			}
-			return result;
-		} else {
-			return PLUtil.renderTerm(term);
-		}
-
-	}
-
-
-	private static boolean isList(CTerm term) {
-
-		return term.getFunctorValue().equals(".") && term.getArity() == 2;
-	}
-
 }

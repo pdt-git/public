@@ -67,6 +67,7 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
@@ -167,7 +168,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			PrologInterface2 pif = ((PrologInterface2) plProject
 					.getMetadataPrologInterface());
 			setupPif(pif);
-			final AsyncPrologSession as = pif.getAsyncSession();
+			final AsyncPrologSession as = pif.getAsyncSession(PrologInterface.NONE);
 
 			monitor.beginTask(taskname, contentList.size()
 					+ existenceList.size());
@@ -235,7 +236,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	private void setupPif(PrologInterface2 pif) throws CoreException {
 		PrologSession s = null;
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 
 			PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 					.getLibraryManager();
@@ -294,7 +295,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		AsyncPrologSession as = null;
 		try {
 			as = ((PrologInterface2) plProject.getMetadataPrologInterface())
-					.getAsyncSession();
+					.getAsyncSession(PrologInterface.NONE);
 
 			forget(forgetList, as, monitor);
 		} catch (PrologInterfaceException e) {

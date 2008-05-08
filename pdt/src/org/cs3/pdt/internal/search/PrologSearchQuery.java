@@ -122,7 +122,7 @@ public class PrologSearchQuery implements ISearchQuery {
 			+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
 			List l=null;
 			try{
-				session=pif.getSession();
+				session=pif.getSession(PrologInterface.NONE);
 				l = session.queryAll(query);
 			}
 			finally{

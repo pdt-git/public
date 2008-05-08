@@ -113,7 +113,7 @@ public class AdapterFactory implements IAdapterFactory {
 			query = "fail";
 		}
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			Map m = s.queryOnce(query);
 			if (m == null) {
 				return null;

@@ -54,7 +54,7 @@ public class PEFPropertySource implements IPropertySource {
 		PrologSession s = null;
 		data = new HashMap<Object, Object>();
 		try {
-			s=pif.getSession();
+			s=pif.getSession(PrologInterface.NONE);
 			List l = s.queryAll("pef_graph_property(Category,"+id+", Key,Value)");
 			descriptors = new IPropertyDescriptor[l.size()];			
 			int i=0;

@@ -96,7 +96,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		if (pif.isUp()) {
 			PrologSession session=null;
 			try {
-				session = pif.getSession();
+				session = pif.getSession(PrologInterface.NONE);
 			} catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
 			}
@@ -147,7 +147,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		}
 		PrologSession s =null;
 		try {
-		s= pif.getSession();
+		s= pif.getSession(PrologInterface.NONE);
 		
 			PLUtil.configureFileSearchPath(mgr, s,keys);
 			

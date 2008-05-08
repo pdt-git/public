@@ -56,11 +56,21 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Stack;
+import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.LogBuffer;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.cterm.CAtom;
+import org.cs3.pl.cterm.CString;
+import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CTermFactory;
+import org.cs3.pl.cterm.CVariable;
+import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
 /**
@@ -626,4 +636,109 @@ public class SocketClient {
 	public long getServerPid(){
 		return pid;
 	}
+	
+	public  Object readValue(int flags, CTermFactory ctermFactory) throws IOException {
+		lock();
+		Object value = null;
+		try {
+			BufferedReader r = getReader();
+			// skip whitespace
+			r.mark(1);
+			int c = r.read();
+			while (c != -1 && Character.isWhitespace((char) c)) {
+				r.mark(1);
+				c = r.read();
+			}
+			if (c == -1) {
+				throw new IOException(
+						"read EOF, while skipping whitespace before value.");
+			}
+			StringBuffer sb = new StringBuffer();
+			Stack stack = new Stack();
+			// first non-whitespace char should be a '<'
+			// otherwise we put reset the stream to the old position and
+			// return null
+
+			if (c != '<' && c != '{') {
+				r.reset();
+				return null;
+			}
+			while (c != -1) {
+
+				switch (c) {
+				case '<':
+
+					// clear buffer
+					sb.setLength(0);
+					break;
+				case '{':
+					// push new container
+					stack.push(new Vector());
+					break;
+				case '>':
+					// flush and unescape buffer (remove escaping added by consult_server)
+					value = Util.unescape(sb.toString(), 0, sb.length());
+					//parse the value using the CTERM parser
+					value = ctermFactory.createCTerm(value);
+					
+					if (Util.flagsSet(flags,PrologInterface.CTERMS)) {
+						;// if a CTerm is what the client wants, we are done.
+					}					
+					// otherwise, create a string value
+					else{
+
+						if(Util.flagsSet(flags, PrologInterface.UNQUOTE_ATOMS)					
+							&&(value instanceof CString ||value instanceof CAtom)){
+						value = ((CTerm)value).getFunctorValue();
+						}
+						else if (value instanceof CVariable) {
+							value=((CVariable)value).getFunctorValue();
+						}
+						else{
+							value=PLUtil.renderTerm((CTerm)value);
+						}
+					}
+					// if the stack is empty, return the value.
+					// otherwise, the value is elem of the list lying on top of
+					// the stack.
+					if (stack.isEmpty()) {
+						return value;
+					} else {
+						List l = (List) stack.peek();
+						l.add(value);
+					}
+					break;
+				case '}':
+					// if the stack is empty at this point, we have a problem
+					if (stack.isEmpty()) {
+						throw new IOException(
+								"Read a closing curly bracket (']') but there is no containing list!");
+					}
+					// pop container from stack.
+					value = stack.pop();
+					if (stack.isEmpty()) {
+						return value;
+					} else {
+						List l = (List) stack.peek();
+						l.add(value);
+					}
+					break;
+				default:
+					// append to buffer
+					sb.append((char) c);
+				}
+				c = r.read();
+			}
+			if (c == -1) {
+				throw new IOException(
+						"read EOF, while skipping whitespace before value.");
+			}
+
+		} finally {
+			unlock();
+		}
+		return value;
+	}
+
+	
 }

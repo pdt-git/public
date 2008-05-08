@@ -74,9 +74,9 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 	}
 
 	
-	public AsyncPrologSession getAsyncSession_impl() throws Throwable {
+	public AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable {
 		ReusablePIFComConnection connection = getConnection();
-		return new AsynchronousPIFComSession(connection,this);
+		return new AsynchronousPIFComSession(connection,this,flags);
 	}
 
 	private ReusablePIFComConnection getConnection()
@@ -103,9 +103,9 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 	}
 
 	
-	public PrologSession getSession_impl() throws Throwable {
+	public PrologSession getSession_impl(int flags) throws Throwable {
 		ReusablePIFComConnection connection = getConnection();
-		return new PIFComSession(connection,this);
+		return new PIFComSession(connection,this,flags);
 	}
 
 	public PrologInterfaceFactory getFactory() {

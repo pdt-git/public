@@ -165,7 +165,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 		if (pif.isUp()) {
 			PrologSession s = null;
 			try {
-				s = pif.getSession();
+				s = pif.getSession(PrologInterface.NONE);
 				hook.onInit(pif, s);
 
 			} catch (PrologInterfaceException e) {
@@ -239,7 +239,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			return;
 		}
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			String query = "pif_unsubscribe("+ticket+ ")";
 			s.queryOnce(query);
 		} catch (PrologInterfaceException e) {
@@ -285,7 +285,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			Debug.rethrow(e);
 		}
 		try {
-			s = pif.getSession();
+			s = pif.getSession(PrologInterface.NONE);
 			int port = dispatcher.getPort();
 			if(port==-1){
 				Debug.debug("debug");

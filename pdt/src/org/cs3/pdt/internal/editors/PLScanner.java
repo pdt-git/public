@@ -51,6 +51,7 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologException;
+import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IProject;
@@ -85,7 +86,7 @@ public class PLScanner extends RuleBasedScanner {
 			PrologSession session = null;
 			try {
 				PDTPlugin r = PDTPlugin.getDefault();
-				session = plProject.getMetadataPrologInterface().getSession();
+				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 				List solutions = session
 						.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
 				List keywords = new ArrayList();
@@ -117,7 +118,7 @@ public class PLScanner extends RuleBasedScanner {
 			;
 			try {
 				PDTPlugin r = PDTPlugin.getDefault();
-				session = plProject.getMetadataPrologInterface().getSession();
+				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 				List solutions = session
 						.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
 				List keywords = new ArrayList();

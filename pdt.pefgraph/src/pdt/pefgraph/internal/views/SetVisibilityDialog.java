@@ -41,7 +41,7 @@ public class SetVisibilityDialog extends Dialog {
 	protected void okPressed() {
 		PrologSession s=null;
 		try {
-			s=pif.getSession();
+			s=pif.getSession(PrologInterface.NONE);
 			String query = "pef_graph_set_visible("+idText.getText()+",true),pef_graph_refresh";
 			s.queryOnce(query);
 		} catch (PrologInterfaceException e) {
