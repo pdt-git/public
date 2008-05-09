@@ -52,6 +52,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
+import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
@@ -332,6 +333,23 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	}
 
+	public void testPDT291_nil() throws Exception{
+		rec.clear();
+		session.queryOnce("nabla", "A=[]", PrologInterface.PROCESS_LISTS);
+		session.join();		
+		assertTrue(rec.get(0).event.bindings.get("A") instanceof List);
+		
+		rec.clear();
+		session.queryOnce("nabla", "A=[]", PrologInterface.NONE);
+		session.join();
+		assertTrue(rec.get(0).event.bindings.get("A") instanceof String);
+		
+		rec.clear();
+		session.queryOnce("nabla", "A=[]", PrologInterface.CTERMS);
+		session.join();
+		assertTrue(rec.get(0).event.bindings.get("A") instanceof CNil);
+	}
+	
 	public void testPDT287_2() throws Exception {
 		
 		session.queryOnce("quoted", "atom_codes(A,[123,10])",PrologInterface.PROCESS_LISTS);
