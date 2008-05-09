@@ -52,6 +52,13 @@ public class PIFComPrologInterface extends AbstractPrologInterface2 {
 
 	
 	public String getOption(String opt) {
+		// ld: changed semantic:: System properties override any settings
+		String s = System.getProperty(opt);
+		if (s != null) {
+			Debug.warning("option " + opt
+					+ " is overridden by System Property: " + s);
+			return s;
+		}
 		Option[] options = factory.getOptions();
 		for (Option option : options) {
 			if (option.getId().equals(opt)) {
