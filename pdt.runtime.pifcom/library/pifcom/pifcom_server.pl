@@ -7,7 +7,7 @@
 :- use_module(pifcom_codec).
 
 %:- debug(pifcom_server).
-%:- guitracer.
+:- guitracer.
 
 
 pifcom_start_server(Address):-
@@ -54,8 +54,7 @@ accept_loop(TCPSocket,UDPSocket):-
 					debug(pifcom_server,"Could not create handler thread: ~w.~n",[E])
 				)
 			),
-
-			
+/* does not work this way. see PDT-292, PDT-293 
 			(	nonvar(ThreadId),
 				thread_property(ThreadId,status(Status)),
 				Status==running
@@ -63,6 +62,7 @@ accept_loop(TCPSocket,UDPSocket):-
 			;	tcp_close_socket(Slave),
 				debug(pifcom_server,"Handler at ~w could not be created.~n",[Alias])
 			),
+*/
 			fail
 		;	fail
 		),
