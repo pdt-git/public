@@ -67,7 +67,9 @@ import org.cs3.pl.cterm.internal.ParserCTermFactory;
  */
 public class PLUtil {
 	public static boolean isList(CTerm term) {
-
+		if(term instanceof CNil){
+			return true;
+		}
 		return term.getFunctorValue().equals(".") && term.getArity() == 2;
 	}
 	public static void checkFlags(int flags) {

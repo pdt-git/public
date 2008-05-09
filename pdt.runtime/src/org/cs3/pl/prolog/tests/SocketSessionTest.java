@@ -57,6 +57,7 @@ import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -422,6 +423,17 @@ public class SocketSessionTest extends TestCase {
 		}
 	}
 
+	public void testPDT291_nil() throws Exception {
+		PrologSession session = pif.getSession(PrologInterface.NONE);
+		Map m1=session.queryOnce("A=[]",PrologInterface.NONE);
+		Map m2=session.queryOnce("A=[]",PrologInterface.PROCESS_LISTS);
+		Map m3=session.queryOnce("A=[]",PrologInterface.CTERMS);
+		
+		assertTrue(m1.get("A") instanceof String);
+		assertTrue(m2.get("A") instanceof List);
+		assertTrue(m3.get("A") instanceof CNil);
+	}
+	
 	public void testPDT287_0() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 		Map map = null;
