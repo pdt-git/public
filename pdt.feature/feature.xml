@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="PDTFeature"
-      label="PDT-Feature"
+      label="Prolog Development Tools"
       version="0.2.0.qualifier"
       provider-name="http://roots.iai.uni-bonn.de">
 
@@ -48,7 +48,7 @@ and/or distributed.
    </license>
 
    <url>
-      <update label="ROOTS Update Site" url="http://roots.iai.uni-bonn.de/research/jtransformer/downloads/JTransformerUpdateSite"/>
+      <update label="ROOTS Update Site" url="http://roots.iai.uni-bonn.de/downloads/update-site"/>
    </url>
 
    <requires>
