@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.cs3.pdt.common"
-   name="Common"
-   version="0.2.0.qualifier">
-   <runtime>
-      <library name="common.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-   <requires>
-      <import plugin="org.junit"/>
-   </requires>
-
+<plugin>
+    
 </plugin>

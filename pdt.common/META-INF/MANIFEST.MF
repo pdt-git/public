@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Common
+Bundle-SymbolicName: org.cs3.pdt.common
+Bundle-Version: 0.2.0.qualifier
+Bundle-ClassPath: common.jar
+Bundle-Localization: plugin
+Export-Package: org.cs3.pl.common
+Require-Bundle: org.junit
