@@ -13,6 +13,7 @@ public class PrologInterfaceTests {
 		suite.addTestSuite(AsyncSocketSessionTest.class);
 		//suite.addTestSuite(MysteriousRaceConditionTest.class);
 		suite.addTestSuite(SocketSessionThrowTest.class);
+		suite.addTestSuite(LifeCycleHookTest.class);
 		suite.addTestSuite(LazyStartupRaceTest.class);
 		//$JUnit-END$
 		return suite;

@@ -66,6 +66,7 @@ public abstract class AbstractState implements State {
 		} else {
 			Debug
 					.debug("\t-> hook exists, reusing wrapper, but adding hook code..");
+			node.hooks.add(hook);
 
 		}
 		for (int i = 0; i < dependencies.length; i++) {
