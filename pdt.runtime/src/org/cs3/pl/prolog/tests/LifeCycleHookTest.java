@@ -24,16 +24,19 @@ public class LifeCycleHookTest extends TestCase {
 		private int onInit;
 
 		public void lateInit(PrologInterface pif) {
+			Debug.debug("lateInit");
 			lateInit++;
 			
 		}
 
 		public void onError(PrologInterface pif) {
+			Debug.debug("onError");
 			onError++;
 			
 		}
 
 		public void setData(Object data) {
+			Debug.debug("setData");
 			this.data=data;
 			setData++;
 			
@@ -41,18 +44,21 @@ public class LifeCycleHookTest extends TestCase {
 
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
+			Debug.debug("afterInit");
 			afterInit++;
 			
 		}
 
 		public void beforeShutdown(PrologInterface pif, PrologSession session)
 				throws PrologInterfaceException {
+			Debug.debug("beforeShutdown");
 			beforeShutdown++;
 			
 		}
 
 		public void onInit(PrologInterface pif, PrologSession initSession)
 				throws PrologInterfaceException {
+			Debug.debug("onInit");
 			onInit++;
 			
 		}
