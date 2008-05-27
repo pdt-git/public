@@ -13,6 +13,12 @@
 
 :- use_module(library('transform/transform')).
 
+:- op(1100,xfy,'||').
+:- op(1050,xfy,'&->').
+:- op(1050,xfy,'&+>').
+:- op(1000,xfy,&&).
+
+
 transform:interprete_selection('pdt.refactorings.RenameFile',file(Path),params(File,Name)):-
     get_pef_file(Path,File),
     file_base_name(Path,Name).
@@ -34,21 +40,31 @@ request_relevant_targets(File,NewName):-
 		)
 	).
 	    
+/*
+ctseq(pdt_rename_file(+File,+NewName)
 
+Rename file and update all references accordingly.
+*/
 ctseq(pdt_rename_file(File,NewName),
-	negseq(
-		pdt_rename_file__generate_problems(File,NewName,fatal),
-		orseq( 
-			pdt_rename_file__generate_problems(File,NewName,_),
-			andseq(
-				pdt_rename_file__do_rename(File,NewName,OldPath),
-				pdt_rename_file__update_dependencies(File,OldPath )
-			)
+	(	/* check for any fatal problems first*/
+		pdt_rename_file__generate_problems(File,NewName,fatal)
+	&->	/* if there are no fatal problems, generate (but ignore) any non-fatal ones */
+		(	pdt_rename_file__generate_problems(File,NewName,_)
+		|	/* rename the file */
+			pdt_rename_file__do_rename(File,NewName,OldPath) &&
+			/* update references */
+			pdt_rename_file__update_dependencies(File,OldPath)			
 		)
 	)
 ).
 
 
+/*
+pdt_rename_file__do_rename(+File,+NewName,-OldPath)
+
+Change the 'path' attribute of File so that its last segment is NewName.
+Unify OldPath with the previous value of the 'path' attribute.
+*/
 ct(pdt_rename_file__do_rename(File,NewName,OldPath),
     condition(
         pef_file_query([file=File,path=OldPath]),
@@ -60,89 +76,107 @@ ct(pdt_rename_file__do_rename(File,NewName,OldPath),
         pef_file_assert([id=File,path=NewPath])
     )
 ).
-
+/*
+pdt_rename_file__generate_problems(+File,+NewName,-Severity)
+calls do_check/4 to find any potential problems and adds 
+respective pef_transformation_problem facts to the model.
+*/
 ct( pdt_rename_file__generate_problems(File,NewName,Severity), 
-      condition(
-        get_pef_file(OldPath,File),
-        file_directory_name(OldPath,OldDir),
-        concat_atom([OldDir,NewName],'/',NewPath),
-        do_check(OldPath,NewPath,Severity,Msg),
-        (   string(Msg)
-                    ->  Msg=MsgString
-                    ;   string_to_list(MsgString,Msg)
-        )
-      ),
-      transformation(
-        pef_transformation_problem_assert([severity=Severity,message=MsgString])
-      )
+  condition(
+    get_pef_file(OldPath,File),
+    file_directory_name(OldPath,OldDir),
+    concat_atom([OldDir,NewName],'/',NewPath),
+    do_check(OldPath,NewPath,Severity,Msg),
+    (   string(Msg)
+                ->  Msg=MsgString
+                ;   string_to_list(MsgString,Msg)
+    )
+  ),
+  transformation(
+    pef_transformation_problem_assert([severity=Severity,message=MsgString])
+  )
 ).   
     
 ctseq( pdt_rename_file__update_dependencies(File,OldPath ),
-	andseq(
-		ct(
-			condition(
-		   		pef_file_dependency_query([dependency=File,depending=ReferingFile,toplevel=Toplevel]),	
-				%get_pef_file(ReferingPath,ReferingFile),
-				%pdt_request_target(ast(file(ReferingPath))),
-				find_file_reference(Toplevel,RefTerm,Reference),
-				resolve_reference(RefTerm,ReferingFile,OldPath)
-			),
-			action(skip)
+	ct(% find references to File
+		condition(
+			% find toplevels containing a reference
+	   		pef_file_dependency_query([dependency=File,depending=ReferingFile,toplevel=Toplevel]),					
+			% find any file reference within Toplevel...
+			find_file_reference(Toplevel,RefTerm,Reference),
+			% ... that resolves to the old value of the file's path attribute
+			resolve_reference(RefTerm,ReferingFile,OldPath)
 		),
-		andseq(
-			pdt_generate_file_reference(File,ReferingFile,NewReference),
-			pdt_ast_replace(Reference,NewReference)
-		)	
-		%pef_property_assert([pef=NewReference,key=copy,value=true]),	
-		%mark_toplevel_modified(Toplevel).
-	)
+		action(skip)
+	)&&	
+	% generate a subtree resambling the new file reference
+	pdt_generate_file_reference(File,ReferingFile,NewReference)&&
+	% replaces the old reference with the new one.
+	pdt_ast_replace(Reference,NewReference)		
 ).
 
-ctseq( pdt_generate_file_reference(File,ReferingFile,NewReference),
-	andseq(
-		ct(
-			condition(
-				pef_file_query([id=File,path=Path]),
-				pef_file([id=ReferingFile,path=ReferingPath]),
-				file_directory_name(ReferingPath,ContainerPath),
-				atom_concat(ContainerPath,'/',Prefix)
-			),
-			action(
-				skip
-			)
+
+/*
+pdt_generate_file_reference(+File,+ReferingFile,-NewReference).
+
+Generate a AST representing a file reference.
+This will either be a single atom representing an absolute or relative path,
+or it will be a compound of arity 1 representing an aliased path (like library('foo/bar.pl')). 
+
+*/
+ctseq( pdt_generate_file_reference(File,ReferingFile,NewReference),	
+	ct(
+		condition(
+			pef_file_query([id=File,path=Path]),
+			pef_file([id=ReferingFile,path=ReferingPath]),
+			file_directory_name(ReferingPath,ContainerPath),
+			atom_concat(ContainerPath,'/',Prefix)
 		),
-		negseq(
-			&>( %if
-				ct(condition(atom_concat(Prefix,RelativePath,Path)),action(skip)), 
-				%then
-			    pdt_generate_plain_file_reference(RelativePath,NewReference)
-			),
-			negseq(
-				&>( %else if
-					ct(
-						condition(
-							pdt_relative_path(Path,Alias,RelativePath),
-							!
-						),
-						action(skip)
-					), 
-					%then
-			    	pdt_generate_alias_file_reference(Alias,RelativePath,NewReference)
-				),
-				% else
-				generate_plain_file_reference(Path,NewReference) 	
-			)
+		action(
+			skip
 		)
-	)
+	)&&
+	(	( %if File is in the same Directory as the refering file or one of its subdirectories
+			ct(condition(atom_concat(Prefix,RelativePath,Path)),action(skip))
+		&+>	%then use a plain relative path.
+		    pdt_generate_plain_file_reference(RelativePath,NewReference)
+		)
+	&->	(	(	ct( %else if File is somewhere in the file search path
+					condition(
+						pdt_relative_path(Path,Alias,RelativePath),
+						!
+					),
+					action(skip)
+				) 
+				%then use an aliased relative path.
+		    &+>	pdt_generate_alias_file_reference(Alias,RelativePath,NewReference)
+			)
+			% if none of the above holds, use an absolute path.
+		&->	generate_plain_file_reference(Path,NewReference) 	
+		)
+	)	
 ).
 
 
+/*
+pdt_generate_plain_file_reference(+RelativePath,-NewReference).
+Creates a single atom representing a plain (absolute or relative) path.
+
+FIXME: this should use ast_replace !!
+*/
 ct( pdt_generate_plain_file_reference(RelativePath,NewReference),
 	condition(pef_reserve_id(pef_term,NewReference)),
     action(pef_term_assert([id=NewReference,arity=0,name=RelativePath]))
 ).
 
 
+
+/*
+pdt_generate_alias_file_reference(+Alias,+RelativePath,-NewReference)
+Creates a compound of arity 1 representing an aliased path (like library('foo/bar.pl')).
+
+FIXME: this should use ast_replace !!
+*/
 ct( pdt_generate_alias_file_reference(Alias,RelativePath,NewReference),
 	condition(
 		pef_reserve_id(pef_term,NewReference),
@@ -155,8 +189,8 @@ ct( pdt_generate_alias_file_reference(Alias,RelativePath,NewReference),
     )
 ).
 
-
-    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% no side effects below this line
     
     
 
@@ -182,15 +216,6 @@ do_check(_,_,warning,Message):-
 	pef_file_not_found_query([file_spec=Spec]),
 	format(string(Message), "Unresolved file reference: ~w",[Spec]).    
 	
-do_it(OldPath,NewPath):-
-    get_pef_file(OldPath,File),
-    pef_file_retractall([id=File]),
-    pef_file_assert([id=File,path=NewPath]),
-    mark_file_renamed(File,OldPath),
-    forall(
-    	pef_file_dependency_query([dependency=File,toplevel=Toplevel]),
-    	pdt_with_targets([],update_dependency(Toplevel,File,OldPath))
-    ).
     
     
 find_dependency(File,OldPath,ReferingFile,Reference):-
