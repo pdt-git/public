@@ -21,6 +21,22 @@ meta_edge_clause(Clause):-
         	)
     ).
 
+
+index_name__legacy(Tmpl,ArgNum,IxName):-    
+    integer(ArgNum),
+    !,    
+    functor(Tmpl,Type,_),
+    arg(ArgNum,Tmpl,ArgName),
+    concat_atom([Type,revix,ArgName],'$',IxName).
+index_name__legacy(Tmpl,[ArgName|ArgNames],IxName):-  
+	!,  
+    functor(Tmpl,Type,_),
+    concat_atom([Type,cmpix|[ArgName|ArgNames]],'$',IxName).
+index_name__legacy(Tmpl,ArgName,IxName):-    
+    functor(Tmpl,Type,_),
+    concat_atom([Type,revix,ArgName],'$',IxName).
+
+
 inverse_meta_edge_clause(Clause):-
     '$metapef_edge'(FromT,ArgNum,ToT),
     '$metapef_template'(FromT,FromTemplate),
@@ -30,7 +46,7 @@ inverse_meta_edge_clause(Clause):-
     arg(ArgNum,FromHead,To),   	
    	% use reverse index, if available.
    	(	'$metapef_attribute_tag'(FromT,ArgNum,index)
-   	->	index_name(FromTemplate,ArgNum,IxName),
+   	->	index_name__legacy(FromTemplate,ArgNum,IxName),
     	IndexQuery=..[IxName,To,FromRef],
     	Query=(IndexQuery,clause(FromHead,_,FromRef))
     ;	Query=clause(FromHead,_,FromRef)
@@ -58,7 +74,7 @@ meta_node_clause(Clause):-
     ->	arg(IdNum,Head,Id),
     	(	IdNum==1
     	->	Clause=('$pef_node'(Name,Id,Labels):-Head)
-    	;	index_name(Tmpl,IdNum,IxName),
+    	;	index_name__legacy(Tmpl,IdNum,IxName),
     		IxQuery=..[IxName,Id,Ref],
     		Clause=('$pef_node'(Name,Id,Labels):-IxQuery,clause(Head,_,Ref))
     	)

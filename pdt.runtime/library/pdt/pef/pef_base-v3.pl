@@ -9,7 +9,7 @@
 		pef_record_key/2,
 		pef_type_tag/2,
 		pef_type_is_a/2,
-%		pef_last_record/2,
+		pef_last_record/2,
 		pef_node/3,
 		pef_edge/3,
 		pef_delete/1,
@@ -138,13 +138,11 @@ pef_start_recording(Term,Mode):-
 	record_key(Term,Key),
 	asserta('$recording'(Key,Mode)).
 
-/*
 pef_last_record(Term,Ref):-
     record_key(Term,Key),
     recorded(Key,Ref),
     !.
 pef_last_record(_,[]).
-*/
 	
 pef_stop_recording:-
 	retract('$recording'(_,_)),
@@ -152,7 +150,6 @@ pef_stop_recording:-
 pef_stop_recording:-
     throw(not_recording).
 
-/*
 pef_clear_record(Term):-
     record_key(Term,Key),
     forall(
@@ -161,15 +158,6 @@ pef_clear_record(Term):-
     		erase(RecordRef)
     	)
     ).
-*/
-pef_clear_record(Term):-
-    record_key(Term,Key),
-    forall(
-    	retract('$undo'(Key,CleanupGoal)),
-    	call(CleanupGoal)
-    ).
-
-
 pef_record_key(Term,Key):-
     record_key(Term,Key).
     
@@ -267,7 +255,7 @@ pef_generic_query(Type,ArgList,Data):-
     
 % rules for expanding and postprocessing pef definitions.	 
 :- ensure_loaded(pef_base__term_expansion-v3).
-:- ensure_loaded(pef_base__post_processing-v3).    
+:- ensure_loaded(pef_base__post_processing).    
 
 % PEF definitions moved to a separate file.
 :- include(pef_definitions).
