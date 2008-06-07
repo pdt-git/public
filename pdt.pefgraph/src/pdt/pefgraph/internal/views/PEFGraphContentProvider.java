@@ -94,7 +94,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 
 		PrologSession s = null;
 		try {
-			s = pif.getSession(PrologInterface.NONE);
+			s = pif.getSession(PrologInterface.PROCESS_LISTS);
 			List l = s.queryAll("pef_graph_node(Id, Type,Labels)");
 			for (Object o : l) {
 
@@ -131,7 +131,7 @@ public class PEFGraphContentProvider implements IGraphContentProvider,
 		PrologSession s = null;
 		PEFNode result=null;
 		try {
-			s = pif.getSession(PrologInterface.NONE);
+			s = pif.getSession(PrologInterface.PROCESS_LISTS);
 			Map m = s.queryOnce("pef_graph_node(" + id + ", Type,Labels)");
 			if (m == null) {
 				return null;
