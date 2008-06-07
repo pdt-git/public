@@ -152,24 +152,26 @@ mutable_X(Target):-
 fp_request_target(Target):-
     fp_building_target(Target),
     !,
+    thread_self(Me),
     client_log(Target,already_building),
      (	building_target(Building),mutable(Target)
-    ->	client_send_message(Building,depend(Target))	
+    ->	client_send_message(Building,depend(Me,Target))	
     ;	true
     ).
 fp_request_target(Target):-    
     '$has_lock'(Target),
     !,
     client_log(Target,already_locked),
+    thread_self(Me),
     (	building_target(Building),mutable(Target)
-    ->	client_send_message(Building,depend(Target))	
+    ->	client_send_message(Building,depend(Me,Target))	
     ;	true
     ),    
     my_debug(builder(debug),"target already granted: ~w ~n",[Target]).
 fp_request_target(Target):-
     thread_self(Me),
     (	building_target(Building),mutable(Target)
-    ->	client_send_message(Building,depend(Target))	    	
+    ->	client_send_message(Building,depend(Me,Target))	    	
 	;	true
 	),
     
@@ -324,15 +326,16 @@ request_target(Target):-
     ), 
     '$has_lock'(Target),
     !,
+    thread_self(Me),
     (	building_target(Building),mutable(Target)
-    ->	client_send_message(Building,depend(Target))	
+    ->	client_send_message(Building,depend(Me,Target))	
     ;	true
     ),    
     my_debug(builder(debug),"target already granted: ~w ~n",[Target]).
 request_target(Target):-
     thread_self(Me),   	 	
     (	building_target(Building),mutable(Target)
-    ->	client_send_message(Building,depend(Target))	    	
+    ->	client_send_message(Building,depend(Me,Target))	    	
 	;	true
 	),
    	client_send_message(Target,request(lock(Me,[]))),
@@ -958,8 +961,10 @@ target_transition(state(building(_), _ , Ls,SLs,Ws), 		error(E),	 	report_error(
     forall(member(W,Ws),retract('$thread_waits'(W,Target))).
 
 
-target_transition(state(building(P),outdated,Ls,SLs,Ws),	depend(_Dep),	[], 					state(building(P), outdated, Ls,SLs,Ws),	_Target).
-target_transition(state(building(P),pending(P),Ls,SLs,Ws),	depend(Dep),	add_dependency(Dep), 	state(building(P), Status , Ls,SLs,Ws),		_Target):-
+target_transition(state(building(P),outdated,Ls,SLs,Ws),	depend(_,_Dep),	[], 					state(building(P), outdated, Ls,SLs,Ws),	_Target).
+target_transition(state(building(P),pending(P),Ls,SLs,Ws),		depend(Client,Dep),	[], 					state(building(P), pending(P), Ls,SLs,Ws),	_Target):-
+    closes_cycle(Client,Dep). %ignore deps resulting from requests that would close a lock cycle.
+target_transition(state(building(P),pending(P),Ls,SLs,Ws),	depend(_,Dep),	add_dependency(Dep), 	state(building(P), Status , Ls,SLs,Ws),		_Target):-
     /* normally it adding a dependency to an outdated target is no problem, since the dependency will be requested and rebuild during the pending build.
        We only have a problem, if the building thread already holds an (obsoleted!) lock on the dependency, because this may stay unnoticed.
        
@@ -1118,6 +1123,7 @@ execute_action(rebuild(Thread),Target):-
 	arbiter_send_message(Thread,Target,rebuild(Target,OldDeps)).
 execute_action(report_cycle(Thread),Target):-
     %dump(report_cycle(Thread,Target,Path)),
+    spyme,
 	arbiter_send_message(Thread,Target, cycle(Target)).
 execute_action(notify_done,Target):-
 	my_debug(builder(debug),"target done: ~w~n",[Target]),
@@ -1153,7 +1159,7 @@ execute_action(request_again([Client|Clients]),Target):-
 
 
 
-
+spyme.
 do_grant(lock(Client,Target2),Target):-
     (	Target2==[]
     ->	arbiter_send_message(Client,Target,grant(Target))
