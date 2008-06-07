@@ -57,9 +57,8 @@ public class AdapterFactory implements IAdapterFactory {
 
 	private Object getHandle(Object o) throws CoreException {
 		if (o instanceof IMarker) {
-			IMarker m = (IMarker) o;
-
-			if (PDTCore.PROBLEM.equals(m.getType())) {
+			IMarker m = (IMarker) o;			
+			if (m.isSubtypeOf(PDTCore.PROBLEM)) {
 				return createHandle(m);
 			}
 
