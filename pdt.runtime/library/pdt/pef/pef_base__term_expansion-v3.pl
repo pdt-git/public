@@ -118,18 +118,20 @@ parse_attribute_declaration(N,Arg,Decl):-
 
 
 %% generate an assert clause from a a type_decl data structure.
-type_decl_assert_clause(TypeDecl,
-	(	Head:-
-			Getter,
-			IdCheck,
-			AssertAndRecord
-	)
-):-	type_decl_getter(TypeDecl,AttrList,Data,Getter),
+type_decl_assert_clause(TypeDecl,Clause):-	
+	type_decl_getter(TypeDecl,AttrList,Data,Getter),
     type_decl_name(TypeDecl,Name),
     atom_concat(Name,'_assert',HeadName),
     Head=..[HeadName,AttrList],
     type_decl_id_check(TypeDecl,Data,IdCheck),
-    type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord).
+    type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord),
+    (	Clause = (:- export(Head))
+    ;	Clause = (	Head:-
+			Getter,
+			IdCheck,
+			AssertAndRecord
+		)
+	).
     
 type_decl_assert_and_record(TypeDecl,Data,AssertAndRecord):-
 	type_decl_assert(TypeDecl,Data,Assert),
@@ -280,20 +282,21 @@ type_decl_attr_by_type(TypeDecl,AttrType,AttrDecl):-
     
 
 
-type_decl_query_clause(TypeDecl,
-	(	Head:-
-			Getter,			
-			IxQueries,
-			Data
-	)
-):-
+type_decl_query_clause(TypeDecl,Clause):-
     type_decl_name(TypeDecl,TypeName),
     type_decl_getter(TypeDecl,AttrList,Data,Getter),
     type_decl_index_queries(TypeDecl,Data,IxQueries),
     atom_concat(TypeName,'_query',HeadName),
     (	Head=..[HeadName,AttrList]
     ;	Head=..[HeadName,AttrList,Data]
-    ).
+    ),
+    (	Clause = (:- export(Head))
+    ;	Clause = (	Head:-
+			Getter,			
+			IxQueries,
+			Data
+		)
+	).
 
 type_decl_index_queries(TypeDecl,Data,IxQueries):-
     (	bagof(CmpIxQuery,type_decl_cmpix_query(TypeDecl,Data,CmpIxQuery),CmpIxQueries)
@@ -337,15 +340,7 @@ type_decl_revix_query(TypeDecl,Data,(nonvar(Key) -> RevIxGoal)):-
 
 
 
-type_decl_retract_clause(TypeDecl,
-	(	Head:-
-			Getter,			
-			IxQueries,
-			retract(Data),
-			IxRetracts,
-			RecordUndo
-	)
-):-
+type_decl_retract_clause(TypeDecl,Clause):-
     type_decl_name(TypeDecl,TypeName),
     type_decl_getter(TypeDecl,AttrList,Data,Getter),
     type_decl_index_queries(TypeDecl,Data,IxQueries),
@@ -354,10 +349,29 @@ type_decl_retract_clause(TypeDecl,
     atom_concat(TypeName,'_retract',HeadName),
     (	Head=..[HeadName,AttrList]
     ;	Head=..[HeadName,AttrList,Data]
-    ).
+    ),
+    (	Clause = (:- export(Head))
+    ;	Clause = (	Head:-
+			Getter,			
+			IxQueries,
+			retract(Data),
+			IxRetracts,
+			RecordUndo
+		)
+	).
 
-type_decl_retractall_clause(TypeDecl,
-	(	Head:-
+type_decl_retractall_clause(TypeDecl,Clause):-
+    type_decl_name(TypeDecl,TypeName),
+    type_decl_getter(TypeDecl,AttrList,Data,Getter),
+    type_decl_index_queries(TypeDecl,Data,IxQueries),
+    type_decl_index_retracts(TypeDecl,Data,IxRetracts),
+    type_decl_record_retract(TypeDecl,Data,RecordUndo),
+    atom_concat(TypeName,'_retractall',HeadName),
+    (	Head=..[HeadName,AttrList]
+    ;	Head=..[HeadName,AttrList,Data]
+    ),
+    (	Clause = (:- export(Head))
+    ;	Clause = (	Head:-
 			Getter,			
 			forall(	
 				(	IxQueries,
@@ -367,17 +381,8 @@ type_decl_retractall_clause(TypeDecl,
 					RecordUndo
 				)
 			)
-	)
-):-
-    type_decl_name(TypeDecl,TypeName),
-    type_decl_getter(TypeDecl,AttrList,Data,Getter),
-    type_decl_index_queries(TypeDecl,Data,IxQueries),
-    type_decl_index_retracts(TypeDecl,Data,IxRetracts),
-    type_decl_record_retract(TypeDecl,Data,RecordUndo),
-    atom_concat(TypeName,'_retractall',HeadName),
-    (	Head=..[HeadName,AttrList]
-    ;	Head=..[HeadName,AttrList,Data]
-    ).
+		)
+	).
     		
 
 type_decl_index_retracts(TypeDecl,Data,IxRetracts):-    
@@ -514,6 +519,10 @@ type_decl_untyped_template(Decl,Tmpl):-
 	type_decl_attribute_names(Decl,AttrNames),
 	Tmpl=..[Type|AttrNames].
 
+type_decl_dynamic_directive(Decl, (:- dynamic Name/Arity) ):-
+    type_decl_name(Decl,Name),
+    type_decl_arity(Decl,Arity).
+
 type_decl_index_directive(Decl,	(:- dynamic IxName/2) ):-    
     type_decl_revix_name(Decl,_,IxName).
 type_decl_index_directive(Decl,	(:- dynamic IxName/2) ):-    
@@ -600,6 +609,7 @@ assert_sequence(TypeDecl,
   
 expand_type_decl(TypeDecl,Out):-
     (	type_decl_metapef_clause(TypeDecl,Out)
+    ;	type_decl_dynamic_directive(TypeDecl,Out)
     ;	type_decl_index_directive(TypeDecl,Out)
     ;	type_decl_assert_clause(TypeDecl,Out)
     ;	type_decl_retract_clause(TypeDecl,Out)
