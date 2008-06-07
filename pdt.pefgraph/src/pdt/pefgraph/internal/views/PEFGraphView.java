@@ -7,6 +7,7 @@ import java.util.Map;
 import org.cs3.pdt.core.PEFHandle;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -170,7 +171,7 @@ public class PEFGraphView extends ViewPart{
 			String selectionList = "["+Util.splice(getSelectedIds(), ",")+"]";
 			PrologSession s = null;
 			try{
-				s=pif.getSession(PrologInterface.NONE);
+				s=pif.getSession(PrologInterface.PROCESS_LISTS);
 				List l = s.queryAll("pef_graph_action("+selectionList+",Action,Path,Label,Style)");
 				for (Object object : l) {
 					Map m = (Map) object;
@@ -180,7 +181,10 @@ public class PEFGraphView extends ViewPart{
 					String style = (String)m.get("Style");
 					createContextMenuAction(pif,manager,action,path,label,style);
 				}
-			} catch (PrologInterfaceException e) {
+			} catch(PrologException e){
+				Debug.rethrow(e);
+			}
+			catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
 			}finally{
 				if(s!=null){
