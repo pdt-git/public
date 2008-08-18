@@ -18,14 +18,40 @@ add_req(From,Client,To):-
 	set_edge_label(From,To,Client,req). 
 
 add_bwd(From,Client,To):-
-	% TODO: only propagate max bwd.
-	set_edge_label(From,To,Client,bwd),
+	% determine depth of To
+	target_depth(To,ToDepth),
+	(	edge_label(From,Other,Client,bwd(OtherDepth))
+	->	% If From already has  an outgoing bwd edge,
+		% two cases have to be differentiated:
+		(	OtherDep =< ToDepth
+		->	% if the existing edge has a smaller or equal 
+			% depth than the new one, keep it. Instead
+			% of the new one, we add a normal dependency.
+			add_dependency(From,To), %just in case there is no edge yet.
+			clear_edge_label(From,To,Client)
+		;	% Otherwise replace the existing edge with a
+			% normal dependency, and add the new edge.
+			clear_edge_label(From,Other,Client),
+			set_edge_label(From,To,Client,bwd(ToDepth)
+		)
+	;	% If from has no outgoing bwd edge yet, we can simply
+		% add the new edge.
+		set_edge_label(From,To,Client,bwd(ToDepth))
+	),
+	% in each case, we need to notify the client.
 	send_message_target_client(To,Client,implied(To)).
+
+target_depth(Target,Depth):-
+	(	edge_label(Target,_,_,bwd(N))
+	->  Depth=N
+	;	edge_label(_,Target,_,bld(N))
+	->	Depth=N
+	).
 
 add_lck(From,Client,To):-
 	set_edge_label(From,To,Client,lck),
 	% do not send notification if this is an implied lock
-	% i.e. it's not direct, and From is not beeing build.
+	% i.e. it's not direct, and From is not being build.
 	(	From == []
 	->	send_message_target_client(To,Client,grant(To))
 	;	edge_label(_,From,Client,bld(_))
@@ -49,7 +75,48 @@ start_build(From,Client,To):-
 	send_message_target_client(To,Client,build(To)).
 
 build_done(Target):-
+	% clear incoming bld(_) edge, leaving a simple dependency
+	forall(
+		edge_label(From,Target,Client,bld(_),
+		clear_edge_label(From,Target,Client)
+	),
+	% do the same for incoming bwd(_) edges, but send success
+	% messages back to the respective peers. 
+	% This should recursively mark the whole scc as 
+	% consistent, once the build of the first node is complete.
+	forall(
+		edge_label(From,Target,Client,bld(_),
+		(	clear_edge_label(From,Target,Client),
+			send_message_target_target(Target,From,success)
+		)
+	),
+build_obsolete(Target):-
+	% funny as this may sound: the actions are 
+	% completely the same.
+	build_done(Target).	
+
+report_error(Target, Error):-
+	% the error has to be propagated back along all
+	% incoming req, bld and bwd edges.
+	% There shouldn't be any other incoming edges.
+	forall(
+		edge_label(From,Target,Client,Label),
+		(	Label==req
+			% req: we have to notify the waiting client.
+		->	send_message_target_client(Target,Client,error(Error))
+		;	% bld/bwd edges: we have to notify waiting peers.
+			send_message_target_target(Target,From,error(Error))
+		),
+	),
+	% remove incoming edge/ replace them with dep edges
+	clear_edge_label(_,Target,_).
 	
-build_obsolete/1,		
-report_error/2,
-propagate_invalid/1
+	
+propagate_invalid(Target):-
+	% propagate back along incoming deps.
+	% Note: ANY edge implies a dep edge. It suffices to
+	% propagate along incoming dep edges.
+	forall(
+		target_depends(From,Target),
+		send_message_target_target(Target,From,invalidate)
+	).
