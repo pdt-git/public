@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 20001102//EN' 'http://www.w3.org/TR/2000/CR-SVG-20001102/DTD/svg-20001102.dtd'>
+<svg height="635" width="1260" xmlns="http://www.w3.org/2000/svg">
+<ellipse cx="455" cy="609" rx="12.0" ry="12.0" style="fill:#000000; stroke:#000000; stroke-width:1"/>
+<ellipse cx="455" cy="609" rx="11.0" ry="11.0" style="fill:#ffffff; stroke:#ffffff; stroke-width:1"/>
+<ellipse cx="455" cy="609" rx="7.0" ry="7.0" style="fill:#000000; stroke:#000000; stroke-width:1"/>
+<rect height="528" rx="16" ry="16" style="fill:#00ffff; stroke:#00ffff; stroke-width:1" width="1232" x="14" y="14"/>
+<rect height="528" rx="16" ry="16" style="fill:#ffffff; stroke:#ffffff; stroke-width:1" width="1232" x="14" y="14"/>
+<rect height="528" rx="16" ry="16" style="fill:#ffffff; stroke:#000000; stroke-width:1" width="1232" x="14" y="14"/>
+<text style="font-family:Dialog; font-size:12;" x="608" y="29">
+running</text>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="14" x2="1245" y1="36" y2="36"/>
+<text style="font-family:Dialog; font-size:12;" x="16" y="51">
+abort_batch(t : void) / add_aborting_batch(t), report_abort_complete(t)</text>
+<text style="font-family:Dialog; font-size:12;" x="16" y="66">
+abort_control(t : void) [aborting_batch(t)] / remove_aborting_batch(t)</text>
+<rect height="148" rx="16" ry="16" style="fill:#00ffff; stroke:#00ffff; stroke-width:1" width="742" x="206" y="358"/>
+<rect height="148" rx="16" ry="16" style="fill:#ffffff; stroke:#ffffff; stroke-width:1" width="742" x="206" y="358"/>
+<rect height="148" rx="16" ry="16" style="fill:#ffffff; stroke:#000000; stroke-width:1" width="742" x="206" y="358"/>
+<text style="font-family:Dialog; font-size:12;" x="552" y="373">
+Skipping</text>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="206" x2="947" y1="380" y2="380"/>
+<text style="font-family:Dialog; font-size:12;" x="208" y="395">
+abort_batch(t : Integer) [aborting_control(t) &amp;&amp; aborting_control &gt; 1] / remove_aborting_control(t),report_abort_complete(t)</text>
+<text style="font-family:Dialog; font-size:12;" x="208" y="410">
+abort_control(t : Integer) [! aborting_batch(t)] / add_aborting_control(t)</text>
+<text style="font-family:Dialog; font-size:12;" x="208" y="425">
+query(t : Integer, q : CTerm) / report_skip(t)</text>
+<text style="font-family:Dialog; font-size:12;" x="208" y="440">
+timeout</text>
+<ellipse cx="286" cy="78" rx="8.0" ry="8.0" style="fill:#00ffff; stroke:#00ffff; stroke-width:1"/>
+<ellipse cx="286" cy="78" rx="8.0" ry="8.0" style="fill:#000000; stroke:#000000; stroke-width:1"/>
+<rect height="88" rx="16" ry="16" style="fill:#00ffff; stroke:#00ffff; stroke-width:1" width="320" x="182" y="126"/>
+<rect height="88" rx="16" ry="16" style="fill:#ffffff; stroke:#ffffff; stroke-width:1" width="320" x="182" y="126"/>
+<rect height="88" rx="16" ry="16" style="fill:#ffffff; stroke:#000000; stroke-width:1" width="320" x="182" y="126"/>
+<text style="font-family:Dialog; font-size:12;" x="331" y="141">
+Idle</text>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="182" x2="501" y1="148" y2="148"/>
+<text style="font-family:Dialog; font-size:12;" x="184" y="163">
+timeout</text>
+<text style="font-family:Dialog; font-size:12;" x="184" y="178">
+syntax_error(t, e : Error) / report_protocol_error(t,e)</text>
+<polyline points="287,85 287,126" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="280" x2="287" y1="114" y2="126"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="294" x2="287" y1="114" y2="126"/>
+<rect height="88" rx="16" ry="16" style="fill:#00ffff; stroke:#00ffff; stroke-width:1" width="303" x="854" y="126"/>
+<rect height="88" rx="16" ry="16" style="fill:#ffffff; stroke:#ffffff; stroke-width:1" width="303" x="854" y="126"/>
+<rect height="88" rx="16" ry="16" style="fill:#ffffff; stroke:#000000; stroke-width:1" width="303" x="854" y="126"/>
+<text style="font-family:Dialog; font-size:12;" x="984" y="141">
+Proving</text>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="854" x2="1156" y1="148" y2="148"/>
+<text style="font-family:Dialog; font-size:12;" x="856" y="163">
+success(t, q : CTerm) / report_solution(t,q)</text>
+<polyline points="342,542 342,610 443,610" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="431" x2="443" y1="617" y2="610"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="431" x2="443" y1="603" y2="610"/>
+<text style="font-family:Dialog; font-size:12;" x="349" y="606">
+eof</text>
+<polyline points="458,542 458,597" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="451" x2="458" y1="585" y2="597"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="465" x2="458" y1="585" y2="597"/>
+<text style="font-family:Dialog; font-size:12;" x="468" y="575">
+bye / report_bye</text>
+<polyline points="502,182 854,182" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="842" x2="854" y1="189" y2="182"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="842" x2="854" y1="175" y2="182"/>
+<text style="font-family:Dialog; font-size:12;" x="622" y="178">
+query(t, q : CTerm)</text>
+<polyline points="854,142 502,142" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="514" x2="502" y1="135" y2="142"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="514" x2="502" y1="149" y2="142"/>
+<text style="font-family:Dialog; font-size:12;" x="547" y="138">
+fail(t : Integer)(t : void)(t : void) / report_fail(t)</text>
+<polyline points="854,206 502,206" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="514" x2="502" y1="199" y2="206"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="514" x2="502" y1="213" y2="206"/>
+<text style="font-family:Dialog; font-size:12;" x="576" y="202">
+error(t, e : Error) / report_error(t,e)</text>
+<polyline points="940,214 940,358" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="933" x2="940" y1="346" y2="358"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="947" x2="940" y1="346" y2="358"/>
+<text style="font-family:Dialog; font-size:12;" x="950" y="277">
+abort_control(t : Integer) [! aborting_batch(t)] / </text>
+<text style="font-family:Dialog; font-size:12;" x="1048" y="292">
+report_cut(t);</text>
+<text style="font-family:Dialog; font-size:12;" x="1019" y="307">
+add_aborting_control(t)</text>
+<polyline points="382,358 382,214" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="389" x2="382" y1="226" y2="214"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="375" x2="382" y1="226" y2="214"/>
+<text style="font-family:Dialog; font-size:12;" x="392" y="277">
+abort_batch(t : Integer) [aborting_control(t) &amp;&amp; aborting_control = 1] / </text>
+<text style="font-family:Dialog; font-size:12;" x="516" y="292">
+remove_aborting_control(t);</text>
+<text style="font-family:Dialog; font-size:12;" x="523" y="307">
+report_abort_complete(t)</text>
+<polyline points="182,198 30,198 30,446 206,446" style="fill:none; stroke:#000000; stroke-width:1"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="194" x2="206" y1="453" y2="446"/>
+<line style="fill:#000000; stroke:#000000; stroke-width:1" x1="194" x2="206" y1="439" y2="446"/>
+<text style="font-family:Dialog; font-size:12;" x="40" y="333">
+abort_control(t : void) [!aborting_batch(t)] / </text>
+<text style="font-family:Dialog; font-size:12;" x="99" y="348">
+add_aborting_control(t)</text>
+</svg>
