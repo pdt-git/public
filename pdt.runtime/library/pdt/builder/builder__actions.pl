@@ -3,7 +3,7 @@
 		add_bwd/3,
 		add_lck/3,
 		add_dep/2,
-		start_build/1,
+		start_build/3,
 		build_done/1,
 		build_obsolete/1,		
 		report_error/2,
@@ -23,7 +23,7 @@ add_bwd(From,Client,To):-
 	(	edge_label(From,Other,Client,bwd(OtherDepth))
 	->	% If From already has  an outgoing bwd edge,
 		% two cases have to be differentiated:
-		(	OtherDep =< ToDepth
+		(	OtherDepth =< ToDepth
 		->	% if the existing edge has a smaller or equal 
 			% depth than the new one, keep it. Instead
 			% of the new one, we add a normal dependency.
@@ -32,7 +32,7 @@ add_bwd(From,Client,To):-
 		;	% Otherwise replace the existing edge with a
 			% normal dependency, and add the new edge.
 			clear_edge_label(From,Other,Client),
-			set_edge_label(From,To,Client,bwd(ToDepth)
+			set_edge_label(From,To,Client,bwd(ToDepth))
 		)
 	;	% If from has no outgoing bwd edge yet, we can simply
 		% add the new edge.
@@ -77,7 +77,7 @@ start_build(From,Client,To):-
 build_done(Target):-
 	% clear incoming bld(_) edge, leaving a simple dependency
 	forall(
-		edge_label(From,Target,Client,bld(_),
+		edge_label(From,Target,Client,bld(_)),
 		clear_edge_label(From,Target,Client)
 	),
 	% do the same for incoming bwd(_) edges, but send success
@@ -85,11 +85,11 @@ build_done(Target):-
 	% This should recursively mark the whole scc as 
 	% consistent, once the build of the first node is complete.
 	forall(
-		edge_label(From,Target,Client,bld(_),
+		edge_label(From,Target,Client,bld(_)),
 		(	clear_edge_label(From,Target,Client),
 			send_message_target_target(Target,From,success)
 		)
-	),
+	).
 build_obsolete(Target):-
 	% funny as this may sound: the actions are 
 	% completely the same.
@@ -106,7 +106,7 @@ report_error(Target, Error):-
 		->	send_message_target_client(Target,Client,error(Error))
 		;	% bld/bwd edges: we have to notify waiting peers.
 			send_message_target_target(Target,From,error(Error))
-		),
+		)
 	),
 	% remove incoming edge/ replace them with dep edges
 	clear_edge_label(_,Target,_).

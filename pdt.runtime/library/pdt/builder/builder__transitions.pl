@@ -1,4 +1,13 @@
-:- module(builder__transitions,[transition/4]).
+:- module(builder__transitions,
+	[	transition/4,
+		update_target_state/2,
+		current_target_state/2,
+		clear_target_states/0
+	]
+).
+
+:- dynamic '$target_state'/2.
+
 :- use_module(builder__graph).
 :- use_module(builder__actions).
 
@@ -8,7 +17,7 @@
 
 
 builder__transitions:term_expansion( (State ~~ ConditionAndAction) , Output):-
-	expand_term( (State ~~ ConditionAndAction ~~> State) ,Output).
+	term_expansion( (State ~~ ConditionAndAction ~~> State) ,Output).
 
 builder__transitions:term_expansion( (State0 ~~ TriggerCondition / Action ~~> NewState0) , Output):-
 	!,
@@ -85,12 +94,12 @@ pp_compile_condition(Rel,once(Goal)):-
 
 
 
-pp_relation((A,dep,B),target_depends(A,B)).
-pp_relation((A,C:req,B),edge_label(A,B,C,req)).
-pp_relation((A,C:bld(N),B),edge_label(A,B,C,bld(N))).
-pp_relation((A,C:bwd(N),B),edge_label(A,B,C,bwd(N))).
-pp_relation((A,C:lck,B),edge_label(A,B,C,lck)).
-pp_relation((A,C:xcl,B),edge_label(A,B,C,xcl)).
+pp_relation(c(A,dep,B),target_depends(A,B)):-!.
+pp_relation(c(A,C:req,B),edge_label(A,B,C,req)):-!.
+pp_relation(c(A,C:bld(N),B),edge_label(A,B,C,bld(N))):-!.
+pp_relation(c(A,C:bwd(N),B),edge_label(A,B,C,bwd(N))):-!.
+pp_relation(c(A,C:lck,B),edge_label(A,B,C,lck)):-!.
+pp_relation(c(A,C:xcl,B),edge_label(A,B,C,xcl)):-!.
 
 
 pp_one(G):-
@@ -119,24 +128,48 @@ replace_this_args([],_,[]).
 replace_this_args([Arg|Args],This, [NewArg|NewArgs]):-
 	replace_this(Arg,This,NewArg),
 	replace_this_args(Args,This,NewArgs).
+
+current_target_state(Target,State):-    
+    (	'$target_state'(Target,S)
+    *->	State=S
+    ;	State=state(idle,obsolete)
+    ).
+
+update_target_state(Target,NewState):-
+	thread_self(Me),
+	(	Me \== build_arbiter
+	->	throw(only_arbiter_should_modify_state(Me,Target,NewState))
+	;	NewState==state(idle,obsolete)
+    ->  retractall('$target_state'(Target,_))
+    ;   retractall('$target_state'(Target,_)),
+    	assert('$target_state'(Target,NewState))
+    ).
+
+clear_target_states:-
+	thread_self(Me),
+	(	Me == build_arbiter
+	->	retractall('$target_state'(_,_))
+	;	throw(only_arbiter_should_modify_state(Me))
+	).
+	
 %-----------------------------------------------------
 %TODO: send "implied" when requesting a lock twice.
 idle,obsolete 		~~ req(T,C) 										/ start_build(T,C,this) 					~~> building,pending.
 idle,consistent		~~ req(T,C)											/ add_lck(T,C,this)							~~> reading,consistent.
 idle,consistent		~~ invalidate										/ propagate_invalid(this)					~~> idle,obsolete.
-building,pending 	~~ success, (this,_:bwd(N),_) -> (_,_:bwd(N),this))	/ build_done(this)							~~> idle,consistent.
+building,pending 	~~ success, (c(this,_:bwd(N),_) -> c(_,_:bwd(N),this))/ build_done(this)							~~> idle,consistent.
 building,pending 	~~ success. %target has outgoing bwd. rerequesting will propagate. nothing to do right now.
 building,pending	~~ invalidate										/ propagate_invalid(this)					~~> building,obsolete.
 building,obsolete 	~~ success 											/ build_obsolete(this) 						~~> idle,obsolete.
-building,_ 			~~ req(T,C), \+ (T,C:bld(_),this)					/ add_req(T,C,this).
-building,_ 			~~ req(T,C), (T,C:bld(_),this) 						/ add_bwd(T,C,this).
+building,_ 			~~ req(T,C), \+ c(T,C:bld(_),this)					/ add_req(T,C,this).
+building,_ 			~~ req(T,C), c(T,C:bld(_),this) 					/ add_bwd(T,C,this).
 building,_ 			~~ rel(T,_) 										/ put_dep(T,this).
 building,_ 			~~ error(E) 										/ report_error(this,E) 						~~> idle,obsolete.
-reading,obsolete	~~ rel(T,C), (_,_:lck,this)=1, (T2,C2:req,this) 	/ rem_lck(T,C,this),start_bld(T2,C2,this)	~~> building,pending.
-reading,obsolete	~~ rel(T,C), (_,_:lck,this)=1, \+ (_,_:req,this) 	/ rem_lck(T,C,this)							~~> idle,obsolete.
+reading,obsolete	~~ rel(T,C), c(_,_:lck,this)=1, c(T2,C2:req,this) 	/ rem_lck(T,C,this),start_bld(T2,C2,this)	~~> building,pending.
+reading,obsolete	~~ rel(T,C), c(_,_:lck,this)=1, \+ c(_,_:req,this) 	/ rem_lck(T,C,this)							~~> idle,obsolete.
 reading,obsolete	~~ req(T,C)											/ add_req(T,C,this).
-reading, consistent	~~ rel(T,C), (_,_:lck,this)=1 						/ rem_lck(T,C,this)							~~> idle,consistent.
+reading, consistent	~~ rel(T,C), c(_,_:lck,this)=1 						/ rem_lck(T,C,this)							~~> idle,consistent.
 reading,_			~~ req(T,C) 										/ add_lck(T,C,this).
-reading,_			~~ rel(T,C), (_,_:lck,this)>1 						/ rem_lck(T,C,this).
+reading,_			~~ rel(T,C), c(_,_:lck,this)>1 						/ rem_lck(T,C,this).
 _,obsolete			~~ invalidate.
 

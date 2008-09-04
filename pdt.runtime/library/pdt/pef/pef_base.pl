@@ -27,7 +27,8 @@
 				 '$metapef_edge'/3,
 				 '$metapef_attribute_tag'/3,
 				 '$metapef_type_tag'/2,
-				 '$metapef_is_a'/2.
+				 '$metapef_is_a'/2,
+				 '$metapef_type_decl'/2 .
 
 
 :- dynamic '$option'/1.
