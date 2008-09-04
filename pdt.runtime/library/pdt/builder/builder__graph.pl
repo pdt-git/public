@@ -6,7 +6,8 @@
 		clear_dependencies/1,
 		net_dependency/2,
 		net_dependencies/2,
-		dependencies/2
+		dependencies/2,
+		clear_graph/0
 	]
 ).
 
@@ -24,6 +25,13 @@
 :- dynamic '$target_depends'/2,
 		   '$target_depends_inv'/2.
 
+
+clear_graph:-
+	retractall('$edge_label__by_client'(_,_,_,_)),
+	retractall('$edge_label__by_from'(_,_,_,_)),
+	retractall('$edge_label__by_to'(_,_,_,_)),
+	retractall('$target_depends'(_,_)),
+	retractall('$target_depends_inv'(_,_)).
 
 edge_label(From,To,Client,Label):-
     (	nonvar(From)
