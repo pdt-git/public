@@ -23,7 +23,7 @@ run_concurrent_test(Head):-
 		\+ concurrent_tests:todo(_,_),
 	!.
 
-max_depth(0).
+max_depth(1).
 
 
 
@@ -204,7 +204,7 @@ concatseq(In,B,Out):-
 	(	In = (A~>As)
 	->	Out = (A~>Tail),
 		concatseq(As,B,Tail)
-	;	Out = (A ~> B)
+	;	Out = (In ~> B)
 	).	
 
 %InA and InB are deterministic
@@ -287,7 +287,7 @@ step(Module,Head):-
 
 	
 process_deterministic_sequence(Seq,Module,Head,Depth):-
-	%format("processing ~w (depth=~w) ~n",[Seq,Depth]),
+	format("processing ~W (depth=~w) ~n",[Seq,[module(concurrent_tests)],Depth]),
 	Module:ignore(setup(Head)),
 	process_literals(Seq,Outcome),
 	Module:ignore(teardown(Head)),
@@ -295,11 +295,11 @@ process_deterministic_sequence(Seq,Module,Head,Depth):-
 
 process_outcome(Outcome,Seq,Depth):-
 	(	Outcome = error(E)
-	->	format("Sequence produced error: ~w~nFailing sequence:~w~n",[E,Seq])
+	->	format("Sequence produced error: ~w~nFailing sequence:~W~n",[E,Seq,[module(concurrent_tests)]])
 	;	Outcome = incomplete
 	->	max_depth(Max),
 		(	Depth > Max	
-		->	format("Sequence exceeds depth limit: ~w~n",[Seq])
+		->	format("Sequence exceeds depth limit: ~W~n",[Seq,[module(concurrent_tests)]])
 		;	assert(todo(Seq,Depth))
 		)
 	;	true
@@ -308,6 +308,8 @@ process_outcome(Outcome,Seq,Depth):-
 
 process_literals(Part,Outcome):-
 	(	Part = (_:sequence(_) ~> B)
+	->	Outcome = incomplete
+	;Part = (_:sequence(_))
 	->	Outcome = incomplete
 	;	Part = (A ~> B)
 	->	execute_literal(A,OutcomeA),
@@ -329,7 +331,7 @@ execute_literal(Lit0,Outcome):-
 		->	Outcome=Error
 		;	Outcome=error(check_failed(Goal))
 		)
-	;	(	Cx:catch(once(Goal),Error,fail)
+	;	(	Cx:catch(once(Lit),Error,fail)
 		->	Outcome=true
 		;	nonvar(Error)
 		->	Outcome=Error

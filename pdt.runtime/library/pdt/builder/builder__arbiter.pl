@@ -8,7 +8,8 @@
 :- use_module(builder__messages).
 
 % runs the arbiter's message dispatch loop.
-run_arbiter:-       
+run_arbiter:-    
+	trace,   
 	repeat,
 		next_target_message(Target,_,Event),
 		(	ground(Target)
