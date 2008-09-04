@@ -4,19 +4,27 @@
 :- use_module(library('util/concurrent_tests')).
 
 depends(a,b).
-depends(a,c).
-depends(c,d).
-depends(c,e).
-depends(e,b).
-depends(e,b).
-depends(b,c).
+%depends(a,c).
+%depends(c,d).
+%depends(c,e).
+%depends(e,b).
+%depends(e,b).
+%depends(b,c).
 
 client(c1).
-client(c2).
-client(c3).
+%client(c2).
+%client(c3).
 setup(_):-
+	forall(
+		client(C),
+		message_queue_create(C)
+	),
 	stop_arbiter.
-teardown(_).	
+teardown(_):-
+	forall(
+		client(C),
+		message_queue_destroy(C)
+	).
 
 /*
 
