@@ -4,49 +4,49 @@
       <param name="target" value="features"/>
       <param name="element.id" value="PDTFeature"/>
       <param name="project.name" value="pdt.feature"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt.common.ui"/>
       <param name="project.name" value="pdt.common.ui"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt"/>
       <param name="project.name" value="pdt"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt.common"/>
       <param name="project.name" value="pdt.common"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt.console"/>
       <param name="project.name" value="pdt.console"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt.core"/>
       <param name="project.name" value="pdt.core"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt.runtime"/>
       <param name="project.name" value="pdt.runtime"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
     <antcall target="svn.co">
       <param name="target" value="plugins"/>
       <param name="element.id" value="org.cs3.pdt.runtime.socket"/>
       <param name="project.name" value="pdt.runtime.socket"/>
-      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt"/>
+      <param name="url" value="https://svn.iai.uni-bonn.de/repos/IAI_Software/pdt/trunk"/>
     </antcall>
   </target>
 </project>
