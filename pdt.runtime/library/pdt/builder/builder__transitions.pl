@@ -1,12 +1,9 @@
 :- module(builder__transitions,
-	[	transition/4,
-		update_target_state/2,
-		current_target_state/2,
-		clear_target_states/0
+	[	transition/4
 	]
 ).
 
-:- dynamic '$target_state'/2.
+
 
 :- use_module(builder__graph).
 :- use_module(builder__actions).
@@ -129,28 +126,6 @@ replace_this_args([Arg|Args],This, [NewArg|NewArgs]):-
 	replace_this(Arg,This,NewArg),
 	replace_this_args(Args,This,NewArgs).
 
-current_target_state(Target,State):-    
-    (	'$target_state'(Target,S)
-    *->	State=S
-    ;	State=state(idle,obsolete)
-    ).
-
-update_target_state(Target,NewState):-
-	thread_self(Me),
-	(	Me \== build_arbiter
-	->	throw(only_arbiter_should_modify_state(Me,Target,NewState))
-	;	NewState==state(idle,obsolete)
-    ->  retractall('$target_state'(Target,_))
-    ;   retractall('$target_state'(Target,_)),
-    	assert('$target_state'(Target,NewState))
-    ).
-
-clear_target_states:-
-	thread_self(Me),
-	(	Me == build_arbiter
-	->	retractall('$target_state'(_,_))
-	;	throw(only_arbiter_should_modify_state(Me))
-	).
 	
 %-----------------------------------------------------
 %TODO: send "implied" when requesting a lock twice.
@@ -172,4 +147,5 @@ reading, consistent	~~ rel(T,C), c(_,_:lck,this)=1 						/ rem_lck(T,C,this)				
 reading,_			~~ req(T,C) 										/ add_lck(T,C,this).
 reading,_			~~ rel(T,C), c(_,_:lck,this)>1 						/ rem_lck(T,C,this).
 _,obsolete			~~ invalidate.
+
 

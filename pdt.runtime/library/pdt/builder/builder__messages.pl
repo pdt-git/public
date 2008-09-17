@@ -6,7 +6,8 @@
 		send_message_target_client/3,
 		send_message_target_target/3,
 		next_target_message/3,
-		next_client_message/2
+		next_client_message/2,
+		next_client_message/3
 	]
 ).
 
@@ -47,7 +48,10 @@ send_message_client_target(Target,Data):-
 send_message_client_target(Sender,Target,Data):-	
 	gen_message(Sender,Target,Data,Msg),
 	ensure_arbiter_is_running,	
-	thread_send_message(build_arbiter,Msg).
+	thread_send_message(build_arbiter,Msg),
+	!.
+send_message_client_target(Sender,Target,Data):-
+	throw(failed(send_message_client_target(Sender,Target,Data))).
 
 send_block_client_target(Data):-
 	thread_self(Sender),
@@ -94,8 +98,32 @@ next_target_message(Target,Sender,Data):-
 	;	thread_get_message(Msg)
 	).
 	
-next_client_message(Sender,Data):-	
+next_client_message(Sender,Data):-		
 	msg_new(Msg),	
 	msg_sender(Msg,Sender),
 	msg_data(Msg,Data),
-	thread_get_message(Msg).
+	repeat,
+		ensure_arbiter_is_running,
+		catch(
+			call_with_time_limit( 1, thread_get_message(Msg)),
+			time_limit_exceeded,
+			fail
+		),
+	!.
+	
+	
+
+next_client_message(Client,Sender,Data):-		
+	msg_new(Msg),	
+	msg_sender(Msg,Sender),
+	msg_data(Msg,Data),
+	repeat,
+		ensure_arbiter_is_running,
+		catch(
+			call_with_time_limit( 1, thread_get_message(Client,Msg)),
+			time_limit_exceeded,
+			fail
+		),
+	!.
+	
+	

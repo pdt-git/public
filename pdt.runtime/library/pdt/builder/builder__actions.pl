@@ -2,6 +2,7 @@
 	[	add_req/3, 
 		add_bwd/3,
 		add_lck/3,
+		rem_lck/3,
 		add_dep/2,
 		start_build/3,
 		build_done/1,
@@ -58,7 +59,10 @@ add_lck(From,Client,To):-
 	->	send_message_target_client(To,Client,grant(To))
 	;	true
 	).
-		
+rem_lck(From,Client,To):-
+	% NB: This one is not described in the DA. 
+	% But if i remember correctly, it was trivial:
+	clear_edge_label(From,To,Client).
 
 add_dep(From,To):- 
 	% we assume that some client edge exists.
@@ -97,18 +101,13 @@ build_obsolete(Target):-
 
 report_error(Target, Error):-
 	% the error has to be propagated back along all
-	% incoming req, bld and bwd edges.
-	% There shouldn't be any other incoming edges.
+	% incoming req.	
 	forall(
-		edge_label(From,Target,Client,Label),
-		(	Label==req
-			% req: we have to notify the waiting client.
-		->	send_message_target_client(Target,Client,error(Error))
-		;	% bld/bwd edges: we have to notify waiting peers.
-			send_message_target_target(Target,From,error(Error))
-		)
+		edge_label(_,Target,Client,req),				
+		send_message_target_client(Target,Client,error(Error))		
 	),
-	% remove incoming edge/ replace them with dep edges
+	% all incoming edges are (req, bld, bwd) are replaced with 
+	% normal dep edges.
 	clear_edge_label(_,Target,_).
 	
 	
