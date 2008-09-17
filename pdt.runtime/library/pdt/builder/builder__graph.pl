@@ -1,4 +1,4 @@
-:- module(builder__edges,
+:- module(builder__graph,
 	[	edge_label/4, 
 		set_edge_label/4, 
 		clear_edge_label/3,
@@ -6,8 +6,12 @@
 		clear_dependencies/1,
 		net_dependency/2,
 		net_dependencies/2,
-		dependencies/2,
-		clear_graph/0
+		dependencies/2,		
+		update_target_state/2,
+		current_target_state/2,
+		clear_graph/0,
+		store_graph/1,
+		load_graph/1		
 	]
 ).
 
@@ -22,16 +26,73 @@
 	'$edge_label__by_from'/4,
 	'$edge_label__by_to'/4.
 
+:- dynamic 
+	'$edge_label__by_client'/5,
+	'$edge_label__by_from'/5,
+	'$edge_label__by_to'/5.
+
+
 :- dynamic '$target_depends'/2,
 		   '$target_depends_inv'/2.
 
+:- dynamic '$target_depends'/3,
+		   '$target_depends_inv'/3.
+
+:- dynamic '$target_state'/2.
+
+:- dynamic '$target_state'/3.
+
+current_target_state(Target,State):-    
+    (	'$target_state'(Target,S)
+    *->	State=S
+    ;	State=state(idle,obsolete)
+    ).
+
+update_target_state(Target,NewState):-	
+	writeln(update_target_state(Target,NewState)),
+	thread_self(Me),
+	(	Me \== build_arbiter
+	->	throw(only_arbiter_should_modify_state(Me,Target,NewState))
+	;	NewState==state(idle,obsolete)
+    ->  retractall('$target_state'(Target,_))    	
+    ;   retractall('$target_state'(Target,_)),    	
+    	assert('$target_state'(Target,NewState))
+    ).
+
+
 
 clear_graph:-
+	retractall('$target_state'(_,_)),
 	retractall('$edge_label__by_client'(_,_,_,_)),
 	retractall('$edge_label__by_from'(_,_,_,_)),
 	retractall('$edge_label__by_to'(_,_,_,_)),
 	retractall('$target_depends'(_,_)),
 	retractall('$target_depends_inv'(_,_)).
+store_graph(Num):-
+	forall('$target_state'(A,B),assert('$target_state'(Num,A,B))),
+	forall('$edge_label__by_client'(A,B,C,D),assert('$edge_label__by_client'(Num,A,B,C,D))),
+	forall('$edge_label__by_from'(A,B,C,D),assert('$edge_label__by_from'(Num,A,B,C,D))),
+	forall('$edge_label__by_to'(A,B,C,D),assert('$edge_label__by_to'(Num,A,B,C,D))),
+	forall('$target_depends'(A,B),assert('$target_depends'(Num,A,B))),
+	forall('$target_depends_inv'(A,B),assert('$target_depends_inv'(Num,A,B))).
+%load_graph(Num):-
+%	clear_graph,
+%	forall(retract('$target_state'(Num,A,B)),assert('$target_state'(A,B))),
+%	forall(retract('$edge_label__by_client'(Num,A,B,C,D)),assert('$edge_label__by_client'(A,B,C,D))),
+%	forall(retract('$edge_label__by_from'(Num,A,B,C,D)),assert('$edge_label__by_from'(A,B,C,D))),
+%	forall(retract('$edge_label__by_to'(Num,A,B,C,D)),assert('$edge_label__by_to'(A,B,C,D))),
+%	forall(retract('$target_depends'(Num,A,B)),assert('$target_depends'(A,B))),
+%	forall(retract('$target_depends_inv'(Num,A,B)),assert('$target_depends_inv'(A,B))).	
+load_graph(Num):-
+	clear_graph,
+	forall('$target_state'(Num,A,B),assert('$target_state'(A,B))),
+	forall('$edge_label__by_client'(Num,A,B,C,D),assert('$edge_label__by_client'(A,B,C,D))),
+	forall('$edge_label__by_from'(Num,A,B,C,D),assert('$edge_label__by_from'(A,B,C,D))),
+	forall('$edge_label__by_to'(Num,A,B,C,D),assert('$edge_label__by_to'(A,B,C,D))),
+	forall('$target_depends'(Num,A,B),assert('$target_depends'(A,B))),
+	forall('$target_depends_inv'(Num,A,B),assert('$target_depends_inv'(A,B))).	
+
+
 
 edge_label(From,To,Client,Label):-
     (	nonvar(From)
@@ -115,10 +176,10 @@ clear_dependencies also clears all outgoing labels
 add_dependency__expensive(Target,Dep):-  
 	%begin debug
 	% checking basic dep invariant.
-	(	available(Target), \+ available(Dep)
-	->	throw(adding_illigal_dep(Target,Dep))
-	;	true
-	),
+	%(	available(Target), \+ available(Dep)
+	%->	throw(adding_illigal_dep(Target,Dep))
+	%;	true
+	%),
 	%end debug  
     (	net_dependency(Target,Dep)
     ->	true

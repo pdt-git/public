@@ -1,58 +1,78 @@
 /*
-Goal:
-- define a simple language for specifying concurrent, nondeterministic  sequences of atomic actions.
-- define a simple language for special actions that constitute checks of some conditions.
-- use term expansion to generate a set of all deterministic sequences that are represented by the nondeterministic one.
+http://butterbur03.iai.uni-bonn.de:8080/jira/browse/PDT-302
+https://sewiki.iai.uni-bonn.de/research/pdt/developers/architecture/subsystems/pdtcore/buildsystem/start
 */
 :- module(concurrent_tests,
-	[	op(1140, xfy, #), % interleave
-		op(1135, xfy, ?), % nondet. choice
+	[	op(1145, xfx, else), % comitted choice
+		op(1140, xfy, #), % interleave
+		op(1135, xfy, ?), % nondet. choice		
 		op(1130, xfy, ~>), % concat
 		run_concurrent_test/1
 	]
 ).
 
-:- module_transparent run_concurrent_test/1.
-:- dynamic todo/2.
-:- thread_local todo/2.
+:- module_transparent 
+	run_concurrent_test/1.
+
+/*
+The todo queue stores deferred branches.
+
+todo(Num,Seq,TotalDepth,Stack,Marks)
+
+Num: number of the deferred branch
+Seq: the remaining sequence
+TotalDepth: the depth of the branch.
+Stack: the path from the branch up to the root.
+Marks: a list of marked ancestors.
+
+*/
+:- dynamic todo/5.
+
+/*
+The dynamic predicate branch_marked(Num) succeeds if
+Num is the number of a marked branch. There shouldn't be more
+than one fact for the same branch.
+*/
+:- dynamic branch_marked/1.
+
+/*
+The dynamic predicate branch_deferred(Num) succeeds if a sub-branch
+of a marked branch is deferred. 
+There may be more than one facts for each marked branch -- we use them
+as a counter.
+*/
+:- dynamic branch_deferred/1.
+
 run_concurrent_test(Head):-
+	tell('testresults.log'),
 	context_module(Module),
-	concurrent_tests:assert(todo(Module:sequence(Head),0)),
-	repeat,
-		step(Module,Head),
-		\+ concurrent_tests:todo(_,_),
-	!.
+	concurrent_tests:call_cleanup(run_concurrent_test_X(Module,Head),told).
 
-max_depth(1).
+run_concurrent_test_X(Module,Head):-
+	flag(seq_counter,_,0),	
+	add_module_prefix(sequence(Head),Module,Seq),	
+	assert(todo([],Seq,0,[],[])),
+	process_queue(Module).
 
 
 
-/*
-Sequence Syntax
-
-Atomic sequences / literals: 
- - Prolog goals,
- - sequence(Head),
- - check(Goal)
- 
-Complex sequences: If A and B are sequences then
- - A ~> B  is a sequence (concatenation)
- - A ? B is a sequence (nondeterministic choice)
- - A # B is a sequence (nondeterministic interleaving)
- 
-Meta sequence: If S is a sequence then
- - meta(Goal, Op, S) is a sequence. 
-
-You can think of this "meta" sequence as a "static" forall. Goal is evaluated during sequence reduction (see below).
-Any bindings resulting from this are used to instantiate Sequence. The meta/3 literal is replaced
-by a sequence resulting from the combination of all instances with Operator.
-*/
+max_total_depth(Module,D):-
+	(	Module:clause(max_total_depth(_),_,_)
+	->	Module:max_total_depth(D)
+	;	D=50
+	).
+max_step_depth(Module,D):-
+	(	Module:clause(max_step_depth(_),_,_)
+	->	Module:max_step_depth(D)
+	;	D=10
+	).
 
 
 /*
-Pre-process sequences: explicitly specify the context module for each literal.
-*/
-
+ * preprocessing: 
+ *   - push down context module into literals
+ *   - replace sequence references with equivalent meta literals
+ */
 add_module_prefix(In,Module,Out):-
 	(	In=nil
 	->	Out=In
@@ -64,293 +84,515 @@ add_module_prefix(In,Module,Out):-
 	->	Out=(AA?BB),
 		add_module_prefix(A,Module,AA),
 		add_module_prefix(B,Module,BB)
+	;	In=(A else B)
+	->	Out=(AA else BB),
+		add_module_prefix(A,Module,AA),
+		add_module_prefix(B,Module,BB)
 	;	In=(A#B)		
 	->	Out=(AA#BB),
 		add_module_prefix(A,Module,AA),
 		add_module_prefix(B,Module,BB)
-	;	In = meta(Goal, Op, S)
-	->	Out = meta(Module:Goal,Op,SS),
-		add_module_prefix(S,Module,SS)
-	;	Out=Module:In
+	;	In = meta(Goal0, Op, S)
+	->	my_strip_module(Module:Goal0,Module1,Goal),
+		Out = meta(Module1:Goal,Op,S)
+	;	In = meta(Goal0, Op, S,Share)
+	->	my_strip_module(Module:Goal0,Module1,Goal),
+		Out = meta(Module1:Goal,Op,S,Share)		
+	;	In = sequence(Head0)
+	->	my_strip_module(Module:Head0,Module1,Head),
+		% make sure the sequence exists. If it does not, 
+		% insert an error in the sequence.
+		(	Module1:clause(sequence(Head,_,_),_,_)
+		->	Out = meta(
+				Module1:sequence(Head,Cx, Body),
+				(?), 
+				Cx:Body,
+				share(Head,Head,Head)
+			)
+		;	Out=(Module1:throw(error(existence_error(sequence, Module1:Head), _)))
+		)
+	;	In = (_:_)
+	->	my_strip_module(In,SubSeqMod,SubSeq),
+		add_module_prefix(SubSeq,SubSeqMod,Out)			
+	;	my_strip_module(Module:In,Module1,In1),
+		Out=(Module1:In1)
 	).
 
 
 
-/*
-Reduction to deterministic sequences:
-
-We use a set of rules to transform any sequence into a nondeterministic choice of 
-deterministic sequences. The result looks like this:
-
-  a ~> b ~> ... ~> c 
-? d ~> e ~> ... ~> f 
-? ... 
-and so on. The a,b,c,... are atomic sequences (literals)
-*/
-
-/*
-braindump 3.9.08, 2223,
-
-platzeffizienz ist der knackpunkt, nicht zeiteffizienz. (vgl model checking) 
-
-Idee: Eine nicht-deterministische Sequenz entspricht einer nicht deterministischen
-Entscheidung zwischen mehreren deterministischen Sequenzen.
-
-In allen für uns relevanten Fällen: endlicher Verzweigungsgrad. 
-
-A ? B: 
-det(A) U det(B)
-
-A ~> B
-{a~>b|a aus det(A), b aus det(B)}
-
-A # B
-{a1~>det(a # b1~>b), b1~>det(b # a1~>b) |a1~>a aus det(A), b1~>b aus det(B)}
+is_meta_literal(meta(_,_,_)).
+is_meta_literal(meta(_,_,_,_)).
+is_meta_literal(sequence(_)).
 
 
-
-
-
-
-*/
-
-% eliminate empty sequences
-reduce_rule( 	(A ? nil),				A										,r(nil,1,_)).
-reduce_rule( 	(nil ? A),				A										,r(nil,2,_)).
-reduce_rule( 	(A # nil),				A										,r(nil,3,_)).
-reduce_rule( 	(nil # A),				A										,r(nil,4,_)).
-reduce_rule( 	(A ~> nil),				A										,r(nil,5,_)).
-reduce_rule( 	(nil ~> A),				A										,r(nil,6,_)).
-
-
-
-
-% normalize order
-reduce_rule( 	((A ? B) ? C),			(A ?B ? C)								,r(norm,1,_)).
-reduce_rule( 	((A # B) # C),			(A #B # C)								,r(norm,2,_)).
-reduce_rule( 	((A ~> B) ~> C),		(A ~>B ~> C)							,r(norm,2,_)).
-
-% pull up disjunction
-reduce_rule( 	((A?B)#C),				((A#C) ? (B#C))							,r(pull,1,_)). 
-reduce_rule(	(A#(B?C)),				((A#B) ? (A#C))							,r(pull,2,_)). 
-reduce_rule( 	((A?B)~>C),				((A~>C) ? (B~>C))						,r(pull,3,_)). 
-reduce_rule(	(A~>(B?C)),				((A~>B) ? (A~>C))						,r(pull,4,_)).
-
-% eliminate interleave operator
-reduce_rule(	(A~>B#C~>D),			( (A~>(B # C~>D)) ? (C~>(D# A~>B )) )	,r(elm,1,_)).
-reduce_rule(	(A~>B#C),				(A~>(B # C) ? C ~>A~>B )				,r(elm,2,_)). %assumes C is atomic.
-reduce_rule(	(A#B~>C),				(A~>B~>C ? B~>(A#C))					,r(elm,3,_)). %assumes A is atomic.
-reduce_rule(	(A#B),					(A~>B ? B~>A)							,r(elm,3,_)). %assumes A and B are atomic.
-
-
-
-% expand meta literals
-reduce_rule(	meta(Goal,Op,Template),	Sequence								,r(meta,1,_)):-
-	findall(Template,Goal,Instances),
-	combine(Instances,Op,Sequence).
-
-
+unfold_meta(meta(Goal0,Op,Template),Seq):-
+	my_strip_module(Goal0,GoalCx,Goal),	
+	GoalCx:findall(Template,Goal,Instances),
+	combine(Instances,Op,Seq0),
+	add_module_prefix(Seq0,GoalCx,Seq).
+unfold_meta(meta(Goal0,Op,Template,share(In,Init,Out)),Seq):-
+	my_strip_module(Goal0,GoalCx,Goal),	
+	GoalCx:findall(Template-In-Out,Goal,Instances),
+	combine(Instances,Op,Init,Out,Seq0),
+	add_module_prefix(Seq0,GoalCx,Seq).
+		
 combine([],_,nil).
 combine([Seq|Seqs],Op,Out):-
-	Out =.. [Op,Seq,Seqs2],
-	combine(Seqs,Op,Seqs2).
+	(	Seqs==[]
+	->	Out=Seq
+	;	Out =.. [Op,Seq,Seqs2],
+		combine(Seqs,Op,Seqs2)
+	).
 	
-
-subsequence0((A~>B),A,AA,(AA~>B)).
-subsequence0((A~>B),B,BB,(A~>BB)).
-subsequence0((A?B),A,AA,(AA?B)).
-subsequence0((A?B),B,BB,(A?BB)).
-subsequence0((A#B),A,AA,(AA#B)).
-subsequence0((A#B),B,BB,(A#BB)).
-
-
-subsequence(Seq0,Seq0,Seq,Seq).
-subsequence(Seq0,Sub0,Sub,Seq):-
-	subsequence0(Seq0,Sub1,Sub2,Seq),
-	subsequence(Sub1,Sub0,Sub,Sub2).
-
-
-
-reduce(In,Out):-
-	(	subsequence(In,Sub1,Sub,Expanded),
-		reduce_rule(Sub1,Sub,Name)
-	->	%format("apply ~w on ~w yields ~w~n",[Name,Sub1,Expanded]),
-		format("apply ~w~n",[Name]),
-		reduce(Expanded,Out)		
-	;	In=Out
+combine([],_,InOut,InOut,nil).
+combine([Inst-Input-Next|More],Op,Input, Output,Sequence):-	
+	(	More == []
+	->	Output=Next, 
+		Sequence=Inst
+	;	Sequence =..[Op,Inst,MoreSequence],
+		combine(More,Op,Next,Output,MoreSequence)
 	).
 
 
-detseq(S,DS):-
-	(	S = (A?B)
-	->	(detseq(A,DS) ; detseq(B,DS))
-	;	S = (A~>B)	
-	->	detseq(A,DA),
-		detseq(B,DB),
-		concatseq(DA,DB,DS)
-	;	S = (A # B)
-	->	detseq(A,DA),
-		detseq(B,DB),
-		interleave(DA,DB,DS)
-	;	S = meta(Goal,Op,Template)
-	->	findall(Template,Goal,Instances),
-		combine(Instances,Op,Sequence),
-		detseq(Sequence,DS)
-	;	DS = S
-	).	
 
-%In and B are deterministic
-concatseq(In,B,Out):-
-	(	In = (A~>As)
+
+
+
+
+/******************************
+ *	new meta-interpreter.
+ * does unfolding/exploration on the fly.
+ * still uses iterative deepening.
+ */
+ 
+seq_step_tail( (A~>nil), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (nil~>A), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).	
+seq_step_tail( (A#nil), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (nil#A), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (A?nil), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (nil?A), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (A else nil), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (nil else A), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	
+seq_step_tail( (A~>B), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,TailA ),
+	seq_concat(TailA, B,Tail).		
+seq_step_tail( (A?B), Step, Tail):-
+	!,
+	next_seqnum(Num),
+	(	seq_step_tail((store(Num)~>A),Step,Tail)
+	;	seq_step_tail((recall(Num)~>B),Step,Tail)
+	).
+seq_step_tail( (A else B), Step, Tail):-
+	!,	
+	next_seqnum(Num),	
+	(	seq_concat((store(Num)~>mark_branch(Num)~>A),unmark_branch(Num),Rewritten)		
+	;	Rewritten = (add_mark(Num)~>recall(Num)~>join_branch(Num)~>unmark_branch(Num)~>B)		
+	),
+	seq_step_tail(Rewritten,Step,Tail).	
+seq_step_tail( (A#B), Step, Tail):-
+	!,
+	next_seqnum(Num),
+	(	Tail = (TailA # B),
+		seq_step_tail((store(Num)~>A),Step,TailA)
+	;	Tail = (A # TailB),
+		seq_step_tail((recall(Num)~>B),Step,TailB)
+	).	
+seq_step_tail( Literal, Step, Tail):-
+	(	is_meta_literal(Literal)
+	->	unfold_meta(Literal,Tail),
+		% do not recurse here! 
+		% Recursion could produce infinit paths.  
+		% So we do not recurse here, but 
+		% in process_sequence/5, where the depth 
+		% limits are checked. 
+		% In addition the added no-op may help
+		% stupid humans to understand the traces. 
+		Step = nop(Literal) 
+	;	Step=Literal, 
+		Tail = nil
+	).
+
+
+seq_concat(In,B,Out):-
+	(	In == nil
+	->	Out = B
+	;	B == nil
+	->  Out = In
+	;	In = (A~>As)
 	->	Out = (A~>Tail),
-		concatseq(As,B,Tail)
+		seq_concat(As,B,Tail)
 	;	Out = (In ~> B)
 	).	
 
-%InA and InB are deterministic
-interleave(A,B,Out):-
-	(	A==nil
-	->	Out=B
-	;	B==nil
-	->	Out=A
-	;	seq_first_tail(A,FirstA,TailA),
-		Out=(FirstA ~> Tail), 
-		interleave(TailA,B,Tail)
-	;	seq_first_tail(B,FirstB,TailB),
-		Out=(FirstB ~> Tail), 
-		interleave(A,TailB,Tail)
-	). 
 
 
-seq_first_tail(nil,nil,nil):-!.
-seq_first_tail((A~>B),A,B):-!.
-seq_first_tail(A,A,nil).
+process_queue(Module):-
+	repeat,
+		(	next_sequence(Seq,Num,Stack,TotalDepth,Marks)
+		->	process(Num,Seq,Module,Stack,TotalDepth,Marks),
+			fail
+		;	true
+		),	
+	!.
 
-/*
-
-Semantic of deterministic sequences.
-
-The literals of a deterministic sequence are executed one after another, possibly instantiating subsequent
-literals. If the execution of a literal fails, the sequence is discarded as irrelevant.
-If the execution raises an exception, the sequence is regarded as error case.
-
-There are two special literals recognized by the meta-interpreter: 
-
-- check(Goal)
-This throws an exception if Goal fails. Similar to the assert() methods of JUnit.
-
-- sequence(Head)
-Refers to a subsequence. If the interpreter encounters it, it marks the sequence as "incomplete". Execution is 
-deferred until after the next unfolding step. If the current unfolding depth exceeds a predefined maximum, an exception is raised.
-
-*/
-
-
-
-% non-recursive unfolding:
-% simultaneously replace all occurrences of
-% sequence/1 with the respective body.  
-unfold_step(In,Out):-
-	(	In=Cx0:sequence(Head)
-	->	Out=meta(
-			(	Cx0:sequence(Head,Cx, Body0),
-				add_module_prefix(Body0,Cx,Body)
-			),
-			(?), 
-			Body
-		)
-	;	In=(A~>B)	
-	->	Out=(AA~>BB),
-		unfold_step(A,AA),
-		unfold_step(B,BB)
-	;	In=(A?B)
-	->	Out=(AA?BB),
-		unfold_step(A,AA),
-		unfold_step(B,BB)
-	;	In=(A#B)		
-	->	Out=(AA#BB),
-		unfold_step(A,AA),
-		unfold_step(B,BB)
-	;	Out=In
+process(Num,Seq,Module,Stack,TotalDepth,Marks0):-
+	filter_marks__resume(Marks0,Marks),
+	catch(
+		(	Module:fixture_setup(Num)
+		->	true
+		;	SetupError=error(failed(Module:fixture_setup(Num)))
+		),
+		SetupError,
+		report_setup_error(SetupError,Seq,Stack)		
+	),
+	(	var(SetupError)
+	->	process_sequence(Seq,Module,Stack,0,TotalDepth,Marks)
+	;	true
+	),		
+	catch(
+		(	Module:fixture_teardown(Num)
+		->	true
+		;	TeardownError=error(failed(Module:fixture_teardown(Num)))
+		),
+		TeardownError,
+		report_teardown_error(TeardownError,Seq,Stack)
+	),	
+	(	var(TeardownError), 
+		var(SetupError)
+	->	true	
+	;	throw(stop)
 	).
-
-
-step(Module,Head):-
-	retract(todo(In,Depth)),
-	unfold_step(In,Unfolded),	
-	NewDepth is Depth +1,
-	forall(
-		detseq(Unfolded,DetSeq),
-		process_deterministic_sequence(DetSeq,Module,Head,NewDepth)
-	).
-
-
 	
-process_deterministic_sequence(Seq,Module,Head,Depth):-
-	format("processing ~W (depth=~w) ~n",[Seq,[module(concurrent_tests)],Depth]),
-	Module:ignore(setup(Head)),
-	process_literals(Seq,Outcome),
-	Module:ignore(teardown(Head)),
-	process_outcome(Outcome,Seq,Depth).
 
-process_outcome(Outcome,Seq,Depth):-
-	(	Outcome = error(E)
-	->	format("Sequence produced error: ~w~nFailing sequence:~W~n",[E,Seq,[module(concurrent_tests)]])
-	;	Outcome = incomplete
-	->	max_depth(Max),
-		(	Depth > Max	
-		->	format("Sequence exceeds depth limit: ~W~n",[Seq,[module(concurrent_tests)]])
-		;	assert(todo(Seq,Depth))
+
+
+process_sequence(Seq,Module,Stack,StepDepth,TotalDepth,Marks):-	
+	max_total_depth(Module,MaxTotalDepth),
+	max_step_depth(Module,MaxStepDepth),
+	(	Seq == nil
+	->	report_sequence_succeeded(Stack)
+	;	TotalDepth > MaxTotalDepth
+	->	report_depth_limit_exceeded(Seq,Stack)
+	;	StepDepth > MaxStepDepth
+	->	defer_sequence(Seq,Module,Stack,TotalDepth,Marks,Num),
+		report_sequence_defered(Num,Seq,Stack)
+	;	process_sequence_X(Seq,Module,Stack,StepDepth,TotalDepth,Marks)
+	).
+
+process_sequence_X(Seq,Module,Stack,StepDepth,TotalDepth,Marks):-	
+	seq_step_tail( Seq,Step,Tail),
+	(	Step = nop(_)
+	->	NextMarks=Marks,
+		Outcome = true
+	;	Step == nil
+	->	NextMarks=Marks,
+		Outcome = true
+	;	Step = store(Num)
+	->	NextMarks=Marks,
+		catch(
+			(	Module:fixture_store(Num)
+			->	Outcome= true
+			;	Outcome= error(failed(Module:fixture_store(Num)))
+			),
+			Outcome,
+			true
 		)
+	;	Step = recall(Num)
+	->	debug(concurrent_tests, "~n~nRetrying at ~w, with Marks=~w~n",[Num,Marks]),
+		filter_marks__cp(Marks,NextMarks),		
+		catch(
+			(	Module:fixture_setup(Num)
+			->	Outcome= true
+			;	Outcome= error(failed(Module:fixture_setup(Num)))
+			),
+			Outcome,
+			true
+		)
+	;	Step = mark_branch(Num)
+	->  (	branch_marked(Num)
+		->	NextMarks=Marks
+		;	NextMarks=[Num|Marks],
+			assert(branch_marked(Num))
+		),
+		Outcome = true
+	; 	Step = add_mark(Num)
+	->	NextMarks=[Num|Marks],
+		Outcome=true			
+	;	Step = unmark_branch(Num)
+	->  retractall(branch_marked(Num)),
+		retractall(branch_deferred(Num)),
+		debug(concurrent_tests, "unmark_branch(~w): removing all branch_marked(~w) and branch_deferred(~w) facts.~n",[Num,Num,Num]),
+		filter_marks__cp(Marks,NextMarks),
+		Outcome = true		
+	;	Step = join_branch(Num)
+	->	NextMarks = Marks,
+		(	branch_marked(Num)
+		->	debug(concurrent_tests, "join_branch(~w): The branch is still marked. ~n",[Num]),
+			(	branch_deferred(Num)
+			->	debug(concurrent_tests, "join_branch(~w): some subbranch is still in the queue, deferring the current branch. ~n",[Num]),
+				Outcome= defer
+			;	Outcome= true,
+				debug(concurrent_tests, "join_branch(~w): no subbranch queued, continuing on current branch. ~n",[Num])
+			)
+		;	Outcome=fail,
+			debug(concurrent_tests, "join_branch(~w): The branch is not marked (any more). Discarding current branch.~n",[Num])
+		)
+	;	NextMarks=Marks,
+		execute_literal(Step,Outcome)
+	),
+	(	Outcome = fail
+	->	report_sequence_discarded(Seq,Module,TotalDepth,Stack)		
+	;	Outcome = true
+	->	NextStepDepth is StepDepth + 1,
+		NextTotalDepth is TotalDepth + 1,
+		process_sequence(Tail,Module,[Step|Stack],NextStepDepth,NextTotalDepth,NextMarks)
+	;	Outcome = defer
+	->	defer_sequence(Seq,Module,Stack,TotalDepth,Marks,StoreNum),
+		report_sequence_defered(StoreNum,Seq,Stack)
+	;	report_sequence_produced_error(Seq,Module,TotalDepth,Stack,Outcome)
+	).
+
+defer_sequence(Seq,Module,Stack,TotalDepth,Marks,Num):-
+	next_seqnum(Num),
+	debug(concurrent_tests, "defer_sequence: Num=~w, Marks=~w~n",[Num,Marks]),
+	forall(
+		member(Mark,Marks),
+		(	assert(branch_deferred(Mark)),
+			count(branch_deferred(Mark),Count),
+			debug(concurrent_tests, "Added one branch_deferred(~w) fact. There are now ~w.~n",[Mark,Count])
+		)
+	),
+	Module:fixture_store(Num),
+	assert(todo(Num,Seq,TotalDepth,Stack,Marks)).
+
+filter_marks__resume([],[]).
+filter_marks__resume([Mark|Marks],FilteredMarks):-
+	(	branch_marked(Mark)
+	->	debug(concurrent_tests, "filter_marks__resume: The branch ~w is still marked: keeping the mark.~n",[Mark]),
+		count(branch_deferred(Mark),Count),
+		once(retract(branch_deferred(Mark))),
+		debug(concurrent_tests, "filter_marks__resume: Removed one of ~w branch_deferred(~w) facts.~n",[Count,Mark]),			
+		FilteredMarks=[Mark|MoreFilteredMarks]
+	;	debug(concurrent_tests, "filter_marks__resume: The branch ~w is not marked any more: dropping the mark.~n",[Mark]),
+		FilteredMarks=MoreFilteredMarks	
+	),
+	filter_marks__resume(Marks,MoreFilteredMarks).
+
+filter_marks__cp([],[]).
+filter_marks__cp([Mark|Marks],FilteredMarks):-
+	(	branch_marked(Mark)
+	->	debug(concurrent_tests, "filter_marks__cp: The branch ~w is still marked: keeping the mark.~n",[Mark]),
+		FilteredMarks=[Mark|MoreFilteredMarks]		
+	;	debug(concurrent_tests, "filter_marks__cp: The branch ~w is not marked any more: dropping the mark.~n",[Mark]),
+		FilteredMarks=MoreFilteredMarks	
+	),
+	filter_marks__cp(Marks,MoreFilteredMarks).
+
+
+
+next_sequence(Seq,Num,Stack,TotalDepth,Marks):-
+	retract(todo(Num,Seq,TotalDepth,Stack,Marks)),
+	report_sequence_resumed(Num,Marks).
+	
+next_seqnum(Num):-	
+	flag('$concurrent_tests__defered_sequence_counter',Num,Num+1).	
+
+
+report_sequence_produced_error(Seq,_Module,_Depth,Stack,Error):-
+	format("~n~nSequence produced error: ~w~nFailing Path:~n", [Error]),
+	reverse(Stack,Path),
+	write_path(Path),	
+	format("~nRemainder of the failing sequence: ~n",[]),
+	write_sequence(Seq).
+report_sequence_discarded(_Seq,_Module,_Depth,_Stack).%:-	
+	%debug(concurrent_tests, "~n~nSequence discarded: ~nPath:~n", []),
+	%reverse(Stack,Path),
+	%write_path(Path),
+	%debug(concurrent_tests, "~nDiscarded remainder:~n",[]),
+	%write_sequence(Seq).
+report_sequence_defered(_Num,_Seq,_Stack).%:-
+	%debug(concurrent_tests, "~n~nSequence defered: ~w~nPath:~n", [Num]),
+	%reverse(Stack,Path),
+	%write_path(Path),
+	%debug(concurrent_tests, "~nRemaining sequence:~n",[]),
+	%write_sequence(Seq).
+report_sequence_succeeded(Stack):-
+	format("~n~nSequence succeeded:~n",[]),
+	reverse(Stack,Path),
+	write_path(Path).
+report_depth_limit_exceeded(Seq,Stack):-
+	format("~n~nSequence exceeds depth limit: ~nPath:~n", []),
+	reverse(Stack,Path),
+	write_path(Path),
+	format("~nRemaining sequence:~n",[]),
+	write_sequence(Seq).
+report_setup_error(Error,Seq,Stack):-
+	format("~n~nError during fixture setup: ~w~nFailing Path:~n", [Error]),
+	reverse(Stack,Path),
+	write_path(Path),
+	format("~nRemainder of the failing sequence:~n",[]),
+	write_sequence(Seq).
+report_teardown_error(Error,Seq,Stack):-
+	format("~n~nError during fixture teardown: ~w~nFailing Path:~n", [Error]),
+	reverse(Stack,Path),
+	write_path(Path),
+	format("~nRemainder of the failing sequence:~n",[]),
+	write_sequence(Seq).	
+report_sequence_resumed(_Num,_Marks).%:-
+	%debug(concurrent_tests, "~n~nResuming Sequence ~w, Marks=~w~n",[Num,Marks]).	
+
+execute_literal(Lit0,Outcome):-
+	debug(concurrent_tests,"literal: ~t~W ",[Lit0,[module(concurrent_tests)]]),
+	Lit0 = Cx:Lit,
+	execute_literalX(Lit,Cx,Outcome),
+	debug(concurrent_tests,"outcome: ~t~w~n",[Outcome]),
+	!.
+execute_literal(Lit0,Outcome):-
+	throw(failed(execute_literal(Lit0,Outcome))).	
+
+execute_literalX(check(Goal),Cx,Outcome):-
+	!,
+	(	Cx:catch(Goal,Error,true)
+	->	(	var(Error)
+		->	Outcome=true
+		;	Outcome=Error
+		)
+	;	Outcome=error(check_failed(Goal))
+	).
+execute_literalX(Goal,Cx,Outcome):-	
+	(	Cx:catch(Goal,Error,true)
+	->	(	var(Error)
+		->	Outcome=true
+		;	Outcome=Error
+		)
+	;	Outcome=fail
+	).
+
+:- module_transparent my_strip_module/3.
+	
+my_strip_module(A,Mod,Goal):-	
+	context_module(Candidate),
+	concurrent_tests:my_strip_module(A,Candidate,Mod,Goal).
+my_strip_module(A,Cand,Mod,Goal):-
+	(	var(A)
+	->	Mod=Cand,Goal=A
+	;	A=NextCand:NextA
+	->	my_strip_module(NextA,NextCand,Mod,Goal)
+	;	Mod=Cand,Goal=A
+	).
+
+write_sequence(Seq):-
+	copy_term(Seq,Seq1),
+	numbervars(Seq1,0,_),
+	format("   ",[]),
+	write_sequence(Seq1,100000,""),
+	nl,
+	!.  	
+write_sequence(Seq):-
+	throw(failed(write_sequence(Seq))).
+	
+write_sequence(Seq,P0,I):-
+	(	is_literal(Seq)
+	->	write_literal(Seq)
+	;	write_complex(Seq,P0,I)
+	),
+	!.
+write_sequence(Seq,P0,I):-
+	throw(failed(write_sequence(Seq,P0,I))).
+is_literal(Seq):-
+	(	var(Seq)
+	->	true
+	;	memberchk(Seq,[(A~>B),(A#B),(A?B)])
+	->	fail
 	;	true
 	).
 
-
-process_literals(Part,Outcome):-
-	(	Part = (_:sequence(_) ~> B)
-	->	Outcome = incomplete
-	;Part = (_:sequence(_))
-	->	Outcome = incomplete
-	;	Part = (A ~> B)
-	->	execute_literal(A,OutcomeA),
-		(	OutcomeA == true
-		->	process_literals(B,Outcome)
-		;	Outcome=OutcomeA
-		)
-	;	Part = nil
-	->	Outcome=true
-	;	execute_literal(Part,Outcome)
-	).
-
-execute_literal(Lit0,Outcome):-
-	Lit0 = Cx:Lit,
-	(	Lit = check(Goal)
-	->	(	Cx:catch(once(Goal),Error,fail)
-		->	Outcome=true
-		;	nonvar(Error)
-		->	Outcome=Error
-		;	Outcome=error(check_failed(Goal))
-		)
-	;	(	Cx:catch(once(Lit),Error,fail)
-		->	Outcome=true
-		;	nonvar(Error)
-		->	Outcome=Error
-		;	Outcome=fail
-		)
-	).
-
-
+write_literal(Seq):-
+	format("~W",[Seq,[module(concurrent_tests),numbervars(true)]]).
 		
-write_sequences((Seq?Seqs)):-
-	!,
-	writeln(Seq),
-	write_sequences(Seqs).
-write_sequences(Seq):-
-	writeln(Seq).
+write_complex(Seq,P0,I0):-
+	Seq =..[ Junctor,Left,Right],
+	once(current_op(P,_,concurrent_tests:Junctor)),
+	pad_junctor(Junctor,Pad),
+	LeftP is P - 1,	
+	(	P > P0
+	->	append(I0,"   ",I),
+		format("(  ",[]),
+		write_sequence(Left,LeftP,I),
+		format("~n~s~w~s",[I,Junctor,Pad]),
+		write_sequence(Right,P,I),
+		format("~n~s)",[I])
+	;	write_sequence(Left,LeftP,I0),
+		format("~n~s~w~s",[I0,Junctor,Pad]),
+		write_sequence(Right,P,I0)
+	).
+		
+pad_junctor((#),"  ").
+pad_junctor((?),"  ").
+pad_junctor((else)," ").
+pad_junctor((~>)," ").
+
+write_path(Path):-
+	combine(Path,(~>),PathSeq),
+	write_sequence(PathSeq).
+
+%write_path(Path):-
+%	copy_term(Path,Path1),
+%	numbervars(Path1,0,_),
+%	write_path_X(Path1).
+		
+%write_path_X([]).
+%write_path_X([Literal|Literals]):-
+%	write_literal(Literal),
+%	nl,
+%	write_path_X(Literals).
+
+
+
+% code copied from the occurs lib.
+count(Goal, Count) :-
+	State = count(0),
+	(   Goal,
+	    arg(1, State, N0),
+	    N is N0 + 1,
+	    nb_setarg(1, State, N),
+	    fail
+	;   arg(1, State, Count)
+	).
+
+count_paths(Seq,Module,Depth,Count):-
+	max_total_depth(Module,MaxDepth),
+	count(truncate_path(Seq,Depth,MaxDepth,_Path),Count).
+
 	
-	
-
-
-
-
-	
+truncate_path(Seq,CurrentDepth,MaxDepth,Path):-
+	(	CurrentDepth>MaxDepth
+	->	Path=[truncate]
+	;	Seq=nil
+	->	Path=[]
+	;	seq_step_tail(Seq,Step,Tail),
+		NextDepth is CurrentDepth+1,
+		Path=[Step|TailPath],
+		truncate_path(Tail,NextDepth,MaxDepth,TailPath)
+	).
+		
+spyme.		
