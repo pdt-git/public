@@ -7,8 +7,8 @@
 
 %:- tspy(builder__messages:next_client_message/3).
 
-max_total_depth(50).
-max_step_depth(10).
+max_total_depth(150).
+max_step_depth(50).
 
 builder_test:-
 	(	current_thread(test_driver,_)
@@ -16,7 +16,7 @@ builder_test:-
 	;	true
 	),
 	thread_create(
-		run_concurrent_test(my_testX),
+		run_concurrent_test(my_test),
 		_,
 		[alias(test_driver)]
 	).
@@ -26,12 +26,11 @@ builder_test_count(C):-
 	
 :- dynamic depends/2.
 depends(a,b).
-%depends(a,c).
-%depends(c,d).
-%depends(c,e).
-%depends(e,b).
-%depends(e,b).
-%depends(b,c).
+depends(a,c).
+depends(c,d).
+depends(c,e).
+depends(e,b).
+depends(b,c).
 
 client(c1).
 %client(c2).
@@ -101,10 +100,22 @@ wait_for(Target,Msg):-
 			fail
 		),
 	!.
-/*
-
-   
-*/
+% special verison for concurrent testing.
+%  We first send a ping. 
+%  Now we know that the arbiter HAS to send something eventually.
+%  If we receive a pong, then there hasn't been any server activity in the mean time.
+%  We also know that there was no client activity in the mean time (we control all clients!)
+%  So a pong means: we are locked. The system cannot step. The current path / interleaving
+%  should be discarded. 
+%  If we receive something else, than there was some server activity. We have to wait for the pong, though,
+%  to remove it from the queue.  
+my_next_client_message(Client,From,Msg):-	
+	send_message_client_target(Client,meta,ping(Client)),
+	next_client_message(Client,From,Msg),
+	(	Msg == pong
+	->	fail
+	;	next_client_message(Client,meta,pong)
+	).
 
 
 sequence(
@@ -150,7 +161,7 @@ sequence(
 	simple_request(C,From,T,LocksIn,LocksOut),
 	builder__test,	
 	(	send_message_client_target(C,T,req(From,C))
-	~>	next_client_message(C,_,Msg) 
+	~>	my_next_client_message(C,_,Msg) 
 	~> 	(	Msg = build(T2)
 		~>  meta(
 				depends(T2,T3), 
