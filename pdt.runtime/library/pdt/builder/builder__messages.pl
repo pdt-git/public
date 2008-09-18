@@ -7,7 +7,9 @@
 		send_message_target_target/3,
 		next_target_message/3,
 		next_client_message/2,
-		next_client_message/3
+		next_client_message/3,
+		peek_client_message/2,
+		peek_client_message/3
 	]
 ).
 
@@ -126,4 +128,12 @@ next_client_message(Client,Sender,Data):-
 		),
 	!.
 	
+peek_client_message(Client,Sender,Data):-
+	msg_new(Msg),	
+	msg_sender(Msg,Sender),
+	msg_data(Msg,Data),
+	thread_peek_message(Client,Msg).
 	
+peek_client_message(Sender,Data):-
+	thread_self(Client),
+	peek_client_message(Client,Sender,Data).

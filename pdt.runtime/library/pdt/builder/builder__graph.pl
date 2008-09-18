@@ -49,7 +49,7 @@ current_target_state(Target,State):-
     ).
 
 update_target_state(Target,NewState):-	
-	writeln(update_target_state(Target,NewState)),
+	%writeln(update_target_state(Target,NewState)),
 	thread_self(Me),
 	(	Me \== build_arbiter
 	->	throw(only_arbiter_should_modify_state(Me,Target,NewState))
