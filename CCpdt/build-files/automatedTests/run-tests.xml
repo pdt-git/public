@@ -61,7 +61,7 @@ version=3.1.0</echo>
     		<property name="plugin-name" value="org.cs3.pdt.runtime" />
     		<property name="classname" value="org.cs3.pl.prolog.tests.PrologInterfaceTests" />
 			<property name="eclipse-home" value="${test.eclipse.host.eclipse}" />
-			<property name="extraVMargs" value="-Demma.coverage.out.file=${emma.coverage.output} -Dpif.file_search_path=&quot;library=/home/lukas/workspace/pdt.runtime.socket/library/socket&quot;
+			<property name="extraVMargs" value="-Demma.coverage.out.file=${emma.coverage.output} -Dpif.file_search_path=&quot;library=L:/Work/eclipse-SDK-3.4-win32-pdt/workspace/pdt.runtime.socket/library/socket&quot;
 				-Dpif.implementation=&quot;org.cs3.pl.prolog.internal.socket.Factory&quot;" />
 		</ant>
 	</target>
