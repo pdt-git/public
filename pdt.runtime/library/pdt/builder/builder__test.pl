@@ -118,6 +118,8 @@ my_next_client_message(Client,From,Msg):-
 	).
 
 
+	
+
 sequence(
 	my_testX,
 	builder__test,
@@ -161,29 +163,31 @@ sequence(
 	simple_request(C,From,T,LocksIn,LocksOut),
 	builder__test,	
 	(	send_message_client_target(C,T,req(From,C))
-	~>	my_next_client_message(C,_,Msg) 
-	~> 	(	Msg = build(T2)
-		~>  meta(
-				depends(T2,T3), 
-				(~>), 
-				(	\+ member(error(_),LIn)
-				~>	sequence(simple_request(C,T2,T3,LIn,LOut))
-				?	memberchk(error(_),LIn),
-					LOut = LIn
-				),
-				share(LIn,LocksIn,LOut)
+	~>	wait(	
+			my_next_client_message(C,_,Msg), 
+		 	(	Msg = build(T2)
+			~>  meta(
+					depends(T2,T3), 
+					(~>), 
+					(	\+ member(error(_),LIn)
+					~>	sequence(simple_request(C,T2,T3,LIn,LOut))
+					?	memberchk(error(_),LIn),
+						LOut = LIn
+					),
+					share(LIn,LocksIn,LOut)
+				)
+			~>	(	\+ memberchk(error(_),LOut),
+					send_message_client_target(C,T2,success)
+				~>	sequence(simple_request(C,From,T,LOut,LocksOut))			
+				%?	LocksOut=[error(test_error(T2,local))|LOut],
+				%	send_message_client_target(C,T2,error(test_error(T2,nonlocal)))			
+				)		
+			? 	Msg = grant(T),
+			 	LocksOut = [T|LocksIn]		 	
+			? 	Msg = error(E),
+				LocksOut = [error(E)|LocksIn]
+			else throw(error(unexpected_message(Msg)))
 			)
-		~>	(	\+ memberchk(error(_),LOut),
-				send_message_client_target(C,T2,success)
-			~>	sequence(simple_request(C,From,T,LOut,LocksOut))			
-			%?	LocksOut=[error(test_error(T2,local))|LOut],
-			%	send_message_client_target(C,T2,error(test_error(T2,nonlocal)))			
-			)		
-		? 	Msg = grant(T),
-		 	LocksOut = [T|LocksIn]		 	
-		? 	Msg = error(E),
-			LocksOut = [error(E)|LocksIn]
-		else throw(error(unexpected_message(Msg)))
 		)
 	%~>	check(ground(LocksOut))		
 	)	

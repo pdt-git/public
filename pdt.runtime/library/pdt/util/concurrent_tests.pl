@@ -92,6 +92,10 @@ add_module_prefix(In,Module,Out):-
 	->	Out=(AA#BB),
 		add_module_prefix(A,Module,AA),
 		add_module_prefix(B,Module,BB)
+	;	In=wait(Cond,Seq)		
+	->	my_strip_module(Module:Cond,Module1,Cond1),
+		Out=wait(Module1:Cond1,Seq1),		
+		add_module_prefix(Seq,Module,Seq1)
 	;	In = meta(Goal0, Op, S)
 	->	my_strip_module(Module:Goal0,Module1,Goal),
 		Out = meta(Module1:Goal,Op,S)
@@ -216,6 +220,10 @@ seq_step_tail( (A#B), Step, Tail):-
 	;	Tail = (A # TailB),
 		seq_step_tail((recall(Num)~>B),Step,TailB)
 	).	
+seq_step_tail(wait(Condition,Seq),Step,Tail):-
+	!,
+	Condition,
+	seq_step_tail(Seq,Step,Tail).
 seq_step_tail( Literal, Step, Tail):-
 	(	is_meta_literal(Literal)
 	->	unfold_meta(Literal,Tail),
@@ -230,7 +238,7 @@ seq_step_tail( Literal, Step, Tail):-
 	;	Step=Literal, 
 		Tail = nil
 	).
-
+ 
 
 seq_concat(In,B,Out):-
 	(	In == nil
@@ -299,7 +307,12 @@ process_sequence(Seq,Module,Stack,StepDepth,TotalDepth,Marks):-
 	).
 
 process_sequence_X(Seq,Module,Stack,StepDepth,TotalDepth,Marks):-	
-	seq_step_tail( Seq,Step,Tail),
+	(	seq_step_tail( Seq,Step,Tail)
+	*-> process_sequence_XX(Step,Tail,Seq,Module,Stack,StepDepth,TotalDepth,Marks)
+	;	report_dead_lock(Seq,Stack)
+	).
+	
+process_sequence_XX(Step,Tail,Seq,Module,Stack,StepDepth,TotalDepth,Marks):-	
 	(	Step = nop(_)
 	->	NextMarks=Marks,
 		Outcome = true
@@ -417,6 +430,12 @@ next_seqnum(Num):-
 	flag('$concurrent_tests__defered_sequence_counter',Num,Num+1).	
 
 
+report_dead_lock(Seq,Stack):-
+	format("~n~nSequence locked, no more executable steps: ~nFailing Path:~n", []),
+	reverse(Stack,Path),
+	write_path(Path),	
+	format("~nNothing executable in remaining sequence: ~n",[]),
+	write_sequence(Seq).
 report_sequence_produced_error(Seq,_Module,_Depth,Stack,Error):-
 	format("~n~nSequence produced error: ~w~nFailing Path:~n", [Error]),
 	reverse(Stack,Path),
@@ -521,7 +540,7 @@ write_sequence(Seq,P0,I):-
 is_literal(Seq):-
 	(	var(Seq)
 	->	true
-	;	memberchk(Seq,[(A~>B),(A#B),(A?B)])
+	;	memberchk(Seq,[(A~>B),(A#B),(A?B),(A else B),wait(A,B)])
 	->	fail
 	;	true
 	).
@@ -531,19 +550,31 @@ write_literal(Seq):-
 		
 write_complex(Seq,P0,I0):-
 	Seq =..[ Junctor,Left,Right],
-	once(current_op(P,_,concurrent_tests:Junctor)),
-	pad_junctor(Junctor,Pad),
-	LeftP is P - 1,	
-	(	P > P0
-	->	append(I0,"   ",I),
-		format("(  ",[]),
-		write_sequence(Left,LeftP,I),
-		format("~n~s~w~s",[I,Junctor,Pad]),
-		write_sequence(Right,P,I),
-		format("~n~s)",[I])
-	;	write_sequence(Left,LeftP,I0),
-		format("~n~s~w~s",[I0,Junctor,Pad]),
-		write_sequence(Right,P,I0)
+	(	current_op(P,_,concurrent_tests:Junctor)
+	->	pad_junctor(Junctor,Pad),
+		LeftP is P - 1,	
+		(	P > P0
+		->	append(I0,"   ",I),
+			format("(  ",[]),
+			write_sequence(Left,LeftP,I),
+			format("~n~s~w~s",[I,Junctor,Pad]),
+			write_sequence(Right,P,I),
+			format("~n~s)",[I])
+		;	write_sequence(Left,LeftP,I0),
+			format("~n~s~w~s",[I0,Junctor,Pad]),
+			write_sequence(Right,P,I0)
+		)
+	;	LeftP = 999, 
+		RightP = 999,
+		append(I0,"   ",IMe),
+		append(IMe,"   ",IKids),
+		format("~w(~n",[Junctor]),
+		format("~s",[IKids]),
+		write_sequence(Left,LeftP,IMe),
+		format(",~n",[]),
+		format("~s",[IKids]),
+		write_sequence(Right,RightP,IMe),
+		format("~n~s)",[IMe])	
 	).
 		
 pad_junctor((#),"  ").
