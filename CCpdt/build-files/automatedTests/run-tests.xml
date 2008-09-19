@@ -55,7 +55,7 @@ version=3.1.0</echo>
 		Note that it is not needed if you use the autotestsuite -->
 
 	<target name="-runTestSuite" description="Should be called from allTests.xml only">
-		<ant target="ui-test" antfile="${test.library.xml}" dir="${test.eclipse.host.eclipse}">
+		<ant target="core-test" antfile="${test.library.xml}" dir="${test.eclipse.host.eclipse}">
 			<!-- inject additional properties for Eclipse startup with data-dir property -->
 			<property name="data-dir" value="${test.workspace} -clean -dev ${basedir}/emma.jar" />
     		<property name="plugin-name" value="org.cs3.pdt.runtime" />
