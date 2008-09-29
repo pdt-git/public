@@ -522,8 +522,9 @@ my_strip_module(A,Cand,Mod,Goal):-
 write_sequence(Seq):-
 	copy_term(Seq,Seq1),
 	numbervars(Seq1,0,_),
+	filter_seq(Seq1,Seq2),
 	format("   ",[]),
-	write_sequence(Seq1,100000,""),
+	write_sequence(Seq2,100000,""),
 	nl,
 	!.  	
 write_sequence(Seq):-
@@ -586,6 +587,23 @@ write_path(Path):-
 	combine(Path,(~>),PathSeq),
 	write_sequence(PathSeq).
 
+	
+filter_seq(In,Out):-
+	(	is_literal(In)
+	->	(	member(In,[nop(_),mark_branch(_),unmark_branch(_),store(_),recall(_)])
+		->	Out = nil
+		;	Out = In
+		)
+	;	In =.. [Fun,LH,RH],
+		filter_seq(LH,LOut),
+		filter_seq(RH,ROut),
+		(	ROut==nil
+		->	Out = LOut
+		;	LOut==nil
+		->	Out = ROut
+		;	Out =.. [Fun,LOut,ROut]
+		)
+	).
 %write_path(Path):-
 %	copy_term(Path,Path1),
 %	numbervars(Path1,0,_),

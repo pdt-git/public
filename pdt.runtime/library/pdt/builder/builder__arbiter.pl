@@ -7,6 +7,7 @@
 :- use_module(builder__transitions).
 :- use_module(builder__messages).
 :- use_module(builder__graph).
+:- use_module(builder__debug).
 
 % runs the arbiter's message dispatch loop.
 run_arbiter(Num):-    
@@ -44,7 +45,8 @@ process_message(Target,Event):-
     	;	throw(non_ground_state(Target,State,Event))
     ),        
     (	transition(Event,Target,State,NewState)
-    ->  (	ground(NewState)
+    ->  dbg_step_describe(Target,NewState),
+    	(	ground(NewState)
     	->	%format("target ~w, state ~w --> event ~w, new state ~w~n",[Target,State,Event,NewState]),
     		update_target_state(Target,NewState)
     	;	throw(transition_to_non_ground_state(State,Event,NewState,Target))

@@ -15,7 +15,7 @@
 
 %hmm... cyclic dependency. :-(
 :- use_module(builder__arbiter).
-
+:- use_module(builder__debug).
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).
 :- pdt_define_context(msg(sn,sender,receiver,data)).
 
@@ -42,6 +42,8 @@ gen_message(Sender,Receiver,Data,Msg):-
 gen_block([],_,[]).
 gen_block([Receiver-Data|MoreData],Sender,[Msg|MoreMsg]):-
 	gen_message(Sender,Receiver,Data,Msg),
+	msg_sn(Msg,SN),
+	dbg_step_send(Sender,SN,Data),
 	gen_block(MoreData,Sender,MoreMsg).
 
 send_message_client_target(Target,Data):-
@@ -51,6 +53,8 @@ send_message_client_target(Sender,Target,Data):-
 	gen_message(Sender,Target,Data,Msg),
 	ensure_arbiter_is_running,	
 	thread_send_message(build_arbiter,Msg),
+	msg_sn(Msg,SN),
+	dbg_step_send(Sender,SN,Data),
 	!.
 send_message_client_target(Sender,Target,Data):-
 	throw(failed(send_message_client_target(Sender,Target,Data))).
@@ -68,14 +72,19 @@ send_block_client_target(Data,Sender):-
 	
 send_message_target_client(Target,Client,Data):-
 	gen_message(Target,Client,Data,Msg),
-	thread_send_message(Client,Msg).
+	thread_send_message(Client,Msg),
+	msg_sn(Msg,SN),
+	dbg_step_send(Target,SN,Data).
 	
 send_message_target_target(Sender,Receiver,Data):-
 	gen_message(Sender,Receiver,Data,Msg),
-	assert('$fast_lane'(Msg)).
+	assert('$fast_lane'(Msg)),
+	msg_sn(Msg,SN),
+	dbg_step_send(Sender,SN,Data).
 
 
-next_target_message(Target,Sender,Data):-	
+next_target_message(Target,Sender,Data):-
+	dbg_step(Target),	
 	% check for message blocks
 	% if any is in the queue, put the messages it contains 
 	% on the fast lane.
@@ -98,24 +107,17 @@ next_target_message(Target,Sender,Data):-
 	(	retract('$fast_lane'(Msg))
 	->	true
 	;	thread_get_message(Msg)
-	).
+	),
+	msg_sn(Msg,SN),
+	dbg_step_receive(Target,SN).
 	
 next_client_message(Sender,Data):-		
-	msg_new(Msg),	
-	msg_sender(Msg,Sender),
-	msg_data(Msg,Data),
-	repeat,
-		ensure_arbiter_is_running,
-		catch(
-			call_with_time_limit( 1, thread_get_message(Msg)),
-			time_limit_exceeded,
-			fail
-		),
-	!.
-	
+	thread_self(Client),
+	next_client_message(Client,Sender,Data).
 	
 
-next_client_message(Client,Sender,Data):-		
+next_client_message(Client,Sender,Data):-
+	dbg_step(Client),		
 	msg_new(Msg),	
 	msg_sender(Msg,Sender),
 	msg_data(Msg,Data),
@@ -126,7 +128,9 @@ next_client_message(Client,Sender,Data):-
 			time_limit_exceeded,
 			fail
 		),
-	!.
+	!,
+	msg_sn(Msg,SN),
+	dbg_step_receive(Client,SN).
 	
 peek_client_message(Client,Sender,Data):-
 	msg_new(Msg),	
