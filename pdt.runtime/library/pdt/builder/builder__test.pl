@@ -100,6 +100,9 @@ wait_for(Target,Msg):-
 			fail
 		),
 	!.
+	
+:- dynamic buffered_message/3.	
+	
 % special verison for concurrent testing.
 %  We first send a ping. 
 %  Now we know that the arbiter HAS to send something eventually.
@@ -109,16 +112,23 @@ wait_for(Target,Msg):-
 %  should be discarded. 
 %  If we receive something else, than there was some server activity. We have to wait for the pong, though,
 %  to remove it from the queue.  
-my_next_client_message(Client,From,Msg):-	
+my_next_client_message_check(Client,From):-	
+	buffered_message(Client,From,_),
+	!.
+my_next_client_message_check(Client,From):-	
 	send_message_client_target(Client,meta,ping(Client)),
 	next_client_message(Client,From,Msg),
 	(	Msg == pong
 	->	fail
-	;	next_client_message(Client,meta,pong)
+	;	assert(buffered_message(Client,From,Msg)),
+		next_client_message(Client,meta,pong)
 	).
 
-
-	
+my_next_client_message(Client,From,Msg):-
+	retract(buffered_message(Client,From,Msg)),
+	!.
+my_next_client_message(Client,From,Msg):-
+	next_client_message(Client,From,Msg).	
 
 sequence(
 	my_testX,
@@ -164,29 +174,31 @@ sequence(
 	builder__test,	
 	(	send_message_client_target(C,T,req(From,C))
 	~>	wait(	
-			my_next_client_message(C,_,Msg), 
-		 	(	Msg = build(T2)
-			~>  meta(
-					depends(T2,T3), 
-					(~>), 
-					(	\+ member(error(_),LIn)
-					~>	sequence(simple_request(C,T2,T3,LIn,LOut))
-					?	memberchk(error(_),LIn),
-						LOut = LIn
-					),
-					share(LIn,LocksIn,LOut)
+			my_next_client_message_check(C,_), 
+		    (	my_next_client_message(C,_,Msg)
+		    ~> 	( 	Msg = build(T2)
+				~>  meta(
+						depends(T2,T3), 
+						(~>), 
+						(	\+ member(error(_),LIn)
+						~>	sequence(simple_request(C,T2,T3,LIn,LOut))
+						?	memberchk(error(_),LIn),
+							LOut = LIn
+						),
+						share(LIn,LocksIn,LOut)
+					)
+				~>	(	\+ memberchk(error(_),LOut),
+						send_message_client_target(C,T2,success)
+					~>	sequence(simple_request(C,From,T,LOut,LocksOut))			
+					%?	LocksOut=[error(test_error(T2,local))|LOut],
+					%	send_message_client_target(C,T2,error(test_error(T2,nonlocal)))			
+					)		
+				? 	Msg = grant(T),
+				 	LocksOut = [T|LocksIn]		 	
+				? 	Msg = error(E),
+					LocksOut = [error(E)|LocksIn]
+				else throw(error(unexpected_message(Msg)))
 				)
-			~>	(	\+ memberchk(error(_),LOut),
-					send_message_client_target(C,T2,success)
-				~>	sequence(simple_request(C,From,T,LOut,LocksOut))			
-				%?	LocksOut=[error(test_error(T2,local))|LOut],
-				%	send_message_client_target(C,T2,error(test_error(T2,nonlocal)))			
-				)		
-			? 	Msg = grant(T),
-			 	LocksOut = [T|LocksIn]		 	
-			? 	Msg = error(E),
-				LocksOut = [error(E)|LocksIn]
-			else throw(error(unexpected_message(Msg)))
 			)
 		)
 	%~>	check(ground(LocksOut))		
@@ -252,3 +264,36 @@ sequence(
 	~> send_message_client_target(c1, a, error(test_error(a, nonlocal)))	
 	)
 ).
+
+debug_seq(
+	(   builder__test:send_message_client_target(c1, a, req([], c1))
+	~> builder__test:my_next_client_message(c1, a, build(a))
+	~> builder__test: (build(a)=build(a))
+	~> builder__test: (\+member(error(K), []))
+	~> builder__test:send_message_client_target(c1, b, req(a, c1))
+	~> builder__test:my_next_client_message(c1, b, build(b))
+	~> builder__test: (build(b)=build(b))
+	~> builder__test: (\+member(error(T), []))
+	~> builder__test:send_message_client_target(c1, c, req(b, c1))
+	~> builder__test:my_next_client_message(c1, c, build(c))
+	~> builder__test: (build(c)=build(c))
+	~> builder__test: (\+member(error(B1), []))
+	~> builder__test:send_message_client_target(c1, d, req(c, c1))
+	~> builder__test:my_next_client_message(c1, d, build(d))
+	~> builder__test: (build(d)=build(d))
+	~> builder__test: (\+memberchk(error(I1), []), send_message_client_target(c1, d, success))
+	~> builder__test:send_message_client_target(c1, d, req(c, c1))
+	~> builder__test:my_next_client_message(c1, d, grant(d))
+	~> builder__test: (grant(d)=grant(d), [d]=[d])
+	~> builder__test: (\+member(error(L1), [d]))
+	~> builder__test:send_message_client_target(c1, e, req(c, c1))
+	~> builder__test:my_next_client_message(c1, e, build(e))
+	~> builder__test: (build(e)=build(e))
+	~> builder__test: (\+member(error(T1), [d]))
+	~> builder__test:send_message_client_target(c1, b, req(e, c1))
+	)
+).		
+
+run_debug_seq(Step~>Steps):-
+	Step,
+	run_debug_seq(Steps).
