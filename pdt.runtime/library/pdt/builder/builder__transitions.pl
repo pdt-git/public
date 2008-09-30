@@ -128,7 +128,7 @@ replace_this_args([Arg|Args],This, [NewArg|NewArgs]):-
 
 	
 %-----------------------------------------------------
-%TODO: send "implied" when requesting a lock twice.
+
 idle,obsolete 		~~ req(T,C) 										/ start_build(T,C,this) 					~~> building,pending.
 idle,consistent		~~ req(T,C)											/ add_lck(T,C,this)							~~> reading,consistent.
 idle,consistent		~~ invalidate										/ propagate_invalid(this)					~~> idle,obsolete.
@@ -136,8 +136,8 @@ building,pending 	~~ success, (c(this,_:bwd(N),_) -> c(_,_:bwd(N),this))/ build_
 building,pending 	~~ success. %target has outgoing bwd. rerequesting will propagate. nothing to do right now.
 building,pending	~~ invalidate										/ propagate_invalid(this)					~~> building,obsolete.
 building,obsolete 	~~ success 											/ build_obsolete(this) 						~~> idle,obsolete.
-building,_ 			~~ req(T,C), \+ c(T,C:bld(_),this)					/ add_req(T,C,this).
-building,_ 			~~ req(T,C), c(T,C:bld(_),this) 					/ add_bwd(T,C,this).
+building,_ 			~~ req(T,C), \+ c(_,C:bld(_),this)					/ add_req(T,C,this).
+building,_ 			~~ req(T,C), c(_,C:bld(_),this) 					/ add_bwd(T,C,this).
 building,_ 			~~ rel(T,_) 										/ put_dep(T,this).
 building,_ 			~~ error(E) 										/ report_error(this,E) 						~~> idle,obsolete.
 reading,obsolete	~~ rel(T,C), c(_,_:lck,this)=1, c(T2,C2:req,this) 	/ rem_lck(T,C,this),start_bld(T2,C2,this)	~~> building,pending.
