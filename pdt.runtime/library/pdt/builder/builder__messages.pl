@@ -84,7 +84,7 @@ send_message_target_target(Sender,Receiver,Data):-
 
 
 next_target_message(Target,Sender,Data):-
-	dbg_step(Target),	
+		
 	% check for message blocks
 	% if any is in the queue, put the messages it contains 
 	% on the fast lane.
@@ -97,6 +97,7 @@ next_target_message(Target,Sender,Data):-
 		)
 	;	true
 	),
+	
 	% Now, go on with the delivery, by creating a message template.
 	msg_new(Msg),
 	msg_receiver(Msg,Target),
@@ -109,6 +110,7 @@ next_target_message(Target,Sender,Data):-
 	;	thread_get_message(Msg)
 	),
 	msg_sn(Msg,SN),
+	dbg_step(Target),
 	dbg_step_receive(Target,SN).
 	
 next_client_message(Sender,Data):-		
