@@ -194,7 +194,9 @@ sequence(
 					%	send_message_client_target(C,T2,error(test_error(T2,nonlocal)))			
 					)		
 				? 	Msg = grant(T),
-				 	LocksOut = [T|LocksIn]		 	
+				 	LocksOut = [T|LocksIn]
+				?	Msg = implied(T),
+					LocksOut = LocksIn
 				? 	Msg = error(E),
 					LocksOut = [error(E)|LocksIn]
 				else throw(error(unexpected_message(Msg)))
@@ -265,35 +267,74 @@ sequence(
 	)
 ).
 
+my_debug:-
+	(	current_thread(test_driver,_)
+	->	thread_join(test_driver,_)
+	;	true
+	),
+	thread_create(
+		my_debug2,
+		_,
+		[alias(test_driver)]
+	).
+my_debug2:-
+	debug_seq(S),run_debug_seq(S).
+
 debug_seq(
-	(   builder__test:send_message_client_target(c1, a, req([], c1))
-	~> builder__test:my_next_client_message(c1, a, build(a))
-	~> builder__test: (build(a)=build(a))
-	~> builder__test: (\+member(error(K), []))
-	~> builder__test:send_message_client_target(c1, b, req(a, c1))
-	~> builder__test:my_next_client_message(c1, b, build(b))
-	~> builder__test: (build(b)=build(b))
-	~> builder__test: (\+member(error(T), []))
-	~> builder__test:send_message_client_target(c1, c, req(b, c1))
-	~> builder__test:my_next_client_message(c1, c, build(c))
-	~> builder__test: (build(c)=build(c))
-	~> builder__test: (\+member(error(B1), []))
-	~> builder__test:send_message_client_target(c1, d, req(c, c1))
-	~> builder__test:my_next_client_message(c1, d, build(d))
-	~> builder__test: (build(d)=build(d))
-	~> builder__test: (\+memberchk(error(I1), []), send_message_client_target(c1, d, success))
-	~> builder__test:send_message_client_target(c1, d, req(c, c1))
-	~> builder__test:my_next_client_message(c1, d, grant(d))
-	~> builder__test: (grant(d)=grant(d), [d]=[d])
-	~> builder__test: (\+member(error(L1), [d]))
-	~> builder__test:send_message_client_target(c1, e, req(c, c1))
-	~> builder__test:my_next_client_message(c1, e, build(e))
-	~> builder__test: (build(e)=build(e))
-	~> builder__test: (\+member(error(T1), [d]))
-	~> builder__test:send_message_client_target(c1, b, req(e, c1))
+	(    builder__test:send_message_client_target(c1, a, req([], c1))
+~> builder__test:my_next_client_message(c1, a, build(a))
+~> builder__test: (build(a)=build(a))
+~> builder__test: (\+member(error(K), []))
+~> builder__test:send_message_client_target(c1, b, req(a, c1))
+~> builder__test:my_next_client_message(c1, b, build(b))
+~> builder__test: (build(b)=build(b))
+~> builder__test: (\+member(error(R), []))
+~> builder__test:send_message_client_target(c1, c, req(b, c1))
+~> builder__test:my_next_client_message(c1, c, build(c))
+~> builder__test: (build(c)=build(c))
+~> builder__test: (\+member(error(Y), []))
+~> builder__test:send_message_client_target(c1, d, req(c, c1))
+~> builder__test:my_next_client_message(c1, d, build(d))
+~> builder__test: (build(d)=build(d))
+~> builder__test: (\+memberchk(error(F1), []), send_message_client_target(c1, d, success))
+~> builder__test:send_message_client_target(c1, d, req(c, c1))
+~> builder__test:my_next_client_message(c1, d, grant(d))
+~> builder__test: (grant(d)=grant(d), [d]=[d])
+~> builder__test: (\+member(error(I1), [d]))
+~> builder__test:send_message_client_target(c1, e, req(c, c1))
+~> builder__test:my_next_client_message(c1, e, build(e))
+~> builder__test: (build(e)=build(e))
+~> builder__test: (\+member(error(P1), [d]))
+~> builder__test:send_message_client_target(c1, b, req(e, c1))
+~> builder__test:my_next_client_message(c1, b, implied(b))
+~> builder__test: (implied(b)=implied(b), [d]=[d])
+~> builder__test: (\+memberchk(error(S1), [d]), send_message_client_target(c1, e, success))
+~> builder__test:send_message_client_target(c1, e, req(c, c1))
+~> builder__test:my_next_client_message(c1, e, implied(e))
+~> builder__test: (implied(e)=implied(e), [d]=[d])
+~> builder__test: (\+memberchk(error(V1), [d]), send_message_client_target(c1, c, success))
+~> builder__test:send_message_client_target(c1, c, req(b, c1))
+~> builder__test:my_next_client_message(c1, c, implied(c))
+~> builder__test: (implied(c)=implied(c), [d]=[d])
+~> builder__test: (\+memberchk(error(Y1), [d]), send_message_client_target(c1, b, success))
+~> builder__test:send_message_client_target(c1, b, req(a, c1))
+~> builder__test:my_next_client_message(c1, b, grant(b))
+~> builder__test: (grant(b)=grant(b), [b, d]=[b, d])
+~> builder__test: (\+member(error(B2), [b, d]))
+~> builder__test:send_message_client_target(c1, c, req(a, c1))
 	)
 ).		
 
-run_debug_seq(Step~>Steps):-
+run_debug_seq(Seq):-
+	fixture_setup(debug),
+	call_cleanup(
+		run_debug_seq_X(Seq),
+		fixture_teardown(debug)
+	).
+
+run_debug_seq_X(Step~>Steps):-
+	!,
 	Step,
-	run_debug_seq(Steps).
+	run_debug_seq_X(Steps).
+run_debug_seq_X(Step):-
+	Step.	
