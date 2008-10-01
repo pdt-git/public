@@ -55,14 +55,15 @@ add_lck(From,Client,Target):-
 	% send implied instead of grant. Also do not propagate the request in this case.
 	(	edge_label(_,Target,Client,lck)
 	->	Notification = implied(Target)
-	;	Notification = grant(Target)
+	;	Notification = grant(Target),
 		% PDT-308: We need to propagate the request along outgoing dep edges
 		forall(
 			target_depends(Target,To),
-			send_message_target_target(Target,To,req(Target,Client)
-		)
+			send_message_target_target(Target,To,req(Target,Client))
+		),
+		set_edge_label(From,Target,Client,lck)
 	),	
-	set_edge_label(From,Target,Client,lck),
+	
 	% do not send notification if this is an implied lock
 	% i.e. it's not direct, and From is not being build.
 	(	From == []
@@ -78,7 +79,7 @@ grant_waiting(Target):-
 	% and notify clients.
 	forall(
 		edge_label(From,Target,Client,req),
-		add_lck(From,Client,To) % this should do.
+		add_lck(From,Client,Target) % this should do.
 	).
 	
 
@@ -105,7 +106,7 @@ start_build(From,Client,To):-
 build_done(Target):-
 	% If there is an outgoing bwd edge, replace it with a normal dep edge. See PDT-306
 	forall(
-		edge_label(Target,To,Client,bld(_)),
+		edge_label(Target,To,Client,bwd(_)),
 		clear_edge_label(Target,To,Client)
 	),		
 	% clear incoming bld(_) edge, leaving a simple dependency
