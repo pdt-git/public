@@ -49,16 +49,40 @@ target_depth(Target,Depth):-
 	->	Depth=N
 	).
 
-add_lck(From,Client,To):-
-	set_edge_label(From,To,Client,lck),
+add_lck(From,Client,Target):-
+	% PDT-310: need to avoid confluent lck edges
+	% if there is an incoming lck edge by the requesting client, 
+	% send implied instead of grant. Also do not propagate the request in this case.
+	(	edge_label(_,Target,Client,lck)
+	->	Notification = implied(Target)
+	;	Notification = grant(Target)
+		% PDT-308: We need to propagate the request along outgoing dep edges
+		forall(
+			target_depends(Target,To),
+			send_message_target_target(Target,To,req(Target,Client)
+		)
+	),	
+	set_edge_label(From,Target,Client,lck),
 	% do not send notification if this is an implied lock
 	% i.e. it's not direct, and From is not being build.
 	(	From == []
-	->	send_message_target_client(To,Client,grant(To))
+	->	send_message_target_client(Target,Client,Notification)
 	;	edge_label(_,From,Client,bld(_))
-	->	send_message_target_client(To,Client,grant(To))
+	->	send_message_target_client(Target,Client,Notification)
 	;	true
 	).
+
+% see PDT-307
+grant_waiting(Target):-
+	% turn all incoming req edges to lck edges,
+	% and notify clients.
+	forall(
+		edge_label(From,Target,Client,req),
+		add_lck(From,Client,To) % this should do.
+	).
+	
+
+	
 rem_lck(From,Client,To):-
 	% NB: This one is not described in the DA. 
 	% But if i remember correctly, it was trivial:
@@ -79,21 +103,28 @@ start_build(From,Client,To):-
 	send_message_target_client(To,Client,build(To)).
 
 build_done(Target):-
+	% If there is an outgoing bwd edge, replace it with a normal dep edge. See PDT-306
+	forall(
+		edge_label(Target,To,Client,bld(_)),
+		clear_edge_label(Target,To,Client)
+	),		
 	% clear incoming bld(_) edge, leaving a simple dependency
 	forall(
 		edge_label(From,Target,Client,bld(_)),
 		clear_edge_label(From,Target,Client)
 	),
+	
 	% do the same for incoming bwd(_) edges, but send success
 	% messages back to the respective peers. 
 	% This should recursively mark the whole scc as 
 	% consistent, once the build of the first node is complete.
 	forall(
-		edge_label(From,Target,Client,bld(_)),
+		edge_label(From,Target,Client,bwd(_)),
 		(	clear_edge_label(From,Target,Client),
 			send_message_target_target(Target,From,success)
 		)
 	).
+	
 build_obsolete(Target):-
 	% funny as this may sound: the actions are 
 	% completely the same.

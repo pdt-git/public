@@ -132,6 +132,9 @@ replace_this_args([Arg|Args],This, [NewArg|NewArgs]):-
 idle,obsolete 		~~ req(T,C) 										/ start_build(T,C,this) 					~~> building,pending.
 idle,consistent		~~ req(T,C)											/ add_lck(T,C,this)							~~> reading,consistent.
 idle,consistent		~~ invalidate										/ propagate_invalid(this)					~~> idle,obsolete.
+% Note that the whole magic happens in the guard condition: it says:
+%  if for each of my outgoing bwd(N) edges (there can be at most one!) there is an
+%  incoming bwd(N) edge, then I am the first node in the SCC and thus the build is complete.
 building,pending 	~~ success, (c(this,_:bwd(N),_) -> c(_,_:bwd(N),this))/ build_done(this)							~~> idle,consistent.
 building,pending 	~~ success. %target has outgoing bwd. rerequesting will propagate. nothing to do right now.
 building,pending	~~ invalidate										/ propagate_invalid(this)					~~> building,obsolete.
