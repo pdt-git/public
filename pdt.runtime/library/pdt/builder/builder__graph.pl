@@ -208,13 +208,16 @@ target_depends(T1,T2):-
 clear_dependencies(Target):-
     clear_edge_label(Target,_,_),
     forall(
-    	clause('$target_depends'(Target,Dep),_,Ref),
-    	(	retract('$target_depends_inv'(Dep,Target)),
+    	clause('$target_depends'(Target,Dep),_,Ref),    	
+    	(	uberspy(Target,Dep),
+    		retract('$target_depends_inv'(Dep,Target)),
     		erase(Ref)
     	)
     ).
 
-
+/* This is the old, obsolete implementation. Does not work with cyclic graphs.
+   see PDT-305.
+   New implementation: see bottom.
 erase_redundant_edge(K1,K2):-
     gensym('$visited',V),dynamic( V/1),
     gensym('$visited',W),dynamic( W/1),
@@ -233,13 +236,22 @@ erase_redundant_edge_x(K1,K2,V,W):-
 	(	N=K1
 	;	net_dependency_X_inv(K1,N,W)
 	),
-	clause('$target_depends'(N,M),_,Ref),
+	clause('$target_depends'(N,M),_,Ref),	
 	VVV=..[V,M],
 	call(VVV),
 	!,
+	uberspy(N,M),
 	erase(Ref),
-	retract('$target_depends_inv'(M,N)).
+	retract('$target_depends_inv'(M,N)).	
 erase_redundant_edge_x(_,_,_,_).
+
+*/
+uberspy(A,B):-
+	(	(A==c,B==d)
+	->	spyme
+	;	true
+	).
+spyme.	
 	
 net_dependency(T1,T2):-
     gensym('$visited',V),
@@ -279,39 +291,89 @@ dependencies(L,R):-
     ;	findall(M,target_depends(M,R),L)
     ).
 
-/*Zyklentest wird durchgeführt bei jedem request:
-ein request X->Y eines obsoleten Targets Y fügt eine "wait"-Kante hinzu.
-diese Kante kann typ i oder ii. Sie schließt einen Zyklus, wenn
-im Wait-Graphen X von Y aus ereichbar ist.
-*/
+%----------------------------------------------------------------------------------------------------------
+% reimplementation of the dep graph optimization.
+% Not thread safe, should only be run by the arbiter!
+%
+% To understand what's going on, see wiki
+% https://sewiki.iai.uni-bonn.de/research/pdt/developers/architecture/subsystems/pdtcore/buildsystem/avoidredundantdependencies
+% See PDT-305.
 
-/*
-Beobachtungen:
-- Wenn Ein Zyklus gefunden wird, dann gilt per definition: für jeden beteiligten client c:
- entweder c ist der anfragende thread, oder c wartet (direkt oder indirekt) auf den anfragenden thread.
-- Daraus folgt: ich kann jedem beteiligten Thread eine Nachricht schicken!!
-- Der Graph kann -- so wie das im Prinzip auch im augenblick passiert -- abstrahiert werden zur Betrachtung von Threads
-  die aufeinander warten. Nur die Targets an den "Übergängen" sind interessant.
-- Unterscheide zwei Fälle:
- a) Zyklus enthält Typ iii Kante. Dann haben wir keinen "echten" Abhängigkeitszyklus.
-   Das Problem läßt sich lösen, in dem Das Target mit dem obsoleten Lock sich aus dem Zyklus "zurückzieht", und dann das
-   erste Target im Zyklus erneut anfordert.
- b) Zyklus enthält nur Typ i und ii Kanten. Dann haben wir einen "echten" Abhängigkeitszyklus. Um das Problem zu lösen,
-   müssen alle beteiligten Targets vom selben Client berechnet werden.
-- Die angefragte Kante kann Teil von mehreren Zyklen sein.
-  Davon kann aber nur einer ein echter Abhängigkeitszyklus sein.
-  Die zum einem Client gehörenden Typ i und ii Kanten bilden jeweils einen linearen Pfad. Anderenfalls würde
-  ein Client gerade auf mehrere Dinge gleichzeitig warten, und das ist unmöglich. Der Zyklus setzt sich aber aus fragmenten dieser
-  linearen Pfade zusammen. Wenn es nirgendwo eine Verzweigung gibt, kann die angefragte Kante auch nicht mehr als einen Zyklus schließen.
+:- dynamic '$mark'/2. %edge marks applied during bw-search. 
+:- dynamic '$mark'/1. %node marks applied during fw-search.
 
-retreat and reserve:
-when a real cycle is detected, all but one client must "reatreat" i.e. abort builds of all targets that are part of the cycle and rerequest the outermost one.
-At the same time, to keep them from starting to build again, the targets on the cycle need to be "reserved" for the reamining thread that did not retreat.
-reservation could be represented by an extra substate of the "building" state.
+% assumes A->B was inserted and is not redundant itsefl.
+erase_redundant_edge(A,B):-	
+	setup_and_call_cleanup(
+		bw_search(A,B), % start with the bw search
+		ignore(fw_search(B,A,A)), % then do the fw search
+		clear_marks % clean up afterwards.
+	).
 
-Doing cycle Builds:
-possible solution if executed on a single thread: Idea of two sets Pending and Done.
-starting a build: target is put in the pending set. once it is done, put it in the Done set.
-once the pending set is empty, mark all targets in the done set as clean *SIMULTANEOUSLY*. (similar as with fp builds.)
-This should keep all invariances satisfied during the build and still preserves a correct dependency realtion. 
-*/
+mark_dep(A,B):-
+	(	'$mark'(A,B)
+	->	throw(edge_already_marked(A,B))
+	;	assert( '$mark'(A,B) )
+	).
+	
+mark_node(A):-
+	(	'$mark'(A)
+	->	throw(node_already_marked(A))
+	;	assert( '$mark'(A) )
+	).	
+	
+dep_marked(A,B):-'$mark'(A,B).
+
+node_marked(A):-'$mark'(A).
+
+clear_marks:-
+	retractall('$mark'(_,_)),
+	retractall('$mark'(_)).
+
+% initial call should be with A->B beeing the inserted edge.	
+bw_search(A,B):-	
+	(	dep_marked(_,A) % A already visited?
+	->	true
+	;	A==B % did we arrive back at the inserted edge?
+	->	true
+	;	%otherwise, mark incoming edges (if there are any) and recurse.
+		forall(
+			target_depends(Pred,A),
+			(	mark_dep(Pred,A),
+				bw_search(Pred,B)
+			)
+		)
+	).
+
+
+% implementation note:
+% This predicate succeeds only if a redundant edge is found and removed.
+% It shouldn't leave any choice points. 
+% Be sure to fail in terminal cases if no redundancy is found.
+% If one is found, succeed and destroy all remaining choices.
+% in particular, do not leave choices after a successfull recursive call.
+%
+% initial call should be with A->B beeing the inserted edge.
+% Prev should always be the top node in the path/stack. Initialize with A to 
+% avoid the inserted edge being "identified" as redundant.
+fw_search(B,Prev,A):-
+	(	node_marked(B) % B already visited?
+	->	fail
+	;	A==B % did we areive back at the inserted edge?
+	->	fail
+	;	redundant_incoming_edge(X,B,Prev) % is there a redundant incoming edge?
+	->  % be done with it.
+		% retract should leave no choices. If it does, something is wrong.
+		retract('$target_depends'(X,B)),
+		retract('$target_depends_inv'(B,X))		
+	;	% otherwise, mark the node and check successors. Cut on success.
+		mark_node(B),
+		target_depends(B,Succ),
+		fw_search(Succ,B,A),
+		!
+	).
+	
+redundant_incoming_edge(X,Y,Prev):-
+	X \== Prev,
+	dep_marked(X,Y2),
+	Y2 \== Y.
