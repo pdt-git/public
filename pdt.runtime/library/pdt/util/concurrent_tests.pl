@@ -76,7 +76,13 @@ max_step_depth(Module,D):-
 add_module_prefix(In,Module,Out):-
 	(	In=nil
 	->	Out=In
+	;	member(In,[nop(_),mark_branch(_),unmark_branch(_),store(_),recall(_)])
+	->	Out=In
 	;	In=(A~>B)	
+	->	Out=(AA~>BB),
+		add_module_prefix(A,Module,AA),
+		add_module_prefix(B,Module,BB)
+	;	In=(A,B)	
 	->	Out=(AA~>BB),
 		add_module_prefix(A,Module,AA),
 		add_module_prefix(B,Module,BB)
@@ -169,6 +175,12 @@ combine([Inst-Input-Next|More],Op,Input, Output,Sequence):-
  * still uses iterative deepening.
  */
  
+seq_step_tail( (A,nil), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).
+seq_step_tail( (nil,A), Step, Tail):-
+	!,	
+	seq_step_tail(	A, Step,Tail).	
 seq_step_tail( (A~>nil), Step, Tail):-
 	!,	
 	seq_step_tail(	A, Step,Tail).
@@ -195,6 +207,21 @@ seq_step_tail( (nil else A), Step, Tail):-
 	seq_step_tail(	A, Step,Tail).
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~	
+
+seq_step_tail((A,B),Step,Tail):-
+	!,
+ 	seq_step_tail(A,AStep,ATail),
+	seq_step_tail(B,BStep,BTail),
+	( 	AStep==A, 
+		ATail==nil %A is atomic
+	-> 	Step=(A,BStep),
+		Tail=BTail
+	;	BStep==B, 
+		BTail==nil %B is atomic
+	->	Step = AStep,
+		Tail = (ATail,B)
+	;	throw(error(not_a_sequence))
+	). 
 seq_step_tail( (A~>B), Step, Tail):-
 	!,	
 	seq_step_tail(	A, Step,TailA ),
@@ -202,39 +229,49 @@ seq_step_tail( (A~>B), Step, Tail):-
 seq_step_tail( (A?B), Step, Tail):-
 	!,
 	next_seqnum(Num),
-	(	seq_step_tail((store(Num)~>A),Step,Tail)
-	;	seq_step_tail((recall(Num)~>B),Step,Tail)
+	(	Step = (store(Num),Step0),
+		seq_step_tail(A,Step0,Tail)		
+	;	Step = (recall(Num),Step0),
+		seq_step_tail(B,Step0,Tail)		
 	).
 seq_step_tail( (A else B), Step, Tail):-
 	!,	
 	next_seqnum(Num),	
-	(	seq_concat((store(Num)~>mark_branch(Num)~>A),unmark_branch(Num),Rewritten)		
-	;	Rewritten = (add_mark(Num)~>recall(Num)~>join_branch(Num)~>unmark_branch(Num)~>B)		
+	(	Rewritten=(store(Num),mark_branch(Num),A,unmark_branch(Num))		
+	;	Rewritten = (add_mark(Num),recall(Num),join_branch(Num),unmark_branch(Num),B)		
 	),
 	seq_step_tail(Rewritten,Step,Tail).	
 seq_step_tail( (A#B), Step, Tail):-
 	!,
-	next_seqnum(Num),
-	(	Tail = (TailA # B),
-		seq_step_tail((store(Num)~>A),Step,TailA)
-	;	Tail = (A # TailB),
-		seq_step_tail((recall(Num)~>B),Step,TailB)
-	).	
+	% Interleaving: we can
+	% nondeterministically choose decompositions 
+	% for both A and B.
+	% Then we can nondeterministically choose whether we want to
+	% continue with A or B.
+	% Instead of doing this manually, we can rewrite the
+	% the formula using meta-unfolding.	
+	Rewritten=
+		meta(
+			(	concurrent_tests:seq_step_tail(A,TStep,TTail), TOther=B
+			;	concurrent_tests:seq_step_tail(B,TStep,TTail), TOther=A
+			),
+			(?),
+			(TStep~>(TTail#TOther)),
+			share(_,_,_)
+		), 	
+	
+	seq_step_tail(Rewritten,Step,Tail).
+		
 seq_step_tail(wait(Condition,Seq),Step,Tail):-
 	!,
 	Condition,
 	seq_step_tail(Seq,Step,Tail).
 seq_step_tail( Literal, Step, Tail):-
 	(	is_meta_literal(Literal)
-	->	unfold_meta(Literal,Tail),
-		% do not recurse here! 
-		% Recursion could produce infinit paths.  
-		% So we do not recurse here, but 
-		% in process_sequence/5, where the depth 
-		% limits are checked. 
-		% In addition the added no-op may help
-		% stupid humans to understand the traces. 
-		Step = nop(Literal) 
+	->	unfold_meta(Literal,Unfolded),
+		% FIXME: this recursion does not check depth limit.
+		% This may cause inifinite recursion. See PDT-314
+		seq_step_tail(Unfolded,Step,Tail)
 	;	Step=Literal, 
 		Tail = nil
 	).
@@ -251,7 +288,19 @@ seq_concat(In,B,Out):-
 	;	Out = (In ~> B)
 	).	
 
+% only used for debugging
 
+detseq(Seq,FilteredSeq):-
+	detseq2(Seq,DetSeq),
+	filter_seq(DetSeq,FilteredSeq).
+	
+detseq2(Seq,DetSeq):-
+	(	Seq == nil
+	->	DetSeq=Seq
+	;	DetSeq=(Step~>DetTail),
+		seq_step_tail(Seq,Step,Tail),
+		detseq2(Tail,DetTail)
+	).
 
 process_queue(Module):-
 	repeat,
@@ -313,7 +362,28 @@ process_sequence_X(Seq,Module,Stack,StepDepth,TotalDepth,Marks):-
 	).
 	
 process_sequence_XX(Step,Tail,Seq,Module,Stack,StepDepth,TotalDepth,Marks):-	
-	(	Step = nop(_)
+	process_step(Step,Module,Marks,NextMarks,Outcome),
+	(	Outcome == fail
+	->	report_sequence_discarded(Seq,Module,TotalDepth,Stack)		
+	;	Outcome == true
+	->	NextStepDepth is StepDepth + 1,
+		NextTotalDepth is TotalDepth + 1,
+		process_sequence(Tail,Module,[Step|Stack],NextStepDepth,NextTotalDepth,NextMarks)
+	;	Outcome == defer
+	->	defer_sequence(Seq,Module,Stack,TotalDepth,Marks,StoreNum),
+		report_sequence_defered(StoreNum,Seq,Stack)
+	;	report_sequence_produced_error(Seq,Module,TotalDepth,Stack,Outcome)
+	).
+
+process_step(Step,Module,Marks,NextMarks,Outcome):-
+	(	Step = (A,B)
+	->	process_step(A,Module,Marks,TmpMarks,TmpOutcome),
+		(	TmpOutcome==true
+		->	process_step(B,Module,TmpMarks,NextMarks,Outcome)
+		;	NextMarks=TmpMarks,
+			Outcome=TmpOutcome
+		)
+	;	Step = nop(_)
 	->	NextMarks=Marks,
 		Outcome = true
 	;	Step == nil
@@ -371,18 +441,8 @@ process_sequence_XX(Step,Tail,Seq,Module,Stack,StepDepth,TotalDepth,Marks):-
 		)
 	;	NextMarks=Marks,
 		execute_literal(Step,Outcome)
-	),
-	(	Outcome = fail
-	->	report_sequence_discarded(Seq,Module,TotalDepth,Stack)		
-	;	Outcome = true
-	->	NextStepDepth is StepDepth + 1,
-		NextTotalDepth is TotalDepth + 1,
-		process_sequence(Tail,Module,[Step|Stack],NextStepDepth,NextTotalDepth,NextMarks)
-	;	Outcome = defer
-	->	defer_sequence(Seq,Module,Stack,TotalDepth,Marks,StoreNum),
-		report_sequence_defered(StoreNum,Seq,Stack)
-	;	report_sequence_produced_error(Seq,Module,TotalDepth,Stack,Outcome)
 	).
+
 
 defer_sequence(Seq,Module,Stack,TotalDepth,Marks,Num):-
 	next_seqnum(Num),
@@ -541,7 +601,7 @@ write_sequence(Seq,P0,I):-
 is_literal(Seq):-
 	(	var(Seq)
 	->	true
-	;	memberchk(Seq,[(A~>B),(A#B),(A?B),(A else B),wait(A,B)])
+	;	memberchk(Seq,[(A,B),(A~>B),(A#B),(A?B),(A else B),wait(A,B)])
 	->	fail
 	;	true
 	).
@@ -577,7 +637,8 @@ write_complex(Seq,P0,I0):-
 		write_sequence(Right,RightP,IMe),
 		format("~n~s)",[IMe])	
 	).
-		
+
+pad_junctor((,),"  ").		
 pad_junctor((#),"  ").
 pad_junctor((?),"  ").
 pad_junctor((else)," ").
