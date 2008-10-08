@@ -330,8 +330,12 @@ clear_marks:-
 	retractall('$mark'(_,_)),
 	retractall('$mark'(_)).
 
-% initial call should be with A->B beeing the inserted edge.	
+
 bw_search(A,B):-	
+	mark_dep(A,B), % the inserted edge is always marked. See PDT-305.
+	bw_search_X(A,B).	
+% initial call should be with A->B beeing the inserted edge.	
+bw_search_X(A,B):-	
 	(	dep_marked(_,A) % A already visited?
 	->	true
 	;	A==B % did we arrive back at the inserted edge?
@@ -340,7 +344,7 @@ bw_search(A,B):-
 		forall(
 			target_depends(Pred,A),
 			(	mark_dep(Pred,A),
-				bw_search(Pred,B)
+				bw_search_X(Pred,B)
 			)
 		)
 	).
@@ -374,6 +378,8 @@ fw_search(B,Prev,A):-
 	).
 	
 redundant_incoming_edge(X,Y,Prev):-
-	X \== Prev,
-	dep_marked(X,Y2),
-	Y2 \== Y.
+	target_depends(X,Y), %X is predecessor of Y
+	X \== Prev, %X is not on the current path
+	dep_marked(X,Y2), % There is a marked edge X->Y2
+	Y2 \== Y. % Y2 is not Y
+	
