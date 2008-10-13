@@ -52,7 +52,7 @@ output_as_expected(N):-
 	length(Output,OutputLen),
 	OutputLen==ExpectedLen.
 
-%test_case(0,"trivial graph").
+test_case(0,"trivial graph").
 input(0,a,b).
 input(0,b,c).
 
@@ -62,33 +62,43 @@ input(1,b,c).
 input(1,c,d).	
 input(1,a,d,red).  
 
-%test_case(2,"no redundant edge, but a cycle").
+test_case(2,"no redundant edge, but a cycle").
 input(2,a,b).
 input(2,b,c).
 input(2,c,d).
 input(2,c,e).
 input(2,e,b).
 	
-%test_case(3,"redundant bwd edge").	
+test_case(3,"redundant bwd edge").	
 input(3,a,b).
 input(3,b,c).
 input(3,c,d).
 input(3,d,a).
 input(3,b,a,red).
 
-%test_case(4,"cycle and redundant edge (not on cycle)").
-input(3,a,b).
-input(3,b,c).
-input(3,d,c,red).
-input(3,d,a).
-input(3,b,a).
+test_case(4,"cycle and redundant edge (not on cycle)").
+input(4,a,b).
+input(4,b,c).
+input(4,d,c,red).
+input(4,d,a).
+input(4,b,a).
 
-
+spyme.
 
 fixture_setup(Num):-
-	load_graph(Num).
+	load_graph(Num),
+	(	findall(A,(target_depends(a,b),A=1),As),
+		length(As,2)
+	->	spyme
+	;	true
+	).
 
 fixture_store(Num):-
+	(	findall(A,(target_depends(a,b),A=1),As),
+		length(As,2)
+	->	spyme
+	;	true
+	),
 	store_graph(Num).
 	
 fixture_teardown(_).	

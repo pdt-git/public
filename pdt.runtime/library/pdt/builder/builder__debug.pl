@@ -2,7 +2,8 @@
 	[	dbg_step/1,
 		dbg_step_describe/2,
 		dbg_step_receive/2,
-		dbg_step_send/3
+		dbg_step_send/3,
+		dbg_write_dot/0
 	]
 ).
 
