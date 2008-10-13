@@ -73,6 +73,10 @@ store_graph(Num):-
 	forall('$edge_label__by_client'(A,B,C,D),assert('$edge_label__by_client'(Num,A,B,C,D))),
 	forall('$edge_label__by_from'(A,B,C,D),assert('$edge_label__by_from'(Num,A,B,C,D))),
 	forall('$edge_label__by_to'(A,B,C,D),assert('$edge_label__by_to'(Num,A,B,C,D))),
+	(	Num==0
+	->	spyme
+	;	true
+	),
 	forall('$target_depends'(A,B),assert('$target_depends'(Num,A,B))),
 	forall('$target_depends_inv'(A,B),assert('$target_depends_inv'(Num,A,B))).
 %load_graph(Num):-
@@ -85,12 +89,21 @@ store_graph(Num):-
 %	forall(retract('$target_depends_inv'(Num,A,B)),assert('$target_depends_inv'(A,B))).	
 load_graph(Num):-
 	clear_graph,
+	(	target_depends(a,b)
+	->	spyme
+	;	true
+	),
 	forall('$target_state'(Num,A,B),assert('$target_state'(A,B))),
 	forall('$edge_label__by_client'(Num,A,B,C,D),assert('$edge_label__by_client'(A,B,C,D))),
 	forall('$edge_label__by_from'(Num,A,B,C,D),assert('$edge_label__by_from'(A,B,C,D))),
 	forall('$edge_label__by_to'(Num,A,B,C,D),assert('$edge_label__by_to'(A,B,C,D))),
 	forall('$target_depends'(Num,A,B),assert('$target_depends'(A,B))),
-	forall('$target_depends_inv'(Num,A,B),assert('$target_depends_inv'(A,B))).	
+	forall('$target_depends_inv'(Num,A,B),assert('$target_depends_inv'(A,B))),
+	(	findall(A,(target_depends(a,b),A=1),As),
+		length(As,2)
+	->	spyme
+	;	true
+	).	
 
 
 
@@ -251,7 +264,7 @@ uberspy(A,B):-
 	->	spyme
 	;	true
 	).
-spyme.	
+	
 	
 net_dependency(T1,T2):-
     gensym('$visited',V),
@@ -312,13 +325,15 @@ erase_redundant_edge(A,B):-
 
 mark_dep(A,B):-
 	(	'$mark'(A,B)
-	->	throw(edge_already_marked(A,B))
+	->	spyme,writeln(doh),
+		throw(edge_already_marked(A,B))
 	;	assert( '$mark'(A,B) )
 	).
 	
 mark_node(A):-
 	(	'$mark'(A)
-	->	throw(node_already_marked(A))
+	->	spyme,writeln(doh),
+		throw(node_already_marked(A))
 	;	assert( '$mark'(A) )
 	).	
 	
@@ -382,4 +397,5 @@ redundant_incoming_edge(X,Y,Prev):-
 	X \== Prev, %X is not on the current path
 	dep_marked(X,Y2), % There is a marked edge X->Y2
 	Y2 \== Y. % Y2 is not Y
-	
+
+spyme.	

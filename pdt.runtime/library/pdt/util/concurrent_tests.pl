@@ -29,19 +29,43 @@ Marks: a list of marked ancestors.
 :- dynamic todo/5.
 
 /*
-The dynamic predicate branch_marked(Num) succeeds if
-Num is the number of a marked branch. There shouldn't be more
-than one fact for the same branch.
+This is used to make one branch wait for another (used for else-sequences)
+As long as token_frozen(<token>) succeeds, the special literal thaw(<token>) will
+cause the current sequence to be deferred immediately.
+
+Facts are asserted when a sequence that freezes some tokens is deferred. A sequence freezes a token if that
+token is in the sequences token (aka marks) list. Tokens are added to this list when the specail literal
+freeze(<Token>) is encountered.
+
+Facts are removed when  a sequence that freezes some tokens is resumed (i.e. removed from the queue).
+
+Since several branches may freeze the same token, several facts with the same
+argument may exists. If all the freezing branches are completely explored (i.e. no subbranch  
+left in the todo queue), then there should be no more token_frozen(<token>) marks.
 */
-:- dynamic branch_marked/1.
+:- dynamic token_frozen/1.
 
 /*
-The dynamic predicate branch_deferred(Num) succeeds if a sub-branch
-of a marked branch is deferred. 
-There may be more than one facts for each marked branch -- we use them
-as a counter.
+This is used for realizing the special literal state(<token>). When such a literal is encountered,
+the interpreter looks if there is a corresponding stored_fixture_exists(<token>) fact. If this is the case,
+the interpreter tells the fixture to recall the state associated with that token. Otherwise the interpreter 
+asks the fixture to associate the current state with the token and adds a corresponding stored_fixture_exists(<token>) 
+fact. 
 */
-:- dynamic branch_deferred/1.
+:- dynamic stored_fixture_exists/1.
+
+
+/*
+This is used for marking branches for which at least one successfull path was found.
+
+When a the interpreter engounters the special literal mark_success(<token>),
+it will add a respective fact success(<token>), if no such fact exists already.
+
+Upon encountering the literal clear_success(<token>), this fact is removed again.
+
+The special literal did_succeed(<token>) can be used to test whether a success(<token>) fact exists. 
+*/
+:- dynamic success/1.
 
 run_concurrent_test(Head):-
 	tell('testresults.log'),
@@ -229,38 +253,40 @@ seq_step_tail( (A~>B), Step, Tail):-
 seq_step_tail( (A?B), Step, Tail):-
 	!,
 	next_seqnum(Num),
-	(	Step = (store(Num),Step0),
+	(	Step = (state(Num),Step0),
 		seq_step_tail(A,Step0,Tail)		
-	;	Step = (recall(Num),Step0),
+	;	Step = (state(Num),Step0),
 		seq_step_tail(B,Step0,Tail)		
 	).
 seq_step_tail( (A else B), Step, Tail):-
 	!,	
-	next_seqnum(Num),	
-	(	Rewritten=(store(Num),mark_branch(Num),A,unmark_branch(Num))		
-	;	Rewritten = (add_mark(Num),recall(Num),join_branch(Num),unmark_branch(Num),B)		
-	),
+	next_seqnum(Num1),	
+	next_seqnum(Num2),
+	next_seqnum(Num3),
+	Rewritten=
+		(  	freeze(Num1),
+			A,
+			flag(Num2)
+		?  	freeze(Num3), 
+			thaw(Num1), 
+			did_succeed(Num2), 
+			B
+		?  	thaw(Num3), 
+			thaw(Num1), 
+			clear_success(Num2)
+		),
 	seq_step_tail(Rewritten,Step,Tail).	
 seq_step_tail( (A#B), Step, Tail):-
 	!,
-	% Interleaving: we can
-	% nondeterministically choose decompositions 
-	% for both A and B.
-	% Then we can nondeterministically choose whether we want to
-	% continue with A or B.
-	% Instead of doing this manually, we can rewrite the
-	% the formula using meta-unfolding.	
-	Rewritten=
-		meta(
-			(	concurrent_tests:seq_step_tail(A,TStep,TTail), TOther=B
-			;	concurrent_tests:seq_step_tail(B,TStep,TTail), TOther=A
-			),
-			(?),
-			(TStep~>(TTail#TOther)),
-			share(_,_,_)
-		), 	
+	next_seqnum(Num),
+	(	Step = (state(Num),StepA),
+		Tail = (TailA#B),
+		seq_step_tail(A,StepA,TailA)		
+	;	Step = (state(Num),StepB),
+		Tail = (A#TailB),
+		seq_step_tail(B,StepB,TailB)
+	).
 	
-	seq_step_tail(Rewritten,Step,Tail).
 		
 seq_step_tail(wait(Condition,Seq),Step,Tail):-
 	!,
@@ -311,8 +337,7 @@ process_queue(Module):-
 		),	
 	!.
 
-process(Num,Seq,Module,Stack,TotalDepth,Marks0):-
-	filter_marks__resume(Marks0,Marks),
+process(Num,Seq,Module,Stack,TotalDepth,Marks):-	
 	catch(
 		(	Module:fixture_setup(Num)
 		->	true
@@ -388,60 +413,83 @@ process_step(Step,Module,Marks,NextMarks,Outcome):-
 		Outcome = true
 	;	Step == nil
 	->	NextMarks=Marks,
-		Outcome = true
-	;	Step = store(Num)
-	->	NextMarks=Marks,
-		catch(
-			(	Module:fixture_store(Num)
-			->	Outcome= true
-			;	Outcome= error(failed(Module:fixture_store(Num)))
-			),
-			Outcome,
-			true
-		)
-	;	Step = recall(Num)
-	->	debug(concurrent_tests, "~n~nRetrying at ~w, with Marks=~w~n",[Num,Marks]),
-		filter_marks__cp(Marks,NextMarks),		
-		catch(
-			(	Module:fixture_setup(Num)
-			->	Outcome= true
-			;	Outcome= error(failed(Module:fixture_setup(Num)))
-			),
-			Outcome,
-			true
-		)
-	;	Step = mark_branch(Num)
-	->  (	branch_marked(Num)
-		->	NextMarks=Marks
-		;	NextMarks=[Num|Marks],
-			assert(branch_marked(Num))
-		),
-		Outcome = true
-	; 	Step = add_mark(Num)
-	->	NextMarks=[Num|Marks],
-		Outcome=true			
-	;	Step = unmark_branch(Num)
-	->  retractall(branch_marked(Num)),
-		retractall(branch_deferred(Num)),
-		debug(concurrent_tests, "unmark_branch(~w): removing all branch_marked(~w) and branch_deferred(~w) facts.~n",[Num,Num,Num]),
-		filter_marks__cp(Marks,NextMarks),
-		Outcome = true		
-	;	Step = join_branch(Num)
-	->	NextMarks = Marks,
-		(	branch_marked(Num)
-		->	debug(concurrent_tests, "join_branch(~w): The branch is still marked. ~n",[Num]),
-			(	branch_deferred(Num)
-			->	debug(concurrent_tests, "join_branch(~w): some subbranch is still in the queue, deferring the current branch. ~n",[Num]),
-				Outcome= defer
-			;	Outcome= true,
-				debug(concurrent_tests, "join_branch(~w): no subbranch queued, continuing on current branch. ~n",[Num])
-			)
-		;	Outcome=fail,
-			debug(concurrent_tests, "join_branch(~w): The branch is not marked (any more). Discarding current branch.~n",[Num])
-		)
+		Outcome = true	
+	;	Step = state(Num)
+	->	p_state(Module,Num,Marks,NextMarks,Outcome)	
+	;	Step = freeze(Num)
+	->	p_freeze(Num,Marks,NextMarks,Outcome)
+	;	Step = thaw(Num)
+	->	p_thaw(Module,Num,Marks,NextMarks,Outcome)
+	;	Step = did_succeed(Num)
+	->	p_did_succeed(Num,Marks,NextMarks,Outcome)	
+	;	Step = mark_success(Num)
+	->	p_mark_success(Num,Marks,NextMarks,Outcome)
+	;	Step = clear_success(Num)
+	->	p_clear_success(Num,Marks,NextMarks,Outcome)
 	;	NextMarks=Marks,
 		execute_literal(Step,Outcome)
 	).
+
+
+
+
+	
+
+
+
+p_mark_success(Num,Marks,Marks,true):-
+	(	success(Num)
+	->	true
+	;	assert(success(Num))
+	).
+
+p_clear_success(Num,Marks,Marks,true):-
+	retractall(sucess(Num)).
+	
+p_did_succeed(Num,Marks,Marks,true):-
+	\+ \+ success(Num).
+
+p_freeze(Num,Marks,[Num|Marks],true).
+
+p_thaw(Num,Marks,Marks,Outcome):-
+	(	member(Num,Marks)
+	->	Outcome=error(cannot_thaw_active_mark,Num)
+	;	token_frozen(Num)
+	->	Outcome=defer
+	;	Outcome=true
+	).
+	
+
+p_state(Module,Num,Marks,NextMarks,Outcome):-
+	(	stored_fixture_exists(Num)
+	->	p_recall(Module,Num,Marks,NextMarks,Outcome)
+	;	p_store(Module,Num,Marks,NextMarks,Outcome)
+	).
+
+
+p_store(Module,Num,Marks,NextMarks,Outcome):-
+	NextMarks=Marks,
+	catch(
+		(	Module:fixture_store(Num)
+		->	Outcome= true,
+			assert(stored_fixture_exists(Num))			
+		;	Outcome= error(failed(Module:fixture_store(Num)))
+		),
+		Outcome,
+		true
+	).
+p_recall(Module,Num,Marks,Marks,Outcome):-
+	debug(concurrent_tests, "~n~nRetrying at ~w, with Marks=~w~n",[Num,Marks]),
+	%filter_marks__cp(Marks,NextMarks),		
+	catch(
+		(	Module:fixture_setup(Num)
+		->	Outcome= true
+		;	Outcome= error(failed(Module:fixture_setup(Num)))
+		),
+		Outcome,
+		true
+	).
+
 
 
 defer_sequence(Seq,Module,Stack,TotalDepth,Marks,Num):-
@@ -449,41 +497,20 @@ defer_sequence(Seq,Module,Stack,TotalDepth,Marks,Num):-
 	debug(concurrent_tests, "defer_sequence: Num=~w, Marks=~w~n",[Num,Marks]),
 	forall(
 		member(Mark,Marks),
-		(	assert(branch_deferred(Mark)),
-			count(branch_deferred(Mark),Count),
-			debug(concurrent_tests, "Added one branch_deferred(~w) fact. There are now ~w.~n",[Mark,Count])
-		)
+		assert(token_frozen(Mark))
 	),
 	Module:fixture_store(Num),
 	assert(todo(Num,Seq,TotalDepth,Stack,Marks)).
 
-filter_marks__resume([],[]).
-filter_marks__resume([Mark|Marks],FilteredMarks):-
-	(	branch_marked(Mark)
-	->	debug(concurrent_tests, "filter_marks__resume: The branch ~w is still marked: keeping the mark.~n",[Mark]),
-		count(branch_deferred(Mark),Count),
-		once(retract(branch_deferred(Mark))),
-		debug(concurrent_tests, "filter_marks__resume: Removed one of ~w branch_deferred(~w) facts.~n",[Count,Mark]),			
-		FilteredMarks=[Mark|MoreFilteredMarks]
-	;	debug(concurrent_tests, "filter_marks__resume: The branch ~w is not marked any more: dropping the mark.~n",[Mark]),
-		FilteredMarks=MoreFilteredMarks	
-	),
-	filter_marks__resume(Marks,MoreFilteredMarks).
-
-filter_marks__cp([],[]).
-filter_marks__cp([Mark|Marks],FilteredMarks):-
-	(	branch_marked(Mark)
-	->	debug(concurrent_tests, "filter_marks__cp: The branch ~w is still marked: keeping the mark.~n",[Mark]),
-		FilteredMarks=[Mark|MoreFilteredMarks]		
-	;	debug(concurrent_tests, "filter_marks__cp: The branch ~w is not marked any more: dropping the mark.~n",[Mark]),
-		FilteredMarks=MoreFilteredMarks	
-	),
-	filter_marks__cp(Marks,MoreFilteredMarks).
 
 
-
+% aka resume_sequence
 next_sequence(Seq,Num,Stack,TotalDepth,Marks):-
 	retract(todo(Num,Seq,TotalDepth,Stack,Marks)),
+	forall(
+		member(Mark,Marks),
+		retract(token_frozen(Mark))
+	),	
 	report_sequence_resumed(Num,Marks).
 	
 next_seqnum(Num):-	
@@ -651,7 +678,7 @@ write_path(Path):-
 	
 filter_seq(In,Out):-
 	(	is_literal(In)
-	->	(	member(In,[nop(_),mark_branch(_),unmark_branch(_),store(_),recall(_)])
+	->	(	member(In,[nop(_),mark_success(_),clear_success(_),did_succeed(_),state(_),freeze(_),thaw(_)])
 		->	Out = nil
 		;	Out = In
 		)
