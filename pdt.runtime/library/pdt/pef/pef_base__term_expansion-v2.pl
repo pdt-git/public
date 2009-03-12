@@ -46,7 +46,7 @@ this data structure is for internal use in this module only.
 
 
 
-user:term_expansion((:- define_pef(TypedTemplate)),Decls):-
+user:term_expansion((:- define_pef(TypedTemplate0)),Decls):-
     pef_base__term_expansion(TypedTemplate,Decls).
     
 % entry point for expansion of pef type declarations.
@@ -101,20 +101,20 @@ strip_types_args([Arg|Args1],[Arg|Args2]):-
 parse_type_declaration(Type @ TagAndMore,TypeDecl):-
     type_decl_new(TypeDecl),
     parse_tag_and_more(TagAndMore,Tags,SuperTypes),
-    parse_attributes(Type,Attributes),
+    parse_attributes(Type,Attributes)
     type_decl_tags(TypeDecl,Tags),
     type_decl_supertypes(TypeDecl,SuperTypes),
     type_decl_attributes(TypeDecl,Attributes).
 parse_type_declaration(Type : TypeAndMore,TypeDecl):-
     type_decl_new(TypeDecl),
     parse_type_and_more(TypeAndMore,Tags,SuperTypes),
-    parse_attribute_declarations(Type,Attributes),
+    parse_attribute_declarations(Type,Attributes)
     type_decl_tags(TypeDecl,Tags),
     type_decl_supertypes(TypeDecl,SuperTypes),
     type_decl_attributes(TypeDecl,Attributes).
 parse_type_declaration(Type,TypeDecl):-
     type_decl_new(TypeDecl),    
-    parse_attribute_declarations(Type,Attributes),
+    parse_attribute_declarations(Type,Attributes)
     type_decl_tags(TypeDecl,[]),
     type_decl_supertypes(TypeDecl,[]),
     type_decl_attributes(TypeDecl,Attributes).
@@ -136,7 +136,7 @@ parse_type_and_more(Type : TypeAndMore,Tags,[Type|Types]):-
 parse_type_and_more(Type,[],[Type]).
 
 
-parse_attribute_declarations(N,_Type,Attributes):-    
+parse_attribute_declarations(N,Type,Attributes):-    
     N==0,!.
 parse_attribute_declarations(N,Type,Attributes):-
     arg(N,Type,TypeArg),
@@ -154,7 +154,7 @@ parse_attribute_declaration(N,Arg,Decl):-
 		attr_decl_tags(Decl,Tags),
 		attr_decl_types(Decl,Types)
 	;	Arg = Name : TypeAndMore
-	->	parse_type_and_more(TypeAndMore,Tags,Types),
+	->	parse_type_and_more(TypendMore,Tags,Types),
 		attr_decl_name(Decl,Name),
 		attr_decl_tags(Decl,Tags),
 		attr_decl_types(Decl,Types)

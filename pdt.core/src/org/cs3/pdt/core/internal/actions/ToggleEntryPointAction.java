@@ -66,10 +66,10 @@ public class ToggleEntryPointAction implements IObjectActionDelegate {
 			plProject.setPreferenceValue(PDTCore.PROP_ENTRY_POINTS, sb.toString());
 			updateAction(action);
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), UIUtils.getDisplay()
-					.getActiveShell(), PDTCore.ERR_UNKNOWN,
-					PDTCore.CX_TOGGLE_ENTRY_POINT, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getDisplay()
+//					.getActiveShell(), PDTCore.ERR_UNKNOWN,
+//					PDTCore.CX_TOGGLE_ENTRY_POINT, e);
 		}
 	}
 
@@ -110,10 +110,10 @@ public class ToggleEntryPointAction implements IObjectActionDelegate {
 			}
 			updateAction(action);
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), UIUtils.getDisplay()
-					.getActiveShell(), PDTCore.ERR_UNKNOWN,
-					PDTCore.CX_TOGGLE_ENTRY_POINT, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getDisplay()
+//					.getActiveShell(), PDTCore.ERR_UNKNOWN,
+//					PDTCore.CX_TOGGLE_ENTRY_POINT, e);
 		}
 	}
 

@@ -130,13 +130,13 @@ public class PLConfiguration extends SourceViewerConfiguration {
 			scanner = new PLScanner(editor, colorManager);
 		} catch (CoreException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
-					PDT.ERR_CORE_EXCEPTION, PDT.CX_EDITOR_CONFIGURATION, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
+//					PDT.ERR_CORE_EXCEPTION, PDT.CX_EDITOR_CONFIGURATION, e);
 		} catch (PrologInterfaceException e) {
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
-					PDT.ERR_PIF, PDT.CX_EDITOR_CONFIGURATION, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
+//					PDT.ERR_PIF, PDT.CX_EDITOR_CONFIGURATION, e);
 		}
 		scanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager
 				.getColor(IPLColorConstants.DEFAULT))));

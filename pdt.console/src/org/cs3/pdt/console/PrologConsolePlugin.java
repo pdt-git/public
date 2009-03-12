@@ -71,9 +71,46 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 	private void initOptions() {
 
 		options = new Option[] {
-				new SimpleOption(PDTConsole.PREF_CONSOLE_FONT, "Console Font",
-						"Font used in the Prolog Console view", Option.FONT,
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_FONT, 
+						"Console Font",
+						"Font used in the Prolog Console view", 
+						Option.FONT,
 						JFaceResources.DEFAULT_FONT),
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_SHOW_COLORS,
+						"Show colors in console view ",
+						"If this flag is set, lines starting with special keywords are colored.",
+						SimpleOption.FLAG, "true"),
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_COLORS_THREESTARS,
+						"Allow Prefix of '***' for coloring",						
+						"If this flag is set, lines starting with '***' and '*** ' are colored",
+						SimpleOption.FLAG, "true"),						
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_COLOR_ERROR,
+						"Color for ERROR: (restart eclipse)",
+						"Color for lines which starts with 'ERROR:'", 
+						Option.COLOR,
+						"FF0000"),
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_COLOR_INFO,
+						"Color for INFO: (restart eclipse)",
+						"Color for lines which starts with 'INFO:'", 
+						Option.COLOR,
+						"0000FF"),
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_COLOR_WARNING,
+						"Color for WARNING: (restart eclipse)",
+						"Color for lines which starts with 'WARNING:'", 
+						Option.COLOR,
+						"DD720F"),
+				new SimpleOption(
+						PDTConsole.PREF_CONSOLE_COLOR_DEBUG,
+						"Color for DEBUG: (restart eclipse)",
+						"Color for lines which starts with 'DEBUG:'", 
+						Option.COLOR,
+						"FF00FF"),
 				new SimpleOption(
 						PDTConsole.PREF_ENTER_FOR_BACKTRACKING,
 						"Use Enter Key for backtracking",
@@ -139,7 +176,8 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 						}
 						return sb.toString();
 					}
-				} };
+				},
+			 };
 
 	}
 

@@ -109,9 +109,9 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			addMarker(id, filename, start, end, severity, message);
 
 		} catch (CoreException e1) {
-			UIUtils.logError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), PDTCore.ERR_UNKNOWN,
-					PDTCore.CX_UPDATE_MARKERS, e1);
+//			UIUtils.logError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), PDTCore.ERR_UNKNOWN,
+//					PDTCore.CX_UPDATE_MARKERS, e1);
 		}
 	}
 
@@ -146,10 +146,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			PrologInterface2 pif = ((PrologInterface2) plProject
 					.getMetadataPrologInterface());
 			s = pif.getSession(PrologInterface.NONE);
-			//s.queryOnce("debug");
-			//s.queryOnce("tspy(parse:do_inclusion/2)");
-			//s.queryOnce("tspy(pdt_builder:spyme/0)");
-			//s.queryOnce("tspy(pdt_builder:arbiter_send_message/3)");
+
 			query = "pdt_problem(Id,File," + tag + ",Start,End,Severity,Msg)";
 
 			List<Map<String, Object>> solutions = s.queryAll(query);

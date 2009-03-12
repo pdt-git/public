@@ -41,8 +41,9 @@
 
 package org.cs3.pdt.runtime;
 
+import java.util.List;
+
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
 
 /**
  * Subscription for a PrologInterface instance.
@@ -173,4 +174,12 @@ public interface Subscription {
 	 * @return
 	 */
 	public abstract Object getData();
+
+	/**
+	 * Bootstrap library contribution (key) demanded by this subscription.
+	 * Several plug-ins/fragments may contribute to a contribution key. 
+	 *    
+	 * @return
+	 */
+	public abstract List<String> getBootstrapConstributionKeys();
 }

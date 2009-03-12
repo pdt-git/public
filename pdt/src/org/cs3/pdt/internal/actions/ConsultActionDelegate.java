@@ -133,18 +133,18 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				run();
 			} catch (IOException e) {
 				Debug.report(e);
-				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-						window.getShell(), PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_CONSULT, e);
+//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+//						window.getShell(), PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_CONSULT, e);
 			} catch (PartInitException e) {
 				Debug.report(e);
-				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-						window.getShell(), PDT.ERR_WORKBENCH_UI_PROBLEM, PDT.CX_CONSULT, e);
+//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+//						window.getShell(), PDT.ERR_WORKBENCH_UI_PROBLEM, PDT.CX_CONSULT, e);
 			} catch (OperationCanceledException e) {
 				return;
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
-				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-						window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
+//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+//						window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
 			}
 
 		} else {

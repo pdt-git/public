@@ -85,12 +85,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -396,6 +399,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private HashMap viewerStates = new HashMap();
 
+	private SelectContextPIFAutomatedAction automatedSelector;
+
 	public void createPartControl(Composite parent) {
 
 		try {
@@ -573,57 +578,98 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
-		addContributions(toolBarManager);
 		createCombo(toolBarManager);
-		pifSelector.init(getViewSite().getWorkbenchWindow());
+		addContributions(toolBarManager);
+	
+//		pifSelector.init(getViewSite().getWorkbenchWindow());
+		automatedSelector.init(getViewSite().getWorkbenchWindow());
 
 	}
 
 	private void createCombo(IToolBarManager toolBarManager) {
-		pifSelector = new SelectPifAction() {
+		
+		automatedSelector = new SelectContextPIFAutomatedAction(){
 
-			protected void setPrologInterface(PrologInterface prologInterface) {
-				PrologConsoleView.this.setPrologInterface(prologInterface);
-
-			}
-
+			
 			protected PrologInterface getPrologInterface() {
 				return PrologConsoleView.this.getPrologInterface();
 			}
 
-		};
-		toolBarManager.add(pifSelector);
+			
+			protected void setPrologInterface(PrologInterface prologInterface) {
+				PrologConsoleView.this.setPrologInterface(prologInterface);
+				
+			}
 
-		contextSelector = new SelectContextsAction() {
+			
+			protected void trackerActivated(PrologContextTracker tracker) {
+				setPrologInterface(automatedSelector.getCurrentPrologInterface());
+				
+			}
+
+			
+			protected void trackerDeactivated(PrologContextTracker tracker) {
+				setPrologInterface(automatedSelector.getCurrentPrologInterface());
+				
+			}
+
 
 			public void contextChanged(PrologContextTrackerEvent e) {
 				PrologContextTracker tracker = (PrologContextTracker) e
-						.getSource();
+				.getSource();
 				Debug.info("context changed for tracker " + tracker.getLabel());
-				setPrologInterface(e.getPrologInterface());
-
+			setPrologInterface(e.getPrologInterface());
+				
 			}
-
-			protected void trackerActivated(PrologContextTracker tracker) {
-				setPrologInterface(contextSelector.getCurrentPrologInterface());
-
-			}
-
-			protected void trackerDeactivated(PrologContextTracker tracker) {
-				setPrologInterface(contextSelector.getCurrentPrologInterface());
-
-			}
-
+			
 		};
+		toolBarManager.add(automatedSelector);
+		
+//		pifSelector = new SelectPifAction() {
+//
+//			protected void setPrologInterface(PrologInterface prologInterface) {
+//				PrologConsoleView.this.setPrologInterface(prologInterface);
+//
+//			}
+//
+//			protected PrologInterface getPrologInterface() {
+//				return PrologConsoleView.this.getPrologInterface();
+//			}
+//
+//		};
+//		toolBarManager.add(pifSelector);
 
-		toolBarManager.add(contextSelector);
-		setPrologInterface(contextSelector.getCurrentPrologInterface());
+//		contextSelector = new SelectContextsAction() {
+//
+//			public void contextChanged(PrologContextTrackerEvent e) {
+//				PrologContextTracker tracker = (PrologContextTracker) e
+//						.getSource();
+//				Debug.info("context changed for tracker " + tracker.getLabel());
+//				setPrologInterface(e.getPrologInterface());
+//
+//			}
+//
+//			protected void trackerActivated(PrologContextTracker tracker) {
+//				setPrologInterface(contextSelector.getCurrentPrologInterface());
+//
+//			}
+//
+//			protected void trackerDeactivated(PrologContextTracker tracker) {
+//				setPrologInterface(contextSelector.getCurrentPrologInterface());
+//
+//			}
+//		};
+
+//		toolBarManager.add(contextSelector);
+//		setPrologInterface(contextSelector.getCurrentPrologInterface());
+		setPrologInterface(automatedSelector.getCurrentPrologInterface());
+	
 	}
 
 	private void addContributions(IContributionManager manager) {
 		IWorkbenchWindow window = getSite().getWorkbenchWindow();
 		manager.add(new Separator("#System"));
-		manager.add(restartAction);		
+				
 		manager.add(new Separator("#ConsoleInternal"));
 		manager.add(guiTracerAction);
 //		manager.add(activateGuiTracerAction);
@@ -634,16 +680,19 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		sall.setImageDescriptor(ImageRepository
 				.getImageDescriptor(ImageRepository.SELECT_ALL));
 		manager.add(sall);
-		manager.add(clearAction);
-		manager.add(ActionFactory.COPY.create(window));
+
 		manager.add(ActionFactory.CUT.create(window));
+		manager.add(ActionFactory.COPY.create(window));
 		manager.add(ActionFactory.PASTE.create(window));
 		manager.add(pasteFileNameAction);
-		manager.add(debugAction);
+//		manager.add(debugAction);
+		manager.add(clearAction);
 		manager.add(new Separator("#Clipboard-end"));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS
-				+ "-end"));
+				+ "-end"));		
+		manager.add(restartAction);
+
 	}
 
 	private File getHistoryFile() {
@@ -740,9 +789,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);// not much we can do.
 
-			UIUtils.logError(PrologConsolePlugin.getDefault()
-					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
-					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
+//			UIUtils.logError(PrologConsolePlugin.getDefault()
+//					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
+//					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
 		}
 		// if(pif==currentPif){
 		// reconfigureViewer(pif);
@@ -810,9 +859,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 			} catch (PrologInterfaceException e) {
 				Debug.report(e);
 
-				UIUtils.logError(PrologConsolePlugin.getDefault()
-						.getErrorMessageProvider(), PDTConsole.ERR_PIF,
-						PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
+//				UIUtils.logError(PrologConsolePlugin.getDefault()
+//						.getErrorMessageProvider(), PDTConsole.ERR_PIF,
+//						PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
 			}
 			reconfigureViewer(currentPif);
 			getDefaultPrologConsoleService().fireActivePrologInterfaceChanged(this);
@@ -820,8 +869,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		} else {
 			Debug.debug("no pif (yet).");
 		}
-		if (pifSelector != null) {
-			pifSelector.update();
+//		if (pifSelector != null) {
+//			pifSelector.update();
+//		}
+		if(automatedSelector != null){
+			automatedSelector.update();
 		}
 	}
 

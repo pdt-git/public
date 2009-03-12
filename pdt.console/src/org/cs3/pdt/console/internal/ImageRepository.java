@@ -60,20 +60,24 @@ public class ImageRepository {
 	
 	public final static String GUITRACER = "guitracer.gif";
 
-	public final static String CLEAR = "clear.gif";
+	public final static String CLEAR = "clear.png";
 
 	public final static String NOGUITRACER = "noguitracer.gif";
 	
+	public final static String FOLLOW_MODE = "console_following.png";
     
-    
-
+	public final static String MANUAL_MODE = "console.png";
+	
+	public final static String MANUAL_MODE_FREE = "console_warning.png";
     
 	public static final String BREAK = "break.gif";
 
-	public static final String RESTART = "restart.gif";
+	public static final String RESTART = "restart.png";
 	
-	public static final String SELECT_ALL = "select_all.gif";
-	public static final String SELECT_PIF = "console_view.gif";
+	public static final String SELECT_ALL = "selectall.png";
+	
+	public static final String SELECT_PIF = "console.png";
+	
 	public static final String TRACK_CONTEXT = "synced.gif";
 
 	public static final String PASTE_FILENAME = "paste_filename.gif";

@@ -48,10 +48,8 @@ log_send(Subject,Msg,Object,SN):-
     incident_new(Cause),
     incident_type(Cause,transition),
     incident_subject(Cause,Subject),
-    (	Cause
-    ->	incident_sn(Cause,CauseSN)
-    ;	CauseSN = []
-    ),
+    once(Cause),
+    incident_sn(Cause,CauseSN),
 	thread_self(Thread),
 	reserve_sn(SN),
 	incident_new(I),
@@ -103,10 +101,8 @@ log_mark(Subject,Action):-
 	incident_new(Cause),
     incident_type(Cause,transition),
     incident_subject(Cause,Subject),
-    (	Cause
-    ->	incident_sn(Cause,CauseSN)
-    ;	CauseSN=[]
-   	),
+    once(Cause),
+    incident_sn(Cause,CauseSN),
 	thread_self(Thread),    
 	reserve_sn(SN),
 	incident_new(I),
@@ -124,10 +120,8 @@ log_action(Subject,Action):-
 	incident_new(Cause),
     incident_type(Cause,transition),
     incident_subject(Cause,Subject),
-    (	Cause
-    ->	incident_sn(Cause,CauseSN)
-    ;	CauseSN=[]
-    ),
+    once(Cause),
+    incident_sn(Cause,CauseSN),
 	thread_self(Thread),    
 	reserve_sn(SN),
 	incident_new(I),
@@ -145,10 +139,9 @@ log_transition(Subject,NewState):-
 	incident_new(Cause),
     incident_type(Cause,event),
     incident_subject(Cause,Subject),
-    (	Cause
-    ->	incident_sn(Cause,CauseSN)
-    ;	CauseSN = []
-    ),	   
+    once(Cause),
+    incident_sn(Cause,CauseSN),
+	    
    	thread_self(Thread),    
 	reserve_sn(SN),
 	incident_new(I),
@@ -164,7 +157,7 @@ log_transition(Subject,NewState):-
 
 log_push_state(Subject,State):-
     asserta('$stack'(Subject,State)),
-    log_transition(Subject,State).
+    log_transition(Subject,NewState).
     
 log_pop_state(Subject):-
 	retract('$stack'(Subject,_)),
@@ -212,35 +205,6 @@ filter(From,To,Subjects,Incidents):-
     	),
     	Incidents
     ).
-
-filter(Subjects,Incidents):-
-    setof(
-    	I,
-    	(	incident_query([sn=I,subject=Subject]),
-    		memberchk(Subject,Subjects)
-    	),
-    	Incidents
-    ).
-
-
-filter(From,To,Incidents):-
-    setof(
-    	I,
-    	(	incident_query([sn=I]),
-    		From =< I,
-    		I =< To
-    	),
-    	Incidents
-    ).
-
-
-all_incidents(Incidents):-
-    setof(
-    	I,
-		incident_query([sn=I]),
-    	Incidents
-    ).
-
     		
 write_incidents(From,To,Subjects,Tmp):-
 	filter(From,To,Subjects,Incidents),

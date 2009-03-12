@@ -82,9 +82,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 			return backend.getChildren(parentElement);
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getControl().getShell(),
-					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), viewer.getControl().getShell(),
+//					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
 			return new Object[0];
 		}
 	}
@@ -155,9 +155,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 		} catch (Exception e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getControl().getShell(),
-					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), viewer.getControl().getShell(),
+//					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
 		}
 	}
 

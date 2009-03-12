@@ -36,8 +36,8 @@ public class OpenConsoleAction implements IWorkbenchWindowActionDelegate {
 		try {
 			activePage.showView("org.cs3.pdt.console.internal.views.PrologConsoleView");
 		} catch (PartInitException e) {
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
-					PDTCore.ERR_UNKNOWN, PDTCore.CX_UNKNOWN, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
+//					PDTCore.ERR_UNKNOWN, PDTCore.CX_UNKNOWN, e);
 
 		}
 

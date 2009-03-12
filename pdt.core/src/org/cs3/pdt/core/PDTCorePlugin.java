@@ -81,9 +81,9 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 				r.removeSubscription(prologProject.getRuntimeSubscription());
 			}
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), UIUtils.getActiveShell(),
-					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getActiveShell(),
+//					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
 		}
 
 	}
@@ -99,9 +99,9 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 				r.addSubscription(prologProject.getRuntimeSubscription());
 			}
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), UIUtils.getActiveShell(),
-					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getActiveShell(),
+//					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
 		}
 
 	}
@@ -147,9 +147,9 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 					projectClosing(project);
 				}
 			} catch (CoreException e) {
-				UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-						.getErrorMessageProvider(), UIUtils.getActiveShell(),
-						PDTCore.ERR_UNKNOWN, PDTCore.CX_CHECK_PROJECTS, e);
+//				UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//						.getErrorMessageProvider(), UIUtils.getActiveShell(),
+//						PDTCore.ERR_UNKNOWN, PDTCore.CX_CHECK_PROJECTS, e);
 			}
 
 		}
