@@ -111,22 +111,22 @@ public abstract class PrologContentAssistProcessor {
 					.toArray(new ICompletionProposal[proposals.size()]);
 		} catch (BadLocationException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getTextWidget()
-					.getShell(), PDT.ERR_COMPLETION_BAD_LOCATION,
-					PDT.CX_COMPLETION, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), viewer.getTextWidget()
+//					.getShell(), PDT.ERR_COMPLETION_BAD_LOCATION,
+//					PDT.CX_COMPLETION, e);
 			return null;
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getTextWidget()
-					.getShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), viewer.getTextWidget()
+//					.getShell(), PDT.ERR_PIF, PDT.CX_COMPLETION, e);
 			return null;
 		} catch (CoreException e) {
 			Debug.report(e);
-			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-					.getErrorMessageProvider(), viewer.getTextWidget()
-					.getShell(), PDT.ERR_CORE_EXCEPTION, PDT.CX_COMPLETION, e);
+//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
+//					.getErrorMessageProvider(), viewer.getTextWidget()
+//					.getShell(), PDT.ERR_CORE_EXCEPTION, PDT.CX_COMPLETION, e);
 			return null;
 		} finally {
 	

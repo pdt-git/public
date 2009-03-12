@@ -51,6 +51,7 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -217,8 +218,8 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		int len = 1;
 		while (true) {
 
-			String first = (String) completions.first();
-			String last = (String) completions.last();
+			String first = Util.unquoteAtom((String) completions.first());
+			String last = Util.unquoteAtom((String) completions.last());
 			if (first.length() < len || last.length() < len) {
 				break;
 			}

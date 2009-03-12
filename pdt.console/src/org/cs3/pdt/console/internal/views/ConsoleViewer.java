@@ -41,8 +41,8 @@
 
 package org.cs3.pdt.console.internal.views;
 
-import javax.swing.text.StyledEditorKit.StyledTextAction;
-
+import org.cs3.pdt.console.PDTConsole;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
@@ -55,6 +55,7 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.DisposeEvent;
@@ -71,6 +72,7 @@ import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -147,7 +149,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	private ModifyListener modifyListener = new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
-			if(!thatWasMe){
+			if (!thatWasMe) {
 				ui_inputModified(ui_getLineBuffer());
 			}
 		}
@@ -171,6 +173,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	public ConsoleViewer(Composite parent, int styles) {
 		createControl(parent, styles);
+		initColors();
 	}
 
 	private void createControl(Composite parent, int styles) {
@@ -207,13 +210,13 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 			public void mouseDown(MouseEvent e) {
 				if (control.getSelectionCount() == 0) {
-					try{
-						int offset = control
-							.getOffsetAtLocation(new Point(e.x, e.y));
+					try {
+						int offset = control.getOffsetAtLocation(new Point(e.x,
+								e.y));
 						control.setSelection(offset);
-					}
-					catch(IllegalArgumentException ere){
-						// TODO: what do we do when mouse position is behind the end
+					} catch (IllegalArgumentException ere) {
+						// TODO: what do we do when mouse position is behind the
+						// end
 						// of a line?
 						;
 					}
@@ -233,8 +236,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 
 		});
-		
-		control.setEnabled(model!=null&&model.isConnected());
+
+		control.setEnabled(model != null && model.isConnected());
 	}
 
 	public Control getControl() {
@@ -299,7 +302,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.views.ConsoleController#setModel(org.cs3.pl.views.ConsoleModel)
+	 * @see
+	 * org.cs3.pl.views.ConsoleController#setModel(org.cs3.pl.views.ConsoleModel
+	 * )
 	 */
 	public void setModel(ConsoleModel consoleModel) {
 		if (model == consoleModel) {
@@ -313,8 +318,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			model.addConsoleListener(this);
 			ui_setSingleCharMode(model.isSingleCharMode());
 			ui_setEnabled(model.isConnected());
-		}
-		else{
+		} else {
 			ui_setEnabled(false);
 		}
 
@@ -323,47 +327,48 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 
-	public static final class SavedState{
+	public static final class SavedState {
 		private int startOfInput;
 		private String contents;
 		private ConsoleHistory history;
 		private ConsoleModel model;
 		public ConsoleCompletionProvider completionProvider;
 		public int caretPosition;
-		
+
 	}
-	
-	public SavedState saveState(){
-		if(control.isDisposed()){
+
+	public SavedState saveState() {
+		if (control.isDisposed()) {
 			return null;
 		}
 		SavedState s = new SavedState();
-		s.startOfInput=startOfInput;
-		s.contents=control.getText();
-		s.history=history;
-		s.model=model;
-		s.completionProvider=completionProvider;
-		s.caretPosition=control.getCaretOffset();
+		s.startOfInput = startOfInput;
+		s.contents = control.getText();
+		s.history = history;
+		s.model = model;
+		s.completionProvider = completionProvider;
+		s.caretPosition = control.getCaretOffset();
 		return s;
 	}
-	
-	public void loadState(SavedState s){
-		thatWasMe=true;
-		
-		startOfInput=s.startOfInput;
+
+	public void loadState(SavedState s) {
+		thatWasMe = true;
+
+		startOfInput = s.startOfInput;
 		control.setText(s.contents);
 		control.setCaretOffset(s.caretPosition);
 		setHistory(s.history);
 		setModel(s.model);
 		setCompletionProvider(s.completionProvider);
 		control.showSelection();
-		thatWasMe=false;
+		thatWasMe = false;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.views.ConsoleModelListener#onCommit(org.cs3.pl.views.ConsoleModelEvent)
+	 * @seeorg.cs3.pl.views.ConsoleModelListener#onCommit(org.cs3.pl.views.
+	 * ConsoleModelEvent)
 	 */
 	public void onCommit(final ConsoleModelEvent e) {
 		Display display = control.getDisplay();
@@ -381,7 +386,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.views.ConsoleModelListener#onEditBufferChanged(org.cs3.pl.views.ConsoleModelEvent)
+	 * @see
+	 * org.cs3.pl.views.ConsoleModelListener#onEditBufferChanged(org.cs3.pl.
+	 * views.ConsoleModelEvent)
 	 */
 	public void onEditBufferChanged(final ConsoleModelEvent e) {
 		if (control == null) {
@@ -411,7 +418,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.ConsoleModelEvent)
+	 * @seeorg.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.
+	 * ConsoleModelEvent)
 	 */
 	public void onModeChange(final ConsoleModelEvent e) {
 		Debug.debug("mode changed: " + model.isSingleCharMode());
@@ -436,10 +444,11 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.views.ConsoleModelListener#onOutput(org.cs3.pl.views.ConsoleModelEvent)
+	 * @seeorg.cs3.pl.views.ConsoleModelListener#onOutput(org.cs3.pl.views.
+	 * ConsoleModelEvent)
 	 */
 	public void onOutput(final ConsoleModelEvent e) {
-		if (control == null||control.isDisposed()) {
+		if (control == null || control.isDisposed()) {
 			return;
 		}
 		Display display = control.getDisplay();
@@ -457,7 +466,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console.ConsoleModelEvent)
+	 * @see
+	 * org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console
+	 * .ConsoleModelEvent)
 	 */
 	public void afterConnect(final ConsoleModelEvent e) {
 		Display display = control.getDisplay();
@@ -475,10 +486,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console.ConsoleModelEvent)
+	 * @see
+	 * org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console
+	 * .ConsoleModelEvent)
 	 */
 	public void beforeDisconnect(final ConsoleModelEvent e) {
-		if(control.isDisposed()){
+		if (control.isDisposed()) {
 			return;
 		}
 		Display display = control.getDisplay();
@@ -547,18 +560,136 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 	}
 
+	private Color parseColor(String hexColor){
+		Display display = control.getDisplay();
+		java.awt.Color c = new java.awt.Color(Integer.parseInt(	hexColor, 16));
+		 return new Color(display, c.getRed(), c.getGreen(), c.getBlue());		
+	}
+	private void setColorRangeInControl(int start,int end,Color col) {
+			StyleRange range = new StyleRange(start, end,
+					col, control.getBackground());
+			control.setStyleRange(range);			
+	}
+	
+	
+	
+	
+	
+    final String PLACEHOLDER_WARNING = "WARNING:";			
+    final String PLACEHOLDER_ERROR = "ERROR:";
+    final String PLACEHOLDER_DEBUG = "DEBUG:";
+    final String PLACEHOLDER_INFO = "INFO:";
+    final String PLACEHOLDER_SPACETAB = "  ";
+    final String PLACEHOLDER_THREESTARS = "***";
+
+    private Color LastOutputColor = null;
+    private boolean LineFeedOccured = true;
+    private Color COLOR_ERROR;
+	private Color COLOR_WARNING;
+	private Color COLOR_INFO;
+	private Color COLOR_DEBUG;
+	private void initColors(){				
+		
+		COLOR_ERROR = parseColor(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLOR_ERROR, "FF0000"));
+		COLOR_WARNING =parseColor(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLOR_WARNING, "DD720F"));
+		COLOR_INFO =  parseColor(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLOR_INFO, "0000FF"));
+		COLOR_DEBUG =  parseColor(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLOR_DEBUG, "FF00FF"));				
+		
+//		COLOR_ERROR = control.getDisplay().getSystemColor(SWT.COLOR_RED);
+//		COLOR_WARNING = parseColor("DD720F");
+//		COLOR_INFO = control.getDisplay().getSystemColor(SWT.COLOR_BLUE);
+//		COLOR_DEBUG = control.getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
+	}
+	private boolean lineStartsWith(String line, String start){
+		if (line.startsWith(start, 0)) {
+			return true;		
+		}
+		if (line.startsWith(" " + start, 0)) {
+			return true;		
+		}
+		if (Boolean.valueOf(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "true"))	.booleanValue()) {
+			if (line.startsWith(PLACEHOLDER_THREESTARS + start, 0)) {
+				return true;		
+			}
+			if (line.startsWith(PLACEHOLDER_THREESTARS + " " + start, 0)) {
+				return true;		
+			}
+			if (line.startsWith(" " + PLACEHOLDER_THREESTARS + start, 0)) {
+				return true;		
+			}
+			if (line.startsWith(" " + PLACEHOLDER_THREESTARS + " " + start, 0)) {
+				return true;		
+			}
+			
+		}
+		return false;
+	}
+	
 	private void ui_appendOutput(String output) {
 		thatWasMe = true;
 		int p = 0;
 		try {
 			p = control.getCaretOffset() - startOfInput;
+					
 			
 			
 			
+			control.replaceTextRange(startOfInput, 0, output);		
+			String[] Rows = output.split("\n");
 			
-			control.replaceTextRange(startOfInput, 0, output);
-			startOfInput += output.length();	
+			if (Boolean.valueOf(
+					PrologConsolePlugin.getDefault().getPreferenceValue(
+							PDTConsole.PREF_CONSOLE_SHOW_COLORS, "true"))
+					.booleanValue()) {
+				int CharCount = 0;
+
+				
+				String row;
+				
+				//for (String row : Rows) {
+				for (int i=0; i<Rows.length;i++){
+					row = Rows[i];
+					// Get the Color-Information
+					String UpperCaseRow = row.toUpperCase();
+					if (lineStartsWith(UpperCaseRow,PLACEHOLDER_WARNING)) {
+						LastOutputColor = COLOR_WARNING;
+					} else if (lineStartsWith(UpperCaseRow,PLACEHOLDER_ERROR)) {
+						LastOutputColor = COLOR_ERROR;
+					} else if (lineStartsWith(UpperCaseRow,PLACEHOLDER_DEBUG)) {
+						LastOutputColor = COLOR_DEBUG;
+					} else if (lineStartsWith(UpperCaseRow,PLACEHOLDER_INFO)) {
+						LastOutputColor = COLOR_INFO;
+					} else if (lineStartsWith(UpperCaseRow,PLACEHOLDER_THREESTARS)) {
+						LastOutputColor = COLOR_INFO;												
+					} else if (!UpperCaseRow.startsWith("\u0009")
+							// tabChar oder zwei leerzeichen
+							&& !UpperCaseRow.startsWith(PLACEHOLDER_SPACETAB, 0)
+							&& LineFeedOccured) {
+						// No Color Setting, take default color
+						LastOutputColor = null;
+					}
+					// SET the Color-Information
+					if (LastOutputColor != null) {
+						setColorRangeInControl(startOfInput + CharCount, row
+								.length(), LastOutputColor);
+					}
+
+					
+					CharCount += row.length() + 1;					
+				
+				}
+				// is needed for long lines which are pushed in multiple parts
+				if (output.endsWith("\n")) {
+					LineFeedOccured = true;
+				} else {
+					LineFeedOccured = false;
+				}
+			}
+
 			
+			
+			startOfInput += output.length();
+
 			control.setCaretOffset(startOfInput + p);
 			control.showSelection();
 		} catch (Throwable e) {
@@ -583,8 +714,6 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		thatWasMe = false;
 	}
 
-	
-	
 	private void ui_setSingleCharMode(boolean b) {
 		Display display = control.getDisplay();
 		if (b) {
@@ -596,8 +725,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		}
 	}
-	
-	private void ui_setEnabled(boolean b){
+
+	private void ui_setEnabled(boolean b) {
 		control.setEnabled(b);
 		Display display = control.getDisplay();
 		if (b) {
@@ -605,8 +734,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		} else {
-			control.setBackground(display
-					.getSystemColor(SWT.COLOR_GRAY));
+			control.setBackground(display.getSystemColor(SWT.COLOR_GRAY));
 		}
 	}
 
@@ -617,10 +745,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		if (model == null) {
 			e.doit = false;
 		} else if (e.start < startOfInput) {
-			//allow insertion (put the new text at the very end of the buffer)
-			//but do not allow modification of text before startOfInput.
+			// allow insertion (put the new text at the very end of the buffer)
+			// but do not allow modification of text before startOfInput.
 			e.doit = false;
-			if(e.end==e.start){//insertion
+			if (e.end == e.start) {// insertion
 				control.replaceTextRange(control.getCharCount(), 0, e.text);
 			}
 		} else {
@@ -637,9 +765,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			}
 			int keyCode = event.keyCode;
 			int keyChar = event.character;
-			
-			if ((keyCode&SWT.MODIFIER_MASK)==0&&control.getCaretOffset() < startOfInput) {
-				
+
+			if ((keyCode & SWT.MODIFIER_MASK) == 0
+					&& control.getCaretOffset() < startOfInput) {
+
 				control.setCaretOffset(control.getCharCount());
 			}
 			if (model == null) {
@@ -696,9 +825,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					break;
 
 				case ' ':
-					if((keyMask&SWT.CTRL)!=0){
+					if ((keyMask & SWT.CTRL) != 0) {
 						doCompletion();
-						event.doit = false;							
+						event.doit = false;
 					}
 					break;
 				case SWT.TAB:
@@ -766,9 +895,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 		if (model.isSingleCharMode() && keyChar > 0) {
 			Debug.debug("keyChar: '" + keyChar + "'");
-			if(enterSendsSemicolon&&(keyCode==SWT.CR||keyCode==SWT.KEYPAD_CR)){
+			if (enterSendsSemicolon
+					&& (keyCode == SWT.CR || keyCode == SWT.KEYPAD_CR)) {
 				model.putSingleChar(';');
-			}else{
+			} else {
 				model.putSingleChar(keyChar);
 			}
 		} else {
@@ -869,10 +999,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		return control.getCaretOffset();
 	}
 
-	public void setCaretOffset(int offset){
+	public void setCaretOffset(int offset) {
 		control.setCaretOffset(offset);
 	}
-	
+
 	public void cut() {
 		control.cut();
 
@@ -894,8 +1024,8 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	public void setEnterSendsSemicolon(boolean useEnter) {
-		this.enterSendsSemicolon=useEnter;
-		
+		this.enterSendsSemicolon = useEnter;
+
 	}
 
 	public boolean getEnterSendsSemicolon() {
@@ -907,17 +1037,17 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	}
 
 	public void setEnabled(final boolean b) {
-		if(Display.getCurrent() == control.getDisplay()) {
+		if (Display.getCurrent() == control.getDisplay()) {
 			ui_setEnabled(b);
 		} else {
-			control.getDisplay().asyncExec(new Runnable(){
+			control.getDisplay().asyncExec(new Runnable() {
 
 				public void run() {
 					ui_setEnabled(b);
 				}
-				
+
 			});
 		}
-		
+
 	}
 }

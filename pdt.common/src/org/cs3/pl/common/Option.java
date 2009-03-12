@@ -65,6 +65,8 @@ public interface Option {
 	public static final int ENUM = 8;
 
 	public static final int FONT = 9;
+	
+	public static final int COLOR = 10;
 
 	public String getDefault();
 

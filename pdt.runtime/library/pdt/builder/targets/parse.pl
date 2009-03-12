@@ -200,8 +200,8 @@ process_inclusion(F,Cx):-
 	pef_file_dependency_assert([id=Id,depending=MyRef,toplevel=TlRef,dependency=Ref]),
 	catch(
 		do_inclusion(File,Cx),
-		error(cycle(_)),
-		pef_parser_dependency_cycle_assert([action=parse(file(File)),toplevel=TlRef])
+		error(cycle(Toplevel)),
+		pef_parser_dependency_cycle_assert([action=parse(file(File)),toplevel=Toplevel])
 	).
 process_inclusion(F,Cx):-
     pef_reserve_id(pef_file_not_found,Id),

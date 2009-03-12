@@ -265,6 +265,10 @@ public class DefaultSubscription implements PersistableSubscription {
 	public Object getData() {		
 		return null;
 	}
+
+	public List<String> getBootstrapConstributionKeys() {
+		return new ArrayList<String>();
+	}
 	
 
 }

@@ -39,12 +39,12 @@
 #    distributed.                                                        #
 ##########################################################################
 SWI_EXECUTABLE="/opt/local/bin/xpce"
-SWI_HOME="/opt/local/lib/swipl-5.6.12"
+SWI_HOME="/opt/local/lib/swipl-5.6.63"
 SO= $(shell $(SWI_EXECUTABLE) -qt [libname],full_name)
 BASE= $(shell $(SWI_EXECUTABLE) -qt [libname],base_name)
 OBJ= $(BASE).o
 SRC= $(OBJ:.o=.c)
-export MACOSX_DEPLOYMENT_TARGET="10.4"
+export MACOSX_DEPLOYMENT_TARGET="10.5"
 
 
 
@@ -56,8 +56,8 @@ clean:
 	rm $(SO)
 
 $(SO): $(OBJ)	
-	MACOSX_DEPLOYMENT_TARGET="10.4" gcc  -Wall -g -undefined dynamic_lookup -dynamiclib -o $(SO) $(OBJ)
+	MACOSX_DEPLOYMENT_TARGET="10.5" gcc  -Wall -g -undefined dynamic_lookup -dynamiclib -o $(SO) $(OBJ)
 
 $(OBJ): $(SRC)
-	MACOSX_DEPLOYMENT_TARGET="10.4" gcc -Wall -g -I$(SWI_HOME)/include -fpic -c $(SRC)
+	MACOSX_DEPLOYMENT_TARGET="10.5" gcc -Wall -g -I$(SWI_HOME)/include -fpic -c $(SRC)
 

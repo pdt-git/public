@@ -68,10 +68,10 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 			plProject.setPreferenceValue(PDTCore.PROP_SOURCE_PATH, sb.toString());
 			updateAction(action);
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), UIUtils.getDisplay()
-					.getActiveShell(), PDTCore.ERR_UNKNOWN,
-					PDTCore.CX_TOGGLE_SOURCE_PATH_ENTRY, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getDisplay()
+//					.getActiveShell(), PDTCore.ERR_UNKNOWN,
+//					PDTCore.CX_TOGGLE_SOURCE_PATH_ENTRY, e);
 		}
 	}
 
@@ -113,10 +113,10 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 			}
 			updateAction(action);
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-					.getErrorMessageProvider(), UIUtils.getDisplay()
-					.getActiveShell(), PDTCore.ERR_UNKNOWN,
-					PDTCore.CX_TOGGLE_SOURCE_PATH_ENTRY, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
+//					.getErrorMessageProvider(), UIUtils.getDisplay()
+//					.getActiveShell(), PDTCore.ERR_UNKNOWN,
+//					PDTCore.CX_TOGGLE_SOURCE_PATH_ENTRY, e);
 		}
 	}
 

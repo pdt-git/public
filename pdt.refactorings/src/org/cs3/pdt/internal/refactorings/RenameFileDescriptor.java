@@ -38,7 +38,7 @@ public class RenameFileDescriptor extends PrologRefactoringDescriptor{
 		return "file('"+Util.prologFileName(file.getLocation().toFile())+"')";
 	}
 
-	private static IFile selectedFile(ISelection selection, IWorkbenchPart activePart) {
+	private IFile selectedFile(ISelection selection, IWorkbenchPart activePart) {
 		if(activePart.getSite().getId().equals("org.cs3.pdt.internal.editors.PLEditor")){
 			return UIUtils.getFileInActiveEditor();
 		}

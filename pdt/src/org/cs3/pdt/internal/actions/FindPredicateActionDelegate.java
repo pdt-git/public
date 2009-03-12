@@ -112,8 +112,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			}
 			final IFile file = UIUtils.getFileInActiveEditor();
 			if(file==null){
-				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), shell, 
-						PDT.ERR_NO_ACTIVE_FILE, PDT.CX_FIND_PREDICATE, null);
+//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(), shell, 
+//						PDT.ERR_NO_ACTIVE_FILE, PDT.CX_FIND_PREDICATE, null);
 			}
 			
 			Job j = new Job("Searching predicate definition") {

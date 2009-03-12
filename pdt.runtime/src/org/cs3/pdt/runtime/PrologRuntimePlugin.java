@@ -81,6 +81,7 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
+import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
@@ -790,9 +791,29 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			r.addPrologInterface(pifKey, pif);
 			addGlobalHooks(pifKey, pif);
 		}
+		List<String> contributionKeys = s.getBootstrapConstributionKeys();
+		for (String contributionKey : contributionKeys) {
+			Set<String> libraryList = getBootstrapList(contributionKey);
+			for (String library : libraryList) {
+				if(!pif.getBootstrapLibraries().contains(library)){
+					pif.getBootstrapLibraries().add(library);
+					if(pif.isUp()){
+						PrologSession session = null;
+						try {
+							session = pif.getSession(PrologInterface.LEGACY);
+							session.queryOnce("['"+library+"']");
+						} catch (PrologInterfaceException e) {
+							Debug.report(e);
+							if(session != null)session.dispose();
+						}
+					}
+				}
+			}
+		}
 		if (s.getId() != null) {
 			r.addSubscription(s);
 		}
+
 		return pif;
 	}
 

@@ -188,7 +188,7 @@ pdt_context_get_value(Module,CxTerm,ArgName,Value):-
 
 
 
-%%pdt_context_get_values(+Module, +Context, NameValuePairs)
+%%pdt_context_set_values(+Module, +Context, +NameValuePairs)
 % convenience method to replace several field values of a context at the same time.
 % The original Context term will not be modified.
 %

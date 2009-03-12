@@ -157,9 +157,9 @@ public class PrologOutline extends ContentOutlinePage {
 				} catch (Exception e) {
 					ErrorMessageProvider emp = PDTPlugin.getDefault()
 							.getErrorMessageProvider();
-					UIUtils.logAndDisplayError(emp, getSite().getShell(),
-							PDT.ERR_FILENAME_CONVERSION_PROBLEM,
-							PDT.CX_OUTLINE, e);
+//					UIUtils.logAndDisplayError(emp, getSite().getShell(),
+//							PDT.ERR_FILENAME_CONVERSION_PROBLEM,
+//							PDT.CX_OUTLINE, e);
 					return null;
 				}
 			}
@@ -274,9 +274,9 @@ public class PrologOutline extends ContentOutlinePage {
 				Debug.warning("bad location: "+startOffset+", "+endOffset);
 				ErrorMessageProvider emp = PDTPlugin.getDefault()
 				.getErrorMessageProvider();
-				UIUtils.logAndDisplayError(emp, getSite().getShell(),
-				PDT.ERR_OUTLINE_BAD_LOCATION,
-				PDT.CX_OUTLINE, e);
+//				UIUtils.logAndDisplayError(emp, getSite().getShell(),
+//				PDT.ERR_OUTLINE_BAD_LOCATION,
+//				PDT.CX_OUTLINE, e);
 			}
 		}
 

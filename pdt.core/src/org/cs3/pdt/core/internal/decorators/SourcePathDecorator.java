@@ -45,8 +45,8 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 				decoration.addOverlay(ImageRepository.getImageDescriptor(ImageRepository.SOURCEPATH_DECORATION));				
 			}
 		} catch (CoreException e) {
-			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
-					PDTCore.ERR_UNKNOWN, PDTCore.CX_UNKNOWN, e);
+//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault().getErrorMessageProvider(), UIUtils.getDisplay().getActiveShell(), 
+//					PDTCore.ERR_UNKNOWN, PDTCore.CX_UNKNOWN, e);
 		}
 		
 		
