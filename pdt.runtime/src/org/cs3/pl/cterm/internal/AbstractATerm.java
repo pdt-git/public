@@ -44,11 +44,9 @@ package org.cs3.pl.cterm.internal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
-import org.cs3.pl.cterm.internal.parser.SimpleNode;
 import org.cs3.pl.prolog.PLUtil;
 
 public abstract class AbstractATerm implements CTerm {

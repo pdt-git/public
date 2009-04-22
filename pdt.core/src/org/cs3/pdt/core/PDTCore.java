@@ -41,13 +41,6 @@
 
 package org.cs3.pdt.core;
 
-import java.util.ArrayList;
-
-import org.cs3.pl.prolog.PrologInterface;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 public class PDTCore {
 

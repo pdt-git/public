@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.ui.util;
 
-import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;

@@ -3,7 +3,6 @@ package org.cs3.pdt.runtime.internal;
 import java.io.File;
 
 import org.cs3.pl.prolog.LifeCycleHook2;
-import org.cs3.pl.prolog.PrologLibraryManager;
 
 /**
  * A description of a life cycle hook as obtained from the plugin.xml file.

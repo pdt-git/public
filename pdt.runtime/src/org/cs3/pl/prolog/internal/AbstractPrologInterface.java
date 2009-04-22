@@ -45,30 +45,23 @@ package org.cs3.pl.prolog.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.Disposable;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
-import org.cs3.pl.prolog.internal.lifecycle.WorkRunnable;
 import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * convenience implementation of common infrastructure.

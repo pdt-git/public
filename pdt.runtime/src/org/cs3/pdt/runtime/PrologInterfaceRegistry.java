@@ -43,7 +43,6 @@ package org.cs3.pdt.runtime;
 
 import java.util.Set;
 
-import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
 import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;

@@ -51,7 +51,6 @@ import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;

@@ -51,7 +51,6 @@ import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;

@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.runtime;
 
-import java.util.List;
 import java.util.Map;
 
 /**

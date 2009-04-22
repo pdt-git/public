@@ -41,10 +41,7 @@
 
 package org.cs3.pdt.internal.editors;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.contentassistant.NaivPrologContentAssistProcessor;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;

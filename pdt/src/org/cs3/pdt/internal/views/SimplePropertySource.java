@@ -2,7 +2,6 @@ package org.cs3.pdt.internal.views;
 
 import java.util.Map;
 
-import org.cs3.pl.cterm.CTerm;
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;

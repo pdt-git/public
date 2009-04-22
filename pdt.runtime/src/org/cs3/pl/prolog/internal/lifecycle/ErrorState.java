@@ -1,7 +1,5 @@
 package org.cs3.pl.prolog.internal.lifecycle;
 
-import java.util.concurrent.BlockingQueue;
-
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class ErrorState extends AbstractState {

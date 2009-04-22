@@ -31,7 +31,6 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.views.properties.IPropertySource;
 
 public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		implements PrologFileContentModel, LifeCycleHook2,

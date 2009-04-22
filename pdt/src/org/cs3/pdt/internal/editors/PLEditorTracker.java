@@ -41,26 +41,21 @@
 
 package org.cs3.pdt.internal.editors;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.AbstractPrologContextTracker;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 

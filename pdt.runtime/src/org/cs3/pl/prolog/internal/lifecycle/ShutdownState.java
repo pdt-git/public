@@ -2,11 +2,9 @@ package org.cs3.pl.prolog.internal.lifecycle;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.concurrent.BlockingQueue;
 
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 
 public class ShutdownState extends AbstractState {
 

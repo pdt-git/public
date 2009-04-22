@@ -1,14 +1,11 @@
 package org.cs3.pdt.core.internal.decorators;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.internal.ImageRepository;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.OptionProviderEvent;
 import org.cs3.pl.common.OptionProviderListener;
 import org.eclipse.core.resources.IProject;

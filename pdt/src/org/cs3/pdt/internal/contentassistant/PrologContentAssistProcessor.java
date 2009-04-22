@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.editors.PLPartitionScanner;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;

@@ -53,7 +53,6 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.UIUtils;

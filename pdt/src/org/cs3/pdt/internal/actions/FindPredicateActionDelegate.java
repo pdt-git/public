@@ -41,26 +41,19 @@
 
 package org.cs3.pdt.internal.actions;
 
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCorePlugin;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
-import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -71,7 +64,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;

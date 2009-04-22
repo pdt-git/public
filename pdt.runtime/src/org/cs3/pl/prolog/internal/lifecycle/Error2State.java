@@ -1,6 +1,5 @@
 package org.cs3.pl.prolog.internal.lifecycle;
 
-import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class Error2State extends AbstractState{

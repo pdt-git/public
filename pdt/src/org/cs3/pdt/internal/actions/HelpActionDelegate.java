@@ -42,8 +42,6 @@
 package org.cs3.pdt.internal.actions;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
-import org.cs3.pl.common.Debug;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchWindow;

@@ -41,26 +41,20 @@
 
 package org.cs3.pdt.core.internal.natures;
 
-import java.io.File;
 import java.util.Map;
-import java.util.Set;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;

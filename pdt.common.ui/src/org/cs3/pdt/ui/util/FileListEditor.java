@@ -56,18 +56,14 @@
 package org.cs3.pdt.ui.util;
 
 import java.io.File;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;

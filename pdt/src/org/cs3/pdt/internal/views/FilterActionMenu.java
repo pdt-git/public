@@ -5,12 +5,7 @@ package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.console.internal.views.SelectContextsAction;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologContextTracker;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Util;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;

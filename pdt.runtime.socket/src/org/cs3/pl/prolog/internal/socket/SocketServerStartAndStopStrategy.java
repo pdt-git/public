@@ -44,14 +44,12 @@
 package org.cs3.pl.prolog.internal.socket;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Date;
@@ -64,7 +62,6 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
 /**

@@ -55,11 +55,9 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.console.prolog.PrologConsoleService;
-
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class PrologConsolePlugin extends AbstractUIPlugin {

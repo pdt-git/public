@@ -41,22 +41,13 @@
 
 package org.cs3.pl.prolog.internal.socket;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -64,11 +55,9 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
 import org.cs3.pl.prolog.AsyncPrologSessionListener2;
 import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class AsyncSocketSession implements AsyncPrologSession {
 	

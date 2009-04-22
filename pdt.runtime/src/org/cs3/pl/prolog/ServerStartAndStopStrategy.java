@@ -41,8 +41,6 @@
 
 package org.cs3.pl.prolog;
 
-import java.io.IOException;
-import java.net.SocketException;
 
 
 /**

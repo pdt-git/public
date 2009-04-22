@@ -42,7 +42,6 @@
 package org.cs3.pl.metadata;
 
 import org.cs3.pl.cterm.CTerm;
-import org.eclipse.core.resources.IFile;
 
 /**@deprecated*/
 public class GoalData extends PrologElementData implements Goal {

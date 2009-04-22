@@ -50,7 +50,6 @@ import java.util.HashSet;
 import java.util.Vector;
 
 import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.search.ui.ISearchQuery;
@@ -62,8 +61,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
-
-import com.sun.org.apache.xalan.internal.xsltc.runtime.Hashtable;
 
 /**
  * @author rho

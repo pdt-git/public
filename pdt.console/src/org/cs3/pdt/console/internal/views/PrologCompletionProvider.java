@@ -48,13 +48,11 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PredicateData;
 import org.cs3.pl.prolog.PLUtil;

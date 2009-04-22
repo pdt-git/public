@@ -5,9 +5,7 @@ import java.util.HashSet;
 
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.LifeCycleHook3;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 
 public class AfterInitState extends AbstractState {
 
