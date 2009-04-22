@@ -47,9 +47,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.cs3.pl.common.Util;
-
 import junit.framework.TestCase;
+
+import org.cs3.pl.common.Util;
 
 /*
  * each test precedes a diagram spec that you can run through dot to

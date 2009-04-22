@@ -49,7 +49,6 @@ import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 
 public abstract class AbstractPrologInterface2 extends AbstractPrologInterface
 		implements PrologInterface2 {

@@ -43,7 +43,6 @@ package org.cs3.pl.console.prolog;
 
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
 
 public interface PrologConsole {
 	public ConsoleModel getModel();

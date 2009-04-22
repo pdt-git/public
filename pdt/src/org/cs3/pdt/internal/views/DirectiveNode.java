@@ -49,7 +49,6 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Directive;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.SourceLocation;

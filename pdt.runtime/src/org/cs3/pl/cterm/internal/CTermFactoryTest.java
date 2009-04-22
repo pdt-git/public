@@ -49,7 +49,6 @@ import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CString;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
-import org.cs3.pl.prolog.PLUtil;
 
 public class CTermFactoryTest extends TestCase {
 	

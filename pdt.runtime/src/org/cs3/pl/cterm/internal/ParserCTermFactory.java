@@ -65,9 +65,7 @@ import org.cs3.pl.cterm.internal.parser.ASTString;
 import org.cs3.pl.cterm.internal.parser.ASTVariable;
 import org.cs3.pl.cterm.internal.parser.CanonicalTermParser;
 import org.cs3.pl.cterm.internal.parser.Node;
-import org.cs3.pl.cterm.internal.parser.ParseException;
 import org.cs3.pl.cterm.internal.parser.SimpleNode;
-import org.cs3.pl.cterm.internal.parser.Token;
 
 public class ParserCTermFactory implements CTermFactory {
 

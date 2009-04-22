@@ -43,7 +43,6 @@
  */
 package org.cs3.pl.prolog;
 
-import org.cs3.pl.common.Debug;
 
 /**
  * A prolog exception is thrown when a prolog query

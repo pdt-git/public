@@ -41,9 +41,6 @@
 
 package org.cs3.pl.prolog;
 
-import java.io.IOException;
-
-import org.cs3.pl.common.OptionProvider;
 
 /**
  * Prolog Session for asynchronous queries.

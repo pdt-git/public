@@ -11,23 +11,11 @@
 
 package org.cs3.pdt.internal.search;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.cs3.pdt.internal.views.PEFNode;
-import org.cs3.pl.metadata.GoalData;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.search.ui.text.Match;
-
-import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
 
 
 

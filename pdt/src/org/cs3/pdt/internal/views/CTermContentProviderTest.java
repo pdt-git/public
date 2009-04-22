@@ -1,7 +1,8 @@
 package org.cs3.pdt.internal.views;
 
 import java.io.File;
-import java.util.Map;
+
+import junit.framework.TestCase;
 
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -12,8 +13,6 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
-
-import junit.framework.TestCase;
 
 public class CTermContentProviderTest extends TestCase {
 	final static String testdata = "testdata/testdata_00.pl";

@@ -1,12 +1,10 @@
 package org.cs3.pl.prolog;
 
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Option;
 
 public class AsyncPrologSessionProxy implements AsyncPrologSession {
 

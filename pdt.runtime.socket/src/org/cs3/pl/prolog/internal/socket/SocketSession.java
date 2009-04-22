@@ -43,23 +43,13 @@
  */
 package org.cs3.pl.prolog.internal.socket;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.Vector;
 
-import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.common.Util;
-import org.cs3.pl.cterm.CAtom;
-import org.cs3.pl.cterm.CString;
-import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
-import org.cs3.pl.cterm.CVariable;
 import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;

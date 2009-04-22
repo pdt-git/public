@@ -46,7 +46,6 @@ package org.cs3.pdt.core.internal.builder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.parser.LineBreakInfoProvider;
 import org.cs3.pl.parser.Problem;
@@ -58,8 +57,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 /**

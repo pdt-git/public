@@ -42,7 +42,6 @@
 package org.cs3.pl.common;
 
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Date;
 
 /**

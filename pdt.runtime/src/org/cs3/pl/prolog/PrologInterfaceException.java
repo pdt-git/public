@@ -43,7 +43,6 @@
  */
 package org.cs3.pl.prolog;
 
-import org.cs3.pl.common.Debug;
 
 /**
  * A PrologInterfaceException is thrown when a PrologInterface looses

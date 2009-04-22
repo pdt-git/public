@@ -45,7 +45,6 @@ package org.cs3.pdt.runtime.internal.preferences;
 
 import java.io.IOException;
 
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;

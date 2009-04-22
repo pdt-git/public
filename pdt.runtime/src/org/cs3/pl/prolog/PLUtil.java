@@ -41,7 +41,6 @@
 
 package org.cs3.pl.prolog;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,10 +55,8 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.CVariable;
 import org.cs3.pl.cterm.internal.ATermFactory;
-import org.cs3.pl.cterm.internal.ParserCTermFactory;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.

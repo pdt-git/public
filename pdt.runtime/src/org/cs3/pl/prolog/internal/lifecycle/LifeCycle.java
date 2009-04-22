@@ -1,17 +1,14 @@
 package org.cs3.pl.prolog.internal.lifecycle;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.LifeCycleHook3;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public abstract class LifeCycle {
 

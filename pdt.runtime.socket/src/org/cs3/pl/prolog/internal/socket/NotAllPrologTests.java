@@ -42,14 +42,14 @@
 package org.cs3.pl.prolog.internal.socket;
 
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.cs3.pl.prolog.tests.AsyncSocketSessionTest;
 import org.cs3.pl.prolog.tests.LazyStartupRaceTest;
 import org.cs3.pl.prolog.tests.SocketSessionTest;
 import org.cs3.pl.prolog.tests.SocketSessionThrowTest;
 import org.cs3.pl.prolog.tests.XpceTest;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 public class NotAllPrologTests {
 

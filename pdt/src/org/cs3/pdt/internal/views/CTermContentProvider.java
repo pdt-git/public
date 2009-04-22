@@ -41,12 +41,9 @@
 
 package org.cs3.pdt.internal.views;
 
-import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.IPrologEventDispatcher;

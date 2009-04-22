@@ -3,12 +3,6 @@ package org.cs3.pdt.runtime.internal;
 import java.io.Reader;
 import java.io.StringReader;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry.RegistryHandler;
-import org.xml.sax.InputSource;
-
 import junit.framework.TestCase;
 
 public class RegistryHandlerTest extends TestCase {

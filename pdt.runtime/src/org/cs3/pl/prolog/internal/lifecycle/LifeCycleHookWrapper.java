@@ -42,16 +42,10 @@
 package org.cs3.pl.prolog.internal.lifecycle;
 
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.concurrent.BlockingQueue;
 
-import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.LifeCycleHook2;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 
 public class LifeCycleHookWrapper {
 
