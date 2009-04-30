@@ -47,6 +47,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
+import org.cs3.pdt.console.internal.preferences.PreferenceConstants;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
@@ -57,7 +58,11 @@ import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.console.prolog.PrologConsoleService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class PrologConsolePlugin extends AbstractUIPlugin {
@@ -68,47 +73,7 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 
 	private void initOptions() {
 
-		options = new Option[] {
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_FONT, 
-						"Console Font",
-						"Font used in the Prolog Console view", 
-						Option.FONT,
-						JFaceResources.DEFAULT_FONT),
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_SHOW_COLORS,
-						"Show colors in console view ",
-						"If this flag is set, lines starting with special keywords are colored.",
-						SimpleOption.FLAG, "true"),
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_COLORS_THREESTARS,
-						"Allow Prefix of '***' for coloring",						
-						"If this flag is set, lines starting with '***' and '*** ' are colored",
-						SimpleOption.FLAG, "true"),						
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_COLOR_ERROR,
-						"Color for ERROR: (restart eclipse)",
-						"Color for lines which starts with 'ERROR:'", 
-						Option.COLOR,
-						"FF0000"),
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_COLOR_INFO,
-						"Color for INFO: (restart eclipse)",
-						"Color for lines which starts with 'INFO:'", 
-						Option.COLOR,
-						"0000FF"),
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_COLOR_WARNING,
-						"Color for WARNING: (restart eclipse)",
-						"Color for lines which starts with 'WARNING:'", 
-						Option.COLOR,
-						"DD720F"),
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_COLOR_DEBUG,
-						"Color for DEBUG: (restart eclipse)",
-						"Color for lines which starts with 'DEBUG:'", 
-						Option.COLOR,
-						"FF00FF"),
+		options = new Option[] {				
 				new SimpleOption(
 						PDTConsole.PREF_ENTER_FOR_BACKTRACKING,
 						"Use Enter Key for backtracking",
@@ -283,4 +248,7 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 		}
 		return errorMessageProvider;
 	}
+
+	
+	
 }

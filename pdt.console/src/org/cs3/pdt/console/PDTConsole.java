@@ -41,21 +41,18 @@
 
 package org.cs3.pdt.console;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+
 final public class PDTConsole {
 	public static final String CONSOLE_VIEW_ID="org.cs3.pdt.console.internal.views.PrologConsoleView";
     /*
      * the port on which the prolog console server is listening.
      */
     //public static final String PREF_CONSOLE_PORT = "pdt.console.port";
-	public static final String PREF_CONSOLE_FONT = "pdt.console.font";
-	
-	public static final String PREF_CONSOLE_SHOW_COLORS = "pdt.console.show_colors";
-	public static final String PREF_CONSOLE_COLOR_ERROR = "pdt.console.color_error";
-	public static final String PREF_CONSOLE_COLOR_INFO = "pdt.console.color_info";
-	public static final String PREF_CONSOLE_COLOR_WARNING = "pdt.console.color_warning";
-	public static final String PREF_CONSOLE_COLOR_DEBUG = "pdt.console.color_debug";
-	public static final String PREF_CONSOLE_COLORS_THREESTARS = "pdt.console.colors_threestars";
-	
+
+	// This Constants should be moved to .preferences.PreferenceConstants
 	public static final String PREF_CONSOLE_HISTORY_FILE = "pdt.console.history.file";
 	public static final String PREF_ENTER_FOR_BACKTRACKING = "pdt.console.enter.for.backtracking";
 	public static final String CONTRIB_PIF_SELECTOR_ID = "pdt.console.contribution.pifselector";
