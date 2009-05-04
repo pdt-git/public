@@ -140,10 +140,10 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private int startOfInput = 0;
 	private boolean enterSendsSemicolon;
 
-	final String PLACEHOLDER_WARNING = "WARNING:";
-	final String PLACEHOLDER_ERROR = "ERROR:";
-	final String PLACEHOLDER_DEBUG = "DEBUG:";
-	final String PLACEHOLDER_INFO = "INFO:";
+	final String PLACEHOLDER_WARNING = "WARNING";
+	final String PLACEHOLDER_ERROR = "ERROR";
+	final String PLACEHOLDER_DEBUG = "DEBUG";
+	final String PLACEHOLDER_INFO = "INFO";
 	final String PLACEHOLDER_SPACETAB = "  ";
 	final String PLACEHOLDER_THREESTARS = "***";
 
