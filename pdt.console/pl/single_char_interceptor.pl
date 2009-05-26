@@ -120,8 +120,10 @@ sci_load:-
 arch_lib_name(LibName):-
     current_prolog_flag(shared_object_extension,Ext),
     current_prolog_flag(arch,Arch),
+    current_prolog_flag(version,A),
+    (A<50700 -> Ver = 56 ; Ver = 57),
     sci_setting(cio_base_name,Base),
-    concat_atom([Base,Arch,Ext],'.',LibName).
+    concat_atom([Base,Ver,Arch,Ext],'.',LibName).
 
 
 lib_name(LibName):-
@@ -132,8 +134,10 @@ lib_name(LibName):-
        
 lib_name(LibName):- %fallback to "default" arch
     current_prolog_flag(shared_object_extension,Ext),
+    current_prolog_flag(version,A),
+    (A<50700 -> Ver = 56 ; Ver = 57),
     sci_setting(cio_base_name,Base),
-    concat_atom([Base,Ext],'.',LibName).
+    concat_atom([Base,Ver,Ext],'.',LibName).
        
   
   
