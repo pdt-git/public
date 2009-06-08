@@ -42,7 +42,7 @@
 package org.cs3.pdt.console.internal.views;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.console.preferences.fontcolor.PreferenceConstants;
+import org.cs3.pdt.console.preferences.PreferenceConstants;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;

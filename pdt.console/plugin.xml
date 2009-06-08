@@ -56,26 +56,23 @@
 	</extension>-->
 	<extension
        point="org.eclipse.core.runtime.preferences">
-    <initializer class="org.cs3.pdt.console.preferences.Initializer"/>
     <initializer
-          class="org.cs3.pdt.console.preferences.fontcolor.PreferenceInitializer">
-    </initializer>
-    <initializer
-          class="org.cs3.pdt.console.preferences.fontcolor.PreferenceInitializer">
+          class="org.cs3.pdt.console.preferences.PreferenceInitializer">
     </initializer>
  </extension>
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.console.preferences.PreferencePage"
-          id="org.cs3.pdt.console.internal.preferences.PDTPreferencePage"
-          name="Prolog Console"/>
-    <page
-          category="org.cs3.pdt.console.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.console.preferences.fontcolor.PreferencePage"
-          id="org.cs3.pdt.console.internal.preferences.PreferencePageFontAndColor"
+          category="org.cs3.pdt.console.preferences.PreferencePageMain"
+          class="org.cs3.pdt.console.preferences.PreferencePageFontColor"
+          id="org.cs3.pdt.console.preferences.PreferencePageFontAndColor"
           name="Console Font and Color">
+    </page>
+    <page
+    	  category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.pdt.console.preferences.PreferencePageMain"
+          id="org.cs3.pdt.console.preferences.PreferencePageMain"
+          name="Prolog Console">
     </page>
  </extension>
     <extension

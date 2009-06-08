@@ -45,9 +45,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
+import org.cs3.pdt.console.preferences.PreferenceConstants;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerListener;
 import org.cs3.pdt.runtime.PrologContextTrackerService;
@@ -138,7 +138,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 					tracker.addPrologContextTrackerListener(SelectContextsAction.this);
 					trackerActivated(tracker);
 				}
-				PrologConsolePlugin.getDefault().setPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,Util.splice(getActiveTrackers(),","));
+				PrologConsolePlugin.getDefault().setPreferenceValue(PreferenceConstants.PREF_CONTEXT_TRACKERS,Util.splice(getActiveTrackers(),","));
 				setChecked(getActiveTrackers().contains(trackerId));
 			}
 		};
@@ -272,7 +272,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	Set getActiveTrackers() {
 		if(activeTrackers==null){
 			activeTrackers=new HashSet();			
-			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);
+			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PreferenceConstants.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);
 			PrologContextTrackerService trackerService = PrologRuntimePlugin.getDefault().getContextTrackerService();
 			for (Iterator iter = activeTrackers.iterator(); iter.hasNext();) {
 				String id = (String) iter.next();				

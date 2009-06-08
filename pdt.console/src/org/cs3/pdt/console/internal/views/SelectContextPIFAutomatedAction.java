@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
+import org.cs3.pdt.console.preferences.PreferenceConstants;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerListener;
 import org.cs3.pdt.runtime.PrologContextTrackerService;
@@ -187,7 +187,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 						trackerActivated(trackers[i]);
 
 						PrologConsolePlugin.getDefault().setPreferenceValue(
-								PDTConsole.PREF_CONTEXT_TRACKERS,
+								PreferenceConstants.PREF_CONTEXT_TRACKERS,
 								Util.splice(getActiveTrackers(), ","));
 
 					}
@@ -206,7 +206,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 						}
 
 						PrologConsolePlugin.getDefault().setPreferenceValue(
-								PDTConsole.PREF_CONTEXT_TRACKERS,
+								PreferenceConstants.PREF_CONTEXT_TRACKERS,
 								Util.splice(getActiveTrackers(), ","));
 					}
 					setImageDescriptor(ImageRepository
@@ -238,7 +238,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 					trackerActivated(tracker);
 				}
 				PrologConsolePlugin.getDefault().setPreferenceValue(
-						PDTConsole.PREF_CONTEXT_TRACKERS,
+						PreferenceConstants.PREF_CONTEXT_TRACKERS,
 						Util.splice(getActiveTrackers(), ","));
 				setChecked(getActiveTrackers().contains(trackerId));
 			}
@@ -258,7 +258,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		}
 		// remove hidden subscriptions from the set
 		boolean showHidden = "true".equals(PrologConsolePlugin.getDefault()
-				.getPreferenceValue(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,
+				.getPreferenceValue(PreferenceConstants.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,
 						"false"));
 		if (!showHidden) {
 			for (Iterator it = subs.iterator(); it.hasNext();) {
@@ -326,7 +326,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		if (activeTrackers == null) {
 			activeTrackers = new HashSet();
 			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(
-					PDTConsole.PREF_CONTEXT_TRACKERS, ""), ",", activeTrackers);
+					PreferenceConstants.PREF_CONTEXT_TRACKERS, ""), ",", activeTrackers);
 			PrologContextTrackerService trackerService = PrologRuntimePlugin
 					.getDefault().getContextTrackerService();
 			for (Iterator iter = activeTrackers.iterator(); iter.hasNext();) {

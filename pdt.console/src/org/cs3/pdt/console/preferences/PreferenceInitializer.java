@@ -1,6 +1,10 @@
-package org.cs3.pdt.console.preferences.fontcolor;
+package org.cs3.pdt.console.preferences;
+
+import java.io.File;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.runtime.PrologContextTracker;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -22,15 +26,43 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
+		
+		initializeDefaultPreferences_Main(store);
+		initializeDefaultPreferences_FontAndColor(store);		
+		
+	}
+	
+	
+	private void initializeDefaultPreferences_Main(IPreferenceStore store){
+		store.setDefault(PreferenceConstants.PREF_TIMEOUT, 15000);
+		store.setDefault(PreferenceConstants.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, false);
+		store.setDefault(PreferenceConstants.PREF_ENTER_FOR_BACKTRACKING, false);
+		store.setDefault(PreferenceConstants.PREF_ENABLE_CONSOLE_VOODOO, true);
+		
+		String historyFile = System.getProperty("user.home") + File.separator + ".prolog_console_history";		
+		store.setDefault(PreferenceConstants.PREF_CONSOLE_HISTORY_FILE,	historyFile);
+			
+		
+		store.setDefault(PreferenceConstants.PREF_CONTEXT_TRACKERS,	getDefaultContextTrackers());
+	}
+	
+	public String getDefaultContextTrackers() {
 
-		// public static final Font DEFAULT_CONSOLE_FONT = "pdt.console.font";
-		// public static final Boolean DEFAULT_CONSOLE_SHOW_COLORS = true;
-		// public static final int DEFAULT_CONSOLE_COLOR_ERROR = SWT.COLOR_RED;
-		// public static final int DEFAULT_CONSOLE_COLOR_WARNING =
-		// SWT.COLOR_DARK_YELLOW;
-		// public static final int DEFAULT_CONSOLE_COLOR_INFO = SWT.COLOR_BLUE;
-		// public static final int DEFAULT_CONSOLE_COLOR_DEBUG =
-		// SWT.COLOR_MAGENTA;
+		PrologContextTracker[] trackers = PrologRuntimePlugin
+				.getDefault().getContextTrackerService()
+				.getContextTrackers();
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < trackers.length; i++) {
+			PrologContextTracker tracker = trackers[i];
+			if (i > 0) {
+				sb.append(',');
+			}
+			sb.append(tracker.getId());
+		}
+		return sb.toString();
+	}
+	
+	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){	
 
 		FontData fd = new FontData("Courier New", 10, SWT.NORMAL);
 		PreferenceConverter.setDefault(store, PreferenceConstants.PREF_CONSOLE_FONT, fd);

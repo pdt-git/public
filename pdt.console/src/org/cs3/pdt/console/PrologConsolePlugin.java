@@ -47,7 +47,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
-import org.cs3.pdt.console.preferences.fontcolor.PreferenceConstants;
+import org.cs3.pdt.console.preferences.PreferenceConstants;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
@@ -71,110 +71,6 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 
 	private ResourceBundle resourceBundle;
 
-	private void initOptions() {
-
-		options = new Option[] {				
-				new SimpleOption(
-						PDTConsole.PREF_ENTER_FOR_BACKTRACKING,
-						"Use Enter Key for backtracking",
-						"If enabled, the enter key sends a semicolon(';') when\n"
-								+ "while the console is in 'get_single_char/1'-mode, \n"
-								+ "e.g., when backtracking over the solutions to a goal.",
-						Option.FLAG, "false"),
-				new SimpleOption(
-						PDTConsole.PREF_ENABLE_CONSOLE_VOODOO,
-						"intercept get_single_char/1 calls",
-						"When enabled, the console view will be able to detect\n"
-								+ "whether the user input stream is read from via get_single_char/1"
-								+ "(e.g. when backtracking through query results).\n"
-								+ "In those situations, the console view will emulate the "
-								+ "unbuffered behaviour of the SWI-Prolog default terminal/plwin "
-								+ "interface. This works just fine in most cases, but there have been "
-								+ "reports of problems when using Edinburgh-style io predicates.\n"
-								+ "If you get unexpected io behaviour from "
-								+ "your application, disabling this flag may help.",
-						Option.FLAG, "true"),
-				new SimpleOption(
-						PDTConsole.PREF_CONSOLE_HISTORY_FILE,
-						"History File",
-						"The Prolog Console uses this to save its command history.\n"
-								+ "Just leave it empty if you do not want the command history to be persistent.",
-						Option.FILE, System.getProperty("user.home")
-								+ File.separator + ".prolog_console_histroy") {
-					public String validate(String value) {
-						return ensureFileExists(value, "History File");
-					}
-				},
-				new SimpleOption(
-						PDTConsole.PREF_TIMEOUT,
-						"Connect Timeout",
-						"Maximum time in milliseconds to wait for the console server to come up.",
-						SimpleOption.NUMBER, "15000"),
-				new SimpleOption(
-						PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,
-						"Show Hidden Processes",
-						"If this flag is set, processes will be shown in the console even if all subscriptions are marked as invisible.",
-						SimpleOption.FLAG, "false"),
-				new SimpleOption(
-						PDTConsole.PREF_CONTEXT_TRACKERS,
-						"active context trackers",
-						"comma-separated list of trackers the console does follow",
-						SimpleOption.STRING, null) {
-					public boolean isVisible() {
-						return false;
-					}
-
-					public String getDefault() {
-
-						PrologContextTracker[] trackers = PrologRuntimePlugin
-								.getDefault().getContextTrackerService()
-								.getContextTrackers();
-						StringBuffer sb = new StringBuffer();
-						for (int i = 0; i < trackers.length; i++) {
-							PrologContextTracker tracker = trackers[i];
-							if (i > 0) {
-								sb.append(',');
-							}
-							sb.append(tracker.getId());
-						}
-						return sb.toString();
-					}
-				},
-			 };
-
-	}
-
-	private String ensureFileExists(String value, String label) {
-		if (value == null) {
-			return label + "must not be null";
-		}
-		if (value.length() == 0) {
-			return label + " must not be empty";
-		}
-		File f = new File(value);
-		if (!f.isAbsolute()) {
-			return label + " mus be an absolute path";
-		}
-		if (f.isDirectory()) {
-			return label + " exists, but is a directory";
-		}
-		if (!f.exists()) {
-			try {
-				if (!f.createNewFile()) {
-
-				}
-			} catch (IOException e) {
-				Debug.report(e);
-				return "could not create: " + label;
-			}
-
-		}
-		if (!f.canWrite()) {
-			return label + " exists, but is not writable";
-		}
-		return "";
-	}
-
 	// The shared instance.
 	private static PrologConsolePlugin plugin;
 
@@ -185,19 +81,11 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
-	public Option[] getOptions() {
-		if (this.options == null) {
-			initOptions();
-		}
-		return this.options;
-	}
-
 	public PrologConsolePlugin() {
 		super();
 		plugin = this;
 		try {
-			resourceBundle = ResourceBundle
-					.getBundle("prg.cs3.pdt.PDTPluginResources");
+			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
@@ -249,6 +137,4 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 		return errorMessageProvider;
 	}
 
-	
-	
 }
