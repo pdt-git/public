@@ -1,4 +1,4 @@
-package org.cs3.pdt.console.internal.preferences;
+package org.cs3.pdt.console.preferences.fontcolor;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
