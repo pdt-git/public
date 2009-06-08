@@ -50,17 +50,9 @@ final public class PDTConsole {
     /*
      * the port on which the prolog console server is listening.
      */
-    //public static final String PREF_CONSOLE_PORT = "pdt.console.port";
 
-	// This Constants should be moved to .preferences.PreferenceConstants
-	public static final String PREF_CONSOLE_HISTORY_FILE = "pdt.console.history.file";
-	public static final String PREF_ENTER_FOR_BACKTRACKING = "pdt.console.enter.for.backtracking";
 	public static final String CONTRIB_PIF_SELECTOR_ID = "pdt.console.contribution.pifselector";
-	public static final String PREF_TIMEOUT = "pdt.console.timeout";
 	public static final String PL_LIBRARY = "pdt.console.library";
-	public static final String PREF_CONTEXT_TRACKERS = "pdt.console.trackers";
-	public static final String PREF_ENABLE_CONSOLE_VOODOO = "pdt.console.enable_voodoo";
-	public static final String PREF_SHOW_HIDDEN_SUBSCRIPTIONS = "pdt.console.show_hidden";
 	public static final String COMMAND_PASTE_FILENAME = "pdt.console.paste_filename";
 	public static final String CONTEXT_USING_CONSOLE_VIEW = "org.cs3.pdt.console";
 	public static final int ERR_UNKNOWN = -1;
