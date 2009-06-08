@@ -1,4 +1,4 @@
-package org.cs3.pdt.console.internal.preferences;
+package org.cs3.pdt.console.preferences.fontcolor;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -24,7 +24,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * preferences can be accessed directly via the preference store.
  */
 
-public class PreferencePageFontAndColor extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	private ColorFieldEditor cfe_error;
 	private ColorFieldEditor cfe_warn;
@@ -33,7 +33,7 @@ public class PreferencePageFontAndColor extends FieldEditorPreferencePage implem
 	private BooleanFieldEditor bfe_inter_start;
 	private BooleanFieldEditorWithAccessToCheckBox bfe_showColors;	
 	
-	public PreferencePageFontAndColor() {
+	public PreferencePage() {
 		super(GRID);
 		setPreferenceStore(PrologConsolePlugin.getDefault().getPreferenceStore());
 		setDescription("Console font and color preferences");

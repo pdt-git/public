@@ -1,4 +1,4 @@
-package org.cs3.pdt.console.internal.preferences;
+package org.cs3.pdt.console.preferences.fontcolor;
 
 /**
  * Constant definitions for plug-in preferences
