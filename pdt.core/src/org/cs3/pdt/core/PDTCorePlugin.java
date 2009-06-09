@@ -185,12 +185,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 	// }
 	// return prologHelper;
 	// }
-	public Option[] getOptions() {
-		if (options == null) {
-			initOptions();
-		}
-		return this.options;
-	}
+
 
 	/**
 	 * look up a preference value.
@@ -245,67 +240,6 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 			return label + " exists, but is not writable";
 		}
 		return "";
-	}
-
-	/**
-	 * 
-	 */
-	private void initOptions() {
-		String fileSep = File.separator;
-
-		String location = "";
-		try {
-			location = getLocation();
-		} catch (IOException e) {
-			Debug.report(e);
-			Debug.error("Could not find plugin installation dir.");
-		}
-
-		options = new Option[] {
-				
-				
-				new SimpleOption(
-						PDTCore.PREF_SOURCE_PATH_DEFAULT,
-						"Default Source Path",
-						"The default value for the source path of prolog projects.",
-						Option.STRING, "/"),
-				new SimpleOption(
-						PDTCore.PREF_METADATA_PIF_KEY_DEFAULT,
-						"Default Meta Data PrologInterface",
-						"The default value for the Metadata PrologInterface property of prolog projects.",
-						Option.STRING, "%project%-meta"),
-				new SimpleOption(
-						PDTCore.PREF_RUNTIME_PIF_KEY_DEFAULT,
-						"Default Runtime PrologInterface",
-						"The default value for the Runtime PrologInterface property of prolog projects.",
-						Option.STRING, "%project%-PDT"),
-				new SimpleOption(
-						PDTCore.PREF_CONVERT_CHARACTER_OFFSETS,
-						"Convert character offsets",
-						"If true, character offsets read by the prolog core will be interpreted as "
-								+ "logical offsets (e.g. windows line-endings counting as a single character), and "
-								+ "will be converted to physical offsets by the ui.",
-						Option.FLAG, "true"),
-
-				new SimpleOption(
-						PDTCore.PREF_AUTO_CONSULT,
-						"Enable Auto-Consult (EXPERIMENTAL)",
-						"If this flag is set, the PDT will automaticaly (re-)consult any source file,"
-								+ "unless it is explicitly exluded from Auto-Consult. Note that this is an experimental "
-								+ "feature and defaults to \"false\" for 0.1.x",
-						Option.FLAG, "false"),
-				new SimpleOption(
-						PDTCore.PREF_IGNORE_HIDDEN_LIBS,
-						"Ignore Hidden Libraries",
-						"If this flag is set, the PDT will ignore files that are marked as hidden when looking up " +
-						"predicates and the like. For example, the PDT marks all of its own source code libraries as hidden. " +
-						"Enabling this flag is usefull if you want to edit different versions of the PDT source " +
-						"files than the once the PDT is currently using itself.",
-						Option.FLAG,
-						"false")
-
-		};
-
 	}
 
 	/**
