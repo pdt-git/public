@@ -3,6 +3,7 @@ package org.cs3.pdt.console.preferences;
 import java.io.File;
 import java.io.IOException;
 
+import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -46,7 +47,7 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 		//If enabled, the enter key sends a semicolon(';') when\n
 		//while the console is in 'get_single_char/1'-mode, \n
 		//e.g., when backtracking over the solutions to a goal.		
-		addField(new BooleanFieldEditor(PreferenceConstants.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
 		
 		//When enabled, the console view will be able to detect\n
 		//whether the user input stream is read from via get_single_char/1
@@ -57,20 +58,20 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 		//reports of problems when using Edinburgh-style io predicates.\n
 		//If you get unexpected io behaviour from 
 		//your application, disabling this flag may help.
-		addField(new BooleanFieldEditor(PreferenceConstants.PREF_ENABLE_CONSOLE_VOODOO,"intercept get_single_char/1 calls",getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PDTConsole.PREF_ENABLE_CONSOLE_VOODOO,"intercept get_single_char/1 calls",getFieldEditorParent()));
 
 		//The Prolog Console uses this to save its command history.\n
 		//Just leave it empty if you do not want the command history to be persistent.
-		addField(new FileFieldEditorWithEnsureFileExists(PreferenceConstants.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
+		addField(new FileFieldEditorWithEnsureFileExists(PDTConsole.PREF_CONSOLE_HISTORY_FILE,"History File",getFieldEditorParent()));
 		
 		//Maximum time in milliseconds to wait for the console server to come up.
-		addField(new IntegerFieldEditor(PreferenceConstants.PREF_TIMEOUT,"Connect Timeout",getFieldEditorParent()));
+		addField(new IntegerFieldEditor(PDTConsole.PREF_TIMEOUT,"Connect Timeout",getFieldEditorParent()));
 		
 		//If this flag is set, processes will be shown in the console even if all subscriptions are marked as invisible.
-		addField(new BooleanFieldEditor(PreferenceConstants.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Show Hidden Processes",getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Show Hidden Processes",getFieldEditorParent()));
 		
 		//comma-separated list of trackers the console does follow
-		StringFieldEditor sfe = new StringFieldEditor(PreferenceConstants.PREF_CONTEXT_TRACKERS,"Active context trackers",getFieldEditorParent());
+		StringFieldEditor sfe = new StringFieldEditor(PDTConsole.PREF_CONTEXT_TRACKERS,"Active context trackers",getFieldEditorParent());
 		addField(sfe);
 		// Disabled, because Lukas set it in his implementation to invisible
 		sfe.setEnabled(false, getFieldEditorParent()); 

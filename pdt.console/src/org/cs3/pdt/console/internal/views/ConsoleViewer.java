@@ -41,8 +41,8 @@
 
 package org.cs3.pdt.console.internal.views;
 
+import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.console.preferences.PreferenceConstants;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
@@ -205,21 +205,21 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
 
 			// Font
-			FontData fd = PreferenceConverter.getFontData(store, PreferenceConstants.PREF_CONSOLE_FONT);
+			FontData fd = PreferenceConverter.getFontData(store, PDTConsole.PREF_CONSOLE_FONT);
 			control.setFont(new Font(display, fd));
 
 			// Coloring
-			RGB color_err = PreferenceConverter.getColor(store, PreferenceConstants.PREF_CONSOLE_COLOR_ERROR);
-			RGB color_warn = PreferenceConverter.getColor(store, PreferenceConstants.PREF_CONSOLE_COLOR_WARNING);
-			RGB color_info = PreferenceConverter.getColor(store, PreferenceConstants.PREF_CONSOLE_COLOR_INFO);
-			RGB color_dbg = PreferenceConverter.getColor(store, PreferenceConstants.PREF_CONSOLE_COLOR_DEBUG);
+			RGB color_err = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_ERROR);
+			RGB color_warn = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_WARNING);
+			RGB color_info = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_INFO);
+			RGB color_dbg = PreferenceConverter.getColor(store, PDTConsole.PREF_CONSOLE_COLOR_DEBUG);
 
 			COLOR_ERROR = new Color(display, color_err);
 			COLOR_WARNING = new Color(display, color_warn);
 			COLOR_INFO = new Color(display, color_info);
 			COLOR_DEBUG = new Color(display, color_dbg);
 			
-			coloringEnabled = store.getBoolean(PreferenceConstants.PREF_CONSOLE_SHOW_COLORS); 
+			coloringEnabled = store.getBoolean(PDTConsole.PREF_CONSOLE_SHOW_COLORS); 
 
 		}
 	}
@@ -613,7 +613,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		if (line.startsWith(" " + start, 0)) {
 			return true;
 		}
-		if (Boolean.valueOf(PrologConsolePlugin.getDefault().getPreferenceValue(PreferenceConstants.PREF_CONSOLE_COLORS_THREESTARS, "true")).booleanValue()) {
+		if (Boolean.valueOf(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "true")).booleanValue()) {
 			if (line.startsWith(PLACEHOLDER_THREESTARS + start, 0)) {
 				return true;
 			}

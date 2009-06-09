@@ -47,7 +47,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
-import org.cs3.pdt.console.preferences.PreferenceConstants;
+
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
