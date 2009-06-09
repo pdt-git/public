@@ -54,7 +54,6 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.console.preferences.PreferenceConstants;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologContextTrackerEvent;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
@@ -686,10 +685,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 
 	private File getHistoryFile() {
 		String value = PrologConsolePlugin.getDefault().getPreferenceValue(
-				PreferenceConstants.PREF_CONSOLE_HISTORY_FILE, null);
+				PDTConsole.PREF_CONSOLE_HISTORY_FILE, null);
 		if (value == null) {
 			throw new NullPointerException("Required property \""
-					+ PreferenceConstants.PREF_CONSOLE_HISTORY_FILE
+					+ PDTConsole.PREF_CONSOLE_HISTORY_FILE
 					+ "\" was not specified.");
 		}
 		return new File(value);
@@ -986,7 +985,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		title.setText(key);
 		boolean useEnter = Boolean.valueOf(
 				PrologConsolePlugin.getDefault().getPreferenceValue(
-						PreferenceConstants.PREF_ENTER_FOR_BACKTRACKING, "false"))
+						PDTConsole.PREF_ENTER_FOR_BACKTRACKING, "false"))
 				.booleanValue();
 
 		viewer.setEnterSendsSemicolon(useEnter);

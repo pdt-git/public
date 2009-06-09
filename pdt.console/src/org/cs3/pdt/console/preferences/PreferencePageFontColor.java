@@ -1,5 +1,6 @@
 package org.cs3.pdt.console.preferences;
 
+import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ColorFieldEditor;
@@ -82,14 +83,14 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
 	public void createFieldEditors() {
 		
 		
-		addField(new FontFieldEditor(PreferenceConstants.PREF_CONSOLE_FONT, "Console font:", getFieldEditorParent()));
+		addField(new FontFieldEditor(PDTConsole.PREF_CONSOLE_FONT, "Console font:", getFieldEditorParent()));
 
-		bfe_showColors = new BooleanFieldEditorWithAccessToCheckBox(PreferenceConstants.PREF_CONSOLE_SHOW_COLORS, "Show colors", getFieldEditorParent());
-		cfe_error = new ColorFieldEditor(PreferenceConstants.PREF_CONSOLE_COLOR_ERROR, "Error color", getFieldEditorParent());
-		cfe_warn = new ColorFieldEditor(PreferenceConstants.PREF_CONSOLE_COLOR_WARNING, "Warning color", getFieldEditorParent());
-		cfe_info = new ColorFieldEditor(PreferenceConstants.PREF_CONSOLE_COLOR_INFO, "Information color", getFieldEditorParent());
-		cfe_dbg = new ColorFieldEditor(PreferenceConstants.PREF_CONSOLE_COLOR_DEBUG, "Debug color", getFieldEditorParent());
-		bfe_inter_start = new BooleanFieldEditor(PreferenceConstants.PREF_CONSOLE_COLORS_THREESTARS, "Interprete *** as 'Information' ", getFieldEditorParent());
+		bfe_showColors = new BooleanFieldEditorWithAccessToCheckBox(PDTConsole.PREF_CONSOLE_SHOW_COLORS, "Show colors", getFieldEditorParent());
+		cfe_error = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_ERROR, "Error color", getFieldEditorParent());
+		cfe_warn = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_WARNING, "Warning color", getFieldEditorParent());
+		cfe_info = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_INFO, "Information color", getFieldEditorParent());
+		cfe_dbg = new ColorFieldEditor(PDTConsole.PREF_CONSOLE_COLOR_DEBUG, "Debug color", getFieldEditorParent());
+		bfe_inter_start = new BooleanFieldEditor(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, "Interprete *** as 'Information' ", getFieldEditorParent());
 	
 		addField(bfe_showColors);
 		final Button checkBox = bfe_showColors.getCheckBox(getFieldEditorParent());
@@ -115,7 +116,7 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
 
 		// Werte am Anfang initialisieren
 		IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
-		Boolean show_colors = store.getBoolean(PreferenceConstants.PREF_CONSOLE_SHOW_COLORS);		
+		Boolean show_colors = store.getBoolean(PDTConsole.PREF_CONSOLE_SHOW_COLORS);		
 		initColorFieldEditors(show_colors);
 		
 

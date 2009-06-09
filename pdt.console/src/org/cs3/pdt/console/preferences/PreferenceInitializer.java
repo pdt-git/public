@@ -2,6 +2,7 @@ package org.cs3.pdt.console.preferences;
 
 import java.io.File;
 
+import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.runtime.PrologContextTracker;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
@@ -34,16 +35,16 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	
 	
 	private void initializeDefaultPreferences_Main(IPreferenceStore store){
-		store.setDefault(PreferenceConstants.PREF_TIMEOUT, 15000);
-		store.setDefault(PreferenceConstants.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, false);
-		store.setDefault(PreferenceConstants.PREF_ENTER_FOR_BACKTRACKING, false);
-		store.setDefault(PreferenceConstants.PREF_ENABLE_CONSOLE_VOODOO, true);
+		store.setDefault(PDTConsole.PREF_TIMEOUT, 15000);
+		store.setDefault(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, false);
+		store.setDefault(PDTConsole.PREF_ENTER_FOR_BACKTRACKING, false);
+		store.setDefault(PDTConsole.PREF_ENABLE_CONSOLE_VOODOO, true);
 		
 		String historyFile = System.getProperty("user.home") + File.separator + ".prolog_console_history";		
-		store.setDefault(PreferenceConstants.PREF_CONSOLE_HISTORY_FILE,	historyFile);
+		store.setDefault(PDTConsole.PREF_CONSOLE_HISTORY_FILE,	historyFile);
 			
 		
-		store.setDefault(PreferenceConstants.PREF_CONTEXT_TRACKERS,	getDefaultContextTrackers());
+		store.setDefault(PDTConsole.PREF_CONTEXT_TRACKERS,	getDefaultContextTrackers());
 	}
 	
 	public String getDefaultContextTrackers() {
@@ -65,20 +66,20 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){	
 
 		FontData fd = new FontData("Courier New", 10, SWT.NORMAL);
-		PreferenceConverter.setDefault(store, PreferenceConstants.PREF_CONSOLE_FONT, fd);
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_FONT, fd);
 
-		store.setDefault(PreferenceConstants.PREF_CONSOLE_SHOW_COLORS, true);
+		store.setDefault(PDTConsole.PREF_CONSOLE_SHOW_COLORS, true);
 
 		Color color_err = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 		Color color_warn = new Color(Display.getDefault(),255,128,50);
 		Color color_info = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
 		Color color_dbg = Display.getDefault().getSystemColor(SWT.COLOR_MAGENTA);
-		PreferenceConverter.setDefault(store, PreferenceConstants.PREF_CONSOLE_COLOR_ERROR, color_err.getRGB());
-		PreferenceConverter.setDefault(store, PreferenceConstants.PREF_CONSOLE_COLOR_WARNING, color_warn.getRGB());
-		PreferenceConverter.setDefault(store, PreferenceConstants.PREF_CONSOLE_COLOR_INFO, color_info.getRGB());
-		PreferenceConverter.setDefault(store, PreferenceConstants.PREF_CONSOLE_COLOR_DEBUG, color_dbg.getRGB());
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_ERROR, color_err.getRGB());
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_WARNING, color_warn.getRGB());
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_INFO, color_info.getRGB());
+		PreferenceConverter.setDefault(store, PDTConsole.PREF_CONSOLE_COLOR_DEBUG, color_dbg.getRGB());
 
-		store.setDefault(PreferenceConstants.PREF_CONSOLE_COLORS_THREESTARS, true);
+		store.setDefault(PDTConsole.PREF_CONSOLE_COLORS_THREESTARS, true);
 
 	}
 
