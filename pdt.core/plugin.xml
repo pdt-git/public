@@ -28,15 +28,18 @@
    </requires>
 	<extension
        point="org.eclipse.core.runtime.preferences">
-    <initializer class="org.cs3.pdt.core.internal.preferences.Initializer"/>
+    <initializer
+          class="org.cs3.pdt.core.preferences.PreferenceInitializer">
+    </initializer>
  </extension>
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.core.internal.preferences.PreferencePage"
-          id="org.cs3.pdt.core.internal.preferences.PDTPreferencePage"
-          name="Prolog Core"/>
+          class="org.cs3.pdt.core.preferences.PreferencePage"
+          id="org.cs3.pdt.core.preferences.PreferencePage"
+          name="Prolog Core">
+    </page>
  </extension>
  <extension point="org.eclipse.team.core.fileTypes">
 	        <fileTypes extension="pl" type="text"/>

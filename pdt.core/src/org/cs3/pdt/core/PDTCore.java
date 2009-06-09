@@ -57,8 +57,6 @@ public class PDTCore {
 	 * </code>
 	 */
 	public final static String NATURE_ID = "org.cs3.pdt.core.PDTProjectNature";
-	
-	
 	public static final String PROLOG_BUILDER_ID = "org.cs3.pdt.core.PrologBuilder";
 	
 	/**
