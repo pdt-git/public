@@ -67,7 +67,7 @@ import org.osgi.framework.BundleContext;
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin  {
+public class PDTPlugin extends AbstractUIPlugin {
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -96,13 +96,9 @@ public class PDTPlugin extends AbstractUIPlugin  {
 
 	// Resource bundle.
 	private ResourceBundle resourceBundle;
-
 	private Object root;
-
 	private DefaultResourceFileLocator rootLocator;
-
 	private Option[] options;
-
 	private DefaultErrorMessageProvider errorMessageProvider;
 
 	/**
@@ -112,8 +108,7 @@ public class PDTPlugin extends AbstractUIPlugin  {
 		super();
 		plugin = this;
 		try {
-			resourceBundle = ResourceBundle
-					.getBundle("prg.cs3.pdt.PDTPluginResources");
+			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
@@ -164,7 +159,7 @@ public class PDTPlugin extends AbstractUIPlugin  {
 	public void setPreferenceValue(String key, String value) {
 		getPreferenceStore().setValue(key, value);
 	}
-	
+
 	/**
 	 * 
 	 */
@@ -185,8 +180,7 @@ public class PDTPlugin extends AbstractUIPlugin  {
 		if (logFileName != null && !logFileName.equals("")) {
 			System.out.println("debug output is written to: " + logFileName);
 			File logFile = new File(logFileName);
-			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(
-					new FileOutputStream(logFile, true));
+			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(logFile, true));
 			Debug.setOutputStream(new PrintStream(bufferedOutputStream));
 		} else {
 			Debug.setOutputStream(System.err);
@@ -206,99 +200,13 @@ public class PDTPlugin extends AbstractUIPlugin  {
 		}
 	}
 
-	public Option[] getOptions() {
-		if (options == null) {
-			initOptions();
-		}
-		return this.options;
-	}
-
-	/**
-	 * 
-	 */
-	private void initOptions() {
-		String fileSep = File.separator;
-		String location = "";
-		try {
-			location = getLocation();
-		} catch (IOException e) {
-			Debug.report(e);
-			Debug.error("Could not find plugin installation dir.");
-		}
-
-		options = new Option[] {
-				new SimpleOption(PDT.PREF_DEBUG_LEVEL, "Debug Level",
-						"Determines the verbosity of the debug log file.",
-						Option.ENUM, "WARNING", new String[][] {
-								{ "error", "ERROR" }, { "warning", "WARNING" },
-								{ "info", "INFO" }, { "debug", "DEBUG" } }),
-				new SimpleOption(
-						PDT.PREF_CLIENT_LOG_FILE,
-						"Log file location",
-						"A file to which debug output of the PDT will be writen",
-						Option.FILE, location + fileSep + "pdt.log"),
-				new SimpleOption(
-						PDT.PREF_ADD_NATURE_ON_OPEN,
-						"Automatically add Prolog Nature when opening pl files",
-						"When i open a file in the prolog editor that does not belong to " +
-						"a prolog project, ask if i want to add the prolog nature.",
-						Option.ENUM, MessageDialogWithToggle.PROMPT, new String[][] {
-								{ "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
-								{ "ask", MessageDialogWithToggle.PROMPT }}),
-				new SimpleOption(
-						PDT.PREF_SWITCH_TO_DEFAULT_PIF,
-						"Switch to default runtime before consulting",
-						"When i consult a prolog file, but the active console view is not connected to the default runtime" +
-						"of the respective prolog project, should i switch to the default runtime first?",
-						Option.ENUM, MessageDialogWithToggle.PROMPT, new String[][] {
-								{ "always", MessageDialogWithToggle.ALWAYS }, { "never", MessageDialogWithToggle.NEVER },
-								{ "ask", MessageDialogWithToggle.PROMPT }}),
-				new SimpleOption(
-						PDT.PREF_OUTLINE_FILTERS,
-						"Active Filters for the Prolog Outline",
-						"A comma separated list of filter ids that should be activated at startup",
-						Option.STRING, "hide_subterms"
-				){
-					public boolean isVisible() {
-					
-						return false;
-					}
-					
-				},new SimpleOption(
-						PDT.PREF_OUTLINE_SORT,
-						"Whether the Prolog Outline is to be sorted lexicographical",
-						"true or false",
-						Option.FLAG, "false"
-				){
-					public boolean isVisible() {
-					
-						return false;
-					}
-				}
-				
-
-		};
-
-	}
-
-	private String getLocation() throws IOException {
-		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
-		String location = null;
-		location = new File(Platform.asLocalURL(url).getFile())
-				.getAbsolutePath();
-		if (location.charAt(location.length() - 1) == File.separatorChar)
-			location = location.substring(0, location.length() - 1);
-		return location;
-	}
-
-	
-	public String getId() {		
+	public String getId() {
 		return getBundle().getSymbolicName();
 	}
 
 	public ErrorMessageProvider getErrorMessageProvider() {
-		if(errorMessageProvider==null){
-			errorMessageProvider=new DefaultErrorMessageProvider(this);
+		if (errorMessageProvider == null) {
+			errorMessageProvider = new DefaultErrorMessageProvider(this);
 		}
 		return errorMessageProvider;
 	}
