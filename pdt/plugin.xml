@@ -46,7 +46,9 @@
    </extension>
  <extension
        point="org.eclipse.core.runtime.preferences">
-    <initializer class="org.cs3.pdt.internal.preferences.Initializer"/>
+    <initializer
+          class="org.cs3.pdt.preferences.PreferenceInitializer">
+    </initializer>
  </extension>
  
  <extension
@@ -93,9 +95,10 @@
  <extension
        point="org.eclipse.ui.preferencePages">
     <page
-          class="org.cs3.pdt.internal.preferences.PreferencePage"
-          name="PDT Preferences"
-          id="org.cs3.pdt.internal.preferences.PDTPreferencePage"/>
+          class="org.cs3.pdt.preferences.PreferencePage"
+          id="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          name="PDT Preferences">
+    </page>
  </extension>
   <extension
          point="org.eclipse.ui.editors">
