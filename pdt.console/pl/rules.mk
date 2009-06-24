@@ -5,22 +5,34 @@
 # destination path, compiler, library search-path, etc.
 ################################################################
 
+# Target architecture.  One of WIN32 or WIN64
+
+MD=WIN32
+
+!if "$(MD)" == "WIN64"
+!include rules64.mk
+!else
+!include rules32.mk
+!endif
+
 # Installation target directory.  At the moment, the build will probably
 # fail if there is whitespace in the $prefix directory.  You can however
 # copy the result to wherever you want.
 
 # prefix=C:\Program Files
 #HOME=$(USERPROFILE)
-prefix=z:
-PLBASE=$(prefix)\pl
-PLHOME=$(PLBASE)
+prefix=C:\
+PLBASE=C:\swi50710
+PLHOME=C:\swi50710
 BINDIR=$(PLBASE)\bin
 LIBDIR=$(PLBASE)\lib
 INCDIR=$(PLBASE)\include
 PLCUSTOM=$(PLBASE)\custom
 
 # since 5.6.28(?) we also need unistd.h. On Gorbag, it can be found here: 
-EXTINCL=z:\MinGW\include\system
+
+# Get extra include files from here
+EXTRAINCDIR=C:\MinGW\include\sys
 
 # We get pthreadVC.dll, pthreadVC.lib, pthread.h, sched.h and semaphore.h
 # from the locations below
@@ -34,21 +46,26 @@ OPENSSL=C:\OpenSSL
 OPENSSLLIBDIR=$(OPENSSL)\lib\VC
 OPENSSLINCDIR=$(OPENSSL)\include
 
+# NullSoft installer
+NSISDEFS=$(NSISDEFS) /DPTHREAD=$(LIBPTHREAD) /DZLIB=$(LIBZLIB) /DBOOT=$(PLBOOTFILE)
+
 # Setup the environment.  Use this to additional libraries and include
 # files to the path.  In particular provide access to the jpeg and xpm
 # libraries required to build XPCE
 
 INCLUDE=$(PLHOME)\include;$(INCLUDE);$(HOME)\include
-LIB=$(LIB);$(HOME)\lib
+LIB=$(LIB);$(HOME)\lib;$(PLHOME)\lib
 
 # Configuration selection
 
 # CFG: dev=development environment; rt=runtime system only
 # DBG: true=for C-level debugging; false=non-debugging
 # MT:  true=multi-threading version; false=normal single-threading
+# GMP: true=enable unbounded arithmetic using GNU GMP library
 CFG=dev
 DBG=false
 MT=true
+GMP=true
 PDB=false
 SYMOPT=
 SYMBOLS=true
@@ -56,14 +73,13 @@ DBGOPT=/Od
 #DBGOPT=/O2
 
 !IF "$(DBG)" == "true"
-SYMOPT="/Zi"
+SYMOPT=/Zi
 PDB=true
 !ENDIF
 
 !IF "$(SYMBOLS)" == "true"
 SYMOPT=/Zi
 PDB=true
-
 !ENDIF
 
 !IF "$(CFG)" == "rt"
@@ -74,7 +90,8 @@ BINDIR=$(PLBASE)\runtime
 # Define the packages to be installed automatically.  Note that the
 # Makefile also checks whether the package directory exists.
 
-PKGS=	chr table cpp odbc clib sgml sgml\RDF semweb http xpce jpl ssl
+PLPKG=chr clpqr http plunit pldoc
+PKGS=$(PLPKG) cpp odbc clib table sgml sgml\RDF semweb xpce nlp zlib ssl jpl
 PKGDIR=$(PLHOME)\packages
 PKGDOC=$(PLBASE)\doc\packages
 
@@ -97,11 +114,11 @@ INSTALL=copy
 INSTALL_PROGRAM=$(INSTALL)
 INSTALL_DATA=$(INSTALL)
 MKDIR=mkdir
-MAKE=nmake CFG="$(CFG)" DBG="$(DBG)" MT="$(MT)" /nologo /f Makefile.mak
+MAKE=nmake CFG="$(CFG)" DBG="$(DBG)" MT="$(MT)" MD="$(MD)" GMP="$(GMP)" /nologo /f Makefile.mak
 
-LIBS=user32.lib shell32.lib gdi32.lib advapi32.lib wsock32.lib
+LIBS=msvcprt.lib user32.lib shell32.lib gdi32.lib advapi32.lib wsock32.lib ole32.lib $(EXTINCL)
 !if "$(MT)" == "true"
-LIBS=$(LIBS) $(PLHOME)\lib\pthreadVC.lib
+LIBS=$(LIBS) $(LIBPTHREAD).lib
 !ENDIF
 
 # Architecture identifier for Prolog's current_prolog_flag(arch, Arch)
@@ -114,19 +131,16 @@ PLLIB=$(PLHOME)\lib\libpl.lib
 TERMLIB=$(PLHOME)\lib\plterm.lib
 UXLIB=$(PLHOME)\lib\uxnt.lib
 
+CFLAGS=/MD /W3 $(SYMOPT) /EHsc /D__WINDOWS__ /D$(MD) /nologo /c
+LDFLAGS=/DEBUG /NODEFAULTLIB:libcmt.lib
+
 !IF "$(DBG)" == "false"
-CFLAGS=/TC /MD /W3 /O2 $(SYMOPT) /GX /DNDEBUG /DWIN32 /D_WINDOWS $(CMFLAGS) /nologo /c
-!IF "$(PDB)" == "true"
-LDFLAGS=/DEBUG /OPT:REF
-!ELSE
-LDFLAGS=
-!ENDIF
+CFLAGS=/DNDEBUG /O2 $(CFLAGS)
 D=
 DBGLIBS=
 !ELSE
-CFLAGS=/MD /W3 $(SYMOPT) $(DBGOPT) /GX /D_DEBUG /DWIN32 /D_WINDOWS $(CMFLAGS) /nologo /c
-LD=link.exe /nologo /incremental:yes
-LDFLAGS=/DEBUG
+CFLAGS=/D_DEBUG $(CFLAGS)
+LDFLAGS=/incremental:yes $(LDFLAGS)
 D=D
 DBGLIBS=msvcrtd.lib
 !ENDIF
@@ -134,11 +148,20 @@ DBGLIBS=msvcrtd.lib
 !IF "$(MT)" == "true"
 CFLAGS=/DO_PLMT /D_REENTRANT $(CFLAGS)
 !ENDIF
+!IF "$(GMP)" == "true"
+CFLAGS=/DO_GMP $(CFLAGS)
+GMPLIB=gmp.lib
+!ELSE
+GMPLIB=
+!ENDIF
+
+# Enable for serious debugging
+# CFLAGS=/DO_DEBUG /DO_SECURE $(CFLAGS)
 
 .c.obj:
-	@$(CC) -I. -Irc -I $(PLHOME)\include -I $(EXTINCL) $(CFLAGS) /D__WINDOWS__ /Fo$@ $<
+	@$(CC) -I. -Irc -I $(PLHOME)\include $(CFLAGS) /Fo$@ $<
 .cxx.obj:
-	@$(CC) -I. -Irc -I $(PLHOME)\include -I $(EXTINCL) $(CFLAGS) /D__WINDOWS__ /Fo$@ $<
+	@$(CC) -I. -Irc -I $(PLHOME)\include $(CFLAGS) /Fo$@ $<
 
 ################################################################
 # Used to update the library INDEX.pl after adding or deleing
