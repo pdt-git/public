@@ -54,8 +54,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		
 		
 		//A comma separated list of filter ids that should be activated at startup
-		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Active Filters for the Prolog Outline", getFieldEditorParent());
-		sfe.setEnabled(false, getFieldEditorParent()); // disabled, because Lukas made it before invisible in his implementation
+		StringFieldEditor sfe = new StringFieldEditor(PDT.PREF_OUTLINE_FILTERS, "Default active Filters for the Prolog Outline", getFieldEditorParent());
+//		sfe.setEnabled(false, getFieldEditorParent()); // disabled, because Lukas made it before invisible in his implementation
 		addField(sfe);
 		
 		
