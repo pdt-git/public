@@ -367,7 +367,15 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 	}
 
-	private void reset() throws PrologInterfaceException {
+	/**
+	 * causes complete re-initialization of the Prolog system, and invalidates
+	 * all current sessions.
+	 * 
+	 * @throws PrologInterfaceException
+	 * 
+	 * @throws IOException
+	 */
+	public void reset() throws PrologInterfaceException {
 		synchronized (lifecycle) {
 			lifecycle.reset();
 			try {

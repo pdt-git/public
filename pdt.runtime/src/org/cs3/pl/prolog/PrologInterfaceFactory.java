@@ -58,8 +58,9 @@ import org.cs3.pl.common.Util;
 
 public abstract class PrologInterfaceFactory {
    
+    // public final static String DEFAULT="org.cs3.pifcom.Factory";
     public final static String DEFAULT="org.cs3.pl.prolog.internal.socket.Factory";
-
+    
     private ResourceFileLocator locator= new DefaultResourceFileLocator().subLocator(".PrologInterface");
 
 	private PrologLibraryManager libraryManager;
