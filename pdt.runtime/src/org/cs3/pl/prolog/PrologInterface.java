@@ -138,6 +138,8 @@ public interface PrologInterface {
 
 	public abstract void restart() throws PrologInterfaceException;
 
+	public abstract void reset() throws PrologInterfaceException;
+
 	/**
 	 * checks whether the prologInterface is up and running.
 	 * 
