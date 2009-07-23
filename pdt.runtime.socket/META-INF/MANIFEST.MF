@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Prolog Interface Socket
+Bundle-SymbolicName: org.cs3.pdt.runtime.socket; singleton:=true
+Bundle-Version: 0.2.0.qualifier
+Bundle-ClassPath: prologinterface-socket.jar
+Bundle-Vendor: http://roots.iai.uni-bonn.de
+Fragment-Host: org.cs3.pdt.runtime;bundle-version="[0.1.2,1.0.0)"
+Bundle-Localization: plugin
+Export-Package: org.cs3.pl.prolog.internal.socket
