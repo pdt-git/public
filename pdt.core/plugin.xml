@@ -1,32 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.cs3.pdt.core"
-   name="MetaData"
-   version="0.2.0.qualifier"
-
-   class="org.cs3.pdt.core.PDTCorePlugin">
-   <runtime>
-      <library name="metadata.jar">
-         <export name="*"/>
-      </library>
-      <library name="lib/commons-lang-2.1.jar">
-         <export name="*"/>
-      </library>
-   </runtime>
-   <requires>
-      <import plugin="org.cs3.pdt.common"/>
-      <import plugin="org.junit"/>
-      <import plugin="org.cs3.pdt.runtime"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.cs3.pdt.common.ui"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.jface.text"/>
-   </requires>
-	<extension
+<plugin>
+    	<extension
        point="org.eclipse.core.runtime.preferences">
     <initializer
           class="org.cs3.pdt.core.preferences.PreferenceInitializer">
