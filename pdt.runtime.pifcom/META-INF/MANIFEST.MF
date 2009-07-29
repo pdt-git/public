@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Prolog Interface PIFCom
 Bundle-SymbolicName: org.cs3.pdt.runtime.pifcom; singleton:=true
-Bundle-Version: 0.2.0
+Bundle-Version: 0.2.2
 Bundle-ClassPath: prologinterface-pifcom.jar
 Bundle-Vendor: http://roots.iai.uni-bonn.de
 Fragment-Host: org.cs3.pdt.runtime;bundle-version="[0.1.2,1.0.0)"

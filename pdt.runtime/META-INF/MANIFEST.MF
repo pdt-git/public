@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: PrologInterface
 Bundle-SymbolicName: org.cs3.pdt.runtime; singleton:=true
-Bundle-Version: 0.2.0.qualifier
+Bundle-Version: 0.2.2.qualifier
 Bundle-ClassPath: prologinterface.jar
 Bundle-Activator: org.cs3.pdt.runtime.PrologRuntimePlugin
 Bundle-Localization: plugin
