@@ -679,18 +679,18 @@ apply_aj_cts :-
     %apply_ct(resolve_no_call_invocations)
     .
     
-getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     java_fq(methodDefT(ID,RecieverType_fq,_,_,_,_,_)).
 
 
 %--ma statements 
-getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     statement(ID),
     enclClass_fq(ID,RecieverType_fq).
    
     
 
-getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     getReceiver(ID, Rec),
     (
     Rec = 'null' ->
@@ -699,7 +699,7 @@ getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     )    
    	.
    	
-% getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+% getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
 %    applyT(ID, _parent, _encl, _Receiver, 'super', _args,_method),
 %
 %    (

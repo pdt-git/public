@@ -107,7 +107,7 @@ addArg(FnArg,PcArgs,Ident,Parent,ForwMethod):-
     local_vars_of_jp(JP, ArgsTemp),
     lvar_ids(ArgsTemp,Args2),
 
-    getRecieverTypeOrEnclosingIfInAnonymousClass_fq(JP,Type),    
+    getReceiverTypeOrEnclosingIfInAnonymousClass_fq(JP,Type),    
   	enclClass(JP, EnclClass),
   	(
   	anonymousClass(EnclClass) ->
@@ -264,22 +264,22 @@ matches_exceptions(_,[]):- fail.
  *
  *
  */
-getRecieverType(JpID,RecieverType):-       
+getReceiverType(JpID,RecieverType):-       
   applyT(JpID,_,_,_,_,_,Member),
   enclClass(Member,EnclClass),
   getType(EnclClass,RecieverType).
 
-getRecieverType(JpID,RecieverType):-           
+getReceiverType(JpID,RecieverType):-           
   getFieldT(JpID,_,_,_,_,Member),
   enclClass(Member,EnclClass),
   getType(EnclClass,RecieverType).
       
-getRecieverType(JpID,RecieverType):-             
+getReceiverType(JpID,RecieverType):-             
   setField(JpID,_,_,_,Member,_),    	
   enclClass(Member,EnclClass),
   getType(EnclClass,RecieverType).
     
-getRecieverType(JpID,RecieverType):-             
+getReceiverType(JpID,RecieverType):-             
   methodDefT(JpID,_,_,_,_,_,_),
   enclClass(JpID,EnclClass),
   getType(EnclClass,RecieverType).
@@ -1585,18 +1585,18 @@ apply_aj_cts :-
     %apply_ct(resolve_no_call_invocations)
     .
     
-getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     java_fq(methodDefT(ID,RecieverType_fq,_,_,_,_,_)).
 
 
 %--ma statements 
-getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     statement(ID),
     enclClass_fq(ID,RecieverType_fq).
    
     
 
-getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     getReceiver(ID, Rec),
     (
     Rec = 'null' ->
@@ -1605,7 +1605,7 @@ getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
     )    
    	.
    	
-% getRecieverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
+% getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
 %    applyT(ID, _parent, _encl, _Receiver, 'super', _args,_method),
 %
 %    (

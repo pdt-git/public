@@ -107,7 +107,7 @@ addArg(FnArg,PcArgs,Ident,Parent,ForwMethod):-
     local_vars_of_jp(JP, ArgsTemp),
     lvar_ids(ArgsTemp,Args2),
 
-    getRecieverTypeOrEnclosingIfInAnonymousClass_fq(JP,Type),    
+    getReceiverTypeOrEnclosingIfInAnonymousClass_fq(JP,Type),    
   	enclClass(JP, EnclClass),
   	(
   	anonymousClass(EnclClass) ->
@@ -264,22 +264,22 @@ matches_exceptions(_,[]):- fail.
  *
  *
  */
-getRecieverType(JpID,RecieverType):-       
+getReceiverType(JpID,RecieverType):-       
   applyT(JpID,_,_,_,_,_,Member),
   enclClass(Member,EnclClass),
   getType(EnclClass,RecieverType).
 
-getRecieverType(JpID,RecieverType):-           
+getReceiverType(JpID,RecieverType):-           
   getFieldT(JpID,_,_,_,_,Member),
   enclClass(Member,EnclClass),
   getType(EnclClass,RecieverType).
       
-getRecieverType(JpID,RecieverType):-             
+getReceiverType(JpID,RecieverType):-             
   setField(JpID,_,_,_,Member,_),    	
   enclClass(Member,EnclClass),
   getType(EnclClass,RecieverType).
     
-getRecieverType(JpID,RecieverType):-             
+getReceiverType(JpID,RecieverType):-             
   methodDefT(JpID,_,_,_,_,_,_),
   enclClass(JpID,EnclClass),
   getType(EnclClass,RecieverType).
