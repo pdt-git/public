@@ -74,7 +74,7 @@
       <editor
             name="PL Editor"
             icon="icons/prolog_file.gif"
-            extensions="pl"
+            extensions="pl , plt"
             class="org.cs3.pdt.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
