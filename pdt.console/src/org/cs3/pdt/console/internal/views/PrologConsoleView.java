@@ -772,15 +772,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	 */
 	public void afterInit(PrologInterface pif) {
 		// viewer.setController(controller);
-		try {
-			connect(pif);
-		} catch (PrologInterfaceException e) {
-			Debug.report(e);// not much we can do.
-
-//			UIUtils.logError(PrologConsolePlugin.getDefault()
-//					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
-//					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
-		}
+//		try {
+//			connect(pif);
+//		} catch (PrologInterfaceException e) {
+//			Debug.report(e);// not much we can do.
+//
+////			UIUtils.logError(PrologConsolePlugin.getDefault()
+////					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
+////					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
+//		}
 		// if(pif==currentPif){
 		// reconfigureViewer(pif);
 		// }
