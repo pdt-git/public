@@ -115,17 +115,18 @@ release_targets(Ref):-
     clause('$has_lock'(T),_,LockRef),
     (	LockRef==Ref
     ->	my_debug(builder(debug),"~t found marker, erasing it: ~w~n",[Ref]),
-    	erase(Ref),
-    	!
+    	erase(Ref) /*,
+    	!*/
     ;  	my_debug(builder(debug),"~t found lock ~w, ref=~w, erasing it. ~n",[T,LockRef]),
     	erase(LockRef),
 		my_debug(builder(debug),"~t sending release message to arbiter (target: ~w) ~n",[T]),
 		thread_self(Me),		
 		client_send_message(T,release(lock(Me,[]))),
 		fail
-    ).
-release_targets(Ref):-
-    throw(failed(error(release_targets(Ref)))).
+    ),
+    !.     
+release_targets(Ref)/*:-
+    throw(failed(error(release_targets(Ref))))*/.
 
 
 
