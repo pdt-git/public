@@ -102,6 +102,8 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
+
 public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		PrologConsole {
 	private final class ClearAction extends Action {
@@ -772,15 +774,15 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	 */
 	public void afterInit(PrologInterface pif) {
 		// viewer.setController(controller);
-//		try {
-//			connect(pif);
-//		} catch (PrologInterfaceException e) {
-//			Debug.report(e);// not much we can do.
-//
-////			UIUtils.logError(PrologConsolePlugin.getDefault()
-////					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
-////					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
-//		}
+		try {
+			connect(pif);
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);// not much we can do.
+
+//			UIUtils.logError(PrologConsolePlugin.getDefault()
+//					.getErrorMessageProvider(), PDTConsole.ERR_PIF,
+//					PDTConsole.CX_CONSOLE_VIEW_ATTACH_TO_PIF, e);
+		}
 		// if(pif==currentPif){
 		// reconfigureViewer(pif);
 		// }
@@ -873,8 +875,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	 * attach means: ensure a model exsists for this pif. ensure the model is
 	 * connected. console only attach to a pif that is in UP state.
 	 * 
+	 * TR: that's why I synchronized it.
 	 */
-	private void connect(final PrologInterface pif)
+	synchronized private void connect(final PrologInterface pif)
 			throws PrologInterfaceException {
 
 		PrologSocketConsoleModel model = (PrologSocketConsoleModel) models
