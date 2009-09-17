@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,6 +89,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
@@ -100,6 +102,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.omg.CORBA.Environment;
 import org.osgi.framework.BundleContext;
 
 public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
@@ -413,65 +416,76 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		IExtensionPoint point = registry.getExtensionPoint(
 				PrologRuntime.PLUGIN_ID,
 				PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
+		
 		if (point == null) {
-			Debug.error("could not find the extension point "
-					+ PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
-			throw new RuntimeException("could not find the extension point "
-					+ PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
+			Debug.error("could not find the extension point " + PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
+			throw new RuntimeException("could not find the extension point " + PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
 		}
-		IExtension[] extensions = point.getExtensions();
-
-		for (int i = 0; i < extensions.length; i++) {
-			IExtension ext = extensions[i];
-			IConfigurationElement[] configurationElements = ext
-					.getConfigurationElements();
-			for (int j = 0; j < configurationElements.length; j++) {
-				IConfigurationElement elm = configurationElements[j];
-				String pifKey = elm.getAttribute("key");
-				if (pifKey == null) {
-					pifKey = "";
-				}
-				Set contribs = (Set) bootStrapLists.get(pifKey);
-				if (contribs == null) {
-					contribs = new HashSet();
-					bootStrapLists.put(pifKey, contribs);
-				}
-				String resName = elm.getAttribute("path");
-				String className = elm.getAttribute("class");
-				if (className != null) {
-					BootstrapContribution bc = null;
-					try {
-						bc = (BootstrapContribution) elm
-								.createExecutableExtension("class");
-						bc.contributeToBootstrapList(pifKey, contribs);
-					} catch (CoreException e1) {
-						Debug.rethrow("Problem instantiating: "
-								+ elm.getAttributeAsIs("class"), e1);
-					}
-				} else if (resName != null) {
-					Debug.debug("got this resname: " + resName);
-					String namespace = ext.getNamespace();
-					Debug.debug("got this namespace: " + namespace);
-					URL url = BundleUtility.find(Platform.getBundle(namespace),
-							resName);
-					try {
-
-						// URL url = Platform.getBundle(namespace).getEntry(
-						// resName);
-						Debug.debug("trying to resolve this url: " + url);
-						url = Platform.asLocalURL(url);
-					} catch (Exception e) {
-						Debug.rethrow("Problem resolving url: "
-								+ url.toString(), e);
-					}
-					// URI uri = URI.create(url.toString());
-					File file = new File(url.getFile());
-
-					contribs.add(Util.prologFileName(file));
-				}
-			}
+		
+		for (IExtension extension : point.getExtensions()) {
+			registerBootstrapContribution(extension);
 		}
+	}
 
+	private void registerBootstrapContribution(IExtension extension) {
+		for (IConfigurationElement element : extension.getConfigurationElements()) {
+			try {
+				addBootstrap(extension, element);
+			} catch(RuntimeException e) {
+				/*DO nothing. Throwing here breaks the "Safe Platform Rule". The exception is 
+				 * already entered into the PDT log! 
+				*/
+			}			
+		}
+	}
+
+	private void addBootstrap(IExtension extension, IConfigurationElement element ) {
+		String pifKey = element.getAttribute("key");
+		pifKey = (pifKey == null) ? "" : pifKey;
+		
+		Set contribs = createCachedContribsForPrologInterface(pifKey);
+		
+		String resource = element.getAttribute("path");
+		String className = element.getAttribute("class");
+		
+		if (className != null) {
+			addBootstrapClass(element, pifKey, contribs);
+		} else if (resource != null) {
+			addBootstrapResource(extension, resource, contribs);
+		}
+	}
+
+	private Set createCachedContribsForPrologInterface(String pifKey) {
+		Set contribs = (Set) bootStrapLists.get(pifKey);
+		if (contribs == null) {
+			contribs = new HashSet();
+			bootStrapLists.put(pifKey, contribs);
+		}
+		return contribs;
+	}
+
+	private void addBootstrapClass(IConfigurationElement element, String pifKey, Set contribs) {
+		try {
+			BootstrapContribution bc = (BootstrapContribution) element.createExecutableExtension("class");
+			bc.contributeToBootstrapList(pifKey, contribs);
+		} catch (CoreException e1) {
+			Debug.rethrow("Problem instantiating class as extension for bootstrapContribution, class: " + element.getAttribute("class"), e1);
+		}
+	}
+	
+	private void addBootstrapResource(IExtension ext, String resource, Set contribs) {
+		Debug.debug("got this resname: " + resource);
+		IContributor contributor = ext.getContributor();
+		Debug.debug("got this contributor: " + contributor.toString());
+		URL url = BundleUtility.find(Platform.getBundle(contributor.getName()), resource);
+		try {
+			Debug.debug("trying to resolve this url: " + url);
+			url = FileLocator.toFileURL(url);
+		} catch (Exception e) {
+			Debug.rethrow("Problem resolving path extension for bootstrapContribution, contributor: " + contributor.getName() + " and resource: " + resource, e);
+		}
+		File file = new File(url.getFile());
+		contribs.add(Util.prologFileName(file));
 	}
 
 	/**
