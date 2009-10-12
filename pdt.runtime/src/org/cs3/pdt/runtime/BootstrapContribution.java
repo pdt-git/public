@@ -46,15 +46,11 @@ package org.cs3.pdt.runtime;
 import java.util.Set;
 
 /**
- * @deprecated BooptstrapContributions stink.
- * describes a contribution to the set of bootstrap files consulted during the
- * start of PrologInterface objects created by the PDT.
  */
 public interface BootstrapContribution {
 
     /**
      * Contribute to the list of bootstrap files.
-     * @deprecated BooptstrapContributions stink.
      * @param bootstrapList
      *                    the List of bootstrap files
      * @param key
