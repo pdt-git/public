@@ -362,7 +362,7 @@ user:tearDown('pdtplugin:find_pred') :-
  * 1. Argumentname (parent,..)
  * 2. Kind         (id, attr)
  * 3. List or Atom (list,atom)
- * 4. constraints  (atom,classDefT,...)
+ * 4. constraints  (atom,classT,...)
  * 5. isVariable   (yes|no) (yes only in the error case!)
  */
 
