@@ -64,7 +64,7 @@ updateForwardsFact(_stmt,_kind, _forwCall,_forwMethod):-
  *
  */
 createForwardingMethod(_method, _class,_,_forwBody) :-
-    methodDefT(_method,_class,_,_,_,_,_),
+    methodT(_method,_class,_,_,_,_,_),
     !,
     createForwMethodExecution(_method, _forwBody,[]).
 
@@ -74,7 +74,7 @@ createForwardingMethod(Stat,Class,ForwMethod,ForwBody) :-
     createForwBody(Stat, ForwMethod, ForwBody, ForwName, _params, Type, _execReturn),
     createReturnOrExec(ForwBody, ForwMethod, Type, Stat, _execReturn),
     add_to_class(Class, ForwMethod),
-    add(methodDefT(ForwMethod, Class, ForwName, _params, Type, [], ForwBody)),
+    add(methodT(ForwMethod, Class, ForwName, _params, Type, [], ForwBody)),
 	share_static_modifier(EnclMethod,ForwMethod),
     add(modifierT(ForwMethod, 'private')),
     add(blockT(ForwBody, ForwMethod, ForwMethod, [_execReturn])).
@@ -87,7 +87,7 @@ createAroundMethod(Stat, Class,ForwStats,ForwMethod,ForwBody) :-
     createAroundBody(Stat, ForwMethod, ForwBody, ForwName, _params, Type),
 %    createReturnOrExec(ForwBody, ForwMethod, Type, Stat, _execReturn),
     add_to_class(Class, ForwMethod),
-    add(methodDefT(ForwMethod, Class, ForwName, _params, Type, [], ForwBody)),
+    add(methodT(ForwMethod, Class, ForwName, _params, Type, [], ForwBody)),
 	share_static_modifier(EnclMethod,ForwMethod),
     add(modifierT(ForwMethod, 'private')),
     add(blockT(ForwBody, ForwMethod, ForwMethod, ForwStats)).
@@ -263,7 +263,7 @@ matchLMVPattern(VdHead, [Term | PatTail]) :-
     
 matchParamTypeNameList([],[]).
 matchParamTypeNameList([Head | Tail],[FNHead|FNTail]):-
-    paramDefT(Head,_,Type,_),
+    paramT(Head,_,Type,_),
     getTypeName(Type,FNHead),
 	matchParamTypeNameList(Tail,FNTail).
 	
@@ -296,9 +296,9 @@ weave(after, _pc,_exec):-
 
 callToAdviceMethod(_pc, _adviceMeth, _adviceArgs,_exec,_forwMethod,_forwBody) :-
     (replaceStatementWithForwarding(_pc,_forwMethod,_forwBody); true),
-    methodDefT(_adviceMeth,Aspect,_adviceMethName, _,_,_,_),
-    fieldDefT(_adviceInstanceVar,Aspect,_,'aspectInstance',_),
-    classDefT(Aspect,_,AdviceName,_),
+    methodT(_adviceMeth,Aspect,_adviceMethName, _,_,_,_),
+    fieldT(_adviceInstanceVar,Aspect,_,'aspectInstance',_),
+    classT(Aspect,_,AdviceName,_),
     new_ids([_exec, _apply, _selectAdviceMethod,_selectInstField, _ident]),
     enclMethod(_pc,_enclMethod),
     createIdentsReferencingAdviceParams(_pc, _enclMethod,_adviceArgs, _adviceCallArgs),
@@ -325,29 +325,29 @@ createIdentsReferencingAdviceParams(_call,_enclMethod,[_adviceArg|_adviceArgs],[
 
 boxing_class(int, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Integer',_).
+    classT(_class,_pckg,'Integer',_).
     
 boxing_class(double, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Double',_).
+    classT(_class,_pckg,'Double',_).
 boxing_class(float, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Float',_).
+    classT(_class,_pckg,'Float',_).
 boxing_class(char, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Character',_).
+    classT(_class,_pckg,'Character',_).
 boxing_class(byte, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Byte',_).
+    classT(_class,_pckg,'Byte',_).
 boxing_class(short, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Short',_).
+    classT(_class,_pckg,'Short',_).
 boxing_class(long, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Long',_).
+    classT(_class,_pckg,'Long',_).
 boxing_class(boolean, _class):-
     packageT(_pckg, 'java.lang'),
-    classDefT(_class,_pckg,'Boolean',_).
+    classT(_class,_pckg,'Boolean',_).
 boxing_class(Kind, _class):-
 	sformat(Msg, 'ERROR: Could not find boxing class for ~w~n', [Kind]),
 	throw(Msg).
@@ -373,9 +373,9 @@ add_proceed_call_idents(_pc,_call,_enclMethod, _adviceArgs, [_param|_params], [_
 getRefIdentName(_ref,_name):-
     localDefT(_ref, _, _, _, _name, _).
 getRefIdentName(_ref,_name):-
-    paramDefT(_ref, _, _, _name).
+    paramT(_ref, _, _, _name).
 getRefIdentName(_ref,'this'):-
-    classDefT(_ref, _, _, _).
+    classT(_ref, _, _, _).
 
 
 getCompareElement(_method,_param, _, _class):-
@@ -416,7 +416,7 @@ createForwMethParams(_enclClass,_forwMethod,_DeclaringType,_origReceiver, _args,
     createForwParams(_forwMethod, _args, _Params).
 
 validThisType(EnclClass,Type):-
-    classDefT(EnclClass, Parent,_,_),
+    classT(EnclClass, Parent,_,_),
     newClassT(Parent,_,_,_,_,TypeExpr,_,_),
     getType(TypeExpr, type(class,Type,0)),
 %    extendsT(EnclClass,Super),
@@ -432,7 +432,7 @@ validThisType(EnclClass,EnclClass).
  */
  
 outerOrEnclClass(EnclClass,OuterClass):-
-    classDefT(EnclClass,NewClass,_,_),
+    classT(EnclClass,NewClass,_,_),
     newClassT(NewClass,_,NewClassEncl,_,_,_,_,_),
     enclClass(NewClassEncl,OuterClass),
     !.
@@ -442,23 +442,23 @@ outerOrEnclClass(EnclClass,EnclClass).
 
 createThisInstanceParam(_enclClass,_forwMethod,_InstanceVarDef):-
     new_id(_InstanceVarDef),
-    add(java_fq(paramDefT(_InstanceVarDef, _forwMethod, _enclClass, '_this'))).
+    add(java_fq(paramT(_InstanceVarDef, _forwMethod, _enclClass, '_this'))).
 
 
 createTargetInstanceParam(DeclaringType, _forwMethod, _ReceiverVarDef):-
     new_id(_ReceiverVarDef),
-    add(java_fq(paramDefT(_ReceiverVarDef,  _forwMethod, DeclaringType, '_target'))),
+    add(java_fq(paramT(_ReceiverVarDef,  _forwMethod, DeclaringType, '_target'))),
     !.
 
 /*
 createTargetInstanceParam(_enclClass, _forwMethod, 'null',_ReceiverVarDef):-
     new_id(_ReceiverVarDef),
-    add(paramDefT(_ReceiverVarDef,  _forwMethod, type(class,_enclClass,0), '_target')),
+    add(paramT(_ReceiverVarDef,  _forwMethod, type(class,_enclClass,0), '_target')),
     !.
 createTargetInstanceParam(_enclClass, _forwMethod, _origReceiver,_ReceiverVarDef):-
     new_id(_ReceiverVarDef),
     getType(_origReceiver, _type),
-    add(paramDefT(_ReceiverVarDef,  _forwMethod, _type, '_target')).
+    add(paramT(_ReceiverVarDef,  _forwMethod, _type, '_target')).
 */
 
 createForwParams(_forwMethod, _args, _Params) :-
@@ -476,38 +476,38 @@ createForwParam(_forwMethod, _arg, _Param,_counter) :-
     fullQualifiedName(JLO, 'java.lang.Object'),
     new_id(_Param),
     append_num('x', _counter, _name),
-    add(paramDefT(_Param, _forwMethod,type(class,JLO,0), _name)),
+    add(paramT(_Param, _forwMethod,type(class,JLO,0), _name)),
     !.
 
 createForwParam(_forwMethod, _arg, _Param,_counter) :-
     getType(_arg,_type),
     new_id(_Param),
     append_num('x', _counter, _name),
-    add(paramDefT(_Param, _forwMethod, _type, _name)),
+    add(paramT(_Param, _forwMethod, _type, _name)),
     !.
 
 % DEBUG commented
 
 getForwParam(_method, _adviceArg, _IdentRef,_IdentName):-
     % Ausnahme fuer den execution pointcut
-    methodDefT(_method, _class, _, _params, _, _, _),
+    methodT(_method, _class, _, _params, _, _, _),
     !,
     forwards(_, _forwMethod, _, _method),
-    methodDefT(_forwMethod, _, _, [_|[_|_origParams]], _, _, _),
+    methodT(_forwMethod, _, _, [_|[_|_origParams]], _, _, _),
     findParamExecution(_adviceArg,_class,_params,_origParams,_IdentName,_IdentRef).
 
 
 getForwParam(Pc, _adviceArg, _forwParam,_forwParamName):-
     forwards(_forwCall, _forwMethod, _, Pc),
-    methodDefT(_forwMethod, _, _, [_thisParam|[_targetParam|_params]], _, _, _),
+    methodT(_forwMethod, _, _, [_thisParam|[_targetParam|_params]], _, _, _),
     applyT(_forwCall, _,_, _, _,[_|[_|_args]],_),
     getRealEncl(Pc,_,RealEncl),
-    methodDefT(RealEncl,_,_,EnclParams,_,_,_),
+    methodT(RealEncl,_,_,EnclParams,_,_,_),
     length(EnclParams,NumEnclParams),
     remove_tail(_args,NumEnclParams,ArgListWithoutEnclParams),
     concat_lists([ArgListWithoutEnclParams,EnclParams],SearchList),
     findParam(_adviceArg,_thisParam,_targetParam,_params,SearchList,_forwParam),
-    paramDefT(_forwParam, _,_type, _forwParamName).
+    paramT(_forwParam, _,_type, _forwParamName).
 
 findParamExecution('_this',_class, _,_,'this',_class):- !.
 findParamExecution('_target',_class,_,_,'this',_class):- !.
@@ -515,7 +515,7 @@ findParamExecution(_param,_class,_params,_origParams, _forwParamName,_Param):-
     _param \= '_this',
     _param \= '_target',
     findParam(_param,_,_,_params,_origParams,_Param),
-    paramDefT(_Param, _, _type, _forwParamName).
+    paramT(_Param, _, _type, _forwParamName).
 
 
 findParam('_this',_ThisParam,_,_,_,_ThisParam):-
@@ -582,7 +582,7 @@ set_visibility(_var, _type, _ref):-
 create_ref_idents(_pc, _apply, _encl, [], []).
 
 create_ref_idents(_pc, _apply, _encl, [_param_id|_rest], [_ident_id | _rest_ids]) :-
-    paramDefT(_param_id,_,_, _name),
+    paramT(_param_id,_,_, _name),
     !,
     add(identT(_ident_id, _apply, _encl, _name, _param_id)),
     create_ref_idents(_pc, _apply, _encl, _rest, _restids).
@@ -621,7 +621,7 @@ extract_types(_encl, [_fn|_rest], [_Type | _Rest]) :-
     !,
     encl_class(_encl,_encl_class),
     resolve_field(_fn,_encl_class,_field),
-    fieldDefT(_field,_,_Type, _,_),
+    fieldT(_field,_,_Type, _,_),
     create_ref_idents(_encl, _rest, _Rest).
 
 extract_types(_encl, [_arg|_rest], [_Type | _Rest]) :-
@@ -637,14 +637,14 @@ extract_types(_encl, [[_h |_t] | _rest], _Rest) :-
     
 
 constructor(_constructor,_class,_params):-
-    methodDefT(_constructor,_class,'<init>', _paramsConstructor,_,[],_),
+    methodT(_constructor,_class,'<init>', _paramsConstructor,_,[],_),
     matchParams(_params, _paramsConstructor).
 
 
 lookupForwParameter(Arg,_,[],[],_, _):-
     format('forwarding parameter lookup failed: ~w~n',[Arg]).
 lookupForwParameter(_,FnArg,[FnArg|_],[Param|_],Param, Name):-
-    paramDefT(Param,_,_,Name).
+    paramT(Param,_,_,Name).
 lookupForwParameter(ForwMethod,FnArg,[_|PcArgs],[_|ArgParams],Param, Name):-
     lookupForwParameter(ForwMethod,FnArg,PcArgs,ArgParams,Param, Name).
    
@@ -680,7 +680,7 @@ apply_aj_cts :-
     .
     
 getReceiverTypeOrEnclosingIfInAnonymousClass_fq(ID,RecieverType_fq):-
-    java_fq(methodDefT(ID,RecieverType_fq,_,_,_,_,_)).
+    java_fq(methodT(ID,RecieverType_fq,_,_,_,_,_)).
 
 
 %--ma statements 
@@ -714,7 +714,7 @@ getNonAnonymousEnclosingClass_fq(Id,Class_fq):-
 	(
 		anonymousClass(Encl) ->
 		(
-			classDefT(Encl,Parent,_,_),
+			classT(Encl,Parent,_,_),
 			enclClass(Parent,ParentOfParent),
 			getNonAnonymousEnclosingClass_fq(ParentOfParent,Class_fq)
 		);
@@ -738,7 +738,7 @@ getReturnType(ID,Type):-
 	% fullQualifiedName(Class,Type).   
       
 anonymousClass(ID):-
-	classDefT(ID,Parent,_,_),     
+	classT(ID,Parent,_,_),     
   	newClassT(Parent,_,_,_,_,_,_,_).
   	
 
@@ -752,7 +752,7 @@ anonymousClass(ID):-
  * see LAJ-87
  */          	
 local_vars_of_jp(Jp,Vars):-
- methodDefT(Jp,_,_,Args,_,_,_),
+ methodT(Jp,_,_,Args,_,_,_),
  local_defs_of_jp([Jp],Blacklist),
  %local_vars_of_jp([Jp],LocalVars,Blacklist),
  local_vars_of_jp(Args,Vars,[]).
@@ -827,11 +827,11 @@ local_var(ID,Ref):-
 
 local_var(ID,Ref):-
     identT(ID,_,_,_,Ref),
-    paramDefT(Ref,_,_,_).
+    paramT(Ref,_,_,_).
  
 
 local_var(Ref,Ref):-    
-    paramDefT(Ref,_,_,_).
+    paramT(Ref,_,_,_).
  
 
    		
@@ -855,7 +855,7 @@ tree_names([Arg|Args],Names):-
  */
   
 tree_name(Arg,Name):-
-    paramDefT(Arg,_,_,Name).
+    paramT(Arg,_,_,Name).
       	
 tree_name(ID,Name):-
     identT(ID,_,_,_,Ref),
@@ -866,7 +866,7 @@ tree_name(ID,Name):-
 
 tree_name(ID,Name):-
     identT(ID,_,_,_,Ref),
-    paramDefT(Ref,_,_,Name).  	
+    paramT(Ref,_,_,Name).  	
   
 tree_name(ID,_):-    
     treeSignature(ID,Signature),
@@ -937,7 +937,7 @@ add_proceed_call(_pc,_call, _parent, _enclMethod,_adviceArgs,_proceedArgs):-
  
 /*around(Method,AroundStmts,_,ForwBody) :-
 % special case: execution pointcut
-    methodDefT(Method,_,_,_,_,_,_),
+    methodT(Method,_,_,_,_,_,_),
     createForwMethodExecution(Method, ForwBody, AroundStmts).
 
 around(_stat,_aroundStmts,_forwMethod,_forwBody) :-
