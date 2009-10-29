@@ -57,11 +57,12 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -84,6 +85,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -163,9 +166,7 @@ public class PLEditor extends TextEditor {
 		try {
 			colorManager = new ColorManager();
 			configuration = new PLConfiguration(colorManager, this);
-
 			setSourceViewerConfiguration(configuration);
-			setDocumentProvider(new PLDocumentProvider());
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -174,7 +175,7 @@ public class PLEditor extends TextEditor {
 
 	private static final String SEP_INSPECT = "inspect";
 
-	private IFile file;
+	private IPath filepath;
 
 	
 
@@ -409,8 +410,7 @@ public class PLEditor extends TextEditor {
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
 
-		return getPrologDataFromOffset(Util.prologFileName(file.getLocation()
-				.toFile()), document, offset);
+		return getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
 	}
 
 	/**
@@ -708,20 +708,36 @@ public class PLEditor extends TextEditor {
 	 * @see org.eclipse.ui.editors.text.TextEditor#doSetInput(org.eclipse.ui.IEditorInput)
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
+		
+		setDocumentProvider(createDocumentProvider(input));
+		
 		checkForPrologNature(input);
 		if (fOutlinePage != null) {
 			fOutlinePage.setInput(input);
 		}
 		super.doSetInput(input);
-		IFileEditorInput editorInput = null;
+	
 		if (input instanceof IFileEditorInput) {
-			editorInput = (IFileEditorInput) input;
-
+			IFileEditorInput editorInput = (IFileEditorInput) input;
+			filepath = editorInput.getFile().getLocation();
+			
 		}
-		if (editorInput == null) {
+		if (input instanceof FileStoreEditorInput){
+			FileStoreEditorInput editorInput = (FileStoreEditorInput) input;
+			filepath =  new Path(editorInput.getURI().getPath());
+		}
+		else{
 			return;
 		}
-		file=editorInput.getFile();
+		
+	}
+
+	private IDocumentProvider createDocumentProvider(IEditorInput input) {
+		 if(input instanceof FileStoreEditorInput){
+             return new ExternalDocumentProvider();
+		 } else{
+			 return new PLDocumentProvider();
+		 }
 	}
 
 	private void checkForPrologNature(IEditorInput input) {

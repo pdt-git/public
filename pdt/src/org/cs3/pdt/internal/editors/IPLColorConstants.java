@@ -41,9 +41,6 @@
 
 package org.cs3.pdt.internal.editors;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.JavaColorManager;
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.swt.graphics.RGB;
 
 public interface IPLColorConstants {
