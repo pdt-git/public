@@ -371,7 +371,7 @@ add_proceed_call_idents(_pc,_call,_enclMethod, _adviceArgs, [_param|_params], [_
 
 
 getRefIdentName(_ref,_name):-
-    localDefT(_ref, _, _, _, _name, _).
+    localT(_ref, _, _, _, _name, _).
 getRefIdentName(_ref,_name):-
     paramT(_ref, _, _, _name).
 getRefIdentName(_ref,'this'):-
@@ -795,7 +795,7 @@ local_vars_of_jp([H|T],List,Blacklist) :-
 
 local_defs_of_jp([],[]).
 local_defs_of_jp([Id|Ids],List) :-
-    localDefT(Id,_,_,_,_,_),
+    localT(Id,_,_,_,_,_),
     local_defs_of_jp(Ids, NewList),    
     !,
     concat_lists([Id,NewList],List)
@@ -822,7 +822,7 @@ lvar_ids([Lvar|Lvars],Ids) :-
     
 local_var(ID,Ref):-
     identT(ID,_,_,_,Ref),
-    localDefT(Ref,_,_,_,_,_).
+    localT(Ref,_,_,_,_,_).
   
 
 local_var(ID,Ref):-
@@ -859,10 +859,10 @@ tree_name(Arg,Name):-
       	
 tree_name(ID,Name):-
     identT(ID,_,_,_,Ref),
-    localDefT(Ref,_,_,_,Name,_).  
+    localT(Ref,_,_,_,Name,_).  
 
 tree_name(ID,Name):-
-    localDefT(ID,_,_,_,Name,_).  
+    localT(ID,_,_,_,Name,_).  
 
 tree_name(ID,Name):-
     identT(ID,_,_,_,Ref),
