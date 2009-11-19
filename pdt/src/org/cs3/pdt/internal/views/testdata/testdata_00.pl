@@ -515,8 +515,8 @@ extract_class_name_(_, ClassName, '',ClassName).
 :- dynamic forwards/4.
 :- dynamic pointcut/1.
 :- dynamic visibility/3.
-:- dynamic aj_ct_list/1.
-:- multifile aj_ct_list/1.
+:- dynamic laj_ct_list/1.
+:- multifile laj_ct_list/1.
 :- dynamic laj_binding_transfer/3.
 
 /*** AUXILIARY PREDICATES ***************************************/
@@ -1574,13 +1574,13 @@ bindIdIfNeeded(_ID).
  * apply_aj_cts.
  * 
  * debugging predicate
- * applies all cts in the aj_ct_list 
+ * applies all cts in the laj_ct_list 
  * fact in the given order.
  */
 apply_aj_cts :-
     rollback,
     apply_ct(change_aspect_class_member_visibility),
-    aj_ct_list(A),
+    laj_ct_list(A),
     apply_ctlist(A)
     %apply_ct(resolve_no_call_invocations)
     .
