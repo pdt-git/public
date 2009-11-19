@@ -515,8 +515,8 @@ extract_class_name_(_, ClassName, '',ClassName).
 :- dynamic forwards/4.
 :- dynamic pointcut/1.
 :- dynamic visibility/3.
-:- dynamic aj_ct_list/1.
-:- multifile aj_ct_list/1.
+:- dynamic laj_ct_list/1.
+:- multifile laj_ct_list/1.
 :- dynamic laj_binding_transfer/3.
 
 /*** AUXILIARY PREDICATES ***************************************/
