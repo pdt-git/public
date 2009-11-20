@@ -21,10 +21,10 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface2;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
-public class PIFComPrologInterface extends AbstractPrologInterface2 {
+public class PIFComPrologInterface extends AbstractPrologInterface {
 
 	DatagramSocket udpSocket = null;
 	private ReusablePool pool = null;
