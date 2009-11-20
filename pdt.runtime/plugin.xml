@@ -7,15 +7,18 @@
    <extension-point id="prologContextTracker" name="Prolog Context Tracker" schema="schema/prologContextTracker.exsd"/>
 	<extension
        point="org.eclipse.core.runtime.preferences">
-    <initializer class="org.cs3.pdt.runtime.internal.preferences.Initializer"/>
+    <initializer
+          class="org.cs3.pdt.runtime.preferences.PreferenceInitializer">
+    </initializer>
  </extension>
     <extension
        point="org.eclipse.ui.preferencePages">
     <page
           category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
-          class="org.cs3.pdt.runtime.internal.preferences.PreferencePage"
-          id="org.cs3.pdt.runtime.internal.preferences.PDTPreferencePage"
-          name="Prolog Runtime"/>
+          class="org.cs3.pdt.runtime.preferences.PreferencePage"
+          id="org.cs3.pdt.runtime.preferences.PreferencePage"
+          name="Prolog Runtime">
+    </page>
  </extension>
     <extension
           point="org.eclipse.ui.startup">

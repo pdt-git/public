@@ -8,7 +8,7 @@ Bundle-Activator: org.cs3.pdt.runtime.PrologRuntimePlugin
 Bundle-Localization: plugin
 Export-Package: org.cs3.pdt.runtime,
  org.cs3.pdt.runtime.internal,
- org.cs3.pdt.runtime.internal.preferences,
+ org.cs3.pdt.runtime.preferences,
  org.cs3.pl.cterm,
  org.cs3.pl.cterm.internal,
  org.cs3.pl.cterm.internal.parser,

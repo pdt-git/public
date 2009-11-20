@@ -7,8 +7,8 @@
 ).
 
 :- multifile interprete_selection/3, perform_transformation/2.
-:- use_module(library(pef/pef_base)).
-:- use_module(library(builder/builder)).
+:- use_module(library('pef/pef_base')).
+:- use_module(library('builder/builder')).
 
 
 pdt_interprete_selection(Refactoring,Selection,Params):-
