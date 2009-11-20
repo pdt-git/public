@@ -53,6 +53,7 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.Disposable;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
@@ -448,5 +449,46 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	}
 	public void debug_wakeupPoledSessions(){
 		
+	}
+public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable;
+	
+	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
+		return getAsyncSession(LEGACY);
+	}
+	
+	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException {
+		PLUtil.checkFlags(flags);
+		synchronized (lifecycle) {
+			if(getError()!=null){
+				throw new PrologInterfaceException(getError());
+			}
+			if (!isUp()) {
+				try {
+					start();
+					waitUntilUp();
+				} catch (InterruptedException e) {
+					Debug.rethrow(e);
+				}
+			}
+			try {
+				return getAsyncSession_internal(flags);
+			} catch (Throwable t) {
+				throw new PrologInterfaceException("Failed to obtain session",
+						t);
+			}
+		}
+	}
+
+	private AsyncPrologSession getAsyncSession_internal(int flags) throws Throwable {
+
+		AsyncPrologSession s = getAsyncSession_impl(flags);
+		sessions.add(new WeakReference(s));
+		return s;
+
+	}
+
+	public void removeLifeCycleHook(final LifeCycleHook hook,
+			final String hookId) {
+		lifecycle.removeLifeCycleHook(hook, hookId);
 	}
 }

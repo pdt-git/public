@@ -18,7 +18,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	private String threadAlias;
 
-	private PrologInterface2 pif;
+	private PrologInterface pif;
 
 	protected Object targetLock = new Object();
 
@@ -206,7 +206,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 	
 
 
-	public AsyncPrologSessionProxy(PrologInterface2 pif,int flags) {
+	public AsyncPrologSessionProxy(PrologInterface pif,int flags) {
 		super();
 		this.pif = pif;
 		this.flags=flags;
@@ -214,7 +214,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		watchdog.start();
 	}
 
-	public AsyncPrologSessionProxy(PrologInterface2 pif, long timeout,int flags) {
+	public AsyncPrologSessionProxy(PrologInterface pif, long timeout,int flags) {
 		super();
 		this.pif = pif;
 		this.flags=flags;

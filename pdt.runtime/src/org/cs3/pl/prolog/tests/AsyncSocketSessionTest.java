@@ -59,14 +59,13 @@ import org.cs3.pl.prolog.AsyncPrologSessionListener;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 
 public class AsyncSocketSessionTest extends TestCase {
 
-	private PrologInterface2 pif;
+	private PrologInterface pif;
 
 	private Recorder rec;
 
@@ -75,7 +74,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance();
-		pif = (PrologInterface2) factory.create();
+		pif = (PrologInterface) factory.create();
 
 		pif.start();
 		rec = new Recorder();

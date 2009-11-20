@@ -206,7 +206,16 @@ public interface PrologInterface {
 	 *             PrologInterface2.removeLifeCycleHook(LifeCycleHook2,String)
 	 */
 	public abstract void removeLifeCycleHook(String hookId);
-
+	/**
+	 * 
+	 * @deprecated use getAsyncSession(int). Using the PrologInterface.LEGACY should
+	 * be compatible with legacy code.
+	 * 
+	 */
+	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
+	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
+	public void removeLifeCycleHook(final LifeCycleHook hook,
+			final String hookId);
 	
 
 }

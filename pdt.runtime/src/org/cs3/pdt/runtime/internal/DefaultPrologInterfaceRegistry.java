@@ -13,7 +13,6 @@ import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryListener;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 
 public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 
@@ -174,7 +173,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 				Set<LifeCycleHookDescriptor> descriptors = getHookDescriptorsForTags(s
 						.getTags());
 				for (LifeCycleHookDescriptor desc : descriptors) {
-					((PrologInterface2) pif).removeLifeCycleHook(desc
+					((PrologInterface) pif).removeLifeCycleHook(desc
 							.createHook(s.getData()), desc.getHookId());
 				}
 			}
@@ -212,7 +211,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			Set<LifeCycleHookDescriptor> descriptors = getHookDescriptorsForTags(s
 					.getTags());
 			for (LifeCycleHookDescriptor desc : descriptors) {
-				((PrologInterface2) pifs.get(s.getPifKey()))
+				((PrologInterface) pifs.get(s.getPifKey()))
 						.removeLifeCycleHook(desc.createHook(s.getData()), desc
 								.getHookId());
 			}
@@ -244,7 +243,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			descriptorsDiff.removeAll(descriptorsAfter);
 			for (LifeCycleHookDescriptor desc : descriptorsDiff) {
 
-				((PrologInterface2) getPrologInterface(s.getPifKey()))
+				((PrologInterface) getPrologInterface(s.getPifKey()))
 						.removeLifeCycleHook(desc.createHook(s.getData()), desc
 								.getHookId());
 			}
@@ -275,7 +274,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			l.add(descr);
 			Set<Subscription> subs = getSubscriptionsForTags(descr.getTags());
 			for (Subscription subscription : subs) {
-				PrologInterface2 pif = (PrologInterface2) pifs.get(subscription
+				PrologInterface pif = (PrologInterface) pifs.get(subscription
 						.getPifKey());
 				if (pif != null) {
 					pif.addLifeCycleHook(descr.createHook(subscription
@@ -298,7 +297,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			l.add(descr);
 			Set<Subscription> subs = getSubscriptionsForTags(descr.getTags());
 			for (Subscription subscription : subs) {
-				PrologInterface2 pif = (PrologInterface2) pifs.get(subscription
+				PrologInterface pif = (PrologInterface) pifs.get(subscription
 						.getPifKey());
 				if (pif != null) {
 					pif.removeLifeCycleHook(descr.createHook(subscription
