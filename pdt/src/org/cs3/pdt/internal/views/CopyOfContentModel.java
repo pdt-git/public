@@ -21,7 +21,6 @@ import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -325,7 +324,7 @@ public class CopyOfContentModel extends DefaultAsyncPrologSessionListener implem
 
 	private AsyncPrologSession getSession() throws PrologInterfaceException {
 		if (session == null && pif != null) {
-			session = ((PrologInterface2) pif).getAsyncSession(PrologInterface.CTERMS);			
+			session = ((PrologInterface) pif).getAsyncSession(PrologInterface.CTERMS);			
 			session.addBatchListener(this);
 		}
 		return session;
@@ -371,7 +370,7 @@ public class CopyOfContentModel extends DefaultAsyncPrologSessionListener implem
 			session = null;
 		}
 		if (this.pif != null) {
-			((PrologInterface2) this.pif).removeLifeCycleHook(this, HOOK_ID);
+			((PrologInterface) this.pif).removeLifeCycleHook(this, HOOK_ID);
 		}
 		this.pif = pif;
 		if (this.pif != null) {
