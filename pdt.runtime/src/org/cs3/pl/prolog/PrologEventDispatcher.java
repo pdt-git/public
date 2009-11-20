@@ -64,9 +64,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	Object eventTicket = new Object();
 
-	private PrologInterface2 pif;
+	private PrologInterface pif;
 
-	public PrologEventDispatcher(PrologInterface2 pif){
+	public PrologEventDispatcher(PrologInterface pif){
 		this.pif = pif;
 		//make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook2(){
