@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -12,10 +11,6 @@ import org.cs3.pifcom.codec.CTermMessage;
 import org.cs3.pifcom.codec.Message;
 import org.cs3.pifcom.codec.NameMessage;
 import org.cs3.pifcom.codec.UIntMessage;
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.SimpleOption;
-import org.cs3.pl.cterm.CNil;
-import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
