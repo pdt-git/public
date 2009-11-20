@@ -57,6 +57,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 /**
  */
@@ -68,13 +69,13 @@ public class SocketSession implements PrologSession {
 
 	private String lastQuery;
 
-	private SocketPrologInterface pif;
+	private AbstractPrologInterface pif;
 
 	private CTermFactory ctermFactory = new ATermFactory();
 
 	private int flags;
 
-	public SocketSession(SocketClient client, SocketPrologInterface pif,int flags) {
+	public SocketSession(SocketClient client, AbstractPrologInterface pif,int flags) {
 		this.client = client;
 		this.pif = pif;
 		this.flags=flags;
