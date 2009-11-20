@@ -102,8 +102,6 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
-
 public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 		PrologConsole {
 	private final class ClearAction extends Action {
