@@ -55,8 +55,6 @@ import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 
-import sun.security.action.GetLongAction;
-
 
 public abstract class PrologInterfaceFactory {
    
