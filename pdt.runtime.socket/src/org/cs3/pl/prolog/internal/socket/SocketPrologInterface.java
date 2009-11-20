@@ -53,10 +53,10 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface2;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
-public class SocketPrologInterface extends AbstractPrologInterface2 {
+public class SocketPrologInterface extends AbstractPrologInterface {
 
 	private class InitSession extends SocketSession {
 		public InitSession(SocketClient client, SocketPrologInterface pif,int flags)

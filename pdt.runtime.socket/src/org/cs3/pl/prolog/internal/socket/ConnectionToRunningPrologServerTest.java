@@ -46,7 +46,6 @@ import junit.framework.TestCase;
 import org.cs3.pl.prolog.PrologEventDispatcher;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceFactory;
@@ -122,7 +121,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:notify/2))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:thread_get_message/1))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:cleanup_thread/1))))");
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher((PrologInterface2) pif);
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher((PrologInterface) pif);
 		dispatcher.addPrologInterfaceListener("localisation:company_nearby(MAC, Other, Distance, 1000)",locationListener);
 
 		session.queryOnce("sync:deleteAll(magicmap:location('00-09-2D-53-27-3A', _,_,_))");
@@ -186,7 +185,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 			public void update(PrologInterfaceEvent e) {
 			}
 		};
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher((PrologInterface2) pif);
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher((PrologInterface) pif);
 		try {
 			
 			dispatcher.addPrologInterfaceListener("aha(",nullListener);
