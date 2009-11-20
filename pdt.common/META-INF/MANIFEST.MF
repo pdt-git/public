@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Common
 Bundle-SymbolicName: org.cs3.pdt.common;singleton:=true
-Bundle-Version: 0.2.2.qualifier
+Bundle-Version: 0.2.3.qualifier
 Bundle-ClassPath: common.jar
 Bundle-Localization: plugin
 Export-Package: org.cs3.pl.common;uses:="junit.framework"
