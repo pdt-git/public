@@ -1,7 +1,6 @@
 package org.cs3.pifcom.codec;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;

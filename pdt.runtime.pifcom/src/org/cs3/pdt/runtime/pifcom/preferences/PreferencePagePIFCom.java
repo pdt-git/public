@@ -1,11 +1,8 @@
 package org.cs3.pdt.runtime.pifcom.preferences;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pl.prolog.PrologInterface;
-import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 

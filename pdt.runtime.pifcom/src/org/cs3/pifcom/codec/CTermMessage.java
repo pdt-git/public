@@ -1,7 +1,5 @@
 package org.cs3.pifcom.codec;
 
-import java.nio.charset.Charset;
-
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.PLUtil;

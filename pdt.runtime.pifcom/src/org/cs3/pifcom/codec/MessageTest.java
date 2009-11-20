@@ -17,7 +17,6 @@ import java.net.Socket;
 import junit.framework.TestCase;
 
 import org.cs3.pdt.runtime.preferences.PreferenceInitializer;
-import org.cs3.pifcom.Factory;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
 
