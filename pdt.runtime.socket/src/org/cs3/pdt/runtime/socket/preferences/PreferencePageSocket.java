@@ -1,13 +1,11 @@
 package org.cs3.pdt.runtime.socket.preferences;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
-import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
