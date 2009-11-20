@@ -16,7 +16,6 @@ import org.cs3.pl.common.SimpleOption;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
@@ -61,7 +60,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 	private void updatePrologBackend(String[] ids, String[] values) {
 		itsMe=true;
 		try {
-			AsyncPrologSession s = ((PrologInterface2)prologProject.getMetadataPrologInterface()).getAsyncSession(PrologInterface.NONE);
+			AsyncPrologSession s = ((PrologInterface)prologProject.getMetadataPrologInterface()).getAsyncSession(PrologInterface.NONE);
 			s.addBatchListener(new DefaultAsyncPrologSessionListener());
 			for (int i = 0; i < values.length; i++) {
 				s.queryOnce("setup annotators", "pdt_set_annotator_enabled("+ids[i]+", "+values[i]+")");
