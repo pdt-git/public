@@ -17,7 +17,6 @@ import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
@@ -136,7 +135,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 
 			String subject = "progress(" + tag + ")";
 			dispatcher.addPrologInterfaceListener(subject, this);
-			PrologInterface2 pif = ((PrologInterface2) plProject
+			PrologInterface pif = ((PrologInterface) plProject
 					.getMetadataPrologInterface());
 			s = pif.getSession(PrologInterface.NONE);
 

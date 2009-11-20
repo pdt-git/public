@@ -63,7 +63,6 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
@@ -159,7 +158,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			IPrologProject plProject = (IPrologProject) getProject().getNature(
 					PDTCore.NATURE_ID);
 
-			PrologInterface2 pif = ((PrologInterface2) plProject
+			PrologInterface pif = ((PrologInterface) plProject
 					.getMetadataPrologInterface());
 			setupPif(pif);
 			final AsyncPrologSession as = pif.getAsyncSession(PrologInterface.NONE);
@@ -227,7 +226,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	private void setupPif(PrologInterface2 pif) throws CoreException {
+	private void setupPif(PrologInterface pif) throws CoreException {
 		PrologSession s = null;
 		try {
 			s = pif.getSession(PrologInterface.NONE);
@@ -288,7 +287,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				PDTCore.NATURE_ID);
 		AsyncPrologSession as = null;
 		try {
-			as = ((PrologInterface2) plProject.getMetadataPrologInterface())
+			as = ((PrologInterface) plProject.getMetadataPrologInterface())
 					.getAsyncSession(PrologInterface.NONE);
 
 			forget(forgetList, as, monitor);
