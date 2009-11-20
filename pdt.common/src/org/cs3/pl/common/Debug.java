@@ -41,9 +41,6 @@
 
 package org.cs3.pl.common;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
