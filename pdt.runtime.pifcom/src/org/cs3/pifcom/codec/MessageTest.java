@@ -16,6 +16,7 @@ import java.net.Socket;
 
 import junit.framework.TestCase;
 
+import org.cs3.pdt.runtime.preferences.PreferenceInitializer;
 import org.cs3.pifcom.Factory;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
@@ -54,8 +55,7 @@ public class MessageTest extends TestCase {
 	
 	
 	private void setUp_echo() throws IOException {
-		String executable = System.getProperty("executable", Factory
-				.guessExecutableName());
+		String executable = System.getProperty("executable", PreferenceInitializer.guessExecutableName());
 
 		String prolog_main = System.getProperty("prolog_main");
 		if (prolog_main == null) {

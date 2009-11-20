@@ -12,14 +12,14 @@ import org.cs3.pl.prolog.PrologInterface;
 public class PIFComUtils {
 	public static Object processBinding(CTermMessage m, int flags) {
 		CTerm term = m.getCTermValue();
-		if ((PrologInterface.CTERMS & flags)>0) {
+		if ((PrologInterface.CTERMS & flags) > 0) {
 			return term;
 		}
-		if ((PrologInterface.PROCESS_LISTS&flags)>0) {
-			return interpreteLists_deep(term,flags);
+		if ((PrologInterface.PROCESS_LISTS & flags) > 0) {
+			return interpreteLists_deep(term, flags);
 		}
-		if((PrologInterface.UNQUOTE_ATOMS&flags )>0) {
-			if(term instanceof CString||term instanceof CAtom){
+		if ((PrologInterface.UNQUOTE_ATOMS & flags) > 0) {
+			if (term instanceof CString || term instanceof CAtom) {
 				return term.getFunctorValue();
 			}
 		}
@@ -34,14 +34,12 @@ public class PIFComUtils {
 
 			Vector result = new Vector();
 			for (CTerm t : terms) {
-				result.add(interpreteLists_deep(t,flags));
+				result.add(interpreteLists_deep(t, flags));
 			}
 			return result;
-		}else if((PrologInterface.UNQUOTE_ATOMS&flags )>0 &&
-				(term instanceof CString||term instanceof CAtom)){
+		} else if ((PrologInterface.UNQUOTE_ATOMS & flags) > 0 && (term instanceof CString || term instanceof CAtom)) {
 			return term.getFunctorValue();
-		} 
-		else{
+		} else {
 			return PLUtil.renderTerm(term);
 		}
 

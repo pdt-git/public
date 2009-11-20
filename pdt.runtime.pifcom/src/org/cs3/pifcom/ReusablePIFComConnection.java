@@ -36,19 +36,15 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 	private final ReusablePool pool;
 	private final DatagramSocket udpSocket;
 
-	public ReusablePIFComConnection(DatagramSocket udpSocket, InetAddress host,
-			int port, ReusablePool pool) throws UnknownHostException,
-			IOException {
+	public ReusablePIFComConnection(DatagramSocket udpSocket, InetAddress host, int port, ReusablePool pool) throws UnknownHostException, IOException {
 
 		this.udpSocket = udpSocket;
 		this.pool = pool;
 		// connect
 		clientSocket = new Socket(host, port);
-		in = new DataInputStream(new BufferedInputStream(clientSocket
-				.getInputStream()));
+		in = new DataInputStream(new BufferedInputStream(clientSocket.getInputStream()));
 
-		out = new DataOutputStream(new BufferedOutputStream(clientSocket
-				.getOutputStream()));
+		out = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
 		this.host = host;
 		clientSocket.setSoTimeout(2000);
 		NameMessage m;
@@ -61,7 +57,6 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 		processorThreadAlias = m.getStringValue();
 	}
 
-	
 	public void dispose() {
 		disposed = true;
 		if (pool != null) {
@@ -71,13 +66,11 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 		}
 	}
 
-	
 	public void flushBatch() throws IOException {
 		out.flush();
 
 	}
 
-	
 	public int getNewTicket() {
 		if (nextTicket == 0xFFFF) {
 			nextTicket = 0;
@@ -86,34 +79,28 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 		return nextTicket++;
 	}
 
-	
 	public String getThreadAlias() {
 		return processorThreadAlias;
 	}
 
-	
 	public boolean isDisposed() {
 
 		return disposed;
 	}
 
-	
 	public Message readMessage() throws IOException {
 
 		return Message.read(in);
 	}
 
-	
 	public void sendControlMessage(Message m) throws IOException {
 		m.send(udpSocket, host, udpSlavePort);
 	}
 
-	
 	public void writeBatchMessage(Message m) throws IOException {
 		m.write(out);
 	}
 
-	
 	public void destroy() {
 		try {
 			writeBatchMessage(Message.bye(getNewTicket()));
@@ -129,11 +116,9 @@ abstract class ReusablePIFComConnection implements PIFComConnection, Reusable {
 
 	}
 
-	
 	public void recylce() {
 	}
 
-	
 	public void reuse() {
 		disposed = false;
 		try {

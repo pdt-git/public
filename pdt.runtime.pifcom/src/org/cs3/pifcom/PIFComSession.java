@@ -19,10 +19,11 @@ import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class PIFComSession implements PrologSession {
 
-	private PIFComPrologInterface pif;
+	private AbstractPrologInterface pif;
 
 	private PIFComConnection connection;
 
@@ -30,7 +31,7 @@ public class PIFComSession implements PrologSession {
 
 	
 	public PIFComSession(PIFComConnection connection,
-			PIFComPrologInterface pif, int flags) {
+			AbstractPrologInterface pif, int flags) {
 		this.connection = connection;
 		this.pif = pif;
 		this.flags=flags;
