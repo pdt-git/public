@@ -10,7 +10,10 @@ public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterface pif = Factory.newInstance().create();
-		String kill=pif.getOption(SocketPrologInterface.KILLCOMMAND);
+		//String kill=pif.getOption(SocketPrologInterface.PREF_KILLCOMMAND);
+		SocketPrologInterface spif = (SocketPrologInterface) pif;
+		String kill= spif.getKillcommand();
+		
 		pif.start();
 
 		
@@ -33,7 +36,11 @@ public class RestartTest extends TestCase {
 	public void testRecover_lazy() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		PrologInterface pif = Factory.newInstance().create();
-		String kill=pif.getOption(SocketPrologInterface.KILLCOMMAND);
+		//String kill=pif.getOption(SocketPrologInterface.KILLCOMMAND);
+		SocketPrologInterface spif = (SocketPrologInterface) pif;
+		String kill= spif.getKillcommand();
+		
+		
 		//pif.start();
 
 		

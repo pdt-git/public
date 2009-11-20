@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -55,11 +56,16 @@ import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.ReusablePool;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 public class SocketPrologInterface extends AbstractPrologInterface {
 
+	
+
+	
+	
 	private class InitSession extends SocketSession {
-		public InitSession(SocketClient client, SocketPrologInterface pif,int flags)
+		public InitSession(SocketClient client, AbstractPrologInterface pif,int flags)
 				throws IOException {
 			super(client, pif,flags);
 		}
@@ -76,7 +82,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	}
 
 	private class ShutdownSession extends SocketSession {
-		public ShutdownSession(SocketClient client, SocketPrologInterface pif, int flags)
+		public ShutdownSession(SocketClient client, AbstractPrologInterface pif, int flags)
 				throws IOException {
 			super(client, pif,flags);
 		}
@@ -92,45 +98,164 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		}
 	}
 
-	private int port = -1;
 
-	private boolean standAloneServer = false;
+	/************************************************/
+	/**** Options [Start] *****/
+	/************************************************/
+	
 
+	public static final String PREF_KILLCOMMAND = "pif.killcommand";
+	public static final String PREF_PORT = "pif.port";
+	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
+	//public static final String PREF_ENGINE_FILE = "pif.engine_file";
+	public static final String PREF_MAIN_FILE = "pif.main_file";
+	public final static String PREF_USE_POOL = "pif.use_pool";
+	public static final String PREF_CREATE_LOGS = "pif.create_logs";
+	
 	private boolean useSessionPooling = true;
-
-	private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
-
-	public final static String EXECUTABLE = "pif.executable";
-
-	public static final String ENVIRONMENT = "pif.environment";
-
-	public static final String KILLCOMMAND = "pif.killcommand";
+	private int port = -1;
+	private boolean hidePlwin;
+	private String killcommand;
+	private boolean createLogs;
+		
 
 	
-	public final static String STANDALONE = "pif.standalone";
+	private void setKillcommand(String killcommand) {
+		this.killcommand = killcommand;
+	}
+	public String getKillcommand() {
+		return killcommand;
+	}
+	public void setPort(int port) {
+		this.port = port;
+	}
+	public void setPort(String port) {
+		this.port = Integer.parseInt(port);
+	}
+	public void setUseSessionPooling(String useSessionPooling) {
+		setUseSessionPooling(Boolean.parseBoolean(useSessionPooling));
+	}
+	public void setUseSessionPooling(boolean useSessionPooling) {
+		this.useSessionPooling = useSessionPooling;
+		pool = useSessionPooling ? new ReusablePool() : null;
+	}
+	public void setCreateLogs(boolean createLogs) {
+		this.createLogs = createLogs;
+	}
+	public void setCreateLogs(String createLogs) {
+		this.createLogs = Boolean.parseBoolean(createLogs);
+	}
+	public boolean isCreateLogs() {
+		return createLogs;
+	}
+	public int getPort() {
+		return port;
+	}
 
-	public static final String ENGINE_FILE = "pif.engine_file";
+	
+	public boolean isHidePlwin() {
+		return hidePlwin;
+	}
 
-	public static final String MAIN_FILE = "pif.main_file";
+	public void setHidePlwin(boolean hidePlwin) {
+		this.hidePlwin = hidePlwin;
+	}
+	public void setHidePlwin(String hidePlwin) {
+		this.hidePlwin = Boolean.parseBoolean(hidePlwin);
+	}
+	
+	public void initOptions(){
+		
+		super.initOptions(preference_store);
+	
+		
+		setPort(overridePreferenceBySytemProperty(PREF_PORT));
+		this.setHidePlwin(overridePreferenceBySytemProperty(PREF_HIDE_PLWIN));		
+		this.setKillcommand(overridePreferenceBySytemProperty(PREF_KILLCOMMAND));
+		this.setCreateLogs(overridePreferenceBySytemProperty(PREF_CREATE_LOGS));
+		setUseSessionPooling(overridePreferenceBySytemProperty(PREF_USE_POOL));
+	}
+	
+	
+	
+//	public void setOption(String opt, String value) {
+//		if (FILE_SEARCH_PATH.equals(opt)){
+//			this.fileSearchPath=value;
+//		}
+//		else if (PREF_EXECUTABLE.equals(opt)) {
+//			this.executable = value;
+//		} else if (PREF_ENVIRONMENT.equals(opt)) {
+//			this.environment = value;
+//		} else if (KILLCOMMAND.equals(opt)) {
+//			this.killcommand = value;
+//		} else if (PREF_STANDALONE.equals(opt)) {
+//			setStandAloneServer(Boolean.valueOf(value).booleanValue());
+//		} else if (PREF_TIMEOUT.equals(opt)) {
+//			this.timeout = Integer.parseInt(value);
+//		} else if (PREF_HIDE_PLWIN.equals(opt)) {
+//			this.hidePlwin = Boolean.valueOf(value).booleanValue();
+//		} else if (PREF_CREATE_LOGS.equals(opt)) {
+//			this.createLogs = Boolean.valueOf(value).booleanValue();
+//		} else if (PREF_USE_POOL.equals(opt)) {
+//			setUseSessionPooling(Boolean.valueOf(value).booleanValue());
+//		} else if (PREF_HOST.equals(opt)) {
+//			setHost(value);
+//		} else if (PREF_PORT.equals(opt)) {
+//			setPort(Integer.parseInt(value));
+//		} else {
+//			throw new IllegalArgumentException("option not supported: " + opt);
+//		}
+//	}
 
-	public final static String USE_POOL = "pif.use_pool";
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
+	 */
+	// Please use getters & setters instead
+	//@Deprecated
+//	public String getOption(String opt) {
+//		// ld: changed semantic:: System properties override any settings
+//		String s = System.getProperty(opt);
+//		if (s != null) {
+//			Debug.warning("option " + opt
+//					+ " is overridden by System Property: " + s);
+//			return s;
+//		}
+//		if(PREF_FILE_SEARCH_PATH.equals(opt)){
+//			return getFileSearchPath();
+//		} else if (PREF_EXECUTABLE.equals(opt)) {
+//			return getExecutable();
+//		} else if (PREF_ENVIRONMENT.equals(opt)) {
+//			return getEnvironment();
+//		} else if (PREF_KILLCOMMAND.equals(opt)) {
+//			return "" + getKillcommand();
+//		} else if (PREF_STANDALONE.equals(opt)) {
+//			return "" + isStandAloneServer();
+//		} else if (PREF_USE_POOL.equals(opt)) {
+//			return "" + useSessionPooling;
+//		} else if (PREF_HIDE_PLWIN.equals(opt)) {
+//			return "" + isHidePlwin();
+//		} else if (PREF_CREATE_LOGS.equals(opt)) {
+//			return "" + createLogs;
+//		} else if (PREF_TIMEOUT.equals(opt)) {
+//			return "" + getTimeout();
+//		} else if (PREF_HOST.equals(opt)) {
+//			return getHost();
+//		} else if (PREF_PORT.equals(opt)) {
+//			return "" + port;
+//		} else {
+//			throw new IllegalArgumentException("option not supported: " + opt);
+//		}
+//	}
+	
+	
+	/************************************************/
+	/**** Options [End] *****/
+	/************************************************/	
 
-	public final static String TIMEOUT = "pif.timeout";
 
-	public static final String HIDE_PLWIN = "pif.hide_plwin";
-
-	public static final String HOST = "pif.host";
-
-	public static final String PORT = "pif.port";
-
-	public static final String CREATE_LOGS = "pif.create_logs";
-
-	private String host;
-
-	private String engineDir;
-
-	private String executable;
-
+	private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 	private PrologInterfaceFactory factory;
 
 	private ResourceFileLocator locator;
@@ -139,23 +264,15 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 	private File lockFile;
 
-	private int timeout;
-
-	private boolean hidePlwin;
-
-	private String environment;
-
-	private String killcommand;
-
-	private boolean createLogs;
-
+	
 	private ServerStartAndStopStrategy startAndStopStrategy;
 
-	private String fileSearchPath;
+	protected IPreferenceStore preference_store;
 
 	public SocketPrologInterface(PrologInterfaceFactory factory, String name) {
 		super(name);
 		this.factory = factory;
+		preference_store = PrologRuntimePlugin.getDefault().getPreferenceStore();
 
 	}
 
@@ -168,7 +285,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			}
 			if (socket == null) {
 				Debug.info("creating new ReusableSocket");
-				socket = new ReusableSocket(host, port);
+				socket = new ReusableSocket(getHost(), port);
 			} else {
 				Debug.info("reusing old ReusableSocket");
 			}
@@ -193,7 +310,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			}
 			if (socket == null) {
 				Debug.info("creating new ReusableSocket");
-				socket = new ReusableSocket(host, port);
+				socket = new ReusableSocket(getHost(), port);
 			} else {
 				Debug.info("reusing old ReusableSocket");
 			}
@@ -210,112 +327,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		}
 	}
 
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	private void setHost(String value) {
-		this.host = value;
-	}
-
-	/**
-	 * @param standAloneServer
-	 *            The standAloneServer to set.
-	 */
-	public void setStandAloneServer(boolean standAloneServer) {
-		if (isDown()) {
-			this.standAloneServer = standAloneServer;
-		} else {
-			throw new IllegalStateException(
-					"Cannot change standalone flag while in use.");
-		}
-
-	}
-
-	/**
-	 * @param useSessionPooling
-	 *            The useSessionPooling to set.
-	 */
-	public void setUseSessionPooling(boolean useSessionPooling) {
-		this.useSessionPooling = useSessionPooling;
-		pool = useSessionPooling ? new ReusablePool() : null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#setOption(java.lang.String,
-	 *      java.lang.String)
-	 */
-	public void setOption(String opt, String value) {
-		if (FILE_SEARCH_PATH.equals(opt)){
-			this.fileSearchPath=value;
-		}
-		else if (EXECUTABLE.equals(opt)) {
-			this.executable = value;
-		} else if (ENVIRONMENT.equals(opt)) {
-			this.environment = value;
-		} else if (KILLCOMMAND.equals(opt)) {
-			this.killcommand = value;
-		} else if (STANDALONE.equals(opt)) {
-			setStandAloneServer(Boolean.valueOf(value).booleanValue());
-		} else if (TIMEOUT.equals(opt)) {
-			this.timeout = Integer.parseInt(value);
-		} else if (HIDE_PLWIN.equals(opt)) {
-			this.hidePlwin = Boolean.valueOf(value).booleanValue();
-		} else if (CREATE_LOGS.equals(opt)) {
-			this.createLogs = Boolean.valueOf(value).booleanValue();
-		} else if (USE_POOL.equals(opt)) {
-			setUseSessionPooling(Boolean.valueOf(value).booleanValue());
-		} else if (HOST.equals(opt)) {
-			setHost(value);
-		} else if (PORT.equals(opt)) {
-			setPort(Integer.parseInt(value));
-		} else {
-			throw new IllegalArgumentException("option not supported: " + opt);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
-	 */
-	public String getOption(String opt) {
-		// ld: changed semantic:: System properties override any settings
-		String s = System.getProperty(opt);
-		if (s != null) {
-			Debug.warning("option " + opt
-					+ " is overridden by System Property: " + s);
-			return s;
-		}
-		if(FILE_SEARCH_PATH.equals(opt)){
-			return fileSearchPath;
-		} else if (EXECUTABLE.equals(opt)) {
-			return executable;
-		} else if (ENVIRONMENT.equals(opt)) {
-			return environment;
-		} else if (KILLCOMMAND.equals(opt)) {
-			return "" + killcommand;
-		} else if (STANDALONE.equals(opt)) {
-			return "" + standAloneServer;
-		} else if (USE_POOL.equals(opt)) {
-			return "" + useSessionPooling;
-		} else if (HIDE_PLWIN.equals(opt)) {
-			return "" + hidePlwin;
-		} else if (CREATE_LOGS.equals(opt)) {
-			return "" + createLogs;
-		} else if (TIMEOUT.equals(opt)) {
-			return "" + timeout;
-		} else if (HOST.equals(opt)) {
-			return host;
-		} else if (PORT.equals(opt)) {
-			return "" + port;
-		} else {
-			throw new IllegalArgumentException("option not supported: " + opt);
-		}
-	}
-
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -344,7 +357,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
-			return new InitSession(new SocketClient(host, port), this,LEGACY);
+			return new InitSession(new SocketClient(getHost(), port), this,LEGACY);
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -360,7 +373,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			throws PrologInterfaceException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
-			return new ShutdownSession(new SocketClient(host, port), this,LEGACY);
+			return new ShutdownSession(new SocketClient(getHost(), port), this,LEGACY);
 		} catch (Throwable e) {
 			throw error(e);
 			
@@ -423,7 +436,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
 	public void start() throws PrologInterfaceException {
-		
+		System.out.println("Start Socket ");
 		if (pool != null) {
 			pool.clear();
 		}
@@ -439,22 +452,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		return lockFile;
 	}
 
-	public int getPort() {
-		return port;
-	}
-
-	public int getTimeout() {
-		return timeout;
-	}
-
-	public boolean isHidePlwin() {
-		return hidePlwin;
-	}
-
-	public void setHidePlwin(boolean hidePlwin) {
-		this.hidePlwin = hidePlwin;
-	}
-
+	
 	
 	public ServerStartAndStopStrategy getStartAndStopStrategy() {	
 		return this.startAndStopStrategy;
@@ -485,5 +483,8 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			}
 		}
 	}
+
+
+
 	
 }

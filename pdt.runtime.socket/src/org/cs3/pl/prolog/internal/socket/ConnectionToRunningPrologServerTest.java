@@ -204,7 +204,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 		PrologInterfaceFactory factory= Factory.newInstance(FACTORY);
 		PrologInterface pif = factory.create();
 		
-		pif.setOption(SocketPrologInterface.STANDALONE,"true");
+		pif.setStandAloneServer(true);		
 		pif.start();
 		return pif;
 	}
