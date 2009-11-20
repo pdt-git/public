@@ -24,6 +24,7 @@ import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class AsynchronousPIFComSession implements AsyncPrologSession {
 		private final class ResultDispatcher extends Thread {
@@ -61,7 +62,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 	HashMap<Integer, Object> tickets = new HashMap<Integer, Object>();
 	private HashMap<Integer, String> queries = new HashMap();
 	private Vector<AsyncPrologSessionListener> listeners = new Vector<AsyncPrologSessionListener>();
-	private PIFComPrologInterface pif;
+	private AbstractPrologInterface pif;
 	private ResultDispatcher dispatcher;
 	private boolean disposed;
 	private PrologInterfaceException error;
@@ -69,7 +70,7 @@ public class AsynchronousPIFComSession implements AsyncPrologSession {
 	private int flags;
 
 	public AsynchronousPIFComSession(PIFComConnection connection,
-			PIFComPrologInterface pif, int flags) {
+			AbstractPrologInterface pif, int flags) {
 		this.connection = connection;
 		this.pif = pif;
 		this.flags=flags;

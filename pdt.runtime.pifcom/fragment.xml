@@ -2,6 +2,7 @@
 <?eclipse version="3.0"?>
 <fragment>
 
+
     <extension
          point="org.cs3.pdt.runtime.prologLibrary">
       <library
@@ -9,6 +10,21 @@
             id="pdt.runtime.pifcom.codebase"
             path="library/pifcom/">
       </library>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="org.cs3.pdt.runtime.preferences.PreferencePage"
+            class="org.cs3.pdt.runtime.pifcom.preferences.PreferencePagePIFCom"
+            id="org.cs3.pdt.runtime.pifcom.preferences.PreferencePagePIFCom"
+            name="PIFCom Preferences">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.cs3.pdt.runtime.pifcom.preferences.PreferenceInitializer">
+      </initializer>
    </extension>
 
 </fragment>

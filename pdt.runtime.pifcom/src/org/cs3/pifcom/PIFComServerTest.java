@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 
+import junit.framework.TestCase;
+
+import org.cs3.pdt.runtime.preferences.PreferenceInitializer;
 import org.cs3.pifcom.codec.CTermMessage;
 import org.cs3.pifcom.codec.Message;
 import org.cs3.pifcom.codec.NameMessage;
@@ -22,8 +23,7 @@ import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CTerm;
-
-import junit.framework.TestCase;
+import org.cs3.pl.prolog.PrologInterface;
 
 /*
  * Starts a prolog process running the pifcom_server.
@@ -69,8 +69,8 @@ public class PIFComServerTest extends TestCase {
 	private String processorThreadAlias;
 
 	protected void setUp() throws IOException {
-		String executable = System.getProperty("pif.executable", Factory
-				.guessExecutableName());
+		String executable = System.getProperty(PrologInterface.PREF_EXECUTABLE, 
+				PreferenceInitializer.guessExecutableName());
 
 		String path = System.getProperty("prolog.library_path");
 		if (path == null) {
