@@ -57,6 +57,7 @@ public final class PDT {
 	 * using the static Debug.setDeubgLevel(int) method.
 	 */
 	public final static String PREF_DEBUG_LEVEL = "debug.level";
+	public final static String PREF_DEBUG_OUTPUT_TO = "debug.output.to";
 	public static final String PREF_ADD_NATURE_ON_OPEN = "pdt.ask.add_nature";
 
 	/**
