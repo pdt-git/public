@@ -61,6 +61,8 @@ import org.cs3.pl.common.SimpleOption;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -114,21 +116,21 @@ public class PDTPlugin extends AbstractUIPlugin {
 		}
 	}
 
-	public ResourceFileLocator getResourceLocator(String key) {
-		if (rootLocator == null) {
-			URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
-			File location = null;
-			try {
-				location = new File(Platform.asLocalURL(url).getFile());
-			} catch (IOException t) {
-				Debug.report(t);
-				throw new RuntimeException(t);
-			}
-
-			rootLocator = new DefaultResourceFileLocator(location);
-		}
-		return rootLocator.subLocator(key);
-	}
+//	public ResourceFileLocator getResourceLocator(String key) {
+//		if (rootLocator == null) {
+//			URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
+//			File location = null;
+//			try {
+//				location = new File(Platform.asLocalURL(url).getFile());
+//			} catch (IOException t) {
+//				Debug.report(t);
+//				throw new RuntimeException(t);
+//			}
+//
+//			rootLocator = new DefaultResourceFileLocator(location);
+//		}
+//		return rootLocator.subLocator(key);
+//	}
 
 	/**
 	 * Returns the plugin's resource bundle,
@@ -175,16 +177,14 @@ public class PDTPlugin extends AbstractUIPlugin {
 
 	private void reconfigureDebugOutput() throws FileNotFoundException {
 		String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL, "WARNING");
-		Debug.setDebugLevel(debugLevel);
+		String debugOutputTo = getPreferenceValue(PDT.PREF_DEBUG_OUTPUT_TO, "LOGFILE");
 		String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE, null);
-		if (logFileName != null && !logFileName.equals("")) {
-			System.out.println("debug output is written to: " + logFileName);
-			File logFile = new File(logFileName);
-			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(logFile, true));
-			Debug.setOutputStream(new PrintStream(bufferedOutputStream));
-		} else {
-			Debug.setOutputStream(System.err);
-		}
+		
+		Debug.setDebugLevel(debugLevel);
+		Debug.setLogFile(logFileName);	
+		Debug.setOutputTo(debugOutputTo);
+		
+		
 	}
 
 	/**
@@ -194,7 +194,17 @@ public class PDTPlugin extends AbstractUIPlugin {
 		try {
 			super.start(context);
 			reconfigureDebugOutput();
+			IPropertyChangeListener debugPropertyChangeListener = new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent e) {
+					try {
+						PDTPlugin.getDefault().reconfigureDebugOutput();
+					} catch (FileNotFoundException e1) {
+						Debug.report(e1);
+					}
+				}
 
+			};	
+			getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
