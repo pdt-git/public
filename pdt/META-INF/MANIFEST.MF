@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: PDT Plug-in
 Bundle-SymbolicName: org.cs3.pdt; singleton:=true
-Bundle-Version: 0.2.2.qualifier
+Bundle-Version: 0.2.3.qualifier
 Bundle-ClassPath: PDT.jar
 Bundle-Activator: org.cs3.pdt.PDTPlugin
 Bundle-Vendor: http://roots.iai.uni-bonn.de

@@ -22,7 +22,6 @@ import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterface2;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
@@ -275,7 +274,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (sessionLock) {
 			if (session == null && pif != null) {
 				//session = ((PrologInterface2) pif).getAsyncSession();
-				session=new AsyncPrologSessionProxy((PrologInterface2) pif,PrologInterface.PROCESS_LISTS);
+				session=new AsyncPrologSessionProxy((PrologInterface) pif,PrologInterface.PROCESS_LISTS);
 				// session.setPreferenceValue("socketsession.canonical",
 				// "true");
 				session.addBatchListener(this);
@@ -313,7 +312,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			this.dispatcher.removePrologInterfaceListener(this.subject, this);
 		}
 		if (this.pif != null) {
-			((PrologInterface2) this.pif).removeLifeCycleHook(this, HOOK_ID);
+			((PrologInterface) this.pif).removeLifeCycleHook(this, HOOK_ID);
 		}
 		this.pif = pif;
 		this.dispatcher = d;
