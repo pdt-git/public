@@ -63,6 +63,7 @@ import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * convenience implementation of common infrastructure.
@@ -70,6 +71,148 @@ import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
  * Subclasses have to implement getSession().
  */
 public abstract class AbstractPrologInterface implements PrologInterface {
+
+	protected HashSet<WeakReference<PrologSession>> sessions = new HashSet<WeakReference<PrologSession>>();
+	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
+	private List<String> bootstrapLibraries = new Vector();
+
+	/************************************************/
+	/**** Options [Start] *****/
+	/************************************************/
+
+	private boolean standAloneServer = false;
+	private String host;
+	private String executable;
+	private String environment;
+	private int timeout;
+	private String fileSearchPath;
+
+	private IPreferenceStore preference_store;
+
+	public void setStandAloneServer(String standAloneServer) {
+		setStandAloneServer(Boolean.parseBoolean(standAloneServer));
+	}
+
+	public void setStandAloneServer(boolean standAloneServer) {
+		if (isDown()) {
+			this.standAloneServer = standAloneServer;
+		} else {
+			throw new IllegalStateException("Cannot change standalone flag while in use.");
+		}
+
+	}
+
+	public boolean isStandAloneServer() {
+		return standAloneServer;
+	}
+
+	public void setFileSearchPath(String fileSearchPath) {
+		this.fileSearchPath = fileSearchPath;
+	}
+
+	public String getFileSearchPath() {
+		return fileSearchPath;
+	}
+
+	private void setHost(String value) {
+		this.host = value;
+	}
+
+	public String getHost() {
+		return host;
+	}
+
+	private void setTimeout(String timeout) {
+		this.timeout = Integer.parseInt(timeout);
+	}
+
+	private void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setExecutable(String executable) {
+		this.executable = executable;
+	}
+
+	public String getExecutable() {
+		return executable;
+	}
+
+	private void setEnvironment(String environment) {
+		this.environment = environment;
+	}
+
+	public String getEnvironment() {
+		return environment;
+	}
+
+	public void initOptions(IPreferenceStore store) {
+		preference_store = store;
+
+		// setStandAloneServer(preference_store.getBoolean(PREF_STANDALONE));
+		// setHost(preference_store.getString(PREF_HOST));
+		// setExecutable(preference_store.getString(PREF_EXECUTABLE));
+		// setEnvironment(preference_store.getString(PREF_ENVIRONMENT));
+		// setTimeout(preference_store.getInt(PREF_TIMEOUT));
+		// setFileSearchPath(preference_store.getString(PREF_FILE_SEARCH_PATH));
+
+		setStandAloneServer(overridePreferenceBySytemProperty(PREF_STANDALONE));
+		setHost(overridePreferenceBySytemProperty(PREF_HOST));
+		setExecutable(overridePreferenceBySytemProperty(PREF_EXECUTABLE));
+		setEnvironment(overridePreferenceBySytemProperty(PREF_ENVIRONMENT));
+		setTimeout(overridePreferenceBySytemProperty(PREF_TIMEOUT));
+		setFileSearchPath(overridePreferenceBySytemProperty(PREF_FILE_SEARCH_PATH));
+
+	}
+
+	protected String overridePreferenceBySytemProperty(String name) {
+		String value;
+		// System properties override any preference settings
+		// example: vm-arguments: -Dpif.hide_plwin=false
+		value = System.getProperty(name);
+		// System.getProperty(name,preference_store.getString(name))
+
+		if (value != null) {
+			Debug.warning("option " + name + " is overridden by system property: " + value);
+			// System.out.println("option " + name +
+			// " is overridden by system property: " + value);
+			return value;
+		}
+
+		value = preference_store.getString(name);
+		// System.out.println("option " + name + " is set by preference: " +
+		// value);
+		return value;
+
+	}
+
+	// /**
+	// * override this if you need configurable options. the default
+	// * implementation does not have any configuragble options, so it will
+	// always
+	// * through an IllegalArgumentException..
+	// */// public String getOption(String opt) {
+	// throw new IllegalArgumentException("option not supported: " + opt);
+	// }
+
+	// /**
+	// * override this if you need configurable options. the default
+	// * implementation does not have any configuragble options, so it will
+	// always
+	// * through an IllegalArgumentException..
+	// */
+	// public void setOption(String opt, String value) {
+	// throw new IllegalArgumentException("option not supported: " + opt);
+	// }
+
+	/************************************************/
+	/**** Options [End] *****/
+	/************************************************/
+
 	protected static final class PifShutdownHook extends Thread {
 		WeakHashMap<PrologInterface, Object> pifs;
 
@@ -89,8 +232,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 
 		public void run() {
-			for (Iterator<PrologInterface> it = pifs.keySet().iterator(); it
-					.hasNext();) {
+			for (Iterator<PrologInterface> it = pifs.keySet().iterator(); it.hasNext();) {
 				PrologInterface pif = it.next();
 				if (pif != null) {
 					try {
@@ -112,25 +254,17 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 		public MyLifeCycle(String name) {
 			super(name);
-
 		}
 
-		
-		public PrologSession getInitialSession()
-				throws PrologInterfaceException {
-
+		public PrologSession getInitialSession() throws PrologInterfaceException {
 			return AbstractPrologInterface.this.getInitialSession();
 		}
 
-		
 		public PrologInterface getPrologInterface() {
-
 			return AbstractPrologInterface.this;
 		}
 
-		
-		public PrologSession getShutdownSession()
-				throws PrologInterfaceException {
+		public PrologSession getShutdownSession() throws PrologInterfaceException {
 			return AbstractPrologInterface.this.getShutdownSession();
 		}
 
@@ -143,20 +277,18 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		}
 
 		public boolean isServerRunning() throws Throwable {
-			return getStartAndStopStrategy().isRunning(
-					AbstractPrologInterface.this);
+			return getStartAndStopStrategy().isRunning(AbstractPrologInterface.this);
 		}
 
 		public void disposeSessions() throws Throwable {
 			synchronized (sessions) {
-				HashSet<WeakReference<PrologSession>> cloned = new HashSet<WeakReference<PrologSession>>(
-						sessions);
+				HashSet<WeakReference<PrologSession>> cloned = new HashSet<WeakReference<PrologSession>>(sessions);
 				for (WeakReference<PrologSession> ref : cloned) {
 					Disposable ps = ref.get();
 					if (ps != null && !ps.isDisposed()) {
-						try{
+						try {
 							ps.dispose();
-						} catch(Throwable t){
+						} catch (Throwable t) {
 							Debug.report(t);
 						}
 
@@ -170,8 +302,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	final MyLifeCycle lifecycle;
 
-	private List<String> bootstrapLibraries = new Vector();
-
 	public List<String> getBootstrapLibraries() {
 		return bootstrapLibraries;
 	}
@@ -179,10 +309,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public void setBootstrapLibraries(List<String> l) {
 		this.bootstrapLibraries = l;
 	}
-
-	protected HashSet<WeakReference<PrologSession>> sessions = new HashSet<WeakReference<PrologSession>>();
-
-	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
 
 	public AbstractPrologInterface() {
 		PifShutdownHook.getInstance().add(this);
@@ -206,15 +332,15 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * @param id
 	 * @param dependsOn
 	 */
-	public void addLifeCycleHook(LifeCycleHook hook, String id,
-			String[] dependencies) {
+	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies) {
 		lifecycle.addLifeCycleHook(hook, id, dependencies);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
+	 * @see
+	 * org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
 	 */
 	public void removeLifeCycleHook(String hookId) {
 		lifecycle.removeLifeCycleHook(hookId);
@@ -251,7 +377,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 
 		try {
-			return getSession_internal(LEGACY);//FIXME: a temporary solution. 
+			return getSession_internal(LEGACY);// FIXME: a temporary solution.
 		} catch (Throwable t) {
 			throw new PrologInterfaceException(t);
 		}
@@ -269,12 +395,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	public abstract PrologSession getSession_impl(int flags) throws Throwable;
 
-	public PrologSession getSession() throws PrologInterfaceException{
+	public PrologSession getSession() throws PrologInterfaceException {
 		return getSession(LEGACY);
 	}
-	
+
 	public PrologSession getSession(int flags) throws PrologInterfaceException {
-		
+
 		PLUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
@@ -291,14 +417,11 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			try {
 				return getSession_internal(flags);
 			} catch (Throwable t) {
-				throw new PrologInterfaceException("Failed to obtain session",
-						t);
+				throw new PrologInterfaceException("Failed to obtain session", t);
 			}
 
 		}
 	}
-
-	
 
 	private PrologSession getSession_internal(int flags) throws Throwable {
 
@@ -308,8 +431,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
-	protected void waitUntilUp() throws InterruptedException,
-			PrologInterfaceException {
+	protected void waitUntilUp() throws InterruptedException, PrologInterfaceException {
 		lifecycle.waitUntilUp();
 	}
 
@@ -319,10 +441,9 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * @return
 	 * @throws PrologInterfaceException
 	 */
-	protected PrologSession getShutdownSession()
-			throws PrologInterfaceException {
+	protected PrologSession getShutdownSession() throws PrologInterfaceException {
 		try {
-			return getSession_internal(LEGACY); //FIXME: a temporary solution
+			return getSession_internal(LEGACY); // FIXME: a temporary solution
 		} catch (Throwable t) {
 			throw new PrologInterfaceException(t);
 		}
@@ -447,19 +568,21 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return getError();
 
 	}
-	public void debug_wakeupPoledSessions(){
-		
+
+	public void debug_wakeupPoledSessions() {
+
 	}
-public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable;
-	
+
+	public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable;
+
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
 		return getAsyncSession(LEGACY);
 	}
-	
+
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException {
 		PLUtil.checkFlags(flags);
 		synchronized (lifecycle) {
-			if(getError()!=null){
+			if (getError() != null) {
 				throw new PrologInterfaceException(getError());
 			}
 			if (!isUp()) {
@@ -473,8 +596,7 @@ public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwa
 			try {
 				return getAsyncSession_internal(flags);
 			} catch (Throwable t) {
-				throw new PrologInterfaceException("Failed to obtain session",
-						t);
+				throw new PrologInterfaceException("Failed to obtain session", t);
 			}
 		}
 	}
@@ -487,8 +609,7 @@ public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwa
 
 	}
 
-	public void removeLifeCycleHook(final LifeCycleHook hook,
-			final String hookId) {
+	public void removeLifeCycleHook(final LifeCycleHook hook, final String hookId) {
 		lifecycle.removeLifeCycleHook(hook, hookId);
 	}
 }

@@ -53,10 +53,7 @@ public interface PrologInterface {
 	 */
 	public final static String SUBJECT_CONSULTED = "consulted";
 
-	/**
-	 * property constant.
-	 */
-	public static final String FILE_SEARCH_PATH = "pif.file_search_path";
+	
 
 	/**
 	 * session flag.
@@ -106,6 +103,21 @@ public interface PrologInterface {
 	 * method.
 	 */
 	public final static int LEGACY = UNQUOTE_ATOMS | PROCESS_LISTS;
+	
+	/**
+	 * property constant.
+	 */
+	public static final String PREF_FILE_SEARCH_PATH = "pif.file_search_path";
+	public static final String PREF_EXECUTABLE = "pif.executable";
+	public static final String PREF_ENVIRONMENT = "pif.environment";
+	public static final String PREF_STANDALONE = "pif.standalone";
+	public static final String PREF_TIMEOUT = "pif.timeout";
+	public static final String PREF_HOST = "pif.host";
+	
+	public static final String STACK_COMMMAND_LINE_PARAMETERS = "-L4m -G4m -T4m -A1m";
+
+	public static final String WINDOWS_EXECUTABLE = "plwin";
+
 
 	/**
 	 * Returns a prolog session.<br>
@@ -160,18 +172,37 @@ public interface PrologInterface {
 			String[] dependencies);
 
 	/**
-	 * set a configuration option of this prolog interface.
+	 * init options of this prolog interface from preference_store
 	 * 
 	 * @see PrologInterfaceFactory.getOptions()
 	 */
-	public void setOption(String opt, String value);
+	public void initOptions();
+		
+	
+//	/**
+//	 * set a configuration option of this prolog interface.
+//	 * 
+//	 * @see PrologInterfaceFactory.getOptions()
+//	 */
+//	public void setOption(String opt, String value);
+	
+	public void setStandAloneServer(boolean standAloneServer);
 
-	/**
-	 * get the current value of a configuration option.
-	 * 
-	 * @see PrologInterfaceFactory.getOptions()
-	 */
-	public String getOption(String opt);
+	public boolean isStandAloneServer();
+	public String getExecutable();
+	public void setExecutable(String executable);
+	public String getEnvironment() ;
+	public String getHost();
+	public String getFileSearchPath();
+	public int getTimeout();
+	public void setFileSearchPath(String fileSearchPath);
+	
+//	/**
+//	 * get the current value of a configuration option.
+//	 * 
+//	 * @see PrologInterfaceFactory.getOptions()
+//	 */
+//	public String getOption(String opt);
 
 	/**
 	 * get the life list of bootstrap libraries. <br>

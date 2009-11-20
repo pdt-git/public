@@ -49,24 +49,29 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
-import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
+
+import sun.security.action.GetLongAction;
 
 
 public abstract class PrologInterfaceFactory {
    
     // public final static String DEFAULT="org.cs3.pifcom.Factory";
     public final static String DEFAULT="org.cs3.pl.prolog.internal.socket.Factory";
+    public final static String PIFCOM="org.cs3.pifcom.Factory";
+
     
     private ResourceFileLocator locator= new DefaultResourceFileLocator().subLocator(".PrologInterface");
 
 	private PrologLibraryManager libraryManager;
 
     public static PrologInterfaceFactory newInstance(){
-        return newInstance(System.getProperty("pif.implementation",DEFAULT));
+    	
+        return newInstance(System.getProperty(PrologRuntime.PREF_PIF_IMPLEMENTATION,DEFAULT));
     }
     
     public static PrologInterfaceFactory newInstance(String fqn) {
@@ -87,10 +92,10 @@ public abstract class PrologInterfaceFactory {
     public abstract PrologInterface create();
     public abstract PrologInterface create(String name);
     
-    public abstract Option[] getOptions();
+  //  public abstract Option[] getOptions();
     
     public void setResourceLocator(ResourceFileLocator locator){
-        this.locator=locator;
+		this.locator=locator;
     }
     
     public ResourceFileLocator getResourceLocator(){
@@ -106,7 +111,7 @@ public abstract class PrologInterfaceFactory {
     }
     
     public File ensureInstalled(String res, Class clazz){
-        File f = locator.resolve(res);
+        File f = getResourceLocator().resolve(res);
         
         if(f.exists()){
             f.delete();
@@ -130,7 +135,7 @@ public abstract class PrologInterfaceFactory {
 		return null;
 	}
 
-	protected String guessFileSearchPath(String libraryId) {
+    public String guessFileSearchPath(String libraryId) {
 		PrologLibraryManager mgr = getLibraryManager();
 		if(mgr==null){
 			return null;
