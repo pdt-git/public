@@ -16,7 +16,7 @@ class JackTheProcessRipper extends Thread {
 	 * the heap contains processes that are scheduled for termination. The times
 	 * at which they should be killed is used as Keys. (Long)
 	 */
-	private TreeMap heap = new TreeMap();
+	private TreeMap<Long,ExternalKillProcessWrapper> heap = new TreeMap<Long,ExternalKillProcessWrapper>();
 
 	/**
 	 * processes is a set of all processes that were started using the enclosing
@@ -25,7 +25,7 @@ class JackTheProcessRipper extends Thread {
 	 * vm to exit before this condition holds. It will not allow the creation of
 	 * another process once the shutdown has begun.
 	 */
-	private HashSet processes = new HashSet();
+	private HashSet<ExternalKillProcessWrapper> processes = new HashSet<ExternalKillProcessWrapper>();
 
 	private boolean shuttingDown = false;
 
@@ -48,7 +48,7 @@ class JackTheProcessRipper extends Thread {
 		start();
 	}
 
-	public void registerProcess(ProcessWrapper p) {
+	public void registerProcess(ExternalKillProcessWrapper p) {
 		if (shuttingDown) {
 			throw new IllegalStateException(
 					"you cannot register processes during shutdown");
@@ -59,7 +59,7 @@ class JackTheProcessRipper extends Thread {
 	}
 
 	public void run() {
-		ProcessWrapper process = null;
+		ExternalKillProcessWrapper process = null;
 		// Runtime.getRuntime().addShutdownHook(this);
 		// FIXME: what to do on vm shutdown?
 		while (!(shuttingDown && processes.isEmpty() && heap.isEmpty())) {
@@ -75,7 +75,7 @@ class JackTheProcessRipper extends Thread {
 
 	}
 
-	private ProcessWrapper dequeue() {
+	private ExternalKillProcessWrapper dequeue() {
 		synchronized (heap) {
 			while (heap.isEmpty()) {
 				try {
@@ -93,11 +93,11 @@ class JackTheProcessRipper extends Thread {
 					Debug.report(e);
 				}
 			}
-			return (ProcessWrapper) heap.remove(next);
+			return (ExternalKillProcessWrapper) heap.remove(next);
 		}
 	}
 
-	public void enqueue(ProcessWrapper p, long timeout) {
+	public void enqueue(ExternalKillProcessWrapper p, long timeout) {
 		synchronized (heap) {
 			long due = System.currentTimeMillis() + timeout;
 			Long key = null;

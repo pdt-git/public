@@ -4,7 +4,6 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -43,7 +42,7 @@ public class PreferencePageSocket
 		
 	
 		// eg. kill or /usr/bin/kill on most systems",
-		addField(new FileFieldEditor(SocketPrologInterface.PREF_KILLCOMMAND, "command to kill processes", getFieldEditorParent()));
+//		addField(new FileFieldEditor(ProcessKiller.PREF_KILLCOMMAND, "command to kill processes", getFieldEditorParent()));
 
 		
 		// If true, the PIF will try to pool and reuse disposed sessions to

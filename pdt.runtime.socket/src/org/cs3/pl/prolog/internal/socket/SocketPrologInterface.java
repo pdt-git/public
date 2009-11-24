@@ -43,20 +43,16 @@ package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.ReusablePool;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 public class SocketPrologInterface extends AbstractPrologInterface {
 
@@ -104,7 +100,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	/************************************************/
 	
 
-	public static final String PREF_KILLCOMMAND = "pif.killcommand";
+	
 	public static final String PREF_PORT = "pif.port";
 	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
 	//public static final String PREF_ENGINE_FILE = "pif.engine_file";
@@ -115,17 +111,17 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	private boolean useSessionPooling = true;
 	private int port = -1;
 	private boolean hidePlwin;
-	private String killcommand;
+//	private String killcommand;
 	private boolean createLogs;
 		
 
 	
-	private void setKillcommand(String killcommand) {
-		this.killcommand = killcommand;
-	}
-	public String getKillcommand() {
-		return killcommand;
-	}
+//	private void setKillcommand(String killcommand) {
+//		this.killcommand = killcommand;
+//	}
+//	public String getKillcommand() {
+//		return killcommand;
+//	}
 	public void setPort(int port) {
 		this.port = port;
 	}
@@ -150,13 +146,10 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	}
 	public int getPort() {
 		return port;
-	}
-
-	
+	}	
 	public boolean isHidePlwin() {
 		return hidePlwin;
 	}
-
 	public void setHidePlwin(boolean hidePlwin) {
 		this.hidePlwin = hidePlwin;
 	}
@@ -166,88 +159,17 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	
 	public void initOptions(){
 		
-		super.initOptions(preference_store);
-	
+//		super.initOptions(preference_store);
+		super.initOptions();
 		
-		setPort(overridePreferenceBySytemProperty(PREF_PORT));
-		this.setHidePlwin(overridePreferenceBySytemProperty(PREF_HIDE_PLWIN));		
-		this.setKillcommand(overridePreferenceBySytemProperty(PREF_KILLCOMMAND));
-		this.setCreateLogs(overridePreferenceBySytemProperty(PREF_CREATE_LOGS));
-		setUseSessionPooling(overridePreferenceBySytemProperty(PREF_USE_POOL));
+		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
+		
+		setPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
+		this.setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));		
+//		this.setKillcommand(overridePreferenceBySytemProperty(PREF_KILLCOMMAND));
+		this.setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_LOGS));
+		setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
 	}
-	
-	
-	
-//	public void setOption(String opt, String value) {
-//		if (FILE_SEARCH_PATH.equals(opt)){
-//			this.fileSearchPath=value;
-//		}
-//		else if (PREF_EXECUTABLE.equals(opt)) {
-//			this.executable = value;
-//		} else if (PREF_ENVIRONMENT.equals(opt)) {
-//			this.environment = value;
-//		} else if (KILLCOMMAND.equals(opt)) {
-//			this.killcommand = value;
-//		} else if (PREF_STANDALONE.equals(opt)) {
-//			setStandAloneServer(Boolean.valueOf(value).booleanValue());
-//		} else if (PREF_TIMEOUT.equals(opt)) {
-//			this.timeout = Integer.parseInt(value);
-//		} else if (PREF_HIDE_PLWIN.equals(opt)) {
-//			this.hidePlwin = Boolean.valueOf(value).booleanValue();
-//		} else if (PREF_CREATE_LOGS.equals(opt)) {
-//			this.createLogs = Boolean.valueOf(value).booleanValue();
-//		} else if (PREF_USE_POOL.equals(opt)) {
-//			setUseSessionPooling(Boolean.valueOf(value).booleanValue());
-//		} else if (PREF_HOST.equals(opt)) {
-//			setHost(value);
-//		} else if (PREF_PORT.equals(opt)) {
-//			setPort(Integer.parseInt(value));
-//		} else {
-//			throw new IllegalArgumentException("option not supported: " + opt);
-//		}
-//	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#getOption(java.lang.String)
-	 */
-	// Please use getters & setters instead
-	//@Deprecated
-//	public String getOption(String opt) {
-//		// ld: changed semantic:: System properties override any settings
-//		String s = System.getProperty(opt);
-//		if (s != null) {
-//			Debug.warning("option " + opt
-//					+ " is overridden by System Property: " + s);
-//			return s;
-//		}
-//		if(PREF_FILE_SEARCH_PATH.equals(opt)){
-//			return getFileSearchPath();
-//		} else if (PREF_EXECUTABLE.equals(opt)) {
-//			return getExecutable();
-//		} else if (PREF_ENVIRONMENT.equals(opt)) {
-//			return getEnvironment();
-//		} else if (PREF_KILLCOMMAND.equals(opt)) {
-//			return "" + getKillcommand();
-//		} else if (PREF_STANDALONE.equals(opt)) {
-//			return "" + isStandAloneServer();
-//		} else if (PREF_USE_POOL.equals(opt)) {
-//			return "" + useSessionPooling;
-//		} else if (PREF_HIDE_PLWIN.equals(opt)) {
-//			return "" + isHidePlwin();
-//		} else if (PREF_CREATE_LOGS.equals(opt)) {
-//			return "" + createLogs;
-//		} else if (PREF_TIMEOUT.equals(opt)) {
-//			return "" + getTimeout();
-//		} else if (PREF_HOST.equals(opt)) {
-//			return getHost();
-//		} else if (PREF_PORT.equals(opt)) {
-//			return "" + port;
-//		} else {
-//			throw new IllegalArgumentException("option not supported: " + opt);
-//		}
-//	}
 	
 	
 	/************************************************/
@@ -256,25 +178,27 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 
 	private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
-	private PrologInterfaceFactory factory;
-
-	private ResourceFileLocator locator;
-
-	private HashMap consultServices = new HashMap();
-
-	private File lockFile;
-
 	
+//	private ResourceFileLocator locator;
+//	private HashMap consultServices = new HashMap();
+	private File lockFile;
 	private ServerStartAndStopStrategy startAndStopStrategy;
+//	protected IPreferenceStore preference_store;
 
-	protected IPreferenceStore preference_store;
-
-	public SocketPrologInterface(PrologInterfaceFactory factory, String name) {
+	public SocketPrologInterface(String name) {		
 		super(name);
-		this.factory = factory;
-		preference_store = PrologRuntimePlugin.getDefault().getPreferenceStore();
+//		if (Util.isWindows()) {
+//			PrologRuntimePlugin.getDefault().ensureInstalled(FKILL_EXE, SocketPrologInterface.class);
+//		}
+
+
+//		preference_store = PrologRuntimePlugin.getDefault().getPreferenceStore();
+		initOptions();		
+		setFileSearchPath(PrologRuntimePlugin.getDefault().guessFileSearchPath("pdt.runtime.socket.codebase"));
+		setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
 
 	}
+	
 
 	public PrologSession getSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
@@ -380,29 +304,21 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.IPrologInterface#getFactory()
-	 */
-	public PrologInterfaceFactory getFactory() {
-		return factory;
-	}
 
-	/**
-	 * @return Returns the locator.
-	 */
-	public ResourceFileLocator getLocator() {
-		return locator;
-	}
-
-	/**
-	 * @param locator
-	 *            The locator to set.
-	 */
-	public void setLocator(ResourceFileLocator locator) {
-		this.locator = locator;
-	}
+//	/**
+//	 * @return Returns the locator.
+//	 */
+//	public ResourceFileLocator getLocator() {
+//		return locator;
+//	}
+//
+//	/**
+//	 * @param locator
+//	 *            The locator to set.
+//	 */
+//	public void setLocator(ResourceFileLocator locator) {
+//		this.locator = locator;
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -483,8 +399,19 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			}
 		}
 	}
-
-
-
+	
+	 // =============================================================
+	 // modified from factory
+	 // =============================================================
+    
+	public static PrologInterface newInstance(){
+	    	
+	        return newInstance("egal",null);
+	    }
+	    
+	    public static PrologInterface newInstance(String fqn,String name) {
+	    	// fqn ist egal, da diese Methode die allgemeinere aus der abstrakten oberklasse überschreibt
+	    	return new SocketPrologInterface(name);
+	    }
 	
 }
