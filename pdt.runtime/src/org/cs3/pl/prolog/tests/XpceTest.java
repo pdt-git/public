@@ -5,12 +5,13 @@ import junit.framework.TestCase;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class XpceTest extends TestCase {
 	public void testXpce() throws  PrologInterfaceException {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		PrologInterface arsch = PrologInterfaceFactory.newInstance().create();
+//		PrologInterface arsch = PrologInterfaceFactory.newInstance().create();
+		PrologInterface arsch = AbstractPrologInterface.newInstance();
 		arsch.start();
 		try{			
 			arsch.getSession().queryOnce("help");

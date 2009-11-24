@@ -55,8 +55,10 @@ public class PrologRuntime {
      * The fully-qualified classname of a class that extends
      * PrologInterfaceFactory.
      */
-    public final static String PREF_PIF_IMPLEMENTATION = "pif.implementation";
-    public static final String PREF_PIF_BOOTSTRAP_DIR = "pif.bootstrap.dir";
+//    public final static String PREF_PIF_IMPLEMENTATION = "pif.implementation";
+    public final static String PREF_PROLOGIF_IMPLEMENTATION = "prolog.interface.implementation";
+    
+    public static final String PREF_PIF_BOOTSTRAP_DIR = "pif.bootstrap.dir";    
     public static final String EP_HOOKS = "hooks";
     public static final String EP_BOOTSTRAP_CONTRIBUTION = "bootstrapContribution";
 	public static final String EP_TRACKERS = "prologContextTracker";

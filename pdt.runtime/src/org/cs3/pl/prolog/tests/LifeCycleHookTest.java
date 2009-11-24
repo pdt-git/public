@@ -6,8 +6,8 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.LifeCycleHook3;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class LifeCycleHookTest extends TestCase {
 
@@ -69,7 +69,8 @@ public class LifeCycleHookTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();
+//		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();
+		this.pif = AbstractPrologInterface.newInstance();
 		
 	}
 

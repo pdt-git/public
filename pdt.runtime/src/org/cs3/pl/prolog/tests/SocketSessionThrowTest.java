@@ -48,8 +48,8 @@ import junit.framework.TestCase;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 /**
  * @author terra
@@ -58,7 +58,8 @@ public class SocketSessionThrowTest extends TestCase {
 	private PrologInterface pif;
 
     protected void setUp() throws Exception {
-      pif=PrologInterfaceFactory.newInstance().create();
+//      pif=PrologInterfaceFactory.newInstance().create();
+      pif = AbstractPrologInterface.newInstance();
       pif.start();
     }
     
