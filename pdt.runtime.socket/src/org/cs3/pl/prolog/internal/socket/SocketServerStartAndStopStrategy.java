@@ -68,7 +68,7 @@ import org.cs3.pl.prolog.ServerStartAndStopStrategy;
  */
 public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrategy {
 
-	private ProcessWrapper serverProcess;
+	private ExternalKillProcessWrapper serverKillProcessWrapper;
 
 	public class _InputStreamPump extends InputStreamPump {
 
@@ -118,7 +118,8 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 		}
 
 		String envstring = socketPif.getEnvironment();
-		String engineDir = Util.prologFileName(socketPif.getFactory().getResourceLocator().resolve("/"));
+//		String engineDir = Util.prologFileName(socketPif.getFactory().getResourceLocator().resolve("/"));
+//		String engineDir = Util.prologFileName(PrologRuntimePlugin.getDefault().getResourceLocator().resolve("/"));
 
 		File tmpFile = null;
 		try {
@@ -252,11 +253,15 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			// The process should be up now.
 			SocketClient c = new SocketClient(socketPif.getHost(), port);
 			long pid = c.getServerPid();
+
 			c.close();
-			String cmd = socketPif.getKillcommand() + " " + pid;
+//			String cmd = socketPif.getKillcommand() + " " + pid;
 			// an experiment
-			this.serverProcess = new ExternalKillProcessWrapper(process, new String[] { socketPif.getKillcommand(), "" + pid });
-			JackTheProcessRipper.getInstance().registerProcess(serverProcess);
+//			this.serverProcess = new ExternalKillProcessWrapper(process, new String[] { socketPif.getKillcommand(), "" + pid });
+//			this.serverProcess = new ExternalKillProcessWrapper(process,  pid );
+			this.serverKillProcessWrapper = new ExternalKillProcessWrapper(pid);
+			
+			JackTheProcessRipper.getInstance().registerProcess(serverKillProcessWrapper);
 			return process;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -298,8 +303,8 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 
 			socketPif.getLockFile().delete();
 			Debug.info("server process will be killed in 5 seconds.");
-			JackTheProcessRipper.getInstance().enqueue(serverProcess, 5000);
-			serverProcess = null;
+			JackTheProcessRipper.getInstance().enqueue(serverKillProcessWrapper, 5000);
+			serverKillProcessWrapper = null;
 
 		} catch (Throwable e) {
 			Debug.report(e);
