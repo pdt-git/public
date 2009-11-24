@@ -197,50 +197,60 @@ public class Util {
 		return logFile.getCanonicalFile();
 	}
 
-	/**
-	 * 
-	 * @param cmd
-	 * @return an array of two strings: th 0th one contains process output, the
-	 *         1th one error.
-	 * @throws IOException
-	 * @throws InterruptedException
-	 */
-	public static String[] exec(String cmd) throws IOException,
-			InterruptedException {
-		Process process = null;
-		try {
-
-			process = Runtime.getRuntime().exec(cmd);
-		} catch (Throwable t) {
-			Debug.report(t);
-			return new String[] { "ERROR", "" };
-		}
-
-		class _InputStreamPump extends InputStreamPump {
-			StringBuffer sb = new StringBuffer();
-
-			public _InputStreamPump(InputStream s) {
-				super(s);
-			}
-
-			protected void dataAvailable(char[] buffer, int length) {
-				String string = new String(buffer, 0, length);
-				sb.append(string);
-
-			}
-
-		}
-		_InputStreamPump errPump = new _InputStreamPump(process
-				.getErrorStream());
-		_InputStreamPump outPump = new _InputStreamPump(process
-				.getInputStream());
-		errPump.start();
-		outPump.start();
-		process.waitFor();
-		outPump.join();
-		errPump.join();
-		return new String[] { outPump.sb.toString(), errPump.sb.toString() };
+	public static void killRuntimeProcesses(long processId) throws IOException, InterruptedException {
+		String killCommand;
+		if(Util.isWindows()){
+			killCommand= "taskkill /PID " + processId;
+		} else {
+			killCommand= "kill " + processId;
+		}		
+		Runtime.getRuntime().exec(killCommand);
 	}
+	
+//	/**
+//	 * 
+//	 * @param cmd
+//	 * @return an array of two strings: th 0th one contains process output, the
+//	 *         1th one error.
+//	 * @throws IOException
+//	 * @throws InterruptedException
+//	 */
+//	public static String[] exec(String cmd) throws IOException,
+//			InterruptedException {
+//		Process process = null;
+//		try {
+//
+//			process = Runtime.getRuntime().exec(cmd);
+//		} catch (Throwable t) {
+//			Debug.report(t);
+//			return new String[] { "ERROR", "" };
+//		}
+//
+//		class _InputStreamPump extends InputStreamPump {
+//			StringBuffer sb = new StringBuffer();
+//
+//			public _InputStreamPump(InputStream s) {
+//				super(s);
+//			}
+//
+//			protected void dataAvailable(char[] buffer, int length) {
+//				String string = new String(buffer, 0, length);
+//				sb.append(string);
+//
+//			}
+//
+//		}
+//		_InputStreamPump errPump = new _InputStreamPump(process
+//				.getErrorStream());
+//		_InputStreamPump outPump = new _InputStreamPump(process
+//				.getInputStream());
+//		errPump.start();
+//		outPump.start();
+//		process.waitFor();
+//		outPump.join();
+//		errPump.join();
+//		return new String[] { outPump.sb.toString(), errPump.sb.toString() };
+//	}
 
 	public static void copy(InputStream in, OutputStream out)
 			throws IOException {
