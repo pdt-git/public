@@ -45,6 +45,7 @@ package org.cs3.pl.prolog.internal;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -52,6 +53,8 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
+import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.Disposable;
@@ -150,64 +153,39 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return environment;
 	}
 
-	public void initOptions(IPreferenceStore store) {
-		preference_store = store;
-
-		// setStandAloneServer(preference_store.getBoolean(PREF_STANDALONE));
-		// setHost(preference_store.getString(PREF_HOST));
-		// setExecutable(preference_store.getString(PREF_EXECUTABLE));
-		// setEnvironment(preference_store.getString(PREF_ENVIRONMENT));
-		// setTimeout(preference_store.getInt(PREF_TIMEOUT));
-		// setFileSearchPath(preference_store.getString(PREF_FILE_SEARCH_PATH));
-
-		setStandAloneServer(overridePreferenceBySytemProperty(PREF_STANDALONE));
-		setHost(overridePreferenceBySytemProperty(PREF_HOST));
-		setExecutable(overridePreferenceBySytemProperty(PREF_EXECUTABLE));
-		setEnvironment(overridePreferenceBySytemProperty(PREF_ENVIRONMENT));
-		setTimeout(overridePreferenceBySytemProperty(PREF_TIMEOUT));
-		setFileSearchPath(overridePreferenceBySytemProperty(PREF_FILE_SEARCH_PATH));
-
-	}
-
-	protected String overridePreferenceBySytemProperty(String name) {
-		String value;
-		// System properties override any preference settings
-		// example: vm-arguments: -Dpif.hide_plwin=false
-		value = System.getProperty(name);
-		// System.getProperty(name,preference_store.getString(name))
-
-		if (value != null) {
-			Debug.warning("option " + name + " is overridden by system property: " + value);
-			// System.out.println("option " + name +
-			// " is overridden by system property: " + value);
-			return value;
-		}
-
-		value = preference_store.getString(name);
-		// System.out.println("option " + name + " is set by preference: " +
-		// value);
-		return value;
+//	public void initOptions(IPreferenceStore store) {
+//		preference_store = store;
+//
+//		// setStandAloneServer(preference_store.getBoolean(PREF_STANDALONE));
+//		// setHost(preference_store.getString(PREF_HOST));
+//		// setExecutable(preference_store.getString(PREF_EXECUTABLE));
+//		// setEnvironment(preference_store.getString(PREF_ENVIRONMENT));
+//		// setTimeout(preference_store.getInt(PREF_TIMEOUT));
+//		// setFileSearchPath(preference_store.getString(PREF_FILE_SEARCH_PATH));
+//
+//		setStandAloneServer(overridePreferenceBySystemProperty(PREF_STANDALONE));
+//		setHost(overridePreferenceBySystemProperty(PREF_HOST));
+//		setExecutable(overridePreferenceBySystemProperty(PREF_EXECUTABLE));
+//		setEnvironment(overridePreferenceBySystemProperty(PREF_ENVIRONMENT));
+//		setTimeout(overridePreferenceBySystemProperty(PREF_TIMEOUT));
+//		setFileSearchPath(overridePreferenceBySystemProperty(PREF_FILE_SEARCH_PATH));
+//
+//	}
+	public void initOptions() {
+		
+		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
+		
+		setStandAloneServer(plugin.overridePreferenceBySystemProperty(PREF_STANDALONE));
+		setHost(plugin.overridePreferenceBySystemProperty(PREF_HOST));
+		setExecutable(plugin.overridePreferenceBySystemProperty(PREF_EXECUTABLE));
+		setEnvironment(plugin.overridePreferenceBySystemProperty(PREF_ENVIRONMENT));
+		setTimeout(plugin.overridePreferenceBySystemProperty(PREF_TIMEOUT));
+		setFileSearchPath(plugin.overridePreferenceBySystemProperty(PREF_FILE_SEARCH_PATH));
 
 	}
 
-	// /**
-	// * override this if you need configurable options. the default
-	// * implementation does not have any configuragble options, so it will
-	// always
-	// * through an IllegalArgumentException..
-	// */// public String getOption(String opt) {
-	// throw new IllegalArgumentException("option not supported: " + opt);
-	// }
 
-	// /**
-	// * override this if you need configurable options. the default
-	// * implementation does not have any configuragble options, so it will
-	// always
-	// * through an IllegalArgumentException..
-	// */
-	// public void setOption(String opt, String value) {
-	// throw new IllegalArgumentException("option not supported: " + opt);
-	// }
+
 
 	/************************************************/
 	/**** Options [End] *****/
@@ -612,4 +590,98 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	public void removeLifeCycleHook(final LifeCycleHook hook, final String hookId) {
 		lifecycle.removeLifeCycleHook(hook, hookId);
 	}
+
+	
+	
+	
+	
+	 // =============================================================
+	 // modified from factory
+	 // =============================================================
+	public final static String PL_INTERFACE_DEFAULT="org.cs3.pl.prolog.internal.socket.SocketPrologInterface";
+    public final static String PL_INTERFACE_PIFCOM="org.cs3.pifcom.PIFComPrologInterface";
+    
+	public static PrologInterface newInstance() {
+
+		return newInstance(System.getProperty(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, PL_INTERFACE_DEFAULT), null);
+	}
+
+	public static PrologInterface newInstance(String fqn, String name) {
+		try {
+			Class impl = Class.forName(fqn);
+			Class[] typeList = { String.class };
+			Constructor cons= impl.getDeclaredConstructor(typeList);
+			cons.newInstance(name);
+			
+			if (!PrologInterface.class.isAssignableFrom(impl)) {
+				throw new IllegalArgumentException("not a valid prolog-interface class");
+			}
+			
+			
+			return (PrologInterface) cons.newInstance(name);//impl.newInstance();
+
+		} catch (Throwable t) {
+			Debug.rethrow(t);
+			return null;
+		}
+	    }
+	
+
+	 // =============================================================
+	 // moved from factory
+	 // =============================================================
+
+//
+//	private ResourceFileLocator locator = new DefaultResourceFileLocator().subLocator(".PrologInterface");
+//	private PrologLibraryManager libraryManager;
+
+//	public void setResourceLocator(ResourceFileLocator locator) {
+//		this.locator = locator;
+//	}
+//
+//	public ResourceFileLocator getResourceLocator() {
+//		return locator;
+//	}
+//
+//	public void setLibraryManager(PrologLibraryManager mgr) {
+//		this.libraryManager = mgr;
+//	}
+//
+//	public PrologLibraryManager getLibraryManager() {
+//		return this.libraryManager;
+//	}
+
+//	public File ensureInstalled(String res, Class clazz) {
+//		File f = getResourceLocator().resolve(res);
+//
+//		if (f.exists()) {
+//			f.delete();
+//		}
+//		if (!f.exists()) {
+//			f.getParentFile().mkdirs();
+//			try {
+//				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+//				InputStream in = clazz.getResourceAsStream(res);
+//				Util.copy(in, out);
+//				in.close();
+//				out.close();
+//			} catch (IOException e) {
+//				Debug.rethrow(e);
+//			}
+//		}
+//		return f;
+//	}
+//
+//	public String guessFileSearchPath(String libraryId) {
+//		PrologLibraryManager mgr = getLibraryManager();
+//		if (mgr == null) {
+//			return null;
+//		}
+//		PrologLibrary lib = mgr.resolveLibrary(libraryId);
+//		if (lib == null) {
+//			return null;
+//		}
+//		return "library=" + lib.getPath();
+//	}
+
 }

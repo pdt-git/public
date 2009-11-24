@@ -220,12 +220,6 @@ public interface PrologInterface {
 	 */
 	public void setBootstrapLibraries(List<String> l);
 
-	/**
-	 * 
-	 * @return the factory instance that created this pif, or if this pif was
-	 *         not created by a factory (unlikely :-) ).
-	 */
-	public PrologInterfaceFactory getFactory();
 
 	/**
 	 * unregister a lifeCycleHook.
@@ -249,4 +243,7 @@ public interface PrologInterface {
 			final String hookId);
 	
 
+
+	
+	
 }

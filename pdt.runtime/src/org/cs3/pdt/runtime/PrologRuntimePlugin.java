@@ -41,12 +41,15 @@
 
 package org.cs3.pdt.runtime;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
@@ -67,7 +70,6 @@ import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
 import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
-import org.cs3.pl.common.Option;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
@@ -76,11 +78,11 @@ import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.UDPEventDispatcher;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
@@ -130,36 +132,22 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	// Resource bundle.
 	private ResourceBundle resourceBundle;
 
-	private DefaultResourceFileLocator rootLocator;
 
-	private Option[] options;
 
 	private DefaultSAXPrologInterfaceRegistry registry;
-
 	private PrologLibraryManager libraryManager;
-
+	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
-
 	private HashMap globalHooks;
-
 	private Map<String, List<BootstrapPrologContribution>> bootStrapLists;
-
-	private PrologInterfaceFactory factory;
-
+//	private PrologInterfaceFactory factory;
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
-
 	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
 
 	private final static Object contextTrackerMux = new Object();
-
 	private final static Object libraryManagerMux = new Object();
-
 	private final static Object globalHooksMux = new Object();
-
 	private final static Object registryMux = new Object();
-
-	private final static Object optionsMux = new Object();
-
 	private static final Object preferencesMux = new Object();
 
 	public PrologLibraryManager getLibraryManager() {
@@ -174,7 +162,74 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			return libraryManager;
 		}
 	}
+	public String guessFileSearchPath(String libraryId) {
+		PrologLibraryManager mgr = getLibraryManager();
+		if (mgr == null) {
+			return null;
+		}
+		PrologLibrary lib = mgr.resolveLibrary(libraryId);
+		if (lib == null) {
+			return null;
+		}
+		return "library=" + lib.getPath();
+	}	
+//	// I don't know if this is needed
+//	private void setLibraryManager(PrologLibraryManager mgr) {
+//		this.libraryManager = mgr;
+//	}
+//	
+//	// I don't know if this is needed
+//	public void setResourceLocator(ResourceFileLocator locator) {		
+//		this.resourceLocator = locator;
+//	}
+	public ResourceFileLocator getResourceLocator() {
+		if (resourceLocator == null){
+			String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
+			resourceLocator = new DefaultResourceFileLocator(new File(bootStrapDir));			
+		}
+		return resourceLocator;
+	}
+	public File ensureInstalled(String res, Class clazz) {
+		File f = getResourceLocator().resolve(res);
+		System.out.println("ensure installed " + res + " in context from " + clazz.toString());
+		if (f.exists()) {
+			f.delete();
+			System.out.println("file deleted: " + f.toString());
+		}
+		if (!f.exists()) {
+			f.getParentFile().mkdirs();
+			try {
+				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+				InputStream in = clazz.getResourceAsStream(res);
+				Util.copy(in, out);
+				in.close();
+				out.close();
+				System.out.println("file copied: " + f.toString());
+			} catch (IOException e) {
+				Debug.rethrow(e);
+			}
+		}
+		return f;
+	}
+//	public ResourceFileLocator getResourceLocator(String key) {
+//	if (rootLocator == null) {
+//		URL url = getDefault().getBundle().getEntry("/");
+//		File location = null;
+//		try {
+//			location = new File(Platform.asLocalURL(url).getFile());
+//		} catch (IOException t) {
+//			Debug.rethrow(t);
+//		}
+//		rootLocator = new DefaultResourceFileLocator(location);
+//	}
+//	return rootLocator.subLocator(key);
+//}
 
+
+
+
+
+	
 	public PrologContextTrackerService getContextTrackerService() {
 		synchronized (contextTrackerMux) {
 			if (contextTrackerService == null) {
@@ -222,26 +277,25 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 
-	public ResourceFileLocator getResourceLocator(String key) {
-		if (rootLocator == null) {
-			URL url = getDefault().getBundle().getEntry("/");
-			File location = null;
-			try {
-				location = new File(Platform.asLocalURL(url).getFile());
-			} catch (IOException t) {
-				Debug.rethrow(t);
-			}
-			rootLocator = new DefaultResourceFileLocator(location);
-		}
-		return rootLocator.subLocator(key);
-	}
+	
+	
+	
 
+
+	
 	private PrologInterface createPrologInterface(String name) {
 		PrologInterface prologInterface = null;
-
-		factory = getPrologInterfaceFactory();
-
-		prologInterface = factory.create(name);
+		
+		String impl = getPreferenceValue(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, null);
+		if (impl == null) {
+			throw new RuntimeException("The required property \"" + PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION + "\" was not specified. Use Default: "+ AbstractPrologInterface.PL_INTERFACE_DEFAULT);
+		} else {
+			impl = AbstractPrologInterface.PL_INTERFACE_DEFAULT;	
+		}
+		prologInterface = AbstractPrologInterface.newInstance(impl,name);
+//		String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
+//		prologInterface.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
+//		prologInterface.setLibraryManager(getLibraryManager());
 
 		return prologInterface;
 	}
@@ -1085,27 +1139,41 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			return globalHooks;
 		}
 	}
+	
+	public String overridePreferenceBySystemProperty(String name) {
+		String value;
+		value = System.getProperty(name);
 
-	public PrologInterfaceFactory getPrologInterfaceFactory() {
-		if (factory == null) {
-
-			String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION, null);
-//			System.out.println("impl = "+impl);
-			impl = factory.DEFAULT;
-			// impl = factory.PIFCOM;
-			factory = PrologInterfaceFactory.newInstance(impl);
-		
-			if (impl == null) {
-				throw new RuntimeException("The required property \"" + PrologRuntime.PREF_PIF_IMPLEMENTATION + "\" was not specified.");
-			}
-			
-			
-			String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
-			factory.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
-			factory.setLibraryManager(getLibraryManager());
-
+		if (value != null) {
+			Debug.warning("option " + name + " is overridden by system property: " + value);
+			return value;
 		}
-		return factory;
+		
+		value = getPreferenceStore().getString(name);
+		
+		return value;
 	}
+	
+//	public PrologInterfaceFactory getPrologInterfaceFactory() {
+//		if (factory == null) {
+//
+//			String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION, null);
+////			System.out.println("impl = "+impl);
+//			impl = factory.DEFAULT;
+//			// impl = factory.PIFCOM;
+//			factory = PrologInterfaceFactory.newInstance(impl);
+//		
+//			if (impl == null) {
+//				throw new RuntimeException("The required property \"" + PrologRuntime.PREF_PIF_IMPLEMENTATION + "\" was not specified.");
+//			}
+//			
+//			
+//			String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
+//			factory.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
+//			factory.setLibraryManager(getLibraryManager());
+//
+//		}
+//		return factory;
+//	}
 
 }

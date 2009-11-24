@@ -5,8 +5,8 @@ import junit.framework.TestCase;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class MysteriousRaceConditionTest extends TestCase {
 
@@ -15,7 +15,8 @@ public class MysteriousRaceConditionTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-		pif = PrologInterfaceFactory.newInstance().create();
+//		pif = PrologInterfaceFactory.newInstance().create();
+		pif = AbstractPrologInterface.newInstance();
 
 	}
 
