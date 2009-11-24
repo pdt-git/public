@@ -10,7 +10,6 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -25,10 +24,13 @@ public class CTermContentProviderTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
 		pif = PrologRuntimePlugin.getDefault().getPrologInterface("test");
-		PrologInterfaceFactory factory = pif.getFactory();
+//		PrologInterfaceFactory factory = pif.getFactory();
 		PrologSession s = pif.getSession();
-		factory.ensureInstalled(testdata, CTermContentProviderTest.class);
-		file = factory.getResourceLocator().resolve(testdata);
+//		factory.ensureInstalled(testdata, CTermContentProviderTest.class);
+//		file = factory.getResourceLocator().resolve(testdata);
+		PrologRuntimePlugin.getDefault().ensureInstalled(testdata, CTermContentProviderTest.class);
+		file = PrologRuntimePlugin.getDefault().getResourceLocator().resolve(testdata);
+		
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
 		PLUtil.configureFileSearchPath(mgr, s,
