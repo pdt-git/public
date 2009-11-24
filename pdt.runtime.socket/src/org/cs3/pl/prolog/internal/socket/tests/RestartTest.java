@@ -1,4 +1,4 @@
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.internal.socket.tests;
 
 
 import junit.framework.TestCase;
@@ -6,6 +6,8 @@ import junit.framework.TestCase;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
+import org.cs3.pl.prolog.internal.socket.SocketSession;
 
 public class RestartTest extends TestCase {
 	public void testRecover() throws Exception {

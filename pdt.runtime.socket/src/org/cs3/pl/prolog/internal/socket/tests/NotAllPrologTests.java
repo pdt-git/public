@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.internal.socket.tests;
 
 
 import junit.framework.Test;

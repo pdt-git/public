@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog.internal.socket;
+package org.cs3.pl.prolog.internal.socket.tests;
 
 import junit.framework.TestCase;
 
@@ -50,6 +50,7 @@ import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
 
 
 /**
