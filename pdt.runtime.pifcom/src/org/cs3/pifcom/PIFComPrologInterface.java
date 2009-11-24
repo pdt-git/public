@@ -19,7 +19,6 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
@@ -33,7 +32,6 @@ public class PIFComPrologInterface extends AbstractPrologInterface {
 
 	private InetAddress hostAdr;
 	
-	private PrologInterfaceFactory factory;
 	private ServerStartAndStopStrategy startAndStopStrategy;
 	protected Process process;
 
@@ -90,57 +88,32 @@ public class PIFComPrologInterface extends AbstractPrologInterface {
 	public void initOptions(){
 		
 		
-		super.initOptions(preference_store);
-
+		super.initOptions();
+//		super.initOptions(preference_store);
 		
-		setTcpMasterPort(overridePreferenceBySytemProperty(PIFComConstants.PIF_PORT_TCP)); 
-		setUdpMasterPort(overridePreferenceBySytemProperty(PIFComConstants.PIF_PORT_UDP));
+		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
+		
+		setTcpMasterPort(plugin.overridePreferenceBySystemProperty(PIFComConstants.PIF_PORT_TCP)); 
+		setUdpMasterPort(plugin.overridePreferenceBySystemProperty(PIFComConstants.PIF_PORT_UDP));
 		
 		//this.hidePlwin = preference_store.getBoolean(PREF_HIDE_PLWIN);
 		
 	
 	}
 
-//	public String getOption(String opt) {
-//		// ld: changed semantic:: System properties override any settings
-////		if (preferences.containsKey(opt)){
-////			return preferences.get(opt);
-////		}
-////		
-////		String s = System.getProperty(opt);
-////		if (s != null) {
-////			Debug.warning("option " + opt + " is overridden by System Property: " + s);
-////			return s;
-////		}
-//		
-//		if (preference_store.contains(opt)){
-//			return preference_store.getString(opt);
-//		}
-////		Option[] options = factory.getOptions();
-////		for (Option option : options) {
-////			if (option.getId().equals(opt)) {
-////				return this.preferences.get(opt);
-////			}
-////		}
-//
-//		return super.getOption(opt);
-//	}
 
 	
 	/************************************************/
 	/**** Options [End] *****/
 	/************************************************/		
 	
-	public PIFComPrologInterface(Factory factory, String name) {
-		super(name);
-		this.factory = factory;
+	public PIFComPrologInterface(String name) {
+		super(name);		
 		preference_store = PrologRuntimePlugin.getDefault().getPreferenceStore();
 
 	}
 
-	public PIFComPrologInterface(Factory factory) {
-
-		this.factory = factory;
+	public PIFComPrologInterface() {
 		preference_store = PrologRuntimePlugin.getDefault().getPreferenceStore();
 
 	}
@@ -173,10 +146,6 @@ public class PIFComPrologInterface extends AbstractPrologInterface {
 		return new PIFComSession(connection, this, flags);
 	}
 
-	public PrologInterfaceFactory getFactory() {
-
-		return factory;
-	}
 
 	public ServerStartAndStopStrategy getStartAndStopStrategy() {
 
@@ -325,5 +294,20 @@ public class PIFComPrologInterface extends AbstractPrologInterface {
 			System.err.flush();
 		}
 	}
+	
+	 // =============================================================
+	 // modified from factory
+	 // =============================================================
+   
+	public static PrologInterface newInstance(){
+	    	
+	        return newInstance("egal",null);
+	    }
+	    
+	    public static PrologInterface newInstance(String fqn,String name) {
+	    	// fqn ist egal, da diese Methode die allgemeinere aus der abstrakten oberklasse überschreibt
+
+	    	return new PIFComPrologInterface(name);
+	    }
 
 }
