@@ -14,8 +14,8 @@ import junit.framework.TestSuite;
 
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceFactory;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 public class InterpreterTest extends TestCase {
 
@@ -35,7 +35,8 @@ public class InterpreterTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String[] codebase = System.getProperty("codebase").split(System.getProperty("path.separator"));
-		pif=PrologInterfaceFactory.newInstance().create();
+//		pif=PrologInterfaceFactory.newInstance().create();
+		pif = AbstractPrologInterface.newInstance();
 		PrologSession s = pif.getSession();
 		for (int i = 0; i < codebase.length; i++) {
 			s.queryOnce("assert(file_search_path(library,'"+codebase[i]+"'))");	
