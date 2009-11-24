@@ -191,10 +191,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 	public File ensureInstalled(String res, Class clazz) {
 		File f = getResourceLocator().resolve(res);
-		System.out.println("ensure installed " + res + " in context from " + clazz.toString());
+//		System.out.println("ensure installed " + res + " in context from " + clazz.toString());
 		if (f.exists()) {
 			f.delete();
-			System.out.println("file deleted: " + f.toString());
+//			System.out.println("file deleted: " + f.toString());
 		}
 		if (!f.exists()) {
 			f.getParentFile().mkdirs();
@@ -204,7 +204,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				Util.copy(in, out);
 				in.close();
 				out.close();
-				System.out.println("file copied: " + f.toString());
+//				System.out.println("file copied: " + f.toString());
 			} catch (IOException e) {
 				Debug.rethrow(e);
 			}
