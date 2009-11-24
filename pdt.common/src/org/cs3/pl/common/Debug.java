@@ -73,7 +73,7 @@ public class Debug {
 	final public static int LEVEL_OUTPUT_CONSOLE = 1;
 
 	static private int debugLevel = LEVEL_ERROR;
-	static private int debugOutputTo = LEVEL_OUTPUT_CONSOLE;
+//	static private int debugOutputTo = LEVEL_OUTPUT_CONSOLE;
 	static private String outputFile;
 	static private PrintStream outputLogFilePrintStream; 
 	
@@ -101,14 +101,23 @@ public class Debug {
 	}
 
 	static public void setOutputTo(String output) {
-		out.println("pdt: set debug output: " + output);
-		if (output.equalsIgnoreCase("LOGFILE")) {
-			debugOutputTo = LEVEL_OUTPUT_LOGFILE;
-			setOutputStream(outputLogFilePrintStream);
+		
+		if (output.equalsIgnoreCase("LOGFILE") ) {
+//			debugOutputTo = LEVEL_OUTPUT_LOGFILE;
+			
+			if (outputLogFilePrintStream!=null) {
+				setOutputStream(outputLogFilePrintStream);
+				out.println("pdt: set debug output to " + output);
+			} else {
+				setOutputStream(System.err);
+				out.println("pdt: set debug output NOT to "+ output+" because LogFileStream/File invalid, please check preferences");
+				out.println("pdt: set debug output to CONSOLE");
+			}
 		}
 		if (output.equalsIgnoreCase("CONSOLE")) {
-			debugOutputTo = LEVEL_OUTPUT_CONSOLE;
+//			debugOutputTo = LEVEL_OUTPUT_CONSOLE;
 			setOutputStream(System.err);
+			out.println("pdt: set debug output to " + output);
 		}
 					
 	
@@ -239,7 +248,7 @@ public class Debug {
 
 	private static void setOutputStream(PrintStream out) {
 		if (out == null)
-			throw new IllegalArgumentException("null invalid");
+			throw new IllegalArgumentException("output stream is null");
 		Debug.out = out;
 		out.println("\n---8<------------------------8<---\n");
 		out.println(new Date());
