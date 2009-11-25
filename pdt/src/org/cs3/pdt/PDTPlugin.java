@@ -169,10 +169,10 @@ public class PDTPlugin extends AbstractUIPlugin {
 	private void reconfigureDebugOutput() throws FileNotFoundException {
 		String debugLevel = getPreferenceValue(PDT.PREF_DEBUG_LEVEL, "WARNING");
 		String debugOutputTo = getPreferenceValue(PDT.PREF_DEBUG_OUTPUT_TO, "LOGFILE");
-		String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE, null);
+		String logFileName = getPreferenceValue(PDT.PREF_CLIENT_LOG_FILE_DIR, System.getProperty("java.io.tmpdir"));
 		
 		Debug.setDebugLevel(debugLevel);
-		Debug.setLogFile(logFileName);	
+		Debug.setLogDir(logFileName);	
 		Debug.setOutputTo(debugOutputTo);
 		
 		
