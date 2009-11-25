@@ -106,7 +106,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	//public static final String PREF_ENGINE_FILE = "pif.engine_file";
 	public static final String PREF_MAIN_FILE = "pif.main_file";
 	public final static String PREF_USE_POOL = "pif.use_pool";
-	public static final String PREF_CREATE_LOGS = "pif.create_logs";
+	public static final String PREF_CREATE_SERVER_LOGS = "pif.create_logs";
 	
 	private boolean useSessionPooling = true;
 	private int port = -1;
@@ -167,7 +167,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		setPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
 		this.setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));		
 //		this.setKillcommand(overridePreferenceBySytemProperty(PREF_KILLCOMMAND));
-		this.setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_LOGS));
+		this.setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_SERVER_LOGS));
 		setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
 	}
 	
