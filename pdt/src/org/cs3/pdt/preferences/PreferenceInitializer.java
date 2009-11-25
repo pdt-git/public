@@ -36,7 +36,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 		store.setDefault(PDT.PREF_DEBUG_LEVEL, "WARNING");
 		store.setDefault(PDT.PREF_DEBUG_OUTPUT_TO,"LOGFILE");
-		store.setDefault(PDT.PREF_CLIENT_LOG_FILE, location + File.separator + "pdt.log");
+		store.setDefault(PDT.PREF_CLIENT_LOG_FILE_DIR, location);
 		store.setDefault(PDT.PREF_ADD_NATURE_ON_OPEN, MessageDialogWithToggle.PROMPT);
 		store.setDefault(PDT.PREF_SWITCH_TO_DEFAULT_PIF, MessageDialogWithToggle.PROMPT);
 		store.setDefault(PDT.PREF_OUTLINE_FILTERS,"hide_subterms" );

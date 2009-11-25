@@ -68,7 +68,7 @@ public final class PDT {
 	/**
 	 * log file location used by the pdt plugin.
 	 */
-	public static final String PREF_CLIENT_LOG_FILE = "pdt.logfile";
+	public static final String PREF_CLIENT_LOG_FILE_DIR = "pdt.logfile";
 
 	/**
 	 * ui scope used for keybindings etc in the prolog editor.

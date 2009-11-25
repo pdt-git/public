@@ -4,8 +4,8 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
@@ -52,7 +52,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(rgfe_output);
 
 		// A file to which debug output of the PDT will be writen
-		FileFieldEditor ffe = new FileFieldEditor(PDT.PREF_CLIENT_LOG_FILE, "Log file location", getFieldEditorParent());
+//		FileFieldEditor ffe = new FileFieldEditor(PDT.PREF_CLIENT_LOG_FILE, "Log file location", getFieldEditorParent());
+		DirectoryFieldEditor ffe = new DirectoryFieldEditor(PDT.PREF_CLIENT_LOG_FILE_DIR, "Log file location", getFieldEditorParent());
 		//ffe.setPropertyChangeListener(debugPropertyChangeListener);
 		//ffe.getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
 		addField(ffe);		
