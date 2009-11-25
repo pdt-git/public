@@ -73,8 +73,12 @@ public class Debug {
 	final public static int LEVEL_OUTPUT_CONSOLE = 1;
 
 	static private int debugLevel = LEVEL_ERROR;
+	
+	private static String PREFIX_OUTPUT = "pdt: ";
+	
 //	static private int debugOutputTo = LEVEL_OUTPUT_CONSOLE;
-	static private String outputFile;
+	static private String outputDir;
+//	static private String outputFile;
 	static private PrintStream outputLogFilePrintStream; 
 	
 	
@@ -82,7 +86,7 @@ public class Debug {
 
 	static public void setDebugLevel(String s) {
 
-		System.out.println("pdt: set debug level: " + s);
+		System.out.println(PREFIX_OUTPUT + "set debug level: " + s);
 		if (s.equalsIgnoreCase("NONE"))
 			debugLevel = LEVEL_NONE;
 		else if (s.equalsIgnoreCase("ERROR"))
@@ -107,17 +111,17 @@ public class Debug {
 			
 			if (outputLogFilePrintStream!=null) {
 				setOutputStream(outputLogFilePrintStream);
-				out.println("pdt: set debug output to " + output);
+				out.println(PREFIX_OUTPUT + "set debug output to " + output);
 			} else {
 				setOutputStream(System.err);
-				out.println("pdt: set debug output NOT to "+ output+" because LogFileStream/File invalid, please check preferences");
-				out.println("pdt: set debug output to CONSOLE");
+				out.println(PREFIX_OUTPUT + "set debug output NOT to "+ output+" because LogFileStream/File invalid, please check preferences");
+				out.println(PREFIX_OUTPUT + "set debug output to CONSOLE");
 			}
 		}
 		if (output.equalsIgnoreCase("CONSOLE")) {
 //			debugOutputTo = LEVEL_OUTPUT_CONSOLE;
 			setOutputStream(System.err);
-			out.println("pdt: set debug output to " + output);
+			out.println(PREFIX_OUTPUT + "set debug output to " + output);
 		}
 					
 	
@@ -128,11 +132,16 @@ public class Debug {
 		
 	
 	
-	static public void setLogFile(String logFileName) throws FileNotFoundException {
-		outputFile = logFileName;
-		if (outputFile != null && !outputFile.equals("")) {
-			System.out.println("pdt: debug output is written to: " + outputFile);
-			File logFile = new File(outputFile);
+	static public void setLogDir(String logFileDir) throws FileNotFoundException {
+		outputDir = logFileDir;
+//		if (!outputDir.endsWith(File.separator)) {
+//			outputDir = outputDir + File.separator;
+//		}
+//		outputFile = logFileDir +;
+		if (outputDir != null && !outputDir.equals("")) {
+			File logFile = new File(outputDir, "pdt.log");
+			System.out.println(PREFIX_OUTPUT + "debug output is written to: " + logFile.getAbsolutePath());
+			
 			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(logFile, true));
 			outputLogFilePrintStream = new PrintStream(bufferedOutputStream);
 			setOutputTo("LOGFILE");
@@ -141,6 +150,9 @@ public class Debug {
 			
 		}
 
+	}
+	static public String getLogDir(){
+		return outputDir;
 	}
 
 	/**
@@ -177,7 +189,7 @@ public class Debug {
 	 */
 
 	public static void info(String msg) {
-		write(LEVEL_INFO, msg);
+		write(LEVEL_INFO,PREFIX_OUTPUT +  msg);
 	}
 
 	/**
@@ -190,7 +202,7 @@ public class Debug {
 
 	public static void warning(String msg) {
 		System.out.println(msg);
-		write(LEVEL_WARNING, msg);
+		write(LEVEL_WARNING,PREFIX_OUTPUT +  msg);
 	}
 
 	/**
@@ -202,7 +214,7 @@ public class Debug {
 	 */
 
 	public static void debug(String msg) {
-		write(LEVEL_DEBUG, msg);
+		write(LEVEL_DEBUG,PREFIX_OUTPUT +  msg);
 	}
 
 	/**
@@ -214,7 +226,7 @@ public class Debug {
 	 */
 
 	public static void error(String msg) {
-		write(LEVEL_ERROR, msg);
+		write(LEVEL_ERROR,PREFIX_OUTPUT +  msg);
 	}
 
 	/**
@@ -229,10 +241,10 @@ public class Debug {
 		if (debugLevel == LEVEL_NONE)
 			return;
 		if (t instanceof Error && debugLevel != LEVEL_NONE) {
-			write(LEVEL_ERROR, "The following Error was caught:");
+			write(LEVEL_ERROR, PREFIX_OUTPUT + "The following Error was caught:");
 			t.printStackTrace(out);
 		} else if (debugLevel >= LEVEL_ERROR) {
-			write(LEVEL_WARNING, "The following Exception was caught:");
+			write(LEVEL_WARNING, PREFIX_OUTPUT + "The following Exception was caught:");
 			t.printStackTrace(out);
 		}
 	}
@@ -248,11 +260,11 @@ public class Debug {
 
 	private static void setOutputStream(PrintStream out) {
 		if (out == null)
-			throw new IllegalArgumentException("output stream is null");
+			throw new IllegalArgumentException("pdt: output stream is null");
 		Debug.out = out;
-		out.println("\n---8<------------------------8<---\n");
-		out.println(new Date());
-		out.println("\n---8<------------------------8<---\n");
+		out.println(PREFIX_OUTPUT + "----------------------------------");
+		out.println(PREFIX_OUTPUT + new Date());
+		out.println(PREFIX_OUTPUT + "----------------------------------");
 	}
 
 	
@@ -274,7 +286,7 @@ public class Debug {
 			prefix = "INFO";
 			break;
 		default:
-			throw new IllegalStateException("Bad level value");
+			throw new IllegalStateException(PREFIX_OUTPUT + "Bad level value");
 		}
 		Thread currentThread = Thread.currentThread();
 		String tn = currentThread.getName();
@@ -283,9 +295,9 @@ public class Debug {
 		// String loc =
 		// "("+stackFrame.getFileName()+":"+stackFrame.getLineNumber()+")";
 		// String loc = stackFrame.toString();
-		Date d = new Date();
+//		Date d = new Date();
 		//if ((debugOutputTo == LEVEL_OUTPUT_LOGFILE) || (debugOutputTo == LEVEL_OUTPUT_CONSOLE)){
-			out.println(prefix + ":" + tn + ": "/* + loc+": " */+ msg);
+			out.println(PREFIX_OUTPUT + prefix + ":" + tn + ": "/* + loc+": " */+ msg);
 			out.flush();	
 		//}
 		
