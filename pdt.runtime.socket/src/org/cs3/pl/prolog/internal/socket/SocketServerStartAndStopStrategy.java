@@ -132,12 +132,17 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			}
 
 			if (socketPif.isCreateLogs()) {
-				p.println(":- multifile user:'$log_dir'/1.");
-				p.println(":- dynamic user:'$log_dir'/1.");
-				File logDir = new File(System.getProperty("java.io.tmpdir"), "pif_server_logs");
-				logDir.mkdirs();
-
-				p.println("user:'$log_dir'('" + Util.prologFileName(logDir) + "').");
+//				p.println(":- multifile user:'$log_dir'/1.");
+//				p.println(":- dynamic user:'$log_dir'/1.");
+//				 
+//				
+//				
+//				File logDir = new File(Debug.getLogDir(), "pif_server");
+////				File logDir = new File(System.getProperty("java.io.tmpdir"), "pif_server.log");
+//				
+//				logDir.mkdirs();
+//
+//				p.println("user:'$log_dir'('" + Util.prologFileName(logDir) + "').");
 				p.println(":- debug(consult_server).");
 
 			}
@@ -211,14 +216,15 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 				process = Runtime.getRuntime().exec(commandArray, envarray);
 			}
 
-			File logFile = Util.getLogFile("org.cs3.pdt.server.log");
+			File logFile = Util.getLogFile(Debug.getLogDir(),"pdt.server.log");
+			System.out.println("pdt: serverlog is written to: " + logFile.toString());
 			// TR: Do not change this constructor call!
 			// J2ME requirement: FileWriter(File,boolean) -> FileWriter(String,
 			// boolean)
 			BufferedWriter writer = new BufferedWriter(new FileWriter(logFile.getAbsolutePath(), true));
-			writer.write("\n---8<-----------------------8<---\n");
+			writer.write("---------------------------------\n");
 			writer.write(new Date().toString() + "\n");
-			writer.write("---8<-----------------------8<---\n\n");
+			writer.write("---------------------------------\n");
 
 			new _InputStreamPump(process.getErrorStream(), writer).start();
 			new _InputStreamPump(process.getInputStream(), writer).start();
@@ -255,10 +261,6 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			long pid = c.getServerPid();
 
 			c.close();
-//			String cmd = socketPif.getKillcommand() + " " + pid;
-			// an experiment
-//			this.serverProcess = new ExternalKillProcessWrapper(process, new String[] { socketPif.getKillcommand(), "" + pid });
-//			this.serverProcess = new ExternalKillProcessWrapper(process,  pid );
 			this.serverKillProcessWrapper = new ExternalKillProcessWrapper(pid);
 			
 			JackTheProcessRipper.getInstance().registerProcess(serverKillProcessWrapper);

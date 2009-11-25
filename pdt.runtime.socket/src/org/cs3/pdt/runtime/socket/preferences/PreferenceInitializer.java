@@ -23,7 +23,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 //		store.setDefault(ProcessKiller.PREF_KILLCOMMAND, ProcessKiller.guessKillCommandName());
 		store.setDefault(SocketPrologInterface.PREF_USE_POOL, guessUsePool());
-		store.setDefault(SocketPrologInterface.PREF_CREATE_LOGS, false);
+		store.setDefault(SocketPrologInterface.PREF_CREATE_SERVER_LOGS, false);
 		store.setDefault(SocketPrologInterface.PREF_PORT, 9944);
 		store.setDefault(SocketPrologInterface.PREF_HIDE_PLWIN, true);
 	}

@@ -52,7 +52,7 @@ public class PreferencePageSocket
 	
 		// When enabled, the server process will produce rather verbose log
 		// files below the systems temp directory.
-		addField(new BooleanFieldEditor(SocketPrologInterface.PREF_CREATE_LOGS, "Create server debug logs", getFieldEditorParent()));
+		addField(new BooleanFieldEditor(SocketPrologInterface.PREF_CREATE_SERVER_LOGS, "Create server debug logs", getFieldEditorParent()));
 
 		// The port the PIF server is listening on
 		IntegerFieldEditor port = new IntegerFieldEditor(SocketPrologInterface.PREF_PORT, "Server port", getFieldEditorParent());
