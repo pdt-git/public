@@ -187,9 +187,9 @@ public class Util {
 		return sb.toString();
 	}
 
-	public static File getLogFile(String name) throws IOException {
-		File logFile = new File(System.getProperty("java.io.tmpdir")
-				+ File.separator + name);
+	public static File getLogFile(String dir, String name) throws IOException {
+		File logFile = new File(dir,name);
+				
 		if (!logFile.exists()) {
 			logFile.getParentFile().mkdirs();
 			logFile.createNewFile();
@@ -494,40 +494,9 @@ public class Util {
 		return sb.toString();
 	}
 
-	private static HashMap startTimes = new HashMap();
 
-	public static void startTime(String key) {
-		String prefix = Thread.currentThread().toString();
-		startTimes.put(prefix + key, new Long(System.currentTimeMillis()));
-	}
 
-	public static long time(String key) {
-		String prefix = Thread.currentThread().toString();
-		Long startTime = (Long) startTimes.get(prefix + key);
-		return startTime == null ? -1 : System.currentTimeMillis()
-				- startTime.longValue();
-	}
 
-	static PrintStream logStream = null;
-
-	public static void printTime(String key) {
-		if (logStream == null) {
-			try {
-				File f = getLogFile("times.txt");
-				logStream = new PrintStream(new BufferedOutputStream(
-						new FileOutputStream(f)));
-				Runtime.getRuntime().addShutdownHook(new Thread() {
-					public void run() {
-						logStream.close();
-					}
-				});
-
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage());
-			}
-		}
-		logStream.println(key + " took " + time(key) + " millis.");
-	}
 
 	/**
 	 * parse an association list.
