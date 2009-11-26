@@ -352,7 +352,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
 	public void start() throws PrologInterfaceException {
-		System.out.println("Start Socket ");
+		System.out.println("pdt: Start Socket ");
 		if (pool != null) {
 			pool.clear();
 		}
