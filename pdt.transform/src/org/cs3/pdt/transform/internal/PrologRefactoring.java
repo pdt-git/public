@@ -2,8 +2,6 @@ package org.cs3.pdt.transform.internal;
 
 import java.util.HashMap;
 
-import org.cs3.pl.common.Option;
-import org.cs3.pl.common.OptionProvider;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 

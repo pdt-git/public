@@ -2,7 +2,6 @@ package org.cs3.pdt.transform.internal.wizards;
 
 import org.cs3.pdt.transform.internal.PrologRefactoring;
 import org.cs3.pdt.transform.internal.PrologRefactoringInfo;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class PrologRefactoringWizard extends RefactoringWizard{

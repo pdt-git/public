@@ -6,16 +6,13 @@ import org.cs3.pdt.transform.PrologRefactoringDescriptor;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PLUtil;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 
 public class DeclarativePrologRefactoringInfo extends PrologRefactoringInfo {
 	private PrologRefactoringDescriptor descriptor;	

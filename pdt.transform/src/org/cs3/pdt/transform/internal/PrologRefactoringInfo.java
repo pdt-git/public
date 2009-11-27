@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.OptionProvider;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
