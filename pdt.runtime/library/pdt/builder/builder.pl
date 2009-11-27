@@ -198,7 +198,8 @@ fp_request_target(Target):-
     	->	throw(wie_komm_ich_denn_hier_hin)
     	;	throw(nicht_meins(Target))
     	)*/
-    ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
+%    ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
+	 ;  my_debug(builder(debug), "unexpected_message: ~w, wait_for_read_lock(~w)",[Msg,Target])
     ).
 
 
@@ -355,7 +356,8 @@ request_target(Target):-
     ->	throw(error(target_failed(Target)))
     ;	Msg=cycle(Target)
     ->	throw(error(cycle(Target)))    
-    ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
+%    ;	throw(error(unexpected_message(Msg,wait_for_read_lock(Target))))
+    ;  my_debug(builder(debug), "unexpected_message: ~w, wait_for_read_lock(~w)",[Msg,Target])
     ).
 
 
