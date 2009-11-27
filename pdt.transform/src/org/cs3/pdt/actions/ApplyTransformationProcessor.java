@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
