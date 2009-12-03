@@ -67,7 +67,7 @@ public class SocketSession implements PrologSession {
 
 	private boolean queryActive;
 
-	private String lastQuery;
+//	private String lastQuery;
 
 	private AbstractPrologInterface pif;
 
@@ -139,10 +139,10 @@ public class SocketSession implements PrologSession {
 			client.readUntil(SocketClient.GIVE_TERM);
 			query = query.trim();
 			if (query.endsWith(".")) {
-				this.lastQuery = query;
+//				this.lastQuery = query;
 				client.writeln(query);
 			} else {
-				this.lastQuery = query + ".";
+//				this.lastQuery = query + ".";
 				client.writeln(query + ".");
 			}
 			Vector results = new Vector();
@@ -196,10 +196,10 @@ public class SocketSession implements PrologSession {
 				query = query.trim();
 
 				if (query.endsWith(".")) {
-					this.lastQuery = query;
+//					this.lastQuery = query;
 					client.writeln(query);
 				} else {
-					this.lastQuery = query + ".";
+//					this.lastQuery = query + ".";
 					client.writeln(query + ".");
 				}
 
