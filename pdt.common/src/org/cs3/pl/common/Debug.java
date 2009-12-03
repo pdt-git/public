@@ -189,7 +189,7 @@ public class Debug {
 	 */
 
 	public static void info(String msg) {
-		write(LEVEL_INFO,PREFIX_OUTPUT +  msg);
+		write(LEVEL_INFO, msg);
 	}
 
 	/**
@@ -201,8 +201,7 @@ public class Debug {
 	 */
 
 	public static void warning(String msg) {
-		System.out.println(msg);
-		write(LEVEL_WARNING,PREFIX_OUTPUT +  msg);
+		write(LEVEL_WARNING,msg);
 	}
 
 	/**
@@ -214,7 +213,7 @@ public class Debug {
 	 */
 
 	public static void debug(String msg) {
-		write(LEVEL_DEBUG,PREFIX_OUTPUT +  msg);
+		write(LEVEL_DEBUG, msg);
 	}
 
 	/**
@@ -226,7 +225,7 @@ public class Debug {
 	 */
 
 	public static void error(String msg) {
-		write(LEVEL_ERROR,PREFIX_OUTPUT +  msg);
+		write(LEVEL_ERROR,msg);
 	}
 
 	/**
