@@ -199,7 +199,7 @@ public class Util {
 	public static void killRuntimeProcesses(long processId) throws IOException, InterruptedException {
 		String killCommand;
 		if(Util.isWindows()){
-			killCommand= "taskkill /PID " + processId;
+			killCommand= "taskkill /F /PID " + processId;
 		} else {
 			killCommand= "kill " + processId;
 		}		
