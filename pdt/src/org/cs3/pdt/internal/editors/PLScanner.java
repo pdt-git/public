@@ -89,13 +89,13 @@ public class PLScanner extends RuleBasedScanner {
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 				List solutions = session
 						.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
-				List keywords = new ArrayList();
+				List<String> keywords = new ArrayList<String>();
 				for (Iterator it = solutions.iterator(); it.hasNext();) {
 					Map si = (Map) it.next();
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
-				plDynamicPredicates = (String[]) keywords
+				plDynamicPredicates = keywords
 						.toArray(new String[0]);
 			} catch (Exception e) {
 				plDynamicPredicates = new String[0];
@@ -121,14 +121,14 @@ public class PLScanner extends RuleBasedScanner {
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 				List solutions = session
 						.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
-				List keywords = new ArrayList();
+				List<String> keywords = new ArrayList<String>();
 				for (Iterator it = solutions.iterator(); it.hasNext();) {
 					Map si = (Map) it.next();
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
 
-				plKeywords = (String[]) keywords.toArray(new String[0]);
+				plKeywords = keywords.toArray(new String[0]);
 			} catch (PrologException e) {
 				plKeywords = new String[0];
 				Debug.report(e);
