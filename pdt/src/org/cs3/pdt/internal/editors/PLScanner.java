@@ -88,7 +88,7 @@ public class PLScanner extends RuleBasedScanner {
 				PDTPlugin r = PDTPlugin.getDefault();
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 				List solutions = session
-						.queryAll("predicate_property(P,dynamic),functor(P,Name,_)");
+						.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
 				for (Iterator it = solutions.iterator(); it.hasNext();) {
 					Map si = (Map) it.next();
@@ -120,7 +120,7 @@ public class PLScanner extends RuleBasedScanner {
 				PDTPlugin r = PDTPlugin.getDefault();
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
 				List solutions = session
-						.queryAll("predicate_property(P,built_in),functor(P,Name,_)");
+						.queryAll("predicate_property(M:P,built_in),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
 				for (Iterator it = solutions.iterator(); it.hasNext();) {
 					Map si = (Map) it.next();
