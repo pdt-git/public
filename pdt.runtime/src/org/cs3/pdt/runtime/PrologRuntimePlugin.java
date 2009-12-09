@@ -353,9 +353,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private void reconfigurePrologInterface(String key, PrologInterface prologInterface) {
 
 		// MetadataEngineInstaller.install(prologInterface);
-		List l = prologInterface.getBootstrapLibraries();
-		l.addAll(getBootstrapList(""));
-		l.addAll(getBootstrapList(key));
+//		List l = prologInterface.getBootstrapLibraries();
+//		l.addAll(getBootstrapList(""));
+//		l.addAll(getBootstrapList(key));
 
 		// we are using the bootstrapContribution extension point just as
 		// anybody else.
