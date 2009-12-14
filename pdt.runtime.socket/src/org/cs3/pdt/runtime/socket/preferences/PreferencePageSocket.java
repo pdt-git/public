@@ -3,6 +3,7 @@ package org.cs3.pdt.runtime.socket.preferences;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.ui.IWorkbench;
@@ -63,6 +64,11 @@ public class PreferencePageSocket
 		// their system tray.
 		// Note: this only works with the plwin executable.
 		addField(new BooleanFieldEditor(SocketPrologInterface.PREF_HIDE_PLWIN, "Hide plwin (windows only)", getFieldEditorParent()));
+		
+		DirectoryFieldEditor ffe = new DirectoryFieldEditor(SocketPrologInterface.PREF_SERVER_LOGDIR, "Server-Log file location", getFieldEditorParent());
+		//ffe.setPropertyChangeListener(debugPropertyChangeListener);
+		//ffe.getPreferenceStore().addPropertyChangeListener(debugPropertyChangeListener);
+		addField(ffe);	
 
 	}
 

@@ -103,7 +103,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	
 	public static final String PREF_PORT = "pif.port";
 	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
-	//public static final String PREF_ENGINE_FILE = "pif.engine_file";
+	public static final String PREF_SERVER_LOGDIR = "pif.server_log_dir";
 	public static final String PREF_MAIN_FILE = "pif.main_file";
 	public final static String PREF_USE_POOL = "pif.use_pool";
 	public static final String PREF_CREATE_SERVER_LOGS = "pif.create_logs";
@@ -111,21 +111,15 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	private boolean useSessionPooling = true;
 	private int port = -1;
 	private boolean hidePlwin;
-//	private String killcommand;
+
 	private boolean createLogs;
+	private String serverLogDir;
 		
 
-	
-//	private void setKillcommand(String killcommand) {
-//		this.killcommand = killcommand;
-//	}
-//	public String getKillcommand() {
-//		return killcommand;
-//	}
 	public void setPort(int port) {
 		this.port = port;
 	}
-	public void setPort(String port) {
+	public void setServerPort(String port) {
 		this.port = Integer.parseInt(port);
 	}
 	public void setUseSessionPooling(String useSessionPooling) {
@@ -156,19 +150,24 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public void setHidePlwin(String hidePlwin) {
 		this.hidePlwin = Boolean.parseBoolean(hidePlwin);
 	}
-	
+	public void setServerLogDir(String path){
+		serverLogDir = path;
+	}
+	public String getServerLogDir(){
+		return serverLogDir;
+	}
 	public void initOptions(){
 		
-//		super.initOptions(preference_store);
 		super.initOptions();
 		
 		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
 		
-		setPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
-		this.setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));		
-//		this.setKillcommand(overridePreferenceBySytemProperty(PREF_KILLCOMMAND));
+		this.setServerPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
+		this.setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));
 		this.setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_SERVER_LOGS));
-		setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
+		this.setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
+		this.setServerLogDir(plugin.overridePreferenceBySystemProperty(PREF_SERVER_LOGDIR));		
+		
 	}
 	
 	
@@ -179,11 +178,9 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 	private ReusablePool pool = useSessionPooling ? new ReusablePool() : null;
 	
-//	private ResourceFileLocator locator;
-//	private HashMap consultServices = new HashMap();
 	private File lockFile;
 	private ServerStartAndStopStrategy startAndStopStrategy;
-//	protected IPreferenceStore preference_store;
+
 
 	public SocketPrologInterface(String name) {		
 		super(name);
@@ -192,7 +189,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 //		}
 
 
-//		preference_store = PrologRuntimePlugin.getDefault().getPreferenceStore();
 		initOptions();		
 		setFileSearchPath(PrologRuntimePlugin.getDefault().guessFileSearchPath("pdt.runtime.socket.codebase"));
 		setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
@@ -303,22 +299,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 			
 		}
 	}
-
-
-//	/**
-//	 * @return Returns the locator.
-//	 */
-//	public ResourceFileLocator getLocator() {
-//		return locator;
-//	}
-//
-//	/**
-//	 * @param locator
-//	 *            The locator to set.
-//	 */
-//	public void setLocator(ResourceFileLocator locator) {
-//		this.locator = locator;
-//	}
 
 	/*
 	 * (non-Javadoc)
