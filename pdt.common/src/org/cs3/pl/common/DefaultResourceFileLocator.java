@@ -83,10 +83,10 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
         return resolved;
     }
 
-    public static void main(String[] args) {
-        File file = new DefaultResourceFileLocator().resolve(".hallo");        
-        System.out.println(file.toString());
-    }
+//    public static void main(String[] args) {
+//        File file = new DefaultResourceFileLocator().resolve(".hallo");        
+//        System.out.println(file.toString());
+//    }
 
     
 }
