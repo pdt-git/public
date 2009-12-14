@@ -1,7 +1,13 @@
 package org.cs3.pdt.runtime.socket.preferences;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -26,6 +32,16 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(SocketPrologInterface.PREF_CREATE_SERVER_LOGS, false);
 		store.setDefault(SocketPrologInterface.PREF_PORT, 9944);
 		store.setDefault(SocketPrologInterface.PREF_HIDE_PLWIN, true);
+		
+		
+		String location = "";
+		try {
+			location = getLocation();
+		} catch (IOException e) {
+			Debug.report(e);
+			Debug.error("Could not find plugin installation dir.");
+		}
+		store.setDefault(SocketPrologInterface.PREF_SERVER_LOGDIR,location);
 	}
 
 	/**
@@ -35,5 +51,13 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		return "true";
 	}
 
+	private String getLocation() throws IOException {
+		URL url = PrologRuntimePlugin.getDefault().getBundle().getEntry("/");
+		String location = null;
+		location = new File(Platform.asLocalURL(url).getFile()).getAbsolutePath();
+		if (location.charAt(location.length() - 1) == File.separatorChar)
+			location = location.substring(0, location.length() - 1);
+		return location;
+	}
 	
 }
