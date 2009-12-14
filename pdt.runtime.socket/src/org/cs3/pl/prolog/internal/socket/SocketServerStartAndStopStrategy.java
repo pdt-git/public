@@ -218,7 +218,7 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 		
 			
 			File logFile = Util.getLogFile(socketPif.getServerLogDir(),"pdt.server.log");
-			System.out.println("pdt: serverlog is written to: " + logFile.toString());
+//			Debug.info("pdt: serverlog is written to: " + logFile.toString());
 			// TR: Do not change this constructor call!
 			// J2ME requirement: FileWriter(File,boolean) -> FileWriter(String,
 			// boolean)
