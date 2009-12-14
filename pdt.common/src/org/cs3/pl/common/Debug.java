@@ -151,9 +151,9 @@ public class Debug {
 		}
 
 	}
-	static public String getLogDir(){
-		return outputDir;
-	}
+//	static public String getLogDir(){
+//		return outputDir;
+//	}
 
 	/**
 	 * sets the level of reporting to the specified constant. Only the LEVEL_*
