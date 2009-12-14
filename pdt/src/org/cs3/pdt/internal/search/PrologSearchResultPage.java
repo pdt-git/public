@@ -76,7 +76,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
-		System.out.println("changed");
+		//System.out.println("changed");
 		
 		StructuredViewer viewer = getViewer();
 		if(viewer!=null){
