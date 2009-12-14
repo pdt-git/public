@@ -74,24 +74,21 @@ public class PDTPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
-	/**
-	 * Returns the string from the plugin's resource bundle, or 'key' if not
-	 * found.
-	 */
-	public static String getResourceString(String key) {
-		ResourceBundle bundle = PDTPlugin.getDefault().getResourceBundle();
-		try {
-			return (bundle != null) ? bundle.getString(key) : key;
-		} catch (MissingResourceException e) {
-			return key;
-		}
-	}
-
-	// Resource bundle.
-	private ResourceBundle resourceBundle;
-	private Object root;
-	private DefaultResourceFileLocator rootLocator;
-	private Option[] options;
+//	/**
+//	 * Returns the string from the plugin's resource bundle, or 'key' if not
+//	 * found.
+//	 */
+//	public static String getResourceString(String key) {
+//		ResourceBundle bundle = PDTPlugin.getDefault().getResourceBundle();
+//		try {
+//			return (bundle != null) ? bundle.getString(key) : key;
+//		} catch (MissingResourceException e) {
+//			return key;
+//		}
+//	}
+//
+//	// Resource bundle.
+//	private ResourceBundle resourceBundle;
 	private DefaultErrorMessageProvider errorMessageProvider;
 
 	/**
@@ -100,11 +97,11 @@ public class PDTPlugin extends AbstractUIPlugin {
 	public PDTPlugin() {
 		super();
 		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
+//		try {
+//			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
+//		} catch (MissingResourceException x) {
+//			resourceBundle = null;
+//		}
 	}
 
 //	public ResourceFileLocator getResourceLocator(String key) {
@@ -123,12 +120,12 @@ public class PDTPlugin extends AbstractUIPlugin {
 //		return rootLocator.subLocator(key);
 //	}
 
-	/**
-	 * Returns the plugin's resource bundle,
-	 */
-	public ResourceBundle getResourceBundle() {
-		return resourceBundle;
-	}
+//	/**
+//	 * Returns the plugin's resource bundle,
+//	 */
+//	public ResourceBundle getResourceBundle() {
+//		return resourceBundle;
+//	}
 
 	/**
 	 * look up a preference value.
