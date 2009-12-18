@@ -42,14 +42,10 @@
 package org.cs3.pdt;
 
 import java.io.FileNotFoundException;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.DefaultResourceFileLocator;
-import org.cs3.pl.common.Option;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.util.IPropertyChangeListener;
