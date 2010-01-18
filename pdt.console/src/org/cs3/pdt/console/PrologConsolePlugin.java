@@ -47,17 +47,12 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
-import org.cs3.pl.common.Option;
 import org.cs3.pl.console.prolog.PrologConsoleService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class PrologConsolePlugin extends AbstractUIPlugin {
-
-	private Option[] options;
-
-	private ResourceBundle resourceBundle;
 
 	// The shared instance.
 	private static PrologConsolePlugin plugin;
@@ -73,9 +68,8 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 		super();
 		plugin = this;
 		try {
-			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
+			ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
 		} catch (MissingResourceException x) {
-			resourceBundle = null;
 		}
 	}
 

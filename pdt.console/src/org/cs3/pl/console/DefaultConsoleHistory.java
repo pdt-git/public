@@ -63,8 +63,8 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 
 	private ConsoleModel model = null;
 	
-	private LinkedList head = new LinkedList();
-	private LinkedList tail = new LinkedList();
+	private LinkedList<String> head = new LinkedList<String>();
+	private LinkedList<String> tail = new LinkedList<String>();
 
 	//should history be modifieable?
 	private boolean changeHistory=false;
@@ -118,7 +118,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 		}
 		if(!head.isEmpty()){
 			tail.addFirst(changeHistory||original==null? model.getLineBuffer() : original);
-			original=(String) head.getLast();
+			original=head.getLast();
 			model.setLineBuffer((String) original);
 			head.removeLast();
 		}
@@ -135,7 +135,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 		}
 		if(!tail.isEmpty()){
 			head.addLast(changeHistory||original==null? model.getLineBuffer() : original);
-			original=(String) tail.getFirst();
+			original=tail.getFirst();
 			model.setLineBuffer((String) original);
 			tail.removeFirst();
 		}
@@ -220,12 +220,12 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	
 	public void saveHistory(OutputStream os) throws IOException{
 		PrintStream ps = new PrintStream(os);
-		for (Iterator iter = head.iterator(); iter.hasNext();) {
-			String line = (String) iter.next();
+		for (Iterator<String> iter = head.iterator(); iter.hasNext();) {
+			String line = iter.next();
 			ps.println(line);
 		}
-		for (Iterator iter = tail.iterator(); iter.hasNext();) {
-			String line = (String) iter.next();
+		for (Iterator<String> iter = tail.iterator(); iter.hasNext();) {
+			String line = iter.next();
 			ps.println(line);
 		}
 	}

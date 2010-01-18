@@ -143,10 +143,10 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	private void fillMenu() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
-		Set keys = reg.getAllKeys();
+		Set<String> keys = reg.getAllKeys();
 		Menu menu = getCreatedMenu();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+			String key = it.next();
 
 			createAction(menu, reg, key);
 		}
@@ -188,7 +188,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	private void createAction(Menu menu, final PrologInterfaceRegistry reg,
 			final String key) {
 
-		Set subs = reg.getSubscriptionsForPif(key);
+		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
 		if(subs.size() == 0){
 			return;
 		}
@@ -196,8 +196,8 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 		boolean showHidden = "true".equals(PrologConsolePlugin.getDefault().getPreferenceValue(
 				PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS, "false"));
 		if (!showHidden) {
-			for (Iterator it = subs.iterator(); it.hasNext();) {
-				Subscription sub = (Subscription) it.next();
+			for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
+				Subscription sub = it.next();
 				if (!sub.isVisible()) {
 					it.remove();
 				}
@@ -220,8 +220,8 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 
 		buf.append(key);
 		buf.append(": ");
-		for (Iterator it = subs.iterator(); it.hasNext();) {
-			Subscription sub = (Subscription) it.next();
+		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
+			Subscription sub = it.next();
 			if(!sub.isVisible() && !showHidden){
 				continue;
 			}

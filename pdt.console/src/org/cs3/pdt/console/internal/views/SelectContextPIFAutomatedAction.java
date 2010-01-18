@@ -44,10 +44,15 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		PrologContextTrackerListener {
 
 	private Menu createdMenu;
-	private Set activeTrackers;
+	private Set<String> activeTrackers;
 	private IAction fAction;
 	private IWorkbenchWindow window;
 	private boolean unifiedTrackerEnabled;
+
+	protected abstract void setPrologInterface(PrologInterface prologInterface);
+	protected abstract PrologInterface getPrologInterface();
+	protected abstract void trackerActivated(PrologContextTracker tracker);
+	protected abstract void trackerDeactivated(PrologContextTracker tracker);
 
 	/*
 	 * (non-Javadoc)
@@ -69,7 +74,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	}
 
 	private void setImageDescriptorSensitive() {
-		Set trackers= getActiveTrackers();
+		Set<String> trackers= getActiveTrackers();
 		if(trackers.isEmpty()) setImageDescriptor(ImageRepository
 				.getImageDescriptor(ImageRepository.MANUAL_MODE_FREE));
 		else setImageDescriptor(ImageRepository
@@ -150,9 +155,9 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	private void fillMenu() {
 		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
 				.getPrologInterfaceRegistry();
-		Set keys = reg.getAllKeys();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		Set<String> keys = reg.getAllKeys();
+		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+			String key = it.next();
 
 			createPIFAction(getCreatedMenu(), reg, key);
 		}
@@ -163,8 +168,6 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		final MenuItem item = new MenuItem(parent, SWT.CHECK);
 
 		item.setText("Follow Mode");
-//		unifiedTrackerEnabled = getActiveTrackers().contains(
-//				trackers[0].getId());
 		unifiedTrackerEnabled = !getActiveTrackers().isEmpty();
 		item.setSelection(unifiedTrackerEnabled);
 		
@@ -218,41 +221,9 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	}
 
-	private void createContextChAction(Menu parent,
-			final PrologContextTracker tracker) {
-		final String trackerId = tracker.getId();
-		IAction action = new Action(tracker.getLabel(), IAction.AS_CHECK_BOX) {
-			public void run() {
-
-				if (getActiveTrackers().contains(trackerId)) {
-					getActiveTrackers().remove(trackerId);
-					tracker
-							.removePrologContextTrackerListener(SelectContextPIFAutomatedAction.this);
-
-					trackerDeactivated(tracker);
-				} else {
-					getActiveTrackers().add(trackerId);
-					tracker
-							.addPrologContextTrackerListener(SelectContextPIFAutomatedAction.this);
-
-					trackerActivated(tracker);
-				}
-				PrologConsolePlugin.getDefault().setPreferenceValue(
-						PDTConsole.PREF_CONTEXT_TRACKERS,
-						Util.splice(getActiveTrackers(), ","));
-				setChecked(getActiveTrackers().contains(trackerId));
-			}
-		};
-		action.setChecked(getActiveTrackers().contains(trackerId));
-		ActionContributionItem item = new ActionContributionItem(action);
-
-		item.fill(parent, -1);
-
-	}
-
 	private void createPIFAction(Menu menu, PrologInterfaceRegistry reg,
 			final String key) {
-		Set subs = reg.getSubscriptionsForPif(key);
+		Set<Subscription> subs = reg.getSubscriptionsForPif(key);
 		if (subs.size() == 0) {
 			return;
 		}
@@ -261,8 +232,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 				.getPreferenceValue(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,
 						"false"));
 		if (!showHidden) {
-			for (Iterator it = subs.iterator(); it.hasNext();) {
-				Subscription sub = (Subscription) it.next();
+			for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
+				Subscription sub = it.next();
 				if (!sub.isVisible()) {
 					it.remove();
 				}
@@ -286,8 +257,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 		buf.append(key);
 		buf.append(": ");
-		for (Iterator it = subs.iterator(); it.hasNext();) {
-			Subscription sub = (Subscription) it.next();
+		for (Iterator<Subscription> it = subs.iterator(); it.hasNext();) {
+			Subscription sub = it.next();
 			if (!sub.isVisible() && !showHidden) {
 				continue;
 			}
@@ -313,24 +284,16 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		return createdMenu;
 
 	}
-
-	protected abstract void setPrologInterface(PrologInterface prologInterface);
-
-	protected abstract PrologInterface getPrologInterface();
-
-	protected abstract void trackerActivated(PrologContextTracker tracker);
-
-	protected abstract void trackerDeactivated(PrologContextTracker tracker);
-
-	Set getActiveTrackers() {
+	
+	Set<String> getActiveTrackers() {
 		if (activeTrackers == null) {
-			activeTrackers = new HashSet();
+			activeTrackers = new HashSet<String>();
 			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(
 					PDTConsole.PREF_CONTEXT_TRACKERS, ""), ",", activeTrackers);
 			PrologContextTrackerService trackerService = PrologRuntimePlugin
 					.getDefault().getContextTrackerService();
-			for (Iterator iter = activeTrackers.iterator(); iter.hasNext();) {
-				String id = (String) iter.next();
+			for (Iterator<String> iter = activeTrackers.iterator(); iter.hasNext();) {
+				String id = iter.next();
 				PrologContextTracker contextTracker = trackerService
 						.getContextTracker(id);
 				if (contextTracker != null) {
@@ -380,8 +343,8 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	public PrologInterface getCurrentPrologInterface() {
 
-		for (Iterator it = getActiveTrackers().iterator(); it.hasNext();) {
-			String trackerId = (String) it.next();
+		for (Iterator<String> it = getActiveTrackers().iterator(); it.hasNext();) {
+			String trackerId = it.next();
 			PrologContextTracker tracker = PrologRuntimePlugin.getDefault()
 					.getContextTrackerService().getContextTracker(trackerId);
 			if (tracker == null) {
