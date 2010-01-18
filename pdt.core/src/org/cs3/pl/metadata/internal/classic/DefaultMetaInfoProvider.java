@@ -82,17 +82,6 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		this.pdtModulePrefix = prefix;
 	}
 
-	
-	
-	
-
-	/**
-	 * @param file
-	 * @return
-	 * @throws PrologException
-	 * @throws NumberFormatException
-	 * @throws PrologInterfaceException 
-	 */
 
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix)
 			throws NumberFormatException, PrologException, PrologInterfaceException {
@@ -117,8 +106,6 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 */
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
 			String filename) throws NumberFormatException, PrologException, PrologInterfaceException {
-		// return
-		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 
 		if (module == null)
@@ -128,11 +115,10 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		String query = pdtModulePrefix + "find_pred('"
 				+ filename + "','" + prefix + "', " + module
 				+ ",Name,Arity,Public)";
-		List results = session.queryAll(query);
-		List list = new ArrayList();
-		// while (result != null) {
-		for (Iterator it = results.iterator(); it.hasNext();) {
-			Map result = (Map) it.next();
+		List<Map<String,Object>> results = session.queryAll(query);
+		List<Predicate> list = new ArrayList<Predicate>();
+		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
+			Map<String,Object> result = it.next();
 			boolean pub = Boolean.valueOf(result.get("Public").toString())
 					.booleanValue();
 			Predicate data = new PredicateData(module, result.get("Name")
@@ -142,7 +128,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 
 		}
 		session.dispose();
-		return (Predicate[]) list.toArray(new Predicate[0]);
+		return list.toArray(new Predicate[0]);
 	}
 
 	public String getSummary(Predicate data) throws PrologException, PrologInterfaceException {
@@ -155,17 +141,11 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	public Clause[] retrievePrologElements(String file) throws PrologException, PrologInterfaceException {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 
-		List results = session.queryAll(/*
-										 * "bagof([Pos_,Len_]," +
-										 */"meta_data" + "('" + file
-				+ "',Module,Name,Arity,Public,Pos,Len, Dyn,Mul)"
-		/* +",[[Pos,Len]|_])" */);
-		List list = new ArrayList();
-		for (Iterator it = results.iterator(); it.hasNext();) {
-			Map result = (Map) it.next();
-			// debug(result.get("Name").toString()+" - PUBLIC-
-			// "+Boolean.valueOf(result.get("Public").toString()).booleanValue());
-
+		List<Map<String,Object>> results = session.queryAll("meta_data" + "('" + file
+				+ "',Module,Name,Arity,Public,Pos,Len, Dyn,Mul)");
+		List<Clause> list = new ArrayList<Clause>();
+		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
+			Map<String,Object> result = it.next();
 			SourceLocation sl = new SourceLocation(file, true, false);
 			sl.offset = Integer.parseInt(result.get("Pos").toString());
 			sl.endOffset = sl.offset
@@ -181,13 +161,13 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 
 		}
 		session.dispose();
-		return (Clause[]) list.toArray(new Clause[0]);
+		return list.toArray(new Clause[0]);
 	}
 
 	public String getHelp(Predicate data) throws PrologInterfaceException {
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
-		Map table = null;
+		Map<String,Object> table = null;
 		try {
 			table = session.queryOnce("manual_entry(" + data.getName() + ","
 					+ data.getArity() + ",Info)");
@@ -202,7 +182,6 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	}
 
 	public SourceLocation[] findReferences(Predicate data) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -214,22 +193,22 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				+"'"+p.getModule()+"',"
 				+"'"+p.getName()+"',"
 				+p.getArity()+","
-				+"_,"//wether it is public - we already know this.
+				+"_,"//whether it is public - we already know this.
 				+"Pos,"
 				+"Len,"
-				+"_,"//wether it is dynamic - we already know this.
-				+"_)"//wether it is multifile - we already know this.
+				+"_,"//whether it is dynamic - we already know this.
+				+"_)"//whether it is multifile - we already know this.
 				;
 				
 				
-			List l = session.queryAll(query);
+			List<Map<String,Object>> l = session.queryAll(query);
 			if (l==null){
 				return new Clause[0];
 			}
 			Clause[] result = new Clause[l.size()];
 			int i=0;
-			for (Iterator it = l.iterator(); it.hasNext();i++) {
-				Map m = (Map) it.next();
+			for (Iterator<Map<String,Object>> it = l.iterator(); it.hasNext();i++) {
+				Map<String,Object> m = it.next();
 				SourceLocation sl = new SourceLocation((String) m.get("File"),true,false);				
 				sl.offset=Integer.parseInt( (String) m.get("Pos"));
 				sl.endOffset=sl.offset+Integer.parseInt( (String) m.get("Len"));				
@@ -253,7 +232,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 * 
 	 */
 	public Predicate[] findPredicates(Goal g) throws PrologInterfaceException {
-		Set result = new HashSet();
+		Set<PredicateData> result = new HashSet<PredicateData>();
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try{
 			String query= "meta_data(File,"
@@ -266,9 +245,9 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				+"Dyn,"
 				+"Mult)"
 				;	
-			List l = session.queryAll(query);
-			for (Iterator it = l.iterator(); it.hasNext();) {
-				Map m = (Map) it.next();
+			List<Map<String,Object>> l = session.queryAll(query);
+			for (Iterator<Map<String,Object>> it = l.iterator(); it.hasNext();) {
+				Map<String,Object> m = it.next();
 				String module = (String) m.get("Module");
 				String label = g.getName();
 				int arity = g.getArity();
@@ -283,7 +262,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				session.dispose();
 			}
 		}
-		return (Predicate[]) result.toArray(new Predicate[result.size()]);
+		return result.toArray(new Predicate[result.size()]);
 	}
 
 }

@@ -57,13 +57,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-/**
- */
 public class AutoConsultAction implements IObjectActionDelegate {
-    private IWorkbenchPart targetPart;
-
-    private IAction action;
-
     private IFile file;
 
     private IPrologProject project;
@@ -77,8 +71,6 @@ public class AutoConsultAction implements IObjectActionDelegate {
      *           org.eclipse.ui.IWorkbenchPart)
      */
     public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-        this.action = action;
-        this.targetPart = targetPart;
     }
 
     /*

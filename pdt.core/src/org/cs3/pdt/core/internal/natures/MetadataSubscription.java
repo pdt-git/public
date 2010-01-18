@@ -129,9 +129,9 @@ public class MetadataSubscription extends DefaultSubscription implements
 		}
 	}
 
-	public void restoreState(Map params) {
+	public void restoreState(Map<String, String> params) {
 		super.restoreState(params);
-		setProjectName((String) params.get("project"));
+		setProjectName(params.get("project"));
 	}
 
 	private void setProjectName(String pname) {
@@ -151,24 +151,21 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	public void onInit(PrologInterface pif, PrologSession initSession)
 			throws PrologInterfaceException {
-		/* load pdt backend facade */
+		loadBackendFacade(initSession);
+		setupSourcePaths(initSession);
+	}
+
+	private void loadBackendFacade(PrologSession initSession)
+			throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
 		PLUtil.configureFileSearchPath(mgr, initSession,
 				new String[] { PDTCore.ENGINE_ID });
 		initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
-		
-		//begin debug
-		
-		//initSession.queryOnce("tspy(parse:do_inclusion)");
-		//initSession.queryOnce("tspy(pdt_builder:next_message)");
-		//initSession.queryOnce("tspy(pdt_builder:arbiter_send_message)");
-		
-		//end debug
-		
-		
-		/* setup project source paths */
+	}
 
+	private void setupSourcePaths(PrologSession initSession)
+			throws PrologInterfaceException {
 		try {
 			IPrologProject project = getPrologProject();
 			project.updateBuildPath(initSession);
@@ -177,14 +174,13 @@ public class MetadataSubscription extends DefaultSubscription implements
 		}
 	}
 
+	
 	public void afterInit(PrologInterface pif) {
-
 		scheduleInitialBuild(pif);
 	}
 
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
 		;
-
 	}
 
 	private void scheduleInitialBuild(PrologInterface pif) {

@@ -112,9 +112,9 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private Subscription metadataPifSubscription;
 
-	private HashMap libraries;
+	private HashMap<String, DefaultPrologLibrary> libraries;
 
-	private Vector listeners = new Vector();
+	private Vector<OptionProviderListener> listeners = new Vector<OptionProviderListener>();
 
 	private AnnotatorsOptionProvider annotatorsOptionProvider;
 
@@ -151,22 +151,22 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private void registerLibraries() throws CoreException {
-		HashMap libs = getPrologLibraries();
+		HashMap<String, DefaultPrologLibrary> libs = getPrologLibraries();
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
-		for (Iterator it = libs.values().iterator(); it.hasNext();) {
-			PrologLibrary lib = (PrologLibrary) it.next();
+		for (Iterator<DefaultPrologLibrary> it = libs.values().iterator(); it.hasNext();) {
+			PrologLibrary lib = it.next();
 			mgr.addLibrary(lib);
 		}
 
 	}
 
 	private void unregisterLibraries() throws CoreException {
-		HashMap libs = getPrologLibraries();
+		HashMap<String, DefaultPrologLibrary> libs = getPrologLibraries();
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
-		for (Iterator it = libs.values().iterator(); it.hasNext();) {
-			PrologLibrary lib = (PrologLibrary) it.next();
+		for (Iterator<DefaultPrologLibrary> it = libs.values().iterator(); it.hasNext();) {
+			PrologLibrary lib = it.next();
 			mgr.removeLibrary(lib);
 		}
 
@@ -234,8 +234,8 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * 
 	 * @see org.cs3.pdt.IPrologProject#getExistingSourcePathEntries()
 	 */
-	public Set getExistingSourcePathEntries() throws CoreException {
-		Set r = new HashSet();
+	public Set<IContainer> getExistingSourcePathEntries() throws CoreException {
+		Set<IContainer> r = new HashSet<IContainer>();
 		String[] elms = getPreferenceValue(PDTCore.PROP_SOURCE_PATH, "/")
 				.split(System.getProperty("path.separator"));
 		for (int i = 0; i < elms.length; i++) {
@@ -285,7 +285,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * @see org.cs3.pdt.IPrologProject#isPrologSource(org.eclipse.core.resources.IResource)
 	 */
 	public boolean isPrologSource(IResource resource) throws CoreException {
-		Set sourcePathEntries = getExistingSourcePathEntries();
+		Set<IContainer> sourcePathEntries = getExistingSourcePathEntries();
 
 //		if (!resource.exists()) {
 //			return false;
@@ -675,7 +675,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	public void setPreferenceValues(String[] ids, String[] values) {
-		Vector changed = new Vector();
+		Vector<String> changed = new Vector<String>();
 		try {
 			for (int i = 0; i < values.length; i++) {
 				String value = values[i];
@@ -693,7 +693,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 			}
 			if (!changed.isEmpty()) {
-				fireValuesChanged((String[]) changed.toArray(new String[changed
+				fireValuesChanged(changed.toArray(new String[changed
 						.size()]));
 			}
 
@@ -738,12 +738,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public String[] getPrologLibraryKeys() throws CoreException {
 
-		HashMap libs = getPrologLibraries();
+		HashMap<String, DefaultPrologLibrary> libs = getPrologLibraries();
 
-		return (String[]) libs.keySet().toArray(new String[libs.size()]);
+		return libs.keySet().toArray(new String[libs.size()]);
 	}
 
-	public HashMap getPrologLibraries() throws CoreException {
+	public HashMap<String, DefaultPrologLibrary> getPrologLibraries() throws CoreException {
 		if (libraries == null) {
 			createLibraries();
 			registerLibraries();
@@ -753,10 +753,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private void createLibraries() throws CoreException {
 
-		Set s = getExistingSourcePathEntries();
-		libraries = new HashMap();
-		for (Iterator it = s.iterator(); it.hasNext();) {
-			IContainer c = (IContainer) it.next();
+		Set<IContainer> s = getExistingSourcePathEntries();
+		libraries = new HashMap<String, DefaultPrologLibrary>();
+		for (Iterator<IContainer> it = s.iterator(); it.hasNext();) {
+			IContainer c = it.next();
 			File f = c.getLocation().toFile();
 			String key = c.getFullPath().toString();
 			if (f != null) {
@@ -817,24 +817,24 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	protected void fireValueChanged(String id) {
 		OptionProviderEvent e = new OptionProviderEvent(this, id);
-		Vector clone = new Vector();
+		Vector<OptionProviderListener> clone = new Vector<OptionProviderListener>();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
-		for (Iterator it = clone.iterator(); it.hasNext();) {
-			OptionProviderListener l = (OptionProviderListener) it.next();
+		for (Iterator<OptionProviderListener> it = clone.iterator(); it.hasNext();) {
+			OptionProviderListener l = it.next();
 			l.valuesChanged(e);
 		}
 	}
 
 	private void fireValuesChanged(String[] ids) {
 		OptionProviderEvent e = new OptionProviderEvent(this, ids);
-		Vector clone = new Vector();
+		Vector<OptionProviderListener> clone = new Vector<OptionProviderListener>();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
-		for (Iterator it = clone.iterator(); it.hasNext();) {
-			OptionProviderListener l = (OptionProviderListener) it.next();
+		for (Iterator<OptionProviderListener> it = clone.iterator(); it.hasNext();) {
+			OptionProviderListener l = it.next();
 			l.valuesChanged(e);
 		}
 

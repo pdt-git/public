@@ -51,6 +51,7 @@ import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -71,7 +72,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
      * @return
      * @throws CoreException
      */
-    public Set getExistingSourcePathEntries() throws CoreException;
+    public Set<IContainer> getExistingSourcePathEntries() throws CoreException;
     
     /**
      * parses the current value of the entry points property and returns

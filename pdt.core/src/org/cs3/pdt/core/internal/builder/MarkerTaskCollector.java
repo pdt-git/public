@@ -61,7 +61,7 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 /**
  */
 public class MarkerTaskCollector implements TaskCollector {
-    private ArrayList markers = new ArrayList();
+    private ArrayList<HashMap<String, Integer>> markers = new ArrayList<HashMap<String, Integer>>();
     private IFile file;
     
     
@@ -82,7 +82,7 @@ public class MarkerTaskCollector implements TaskCollector {
      */
     public void reportTask(Task p){
         
-        HashMap attributes = new HashMap();
+        HashMap<String, Integer> attributes = new HashMap<String, Integer>();
         
         MarkerUtilities.setMessage(attributes, p.message);
         MarkerUtilities.setLineNumber(attributes, p.firstRow);
@@ -120,7 +120,7 @@ public class MarkerTaskCollector implements TaskCollector {
                 public void run(IProgressMonitor monitor) throws CoreException {
                     for (int i = 0; i < markers.size(); i++) {
                         IMarker marker = file.createMarker(IMarker.TASK);
-                        marker.setAttributes((HashMap) markers.get(i));
+                        marker.setAttributes(markers.get(i));
                        
                     }
                 }

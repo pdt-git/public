@@ -47,7 +47,6 @@ import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.action.IAction;
@@ -61,10 +60,6 @@ import org.eclipse.ui.IWorkbenchPart;
  * @inheritDoc
  */
 public class PrologProjectNatureAction implements IObjectActionDelegate {
-	private IWorkbenchPart targetPart;
-
-	private IAction action;
-
 	private IProject project;
 
 	/*
@@ -74,8 +69,6 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 	 *      org.eclipse.ui.IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		this.action = action;
-		this.targetPart = targetPart;
 	}
 
 	/*
@@ -109,18 +102,6 @@ public class PrologProjectNatureAction implements IObjectActionDelegate {
 	}
 
 	
-
-	/**
-	 * @param project2
-	 * @throws CoreException
-	 */
-	private void removeNatureFromAllOtherProjects() throws CoreException {
-		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
-				.getProjects();
-		for (int i = 0; i < projects.length; i++)
-			if (projects[i].isOpen())
-				PDTCoreUtils.removePDTNature(projects[i]);
-	}
 
 	/*
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,

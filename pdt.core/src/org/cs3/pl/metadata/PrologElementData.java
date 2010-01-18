@@ -47,9 +47,7 @@ import java.util.Comparator;
 
 /**
  * a tuple describing a logical prolog element like a predicate or a module..
- * 
- *@deprecated
- *
+
  */
 public class PrologElementData implements Serializable, Comparable{
 
@@ -151,19 +149,6 @@ public class PrologElementData implements Serializable, Comparable{
 	public String toString() {
 		return getSignature();
 	}
-
-
-	
-
-
-	/**
-	 * @deprecated use getKnownDefinition.getOffset()
-	 * @return
-	 */
-	public int getPosition() {
-		return knownDefinition==null?-1:knownDefinition.offset;
-	}
-
 
 
 

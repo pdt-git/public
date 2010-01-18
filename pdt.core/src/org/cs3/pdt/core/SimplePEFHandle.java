@@ -24,6 +24,8 @@ public class SimplePEFHandle implements PEFHandle {
 		return pif;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}

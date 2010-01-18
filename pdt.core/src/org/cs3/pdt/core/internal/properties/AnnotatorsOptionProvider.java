@@ -23,15 +23,40 @@ import org.cs3.pl.prolog.PrologSession;
 
 public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderExtension,PrologInterfaceListener {
 	public static final String SUBJECT = "annotator_enabled";
-
 	IPrologProject prologProject = null;
-
 	private Option[] options;
-
-	//private Map settings=new HashMap();
-	private Vector listeners = new Vector();
-
+	private Vector<OptionProviderListener> listeners = new Vector<OptionProviderListener>();
 	private boolean itsMe;
+	
+	public  AnnotatorsOptionProvider(IPrologProject plProject)  throws PrologInterfaceException {
+		this.prologProject=plProject;
+		PrologInterface pif = prologProject.getMetadataPrologInterface();
+		
+		PrologSession session = pif.getSession(PrologInterface.NONE);
+		List<Map<String,Object>> l = session.queryAll("pdt_annotator_enabled(Annotator,Enabled)");
+		options = new Option[l.size()];
+		
+		int i=0;
+		Vector<String> ids = new Vector<String>();
+		Vector<String> values = new Vector<String>();
+		Iterator<Map<String,Object>> iter = l.iterator();
+		while(iter.hasNext()) {
+			Map<String,Object> map = iter.next();
+			String annotator = (String) map.get("Annotator");
+			String enabled = (String) map.get("Enabled");
+			options[i++] = new SimpleOption(annotator,annotator,"no description",Option.FLAG,"true");
+			
+			String persisted = prologProject.getPreferenceValue("enabled."+annotator, enabled);
+			if(!persisted.equals(enabled)){
+				ids.add(annotator);
+				values.add(persisted);
+			}
+		}
+		updatePrologBackend(
+				ids.toArray(new String[ids.size()]), 
+				values.toArray(new String[values.size()]));
+	}
+	
 	public void addOptionProviderListener(OptionProviderListener l) {
 		synchronized (listeners) {
 			if(!listeners.contains(l)){
@@ -75,50 +100,18 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 
 	private void fireValuesChanged(String[] ids) {
 		OptionProviderEvent e = new OptionProviderEvent(this,ids);
-		Vector clone = new Vector();
+		Vector<OptionProviderListener> clone = new Vector<OptionProviderListener>();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
-		for (Iterator it = clone.iterator(); it.hasNext();) {
-			OptionProviderListener l = (OptionProviderListener) it.next();
+		for (Iterator<OptionProviderListener> it = clone.iterator(); it.hasNext();) {
+			OptionProviderListener l = it.next();
 			l.valuesChanged(e);
 		}
-		
 	}
 
 	public Option[] getOptions() {
 		return options;
-	}
-
-	public  AnnotatorsOptionProvider(IPrologProject plProject)  throws PrologInterfaceException {
-		this.prologProject=plProject;
-		PrologInterface pif = prologProject.getMetadataPrologInterface();
-		
-		
-		PrologSession session = pif.getSession(PrologInterface.NONE);
-		List l = session.queryAll("pdt_annotator_enabled(Annotator,Enabled)");
-		options = new Option[l.size()];
-		
-		int i=0;
-		Vector ids = new Vector();
-		Vector values = new Vector();
-		for (Iterator iter = l.iterator(); iter.hasNext();) {
-			Map map = (Map) iter.next();
-			String annotator = (String) map.get("Annotator");
-			String enabled = (String) map.get("Enabled");
-			options[i++] = new SimpleOption(annotator,annotator,"no description",Option.FLAG,"true");
-			
-			String persisted = prologProject.getPreferenceValue("enabled."+annotator, enabled);
-			if(!persisted.equals(enabled)){
-				ids.add(annotator);
-				values.add(persisted);
-			}
-			
-		}
-		updatePrologBackend(
-				(String[])ids.toArray(new String[ids.size()]), 
-				(String[])values.toArray(new String[values.size()]));
-		
 	}
 
 	public synchronized String getPreferenceValue(String id, String string) {		
@@ -136,8 +129,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 	}
 
 	public void reconfigure() {
-
-
+		;
 	}
 
 	public void setPreferenceValue(String id, String value) {
@@ -151,12 +143,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		if(!SUBJECT.equals(e.getSubject())){
 			return;
 		}
-		
 		String[] eventdata=e.getEvent().split("-");
 		setPreferenceValue(eventdata[0], eventdata[1]);
-		
-		
 	}
-	
-	
 }

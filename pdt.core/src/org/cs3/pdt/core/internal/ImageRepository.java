@@ -62,7 +62,7 @@ import org.eclipse.swt.graphics.Image;
  */
 public class ImageRepository {
 
-	private static HashMap cache = new HashMap();
+	private static HashMap<String, Image> cache = new HashMap<String, Image>();
 	
 	public final static String SOURCEPATH_DECORATION = "sample_decorator.gif";
 
@@ -75,7 +75,7 @@ public class ImageRepository {
     }
 
     public static final Image getImage(String icon) {
-        Image image = (Image) cache.get(icon);
+        Image image = cache.get(icon);
         if (image == null) {
             image = getImageDescriptor(icon).createImage();
             cache.put(icon, image);

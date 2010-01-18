@@ -161,19 +161,10 @@ public interface Predicate extends Comparable{
 	 * @deprecated getPredicateProperty(MULTIFILE) instead
 	 */	
 	public boolean isMultifile();
-	
-	
-	
-
-	
 
 	/**
 	 * @deprecated use getModule() and getPredicateProperty(EXPORTED) instead
 	 */
 	public boolean isPublic();
-	
-
-	
-	
 
 }

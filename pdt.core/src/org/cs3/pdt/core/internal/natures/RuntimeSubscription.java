@@ -60,19 +60,14 @@ import org.eclipse.core.runtime.CoreException;
 
 public class RuntimeSubscription extends DefaultSubscription implements
 		LifeCycleHook {
-
 	private String projectName;
-
 	private IProject project;
-
 	private IPrologProject prologProject;
-	
 	
 	public RuntimeSubscription() {
 		super();
 	}
 
-	
 	public RuntimeSubscription(String projectName, String id, String pifId) {
 
 		super(id, pifId, "used as default runtime for project" + projectName,
@@ -86,7 +81,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 			try {
 				afterInit(pif);
 			} catch (PrologInterfaceException e) {
-				//nothing to do. The pif will have to be restarted anyway to be used.
+				;
 			}
 		}
 	}
@@ -110,18 +105,17 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		}
 	}
 
-	public void restoreState(Map params) {
+	public void restoreState(Map<String, String> params) {
 		super.restoreState(params);
-		setProjectName((String) params.get("project"));
+		setProjectName(params.get("project"));
 	}
 
 	private void setProjectName(String pname) {
 		this.projectName = pname;
-
 	}
 
-	public Map saveState() {
-		Map map = super.saveState();
+	public Map<String, String> saveState() {
+		Map<String, String> map = super.saveState();
 		map.put("project", getProjectName());
 		return map;
 	}
@@ -132,12 +126,10 @@ public class RuntimeSubscription extends DefaultSubscription implements
 
 	public void onInit(PrologInterface pif, PrologSession initSession) {
 		;
-
 	}
 
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
-				.getLibraryManager();
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
 		IPrologProject plp = getPrologProject();
 		String[] keys = null;
 		try {
@@ -147,16 +139,13 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		}
 		PrologSession s =null;
 		try {
-		s= pif.getSession(PrologInterface.NONE);
-		
+			s= pif.getSession(PrologInterface.NONE);
 			PLUtil.configureFileSearchPath(mgr, s,keys);
-			
 		} finally {
 			if (s != null) {
 				s.dispose();
 			}
 		}
-
 	}
 
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
