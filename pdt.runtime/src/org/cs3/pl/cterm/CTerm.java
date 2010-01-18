@@ -41,15 +41,40 @@
 
 package org.cs3.pl.cterm;
 
+import org.cs3.pl.common.Util;
+import org.cs3.pl.cterm.internal.parser.ASTNode;
+import org.cs3.pl.prolog.PLUtil;
 
+public class CTerm {
+	protected ASTNode node;
+	private String functorValue;
+	
+	public CTerm(ASTNode node) {
+		this.node=node;
+	}
+	
+	public String toString() {
+		return PLUtil.renderTerm(this);
+	}
+		
+	public String getFunctorValue() {
+		if(functorValue==null){
+			functorValue=doGetFunctorValue();	
+		}
+		return functorValue;
+	}
 
+	private  String doGetFunctorValue() {
+		String image = getFunctorImage();
+		return Util.unquoteAtom(image);
+	}
 
-public interface CTerm {
-	boolean hasAnnotation(String string);
-	public CTerm getAnotation(String functor);
-	public String[] getAnnotationKeys();
-	public String getFunctorImage();
-	public int getArity();
-	public String getFunctorValue();
-	public CTermFactory getFactory();
+	public String getFunctorImage() {
+		return node.getImage();
+	}
+
+	public int getArity() {	
+		return 0;
+	}
+
 }

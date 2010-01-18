@@ -56,9 +56,9 @@ public class DefaultPrologContextTrackerService implements
 		PrologContextTrackerService {
 	
 	
-	private HashMap contextTrackers=new HashMap();
+	private HashMap<String, PrologContextTracker> contextTrackers=new HashMap<String, PrologContextTracker>();
 
-	private HashMap contextTrackerListeners=new HashMap();
+	private HashMap<String, Set<PrologContextTrackerListener>> contextTrackerListeners=new HashMap<String, Set<PrologContextTrackerListener>>();
 	
 
 	/**
@@ -68,14 +68,14 @@ public class DefaultPrologContextTrackerService implements
 	 */
 	public void registerPrologContextTracker(PrologContextTracker tracker) {
 		contextTrackers.put(tracker.getId(),tracker);
-		Set s = (Set)contextTrackerListeners.get(tracker.getId());
-		if(s==null){
-			s=new HashSet();
-			contextTrackerListeners.put(tracker.getId(),s);
+		Set<PrologContextTrackerListener> listeners = contextTrackerListeners.get(tracker.getId());
+		if(listeners==null){
+			listeners=new HashSet<PrologContextTrackerListener>();
+			contextTrackerListeners.put(tracker.getId(),listeners);
 		}
-		for (Iterator it = s.iterator(); it.hasNext();) {
-			PrologContextTrackerListener l = (PrologContextTrackerListener) it.next();
-			tracker.addPrologContextTrackerListener(l);
+		for (Iterator<PrologContextTrackerListener> it = listeners.iterator(); it.hasNext();) {
+			PrologContextTrackerListener nextListener = it.next();
+			tracker.addPrologContextTrackerListener(nextListener);
 		}
 		lateInit(tracker);
 	}
@@ -102,14 +102,14 @@ public class DefaultPrologContextTrackerService implements
 	 */
 	public void unregisterPrologContextTracker(PrologContextTracker tracker) {
 		contextTrackers.remove(tracker.getId());
-		Set s = (Set)contextTrackerListeners.remove(tracker.getId());
-		if(s==null){
+		Set<PrologContextTrackerListener> listeners = contextTrackerListeners.remove(tracker.getId());
+		if(listeners==null){
 			return;
 		}
 		
-		for (Iterator it = s.iterator(); it.hasNext();) {
-			PrologContextTrackerListener l = (PrologContextTrackerListener) it.next();
-			tracker.removePrologContextTrackerListener(l);
+		for (Iterator<PrologContextTrackerListener> it = listeners.iterator(); it.hasNext();) {
+			PrologContextTrackerListener nextListener = it.next();
+			tracker.removePrologContextTrackerListener(nextListener);
 		}
 	}
 	
@@ -121,13 +121,13 @@ public class DefaultPrologContextTrackerService implements
 	 * @param l
 	 */
 	public void addPrologContextTrackerListener(String trackerID, PrologContextTrackerListener l){
-		Set s = (Set)contextTrackerListeners.get(trackerID);
+		Set<PrologContextTrackerListener> s = contextTrackerListeners.get(trackerID);
 		if(s==null){
-			s=new HashSet();
+			s=new HashSet<PrologContextTrackerListener>();
 			contextTrackerListeners.put(trackerID,s);
 		}
 		s.add(l);
-		PrologContextTracker tracker = (PrologContextTracker) contextTrackers.get(trackerID);
+		PrologContextTracker tracker = contextTrackers.get(trackerID);
 		if(tracker!=null){
 			tracker.addPrologContextTrackerListener(l);
 		}
@@ -144,12 +144,12 @@ public class DefaultPrologContextTrackerService implements
 	 * @param l
 	 */
 	public void removePrologContextTrackerListener(String trackerID, PrologContextTrackerListener l){
-		Set s = (Set)contextTrackerListeners.get(trackerID);
-		if(s==null){
+		Set<PrologContextTrackerListener> listeners = contextTrackerListeners.get(trackerID);
+		if(listeners==null){
 			return;
 		}
-		s.remove(l);
-		PrologContextTracker tracker = (PrologContextTracker) contextTrackers.get(trackerID);
+		listeners.remove(l);
+		PrologContextTracker tracker = contextTrackers.get(trackerID);
 		if(tracker!=null){
 			tracker.removePrologContextTrackerListener(l);
 		}
@@ -160,11 +160,11 @@ public class DefaultPrologContextTrackerService implements
 	 * @return an array containing all context trackers currently registered with the runtime plugin.
 	 */
 	public PrologContextTracker[] getContextTrackers() {		
-		return (PrologContextTracker[]) contextTrackers.values().toArray(new PrologContextTracker[contextTrackers.size()]);
+		return contextTrackers.values().toArray(new PrologContextTracker[contextTrackers.size()]);
 	}
 
 	public PrologContextTracker getContextTracker(String trackerId) {
-		return (PrologContextTracker) contextTrackers.get(trackerId);
+		return contextTrackers.get(trackerId);
 	}
 
 }

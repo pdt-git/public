@@ -79,10 +79,7 @@ public class SocketSessionTest extends TestCase {
 	 */
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel("DEBUG");
-
-//		pif = PrologInterfaceFactory.newInstance().create();
 		pif = AbstractPrologInterface.newInstance();
-
 		pif.start();
 	}
 
@@ -152,7 +149,7 @@ public class SocketSessionTest extends TestCase {
 
 	public void testCTerm() throws PrologException, PrologInterfaceException {
 		PrologSession s = pif.getSession(PrologInterface.CTERMS);		
-		Map map = s.queryOnce("A=[1,2]");
+		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
 		Object a = map.get("A");
 		assertTrue(a instanceof CCompound);
@@ -163,7 +160,7 @@ public class SocketSessionTest extends TestCase {
 			PrologInterfaceException {
 		PrologSession s =  pif.getSession(PrologInterface.NONE);
 		
-		Map map = s.queryOnce("A=[1,2]");
+		Map<String,Object> map = s.queryOnce("A=[1,2]");
 		assertNotNull(map);
 		Object a = map.get("A");
 		assertTrue(a instanceof String);
@@ -193,7 +190,7 @@ public class SocketSessionTest extends TestCase {
 		PrologSession server = pif.getSession();
 
 		// ClientConnection connection= new ClientConnectionStub();
-		Map r = server.queryOnce("assert(wahr(wahrheit))");
+		Map<String,Object> r = server.queryOnce("assert(wahr(wahrheit))");
 		assertNotNull("result should not be null", r);
 		assertTrue("result should be empty", r.isEmpty());
 
@@ -222,9 +219,6 @@ public class SocketSessionTest extends TestCase {
 		PrologSession s = pif.getSession();
 		try {
 			s.queryAll("test(''asdf'')");
-			// s.queryOnce("guitracer");
-			// s.queryOnce("spy(handle_command)");
-			// s.queryAll("test ( bla )");
 		} catch (PrologException e) {
 			;
 		}
@@ -248,7 +242,6 @@ public class SocketSessionTest extends TestCase {
 		};
 		thread.start();
 
-		// ((PIFComPrologInterface)pif).process.destroy();
 		((AbstractPrologInterface) pif).getStartAndStopStrategy().stopServer(
 				pif);
 		thread.join();
@@ -264,31 +257,31 @@ public class SocketSessionTest extends TestCase {
 	 */
 	public void testList() throws PrologInterfaceException {
 		PrologSession s = pif.getSession();
-		Map map = s.queryOnce("A=[1,2,3,[[a,b,['{}']]],[b,c]]");
+		Map<String,Object> map = s.queryOnce("A=[1,2,3,[[a,b,['{}']]],[b,c]]");
 
 		Object A = map.get("A");
 		assertEquals("[1, 2, 3, [[a, b, [{}]]], [b, c]]", A.toString());
-		assertTrue(A instanceof List);
-		List l = (List) A;
+		assertTrue(A instanceof List<?>);
+		List<?> l = (List<?>) A;
 		assertEquals("1", (String) l.get(0));
 		assertEquals("2", (String) l.get(1));
 		assertEquals("3", (String) l.get(2));
 		assertEquals(5, l.size());
 		A = l.get(3);
-		assertTrue(A instanceof List);
-		List m = (List) A;
+		assertTrue(A instanceof List<?>);
+		List<?> m = (List<?>) A;
 		assertEquals(1, m.size());
-		assertTrue(m.get(0) instanceof List);
-		m = (List) m.get(0);
+		assertTrue(m.get(0) instanceof List<?>);
+		m = (List<?>) m.get(0);
 		assertEquals(3, m.size());
 		assertEquals("a", (String) m.get(0));
 		assertEquals("b", (String) m.get(1));
-		assertTrue(m.get(2) instanceof List);
-		m = (List) m.get(2);
+		assertTrue(m.get(2) instanceof List<?>);
+		m = (List<?>) m.get(2);
 		assertEquals(1, m.size());
 		assertEquals("{}", (String) m.get(0));
-		assertTrue(l.get(4) instanceof List);
-		m = (List) l.get(4);
+		assertTrue(l.get(4) instanceof List<?>);
+		m = (List<?>) l.get(4);
 		assertEquals(2, m.size());
 		assertEquals("b", (String) m.get(0));
 		assertEquals("c", (String) m.get(1));
@@ -298,33 +291,29 @@ public class SocketSessionTest extends TestCase {
 	public void testQueryAll() throws Throwable {
 		PrologSession s = pif.getSession();
 
-		List l = s.queryAll("member(A,[ich,du,muellers_kuh])");
-		assertEquals(3, l.size());
-		Vector v = new Vector();
-		for (Iterator it = l.iterator(); it.hasNext();) {
-			Map m = (Map) it.next();
+		List<Map<String,Object>> result = s.queryAll("member(A,[ich,du,muellers_kuh])");
+		assertEquals(3, result.size());
+		Vector<Object> v = new Vector<Object>();
+		for (Iterator<Map<String,Object>> it = result.iterator(); it.hasNext();) {
+			Map<String,Object> m = it.next();
 			v.add(m.get("A"));
 		}
 		assertEquals("ich", v.get(0));
 		assertEquals("du", v.get(1));
 		assertEquals("muellers_kuh", v.get(2));
 
-		l = s.queryAll("member(ich,[ich,ich,muellers_kuh])");
-		assertEquals(2, l.size());
-		for (Iterator it = l.iterator(); it.hasNext();) {
-			Map m = (Map) it.next();
+		result = s.queryAll("member(ich,[ich,ich,muellers_kuh])");
+		assertEquals(2, result.size());
+		for (Iterator<Map<String,Object>> it = result.iterator(); it.hasNext();) {
+			Map<String,Object> m = it.next();
 			assertEquals(0, m.size());
 		}
-		l = s.queryAll("member(und,[ich,du,muellers_kuh])");
-		assertEquals(0, l.size());
+		result = s.queryAll("member(und,[ich,du,muellers_kuh])");
+		assertEquals(0, result.size());
 
 	}
 
 	public void _test_longAtomLength() throws Throwable {
-		// session.queryOnce("0", "guitracer");
-		// session.queryOnce("0", "trace");
-		// session.join();
-		// rec.clear();
 		StringBuffer sb = new StringBuffer();
 
 		int len = 600000;
@@ -334,15 +323,11 @@ public class SocketSessionTest extends TestCase {
 
 		String atom = sb.toString();
 		PrologSession s = pif.getSession();
-		Map map = s.queryOnce("atom_length(" + atom + ",1,3,_,Sub)");
+		Map<String,Object> map = s.queryOnce("atom_length(" + atom + ",1,3,_,Sub)");
 		assertEquals("aaa", map.get("Sub"));
 	}
 
 	public void _test_longAtom_result() throws Throwable {
-		// session.queryOnce("0", "guitracer");
-		// session.queryOnce("0", "trace");
-		// session.join();
-		// rec.clear();
 		StringBuffer sb = new StringBuffer();
 
 		for (int i = 0; i < 600000; i++) {
@@ -351,15 +336,11 @@ public class SocketSessionTest extends TestCase {
 
 		String atom = sb.toString();
 		PrologSession s = pif.getSession();
-		Map map = s.queryOnce("A=" + atom);
+		Map<String,Object> map = s.queryOnce("A=" + atom);
 		assertEquals(atom, map.get("A"));
 	}
 
 	public void test_longAtom() throws Throwable {
-		// session.queryOnce("0", "guitracer");
-		// session.queryOnce("0", "trace");
-		// session.join();
-		// rec.clear();
 		StringBuffer sb = new StringBuffer();
 
 		for (int i = 0; i < 600000; i++) {
@@ -377,18 +358,13 @@ public class SocketSessionTest extends TestCase {
 	 */
 	public void testTurkish() throws Exception {
 		PrologSession session = pif.getSession();
-		// session.queryOnce("guitracer");
-		// session.queryOnce("trace");
 		String query = "A=kad\u0131n(nurhan)";
-		Map map = session.queryOnce(query);
+		Map<String,Object> map = session.queryOnce(query);
 		String actual = (String) map.get("A");
 		assertEquals("kad\u0131n(nurhan)", actual);
 	}
 
 	public void testTurkishX() throws Exception {
-
-		// session.queryOnce("guitracer");
-		// session.queryOnce("trace");
 		String expected = "kad\u0131n(nurhan)";
 		File file = File.createTempFile("testturkish", ".txt");
 		PrintWriter out = new PrintWriter(new OutputStreamWriter(
@@ -409,11 +385,9 @@ public class SocketSessionTest extends TestCase {
 		 * This should ensure compatibility with legacy code.
 		 */
 		PrologSession session = pif.getSession();
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
-			// map = session.queryOnce("A = 'package test0001;\n\nimport
-			// java.util.*;\n\npublic class Test {\n'");
-			// session.queryOnce("guitracer");
+
 			map = session.queryOnce("atom_codes(A,[123,10])");
 			assertEquals("{\n", map.get("A"));
 		} catch (Exception e) {
@@ -425,18 +399,19 @@ public class SocketSessionTest extends TestCase {
 
 	public void testPDT291_nil() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
-		Map m1=session.queryOnce("A=[]",PrologInterface.NONE);
-		Map m2=session.queryOnce("A=[]",PrologInterface.PROCESS_LISTS);
-		Map m3=session.queryOnce("A=[]",PrologInterface.CTERMS);
-		
+		Map<String,Object> m1=session.queryOnce("A=[]");
 		assertTrue(m1.get("A") instanceof String);
-		assertTrue(m2.get("A") instanceof List);
+		session = pif.getSession(PrologInterface.PROCESS_LISTS);
+		Map<String,Object> m2=session.queryOnce("A=[]");
+		assertTrue(m2.get("A") instanceof List<?>);
+		session = pif.getSession(PrologInterface.CTERMS);
+		Map<String,Object> m3=session.queryOnce("A=[]");
 		assertTrue(m3.get("A") instanceof CNil);
 	}
 	
 	public void testPDT287_0() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
 			// atoms should be quoted.
 			map = session.queryOnce("atom_codes(A,[123,10])");
@@ -458,7 +433,7 @@ public class SocketSessionTest extends TestCase {
 
 	public void testPDT287_1() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.UNQUOTE_ATOMS);
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
 			// atoms should be unquoted.
 			map = session.queryOnce("atom_codes(A,[123,10])");
@@ -480,7 +455,7 @@ public class SocketSessionTest extends TestCase {
 
 	public void testPDT287_2() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.PROCESS_LISTS);
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
 			// atoms should be quoted.
 			map = session.queryOnce("atom_codes(A,[123,10])");
@@ -493,11 +468,11 @@ public class SocketSessionTest extends TestCase {
 			// lists should be processed
 			map = session.queryOnce("A=[[1,2],'A']");
 			Object o = map.get("A");
-			assertTrue(o instanceof List);
+			assertTrue(o instanceof List<?>);
 
 			// list elements should be processed recursively
-			List l = (List) o;
-			assertTrue(l.get(0) instanceof List);
+			List<?> l = (List<?>) o;
+			assertTrue(l.get(0) instanceof List<?>);
 			assertEquals("'A'", l.get(1));
 
 		} catch (Exception e) {
@@ -510,7 +485,7 @@ public class SocketSessionTest extends TestCase {
 	public void testPDT287_3() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.PROCESS_LISTS
 				| PrologInterface.UNQUOTE_ATOMS);
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
 			// atoms should be unquoted.
 			map = session.queryOnce("atom_codes(A,[123,10])");
@@ -523,11 +498,11 @@ public class SocketSessionTest extends TestCase {
 			// lists should be processed
 			map = session.queryOnce("A=[[1,2],'A']");
 			Object o = map.get("A");
-			assertTrue(o instanceof List);
+			assertTrue(o instanceof List<?>);
 
 			// list elements should be processed recursively
-			List l = (List) o;
-			assertTrue(l.get(0) instanceof List);
+			List<?> l = (List<?>) o;
+			assertTrue(l.get(0) instanceof List<?>);
 			assertEquals("A", l.get(1));
 
 		} catch (Exception e) {
@@ -539,7 +514,7 @@ public class SocketSessionTest extends TestCase {
 
 	public void testPDT287_4() throws Exception {
 		PrologSession session = pif.getSession(PrologInterface.CTERMS);
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
 			// Everything should be CTerms, no list Processing.
 			map = session.queryOnce("A=[[1,2],'A']");
@@ -556,7 +531,7 @@ public class SocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			PrologSession session = pif.getSession(PrologInterface.CTERMS
+			pif.getSession(PrologInterface.CTERMS
 					| PrologInterface.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -564,7 +539,7 @@ public class SocketSessionTest extends TestCase {
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			PrologSession session = pif.getSession(PrologInterface.CTERMS
+			pif.getSession(PrologInterface.CTERMS
 					| PrologInterface.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -573,7 +548,7 @@ public class SocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			PrologSession session = pif.getSession(PrologInterface.CTERMS
+			pif.getSession(PrologInterface.CTERMS
 					| PrologInterface.UNQUOTE_ATOMS
 					| PrologInterface.PROCESS_LISTS);
 			fail();
@@ -581,45 +556,11 @@ public class SocketSessionTest extends TestCase {
 			;
 		}
 	}
-
-	public void testPDT287_illegal_query() throws Exception {
-		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
-		try {
-			
-			pif.getSession(PrologInterface.NONE).queryOnce("syntax error",PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS);
-			fail();
-		} catch (IllegalArgumentException e) {
-			;
-		}
-		// combination of CTERMS and PROCESS_LIST is illegal (for now).
-		try {
-			pif.getSession(PrologInterface.NONE).queryOnce("syntax error",PrologInterface.CTERMS
-					| PrologInterface.PROCESS_LISTS);
-			fail();
-		} catch (IllegalArgumentException e) {
-			;
-		}
 		
-		// naturally, combination of all three is illegal
-		try {
-			pif.getSession(PrologInterface.NONE).queryOnce("syntax error",PrologInterface.CTERMS
-					| PrologInterface.UNQUOTE_ATOMS
-					| PrologInterface.PROCESS_LISTS);
-			fail();
-		} catch (IllegalArgumentException e) {
-			;
-		}
-	}
-	
-	
 	public void testEscapePDT245() throws Exception {
 		PrologSession session = pif.getSession();
-		Map map = null;
+		Map<String,Object> map = null;
 		try {
-			// map = session.queryOnce("A = 'package test0001;\n\nimport
-			// java.util.*;\n\npublic class Test {\n'");
-			// session.queryOnce("guitracer");
 			map = session.queryOnce("atom_codes(A,[123,10])");
 			assertEquals("{\n", map.get("A"));
 		} catch (Exception e) {
@@ -631,13 +572,12 @@ public class SocketSessionTest extends TestCase {
 
 	public void testException() throws Exception {
 		PrologSession session = pif.getSession();
-		Map map = null;
 		try {
-			map = session.queryOnce("cluse(a,b)");
+			session.queryOnce("cluse(a,b)");
 			fail("expected exception");
 		} catch (Exception e) {
 			try {
-				map = session.queryOnce("true"); // <--- blocks the system
+				session.queryOnce("true");
 			} catch (Exception ex) {
 				fail("no exception expected");
 			}

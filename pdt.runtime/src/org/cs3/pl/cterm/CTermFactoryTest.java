@@ -39,27 +39,18 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.cterm.internal;
+package org.cs3.pl.cterm;
 
 import junit.framework.TestCase;
 
-import org.cs3.pl.cterm.CAtom;
-import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.cterm.CInteger;
-import org.cs3.pl.cterm.CString;
-import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.cterm.CTermFactory;
 
 public class CTermFactoryTest extends TestCase {
 	
-	private CTermFactory factory;
-	
 	protected void setUp() throws Exception {
-		this.factory = new ParserCTermFactory();
-		//this.factory = new ATermFactory();
+		;
 	}
 	public void testUnquotedAtom00() throws Throwable {
-		CTerm term = factory.createCTerm("hola");		
+		CTerm term = CTermFactory.createCTerm("hola");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor value","hola",atom.getFunctorValue());
@@ -67,7 +58,7 @@ public class CTermFactoryTest extends TestCase {
 		assertEquals("arity",0,atom.getArity());		
 	}
 	public void testUnquotedAtom01() throws Throwable {
-		CTerm term = factory.createCTerm("hol_a");		
+		CTerm term = CTermFactory.createCTerm("hol_a");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor value","hol_a",atom.getFunctorValue());
@@ -76,7 +67,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testUnquotedAtom02() throws Throwable {
-		CTerm term = factory.createCTerm("holT0_a");		
+		CTerm term = CTermFactory.createCTerm("holT0_a");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor value","holT0_a",atom.getFunctorValue());
@@ -86,7 +77,7 @@ public class CTermFactoryTest extends TestCase {
 	
 	public void testUnquotedAtom03() throws Throwable {
 		try{
-			CTerm term = factory.createCTerm("23skido?");
+			CTermFactory.createCTerm("23skido?");
 			fail("atoms are not allowed to start with digits. there should be an exception!");
 		}catch(Exception pe){			
 			return;
@@ -94,7 +85,7 @@ public class CTermFactoryTest extends TestCase {
 				
 	}
 	public void testUnquotedAtom04() throws Throwable {
-		CTerm term = factory.createCTerm("s�ben");		
+		CTerm term = CTermFactory.createCTerm("s�ben");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor value","s�ben",atom.getFunctorValue());
@@ -103,7 +94,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testQuotedAtom01() throws Throwable{
-		CTerm term = factory.createCTerm("'Ecce, Corinna venit.'");		
+		CTerm term = CTermFactory.createCTerm("'Ecce, Corinna venit.'");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor value","Ecce, Corinna venit.",atom.getFunctorValue());
@@ -112,7 +103,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testQuotedAtom02() throws Throwable{
-		CTerm term = factory.createCTerm("'Ecce, \\'Corinna\\' venit.'");		
+		CTerm term = CTermFactory.createCTerm("'Ecce, \\'Corinna\\' venit.'");		
 		assertTrue("type",term instanceof CAtom);
 		CAtom atom= (CAtom)term;
 		assertEquals("functor image","'Ecce, \\'Corinna\\' venit.'",atom.getFunctorImage());
@@ -123,7 +114,7 @@ public class CTermFactoryTest extends TestCase {
 	
 	
 	public void testQuotedStromg01() throws Throwable{
-		CTerm term = factory.createCTerm("\"Ecce, \\\"Corinna\\\" venit.\"");		
+		CTerm term = CTermFactory.createCTerm("\"Ecce, \\\"Corinna\\\" venit.\"");		
 		assertTrue("type is "+term.getClass().getName(),term instanceof CString);
 		CString string= (CString)term;
 		assertEquals("functor image","\"Ecce, \\\"Corinna\\\" venit.\"",string.getFunctorImage());
@@ -134,7 +125,7 @@ public class CTermFactoryTest extends TestCase {
 	
 	
 	public void testInteger01() throws Throwable{
-		CTerm term = factory.createCTerm("42");		
+		CTerm term = CTermFactory.createCTerm("42");		
 		assertTrue("type",term instanceof CInteger);
 		CInteger integer= (CInteger)term;
 		assertEquals("functor image","42",integer.getFunctorImage());
@@ -144,7 +135,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testInteger02() throws Throwable{
-		CCompound c = (CCompound) factory.createCTerm("worked(1)");
+		CCompound c = (CCompound) CTermFactory.createCTerm("worked(1)");
 		CTerm term = c.getArgument(0);
 		assertTrue("type",term instanceof CInteger);
 		CInteger integer= (CInteger)term;		
@@ -153,7 +144,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testInteger03() throws Throwable{
-		CCompound c = (CCompound) factory.createCTerm("worked(23)");
+		CCompound c = (CCompound) CTermFactory.createCTerm("worked(23)");
 		CTerm term = c.getArgument(0);
 		assertTrue("type",term instanceof CInteger);
 		CInteger integer= (CInteger)term;		
@@ -162,7 +153,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testCompound01() throws Throwable{
-		CTerm term = factory.createCTerm("aterm(annos,t)");		
+		CTerm term = CTermFactory.createCTerm("aterm(annos,t)");		
 		assertTrue("type: "+term.getClass().getName(),term instanceof CCompound);
 		CCompound aterm= (CCompound)term;
 		assertEquals("functor value","aterm",aterm.getFunctorValue());
@@ -185,7 +176,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	public void testCompound02() throws Throwable{
-		CTerm term = factory.createCTerm(";(a,b)");		
+		CTerm term = CTermFactory.createCTerm(";(a,b)");		
 		assertTrue("type",term instanceof CCompound);
 		CCompound aterm= (CCompound)term;
 		assertEquals("functor value",";",aterm.getFunctorValue());
@@ -207,7 +198,7 @@ public class CTermFactoryTest extends TestCase {
 		
 	}
 	public void testCut00() throws Throwable{
-		CTerm term = factory.createCTerm("','(!,b)");		
+		CTerm term = CTermFactory.createCTerm("','(!,b)");		
 		assertTrue("type",term instanceof CCompound);
 		CCompound aterm= (CCompound)term;
 		assertEquals("functor value",",",aterm.getFunctorValue());
@@ -227,10 +218,5 @@ public class CTermFactoryTest extends TestCase {
 		assertEquals("t functor image","b",t.getFunctorImage());
 		assertEquals("t arity",0,t.getArity());
 		
-	}
-	//'.'(label('module(op_annotator, [])'), '.'(variable_names([]), '.'(singletons([]), '.'(file_ref(93), '.'(n(1), '.'(last_n(4), '.'(position(-(2042, 2067)), '.'(functor_type(prefix), _G799))))))))
-	public void testMisc00() throws Throwable{
-		String input = "'.'(label('module(op_annotator, [])'), '.'(variable_names([]), '.'(singletons([]), '.'(file_ref(93), '.'(n(1), '.'(last_n(4), '.'(position(-(2042, 2067)), '.'(functor_type(prefix), _G799))))))))";
-		CTerm term = factory.createCTerm("','(!,b)");		
 	}
 }

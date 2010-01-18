@@ -9,7 +9,6 @@ import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -35,7 +34,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		store.setDefault(PrologInterface.PREF_FILE_SEARCH_PATH, plugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
 		
-		store.setDefault(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, AbstractPrologInterface.PL_INTERFACE_DEFAULT);
+//		store.setDefault(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, AbstractPrologInterface.PL_INTERFACE_DEFAULT);
 		store.setDefault(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
 		
 		store.setDefault(PrologInterface.PREF_EXECUTABLE, guessExecutableName());

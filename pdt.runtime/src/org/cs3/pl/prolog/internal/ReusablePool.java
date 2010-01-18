@@ -56,7 +56,7 @@ import org.cs3.pl.common.Debug;
  * rpc overhead. So we try to pool unused sessions for later use.
  */
 public class ReusablePool {
-	HashMap pool = new HashMap();
+	HashMap<Class<? extends Reusable>, LinkedList<Reusable>> pool = new HashMap<Class<? extends Reusable>, LinkedList<Reusable>>();
 
 	int maxPoolSize = 5;
 
@@ -76,11 +76,11 @@ public class ReusablePool {
 				s.destroy();				
 				return;
 			}			
-			Class clazz = s.getClass();
+			Class<? extends Reusable> clazz = s.getClass();
 
-			LinkedList l = (LinkedList) pool.get(clazz);
+			LinkedList<Reusable> l = pool.get(clazz);
 			if (l == null) {
-				l = new LinkedList();
+				l = new LinkedList<Reusable>();
 				pool.put(clazz, l);
 			}
 			l.addLast(s);
@@ -90,25 +90,26 @@ public class ReusablePool {
 		}
 	}
 
-	public Reusable findInstance(Class clazz) {
-		Reusable r = null;
+	public Reusable findInstance(Class<? extends Reusable> clazz) {
+		Reusable instance = null;
 		synchronized (pool) {
-			LinkedList l = (LinkedList) pool.get(clazz);
-			if (l == null) {
-				Debug.debug("no reusable instance in pool");
-				return null;
-			}
-			if (l.isEmpty()) {
+			LinkedList<Reusable> references = pool.get(clazz);
+			if (noInstanceExists(references)) {
 				Debug.debug("no reusable instance in pool");
 				return null;
 			}
 			poolSize--;
-			r = (Reusable) l.removeFirst();
+			instance = references.removeFirst();
 
 		}
-		r.reuse();
+		instance.reuse();
 		Debug.debug("instance taken from pool and reanimated. poolSize now: "+poolSize);
-		return r;
+		return instance;
+	}
+
+	
+	private boolean noInstanceExists(LinkedList<Reusable> references) {
+		return references == null || references.isEmpty();
 	}
 
 	public int getMaxTotalSize() {
@@ -125,16 +126,14 @@ public class ReusablePool {
 	// TRHO: fixed PDT-262
 	public void clear(){
 		synchronized (pool) {
-		Collection collection = pool.values();
-			for (Iterator it = collection.iterator(); it.hasNext();) {
-				List list = (List) it.next();
-				for (Iterator it2 = list.iterator(); it2.hasNext();) {
-					Reusable s = (Reusable) it2.next();
+		Collection<LinkedList<Reusable>> collection = pool.values();
+			for (Iterator<LinkedList<Reusable>> outerIterator = collection.iterator(); outerIterator.hasNext();) {
+				List<Reusable> list = outerIterator.next();
+				for (Iterator<Reusable> reusableIterator = list.iterator(); reusableIterator.hasNext();) {
+					Reusable s = reusableIterator.next();
 					s.destroy();
-					//it2.remove();
 				}
 				list.clear();
-				//it.remove();
 			}
 			pool.clear();
 			poolSize=0;

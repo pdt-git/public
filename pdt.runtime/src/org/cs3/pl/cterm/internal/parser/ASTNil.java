@@ -43,18 +43,9 @@
 
 package org.cs3.pl.cterm.internal.parser;
 
-public class ASTNil extends SimpleNode {
-  public ASTNil(int id) {
-    super(id);
-  }
+public class ASTNil extends ASTNode {
 
   public ASTNil(CanonicalTermParser p, int id) {
     super(p, id);
-  }
-
-
-  /** Accept the visitor. **/
-  public Object jjtAccept(CanonicalTermParserVisitor visitor, Object data) {
-    return visitor.visit(this, data);
   }
 }

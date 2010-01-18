@@ -59,7 +59,7 @@ public class PrologLibraryManager {
 	/**
 	 * maps ids to libraries
 	 */
-	private HashMap libraries = new HashMap();
+	private HashMap<String, PrologLibrary> libraries = new HashMap<String, PrologLibrary>();
 
 	
 	/**
@@ -67,29 +67,29 @@ public class PrologLibraryManager {
 	 * i.e., ids on which other libs depend, but for which
 	 * no library is registered.
 	 */
-	private HashSet unresolvedDependencies = new HashSet();
+	private HashSet<String> unresolvedDependencies = new HashSet<String>();
 	
 	/**
 	 * Contains ids of libs with broken dependencies.
 	 * A library is broken, if it has unresolved dependencies
 	 * or depends on a broken library.
 	 */
-	private HashSet brokenLibraries = new HashSet();
+	private HashSet<String> brokenLibraries = new HashSet<String>();
 	
 	public void  check(){
-		Set done = new HashSet();
+		Set<String> done = new HashSet<String>();
 		
 		brokenLibraries.clear();
 		unresolvedDependencies.clear();		
-		Set todo = libraries.keySet();
-		for (Iterator it = todo.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		Set<String> todo = libraries.keySet();
+		for (Iterator<String> it = todo.iterator(); it.hasNext();) {
+			String key = it.next();
 			check(key, done);
 			
 		}
 	}
 	
-	private void check(String key,Set done) {
+	private void check(String key,Set<String> done) {
 		if(done.contains(key)){
 			return;
 		}
@@ -98,10 +98,10 @@ public class PrologLibraryManager {
 			unresolvedDependencies.add(key);
 			return;
 		}
-		Set dependencies = lib.getDependencies();
+		Set<String> dependencies = lib.getDependencies();
 		done.add(key);
-		for (Iterator it = dependencies.iterator(); it.hasNext();) {
-			String dep = (String) it.next();
+		for (Iterator<String> it = dependencies.iterator(); it.hasNext();) {
+			String dep = it.next();
 			check(dep,done);
 			if(brokenLibraries.contains(dep)
 			||unresolvedDependencies.contains(dep)){
@@ -123,15 +123,15 @@ public class PrologLibraryManager {
 	}
 	
 		
-	public Set getUnresolvedDependencies(){
+	public Set<String> getUnresolvedDependencies(){
 		return Collections.unmodifiableSet(unresolvedDependencies);
 	}
 
-	public Set getBrokenLibraries(){
+	public Set<String> getBrokenLibraries(){
 		return brokenLibraries;
 	}
 	
 	public PrologLibrary resolveLibrary(String id){
-		return (PrologLibrary) libraries.get(id);
+		return libraries.get(id);
 	}
 }

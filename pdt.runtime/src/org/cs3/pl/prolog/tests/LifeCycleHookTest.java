@@ -17,7 +17,6 @@ public class LifeCycleHookTest extends TestCase {
 		private int lateInit;
 		private int onError;
 		private int setData;
-		private Object data;
 		private int afterInit;
 		private int beforeShutdown;
 		private int onInit;
@@ -36,7 +35,6 @@ public class LifeCycleHookTest extends TestCase {
 
 		public void setData(Object data) {
 			Debug.debug("setData");
-			this.data=data;
 			setData++;
 			
 		}

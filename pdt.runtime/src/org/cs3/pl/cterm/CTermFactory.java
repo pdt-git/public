@@ -41,8 +41,68 @@
 
 package org.cs3.pl.cterm;
 
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
-public interface CTermFactory {
-	public CTerm createCTerm(Object data);
-	
+import org.cs3.pl.common.Debug;
+import org.cs3.pl.cterm.internal.parser.ASTAtom;
+import org.cs3.pl.cterm.internal.parser.ASTCompound;
+import org.cs3.pl.cterm.internal.parser.ASTFloat;
+import org.cs3.pl.cterm.internal.parser.ASTInteger;
+import org.cs3.pl.cterm.internal.parser.ASTNil;
+import org.cs3.pl.cterm.internal.parser.ASTString;
+import org.cs3.pl.cterm.internal.parser.ASTVariable;
+import org.cs3.pl.cterm.internal.parser.CanonicalTermParser;
+import org.cs3.pl.cterm.internal.parser.ASTNode;
+
+public class CTermFactory {
+
+	public static CTerm createCTerm(Object data) {
+		CanonicalTermParser parser=null;
+		if(data instanceof InputStream){
+			parser = new CanonicalTermParser((InputStream) data); 
+		}
+		else if (data instanceof Reader){
+			parser = new CanonicalTermParser((Reader) data);
+		}
+		else{
+			String input = data.toString();
+			Reader reader = new StringReader(input);
+			parser = new CanonicalTermParser(reader);
+		}
+		try {
+			parser.Start();
+		} catch (Throwable e) {
+			Debug.report(e);
+			throw new RuntimeException(e.getMessage());
+		}
+		return create(parser.getASTRoot());
+	}
+
+	static CTerm create(ASTNode root) {
+		if(root instanceof ASTAtom){
+			return new CAtom(root);
+		} 
+		if(root instanceof ASTString){
+			return new CString(root);
+		}
+		if(root instanceof ASTVariable){
+			return new CVariable(root);
+		} 
+		if(root instanceof ASTCompound){
+			return new CCompound(root);
+		} 
+		if(root instanceof ASTInteger){
+			return new CInteger(root);
+		}
+		if(root instanceof ASTFloat){
+			return new CFloat(root);
+		}
+		if(root instanceof ASTNil){
+			return new CNil(root);
+		}
+		throw new IllegalArgumentException("bad node type: "+root.getClass().getName());
+	}
+
 }

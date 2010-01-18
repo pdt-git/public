@@ -41,8 +41,6 @@
 
 package org.cs3.pl.prolog.tests;
 
-import java.util.Map;
-
 import junit.framework.TestCase;
 
 import org.cs3.pl.prolog.PrologException;
@@ -58,7 +56,6 @@ public class SocketSessionThrowTest extends TestCase {
 	private PrologInterface pif;
 
     protected void setUp() throws Exception {
-//      pif=PrologInterfaceFactory.newInstance().create();
       pif = AbstractPrologInterface.newInstance();
       pif.start();
     }
@@ -75,7 +72,7 @@ public class SocketSessionThrowTest extends TestCase {
 	public void testThrow() throws PrologException, PrologInterfaceException{
 		PrologSession ss = pif.getSession();
 		try  {
-		Map query = ss.queryOnce("throw(A)");
+		ss.queryOnce("throw(A)");
 		} catch(Exception ex){
 			System.out.println("");
 		}

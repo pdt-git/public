@@ -1,14 +1,10 @@
 package org.cs3.pl.prolog.internal.lifecycle;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class ShutdownState extends AbstractState {
-
-	private PrologInterfaceException error;
 
 	public ShutdownState(LifeCycle context) {
 		super(context);
@@ -20,9 +16,7 @@ public class ShutdownState extends AbstractState {
 	public void enter() {
 		
 		HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
-		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
-		
-		PrologInterface pif = context.getPrologInterface();
+		context.getPrologInterface();
 		context.clearWorkQueue(); //there may be afterINit hooks left. dump them.
 		
 		for (LifeCycleHookWrapper w : context.getHooks().values()) {			

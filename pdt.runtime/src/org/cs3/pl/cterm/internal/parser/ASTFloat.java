@@ -43,18 +43,9 @@
 
 package org.cs3.pl.cterm.internal.parser;
 
-public class ASTFloat extends SimpleNode {
-  public ASTFloat(int id) {
-    super(id);
-  }
+public class ASTFloat extends ASTNode {
 
   public ASTFloat(CanonicalTermParser p, int id) {
     super(p, id);
-  }
-
-
-  /** Accept the visitor. **/
-  public Object jjtAccept(CanonicalTermParserVisitor visitor, Object data) {
-    return visitor.visit(this, data);
   }
 }

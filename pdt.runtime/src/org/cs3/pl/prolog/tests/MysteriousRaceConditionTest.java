@@ -15,7 +15,6 @@ public class MysteriousRaceConditionTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
-//		pif = PrologInterfaceFactory.newInstance().create();
 		pif = AbstractPrologInterface.newInstance();
 
 	}
@@ -64,9 +63,6 @@ public class MysteriousRaceConditionTest extends TestCase {
 		session.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
 		session.queryOnce("guitracer");
 		session.queryOnce("tspy(parse:spyme)"); //this predicate exists.
-		PrologSession session2 = pif.getSession();
-		
-
 	}
 
 }

@@ -73,8 +73,6 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
-//		PrologInterfaceFactory factory = PrologInterfaceFactory.newInstance();
-//		pif = (PrologInterface) factory.create();
 		pif = AbstractPrologInterface.newInstance();
 
 		pif.start();
@@ -131,8 +129,8 @@ public class AsyncSocketSessionTest extends TestCase {
 			sb.append(event.message == null ? "null" : Util.hideStreamHandles(
 					event.message, "$stream(_)"));
 			sb.append(',');
-			sb.append(event.bindings == null ? "null" : "("
-					+ Util.prettyPrint(event.bindings) + ")");
+			sb.append(event.getBindings() == null ? "null" : "("
+					+ Util.prettyPrint(event.getBindings()) + ")");
 			sb.append(')');
 			return sb.toString();
 		}
@@ -144,7 +142,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 
 		public synchronized Record last() {
-			return (Record) records.lastElement();
+			return records.lastElement();
 		}
 
 		public Record get(int i) {
@@ -154,8 +152,8 @@ public class AsyncSocketSessionTest extends TestCase {
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			boolean first = true;
-			for (Iterator it = records.iterator(); it.hasNext();) {
-				Record r = (Record) it.next();
+			for (Iterator<Record> it = records.iterator(); it.hasNext();) {
+				Record r = it.next();
 				if (!first) {
 					sb.append(", ");
 				}
@@ -282,11 +280,11 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.join();
 		Record last = rec.get(0);
 		AsyncPrologSessionEvent event = last.event;
-		Map bindings = event.bindings;
+		Map<String, Object> bindings = event.getBindings();
 		Object object = bindings.get("A");
 		assertNotNull(object);
-		assertTrue(object instanceof List);
-		List l = (List) object;
+		assertTrue(object instanceof List<?>);
+		List<?> l = (List<?>) object;
 		assertEquals(3, l.size());
 		for (int i = 0; i < 3; i++) {
 			Object o = l.get(i);
@@ -308,9 +306,9 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.queryOnce("ignore_lists", "A=[1,2]",PrologInterface.NONE);
 
 		session.join();
-		assertEquals("'{\\n'", rec.get(0).event.bindings.get("A"));
-		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
-		assertEquals("'.'(1, '.'(2, []))", rec.get(4).event.bindings.get("A"));
+		assertEquals("'{\\n'", rec.get(0).event.getBindings().get("A"));
+		assertEquals("+('B', 'C')", rec.get(2).event.getBindings().get("A"));
+		assertEquals("'.'(1, '.'(2, []))", rec.get(4).event.getBindings().get("A"));
 
 	}
 
@@ -322,13 +320,13 @@ public class AsyncSocketSessionTest extends TestCase {
 
 		session.join();
 		// atoms should be unquoted.
-		assertEquals("{\n", rec.get(0).event.bindings.get("A"));
+		assertEquals("{\n", rec.get(0).event.getBindings().get("A"));
 
 		// terms should be canonical.
-		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+		assertEquals("+('B', 'C')", rec.get(2).event.getBindings().get("A"));
 
 		// lists should be ignored
-		assertEquals("'.'(1, '.'(2, []))", rec.get(4).event.bindings.get("A"));
+		assertEquals("'.'(1, '.'(2, []))", rec.get(4).event.getBindings().get("A"));
 
 	}
 
@@ -336,17 +334,17 @@ public class AsyncSocketSessionTest extends TestCase {
 		rec.clear();
 		session.queryOnce("nabla", "A=[]", PrologInterface.PROCESS_LISTS);
 		session.join();		
-		assertTrue(rec.get(0).event.bindings.get("A") instanceof List);
+		assertTrue(rec.get(0).event.getBindings().get("A") instanceof List<?>);
 		
 		rec.clear();
 		session.queryOnce("nabla", "A=[]", PrologInterface.NONE);
 		session.join();
-		assertTrue(rec.get(0).event.bindings.get("A") instanceof String);
+		assertTrue(rec.get(0).event.getBindings().get("A") instanceof String);
 		
 		rec.clear();
 		session.queryOnce("nabla", "A=[]", PrologInterface.CTERMS);
 		session.join();
-		assertTrue(rec.get(0).event.bindings.get("A") instanceof CNil);
+		assertTrue(rec.get(0).event.getBindings().get("A") instanceof CNil);
 	}
 	
 	public void testPDT287_2() throws Exception {
@@ -357,18 +355,18 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.join();
 		
 		// atoms should be quoted.
-		assertEquals("'{\\n'", rec.get(0).event.bindings.get("A"));
+		assertEquals("'{\\n'", rec.get(0).event.getBindings().get("A"));
 
 		// terms should be canonical.
-		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+		assertEquals("+('B', 'C')", rec.get(2).event.getBindings().get("A"));
 
 		// lists should be processed
-		Object o = rec.get(4).event.bindings.get("A");
-		assertTrue(o instanceof List);
+		Object o = rec.get(4).event.getBindings().get("A");
+		assertTrue(o instanceof List<?>);
 
 		// list elements should be processed recursively
-		List l = (List) o;
-		assertTrue(l.get(0) instanceof List);
+		List<?> l = (List<?>) o;
+		assertTrue(l.get(0) instanceof List<?>);
 		assertEquals("'A'", l.get(1));
 
 	}
@@ -383,18 +381,18 @@ public class AsyncSocketSessionTest extends TestCase {
 				| PrologInterface.UNQUOTE_ATOMS);
 		session.join();
 		// atoms should be unquoted.
-		assertEquals("{\n", rec.get(0).event.bindings.get("A"));
+		assertEquals("{\n", rec.get(0).event.getBindings().get("A"));
 
 		// terms should be canonical.
-		assertEquals("+('B', 'C')", rec.get(2).event.bindings.get("A"));
+		assertEquals("+('B', 'C')", rec.get(2).event.getBindings().get("A"));
 
 		// lists should be processed
-		Object o = rec.get(4).event.bindings.get("A");
-		assertTrue(o instanceof List);
+		Object o = rec.get(4).event.getBindings().get("A");
+		assertTrue(o instanceof List<?>);
 
 		// list elements should be processed recursively
-		List l = (List) o;
-		assertTrue(l.get(0) instanceof List);
+		List<?> l = (List<?>) o;
+		assertTrue(l.get(0) instanceof List<?>);
 		assertEquals("A", l.get(1));
 
 	}
@@ -404,7 +402,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		// Everything should be CTerms, no list Processing.
 		session.queryOnce("bla", "A=[[1,2],'A']",PrologInterface.CTERMS);
 		session.join();
-		Object o = rec.get(0).event.bindings.get("A");
+		Object o = rec.get(0).event.getBindings().get("A");
 		assertTrue(o instanceof CCompound);
 
 	}
@@ -412,7 +410,7 @@ public class AsyncSocketSessionTest extends TestCase {
 	public void testPDT287_illegal_session() throws Exception {
 		// combination of CTERMS and UNQUOTE_ATOMS is illegal.
 		try {
-			AsyncPrologSession session = pif.getAsyncSession(PrologInterface.CTERMS
+			pif.getAsyncSession(PrologInterface.CTERMS
 					| PrologInterface.UNQUOTE_ATOMS);
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -420,7 +418,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		}
 		// combination of CTERMS and PROCESS_LIST is illegal (for now).
 		try {
-			AsyncPrologSession session = pif.getAsyncSession(PrologInterface.CTERMS
+			pif.getAsyncSession(PrologInterface.CTERMS
 					| PrologInterface.PROCESS_LISTS);
 			fail();
 		} catch (IllegalArgumentException e) {
@@ -429,7 +427,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		
 		// naturally, combination of all three is illegal
 		try {
-			AsyncPrologSession session = pif.getAsyncSession(PrologInterface.CTERMS
+			pif.getAsyncSession(PrologInterface.CTERMS
 					| PrologInterface.UNQUOTE_ATOMS
 					| PrologInterface.PROCESS_LISTS);
 			fail();
@@ -531,9 +529,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.queryOnce("1", "thread_self(Alias)");
 		session.join();
 		Record r = (Record) rec.records.get(0);
-		final String alias = (String) r.event.bindings.get("Alias");
-		// session.queryOnce("debug", "guitracer");
-		// session.queryOnce("debug", "spy(handle_batch_command)");
+		final String alias = (String) r.event.getBindings().get("Alias");
 		session.queryAll("2", "repeat,thread_get_message(test(M))");
 		final PrologSession syncSession = pif.getSession();
 
@@ -579,13 +575,9 @@ public class AsyncSocketSessionTest extends TestCase {
 			session.abort(lock);
 			Debug.debug("enter 7");
 		}
-		// session.queryOnce("toggle uitracer","guitracer");
-		// session.queryOnce("start tracer","trace");
 
 		session.dispose();
-		assertEquals(/*
-						 * "goalHasSolution(2,null,(M-->2)), " +
-						 */"goalCut(2,null,null), " + "goalSkipped(3,null,null), "
+		assertEquals("goalCut(2,null,null), " + "goalSkipped(3,null,null), "
 				+ "abortComplete(dummy,null,null), "
 				+ "batchComplete(null,null,null)", rec.toString());
 
@@ -606,7 +598,7 @@ public class AsyncSocketSessionTest extends TestCase {
 			sessions[i] = pif.getAsyncSession();
 		}
 		try {
-			AsyncPrologSession session = pif.getAsyncSession();
+			pif.getAsyncSession();
 
 		} catch (PrologInterfaceException e) {
 			e.printStackTrace();

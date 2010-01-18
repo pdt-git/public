@@ -41,6 +41,12 @@
 
 package org.cs3.pl.cterm;
 
-public interface CNil extends CTerm {
+import org.cs3.pl.cterm.internal.parser.ASTNode;
 
+public class CNil extends CTerm {
+	
+	public CNil(ASTNode node) {
+		super(node);
+	}
+	
 }

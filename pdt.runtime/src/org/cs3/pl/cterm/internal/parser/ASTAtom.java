@@ -43,18 +43,9 @@
 
 package org.cs3.pl.cterm.internal.parser;
 
-public class ASTAtom extends SimpleNode {
-  public ASTAtom(int id) {
-    super(id);
-  }
+public class ASTAtom extends ASTNode {
 
   public ASTAtom(CanonicalTermParser p, int id) {
     super(p, id);
-  }
-
-
-  /** Accept the visitor. **/
-  public Object jjtAccept(CanonicalTermParserVisitor visitor, Object data) {
-    return visitor.visit(this, data);
   }
 }

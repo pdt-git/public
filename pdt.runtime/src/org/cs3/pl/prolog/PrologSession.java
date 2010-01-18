@@ -45,24 +45,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface PrologSession extends Disposable{
-
-	/**
-	 * retrieve the PrologInterface that created this session.	
-	 */
-	public PrologInterface getPrologInterface();
-	
-
-
     public Map<String,Object> queryOnce(String query) throws PrologException,PrologInterfaceException;
-
     public List<Map<String,Object>> queryAll(String query) throws PrologException,PrologInterfaceException;
-
-    public Map<String,Object> queryOnce(String query,int flags) throws PrologException,PrologInterfaceException;
-
-    public List<Map<String,Object>> queryAll(String query,int flags) throws PrologException,PrologInterfaceException;
-    
-
-    public String getProcessorThreadAlias() throws PrologInterfaceException;
-   
-
 }

@@ -1,6 +1,5 @@
 package org.cs3.pl.prolog;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -11,8 +10,6 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 	private AsyncPrologSession targetSession;
 
 	private Vector<AsyncPrologSessionListener> listeners = new Vector<AsyncPrologSessionListener>();
-
-	private HashMap<String, String> prefs = new HashMap();
 
 	private boolean disposed;
 
@@ -39,8 +36,8 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 				synchronized (targetLock) {
 					if (hasTargetSession() && getTargetSession().isIdle()) {
 						getTargetSession().dispose();
-						for (Iterator it = listeners.iterator(); it.hasNext();) {
-							AsyncPrologSessionListener l = (AsyncPrologSessionListener) it
+						for (Iterator<AsyncPrologSessionListener> it = listeners.iterator(); it.hasNext();) {
+							AsyncPrologSessionListener l = it
 									.next();
 							getTargetSession().removeBatchListener(l);
 						}
@@ -52,8 +49,6 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	};
 
-	private long timeout;
-
 	private int flags;
 
 	private AsyncPrologSession getTargetSession() {
@@ -61,8 +56,8 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 			if (!hasTargetSession()) {
 				try {
 					AsyncPrologSession s = pif.getAsyncSession(this.flags);
-					for (Iterator it = listeners.iterator(); it.hasNext();) {
-						AsyncPrologSessionListener l = (AsyncPrologSessionListener) it
+					for (Iterator<AsyncPrologSessionListener> it = listeners.iterator(); it.hasNext();) {
+						AsyncPrologSessionListener l = it
 								.next();
 						s.addBatchListener(l);
 					}
@@ -210,7 +205,6 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		super();
 		this.pif = pif;
 		this.flags=flags;
-		timeout = 1000;
 		watchdog.start();
 	}
 
@@ -218,7 +212,6 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		super();
 		this.pif = pif;
 		this.flags=flags;
-		this.timeout = timeout;
 		watchdog.start();
 	}
 }
