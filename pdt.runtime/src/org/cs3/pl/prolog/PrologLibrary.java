@@ -72,7 +72,7 @@ public interface PrologLibrary {
 	/**
 	 * @return a list of identifiers of libraries this library depends on.
 	 */
-	public Set getDependencies();
+	public Set<String> getDependencies();
 	
 	/**
 	 * retrieve application-specific data from the library.

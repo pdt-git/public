@@ -55,7 +55,7 @@ public abstract class AbstractState implements State {
 		Debug.debug("requested to add hook: id=\"" + id + "\", dependencies=\""
 				+ Util.prettyPrint(dependencies) + "\"");
 
-		LifeCycleHookWrapper node = (LifeCycleHookWrapper) hooks.get(id);
+		LifeCycleHookWrapper node = hooks.get(id);
 
 		if (node == null) {
 			Debug.debug("\t-> hook unknown, new wrapper created.");
@@ -70,7 +70,7 @@ public abstract class AbstractState implements State {
 
 		}
 		for (int i = 0; i < dependencies.length; i++) {
-			LifeCycleHookWrapper dep = (LifeCycleHookWrapper) hooks
+			LifeCycleHookWrapper dep = hooks
 					.get(dependencies[i]);
 			Debug.debug("\t-> looking up dependency \"" + dependencies[i]
 					+ "\"");
@@ -104,19 +104,10 @@ public abstract class AbstractState implements State {
 	
 	public State removeLifeCycleHook(String hookId) {
 		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
-		LifeCycleHookWrapper h = (LifeCycleHookWrapper) hooks.get(hookId);
-		if (h != null) {
-
-			hooks.remove(h);
-			for (Iterator it = h.pre.iterator(); it.hasNext();) {
-				LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-				elm.post.remove(h);
-			}
-			for (Iterator it = h.post.iterator(); it.hasNext();) {
-				LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-				elm.pre.remove(h);
-			}
-			h.hooks.clear();// extra paranoia :-)
+		LifeCycleHookWrapper wrapper = hooks.get(hookId);
+		if (wrapper != null) {
+			removeWrapper(hooks, wrapper);
+			wrapper.hooks.clear();// extra paranoia :-)
 		}
 		return this;
 	}
@@ -124,22 +115,27 @@ public abstract class AbstractState implements State {
 	
 	public State removeLifeCycleHook(LifeCycleHook hook, String hookId) {
 		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
-		LifeCycleHookWrapper wrapper = (LifeCycleHookWrapper) hooks.get(hookId);
+		LifeCycleHookWrapper wrapper = hooks.get(hookId);
 		if (wrapper != null) {
 			wrapper.hooks.remove(hook);
 			if (wrapper.hooks.isEmpty()) {
-				hooks.remove(wrapper);
-				for (Iterator it = wrapper.pre.iterator(); it.hasNext();) {
-					LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-					elm.post.remove(wrapper);
-				}
-				for (Iterator it = wrapper.post.iterator(); it.hasNext();) {
-					LifeCycleHookWrapper elm = (LifeCycleHookWrapper) it.next();
-					elm.pre.remove(wrapper);
-				}
+				removeWrapper(hooks, wrapper);
 			}
 		}
 		return this;
+	}
+
+	private void removeWrapper(HashMap<String, LifeCycleHookWrapper> hooks,
+			LifeCycleHookWrapper wrapper) {
+		hooks.remove(wrapper);
+		for (Iterator<LifeCycleHookWrapper> it = wrapper.pre.iterator(); it.hasNext();) {
+			LifeCycleHookWrapper elm = it.next();
+			elm.post.remove(wrapper);
+		}
+		for (Iterator<LifeCycleHookWrapper> it = wrapper.post.iterator(); it.hasNext();) {
+			LifeCycleHookWrapper elm = it.next();
+			elm.pre.remove(wrapper);
+		}
 	}
 
 	

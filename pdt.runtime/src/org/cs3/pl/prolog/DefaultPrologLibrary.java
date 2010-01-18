@@ -50,15 +50,15 @@ import java.util.Set;
 public class DefaultPrologLibrary implements PrologLibrary {
 
 	private String id;
-	private Set deps;
+	private Set<String> deps;
 	private String alias;
 	private String path;
-	private HashMap attributes= new HashMap();
+	private HashMap<String, String> attributes= new HashMap<String, String>();
 
 	public DefaultPrologLibrary(String id, String[] deps, String alias, String path) {
 		super();
 		this.id = id;
-		this.deps=new HashSet();
+		this.deps=new HashSet<String>();
 		for (int i = 0; i < deps.length; i++) {
 			this.deps.add(deps[i]);
 		}		
@@ -66,7 +66,7 @@ public class DefaultPrologLibrary implements PrologLibrary {
 		this.path = path;
 	}
 	
-	public DefaultPrologLibrary(String id, Set deps, String alias, String path) {
+	public DefaultPrologLibrary(String id, Set<String> deps, String alias, String path) {
 		super();
 		this.id = id;
 		this.deps = deps;
@@ -74,7 +74,7 @@ public class DefaultPrologLibrary implements PrologLibrary {
 		this.path = path;
 	}
 
-	public DefaultPrologLibrary(String id, Set deps, String alias, String path, Map libAttrs) {
+	public DefaultPrologLibrary(String id, Set<String> deps, String alias, String path, Map<String, String> libAttrs) {
 		this(id,deps,alias,path);
 		this.attributes.putAll(libAttrs);
 	}
@@ -91,12 +91,12 @@ public class DefaultPrologLibrary implements PrologLibrary {
 		return this.alias;
 	}
 
-	public Set getDependencies() {
+	public Set<String> getDependencies() {
 		return this.deps;
 	}
 
 	public String getAttributeValue(String attr) {
-		return (String) attributes.get(attr);
+		return attributes.get(attr);
 	}
 
 }

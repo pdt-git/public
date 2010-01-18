@@ -41,6 +41,10 @@
 
 package org.cs3.pl.cterm;
 
-public interface CFloat extends CTerm {
-	double getDoubleValue();
+import org.cs3.pl.cterm.internal.parser.ASTNode;
+
+public class CFloat extends CTerm {
+	public CFloat(ASTNode node) {
+		super(node);
+	}
 }

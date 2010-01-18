@@ -101,7 +101,7 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 				String bundle = attributes.getValue("bundle");
 				String className = attributes.getValue("class");
 				int count = attributes.getLength();
-				HashMap params = new HashMap();
+				HashMap<String, String> params = new HashMap<String, String>();
 				for (int j = 0; j < count; j++) {
 					String value = attributes.getValue(j);
 					String name = attributes.getLocalName(j);
@@ -142,14 +142,14 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 					ps = (PersistableSubscription) s;
 				}
 				if(ps!=null && ps.isPersistent()){
-					Map m = ps.saveState();
+					Map<String, String> m = ps.saveState();
 					m.put("class",ps.getClass().getName());
 					m.put("bundle",ps.getHostId());
 					w.write("   <subscription\n");
 					try{
-						for (Iterator jt = m.keySet().iterator(); jt.hasNext();) {
-							String key = Util.escape((String) jt.next());
-							String value = Util.escape((String) m.get(key));
+						for (Iterator<String> jt = m.keySet().iterator(); jt.hasNext();) {
+							String key = Util.escape(jt.next());
+							String value = Util.escape(m.get(key));
 							w.write("      "+key+"=\""+value+"\"\n");
 						}
 					}

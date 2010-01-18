@@ -79,7 +79,7 @@ public interface PersistableSubscription extends Subscription {
 	 *            type is String. This map contains the same data as the on that
 	 *            was previously returned by saveState.
 	 */
-	public abstract void restoreState(Map params);
+	public abstract void restoreState(Map<String, String> params);
 
 	/**
 	 * save state.
@@ -92,7 +92,7 @@ public interface PersistableSubscription extends Subscription {
 	 * 
 	 * @return the saved state.
 	 */
-	public abstract Map saveState();
+	public abstract Map<String, String> saveState();
 
 	/**
 	 * Check wether this subscription should be persisted on shutdown.

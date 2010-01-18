@@ -50,13 +50,12 @@ public class AsyncPrologSessionEvent extends EventObject {
 	public String query=null;
 	public Object ticket=null;
 	public String message=null;
-	public Map bindings = null;
+	private Map<String, Object> bindings = null;
 	public Exception exception=null;
 	public int id=-1;
 	
 	public AsyncPrologSessionEvent(Object source) {
 		super(source);
-
 	}
 
 	public AsyncPrologSessionEvent(Object source, Object ticket) {
@@ -70,10 +69,14 @@ public class AsyncPrologSessionEvent extends EventObject {
 		this.message=message;
 	}
 
-	public AsyncPrologSessionEvent(Object source, Object ticket, Map bindings) {
+	public AsyncPrologSessionEvent(Object source, Object ticket, Map<String, Object> bindings) {
 		super(source);
 		this.ticket=ticket;
 		this.bindings=bindings;
+	}
+
+	public Map<String, Object> getBindings() {
+		return bindings;
 	}
 
 }

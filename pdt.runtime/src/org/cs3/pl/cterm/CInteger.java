@@ -41,6 +41,14 @@
 
 package org.cs3.pl.cterm;
 
-public interface CInteger extends CTerm{
-	int getIntValue();
+import org.cs3.pl.cterm.internal.parser.ASTNode;
+
+public class CInteger extends CTerm{
+	public CInteger(ASTNode node) {
+		super(node);
+	}
+	public int getIntValue() {		
+		return Integer.parseInt(getFunctorValue());
+	}
+
 }

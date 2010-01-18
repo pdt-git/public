@@ -55,8 +55,8 @@ import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CTermFactory;
 import org.cs3.pl.cterm.CVariable;
-import org.cs3.pl.cterm.internal.ATermFactory;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.
@@ -143,7 +143,7 @@ public class PLUtil {
 
 	public static CTerm[] listAsArray(CTerm term) {
 		Vector<CTerm> v = listAsVector(term);
-		return (CTerm[]) v.toArray(new CTerm[v.size()]);
+		return v.toArray(new CTerm[v.size()]);
 	}
 
 	public static Vector<CTerm> listAsVector(CTerm term) {
@@ -161,20 +161,20 @@ public class PLUtil {
 	 * Converts a property list term to a Map.
 	 * 
 	 * The argument should be list containing elements of the form
-	 * property(value) or =(Property,Value). Atomic elements are interpreted as
-	 * if they were of the form property(true). The returned map will contain a
+	 * property(value) or =(Property,Value). Atomic elements return themselves as second 
+	 * argument since they don't have an explicit value. The returned map will contain a
 	 * single value for each property found. If the same property name is
 	 * encountered more than once, the returned map will reflect only the last
-	 * occurance.
+	 * occurrence.
 	 * 
-	 * @see listAsMultiMap(CTerm) TODO
+	 * @see listAsMultiMap(CTerm)
 	 * @param term
 	 *            a term with functor "./2"
 	 * 
-	 * @return a map with keytype string, value type CTerm
+	 * @return a map with key-type string, value type CTerm
 	 */
-	public static Map<String,Object> listAsMap(CTerm term) {
-		Map<String,Object> m = new HashMap<String,Object>();
+	public static Map<String,CTerm> listAsMap(CTerm term) {
+		Map<String,CTerm> m = new HashMap<String,CTerm>();
 		while (term instanceof CCompound && ".".equals(term.getFunctorValue())
 				&& 2 == term.getArity()) {
 			CCompound compound = (CCompound) term;
@@ -192,13 +192,14 @@ public class PLUtil {
 				}
 
 			} else if (propertyTerm.getArity() == 0) {
-				m.put(propertyTerm.getFunctorValue(), "true");
+				m.put(propertyTerm.getFunctorValue(), propertyTerm);
 			}
 
 			term = compound.getArgument(1);
 		}
 		return m;
 	}
+
 
 	/**
 	 * lookup an entry in a red-black tree.
@@ -233,7 +234,7 @@ public class PLUtil {
 		return null;
 	}
 
-	private static class _rbTreeNodeIterator implements Iterator {
+	private static class _rbTreeNodeIterator implements Iterator<CCompound> {
 
 		/*
 		 * invariance: the left-most node that was not yet returned is top on
@@ -250,7 +251,7 @@ public class PLUtil {
 			return !stack.isEmpty();
 		}
 
-		public Object next() {
+		public CCompound next() {
 			// climb up
 			CCompound top = (CCompound) stack.removeLast();
 			// left subtree is already done. ->dive right
@@ -283,15 +284,6 @@ public class PLUtil {
 					&& c.getArgument(3) instanceof CNil;
 		}
 
-		private boolean hasLeftChild(CTerm node) {
-			if (!(node instanceof CCompound)) {
-				return false;
-			}
-			CCompound c = (CCompound) node;
-
-			return !isEmptyTree((CCompound) c.getArgument(0));
-		}
-
 		private boolean hasRightChild(CTerm node) {
 			if (!(node instanceof CCompound)) {
 				return false;
@@ -308,17 +300,13 @@ public class PLUtil {
 
 	}
 
-	public static Iterator rbtreeIterateNodes(CTerm tree) {
+	public static Iterator<CCompound> rbtreeIterateNodes(CTerm tree) {
 		return new _rbTreeNodeIterator(tree);
 
 	}
 
-	
-
-	
 	public static CTerm createCTerm(Object input) {
-		ATermFactory factory = new ATermFactory();
-		return factory.createCTerm(input);
+		return CTermFactory.createCTerm(input);
 	}
 
 	public static String renderTerm(CTerm term) {

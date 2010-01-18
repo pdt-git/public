@@ -69,7 +69,7 @@ public abstract class AbstractPrologContextTracker implements
 
 	private String label;
 
-	private Vector listeners = new Vector();
+	private Vector<PrologContextTrackerListener> listeners = new Vector<PrologContextTrackerListener>();
 
 	/**
 	 * Notify listeners that the "current" PrologInterface has changed.
@@ -83,13 +83,12 @@ public abstract class AbstractPrologContextTracker implements
 		PrologContextTrackerEvent e=null;
 		e = new PrologContextTrackerEvent(this,
 				getCurrentPrologInterface());
-		Vector cloned = null;
+		Vector<PrologContextTrackerListener> cloned = null;
 		synchronized (listeners) {
-			cloned = (Vector) listeners.clone();
+			cloned = (Vector<PrologContextTrackerListener>) listeners.clone();
 		}
-		for (Iterator it = cloned.iterator(); it.hasNext();) {
-			PrologContextTrackerListener l = (PrologContextTrackerListener) it
-					.next();
+		for (Iterator<PrologContextTrackerListener> it = cloned.iterator(); it.hasNext();) {
+			PrologContextTrackerListener l = it.next();
 			l.contextChanged(e);
 		}
 	}

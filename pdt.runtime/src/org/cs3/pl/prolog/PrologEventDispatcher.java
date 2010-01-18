@@ -52,7 +52,7 @@ import org.cs3.pl.common.Util;
 
 public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener implements IPrologEventDispatcher {
 
-	private HashMap listenerLists = new HashMap();
+	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
 
 	/*
 	 * XXX i don't like the idea of keeping a reference to this session on the
@@ -81,9 +81,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			}
 
 			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-				Set subjects = listenerLists.keySet();
-				for (Iterator it = subjects.iterator(); it.hasNext();) {
-					String subject = (String) it.next();
+				Set<String> subjects = listenerLists.keySet();
+				for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
+					String subject = it.next();
 					enableSubject(subject);
 				}
 				
@@ -140,9 +140,9 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	public void addPrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
-			Vector list = (Vector) listenerLists.get(subject);
+			Vector<PrologInterfaceListener> list = listenerLists.get(subject);
 			if (list == null) {
-				list = new Vector();
+				list = new Vector<PrologInterfaceListener>();
 				listenerLists.put(subject, list);
 				enableSubject(subject);
 			}
@@ -165,7 +165,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	public void removePrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
-			Vector list = (Vector) listenerLists.get(subject);
+			Vector<PrologInterfaceListener> list = listenerLists.get(subject);
 			if (list == null) {
 				return;
 			}
@@ -258,18 +258,16 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	 * @param string
 	 */
 	private void fireUpdate(String subject, String key, String event) {
-		Vector listeners = (Vector) listenerLists.get(key);
+		Vector<PrologInterfaceListener> listeners = listenerLists.get(key);
 		if (listeners == null) {
 			return;
 		}
-		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, key,
-				event);
-
-		Vector cloned = null;
+		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, event);
+		Vector<PrologInterfaceListener> cloned = null;
 		synchronized (listeners) {
-			cloned = (Vector) listeners.clone();
+			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
 		}
-		for (Iterator it = cloned.iterator(); it.hasNext();) {
+		for (Iterator<PrologInterfaceListener> it = cloned.iterator(); it.hasNext();) {
 			PrologInterfaceListener l = (PrologInterfaceListener) it.next();
 			l.update(e);
 		}
@@ -277,12 +275,12 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
-		String subject = (String) e.bindings.get("Subject");
+		String subject = (String) e.getBindings().get("Subject");
 		if ("$abort".equals(subject)) {
 			return;
 		}
-		String key = (String) e.bindings.get("Key");
-		String event = (String) e.bindings.get("Event");
+		String key = (String) e.getBindings().get("Key");
+		String event = (String) e.getBindings().get("Event");
 		fireUpdate(subject, key, event);
 	}
 

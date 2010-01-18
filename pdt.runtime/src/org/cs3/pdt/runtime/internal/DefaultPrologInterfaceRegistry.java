@@ -124,7 +124,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 	}
 	
 	public Set<Subscription> getSubscriptionsForPif(String key) {
-		Collection coll = subscriptionLists.get(key);
+		Collection<Subscription> coll = subscriptionLists.get(key);
 		HashSet<Subscription> subscripitions = new HashSet<Subscription>();
 		if(coll != null){
 			subscripitions.addAll(coll);
@@ -211,7 +211,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			Set<LifeCycleHookDescriptor> descriptors = getHookDescriptorsForTags(s
 					.getTags());
 			for (LifeCycleHookDescriptor desc : descriptors) {
-				((PrologInterface) pifs.get(s.getPifKey()))
+				pifs.get(s.getPifKey())
 						.removeLifeCycleHook(desc.createHook(s.getData()), desc
 								.getHookId());
 			}
@@ -274,7 +274,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			l.add(descr);
 			Set<Subscription> subs = getSubscriptionsForTags(descr.getTags());
 			for (Subscription subscription : subs) {
-				PrologInterface pif = (PrologInterface) pifs.get(subscription
+				PrologInterface pif = pifs.get(subscription
 						.getPifKey());
 				if (pif != null) {
 					pif.addLifeCycleHook(descr.createHook(subscription
@@ -297,7 +297,7 @@ public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 			l.add(descr);
 			Set<Subscription> subs = getSubscriptionsForTags(descr.getTags());
 			for (Subscription subscription : subs) {
-				PrologInterface pif = (PrologInterface) pifs.get(subscription
+				PrologInterface pif = pifs.get(subscription
 						.getPifKey());
 				if (pif != null) {
 					pif.removeLifeCycleHook(descr.createHook(subscription

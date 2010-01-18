@@ -228,9 +228,11 @@ public interface PrologInterface {
 	 * 
 	 * @param reconfigureHookId
 	 * @deprecated If possible please use
-	 *             PrologInterface2.removeLifeCycleHook(LifeCycleHook2,String)
+	 *             PrologInterface.removeLifeCycleHook(LifeCycleHook,String)
 	 */
 	public abstract void removeLifeCycleHook(String hookId);
+	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
+	
 	/**
 	 * 
 	 * @deprecated use getAsyncSession(int). Using the PrologInterface.LEGACY should
@@ -239,8 +241,7 @@ public interface PrologInterface {
 	 */
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
-	public void removeLifeCycleHook(final LifeCycleHook hook,
-			final String hookId);
+
 	
 
 

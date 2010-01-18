@@ -46,14 +46,12 @@ package org.cs3.pl.prolog.internal;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -62,11 +60,9 @@ import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 /**
  * convenience implementation of common infrastructure.
@@ -75,14 +71,14 @@ import org.eclipse.jface.preference.IPreferenceStore;
  */
 public abstract class AbstractPrologInterface implements PrologInterface {
 
-	protected HashSet<WeakReference<PrologSession>> sessions = new HashSet<WeakReference<PrologSession>>();
-	private HashMap<String, Vector<PrologInterfaceListener>> listenerLists = new HashMap<String, Vector<PrologInterfaceListener>>();
-	private List<String> bootstrapLibraries = new Vector();
-
+	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
+	private List<String> bootstrapLibraries = new Vector<String>();
+	private final MyLifeCycle lifecycle;
+	
 	/************************************************/
 	/**** Options [Start] *****/
 	/************************************************/
-
+	
 	private boolean standAloneServer = false;
 	private String host;
 	private String executable;
@@ -90,8 +86,19 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	private int timeout;
 	private String fileSearchPath;
 
-	private IPreferenceStore preference_store;
+	public AbstractPrologInterface() {
+		this(null);
+	}
 
+	public AbstractPrologInterface(String string) {
+		PifShutdownHook.getInstance().add(this);
+		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
+	}
+	
+	/************************************************/
+	/**** Options [Start] *****/
+	/************************************************/
+	
 	public void setStandAloneServer(String standAloneServer) {
 		setStandAloneServer(Boolean.parseBoolean(standAloneServer));
 	}
@@ -129,10 +136,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		this.timeout = Integer.parseInt(timeout);
 	}
 
-	private void setTimeout(int timeout) {
-		this.timeout = timeout;
-	}
-
 	public int getTimeout() {
 		return timeout;
 	}
@@ -153,24 +156,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return environment;
 	}
 
-//	public void initOptions(IPreferenceStore store) {
-//		preference_store = store;
-//
-//		// setStandAloneServer(preference_store.getBoolean(PREF_STANDALONE));
-//		// setHost(preference_store.getString(PREF_HOST));
-//		// setExecutable(preference_store.getString(PREF_EXECUTABLE));
-//		// setEnvironment(preference_store.getString(PREF_ENVIRONMENT));
-//		// setTimeout(preference_store.getInt(PREF_TIMEOUT));
-//		// setFileSearchPath(preference_store.getString(PREF_FILE_SEARCH_PATH));
-//
-//		setStandAloneServer(overridePreferenceBySystemProperty(PREF_STANDALONE));
-//		setHost(overridePreferenceBySystemProperty(PREF_HOST));
-//		setExecutable(overridePreferenceBySystemProperty(PREF_EXECUTABLE));
-//		setEnvironment(overridePreferenceBySystemProperty(PREF_ENVIRONMENT));
-//		setTimeout(overridePreferenceBySystemProperty(PREF_TIMEOUT));
-//		setFileSearchPath(overridePreferenceBySystemProperty(PREF_FILE_SEARCH_PATH));
-//
-//	}
 	public void initOptions() {
 		
 		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
@@ -183,9 +168,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		setFileSearchPath(plugin.overridePreferenceBySystemProperty(PREF_FILE_SEARCH_PATH));
 
 	}
-
-
-
 
 	/************************************************/
 	/**** Options [End] *****/
@@ -220,7 +202,6 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 					}
 				}
 			}
-
 		}
 
 		public void add(PrologInterface pif) {
@@ -260,8 +241,8 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 		public void disposeSessions() throws Throwable {
 			synchronized (sessions) {
-				HashSet<WeakReference<PrologSession>> cloned = new HashSet<WeakReference<PrologSession>>(sessions);
-				for (WeakReference<PrologSession> ref : cloned) {
+				HashSet<WeakReference<? extends Disposable>> cloned = new HashSet<WeakReference<? extends Disposable>>(sessions);
+				for (WeakReference<? extends Disposable> ref : cloned) {
 					Disposable ps = ref.get();
 					if (ps != null && !ps.isDisposed()) {
 						try {
@@ -278,26 +259,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
-	final MyLifeCycle lifecycle;
-
 	public List<String> getBootstrapLibraries() {
 		return bootstrapLibraries;
 	}
 
 	public void setBootstrapLibraries(List<String> l) {
 		this.bootstrapLibraries = l;
-	}
-
-	public AbstractPrologInterface() {
-		PifShutdownHook.getInstance().add(this);
-		lifecycle = new MyLifeCycle(this.toString());
-
-	}
-
-	public AbstractPrologInterface(String string) {
-		PifShutdownHook.getInstance().add(this);
-
-		lifecycle = new MyLifeCycle(string == null ? this.toString() : string);
 	}
 
 	protected void finalize() throws Throwable {
@@ -324,6 +291,10 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		lifecycle.removeLifeCycleHook(hookId);
 	}
 
+	public void removeLifeCycleHook(final LifeCycleHook hook, final String hookId) {
+		lifecycle.removeLifeCycleHook(hook, hookId);
+	}
+	
 	/**
 	 * 
 	 * override this if your subclass needs special initial Sessions
@@ -364,7 +335,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	/**
 	 * override this if you need configurable options. the default
-	 * implementation does not have any configuragble options, so it will always
+	 * implementation does not have any configurable options, so it will always
 	 * through an IllegalArgumentException..
 	 */
 	public String getOption(String opt) {
@@ -580,108 +551,37 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	}
 
 	private AsyncPrologSession getAsyncSession_internal(int flags) throws Throwable {
-
-		AsyncPrologSession s = getAsyncSession_impl(flags);
-		sessions.add(new WeakReference(s));
-		return s;
-
+		AsyncPrologSession asyncSession = getAsyncSession_impl(flags);
+		sessions.add(new WeakReference<AsyncPrologSession>(asyncSession));
+		return asyncSession;
 	}
-
-	public void removeLifeCycleHook(final LifeCycleHook hook, final String hookId) {
-		lifecycle.removeLifeCycleHook(hook, hookId);
-	}
-
-	
-	
 	
 	
 	 // =============================================================
 	 // modified from factory
 	 // =============================================================
 	public final static String PL_INTERFACE_DEFAULT="org.cs3.pl.prolog.internal.socket.SocketPrologInterface";
-    public final static String PL_INTERFACE_PIFCOM="org.cs3.pifcom.PIFComPrologInterface";
+ 
     
 	public static PrologInterface newInstance() {
-
-		return newInstance(System.getProperty(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, PL_INTERFACE_DEFAULT), null);
+		return newInstance(PL_INTERFACE_DEFAULT, null);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static PrologInterface newInstance(String fqn, String name) {
 		try {
-			Class impl = Class.forName(fqn);
-			Class[] typeList = { String.class };
-			Constructor cons= impl.getDeclaredConstructor(typeList);
-			cons.newInstance(name);
-			
+			Class<?> impl = Class.forName(fqn);
+			Class<?>[] typeList = { String.class };
 			if (!PrologInterface.class.isAssignableFrom(impl)) {
 				throw new IllegalArgumentException("not a valid prolog-interface class");
-			}
-			
-			
-			return (PrologInterface) cons.newInstance(name);//impl.newInstance();
-
+			} 
+			Constructor<? extends PrologInterface> cons= ((Class<? extends PrologInterface>)impl).getDeclaredConstructor(typeList);
+			//			cons.newInstance(name);
+			return (PrologInterface) cons.newInstance(name);
 		} catch (Throwable t) {
 			Debug.rethrow(t);
 			return null;
 		}
-	    }
-	
-
-	 // =============================================================
-	 // moved from factory
-	 // =============================================================
-
-//
-//	private ResourceFileLocator locator = new DefaultResourceFileLocator().subLocator(".PrologInterface");
-//	private PrologLibraryManager libraryManager;
-
-//	public void setResourceLocator(ResourceFileLocator locator) {
-//		this.locator = locator;
-//	}
-//
-//	public ResourceFileLocator getResourceLocator() {
-//		return locator;
-//	}
-//
-//	public void setLibraryManager(PrologLibraryManager mgr) {
-//		this.libraryManager = mgr;
-//	}
-//
-//	public PrologLibraryManager getLibraryManager() {
-//		return this.libraryManager;
-//	}
-
-//	public File ensureInstalled(String res, Class clazz) {
-//		File f = getResourceLocator().resolve(res);
-//
-//		if (f.exists()) {
-//			f.delete();
-//		}
-//		if (!f.exists()) {
-//			f.getParentFile().mkdirs();
-//			try {
-//				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-//				InputStream in = clazz.getResourceAsStream(res);
-//				Util.copy(in, out);
-//				in.close();
-//				out.close();
-//			} catch (IOException e) {
-//				Debug.rethrow(e);
-//			}
-//		}
-//		return f;
-//	}
-//
-//	public String guessFileSearchPath(String libraryId) {
-//		PrologLibraryManager mgr = getLibraryManager();
-//		if (mgr == null) {
-//			return null;
-//		}
-//		PrologLibrary lib = mgr.resolveLibrary(libraryId);
-//		if (lib == null) {
-//			return null;
-//		}
-//		return "library=" + lib.getPath();
-//	}
+	}
 
 }

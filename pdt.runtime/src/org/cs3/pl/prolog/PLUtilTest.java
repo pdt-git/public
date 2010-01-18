@@ -68,7 +68,7 @@ public class PLUtilTest extends TestCase {
 	}
 	
 	public void testIterator() throws Throwable{
-		Map map = session.queryOnce("pdt_rbtree_new(T0)," +
+		Map<String,Object> map = session.queryOnce("pdt_rbtree_new(T0)," +
 				"pdt_rbtree_insert(T0,a,0,T1)," +
 				"pdt_rbtree_insert(T1,y,1,T2)," +
 				"pdt_rbtree_insert(T2,x,2,T3)," +
@@ -76,7 +76,7 @@ public class PLUtilTest extends TestCase {
 				"pdt_rbtree_insert(T4,z,4,T5)," +
 				"pdt_rbtree_insert(T5,c,5,T6)");
 		CTerm t=(CTerm) map.get("T6");
-		Iterator it =PLUtil.rbtreeIterateNodes(t);
+		Iterator<CCompound> it =PLUtil.rbtreeIterateNodes(t);
 		StringBuffer sb =new StringBuffer();
 		while(it.hasNext()){
 			CCompound c = (CCompound) it.next();
@@ -92,7 +92,7 @@ public class PLUtilTest extends TestCase {
 	
 	
 	public void testLookup() throws Throwable{
-		Map map = session.queryOnce("pdt_rbtree_new(T0)," +
+		Map<String,Object> map = session.queryOnce("pdt_rbtree_new(T0)," +
 				"pdt_rbtree_insert(T0,a,0,T1)," +
 				"pdt_rbtree_insert(T1,y,1,T2)," +
 				"pdt_rbtree_insert(T2,x,2,T3)," +

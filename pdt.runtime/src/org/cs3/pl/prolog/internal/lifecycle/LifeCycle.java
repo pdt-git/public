@@ -143,7 +143,7 @@ public abstract class LifeCycle {
 			throw new IllegalMonitorStateException(
 					"cannot call this from transition or work queue.");
 		}
-		PrologInterfaceException t = getError();
+		getError();
 		while ((getError()) == null) {
 			this.wait();
 		}

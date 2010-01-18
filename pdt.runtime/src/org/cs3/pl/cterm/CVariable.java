@@ -41,6 +41,13 @@
 
 package org.cs3.pl.cterm;
 
-public interface CVariable extends CTerm {
-	public String getVariableName();
+import org.cs3.pl.cterm.internal.parser.ASTNode;
+
+public class CVariable extends CTerm {
+	public CVariable(ASTNode node) {
+		super(node);
+	}
+	public String getVariableName() {
+		return getFunctorValue();			
+	}
 }

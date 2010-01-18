@@ -11,15 +11,13 @@ public class InitState extends AbstractState {
 
 	protected InitState(LifeCycle context) {
 		super(context);
-
 	}
 
-	
 	public void enter() {
 		HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
-		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();				
+		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
+		
 		context.enqueueWork(new NamedWorkRunnable("startServer"){
-			
 			public void run() throws PrologInterfaceException {
 				try {
 					context.startServer();
@@ -28,19 +26,16 @@ public class InitState extends AbstractState {
 				}
 			}	
 		});
-		
+
 		for (LifeCycleHookWrapper h : hooks.values()) {
 			h.onInit(done);
 		}
-		
-		context.enqueueWork(new NamedWorkRunnable("workDoneInit") {
-			
+
+		context.enqueueWork(new NamedWorkRunnable("workDoneInit") {	
 			public void run() throws PrologInterfaceException {
 				context.workDone();
-
 			}
 		});
-		
 	}
 
 	

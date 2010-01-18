@@ -41,8 +41,12 @@
 
 package org.cs3.pl.cterm;
 
-public interface CAtom extends CTerm {
+import org.cs3.pl.cterm.internal.parser.ASTNode;
 
+public class CAtom extends CTerm {
 	
-
+	public CAtom(ASTNode node) {
+		super(node);
+	}	
+	
 }

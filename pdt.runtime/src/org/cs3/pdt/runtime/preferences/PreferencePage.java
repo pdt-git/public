@@ -3,9 +3,7 @@ package org.cs3.pdt.runtime.preferences;
 import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
@@ -49,12 +47,12 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		
 		// The factory to be used for creating PrologInterface instances
 //		addField(new StringFieldEditor(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, "PrologInterface implementation", getFieldEditorParent()));
-		addField(new ComboFieldEditor(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION,"PrologInterface implementation",
-				  new String[][] {
-                	{"Socket (stable)", AbstractPrologInterface.PL_INTERFACE_DEFAULT},
-                	{"PIFcom (very experimental - don't change, if you don't know what you do)", AbstractPrologInterface.PL_INTERFACE_PIFCOM}
-				}
-                ,getFieldEditorParent()));	
+//		addField(new ComboFieldEditor(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION,"PrologInterface implementation",
+//				  new String[][] {
+//                	{"Socket (stable)", AbstractPrologInterface.PL_INTERFACE_DEFAULT},
+//                	{"PIFcom (very experimental - don't change, if you don't know what you do)", AbstractPrologInterface.PL_INTERFACE_PIFCOM}
+//				}
+//                ,getFieldEditorParent()));	
 		
 		// The PrologInterface needs to temporarily store some
 		// prolog files during bootstrapping. Any directory for which 

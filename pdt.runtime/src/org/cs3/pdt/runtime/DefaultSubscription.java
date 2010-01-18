@@ -177,15 +177,15 @@ public class DefaultSubscription implements PersistableSubscription {
 
 
 
-	public void restoreState(Map params) {
-		setDescritpion((String) params.get("description"));
-		setName((String) params.get("name"));
-		setHostId((String) params.get("hostid"));
-		setPifKey((String) params.get("pifkey"));
-		setId((String) params.get("id"));
-		setPersistent((String) params.get("persistent"));
+	public void restoreState(Map<String, String> params) {
+		setDescritpion(params.get("description"));
+		setName(params.get("name"));
+		setHostId(params.get("hostid"));
+		setPifKey(params.get("pifkey"));
+		setId(params.get("id"));
+		setPersistent(params.get("persistent"));
 		if(params.get("tags")!= null) {
-			setTags(Util.split((String)params.get("tags"),","));
+			setTags(Util.split(params.get("tags"),","));
 		}
 
 	}
@@ -196,8 +196,8 @@ public class DefaultSubscription implements PersistableSubscription {
 		setPersistent(Boolean.valueOf(string).booleanValue());		
 	}
 
-	public Map saveState() {
-		Map m = new HashMap();
+	public Map<String, String> saveState() {
+		Map<String, String> m = new HashMap<String, String>();
 		m.put("description",getDescritpion());
 		m.put("name",getName());
 		m.put("hostid",getHostId());

@@ -284,12 +284,12 @@ public class PrologLibraryManagerTest extends TestCase {
 	
 	private static class Lib implements PrologLibrary{
 		String id;
-		Set deps;
+		Set<String> deps;
 		
 
 		public Lib(String id, String ds){
 			this.id=id;
-			this.deps=new HashSet();
+			this.deps=new HashSet<String>();
 			for (int i = 0; i < ds.length(); i++) {
 				deps.add(String.valueOf(ds.charAt(i)));
 			}
@@ -300,7 +300,7 @@ public class PrologLibraryManagerTest extends TestCase {
 		}
 		public Lib(String id) {
 			this.id=id;
-			this.deps=new HashSet();
+			this.deps=new HashSet<String>();
 		}
 
 		public String getId() {
@@ -315,7 +315,7 @@ public class PrologLibraryManagerTest extends TestCase {
 			return "alias";
 		}
 
-		public Set getDependencies() {
+		public Set<String> getDependencies() {
 			return deps;
 		}
 		public String getAttributeValue(String attr) {
@@ -327,8 +327,7 @@ public class PrologLibraryManagerTest extends TestCase {
 	
 
 	private void doTest(PrologLibrary[] libs, String[] resolved, String[] unresolved, String[] broken) {
-		Set allDeps = getAllDeps(libs);
-		Map allLibs = getAllLibs(libs); 
+		Map<String, PrologLibrary> allLibs = getAllLibs(libs); 
 		PrologLibraryManager mgr = new PrologLibraryManager();
 		for (int i = 0; i < libs.length; i++) {
 			PrologLibrary lib = libs[i];
@@ -349,16 +348,8 @@ public class PrologLibraryManagerTest extends TestCase {
 		
 	}
 
-	private Set getAllDeps(PrologLibrary[] libs) {
-		HashSet set = new HashSet();
-		for (int i = 0; i < libs.length; i++) {
-			set.addAll(libs[i].getDependencies());
-		}
-		return set;
-	}
-
-	private Map getAllLibs(PrologLibrary[] libs){
-		HashMap map = new HashMap();
+	private Map<String, PrologLibrary> getAllLibs(PrologLibrary[] libs){
+		HashMap<String, PrologLibrary> map = new HashMap<String, PrologLibrary>();
 		for (int i = 0; i < libs.length; i++) {
 			map.put(libs[i].getId(),libs[i]);
 		}
@@ -370,49 +361,49 @@ public class PrologLibraryManagerTest extends TestCase {
 	
 
 	private void checkBroken(String msg, PrologLibraryManager mgr, String string) {
-		Set exp=new HashSet();
+		Set<Object> exp=new HashSet<Object>();
 		for (int i = 0; i < string.length(); i++) {
 			exp.add(String.valueOf(string.charAt(i)));
 		}
-		Set act = mgr.getBrokenLibraries();
+		Set<String> act = mgr.getBrokenLibraries();
 		assertEqualSet(msg+": broken libs do not match",exp,act);
 	}
 
 	private void checkUnresolved(String msg, PrologLibraryManager mgr, String string) {
-		Set exp=new HashSet();
+		Set<Object> exp=new HashSet<Object>();
 		for (int i = 0; i < string.length(); i++) {
 			String key =String.valueOf(string.charAt(i)); 
 			exp.add(key);
 			assertNull("unresolved key "+key+" is actually resolveable",mgr.resolveLibrary(key));
 		}
-		Set act = mgr.getUnresolvedDependencies();
+		Set<String> act = mgr.getUnresolvedDependencies();
 		assertEqualSet(msg+": unresolved deps do not match",exp,act);
 		
 	}
 
-	private void checkResolved(String msg,PrologLibraryManager mgr, String string, Map allLibs) {
-		HashMap exp=new HashMap();
+	private void checkResolved(String msg,PrologLibraryManager mgr, String string, Map<String, PrologLibrary> allLibs) {
+		HashMap<String, PrologLibrary> exp=new HashMap<String, PrologLibrary>();
 		for (int i = 0; i < string.length(); i++) {
 			String key = String.valueOf(string.charAt(i));
 			exp.put(key,allLibs.get(key));
 		}
-		Set negExp = new HashSet();
+		Set<String> negExp = new HashSet<String>();
 		negExp.addAll(allLibs.keySet());
 		negExp.removeAll(exp.keySet());
-		Set keys = exp.keySet();
-		for (Iterator it = keys.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		Set<String> keys = exp.keySet();
+		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
+			String key = it.next();
 			assertSame(msg+": "+key+" is not resolved to same lib.",exp.get(key),mgr.resolveLibrary(key));
 		}
 			
-		for (Iterator it = negExp.iterator(); it.hasNext();) {
-			String key = (String) it.next();
+		for (Iterator<String> it = negExp.iterator(); it.hasNext();) {
+			String key = it.next();
 			assertNull(msg+": "+key+" should not be resolvable.",mgr.resolveLibrary(key));
 		}
 		
 	}
 	
-	private void assertEqualSet(String msg,Set expUsers, Set actUsers) {
+	private void assertEqualSet(String msg,Set<Object> expUsers, Set<String> actUsers) {
 		String es="expected: \n"+Util.prettyPrint(expUsers);
 		String as="but was: \n"+Util.prettyPrint(actUsers);			
 		assertTrue(msg+": exp !>= act\n"+es+as,expUsers.containsAll(actUsers));

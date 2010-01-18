@@ -34,7 +34,7 @@ public class Token {
    * token.  Otherwise, see below for a description of the contents of
    * this field.
    */
-  public Token next;
+  private Token next;
 
   /**
    * This field is used to access special tokens that occur prior to this
@@ -76,6 +76,31 @@ public class Token {
      {
        default : return new Token();
      }
+  }
+
+  /**
+   * A reference to the next regular (non-special) token from the input
+   * stream.  If this is the last token from the input stream, or if the
+   * token manager has not read tokens beyond this one, this field is
+   * set to null.  This is true only if this token is also a regular
+   * token.  Otherwise, see below for a description of the contents of
+   * this field.
+   */
+  Token setNext(Token next) {
+	  this.next = next;
+	  return next;
+  }
+
+  /**
+   * A reference to the next regular (non-special) token from the input
+   * stream.  If this is the last token from the input stream, or if the
+   * token manager has not read tokens beyond this one, this field is
+   * set to null.  This is true only if this token is also a regular
+   * token.  Otherwise, see below for a description of the contents of
+   * this field.
+   */
+  public Token getNext() {
+	  return next;
   }
 
 }
