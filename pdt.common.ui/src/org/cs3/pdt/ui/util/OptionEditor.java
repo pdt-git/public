@@ -63,7 +63,7 @@ abstract public class OptionEditor implements PropertyEditor {
 
     Option option;
 
-    private Vector listeners = new Vector();
+    private Vector<IPropertyChangeListener> listeners = new Vector<IPropertyChangeListener>();
 
     /**
      * @param parent
@@ -137,12 +137,12 @@ abstract public class OptionEditor implements PropertyEditor {
     
     protected void firePropertyChange(String oldValue, String newValue){
         PropertyChangeEvent e = new PropertyChangeEvent(this,getKey(),oldValue,newValue);
-        Vector cloned=null;
+        Vector<IPropertyChangeListener> cloned=null;
         synchronized(listeners){
-            cloned= (Vector) listeners.clone();
+            cloned= (Vector<IPropertyChangeListener>) listeners.clone();
         }
-        for (Iterator it = cloned.iterator(); it.hasNext();) {
-            IPropertyChangeListener l = (IPropertyChangeListener) it.next();
+        for (Iterator<IPropertyChangeListener> it = cloned.iterator(); it.hasNext();) {
+            IPropertyChangeListener l = it.next();
             l.propertyChange(e);
         }
     }

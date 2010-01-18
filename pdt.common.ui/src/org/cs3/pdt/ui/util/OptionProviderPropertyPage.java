@@ -64,7 +64,7 @@ import org.eclipse.ui.dialogs.PropertyPage;
 public abstract class OptionProviderPropertyPage extends PropertyPage implements
         IWorkbenchPropertyPage {
 
-    private HashMap editors = new HashMap();
+    private HashMap<String, PropertyEditor> editors = new HashMap<String, PropertyEditor>();
 	
 
     /**
@@ -137,7 +137,7 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
         for (int i = 0; i < options.length; i++) {
             Option option = options[i];
             String id = option.getId();
-            PropertyEditor editor = (PropertyEditor) editors.get(id);
+            PropertyEditor editor = editors.get(id);
             String value = editor.getValue();
             
             try {
@@ -164,7 +164,7 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
         for (int i = 0; i < options.length; i++) {
             Option option = options[i];
             String id = option.getId();
-            PropertyEditor editor = (PropertyEditor) editors.get(id);
+            PropertyEditor editor = editors.get(id);
             editor.revertToDefault();
         }
     }
@@ -174,7 +174,7 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
         for (int i = 0; i < options.length; i++) {
             Option option = options[i];
             String id = option.getId();
-            PropertyEditor editor = (PropertyEditor) editors.get(id);
+            PropertyEditor editor = editors.get(id);
 
             
             try {

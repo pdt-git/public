@@ -63,7 +63,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -95,64 +95,23 @@ import org.eclipse.ui.dialogs.ContainerSelectionDialog;
  */
 public  class FileListEditor extends FieldEditor{
 
-	/**
-	 * The list widget; <code>null</code> if none
-	 * (before creation or after disposal).
-	 */
 	private List list;
-
-	/**
-	 * The button box containing the Add, Remove, Up, and Down buttons;
-	 * <code>null</code> if none (before creation or after disposal).
-	 */
 	private Composite buttonBox;
-
-	/**
-	 * The Add button.
-	 */
 	private Button addDirButton;
 	private Button addFileButton;
-
-	/**
-	 * The Remove button.
-	 */
 	private Button removeButton;
-
-	/**
-	 * The Up button.
-	 */
 	private Button upButton;
-
-	/**
-	 * The Down button.
-	 */
 	private Button downButton;
-
-	/**
-	 * The selection listener.
-	 */
 	private SelectionListener selectionListener;
-
     private String addFileButtonLabel = "add File...";
-
     private String addDirButtonLabel = "add Directory...";
-
     private String dirChooserLabelText;
-
     private String lastPath;
-
     private boolean dirEndsWithSeparator=true;
-
     private String fileChooserLabelText;
-
     private String lastFilePath;
-
     private String[] filterExtensions;
-
-	private boolean relative;
-
 	private IContainer rootContainer;
-
 	private boolean workspaceResource;
 /**
  * Creates a new list field editor 
@@ -517,9 +476,6 @@ protected  Object[] getNewWsDir(){
 }
 
 
-private boolean isRelative() {
-	return this.relative;
-}
 private IContainer getRootContainer() {
 	return this.rootContainer;
 }
@@ -702,7 +658,6 @@ public void setEnabled(boolean enabled, Composite parent){
         this.filterExtensions = filterExtensions;
     }
 	public void setRelative(boolean relative) {
-		this.relative = relative;
 	}
 	public void setRootContainer(IContainer rootContainer) {
 		this.rootContainer = rootContainer;
