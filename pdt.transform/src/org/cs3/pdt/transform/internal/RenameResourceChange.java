@@ -87,14 +87,14 @@ public final class RenameResourceChange extends PDTChange {
 		}
 	}
 
-	public Change perform(IProgressMonitor pm) throws CoreException {
+	public Change perform(IProgressMonitor progressMonitor) throws CoreException {
 		try {
-			pm.beginTask("Rename Resource", 1);
+			progressMonitor.beginTask("Rename Resource", 1);
 
 			IResource resource= getResource();
 			long currentStamp= resource.getModificationStamp();
 			IPath newPath= renamedResourcePath(fResourcePath, fNewName);
-			resource.move(newPath, IResource.SHALLOW, pm);
+			resource.move(newPath, IResource.SHALLOW, progressMonitor);
 			if (fStampToRestore != IResource.NULL_STAMP) {
 				IResource newResource= ResourcesPlugin.getWorkspace().getRoot().findMember(newPath);
 				newResource.revertModificationStamp(fStampToRestore);
@@ -102,7 +102,7 @@ public final class RenameResourceChange extends PDTChange {
 			String oldName= fResourcePath.lastSegment();
 			return new RenameResourceChange(null, newPath, oldName, fComment, currentStamp);
 		} finally {
-			pm.done();
+			progressMonitor.done();
 		}
 	}
 }

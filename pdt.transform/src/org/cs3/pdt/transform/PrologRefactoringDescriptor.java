@@ -14,7 +14,7 @@ public abstract class PrologRefactoringDescriptor {
 	private File[] definitions;
 	private String id;
 	private String label;
-	private Class objectClass;
+	private Class<?> objectClass;
 	private boolean adaptable;
 	private String description;
 
@@ -50,11 +50,11 @@ public abstract class PrologRefactoringDescriptor {
 		this.label = label;
 	}
 
-	public final Class getObjectClass() {
+	public final Class<?> getObjectClass() {
 		return objectClass;
 	}
 
-	public final void setObjectClass(Class objectClass) {
+	public final void setObjectClass(Class<?> objectClass) {
 		this.objectClass = objectClass;
 	}
 

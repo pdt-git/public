@@ -149,15 +149,11 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin {
 			URL url = FileLocator.find(Platform.getBundle(namespace), new Path(
 					resName), null);
 			try {
-
-				// URL url = Platform.getBundle(namespace).getEntry(
-				// resName);
 				Debug.debug("trying to resolve this url: " + url);
-				url = Platform.asLocalURL(url);
+				url = FileLocator.toFileURL(url);
 			} catch (Exception e) {
 				Debug.rethrow("Problem resolving url: " + url.toString(), e);
 			}
-			// URI uri = URI.create(url.toString());
 			definitions[i] = new File(url.getFile());
 
 		}
