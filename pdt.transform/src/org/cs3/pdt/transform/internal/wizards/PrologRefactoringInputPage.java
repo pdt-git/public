@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 public class PrologRefactoringInputPage extends UserInputWizardPage {
 
 	private PrologRefactoringInfo info;
-	private HashMap editors = new HashMap();
+	private HashMap<String, PropertyEditor> editors = new HashMap<String, PropertyEditor>();
 
 	public PrologRefactoringInputPage(PrologRefactoringInfo info) {
 		super(info.getName());
@@ -71,7 +71,7 @@ public class PrologRefactoringInputPage extends UserInputWizardPage {
 		for (int i = 0; i < options.length; i++) {
 			Option option = options[i];
 			String id = option.getId();
-			PropertyEditor editor = (PropertyEditor) editors.get(id);
+			PropertyEditor editor = editors.get(id);
 
 			if (options[i].isVisible()) {
 				try {
