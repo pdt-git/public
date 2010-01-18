@@ -40,7 +40,7 @@
  ****************************************************************************/
 
 package org.cs3.pl.metadata;
-/**@deprecated*/
+
 public class PredicateData extends PrologElementData implements Predicate {
 	
 	private static final long serialVersionUID = 1L;
@@ -63,7 +63,6 @@ public class PredicateData extends PrologElementData implements Predicate {
 	}
 
 	public void setPredicateProperty(String property, String value) {
-		//TODO or not todo, that's the question. 
-		
+
 	}
 }

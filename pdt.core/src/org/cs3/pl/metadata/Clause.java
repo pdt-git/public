@@ -75,7 +75,6 @@ public interface Clause extends Comparable{
 	public SourceLocation getSourceLocation();
 	
 	
-	
 	/**
 	 * @return a label, suitable for displaying in list or tree views to 
 	 * represent this clause.
@@ -90,40 +89,11 @@ public interface Clause extends Comparable{
 	 */
 	public int getLength();
 
-	
-
-	/**
-	 * @deprecated use getPredicate.isPublic()
-	 */
-	public boolean isPublic();
-
-	/**
-	 * @deprecated use getPredicate().getSigniture()
-	 * 
-	 */
-	public String getSignature();
-	
-	/**
-	 * @deprecated use getKnownDefinition.getOffset()
-	 * 
-	 */
-	public int getPosition();
 
 	/**
 	 * @deprecated use getPredicate().getArity();
 	 */
 	public int getArity();
-
-	/**
-	 * @deprecated use getPredicate().isDynamic();
-	 */
-	public boolean isDynamic();
-
-	/**
-	 * @deprecated use getPredicate().isMultifile();
-	 */
-	public boolean isMultifile();
-
 	
 	/**
 	 * @return a handle to the Predicate this clause contributes to.

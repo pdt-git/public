@@ -26,12 +26,11 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 	private IPrologProject plProject;
 
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		// TODO Auto-generated method stub
-
+		;
 	}
 
 	public void run(IAction action) {
-		Set entries;
+		Set<IContainer> entries;
 		try {
 			entries = plProject.getExistingSourcePathEntries();
 
@@ -44,8 +43,8 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 			
 			String sep = System.getProperty("path.separator");
 			StringBuffer sb = new StringBuffer();
-			for (Iterator it = entries.iterator(); it.hasNext();) {
-				IContainer entry = (IContainer) it.next();
+			for (Iterator<IContainer> it = entries.iterator(); it.hasNext();) {
+				IContainer entry = it.next();
 
 				
 				IPath path = entry.getProjectRelativePath();
@@ -64,10 +63,6 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 			plProject.setPreferenceValue(PDTCore.PROP_SOURCE_PATH, sb.toString());
 			updateAction(action);
 		} catch (CoreException e) {
-//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-//					.getErrorMessageProvider(), UIUtils.getDisplay()
-//					.getActiveShell(), PDTCore.ERR_UNKNOWN,
-//					PDTCore.CX_TOGGLE_SOURCE_PATH_ENTRY, e);
 		}
 	}
 
@@ -109,10 +104,6 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 			}
 			updateAction(action);
 		} catch (CoreException e) {
-//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-//					.getErrorMessageProvider(), UIUtils.getDisplay()
-//					.getActiveShell(), PDTCore.ERR_UNKNOWN,
-//					PDTCore.CX_TOGGLE_SOURCE_PATH_ENTRY, e);
 		}
 	}
 

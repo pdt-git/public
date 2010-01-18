@@ -66,11 +66,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.text.IDocument;
 
 public final class PDTCoreUtils {
-	/**
-	 * @param ipd
-	 * @return
-	 * @throws CoreException
-	 */
+
 	public static void addPDTNature(IProject project) throws CoreException {
 
 		IProjectDescription ipd = project.getDescription();
@@ -86,11 +82,6 @@ public final class PDTCoreUtils {
 
 	}
 
-	/**
-	 * @param project
-	 * @return
-	 * @throws CoreException
-	 */
 	public static void removePDTNature(IProject project) throws CoreException {
 		if (project.hasNature(PDTCore.NATURE_ID)) {
 			IProjectDescription ipd = project.getDescription();
@@ -184,11 +175,11 @@ public final class PDTCoreUtils {
 	 * the "corrected" version: it does normalize the locations before comparing
 	 * them. propably hurts performance, but i cant help it. --lu
 	 */
-	public static List allPathsForLocation(IPath l) {
+	public static List<IPath> allPathsForLocation(IPath l) {
 		IPath location = normalize(l);
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot()
 				.getProjects();
-		final ArrayList results = new ArrayList();
+		final ArrayList<IPath> results = new ArrayList<IPath>();
 		for (int i = 0; i < projects.length; i++) {
 			IProject project = projects[i];
 			// check the project location
@@ -228,42 +219,31 @@ public final class PDTCoreUtils {
 		return results;
 	}
 
-	/**
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
 	public static IFile[] findFilesForLocation(String path) {
 		IPath fpath = new Path(path);
 		return findFilesForLocation(fpath);
 	}
 
 	public static IFile[] findFilesForLocation(IPath location) {
-		IFile file = null;
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
 	
-		List list = PDTCoreUtils.allPathsForLocation(location);
-		ArrayList result = new ArrayList(list.size());
-		for (Iterator it = list.iterator(); it.hasNext();) {
-			IPath p = (IPath) it.next();
+		List<IPath> list = PDTCoreUtils.allPathsForLocation(location);
+		ArrayList<IResource> result = new ArrayList<IResource>(list.size());
+		for (Iterator<IPath> it = list.iterator(); it.hasNext();) {
+			IPath p = it.next();
 			IResource r = root.findMember(p);
 			if (r != null && r.getType() == IResource.FILE) {
 				result.add(r);
 			}
 		}
-		IFile[] files = (IFile[]) result.toArray(new IFile[result.size()]);
+		IFile[] files = result.toArray(new IFile[result.size()]);
 		return files;
 	
 	}
 
-	/**
-	 * @param file
-	 * @return
-	 * @throws IOException
-	 */
+
 	public static IFile findFileForLocation(String path) throws IOException {
-	
 		return findFileForLocation(new Path(path));
 	}
 

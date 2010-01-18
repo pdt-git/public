@@ -35,14 +35,12 @@ public class InterpreterTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		String[] codebase = System.getProperty("codebase").split(System.getProperty("path.separator"));
-//		pif=PrologInterfaceFactory.newInstance().create();
 		pif = AbstractPrologInterface.newInstance();
 		PrologSession s = pif.getSession();
 		for (int i = 0; i < codebase.length; i++) {
 			s.queryOnce("assert(file_search_path(library,'"+codebase[i]+"'))");	
 		}
 		s.queryOnce("use_module(library('builder/targets/test_interpreter'))");
-//		s.queryOnce("spy(interprete_toplevel)");
 		s.queryOnce("nospyall");
 		s.dispose();
 	}
@@ -55,10 +53,10 @@ public class InterpreterTest extends TestCase {
 	
 	public void testIt()throws Throwable{
 		PrologSession s = pif.getSession();
-		List list = s.queryAll("pdt_test_interpreter('"+Util.prologFileName(file)+"',R)");
+		List<Map<String,Object>> list = s.queryAll("pdt_test_interpreter('"+Util.prologFileName(file)+"',R)");
 		s.dispose();
-		for (Iterator iter = list.iterator(); iter.hasNext();) {
-			Map map = (Map) iter.next();
+		for (Iterator<Map<String,Object>> iter = list.iterator(); iter.hasNext();) {
+			Map<String,Object> map = iter.next();
 			String result=(String) map.get("R");
 			assertFalse(result,result.startsWith("failed"));
 		}
@@ -78,7 +76,7 @@ public class InterpreterTest extends TestCase {
 					"It should be a list of search path entries separated by your systems path separator.");
 		}
 		File root = new File(testdata);
-		LinkedList todo = new LinkedList();
+		LinkedList<File> todo = new LinkedList<File>();
 		todo.add(root);
 		FileFilter filter = new FileFilter() {
 			public boolean accept(File f) {
@@ -86,7 +84,7 @@ public class InterpreterTest extends TestCase {
 			}
 		};
 		while (!todo.isEmpty()) {
-			File dir = (File) todo.removeFirst();
+			File dir = todo.removeFirst();
 			File[] files = dir.listFiles(filter);
 			Arrays.sort(files);
 			for (int i = 0; i < files.length; i++) {

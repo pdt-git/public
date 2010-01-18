@@ -43,7 +43,7 @@ package org.cs3.pl.metadata;
 
 import org.cs3.pl.cterm.CTerm;
 
-/**@deprecated*/
+
 public class GoalData extends PrologElementData implements Goal {
 
 	private static final long serialVersionUID = 1L;
@@ -56,7 +56,7 @@ public class GoalData extends PrologElementData implements Goal {
 	}
 
 	public CTerm getTerm() {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 

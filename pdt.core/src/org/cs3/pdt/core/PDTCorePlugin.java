@@ -41,9 +41,6 @@
 
 package org.cs3.pdt.core;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -51,7 +48,6 @@ import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
-import org.cs3.pl.common.Option;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -67,6 +63,23 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class PDTCorePlugin extends AbstractUIPlugin {
+	private static PDTCorePlugin plugin;
+	
+	public PDTCorePlugin() {
+		super();
+		plugin = this;
+		try {
+			ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
+		} catch (MissingResourceException x) {
+		}
+	}
+	
+	/**
+	 * Returns the shared instance.
+	 */
+	public static PDTCorePlugin getDefault() {
+		return plugin;
+	}	
 	private void projectClosing(IProject project) {
 		try {
 			IPrologProject prologProject = PDTCoreUtils
@@ -78,11 +91,8 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 				r.removeSubscription(prologProject.getRuntimeSubscription());
 			}
 		} catch (CoreException e) {
-//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-//					.getErrorMessageProvider(), UIUtils.getActiveShell(),
-//					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
+			;
 		}
-
 	}
 
 	private void projectOpened(IProject project) {
@@ -96,19 +106,14 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 				r.addSubscription(prologProject.getRuntimeSubscription());
 			}
 		} catch (CoreException e) {
-//			UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-//					.getErrorMessageProvider(), UIUtils.getActiveShell(),
-//					PDTCore.ERR_UNKNOWN, PDTCore.CX_REMOVE_SUBSCRIPTIONS, e);
+			;		
 		}
-
 	}
 
 	private final class _ResourceDeltaVisitor implements IResourceDeltaVisitor {
 
-		private IResourceChangeEvent event;
-
 		public _ResourceDeltaVisitor(IResourceChangeEvent event) {
-			this.event = event;
+			;
 		}
 
 		public boolean visit(IResourceDelta delta) throws CoreException {
@@ -122,8 +127,6 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 							&& project.isOpen()){
 						projectOpened(project);
 					}
-				
-
 				return false;
 			default:
 				return false;
@@ -144,9 +147,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 					projectClosing(project);
 				}
 			} catch (CoreException e) {
-//				UIUtils.logAndDisplayError(PDTCorePlugin.getDefault()
-//						.getErrorMessageProvider(), UIUtils.getActiveShell(),
-//						PDTCore.ERR_UNKNOWN, PDTCore.CX_CHECK_PROJECTS, e);
+				;
 			}
 
 		}
@@ -164,26 +165,9 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		
 		IWorkspace ws = ResourcesPlugin.getWorkspace();
-		
-		ws.addResourceChangeListener(
-				new _ResourceChangeListener());
+		ws.addResourceChangeListener(new _ResourceChangeListener());
 	}
-
-	private ResourceBundle resourceBundle;
-
-	private Option[] options;
-
-	// public IMetaInfoProvider getMetaInfoProvider() {
-	// if (prologHelper == null) {
-	// prologHelper = new
-	// DefaultMetaInfoProvider(PrologRuntimePlugin.getDefault().getPrologInterface(),
-	// pdtModulePrefix);
-	// }
-	// return prologHelper;
-	// }
-
 
 	/**
 	 * look up a preference value.
@@ -204,68 +188,9 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 		return System.getProperty(key, value);
 	}
 
-	private String getLocation() throws IOException {
-		URL url = PDTCorePlugin.getDefault().getBundle().getEntry("/");
-		String location = null;
-		location = new File(Platform.asLocalURL(url).getFile())
-				.getAbsolutePath();
-		if (location.charAt(location.length() - 1) == File.separatorChar)
-			location = location.substring(0, location.length() - 1);
-		return location;
-	}
 
-	private String ensureDirExists(String value, String label) {
-		if (value == null) {
-			return label + "must not be null";
-		}
-		if (value.length() == 0) {
-			return label + " must not be empty";
-		}
-		File f = new File(value);
-		if (!f.isAbsolute()) {
-			return label + " must be an absolute path";
-		}
-		if (!f.exists()) {
-			if (!f.mkdirs()) {
-				return "could not create " + label;
-			}
-			return "";
-		}
-		if (!f.isDirectory()) {
-			return label + " exists, but is not a directory";
-		}
-		if (!f.canWrite()) {
-			return label + " exists, but is not writable";
-		}
-		return "";
-	}
-
-	/**
-	 * 
-	 */
 	public void reconfigure() {
 		;
-	}
-
-	public PDTCorePlugin() {
-		super();
-		plugin = this;
-		try {
-			resourceBundle = ResourceBundle
-					.getBundle("prg.cs3.pdt.PDTPluginResources");
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
-	}
-
-	// The shared instance.
-	private static PDTCorePlugin plugin;
-
-	/**
-	 * Returns the shared instance.
-	 */
-	public static PDTCorePlugin getDefault() {
-		return plugin;
 	}
 
 }

@@ -83,27 +83,24 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		marker.setAttribute(PDTCore.PROBLEM_ID, id);
 	}
 
-	public void processSolution(Map m) {
+	public void processSolution(Map<String,Object> solution) {
 
-		String id = (String) m.get("Id");
-		String filename = Util.unquoteAtom((String) m.get("File"));
+		String id = (String)solution.get("Id");
+		String filename = Util.unquoteAtom((String) solution.get("File"));
 		int start = 0;
 		int end = 0;
 		try {
-			start = Integer.parseInt(((String) m.get("Start")));
-			end = Integer.parseInt(((String) m.get("End")));
+			start = Integer.parseInt(((String) solution.get("Start")));
+			end = Integer.parseInt(((String) solution.get("End")));
 		} catch (NumberFormatException ee) {
 			Debug.report(ee);
 		}
-		String severity = Util.unquoteAtom((String) m.get("Severity"));
-		String message = Util.unquoteAtom((String) m.get("Msg"));
+		String severity = Util.unquoteAtom((String) solution.get("Severity"));
+		String message = Util.unquoteAtom((String) solution.get("Msg"));
 		try {
 			addMarker(id, filename, start, end, severity, message);
 
 		} catch (CoreException e1) {
-//			UIUtils.logError(PDTCorePlugin.getDefault()
-//					.getErrorMessageProvider(), PDTCore.ERR_UNKNOWN,
-//					PDTCore.CX_UPDATE_MARKERS, e1);
 		}
 	}
 
@@ -146,8 +143,8 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			dispatcher.removePrologInterfaceListener(subject, this);
 			plProject.getProject().deleteMarkers(getMarkerType(tag), true,
 					IResource.DEPTH_INFINITE);
-			for (Map<String, Object> map : solutions) {
-				processSolution(map);
+			for (Map<String, Object> nextSolution : solutions) {
+				processSolution(nextSolution);
 			}
 
 		} catch (PrologInterfaceException e) {
@@ -173,9 +170,6 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		if ("expensive".equals(tag)) {
 			Debug.debug(e.getSubject() + " <-- " + e.getEvent());
 		}
-		/*
-		 * if (!e.getSubject().equals("builder(problems(workspace))")) { return; }
-		 */
 		if (e.getEvent().equals("done")) {
 			monitor.done();
 			return;
@@ -200,7 +194,6 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		}
 		int arg = ((CInteger) argTerm).getIntValue();
 		String functor = event.getFunctorValue();
-		// Debug.debug("progress: "+functor+", "+arg);
 		if (functor.equals("start")) {
 			monitor.beginTask("Searching for Problems (" + tag + ")", arg);
 			return;

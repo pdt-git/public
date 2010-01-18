@@ -66,6 +66,7 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -79,37 +80,29 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-/**
- */
 public class PrologBuilder extends IncrementalProjectBuilder {
 
-	/**
-	 * 
-	 */
+
 	public PrologBuilder() {
 		super();
 	}
 
 	private void contentsChanged(IFile file, AsyncPrologSession as)
 			throws CoreException, PrologInterfaceException {
-
 		Debug.debug("builder processing file " + file);
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 		file.getCharset();
 		as.queryOnce(file, "pdt_file_contents_changed('" + plFileName + "')");
-
 	}
 
 	private void existenceChanged(IFile file, AsyncPrologSession as)
 			throws CoreException, PrologInterfaceException {
-
 		Debug.debug("builder processing file " + file);
 		File ioFile = file.getLocation().toFile();
 		String plFileName = Util.prologFileName(ioFile);
 		file.getCharset();
 		as.queryOnce(file, "pdt_file_existence_changed('" + plFileName + "')");
-
 	}
 
 	/*
@@ -118,14 +111,14 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
 	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected IProject[] build(int kind, Map args,
 			final IProgressMonitor monitor) throws CoreException {
-		// if(true) return null;
+
 		try {
 
 			Debug.debug("PrologBuilder.build(...) was triggered");
 			String taskname = "updating prolog metadata";
-			;
 
 			/*
 			 * from the pdt's pov there are two ways a file may change its
@@ -250,24 +243,18 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 	}
 
-	/**
-	 * @param v
-	 * @throws IOException
-	 * @throws CoreException
-	 * @throws PrologInterfaceException
-	 */
-	private void build(Set contentsSet, Set existenceSet,
+	private void build(Set<IFile> contentsSet, Set<IFile> existenceSet,
 			AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, IOException, PrologInterfaceException {
 
-		for (Iterator it = existenceSet.iterator(); !monitor.isCanceled()
+		for (Iterator<IFile> it = existenceSet.iterator(); !monitor.isCanceled()
 				&& it.hasNext();) {
-			IFile file = (IFile) it.next();
+			IFile file =it.next();
 			existenceChanged(file, as);
 		}
-		for (Iterator it = contentsSet.iterator(); !monitor.isCanceled()
+		for (Iterator<IFile> it = contentsSet.iterator(); !monitor.isCanceled()
 				&& it.hasNext();) {
-			IFile file = (IFile) it.next();
+			IFile file =it.next();
 			contentsChanged(file, as);
 		}
 
@@ -313,9 +300,9 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			throws CoreException {
 		final IPrologProject plProject = (IPrologProject) project
 				.getNature(PDTCore.NATURE_ID);
-		Set roots = plProject.getExistingSourcePathEntries();
-		for (Iterator it = roots.iterator(); it.hasNext();) {
-			IResource root = (IResource) it.next();
+		Set<IContainer> roots = plProject.getExistingSourcePathEntries();
+		for (Iterator<IContainer> it = roots.iterator(); it.hasNext();) {
+			IResource root = it.next();
 			root.accept(new IResourceVisitor() {
 				public boolean visit(IResource resource) throws CoreException {
 					try {
@@ -340,8 +327,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @return
 	 * @throws CoreException
 	 */
-	private void collect(IResourceDelta delta, final Set contentsList,
-			final Set existenceList) throws CoreException {
+	private void collect(IResourceDelta delta, final Set<IFile> contentsList,
+			final Set<IFile> existenceList) throws CoreException {
 		final IPrologProject plProject = (IPrologProject) getProject()
 				.getNature(PDTCore.NATURE_ID);
 
@@ -354,9 +341,9 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 						switch (delta.getKind()) {
 						case IResourceDelta.ADDED:
 						case IResourceDelta.REMOVED:
-							existenceList.add(resource);
+							existenceList.add((IFile) resource);
 						default:
-							contentsList.add(resource);
+							contentsList.add((IFile) resource);
 						}
 
 						return false;
@@ -381,21 +368,13 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 	}
 
-	/**
-	 * @param as
-	 * @param monitor
-	 * @param forgetList
-	 * @throws CoreException
-	 * @throws PrologInterfaceException
-	 */
-	private void forget(Set v, AsyncPrologSession as, IProgressMonitor monitor)
+
+	private void forget(Set<IFile> v, AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, PrologInterfaceException {
-		for (Iterator it = v.iterator(); it.hasNext() && !monitor.isCanceled();) {
+		for (Iterator<IFile> it = v.iterator(); it.hasNext() && !monitor.isCanceled();) {
 			IFile file = (IFile) it.next();
 			forget(file, as);
-
 		}
-
 	}
 
 	private boolean isCanidate(IResource r) throws CoreException {
@@ -404,9 +383,9 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		if (plProject.isPrologSource(r)) {
 			return true;
 		}
-		Set srcDirs = plProject.getExistingSourcePathEntries();
-		for (Iterator it = srcDirs.iterator(); it.hasNext();) {
-			IResource srcDir = (IResource) it.next();
+		Set<IContainer> srcDirs = plProject.getExistingSourcePathEntries();
+		for (Iterator<IContainer> it = srcDirs.iterator(); it.hasNext();) {
+			IResource srcDir = it.next();
 			if (r.getFullPath().isPrefixOf(srcDir.getFullPath())) {
 				return true;
 			}

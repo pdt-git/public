@@ -51,7 +51,7 @@ import org.cs3.pl.common.Debug;
 /**
  */
 public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
-    Vector lineBreaks = new Vector();
+    Vector<Integer> lineBreaks = new Vector<Integer>();
     private String nl;
 
     public StringLineBreakInfoProvider(String text,String nl) {
@@ -79,7 +79,7 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
      */
     public int getOffsetAtLine(int line) {
         try{
-        	return line == 0 ? 0 : ((Integer) lineBreaks.get(line - 1)).intValue()+nl.length();
+        	return line == 0 ? 0 : lineBreaks.get(line - 1).intValue()+nl.length();
         }
         catch(ArrayIndexOutOfBoundsException e){
         	Debug.error("AaaaAAAAaaaaAAAAaaaAAAaaargh.");
@@ -89,8 +89,8 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
 
     public int getLineAtOffset(int offset){
     	int r=0;
-    	for (Iterator it = lineBreaks.iterator(); it.hasNext();) {
-			Integer i = (Integer) it.next();
+    	for (Iterator<Integer> it = lineBreaks.iterator(); it.hasNext();) {
+			Integer i = it.next();
 			if(i.intValue()<offset){
 				r++;
 			}else{

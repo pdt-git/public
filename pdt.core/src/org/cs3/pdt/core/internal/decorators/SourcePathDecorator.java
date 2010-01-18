@@ -18,7 +18,7 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 public class SourcePathDecorator implements ILightweightLabelDecorator, OptionProviderListener{
 
-	private Vector listeners = new Vector();
+	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
 	public void decorate(Object element, IDecoration decoration) {
 		if(!(element instanceof IResource)){
@@ -88,12 +88,12 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 
 	private void fireLabelProviderChanged() {
 		LabelProviderChangedEvent e = new LabelProviderChangedEvent(this);
-		Vector clone=new Vector();
+		Vector<ILabelProviderListener> clone=new Vector<ILabelProviderListener>();
 		synchronized(listeners){
 			clone.addAll(listeners);
 		}
-		for (Iterator it = clone.iterator(); it.hasNext();) {
-			ILabelProviderListener l = (ILabelProviderListener) it.next();
+		for (Iterator<ILabelProviderListener> it = clone.iterator(); it.hasNext();) {
+			ILabelProviderListener l = it.next();
 			l.labelProviderChanged(e);
 		}
 		

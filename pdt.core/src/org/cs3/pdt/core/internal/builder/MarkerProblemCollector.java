@@ -62,7 +62,7 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 /**
  */
 public class MarkerProblemCollector implements ProblemCollector {
-    private ArrayList markers = new ArrayList();
+    private ArrayList<HashMap<String, Integer>> markers = new ArrayList<HashMap<String, Integer>>();
     private IFile file;
     private LineBreakInfoProvider lineInfo;
     private int maxSeverity=-1;
@@ -99,7 +99,7 @@ public class MarkerProblemCollector implements ProblemCollector {
         int severity=mapSeverity(p.severity);
         maxSeverity=Math.max(maxSeverity,severity);
         
-        HashMap attributes = new HashMap();
+        HashMap<String, Integer> attributes = new HashMap<String, Integer>();
         MarkerUtilities.setMessage(attributes, p.message);
         MarkerUtilities.setLineNumber(attributes, p.firstRow);
         
@@ -137,7 +137,7 @@ public class MarkerProblemCollector implements ProblemCollector {
                 public void run(IProgressMonitor monitor) throws CoreException {
                     for (int i = 0; i < markers.size(); i++) {
                         IMarker marker = file.createMarker(IMarker.PROBLEM);
-                        marker.setAttributes((HashMap) markers.get(i));
+                        marker.setAttributes(markers.get(i));
                         //				MarkerAnnotation annotation = new
                         // MarkerAnnotation(marker);
                         //				annotation.setText("ahahahaha");
