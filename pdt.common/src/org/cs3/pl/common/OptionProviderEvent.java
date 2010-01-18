@@ -4,6 +4,7 @@ import java.util.EventObject;
 
 public class OptionProviderEvent extends EventObject {
 
+	private static final long serialVersionUID = 1L;
 	public String[] ids;
 
 	public OptionProviderEvent(Object source,String id) {
