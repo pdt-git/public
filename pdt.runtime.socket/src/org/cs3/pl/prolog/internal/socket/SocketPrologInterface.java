@@ -184,11 +184,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 	public SocketPrologInterface(String name) {		
 		super(name);
-//		if (Util.isWindows()) {
-//			PrologRuntimePlugin.getDefault().ensureInstalled(FKILL_EXE, SocketPrologInterface.class);
-//		}
-
-
 		initOptions();		
 		setFileSearchPath(PrologRuntimePlugin.getDefault().guessFileSearchPath("pdt.runtime.socket.codebase"));
 		setStartAndStopStrategy(new SocketServerStartAndStopStrategy());

@@ -7,7 +7,7 @@ import java.net.URL;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.internal.socket.SocketPrologInterface;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -26,8 +26,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
 		IPreferenceStore store = plugin.getPreferenceStore();
-		
-//		store.setDefault(ProcessKiller.PREF_KILLCOMMAND, ProcessKiller.guessKillCommandName());
 		store.setDefault(SocketPrologInterface.PREF_USE_POOL, guessUsePool());
 		store.setDefault(SocketPrologInterface.PREF_CREATE_SERVER_LOGS, false);
 		store.setDefault(SocketPrologInterface.PREF_PORT, 9944);
@@ -44,20 +42,23 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(SocketPrologInterface.PREF_SERVER_LOGDIR,location);
 	}
 
-	/**
-	 * @return
-	 */
 	public static String guessUsePool() {
 		return "true";
 	}
 
 	private String getLocation() throws IOException {
 		URL url = PrologRuntimePlugin.getDefault().getBundle().getEntry("/");
-		String location = null;
-		location = new File(Platform.asLocalURL(url).getFile()).getAbsolutePath();
+		String location = getAbsolutePathForURL(url);
 		if (location.charAt(location.length() - 1) == File.separatorChar)
 			location = location.substring(0, location.length() - 1);
 		return location;
+	}
+
+	private String getAbsolutePathForURL(URL url) throws IOException {
+		String fileName = FileLocator.toFileURL(url).getFile();
+		File file = new File(fileName);
+		String absolutePath = file.getAbsolutePath();
+		return absolutePath;
 	}
 	
 }
