@@ -64,6 +64,25 @@ import org.cs3.pl.console.prolog.QueryExpansion;
  */
 public class PrologSocketConsoleModel implements ConsoleModel {
 
+	private int port;
+
+	private Thread readerThread = null;
+
+	private boolean singleCharMode = false;
+
+	private String lineBuffer = "";
+
+	private BufferedWriter writer;
+
+	private HashSet<ConsoleModelListener> listeners = new HashSet<ConsoleModelListener>();
+
+	private Socket socket;
+
+	private Vector<QueryExpansion> expansions = new Vector<QueryExpansion>();
+
+	private boolean disconnecting;
+
+
 	private class ConsoleReader implements Runnable {
 
 		private static final int ESCAPE_CHAR = '*';
@@ -159,26 +178,6 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 	}
 
-	private int port;
-
-	private Thread readerThread = null;
-
-	private boolean singleCharMode = false;
-
-	private String lineBuffer = "";
-
-	private BufferedWriter writer;
-
-	private HashSet listeners = new HashSet();
-
-	private Socket socket;
-
-	private Vector expansions = new Vector();
-
-	//private File serverLockFile;
-
-	private boolean disconnecting;
-
 	public PrologSocketConsoleModel() {
 		this.port = 5567;
 		connect();
@@ -234,8 +233,8 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	private String expandQuery(String query) {
-		for (Iterator it = expansions.iterator(); it.hasNext();) {
-			QueryExpansion exp = (QueryExpansion) it.next();
+		for (Iterator<QueryExpansion> it = expansions.iterator(); it.hasNext();) {
+			QueryExpansion exp = it.next();
 			query = exp.apply(query);
 		}
 		return query;
@@ -323,25 +322,6 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			Debug.warning("Seems we are already connected?");
 			return;
 		}
-		
-		
-		
-		/*
-		long startTime = System.currentTimeMillis();
-		while (!isServerActive()) {
-			try {
-				Thread.sleep(100);
-				long elapsedTime = System.currentTimeMillis() - startTime;
-				if (elapsedTime > timeout) {
-					throw new RuntimeException(
-							"Timeout while waiting for peer to start console service.");
-				}
-			} catch (InterruptedException e) {
-				Debug.report(e);
-				throw new RuntimeException(e);
-			}
-		}
-		 */
 		try {
 			Debug.info("connecting console to server at port " + port);
 			socket = new Socket((String) null, port);
@@ -359,18 +339,11 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 							"false");
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
-				// writer.write("use_module(library(single_char_interceptor)).\n"
-				// + "sd_install,"
-				// + "set_stream(current_output,tty(true)),"
-				// + "set_stream(current_input,tty(true)).\n");
 				writer.write("use_module(library(single_char_interceptor)).\n"
 						+ "sci_install.\n"
 						+ "set_stream(current_output,tty(true)),"
 						+ "set_stream(current_input,tty(true)).\n");
-			} else {
-				// writer.write("set_stream(current_output,tty(true)),"
-				// + "set_stream(current_input,tty(true)).\n");
-			}
+			} 
 			writer.flush();
 			Debug.debug("Connect complete");
 			fireAfterConnect();
@@ -402,11 +375,9 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 			try {
 				if (socket != null) {
-					// writer.write("sd_uninstall.\n");
-					// writer.flush();
+
 					writer.write("end_of_file.\n");
 					writer.flush();
-					// writer.close();
 					if(Thread.currentThread()!=readerThread){
 						readerThread.join(10000);
 					}
@@ -436,14 +407,14 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 	private void fireAfterConnect() {
 		ConsoleModelEvent e = new ConsoleModelEvent(this);
-		HashSet l;
+		HashSet<ConsoleModelListener> l;
 
 		synchronized (listeners) {
-			l = (HashSet) listeners.clone();
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();) {
-			ConsoleModelListener list = (ConsoleModelListener) i.next();
+		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = i.next();
 			list.afterConnect(e);
 		}
 	}
@@ -451,56 +422,54 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	private void fireBeforeDisconnect() {
 
 		ConsoleModelEvent e = new ConsoleModelEvent(this);
-		HashSet l;
+		HashSet<ConsoleModelListener> l;
 
 		synchronized (listeners) {
-			l = (HashSet) listeners.clone();
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();) {
-			ConsoleModelListener list = (ConsoleModelListener) i.next();
+		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = i.next();
 			list.beforeDisconnect(e);
 		}
-
 	}
 
 	void fireOutputEvent(ConsoleModelEvent cme) {
-		HashSet l;
+		HashSet<ConsoleModelListener> l;
 
 		synchronized (listeners) {
-			l = (HashSet) listeners.clone();
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();) {
-			ConsoleModelListener list = (ConsoleModelListener) i.next();
+		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = i.next();
 			list.onOutput(cme);
 		}
-
 	}
 
 	void fireModeChange(ConsoleModelEvent cme) {
-		HashSet l;
+		HashSet<ConsoleModelListener> l;
 
 		synchronized (listeners) {
-			l = (HashSet) listeners.clone();
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();) {
-			ConsoleModelListener list = (ConsoleModelListener) i.next();
+		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = i.next();
 			list.onModeChange(cme);
 		}
 
 	}
 
 	private void fireCommitEvent(ConsoleModelEvent cme) {
-		HashSet l;
+		HashSet<ConsoleModelListener> l;
 
 		synchronized (listeners) {
-			l = (HashSet) listeners.clone();
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();) {
-			ConsoleModelListener list = (ConsoleModelListener) i.next();
+		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = i.next();
 			list.onCommit(cme);
 		}
 	}
@@ -508,21 +477,17 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	private void fireEditBufferChangedEvent(String oldBuffer, String buffer) {
 		ConsoleModelEvent ev = new ConsoleModelEvent(this, oldBuffer, buffer);
 
-		HashSet l;
+		HashSet<ConsoleModelListener> l;
 
 		synchronized (listeners) {
-			l = (HashSet) listeners.clone();
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
 		}
 
-		for (Iterator i = l.iterator(); i.hasNext();) {
-			ConsoleModelListener list = (ConsoleModelListener) i.next();
+		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
+			ConsoleModelListener list = i.next();
 			list.onEditBufferChanged(ev);
 		}
 	}
-
-//	private boolean isServerActive() {
-//		return serverLockFile.exists();
-//	}
 
 	public boolean isConnected() {
 		if (socket == null) {

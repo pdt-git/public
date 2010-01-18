@@ -73,7 +73,7 @@ import java.util.Vector;
  *  0<=pointer<=history.size()
  */
 public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
-	Vector history = new Vector();
+	Vector<String> history = new Vector<String>();
 	int pointer=0;
 	String lastLine;
 	
@@ -109,7 +109,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 			lastLine=current;			
 		}	
 		pointer--;
-		model.setLineBuffer((String) history.get(pointer));
+		model.setLineBuffer(history.get(pointer));
 	}
 
 	public void next() {
@@ -126,7 +126,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 			lastLine=null;			
 		}
 		else {			
-			  model.setLineBuffer((String) history.get(pointer));
+			  model.setLineBuffer(history.get(pointer));
 		}
 		
 	}
@@ -161,8 +161,8 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 	
 	public void saveHistory(OutputStream os) throws IOException{
 		PrintStream ps = new PrintStream(os);
-		for (Iterator iter = history.iterator(); iter.hasNext();) {
-			String line = (String) iter.next();
+		for (Iterator<String> iter = history.iterator(); iter.hasNext();) {
+			String line = iter.next();
 			ps.println(line);
 		}
 	}

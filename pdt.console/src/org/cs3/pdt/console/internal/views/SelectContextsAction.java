@@ -70,7 +70,7 @@ import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 public abstract class SelectContextsAction extends Action implements IMenuCreator,
 		IWorkbenchWindowPulldownDelegate2, PrologContextTrackerListener {
 
-	private Set activeTrackers;
+	private Set<String> activeTrackers;
 	
 	/**
 	 * Cascading menu
@@ -108,8 +108,8 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 
 	public PrologInterface getCurrentPrologInterface(){
 		
-		for (Iterator it = getActiveTrackers().iterator(); it.hasNext();) {
-			String trackerId = (String) it.next();
+		for (Iterator<String> it = getActiveTrackers().iterator(); it.hasNext();) {
+			String trackerId = it.next();
 			PrologContextTracker tracker = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTracker(trackerId);
 			if(tracker == null)
 			{
@@ -269,13 +269,13 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 
 
 
-	Set getActiveTrackers() {
+	Set<String> getActiveTrackers() {
 		if(activeTrackers==null){
-			activeTrackers=new HashSet();			
+			activeTrackers=new HashSet<String>();			
 			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);
 			PrologContextTrackerService trackerService = PrologRuntimePlugin.getDefault().getContextTrackerService();
-			for (Iterator iter = activeTrackers.iterator(); iter.hasNext();) {
-				String id = (String) iter.next();				
+			for (Iterator<String> iter = activeTrackers.iterator(); iter.hasNext();) {
+				String id = iter.next();				
 				PrologContextTracker contextTracker = trackerService.getContextTracker(id);
 				if(contextTracker!=null){
 					contextTracker.addPrologContextTrackerListener(this);

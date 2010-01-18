@@ -47,15 +47,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import org.cs3.pdt.console.PDTConsole;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.CompoletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PredicateData;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -79,8 +76,8 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			}
 			String[] result = new String[options.size()];
 			int i = 0;
-			for (Iterator it = options.iterator(); it.hasNext(); i++) {
-				String o = (String) it.next();
+			for (Iterator<String> it = options.iterator(); it.hasNext(); i++) {
+				String o = it.next();
 				result[i] = o;
 			}
 			return result;
@@ -110,13 +107,13 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
 		int newPos = -1;
 
-		TreeSet options = null;
+		TreeSet<String> options = null;
 
 		int pos = -1;
 
 	}
 
-	TreeSet completions = null;
+	TreeSet<String> completions = null;
 
 	private PrologInterface pif;
 
@@ -143,9 +140,9 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
 		try {
 			elems = getPredicatesWithPrefix(null, prefix, null);
-			r.options = new TreeSet();
+			r.options = new TreeSet<String>();
 
-			completions = new TreeSet();
+			completions = new TreeSet<String>();
 			for (int i = 0; i < elems.length; i++) {
 				r.options.add(elems[i].getSignature());
 				completions.add(elems[i].getName());
@@ -159,7 +156,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		}
 
 		String completion = completions == null || completions.isEmpty() ? ""
-				: (String) completions.first();
+				: completions.first();
 		if (elems == null || elems.length == 0) {
 			r.newLine = line;
 			r.newPos = pos;
@@ -179,8 +176,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
 			String filename) throws NumberFormatException, PrologException,
 			PrologInterfaceException {
-		// return
-		// (PrologElementData[])predicates.get(makeFilenameSWIConform(filename));
+
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try {
 			if (module == null)
@@ -189,20 +185,18 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 				filename = "_";
 			String query = "find_pred('" + filename + "','" + prefix + "', "
 					+ module + ",Name,Arity,Public)";
-			List results = session.queryAll(query);
-			List list = new ArrayList();
-			// while (result != null) {
-			for (Iterator it = results.iterator(); it.hasNext();) {
-				Map result = (Map) it.next();
+			List<Map<String,Object>> results = session.queryAll(query);
+			List<Predicate> list = new ArrayList<Predicate>();
+			for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
+				Map<String,Object> result = it.next();
 				boolean pub = Boolean.valueOf(result.get("Public").toString())
 						.booleanValue();
 				Predicate data = new PredicateData(module, result.get("Name")
 						.toString(), Integer.parseInt(result.get("Arity")
 						.toString()), pub, false, false);
 				list.add(data);
-
 			}
-			return (Predicate[]) list.toArray(new Predicate[0]);
+			return list.toArray(new Predicate[0]);
 		} finally {
 			if (session != null) {
 				session.dispose();
@@ -216,8 +210,8 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		int len = 1;
 		while (true) {
 
-			String first = Util.unquoteAtom((String) completions.first());
-			String last = Util.unquoteAtom((String) completions.last());
+			String first = Util.unquoteAtom(completions.first());
+			String last = Util.unquoteAtom(completions.last());
 			if (first.length() < len || last.length() < len) {
 				break;
 			}
@@ -232,28 +226,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	}
 
 	public void setPrologInterface(PrologInterface pif) {
-		
 		this.pif = pif;
-		
-		
-	}
-
-	private void load_libraries(PrologInterface pif) {
-		PrologSession s =null;
-		try{
-			s= pif.getSession(PrologInterface.NONE);
-			PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), s, new String[]{PDTConsole.PL_LIBRARY});
-			s.queryOnce("use_module(library(pdtplugin))");
-			
-		} catch (PrologException e) {
-			Debug.report(e);
-		} catch (PrologInterfaceException e) {
-			Debug.report(e);
-		}finally{
-			if(s!=null){
-				s.dispose();
-			}
-		}
 	}
 
 	public PrologInterface getPrologInterface() {
