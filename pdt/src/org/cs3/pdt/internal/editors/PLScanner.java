@@ -46,7 +46,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
@@ -85,13 +84,12 @@ public class PLScanner extends RuleBasedScanner {
 			
 			PrologSession session = null;
 			try {
-				PDTPlugin r = PDTPlugin.getDefault();
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
-				List solutions = session
+				List<Map<String,Object>> solutions = session
 						.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
-				for (Iterator it = solutions.iterator(); it.hasNext();) {
-					Map si = (Map) it.next();
+				for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
+					Map<String,Object> si = (Map<String,Object>) it.next();
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
@@ -117,13 +115,12 @@ public class PLScanner extends RuleBasedScanner {
 			PrologSession session = null;
 			;
 			try {
-				PDTPlugin r = PDTPlugin.getDefault();
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
-				List solutions = session
+				List<Map<String,Object>> solutions = session
 						.queryAll("predicate_property(M:P,built_in),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
-				for (Iterator it = solutions.iterator(); it.hasNext();) {
-					Map si = (Map) it.next();
+				for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
+					Map<String,Object> si = (Map<String,Object>) it.next();
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
@@ -155,9 +152,6 @@ public class PLScanner extends RuleBasedScanner {
 				plProject = (IPrologProject) project
 						.getNature(PDTCore.NATURE_ID);
 			}
-
-		
-
 		initKeywords(plProject);
 		initDynamicPredicates(plProject);
 		IToken procInstr = new Token(new TextAttribute(manager
@@ -177,7 +171,6 @@ public class PLScanner extends RuleBasedScanner {
 		// Add rule for processing instructions
 
 		WordRule wordRule = new WordRule(new WordDetector(), wordToken);
-		WordRule dynamicRule = new WordRule(new WordDetector(), dynamicToken);
 
 		for (int i = 0; plKeywords!=null&&i < plKeywords.length; i++){
 			wordRule.addWord(plKeywords[i], keywordToken);
@@ -194,7 +187,6 @@ public class PLScanner extends RuleBasedScanner {
 		// Add generic whitespace rule.
 		rules[3] = new WhitespaceRule(new PLWhitespaceDetector());
 		rules[4] = wordRule;
-		// rules[5] = dynamicRule;
 
 		setRules(rules);
 	}

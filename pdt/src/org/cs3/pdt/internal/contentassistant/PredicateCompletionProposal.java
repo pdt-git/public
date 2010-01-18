@@ -18,11 +18,11 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private int offset;
 	private int length;
 	private String name;	
-	private Map<String,Object> tags;
+	private Map<String,?> tags;
 	private String label;
 	
-	public PredicateCompletionProposal(int offset, int length, /*String module,*/
-			String name, int arity, Map<String,Object> tags) {
+	public PredicateCompletionProposal(int offset, int length,
+			String name, int arity, Map<String,?> tags) {
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(tags.containsKey("public")?ImageRepository.PE_PUBLIC:ImageRepository.PE_HIDDEN),
 						null,null,null);

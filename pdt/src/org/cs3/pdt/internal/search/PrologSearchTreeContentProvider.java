@@ -11,8 +11,6 @@
 
 package org.cs3.pdt.internal.search;
 
-import java.util.Map;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.search.ui.text.Match;
@@ -26,10 +24,6 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		super(page);
 		
 	}
-
-	private Map fChildrenMap;
-	
-	
 
 	public Object getParent(Object child) {
 		if(child==null||getSearchResult()==null){

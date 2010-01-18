@@ -124,17 +124,15 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			String query = "pdt_completion('" + path + "',"
 					+ (module != null ? "'" + module + "'" : "_") + ",'"
 					+ prefix + "',Module:Name/Arity,Tags)";
-			List<Map<String, Object>> l = s.queryAll(query);
+			List<Map<String, Object>> answers = s.queryAll(query);
 
-			for (Map map : l) {
+			for (Map<String, Object> anAnswer : answers) {
+				String name = ((CTerm) anAnswer.get("Name")).getFunctorValue();
+				String arity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
+				int parseInt = Integer.parseInt(arity);
+				Map<String, CTerm> tags = PLUtil.listAsMap((CTerm) anAnswer.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
-						begin, len, /*((CTerm) map.get("Module"))
-								.getFunctorValue(), */ ((CTerm) map.get("Name"))
-								.getFunctorValue(), Integer
-								.parseInt(((CTerm) map.get("Arity"))
-										.getFunctorValue()), PLUtil
-								.listAsMap((CTerm) map.get("Tags")));
-
+												begin, len, name, parseInt, tags);
 				proposals.add(p);
 			}
 		} finally {

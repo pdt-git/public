@@ -70,21 +70,6 @@ public class PDTPlugin extends AbstractUIPlugin {
 		return plugin;
 	}
 
-//	/**
-//	 * Returns the string from the plugin's resource bundle, or 'key' if not
-//	 * found.
-//	 */
-//	public static String getResourceString(String key) {
-//		ResourceBundle bundle = PDTPlugin.getDefault().getResourceBundle();
-//		try {
-//			return (bundle != null) ? bundle.getString(key) : key;
-//		} catch (MissingResourceException e) {
-//			return key;
-//		}
-//	}
-//
-//	// Resource bundle.
-//	private ResourceBundle resourceBundle;
 	private DefaultErrorMessageProvider errorMessageProvider;
 
 	/**
@@ -93,35 +78,7 @@ public class PDTPlugin extends AbstractUIPlugin {
 	public PDTPlugin() {
 		super();
 		plugin = this;
-//		try {
-//			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.PDTPluginResources");
-//		} catch (MissingResourceException x) {
-//			resourceBundle = null;
-//		}
 	}
-
-//	public ResourceFileLocator getResourceLocator(String key) {
-//		if (rootLocator == null) {
-//			URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
-//			File location = null;
-//			try {
-//				location = new File(Platform.asLocalURL(url).getFile());
-//			} catch (IOException t) {
-//				Debug.report(t);
-//				throw new RuntimeException(t);
-//			}
-//
-//			rootLocator = new DefaultResourceFileLocator(location);
-//		}
-//		return rootLocator.subLocator(key);
-//	}
-
-//	/**
-//	 * Returns the plugin's resource bundle,
-//	 */
-//	public ResourceBundle getResourceBundle() {
-//		return resourceBundle;
-//	}
 
 	/**
 	 * look up a preference value.
@@ -156,7 +113,6 @@ public class PDTPlugin extends AbstractUIPlugin {
 		} catch (Throwable e) {
 			Debug.report(e);
 		}
-
 	}
 
 	private void reconfigureDebugOutput() throws FileNotFoundException {

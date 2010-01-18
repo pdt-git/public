@@ -55,8 +55,6 @@ import org.eclipse.jface.text.source.ICharacterPairMatcher;
  */
 public class PLCharacterPairMatcher implements ICharacterPairMatcher {
 
-    private int offset;
-    private IDocument document;
     private int anchor;
     private StringBuffer stack = new StringBuffer();
 
@@ -64,8 +62,7 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
      * @see org.eclipse.jface.text.source.ICharacterPairMatcher#dispose()
      */
     public void dispose() {
-    	
-
+    	;
     }
 
     /* (non-Javadoc)
@@ -73,8 +70,6 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
      */
     public void clear() {
        anchor = -1;
-       document = null;
-       offset = -1;
        stack=new StringBuffer();
        
     }
@@ -84,14 +79,12 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
      */
     public IRegion match(IDocument document, int offset) {
         try {
-            this.document = document;
             offset--;//XXX: why decrement? causes  BadLocationException below when offset==0
             		//think it is because we always try to match the char left of the cursor.
                     //if we are at 0, there is nothing to match.
             if(offset<0){
             	return null;
             }
-            this.offset = offset;
             //XXX: debugging, please remove try/catch
             String partitionType=null;
             try {

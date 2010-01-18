@@ -55,7 +55,6 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -86,6 +85,17 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 public class PrologOutline extends ContentOutlinePage {
+	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
+	private ITreeContentProvider contentProvider;
+	private PrologFileContentModel model;
+	private boolean convertPositions;
+	private PLEditor editor;
+	private ILabelProvider labelProvider;
+	private PrologOutlineFilter[] filters;
+	private IEditorInput input;
+	private TreeViewer viewer;
+	private Menu contextMenu;
+	
 	private final class Comparer implements IElementComparer {
 		public int hashCode(Object element) {
 			if (element instanceof Predicate) {
@@ -104,27 +114,6 @@ public class PrologOutline extends ContentOutlinePage {
 			return a.equals(b);
 		}
 	}
-
-	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
-
-	// private TreeViewer viewer;
-	private ITreeContentProvider contentProvider;
-
-	private PrologFileContentModel model;
-
-	private boolean convertPositions;
-
-	private PLEditor editor;
-
-	private ILabelProvider labelProvider;
-
-	private PrologOutlineFilter[] filters;
-
-	private IEditorInput input;
-
-	private TreeViewer viewer;
-
-	private Menu contextMenu;
 
 	public PrologOutline(PLEditor editor) {
 		this.editor = editor;
@@ -155,11 +144,6 @@ public class PrologOutline extends ContentOutlinePage {
 					}
 					return file == null ? null : file.getLocation().toFile();
 				} catch (Exception e) {
-					ErrorMessageProvider emp = PDTPlugin.getDefault()
-							.getErrorMessageProvider();
-//					UIUtils.logAndDisplayError(emp, getSite().getShell(),
-//							PDT.ERR_FILENAME_CONVERSION_PROBLEM,
-//							PDT.CX_OUTLINE, e);
 					return null;
 				}
 			}
@@ -226,16 +210,9 @@ public class PrologOutline extends ContentOutlinePage {
 	}
 
 	public IEditorInput getInput() {
-		TreeViewer viewer = getTreeViewer();
-
+		getTreeViewer();
 		return input;
 	}
-
-	/**
-	 * @param input2
-	 * @param b
-	 * @return
-	 */
 
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
@@ -272,11 +249,6 @@ public class PrologOutline extends ContentOutlinePage {
 						+ "<<<");
 			} catch (BadLocationException e) {
 				Debug.warning("bad location: "+startOffset+", "+endOffset);
-				ErrorMessageProvider emp = PDTPlugin.getDefault()
-				.getErrorMessageProvider();
-//				UIUtils.logAndDisplayError(emp, getSite().getShell(),
-//				PDT.ERR_OUTLINE_BAD_LOCATION,
-//				PDT.CX_OUTLINE, e);
 			}
 		}
 
@@ -286,13 +258,7 @@ public class PrologOutline extends ContentOutlinePage {
 				return ;
 			}
 			editor.selectAndReveal(startOffset, endOffset - startOffset);
-			// editor.selectAndReveal(0,1);
-
 		}
-	}
-
-	private ITreeContentProvider getContentProvider() {
-		return contentProvider;
 	}
 
 	public PrologOutlineFilter[] getAvailableFilters() {
@@ -310,7 +276,7 @@ public class PrologOutline extends ContentOutlinePage {
 	protected void initFilters() {
 		String value = PDTPlugin.getDefault().getPreferenceValue(
 				PDT.PREF_OUTLINE_FILTERS, "");
-		HashSet enabledIds = new HashSet();
+		HashSet<String> enabledIds = new HashSet<String>();
 		Util.split(value, ",", enabledIds);
 		PrologOutlineFilter[] filters = getAvailableFilters();
 		for (int i = 0; i < filters.length; i++) {

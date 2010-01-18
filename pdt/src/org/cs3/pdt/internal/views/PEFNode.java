@@ -14,7 +14,5 @@ public interface PEFNode extends PEFHandle {
 	public int getEndPosition();
 	public Set<String> getTags();
 	public String getType();
-	
-	
-	
+
 }

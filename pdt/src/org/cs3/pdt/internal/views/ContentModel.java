@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -12,8 +13,6 @@ import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionProxy;
@@ -36,43 +35,23 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		PrologInterfaceListener {
 
 	private static final String HOOK_ID = "PrologFileContentModelHook";
-
 	protected Object hookData;
-	
-	
+	private Object input;
+	private PrologInterface pif;
+	private HashMap<Object, Vector<Object>> cache = new HashMap<Object, Vector<Object>>();
+	private String oneMomentPlease = "one moment please...";
+	private Vector<PrologFileContentModelListener> listeners = new Vector<PrologFileContentModelListener>();
+	private HashMap<Object, Vector<PrologFileContentModelListener>> specificListeners = new HashMap<Object, Vector<PrologFileContentModelListener>>();
+	private long timestamp = Long.MIN_VALUE;
+	private IPrologEventDispatcher dispatcher;
+	private String subject;
+	private AsyncPrologSession session;
+
 	public void setData(Object data) {
 		this.hookData=data;
-		
 	}
-	private Object input;
 
-	private PrologInterface pif;
-
-	private HashMap cache = new HashMap();
-
-	private String oneMomentPlease = "one moment please...";
-
-	private Vector listeners = new Vector();
-
-	private HashMap specificListeners = new HashMap();
-
-	private long timestamp = Long.MIN_VALUE;
-
-	private IPrologEventDispatcher dispatcher;
-
-	private String subject;
-
-	private AsyncPrologSession session;
-/*
-	private Thread collector = new Thread(){
-			while(true)
-			while(! shouldDispose()){
-				this.wait(2000);
-			}
-	};
-	*/
 	public void update(PrologInterfaceEvent e) {
-
 		String subject = e.getSubject();
 		String event = e.getEvent();
 
@@ -98,7 +77,6 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			return "pef_file".equals(type) || "pef_predicate".equals(type);
 		}
 		return parentElement == input;
-
 	}
 
 	/*
@@ -109,26 +87,15 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	public Object[] getChildren(Object parentElement)
 			throws PrologInterfaceException {
 		Debug.debug("outline getChildren for " + parentElement);
-		Vector children = null;
+		Vector<Object> children = null;
 		synchronized (cache) {
 			children = getCachedChildren(parentElement);
 			if (children.isEmpty()) {
 				Debug.debug("outline no children cached for " + parentElement);
-				if (parentElement instanceof CTermNode) {
-					// FIXME: handle partial fetched terms (not implemented yet)
-					CTerm term = ((CTermNode) parentElement).term;
-					CCompound c = null;
-					if (term instanceof CCompound) {
-						c = (CCompound) term;
-						for (int i = 0; i < c.getArity(); i++) {
-							children.add(new CTermNode(c.getArgument(i)));
-						}
-					}
-				} else if (pif != null && pif.isUp()) {
+				if (pif != null && pif.isUp()) {
 					Debug.debug("outline adding oneMomentPlease to "
 							+ parentElement);
 					children.add(oneMomentPlease);
-
 					fetchChildren(parentElement);
 				}
 			} else {
@@ -163,7 +130,6 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 							"End)";
 			session.queryAll(input, query);
 		}
-
 	}
 
 	private Object sessionLock = new Object();
@@ -189,34 +155,26 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private class _PEFNode implements PEFNode, IAdaptable {
 
 		private int endPosition;
-
 		private File file;
-
 		private String id;
-
 		private String label;
-
 		private int startPosition;
-
-		private Set tags;
-
+		private Set<String> tags;
 		private String type;
 
-		public _PEFNode(AsyncPrologSessionEvent e, File file) {
-			type = (String) e.bindings.get("ChildT");
-			id = (String) e.bindings.get("Child");
-			startPosition = Integer.parseInt((String) e.bindings.get("Start"));
-			endPosition = Integer.parseInt((String) e.bindings.get("End"));
+		public _PEFNode(AsyncPrologSessionEvent event, File file) {
+			Map<String,Object>bindings = event.getBindings();
+			type = (String) bindings.get("ChildT");
+			id = (String) bindings.get("Child");
+			startPosition = Integer.parseInt((String) bindings.get("Start"));
+			endPosition = Integer.parseInt((String) bindings.get("End"));
 			this.file = file;
-			label = Util.unquoteAtom((String) e.bindings.get("Label"));
-			tags = new HashSet();
-			tags.addAll((Collection) e.bindings.get("Tags"));
+			label = Util.unquoteAtom((String) bindings.get("Label"));
+			tags = new HashSet<String>();
+			tags.addAll((Collection<String>) bindings.get("Tags"));
 		}
 
 		public Object getAdapter(Class adapter) {
-//			if (IPropertySource.class.isAssignableFrom(adapter)) {
-//				return new PEFNodePropertySource(this);
-//			}
 			return Platform.getAdapterManager().getAdapter(this, adapter);
 		}
 
@@ -246,8 +204,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			return this.startPosition;
 		}
 
-		public Set getTags() {
-
+		public Set<String> getTags() {
 			return this.tags;
 		}
 
@@ -256,7 +213,6 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 
 		public PrologInterface getPrologInterface() {
-			
 			return getPif();
 		}
 
@@ -360,8 +316,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		fireContentModelChanged();
 	}
 
-	private void addChildren(Object parent, Collection collection) {
-		Vector children = null;
+	private void addChildren(Object parent, Collection<Object> collection) {
+		Vector<Object> children = null;
 		Object[] removed = null;
 		synchronized (cache) {
 			children = getCachedChildren(parent);
@@ -380,16 +336,16 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	}
 
 	private void addChild(Object parent, Object child) {
-		Vector children = new Vector();
+		Vector<Object> children = new Vector<Object>();
 		children.add(child);
 		addChildren(parent, children);
 	}
 
-	private Vector getCachedChildren(Object parent) {
+	private Vector<Object> getCachedChildren(Object parent) {
 		synchronized (cache) {
-			Vector children = (Vector) cache.get(parent);
+			Vector<Object> children = cache.get(parent);
 			if (children == null) {
-				children = new Vector();
+				children = new Vector<Object>();
 
 				cache.put(parent, children);
 			}
@@ -401,15 +357,15 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private void fireChildrenAdded(Object parent, Object[] children) {
 		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
 				parent, children, getLastResetTime());
-		HashSet clone = new HashSet();
+		HashSet<PrologFileContentModelListener> clone = new HashSet<PrologFileContentModelListener>();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
 		synchronized (specificListeners) {
 			clone.addAll(getListenersForParent(parent));
 		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
+		for (Iterator<PrologFileContentModelListener> iter = clone.iterator(); iter.hasNext();) {
+			PrologFileContentModelListener l = iter
 					.next();
 			l.childrenAdded(e);
 		}
@@ -419,15 +375,15 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private void fireChildrenRemoved(Object parent, Object[] children) {
 		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
 				parent, children, getLastResetTime());
-		HashSet clone = new HashSet();
+		HashSet<PrologFileContentModelListener> clone = new HashSet<PrologFileContentModelListener>();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
 		synchronized (specificListeners) {
 			clone.addAll(getListenersForParent(parent));
 		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
+		for (Iterator<PrologFileContentModelListener> iter = clone.iterator(); iter.hasNext();) {
+			PrologFileContentModelListener l = iter
 					.next();
 			l.childrenRemoved(e);
 		}
@@ -438,19 +394,19 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 		PrologFileContentModelEvent e = new PrologFileContentModelEvent(this,
 				getLastResetTime());
-		HashSet clone = new HashSet();
+		HashSet<PrologFileContentModelListener> clone = new HashSet<PrologFileContentModelListener>();
 		synchronized (listeners) {
 			clone.addAll(listeners);
 		}
 		synchronized (specificListeners) {
-			for (Iterator iter = specificListeners.values().iterator(); iter
+			for (Iterator<Vector<PrologFileContentModelListener>> iter = specificListeners.values().iterator(); iter
 					.hasNext();) {
-				Collection c = (Collection) iter.next();
+				Collection<PrologFileContentModelListener> c = iter.next();
 				clone.addAll(c);
 			}
 		}
-		for (Iterator iter = clone.iterator(); iter.hasNext();) {
-			PrologFileContentModelListener l = (PrologFileContentModelListener) iter
+		for (Iterator<PrologFileContentModelListener> iter = clone.iterator(); iter.hasNext();) {
+			PrologFileContentModelListener l = iter
 					.next();
 			l.contentModelChanged(e);
 		}
@@ -505,11 +461,11 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 	}
 
-	public Vector getListenersForParent(Object parent) {
+	public Vector<PrologFileContentModelListener> getListenersForParent(Object parent) {
 		synchronized (specificListeners) {
-			Vector listeners = (Vector) specificListeners.get(parent);
+			Vector<PrologFileContentModelListener> listeners = specificListeners.get(parent);
 			if (listeners == null) {
-				listeners = new Vector();
+				listeners = new Vector<PrologFileContentModelListener>();
 				specificListeners.put(parent, listeners);
 			}
 			return listeners;
@@ -519,7 +475,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	public void addPrologFileContentModelListener(Object parent,
 			PrologFileContentModelListener l) {
 		synchronized (specificListeners) {
-			Vector listeners = getListenersForParent(parent);
+			Vector<PrologFileContentModelListener> listeners = getListenersForParent(parent);
 			if (!listeners.contains(l)) {
 				listeners.add(l);
 			}
@@ -530,7 +486,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	public void removePrologFileContentModelListener(Object parent,
 			PrologFileContentModelListener l) {
 		synchronized (specificListeners) {
-			Vector listeners = getListenersForParent(parent);
+			Vector<PrologFileContentModelListener> listeners = getListenersForParent(parent);
 			if (listeners.contains(l)) {
 				listeners.remove(l);
 			}
@@ -556,13 +512,10 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	public void beforeShutdown(PrologInterface pif, PrologSession s)
 			throws PrologInterfaceException {
-
 		reset();
-
 	}
 
 	public void onError(PrologInterface pif) {
-
 		try {
 			reset();
 		} catch (PrologInterfaceException e) {
@@ -573,11 +526,9 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	public void onInit(PrologInterface pif, PrologSession initSession)
 			throws PrologInterfaceException {
 		;
-
 	}
 
 	public void dispose() {
-
 		try {
 			setPif(null, null);
 		} catch (PrologInterfaceException e) {
@@ -585,11 +536,8 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 		cache.clear();
 		listeners.clear();
-		// listeners = null;
-		specificListeners.clear();
-		// specificListeners = null;
-		// input = null;
 
+		specificListeners.clear();
 	}
 
 	public synchronized long getLastResetTime() {

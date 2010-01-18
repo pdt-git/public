@@ -24,31 +24,23 @@ public class CTermContentProviderTest extends TestCase {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
 		pif = PrologRuntimePlugin.getDefault().getPrologInterface("test");
-//		PrologInterfaceFactory factory = pif.getFactory();
 		PrologSession s = pif.getSession();
-//		factory.ensureInstalled(testdata, CTermContentProviderTest.class);
-//		file = factory.getResourceLocator().resolve(testdata);
 		PrologRuntimePlugin.getDefault().ensureInstalled(testdata, CTermContentProviderTest.class);
 		file = PrologRuntimePlugin.getDefault().getResourceLocator().resolve(testdata);
 		
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
-				.getLibraryManager();
-		PLUtil.configureFileSearchPath(mgr, s,
-				new String[] { PDTCore.ENGINE_ID });
-		s
-				.queryOnce("use_module(library('/org/cs3/pdt/annotate/pdt_annotator')),"
+		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		PLUtil.configureFileSearchPath(mgr, s, new String[] { PDTCore.ENGINE_ID });
+		s.queryOnce("use_module(library('/org/cs3/pdt/annotate/pdt_annotator')),"
 						+ "use_module(library('/org/cs3/pdt/core/pdt_meta_info')),"
 						+ "use_module(library('/org/cs3/pdt/model/predicate_definition_factory')),"
 						+ "use_module(library('/org/cs3/pdt/model/builtin_predicate_factory')),"
 						+ "use_module(library('/org/cs3/pdt/model/pdt_index')),"
 						+ "use_module(library('/org/cs3/pdt/model/pdt_handle'))");
-		s
-				.queryOnce("register_annotator(library('/org/cs3/pdt/annotate/op_annotator')),"
+		s.queryOnce("register_annotator(library('/org/cs3/pdt/annotate/op_annotator')),"
 						+ "register_annotator(library('/org/cs3/pdt/annotate/fileref_annotator')),"
 						+ "register_annotator(library('/org/cs3/pdt/annotate/export_annotator')),"
 						+ "register_annotator(library('/org/cs3/pdt/annotate/member_annotator')),"
 						+ "register_annotator(library('/org/cs3/pdt/annotate/indexer'))");
-
 		s.queryOnce("win_window_pos([show(true)])");
 		s.dispose();
 	}
@@ -68,14 +60,7 @@ public class CTermContentProviderTest extends TestCase {
 		backend.setInput(file);
 		backend.setPif(pif,null);
 		PrologSession s = pif.getSession();
-		s
-				.queryOnce("pdt_ensure_annotated('" + Util.prologFileName(file)
+		s.queryOnce("pdt_ensure_annotated('" + Util.prologFileName(file)
 						+ "')");
-
-		// FIXME
-		/*
-		 * Object[] data = backend.getData(); assertNotNull(data);
-		 * assertTrue(data.length>0);
-		 */
 	}
 }

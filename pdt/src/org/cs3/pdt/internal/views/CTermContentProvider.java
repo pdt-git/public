@@ -53,7 +53,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IFileEditorInput;
 
@@ -61,10 +60,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		PrologFileContentModelListener {
 
 	private TreeViewer viewer;
-
 	private PrologFileContentModel backend;
-
-	
 
 	public CTermContentProvider(Viewer outline, PrologFileContentModel backend) {
 		this.viewer = (TreeViewer) outline;
@@ -75,13 +71,9 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	public Object[] getChildren(Object parentElement) {
 		try {
-			
 			return backend.getChildren(parentElement);
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
-//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-//					.getErrorMessageProvider(), viewer.getControl().getShell(),
-//					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
 			return new Object[0];
 		}
 	}
@@ -91,18 +83,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	public boolean hasChildren(Object parentElement) {
-		// XXX a hack.
-		if (parentElement instanceof DirectiveNode
-				|| parentElement instanceof ClauseNode) {
-			ViewerFilter[] filters = viewer.getFilters();
-			for (int i = 0; i < filters.length; i++) {
-				if (filters[i] instanceof HideSubtermsFilter) {
-					return false;
-				}
-			}
-		}
 		return backend.hasChildren(parentElement);
-
 	}
 
 	/*
@@ -152,9 +133,6 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 		} catch (Exception e) {
 			Debug.report(e);
-//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-//					.getErrorMessageProvider(), viewer.getControl().getShell(),
-//					PDT.ERR_PIF, PDT.CX_OUTLINE, e);
 		}
 	}
 
@@ -217,7 +195,6 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 		Debug.debug("outline remove " + Util.prettyPrint(e.children));
 		viewer.remove(e.children);
-
 	}
 
 	public void contentModelChanged(final PrologFileContentModelEvent e) {
@@ -239,7 +216,6 @@ public class CTermContentProvider implements ITreeContentProvider,
 		Debug.debug("outline refresh (contentModelChanged)");
 		
 		viewer.refresh();
-
 	}
 
 }
