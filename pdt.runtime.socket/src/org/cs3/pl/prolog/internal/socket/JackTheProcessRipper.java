@@ -3,38 +3,23 @@
  */
 package org.cs3.pl.prolog.internal.socket;
 
-import java.util.HashSet;
-import java.util.TreeMap;
+import java.io.IOException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 
-class JackTheProcessRipper extends Thread {
+public class JackTheProcessRipper extends Thread {
 
+	private static final String LINUX_AND_OTHER_KILL_COMMAND = "kill -KILL ";
+	private static final String WINDOWS_KILL_COMMAND = "taskkill /F /PID ";
+	private static final Long NONVALID_PID = Long.valueOf(-1);
+	private static final long TIMEOUT_WAITING_FOR_AN_PID = 1000L;
+	
 	static JackTheProcessRipper instance;
-
-	/**
-	 * the heap contains processes that are scheduled for termination. The times
-	 * at which they should be killed is used as Keys. (Long)
-	 */
-	private TreeMap<Long,ExternalKillProcessWrapper> heap = new TreeMap<Long,ExternalKillProcessWrapper>();
-
-	/**
-	 * processes is a set of all processes that were started using the enclosing
-	 * strategy. When the vm is shutting down, the ripper will make sure that
-	 * the heap is empty AND the processes set are empty. It will not allow the
-	 * vm to exit before this condition holds. It will not allow the creation of
-	 * another process once the shutdown has begun.
-	 */
-	private HashSet<ExternalKillProcessWrapper> processes = new HashSet<ExternalKillProcessWrapper>();
-
-	private boolean shuttingDown = false;
-
-	public static JackTheProcessRipper getInstance() {
-		if (instance == null) {
-			instance = new JackTheProcessRipper();
-		}
-		return instance;
-	}
+	static private SynchronousQueue<Long> toBeDestroyed = new SynchronousQueue<Long>();
+	static private boolean shuttingDown = false;
 
 	private JackTheProcessRipper() {
 		super("Jack the Process Ripper");
@@ -48,64 +33,55 @@ class JackTheProcessRipper extends Thread {
 		start();
 	}
 
-	public void registerProcess(ExternalKillProcessWrapper p) {
-		if (shuttingDown) {
-			throw new IllegalStateException(
-					"you cannot register processes during shutdown");
+	public static JackTheProcessRipper getInstance() {
+		if (instance == null) {
+			instance = new JackTheProcessRipper();
 		}
-		synchronized (processes) {
-			processes.add(p);
-		}
+		return instance;
 	}
 
+	/**
+	 * Runs until the Shutdown Hook is activated and destroys every
+	 * Prolog-processed referenced by a PID that is given via
+	 * JackTheProcessRipper.markForDeletion(long).
+	 */
 	public void run() {
-		ExternalKillProcessWrapper process = null;
-		// Runtime.getRuntime().addShutdownHook(this);
-		// FIXME: what to do on vm shutdown?
-		while (!(shuttingDown && processes.isEmpty() && heap.isEmpty())) {
-			process = dequeue();
+		Long processId = NONVALID_PID;
+		while (!shuttingDown) {
 			try {
-				process.destroy();
-				processes.remove(process);
+				processId=toBeDestroyed.poll(TIMEOUT_WAITING_FOR_AN_PID,TimeUnit.MILLISECONDS);
+				if (isValidProcessId(processId)) {
+					killRuntimeProcess(processId);
+				}
 			} catch (Throwable t) {
 				Debug.report(t);
+			} finally {
+				processId = NONVALID_PID;
 			}
-
-		}
-
-	}
-
-	private ExternalKillProcessWrapper dequeue() {
-		synchronized (heap) {
-			while (heap.isEmpty()) {
-				try {
-					heap.wait(5000);
-				} catch (InterruptedException e) {
-					Debug.report(e);
-				}
-			}
-			Long next = (Long) heap.firstKey();
-			if (System.currentTimeMillis() - next.longValue() > 20) {
-				try {
-					Thread.sleep(20 + next.longValue()
-							- System.currentTimeMillis());
-				} catch (InterruptedException e) {
-					Debug.report(e);
-				}
-			}
-			return (ExternalKillProcessWrapper) heap.remove(next);
 		}
 	}
 
-	public void enqueue(ExternalKillProcessWrapper p, long timeout) {
-		synchronized (heap) {
-			long due = System.currentTimeMillis() + timeout;
-			Long key = null;
-			while (heap.containsKey(key = new Long(due))) {
-				due++;
-			}
-			heap.put(key, p);
-			heap.notifyAll();
+	private static boolean isValidProcessId(Long processId) {
+		if (processId==null)
+			return false;
+		return processId.compareTo(NONVALID_PID)>0;
+	}
+
+	private static void killRuntimeProcess(long processId) throws IOException, InterruptedException {
+		String killCommand;
+		if(Util.isWindows()){
+			killCommand= WINDOWS_KILL_COMMAND + processId;
+		} else {
+			killCommand= LINUX_AND_OTHER_KILL_COMMAND + processId;
+		}		
+		Runtime.getRuntime().exec(killCommand);
+	}
+
+	public void markForDeletion(long processId) throws InterruptedException{
+		if (shuttingDown) {
+			throw new IllegalStateException(
+			"you cannot register processes for deletion during shutdown");
 		}
+		toBeDestroyed.put(processId);
 	}
 }

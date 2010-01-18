@@ -49,32 +49,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pl.cterm.CTermFactory;
-import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 
 /**
  */
 public class SocketSession implements PrologSession {
-
 	private SocketClient client;
-
 	private boolean queryActive;
-
-//	private String lastQuery;
-
 	private AbstractPrologInterface pif;
-
-	private CTermFactory ctermFactory = new ATermFactory();
-
 	private int flags;
-
+	
 	public SocketSession(SocketClient client, AbstractPrologInterface pif,int flags) {
 		this.client = client;
 		this.pif = pif;
@@ -91,269 +80,167 @@ public class SocketSession implements PrologSession {
 			return;
 		}
 		try {
-			client.lock();
 			client.close();
 		} catch (IOException e) {
 			pif.error(e);
 		} finally {
-			if (client != null) {
-				client.unlock();
-				client = null;
-			}
-
+			client = null;
 		}
 	}
 
-	public List queryAll(String query) throws PrologException,
-	PrologInterfaceException {
-		return queryAll(query,this.flags);
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#queryAll(java.lang.String)
-	 */
-	public List queryAll(String query, int flags) throws PrologException,
-			PrologInterfaceException {
+	public List<Map<String, Object>> queryAll(String query) throws PrologException,
+		PrologInterfaceException {
 		PLUtil.checkFlags(flags);
-		
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
-
-		endQuery();
 		if (query.length() == 0) {
-			List l = new Vector();
-			l.add(new HashMap());
-			return l;
+			return generateEmptyResults();
 		}
-
-		client.lock();
+		Vector<Map<String, Object>> results;
 		try {
 			configureProtocol(flags);
-			client.readUntil(SocketClient.GIVE_COMMAND);
-
-			client.writeln(SocketClient.QUERY_ALL);
-
-			client.readUntil(SocketClient.GIVE_TERM);
-			query = query.trim();
-			if (query.endsWith(".")) {
-//				this.lastQuery = query;
-				client.writeln(query);
-			} else {
-//				this.lastQuery = query + ".";
-				client.writeln(query + ".");
-			}
-			Vector results = new Vector();
-			Map result = read_solution(flags);
-			while (result != null) {
-				results.add(result);
-				result = read_solution(flags);
-
-			}
-			return results;
+			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+			client.writeln(SocketCommunicationConstants.QUERY_ALL);
+			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+			normalizeQuery(query);
+			results = readResults();
 		} catch (IOException e) {
 			throw pif.error(e);
-
-		} finally {
-			if (client != null) {
-				client.unlock();
-			}
-		}
+		} 
+		return results;
 	}
 
-	public Map queryOnce(String query) throws PrologException,
+
+	public Map<String, Object> queryOnce(String query) throws PrologException,
 	PrologInterfaceException {
-		return queryOnce(query,this.flags);
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#queryOnce(java.lang.String)
-	 */
-	public Map queryOnce(String query, int flags) throws PrologException,
-			PrologInterfaceException {
 		PLUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
-		Map solution;
+		Map<String, Object> solution;
 		if (query.length() == 0) {
-			solution = new HashMap();
+			solution = generateAnEmtpyResult();
 		} else {
-
-			endQuery();
-			client.lock();
 			try {
 				configureProtocol(flags);
-				client.readUntil(SocketClient.GIVE_COMMAND);
-
-				client.writeln(SocketClient.QUERY);
-
-				client.readUntil(SocketClient.GIVE_TERM);
-				query = query.trim();
-
-				if (query.endsWith(".")) {
-//					this.lastQuery = query;
-					client.writeln(query);
-				} else {
-//					this.lastQuery = query + ".";
-					client.writeln(query + ".");
-				}
-
-				queryActive = true;
+				client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+				client.writeln(SocketCommunicationConstants.QUERY);
+				client.readUntil(SocketCommunicationConstants.GIVE_TERM);
+				normalizeQuery(query);
 				solution = read_solution(flags);
-
 			} catch (IOException e) {
-				client.unlock();
-				solution = null;
 				throw pif.error(e);
-
-			}
-			if (solution == null) {
-				endQuery();
+			} finally {
+				tryFinishReading(); 
 			}
 		}
-		
-		endQuery();
 		return solution;
 	}
 
-	
+	private void tryFinishReading() throws PrologInterfaceException {
+		try {
+			finishReading();
+		} catch (IOException e) {
+			throw pif.error(e);
+		}
+	}
 
-	/**
-	 * @return
-	 * @throws IOException
-	 */
-	private Map read_solution(int flags) throws IOException {
-		HashMap result = new HashMap();
-		// try to read a variable name
+
+	private void normalizeQuery(String query) throws IOException {
+		query = query.trim();
+		if (query.endsWith(".")) {
+			client.writeln(query);
+		} else {
+			client.writeln(query + ".");
+		}
+	}
+
+	private List<Map<String, Object>> generateEmptyResults() {
+		List<Map<String, Object>> l = new Vector<Map<String, Object>>();
+		l.add(generateAnEmtpyResult());
+		return l;
+	}
+	
+	private Map<String, Object> generateAnEmtpyResult() {
+		return new HashMap<String, Object>();
+	}
+	
+	private Vector<Map<String, Object>> readResults() throws IOException {
+		Vector<Map<String, Object>> results = new Vector<Map<String, Object>>();
+		Map<String, Object> result = read_solution(flags);
+		while (result != null) {
+			results.add(result);
+			result = read_solution(flags);
+		}
+		return results;
+	}
+	
+	private Map<String, Object> read_solution(int flags) throws IOException {
+		HashMap<String, Object> result = new HashMap<String, Object>();
 		while (true) {			
 			String varname = (String) readValue(PrologInterface.UNQUOTE_ATOMS);
 			if (varname == null) {
-				// there was no respective data
-				String line = client.readln();
-				// Debug.debug("parsing: "+line);
-				if (line == null) {
-					throw new IOException("don't know what to do.");
-				}
-				if (line.startsWith(SocketClient.ERROR)) {
-					lastError = new PrologException(line
-							.substring(SocketClient.ERROR.length()));
-					throw lastError;
-				}
-				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
-					return result;
-				}
-				if (SocketClient.NO.equals(line)) {// no
-					// further
-					// solutions
-					return null;
-				}
-				if (SocketClient.YES.equals(line)) {// no
-					// further
-					// solutions
-					/*
-					 * note: OK is only legal (according to the protocoo) when
-					 * preceeded by END_OF_SOLUTION. (
-					 */
-					return null;
-				}
+				return handleSpecialResults(result);
 			} else {
-				// so we have a variable name.
-				// then there should also be a variabe value.
-				Object value = readValue(flags);
-				if (value == null) {
-					throw new PrologException(
-							"could not read value for variable " + varname);
-				}
-				
-				
+				Object value = readVariableValue(flags, varname);
 				result.put(varname, value);
 			}
 		}
 	}
 
+	private Object readVariableValue(int flags, String varname)
+			throws IOException {
+		Object value = readValue(flags);
+		if (value == null) {
+			throw new PrologException(
+					"could not read value for variable " + varname);
+		}
+		return value;
+	}
+
+	private HashMap<String, Object> handleSpecialResults(HashMap<String, Object> result)
+			throws IOException {
+		String line = client.readln();
+		if (line == null) {
+			throw new IOException("There was no solution to read.");
+		}
+		if (line.startsWith(SocketCommunicationConstants.ERROR)) {
+			throwPrologErrorToJavaVM(line);
+		}
+		if (SocketCommunicationConstants.END_OF_SOLUTION.equals(line)) {
+			return result;
+		}
+		return null;
+	}
+
+	private void throwPrologErrorToJavaVM(String line) {
+		int errorLength = SocketCommunicationConstants.ERROR.length();
+		String errorSubstring = line.substring(errorLength);
+		throw new PrologException(errorSubstring);
+	}
+
 	private Object readValue(int flags) throws IOException {
-		return client.readValue(flags,ctermFactory);
+		return client.readValue(flags);
 	}
 	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#endQuery()
-	 */
-	public void endQuery() throws PrologException, PrologInterfaceException {
-		if (isDisposed()) {
-			throw new IllegalStateException("Session is disposed!");
-		}
-		if (!queryActive) {
-			return;
-		}
-		if (lastError != null) {
-			lastError = null;
-			queryActive = false;
-			return;
-		}
-		client.lock();
-		try {
-			while (true) {
-				String line = client.readln();
-				if (line == null) {
-					throw pif.error(new IllegalStateException(
-							"don't know what to do."));
-				}
-				if (SocketClient.MORE.equals(line)) {
-					client.writeln(SocketClient.NO);
-				}
-				if (SocketClient.OK.equals(line)) {
-					return;
-				}
-				if (line.startsWith(SocketClient.ERROR)) {
-					throw new PrologException(line.substring(SocketClient.ERROR
-							.length()));
-				}
+	private void finishReading() throws IOException, PrologInterfaceException {
+		while (true) {
+			String line = client.readln();
+			if (line == null) {
+				throw pif.error(new IllegalStateException(
+						"There is nothing to read"));
 			}
-		} catch (IOException e) {
-			throw pif.error(e);
-		} finally {
-			// this is no typo!
-			// we need to release lock TWO times:
-			// inner lock: in this method.
-			// outer lock: in preceeding call to query.
-			queryActive = false;
-			client.unlock();
-			client.unlock();
-
+			if (SocketCommunicationConstants.MORE.equals(line)) {
+				client.writeln(SocketCommunicationConstants.NO);
+			}
+			if (SocketCommunicationConstants.OK.equals(line)) {
+				return;
+			}
+			if (line.startsWith(SocketCommunicationConstants.ERROR)) {
+				throwPrologErrorToJavaVM(line);
+			}
 		}
-
-	}
-
-	private PrologInterfaceListener dispatcher = null;
-
-	
-
-	
-
-	private PrologException lastError;
-
-	private boolean interpreteLists;
-
-	/**
-	 * @return Returns the dispatcher.
-	 */
-	public PrologInterfaceListener getDispatcher() {
-		return dispatcher;
-	}
-
-	/**
-	 * @param dispatcher
-	 *            The dispatcher to set.
-	 */
-	public void setDispatcher(PrologInterfaceListener dispatcher) {
-		this.dispatcher = dispatcher;
 	}
 
 	/*
@@ -362,17 +249,7 @@ public class SocketSession implements PrologSession {
 	 * @see org.cs3.pl.prolog.PrologSession#isDisposed()
 	 */
 	public boolean isDisposed() {
-		// TODO Auto-generated method stub
 		return client == null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.cs3.pl.prolog.PrologSession#getPrologInterface()
-	 */
-	public PrologInterface getPrologInterface() {
-		return pif;
 	}
 
 	private void configureProtocol(int flags) {
@@ -384,46 +261,25 @@ public class SocketSession implements PrologSession {
 		setProtocolOption("interprete_lists", Boolean.toString(processLists));
 	}
 
-	/*
-	 * public void setPreferenceValue(String id, String value) {
-	 * 
-	 * if (OPT_CANONICAL.equals(id)) { canonical =
-	 * Boolean.valueOf(value).booleanValue(); setProtocolOption("canonical",
-	 * value); } else if (OPT_INTERPRETE_LISTS.equals(id)) { interpreteLists =
-	 * Boolean.valueOf(value).booleanValue();
-	 * setProtocolOption("interprete_lists", value); } else { throw new
-	 * IllegalArgumentException("unkown option id: " + id); } }
-	 */
 	public SocketClient getClient() {
 		return client;
 	}
 
-	public void setProtocolOption(String id, String value) {
+	private void setProtocolOption(String id, String value) {
 		if (queryActive) {
 			throw new RuntimeException(
 					"Cannot set protocol option while query is active.");
 		}
-		client.lock();
 		try {
-			client.readUntil(SocketClient.GIVE_COMMAND);
-			client.writeln(SocketClient.SET_OPTION);
-			client.readUntil(SocketClient.GIVE_SYMBOL);
+			client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+			client.writeln(SocketCommunicationConstants.SET_OPTION);
+			client.readUntil(SocketCommunicationConstants.GIVE_SYMBOL);
 			client.writeln(id);
-			client.readUntil(SocketClient.GIVE_TERM);
+			client.readUntil(SocketCommunicationConstants.GIVE_TERM);
 			client.writeln(value);
-			client.readUntil(SocketClient.OK);
+			client.readUntil(SocketCommunicationConstants.OK);
 		} catch (IOException e) {
 			throw new RuntimeException("IO Error while setting protocol option");
-		} finally {
-			client.unlock();
-		}
+		} 
 	}
-
-	public String getProcessorThreadAlias() throws PrologInterfaceException {
-		if (isDisposed()) {
-			throw new IllegalStateException("Session is disposed!");
-		}
-		return client.getProcessorThread();
-	}
-
 }

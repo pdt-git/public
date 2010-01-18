@@ -48,8 +48,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.cterm.CTermFactory;
-import org.cs3.pl.cterm.internal.ATermFactory;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
@@ -61,35 +59,17 @@ import org.cs3.pl.prolog.PrologSession;
 
 public class AsyncSocketSession implements AsyncPrologSession {
 	
-	
-	
-	private boolean canonical;
 	private SocketPrologInterface pif;
 	private SocketClient client;
-
 	private Thread dispatcher;
-
 	private boolean disposing;
-
 	private int ticketCounter;
-
 	private HashMap<Integer,Object> tickets = new HashMap<Integer, Object>();
-
-	private CTermFactory ctermFactory;
-
 	private Vector<AsyncPrologSessionListener> listeners=new Vector<AsyncPrologSessionListener>();
-
-	
-
 	private Object lastAbortTicket;
-
 	private HashMap<Integer,String> queries= new HashMap<Integer, String>();
 	private HashMap<Integer,Integer> queryFlags = new HashMap<Integer, Integer>();
-
-	//private PrologSession controlSession;
-
 	private Exception batchError;
-	private boolean interpreteLists;
 	private int flags;
 
 	public void addBatchListener(AsyncPrologSessionListener l) {
@@ -97,9 +77,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			if(!listeners.contains(l)){
 				listeners.add(l);
 			}
-
-		}
-		
+		}	
 	}
 
 	public void removeBatchListener(AsyncPrologSessionListener l) {
@@ -107,47 +85,40 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			if(listeners.contains(l)){
 				listeners.remove(l);
 			}
-
-		}
-		
+		}		
 	}
 	
 	public AsyncSocketSession(SocketClient client, SocketPrologInterface pif, int flags) throws IOException {
 		this.client = client;
 		this.pif = pif;
-		ctermFactory=new ATermFactory();
 		this.flags=flags;
-		enterBatch();
-		
-		
+		enterBatch();	
 	}
 
 	private boolean readAndDispatch() throws PrologInterfaceException {
 		try {
 			String line=client.readln().trim();
 			Thread.currentThread().setName("async result dispatcher ("+client.getProcessorThread()+")");
-			if(SocketClient.EOB_COMPLETE.equals(line)){
+			if(SocketCommunicationConstants.EOB_COMPLETE.equals(line)){
 				dispatchBatchComplete();
 				return false;
 			}
-			else if(line.startsWith(SocketClient.ABORT_COMPLETE)){				
-				dispatchAbortComplete(Integer.parseInt(line.substring(SocketClient.ABORT_COMPLETE.length())));
+			else if(line.startsWith(SocketCommunicationConstants.ABORT_COMPLETE)){				
+				dispatchAbortComplete(Integer.parseInt(line.substring(SocketCommunicationConstants.ABORT_COMPLETE.length())));
 			}
-			else if(line.startsWith(SocketClient.JOIN_COMPLETE)){				
-				dispatchJoinComplete(Integer.parseInt(line.substring(SocketClient.JOIN_COMPLETE.length())));
+			else if(line.startsWith(SocketCommunicationConstants.JOIN_COMPLETE)){				
+				dispatchJoinComplete(Integer.parseInt(line.substring(SocketCommunicationConstants.JOIN_COMPLETE.length())));
 			}
-			else if(line.startsWith(SocketClient.RESULTS_FOR_QUERY)){				
-				readAndDispatchResults(Integer.parseInt(line.substring(SocketClient.RESULTS_FOR_QUERY.length())));
+			else if(line.startsWith(SocketCommunicationConstants.RESULTS_FOR_QUERY)){				
+				readAndDispatchResults(Integer.parseInt(line.substring(SocketCommunicationConstants.RESULTS_FOR_QUERY.length())));
 			}
-			else if(line.startsWith(SocketClient.SKIPPING_QUERY)){				
-				dispatchSkippingQuery(Integer.parseInt(line.substring(SocketClient.SKIPPING_QUERY.length())));
+			else if(line.startsWith(SocketCommunicationConstants.SKIPPING_QUERY)){				
+				dispatchSkippingQuery(Integer.parseInt(line.substring(SocketCommunicationConstants.SKIPPING_QUERY.length())));
 			}
 			
 		} catch (IOException e) {
 			handleBatchError(e);
-			
 			throw pif.error(e);
-			
 		}
 		return true;
 	}
@@ -163,36 +134,28 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			queries.clear();
 		}
 		for (Iterator<Object> it = cloned.iterator(); it.hasNext();) {
-			Object ticket = (Object) it.next();
+			Object ticket = it.next();
 			synchronized (ticket) {
 				ticket.notifyAll();	
 			}
-			
 		}
 		fireBatchError(e);		
 	}
 
 	private void dispatchBatchComplete() {
 		fireBatchComplete();
-		
 		synchronized (tickets) {
-			
-			
 			tickets.clear();
 			Vector<Object> values = new Vector<Object>(tickets.values());
-			
 			for (Iterator<Object> it = values.iterator(); it.hasNext();) {
 				Object ticket=it.next();				
 				synchronized (ticket) {
 					ticket.notifyAll();
 				}
 			}
-			
 		}
 	}
 	
-	
-
 	private void dispatchSkippingQuery(int id) {
 		Object ticket = getTicket(id);
 		fireGoalSkipped(id,ticket);
@@ -202,8 +165,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 
-	
-
 	private void dispatchJoinComplete(int id) {
 		Object ticket = getTicket(id);
 		fireJoinComplete(id,ticket);
@@ -212,7 +173,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			ticket.notifyAll();
 		}
 	}
-
 	
 	private void dispatchAbortComplete(int id) {
 		Debug.info("abort complete recieved, id="+id);
@@ -230,7 +190,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			ticket.notifyAll();
 			Debug.info("notifying done, id="+id);
 		}
-		
 	}
 	
 	
@@ -243,15 +202,10 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		finally{
 			synchronized (ticket) {
 				ticket.notifyAll();
-				
-				
 			}
 		}
 	}
 
-	
-
-	
 
 	private void fireBatchComplete() {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this);
@@ -271,7 +225,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				l.joinComplete(e);
 			}
 		}
-		
 	}
 
 	private void fireAbortComplete(int id,Object ticket) {
@@ -282,8 +235,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				l.abortComplete(e);
 			}
 		}
-		
-		
 	}
 	
 	private void fireGoalSucceeded(int id,Object ticket) {
@@ -306,7 +257,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				l.goalFailed(e);
 			}
 		}
-		
 	}
 
 	private void fireGoalRaisedException(int id,Object ticket, String string) {
@@ -318,7 +268,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				l.goalRaisedException(e);
 			}
 		}
-		
 	}
 
 	private void fireGoalHasSolution(int id,Object ticket, Map<String,Object> result) {
@@ -341,7 +290,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				l.goalSkipped(e);
 			}
 		}
-		
 	}
 
 	private void fireGoalCut(int id,Object ticket) {
@@ -353,7 +301,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				l.goalCut(e);
 			}
 		}
-		
 	}
 	private void fireBatchError(Exception e2) {
 		AsyncPrologSessionEvent e = new AsyncPrologSessionEvent(this);
@@ -363,10 +310,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				if(l instanceof AsyncPrologSessionListener2){
 					((AsyncPrologSessionListener2)l).batchError(e);	
 				}
-				
 			}
 		}
-		
 	}
 	
 	
@@ -375,7 +320,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		HashMap<String,Object> result = new HashMap<String, Object>();
 		// try to read a variable name
 		while (true) {
-			String varname = (String) client.readValue(PrologInterface.NONE,ctermFactory);
+			String varname = (String) client.readValue(PrologInterface.NONE);
 			if (varname == null) {
 				// there was no respective data
 				String line = client.readln();
@@ -383,26 +328,26 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				if (line == null) {
 					throw new IOException("don't know what to do.");
 				}
-				if (line.startsWith(SocketClient.ERROR)) {
-					fireGoalRaisedException(id,ticket, line.substring(SocketClient.ERROR.length()));
+				if (line.startsWith(SocketCommunicationConstants.ERROR)) {
+					fireGoalRaisedException(id,ticket, line.substring(SocketCommunicationConstants.ERROR.length()));
 					removeTicket(id);
 					return false;
 				}
-				if (SocketClient.END_OF_SOLUTION.equals(line)) {// yes
+				if (SocketCommunicationConstants.END_OF_SOLUTION.equals(line)) {// yes
 					fireGoalHasSolution(id,ticket, result);
 					return true;
 				}
-				if (SocketClient.NO.equals(line)) {
+				if (SocketCommunicationConstants.NO.equals(line)) {
 					fireGoalFailed(id,ticket);
 					removeTicket(id);
 					return false;
 				}
-				if (SocketClient.YES.equals(line)) {
+				if (SocketCommunicationConstants.YES.equals(line)) {
 					fireGoalSucceeded(id,ticket);
 					removeTicket(id);
 					return false;
 				}
-				if (SocketClient.CUT.equals(line)) {
+				if (SocketCommunicationConstants.CUT.equals(line)) {
 					fireGoalCut(id,ticket);
 					removeTicket(id);
 					return false;
@@ -410,55 +355,38 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			} else {
 				// so we have a variable name.
 				// then there should also be a variabe value.
-				Object value = client.readValue(flags,ctermFactory);
+				Object value = client.readValue(flags);
 				if (value == null) {
 					throw new IOException(
 							"could not read value for variable " + varname);
 				}
-				
 				result.put(varname, value);
 			}
 		}
 	}
 
-	
-	
-	
-	
-
 	private void enterBatch() throws IOException {
 		this.dispatcher = new Thread("Async Query Result Dispatcher"){
 			public void run() {
 				try{
-					
 					while(readAndDispatch());
 				} catch(Exception e){
-					//there is little we can do here.
 					Debug.report(e);
 				}
 			}
-
-			
 		};
-		client.lock();
-		try {
-			client.readUntil(SocketClient.GIVE_COMMAND);
-			client.writeln(SocketClient.ENTER_BATCH);
-			client.readUntil(SocketClient.GO_AHEAD);
-		}finally{
-			client.unlock();
-		}
+		client.readUntil(SocketCommunicationConstants.GIVE_COMMAND);
+		client.writeln(SocketCommunicationConstants.ENTER_BATCH);
+		client.readUntil(SocketCommunicationConstants.GO_AHEAD);
 		dispatcher.start();	
-		
 	}
 	
 	private void exitBatch() throws IOException, PrologInterfaceException{
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call exitBatch() from dispatch thread");
 		}
-		client.lock();
 		try{
-			client.writeln(SocketClient.EOB);
+			client.writeln(SocketCommunicationConstants.EOB);
 			
 			dispatcher.join(pif.getTimeout());
 			if(dispatcher.isAlive()){
@@ -472,12 +400,9 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			synchronized (listeners) {
 				listeners.clear();
 			}
-			client.readUntil(SocketClient.OK);
+			client.readUntil(SocketCommunicationConstants.OK);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);			
-		}
-		finally{
-			client.unlock();
 		}
 	}
 
@@ -551,12 +476,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	public boolean isPending(Object ticket){
 		synchronized (tickets) {
 			return tickets.containsValue(ticket);
-
 		}
 	}
 	public String getQuery(int id){
 		synchronized (tickets) {
-			return (String) queries.get(new Integer(id));
+			return queries.get(new Integer(id));
 		}
 	}
 	
@@ -579,12 +503,8 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			Integer key = new Integer(id);			
 			tickets.remove(key);			
 			queries.remove(key);
-			
 		}
 	}
-	
-	
-	
 
 	public void join() throws PrologInterfaceException{
 		if(Thread.currentThread()==dispatcher){
@@ -604,19 +524,18 @@ public class AsyncSocketSession implements AsyncPrologSession {
 					throw new PrologInterfaceException(batchError);
 				}
 			}
-			
 		} catch (IOException e) {
 			throw pif.error(e);
 		} catch (InterruptedException e) {
 			Debug.rethrow(e);
 		}
-		
 	}
 	private static class _AbortTicket{}
 	
 	public void abort() throws PrologInterfaceException {
 		abort(new _AbortTicket());
 	}
+	
 	public void abort(Object ticket) throws PrologInterfaceException {
 		Debug.debug("enter 2");
 		if(ticket==null){
@@ -662,7 +581,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 				Debug.info("abort ticket is not/no longer pending, id="+id);
 				
 			}
-			
 		} catch (IOException e) {
 			throw pif.error(e);
 		} catch (InterruptedException e) {
@@ -670,7 +588,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}finally{
 			if(controlSession!=null){
 				controlSession.dispose();
-				
 			}
 		}
 		
@@ -682,24 +599,18 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			return;
 		}
 		disposing=true;
-		client.lock();
 		try {
 			if(pif.getError()==null){
 				exitBatch();
-				//controlSession.dispose();
 			}			
 			client.close();
 		} catch (Exception e) {
 			pif.error(e);
 		} finally {
-			client.unlock();
-			
-			//controlSession=null;
 			client = null;
 			disposing=false;
 		}
 	}
-
 	
 	public Object getLastAbortTicket(){
 		return lastAbortTicket;
@@ -717,24 +628,16 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	public PrologInterface getPrologInterface() {
 		return pif;
 	}
-
 	
 	private void setProtocolOption(String id, String value) throws PrologInterfaceException {
-		client.lock();
-		
-		try {
-			
-			client.writeln("set_option("+id+","+value+").");
-			
-			
+		try {			
+			client.writeln("set_option("+id+","+value+").");			
 		} catch (IOException e) {
 			throw pif.error(e);
-		} finally {
-			client.unlock();
 		}
 	}
+	
 	public String getProcessorThreadAlias() {
-		
 		return client.getProcessorThread();
 	}
 
@@ -744,11 +647,6 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 		synchronized (tickets) {
 			return tickets.isEmpty();
-
 		}
 	}
-
-	
-
-	
 }
