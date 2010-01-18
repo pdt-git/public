@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -135,21 +136,24 @@ public class Util {
 		return false;
 	}
 
-	public static String prettyPrint(Map r) {
-		if (r != null) {
+	public static String prettyPrint(Map<String, ?> input) {
+		if (input != null) {
 			boolean first = true;
-			StringBuffer sb = new StringBuffer();
-			for (Iterator it = r.keySet().iterator(); it.hasNext();) {
+			StringBuffer result = new StringBuffer();
+			Set<String> keys = input.keySet();
+			Iterator<String> it = keys.iterator();
+			while (it.hasNext()) {
 				if (!first) {
-					sb.append(", ");
+					result.append(", ");
 				}
-				String key = (String) it.next();
-				String val = (String) r.get(key);
-				sb.append(key + "-->" + val);
+				String key = it.next();
+				Object value = input.get(key);
+				String valueAsString = value.toString();
+				result.append(key + "-->" + valueAsString);
 				first = false;
 
 			}
-			return sb.toString();
+			return result.toString();
 		}
 		return "";
 	}
@@ -185,6 +189,30 @@ public class Util {
 		// sb.append("}");
 		return sb.toString();
 	}
+	
+	public static String prettyPrint(Collection<?> input) {
+		if (input != null && !input.isEmpty()) {
+			Iterator<?> it = input.iterator();
+			return concatinateElements(it);
+		}
+		return "";
+	}
+
+	
+	private static String concatinateElements(Iterator<?> it) {
+		StringBuffer sb = new StringBuffer();
+		boolean first = true;
+		while ( it.hasNext()) {
+			if (!first) {
+				sb.append(", ");
+			}
+			Object next = it.next();
+			String elm = next == null ? "<null>" : next.toString();
+			sb.append(elm);
+			first = false;
+		}
+		return sb.toString();
+	}
 
 	public static File getLogFile(String dir, String name) throws IOException {
 		File logFile = new File(dir,name);
@@ -195,61 +223,6 @@ public class Util {
 		}
 		return logFile.getCanonicalFile();
 	}
-
-	public static void killRuntimeProcesses(long processId) throws IOException, InterruptedException {
-		String killCommand;
-		if(Util.isWindows()){
-			killCommand= "taskkill /F /PID " + processId;
-		} else {
-			killCommand= "kill " + processId;
-		}		
-		Runtime.getRuntime().exec(killCommand);
-	}
-	
-//	/**
-//	 * 
-//	 * @param cmd
-//	 * @return an array of two strings: th 0th one contains process output, the
-//	 *         1th one error.
-//	 * @throws IOException
-//	 * @throws InterruptedException
-//	 */
-//	public static String[] exec(String cmd) throws IOException,
-//			InterruptedException {
-//		Process process = null;
-//		try {
-//
-//			process = Runtime.getRuntime().exec(cmd);
-//		} catch (Throwable t) {
-//			Debug.report(t);
-//			return new String[] { "ERROR", "" };
-//		}
-//
-//		class _InputStreamPump extends InputStreamPump {
-//			StringBuffer sb = new StringBuffer();
-//
-//			public _InputStreamPump(InputStream s) {
-//				super(s);
-//			}
-//
-//			protected void dataAvailable(char[] buffer, int length) {
-//				String string = new String(buffer, 0, length);
-//				sb.append(string);
-//
-//			}
-//
-//		}
-//		_InputStreamPump errPump = new _InputStreamPump(process
-//				.getErrorStream());
-//		_InputStreamPump outPump = new _InputStreamPump(process
-//				.getInputStream());
-//		errPump.start();
-//		outPump.start();
-//		process.waitFor();
-//		outPump.join();
-//		errPump.join();
-//		return new String[] { outPump.sb.toString(), errPump.sb.toString() };
-//	}
 
 	public static void copy(InputStream in, OutputStream out)
 			throws IOException {
@@ -441,6 +414,10 @@ public class Util {
 		return result.toString();
 	}
 
+	public static String unescapeBuffer(StringBuffer line) {
+		return unescape(line.toString(),0,line.length());
+	}
+	
 	/**
 	 * @param line
 	 * @param start
@@ -506,21 +483,21 @@ public class Util {
 	 *         multiple mappings for a single key, the map will contain a List
 	 *         of this values. Otherwise, the value type will bs String.
 	 */
-	public static Map parseAssociation(List l) {
-		HashMap map = new HashMap();
-		for (Iterator it = l.iterator(); it.hasNext();) {
-			String elm = (String) it.next();
+	public static Map<String, Object> parseAssociation(List<String> l) {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		for (Iterator<String> it = l.iterator(); it.hasNext();) {
+			String elm = it.next();
 			String[] s = splitKeyValue(elm);
 			String key = s[0];
 			String val = s[1];
 			Object o = map.get(key);
 			if (o == null) {
 				map.put(key, val);
-			} else if (o instanceof List) {
-				List ll = (List) o;
+			} else if (o instanceof List<?>) {
+				List<String> ll = (List<String>) o;
 				ll.add(val);
 			} else {
-				List ll = new Vector();
+				List<Object> ll = new Vector<Object>();
 				ll.add(o);
 				ll.add(val);
 				map.put(key, ll);
@@ -559,24 +536,7 @@ public class Util {
 		return port;
 	}
 
-	public static String prettyPrint(Collection c) {
-		if (c != null && !c.isEmpty()) {
-			StringBuffer sb = new StringBuffer();
-			boolean first = true;
-			for (Iterator it = c.iterator(); it.hasNext();) {
-				if (!first) {
-					sb.append(", ");
-				}
-				Object next = it.next();
-				String elm = next == null ? "<null>" : next.toString();
-				sb.append(elm);
-				first = false;
-			}
-			return sb.toString();
-		}
-		return "";
-
-	}
+	
 
 	public static String quoteAtom(String term) {
 
@@ -595,10 +555,10 @@ public class Util {
 		return sb.toString();
 	}
 
-	public static String splice(Collection c, String delim) {
+	public static String splice(Collection<String> c, String delim) {
 		if (c != null && !c.isEmpty()) {
 			StringBuffer sb = new StringBuffer();
-			for (Iterator it = c.iterator(); it.hasNext();) {
+			for (Iterator<String> it = c.iterator(); it.hasNext();) {
 				Object next = it.next();
 				sb.append(next);
 				if (it.hasNext()) {
@@ -612,7 +572,6 @@ public class Util {
 	}
 
 	public static String unquoteAtom(String image) {
-
 		image = image.trim();
 		if (image.length() == 0 || image.charAt(0) != '\'') {
 			return image;
@@ -736,7 +695,7 @@ public class Util {
 		return Character.isDigit(c) || '0' <= c && c <= '7';
 	}
 
-	public static void split(String string, String search, Collection results) {
+	public static void split(String string, String search, Collection<String> results) {
 		if (string == null) {
 			return;
 		}
@@ -753,9 +712,9 @@ public class Util {
 	}
 
 	public static String[] split(String string, String search) {
-		Vector v = new Vector();
+		Vector<String> v = new Vector<String>();
 		split(string, search, v);
-		return (String[]) v.toArray(new String[v.size()]);
+		return v.toArray(new String[v.size()]);
 
 	}
 
