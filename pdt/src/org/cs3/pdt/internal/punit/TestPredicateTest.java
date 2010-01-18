@@ -79,7 +79,7 @@ public class TestPredicateTest extends TestCase {
 			String kind = null;
 			String comment = null;
 
-			Map queryResult = session.queryOnce("junit_adapter('" + getName()
+			Map<String,Object> queryResult = session.queryOnce("junit_adapter('" + getName()
 					+ "',Kind,Comment)");
 			if (queryResult != null) {
 				kind = (String) queryResult.get("Kind");

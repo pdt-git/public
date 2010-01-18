@@ -68,12 +68,8 @@ import org.eclipse.ui.IFileEditorInput;
 
 public class PLConfiguration extends SourceViewerConfiguration {
 	private PLDoubleClickStrategy doubleClickStrategy;
-
-	// private PLTagScanner tagScanner;
 	private PLScanner scanner;
-
 	private ColorManager colorManager;
-
 	private IContentAssistant assistant;
 
 	/*
@@ -90,9 +86,6 @@ public class PLConfiguration extends SourceViewerConfiguration {
 	 */
 	private PLEditor editor;
 
-	// public IContentAssistant getAssistant(){
-	// return assistant;
-	// }
 
 	public PLConfiguration(ColorManager colorManager, PLEditor editor) {
 		this.colorManager = colorManager;
@@ -119,21 +112,13 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return scanner;
 	}
 
-	/**
-	 * 
-	 */
+
 	public void reinitScanner() {
 		try {
 			scanner = new PLScanner(editor, colorManager);
 		} catch (CoreException e) {
 			Debug.report(e);
-//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-//					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
-//					PDT.ERR_CORE_EXCEPTION, PDT.CX_EDITOR_CONFIGURATION, e);
 		} catch (PrologInterfaceException e) {
-//			UIUtils.logAndDisplayError(PDTPlugin.getDefault()
-//					.getErrorMessageProvider(), editor.getEditorSite().getShell(),
-//					PDT.ERR_PIF, PDT.CX_EDITOR_CONFIGURATION, e);
 		}
 		scanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager
 				.getColor(IPLColorConstants.DEFAULT))));
@@ -148,20 +133,10 @@ public class PLConfiguration extends SourceViewerConfiguration {
 						.getColor(IPLColorConstants.PL_COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
-		// DefaultDamagerRepairer dr =
-		// new DefaultDamagerRepairer(getPLScanner());
-		// reconciler.setDamager(dr, PLPartitionScanner.PL_MULTI_COMMENT);
-		// reconciler.setRepairer(dr, PLPartitionScanner.PL_MULTI_COMMENT);
-
 		DefaultDamagerRepairer dr = new DefaultDamagerRepairer(getPLScanner());
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
-		/*
-		 * dr = new DefaultDamagerRepairer(getPLScanner());
-		 * reconciler.setDamager(dr, PLPartitionScanner.PL_DEFAULT);
-		 * reconciler.setRepairer(dr, PLPartitionScanner.PL_DEFAULT);
-		 */
 		ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager
 				.getColor(IPLColorConstants.PL_COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_COMMENT);
@@ -218,10 +193,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 					}
 				});
 		this.assistant = assistant;
-
-		//		
 		return assistant;
-
 	}
 
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer,

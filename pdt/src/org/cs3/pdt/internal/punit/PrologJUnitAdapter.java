@@ -54,7 +54,6 @@ import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
@@ -71,23 +70,6 @@ import org.cs3.pl.prolog.PrologSession;
  */
 public class PrologJUnitAdapter extends TestPredicateTest {
 	
-//	/**
-//	 * Retrieve a free server port >= port.
-//	 * @param port
-//	 * @return
-//	 */
-//	
-//	static private int getFreeServerSocket(int port) {
-//		while (true)
-//			try {
-//				ServerSocket sock = new ServerSocket(port);
-//				sock.close();
-//				return port;
-//			} catch (IOException e) {
-//				port++;
-//			}
-//	}
-
 	/**
 	 * Generates a Testsuite containing one TestCase for each
 	 * test('&lt;testname&gt;') clause in the engine.  
@@ -102,20 +84,18 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 		PrologSession session = null;
 		TestSuite suite = null;
 		try {
-			PDTPlugin r = PDTPlugin.getDefault();
 			//FIXME: this whole package should be rewritten from scratch...
 			pif = PrologRuntimePlugin.getDefault().getPrologInterface("dummy");
 			session = pif.getSession();
-			// result = manager.query("clause(test(Testname), _)");
 			suite = new TestSuite();
 			IPrologInterfaceAdapter adapter = new IPrologInterfaceAdapter() {
 				public PrologInterface getPrologInterface() {
 					return pif;
 				}
 			};
-			List tests = session.queryAll("test_suite(Testname)");
-			for (Iterator iter = tests.iterator(); iter.hasNext();) {
-				Map test = (Map) iter.next();
+			List<Map<String,Object>> tests = session.queryAll("test_suite(Testname)");
+			for (Iterator<Map<String,Object>> iter = tests.iterator(); iter.hasNext();) {
+				Map<String,Object> test = iter.next();
 				String testname = (String) test.get("Testname");
 				suite.addTest(new TestPredicateTest(testname,adapter));
 			}

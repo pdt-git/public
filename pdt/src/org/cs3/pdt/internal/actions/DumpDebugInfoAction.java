@@ -47,7 +47,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -66,37 +65,30 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
      * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#dispose()
      */
     public void dispose() {
-        // TODO Auto-generated method stub
-
+        ;
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
      */
     public void init(IWorkbenchWindow window) {
-        // TODO Auto-generated method stub
-
+        ;
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
      */
-    public void run(IAction action) {
-        PDTPlugin plugin = PDTPlugin.getDefault();
-		
-		
+    public void run(IAction action) {		
 		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 		PrologInterface pif = console.getPrologInterface();
 		PrologSession session = null;
 		 try {
 			 session = pif.getSession(PrologInterface.NONE);
-             List l = session.queryAll("current_thread(A,B)");
-             for (Iterator iter = l.iterator(); iter.hasNext();) {
-				Map r = (Map) iter.next();
+             List<Map<String,Object>> l = session.queryAll("current_thread(A,B)");
+             for (Iterator<Map<String,Object>> iter = l.iterator(); iter.hasNext();) {
+				Map<String,Object> r = iter.next();
 				Debug.info(r.get("A")+"-->"+r.get("B"));
-			}
-             
-             
+             }
          } catch (Throwable e) {
              Debug.report(e);
          }
@@ -105,16 +97,13 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
         		 session.dispose();
         	 }
          }
-        
-
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
      */
     public void selectionChanged(IAction action, ISelection selection) {
-        // TODO Auto-generated method stub
-
+       ;
     }
 
 }

@@ -441,9 +441,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		}
 
 		fTextLayout.setText(text);
-		Iterator iter= presentation.getAllStyleRangeIterator();
+		Iterator<StyleRange> iter= presentation.getAllStyleRangeIterator();
 		while (iter.hasNext()) {
-			StyleRange sr= (StyleRange)iter.next();
+			StyleRange sr= iter.next();
 			if (sr.fontStyle == SWT.BOLD)
 				fTextLayout.setStyle(fBoldStyle, sr.start, sr.start + sr.length - 1);
 		}

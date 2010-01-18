@@ -170,7 +170,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		
 		String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
 		+ "pdt_predicate_contribution(Pred,File,Start,End)";
-		Map m=null;
+		Map<String,Object> m=null;
 		try{
 			session=pif.getSession(PrologInterface.NONE);
 			m = session.queryOnce(query);
@@ -187,43 +187,5 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		
 		return loc;
 	}
-	
-	private SourceLocation findFirstClausePosition_old(IFile file, Goal goal) throws PrologInterfaceException {
-		IPrologProject plprj;
-		try {
-			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
-		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
-		}
-		String plFile = Util.prologFileName(file.getLocation().toFile());
-		PrologSession s = plprj.getMetadataPrologInterface().getSession(PrologInterface.NONE);
-		SourceLocation loc =null;
-		try{
-			String contextModule = goal.getModule();
-			String query=null;
-			if(contextModule==null){
-				query = "pdt_file_module('"+plFile+"',Context)," +
-						"pdt_find_first_clause_position(Context,"+goal.getName()+"/"+goal.getArity()+",File,From-To)";	
-			}else{
-				query = "pdt_find_first_clause_position("+contextModule+","+goal.getName()+"/"+goal.getArity()+",File,From-To)";
-			}
-			Map map = s.queryOnce(query);
-			if(map==null){
-				return null;
-			}
-			String fileName = (String) map.get("File");
-			loc=new SourceLocation(fileName,false,false);
-			loc.offset=Integer.parseInt((String)map.get("From"));
-			loc.endOffset=Integer.parseInt((String)map.get("To"));
-		}finally{
-			if(s!=null){
-				s.dispose();
-			}
-		}
-		return loc;
-	}
-	
-	
 
 }

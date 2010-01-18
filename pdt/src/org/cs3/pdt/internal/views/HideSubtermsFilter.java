@@ -6,13 +6,9 @@ public class HideSubtermsFilter extends PrologOutlineFilter {
 
 	public HideSubtermsFilter(String id, String label) {
 		super(id, label);
-
 	}
 
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-		if(element instanceof CTermNode){
-			return false;
-		}
 		return true;
 	}
 

@@ -82,7 +82,7 @@ public class AnnotationHover implements IAnnotationHover {
         if (model == null)
             return new String[0];
 
-        ArrayList messages = new ArrayList();
+        ArrayList<String> messages = new ArrayList<String>();
 
         Iterator iter = model.getAnnotationIterator();
         while (iter.hasNext()) {
@@ -100,7 +100,7 @@ public class AnnotationHover implements IAnnotationHover {
                 }
             }
         }
-        return (String[]) messages.toArray(new String[messages.size()]);
+        return messages.toArray(new String[messages.size()]);
     }
 
     private boolean compareRulerLine(

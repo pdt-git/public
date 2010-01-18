@@ -47,13 +47,14 @@ IContentAssistProcessor  {
 					+ prefix + "',Module:Name/Arity,Tags)";
 			List<Map<String, Object>> l = s.queryAll(query);
 
-			for (Map map : l) {
+			for (Map<String,Object> map : l) {
+				String name = ((CTerm) map.get("Name")).getFunctorValue();
+				int arity = Integer.parseInt(((CTerm) map.get("Arity"))
+							.getFunctorValue());
+				Map<String, CTerm> tags = PLUtil
+								.listAsMap((CTerm) map.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
-						begin, len,  
-							((CTerm) map.get("Name")).getFunctorValue(), 
-							Integer.parseInt(((CTerm) map.get("Arity"))
-										.getFunctorValue()), PLUtil
-										.listAsMap((CTerm) map.get("Tags")));
+						begin, len, name, arity, tags);
 				proposals.add(p);
 			}
 		} finally {
@@ -85,7 +86,7 @@ IContentAssistProcessor  {
 			String query = "trace,pdt_var_completion('" + path + "',"+offset+",'" + prefix + "',Name)";
 			List<Map<String,Object>> l = s.queryAll(query);
 
-			for (Map map : l) {
+			for (Map<String,Object> map : l) {
 				String proposal = ((CTerm)map.get("Name")).getFunctorValue();
 				int cursorPos=proposal.length();
 				ComparableCompletionProposal p = new VariableCompletionProposal(

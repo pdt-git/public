@@ -45,7 +45,6 @@ import java.util.Hashtable;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
-import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
@@ -82,10 +81,9 @@ public class SpyPointActionDelegate extends TextEditorAction {
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
 
-	Hashtable spypred = new Hashtable();
+	Hashtable<String, String> spypred = new Hashtable<String, String>();
 
 	public void run() {
-		PDTPlugin plugin = PDTPlugin.getDefault();
 		UIUtils.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 

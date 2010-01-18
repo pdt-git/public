@@ -87,7 +87,6 @@ public final class PDTUtils {
 		// see if it is a workspace path:
 		file = wsRoot.getFile(fpath);
 
-		boolean showLine;
 		if (!loc.isWorkspacePath) {
 			try {
 				file = PDTCoreUtils.findFileForLocation(loc.file);

@@ -61,7 +61,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
@@ -80,7 +79,6 @@ import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -105,8 +103,6 @@ public class PLEditor extends TextEditor {
 	protected final static char[] BRACKETS = { '(', ')', '[', ']' };
 
 	private PLConfiguration configuration;
-
-	private IProgressMonitor monitor = new NullProgressMonitor();
 
 	private IContentAssistant assistant;
 
@@ -298,16 +294,11 @@ public class PLEditor extends TextEditor {
 		try {
 			if (IContentOutlinePage.class.equals(required)) {
 				if (fOutlinePage == null) {
-					// fOutlinePage= new PrologOutline(this,
-					// ((IFileEditorInput)getEditorInput()).getFile());
 					fOutlinePage = new PrologOutline(this);
 					fOutlinePage.setInput(getEditorInput());
 				}
 				return fOutlinePage;
 			}
-			// if (required.equals(IPropertySheetPage.class)) {
-			// return new PropertySheetPage();
-			// }
 			return super.getAdapter(required);
 		} catch (Throwable t) {
 			Debug.report(t);
@@ -337,7 +328,6 @@ public class PLEditor extends TextEditor {
 		Document document;
 		document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
-		// System.out.println("namen: "+getEditorInput().getName());
 		int offset;
 		try {
 			offset = document.getLineInformation(line - 1).getOffset();
@@ -405,7 +395,6 @@ public class PLEditor extends TextEditor {
 		Document document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
 
-		String line = null;
 		TextSelection selection = (TextSelection) getEditorSite()
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
@@ -598,8 +587,6 @@ public class PLEditor extends TextEditor {
 			return true;
 		if (c == '_')
 			return true;
-		// if (c == '-')
-		// return false;
 
 		return false;
 	}
@@ -626,11 +613,6 @@ public class PLEditor extends TextEditor {
 	}
 
 	public TextSelection getSelection() {
-		Document document = (Document) getDocumentProvider().getDocument(
-				getEditorInput());
-		Display display = PDTPlugin.getDefault().getWorkbench().getDisplay();
-
-		String line = null;
 		return (TextSelection) getEditorSite().getSelectionProvider()
 				.getSelection();
 	}

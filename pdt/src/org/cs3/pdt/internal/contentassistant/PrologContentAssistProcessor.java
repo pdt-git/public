@@ -31,11 +31,9 @@ public abstract class PrologContentAssistProcessor {
 	private class Prefix {
 		int begin;
 		int length;
-		IDocument document;
 		String prefix;
 				
 		Prefix(IDocument document, int begin, String prefix) {
-			this.document=document;
 			this.begin=begin;
 			this.prefix=prefix;
 			this.length=prefix.length();
@@ -104,7 +102,7 @@ public abstract class PrologContentAssistProcessor {
 			if (proposals.size() == 0)
 				return null;
 			Collections.sort(proposals);
-			return (ICompletionProposal[]) proposals
+			return proposals
 					.toArray(new ICompletionProposal[proposals.size()]);
 		} catch (BadLocationException e) {
 			Debug.report(e);
