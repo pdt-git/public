@@ -138,8 +138,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private PrologLibraryManager libraryManager;
 	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
-	private HashMap<String, Map> globalHooks;
+	private HashMap globalHooks;
 	private Map<String, List<BootstrapPrologContribution>> bootStrapLists;
+//	private PrologInterfaceFactory factory;
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
 
@@ -172,7 +173,15 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 		return "library=" + lib.getPath();
 	}	
-
+//	// I don't know if this is needed
+//	private void setLibraryManager(PrologLibraryManager mgr) {
+//		this.libraryManager = mgr;
+//	}
+//	
+//	// I don't know if this is needed
+//	public void setResourceLocator(ResourceFileLocator locator) {		
+//		this.resourceLocator = locator;
+//	}
 	public ResourceFileLocator getResourceLocator() {
 		if (resourceLocator == null){
 			String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
@@ -180,10 +189,12 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 		return resourceLocator;
 	}
-	public File ensureInstalled(String res, Class<?> clazz) {
+	public File ensureInstalled(String res, Class clazz) {
 		File f = getResourceLocator().resolve(res);
+//		System.out.println("ensure installed " + res + " in context from " + clazz.toString());
 		if (f.exists()) {
 			f.delete();
+//			System.out.println("file deleted: " + f.toString());
 		}
 		if (!f.exists()) {
 			f.getParentFile().mkdirs();
@@ -193,12 +204,30 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				Util.copy(in, out);
 				in.close();
 				out.close();
+//				System.out.println("file copied: " + f.toString());
 			} catch (IOException e) {
 				Debug.rethrow(e);
 			}
 		}
 		return f;
 	}
+//	public ResourceFileLocator getResourceLocator(String key) {
+//	if (rootLocator == null) {
+//		URL url = getDefault().getBundle().getEntry("/");
+//		File location = null;
+//		try {
+//			location = new File(Platform.asLocalURL(url).getFile());
+//		} catch (IOException t) {
+//			Debug.rethrow(t);
+//		}
+//		rootLocator = new DefaultResourceFileLocator(location);
+//	}
+//	return rootLocator.subLocator(key);
+//}
+
+
+
+
 
 	
 	public PrologContextTrackerService getContextTrackerService() {
@@ -232,6 +261,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				}
 			}
 		});
+
 	}
 
 	/**
@@ -246,12 +276,26 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			resourceBundle = null;
 		}
 	}
+
+	
+	
+	
+
+
 	
 	private PrologInterface createPrologInterface(String name) {
 		PrologInterface prologInterface = null;
 		
-
-		prologInterface = AbstractPrologInterface.newInstance(AbstractPrologInterface.PL_INTERFACE_DEFAULT,name);
+		String impl = getPreferenceValue(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, null);
+		if (impl == null) {
+			throw new RuntimeException("The required property \"" + PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION + "\" was not specified. Use Default: "+ AbstractPrologInterface.PL_INTERFACE_DEFAULT);
+		} else {
+			impl = AbstractPrologInterface.PL_INTERFACE_DEFAULT;	
+		}
+		prologInterface = AbstractPrologInterface.newInstance(impl,name);
+//		String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
+//		prologInterface.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
+//		prologInterface.setLibraryManager(getLibraryManager());
 
 		return prologInterface;
 	}
@@ -278,31 +322,68 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 		synchronized (preferencesMux) {
 
+			//IPreferencesService service = Platform.getPreferencesService();
+			//String qualifier = getBundle().getSymbolicName();
+			//String value = service.getString(qualifier, key, defaultValue, null);
+
 			String value = getPreferenceStore().getString(key);
 
 			return System.getProperty(key, value);
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public void reconfigure() {
+
 		reconfigurePrologInterfaces();
 	}
 
 	private void reconfigurePrologInterfaces() {
 		PrologInterfaceRegistry r = getPrologInterfaceRegistry();
-		Set<String> keys = r.getRegisteredKeys();
-		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
-			String key = it.next();
+		Set keys = r.getRegisteredKeys();
+		for (Iterator it = keys.iterator(); it.hasNext();) {
+			String key = (String) it.next();
 			PrologInterface pif = r.getPrologInterface(key);
-			initPrologInterfaceOptions(pif);
+			reconfigurePrologInterface(key, pif);
 		}
 	}
 
-	private void initPrologInterfaceOptions(PrologInterface prologInterface) {
+	private void reconfigurePrologInterface(String key, PrologInterface prologInterface) {
+
+		// MetadataEngineInstaller.install(prologInterface);
+//		List l = prologInterface.getBootstrapLibraries();
+//		l.addAll(getBootstrapList(""));
+//		l.addAll(getBootstrapList(key));
+
+		// we are using the bootstrapContribution extension point just as
+		// anybody else.
+		// --lu
+		// l.add(Util.prologFileName(getResourceLocator(PDT.LOC_ENGINE).resolve(
+		// "main.pl")));
+
 		prologInterface.initOptions();
+
+		// PrologInterfaceFactory factory = prologInterface.getFactory();
+		// Option[] options = factory.getOptions();
+		// for (int i = 0; i < options.length; i++) {
+		// String id = options[i].getId();
+		// String val = getPreferenceValue(id, options[i].getDefault());
+		// try {
+		// prologInterface.setOption(id, val);
+		// } catch (Throwable t) {
+		// Debug.warning("could not set option " + options[i].getLabel()
+		// + "(" + options[i].getId() + ")");
+		// Debug.report(t);
+		// }
+		// }
+
 	}
 
-
+	/**
+	 * @return
+	 */
 	private Map<String, List<BootstrapPrologContribution>> getBootStrapLists() {
 		if (bootStrapLists == null) {
 			bootStrapLists = new HashMap<String, List<BootstrapPrologContribution>>();
@@ -337,17 +418,20 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				URL url = BundleUtility.find(Platform.getBundle(namespace), resName);
 				try {
 
+					// URL url = Platform.getBundle(namespace).getEntry(
+					// resName);
 					Debug.debug("trying to resolve this url: " + url);
 					url = Platform.asLocalURL(url);
 				} catch (Exception e) {
 					Debug.rethrow("Problem resolving url: " + url.toString(), e);
 				}
+				// URI uri = URI.create(url.toString());
 				File file = new File(url.getFile());
 				String path = Util.prologFileName(file);
 
 				IConfigurationElement[] childElms = elm.getChildren();
-				Map<String, String> libAttrs = new HashMap<String, String>();
-				Set<String> deps = new HashSet<String>();
+				Map libAttrs = new HashMap();
+				Set deps = new HashSet();
 				for (int k = 0; k < childElms.length; k++) {
 					IConfigurationElement childElm = childElms[k];
 					if ("dependency".equals(childElm.getName())) {
@@ -398,18 +482,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private void topologicalSort(List<BootstrapPrologContribution> contributions) {
 		Map<String, ContributionPredecessors> predecessors = new HashMap<String, ContributionPredecessors>();
-		initPredecessors(contributions, predecessors);
-		List<String> remove = new ArrayList<String>();
-		topologicalSorting(contributions, predecessors, remove);
-		if (predecessors.keySet().size() > 0) {
-			throw new RuntimeException("cycle found in bootstrap contribution dependencies: " + contributions);
-		}
-
-	}
-
-	private void initPredecessors(
-			List<BootstrapPrologContribution> contributions,
-			Map<String, ContributionPredecessors> predecessors) {
+		// List<BootstrapPrologContribution> sorted = new
+		// ArrayList<BootstrapPrologContribution>();
+		// Init predecessor list:
 		for (BootstrapPrologContribution contribution : contributions) {
 			ContributionPredecessors current = predecessors.get(contribution.getId());
 			if (current != null) {
@@ -423,12 +498,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				predecessors.get(dependencyId).numPredecessors++;
 			}
 		}
-	}
-	
-	private void topologicalSorting(
-			List<BootstrapPrologContribution> contributions,
-			Map<String, ContributionPredecessors> predecessors,
-			List<String> remove) {
+		List<String> remove = new ArrayList<String>();
+		// topological sorting:
 		int counter = 0;
 		contributions.clear();
 		while (!predecessors.isEmpty() && counter <= contributions.size()) {
@@ -448,6 +519,11 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			}
 			remove.clear();
 		}
+		if (predecessors.keySet().size() > 0) {
+			throw new RuntimeException("cycle found in bootstrap contribution dependencies: " + contributions);
+		}
+		// contributions.addAll(sorted);
+		//
 	}
 
 	private void registerBootstrapContribution(IExtension extension) {
@@ -472,10 +548,15 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		List<BootstrapPrologContribution> contribs = createCachedContribsForPrologInterface(contributionKey);
 
 		String resource = element.getAttribute("path");
+		// String className = element.getAttribute("class");
 
 		Set<String> dependencies = getContributionDependencies(element);
 
+		// if (className != null) {
+		// addBootstrapClass(element, pifKey, contribs, dependencies );
+		// } else
 		addBootstrapResource(extension, resource, contribs, dependencies, contributionId);
+
 	}
 
 	private Set<String> getContributionDependencies(IConfigurationElement element) {
@@ -497,6 +578,20 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		return contribs;
 	}
 
+	// private void addBootstrapClass(IConfigurationElement element, String
+	// pifKey, Set contribs, Set<String> dependencies) {
+	// try {
+	// BootstrapContribution bc = (BootstrapContribution)
+	// element.createExecutableExtension("class");
+	// BootstrapContributionWrapper bc = new
+	// BootstrapContributionWrapper(bc,dependencies);
+	// bc.contributeToBootstrapList(pifKey, contribs);
+	// } catch (CoreException e1) {
+	// Debug.rethrow("Problem instantiating class as extension for bootstrapContribution, class: "
+	// + element.getAttribute("class"), e1);
+	// }
+	// }
+
 	private void addBootstrapResource(IExtension ext, String resource, List<BootstrapPrologContribution> contribs,
 			Set<String> dependencies, String contributionId) {
 		Debug.debug("got this resname: " + resource);
@@ -514,6 +609,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		contribs.add(new BootstrapPrologContribution(contributionId, Util.prologFileName(file), dependencies));
 	}
 
+	/**
+	 * @param contributionKey
+	 * @return
+	 */
 	private List<BootstrapPrologContribution> getBootstrapList(String contributionKey) {
 		List<BootstrapPrologContribution> r = getBootStrapLists().get(contributionKey);
 		return r == null ? new ArrayList<BootstrapPrologContribution>() : r;
@@ -552,6 +651,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	private LifeCycleHookDescriptor createHookDescriptor(final IConfigurationElement celem, IExtension extension) throws CoreException {
+		LifeCycleHook hook = (LifeCycleHook) celem.createExecutableExtension("class");
 		String dependsOn = celem.getAttribute("dependsOn");
 		if (dependsOn == null) {
 			dependsOn = "";
@@ -569,11 +669,16 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			Debug.debug("got this namespace: " + namespace);
 			URL url = FileLocator.find(Platform.getBundle(namespace), new Path(resName), null);
 			try {
+
+				// URL url =
+				// Platform.getBundle(namespace).getEntry(
+				// resName);
 				Debug.debug("trying to resolve this url: " + url);
 				url = FileLocator.toFileURL(url);
 			} catch (Exception e) {
 				Debug.rethrow("Problem resolving url: " + url.toString(), e);
 			}
+			// URI uri = URI.create(url.toString());
 			consults[k] = new File(url.getFile());
 		}
 		children = celem.getChildren("hookDependency");
@@ -683,22 +788,50 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	}
 
+	// public Option[] getOptions() {
+	// synchronized (optionsMux) {
+	// if (options == null) {
+	// initOptions();
+	// }
+	// return this.options;
+	// }
+	// }
+
+	/**
+	 * 
+	 */
+	// private void initOptions() {
+	//
+	// options = new Option[] {
+	// new SimpleOption(
+	// PrologRuntime.PREF_PIF_IMPLEMENTATION,
+	// "PrologInterfaceFactory implementation",
+	// "The factory to be used for creating PrologInterface instances",
+	// Option.STRING, PrologInterfaceFactory.DEFAULT),
+	// new SimpleOption(
+	// PrologRuntime.PREF_PIF_BOOTSTRAP_DIR,
+	// "PrologInterface Bootstrap Directory",
+	// "The PrologInterface needs to temporarily store some"
+	// + "prolog files during bootstrapping. Any directory for which "
+	// + "you have write permissions will do.",
+	// Option.DIR, System.getProperty("java.io.tmpdir")) };
+	//
+	// }
 
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
 	public void stop(BundleContext context) throws Exception {
 		try {
-			PrologInterfaceRegistry registry = getPrologInterfaceRegistry();
-			Set<String> keys = new HashSet<String>(registry.getRegisteredKeys()); // clone this. see
+			PrologInterfaceRegistry r = getPrologInterfaceRegistry();
+			Set keys = new HashSet(r.getRegisteredKeys()); // clone this. see
 			// PDT-194
-			Iterator<String> it = keys.iterator();
-			while ( it.hasNext()) {
-				String key = it.next();
-				PrologInterface pif = registry.getPrologInterface(key);
+			for (Iterator it = keys.iterator(); it.hasNext();) {
+				String key = (String) it.next();
+				PrologInterface pif = r.getPrologInterface(key);
 				try {
 					pif.stop();
-					registry.removePrologInterface(key);
+					r.removePrologInterface(key);
 				} catch (Throwable e) {
 					Debug.warning("problems during shutdown of pif " + key);
 					Debug.report(e);
@@ -723,7 +856,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	/**
 	 * get a PrologInterface to a given key. This is a convenience method to
-	 * "just get the darn thing". This will create the PrologInterface if
+	 * "just get the darn thing". This will use create the PrologInterface if
 	 * the registry does not contain it, and register it with the registry. No
 	 * subscription will be added to the history.
 	 * 
@@ -753,7 +886,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		PrologInterface pif = r.getPrologInterface(pifKey);
 		if (pif == null) {
 			pif = createPrologInterface(pifKey);
-			initPrologInterfaceOptions(pif);
+			reconfigurePrologInterface(pifKey, pif);
 			r.addPrologInterface(pifKey, pif);
 			addGlobalHooks(pifKey, pif);
 		}
@@ -787,20 +920,21 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	private void addGlobalHooks(String pifKey, PrologInterface pif) {
-		Map hooks = getGlobalHooks().get(pifKey);
+		Map hooks = (Map) getGlobalHooks().get(pifKey);
 		if (hooks != null) {
-			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
-				_HookRecord record = it.next();
+			for (Iterator it = hooks.values().iterator(); it.hasNext();) {
+				_HookRecord record = (_HookRecord) it.next();
 				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
 			}
 		}
-		hooks = getGlobalHooks().get("");
+		hooks = (Map) getGlobalHooks().get("");
 		if (hooks != null) {
-			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
-				_HookRecord record = it.next();
+			for (Iterator it = hooks.values().iterator(); it.hasNext();) {
+				_HookRecord record = (_HookRecord) it.next();
 				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
 			}
 		}
+		// pif.start();
 	}
 
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
@@ -827,7 +961,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					Reader r = new BufferedReader(new FileReader(file));
 					registry.load(r);
 				} else {
-					Debug.warning("Registry file " + file.getCanonicalPath() + " could not be read. A new file will be created on exit.");
+					Debug.warning("Regestry file " + file.getCanonicalPath() + " could not be read. A new file will be created on exit.");
 				}
 			}
 			registerStaticHooks();
@@ -871,7 +1005,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				// thrown and we do not update the path
 				Writer w = null;
 				try {
-					Debug.info("writing registry to " + f.getCanonicalPath());
+					Debug.info("writing regestry to " + f.getCanonicalPath());
 					w = new BufferedWriter(new FileWriter(f));
 					myPluginInstance.registry.save(w);
 					w.close();
@@ -934,13 +1068,72 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	}
 
+	/**
+	 * globally register a hook with a given pifKey.
+	 * 
+	 * The plugin will store the key->hook association in a plugin-global table.
+	 * If there is already a pif registered for the given key, the hook will be
+	 * added emidiately. Otherwise it will be added the first time some client
+	 * requests a prolog interface for the given key.
+	 * 
+	 * Note that no attempt is made to actually execute the code in the hook if
+	 * the pif is already running.
+	 * 
+	 * 
+	 */
+	private void registerLifeCycleHook(String[] tags, LifeCycleHook hook, String hookId, String[] deps) {
+		if (tags == null || tags.length == 0) {
+			tags = new String[] { "any" };
+		}
+		synchronized (globalHooksMux) {
+			for (int i = 0; i < deps.length; i++) {
+				String pifKey = tags[i];
+				Map hooks = (Map) getGlobalHooks().get(pifKey);
 
+				if (hooks == null) {
+					hooks = new HashMap();
+					getGlobalHooks().put(pifKey, hooks);
+				}
+				hooks.put(hookId, new _HookRecord(hook, hookId, deps));
+				PrologInterface pif = getPrologInterfaceRegistry().getPrologInterface(pifKey);
+				if (pif != null) {
+					pif.addLifeCycleHook(hook, hookId, deps);
+				}
+			}
+		}
+	}
 
+	/**
+	 * globally unregister a hook.
+	 * 
+	 * removes the hook from the plugin global table. If pif is registered with
+	 * the given key, the hook is removed from this pif, too.
+	 * 
+	 * Note that no attempt is made to actualy execute the code in the hook if
+	 * the pif is already running.
+	 * 
+	 * @param pifKey
+	 * @param hook
+	 */
+	private void unregisterLifeCycleHook(String pifKey, String hookId) {
+		synchronized (globalHooksMux) {
+			Map hooks = (Map) getGlobalHooks().get(pifKey);
 
-	private HashMap<String, Map> getGlobalHooks() {
+			if (hooks == null) {
+				return;
+			}
+			hooks.remove(hookId);
+			PrologInterface pif = getPrologInterfaceRegistry().getPrologInterface(pifKey);
+			if (pif != null) {
+				pif.removeLifeCycleHook(hookId);
+			}
+		}
+	}
+
+	private HashMap getGlobalHooks() {
 		synchronized (globalHooksMux) {
 			if (globalHooks == null) {
-				globalHooks = new HashMap<String, Map>();
+				globalHooks = new HashMap();
 				registerStaticHooks();
 			}
 			return globalHooks;
@@ -961,4 +1154,26 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		return value;
 	}
 	
+//	public PrologInterfaceFactory getPrologInterfaceFactory() {
+//		if (factory == null) {
+//
+//			String impl = getPreferenceValue(PrologRuntime.PREF_PIF_IMPLEMENTATION, null);
+////			System.out.println("impl = "+impl);
+//			impl = factory.DEFAULT;
+//			// impl = factory.PIFCOM;
+//			factory = PrologInterfaceFactory.newInstance(impl);
+//		
+//			if (impl == null) {
+//				throw new RuntimeException("The required property \"" + PrologRuntime.PREF_PIF_IMPLEMENTATION + "\" was not specified.");
+//			}
+//			
+//			
+//			String bootStrapDir = getPreferenceValue(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
+//			factory.setResourceLocator(new DefaultResourceFileLocator(new File(bootStrapDir)));
+//			factory.setLibraryManager(getLibraryManager());
+//
+//		}
+//		return factory;
+//	}
+
 }
