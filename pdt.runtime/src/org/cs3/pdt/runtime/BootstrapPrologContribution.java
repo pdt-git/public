@@ -2,27 +2,22 @@ package org.cs3.pdt.runtime;
 
 import java.util.Set;
 
-public class BootstrapPrologContribution {
+abstract public class BootstrapPrologContribution {
 
 	private Set<String> dependencies;
 	public Set<String> getDependencies() {
 		return dependencies;
 	}
 
-	private String file;
 	private String id;
 
 	public String getId() {
 		return id;
 	}
 
-	public String getFile() {
-		return file;
-	}
 
-	public BootstrapPrologContribution(String id,String file,Set<String> dependencies) {
+	public BootstrapPrologContribution(String id,Set<String> dependencies) {
 		this.id = id;
-		this.file = file;
 		this.dependencies = dependencies;
 	}
 
@@ -33,5 +28,17 @@ public class BootstrapPrologContribution {
 			return contribString;
 		}
 		return contribString + " depends on [" + dependencies+ "]";
+	}
+	
+	public abstract String getPrologInitStatement();
+	
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(((BootstrapPrologContribution)obj).getId().equals(id));
 	}
 }

@@ -139,7 +139,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
 	private HashMap<String, Map> globalHooks;
-	private Map<String, List<BootstrapPrologContribution>> bootStrapLists;
+	private Map<String, List<BootstrapPrologContribution>> bootStrapContribForKey;
+	private Map<String, BootstrapPrologContribution> allBootStrapLists = new HashMap<String, BootstrapPrologContribution>();
+	
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
 
@@ -304,11 +306,11 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 
 	private Map<String, List<BootstrapPrologContribution>> getBootStrapLists() {
-		if (bootStrapLists == null) {
-			bootStrapLists = new HashMap<String, List<BootstrapPrologContribution>>();
+		if (bootStrapContribForKey == null) {
+			bootStrapContribForKey = new HashMap<String, List<BootstrapPrologContribution>>();
 			registerStaticBootstrapContributions();
 		}
-		return bootStrapLists;
+		return bootStrapContribForKey;
 	}
 
 	private void registerStaticLibraries() {
@@ -379,9 +381,48 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			registerBootstrapContribution(extension);
 		}
 
-		for (String key : bootStrapLists.keySet()) {
-			List<BootstrapPrologContribution> contributions = bootStrapLists.get(key);
-			topologicalSort(contributions);
+		for (String key : bootStrapContribForKey.keySet()) {
+			HashSet<BootstrapPrologContribution> contributions = new HashSet<BootstrapPrologContribution>(bootStrapContribForKey.get(key));
+			
+			int lastLen;
+			do {
+				lastLen = contributions.size();
+				for (BootstrapPrologContribution contribution : new ArrayList<BootstrapPrologContribution>(contributions)) {
+					for (String dependency : contribution.getDependencies()) {
+						BootstrapPrologContribution depContribution = allBootStrapLists.get(dependency );
+						if(depContribution == null){
+							Debug.error("dependency does not exist: " + dependency +", for contribution " + contribution.getId());
+						} else {
+							contributions.add(depContribution);
+						}
+					}
+				}
+			} while(lastLen < contributions.size());
+			
+			
+			List<BootstrapPrologContribution> sortedContributions = new ArrayList<BootstrapPrologContribution>();
+			List<BootstrapPrologContribution> fileContribs = new ArrayList<BootstrapPrologContribution>();
+
+			separateContributions(contributions,sortedContributions,fileContribs);
+
+			topologicalSort(fileContribs);
+			sortedContributions.addAll(fileContribs);
+			Debug.info("==== Sorted bsc list for key: " + key + " =====");
+			for (BootstrapPrologContribution bootstrapPrologContribution : sortedContributions) {
+				Debug.info(" - " + bootstrapPrologContribution);
+			}
+			bootStrapContribForKey.put(key, sortedContributions);
+		}
+	}
+
+	private void separateContributions(
+			HashSet<BootstrapPrologContribution> allContribs, List<BootstrapPrologContribution> pathContribs, List<BootstrapPrologContribution> fileContribs) {
+		for (BootstrapPrologContribution contribution : allContribs) {
+			if(contribution instanceof BootstrapPrologContributionFile){
+				fileContribs.add(contribution);
+			} else {
+				pathContribs.add(contribution);
+			}
 		}
 	}
 
@@ -420,7 +461,10 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 		for (BootstrapPrologContribution contribution : contributions) {
 			for (String dependencyId : contribution.getDependencies()) {
-				predecessors.get(dependencyId).numPredecessors++;
+				if(allBootStrapLists.get(dependencyId) instanceof BootstrapPrologContributionFile){
+					ContributionPredecessors contributionPredecessors = predecessors.get(dependencyId);
+					contributionPredecessors.numPredecessors++;
+				}
 			}
 		}
 	}
@@ -442,7 +486,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			}
 			for (String id : remove) {
 				for (String depId : predecessors.get(id).contribution.getDependencies()) {
-					predecessors.get(depId).numPredecessors--;
+					if(predecessors.get(depId) != null)// otherwise it will be an alias
+						predecessors.get(depId).numPredecessors--;
 				}
 				predecessors.remove(id);
 			}
@@ -472,16 +517,19 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		List<BootstrapPrologContribution> contribs = createCachedContribsForPrologInterface(contributionKey);
 
 		String resource = element.getAttribute("path");
+		String alias = element.getAttribute("alias");
 
 		Set<String> dependencies = getContributionDependencies(element);
 
-		addBootstrapResource(extension, resource, contribs, dependencies, contributionId);
+		addBootstrapResource(extension, resource, alias,contribs, dependencies, contributionId);
 	}
 
 	private Set<String> getContributionDependencies(IConfigurationElement element) {
 		Set<String> dependencies = new HashSet<String>();
 		for (IConfigurationElement childElm : element.getChildren()) {
 			if ("dependency".equals(childElm.getName())) {
+				if(childElm.getAttribute("contribution")==null) 
+					System.out.println("DEBUG");
 				dependencies.add(childElm.getAttribute("contribution"));
 			}
 		}
@@ -489,15 +537,15 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	private List<BootstrapPrologContribution> createCachedContribsForPrologInterface(String contributionKey) {
-		List<BootstrapPrologContribution> contribs = bootStrapLists.get(contributionKey);
+		List<BootstrapPrologContribution> contribs = bootStrapContribForKey.get(contributionKey);
 		if (contribs == null) {
 			contribs = new ArrayList<BootstrapPrologContribution>();
-			bootStrapLists.put(contributionKey, contribs);
+			bootStrapContribForKey.put(contributionKey, contribs);
 		}
 		return contribs;
 	}
 
-	private void addBootstrapResource(IExtension ext, String resource, List<BootstrapPrologContribution> contribs,
+	private void addBootstrapResource(IExtension ext, String resource, String alias, List<BootstrapPrologContribution> contribs,
 			Set<String> dependencies, String contributionId) {
 		Debug.debug("got this resname: " + resource);
 		IContributor contributor = ext.getContributor();
@@ -511,7 +559,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 					+ " and resource: " + resource, e);
 		}
 		File file = new File(url.getFile());
-		contribs.add(new BootstrapPrologContribution(contributionId, Util.prologFileName(file), dependencies));
+		BootstrapPrologContribution contrib;
+		if(alias != null){
+			contrib = new BootstrapPrologContributionAlias(contributionId, alias, Util.prologFileName(file), dependencies);
+		} else {
+			contrib = new BootstrapPrologContributionFile(contributionId, Util.prologFileName(file), dependencies);
+		}
+		contribs.add(contrib);
+		allBootStrapLists.put(contributionId, contrib);
 	}
 
 	private List<BootstrapPrologContribution> getBootstrapList(String contributionKey) {
@@ -761,13 +816,14 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		for (String contributionKey : contributionKeys) {
 			List<BootstrapPrologContribution> libraryList = getBootstrapList(contributionKey);
 			for (BootstrapPrologContribution library : libraryList) {
-				if (!pif.getBootstrapLibraries().contains(library.getFile())) {
-					pif.getBootstrapLibraries().add(library.getFile());
+				if (!pif.getBootstrapLibraries().contains(library)) {
+					pif.getBootstrapLibraries().add(library);
 					if (pif.isUp()) {
 						PrologSession session = null;
 						try {
 							session = pif.getSession(PrologInterface.LEGACY);
-							String consult = "['" + library.getFile() + "']";
+							
+							String consult = library.getPrologInitStatement();
 							Debug.debug("consult " + consult + ", from " + library);
 							session.queryOnce(consult);
 						} catch (PrologInterfaceException e) {

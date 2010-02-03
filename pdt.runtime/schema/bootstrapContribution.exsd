@@ -18,7 +18,8 @@
       </annotation>
       <complexType>
          <sequence>
-            <element ref="contribution" minOccurs="1" maxOccurs="unbounded"/>
+            <element ref="fileContribution" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="fileSearchPathContribution" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -44,10 +45,10 @@
       </complexType>
    </element>
 
-   <element name="contribution">
+   <element name="fileContribution">
       <annotation>
          <documentation>
-            Contributes an entry (i.e. an absolute filename) to the list of files that will be consulted into any PrologInterface created by the PDT.
+            Contributes a prolog file that will be consulted into a PrologInterface with a matching contribution key.
          </documentation>
       </annotation>
       <complexType>
@@ -89,6 +90,47 @@ See Subscription.getBootstrapConstributionKeys() for details.
             <annotation>
                <documentation>
                   
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="fileSearchPathContribution">
+      <complexType>
+         <sequence minOccurs="0" maxOccurs="unbounded">
+            <element ref="dependency"/>
+         </sequence>
+         <attribute name="id" type="string">
+            <annotation>
+               <documentation>
+                  The id of this contribution
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="alias" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The alias which is automatically registered as a file search path.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="path" type="string" use="required">
+            <annotation>
+               <documentation>
+                  A path to the directory to be register.
+               </documentation>
+               <appInfo>
+                  <meta.attribute kind="resource"/>
+               </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="key" type="string">
+            <annotation>
+               <documentation>
+                  An optional bootstrap contribution key to determine with which PrologInterface a contribution should be loaded.
+Subscriptions may demand for a list of contribution keys.
+See Subscription.getBootstrapConstributionKeys() for details.
                </documentation>
             </annotation>
          </attribute>
