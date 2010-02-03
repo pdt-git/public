@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
+import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -72,7 +73,7 @@ import org.cs3.pl.prolog.internal.lifecycle.LifeCycle;
 public abstract class AbstractPrologInterface implements PrologInterface {
 
 	protected HashSet<WeakReference<? extends Disposable>> sessions = new HashSet<WeakReference<? extends Disposable>>();
-	private List<String> bootstrapLibraries = new Vector<String>();
+	private List<BootstrapPrologContribution> bootstrapLibraries = new Vector<BootstrapPrologContribution>();
 	private final MyLifeCycle lifecycle;
 	
 	/************************************************/
@@ -259,11 +260,11 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
-	public List<String> getBootstrapLibraries() {
+	public List<BootstrapPrologContribution> getBootstrapLibraries() {
 		return bootstrapLibraries;
 	}
 
-	public void setBootstrapLibraries(List<String> l) {
+	public void setBootstrapLibraries(List<BootstrapPrologContribution> l) {
 		this.bootstrapLibraries = l;
 	}
 

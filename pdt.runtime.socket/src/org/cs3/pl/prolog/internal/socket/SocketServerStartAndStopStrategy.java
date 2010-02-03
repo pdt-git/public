@@ -58,6 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
 import org.cs3.pl.common.Util;
@@ -236,10 +237,10 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			tmpWriter.println(":- debug(consult_server).");
 
 		}
-		List<String> bootstrapLIbraries = socketPif.getBootstrapLibraries();
-		for (Iterator<String> it = bootstrapLIbraries.iterator(); it.hasNext();) {
-			String s = it.next();
-			tmpWriter.println(":- ['" + s + "'].");
+		List<BootstrapPrologContribution> bootstrapLibraries = socketPif.getBootstrapLibraries();
+		for (Iterator<BootstrapPrologContribution> it = bootstrapLibraries.iterator(); it.hasNext();) {
+			BootstrapPrologContribution contribution = it.next();
+			tmpWriter.println(":- "+contribution.getPrologInitStatement()+".");
 		}
 		tmpWriter.println(":- [library(consult_server)].");
 		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");

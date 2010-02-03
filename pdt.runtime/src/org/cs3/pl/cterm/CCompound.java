@@ -41,10 +41,12 @@
 
 package org.cs3.pl.cterm;
 
+import java.util.Iterator;
+
 import org.cs3.pl.cterm.internal.parser.ASTAtom;
 import org.cs3.pl.cterm.internal.parser.ASTNode;
 
-public class CCompound extends CTerm{
+public class CCompound extends CTerm implements Iterable<CTerm> {
 	private CTerm[] args;
 
 	public CCompound(ASTNode node) {
@@ -65,6 +67,11 @@ public class CCompound extends CTerm{
 
 	public int getArity() {
 		return args.length;
+	}
+
+	@Override
+	public Iterator<CTerm> iterator() {
+		return new ArrayIterator<CTerm>(args);
 	}
 
 }

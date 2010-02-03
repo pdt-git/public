@@ -44,6 +44,8 @@ package org.cs3.pl.prolog;
 import java.io.IOException;
 import java.util.List;
 
+import org.cs3.pdt.runtime.BootstrapPrologContribution;
+
 public interface PrologInterface {
 
 	/**
@@ -212,13 +214,13 @@ public interface PrologInterface {
 	 * 
 	 * @return the life list of bootstrap libraries
 	 */
-	public List<String> getBootstrapLibraries();
+	public List<BootstrapPrologContribution> getBootstrapLibraries();
 
 	/**
 	 * @see getBootStrapLibraries()
 	 * @param l
 	 */
-	public void setBootstrapLibraries(List<String> l);
+	public void setBootstrapLibraries(List<BootstrapPrologContribution> l);
 
 
 	/**
