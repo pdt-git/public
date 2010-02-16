@@ -66,7 +66,6 @@ import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
-import org.cs3.pdt.runtime.internal.LifeCycleHookDecorator;
 import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
@@ -75,7 +74,6 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibrary;
@@ -141,9 +139,9 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private HashMap<String, Map> globalHooks;
 	private Map<String, List<BootstrapPrologContribution>> bootStrapContribForKey;
 	private Map<String, BootstrapPrologContribution> allBootStrapLists = new HashMap<String, BootstrapPrologContribution>();
-	
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
+
 
 	private final static Object contextTrackerMux = new Object();
 	private final static Object libraryManagerMux = new Object();
@@ -414,8 +412,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			bootStrapContribForKey.put(key, sortedContributions);
 		}
 	}
-
-	private void separateContributions(
+	
+		private void separateContributions(
 			HashSet<BootstrapPrologContribution> allContribs, List<BootstrapPrologContribution> pathContribs, List<BootstrapPrologContribution> fileContribs) {
 		for (BootstrapPrologContribution contribution : allContribs) {
 			if(contribution instanceof BootstrapPrologContributionFile){
@@ -425,6 +423,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			}
 		}
 	}
+	
 
 	private class ContributionPredecessors {
 
@@ -569,6 +568,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		allBootStrapLists.put(contributionId, contrib);
 	}
 
+
 	private List<BootstrapPrologContribution> getBootstrapList(String contributionKey) {
 		List<BootstrapPrologContribution> r = getBootStrapLists().get(contributionKey);
 		return r == null ? new ArrayList<BootstrapPrologContribution>() : r;
@@ -658,46 +658,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private LifeCycleHookDescriptor createHookDescriptor(final IConfigurationElement celem, final String id, final File[] consults,
 			final String[] hookDependencies, final String[] libraryDependencies, final String[] tags) {
-		LifeCycleHookDescriptor descr = new LifeCycleHookDescriptor() {
-
-			public LifeCycleHook getImplementation() {
-				if (celem.getAttribute("class") == null) {
-					try {
-						return (LifeCycleHook) celem.createExecutableExtension("class");
-					} catch (CoreException e) {
-						Debug.rethrow(e);
-					}
-				}
-				return null;
-			}
-
-			public LifeCycleHook2 createHook(Object data) {
-				LifeCycleHook2 hook = new LifeCycleHookDecorator(getImplementation(), libraryDependencies, consults, getLibraryManager());
-				hook.setData(data);
-				return hook;
-			}
-
-			public File[] getConsults() {
-				return consults;
-			}
-
-			public String[] getHookDependencies() {
-				return hookDependencies;
-			}
-
-			public String getHookId() {
-				return id;
-			}
-
-			public String[] getLibraryDependencies() {
-				return libraryDependencies;
-			}
-
-			public String[] getTags() {
-				return tags;
-			}
-
-		};
+		LifeCycleHookDescriptor descr = new LifeCycleHookDescriptor(this, tags, consults, hookDependencies,
+				id, libraryDependencies, celem);
 		return descr;
 	}
 
