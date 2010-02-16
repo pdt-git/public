@@ -1,7 +1,6 @@
 package org.cs3.pl.prolog.internal.lifecycle;
 
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.LifeCycleHook3;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class UpState extends AbstractState {
@@ -16,10 +15,10 @@ public class UpState extends AbstractState {
 	
 	public State addLifeCycleHook(final LifeCycleHook hook, String id,
 			String[] dependencies) {
-		if (hook instanceof LifeCycleHook3 && isNewHook(hook,id)) {
+		if (isNewHook(hook,id)) {
 			context.enqueueWork(new NamedWorkRunnable("lateInit_on_"+id) {
 				public void run() throws PrologInterfaceException {
-					((LifeCycleHook3)hook).lateInit(context.getPrologInterface());
+					hook.lateInit(context.getPrologInterface());
 				}
 			});
 		}

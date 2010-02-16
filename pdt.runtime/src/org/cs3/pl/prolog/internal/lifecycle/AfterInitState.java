@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.LifeCycleHook3;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class AfterInitState extends AbstractState {
@@ -44,10 +43,10 @@ public class AfterInitState extends AbstractState {
 	
 	public State addLifeCycleHook(final LifeCycleHook hook, String id,
 			String[] dependencies) {
-		if (hook instanceof LifeCycleHook3 && isNewHook(hook, id)) {
+		if (isNewHook(hook, id)) {
 			context.enqueueWork(new NamedWorkRunnable("lateInit on "+id) {
 				public void run() throws PrologInterfaceException {
-					((LifeCycleHook3) hook).lateInit(context
+					hook.lateInit(context
 							.getPrologInterface());
 				}
 			});

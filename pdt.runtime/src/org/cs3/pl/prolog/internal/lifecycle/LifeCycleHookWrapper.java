@@ -44,7 +44,6 @@ package org.cs3.pl.prolog.internal.lifecycle;
 import java.util.HashSet;
 
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.LifeCycleHook2;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
 public class LifeCycleHookWrapper {
@@ -148,16 +147,12 @@ public class LifeCycleHookWrapper {
 	}
 
 	public void onError() {
-
 		for (final LifeCycleHook hook : hooks) {
-			if (hook instanceof LifeCycleHook2) {
-				context.enqueueWork(new NamedWorkRunnable("onError_on_"+id) {
-					
-					public void run() throws PrologInterfaceException {
-						((LifeCycleHook2) hook).onError(context.getPrologInterface());
-					}
-				});
-			}
+			context.enqueueWork(new NamedWorkRunnable("onError_on_"+id) {
+				public void run() throws PrologInterfaceException {
+					hook.onError(context.getPrologInterface());
+				}
+			});
 		}
 	}
 }
