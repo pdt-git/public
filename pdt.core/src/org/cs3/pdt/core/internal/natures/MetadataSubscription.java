@@ -78,17 +78,16 @@ public class MetadataSubscription extends DefaultSubscription implements
 		super();
 	}
 
-	
-	public boolean isVisible() {
-		return false;
-	}
-
 	public MetadataSubscription(String projectName, String id, String pifId) {
 
 		super(id, pifId, "used to store and process meta information on prolog"
 				+ "source code found in project " + projectName, projectName
 				+ " - metadata", PDTCore.PLUGIN_ID, true);
 		setProjectName(projectName);
+	}
+
+	public boolean isVisible() {
+		return false;
 	}
 
 	public void configure(PrologInterface pif) {
@@ -245,5 +244,20 @@ public class MetadataSubscription extends DefaultSubscription implements
 					"Problems during build", e);
 		}
 		return Status.OK_STATUS;
+	}
+
+	@Override
+	public void lateInit(PrologInterface pif) {
+		;
+	}
+
+	@Override
+	public void onError(PrologInterface pif) {
+		;
+	}
+
+	@Override
+	public void setData(Object data) {
+		;
 	}
 }
