@@ -106,34 +106,9 @@ public class Util {
 		return "fp_" + l + "_" + m;
 	}
 
-	public static boolean isJava5() {
-		return System.getProperty("java.version").startsWith("1.5");
-	}
-
 	public static File getLockFile() {
 		String tmpdir = System.getProperty("java.io.tmpdir");
 		return new File(tmpdir, generateFingerPrint());
-	}
-
-	/**
-	 * @deprecated this does not work correctly e.g. on systems that have
-	 *             separate ip4 and ip6 stacks (MacOS X,...)
-	 */
-	public static boolean probePort(int port) {
-		try {
-			ServerSocket ss = new ServerSocket(port);
-			// Socket cs = ss.accept();
-			//            
-			// new InputStreamPump(cs.getInputStream()){
-			// protected void dataAvailable(char[] buffer, int length) {
-			// System.out.print(String.copyValueOf(buffer,0,length));
-			// }
-			// };
-			ss.close();
-		} catch (IOException e1) {
-			return true;
-		}
-		return false;
 	}
 
 	public static String prettyPrint(Map<String, ?> input) {
@@ -163,14 +138,12 @@ public class Util {
 			return "";
 		}
 		StringBuffer sb = new StringBuffer();
-		// sb.append("{");
 		for (int i = 0; i < a.length; i++) {
 			if (i > 0) {
 				sb.append(", ");
 			}
 			sb.append(a[i].toString());
 		}
-		// sb.append("}");
 		return sb.toString();
 	}
 	
