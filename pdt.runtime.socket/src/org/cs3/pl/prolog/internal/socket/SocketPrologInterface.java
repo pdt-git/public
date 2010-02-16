@@ -56,10 +56,6 @@ import org.cs3.pl.prolog.internal.ReusablePool;
 
 public class SocketPrologInterface extends AbstractPrologInterface {
 
-	
-
-	
-	
 	private class InitSession extends SocketSession {
 		public InitSession(SocketClient client, AbstractPrologInterface pif,int flags)
 				throws IOException {
@@ -94,13 +90,10 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		}
 	}
 
-
 	/************************************************/
 	/**** Options [Start] *****/
 	/************************************************/
-	
-
-	
+		
 	public static final String PREF_PORT = "pif.port";
 	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
 	public static final String PREF_SERVER_LOGDIR = "pif.server_log_dir";
@@ -157,17 +150,13 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		return serverLogDir;
 	}
 	public void initOptions(){
-		
 		super.initOptions();
-		
 		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
-		
-		this.setServerPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
-		this.setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));
-		this.setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_SERVER_LOGS));
-		this.setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
-		this.setServerLogDir(plugin.overridePreferenceBySystemProperty(PREF_SERVER_LOGDIR));		
-		
+		setServerPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
+		setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));
+		setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_SERVER_LOGS));
+		setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
+		setServerLogDir(plugin.overridePreferenceBySystemProperty(PREF_SERVER_LOGDIR));		
 	}
 	
 	
@@ -185,11 +174,13 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public SocketPrologInterface(String name) {		
 		super(name);
 		initOptions();		
-		setFileSearchPath(PrologRuntimePlugin.getDefault().guessFileSearchPath("pdt.runtime.socket.codebase"));
+		initPath();
 		setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
-
 	}
 	
+	protected void initPath() {
+		setFileSearchPath(PrologRuntimePlugin.getDefault().guessFileSearchPath("pdt.runtime.socket.codebase"));
+	}
 
 	public PrologSession getSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
