@@ -75,7 +75,7 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
         GridLayout layout = new GridLayout();
         layout.numColumns = 3;
         composite.setLayout(layout);
-        
+    
         GridData data = new GridData(GridData.FILL);
         data.grabExcessHorizontalSpace = true;
         data.verticalAlignment = GridData.FILL;
