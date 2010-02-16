@@ -64,7 +64,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.LifeCycleHook2;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -102,7 +102,7 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
-public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
+public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		PrologConsole {
 	private final class ClearAction extends Action {
 		private ClearAction(String text, String tooltip, ImageDescriptor image) {
@@ -935,6 +935,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook2,
 	}
 
 	public void setData(Object data) {
+		;
+	}
+
+	@Override
+	public void lateInit(PrologInterface pif) {
 		;
 	}
 
