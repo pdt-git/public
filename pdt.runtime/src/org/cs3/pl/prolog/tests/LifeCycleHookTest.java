@@ -3,7 +3,7 @@ package org.cs3.pl.prolog.tests;
 import junit.framework.TestCase;
 
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.prolog.LifeCycleHook3;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -12,7 +12,7 @@ import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 public class LifeCycleHookTest extends TestCase {
 
 
-	private class MyHook implements LifeCycleHook3{
+	private class MyHook implements LifeCycleHook{
 
 		private int lateInit;
 		private int onError;

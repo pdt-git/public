@@ -67,7 +67,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	public UDPEventDispatcher(PrologInterface pif) {
 		this.pif = pif;
 		// make sure that we do not hang the pif on shutdown.
-		LifeCycleHook hook = new LifeCycleHook2() {
+		LifeCycleHook hook = new LifeCycleHook() {
 			public void onInit(PrologInterface pif, PrologSession initSession)
 					throws PrologException, PrologInterfaceException {
 
@@ -95,9 +95,15 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			}
 
 			public void onError(PrologInterface pif) {
+				;
 			}
 
 			public void setData(Object data) {
+				;
+			}
+			
+			public void lateInit(PrologInterface pif) {
+				;
 			}
 		};
 		

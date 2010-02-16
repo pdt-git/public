@@ -53,7 +53,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		return "false";
 	}
 
-	private String guessEnvironmentVariables() {
+	public static String guessEnvironmentVariables() {
 		if (Util.isMacOS()) {
 			String home = System.getProperty("user.home");
 			return "DISPLAY=:0.0, HOME=" + home;

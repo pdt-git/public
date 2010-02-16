@@ -70,14 +70,11 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	public PrologEventDispatcher(PrologInterface pif){
 		this.pif = pif;
 		//make sure that we do not hang the pif on shutdown.
-		LifeCycleHook hook = new LifeCycleHook2(){
+		LifeCycleHook hook = new LifeCycleHook(){
 
-			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {
-				
-//					PLUtil.configureFileSearchPath(pif.getFactory().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});					
-					PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});
-					initSession.queryOnce("use_module(library(pif_observe))");
-				
+			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
+				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});
+				initSession.queryOnce("use_module(library(pif_observe))");				
 			}
 
 			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
@@ -85,11 +82,8 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
 					String subject = it.next();
 					enableSubject(subject);
-				}
-				
+				}				
 			}
-
-			
 
 			public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
 				stop(session);
@@ -97,24 +91,25 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 			public void onError(PrologInterface pif) {
 				session=null;
-				
 			}
 
-			
 			public void setData(Object data) {
-				
-				
+				;
+			}
+			
+			public void lateInit(PrologInterface pif) {
+				;
 			}
 
 		};
-		
+
 		pif.addLifeCycleHook(hook, null,null);
 		if(pif.isUp()){
 			PrologSession s =null;
 			try{
 				s= pif.getSession(PrologInterface.NONE);
 				hook.onInit(pif,s);
-				
+
 			} catch (PrologInterfaceException e) {
 				Debug.rethrow(e);
 			}
@@ -123,7 +118,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 					s.dispose();
 				}
 			}
-			
+
 		}
 	}
 
@@ -190,7 +185,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
 			String query = "pif_observe('" + session.getProcessorThreadAlias() + "',"
-					+ subject + ","+Util.quoteAtom(subject) +")";
+			+ subject + ","+Util.quoteAtom(subject) +")";
 			s.queryOnce(query);
 		} finally {
 			s.dispose();
@@ -234,7 +229,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				+ "',notify('$abort',_))");
 	}
 
-	
+
 	public void stop() throws PrologInterfaceException {
 		if (session == null) {
 			return;
@@ -243,7 +238,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		session.dispose();
 		session = null;
 	}
-	
+
 	public void stop(PrologSession s) throws PrologException, PrologInterfaceException {
 		if (session == null) {
 			return;
@@ -272,7 +267,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			l.update(e);
 		}
 	}
-	
+
 
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		String subject = (String) e.getBindings().get("Subject");

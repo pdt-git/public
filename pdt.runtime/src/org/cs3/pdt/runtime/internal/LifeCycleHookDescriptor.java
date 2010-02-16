@@ -2,7 +2,11 @@ package org.cs3.pdt.runtime.internal;
 
 import java.io.File;
 
-import org.cs3.pl.prolog.LifeCycleHook2;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.LifeCycleHook;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 
 /**
  * A description of a life cycle hook as obtained from the plugin.xml file.
@@ -12,21 +16,57 @@ import org.cs3.pl.prolog.LifeCycleHook2;
  * @author degenerl
  * 
  */
-public  interface LifeCycleHookDescriptor {
-	public String[] getLibraryDependencies();
-	public String[] getHookDependencies() ;
-	public File[] getConsults() ;
-	public String getHookId() ;
-	public String[] getTags() ;
+public class LifeCycleHookDescriptor {
+	private final PrologRuntimePlugin prologRuntimePlugin;
+	private final String[] tags;
+	private final File[] consults;
+	private final String[] hookDependencies;
+	private final String id;
+	private final String[] libraryDependencies;
+	private final IConfigurationElement celem;
+
+	public LifeCycleHookDescriptor(PrologRuntimePlugin prologRuntimePlugin, String[] tags, File[] consults,
+			String[] hookDependencies, String id,
+			String[] libraryDependencies, IConfigurationElement celem) {
+		this.prologRuntimePlugin = prologRuntimePlugin;
+		this.tags = tags;
+		this.consults = consults;
+		this.hookDependencies = hookDependencies;
+		this.id = id;
+		this.libraryDependencies = libraryDependencies;
+		this.celem = celem;
+	}
+
 	
-	
-	/**
-	 * creates a hook instance parameterized with the given domain object.
-	 * 
-	 * It is the responsible of returned hook to make sure that the hook
-	 * configures the pif according to this description.
-	 * See LiveCycleHooiDecorator for a typical implementation.
-	 */
-	public LifeCycleHook2 createHook(Object data) ;
+	public LifeCycleHook getImplementation() {
+		if (celem.getAttribute("class") == null) {
+			try {
+				return (LifeCycleHook) celem.createExecutableExtension("class");
+			} catch (CoreException e) {
+				Debug.rethrow(e);
+			}
+		}
+		return null;
+	}
+	public LifeCycleHook createHook(Object data) {
+		LifeCycleHook hook = new LifeCycleHookProxy(getImplementation(), libraryDependencies, consults, this.prologRuntimePlugin.getLibraryManager());
+		hook.setData(data);
+		return hook;
+	}
+	public File[] getConsults() {
+		return consults;
+	}
+	public String[] getHookDependencies() {
+		return hookDependencies;
+	}
+	public String getHookId() {
+		return id;
+	}
+	public String[] getLibraryDependencies() {
+		return libraryDependencies;
+	}
+	public String[] getTags() {
+		return tags;
+	}
 	
 }
