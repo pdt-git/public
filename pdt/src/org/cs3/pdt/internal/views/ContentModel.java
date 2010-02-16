@@ -18,7 +18,7 @@ import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionProxy;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
-import org.cs3.pl.prolog.LifeCycleHook2;
+import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.part.FileEditorInput;
 
 public abstract class ContentModel extends DefaultAsyncPrologSessionListener
-		implements PrologFileContentModel, LifeCycleHook2,
+		implements PrologFileContentModel, LifeCycleHook,
 		PrologInterfaceListener {
 
 	private static final String HOOK_ID = "PrologFileContentModelHook";
@@ -521,6 +521,10 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		} catch (PrologInterfaceException e) {
 			Debug.rethrow(e);
 		}
+	}
+	
+	public void lateInit(PrologInterface pif) {
+		;
 	}
 
 	public void onInit(PrologInterface pif, PrologSession initSession)
