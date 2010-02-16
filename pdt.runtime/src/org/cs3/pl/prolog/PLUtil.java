@@ -322,7 +322,7 @@ public class PLUtil {
 		} else {
 			sb.append(term.getFunctorImage());
 		}
-		if (term.getArity() > 0) {
+/*		if (term.getArity() > 0) {
 			sb.append('(');
 			CCompound compound = (CCompound) term;
 			for (int i = 0; i < compound.getArity(); i++) {
@@ -332,7 +332,7 @@ public class PLUtil {
 				renderTerm(compound.getArgument(i), sb);
 			}
 			sb.append(')');
-		}
+		}*/
 
 	}
 
