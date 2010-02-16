@@ -133,10 +133,7 @@ public final class UIUtils {
 				return getDisplay().getActiveShell();
 			}
 		}.rval;
-
 	}
-
-	
 	
 	public static IWorkbenchPage getActivePage() {
 		return (IWorkbenchPage) new _SyncReturn() {
@@ -145,7 +142,6 @@ public final class UIUtils {
 						.getActivePage();
 			}
 		}.rval;
-
 	}
 
 	public static IEditorPart getActiveEditor() {
@@ -158,10 +154,8 @@ public final class UIUtils {
 				return page.getActiveEditor();
 			}
 		}.rval;
-
 	}
 
-		
 	public static void displayMessageDialog(final Shell shell,
 			final String title, final String msg) {
 		if (Display.getCurrent() != shell.getDisplay()) {
@@ -173,7 +167,6 @@ public final class UIUtils {
 			return;
 		}
 		MessageDialog.openInformation(shell, title, msg);
-
 	}
 
 	public static void displayErrorDialog(final Shell shell,
@@ -187,7 +180,6 @@ public final class UIUtils {
 			return;
 		}
 		MessageDialog.openError(shell, title, msg);
-
 	}
 
 	public static void displayErrorDialog(final ErrorMessageProvider provider,
@@ -211,7 +203,6 @@ public final class UIUtils {
 			Throwable e, int errCode) {
 		Status status = new Status(Status.ERROR, provider.getId(), errCode,
 				provider.getErrorMessage(errCode), e);
-
 		return status;
 	}
 
@@ -247,21 +238,17 @@ public final class UIUtils {
 						.getStatusLineManager().setMessage(string);
 			}
 		});
-
 	}
+	
 	public  static IViewPart showView(String viewId) throws PartInitException {
-		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI
-				.getWorkbench().getActiveWorkbenchWindow();
+		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (activeWorkbenchWindow == null) {
 			return null;
 		}
-
 		final IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
 		if (activePage == null) {
 			return null;
 		}
-
 		return activePage.showView(viewId);
-
 	}
 }

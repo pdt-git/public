@@ -15,7 +15,6 @@ public class EnumEditor extends OptionEditor {
 	
 	public EnumEditor(Composite parent, Option option) {
 		super(parent, option);
-		// TODO Auto-generated constructor stub
 	}
 
 	protected void createControls(Composite composite) {
