@@ -129,10 +129,9 @@ public class SocketSession implements PrologSession {
 				client.readUntil(SocketCommunicationConstants.GIVE_TERM);
 				normalizeQuery(query);
 				solution = read_solution(flags);
+				tryFinishReading();
 			} catch (IOException e) {
 				throw pif.error(e);
-			} finally {
-				tryFinishReading(); 
 			}
 		}
 		return solution;
