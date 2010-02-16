@@ -63,17 +63,11 @@ import org.cs3.pl.prolog.PrologInterface;
 public class DefaultSubscription implements PersistableSubscription {
 	
 	private String descritpion;
-	
 	private String hostId;
-	
 	private String id;
-
 	private String name;
-
 	private boolean persistent;
-
 	private String pifKey;
-
 	private String[] tags = new String[0];
 	
 	/**
@@ -113,26 +107,13 @@ public class DefaultSubscription implements PersistableSubscription {
 		
 	}
 
-
-
-	
-
-	/**
-	 * the default implementation does nothing.
-	 */
 	public void configure(PrologInterface pif) {
 		;		
 	}
 
-
-	/**
-	 * the default implementation does nothing.
-	 */	
 	public void deconfigure(PrologInterface pif){
 		;
 	}
-
-
 
 	/* (non-Javadoc)
 	 * @see org.cs3.pdt.runtime.Subscription#getDescritpion()
@@ -141,26 +122,17 @@ public class DefaultSubscription implements PersistableSubscription {
 		return descritpion;
 	}
 
-
-
 	public String getHostId() {		
 		return hostId;
 	}
 
-
-
 	public String getId() {
-		
 		return id;
 	}
-
-
 
 	public String getName() {
 		return this.name;		
 	}
-
-
 
 	/* (non-Javadoc)
 	 * @see org.cs3.pdt.runtime.Subscription#getKey()
@@ -169,13 +141,9 @@ public class DefaultSubscription implements PersistableSubscription {
 		return pifKey;
 	}
 
-
-
 	final public boolean isPersistent() {
 		return persistent;
 	}
-
-
 
 	public void restoreState(Map<String, String> params) {
 		setDescritpion(params.get("description"));
@@ -187,10 +155,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		if(params.get("tags")!= null) {
 			setTags(Util.split(params.get("tags"),","));
 		}
-
 	}
-
-
 
 	private void setPersistent(String string) {
 		setPersistent(Boolean.valueOf(string).booleanValue());		
@@ -208,57 +173,41 @@ public class DefaultSubscription implements PersistableSubscription {
 		return m;
 	}
 
-
-
 	protected void setDescritpion(String descritpion) {
 		this.descritpion = descritpion;
 	}
-
-
 
 	protected void setHostId(String hostId) {
 		this.hostId = hostId;
 	}
 
-
-
 	protected void setId(String id) {
-		this.id=id;
-		
+		this.id=id;		
 	}
-
-
 
 	protected void setName(String name) {
 		this.name = name;
 	}
 
-
-
 	protected void setPersistent(boolean persistent) {
 		this.persistent = persistent;
 	}
 
-
-
 	protected void setPifKey(String key) {
 		this.pifKey = key;
 	}
-
 
 	public boolean isVisible() {
 		return true;
 	}
 
 	public String[] getTags() {
-		
 		return tags;
 	}
 
 	public void setTags(String[] tags) {
 		this.tags = tags;
 	}
-
 	
 	public Object getData() {		
 		return null;
@@ -267,6 +216,4 @@ public class DefaultSubscription implements PersistableSubscription {
 	public List<String> getBootstrapConstributionKeys() {
 		return new ArrayList<String>();
 	}
-	
-
 }
