@@ -52,14 +52,7 @@ import java.io.File;
  */
 public class DefaultResourceFileLocator implements ResourceFileLocator {
     String root;
-    public DefaultResourceFileLocator(){
-        this(new File(System.getProperty("user.home")));
-    }
      
-     /**
-      * FIXME: was URI now String
-      * @param root
-      */
      public DefaultResourceFileLocator(File root) {
      	String rootPath = root.getAbsolutePath();
          try {
@@ -69,6 +62,7 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
              throw new RuntimeException(e.getMessage());
          }
      }
+     
     public ResourceFileLocator subLocator(String subdir){
         return new DefaultResourceFileLocator(resolve(subdir));
     }
@@ -78,15 +72,7 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
      * @see org.cs3.pl.common.ResourceLocator#resolve(java.lang.String)
      */
     public File resolve(String rel) {
-       
         File resolved = new File(root+ rel);
         return resolved;
-    }
-
-//    public static void main(String[] args) {
-//        File file = new DefaultResourceFileLocator().resolve(".hallo");        
-//        System.out.println(file.toString());
-//    }
-
-    
+    }    
 }
