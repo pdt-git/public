@@ -183,4 +183,18 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		return prologProject;
 	}
 
+	@Override
+	public void lateInit(PrologInterface pif) {
+		;
+	}
+
+	@Override
+	public void onError(PrologInterface pif) {
+		;
+	}
+
+	@Override
+	public void setData(Object data) {
+		;
+	}
 }
