@@ -68,24 +68,13 @@ public class Debug {
 	final public static int LEVEL_WARNING = 2;
 	final public static int LEVEL_INFO = 3;
 	final public static int LEVEL_DEBUG = 4;
-
-	final public static int LEVEL_OUTPUT_LOGFILE = 0;
-	final public static int LEVEL_OUTPUT_CONSOLE = 1;
-
-	static private int debugLevel = LEVEL_ERROR;
-	
+	static private int debugLevel = LEVEL_ERROR;	
 	private static String PREFIX_OUTPUT = "pdt: ";
-	
-//	static private int debugOutputTo = LEVEL_OUTPUT_CONSOLE;
 	static private String outputDir;
-//	static private String outputFile;
 	static private PrintStream outputLogFilePrintStream; 
-	
-	
 	static private PrintStream out = System.err;
 
 	static public void setDebugLevel(String s) {
-
 		System.out.println(PREFIX_OUTPUT + "set debug level: " + s);
 		if (s.equalsIgnoreCase("NONE"))
 			debugLevel = LEVEL_NONE;
@@ -99,16 +88,12 @@ public class Debug {
 			debugLevel = LEVEL_DEBUG;
 		else {
 			debugLevel = LEVEL_ERROR;
-			error("Invalid debug level specified");
+			error("Invalid debug level specified, set debug level to ERROR");
 		}
-
 	}
 
-	static public void setOutputTo(String output) {
-		
+	static public void setOutputTo(String output) {		
 		if (output.equalsIgnoreCase("LOGFILE") ) {
-//			debugOutputTo = LEVEL_OUTPUT_LOGFILE;
-			
 			if (outputLogFilePrintStream!=null) {
 				setOutputStream(outputLogFilePrintStream);
 				out.println(PREFIX_OUTPUT + "set debug output to " + output);
@@ -119,41 +104,24 @@ public class Debug {
 			}
 		}
 		if (output.equalsIgnoreCase("CONSOLE")) {
-//			debugOutputTo = LEVEL_OUTPUT_CONSOLE;
 			setOutputStream(System.err);
 			out.println(PREFIX_OUTPUT + "set debug output to " + output);
 		}
-					
-	
-
-	}
-
-	
-		
-	
+	}	
 	
 	static public void setLogDir(String logFileDir) throws FileNotFoundException {
 		outputDir = logFileDir;
-//		if (!outputDir.endsWith(File.separator)) {
-//			outputDir = outputDir + File.separator;
-//		}
-//		outputFile = logFileDir +;
 		if (outputDir != null && !outputDir.equals("")) {
 			File logFile = new File(outputDir, "pdt.log");
 			System.out.println(PREFIX_OUTPUT + "debug output is written to: " + logFile.getAbsolutePath());
-			
 			BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(logFile, true));
 			outputLogFilePrintStream = new PrintStream(bufferedOutputStream);
 			setOutputTo("LOGFILE");
 		} else {
 			setOutputTo("CONSOLE");
-			
 		}
-
 	}
-//	static public String getLogDir(){
-//		return outputDir;
-//	}
+
 
 	/**
 	 * sets the level of reporting to the specified constant. Only the LEVEL_*
@@ -162,22 +130,10 @@ public class Debug {
 	 * @param level
 	 *            a LEVEL_* constant
 	 */
-
 	static public void setDebugLevel(int level) {
 		if (level < LEVEL_NONE || level > LEVEL_DEBUG)
 			throw new IllegalArgumentException("Bad LEVEL");
 		debugLevel = level;
-	}
-
-	/**
-	 * returns to current verbosity of debug output. Returns the value of one of
-	 * the constants defined in this class.
-	 * 
-	 * @return a value from LEVEL_NONE to LEVEL_DEBUG
-	 */
-
-	static public int getDebugLevel() {
-		return debugLevel;
 	}
 
 	/**
@@ -187,7 +143,6 @@ public class Debug {
 	 * @param msg
 	 *            the message
 	 */
-
 	public static void info(String msg) {
 		write(LEVEL_INFO, msg);
 	}
@@ -199,7 +154,6 @@ public class Debug {
 	 * @param msg
 	 *            the message
 	 */
-
 	public static void warning(String msg) {
 		write(LEVEL_WARNING,msg);
 	}
@@ -211,19 +165,17 @@ public class Debug {
 	 * @param msg
 	 *            the message
 	 */
-
 	public static void debug(String msg) {
 		write(LEVEL_DEBUG, msg);
 	}
 
 	/**
-	 * Sends an error message gto be considered for output. It is printed if the
+	 * Sends an error message to be considered for output. It is printed if the
 	 * current debug level is not set to LEVEL_NONE
 	 * 
 	 * @param msg
 	 *            the message
 	 */
-
 	public static void error(String msg) {
 		write(LEVEL_ERROR,msg);
 	}
@@ -235,7 +187,6 @@ public class Debug {
 	 * @param t
 	 *            a throwable object
 	 */
-
 	public static void report(Throwable t) {
 		if (debugLevel == LEVEL_NONE)
 			return;
@@ -248,15 +199,6 @@ public class Debug {
 		}
 	}
 
-	/**
-	 * redirects debug output to another PrintStream. The parameter stream may
-	 * not be null, and must not be closed by an external class. Use this method
-	 * to save debug output to a file.
-	 * 
-	 * @param out
-	 *            the new output stream
-	 */
-
 	private static void setOutputStream(PrintStream out) {
 		if (out == null)
 			throw new IllegalArgumentException("pdt: output stream is null");
@@ -266,7 +208,6 @@ public class Debug {
 		out.println(PREFIX_OUTPUT + "----------------------------------");
 	}
 
-	
 	private static void write(int level, String msg) {
 		if (level > debugLevel)
 			return;
@@ -288,27 +229,9 @@ public class Debug {
 			throw new IllegalStateException(PREFIX_OUTPUT + "Bad level value");
 		}
 		Thread currentThread = Thread.currentThread();
-		String tn = currentThread.getName();
-		// StackTraceElement stackFrame = new
-		// Throwable().getStackTrace()[2];//currentThread.getStackTrace()[4];
-		// String loc =
-		// "("+stackFrame.getFileName()+":"+stackFrame.getLineNumber()+")";
-		// String loc = stackFrame.toString();
-//		Date d = new Date();
-		//if ((debugOutputTo == LEVEL_OUTPUT_LOGFILE) || (debugOutputTo == LEVEL_OUTPUT_CONSOLE)){
-			out.println(PREFIX_OUTPUT + prefix + ":" + tn + ": "/* + loc+": " */+ msg);
-			out.flush();	
-		//}
-		
-
-	}
-
-	public static void dumpStackTrace() {
-		try {
-			throw new Error("just to produce a stack trace");
-		} catch (Throwable e) {
-			Debug.report(e);
-		}
+		String nameOfCurrentThread = currentThread.getName();
+		out.println(PREFIX_OUTPUT + prefix + ":" + nameOfCurrentThread + ": "+ msg);
+		out.flush();	
 	}
 
 	public static void rethrow(String string, Throwable e) {
@@ -324,5 +247,4 @@ public class Debug {
 		throw new RuntimeException(e);
 
 	}
-
 }
