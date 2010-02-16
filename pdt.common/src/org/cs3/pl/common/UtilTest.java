@@ -44,12 +44,6 @@ package org.cs3.pl.common;
 import junit.framework.TestCase;
 
 public class UtilTest extends TestCase {
-//	public void testExec() throws IOException, InterruptedException {
-//		String[] r = org.cs3.pl.common.Util
-//				.exec("plwin -t source_file(A),concat(X,'/plwin.rc',A),write(X),nl,flush_output. -g halt.");
-//		System.out.println("'" + r[0] + "'\n'" + r[1] + "'");
-//		assertEquals("hallo", Util.exec("echo hallo")[0].trim());
-//	}
 
 	public void testReplaceAll() {
 		assertEquals(Util.replaceAll("\\\"", "\\", "\\\\"), "\\\\\"");
@@ -86,7 +80,6 @@ public class UtilTest extends TestCase {
 	}
 	
 	public void testLogicalToPhysicalOffset01() throws Throwable{
-		//String data = "0"+"\r\n"+"2"+"3"+"\n"+"5";
 		byte[] bytes={0x30,0x0D,0x0a,0x32,0x0a,0x35};
 		String data = new String(bytes);
 		assertEquals(0,Util.logicalToPhysicalOffset(data,0));
@@ -95,6 +88,5 @@ public class UtilTest extends TestCase {
 		assertEquals(4,Util.logicalToPhysicalOffset(data,3));
 		assertEquals(5,Util.logicalToPhysicalOffset(data,4));
 		assertEquals(6,Util.logicalToPhysicalOffset(data,5));
-		
 	}
 }

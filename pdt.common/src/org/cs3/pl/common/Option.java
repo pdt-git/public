@@ -60,13 +60,13 @@ public interface Option {
 
 	public final static int DIRS = 6;
 
-	public final static int PATH = 7;
+//	public final static int PATH = 7;
 
 	public static final int ENUM = 8;
 
-	public static final int FONT = 9;
+//	public static final int FONT = 9;
 	
-	public static final int COLOR = 10;
+//	public static final int COLOR = 10;
 
 	public String getDefault();
 

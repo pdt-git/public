@@ -73,6 +73,7 @@ public class SimpleOption implements Option {
         this.defaultValue = defaultValue;
         this.enumValues=null;
     }
+    
     public SimpleOption(String id, String label, String description, int type,
             String defaultValue,String[][] enumValues) {
         super();
