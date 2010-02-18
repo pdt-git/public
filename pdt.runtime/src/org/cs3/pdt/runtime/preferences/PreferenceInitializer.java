@@ -39,7 +39,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		store.setDefault(PrologInterface.PREF_EXECUTABLE, guessExecutableName());
 		store.setDefault(PrologInterface.PREF_ENVIRONMENT, guessEnvironmentVariables());
-		store.setDefault(PrologInterface.PREF_STANDALONE, guessStandAlone());
+		store.setDefault(PrologInterface.PREF_STANDALONE, "false");
 		store.setDefault(PrologInterface.PREF_HOST, "localhost");
 		
 		store.setDefault(PrologInterface.PREF_TIMEOUT,15000 );
@@ -49,10 +49,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	}
 
 	
-	private static String guessStandAlone() {
-		return "false";
-	}
-
 	public static String guessEnvironmentVariables() {
 		if (Util.isMacOS()) {
 			String home = System.getProperty("user.home");
