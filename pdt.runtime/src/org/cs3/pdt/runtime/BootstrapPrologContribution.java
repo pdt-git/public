@@ -39,6 +39,6 @@ abstract public class BootstrapPrologContribution {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return super.equals(((BootstrapPrologContribution)obj).getId().equals(id));
+		return ((BootstrapPrologContribution)obj).getId().equals(id);
 	}
 }
