@@ -71,6 +71,9 @@ public class CCompound extends CTerm implements Iterable<CTerm> {
 
 	@Override
 	public Iterator<CTerm> iterator() {
+		for (int i = 0;i<args.length;i++) {
+			getArgument(i);
+		}
 		return new ArrayIterator<CTerm>(args);
 	}
 
