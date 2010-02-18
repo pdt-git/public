@@ -57,7 +57,7 @@ pdt_var_completion(Path,Offset,Prefix,Name):-
 	member(Name = _,VarNames),
 		atom_prefix(Name,Prefix).
 
-very_slow_hand_made_heuristic_parser(File,Offset,Begin,End,VarNames):-
+very_slow_hand_made_heuristic_parser(_File,_Offset,_Begin,_End,VarNames):-
 	VarNames = "Test".	
 	
 guess_module(_PID,FID,ContextMID):-
