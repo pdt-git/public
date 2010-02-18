@@ -63,7 +63,7 @@ node_indent(Node,Indent):-
     pef_property_query([pef=Node,key=tokens,value=Tokens]),
     pef_property_query([pef=Node,key=start,value=Offset]),
     relative_positions(Tokens,Offset,Tokens2),
-    node_to_memory_file(Node,MF),
+    node_to_memory_file(Node,Mf),
     open_memory_file(Mf,read,In),
     call_cleanup(
     	node_indent_X(Tokens2,In,Indent),
