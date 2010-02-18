@@ -66,6 +66,11 @@ import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
 public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrategy {
+private static JackTheProcessRipper processRipper;
+	
+	public SocketServerStartAndStopStrategy() {
+		processRipper=JackTheProcessRipper.getInstance();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -295,7 +300,7 @@ public class SocketServerStartAndStopStrategy implements ServerStartAndStopStrat
 			client.close();
 			socketPif.getLockFile().delete();
 			Debug.info("server process will be killed in about a second.");
-			JackTheProcessRipper.getInstance().markForDeletion(pid);
+			processRipper.markForDeletion(pid);
 		} catch (Exception e) {
 			Debug.warning("There was a problem during server shutdown.");
 			Debug.report(e);
