@@ -211,7 +211,7 @@ start_server(Port):-
 stop_server:-
 	server(Port),
 	!,
-	do_stop_server(Port,LockFile).
+	do_stop_server(Port,_LockFile).
 stop_server.
 
 do_stop_server(Port):-
