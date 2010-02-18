@@ -26,7 +26,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		
 		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
 		IPreferenceStore store = plugin.getPreferenceStore();
-		store.setDefault(SocketPrologInterface.PREF_USE_POOL, guessUsePool());
+		store.setDefault(SocketPrologInterface.PREF_USE_POOL, "true");
 		store.setDefault(SocketPrologInterface.PREF_CREATE_SERVER_LOGS, false);
 		store.setDefault(SocketPrologInterface.PREF_PORT, 9944);
 		store.setDefault(SocketPrologInterface.PREF_HIDE_PLWIN, true);
@@ -40,10 +40,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 			Debug.error("Could not find plugin installation dir.");
 		}
 		store.setDefault(SocketPrologInterface.PREF_SERVER_LOGDIR,location);
-	}
-
-	public static String guessUsePool() {
-		return "true";
 	}
 
 	private String getLocation() throws IOException {
