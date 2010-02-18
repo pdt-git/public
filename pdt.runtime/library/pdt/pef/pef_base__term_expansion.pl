@@ -3,7 +3,7 @@
 
 :- op(600,xfy,@).
 
-
+:- multifile $pef_interprete_undo_as_assert/1.
 
 %-------------------------------------- 
 % this section was backported from my last "spike".
