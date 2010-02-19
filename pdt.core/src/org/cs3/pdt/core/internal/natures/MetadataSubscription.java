@@ -49,8 +49,8 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
@@ -158,7 +158,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 			throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 				.getLibraryManager();
-		PLUtil.configureFileSearchPath(mgr, initSession,
+		FileSearchPathConfigurator.configureFileSearchPath(mgr, initSession,
 				new String[] { PDTCore.ENGINE_ID });
 		initSession.queryOnce("ensure_loaded(library('facade/pdt_facade'))");
 	}
