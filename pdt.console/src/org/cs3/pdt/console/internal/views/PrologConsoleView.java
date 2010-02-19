@@ -64,8 +64,8 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.NewConsoleHistory;
 import org.cs3.pl.console.prolog.PrologConsole;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -791,7 +791,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
-		PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault()
+		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimePlugin.getDefault()
 				.getLibraryManager(), session,
 				new String[] { PDTConsole.PL_LIBRARY });
 		
