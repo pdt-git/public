@@ -125,7 +125,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return fileSearchPath;
 	}
 
-	protected void setHost(String value) {
+	public void setHost(String value) {
 		this.host = value;
 	}
 
@@ -133,7 +133,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return host;
 	}
 
-	protected void setTimeout(String timeout) {
+	public void setTimeout(String timeout) {
 		this.timeout = Integer.parseInt(timeout);
 	}
 
@@ -149,7 +149,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		return executable;
 	}
 
-	protected void setEnvironment(String environment) {
+	public void setEnvironment(String environment) {
 		this.environment = environment;
 	}
 

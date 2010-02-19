@@ -194,9 +194,12 @@ public interface PrologInterface {
 	public String getExecutable();
 	public void setExecutable(String executable);
 	public String getEnvironment() ;
+	public void setEnvironment(String executable) ;
 	public String getHost();
+	public void setHost(String host);
 	public String getFileSearchPath();
 	public int getTimeout();
+	public void setTimeout(String timeout);
 	public void setFileSearchPath(String fileSearchPath);
 	
 //	/**
