@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.preferences.PreferenceInitializer;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
@@ -102,7 +103,7 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public static final String PREF_CREATE_SERVER_LOGS = "pif.create_logs";
 	
 	private boolean useSessionPooling = true;
-	private int port = -1;
+	private int port = 9999;
 	private boolean hidePlwin;
 
 	private boolean createLogs;
@@ -172,16 +173,18 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 
 
 	public SocketPrologInterface(String name) {		
-		super(name);
-		initOptions();		
-		initPath();
+		super(name);		
+		setDefaults();
 		setStartAndStopStrategy(new SocketServerStartAndStopStrategy());
 	}
 	
-	protected void initPath() {
-		setFileSearchPath(PrologRuntimePlugin.getDefault().guessFileSearchPath("pdt.runtime.socket.codebase"));
+	public void setDefaults() {
+		setHidePlwin(true);
+		setCreateLogs(false);
+		setUseSessionPooling("true");
+		setServerLogDir(System.getProperty("java.io.tmpdir"));		
 	}
-
+	
 	public PrologSession getSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
 		try {
