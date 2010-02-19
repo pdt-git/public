@@ -61,7 +61,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
-import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
@@ -226,7 +226,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 
 			PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
 					.getLibraryManager();
-			PLUtil.configureFileSearchPath(mgr, s,
+			FileSearchPathConfigurator.configureFileSearchPath(mgr, s,
 					new String[] { PrologRuntime.LIB_PDT });
 
 			s.queryOnce("use_module(library('facade/pdt_workspace'))");

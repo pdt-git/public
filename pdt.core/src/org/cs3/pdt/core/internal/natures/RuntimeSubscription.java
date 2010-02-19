@@ -48,8 +48,8 @@ import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
@@ -140,7 +140,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		PrologSession s =null;
 		try {
 			s= pif.getSession(PrologInterface.NONE);
-			PLUtil.configureFileSearchPath(mgr, s,keys);
+			FileSearchPathConfigurator.configureFileSearchPath(mgr, s,keys);
 		} finally {
 			if (s != null) {
 				s.dispose();

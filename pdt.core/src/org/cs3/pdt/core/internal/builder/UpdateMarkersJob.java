@@ -14,8 +14,8 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CInteger;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -175,7 +175,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			return;
 		}
 
-		CTerm term = PLUtil.createCTerm(e.getEvent());
+		CTerm term = CTermUtil.createCTerm(e.getEvent());
 		if (!(term instanceof CCompound)) {
 			Debug.warning("wunder, wunder: term ist kein Compound:"
 					+ e.getEvent());
@@ -187,7 +187,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		CTerm argTerm = event.getArgument(0);
 		if (!(argTerm instanceof CInteger)) {
 			Debug.warning("wunder, wunder: argterm ist kein Integer:"
-					+ PLUtil.renderTerm(argTerm));
+					+ CTermUtil.renderTerm(argTerm));
 			Debug.warning("Subject: " + e.getSubject() + " , Event: \""
 					+ e.getEvent() + "\"");
 			return;
