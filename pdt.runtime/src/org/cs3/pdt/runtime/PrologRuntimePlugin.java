@@ -110,7 +110,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	private ResourceBundle resourceBundle;
 
 	private DefaultSAXPrologInterfaceRegistry registry;
-	private PrologLibraryManager libraryManager;
+	private static PrologLibraryManager libraryManager;
 	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
 	private HashMap<String, Map> globalHooks;
@@ -157,7 +157,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 
-	public PrologLibraryManager getLibraryManager() {
+	public static PrologLibraryManager getLibraryManager() {
 		synchronized (libraryManagerMux) {
 			if (libraryManager == null) {
 
@@ -170,7 +170,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 	
-	public String guessFileSearchPath(String libraryId) {
+	public static String guessFileSearchPath(String libraryId) {
 		PrologLibraryManager mgr = getLibraryManager();
 		if (mgr == null) {
 			return null;
@@ -251,7 +251,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		
 
 		prologInterface = AbstractPrologInterface.newInstance(AbstractPrologInterface.PL_INTERFACE_DEFAULT,name);
-
+		prologInterface.initOptions();
+		prologInterface.setFileSearchPath(guessFileSearchPath("pdt.runtime.socket.codebase"));
 		return prologInterface;
 	}
 
@@ -310,7 +311,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		return bootStrapContribForKey;
 	}
 
-	private void registerStaticLibraries() {
+	private static void registerStaticLibraries() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(PrologRuntime.PLUGIN_ID, PrologRuntime.EP_PROLOG_LIBRARY);
 		if (point == null) {
