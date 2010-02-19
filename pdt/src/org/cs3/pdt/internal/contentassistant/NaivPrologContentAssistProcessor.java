@@ -10,7 +10,7 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -130,7 +130,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				String name = ((CTerm) anAnswer.get("Name")).getFunctorValue();
 				String arity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
 				int parseInt = Integer.parseInt(arity);
-				Map<String, CTerm> tags = PLUtil.listAsMap((CTerm) anAnswer.get("Tags"));
+				Map<String, CTerm> tags = CTermUtil.listAsMap((CTerm) anAnswer.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
 												begin, len, name, parseInt, tags);
 				proposals.add(p);

@@ -17,9 +17,9 @@ import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionProxy;
 import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceEvent;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -498,7 +498,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 				.getLibraryManager();
 		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
-			PLUtil.configureFileSearchPath(mgr, s,
+			FileSearchPathConfigurator.configureFileSearchPath(mgr, s,
 					new String[] { PrologRuntime.LIB_PDT });
 			s.queryOnce("use_module(library('facade/pdt_outline'))");
 			s.queryOnce("use_module(library('pef/pef_api'))");
