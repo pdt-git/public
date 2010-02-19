@@ -39,36 +39,28 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.prolog;
+package org.cs3.pl.cterm;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
 import java.util.Vector;
 
 import org.cs3.pl.common.Util;
-import org.cs3.pl.cterm.CCompound;
-import org.cs3.pl.cterm.CInteger;
-import org.cs3.pl.cterm.CNil;
-import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.cterm.CTermFactory;
-import org.cs3.pl.cterm.CVariable;
+import org.cs3.pl.prolog.PrologInterface;
 
 /**
  * some frequently used code fragments related to the setup of prolog runtimes.
  * 
  */
-public class PLUtil {
+public class CTermUtil {
+	
 	public static boolean isList(CTerm term) {
 		if(term instanceof CNil){
 			return true;
 		}
 		return term.getFunctorValue().equals(".") && term.getArity() == 2;
 	}
+
 	public static void checkFlags(int flags) {
 		if(Util.flagsSet(flags,PrologInterface.CTERMS | PrologInterface.UNQUOTE_ATOMS) ){
 			throw new IllegalArgumentException("cannot combine CTERMS and UNTQUOTE_ATOMS");
@@ -77,70 +69,7 @@ public class PLUtil {
 			throw new IllegalArgumentException("cannot combine CTERMS and PROCESS_LISTS (yet)");
 		}
 	}
-	public static void configureFileSearchPath(PrologLibraryManager mgr,
-			PrologSession session, String[] libIds) throws PrologException,
-			PrologInterfaceException {
-
-		StringBuffer sb = new StringBuffer();
-		PrologLibrary[] required = getRequiredLibs(mgr, libIds);
-		for (int i = 0; i < required.length; i++) {
-			PrologLibrary lib = required[i];
-
-			if (sb.length() > 0) {
-				sb.append(',');
-			}
-			sb.append("(	user:file_search_path(" + lib.getAlias() + ", '"
-					+ lib.getPath() + "')" + "->	true"
-					+ ";	user:assert(file_search_path(" + lib.getAlias()
-					+ ", '" + lib.getPath() + "'))");
-			if ("true".equals(lib.getAttributeValue("hidden"))) {
-				sb.append(", pdt_util:assert(pdt_hidden_path('" + lib.getPath()
-						+ "'))");
-			}
-			sb.append(")");
-		}
-
-		session.queryOnce(sb.toString());
-
-	}
-
-	public static PrologLibrary[] getRequiredLibs(PrologLibraryManager mgr,
-			String[] libIds) {
-
-		Stack<String> todo = new Stack<String>();
-		Set<PrologLibrary> required = new HashSet<PrologLibrary>();
-		for (int i = 0; i < libIds.length; i++) {
-			if (mgr.resolveLibrary(libIds[i]) == null) {
-				throw new IllegalArgumentException("library id " + libIds[i]
-						+ " is unresolved");
-			}
-			if (mgr.getBrokenLibraries().contains(libIds[i])) {
-				throw new IllegalArgumentException("library id " + libIds[i]
-						+ " is broken");
-			}
-			todo.add(libIds[i]);
-
-		}
-
-		while (!todo.isEmpty()) {
-			String key = todo.pop();
-			PrologLibrary lib = mgr.resolveLibrary(key);
-			if (lib == null) {
-				// this should not happen
-				throw new IllegalStateException("unresoved: " + key
-						+ ". Bug in LibraryManager?");
-			}
-			if (!required.contains(lib)) {
-				required.add(lib);
-				todo.addAll(lib.getDependencies());
-			}
-
-		}
-
-		return required.toArray(new PrologLibrary[required
-				.size()]);
-	}
-
+	
 	public static CTerm[] listAsArray(CTerm term) {
 		Vector<CTerm> v = listAsVector(term);
 		return v.toArray(new CTerm[v.size()]);
@@ -156,7 +85,7 @@ public class PLUtil {
 		}
 		return v;
 	}
-
+	
 	/**
 	 * Converts a property list term to a Map.
 	 * 
@@ -201,110 +130,6 @@ public class PLUtil {
 	}
 
 
-	/**
-	 * lookup an entry in a red-black tree.
-	 * 
-	 * See module org/cs3/pdt/util/pdt_util_rbtree for details on the expected
-	 * datastructure. This method does NOT call prolog. It performs a binary
-	 * search on the CTerm data structure passed as first argument.
-	 * 
-	 * Note that only the functor name of key terms is compared. (I do not want
-	 * to implement deep standard-order term comparision in java).
-	 * 
-	 * @param tree
-	 * @param key
-	 * @return the first match found or null if none found.
-	 * 
-	 */
-	public static CTerm rbtreeLookup(CTerm tree, String key) {
-		while (tree instanceof CCompound) {// if it's a compound, it's not NIL.
-			CTerm keyTerm = ((CCompound) tree).getArgument(1);
-			String keyString = keyTerm.getFunctorValue();
-			int c = key.compareTo(keyString);
-			if (c < 0) {
-				tree = ((CCompound) tree).getArgument(0);
-			} else if (c == 0) {
-				return tree = ((CCompound) tree).getArgument(2);
-			} else if (c > 0) {
-				tree = ((CCompound) tree).getArgument(3);
-			}
-		}
-		// in a correctly formed rbtree, the invariant only fails if tree is
-		// NIL.
-		return null;
-	}
-
-	private static class _rbTreeNodeIterator implements Iterator<CCompound> {
-
-		/*
-		 * invariance: the left-most node that was not yet returned is top on
-		 * stack.
-		 */
-
-		private LinkedList<CTerm> stack = new LinkedList<CTerm>();
-
-		public _rbTreeNodeIterator(CTerm root) {
-			diveLeft(root);
-		}
-
-		public boolean hasNext() {
-			return !stack.isEmpty();
-		}
-
-		public CCompound next() {
-			// climb up
-			CCompound top = (CCompound) stack.removeLast();
-			// left subtree is already done. ->dive right
-			if (hasRightChild(top)) {
-				CCompound right = (CCompound) top.getArgument(3);
-				diveLeft(right);
-			}
-
-			return top;
-		}
-
-		private void diveLeft(CTerm node) {
-			while (!isEmptyTree(node)) {
-				stack.addLast(node);
-				node = ((CCompound) node).getArgument(0);
-
-			}
-
-		}
-
-		private boolean isEmptyTree(CTerm c) {
-			return isEmptyTree((CCompound) c);
-		}
-
-		private boolean isEmptyTree(CCompound c) {
-			return "black".equals(c.getFunctorValue())
-					&& c.getArgument(0) instanceof CNil
-					&& c.getArgument(1) instanceof CNil
-					&& c.getArgument(2) instanceof CNil
-					&& c.getArgument(3) instanceof CNil;
-		}
-
-		private boolean hasRightChild(CTerm node) {
-			if (!(node instanceof CCompound)) {
-				return false;
-			}
-			CCompound c = (CCompound) node;
-
-			return !isEmptyTree((CCompound) c.getArgument(3));
-		}
-
-		public void remove() {
-			throw new UnsupportedOperationException();
-
-		}
-
-	}
-
-	public static Iterator<CCompound> rbtreeIterateNodes(CTerm tree) {
-		return new _rbTreeNodeIterator(tree);
-
-	}
-
 	public static CTerm createCTerm(Object input) {
 		return CTermFactory.createCTerm(input);
 	}
@@ -333,7 +158,6 @@ public class PLUtil {
 			}
 			sb.append(')');
 		}*/
-
 	}
 
 	public static String renderSignature(CTerm sig, String defaultModule) {

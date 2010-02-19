@@ -53,10 +53,10 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
 import org.cs3.pl.cterm.CNil;
 import org.cs3.pl.cterm.CTerm;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -99,7 +99,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		public boolean isSyntaxError() {
 			// error(syntax_error(cannot_start_term), stream($stream(_), 9, 0,
 			// 116))
-			CTerm msg = PLUtil.createCTerm(event.message);
+			CTerm msg = CTermUtil.createCTerm(event.message);
 			if (!(msg instanceof CCompound)) {
 				return false;
 			}
