@@ -8,7 +8,7 @@ import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
-import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -51,7 +51,7 @@ IContentAssistProcessor  {
 				String name = ((CTerm) map.get("Name")).getFunctorValue();
 				int arity = Integer.parseInt(((CTerm) map.get("Arity"))
 							.getFunctorValue());
-				Map<String, CTerm> tags = PLUtil
+				Map<String, CTerm> tags = CTermUtil
 								.listAsMap((CTerm) map.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
 						begin, len, name, arity, tags);

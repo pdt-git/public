@@ -8,7 +8,7 @@ import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
@@ -29,7 +29,7 @@ public class CTermContentProviderTest extends TestCase {
 		file = PrologRuntimePlugin.getDefault().getResourceLocator().resolve(testdata);
 		
 		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
-		PLUtil.configureFileSearchPath(mgr, s, new String[] { PDTCore.ENGINE_ID });
+		FileSearchPathConfigurator.configureFileSearchPath(mgr, s, new String[] { PDTCore.ENGINE_ID });
 		s.queryOnce("use_module(library('/org/cs3/pdt/annotate/pdt_annotator')),"
 						+ "use_module(library('/org/cs3/pdt/core/pdt_meta_info')),"
 						+ "use_module(library('/org/cs3/pdt/model/predicate_definition_factory')),"
