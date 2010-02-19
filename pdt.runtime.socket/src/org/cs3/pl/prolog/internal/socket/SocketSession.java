@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -90,7 +90,7 @@ public class SocketSession implements PrologSession {
 
 	public List<Map<String, Object>> queryAll(String query) throws PrologException,
 		PrologInterfaceException {
-		PLUtil.checkFlags(flags);
+		CTermUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
@@ -114,7 +114,7 @@ public class SocketSession implements PrologSession {
 
 	public Map<String, Object> queryOnce(String query) throws PrologException,
 	PrologInterfaceException {
-		PLUtil.checkFlags(flags);
+		CTermUtil.checkFlags(flags);
 		if (isDisposed()) {
 			throw new IllegalStateException("Session is disposed!");
 		}
