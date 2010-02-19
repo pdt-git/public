@@ -10,8 +10,8 @@ import org.cs3.pl.cterm.CAtom;
 import org.cs3.pl.cterm.CString;
 import org.cs3.pl.cterm.CTerm;
 import org.cs3.pl.cterm.CTermFactory;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.cterm.CVariable;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 
 public class ValueReader {
@@ -111,7 +111,7 @@ public class ValueReader {
 				value=((CVariable)ctermValue).getFunctorValue();
 			}
 			else{
-				value=PLUtil.renderTerm(ctermValue);
+				value=CTermUtil.renderTerm(ctermValue);
 			}
 		}
 		return value;

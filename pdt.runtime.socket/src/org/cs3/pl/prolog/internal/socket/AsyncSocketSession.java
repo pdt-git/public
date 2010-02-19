@@ -48,11 +48,11 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.AsyncPrologSessionEvent;
 import org.cs3.pl.prolog.AsyncPrologSessionListener;
 import org.cs3.pl.prolog.AsyncPrologSessionListener2;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -420,7 +420,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 	
 	public void queryOnce(Object ticket, String query,int flags) throws PrologInterfaceException {
-		PLUtil.checkFlags(flags);
+		CTermUtil.checkFlags(flags);
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");
 		}
@@ -442,7 +442,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		queryAll(ticket,query,this.flags);
 	}
 	public void queryAll(Object ticket, String query,int flags) throws PrologInterfaceException {
-		PLUtil.checkFlags(flags);
+		CTermUtil.checkFlags(flags);
 		if(isDisposed()){
 			throw new IllegalStateException("Session is disposed!");
 		}
