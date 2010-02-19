@@ -106,11 +106,41 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	// The shared instance.
 	private static PrologRuntimePlugin plugin;
+	// Resource bundle.
+	private ResourceBundle resourceBundle;
+
+	private DefaultSAXPrologInterfaceRegistry registry;
+	private PrologLibraryManager libraryManager;
+	private DefaultResourceFileLocator resourceLocator;
+	private PrologContextTrackerService contextTrackerService;
+	private HashMap<String, Map> globalHooks;
+	private Map<String, List<BootstrapPrologContribution>> bootStrapContribForKey;
+	private Map<String, BootstrapPrologContribution> allBootStrapLists = new HashMap<String, BootstrapPrologContribution>();
+	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
+	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
+
+	private final static Object contextTrackerMux = new Object();
+	private final static Object libraryManagerMux = new Object();
+	private final static Object globalHooksMux = new Object();
+	private final static Object registryMux = new Object();
+	private static final Object preferencesMux = new Object();
+
+	public PrologRuntimePlugin() {
+		super();
+		plugin = this;
+		try {
+			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.runtime.PrologRuntimePluginResources");
+		} catch (MissingResourceException x) {
+			resourceBundle = null;
+		}
+	}
 
 	/**
 	 * Returns the shared instance.
 	 */
 	public static PrologRuntimePlugin getDefault() {
+		if (plugin == null)
+			plugin = new PrologRuntimePlugin();
 		return plugin;
 	}
 
@@ -127,28 +157,6 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 	}
 
-	// Resource bundle.
-	private ResourceBundle resourceBundle;
-
-
-
-	private DefaultSAXPrologInterfaceRegistry registry;
-	private PrologLibraryManager libraryManager;
-	private DefaultResourceFileLocator resourceLocator;
-	private PrologContextTrackerService contextTrackerService;
-	private HashMap<String, Map> globalHooks;
-	private Map<String, List<BootstrapPrologContribution>> bootStrapContribForKey;
-	private Map<String, BootstrapPrologContribution> allBootStrapLists = new HashMap<String, BootstrapPrologContribution>();
-	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
-	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
-
-
-	private final static Object contextTrackerMux = new Object();
-	private final static Object libraryManagerMux = new Object();
-	private final static Object globalHooksMux = new Object();
-	private final static Object registryMux = new Object();
-	private static final Object preferencesMux = new Object();
-
 	public PrologLibraryManager getLibraryManager() {
 		synchronized (libraryManagerMux) {
 			if (libraryManager == null) {
@@ -161,6 +169,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			return libraryManager;
 		}
 	}
+	
 	public String guessFileSearchPath(String libraryId) {
 		PrologLibraryManager mgr = getLibraryManager();
 		if (mgr == null) {
@@ -180,6 +189,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		}
 		return resourceLocator;
 	}
+	
 	public File ensureInstalled(String res, Class<?> clazz) {
 		File f = getResourceLocator().resolve(res);
 		if (f.exists()) {
@@ -234,18 +244,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		});
 	}
 
-	/**
-	 * The constructor.
-	 */
-	public PrologRuntimePlugin() {
-		super();
-		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("prg.cs3.pdt.runtime.PrologRuntimePluginResources");
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
-	}
+
 	
 	private PrologInterface createPrologInterface(String name) {
 		PrologInterface prologInterface = null;
@@ -749,7 +748,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	 * @throws PrologInterfaceException
 	 */
 	public PrologInterface getPrologInterface(String key) {
-		return getPrologInterface(new DefaultSubscription(null, key, null, null));
+		DefaultSubscription defaultSubscription = new DefaultSubscription(null, key, null, null);
+		return getPrologInterface(defaultSubscription);
 	}
 
 	/**
