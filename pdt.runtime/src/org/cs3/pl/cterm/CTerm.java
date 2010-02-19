@@ -43,7 +43,6 @@ package org.cs3.pl.cterm;
 
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.internal.parser.ASTNode;
-import org.cs3.pl.prolog.PLUtil;
 
 public class CTerm {
 	protected ASTNode node;
@@ -54,7 +53,7 @@ public class CTerm {
 	}
 	
 	public String toString() {
-		return PLUtil.renderTerm(this);
+		return CTermUtil.renderTerm(this);
 	}
 		
 	public String getFunctorValue() {

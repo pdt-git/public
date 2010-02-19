@@ -50,7 +50,6 @@ import java.util.Set;
 
 
 /**
- * TODO: this should be an interface.
  * TODO: add docs.
  * @author lukas
  *
@@ -85,7 +84,6 @@ public class PrologLibraryManager {
 		for (Iterator<String> it = todo.iterator(); it.hasNext();) {
 			String key = it.next();
 			check(key, done);
-			
 		}
 	}
 	
@@ -106,10 +104,8 @@ public class PrologLibraryManager {
 			if(brokenLibraries.contains(dep)
 			||unresolvedDependencies.contains(dep)){
 				brokenLibraries.add(key);
-				
 			}
 		}
-		
 	}
 
 	public void addLibrary(PrologLibrary nlib){
@@ -122,7 +118,6 @@ public class PrologLibraryManager {
 		check();
 	}
 	
-		
 	public Set<String> getUnresolvedDependencies(){
 		return Collections.unmodifiableSet(unresolvedDependencies);
 	}

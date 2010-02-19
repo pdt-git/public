@@ -15,6 +15,7 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CCompound;
+import org.cs3.pl.cterm.CTermUtil;
 
 public class UDPEventDispatcher implements IPrologEventDispatcher{
 
@@ -31,10 +32,10 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	
 	private void dispatch(DatagramPacket p) {
 		String data = new String(p.getData(),p.getOffset(),p.getLength());
-		CCompound term = (CCompound) PLUtil.createCTerm(data);
-		String ticket = PLUtil.renderTerm(term.getArgument(0));
-		String subject = PLUtil.renderTerm(term.getArgument(1));
-		String event = PLUtil.renderTerm(term.getArgument(2));
+		CCompound term = (CCompound) CTermUtil.createCTerm(data);
+		String ticket = CTermUtil.renderTerm(term.getArgument(0));
+		String subject = CTermUtil.renderTerm(term.getArgument(1));
+		String event = CTermUtil.renderTerm(term.getArgument(2));
 		if(event.equals("invalid")){
 			Debug.debug("debug");
 		}
@@ -71,7 +72,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			public void onInit(PrologInterface pif, PrologSession initSession)
 					throws PrologException, PrologInterfaceException {
 
-				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), initSession,
+				FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(), initSession,
 						new String[] { "pdt.runtime.library.pif" });
 				initSession.queryOnce("use_module(library(pif_observe2))");
 			}
@@ -126,7 +127,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	}
 
 	static String canonical(String in){
-		return PLUtil.renderTerm(PLUtil.createCTerm(in));
+		return CTermUtil.renderTerm(CTermUtil.createCTerm(in));
 	}
 	
 	/* (non-Javadoc)

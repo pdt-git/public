@@ -3,8 +3,8 @@ package org.cs3.pdt.runtime.internal;
 import java.io.File;
 
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
@@ -61,7 +61,7 @@ public class LifeCycleHookProxy implements LifeCycleHook{
 	
 	public void onInit(PrologInterface pif, PrologSession initSession)
 			throws PrologInterfaceException {
-		PLUtil.configureFileSearchPath(libmgr, initSession, dependencies);
+		FileSearchPathConfigurator.configureFileSearchPath(libmgr, initSession, dependencies);
 		for (int i = 0; i < consults.length; i++) {
 			initSession.queryOnce("ensure_loaded('"+Util.prologFileName(consults[i])+"')");
 		}

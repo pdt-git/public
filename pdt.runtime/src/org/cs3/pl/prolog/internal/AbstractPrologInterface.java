@@ -55,10 +55,10 @@ import java.util.WeakHashMap;
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.Disposable;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PLUtil;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -351,7 +351,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	public PrologSession getSession(int flags) throws PrologInterfaceException {
 
-		PLUtil.checkFlags(flags);
+		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
 				throw new PrologInterfaceException(getError());
@@ -530,7 +530,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	}
 
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException {
-		PLUtil.checkFlags(flags);
+		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
 				throw new PrologInterfaceException(getError());

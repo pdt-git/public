@@ -73,7 +73,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
-				PLUtil.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});
+				FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});
 				initSession.queryOnce("use_module(library(pif_observe))");				
 			}
 

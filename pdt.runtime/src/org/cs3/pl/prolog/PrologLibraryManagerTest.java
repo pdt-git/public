@@ -60,6 +60,27 @@ import org.cs3.pl.common.Util;
 public class PrologLibraryManagerTest extends TestCase {
 	
 	/*
+	 * For each test the libraries will be added to the known libraries
+	 * in the order they appear in libs. After that they will be removed 
+	 * in the same order.
+	 * (first to last are added than first to last are removed)
+	 * 
+	 * After each change (add or remove) doTest checks whether the right
+	 * libraries are resolved, broken or unresolved. To do this the
+	 * given situation is compared to the 3 strings arrays "broken", "resolved" 
+	 * and "unresolved" as followes:
+	 * 
+	 * The first element of the array shows the values for the situation after the
+	 * first library was added, the second shows the values for the situation after
+	 * the first and second libraries are added. When all are added the next element
+	 * shows the situation after the first library was removed, the element after that
+	 * shows the situation after the first and second libraries are removed and so on.
+	 * The last element shows the situation after all libraries are removed (all empty).
+	 * 
+	 */
+	
+	
+	/*
 	digraph test01 {	
 		A->B;
 		A->C
@@ -67,9 +88,9 @@ public class PrologLibraryManagerTest extends TestCase {
 	*/
 
 	public void test01() throws Throwable{
-		Lib a = new Lib("A","BC");
-		Lib b = new Lib("B");
-		Lib c = new Lib("C");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","BC");
+		DummyPrologLibrary b = new DummyPrologLibrary("B");
+		DummyPrologLibrary c = new DummyPrologLibrary("C");
 		PrologLibrary[] libs ={a,b,c};		
 		String[] broken = {"A","A","","","",""};
 		String[] unresolved = {"BC","C","","","",""};
@@ -87,8 +108,8 @@ public class PrologLibraryManagerTest extends TestCase {
 	*/
 
 	public void test02() throws Throwable{
-		Lib a = new Lib("A","BB");
-		Lib b = new Lib("B");		
+		DummyPrologLibrary a = new DummyPrologLibrary("A","BB");
+		DummyPrologLibrary b = new DummyPrologLibrary("B");		
 		PrologLibrary[] libs ={a,b};		
 		String[] broken = {"A","","",""};
 		String[] unresolved = {"B","","",""};
@@ -106,9 +127,9 @@ public class PrologLibraryManagerTest extends TestCase {
 	}
 	*/	
 	public void test03() throws Throwable{
-		Lib a = new Lib("A","C");
-		Lib b = new Lib("B", "C");		
-		Lib c = new Lib("C");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","C");
+		DummyPrologLibrary b = new DummyPrologLibrary("B", "C");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C");
 		PrologLibrary[] libs ={a,b,c};		
 		String[] broken = {"A","AB","","","",""};
 		String[] unresolved = {"C","C","","","",""};
@@ -127,10 +148,10 @@ public class PrologLibraryManagerTest extends TestCase {
 	*/
 	
 	public void test04() throws Throwable{
-		Lib a = new Lib("A","B");
-		Lib b = new Lib("B");		
-		Lib c = new Lib("C","D");
-		Lib d = new Lib("D");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","B");
+		DummyPrologLibrary b = new DummyPrologLibrary("B");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C","D");
+		DummyPrologLibrary d = new DummyPrologLibrary("D");
 		PrologLibrary[] libs ={a,b,c,d};		
 		String[] broken = {"A","","C","","",
 				           "", "", "", ""};
@@ -154,10 +175,10 @@ public class PrologLibraryManagerTest extends TestCase {
 
 	
 	public void test05() throws Throwable{
-		Lib a = new Lib("A","CD");
-		Lib b = new Lib("B","CD");		
-		Lib c = new Lib("C");
-		Lib d = new Lib("D");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","CD");
+		DummyPrologLibrary b = new DummyPrologLibrary("B","CD");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C");
+		DummyPrologLibrary d = new DummyPrologLibrary("D");
 		PrologLibrary[] libs ={a,b,c,d};		
 		String[] broken = {"A","AB","AB","",
 				           "", "", "", ""};
@@ -181,10 +202,10 @@ public class PrologLibraryManagerTest extends TestCase {
 
 	
 	public void test06() throws Throwable{
-		Lib a = new Lib("A","BC");
-		Lib b = new Lib("B","D");		
-		Lib c = new Lib("C","D");
-		Lib d = new Lib("D");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","BC");
+		DummyPrologLibrary b = new DummyPrologLibrary("B","D");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C","D");
+		DummyPrologLibrary d = new DummyPrologLibrary("D");
 		PrologLibrary[] libs ={a,b,c,d};		
 		String[] broken = {"A","AB","ABC","",
 				           "", "", "", ""};
@@ -208,10 +229,10 @@ public class PrologLibraryManagerTest extends TestCase {
 
 	
 	public void test07() throws Throwable{
-		Lib a = new Lib("A","BC");
-		Lib b = new Lib("B");		
-		Lib c = new Lib("C");
-		Lib d = new Lib("D","BC");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","BC");
+		DummyPrologLibrary b = new DummyPrologLibrary("B");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C");
+		DummyPrologLibrary d = new DummyPrologLibrary("D","BC");
 		PrologLibrary[] libs ={a,b,c,d};		
 		String[] broken = {"A","A","","",
 				           "", "D", "D", ""};
@@ -235,12 +256,12 @@ public class PrologLibraryManagerTest extends TestCase {
 
 	
 	public void test08() throws Throwable{
-		Lib a = new Lib("A","BC");
-		Lib b = new Lib("B","A");		
-		Lib c = new Lib("C","D");
-		Lib d = new Lib("D");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","BC");
+		DummyPrologLibrary b = new DummyPrologLibrary("B","A");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C","D");
+		DummyPrologLibrary d = new DummyPrologLibrary("D");
 		PrologLibrary[] libs ={a,b,c,d};		
-		String[] broken = {"A","AB","ABC","",
+		String[] broken = {"A","A","AC","",
 				           "B", "", "", ""};
 		String[] unresolved = {"BC","C","D","",
 				               "A","", "", ""};
@@ -258,10 +279,10 @@ public class PrologLibraryManagerTest extends TestCase {
 	}
 	*/	
 	public void test09() throws Throwable{
-		Lib a = new Lib("A","C");
-		Lib b = new Lib("B","A");		
-		Lib c = new Lib("C");
-		Lib d = new Lib("D","C");
+		DummyPrologLibrary a = new DummyPrologLibrary("A","C");
+		DummyPrologLibrary b = new DummyPrologLibrary("B","A");		
+		DummyPrologLibrary c = new DummyPrologLibrary("C");
+		DummyPrologLibrary d = new DummyPrologLibrary("D","C");
 		PrologLibrary[] libs ={a,b,c,d};		
 		String[] broken = {"A","AB","","",
 				           "B", "", "D", ""};
@@ -274,58 +295,6 @@ public class PrologLibraryManagerTest extends TestCase {
 	}
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	private static class Lib implements PrologLibrary{
-		String id;
-		Set<String> deps;
-		
-
-		public Lib(String id, String ds){
-			this.id=id;
-			this.deps=new HashSet<String>();
-			for (int i = 0; i < ds.length(); i++) {
-				deps.add(String.valueOf(ds.charAt(i)));
-			}
-		}
-		public String toString() {
-		
-			return "Lib "+id+" -> "+Util.prettyPrint(deps.toArray());
-		}
-		public Lib(String id) {
-			this.id=id;
-			this.deps=new HashSet<String>();
-		}
-
-		public String getId() {
-			return id;
-		}
-
-		public String getPath() {
-			return "path";
-		}
-
-		public String getAlias() {
-			return "alias";
-		}
-
-		public Set<String> getDependencies() {
-			return deps;
-		}
-		public String getAttributeValue(String attr) {
-			return null;
-		}
-		
-	}
-	
-	
-
 	private void doTest(PrologLibrary[] libs, String[] resolved, String[] unresolved, String[] broken) {
 		Map<String, PrologLibrary> allLibs = getAllLibs(libs); 
 		PrologLibraryManager mgr = new PrologLibraryManager();
