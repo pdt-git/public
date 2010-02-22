@@ -9,11 +9,6 @@ public class StandaloneSocketPrologInterface extends SocketPrologInterface {
 	}
 	
 	@Override
-	protected void initPath() {
-		;
-	}
-	
-	@Override
 	public void initOptions(){
 		setStandAloneServer("false");
 		setHost("localhost");
