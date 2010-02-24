@@ -19,6 +19,8 @@
 	]
 ).
 
+:- multifile $pef_interprete_undo_as_assert/1.
+
 :- use_module(library('org/cs3/pdt/util/pdt_util_context')).	
 
 % these rules are generated during the expansion of the pef definitions
