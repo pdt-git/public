@@ -193,10 +193,11 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 						.findInstance(ReusableSocket.class);
 			}
 			if (socket == null) {
-				Debug.info("creating new ReusableSocket");
 				socket = new ReusableSocket(getHost(), port);
+				Debug.info("sync session creating new ReusableSocket: " + socket.getLocalPort());
+
 			} else {
-				Debug.info("reusing old ReusableSocket");
+				Debug.info("sync session reusing old ReusableSocket: " + socket.getLocalPort());
 			}
 
 			SocketClient client = new SocketClient(socket);
@@ -218,10 +219,10 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 						.findInstance(ReusableSocket.class);
 			}
 			if (socket == null) {
-				Debug.info("creating new ReusableSocket");
 				socket = new ReusableSocket(getHost(), port);
+				Debug.info("async session creating new ReusableSocket: " + socket.getLocalPort());
 			} else {
-				Debug.info("reusing old ReusableSocket");
+				Debug.info("async session reusing old ReusableSocket: " + socket.getLocalPort());
 			}
 			SocketClient client = new SocketClient(socket);
 			client.setParanoiaEnabled(false);

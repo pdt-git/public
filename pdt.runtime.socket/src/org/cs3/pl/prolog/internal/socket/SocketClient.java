@@ -114,8 +114,10 @@ public class SocketClient {
 		try {
 			if (pool != null) {
 				reset();
+	            Debug.info("recycle socket: " + socket.getLocalPort());
 				pool.recycle(socket);
 			} else {
+	            Debug.info("destroy socket: " + socket.getLocalPort());
 				socket.destroy();
 			}
 		} finally {
