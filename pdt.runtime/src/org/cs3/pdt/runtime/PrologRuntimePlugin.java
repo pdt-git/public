@@ -66,7 +66,6 @@ import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
-import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
@@ -589,10 +588,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				for (int j = 0; j < celems.length; j++) {
 
 					final IConfigurationElement celem = celems[j];
-					if (celem.getName().equals("hook")) {
-						LifeCycleHookDescriptor descr = createHookDescriptor(celem, extension);
-						getPrologInterfaceRegistry().addHookDescriptor(descr);
-					} else if (celem.getName().equals("registryHook")) {
+					if (celem.getName().equals("registryHook")) {
 						RegistryHook hook = (RegistryHook) celem.createExecutableExtension("class");
 						registryHooks.add(hook);
 					} else {
@@ -604,63 +600,6 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 			Debug.rethrow(e);
 		}
 
-	}
-
-	private LifeCycleHookDescriptor createHookDescriptor(final IConfigurationElement celem, IExtension extension) throws CoreException {
-		String dependsOn = celem.getAttribute("dependsOn");
-		if (dependsOn == null) {
-			dependsOn = "";
-		}
-		String[] dependencies = Util.split(dependsOn, ",");
-		final String id = celem.getAttribute("id");
-		String pifKey = celem.getAttribute("key");
-
-		IConfigurationElement[] children = celem.getChildren("consult");
-		final File[] consults = new File[children.length];
-		for (int k = 0; k < children.length; k++) {
-			String resName = children[k].getAttribute("resource");
-			Debug.debug("got this resname: " + resName);
-			String namespace = extension.getNamespaceIdentifier();
-			Debug.debug("got this namespace: " + namespace);
-			URL url = FileLocator.find(Platform.getBundle(namespace), new Path(resName), null);
-			try {
-				Debug.debug("trying to resolve this url: " + url);
-				url = FileLocator.toFileURL(url);
-			} catch (Exception e) {
-				Debug.rethrow("Problem resolving url: " + url.toString(), e);
-			}
-			consults[k] = new File(url.getFile());
-		}
-		children = celem.getChildren("hookDependency");
-		final String[] hookDependencies = new String[children.length + dependencies.length];
-		for (int k = 0; k < children.length; k++) {
-			hookDependencies[k] = children[k].getAttribute("hook");
-		}
-		System.arraycopy(dependencies, 0, hookDependencies, children.length, hookDependencies.length);
-
-		children = celem.getChildren("libraryDependency");
-		final String[] libraryDependencies = new String[children.length];
-		for (int k = 0; k < libraryDependencies.length; k++) {
-			libraryDependencies[k] = children[k].getAttribute("library");
-		}
-
-		children = celem.getChildren("tag");
-		final String[] tags = new String[children.length + (pifKey == null ? 0 : 1)];
-		for (int k = 0; k < tags.length; k++) {
-			tags[k] = children[k].getAttribute("name");
-		}
-		if (pifKey != null) {
-			tags[children.length] = pifKey;
-		}
-
-		return createHookDescriptor(celem, id, consults, hookDependencies, libraryDependencies, tags);
-	}
-
-	private LifeCycleHookDescriptor createHookDescriptor(final IConfigurationElement celem, final String id, final File[] consults,
-			final String[] hookDependencies, final String[] libraryDependencies, final String[] tags) {
-		LifeCycleHookDescriptor descr = new LifeCycleHookDescriptor(this, tags, consults, hookDependencies,
-				id, libraryDependencies, celem);
-		return descr;
 	}
 
 	/**
