@@ -43,7 +43,6 @@ package org.cs3.pdt.runtime;
 
 import java.util.Set;
 
-import org.cs3.pdt.runtime.internal.LifeCycleHookDescriptor;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 
@@ -120,30 +119,6 @@ public interface PrologInterfaceRegistry {
 	public void removePrologInterfaceRegistryListener(
 			PrologInterfaceRegistryListener l);
 
-	
-	
-	/**
-	 * Add a hook descriptor to the registry.
-	 * 
-	 * For each distinct tuple (PrologInterface, Data) where
-	 *   - PrologInterface is a registered Prolog Interface
-	 *   - and Data is the user data of a registered subscription refering to PrologInterface
-	 *   - that subscription has at least one tag in common with this hook descriptor.  
-	 * a hook will be created using the descriptor, it will be parameterized with 
-	 * the user data and will be registered with the prolog interface instance.
-	 * If the prolog interface instance is already running, both the onInit() and 
-	 * afterInit() methods will be called.  
-	 */
-	public void addHookDescriptor(LifeCycleHookDescriptor descr);
-	
-	/**
-	 * Remove a hook descriptor from the registry.
-	 * 
-	 * In addition, this will remove ALL hooks with the given hook id
-	 * from ALL registered Prolog Interfaces.   
-	 */
-	public void removeHookDescriptor(LifeCycleHookDescriptor descr);
-	
 	
 	/**
 	 * Register a PrologInterface with this registry.

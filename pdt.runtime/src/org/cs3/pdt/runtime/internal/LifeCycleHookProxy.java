@@ -15,7 +15,6 @@ public class LifeCycleHookProxy implements LifeCycleHook{
 	private String[] dependencies;
 	private File[] consults;
 	private LifeCycleHook target;
-	private LifeCycleHookDescriptor descriptor;
 	private Object data;
 	
 	public LifeCycleHookProxy(LifeCycleHook hook,
@@ -32,7 +31,7 @@ public class LifeCycleHookProxy implements LifeCycleHook{
 			return false;
 		}
 		LifeCycleHookProxy other = (LifeCycleHookProxy) obj;
-		return this.descriptor.equals(other.descriptor)&&this.data.equals(other.data);
+		return this.data.equals(other.data);
 	}
 	
 	public void onError(PrologInterface pif) {
