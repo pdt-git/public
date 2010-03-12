@@ -70,6 +70,7 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.BootstrapPrologContribution;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -78,8 +79,8 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
-import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
+import org.cs3.pl.prolog.internal.PreferenceProvider;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
@@ -102,6 +103,14 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
+
+	public class EclipsePreferenceProvider implements PreferenceProvider {
+
+		@Override
+		public String getPreference(String key) {
+			return plugin.overridePreferenceBySystemProperty(key);
+		}
+	}
 
 	// The shared instance.
 	private static PrologRuntimePlugin plugin;
@@ -250,7 +259,8 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 		
 
 		prologInterface = AbstractPrologInterface.newInstance(AbstractPrologInterface.PL_INTERFACE_DEFAULT,name);
-		prologInterface.initOptions();
+		prologInterface.initOptions(new EclipsePreferenceProvider());
+		
 		prologInterface.setFileSearchPath(guessFileSearchPath("pdt.runtime.socket.codebase"));
 		return prologInterface;
 	}
@@ -298,7 +308,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	}
 
 	private void initPrologInterfaceOptions(PrologInterface prologInterface) {
-		prologInterface.initOptions();
+		prologInterface.initOptions(new EclipsePreferenceProvider());
 	}
 
 
@@ -337,7 +347,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 				try {
 
 					Debug.debug("trying to resolve this url: " + url);
-					url = Platform.asLocalURL(url);
+					url = FileLocator.toFileURL(url);
 				} catch (Exception e) {
 					Debug.rethrow("Problem resolving url: " + url.toString(), e);
 				}
