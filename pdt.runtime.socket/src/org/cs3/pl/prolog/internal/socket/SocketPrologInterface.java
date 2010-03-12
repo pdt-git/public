@@ -44,8 +44,6 @@ package org.cs3.pl.prolog.internal.socket;
 import java.io.File;
 import java.io.IOException;
 
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.preferences.PreferenceInitializer;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
@@ -53,9 +51,10 @@ import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
+import org.cs3.pl.prolog.internal.PreferenceProvider;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
-public class SocketPrologInterface extends AbstractPrologInterface {
+public class SocketPrologInterface extends AbstractPrologInterface implements SocketPrologInterfacePreferences {
 
 	private class InitSession extends SocketSession {
 		public InitSession(SocketClient client, AbstractPrologInterface pif,int flags)
@@ -91,17 +90,6 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 		}
 	}
 
-	/************************************************/
-	/**** Options [Start] *****/
-	/************************************************/
-		
-	public static final String PREF_PORT = "pif.port";
-	public static final String PREF_HIDE_PLWIN = "pif.hide_plwin";
-	public static final String PREF_SERVER_LOGDIR = "pif.server_log_dir";
-	public static final String PREF_MAIN_FILE = "pif.main_file";
-	public final static String PREF_USE_POOL = "pif.use_pool";
-	public static final String PREF_CREATE_SERVER_LOGS = "pif.create_logs";
-	
 	private boolean useSessionPooling = true;
 	private int port = 9999;
 	private boolean hidePlwin;
@@ -150,14 +138,14 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	public String getServerLogDir(){
 		return serverLogDir;
 	}
-	public void initOptions(){
-		super.initOptions();
-		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
-		setServerPort(plugin.overridePreferenceBySystemProperty(PREF_PORT));
-		setHidePlwin(plugin.overridePreferenceBySystemProperty(PREF_HIDE_PLWIN));
-		setCreateLogs(plugin.overridePreferenceBySystemProperty(PREF_CREATE_SERVER_LOGS));
-		setUseSessionPooling(plugin.overridePreferenceBySystemProperty(PREF_USE_POOL));
-		setServerLogDir(plugin.overridePreferenceBySystemProperty(PREF_SERVER_LOGDIR));		
+	public void initOptions(PreferenceProvider provider) {
+		super.initOptions(provider);
+		setServerPort(provider.getPreference(SocketPrologInterface.PREF_PORT));
+		setHidePlwin(provider.getPreference(SocketPrologInterface.PREF_HIDE_PLWIN));
+		setCreateLogs(provider.getPreference(SocketPrologInterface.PREF_CREATE_SERVER_LOGS));
+		setUseSessionPooling(provider.getPreference(SocketPrologInterface.PREF_USE_POOL));
+		setServerLogDir(provider.getPreference(SocketPrologInterface.PREF_SERVER_LOGDIR));		
+
 	}
 	
 	
@@ -374,14 +362,15 @@ public class SocketPrologInterface extends AbstractPrologInterface {
 	 // modified from factory
 	 // =============================================================
     
-	public static PrologInterface newInstance(){
-	    	
-	        return newInstance("egal",null);
-	    }
-	    
-	    public static PrologInterface newInstance(String fqn,String name) {
-	    	// fqn ist egal, da diese Methode die allgemeinere aus der abstrakten oberklasse überschreibt
-	    	return new SocketPrologInterface(name);
-	    }
+	public static PrologInterface newInstance() {
+
+		return newInstance("egal", null);
+	}
+
+	public static PrologInterface newInstance(String fqn, String name) {
+		// fqn ist egal, da diese Methode die allgemeinere aus der abstrakten
+		// oberklasse überschreibt
+		return new SocketPrologInterface(name);
+	}
 	
 }
