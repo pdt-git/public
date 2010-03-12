@@ -58,10 +58,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.InputStreamPump;
+import org.cs3.pl.common.PDTConstants;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.prolog.BootstrapPrologContribution;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 
@@ -211,7 +212,7 @@ private static JackTheProcessRipper processRipper;
 	private static String[] getCommands(SocketPrologInterface socketPif) {
 		String executable = socketPif.getExecutable();
 		if (!executable.contains(" -L")) {
-			executable += " " + PrologInterface.STACK_COMMMAND_LINE_PARAMETERS;
+			executable += " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 		}
 		String[] command = Util.split(executable, " ");
 		return command;
