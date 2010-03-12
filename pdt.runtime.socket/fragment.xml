@@ -9,19 +9,4 @@
             path="library/socket/">
       </library>
    </extension>
-	<extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            category="org.cs3.pdt.runtime.preferences.PreferencePage"
-            class="org.cs3.pdt.runtime.socket.preferences.PreferencePageSocket"
-            id="org.cs3.pdt.runtime.socket.preferences.PreferencePageSocket"
-            name="Socket Preferences">
-      </page>
-   </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="org.cs3.pdt.runtime.socket.preferences.PreferenceInitializer">
-      </initializer>
-   </extension>
 </fragment>
