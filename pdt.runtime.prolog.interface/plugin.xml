@@ -2,5 +2,6 @@
 <?eclipse version="3.0"?>
 <plugin>
    <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>
+     <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension-point id="prologLibrary" name="Prolog Library" schema="schema/prologLibrary.exsd"/>
 </plugin>

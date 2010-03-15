@@ -46,7 +46,7 @@ import java.util.Map;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.runtime.ui.DefaultSubscription;
+import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.FileSearchPathConfigurator;

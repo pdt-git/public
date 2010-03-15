@@ -52,32 +52,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.URL;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
-import org.cs3.pdt.runtime.PrologRuntime;
+import org.cs3.pdt.runtime.DefaultSubscription;
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.RegistryHook;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
-import org.cs3.pdt.runtime.internal.DefaultSAXPrologInterfaceRegistry;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.DefaultPrologLibrary;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
-import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.UDPEventDispatcher;
@@ -88,7 +84,6 @@ import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -99,7 +94,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.util.BundleUtility;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -118,16 +112,13 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	// Resource bundle.
 	private ResourceBundle resourceBundle;
 
-	private DefaultSAXPrologInterfaceRegistry registry;
 	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
-	private HashMap<String, Map> globalHooks;
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
+	private boolean savedRegistryLoaded;
 
 	private final static Object contextTrackerMux = new Object();
-	private final static Object globalHooksMux = new Object();
-	private final static Object registryMux = new Object();
 	private static final Object preferencesMux = new Object();
 
 	public PrologRuntimeUIPlugin() {
@@ -289,35 +280,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 
 
-	protected void registerStaticHooks() {
-		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntimeUI.PLUGIN_ID, PrologRuntimeUI.EP_HOOKS);
-		if (point == null) {
-			Debug.error("could not find the extension point " + PrologRuntimeUI.EP_HOOKS);
-			throw new RuntimeException("could not find the extension point " + PrologRuntimeUI.EP_HOOKS);
-		}
-		IExtension[] extensions = point.getExtensions();
-		try {
-			for (int i = 0; i < extensions.length; i++) {
-				IExtension extension = extensions[i];
-				IConfigurationElement[] celems = extension.getConfigurationElements();
-				for (int j = 0; j < celems.length; j++) {
-
-					final IConfigurationElement celem = celems[j];
-					if (celem.getName().equals("registryHook")) {
-						RegistryHook hook = (RegistryHook) celem.createExecutableExtension("class");
-						registryHooks.add(hook);
-					} else {
-						Debug.warning("hmmm... asumed a hook, but got a " + celem.getName());
-					}
-				}
-			}
-		} catch (CoreException e) {
-			Debug.rethrow(e);
-		}
-
-	}
-
 	/**
 	 * register all trackers that are defined using the extension point
 	 * org.cs3.pdt.runtime.prologContextTracker.
@@ -383,6 +345,15 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 	}
 
+	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
+		
+		PrologInterfaceRegistry pir = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		if(!savedRegistryLoaded){
+			loadSavedRegistry();
+		}
+		return pir;
+	}
+
 	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif) {
 		IPrologEventDispatcher r = dispatchers.get(pif);
 		if (r == null) {
@@ -428,7 +399,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 			pif = createPrologInterface(pifKey);
 			initPrologInterfaceOptions(pif);
 			r.addPrologInterface(pifKey, pif);
-			addGlobalHooks(pifKey, pif);
+			PrologRuntimePlugin.getDefault().addGlobalHooks(pifKey, pif);
 		}
 		List<String> contributionKeys = s.getBootstrapConstributionKeys();
 		for (String contributionKey : contributionKeys) {
@@ -460,36 +431,11 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		return pif;
 	}
 
-	private void addGlobalHooks(String pifKey, PrologInterface pif) {
-		Map hooks = getGlobalHooks().get(pifKey);
-		if (hooks != null) {
-			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
-				_HookRecord record = it.next();
-				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
-			}
-		}
-		hooks = getGlobalHooks().get("");
-		if (hooks != null) {
-			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
-				_HookRecord record = it.next();
-				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
-			}
-		}
-	}
+	
 
-	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
-		synchronized (registryMux) {
-			if (this.registry == null) {
-				this.registry = new DefaultSAXPrologInterfaceRegistry();
-				initRegistry();
-			}
-			return this.registry;
-		}
-
-	}
-
-	private void initRegistry() {
+	private void loadSavedRegistry() {
 		try {
+			
 			ISavedState lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(this, new _SaveParticipant());
 
 			if (lastState != null) {
@@ -499,14 +445,10 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 				if (file.canRead()) {
 					Debug.info("Reading registry file " + file.getCanonicalPath());
 					Reader r = new BufferedReader(new FileReader(file));
-					registry.load(r);
+					getPrologInterfaceRegistry().load(r);
 				} else {
 					Debug.warning("Registry file " + file.getCanonicalPath() + " could not be read. A new file will be created on exit.");
 				}
-			}
-			registerStaticHooks();
-			for (RegistryHook hook : registryHooks) {
-				hook.addSubscriptions(registry);
 			}
 		} catch (CoreException e) {
 			Debug.rethrow(e);
@@ -520,9 +462,9 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	 * Checks if a PrologInterface is registered for the given key.
 	 * 
 	 * This method may be used by clients who want to check for the existence of
-	 * a key in the registry without actualy creating a PrologInterface (yet).
+	 * a key in the registry without actually creating a PrologInterface (yet).
 	 * 
-	 * This is aequivalent to calling
+	 * This is equivalent to calling
 	 * <code>getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey)</code>
 	 * 
 	 * @param pifKey
@@ -547,7 +489,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 				try {
 					Debug.info("writing registry to " + f.getCanonicalPath());
 					w = new BufferedWriter(new FileWriter(f));
-					myPluginInstance.registry.save(w);
+					myPluginInstance.getPrologInterfaceRegistry().save(w);
 					w.close();
 				} catch (IOException e) {
 					Debug.rethrow(e);
@@ -592,34 +534,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 	}
 
-	private static class _HookRecord {
-		LifeCycleHook hook;
-
-		String hookId;
-
-		String[] deps;
-
-		public _HookRecord(LifeCycleHook hook, String hookId, String[] deps) {
-			super();
-			this.hook = hook;
-			this.hookId = hookId;
-			this.deps = deps;
-		}
-
-	}
-
-
-
-
-	private HashMap<String, Map> getGlobalHooks() {
-		synchronized (globalHooksMux) {
-			if (globalHooks == null) {
-				globalHooks = new HashMap<String, Map>();
-				registerStaticHooks();
-			}
-			return globalHooks;
-		}
-	}
+	
 	
 	public String overridePreferenceBySystemProperty(String name) {
 		String value;
