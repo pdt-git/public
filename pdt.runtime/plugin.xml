@@ -23,7 +23,7 @@
        <startup/>
     </extension>
     <extension
-          point="org.cs3.pdt.runtime.prolog.interface.prologLibrary">
+          point="org.cs3.pdt.runtime.prologLibrary">
        <library
              alias="library"
              id="pdt.runtime.library.pif"

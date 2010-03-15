@@ -56,9 +56,9 @@ import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.internal.builder.UpdateMarkersJob;
 import org.cs3.pdt.core.internal.properties.AnnotatorsOptionProvider;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.Subscription;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Option;
@@ -152,7 +152,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private void registerLibraries() throws CoreException {
 		HashMap<String, DefaultPrologLibrary> libs = getPrologLibraries();
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager();
 		for (Iterator<DefaultPrologLibrary> it = libs.values().iterator(); it.hasNext();) {
 			PrologLibrary lib = it.next();
@@ -163,7 +163,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private void unregisterLibraries() throws CoreException {
 		HashMap<String, DefaultPrologLibrary> libs = getPrologLibraries();
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager();
 		for (Iterator<DefaultPrologLibrary> it = libs.values().iterator(); it.hasNext();) {
 			PrologLibrary lib = it.next();
@@ -339,7 +339,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public PrologInterface getMetadataPrologInterface() {
 		if (metadataPif == null) {
-			metadataPif = PrologRuntimePlugin.getDefault().getPrologInterface(
+			metadataPif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(
 					getMetadataSubscription());
 
 		}
@@ -348,7 +348,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public PrologInterface getRuntimePrologInterface() {
 		if (runtimePif == null) {
-			runtimePif = PrologRuntimePlugin.getDefault().getPrologInterface(
+			runtimePif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(
 					getRuntimeSubscription());
 
 		}
@@ -363,7 +363,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	protected void unregisterSubscriptions() throws PrologInterfaceException {
 		// this should do the trick:
-		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		r.removeSubscription(getMetadataSubscriptionKey());
 		r.removeSubscription(getRuntimeSubscriptionKey());
@@ -372,7 +372,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public Subscription getMetadataSubscription() {
 		String id = getMetadataSubscriptionKey();
 		String pifKey = getMetadataPrologInterfaceKey();
-		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		if (metadataPifSubscription == null) {
 			metadataPifSubscription = r.getSubscription(id);
@@ -388,7 +388,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public Subscription getRuntimeSubscription() {
 		String id = getRuntimeSubscriptionKey();
-		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		if (runtimePifSubscription == null) {
 			runtimePifSubscription = r.getSubscription(id);
@@ -715,7 +715,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private void pifKeysChanged() {
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		if (runtimePif != null) {
 			reg.removeSubscription(runtimePifSubscription);
@@ -794,7 +794,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 */
 	public IPrologEventDispatcher getMetaDataEventDispatcher()
 			throws PrologInterfaceException {
-		return PrologRuntimePlugin.getDefault().getPrologEventDispatcher(
+		return PrologRuntimeUIPlugin.getDefault().getPrologEventDispatcher(
 				getMetadataPrologInterface());
 	}
 

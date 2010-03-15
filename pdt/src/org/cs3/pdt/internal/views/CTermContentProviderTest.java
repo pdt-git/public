@@ -5,7 +5,7 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.FileSearchPathConfigurator;
@@ -23,12 +23,12 @@ public class CTermContentProviderTest extends TestCase {
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
-		pif = PrologRuntimePlugin.getDefault().getPrologInterface("test");
+		pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface("test");
 		PrologSession s = pif.getSession();
-		PrologRuntimePlugin.getDefault().ensureInstalled(testdata, CTermContentProviderTest.class);
-		file = PrologRuntimePlugin.getDefault().getResourceLocator().resolve(testdata);
+		PrologRuntimeUIPlugin.getDefault().ensureInstalled(testdata, CTermContentProviderTest.class);
+		file = PrologRuntimeUIPlugin.getDefault().getResourceLocator().resolve(testdata);
 		
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault().getLibraryManager();
 		FileSearchPathConfigurator.configureFileSearchPath(mgr, s, new String[] { PDTCore.ENGINE_ID });
 		s.queryOnce("use_module(library('/org/cs3/pdt/annotate/pdt_annotator')),"
 						+ "use_module(library('/org/cs3/pdt/core/pdt_meta_info')),"

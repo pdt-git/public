@@ -53,8 +53,8 @@ import java.util.Set;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -224,10 +224,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		try {
 			s = pif.getSession(PrologInterface.NONE);
 
-			PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+			PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault()
 					.getLibraryManager();
 			FileSearchPathConfigurator.configureFileSearchPath(mgr, s,
-					new String[] { PrologRuntime.LIB_PDT });
+					new String[] { PrologRuntimeUI.LIB_PDT });
 
 			s.queryOnce("use_module(library('facade/pdt_workspace'))");
 		} catch (PrologInterfaceException e) {

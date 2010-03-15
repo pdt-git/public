@@ -33,5 +33,5 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.core,
  org.cs3.pdt.console,
  org.cs3.pdt.common.ui,
- org.cs3.pdt.runtime;bundle-version="[0.2.0,1.0.0)"
+ org.cs3.pdt.runtime.ui;bundle-version="[0.2.0,1.0.0)"
 Bundle-ActivationPolicy: lazy

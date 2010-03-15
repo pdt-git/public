@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -494,12 +494,12 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	}
 
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager();
 		PrologSession s = pif.getSession(PrologInterface.NONE);
 		try {
 			FileSearchPathConfigurator.configureFileSearchPath(mgr, s,
-					new String[] { PrologRuntime.LIB_PDT });
+					new String[] { PrologRuntimeUI.LIB_PDT });
 			s.queryOnce("use_module(library('facade/pdt_outline'))");
 			s.queryOnce("use_module(library('pef/pef_api'))");
 		} finally {

@@ -1,7 +1,7 @@
 package org.cs3.pdt.runtime.preferences;
 
-import org.cs3.pdt.runtime.PrologRuntime;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
@@ -28,7 +28,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	public PreferencePage() {
 		super(GRID);
 		
-		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
+		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
 		setPreferenceStore(plugin.getPreferenceStore());
 		setDescription("Preferences for the Prolog Interface");
 
@@ -57,7 +57,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		// The PrologInterface needs to temporarily store some
 		// prolog files during bootstrapping. Any directory for which 
 		// you have write permissions will do.
-		addField(new DirectoryFieldEditor(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, "PrologInterface Bootstrap Directory", getFieldEditorParent()));
+		addField(new DirectoryFieldEditor(PrologRuntimeUI.PREF_PIF_BOOTSTRAP_DIR, "PrologInterface Bootstrap Directory", getFieldEditorParent()));
 
 		// eg. xpce or /usr/bin/xpce
 		addField(new StringFieldEditor(PrologInterface.PREF_EXECUTABLE, "SWI-Prolog executable", getFieldEditorParent()));

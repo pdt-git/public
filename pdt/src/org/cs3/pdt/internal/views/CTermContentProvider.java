@@ -43,7 +43,7 @@ package org.cs3.pdt.internal.views;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
@@ -122,7 +122,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			if (plProject != null) {
 				
 				PrologInterface pif = plProject.getMetadataPrologInterface();
-				IPrologEventDispatcher d = PrologRuntimePlugin.getDefault().getPrologEventDispatcher(pif);
+				IPrologEventDispatcher d = PrologRuntimeUIPlugin.getDefault().getPrologEventDispatcher(pif);
 				backend.setPif(pif,d);
 			} else {
 				backend.setPif(null,null);

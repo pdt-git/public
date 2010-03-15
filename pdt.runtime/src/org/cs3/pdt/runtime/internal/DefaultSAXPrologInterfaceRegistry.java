@@ -52,8 +52,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.cs3.pdt.runtime.PersistableSubscription;
-import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.runtime.ui.PersistableSubscription;
+import org.cs3.pdt.runtime.ui.Subscription;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.eclipse.core.runtime.Platform;

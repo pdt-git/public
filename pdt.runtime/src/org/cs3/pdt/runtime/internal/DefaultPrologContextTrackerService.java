@@ -46,9 +46,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.cs3.pdt.runtime.PrologContextTracker;
-import org.cs3.pdt.runtime.PrologContextTrackerListener;
-import org.cs3.pdt.runtime.PrologContextTrackerService;
+import org.cs3.pdt.runtime.ui.PrologContextTracker;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerListener;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerService;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 

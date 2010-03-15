@@ -4,7 +4,6 @@ Bundle-Name: PDT Runtime Socket UI
 Bundle-SymbolicName: pdt.runtime.socket.ui;singleton:=true
 Bundle-Version: 0.2.3.qualifier
 Bundle-Vendor: University of Bonn
-Fragment-Host: org.cs3.pdt.runtime
-Require-Bundle: org.cs3.pdt.runtime,
- org.eclipse.ui,
+Fragment-Host: org.cs3.pdt.runtime.ui
+Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime

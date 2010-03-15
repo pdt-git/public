@@ -39,39 +39,71 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
+package org.cs3.pdt.runtime.ui;
 
-import java.util.EventObject;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPartReference;
 
-import org.cs3.pl.prolog.PrologInterface;
+public abstract class AbstractEditorTracker extends AbstractPrologContextTracker implements IPartListener2
+{
 
-public class PrologContextTrackerEvent extends EventObject {
-
-	private PrologInterface pif;
-
-	/**
-	 * creates a new PrologContextTrackerEvent.
-	 * 
-	 * 
-	 * @param source
-	 *            this should be the tracker that caused the event.
-	 * @param pif
-	 *            this should be what the pif thinks is the currently active
-	 *            PrologInterface _AFTER_ the change. Maybe null to indicate
-	 *            that no pif is currently active according to the source
-	 *            tracker.
-	 */
-	public PrologContextTrackerEvent(Object source, PrologInterface pif) {
-		super(source);
-		this.pif = pif;
+	public AbstractEditorTracker()
+	{
+		super();
 	}
 
-	/**
-	 * @return the currently active PrologInterface (according to the tracker
-	 *         that send this event), or null if no PrologInterface is active
-	 *         (dito).
-	 */
-	public PrologInterface getPrologInterface() {
-		return pif;
+	public AbstractEditorTracker(String id, String label)
+	{
+		super(id, label);
 	}
+
+	public void init(IWorkbench workbench) {
+		workbench.getActiveWorkbenchWindow().getPartService().addPartListener(this);
+		fireContextChanged();
+	}
+	
+	private void check(IWorkbenchPartReference partRef) {
+		if(partRef instanceof IEditorReference){
+			if(getCurrentPrologInterface()!=null){
+				fireContextChanged();
+			}			
+		}
+	}
+	
+	public void partActivated(IWorkbenchPartReference partRef) {		
+		check(partRef);		
+	}	
+
+	public void partBroughtToTop(IWorkbenchPartReference partRef) {
+		check(partRef);	
+	}
+
+	public void partClosed(IWorkbenchPartReference partRef) {
+		check(partRef);
+	}
+
+	public void partDeactivated(IWorkbenchPartReference partRef) {
+		check(partRef);
+	}
+
+	public void partOpened(IWorkbenchPartReference partRef) {
+		check(partRef);
+	}
+
+	public void partHidden(IWorkbenchPartReference partRef) {
+		check(partRef);
+	}
+
+	public void partVisible(IWorkbenchPartReference partRef) {
+		check(partRef);
+	}
+
+	public void partInputChanged(IWorkbenchPartReference partRef) {
+		check(partRef);
+	}
+
+	
+
 }

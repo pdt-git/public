@@ -48,10 +48,10 @@ import java.util.Set;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologContextTracker;
-import org.cs3.pdt.runtime.PrologContextTrackerListener;
-import org.cs3.pdt.runtime.PrologContextTrackerService;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologContextTracker;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerListener;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerService;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
@@ -110,7 +110,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 		
 		for (Iterator<String> it = getActiveTrackers().iterator(); it.hasNext();) {
 			String trackerId = it.next();
-			PrologContextTracker tracker = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTracker(trackerId);
+			PrologContextTracker tracker = PrologRuntimeUIPlugin.getDefault().getContextTrackerService().getContextTracker(trackerId);
 			if(tracker == null)
 			{
 				return null;
@@ -192,7 +192,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	}
 
 	private void fillMenu() {
-		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault().getContextTrackerService().getContextTrackers();
+		PrologContextTracker[] trackers = PrologRuntimeUIPlugin.getDefault().getContextTrackerService().getContextTrackers();
 		Menu menu=getCreatedMenu();
 		for (int i = 0; i < trackers.length; i++) {
 			
@@ -273,7 +273,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 		if(activeTrackers==null){
 			activeTrackers=new HashSet<String>();			
 			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(PDTConsole.PREF_CONTEXT_TRACKERS,""),",",activeTrackers);
-			PrologContextTrackerService trackerService = PrologRuntimePlugin.getDefault().getContextTrackerService();
+			PrologContextTrackerService trackerService = PrologRuntimeUIPlugin.getDefault().getContextTrackerService();
 			for (Iterator<String> iter = activeTrackers.iterator(); iter.hasNext();) {
 				String id = iter.next();				
 				PrologContextTracker contextTracker = trackerService.getContextTracker(id);

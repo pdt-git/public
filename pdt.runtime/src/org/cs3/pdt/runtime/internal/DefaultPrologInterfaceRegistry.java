@@ -8,10 +8,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
-import org.cs3.pdt.runtime.PrologInterfaceRegistryListener;
-import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistryEvent;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistryListener;
+import org.cs3.pdt.runtime.ui.Subscription;
 import org.cs3.pl.prolog.PrologInterface;
 
 public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {

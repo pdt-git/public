@@ -8,7 +8,7 @@
     <version>1.0.0</version>
   </parent>
   <groupId>org.cs3.roots</groupId>
-  <artifactId>org.cs3.pdt.runtime.prolog.interface</artifactId>
+  <artifactId>org.cs3.pdt.runtime</artifactId>
   <version>0.2.3.qualifier</version>
   <packaging>eclipse-plugin</packaging>
 </project>

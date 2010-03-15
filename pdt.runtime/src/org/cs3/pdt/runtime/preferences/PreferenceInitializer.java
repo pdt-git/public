@@ -1,7 +1,8 @@
 package org.cs3.pdt.runtime.preferences;
 
-import org.cs3.pdt.runtime.PrologRuntime;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -12,7 +13,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-	protected PrologRuntimePlugin plugin;
+	protected PrologRuntimeUIPlugin plugin;
 	protected IPreferenceStore store;
 	
 	
@@ -23,14 +24,14 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
-		plugin = PrologRuntimePlugin.getDefault();
+		plugin = PrologRuntimeUIPlugin.getDefault();
 		store = plugin.getPreferenceStore();
 
 		
-		store.setDefault(PrologInterface.PREF_FILE_SEARCH_PATH, plugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
+		store.setDefault(PrologInterface.PREF_FILE_SEARCH_PATH, PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
 		
 //		store.setDefault(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, AbstractPrologInterface.PL_INTERFACE_DEFAULT);
-		store.setDefault(PrologRuntime.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
+		store.setDefault(PrologRuntimeUI.PREF_PIF_BOOTSTRAP_DIR, System.getProperty("java.io.tmpdir"));
 		
 		store.setDefault(PrologInterface.PREF_EXECUTABLE, Util.guessExecutableName());
 		store.setDefault(PrologInterface.PREF_ENVIRONMENT, Util.guessEnvironmentVariables());

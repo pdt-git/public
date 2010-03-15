@@ -10,12 +10,12 @@ import java.util.Set;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologContextTracker;
-import org.cs3.pdt.runtime.PrologContextTrackerListener;
-import org.cs3.pdt.runtime.PrologContextTrackerService;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.runtime.ui.PrologContextTracker;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerListener;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerService;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.Subscription;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
@@ -98,7 +98,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			getCreatedMenu().dispose();
 		}
 		setCreatedMenu(new Menu(parent));
-		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault()
+		PrologContextTracker[] trackers = PrologRuntimeUIPlugin.getDefault()
 				.getContextTrackerService().getContextTrackers();
 
 		createContextUnifiedAction(getCreatedMenu(), trackers);
@@ -121,7 +121,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			getCreatedMenu().dispose();
 		}
 		setCreatedMenu(new Menu(parent));
-		PrologContextTracker[] trackers = PrologRuntimePlugin.getDefault()
+		PrologContextTracker[] trackers = PrologRuntimeUIPlugin.getDefault()
 				.getContextTrackerService().getContextTrackers();
 
 		createContextUnifiedAction(getCreatedMenu(), trackers);
@@ -153,7 +153,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	// PIF Selection part
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
 		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
@@ -245,7 +245,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
 			public void run() {
 				if (this.isChecked())
-					setPrologInterface(PrologRuntimePlugin.getDefault()
+					setPrologInterface(PrologRuntimeUIPlugin.getDefault()
 							.getPrologInterface(key));
 				if(!unifiedTrackerEnabled) SelectContextPIFAutomatedAction.this.setImageDescriptor(ImageRepository
 						.getImageDescriptor(ImageRepository.MANUAL_MODE));
@@ -290,7 +290,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			activeTrackers = new HashSet<String>();
 			Util.split(PrologConsolePlugin.getDefault().getPreferenceValue(
 					PDTConsole.PREF_CONTEXT_TRACKERS, ""), ",", activeTrackers);
-			PrologContextTrackerService trackerService = PrologRuntimePlugin
+			PrologContextTrackerService trackerService = PrologRuntimeUIPlugin
 					.getDefault().getContextTrackerService();
 			for (Iterator<String> iter = activeTrackers.iterator(); iter.hasNext();) {
 				String id = iter.next();
@@ -345,7 +345,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 		for (Iterator<String> it = getActiveTrackers().iterator(); it.hasNext();) {
 			String trackerId = it.next();
-			PrologContextTracker tracker = PrologRuntimePlugin.getDefault()
+			PrologContextTracker tracker = PrologRuntimeUIPlugin.getDefault()
 					.getContextTrackerService().getContextTracker(trackerId);
 			if (tracker == null) {
 				return null;
@@ -375,7 +375,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
