@@ -67,7 +67,7 @@ and/or distributed.
       <import plugin="org.eclipse.swt"/>
       <import plugin="org.cs3.pdt.common"/>
       <import plugin="org.cs3.pdt.core"/>
-      <import plugin="org.cs3.pdt.runtime"/>
+      <import plugin="org.cs3.pdt.runtime.ui"/>
       <import plugin="org.cs3.pdt.console"/>
       <import plugin="org.cs3.pdt.common.ui"/>
    </requires>
@@ -124,7 +124,7 @@ and/or distributed.
          unpack="false"/>
 
    <plugin
-         id="org.cs3.pdt.runtime.prolog.interface"
+         id="org.cs3.pdt.runtime"
          download-size="0"
          install-size="0"
          version="0.0.0"
