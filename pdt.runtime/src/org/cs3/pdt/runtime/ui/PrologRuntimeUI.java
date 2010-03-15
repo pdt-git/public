@@ -57,8 +57,8 @@ public class PrologRuntimeUI {
      */
     
     public static final String PREF_PIF_BOOTSTRAP_DIR = "pif.bootstrap.dir";    
-    public static final String EP_HOOKS = "hooks";
-	public static final String EP_TRACKERS = "prologContextTracker";
+
+    public static final String EP_TRACKERS = "prologContextTracker";
 	
 	
     

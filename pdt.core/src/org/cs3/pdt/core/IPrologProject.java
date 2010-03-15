@@ -43,7 +43,7 @@ package org.cs3.pdt.core;
 
 import java.util.Set;
 
-import org.cs3.pdt.runtime.ui.Subscription;
+import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderExtension;
 import org.cs3.pl.metadata.IMetaInfoProvider;

@@ -1,4 +1,4 @@
-package org.cs3.pdt.runtime.internal;
+package org.cs3.pdt.runtime;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,13 +8,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.ui.PrologInterfaceRegistryEvent;
-import org.cs3.pdt.runtime.ui.PrologInterfaceRegistryListener;
-import org.cs3.pdt.runtime.ui.Subscription;
 import org.cs3.pl.prolog.PrologInterface;
 
-public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
+abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceRegistry {
 
 	private HashMap<String, PrologInterface> pifs = new HashMap<String, PrologInterface>();
 	private HashMap<String, Subscription> subscriptions = new HashMap<String, Subscription>();

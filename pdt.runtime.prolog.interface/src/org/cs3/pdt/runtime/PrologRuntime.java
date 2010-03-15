@@ -8,4 +8,6 @@ public interface PrologRuntime {
 
 	String EP_PROLOG_LIBRARY = "prologLibrary";
 
+    String EP_HOOKS = "hooks";
+
 }
