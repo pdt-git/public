@@ -53,8 +53,8 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -158,7 +158,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			// boring. nothing to check.
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		String consolePifKey = reg.getKey(pif);
 		String projectPifKey = null;
@@ -215,7 +215,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			if (shouldSwitchPif) {
 
 				
-					pif = PrologRuntimePlugin.getDefault().getPrologInterface(
+					pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(
 							projectPifKey);
 				
 				PrologConsolePlugin.getDefault().getPrologConsoleService()

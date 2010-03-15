@@ -2,7 +2,6 @@ package org.cs3.pdt.runtime;
 
 import java.util.Set;
 
-import org.cs3.pl.prolog.BootstrapPrologContribution;
 
 public class BootstrapPrologContributionFile extends BootstrapPrologContribution{
 

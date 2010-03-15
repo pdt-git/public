@@ -45,8 +45,8 @@ import java.util.Map;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.DefaultSubscription;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -129,7 +129,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 	}
 
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault().getLibraryManager();
+		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault().getLibraryManager();
 		IPrologProject plp = getPrologProject();
 		String[] keys = null;
 		try {

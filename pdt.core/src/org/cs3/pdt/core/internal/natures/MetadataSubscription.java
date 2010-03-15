@@ -46,8 +46,8 @@ import java.util.Map;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.DefaultSubscription;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.LifeCycleHook;
@@ -156,7 +156,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	private void loadBackendFacade(PrologSession initSession)
 			throws PrologInterfaceException {
-		PrologLibraryManager mgr = PrologRuntimePlugin.getDefault()
+		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager();
 		FileSearchPathConfigurator.configureFileSearchPath(mgr, initSession,
 				new String[] { PDTCore.ENGINE_ID });

@@ -1,6 +1,6 @@
 package org.cs3.pdt.runtime.socket.preferences;
 
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
@@ -28,7 +28,7 @@ public class PreferencePageSocket
 
 	public PreferencePageSocket() {
 		super(GRID);
-		setPreferenceStore(PrologRuntimePlugin.getDefault().getPreferenceStore());
+		setPreferenceStore(PrologRuntimeUIPlugin.getDefault().getPreferenceStore());
 		setDescription("Preferences for the Socket-Runtime");
 	}
 	

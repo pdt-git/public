@@ -7,7 +7,7 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -126,7 +126,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		PrologSession s = null;
 		try {
 
-			IPrologEventDispatcher dispatcher = PrologRuntimePlugin
+			IPrologEventDispatcher dispatcher = PrologRuntimeUIPlugin
 					.getDefault().getPrologEventDispatcher(
 							plProject.getMetadataPrologInterface());
 

@@ -52,10 +52,10 @@ import java.util.List;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
+import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
-import org.cs3.pl.prolog.BootstrapPrologContribution;
 import org.cs3.pl.prolog.Disposable;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;

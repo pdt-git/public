@@ -39,10 +39,28 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
+package org.cs3.pdt.runtime.ui;
 
-import java.util.EventListener;
+public class PrologRuntimeUI {
+	
+	public static final String PLUGIN_ID = "org.cs3.pdt.runtime.ui";
+	public static final String LIB_PIF = "pdt.runtime.library.pif";
+	public static final String LIB_COMMON = "pdt.runtime.library.common";
+	//public static final String LIB_SWIPL = "pdt.runtime.library.swipl";
+	public static final String LIB_ATTIC = "pdt.runtime.library.attic";
+	public static final String LIB_PDT = "pdt.runtime.library.pdt";
+	public static final String LIB_TESTDATA = "pdt.runtime.library.testdata";
+	
+	/**
+     * The fully-qualified classname of a class that extends
+     * PrologInterfaceFactory.
+     */
+    
+    public static final String PREF_PIF_BOOTSTRAP_DIR = "pif.bootstrap.dir";    
+    public static final String EP_HOOKS = "hooks";
+	public static final String EP_TRACKERS = "prologContextTracker";
+	
+	
+    
 
-public interface PrologContextTrackerListener extends EventListener {
-	public void contextChanged(PrologContextTrackerEvent e);
 }

@@ -47,10 +47,10 @@ import java.util.Set;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.Subscription;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistryEvent;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.ui.Subscription;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -141,7 +141,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	}
 
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
 		Menu menu = getCreatedMenu();
@@ -169,7 +169,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
@@ -209,7 +209,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
 			public void run() {
 				if (this.isChecked())
-					setPrologInterface(PrologRuntimePlugin.getDefault()
+					setPrologInterface(PrologRuntimeUIPlugin.getDefault()
 							.getPrologInterface(key));
 			}
 

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
@@ -23,7 +23,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		
-		PrologRuntimePlugin plugin = PrologRuntimePlugin.getDefault();
+		PrologRuntimeUIPlugin plugin = PrologRuntimeUIPlugin.getDefault();
 		IPreferenceStore store = plugin.getPreferenceStore();
 		store.setDefault(SocketPrologInterfacePreferences.PREF_USE_POOL, "true");
 		store.setDefault(SocketPrologInterfacePreferences.PREF_CREATE_SERVER_LOGS, false);
@@ -42,7 +42,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	}
 
 	private String getLocation() throws IOException {
-		URL url = PrologRuntimePlugin.getDefault().getBundle().getEntry("/");
+		URL url = PrologRuntimeUIPlugin.getDefault().getBundle().getEntry("/");
 		String location = getAbsolutePathForURL(url);
 		if (location.charAt(location.length() - 1) == File.separatorChar)
 			location = location.substring(0, location.length() - 1);

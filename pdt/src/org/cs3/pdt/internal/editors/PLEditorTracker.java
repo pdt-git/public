@@ -43,7 +43,7 @@ package org.cs3.pdt.internal.editors;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
-import org.cs3.pdt.runtime.AbstractPrologContextTracker;
+import org.cs3.pdt.runtime.ui.AbstractPrologContextTracker;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterface;

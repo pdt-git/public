@@ -54,7 +54,7 @@ import java.util.Map;
 
 import junit.framework.TestSuite;
 
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologSession;
 
@@ -85,7 +85,7 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 		TestSuite suite = null;
 		try {
 			//FIXME: this whole package should be rewritten from scratch...
-			pif = PrologRuntimePlugin.getDefault().getPrologInterface("dummy");
+			pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface("dummy");
 			session = pif.getSession();
 			suite = new TestSuite();
 			IPrologInterfaceAdapter adapter = new IPrologInterfaceAdapter() {

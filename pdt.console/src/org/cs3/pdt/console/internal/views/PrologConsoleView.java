@@ -54,10 +54,10 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
-import org.cs3.pdt.runtime.PrologContextTracker;
-import org.cs3.pdt.runtime.PrologContextTrackerEvent;
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
+import org.cs3.pdt.runtime.ui.PrologContextTracker;
+import org.cs3.pdt.runtime.ui.PrologContextTrackerEvent;
+import org.cs3.pdt.runtime.ui.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -791,7 +791,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
-		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimePlugin.getDefault()
+		FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager(), session,
 				new String[] { PDTConsole.PL_LIBRARY });
 		
@@ -873,7 +873,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		} else {
 			viewer.loadState(savedState);
 		}
-		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault()
+		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
 				.getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
 		title.setText(key);
