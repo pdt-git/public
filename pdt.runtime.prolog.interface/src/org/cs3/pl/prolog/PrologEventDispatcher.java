@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.runtime;
+package org.cs3.pl.prolog;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,18 +48,6 @@ import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.AsyncPrologSession;
-import org.cs3.pl.prolog.AsyncPrologSessionEvent;
-import org.cs3.pl.prolog.DefaultAsyncPrologSessionListener;
-import org.cs3.pl.prolog.FileSearchPathConfigurator;
-import org.cs3.pl.prolog.IPrologEventDispatcher;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologException;
-import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceEvent;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologInterfaceListener;
-import org.cs3.pl.prolog.PrologSession;
 
 public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener implements IPrologEventDispatcher {
 
@@ -78,13 +66,16 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 
 	private PrologInterface pif;
 
-	public PrologEventDispatcher(PrologInterface pif){
+	protected PrologLibraryManager libraryManager;
+
+	public PrologEventDispatcher(PrologInterface pif,PrologLibraryManager libManager){
 		this.pif = pif;
+		this.libraryManager = libManager;
 		//make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook(){
 
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
-				FileSearchPathConfigurator.configureFileSearchPath(PrologRuntimePlugin.getDefault().getLibraryManager(),initSession,new String[]{"pdt.runtime.library.pif"});
+				FileSearchPathConfigurator.configureFileSearchPath(libraryManager,initSession,new String[]{"pdt.runtime.library.pif"});
 				initSession.queryOnce("use_module(library(pif_observe))");				
 			}
 
