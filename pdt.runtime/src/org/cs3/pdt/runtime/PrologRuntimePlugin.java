@@ -75,10 +75,12 @@ import org.cs3.pl.prolog.DefaultPrologLibrary;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.LifeCycleHook;
 import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.PrologInterfaceConstants;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
+import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.cs3.pl.prolog.internal.PreferenceProvider;
 import org.eclipse.core.resources.ISaveContext;
@@ -322,7 +324,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private static void registerStaticLibraries() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntime.PLUGIN_ID, PrologRuntime.EP_PROLOG_LIBRARY);
+		IExtensionPoint point = registry.getExtensionPoint(PrologInterfaceConstants.PLUGIN_ID, PrologRuntime.EP_PROLOG_LIBRARY);
 		if (point == null) {
 			Debug.error("could not find the extension point " + PrologRuntime.EP_PROLOG_LIBRARY);
 			throw new RuntimeException("could not find the extension point " + PrologRuntime.EP_PROLOG_LIBRARY);
@@ -377,7 +379,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 
 	private void registerStaticBootstrapContributions() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
-		IExtensionPoint point = registry.getExtensionPoint(PrologRuntime.PLUGIN_ID, PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
+		IExtensionPoint point = registry.getExtensionPoint(PrologInterfaceConstants.PLUGIN_ID, PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
 
 		if (point == null) {
 			Debug.error("could not find the extension point " + PrologRuntime.EP_BOOTSTRAP_CONTRIBUTION);
@@ -680,7 +682,7 @@ public class PrologRuntimePlugin extends AbstractUIPlugin implements IStartup {
 	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif) {
 		IPrologEventDispatcher r = dispatchers.get(pif);
 		if (r == null) {
-			r = new UDPEventDispatcher(pif);
+			r = new UDPEventDispatcher(pif,getLibraryManager());
 			dispatchers.put(pif, r);
 		}
 		return r;

@@ -2,8 +2,6 @@
 <?eclipse version="3.0"?>
 <plugin>
      <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
-   <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>
-   <extension-point id="prologLibrary" name="Prolog Library" schema="schema/prologLibrary.exsd"/>
    <extension-point id="prologContextTracker" name="Prolog Context Tracker" schema="schema/prologContextTracker.exsd"/>
 	<extension
        point="org.eclipse.core.runtime.preferences">
@@ -25,7 +23,7 @@
        <startup/>
     </extension>
     <extension
-          point="org.cs3.pdt.runtime.prologLibrary">
+          point="org.cs3.pdt.runtime.prolog.interface.prologLibrary">
        <library
              alias="library"
              id="pdt.runtime.library.pif"

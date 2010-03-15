@@ -3,7 +3,7 @@
 <fragment>
 
     <extension
-         point="org.cs3.pdt.runtime.prologLibrary">
+         point="org.cs3.pdt.runtime.prolog.interface.prologLibrary">
       <library
             id="pdt.runtime.socket.codebase"
             path="library/socket/">

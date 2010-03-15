@@ -119,7 +119,7 @@
     </page> -->
  </extension>
   <extension
-        point="org.cs3.pdt.runtime.prologLibrary">
+        point="org.cs3.pdt.runtime.prolog.interface.prologLibrary">
      <library
            alias="library"
            id="pdt.core.library"
