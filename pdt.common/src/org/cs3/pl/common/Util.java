@@ -843,8 +843,8 @@ public class Util {
 	 *         plwin
 	 */
 	private static String findWindowsExecutable() {
-		String default_exec = PDTConstants.WINDOWS_EXECUTABLE;
-		String plwin = default_exec;
+		String[] default_exec = PDTConstants.WINDOWS_EXECUTABLES.split(",");
+		String plwin = null;
 
 		String path;
 		try {
@@ -853,38 +853,45 @@ public class Util {
 					"cmd.exe /c echo %PATH%");
 
 			if (process == null)
-				return default_exec;
+				return default_exec[0];
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(
 					process.getInputStream()));
 			path = br.readLine();
 
 			if (path == null)
-				return default_exec;
+				return default_exec[0];
 
 			// TODO just search in case of executable was not found.
 			String[] paths = Util.split(path, ";");
 			File exeFile = null;
 
 			for (int i = 0; i < paths.length; i++) {
+				
+				for (String exec : default_exec) {
+					if (exec.indexOf(".exe") == -1)
+						exec += ".exe";
 
-				if (default_exec.indexOf(".exe") == -1)
-					default_exec += ".exe";
+					String currPath = paths[i] + "\\" + exec;
+					exeFile = new File(currPath);
 
-				String currPath = paths[i] + "\\" + default_exec;
-				exeFile = new File(currPath);
-
-				if (exeFile.exists()) {
-					plwin = "\"" + currPath + "\"";
+					if (exeFile.exists()) {
+						plwin = "\"" + currPath + "\"";
+						break;
+					}
+				}
+				if(plwin!=null){
 					break;
 				}
 			}
-
+			if(plwin== null){
+				return default_exec[0];
+			}
 			return plwin;
 
 		} catch (IOException e) {
 
-			return default_exec;
+			return default_exec[0];
 		}
 	}
 
