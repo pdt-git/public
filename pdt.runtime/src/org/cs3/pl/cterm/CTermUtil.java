@@ -104,7 +104,7 @@ public class CTermUtil {
 	 */
 	public static Map<String,CTerm> listAsMap(CTerm term) {
 		Map<String,CTerm> m = new HashMap<String,CTerm>();
-		while (term instanceof CCompound && ".".equals(term.getFunctorValue())
+		while (term instanceof CCompound //&& ".".equals(term.getFunctorValue()) // TRHO: temporary deactivated, because CTerm is broken
 				&& 2 == term.getArity()) {
 			CCompound compound = (CCompound) term;
 			CTerm propertyTerm = compound.getArgument(0);
@@ -116,7 +116,9 @@ public class CTermUtil {
 									.getArgument(0))),
 							((CCompound) propertyTerm).getArgument(1));
 				} else if (propertyTerm.getArity() == 1) {
-					m.put(propertyTerm.getFunctorValue(),
+					m.put(propertyTerm.getFunctorValue()
+							.substring(0, propertyTerm.getFunctorValue().indexOf('(')) // TRHO: added this line, because CTerm is broken, TBD
+							,
 							((CCompound) propertyTerm).getArgument(0));
 				}
 
