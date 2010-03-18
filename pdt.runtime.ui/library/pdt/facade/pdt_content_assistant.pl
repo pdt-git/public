@@ -32,6 +32,7 @@
 %
 pdt_completion(File,ContextName,Prefix,ModuleName:PredName/Arity,Tags):-
     get_pef_file(File,FID),
+    
     pef_program_query([file=FID,id=PID]),
     (	var(ContextName)
     ->	guess_module(PID,FID,ContextMID)
@@ -50,7 +51,7 @@ pdt_completion(_File,_ContextName,Prefix,user:PredName/Arity,Tags):-
 	predicate(PredName,Arity,_,_,_),
 	atom_prefix(PredName,Prefix),
 	manual_entry(PredName,Arity,Doc),
-	Tags=[public,
+	Tags=[built_in,
 	% head(is(get_defining_file('AbbaId','File'),det)), % TRHO NOT SUPPORTED
 	documentation(Doc)]. % TODO, retrieve from documentation
 	% id(40085) %TRHO not supported for built-ins
