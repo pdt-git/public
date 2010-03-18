@@ -24,7 +24,11 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	public PredicateCompletionProposal(int offset, int length,
 			String name, int arity, Map<String,?> tags) {
 		super(name,offset,length,name.length(),
-				ImageRepository.getImage(tags.containsKey("public")?ImageRepository.PE_PUBLIC:ImageRepository.PE_HIDDEN),
+				ImageRepository.getImage(
+						isBuiltIn(tags)?
+								ImageRepository.PE_BUILT_IN :
+						isPublic(tags)?
+								ImageRepository.PE_PUBLIC:ImageRepository.PE_HIDDEN),
 						null,null,null);
 		this.offset = offset;
 		this.length = length;
@@ -32,6 +36,24 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		this.tags=tags;
 		this.label = name+"/"+arity;
 	}
+
+	private static boolean isPublic(Map<String, ?> tags) {
+		return tags.containsKey("public");
+	}
+	
+	private static boolean isBuiltIn(Map<String, ?> tags) {
+		return tags.containsKey("built_in");
+	}
+
+	public boolean isPublic() {
+		return isPublic(tags);
+	}
+
+	public boolean isBuiltIn() {
+		return isBuiltIn(tags);
+	}
+
+
 	
 	public void apply(IDocument document) {
 		try {
@@ -104,8 +126,16 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 
 	@Override
 	public int compareTo(ComparableCompletionProposal o) {
-		if (o instanceof PredicateCompletionProposal)
-			return getLabel().compareTo(((PredicateCompletionProposal)o).getLabel());
+		if (o instanceof PredicateCompletionProposal){
+			PredicateCompletionProposal other = (PredicateCompletionProposal)o;
+			if(isBuiltIn() && !other.isBuiltIn()) {
+				return 1;
+			} if(!isBuiltIn() && other.isBuiltIn()) {
+				return -1;
+			}				
+			return getLabel().compareTo(other.getLabel());
+			
+		}
 		return 0;
 	}
 
