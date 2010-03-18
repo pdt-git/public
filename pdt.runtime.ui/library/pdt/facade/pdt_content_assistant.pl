@@ -39,7 +39,8 @@ pdt_completion(File,ContextName,Prefix,ModuleName:PredName/Arity,Tags):-
     ;	resolve_module(PID,ContextName,ContextMID)
     ),
     pef_predicate_query([id=Id,name=PredName,arity=Arity,module=MID]),
-	atom_prefix(PredName,Prefix),
+    term_to_atom(PredName,PredNameAtom),
+	atom_prefix(PredNameAtom,Prefix),
 	resolve_predicate(PID,ContextMID,PredName,Arity,Id),
 	module_name(MID,ModuleName),
 	findall(Tag,completion_tag(Id,MID,ModuleName,PredName,Arity,Tag),Tags).
