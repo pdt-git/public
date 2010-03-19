@@ -148,8 +148,12 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			}
 
 		} catch (PrologInterfaceException e) {
-			return UIUtils.createErrorStatus(PDTCorePlugin.getDefault()
+			if(e.getMessage().contains("obsolete_lock")){
+				UIUtils.setStatusErrorMessage(e.getLocalizedMessage());
+			} else {
+				return UIUtils.createErrorStatus(PDTCorePlugin.getDefault()
 					.getErrorMessageProvider(), e, PDTCore.ERR_PIF);
+			}
 		} catch (CoreException e) {
 			return e.getStatus();
 		} catch(Throwable t){
