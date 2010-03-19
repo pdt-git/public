@@ -91,8 +91,8 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 				plProject=(IPrologProject) project.getNature(PDTCore.NATURE_ID);
 			}
 		} catch (CoreException e) {
-			Debug.report(e);
-			throw new RuntimeException(e);
+			Debug.warning(e.getLocalizedMessage() + " - the project was removed from the workspace");
+			//throw new RuntimeException(e);
 		}
 		if(plProject==null){
 			return null;
