@@ -45,7 +45,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.eclipse.core.resources.IProject;
@@ -85,8 +85,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 			IPrologProject prologProject = PDTCoreUtils
 					.getPrologProject(project);
 			if (prologProject != null) {
-				PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
-						.getPrologInterfaceRegistry();
+				PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 				r.removeSubscription(prologProject.getMetadataSubscription());
 				r.removeSubscription(prologProject.getRuntimeSubscription());
 			}
@@ -100,8 +99,7 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 			IPrologProject prologProject = PDTCoreUtils
 					.getPrologProject(project);
 			if (prologProject != null) {
-				PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
-						.getPrologInterfaceRegistry();
+				PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 				r.addSubscription(prologProject.getMetadataSubscription());
 				r.addSubscription(prologProject.getRuntimeSubscription());
 			}

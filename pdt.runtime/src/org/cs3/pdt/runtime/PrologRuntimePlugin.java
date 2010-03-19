@@ -379,10 +379,8 @@ public class PrologRuntimePlugin extends Plugin {
 	}
 
 	/**
-	 * IMPORTANT: If you use this plug-in in Eclipse and want
-	 * make use of stored 
 	 *  
-	 * @return
+	 * @return prolog registry
 	 */
 	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
 		synchronized (registryMux) {

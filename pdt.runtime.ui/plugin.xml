@@ -17,6 +17,12 @@
           name="Prolog Runtime">
     </page>
  </extension>
+  <extension
+        point="org.cs3.pdt.runtime.hooks">
+     <registryHook
+           class="org.cs3.pdt.runtime.internal.PDTRegistryHook">
+     </registryHook>
+  </extension> 
     <extension
           point="org.eclipse.ui.startup">
        <startup/>

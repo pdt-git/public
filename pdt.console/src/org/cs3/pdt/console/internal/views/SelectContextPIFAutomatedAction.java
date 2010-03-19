@@ -11,6 +11,7 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.ui.PrologContextTracker;
 import org.cs3.pdt.runtime.ui.PrologContextTrackerListener;
@@ -153,8 +154,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 
 	// PIF Selection part
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
 		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
 			String key = it.next();
@@ -375,8 +375,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
 			setToolTipText("no pif selected");

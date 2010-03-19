@@ -116,7 +116,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	private PrologContextTrackerService contextTrackerService;
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
 	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
-	private boolean savedRegistryLoaded;
 
 	private final static Object contextTrackerMux = new Object();
 	private static final Object preferencesMux = new Object();
@@ -272,6 +271,10 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 	}
 
+	private PrologInterfaceRegistry getPrologInterfaceRegistry() {
+		return PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+	}
+
 	private void initPrologInterfaceOptions(PrologInterface prologInterface) {
 		prologInterface.initOptions(new EclipsePreferenceProvider());
 	}
@@ -343,15 +346,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		} finally {
 			super.stop(context);
 		}
-	}
-
-	public PrologInterfaceRegistry getPrologInterfaceRegistry() {
-		
-		PrologInterfaceRegistry pir = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
-		if(!savedRegistryLoaded){
-			loadSavedRegistry();
-		}
-		return pir;
 	}
 
 	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif) {
@@ -433,30 +427,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 
 	
 
-	private void loadSavedRegistry() {
-		try {
-			
-			ISavedState lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(this, new _SaveParticipant());
-
-			if (lastState != null) {
-				IPath location = lastState.lookup(new Path("registry"));
-				location = getStateLocation().append(location);
-				File file = location.toFile();
-				if (file.canRead()) {
-					Debug.info("Reading registry file " + file.getCanonicalPath());
-					Reader r = new BufferedReader(new FileReader(file));
-					getPrologInterfaceRegistry().load(r);
-				} else {
-					Debug.warning("Registry file " + file.getCanonicalPath() + " could not be read. A new file will be created on exit.");
-				}
-			}
-		} catch (CoreException e) {
-			Debug.rethrow(e);
-		} catch (IOException e) {
-			Debug.rethrow(e);
-
-		}
-	}
 
 	/**
 	 * Checks if a PrologInterface is registered for the given key.
@@ -474,66 +444,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		return getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey);
 	}
 
-	private final class _SaveParticipant implements ISaveParticipant {
-		public void saving(ISaveContext context) throws CoreException {
-			switch (context.getKind()) {
-			case ISaveContext.FULL_SAVE:
-				PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
-				// save the plug-in state
-				int saveNumber = context.getSaveNumber();
-				String saveFileName = "registry-" + Integer.toString(saveNumber);
-				File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
-				// if we fail to write, an exception is
-				// thrown and we do not update the path
-				Writer w = null;
-				try {
-					Debug.info("writing registry to " + f.getCanonicalPath());
-					w = new BufferedWriter(new FileWriter(f));
-					myPluginInstance.getPrologInterfaceRegistry().save(w);
-					w.close();
-				} catch (IOException e) {
-					Debug.rethrow(e);
-				}
-				context.map(new Path("registry"), new Path(saveFileName));
-				context.needSaveNumber();
-				break;
-			case ISaveContext.PROJECT_SAVE:
-				break;
-			case ISaveContext.SNAPSHOT:
-				break;
-			}
-
-		}
-
-		public void rollback(ISaveContext context) {
-			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
-
-			// since the save operation has failed, delete
-			// the saved state we have just written
-			int saveNumber = context.getSaveNumber();
-			String saveFileName = "registry-" + Integer.toString(saveNumber);
-			File f = myPluginInstance.getStateLocation().append(saveFileName).toFile();
-			f.delete();
-
-		}
-
-		public void prepareToSave(ISaveContext context) throws CoreException {
-			;
-		}
-
-		public void doneSaving(ISaveContext context) {
-			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
-
-			// delete the old saved state since it is not
-			// necessary anymore
-			int previousSaveNumber = context.getPreviousSaveNumber();
-			String oldFileName = "registry-" + Integer.toString(previousSaveNumber);
-			File f = myPluginInstance.getStateLocation().append(oldFileName).toFile();
-			f.delete();
-
-		}
-	}
-
+	
 	
 	
 	public String overridePreferenceBySystemProperty(String name) {

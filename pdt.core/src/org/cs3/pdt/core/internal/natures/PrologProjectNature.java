@@ -57,6 +57,7 @@ import org.cs3.pdt.core.PDTCorePlugin;
 import org.cs3.pdt.core.internal.builder.UpdateMarkersJob;
 import org.cs3.pdt.core.internal.properties.AnnotatorsOptionProvider;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -363,8 +364,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	protected void unregisterSubscriptions() throws PrologInterfaceException {
 		// this should do the trick:
-		PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		r.removeSubscription(getMetadataSubscriptionKey());
 		r.removeSubscription(getRuntimeSubscriptionKey());
 	}
@@ -372,8 +372,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	public Subscription getMetadataSubscription() {
 		String id = getMetadataSubscriptionKey();
 		String pifKey = getMetadataPrologInterfaceKey();
-		PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		if (metadataPifSubscription == null) {
 			metadataPifSubscription = r.getSubscription(id);
 		}
@@ -388,8 +387,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	public Subscription getRuntimeSubscription() {
 		String id = getRuntimeSubscriptionKey();
-		PrologInterfaceRegistry r = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		if (runtimePifSubscription == null) {
 			runtimePifSubscription = r.getSubscription(id);
 		}
@@ -715,8 +713,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private void pifKeysChanged() {
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		if (runtimePif != null) {
 			reg.removeSubscription(runtimePifSubscription);
 			runtimePifSubscription = null;

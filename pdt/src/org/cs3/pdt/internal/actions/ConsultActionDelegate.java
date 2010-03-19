@@ -54,6 +54,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -158,8 +159,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			// boring. nothing to check.
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String consolePifKey = reg.getKey(pif);
 		String projectPifKey = null;
 		IFile file = UIUtils.getFileInActiveEditor();
