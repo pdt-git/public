@@ -18,6 +18,7 @@ import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 public class EntryPointDecorator implements ILightweightLabelDecorator, OptionProviderListener{
 
+	
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
 	public void decorate(Object element, IDecoration decoration) {
