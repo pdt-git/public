@@ -64,9 +64,9 @@ public class ImageRepository {
 
 	private static HashMap<String, Image> cache = new HashMap<String, Image>();
 	
-	public final static String SOURCEPATH_DECORATION = "sample_decorator.gif";
+	public final static String SOURCEPATH_DECORATION = "pdt_container_decorator.png";
 
-	public static final String ENTRYPOINT_DECORATION = "sample_decorator.gif";
+	public static final String ENTRYPOINT_DECORATION = "pdt_file_decorator.png";
 
 	
     public static final ImageDescriptor getImageDescriptor(String icon) {
