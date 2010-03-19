@@ -55,6 +55,7 @@ import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologContextTracker;
 import org.cs3.pdt.runtime.ui.PrologContextTrackerEvent;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
@@ -873,8 +874,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		} else {
 			viewer.loadState(savedState);
 		}
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		String key = reg.getKey(pif);
 		title.setText(key);
 		boolean useEnter = Boolean.valueOf(

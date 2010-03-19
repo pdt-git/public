@@ -49,6 +49,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologInterfaceRegistryEvent;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.prolog.PrologInterface;
@@ -141,8 +142,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	}
 
 	private void fillMenu() {
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		Set<String> keys = reg.getAllKeys();
 		Menu menu = getCreatedMenu();
 		for (Iterator<String> it = keys.iterator(); it.hasNext();) {
@@ -169,8 +169,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 			});
 			return;
 		}
-		PrologInterfaceRegistry reg = PrologRuntimeUIPlugin.getDefault()
-				.getPrologInterfaceRegistry();
+		PrologInterfaceRegistry reg = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
 		PrologInterface pif = getPrologInterface();
 		if (pif == null) {
 			setToolTipText("no pif selected");
