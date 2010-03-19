@@ -72,7 +72,7 @@
          <action
                label="Remove Prolog Project Nature"
 			   style="push"
-               menubarPath="org.cs3.pdt.menu/group0"
+               menubarPath="org.cs3.pdt.menu/group1"
                tooltip="Removes PrologProject nature to/from a project"
                class="org.cs3.pdt.core.internal.actions.PrologProjectNatureAction"
                id="remove.PrologProjectNatureAction">
@@ -83,6 +83,17 @@
             adaptable="true"
             objectClass="org.eclipse.core.resources.IFile"
             id="PrologFileObjectContribution">
+                       <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
+            
             <visibility>
              <objectState
                    name="projectNature"
@@ -93,6 +104,7 @@
          <action
                label="Auto-Consult"
                style="toggle"
+               menubarPath="org.cs3.pdt.menu/group0"
                tooltip="Whether the file should be consulted"
                class="org.cs3.pdt.core.internal.actions.AutoConsultAction"
                id="AutoConsultAction">
@@ -102,16 +114,27 @@
             adaptable="true"
             id="pdt.core.SourceFolderContribution"
             objectClass="org.eclipse.core.resources.IContainer">
-            <visibility>
+                    <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
+         <visibility>
              <objectState
                    name="projectNature"
                    value="org.cs3.pdt.core.PDTProjectNature">
              </objectState>
-		    </visibility>            
+		 </visibility>            
             
          <action
                class="org.cs3.pdt.core.internal.actions.ToggleSourceFolderAction"
                id="pdt.core.toggle.source.folder.action"
+               menubarPath="org.cs3.pdt.menu/group0"
                label="Include in Prolog Source Path"
                style="toggle"
                tooltip="If checked, the fodler is included in the source lookup path"/>
@@ -120,6 +143,16 @@
             adaptable="true"
             id="pdt.core.EntryPointContribution"
             objectClass="org.eclipse.core.resources.IFile">
+           <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
             <visibility>
              <objectState
                    name="projectNature"
@@ -131,6 +164,7 @@
                class="org.cs3.pdt.core.internal.actions.ToggleEntryPointAction"
                id="pdt.core.toggle_entry_point.action"
                label="Mark as Entry Point"
+               menubarPath="org.cs3.pdt.menu/group0"
                style="toggle"
                tooltip="If checked, the file is considered as a &quot;main&quot; file.">
          </action>
@@ -224,7 +258,7 @@
      <decorator
            adaptable="true"
            class="org.cs3.pdt.core.internal.decorators.SourcePathDecorator"
-           icon="icons/sample_decorator.gif"
+           icon="icons/pdt_container_decorator.png"
            id="org.cs3.pdt.core.source.path.decorator"
            label="Prolog Source Path Decorator"
            lightweight="true"
@@ -240,7 +274,7 @@
      <decorator
            adaptable="true"
            class="org.cs3.pdt.core.internal.decorators.EntryPointDecorator"
-           icon="icons/sample_decorator.gif"
+           icon="icons/pdt_file_decorator.png"
            id="org.cs3.pdt.core.entrypoints.decorator"
            label="Prolog Entry Points Decorator"
            lightweight="true"
