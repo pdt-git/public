@@ -20,6 +20,10 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
+	public SourcePathDecorator() {
+		System.out.println("DEBUG");
+	}
+
 	public void decorate(Object element, IDecoration decoration) {
 		if(!(element instanceof IResource)){
 			return;

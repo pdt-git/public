@@ -22,22 +22,74 @@
 	
 <extension
          point="org.eclipse.ui.popupMenus">
+         
+         
       <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IProject"
             id="PrologProjectObjectContribution">
+            <!-- see org.eclipse.ui.IResourceActionFilter.PROJECT_NATURE -->
+            <visibility>
+		       <not>
+	             <objectState
+	                   name="nature"
+	                   value="org.cs3.pdt.core.PDTProjectNature">
+	             </objectState>
+	          </not>
+		    </visibility>            
+            
          <action
                label="Prolog Project Nature"
-               style="toggle"
+			   style="push"
+               menubarPath="org.eclipse.ui.projectConfigure/additions"
                tooltip="Assignes/retracts PrologProject nature to/from a project"
                class="org.cs3.pdt.core.internal.actions.PrologProjectNatureAction"
-               id="PrologProjectNatureAction">
+               id="add.PrologProjectNatureAction">
          </action>
-      </objectContribution>      
+      </objectContribution>
+      
+      <objectContribution
+            adaptable="true"
+            objectClass="org.eclipse.core.resources.IProject"
+            id="PrologProjectObjectContribution">
+           <menu
+	           id="org.cs3.pdt.menu"
+	           label="Prolog Development Tools">
+	        <separator
+	              name="group0">
+	        </separator>
+	        <separator
+	              name="group1">
+	        </separator>
+	     </menu>
+	     <!-- see org.eclipse.ui.IProjectActionFilter.NATURE -->
+            <visibility>
+             <objectState
+                   name="projectNature"
+                   value="org.cs3.pdt.core.PDTProjectNature">
+             </objectState>
+		    </visibility>            
+         <action
+               label="Remove Prolog Project Nature"
+			   style="push"
+               menubarPath="org.cs3.pdt.menu/group0"
+               tooltip="Removes PrologProject nature to/from a project"
+               class="org.cs3.pdt.core.internal.actions.PrologProjectNatureAction"
+               id="remove.PrologProjectNatureAction">
+         </action>
+      </objectContribution>
+            
       <objectContribution
             adaptable="true"
             objectClass="org.eclipse.core.resources.IFile"
             id="PrologFileObjectContribution">
+            <visibility>
+             <objectState
+                   name="projectNature"
+                   value="org.cs3.pdt.core.PDTProjectNature">
+             </objectState>
+		    </visibility>            
+            
          <action
                label="Auto-Consult"
                style="toggle"
@@ -50,6 +102,13 @@
             adaptable="true"
             id="pdt.core.SourceFolderContribution"
             objectClass="org.eclipse.core.resources.IContainer">
+            <visibility>
+             <objectState
+                   name="projectNature"
+                   value="org.cs3.pdt.core.PDTProjectNature">
+             </objectState>
+		    </visibility>            
+            
          <action
                class="org.cs3.pdt.core.internal.actions.ToggleSourceFolderAction"
                id="pdt.core.toggle.source.folder.action"
@@ -61,6 +120,13 @@
             adaptable="true"
             id="pdt.core.EntryPointContribution"
             objectClass="org.eclipse.core.resources.IFile">
+            <visibility>
+             <objectState
+                   name="projectNature"
+                   value="org.cs3.pdt.core.PDTProjectNature">
+             </objectState>
+		    </visibility>            
+            
          <action
                class="org.cs3.pdt.core.internal.actions.ToggleEntryPointAction"
                id="pdt.core.toggle_entry_point.action"
@@ -136,25 +202,40 @@
   </extension>
   <extension
         point="org.eclipse.ui.decorators">
+        <decorator
+           adaptable="true"
+           icon="icons/pdt_marker.png"
+           id="org.cs3.pdt.core.pdt.project"
+           label="PDT Project"
+           lightweight="true"
+           location="TOP_LEFT"
+           state="true">
+           <enablement>
+           <and>
+                <objectClass name="org.eclipse.core.resources.IProject"/>
+	             <objectState
+	                   name="nature"
+	                   value="org.cs3.pdt.core.PDTProjectNature">
+	             </objectState>
+           </and> 
+            </enablement>
+            
+     </decorator>
      <decorator
            adaptable="true"
            class="org.cs3.pdt.core.internal.decorators.SourcePathDecorator"
            icon="icons/sample_decorator.gif"
-           id="org.cs3.pdt.core.sourcepath.decorator"
+           id="org.cs3.pdt.core.source.path.decorator"
            label="Prolog Source Path Decorator"
            lightweight="true"
            location="TOP_RIGHT"
-           objectClass="org.eclipse.core.resources.IContainer"
            state="true">
-        <enablement>
-           <and>
-              <objectClass name="org.eclipse.core.resources.IResource"/>
-              <or>
-                 <objectClass name="org.eclipse.core.resources.IProject"/>
-                 <objectClass name="org.eclipse.core.resources.IFile"/>
-              </or>
-           </and>
-        </enablement>
+           <enablement>
+           	<or>
+                <objectClass name="org.eclipse.core.resources.IProject"/> 
+                <objectClass name="org.eclipse.core.resources.IFolder"/> 
+            </or>
+            </enablement>
      </decorator>
      <decorator
            adaptable="true"
