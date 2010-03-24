@@ -5,7 +5,7 @@ import java.io.File;
 import org.cs3.pdt.transform.PrologRefactoringDescriptor;
 import org.cs3.pl.common.Option;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.PLUtil;
+import org.cs3.pl.prolog.FileSearchPathConfigurator;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologLibraryManager;
@@ -48,7 +48,7 @@ public class DeclarativePrologRefactoringInfo extends PrologRefactoringInfo {
 
 	@Override
 	public void configure(PrologLibraryManager libman, PrologSession s) throws PrologInterfaceException {		
-		PLUtil.configureFileSearchPath(libman, s, descriptor.getDependencies());
+		FileSearchPathConfigurator.configureFileSearchPath(libman, s, descriptor.getDependencies());
 		File[] definitions = descriptor.getDefinitions();
 		for (int i = 0; i < definitions.length; i++) {
 			s.queryOnce("ensure_loaded('"+Util.prologFileName(definitions[i])+"')");	
