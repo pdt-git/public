@@ -104,7 +104,7 @@ public class CTermUtil {
 	 */
 	public static Map<String,CTerm> listAsMap(CTerm term) {
 		Map<String,CTerm> m = new HashMap<String,CTerm>();
-		while (term instanceof CCompound //&& ".".equals(term.getFunctorValue()) // TRHO: temporary deactivated, because CTerm is broken
+		while (term instanceof CCompound && ".".equals(term.getFunctorValue())
 				&& 2 == term.getArity()) {
 			CCompound compound = (CCompound) term;
 			CTerm propertyTerm = compound.getArgument(0);
@@ -116,9 +116,7 @@ public class CTermUtil {
 									.getArgument(0))),
 							((CCompound) propertyTerm).getArgument(1));
 				} else if (propertyTerm.getArity() == 1) {
-					m.put(propertyTerm.getFunctorValue()
-							.substring(0, propertyTerm.getFunctorValue().indexOf('(')) // TRHO: added this line, because CTerm is broken, TBD
-							,
+					m.put(propertyTerm.getFunctorValue(),
 							((CCompound) propertyTerm).getArgument(0));
 				}
 
@@ -149,7 +147,7 @@ public class CTermUtil {
 		} else {
 			sb.append(term.getFunctorImage());
 		}
-/*		if (term.getArity() > 0) {
+		if (term.getArity() > 0) {
 			sb.append('(');
 			CCompound compound = (CCompound) term;
 			for (int i = 0; i < compound.getArity(); i++) {
@@ -159,7 +157,7 @@ public class CTermUtil {
 				renderTerm(compound.getArgument(i), sb);
 			}
 			sb.append(')');
-		}*/
+		}
 	}
 
 	public static String renderSignature(CTerm sig, String defaultModule) {

@@ -113,7 +113,7 @@ public class CTermFactoryTest extends TestCase {
 	}
 	
 	
-	public void testQuotedStromg01() throws Throwable{
+	public void testQuotedString01() throws Throwable{
 		CTerm term = CTermFactory.createCTerm("\"Ecce, \\\"Corinna\\\" venit.\"");		
 		assertTrue("type is "+term.getClass().getName(),term instanceof CString);
 		CString string= (CString)term;

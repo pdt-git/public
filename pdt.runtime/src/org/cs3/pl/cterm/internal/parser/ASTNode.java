@@ -116,4 +116,15 @@ public class ASTNode {
 			return false;
 		return true;
 	}
+
+	public String getFunctorImage() {
+		StringBuffer sb = new StringBuffer();
+		Token t = getFirstToken();
+		do{
+			sb.append(t.image);
+			t=t.getNext();
+		} while(canGetAnotherToken(t)&&
+			 !t.image.equals("("));
+		return sb.toString();
+	}
 }
