@@ -65,11 +65,11 @@ public class CTerm {
 
 	private  String doGetFunctorValue() {
 		String image = getFunctorImage();
-		return Util.unquoteAtom(image);
+		return Util.unquoteStringOrAtom(image);
 	}
 
 	public String getFunctorImage() {
-		return node.getImage();
+		return node.getFunctorImage();
 	}
 
 	public int getArity() {	
