@@ -566,13 +566,15 @@ public class Util {
 		return sb.toString();
 	}
 
-	public static String unquoteString(String image) {
+	public static String unquoteStringOrAtom(String image) {
 
 		image = image.trim();
-		if (image.length() == 0 || image.charAt(0) != '\"') {
+		if (image.length() == 0){
 			return image;
 		}
-		image = image.substring(1, image.length() - 1);
+		if( image.charAt(0) == '\"' || image.charAt(0) == '\'') {
+			image = image.substring(1, image.length() - 1);
+		}
 		StringBuffer sb = new StringBuffer();
 
 		for (int i = 0; i < image.length(); i++) {
