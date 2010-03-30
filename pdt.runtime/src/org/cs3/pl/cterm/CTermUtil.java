@@ -152,7 +152,7 @@ public class CTermUtil {
 			CCompound compound = (CCompound) term;
 			for (int i = 0; i < compound.getArity(); i++) {
 				if (i > 0) {
-					sb.append(", ");
+					sb.append(",");
 				}
 				renderTerm(compound.getArgument(i), sb);
 			}
