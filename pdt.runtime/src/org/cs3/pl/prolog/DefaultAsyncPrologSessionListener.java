@@ -63,9 +63,6 @@ public class DefaultAsyncPrologSessionListener implements
 	}
 
 	public void goalRaisedException(AsyncPrologSessionEvent e) {
-		if(e.query==null){
-			Debug.debug("Debug");
-		}
 		Debug.error("Goal raised exception: "+e.message+"\n query: "+e.query +"\n ticket: "+e.ticket);
 	}
 
