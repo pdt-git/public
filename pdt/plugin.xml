@@ -35,7 +35,6 @@
        <action
              label="Restart"
              class="org.cs3.pdt.internal.actions.RestartAction"
-             accelerator="Ctrl+F9"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.restart"/>
