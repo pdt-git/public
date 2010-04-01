@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: PDT Runtime Prolog Interface
 Bundle-SymbolicName: org.cs3.pdt.runtime;singleton:=true
 Bundle-Version: 0.2.3.qualifier
+Bundle-ClassPath: prologinterface.jar
 Require-Bundle: org.cs3.pdt.common,
  org.junit,
  org.eclipse.core.runtime
