@@ -162,7 +162,7 @@ public class PLScanner extends RuleBasedScanner {
 		IToken dynamicToken = new Token(new TextAttribute(manager
 				.getColor(IPLColorConstants.PL_DYNAMIC), null, 1));
 		IToken wordToken = new Token(new TextAttribute(manager
-				.getColor(IPLColorConstants.PL_KEYWORD), null, 0));
+				.getColor(IPLColorConstants.DEFAULT), null, 0));
 
 		IToken string = new Token(new TextAttribute(manager
 				.getColor(IPLColorConstants.STRING)));
