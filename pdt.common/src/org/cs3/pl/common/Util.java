@@ -1,5 +1,5 @@
 /*****************************************************************************
- * This file is part of the Prolog Development Tool (PDT)
+ex * This file is part of the Prolog Development Tool (PDT)
  * 
  * Author: Lukas Degener (among others) 
  * E-mail: degenerl@cs.uni-bonn.de
@@ -786,7 +786,19 @@ public class Util {
 
 		if (Util.isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
-					+ findWindowsExecutable() + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+					+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			// return "plwin";
+		}
+		// return "xterm -e xpce"; // For Mac and Linux with console
+		return findUnixExecutable() + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+
+	}
+	
+	public static String guessCommandLineExecutableName() {
+
+		if (Util.isWindows()) {
+			return //"cmd.exe /c start \"cmdwindow\" /min "
+					 findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 			// return "plwin";
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
@@ -841,11 +853,12 @@ public class Util {
 	 * @author Hasan Abdel Halim
 	 * 
 	 * Finds the current SWI-Prolog executable for Windoze OS
+	 * @param executables 
 	 * @return the complete path of the executable otherwise it will return
 	 *         plwin
 	 */
-	private static String findWindowsExecutable() {
-		String[] default_exec = PDTConstants.WINDOWS_EXECUTABLES.split(",");
+	private static String findWindowsExecutable(String executables) {
+		String[] default_exec = executables.split(",");
 		String plwin = null;
 
 		String path;
