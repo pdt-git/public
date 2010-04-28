@@ -1,0 +1,12 @@
+
+all-wcprops
+entries
+format
+.svn
+*.svn-base
+*.class
+bin
+.classpath
+.project
+.cvsignore
+/.metadata/
