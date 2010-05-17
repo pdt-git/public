@@ -50,9 +50,10 @@ import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.console.prolog.PrologConsoleService;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-public class PrologConsolePlugin extends AbstractUIPlugin {
+public class PrologConsolePlugin extends AbstractUIPlugin implements IStartup{
 
 	// The shared instance.
 	private static PrologConsolePlugin plugin;
@@ -117,6 +118,10 @@ public class PrologConsolePlugin extends AbstractUIPlugin {
 			errorMessageProvider = new DefaultErrorMessageProvider(this);
 		}
 		return errorMessageProvider;
+	}
+
+	@Override
+	public void earlyStartup() {
 	}
 
 }

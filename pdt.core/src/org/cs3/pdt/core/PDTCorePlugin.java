@@ -59,10 +59,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-public class PDTCorePlugin extends AbstractUIPlugin {
+public class PDTCorePlugin extends AbstractUIPlugin implements IStartup{
 	private static PDTCorePlugin plugin;
 	
 	public PDTCorePlugin() {
@@ -189,6 +190,11 @@ public class PDTCorePlugin extends AbstractUIPlugin {
 
 	public void reconfigure() {
 		;
+	}
+
+	@Override
+	public void earlyStartup() {
+		
 	}
 
 }
