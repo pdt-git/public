@@ -15,13 +15,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class PDTTransformationsPlugin extends AbstractUIPlugin {
+public class PDTTransformationsPlugin extends AbstractUIPlugin implements IStartup{
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.cs3.pdt.transform";
@@ -167,5 +168,9 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin {
 		}
 		desc.setDependencies(dependencies);
 		return desc;
+	}
+
+	@Override
+	public void earlyStartup() {
 	}
 }

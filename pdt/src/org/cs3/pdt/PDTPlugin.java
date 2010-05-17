@@ -50,13 +50,14 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.ui.IStartup;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class to be used in the desktop.
  */
-public class PDTPlugin extends AbstractUIPlugin {
+public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
@@ -159,6 +160,10 @@ public class PDTPlugin extends AbstractUIPlugin {
 			errorMessageProvider = new DefaultErrorMessageProvider(this);
 		}
 		return errorMessageProvider;
+	}
+
+	@Override
+	public void earlyStartup() {
 	}
 
 }
