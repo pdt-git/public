@@ -4,4 +4,12 @@
    <extension-point id="bootstrapContribution" name="Bootstrap Contribution" schema="schema/bootstrapContribution.exsd"/>
      <extension-point id="hooks" name="LifeCycle Hooks" schema="schema/org.cs3.pdt.hooks.exsd"/>
    <extension-point id="prologLibrary" name="Prolog Library" schema="schema/prologLibrary.exsd"/>
+       <extension
+             point="org.cs3.pdt.runtime.bootstrapContribution">
+          <fileSearchPathContribution
+                alias="library"
+                id="pdt.runtime.library.pif.contribution"
+                path="library/pif">
+          </fileSearchPathContribution>
+       </extension>
 </plugin>

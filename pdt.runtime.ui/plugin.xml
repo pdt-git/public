@@ -29,15 +29,6 @@
     </extension>
     <extension
           point="org.cs3.pdt.runtime.prologLibrary">
-       <library
-             alias="library"
-             id="pdt.runtime.library.pif"
-             path="library/pif/">
-          <attribute
-                id="hidden"
-                value="true"/>
-             
-             </library>
 		<library
         alias="library"
         id="pdt.runtime.library.common"
