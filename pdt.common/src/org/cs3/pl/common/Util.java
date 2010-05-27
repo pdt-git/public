@@ -790,7 +790,7 @@ public class Util {
 			// return "plwin";
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable() + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 
 	}
 	
@@ -802,7 +802,7 @@ public class Util {
 			// return "plwin";
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable() + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 
 	}
 
@@ -810,12 +810,12 @@ public class Util {
 	 * @author Hasan Abdel Halim
 	 * 
 	 * Finds the current SWI-Prolog executable for UNIX/BSD-BASED OS
+	 * @param unixCommandLineExecutables 
 	 * @return the complete path of the executable otherwise it will return xpce
 	 */
-	private static String findUnixExecutable() {
-		String default_exec = "xpce";
-		String xpce = default_exec;
-
+	private static String findUnixExecutable(String unixCommandLineExecutables) {
+		String[] default_exec = unixCommandLineExecutables.split(",");
+		
 		// TODO shall we look for the env. variables as we do for Windows ?
 		String[] appendPath = null;
 
@@ -826,26 +826,30 @@ public class Util {
 		}
 
 		try {
-			Process process = Runtime.getRuntime().exec(
-					"which " + default_exec, appendPath);
+			
+			for (String exec : default_exec) {
 
-			if (process == null)
-				return null;
-
-			BufferedReader br = new BufferedReader(new InputStreamReader(
-					process.getInputStream()));
-			String path = br.readLine();
-
-			if (path == null || path.startsWith("no " + default_exec))
-				return default_exec;
-
-			xpce = path;
-
-			return xpce;
+				Process process = Runtime.getRuntime().exec(
+						"which " + exec, appendPath);
+	
+				if (process == null)
+					return null;
+	
+				BufferedReader br = new BufferedReader(new InputStreamReader(
+						process.getInputStream()));
+				String path = br.readLine();
+	
+				if (path == null || path.startsWith("no " + default_exec))
+					continue;
+				else {
+					return path;
+				}
+			}
+			return default_exec[0];
 
 		} catch (IOException e) {
 
-			return default_exec;
+			return default_exec[0];
 		}
 	}
 
