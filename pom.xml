@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.cs3.roots</groupId>
+  <artifactId>jtransformer_projects</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <build>
+       <pluginManagement>
+      <plugins>
+        <plugin>
+			<groupId>org.sonatype.tycho</groupId>
+            <artifactId>maven-osgi-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.6</source>
+                <target>1.6</target>
+				 <showDeprecation>true</showDeprecation>
+			      <showWarnings>true</showWarnings>
+                
+            </configuration>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+    <plugins>
+    <!-- does not work, yet
+     <plugin>
+           <groupId>org.codehaus.mojo</groupId>
+           <artifactId>cobertura-maven-plugin</artifactId>
+           <version>2.3</version>
+           <configuration>
+               <formats>
+                   <format>xml</format>
+               </formats>
+           </configuration>
+           <executions>
+               <execution>
+                   <phase>package</phase>
+                   <goals>
+                       <goal>cobertura</goal>
+                   </goals>
+               </execution>
+           </executions>
+       </plugin>
+        -->
+
+      <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+      </plugin>
+      <!-- leads to a class cast exception ?!
+       <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>tycho-p2-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <target>c:/temp/jt_site</target>
+        </configuration>
+      </plugin>  -->
+      
+      <!--
+	  <plugin>
+        <groupId>org.sonatype.tycho</groupId>
+        <artifactId>maven-osgi-test-plugin</artifactId>
+        <version>0.7.0</version>
+        <configuration>
+          <useUIHarness>true</useUIHarness>
+          <useUIThread>true</useUIThread>
+          <product>org.eclipse.sdk.ide</product>
+          <application>org.eclipse.ui.ide.workbench</application>
+		  <forkMode>pertest</forkMode>
+		  <argLine>-Xms256m -Xmx768m</argLine> <testFailureIgnore>false</testFailureIgnore>
+		  <skip>false</skip>
+		  <includes>
+			<include>**/*Test.java</include>
+		  </includes>
+        </configuration>
+      </plugin>
+      -->
+    </plugins>
+  </build>
+  <modules>
+    <module>pdt</module>
+    <module>pdt.common</module>
+    <module>pdt.common.ui</module>
+    <module>pdt.console</module>
+    <module>pdt.core</module>
+    <module>pdt.feature</module>
+    <module>pdt.runtime</module>
+    <module>pdt.runtime.ui</module>
+    <module>pdt.runtime.socket</module>
+    <module>pdt.runtime.socket.ui</module>
+  </modules>
+</project>
