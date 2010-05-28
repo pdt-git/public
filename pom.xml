@@ -48,7 +48,7 @@
       <plugin>
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
-        <version>0.7.0</version>
+        <version>0.8.0</version>
         <extensions>true</extensions>
       </plugin>
       <!-- leads to a class cast exception ?!
@@ -62,11 +62,10 @@
         </configuration>
       </plugin>  -->
       
-      <!--
 	  <plugin>
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>maven-osgi-test-plugin</artifactId>
-        <version>0.7.0</version>
+        <version>0.8.0</version>
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
@@ -80,7 +79,6 @@
 		  </includes>
         </configuration>
       </plugin>
-      -->
     </plugins>
   </build>
   <modules>
