@@ -224,7 +224,6 @@
            alias="library"
            id="pdt.core.library"
            path="engine">
-        <dependency library="pdt.runtime.library.pif"/>
         <dependency library="pdt.runtime.library.common"/>
         <!--<dependency library="pdt.runtime.library.swipl"/>-->
         <dependency library="pdt.runtime.library.attic"/>
