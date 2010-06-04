@@ -74,8 +74,8 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			public void onInit(PrologInterface pif, PrologSession initSession)
 					throws PrologException, PrologInterfaceException {
 
-				FileSearchPathConfigurator.configureFileSearchPath(libraryManager, initSession,
-						new String[] { "pdt.runtime.library.pif" });
+//				FileSearchPathConfigurator.configureFileSearchPath(libraryManager, initSession,
+//						new String[] { "pdt.runtime.library.pif" });
 				initSession.queryOnce("use_module(library(pif_observe2))");
 			}
 

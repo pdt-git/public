@@ -44,7 +44,7 @@ package org.cs3.pdt.runtime.ui;
 public class PrologRuntimeUI {
 	
 	public static final String PLUGIN_ID = "org.cs3.pdt.runtime.ui";
-	public static final String LIB_PIF = "pdt.runtime.library.pif";
+//	public static final String LIB_PIF = "pdt.runtime.library.pif";
 	public static final String LIB_COMMON = "pdt.runtime.library.common";
 	//public static final String LIB_SWIPL = "pdt.runtime.library.swipl";
 	public static final String LIB_ATTIC = "pdt.runtime.library.attic";
