@@ -284,7 +284,7 @@ pl_test:-
 %     pl_test(['Z:/WorkspaceTeaching/svf.examples.prolog/pl/Load.pl'],'Z:/WorkspaceTeaching/bla/test.pl'). 
 %    pl_test(['Z:/pdt.git'],'Z:/test.graphml').   
 %    pl_test(['Z:/WorkspaceTeaching/bla/'],'Z:/WorkspaceTeaching3/test.graphml').   
-    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt'],'Z:/WorkspaceTeaching3/test.graphml').     
+    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test.graphml').     
 %     pl_test(['Z:/pdt.git'],'Z:/WorkspaceTeaching3/test.graphml').       
 %    pl_test('Z:/WorkspacePDT/pdt.runtime/library/attic/org/cs3/pdt/metadata/mi_meta_ops.pl','Z:/WorkspaceTeaching/bla/test.pl').     
 %    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/attic/spike/socket/pifcom_codec.pl'],'Z:/WorkspaceTeaching/bla/test.pl').

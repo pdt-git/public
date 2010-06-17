@@ -56,7 +56,7 @@ categorize_directive(use_module,Args,_Pos,ParentId):-
 	nth1(1,Args,Files),	
 	(	nth1(2,Args,Imports)
 	;	Imports = all							
-	),
+	),			
 	assert(load_dir(ParentId,Files,Imports)).
 categorize_directive(ensure_loaded,Args,_Pos,ParentId):-
 	!,					
