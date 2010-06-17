@@ -92,11 +92,33 @@ lookup_complex_file_reference(_Args,_LoadingId,'','file not found in project').
 lookup_direct_file_reference(ToLoad,LoadingId,Id):-
     prolog_file_type(Pl,prolog),
     fileT(LoadingId,LoadingName,_),
-    absolute_file_name(ToLoad,[extensions(Pl),relative_to(LoadingName)],FileName),
-	fileT_ri(FileName,Id),
+    absolute_file_name(ToLoad,[extensions(Pl),relative_to(LoadingName)],FileName),	
+    						format('FileToLoad: ~w loadedBy: ~w~n', [FileName,LoadingName]),
+	find_file_id_for_file_name(FileName,Id),	format('FileToLoadId: ~w~n', [Id]),
 	!.   
 
 
+/**
+ * find_file_id_for_file_name(?FileName, ?Id) is_det
+ * 
+ * This predicate can be used if one get's a file name via absolute_file_name/3.
+ * absolute_file_name/3 generates lower case names even if the reference file
+ * name (the name of the file to which you compare the relative file name) is given
+ * as with an upper case absolute path.
+ *
+ * Either Arg2 is the id of a fileT fact with arg1 as respective file name, or 
+ * id is the id of a fileT that has a file name that is equal to arg2 after 
+ * converting all letters to lower case (for both names).
+ *
+ * (alternatively one could store names in fielT_ri as lower case, would be much faster)
+ */
+find_file_id_for_file_name(FileName,Id):-
+    fileT_ri(FileName,Id).
+find_file_id_for_file_name(FileName,Id):-
+    downcase_atom(FileName,LowerFileName),
+    fileT_ri(AFileName,Id),
+    downcase_atom(AFileName,LowerAFileName),
+    LowerFileName == LowerAFileName.
 
 /**
  * compute_dir_with_file_search_path(+Key, -FinalDir, +Directive)
