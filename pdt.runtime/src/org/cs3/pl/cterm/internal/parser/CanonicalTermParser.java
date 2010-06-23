@@ -119,6 +119,7 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 
 	final public void Start() throws ParseException {
 		Term();
+	//	System.out.println(token);
 		jj_consume_token(0);
 	}
 
@@ -130,6 +131,7 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 		} else if (jj_2_2(2147483647)) {
 			Compound();
 		} else {
+			//System.out.println((jj_ntk==-1)?jj_ntk():jj_ntk);
 			switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
 			case QUOTED_STRING:
 				String();
@@ -138,6 +140,7 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 			case CUT:
 			case ATOM_IDENTIFIER:
 			case QUOTED_ATOM:
+//			case CLAUSE_IDENTIFIER:
 				Atom();
 				break;
 			case DECIMAL_LITERAL:
@@ -180,6 +183,11 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 				jj_consume_token(LBRC);
 				jj_consume_token(RBRC);
 				break;
+//			case CLAUSE_IDENTIFIER:
+//				System.out.print("hier -->>");
+//				System.out.println(token);
+//				Token newToken = jj_consume_token(CLAUSE_IDENTIFIER);
+//				System.out.println(newToken);
 			default:
 				jj_la1[1] = jj_gen;
 				jj_consume_token(-1);
@@ -234,22 +242,24 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 		jjtreeOpenNodeScope(jjtn000);
 		try {
 			Atom();
+			System.out.print("Compound:");
 			jj_consume_token(LPAREN);
-			Term();
+			System.out.print("(");
+			Term();	
 			label_1:
 				while (true) {
 					switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
 					case COMMA:
-						;
+						;	System.out.print(",");
 						break;
 					default:
-						jj_la1[2] = jj_gen;
+						jj_la1[2] = jj_gen;	System.out.print("Term:"); System.out.print(token);
 						break label_1;
 					}
 					jj_consume_token(COMMA);
-					Term();
+					Term(); 	
 				}
-			jj_consume_token(RPAREN);
+			jj_consume_token(RPAREN);	System.out.println(")");
 		} catch (Throwable jjte000) {
 			if (jjtc000) {
 				jjtree.clearNodeScope(jjtn000);
@@ -500,6 +510,12 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 			}
 			return token;
 		}
+		System.out.print("Token: ");
+		System.out.println(token);
+		System.out.print("OldToken: ");
+		System.out.println(oldToken);
+		System.out.print("Kind: ");
+		System.out.println(kind);
 		token = oldToken;
 		jj_kind = kind;
 		throw generateParseException();
