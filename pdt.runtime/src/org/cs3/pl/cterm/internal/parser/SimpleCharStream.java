@@ -193,7 +193,7 @@ public class SimpleCharStream
         FillBuff();
 
      char c = buffer[bufpos];
-
+     System.out.print(c);
      UpdateLineColumn(c);
      return (c);
   }
