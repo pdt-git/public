@@ -93,8 +93,7 @@ lookup_direct_file_reference(ToLoad,LoadingId,Id):-
     prolog_file_type(Pl,prolog),
     fileT(LoadingId,LoadingName,_),
     absolute_file_name(ToLoad,[extensions(Pl),relative_to(LoadingName)],FileName),	
-    						format('FileToLoad: ~w loadedBy: ~w~n', [FileName,LoadingName]),
-	find_file_id_for_file_name(FileName,Id),	format('FileToLoadId: ~w~n', [Id]),
+	find_file_id_for_file_name(FileName,Id),	
 	!.   
 
 
