@@ -169,8 +169,25 @@ public final class UIUtils {
 		MessageDialog.openInformation(shell, title, msg);
 	}
 
+	/**
+	 * Copied here from JTUtils.
+	 * 
+	 * @return
+	 */
+	public static boolean isTestingMode() {
+		String testingEnv = System.getProperty("JT_TESTING");
+		if(testingEnv == null){
+			testingEnv = System.getenv("JT_TESTING");
+		}
+		return testingEnv != null && testingEnv.toLowerCase().equals("true");
+	}
+
 	public static void displayErrorDialog(final Shell shell,
 			final String title, final String msg) {
+		if(isTestingMode()){
+			throw new RuntimeException("Error Dialog: \n" +title + "\n" + msg);
+		}
+
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
 				public void run() {
