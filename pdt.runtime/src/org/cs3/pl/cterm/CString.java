@@ -43,6 +43,7 @@ package org.cs3.pl.cterm;
 
 import org.cs3.pl.cterm.internal.parser.ASTNode;
 
+
 public class CString extends CTerm {
 	public CString(ASTNode node) {
 		super(node);

@@ -50,13 +50,17 @@ options {
                         
                                                   
                     
+                                                        
                
              
   DEBUG_PARSER=false;
   DEBUG_LOOKAHEAD=false;
   DEBUG_TOKEN_MANAGER=false;  
                        
+                    
   LOOKAHEAD=1;
+  //OUTPUT_DIRECTORY ="generated";
+  //JJTREE_OUTPUT_DIRECTORY ="generated";
 
   
 }
@@ -66,6 +70,8 @@ package org.cs3.pl.cterm.internal.parser;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,18 +134,15 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 		void jjtreeOpenNodeScope(Node n)
     {
     	Token t = getToken(1);
-    	//System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
-    	//System.err.prinln("   first token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");
-      ((SimpleNode)n).setFirstToken(t);
+
+      ((SimpleNode)n).jjtSetFirstToken(t);
       
     }
 
     void jjtreeCloseNodeScope(Node n)
     {
       Token t = getToken(0);
-    	//System.err.prinln("closing node of type "+n);
-    	//System.err.prinln("   last token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");      
-      ((SimpleNode)n).setLastToken(t);
+      ((SimpleNode)n).jjtSetLastToken(t);
       
       
 	  
@@ -149,9 +152,8 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 		SimpleNode s = (SimpleNode)n;
 		if(s.jjtGetNumChildren()>0){
 			 SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
-			 s.setFirstToken(firstChild.getFirstToken());
+			 s.jjtSetFirstToken(firstChild.jjtGetFirstToken());
 		}
-		//System.err.println("created: "+ s+" : "+s.getImage());
 		
 		
  	  
@@ -170,8 +172,7 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 public static void main(String args[]) throws FileNotFoundException {
         InputStream stream = null;
         if(args==null||args.length==0){
-            //System.err.println("Reading from standard input...");
-            stream=System.in;
+             stream=System.in;
         }
         else{
                 return;
@@ -215,9 +216,9 @@ TOKEN : /* SEPARATORS */
 |   < LSQB: "[" >
 |   < RSQB: "]" >
 |	< LBRC:	"{" >
-|   < RBRC: "}" >
+|   < RBRC: "}" > 
 |	< LABR: "<" >
-|	< RABR: ">" >
+|	< RABR: ">" > 
 |	< CUT: "!" >
 }
 
@@ -226,6 +227,7 @@ TOKEN : /* IDENTIFIERS */
 {
   < ATOM_IDENTIFIER: (<LC_LETTER>|<GRAPHIC>) (<LETTER>|<DIGIT>|<GRAPHIC>)* >
 | < VARIABLE_IDENTIFIER: <UC_LETTER> (<LETTER>|<DIGIT>)* >
+| < CLAUSE_REFERENCE: (<LETTER>|<DIGIT>) (<LETTER>|<DIGIT>)* >
 |  < #LETTER: <UC_LETTER>|<LC_LETTER> >
 |  < #LC_LETTER: ["a"-"z"]|<UNICODE_LETTER> >
 |  < #UNICODE_LETTER:  ["\u00c0" - "\u1fff"]| ["\u3040" - "\ud7ff"]| ["\ue000" - "\uffef"]>
@@ -293,10 +295,10 @@ void Term()     :{}
 void ClauseSyntax()       :{}
 {
 	<LABR>
-	<VARIABLE_IDENTIFIER>
+	<ATOM_IDENTIFIER>
 	<RABR>
 	<LPAREN>
-	Atom()
+	<CLAUSE_REFERENCE>
 	<RPAREN>
 } 
 
@@ -305,6 +307,7 @@ void Atom():{/*@bgen(jjtree) Atom */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) Atom */
         try {
@@ -328,6 +331,7 @@ void Atom():{/*@bgen(jjtree) Atom */
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
         }
 /*@egen*/
@@ -338,6 +342,7 @@ void Nil():{/*@bgen(jjtree) Nil */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) Nil */
         try {
@@ -347,6 +352,7 @@ void Nil():{/*@bgen(jjtree) Nil */
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
         }
 /*@egen*/
@@ -357,6 +363,7 @@ void Variable():{/*@bgen(jjtree) Variable */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) Variable */
         try {
@@ -366,6 +373,7 @@ void Variable():{/*@bgen(jjtree) Variable */
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
         }
 /*@egen*/
@@ -377,6 +385,7 @@ void Compound():{/*@bgen(jjtree) Compound */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) Compound */
         try {
@@ -407,6 +416,7 @@ void Compound():{/*@bgen(jjtree) Compound */
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
         }
 /*@egen*/
@@ -422,6 +432,7 @@ void Integer() : {/*@bgen(jjtree) Integer */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) Integer */
   try {
@@ -431,6 +442,7 @@ void Integer() : {/*@bgen(jjtree) Integer */
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
       jjtreeCloseNodeScope(jjtn000);
+      jjtn000.jjtSetLastToken(getToken(0));
     }
   }
 /*@egen*//*|<OCT_LITERAL>|<HEX_LITERAL>*/
@@ -441,6 +453,7 @@ void Float() :{/*@bgen(jjtree) Float */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) Float */
         try {
@@ -450,6 +463,7 @@ void Float() :{/*@bgen(jjtree) Float */
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
         }
 /*@egen*/
@@ -460,6 +474,7 @@ void String() :{/*@bgen(jjtree) String */
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
 /*@egen*/}
 {/*@bgen(jjtree) String */
         try {
@@ -469,6 +484,7 @@ void String() :{/*@bgen(jjtree) String */
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
         }
 /*@egen*/

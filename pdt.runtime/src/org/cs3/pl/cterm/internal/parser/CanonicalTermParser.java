@@ -64,30 +64,26 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
                 void jjtreeOpenNodeScope(Node n)
     {
         Token t = getToken(1);
-        //System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
-        //System.err.prinln("   first token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");
-      ((ASTNode)n).setFirstToken(t);
+
+      ((SimpleNode)n).jjtSetFirstToken(t);
 
     }
 
     void jjtreeCloseNodeScope(Node n)
     {
       Token t = getToken(0);
-        //System.err.prinln("closing node of type "+n);
-        //System.err.prinln("   last token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");      
-      ((ASTNode)n).setLastToken(t);
+      ((SimpleNode)n).jjtSetLastToken(t);
 
 
 
                 //need to "manualy" figure out the start token, as node scope hooks are
                 //called "to late" for nodes like ASTInfixTerm 
                 //if the nodes children have already been poped, this should work:
-                ASTNode s = (ASTNode)n;
+                SimpleNode s = (SimpleNode)n;
                 if(s.jjtGetNumChildren()>0){
-                         ASTNode firstChild = (ASTNode)s.jjtGetChild(0);
-                         s.setFirstToken(firstChild.getFirstToken());
+                         SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
+                         s.jjtSetFirstToken(firstChild.jjtGetFirstToken());
                 }
-                //System.err.println("created: "+ s+" : "+s.getImage());
 
 
 
@@ -106,8 +102,7 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 public static void main(String args[]) throws FileNotFoundException {
         InputStream stream = null;
         if(args==null||args.length==0){
-            //System.err.println("Reading from standard input...");
-            stream=System.in;
+             stream=System.in;
         }
         else{
                 return;
@@ -173,10 +168,10 @@ public static void main(String args[]) throws FileNotFoundException {
 
   final public void ClauseSyntax() throws ParseException {
     jj_consume_token(LABR);
-    jj_consume_token(VARIABLE_IDENTIFIER);
+    jj_consume_token(ATOM_IDENTIFIER);
     jj_consume_token(RABR);
     jj_consume_token(LPAREN);
-    Atom();
+    jj_consume_token(CLAUSE_REFERENCE);
     jj_consume_token(RPAREN);
   }
 
@@ -186,6 +181,7 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case ATOM_IDENTIFIER:
@@ -227,6 +223,7 @@ public static void main(String args[]) throws FileNotFoundException {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
     }
   }
@@ -237,6 +234,7 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       jj_consume_token(LSQB);
       jj_consume_token(RSQB);
@@ -244,6 +242,7 @@ public static void main(String args[]) throws FileNotFoundException {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
     }
   }
@@ -254,12 +253,14 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       jj_consume_token(VARIABLE_IDENTIFIER);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
     }
   }
@@ -270,6 +271,7 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       Atom();
       jj_consume_token(LPAREN);
@@ -306,6 +308,7 @@ public static void main(String args[]) throws FileNotFoundException {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
     }
   }
@@ -332,6 +335,7 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case DECIMAL_LITERAL:
@@ -349,6 +353,7 @@ public static void main(String args[]) throws FileNotFoundException {
     if (jjtc000) {
       jjtree.closeNodeScope(jjtn000, true);
       jjtreeCloseNodeScope(jjtn000);
+      jjtn000.jjtSetLastToken(getToken(0));
     }
     }
   }
@@ -359,12 +364,14 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       jj_consume_token(FLOATING_POINT_LITERAL);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
     }
   }
@@ -375,12 +382,14 @@ public static void main(String args[]) throws FileNotFoundException {
   boolean jjtc000 = true;
   jjtree.openNodeScope(jjtn000);
   jjtreeOpenNodeScope(jjtn000);
+  jjtn000.jjtSetFirstToken(getToken(1));
     try {
       jj_consume_token(QUOTED_STRING);
     } finally {
           if (jjtc000) {
             jjtree.closeNodeScope(jjtn000, true);
             jjtreeCloseNodeScope(jjtn000);
+            jjtn000.jjtSetLastToken(getToken(0));
           }
     }
   }
@@ -399,11 +408,6 @@ public static void main(String args[]) throws FileNotFoundException {
     finally { jj_save(1, xla); }
   }
 
-  private boolean jj_3R_4() {
-    if (jj_3R_5()) return true;
-    return false;
-  }
-
   private boolean jj_3R_3() {
     if (jj_scan_token(LBRC)) return true;
     if (jj_scan_token(RBRC)) return true;
@@ -412,10 +416,10 @@ public static void main(String args[]) throws FileNotFoundException {
 
   private boolean jj_3R_5() {
     if (jj_scan_token(LABR)) return true;
-    if (jj_scan_token(VARIABLE_IDENTIFIER)) return true;
+    if (jj_scan_token(ATOM_IDENTIFIER)) return true;
     if (jj_scan_token(RABR)) return true;
     if (jj_scan_token(LPAREN)) return true;
-    if (jj_3R_2()) return true;
+    if (jj_scan_token(CLAUSE_REFERENCE)) return true;
     if (jj_scan_token(RPAREN)) return true;
     return false;
   }
@@ -431,7 +435,7 @@ public static void main(String args[]) throws FileNotFoundException {
     xsp = jj_scanpos;
     if (jj_scan_token(18)) {
     jj_scanpos = xsp;
-    if (jj_scan_token(32)) {
+    if (jj_scan_token(33)) {
     jj_scanpos = xsp;
     if (jj_scan_token(17)) {
     jj_scanpos = xsp;
@@ -447,6 +451,11 @@ public static void main(String args[]) throws FileNotFoundException {
 
   private boolean jj_3_1() {
     if (jj_scan_token(LPAREN)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_4() {
+    if (jj_3R_5()) return true;
     return false;
   }
 
@@ -469,10 +478,10 @@ public static void main(String args[]) throws FileNotFoundException {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x4c0ea800,0x6a000,0x200,0x4c000000,0xc000000,};
+      jj_la1_0 = new int[] {0x980ea800,0x6a000,0x200,0x98000000,0x18000000,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x3,0x1,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0x6,0x2,0x0,0x0,0x0,};
    }
   final private JJCalls[] jj_2_rtns = new JJCalls[2];
   private boolean jj_rescan = false;
@@ -557,7 +566,7 @@ public static void main(String args[]) throws FileNotFoundException {
     Token oldToken;
     if ((oldToken = token).next != null) token = token.next;
     else token = token.next = token_source.getNextToken();
-    jj_ntk = -1;
+    jj_ntk = -1;		System.out.println(token);
     if (token.kind == kind) {
       jj_gen++;
       if (++jj_gc > 100) {
@@ -661,7 +670,7 @@ public static void main(String args[]) throws FileNotFoundException {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[34];
+    boolean[] la1tokens = new boolean[35];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -678,7 +687,7 @@ public static void main(String args[]) throws FileNotFoundException {
         }
       }
     }
-    for (int i = 0; i < 34; i++) {
+    for (int i = 0; i < 35; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
