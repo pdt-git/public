@@ -3,7 +3,7 @@ package org.cs3.pl.cterm.internal.parser;
 
 public interface CanonicalTermParserVisitor
 {
-  public Object visit(ASTNode node, Object data);
+  public Object visit(SimpleNode node, Object data);
   public Object visit(ASTAtom node, Object data);
   public Object visit(ASTNil node, Object data);
   public Object visit(ASTVariable node, Object data);

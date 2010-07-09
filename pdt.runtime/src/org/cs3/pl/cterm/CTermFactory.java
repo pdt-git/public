@@ -54,7 +54,7 @@ import org.cs3.pl.cterm.internal.parser.ASTNil;
 import org.cs3.pl.cterm.internal.parser.ASTString;
 import org.cs3.pl.cterm.internal.parser.ASTVariable;
 import org.cs3.pl.cterm.internal.parser.CanonicalTermParser;
-import org.cs3.pl.cterm.internal.parser.ASTNode;
+import org.cs3.pl.cterm.internal.parser.Node;
 
 public class CTermFactory {
 
@@ -80,27 +80,27 @@ public class CTermFactory {
 		return create(parser.getASTRoot());
 	}
 
-	static CTerm create(ASTNode root) {
+	static CTerm create(Node root) {
 		if(root instanceof ASTAtom){
-			return new CAtom(root);
+			return new CAtom((ASTAtom)root);
 		} 
 		if(root instanceof ASTString){
-			return new CString(root);
+			return new CString((ASTString)root);
 		}
 		if(root instanceof ASTVariable){
-			return new CVariable(root);
+			return new CVariable((ASTVariable)root);
 		} 
 		if(root instanceof ASTCompound){
-			return new CCompound(root);
+			return new CCompound((ASTCompound)root);
 		} 
 		if(root instanceof ASTInteger){
-			return new CInteger(root);
+			return new CInteger((ASTInteger)root);
 		}
 		if(root instanceof ASTFloat){
-			return new CFloat(root);
+			return new CFloat((ASTFloat)root);
 		}
 		if(root instanceof ASTNil){
-			return new CNil(root);
+			return new CNil((ASTNil)root);
 		}
 		throw new IllegalArgumentException("bad node type: "+root.getClass().getName());
 	}

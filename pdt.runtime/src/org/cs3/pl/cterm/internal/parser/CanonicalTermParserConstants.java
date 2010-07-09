@@ -37,33 +37,35 @@ public interface CanonicalTermParserConstants {
   /** RegularExpression Id. */
   int VARIABLE_IDENTIFIER = 19;
   /** RegularExpression Id. */
-  int LETTER = 20;
+  int CLAUSE_REFERENCE = 20;
   /** RegularExpression Id. */
-  int LC_LETTER = 21;
+  int LETTER = 21;
   /** RegularExpression Id. */
-  int UNICODE_LETTER = 22;
+  int LC_LETTER = 22;
   /** RegularExpression Id. */
-  int GRAPHIC = 23;
+  int UNICODE_LETTER = 23;
   /** RegularExpression Id. */
-  int UC_LETTER = 24;
+  int GRAPHIC = 24;
   /** RegularExpression Id. */
-  int DIGIT = 25;
+  int UC_LETTER = 25;
   /** RegularExpression Id. */
-  int DECIMAL_LITERAL = 26;
+  int DIGIT = 26;
   /** RegularExpression Id. */
-  int BIN_LITERAL = 27;
+  int DECIMAL_LITERAL = 27;
   /** RegularExpression Id. */
-  int OCT_LITERAL = 28;
+  int BIN_LITERAL = 28;
   /** RegularExpression Id. */
-  int HEX_LITERAL = 29;
+  int OCT_LITERAL = 29;
   /** RegularExpression Id. */
-  int FLOATING_POINT_LITERAL = 30;
+  int HEX_LITERAL = 30;
   /** RegularExpression Id. */
-  int EXPONENT = 31;
+  int FLOATING_POINT_LITERAL = 31;
   /** RegularExpression Id. */
-  int QUOTED_ATOM = 32;
+  int EXPONENT = 32;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 33;
+  int QUOTED_ATOM = 33;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 34;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -90,6 +92,7 @@ public interface CanonicalTermParserConstants {
     "\"!\"",
     "<ATOM_IDENTIFIER>",
     "<VARIABLE_IDENTIFIER>",
+    "<CLAUSE_REFERENCE>",
     "<LETTER>",
     "<LC_LETTER>",
     "<UNICODE_LETTER>",
