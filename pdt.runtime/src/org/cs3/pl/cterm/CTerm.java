@@ -69,7 +69,7 @@ public class CTerm {
 	}
 
 	public String getFunctorImage() {
-		return node.getFunctorImage();
+		return node.getFunctor();
 	}
 
 	public int getArity() {	

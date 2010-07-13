@@ -62,7 +62,7 @@ public class CCompound extends CTerm implements Iterable<CTerm> {
 	}
 
 	protected String doGetFunctorImage() {
-		return ((ASTAtom)node.jjtGetChild(0)).getImage();
+		return ((ASTAtom)node.jjtGetChild(0)).getString();
 	}
 
 	public int getArity() {

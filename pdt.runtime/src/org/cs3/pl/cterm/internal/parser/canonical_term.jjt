@@ -213,17 +213,15 @@ TOKEN : /* SEPARATORS */
 |   < RSQB: "]" >
 |	< LBRC:	"{" >
 |   < RBRC: "}" > 
-|	< LABR: "<" >
-|	< RABR: ">" > 
 |	< CUT: "!" >
 }
 
 
 TOKEN : /* IDENTIFIERS */
 {
-  < ATOM_IDENTIFIER: (<LC_LETTER>|<GRAPHIC>) (<LETTER>|<DIGIT>|<GRAPHIC>)* >
+  < CLAUSE_DEF: "<" "c" "l" "a" "u" "s" "e" ">" >
+|  < ATOM_IDENTIFIER: (<LC_LETTER>|<GRAPHIC>) (<LETTER>|<DIGIT>|<GRAPHIC>)* >
 | < VARIABLE_IDENTIFIER: <UC_LETTER> (<LETTER>|<DIGIT>)* >
-| < CLAUSE_REFERENCE: (<LETTER>|<DIGIT>) (<LETTER>|<DIGIT>)* >
 |  < #LETTER: <UC_LETTER>|<LC_LETTER> >
 |  < #LC_LETTER: ["a"-"z"]|<UNICODE_LETTER> >
 |  < #UNICODE_LETTER:  ["\u00C0" - "\u1FFF"]| ["\u3040" - "\uD7FF"]| ["\uE000" - "\uFFEF"]>
@@ -267,9 +265,11 @@ TOKEN : /* LITERALS */
       )*
       "\"" 
   >
-
 }
 
+TOKEN : /* REFERENCES */
+	{< CLAUSE_REFERENCE: (<UC_LETTER>|<DIGIT>) (<UC_LETTER>|<DIGIT>)* >}
+	
 void Start()#void:{}
 {
 	Term()
@@ -279,6 +279,7 @@ void Start()#void:{}
 void Term()#void:{}
 {
 	LOOKAHEAD("(") "(" Term() ")"
+	|LOOKAHEAD(<CLAUSE_DEF> "(") Atom()
 	|LOOKAHEAD(Atom() "(") Compound()
 	|String()
 	|Atom()
@@ -290,9 +291,7 @@ void Term()#void:{}
 
 void ClauseSyntax() #void :{}
 {
-	<LABR>
-	<ATOM_IDENTIFIER>
-	<RABR>
+	<CLAUSE_DEF>
 	<LPAREN>
 	<CLAUSE_REFERENCE>
 	<RPAREN>
@@ -300,7 +299,11 @@ void ClauseSyntax() #void :{}
 
 void Atom():{}
 {
-	<ATOM_IDENTIFIER>|<QUOTED_ATOM>|<CUT>|<LBRC><RBRC>|ClauseSyntax()
+	ClauseSyntax()
+	|<ATOM_IDENTIFIER>
+	|<QUOTED_ATOM>
+	|<CUT>
+	|<LBRC><RBRC>
 }
 
 void Nil():{}
