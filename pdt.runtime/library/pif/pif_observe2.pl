@@ -81,13 +81,13 @@ pif_subscribe(Address,Subject,Ticket):-
 %
 pif_unsubscribe(Address,Subject):-
  	retractall(observing(Address,Subject,_)),
- 	(	socket(S), \+ observing(_,_)
+ 	(	socket(S), \+ observing(_,_,_)
  	->	tcp_close_socket(S),
  		retractall(socket(_))
  	).
 
 pif_unsubscribe(Ticket):-
-    retract(observing(_,_,Ticket),
+    retract(observing(_,_,Ticket)),
  	(	socket(S), \+ observing(_,_,_)
  	->	tcp_close_socket(S),
  		retractall(socket(_))
