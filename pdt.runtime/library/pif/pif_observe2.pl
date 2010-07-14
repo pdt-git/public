@@ -56,7 +56,7 @@
 
 :- use_module(library(socket)).
 
-:- dynamic observing/2, socket/1.
+:- dynamic observing/3, socket/1.
 
 %%
 % pif_subscribe(+Address,+Subject).
@@ -68,7 +68,8 @@ pif_subscribe(Address,Subject):-
 
 
 pif_subscribe(Address,Subject,Ticket):-
-    assert(observing(Address,Subject),Ticket),
+    term_hash((Address,Subject),Ticket),
+    assert(observing(Address,Subject,Ticket)),
     (	socket(_)
     ->	true
     ;	udp_socket(USocket),
@@ -79,18 +80,15 @@ pif_subscribe(Address,Subject,Ticket):-
 % pif_unsubscribe(+Address,+Subject).
 %
 pif_unsubscribe(Address,Subject):-
- 	retractall(observing(Address,Subject)),
- 	(	socket(S), \+ observing(_,_)
+ 	retractall(observing(Address,Subject,_)),
+ 	(	socket(S), \+ observing(_,_,_)
  	->	tcp_close_socket(S),
  		retractall(socket(_))
  	).
 
 pif_unsubscribe(Ticket):-
-    (	catch(clause(observing(_,_),_,Ticket),_,fail)
- 	->	erase(Ticket)
- 	;	true
- 	),
- 	(	socket(S), \+ observing(_,_)
+    retract(observing(_,_,Ticket)),
+ 	(	socket(S), \+ observing(_,_,_)
  	->	tcp_close_socket(S),
  		retractall(socket(_))
  	).
@@ -100,9 +98,8 @@ pif_unsubscribe(Ticket):-
 pif_notify(Subject,Event) :-
 	debug(pif_observe,'~w~n',[pif_notify(Subject,Event)]),
 	forall(
-		clause(observing(Address,Subject),_,Ref),
+		observing(Address,Subject,Ref),
 		notify_X(Address,Subject,Ref,Event)
-    	
 	).   
 
 notify_X(Address,Subject,Ref,Event):-	

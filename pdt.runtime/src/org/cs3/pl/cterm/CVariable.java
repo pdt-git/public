@@ -43,6 +43,7 @@ package org.cs3.pl.cterm;
 
 import org.cs3.pl.cterm.internal.parser.ASTNode;
 
+
 public class CVariable extends CTerm {
 	public CVariable(ASTNode node) {
 		super(node);
