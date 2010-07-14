@@ -43,6 +43,7 @@ package org.cs3.pl.cterm;
 
 import org.cs3.pl.cterm.internal.parser.ASTNode;
 
+
 public class CInteger extends CTerm{
 	public CInteger(ASTNode node) {
 		super(node);

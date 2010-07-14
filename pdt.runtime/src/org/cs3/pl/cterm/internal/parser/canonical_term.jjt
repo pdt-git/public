@@ -44,18 +44,22 @@
 */
 
 options {
-  JDK_VERSION = "1.4";
+  JDK_VERSION = "1.6";
   STATIC=false;
   NODE_USES_PARSER=true;
   NODE_PACKAGE="org.cs3.pl.cterm.internal.parser";
   NODE_PREFIX="AST";
+  NODE_CLASS="org.cs3.pl.cterm.internal.parser.ASTNode";
   VISITOR=true;
   MULTI=true;
   DEBUG_PARSER=false;
   DEBUG_LOOKAHEAD=false;
   DEBUG_TOKEN_MANAGER=false;  
   NODE_SCOPE_HOOK=true;
+  TRACK_TOKENS=true;
   LOOKAHEAD=1;
+  //OUTPUT_DIRECTORY ="generated";
+  //JJTREE_OUTPUT_DIRECTORY ="generated";
 
   
 }
@@ -65,6 +69,8 @@ package org.cs3.pl.cterm.internal.parser;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,18 +130,15 @@ public class CanonicalTermParser {
 		void jjtreeOpenNodeScope(Node n)
     {
     	Token t = getToken(1);
-    	//System.err.println("open node of type "+PrologTermParserTreeConstants.jjtNodeName[((SimpleNode)n).id]);
-    	//System.err.prinln("   first token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");
-      ((SimpleNode)n).setFirstToken(t);
+
+      ((SimpleNode)n).jjtSetFirstToken(t);
       
     }
 
     void jjtreeCloseNodeScope(Node n)
     {
       Token t = getToken(0);
-    	//System.err.prinln("closing node of type "+n);
-    	//System.err.prinln("   last token: "+t.image+" at line "+t.beginLine+", column "+t.beginColumn+".");      
-      ((SimpleNode)n).setLastToken(t);
+      ((SimpleNode)n).jjtSetLastToken(t);
       
       
 	  
@@ -145,9 +148,8 @@ public class CanonicalTermParser {
 		SimpleNode s = (SimpleNode)n;
 		if(s.jjtGetNumChildren()>0){
 			 SimpleNode firstChild = (SimpleNode)s.jjtGetChild(0);
-			 s.setFirstToken(firstChild.getFirstToken());
+			 s.jjtSetFirstToken(firstChild.jjtGetFirstToken());
 		}
-		//System.err.println("created: "+ s+" : "+s.getImage());
 		
 		
  	  
@@ -166,8 +168,7 @@ public class CanonicalTermParser {
 public static void main(String args[]) throws FileNotFoundException {
         InputStream stream = null;
         if(args==null||args.length==0){
-            //System.err.println("Reading from standard input...");
-            stream=System.in;
+             stream=System.in;
         }
         else{
                 return;
@@ -211,14 +212,15 @@ TOKEN : /* SEPARATORS */
 |   < LSQB: "[" >
 |   < RSQB: "]" >
 |	< LBRC:	"{" >
-|   < RBRC: "}" >
+|   < RBRC: "}" > 
 |	< CUT: "!" >
 }
 
 
 TOKEN : /* IDENTIFIERS */
 {
-  < ATOM_IDENTIFIER: (<LC_LETTER>|<GRAPHIC>) (<LETTER>|<DIGIT>|<GRAPHIC>)* >
+  < CLAUSE_DEF: "<" "c" "l" "a" "u" "s" "e" ">" >
+|  < ATOM_IDENTIFIER: (<LC_LETTER>|<GRAPHIC>) (<LETTER>|<DIGIT>|<GRAPHIC>)* >
 | < VARIABLE_IDENTIFIER: <UC_LETTER> (<LETTER>|<DIGIT>)* >
 |  < #LETTER: <UC_LETTER>|<LC_LETTER> >
 |  < #LC_LETTER: ["a"-"z"]|<UNICODE_LETTER> >
@@ -263,9 +265,11 @@ TOKEN : /* LITERALS */
       )*
       "\"" 
   >
-
 }
 
+TOKEN : /* REFERENCES */
+	{< CLAUSE_REFERENCE: (<UC_LETTER>|<DIGIT>) (<UC_LETTER>|<DIGIT>)* >}
+	
 void Start()#void:{}
 {
 	Term()
@@ -275,6 +279,7 @@ void Start()#void:{}
 void Term()#void:{}
 {
 	LOOKAHEAD("(") "(" Term() ")"
+	|LOOKAHEAD(<CLAUSE_DEF> "(") Atom()
 	|LOOKAHEAD(Atom() "(") Compound()
 	|String()
 	|Atom()
@@ -284,9 +289,21 @@ void Term()#void:{}
 	
 }
 
+void ClauseSyntax() #void :{}
+{
+	<CLAUSE_DEF>
+	<LPAREN>
+	<CLAUSE_REFERENCE>
+	<RPAREN>
+} 
+
 void Atom():{}
 {
-	<ATOM_IDENTIFIER>|<QUOTED_ATOM>|<CUT>|<LBRC><RBRC>
+	ClauseSyntax()
+	|<ATOM_IDENTIFIER>
+	|<QUOTED_ATOM>
+	|<CUT>
+	|<LBRC><RBRC>
 }
 
 void Nil():{}
