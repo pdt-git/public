@@ -3,7 +3,7 @@
 :- use_module(prolog_file_reader_quick).
 
 /**
- * write_facts_to_abba(+File)
+ * write_facts_to_graphML(+File)
  *   Arg1 has to be a full qualified file name. The file may not exist.
  *   The predicated collects the relevant informations about the following 
  *   facts and converts them into abba-sources for Bashaars Tool. This 
@@ -11,7 +11,7 @@
  *   The facts that are considered are:
  *   ###### to be completed #########
  **/
-write_facts_to_abba(File):-
+write_facts_to_graphML(File):-
     open(File,write,OutStream,[type(text)]),
     write_graphML_header(OutStream),
     write_graphML_keys(OutStream),
@@ -49,6 +49,8 @@ write_graphML_header(OutStream):-
 	
 	
 write_graphML_keys(OutStream):-
+    write(OutStream, '<key id="id" for="node" attr.name="id" attr.type="string"/>'),
+    nl(OutStream),
     write(OutStream, '<key id="kind" for="all" attr.name="kind" attr.type="string"/>'),
     nl(OutStream),
     write(OutStream, '<key id="fileName" for="node" attr.name="description" attr.type="string"/>'),
@@ -104,6 +106,7 @@ write_files(Stream):-
 		
 write_file(Stream,Id,FileName,Module):-
 	open_node(Stream,Id),
+	write_data(Stream,'id',Id),
 	write_data(Stream,'fileName',FileName),
 	write_data(Stream,'module',Module),	
 	start_graph_element(Stream),
@@ -122,6 +125,7 @@ write_predicates(Stream,FileId):-
 		
 write_predicate(Stream,Id,Functor,Arity,Module):-
     open_node(Stream,Id),
+    write_data(Stream,'id',Id),
 	write_data(Stream,'functor',Functor),
 	write_data(Stream,'arity',Arity),	
 	write_data(Stream,'moduleOfPredicate',Module),	
@@ -297,5 +301,5 @@ pl_test:-
 pl_test(Project,Output):-
 	plparser_quick:generate_facts(Project),
 	writeln('generate abba sources'),
-    time(write_facts_to_abba(Output)).     %Ergebnisdatei (abba-Format)
+    time(write_facts_to_graphML(Output)).     %Ergebnisdatei (abba-Format)
     
