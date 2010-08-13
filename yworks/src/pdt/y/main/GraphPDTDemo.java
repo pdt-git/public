@@ -25,6 +25,7 @@ import y.layout.hierarchic.IncrementalHierarchicLayouter;
 import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
+import y.view.hierarchy.GroupLayoutConfigurator;
 
 public class GraphPDTDemo extends  JPanel {
 
@@ -37,7 +38,6 @@ public class GraphPDTDemo extends  JPanel {
 
 	public GraphPDTDemo() 
 	{
-
 		setLayout(new BorderLayout());
 		reader = new GraphMLReader();
 		view = new Graph2DView();
@@ -54,11 +54,13 @@ public class GraphPDTDemo extends  JPanel {
 		ol.setOrientation(LayoutOrientation.LEFT_TO_RIGHT);
 		layout.setOrientationLayouter(ol);
 
-		EditMode hot = new EditMode();
-		hot.allowNodeCreation(false);
-		hot.allowEdgeCreation(false);
-
-		view.addViewMode(hot);
+		EditMode editMode = new EditMode();
+		editMode.allowNodeCreation(false);
+		editMode.allowEdgeCreation(false);
+		editMode.setPopupMode(new HierarchicPopupMode());
+		view.addViewMode(editMode);
+		view.addViewMode(new ToggleOpenClosedStateViewMode());
+		
 		add(view);
 
 		updateView();
@@ -81,6 +83,7 @@ public class GraphPDTDemo extends  JPanel {
 		view.updateWorldRect();
 		view.updateView();
 	}
+
 
 	public void start()
 	{
