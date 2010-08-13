@@ -21,6 +21,7 @@ import y.util.GraphCopier;
 import y.util.Maps;
 import y.view.Graph2D;
 import y.view.Graph2DCopyFactory;
+import y.view.hierarchy.HierarchyManager;
 
 
 public class GraphMLReader {
@@ -33,9 +34,12 @@ public class GraphMLReader {
 	private GraphCopier graphCopier = new GraphCopier(new Graph2DCopyFactory());
 	
 	private DataMap dataMap = Maps.createHashedDataMap();
+
+	private HierarchyManager hierarchy;
 	
 	public GraphMLReader(){
 		graph = new Graph2D();
+		hierarchy = new HierarchyManager(graph);
 		core.addInputDataAcceptor("id", dataMap, KeyScope.NODE, KeyType.STRING);
 		
 		core.addNodeRealizerSerializer(new GroupNodeRealizerSerializer());
