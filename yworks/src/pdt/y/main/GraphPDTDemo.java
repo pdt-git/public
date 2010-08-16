@@ -21,6 +21,7 @@ import pdt.y.graphml.GraphMLReader;
 import y.base.Node;
 import y.layout.LayoutOrientation;
 import y.layout.OrientationLayouter;
+import y.layout.hierarchic.GivenLayersLayerer;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
 import y.view.EditMode;
 import y.view.Graph2D;
@@ -45,6 +46,15 @@ public class GraphPDTDemo extends  JPanel {
 		
 		layout = new IncrementalHierarchicLayouter();
 
+		//	     layout.setFixedElementsLayerer(gll = new GivenLayersLayerer());
+		//	     hintsFactory = layout.createIncrementalHintsFactory();
+		// 		layout.setComponentLayouterEnabled(false);
+		layout.setLayoutMode(IncrementalHierarchicLayouter.LAYOUT_MODE_INCREMENTAL);
+
+		layout.getEdgeLayoutDescriptor().setSourcePortOptimizationEnabled(true);
+		layout.getEdgeLayoutDescriptor().setTargetPortOptimizationEnabled(true);
+		layout.setOrthogonallyRouted(true);
+
 		//set some options
 		layout.getNodeLayoutDescriptor().setMinimumLayerHeight(60);
 		layout.getNodeLayoutDescriptor().setMinimumDistance(20);
@@ -53,7 +63,7 @@ public class GraphPDTDemo extends  JPanel {
 		OrientationLayouter ol = new OrientationLayouter();
 		ol.setOrientation(LayoutOrientation.LEFT_TO_RIGHT);
 		layout.setOrientationLayouter(ol);
-
+		
 		EditMode editMode = new EditMode();
 		editMode.allowNodeCreation(false);
 		editMode.allowEdgeCreation(false);
