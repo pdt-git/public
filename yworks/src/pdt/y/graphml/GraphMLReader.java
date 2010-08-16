@@ -1,18 +1,16 @@
 package pdt.y.graphml;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import y.base.DataAcceptor;
+import pdt.y.main.MyShapeNodeRealizer;
+import pdt.y.main.MyShapeNodeRealizerSerializer;
+
+
 import y.base.DataMap;
-import y.base.Graph;
-import y.base.GraphCopyFactory;
 import y.base.Node;
 import y.io.GraphMLIOHandler;
-import y.io.IOHandler;
-import y.io.graphml.GraphMLHandler;
 import y.io.graphml.KeyScope;
 import y.io.graphml.KeyType;
 import y.io.graphml.graph2d.Graph2DGraphMLHandler;
@@ -21,6 +19,9 @@ import y.util.GraphCopier;
 import y.util.Maps;
 import y.view.Graph2D;
 import y.view.Graph2DCopyFactory;
+import y.view.ShapeNodeRealizer;
+import y.view.hierarchy.DefaultHierarchyGraphFactory;
+import y.view.hierarchy.GroupNodeRealizer;
 import y.view.hierarchy.HierarchyManager;
 
 
@@ -34,16 +35,43 @@ public class GraphMLReader {
 	private GraphCopier graphCopier = new GraphCopier(new Graph2DCopyFactory());
 	
 	private DataMap dataMap = Maps.createHashedDataMap();
-
+	private DataMap moduleMap = Maps.createHashedDataMap();
+	
 	private HierarchyManager hierarchy;
+
+	private ShapeNodeRealizer shapeNodeRealizer;
 	
 	public GraphMLReader(){
 		graph = new Graph2D();
-		hierarchy = new HierarchyManager(graph);
-		core.addInputDataAcceptor("id", dataMap, KeyScope.NODE, KeyType.STRING);
+		shapeNodeRealizer = new ShapeNodeRealizer(ShapeNodeRealizer.ELLIPSE);
 		
-		core.addNodeRealizerSerializer(new GroupNodeRealizerSerializer());
-		ioHandler.addNodeRealizerSerializer(new GroupNodeRealizerSerializer());
+
+		GroupNodeRealizer groupNodeRealizer = new GroupNodeRealizer();
+//		groupNodeRealizer.setShapeType(ShapeNodeRealizer.OCTAGON);
+
+//		graph.setDefaultNodeRealizer(shapeNodeRealizer);
+
+		
+		  MyShapeNodeRealizer svr = new MyShapeNodeRealizer(this);
+		  svr.setSize(70,70);
+		  svr.setState(MyShapeNodeRealizer.FINAL_STATE);
+		  svr.setFillColor(Color.ORANGE);      
+		  graph.setDefaultNodeRealizer(svr.createCopy());
+		    
+		hierarchy = new HierarchyManager(graph);
+		
+//		DefaultHierarchyGraphFactory hgf =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
+//		hgf.setDefaultGroupNodeRealizer(groupNodeRealizer);
+//		hgf.setProxyNodeRealizerEnabled(false);
+		
+		
+		core.addInputDataAcceptor("id", dataMap, KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("module", moduleMap, KeyScope.NODE,KeyType.STRING);
+		
+		core.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
+//		core.addNodeRealizerSerializer(new GroupNodeRealizerSerializer());
+		
+
 	}
 	
 	public boolean loadFile(URL resource){
@@ -75,6 +103,10 @@ public class GraphMLReader {
 	
 	public String getIdForNode(Node node){
 		return (String) dataMap.get(node);
+	}
+	
+	public String getModule(Node node){
+		return (String) moduleMap.get(node);
 	}
 	
 }
