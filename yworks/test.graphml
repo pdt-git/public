@@ -34,18 +34,21 @@
    <data key="functor">deleteXrefDb</data>
    <data key="arity">0</data>
    <data key="moduleOfPredicate">xref</data>
+   <data key="module">initial</data>
 </node>
 <node id="10620">
    <data key="id">10620</data>
    <data key="functor">buildXrefDb</data>
    <data key="arity">0</data>
    <data key="moduleOfPredicate">xref</data>
+   <data key="module">transition</data>
 </node>
 <node id="10621">
    <data key="id">10621</data>
    <data key="functor">find_xref___</data>
    <data key="arity">3</data>
    <data key="moduleOfPredicate">xref</data>
+   <data key="module">final</data>
 </node>
 <node id="10622">
    <data key="id">10622</data>
