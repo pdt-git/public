@@ -18,10 +18,16 @@ import javax.swing.JRootPane;
 import javax.swing.filechooser.FileFilter;
 
 import pdt.y.graphml.GraphMLReader;
+import y.base.GraphEvent;
+import y.base.GraphListener;
 import y.base.Node;
+import y.layout.BufferedLayouter;
 import y.layout.LayoutOrientation;
+import y.layout.LayoutStage;
+import y.layout.Layouter;
 import y.layout.OrientationLayouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
+import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
@@ -35,6 +41,7 @@ public class GraphPDTDemo extends  JPanel {
 	private Graph2D model;
 	private GraphMLReader reader;
 	private IncrementalHierarchicLayouter layout;
+	private OrthogonalEdgeRouter router;
 
 	public GraphPDTDemo() 
 	{
@@ -43,8 +50,30 @@ public class GraphPDTDemo extends  JPanel {
 		view = new Graph2DView();
 		model = new Graph2D();
 		
-		layout = new IncrementalHierarchicLayouter();
+		router = new OrthogonalEdgeRouter();
+	
+	    
+		
 
+		createLayout();
+
+		EditMode editMode = new EditMode();
+		editMode.allowNodeCreation(false);
+		editMode.allowEdgeCreation(false);
+		editMode.setPopupMode(new HierarchicPopupMode());
+		editMode.setMoveSelectionMode(new MyMoveSelectionMode(router));
+		view.addViewMode(editMode);
+		view.addViewMode(new ToggleOpenClosedStateViewMode());
+		
+		add(view);
+
+		updateView();
+	}
+
+	private void createLayout() {
+		
+		layout = new IncrementalHierarchicLayouter();
+		
 		//set some options
 		layout.getNodeLayoutDescriptor().setMinimumLayerHeight(60);
 		layout.getNodeLayoutDescriptor().setMinimumDistance(20);
@@ -53,17 +82,9 @@ public class GraphPDTDemo extends  JPanel {
 		OrientationLayouter ol = new OrientationLayouter();
 		ol.setOrientation(LayoutOrientation.LEFT_TO_RIGHT);
 		layout.setOrientationLayouter(ol);
-
-		EditMode editMode = new EditMode();
-		editMode.allowNodeCreation(false);
-		editMode.allowEdgeCreation(false);
-		editMode.setPopupMode(new HierarchicPopupMode());
-		view.addViewMode(editMode);
-		view.addViewMode(new ToggleOpenClosedStateViewMode());
 		
-		add(view);
-
-		updateView();
+		
+		
 	}
 
 	protected void loadGraph(URL resource) {
