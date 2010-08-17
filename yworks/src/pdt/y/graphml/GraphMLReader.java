@@ -40,6 +40,8 @@ public class GraphMLReader {
 	private HierarchyManager hierarchy;
 
 	private ShapeNodeRealizer shapeNodeRealizer;
+
+	private MyShapeNodeRealizer svr;
 	
 	public GraphMLReader(){
 		graph = new Graph2D();
@@ -52,13 +54,14 @@ public class GraphMLReader {
 //		graph.setDefaultNodeRealizer(shapeNodeRealizer);
 
 		
-		  MyShapeNodeRealizer svr = new MyShapeNodeRealizer(this);
+		  svr = new MyShapeNodeRealizer(this);
 		  svr.setSize(70,70);
 		  svr.setState(MyShapeNodeRealizer.FINAL_STATE);
 		  svr.setFillColor(Color.ORANGE);      
-		  graph.setDefaultNodeRealizer(svr.createCopy());
 		    
+		graph.setDefaultNodeRealizer(svr);
 		hierarchy = new HierarchyManager(graph);
+		
 		
 //		DefaultHierarchyGraphFactory hgf =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
 //		hgf.setDefaultGroupNodeRealizer(groupNodeRealizer);
@@ -68,9 +71,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("id", dataMap, KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", moduleMap, KeyScope.NODE,KeyType.STRING);
 		
-		core.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
-//		core.addNodeRealizerSerializer(new GroupNodeRealizerSerializer());
-		
+		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
 
 	}
 	
@@ -91,6 +92,7 @@ public class GraphMLReader {
 		return this.graph;
 	}
 	
+	// For testing:
 	public Graph2D readFile(InputStream inputFileStream){
 	    graph.clear();
 		try {

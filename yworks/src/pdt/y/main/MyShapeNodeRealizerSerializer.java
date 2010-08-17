@@ -16,6 +16,11 @@ import org.w3c.dom.Element;
  * RealizerSerializer that can be used to serialize instances of StateNodeRealizer to/from GraphML
  */
 public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerializer {
+	public MyShapeNodeRealizerSerializer(){
+		super();
+		System.out.println(getName());
+	}
+	
 	@Override
 	public String getName() {
 		return "data";
