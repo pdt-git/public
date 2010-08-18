@@ -18,43 +18,37 @@ import javax.swing.JRootPane;
 import javax.swing.filechooser.FileFilter;
 
 import pdt.y.graphml.GraphMLReader;
-import y.base.GraphEvent;
-import y.base.GraphListener;
+import pdt.y.model.GraphModel;
+import pdt.y.view.modes.HierarchicPopupMode;
+import pdt.y.view.modes.MyMoveSelectionMode;
+import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
 import y.base.Node;
-import y.layout.BufferedLayouter;
 import y.layout.LayoutOrientation;
-import y.layout.LayoutStage;
-import y.layout.Layouter;
 import y.layout.OrientationLayouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
-import y.view.hierarchy.GroupLayoutConfigurator;
 
 public class GraphPDTDemo extends  JPanel {
-
-	
-	private static final long serialVersionUID = -611433500513523511L;
 	private Graph2DView view;
-	private Graph2D model;
+	private GraphModel model;
+	private Graph2D graph;
 	private GraphMLReader reader;
 	private IncrementalHierarchicLayouter layout;
 	private OrthogonalEdgeRouter router;
+	
+	private static final long serialVersionUID = -611433500513523511L;
+	private ExitAction data = new ExitAction();
 
 	public GraphPDTDemo() 
 	{
 		setLayout(new BorderLayout());
 		reader = new GraphMLReader();
 		view = new Graph2DView();
-		model = new Graph2D();
-		
 		router = new OrthogonalEdgeRouter();
 	
-	    
-		
-
 		createLayout();
 
 		EditMode editMode = new EditMode();
@@ -89,15 +83,16 @@ public class GraphPDTDemo extends  JPanel {
 
 	protected void loadGraph(URL resource) {
 		model = reader.readFile(resource);
+		graph = model.getGraph();
 		this.updateView();
 
 	}
 	
 	private void updateView() {
-		view.setGraph2D(model);
+		view.setGraph2D(graph);
 
-		for (Node node : model.getNodeArray()) {
-			model.setLabelText(node, reader.getIdForNode(node));
+		for (Node node : graph.getNodeArray()) {
+			graph.setLabelText(node, model.getIdForNode(node));
 		}
 
 		view.applyLayout(layout);
@@ -189,13 +184,17 @@ public class GraphPDTDemo extends  JPanel {
 			}
 		}
 	}
-
 	
-
+	
 	/**
 	 * Action that terminates the application
 	 */
-	protected static class ExitAction extends AbstractAction {
+	protected  class ExitAction extends AbstractAction {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 96864293273482994L;
+
 		public ExitAction() {
 			super("Exit");
 		}
@@ -204,4 +203,8 @@ public class GraphPDTDemo extends  JPanel {
 			System.exit(0);
 		}
 	}
+
+	
+
+	
 }

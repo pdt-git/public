@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import pdt.y.main.MyShapeNodeRealizer;
-import pdt.y.main.MyShapeNodeRealizerSerializer;
+import pdt.y.model.GraphModel;
+import pdt.y.model.realizer.MyShapeNodeRealizer;
+import pdt.y.model.realizer.MyShapeNodeRealizerSerializer;
 
 
 import y.base.DataMap;
@@ -31,36 +32,16 @@ public class GraphMLReader {
 
 	private GraphMLIOHandler ioHandler = new GraphMLIOHandler();
 	private Graph2DGraphMLHandler core = ioHandler.getGraphMLHandler();
-	private Graph2D graph;
 	private GraphCopier graphCopier = new GraphCopier(new Graph2DCopyFactory());
 	
-	private DataMap dataMap = Maps.createHashedDataMap();
-	private DataMap moduleMap = Maps.createHashedDataMap();
+	private GraphModel model = null;
 	
-	private HierarchyManager hierarchy;
-
-	private ShapeNodeRealizer shapeNodeRealizer;
-
+	
 	private MyShapeNodeRealizer svr;
 	
 	public GraphMLReader(){
-		graph = new Graph2D();
-		shapeNodeRealizer = new ShapeNodeRealizer(ShapeNodeRealizer.ELLIPSE);
-		
-
-		GroupNodeRealizer groupNodeRealizer = new GroupNodeRealizer();
-//		groupNodeRealizer.setShapeType(ShapeNodeRealizer.OCTAGON);
-
-//		graph.setDefaultNodeRealizer(shapeNodeRealizer);
-
-		
-		  svr = new MyShapeNodeRealizer(this);
-		  svr.setSize(70,70);
-		  svr.setState(MyShapeNodeRealizer.FINAL_STATE);
-		  svr.setFillColor(Color.ORANGE);      
-		    
-		graph.setDefaultNodeRealizer(svr);
-		hierarchy = new HierarchyManager(graph);
+		model = new GraphModel();
+		model.useHierarchy();
 		
 		
 //		DefaultHierarchyGraphFactory hgf =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
@@ -68,17 +49,17 @@ public class GraphMLReader {
 //		hgf.setProxyNodeRealizerEnabled(false);
 		
 		
-		core.addInputDataAcceptor("id", dataMap, KeyScope.NODE, KeyType.STRING);
-		core.addInputDataAcceptor("module", moduleMap, KeyScope.NODE,KeyType.STRING);
+		core.addInputDataAcceptor("id", model.getDataMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("module", model.getModuleMap(), KeyScope.NODE,KeyType.STRING);
 		
 		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
 
 	}
 	
 	public boolean loadFile(URL resource){
-		graph.clear();
+		model.clear();
 		try {
-			ioHandler.read(graph, resource);
+			ioHandler.read(model.getGraph(), resource);
 			return true;
 		} catch (IOException e) {
 			return false;
@@ -87,28 +68,30 @@ public class GraphMLReader {
 	
 	
 	
-	public Graph2D readFile(URL resource){
+	public GraphModel readFile(URL resource){
 		this.loadFile(resource);
-		return this.graph;
+		return this.model;
 	}
 	
 	// For testing:
-	public Graph2D readFile(InputStream inputFileStream){
-	    graph.clear();
+	Graph2D readFile(InputStream inputFileStream){
+	    model.clear();
 		try {
-			ioHandler.read(graph, inputFileStream);
+			ioHandler.read(model.getGraph(), inputFileStream);
 		} catch (IOException e) {
 			return (Graph2D) graphCopier.copy(DEFAULT_EMPTY_GRAPH);
 		}
-		return graph;
+		return model.getGraph();
 	}
 	
-	public String getIdForNode(Node node){
-		return (String) dataMap.get(node);
+	// For testing:
+	String getIdForNode(Node node){
+		return model.getIdForNode(node);
 	}
 	
-	public String getModule(Node node){
-		return (String) moduleMap.get(node);
+	// For testing:
+	String getModule(Node node){
+		return model.getModule(node);
 	}
 	
 }
