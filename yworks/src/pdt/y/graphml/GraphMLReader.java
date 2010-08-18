@@ -18,6 +18,9 @@ import y.io.graphml.graph2d.Graph2DGraphMLHandler;
 import y.io.graphml.graph2d.GroupNodeRealizerSerializer;
 import y.util.GraphCopier;
 import y.util.Maps;
+import y.view.Arrow;
+import y.view.EdgeRealizer;
+import y.view.GenericEdgeRealizer;
 import y.view.Graph2D;
 import y.view.Graph2DCopyFactory;
 import y.view.ShapeNodeRealizer;
@@ -42,7 +45,18 @@ public class GraphMLReader {
 	public GraphMLReader(){
 		model = new GraphModel();
 		model.useHierarchy();
-		
+
+
+		GroupNodeRealizer groupNodeRealizer = new GroupNodeRealizer();
+
+
+
+
+		EdgeRealizer myEdgeRealizier = new GenericEdgeRealizer();
+
+		myEdgeRealizier.setTargetArrow(Arrow.DELTA);
+
+		graph.setDefaultEdgeRealizer(myEdgeRealizier);
 		
 //		DefaultHierarchyGraphFactory hgf =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
 //		hgf.setDefaultGroupNodeRealizer(groupNodeRealizer);
