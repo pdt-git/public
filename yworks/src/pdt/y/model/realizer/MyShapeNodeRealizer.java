@@ -3,9 +3,6 @@ package pdt.y.model.realizer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import demo.view.realizer.StateNodeRealizer;
-
-import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphModel;
 
 import y.view.LineType;
@@ -23,7 +20,7 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 
 	public MyShapeNodeRealizer(GraphModel  model){
 		super(ShapeNodeRealizer.ROUND_RECT);
-		this.state = TRANSITION_STATE;
+		//this.state = TRANSITION_STATE;
 		this.model= model;
 	}
 	
@@ -55,7 +52,12 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 			break;
 		case TRANSITION_STATE:
 			this.setShapeType(TRAPEZOID);
-			gfx.setColor(Color.RED);
+			this.setFillColor(Color.MAGENTA);
+			this.setFillColor2(Color.BLUE);
+			this.setLineColor(Color.GREEN);
+			byte myStyle = LineType.DASHED_DOTTED_1.getLineStyle();
+			LineType myLineType = LineType.getLineType(3,myStyle);
+			this.setLineType(myLineType);
 			break;
 		case FINAL_STATE: 
 			gfx.setStroke(LineType.LINE_2);

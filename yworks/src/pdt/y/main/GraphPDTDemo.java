@@ -48,7 +48,7 @@ public class GraphPDTDemo extends  JPanel {
 		reader = new GraphMLReader();
 		view = new Graph2DView();
 		router = new OrthogonalEdgeRouter();
-	
+		
 		createLayout();
 
 		EditMode editMode = new EditMode();
@@ -61,11 +61,10 @@ public class GraphPDTDemo extends  JPanel {
 		
 		add(view);
 
-		updateView();
+		//updateView();
 	}
 
 	private void createLayout() {
-		
 		layout = new IncrementalHierarchicLayouter();
 		
 		//set some options
@@ -76,16 +75,12 @@ public class GraphPDTDemo extends  JPanel {
 		OrientationLayouter ol = new OrientationLayouter();
 		ol.setOrientation(LayoutOrientation.LEFT_TO_RIGHT);
 		layout.setOrientationLayouter(ol);
-		
-		
-		
 	}
 
 	protected void loadGraph(URL resource) {
 		model = reader.readFile(resource);
 		graph = model.getGraph();
 		this.updateView();
-
 	}
 	
 	private void updateView() {

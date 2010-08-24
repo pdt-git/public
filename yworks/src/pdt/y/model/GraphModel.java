@@ -6,9 +6,15 @@ import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Node;
 import y.util.Maps;
+import y.view.Arrow;
 import y.view.EdgeRealizer;
+import y.view.GenericEdgeRealizer;
 import y.view.Graph2D;
+import y.view.LineType;
 import y.view.NodeRealizer;
+import y.view.ShapeNodeRealizer;
+import y.view.hierarchy.DefaultHierarchyGraphFactory;
+import y.view.hierarchy.GroupNodeRealizer;
 import y.view.hierarchy.HierarchyManager;
 
 public class GraphModel {
@@ -21,19 +27,38 @@ public class GraphModel {
 	
 	private NodeRealizer nodeRealizer;
 	private EdgeRealizer edgeRealizer;
-	
+
+	private GroupNodeRealizer groupNodeRealizer;
 	
 	public GraphModel(){
-		nodeRealizer = new MyShapeNodeRealizer(this);
-		nodeRealizer.setSize(70,70);
-		nodeRealizer.setFillColor(Color.ORANGE);      
-		
-		graph.setDefaultNodeRealizer(nodeRealizer);
+		initGroupNodeRealizer();
+		initNodeRealizer();
+		initEdgeNodeRealizer();
+	}
+
+	private void initGroupNodeRealizer() {
+		groupNodeRealizer = new GroupNodeRealizer();
+		groupNodeRealizer.setFillColor(Color.GRAY);
+		groupNodeRealizer.setShapeType(GroupNodeRealizer.ROUND_RECT);
 	}
 	
-	
-	
-	
+	private void initNodeRealizer() {
+		nodeRealizer = new MyShapeNodeRealizer(this);
+		nodeRealizer.setSize(40,40);
+		nodeRealizer.setFillColor(Color.ORANGE);      
+		graph.setDefaultNodeRealizer(nodeRealizer);
+	}
+
+	private void initEdgeNodeRealizer() {
+		edgeRealizer = new GenericEdgeRealizer();
+		edgeRealizer.setTargetArrow(Arrow.DELTA);
+		edgeRealizer.setLineColor(Color.BLUE);
+		byte myStyle = LineType.LINE_3.getLineStyle();
+		LineType myLineType = LineType.getLineType(4,myStyle);
+		edgeRealizer.setLineType(myLineType);
+		graph.setDefaultEdgeRealizer(edgeRealizer);
+	}
+
 	public String getIdForNode(Node node){
 		return (String) dataMap.get(node);
 	}
@@ -94,6 +119,9 @@ public class GraphModel {
 		if(this.hierarchy == null && this.graph !=null){
 			this.hierarchy= new HierarchyManager(graph);
 		}
+		DefaultHierarchyGraphFactory graphFactory =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
+		graphFactory.setDefaultGroupNodeRealizer(groupNodeRealizer);
+		graphFactory.setProxyNodeRealizerEnabled(false);
 	}
 	
 	public boolean isHierarchyEnabled(){

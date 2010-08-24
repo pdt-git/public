@@ -3,13 +3,11 @@ package pdt.y.model.realizer;
 import org.w3c.dom.Node;
 
 import y.io.graphml.graph2d.AbstractNodeRealizerSerializer;
-import y.io.graphml.graph2d.ShapeNodeRealizerSerializer;
 import y.io.graphml.input.GraphMLParseContext;
 import y.io.graphml.input.GraphMLParseException;
 import y.io.graphml.output.GraphMLWriteContext;
 import y.io.graphml.output.XmlWriter;
 import y.view.NodeRealizer;
-import y.view.ShapeNodeRealizer;
 
 import org.w3c.dom.Element;
 /**
@@ -44,7 +42,6 @@ public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerialize
 			String state=moduleNode.toString();
 			if("initial".equals(state)) {
 				snr.setState(MyShapeNodeRealizer.INITIAL_STATE);
-				
 			}
 			else if("transition".equals(state)) {
 				snr.setState(MyShapeNodeRealizer.TRANSITION_STATE);
