@@ -35,7 +35,7 @@ public class MyMoveSelectionMode extends MoveSelectionMode {
 		final Graph2D graph = view.getGraph2D();
 		YCursor cursor= graph.selectedNodes();
 		
-		if (graph.selectedNodes().ok()) {
+		if (cursor.ok()) {
 			router.doLayout(graph);
 			graph.updateViews();
 		}
