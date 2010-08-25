@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 
 import pdt.y.graphml.GraphMLReader;
+import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
 import pdt.y.view.actions.ExitAction;
 import pdt.y.view.actions.LoadAction;
@@ -20,16 +21,7 @@ import pdt.y.view.modes.MyMoveSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
 import pdt.y.view.modes.WheelScroller;
 import y.base.Node;
-import y.layout.BufferedLayouter;
-import y.layout.CanonicMultiStageLayouter;
-import y.layout.CompositeLayoutStage;
-import y.layout.LayoutOrientation;
-import y.layout.Layouter;
-import y.layout.OrientationLayouter;
-import y.layout.grouping.FixedGroupLayoutStage;
-import y.layout.hierarchic.IncrementalHierarchicLayouter;
 import y.layout.router.OrthogonalEdgeRouter;
-import y.layout.router.OrthogonalSegmentDistributionStage;
 import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
@@ -41,61 +33,46 @@ public class GraphPDTDemo extends  JPanel {
 	private Graph2D graph;
 	private GraphMLReader reader;
 	
-	private CompositeLayoutStage stage = new CompositeLayoutStage();
-	private Layouter coreLayouter;
-	private OrthogonalEdgeRouter edgeLayouter = new OrthogonalEdgeRouter();
+	private GraphLayout layoutModel;
 	
 	private static final long serialVersionUID = -611433500513523511L;
 
 	public GraphPDTDemo() 
 	{
-		setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout());
+		
+		layoutModel = new  GraphLayout();
+		
 		reader = new GraphMLReader();
 		view = new Graph2DView();
 		view.addMouseWheelListener(new WheelScroller(view));
-		createLayout();
+
 
 		EditMode editMode = new EditMode();
 		editMode.allowNodeCreation(false);
 		editMode.allowEdgeCreation(false);
 		editMode.setPopupMode(new HierarchicPopupMode());
-		editMode.setMoveSelectionMode(new MyMoveSelectionMode(edgeLayouter));
+		editMode.setMoveSelectionMode(new MyMoveSelectionMode(new OrthogonalEdgeRouter()));
+		
+		
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
 		
 		add(view);
 
+		addMouseZoomSupport();
+	}
+
+
+
+	public void addMouseZoomSupport() {
 		Graph2DViewMouseWheelZoomListener wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
 		//zoom in/out at mouse pointer location 
 		wheelZoomListener.setCenterZooming(false);    
 		view.getCanvasComponent().addMouseWheelListener(wheelZoomListener);
-		//updateView();
 	}
 
-	private void createLayout() {
-		coreLayouter = createCoreLayout();
-		
-		
-		stage.setCoreLayouter(coreLayouter);
-		stage.appendStage(edgeLayouter);
-	}
 
-	public Layouter createCoreLayout() {
-		IncrementalHierarchicLayouter layout = new IncrementalHierarchicLayouter();
-		
-		//set some options
-		layout.getNodeLayoutDescriptor().setMinimumLayerHeight(60);
-		layout.getNodeLayoutDescriptor().setMinimumDistance(20);
-
-		//use left-to-right layout orientation
-		OrientationLayouter ol = new OrientationLayouter();
-		ol.setOrientation(LayoutOrientation.BOTTOM_TO_TOP);
-		layout.setOrientationLayouter(ol);
-		layout.setBackloopRoutingEnabled(true);
-		layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
-	
-		return layout;
-	}
 
 	public void loadGraph(URL resource) {
 		model = reader.readFile(resource);
@@ -104,18 +81,18 @@ public class GraphPDTDemo extends  JPanel {
 		this.updateView();
 	}
 	
+	
 	private void updateView() {
 		for (Node node : graph.getNodeArray()) {
 			graph.setLabelText(node, model.getIdForNode(node));
 		}
-
-
 		this.calcLayout();
 	}
 
+	
+	
 	public void calcLayout() {
-
-		view.applyLayout(stage);
+		view.applyLayout(layoutModel.getLayouter());
 		view.fitContent();
 		view.updateView();
 	}

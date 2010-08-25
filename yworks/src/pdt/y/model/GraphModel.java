@@ -1,18 +1,11 @@
 package pdt.y.model;
 
 import java.awt.Color;
-import java.awt.geom.Rectangle2D;
 
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
-import y.base.Edge;
-import y.base.EdgeCursor;
 import y.base.Node;
-import y.base.NodeCursor;
 import y.geom.YDimension;
-import y.layout.PortConstraint;
-import y.layout.PortConstraintConfigurator;
-import y.layout.PortConstraintKeys;
 import y.util.Maps;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
@@ -20,8 +13,6 @@ import y.view.GenericEdgeRealizer;
 import y.view.Graph2D;
 import y.view.LineType;
 import y.view.NodeRealizer;
-import y.view.Port;
-import y.view.ShapeNodeRealizer;
 import y.view.hierarchy.DefaultHierarchyGraphFactory;
 import y.view.hierarchy.GroupNodeRealizer;
 import y.view.hierarchy.HierarchyManager;

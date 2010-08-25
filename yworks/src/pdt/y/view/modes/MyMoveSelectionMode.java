@@ -2,6 +2,7 @@ package pdt.y.view.modes;
 
 import y.base.YCursor;
 import y.layout.Layouter;
+import y.layout.router.OrthogonalEdgeRouter;
 import y.view.Graph2D;
 import y.view.MoveSelectionMode;
 
@@ -10,7 +11,7 @@ import y.view.MoveSelectionMode;
 */
 public class MyMoveSelectionMode extends MoveSelectionMode {
 	private static final boolean ROUTE_EDGES_ON_MOVE = true;
-	private Layouter router;
+	private Layouter router = new OrthogonalEdgeRouter();
 	
 	
 	public MyMoveSelectionMode(Layouter router) {
