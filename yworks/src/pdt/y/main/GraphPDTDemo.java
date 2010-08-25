@@ -22,6 +22,7 @@ import pdt.y.model.GraphModel;
 import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MyMoveSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
+import pdt.y.view.modes.WheelScroller;
 import y.base.Node;
 import y.layout.LayoutOrientation;
 import y.layout.OrientationLayouter;
@@ -48,6 +49,7 @@ public class GraphPDTDemo extends  JPanel {
 		reader = new GraphMLReader();
 		view = new Graph2DView();
 		router = new OrthogonalEdgeRouter();
+		view.addMouseWheelListener(new WheelScroller(view));
 		
 		createLayout();
 
