@@ -85,8 +85,12 @@ public class GraphPDTDemo extends  JPanel {
 		ol.setOrientation(LayoutOrientation.BOTTOM_TO_TOP);
 		layout.setOrientationLayouter(ol);
 		layout.setBackloopRoutingEnabled(true);
-		layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
-	
+		layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TIGHT_TREE);
+		//layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
+		layout.setGroupAlignmentPolicy(IncrementalHierarchicLayouter.POLICY_ALIGN_GROUPS_CENTER);
+		layout.setGroupCompactionEnabled(true);
+		layout.setRecursiveGroupLayeringEnabled(true);
+		
 		layouter = layout;
 		
 	}
