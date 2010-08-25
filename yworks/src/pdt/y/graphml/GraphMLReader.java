@@ -4,9 +4,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import pdt.y.model.GraphModel;
-import pdt.y.model.realizer.MyShapeNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizerSerializer;
-import y.base.DataMap;
 import y.base.Edge;
 import y.base.EdgeCursor;
 import y.base.EdgeMap;
@@ -20,7 +18,6 @@ import y.layout.PortConstraintKeys;
 import y.util.GraphCopier;
 import y.view.Graph2D;
 import y.view.Graph2DCopyFactory;
-import y.view.hierarchy.GroupNodeRealizer;
 
 
 public class GraphMLReader {
