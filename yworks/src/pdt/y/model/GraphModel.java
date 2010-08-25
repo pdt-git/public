@@ -5,6 +5,9 @@ import java.awt.Color;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Node;
+import y.layout.PortConstraint;
+import y.layout.PortConstraintConfigurator;
+import y.layout.PortConstraintKeys;
 import y.util.Maps;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
@@ -12,6 +15,7 @@ import y.view.GenericEdgeRealizer;
 import y.view.Graph2D;
 import y.view.LineType;
 import y.view.NodeRealizer;
+import y.view.Port;
 import y.view.ShapeNodeRealizer;
 import y.view.hierarchy.DefaultHierarchyGraphFactory;
 import y.view.hierarchy.GroupNodeRealizer;
@@ -34,6 +38,9 @@ public class GraphModel {
 		initGroupNodeRealizer();
 		initNodeRealizer();
 		initEdgeNodeRealizer();
+		
+		DataMap targetMap = graph.createEdgeMap();
+		graph.addDataProvider(PortConstraintKeys.TARGET_PORT_CONSTRAINT_KEY, targetMap);
 	}
 
 	private void initGroupNodeRealizer() {
@@ -56,6 +63,9 @@ public class GraphModel {
 		byte myStyle = LineType.LINE_3.getLineStyle();
 		LineType myLineType = LineType.getLineType(4,myStyle);
 		edgeRealizer.setLineType(myLineType);
+		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
+		
+		//edgeRealizer.setTargetPort(PortConstraint.);
 		graph.setDefaultEdgeRealizer(edgeRealizer);
 	}
 
