@@ -16,7 +16,7 @@ import org.w3c.dom.Element;
 public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerializer {
 	public MyShapeNodeRealizerSerializer(){
 		super();
-		System.out.println(getName());
+		
 	}
 	
 	@Override
