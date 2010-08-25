@@ -1,10 +1,15 @@
 package pdt.y.model;
 
 import java.awt.Color;
+import java.awt.geom.Rectangle2D;
 
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
+import y.base.Edge;
+import y.base.EdgeCursor;
 import y.base.Node;
+import y.base.NodeCursor;
+import y.geom.YDimension;
 import y.layout.PortConstraint;
 import y.layout.PortConstraintConfigurator;
 import y.layout.PortConstraintKeys;
@@ -38,15 +43,18 @@ public class GraphModel {
 		initGroupNodeRealizer();
 		initNodeRealizer();
 		initEdgeNodeRealizer();
-		
-		DataMap targetMap = graph.createEdgeMap();
-		graph.addDataProvider(PortConstraintKeys.TARGET_PORT_CONSTRAINT_KEY, targetMap);
 	}
-
+	
 	private void initGroupNodeRealizer() {
 		groupNodeRealizer = new GroupNodeRealizer();
 		groupNodeRealizer.setFillColor(Color.GRAY);
 		groupNodeRealizer.setShapeType(GroupNodeRealizer.ROUND_RECT);
+		groupNodeRealizer.setConsiderNodeLabelSize(true); 
+	//	groupNodeRealizer.setAutoBoundsEnabled(true);
+	//	Rectangle2D minimalAutoBounds = groupNodeRealizer.getMinimalAutoBounds();
+	//	Rectangle2D minimalAutoBounds = groupNodeRealizer.calcMinimumGroupBounds();
+		YDimension minSize = groupNodeRealizer.getMinimumSize();
+		groupNodeRealizer.setSize(minSize.getWidth(), minSize.getHeight());
 	}
 	
 	private void initNodeRealizer() {
@@ -61,11 +69,8 @@ public class GraphModel {
 		edgeRealizer.setTargetArrow(Arrow.DELTA);
 		edgeRealizer.setLineColor(Color.BLUE);
 		byte myStyle = LineType.LINE_3.getLineStyle();
-		LineType myLineType = LineType.getLineType(4,myStyle);
+		LineType myLineType = LineType.getLineType(2,myStyle);
 		edgeRealizer.setLineType(myLineType);
-		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
-		
-		//edgeRealizer.setTargetPort(PortConstraint.);
 		graph.setDefaultEdgeRealizer(edgeRealizer);
 	}
 

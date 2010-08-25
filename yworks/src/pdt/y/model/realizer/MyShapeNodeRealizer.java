@@ -20,7 +20,7 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 
 	public MyShapeNodeRealizer(GraphModel  model){
 		super(ShapeNodeRealizer.ROUND_RECT);
-		//this.state = TRANSITION_STATE;
+		this.state = TRANSITION_STATE;
 		this.model= model;
 	}
 	

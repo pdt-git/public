@@ -75,8 +75,10 @@ public class GraphPDTDemo extends  JPanel {
 
 		//use left-to-right layout orientation
 		OrientationLayouter ol = new OrientationLayouter();
-		ol.setOrientation(LayoutOrientation.LEFT_TO_RIGHT);
+		ol.setOrientation(LayoutOrientation.BOTTOM_TO_TOP);
 		layout.setOrientationLayouter(ol);
+		layout.setBackloopRoutingEnabled(true);
+		layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
 	}
 
 	protected void loadGraph(URL resource) {

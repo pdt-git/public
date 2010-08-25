@@ -6,11 +6,17 @@ import java.net.URL;
 import pdt.y.model.GraphModel;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizerSerializer;
+import y.base.DataMap;
+import y.base.Edge;
+import y.base.EdgeCursor;
+import y.base.EdgeMap;
 import y.base.Node;
 import y.io.GraphMLIOHandler;
 import y.io.graphml.KeyScope;
 import y.io.graphml.KeyType;
 import y.io.graphml.graph2d.Graph2DGraphMLHandler;
+import y.layout.PortConstraint;
+import y.layout.PortConstraintKeys;
 import y.util.GraphCopier;
 import y.view.Graph2D;
 import y.view.Graph2DCopyFactory;
@@ -33,7 +39,7 @@ public class GraphMLReader {
 				
 		core.addInputDataAcceptor("id", model.getDataMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", model.getModuleMap(), KeyScope.NODE,KeyType.STRING);
-		
+	
 		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
 
 	}
@@ -52,8 +58,21 @@ public class GraphMLReader {
 	
 	public GraphModel readFile(URL resource){
 		this.loadFile(resource);
+		assignSouthPortToEdges();
 		return this.model;
 	}
+	
+	private void assignSouthPortToEdges() {
+		Graph2D graph = model.getGraph();
+		EdgeMap targetMap = graph.createEdgeMap();
+		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
+		 for (EdgeCursor edges = graph.edges(); edges.ok(); edges.next()) {
+			 Edge edge = edges.edge();
+			 targetMap.set(edge, portConstraint);
+		 }
+		graph.addDataProvider(PortConstraintKeys.TARGET_PORT_CONSTRAINT_KEY, targetMap);
+	}
+
 	
 	// For testing:
 	Graph2D readFile(InputStream inputFileStream){
