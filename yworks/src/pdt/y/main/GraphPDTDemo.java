@@ -24,10 +24,12 @@ import y.layout.BufferedLayouter;
 import y.layout.CanonicMultiStageLayouter;
 import y.layout.CompositeLayoutStage;
 import y.layout.LayoutOrientation;
+import y.layout.Layouter;
 import y.layout.OrientationLayouter;
 import y.layout.grouping.FixedGroupLayoutStage;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
 import y.layout.router.OrthogonalEdgeRouter;
+import y.layout.router.OrthogonalSegmentDistributionStage;
 import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
@@ -39,18 +41,17 @@ public class GraphPDTDemo extends  JPanel {
 	private Graph2D graph;
 	private GraphMLReader reader;
 	
-	private OrthogonalEdgeRouter router;
+	private CompositeLayoutStage stage = new CompositeLayoutStage();
+	private Layouter coreLayouter;
+	private OrthogonalEdgeRouter edgeLayouter = new OrthogonalEdgeRouter();
 	
 	private static final long serialVersionUID = -611433500513523511L;
-	private CanonicMultiStageLayouter layouter;
-	private CompositeLayoutStage stage;
 
 	public GraphPDTDemo() 
 	{
 		setLayout(new BorderLayout());
 		reader = new GraphMLReader();
 		view = new Graph2DView();
-		router = new OrthogonalEdgeRouter();
 		view.addMouseWheelListener(new WheelScroller(view));
 		createLayout();
 
@@ -58,7 +59,7 @@ public class GraphPDTDemo extends  JPanel {
 		editMode.allowNodeCreation(false);
 		editMode.allowEdgeCreation(false);
 		editMode.setPopupMode(new HierarchicPopupMode());
-		editMode.setMoveSelectionMode(new MyMoveSelectionMode(router));
+		editMode.setMoveSelectionMode(new MyMoveSelectionMode(edgeLayouter));
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
 		
@@ -72,8 +73,14 @@ public class GraphPDTDemo extends  JPanel {
 	}
 
 	private void createLayout() {
-		layouter = null;
+		coreLayouter = createCoreLayout();
+		
+		
+		stage.setCoreLayouter(coreLayouter);
+		stage.appendStage(edgeLayouter);
+	}
 
+	public Layouter createCoreLayout() {
 		IncrementalHierarchicLayouter layout = new IncrementalHierarchicLayouter();
 		
 		//set some options
@@ -87,8 +94,7 @@ public class GraphPDTDemo extends  JPanel {
 		layout.setBackloopRoutingEnabled(true);
 		layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
 	
-		layouter = layout;
-		
+		return layout;
 	}
 
 	public void loadGraph(URL resource) {
@@ -108,9 +114,8 @@ public class GraphPDTDemo extends  JPanel {
 	}
 
 	public void calcLayout() {
-		view.applyLayout(layouter);
-//		stage.doLayout(graph);
-//		view.applyLayout(stage);
+
+		view.applyLayout(stage);
 		view.fitContent();
 		view.updateView();
 	}
