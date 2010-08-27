@@ -2,6 +2,7 @@ package pdt.y.model;
 
 import y.layout.CompositeLayoutStage;
 import y.layout.LayoutOrientation;
+import y.layout.LayoutStage;
 import y.layout.Layouter;
 import y.layout.OrientationLayouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
@@ -11,7 +12,7 @@ public class GraphLayout {
 
 	private CompositeLayoutStage stage;
 	private Layouter coreLayouter;
-	private OrthogonalEdgeRouter edgeLayouter; 
+	private LayoutStage edgeLayouter; 
 
 	
 	public GraphLayout() {
@@ -24,7 +25,7 @@ public class GraphLayout {
 	}
 
 
-	protected OrthogonalEdgeRouter createEdgeLayout() {
+	protected LayoutStage createEdgeLayout() {
 		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
 		return router;
 	}
