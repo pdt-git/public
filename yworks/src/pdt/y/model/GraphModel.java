@@ -2,6 +2,7 @@ package pdt.y.model;
 
 import java.awt.Color;
 
+import pdt.y.model.realizer.MyGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Node;
@@ -37,21 +38,11 @@ public class GraphModel {
 	}
 	
 	private void initGroupNodeRealizer() {
-		groupNodeRealizer = new GroupNodeRealizer();
-		groupNodeRealizer.setFillColor(Color.GRAY);
-		groupNodeRealizer.setShapeType(GroupNodeRealizer.ROUND_RECT);
-		groupNodeRealizer.setConsiderNodeLabelSize(true); 
-	//	groupNodeRealizer.setAutoBoundsEnabled(true);
-	//	Rectangle2D minimalAutoBounds = groupNodeRealizer.getMinimalAutoBounds();
-	//	Rectangle2D minimalAutoBounds = groupNodeRealizer.calcMinimumGroupBounds();
-		YDimension minSize = groupNodeRealizer.getMinimumSize();
-		groupNodeRealizer.setSize(minSize.getWidth(), minSize.getHeight());
+		groupNodeRealizer = new MyGroupNodeRealizer();
 	}
 	
 	private void initNodeRealizer() {
-		nodeRealizer = new MyShapeNodeRealizer(this);
-		nodeRealizer.setSize(40,40);
-		nodeRealizer.setFillColor(Color.ORANGE);      
+		nodeRealizer = new MyShapeNodeRealizer(this);    
 		graph.setDefaultNodeRealizer(nodeRealizer);
 	}
 
