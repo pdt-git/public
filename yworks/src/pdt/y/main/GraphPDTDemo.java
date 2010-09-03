@@ -13,6 +13,8 @@ import javax.swing.JRootPane;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
+import pdt.y.model.realizer.ModuleGroupNodeRealizer;
+import pdt.y.model.realizer.MyGroupNodeRealizer;
 import pdt.y.view.actions.ExitAction;
 import pdt.y.view.actions.LoadAction;
 import pdt.y.view.actions.ResetLayout;
@@ -20,12 +22,14 @@ import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MyMoveSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
 import pdt.y.view.modes.WheelScroller;
+import y.base.DataMap;
 import y.base.Node;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
+import y.view.hierarchy.GroupNodeRealizer;
 
 public class GraphPDTDemo extends  JPanel {
 	private Graph2DView view;
@@ -48,12 +52,7 @@ public class GraphPDTDemo extends  JPanel {
 		view.addMouseWheelListener(new WheelScroller(view));
 
 
-		EditMode editMode = new EditMode();
-		editMode.allowNodeCreation(false);
-		editMode.allowEdgeCreation(false);
-		editMode.setPopupMode(new HierarchicPopupMode());
-		editMode.setMoveSelectionMode(new MyMoveSelectionMode(new OrthogonalEdgeRouter()));
-		
+		EditMode editMode = initEditMode();
 		
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
@@ -61,6 +60,17 @@ public class GraphPDTDemo extends  JPanel {
 		add(view);
 
 		addMouseZoomSupport();
+	}
+
+
+
+	private EditMode initEditMode() {
+		EditMode editMode = new EditMode();
+		editMode.allowNodeCreation(false);
+		editMode.allowEdgeCreation(false);
+		editMode.setPopupMode(new HierarchicPopupMode());
+		editMode.setMoveSelectionMode(new MyMoveSelectionMode(new OrthogonalEdgeRouter()));
+		return editMode;
 	}
 
 
@@ -83,10 +93,34 @@ public class GraphPDTDemo extends  JPanel {
 	
 	
 	private void updateView() {
-		for (Node node : graph.getNodeArray()) {
-			graph.setLabelText(node, model.getIdForNode(node));
-		}
+		createFirstLabel();
 		this.calcLayout();
+	}
+
+
+
+	private void createFirstLabel() {
+		DataMap fileNameMap = model.getFileNameMap();
+		DataMap moduleMap = model.getModuleMap();
+		DataMap dataMap = model.getDataMap();
+		
+		GroupNodeRealizer fileRealizer = model.getFilegroupNodeRealizer();
+		GroupNodeRealizer moduleRealizer = model.getModuleGroupNodeRealizer();
+		for (Node node : graph.getNodeArray()) {
+			//graph.setLabelText(node, model.getIdForNode(node));
+			String labelText = (String)moduleMap.get(node);
+			if (labelText == null || labelText.equals("user")) {
+				labelText = (String)fileNameMap.get(node);
+				if (labelText == null) {
+					labelText=(String)dataMap.get(node);
+				} else {
+					graph.setRealizer(node, new MyGroupNodeRealizer(fileRealizer));
+				}
+			} else {
+				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleRealizer));
+			}
+			graph.setLabelText(node,labelText);
+		}
 	}
 
 	
@@ -137,16 +171,5 @@ public class GraphPDTDemo extends  JPanel {
 		menuBar.add(menu);
 		return menuBar;
 	}
-
-
-	
-	
-	
-
-
-
-
-	
-
 	
 }
