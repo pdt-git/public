@@ -36,6 +36,8 @@ public class GraphMLReader {
 				
 		core.addInputDataAcceptor("id", model.getDataMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", model.getModuleMap(), KeyScope.NODE,KeyType.STRING);
+		core.addInputDataAcceptor("description", model.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
+
 	
 		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
 

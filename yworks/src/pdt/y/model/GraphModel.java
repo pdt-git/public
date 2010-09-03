@@ -2,6 +2,7 @@ package pdt.y.model;
 
 import java.awt.Color;
 
+import pdt.y.model.realizer.ModuleGroupNodeRealizer;
 import pdt.y.model.realizer.MyGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
@@ -24,22 +25,40 @@ public class GraphModel {
 	// Addition data:
 	private DataMap dataMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
+	private DataMap fileNameMap = Maps.createHashedDataMap();
+	private DataMap kindMap = Maps.createHashedDataMap();
+	public DataMap getKindMap() {
+		return kindMap;
+	}
+
+	public void setKindMap(DataMap kindMap) {
+		this.kindMap = kindMap;
+	}
+
+
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer nodeRealizer;
 	private EdgeRealizer edgeRealizer;
 
-	private GroupNodeRealizer groupNodeRealizer;
+	private GroupNodeRealizer filegroupNodeRealizer;
+	private GroupNodeRealizer moduleGroupNodeRealizer;
 	
 	public GraphModel(){
 		initGroupNodeRealizer();
+		initModuleGroupNodeRealizer();
 		initNodeRealizer();
 		initEdgeNodeRealizer();
 	}
 	
 	private void initGroupNodeRealizer() {
-		groupNodeRealizer = new MyGroupNodeRealizer();
+		filegroupNodeRealizer = new MyGroupNodeRealizer(this);
 	}
+	
+	private void initModuleGroupNodeRealizer() {
+		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
+	}
+	
 	
 	private void initNodeRealizer() {
 		nodeRealizer = new MyShapeNodeRealizer(this);    
@@ -102,6 +121,14 @@ public class GraphModel {
 		this.moduleMap = moduleMap;
 	}
 
+	public DataMap getFileNameMap() {
+		return fileNameMap;
+	}
+
+	public void setFileNameMap(DataMap fileNameMap) {
+		this.fileNameMap = fileNameMap;
+	}
+
 	public Graph2D getGraph() {
 		return graph;
 	}
@@ -112,12 +139,20 @@ public class GraphModel {
 	
 	
 	
+	public GroupNodeRealizer getFilegroupNodeRealizer() {
+		return filegroupNodeRealizer;
+	}
+
+	public GroupNodeRealizer getModuleGroupNodeRealizer() {
+		return moduleGroupNodeRealizer;
+	}
+
 	public void useHierarchy(){
 		if(this.hierarchy == null && this.graph !=null){
 			this.hierarchy= new HierarchyManager(graph);
 		}
 		DefaultHierarchyGraphFactory graphFactory =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
-		graphFactory.setDefaultGroupNodeRealizer(groupNodeRealizer);
+		graphFactory.setDefaultGroupNodeRealizer(filegroupNodeRealizer);
 		graphFactory.setProxyNodeRealizerEnabled(false);
 	}
 	
