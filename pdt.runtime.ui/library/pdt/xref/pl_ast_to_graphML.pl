@@ -1,9 +1,7 @@
-%:- consult('util/load_xref.pl').
-%:- use_module('../parse_util.pl').
 :- use_module(prolog_file_reader_quick).
 
 /**
- * write_facts_to_graphML(+File)
+ * write_facts_to_graphML(+Project,+File)
  *   Arg1 has to be a full qualified file name. The file may not exist.
  *   The predicated collects the relevant informations about the following 
  *   facts and converts them into abba-sources for Bashaars Tool. This 
@@ -11,13 +9,14 @@
  *   The facts that are considered are:
  *   ###### to be completed #########
  **/
-write_facts_to_graphML(File):-
+write_facts_to_graphML(Project, File):-
     open(File,write,OutStream,[type(text)]),
     write_graphML_header(OutStream),
     write_graphML_keys(OutStream),
     start_graph_element(OutStream),
     flush_output(OutStream),
-    write_files(OutStream),
+    Project=[FirstProject],
+    write_files(FirstProject,OutStream),
 /*    nl(OutStream),
     flush_output(OutStream),
     write_onloades(OutStream),
@@ -97,18 +96,24 @@ write_graphML_footer(OutStream):-
  * write_files(+Stream)
  *    writes #### dito ####
  */
-write_files(Stream):-
+write_files(Project,Stream):-
     forall(	fileT(Id,File,Module),
-    		(	write_file(Stream,Id,File,Module),
+    		(	write_file(Stream,Project,Id,File,Module),
     			flush_output(Stream)
     		)
     	  ).
 		
-write_file(Stream,Id,FileName,Module):-
+write_file(Stream,Project,Id,FileName,Module):-
 	open_node(Stream,Id),
 	write_data(Stream,'id',Id),
-	write_data(Stream,'fileName',FileName),
+	catch(atom_concat(Project,RelativeFileName,FileName), _, RelativeFileName=FileName),
+	format('~w~n~w -> ~w~n', [Project, FileName, RelativeFileName]), 
+	write_data(Stream,'fileName',RelativeFileName),
 	write_data(Stream,'module',Module),	
+	(	Module=user
+	->	write_data(Stream,'kind','file')
+	;	write_data(Stream,'kind','module')
+	),
 	start_graph_element(Stream),
 	write_predicates(Stream,Id),
 	close_graph_element(Stream),
@@ -125,6 +130,7 @@ write_predicates(Stream,FileId):-
 		
 write_predicate(Stream,Id,Functor,Arity,Module):-
     open_node(Stream,Id),
+    write_data(Stream,'kind','predicate'),
     write_data(Stream,'id',Id),
 	write_data(Stream,'functor',Functor),
 	write_data(Stream,'arity',Arity),	
@@ -159,6 +165,7 @@ write_load_edges(Stream):-
 
 write_load_edge(Stream,LoadingFileId,FileId):-
     open_edge(Stream,LoadingFileId,FileId),
+    write_data(Stream,'kind','loading'),
 	close_edge(Stream).
 	
 write_call_edges(Stream):-
@@ -223,38 +230,6 @@ write_hierarchy(Stream):-
 write_edges(_).*/		
 
     
-write_position(Stream,Id,Begin,End):-
-    write(Stream, 'property("'),
-    write(Stream, Id),
-    write(Stream, '", "position('),
-    write(Stream, Begin),
-    write(Stream,', '),
-    write(Stream, End),
-    write(Stream, ')").'),
-    nl(Stream).
-
-write_within(Stream,Id1,Id2,Text):-
-    write(Stream, 'within("'),
-    write(Stream, Id1),
-    write(Stream, '", "'),
-    write(Stream, Id2),
-    write(Stream,'", "'),
-    write(Stream, Text),
-    write(Stream, '").'),
-    nl(Stream).
-    
-write_edge(Stream,Id,Callee,Caller,Term):-
-    write(Stream, 'edge("'),
-    write(Stream, Id),
-    write(Stream, '", "edge_call", "'),
-    write(Stream, Term),
-    write(Stream,'", "'),
-    write(Stream, Callee),
-    write(Stream,'", "'),
-    write(Stream, Caller),
-    write(Stream, '").'),
-    nl(Stream).
-    
 start_graph_element(OutStream):-
     write(OutStream,'<graph edgedefault="directed">'), 
     nl(OutStream).
@@ -288,7 +263,7 @@ pl_test:-
 %     pl_test(['Z:/WorkspaceTeaching/svf.examples.prolog/pl/Load.pl'],'Z:/WorkspaceTeaching/bla/test.pl'). 
 %    pl_test(['Z:/pdt.git'],'Z:/test.graphml').   
 %    pl_test(['Z:/WorkspaceTeaching/bla/'],'Z:/WorkspaceTeaching3/test.graphml').   
-    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test.graphml').     
+    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test3.graphml').     
 %     pl_test(['Z:/pdt.git'],'Z:/WorkspaceTeaching3/test.graphml').       
 %    pl_test('Z:/WorkspacePDT/pdt.runtime/library/attic/org/cs3/pdt/metadata/mi_meta_ops.pl','Z:/WorkspaceTeaching/bla/test.pl').     
 %    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/attic/spike/socket/pifcom_codec.pl'],'Z:/WorkspaceTeaching/bla/test.pl').
@@ -301,5 +276,5 @@ pl_test:-
 pl_test(Project,Output):-
 	plparser_quick:generate_facts(Project),
 	writeln('generate abba sources'),
-    time(write_facts_to_graphML(Output)).     %Ergebnisdatei (abba-Format)
+    time(write_facts_to_graphML(Project,Output)).
     
