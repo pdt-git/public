@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="PDT"
+            id="pdt.yworks.swt">
+      </category>
+      <view
+            name="yWorks Demo View"
+            category="pdt.yworks.swt"
+            class="pdt.y.main.yWorksDemoView"
+            id="pdt.yworks.swt.views.yWorksDemoView">
+      </view>
+   </extension>
+
+</plugin>
