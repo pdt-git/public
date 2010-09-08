@@ -15,5 +15,27 @@
             id="pdt.yworks.swt.views.yWorksDemoView">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="pdt.y.swt.commands.LoadCommand"
+            description="LoadCommand"
+            id="graphml.commands.load"
+            name="Load">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:pdt.yworks.swt.views.yWorksDemoView">
+         <command
+               commandId="graphml.commands.load"
+               label="Load"
+               style="push"
+               tooltip="Loads a graph from a GraphML file">
+         </command>
+      </menuContribution>
+   </extension>
 
 </plugin>
