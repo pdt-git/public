@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import pdt.y.model.GraphModel;
-
 import y.view.LineType;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;

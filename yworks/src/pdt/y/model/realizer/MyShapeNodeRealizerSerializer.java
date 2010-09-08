@@ -1,5 +1,6 @@
 package pdt.y.model.realizer;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import y.io.graphml.graph2d.AbstractNodeRealizerSerializer;
@@ -8,8 +9,6 @@ import y.io.graphml.input.GraphMLParseException;
 import y.io.graphml.output.GraphMLWriteContext;
 import y.io.graphml.output.XmlWriter;
 import y.view.NodeRealizer;
-
-import org.w3c.dom.Element;
 /**
  * RealizerSerializer that can be used to serialize instances of StateNodeRealizer to/from GraphML
  */
