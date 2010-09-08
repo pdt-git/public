@@ -7,7 +7,6 @@ import pdt.y.model.realizer.MyGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Node;
-import y.geom.YDimension;
 import y.util.Maps;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
@@ -23,19 +22,10 @@ public class GraphModel {
 	private Graph2D graph=new Graph2D();
     
 	// Addition data:
-	private DataMap dataMap = Maps.createHashedDataMap();
+	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
 	private DataMap kindMap = Maps.createHashedDataMap();
-	public DataMap getKindMap() {
-		return kindMap;
-	}
-
-	public void setKindMap(DataMap kindMap) {
-		this.kindMap = kindMap;
-	}
-
-
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer nodeRealizer;
@@ -76,7 +66,7 @@ public class GraphModel {
 	}
 
 	public String getIdForNode(Node node){
-		return (String) dataMap.get(node);
+		return (String) nodeMap.get(node);
 	}
 	
 	public String getModule(Node node){
@@ -105,12 +95,12 @@ public class GraphModel {
 		this.graph.setDefaultEdgeRealizer(edgeRealizer);
 	}
 
-	public DataMap getDataMap() {
-		return dataMap;
+	public DataMap getNodeMap() {
+		return nodeMap;
 	}
 
-	public void setDataMap(DataMap dataMap) {
-		this.dataMap = dataMap;
+	public void setNodeMap(DataMap dataMap) {
+		this.nodeMap = dataMap;
 	}
 
 	public DataMap getModuleMap() {
@@ -127,6 +117,14 @@ public class GraphModel {
 
 	public void setFileNameMap(DataMap fileNameMap) {
 		this.fileNameMap = fileNameMap;
+	}
+
+	public DataMap getKindMap() {
+		return kindMap;
+	}
+
+	public void setKindMap(DataMap kindMap) {
+		this.kindMap = kindMap;
 	}
 
 	public Graph2D getGraph() {
