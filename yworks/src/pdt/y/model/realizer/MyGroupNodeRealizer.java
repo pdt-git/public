@@ -4,20 +4,10 @@ import java.awt.Color;
 import java.awt.geom.Rectangle2D;
 
 import pdt.y.model.GraphModel;
-
-import y.base.DataMap;
-import y.base.Node;
-import y.base.YList;
 import y.geom.YDimension;
 import y.geom.YInsets;
-import y.geom.YPoint;
-import y.geom.YRectangle;
-import y.layout.NodeLabelLayout;
-import y.layout.NodeLabelModel;
-import y.layout.NodeLayout;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
-import y.view.ShapeNodeRealizer;
 import y.view.SizeConstraintProvider;
 import y.view.hierarchy.GroupNodeRealizer;
 
@@ -47,18 +37,15 @@ import y.view.hierarchy.GroupNodeRealizer;
 		setAutoBoundsEnabled(true);
 		YInsets minInsets = new YInsets(5,5,5,5);
 		setMinimalInsets(minInsets);
-		initializeDesignOfHeaderLabel();
+		createFileLabel();
 	}
     
-    private void initializeDesignOfHeaderLabel() {
-		DataMap moduleMap = model.getModuleMap();
-		Node node = getNode();
-    	NodeLabel label = getLabel(); //this gets the first label only
-		String labelText = (String)moduleMap.get(node);
-		createFileLabel(label);
+    private void createFileLabel() {
+		createHeaderLabel();
     }
     
-    private void createFileLabel(NodeLabel label) {
+    private void createHeaderLabel() {
+    	NodeLabel label = getLabel();
     	label.setAlignment(NodeLabel.LEFT);
     	label.setBackgroundColor(Color.ORANGE);
     	label.setTextColor(Color.BLUE);

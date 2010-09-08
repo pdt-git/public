@@ -34,13 +34,16 @@ public class GraphMLReader {
 		model = new GraphModel();
 		model.useHierarchy();
 				
-		core.addInputDataAcceptor("id", model.getDataMap(), KeyScope.NODE, KeyType.STRING);
+		addInputDataAccessorsToCore();
+
+		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
+	}
+
+	private void addInputDataAccessorsToCore() {
+		core.addInputDataAcceptor("id", model.getNodeMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("module", model.getModuleMap(), KeyScope.NODE,KeyType.STRING);
 		core.addInputDataAcceptor("description", model.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
-
-	
-		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
-
+		core.addInputDataAcceptor("kind", model.getKindMap(), KeyScope.ALL, KeyType.STRING);
 	}
 	
 	public boolean loadFile(URL resource){

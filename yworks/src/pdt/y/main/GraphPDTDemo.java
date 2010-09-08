@@ -32,6 +32,9 @@ import y.view.Graph2DViewMouseWheelZoomListener;
 import y.view.hierarchy.GroupNodeRealizer;
 
 public class GraphPDTDemo extends  JPanel {
+	private static final String PREDICATE = "predicate";
+	private static final String FILE = "file";
+	private static final String MODULE = "module";
 	private Graph2DView view;
 	private GraphModel model;
 	private Graph2D graph;
@@ -50,7 +53,6 @@ public class GraphPDTDemo extends  JPanel {
 		reader = new GraphMLReader();
 		view = new Graph2DView();
 		view.addMouseWheelListener(new WheelScroller(view));
-
 
 		EditMode editMode = initEditMode();
 		
@@ -88,42 +90,57 @@ public class GraphPDTDemo extends  JPanel {
 		model = reader.readFile(resource);
 		graph = model.getGraph();
 		view.setGraph2D(graph);
+		categorizeData();
 		this.updateView();
 	}
 	
+	private void categorizeData() {
+		categorizeNodes();		
+	}
 	
 	private void updateView() {
+		
 		createFirstLabel();
 		this.calcLayout();
 	}
 
-
+	private void categorizeNodes() {
+		DataMap kindMap = model.getKindMap();
+		GroupNodeRealizer fileRealizer = model.getFilegroupNodeRealizer();
+		GroupNodeRealizer moduleRealizer = model.getModuleGroupNodeRealizer();
+		for (Node node: graph.getNodeArray()) {
+			System.out.println(node.index());
+			String kind = (String)kindMap.get(node);
+			System.out.println(kind);
+			if (kind.equals(MODULE)) {
+				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleRealizer));
+			} else if (kind.equals(FILE)) {
+				graph.setRealizer(node, new MyGroupNodeRealizer(fileRealizer));
+			} else {
+				// no realizer to set because it is already bound to default realizer
+			}
+		}
+	}
 
 	private void createFirstLabel() {
 		DataMap fileNameMap = model.getFileNameMap();
 		DataMap moduleMap = model.getModuleMap();
-		DataMap dataMap = model.getDataMap();
-		
-		GroupNodeRealizer fileRealizer = model.getFilegroupNodeRealizer();
-		GroupNodeRealizer moduleRealizer = model.getModuleGroupNodeRealizer();
-		for (Node node : graph.getNodeArray()) {
-			//graph.setLabelText(node, model.getIdForNode(node));
-			String labelText = (String)moduleMap.get(node);
-			if (labelText == null || labelText.equals("user")) {
+		DataMap nodeMap = model.getNodeMap();
+		DataMap kindMap = model.getKindMap();
+				
+		String labelText;
+		for (Node node: graph.getNodeArray()) {
+			String kind = (String)kindMap.get(node);
+			if (kind.equals(MODULE)) {
+				labelText = (String)moduleMap.get(node);
+			} else if (kind.equals(FILE)) {
 				labelText = (String)fileNameMap.get(node);
-				if (labelText == null) {
-					labelText=(String)dataMap.get(node);
-				} else {
-					graph.setRealizer(node, new MyGroupNodeRealizer(fileRealizer));
-				}
 			} else {
-				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleRealizer));
+				labelText=(String)nodeMap.get(node);
 			}
 			graph.setLabelText(node,labelText);
 		}
 	}
-
-	
 	
 	public void calcLayout() {
 		view.applyLayout(layoutModel.getLayouter());
