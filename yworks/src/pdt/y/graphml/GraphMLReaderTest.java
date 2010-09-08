@@ -1,5 +1,8 @@
 package pdt.y.graphml;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -10,8 +13,6 @@ import org.junit.Test;
 import y.base.Edge;
 import y.base.Node;
 import y.view.Graph2D;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class GraphMLReaderTest {
 	

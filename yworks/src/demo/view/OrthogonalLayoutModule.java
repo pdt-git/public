@@ -13,14 +13,9 @@
  ***************************************************************************/
 package demo.view;
 
-import y.module.LayoutModule;
-import y.module.YModule;
-
 import y.base.Edge;
 import y.base.EdgeCursor;
-
 import y.layout.LabelLayoutConstants;
-import y.layout.LabelLayoutTranslator;
 import y.layout.LabelRanking;
 import y.layout.LayoutStage;
 import y.layout.Layouter;
@@ -28,14 +23,13 @@ import y.layout.grouping.FixedGroupLayoutStage;
 import y.layout.labeling.GreedyMISLabeling;
 import y.layout.orthogonal.OrthogonalGroupLayouter;
 import y.layout.orthogonal.OrthogonalLayouter;
+import y.module.LayoutModule;
 import y.option.ConstraintManager;
-
+import y.option.OptionHandler;
 import y.view.EdgeLabel;
 import y.view.EdgeRealizer;
 import y.view.Graph2D;
 import y.view.hierarchy.HierarchyManager;
-
-import y.option.OptionHandler;
 
 /**
  * This module represents an interactive configurator and launcher for
