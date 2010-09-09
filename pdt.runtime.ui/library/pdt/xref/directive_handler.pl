@@ -4,7 +4,6 @@
 
 handle_directive(op,Args,Pos,ParentId,FileId,Module):-
 	!,									% operators
-	%format('op(~w)~n',[Args]),	
 	Call =.. [op|Args],
 	Args = [Precedence, Type, Name],
 	(	member(Type,[xfx,  xfy, yfx,  yfy])
