@@ -22,7 +22,6 @@ import pdt.y.view.modes.HierarchicPopupMode;
 import pdt.y.view.modes.MyMoveSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
 import pdt.y.view.modes.WheelScroller;
-import y.base.DataMap;
 import y.base.Node;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
@@ -32,11 +31,8 @@ import y.view.Graph2DViewMouseWheelZoomListener;
 import y.view.hierarchy.GroupNodeRealizer;
 
 public class GraphPDTDemo extends  JPanel {
-	private static final String PREDICATE = "predicate";
-	private static final String FILE = "file";
-	private static final String MODULE = "module";
 	private Graph2DView view;
-	private GraphModel model;
+	public GraphModel model;
 	private Graph2D graph;
 	private GraphMLReader reader;
 	
@@ -105,16 +101,12 @@ public class GraphPDTDemo extends  JPanel {
 	}
 
 	private void categorizeNodes() {
-		DataMap kindMap = model.getKindMap();
 		GroupNodeRealizer fileRealizer = model.getFilegroupNodeRealizer();
 		GroupNodeRealizer moduleRealizer = model.getModuleGroupNodeRealizer();
 		for (Node node: graph.getNodeArray()) {
-			System.out.println(node.index());
-			String kind = (String)kindMap.get(node);
-			System.out.println(kind);
-			if (kind.equals(MODULE)) {
+			if (model.isModule(node)) {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleRealizer));
-			} else if (kind.equals(FILE)) {
+			} else if (model.isFile(node)) {
 				graph.setRealizer(node, new MyGroupNodeRealizer(fileRealizer));
 			} else {
 				// no realizer to set because it is already bound to default realizer
@@ -123,31 +115,18 @@ public class GraphPDTDemo extends  JPanel {
 	}
 
 	private void createFirstLabel() {
-		DataMap fileNameMap = model.getFileNameMap();
-		DataMap moduleMap = model.getModuleMap();
-		DataMap nodeMap = model.getNodeMap();
-		DataMap kindMap = model.getKindMap();
-				
 		String labelText;
 		for (Node node: graph.getNodeArray()) {
-			String kind = (String)kindMap.get(node);
-			if (kind.equals(MODULE)) {
-				labelText = (String)moduleMap.get(node);
-			} else if (kind.equals(FILE)) {
-				labelText = (String)fileNameMap.get(node);
-			} else {
-				labelText=(String)nodeMap.get(node);
-			}
+			labelText = model.getLabelTextForNode(node);
 			graph.setLabelText(node,labelText);
 		}
 	}
-	
+
 	public void calcLayout() {
 		view.applyLayout(layoutModel.getLayouter());
 		view.fitContent();
 		view.updateView();
 	}
-
 
 	public void start()
 	{

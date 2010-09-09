@@ -56,12 +56,11 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 			gfx.setColor(Color.BLUE);
 			break;
 		case TRANSITION_STATE:
-			this.setShapeType(TRAPEZOID);
-			this.setFillColor(Color.MAGENTA);
-			this.setFillColor2(Color.BLUE);
-			this.setLineColor(Color.GREEN);
-			byte myStyle = LineType.DASHED_DOTTED_1.getLineStyle();
-			LineType myLineType = LineType.getLineType(3,myStyle);
+			this.setShapeType(ROUND_RECT);
+			this.setFillColor(Color.WHITE);
+			this.setLineColor(Color.BLUE);
+			byte myStyle = LineType.LINE_2.getLineStyle();
+			LineType myLineType = LineType.getLineType(2,myStyle);
 			this.setLineType(myLineType);
 			break;
 		case FINAL_STATE: 
