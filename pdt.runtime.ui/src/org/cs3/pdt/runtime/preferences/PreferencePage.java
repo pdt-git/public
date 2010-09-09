@@ -1,13 +1,20 @@
 package org.cs3.pdt.runtime.preferences;
 
+import java.util.Set;
+
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.DirectoryFieldEditor;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -25,6 +32,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 public class PreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 	
 	
+	private String newPrefExecutable;
+	private StringFieldEditor executable;
+
 	public PreferencePage() {
 		super(GRID);
 		
@@ -60,7 +70,8 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		addField(new DirectoryFieldEditor(PrologRuntimeUI.PREF_PIF_BOOTSTRAP_DIR, "PrologInterface Bootstrap Directory", getFieldEditorParent()));
 
 		// eg. xpce or /usr/bin/xpce
-		addField(new StringFieldEditor(PrologInterface.PREF_EXECUTABLE, "SWI-Prolog executable", getFieldEditorParent()));
+		executable = new StringFieldEditor(PrologInterface.PREF_EXECUTABLE, "SWI-Prolog executable", getFieldEditorParent());
+		addField(executable);
 
 		// A comma-separated list of VARIABLE=VALUE pairs.
 		addField(new StringFieldEditor(PrologInterface.PREF_ENVIRONMENT, "Extra environment variables", getFieldEditorParent()));
@@ -93,6 +104,51 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
+	}
+	
+	public void propertyChange(PropertyChangeEvent event) {
+		super.propertyChange(event);
+		
+		if(((FieldEditor)event.getSource()).getPreferenceName().equals(PrologInterface.PREF_EXECUTABLE)){
+			newPrefExecutable = (String)event.getNewValue();
+		}
+    }
+	
+	@Override
+	public boolean performOk() {
+		if(newPrefExecutable!= null) {
+			updatePrologInterfaceExecutables();	
+		}
+		return super.performOk();
+	}
+
+	private void updatePrologInterfaceExecutables() {
+		PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
+		for (String id : subscriptionIds) {
+			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());
+			if(pif.isDown()){
+				pif.setExecutable(newPrefExecutable);
+			}
+		}
+	}
+	
+	@Override
+	protected void performApply() {
+		if(newPrefExecutable!= null) {
+			updatePrologInterfaceExecutables();	
+		}
+		newPrefExecutable=null;
+	}
+	
+	/**
+	 * Resets the executable field.
+	 * TODO: extends this to support fields.
+	 */
+	@Override
+	protected void performDefaults() {
+		executable.setStringValue(Util.guessExecutableName());
+		super.performDefaults();
 	}
 
 }

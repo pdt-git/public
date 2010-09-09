@@ -1,7 +1,7 @@
 package org.cs3.pl.prolog.internal.socket;
 
+import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.prolog.internal.PreferenceProvider;
 
 
 public class StandaloneSocketPrologInterface extends SocketPrologInterface {

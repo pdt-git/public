@@ -59,8 +59,10 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologContextTracker;
 import org.cs3.pdt.runtime.ui.PrologContextTrackerEvent;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.NewConsoleHistory;
@@ -265,6 +267,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
 								if (getPrologInterface() != null) {
+									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
 									getPrologInterface().start();
 								}
 							}
