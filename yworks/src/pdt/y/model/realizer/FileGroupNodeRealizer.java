@@ -7,13 +7,13 @@ import y.view.NodeLabel;
 import y.view.NodeRealizer;
 
 
-public class MyGroupNodeRealizer extends PrologGroupNodeRealizer {
+public class FileGroupNodeRealizer extends PrologGroupNodeRealizer {
 
-	public MyGroupNodeRealizer(GraphModel model) {
+	public FileGroupNodeRealizer(GraphModel model) {
 		super(model);
 	}
 
-	public MyGroupNodeRealizer(NodeRealizer nr) {
+	public FileGroupNodeRealizer(NodeRealizer nr) {
 		super(nr);
 	}
 
@@ -28,6 +28,6 @@ public class MyGroupNodeRealizer extends PrologGroupNodeRealizer {
 	}
 
 	public NodeRealizer createCopy(NodeRealizer nr) {
-		return new MyGroupNodeRealizer(nr);
+		return new FileGroupNodeRealizer(nr);
 	}
 }
