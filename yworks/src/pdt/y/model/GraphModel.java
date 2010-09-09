@@ -26,6 +26,9 @@ public class GraphModel {
 	private DataMap moduleMap = Maps.createHashedDataMap();
 	private DataMap fileNameMap = Maps.createHashedDataMap();
 	private DataMap kindMap = Maps.createHashedDataMap();
+	private DataMap functorMap = Maps.createHashedDataMap();
+	private DataMap arityMap = Maps.createHashedDataMap();
+	
 	private HierarchyManager hierarchy = null;
 	
 	private NodeRealizer nodeRealizer;
@@ -33,6 +36,10 @@ public class GraphModel {
 
 	private GroupNodeRealizer filegroupNodeRealizer;
 	private GroupNodeRealizer moduleGroupNodeRealizer;
+
+	private static final String MODULE = "module";
+	private static final String FILE = "file";
+	private static final String PREDICATE = "predicate";
 	
 	public GraphModel(){
 		initGroupNodeRealizer();
@@ -99,32 +106,24 @@ public class GraphModel {
 		return nodeMap;
 	}
 
-	public void setNodeMap(DataMap dataMap) {
-		this.nodeMap = dataMap;
-	}
-
 	public DataMap getModuleMap() {
 		return moduleMap;
-	}
-
-	public void setModuleMap(DataMap moduleMap) {
-		this.moduleMap = moduleMap;
 	}
 
 	public DataMap getFileNameMap() {
 		return fileNameMap;
 	}
-
-	public void setFileNameMap(DataMap fileNameMap) {
-		this.fileNameMap = fileNameMap;
-	}
-
+	
 	public DataMap getKindMap() {
 		return kindMap;
 	}
 
-	public void setKindMap(DataMap kindMap) {
-		this.kindMap = kindMap;
+	public DataMap getFunctorMap() {
+		return functorMap;
+	}
+
+	public DataMap getArityMap() {
+		return arityMap;
 	}
 
 	public Graph2D getGraph() {
@@ -169,5 +168,37 @@ public class GraphModel {
 	public void clear(){
 		this.graph.clear();
 		
+	}
+
+	public boolean isPredicate(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(GraphModel.PREDICATE);
+	}
+
+	public boolean isModule(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(GraphModel.MODULE);
+	}
+
+	public boolean isFile(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(GraphModel.FILE);
+	}
+
+	public String getLabelTextForNode(Node node) {
+		String labelText;
+		if (isModule(node)) {
+			labelText = moduleMap.get(node).toString();
+		} else if (isFile(node))  {
+			labelText = fileNameMap.get(node).toString();
+		} else if (isPredicate(node))  {
+			labelText = functorMap.get(node) + " / " + arityMap.get(node);
+		} else {
+			labelText=nodeMap.get(node).toString();
+		}
+		return labelText;
 	}
 }

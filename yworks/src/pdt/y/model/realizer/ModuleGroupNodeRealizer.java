@@ -1,10 +1,10 @@
 package pdt.y.model.realizer;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 import pdt.y.model.GraphModel;
-import y.base.DataMap;
 import y.base.Node;
 import y.base.NodeCursor;
 import y.geom.YDimension;
@@ -17,8 +17,16 @@ import y.view.hierarchy.HierarchyManager;
 
 
   public class ModuleGroupNodeRealizer extends GroupNodeRealizer {
-	  private GraphModel  model;
-    public ModuleGroupNodeRealizer(GraphModel model) {
+	  private static double Y_OFFSET = 3.0;
+	  private static double X_OFFSET = 3.0;
+	  
+	  private GraphModel model;
+	  
+	  private double totalLableHeight = 0.0;
+	  private double totalLableWidth = 0.0;
+	  
+	  
+	public ModuleGroupNodeRealizer(GraphModel model) {
       super();
       this.model=model;
       init();
@@ -41,15 +49,9 @@ import y.view.hierarchy.HierarchyManager;
 		setAutoBoundsEnabled(true);
 		YInsets minInsets = new YInsets(5,5,5,5);
 		setMinimalInsets(minInsets);
-		createModuleLabel();
+		createHeaderLabel();
 	}
     
- 
-    public void createModuleLabel() {
-    	createHeaderLabel();
-    	//createContentLabel();
-    }
-
 	private void createHeaderLabel() {
 		NodeLabel label = getLabel();
     	label.setAlignment(NodeLabel.CENTER);
@@ -59,35 +61,93 @@ import y.view.hierarchy.HierarchyManager;
     	label.setModel(NodeLabel.INTERNAL);
 	}
 	
-	public void createContentLabel() {
-		Node node = getNode();
-		HierarchyManager hierarchy = model.getHierarchyManager();
-		NodeCursor nodeCursor = hierarchy.getChildren(node);
-		DataMap allNodes = model.getNodeMap();
+	public void paintText(Graphics2D gfx){
+		NodeLabel label = getLabel();
+		label.paint(gfx);
+		paintContentLabel(gfx);
+		YDimension dimension = calculateMinSize();
+		setSize(dimension.width, dimension.height);
+	}
+
+	private NodeLabel paintAnInnerLabel(Graphics2D gfx, String labelText, double yOffset) {
+		NodeLabel childLabel = new NodeLabel();
+		childLabel.setText(labelText);
+		childLabel.setModel(NodeLabel.FREE);
+		childLabel.setOffset(X_OFFSET, yOffset);
+		childLabel.bindRealizer(this);
+		childLabel.paint(gfx);
+		return childLabel;
+	}
+
+	private void calculateLabelSize(){
+		double height = Y_OFFSET;
+		double width = 0;
+		for (int a=0; a<labelCount(); a++){
+			NodeLabel label= getLabel(a);
+			height += label.getHeight()+Y_OFFSET;
+			width = Math.max(width,label.getWidth());
+		}
+		NodeCursor nodeCursor = getNodeCursorForInnerNodes();
+		if (nodeCursor != null) {
+			while (nodeCursor.ok()) {
+				Node childNode = nodeCursor.node();
+				NodeLabel label = new NodeLabel();
+				String labelText = model.getLabelTextForNode(childNode);
+				label.setText(labelText);
+				height += label.getHeight()+Y_OFFSET;
+				width = Math.max(width,label.getWidth());
+				nodeCursor.next();
+			}
+		}
+		//width+= X_OFFSET *2;
+		totalLableHeight = height;
+		totalLableWidth = width;
+	}
+
+	private void paintContentLabel(Graphics2D gfx) {
+		NodeCursor nodeCursor = getNodeCursorForInnerNodes();
+	
+		double momentaryLabelHeight= getLabel().getHeight()+ Y_OFFSET;
 		while (nodeCursor.ok()) {
 			Node childNode = nodeCursor.node();
-			NodeLabel childLabel = new NodeLabel();
-			childLabel.setText((String)allNodes.get(childNode));
-			childLabel.bindRealizer(this);
+			String labelText = model.getLabelTextForNode(childNode);
+			NodeLabel childLabel = paintAnInnerLabel(gfx, labelText, momentaryLabelHeight);
+			//gfx.setColor(getLineColor());
+			//gfx.drawLine((int)x+1,(int)(y+actualYOffset),(int)(x+width-1),(int)(y+labelHeight));
+			momentaryLabelHeight += childLabel.getHeight() + Y_OFFSET;
+			nodeCursor.next();
 		}
 	}
-	
-	
+
+	private NodeCursor getNodeCursorForInnerNodes() {
+		Node node = getNode();
+		HierarchyManager hierarchy = model.getHierarchyManager();
+		NodeCursor nodeCursor = null;
+		try{
+			nodeCursor = hierarchy.getChildren(node);
+		} catch (NullPointerException e) {
+		}
+		return nodeCursor;
+	}
 
 	public NodeRealizer createCopy(NodeRealizer nr) {
       return new ModuleGroupNodeRealizer(nr);
     }
-
+	
 	public SizeConstraintProvider getSizeConstraintProvider() {
 		YDimension minSize = calculateMinSize();
 		return new SizeConstraintProvider.Default(minSize, minSize);
 	}
 
 	private YDimension calculateMinSize() {
+		calculateLabelSize();
 		Rectangle2D minimalGroupBounds = calcMinimumGroupBounds();
-		double maxWidth = minimalGroupBounds.getWidth();
-		maxWidth = Math.max(maxWidth, getLabel().getWidth());
-		double maxHeight = minimalGroupBounds.getHeight();
+		double innerGraphWidth = minimalGroupBounds.getWidth();
+		double maxWidth = Math.max(innerGraphWidth, totalLableWidth);
+		
+		double innerGraphHeight = minimalGroupBounds.getHeight();
+		double maxHeight = innerGraphHeight + totalLableHeight;
+		
 		return new YDimension(maxWidth, maxHeight);
 	}
   }
