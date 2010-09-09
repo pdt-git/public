@@ -17,23 +17,11 @@ write_facts_to_graphML(Project, File):-
     flush_output(OutStream),
     Project=[FirstProject],
     write_files(FirstProject,OutStream),
-/*    nl(OutStream),
     flush_output(OutStream),
-    write_onloades(OutStream),
-    nl(OutStream),
-    flush_output(OutStream),
-    write_directives(OutStream),
-    nl(OutStream),
-    flush_output(OutStream),
-    write_clauses(OutStream),
-    nl(OutStream),
-    flush_output(OutStream),
-    write_hierarchy(OutStream),
-    nl(OutStream),
-    flush_output(OutStream),
-    write_edges(OutStream),
- */   
   	write_load_edges(OutStream),
+  	flush_output(OutStream),
+  	write_call_edges(OutStream),
+  	flush_output(OutStream),
  	close_graph_element(OutStream),
     write_graphML_footer(OutStream),
     close(OutStream).
@@ -106,8 +94,13 @@ write_files(Project,Stream):-
 write_file(Stream,Project,Id,FileName,Module):-
 	open_node(Stream,Id),
 	write_data(Stream,'id',Id),
-	catch(atom_concat(Project,RelativeFileName,FileName), _, RelativeFileName=FileName),
-	format('~w~n~w -> ~w~n', [Project, FileName, RelativeFileName]), 
+	catch(	(	atom_concat(Project,RelativeWithSlash,FileName),
+				atom_concat('/',RelativeFileName,RelativeWithSlash)
+			),
+			_, 
+			RelativeFileName=FileName
+		),
+	%format('~w~n~w -> ~w~n', [Project, FileName, RelativeFileName]), 
 	write_data(Stream,'fileName',RelativeFileName),
 	write_data(Stream,'module',Module),	
 	(	Module=user
@@ -123,9 +116,7 @@ write_predicates(Stream,FileId):-
 	forall(	predicateT(Id,FileId,Functor,Arity,Module),
 			(	write_predicate(Stream,Id,Functor,Arity,Module),
 				flush_output(Stream)
-/*				slT(Id,Begin,Length),
-				write_position(Stream,Id,Begin,Length)
-*/			)
+			)
 	).
 		
 write_predicate(Stream,Id,Functor,Arity,Module):-
@@ -169,17 +160,38 @@ write_load_edge(Stream,LoadingFileId,FileId):-
 	close_edge(Stream).
 	
 write_call_edges(Stream):-
+	forall(lit_edge(SourceLiteralId,TargetRuleId),
+		(	(	(	literalT(SourceLiteralId,_,SourceRule,_,_,_)
+    		;	metaT(SourceLiteralId,_,SourceRule,_,_,_)
+    		),
+    		ruleT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
+    		predicateT_ri(SourceFunctor,SourceArity,SourceModule,SourceId),
+    		
+    		ruleT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
+    		predicateT_ri(TargetFunctor,TargetArity,TargetModule,TargetId)
+			)
+		->	write_call_edge(Stream,SourceId,TargetId)
+		;	format('Problem: ~w, ~w~n',[SourceId, TargetId])
+		)
+	).	
+	
+write_call_edge(Stream,SourceId,TargetId):-
+    open_edge(Stream,SourceId,TargetId),
+    write_data(Stream,'kind','call'),
+	close_edge(Stream).
+	
+/*write_call_edges(Stream):-
     lit_edge(LId,CalleeId),
     literalT(LId,_,CallerId,_,_,_),
     termT(LId,Term),
     	write_edge(Stream,LId,CalleeId,CallerId,Term),
     fail.
-write_edges(_).		
+write_edges(_).*/		
 	
 	
 	
 
-write_onloades(Stream):-
+/*write_onloades(Stream):-
 	forall(	onloadT(Id,_,Module),
 			(	write_node(Stream,Id,prolog_onload,Module),
 				slT(Id,Begin,Length),
@@ -213,12 +225,12 @@ write_hierarchy(Stream):-
     forall(	predicateT(PredId,FileId,_,_,_),
  			write_within(Stream,FileId,PredId,'parent-child')
     	),
-    forall( /*directiveT(DirectId,_,_), */onload_edge(DirectId,OnloadId),
+    forall( onload_edge(DirectId,OnloadId),
     		write_within(Stream,OnloadId,DirectId,'parent-child')
     	),
     forall(	pred_edge(ClauseId,Id),
     		write_within(Stream,Id,ClauseId,'parent-child')
-    	).
+    	).*/
  
     	
 /*write_edges(Stream):-
@@ -258,20 +270,7 @@ write_data(Stream,Key,Value):-
 
 
 pl_test:-
-%    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/pdt/xref'],'Z:/WorkspaceTeaching/bla/test.pl'). 
-%    pl_test(['Z:/WorkspaceTeaching/svf.examples.prolog'],'Z:/WorkspaceTeaching/bla/test.pl'). 
-%     pl_test(['Z:/WorkspaceTeaching/svf.examples.prolog/pl/Load.pl'],'Z:/WorkspaceTeaching/bla/test.pl'). 
-%    pl_test(['Z:/pdt.git'],'Z:/test.graphml').   
-%    pl_test(['Z:/WorkspaceTeaching/bla/'],'Z:/WorkspaceTeaching3/test.graphml').   
-    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test3.graphml').     
-%     pl_test(['Z:/pdt.git'],'Z:/WorkspaceTeaching3/test.graphml').       
-%    pl_test('Z:/WorkspacePDT/pdt.runtime/library/attic/org/cs3/pdt/metadata/mi_meta_ops.pl','Z:/WorkspaceTeaching/bla/test.pl').     
-%    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/attic/spike/socket/pifcom_codec.pl'],'Z:/WorkspaceTeaching/bla/test.pl').
-%    pl_test(['Z:/WorkspaceTeaching/bla/seltsam.pl'],'Z:/WorkspaceTeaching/bla/test.pl').   
-%    pl_test(['Z:/WorkspaceTeaching/bla/automat.pl'],'Z:/WorkspaceTeaching/bla/test.pl').   
-%    pl_test(['Z:/WorkspacePDT/pdt.runtime/library/pdt/xref/prolog_file_reader_quick.pl'],'Z:/WorkspaceTeaching/bla/test.pl'). 
-%   pl_test(['Z:/WorkspacePDT/jtransformer'],'Z:/WorkspaceTeaching/bla/test.pl'). 
-      
+    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test3.graphml').           
  
 pl_test(Project,Output):-
 	plparser_quick:generate_facts(Project),
