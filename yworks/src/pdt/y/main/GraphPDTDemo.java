@@ -13,8 +13,6 @@ import javax.swing.JRootPane;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
-import pdt.y.model.realizer.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.FileGroupNodeRealizer;
 import pdt.y.view.actions.ExitAction;
 import pdt.y.view.actions.LoadAction;
 import pdt.y.view.actions.ResetLayout;
@@ -28,12 +26,11 @@ import y.view.EditMode;
 import y.view.Graph2D;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
-import y.view.hierarchy.GroupNodeRealizer;
 
 public class GraphPDTDemo extends  JPanel {
 	private Graph2DView view;
 	public GraphModel model;
-	private Graph2D graph;
+	public Graph2D graph;
 	private GraphMLReader reader;
 	
 	private GraphLayout layoutModel;
@@ -86,32 +83,13 @@ public class GraphPDTDemo extends  JPanel {
 		model = reader.readFile(resource);
 		graph = model.getGraph();
 		view.setGraph2D(graph);
-		categorizeData();
+		model.categorizeData();
 		this.updateView();
 	}
 	
-	private void categorizeData() {
-		categorizeNodes();		
-	}
-	
 	private void updateView() {
-		
 		createFirstLabel();
 		this.calcLayout();
-	}
-
-	private void categorizeNodes() {
-		GroupNodeRealizer fileRealizer = model.getFilegroupNodeRealizer();
-		GroupNodeRealizer moduleRealizer = model.getModuleGroupNodeRealizer();
-		for (Node node: graph.getNodeArray()) {
-			if (model.isModule(node)) {
-				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleRealizer));
-			} else if (model.isFile(node)) {
-				graph.setRealizer(node, new FileGroupNodeRealizer(fileRealizer));
-			} else {
-				// no realizer to set because it is already bound to default realizer
-			}
-		}
 	}
 
 	private void createFirstLabel() {
