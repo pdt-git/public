@@ -45,13 +45,13 @@ import java.io.File;
 import java.io.IOException;
 
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.ServerStartAndStopStrategy;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
-import org.cs3.pl.prolog.internal.PreferenceProvider;
 import org.cs3.pl.prolog.internal.ReusablePool;
 
 public class SocketPrologInterface extends AbstractPrologInterface implements SocketPrologInterfacePreferences {
