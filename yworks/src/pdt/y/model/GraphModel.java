@@ -3,7 +3,7 @@ package pdt.y.model;
 import java.awt.Color;
 
 import pdt.y.model.realizer.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.MyGroupNodeRealizer;
+import pdt.y.model.realizer.FileGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Node;
@@ -49,7 +49,7 @@ public class GraphModel {
 	}
 	
 	private void initGroupNodeRealizer() {
-		filegroupNodeRealizer = new MyGroupNodeRealizer(this);
+		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 	}
 	
 	private void initModuleGroupNodeRealizer() {

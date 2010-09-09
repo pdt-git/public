@@ -14,7 +14,7 @@ import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
 import pdt.y.model.realizer.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.MyGroupNodeRealizer;
+import pdt.y.model.realizer.FileGroupNodeRealizer;
 import pdt.y.view.actions.ExitAction;
 import pdt.y.view.actions.LoadAction;
 import pdt.y.view.actions.ResetLayout;
@@ -107,7 +107,7 @@ public class GraphPDTDemo extends  JPanel {
 			if (model.isModule(node)) {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleRealizer));
 			} else if (model.isFile(node)) {
-				graph.setRealizer(node, new MyGroupNodeRealizer(fileRealizer));
+				graph.setRealizer(node, new FileGroupNodeRealizer(fileRealizer));
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}
