@@ -13,6 +13,35 @@
  ***************************************************************************/
 package demo.view;
 
+import java.awt.BorderLayout;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.print.PageFormat;
+import java.awt.print.PrinterJob;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.JToolBar;
+import javax.swing.UIManager;
+import javax.swing.filechooser.FileFilter;
+
 import y.io.GraphMLIOHandler;
 import y.io.IOHandler;
 import y.option.OptionHandler;
@@ -25,33 +54,6 @@ import y.view.Graph2DView;
 import y.view.Graph2DViewActions;
 import y.view.Graph2DViewMouseWheelZoomListener;
 import y.view.MovePortMode;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
-import javax.swing.ImageIcon;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JPanel;
-import javax.swing.JRootPane;
-import javax.swing.JToolBar;
-import javax.swing.UIManager;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-import java.awt.BorderLayout;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.print.PageFormat;
-import java.awt.print.PrinterJob;
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 /**
  * Abstract base class for GUI- and <code>Graph2DView</code>-based demos.

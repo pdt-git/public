@@ -1,18 +1,16 @@
 package pdt.y.model;
 
-import java.awt.Color;
-
-import pdt.y.model.realizer.MyGroupNodeRealizer;
+import pdt.y.model.realizer.CallEdgeRealizer;
+import pdt.y.model.realizer.FileGroupNodeRealizer;
+import pdt.y.model.realizer.LoadEdgeRealizer;
+import pdt.y.model.realizer.ModuleGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
+import y.base.Edge;
 import y.base.Node;
-import y.geom.YDimension;
 import y.util.Maps;
-import y.view.Arrow;
 import y.view.EdgeRealizer;
-import y.view.GenericEdgeRealizer;
 import y.view.Graph2D;
-import y.view.LineType;
 import y.view.NodeRealizer;
 import y.view.hierarchy.DefaultHierarchyGraphFactory;
 import y.view.hierarchy.GroupNodeRealizer;
@@ -22,84 +20,113 @@ public class GraphModel {
 	private Graph2D graph=new Graph2D();
     
 	// Addition data:
-	private DataMap dataMap = Maps.createHashedDataMap();
+	private DataMap nodeMap = Maps.createHashedDataMap();
 	private DataMap moduleMap = Maps.createHashedDataMap();
+	private DataMap fileNameMap = Maps.createHashedDataMap();
+	private DataMap kindMap = Maps.createHashedDataMap();
+	private DataMap functorMap = Maps.createHashedDataMap();
+	private DataMap arityMap = Maps.createHashedDataMap();
+	
 	private HierarchyManager hierarchy = null;
 	
-	private NodeRealizer nodeRealizer;
-	private EdgeRealizer edgeRealizer;
+	private NodeRealizer predicateNodeRealizer;
+	private GroupNodeRealizer filegroupNodeRealizer;
+	private GroupNodeRealizer moduleGroupNodeRealizer;
+	
+	private EdgeRealizer callEdgeRealizer;
+	private EdgeRealizer loadEdgeRealizer;
 
-	private GroupNodeRealizer groupNodeRealizer;
+	private static final String MODULE = "module";
+	private static final String FILE = "file";
+	private static final String PREDICATE = "predicate";
+	private static final String CALL = "call";
+	private static final String LOADING = "loading";
 	
 	public GraphModel(){
-		initGroupNodeRealizer();
-		initNodeRealizer();
-		initEdgeNodeRealizer();
-	}
-	
-	private void initGroupNodeRealizer() {
-		groupNodeRealizer = new MyGroupNodeRealizer();
-	}
-	
-	private void initNodeRealizer() {
-		nodeRealizer = new MyShapeNodeRealizer(this);    
-		graph.setDefaultNodeRealizer(nodeRealizer);
+		initRealizer();
 	}
 
-	private void initEdgeNodeRealizer() {
-		edgeRealizer = new GenericEdgeRealizer();
-		edgeRealizer.setTargetArrow(Arrow.DELTA);
-		edgeRealizer.setLineColor(Color.BLUE);
-		byte myStyle = LineType.LINE_3.getLineStyle();
-		LineType myLineType = LineType.getLineType(2,myStyle);
-		edgeRealizer.setLineType(myLineType);
-		graph.setDefaultEdgeRealizer(edgeRealizer);
+	private void initRealizer() {
+		initNodeRealizers();
+		initEdgeRealizers();
+	}
+
+	private void initNodeRealizers() {
+		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
+		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
+		predicateNodeRealizer = new MyShapeNodeRealizer(this);    
+		graph.setDefaultNodeRealizer(predicateNodeRealizer);
+	}
+
+	private void initEdgeRealizers() {
+		loadEdgeRealizer = new LoadEdgeRealizer();
+		callEdgeRealizer = new CallEdgeRealizer();
+		graph.setDefaultEdgeRealizer(callEdgeRealizer);
+	}
+
+	public void categorizeData() {
+		categorizeNodes();		
+		categorizeEdges();
+	}
+
+	private void categorizeNodes() {
+		for (Node node: graph.getNodeArray()) {
+			if (isModule(node)) {
+				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleGroupNodeRealizer));
+			} else if (isFile(node)) {
+				graph.setRealizer(node, new FileGroupNodeRealizer(filegroupNodeRealizer));
+			} else {
+				// no realizer to set because it is already bound to default realizer
+			}
+		}
+	}
+
+	private void categorizeEdges() {
+		for (Edge edge: graph.getEdgeArray()) {
+			if (isLoadingEdge(edge)) {
+				graph.setRealizer(edge, new LoadEdgeRealizer(loadEdgeRealizer));
+			} else if (isCallEdge(edge)) {
+				graph.setRealizer(edge, new CallEdgeRealizer(callEdgeRealizer));
+			} else {
+				// no realizer to set because it is already bound to default realizer
+			}
+		}
 	}
 
 	public String getIdForNode(Node node){
-		return (String) dataMap.get(node);
+		return nodeMap.get(node).toString();
 	}
 	
 	public String getModule(Node node){
-		return (String) moduleMap.get(node);
+		return moduleMap.get(node).toString();
 	}
 	
 	
 	
 	// Getter and Setter
-	
-	public NodeRealizer getNodeRealizer() {
-		return nodeRealizer;
-	}
 
-	public void setNodeRealizer(NodeRealizer nodeRealizer) {
-		this.nodeRealizer = nodeRealizer;
-		this.graph.setDefaultNodeRealizer(nodeRealizer);
-	}
-
-	public EdgeRealizer getEdgeRealizer() {
-		return edgeRealizer;
-	}
-
-	public void setEdgeRealizer(EdgeRealizer edgeRealizer) {
-		this.edgeRealizer = edgeRealizer;
-		this.graph.setDefaultEdgeRealizer(edgeRealizer);
-	}
-
-	public DataMap getDataMap() {
-		return dataMap;
-	}
-
-	public void setDataMap(DataMap dataMap) {
-		this.dataMap = dataMap;
+	public DataMap getNodeMap() {
+		return nodeMap;
 	}
 
 	public DataMap getModuleMap() {
 		return moduleMap;
 	}
 
-	public void setModuleMap(DataMap moduleMap) {
-		this.moduleMap = moduleMap;
+	public DataMap getFileNameMap() {
+		return fileNameMap;
+	}
+	
+	public DataMap getKindMap() {
+		return kindMap;
+	}
+
+	public DataMap getFunctorMap() {
+		return functorMap;
+	}
+
+	public DataMap getArityMap() {
+		return arityMap;
 	}
 
 	public Graph2D getGraph() {
@@ -110,14 +137,12 @@ public class GraphModel {
 		this.graph = model;
 	}
 	
-	
-	
 	public void useHierarchy(){
 		if(this.hierarchy == null && this.graph !=null){
 			this.hierarchy= new HierarchyManager(graph);
 		}
 		DefaultHierarchyGraphFactory graphFactory =(DefaultHierarchyGraphFactory)hierarchy.getGraphFactory();
-		graphFactory.setDefaultGroupNodeRealizer(groupNodeRealizer);
+		graphFactory.setDefaultGroupNodeRealizer(filegroupNodeRealizer);
 		graphFactory.setProxyNodeRealizerEnabled(false);
 	}
 	
@@ -135,6 +160,49 @@ public class GraphModel {
 	
 	public void clear(){
 		this.graph.clear();
-		
+	}
+
+	public boolean isPredicate(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(GraphModel.PREDICATE);
+	}
+
+	public boolean isModule(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(GraphModel.MODULE);
+	}
+
+	public boolean isFile(Node node) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(node).toString();
+		return kind.equals(GraphModel.FILE);
+	}
+	
+	public boolean isCallEdge(Edge edge) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(edge).toString();
+		return kind.equals(GraphModel.CALL);
+	}
+	
+	public boolean isLoadingEdge(Edge edge) {
+		DataMap kindMap = getKindMap();
+		String kind = kindMap.get(edge).toString();
+		return kind.equals(GraphModel.LOADING);
+	}
+
+	public String getLabelTextForNode(Node node) {
+		String labelText;
+		if (isModule(node)) {
+			labelText = moduleMap.get(node).toString();
+		} else if (isFile(node))  {
+			labelText = fileNameMap.get(node).toString();
+		} else if (isPredicate(node))  {
+			labelText = functorMap.get(node) + " / " + arityMap.get(node);
+		} else {
+			labelText=nodeMap.get(node).toString();
+		}
+		return labelText;
 	}
 }

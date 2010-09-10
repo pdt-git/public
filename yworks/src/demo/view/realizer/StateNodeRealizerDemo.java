@@ -13,20 +13,19 @@
  ***************************************************************************/
 package demo.view.realizer;
 
-import demo.view.DemoBase;
-import demo.view.DemoDefaults;
+import java.awt.EventQueue;
+import java.awt.event.MouseEvent;
 
 import y.base.GraphEvent;
 import y.base.GraphListener;
 import y.base.Node;
+import y.io.GraphMLIOHandler;
 import y.view.Graph2D;
 import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 import y.view.ViewMode;
-import y.io.GraphMLIOHandler;
-
-import java.awt.EventQueue;
-import java.awt.event.MouseEvent;
+import demo.view.DemoBase;
+import demo.view.DemoDefaults;
 
 /**
  * This demo shows how the custom node realizer {@link StateNodeRealizer}
