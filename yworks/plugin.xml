@@ -18,7 +18,7 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="pdt.y.swt.commands.LoadCommand"
+            defaultHandler="pdt.y.swt.commands.LoadCommandHandler"
             description="LoadCommand"
             id="graphml.commands.load"
             name="Load">
