@@ -41,7 +41,7 @@ public class GraphMLReader {
 
 	}
 	
-	public boolean loadFile(URL resource){
+	private boolean loadFile(URL resource){
 		model.clear();
 		try {
 			ioHandler.read(model.getGraph(), resource);

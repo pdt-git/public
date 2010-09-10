@@ -17,6 +17,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.ViewPart;
 
+import pdt.y.swt.commands.GraphLoadAction;
+
 
 
 
@@ -27,7 +29,7 @@ public class yWorksDemoView extends ViewPart {
 
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private SwingControl swingControl;
-    private GraphPDTDemo view;
+    private PDTGraphSwing view = new PDTGraphSwing();
 	private FormToolkit toolkit;
 	private Form form;
 
@@ -37,28 +39,22 @@ public class yWorksDemoView extends ViewPart {
 	}
 
 	public void createPartControl(final Composite parent) {
-		toolkit = new FormToolkit(parent.getDisplay());
-		form = toolkit.createForm(parent);
-		form.setText("Hello, Eclipse Forms");
-		toolkit.decorateFormHeading(form);
-		
+
 		swingControl = new SwingControl(parent, SWT.NONE) {
-		
-
 			protected JComponent createSwingComponent() {
-		    	view = new GraphPDTDemo();
-		       
-		        return view;
-		      }
+				
+				return view;
+			}
 
-		      public Composite getLayoutAncestor() {
-		        return parent;
-		      }
-		    };
-		
-		    createMenu();
-		    createToolbar();
-  }
+			public Composite getLayoutAncestor() {
+				return parent;
+			}
+		};
+
+
+		createMenu();
+		createToolbar();
+	}
 
 		
 
@@ -80,7 +76,7 @@ public class yWorksDemoView extends ViewPart {
      */
     private void createToolbar() {
             IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
-                    
+            mgr.add(new GraphLoadAction(view));        
     }
 
 
