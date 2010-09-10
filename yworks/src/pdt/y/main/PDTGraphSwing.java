@@ -82,9 +82,11 @@ public class PDTGraphSwing extends  JPanel {
 	
 	public void loadGraph(URL resource) {
 		model = reader.readFile(resource);
+		model.categorizeData();
+		model.assignPortsToEdges();
 		graph = model.getGraph();
 		view.setGraph2D(graph);
-		model.categorizeData();		
+		
 		this.updateView();
 	}
 	
