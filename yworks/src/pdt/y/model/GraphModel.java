@@ -7,7 +7,11 @@ import pdt.y.model.realizer.ModuleGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Edge;
+import y.base.EdgeCursor;
+import y.base.EdgeMap;
 import y.base.Node;
+import y.layout.PortConstraint;
+import y.layout.PortConstraintKeys;
 import y.util.Maps;
 import y.view.EdgeRealizer;
 import y.view.Graph2D;
@@ -204,5 +208,16 @@ public class GraphModel {
 			labelText=nodeMap.get(node).toString();
 		}
 		return labelText;
+	}
+
+	public void assignPortsToEdges() {
+		EdgeMap targetMap = graph.createEdgeMap();
+		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
+		for (Edge edge: graph.getEdgeArray()) {
+			if (isLoadingEdge(edge)) {
+				targetMap.set(edge, portConstraint);
+			} 
+		}
+		graph.addDataProvider(PortConstraintKeys.TARGET_PORT_CONSTRAINT_KEY, targetMap);
 	}
 }

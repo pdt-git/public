@@ -6,6 +6,7 @@ import y.layout.LayoutStage;
 import y.layout.Layouter;
 import y.layout.OrientationLayouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
+import y.layout.router.ChannelEdgeRouter;
 import y.layout.router.OrthogonalEdgeRouter;
 
 public class GraphLayout {
@@ -26,7 +27,8 @@ public class GraphLayout {
 
 
 	protected LayoutStage createEdgeLayout() {
-		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
+		//OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
+		ChannelEdgeRouter router = new ChannelEdgeRouter();
 		return router;
 	}
 
