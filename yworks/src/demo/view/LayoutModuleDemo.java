@@ -13,12 +13,6 @@
  ***************************************************************************/
 package demo.view;
 
-import demo.view.DemoBase;
-import y.module.LayoutModule;
-import y.option.OptionHandler;
-import y.view.Arrow;
-import y.view.hierarchy.HierarchyManager;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -26,15 +20,20 @@ import java.awt.event.ActionEvent;
 import java.net.URL;
 
 import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JToolBar;
 import javax.swing.ListCellRenderer;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.Action;
-import javax.swing.JButton;
+
+import y.module.LayoutModule;
+import y.option.OptionHandler;
+import y.view.Arrow;
+import y.view.hierarchy.HierarchyManager;
 
 /**
  * Demonstrates how layout modules can be added to the GUI of an application.

@@ -22,17 +22,18 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import y.io.graphml.graph2d.ShapeNodeRealizerSerializer;
+import y.io.graphml.input.GraphMLParseContext;
+import y.io.graphml.input.GraphMLParseException;
+import y.io.graphml.output.GraphMLWriteContext;
+import y.io.graphml.output.XmlWriter;
 import y.util.YVersion;
 import y.view.LineType;
 import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
-import y.io.graphml.graph2d.ShapeNodeRealizerSerializer;
-import y.io.graphml.input.GraphMLParseContext;
-import y.io.graphml.input.GraphMLParseException;
-import y.io.graphml.output.XmlWriter;
-import y.io.graphml.output.GraphMLWriteContext;
-import org.w3c.dom.Node;
-import org.w3c.dom.Element;
 
 /**
  * This class represents a custom NodeRealizer with its own paint,
