@@ -13,10 +13,12 @@ import y.view.PopupMode;
  */
 public class HierarchicPopupMode extends PopupMode{
 
+	@Override
 	public JPopupMenu getPaperPopup(double x, double y) {
 		return addFolderPopupItems(new JPopupMenu(), x, y, null, false);
 	}
 
+	@Override
 	public JPopupMenu getNodePopup(Node v) {
 		Graph2D graph = getGraph2D();
 		return addFolderPopupItems(new JPopupMenu(),
@@ -25,6 +27,7 @@ public class HierarchicPopupMode extends PopupMode{
 				v, true);
 	}
 
+	@Override
 	public JPopupMenu getSelectionPopup(double x, double y) {
 		return addFolderPopupItems(new JPopupMenu(), x, y, null, getGraph2D().selectedNodes().ok());
 	}

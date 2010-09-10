@@ -15,7 +15,8 @@ import y.view.hierarchy.HierarchyManager;
 public class ToggleOpenClosedStateViewMode extends ViewMode {  
   HierarchyManager hierarchyManager;  
 
-  public void mouseClicked(MouseEvent event) {  
+  @Override
+public void mouseClicked(MouseEvent event) {  
     // Convert the mouse event's coordinates from view to world coordinates.   
     double x = translateX(event.getX());  
     double y = translateY(event.getY());  

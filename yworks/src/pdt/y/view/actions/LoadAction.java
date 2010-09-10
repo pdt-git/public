@@ -33,10 +33,12 @@ import pdt.y.main.PDTGraphSwing;
 				chooser = new JFileChooser();
 				chooser.setAcceptAllFileFilterUsed(false);
 				chooser.addChoosableFileFilter(new FileFilter() {
+					@Override
 					public boolean accept(File f) {
 						return f.isDirectory() || f.getName().endsWith(".graphml");
 					}
 
+					@Override
 					public String getDescription() {
 						return "GraphML Format (.graphml)";
 					}

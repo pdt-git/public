@@ -27,6 +27,7 @@ import y.view.NodeRealizer;
     	label.setModel(NodeLabel.INTERNAL);
 	}
 
+	@Override
 	public NodeRealizer createCopy(NodeRealizer nr) {
 	  return new ModuleGroupNodeRealizer(nr);
 	}

@@ -82,11 +82,13 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 
 	}
 
+	@Override
 	public SizeConstraintProvider getSizeConstraintProvider() {
 		return new SizeConstraintProvider.Default(Math.max(1, getLabel().getWidth()), 
 				Math.max(1, getLabel().getHeight()), MAX_NODE_WIDTH, MAX_NODE_HEIGHT);
 	}
 
+	@Override
 	protected void labelBoundsChanged(NodeLabel label) {
 		if (label == getLabel()) {//only resize on bounds changes of the first label
 			setSize(Math.max(30, label.getWidth()), Math.max(30, label.getHeight()));
@@ -94,6 +96,7 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 	}
 
 
+	@Override
 	public NodeRealizer createCopy(NodeRealizer r)
 	{
 		return new MyShapeNodeRealizer(r);

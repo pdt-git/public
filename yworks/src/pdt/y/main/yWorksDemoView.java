@@ -38,14 +38,17 @@ public class yWorksDemoView extends ViewPart {
 	public yWorksDemoView() {
 	}
 
+	@Override
 	public void createPartControl(final Composite parent) {
 
 		swingControl = new SwingControl(parent, SWT.NONE) {
+			@Override
 			protected JComponent createSwingComponent() {
 				
 				return view;
 			}
 
+			@Override
 			public Composite getLayoutAncestor() {
 				return parent;
 			}
@@ -58,7 +61,8 @@ public class yWorksDemoView extends ViewPart {
 
 		
 
-  public void setFocus() {
+  @Override
+public void setFocus() {
     swingControl.setFocus();
   }
 
