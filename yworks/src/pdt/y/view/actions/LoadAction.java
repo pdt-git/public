@@ -9,7 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import pdt.y.main.GraphPDTDemo;
+import pdt.y.main.PDTGraphSwing;
 
 /**
 	 * Action that loads the current graph from a file in GraphML format.
@@ -20,12 +20,12 @@ import pdt.y.main.GraphPDTDemo;
 		 */
 		private static final long serialVersionUID = 65359810633139537L;
 		JFileChooser chooser;
-		private GraphPDTDemo frame;
+		private PDTGraphSwing frame;
 
-		public LoadAction(GraphPDTDemo frame) {
+		public LoadAction(PDTGraphSwing pdtGraphSwing) {
 			super("Load...");
 			chooser = null;
-			this.frame = frame;
+			this.frame = pdtGraphSwing;
 		}
 
 		public void actionPerformed(ActionEvent e) {

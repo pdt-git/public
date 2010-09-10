@@ -4,17 +4,15 @@
 
    <extension
          point="org.eclipse.ui.views">
-      <category
-            name="PDT"
-            id="pdt.yworks.swt">
-      </category>
+
       <view
             name="yWorks Demo View"
-            category="pdt.yworks.swt"
+            category="org.cs3.pdt"
             class="pdt.y.main.yWorksDemoView"
             id="pdt.yworks.swt.views.yWorksDemoView">
       </view>
    </extension>
+   <!--
    <extension
          point="org.eclipse.ui.commands">
       <command
@@ -37,5 +35,5 @@
          </command>
       </menuContribution>
    </extension>
-
+   -->
 </plugin>

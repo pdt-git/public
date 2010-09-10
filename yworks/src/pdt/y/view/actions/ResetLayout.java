@@ -4,15 +4,15 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import pdt.y.main.GraphPDTDemo;
+import pdt.y.main.PDTGraphSwing;
 
 public class ResetLayout extends AbstractAction{
 	private static final long serialVersionUID = -5882701241202823622L;
-	private GraphPDTDemo view;
+	private PDTGraphSwing view;
 	
-	public ResetLayout(GraphPDTDemo view) {
+	public ResetLayout(PDTGraphSwing pdtGraphSwing) {
 		super("Reset Layout");
-		this.view = view;
+		this.view = pdtGraphSwing;
 	}
 
 	@Override

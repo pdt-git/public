@@ -27,7 +27,7 @@ import y.view.Graph2D;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
 
-public class GraphPDTDemo extends  JPanel {
+public class PDTGraphSwing extends  JPanel {
 	private Graph2DView view;
 	private GraphModel model;
 	private Graph2D graph;
@@ -37,7 +37,7 @@ public class GraphPDTDemo extends  JPanel {
 	
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public GraphPDTDemo() 
+	public PDTGraphSwing() 
 	{
 		this.setLayout(new BorderLayout());
 		
@@ -65,7 +65,7 @@ public class GraphPDTDemo extends  JPanel {
 
 
 
-	public void addMouseZoomSupport() {
+	private void addMouseZoomSupport() {
 		Graph2DViewMouseWheelZoomListener wheelZoomListener = new Graph2DViewMouseWheelZoomListener();
 		//zoom in/out at mouse pointer location 
 		wheelZoomListener.setCenterZooming(false);    
@@ -73,7 +73,10 @@ public class GraphPDTDemo extends  JPanel {
 	}
 
 
-
+	public void setModel(GraphModel model){
+		this.model = model;
+	}
+	
 	public void loadGraph(URL resource) {
 		model = reader.readFile(resource);
 		graph = model.getGraph();
@@ -108,7 +111,7 @@ public class GraphPDTDemo extends  JPanel {
 		frame.setVisible(true);
 	}
 
-	public final void addContentTo( final JRootPane rootPane )
+	private final void addContentTo( final JRootPane rootPane )
 	{
 		rootPane.setContentPane(this);
 		rootPane.setJMenuBar(createMenuBar());
@@ -117,7 +120,7 @@ public class GraphPDTDemo extends  JPanel {
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
-				(new GraphPDTDemo()).start();
+				(new PDTGraphSwing()).start();
 			}
 		});
 	}
