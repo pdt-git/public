@@ -20,6 +20,7 @@ public class MyMoveSelectionMode extends MoveSelectionMode {
 	}
 
 
+	@Override
 	protected void selectionOnMove(double dx, double dy, double x, double y) {
 		if (ROUTE_EDGES_ON_MOVE) {
 			routeEdgesToSelection();
@@ -27,6 +28,7 @@ public class MyMoveSelectionMode extends MoveSelectionMode {
 		}
 	}
 
+	@Override
 	protected void selectionMovedAction(double dx, double dy, double x, double y) {
 		routeEdgesToSelection();
 		super.selectionMovedAction(dx, dy, x, y);

@@ -27,6 +27,7 @@ public class FileGroupNodeRealizer extends PrologGroupNodeRealizer {
 		label.setModel(NodeLabel.INTERNAL);
 	}
 
+	@Override
 	public NodeRealizer createCopy(NodeRealizer nr) {
 		return new FileGroupNodeRealizer(nr);
 	}

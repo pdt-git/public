@@ -51,7 +51,7 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
     
     protected abstract void createHeaderLabel();
 	
-	
+	@Override
 	public void paintText(Graphics2D gfx) {
 		NodeLabel label = getLabel();
 		label.paint(gfx);
@@ -121,6 +121,7 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 		return nodeCursor;
 	}
 
+	@Override
 	public SizeConstraintProvider getSizeConstraintProvider() {
 		YDimension minSize = calculateMinSize();
 		return new SizeConstraintProvider.Default(minSize, minSize);
