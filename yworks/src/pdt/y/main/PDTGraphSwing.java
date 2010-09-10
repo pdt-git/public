@@ -47,13 +47,7 @@ public class PDTGraphSwing extends  JPanel {
 		view = new Graph2DView();
 		view.addMouseWheelListener(new WheelScroller(view));
 
-
-		EditMode editMode = new EditMode();
-		editMode.allowNodeCreation(false);
-		editMode.allowEdgeCreation(false);
-		editMode.setPopupMode(new HierarchicPopupMode());
-		editMode.setMoveSelectionMode(new MyMoveSelectionMode(new OrthogonalEdgeRouter()));
-		
+		EditMode editMode = initEditMode();
 		
 		view.addViewMode(editMode);
 		view.addViewMode(new ToggleOpenClosedStateViewMode());
@@ -63,6 +57,15 @@ public class PDTGraphSwing extends  JPanel {
 		addMouseZoomSupport();
 	}
 
+
+	private EditMode initEditMode() {
+		EditMode editMode = new EditMode();
+		editMode.allowNodeCreation(false);
+		editMode.allowEdgeCreation(false);
+		editMode.setPopupMode(new HierarchicPopupMode());
+		editMode.setMoveSelectionMode(new MyMoveSelectionMode(new OrthogonalEdgeRouter()));
+		return editMode;
+	}
 
 
 	private void addMouseZoomSupport() {
@@ -81,18 +84,23 @@ public class PDTGraphSwing extends  JPanel {
 		model = reader.readFile(resource);
 		graph = model.getGraph();
 		view.setGraph2D(graph);
+		model.categorizeData();		
 		this.updateView();
 	}
 	
 	
 	private void updateView() {
-		for (Node node : graph.getNodeArray()) {
-			graph.setLabelText(node, model.getIdForNode(node));
-		}
+		createFirstLabel();
 		this.calcLayout();
 	}
 
-	
+		private void createFirstLabel() {
+		String labelText;
+		for (Node node: graph.getNodeArray()) {
+			labelText = model.getLabelTextForNode(node);
+			graph.setLabelText(node,labelText);
+		}
+	}
 	
 	public void calcLayout() {
 		view.applyLayout(layoutModel.getLayouter());
