@@ -20,8 +20,6 @@ parse(File):-
  */          
 parse(File,InStream):-
     new_node_id(Id),	
-%    downcase_atom(File,DFile),
-%	File = DFile,
     nb_setval(module_to_parse, user),
     parse_clauses(InStream,Id),
     nb_getval(module_to_parse,ActualModule),

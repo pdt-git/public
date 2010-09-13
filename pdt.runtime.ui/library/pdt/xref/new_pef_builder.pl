@@ -31,6 +31,3 @@ consult_entry_point_and_parse(File, Project):-
 %consult_entry_point_and_parse(_,_).
 
 
-
-%consult_entry_point_and_parse('z:/workspaceteaching/ct-core/load.pl', 'z:/workspaceteaching/ct-core').
-%write_facts_to_abba('Z:/WorkspaceTeaching/bla/test.pl').
