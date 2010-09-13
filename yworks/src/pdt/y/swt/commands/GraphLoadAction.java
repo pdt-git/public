@@ -4,18 +4,24 @@ import java.io.File;
 import java.net.MalformedURLException;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import pdt.y.main.PDTGraphSwing;
 
 public class GraphLoadAction  extends Action {
-	
+	static {
+		image = ImageDescriptor.createFromImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+	}
+	  
+    private static ImageDescriptor image;
 	private PDTGraphSwing view;
 
 	public GraphLoadAction(PDTGraphSwing view) {
-		super("Load");
+		super("Load",image);
 		this.view = view;
 	}
 	
@@ -34,7 +40,7 @@ public class GraphLoadAction  extends Action {
 		if(selectedFile == null) 
 			return;
 		
-		System.out.println(selectedFile);
+		
 		try {
 			view.loadGraph(file.toURI().toURL());
 		} catch (MalformedURLException e) {
