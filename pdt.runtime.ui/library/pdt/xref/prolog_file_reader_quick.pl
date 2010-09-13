@@ -32,7 +32,7 @@ derive_edges:-
     		
     		( (  ruleT_ri(Functor,Arity,Id), 
     			% ruleT(Id,_,Module,Functor,Arity),    %Eva: umstellen auf PredicateT?
-     			 assert(lit_edge(LId,Id))
+     			 assert(lit_edge(LId,Id))	
     		  )
     		  ;	/*
     			(	( functor(Term,Functor,Arity),
