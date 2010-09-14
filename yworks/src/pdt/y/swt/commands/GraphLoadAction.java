@@ -3,6 +3,9 @@ package pdt.y.swt.commands;
 import java.io.File;
 import java.net.MalformedURLException;
 
+import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pl.prolog.PrologInterface;
+import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.FileDialog;
@@ -47,8 +50,7 @@ public class GraphLoadAction  extends Action {
 			e.printStackTrace();
 		}
 
-		
-		
+	
 		
 	}
 }
