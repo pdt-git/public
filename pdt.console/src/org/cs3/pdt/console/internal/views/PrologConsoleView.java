@@ -503,23 +503,27 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		automatedSelector = new SelectContextPIFAutomatedAction(){
 
 			
+			@Override
 			protected PrologInterface getPrologInterface() {
 				return PrologConsoleView.this.getPrologInterface();
 			}
 
 			
+			@Override
 			protected void setPrologInterface(PrologInterface prologInterface) {
 				PrologConsoleView.this.setPrologInterface(prologInterface);
 				
 			}
 
 			
+			@Override
 			protected void trackerActivated(PrologContextTracker tracker) {
 				setPrologInterface(automatedSelector.getCurrentPrologInterface());
 				
 			}
 
 			
+			@Override
 			protected void trackerDeactivated(PrologContextTracker tracker) {
 				setPrologInterface(automatedSelector.getCurrentPrologInterface());
 				
