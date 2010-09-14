@@ -150,7 +150,7 @@ write_load_edges(Stream):-
     		)
     	->	write_load_edge(Stream,LoadingFileId,FileId)
     		%format(Stream,'<edge source="~w" target="~w"/>~n', [LoadingFileId, FileId])
-    	;	format('Problem: ~w, ~w~n',[LoadingFileId, FileId])
+    	;	format('Problem with load-edge: ~w, ~w~n',[LoadingFileId, FileId])
 	    )
 	).
 
@@ -171,7 +171,7 @@ write_call_edges(Stream):-
     		predicateT_ri(TargetFunctor,TargetArity,TargetModule,TargetId)
 			)
 		->	write_call_edge(Stream,SourceId,TargetId)
-		;	format('Problem: ~w, ~w~n',[SourceId, TargetId])
+		;	format('Problem with call-edge: ~w, ~w~n',[SourceId, TargetId])
 		)
 	).	
 	
@@ -270,10 +270,11 @@ write_data(Stream,Key,Value):-
 
 
 pl_test:-
-    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test3.graphml').           
+   % pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test3.graphml').           
+    pl_test(['Z:/WorkspaceTeaching/bla/testing'],'Z:/WorkspaceTeaching3/test4.graphml').
  
 pl_test(Project,Output):-
 	plparser_quick:generate_facts(Project),
-	writeln('generate abba sources'),
+	writeln('generating graphml-file'),
     time(write_facts_to_graphML(Project,Output)).
     
