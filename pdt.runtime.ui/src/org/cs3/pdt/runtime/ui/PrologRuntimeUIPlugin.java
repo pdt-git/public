@@ -67,8 +67,10 @@ import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.RegistryHook;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
+import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
+import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
@@ -78,7 +80,6 @@ import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
-import org.cs3.pl.prolog.internal.PreferenceProvider;
 import org.eclipse.core.resources.ISaveContext;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
@@ -99,13 +100,6 @@ import org.osgi.framework.BundleContext;
 
 public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup {
 
-	public class EclipsePreferenceProvider implements PreferenceProvider {
-
-		@Override
-		public String getPreference(String key) {
-			return plugin.overridePreferenceBySystemProperty(key);
-		}
-	}
 
 	// The shared instance.
 	private static PrologRuntimeUIPlugin plugin;
@@ -223,7 +217,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		
 
 		prologInterface = AbstractPrologInterface.newInstance(AbstractPrologInterface.PL_INTERFACE_DEFAULT,name);
-		prologInterface.initOptions(new EclipsePreferenceProvider());
+		prologInterface.initOptions(new EclipsePreferenceProvider(this));
 		
 		prologInterface.setFileSearchPath(PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
 		return prologInterface;
@@ -276,7 +270,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	}
 
 	private void initPrologInterfaceOptions(PrologInterface prologInterface) {
-		prologInterface.initOptions(new EclipsePreferenceProvider());
+		prologInterface.initOptions(new EclipsePreferenceProvider(this));
 	}
 
 
@@ -447,22 +441,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		return getPrologInterfaceRegistry().getRegisteredKeys().contains(pifKey);
 	}
 
-	
-	
-	
-	public String overridePreferenceBySystemProperty(String name) {
-		String value;
-		value = System.getProperty(name);
 
-		if (value != null) {
-			Debug.warning("option " + name + " is overridden by system property: " + value);
-			return value;
-		}
-		
-		value = getPreferenceStore().getString(name);
-		
-		return value;
-	}
 
 	public PrologLibraryManager getLibraryManager() {
 		return PrologRuntimePlugin.getLibraryManager();

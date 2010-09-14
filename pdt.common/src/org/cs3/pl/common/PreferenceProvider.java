@@ -1,4 +1,4 @@
-package org.cs3.pl.prolog.internal;
+package org.cs3.pl.common;
 
 public interface PreferenceProvider {
 	String getPreference(String key);
