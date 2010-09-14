@@ -47,7 +47,7 @@ public class PreferencePageMain extends FieldEditorPreferencePage implements IWo
 		//If enabled, the enter key sends a semicolon(';') when\n
 		//while the console is in 'get_single_char/1'-mode, \n
 		//e.g., when backtracking over the solutions to a goal.		
-		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
+//		addField(new BooleanFieldEditor(PDTConsole.PREF_SHOW_HIDDEN_SUBSCRIPTIONS,"Use Enter Key for backtracking",getFieldEditorParent()));
 		
 		//When enabled, the console view will be able to detect\n
 		//whether the user input stream is read from via get_single_char/1

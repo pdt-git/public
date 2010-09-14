@@ -54,6 +54,7 @@ import java.util.WeakHashMap;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.cterm.CTermUtil;
 import org.cs3.pl.prolog.AsyncPrologSession;
 import org.cs3.pl.prolog.Disposable;
