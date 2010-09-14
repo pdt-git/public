@@ -12,6 +12,16 @@
             id="pdt.yworks.swt.views.yWorksDemoView">
       </view>
    </extension>
+   <extension
+         point="org.cs3.pdt.runtime.hooks">
+      <hook
+            class="pdt.y.main.PrologInterfaceLifecycleObserver"
+            id="graphml.hook1">
+      </hook>
+      <registryHook
+            class="pdt.y.main.PDTRegistry">
+      </registryHook>
+   </extension>
    <!--
    <extension
          point="org.eclipse.ui.commands">

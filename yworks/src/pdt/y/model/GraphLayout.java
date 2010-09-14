@@ -32,8 +32,8 @@ public class GraphLayout {
 
 
 	protected LayoutStage createEdgeLayout() {
-		//OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
-		ChannelEdgeRouter router = new ChannelEdgeRouter();
+		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
+		//ChannelEdgeRouter router = new ChannelEdgeRouter();
 		return router;
 	}
 
@@ -42,22 +42,20 @@ public class GraphLayout {
 		IncrementalHierarchicLayouter layouter = new IncrementalHierarchicLayouter();
 		
 		//set some options
-		layouter.getNodeLayoutDescriptor().setMinimumLayerHeight(10);
-		layouter.getNodeLayoutDescriptor().setMinimumDistance(10);
+		layouter.getNodeLayoutDescriptor().setMinimumLayerHeight(2);
+		layouter.getNodeLayoutDescriptor().setMinimumDistance(5);
 
 		
 		//use left-to-right layout orientation
 		OrientationLayouter ol = new OrientationLayouter();
-		ol.setOrientation(LayoutOrientation.BOTTOM_TO_TOP);
+		ol.setOrientation(LayoutOrientation.TOP_TO_BOTTOM);
 		layouter.setOrientationLayouter(ol);
-		layouter.setBackloopRoutingEnabled(true);
-//		layouter.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TIGHT_TREE);
-		//layout.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
-//		layouter.setGroupAlignmentPolicy(IncrementalHierarchicLayouter.POLICY_ALIGN_GROUPS_CENTER);
+//		layouter.setBackloopRoutingEnabled(true);
+		layouter.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TIGHT_TREE);
+//		layouter.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
+		layouter.setGroupAlignmentPolicy(IncrementalHierarchicLayouter.POLICY_ALIGN_GROUPS_CENTER);
 		//layout.setSubgraphLayouter(arg0);	// here is something for stages
-//		layouter.setGroupCompactionEnabled(true);
-		layouter.setRecursiveGroupLayeringEnabled(true);
-//		layouter.setAutomaticEdgeGroupingEnabled(true);
+
 		
 	    final AdaptNodeToLabelWidths stage = new AdaptNodeToLabelWidths();
 	    stage.setAdaptGroupNodesOnly(false);
@@ -81,11 +79,16 @@ public class GraphLayout {
 	    // horizontal group compaction tries to prevent
 	    // IncrementalHierarchicLayouter from being to generous when calculating
 	    // group node sizes for non-empty group nodes
-	    //if (options.getBool(OPTION_USE_HORIZONTAL_GROUP_COMPACTION)) {
-	      final SimplexNodePlacer snp = new SimplexNodePlacer();
-	      snp.setGroupCompactionStrategy(SimplexNodePlacer.GROUP_COMPACTION_MAX);
-	      layouter.setNodePlacer(snp);
-	    //}
+	    SimplexNodePlacer snp = new SimplexNodePlacer();
+	    snp.setGroupCompactionStrategy(SimplexNodePlacer.GROUP_COMPACTION_MAX);
+		layouter.setGroupCompactionEnabled(true);
+		layouter.setRecursiveGroupLayeringEnabled(true);
+	    layouter.setNodePlacer(snp);
+	   
+	    
+	    layouter.setAutomaticEdgeGroupingEnabled(true);
+	    //layouter.setNodeToNodeDistance(10);
+	    //layouter.setNodeToEdgeDistance(8);
 		
 		return layouter;
 	}
