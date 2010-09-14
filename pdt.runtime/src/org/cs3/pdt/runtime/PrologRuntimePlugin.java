@@ -442,7 +442,7 @@ public class PrologRuntimePlugin extends Plugin {
 						RegistryHook hook = (RegistryHook) celem.createExecutableExtension("class");
 						hook.addSubscriptions(this.registry);
 					} else {
-						Debug.warning("hmmm... asumed a hook, but got a " + celem.getName());
+						Debug.warning("hmmm... asumed a registryHook, but got a " + celem.getName());
 					}
 				}
 			}
