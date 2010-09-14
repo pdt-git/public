@@ -18,6 +18,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.part.ViewPart;
 
 import pdt.y.swt.commands.GraphLoadAction;
+import pdt.y.swt.commands.GraphPIFAction;
 
 
 
@@ -80,7 +81,8 @@ public void setFocus() {
      */
     private void createToolbar() {
             IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
-            mgr.add(new GraphLoadAction(view));        
+            mgr.add(new GraphLoadAction(view));
+            mgr.add(new GraphPIFAction(view));
     }
 
 
