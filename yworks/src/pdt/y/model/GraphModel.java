@@ -211,13 +211,13 @@ public class GraphModel {
 	}
 
 	public void assignPortsToEdges() {
-		EdgeMap targetMap = graph.createEdgeMap();
+		EdgeMap sourceMap = graph.createEdgeMap();
 		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
 		for (Edge edge: graph.getEdgeArray()) {
 			if (isLoadingEdge(edge)) {
-				targetMap.set(edge, portConstraint);
+				sourceMap.set(edge, portConstraint);
 			} 
 		}
-		graph.addDataProvider(PortConstraintKeys.TARGET_PORT_CONSTRAINT_KEY, targetMap);
+		graph.addDataProvider(PortConstraintKeys.SOURCE_PORT_CONSTRAINT_KEY, sourceMap);
 	}
 }

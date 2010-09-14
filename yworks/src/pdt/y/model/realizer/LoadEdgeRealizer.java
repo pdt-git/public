@@ -20,7 +20,7 @@ public class LoadEdgeRealizer extends GenericEdgeRealizer {
 	}
 	
 	private void init() {
-		setTargetArrow(Arrow.DELTA);
+		setSourceArrow(Arrow.DELTA);
 		setLineColor(Color.BLUE);
 		byte myStyle = LineType.LINE_3.getLineStyle();
 		LineType myLineType = LineType.getLineType(2,myStyle);
