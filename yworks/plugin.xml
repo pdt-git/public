@@ -18,9 +18,6 @@
             class="pdt.y.main.PrologInterfaceLifecycleObserver"
             id="graphml.hook1">
       </hook>
-      <registryHook
-            class="pdt.y.main.PDTRegistry">
-      </registryHook>
    </extension>
    <!--
    <extension
