@@ -26,7 +26,7 @@ public class GraphMLReader {
 	private GraphModel model = null;
 	
 	public GraphMLReader(){
-		model = new GraphModel();
+		model = GraphModel.getInstance();
 		model.useHierarchy();
 				
 		addInputDataAccessorsToCore();
@@ -41,6 +41,7 @@ public class GraphMLReader {
 		core.addInputDataAcceptor("kind", model.getKindMap(), KeyScope.ALL, KeyType.STRING);
 		core.addInputDataAcceptor("functor", model.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
 		core.addInputDataAcceptor("arity", model.getArityMap(), KeyScope.NODE, KeyType.INT);
+		core.addInputDataAcceptor("frequency", model.getCallFrequencyMap(), KeyScope.EDGE, KeyType.INT);
 	}
 	
 	private boolean loadFile(URL resource){
