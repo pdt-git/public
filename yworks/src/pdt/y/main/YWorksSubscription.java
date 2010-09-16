@@ -14,37 +14,13 @@
 package pdt.y.main;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 
 import org.cs3.pdt.runtime.DefaultSubscription;
-import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
-import org.eclipse.core.runtime.jobs.Job;
 
 public class YWorksSubscription extends DefaultSubscription implements
 			LifeCycleHook {
@@ -61,9 +37,9 @@ public class YWorksSubscription extends DefaultSubscription implements
 		 */
 		Object configureMonitor = new Object();
 		
-		private PrologInterface pif;
+//		private PrologInterface pif;
 
-		static Object toBeBuiltMonitor = new Object();
+//		static Object toBeBuiltMonitor = new Object();
 		
 		private YWorksSubscription(String id, String pifID,
 				String descritpion, String name) {
@@ -74,12 +50,12 @@ public class YWorksSubscription extends DefaultSubscription implements
 
 		
 
-		public boolean isPrologInterfaceUp() {
-			if(pif == null) {
-				return false;
-			}
-			return pif.isUp();
-		}
+//		public boolean isPrologInterfaceUp() {
+//			if(pif == null) {
+//				return false;
+//			}
+//			return pif.isUp();
+//		}
 
 
 		/**
@@ -106,20 +82,14 @@ public class YWorksSubscription extends DefaultSubscription implements
 
 		@Override
 		public void lateInit(PrologInterface pif) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void onError(PrologInterface pif) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void setData(Object data) {
-			// TODO Auto-generated method stub
-			
 		}
 
 
@@ -127,24 +97,18 @@ public class YWorksSubscription extends DefaultSubscription implements
 		@Override
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
-			// TODO Auto-generated method stub
-			
 		}
 
 
 		@Override
 		public void beforeShutdown(PrologInterface pif, PrologSession session)
 				throws PrologInterfaceException {
-			// TODO Auto-generated method stub
-			
 		}
 
 
 		@Override
 		public void onInit(PrologInterface pif, PrologSession initSession)
 				throws PrologInterfaceException {
-			// TODO Auto-generated method stub
-			
 		}
 
 	}
