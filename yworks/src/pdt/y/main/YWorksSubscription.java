@@ -31,15 +31,6 @@ public class YWorksSubscription extends DefaultSubscription implements
 		static {
 			demandedBootstrapContributionsKeys.add(YWORKS_BOOTSTRAPCONTRIBUTION_KEY);
 		}
-
-		/**
-		 * still needed?
-		 */
-		Object configureMonitor = new Object();
-		
-//		private PrologInterface pif;
-
-//		static Object toBeBuiltMonitor = new Object();
 		
 		private YWorksSubscription(String id, String pifID,
 				String descritpion, String name) {
@@ -47,16 +38,6 @@ public class YWorksSubscription extends DefaultSubscription implements
 			setPersistent(false);
 
 		}
-
-		
-
-//		public boolean isPrologInterfaceUp() {
-//			if(pif == null) {
-//				return false;
-//			}
-//			return pif.isUp();
-//		}
-
 
 		/**
 		 * Use this method to instantiate a YWorksSubscription. 
@@ -92,23 +73,18 @@ public class YWorksSubscription extends DefaultSubscription implements
 		public void setData(Object data) {
 		}
 
-
-
 		@Override
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
 		}
-
 
 		@Override
 		public void beforeShutdown(PrologInterface pif, PrologSession session)
 				throws PrologInterfaceException {
 		}
 
-
 		@Override
 		public void onInit(PrologInterface pif, PrologSession initSession)
 				throws PrologInterfaceException {
 		}
-
 	}
