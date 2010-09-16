@@ -1,7 +1,5 @@
 package pdt.y.model;
 
-import demo.view.hierarchic.AdaptNodeToLabelWidths;
-import demo.view.hierarchic.LabelAwareDrawingDistanceCalculator;
 import y.layout.CompositeLayoutStage;
 import y.layout.LayoutOrientation;
 import y.layout.LayoutStage;
@@ -11,9 +9,9 @@ import y.layout.hierarchic.IncrementalHierarchicLayouter;
 import y.layout.hierarchic.incremental.DrawingDistanceCalculator;
 import y.layout.hierarchic.incremental.HierarchicLayouter;
 import y.layout.hierarchic.incremental.SimplexNodePlacer;
-import y.layout.router.ChannelEdgeRouter;
-import y.layout.router.EdgeGroupRouterStage;
 import y.layout.router.OrthogonalEdgeRouter;
+import demo.view.hierarchic.AdaptNodeToLabelWidths;
+import demo.view.hierarchic.LabelAwareDrawingDistanceCalculator;
 
 public class GraphLayout {
 

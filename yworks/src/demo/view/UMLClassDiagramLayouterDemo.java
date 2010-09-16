@@ -13,8 +13,23 @@
  ***************************************************************************/
 package demo.view;
 
-import demo.view.DemoBase;
-import demo.view.DemoDefaults;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import javax.swing.AbstractAction;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JToolBar;
+import javax.swing.ListCellRenderer;
 
 import y.base.DataProvider;
 import y.base.Edge;
@@ -35,23 +50,6 @@ import y.view.Graph2D;
 import y.view.LineType;
 import y.view.NodeRealizer;
 import y.view.PolyLineEdgeRealizer;
-
-import javax.swing.AbstractAction;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JList;
-import javax.swing.JToolBar;
-import javax.swing.ListCellRenderer;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 /**
  * <p>

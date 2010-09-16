@@ -3,7 +3,6 @@ package pdt.y.model.realizer;
 import java.awt.Color;
 
 import pdt.y.model.GraphModel;
-
 import y.base.DataMap;
 import y.base.Edge;
 import y.view.Arrow;
