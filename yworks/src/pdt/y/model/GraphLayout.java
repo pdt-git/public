@@ -12,6 +12,7 @@ import y.layout.hierarchic.incremental.DrawingDistanceCalculator;
 import y.layout.hierarchic.incremental.HierarchicLayouter;
 import y.layout.hierarchic.incremental.SimplexNodePlacer;
 import y.layout.router.ChannelEdgeRouter;
+import y.layout.router.EdgeGroupRouterStage;
 import y.layout.router.OrthogonalEdgeRouter;
 
 public class GraphLayout {
@@ -28,12 +29,16 @@ public class GraphLayout {
 		
 		stage.setCoreLayouter(coreLayouter);
 		stage.appendStage(edgeLayouter);
+//		stage.appendStage(new EdgeGroupRouterStage(coreLayouter));
 	}
 
 
 	protected LayoutStage createEdgeLayout() {
 		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
 		//ChannelEdgeRouter router = new ChannelEdgeRouter();
+	    router.setLocalCrossingMinimizationEnabled(true);
+	    router.setCrossingCost(3.0);
+	    router.setReroutingEnabled(true);
 		return router;
 	}
 

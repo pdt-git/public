@@ -21,6 +21,7 @@ import y.view.hierarchy.GroupNodeRealizer;
 import y.view.hierarchy.HierarchyManager;
 
 public class GraphModel {
+	private static GraphModel instance = null;
 	private Graph2D graph=new Graph2D();
     
 	// Addition data:
@@ -30,6 +31,7 @@ public class GraphModel {
 	private DataMap kindMap = Maps.createHashedDataMap();
 	private DataMap functorMap = Maps.createHashedDataMap();
 	private DataMap arityMap = Maps.createHashedDataMap();
+	private DataMap callFrequencyMap = Maps.createHashedDataMap();
 	
 	private HierarchyManager hierarchy = null;
 	
@@ -48,6 +50,13 @@ public class GraphModel {
 	
 	public GraphModel(){
 		initRealizer();
+	}
+	
+	public static GraphModel getInstance() {
+		if (instance == null) {
+			instance = new GraphModel();
+		}
+		return instance;
 	}
 
 	private void initRealizer() {
@@ -90,7 +99,9 @@ public class GraphModel {
 			if (isLoadingEdge(edge)) {
 				graph.setRealizer(edge, new LoadEdgeRealizer(loadEdgeRealizer));
 			} else if (isCallEdge(edge)) {
-				graph.setRealizer(edge, new CallEdgeRealizer(callEdgeRealizer));
+				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
+				graph.setRealizer(edge, newCallEdgeRealizer);
+				newCallEdgeRealizer.adjustLineWidth();
 			} else {
 				// no realizer to set because it is already bound to default realizer
 			}
@@ -131,6 +142,10 @@ public class GraphModel {
 
 	public DataMap getArityMap() {
 		return arityMap;
+	}
+
+	public DataMap getCallFrequencyMap() {
+		return callFrequencyMap;
 	}
 
 	public Graph2D getGraph() {
