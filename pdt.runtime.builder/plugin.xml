@@ -7,7 +7,7 @@
             alias="pdt_runtime_builder_graphml_creator"
             id="pdt.runtime.builder.graphml_creator"
             key="yworks.contribution.key"
-            path="prolog-src/output_converter">
+            path="prolog-src/output-converter/">
       </fileSearchPathContribution>
    </extension>
 
