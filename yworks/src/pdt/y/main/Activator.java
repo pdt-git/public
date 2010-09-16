@@ -1,6 +1,7 @@
 package pdt.y.main;
 
-import org.cs3.pdt.runtime.PrologInterfaceRegistry;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
+import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -9,15 +10,20 @@ import org.osgi.framework.BundleContext;
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin {
-
-	private PrologInterfaceRegistry registry=null;
+	private static String NAME = "GraphML";
 	
-	public PrologInterfaceRegistry getRegistry() {
-		return registry;
+	private PrologInterface prologInterface=null;
+	
+	public PrologInterface getPrologInterface() {
+		if(prologInterface == null) {
+			YWorksSubscription subscription = YWorksSubscription.newInstance(NAME);
+			 prologInterface = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+		} 
+		return prologInterface;
 	}
 
-	public void setRegistry(PrologInterfaceRegistry registry) {
-		this.registry = registry;
+	public void setPrologInterface(PrologInterface prologInterface) {
+		this.prologInterface = prologInterface;
 	}
 
 	// The plug-in ID
@@ -36,6 +42,7 @@ public class Activator extends AbstractUIPlugin {
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -45,6 +52,7 @@ public class Activator extends AbstractUIPlugin {
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);

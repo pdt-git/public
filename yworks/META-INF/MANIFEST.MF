@@ -7,8 +7,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.junit4;bundle-version="4.5.0",
  org.cs3.pdt.runtime;bundle-version="0.2.3",
- org.cs3.pdt.common,
- org.cs3.pdt.runtime.ui;bundle-version="0.2.3"
+ org.cs3.pdt.common;bundle-version="0.2.3",
+ org.cs3.pdt.runtime.ui;bundle-version="0.2.3",
+ org.cs3.pdt.common.ui;bundle-version="0.2.3",
+ org.eclipse.core.resources;bundle-version="3.5.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: org.eclipse.ui.forms,
  org.eclipse.ui.forms.events,
