@@ -7,7 +7,6 @@ import pdt.y.model.realizer.ModuleGroupNodeRealizer;
 import pdt.y.model.realizer.MyShapeNodeRealizer;
 import y.base.DataMap;
 import y.base.Edge;
-import y.base.EdgeCursor;
 import y.base.EdgeMap;
 import y.base.Node;
 import y.layout.PortConstraint;

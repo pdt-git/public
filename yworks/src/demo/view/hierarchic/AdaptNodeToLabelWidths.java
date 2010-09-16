@@ -1,15 +1,15 @@
 package demo.view.hierarchic;
 
 
+import y.base.DataProvider;
 import y.base.Node;
 import y.base.NodeCursor;
-import y.base.DataProvider;
 import y.geom.YRectangle;
 import y.layout.AbstractLayoutStage;
 import y.layout.LayoutGraph;
 import y.layout.Layouter;
-import y.layout.NodeLayout;
 import y.layout.NodeLabelLayout;
+import y.layout.NodeLayout;
 import y.layout.grouping.GroupingKeys;
 import y.util.DataProviderAdapter;
 

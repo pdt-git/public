@@ -1,15 +1,15 @@
 package demo.view.hierarchic;
 
 
-import y.module.LayoutModule;
-import y.view.Graph2D;
-import y.view.hierarchy.GroupLayoutConfigurator;
 import y.layout.Layouter;
 import y.layout.hierarchic.IncrementalHierarchicLayouter;
-import y.layout.hierarchic.incremental.HierarchicLayouter;
 import y.layout.hierarchic.incremental.DrawingDistanceCalculator;
+import y.layout.hierarchic.incremental.HierarchicLayouter;
 import y.layout.hierarchic.incremental.SimplexNodePlacer;
+import y.module.LayoutModule;
 import y.option.OptionHandler;
+import y.view.Graph2D;
+import y.view.hierarchy.GroupLayoutConfigurator;
 
 
 /**
