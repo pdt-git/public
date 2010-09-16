@@ -21,17 +21,17 @@ import pdt.y.main.Activator;
 import pdt.y.main.PDTGraphSwing;
 
 public class GraphPIFAction  extends Action {
+	private static final String FILE_TO_CONSULT = "pl_ast_to_graphML";
+	private static final String PATH_ALIAS = "pdt_runtime_builder_graphml_creator";
 	private static final String NAME_OF_HELPING_FILE = "pdt-yworks-help.graphml";
 
 	static {
-		image = ImageDescriptor.createFromImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER/*.IMG_OBJ_PROJECT*/));
+		image = ImageDescriptor.createFromImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER));
 	}
 	  
-//	private static File helpFile = new File("z:/pdt.git/yworks/help.graphml");
 	private File helpFile;
     private static ImageDescriptor image;
 	private PDTGraphSwing view;
-//	private String workspaceLocation;
 
 
 	public GraphPIFAction(PDTGraphSwing view) {
@@ -40,13 +40,7 @@ public class GraphPIFAction  extends Action {
 		PrologRuntimeUIPlugin plugin=PrologRuntimeUIPlugin.getDefault();
 		ResourceFileLocator locator = plugin.getResourceLocator();
 		helpFile = locator.resolve(NAME_OF_HELPING_FILE);
-		System.out.println(helpFile.toString());
-//		
-//		getWorkspaceLocation();
-//		File ahelpFile = new File(workspaceLocation+"/"+NAME_OF_HELPING_FILE);
-//		System.out.println(ahelpFile);
-//		System.out.println(ahelpFile.toString());
-		
+		System.out.println("Location of file .graphml file: "+helpFile.toString());		
 	}
 
 
@@ -60,23 +54,16 @@ public class GraphPIFAction  extends Action {
 	@Override
 	public void run() {
 		PrologInterface pif=Activator.getDefault().getPrologInterface();
-//		File file = getFileToConsult();
-//		String prologNameOfFileToConsult = Util.prologFileName(file);
-		String prologNameOfFileToConsult = "pdt_runtime_builder_graphml_creator(pl_ast_to_graphML)";
+		String prologNameOfFileToConsult = PATH_ALIAS+"("+FILE_TO_CONSULT+")";
 
 		String folderToParse = selectFolderToParse();
 		try {
-//			if (pif.isDown()) {
-//				pif.start();
-//			}	else{
-//			}
+
 			PrologSession session = pif.getSession(PrologInterface.LEGACY);
-			//session.queryOnce("win_window_pos([show(true)])");
 			
 			session.queryOnce("consult("+prologNameOfFileToConsult+").");
 			session.queryOnce("pl_test(['"+folderToParse+"'],'"+Util.prologFileName(helpFile)+"').");
 			view.loadGraph(helpFile.toURI().toURL());
-			//pif.stop();
 		} catch (PrologException e1) {
 			e1.printStackTrace();
 		} catch (MalformedURLException e) {
@@ -85,42 +72,6 @@ public class GraphPIFAction  extends Action {
 			e.printStackTrace();
 		}
 	}
-
-
-//	private File getFileToConsult() {
-//		PrologRuntimeUIPlugin plugin=PrologRuntimeUIPlugin.getDefault();
-//		ResourceFileLocator locator = plugin.getResourceLocator();
-////		Class.getResource
-////		File file=new File("z:/pdt.git/pdt.runtime.ui/library/pdt/xref/pl_ast_to_graphML.pl");
-//		return file;
-//	}
-	
-	
-//	private void consultNeededFiles(PrologInterface prologInterface) {
-//		String contributionKey = "yworks.contribution.key";
-//		List<BootstrapPrologContribution> libraryList = PrologRuntimePlugin.getDefault().getBootstrapList(contributionKey);
-//		for (BootstrapPrologContribution library : libraryList) {
-//			if (!prologInterface.getBootstrapLibraries().contains(library)) {
-//					prologInterface.getBootstrapLibraries().add(library);
-//					if (prologInterface.isUp()) {
-//						PrologSession session = null;
-//						try {
-//							session = prologInterface.getSession(PrologInterface.LEGACY);
-//							
-//							String consult = library.getPrologInitStatement();
-//							Debug.debug("consult " + consult + ", from " + library);
-//							session.queryOnce(consult);
-//						} catch (PrologInterfaceException e) {
-//							Debug.report(e);
-//							if (session != null)
-//								session.dispose();
-//						}
-//					}
-//				}
-//			}
-//		
-//	}
-
 	
 	private String selectFolderToParse() {
 		Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
