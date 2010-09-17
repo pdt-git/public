@@ -64,22 +64,22 @@ build_load_edges_for_list([A|B],LoadingId,Imports,Directive):-
     build_load_edges_for_list(B,LoadingId,Imports,Directive).
 
 
+
 lookup_complex_file_reference(Arg,LoadingId,FileId,''):-
     atom(Arg),
     !,
     lookup_direct_file_reference(Arg,LoadingId,FileId).
 lookup_complex_file_reference(ToLoadConstruct,LoadingId,FileId,''):-
     ToLoadConstruct =.. [PathKey,File],
-    compute_dir_with_file_search_path(PathKey,FlatDir,Directive),
-    combine_two_path_elements(FlatDir,File,FileName,Directive),
+    compute_dir_with_file_search_path(PathKey,FlatDir),
+    combine_two_path_elements(FlatDir,File,FileName),
 	lookup_direct_file_reference(FileName,LoadingId,FileId),
 	!.   
 lookup_complex_file_reference(ToLoadConstruct,_LoadingId,FileId,'guessed file reference'):-
-    ToLoadConstruct =.. [_,File],
-    prolog_file_type(Pl,prolog),
-    file_name_extension(File,Pl,FilePl),	
-    fileT_ri(AFile,FileId),							% Eva: optimierbar?
-	atom_concat(_,FilePl,AFile),
+    ToLoadConstruct =.. [_,FilePath],
+	get_path_with_prolog_file_ending(FilePath,FilePathPl),
+	fileT_ri(AFile,FileId),					%ToDo: optimierbar?
+	atom_concat(_,FilePathPl,AFile),
 	!.    
 lookup_complex_file_reference(library(_Name),_LoadingId,'','link to external library'):-
     				% if it is a reference to a library file 
@@ -87,6 +87,8 @@ lookup_complex_file_reference(library(_Name),_LoadingId,'','link to external lib
     				% so there may be no fileT for it to find with build_direct_load_edge
     !.	
 lookup_complex_file_reference(_Args,_LoadingId,'','file not found in project').
+
+
 
 
 lookup_direct_file_reference(ToLoad,LoadingId,Id):-
@@ -120,26 +122,31 @@ find_file_id_for_file_name(FileName,Id):-
     LowerFileName == LowerAFileName.
 
 /**
- * compute_dir_with_file_search_path(+Key, -FinalDir, +Directive)
+ * compute_dir_with_file_search_path(+Key, -FinalDir)
  *   resolves the directory represented by Arg1
  *   with file_search_path/2.
  *   
  *   It does this recursivley, if the path given by
  *   file_search_path is not a plain path but a refernce
  *   with a key to another path stored in file_search_path/2.
- *  
- *   Arg3 is needed to compose some warnings if it stumbles
- *   over syntax errors.
  **/
-compute_dir_with_file_search_path(Key,FinalDir,Directive):-
+compute_dir_with_file_search_path(Key,FinalDir):-
 	file_search_path(Key,Dir),
     (	Dir =.. [InnerKey,DirPath]
-    ->	compute_dir_with_file_search_path(InnerKey,InnerDir,Directive),
- 		combine_two_path_elements(InnerDir,DirPath,FinalDir,Directive)
+    ->	compute_dir_with_file_search_path(InnerKey,InnerDir),
+ 		combine_two_path_elements(InnerDir,DirPath,FinalDir)
     ;	Dir = FinalDir
     ).    	
  
  
+get_path_with_prolog_file_ending(FilePath,FilePathPl):-
+    path_to_list(FilePath,List),
+    last(List,File),
+    append(PrePath,File,List),
+    prolog_file_type(Pl,prolog),
+    file_name_extension(File,Pl,FilePl),	
+    append(PrePath,FilePl,ListPl),
+    atomic_list_concat(ListPl,'/',FilePathPl).	
  
 /**
  * combine_tow_path_elements(+First,+Second,-Combination,+Directive)
@@ -150,9 +157,44 @@ compute_dir_with_file_search_path(Key,FinalDir,Directive):-
  *    Arg4 is needed to compose some warnings if it stumbles
  *    over syntax errors.
  **/ 
-combine_two_path_elements(First,Second,Combination,Directive):-
-    (	not(atomic(First)), assert(warning(Directive,'is not atomic',[First]))
-    ;	not(atomic(Second)), assert(warning(Directive,'is not atomic',[Second]))
-    ;	atomic(First), atomic(Second),
+/* combine_two_path_elements(First,Second,Combination,Directive):-
+    (	not(atomic(First)), assert(warning(Directive,'is not atomic',[First])), writeln('first not atomic')
+    ;	not(atomic(Second)), 
+    	assert(warning(Directive,'is not atomic',[Second])), 
+    	writeln('second not atomic'),
+    	path_to_list(Second,Atomic_Second)
+    ;	atomic(First), atomic(Second), writeln('both atomic'),
     	atomic_list_concat([First,'/',Second],Combination)
+    ).*/
+
+
+/**
+ * combine_tow_path_elements(+First,+Second,-Combination)
+ *    Arg3 is the atom that begins with Arg1, is followed
+ *    with a '/' and ends with Arg2. If Arg1 and Arg2 are
+ *    terms their atom representation is used.
+ **/ 
+combine_two_path_elements(First,Second,Combination):-
+    listify_path_element(First,FirstList),
+    listify_path_element(Second,SecondList),
+	append(FirstList,SecondList,List),
+	atomic_list_concat(List,'/',Combination).    
+    
+listify_path_element(Elem,List):-
+    (	atomic(Elem)
+    ->	List = [Elem]
+    ;	path_to_list(Elem,List)
     ).
+    
+/**
+ * path_to_list(+Path,?List)
+ *	  This is more or less the reversion of atomic_list_concat/3 
+ *    with '/' as seperator.
+ *    Arg1 ia a term that should describe at least a part of a file path
+ *    Arg2 is a list of all parts of the term, that are seperated by '/'. 
+ **/
+path_to_list(Path,List):-
+    Path =.. [/,First,Second],
+    listify_path_element(First,FirstList),
+    listify_path_element(Second,SecondList),
+    append(FirstList,SecondList,List).
