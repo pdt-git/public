@@ -40,15 +40,19 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 		if(model.isCallEdge(edge)) {
 			DataMap frequencyMap = model.getCallFrequencyMap();
 			int frequency = frequencyMap.getInt(edge);
-			if (frequency <= 1)
-				return 1;
-			if (frequency <= 3)
-				return 2;
-			if (frequency <= 5)
-				return 3;
-			if (frequency <= 10)
-				return 4;
-			return 5;
+//			if (frequency <= 1)
+//				return 1;
+//			if (frequency <= 3)
+//				return 2;
+//			if (frequency <= 5)
+//				return 3;
+//			if (frequency <= 10)
+//				return 4;
+//			return 5;
+			if(frequency <= 8) {
+				return frequency;
+			}
+			return 9; 
 		}
 		return 1;
 	}

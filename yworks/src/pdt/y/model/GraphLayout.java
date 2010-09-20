@@ -35,7 +35,7 @@ public class GraphLayout {
 		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
 		//ChannelEdgeRouter router = new ChannelEdgeRouter();
 	    router.setLocalCrossingMinimizationEnabled(true);
-	    router.setCrossingCost(3.0);
+	    router.setCrossingCost(2.0);
 	    router.setReroutingEnabled(true);
 		return router;
 	}
@@ -46,7 +46,7 @@ public class GraphLayout {
 		
 		//set some options
 		layouter.getNodeLayoutDescriptor().setMinimumLayerHeight(2);
-		layouter.getNodeLayoutDescriptor().setMinimumDistance(5);
+		layouter.getNodeLayoutDescriptor().setMinimumDistance(10);
 
 		
 		//use left-to-right layout orientation
@@ -62,7 +62,7 @@ public class GraphLayout {
 		
 	    final AdaptNodeToLabelWidths stage = new AdaptNodeToLabelWidths();
 	    stage.setAdaptGroupNodesOnly(false);
-	    stage.setGroupLabelWidthAdjustment(20);
+	    //stage.setGroupLabelWidthAdjustment(20);
 
 	    layouter.prependStage(stage);
 	    final HierarchicLayouter hl = layouter.getHierarchicLayouter();
@@ -76,7 +76,7 @@ public class GraphLayout {
 	    // to the general "no node resizing" policy of yFiles layout algorithms
 	    final LabelAwareDrawingDistanceCalculator laddc =
 	            new LabelAwareDrawingDistanceCalculator(ddc);
-	    laddc.setGroupLabelWidthAdjustment(0.0);
+	    laddc.setGroupLabelWidthAdjustment(2.0);
 	    hl.setDrawingDistanceCalculator(laddc);
 
 	    // horizontal group compaction tries to prevent
@@ -85,6 +85,7 @@ public class GraphLayout {
 	    SimplexNodePlacer snp = new SimplexNodePlacer();
 	    snp.setGroupCompactionStrategy(SimplexNodePlacer.GROUP_COMPACTION_MAX);
 		layouter.setGroupCompactionEnabled(true);
+	    //layouter.setGroupCompactionEnabled(false);
 		layouter.setRecursiveGroupLayeringEnabled(true);
 	    layouter.setNodePlacer(snp);
 	   
