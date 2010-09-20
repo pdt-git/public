@@ -85,7 +85,6 @@ public class GraphLayout {
 	    SimplexNodePlacer snp = new SimplexNodePlacer();
 	    snp.setGroupCompactionStrategy(SimplexNodePlacer.GROUP_COMPACTION_MAX);
 		layouter.setGroupCompactionEnabled(true);
-	    //layouter.setGroupCompactionEnabled(false);
 		layouter.setRecursiveGroupLayeringEnabled(true);
 	    layouter.setNodePlacer(snp);
 	   
