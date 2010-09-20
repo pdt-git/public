@@ -43,7 +43,6 @@ public class GraphPIFAction  extends Action {
 		System.out.println("Location of file .graphml file: "+helpFile.toString());		
 	}
 
-
 //	private void getWorkspaceLocation() {
 //		IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
 //		workspaceLocation = wsRoot.getLocation().toString();
@@ -58,11 +57,11 @@ public class GraphPIFAction  extends Action {
 
 		String folderToParse = selectFolderToParse();
 		try {
-
 			PrologSession session = pif.getSession(PrologInterface.LEGACY);
 			
 			session.queryOnce("consult("+prologNameOfFileToConsult+").");
 			session.queryOnce("pl_test(['"+folderToParse+"'],'"+Util.prologFileName(helpFile)+"').");
+			
 			view.loadGraph(helpFile.toURI().toURL());
 		} catch (PrologException e1) {
 			e1.printStackTrace();
