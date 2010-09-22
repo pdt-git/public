@@ -109,15 +109,12 @@ public final class PDTUtils {
 		if (part instanceof PLEditor) {
 			PLEditor editor = (PLEditor) part;
 
-			if (loc.isRowBased)
-				editor.gotoLine(loc.line);
-			else {
-				IDocument doc = editor.getDocumentProvider().getDocument(
-						editor.getEditorInput());
+			IDocument doc = editor.getDocumentProvider().getDocument(
+					editor.getEditorInput());
 
-				editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
-						doc.get(), loc.offset));
-			}
+			editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
+					doc.get(), loc.offset));
+
 		}
 
 	}
