@@ -58,7 +58,6 @@ import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.RegistryHook;
 import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
@@ -96,8 +95,6 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	private DefaultResourceFileLocator resourceLocator;
 	private PrologContextTrackerService contextTrackerService;
 	private WeakHashMap<PrologInterface, IPrologEventDispatcher> dispatchers = new WeakHashMap<PrologInterface, IPrologEventDispatcher>();
-	private HashSet<RegistryHook> registryHooks = new HashSet<RegistryHook>();
-
 	private final static Object contextTrackerMux = new Object();
 	private static final Object preferencesMux = new Object();
 
