@@ -49,6 +49,7 @@ public class StartUp implements IStartup {
 		/* (non-Javadoc)
 	 * @see org.eclipse.ui.IStartup#earlyStartup()
 	 */
+	@Override
 	public void earlyStartup() {
 		Debug.info("To early to say anything concrete...");
 	}

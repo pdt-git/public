@@ -21,6 +21,7 @@ public class EntryPointDecorator implements ILightweightLabelDecorator, OptionPr
 	
 	private Vector<ILabelProviderListener> listeners = new Vector<ILabelProviderListener>();
 
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		if(!(element instanceof IResource)){
 			return;
@@ -50,6 +51,7 @@ public class EntryPointDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener l) {
 		synchronized (listeners) {
 			if(!listeners.contains(l)){
@@ -59,14 +61,17 @@ public class EntryPointDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
+	@Override
 	public void dispose() {
 		
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return false;
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener l) {
 		synchronized (listeners) {
 			if(listeners.contains(l)){
@@ -76,6 +81,7 @@ public class EntryPointDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
+	@Override
 	public void valuesChanged(OptionProviderEvent e) {
 		String[] ids= e.ids;
 		for (int i = 0; i < ids.length; i++) {

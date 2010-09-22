@@ -49,6 +49,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	 * GUI blocks needed to manipulate various types of preferences. Each field
 	 * editor knows how to save and restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		// Will be passed to SWI-Prolog using the -p command line option.
 		// Make sure that the library(consult_server) can be resolved.
@@ -103,9 +104,11 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 	 * @see
 	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 	
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
 		

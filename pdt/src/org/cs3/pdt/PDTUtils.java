@@ -73,6 +73,7 @@ public final class PDTUtils {
 		if (Display.getCurrent() != UIUtils.getDisplay()) {
 
 			UIUtils.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					showSourceLocation(loc);
 				}

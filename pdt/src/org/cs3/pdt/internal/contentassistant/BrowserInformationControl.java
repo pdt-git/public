@@ -206,11 +206,13 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fBrowser.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		fBrowser.addKeyListener(new KeyListener() {
 
+			@Override
 			public void keyPressed(KeyEvent e)  {
 				if (e.character == 0x1B) // ESC
 					fShell.dispose();
 			}
 
+			@Override
 			public void keyReleased(KeyEvent e) {}
 		});
 		/*
@@ -223,6 +225,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			/*
 			 * @see org.eclipse.swt.browser.LocationAdapter#changing(org.eclipse.swt.browser.LocationEvent)
 			 */
+			@Override
 			public void changing(LocationEvent event) {
 				String location= event.location;
 				/*
@@ -293,6 +296,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setInformation(String)
 	 */
+	@Override
 	public void setInformation(String content) {
 		fBrowserHasContent= content != null && content.length() > 0;
 
@@ -326,6 +330,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @see org.eclipse.jdt.internal.ui.text.IInformationControlExtension4#setStatusText(java.lang.String)
 	 * @since 3.2
 	 */
+	@Override
 	public void setStatusText(String statusFieldText) {
 		fStatusFieldText= statusFieldText;
 	}
@@ -333,6 +338,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setVisible(boolean)
 	 */
+	@Override
 	public void setVisible(boolean visible) {
 		if (fShell.isVisible() == visible)
 			return;
@@ -382,6 +388,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#dispose()
 	 */
+	@Override
 	public void dispose() {
 		fTextLayout.dispose();
 		fTextLayout= null;
@@ -396,6 +403,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
 	 */
+	@Override
 	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
@@ -408,6 +416,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setSize(int, int)
 	 */
+	@Override
 	public void setSize(int width, int height) {
 		fShell.setSize(Math.min(width, fMaxWidth), Math.min(height, fMaxHeight));
 	}
@@ -415,6 +424,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setLocation(Point)
 	 */
+	@Override
 	public void setLocation(Point location) {
 		fShell.setLocation(location);
 	}
@@ -422,6 +432,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setSizeConstraints(int, int)
 	 */
+	@Override
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
 		fMaxWidth= maxWidth;
 		fMaxHeight= maxHeight;
@@ -430,6 +441,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#computeSizeHint()
 	 */
+	@Override
 	public Point computeSizeHint() {
 		TextPresentation presentation= new TextPresentation();
 		HTML2TextReader reader= new HTML2TextReader(new StringReader(fInputText), presentation);
@@ -478,6 +490,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#computeTrim()
 	 */
+	@Override
 	public Rectangle computeTrim() {
 		return fShell.computeTrim(0, 0, 0, 0);
 	}
@@ -485,6 +498,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#getBounds()
 	 */
+	@Override
 	public Rectangle getBounds() {
 		return fShell.getBounds();
 	}
@@ -492,6 +506,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresLocation()
 	 */
+	@Override
 	public boolean restoresLocation() {
 		return false;
 	}
@@ -499,6 +514,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresSize()
 	 */
+	@Override
 	public boolean restoresSize() {
 		return false;
 	}
@@ -506,6 +522,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#addDisposeListener(DisposeListener)
 	 */
+	@Override
 	public void addDisposeListener(DisposeListener listener) {
 		fShell.addDisposeListener(listener);
 	}
@@ -513,6 +530,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#removeDisposeListener(DisposeListener)
 	 */
+	@Override
 	public void removeDisposeListener(DisposeListener listener) {
 		fShell.removeDisposeListener(listener);
 	}
@@ -520,6 +538,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setForegroundColor(Color)
 	 */
+	@Override
 	public void setForegroundColor(Color foreground) {
 		fBrowser.setForeground(foreground);
 	}
@@ -527,6 +546,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setBackgroundColor(Color)
 	 */
+	@Override
 	public void setBackgroundColor(Color background) {
 		fBrowser.setBackground(background);
 	}
@@ -534,6 +554,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#isFocusControl()
 	 */
+	@Override
 	public boolean isFocusControl() {
 		return fBrowser.isFocusControl();
 	}
@@ -541,6 +562,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#setFocus()
 	 */
+	@Override
 	public void setFocus() {
 		fShell.forceFocus();
 		fBrowser.setFocus();
@@ -549,6 +571,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#addFocusListener(FocusListener)
 	 */
+	@Override
 	public void addFocusListener(final FocusListener listener) {
 		fBrowser.addFocusListener(listener);
 
@@ -558,6 +581,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		 */
 		if (fFocusListeners.isEmpty()) {
 			fDeactivateListener=  new Listener() {
+				@Override
 				public void handleEvent(Event event) {
 					Object[] listeners= fFocusListeners.getListeners();
 					for (int i = 0; i < listeners.length; i++)
@@ -572,6 +596,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControl#removeFocusListener(FocusListener)
 	 */
+	@Override
 	public void removeFocusListener(FocusListener listener) {
 		fBrowser.removeFocusListener(listener);
 
@@ -589,6 +614,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	/*
 	 * @see IInformationControlExtension#hasContents()
 	 */
+	@Override
 	public boolean hasContents() {
 		return fBrowserHasContent;
 	}

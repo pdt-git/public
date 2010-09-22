@@ -62,6 +62,7 @@ public class InputStreamPump extends Thread {
 		this.log = writer;
 	}
 
+	@Override
 	public void run() {
 		char[] buf = new char[256];
 		int read = 0;

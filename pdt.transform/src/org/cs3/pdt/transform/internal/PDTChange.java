@@ -138,6 +138,7 @@ public abstract class PDTChange extends Change {
 		fReadOnly= false;
 	}
 	
+	@Override
 	public void initializeValidationData(IProgressMonitor pm) {
 		IResource resource= getResource(getModifiedElement());
 		if (resource != null) {
@@ -228,6 +229,7 @@ public abstract class PDTChange extends Change {
 		return null;
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}

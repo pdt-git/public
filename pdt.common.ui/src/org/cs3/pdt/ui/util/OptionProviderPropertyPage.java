@@ -80,7 +80,8 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
      * 
      * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
      */
-    protected Control createContents(Composite parent) {
+    @Override
+	protected Control createContents(Composite parent) {
         Composite composite = new Composite(parent, SWT.NONE);
         GridLayout layout = new GridLayout();
         composite.setLayout(layout);
@@ -112,7 +113,8 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
             editor.setEnabled(System.getProperty(editor.getKey()) == null);
             editors.put(editor.getKey(), editor);
             editor.addPropertyChangeListener(new IPropertyChangeListener() {
-                public void propertyChange(PropertyChangeEvent e) {
+                @Override
+				public void propertyChange(PropertyChangeEvent e) {
                     validate((PropertyEditor)e.getSource());
                 }
                 
@@ -131,7 +133,8 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
      * 
      * @see org.eclipse.jface.preference.IPreferencePage#performOk()
      */
-    public boolean performOk() {
+    @Override
+	public boolean performOk() {
         Option[] options = getOptionProvider().getOptions();
         
         for (int i = 0; i < options.length; i++) {
@@ -158,7 +161,8 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
      * 
      * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
      */
-    protected void performDefaults() {
+    @Override
+	protected void performDefaults() {
         super.performDefaults();
         Option[] options = getOptionProvider().getOptions();
         for (int i = 0; i < options.length; i++) {

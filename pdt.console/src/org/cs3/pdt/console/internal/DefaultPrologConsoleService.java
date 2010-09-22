@@ -62,6 +62,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		addPrologConsoleListener(this);
 	}
 	
+	@Override
 	public void registerPrologConsole(PrologConsole console) {
 		
 		synchronized (consoles) {
@@ -72,6 +73,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		
 	}
 
+	@Override
 	public void unregisterPrologConsole(PrologConsole console) {
 		synchronized (consoles) {
 			if(consoles.contains(console)){
@@ -85,10 +87,12 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		}		
 	}
 
+	@Override
 	public PrologConsole[] getRegisteredPrologConsoles() {		
 		return consoles.toArray(new PrologConsole[consoles.size()]);
 	}
 
+	@Override
 	public PrologConsole getActivePrologConsole() {
 		if(activeConsole!=null){
 			return activeConsole;
@@ -100,16 +104,19 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 	}
 
 	
+	@Override
 	public void consoleRecievedFocus(PrologConsoleEvent e) {
 		activeConsole=(PrologConsole) e.getSource();
 		
 	}
 
+	@Override
 	public void consoleLostFocus(PrologConsoleEvent e) {
 		activeConsole=null;		
 	}
 
 
+	@Override
 	public void consoleVisibilityChanged(PrologConsoleEvent e) {
 		PrologConsole c = (PrologConsole) e.getSource();
 		if(c.isVisible()){
@@ -122,10 +129,12 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 	}
 
 	
+	@Override
 	public void activePrologInterfaceChanged(PrologConsoleEvent e) {
 		
 	}
 
+	@Override
 	public void addPrologConsoleListener(PrologConsoleListener l) {
 		synchronized (listeners) {
 			if (!listeners.contains(l)) {
@@ -135,6 +144,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 
 	}
 
+	@Override
 	public void removePrologConsoleListener(PrologConsoleListener l) {
 		synchronized (listeners) {
 			if (listeners.contains(l)) {

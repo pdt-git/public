@@ -93,6 +93,7 @@ public abstract class AbstractPrologContextTracker implements
 		}
 	}
 
+	@Override
 	public void addPrologContextTrackerListener(PrologContextTrackerListener l) {
 
 		synchronized (listeners) {
@@ -103,6 +104,7 @@ public abstract class AbstractPrologContextTracker implements
 
 	}
 
+	@Override
 	public void removePrologContextTrackerListener(
 			PrologContextTrackerListener l) {
 
@@ -114,10 +116,12 @@ public abstract class AbstractPrologContextTracker implements
 
 	}
 
+	@Override
 	public String getLabel() {
 		return label;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}

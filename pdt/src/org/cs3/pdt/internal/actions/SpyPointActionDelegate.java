@@ -69,24 +69,21 @@ import org.eclipse.ui.texteditor.TextEditorAction;
  * @see IWorkbenchWindowActionDelegate
  */
 public class SpyPointActionDelegate extends TextEditorAction {
-	/**
-	 * 
-	 */
+	Hashtable<String, String> spypred = new Hashtable<String, String>();
+	
 	public SpyPointActionDelegate(ITextEditor editor) {
 		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),
-				SpyPointActionDelegate.class.getName(), editor); //$NON-NLS-1$
+				SpyPointActionDelegate.class.getName(), editor); 
 	}
 
 	/**
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
-
-	Hashtable<String, String> spypred = new Hashtable<String, String>();
-
+	@Override
 	public void run() {
 		UIUtils.getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
-
 				PLEditor editor = (PLEditor) UIUtils.getActiveEditor();
 				IFileEditorInput editorInput = (IFileEditorInput) editor
 						.getEditorInput();
@@ -127,7 +124,6 @@ public class SpyPointActionDelegate extends TextEditorAction {
 									"PDT Plugin",
 									"Cannot locate a predicate at the specified location.");
 					return;
-
 				}
 				Predicate[] p=null;
 				try {
@@ -141,10 +137,9 @@ public class SpyPointActionDelegate extends TextEditorAction {
 				if (p == null || p.length == 0) {
 					MessageDialog.openInformation(editor.getEditorSite()
 							.getShell(), "PDT Plugin",
-							"Cannot find predicate: " + data //$NON-NLS-2$
+							"Cannot find predicate: " + data 
 									+ "."); //$NON-NLS-1$
 					return;
-
 				}
 				if (p.length > 1) {
 					UIUtils
@@ -184,7 +179,6 @@ public class SpyPointActionDelegate extends TextEditorAction {
 					}
 					spypred.put(pred, pred);
 				}
-
 			}
 		});
 	}
@@ -194,5 +188,4 @@ public class SpyPointActionDelegate extends TextEditorAction {
 	 */
 	public void dispose() {
 	}
-
 }

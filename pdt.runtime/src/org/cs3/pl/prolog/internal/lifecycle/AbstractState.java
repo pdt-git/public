@@ -13,15 +13,18 @@ public abstract class AbstractState implements State {
 	protected final LifeCycle context;
 
 	
+	@Override
 	public boolean isUp() {	
 		return false;
 	}
 	
+	@Override
 	public boolean isDown() {	
 		return false;
 	}
 	
 	
+	@Override
 	public PrologInterfaceException getError() {	
 		return null;		
 	}
@@ -32,16 +35,19 @@ public abstract class AbstractState implements State {
 	}
 
 	
+	@Override
 	public State reset() {
 	
 		return this;
 	}
 	
+	@Override
 	public void enter() {
 	
 		
 	}
 	
+	@Override
 	public State addLifeCycleHook(LifeCycleHook hook, String id,
 			String[] dependencies) {
 
@@ -89,6 +95,7 @@ public abstract class AbstractState implements State {
 	}
 
 	
+	@Override
 	public State error(Throwable e) {
 		if(e instanceof PrologInterfaceException){
 			return new ErrorState(context,(PrologInterfaceException) e);
@@ -97,11 +104,13 @@ public abstract class AbstractState implements State {
 	}
 
 	
+	@Override
 	public State workDone() {
 		return this;
 	}
 
 	
+	@Override
 	public State removeLifeCycleHook(String hookId) {
 		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
 		LifeCycleHookWrapper wrapper = hooks.get(hookId);
@@ -113,6 +122,7 @@ public abstract class AbstractState implements State {
 	}
 
 	
+	@Override
 	public State removeLifeCycleHook(LifeCycleHook hook, String hookId) {
 		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
 		LifeCycleHookWrapper wrapper = hooks.get(hookId);
@@ -139,11 +149,13 @@ public abstract class AbstractState implements State {
 	}
 
 	
+	@Override
 	public State start() {
 		return this;
 	}
 
 	
+	@Override
 	public State stop() {
 		return this;
 	}

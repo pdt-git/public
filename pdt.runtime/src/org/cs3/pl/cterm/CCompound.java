@@ -65,6 +65,7 @@ public class CCompound extends CTerm implements Iterable<CTerm> {
 		return ((ASTAtom)node.jjtGetChild(0)).getString();
 	}
 
+	@Override
 	public int getArity() {
 		return args.length;
 	}

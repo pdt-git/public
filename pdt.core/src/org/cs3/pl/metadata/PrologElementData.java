@@ -105,9 +105,11 @@ public class PrologElementData implements Serializable, Comparable{
 		this.m_hasKnownDefinition=false;
 	}
 	
+	@Override
 	public int hashCode() {
 		return getSignature().hashCode();
 	}
+	@Override
 	public boolean equals(Object obj) {
 		if(obj==null){
 			return false;
@@ -146,6 +148,7 @@ public class PrologElementData implements Serializable, Comparable{
 		return module+":"+label + "/" + arity;
 	}
 
+	@Override
 	public String toString() {
 		return getSignature();
 	}
@@ -199,6 +202,7 @@ public class PrologElementData implements Serializable, Comparable{
 	 * @return Returns the length.
 	 * @deprecated use getKnownDefinition.getEndOffset()-getKnownDefinition().getOffset()
 	 */
+	@Deprecated
 	public int getLength() {
 		return knownDefinition==null?-1:knownDefinition.endOffset-knownDefinition.offset;
 	}
@@ -209,6 +213,7 @@ public class PrologElementData implements Serializable, Comparable{
 	static public Comparator getComparator() {
 		return new Comparator() {
 
+			@Override
 			public int compare(Object arg0, Object arg1) {
 				return ((PrologElementData) arg0).getSignature().compareTo(
 						((PrologElementData) arg1).getSignature());
@@ -217,6 +222,7 @@ public class PrologElementData implements Serializable, Comparable{
 		};
 	}
 	
+	@Override
 	public int compareTo(Object arg0) {
 		return getSignature().compareTo(((Predicate)arg0).getSignature());
 	}

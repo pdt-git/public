@@ -42,16 +42,10 @@
 package org.cs3.pdt.runtime.ui;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -70,7 +64,6 @@ import org.cs3.pdt.runtime.internal.DefaultPrologContextTrackerService;
 import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.DefaultResourceFileLocator;
-import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.common.ResourceFileLocator;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.IPrologEventDispatcher;
@@ -80,17 +73,11 @@ import org.cs3.pl.prolog.PrologLibraryManager;
 import org.cs3.pl.prolog.PrologSession;
 import org.cs3.pl.prolog.UDPEventDispatcher;
 import org.cs3.pl.prolog.internal.AbstractPrologInterface;
-import org.eclipse.core.resources.ISaveContext;
-import org.eclipse.core.resources.ISaveParticipant;
-import org.eclipse.core.resources.ISavedState;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.IWorkbench;
@@ -187,6 +174,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 	}
 
+	@Override
 	public void earlyStartup() {
 		/*
 		 * if the context tracker service was not requested yet, it does not
@@ -201,6 +189,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		}
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		workbench.getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				PrologContextTracker[] contextTrackers = contextTrackerService.getContextTrackers();
 				for (int i = 0; i < contextTrackers.length; i++) {
@@ -318,6 +307,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	/**
 	 * This method is called when the plug-in is stopped
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		try {
 			PrologInterfaceRegistry registry = getPrologInterfaceRegistry();

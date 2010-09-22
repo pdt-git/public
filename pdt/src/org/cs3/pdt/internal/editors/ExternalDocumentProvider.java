@@ -8,6 +8,7 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 public class ExternalDocumentProvider extends TextFileDocumentProvider{
 	
+	@Override
 	protected FileInfo createFileInfo(Object element) throws CoreException {
         FileInfo info = super.createFileInfo(element);
         if(info==null){

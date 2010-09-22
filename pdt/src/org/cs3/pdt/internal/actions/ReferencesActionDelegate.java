@@ -66,40 +66,37 @@ public class ReferencesActionDelegate extends TextEditorAction {
 	public ReferencesActionDelegate(ITextEditor editor) {
 		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),ReferencesActionDelegate.class.getName(), editor);
 	}
-	
+
 	/**
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
-public void run() {
-		
+	@Override
+	public void run() {
+
 		UIUtils.getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				try {
-						PLEditor editor = (PLEditor) UIUtils
-								.getActiveEditor();
-						IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
-						IPrologProject plProject = (IPrologProject) editorInput.getFile().getProject().getNature(PDTCore.NATURE_ID);
-						Goal data = editor.getSelectedPrologElement();
-						if(data == null){
-							Debug.warning("data is null");
-							return;
-						}
-						
-						
-						ISearchQuery query = new PrologSearchQuery(plProject.getMetadataPrologInterface(),data);
-						NewSearchUI.activateSearchResultView();
-						NewSearchUI.runQuery(query);
-						plProject.updateMarkers();
-
+					PLEditor editor = (PLEditor) UIUtils
+					.getActiveEditor();
+					IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
+					IPrologProject plProject = (IPrologProject) editorInput.getFile().getProject().getNature(PDTCore.NATURE_ID);
+					Goal data = editor.getSelectedPrologElement();
+					if(data == null){
+						Debug.warning("data is null");
+						return;
+					}
+					ISearchQuery query = new PrologSearchQuery(plProject.getMetadataPrologInterface(),data);
+					NewSearchUI.activateSearchResultView();
+					NewSearchUI.runQuery(query);
+					plProject.updateMarkers();
 				} catch (Exception e) {
 					Debug.report(e);
 				}
 			}
 		});
 	}
-	
+
 	public void dispose() {
 	}
-	
-	
 }

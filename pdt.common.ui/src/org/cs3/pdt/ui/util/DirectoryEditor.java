@@ -71,7 +71,8 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.OptionEditor#createControls(org.eclipse.swt.widgets.Composite)
      */
-    protected void createControls(Composite composite) {
+    @Override
+	protected void createControls(Composite composite) {
         GridLayout layout = new GridLayout();
         layout.numColumns = 3;
         composite.setLayout(layout);
@@ -105,7 +106,8 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
         valueField.setLayoutData(gd);
         valueField.addModifyListener(new ModifyListener() {
             String old="";
-            public void modifyText(ModifyEvent e) {
+            @Override
+			public void modifyText(ModifyEvent e) {
                 if(old.equals(e.data)) {
                     return;
                 }
@@ -125,7 +127,8 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
         gd.widthHint =convertWidthInCharsToPixels(button.getText().length() + 2);        
         button.setLayoutData(gd);
         button.addSelectionListener(new SelectionListener() {
-            public void widgetSelected(SelectionEvent e) {
+            @Override
+			public void widgetSelected(SelectionEvent e) {
                DirectoryDialog d = new DirectoryDialog(parent.getShell());
                if(getValue()!=null){
                    d.setFilterPath(getValue());
@@ -138,7 +141,8 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
                }
             }
 
-            public void widgetDefaultSelected(SelectionEvent e) {               
+            @Override
+			public void widgetDefaultSelected(SelectionEvent e) {               
                 widgetSelected(e);
             }
         });
@@ -148,7 +152,8 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#setValue(java.lang.String)
      */
-    public void setValue(String value) {
+    @Override
+	public void setValue(String value) {
         valueField.setText(value);
     }
 
@@ -156,7 +161,8 @@ public class DirectoryEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getValue()
      */
-    public String getValue() {      
+    @Override
+	public String getValue() {      
         return valueField.getText();
     }
 

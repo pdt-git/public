@@ -60,6 +60,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 public class AnnotationHover implements IAnnotationHover {
 
+	@Override
     public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
         String[] messages = getMessagesForLine(sourceViewer, lineNumber);
 

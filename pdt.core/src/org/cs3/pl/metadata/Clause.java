@@ -80,6 +80,7 @@ public interface Clause extends Comparable{
 	 * represent this clause.
 	 * @deprecated constructing the label should be the job of a label provider
 	 */
+	@Deprecated
 	public String getName();
 	
 
@@ -87,12 +88,14 @@ public interface Clause extends Comparable{
 	 * 
 	 * @deprecated use getKnownDefinition.getEndOffset()-getKnownDefinition().getOffset()
 	 */
+	@Deprecated
 	public int getLength();
 
 
 	/**
 	 * @deprecated use getPredicate().getArity();
 	 */
+	@Deprecated
 	public int getArity();
 	
 	/**

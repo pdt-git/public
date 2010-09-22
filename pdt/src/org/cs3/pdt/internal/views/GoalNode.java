@@ -54,18 +54,22 @@ public class GoalNode implements Goal {
 		this.term = term;
 	}
 
+	@Override
 	public int getArity() {
 		return term.getArity();
 	}
 
+	@Override
 	public String getName() {
 		return term.getFunctorValue();
 	}
 
+	@Override
 	public String getModule() {
 		return module;
 	}
 
+	@Override
 	public CTerm getTerm() {
 		return term;
 	}

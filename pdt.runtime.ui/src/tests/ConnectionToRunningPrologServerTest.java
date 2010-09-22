@@ -67,6 +67,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 	static PrologInterface pif = null;
 
+	@Override
 	protected void setUp() throws Exception {
 		if(pif == null) {
 			pif = init();
@@ -74,6 +75,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 		super.setUp();
 	}
 	
+	@Override
 	protected void tearDown() throws Exception {
 		
 		super.tearDown();
@@ -89,6 +91,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 		PrologSession session = pif.getSession(PrologInterface.LEGACY);
 		
 		PrologInterfaceListener listener = new PrologInterfaceListener(){
+			@Override
 			public void update(PrologInterfaceEvent e) {
 				System.out.println("RECEIVED EVENT: "+e.getEvent() + ", SUBJECT " + e.getSubject());
 				System.out.flush();
@@ -102,6 +105,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 		};
 
 		PrologInterfaceListener locationListener = new PrologInterfaceListener(){
+			@Override
 			public void update(PrologInterfaceEvent e) {
 				System.out.println("LOCALISATION: RECEIVED EVENT: "+e.getEvent() + ", SUBJECT " + e.getSubject());
 				System.out.flush();
@@ -122,7 +126,7 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:notify/2))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:thread_get_message/1))))");
 //		session.queryOnce("forall(current_thread(A,_),thread_signal(A,(guitracer,spy(consult_server:cleanup_thread/1))))");
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher((PrologInterface) pif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
 		dispatcher.addPrologInterfaceListener("localisation:company_nearby(MAC, Other, Distance, 1000)",locationListener);
 
 		session.queryOnce("sync:deleteAll(magicmap:location('00-09-2D-53-27-3A', _,_,_))");
@@ -183,10 +187,11 @@ public class ConnectionToRunningPrologServerTest extends TestCase {
 
 	public void testErrors() throws Exception {
 		PrologInterfaceListener nullListener = new PrologInterfaceListener(){
+			@Override
 			public void update(PrologInterfaceEvent e) {
 			}
 		};
-		PrologEventDispatcher dispatcher = new PrologEventDispatcher((PrologInterface) pif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
+		PrologEventDispatcher dispatcher = new PrologEventDispatcher(pif,PrologRuntimeUIPlugin.getDefault().getLibraryManager());
 		try {
 			
 			dispatcher.addPrologInterfaceListener("aha(",nullListener);
