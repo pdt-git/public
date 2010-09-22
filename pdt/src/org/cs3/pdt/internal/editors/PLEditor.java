@@ -296,6 +296,7 @@ public class PLEditor extends TextEditor {
 	 * @param parent
 	 */
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class required) {
 		try {
