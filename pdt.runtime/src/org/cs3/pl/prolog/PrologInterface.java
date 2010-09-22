@@ -125,12 +125,23 @@ public interface PrologInterface {
 	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
+	 * Uses flag=LEGACY
+	 * 
 	 * @return a new Session Object
-	 * @deprecated use getSession(int).
 	 */
-	@Deprecated
 	public abstract PrologSession getSession() throws PrologInterfaceException;
 
+	/**
+	 * Returns a prolog session.<br>
+	 * Use sessions to interact with the prolog system. Sessions can only be
+	 * obtained while the PrologInterface is in UP state. During startup, this
+	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
+	 * raise an IllegalStateException.
+	 * 
+	 * Flag sets the kind of objects returned by the queries.
+	 * 
+	 * @return a new Session Object
+	 */
 	public abstract PrologSession getSession(int flags) throws PrologInterfaceException;
 	
 	/**
@@ -198,12 +209,6 @@ public interface PrologInterface {
 	public void setTimeout(String timeout);
 	public void setFileSearchPath(String fileSearchPath);
 	
-//	/**
-//	 * get the current value of a configuration option.
-//	 * 
-//	 * @see PrologInterfaceFactory.getOptions()
-//	 */
-//	public String getOption(String opt);
 
 	/**
 	 * get the life list of bootstrap libraries. <br>
@@ -236,12 +241,8 @@ public interface PrologInterface {
 	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
 	
 	/**
-	 * 
-	 * @deprecated use getAsyncSession(int). Using the PrologInterface.LEGACY should
-	 * be compatible with legacy code.
-	 * 
+	 * Uses the PrologInterface.LEGACY 
 	 */
-	@Deprecated
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
 
