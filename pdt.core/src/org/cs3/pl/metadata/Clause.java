@@ -65,7 +65,7 @@ package org.cs3.pl.metadata;
  * @author lukas
  *
  */
-public interface Clause extends Comparable{
+public interface Clause {
 
 
 	/**
@@ -73,29 +73,11 @@ public interface Clause extends Comparable{
 	 * defined.
 	 */
 	public SourceLocation getSourceLocation();
-	
-	
-	/**
-	 * @return a label, suitable for displaying in list or tree views to 
-	 * represent this clause.
-	 * @deprecated constructing the label should be the job of a label provider
-	 */
-	@Deprecated
+		
 	public String getName();
 	
-
-	/**
-	 * 
-	 * @deprecated use getKnownDefinition.getEndOffset()-getKnownDefinition().getOffset()
-	 */
-	@Deprecated
 	public int getLength();
 
-
-	/**
-	 * @deprecated use getPredicate().getArity();
-	 */
-	@Deprecated
 	public int getArity();
 	
 	/**

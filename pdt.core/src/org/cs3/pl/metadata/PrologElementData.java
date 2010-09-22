@@ -49,7 +49,7 @@ import java.util.Comparator;
  * a tuple describing a logical prolog element like a predicate or a module..
 
  */
-public class PrologElementData implements Serializable, Comparable{
+public class PrologElementData implements Serializable, Comparable<PrologElementData>{
 
 	/**
      * Comment for <code>serialVersionUID</code>
@@ -200,9 +200,7 @@ public class PrologElementData implements Serializable, Comparable{
 	}
 	/**
 	 * @return Returns the length.
-	 * @deprecated use getKnownDefinition.getEndOffset()-getKnownDefinition().getOffset()
 	 */
-	@Deprecated
 	public int getLength() {
 		return knownDefinition==null?-1:knownDefinition.endOffset-knownDefinition.offset;
 	}
@@ -210,20 +208,20 @@ public class PrologElementData implements Serializable, Comparable{
 	
 	
 
-	static public Comparator getComparator() {
-		return new Comparator() {
+	static public Comparator<PrologElementData> getComparator() {
+		return new Comparator<PrologElementData>() {
 
 			@Override
-			public int compare(Object arg0, Object arg1) {
-				return ((PrologElementData) arg0).getSignature().compareTo(
-						((PrologElementData) arg1).getSignature());
+			public int compare(PrologElementData arg0, PrologElementData arg1) {
+				return arg0.getSignature().compareTo(
+						arg1.getSignature());
 			}
 			
 		};
 	}
 	
 	@Override
-	public int compareTo(Object arg0) {
+	public int compareTo(PrologElementData arg0) {
 		return getSignature().compareTo(((Predicate)arg0).getSignature());
 	}
 	

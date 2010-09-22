@@ -64,7 +64,7 @@ package org.cs3.pl.metadata;
  * @author lukas
  *
  */
-public interface Predicate extends Comparable{
+public interface Predicate {
 
 	/**
 	 * predicate property exported.
@@ -127,9 +127,7 @@ public interface Predicate extends Comparable{
 	 *  
 	 * @return the signature of the predicate:
 	 * name/arity.
-	 * @deprecated this method is redundant and will be removed
 	 */
-	@Deprecated
 	public String getSignature();
 
 	/**
@@ -153,22 +151,10 @@ public interface Predicate extends Comparable{
 	 */
 	public String getModule();
 	
-	/**
-	 * @deprecated use getPredicateProperty(DYNAMIC) instead
-	 */
-	@Deprecated
 	public boolean isDynamic();
 
-	/**
-	 * @deprecated getPredicateProperty(MULTIFILE) instead
-	 */	
-	@Deprecated
 	public boolean isMultifile();
 
-	/**
-	 * @deprecated use getModule() and getPredicateProperty(EXPORTED) instead
-	 */
-	@Deprecated
 	public boolean isPublic();
 
 }
