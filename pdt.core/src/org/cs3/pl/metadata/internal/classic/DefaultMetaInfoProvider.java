@@ -150,7 +150,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		List<Clause> list = new ArrayList<Clause>();
 		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
 			Map<String,Object> result = it.next();
-			SourceLocation sl = new SourceLocation(file, true, false);
+			SourceLocation sl = new SourceLocation(file, true);
 			sl.offset = Integer.parseInt(result.get("Pos").toString());
 			sl.endOffset = sl.offset
 					+ Integer.parseInt(result.get("Len").toString());
@@ -216,7 +216,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			int i=0;
 			for (Iterator<Map<String,Object>> it = l.iterator(); it.hasNext();i++) {
 				Map<String,Object> m = it.next();
-				SourceLocation sl = new SourceLocation((String) m.get("File"),true,false);				
+				SourceLocation sl = new SourceLocation((String) m.get("File"),true);				
 				sl.offset=Integer.parseInt( (String) m.get("Pos"));
 				sl.endOffset=sl.offset+Integer.parseInt( (String) m.get("Len"));				
 				result[i]=new ClauseData(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);

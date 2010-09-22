@@ -183,7 +183,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			}
 		}
 		String fileName = Util.unquoteAtom((String) m.get("File"));
-		SourceLocation loc=new SourceLocation(fileName,false,false);
+		SourceLocation loc=new SourceLocation(fileName,false);
 		loc.offset=Integer.parseInt((String)m.get("Start"));
 		loc.endOffset=Integer.parseInt((String)m.get("End"));
 		
