@@ -111,6 +111,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
 	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected IProject[] build(int kind, Map args,
 			final IProgressMonitor monitor) throws CoreException {
@@ -325,18 +326,8 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	/**
-	 * @param delta
-	 * @param existenceList
-	 * @param contentsList
-	 * @return
-	 * @throws CoreException
-	 */
 	private void collect(IResourceDelta delta, final Set<IFile> contentsList,
 			final Set<IFile> existenceList) throws CoreException {
-		final IPrologProject plProject = (IPrologProject) getProject()
-				.getNature(PDTCore.NATURE_ID);
-
 		delta.accept(new IResourceDeltaVisitor() {
 			@Override
 			public boolean visit(IResourceDelta delta) throws CoreException {

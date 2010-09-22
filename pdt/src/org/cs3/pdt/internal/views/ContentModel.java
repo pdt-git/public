@@ -178,6 +178,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			tags.addAll((Collection<String>) bindings.get("Tags"));
 		}
 
+		@SuppressWarnings("rawtypes")
 		@Override
 		public Object getAdapter(Class adapter) {
 			return Platform.getAdapterManager().getAdapter(this, adapter);
