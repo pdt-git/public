@@ -77,6 +77,7 @@ public class SocketSessionTest extends TestCase {
 	 * 
 	 * @see junit.framework.TestCase#setUp()
 	 */
+	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel("DEBUG");
 		pif = AbstractPrologInterface.newInstance();
@@ -88,6 +89,7 @@ public class SocketSessionTest extends TestCase {
 	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		pif.stop();
 	}
@@ -104,6 +106,7 @@ public class SocketSessionTest extends TestCase {
 		class _Thread extends Thread {
 			Exception e = null;
 
+			@Override
 			public void run() {
 				for (int i = 0; i < 5; i++) {
 					try {
@@ -229,6 +232,7 @@ public class SocketSessionTest extends TestCase {
 		final Throwable[] t = new Throwable[1];
 		Thread thread = new Thread() {
 
+			@Override
 			public void run() {
 				try {
 					s.queryAll("thread_get_message(knarst)");
