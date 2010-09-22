@@ -15,6 +15,7 @@ public abstract class PrologSearchContentProvider implements IStructuredContentP
 		fPage= page;
 	}
 	
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		initialize((PrologSearchResult) newInput);
 		
@@ -27,6 +28,7 @@ public abstract class PrologSearchContentProvider implements IStructuredContentP
 	public abstract void elementsChanged(Object[] updatedElements);
 	public abstract void clear();
 
+	@Override
 	public void dispose() {
 		// nothing to do
 	}

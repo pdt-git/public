@@ -83,6 +83,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	}
 
 
+	@Override
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix)
 			throws NumberFormatException, PrologException, PrologInterfaceException {
 		return getPredicatesWithPrefix(module, prefix, null);
@@ -104,6 +105,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 * @throws NumberFormatException
 	 * @throws PrologInterfaceException 
 	 */
+	@Override
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
 			String filename) throws NumberFormatException, PrologException, PrologInterfaceException {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
@@ -131,6 +133,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return list.toArray(new Predicate[0]);
 	}
 
+	@Override
 	public String getSummary(Predicate data) throws PrologException, PrologInterfaceException {
 		String help = getHelp(data);
 		if (help == null)
@@ -138,6 +141,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return help.substring(0, help.indexOf('\n'));
 	}
 
+	@Override
 	public Clause[] retrievePrologElements(String file) throws PrologException, PrologInterfaceException {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 
@@ -164,6 +168,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return list.toArray(new Clause[0]);
 	}
 
+	@Override
 	public String getHelp(Predicate data) throws PrologInterfaceException {
 
 		PrologSession session = pif.getSession(PrologInterface.NONE);
@@ -181,10 +186,12 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		return null;
 	}
 
+	@Override
 	public SourceLocation[] findReferences(Predicate data) {
 		return null;
 	}
 
+	@Override
 	public Clause[] findClauses(Predicate p) throws PrologInterfaceException {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try {
@@ -231,6 +238,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 * Best we can do atm. :-(
 	 * 
 	 */
+	@Override
 	public Predicate[] findPredicates(Goal g) throws PrologInterfaceException {
 		Set<PredicateData> result = new HashSet<PredicateData>();
 		PrologSession session = pif.getSession(PrologInterface.NONE);

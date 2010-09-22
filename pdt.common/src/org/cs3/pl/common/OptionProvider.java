@@ -49,6 +49,7 @@ public interface OptionProvider {
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	public void reconfigure();
 
 	

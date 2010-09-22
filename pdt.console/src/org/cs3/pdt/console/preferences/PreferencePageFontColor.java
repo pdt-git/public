@@ -80,6 +80,7 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
 	 * GUI blocks needed to manipulate various types of preferences. Each field
 	 * editor knows how to save and restore itself.
 	 */
+	@Override
 	public void createFieldEditors() {
 		
 		
@@ -99,7 +100,8 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
          
 		 
 		 checkBox.addSelectionListener(new SelectionAdapter() {
-                public void widgetSelected(SelectionEvent e) {
+                @Override
+				public void widgetSelected(SelectionEvent e) {
 
                     boolean isSelected = checkBox.getSelection();
                     initColorFieldEditors(isSelected);
@@ -131,6 +133,7 @@ public class PreferencePageFontColor extends FieldEditorPreferencePage implement
 	 * @see
 	 * org.eclipse.ui.IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
 	 */
+	@Override
 	public void init(IWorkbench workbench) {
 	}
 

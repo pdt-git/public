@@ -120,6 +120,7 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	public String[] getPrologLibraryKeys() throws CoreException;
 
 	/**@deprecated use PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface) instead.*/
+	@Deprecated
 	public IPrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
 
 	public void updateMarkers() throws CoreException;

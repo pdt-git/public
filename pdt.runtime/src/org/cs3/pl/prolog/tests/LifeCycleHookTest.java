@@ -21,24 +21,28 @@ public class LifeCycleHookTest extends TestCase {
 		private int beforeShutdown;
 		private int onInit;
 
+		@Override
 		public void lateInit(PrologInterface pif) {
 			Debug.debug("lateInit");
 			lateInit++;
 			
 		}
 
+		@Override
 		public void onError(PrologInterface pif) {
 			Debug.debug("onError");
 			onError++;
 			
 		}
 
+		@Override
 		public void setData(Object data) {
 			Debug.debug("setData");
 			setData++;
 			
 		}
 
+		@Override
 		public void afterInit(PrologInterface pif)
 				throws PrologInterfaceException {
 			Debug.debug("afterInit");
@@ -46,6 +50,7 @@ public class LifeCycleHookTest extends TestCase {
 			
 		}
 
+		@Override
 		public void beforeShutdown(PrologInterface pif, PrologSession session)
 				throws PrologInterfaceException {
 			Debug.debug("beforeShutdown");
@@ -53,6 +58,7 @@ public class LifeCycleHookTest extends TestCase {
 			
 		}
 
+		@Override
 		public void onInit(PrologInterface pif, PrologSession initSession)
 				throws PrologInterfaceException {
 			Debug.debug("onInit");
@@ -65,6 +71,7 @@ public class LifeCycleHookTest extends TestCase {
 	
 	private PrologInterface pif;
 
+	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 //		this.pif=(PrologInterface) PrologInterfaceFactory.newInstance().create();

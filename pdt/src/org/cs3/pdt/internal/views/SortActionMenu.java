@@ -40,6 +40,7 @@ final class SortActionMenu extends Action implements IMenuCreator,
 		
 	}
 
+	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
 
@@ -56,6 +57,7 @@ final class SortActionMenu extends Action implements IMenuCreator,
 	/**
 	 * @see IMenuCreator#getMenu(Control)
 	 */
+	@Override
 	public Menu getMenu(Control parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -69,6 +71,7 @@ final class SortActionMenu extends Action implements IMenuCreator,
 	/**
 	 * @see IMenuCreator#getMenu(Menu)
 	 */
+	@Override
 	public Menu getMenu(Menu parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -94,6 +97,7 @@ final class SortActionMenu extends Action implements IMenuCreator,
 	private void createAction(Menu parent, final PrologOutlineFilter filter) {
 
 		IAction action = new Action(filter.getLabel(), IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				if (isFilterActive(filter)) {
 					getViewer().removeFilter(filter);
@@ -133,6 +137,7 @@ final class SortActionMenu extends Action implements IMenuCreator,
 		// Add listener to repopulate the menu each time
 		// it is shown to reflect changes in selection or active perspective
 		fCreatedMenu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m = (Menu) e.widget;
 				MenuItem[] items = m.getItems();
@@ -144,11 +149,13 @@ final class SortActionMenu extends Action implements IMenuCreator,
 		});
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void run(IAction action) {
 		// TODO Auto-generated method stub
 
@@ -158,6 +165,7 @@ final class SortActionMenu extends Action implements IMenuCreator,
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
 	 *      org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (fAction == null) {
 			initialize(action);

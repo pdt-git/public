@@ -128,6 +128,7 @@ public interface PrologInterface {
 	 * @return a new Session Object
 	 * @deprecated use getSession(int).
 	 */
+	@Deprecated
 	public abstract PrologSession getSession() throws PrologInterfaceException;
 
 	public abstract PrologSession getSession(int flags) throws PrologInterfaceException;
@@ -230,6 +231,7 @@ public interface PrologInterface {
 	 * @deprecated If possible please use
 	 *             PrologInterface.removeLifeCycleHook(LifeCycleHook,String)
 	 */
+	@Deprecated
 	public abstract void removeLifeCycleHook(String hookId);
 	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
 	
@@ -239,6 +241,7 @@ public interface PrologInterface {
 	 * be compatible with legacy code.
 	 * 
 	 */
+	@Deprecated
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
 

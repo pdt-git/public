@@ -55,6 +55,7 @@ public class GoalData extends PrologElementData implements Goal {
 		this.file=file;
 	}
 
+	@Override
 	public CTerm getTerm() {
 
 		return null;

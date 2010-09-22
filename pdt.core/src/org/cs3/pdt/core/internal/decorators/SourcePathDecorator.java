@@ -24,6 +24,7 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 		System.out.println("DEBUG");
 	}
 
+	@Override
 	public void decorate(Object element, IDecoration decoration) {
 		if(!(element instanceof IResource)){
 			return;
@@ -53,6 +54,7 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener l) {
 		synchronized (listeners) {
 			if(!listeners.contains(l)){
@@ -62,14 +64,17 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
+	@Override
 	public void dispose() {
 		
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return false;
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener l) {
 		synchronized (listeners) {
 			if(listeners.contains(l)){
@@ -79,6 +84,7 @@ public class SourcePathDecorator implements ILightweightLabelDecorator, OptionPr
 		
 	}
 
+	@Override
 	public void valuesChanged(OptionProviderEvent e) {
 		String[] ids= e.ids;
 		for (int i = 0; i < ids.length; i++) {

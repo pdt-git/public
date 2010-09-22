@@ -51,6 +51,7 @@ import org.eclipse.core.runtime.IAdaptable;
 
 public class PrologProjectPropertyPage extends OptionProviderPropertyPage {
 
+	@Override
 	protected OptionProvider getOptionProvider(IAdaptable element) {
 		if(element==null){
 			return null;

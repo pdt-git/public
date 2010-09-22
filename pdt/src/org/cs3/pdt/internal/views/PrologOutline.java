@@ -97,6 +97,7 @@ public class PrologOutline extends ContentOutlinePage {
 	private Menu contextMenu;
 	
 	private final class Comparer implements IElementComparer {
+		@Override
 		public int hashCode(Object element) {
 			if (element instanceof Predicate) {
 				Predicate p = (Predicate) element;
@@ -105,6 +106,7 @@ public class PrologOutline extends ContentOutlinePage {
 			return element.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object a, Object b) {
 			if (a instanceof Predicate && b instanceof Predicate) {
 				Predicate pa = (Predicate) a;
@@ -119,12 +121,14 @@ public class PrologOutline extends ContentOutlinePage {
 		this.editor = editor;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
 		viewer = getTreeViewer();
 		model = new ContentModel() {
 
+			@Override
 			public File getFile() {
 				try {
 					IFileEditorInput editorInput = null;
@@ -186,6 +190,7 @@ public class PrologOutline extends ContentOutlinePage {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				PrologOutline.this.fillContextMenu(manager);
 			}
@@ -196,6 +201,7 @@ public class PrologOutline extends ContentOutlinePage {
 	}
 	
 	
+	@Override
 	public TreeViewer getTreeViewer() {
 		return super.getTreeViewer();
 	}
@@ -214,6 +220,7 @@ public class PrologOutline extends ContentOutlinePage {
 		return input;
 	}
 
+	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
 		
@@ -287,6 +294,7 @@ public class PrologOutline extends ContentOutlinePage {
 		}
 	}
 
+	@Override
 	public void dispose() {
 
 		super.dispose();

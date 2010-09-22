@@ -72,6 +72,7 @@ public final class SourceLocation implements Serializable, Comparable {
 	 * @deprecated all positions should be stream based. Support for row-based
 	 *             positions will be discontinued.
 	 */
+	@Deprecated
 	public int line = 1;
 
 	/**
@@ -93,6 +94,7 @@ public final class SourceLocation implements Serializable, Comparable {
 	 * @deprecated all positions should be stream based. Support for row-based
 	 *             positions will be discontinued.
 	 */
+	@Deprecated
 	public int lastLine = 1;
 
 	/**
@@ -118,6 +120,7 @@ public final class SourceLocation implements Serializable, Comparable {
 	 * @deprecated all positions should be stream based. Support for row-based
 	 *             positions will be discontinued.
 	 */
+	@Deprecated
 	public boolean isRowBased;
 
 	/**
@@ -137,6 +140,7 @@ public final class SourceLocation implements Serializable, Comparable {
 		this(file.getCanonicalPath(),false,isRowBased);
 	}
 
+	@Override
 	public String toString() {
 		if (isRowBased) {
 			return file + "/" + line + "," + offset;
@@ -144,6 +148,7 @@ public final class SourceLocation implements Serializable, Comparable {
 		return file + "/" + offset;
 	}
 
+	@Override
 	public int compareTo(Object arg0) {
 		// any object that is not a source location comes after at the end.
 		if (!(arg0 instanceof SourceLocation)) {
@@ -190,10 +195,12 @@ public final class SourceLocation implements Serializable, Comparable {
 		//both source locations describe the same "physical" character sequence.
 		return 0;
 	}
+	@Override
 	public boolean equals(Object obj) {		
 		return compareTo(obj)==0;
 	}
 	
+	@Override
 	public int hashCode() {
 		return file.hashCode()+line+offset+endOffset+lastLine;
 	}

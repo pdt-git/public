@@ -12,11 +12,13 @@ public class PEFNodePropertySource implements IPropertySource {
 		this.node = node;
 	}
 
+	@Override
 	public Object getEditableValue() {
 
 		return this;
 	}
 
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 
 		PropertyDescriptor[] r = new PropertyDescriptor[] {
@@ -33,6 +35,7 @@ public class PEFNodePropertySource implements IPropertySource {
 
 	}
 
+	@Override
 	public Object getPropertyValue(Object id) {
 		if ("label".equals(id)) {
 			return node.getLabel();
@@ -55,16 +58,19 @@ public class PEFNodePropertySource implements IPropertySource {
 		return null;
 	}
 
+	@Override
 	public boolean isPropertySet(Object id) {
 		
 		return false;
 	}
 
+	@Override
 	public void resetPropertyValue(Object id) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void setPropertyValue(Object id, Object value) {
 		// TODO Auto-generated method stub
 

@@ -63,6 +63,7 @@ public class PDTRegistryHook implements RegistryHook {
 		}
 	}
 	private static final class _SaveParticipant implements ISaveParticipant {
+		@Override
 		public void saving(ISaveContext context) throws CoreException {
 			switch (context.getKind()) {
 			case ISaveContext.FULL_SAVE:
@@ -93,6 +94,7 @@ public class PDTRegistryHook implements RegistryHook {
 
 		}
 
+		@Override
 		public void rollback(ISaveContext context) {
 			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
 
@@ -105,10 +107,12 @@ public class PDTRegistryHook implements RegistryHook {
 
 		}
 
+		@Override
 		public void prepareToSave(ISaveContext context) throws CoreException {
 			;
 		}
 
+		@Override
 		public void doneSaving(ISaveContext context) {
 			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
 

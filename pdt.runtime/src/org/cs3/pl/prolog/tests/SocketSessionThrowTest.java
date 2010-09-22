@@ -55,12 +55,14 @@ import org.cs3.pl.prolog.internal.AbstractPrologInterface;
 public class SocketSessionThrowTest extends TestCase {
 	private PrologInterface pif;
 
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
       pif = AbstractPrologInterface.newInstance();
       pif.start();
     }
     
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         pif.stop();
     }
 	

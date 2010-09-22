@@ -92,12 +92,14 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		this.editor = editor;
 	}
 
+	@Override
 	public String[] getConfiguredContentTypes(ISourceViewer sourceViewer) {
 		return new String[] { IDocument.DEFAULT_CONTENT_TYPE,
 				PLPartitionScanner.PL_COMMENT,
 				PLPartitionScanner.PL_MULTI_COMMENT };
 	}
 
+	@Override
 	public ITextDoubleClickStrategy getDoubleClickStrategy(
 			ISourceViewer sourceViewer, String contentType) {
 		if (doubleClickStrategy == null)
@@ -124,6 +126,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 				.getColor(IPLColorConstants.DEFAULT))));
 	}
 
+	@Override
 	public IPresentationReconciler getPresentationReconciler(
 			ISourceViewer sourceViewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();
@@ -145,15 +148,18 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return reconciler;
 	}
 
+	@Override
 	public IAutoIndentStrategy getAutoIndentStrategy(
 			ISourceViewer sourceViewer, String contentType) {
 		return new PLAutoIndentStrategy();
 	}
 
+	@Override
 	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
 		return new AnnotationHover();
 	}
 
+	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		if (assistant != null)
 			return assistant;
@@ -162,7 +168,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 			assistant = new ContentAssistant();
 			assistant.setContentAssistProcessor(
 					new NaivPrologContentAssistProcessor(){
-
+						@Override
 						protected IFile getFile() {
 							if(editor==null){
 								return null;
@@ -186,6 +192,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		assistant.install(sourceViewer);
 		assistant
 				.setInformationControlCreator(new IInformationControlCreator() {
+					@Override
 					public IInformationControl createInformationControl(
 							Shell parent) {
 
@@ -196,6 +203,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return assistant;
 	}
 
+	@Override
 	public String[] getDefaultPrefixes(ISourceViewer sourceViewer,
 			String contentType) {
 		return new String[] { "%", "" };

@@ -34,6 +34,7 @@ public abstract class LifeCycle {
 		}
 
 		
+		@Override
 		public void run() {
 			while (shouldBeRunning) {
 				try {
@@ -56,6 +57,7 @@ public abstract class LifeCycle {
 			queue.add(new NamedWorkRunnable("shouldBeRunning=false") {
 
 				
+				@Override
 				public void run() throws PrologInterfaceException {
 					shouldBeRunning = false;
 
@@ -181,6 +183,7 @@ public abstract class LifeCycle {
 
 		transitionThread.enqueue(new NamedWorkRunnable("start") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 
 				setState(state.start());
@@ -193,6 +196,7 @@ public abstract class LifeCycle {
 	public synchronized void stop() {
 		transitionThread.enqueue(new NamedWorkRunnable("stop") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 				setState(state.stop());
 			}
@@ -202,6 +206,7 @@ public abstract class LifeCycle {
 	public synchronized void error(final Throwable e) {
 		transitionThread.enqueue(new NamedWorkRunnable("error") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 				setState(state.error(e));
 
@@ -212,6 +217,7 @@ public abstract class LifeCycle {
 	protected synchronized void workDone() {
 		transitionThread.enqueue(new NamedWorkRunnable("workDone") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 				setState(state.workDone());
 
@@ -223,6 +229,7 @@ public abstract class LifeCycle {
 			final String id, final String[] dependencies) {
 		transitionThread.enqueue(new NamedWorkRunnable("addLifeCycleHook/3") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 				setState(state.addLifeCycleHook(hook, id, dependencies));
 
@@ -234,6 +241,7 @@ public abstract class LifeCycle {
 		transitionThread
 				.enqueue(new NamedWorkRunnable("removeLifeCycleHook/1") {
 					
+					@Override
 					public void run() throws PrologInterfaceException {
 						setState(state.removeLifeCycleHook(hookId));
 
@@ -247,6 +255,7 @@ public abstract class LifeCycle {
 		transitionThread
 				.enqueue(new NamedWorkRunnable("removeLifeCycleHook/2") {
 					
+					@Override
 					public void run() throws PrologInterfaceException {
 						setState(state.removeLifeCycleHook(hook, hookId));
 
@@ -257,6 +266,7 @@ public abstract class LifeCycle {
 	public synchronized void reset() {
 		transitionThread.enqueue(new NamedWorkRunnable("reset") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 				setState(state.reset());
 

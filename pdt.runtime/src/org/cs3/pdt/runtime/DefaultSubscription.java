@@ -107,10 +107,12 @@ public class DefaultSubscription implements PersistableSubscription {
 		
 	}
 
+	@Override
 	public void configure(PrologInterface pif) {
 		;		
 	}
 
+	@Override
 	public void deconfigure(PrologInterface pif){
 		;
 	}
@@ -118,18 +120,22 @@ public class DefaultSubscription implements PersistableSubscription {
 	/* (non-Javadoc)
 	 * @see org.cs3.pdt.runtime.Subscription#getDescritpion()
 	 */
+	@Override
 	public String getDescritpion() {
 		return descritpion;
 	}
 
+	@Override
 	public String getHostId() {		
 		return hostId;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
 
+	@Override
 	public String getName() {
 		return this.name;		
 	}
@@ -137,14 +143,17 @@ public class DefaultSubscription implements PersistableSubscription {
 	/* (non-Javadoc)
 	 * @see org.cs3.pdt.runtime.Subscription#getKey()
 	 */
+	@Override
 	public String getPifKey() {
 		return pifKey;
 	}
 
+	@Override
 	final public boolean isPersistent() {
 		return persistent;
 	}
 
+	@Override
 	public void restoreState(Map<String, String> params) {
 		setDescritpion(params.get("description"));
 		setName(params.get("name"));
@@ -161,6 +170,7 @@ public class DefaultSubscription implements PersistableSubscription {
 		setPersistent(Boolean.valueOf(string).booleanValue());		
 	}
 
+	@Override
 	public Map<String, String> saveState() {
 		Map<String, String> m = new HashMap<String, String>();
 		m.put("description",getDescritpion());
@@ -197,10 +207,12 @@ public class DefaultSubscription implements PersistableSubscription {
 		this.pifKey = key;
 	}
 
+	@Override
 	public boolean isVisible() {
 		return true;
 	}
 
+	@Override
 	public String[] getTags() {
 		return tags;
 	}
@@ -209,10 +221,12 @@ public class DefaultSubscription implements PersistableSubscription {
 		this.tags = tags;
 	}
 	
+	@Override
 	public Object getData() {		
 		return null;
 	}
 
+	@Override
 	public List<String> getBootstrapConstributionKeys() {
 		return new ArrayList<String>();
 	}
