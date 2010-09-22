@@ -41,8 +41,6 @@
 
 package org.cs3.pl.metadata;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 
 /**
@@ -61,19 +59,8 @@ import java.io.Serializable;
  *  
  * 
  */
-public final class SourceLocation implements Serializable, Comparable {
+public final class SourceLocation implements Serializable, Comparable<SourceLocation> {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * The line within the source code. <br>
-	 * This is only used for line based source locations. The first line in a
-	 * file is line 1;
-	 * 
-	 * @deprecated all positions should be stream based. Support for row-based
-	 *             positions will be discontinued.
-	 */
-	@Deprecated
-	public int line = 1;
 
 	/**
 	 * The offset within the source file / source line. <br>
@@ -85,17 +72,6 @@ public final class SourceLocation implements Serializable, Comparable {
 	 * 0.
 	 */
 	public int offset = 0;
-
-	/**
-	 * The last line of a range. (inclusive) <br>
-	 * For line-based locations this is the last line that overlaps with this
-	 * range. For stream-based locations, this value is meaningless.
-	 * 
-	 * @deprecated all positions should be stream based. Support for row-based
-	 *             positions will be discontinued.
-	 */
-	@Deprecated
-	public int lastLine = 1;
 
 	/**
 	 * The end offset of a range. (exclusive) <br>
@@ -115,46 +91,23 @@ public final class SourceLocation implements Serializable, Comparable {
 	public String file;
 
 	/**
-	 * Determines wether this is a row-based location.
-	 * 
-	 * @deprecated all positions should be stream based. Support for row-based
-	 *             positions will be discontinued.
-	 */
-	@Deprecated
-	public boolean isRowBased;
-
-	/**
 	 * Determines wether the path is workspace-relative.
 	 */
 	public boolean isWorkspacePath;
 
-	public SourceLocation(String file, boolean isWorkspacePath,
-			boolean isRowBased) {
+	public SourceLocation(String file, boolean isWorkspacePath) {
 		this.file = file;
 		this.isWorkspacePath = isWorkspacePath;
-		this.isRowBased = isRowBased;
 	}
 	
-	public SourceLocation(File file,
-			boolean isRowBased) throws IOException {
-		this(file.getCanonicalPath(),false,isRowBased);
-	}
-
 	@Override
 	public String toString() {
-		if (isRowBased) {
-			return file + "/" + line + "," + offset;
-		}
 		return file + "/" + offset;
 	}
 
 	@Override
-	public int compareTo(Object arg0) {
-		// any object that is not a source location comes after at the end.
-		if (!(arg0 instanceof SourceLocation)) {
-			return 1;
-		}
-		SourceLocation other = (SourceLocation) arg0;
+	public int compareTo(SourceLocation arg0) {
+		SourceLocation other = arg0;
 		// workspace paths come before absolute paths.
 		int c = (isWorkspacePath ? 0 : 1) - (other.isWorkspacePath ? 0 : 1);
 		if (c != 0) {
@@ -165,28 +118,11 @@ public final class SourceLocation implements Serializable, Comparable {
 		if (c != 0) {
 			return c;
 		}
-		// stream based comes before row based
-		c = (isRowBased ? 1 : 0) - (other.isRowBased ? 1 : 0);
-		if (c != 0) {
-			return c;
-		}
 		// if there is still no difference, both positions are
 		// either row based or stream based.
-		if (isRowBased) {
-			c = other.line - line;
-			if (c != 0) {
-				return c;
-			}
-		}
 		c = offset-other.offset ;
 		if (c != 0) {
 			return c;
-		}
-		if (isRowBased) {
-			c = other.lastLine - line;
-			if (c != 0) {
-				return c;
-			}
 		}
 		c = endOffset-other.endOffset;
 		if (c != 0) {
@@ -195,13 +131,17 @@ public final class SourceLocation implements Serializable, Comparable {
 		//both source locations describe the same "physical" character sequence.
 		return 0;
 	}
+
 	@Override
 	public boolean equals(Object obj) {		
-		return compareTo(obj)==0;
+		if(obj instanceof SourceLocation) {
+			return compareTo((SourceLocation)obj)==0;
+		}
+		else return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return file.hashCode()+line+offset+endOffset+lastLine;
+		return file.hashCode()+offset+endOffset;
 	}
 }
