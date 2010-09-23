@@ -286,8 +286,8 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 					} else {
 						AbstractPrologContextTracker tracker = (AbstractPrologContextTracker) celem[j].createExecutableExtension("class");
 
-						String id = celem[j].getAttributeAsIs("id");
-						String label = celem[j].getAttributeAsIs("label");
+						String id = celem[j].getAttribute("id");
+						String label = celem[j].getAttribute("label");
 						tracker.setLabel(label);
 						tracker.setId(id);
 						getContextTrackerService().registerPrologContextTracker(tracker);
