@@ -18,6 +18,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 	private Vector<PrologInterfaceRegistryListener> listeners = new Vector<PrologInterfaceRegistryListener>();
 	private HashMap<PrologInterface, String> pifKeys = new HashMap<PrologInterface, String>();
 
+	@Override
 	public void addPrologInterfaceRegistryListener(
 			PrologInterfaceRegistryListener l) {
 		synchronized (listeners) {
@@ -28,6 +29,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	}
 
+	@Override
 	public void removePrologInterfaceRegistryListener(
 			PrologInterfaceRegistryListener l) {
 		synchronized (listeners) {
@@ -86,30 +88,36 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 	}
 
+	@Override
 	public Set<String> getRegisteredKeys() {
 
 		return pifs.keySet();
 	}
 
+	@Override
 	public String getKey(PrologInterface prologInterface) {
 		return pifKeys.get(prologInterface);
 	}
 
+	@Override
 	public PrologInterface getPrologInterface(String key) {
 		return pifs.get(key);
 	}
 
+	@Override
 	public Subscription getSubscription(String key) {
 		return subscriptions.get(key);
 
 	}
 
+	@Override
 	public Set<String> getAllKeys() {
 		Set<String> s = new HashSet<String>(getRegisteredKeys());
 		s.addAll(subscriptionLists.keySet());
 		return s;
 	}
 
+	@Override
 	public Set<String> getAllSubscriptionIDs() {
 		return new HashSet<String>(subscriptions.keySet());
 	}
@@ -118,6 +126,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		return new HashSet<Subscription>(subscriptions.values());
 	}
 	
+	@Override
 	public Set<Subscription> getSubscriptionsForPif(String key) {
 		Collection<Subscription> coll = subscriptionLists.get(key);
 		HashSet<Subscription> subscripitions = new HashSet<Subscription>();
@@ -127,6 +136,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		return subscripitions;
 	}
 
+	@Override
 	public void addPrologInterface(String key, PrologInterface pif) {
 		Object old = pifs.get(key);
 		if (old == pif) {
@@ -144,6 +154,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		firePrologInterfaceAdded(key);
 	}
 
+	@Override
 	public void removePrologInterface(String key) {
 		PrologInterface pif = pifs.get(key);
 		if (pif == null) {
@@ -163,6 +174,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 
 	}
 
+	@Override
 	public void addSubscription(Subscription s) {
 		// do not add anonymous subscriptions
 		String sid = s.getId();
@@ -191,33 +203,40 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		fireSubscriptionAdded(s);
 	}
 
+	@Override
 	public void removeSubscription(String id) {
 		removeSubscription(getSubscription(id));
 	}
 
-	public void removeSubscription(Subscription s) {
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void removeSubscription(Subscription subscription) {
 		// do not remove anonymous subscriptions
-		if (s.getId() == null) {
+		if (subscription == null) {
 			return;
 		}
-		if (!subscriptions.containsKey(s.getId())) {
+		String id = subscription.getId();
+		if (id == null) {
 			return;
 		}
-		if (pifs.containsKey(s.getPifKey())) {
-			s.deconfigure(getPrologInterface(s.getPifKey()));
-			Set<Subscription> otherSubscriptions = getSubscriptionsForPif(s
-					.getPifKey());
-			otherSubscriptions.remove(s);
+		if (!subscriptions.containsKey(id)) {
+			return;
 		}
-		subscriptions.remove(s.getId());
+		String pifKey = subscription.getPifKey();
+		if (pifs.containsKey(pifKey)) {
+			subscription.deconfigure(getPrologInterface(pifKey));
+			Set<Subscription> otherSubscriptions = getSubscriptionsForPif(pifKey);
+			otherSubscriptions.remove(subscription);
+		}
+		subscriptions.remove(id);
 
-		Set l = subscriptionLists.get(s.getPifKey());
-		if (l == null) {
+		Set keySet = subscriptionLists.get(pifKey);
+		if (keySet == null) {
 			return;
 		}
-		if (l.contains(s.getId())) {
-			l.remove(s.getId());
-			fireSubscriptionRemoved(s);
+		if (keySet.contains(id)) {
+			keySet.remove(id);
+			fireSubscriptionRemoved(subscription);
 
 		}
 
