@@ -269,6 +269,13 @@ public class Util {
 	// specify buffer size for extraction
 	static final int BUFFER = 2048;
 
+	/**
+	 * @param file
+	 */
+	public static void unzip(File file) {
+		unzip(file, file.getParentFile());
+	}
+
 	/*
 	 * the body of this method was taken from here.
 	 * 
@@ -333,13 +340,6 @@ public class Util {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-	}
-
-	/**
-	 * @param file
-	 */
-	public static void unzip(File file) {
-		unzip(file, file.getParentFile());
 	}
 
 	/**
