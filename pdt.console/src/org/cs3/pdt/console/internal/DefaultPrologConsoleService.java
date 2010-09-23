@@ -53,7 +53,6 @@ import org.cs3.pl.console.prolog.PrologConsoleService;
 public class DefaultPrologConsoleService implements PrologConsoleService, PrologConsoleListener {
 
 	private Vector<PrologConsoleListener> listeners = new Vector<PrologConsoleListener>();
-
 	private HashSet<PrologConsole> visibleConsoles=new HashSet<PrologConsole>();
 	private Vector<PrologConsole> consoles=new Vector<PrologConsole>();
 	private PrologConsole activeConsole;
@@ -70,7 +69,6 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 				consoles.add(console);
 			}			
 		}
-		
 	}
 
 	@Override
@@ -154,23 +152,16 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 	}
 
 	public void fireConsoleRecievedFocus(PrologConsole console) {
-		Vector<PrologConsoleListener> clone = null;
-		synchronized (listeners) {
-			clone = (Vector<PrologConsoleListener>) listeners.clone();
-		}
+		Vector<PrologConsoleListener> clone = getAListenersClone();
 		PrologConsoleEvent e = new PrologConsoleEvent(console);
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
 			l.consoleRecievedFocus(e);
 		}
-	}
-	
+	}	
 
 	public void fireActivePrologInterfaceChanged(PrologConsole console) {
-		Vector<PrologConsoleListener> clone = null;
-		synchronized (listeners) {
-			clone = (Vector<PrologConsoleListener>) listeners.clone();
-		}
+		Vector<PrologConsoleListener> clone = getAListenersClone();
 		PrologConsoleEvent e = new PrologConsoleEvent(console);
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
@@ -179,10 +170,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 	}
 
 	public void fireConsoleLostFocus(PrologConsole console) {
-		Vector<PrologConsoleListener> clone = null;
-		synchronized (listeners) {
-			clone = (Vector<PrologConsoleListener>) listeners.clone();
-		}
+		Vector<PrologConsoleListener> clone = getAListenersClone();
 		PrologConsoleEvent e = new PrologConsoleEvent(console);
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
@@ -191,10 +179,7 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 	}
 
 	public void fireConsoleVisibilityChanged(PrologConsole console) {
-		Vector<PrologConsoleListener> clone = null;
-		synchronized (listeners) {
-			clone = (Vector<PrologConsoleListener>) listeners.clone();
-		}
+		Vector<PrologConsoleListener> clone = getAListenersClone();
 		PrologConsoleEvent e = new PrologConsoleEvent(console);
 		for (Iterator<PrologConsoleListener> iter = clone.iterator(); iter.hasNext();) {
 			PrologConsoleListener l = iter.next();
@@ -202,4 +187,14 @@ public class DefaultPrologConsoleService implements PrologConsoleService, Prolog
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private Vector<PrologConsoleListener> getAListenersClone() {
+		Vector<PrologConsoleListener> clone = null;
+		synchronized (listeners) {
+			clone = (Vector<PrologConsoleListener>) listeners.clone();
+		}
+		return clone;
+	}
+
+	
 }
