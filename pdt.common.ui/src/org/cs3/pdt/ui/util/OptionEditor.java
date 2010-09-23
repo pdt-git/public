@@ -142,15 +142,22 @@ abstract public class OptionEditor implements PropertyEditor {
     
     protected void firePropertyChange(String oldValue, String newValue){
         PropertyChangeEvent e = new PropertyChangeEvent(this,getKey(),oldValue,newValue);
-        Vector<IPropertyChangeListener> cloned=null;
-        synchronized(listeners){
-            cloned= (Vector<IPropertyChangeListener>) listeners.clone();
-        }
+        Vector<IPropertyChangeListener> cloned = getAListenerClone();
         for (Iterator<IPropertyChangeListener> it = cloned.iterator(); it.hasNext();) {
             IPropertyChangeListener l = it.next();
             l.propertyChange(e);
         }
     }
+    
+	@SuppressWarnings("unchecked")
+	private Vector<IPropertyChangeListener> getAListenerClone() {
+		Vector<IPropertyChangeListener> cloned=null;
+        synchronized(listeners){
+            cloned= (Vector<IPropertyChangeListener>) listeners.clone();
+        }
+		return cloned;
+	}
+	
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getOption()
      */
