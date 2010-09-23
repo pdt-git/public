@@ -332,7 +332,7 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 	public IPrologEventDispatcher getPrologEventDispatcher(PrologInterface pif) {
 		IPrologEventDispatcher r = dispatchers.get(pif);
 		if (r == null) {
-			r = new UDPEventDispatcher(pif,PrologRuntimePlugin.getLibraryManager());
+			r = new UDPEventDispatcher(pif);
 			dispatchers.put(pif, r);
 		}
 		return r;
