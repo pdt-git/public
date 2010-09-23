@@ -8,9 +8,9 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 public class SimplePropertySource implements IPropertySource {
 
-	private Map properties;
+	private Map<String, ?> properties;
 
-	public SimplePropertySource(Map properties) {
+	public SimplePropertySource(Map<String, ?> properties) {
 		this.properties=properties;
 	}
 
@@ -33,7 +33,6 @@ public class SimplePropertySource implements IPropertySource {
 
 	@Override
 	public Object getPropertyValue(Object id) {
-
 		return properties.get(id);
 	}
 
@@ -44,12 +43,10 @@ public class SimplePropertySource implements IPropertySource {
 
 	@Override
 	public void resetPropertyValue(Object id) {
-		;
 	}
 
 	@Override
 	public void setPropertyValue(Object id, Object value) {
-		;
 	}
 
 }
