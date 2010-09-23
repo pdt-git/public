@@ -269,14 +269,21 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			return;
 		}
 		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, event);
-		Vector<PrologInterfaceListener> cloned = null;
-		synchronized (listeners) {
-			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
-		}
+		Vector<PrologInterfaceListener> cloned = getAListenersClone(listeners);
 		for (Iterator<PrologInterfaceListener> it = cloned.iterator(); it.hasNext();) {
 			PrologInterfaceListener l = it.next();
 			l.update(e);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private Vector<PrologInterfaceListener> getAListenersClone(
+			Vector<PrologInterfaceListener> listeners) {
+		Vector<PrologInterfaceListener> cloned = null;
+		synchronized (listeners) {
+			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
+		}
+		return cloned;
 	}
 
 
