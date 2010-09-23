@@ -148,6 +148,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return reconciler;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public IAutoIndentStrategy getAutoIndentStrategy(
 			ISourceViewer sourceViewer, String contentType) {
