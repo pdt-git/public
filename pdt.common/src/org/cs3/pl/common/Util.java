@@ -781,8 +781,17 @@ public class Util {
 		}
 		return "";
 	}
-	
+
 	public static String guessExecutableName() {
+
+		String guessedExecutable = guessExecutableName__();
+		System.out.println("Guessed Prolog executable with GUI: " + guessedExecutable);
+		return guessedExecutable;
+
+	}
+
+	
+	private static String guessExecutableName__() {
 
 		if (Util.isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
@@ -793,8 +802,16 @@ public class Util {
 		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 
 	}
-	
+
 	public static String guessCommandLineExecutableName() {
+
+		String guessedExecutable = guessCommandLineExecutableName__();
+		System.out.println("Guessed Prolog executable WITHOUT GUI: " + guessedExecutable);
+		return guessedExecutable;
+
+	}
+	
+	private static String guessCommandLineExecutableName__() {
 
 		if (Util.isWindows()) {
 			return //"cmd.exe /c start \"cmdwindow\" /min "
