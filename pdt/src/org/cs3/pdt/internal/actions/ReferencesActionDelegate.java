@@ -88,7 +88,7 @@ public class ReferencesActionDelegate extends TextEditorAction {
 					}
 					ISearchQuery query = new PrologSearchQuery(plProject.getMetadataPrologInterface(),data);
 					NewSearchUI.activateSearchResultView();
-					NewSearchUI.runQuery(query);
+					NewSearchUI.runQueryInBackground(query);
 					plProject.updateMarkers();
 				} catch (Exception e) {
 					Debug.report(e);
