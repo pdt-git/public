@@ -6,5 +6,5 @@ Bundle-Version: 0.2.3.qualifier
 Bundle-ClassPath: prologinterface-socket.jar
 Bundle-Vendor: http://roots.iai.uni-bonn.de
 Fragment-Host: org.cs3.pdt.runtime
-Bundle-Localization: plugin
 Export-Package: org.cs3.pl.prolog.internal.socket
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
