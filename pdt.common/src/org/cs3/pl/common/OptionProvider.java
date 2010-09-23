@@ -46,10 +46,6 @@ public interface OptionProvider {
 
 	public Option[] getOptions();
 	
-	/**
-	 * @deprecated
-	 */
-	@Deprecated
 	public void reconfigure();
 
 	
