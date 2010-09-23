@@ -288,6 +288,7 @@ public class Util {
 	 * 
 	 * --lu
 	 */
+	@SuppressWarnings("rawtypes")
 	public static void unzip(File sourceZipFile, File unzipDestinationDirectory) {
 		try {
 
@@ -449,55 +450,55 @@ public class Util {
 
 
 
-	/**
-	 * parse an association list.
-	 * 
-	 * @param l
-	 *            A list containing strings of the form <code>key->value</code>.
-	 * @return A map that represents the association. If the list contains
-	 *         multiple mappings for a single key, the map will contain a List
-	 *         of this values. Otherwise, the value type will bs String.
-	 */
-	public static Map<String, Object> parseAssociation(List<String> l) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		for (Iterator<String> it = l.iterator(); it.hasNext();) {
-			String elm = it.next();
-			String[] s = splitKeyValue(elm);
-			String key = s[0];
-			String val = s[1];
-			Object o = map.get(key);
-			if (o == null) {
-				map.put(key, val);
-			} else if (o instanceof List<?>) {
-				List<String> ll = (List<String>) o;
-				ll.add(val);
-			} else {
-				List<Object> ll = new Vector<Object>();
-				ll.add(o);
-				ll.add(val);
-				map.put(key, ll);
-			}
-		}
-		return map;
-	}
-
-	private static String[] splitKeyValue(String elm) {
-		final int LEN = elm.length();
-		int l = 0;
-		StringBuffer key = new StringBuffer();
-		String value;
-		while (l < LEN - 1) {
-			if (elm.charAt(l) == '-' && elm.charAt(l + 1) == '>') {
-				value = elm.substring(l + 2, LEN);
-				return new String[] { key.toString(), value };
-			} else {
-				key.append(elm.charAt(l));
-			}
-			l++;
-		}
-
-		throw new IllegalArgumentException(elm);
-	}
+//	/**
+//	 * parse an association list.
+//	 * 
+//	 * @param l
+//	 *            A list containing strings of the form <code>key->value</code>.
+//	 * @return A map that represents the association. If the list contains
+//	 *         multiple mappings for a single key, the map will contain a List
+//	 *         of this values. Otherwise, the value type will bs String.
+//	 */
+//	public static Map<String, Object> parseAssociation(List<String> l) {
+//		HashMap<String, Object> map = new HashMap<String, Object>();
+//		for (Iterator<String> it = l.iterator(); it.hasNext();) {
+//			String elm = it.next();
+//			String[] s = splitKeyValue(elm);
+//			String key = s[0];
+//			String val = s[1];
+//			Object o = map.get(key);
+//			if (o == null) {
+//				map.put(key, val);
+//			} else if (o instanceof List<?>) {
+//				List<String> ll = (List<String>) o;
+//				ll.add(val);
+//			} else {
+//				List<Object> ll = new Vector<Object>();
+//				ll.add(o);
+//				ll.add(val);
+//				map.put(key, ll);
+//			}
+//		}
+//		return map;
+//	}
+//
+//	private static String[] splitKeyValue(String elm) {
+//		final int LEN = elm.length();
+//		int l = 0;
+//		StringBuffer key = new StringBuffer();
+//		String value;
+//		while (l < LEN - 1) {
+//			if (elm.charAt(l) == '-' && elm.charAt(l + 1) == '>') {
+//				value = elm.substring(l + 2, LEN);
+//				return new String[] { key.toString(), value };
+//			} else {
+//				key.append(elm.charAt(l));
+//			}
+//			l++;
+//		}
+//
+//		throw new IllegalArgumentException(elm);
+//	}
 
 	public static long parsePrologTimeStamp(String input) {
 		long l = 1000 * (long) Double.parseDouble(input);
