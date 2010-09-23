@@ -43,8 +43,9 @@ public class PrologRefactoringProcessor extends RefactoringProcessor {
 		}
 		try {
 			s = info.getPrologInterace().getSession(PrologInterface.NONE);
+			PrologRuntimePlugin.getDefault();
 			info.configure(
-					PrologRuntimePlugin.getDefault().getLibraryManager(), s);
+					PrologRuntimePlugin.getLibraryManager(), s);
 			String selectionTerm = info.getSelectionTerm();
 			String parameterTerm = info.getParameterTerm();
 			String identifier = info.getRefactoringId();
