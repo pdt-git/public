@@ -418,11 +418,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 	private void fireAfterConnect() {
 		ConsoleModelEvent e = new ConsoleModelEvent(this);
-		HashSet<ConsoleModelListener> l;
-
-		synchronized (listeners) {
-			l = (HashSet<ConsoleModelListener>) listeners.clone();
-		}
+		HashSet<ConsoleModelListener> l = getAListenersClone();
 
 		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = i.next();
@@ -431,13 +427,8 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	private void fireBeforeDisconnect() {
-
 		ConsoleModelEvent e = new ConsoleModelEvent(this);
-		HashSet<ConsoleModelListener> l;
-
-		synchronized (listeners) {
-			l = (HashSet<ConsoleModelListener>) listeners.clone();
-		}
+		HashSet<ConsoleModelListener> l = getAListenersClone();
 
 		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = i.next();
@@ -446,11 +437,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	void fireOutputEvent(ConsoleModelEvent cme) {
-		HashSet<ConsoleModelListener> l;
-
-		synchronized (listeners) {
-			l = (HashSet<ConsoleModelListener>) listeners.clone();
-		}
+		HashSet<ConsoleModelListener> l = getAListenersClone();
 
 		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = i.next();
@@ -459,25 +446,16 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	}
 
 	void fireModeChange(ConsoleModelEvent cme) {
-		HashSet<ConsoleModelListener> l;
-
-		synchronized (listeners) {
-			l = (HashSet<ConsoleModelListener>) listeners.clone();
-		}
+		HashSet<ConsoleModelListener> l = getAListenersClone();
 
 		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = i.next();
 			list.onModeChange(cme);
 		}
-
 	}
 
 	private void fireCommitEvent(ConsoleModelEvent cme) {
-		HashSet<ConsoleModelListener> l;
-
-		synchronized (listeners) {
-			l = (HashSet<ConsoleModelListener>) listeners.clone();
-		}
+		HashSet<ConsoleModelListener> l = getAListenersClone();
 
 		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = i.next();
@@ -488,16 +466,21 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 	private void fireEditBufferChangedEvent(String oldBuffer, String buffer) {
 		ConsoleModelEvent ev = new ConsoleModelEvent(this, oldBuffer, buffer);
 
-		HashSet<ConsoleModelListener> l;
-
-		synchronized (listeners) {
-			l = (HashSet<ConsoleModelListener>) listeners.clone();
-		}
+		HashSet<ConsoleModelListener> l = getAListenersClone();
 
 		for (Iterator<ConsoleModelListener> i = l.iterator(); i.hasNext();) {
 			ConsoleModelListener list = i.next();
 			list.onEditBufferChanged(ev);
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private HashSet<ConsoleModelListener> getAListenersClone() {
+		HashSet<ConsoleModelListener> l;
+		synchronized (listeners) {
+			l = (HashSet<ConsoleModelListener>) listeners.clone();
+		}
+		return l;
 	}
 
 	@Override
