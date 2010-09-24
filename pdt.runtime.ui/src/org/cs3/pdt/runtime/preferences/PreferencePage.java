@@ -127,7 +127,7 @@ public class PreferencePage extends FieldEditorPreferencePage implements IWorkbe
 		Set<String> subscriptionIds = registry.getAllSubscriptionIDs();
 		for (String id : subscriptionIds) {
 			PrologInterface pif = registry.getPrologInterface(registry.getSubscription(id).getPifKey());
-			if(pif.isDown()){
+			if(pif != null && !(pif.isDown()) ){   // Sinan & Günter, 24.9.2010
 				pif.setExecutable(newPrefExecutable);
 			}
 		}
