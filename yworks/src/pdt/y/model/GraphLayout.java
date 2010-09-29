@@ -10,8 +10,6 @@ import y.layout.hierarchic.incremental.DrawingDistanceCalculator;
 import y.layout.hierarchic.incremental.HierarchicLayouter;
 import y.layout.hierarchic.incremental.SimplexNodePlacer;
 import y.layout.router.OrthogonalEdgeRouter;
-import demo.view.hierarchic.AdaptNodeToLabelWidths;
-import demo.view.hierarchic.LabelAwareDrawingDistanceCalculator;
 
 public class GraphLayout {
 

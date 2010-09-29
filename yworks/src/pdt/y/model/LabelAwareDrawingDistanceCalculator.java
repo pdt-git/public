@@ -55,7 +55,8 @@ public class LabelAwareDrawingDistanceCalculator
   }
 
 
-  public void initialize(
+  @Override
+public void initialize(
           LayoutGraph graph, Layers layers, LayoutDataProvider ldp
   ) {
     if (wrappedCalculator != null) {
@@ -63,7 +64,8 @@ public class LabelAwareDrawingDistanceCalculator
     }
   }
 
-  public double getMinDistance(
+  @Override
+public double getMinDistance(
           LayoutGraph graph,
           Layer layer,
           LayoutDataProvider ldp,
@@ -98,7 +100,8 @@ public class LabelAwareDrawingDistanceCalculator
     }
   }
 
-  public void dispose(
+  @Override
+public void dispose(
           LayoutGraph graph, Layers layers, LayoutDataProvider ldp
   ) {
     if (wrappedCalculator != null) {

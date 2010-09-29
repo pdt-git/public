@@ -2,16 +2,12 @@ package pdt.y.model.realizer;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-
 import pdt.y.model.GraphModel;
 import y.base.Node;
 import y.base.NodeCursor;
-import y.geom.YDimension;
 import y.geom.YInsets;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
-import y.view.SizeConstraintProvider;
 import y.view.hierarchy.GroupNodeRealizer;
 import y.view.hierarchy.HierarchyManager;
 
@@ -20,8 +16,6 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 	private static double Y_OFFSET = 3.0;
 	private static double X_OFFSET = 3.0;
 	protected GraphModel model;
-	private double totalLableHeight = 0.0;
-	private double totalLableWidth = 0.0;
 	private boolean showContentAsLabel = false;
 
 	public PrologGroupNodeRealizer(GraphModel model) {
@@ -73,30 +67,7 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 		return childLabel;
 	}
 
-	private void calculateLabelSize() {
-		double height = Y_OFFSET;
-		double width = 0;
-		for (int a=0; a<labelCount(); a++){
-			NodeLabel label= getLabel(a);
-			height += label.getHeight()+Y_OFFSET;
-			width = Math.max(width,label.getWidth());
-		}
-		NodeCursor nodeCursor = getNodeCursorForInnerNodes();
-		if (nodeCursor != null) {
-			while (nodeCursor.ok()) {
-				Node childNode = nodeCursor.node();
-				NodeLabel label = new NodeLabel();
-				String labelText = model.getLabelTextForNode(childNode);
-				label.setText(labelText);
-				height += label.getHeight()+Y_OFFSET;
-				width = Math.max(width,label.getWidth());
-				nodeCursor.next();
-			}
-		}
-		//width+= X_OFFSET *2;
-		totalLableHeight = height;
-		totalLableWidth = width;
-	}
+
 
 	private void paintContentLabel(Graphics2D gfx) {
 		NodeCursor nodeCursor = getNodeCursorForInnerNodes();

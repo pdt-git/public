@@ -74,12 +74,14 @@ public class AdaptNodeToLabelWidths extends AbstractLayoutStage {
   }
 
 
-  public boolean canLayout( final LayoutGraph graph ) {
+  @Override
+public boolean canLayout( final LayoutGraph graph ) {
     final Layouter layouter = getCoreLayouter();
     return layouter == null || layouter.canLayout(graph);
   }
 
-  public void doLayout( final LayoutGraph graph ) {
+  @Override
+public void doLayout( final LayoutGraph graph ) {
     adaptNodeWidthToLabels(graph);
     final Layouter layouter = getCoreLayouter();
     if (layouter != null) {
@@ -92,7 +94,8 @@ public class AdaptNodeToLabelWidths extends AbstractLayoutStage {
     isGroup = graph.getDataProvider(GroupingKeys.GROUP_DPKEY);
     if (isGroup == null) {
       isGroup = new DataProviderAdapter() {
-        public boolean getBool( final Object node ) {
+        @Override
+		public boolean getBool( final Object node ) {
           return false;
         }
       };
