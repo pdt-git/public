@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 import pdt.y.model.GraphModel;
-import pdt.y.model.realizer.MyShapeNodeRealizerSerializer;
+import pdt.y.model.realizer.PredicateNodeRealizerSerializer;
 import y.base.Node;
 import y.io.GraphMLIOHandler;
 import y.io.graphml.KeyScope;
@@ -31,7 +31,7 @@ public class GraphMLReader {
 				
 		addInputDataAccessorsToCore();
 
-		ioHandler.addNodeRealizerSerializer(new MyShapeNodeRealizerSerializer());
+		ioHandler.addNodeRealizerSerializer(new PredicateNodeRealizerSerializer());
 	}
 
 	private void addInputDataAccessorsToCore() {

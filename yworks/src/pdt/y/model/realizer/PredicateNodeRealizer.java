@@ -10,7 +10,7 @@ import y.view.NodeRealizer;
 import y.view.ShapeNodeRealizer;
 import y.view.SizeConstraintProvider;
 
-public class MyShapeNodeRealizer extends ShapeNodeRealizer{
+public class PredicateNodeRealizer extends ShapeNodeRealizer{
 
 	public static final int INITIAL_STATE = 0;
 	public static final int TRANSITION_STATE = 1;
@@ -21,7 +21,7 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 	private int state;
 	private GraphModel	 model;
 
-	public MyShapeNodeRealizer(GraphModel  model){
+	public PredicateNodeRealizer(GraphModel  model){
 		super(ShapeNodeRealizer.ROUND_RECT);
 		this.state = TRANSITION_STATE;
 		this.model= model;
@@ -29,12 +29,12 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 		this.setFillColor(Color.ORANGE);  
 	}
 
-	public MyShapeNodeRealizer(NodeRealizer r)
+	public PredicateNodeRealizer(NodeRealizer r)
 	{
 		super(r);
-		if(r instanceof MyShapeNodeRealizer)
+		if(r instanceof PredicateNodeRealizer)
 		{
-			MyShapeNodeRealizer sr = (MyShapeNodeRealizer)r;
+			PredicateNodeRealizer sr = (PredicateNodeRealizer)r;
 			this.state = sr.state;
 			this.model	= sr.model;
 		}
@@ -99,7 +99,7 @@ public class MyShapeNodeRealizer extends ShapeNodeRealizer{
 	@Override
 	public NodeRealizer createCopy(NodeRealizer r)
 	{
-		return new MyShapeNodeRealizer(r);
+		return new PredicateNodeRealizer(r);
 	}
 
 }

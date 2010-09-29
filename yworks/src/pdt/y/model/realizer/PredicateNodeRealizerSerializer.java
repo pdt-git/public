@@ -12,8 +12,8 @@ import y.view.NodeRealizer;
 /**
  * RealizerSerializer that can be used to serialize instances of StateNodeRealizer to/from GraphML
  */
-public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerializer {
-	public MyShapeNodeRealizerSerializer(){
+public class PredicateNodeRealizerSerializer extends AbstractNodeRealizerSerializer {
+	public PredicateNodeRealizerSerializer(){
 		super();
 		
 	}
@@ -25,28 +25,28 @@ public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerialize
 
 
 	@Override
-	public Class<MyShapeNodeRealizer> getRealizerClass() {
-		return MyShapeNodeRealizer.class;
+	public Class<PredicateNodeRealizer> getRealizerClass() {
+		return PredicateNodeRealizer.class;
 	}
 
 	@Override
 	public void parse(NodeRealizer realizer, Node domNode, GraphMLParseContext context) throws GraphMLParseException {
 		super.parse(realizer, domNode, context);
 		
-		MyShapeNodeRealizer snr = (MyShapeNodeRealizer) realizer;
+		PredicateNodeRealizer snr = (PredicateNodeRealizer) realizer;
 		
 		String attribute = ((Element) domNode).getAttribute("key");
 		if(attribute.equals("module")){
 			Node moduleNode = ((Element) domNode).getChildNodes().item(0);
 			String state=moduleNode.toString();
 			if("initial".equals(state)) {
-				snr.setState(MyShapeNodeRealizer.INITIAL_STATE);
+				snr.setState(PredicateNodeRealizer.INITIAL_STATE);
 			}
 			else if("transition".equals(state)) {
-				snr.setState(MyShapeNodeRealizer.TRANSITION_STATE);
+				snr.setState(PredicateNodeRealizer.TRANSITION_STATE);
 			}
 			else if("final".equals(state)) {
-				snr.setState(MyShapeNodeRealizer.FINAL_STATE);
+				snr.setState(PredicateNodeRealizer.FINAL_STATE);
 			}
 
 		}
@@ -57,15 +57,15 @@ public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerialize
 	@Override
 	public void writeAttributes(NodeRealizer nr, XmlWriter writer, GraphMLWriteContext context) {
 		super.writeAttributes(nr, writer, context);
-		MyShapeNodeRealizer snr = (MyShapeNodeRealizer) nr;
+		PredicateNodeRealizer snr = (PredicateNodeRealizer) nr;
 		switch(snr.getState()) {
-		case MyShapeNodeRealizer.INITIAL_STATE:
+		case PredicateNodeRealizer.INITIAL_STATE:
 			writer.writeAttribute("state", "initial");
 			break;
-		case MyShapeNodeRealizer.TRANSITION_STATE:
+		case PredicateNodeRealizer.TRANSITION_STATE:
 			writer.writeAttribute("state", "transition");
 			break;
-		case MyShapeNodeRealizer.FINAL_STATE:
+		case PredicateNodeRealizer.FINAL_STATE:
 			writer.writeAttribute("state", "final");
 			break;
 		}
