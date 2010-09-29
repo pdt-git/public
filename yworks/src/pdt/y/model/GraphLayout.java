@@ -25,13 +25,11 @@ public class GraphLayout {
 		
 		stage.setCoreLayouter(coreLayouter);
 		stage.appendStage(edgeLayouter);
-//		stage.appendStage(new EdgeGroupRouterStage(coreLayouter));
 	}
 
 
 	protected LayoutStage createEdgeLayout() {
 		OrthogonalEdgeRouter router = new OrthogonalEdgeRouter();
-		//ChannelEdgeRouter router = new ChannelEdgeRouter();
 	    router.setLocalCrossingMinimizationEnabled(true);
 	    router.setCrossingCost(2.0);
 	    router.setReroutingEnabled(true);
@@ -47,20 +45,20 @@ public class GraphLayout {
 		layouter.getNodeLayoutDescriptor().setMinimumDistance(10);
 
 		
-		//use left-to-right layout orientation
+		//use top-to-bottom layout orientation
+		// the  layouter.setOrientation(..) is not working therefore set orientation manually
 		OrientationLayouter ol = new OrientationLayouter();
 		ol.setOrientation(LayoutOrientation.TOP_TO_BOTTOM);
 		layouter.setOrientationLayouter(ol);
-//		layouter.setBackloopRoutingEnabled(true);
+		
+		
 		layouter.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TIGHT_TREE);
-//		layouter.setFromScratchLayeringStrategy(IncrementalHierarchicLayouter.LAYERING_STRATEGY_HIERARCHICAL_TOPMOST);
 		layouter.setGroupAlignmentPolicy(IncrementalHierarchicLayouter.POLICY_ALIGN_GROUPS_CENTER);
-		//layout.setSubgraphLayouter(arg0);	// here is something for stages
 
 		
 	    final AdaptNodeToLabelWidths stage = new AdaptNodeToLabelWidths();
 	    stage.setAdaptGroupNodesOnly(false);
-	    //stage.setGroupLabelWidthAdjustment(20);
+
 
 	    layouter.prependStage(stage);
 	    final HierarchicLayouter hl = layouter.getHierarchicLayouter();
@@ -87,10 +85,10 @@ public class GraphLayout {
 	    layouter.setNodePlacer(snp);
 	   
 	    
+	    
+	    // Crashes when doing  doLayout manually
 	    layouter.setAutomaticEdgeGroupingEnabled(true);
-	    //layouter.setNodeToNodeDistance(10);
-	    //layouter.setNodeToEdgeDistance(8);
-		
+	    
 		return layouter;
 	}
 	

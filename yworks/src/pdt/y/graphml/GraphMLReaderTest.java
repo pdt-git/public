@@ -2,6 +2,8 @@ package pdt.y.graphml;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -52,9 +54,7 @@ public class GraphMLReaderTest {
 		
 		Node firstNode = graph.firstNode();
 		Node lastNode = graph.lastNode();
-		
-		assertThat(graphReader.getIdForNode(firstNode),is("1"));
-		assertThat(graphReader.getIdForNode(lastNode),is("2"));
+		assertThat(firstNode,is(not(equalTo(lastNode))));
 		
 		Edge edge = graph.firstEdge(); 
 		assertThat(edge.source(),is(firstNode));

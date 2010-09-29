@@ -1,17 +1,15 @@
 package pdt.y.model;
 
-import pdt.y.model.realizer.CallEdgeRealizer;
-import pdt.y.model.realizer.FileGroupNodeRealizer;
-import pdt.y.model.realizer.LoadEdgeRealizer;
-import pdt.y.model.realizer.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.PredicateNodeRealizer;
-import y.base.DataMap;
+import pdt.y.model.realizer.edges.CallEdgeRealizer;
+import pdt.y.model.realizer.edges.LoadEdgeRealizer;
+import pdt.y.model.realizer.groups.ModuleGroupNodeRealizer;
+import pdt.y.model.realizer.nodes.FileGroupNodeRealizer;
+import pdt.y.model.realizer.nodes.PredicateNodeRealizer;
 import y.base.Edge;
 import y.base.EdgeMap;
 import y.base.Node;
 import y.layout.PortConstraint;
 import y.layout.PortConstraintKeys;
-import y.util.Maps;
 import y.view.EdgeRealizer;
 import y.view.Graph2D;
 import y.view.NodeRealizer;
@@ -23,14 +21,7 @@ public class GraphModel {
 	private static GraphModel instance = null;
 	private Graph2D graph=new Graph2D();
     
-	// Addition data:
-	private DataMap nodeMap = Maps.createHashedDataMap();
-	private DataMap moduleMap = Maps.createHashedDataMap();
-	private DataMap fileNameMap = Maps.createHashedDataMap();
-	private DataMap kindMap = Maps.createHashedDataMap();
-	private DataMap functorMap = Maps.createHashedDataMap();
-	private DataMap arityMap = Maps.createHashedDataMap();
-	private DataMap callFrequencyMap = Maps.createHashedDataMap();
+	private GraphDataHolder dataHolder=new GraphDataHolder();
 	
 	private HierarchyManager hierarchy = null;
 	
@@ -41,16 +32,18 @@ public class GraphModel {
 	private EdgeRealizer callEdgeRealizer;
 	private EdgeRealizer loadEdgeRealizer;
 
-	private static final String MODULE = "module";
-	private static final String FILE = "file";
-	private static final String PREDICATE = "predicate";
-	private static final String CALL = "call";
-	private static final String LOADING = "loading";
-	
-	public GraphModel(){
-		initRealizer();
+		
+	private GraphModel(){
+		  
+		initNodeRealizers();
+		initEdgeRealizers();
 	}
 	
+	
+	/**
+	 * Singleton Pattern
+	 * This method should be used to get access to the model
+	 */
 	public static GraphModel getInstance() {
 		if (instance == null) {
 			instance = new GraphModel();
@@ -58,10 +51,7 @@ public class GraphModel {
 		return instance;
 	}
 
-	private void initRealizer() {
-		initNodeRealizers();
-		initEdgeRealizers();
-	}
+	
 
 	private void initNodeRealizers() {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
@@ -83,9 +73,9 @@ public class GraphModel {
 
 	private void categorizeNodes() {
 		for (Node node: graph.getNodeArray()) {
-			if (isModule(node)) {
+			if (dataHolder.isModule(node)) {
 				graph.setRealizer(node, new ModuleGroupNodeRealizer(moduleGroupNodeRealizer));
-			} else if (isFile(node)) {
+			} else if (dataHolder.isFile(node)) {
 				graph.setRealizer(node, new FileGroupNodeRealizer(filegroupNodeRealizer));
 			} else {
 				// no realizer to set because it is already bound to default realizer
@@ -95,9 +85,9 @@ public class GraphModel {
 
 	private void categorizeEdges() {
 		for (Edge edge: graph.getEdgeArray()) {
-			if (isLoadingEdge(edge)) {
+			if (dataHolder.isLoadingEdge(edge)) {
 				graph.setRealizer(edge, new LoadEdgeRealizer(loadEdgeRealizer));
-			} else if (isCallEdge(edge)) {
+			} else if (dataHolder.isCallEdge(edge)) {
 				CallEdgeRealizer newCallEdgeRealizer = new CallEdgeRealizer(callEdgeRealizer);
 				graph.setRealizer(edge, newCallEdgeRealizer);
 				newCallEdgeRealizer.adjustLineWidth();
@@ -107,46 +97,7 @@ public class GraphModel {
 		}
 	}
 
-	public String getIdForNode(Node node){
-		return nodeMap.get(node).toString();
-	}
 	
-	public String getModule(Node node){
-		return moduleMap.get(node).toString();
-	}
-	
-	
-	
-	// Getter and Setter
-
-	public DataMap getNodeMap() {
-		return nodeMap;
-	}
-
-	public DataMap getModuleMap() {
-		return moduleMap;
-	}
-
-	public DataMap getFileNameMap() {
-		return fileNameMap;
-	}
-	
-	public DataMap getKindMap() {
-		return kindMap;
-	}
-
-	public DataMap getFunctorMap() {
-		return functorMap;
-	}
-
-	public DataMap getArityMap() {
-		return arityMap;
-	}
-
-	public DataMap getCallFrequencyMap() {
-		return callFrequencyMap;
-	}
-
 	public Graph2D getGraph() {
 		return graph;
 	}
@@ -180,58 +131,36 @@ public class GraphModel {
 		this.graph.clear();
 	}
 
-	public boolean isPredicate(Node node) {
-		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
-		return kind.equals(GraphModel.PREDICATE);
-	}
-
-	public boolean isModule(Node node) {
-		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
-		return kind.equals(GraphModel.MODULE);
-	}
-
-	public boolean isFile(Node node) {
-		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(node).toString();
-		return kind.equals(GraphModel.FILE);
+	public String getLabelTextForNode(Node node){
+		return dataHolder.getLabelTextForNode(node);
 	}
 	
-	public boolean isCallEdge(Edge edge) {
-		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(edge).toString();
-		return kind.equals(GraphModel.CALL);
-	}
 	
-	public boolean isLoadingEdge(Edge edge) {
-		DataMap kindMap = getKindMap();
-		String kind = kindMap.get(edge).toString();
-		return kind.equals(GraphModel.LOADING);
-	}
 
-	public String getLabelTextForNode(Node node) {
-		String labelText;
-		if (isModule(node)) {
-			labelText = moduleMap.get(node).toString();
-		} else if (isFile(node))  {
-			labelText = fileNameMap.get(node).toString();
-		} else if (isPredicate(node))  {
-			labelText = functorMap.get(node) + " / " + arityMap.get(node);
-		} else {
-			labelText=nodeMap.get(node).toString();
-		}
-		return labelText;
-	}
 
 	public void assignPortsToEdges() {
 		EdgeMap sourceMap = graph.createEdgeMap();
 		PortConstraint portConstraint = PortConstraint.create(PortConstraint.SOUTH, true);
 		for (Edge edge: graph.getEdgeArray()) {
-			if (isLoadingEdge(edge)) {
+			if (dataHolder.isLoadingEdge(edge)) {
 				sourceMap.set(edge, portConstraint);
 			} 
 		}
 		graph.addDataProvider(PortConstraintKeys.SOURCE_PORT_CONSTRAINT_KEY, sourceMap);
+	}
+
+
+	public int getFrequency(Edge edge) {
+		return dataHolder.getFrequency(edge);
+	}
+
+
+	public boolean isCallEdge(Edge edge) {
+		return dataHolder.isCallEdge(edge);
+	}
+
+
+	public GraphDataHolder getDataHolder() {
+		return this.dataHolder;
 	}
 }

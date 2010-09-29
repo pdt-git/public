@@ -1,4 +1,4 @@
-package pdt.y.model.realizer;
+package pdt.y.model.realizer.groups;
 
 import java.awt.Color;
 

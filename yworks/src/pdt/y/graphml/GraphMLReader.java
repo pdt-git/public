@@ -3,9 +3,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
+import pdt.y.model.GraphDataHolder;
 import pdt.y.model.GraphModel;
-import pdt.y.model.realizer.PredicateNodeRealizerSerializer;
-import y.base.Node;
+import pdt.y.model.realizer.nodes.PredicateNodeRealizerSerializer;
 import y.io.GraphMLIOHandler;
 import y.io.graphml.KeyScope;
 import y.io.graphml.KeyType;
@@ -35,13 +35,14 @@ public class GraphMLReader {
 	}
 
 	private void addInputDataAccessorsToCore() {
-		core.addInputDataAcceptor("id", model.getNodeMap(), KeyScope.NODE, KeyType.STRING);
-		core.addInputDataAcceptor("module", model.getModuleMap(), KeyScope.NODE,KeyType.STRING);
-		core.addInputDataAcceptor("description", model.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
-		core.addInputDataAcceptor("kind", model.getKindMap(), KeyScope.ALL, KeyType.STRING);
-		core.addInputDataAcceptor("functor", model.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
-		core.addInputDataAcceptor("arity", model.getArityMap(), KeyScope.NODE, KeyType.INT);
-		core.addInputDataAcceptor("frequency", model.getCallFrequencyMap(), KeyScope.EDGE, KeyType.INT);
+		GraphDataHolder dataHolder = model.getDataHolder();
+		core.addInputDataAcceptor("id", dataHolder.getNodeMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("module", dataHolder.getModuleMap(), KeyScope.NODE,KeyType.STRING);
+		core.addInputDataAcceptor("description", dataHolder.getFileNameMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("kind", dataHolder.getKindMap(), KeyScope.ALL, KeyType.STRING);
+		core.addInputDataAcceptor("functor", dataHolder.getFunctorMap(), KeyScope.NODE, KeyType.STRING);
+		core.addInputDataAcceptor("arity", dataHolder.getArityMap(), KeyScope.NODE, KeyType.INT);
+		core.addInputDataAcceptor("frequency", dataHolder.getCallFrequencyMap(), KeyScope.EDGE, KeyType.INT);
 	}
 	
 	private boolean loadFile(URL resource){
@@ -58,7 +59,6 @@ public class GraphMLReader {
 	
 	public GraphModel readFile(URL resource){
 		this.loadFile(resource);
-		//model.assignSouthPortToEdges();
 		return this.model;
 	}
 	
@@ -73,14 +73,6 @@ public class GraphMLReader {
 		return model.getGraph();
 	}
 	
-	// For testing:
-	String getIdForNode(Node node){
-		return model.getIdForNode(node);
-	}
-	
-	// For testing:
-	String getModule(Node node){
-		return model.getModule(node);
-	}
+
 	
 }

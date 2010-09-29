@@ -1,9 +1,8 @@
-package pdt.y.model.realizer;
+package pdt.y.model.realizer.edges;
 
 import java.awt.Color;
 
 import pdt.y.model.GraphModel;
-import y.base.DataMap;
 import y.base.Edge;
 import y.view.Arrow;
 import y.view.EdgeRealizer;
@@ -38,8 +37,7 @@ public class CallEdgeRealizer extends GenericEdgeRealizer {
 		Edge edge = getEdge();
 		GraphModel model = GraphModel.getInstance();
 		if(model.isCallEdge(edge)) {
-			DataMap frequencyMap = model.getCallFrequencyMap();
-			int frequency = frequencyMap.getInt(edge);
+			int frequency = model.getFrequency(edge);
 //			if (frequency <= 1)
 //				return 1;
 //			if (frequency <= 3)

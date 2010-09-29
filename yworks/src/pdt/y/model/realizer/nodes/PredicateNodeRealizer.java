@@ -1,4 +1,4 @@
-package pdt.y.model.realizer;
+package pdt.y.model.realizer.nodes;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -45,11 +45,6 @@ public class PredicateNodeRealizer extends ShapeNodeRealizer{
 	}
 	@Override
 	protected void paintNode(Graphics2D gfx) {
-
-		if(model.getModule(this.getNode()).equals("transition")){
-			this.setShapeType(TRIANGLE);
-		}
-
 		switch (state) {
 		case INITIAL_STATE:
 			gfx.setStroke(LineType.DASHED_1);
