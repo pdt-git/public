@@ -40,6 +40,7 @@ public class MoveSelectedSelectionMode extends MoveSelectionMode {
 		YCursor cursor= graph.selectedNodes();
 		
 		if (cursor.ok()) {
+			
 			router.doLayout(graph);
 			graph.updateViews();
 		}

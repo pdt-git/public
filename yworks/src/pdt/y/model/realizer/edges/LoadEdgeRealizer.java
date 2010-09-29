@@ -1,4 +1,4 @@
-package pdt.y.model.realizer;
+package pdt.y.model.realizer.edges;
 
 import java.awt.Color;
 

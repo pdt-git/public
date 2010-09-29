@@ -106,6 +106,8 @@ public class PDTGraphSwingStandalone extends  JPanel {
 	
 	public void calcLayout() {
 		view.applyLayout(layoutModel.getLayouter());
+//		layoutModel.getLayouter().doLayout(graph);
+//		graph.updateViews();
 		view.fitContent();
 		view.updateView();
 	}

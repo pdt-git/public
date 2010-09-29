@@ -1,4 +1,4 @@
-package pdt.y.model.realizer;
+package pdt.y.model.realizer.nodes;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

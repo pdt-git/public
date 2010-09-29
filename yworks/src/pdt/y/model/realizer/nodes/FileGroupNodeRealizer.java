@@ -1,8 +1,9 @@
-package pdt.y.model.realizer;
+package pdt.y.model.realizer.nodes;
 
 import java.awt.Color;
 
 import pdt.y.model.GraphModel;
+import pdt.y.model.realizer.groups.PrologGroupNodeRealizer;
 import y.view.NodeLabel;
 import y.view.NodeRealizer;
 
