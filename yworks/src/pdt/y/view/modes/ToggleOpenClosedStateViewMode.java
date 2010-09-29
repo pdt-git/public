@@ -27,31 +27,34 @@ public void mouseClicked(MouseEvent event) {
     if(node == null)
     	return;
     
-    // Test if the node is rendered by GroupNodeRealizer.   
     GroupNodeRealizer groupNodeRealizer = getGroupNodeRealizer(node);
   
     if(groupNodeRealizer == null)
     	return;
     
-    // Get the state label.   
     NodeLabel stateLabel = groupNodeRealizer.getStateLabel();  
     // Test, if the mouse event occurred on the state icon.   
     if (stateLabel.getBox().contains(x, y)) {  
     	// Retrieve the HierarchyManager of the hierarchically organized graph.   
     	hierarchyManager = HierarchyManager.getInstance(view.getGraph2D());  
 
-    	if (hierarchyManager.isFolderNode(node)) {  
-    		// Invokes a customized OpenFolders Action implementation.  
+    	if (hierarchyManager.isFolderNode(node)) {
+    		// If the node is a folder node a specific pre defined action openFolders needs to be used
+    		// A group node is: a folder node if the state is closed.
+    		//                  a group node  if the state is open
     		new Graph2DViewActions.OpenFoldersAction().openFolders(view);  
     	}  
     	else {  
-    		// Invokes a customized CloseGroups Action implementation.  
     		new Graph2DViewActions.CloseGroupsAction().closeGroups(view);  
     	}  
     }  
       
   }
-
+ /**
+  * 
+  * Tests if the node is rendered by GroupNodeRealizer.   
+  * 
+  */
   private GroupNodeRealizer getGroupNodeRealizer(Node node) {
 	  GroupNodeRealizer groupNodeRealizer = null;
 	  Graph2D graph =  view.getGraph2D();

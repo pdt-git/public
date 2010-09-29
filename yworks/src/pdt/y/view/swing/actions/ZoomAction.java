@@ -1,4 +1,4 @@
-package pdt.y.view.actions;
+package pdt.y.view.swing.actions;
 
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;

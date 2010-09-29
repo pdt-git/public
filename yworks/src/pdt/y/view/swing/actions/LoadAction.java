@@ -1,4 +1,4 @@
-package pdt.y.view.actions;
+package pdt.y.view.swing.actions;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -9,7 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import pdt.y.main.PDTGraphSwing;
+import pdt.y.main.PDTGraphSwingStandalone;
 
 /**
 	 * Action that loads the current graph from a file in GraphML format.
@@ -20,9 +20,9 @@ import pdt.y.main.PDTGraphSwing;
 		 */
 		private static final long serialVersionUID = 65359810633139537L;
 		JFileChooser chooser;
-		private PDTGraphSwing frame;
+		private PDTGraphSwingStandalone frame;
 
-		public LoadAction(PDTGraphSwing pdtGraphSwing) {
+		public LoadAction(PDTGraphSwingStandalone pdtGraphSwing) {
 			super("Load...");
 			chooser = null;
 			this.frame = pdtGraphSwing;

@@ -13,13 +13,13 @@ import javax.swing.JRootPane;
 import pdt.y.graphml.GraphMLReader;
 import pdt.y.model.GraphLayout;
 import pdt.y.model.GraphModel;
-import pdt.y.view.actions.ExitAction;
-import pdt.y.view.actions.LoadAction;
-import pdt.y.view.actions.ResetLayout;
 import pdt.y.view.modes.HierarchicPopupMode;
-import pdt.y.view.modes.MyMoveSelectionMode;
+import pdt.y.view.modes.MoveSelectedSelectionMode;
 import pdt.y.view.modes.ToggleOpenClosedStateViewMode;
 import pdt.y.view.modes.WheelScroller;
+import pdt.y.view.swing.actions.ExitAction;
+import pdt.y.view.swing.actions.LoadAction;
+import pdt.y.view.swing.actions.ResetLayout;
 import y.base.Node;
 import y.layout.router.OrthogonalEdgeRouter;
 import y.view.EditMode;
@@ -27,7 +27,7 @@ import y.view.Graph2D;
 import y.view.Graph2DView;
 import y.view.Graph2DViewMouseWheelZoomListener;
 
-public class PDTGraphSwing extends  JPanel {
+public class PDTGraphSwingStandalone extends  JPanel {
 	private Graph2DView view;
 	private GraphModel model;
 	private Graph2D graph;
@@ -37,7 +37,7 @@ public class PDTGraphSwing extends  JPanel {
 	
 	private static final long serialVersionUID = -611433500513523511L;
 
-	public PDTGraphSwing() 
+	public PDTGraphSwingStandalone() 
 	{
 		this.setLayout(new BorderLayout());
 		
@@ -63,7 +63,7 @@ public class PDTGraphSwing extends  JPanel {
 		editMode.allowNodeCreation(false);
 		editMode.allowEdgeCreation(false);
 		editMode.setPopupMode(new HierarchicPopupMode());
-		editMode.setMoveSelectionMode(new MyMoveSelectionMode(new OrthogonalEdgeRouter()));
+		editMode.setMoveSelectionMode(new MoveSelectedSelectionMode(new OrthogonalEdgeRouter()));
 		return editMode;
 	}
 
@@ -131,7 +131,7 @@ public class PDTGraphSwing extends  JPanel {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				(new PDTGraphSwing()).start();
+				(new PDTGraphSwingStandalone()).start();
 			}
 		});
 	}

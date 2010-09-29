@@ -1,16 +1,16 @@
-package pdt.y.view.actions;
+package pdt.y.view.swing.actions;
 
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 
-import pdt.y.main.PDTGraphSwing;
+import pdt.y.main.PDTGraphSwingStandalone;
 
 public class ResetLayout extends AbstractAction{
 	private static final long serialVersionUID = -5882701241202823622L;
-	private PDTGraphSwing view;
+	private PDTGraphSwingStandalone view;
 	
-	public ResetLayout(PDTGraphSwing pdtGraphSwing) {
+	public ResetLayout(PDTGraphSwingStandalone pdtGraphSwing) {
 		super("Reset Layout");
 		this.view = pdtGraphSwing;
 	}

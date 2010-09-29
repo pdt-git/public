@@ -20,5 +20,5 @@ Bundle-ClassPath: .,
  lib/y.jar,
  lib/hamcrest-core-1.2.jar,
  lib/hamcrest-library-1.2.jar
-Bundle-Activator: pdt.y.main.Activator
+Bundle-Activator: pdt.y.main.PluginActivator
 Bundle-ActivationPolicy: lazy

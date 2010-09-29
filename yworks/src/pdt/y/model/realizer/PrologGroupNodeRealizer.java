@@ -13,9 +13,9 @@ import y.view.hierarchy.HierarchyManager;
 
 abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 
+	protected GraphModel model;
 	private static double Y_OFFSET = 3.0;
 	private static double X_OFFSET = 3.0;
-	protected GraphModel model;
 	private boolean showContentAsLabel = false;
 
 	public PrologGroupNodeRealizer(GraphModel model) {
@@ -24,12 +24,12 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 		init();
 	}
 
-	public PrologGroupNodeRealizer(NodeRealizer nr) {
-		super(nr);
-		if(nr instanceof PrologGroupNodeRealizer)
+	public PrologGroupNodeRealizer(NodeRealizer nodeRealizer) {
+		super(nodeRealizer);
+		if(nodeRealizer instanceof PrologGroupNodeRealizer)
 		{
-			PrologGroupNodeRealizer sr = (PrologGroupNodeRealizer)nr;
-			this.model	= sr.model;
+			PrologGroupNodeRealizer specialRealizer = (PrologGroupNodeRealizer)nodeRealizer;
+			this.model	= specialRealizer.model;
 		}
 		init();
 	}
@@ -37,13 +37,15 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 	protected void init() {
 		setFillColor(Color.YELLOW);
 		setShapeType(GroupNodeRealizer.ROUND_RECT);
-		//setConsiderNodeLabelSize(true); 
 		setAutoBoundsEnabled(true);
 		YInsets minInsets = new YInsets(5,5,5,5);
 		setMinimalInsets(minInsets);
 		createHeaderLabel();
 	}
     
+	/**
+	 *  Descendants need to provide an own label for the header
+	 */
     protected abstract void createHeaderLabel();
 	
 	@Override
@@ -53,8 +55,6 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 		if (showContentAsLabel) {
 			paintContentLabel(gfx);
 		}
-//		YDimension dimension = calculateMinSize();
-//		setSize(dimension.width, dimension.height);
 	}
 
 	private NodeLabel paintAnInnerLabel(Graphics2D gfx, String labelText, double yOffset) {
@@ -77,8 +77,6 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 			Node childNode = nodeCursor.node();
 			String labelText = model.getLabelTextForNode(childNode);
 			NodeLabel childLabel = paintAnInnerLabel(gfx, labelText, momentaryLabelHeight);
-			//gfx.setColor(getLineColor());
-			//gfx.drawLine((int)x+1,(int)(y+actualYOffset),(int)(x+width-1),(int)(y+labelHeight));
 			momentaryLabelHeight += childLabel.getHeight() + Y_OFFSET;
 		
 			nodeCursor.next();
@@ -96,24 +94,6 @@ abstract public class PrologGroupNodeRealizer extends GroupNodeRealizer {
 		return nodeCursor;
 	}
 
-/*	@Override
-	public SizeConstraintProvider getSizeConstraintProvider() {
-		YDimension minSize = calculateMinSize();
-		return new SizeConstraintProvider.Default(minSize, minSize);
-	}
 
-	private YDimension calculateMinSize() {
-		if (showContentAsLabel) {
-			calculateLabelSize();
-		}
-		Rectangle2D minimalGroupBounds = calcMinimumGroupBounds();
-		double innerGraphWidth = minimalGroupBounds.getWidth();
-		double maxWidth = Math.max(innerGraphWidth, totalLableWidth)+50.0;
-		
-		double innerGraphHeight = minimalGroupBounds.getHeight();
-		double maxHeight = innerGraphHeight + totalLableHeight+50.0;
-		
-		return new YDimension(maxWidth, maxHeight);
-	}*/
 
 }

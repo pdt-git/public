@@ -32,7 +32,7 @@ public class HierarchicPopupMode extends PopupMode{
 		return addFolderPopupItems(new JPopupMenu(), x, y, null, getGraph2D().selectedNodes().ok());
 	}
 
-	JPopupMenu addFolderPopupItems(JPopupMenu pm, double x, double y, Node node, boolean selected)
+	private JPopupMenu addFolderPopupItems(JPopupMenu pm, double x, double y, Node node, boolean selected)
 	{
 		AbstractAction action;
 		action = new Graph2DViewActions.OpenFoldersAction(view);
