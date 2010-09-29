@@ -20,7 +20,7 @@ public class PredicateNodeRealizerSerializer extends AbstractNodeRealizerSeriali
 	
 	@Override
 	public String getName() {
-		return "Muh";
+		return "predicate";
 	}
 
 

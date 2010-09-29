@@ -9,38 +9,47 @@ import java.awt.geom.Point2D;
 
 import y.view.Graph2DView;
 
+/**
+ * Implements  zooming the yWorks graph in/out with the mouse wheel. 
+ * Is used in the EditMode of the View 
+ * @author jn
+ */
 public class WheelScroller implements MouseWheelListener
 {
-  protected Graph2DView view;
-  
-  public WheelScroller(Graph2DView view)
-  {
-    this.view = view;
-  }
-  
-  @Override
-public void mouseWheelMoved(MouseWheelEvent e)
-  {
-    Point2D p2 = view.getCenter();
-    Point p = view.getViewPoint();
-    Dimension d = view.getViewSize();
-    Rectangle r = view.getWorldRect();
-    
-    if (e.getWheelRotation() >= 0)
-    {
-      if (r.getY() + r.getHeight() - 1 > p.getY() + d.height / view.getZoom())
-        p2.setLocation(p2.getX(), p2.getY() + e.getScrollAmount());
-    }
-    else
-    {
-      if (r.getY() + 1 < p.getY())
-        p2.setLocation(p2.getX(), p2.getY() - e.getScrollAmount());
-    }
-    
-    if (r.contains(p2))
-    {
-      view.setCenter(p2.getX(), p2.getY());
-      view.updateView();
-    }
-  }
+	protected Graph2DView view;
+
+	public WheelScroller(Graph2DView view)
+	{
+		this.view = view;
+	}
+
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent event)
+	{
+		Point2D centerPoint = view.getCenter();
+		Point viewpoint = view.getViewPoint();
+		Dimension viewSize = view.getViewSize();
+		Rectangle rectangle = view.getWorldRect();
+
+		if (isMouseWheelRotatedUp(event))
+		{
+			if (rectangle.getY() + rectangle.getHeight() - 1 > viewpoint.getY() + viewSize.height / view.getZoom())
+				centerPoint.setLocation(centerPoint.getX(), centerPoint.getY() + event.getScrollAmount());
+		}
+		else
+		{
+			if (rectangle.getY() + 1 < viewpoint.getY())
+				centerPoint.setLocation(centerPoint.getX(), centerPoint.getY() - event.getScrollAmount());
+		}
+
+		if (rectangle.contains(centerPoint))
+		{
+			view.setCenter(centerPoint.getX(), centerPoint.getY());
+			view.updateView();
+		}
+	}
+
+	private boolean isMouseWheelRotatedUp(MouseWheelEvent event) {
+		return event.getWheelRotation() >= 0;
+	}
 }

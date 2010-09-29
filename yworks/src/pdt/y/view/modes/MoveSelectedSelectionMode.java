@@ -6,15 +6,16 @@ import y.layout.router.OrthogonalEdgeRouter;
 import y.view.Graph2D;
 import y.view.MoveSelectionMode;
 
-/*
+/**
 * A special mode for moving a selection of the graph.
 */
-public class MyMoveSelectionMode extends MoveSelectionMode {
-	private static final boolean ROUTE_EDGES_ON_MOVE = true;
+public class MoveSelectedSelectionMode extends MoveSelectionMode {
+	// The rerouting of the edges should only be calculated after the move for performance issues
+	private static final boolean ROUTE_EDGES_ON_MOVE = false;
 	private Layouter router = new OrthogonalEdgeRouter();
 	
 	
-	public MyMoveSelectionMode(Layouter router) {
+	public MoveSelectedSelectionMode(Layouter router) {
 		super();
 		this.router = router;
 	}
@@ -34,7 +35,7 @@ public class MyMoveSelectionMode extends MoveSelectionMode {
 		super.selectionMovedAction(dx, dy, x, y);
 	}
 
-	void routeEdgesToSelection() {
+	private void routeEdgesToSelection() {
 		final Graph2D graph = view.getGraph2D();
 		YCursor cursor= graph.selectedNodes();
 		

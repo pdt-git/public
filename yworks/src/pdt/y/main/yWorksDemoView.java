@@ -8,8 +8,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
-import pdt.y.swt.commands.GraphLoadAction;
-import pdt.y.swt.commands.GraphPIFAction;
+import pdt.y.view.swt.commands.GraphLoadAction;
+import pdt.y.view.swt.commands.GraphPIFAction;
 
 
 public class yWorksDemoView extends ViewPart {
@@ -17,7 +17,7 @@ public class yWorksDemoView extends ViewPart {
 
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private SwingControl swingControl;
-    private PDTGraphSwing view = new PDTGraphSwing();
+    private PDTGraphSwingStandalone view = new PDTGraphSwingStandalone();
 
 	public yWorksDemoView() {
 	}

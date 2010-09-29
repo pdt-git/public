@@ -34,7 +34,7 @@ public class YWorksSubscription extends DefaultSubscription implements
 		
 		private YWorksSubscription(String id, String pifID,
 				String descritpion, String name) {
-			super(id, pifID, descritpion, name, Activator.PLUGIN_ID, true);
+			super(id, pifID, descritpion, name, PluginActivator.PLUGIN_ID, true);
 			setPersistent(false);
 
 		}

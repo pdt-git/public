@@ -1,4 +1,4 @@
-package pdt.y.swt.commands;
+package pdt.y.view.swt.commands;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -17,8 +17,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import pdt.y.main.Activator;
-import pdt.y.main.PDTGraphSwing;
+import pdt.y.main.PluginActivator;
+import pdt.y.main.PDTGraphSwingStandalone;
 
 public class GraphPIFAction  extends Action {
 	private static final String FILE_TO_CONSULT = "pl_ast_to_graphML";
@@ -31,10 +31,10 @@ public class GraphPIFAction  extends Action {
 	  
 	private File helpFile;
     private static ImageDescriptor image;
-	private PDTGraphSwing view;
+	private PDTGraphSwingStandalone view;
 
 
-	public GraphPIFAction(PDTGraphSwing view) {
+	public GraphPIFAction(PDTGraphSwingStandalone view) {
 		super("PIF",image);
 		this.view = view;
 		PrologRuntimeUIPlugin plugin=PrologRuntimeUIPlugin.getDefault();
@@ -52,7 +52,7 @@ public class GraphPIFAction  extends Action {
 	
 	@Override
 	public void run() {
-		PrologInterface pif=Activator.getDefault().getPrologInterface();
+		PrologInterface pif=PluginActivator.getDefault().getPrologInterface();
 		String prologNameOfFileToConsult = PATH_ALIAS+"("+FILE_TO_CONSULT+")";
 
 		String folderToParse = selectFolderToParse();

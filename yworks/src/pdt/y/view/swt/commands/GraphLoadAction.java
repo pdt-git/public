@@ -1,4 +1,4 @@
-package pdt.y.swt.commands;
+package pdt.y.view.swt.commands;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -10,7 +10,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import pdt.y.main.PDTGraphSwing;
+import pdt.y.main.PDTGraphSwingStandalone;
 
 public class GraphLoadAction  extends Action {
 	static {
@@ -18,9 +18,9 @@ public class GraphLoadAction  extends Action {
 	}
 	  
     private static ImageDescriptor image;
-	private PDTGraphSwing view;
+	private PDTGraphSwingStandalone view;
 
-	public GraphLoadAction(PDTGraphSwing view) {
+	public GraphLoadAction(PDTGraphSwingStandalone view) {
 		super("Load",image);
 		this.view = view;
 	}
