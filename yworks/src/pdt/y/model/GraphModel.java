@@ -4,7 +4,7 @@ import pdt.y.model.realizer.CallEdgeRealizer;
 import pdt.y.model.realizer.FileGroupNodeRealizer;
 import pdt.y.model.realizer.LoadEdgeRealizer;
 import pdt.y.model.realizer.ModuleGroupNodeRealizer;
-import pdt.y.model.realizer.MyShapeNodeRealizer;
+import pdt.y.model.realizer.PredicateNodeRealizer;
 import y.base.DataMap;
 import y.base.Edge;
 import y.base.EdgeMap;
@@ -66,7 +66,7 @@ public class GraphModel {
 	private void initNodeRealizers() {
 		filegroupNodeRealizer = new FileGroupNodeRealizer(this);
 		moduleGroupNodeRealizer = new ModuleGroupNodeRealizer(this);
-		predicateNodeRealizer = new MyShapeNodeRealizer(this);    
+		predicateNodeRealizer = new PredicateNodeRealizer(this);    
 		graph.setDefaultNodeRealizer(predicateNodeRealizer);
 	}
 
