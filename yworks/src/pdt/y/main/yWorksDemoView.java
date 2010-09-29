@@ -3,12 +3,9 @@ package pdt.y.main;
 import javax.swing.JComponent;
 
 import org.eclipse.albireo.core.SwingControl;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.forms.widgets.Form;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
 
 import pdt.y.swt.commands.GraphLoadAction;
@@ -21,10 +18,6 @@ public class yWorksDemoView extends ViewPart {
 	public static final String ID = "pdt.yworks.swt.views.yWorksDemoView";
 	private SwingControl swingControl;
     private PDTGraphSwing view = new PDTGraphSwing();
-	private FormToolkit toolkit;
-	private Form form;
-
-
 
 	public yWorksDemoView() {
 	}
@@ -62,7 +55,6 @@ public void setFocus() {
      * Create menu.
      */
     private void createMenu() {
-            IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
             
     }
     

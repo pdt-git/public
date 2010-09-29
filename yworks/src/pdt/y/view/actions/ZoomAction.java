@@ -37,7 +37,8 @@ import y.view.Graph2DView;
       this.view = view;
     }
 
-    public void actionPerformed(ActionEvent e) {
+    @Override
+	public void actionPerformed(ActionEvent e) {
       view.setZoom(view.getZoom() * factor);
       // optional code that adjusts the size of the
       // view's world rectangle. The world rectangle

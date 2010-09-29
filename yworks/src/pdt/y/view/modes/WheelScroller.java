@@ -18,7 +18,8 @@ public class WheelScroller implements MouseWheelListener
     this.view = view;
   }
   
-  public void mouseWheelMoved(MouseWheelEvent e)
+  @Override
+public void mouseWheelMoved(MouseWheelEvent e)
   {
     Point2D p2 = view.getCenter();
     Point p = view.getViewPoint();

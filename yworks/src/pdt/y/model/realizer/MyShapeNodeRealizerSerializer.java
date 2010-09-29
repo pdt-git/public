@@ -25,7 +25,7 @@ public class MyShapeNodeRealizerSerializer extends AbstractNodeRealizerSerialize
 
 
 	@Override
-	public Class getRealizerClass() {
+	public Class<MyShapeNodeRealizer> getRealizerClass() {
 		return MyShapeNodeRealizer.class;
 	}
 

@@ -21,7 +21,8 @@ import y.view.Graph2DView;
       this.view=view;
     }
 
-    public void actionPerformed(ActionEvent e) {
+    @Override
+	public void actionPerformed(ActionEvent e) {
       view.fitContent();
       view.updateView();
     }
