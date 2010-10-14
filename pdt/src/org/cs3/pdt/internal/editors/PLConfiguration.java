@@ -66,6 +66,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 
+@SuppressWarnings("deprecation")
 public class PLConfiguration extends SourceViewerConfiguration {
 	private PLDoubleClickStrategy doubleClickStrategy;
 	private PLScanner scanner;
@@ -148,7 +149,6 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return reconciler;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public IAutoIndentStrategy getAutoIndentStrategy(
 			ISourceViewer sourceViewer, String contentType) {
