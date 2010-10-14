@@ -63,7 +63,8 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
          }
      }
      
-    public ResourceFileLocator subLocator(String subdir){
+    @Override
+	public ResourceFileLocator subLocator(String subdir){
         return new DefaultResourceFileLocator(resolve(subdir));
     }
     /*
@@ -71,7 +72,8 @@ public class DefaultResourceFileLocator implements ResourceFileLocator {
      * 
      * @see org.cs3.pl.common.ResourceLocator#resolve(java.lang.String)
      */
-    public File resolve(String rel) {
+    @Override
+	public File resolve(String rel) {
         File resolved = new File(root+ rel);
         return resolved;
     }    

@@ -60,6 +60,7 @@ import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 public class AnnotationHover implements IAnnotationHover {
 
+	@Override
     public String getHoverInfo(ISourceViewer sourceViewer, int lineNumber) {
         String[] messages = getMessagesForLine(sourceViewer, lineNumber);
 
@@ -84,7 +85,7 @@ public class AnnotationHover implements IAnnotationHover {
 
         ArrayList<String> messages = new ArrayList<String>();
 
-        Iterator iter = model.getAnnotationIterator();
+        Iterator<?> iter = model.getAnnotationIterator();
         while (iter.hasNext()) {
             Object object = iter.next();
             if (object instanceof MarkerAnnotation) {

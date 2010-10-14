@@ -78,12 +78,11 @@ public class QueryConsoleThreadAction extends Action{
 		this.console=null;
 	}
 
-
+	@Override
 	public void run() {
 		try {
-
 			Job j = new Job(getToolTipText()) {
-
+				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						PrologConsole c = getConsole();
@@ -100,17 +99,12 @@ public class QueryConsoleThreadAction extends Action{
 					}
 					return Status.OK_STATUS;
 				}
-
-				
-
 			};
 			j.schedule();
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
 	}
-
-
 
 	public String getQuery() {
 		return query;
@@ -135,7 +129,6 @@ public class QueryConsoleThreadAction extends Action{
 		return c;
 	}
 
-
 	public void setQuery(String query) {
 		if(query==null){
 			return;
@@ -147,8 +140,4 @@ public class QueryConsoleThreadAction extends Action{
 			this.query = query;	
 		}
 	}
-
-	
-
-
 }

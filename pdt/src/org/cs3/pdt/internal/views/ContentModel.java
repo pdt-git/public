@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.AsyncPrologSession;
@@ -47,10 +47,12 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	private String subject;
 	private AsyncPrologSession session;
 
+	@Override
 	public void setData(Object data) {
 		this.hookData=data;
 	}
 
+	@Override
 	public void update(PrologInterfaceEvent e) {
 		String subject = e.getSubject();
 		String event = e.getEvent();
@@ -71,6 +73,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#hasChildren(java.lang.Object)
 	 */
+	@Override
 	public boolean hasChildren(Object parentElement) {
 		if (parentElement instanceof PEFNode) {
 			String type = ((PEFNode) parentElement).getType();
@@ -84,6 +87,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#getChildren(java.lang.Object)
 	 */
+	@Override
 	public Object[] getChildren(Object parentElement)
 			throws PrologInterfaceException {
 		Debug.debug("outline getChildren for " + parentElement);
@@ -171,9 +175,18 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			this.file = file;
 			label = Util.unquoteAtom((String) bindings.get("Label"));
 			tags = new HashSet<String>();
-			tags.addAll((Collection<String>) bindings.get("Tags"));
+			Object bindingsTags =  bindings.get("Tags");
+			if (bindingsTags instanceof Collection<?>) {
+				Collection<?> tagsCollection = (Collection<?>)bindingsTags;
+				for (Object tag : tagsCollection) {
+					if (tag instanceof String)
+						tags.add((String) tag);
+				}
+			}
 		}
 
+		@SuppressWarnings("rawtypes")
+		@Override
 		public Object getAdapter(Class adapter) {
 			return Platform.getAdapterManager().getAdapter(this, adapter);
 		}
@@ -183,35 +196,43 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			return label;
 		}
 
+		@Override
 		public int getEndPosition() {
 			return endPosition;
 		}
 
+		@Override
 		public File getFile() {
 			return this.file;
 		}
 
+		@Override
 		public String getId() {
 
 			return this.id;
 		}
 
+		@Override
 		public String getLabel() {
 			return this.label;
 		}
 
+		@Override
 		public int getStartPosition() {
 			return this.startPosition;
 		}
 
+		@Override
 		public Set<String> getTags() {
 			return this.tags;
 		}
 
+		@Override
 		public String getType() {
 			return this.type;
 		}
 
+		@Override
 		public PrologInterface getPrologInterface() {
 			return getPif();
 		}
@@ -220,6 +241,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	
 	
+	@Override
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		Object parent = e.ticket;
 		PEFNode p = new _PEFNode(e, getFile());
@@ -230,7 +252,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		synchronized (sessionLock) {
 			if (session == null && pif != null) {
 				//session = ((PrologInterface2) pif).getAsyncSession();
-				session=new AsyncPrologSessionProxy((PrologInterface) pif,PrologInterface.PROCESS_LISTS);
+				session=new AsyncPrologSessionProxy(pif,PrologInterface.PROCESS_LISTS);
 				// session.setPreferenceValue("socketsession.canonical",
 				// "true");
 				session.addBatchListener(this);
@@ -259,6 +281,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#setPif(org.cs3.pl.prolog.PrologInterface)
 	 */
+	@Override
 	public void setPif(PrologInterface pif, IPrologEventDispatcher d)
 			throws PrologInterfaceException {
 
@@ -268,7 +291,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			this.dispatcher.removePrologInterfaceListener(this.subject, this);
 		}
 		if (this.pif != null) {
-			((PrologInterface) this.pif).removeLifeCycleHook(this, HOOK_ID);
+			(this.pif).removeLifeCycleHook(this, HOOK_ID);
 		}
 		this.pif = pif;
 		this.dispatcher = d;
@@ -289,10 +312,12 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#getPif()
 	 */
+	@Override
 	public PrologInterface getPif() {
 		return pif;
 	}
 
+	@Override
 	public Object getInput() {
 
 		return input;
@@ -303,6 +328,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 	 * 
 	 * @see org.cs3.pdt.internal.views.PrologFileContentModel#reset()
 	 */
+	@Override
 	public void reset() throws PrologInterfaceException {
 		synchronized (this) {
 			timestamp = System.currentTimeMillis();
@@ -412,6 +438,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 	}
 
+	@Override
 	public void addPrologFileContentModelListener(
 			PrologFileContentModelListener l) {
 		if (!listeners.contains(l)) {
@@ -420,6 +447,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	}
 
+	@Override
 	public void removePrologFileContentModelListener(
 			PrologFileContentModelListener l) {
 		if (listeners.contains(l)) {
@@ -428,6 +456,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	}
 
+	@Override
 	public void setInput(Object input) {
 		this.input = input;
 		try {
@@ -472,6 +501,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 	}
 
+	@Override
 	public void addPrologFileContentModelListener(Object parent,
 			PrologFileContentModelListener l) {
 		synchronized (specificListeners) {
@@ -483,6 +513,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 
 	}
 
+	@Override
 	public void removePrologFileContentModelListener(Object parent,
 			PrologFileContentModelListener l) {
 		synchronized (specificListeners) {
@@ -493,6 +524,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 	}
 
+	@Override
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault()
 				.getLibraryManager();
@@ -510,11 +542,13 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		reset();
 	}
 
+	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession s)
 			throws PrologInterfaceException {
 		reset();
 	}
 
+	@Override
 	public void onError(PrologInterface pif) {
 		try {
 			reset();
@@ -523,15 +557,18 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		}
 	}
 	
+	@Override
 	public void lateInit(PrologInterface pif) {
 		;
 	}
 
+	@Override
 	public void onInit(PrologInterface pif, PrologSession initSession)
 			throws PrologInterfaceException {
 		;
 	}
 
+	@Override
 	public void dispose() {
 		try {
 			setPif(null, null);
@@ -544,6 +581,7 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 		specificListeners.clear();
 	}
 
+	@Override
 	public synchronized long getLastResetTime() {
 		return timestamp;
 	}

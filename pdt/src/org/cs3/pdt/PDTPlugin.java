@@ -131,11 +131,13 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 	/**
 	 * This method is called upon plug-in activation
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		try {
 			super.start(context);
 			reconfigureDebugOutput();
 			IPropertyChangeListener debugPropertyChangeListener = new IPropertyChangeListener() {
+				@Override
 				public void propertyChange(PropertyChangeEvent e) {
 					try {
 						PDTPlugin.getDefault().reconfigureDebugOutput();

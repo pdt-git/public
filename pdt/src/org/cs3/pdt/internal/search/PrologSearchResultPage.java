@@ -73,6 +73,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		init(NewSearchUI.getSearchResultView().getActivePage().getSite());
 	}
 	
+	@Override
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
@@ -84,6 +85,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		}
 	}
 
+	@Override
 	protected void clear() {
 		if (fContentProvider != null)
 			fContentProvider.clear();
@@ -93,6 +95,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		}
 	}
 
+	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		//viewer.setSorter(new JavaElementLineSorter());
 		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
@@ -103,6 +106,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	public StructuredViewer getViewer() {		
 		return super.getViewer();
 	}
+	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		//viewer.setSorter(new JavaElementLineSorter());
 		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
@@ -113,6 +117,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		
 	}
 	
+	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		
 		PLEditor editor= null;
@@ -133,7 +138,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		if (editor != null && activate)
 			editor.getEditorSite().getPage().activate(editor);
 		if (editor instanceof ITextEditor) {
-			ITextEditor textEditor= (ITextEditor) editor;
+			ITextEditor textEditor= editor;
 			textEditor.selectAndReveal(currentOffset, currentLength);
 		}
 	}

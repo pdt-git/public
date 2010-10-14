@@ -80,12 +80,13 @@ public class PrologSearchQuery implements ISearchQuery {
 		result = new PrologSearchResult(this, data);
 	}
 
+	@Override
 	public IStatus run(IProgressMonitor monitor) {
 		try {
 			return run_impl(monitor);
 		} catch (Throwable t) {
 			Debug.report(t);
-			return new Status(Status.ERROR,PDT.PLUGIN_ID,42,"Exception caught during search.",t);
+			return new Status(IStatus.ERROR,PDT.PLUGIN_ID,42,"Exception caught during search.",t);
 		}
 	}
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
@@ -149,18 +150,22 @@ public class PrologSearchQuery implements ISearchQuery {
 		return Status.OK_STATUS;
 	}
 
+	@Override
 	public String getLabel() {
 		return "Prolog Query: " + data.getSignature();
 	}
 
+	@Override
 	public boolean canRerun() {
 		return true;
 	}
 
+	@Override
 	public boolean canRunInBackground() {
 		return false;
 	}
 
+	@Override
 	public ISearchResult getSearchResult() {
 		return result;
 	}

@@ -95,7 +95,8 @@ public class MarkerProblemCollector implements ProblemCollector {
      * @see org.cs3.pl.parser.ProblemCollector#reportProblem(org.cs3.pl.parser.Token,
      *           java.lang.String, int)
      */
-    public void reportProblem(Problem p) {
+    @Override
+	public void reportProblem(Problem p) {
         int severity=mapSeverity(p.severity);
         maxSeverity=Math.max(maxSeverity,severity);
         
@@ -116,7 +117,8 @@ public class MarkerProblemCollector implements ProblemCollector {
      * 
      * @see org.cs3.pl.parser.ProblemCollector#reset()
      */
-    public void reset() {
+    @Override
+	public void reset() {
         maxSeverity=Integer.MIN_VALUE;
        resetProblems();
     }
@@ -126,7 +128,8 @@ public class MarkerProblemCollector implements ProblemCollector {
      * 
      * @see org.cs3.pl.parser.ProblemCollector#done()
      */
-    public void done() {
+    @Override
+	public void done() {
         createMarkers();
     }
 
@@ -134,7 +137,8 @@ public class MarkerProblemCollector implements ProblemCollector {
         if (markers.size() > 0) {
 
             IWorkspaceRunnable r = new IWorkspaceRunnable() {
-                public void run(IProgressMonitor monitor) throws CoreException {
+                @Override
+				public void run(IProgressMonitor monitor) throws CoreException {
                     for (int i = 0; i < markers.size(); i++) {
                         IMarker marker = file.createMarker(IMarker.PROBLEM);
                         marker.setAttributes(markers.get(i));

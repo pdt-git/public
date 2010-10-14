@@ -75,6 +75,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		setProjectName(projectName);
 	}
 
+	@Override
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
 		if (pif.isUp()) {
@@ -86,6 +87,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		}
 	}
 
+	@Override
 	public void deconfigure(PrologInterface pif) {
 		pif.removeLifeCycleHook(getId());
 		if (pif.isUp()) {
@@ -105,6 +107,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		}
 	}
 
+	@Override
 	public void restoreState(Map<String, String> params) {
 		super.restoreState(params);
 		setProjectName(params.get("project"));
@@ -114,6 +117,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		this.projectName = pname;
 	}
 
+	@Override
 	public Map<String, String> saveState() {
 		Map<String, String> map = super.saveState();
 		map.put("project", getProjectName());
@@ -124,10 +128,12 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		return this.projectName;
 	}
 
+	@Override
 	public void onInit(PrologInterface pif, PrologSession initSession) {
 		;
 	}
 
+	@Override
 	public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 		PrologLibraryManager mgr = PrologRuntimeUIPlugin.getDefault().getLibraryManager();
 		IPrologProject plp = getPrologProject();
@@ -148,6 +154,7 @@ public class RuntimeSubscription extends DefaultSubscription implements
 		}
 	}
 
+	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
 		;
 	}

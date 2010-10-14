@@ -71,6 +71,7 @@ public class AsyncSocketSessionTest extends TestCase {
 
 	private AsyncPrologSession session;
 
+	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		pif = AbstractPrologInterface.newInstance();
@@ -81,6 +82,7 @@ public class AsyncSocketSessionTest extends TestCase {
 		session.addBatchListener(rec);
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		pif.stop();
 	}
@@ -115,6 +117,7 @@ public class AsyncSocketSessionTest extends TestCase {
 			return true;
 		}
 
+		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append(method);
@@ -149,6 +152,7 @@ public class AsyncSocketSessionTest extends TestCase {
 			return records.get(i);
 		}
 
+		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			boolean first = true;
@@ -165,46 +169,55 @@ public class AsyncSocketSessionTest extends TestCase {
 
 		Vector<Record> records = new Vector<Record>();
 
+		@Override
 		public synchronized void joinComplete(AsyncPrologSessionEvent e) {
 			records.add(new Record("joinComplete", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void abortComplete(AsyncPrologSessionEvent e) {
 			records.add(new Record("abortComplete", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void goalSucceeded(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalSucceeded", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void goalFailed(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalFailed", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void goalRaisedException(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalRaisedException", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void goalHasSolution(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalHasSolution", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void goalSkipped(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalSkipped", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void goalCut(AsyncPrologSessionEvent e) {
 			records.add(new Record("goalCut", e));
 			notifyAll();
 		}
 
+		@Override
 		public synchronized void batchComplete(AsyncPrologSessionEvent e) {
 			records.add(new Record("batchComplete", e));
 			notifyAll();
@@ -546,6 +559,7 @@ public class AsyncSocketSessionTest extends TestCase {
 
 		synchronized (lock) {
 			Thread thread = new Thread() {
+				@Override
 				public void run() {
 
 					// we need to make sure that test(2) (see below) is send

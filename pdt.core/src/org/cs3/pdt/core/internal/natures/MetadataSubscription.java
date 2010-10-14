@@ -86,10 +86,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 		setProjectName(projectName);
 	}
 
+	@Override
 	public boolean isVisible() {
 		return false;
 	}
 
+	@Override
 	public void configure(PrologInterface pif) {
 		pif.addLifeCycleHook(this, getId(), new String[0]);
 		if (pif.isUp()) {
@@ -109,6 +111,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		}
 	}
 
+	@Override
 	public void deconfigure(PrologInterface pif) {
 		pif.removeLifeCycleHook(getId());
 		if (pif.isUp()) {
@@ -128,6 +131,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		}
 	}
 
+	@Override
 	public void restoreState(Map<String, String> params) {
 		super.restoreState(params);
 		setProjectName(params.get("project"));
@@ -138,6 +142,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 
 	}
 
+	@Override
 	public Map<String, String> saveState() {
 		Map<String, String> map = super.saveState();
 		map.put("project", getProjectName());
@@ -148,6 +153,7 @@ public class MetadataSubscription extends DefaultSubscription implements
 		return this.projectName;
 	}
 
+	@Override
 	public void onInit(PrologInterface pif, PrologSession initSession)
 			throws PrologInterfaceException {
 		loadBackendFacade(initSession);
@@ -174,10 +180,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 	}
 
 	
+	@Override
 	public void afterInit(PrologInterface pif) {
 		scheduleInitialBuild(pif);
 	}
 
+	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
 		;
 	}
@@ -192,10 +200,12 @@ public class MetadataSubscription extends DefaultSubscription implements
 			Debug.debug("autobuild is on, let's rock.");
 
 			Job j = new Job("Building Prolog Metadata") {
+				@Override
 				public IStatus run(IProgressMonitor monitor) {
 					return runBuildJob(monitor);
 				}
 
+				@Override
 				public boolean belongsTo(Object family) {
 					return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
 				}

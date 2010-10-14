@@ -68,8 +68,7 @@
              id="org.cs3.pdt.console"
              name="PDT Console Commands"/>
        <command
-             category="org.cs3.pdt.console"
-             categoryId="org.cs3.pdt.console"
+       		 categoryId="org.cs3.pdt.console"
              description="Paste the name of the file currently edited in the editor"
              id="pdt.console.paste_filename"
              name="Paste Filename"/>

@@ -48,6 +48,7 @@ import org.cs3.pl.prolog.PrologInterface;
 
 public class Factory extends MetaInfoProviderFactory {
 
+	@Override
 	public IMetaInfoProvider create(PrologInterface pif) {
 		return new DefaultMetaInfoProvider(pif);
 	}

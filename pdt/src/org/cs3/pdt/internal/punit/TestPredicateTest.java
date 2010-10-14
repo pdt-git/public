@@ -64,6 +64,7 @@ public class TestPredicateTest extends TestCase {
 		this.adapter = adapter;
 	}
 	
+	@Override
 	protected void runTest() throws PrologException, PrologInterfaceException {
 		String resultString = "";
 		boolean failed = false;

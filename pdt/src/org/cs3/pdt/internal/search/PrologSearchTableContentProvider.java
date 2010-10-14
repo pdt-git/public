@@ -81,6 +81,7 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 	/*
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		if (inputElement instanceof AbstractTextSearchResult)
 			return ((AbstractTextSearchResult) inputElement).getElements();
@@ -90,6 +91,7 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
 	 */
+	@Override
 	public void dispose() {
 		//nothing
 	}
@@ -97,6 +99,7 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 	/*
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
+	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		fTableViewer= (TableViewer) viewer;
 		if(fSearchResult!=null){
@@ -108,6 +111,7 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 		}
 	}
 
+	@Override
 	public void elementsChanged(Object[] updatedElements) {
 		//TODO: copied from JavaSearchTableContentProvider
 		int addCount= 0;
@@ -126,6 +130,7 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 		}
 	}
 	
+	@Override
 	public void clear() {
 		//TODO: copied from JavaSearchTableContentProvider
 		fTableViewer.refresh();
@@ -134,9 +139,11 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
     /* (non-Javadoc)
      * @see org.eclipse.search.ui.ISearchResultListener#searchResultChanged(org.eclipse.search.ui.SearchResultEvent)
      */
-    public void searchResultChanged(SearchResultEvent e) {        
+    @Override
+	public void searchResultChanged(SearchResultEvent e) {        
          fTableViewer.getControl().getDisplay().asyncExec(new Runnable() {
-            public void run() {            
+            @Override
+			public void run() {            
                 fTableViewer.refresh();
             }
         });

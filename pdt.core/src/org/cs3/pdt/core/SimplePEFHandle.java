@@ -8,6 +8,7 @@ public class SimplePEFHandle implements PEFHandle {
 	private String id;
 	private PrologInterface pif;
 
+	@Override
 	public String getId() {
 
 		return id;
@@ -19,12 +20,13 @@ public class SimplePEFHandle implements PEFHandle {
 		this.id = id;
 	}
 
+	@Override
 	public PrologInterface getPrologInterface() {
 
 		return pif;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		return Platform.getAdapterManager().getAdapter(this, adapter);

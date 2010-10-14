@@ -20,6 +20,7 @@ public class CTermContentProviderTest extends TestCase {
 
 	private PrologInterface pif;
 
+	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 
@@ -45,6 +46,7 @@ public class CTermContentProviderTest extends TestCase {
 		s.dispose();
 	}
 
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
@@ -52,6 +54,7 @@ public class CTermContentProviderTest extends TestCase {
 	public void testMalte() throws Exception {
 		PrologFileContentModel backend = new ContentModel() {
 
+			@Override
 			public File getFile() {
 				return (File) getInput();
 			}

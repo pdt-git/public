@@ -78,7 +78,7 @@ IContentAssistProcessor  {
 		PrologInterface pif = getProject().getMetadataPrologInterface();
 		PrologSession s = null;
 		try {
-			s = (PrologSession) pif.getSession(PrologInterface.CTERMS);			
+			s = pif.getSession(PrologInterface.CTERMS);			
 			/* pdt_completion(File,ContextName,Prefix,Attribute) */
 			IFile file = getFile();
 			String path = Util.prologFileName(file.getLocation().toFile());

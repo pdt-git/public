@@ -150,10 +150,12 @@ public abstract class PrologContentAssistProcessor {
 	public IContextInformationValidator getContextInformationValidator() {
 		class Validator implements IContextInformationValidator {
 	
+			@Override
 			public boolean isContextInformationValid(int position) {
 				return true;
 			}
 	
+			@Override
 			public void install(IContextInformation info, ITextViewer viewer,
 					int documentPosition) {
 				;

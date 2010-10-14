@@ -196,11 +196,13 @@
        point="org.eclipse.ui.propertyPages">
     <page
           adaptable="true"
-          objectClass="org.eclipse.core.resources.IProject"
           class="org.cs3.pdt.core.internal.properties.PrologProjectPropertyPage"
-          icon="icons/sample.gif"
+          id="org.cs3.pdt.properties.projectPropertyPage"
           name="Prolog Project Properties"
-          id="org.cs3.pdt.properties.projectPropertyPage">
+          objectClass="org.eclipse.core.resources.IProject">
+		  <enabledWhen>
+          		<adapt type="org.eclipse.core.resources.IProject"/>
+          </enabledWhen>
 		  <filter
                name="nature"
                value="org.cs3.pdt.core.PDTProjectNature"/>

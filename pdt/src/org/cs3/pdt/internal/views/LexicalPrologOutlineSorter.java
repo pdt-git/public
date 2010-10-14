@@ -7,6 +7,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 final class LexicalPrologOutlineSorter extends ViewerSorter {
+	@Override
 	public int category(Object element) {
 
 		if (!(element instanceof PEFNode)) {
@@ -23,6 +24,7 @@ final class LexicalPrologOutlineSorter extends ViewerSorter {
 		return 3;
 	}
 
+	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (e1 instanceof PEFNode && e2 instanceof PEFNode) {
 

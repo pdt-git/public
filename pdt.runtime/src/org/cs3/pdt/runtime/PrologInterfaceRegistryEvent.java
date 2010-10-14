@@ -46,6 +46,9 @@ import java.util.EventObject;
 import org.cs3.pl.prolog.PrologInterface;
 
 public class PrologInterfaceRegistryEvent extends EventObject {
+
+	private static final long serialVersionUID = 1L;
+
 	public PrologInterface pif = null;
 
 	public String key = null;

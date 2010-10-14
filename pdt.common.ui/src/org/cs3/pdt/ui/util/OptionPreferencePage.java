@@ -79,7 +79,8 @@ IWorkbenchPreferencePage{
      * GUI blocks needed to manipulate various types of preferences. Each field
      * editor knows how to save and restore itself.
      */
-    public void createFieldEditors() {        
+    @Override
+	public void createFieldEditors() {        
         Composite parent = getFieldEditorParent();
         addEditorsForOptions(parent, getOptions());
     }
@@ -99,7 +100,8 @@ IWorkbenchPreferencePage{
             switch(options[i].getType()){
             	case Option.DIR:
             	    editor = new DirectoryFieldEditor(name,label,parent){
-            		protected boolean doCheckState() {
+            		@Override
+					protected boolean doCheckState() {
             			String errmsg=options[j].validate(getStringValue());
             			if(errmsg==null){
             				return super.doCheckState();
@@ -118,7 +120,8 @@ IWorkbenchPreferencePage{
             	break;
             	case Option.NUMBER:
             	    editor = new IntegerFieldEditor(name,label,parent){
-                		protected boolean doCheckState() {
+                		@Override
+						protected boolean doCheckState() {
                 			String errmsg=options[j].validate(getStringValue());
                 			if(errmsg==null){
                 				return super.doCheckState();
@@ -137,7 +140,8 @@ IWorkbenchPreferencePage{
             	break;
             	default:
             	    editor = new StringFieldEditor(name,label,parent){
-                		protected boolean doCheckState() {
+                		@Override
+						protected boolean doCheckState() {
                 			String errmsg=options[j].validate(getStringValue());
                 			if(errmsg==null){
                 				return super.doCheckState();
@@ -157,21 +161,24 @@ IWorkbenchPreferencePage{
             addField(editor);
         }
     }
-    public void init(IWorkbench workbench) {
+    @Override
+	public void init(IWorkbench workbench) {
         //setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
     }
 
     /**
      * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
      */
-    protected void performDefaults() {
+    @Override
+	protected void performDefaults() {
         super.performDefaults();
     }
 
     /**
      * @see org.eclipse.jface.preference.IPreferencePage#performOk()
      */
-    public boolean performOk() {
+    @Override
+	public boolean performOk() {
 
         boolean res = super.performOk();
         reconfigure();

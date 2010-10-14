@@ -13,6 +13,7 @@ public class ClauseReferenceTest extends TestCase {
     CanonicalTermParser termParser;
     InputStream inputStream;
 
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 //		termParser = new CanonicalTermParser(inputStream);

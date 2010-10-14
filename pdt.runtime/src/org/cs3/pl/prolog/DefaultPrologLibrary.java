@@ -79,22 +79,27 @@ public class DefaultPrologLibrary implements PrologLibrary {
 		this.attributes.putAll(libAttrs);
 	}
 
+	@Override
 	public String getId() {		
 		return this.id;
 	}
 
+	@Override
 	public String getPath() {
 		return this.path;
 	}
 
+	@Override
 	public String getAlias() {
 		return this.alias;
 	}
 
+	@Override
 	public Set<String> getDependencies() {
 		return this.deps;
 	}
 
+	@Override
 	public String getAttributeValue(String attr) {
 		return attributes.get(attr);
 	}
