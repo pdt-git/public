@@ -40,8 +40,9 @@ public class PDTRegistryHook implements RegistryHook {
 	public void addSubscriptions(PrologInterfaceRegistry registry) {
 		try {
 			PrologRuntimeUIPlugin runtimeUIPlugin = PrologRuntimeUIPlugin.getDefault();
+			String pluginID = PrologRuntimeUIPlugin.getPluginId();
 			ISavedState lastState =null;
-			lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(runtimeUIPlugin, new _SaveParticipant());
+			lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(pluginID, new _SaveParticipant());
 
 			if (lastState != null) {
 				IPath location = lastState.lookup(new Path("registry"));

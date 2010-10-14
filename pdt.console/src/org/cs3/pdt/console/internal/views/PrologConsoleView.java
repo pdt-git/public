@@ -476,6 +476,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		};
 		pasteFileNameAction
 				.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+		
+		//Object service = IServiceLocator.getService(Class);
+		
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
 		keyBindingService
 				.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
