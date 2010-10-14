@@ -175,7 +175,14 @@ public abstract class ContentModel extends DefaultAsyncPrologSessionListener
 			this.file = file;
 			label = Util.unquoteAtom((String) bindings.get("Label"));
 			tags = new HashSet<String>();
-			tags.addAll((Collection<String>) bindings.get("Tags"));
+			Object bindingsTags =  bindings.get("Tags");
+			if (bindingsTags instanceof Collection<?>) {
+				Collection<?> tagsCollection = (Collection<?>)bindingsTags;
+				for (Object tag : tagsCollection) {
+					if (tag instanceof String)
+						tags.add((String) tag);
+				}
+			}
 		}
 
 		@SuppressWarnings("rawtypes")
