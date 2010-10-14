@@ -1,10 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: MetaData
+Bundle-Name: PDTCore
 Bundle-SymbolicName: org.cs3.pdt.core; singleton:=true
 Bundle-Version: 0.2.3.qualifier
-Bundle-ClassPath: metadata.jar,
- lib/commons-lang-2.1.jar
 Bundle-Activator: org.cs3.pdt.core.PDTCorePlugin
 Export-Package: org.cs3.pdt.core,
  org.cs3.pdt.core.internal,
