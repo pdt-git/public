@@ -85,7 +85,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup {
-
+	private final static String PLUGIN_ID = "org.cs3.pdt.runtime.ui";
 
 	// The shared instance.
 	private static PrologRuntimeUIPlugin plugin;
@@ -115,6 +115,14 @@ public class PrologRuntimeUIPlugin extends AbstractUIPlugin implements IStartup 
 		if (plugin == null)
 			plugin = new PrologRuntimeUIPlugin();
 		return plugin;
+	}
+	
+	/**
+	 * Returns the id of the PrologRuntimeUIPlugin
+	 * @return id of the PrologRuntimeUIPlugin
+	 */
+	public static String getPluginId() {
+		return PLUGIN_ID;
 	}
 
 	/**
