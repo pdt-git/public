@@ -62,6 +62,7 @@ import org.eclipse.jface.text.TextUtilities;
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
+@SuppressWarnings("deprecation")
 public class PLAutoIndentStrategy extends DefaultAutoIndentStrategy implements IAutoEditStrategy{
 
 	private void autoIndentAfterNewLine(IDocument d, DocumentCommand c) {
