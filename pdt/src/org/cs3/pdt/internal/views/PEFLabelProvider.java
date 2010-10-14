@@ -10,6 +10,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class PEFLabelProvider implements ILabelProvider {
 
+	@Override
 	public Image getImage(Object element) {
 		if(element instanceof PEFNode){
 			return getImage(((PEFNode)element));
@@ -37,6 +38,7 @@ public class PEFLabelProvider implements ILabelProvider {
 		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
 	}
 	
+	@Override
 	public String getText(Object element) {
 		if(element instanceof PEFNode){
 			return ((PEFNode)element).getLabel();
@@ -50,21 +52,25 @@ public class PEFLabelProvider implements ILabelProvider {
 		return element.toString();
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
 
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 		// TODO Auto-generated method stub
 

@@ -46,6 +46,7 @@ import junit.framework.TestCase;
 
 public class CTermFactoryTest extends TestCase {
 	
+	@Override
 	protected void setUp() throws Exception {
 		;
 	}

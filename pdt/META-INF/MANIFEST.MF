@@ -6,7 +6,6 @@ Bundle-Version: 0.2.3.qualifier
 Bundle-ClassPath: PDT.jar
 Bundle-Activator: org.cs3.pdt.PDTPlugin
 Bundle-Vendor: http://roots.iai.uni-bonn.de
-Bundle-Localization: plugin
 Export-Package: org.cs3.pdt,
  org.cs3.pdt.internal,
  org.cs3.pdt.internal.actions,
@@ -35,3 +34,4 @@ Require-Bundle: org.eclipse.ui,
  org.cs3.pdt.common.ui,
  org.cs3.pdt.runtime.ui;bundle-version="[0.2.0,1.0.0)"
 Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

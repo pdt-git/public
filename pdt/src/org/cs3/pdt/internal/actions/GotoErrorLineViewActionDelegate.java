@@ -71,10 +71,12 @@ public class GotoErrorLineViewActionDelegate implements IViewActionDelegate{
 	private PrologConsole console;
 	private int targetLine;
 	private String filename;
+	@Override
 	public void init(IViewPart view) {
 		this.console= (PrologConsole) view;
 	}
 
+	@Override
 	public void run(IAction action) {
 		validate();
 		try {
@@ -91,10 +93,10 @@ public class GotoErrorLineViewActionDelegate implements IViewActionDelegate{
 		}
 	}
 
-	public void selectionChanged(IAction action, ISelection selection) {
-		
-				
+	@Override
+	public void selectionChanged(IAction action, ISelection selection) {		
 	}
+	
 	public boolean validate() {
 		try {
 			
@@ -187,6 +189,7 @@ public class GotoErrorLineViewActionDelegate implements IViewActionDelegate{
 			final Display display = PlatformUI.getWorkbench().getDisplay();
 			display.syncExec(new Runnable() {
 
+				@Override
 				public void run() {
 					MessageDialog.openError(display.getActiveShell(),
 							"could not open file",

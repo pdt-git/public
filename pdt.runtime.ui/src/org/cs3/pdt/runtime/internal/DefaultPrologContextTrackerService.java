@@ -66,6 +66,7 @@ public class DefaultPrologContextTrackerService implements
 	 * Any listeners that have already subscribed to the trackers id will be added.
 	 * @param tracker
 	 */
+	@Override
 	public void registerPrologContextTracker(PrologContextTracker tracker) {
 		contextTrackers.put(tracker.getId(),tracker);
 		Set<PrologContextTrackerListener> listeners = contextTrackerListeners.get(tracker.getId());
@@ -84,6 +85,7 @@ public class DefaultPrologContextTrackerService implements
 		if(PlatformUI.isWorkbenchRunning()){
 			final IWorkbench workbench = PlatformUI.getWorkbench();
 			workbench.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					if(PlatformUI.getWorkbench().getActiveWorkbenchWindow()!=null){
 						tracker.init(workbench);	
@@ -100,6 +102,7 @@ public class DefaultPrologContextTrackerService implements
 	 * will be removed from the tracker.
 	 * @param tracker
 	 */
+	@Override
 	public void unregisterPrologContextTracker(PrologContextTracker tracker) {
 		contextTrackers.remove(tracker.getId());
 		Set<PrologContextTrackerListener> listeners = contextTrackerListeners.remove(tracker.getId());
@@ -120,6 +123,7 @@ public class DefaultPrologContextTrackerService implements
 	 * @param trackerID
 	 * @param l
 	 */
+	@Override
 	public void addPrologContextTrackerListener(String trackerID, PrologContextTrackerListener l){
 		Set<PrologContextTrackerListener> s = contextTrackerListeners.get(trackerID);
 		if(s==null){
@@ -143,6 +147,7 @@ public class DefaultPrologContextTrackerService implements
 	 * @param trackerID
 	 * @param l
 	 */
+	@Override
 	public void removePrologContextTrackerListener(String trackerID, PrologContextTrackerListener l){
 		Set<PrologContextTrackerListener> listeners = contextTrackerListeners.get(trackerID);
 		if(listeners==null){
@@ -159,10 +164,12 @@ public class DefaultPrologContextTrackerService implements
 	/**
 	 * @return an array containing all context trackers currently registered with the runtime plugin.
 	 */
+	@Override
 	public PrologContextTracker[] getContextTrackers() {		
 		return contextTrackers.values().toArray(new PrologContextTracker[contextTrackers.size()]);
 	}
 
+	@Override
 	public PrologContextTracker getContextTracker(String trackerId) {
 		return contextTrackers.get(trackerId);
 	}

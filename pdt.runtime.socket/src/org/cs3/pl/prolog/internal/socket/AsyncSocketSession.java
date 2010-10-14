@@ -72,6 +72,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	private Exception batchError;
 	private int flags;
 
+	@Override
 	public void addBatchListener(AsyncPrologSessionListener l) {
 		synchronized (listeners) {
 			if(!listeners.contains(l)){
@@ -80,6 +81,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}	
 	}
 
+	@Override
 	public void removeBatchListener(AsyncPrologSessionListener l) {
 		synchronized (listeners) {
 			if(listeners.contains(l)){
@@ -367,6 +369,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 
 	private void enterBatch() throws IOException {
 		this.dispatcher = new Thread("Async Query Result Dispatcher"){
+			@Override
 			public void run() {
 				try{
 					while(readAndDispatch());
@@ -415,10 +418,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		setProtocolOption("interprete_lists", Boolean.toString(processLists));
 	}
 
+	@Override
 	public void queryOnce(Object ticket, String query) throws PrologInterfaceException {
 		queryOnce(ticket,query,this.flags);
 	}
 	
+	@Override
 	public void queryOnce(Object ticket, String query,int flags) throws PrologInterfaceException {
 		CTermUtil.checkFlags(flags);
 		if(isDisposed()){
@@ -438,9 +443,11 @@ public class AsyncSocketSession implements AsyncPrologSession {
 			throw pif.error(e);
 		}
 	}
+	@Override
 	public void queryAll(Object ticket, String query) throws PrologInterfaceException {
 		queryAll(ticket,query,this.flags);
 	}
+	@Override
 	public void queryAll(Object ticket, String query,int flags) throws PrologInterfaceException {
 		CTermUtil.checkFlags(flags);
 		if(isDisposed()){
@@ -473,6 +480,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		return id;
 	}
 
+	@Override
 	public boolean isPending(Object ticket){
 		synchronized (tickets) {
 			return tickets.containsValue(ticket);
@@ -506,6 +514,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public void join() throws PrologInterfaceException{
 		if(Thread.currentThread()==dispatcher){
 			throw new IllegalThreadStateException("Cannot call join() from dispatch thread!");
@@ -532,10 +541,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 	private static class _AbortTicket{}
 	
+	@Override
 	public void abort() throws PrologInterfaceException {
 		abort(new _AbortTicket());
 	}
 	
+	@Override
 	public void abort(Object ticket) throws PrologInterfaceException {
 		Debug.debug("enter 2");
 		if(ticket==null){
@@ -594,6 +605,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 	}
 
 	
+	@Override
 	public void dispose() {
 		if (isDisposed()) {
 			return;
@@ -616,6 +628,7 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		return lastAbortTicket;
 	}
 	
+	@Override
 	public boolean isDisposed() {
 		return disposing||client == null;
 	}
@@ -637,10 +650,12 @@ public class AsyncSocketSession implements AsyncPrologSession {
 		}
 	}
 	
+	@Override
 	public String getProcessorThreadAlias() {
 		return client.getProcessorThread();
 	}
 
+	@Override
 	public boolean isIdle() {
 		if(isDisposed()){
 			return true;

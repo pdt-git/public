@@ -31,6 +31,7 @@ public class FileListEditorAdapter extends OptionEditor {
      */
     protected static final int HORIZONTAL_GAP = 8;
 	
+	@Override
 	protected void createControls(Composite composite) {
 		GridLayout layout = new GridLayout();
         layout.numColumns = editor.getNumberOfControls();
@@ -44,10 +45,12 @@ public class FileListEditorAdapter extends OptionEditor {
         
 	}
 
+	@Override
 	public String getValue() {
 		return editor.getValue();
 	}
 
+	@Override
 	public void setValue(String value) {
 		editor.setValue(value);
 

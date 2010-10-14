@@ -65,7 +65,8 @@ public class FlagEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.OptionEditor#createControls(org.eclipse.swt.widgets.Composite)
      */
-    protected void createControls(Composite composite) {
+    @Override
+	protected void createControls(Composite composite) {
         GridLayout layout = new GridLayout();
         layout.numColumns = 1;
         composite.setLayout(layout);
@@ -88,16 +89,18 @@ public class FlagEditor extends OptionEditor implements PropertyEditor {
         valueCheckButton.setLayoutData(gd);
         valueCheckButton.addSelectionListener(new SelectionListener() {
             String old="";
-            public void widgetSelected(SelectionEvent e) {
+            @Override
+			public void widgetSelected(SelectionEvent e) {
                 String newValue = valueCheckButton.getSelection() ? "true":"false";
                 if(old.equals(newValue)) {
                     return;
                 }
-                firePropertyChange(old,(String) newValue);
+                firePropertyChange(old,newValue);
                 old=newValue;
             }
 
-            public void widgetDefaultSelected(SelectionEvent e) {             
+            @Override
+			public void widgetDefaultSelected(SelectionEvent e) {             
                 widgetSelected( e);
             }
         });
@@ -106,7 +109,8 @@ public class FlagEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#setValue(java.lang.String)
      */
-    public void setValue(String value) {
+    @Override
+	public void setValue(String value) {
         valueCheckButton.setSelection(Boolean.valueOf(value).booleanValue());
     }
 
@@ -114,7 +118,8 @@ public class FlagEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getValue()
      */
-    public String getValue() {      
+    @Override
+	public String getValue() {      
         return valueCheckButton.getSelection() ? "true":"false";
     }
 

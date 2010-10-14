@@ -80,6 +80,7 @@ private static JackTheProcessRipper processRipper;
 	 * org.cs3.pl.prolog.ServerStartAndStopStrategy#startServer(org.cs3.pl.prolog
 	 * .IPrologInterface)
 	 */
+	@Override
 	public  Process startServer(PrologInterface pif) {
 		if (pif.isStandAloneServer()) {
 			Debug.warning("Will not start server; the option " + PrologInterface.PREF_STANDALONE + " is set.");
@@ -272,6 +273,7 @@ private static JackTheProcessRipper processRipper;
 	 * org.cs3.pl.prolog.ServerStartAndStopStrategy#stopServer(org.cs3.pl.prolog
 	 * .IPrologInterface, boolean)
 	 */
+	@Override
 	public void stopServer(PrologInterface pif) {
 		if (pif.isStandAloneServer()) {
 			Debug.warning("Will not stop server; the option " + PrologInterface.PREF_STANDALONE + " is set.");
@@ -329,6 +331,7 @@ private static JackTheProcessRipper processRipper;
 	 * org.cs3.pl.prolog.ServerStartAndStopStrategy#isRunning(org.cs3.pl.prolog
 	 * .IPrologInterface)
 	 */
+	@Override
 	public  boolean isRunning(PrologInterface pif) {
 		File lockFile = ((SocketPrologInterface) pif).getLockFile();
 		return lockFile != null && lockFile.exists();

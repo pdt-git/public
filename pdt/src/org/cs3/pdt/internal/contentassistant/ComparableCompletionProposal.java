@@ -23,30 +23,37 @@ public abstract class ComparableCompletionProposal implements Comparable<Compara
 				displayString, contextInfo, additionalInfo);
 	}
 	
+	@Override
 	public void apply(IDocument document) {
 		target.apply(document);
 	}
 
+	@Override
 	public String getAdditionalProposalInfo() {
 		return target.getAdditionalProposalInfo();
 	}
 
+	@Override
 	public IContextInformation getContextInformation() {
 		return target.getContextInformation();
 	}
 
+	@Override
 	public String getDisplayString() {
 		return target.getDisplayString();
 	}
 
+	@Override
 	public Image getImage() {
 		return target.getImage();
 	}
 
+	@Override
 	public Point getSelection(IDocument document) {
 		return target.getSelection(document);
 	}
 	
+	@Override
 	public abstract int compareTo(ComparableCompletionProposal o);
 
 }

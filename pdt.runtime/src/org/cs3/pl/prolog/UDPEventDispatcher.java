@@ -28,9 +28,6 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 
 	private _Dispatcher dispatcher;
 
-	private PrologLibraryManager libraryManager;
-
-	
 	private void dispatch(DatagramPacket p) {
 		String data = new String(p.getData(),p.getOffset(),p.getLength());
 		CCompound term = (CCompound) CTermUtil.createCTerm(data);
@@ -43,14 +40,13 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 		fireUpdate(ticket,subject, event);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void fireUpdate(String ticket,  String subject, String event) {
 		Vector<PrologInterfaceListener> listeners = listenerLists.get(ticket);
 		if (listeners == null) {
 			return;
 		}
 		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, event);
-		
-
 		Vector<PrologInterfaceListener> cloned = null;
 		synchronized (listeners) {
 			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
@@ -66,11 +62,11 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	}
 
 
-	public UDPEventDispatcher(PrologInterface pif,PrologLibraryManager libManager){
+	public UDPEventDispatcher(PrologInterface pif){
 		this.pif = pif;
-		this.libraryManager = libManager;
 		// make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook() {
+			@Override
 			public void onInit(PrologInterface pif, PrologSession initSession)
 					throws PrologException, PrologInterfaceException {
 
@@ -79,6 +75,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 				initSession.queryOnce("use_module(library(pif_observe2))");
 			}
 
+				@Override
 				public void afterInit(PrologInterface pif)
 						throws PrologInterfaceException {
 					Set<String> subjects = new HashSet<String>(tickets.keySet());
@@ -92,19 +89,23 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 					}
 				}
 
+			@Override
 			public void beforeShutdown(PrologInterface pif,
 					PrologSession session) throws PrologException,
 					PrologInterfaceException {
 			}
 
+			@Override
 			public void onError(PrologInterface pif) {
 				;
 			}
 
+			@Override
 			public void setData(Object data) {
 				;
 			}
 			
+			@Override
 			public void lateInit(PrologInterface pif) {
 				;
 			}
@@ -135,6 +136,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.PrologInterfaceEventDispatcher#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
+	@Override
 	public void addPrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		String csubject = canonical(subject);
@@ -156,6 +158,7 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.PrologInterfaceEventDispatcher#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
+	@Override
 	public void removePrologInterfaceListener(String subject,
 			PrologInterfaceListener listener) throws PrologInterfaceException {
 		String csubject = canonical(subject);
@@ -207,8 +210,6 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 				Debug.rethrow(e);
 			}
 		}
-				
-
 	}
 
 	private String enableSubject(String subject) {
@@ -217,7 +218,6 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 		if(ticket!=null){
 			return ticket;
 		}
-		
 		try {
 			if (this.dispatcher == null) {
 				int port = Util.findFreePort();
@@ -225,8 +225,6 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 					Debug.debug("debug");
 				}
 				this.dispatcher = new _Dispatcher(port);
-				
-				
 				this.dispatcher.shouldBeRunning=true;
 				this.dispatcher.start();
 			}
@@ -252,21 +250,16 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			}
 		}
 		return ticket;
-
 	}
 	
 	private final class _Dispatcher extends Thread {
-		
 		private boolean shouldBeRunning;
 		private DatagramSocket socket;
-
 		private DatagramPacket packet;
 		private int port;
 
 		private _Dispatcher(int port) {
-			
 			super("UDP Event Dispatchher" + port);
-			
 			this.port=port;
 			try {
 				socket = new DatagramSocket(port);
@@ -281,32 +274,26 @@ public class UDPEventDispatcher implements IPrologEventDispatcher{
 			}
 		}
 
+		@Override
 		public void run() {
-
 			try {
-
 				while (shouldBeRunning) {
 					try {
 						socket.receive(packet);
 						dispatch(packet);
 					} catch (SocketTimeoutException e) {
 						; // this is anticipated.
-					}
-					
+					}		
 				}
 				socket.close();				
 			} catch (IOException e) {
 				Debug.rethrow(e);
 			}
-
 		}
 
-		
-
-		public int getPort() {
-			
+		public int getPort() {		
 			return port;
 		}
 	}
-
+	
 }

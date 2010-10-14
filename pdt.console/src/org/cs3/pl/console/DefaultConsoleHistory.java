@@ -81,6 +81,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleHistory#setConsoleModel(org.cs3.pl.views.ConsoleModel)
 	 */
+	@Override
 	public void setConsoleModel(ConsoleModel consoleModel) {
 		if (model == consoleModel) {
 			return;
@@ -102,6 +103,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleHistory#getConsoleModel()
 	 */
+	@Override
 	public ConsoleModel getConsoleModel() {
 		return model;
 	}
@@ -111,6 +113,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleHistory#previous()
 	 */
+	@Override
 	public void previous() {
 		Debug.debug("previous");
 		if(model==null) {
@@ -119,7 +122,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 		if(!head.isEmpty()){
 			tail.addFirst(changeHistory||original==null? model.getLineBuffer() : original);
 			original=head.getLast();
-			model.setLineBuffer((String) original);
+			model.setLineBuffer(original);
 			head.removeLast();
 		}
 	}
@@ -129,6 +132,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleHistory#next()
 	 */
+	@Override
 	public void next() {
 		if(model==null){
 			return;
@@ -136,7 +140,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 		if(!tail.isEmpty()){
 			head.addLast(changeHistory||original==null? model.getLineBuffer() : original);
 			original=tail.getFirst();
-			model.setLineBuffer((String) original);
+			model.setLineBuffer(original);
 			tail.removeFirst();
 		}
 	}
@@ -152,6 +156,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleHistory#clearHistory()
 	 */
+	@Override
 	public void clearHistory() {
 		initStacks();
 	}
@@ -166,6 +171,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleModelListener#onCommit(org.cs3.pl.views.ConsoleModelEvent)
 	 */
+	@Override
 	public void onCommit(ConsoleModelEvent e) {
 	    //ignore commits like ";" or ""
 	    if(e.getCommitText().trim().equals(";")
@@ -190,23 +196,27 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	 * 
 	 * @see org.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.ConsoleModelEvent)
 	 */
+	@Override
 	public void onModeChange(ConsoleModelEvent e) {	}
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.views.ConsoleModelListener#onEditBufferChanged(org.cs3.pl.views.ConsoleModelEvent)
 	 */
+	@Override
 	public void onEditBufferChanged(ConsoleModelEvent e) {	}
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.cs3.pl.views.ConsoleModelListener#onOutput(org.cs3.pl.views.ConsoleModelEvent)
 	 */
+	@Override
 	public void onOutput(ConsoleModelEvent e) {	}
 
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console.ConsoleModelEvent)
 	 */
+	@Override
 	public void afterConnect(ConsoleModelEvent e) {
 		// TODO should we handle this?		
 	}
@@ -214,6 +224,7 @@ public class DefaultConsoleHistory implements ConsoleHistory,
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console.ConsoleModelEvent)
 	 */
+	@Override
 	public void beforeDisconnect(ConsoleModelEvent e) {
 		// TODO should we handle this?		
 	}

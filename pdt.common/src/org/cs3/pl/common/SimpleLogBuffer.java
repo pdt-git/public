@@ -52,7 +52,8 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, char)
      */
-    public synchronized void log(String key, char c) {
+    @Override
+	public synchronized void log(String key, char c) {
         log(key,new byte[]{(byte) c});
     }
 
@@ -76,7 +77,8 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, byte[], int, int)
      */
-    public synchronized void log(String key, byte[] buf, int offset, int len) {
+    @Override
+	public synchronized void log(String key, byte[] buf, int offset, int len) {
         setKey(key);
         if(len>0) {
             String string = new String(buf,offset,len);
@@ -91,7 +93,8 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, java.lang.String)
      */
-    public synchronized void log(String key, String s) {
+    @Override
+	public synchronized void log(String key, String s) {
         byte[] bytes = s.getBytes();
 		log(key,bytes,0,bytes.length);		
     }
@@ -99,21 +102,24 @@ public class SimpleLogBuffer implements LogBuffer {
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#log(java.lang.String, byte[])
      */
-    public synchronized void log(String key, byte[] b) {
+    @Override
+	public synchronized void log(String key, byte[] b) {
 		log(key,b,0,b.length);
     }
 
     /* (non-Javadoc)
      * @see org.cs3.pl.common.LogBuffer#printLog(java.io.PrintStream)
      */
-    public synchronized void printLog(PrintStream out) {
+    @Override
+	public synchronized void printLog(PrintStream out) {
        out.println(buffer.toString());        
     }
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public synchronized String toString() {     
+    @Override
+	public synchronized String toString() {     
         cutHead();
         return buffer.toString();
     }

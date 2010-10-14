@@ -51,6 +51,7 @@ public class ClauseData extends PrologElementData implements Clause {
 	
 	}
 
+	@Override
 	public Predicate getPredicate() {
 		return new PredicateData(module,label,arity,pub,dynamic,multifile);
 	}

@@ -62,6 +62,7 @@ import org.eclipse.jface.text.TextUtilities;
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
+@SuppressWarnings("deprecation")
 public class PLAutoIndentStrategy extends DefaultAutoIndentStrategy implements IAutoEditStrategy{
 
 	private void autoIndentAfterNewLine(IDocument d, DocumentCommand c) {
@@ -123,6 +124,7 @@ public class PLAutoIndentStrategy extends DefaultAutoIndentStrategy implements I
 	/*
 	 * @see IAutoIndentStrategy#customizeDocumentCommand
 	 */
+	@Override
 	public void customizeDocumentCommand(IDocument d, DocumentCommand c) {
 		if (c.length == 0 && c.text != null && TextUtilities.endsWith(d.getLegalLineDelimiters(), c.text) != -1)
 			autoIndentAfterNewLine(d, c);

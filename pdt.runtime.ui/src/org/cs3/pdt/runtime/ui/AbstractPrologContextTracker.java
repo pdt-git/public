@@ -83,16 +83,23 @@ public abstract class AbstractPrologContextTracker implements
 		PrologContextTrackerEvent e=null;
 		e = new PrologContextTrackerEvent(this,
 				getCurrentPrologInterface());
-		Vector<PrologContextTrackerListener> cloned = null;
-		synchronized (listeners) {
-			cloned = (Vector<PrologContextTrackerListener>) listeners.clone();
-		}
+		Vector<PrologContextTrackerListener> cloned = getAListenersClone();
 		for (Iterator<PrologContextTrackerListener> it = cloned.iterator(); it.hasNext();) {
 			PrologContextTrackerListener l = it.next();
 			l.contextChanged(e);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private Vector<PrologContextTrackerListener> getAListenersClone() {
+		Vector<PrologContextTrackerListener> cloned = null;
+		synchronized (listeners) {
+			cloned = (Vector<PrologContextTrackerListener>) listeners.clone();
+		}
+		return cloned;
+	}
+
+	@Override
 	public void addPrologContextTrackerListener(PrologContextTrackerListener l) {
 
 		synchronized (listeners) {
@@ -103,6 +110,7 @@ public abstract class AbstractPrologContextTracker implements
 
 	}
 
+	@Override
 	public void removePrologContextTrackerListener(
 			PrologContextTrackerListener l) {
 
@@ -114,10 +122,12 @@ public abstract class AbstractPrologContextTracker implements
 
 	}
 
+	@Override
 	public String getLabel() {
 		return label;
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}

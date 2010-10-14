@@ -104,27 +104,33 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 		}
 
+		@Override
 		public int getOffset() {
 
 			return offset;
 		}
 
+		@Override
 		public int getLength() {
 			return length;
 		}
 
+		@Override
 		public int getStartLine() {
 			return startLine;
 		}
 
+		@Override
 		public int getEndLine() {
 			return endLine;
 		}
 
+		@Override
 		public String getText() {
 			return text;
 		}
 
+		@Override
 		public boolean isEmpty() {
 			return text.length() == 0;
 		}
@@ -155,15 +161,18 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private Color COLOR_DEBUG;
 
 	private KeyListener keyListener = new KeyListener() {
+		@Override
 		public void keyPressed(KeyEvent e) {
 			ui_keyPressed(e);
 		}
 
+		@Override
 		public void keyReleased(KeyEvent e) {
 			;
 		}
 	};
 	private ModifyListener modifyListener = new ModifyListener() {
+		@Override
 		public void modifyText(ModifyEvent e) {
 			if (!thatWasMe) {
 				ui_inputModified(ui_getLineBuffer());
@@ -171,16 +180,19 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	};
 	private VerifyKeyListener verifyKeyListener = new VerifyKeyListener() {
+		@Override
 		public void verifyKey(VerifyEvent event) {
 			ui_keyStrokeIntercepted(event);
 		}
 	};
 	private VerifyListener verifyListener = new VerifyListener() {
+		@Override
 		public void verifyText(VerifyEvent e) {
 			ui_inputModificationIntercepted(e);
 		}
 	};
 	private IPropertyChangeListener propertyChangeListener = new IPropertyChangeListener() {
+		@Override
 		public void propertyChange(PropertyChangeEvent event) {
 			initPreferences();
 
@@ -233,17 +245,20 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 		control.setTabs(4);
 		control.addTraverseListener(new TraverseListener() {
+			@Override
 			public void keyTraversed(TraverseEvent e) {
 				e.doit = false;
 			}
 		});
 		control.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				;
 
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fireSelectionChanged(new SelectionChangedEvent(ConsoleViewer.this, getSelection()));
 			}
@@ -252,10 +267,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 		control.addMouseListener(new MouseListener() {
 
+			@Override
 			public void mouseUp(MouseEvent e) {
 				;
 			}
 
+			@Override
 			public void mouseDown(MouseEvent e) {
 				if (control.getSelectionCount() == 0) {
 					try {
@@ -270,6 +287,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 				}
 			}
 
+			@Override
 			public void mouseDoubleClick(MouseEvent e) {
 				;
 
@@ -278,6 +296,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		});
 		control.addDisposeListener(new DisposeListener() {
 
+			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				;
 			}
@@ -287,22 +306,27 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		control.setEnabled(model != null && model.isConnected());
 	}
 
+	@Override
 	public Control getControl() {
 		return control;
 	}
 
+	@Override
 	public Object getInput() {
 		return model;
 	}
 
+	@Override
 	public ISelection getSelection() {
 		return new _TextSelection(control);
 	}
 
+	@Override
 	public void refresh() {
 		; // something to do? dunno.
 	}
 
+	@Override
 	public void setInput(Object input) {
 		ConsoleModel m = null;
 		if (input instanceof ConsoleModel) {
@@ -311,6 +335,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		setModel(m);
 	}
 
+	@Override
 	public void setSelection(ISelection selection, boolean reveal) {
 		ITextSelection s = null;
 		if (selection instanceof ITextSelection) {
@@ -416,10 +441,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @seeorg.cs3.pl.views.ConsoleModelListener#onCommit(org.cs3.pl.views.
 	 * ConsoleModelEvent)
 	 */
+	@Override
 	public void onCommit(final ConsoleModelEvent e) {
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					onCommit(e);
 				}
@@ -436,6 +463,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * org.cs3.pl.views.ConsoleModelListener#onEditBufferChanged(org.cs3.pl.
 	 * views.ConsoleModelEvent)
 	 */
+	@Override
 	public void onEditBufferChanged(final ConsoleModelEvent e) {
 		if (control == null) {
 			Debug.warning("no UI, dropping EditBufferChange: " + e.getNewLineState());
@@ -448,6 +476,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					onEditBufferChanged(e);
 				}
@@ -464,11 +493,13 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @seeorg.cs3.pl.views.ConsoleModelListener#onModeChange(org.cs3.pl.views.
 	 * ConsoleModelEvent)
 	 */
+	@Override
 	public void onModeChange(final ConsoleModelEvent e) {
 		Debug.debug("mode changed: " + model.isSingleCharMode());
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					onModeChange(e);
 				}
@@ -490,6 +521,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * @seeorg.cs3.pl.views.ConsoleModelListener#onOutput(org.cs3.pl.views.
 	 * ConsoleModelEvent)
 	 */
+	@Override
 	public void onOutput(final ConsoleModelEvent e) {
 		if (control == null || control.isDisposed()) {
 			return;
@@ -497,6 +529,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					onOutput(e);
 				}
@@ -513,10 +546,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * org.cs3.pl.console.ConsoleModelListener#afterConnect(org.cs3.pl.console
 	 * .ConsoleModelEvent)
 	 */
+	@Override
 	public void afterConnect(final ConsoleModelEvent e) {
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					afterConnect(e);
 				}
@@ -533,6 +568,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	 * org.cs3.pl.console.ConsoleModelListener#beforeDisconnect(org.cs3.pl.console
 	 * .ConsoleModelEvent)
 	 */
+	@Override
 	public void beforeDisconnect(final ConsoleModelEvent e) {
 		if (control.isDisposed()) {
 			return;
@@ -540,6 +576,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		Display display = control.getDisplay();
 		if (Display.getCurrent() != display) {
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					beforeDisconnect(e);
 				}
@@ -585,10 +622,12 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 
 		final int caretPosition = control.getCaretOffset() - startOfInput;
 		Runnable work = new Runnable() {
+			@Override
 			public void run() {
 
 				final CompoletionResult r = completionProvider.doCompletion(model.getLineBuffer(), caretPosition);
 				final Runnable notify = new Runnable() {
+					@Override
 					public void run() {
 						completionAvailable(r);
 					}
@@ -1032,6 +1071,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		} else {
 			control.getDisplay().asyncExec(new Runnable() {
 
+				@Override
 				public void run() {
 					ui_setEnabled(b);
 				}

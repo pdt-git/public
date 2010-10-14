@@ -25,31 +25,38 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
                                 this.message = message;
                         }
 
-                        public Throwable fillInStackTrace() {
+                        @Override
+						public Throwable fillInStackTrace() {
                                 return cause.fillInStackTrace();
                         }
 
-                        public String getLocalizedMessage() {
+                        @Override
+						public String getLocalizedMessage() {
                                 return message + " ("+cause.getLocalizedMessage()+")";
                         }
 
-                        public String getMessage() {
+                        @Override
+						public String getMessage() {
                                 return message + " ("+cause.getMessage()+")";
                         }
 
-                        public void printStackTrace() {
+                        @Override
+						public void printStackTrace() {
                                 cause.printStackTrace();
                         }
 
-                        public void printStackTrace(PrintStream arg0) {
+                        @Override
+						public void printStackTrace(PrintStream arg0) {
                                 cause.printStackTrace(arg0);
                         }
 
-                        public void printStackTrace(PrintWriter arg0) {
+                        @Override
+						public void printStackTrace(PrintWriter arg0) {
                                 cause.printStackTrace(arg0);
                         }
 
-                        public String toString() {
+                        @Override
+						public String toString() {
                                 return cause.toString();
                         }
 

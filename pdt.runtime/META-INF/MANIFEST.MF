@@ -16,4 +16,5 @@ Export-Package: org.cs3.pdt.runtime,
  org.cs3.pl.prolog.tests
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: org.cs3.pdt.runtime.PrologRuntimePlugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 

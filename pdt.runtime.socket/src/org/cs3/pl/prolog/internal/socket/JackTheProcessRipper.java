@@ -26,6 +26,7 @@ public class JackTheProcessRipper extends Thread {
 		setDaemon(false);
 		Runtime theRuntime = Runtime.getRuntime();
 		Thread shutdownHook = new Thread("Jack The Process Ripper Shutdown Hook") {
+			@Override
 			public void run() {
 				try {
 					Thread.sleep(TIMEOUT_WAITING_FOR_AN_PID);
@@ -51,6 +52,7 @@ public class JackTheProcessRipper extends Thread {
 	 * Prolog-processed referenced by a PID that is given via
 	 * JackTheProcessRipper.markForDeletion(long).
 	 */
+	@Override
 	public void run() {
 		Long processId = NONVALID_PID;
 		while (!shuttingDown) {

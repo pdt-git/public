@@ -49,6 +49,7 @@ import org.eclipse.jface.text.ITextViewer;
 public class PLDoubleClickStrategy implements ITextDoubleClickStrategy {
 	protected ITextViewer fText;
 
+	@Override
 	public void doubleClicked(ITextViewer part) {
 		int pos = part.getSelectedRange().x;
 
