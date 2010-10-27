@@ -271,8 +271,8 @@ write_data(Stream,Key,Value):-
 
 
 pl_test:-
-   % pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test3.graphml').           
-    pl_test(['Z:/pdt.git/pdt.runtime.ui/library/pdt/xref'],'Z:/WorkspaceTeaching3/test5.graphml').
+    pl_test(['Z:/pdt.git/pdt.runtime.ui/library'],'Z:/WorkspaceTeaching3/test6.graphml').           
+   % pl_test(['Z:/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/WorkspaceTeaching3/test5.graphml').
  
 pl_test(Project,Output):-
 	plparser_quick:generate_facts(Project),
