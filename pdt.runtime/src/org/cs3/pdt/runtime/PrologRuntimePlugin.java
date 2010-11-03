@@ -5,7 +5,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,8 +12,6 @@ import java.util.Set;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.DefaultPrologLibrary;
-import org.cs3.pl.prolog.LifeCycleHook;
-import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologLibrary;
 import org.cs3.pl.prolog.PrologLibraryManager;
 import org.eclipse.core.runtime.CoreException;
@@ -36,12 +33,12 @@ public class PrologRuntimePlugin extends Plugin {
 
 	private Map<String, BootstrapPrologContribution> allBootStrapLists = new HashMap<String, BootstrapPrologContribution>();
 	private Map<String, List<BootstrapPrologContribution>> bootStrapContribForKey;
-	private HashMap<String, Map> globalHooks;
+//	private HashMap<String, Map> globalHooks;
 	private PrologInterfaceRegistry registry;
 
 
 	private static PrologLibraryManager libraryManager;
-	private final static Object globalHooksMux = new Object();
+//	private final static Object globalHooksMux = new Object();
 	private final static Object libraryManagerMux = new Object();
 	private final static Object registryMux = new Object();
 
@@ -360,22 +357,22 @@ public class PrologRuntimePlugin extends Plugin {
 	}
 
 
-	public void addGlobalHooks(String pifKey, PrologInterface pif) {
-		Map hooks = getGlobalHooks().get(pifKey);
-		if (hooks != null) {
-			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
-				_HookRecord record = it.next();
-				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
-			}
-		}
-		hooks = getGlobalHooks().get("");
-		if (hooks != null) {
-			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
-				_HookRecord record = it.next();
-				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
-			}
-		}
-	}
+//	public void addGlobalHooks(String pifKey, PrologInterface pif) {
+//		Map hooks = getGlobalHooks().get(pifKey);
+//		if (hooks != null) {
+//			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
+//				_HookRecord record = it.next();
+//				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
+//			}
+//		}
+//		hooks = getGlobalHooks().get("");
+//		if (hooks != null) {
+//			for (Iterator<_HookRecord> it = hooks.values().iterator(); it.hasNext();) {
+//				_HookRecord record = it.next();
+//				pif.addLifeCycleHook(record.hook, record.hookId, record.deps);
+//			}
+//		}
+//	}
 
 	/**
 	 *  
@@ -397,31 +394,31 @@ public class PrologRuntimePlugin extends Plugin {
 	}
 	
 
-	private HashMap<String, Map> getGlobalHooks() {
-		synchronized (globalHooksMux) {
-			if (globalHooks == null) {
-				globalHooks = new HashMap<String, Map>();
-				registerStaticHooks();
-			}
-			return globalHooks;
-		}
-	}
+//	private HashMap<String, Map> getGlobalHooks() {
+//		synchronized (globalHooksMux) {
+//			if (globalHooks == null) {
+//				globalHooks = new HashMap<String, Map>();
+//				registerStaticHooks();
+//			}
+//			return globalHooks;
+//		}
+//	}
 	
-	private static class _HookRecord {
-		LifeCycleHook hook;
-
-		String hookId;
-
-		String[] deps;
-
-		public _HookRecord(LifeCycleHook hook, String hookId, String[] deps) {
-			super();
-			this.hook = hook;
-			this.hookId = hookId;
-			this.deps = deps;
-		}
-
-	}
+//	private static class _HookRecord {
+//		LifeCycleHook hook;
+//
+//		String hookId;
+//
+//		String[] deps;
+//
+//		public _HookRecord(LifeCycleHook hook, String hookId, String[] deps) {
+//			super();
+//			this.hook = hook;
+//			this.hookId = hookId;
+//			this.deps = deps;
+//		}
+//
+//	}
 	protected void registerStaticHooks() {
 		IExtensionRegistry registry = Platform.getExtensionRegistry();
 		IExtensionPoint point = registry.getExtensionPoint(PrologRuntime.PLUGIN_ID, PrologRuntime.EP_HOOKS);
