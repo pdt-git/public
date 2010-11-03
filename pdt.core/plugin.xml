@@ -195,11 +195,10 @@
   <extension
        point="org.eclipse.ui.propertyPages">
     <page
-          adaptable="true"
           class="org.cs3.pdt.core.internal.properties.PrologProjectPropertyPage"
           id="org.cs3.pdt.properties.projectPropertyPage"
           name="Prolog Project Properties"
-          objectClass="org.eclipse.core.resources.IProject">
+	>
 		  <enabledWhen>
           		<adapt type="org.eclipse.core.resources.IProject"/>
           </enabledWhen>
@@ -280,7 +279,6 @@
            label="Prolog Entry Points Decorator"
            lightweight="true"
            location="TOP_RIGHT"
-           objectClass="org.eclipse.core.resources.IFile"
            state="true">
         <enablement>
            <objectClass
