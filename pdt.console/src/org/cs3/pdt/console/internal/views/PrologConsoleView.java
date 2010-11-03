@@ -105,6 +105,7 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
+@SuppressWarnings("deprecation")
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		PrologConsole {
 	private final class ClearAction extends Action {
