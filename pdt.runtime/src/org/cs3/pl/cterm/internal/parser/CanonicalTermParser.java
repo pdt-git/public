@@ -12,7 +12,11 @@ import java.util.List;
 public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserTreeConstants, CanonicalTermParserConstants {/*@bgen(jjtree)*/
   protected JJTCanonicalTermParserState jjtree = new JJTCanonicalTermParserState();public static class RuntimeException extends java.lang.RuntimeException{
 
-                        private Throwable cause;
+                        /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2132793322254995847L;
+						private Throwable cause;
                         private String message;
 
                         public RuntimeException(Throwable e) {
@@ -62,9 +66,9 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
 
             }
 
-        private List errors = new ArrayList();
+        private List<ParseException> errors = new ArrayList<ParseException>();
 
-        public List getErrors() {
+        public List<ParseException> getErrors() {
                 return errors;
         }
 
@@ -117,7 +121,6 @@ public static void main(String args[]) throws FileNotFoundException {
     CanonicalTermParser t = new CanonicalTermParser(stream);
     try {
       t.Term();
-      Node n = t.getASTRoot();
 
       System.err.println("Thank you.");
     } catch (Exception e) {
@@ -604,7 +607,13 @@ public static void main(String args[]) throws FileNotFoundException {
     throw generateParseException();
   }
 
-  static private final class LookaheadSuccess extends java.lang.Error { }
+  static private final class LookaheadSuccess extends java.lang.Error {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2916935552030986067L; }
+  
   final private LookaheadSuccess jj_ls = new LookaheadSuccess();
   private boolean jj_scan_token(int kind) {
     if (jj_scanpos == jj_lastpos) {
