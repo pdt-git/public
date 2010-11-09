@@ -65,8 +65,8 @@ parse_clauses(InStream,FileId):-
  *    parses the term given in Arg1 to PEFs. The term has to be a clause.
  *    If it is a
  *    -  directive, a directiveT is defined and its body is parsed.
- *    -  fact, a factT and a ruleT_ri (for reverse indexing) are defined
- *    -  rule, a ruleT and a ruleT_ri (for reverse indexing) are defined, 
+ *    -  fact, a factT and a clauseT_ri (for reverse indexing) are defined
+ *    -  rule, a clauseT and a clauseT_ri (for reverse indexing) are defined, 
  			its body is parsed.
  *    Body elements are parsed with parse_body_literals/6, head elements with
  *    parse_head_literals/5.
@@ -90,8 +90,8 @@ parse_clause_elements(Head :- Body, Pos, FileId, VarNames, Module) :-  % Rule
  	SubPos = [HeadPos, BodyPos], 
 	assert_new_node(Head :- Body,From,To,ClauseId),  
 	functor(Head,Functor,Arity),
-    assert(ruleT(ClauseId,FileId,Module,Functor,Arity)),
-    assert(ruleT_ri(Functor,Arity,ClauseId)),	
+    assert(clauseT(ClauseId,FileId,Module,Functor,Arity)),
+    assert(clauseT_ri(Functor,Arity,ClauseId)),	
 	assert(pos_and_vars(ClauseId,BodyPos,VarNames)),
     parse_head_literal(Head, HeadPos, ClauseId, Module, VarNames).
 
@@ -102,8 +102,8 @@ parse_clause_elements(Head, Pos, FileId, VarNames, Module) :-   % Fact
    	),
    	assert_new_node(Head,From,To,ClauseId), 
 	functor(Head,Functor,Arity),
-    assert(ruleT(ClauseId,FileId,Module,Functor,Arity)),
-    assert(ruleT_ri(Functor,Arity,ClauseId)),
+    assert(clauseT(ClauseId,FileId,Module,Functor,Arity)),
+    assert(clauseT_ri(Functor,Arity,ClauseId)),
     parse_head_literal(Head, Pos, ClauseId, Module, VarNames).    
  
  

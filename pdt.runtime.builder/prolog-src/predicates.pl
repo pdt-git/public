@@ -5,7 +5,7 @@
 :- ensure_loaded(parse_util).
 
 derive_all_predicates:-
-    forall( ruleT(CId,File,Module,Functor,Arity),
+    forall( clauseT(CId,File,Module,Functor,Arity),
     		derive_predicate_for_clause(CId,Functor,Arity,Module,File,_PId)
     ).
     	  

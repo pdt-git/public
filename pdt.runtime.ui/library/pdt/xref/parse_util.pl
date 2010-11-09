@@ -1,12 +1,12 @@
 :- module(parse_util, [assert_new_node/4, cleanup_nodes/0,
 						fileT/3,
-						ruleT/5, directiveT/3, headT/6,
+						clauseT/5, directiveT/3, headT/6,
 						literalT/6, metaT/6,
 						predicateT/5, onloadT/3, operatorT/8,
 						slT/3, termT/2,
 						dynamicT/5, transparentT/5, multifileT/5,
-						lit_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
-						ruleT_ri/3, predicateT_ri/4, fileT_ri/2,
+						call_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
+						clauseT_ri/3, predicateT_ri/4, fileT_ri/2,
 						import_dir/2, export_dir/2, load_dir/3, property_dir/5, library_dir/3,
 						pos_and_vars/3, 
 						error/3, warning/3]).
@@ -17,7 +17,7 @@
 :- dynamic literalT/6.		%literalT(Id,ParentId,EnclosingId,Module,Functor,Arity)
 :- dynamic metaT/6.			%metaT(Id,ParentId,EnclosingId,Module,Functor,Arity)		<-- da solll wahrscheinlich noch mehr rein...
 :- dynamic headT/6.			%headT(Id,ParentId,EnclosingId,Module,Functor,Arity)
-:- dynamic ruleT/5.			%ruleT(ClauseId,ParentId,Module,Functor,Arity)
+:- dynamic clauseT/5.			%clauseT(ClauseId,ParentId,Module,Functor,Arity)
 :- dynamic directiveT/3.	%directiveT(Id,ParentId,Module)
 :- dynamic predicateT/5.	%predicateT(Id,FileId,Functor,Arity,Module)
 :- dynamic onloadT/3.		%onloadT(PId,File,Module)	
@@ -30,12 +30,12 @@
 :- dynamic termT/2.			%termT(Id,Term)
 :- dynamic slT/3.			%slT(Id,Pos,Len)    <----- should be taken from JTransformer in the long run!!!!
 
-:- dynamic lit_edge/2.		%lit_edge(LId,Id)
-:- dynamic pred_edge/2.		%pred_edge(Id,PId)							<-- ATTENTION: otherway as lit_edge
-:- dynamic onload_edge/2.	%onload_edge(Id,OId)						<-- ATTENTION: otherway as lit_edge
+:- dynamic call_edge/2.		%call_edge(LId,Id)
+:- dynamic pred_edge/2.		%pred_edge(Id,PId)							<-- ATTENTION: otherway as call_edge
+:- dynamic onload_edge/2.	%onload_edge(Id,OId)						<-- ATTENTION: otherway as call_edge
 :- dynamic load_edge/4.		%load_edge(LoadingId,FileId,Imports,Directive)
 
-:- dynamic ruleT_ri/3.      %ruleT_ri(Functor,Arity,ClauseId)
+:- dynamic clauseT_ri/3.      %clauseT_ri(Functor,Arity,ClauseId)
 :- dynamic predicateT_ri/4.	%predicateT_ri(Functor,Arity,Module,Id)		
 :- dynamic fileT_ri/2.		%fileT_ri(FileName,Id)
 :- dynamic pos_and_vars/3.	%pos_and_vars(ClauseId,BodyPos,VarNames)
@@ -58,7 +58,7 @@ cleanup_nodes:-
 	retractall(literalT(_,_,_,_,_,_)),
 	retractall(metaT(_,_,_,_,_,_)),
 	retractall(headT(_,_,_,_,_,_)),
-	retractall(ruleT(_,_,_,_,_)),
+	retractall(clauseT(_,_,_,_,_)),
 	retractall(directiveT(_,_,_)),
 	retractall(predicateT(_,_,_,_,_)),
 	retractall(onloadT(_,_,_)),
@@ -68,11 +68,11 @@ cleanup_nodes:-
 	retractall(multifileT(_,_,_,_,_)),	
 	retractall(termT(_,_)),
 	retractall(slT(_,_,_)),
-	retractall(lit_edge(_,_)),	
+	retractall(call_edge(_,_)),	
 	retractall(pred_edge(_,_)),
 	retractall(onload_edge(_,_)),
 	retractall(load_edge(_,_,_,_)),
-	retractall(ruleT_ri(_,_,_)),     
+	retractall(clauseT_ri(_,_,_)),     
 	retractall(predicateT_ri(_,_,_,_)),
 	retractall(fileT_ri(_,_)),
 	retractall(pos_and_vars(_,_,_)),

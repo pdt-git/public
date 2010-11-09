@@ -94,7 +94,7 @@ write_hirarchy(Stream):-
  
     	
 write_edges(Stream):-
-    lit_edge(LId,CalleeId),
+    call_edge(LId,CalleeId),
     literalT(LId,_,CallerId,_,_,_),
     termT(LId,Term),
     	write_edge(Stream,LId,CalleeId,CallerId,Term),

@@ -106,7 +106,6 @@ write_file(Stream,Project,Id,FileName,Module):-
 			_, 
 			RelativeFileName=FileName
 		),
-	%format('~w~n~w -> ~w~n', [Project, FileName, RelativeFileName]), 
 	write_data(Stream,'fileName',RelativeFileName),
 	write_data(Stream,'module',Module),	
 	(	Module=user
@@ -180,18 +179,8 @@ write_call_edge(Stream,SourceId,TargetId):-
     call_edges_for_predicates(SourceId,TargetId,Frequency),
     write_data(Stream,'frequency',Frequency),
 	close_edge(Stream).
+		
 	
-/*write_call_edges(Stream):-
-    lit_edge(LId,CalleeId),
-    literalT(LId,_,CallerId,_,_,_),
-    termT(LId,Term),
-    	write_edge(Stream,LId,CalleeId,CallerId,Term),
-    fail.
-write_edges(_).*/		
-	
-	
-	
-
 /*write_onloades(Stream):-
 	forall(	onloadT(Id,_,Module),
 			(	write_node(Stream,Id,prolog_onload,Module),
@@ -235,7 +224,7 @@ write_hierarchy(Stream):-
  
     	
 /*write_edges(Stream):-
-    lit_edge(LId,CalleeId),
+    call_edge(LId,CalleeId),
     literalT(LId,_,CallerId,_,_,_),
     termT(LId,Term),
     	write_edge(Stream,LId,CalleeId,CallerId,Term),
