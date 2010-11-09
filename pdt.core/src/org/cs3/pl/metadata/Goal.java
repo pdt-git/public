@@ -52,10 +52,8 @@ import org.cs3.pl.cterm.CTerm;
  */
 public interface Goal {
 
-	/**@deprecated*/
 	public int getArity();
 
-	/**@deprecated*/
 	public String getName();
 
 	public String getModule();

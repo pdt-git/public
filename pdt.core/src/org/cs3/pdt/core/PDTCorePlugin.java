@@ -115,6 +115,7 @@ public class PDTCorePlugin extends AbstractUIPlugin implements IStartup{
 			;
 		}
 
+		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			switch (delta.getResource().getType()) {
 			case IResource.ROOT:
@@ -135,6 +136,7 @@ public class PDTCorePlugin extends AbstractUIPlugin implements IStartup{
 
 	private final class _ResourceChangeListener implements
 			IResourceChangeListener {
+		@Override
 		public void resourceChanged(IResourceChangeEvent event) {
 			IResourceDelta delta = event.getDelta();
 			try {
@@ -162,6 +164,7 @@ public class PDTCorePlugin extends AbstractUIPlugin implements IStartup{
 		return errorMessageProvider;
 	}
 
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		IWorkspace ws = ResourcesPlugin.getWorkspace();

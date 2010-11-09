@@ -82,7 +82,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	 */
 	public FindPredicateActionDelegate(ITextEditor editor) {
 		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),
-				FindPredicateActionDelegate.class.getName(), editor); //$NON-NLS-1$
+				FindPredicateActionDelegate.class.getName(), editor); 
 		this.editor = editor;
 
 	}
@@ -90,6 +90,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	/**
 	 * @see IWorkbenchWindowActionDelegate#run
 	 */
+	@Override
 	public void run() {
 		try {
 			final Goal data = ((PLEditor) editor)
@@ -109,6 +110,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			}
 			
 			Job j = new Job("Searching predicate definition") {
+				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						monitor.beginTask("searching...",
@@ -181,7 +183,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 			}
 		}
 		String fileName = Util.unquoteAtom((String) m.get("File"));
-		SourceLocation loc=new SourceLocation(fileName,false,false);
+		SourceLocation loc=new SourceLocation(fileName,false);
 		loc.offset=Integer.parseInt((String)m.get("Start"));
 		loc.endOffset=Integer.parseInt((String)m.get("End"));
 		

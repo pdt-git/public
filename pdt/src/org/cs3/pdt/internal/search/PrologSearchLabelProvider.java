@@ -22,6 +22,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		this.prologSearchResultPage = prologSearchResultPage;
 	}
 
+	@Override
 	public Image getImage(Object element) {
 		//TODO: correct image
 		if(!(element instanceof PredicateElement)){
@@ -37,6 +38,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
 	}
 
+	@Override
 	public String getText(Object element) {
 		if(element instanceof PredicateElement){
 			
@@ -55,16 +57,20 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		return "no label";
 	}
 
+	@Override
 	public void addListener(ILabelProviderListener listener) {
 	}
 
+	@Override
 	public void dispose() {
 	}
 
+	@Override
 	public boolean isLabelProperty(Object element, String property) {
 		return false;
 	}
 
+	@Override
 	public void removeListener(ILabelProviderListener listener) {
 	}
 }

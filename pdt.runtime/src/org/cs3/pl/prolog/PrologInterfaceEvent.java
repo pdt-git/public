@@ -44,7 +44,6 @@
 package org.cs3.pl.prolog;
 
 import java.util.EventObject;
-import java.util.Map;
 
 /**
  */
@@ -55,7 +54,6 @@ public class PrologInterfaceEvent extends EventObject {
     private static final long serialVersionUID = 1L;
     private String subject;
     private String event;
-	private Map unifier;
 
     /**
      * @return Returns the event.
@@ -82,14 +80,6 @@ public class PrologInterfaceEvent extends EventObject {
     
     public PrologInterfaceEvent(Object source) {
 		super(source);
-	}
-	
-    public void setUnifier(Map unifier) {
-		this.unifier=unifier;
-		
-	}
-	public Map getUnifier() {
-		return unifier;
 	}
     
 }

@@ -69,6 +69,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	}
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		try {
 			return backend.getChildren(parentElement);
@@ -78,10 +79,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 		}
 	}
 
+	@Override
 	public Object getParent(Object element) {
 		return null;
 	}
 
+	@Override
 	public boolean hasChildren(Object parentElement) {
 		return backend.hasChildren(parentElement);
 	}
@@ -91,10 +94,12 @@ public class CTermContentProvider implements ITreeContentProvider,
 	 * 
 	 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
 	 */
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
 	}
 
+	@Override
 	public void dispose() {
 		;
 	}
@@ -104,6 +109,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(Viewer,
 	 *      Object, Object)
 	 */
+	@Override
 	public void inputChanged(final Viewer viewer, Object oldInput, Object input) {
 		
 		try {
@@ -137,6 +143,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 	}
 
 	
+	@Override
 	public void childrenAdded(final PrologFileContentModelEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed()) {
 			return;
@@ -146,6 +153,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			Debug.debug("outline enqueue on ui thread: add "
 					+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					childrenAdded(e);
 				}
@@ -159,6 +167,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 
 	}
 
+	@Override
 	public void childrenChanged(final PrologFileContentModelEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed()) {
 			return;
@@ -168,6 +177,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			Debug.debug("outline enqueue on ui thread: update "
 					+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					childrenChanged(e);
 				}
@@ -178,6 +188,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		viewer.update(e.children, null);
 	}
 
+	@Override
 	public void childrenRemoved(final PrologFileContentModelEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed()) {
 			return;
@@ -187,6 +198,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 			Debug.debug("outline enqueue on ui thread: remove "
 					+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					childrenRemoved(e);
 				}
@@ -197,6 +209,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 		viewer.remove(e.children);
 	}
 
+	@Override
 	public void contentModelChanged(final PrologFileContentModelEvent e) {
 		if (viewer == null || viewer.getControl().isDisposed() || e.isObsolet()) {
 			return;
@@ -207,6 +220,7 @@ public class CTermContentProvider implements ITreeContentProvider,
 					.debug("outline enqueue on ui thread: refresh (contentModelChanged) "
 							+ Util.prettyPrint(e.children));
 			display.asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					contentModelChanged(e);
 				}

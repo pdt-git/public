@@ -26,11 +26,13 @@ public class ApplyTransformation implements IEditorActionDelegate{
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	public void setActiveEditor(IAction action, IEditorPart targetEditor) {
 		this.editor=targetEditor;
 		
 	}
 
+	@Override
 	public void run(IAction action) {
 		
 		ApplyTransformationInfo info = new ApplyTransformationInfo(getCurrentPrologInterface());
@@ -48,6 +50,7 @@ public class ApplyTransformation implements IEditorActionDelegate{
 		
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		// TODO Auto-generated method stub
 		

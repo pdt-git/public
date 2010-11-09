@@ -72,29 +72,29 @@ public class QueryAction extends Action {
 		this.icon = icon;
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		return icon;
 	}
 
+	@Override
 	public String getToolTipText() {
 		return tooltip;
 	}
 
+	@Override
 	public void run() {
 		try {
-
 			Job j = new Job(tooltip) {
-
+				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
-
 						PrologSession session = pif.getSession(PrologInterface.NONE);
 						try {
 							//	 Alternative                        	
 							//	                    		model.setLineBuffer(query + ".");
 							//	                    		model.commitLineBuffer();
 							session.queryOnce(buildQuery());
-
 						} finally {
 							session.dispose();
 						}
@@ -106,7 +106,6 @@ public class QueryAction extends Action {
 					}
 					return Status.OK_STATUS;
 				}
-
 			};
 			j.schedule();
 		} catch (Throwable t) {
@@ -114,6 +113,7 @@ public class QueryAction extends Action {
 		}
 	}
 
+	@Override
 	public String getText() {
 		return text;
 	}
@@ -138,6 +138,4 @@ public class QueryAction extends Action {
 	public void setQuery(String query) {
 		this.query = query;
 	}
-
-	
 }

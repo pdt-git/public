@@ -51,7 +51,7 @@ public interface PrologInterface {
 
 	/**
 	 * consult event subject constant events of this subject will be fired
-	 * whenver something was consulted into the prolog system. <br>
+	 * whenever something was consulted into the prolog system. <br>
 	 * NOT IMPLEMENTED YET
 	 */
 	public final static String SUBJECT_CONSULTED = "consulted";
@@ -61,7 +61,7 @@ public interface PrologInterface {
 	/**
 	 * session flag.
 	 * 
-	 * this shall eventually be the *new* default behaviour. All bindings are
+	 * this shall eventually be the *new* default behavior. All bindings are
 	 * reported as java.lang.String objects using the canonical syntax. Atoms
 	 * are quoted when necessary. lists are not processed. I.e. all bindings
 	 * should be of a form as created by write_canonical/1.
@@ -73,10 +73,10 @@ public interface PrologInterface {
 	 * session flag.
 	 * 
 	 * Deviates from NONE in that bindings that are atoms are unquoted. This is
-	 * supposed to mimic the "old" behaviour where bindings where written into
+	 * supposed to mimic the "old" behavior where bindings where written into
 	 * the stream using write/2 rather than write_canonical/2 or writeq/2. Note
-	 * that this will NOT unquote atoms nested in complex terms, so the
-	 * behaviour is slightly different than it was before.
+	 * that this will NOT un-quote atoms nested in complex terms, so the
+	 * behavior is slightly different than it was before.
 	 */
 	public final static int UNQUOTE_ATOMS = 1;
 
@@ -125,11 +125,23 @@ public interface PrologInterface {
 	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
+	 * Uses flag=LEGACY
+	 * 
 	 * @return a new Session Object
-	 * @deprecated use getSession(int).
 	 */
 	public abstract PrologSession getSession() throws PrologInterfaceException;
 
+	/**
+	 * Returns a prolog session.<br>
+	 * Use sessions to interact with the prolog system. Sessions can only be
+	 * obtained while the PrologInterface is in UP state. During startup, this
+	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
+	 * raise an IllegalStateException.
+	 * 
+	 * Flag sets the kind of objects returned by the queries.
+	 * 
+	 * @return a new Session Object
+	 */
 	public abstract PrologSession getSession(int flags) throws PrologInterfaceException;
 	
 	/**
@@ -171,17 +183,11 @@ public interface PrologInterface {
 			String[] dependencies);
 
 	/**
-	 * init options of this prolog interface from preference_store
+	 * initializes options of this prolog interface from preference_store
 	 * 
 	 * @see PrologInterfaceFactory.getOptions()
 	 */
 	public void initOptions(PreferenceProvider provider);	
-//	/**
-//	 * set a configuration option of this prolog interface.
-//	 * 
-//	 * @see PrologInterfaceFactory.getOptions()
-//	 */
-//	public void setOption(String opt, String value);
 	
 	public void setStandAloneServer(boolean standAloneServer);
 
@@ -197,12 +203,6 @@ public interface PrologInterface {
 	public void setTimeout(String timeout);
 	public void setFileSearchPath(String fileSearchPath);
 	
-//	/**
-//	 * get the current value of a configuration option.
-//	 * 
-//	 * @see PrologInterfaceFactory.getOptions()
-//	 */
-//	public String getOption(String opt);
 
 	/**
 	 * get the life list of bootstrap libraries. <br>
@@ -227,24 +227,14 @@ public interface PrologInterface {
 	 * this will remove ALL hooks registered for this id.
 	 * 
 	 * @param reconfigureHookId
-	 * @deprecated If possible please use
-	 *             PrologInterface.removeLifeCycleHook(LifeCycleHook,String)
 	 */
 	public abstract void removeLifeCycleHook(String hookId);
 	public void removeLifeCycleHook(final LifeCycleHook hook,final String hookId);
 	
 	/**
-	 * 
-	 * @deprecated use getAsyncSession(int). Using the PrologInterface.LEGACY should
-	 * be compatible with legacy code.
-	 * 
+	 * Uses the PrologInterface.LEGACY 
 	 */
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
 
-	
-
-
-	
-	
 }

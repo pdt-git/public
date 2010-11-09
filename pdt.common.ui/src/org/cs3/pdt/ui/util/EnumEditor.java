@@ -17,6 +17,7 @@ public class EnumEditor extends OptionEditor {
 		super(parent, option);
 	}
 
+	@Override
 	protected void createControls(Composite composite) {
 		GridLayout layout = new GridLayout();
         layout.numColumns = 1;
@@ -45,13 +46,15 @@ public class EnumEditor extends OptionEditor {
         combo.setLayoutData(gd);
         combo.addSelectionListener(new SelectionListener() {
             String old="";
-            public void widgetSelected(SelectionEvent e) {
+            @Override
+			public void widgetSelected(SelectionEvent e) {
                 String newValue = getValue();
 				firePropertyChange(old,newValue);
                 old=newValue;
             }
 
             
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {             
                 widgetSelected( e);
             }
@@ -68,12 +71,14 @@ public class EnumEditor extends OptionEditor {
 		return label;
 	}
 
+	@Override
 	public String getValue() {
 		int ix = combo.getSelectionIndex();
         String newValue = getValueForIndex(ix);
 		return newValue;
 	}
 
+	@Override
 	public void setValue(String value) {
 		combo.select(getIndexForValue(value));
 

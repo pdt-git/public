@@ -27,11 +27,13 @@ public class InterpreterTest extends TestCase {
 
 	}
 	
+	@Override
 	public String getName() {
 		
 		
 		return file.getAbsolutePath();
 	}
+	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 		String[] codebase = System.getProperty("codebase").split(System.getProperty("path.separator"));
@@ -45,6 +47,7 @@ public class InterpreterTest extends TestCase {
 		s.dispose();
 	}
 	
+	@Override
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		pif.stop();
@@ -79,6 +82,7 @@ public class InterpreterTest extends TestCase {
 		LinkedList<File> todo = new LinkedList<File>();
 		todo.add(root);
 		FileFilter filter = new FileFilter() {
+			@Override
 			public boolean accept(File f) {
 				return f.isDirectory() || f.getName().equals("main.pl");
 			}

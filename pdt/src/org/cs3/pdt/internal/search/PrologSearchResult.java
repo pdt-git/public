@@ -84,22 +84,27 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		this.data = data2;
 	}
 
+	@Override
 	public IEditorMatchAdapter getEditorMatchAdapter() {
 		return this;
 	}
 
+	@Override
 	public IFileMatchAdapter getFileMatchAdapter() {
 		return this;
 	}
 
+	@Override
 	public String getLabel() {		
 		return "Prolog Search: " + (data==null ? "oops, data is null?!" :data.getModule()+":"+data.getName()+"/"+data.getArity());
 	}
 
+	@Override
 	public String getTooltip() {
 		return getLabel();
 	}
 
+	@Override
 	public ImageDescriptor getImageDescriptor() {
 		// PrologElementAdaptable element = new PrologElementAdaptable(data);
 		// return
@@ -107,10 +112,12 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		return null;
 	}
 
+	@Override
 	public ISearchQuery getQuery() {
 		return query;
 	}
 
+	@Override
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
 		if (ei instanceof IFileEditorInput) {
@@ -126,6 +133,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	 * @see org.eclipse.search.ui.text.IEditorMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult,
 	 *      org.eclipse.ui.IEditorPart)
 	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
 			IEditorPart editor) {
 		IEditorInput ei = editor.getEditorInput();
@@ -142,6 +150,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	 * @see org.eclipse.search.ui.text.IFileMatchAdapter#computeContainedMatches(org.eclipse.search.ui.text.AbstractTextSearchResult,
 	 *      org.eclipse.core.resources.IFile)
 	 */
+	@Override
 	public Match[] computeContainedMatches(AbstractTextSearchResult result,
 			IFile file) {
 		return result.getMatches(file);
@@ -152,6 +161,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	 * 
 	 * @see org.eclipse.search.ui.text.IFileMatchAdapter#getFile(java.lang.Object)
 	 */
+	@Override
 	public IFile getFile(Object element) {
 		if (element instanceof IFile){
 			return (IFile) element;

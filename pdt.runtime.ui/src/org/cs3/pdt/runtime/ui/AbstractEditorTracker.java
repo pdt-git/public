@@ -59,6 +59,7 @@ public abstract class AbstractEditorTracker extends AbstractPrologContextTracker
 		super(id, label);
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		workbench.getActiveWorkbenchWindow().getPartService().addPartListener(this);
 		fireContextChanged();
@@ -72,34 +73,42 @@ public abstract class AbstractEditorTracker extends AbstractPrologContextTracker
 		}
 	}
 	
+	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {		
 		check(partRef);		
 	}	
 
+	@Override
 	public void partBroughtToTop(IWorkbenchPartReference partRef) {
 		check(partRef);	
 	}
 
+	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partDeactivated(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partOpened(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partHidden(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partVisible(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partInputChanged(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}

@@ -5,7 +5,7 @@
 
 %Todo: Kommentar verfassen
 /*parse_bodies:-				%TODO: wieder zum laufen bringen!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	clauseT(ClauseId,_,_,_,_),
+	ruleT(ClauseId,_,_,_,_),
 		termT(ClauseId,ClauseTerm),							% no directives considered
 		ClauseTerm = (_Head :- Body),						% facts without a body will not be considered
 		pos_and_vars(ClauseId,BodyPos,VarNames),
@@ -16,7 +16,7 @@ parse_bodies:-				%TODO: wieder auf Files einschränken!!!!!!!!!!
 	pos_and_vars(ClauseId,BodyPos,VarNames),
 		termT(ClauseId,ClauseTerm),
 		(	(	ClauseTerm = (_Head :- Body),
-				clauseT(ClauseId,_,Module,_,_)
+				ruleT(ClauseId,_,Module,_,_)
 			)
 		;	(	ClauseTerm = (:- Body),
 				directiveT(ClauseId,_,Module)
@@ -29,7 +29,7 @@ parse_bodies.
 
 
 parse_body_literals(Module:Literal, Pos, ParentId, ClauseId, _OrigModule, VarNames) :-
-    !, 
+    !, %write('module:: '),writeln(Module:Literal),
     Pos = term_position(From, To, _FFrom, _FTo, SubPos),
     SubPos = [ModuleFrom-ModuleTo, LiteralPos],
 	assert_new_node(Module:Literal,From,To,Id),   %<===  
@@ -50,7 +50,7 @@ parse_body_literals([A|B], Pos, ParentId, ClauseId, Module, VarNames) :-
    
 parse_body_literals(Body, Pos, ParentId, ClauseId, Module, VarNames) :- 
    	xref:is_metaterm(Body, MetaArguments),
-   	!, 
+   	!, %write('meta:: '),writeln(Body),
    	Pos = term_position(From, To, _FFrom, _FTo, SubPos),
    	assert_new_node(Body,From,To,Id),   %<===
    	functor(Body,Functor,Arity),

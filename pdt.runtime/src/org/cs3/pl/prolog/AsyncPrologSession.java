@@ -195,6 +195,7 @@ public interface AsyncPrologSession extends  Disposable {
 	 * abort(), Once the batch has been closed, this calls will have no effect.
 	 * @throws PrologInterfaceException 
 	 */
+	@Override
 	public void dispose();
 
 	/**
@@ -204,6 +205,7 @@ public interface AsyncPrologSession extends  Disposable {
 	 *         disposed.
 	 * @see dispose()
 	 */
+	@Override
 	public boolean isDisposed();
 
 	/**

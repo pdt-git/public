@@ -20,6 +20,7 @@ class DummyPrologLibrary implements PrologLibrary{
 			deps.add(String.valueOf(dependenciess.charAt(i)));
 		}
 	}
+	@Override
 	public String toString() {
 	
 		return "Lib "+id+" -> "+Util.prettyPrint(deps.toArray());
@@ -29,21 +30,26 @@ class DummyPrologLibrary implements PrologLibrary{
 		this.deps=new HashSet<String>();
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
 
+	@Override
 	public String getPath() {
 		return "path";
 	}
 
+	@Override
 	public String getAlias() {
 		return "alias";
 	}
 
+	@Override
 	public Set<String> getDependencies() {
 		return deps;
 	}
+	@Override
 	public String getAttributeValue(String attr) {
 		return null;
 	}

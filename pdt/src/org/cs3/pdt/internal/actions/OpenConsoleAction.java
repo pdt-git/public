@@ -10,14 +10,17 @@ import org.eclipse.ui.PlatformUI;
 
 public class OpenConsoleAction implements IWorkbenchWindowActionDelegate {
 
+	@Override
 	public void dispose() {
 
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 
 	}
 
+	@Override
 	public void run(IAction action) {
 		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI
 				.getWorkbench().getActiveWorkbenchWindow();
@@ -40,6 +43,7 @@ public class OpenConsoleAction implements IWorkbenchWindowActionDelegate {
 
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 
 	}

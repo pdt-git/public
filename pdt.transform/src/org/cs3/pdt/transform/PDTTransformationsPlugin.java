@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
@@ -43,6 +44,7 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin implements IStart
 	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -53,6 +55,7 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin implements IStart
 	 * 
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
@@ -134,7 +137,7 @@ public class PDTTransformationsPlugin extends AbstractUIPlugin implements IStart
 			} catch (ClassNotFoundException e) {
 				throw new CoreException(
 						new Status(
-								Status.ERROR,
+								IStatus.ERROR,
 								PDTTransform.PLUGIN_ID,
 								"failed to create descriptor, objectClass could not be resolved",
 								e));

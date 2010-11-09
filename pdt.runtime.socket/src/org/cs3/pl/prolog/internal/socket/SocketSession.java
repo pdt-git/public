@@ -75,6 +75,7 @@ public class SocketSession implements PrologSession {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (isDisposed()) {
 			return;
@@ -88,6 +89,7 @@ public class SocketSession implements PrologSession {
 		}
 	}
 
+	@Override
 	public List<Map<String, Object>> queryAll(String query) throws PrologException,
 		PrologInterfaceException {
 		CTermUtil.checkFlags(flags);
@@ -112,6 +114,7 @@ public class SocketSession implements PrologSession {
 	}
 
 
+	@Override
 	public Map<String, Object> queryOnce(String query) throws PrologException,
 	PrologInterfaceException {
 		CTermUtil.checkFlags(flags);
@@ -247,6 +250,7 @@ public class SocketSession implements PrologSession {
 	 * 
 	 * @see org.cs3.pl.prolog.PrologSession#isDisposed()
 	 */
+	@Override
 	public boolean isDisposed() {
 		return client == null;
 	}

@@ -89,7 +89,7 @@ public class PLScanner extends RuleBasedScanner {
 						.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
 				for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
-					Map<String,Object> si = (Map<String,Object>) it.next();
+					Map<String,Object> si = it.next();
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
@@ -120,7 +120,7 @@ public class PLScanner extends RuleBasedScanner {
 						.queryAll("predicate_property(M:P,built_in),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
 				for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
-					Map<String,Object> si = (Map<String,Object>) it.next();
+					Map<String,Object> si = it.next();
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
