@@ -160,14 +160,14 @@ write_load_edge(Stream,LoadingFileId,FileId):-
 	close_edge(Stream).
 	
 write_call_edges(Stream):-
-	forall(lit_edge(SourceLiteralId,TargetRuleId),
+	forall(call_edge(SourceLiteralId,TargetRuleId),
 		(	(	(	literalT(SourceLiteralId,_,SourceRule,_,_,_)
     		;	metaT(SourceLiteralId,_,SourceRule,_,_,_)
     		),
-    		ruleT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
+    		clauseT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
     		predicateT_ri(SourceFunctor,SourceArity,SourceModule,SourceId),
     		
-    		ruleT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
+    		clauseT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
     		predicateT_ri(TargetFunctor,TargetArity,TargetModule,TargetId)
 			)
 		->	write_call_edge(Stream,SourceId,TargetId)
@@ -181,7 +181,7 @@ write_call_edge(Stream,SourceId,TargetId):-
 	close_edge(Stream).
 	
 /*write_call_edges(Stream):-
-    lit_edge(LId,CalleeId),
+    call_edge(LId,CalleeId),
     literalT(LId,_,CallerId,_,_,_),
     termT(LId,Term),
     	write_edge(Stream,LId,CalleeId,CallerId,Term),
@@ -234,7 +234,7 @@ write_hierarchy(Stream):-
  
     	
 /*write_edges(Stream):-
-    lit_edge(LId,CalleeId),
+    call_edge(LId,CalleeId),
     literalT(LId,_,CallerId,_,_,_),
     termT(LId,Term),
     	write_edge(Stream,LId,CalleeId,CallerId,Term),

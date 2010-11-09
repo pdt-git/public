@@ -6,14 +6,14 @@
 :- dynamic call_edges_for_predicates/3.
 count_call_edges_between_predicates:-
     retractall(call_edges_for_predicates(_,_,_)),
-	forall(	lit_edge(SourceLiteralId,TargetRuleId),
+	forall(	call_edge(SourceLiteralId,TargetRuleId),
 			(	(	(	literalT(SourceLiteralId,_,SourceRule,_,_,_)
     				;	metaT(SourceLiteralId,_,SourceRule,_,_,_)
     				),
-    				ruleT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
+    				clauseT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
     				predicateT_ri(SourceFunctor,SourceArity,SourceModule,SourceId),
  
-    				ruleT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
+    				clauseT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
     				predicateT_ri(TargetFunctor,TargetArity,TargetModule,TargetId)
 				)
 			->	inc_call_edges_for_predicates(SourceId,TargetId)

@@ -5,7 +5,7 @@
 
 %Todo: Kommentar verfassen
 /*parse_bodies:-				%TODO: wieder zum laufen bringen!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	ruleT(ClauseId,_,_,_,_),
+	clauseT(ClauseId,_,_,_,_),
 		termT(ClauseId,ClauseTerm),							% no directives considered
 		ClauseTerm = (_Head :- Body),						% facts without a body will not be considered
 		pos_and_vars(ClauseId,BodyPos,VarNames),
@@ -16,7 +16,7 @@ parse_bodies:-				%TODO: wieder auf Files einschränken!!!!!!!!!!
 	pos_and_vars(ClauseId,BodyPos,VarNames),
 		termT(ClauseId,ClauseTerm),
 		(	(	ClauseTerm = (_Head :- Body),
-				ruleT(ClauseId,_,Module,_,_)
+				clauseT(ClauseId,_,Module,_,_)
 			)
 		;	(	ClauseTerm = (:- Body),
 				directiveT(ClauseId,_,Module)
