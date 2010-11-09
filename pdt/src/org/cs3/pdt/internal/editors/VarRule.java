@@ -59,12 +59,14 @@ public class VarRule implements IPredicateRule {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.rules.IPredicateRule#getSuccessToken()
 	 */
+	@Override
 	public IToken getSuccessToken() {
 		return token;
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.rules.IPredicateRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner, boolean)
 	 */
+	@Override
 	public IToken evaluate(ICharacterScanner scanner, boolean resume) {
 		scanner.unread();
 		if (!wsdetector.isWhitespace((char)scanner.read()))
@@ -84,6 +86,7 @@ public class VarRule implements IPredicateRule {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.rules.IRule#evaluate(org.eclipse.jface.text.rules.ICharacterScanner)
 	 */
+	@Override
 	public IToken evaluate(ICharacterScanner scanner) {
 		return evaluate(scanner, false);
 	}

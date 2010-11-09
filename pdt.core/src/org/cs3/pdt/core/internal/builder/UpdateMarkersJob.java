@@ -120,6 +120,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 	}
 
 	
+	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 
 		this.monitor = monitor;
@@ -132,7 +133,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 
 			String subject = "progress(" + tag + ")";
 			dispatcher.addPrologInterfaceListener(subject, this);
-			PrologInterface pif = ((PrologInterface) plProject
+			PrologInterface pif = (plProject
 					.getMetadataPrologInterface());
 			s = pif.getSession(PrologInterface.NONE);
 
@@ -160,7 +161,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 			if(t.getMessage().contains("obsolete_lock")){
 				UIUtils.setStatusErrorMessage(t.getLocalizedMessage());
 			} else {
-			return new Status(Status.ERROR,PDTCore.PLUGIN_ID,"Exception during build",t);
+			return new Status(IStatus.ERROR,PDTCore.PLUGIN_ID,"Exception during build",t);
 			}
 		}
 		finally {
@@ -171,6 +172,7 @@ public class UpdateMarkersJob extends Job implements PrologInterfaceListener {
 		return new Status(IStatus.OK, PDTCore.PLUGIN_ID, "done");
 	}
 
+	@Override
 	public void update(PrologInterfaceEvent e) {
 		if (monitor == null) {
 			return;

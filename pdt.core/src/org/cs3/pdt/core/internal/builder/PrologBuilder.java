@@ -111,6 +111,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
 	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected IProject[] build(int kind, Map args,
 			final IProgressMonitor monitor) throws CoreException {
@@ -151,7 +152,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			IPrologProject plProject = (IPrologProject) getProject().getNature(
 					PDTCore.NATURE_ID);
 
-			PrologInterface pif = ((PrologInterface) plProject
+			PrologInterface pif = (plProject
 					.getMetadataPrologInterface());
 			setupPif(pif);
 			final AsyncPrologSession as = pif.getAsyncSession(PrologInterface.NONE);
@@ -159,12 +160,14 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 			monitor.beginTask(taskname, contentList.size()
 					+ existenceList.size());
 			as.addBatchListener(new DefaultAsyncPrologSessionListener() {
+				@Override
 				public void goalSucceeded(AsyncPrologSessionEvent e) {
 					if (e.ticket instanceof IFile) {
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()) {
 						new Thread() {
+							@Override
 							public void run() {
 								as.dispose();
 								Debug
@@ -175,6 +178,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 					}
 				}
 
+				@Override
 				public void batchError(AsyncPrologSessionEvent e) {
 					// XXX: not sure if this is the right way to do it...
 					monitor.setCanceled(true);
@@ -265,6 +269,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	 * 
 	 * @see org.eclipse.core.resources.IncrementalProjectBuilder#clean(org.eclipse.core.runtime.IProgressMonitor)
 	 */
+	@Override
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		Set<IFile> forgetList = new HashSet<IFile>();
 		collect(getProject(), forgetList);
@@ -274,7 +279,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 				PDTCore.NATURE_ID);
 		AsyncPrologSession as = null;
 		try {
-			as = ((PrologInterface) plProject.getMetadataPrologInterface())
+			as = (plProject.getMetadataPrologInterface())
 					.getAsyncSession(PrologInterface.NONE);
 
 			forget(forgetList, as, monitor);
@@ -304,6 +309,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		for (Iterator<IContainer> it = roots.iterator(); it.hasNext();) {
 			IResource root = it.next();
 			root.accept(new IResourceVisitor() {
+				@Override
 				public boolean visit(IResource resource) throws CoreException {
 					try {
 						if (resource.getType() == IResource.FILE
@@ -320,19 +326,10 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 		}
 	}
 
-	/**
-	 * @param delta
-	 * @param existenceList
-	 * @param contentsList
-	 * @return
-	 * @throws CoreException
-	 */
 	private void collect(IResourceDelta delta, final Set<IFile> contentsList,
 			final Set<IFile> existenceList) throws CoreException {
-		final IPrologProject plProject = (IPrologProject) getProject()
-				.getNature(PDTCore.NATURE_ID);
-
 		delta.accept(new IResourceDeltaVisitor() {
+			@Override
 			public boolean visit(IResourceDelta delta) throws CoreException {
 				try {
 					IResource resource = delta.getResource();
@@ -372,7 +369,7 @@ public class PrologBuilder extends IncrementalProjectBuilder {
 	private void forget(Set<IFile> v, AsyncPrologSession as, IProgressMonitor monitor)
 			throws CoreException, PrologInterfaceException {
 		for (Iterator<IFile> it = v.iterator(); it.hasNext() && !monitor.isCanceled();) {
-			IFile file = (IFile) it.next();
+			IFile file = it.next();
 			forget(file, as);
 		}
 	}

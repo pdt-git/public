@@ -21,6 +21,7 @@ public abstract class PrologOutlineFilter extends ViewerFilter {
 		return label;
 	}
 
+	@Override
 	public String toString() {
 		return getId();
 	}

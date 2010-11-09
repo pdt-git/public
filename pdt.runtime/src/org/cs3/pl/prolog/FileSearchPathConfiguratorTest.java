@@ -18,6 +18,7 @@ public class FileSearchPathConfiguratorTest extends TestCase {
 	DummyPrologLibrary e = new DummyPrologLibrary("e","b");
 	
 	
+	@Override
 	public void setUp() {
 		mgr = new PrologLibraryManager();
 	}

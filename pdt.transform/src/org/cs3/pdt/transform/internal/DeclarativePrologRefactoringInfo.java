@@ -42,6 +42,7 @@ public class DeclarativePrologRefactoringInfo extends PrologRefactoringInfo {
 		return pif;
 	}
 
+	@Override
 	public Option[] getOptions() {
 		return options;
 	}

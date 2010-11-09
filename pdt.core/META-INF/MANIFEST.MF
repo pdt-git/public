@@ -1,12 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: MetaData
+Bundle-Name: PDTCore
 Bundle-SymbolicName: org.cs3.pdt.core; singleton:=true
 Bundle-Version: 0.2.3.qualifier
-Bundle-ClassPath: metadata.jar,
- lib/commons-lang-2.1.jar
 Bundle-Activator: org.cs3.pdt.core.PDTCorePlugin
-Bundle-Localization: plugin
 Export-Package: org.cs3.pdt.core,
  org.cs3.pdt.core.internal,
  org.cs3.pdt.core.internal.actions,
@@ -32,3 +29,4 @@ Require-Bundle: org.cs3.pdt.common,
  org.eclipse.ui.editors,
  org.eclipse.jface.text
 Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

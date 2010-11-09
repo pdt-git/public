@@ -26,6 +26,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	private Thread watchdog = new Thread() {
 
+		@Override
 		public void run() {
 			while (!disposed) {
 				try {
@@ -79,6 +80,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		return targetSession;
 	}
 
+	@Override
 	public void abort() throws PrologInterfaceException {
 		synchronized (targetLock) {
 			if (hasTargetSession()) {
@@ -88,6 +90,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	}
 
+	@Override
 	public void abort(Object monitor) throws PrologInterfaceException {
 		synchronized (targetLock) {
 			if (hasTargetSession()) {
@@ -96,6 +99,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public void addBatchListener(AsyncPrologSessionListener l) {
 		synchronized (targetLock) {
 			if (hasTargetSession()) {
@@ -105,6 +109,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public void dispose() {
 		synchronized (targetLock) {
 			if (hasTargetSession()) {
@@ -114,6 +119,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public String getProcessorThreadAlias() {
 		synchronized (targetLock) {
 			return threadAlias;
@@ -121,6 +127,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	}
 
+	@Override
 	public boolean isDisposed() {
 		synchronized (targetLock) {
 			if (!hasTargetSession()) {
@@ -130,6 +137,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public boolean isIdle() {
 		synchronized (targetLock) {
 			if (!hasTargetSession()) {
@@ -139,6 +147,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public boolean isPending(Object ticket) {
 		synchronized (targetLock) {
 			if (!hasTargetSession()) {
@@ -148,6 +157,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public void join() throws PrologInterfaceException {
 		synchronized (targetLock) {
 			if (!hasTargetSession()) {
@@ -157,6 +167,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 		}
 	}
 
+	@Override
 	public void queryAll(Object ticket, String query)
 			throws PrologInterfaceException {
 		synchronized (targetLock) {
@@ -165,6 +176,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	}
 
+	@Override
 	public void queryOnce(Object ticket, String query)
 			throws PrologInterfaceException {
 		synchronized (targetLock) {
@@ -173,6 +185,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	}
 
+	@Override
 	public void queryAll(Object ticket, String query, int flags)
 			throws PrologInterfaceException {
 		synchronized (targetLock) {
@@ -181,6 +194,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	}
 
+	@Override
 	public void queryOnce(Object ticket, String query, int flags)
 			throws PrologInterfaceException {
 		synchronized (targetLock) {
@@ -189,6 +203,7 @@ public class AsyncPrologSessionProxy implements AsyncPrologSession {
 
 	}
 
+	@Override
 	public void removeBatchListener(AsyncPrologSessionListener l) {
 		synchronized (targetLock) {
 			listeners.remove(l);

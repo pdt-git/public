@@ -60,6 +60,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	 * 
 	 * @see org.eclipse.jface.action.IMenuCreator#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (createdMenu != null) {
 			createdMenu.dispose();
@@ -90,6 +91,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	 * org.eclipse.jface.action.IMenuCreator#getMenu(org.eclipse.swt.widgets
 	 * .Control)
 	 */
+	@Override
 	public Menu getMenu(Control parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -117,6 +119,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	 * org.eclipse.jface.action.IMenuCreator#getMenu(org.eclipse.swt.widgets
 	 * .Menu)
 	 */
+	@Override
 	public Menu getMenu(Menu parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -139,6 +142,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		// it is shown to reflect changes in selection or active perspective
 
 		createdMenu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m = (Menu) e.widget;
 				MenuItem[] items = m.getItems();
@@ -173,10 +177,12 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		
 		item.addSelectionListener(new SelectionListener() {
 
+			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 
 			}
 
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				MenuItem item = (MenuItem) e.getSource();
 				if (item.getSelection()) {
@@ -243,6 +249,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 			}
 		}
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
+			@Override
 			public void run() {
 				if (this.isChecked())
 					setPrologInterface(PrologRuntimeUIPlugin.getDefault()
@@ -307,6 +314,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	/**
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		// do nothing, this action just creates a cascading menu.
 	}
@@ -314,10 +322,12 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		// do nothing - this is just a menu
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
 		this.window = window;
 
@@ -327,6 +337,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
 	 *      org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (fAction == null) {
 			initialize(action);
@@ -367,6 +378,7 @@ public abstract class SelectContextPIFAutomatedAction extends Action implements
 		if (display != Display.getCurrent()) {
 			display.asyncExec(new Runnable() {
 
+				@Override
 				public void run() {
 					update();
 

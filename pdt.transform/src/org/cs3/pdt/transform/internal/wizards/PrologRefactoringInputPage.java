@@ -26,6 +26,7 @@ public class PrologRefactoringInputPage extends UserInputWizardPage {
 		this.info = info;
 	}
 
+	@Override
 	public void createControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
 		setControl(composite);
@@ -54,6 +55,7 @@ public class PrologRefactoringInputPage extends UserInputWizardPage {
 				editor.setEnabled(System.getProperty(editor.getKey()) == null);
 				editors.put(editor.getKey(), editor);
 				editor.addPropertyChangeListener(new IPropertyChangeListener() {
+					@Override
 					public void propertyChange(PropertyChangeEvent e) {
 						info.setPreferenceValue(editor.getKey(), editor
 								.getValue());

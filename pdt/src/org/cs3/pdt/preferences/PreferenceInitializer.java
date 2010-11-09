@@ -7,7 +7,7 @@ import java.net.URL;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -23,6 +23,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @seeorg.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#
 	 * initializeDefaultPreferences()
 	 */
+	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = PDTPlugin.getDefault().getPreferenceStore();
 		
@@ -49,7 +50,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	private String getLocation() throws IOException {
 		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
 		String location = null;
-		location = new File(Platform.asLocalURL(url).getFile()).getAbsolutePath();
+		location = new File(FileLocator.toFileURL(url).getFile()).getAbsolutePath();
 		if (location.charAt(location.length() - 1) == File.separatorChar)
 			location = location.substring(0, location.length() - 1);
 		return location;

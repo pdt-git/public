@@ -78,6 +78,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 	String lastLine;
 	
 	private ConsoleModel model;
+	@Override
 	public void setConsoleModel(ConsoleModel consoleModel) {
 		if (model == consoleModel) {
 			return;
@@ -94,12 +95,14 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 
 	}
 
+	@Override
 	public ConsoleModel getConsoleModel() {		
 		return model;
 	}
 
 	
 	
+	@Override
 	public void previous() {		
 		if(model==null||history.isEmpty()||pointer<=0){
 			return;
@@ -112,6 +115,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 		model.setLineBuffer(history.get(pointer));
 	}
 
+	@Override
 	public void next() {
 		
 		if(model==null){
@@ -131,6 +135,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 		
 	}
 
+	@Override
 	public void clearHistory() {
 		if(lastLine!=null){
 			model.setLineBuffer(lastLine);
@@ -142,6 +147,7 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 	}
 
 	
+	@Override
 	public void onCommit(ConsoleModelEvent e) {		
 		lastLine=null;
 		history.add(e.getCommitText());
@@ -149,14 +155,19 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 	
 	}
 
+	@Override
 	public void onModeChange(ConsoleModelEvent e) {	}
 	
+	@Override
 	public void onEditBufferChanged(ConsoleModelEvent e) {	}
 	
+	@Override
 	public void onOutput(ConsoleModelEvent e) {	}
 
+	@Override
 	public void afterConnect(ConsoleModelEvent e) {}
 
+	@Override
 	public void beforeDisconnect(ConsoleModelEvent e) {}
 	
 	public void saveHistory(OutputStream os) throws IOException{

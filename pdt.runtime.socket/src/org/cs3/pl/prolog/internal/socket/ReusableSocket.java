@@ -64,14 +64,16 @@ public class ReusableSocket extends Socket implements Reusable {
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.internal.Reusable#reuse()
      */
-    public void reuse() {
+    @Override
+	public void reuse() {
         logBuffer.log("socket","reuse");;
     }
 
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.internal.Reusable#destroy()
      */
-    public void destroy() {
+    @Override
+	public void destroy() {
         logBuffer.log("socket","destroy");
         try {
             close();
@@ -84,7 +86,8 @@ public class ReusableSocket extends Socket implements Reusable {
     /* (non-Javadoc)
      * @see org.cs3.pl.prolog.internal.Reusable#recylce()
      */
-    public void recylce() {
+    @Override
+	public void recylce() {
         logBuffer.log("socket","recycle");
     }
 

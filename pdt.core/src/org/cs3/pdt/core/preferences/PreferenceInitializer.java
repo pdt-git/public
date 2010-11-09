@@ -16,6 +16,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @seeorg.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#
 	 * initializeDefaultPreferences()
 	 */
+	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = PDTCorePlugin.getDefault().getPreferenceStore();
 

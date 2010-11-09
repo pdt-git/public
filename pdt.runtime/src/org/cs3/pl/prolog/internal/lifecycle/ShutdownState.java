@@ -13,6 +13,7 @@ public class ShutdownState extends AbstractState {
 
 	
 	
+	@Override
 	public void enter() {
 		
 		HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
@@ -25,6 +26,7 @@ public class ShutdownState extends AbstractState {
 		
 		context.enqueueWork(new NamedWorkRunnable("shutdown_server") {
 			
+			@Override
 			public void run() throws PrologInterfaceException {
 				try {
 					context.disposeSessions();
@@ -41,6 +43,7 @@ public class ShutdownState extends AbstractState {
 	
 
 	
+	@Override
 	public State workDone() {	
 		return new DownState(context); //reset when hooks are through.
 	}

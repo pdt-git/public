@@ -102,6 +102,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	/**
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		// do nothing, this action just creates a cascading menu.
 	}
@@ -109,6 +110,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	/**
 	 * @see IMenuCreator#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -118,6 +120,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	/**
 	 * @see IMenuCreator#getMenu(Control)
 	 */
+	@Override
 	public Menu getMenu(Control parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -131,6 +134,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	/**
 	 * @see IMenuCreator#getMenu(Menu)
 	 */
+	@Override
 	public Menu getMenu(Menu parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -161,6 +165,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 		if (display != Display.getCurrent()) {
 			display.asyncExec(new Runnable() {
 
+				@Override
 				public void run() {
 					update();
 
@@ -206,6 +211,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 			}
 		}
 		IAction action = new Action(key, IAction.AS_RADIO_BUTTON) {
+			@Override
 			public void run() {
 				if (this.isChecked())
 					setPrologInterface(PrologRuntimeUIPlugin.getDefault()
@@ -248,6 +254,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 		// Add listener to repopulate the menu each time
 		// it is shown to reflect changes in selection or active perspective
 		fCreatedMenu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m = (Menu) e.widget;
 				MenuItem[] items = m.getItems();
@@ -270,6 +277,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	/**
 	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
 	 */
+	@Override
 	public void init(IWorkbenchWindow window) {
 		this.window = window;
 
@@ -278,6 +286,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		// do nothing - this is just a menu
 	}
@@ -286,6 +295,7 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
 	 *      org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (fAction == null) {
 			initialize(action);

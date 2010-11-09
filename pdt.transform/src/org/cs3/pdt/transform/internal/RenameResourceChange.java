@@ -55,16 +55,19 @@ public final class RenameResourceChange extends PDTChange {
 		this(descriptor, resource.getFullPath(), newName, comment, IResource.NULL_STAMP);
 	}
 
+	@Override
 	public ChangeDescriptor getDescriptor() {
 		if (fDescriptor != null)
 			return new RefactoringChangeDescriptor(fDescriptor);
 		return null;
 	}
 
+	@Override
 	public Object getModifiedElement() {
 		return getResource();
 	}
 
+	@Override
 	public String getName() {
 		return  "Rename Resource "+ fResourcePath.toString() +" to " + fNewName;
 	}
@@ -77,6 +80,7 @@ public final class RenameResourceChange extends PDTChange {
 		return ResourcesPlugin.getWorkspace().getRoot().findMember(fResourcePath);
 	}
 
+	@Override
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		IResource resource= getResource();
 		if (resource == null || !resource.exists()) {
@@ -87,6 +91,7 @@ public final class RenameResourceChange extends PDTChange {
 		}
 	}
 
+	@Override
 	public Change perform(IProgressMonitor progressMonitor) throws CoreException {
 		try {
 			progressMonitor.beginTask("Rename Resource", 1);

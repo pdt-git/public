@@ -12,6 +12,7 @@ public class MysteriousRaceConditionTest extends TestCase {
 
 	private PrologInterface pif;
 
+	@Override
 	protected void setUp() throws Exception {
 		Debug.setDebugLevel(Debug.LEVEL_DEBUG);
 		
@@ -24,6 +25,7 @@ public class MysteriousRaceConditionTest extends TestCase {
 	 * 
 	 * @see junit.framework.TestCase#tearDown()
 	 */
+	@Override
 	protected void tearDown() throws Exception {
 		pif.stop();
 	}

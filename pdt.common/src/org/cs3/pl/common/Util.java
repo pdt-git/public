@@ -56,9 +56,7 @@ import java.net.ServerSocket;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -269,6 +267,13 @@ public class Util {
 	// specify buffer size for extraction
 	static final int BUFFER = 2048;
 
+	/**
+	 * @param file
+	 */
+	public static void unzip(File file) {
+		unzip(file, file.getParentFile());
+	}
+
 	/*
 	 * the body of this method was taken from here.
 	 * 
@@ -281,6 +286,7 @@ public class Util {
 	 * 
 	 * --lu
 	 */
+	@SuppressWarnings("rawtypes")
 	public static void unzip(File sourceZipFile, File unzipDestinationDirectory) {
 		try {
 
@@ -333,13 +339,6 @@ public class Util {
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
-	}
-
-	/**
-	 * @param file
-	 */
-	public static void unzip(File file) {
-		unzip(file, file.getParentFile());
 	}
 
 	/**
@@ -449,55 +448,55 @@ public class Util {
 
 
 
-	/**
-	 * parse an association list.
-	 * 
-	 * @param l
-	 *            A list containing strings of the form <code>key->value</code>.
-	 * @return A map that represents the association. If the list contains
-	 *         multiple mappings for a single key, the map will contain a List
-	 *         of this values. Otherwise, the value type will bs String.
-	 */
-	public static Map<String, Object> parseAssociation(List<String> l) {
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		for (Iterator<String> it = l.iterator(); it.hasNext();) {
-			String elm = it.next();
-			String[] s = splitKeyValue(elm);
-			String key = s[0];
-			String val = s[1];
-			Object o = map.get(key);
-			if (o == null) {
-				map.put(key, val);
-			} else if (o instanceof List<?>) {
-				List<String> ll = (List<String>) o;
-				ll.add(val);
-			} else {
-				List<Object> ll = new Vector<Object>();
-				ll.add(o);
-				ll.add(val);
-				map.put(key, ll);
-			}
-		}
-		return map;
-	}
-
-	private static String[] splitKeyValue(String elm) {
-		final int LEN = elm.length();
-		int l = 0;
-		StringBuffer key = new StringBuffer();
-		String value;
-		while (l < LEN - 1) {
-			if (elm.charAt(l) == '-' && elm.charAt(l + 1) == '>') {
-				value = elm.substring(l + 2, LEN);
-				return new String[] { key.toString(), value };
-			} else {
-				key.append(elm.charAt(l));
-			}
-			l++;
-		}
-
-		throw new IllegalArgumentException(elm);
-	}
+//	/**
+//	 * parse an association list.
+//	 * 
+//	 * @param l
+//	 *            A list containing strings of the form <code>key->value</code>.
+//	 * @return A map that represents the association. If the list contains
+//	 *         multiple mappings for a single key, the map will contain a List
+//	 *         of this values. Otherwise, the value type will bs String.
+//	 */
+//	public static Map<String, Object> parseAssociation(List<String> l) {
+//		HashMap<String, Object> map = new HashMap<String, Object>();
+//		for (Iterator<String> it = l.iterator(); it.hasNext();) {
+//			String elm = it.next();
+//			String[] s = splitKeyValue(elm);
+//			String key = s[0];
+//			String val = s[1];
+//			Object o = map.get(key);
+//			if (o == null) {
+//				map.put(key, val);
+//			} else if (o instanceof List<?>) {
+//				List<String> ll = (List<String>) o;
+//				ll.add(val);
+//			} else {
+//				List<Object> ll = new Vector<Object>();
+//				ll.add(o);
+//				ll.add(val);
+//				map.put(key, ll);
+//			}
+//		}
+//		return map;
+//	}
+//
+//	private static String[] splitKeyValue(String elm) {
+//		final int LEN = elm.length();
+//		int l = 0;
+//		StringBuffer key = new StringBuffer();
+//		String value;
+//		while (l < LEN - 1) {
+//			if (elm.charAt(l) == '-' && elm.charAt(l + 1) == '>') {
+//				value = elm.substring(l + 2, LEN);
+//				return new String[] { key.toString(), value };
+//			} else {
+//				key.append(elm.charAt(l));
+//			}
+//			l++;
+//		}
+//
+//		throw new IllegalArgumentException(elm);
+//	}
 
 	public static long parsePrologTimeStamp(String input) {
 		long l = 1000 * (long) Double.parseDouble(input);
@@ -781,8 +780,17 @@ public class Util {
 		}
 		return "";
 	}
-	
+
 	public static String guessExecutableName() {
+
+		String guessedExecutable = guessExecutableName__();
+		System.out.println("Guessed Prolog executable with GUI: " + guessedExecutable);
+		return guessedExecutable;
+
+	}
+
+	
+	private static String guessExecutableName__() {
 
 		if (Util.isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
@@ -793,8 +801,16 @@ public class Util {
 		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 
 	}
-	
+
 	public static String guessCommandLineExecutableName() {
+
+		String guessedExecutable = guessCommandLineExecutableName__();
+		System.out.println("Guessed Prolog executable WITHOUT GUI: " + guessedExecutable);
+		return guessedExecutable;
+
+	}
+	
+	private static String guessCommandLineExecutableName__() {
 
 		if (Util.isWindows()) {
 			return //"cmd.exe /c start \"cmdwindow\" /min "

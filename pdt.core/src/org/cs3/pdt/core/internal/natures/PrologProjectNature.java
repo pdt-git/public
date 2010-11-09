@@ -124,6 +124,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	/**
 	 * @see IProjectNature#configure
 	 */
+	@Override
 	public void configure() throws CoreException {
 
 		Debug.debug("configure was called");
@@ -176,6 +177,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	/**
 	 * @see IProjectNature#deconfigure
 	 */
+	@Override
 	public void deconfigure() throws CoreException {
 		try {
 			unregisterSubscriptions();
@@ -213,6 +215,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * 
 	 * @see org.eclipse.core.resources.IProjectNature#getProject()
 	 */
+	@Override
 	public IProject getProject() {
 		return this.project;
 	}
@@ -222,6 +225,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * 
 	 * @see org.eclipse.core.resources.IProjectNature#setProject(org.eclipse.core.resources.IProject)
 	 */
+	@Override
 	public void setProject(IProject project) {
 		if (this.project != null) {
 
@@ -235,6 +239,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * 
 	 * @see org.cs3.pdt.IPrologProject#getExistingSourcePathEntries()
 	 */
+	@Override
 	public Set<IContainer> getExistingSourcePathEntries() throws CoreException {
 		Set<IContainer> r = new HashSet<IContainer>();
 		String[] elms = getPreferenceValue(PDTCore.PROP_SOURCE_PATH, "/")
@@ -261,6 +266,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * 
 	 * @see org.cs3.pdt.IPrologProject#getExistingSourcePathEntries()
 	 */
+	@Override
 	public Set<IFile> getExistingEntryPoints() throws CoreException {
 		Set<IFile> r = new HashSet<IFile>();
 		String[] elms = getPreferenceValue(PDTCore.PROP_ENTRY_POINTS, "")
@@ -285,6 +291,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * 
 	 * @see org.cs3.pdt.IPrologProject#isPrologSource(org.eclipse.core.resources.IResource)
 	 */
+	@Override
 	public boolean isPrologSource(IResource resource) throws CoreException {
 		Set<IContainer> sourcePathEntries = getExistingSourcePathEntries();
 
@@ -308,6 +315,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return false;
 	}
 
+	@Override
 	public void setAutoConsulted(IFile file, boolean val) throws CoreException {
 		file.setPersistentProperty(
 				// TODO: toggled functionality - to test
@@ -315,6 +323,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 				val ? "false" : "true");
 	}
 
+	@Override
 	public boolean isAutoConsulted(IFile file) throws CoreException {
 		// if it is no source file, there is no need to consult it.
 		if (!isPrologSource(file)) {
@@ -338,6 +347,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return autoConsult;
 	}
 
+	@Override
 	public PrologInterface getMetadataPrologInterface() {
 		if (metadataPif == null) {
 			metadataPif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(
@@ -347,6 +357,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return metadataPif;
 	}
 
+	@Override
 	public PrologInterface getRuntimePrologInterface() {
 		if (runtimePif == null) {
 			runtimePif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(
@@ -369,6 +380,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		r.removeSubscription(getRuntimeSubscriptionKey());
 	}
 
+	@Override
 	public Subscription getMetadataSubscription() {
 		String id = getMetadataSubscriptionKey();
 		String pifKey = getMetadataPrologInterfaceKey();
@@ -385,6 +397,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return metadataPifSubscription;
 	}
 
+	@Override
 	public Subscription getRuntimeSubscription() {
 		String id = getRuntimeSubscriptionKey();
 		PrologInterfaceRegistry r = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
@@ -424,6 +437,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return value;
 	}
 
+	@Override
 	public Option[] getOptions() {
 		if (options == null) {
 			options = new Option[] {
@@ -432,6 +446,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Source Path",
 							"List of folders in which the PDT looks for Prolog code.",
 							Option.DIRS, "/") {
+						@Override
 						public String getDefault() {
 							return PDTCorePlugin.getDefault()
 									.getPreferenceValue(
@@ -439,6 +454,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 											"/");
 						}
 
+						@Override
 						public String getHint(String key) {
 							if (UIUtils.IS_WORKSPACE_RESOURCE.equals(key)) {
 								return "true";
@@ -473,6 +489,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 							"Program Entry Points", "List of 'main' files",
 							Option.FILES, "") {
 
+						@Override
 						public String getHint(String key) {
 							if (UIUtils.IS_WORKSPACE_RESOURCE.equals(key)) {
 								return "true";
@@ -510,6 +527,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 									+ " meta information on the project. Any occurance of the string %project% will be"
 									+ " replaced with the project name.",
 							Option.STRING, "") {
+						@Override
 						public String getDefault() {
 							return PDTCorePlugin
 									.getDefault()
@@ -526,6 +544,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 									+ "will be used by default to consult prolog files into it. Any occurance of the string %project% will be"
 									+ " replaced with the project name.",
 							Option.STRING, "") {
+						@Override
 						public String getDefault() {
 							return PDTCorePlugin
 									.getDefault()
@@ -538,6 +557,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return options;
 	}
 
+	@Override
 	public void updateBuildPath(PrologSession initSession)
 			throws CoreException, PrologInterfaceException {
 		String include = getPreferenceValue(
@@ -563,8 +583,10 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 	}
 
+	@Override
 	public void reconfigure() {
 		Job j = new Job("Building Prolog Metadata") {
+			@Override
 			public IStatus run(IProgressMonitor monitor) {
 				try {
 
@@ -596,6 +618,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 				return Status.OK_STATUS;
 			}
 
+			@Override
 			public boolean belongsTo(Object family) {
 				return family == ResourcesPlugin.FAMILY_MANUAL_BUILD;
 			}
@@ -625,6 +648,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	 * @return the value or specified default if no such key exists..
 	 * @throws CoreException
 	 */
+	@Override
 	public String getPreferenceValue(String key, String defaultValue) {
 		String value = System.getProperty(key);
 		if (value != null) {
@@ -649,6 +673,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		return defaultValue;
 	}
 
+	@Override
 	public void setPreferenceValue(String id, String value) {
 
 		try {
@@ -672,6 +697,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 	}
 
+	@Override
 	public void setPreferenceValues(String[] ids, String[] values) {
 		Vector<String> changed = new Vector<String>();
 		try {
@@ -702,11 +728,14 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
+	@Override
 	public OptionProvider getAnnotatorsOptionProvider()
 			throws PrologInterfaceException {
 		if (annotatorsOptionProvider == null) {
 			annotatorsOptionProvider = new AnnotatorsOptionProvider(this);
-			getMetaDataEventDispatcher().addPrologInterfaceListener(
+			IPrologEventDispatcher eventDispatcher = PrologRuntimeUIPlugin.getDefault().getPrologEventDispatcher(
+					getMetadataPrologInterface());
+			eventDispatcher.addPrologInterfaceListener(
 					AnnotatorsOptionProvider.SUBJECT, annotatorsOptionProvider);
 		}
 		return annotatorsOptionProvider;
@@ -728,11 +757,13 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
+	@Override
 	public IMetaInfoProvider getMetaInfoProvider() {
 		return MetaInfoProviderFactory.newInstance().create(
 				getMetadataPrologInterface());
 	}
 
+	@Override
 	public String[] getPrologLibraryKeys() throws CoreException {
 
 		HashMap<String, DefaultPrologLibrary> libs = getPrologLibraries();
@@ -784,17 +815,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	}
 
-	/**
-	 * @deprecated use
-	 *             PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface)
-	 *             instead.
-	 */
-	public IPrologEventDispatcher getMetaDataEventDispatcher()
-			throws PrologInterfaceException {
-		return PrologRuntimeUIPlugin.getDefault().getPrologEventDispatcher(
-				getMetadataPrologInterface());
-	}
-
+	@Override
 	public void addOptionProviderListener(OptionProviderListener l) {
 		synchronized (listeners) {
 			if (!listeners.contains(l)) {
@@ -803,6 +824,7 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 		}
 	}
 
+	@Override
 	public void removeOptionProviderListener(OptionProviderListener l) {
 		synchronized (listeners) {
 			if (listeners.contains(l)) {
@@ -838,10 +860,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 	}
 
 	private static class Mutex implements ISchedulingRule {
+		@Override
 		public boolean isConflicting(ISchedulingRule rule) {
 			return rule == this;
 		}
 
+		@Override
 		public boolean contains(ISchedulingRule rule) {
 			return rule == this;
 		}
@@ -849,20 +873,12 @@ public class PrologProjectNature implements IProjectNature, IPrologProject {
 
 	private static Mutex mux = new Mutex();
 
+	@Override
 	public void updateMarkers() throws CoreException {
-
-		
-
 		UpdateMarkersJob job = new UpdateMarkersJob(this,"cheap");
 		job.setPriority(Job.INTERACTIVE);
 		job.setRule(mux);
 		job.schedule();
-/*
-		job = new UpdateMarkersJob(this, "expensive");
-		job.setPriority(Job.BUILD);
-		job.setRule(mux);
-		job.schedule();
-*/
 	}
 
 }

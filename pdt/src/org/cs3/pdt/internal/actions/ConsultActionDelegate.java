@@ -93,6 +93,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	 * 
 	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#dispose()
 	 */
+	@Override
 	public void dispose() {
 	}
 
@@ -101,6 +102,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	 * 
 	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
 	 */
+	@Override
 	public void init(IWorkbenchWindow window) {
 		this.window = window;
 	}
@@ -110,6 +112,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	 * 
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		PDTPlugin plugin = PDTPlugin.getDefault();
 		IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
@@ -231,6 +234,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
 	 *      org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 	}
 
