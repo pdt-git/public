@@ -78,14 +78,14 @@ parse_body_literals('$Var'(_A), _Pos, _ParentId, _ClauseId, _Module, _VarNames) 
     assert(literalT(Id,ParentId,ClauseId,Functor,Arity)).  							
 */   	
   
-parse_body_literals(Body, Pos, ParentId, ClauseId, Module, _VarNames) :- 
+parse_body_literals(Literal, Pos, ParentId, ClauseId, Module, _VarNames) :- 
 	% Phuuu, finally a simple literal:
 	% Store it! 
 	(	Pos = term_position(From, To, _FFrom, _FTo, _SubPos)
    	;	Pos = From - To
    	),
-	assert_new_node(Body,From,To,Id),   %<===
-	functor(Body,Functor,Arity),
+	assert_new_node(Literal,From,To,Id),   %<===
+	functor(Literal,Functor,Arity),
     assert(literalT(Id,ParentId,ClauseId,Module,Functor,Arity)).
 
 process_meta_argument( (Nr,MetaTerm), Pos, ParentId, ClauseId, Module, VarNames) :- 
