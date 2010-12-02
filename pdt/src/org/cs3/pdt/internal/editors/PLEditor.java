@@ -59,6 +59,7 @@ import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.editors.PLEditor.OccurrenceLocation;
 import org.cs3.pdt.internal.views.PrologOutline;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
@@ -200,6 +201,8 @@ public class PLEditor extends TextEditor {
 	private static final String MATCHING_BRACKETS = "matching.brackets";
 
 	private static final String MATCHING_BRACKETS_COLOR = "matching.brackets.color";
+
+	public static final long OCCURRENCE_UPDATE_DELAY = 400;
 
 	@Override
 	protected void configureSourceViewerDecorationSupport(
@@ -832,12 +835,13 @@ public class PLEditor extends TextEditor {
 		private final IDocument fDocument;
 //		private final ISelectionValidator fPostSelectionValidator;
 		private boolean fCanceled= false;
-		private final OccurrenceLocation[] fLocations;
+		private Object cancelMonitor = new Object();
+		private int fCaretOffset;
 
-		public OccurrencesFinderJob(IDocument document, OccurrenceLocation[] locations) {
+		public OccurrencesFinderJob(IDocument document, int caretOffset) {
 			super("update occurrences");
 			fDocument= document;
-			fLocations= locations;
+			fCaretOffset=caretOffset;
 
 //			if (getSelectionProvider() instanceof ISelectionValidator)
 //				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider();
@@ -849,6 +853,9 @@ public class PLEditor extends TextEditor {
 		void doCancel() {
 			fCanceled= true;
 			cancel();
+			synchronized(cancelMonitor) {
+				cancelMonitor.notify();
+			}
 		}
 
 		private boolean isCanceled(IProgressMonitor progressMonitor) {
@@ -863,8 +870,19 @@ public class PLEditor extends TextEditor {
 		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public IStatus run(IProgressMonitor progressMonitor) {
-			if (isCanceled(progressMonitor))
+//			System.out.println(Thread.currentThread().getName()+ " wait");
+			try {
+				synchronized(cancelMonitor) {
+					cancelMonitor.wait(OCCURRENCE_UPDATE_DELAY);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (isCanceled(progressMonitor)) {
+//				System.out.println(Thread.currentThread().getName()+ " cancelled");
 				return Status.CANCEL_STATUS;
+			}
+//			System.out.println(Thread.currentThread().getName()+ " not cancelled");
 
 			ITextViewer textViewer= getSourceViewer();
 			if (textViewer == null)
@@ -882,15 +900,23 @@ public class PLEditor extends TextEditor {
 			if (annotationModel == null)
 				return Status.CANCEL_STATUS;
 
+
+			
 			// Add occurrence annotations
-			int length= fLocations.length;
+			ArrayList<OccurrenceLocation> locationList = parseOccurrences(fCaretOffset, document);
+			if(locationList == null){
+//				removeOccurrenceAnnotations();
+				return Status.CANCEL_STATUS;
+			}
+			
+			int length= locationList.size();
 			Map annotationMap= new HashMap(length);
 			for (int i= 0; i < length; i++) {
 
 				if (isCanceled(progressMonitor))
 					return Status.CANCEL_STATUS;
 
-				OccurrenceLocation location= fLocations[i];
+				OccurrenceLocation location= locationList.get(i);
 				Position position= new Position(location.getOffset(), location.getLength());
 
 				String description= location.getDescription();
@@ -912,14 +938,15 @@ public class PLEditor extends TextEditor {
 						annotationType="org.cs3.pdt.occurrences";
 				}
 				
-
 				annotationMap.put(new Annotation(annotationType, false, description), position);
 			}
 
 			if (isCanceled(progressMonitor))
 				return Status.CANCEL_STATUS;
-
 			synchronized (annotationModelMonitor) {
+
+				removeOccurrenceAnnotations();
+
 				if (annotationModel instanceof IAnnotationModelExtension) {
 					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
 				} else {
@@ -967,7 +994,7 @@ public class PLEditor extends TextEditor {
 		}
 		
 		if (fOccurrencesFinderJob != null)
-			fOccurrencesFinderJob.cancel();
+			fOccurrencesFinderJob.doCancel();
 		
 
 		if (!fMarkOccurrenceAnnotations )
@@ -990,18 +1017,7 @@ public class PLEditor extends TextEditor {
 //			fMarkOccurrenceModificationStamp= currentModificationStamp;
 //		}
 
-		OccurrenceLocation[] locations= null;
-		Map<String, List<OccurrenceLocation>> singletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
-
-		Map<String, List<OccurrenceLocation>> nonSingletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
-
-		ArrayList<OccurrenceLocation> locationList = parseOccurrences(caretOffset, document, singletonOccurs,
-				nonSingletonOccurs );
-		if(locationList == null){
-			return;
-		}
 		
-		locations = locationList.toArray(new OccurrenceLocation[0]);
 //		if (locations == null) {
 ////			if (!fStickyOccurrenceAnnotations)
 ////				removeOccurrenceAnnotations();
@@ -1011,20 +1027,21 @@ public class PLEditor extends TextEditor {
 //			return;
 //		}
 
-		removeOccurrenceAnnotations();
 	
-		
-		fOccurrencesFinderJob= new OccurrencesFinderJob(document, locations);
-		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
-		//fOccurrencesFinderJob.setSystem(true);
-		//fOccurrencesFinderJob.schedule();
-		fOccurrencesFinderJob.run(new NullProgressMonitor());
+		synchronized (annotationModelMonitor) {
+			fOccurrencesFinderJob= new OccurrencesFinderJob(document,caretOffset);
+			fOccurrencesFinderJob.setPriority(Job.DECORATE);
+			fOccurrencesFinderJob.setSystem(true);
+			fOccurrencesFinderJob.schedule();
+		}
+		//fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
 
-	private ArrayList<OccurrenceLocation> parseOccurrences(int caretOffset, IDocument document,
-			Map<String, List<OccurrenceLocation>> singletonOccurs,
-			Map<String, List<OccurrenceLocation>> nonSingletonOccurs) {
+	private ArrayList<OccurrenceLocation> parseOccurrences(int caretOffset, IDocument document) {
 		ArrayList<OccurrenceLocation> locationList = new ArrayList<OccurrenceLocation>();
+		Map<String, List<OccurrenceLocation>> singletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
+		Map<String, List<OccurrenceLocation>> nonSingletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
+		
 		try {
 			TextSelection var= getVariableAtOffset(document,caretOffset);
 			String varName = var.getText();
