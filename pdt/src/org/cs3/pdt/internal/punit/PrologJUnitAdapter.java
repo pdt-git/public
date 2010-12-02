@@ -47,7 +47,6 @@
  */
 package org.cs3.pdt.internal.punit;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +88,7 @@ public class PrologJUnitAdapter extends TestPredicateTest {
 			session = pif.getSession();
 			suite = new TestSuite();
 			IPrologInterfaceAdapter adapter = new IPrologInterfaceAdapter() {
+				@Override
 				public PrologInterface getPrologInterface() {
 					return pif;
 				}

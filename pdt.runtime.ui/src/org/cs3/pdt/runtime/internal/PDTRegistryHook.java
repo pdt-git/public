@@ -40,8 +40,9 @@ public class PDTRegistryHook implements RegistryHook {
 	public void addSubscriptions(PrologInterfaceRegistry registry) {
 		try {
 			PrologRuntimeUIPlugin runtimeUIPlugin = PrologRuntimeUIPlugin.getDefault();
+			String pluginID = PrologRuntimeUIPlugin.getPluginId();
 			ISavedState lastState =null;
-			lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(runtimeUIPlugin, new _SaveParticipant());
+			lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(pluginID, new _SaveParticipant());
 
 			if (lastState != null) {
 				IPath location = lastState.lookup(new Path("registry"));
@@ -63,6 +64,7 @@ public class PDTRegistryHook implements RegistryHook {
 		}
 	}
 	private static final class _SaveParticipant implements ISaveParticipant {
+		@Override
 		public void saving(ISaveContext context) throws CoreException {
 			switch (context.getKind()) {
 			case ISaveContext.FULL_SAVE:
@@ -93,6 +95,7 @@ public class PDTRegistryHook implements RegistryHook {
 
 		}
 
+		@Override
 		public void rollback(ISaveContext context) {
 			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
 
@@ -105,10 +108,12 @@ public class PDTRegistryHook implements RegistryHook {
 
 		}
 
+		@Override
 		public void prepareToSave(ISaveContext context) throws CoreException {
 			;
 		}
 
+		@Override
 		public void doneSaving(ISaveContext context) {
 			PrologRuntimeUIPlugin myPluginInstance = PrologRuntimeUIPlugin.getDefault();
 

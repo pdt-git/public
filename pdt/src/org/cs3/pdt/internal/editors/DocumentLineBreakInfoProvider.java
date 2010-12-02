@@ -58,6 +58,7 @@ public class DocumentLineBreakInfoProvider implements LineBreakInfoProvider {
     /* (non-Javadoc)
      * @see org.cs3.pl.parser.LineBreakInfoProvider#getLineAtOffset(int)
      */
+	@Override
     public int getLineAtOffset(int offset) {
         try {
             return document.getLineOfOffset(offset);
@@ -69,6 +70,7 @@ public class DocumentLineBreakInfoProvider implements LineBreakInfoProvider {
     /* (non-Javadoc)
      * @see org.cs3.pl.parser.LineBreakInfoProvider#getOffsetAtLine(int)
      */
+	@Override
     public int getOffsetAtLine(int line) {
         try {
             return document.getLineOffset(line);
@@ -80,6 +82,7 @@ public class DocumentLineBreakInfoProvider implements LineBreakInfoProvider {
     /* (non-Javadoc)
      * @see org.cs3.pl.parser.LineBreakInfoProvider#getLineCount()
      */
+	@Override
     public int getLineCount() {
         return document.getNumberOfLines();
     }

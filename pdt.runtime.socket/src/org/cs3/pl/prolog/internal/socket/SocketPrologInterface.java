@@ -62,6 +62,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 			super(client, pif,flags);
 		}
 
+		@Override
 		public void dispose() {
 			Debug.warning("Ignoring attempt to dispose an initial session!");
 			Debug.warning("called from here:");
@@ -79,6 +80,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 			super(client, pif,flags);
 		}
 
+		@Override
 		public void dispose() {
 			Debug.warning("Ignoring attempt to dispose a shutdown session!");
 			Debug.warning("called from here:");
@@ -138,13 +140,14 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	public String getServerLogDir(){
 		return serverLogDir;
 	}
+	@Override
 	public void initOptions(PreferenceProvider provider) {
 		super.initOptions(provider);
-		setServerPort(provider.getPreference(SocketPrologInterface.PREF_PORT));
-		setHidePlwin(provider.getPreference(SocketPrologInterface.PREF_HIDE_PLWIN));
-		setCreateLogs(provider.getPreference(SocketPrologInterface.PREF_CREATE_SERVER_LOGS));
-		setUseSessionPooling(provider.getPreference(SocketPrologInterface.PREF_USE_POOL));
-		setServerLogDir(provider.getPreference(SocketPrologInterface.PREF_SERVER_LOGDIR));		
+		setServerPort(provider.getPreference(SocketPrologInterfacePreferences.PREF_PORT));
+		setHidePlwin(provider.getPreference(SocketPrologInterfacePreferences.PREF_HIDE_PLWIN));
+		setCreateLogs(provider.getPreference(SocketPrologInterfacePreferences.PREF_CREATE_SERVER_LOGS));
+		setUseSessionPooling(provider.getPreference(SocketPrologInterfacePreferences.PREF_USE_POOL));
+		setServerLogDir(provider.getPreference(SocketPrologInterfacePreferences.PREF_SERVER_LOGDIR));		
 
 	}
 	
@@ -173,6 +176,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		setServerLogDir(System.getProperty("java.io.tmpdir"));		
 	}
 	
+	@Override
 	public PrologSession getSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
 		try {
@@ -199,6 +203,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		}
 	}
 
+	@Override
 	public AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable {
 		ReusableSocket socket = null;
 		try {
@@ -232,6 +237,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeInitialSession(org.cs3.pl.prolog.PrologSession)
 	 */
+	@Override
 	protected void disposeInitialSession(PrologSession initSession) {
 		InitSession s = (InitSession) initSession;
 		s.doDispose();
@@ -242,6 +248,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#disposeShutdownSession(org.cs3.pl.prolog.PrologSession)
 	 */
+	@Override
 	protected void disposeShutdownSession(PrologSession s) {
 		ShutdownSession ss = (ShutdownSession) s;
 		ss.doDispose();
@@ -252,6 +259,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getInitialSession()
 	 */
+	@Override
 	protected PrologSession getInitialSession() throws PrologInterfaceException {
 		try {
 			//FIXME: LEGACY for now, should be specified by client somehow.
@@ -267,6 +275,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#getShutdownSession()
 	 */
+	@Override
 	protected PrologSession getShutdownSession()
 			throws PrologInterfaceException {
 		try {
@@ -283,6 +292,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
+	@Override
 	public  void stop() throws PrologInterfaceException {
 		try {
 			super.stop();
@@ -293,6 +303,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		}
 	}
 
+	@Override
 	public  PrologInterfaceException error(Throwable e) {
 		try {
 			super.error(e);
@@ -309,6 +320,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	 * 
 	 * @see org.cs3.pl.prolog.internal.AbstractPrologInterface#stop()
 	 */
+	@Override
 	public void start() throws PrologInterfaceException {
 		Debug.info("pdt: Start Socket ");
 		if (pool != null) {
@@ -328,6 +340,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 
 	
 	
+	@Override
 	public ServerStartAndStopStrategy getStartAndStopStrategy() {	
 		return this.startAndStopStrategy;
 	}
@@ -341,6 +354,7 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	}
 
 	
+	@Override
 	public void debug_wakeupPoledSessions() {
 		int S =pool.getMaxTotalSize();
 		PrologSession[] sessions = new PrologSession[S];

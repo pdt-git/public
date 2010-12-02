@@ -66,7 +66,8 @@ public class StringEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.OptionEditor#createControls(org.eclipse.swt.widgets.Composite)
      */
-    protected void createControls(Composite composite) {
+    @Override
+	protected void createControls(Composite composite) {
         GridLayout layout = new GridLayout();
         layout.numColumns = 2;
         composite.setLayout(layout);
@@ -109,7 +110,8 @@ public class StringEditor extends OptionEditor implements PropertyEditor {
         valueField.setLayoutData(gd);
         valueField.addModifyListener(new ModifyListener() {
             String old="";
-            public void modifyText(ModifyEvent e) {
+            @Override
+			public void modifyText(ModifyEvent e) {
                 if(old.equals(e.data)) {
                     return;
                 }
@@ -122,7 +124,8 @@ public class StringEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#setValue(java.lang.String)
      */
-    public void setValue(String value) {
+    @Override
+	public void setValue(String value) {
         valueField.setText(value);
     }
 
@@ -130,7 +133,8 @@ public class StringEditor extends OptionEditor implements PropertyEditor {
     /* (non-Javadoc)
      * @see org.cs3.jtransformer.internal.properties.PropertyEditor#getValue()
      */
-    public String getValue() {      
+    @Override
+	public String getValue() {      
         return valueField.getText();
     }
 

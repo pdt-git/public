@@ -104,6 +104,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		setStandAloneServer(Boolean.parseBoolean(standAloneServer));
 	}
 
+	@Override
 	public void setStandAloneServer(boolean standAloneServer) {
 		if (isDown()) {
 			this.standAloneServer = standAloneServer;
@@ -113,50 +114,62 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
+	@Override
 	public boolean isStandAloneServer() {
 		return standAloneServer;
 	}
 
+	@Override
 	public void setFileSearchPath(String fileSearchPath) {
 		this.fileSearchPath = fileSearchPath;
 	}
 
+	@Override
 	public String getFileSearchPath() {
 		return fileSearchPath;
 	}
 
+	@Override
 	public void setHost(String value) {
 		this.host = value;
 	}
 
+	@Override
 	public String getHost() {
 		return host;
 	}
 
+	@Override
 	public void setTimeout(String timeout) {
 		this.timeout = Integer.parseInt(timeout);
 	}
 
+	@Override
 	public int getTimeout() {
 		return timeout;
 	}
 
+	@Override
 	public void setExecutable(String executable) {
 		this.executable = executable;
 	}
 
+	@Override
 	public String getExecutable() {
 		return executable;
 	}
 
+	@Override
 	public void setEnvironment(String environment) {
 		this.environment = environment;
 	}
 
+	@Override
 	public String getEnvironment() {
 		return environment;
 	}
 
+	@Override
 	public void initOptions(PreferenceProvider provider) {
 		setStandAloneServer(provider.getPreference(PrologInterface.PREF_STANDALONE));
 		setHost(provider.getPreference(PrologInterface.PREF_HOST));
@@ -188,6 +201,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			return instance;
 		}
 
+		@Override
 		public void run() {
 			for (Iterator<PrologInterface> it = pifs.keySet().iterator(); it.hasNext();) {
 				PrologInterface pif = it.next();
@@ -212,30 +226,37 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			super(name);
 		}
 
+		@Override
 		public PrologSession getInitialSession() throws PrologInterfaceException {
 			return AbstractPrologInterface.this.getInitialSession();
 		}
 
+		@Override
 		public PrologInterface getPrologInterface() {
 			return AbstractPrologInterface.this;
 		}
 
+		@Override
 		public PrologSession getShutdownSession() throws PrologInterfaceException {
 			return AbstractPrologInterface.this.getShutdownSession();
 		}
 
+		@Override
 		public void startServer() throws Throwable {
 			getStartAndStopStrategy().startServer(AbstractPrologInterface.this);
 		}
 
+		@Override
 		public void stopServer() throws Throwable {
 			getStartAndStopStrategy().stopServer(AbstractPrologInterface.this);
 		}
 
+		@Override
 		public boolean isServerRunning() throws Throwable {
 			return getStartAndStopStrategy().isRunning(AbstractPrologInterface.this);
 		}
 
+		@Override
 		public void disposeSessions() throws Throwable {
 			synchronized (sessions) {
 				HashSet<WeakReference<? extends Disposable>> cloned = new HashSet<WeakReference<? extends Disposable>>(sessions);
@@ -256,14 +277,17 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
+	@Override
 	public List<BootstrapPrologContribution> getBootstrapLibraries() {
 		return bootstrapLibraries;
 	}
 
+	@Override
 	public void setBootstrapLibraries(List<BootstrapPrologContribution> l) {
 		this.bootstrapLibraries = l;
 	}
 
+	@Override
 	protected void finalize() throws Throwable {
 		stop();
 		super.finalize();
@@ -274,6 +298,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * @param id
 	 * @param dependsOn
 	 */
+	@Override
 	public void addLifeCycleHook(LifeCycleHook hook, String id, String[] dependencies) {
 		lifecycle.addLifeCycleHook(hook, id, dependencies);
 	}
@@ -284,10 +309,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * @see
 	 * org.cs3.pl.prolog.PrologInterface#removeLifeCycleHook(java.lang.String)
 	 */
+	@Override
 	public void removeLifeCycleHook(String hookId) {
 		lifecycle.removeLifeCycleHook(hookId);
 	}
 
+	@Override
 	public void removeLifeCycleHook(final LifeCycleHook hook, final String hookId) {
 		lifecycle.removeLifeCycleHook(hook, hookId);
 	}
@@ -341,10 +368,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	public abstract PrologSession getSession_impl(int flags) throws Throwable;
 
+	@Override
 	public PrologSession getSession() throws PrologInterfaceException {
 		return getSession(LEGACY);
 	}
 
+	@Override
 	public PrologSession getSession(int flags) throws PrologInterfaceException {
 
 		CTermUtil.checkFlags(flags);
@@ -400,6 +429,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 */
 	public abstract ServerStartAndStopStrategy getStartAndStopStrategy();
 
+	@Override
 	public boolean isDown() {
 		return lifecycle.isDown();
 	}
@@ -407,6 +437,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	/**
 	 * @return
 	 */
+	@Override
 	public boolean isUp() {
 		return lifecycle.isUp();
 	}
@@ -423,6 +454,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * 
 	 * @throws IOException
 	 */
+	@Override
 	public void restart() throws PrologInterfaceException {
 		synchronized (lifecycle) {
 			if (getError() != null) {
@@ -443,6 +475,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 	 * 
 	 * @throws IOException
 	 */
+	@Override
 	public void reset() throws PrologInterfaceException {
 		synchronized (lifecycle) {
 			lifecycle.reset();
@@ -463,6 +496,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		throw new IllegalArgumentException("option not supported: " + opt);
 	}
 
+	@Override
 	public void start() throws PrologInterfaceException {
 
 		synchronized (lifecycle) {
@@ -479,6 +513,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	}
 
+	@Override
 	public void stop() throws PrologInterfaceException {
 		synchronized (lifecycle) {
 			if (getError() != null) {
@@ -521,10 +556,12 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 
 	public abstract AsyncPrologSession getAsyncSession_impl(int flags) throws Throwable;
 
+	@Override
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException {
 		return getAsyncSession(LEGACY);
 	}
 
+	@Override
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException {
 		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
@@ -574,7 +611,7 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 			} 
 			Constructor<? extends PrologInterface> cons= ((Class<? extends PrologInterface>)impl).getDeclaredConstructor(typeList);
 			//			cons.newInstance(name);
-			return (PrologInterface) cons.newInstance(name);
+			return cons.newInstance(name);
 		} catch (Throwable t) {
 			Debug.rethrow(t);
 			return null;

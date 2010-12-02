@@ -8,16 +8,18 @@ import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 public class SimplePropertySource implements IPropertySource {
 
-	private Map properties;
+	private Map<String, ?> properties;
 
-	public SimplePropertySource(Map properties) {
+	public SimplePropertySource(Map<String, ?> properties) {
 		this.properties=properties;
 	}
 
+	@Override
 	public Object getEditableValue() {
 		return this;
 	}
 
+	@Override
 	public IPropertyDescriptor[] getPropertyDescriptors() {
 		String[] keys = (String[]) properties.keySet().toArray(new String[properties.size()]);
 		PropertyDescriptor[] descriptors = new PropertyDescriptor[keys.length];
@@ -29,21 +31,22 @@ public class SimplePropertySource implements IPropertySource {
 		return descriptors;
 	}
 
+	@Override
 	public Object getPropertyValue(Object id) {
-
 		return properties.get(id);
 	}
 
+	@Override
 	public boolean isPropertySet(Object id) {
 		return false;
 	}
 
+	@Override
 	public void resetPropertyValue(Object id) {
-		;
 	}
 
+	@Override
 	public void setPropertyValue(Object id, Object value) {
-		;
 	}
 
 }

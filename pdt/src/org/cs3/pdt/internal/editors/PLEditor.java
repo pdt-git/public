@@ -129,10 +129,12 @@ public class PLEditor extends TextEditor {
 
 	private IContentAssistant assistant;
 
+	@Override
 	protected void initializeKeyBindingScopes() {
 		setKeyBindingScopes(new String[] { PDT.CONTEXT_EDITING_PROLOG_CODE });
 	}
 
+	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
 
@@ -203,6 +205,7 @@ public class PLEditor extends TextEditor {
 
 	private static final String MATCHING_BRACKETS_COLOR = "matching.brackets.color";
 
+	@Override
 	protected void configureSourceViewerDecorationSupport(
 			SourceViewerDecorationSupport support) {
 		getPreferenceStore().setDefault(MATCHING_BRACKETS, true);
@@ -214,6 +217,7 @@ public class PLEditor extends TextEditor {
 		super.configureSourceViewerDecorationSupport(support);
 	}
 
+	@Override
 	public void createPartControl(final Composite parent) {
 		try {
 			createPartControl_impl(parent);
@@ -237,6 +241,7 @@ public class PLEditor extends TextEditor {
 		ResourceBundle bundle = ResourceBundle.getBundle(PDT.RES_BUNDLE_UI);
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ContextAssistProposal", this) {
+			@Override
 			public void run() {
 				assistant.showPossibleCompletions();
 			}
@@ -247,6 +252,7 @@ public class PLEditor extends TextEditor {
 
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ToolTipAction", this) {
+			@Override
 			public void run() {
 				assistant.showContextInformation();
 			}
@@ -324,6 +330,8 @@ public class PLEditor extends TextEditor {
 	 * @param parent
 	 */
 
+	@SuppressWarnings("rawtypes")
+	@Override
 	public Object getAdapter(Class required) {
 		try {
 			if (IContentOutlinePage.class.equals(required)) {
@@ -723,6 +731,7 @@ public class PLEditor extends TextEditor {
 	 * 
 	 * @see org.eclipse.ui.editors.text.TextEditor#doSetInput(org.eclipse.ui.IEditorInput)
 	 */
+	@Override
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		
 		setDocumentProvider(createDocumentProvider(input));

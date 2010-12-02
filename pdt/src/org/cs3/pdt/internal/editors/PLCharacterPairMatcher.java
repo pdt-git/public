@@ -44,7 +44,6 @@
 package org.cs3.pdt.internal.editors;
 
 import org.cs3.pl.common.Debug;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
@@ -61,6 +60,7 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.source.ICharacterPairMatcher#dispose()
      */
+	@Override
     public void dispose() {
     	;
     }
@@ -68,6 +68,7 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.source.ICharacterPairMatcher#clear()
      */
+	@Override
     public void clear() {
        anchor = -1;
        stack=new StringBuffer();
@@ -77,6 +78,7 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.source.ICharacterPairMatcher#match(org.eclipse.jface.text.IDocument, int)
      */
+	@Override
     public IRegion match(IDocument document, int offset) {
         try {
             offset--;//XXX: why decrement? causes  BadLocationException below when offset==0
@@ -85,16 +87,8 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
             if(offset<0){
             	return null;
             }
-            //XXX: debugging, please remove try/catch
-            String partitionType=null;
-            try {
-            	
-				partitionType = document.getContentType(offset);	
-			} catch (BadLocationException e) {
-				Debug.debug("Aha! offset is "+offset+", document length is "+document.getLength());
-				Debug.report(e);
-			}
-            
+            String partitionType = document.getContentType(offset);	
+			
             char nextChar = document.getChar(Math.max(offset,0));
             if(!isBracket(nextChar)){
                 return null;
@@ -184,6 +178,7 @@ public class PLCharacterPairMatcher implements ICharacterPairMatcher {
     /* (non-Javadoc)
      * @see org.eclipse.jface.text.source.ICharacterPairMatcher#getAnchor()
      */
+	@Override
     public int getAnchor() {      
         return anchor;
     }

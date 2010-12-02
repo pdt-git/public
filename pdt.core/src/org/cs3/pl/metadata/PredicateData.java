@@ -49,6 +49,7 @@ public class PredicateData extends PrologElementData implements Predicate {
 		super(module,label, arity,pub, dynamic, multifile);
 	}
 
+	@Override
 	public String getPredicateProperty(String property) {
 		if (EXPORTED.equals(property)) {
 			return isPublic()&&! "user".equals(getModule()) ? "true":"false";
@@ -62,6 +63,7 @@ public class PredicateData extends PrologElementData implements Predicate {
 		return null;
 	}
 
+	@Override
 	public void setPredicateProperty(String property, String value) {
 
 	}

@@ -12,11 +12,13 @@ public class InitState extends AbstractState {
 		super(context);
 	}
 
+	@Override
 	public void enter() {
 		HashSet<LifeCycleHookWrapper> done = new HashSet<LifeCycleHookWrapper>();
 		HashMap<String, LifeCycleHookWrapper> hooks = context.getHooks();
 		
 		context.enqueueWork(new NamedWorkRunnable("startServer"){
+			@Override
 			public void run() throws PrologInterfaceException {
 				try {
 					context.startServer();
@@ -31,6 +33,7 @@ public class InitState extends AbstractState {
 		}
 
 		context.enqueueWork(new NamedWorkRunnable("workDoneInit") {	
+			@Override
 			public void run() throws PrologInterfaceException {
 				context.workDone();
 			}
@@ -38,15 +41,18 @@ public class InitState extends AbstractState {
 	}
 
 	
+	@Override
 	public State workDone() {
 		return new AfterInitState(context);
 	}
 
 	
+	@Override
 	public State addLifeCycleHook(final LifeCycleHook hook, String id,
 			String[] dependencies) {
 		if (isNewHook(hook,id)) {
 			context.enqueueWork(new NamedWorkRunnable("lateInit on"+id) {
+				@Override
 				public void run() throws PrologInterfaceException {
 					hook.lateInit(context.getPrologInterface());
 				}

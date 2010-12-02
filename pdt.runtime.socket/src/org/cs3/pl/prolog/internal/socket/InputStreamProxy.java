@@ -23,18 +23,22 @@ class InputStreamProxy extends InputStream {
 		this.client = client;
 	}
 
+	@Override
 	public int available() throws IOException {
 		return in.available();
 	}
 
+	@Override
 	public void close() throws IOException {
 		client.close();
 	}
 
+	@Override
 	public synchronized void mark(int readlimit) {
 		in.mark(readlimit);
 	}
 
+	@Override
 	public boolean markSupported() {
 		return in.markSupported();
 	}
@@ -44,28 +48,33 @@ class InputStreamProxy extends InputStream {
 	 * 
 	 * @see java.io.InputStream#read()
 	 */
+	@Override
 	public int read() throws IOException {
 		int read = in.read();
 		logBuf.log("read", (char) read);
 		return read;
 	}
 
+	@Override
 	public int read(byte[] b) throws IOException {
 		int read = in.read(b);
 		logBuf.log("read", b, 0, read);
 		return read;
 	}
 
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		int read = in.read(b, off, len);
 		logBuf.log("read", b, off, read);
 		return read;
 	}
 
+	@Override
 	public synchronized void reset() throws IOException {
 		in.reset();
 	}
 
+	@Override
 	public long skip(long n) throws IOException {
 		return in.skip(n);
 	}

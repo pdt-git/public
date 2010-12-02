@@ -64,13 +64,15 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
     /* (non-Javadoc)
      * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#dispose()
      */
-    public void dispose() {
+	@Override
+	public void dispose() {
         ;
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
      */
+	@Override
     public void init(IWorkbenchWindow window) {
         ;
     }
@@ -78,6 +80,7 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
     /* (non-Javadoc)
      * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
      */
+	@Override
     public void run(IAction action) {		
 		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 		PrologInterface pif = console.getPrologInterface();
@@ -102,6 +105,7 @@ public class DumpDebugInfoAction implements IWorkbenchWindowActionDelegate {
     /* (non-Javadoc)
      * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction, org.eclipse.jface.viewers.ISelection)
      */
+	@Override
     public void selectionChanged(IAction action, ISelection selection) {
        ;
     }

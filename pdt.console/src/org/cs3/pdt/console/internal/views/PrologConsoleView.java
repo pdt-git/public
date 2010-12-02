@@ -62,7 +62,6 @@ import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.ui.util.EclipsePreferenceProvider;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.PreferenceProvider;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.console.ConsoleModel;
 import org.cs3.pl.console.NewConsoleHistory;
@@ -79,6 +78,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -105,6 +105,7 @@ import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.UIJob;
 
+@SuppressWarnings("deprecation")
 public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		PrologConsole {
 	private final class ClearAction extends Action {
@@ -113,6 +114,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			setToolTipText(tooltip);
 		}
 
+		@Override
 		public void run() {
 			getViewer().clearOutput();
 		}
@@ -127,11 +129,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		protected abstract String getTextToInsert();
 
+		@Override
 		public void run() {
 			try {
 
 				UIJob j = new UIJob(getToolTipText()) {
 
+					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						try {
 							PrologConsole c = getConsole();
@@ -193,7 +197,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		public GuiTracerAction(String[] query, String[] text, String[] tooltip,
 				ImageDescriptor[] icon) {
 
-			super(null, Action.AS_CHECK_BOX);
+			super(null, IAction.AS_CHECK_BOX);
 			
 			this.queries = query;
 			this.texts = text;
@@ -213,12 +217,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			
 		}
 
+		@Override
 		public void run() {
 			try {		
 				
 				Job j = new Job(getToolTipText()) {
 					
 					
+					@Override
 					protected IStatus run(IProgressMonitor monitor) {
 						try {
 							PrologConsole c = getConsole();
@@ -250,11 +256,13 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 	
 	private final class RestartAction extends Action {
+		@Override
 		public void run() {
 			try {
 
 				Job j = new UIJob("Restarting the PrologInterface") {
 
+					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
 						try {
 							monitor.beginTask("initializing...",
@@ -288,14 +296,17 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		}
 
+		@Override
 		public ImageDescriptor getImageDescriptor() {
 			return ImageRepository.getImageDescriptor(ImageRepository.RESTART);
 		}
 
+		@Override
 		public String getToolTipText() {
 			return "restart";
 		}
 
+		@Override
 		public String getText() {
 			return "restart";
 		}
@@ -320,6 +331,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private SelectContextPIFAutomatedAction automatedSelector;
 
+	@Override
 	public void createPartControl(Composite parent) {
 
 		try {
@@ -336,6 +348,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		Listener handler = new Listener() {
 
+			@Override
 			public void handleEvent(Event event) {
 				switch (event.type) {
 				case SWT.Show:
@@ -395,28 +408,33 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private void createActions() {
 		cutAction = new Action() {
+			@Override
 			public void run() {
 				viewer.cut();
 			}
 		};
 
 		copyAction = new Action() {
+			@Override
 			public void run() {
 				viewer.copy();
 			}
 		};
 		pasteAction = new Action() {
+			@Override
 			public void run() {
 				viewer.paste();
 			}
 		};
 		selectAllAction = new Action() {
+			@Override
 			public void run() {
 				viewer.selectAll();
 			}
 		};
 		new Action(){
 			
+			@Override
 			public void run() {
 				PrologInterface pif = getPrologInterface();
 				if(pif==null){
@@ -446,6 +464,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				"paste the name of the current editor file", ImageRepository
 						.getImageDescriptor(ImageRepository.PASTE_FILENAME)) {
 
+			@Override
 			protected String getTextToInsert() {
 				IFile file = UIUtils.getFileInActiveEditor();
 				if (file == null) {
@@ -458,6 +477,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		};
 		pasteFileNameAction
 				.setActionDefinitionId(PDTConsole.COMMAND_PASTE_FILENAME);
+		
+		//Object service = IServiceLocator.getService(Class);
+		
 		IKeyBindingService keyBindingService = getSite().getKeyBindingService();
 		keyBindingService
 				.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
@@ -471,6 +493,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		manager.setRemoveAllWhenShown(true);
 		manager.addMenuListener(new IMenuListener() {
 
+			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				addContributions(manager);
 
@@ -506,29 +529,34 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		automatedSelector = new SelectContextPIFAutomatedAction(){
 
 			
+			@Override
 			protected PrologInterface getPrologInterface() {
 				return PrologConsoleView.this.getPrologInterface();
 			}
 
 			
+			@Override
 			protected void setPrologInterface(PrologInterface prologInterface) {
 				PrologConsoleView.this.setPrologInterface(prologInterface);
 				
 			}
 
 			
+			@Override
 			protected void trackerActivated(PrologContextTracker tracker) {
 				setPrologInterface(automatedSelector.getCurrentPrologInterface());
 				
 			}
 
 			
+			@Override
 			protected void trackerDeactivated(PrologContextTracker tracker) {
 				setPrologInterface(automatedSelector.getCurrentPrologInterface());
 				
 			}
 
 
+			@Override
 			public void contextChanged(PrologContextTrackerEvent e) {
 				PrologContextTracker tracker = (PrologContextTracker) e
 				.getSource();
@@ -621,6 +649,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		return new File(value);
 	}
 
+	@Override
 	public void setFocus() {
 		if (viewer == null) {
 			Debug
@@ -632,6 +661,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 
 
+	@Override
 	public void dispose() {
 		PrologConsolePlugin.getDefault().getPrologConsoleService()
 				.unregisterPrologConsole(this);
@@ -655,6 +685,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	 * 
 	 * @see org.cs3.pl.prolog.LifeCycleHook#onInit(org.cs3.pl.prolog.PrologSession)
 	 */
+	@Override
 	public void onInit(PrologInterface pif, PrologSession initSession) {
 		;
 	}
@@ -687,6 +718,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	 * 
 	 * @see org.cs3.pl.prolog.LifeCycleHook#afterInit()
 	 */
+	@Override
 	public void afterInit(PrologInterface pif) {
 		try {
 			connect(pif);
@@ -701,12 +733,14 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	 * 
 	 * @see org.cs3.pl.prolog.LifeCycleHook#beforeShutdown(org.cs3.pl.prolog.PrologSession)
 	 */
+	@Override
 	public void beforeShutdown(PrologInterface pif, PrologSession session) {
 		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
 		saveHistory(history);
 		disconnect(pif);
 	}
 
+	@Override
 	public void onError(PrologInterface pif) {
 		NewConsoleHistory history = (NewConsoleHistory) viewer.getHistory();
 		saveHistory(history);
@@ -728,15 +762,18 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		}
 	}
 
+	@Override
 	public ConsoleModel getModel() {
-		return (ConsoleModel) (getPrologInterface() == null ? null : models
+		return (getPrologInterface() == null ? null : models
 				.get(getPrologInterface()));
 	}
 
+	@Override
 	public PrologInterface getPrologInterface() {
 		return currentPif;
 	}
 
+	@Override
 	public void setPrologInterface(PrologInterface newPif) {
 		if(currentPif==newPif){
 			return;
@@ -848,6 +885,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		if (Display.getCurrent() != viewer.getControl().getDisplay()) {
 			viewer.getControl().getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					reconfigureViewer(pif);
 				}
@@ -890,6 +928,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	}
 
 
+	@Override
 	public boolean isVisible() {
 		return partControl.isVisible();
 	}
@@ -898,45 +937,55 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		return viewer;
 	}
 
+	@Override
 	public String getText() {
 		return getViewer().getText();
 	}
 
+	@Override
 	public int getLineAtOffset(int offset) {
 		return getViewer().getLineAtOffset(offset);
 	}
 
+	@Override
 	public int getOffsetAtLine(int line) {
 		return getViewer().getOffsetAtLine(line);
 	}
 
+	@Override
 	public int getLineCount() {
 		return getViewer().getLineCount();
 	}
 
+	@Override
 	public void clearOutput() {
 		getViewer().clearOutput();
 
 	}
 
+	@Override
 	public String getTextRange(int offset, int length) {
 		return getViewer().getTextRange(offset, length);
 	}
 
+	@Override
 	public int getCaretOffset() {
 		return getViewer().getCaretOffset();
 	}
 
+	@Override
 	public int getStartOfInput() {
 
 		return getViewer().getStartOfInput();
 	}
 
+	@Override
 	public void setCaretOffset(int offset) {
 		getViewer().setCaretOffset(offset);
 
 	}
 
+	@Override
 	public void setData(Object data) {
 		;
 	}

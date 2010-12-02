@@ -66,6 +66,7 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 
 	
 
+	@Override
 	public PrologInterface getCurrentPrologInterface(){
 		IEditorPart editor = UIUtils.getActiveEditor();
 		
@@ -101,6 +102,7 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 		return plProject.getRuntimePrologInterface();
 	}
 
+	@Override
 	public void init(IWorkbench workbench) {
 		IWorkbenchWindow activeWorkbenchWindow = workbench.getActiveWorkbenchWindow();
 		IPartService partService = activeWorkbenchWindow.getPartService();
@@ -117,34 +119,42 @@ public class PLEditorTracker extends AbstractPrologContextTracker implements IPa
 		}
 	}
 	
+	@Override
 	public void partActivated(IWorkbenchPartReference partRef) {		
 		check(partRef);		
 	}	
 
+	@Override
 	public void partBroughtToTop(IWorkbenchPartReference partRef) {
 		check(partRef);	
 	}
 
+	@Override
 	public void partClosed(IWorkbenchPartReference partRef) {
 		;//check(partRef);
 	}
 
+	@Override
 	public void partDeactivated(IWorkbenchPartReference partRef) {
 		;//check(partRef);
 	}
 
+	@Override
 	public void partOpened(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partHidden(IWorkbenchPartReference partRef) {
 		;//check(partRef);
 	}
 
+	@Override
 	public void partVisible(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}
 
+	@Override
 	public void partInputChanged(IWorkbenchPartReference partRef) {
 		check(partRef);
 	}

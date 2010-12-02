@@ -12,7 +12,11 @@ import java.util.List;
 public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserTreeConstants, CanonicalTermParserConstants {/*@bgen(jjtree)*/
   protected JJTCanonicalTermParserState jjtree = new JJTCanonicalTermParserState();public static class RuntimeException extends java.lang.RuntimeException{
 
-                        private Throwable cause;
+                        /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2132793322254995847L;
+						private Throwable cause;
                         private String message;
 
                         public RuntimeException(Throwable e) {
@@ -25,39 +29,46 @@ public class CanonicalTermParser/*@bgen(jjtree)*/implements CanonicalTermParserT
                                 this.message = message;
                         }
 
-                        public Throwable fillInStackTrace() {
+                        @Override
+						public Throwable fillInStackTrace() {
                                 return cause.fillInStackTrace();
                         }
 
-                        public String getLocalizedMessage() {
+                        @Override
+						public String getLocalizedMessage() {
                                 return message + " ("+cause.getLocalizedMessage()+")";
                         }
 
-                        public String getMessage() {
+                        @Override
+						public String getMessage() {
                                 return message + " ("+cause.getMessage()+")";
                         }
 
-                        public void printStackTrace() {
+                        @Override
+						public void printStackTrace() {
                                 cause.printStackTrace();
                         }
 
-                        public void printStackTrace(PrintStream arg0) {
+                        @Override
+						public void printStackTrace(PrintStream arg0) {
                                 cause.printStackTrace(arg0);
                         }
 
-                        public void printStackTrace(PrintWriter arg0) {
+                        @Override
+						public void printStackTrace(PrintWriter arg0) {
                                 cause.printStackTrace(arg0);
                         }
 
-                        public String toString() {
+                        @Override
+						public String toString() {
                                 return cause.toString();
                         }
 
             }
 
-        private List errors = new ArrayList();
+        private List<ParseException> errors = new ArrayList<ParseException>();
 
-        public List getErrors() {
+        public List<ParseException> getErrors() {
                 return errors;
         }
 
@@ -110,7 +121,6 @@ public static void main(String args[]) throws FileNotFoundException {
     CanonicalTermParser t = new CanonicalTermParser(stream);
     try {
       t.Term();
-      Node n = t.getASTRoot();
 
       System.err.println("Thank you.");
     } catch (Exception e) {
@@ -597,7 +607,13 @@ public static void main(String args[]) throws FileNotFoundException {
     throw generateParseException();
   }
 
-  static private final class LookaheadSuccess extends java.lang.Error { }
+  static private final class LookaheadSuccess extends java.lang.Error {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2916935552030986067L; }
+  
   final private LookaheadSuccess jj_ls = new LookaheadSuccess();
   private boolean jj_scan_token(int kind) {
     if (jj_scanpos == jj_lastpos) {

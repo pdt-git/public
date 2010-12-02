@@ -48,6 +48,7 @@ public final class RenameFileInfo extends PrologRefactoringInfo {
 		return prologInterface;
 	}
 
+	@Override
 	public Option[] getOptions() {
 
 		return new Option[] {

@@ -102,6 +102,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	/**
 	 * @see IAction#run()
 	 */
+	@Override
 	public void run() {
 		// do nothing, this action just creates a cascading menu.
 	}
@@ -127,6 +128,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	private void createAction(Menu parent, final PrologContextTracker tracker) {
 		final String trackerId = tracker.getId();
 		IAction action = new Action(tracker.getLabel(),IAction.AS_CHECK_BOX){
+			@Override
 			public void run() {
 				
 				if(getActiveTrackers().contains(trackerId)){
@@ -159,6 +161,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	/**
 	 * @see IMenuCreator#dispose()
 	 */
+	@Override
 	public void dispose() {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -168,6 +171,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	/**
 	 * @see IMenuCreator#getMenu(Control)
 	 */
+	@Override
 	public Menu getMenu(Control parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -181,6 +185,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	/**
 	 * @see IMenuCreator#getMenu(Menu)
 	 */
+	@Override
 	public Menu getMenu(Menu parent) {
 		if (getCreatedMenu() != null) {
 			getCreatedMenu().dispose();
@@ -207,6 +212,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 		// Add listener to repopulate the menu each time
 		// it is shown to reflect changes in selection or active perspective
 		fCreatedMenu.addMenuListener(new MenuAdapter() {
+			@Override
 			public void menuShown(MenuEvent e) {
 				Menu m = (Menu) e.widget;
 				MenuItem[] items = m.getItems();
@@ -231,6 +237,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	/**
 	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
 	 */
+	@Override
 	public void init(IWorkbenchWindow window) {
 		// if (window instanceof WorkbenchWindow) {
 		// fKeyBindingService= ((WorkbenchWindow)window).getKeyBindingService();
@@ -240,6 +247,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	/**
 	 * @see org.eclipse.ui.IActionDelegate#run(org.eclipse.jface.action.IAction)
 	 */
+	@Override
 	public void run(IAction action) {
 		// do nothing - this is just a menu
 	}
@@ -248,6 +256,7 @@ public abstract class SelectContextsAction extends Action implements IMenuCreato
 	 * @see org.eclipse.ui.IActionDelegate#selectionChanged(org.eclipse.jface.action.IAction,
 	 *      org.eclipse.jface.viewers.ISelection)
 	 */
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		if (fAction == null) {
 			initialize(action);

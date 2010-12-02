@@ -62,14 +62,17 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
 	private class _Result implements CompoletionResult {
 
+		@Override
 		public String getOriginalLineContent() {
 			return line;
 		}
 
+		@Override
 		public int getOriginalCaretPosition() {
 			return pos;
 		}
 
+		@Override
 		public String[] getOptions() {
 			if (options == null) {
 				return null;
@@ -88,6 +91,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		 * 
 		 * @see org.cs3.pl.views.ConsoleCompletionProvider#getCaretPosition()
 		 */
+		@Override
 		public int getNewCaretPosition() {
 			return newPos;
 		}
@@ -97,6 +101,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 		 * 
 		 * @see org.cs3.pl.views.ConsoleCompletionProvider#getNewLineContent()
 		 */
+		@Override
 		public String getNewLineContent() {
 			return newLine;
 		}
@@ -123,6 +128,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	 * @see org.cs3.pl.views.ConsoleCompletionProvider#getCompletion(java.lang.String,
 	 *      int)
 	 */
+	@Override
 	public CompoletionResult doCompletion(String line, int pos) {
 		if (pif == null) {
 			return null;

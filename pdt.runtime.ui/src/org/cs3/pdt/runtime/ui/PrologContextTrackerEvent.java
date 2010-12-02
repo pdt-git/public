@@ -47,6 +47,8 @@ import org.cs3.pl.prolog.PrologInterface;
 
 public class PrologContextTrackerEvent extends EventObject {
 
+
+	private static final long serialVersionUID = 1L;
 	private PrologInterface pif;
 
 	/**

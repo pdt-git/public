@@ -50,28 +50,26 @@ import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 public class HelpActionDelegate extends QueryAction implements IWorkbenchWindowActionDelegate {
 
 	public HelpActionDelegate() {
-		
 			super(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface(),"help", "opening prolog help","Show SWI-Prolog's built-in help.",null);
-		
 	}
 
+	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void init(IWorkbenchWindow window) {
-		// TODO Auto-generated method stub
 		
 	}
 
+	@Override
 	public void run(IAction action) {
 		run();
-		
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
-		// TODO Auto-generated method stub
 		
 	}
 }

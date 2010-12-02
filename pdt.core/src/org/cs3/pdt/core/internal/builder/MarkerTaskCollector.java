@@ -80,7 +80,8 @@ public class MarkerTaskCollector implements TaskCollector {
      * @see org.cs3.pl.parser.ProblemCollector#reportProblem(org.cs3.pl.parser.Token,
      *           java.lang.String, int)
      */
-    public void reportTask(Task p){
+    @Override
+	public void reportTask(Task p){
         
         HashMap<String, Integer> attributes = new HashMap<String, Integer>();
         
@@ -100,7 +101,8 @@ public class MarkerTaskCollector implements TaskCollector {
      * 
      * @see org.cs3.pl.parser.ProblemCollector#reset()
      */
-    public void reset() {        
+    @Override
+	public void reset() {        
        resetProblems();
     }
 
@@ -109,7 +111,8 @@ public class MarkerTaskCollector implements TaskCollector {
      * 
      * @see org.cs3.pl.parser.ProblemCollector#done()
      */
-    public void done() {
+    @Override
+	public void done() {
         createMarkers();
     }
 
@@ -117,7 +120,8 @@ public class MarkerTaskCollector implements TaskCollector {
         if (markers.size() > 0) {
 
             IWorkspaceRunnable r = new IWorkspaceRunnable() {
-                public void run(IProgressMonitor monitor) throws CoreException {
+                @Override
+				public void run(IProgressMonitor monitor) throws CoreException {
                     for (int i = 0; i < markers.size(); i++) {
                         IMarker marker = file.createMarker(IMarker.TASK);
                         marker.setAttributes(markers.get(i));

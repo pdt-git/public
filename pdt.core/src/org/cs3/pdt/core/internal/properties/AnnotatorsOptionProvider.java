@@ -57,6 +57,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 				values.toArray(new String[values.size()]));
 	}
 	
+	@Override
 	public void addOptionProviderListener(OptionProviderListener l) {
 		synchronized (listeners) {
 			if(!listeners.contains(l)){
@@ -65,12 +66,14 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		}
 	}
 
+	@Override
 	public void removeOptionProviderListener(OptionProviderListener l) {
 		if(listeners.contains(l)){
 			listeners.remove(l);
 		}
 	}
 
+	@Override
 	public synchronized void setPreferenceValues(String[] ids, String[] values) {
 		for (int i = 0; i < values.length; i++) {
 			String value= values[i];
@@ -85,7 +88,7 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 	private void updatePrologBackend(String[] ids, String[] values) {
 		itsMe=true;
 		try {
-			AsyncPrologSession s = ((PrologInterface)prologProject.getMetadataPrologInterface()).getAsyncSession(PrologInterface.NONE);
+			AsyncPrologSession s = (prologProject.getMetadataPrologInterface()).getAsyncSession(PrologInterface.NONE);
 			s.addBatchListener(new DefaultAsyncPrologSessionListener());
 			for (int i = 0; i < values.length; i++) {
 				s.queryOnce("setup annotators", "pdt_set_annotator_enabled("+ids[i]+", "+values[i]+")");
@@ -110,10 +113,12 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		}
 	}
 
+	@Override
 	public Option[] getOptions() {
 		return options;
 	}
 
+	@Override
 	public synchronized String getPreferenceValue(String id, String string) {		
 		return prologProject.getPreferenceValue("enabled."+id, getDefault(id));
 	}
@@ -128,14 +133,17 @@ public class AnnotatorsOptionProvider implements OptionProvider,OptionProviderEx
 		return null;
 	}
 
+	@Override
 	public void reconfigure() {
 		;
 	}
 
+	@Override
 	public void setPreferenceValue(String id, String value) {
 		setPreferenceValues(new String[]{id}, new String[]{value});	
 	}
 
+	@Override
 	public synchronized void update(PrologInterfaceEvent e) {
 		if(itsMe){
 			return;

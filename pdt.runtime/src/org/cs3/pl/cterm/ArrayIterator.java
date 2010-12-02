@@ -22,16 +22,19 @@ public class ArrayIterator<T> implements Iterator<T> {
 		this.lastElement = lastElement;
 	}
 
+	@Override
 	public boolean hasNext() {
 		return elements != null && index <= lastElement;
 	}
 
+	@Override
 	public T next() throws NoSuchElementException {
 		if (!hasNext())
 			throw new NoSuchElementException();
 		return elements[index++];
 	}
 
+	@Override
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
