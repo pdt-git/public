@@ -150,14 +150,14 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
     remove_module_prefix(_module_pred,_pred),    
 %    print(_pred),
 %    format('~n~n',[]),
-    nth_clause(_pred,_,Ref),
+    nth_clause(_module_pred,_,Ref),
     functor(_pred,_name,_arity),
     flush_output,
 %   not(pdtplugin_get_pred_exists(_name,_arity)),
     clause_property(Ref,file(_file)),
     clause_property(Ref,line_count(_pos)),
-    has_property(_pred,dynamic,_dyn),
-    has_property(_pred,multifile,_mul).
+    has_property(_module_pred,dynamic,_dyn),
+    has_property(_module_pred,multifile,_mul).
 %   assert(pdtplugin_get_pred_exists(_name,_arity)),
 %   format('~w , ~w , ~w , ~w , ~w~n',[_name,_arity,_file,_dyn,_mul]).
     
