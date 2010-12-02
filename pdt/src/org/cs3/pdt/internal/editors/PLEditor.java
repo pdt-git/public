@@ -41,6 +41,10 @@
 
 package org.cs3.pdt.internal.editors;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
@@ -52,6 +56,8 @@ import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
+import org.cs3.pdt.internal.contentassistant.VariableCompletionProposal;
+import org.cs3.pdt.internal.editors.PLEditor.OccurrenceLocation;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -61,7 +67,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
@@ -73,11 +83,24 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ISelectionValidator;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITypedRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.custom.CaretEvent;
+import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -163,6 +186,7 @@ public class PLEditor extends TextEditor {
 			colorManager = new ColorManager();
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);
+			
 		} catch (Throwable t) {
 			Debug.report(t);
 			throw new RuntimeException(t);
@@ -236,6 +260,16 @@ public class PLEditor extends TextEditor {
 		tca.setEnabled(true);
 		addAction(menuMgr, tca, "Toggle Comments",
 				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_TOGGLE_COMMENTS);
+		
+		
+		getSourceViewer().getTextWidget().addCaretListener(new CaretListener() {
+			
+			@Override
+			public void caretMoved(CaretEvent event) {
+				updateOccurrenceAnnotations(event.caretOffset);
+				
+			}
+		});
 
 	}
 
@@ -775,5 +809,386 @@ public class PLEditor extends TextEditor {
 			}
 		}
 	}
+	private Object annotationModelMonitor= new Object();
 
+	public Annotation[] fOccurrenceAnnotations;
+
+	private OccurrencesFinderJob fOccurrencesFinderJob;
+
+	private boolean fMarkOccurrenceAnnotations = true;
+
+	private TextSelection oldSelection;
+
+	class OccurrencesFinderJob extends Job {
+
+		private final IDocument fDocument;
+//		private final ISelectionValidator fPostSelectionValidator;
+		private boolean fCanceled= false;
+		private final OccurrenceLocation[] fLocations;
+
+		public OccurrencesFinderJob(IDocument document, OccurrenceLocation[] locations) {
+			super("update occurrences");
+			fDocument= document;
+			fLocations= locations;
+
+//			if (getSelectionProvider() instanceof ISelectionValidator)
+//				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider();
+//			else
+//				fPostSelectionValidator= null;
+		}
+
+		// cannot use cancel() because it is declared final
+		void doCancel() {
+			fCanceled= true;
+			cancel();
+		}
+
+		private boolean isCanceled(IProgressMonitor progressMonitor) {
+			return fCanceled || progressMonitor.isCanceled()
+//				||  fPostSelectionValidator != null && !(fPostSelectionValidator.isValid(fSelection) 
+			 // TRHO || fForcedMarkOccurrencesSelection == fSelection
+						
+				|| LinkedModeModel.hasInstalledModel(fDocument);
+		}
+
+		/*
+		 * @see Job#run(org.eclipse.core.runtime.IProgressMonitor)
+		 */
+		public IStatus run(IProgressMonitor progressMonitor) {
+			if (isCanceled(progressMonitor))
+				return Status.CANCEL_STATUS;
+
+			ITextViewer textViewer= getSourceViewer();
+			if (textViewer == null)
+				return Status.CANCEL_STATUS;
+
+			IDocument document= textViewer.getDocument();
+			if (document == null)
+				return Status.CANCEL_STATUS;
+
+			IDocumentProvider documentProvider= getDocumentProvider();
+			if (documentProvider == null)
+				return Status.CANCEL_STATUS;
+
+			IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
+			if (annotationModel == null)
+				return Status.CANCEL_STATUS;
+
+			// Add occurrence annotations
+			int length= fLocations.length;
+			Map annotationMap= new HashMap(length);
+			for (int i= 0; i < length; i++) {
+
+				if (isCanceled(progressMonitor))
+					return Status.CANCEL_STATUS;
+
+				OccurrenceLocation location= fLocations[i];
+				Position position= new Position(location.getOffset(), location.getLength());
+
+				String description= location.getDescription();
+				String annotationType= (location.getFlags() == 1) ? "org.eclipse.jdt.ui.occurrences.write" : "org.eclipse.jdt.ui.occurrences"; //$NON-NLS-1$ //$NON-NLS-2$
+
+				annotationMap.put(new Annotation(annotationType, false, description), position);
+			}
+
+			if (isCanceled(progressMonitor))
+				return Status.CANCEL_STATUS;
+
+			synchronized (annotationModelMonitor) {
+				if (annotationModel instanceof IAnnotationModelExtension) {
+					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
+				} else {
+					removeOccurrenceAnnotations();
+					Iterator iter= annotationMap.entrySet().iterator();
+					while (iter.hasNext()) {
+						Map.Entry mapEntry= (Map.Entry)iter.next();
+						annotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
+					}
+				}
+				fOccurrenceAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
+			}
+
+			return Status.OK_STATUS;
+		}
+	}
+	
+	void removeOccurrenceAnnotations() {
+//		fMarkOccurrenceModificationStamp= IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP;
+//		fMarkOccurrenceTargetRegion= null;
+
+		IDocumentProvider documentProvider= getDocumentProvider();
+		if (documentProvider == null)
+			return;
+
+		IAnnotationModel annotationModel= documentProvider.getAnnotationModel(getEditorInput());
+		if (annotationModel == null || fOccurrenceAnnotations == null)
+			return;
+
+		synchronized (annotationModelMonitor) {
+			if (annotationModel instanceof IAnnotationModelExtension) {
+				((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, null);
+			} else {
+				for (int i= 0, length= fOccurrenceAnnotations.length; i < length; i++)
+					annotationModel.removeAnnotation(fOccurrenceAnnotations[i]);
+			}
+			fOccurrenceAnnotations= null;
+		}
+	}
+	
+	protected void updateOccurrenceAnnotations(int caretOffset) {
+
+		if (fOccurrencesFinderJob != null)
+			fOccurrencesFinderJob.cancel();
+
+		if (!fMarkOccurrenceAnnotations )
+			return;
+
+//		if (astRoot == null || selection == null)
+//			return;
+
+		IDocument document= getSourceViewer().getDocument();
+		if (document == null)
+			return;
+
+//		if (document instanceof IDocumentExtension4) {
+//			int offset= selection.getOffset();
+//			long currentModificationStamp= ((IDocumentExtension4)document).getModificationStamp();
+//			IRegion markOccurrenceTargetRegion= fMarkOccurrenceTargetRegion;
+//			hasChanged= currentModificationStamp != fMarkOccurrenceModificationStamp;
+//			if (markOccurrenceTargetRegion != null && !hasChanged) {
+//				if (markOccurrenceTargetRegion.getOffset() <= offset && offset <= markOccurrenceTargetRegion.getOffset() + markOccurrenceTargetRegion.getLength())
+//					return;
+//			}
+//			fMarkOccurrenceTargetRegion= JavaWordFinder.findWord(document, offset);
+//			fMarkOccurrenceModificationStamp= currentModificationStamp;
+//		}
+
+		OccurrenceLocation[] locations= null;
+
+//		ASTNode selectedNode= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
+//		if (fMarkExceptions) {
+//			ExceptionOccurrencesFinder finder= new ExceptionOccurrencesFinder();
+//			if (finder.initialize(astRoot, selectedNode) == null) {
+//				locations= finder.getOccurrences();
+//			}
+//		}
+//
+//		if (locations == null && fMarkMethodExitPoints) {
+//			MethodExitsFinder finder= new MethodExitsFinder();
+//			if (finder.initialize(astRoot, selectedNode) == null) {
+//				locations= finder.getOccurrences();
+//			}
+//		}
+//
+//		if (locations == null && fMarkBreakContinueTargets) {
+//			BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
+//			if (finder.initialize(astRoot, selectedNode) == null) {
+//				locations= finder.getOccurrences();
+//			}
+//		}
+//
+//		if (locations == null && fMarkImplementors) {
+//			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
+//			if (finder.initialize(astRoot, selectedNode) == null) {
+//				locations= finder.getOccurrences();
+//			}
+//		}
+//
+//		if (locations == null && selectedNode instanceof Name) {
+//			IBinding binding= ((Name)selectedNode).resolveBinding();
+//			if (binding != null && markOccurrencesOfType(binding)) {
+//				OccurrencesFinder finder= new OccurrencesFinder();
+//				if (finder.initialize(astRoot, selectedNode) == null) {
+//					locations= finder.getOccurrences();
+//				}
+//			}
+//		}
+		ArrayList<OccurrenceLocation> locationList = new ArrayList<OccurrenceLocation>();
+		TextSelection var=null;
+		try {
+			var = getVariableAtOffset(getDocumentProvider().getDocument(getEditorInput()),caretOffset);
+			String varName = var.getText();
+			if(oldSelection!=null && oldSelection.equals(var)){
+				return;
+			} else {
+				oldSelection = var;
+			}
+			int begin=var.getOffset();
+			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
+				boolean inAtom=false;
+				int l = begin == 0 ? begin : begin - 1;
+				String proposal = null;
+				while (l > 0) {
+					if(inAtom) {
+						if(document.getChar(l)=='\''){						
+							if(l == 0 || document.getChar(l-1)!='\''){
+								inAtom=false;
+							}
+						}
+					} else if(PLEditor.predicateDelimiter(document, l)){
+						break;
+					} else if(document.getChar(l)=='\''){
+						inAtom=true;
+					}					
+					ITypedRegion region = document.getPartition(l);
+					if (isComment(region))
+						l = region.getOffset();
+					else {
+						char c = document.getChar(l);
+						if (PLEditor.isVarChar(c)) {
+							if (proposal == null)
+								proposal = "";
+							proposal = c + proposal;
+						} else if (proposal != null) {
+								if(var.getText().equals(proposal)) {
+									locationList.add(new OccurrenceLocation(l+1, var.getLength(), 0,"desc"));
+								}
+							proposal = null;
+						}
+					}
+					l--;
+				}
+			}
+			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
+				int l = begin == document.getLength() ? begin : begin + 1;
+				String proposal = null;
+				boolean inAtom=false;
+				while (l < document.getLength()) {
+					if(inAtom) {
+						if(document.getChar(l)=='\''){						
+							if(l+1 == document.getLength() || document.getChar(l+1)!='\''){
+								inAtom=false;
+							}
+						}
+					} else if(PLEditor.predicateDelimiter(document, l)){
+						break;
+					} else if(document.getChar(l)=='\''){
+						inAtom=true;
+					}
+					ITypedRegion region = document.getPartition(l);
+					if (isComment(region)) {
+						l = region.getOffset() + region.getLength();
+					} else {
+						char c = document.getChar(l);
+						if (PLEditor.isVarChar(c)) {
+							if (proposal == null)
+								proposal = "";
+							proposal = proposal + c;
+						} else if (proposal != null) {
+							if(var.getText().equals(proposal)) {
+								locationList.add(new OccurrenceLocation(l-var.getLength(), var.getLength(), 0,"desc"));
+							}
+							proposal = null;
+						}
+					}
+					l++;
+				}
+			}
+			if(PLEditor.isVarPrefix(varName)) {
+				if(locationList.size()>0){
+					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 0,"desc"));
+				} else {
+					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 1,"desc"));				
+				}
+			}
+		} catch (BadLocationException e) {
+		}
+		
+		locations = locationList.toArray(new OccurrenceLocation[0]);
+//		if (locations == null) {
+////			if (!fStickyOccurrenceAnnotations)
+////				removeOccurrenceAnnotations();
+////		else
+//			if (hasChanged) // check consistency of current annotations
+//				removeOccurrenceAnnotations();
+//			return;
+//		}
+
+		removeOccurrenceAnnotations();
+	
+		
+		fOccurrencesFinderJob= new OccurrencesFinderJob(document, locations);
+		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
+		//fOccurrencesFinderJob.setSystem(true);
+		//fOccurrencesFinderJob.schedule();
+		fOccurrencesFinderJob.run(new NullProgressMonitor());
+	}
+	
+	protected boolean isComment(ITypedRegion region) {
+		return region.getType().equals(PLPartitionScanner.PL_COMMENT)
+				|| region.getType().equals(PLPartitionScanner.PL_MULTI_COMMENT);
+	}
+	
+	/**
+	 * Element representing a occurrence
+	 */
+	public static class OccurrenceLocation {
+		private final int fOffset;
+		private final int fLength;
+		private final int fFlags;
+		private final String fDescription;
+
+		public OccurrenceLocation(int offset, int length, int flags, String description) {
+			fOffset= offset;
+			fLength= length;
+			fFlags= flags;
+			fDescription= description;
+		}
+
+		public int getOffset() {
+			return fOffset;
+		}
+
+		public int getLength() {
+			return fLength;
+		}
+
+		public int getFlags() {
+			return fFlags;
+		}
+
+		public String getDescription() {
+			return fDescription;
+		}
+
+		public String toString() {
+			return "[" + fOffset + " / " + fLength + "] " + fDescription; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		}
+
+	}
+	
+	private class VarPos {
+		int begin;
+		int length;
+		String prefix;
+				
+		VarPos(IDocument document, int begin, String prefix) {
+			this.begin=begin;
+			this.prefix=prefix;
+			this.length=prefix.length();
+		}
+	}
+	private TextSelection getVariableAtOffset(IDocument document, int offset)
+	throws BadLocationException {
+		int begin=offset;
+		if(!PLEditor.isNonQualifiedPredicatenameChar(document.getChar(begin)) && begin>0){
+			begin--;
+		}
+		while (PLEditor.isNonQualifiedPredicatenameChar(document
+				.getChar(begin))
+				&& begin > 0)
+			begin--;
+		if(begin<offset)
+			begin++;
+		int end = offset;
+		while (PLEditor.isNonQualifiedPredicatenameChar(document
+				.getChar(end))
+				&& begin > 0)
+			end++;
+		int length = end - begin;
+		String pos = document.get(begin, length);
+		
+		return new TextSelection(document,begin,length);
+	}
+	
 }
