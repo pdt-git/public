@@ -161,4 +161,99 @@
    </editorContribution>
 </extension>-->
 
+<extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+         name="org.cs3.pdt.occurrences">
+      </type>
+      <type name="org.cs3.pdt.occurrences.singleton"
+      	super="org.cs3.pdt.occurrences">
+      </type>
+      <type name="org.cs3.pdt.occurrences.non.singleton"
+      	super="org.cs3.pdt.occurrences">
+      </type>
+      <type name="org.cs3.pdt.occurrences.singleton.wrong.prefix"
+      	super="org.cs3.pdt.occurrences">
+      </type>
+      
+
+	</extension>
+	
+	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+ <specification
+            annotationType="org.cs3.pdt.occurrences"
+            label="Variable occurrence"
+            textPreferenceKey="occurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="occurrenceHighlighting"
+            highlightPreferenceValue="true"
+            contributesToHeader="false"
+            overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="occurrenceIndicationColor"
+            colorPreferenceValue="212,212,212"
+            presentationLayer="4"
+            showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="true"
+            isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
+	        isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+	        isGoToPreviousNavigationTarget="false"
+            textStylePreferenceKey="occurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>
+	  <specification
+            annotationType="org.cs3.pdt.occurrences.singleton"
+            label="Singleton"
+            textPreferenceKey="singletonOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="singletonOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="singletonOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="singletonOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="singletonOccurrenceIndicationColor"
+            colorPreferenceValue="240,216,168"
+            presentationLayer="4"
+            textStylePreferenceKey="singletonOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>	  
+	<specification
+            annotationType="org.cs3.pdt.occurrences.non.singleton"
+            label="Not a singleton although named as a singleton"
+            textPreferenceKey="nonSingletonOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="nonSingletonOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="nonSingletonOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="nonSingletonOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="nonSingletonOccurrenceIndicationColor"
+            colorPreferenceValue="255,193,193"
+            presentationLayer="4"
+            textStylePreferenceKey="nonSingletonOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>	  	  
+	<specification
+            annotationType="org.cs3.pdt.occurrences.singleton.wrong.prefix"
+            label="Singleton, but named as normal variable"
+            textPreferenceKey="singletonWrongPrefixOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="singletonWrongPrefixOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="singletonWrongPrefixOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="singletonWrongPrefixOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="singletonWrongPrefixOccurrenceIndicationColor"
+            colorPreferenceValue="205,255,198"
+            presentationLayer="4"
+            textStylePreferenceKey="singletonWrongPrefixOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>	  	  
+	</extension>
+	
 </plugin>
