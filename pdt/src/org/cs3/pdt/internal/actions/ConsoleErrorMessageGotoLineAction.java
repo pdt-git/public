@@ -99,6 +99,7 @@ public class ConsoleErrorMessageGotoLineAction extends Action {
 		return true;
 	}
 
+	@Override
 	public void run(){
 		try {
 			gotoLocation(filename,targetLine);
@@ -182,6 +183,7 @@ public class ConsoleErrorMessageGotoLineAction extends Action {
 			final Display display = PlatformUI.getWorkbench().getDisplay();
 			display.syncExec(new Runnable() {
 
+				@Override
 				public void run() {
 					MessageDialog.openError(display.getActiveShell(),
 							"could not open file",

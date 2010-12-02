@@ -77,7 +77,8 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
      * 
      * @see org.cs3.pl.parser.LineBreakInfoProvider#getOffsetAtLine(int)
      */
-    public int getOffsetAtLine(int line) {
+    @Override
+	public int getOffsetAtLine(int line) {
         try{
         	return line == 0 ? 0 : lineBreaks.get(line - 1).intValue()+nl.length();
         }
@@ -87,7 +88,8 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
         }
     }
 
-    public int getLineAtOffset(int offset){
+    @Override
+	public int getLineAtOffset(int offset){
     	int r=0;
     	for (Iterator<Integer> it = lineBreaks.iterator(); it.hasNext();) {
 			Integer i = it.next();
@@ -105,7 +107,8 @@ public class StringLineBreakInfoProvider implements LineBreakInfoProvider {
      * 
      * @see org.cs3.pl.parser.LineBreakInfoProvider#getLineCount()
      */
-    public int getLineCount() {
+    @Override
+	public int getLineCount() {
         return lineBreaks.size();
     }
 

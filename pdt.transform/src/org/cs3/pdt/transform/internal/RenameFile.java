@@ -28,11 +28,13 @@ public class RenameFile implements IEditorActionDelegate{
 		// TODO Auto-generated constructor stub
 	}
 
+	@Override
 	public void setActiveEditor(IAction action, IEditorPart targetEditor) {
 		this.editor=targetEditor;
 		
 	}
 
+	@Override
 	public void run(IAction action) {
 		
 		PrologRefactoringInfo info = new RenameFileInfo(getSelectedFile(),getCurrentPrologInterface());
@@ -57,6 +59,7 @@ public class RenameFile implements IEditorActionDelegate{
 		return selectedFile;
 	}
 	
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		//TODO: track selected file.
 		

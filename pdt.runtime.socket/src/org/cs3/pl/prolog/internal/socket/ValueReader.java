@@ -124,7 +124,7 @@ public class ValueReader {
 	private char readFirstInterestingCharacter(BufferedReader reader)
 	throws IOException {
 		char firstInterestingCharacter = skipWhiteSpace(reader);
-		checkForUnexpectedEOF((int)firstInterestingCharacter);
+		checkForUnexpectedEOF(firstInterestingCharacter);
 		if (invalidFirstCharacter(firstInterestingCharacter)) {
 			reader.reset();
 			hasToContinue=false;

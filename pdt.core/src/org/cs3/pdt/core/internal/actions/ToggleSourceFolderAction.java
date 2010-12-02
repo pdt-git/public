@@ -25,10 +25,12 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 
 	private IPrologProject plProject;
 
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		;
 	}
 
+	@Override
 	public void run(IAction action) {
 		Set<IContainer> entries;
 		try {
@@ -66,6 +68,7 @@ public class ToggleSourceFolderAction implements IObjectActionDelegate {
 		}
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		container = null;
 		try {

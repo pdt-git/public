@@ -74,11 +74,13 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		//make sure that we do not hang the pif on shutdown.
 		LifeCycleHook hook = new LifeCycleHook(){
 
+			@Override
 			public void onInit(PrologInterface pif, PrologSession initSession) throws PrologException, PrologInterfaceException {				
 //				FileSearchPathConfigurator.configureFileSearchPath(libraryManager,initSession,new String[]{"pdt.runtime.library.pif"});
 				initSession.queryOnce("use_module(library(pif_observe))");				
 			}
 
+			@Override
 			public void afterInit(PrologInterface pif) throws PrologInterfaceException {
 				Set<String> subjects = listenerLists.keySet();
 				for (Iterator<String> it = subjects.iterator(); it.hasNext();) {
@@ -87,18 +89,22 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 				}				
 			}
 
+			@Override
 			public void beforeShutdown(PrologInterface pif, PrologSession session) throws PrologException, PrologInterfaceException {
 				stop(session);
 			}
 
+			@Override
 			public void onError(PrologInterface pif) {
 				session=null;
 			}
 
+			@Override
 			public void setData(Object data) {
 				;
 			}
 			
+			@Override
 			public void lateInit(PrologInterface pif) {
 				;
 			}
@@ -124,6 +130,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 		}
 	}
 
+	@Override
 	protected void finalize() throws Throwable {
 		if (session != null) {
 			stop();
@@ -134,6 +141,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#addPrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
+	@Override
 	public void addPrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
@@ -159,6 +167,7 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 	/* (non-Javadoc)
 	 * @see org.cs3.pl.prolog.IPrologEventDispatcher#removePrologInterfaceListener(java.lang.String, org.cs3.pl.prolog.PrologInterfaceListener)
 	 */
+	@Override
 	public void removePrologInterfaceListener(String subject,
 			PrologInterfaceListener l) throws PrologInterfaceException {
 		synchronized (listenerLists) {
@@ -260,17 +269,25 @@ public class PrologEventDispatcher extends DefaultAsyncPrologSessionListener imp
 			return;
 		}
 		PrologInterfaceEvent e = new PrologInterfaceEvent(this, subject, event);
-		Vector<PrologInterfaceListener> cloned = null;
-		synchronized (listeners) {
-			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
-		}
+		Vector<PrologInterfaceListener> cloned = getAListenersClone(listeners);
 		for (Iterator<PrologInterfaceListener> it = cloned.iterator(); it.hasNext();) {
-			PrologInterfaceListener l = (PrologInterfaceListener) it.next();
+			PrologInterfaceListener l = it.next();
 			l.update(e);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private Vector<PrologInterfaceListener> getAListenersClone(
+			Vector<PrologInterfaceListener> listeners) {
+		Vector<PrologInterfaceListener> cloned = null;
+		synchronized (listeners) {
+			cloned = (Vector<PrologInterfaceListener>) listeners.clone();
+		}
+		return cloned;
+	}
 
+
+	@Override
 	public void goalHasSolution(AsyncPrologSessionEvent e) {
 		String subject = (String) e.getBindings().get("Subject");
 		if ("$abort".equals(subject)) {

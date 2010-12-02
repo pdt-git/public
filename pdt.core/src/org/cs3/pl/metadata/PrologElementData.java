@@ -49,7 +49,7 @@ import java.util.Comparator;
  * a tuple describing a logical prolog element like a predicate or a module..
 
  */
-public class PrologElementData implements Serializable, Comparable{
+public class PrologElementData implements Serializable, Comparable<PrologElementData>{
 
 	/**
      * Comment for <code>serialVersionUID</code>
@@ -105,9 +105,11 @@ public class PrologElementData implements Serializable, Comparable{
 		this.m_hasKnownDefinition=false;
 	}
 	
+	@Override
 	public int hashCode() {
 		return getSignature().hashCode();
 	}
+	@Override
 	public boolean equals(Object obj) {
 		if(obj==null){
 			return false;
@@ -146,6 +148,7 @@ public class PrologElementData implements Serializable, Comparable{
 		return module+":"+label + "/" + arity;
 	}
 
+	@Override
 	public String toString() {
 		return getSignature();
 	}
@@ -197,7 +200,6 @@ public class PrologElementData implements Serializable, Comparable{
 	}
 	/**
 	 * @return Returns the length.
-	 * @deprecated use getKnownDefinition.getEndOffset()-getKnownDefinition().getOffset()
 	 */
 	public int getLength() {
 		return knownDefinition==null?-1:knownDefinition.endOffset-knownDefinition.offset;
@@ -206,18 +208,20 @@ public class PrologElementData implements Serializable, Comparable{
 	
 	
 
-	static public Comparator getComparator() {
-		return new Comparator() {
+	static public Comparator<PrologElementData> getComparator() {
+		return new Comparator<PrologElementData>() {
 
-			public int compare(Object arg0, Object arg1) {
-				return ((PrologElementData) arg0).getSignature().compareTo(
-						((PrologElementData) arg1).getSignature());
+			@Override
+			public int compare(PrologElementData arg0, PrologElementData arg1) {
+				return arg0.getSignature().compareTo(
+						arg1.getSignature());
 			}
 			
 		};
 	}
 	
-	public int compareTo(Object arg0) {
+	@Override
+	public int compareTo(PrologElementData arg0) {
 		return getSignature().compareTo(((Predicate)arg0).getSignature());
 	}
 	

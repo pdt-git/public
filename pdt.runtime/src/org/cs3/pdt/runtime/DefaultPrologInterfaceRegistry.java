@@ -1,8 +1,7 @@
 package org.cs3.pdt.runtime;
 
-import java.util.Arrays;
+
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +25,6 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 				listeners.add(l);
 			}
 		}
-
 	}
 
 	@Override
@@ -37,9 +35,9 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 				listeners.remove(l);
 			}
 		}
-
 	}
 
+	@SuppressWarnings("unchecked")
 	public void firePrologInterfaceAdded(String key) {
 		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
 				key);
@@ -52,6 +50,8 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 	}
 
+
+	@SuppressWarnings("unchecked")
 	public void firePrologInterfaceRemoved(String key) {
 		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
 				key);
@@ -64,6 +64,8 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 	}
 
+
+	@SuppressWarnings("unchecked")
 	public void fireSubscriptionAdded(Subscription s) {
 		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
 				s);
@@ -76,6 +78,8 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 	}
 
+
+	@SuppressWarnings("unchecked")
 	public void fireSubscriptionRemoved(Subscription s) {
 		PrologInterfaceRegistryEvent e = new PrologInterfaceRegistryEvent(this,
 				s);
@@ -154,20 +158,21 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		firePrologInterfaceAdded(key);
 	}
 
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public void removePrologInterface(String key) {
 		PrologInterface pif = pifs.get(key);
 		if (pif == null) {
 			return;
 		}
-		HashSet<Subscription> l =  subscriptionLists.get(key);
-		if (l != null) {
-			l =  (HashSet<Subscription>) l.clone();
-			for (Subscription s : l) {
+		HashSet<Subscription> keySet =  subscriptionLists.get(key);
+		if (keySet != null) {
+			keySet =  (HashSet<Subscription>) keySet.clone();
+			for (Subscription s : keySet) {
 				s.deconfigure(pif);
 			}
 		}
-
 		firePrologInterfaceRemoved(key);
 		pifKeys.remove(pif);
 		pifs.remove(key);
@@ -208,7 +213,6 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		removeSubscription(getSubscription(id));
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void removeSubscription(Subscription subscription) {
 		// do not remove anonymous subscriptions
@@ -230,7 +234,7 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 		subscriptions.remove(id);
 
-		Set keySet = subscriptionLists.get(pifKey);
+		Set<Subscription> keySet = subscriptionLists.get(pifKey);
 		if (keySet == null) {
 			return;
 		}
@@ -241,28 +245,4 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		}
 
 	}
-
-	private Set<Subscription> getSubscriptionsForTags(String[] tags) {
-		Set<Subscription> result = new HashSet<Subscription>();
-		Set<String> myTags = new HashSet<String>(Arrays.asList(tags));
-
-		for (Subscription subscription : subscriptions.values()) {
-			Set<String> subscriptionTags = new HashSet<String>(Arrays
-					.asList(subscription.getTags()));
-			if (!Collections.disjoint(myTags, subscriptionTags)) {
-				result.add(subscription);
-			}
-		}
-
-		return result;
-	}
-
-	private String[] getTagsForSubscriptions(Set<Subscription> subscriptions) {
-		HashSet<String> tags = new HashSet<String>();
-		for (Subscription subscription : subscriptions) {
-			tags.addAll(Arrays.asList(subscription.getTags()));
-		}
-		return tags.toArray(new String[tags.size()]);
-	}
-
 }

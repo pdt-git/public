@@ -47,7 +47,6 @@ import org.cs3.pdt.runtime.Subscription;
 import org.cs3.pl.common.OptionProvider;
 import org.cs3.pl.common.OptionProviderExtension;
 import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.prolog.IPrologEventDispatcher;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -63,8 +62,6 @@ import org.eclipse.core.runtime.CoreException;
 public interface IPrologProject extends OptionProvider,OptionProviderExtension{
     
 
-	    
-    
     /**
      * parses the current value of the sourcePath property and returns
      * a Set containing IContainer objects that represent the
@@ -118,9 +115,6 @@ public interface IPrologProject extends OptionProvider,OptionProviderExtension{
 	 * @throws CoreException 
 	 */
 	public String[] getPrologLibraryKeys() throws CoreException;
-
-	/**@deprecated use PrologRuntimePlugin$getPrologEventDispatcher(PrologInterface) instead.*/
-	public IPrologEventDispatcher getMetaDataEventDispatcher() throws PrologInterfaceException;
 
 	public void updateMarkers() throws CoreException;
 	public void updateBuildPath(PrologSession s) throws CoreException, PrologInterfaceException;

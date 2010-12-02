@@ -7,3 +7,4 @@ Bundle-Vendor: University of Bonn
 Fragment-Host: org.cs3.pdt.runtime.ui
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

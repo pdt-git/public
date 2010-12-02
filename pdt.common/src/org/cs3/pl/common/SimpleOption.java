@@ -84,25 +84,32 @@ public class SimpleOption implements Option {
         this.defaultValue = defaultValue;
         this.enumValues=enumValues;
     }
-    public String getId(){
+    @Override
+	public String getId(){
         return id;
     }
-    public  String getLabel(){
+    @Override
+	public  String getLabel(){
         return label;
     }
-    public  String getDescription(){
+    @Override
+	public  String getDescription(){
         return description;
     }
-    public  int getType (){
+    @Override
+	public  int getType (){
         return type;
     }
-    public  String getDefault(){
+    @Override
+	public  String getDefault(){
         return defaultValue;
     }
-    public String[][] getEnumValues() {       
+    @Override
+	public String[][] getEnumValues() {       
         return enumValues;
     }
-    public String validate(String value) {       
+    @Override
+	public String validate(String value) {       
         return null;
     }
 
@@ -110,14 +117,17 @@ public class SimpleOption implements Option {
      * this implementation always returns true.
      * override to change.
      */
-    public boolean isVisible() {
+    @Override
+	public boolean isVisible() {
 		return true;
 	}
     
+	@Override
 	public String getHint(String key) {
 		return null;
 	}
 	
+	@Override
 	public boolean isEditable() {	
 		return true;
 	}

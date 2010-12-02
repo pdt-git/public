@@ -25,6 +25,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		
 	}
 
+	@Override
 	public Object getParent(Object child) {
 		if(child==null||getSearchResult()==null){
 			return null;
@@ -45,10 +46,12 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 
 	
 
+	@Override
 	public Object[] getElements(Object inputElement) {
 		return getChildren(inputElement);
 	}
 
+	@Override
 	protected synchronized void initialize(PrologSearchResult result) {
 		
 		super.initialize(result);
@@ -57,6 +60,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 
 	
 
+	@Override
 	public Object[] getChildren(Object parentElement) {
 		if(parentElement==null||getSearchResult()==null){
 			return null;
@@ -73,6 +77,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		return null;
 	}
 
+	@Override
 	public boolean hasChildren(Object element) {
 		if(element==null||getSearchResult()==null){
 			return false;
@@ -80,6 +85,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		return element instanceof IFile || element instanceof PrologSearchResult;
 	}
 
+	@Override
 	public void clear() {
 		initialize(getSearchResult());
 		getPage().getViewer().refresh();

@@ -62,6 +62,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceRegistry {
 
+	@Override
 	public void load(Reader reader) throws IOException {
 		//Element cpElement;
 
@@ -92,6 +93,7 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 		
 		PersistableSubscription subscription;
 		
+		@Override
 		public void startElement(String uri, String localName, String qName,
 				Attributes attributes) throws SAXException {
 			if (qName.equals("subscription")) {
@@ -106,6 +108,7 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 					params.put(name, value);
 				}
 
+				@SuppressWarnings("rawtypes")
 				Class clazz;
 				try {
 					clazz = Platform.getBundle(bundle).loadClass(className);
@@ -127,6 +130,7 @@ public class DefaultSAXPrologInterfaceRegistry extends DefaultPrologInterfaceReg
 
 	
 	
+	@Override
 	public void save(Writer w) throws IOException {
 		w.write("<registry>\n");
 		try {

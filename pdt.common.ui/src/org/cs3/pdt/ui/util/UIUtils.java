@@ -98,6 +98,7 @@ public final class UIUtils {
 			}
 		}
 
+		@Override
 		public void run() {
 			rval = getRVal();
 		}
@@ -109,6 +110,7 @@ public final class UIUtils {
 		// Modified by Mark Schmatz - added try-catch block
 		try {
 			return (IFile) new _SyncReturn() {
+				@Override
 				Object getRVal() {
 					IEditorPart activeEditor = getActiveEditor();
 					FileEditorInput fileEditorInput = ((FileEditorInput) activeEditor
@@ -128,6 +130,7 @@ public final class UIUtils {
 
 	public static Shell getActiveShell() {
 		return (Shell) new _SyncReturn() {
+			@Override
 			Object getRVal() {
 				
 				return getDisplay().getActiveShell();
@@ -137,6 +140,7 @@ public final class UIUtils {
 	
 	public static IWorkbenchPage getActivePage() {
 		return (IWorkbenchPage) new _SyncReturn() {
+			@Override
 			Object getRVal() {
 				return PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 						.getActivePage();
@@ -146,6 +150,7 @@ public final class UIUtils {
 
 	public static IEditorPart getActiveEditor() {
 		return (IEditorPart) new _SyncReturn() {
+			@Override
 			Object getRVal() {
 				IWorkbenchPage page = getActivePage();
 				if (page == null) {
@@ -160,6 +165,7 @@ public final class UIUtils {
 			final String title, final String msg) {
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					displayMessageDialog(shell, title, msg);
 				}
@@ -190,6 +196,7 @@ public final class UIUtils {
 
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					displayMessageDialog(shell, title, msg);
 				}
@@ -205,6 +212,7 @@ public final class UIUtils {
 
 		if (Display.getCurrent() != shell.getDisplay()) {
 			shell.getDisplay().asyncExec(new Runnable() {
+				@Override
 				public void run() {
 					displayErrorDialog(provider, shell, code, context, x);
 				}
@@ -218,7 +226,7 @@ public final class UIUtils {
 
 	public static IStatus createErrorStatus(ErrorMessageProvider provider,
 			Throwable e, int errCode) {
-		Status status = new Status(Status.ERROR, provider.getId(), errCode,
+		Status status = new Status(IStatus.ERROR, provider.getId(), errCode,
 				provider.getErrorMessage(errCode), e);
 		return status;
 	}
@@ -241,6 +249,7 @@ public final class UIUtils {
 
 	public static void setStatusErrorMessage(final String string) {
 		getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				getActiveEditor().getEditorSite().getActionBars()
 						.getStatusLineManager().setErrorMessage(string);
@@ -250,6 +259,7 @@ public final class UIUtils {
 
 	public static void setStatusMessage(final String string) {
 		getDisplay().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 				getActiveEditor().getEditorSite().getActionBars()
 						.getStatusLineManager().setMessage(string);

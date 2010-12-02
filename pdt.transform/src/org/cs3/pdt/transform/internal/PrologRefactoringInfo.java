@@ -14,6 +14,7 @@ public abstract class PrologRefactoringInfo implements OptionProvider{
 	protected HashMap<String,String> parameters = new HashMap<String, String>();
 	
 	
+	@Override
 	public String getPreferenceValue(String key, String defaultValue) {
 		
 		String value = parameters.get(key);
@@ -29,11 +30,13 @@ public abstract class PrologRefactoringInfo implements OptionProvider{
 		return defaultValue;
 	}
 
+	@Override
 	public void reconfigure() {
 		;
 		
 	}
 
+	@Override
 	public void setPreferenceValue(String id, String value) {
 			parameters.put(id, value);
 		

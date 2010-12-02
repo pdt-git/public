@@ -12,6 +12,7 @@ public class VariableCompletionProposal extends ComparableCompletionProposal{
 		super(proposal,begin,len,cursorPos,image,displayString,contextInfo,additionalInfo);
 	}
 
+	@Override
 	public int compareTo(ComparableCompletionProposal o) {
 		if (o instanceof VariableCompletionProposal) {
 			String displayString = target.getDisplayString();
@@ -21,5 +22,4 @@ public class VariableCompletionProposal extends ComparableCompletionProposal{
 		}
 		return 0;
 	}
-
 }

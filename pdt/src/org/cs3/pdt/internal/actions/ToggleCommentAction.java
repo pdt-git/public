@@ -114,6 +114,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	 * Implementation of the <code>IAction</code> prototype. Checks if the selected
 	 * lines are all commented or not and uncomments/comments them respectively.
 	 */
+	@Override
 	public void run() {
 		if (fOperationTarget == null || fDocumentPartitioning == null || fPrefixesMap == null)
 			return;
@@ -137,12 +138,12 @@ public final class ToggleCommentAction extends TextEditorAction {
 				MessageDialog.openError(shell, "Toggle Comments", "An error message i have yet to think of...");
 			return;
 		}
-
 		Display display= null;
 		if (shell != null && !shell.isDisposed())
 			display= shell.getDisplay();
 
 		BusyIndicator.showWhile(display, new Runnable() {
+			@Override
 			public void run() {
 				fOperationTarget.doOperation(operationCode);
 			}
@@ -305,6 +306,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	 * <code>ITextOperationTarget</code> adapter, and sets the enabled state
 	 * accordingly.
 	 */
+	@Override
 	public void update() {
 		super.update();
 
@@ -324,6 +326,7 @@ public final class ToggleCommentAction extends TextEditorAction {
 	/*
 	 * @see TextEditorAction#setEditor(ITextEditor)
 	 */
+	@Override
 	public void setEditor(ITextEditor editor) {
 		super.setEditor(editor);
 		fOperationTarget= null;

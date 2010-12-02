@@ -25,11 +25,13 @@ public class ToggleEntryPointAction implements IObjectActionDelegate {
 
 	private IPrologProject plProject;
 
+	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 
 
 	}
 
+	@Override
 	public void run(IAction action) {
 		Set<IFile> entries;
 		try {
@@ -68,6 +70,7 @@ public class ToggleEntryPointAction implements IObjectActionDelegate {
 		}
 	}
 
+	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
 		file = null;
 		try {
@@ -81,7 +84,7 @@ public class ToggleEntryPointAction implements IObjectActionDelegate {
 					IFile r = (IFile) a.getAdapter(IFile.class);
 					if (r != null
 							&& (IResource.FILE == r.getType() )) {
-						file = (IFile) r;
+						file = r;
 					}
 				}
 			}

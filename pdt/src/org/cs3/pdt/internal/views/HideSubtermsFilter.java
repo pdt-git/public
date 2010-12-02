@@ -8,6 +8,7 @@ public class HideSubtermsFilter extends PrologOutlineFilter {
 		super(id, label);
 	}
 
+	@Override
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		return true;
 	}
