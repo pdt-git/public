@@ -44,6 +44,7 @@ package org.cs3.pdt.internal.editors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -56,7 +57,6 @@ import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
-import org.cs3.pdt.internal.contentassistant.VariableCompletionProposal;
 import org.cs3.pdt.internal.editors.PLEditor.OccurrenceLocation;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pl.common.Debug;
@@ -83,8 +83,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ISelectionValidator;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
@@ -95,10 +93,8 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.custom.CaretEvent;
 import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.widgets.Composite;
@@ -828,6 +824,9 @@ public class PLEditor extends TextEditor {
 
 	private TextSelection oldSelection;
 
+	private boolean hightlightOccurrences = true;
+	private boolean hightlightSingletonsErrors = true;
+
 	class OccurrencesFinderJob extends Job {
 
 		private final IDocument fDocument;
@@ -895,7 +894,24 @@ public class PLEditor extends TextEditor {
 				Position position= new Position(location.getOffset(), location.getLength());
 
 				String description= location.getDescription();
-				String annotationType= (location.getFlags() == 1) ? "org.eclipse.jdt.ui.occurrences.write" : "org.eclipse.jdt.ui.occurrences"; //$NON-NLS-1$ //$NON-NLS-2$
+				String annotationType;
+				switch(location.getFlags()){
+				case 0:
+					annotationType="org.cs3.pdt.occurrences";
+					break;
+				case 1:
+					annotationType="org.cs3.pdt.occurrences.singleton";
+					break;
+				case 2:
+					annotationType="org.cs3.pdt.occurrences.non.singleton";
+					break;
+				case 3:
+					annotationType="org.cs3.pdt.occurrences.singleton.wrong.prefix";
+					break;
+					default:
+						annotationType="org.cs3.pdt.occurrences";
+				}
+				
 
 				annotationMap.put(new Annotation(annotationType, false, description), position);
 			}
@@ -946,14 +962,16 @@ public class PLEditor extends TextEditor {
 	
 	protected void updateOccurrenceAnnotations(int caretOffset) {
 
+		if(!hightlightOccurrences ){
+			return;
+		}
+		
 		if (fOccurrencesFinderJob != null)
 			fOccurrencesFinderJob.cancel();
+		
 
 		if (!fMarkOccurrenceAnnotations )
 			return;
-
-//		if (astRoot == null || selection == null)
-//			return;
 
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
@@ -973,134 +991,14 @@ public class PLEditor extends TextEditor {
 //		}
 
 		OccurrenceLocation[] locations= null;
+		Map<String, List<OccurrenceLocation>> singletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
 
-//		ASTNode selectedNode= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
-//		if (fMarkExceptions) {
-//			ExceptionOccurrencesFinder finder= new ExceptionOccurrencesFinder();
-//			if (finder.initialize(astRoot, selectedNode) == null) {
-//				locations= finder.getOccurrences();
-//			}
-//		}
-//
-//		if (locations == null && fMarkMethodExitPoints) {
-//			MethodExitsFinder finder= new MethodExitsFinder();
-//			if (finder.initialize(astRoot, selectedNode) == null) {
-//				locations= finder.getOccurrences();
-//			}
-//		}
-//
-//		if (locations == null && fMarkBreakContinueTargets) {
-//			BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
-//			if (finder.initialize(astRoot, selectedNode) == null) {
-//				locations= finder.getOccurrences();
-//			}
-//		}
-//
-//		if (locations == null && fMarkImplementors) {
-//			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
-//			if (finder.initialize(astRoot, selectedNode) == null) {
-//				locations= finder.getOccurrences();
-//			}
-//		}
-//
-//		if (locations == null && selectedNode instanceof Name) {
-//			IBinding binding= ((Name)selectedNode).resolveBinding();
-//			if (binding != null && markOccurrencesOfType(binding)) {
-//				OccurrencesFinder finder= new OccurrencesFinder();
-//				if (finder.initialize(astRoot, selectedNode) == null) {
-//					locations= finder.getOccurrences();
-//				}
-//			}
-//		}
-		ArrayList<OccurrenceLocation> locationList = new ArrayList<OccurrenceLocation>();
-		TextSelection var=null;
-		try {
-			var = getVariableAtOffset(getDocumentProvider().getDocument(getEditorInput()),caretOffset);
-			String varName = var.getText();
-			if(oldSelection!=null && oldSelection.equals(var)){
-				return;
-			} else {
-				oldSelection = var;
-			}
-			int begin=var.getOffset();
-			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
-				boolean inAtom=false;
-				int l = begin == 0 ? begin : begin - 1;
-				String proposal = null;
-				while (l > 0) {
-					if(inAtom) {
-						if(document.getChar(l)=='\''){						
-							if(l == 0 || document.getChar(l-1)!='\''){
-								inAtom=false;
-							}
-						}
-					} else if(PLEditor.predicateDelimiter(document, l)){
-						break;
-					} else if(document.getChar(l)=='\''){
-						inAtom=true;
-					}					
-					ITypedRegion region = document.getPartition(l);
-					if (isComment(region))
-						l = region.getOffset();
-					else {
-						char c = document.getChar(l);
-						if (PLEditor.isVarChar(c)) {
-							if (proposal == null)
-								proposal = "";
-							proposal = c + proposal;
-						} else if (proposal != null) {
-								if(var.getText().equals(proposal)) {
-									locationList.add(new OccurrenceLocation(l+1, var.getLength(), 0,"desc"));
-								}
-							proposal = null;
-						}
-					}
-					l--;
-				}
-			}
-			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
-				int l = begin == document.getLength() ? begin : begin + 1;
-				String proposal = null;
-				boolean inAtom=false;
-				while (l < document.getLength()) {
-					if(inAtom) {
-						if(document.getChar(l)=='\''){						
-							if(l+1 == document.getLength() || document.getChar(l+1)!='\''){
-								inAtom=false;
-							}
-						}
-					} else if(PLEditor.predicateDelimiter(document, l)){
-						break;
-					} else if(document.getChar(l)=='\''){
-						inAtom=true;
-					}
-					ITypedRegion region = document.getPartition(l);
-					if (isComment(region)) {
-						l = region.getOffset() + region.getLength();
-					} else {
-						char c = document.getChar(l);
-						if (PLEditor.isVarChar(c)) {
-							if (proposal == null)
-								proposal = "";
-							proposal = proposal + c;
-						} else if (proposal != null) {
-							if(var.getText().equals(proposal)) {
-								locationList.add(new OccurrenceLocation(l-var.getLength(), var.getLength(), 0,"desc"));
-							}
-							proposal = null;
-						}
-					}
-					l++;
-				}
-			}
-			if(PLEditor.isVarPrefix(varName)) {
-				if(locationList.size()>0){
-					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 0,"desc"));
-				} else {
-					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 1,"desc"));				
-				}
-			}
-		} catch (BadLocationException e) {
+		Map<String, List<OccurrenceLocation>> nonSingletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
+
+		ArrayList<OccurrenceLocation> locationList = parseOccurrences(caretOffset, document, singletonOccurs,
+				nonSingletonOccurs );
+		if(locationList == null){
+			return;
 		}
 		
 		locations = locationList.toArray(new OccurrenceLocation[0]);
@@ -1122,6 +1020,177 @@ public class PLEditor extends TextEditor {
 		//fOccurrencesFinderJob.schedule();
 		fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
+
+	private ArrayList<OccurrenceLocation> parseOccurrences(int caretOffset, IDocument document,
+			Map<String, List<OccurrenceLocation>> singletonOccurs,
+			Map<String, List<OccurrenceLocation>> nonSingletonOccurs) {
+		ArrayList<OccurrenceLocation> locationList = new ArrayList<OccurrenceLocation>();
+		try {
+			TextSelection var= getVariableAtOffset(document,caretOffset);
+			String varName = var.getText();
+			if(oldSelection!=null && oldSelection.equals(var)){
+				return null;
+			} else {
+				oldSelection = var;
+			}
+			int begin=var.getOffset();
+			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
+				boolean inAtom=false;
+				int l = begin == 0 ? begin : begin - 1;
+				String proposal = null;
+				while (l > 0) {
+					if(inAtom) {
+						if(document.getChar(l)=='\''){						
+							if(l == 0 || document.getChar(l-1)!='\''){
+								inAtom=false;
+							}
+						}
+					} else if(PLEditor.predicateDelimiter(document, l)){
+						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
+						break;
+					} else if(document.getChar(l)=='\''){
+						inAtom=true;
+					}					
+					ITypedRegion region = document.getPartition(l);
+					if (isComment(region))
+						l = region.getOffset();
+					else {
+						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
+					}
+					l--;
+				}
+			}
+			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
+				int l = begin = var.getOffset()+ var.getLength();
+				String proposal = null;
+				boolean inAtom=false;
+				while (l < document.getLength()) {
+					if(inAtom) {
+						if(document.getChar(l)=='\''){						
+							if(l+1 == document.getLength() || document.getChar(l+1)!='\''){
+								inAtom=false;
+							}
+						}
+					} else if(PLEditor.predicateDelimiter(document, l)){
+						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
+						break;
+					} else if(document.getChar(l)=='\''){
+						inAtom=true;
+					}
+					ITypedRegion region = document.getPartition(l);
+					if (isComment(region)) {
+						l = region.getOffset() + region.getLength();
+					} else {
+						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
+					}
+					l++;
+				}
+			}
+			if(hightlightSingletonsErrors){
+				for (String varToCheck : singletonOccurs.keySet()) {
+					List<OccurrenceLocation> varLocations = singletonOccurs.get(varToCheck);
+					if(varLocations.size()>1){
+						for (OccurrenceLocation varLocation : varLocations) {
+							locationList.add(varLocation);
+						}
+					}
+				}
+				for (String varToCheck : nonSingletonOccurs.keySet()) {
+					List<OccurrenceLocation> varLocations = nonSingletonOccurs.get(varToCheck);
+					if(varLocations.size()==1){
+						for (OccurrenceLocation varLocation : varLocations) {
+							locationList.add(varLocation);
+						}
+					}
+				}
+
+			}
+			
+			if(PLEditor.isVarPrefix(varName)) {
+				if(locationList.size()>0){
+					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 0,"desc"));
+				} else {
+					locationList.add(new OccurrenceLocation(var.getOffset(), var.getLength(), 1,"desc"));				
+				}
+			}
+		} catch (BadLocationException e) {
+		}
+		return locationList;
+	}
+
+	private String processProposal(
+			Map<String, List<OccurrenceLocation>> singletonOccurs,
+			Map<String, List<OccurrenceLocation>> nonSingletonOccurs,
+			ArrayList<OccurrenceLocation> locationList, TextSelection var,
+			int l, boolean up, String proposal) throws BadLocationException {
+		char c = getSourceViewer().getDocument().getChar(l);
+
+		if (PLEditor.isVarChar(c)) {
+			if (proposal == null)
+				proposal = "";
+			if(up){
+				proposal = c + proposal;
+			}else{
+				proposal = proposal+c;				
+			}
+		} else if (proposal != null) {
+			int length = proposal.length();
+				if(var.getText().equals(proposal)) {
+					locationList.add(new OccurrenceLocation(l+(up?1:-length), length, 0,"desc"));
+				} else if(PLEditor.isVarPrefix(proposal) && !proposal.equals("_") ){
+					List<OccurrenceLocation> probOccs;
+					int kind = 2;
+					if(isSingletonName(proposal)==VAR_KIND_SINGLETON){
+						probOccs=singletonOccurs.get(proposal);
+						if(probOccs==null){
+							probOccs =new ArrayList<OccurrenceLocation>();
+							singletonOccurs.put(proposal, probOccs);
+						}
+						kind = 3;
+					} else {
+						probOccs=nonSingletonOccurs.get(proposal);
+						if(probOccs==null){
+							probOccs =new ArrayList<OccurrenceLocation>();
+							nonSingletonOccurs.put(proposal, probOccs);
+						}
+					}
+					probOccs.add(new OccurrenceLocation(l+(up?1:-length), length, kind,"desc"));
+				}
+			proposal = null;
+		}
+		return proposal;
+	}
+	
+	
+	public static final int VAR_KIND_ANONYMOUS = 0;
+	public static final int VAR_KIND_SINGLETON = 1;
+	public static final int VAR_KIND_NORMAL=2;
+	
+	/**
+	 * @param a valid Prolog variable
+	 */
+	private static int isSingletonName(String proposal) {
+		if(proposal.equals("_")){
+			return VAR_KIND_ANONYMOUS;
+		}
+		if(proposal.length()==1){
+			return VAR_KIND_NORMAL;
+		}
+		if(proposal.charAt(0)=='_' && isSingleSecondChar(proposal.charAt(1))){
+			return VAR_KIND_SINGLETON;
+		}
+		return VAR_KIND_NORMAL;
+	}
+
+	private static boolean isSingleSecondChar(char c) {
+		if (c >= '0' && c <= '9')
+			return true;
+		if (c >= 'A' && c <= 'Z')
+			return true;
+		return false;
+	}
+
+	char c;
 	
 	protected boolean isComment(ITypedRegion region) {
 		return region.getType().equals(PLPartitionScanner.PL_COMMENT)
@@ -1163,7 +1232,7 @@ public class PLEditor extends TextEditor {
 		public String toString() {
 			return "[" + fOffset + " / " + fLength + "] " + fDescription; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		}
-
+		
 	}
 	
 	private class VarPos {
