@@ -1034,7 +1034,6 @@ public class PLEditor extends TextEditor {
 				oldSelection = var;
 			}
 			int begin=var.getOffset();
-			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
 				boolean inAtom=false;
 				int l = begin == 0 ? begin : begin - 1;
 				String proposal = null;
@@ -1059,11 +1058,11 @@ public class PLEditor extends TextEditor {
 					}
 					l--;
 				}
-			}
-			if (PLEditor.isVarPrefix(varName) || varName.length() == 0) {
-				int l = begin = var.getOffset()+ var.getLength();
-				String proposal = null;
-				boolean inAtom=false;
+				
+				// searching downwards
+				l = begin = var.getOffset()+ var.getLength();
+				proposal = null;
+				inAtom=false;
 				while (l < document.getLength()) {
 					if(inAtom) {
 						if(document.getChar(l)=='\''){						
@@ -1085,7 +1084,6 @@ public class PLEditor extends TextEditor {
 					}
 					l++;
 				}
-			}
 			if(hightlightSingletonsErrors){
 				for (String varToCheck : singletonOccurs.keySet()) {
 					List<OccurrenceLocation> varLocations = singletonOccurs.get(varToCheck);
