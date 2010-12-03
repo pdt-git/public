@@ -50,6 +50,8 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -91,21 +93,42 @@ public final class PDTUtils {
 		if (!loc.isWorkspacePath) {
 			try {
 				file = PDTCoreUtils.findFileForLocation(loc.file);
+			} catch(IllegalArgumentException iae){
+				if(iae.getLocalizedMessage().startsWith("Not in Workspace")){
+					IFileStore fileStore = EFS.getLocalFileSystem().getStore(new Path(loc.file));
+					if (!fileStore.fetchInfo().isDirectory() && fileStore.fetchInfo().exists()) {
+						try {
+							IWorkbenchPage page = UIUtils.getActivePage();
+					        IEditorPart part = IDE.openEditorOnFileStore(page, fileStore);
+							openInEditor(loc, lineOffset, part);
+						} catch (PartInitException e) {
+							Debug.report(e);
+						}
+						return;
+					}
+				} else {
+					Debug.report(iae);
+					throw new RuntimeException(iae);
+				}
 			} catch (IOException e) {
 				Debug.report(e);
 				throw new RuntimeException(e);
 			}
 		}
 
-		IEditorPart part;
-
 		try {
 			IWorkbenchPage page = UIUtils.getActivePage();
-			part = IDE.openEditor(page, file);
+			IEditorPart part= IDE.openEditor(page, file);
+			openInEditor(loc, lineOffset, part);
 		} catch (PartInitException e) {
 			Debug.report(e);
 			return;
 		}
+
+
+	}
+
+	private static void openInEditor(final SourceLocation loc,final boolean lineOffset, IEditorPart part) {
 		if (part instanceof PLEditor) {
 			PLEditor editor = (PLEditor) part;
 
@@ -122,7 +145,6 @@ public final class PDTUtils {
 //					doc.get(), loc.offset));
 
 		}
-
 	}
 
 }

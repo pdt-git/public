@@ -148,8 +148,10 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	
 	
 	private void run_impl(Goal goal, IFile file) throws CoreException {
-		IPrologProject plprj;
-		plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		IPrologProject plprj=null;
+		if(file!=null){ // external file
+			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		}
 		if(plprj== null){
 			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
 				PrologSession session =null;
@@ -183,10 +185,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						messageBox.setMessage("Cannot open declaration. No PDT Nature assigned and no active Prolog Console available for a fallback.");
 						messageBox.open();					}
 				});
-				
-				return;
-
 			}
+			return;
 		}
 		PrologInterface pif = plprj.getMetadataPrologInterface();
 		SourceLocation loc;

@@ -803,6 +803,10 @@ public class PLEditor extends TextEditor {
 			return;
 		}
 		IProject project = editorInput.getFile().getProject();
+		if(!project.exists()){ // opened external file
+			return;
+		}
+
 		IPrologProject plProject = null;
 
 		try {

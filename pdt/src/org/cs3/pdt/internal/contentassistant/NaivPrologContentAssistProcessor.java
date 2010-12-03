@@ -1,10 +1,12 @@
 package org.cs3.pdt.internal.contentassistant;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pl.common.Debug;
@@ -110,7 +112,33 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			return;
 		}
 		if(getProject() == null) {
-			Debug.warning("Stopped completion proposal creation. No associated Prolog project found for project '" + getFile().getProject().getName() + "'.");
+			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
+				PrologSession session =null;
+				try {
+					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
+					List<Map<String, Object>> predicates = session.queryAll("find_pred(_,'"+prefix+"',Module,Name,Arity,Public,Doc)");
+					for (Map<String, Object> predicate : predicates) {
+						String name = (String) predicate.get("Name");
+						String strArity = (String) predicate.get("Arity");
+						int arity = Integer.parseInt(strArity);
+						String doc = (String)predicate.get("Doc");
+						Map<String, String> tags = new HashMap<String, String>();
+						if(!doc.equals("nodoc")){
+							tags.put("documentation",doc);
+						}
+						
+						ComparableCompletionProposal p = new PredicateCompletionProposal(
+														begin, len, name, arity, tags);
+						proposals.add(p);
+					}
+					return;
+				}catch(Exception e) {
+					if(session!=null)session.dispose();
+					e.printStackTrace();
+				}
+			} else {
+				Debug.warning("Stopped completion proposal creation. No associated Prolog project found for project '" + getFile().getProject().getName() + "'.");
+			}
 			return;
 		}
 
@@ -128,11 +156,11 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 
 			for (Map<String, Object> anAnswer : answers) {
 				String name = ((CTerm) anAnswer.get("Name")).getFunctorValue();
-				String arity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
-				int parseInt = Integer.parseInt(arity);
+				String strArity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
+				int arity = Integer.parseInt(strArity);
 				Map<String, CTerm> tags = CTermUtil.listAsMap((CTerm) anAnswer.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
-												begin, len, name, parseInt, tags);
+												begin, len, name, arity, tags);
 				proposals.add(p);
 			}
 		} finally {

@@ -148,7 +148,7 @@ public class PLScanner extends RuleBasedScanner {
 			project = editorInput.getFile().getProject();
 		}
 		
-			if (project != null && project.hasNature(PDTCore.NATURE_ID)) {
+			if (project != null && project.exists() && project.hasNature(PDTCore.NATURE_ID)) {
 				plProject = (IPrologProject) project
 						.getNature(PDTCore.NATURE_ID);
 			}

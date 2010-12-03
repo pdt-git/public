@@ -68,11 +68,18 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	@Override
 	public String getDisplayString() {
 		CTerm summary = (CTerm) tags.get("summary");
-		CTerm doc = (CTerm) tags.get("documentation");
+		Object doc = tags.get("documentation");
+
 		if(summary!=null){
 			return getLabel() + " - " + summary.getFunctorValue();
 		 } else if(doc != null){
-			 String value = doc.getFunctorValue();
+			 	String value;
+				if(doc instanceof CTerm){
+					value =((CTerm)doc).getFunctorValue();
+				} else {
+					value = (String)doc;
+				}
+
 			return value.indexOf('\n')>0 ?
 					value.substring(0,value.indexOf('\n')):
 						value;
@@ -106,9 +113,15 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		CTerm doc = (CTerm) tags.get("documentation");
+		Object doc = tags.get("documentation");
 		if(doc!=null){
-			return doc.getFunctorValue().replaceAll("\n", "</b>");
+			String value;
+			if(doc instanceof CTerm){
+				value = ((CTerm)doc).getFunctorValue();
+			} else {
+				value =(String)doc;				
+			}
+			return value.replaceAll("\n", "</b>");
 		}
 		CTerm summary = (CTerm) tags.get("summary");
 		if(summary!=null){

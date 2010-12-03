@@ -47,7 +47,7 @@
     get_file_pos/7,
     get_pred/6,
     get_pred/7,
-    find_pred/6,
+    find_pred/7,
     find_declaration/5,
 %    atom_concat/4,atom_concat/5,
 %    atom_concat/6,atom_concat/7,
@@ -277,7 +277,7 @@ user:test(atom_concat4):-
 
 %pdtplugin:a
 /*
-    pdtplugin_find_pred(+File,+Prefix,?Module,-Name,-Arity,-Public)
+    pdtplugin_find_pred(+File,+Prefix,?Module,-Name,-Arity,-Public,-Help)
     
     The more specific the the arguments are specified, the lesser
     is the number of the retrieved Predicates: Public Name/Arity 
@@ -294,13 +294,39 @@ user:test(atom_concat4):-
     TODO: By now also the modules are bound to name (Arity == 0, Public == true)
 */
 
-find_pred(_,Prefix,Module,Name,Arity,true):-
+find_pred(_,Prefix,Module,Name,Arity,true,Help):-
     var(Module),
-    current_module(Module),
+%    current_module(Module),
     not(Prefix == ''), % performance tweak:
     current_predicate(Name/Arity),
-    atom_concat(Prefix,_,Name).
+    atom_concat(Prefix,_,Name),
+    predicate_manual_entry(Name,Arity,Help). 
 
+predicate_manual_entry(Pred,Arity,Content) :-
+    predicate(Pred,Arity,_,FromLine,ToLine),
+    !,
+    online_help:line_start(FromLine, From),
+    online_help:line_start(ToLine, To),
+    online_help:online_manual_stream(Manual),
+    %set_stream(Manual, encoding(octet)),
+    new_memory_file(Handle),open_memory_file(Handle, write, MemStream),
+%    stream_property(Manual, position(OldPos)),
+ %   set_stream_position(Manual, OldPos),
+    seek(Manual,From,bof,_NewOffset),
+%    stream_position(Manual, _, OLD),
+		    %'$stream_position'(From, 0, 0)),
+    Range is To - From,
+%   current_output(Out),
+    online_help:copy_chars(Range, Manual, MemStream),
+    close(MemStream),
+%    set_output(Out),
+    memory_file_to_atom(Handle,Content),
+    free_memory_file(Handle),
+    !.
+
+predicate_manual_entry(_Pred,_Arity,'nodoc'). 
+
+/*
 find_pred(_,Prefix,Module,Name,Arity,Public):-
     nonvar(Module),
     setof([Pos,Len], meta_data(_,Module,Name, Arity,Public,Pos,Len,_,_),_),
@@ -315,7 +341,7 @@ find_pred(_,Prefix,Module,Name,-1,true):-
     var(Module),
     meta_data_module(_,Name,_),
     atom_concat(Prefix,_,Name).
-
+*/
 write_ranges_to_file(Ranges, Outfile) :-
     online_manual_stream(Manual),
     help_tmp_file(Outfile),
