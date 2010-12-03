@@ -46,15 +46,28 @@ import org.cs3.pl.common.Debug;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
+import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jface.text.AbstractInformationControlManager;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IAutoIndentStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.information.IInformationPresenter;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -62,9 +75,11 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.part.FileEditorInput;
 
 @SuppressWarnings("deprecation")
 public class PLConfiguration extends SourceViewerConfiguration {
@@ -137,6 +152,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 						.getColor(IPLColorConstants.PL_COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
+		
 		DefaultDamagerRepairer dr = new DefaultDamagerRepairer(getPLScanner());
 		reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
@@ -145,6 +161,11 @@ public class PLConfiguration extends SourceViewerConfiguration {
 				.getColor(IPLColorConstants.PL_COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_COMMENT);
+
+		ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager
+				.getColor(IPLColorConstants.STRING)));
+		reconciler.setDamager(ndr, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
+		reconciler.setRepairer(ndr, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
 
 		return reconciler;
 	}
@@ -210,4 +231,65 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		return new String[] { "%", "" };
 	}
 
+	public InformationPresenter getOutlinePresenter(ISourceViewer sourceViewer) {
+		InformationPresenter presenter;
+		presenter= new InformationPresenter(getOutlinePresenterControlCreator(sourceViewer, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
+		presenter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+		presenter.setAnchor(AbstractInformationControlManager.ANCHOR_GLOBAL);
+		IInformationProvider provider= new IInformationProvider() {
+			
+			@Override
+			public IRegion getSubject(ITextViewer textViewer, int offset) {
+				Document document = (Document) editor.getDocumentProvider().getDocument(
+						editor.getEditorInput());
+
+
+					TextSelection selection = (TextSelection) editor.getEditorSite()
+							.getSelectionProvider().getSelection();
+					IRegion info;
+					try {
+						info = document.getLineInformationOfOffset(selection
+								.getOffset());
+						return info;
+					} catch (BadLocationException e) {
+						e.printStackTrace();
+					}
+					return null;
+			}
+			
+			@Override
+			public String getInformation(ITextViewer textViewer, IRegion subject) {
+				return ((FileEditorInput)editor.getEditorInput()).getFile().getFullPath().toPortableString();
+			}
+		};
+		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
+		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
+		presenter.setSizeConstraints(50, 20, true, false);
+		presenter.setEnabled(true);
+		return presenter;
+	}
+	
+	/**
+	 * Returns the outline presenter control creator. The creator is a factory creating outline
+	 * presenter controls for the given source viewer. This implementation always returns a creator
+	 * for <code>JavaOutlineInformationControl</code> instances.
+	 *
+	 * @param sourceViewer the source viewer to be configured by this configuration
+	 * @param commandId the ID of the command that opens this control
+	 * @return an information control creator
+	 * @since 2.1
+	 */
+	private IInformationControlCreator getOutlinePresenterControlCreator(ISourceViewer sourceViewer, final String commandId) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE;
+				int treeStyle= SWT.V_SCROLL | SWT.H_SCROLL;
+				return new PrologOutlineInformationControl(editor.getDocumentProvider().getDocument(editor.getEditorInput()),parent, shellStyle, treeStyle, commandId);
+			}
+		};
+	}
 }

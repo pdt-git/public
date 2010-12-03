@@ -116,6 +116,11 @@
       point="org.eclipse.ui.commands">
    <command
          categoryId="org.cs3.pdt.editing"
+         description="Show Quick Outline"
+         id="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
+         name="Toggle Comments"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
          description="Toggles comment prefix on selected lines"
          id="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
          name="Toggle Comments"/>
@@ -126,6 +131,11 @@
 </extension>
 <extension
       point="org.eclipse.ui.bindings">
+   <key
+         commandId="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+O"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
          contextId="org.cs3.pdt.editingProlog"
