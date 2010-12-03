@@ -57,9 +57,7 @@ import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
-import org.cs3.pdt.internal.editors.PLEditor.OccurrenceLocation;
 import org.cs3.pdt.internal.views.PrologOutline;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
@@ -69,7 +67,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -89,6 +86,7 @@ import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
+import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -113,6 +111,8 @@ import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SHOW_TOOLTIP = "org.eclipse.pdt.ui.edit.text.prolog.show.prologdoc";
+
+	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
 	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 
@@ -196,6 +196,8 @@ public class PLEditor extends TextEditor {
 
 	private IPath filepath;
 
+	private InformationPresenter fOutlinePresenter;
+
 	
 
 	private static final String MATCHING_BRACKETS = "matching.brackets";
@@ -248,6 +250,23 @@ public class PLEditor extends TextEditor {
 		addAction(menuMgr, action, "Context Assist Proposal",
 				IWorkbenchActionConstants.MB_ADDITIONS,
 				ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+
+		
+		fOutlinePresenter= configuration.getOutlinePresenter(this.getSourceViewer());
+		fOutlinePresenter.install(this.getSourceViewer());
+		action = new TextEditorAction(bundle, PLEditor.class.getName()
+				+ ".ToolTipAction", this) {
+			@Override
+			public void run() {
+				TextSelection selection = (TextSelection) getEditorSite()
+				.getSelectionProvider().getSelection();
+				fOutlinePresenter.setOffset(selection.getOffset());
+				
+				fOutlinePresenter.showInformation();
+			}
+		};
+		addAction(menuMgr, action, "show outline",
+				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SHOW_QUICK_OUTLINE);
 
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ToolTipAction", this) {
@@ -691,6 +710,8 @@ public class PLEditor extends TextEditor {
 			return true;
 		if (c >= 'a' && c <= 'z')
 			return true;
+		if (c >= '0' && c <= '9')
+			return true;
 		return false;
 	}
 
@@ -948,7 +969,8 @@ public class PLEditor extends TextEditor {
 				removeOccurrenceAnnotations();
 
 				if (annotationModel instanceof IAnnotationModelExtension) {
-					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
+					((IAnnotationModelExtension)annotationModel).removeAllAnnotations();
+					((IAnnotationModelExtension)annotationModel).replaceAnnotations(null, annotationMap);
 				} else {
 					removeOccurrenceAnnotations();
 					Iterator iter= annotationMap.entrySet().iterator();
@@ -1055,22 +1077,27 @@ public class PLEditor extends TextEditor {
 				int l = begin == 0 ? begin : begin - 1;
 				String proposal = null;
 				while (l > 0) {
-					if(inAtom) {
-						if(document.getChar(l)=='\''){						
-							if(l == 0 || document.getChar(l-1)!='\''){
-								inAtom=false;
-							}
-						}
-					} else if(PLEditor.predicateDelimiter(document, l)){
-						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
-						break;
-					} else if(document.getChar(l)=='\''){
-						inAtom=true;
-					}					
+//					if(inAtom) {
+//						if(document.getChar(l)=='\''){						
+//							if(l == 0 || document.getChar(l-1)!='\''){
+//								inAtom=false;
+//							}
+//						}
+//					} else if(PLEditor.predicateDelimiter(document, l)){
+//						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
+//						break;
+//					} else if(document.getChar(l)=='\''){
+//						inAtom=true;
+//					}	
+ 
 					ITypedRegion region = document.getPartition(l);
 					if (isComment(region))
 						l = region.getOffset();
 					else {
+						if(PLEditor.predicateDelimiter(document, l)){
+							proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
+							break;
+						} 
 						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
 					}
 					l--;
@@ -1081,22 +1108,26 @@ public class PLEditor extends TextEditor {
 				proposal = null;
 				inAtom=false;
 				while (l < document.getLength()) {
-					if(inAtom) {
-						if(document.getChar(l)=='\''){						
-							if(l+1 == document.getLength() || document.getChar(l+1)!='\''){
-								inAtom=false;
-							}
-						}
-					} else if(PLEditor.predicateDelimiter(document, l)){
-						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
-						break;
-					} else if(document.getChar(l)=='\''){
-						inAtom=true;
-					}
+//					if(inAtom) {
+//						if(document.getChar(l)=='\''){						
+//							if(l+1 == document.getLength() || document.getChar(l+1)!='\''){
+//								inAtom=false;
+//							}
+//						}
+//					} else if(PLEditor.predicateDelimiter(document, l)){
+//						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
+//						break;
+//					} else if(document.getChar(l)=='\''){
+//						inAtom=true;
+//					}
 					ITypedRegion region = document.getPartition(l);
 					if (isComment(region)) {
 						l = region.getOffset() + region.getLength();
 					} else {
+						if(PLEditor.predicateDelimiter(document, l)){
+							proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
+							break;
+						}
 						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
 					}
 					l++;
@@ -1209,7 +1240,9 @@ public class PLEditor extends TextEditor {
 	
 	protected boolean isComment(ITypedRegion region) {
 		return region.getType().equals(PLPartitionScanner.PL_COMMENT)
-				|| region.getType().equals(PLPartitionScanner.PL_MULTI_COMMENT);
+				|| region.getType().equals(PLPartitionScanner.PL_MULTI_COMMENT)
+				|| region.getType().equals(PLPartitionScanner.PL_SINGLE_QUOTED_STRING)
+				|| region.getType().equals(PLPartitionScanner.PL_DOUBLE_QUOTED_STRING);
 	}
 	
 	/**
