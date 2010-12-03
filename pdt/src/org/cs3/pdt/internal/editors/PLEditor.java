@@ -978,11 +978,11 @@ public class PLEditor extends TextEditor {
 				return Status.CANCEL_STATUS;
 			synchronized (annotationModelMonitor) {
 
-				removeOccurrenceAnnotations();
+				//removeOccurrenceAnnotations();
 
 				if (annotationModel instanceof IAnnotationModelExtension) {
-					((IAnnotationModelExtension)annotationModel).removeAllAnnotations();
-					((IAnnotationModelExtension)annotationModel).replaceAnnotations(null, annotationMap);
+					//((IAnnotationModelExtension)annotationModel).removeAllAnnotations();
+					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
 				} else {
 					removeOccurrenceAnnotations();
 					Iterator iter= annotationMap.entrySet().iterator();
@@ -1085,23 +1085,9 @@ public class PLEditor extends TextEditor {
 				oldSelection = var;
 			}
 			int begin=var.getOffset();
-				boolean inAtom=false;
 				int l = begin == 0 ? begin : begin - 1;
 				String proposal = null;
 				while (l > 0) {
-//					if(inAtom) {
-//						if(document.getChar(l)=='\''){						
-//							if(l == 0 || document.getChar(l-1)!='\''){
-//								inAtom=false;
-//							}
-//						}
-//					} else if(PLEditor.predicateDelimiter(document, l)){
-//						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,true,proposal);
-//						break;
-//					} else if(document.getChar(l)=='\''){
-//						inAtom=true;
-//					}	
- 
 					ITypedRegion region = document.getPartition(l);
 					if (isComment(region))
 						l = region.getOffset();
@@ -1118,20 +1104,7 @@ public class PLEditor extends TextEditor {
 				// searching downwards
 				l = begin = var.getOffset()+ var.getLength();
 				proposal = null;
-				inAtom=false;
 				while (l < document.getLength()) {
-//					if(inAtom) {
-//						if(document.getChar(l)=='\''){						
-//							if(l+1 == document.getLength() || document.getChar(l+1)!='\''){
-//								inAtom=false;
-//							}
-//						}
-//					} else if(PLEditor.predicateDelimiter(document, l)){
-//						proposal = processProposal(singletonOccurs,nonSingletonOccurs, locationList, var, l,false,proposal);
-//						break;
-//					} else if(document.getChar(l)=='\''){
-//						inAtom=true;
-//					}
 					ITypedRegion region = document.getPartition(l);
 					if (isComment(region)) {
 						l = region.getOffset() + region.getLength();

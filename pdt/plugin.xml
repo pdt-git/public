@@ -259,7 +259,7 @@
             verticalRulerPreferenceKey="singletonWrongPrefixOccurrenceIndicationInVerticalRuler"
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="singletonWrongPrefixOccurrenceIndicationColor"
-            colorPreferenceValue="205,255,198"
+            colorPreferenceValue="255,237,202"
             presentationLayer="4"
             textStylePreferenceKey="singletonWrongPrefixOccurrenceTextStyle"
             textStylePreferenceValue="NONE">
