@@ -204,7 +204,7 @@ public class PLEditor extends TextEditor {
 
 	private static final String MATCHING_BRACKETS_COLOR = "matching.brackets.color";
 
-	public static final long OCCURRENCE_UPDATE_DELAY = 400;
+	public static long OCCURRENCE_UPDATE_DELAY = 300;
 
 	@Override
 	protected void configureSourceViewerDecorationSupport(
@@ -401,12 +401,20 @@ public class PLEditor extends TextEditor {
 	/**
 	 * @param i
 	 */
-	public void gotoOffset(int offset) {
+	public void gotoOffset(int offset,boolean isLineOffset) {
 		Document document;
 		document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
-		TextSelection newSelection = new TextSelection(document, offset, 0);
-		getEditorSite().getSelectionProvider().setSelection(newSelection);
+		TextSelection newSelection;
+		try {
+			if(isLineOffset) {
+				offset = document.getLineOffset(offset);
+			}
+			newSelection = new TextSelection(document,offset, 0);
+			getEditorSite().getSelectionProvider().setSelection(newSelection);
+		} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

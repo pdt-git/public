@@ -69,13 +69,13 @@ public final class PDTUtils {
 				.getActivePrologConsole().getPrologInterface();
 	}
 
-	public static void showSourceLocation(final SourceLocation loc) {
+	public static void showSourceLocation(final SourceLocation loc, final boolean lineOffset) {
 		if (Display.getCurrent() != UIUtils.getDisplay()) {
 
 			UIUtils.getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
-					showSourceLocation(loc);
+					showSourceLocation(loc,lineOffset);
 				}
 			});
 			return;
@@ -112,8 +112,14 @@ public final class PDTUtils {
 			IDocument doc = editor.getDocumentProvider().getDocument(
 					editor.getEditorInput());
 
-			editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
-					doc.get(), loc.offset));
+			int offset  = loc.offset;
+			if( !lineOffset){
+				offset=PDTCoreUtils.convertLogicalToPhysicalOffset(
+						doc.get(), loc.offset);
+			}
+			editor.gotoOffset(offset,lineOffset);
+//			editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
+//					doc.get(), loc.offset));
 
 		}
 
