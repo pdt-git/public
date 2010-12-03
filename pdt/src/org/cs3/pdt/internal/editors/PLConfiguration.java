@@ -263,11 +263,11 @@ public class PLConfiguration extends SourceViewerConfiguration {
 			}
 		};
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_DOC);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
-		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
+		presenter.setInformationProvider(provider, PLPartitionScanner.PL_COMMENT);
+		presenter.setInformationProvider(provider, PLPartitionScanner.PL_DEFAULT);
+		presenter.setInformationProvider(provider, PLPartitionScanner.PL_DOUBLE_QUOTED_STRING);
+		presenter.setInformationProvider(provider, PLPartitionScanner.PL_MULTI_COMMENT);
+		presenter.setInformationProvider(provider, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
 		presenter.setSizeConstraints(50, 20, true, false);
 		presenter.setEnabled(true);
 		return presenter;

@@ -46,6 +46,7 @@
 :- module(pdtplugin,[
     get_file_pos/7,
     get_pred/6,
+    get_pred/7,
     find_pred/6,
 %    atom_concat/4,atom_concat/5,
 %    atom_concat/6,atom_concat/7,
@@ -144,6 +145,13 @@ get_file_pos_(Name,Arity, File,Pos,0, 0) :-
 
 
 get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
+	get_pred(_file, _name,_arity,_pos,_dyn,_mul,_).
+
+%% get_pred(_file, _name,_arity,_pos,_dyn,_mul,Public)
+%
+% boolean properties are bound to 1 or 0.
+%
+get_pred(_file, _name,_arity,_pos,_dyn,_mul,Public) :-
     source_file(_module_pred, _file),
 %    print(_module_pred),
 %    format('~n',[]),
@@ -157,7 +165,8 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
     clause_property(Ref,file(_file)),
     clause_property(Ref,line_count(_pos)),
     has_property(_module_pred,dynamic,_dyn),
-    has_property(_module_pred,multifile,_mul).
+    has_property(_module_pred,multifile,_mul),
+    has_property(_module_pred,exported,Public).
 %   assert(pdtplugin_get_pred_exists(_name,_arity)),
 %   format('~w , ~w , ~w , ~w , ~w~n',[_name,_arity,_file,_dyn,_mul]).
     

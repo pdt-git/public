@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.console.prolog.PrologConsole;
@@ -36,6 +37,8 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -47,11 +50,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
@@ -81,12 +88,40 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	private String fPattern;
 private IDocument document;
 
-	private class OutlineLabelProvider extends LabelProvider{ //, IColorProvider, IStyledLabelProvider {
+	private class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, IStyledLabelProvider {
 		@Override
 		public String getText(Object element) {
 			PrologPredicate prologPredicate = (PrologPredicate)element;
 			return prologPredicate.name  +"/" + prologPredicate.arity;
 		}
+
+		@Override
+		public Image getImage(Object element) {
+			PrologPredicate prologPredicate = (PrologPredicate) element;
+
+			if (prologPredicate.isPublic()) {
+				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+			}
+			return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
+		}
+
+	@Override
+	public Color getForeground(Object element) {
+		PrologPredicate prologPredicate = (PrologPredicate) element;
+		if(prologPredicate.multifile) {
+			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
+		}
+		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element) {
+		PrologPredicate prologPredicate = (PrologPredicate) element;
+		if(prologPredicate.dynamic) {
+			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+		}
+		return null;
+	}
 
 	}
 
@@ -351,7 +386,7 @@ private IDocument document;
 //			fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
 
 		//TODO
-		//treeViewer.setLabelProvider(new ColoringLabelProvider(fInnerLabelProvider));
+		treeViewer.setLabelProvider(fInnerLabelProvider);
 
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
 //		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
@@ -404,12 +439,19 @@ private IDocument document;
 			try {
 				PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 				if(console==null){
+					MessageBox messageBox = new MessageBox(
+							getShell(), SWT.ICON_WARNING
+									| SWT.OK);
+
+					messageBox.setText("Outline");
+					messageBox.setMessage("Cannot open outline, no factbase selected in Prolog Console.");
+					messageBox.open();
 					return;
 				}
 				session = console.getPrologInterface().getSession();
 				String fileName = file.getRawLocation().toFile().getAbsolutePath().replace('\\', '/').toLowerCase();
 				List<Map<String, Object>> result = session.queryAll("get_pred('" + fileName+"',"+
-						"Name,Arity,Line,_,_)");
+						"Name,Arity,Line,Dynamic,Multifile,Public)");
 
 				Set<String> names = new HashSet<String>();
 				for (Map<String, Object> predicate : result) {
@@ -421,6 +463,10 @@ private IDocument document;
 						PrologPredicate prologPredicate = new PrologPredicate();
 						prologPredicate.name=name;
 						prologPredicate.arity=arity;
+						prologPredicate.setPublic(predicate.get("Public").equals("1"));
+						prologPredicate.setMultifile(predicate.get("Multifile").equals("1"));
+						prologPredicate.setDynamic(predicate.get("Dynamic").equals("1"));
+						
 						prologPredicate.line=Integer.parseInt((String)predicate.get("Line"));
 						predicates.add(prologPredicate);
 					}
