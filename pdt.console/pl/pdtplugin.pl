@@ -48,6 +48,7 @@
     get_pred/6,
     get_pred/7,
     find_pred/6,
+    find_declaration/5,
 %    atom_concat/4,atom_concat/5,
 %    atom_concat/6,atom_concat/7,
     get_references/5,
@@ -181,8 +182,7 @@ term_for_signature(Name,0,Term):-
 
 term_for_signature(Name,Arity,Term):-
     not(Arity = 0),
-    freeVariables(Arity, '', Vars),
-    sformat(S,'~w(~w)',[Name,Vars]),
+    freeVariables(Arity, '', Vars),    sformat(S,'~w(~w)',[Name,Vars]),
     atom_to_term(S, Term,_).
     %functor(Term, Name, Arity).
 
@@ -296,6 +296,7 @@ user:test(atom_concat4):-
 
 find_pred(_,Prefix,Module,Name,Arity,true):-
     var(Module),
+    current_module(Module),
     not(Prefix == ''), % performance tweak:
     current_predicate(Name/Arity),
     atom_concat(Prefix,_,Name).
@@ -391,4 +392,11 @@ retrieve_argument_description([Arg|Args],
     (var(Arg) ->
        IsVar = yes; IsVar = no),
 	retrieve_argument_description(Args,ArgDefs,ArgDescr).
+	
+find_declaration(Name,Arity,Module,File,Line):-
+	current_module(Module),
+	functor(Goal,Name,Arity),
+	nth_clause(Module:Goal,_,Ref), 
+	clause_property(Ref,file(File)),
+    clause_property(Ref,line_count(Line)).
          
