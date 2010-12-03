@@ -80,6 +80,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
@@ -175,7 +176,9 @@ public class PrologOutline extends ContentOutlinePage {
 		toolBarManager.add(action);
 		
 		hookContextMenu(parent);
-		
+		if(getInput()instanceof FileStoreEditorInput){ // TRHO: should only happen on external files 
+			return;
+		}
 		viewer.setInput(getInput());
 
 	}

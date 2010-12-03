@@ -7,21 +7,21 @@ import org.eclipse.core.resources.IFile;
 
 public class PrologSourceFileModel {
 	
-	public PrologSourceFileModel(List<PrologPredicate> predicates, IFile file) {
+	public PrologSourceFileModel(List<PrologPredicate> predicates, String file) {
 		super();
 		this.predicates = predicates;
-		this.file = file;
+		this.fileName = file;
 	}
 
 	private List<PrologPredicate> predicates= new ArrayList<PrologPredicate>();
-	private IFile file;
+	private String  fileName;
 	
-	public IFile getFile() {
-		return file;
+	public String getFileName() {
+		return fileName;
 	}
 
-	public void setFile(IFile file) {
-		this.file = file;
+	public void setFile(String file) {
+		this.fileName = file;
 	}
 
 	public List<PrologPredicate> getPredicates() {

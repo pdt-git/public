@@ -433,7 +433,7 @@ private IDocument document;
 	 */
 	public void setInput(Object information) {
 		if(information instanceof String) {
-			IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path((String)information));
+			String fileName = (String)information;
 			List<PrologPredicate> predicates= new ArrayList<PrologPredicate>();
 			PrologSession session=null;
 			try {
@@ -448,7 +448,6 @@ private IDocument document;
 					return;
 				}
 				session = console.getPrologInterface().getSession();
-				String fileName = file.getRawLocation().toFile().getAbsolutePath().replace('\\', '/').toLowerCase();
 				List<Map<String, Object>> result = session.queryAll("get_pred('" + fileName+"',"+
 						"Name,Arity,Line,Dynamic,Multifile,Public)");
 
@@ -477,7 +476,7 @@ private IDocument document;
 			
 			 
 //			
-		PrologSourceFileModel model = new PrologSourceFileModel(predicates,file);
+		PrologSourceFileModel model = new PrologSourceFileModel(predicates,fileName);
 		inputChanged(model, predicates.size()>0?predicates.get(0):null);
 		fInput=model;
 		return;
