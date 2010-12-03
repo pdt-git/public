@@ -294,13 +294,18 @@ user:test(atom_concat4):-
     TODO: By now also the modules are bound to name (Arity == 0, Public == true)
 */
 
+
 find_pred(_,Prefix,Module,Name,Arity,true,Help):-
+	setof((Name,Arity),Module^Prefix^find_pred_(_,Prefix,Module,Name,Arity,true),All),
+	member((Name,Arity),All),
+	predicate_manual_entry(Name,Arity,Help). 
+	
+find_pred_(_,Prefix,Module,Name,Arity,true):-
     var(Module),
 %    current_module(Module),
     not(Prefix == ''), % performance tweak:
     current_predicate(Name/Arity),
-    atom_concat(Prefix,_,Name),
-    predicate_manual_entry(Name,Arity,Help). 
+    atom_concat(Prefix,_,Name).
 
 predicate_manual_entry(Pred,Arity,Content) :-
     predicate(Pred,Arity,_,FromLine,ToLine),
