@@ -440,8 +440,7 @@ private IDocument document;
 				PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
 				if(console==null){
 					MessageBox messageBox = new MessageBox(
-							getShell(), SWT.ICON_WARNING
-									| SWT.OK);
+							getShell(), SWT.ICON_WARNING| SWT.OK);
 
 					messageBox.setText("Outline");
 					messageBox.setMessage("Cannot open outline, no factbase selected in Prolog Console.");
