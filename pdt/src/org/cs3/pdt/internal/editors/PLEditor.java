@@ -399,22 +399,22 @@ public class PLEditor extends TextEditor {
 	}
 
 	/**
+	 * @param i 
 	 * @param i
 	 */
-	public void gotoOffset(int offset,boolean isLineOffset) {
-		Document document;
-		document = (Document) getDocumentProvider().getDocument(
+	public void gotoOffset(int offset, int length) {
+		Document document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
 		TextSelection newSelection;
-		try {
-			if(isLineOffset) {
-				offset = document.getLineOffset(offset);
-			}
-			newSelection = new TextSelection(document,offset, 0);
+//		try {
+//			if(isLineOffset) {
+//				offset = document.getLineOffset(offset);
+//			}
+			newSelection = new TextSelection(document,offset, length);
 			getEditorSite().getSelectionProvider().setSelection(newSelection);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
+//		} catch (BadLocationException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	/**

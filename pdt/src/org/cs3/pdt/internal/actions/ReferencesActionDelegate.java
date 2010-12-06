@@ -51,10 +51,13 @@ import org.cs3.pdt.internal.search.PrologSearchQuery;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Goal;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
@@ -79,17 +82,25 @@ public class ReferencesActionDelegate extends TextEditorAction {
 				try {
 					PLEditor editor = (PLEditor) UIUtils
 					.getActiveEditor();
-					IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
-					IPrologProject plProject = (IPrologProject) editorInput.getFile().getProject().getNature(PDTCore.NATURE_ID);
+					IPrologProject plProject =null;
+					if(editor.getEditorInput() instanceof IFileEditorInput){
+						IFileEditorInput editorInput = (IFileEditorInput) editor.getEditorInput();
+						plProject = (IPrologProject) editorInput.getFile().getProject().getNature(PDTCore.NATURE_ID);
+					} 
+//					else {
+//						FileStoreEditorInput fStoreInput = (FileStoreEditorInput)editor.getEditorInput();
+//						//Path filepath = new Path(fStoreInput.getURI().getPath());
+//						IFile[] file = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(fStoreInput.getURI());
+//					}
 					Goal data = editor.getSelectedPrologElement();
 					if(data == null){
 						Debug.warning("data is null");
 						return;
 					}
-					ISearchQuery query = new PrologSearchQuery(plProject.getMetadataPrologInterface(),data);
+					ISearchQuery query = new PrologSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
 					NewSearchUI.activateSearchResultView();
-					NewSearchUI.runQueryInBackground(query);
-					plProject.updateMarkers();
+					NewSearchUI.runQueryInForeground(null,query);
+					if(plProject!=null) plProject.updateMarkers();
 				} catch (Exception e) {
 					Debug.report(e);
 				}

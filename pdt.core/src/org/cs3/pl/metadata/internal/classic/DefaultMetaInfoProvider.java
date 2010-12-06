@@ -151,9 +151,9 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
 			Map<String,Object> result = it.next();
 			SourceLocation sl = new SourceLocation(file, true);
-			sl.offset = Integer.parseInt(result.get("Pos").toString());
-			sl.endOffset = sl.offset
-					+ Integer.parseInt(result.get("Len").toString());
+			sl.setOffset(Integer.parseInt(result.get("Pos").toString()));
+			sl.setEndOffset(sl.getOffset()
+					+ Integer.parseInt(result.get("Len").toString()));
 			Clause data = new ClauseData(result.get("Module").toString(),
 					result.get("Name").toString(), java.lang.Integer
 							.parseInt(result.get("Arity").toString()), Boolean
@@ -217,8 +217,8 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			for (Iterator<Map<String,Object>> it = l.iterator(); it.hasNext();i++) {
 				Map<String,Object> m = it.next();
 				SourceLocation sl = new SourceLocation((String) m.get("File"),true);				
-				sl.offset=Integer.parseInt( (String) m.get("Pos"));
-				sl.endOffset=sl.offset+Integer.parseInt( (String) m.get("Len"));				
+				sl.setOffset(Integer.parseInt( (String) m.get("Pos")));
+				sl.setEndOffset(sl.getOffset()+Integer.parseInt( (String) m.get("Len")));				
 				result[i]=new ClauseData(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
 			}
 			return result;

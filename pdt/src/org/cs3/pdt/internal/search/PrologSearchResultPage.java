@@ -45,10 +45,12 @@
  */
 package org.cs3.pdt.internal.search;
 
+import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -121,7 +123,19 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		
 		PLEditor editor= null;
-		IFile file = ((PredicateElement)match.getElement()).file;
+		PredicateElement element = (PredicateElement)match.getElement();
+		IFile file = element.getFile();
+		PrologMatch prologMatch = (PrologMatch)match;
+		if(prologMatch.isLineLocation()) {
+			SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+			loc.isWorkspacePath = file.isAccessible();
+			
+			loc.setLine(prologMatch.getLine());
+			loc.setPredicateName(element.getPredicateName());
+			loc.setArity(element.getArity());
+			PDTUtils.showSourceLocation(loc);
+			return;
+		}
 		try {
 			//editor= EditorUtility.openInEditor(file, false);
 		    editor = (PLEditor) IDE.openEditor(UIUtils.getActivePage(),file);

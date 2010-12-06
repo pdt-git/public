@@ -71,7 +71,7 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 	 * containing character stream. The first character in the file is at offset
 	 * 0.
 	 */
-	public int offset = 0;
+	private int offset = 0;
 
 	/**
 	 * The end offset of a range. (exclusive) <br>
@@ -81,7 +81,7 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 	 * For stream-based locations, this is the offset of the first character
 	 * that does NOT belong to the range.
 	 */
-	public int endOffset = 0;
+	private int endOffset = 0;
 
 	/**
 	 * The absolute path to the file containing this location. <br>
@@ -95,6 +95,32 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 	 */
 	public boolean isWorkspacePath;
 
+	private int line;
+
+	private boolean isLineLocation = false;
+
+	private String predicateName;
+
+	private int arity;
+
+	public boolean isLineLocation() {
+		return isLineLocation;
+	}
+
+	public int getLine() {
+		return line;
+	}
+
+	/**
+	 * 
+	 * @param line
+	 */
+	public void setLine(int line) {
+		offset=-1;
+		isLineLocation = true;
+		this.line = line;
+	}
+
 	public SourceLocation(String file, boolean isWorkspacePath) {
 		this.file = file;
 		this.isWorkspacePath = isWorkspacePath;
@@ -102,7 +128,7 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 	
 	@Override
 	public String toString() {
-		return file + "/" + offset;
+		return file + "/" + getOffset();
 	}
 
 	@Override
@@ -120,11 +146,11 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 		}
 		// if there is still no difference, both positions are
 		// either row based or stream based.
-		c = offset-other.offset ;
+		c = getOffset()-other.getOffset() ;
 		if (c != 0) {
 			return c;
 		}
-		c = endOffset-other.endOffset;
+		c = getEndOffset()-other.getEndOffset();
 		if (c != 0) {
 			return c;
 		}
@@ -142,6 +168,41 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 	
 	@Override
 	public int hashCode() {
-		return file.hashCode()+offset+endOffset;
+		return file.hashCode()+getOffset()+getEndOffset();
+	}
+
+	public void setOffset(int offset) {
+		isLineLocation=false;
+		this.offset = offset;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public void setPredicateName(String name) {
+		this.predicateName=name;
+		
+	}
+
+	public String getPredicateName() {
+		return predicateName;
+	}
+
+	public void setArity(int arity) {
+		this.arity =arity;
+		
+	}
+
+	public int getArity() {
+		return arity;
+	}
+
+	public void setEndOffset(int endOffset) {
+		this.endOffset = endOffset;
+	}
+
+	public int getEndOffset() {
+		return endOffset;
 	}
 }

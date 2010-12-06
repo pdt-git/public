@@ -164,10 +164,11 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					if(clauses.size()>0) {
 						Map<String, Object> clause = clauses.get(0);
 						SourceLocation location = new SourceLocation((String)clause.get("File"), false);
-						location.offset=Integer.parseInt((String)clause.get("Line"))-1;
+						location.setLine(Integer.parseInt((String)clause.get("Line"))-1);
+						//location.setOffset(-1);
 					//	System.out.println(location.offset);
 						
-						PDTUtils.showSourceLocation(location,true);
+						PDTUtils.showSourceLocation(location);
 						return;
 					}
 				}catch(Exception e) {
@@ -193,7 +194,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		try {
 			loc = findFirstClausePosition((GoalData)goal,pif);
 			if(loc!=null){
-				PDTUtils.showSourceLocation(loc,false);
+				PDTUtils.showSourceLocation(loc);
 			}
 		} catch (PrologInterfaceException e) {
 			Debug.report(e);
@@ -226,8 +227,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		}
 		String fileName = Util.unquoteAtom((String) m.get("File"));
 		SourceLocation loc=new SourceLocation(fileName,false);
-		loc.offset=Integer.parseInt((String)m.get("Start"));
-		loc.endOffset=Integer.parseInt((String)m.get("End"));
+		loc.setOffset(Integer.parseInt((String)m.get("Start")));
+		loc.setEndOffset(Integer.parseInt((String)m.get("End")));
 		
 		return loc;
 	}
