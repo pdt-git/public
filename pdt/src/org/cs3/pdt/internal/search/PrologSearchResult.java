@@ -167,10 +167,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			return (IFile) element;
 		}
 		if (element instanceof PredicateElement){
-			return ((PredicateElement) element).file;
+			return ((PredicateElement) element).getFile();
 		}
 		if(element instanceof Match){
-			return ((PredicateElement) ((Match) element).getElement()).file;
+			return ((PredicateElement) ((Match) element).getElement()).getFile();
 		}
 		return null;
 	}
@@ -183,7 +183,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			Vector<PredicateElement> v = new Vector<PredicateElement>();
 			for (int i = 0; i < elms.length; i++) {
 				PredicateElement elm = (PredicateElement) elms[i];
-				if(elm.file.equals(file)){
+				if(elm.getFile().equals(file)){
 					v.add(elm);
 				}
 			}
@@ -196,7 +196,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public void addMatch(Match match) {
 		PredicateElement elm = (PredicateElement) match.getElement();
-		fileCache.add(elm.file);
+		fileCache.add(elm.getFile());
 		super.addMatch(match);
 	}
 	

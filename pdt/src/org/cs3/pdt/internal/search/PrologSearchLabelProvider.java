@@ -29,10 +29,10 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return null;
 		}
 		PredicateElement pe = (PredicateElement) element;
-		if("this_pred_ref".equals(pe.type)){
+		if("this_pred_ref".equals(pe.getType())){
 			return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
 		}
-		if("unresolved_pred_ref".equals(pe.type)){
+		if("unresolved_pred_ref".equals(pe.getType())){
 			return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
 		}
 		return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
@@ -43,9 +43,9 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		if(element instanceof PredicateElement){
 			
 			PredicateElement pe = ((PredicateElement)element);
-			String label = pe.label;
-			if(! "this_pred_ref".equals(pe.type)){
-				label += " ("+pe.type+")";
+			String label = pe.getLabel();
+			if(! "this_pred_ref".equals(pe.getType())){
+				label += " ("+pe.getType()+")";
 			}
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";

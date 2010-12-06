@@ -23,6 +23,8 @@ public class ClauseReferenceTest extends TestCase {
 		termParser=new CanonicalTermParser(mockStream("<clause>(02D193FC)"));
 		termParser.Term();
 		Node n =termParser.getASTRoot();
+		
+		
 		ASTAtom expectedAtom = (ASTAtom)n;
 		assertEquals("<clause>(02D193FC)",expectedAtom.getString());
 	}

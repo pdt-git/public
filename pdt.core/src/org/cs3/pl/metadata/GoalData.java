@@ -65,4 +65,9 @@ public class GoalData extends PrologElementData implements Goal {
 		return file;
 	}
 
+	public void setModule(String module) {
+		this.module=module;
+		
+	}
+
 }
