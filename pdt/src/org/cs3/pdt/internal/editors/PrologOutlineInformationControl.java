@@ -38,7 +38,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -50,6 +52,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -374,7 +378,13 @@ private IDocument document;
 		tree.setLayoutData(gd);
 
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
-
+		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				gotoSelectedElement();
+			}
+		});
 		// Hard-coded filters
 		treeViewer.addFilter(new NamePatternFilter());
 		//treeViewer.addFilter(new MemberFilter());
@@ -499,15 +509,7 @@ private IDocument document;
 					KeySequence[] sequences= getInvokingCommandKeySequences();
 					if (sequences == null){
 						if(accelerator==13){
-							PrologPredicate predicate= (PrologPredicate)getSelectedElement();					
-							ISelection selection;
-							try {
-								selection = new TextSelection(document,document.getLineOffset(predicate.line-1),0);
-								UIUtils.getActiveEditor().getEditorSite().getSelectionProvider().setSelection(selection);
-							} catch (BadLocationException e1) {
-								e1.printStackTrace();
-							}
-							close();
+							gotoSelectedElement();
 						}
 						return;
 					}
@@ -556,6 +558,18 @@ private IDocument document;
 		if (update)
 			stringMatcherUpdated();
 
+	}
+
+	public void gotoSelectedElement() {
+		PrologPredicate predicate= (PrologPredicate)getSelectedElement();					
+		ISelection selection;
+		try {
+			selection = new TextSelection(document,document.getLineOffset(predicate.line-1),0);
+			UIUtils.getActiveEditor().getEditorSite().getSelectionProvider().setSelection(selection);
+		} catch (BadLocationException e1) {
+			e1.printStackTrace();
+		}
+		close();
 	}
 
 
