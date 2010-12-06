@@ -160,12 +160,14 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 					String module = "_";
 					if(goal.getModule()!=null)
 						module ="'"+ goal.getModule()+ "'";
-					List<Map<String, Object>> clauses = session.queryAll("find_declaration('" + goal.getName()+"'," + goal.getArity()+ "," + module  + ",File,Line)");
+					String enclFile = UIUtils.getFileFromActiveEditor();
+					
+					String query = "find_declaration('"+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module  + ",File,Line)";
+					List<Map<String, Object>> clauses = session.queryAll(query);
 					if(clauses.size()>0) {
 						Map<String, Object> clause = clauses.get(0);
 						SourceLocation location = new SourceLocation((String)clause.get("File"), false);
 						location.setLine(Integer.parseInt((String)clause.get("Line"))-1);
-						//location.setOffset(-1);
 					//	System.out.println(location.offset);
 						
 						PDTUtils.showSourceLocation(location);

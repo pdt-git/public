@@ -164,14 +164,7 @@ public class PrologSearchQuery implements ISearchQuery {
 					String module = "Module";
 					if(data.getModule()!=null)
 						module ="'"+ data.getModule()+ "'";
-					String enclFile;
-					
-					IEditorInput editorInput = UIUtils.getActiveEditor().getEditorInput();
-					if(editorInput instanceof FileEditorInput){
-						enclFile = ((FileEditorInput)editorInput).getFile().getRawLocation().toPortableString().toLowerCase();
-					} else {
-						enclFile = new File(((FileStoreEditorInput)editorInput).getURI()).getAbsolutePath().replace('\\','/').toLowerCase();						
-					}
+					String enclFile = UIUtils.getFileFromActiveEditor();
 //					FileStoreEditorInput fStoreInput = (FileStoreEditorInput)editor.getEditorInput();
 //					//Path filepath = new Path(fStoreInput.getURI().getPath());
 
@@ -262,6 +255,8 @@ public class PrologSearchQuery implements ISearchQuery {
 		
 		return Status.OK_STATUS;
 	}
+
+
 
 	@Override
 	public String getLabel() {

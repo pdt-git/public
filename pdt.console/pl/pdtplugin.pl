@@ -48,7 +48,7 @@
     get_pred/6,
     get_pred/7,
     find_pred/7,
-    find_declaration/5,
+    find_declaration/6,
 %    atom_concat/4,atom_concat/5,
 %    atom_concat/6,atom_concat/7,
     get_references/8,
@@ -213,7 +213,7 @@ write_reference(Pred,Name, Arity, Nth):-
 
 
 
-%% get_references(+Pred,-Module, -FileName,-Line,-RefModule,-Name,-Arity)
+%% get_references(?EnclFile,+PredName/Arity,?Module, -FileName,-Line,-RefModule,-Name,-Arity)
 %
 %  @author TRHO
 %
@@ -221,7 +221,6 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
     functor(Pred,PredName,PredArity),
     ((nonvar(EnclFile),module_property(Module,file(EnclFile)));
      Module=user),
-%      declaring_module(Pred,Module),
       !,
       % INTERNAL, works for swi 5.11.X
       prolog_explain:explain_predicate(Module:Pred,_e), 
@@ -435,10 +434,12 @@ retrieve_argument_description([Arg|Args],
        IsVar = yes; IsVar = no),
 	retrieve_argument_description(Args,ArgDefs,ArgDescr).
 
-%% find_declaration(+Name,+Arity,?Module,-File,-Line)
+%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
 %
-find_declaration(Name,Arity,Module,File,Line):-
-	current_module(Module),
+find_declaration(EnclFile,Name,Arity,Module,File,Line):-
+    ((nonvar(EnclFile),module_property(Module,file(EnclFile)));
+     Module=user),    
+%	current_module(Module),
 	functor(Goal,Name,Arity),
 	nth_clause(Module:Goal,_,Ref),
 	clause_property(Ref,file(File)),
