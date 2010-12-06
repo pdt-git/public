@@ -219,19 +219,18 @@ write_reference(Pred,Name, Arity, Nth):-
 %
 get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name,Arity):-
     functor(Pred,PredName,PredArity),
-    ((nonvar(EnclFile),module_property(Module,file(EnclFile)));
-     Module=user),
-      !,
-      % INTERNAL, works for swi 5.11.X
-      prolog_explain:explain_predicate(Module:Pred,_e), 
-      writeln(_e),
-      decode_reference(_e,Nth, RefModule,Name, Arity),
-      number(Arity),
-      functor(EnclClause,Name,Arity),
-      %term_for_signature(Name,Arity,EnclClause),
-      nth_clause(RefModule:EnclClause,Nth,Ref),
-      clause_property(Ref,file(FileName)),
-      clause_property(Ref,line_count(Line)).
+	resolve_module(EnclFile,Module),
+    !,
+    % INTERNAL, works for swi 5.11.X
+    prolog_explain:explain_predicate(Module:Pred,_e), 
+    writeln(_e),
+    decode_reference(_e,Nth, RefModule,Name, Arity),
+    number(Arity),
+    functor(EnclClause,Name,Arity),
+    %term_for_signature(Name,Arity,EnclClause),
+    nth_clause(RefModule:EnclClause,Nth,Ref),
+    clause_property(Ref,file(FileName)),
+    clause_property(Ref,line_count(Line)).
 
       
 /**
@@ -437,11 +436,17 @@ retrieve_argument_description([Arg|Args],
 %% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
 %
 find_declaration(EnclFile,Name,Arity,Module,File,Line):-
-    ((nonvar(EnclFile),module_property(Module,file(EnclFile)));
-     Module=user),    
+    resolve_module(EnclFile,Module),
 %	current_module(Module),
 	functor(Goal,Name,Arity),
 	nth_clause(Module:Goal,_,Ref),
 	clause_property(Ref,file(File)),
     clause_property(Ref,line_count(Line)).
 
+resolve_module(EnclFile,Module):-
+ 	var(Module),
+    ( (nonvar(EnclFile),module_property(Module,file(EnclFile)) )
+    ;  Module=user
+    ),
+    !.
+resolve_module(_EnclFile,_Module).
