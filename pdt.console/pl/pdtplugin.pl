@@ -220,7 +220,6 @@ write_reference(Pred,Name, Arity, Nth):-
 get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name,Arity):-
     functor(Pred,PredName,PredArity),
 	resolve_module(EnclFile,Module),
-    !,
     % INTERNAL, works for swi 5.11.X
     prolog_explain:explain_predicate(Module:Pred,_e), 
     writeln(_e),
@@ -447,6 +446,6 @@ resolve_module(EnclFile,Module):-
  	var(Module),
     ( (nonvar(EnclFile),module_property(Module,file(EnclFile)) )
     ;  Module=user
-    ),
-    !.
+    ).
+    
 resolve_module(_EnclFile,_Module).
