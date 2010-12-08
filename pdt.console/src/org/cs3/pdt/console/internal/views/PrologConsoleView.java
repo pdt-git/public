@@ -275,6 +275,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 								// setPrologInterface(getEditorPrologInterface());
 							} finally {
 								if (getPrologInterface() != null) {
+									if (!getPrologInterface().isDown()){
+										getPrologInterface().reset();
+										Thread.sleep(1000);
+									}
 									getPrologInterface().initOptions(new EclipsePreferenceProvider(PrologRuntimeUIPlugin.getDefault()));
 									getPrologInterface().start();
 //									getDefaultPrologConsoleService().fireConsoleVisibilityChanged(PrologConsoleView.this);
