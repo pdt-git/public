@@ -386,5 +386,9 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 		// oberklasse überschreibt
 		return new SocketPrologInterface(name);
 	}
+	@Override
+	public boolean hasError() {
+		return getError()!=null;
+	}
 	
 }
