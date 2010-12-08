@@ -302,17 +302,26 @@ user:test(atom_concat4):-
     TODO: By now also the modules are bound to name (Arity == 0, Public == true)
 */
 
-
-find_pred(_,Prefix,Module,Name,Arity,true,Help):-
-	setof((Name,Arity),Module^Prefix^find_pred_(_,Prefix,Module,Name,Arity,true),All),
+find_pred(EnclFile,Prefix,EnclModule,Name,Arity,true,Help):-
+  
+	setof((Name,Arity),
+	 Prefix^EnclModule^(resolve_module(EnclFile,EnclModule),
+	find_pred_(_,Prefix,EnclModule,Name,Arity,true)),All),
 	member((Name,Arity),All),
+	( var(EnclModule)->
+	  once((
+	     resolve_module(EnclFile,EnclModule),
+	     current_predicate(EnclModule:Name/Arity)))
+	; true
+	),
+	  
 	predicate_manual_entry(Name,Arity,Help).
 
 find_pred_(_,Prefix,Module,Name,Arity,true):-
-    var(Module),
+%    var(Module),
 %    current_module(Module),
     not(Prefix == ''), % performance tweak:
-    current_predicate(Name/Arity),
+    current_predicate(Module:Name/Arity),
     atom_concat(Prefix,_,Name).
 
 predicate_manual_entry(Pred,Arity,Content) :-

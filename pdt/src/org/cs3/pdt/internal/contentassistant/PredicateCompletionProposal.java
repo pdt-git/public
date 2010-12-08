@@ -20,9 +20,10 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String name;	
 	private Map<String,?> tags;
 	private String label;
+	private String module;
 	
 	public PredicateCompletionProposal(int offset, int length,
-			String name, int arity, Map<String,?> tags) {
+			String name, int arity, Map<String,?> tags, String module) {
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(
 						isBuiltIn(tags)?
@@ -34,7 +35,11 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		this.length = length;
 		this.name=name;
 		this.tags=tags;
+		this.module=module;
 		this.label = name+"/"+arity;
+		if(module!=null){
+			label=module+":" + label;
+		}
 	}
 
 	private static boolean isPublic(Map<String, ?> tags) {

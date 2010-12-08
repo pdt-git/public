@@ -9,6 +9,7 @@ import java.util.Set;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
@@ -115,11 +116,19 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
 				PrologSession session =null;
 				try {
+					String enclFile = UIUtils.getFileFromActiveEditor();
+					String moduleArg = module!=null?Util.quoteAtom(module):"Module";
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					List<Map<String, Object>> predicates = session.queryAll("find_pred(_,'"+prefix+"',Module,Name,Arity,Public,Doc)");
+					String query = "find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Doc)";
+					List<Map<String, Object>> predicates = session.queryAll(query);
+					Debug.info("find predicates with prefix: "+ query);
 					for (Map<String, Object> predicate : predicates) {
 						String name = (String) predicate.get("Name");
 						String strArity = (String) predicate.get("Arity");
+						if(predicate.get("Module")!=null){
+							module=(String) predicate.get("Module");
+						}
+						
 						int arity = Integer.parseInt(strArity);
 						String doc = (String)predicate.get("Doc");
 						Map<String, String> tags = new HashMap<String, String>();
@@ -128,7 +137,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						}
 						
 						ComparableCompletionProposal p = new PredicateCompletionProposal(
-														begin, len, name, arity, tags);
+														begin, len, name, arity, tags,module);
 						proposals.add(p);
 					}
 					return;
@@ -157,10 +166,11 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			for (Map<String, Object> anAnswer : answers) {
 				String name = ((CTerm) anAnswer.get("Name")).getFunctorValue();
 				String strArity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
+				String resolvedModule = ((CTerm) anAnswer.get("Module")).getFunctorValue(); //TRHO TODO: not tested, yet
 				int arity = Integer.parseInt(strArity);
 				Map<String, CTerm> tags = CTermUtil.listAsMap((CTerm) anAnswer.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
-												begin, len, name, arity, tags);
+												begin, len, name, arity, tags,resolvedModule );
 				proposals.add(p);
 			}
 		} finally {
