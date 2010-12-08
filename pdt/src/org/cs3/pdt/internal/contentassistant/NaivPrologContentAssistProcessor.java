@@ -35,7 +35,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		Set<String> unique = new HashSet<String>();
 		Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 
-		if (PLEditor.isVarPrefix(prefix) || prefix.length() == 0) {
+		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == 0 ? begin : begin - 1;
 			String proposal = null;
 			while (l > 0 && !PLEditor.predicateDelimiter(document, l)) {
@@ -44,12 +44,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					l = region.getOffset();
 				else {
 					char c = document.getChar(l);
-					if (PLEditor.isVarChar(c)) {
+					if (Util.isVarChar(c)) {
 						if (proposal == null)
 							proposal = "";
 						proposal = c + proposal;
 					} else if (proposal != null) {
-						if (PLEditor.isVarPrefix(proposal.charAt(0))
+						if (Util.isVarPrefix(proposal.charAt(0))
 								&& proposal.regionMatches(true, 0, prefix, 0,
 										prefix.length())
 								&& !unique.contains(proposal) /*
@@ -68,7 +68,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				l--;
 			}
 		}
-		if (PLEditor.isVarPrefix(prefix) || prefix.length() == 0) {
+		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == document.getLength() ? begin : begin + 1;
 			String proposal = null;
 			while (l < document.getLength()
@@ -78,12 +78,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					l = region.getOffset() + region.getLength();
 				} else {
 					char c = document.getChar(l);
-					if (PLEditor.isVarChar(c)) {
+					if (Util.isVarChar(c)) {
 						if (proposal == null)
 							proposal = "";
 						proposal = proposal + c;
 					} else if (proposal != null) {
-						if (PLEditor.isVarPrefix(proposal.charAt(0))
+						if (Util.isVarPrefix(proposal.charAt(0))
 								&& proposal.regionMatches(true, 0, prefix, 0,
 										prefix.length())
 								&& !unique.contains(proposal) /*
@@ -109,7 +109,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			String prefix, List<ComparableCompletionProposal> proposals, String module)
 			throws PrologInterfaceException, CoreException {
 
-		if (PLEditor.isVarPrefix(prefix)) {
+		if (Util.isVarPrefix(prefix)) {
 			return;
 		}
 		if(getProject() == null) {
