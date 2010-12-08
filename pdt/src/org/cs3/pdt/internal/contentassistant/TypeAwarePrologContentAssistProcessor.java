@@ -54,7 +54,7 @@ IContentAssistProcessor  {
 				Map<String, CTerm> tags = CTermUtil
 								.listAsMap((CTerm) map.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
-						begin, len, name, arity, tags);
+						begin, len, name, arity, tags,null);
 				proposals.add(p);
 			}
 		} finally {
