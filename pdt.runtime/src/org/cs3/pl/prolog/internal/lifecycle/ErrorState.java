@@ -45,8 +45,9 @@ public class ErrorState extends AbstractState {
 	
 	@Override
 	public State reset() {
-		shouldReset=true;
-		return this;
+		return new DownState(context);
+//		shouldReset=true;
+//		return this;
 	}
 
 	
