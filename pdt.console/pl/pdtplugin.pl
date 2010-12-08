@@ -221,9 +221,9 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
     functor(Pred,PredName,PredArity),
 	resolve_module(EnclFile,Module),
     % INTERNAL, works for swi 5.11.X
-    prolog_explain:explain_predicate(Module:Pred,_e), 
-    writeln(_e),
-    decode_reference(_e,Nth, RefModule,Name, Arity),
+    prolog_explain:explain_predicate(Module:Pred,Explanation), 
+    writeln(Explanation),
+    decode_reference(Explanation,Nth, RefModule,Name, Arity),
     number(Arity),
     functor(EnclClause,Name,Arity),
     %term_for_signature(Name,Arity,EnclClause),
