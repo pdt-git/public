@@ -236,5 +236,11 @@ public interface PrologInterface {
 	 */
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
+	
+	/**
+	 * Is the {@link PrologInterface} in an error state, e.g. the corresponding process has been killed externally.  
+	 * @return
+	 */
+	public boolean hasError();
 
 }
