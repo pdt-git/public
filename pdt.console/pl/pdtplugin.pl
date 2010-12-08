@@ -53,6 +53,9 @@
 %    atom_concat/6,atom_concat/7,
     get_references/8,
     manual_entry/3,
+    errors_and_warnings/4,
+    activate_warning_and_error_tracing/0,
+    deactivate_warning_and_error_tracing/0,    
     pef_and_spec/5]).
 
 :- use_module(library(explain)).
@@ -458,3 +461,32 @@ resolve_module(EnclFile,Module):-
     ).
     
 resolve_module(_EnclFile,_Module).
+
+
+
+:- dynamic traced_messages/3.
+
+:- dynamic warning_and_error_tracing/0.
+
+activate_warning_and_error_tracing :- 
+	assert(warning_and_error_tracing).
+
+deactivate_warning_and_error_tracing:-
+%	retractall(startup_error(_Time, _Term)),
+	retractall(warning_and_error_tracing),
+	retractall(traced_messages(_,_,_)).
+
+user:message_hook(Term, Level, Lines) :-
+  warning_and_error_tracing,
+  assert(traced_messages(Term, Level,Lines)),
+  fail.
+
+errors_and_warnings(Level,StartLine,Length,Message):-
+	traced_messages( 
+	 error(syntax_error(Message), file(_File, StartLine, Length, _)), Level,_).
+	 
+%	 message_to_string(MessageTerm,MessageString),
+%	 string_to_atom(MessageString,Message).
+	 
+	
+
