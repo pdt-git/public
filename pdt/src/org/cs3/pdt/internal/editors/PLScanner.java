@@ -42,6 +42,7 @@
 package org.cs3.pdt.internal.editors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IFileEditorInput;
 
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
+
 public class PLScanner extends RuleBasedScanner {
 	// public static final String[] plKeywords = {"assert", "retract",
 	// "print","write"};
@@ -80,35 +83,12 @@ public class PLScanner extends RuleBasedScanner {
 	private String[] plDynamicPredicates = null;
 
 	private void initDynamicPredicates(IPrologProject plProject) {
-		plDynamicPredicates=null;
 //		if(plDynamicPredicates==null){
 //			return;
 //		}
 		if(plProject==null){
-			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-			if(console==null){
-				plDynamicPredicates=null;
-				return;
-			}
-			PrologSession session=null;
-			try {
-				session = console.getPrologInterface().getSession();
-				//Deactivated 
-				List<Map<String,Object>> solutions = new ArrayList<Map<String,Object>>();
-				//List<Map<String,Object>> solutions = session.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
-			List<String> keywords = new ArrayList<String>();
-			for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
-				Map<String,Object> si = it.next();
-				String name = (String) si.get("Name");
-				keywords.add(name);
-			}
-			plDynamicPredicates = keywords.toArray(new String[0]);
-
-			}catch(Exception e){
-				e.printStackTrace();
-				if(session!=null)session.dispose();
-			}
-
+			plDynamicPredicates= getPredicatesWithProperty("dynamic");
+			return;
 		}
 		if (plDynamicPredicates == null) {
 			
@@ -135,40 +115,12 @@ public class PLScanner extends RuleBasedScanner {
 	}
 
 	private void initKeywords(IPrologProject plProject) throws PrologInterfaceException {
+		//plKeywords=null;
 		if(plKeywords!=null)
 			return;
 		if(plProject==null){
-			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-			if(console==null){
-				plKeywords=null;
-				return;
-			}
-			
-			 console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-			if(console==null){
-				plKeywords=null;
-				return;
-			}
-			PrologSession session=null;
-			try {
-				session = console.getPrologInterface().getSession();
-				//List<Map<String,Object>> solutions = new ArrayList<Map<String,Object>>();
-				List<Map<String,Object>> solutions = session.queryAll("predicate_property(M:P,built_in),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
-			List<String> keywords = new ArrayList<String>();
-			for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
-				Map<String,Object> si = it.next();
-				if(si.get("Name")instanceof String){
-					String name= (String) si.get("Name");
-					keywords.add(name);
-				}
-			}
-			plKeywords= keywords.toArray(new String[0]);
+			plKeywords = getPredicatesWithProperty("built_in");
 			return;
-			}catch(Exception e){
-				e.printStackTrace();
-				if(session!=null)session.dispose();
-			}
-			
 			
 //			plKeywords = new String[]{"dynamic","multifile","module","use_module"};
 
@@ -197,6 +149,29 @@ public class PLScanner extends RuleBasedScanner {
 				}
 			}
 		}
+	}
+
+	public String[] getPredicatesWithProperty(String property) {
+		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+		if(console==null){
+			return null;
+		}
+		PrologSession session=null;
+		try {
+			session = console.getPrologInterface().getSession();
+			// long before=System.currentTimeMillis();
+			Map<String, Object> solutions=session.queryOnce("predicates_with_property(Predicates,"+property+")");
+			//System.out.println("Resolving dynamic predicates took: " +(System.currentTimeMillis()-before));
+			
+			String predicatesStr = (String)solutions.get("Predicates");
+			// swipl 5.8.x adds ", " between list elements when writing Strings/Streams: 
+			predicatesStr=predicatesStr.replaceAll(" ", "");
+			return predicatesStr.substring(1, predicatesStr.length()-1).split(",");
+		}catch(Exception e){
+			e.printStackTrace();
+			if(session!=null)session.dispose();
+		}
+		return null;
 	}
 
 	public PLScanner(PLEditor editor, ColorManager manager) throws CoreException, PrologInterfaceException {

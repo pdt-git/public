@@ -54,6 +54,8 @@
 %    atom_concat/6,atom_concat/7,
     get_references/8,
     manual_entry/3,
+    predicates_with_property/2,
+%    dynamic_predicates/1,
     errors_and_warnings/4,
     activate_warning_and_error_tracing/0,
     deactivate_warning_and_error_tracing/0,    
@@ -549,4 +551,37 @@ errors_and_warnings(Level,Line,0,Message):-
 
 pdt_consult(File):-
     consult(File).
+
+ 
+predicates_with_property(Predicates,Property):-
+	setof(Name,
+	   predicate_name_with_property(Name,Property),
+	   PredicatesList),
+	   sformat(S,'~w',[PredicatesList]),
+	   string_to_atom(S,Predicates).
+	  
+% helper
+predicate_name_with_property(Name,Property):-
+	predicate_property(_M:Head,Property),
+	functor(Head,Name,_),
+	Name \= '[]'.
+	
+/*	
+For performance purposes:
+
+dynamic_predicates(Predicates):-
+    findall(P,
+     (num_gen(0,4000,N),term_to_atom(N,A),atom_concat(prefixatom, A,P)),
+    PredicatesT),
+    term_to_atom(PredicatesT,Predicates).
     
+num_gen(Start,End,Start):-
+	Start < End.
+	
+num_gen(Start,End,Val):-
+	Start < End,
+	Next is Start+1,
+	num_gen(Next,End,Val).
+		
+		
+		*/
