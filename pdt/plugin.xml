@@ -124,6 +124,11 @@
          description="Toggles comment prefix on selected lines"
          id="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
          name="Toggle Comments"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Toggles comment prefix on selected lines"
+         id="org.eclipse.pdt.ui.edit.save.consult"
+         name="Save and Consult"/>
    <category
          description="Commands for the Prolog Editor"
          id="org.cs3.pdt.editing"
@@ -141,6 +146,11 @@
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+SHIFT+/"/>
+   <key
+         commandId="org.eclipse.pdt.ui.edit.save.consult"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+ALT+S"/>
 </extension>
 <extension
       point="org.eclipse.ui.contexts">

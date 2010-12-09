@@ -150,7 +150,12 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 	@Override
 	public void onCommit(ConsoleModelEvent e) {		
 		lastLine=null;
-		history.add(e.getCommitText());
+		String value = e.getCommitText();
+		if(!(value.equals(" ") || 
+			 value.equals(";") ||
+			 value.startsWith("consult("))) {
+			history.add(e.getCommitText());
+		}
 		pointer=history.size();
 	
 	}

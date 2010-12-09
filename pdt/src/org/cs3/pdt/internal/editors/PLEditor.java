@@ -73,10 +73,12 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -125,6 +127,8 @@ public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
+	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save.consult";
+
 	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 
 	private ColorManager colorManager;
@@ -146,7 +150,7 @@ public class PLEditor extends TextEditor {
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
 		// TRHO: Experimental:
-		// addProblemMarkers();
+		//addProblemMarkers();
 
 	}
 
@@ -166,6 +170,7 @@ public class PLEditor extends TextEditor {
 
 						file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
 						ConsultActionDelegate consult = new ConsultActionDelegate();
+						consult.setSchedulingRule(file);
 						consult.run(null);
 						addMarkers(file);
 						
@@ -188,22 +193,32 @@ public class PLEditor extends TextEditor {
 				try {
 				
 					final IDocument doc = PDTCoreUtils.getDocument(file);
-					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();					
+					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
+					Thread.sleep(350); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
 					List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message)");
 					for (Map<String, Object> msg : msgs) {
-						IMarker marker;
-							marker = file.createMarker(IMarker.PROBLEM);
+						int severity=0;
+						try {
+							severity = mapSeverity(((String)msg.get("Kind")));
+						} catch(IllegalArgumentException e){
+							continue;
+						}
+						IMarker marker = file.createMarker(IMarker.PROBLEM);
+
+							marker.setAttribute(IMarker.SEVERITY, severity);
+							String msgText = (String)msg.get("Message");
 							int start = doc.getLineOffset(Integer.parseInt((String)msg.get("Line"))-1);
 							int end = start +Integer.parseInt((String)msg.get("Length"));
-
+							
+							if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
+								start = end= 0;
+							}
 							MarkerUtilities.setCharStart(marker, start);
 							MarkerUtilities.setCharEnd(marker, end);
 
-							marker.setAttribute(IMarker.SEVERITY, mapSeverity(((String)msg.get("Kind"))));
-							String msgText = (String)msg.get("Message");
 							marker.setAttribute(IMarker.MESSAGE, msgText);
-							session.queryOnce("deactivate_warning_and_error_tracing");
 					}
+					session.queryOnce("deactivate_warning_and_error_tracing");
 				} catch (Exception e) {
 					if(session!=null)session.dispose();
 					Debug.report(e);
@@ -213,6 +228,7 @@ public class PLEditor extends TextEditor {
 				return Status.OK_STATUS;
 			}
 		};
+		j.setRule(file);
 		j.schedule();
 			
 		 
@@ -351,6 +367,7 @@ public class PLEditor extends TextEditor {
 		
 		fOutlinePresenter= configuration.getOutlinePresenter(this.getSourceViewer());
 		fOutlinePresenter.install(this.getSourceViewer());
+		
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ToolTipAction", this) {
 			@Override
@@ -365,6 +382,18 @@ public class PLEditor extends TextEditor {
 		addAction(menuMgr, action, "show outline",
 				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SHOW_QUICK_OUTLINE);
 
+		action = new TextEditorAction(bundle, PLEditor.class.getName()
+				+ ".SaveAndConsultAction", this) {
+			@Override
+			public void run() {
+				doSave(new NullProgressMonitor());
+				addProblemMarkers();
+				setFocus();
+			}
+		};
+		addAction(menuMgr, action, "Save and Consult",
+				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SAVE_AND_CONSULT);
+		
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ToolTipAction", this) {
 			@Override
