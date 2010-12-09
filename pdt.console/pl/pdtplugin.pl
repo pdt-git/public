@@ -45,6 +45,7 @@
 
 :- module(pdtplugin,[
     get_file_pos/7,
+    pdt_consult/1,
     get_pred/6,
     get_pred/7,
     find_pred/8,
@@ -546,3 +547,6 @@ errors_and_warnings(Level,Line,0,Message):-
 %	 a(A).
 	
 
+pdt_consult(File):-
+    consult(File).
+    
