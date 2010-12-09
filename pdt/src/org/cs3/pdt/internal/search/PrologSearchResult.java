@@ -45,6 +45,8 @@
  */
 package org.cs3.pdt.internal.search;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
@@ -201,8 +203,16 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 	
 	public IFile[] getFiles() {
-		
-		return fileCache.toArray(new IFile[fileCache.size()]);
+		IFile[] sortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
+		Arrays.sort(sortedFiles,
+				new Comparator<IFile>() {
+					@Override
+					public int compare(IFile first, IFile second) {
+						return first.getFullPath().toPortableString().compareTo(second.getFullPath().toPortableString());
+					}
+				}
+		);		
+		return sortedFiles;
 	}
 	@Override
 	public void removeAll() {	
