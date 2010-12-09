@@ -131,7 +131,6 @@
          name="Save and Consult"/>
    <command
          categoryId="org.cs3.pdt.editing"
-         defaultHandler="org.cs3.pdt.internal.commands.ConsultCommand"
          description="Consult"
          id="org.eclipse.pdt.ui.edit.consult"
          name="Consult"/>
