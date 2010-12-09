@@ -49,6 +49,7 @@ import org.cs3.pl.console.prolog.PrologConsole;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -59,7 +60,10 @@ public class QueryConsoleThreadAction extends Action{
 
 	private String query;
 	private final PrologConsole console;
+	private ISchedulingRule schedulingRule;
 	
+
+
 
 	public QueryConsoleThreadAction(PrologConsole console, String query,
 			String text, String tooltip, ImageDescriptor icon) {
@@ -100,10 +104,17 @@ public class QueryConsoleThreadAction extends Action{
 					return Status.OK_STATUS;
 				}
 			};
+			if(schedulingRule != null) {
+				j.setRule(schedulingRule);
+			}
 			j.schedule();
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
+	}
+
+	public void setSchedulingRule(ISchedulingRule schedulingRule) {
+		this.schedulingRule = schedulingRule;
 	}
 
 	public String getQuery() {

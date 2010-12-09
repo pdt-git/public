@@ -119,7 +119,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					String enclFile = UIUtils.getFileFromActiveEditor();
 					String moduleArg = module!=null?Util.quoteAtom(module):"Module";
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					String query = "find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Doc)";
+					String query = "find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Builtin,Doc)";
 					List<Map<String, Object>> predicates = session.queryAll(query);
 					Debug.info("find predicates with prefix: "+ query);
 					for (Map<String, Object> predicate : predicates) {
@@ -127,11 +127,21 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						String strArity = (String) predicate.get("Arity");
 						if(predicate.get("Module")!=null){
 							module=(String) predicate.get("Module");
+							if(module.equals("_")){
+								module =null;
+							}
 						}
 						
 						int arity = Integer.parseInt(strArity);
 						String doc = (String)predicate.get("Doc");
 						Map<String, String> tags = new HashMap<String, String>();
+						if(Boolean.parseBoolean((String)predicate.get("Public"))){
+							tags.put("public","true");
+						}
+						if(Boolean.parseBoolean((String)predicate.get("Builtin"))){
+							tags.put("built_in","true");
+						}
+
 						if(!doc.equals("nodoc")){
 							tags.put("documentation",doc);
 						}
