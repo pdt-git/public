@@ -228,7 +228,7 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
 	resolve_module(EnclFile,Module),
     % INTERNAL, works for swi 5.11.X
     prolog_explain:explain_predicate(Module:Pred,Explanation), 
-    writeln(Explanation),
+%    writeln(Explanation),
     decode_reference(Explanation,Nth, RefModule,Name, Arity),
     number(Arity),
     functor(EnclClause,Name,Arity),
