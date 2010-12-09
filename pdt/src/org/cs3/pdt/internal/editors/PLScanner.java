@@ -46,9 +46,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -63,6 +65,8 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IFileEditorInput;
 
 public class PLScanner extends RuleBasedScanner {
@@ -76,17 +80,42 @@ public class PLScanner extends RuleBasedScanner {
 	private String[] plDynamicPredicates = null;
 
 	private void initDynamicPredicates(IPrologProject plProject) {
+		plDynamicPredicates=null;
+//		if(plDynamicPredicates==null){
+//			return;
+//		}
 		if(plProject==null){
-			plDynamicPredicates=null;
-			return;
+			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+			if(console==null){
+				plDynamicPredicates=null;
+				return;
+			}
+			PrologSession session=null;
+			try {
+				session = console.getPrologInterface().getSession();
+				//Deactivated 
+				List<Map<String,Object>> solutions = new ArrayList<Map<String,Object>>();
+				//List<Map<String,Object>> solutions = session.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
+			List<String> keywords = new ArrayList<String>();
+			for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
+				Map<String,Object> si = it.next();
+				String name = (String) si.get("Name");
+				keywords.add(name);
+			}
+			plDynamicPredicates = keywords.toArray(new String[0]);
+
+			}catch(Exception e){
+				e.printStackTrace();
+				if(session!=null)session.dispose();
+			}
+
 		}
 		if (plDynamicPredicates == null) {
 			
 			PrologSession session = null;
 			try {
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
-				List<Map<String,Object>> solutions = session
-						.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
+				List<Map<String,Object>> solutions = session.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
 				for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
 					Map<String,Object> si = it.next();
@@ -106,9 +135,43 @@ public class PLScanner extends RuleBasedScanner {
 	}
 
 	private void initKeywords(IPrologProject plProject) throws PrologInterfaceException {
-		if(plProject==null){
-			plKeywords=null;
+		if(plKeywords!=null)
 			return;
+		if(plProject==null){
+			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+			if(console==null){
+				plKeywords=null;
+				return;
+			}
+			
+			 console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+			if(console==null){
+				plKeywords=null;
+				return;
+			}
+			PrologSession session=null;
+			try {
+				session = console.getPrologInterface().getSession();
+				//List<Map<String,Object>> solutions = new ArrayList<Map<String,Object>>();
+				List<Map<String,Object>> solutions = session.queryAll("predicate_property(M:P,built_in),functor(P,Name,_)"); // M:P is a prolog-trick to get also unused pred's
+			List<String> keywords = new ArrayList<String>();
+			for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
+				Map<String,Object> si = it.next();
+				if(si.get("Name")instanceof String){
+					String name= (String) si.get("Name");
+					keywords.add(name);
+				}
+			}
+			plKeywords= keywords.toArray(new String[0]);
+			return;
+			}catch(Exception e){
+				e.printStackTrace();
+				if(session!=null)session.dispose();
+			}
+			
+			
+//			plKeywords = new String[]{"dynamic","multifile","module","use_module"};
+
 		}
 		if (plKeywords == null) {
 			
@@ -124,7 +187,6 @@ public class PLScanner extends RuleBasedScanner {
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
-
 				plKeywords = keywords.toArray(new String[0]);
 			} catch (PrologException e) {
 				plKeywords = new String[0];

@@ -129,6 +129,8 @@ public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save.consult";
 
+	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
+
 	public static String COMMAND_TOGGLE_COMMENTS = "org.eclipse.pdt.ui.edit.text.prolog.toggle.comments";
 
 	private ColorManager colorManager;
@@ -345,6 +347,7 @@ public class PLEditor extends TextEditor {
 		super.createPartControl(parent);
 
 		MenuManager menuMgr = createPopupMenu();
+		
 
 		createInspectionMenu(menuMgr);
 
@@ -393,7 +396,18 @@ public class PLEditor extends TextEditor {
 		};
 		addAction(menuMgr, action, "Save and Consult",
 				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SAVE_AND_CONSULT);
-		
+
+		action = new TextEditorAction(bundle, PLEditor.class.getName()
+				+ ".ConsultAction", this) {
+			@Override
+			public void run() {
+				ConsultActionDelegate consult = new ConsultActionDelegate();
+				consult.run(null);
+			}
+		};
+		addAction(menuMgr, action, "Consult",
+				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_CONSULT);
+
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ToolTipAction", this) {
 			@Override

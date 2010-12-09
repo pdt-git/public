@@ -47,10 +47,10 @@
        <action
              label="Consult"
              class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
-             accelerator="F9"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.consult"/>
+             
        <action
              label="Open Console"
              class="org.cs3.pdt.internal.actions.OpenConsoleAction"
@@ -126,9 +126,15 @@
          name="Toggle Comments"/>
    <command
          categoryId="org.cs3.pdt.editing"
-         description="Toggles comment prefix on selected lines"
+         description="Save And Consult"
          id="org.eclipse.pdt.ui.edit.save.consult"
          name="Save and Consult"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         defaultHandler="org.cs3.pdt.internal.commands.ConsultCommand"
+         description="Consult"
+         id="org.eclipse.pdt.ui.edit.consult"
+         name="Consult"/>
    <category
          description="Commands for the Prolog Editor"
          id="org.cs3.pdt.editing"
@@ -151,6 +157,12 @@
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          sequence="CTRL+ALT+S"/>
+   <key
+         commandId="org.eclipse.pdt.ui.edit.consult"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="F9"/>
+         
 </extension>
 <extension
       point="org.eclipse.ui.contexts">
@@ -275,5 +287,17 @@
             textStylePreferenceValue="NONE">
 	  </specification>	  	  
 	</extension>
-	
+<!--	
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          allPopups="false"
+          locationURI="menu:org.cs3.pdt.menus.Prolog">
+       <command
+             commandId="org.eclipse.pdt.ui.edit.consult"
+             style="push">
+       </command>
+    </menuContribution>
+ </extension>
+-->	
 </plugin>
