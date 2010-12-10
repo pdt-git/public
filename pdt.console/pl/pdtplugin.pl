@@ -550,7 +550,7 @@ errors_and_warnings(Level,Line,0,Message):-
 	
 
 pdt_consult(File):-
-    consult(File).
+    user:consult(File).
 
  
 predicates_with_property(Predicates,Property):-
