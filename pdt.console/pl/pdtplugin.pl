@@ -61,9 +61,10 @@
     deactivate_warning_and_error_tracing/0,    
     pef_and_spec/5]).
 
+:- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
 :- use_module(library(help)).
-:- doc_collect(false).
+
 %:- [library('org/cs3/pdt/compatibility/compatiblitySWI')].
 /*
 meta_data(?Filename,?Module,?Name,?Arity,?Public,Position,?Length,?Dynamic,?Multifile)
@@ -181,9 +182,8 @@ get_pred(_file, _name,_arity,_pos,_dyn,_mul,Public) :-
 
 
 
-/*
-   term_for_signature(+Name, +Arity, -Term)
-*/
+%%  term_for_signature(+Name, +Arity, -Term) is det.
+%
 term_for_signature(Name,0,Term):-
     atom_to_term(Name,Term,_).
 
@@ -219,8 +219,9 @@ write_reference(Pred,Name, Arity, Nth):-
 
 
 
-%% get_references(?EnclFile,+PredName/Arity,?Module, -FileName,-Line,-RefModule,-Name,-Arity)
+%% get_references(?EnclFile,+PredSignature,?Module, -FileName,-Line,-RefModule,-Name,-Arity) is nondet.
 %
+%  @param PredSignature PredName/Arity
 %  @author TRHO
 %
 get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name,Arity):-
@@ -238,15 +239,14 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
     clause_property(Ref,line_count(Line)).
 
       
-/**
- * decode_reference(RefStr,Nth, Pred,Arity)
- *
- * Reference string from explain/2 predicate
- *
- * IMPORTANT: Hardcoded reference to the user module!
- * Only works for predicates defined in the user module!
- */
 
+%% decode_reference(+RefStr,-Nth, +Pred,-Arity) is nondet.
+%
+% Reference string from explain/2 predicate
+% 
+%  IMPORTANT: Hardcoded reference to the user module!
+%  Only works for predicates defined in the user module!
+%
 decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
     atom_concat('        Referenced from ',Rest,RefStr),
     atom_concat(NthAtom,'-th clause of ',RefModule,':', Pred,'/',ArityAtom,Rest),
@@ -289,26 +289,22 @@ user:test(atom_concat4):-
     atom_concat(a,b,_c,abc),
     _c == c.
 
-%pdtplugin:a
-/*
-    pdtplugin_find_pred(+File,+Prefix,?Module,-Name,-Arity,-Public,-Help)
-
-    The more specific the the arguments are specified, the lesser
-    is the number of the retrieved Predicates: Public Name/Arity
-
-    <Public> represents the module visibility (true/false)
-    For performance reasons an empty prefix with an unspecified module
-    will only bind predicates if File is specified.
-
-    <File> specifies the file from where this query is triggered
-    <Prefix> specifies the prefix of the predicate
-    <Module> specifies the defining module
 
 
-    Return -1 for a module names
-*/
-
- 
+%%  pdtplugin_find_pred(+File,+Prefix,?Module,-Name,-Arity,-Public,-Help) is nondet.
+%
+%   The more specific the the arguments are specified, the lesser
+%   is the number of the retrieved Predicates: Public Name/Arity
+%
+%   <Public> represents the module visibility (true/false)
+%   For performance reasons an empty prefix with an unspecified module
+%   will only bind predicates if File is specified.
+%
+%   <File> specifies the file from where this query is triggered
+%   <Prefix> specifies the prefix of the predicate
+%   <Module> specifies the defining module
+%   @return -1 for a module names
+%
 get_defining_module(_EnclFile,EnclModule,_Name,_Arity):-
 	nonvar(EnclModule),
 	!.
@@ -339,7 +335,7 @@ find_pred(EnclFile,Prefix,EnclModule,Name,Arity,Public,Builtin,Help):-
 	  Builtin=true
 	; Builtin=false
 	),
-	predicate_manual_entry(Name,Arity,Help).
+	predicate_manual_entry(EnclModule,Name,Arity,Help).
 	
 	
 
@@ -349,9 +345,6 @@ find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc'):-
     atom_concat(Prefix,_,Name).
 
 find_pred_(Prefix,Module,Name,Arity,true):-
-    
-%    var(Module),
-%    current_module(Module),
     ( var(Module)->
     	not(Prefix == '')
     ; true
@@ -365,7 +358,7 @@ find_pred_(Prefix,Module,Name,Arity,true):-
       ; true
     ).
 
-predicate_manual_entry(Pred,Arity,Content) :-
+predicate_manual_entry(_Module,Pred,Arity,Content) :-
     predicate(Pred,Arity,_,FromLine,ToLine),
     !,
     online_help:line_start(FromLine, From),
@@ -387,7 +380,11 @@ predicate_manual_entry(Pred,Arity,Content) :-
     free_memory_file(Handle),
     !.
 
-predicate_manual_entry(_Pred,_Arity,'nodoc').
+
+predicate_manual_entry(Module, Pred,Arity,Content) :-
+	pldoc:doc_comment(Module:Pred/Arity,_Pos,_,Content).
+	
+predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
 /*
 find_pred(_,Prefix,Module,Name,Arity,Public):-
@@ -452,19 +449,18 @@ user:tearDown('pdtplugin:find_pred') :-
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,9,false,823,11,false,false)),
     retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,get_file_pos_,7,true,1956,12,false,false)).
 
-/**
- * pef_and_spec(+Id,-Functor,-Args,-ArgDescriptions)
- *
- * binds the functor and the argument descriptions.
- *
- * The descriptions are lists for every argument containing:
- * 1. Argumentname (parent,..)
- * 2. Kind         (id, attr)
- * 3. List or Atom (list,atom)
- * 4. constraints  (atom,classT,...)
- * 5. isVariable   (yes|no) (yes only in the error case!)
- */
 
+%% pef_and_spec(+Id,-Functor,-Args,-ArgDescriptions) is det.
+%
+% binds the functor and the argument descriptions.
+%
+% The descriptions are lists for every argument containing:
+% 1. Argumentname (parent,..)
+% 2. Kind         (id, attr)
+% 3. List or Atom (list,atom)
+% 4. constraints  (atom,classT,...)
+% 5. isVariable   (yes|no) (yes only in the error case!)
+%
 pef_and_spec(Id,Functor,Args,ArgDescr,AtomTerm):-
     getTerm(Id,Term),
     term_to_atom(Term,AtomTerm),
@@ -515,39 +511,34 @@ deactivate_warning_and_error_tracing:-
 	retractall(warning_and_error_tracing),
 	retractall(traced_messages(_,_,_)).
  
-
-  
+ 
+%% message_hook(+Term, +Level,+ Lines) is det. 
+%
+% intercept prolog messages to collect term positions and 
+% error/warning messages in traced_messages/3
+% 
+% @author trho
+%  
 user:message_hook(_Term, Level,Lines) :-
-%  guitracer,
-%  trace,
   warning_and_error_tracing,
   prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
-%  assert(user:swvd(_Term,Level,Line,Lines)),
   assert(traced_messages(Level, Line,Lines)),
   fail.
 
 
-
 errors_and_warnings(Level,Line,0,Message):-
     traced_messages(Level, Line,Lines),
-
 %	traced_messages(
 %	 error(syntax_error(_Message), 
 %	 file(_File, StartLine, Length, _)), 
 %	 Level,Lines),
     new_memory_file(Handle),
    	open_memory_file(Handle, write, Stream),
-	 print_message_lines(Stream,'',Lines),
-     close(Stream),
-	memory_file_to_atom(Handle,Message),     
-     free_memory_file(Handle).
+	print_message_lines(Stream,'',Lines),
+    close(Stream),
+	memory_file_to_atom(Handle,Message),
+    free_memory_file(Handle).
       
-	 
-%	 message_to_string(MessageTerm,MessageString),
-%	 string_to_atom(MessageString,Message).
-	 
-%	 a(A).
-	
 
 pdt_consult(File):-
     user:consult(File).
