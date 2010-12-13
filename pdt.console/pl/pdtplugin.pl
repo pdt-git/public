@@ -382,7 +382,8 @@ predicate_manual_entry(_Module,Pred,Arity,Content) :-
 
 
 predicate_manual_entry(Module, Pred,Arity,Content) :-
-	pldoc:doc_comment(Module:Pred/Arity,_Pos,_,Content).
+	pldoc:doc_comment(Module:Pred/Arity,_Pos,_,Content),
+	!.
 	
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
