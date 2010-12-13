@@ -143,6 +143,11 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 						}
 
 						if(!doc.equals("nodoc")){
+							if(doc.startsWith("%%")){
+								
+								doc= doc.replaceAll("%", "").trim();
+							}
+							
 							tags.put("documentation",doc);
 						}
 						
