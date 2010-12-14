@@ -42,13 +42,16 @@
 package org.cs3.pdt.internal.editors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -63,7 +66,11 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IFileEditorInput;
+
+import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class PLScanner extends RuleBasedScanner {
 	// public static final String[] plKeywords = {"assert", "retract",
@@ -76,8 +83,11 @@ public class PLScanner extends RuleBasedScanner {
 	private String[] plDynamicPredicates = null;
 
 	private void initDynamicPredicates(IPrologProject plProject) {
+//		if(plDynamicPredicates==null){
+//			return;
+//		}
 		if(plProject==null){
-			plDynamicPredicates=null;
+			plDynamicPredicates= getPredicatesWithProperty("dynamic");
 			return;
 		}
 		if (plDynamicPredicates == null) {
@@ -85,8 +95,7 @@ public class PLScanner extends RuleBasedScanner {
 			PrologSession session = null;
 			try {
 				session = plProject.getMetadataPrologInterface().getSession(PrologInterface.NONE);
-				List<Map<String,Object>> solutions = session
-						.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
+				List<Map<String,Object>> solutions = session.queryAll("predicate_property(M:P,dynamic),functor(P,Name,_)");  // M:P is a prolog-trick to get also unused pred's
 				List<String> keywords = new ArrayList<String>();
 				for (Iterator<Map<String,Object>> it = solutions.iterator(); it.hasNext();) {
 					Map<String,Object> si = it.next();
@@ -106,9 +115,15 @@ public class PLScanner extends RuleBasedScanner {
 	}
 
 	private void initKeywords(IPrologProject plProject) throws PrologInterfaceException {
-		if(plProject==null){
-			plKeywords=null;
+		//plKeywords=null;
+		if(plKeywords!=null)
 			return;
+		if(plProject==null){
+			plKeywords = getPredicatesWithProperty("built_in");
+			return;
+			
+//			plKeywords = new String[]{"dynamic","multifile","module","use_module"};
+
 		}
 		if (plKeywords == null) {
 			
@@ -124,7 +139,6 @@ public class PLScanner extends RuleBasedScanner {
 					String name = (String) si.get("Name");
 					keywords.add(name);
 				}
-
 				plKeywords = keywords.toArray(new String[0]);
 			} catch (PrologException e) {
 				plKeywords = new String[0];
@@ -135,6 +149,29 @@ public class PLScanner extends RuleBasedScanner {
 				}
 			}
 		}
+	}
+
+	public String[] getPredicatesWithProperty(String property) {
+		PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+		if(console==null){
+			return null;
+		}
+		PrologSession session=null;
+		try {
+			session = console.getPrologInterface().getSession();
+			// long before=System.currentTimeMillis();
+			Map<String, Object> solutions=session.queryOnce("predicates_with_property(Predicates,"+property+")");
+			//System.out.println("Resolving dynamic predicates took: " +(System.currentTimeMillis()-before));
+			
+			String predicatesStr = (String)solutions.get("Predicates");
+			// swipl 5.8.x adds ", " between list elements when writing Strings/Streams: 
+			predicatesStr=predicatesStr.replaceAll(" ", "");
+			return predicatesStr.substring(1, predicatesStr.length()-1).split(",");
+		}catch(Exception e){
+			e.printStackTrace();
+			if(session!=null)session.dispose();
+		}
+		return null;
 	}
 
 	public PLScanner(PLEditor editor, ColorManager manager) throws CoreException, PrologInterfaceException {

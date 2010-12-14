@@ -20,9 +20,11 @@ import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.internal.text.html.HTML2TextReader;
 import org.eclipse.jface.internal.text.html.HTMLPrinter;
 import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.IInformationControlExtension4;
+import org.eclipse.jface.text.IInformationControlExtension5;
 import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -46,6 +48,7 @@ import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -69,7 +72,7 @@ import org.eclipse.swt.widgets.Shell;
  *
  * @since 3.1
  */
-public class BrowserInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, IInformationControlExtension4,  DisposeListener {
+public class BrowserInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension3, IInformationControlExtension4,  IInformationControlExtension5,DisposeListener {
 
 
 	/**
@@ -279,6 +282,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 */
 	public BrowserInformationControl(Shell parent,int style) {
 		this(parent, SWT.TOOL | SWT.NO_TRIM, style);
+//		fBrowser.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_YELLOW));
+		fBrowser.setSize(700, 300);
+		
 	}
 
 	/**
@@ -617,6 +623,26 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	@Override
 	public boolean hasContents() {
 		return fBrowserHasContent;
+	}
+
+	@Override
+	public boolean containsControl(Control control) {
+		return true;
+	}
+
+	@Override
+	public boolean isVisible() {
+		return true;
+	}
+
+	@Override
+	public Point computeSizeConstraints(int widthInChars, int heightInChars) {
+		return new Point(460,heightInChars);
+	}
+
+	@Override
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return null;
 	}
 }
 
