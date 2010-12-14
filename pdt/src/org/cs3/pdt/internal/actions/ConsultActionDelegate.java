@@ -132,7 +132,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				checkPif();
 				
 
-				setQuery("consult('" + Util.prologFileName(file) + "')");
+				setQuery("pdt_consult('" + Util.prologFileName(file) + "')");
 
 				run();
 			} catch (IOException e) {

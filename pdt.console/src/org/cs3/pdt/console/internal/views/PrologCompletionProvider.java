@@ -190,7 +190,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			if (filename == null)
 				filename = "_";
 			String query = "find_pred('" + filename + "','" + prefix + "', "
-					+ module + ",Name,Arity,Public,_)";
+					+ module + ",Name,Arity,Public,_,_)";
 			List<Map<String,Object>> results = session.queryAll(query);
 			List<Predicate> list = new ArrayList<Predicate>();
 			for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
