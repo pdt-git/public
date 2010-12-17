@@ -43,6 +43,8 @@ package org.cs3.pdt.internal.search;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -183,6 +185,7 @@ public class PrologSearchQuery implements ISearchQuery {
 						data.setModule((String)clauses.get(0).get("Module"));
 					}
 
+					
 					for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 						Map<String,Object> m = iterator.next();
 						Debug.info(m.toString());
