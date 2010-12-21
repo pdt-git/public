@@ -45,6 +45,7 @@ import java.io.File;
 
 import org.cs3.pdt.internal.contentassistant.NaivPrologContentAssistProcessor;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.filesystem.provider.FileStore;
 import org.eclipse.core.resources.IFile;
@@ -263,11 +264,16 @@ public class PLConfiguration extends SourceViewerConfiguration {
 			
 			@Override
 			public String getInformation(ITextViewer textViewer, IRegion subject) {
+				String fileName;
 				if(editor.getEditorInput()instanceof FileEditorInput){
-					return ((FileEditorInput)editor.getEditorInput()).getFile().getRawLocation().toPortableString().toLowerCase();
-				} 
-				return new File(((FileStoreEditorInput)editor.getEditorInput()).getURI()).getAbsolutePath().toLowerCase().replace('\\', '/');
-				
+					fileName= ((FileEditorInput)editor.getEditorInput()).getFile().getRawLocation().toPortableString();
+				} else {
+					fileName = new File(((FileStoreEditorInput)editor.getEditorInput()).getURI()).getAbsolutePath().replace('\\', '/');
+				}
+				if(Util.isWindows()){
+					return fileName.toLowerCase();
+				}
+				return fileName;
 
 			}
 		};
