@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
-<target name="default">
+<project default="default">
 	
-	
-	
-<!--	<eclipse.incrementalBuild project="pdt.common" kind="full"/>
-	<eclipse.incrementalBuild project="pdt.common.ui" kind="full"/>
-	-->
-	<eclipse.incrementalBuild project="pdt" kind="full"/>
-	<eclipse.incrementalBuild project="pdt.console" kind="full"/>
-
-</target>
+	<target name="default">
+		<eclipse.incrementalBuild project="pdt.common" kind="full"/>
+		<eclipse.incrementalBuild project="pdt.common.ui" kind="full"/>
+		<eclipse.incrementalBuild project="pdt" kind="full"/>
+		<eclipse.incrementalBuild project="pdt.console" kind="full"/>
+	</target>
 	
 </project>
