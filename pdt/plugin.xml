@@ -150,7 +150,7 @@
          commandId="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-         sequence="CTRL+SHIFT+/"/>
+         sequence="CTRL+SHIFT+C"/>
    <key
          commandId="org.eclipse.pdt.ui.edit.save.consult"
          contextId="org.cs3.pdt.editingProlog"

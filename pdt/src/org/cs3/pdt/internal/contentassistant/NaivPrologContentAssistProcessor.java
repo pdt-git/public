@@ -157,8 +157,9 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					}
 					return;
 				}catch(Exception e) {
+					Debug.report(e);
+				} finally {
 					if(session!=null)session.dispose();
-					e.printStackTrace();
 				}
 			} else {
 				Debug.warning("Stopped completion proposal creation. No associated Prolog project found for project '" + getFile().getProject().getName() + "'.");

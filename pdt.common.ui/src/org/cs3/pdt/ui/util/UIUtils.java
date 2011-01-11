@@ -43,6 +43,7 @@ package org.cs3.pdt.ui.util;
 
 import java.io.File;
 
+import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -287,9 +288,12 @@ public final class UIUtils {
 		String enclFile;
 		IEditorInput editorInput = UIUtils.getActiveEditor().getEditorInput();
 		if(editorInput instanceof FileEditorInput){
-			enclFile = ((FileEditorInput)editorInput).getFile().getRawLocation().toPortableString().toLowerCase();
+			enclFile = ((FileEditorInput)editorInput).getFile().getRawLocation().toPortableString();
 		} else {
-			enclFile = new File(((FileStoreEditorInput)editorInput).getURI()).getAbsolutePath().replace('\\','/').toLowerCase();						
+			enclFile = new File(((FileStoreEditorInput)editorInput).getURI()).getAbsolutePath().replace('\\','/');						
+		}
+		if(Util.isWindows()){
+			enclFile = enclFile.toLowerCase();
 		}
 		return enclFile;
 	}

@@ -175,9 +175,10 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						return;
 					}
 				}catch(Exception e) {
+					Debug.report(e);
+				} finally {
 					if(session!=null)session.dispose();
-				}
-				
+				}				
 			} else {
 				UIUtils.getDisplay().asyncExec(new Runnable() {
 					
