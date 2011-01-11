@@ -168,7 +168,8 @@ public class PLScanner extends RuleBasedScanner {
 			predicatesStr=predicatesStr.replaceAll(" ", "");
 			return predicatesStr.substring(1, predicatesStr.length()-1).split(",");
 		}catch(Exception e){
-			e.printStackTrace();
+			Debug.report(e);
+		} finally {
 			if(session!=null)session.dispose();
 		}
 		return null;

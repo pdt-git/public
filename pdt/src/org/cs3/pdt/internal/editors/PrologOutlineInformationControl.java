@@ -23,6 +23,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -480,7 +481,8 @@ private IDocument document;
 					}
 				}
 			}catch(Exception e){
-				e.printStackTrace();
+				Debug.report(e);
+			} finally {
 				if(session!=null)session.dispose();
 			}
 			

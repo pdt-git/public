@@ -177,8 +177,9 @@ public class PLEditor extends TextEditor {
 						addMarkers(file);
 						
 					}catch(Exception e) {
+						Debug.report(e);
+					} finally {
 						if(session!=null)session.dispose();
-						e.printStackTrace();
 					}
 
 			}
@@ -196,7 +197,7 @@ public class PLEditor extends TextEditor {
 				
 					final IDocument doc = PDTCoreUtils.getDocument(file);
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					Thread.sleep(350); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
+					Thread.sleep(500); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
 					List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message)");
 					for (Map<String, Object> msg : msgs) {
 						int severity=0;
@@ -222,10 +223,10 @@ public class PLEditor extends TextEditor {
 					}
 					session.queryOnce("deactivate_warning_and_error_tracing");
 				} catch (Exception e) {
-					if(session!=null)session.dispose();
 					Debug.report(e);
 					return Status.CANCEL_STATUS;
-
+				} finally {
+					if(session!=null)session.dispose();
 				}
 				return Status.OK_STATUS;
 			}
