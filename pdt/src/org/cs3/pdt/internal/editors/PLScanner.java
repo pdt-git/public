@@ -160,7 +160,7 @@ public class PLScanner extends RuleBasedScanner {
 		try {
 			session = console.getPrologInterface().getSession();
 			// long before=System.currentTimeMillis();
-			Map<String, Object> solutions=session.queryOnce("predicates_with_property(Predicates,"+property+")");
+			Map<String, Object> solutions=session.queryOnce("predicates_with_property("+property+",Predicates)");
 			//System.out.println("Resolving dynamic predicates took: " +(System.currentTimeMillis()-before));
 			
 			String predicatesStr = (String)solutions.get("Predicates");
