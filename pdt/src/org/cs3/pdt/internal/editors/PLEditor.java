@@ -63,8 +63,6 @@ import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -73,7 +71,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -809,18 +806,19 @@ public class PLEditor extends TextEditor {
 		}
 		super.doSetInput(input);
 	
-		if (input instanceof IFileEditorInput) {
-			IFileEditorInput editorInput = (IFileEditorInput) input;
-			filepath = editorInput.getFile().getLocation();
-			
-		}
-		if (input instanceof FileStoreEditorInput){
-			FileStoreEditorInput editorInput = (FileStoreEditorInput) input;
-			filepath =  new Path(editorInput.getURI().getPath());
-		}
-		else{
-			return;
-		}
+		filepath = new Path(UIUtils.getFileNameForEditorInput(input));
+//		if (input instanceof IFileEditorInput) {
+//			IFileEditorInput editorInput = (IFileEditorInput) input;
+//			filepath = editorInput.getFile().getLocation();
+//			
+//		}
+//		if (input instanceof FileStoreEditorInput){
+//			FileStoreEditorInput editorInput = (FileStoreEditorInput) input;
+//			filepath =  new Path(editorInput.getURI().getPath());
+//		}
+//		else{
+//			return;
+//		}
 		
 	}
 
