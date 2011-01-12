@@ -1,5 +1,6 @@
 package org.cs3.pdt.internal.wizards;
 
+import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -35,7 +36,7 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 		// testing - spyoung
 		if (fPage == null) {
 			fPage = new NewModuleCreationWizardPage();
-			addPage(fPage);
+			addPage(fPage);			
 			//fPage.init(getSelection());
 		}
 	}
@@ -45,13 +46,20 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 	 * and open the Cross References view, if desired.
 	 */
 	public boolean performFinish() {
-		return true;
+		
+		try {
+			IFile file = fPage.createModule(null);
+				if (file  != null) {
+					UIUtils.openInEditor(file, true);
+				}
+			return true;
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return false;
+		} 
+		
 	}
 
-	protected void finishPage(IProgressMonitor monitor)
-			throws InterruptedException, CoreException {
-		fPage.createModule(monitor); // use the full progress monitor
-	}
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
