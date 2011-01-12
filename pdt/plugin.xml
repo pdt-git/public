@@ -45,7 +45,7 @@
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.dump"/>
        <action
-             label="Consult"
+             label="(Re)consult"
              class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"

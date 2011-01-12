@@ -26,13 +26,13 @@
 % along with this program; if not, write to the Free Software Foundation,
 % Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 %
-% ad 1: A program part is said to "depend, either directly or indirectly,
-%   on parts of the Eclipse framework", if it cannot be compiled or cannot
+% ad 1: A program part is said to 'depend, either directly or indirectly,
+%   on parts of the Eclipse framework', if it cannot be compiled or cannot
 %   be run without the help or presence of some part of the Eclipse
-%   framework. All java classes in packages containing the "pdt" package
+%   framework. All java classes in packages containing the 'pdt' package
 %   fragment in their name fall into this category.
 %
-% ad 2: "Third-party code" means any code that was originaly written as
+% ad 2: 'Third-party code' means any code that was originaly written as
 %   part of a project other than the PDT. Files that contain or are based on
 %   such code contain a notice telling you so, and telling you the
 %   particular conditions under which they may be used, modified and/or
@@ -44,142 +44,44 @@
     for the PDT Eclipse Plugin  */
 
 :- module(pdtplugin,[
-    get_file_pos/7,
-    pdt_consult/1,
-    get_pred/6,
-    get_pred/7,
     find_pred/8,
     find_declaration/6,
-%    atom_concat/4,atom_concat/5,
-%    atom_concat/6,atom_concat/7,
     get_references/8,
-    manual_entry/3,
-    predicates_with_property/2,
-%    dynamic_predicates/1,
-    errors_and_warnings/4,
+    get_pred/7,
+    pdt_reload/1,
     activate_warning_and_error_tracing/0,
-    deactivate_warning_and_error_tracing/0,    
-    pef_and_spec/5]).
+    deactivate_warning_and_error_tracing/0,
+    predicates_with_property/2,
+    
+    manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
+    errors_and_warnings/4
+    ]).
 
 :- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
 :- use_module(library(help)).
-
-%:- [library('org/cs3/pdt/compatibility/compatiblitySWI')].
-/*
-meta_data(?Filename,?Module,?Name,?Arity,?Public,Position,?Length,?Dynamic,?Multifile)
-*/
-:- dynamic user:meta_data/9.
-:- multifile user:meta_data/9.
-/*
-meta_data_help(?Module,?Name,?Arity,?Comment)
-*/
-:- dynamic user:meta_data_help/4.
-:- multifile user:meta_data_help/4.
-:- dynamic user:meta_data_module/3.
-:- multifile user:meta_data_module/3.
-
-/*
- atom_concat(?a,?b,?c,?d)
- concats the atoms ?a, ?b and ?c to the atom ?d.
-
- Uses the buildin atom_concat/3:
-    atom_concat(_1,_tmp,_4),
-    atom_concat(_2,_3,_tmp).
-
-*/
-/*
-atom_concat(_1,_2,_3,_4) :-
-    atom_concat(_1,_tmp,_4),
-    atom_concat(_2,_3,_tmp).
-
-atom_concat(_1,_2,_3,_4,_5) :-
-    atom_concat(_1,_2,_tmp,_5),
-    atom_concat(_3,_4,_tmp).
-
-atom_concat(_1,_2,_3,_4,_5,_6) :-
-    atom_concat(_1,_2,_3,_tmp,_6),
-    atom_concat(_4,_5,_tmp).
+:- use_module(library(make)).
 
 
-atom_concat(_1,_2,_3,_4,_5,_6,_7) :-
-    atom_concat(_1,_2,_3,_4,_tmp,_7),
-    atom_concat(_5,_6, _tmp).
 
-atom_concat(_1,_2,_3,_4,_5,_6,_7,_8) :-
-    atom_concat(_1,_2,_3,_4,_5,_tmp,_8),
-    atom_concat(_6,_7, _tmp).
-
-atom_concat(_1,_2,_3,_4,_5,_6,_7,_8,_9) :-
-    atom_concat(_1,_2,_3,_4,_5,_6,_tmp,_9),
-    atom_concat(_7,_8, _tmp).
-*/
-
-
-% get_file_pos(+Context, +Name, +Arity, -File, -Position, -Dynamic, -Multifile)
+%% get_pred(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Public) is nondet.
 %
-% find the declaration of a given predicate or module
+% Looks up all clauses for Name/Arity defined in File.
 %
-% Context - A workspace-relative path to the file that serves as context for the search.
-%			It will basicaly be used to determin a context module.
-% Name	- The predicate name
-% Arity - The arity of the preidcate. Use -1 when looking for a module
-% File - Will be unified with the file containing the definition
-% Position - will be unified with either the character offset or the line number of
-%            the definition within the containing File. If the file defining the searched element
-%		     has already been parsed, character offset will be available. Otherwise information
-%		     is gathered using the build in runtime reflexion, which only gives us line numbers.
-% Dynamic - 1 for dynamic predicates, 0 otherwise. NOT IMPLEMENTED YET-
-% Multifile - 1 for multifile predicates, 0 otherwise. NOT IMLEMENTED YET.
-%
-%
-get_file_pos(_,Name,-1, File,0,0, 0):-
-    % this is needed for modules (in the PrologElementData the arity -1 is used for modules
-    !,
-    meta_data_module(File,Name,_).
-get_file_pos(Context, Name,Arity, Context,Pos,0, 0) :-
-    meta_data(Context, _, Name, Arity, _,Pos,_,_,_),!.
-get_file_pos(_, Name,Arity, File,Pos,0, 0) :-
-    get_file_pos_(Name,Arity, File,Pos,0, 0),!.
-
-% get_file_pos(+Name, +Arity, -File, -Position, -Dynamic, -Multifile)
-%
-% find the declaration of a given predicate or module.
-% same as get_file_pos/7, but ignores context. T
-get_file_pos_(Name,Arity, File,Pos,0, 0) :-
-    term_for_signature(Name,Arity,Pred),
-    nth_clause(Pred,_,Ref),
-    clause_property(Ref,file(File)),
-    clause_property(Ref,line_count(Pos)).
-
-
-get_pred(_file, _name,_arity,_pos,_dyn,_mul) :-
-	get_pred(_file, _name,_arity,_pos,_dyn,_mul,_).
-
-%% get_pred(_file, _name,_arity,_pos,_dyn,_mul,Public)
+% @param Line
 %
 % boolean properties are bound to 1 or 0.
 %
-get_pred(_file, _name,_arity,_pos,_dyn,_mul,Public) :-
+get_pred(_file, _name,_arity,Line,_dyn,_mul,Public) :-
     source_file(_module_pred, _file),
-%    print(_module_pred),
-%    format('~n',[]),
-    remove_module_prefix(_module_pred,_pred),
-%    print(_pred),
-%    format('~n~n',[]),
+	strip_module(_module_pred,_,_pred),
     nth_clause(_module_pred,_,Ref),
     functor(_pred,_name,_arity),
-    flush_output,
-%   not(pdtplugin_get_pred_exists(_name,_arity)),
     clause_property(Ref,file(_file)),
-    clause_property(Ref,line_count(_pos)),
+    clause_property(Ref,line_count(Line)),
     has_property(_module_pred,dynamic,_dyn),
     has_property(_module_pred,multifile,_mul),
     has_property(_module_pred,exported,Public).
-%   assert(pdtplugin_get_pred_exists(_name,_arity)),
-%   format('~w , ~w , ~w , ~w , ~w~n',[_name,_arity,_file,_dyn,_mul]).
-
-
 
 
 %%  term_for_signature(+Name, +Arity, -Term) is det.
@@ -219,7 +121,7 @@ write_reference(Pred,Name, Arity, Nth):-
 
 
 
-%% get_references(?EnclFile,+PredSignature,?Module, -FileName,-Line,-RefModule,-Name,-Arity) is nondet.
+%% get_references(+EnclFile,+PredSignature,?Module, -FileName,-Line,-RefModule,-Name,-Arity) is nondet.
 %
 %  @param PredSignature PredName/Arity
 %  @author TRHO
@@ -254,90 +156,44 @@ decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
     atom_number(ArityAtom,Arity),
     !.
 
-user:setUp(decode_reference) :-
-	assert(user:testpred(1,2)).
-user:test(decode_reference) :-
-    decode_reference('        Referenced from 1-th clause of user:testpred/2',
-                     1, 'testpred',2).
-
-user:tearDown(decode_reference) :-
-	retract(user:testpred(1,2)).
-
-remove_module_prefix(_module_pred,_pred) :-
-    term_to_atom(_module_pred,_atom),
-    atom_concat(_,':',_pred_atom,_atom),
-    atom_to_term(_pred_atom,_pred,_),
-    !.
-remove_module_prefix(_pred,_pred).
-
-
-user:test(atom_concat5):-
-    atom_concat(a,b,c,d,abcd),
-    atom_concat(a,_1,c,d,abcd),
-    _1 == b,
-    atom_concat(a,b,_c,d,abcd),
-    _c == c.
-
-user:test(atom_concat7):-
-    atom_concat(1,2,3,4,5,6,123456).
-
-
-user:test(atom_concat4):-
-    atom_concat(a,b,c,abc),
-    atom_concat(a,_1,c,abc),
-    _1 == b,
-    atom_concat(a,b,_c,abc),
-    _c == c.
-
-
-
-%%  pdtplugin_find_pred(+File,+Prefix,?Module,-Name,-Arity,-Public,-Help) is nondet.
+%% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
 %
-%   The more specific the the arguments are specified, the lesser
-%   is the number of the retrieved Predicates: Public Name/Arity
+% looks up all predicates with prefix Prefix defined or imported in file EnclFile.
 %
-%   <Public> represents the module visibility (true/false)
-%   For performance reasons an empty prefix with an unspecified module
-%   will only bind predicates if File is specified.
+% Used by the PLEditor content assist.
 %
-%   <File> specifies the file from where this query is triggered
-%   <Prefix> specifies the prefix of the predicate
-%   <Module> specifies the defining module
-%   @return -1 for a module names
+% For performance reasons an empty prefix with an unspecified module
+% will only bind predicates if File is specified.
 %
-get_defining_module(_EnclFile,EnclModule,_Name,_Arity):-
-	nonvar(EnclModule),
-	!.
-get_defining_module(EnclFile,Module,Name,Arity):-
-     resolve_module(EnclFile,ModuleCandidate),
-     current_predicate(ModuleCandidate:Name/Arity),
-     functor(Head,Name,Arity),
-     ( predicate_property(ModuleCandidate:Head,imported_from(Module))
-     ; Module = ModuleCandidate
-     ),
-     !.
-
-
-find_pred(EnclFile,Prefix,EnclModule,Name,Arity,Public,Builtin,Help):-
-	setof((Name,Arity),
-	 Prefix^EnclModule^(resolve_module(EnclFile,EnclModule),
-	find_pred_(Prefix,EnclModule,Name,Arity,true)),All),
+% <File> specifies the file from where this query is triggered
+% <Prefix> specifies the prefix of the predicate
+% <Module> specifies the defining module
+%
+%
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+	setof(
+	   (Name,Arity),
+	   Prefix^Module^
+	   ( resolve_module(EnclFile,Module),
+	     find_pred_(Prefix,Module,Name,Arity,true)
+	   ),
+	   All
+	),
 	member((Name,Arity),All),
 	
 	% no enclosing module specified in the code via modulename:..
-	get_defining_module(EnclFile,EnclModule,Name,Arity),
+	get_defining_module(EnclFile,Module,Name,Arity),
 	functor(Term,Name,Arity),
-	( predicate_property(EnclModule:Term,exported)->
-	  Public=true
-	; Public=false
+	( predicate_property(Module:Term,exported)->
+	  Exported=true
+	; Exported=false
 	),
-	( predicate_property(EnclModule:Term,built_in)->
+	( predicate_property(Module:Term,built_in)->
 	  Builtin=true
 	; Builtin=false
 	),
-	predicate_manual_entry(EnclModule,Name,Arity,Help).
-	
-	
+	predicate_manual_entry(Module,Name,Arity,Help).
+
 
 find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc'):-
     var(EnclModule),
@@ -358,24 +214,32 @@ find_pred_(Prefix,Module,Name,Arity,true):-
       ; true
     ).
 
+get_defining_module(_EnclFile,EnclModule,_Name,_Arity):-
+	nonvar(EnclModule),
+	!.
+get_defining_module(EnclFile,Module,Name,Arity):-
+     resolve_module(EnclFile,ModuleCandidate),
+     current_predicate(ModuleCandidate:Name/Arity),
+     functor(Head,Name,Arity),
+     ( predicate_property(ModuleCandidate:Head,imported_from(Module))
+     ; Module = ModuleCandidate
+     ),
+     !.
+
+%% predicate_manual_entry(+Module, +Pred,+Arity,-Content) is det.
+%
+%
 predicate_manual_entry(_Module,Pred,Arity,Content) :-
     predicate(Pred,Arity,_,FromLine,ToLine),
     !,
     online_help:line_start(FromLine, From),
     online_help:line_start(ToLine, To),
     online_help:online_manual_stream(Manual),
-    %set_stream(Manual, encoding(octet)),
     new_memory_file(Handle),open_memory_file(Handle, write, MemStream),
-%    stream_property(Manual, position(OldPos)),
- %   set_stream_position(Manual, OldPos),
     seek(Manual,From,bof,_NewOffset),
-%    stream_position(Manual, _, OLD),
-		    %'$stream_position'(From, 0, 0)),
     Range is To - From,
-%   current_output(Out),
     online_help:copy_chars(Range, Manual, MemStream),
     close(MemStream),
-%    set_output(Out),
     memory_file_to_atom(Handle,Content),
     free_memory_file(Handle),
     !.
@@ -387,22 +251,7 @@ predicate_manual_entry(Module, Pred,Arity,Content) :-
 	
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
-/*
-find_pred(_,Prefix,Module,Name,Arity,Public):-
-    nonvar(Module),
-    setof([Pos,Len], meta_data(_,Module,Name, Arity,Public,Pos,Len,_,_),_),
-    atom_concat(Prefix,_,Name).
 
-find_pred(File,Prefix,Module,Name,Arity,Public):-
-    nonvar(File),
-    setof([Pos,Len], meta_data(File,Module,Name, Arity,Public,Pos,Len,_,_),_),
-    atom_concat(Prefix,_,Name).
-
-find_pred(_,Prefix,Module,Name,-1,true):-
-    var(Module),
-    meta_data_module(_,Name,_),
-    atom_concat(Prefix,_,Name).
-*/
 write_ranges_to_file(Ranges, Outfile) :-
     online_manual_stream(Manual),
     help_tmp_file(Outfile),
@@ -411,6 +260,10 @@ write_ranges_to_file(Ranges, Outfile) :-
     close(Manual),
     close(Output).
 
+%% manual_entry(Pred,Arity,Content) is det.
+%
+% TODO: take over code, or reference predicate_manual_entry
+%
 manual_entry(Pred,Arity,Content) :-
     predicate(Pred,Arity,_,From,To),
     !,
@@ -419,13 +272,11 @@ manual_entry(Pred,Arity,Content) :-
     open_memory_file(Handle, write, MemStream),
     stream_position(Manual, _, '$stream_position'(From, 0, 0)),
     Range is To - From,
-%   current_output(Out),
     online_help:copy_chars(Range, Manual, MemStream),
     close(MemStream),
-%    set_output(Out),
     memory_file_to_atom(Handle,Content),
     free_memory_file(Handle).
-
+/*
 manual_entry(Pred,Arity,Content) :-
     meta_data_help(_,Pred,Arity,ContentString),
     string_to_atom(ContentString,Content).
@@ -433,53 +284,12 @@ manual_entry(Pred,Arity,Content) :-
 manual_entry(Pred,-1,Content) :-
     meta_data_module(_,Pred,ContentString),
     string_to_atom(ContentString,Content).
+*/
 
-user:test('pdtplugin:find_pred') :-
-    bagof([Name,Arity,Public],
-        find_pred('/JTransformer Engine/pdtplugin_.pl', 'a', pdtplugin_, Name, Arity,Public),
-    [[atom_concat_,5,true]|[[atom_concat_,9,false]|_]]).
-
-user:setUp('pdtplugin:find_pred') :-
-    assert(user:meta_data_module('/JTransformer Engine/pdtplugin_.pl','pdtplugin_',"")),
-    assert(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,5,true,726,11,false,false)),
-    assert(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,9,false,823,11,false,false)),
-    assert(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,get_file_pos_,7,true,1956,12,false,false)).
-user:tearDown('pdtplugin:find_pred') :-
-    retract(user:meta_data_module('/JTransformer Engine/pdtplugin_.pl','pdtplugin_',"")),
-    retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,5,true,726,11,false,false)),
-    retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,atom_concat_,9,false,823,11,false,false)),
-    retract(user:meta_data('/JTransformer Engine/pdtplugin_.pl',pdtplugin_,get_file_pos_,7,true,1956,12,false,false)).
-
-
-%% pef_and_spec(+Id,-Functor,-Args,-ArgDescriptions) is det.
-%
-% binds the functor and the argument descriptions.
-%
-% The descriptions are lists for every argument containing:
-% 1. Argumentname (parent,..)
-% 2. Kind         (id, attr)
-% 3. List or Atom (list,atom)
-% 4. constraints  (atom,classT,...)
-% 5. isVariable   (yes|no) (yes only in the error case!)
-%
-pef_and_spec(Id,Functor,Args,ArgDescr,AtomTerm):-
-    getTerm(Id,Term),
-    term_to_atom(Term,AtomTerm),
-    Term =.. [Functor|Args],
-    ast_node_def('Java',Functor,ArgDefs),
-    retrieve_argument_description(Args,ArgDefs,ArgDescr).
-
-retrieve_argument_description([],_,[]).
-retrieve_argument_description([Arg|Args],
-        [ast_arg(Name, mult(_,_,Ord),Kind,Constraints)|ArgDefs],
-        [[Name,Kind,List,Constraints,IsVar]|ArgDescr]):-
-    ((Ord = ord) ->
-       List = list; List = atom),
-    (var(Arg) ->
-       IsVar = yes; IsVar = no),
-	retrieve_argument_description(Args,ArgDefs,ArgDescr).
 
 %% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
+%
+% used for the open declaration action
 %
 find_declaration(EnclFile,Name,Arity,Module,File,Line):-
     resolve_module(EnclFile,Module),
@@ -495,20 +305,18 @@ resolve_module(EnclFile,Module):-
     ( ( nonvar(EnclFile),module_property(Module,file(EnclFile)) )
     ;  Module=user
     ).
-    
+
+% Necessary for find_pred/8, TODO: move to find_pred/8
 resolve_module(_EnclFile,_Module).
 
 
-
 :- dynamic traced_messages/3.
-
 :- dynamic warning_and_error_tracing/0.
 
 activate_warning_and_error_tracing :- 
 	assert(warning_and_error_tracing).
 
 deactivate_warning_and_error_tracing:-
-%	retractall(startup_error(_Time, _Term)),
 	retractall(warning_and_error_tracing),
 	retractall(traced_messages(_,_,_)).
  
@@ -526,13 +334,12 @@ user:message_hook(_Term, Level,Lines) :-
   assert(traced_messages(Level, Line,Lines)),
   fail.
 
-
+%% errors_and_warnings(Level,Line,0,Message) is nondet.
+%
+%
 errors_and_warnings(Level,Line,0,Message):-
     traced_messages(Level, Line,Lines),
-%	traced_messages(
-%	 error(syntax_error(_Message), 
-%	 file(_File, StartLine, Length, _)), 
-%	 Level,Lines),
+%	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
     new_memory_file(Handle),
    	open_memory_file(Handle, write, Stream),
 	print_message_lines(Stream,'',Lines),
@@ -541,39 +348,41 @@ errors_and_warnings(Level,Line,0,Message):-
     free_memory_file(Handle).
       
 
-pdt_consult(File):-
-    user:consult(File).
+%% pdt_reload(File) is det.
+%
+% wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
+%
+pdt_reload(File):-
+    writeln(File),
+    make:reload_file(File).
 
- 
-predicates_with_property(Predicates,Property):-
+%% predicates_with_property(+Property,-Predicates) is det.
+%
+% Look up all Predicates with property Property, e.g. dynamic, built_in
+%
+predicates_with_property(Property,Predicates):-
 	setof(Name,
-	   predicate_name_with_property(Name,Property),
+	   predicate_name_with_property_(Name,Property),
 	   PredicatesList),
 	   sformat(S,'~w',[PredicatesList]),
 	   string_to_atom(S,Predicates).
 	  
 % helper
-predicate_name_with_property(Name,Property):-
+predicate_name_with_property_(Name,Property):-
 	predicate_property(_M:Head,Property),
 	functor(Head,Name,_),
 	Name \= '[]'.
 	
-/*	
-For performance purposes:
+%%%%%%%%%% Tests %%%%%%%%%%%
 
-dynamic_predicates(Predicates):-
-    findall(P,
-     (num_gen(0,4000,N),term_to_atom(N,A),atom_concat(prefixatom, A,P)),
-    PredicatesT),
-    term_to_atom(PredicatesT,Predicates).
-    
-num_gen(Start,End,Start):-
-	Start < End.
+user:setUp(decode_reference) :-
+	assert(user:testpred(1,2)).
+user:test(decode_reference) :-
+    decode_reference('        Referenced from 1-th clause of user:testpred/2',
+                     1, 'testpred',2).
+
+user:tearDown(decode_reference) :-
+	retract(user:testpred(1,2)).
+
+
 	
-num_gen(Start,End,Val):-
-	Start < End,
-	Next is Start+1,
-	num_gen(Next,End,Val).
-		
-		
-		*/
