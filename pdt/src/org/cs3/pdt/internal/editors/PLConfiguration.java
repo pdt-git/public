@@ -41,19 +41,13 @@
 
 package org.cs3.pdt.internal.editors;
 
-import java.io.File;
-
 import org.cs3.pdt.internal.contentassistant.NaivPrologContentAssistProcessor;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterfaceException;
-import org.eclipse.core.filesystem.provider.FileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
-import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jface.text.AbstractInformationControlManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -69,7 +63,6 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
-import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
@@ -83,8 +76,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.ide.FileStoreEditorInput;
-import org.eclipse.ui.part.FileEditorInput;
 
 @SuppressWarnings("deprecation")
 public class PLConfiguration extends SourceViewerConfiguration {
@@ -264,17 +255,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 			
 			@Override
 			public String getInformation(ITextViewer textViewer, IRegion subject) {
-				String fileName;
-				if(editor.getEditorInput()instanceof FileEditorInput){
-					fileName= ((FileEditorInput)editor.getEditorInput()).getFile().getRawLocation().toPortableString();
-				} else {
-					fileName = new File(((FileStoreEditorInput)editor.getEditorInput()).getURI()).getAbsolutePath().replace('\\', '/');
-				}
-				if(Util.isWindows()){
-					return fileName.toLowerCase();
-				}
-				return fileName;
-
+				return UIUtils.getFileNameForEditorInput(editor.getEditorInput());
 			}
 		};
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);

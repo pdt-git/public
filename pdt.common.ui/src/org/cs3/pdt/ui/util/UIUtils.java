@@ -287,6 +287,12 @@ public final class UIUtils {
 	public static String getFileFromActiveEditor() {
 		String enclFile;
 		IEditorInput editorInput = UIUtils.getActiveEditor().getEditorInput();
+		enclFile = getFileNameForEditorInput(editorInput);
+		return enclFile;
+	}
+
+	public static String getFileNameForEditorInput(IEditorInput editorInput) {
+		String enclFile;
 		if(editorInput instanceof FileEditorInput){
 			enclFile = ((FileEditorInput)editorInput).getFile().getRawLocation().toPortableString();
 		} else {
