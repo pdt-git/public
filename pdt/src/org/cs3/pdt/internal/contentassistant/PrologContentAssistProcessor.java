@@ -50,12 +50,22 @@ public abstract class PrologContentAssistProcessor {
 	private Prefix calculatePrefix(IDocument document, int offset)
 			throws BadLocationException {
 				int begin=offset;
-				while (Util.isNonQualifiedPredicatenameChar(document
-						.getChar(begin))
-						&& begin > 0)
-					begin--;
-				int length = offset - begin;
-				begin++;
+				int length=0;
+				boolean isPredChar = Util.isNonQualifiedPredicatenameChar(document.getChar(begin));
+				
+				while (isPredChar){
+					length++;
+					int test = begin-1;
+					if(test >=0){
+						isPredChar = Util.isNonQualifiedPredicatenameChar(document.getChar(test));
+						if(!isPredChar){
+							break;
+						}
+					} else {
+						break;
+					}
+					begin=test;
+				}
 				String pre = document.get(begin, length);
 				
 				Prefix prefix = new Prefix(document,begin,pre);
@@ -64,7 +74,7 @@ public abstract class PrologContentAssistProcessor {
 
 	private String retrievePrefixedModule(int documentOffset, IDocument document, int begin)
 			throws BadLocationException {
-				if (document.getChar(begin - 1) == ':') {
+				if (begin>0 && document.getChar(begin - 1) == ':') {
 					int moduleBegin = begin - 2;
 					while (Util.isNonQualifiedPredicatenameChar(document
 							.getChar(moduleBegin))
