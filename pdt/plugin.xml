@@ -296,7 +296,7 @@
             <wizard
                   category="org.cs3.pdt.wizards"
                   class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard"
-                  icon="icons/module_1.png"
+                  icon="icons/module_2.png"
                   id="pdt.module.wizard"
                   name="Prolog Module">
          <class class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard">
