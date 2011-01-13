@@ -46,7 +46,7 @@ package org.cs3.pl.console;
  * used by the console completion to pass the results of the
  * completion processor.
  */
-public interface CompoletionResult{
+public interface CompletionResult{
     public String getOriginalLineContent();
     public int getOriginalCaretPosition();
     public String getNewLineContent();
