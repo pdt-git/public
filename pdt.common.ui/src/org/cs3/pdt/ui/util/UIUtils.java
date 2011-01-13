@@ -60,6 +60,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
 /**
@@ -302,5 +303,24 @@ public final class UIUtils {
 			enclFile = enclFile.toLowerCase();
 		}
 		return enclFile;
+	}
+	
+	/**
+	 * Open file in its default editor.
+	 * 
+	 * @param file
+	 * @param activate
+	 * @return
+	 * @throws PartInitException
+	 */
+	static public IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
+		if (file != null) {
+			IWorkbenchPage p= getActivePage();
+			if (p != null) {
+				IEditorPart editorPart= IDE.openEditor(p, file, activate);
+				return editorPart;
+			}
+		}
+		return null; 
 	}
 }
