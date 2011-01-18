@@ -45,7 +45,7 @@
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.dump"/>
        <action
-             label="Consult"
+             label="(Re)consult"
              class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
@@ -286,6 +286,30 @@
             textStylePreferenceValue="NONE">
 	  </specification>	  	  
 	</extension>
+	  <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="PDT"
+            id="org.cs3.pdt.wizards">
+      </category>
+      
+            <wizard
+                  category="org.cs3.pdt.wizards"
+                  class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard"
+                  icon="icons/module_2.png"
+                  id="pdt.module.wizard"
+                  name="Prolog Module">
+         <class class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard">
+            <parameter
+                name="javatype"
+                value="true">
+            </parameter>
+         </class>
+         <description>
+            Create a Prolog Module
+         </description>
+      </wizard>
+    </extension>
 <!--	
  <extension
        point="org.eclipse.ui.menus">
