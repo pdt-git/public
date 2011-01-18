@@ -54,5 +54,5 @@ public interface ConsoleCompletionProvider {
 	 * 			If there is more than one option, the provider should
 	 * 			try to do as much as possible.
 	 */
-	public CompoletionResult doCompletion(String line, int pos);
+	public CompletionResult doCompletion(String line, int pos);
 }

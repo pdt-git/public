@@ -4,6 +4,8 @@
 	<target name="default">
 		<eclipse.incrementalBuild project="pdt.common" kind="full"/>
 		<eclipse.incrementalBuild project="pdt.common.ui" kind="full"/>
+		<eclipse.incrementalBuild project="pdt.runtime" kind="full"/>
+		<eclipse.incrementalBuild project="pdt.runtime.ui" kind="full"/>
 		<eclipse.incrementalBuild project="pdt" kind="full"/>
 		<eclipse.incrementalBuild project="pdt.console" kind="full"/>
 	</target>

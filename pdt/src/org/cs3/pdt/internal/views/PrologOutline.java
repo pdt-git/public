@@ -176,7 +176,7 @@ public class PrologOutline extends ContentOutlinePage {
 		toolBarManager.add(action);
 		
 		hookContextMenu(parent);
-		if(getInput()instanceof FileStoreEditorInput){ // TRHO: should only happen on external files 
+		if(getInput() instanceof FileStoreEditorInput){ // TRHO: deactivated for external files 
 			return;
 		}
 		viewer.setInput(getInput());

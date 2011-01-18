@@ -44,7 +44,7 @@ package org.cs3.pdt.console.internal.views;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.console.CompoletionResult;
+import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.console.ConsoleHistory;
 import org.cs3.pl.console.ConsoleModel;
@@ -586,7 +586,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 		}
 	}
 
-	private void completionAvailable(CompoletionResult r) {
+	private void completionAvailable(CompletionResult r) {
 
 		if (!model.getLineBuffer().equals(r.getOriginalLineContent())) {
 			Debug.debug("completion discarded.");
@@ -625,7 +625,7 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 			@Override
 			public void run() {
 
-				final CompoletionResult r = completionProvider.doCompletion(model.getLineBuffer(), caretPosition);
+				final CompletionResult r = completionProvider.doCompletion(model.getLineBuffer(), caretPosition);
 				final Runnable notify = new Runnable() {
 					@Override
 					public void run() {

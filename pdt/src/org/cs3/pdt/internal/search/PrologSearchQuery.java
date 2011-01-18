@@ -41,10 +41,7 @@
 
 package org.cs3.pdt.internal.search;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -61,26 +58,15 @@ import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-import org.eclipse.core.filebuffers.LocationKind;
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.ide.FileStoreEditorInput;
-import org.eclipse.ui.part.FileEditorInput;
 
 public class PrologSearchQuery implements ISearchQuery {
 
@@ -167,8 +153,6 @@ public class PrologSearchQuery implements ISearchQuery {
 					if(data.getModule()!=null)
 						module ="'"+ data.getModule()+ "'";
 					String enclFile = UIUtils.getFileFromActiveEditor();
-//					FileStoreEditorInput fStoreInput = (FileStoreEditorInput)editor.getEditorInput();
-//					//Path filepath = new Path(fStoreInput.getURI().getPath());
 
 					
 					String query = "get_references('"+enclFile+"','" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";

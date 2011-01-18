@@ -151,12 +151,12 @@ public class NewConsoleHistory implements ConsoleHistory, ConsoleModelListener {
 	public void onCommit(ConsoleModelEvent e) {		
 		lastLine=null;
 		String value = e.getCommitText();
-	    //ignore commits like ";", " ", "" + pdt_consult(
+	    //ignore commits like ";", " ", "" + pdt_reload(
 		
 		if(!(value.equals(" ") || 
 				 value.equals("") ||
 				 value.equals(";") ||
-			 value.startsWith("pdt_consult("))
+			 value.startsWith("pdt_reload("))
 			 ) {
 			history.add(e.getCommitText());
 		}
