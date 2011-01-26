@@ -9,7 +9,7 @@
    <repositories>
     <repository>
       <id>snapshots.codehaus</id>
-      <url>http://snapshots.repository.codehaus.org/</url>
+      <url>http://snapshots.repository.codehaus.org</url>
     </repository>
   </repositories>
 
