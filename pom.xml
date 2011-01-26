@@ -6,6 +6,13 @@
   <artifactId>jtransformer_projects</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
+   <repositories>
+    <repository>
+      <id>snapshots.codehaus</id>
+      <url>http://snapshots.repository.codehaus.org/</url>
+    </repository>
+  </repositories>
+
   <build>
        <pluginManagement>
       <plugins>
