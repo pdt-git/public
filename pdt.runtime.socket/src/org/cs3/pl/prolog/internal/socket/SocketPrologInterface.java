@@ -43,6 +43,8 @@ package org.cs3.pl.prolog.internal.socket;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.PreferenceProvider;
@@ -383,12 +385,65 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 
 	public static PrologInterface newInstance(String fqn, String name) {
 		// fqn ist egal, da diese Methode die allgemeinere aus der abstrakten
-		// oberklasse überschreibt
+		// oberklasse ï¿½berschreibt
 		return new SocketPrologInterface(name);
 	}
 	@Override
 	public boolean hasError() {
 		return getError()!=null;
+	}
+
+	/**
+	 * Wrapper for {@link PrologSession#queryOnce(String)}
+	 * Executes queryOnce for every predicate given in predicates.
+	 * 
+	 * @param pif
+	 * @param predicates
+	 * @return result Map of the last predicate queried 
+	 * @throws PrologInterfaceException
+	 */
+	@Override
+	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException {
+		
+		Map<String, Object> result = null;		 
+		PrologSession session = null;
+		try {
+			session = getSession(PrologInterface.LEGACY);
+		    
+		    for (int i = 0; i < predicates.length; i++) {
+				result = session.queryOnce(predicates[i]);
+			}
+		} finally {
+		    if (session != null)
+		      session.dispose();
+		}
+		return result;
+	}
+
+	/**
+	 * Wrapper for {@link PrologSession#queryAll(String)}
+	 * Executes queryAll for every predicate given in predicates.
+	 * 
+	 * @param pif
+	 * @param predicates
+	 * @return result List contains a result map for each predicate queried 
+	 * @throws PrologInterfaceException
+	 */
+	@Override
+	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException {
+		
+		List<Map<String, Object>> result = null;		 
+		PrologSession session = null;
+		try {
+		    session = getSession(PrologInterface.LEGACY);
+		    for (int i = 0; i < predicates.length; i++) {
+				result = session.queryAll(predicates[i]);
+			}
+		} finally {
+		    if (session != null)
+		      session.dispose();
+		}
+		return result;
 	}
 	
 }
