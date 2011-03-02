@@ -379,7 +379,10 @@ public abstract class AbstractPrologInterface implements PrologInterface {
 		CTermUtil.checkFlags(flags);
 		synchronized (lifecycle) {
 			if (getError() != null) {
-				throw new PrologInterfaceException(getError());
+					restart();
+					if (getError() != null) {
+						throw new PrologInterfaceException(getError());
+					}
 			}
 			if (!isUp()) {
 				try {
