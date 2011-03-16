@@ -39,7 +39,7 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/**
+/*
  * to activate debugging for this module, uncomment:
  */
 % :- debug(pif_observe).
@@ -84,7 +84,7 @@ call_unobserve_hook(Thread,Subject,Key):-
 call_unobserve_hook(_,_,_).	
 
 
-/**
+/*
  * backwards compatibility. 
  */
 pif_observe(Thread,Subject):-
