@@ -61,6 +61,9 @@
 :- use_module(library(explain)).
 :- use_module(library(help)).
 :- use_module(library(make)).
+:- use_module(library('pldoc')).
+:- use_module(library('pldoc/doc_html')).
+:- use_module(library('http/html_write')).
 
 
 
@@ -246,11 +249,27 @@ predicate_manual_entry(_Module,Pred,Arity,Content) :-
 
 
 predicate_manual_entry(Module, Pred,Arity,Content) :-
-	pldoc:doc_comment(Module:Pred/Arity,_Pos,_,Content),
-	!.
+    %pldoc:doc_comment(Module:Pred/Arity,_File:_,_Summary,Content),
+    %TODO: The html code is now available:
+	pldoc:doc_comment(Module:Pred/Arity,File:_,_,_Content),
+	gen_html_for_pred_(File,Pred/Arity,Content),
+    !.
 	
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
+gen_html_for_pred_(FileSpec,Functor/Arity,Html):-    
+	doc_file_objects(FileSpec, _File, Objects, FileOptions, []),
+	member(doc(Signature,FilePos,Doc),Objects),
+	(Functor/Arity=Signature;_Module:Functor/Arity=Signature),
+	phrase(html([ 
+	     		\objects([doc(Functor/Arity,FilePos,Doc)], FileOptions)
+	     ]),List),
+	maplist(replace_nl_,List,AtomList),
+	concat_atom(AtomList,Html),
+	!.
+
+replace_nl_(nl(_),''):-!.
+replace_nl_(A,A).
 
 write_ranges_to_file(Ranges, Outfile) :-
     online_manual_stream(Manual),
