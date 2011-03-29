@@ -6,7 +6,8 @@
   <artifactId>jtransformer_projects</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <!-- does not work, yet: findbugs -->
+  
+  <!-- needed for findbugs -->
    <repositories>
     <repository>
       <id>snapshots.codehaus</id>
@@ -28,8 +29,8 @@
                 
             </configuration>
         </plugin>
-		 <!-- does not work, needed for findbugs:-->
- 
+		
+		 <!-- needed for findbugs -->
 		  <plugin>  
               <groupId>org.apache.maven.plugins</groupId>  
               <artifactId>maven-pmd-plugin</artifactId>  
@@ -94,8 +95,8 @@
 		  </includes>
         </configuration>
       </plugin>
- <!-- does not work, need for findbugs:-->
- 	  
+
+	  <!-- needed for findbugs -->
 	   <plugin>  
            <groupId>org.codehaus.mojo</groupId>  
            <artifactId>findbugs-maven-plugin</artifactId>  
