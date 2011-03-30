@@ -808,7 +808,10 @@ public class Util {
 			
 			String bits = "";
 			try {
-				Process p = Runtime.getRuntime().exec(swiExecutable + " -g current_prolog_flag(address_bits,A),writeln(A),halt.");
+				Process p = Runtime.getRuntime().exec(new String[]{
+						swiExecutable,
+						"-g",
+						"current_prolog_flag(address_bits,A),writeln(A),halt."});
 				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				bits = reader.readLine();
 				p.waitFor();
@@ -841,7 +844,10 @@ public class Util {
 			
 			String bits = "";
 			String version ="";
-			Process p = Runtime.getRuntime().exec(swiExecutable + " -g current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt.");
+			Process p = Runtime.getRuntime().exec(new String[]{
+					swiExecutable,
+					"-g",
+					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
 			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			version = reader.readLine();
 			bits = reader.readLine();
