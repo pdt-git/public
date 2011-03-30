@@ -832,35 +832,33 @@ public class Util {
 	}
 
 	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
-		//return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-		return "51118_64";// TEMPversion +"_"+bits;
+//		return "51118_64";// TEMPversion +"_"+bits;
+		
+			String swiExecutable;
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			String version ="";
+			Process p = Runtime.getRuntime().exec(new String[]{
+					swiExecutable,
+					"-g",
+					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			version = reader.readLine();
+			bits = reader.readLine();
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {
+				// TR: fatal anyway:
+				throw new RuntimeException(e);
+			}
+	
 
-//		
-//			String swiExecutable;
-//			if (isWindows()) {
-//				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
-//			} else {
-//				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-//			}
-//			
-//			String bits = "";
-//			String version ="";
-//			Process p = Runtime.getRuntime().exec(new String[]{
-//					swiExecutable,
-//					"-g",
-//					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
-//			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//			version = reader.readLine();
-//			bits = reader.readLine();
-//			try {
-//				p.waitFor();
-//			} catch (InterruptedException e) {
-//				// TR: fatal anyway:
-//				throw new RuntimeException(e);
-//			}
-//	
-//
-//		return version +"_"+bits;
+		return version +"_"+bits;
 	}
 
 	private static String guessExecutableName__() {
