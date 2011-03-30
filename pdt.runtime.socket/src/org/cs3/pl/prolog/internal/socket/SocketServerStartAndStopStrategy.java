@@ -235,6 +235,7 @@ private static JackTheProcessRipper processRipper;
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
 		//tmpWriter.println(":- guitracer.");
+		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- doc_collect(false).");
 		if (socketPif.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" + "->win_window_pos([show(false)])" + ";true).");
@@ -249,8 +250,11 @@ private static JackTheProcessRipper processRipper;
 			BootstrapPrologContribution contribution = it.next();
 			tmpWriter.println(":- "+contribution.getPrologInitStatement()+".");
 		}
+		tmpWriter.println(":- FileName='/tmp/dbg_marker2.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- [library(consult_server)].");
+		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
+		tmpWriter.println(":- FileName='/tmp/dbg_marker4.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.close();
 	}
 
