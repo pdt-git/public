@@ -795,39 +795,39 @@ public class Util {
 	private static String stackCommandLineParameters = null;
 	
 	public static String getStackCommandLineParameters() {
-//		return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;	
-		if (stackCommandLineParameters == null) {
-		
-			String swiExecutable;
-			
-			if (isWindows()) {
-				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
-			} else {
-				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-			}
-			
-			String bits = "";
-			try {
-				Process p = Runtime.getRuntime().exec(new String[]{
-						swiExecutable,
-						"-g",
-						"current_prolog_flag(address_bits,A),writeln(A),halt."});
-				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				bits = reader.readLine();
-				p.waitFor();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-	
-			if (bits.equals("64")) {
-				// no parameters for SWI-Prolog 64bit
-				stackCommandLineParameters = "";
-			} else {
-				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			}
-
-		}
-		return stackCommandLineParameters;
+		return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;	
+//		if (stackCommandLineParameters == null) {
+//		
+//			String swiExecutable;
+//			
+//			if (isWindows()) {
+//				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+//			} else {
+//				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+//			}
+//			
+//			String bits = "";
+//			try {
+//				Process p = Runtime.getRuntime().exec(new String[]{
+//						swiExecutable,
+//						"-g",
+//						"current_prolog_flag(address_bits,A),writeln(A),halt."});
+//				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+//				bits = reader.readLine();
+//				p.waitFor();
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//	
+//			if (bits.equals("64")) {
+//				// no parameters for SWI-Prolog 64bit
+//				stackCommandLineParameters = "";
+//			} else {
+//				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+//			}
+//
+//		}
+//		return stackCommandLineParameters;
 	}
 
 	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
