@@ -63,6 +63,8 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.management.RuntimeErrorException;
+
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
@@ -793,39 +795,67 @@ public class Util {
 	private static String stackCommandLineParameters = null;
 	
 	public static String getStackCommandLineParameters() {
-		return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-//		if (stackCommandLineParameters == null) {
-//		
-//			String swiExecutable;
-//			
-//			if (isWindows()) {
-//				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
-//			} else {
-//				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
-//			}
-//			
-//			String bits = "";
-//			try {
-//				Process p = Runtime.getRuntime().exec(swiExecutable + " -g current_prolog_flag(address_bits,A),writeln(A),halt.");
-//				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//				bits = reader.readLine();
-//				p.waitFor();
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//	
-//			if (bits.equals("64")) {
-//				// no parameters for SWI-Prolog 64bit
-//				stackCommandLineParameters = "";
-//			} else {
-//				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-//			}
-//
-//		}
-//		
-//		return stackCommandLineParameters;
-	}
+		//return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		if (stackCommandLineParameters == null) {
+		
+			String swiExecutable;
+			
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			try {
+				Process p = Runtime.getRuntime().exec(swiExecutable + " -g current_prolog_flag(address_bits,A),writeln(A),halt.");
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				bits = reader.readLine();
+				p.waitFor();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	
+			if (bits.equals("64")) {
+				// no parameters for SWI-Prolog 64bit
+				stackCommandLineParameters = "";
+			} else {
+				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			}
+
+		}
+		
+		return stackCommandLineParameters;
+	}
+
+	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
+		//return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		
+			String swiExecutable;
+			
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			String version ="";
+			Process p = Runtime.getRuntime().exec(swiExecutable + " -g current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt.");
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			version = reader.readLine();
+			bits = reader.readLine();
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {
+				// TR: fatal anyway:
+				throw new RuntimeException(e);
+			}
+	
+
+		return version +"_"+bits;
+	}
+
 	private static String guessExecutableName__() {
 
 		if (isWindows()) {
