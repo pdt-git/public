@@ -234,7 +234,7 @@ private static JackTheProcessRipper processRipper;
 	private static void writeInitialisationToTempFile(SocketPrologInterface socketPif,
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-		tmpWriter.println(":- guitracer.");
+		//tmpWriter.println(":- guitracer.");
 		tmpWriter.println(":- doc_collect(false).");
 		if (socketPif.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" + "->win_window_pos([show(false)])" + ";true).");
