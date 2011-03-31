@@ -116,6 +116,7 @@ private static JackTheProcessRipper processRipper;
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
 			System.out.println("Starting server with (pre) " + Util.prettyPrint(commandArray));
 			List<String> commands = new ArrayList<String>();
+			// keep this until its clear why there is an empty string elements in the array
 			for (String string : commandArray) {
 				if(string != null && string.length()>0){
 					commands.add(string);
@@ -224,7 +225,9 @@ private static JackTheProcessRipper processRipper;
 	private static String[] getCommands(SocketPrologInterface socketPif) {
 		String executable = socketPif.getExecutable();
 		if (!executable.contains(" -L")) {
-			executable += " " + Util.getStackCommandLineParameters();// PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			if(Util.getStackCommandLineParameters().length()>0) {
+				executable += " " + Util.getStackCommandLineParameters();// PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			}
 		}
 		String[] command = Util.split(executable, " ");
 		return command;
