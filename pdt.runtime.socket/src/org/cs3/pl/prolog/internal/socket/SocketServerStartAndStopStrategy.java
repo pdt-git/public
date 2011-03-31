@@ -113,6 +113,8 @@ private static JackTheProcessRipper processRipper;
 		Process process = null;
 		try {
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
+			System.out.println("Starting server with " + Util.prettyPrint(commandArray));
+			
 			if (envarray.length == 0) {
 				Debug.info("inheriting system environment");
 				process = Runtime.getRuntime().exec(commandArray);
