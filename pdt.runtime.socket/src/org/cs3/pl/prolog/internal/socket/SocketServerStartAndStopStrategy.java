@@ -52,6 +52,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -113,6 +114,14 @@ private static JackTheProcessRipper processRipper;
 		Process process = null;
 		try {
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
+			System.out.println("Starting server with (pre) " + Util.prettyPrint(commandArray));
+			List<String> commands = new ArrayList<String>();
+			for (String string : commandArray) {
+				if(string != null && string.length()>0){
+					commands.add(string);
+				}
+			}
+			commandArray=commands.toArray(new String[0]);
 			System.out.println("Starting server with " + Util.prettyPrint(commandArray));
 			
 			if (envarray.length == 0) {
