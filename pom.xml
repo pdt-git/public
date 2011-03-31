@@ -121,8 +121,8 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.6</version>
            <configuration>  
-              <failOnViolation>false</failOnViolation>  
-			  
+              <failOnViolation>false</failOnViolation>  			  
+			  <configLocation>checkstyle_checks.xml</configLocation>
            </configuration>  
 		 <executions>  
               <execution>  
