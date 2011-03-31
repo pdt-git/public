@@ -16,6 +16,7 @@
   </repositories>
 
   <build>
+	<sourceDirectory>src</sourceDirectory>
        <pluginManagement>
       <plugins>
         <plugin>
@@ -97,6 +98,7 @@
       </plugin>
 
 	  <!-- needed for findbugs -->
+
 	   <plugin>  
            <groupId>org.codehaus.mojo</groupId>  
            <artifactId>findbugs-maven-plugin</artifactId>  
@@ -113,6 +115,13 @@
               </execution>  
            </executions>  
         </plugin>  
+		
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.6</version>
+      </plugin>
+	  
         <plugin>  
            <groupId>org.apache.maven.plugins</groupId>  
            <artifactId>maven-pmd-plugin</artifactId>  
