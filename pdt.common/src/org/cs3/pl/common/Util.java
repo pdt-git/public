@@ -795,7 +795,6 @@ public class Util {
 	private static String stackCommandLineParameters = null;
 	
 	public static String getStackCommandLineParameters() {
-//		return PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
 		System.out.println("DEBUG: getStackCommandLineParameters start");
 		if (stackCommandLineParameters == null) {
 		
