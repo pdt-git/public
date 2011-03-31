@@ -114,16 +114,15 @@ private static JackTheProcessRipper processRipper;
 		Process process = null;
 		try {
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
-//			System.out.println("Starting server with (pre) " + Util.prettyPrint(commandArray));
-//			List<String> commands = new ArrayList<String>();
-//			// keep this until its clear why there is an empty string elements in the array
-//			for (String string : commandArray) {
-//				if(string != null && string.length()>0){
-//					commands.add(string);
-//				}
-//			}
-//			commandArray=commands.toArray(new String[0]);
-//			System.out.println("Starting server with " + Util.prettyPrint(commandArray));
+			// Temporary safety code to ensure that the command array contains no empty strings:
+			List<String> commands = new ArrayList<String>();
+			// keep this until its clear why there is an empty string elements in the array
+			for (String string : commandArray) {
+				if(string != null && string.length()>0){
+					commands.add(string);
+				}
+			}
+			commandArray=commands.toArray(new String[0]);
 			
 			if (envarray.length == 0) {
 				Debug.info("inheriting system environment");
