@@ -55,10 +55,13 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 					} else {
 						value = (String)doc;
 					}
-				
-				label=value.indexOf('\n')>0 ?
+				if(value.startsWith("<dl><dt")){
+					label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
+				}else {
+					label=value.indexOf('\n')>0 ?
 						value.substring(0,value.indexOf('\n')):
 						value;
+				}
 				this.doc = value;
 			 } else if(summary!=null){
 					label = label + " - " + summary.getFunctorValue();

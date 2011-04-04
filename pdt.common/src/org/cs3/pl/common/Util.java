@@ -63,6 +63,8 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.management.RuntimeErrorException;
+
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
@@ -789,16 +791,85 @@ public class Util {
 
 	}
 
+
+	private static String stackCommandLineParameters = null;
 	
+	public static String getStackCommandLineParameters() {
+		System.out.println("DEBUG: getStackCommandLineParameters start");
+		if (stackCommandLineParameters == null) {
+		
+			String swiExecutable;
+			
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			try {
+				Process p = Runtime.getRuntime().exec(new String[]{
+						swiExecutable,
+						"-g",
+						"current_prolog_flag(address_bits,A),writeln(A),halt."});
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				bits = reader.readLine();
+				p.waitFor();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	
+			if (bits.equals("64")) {
+				// no parameters for SWI-Prolog 64bit
+				stackCommandLineParameters = "";
+			} else {
+				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			}
+
+		}
+		System.out.println("DEBUG: getStackCommandLineParameters end: '" + stackCommandLineParameters+ "'");
+		
+		return stackCommandLineParameters;
+	}
+
+	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
+//		return "51118_64";// TEMPversion +"_"+bits;
+		
+			String swiExecutable;
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			String version ="";
+			Process p = Runtime.getRuntime().exec(new String[]{
+					swiExecutable,
+					"-g",
+					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			version = reader.readLine();
+			bits = reader.readLine();
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {
+				// TR: fatal anyway:
+				throw new RuntimeException(e);
+			}
+	
+
+		return version +"_"+bits;
+	}
+
 	private static String guessExecutableName__() {
 
 		if (isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
-					+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			// return "plwin";
+				+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getStackCommandLineParameters();
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 
 	}
 
@@ -814,11 +885,10 @@ public class Util {
 
 		if (isWindows()) {
 			return //"cmd.exe /c start \"cmdwindow\" /min "
-					 findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			// return "plwin";
+			findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 
 	}
 

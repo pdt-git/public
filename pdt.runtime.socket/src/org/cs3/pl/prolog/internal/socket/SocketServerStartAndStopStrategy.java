@@ -52,6 +52,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -113,6 +114,16 @@ private static JackTheProcessRipper processRipper;
 		Process process = null;
 		try {
 			Debug.info("Starting server with " + Util.prettyPrint(commandArray));
+			// Temporary safety code to ensure that the command array contains no empty strings:
+			List<String> commands = new ArrayList<String>();
+			// keep this until its clear why there is an empty string elements in the array
+			for (String string : commandArray) {
+				if(string != null && string.length()>0){
+					commands.add(string);
+				}
+			}
+			commandArray=commands.toArray(new String[0]);
+			
 			if (envarray.length == 0) {
 				Debug.info("inheriting system environment");
 				process = Runtime.getRuntime().exec(commandArray);
@@ -213,7 +224,9 @@ private static JackTheProcessRipper processRipper;
 	private static String[] getCommands(SocketPrologInterface socketPif) {
 		String executable = socketPif.getExecutable();
 		if (!executable.contains(" -L")) {
-			executable += " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			if(Util.getStackCommandLineParameters().length()>0) {
+				executable += " " + Util.getStackCommandLineParameters();// PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			}
 		}
 		String[] command = Util.split(executable, " ");
 		return command;
@@ -234,7 +247,8 @@ private static JackTheProcessRipper processRipper;
 	private static void writeInitialisationToTempFile(SocketPrologInterface socketPif,
 			int port, File tmpFile) throws FileNotFoundException {
 		PrintWriter tmpWriter = new PrintWriter(new BufferedOutputStream(new FileOutputStream(tmpFile)));
-		tmpWriter.println(":- guitracer.");
+		//tmpWriter.println(":- guitracer.");
+//		tmpWriter.println(":- FileName='/tmp/dbg_marker1.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- doc_collect(false).");
 		if (socketPif.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" + "->win_window_pos([show(false)])" + ";true).");
@@ -249,8 +263,11 @@ private static JackTheProcessRipper processRipper;
 			BootstrapPrologContribution contribution = it.next();
 			tmpWriter.println(":- "+contribution.getPrologInitStatement()+".");
 		}
+//		tmpWriter.println(":- FileName='/tmp/dbg_marker2.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":- [library(consult_server)].");
+//		tmpWriter.println(":- FileName='/tmp/dbg_marker3.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.println(":-consult_server(" + port + ",'" + Util.prologFileName(socketPif.getLockFile()) + "').");
+//		tmpWriter.println(":- FileName='/tmp/dbg_marker4.txt',open(FileName,write,Stream),writeln(FileName),write(Stream,hey),close(Stream).");
 		tmpWriter.close();
 	}
 
