@@ -10,7 +10,7 @@ public class PDTConstants {
 	// without graphic environment: First value is default!
 	public static final String WINDOWS_COMMAND_LINE_EXECUTABLES = "swipl,plcon";  // plcon -> swipl since 5.9.9
 
-	public static final String STACK_COMMMAND_LINE_PARAMETERS = "-L4m -G4m -T4m -A1m";
+	public static final String STACK_COMMMAND_LINE_PARAMETERS = "-L4m -G4m -T4m";
 
 	// With or without graphic environment: First value is default!
 	public static final String UNIX_COMMAND_LINE_EXECUTABLES = "swipl,xpce";      // xpce deleted since 5.9.9

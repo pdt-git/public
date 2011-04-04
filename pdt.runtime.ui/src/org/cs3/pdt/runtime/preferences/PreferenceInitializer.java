@@ -28,7 +28,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		plugin = PrologRuntimeUIPlugin.getDefault();
 		store = plugin.getPreferenceStore();
 
-		
+		// TODO: replace configuration of file_search_path for consult_server with bootstrap contribution, the library manager is an unnecessary complex concept for the purpose
 		store.setDefault(PrologInterface.PREF_FILE_SEARCH_PATH, PrologRuntimePlugin.guessFileSearchPath("pdt.runtime.socket.codebase"));
 		
 //		store.setDefault(PrologRuntime.PREF_PROLOGIF_IMPLEMENTATION, AbstractPrologInterface.PL_INTERFACE_DEFAULT);

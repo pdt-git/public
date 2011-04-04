@@ -6,15 +6,17 @@
   <artifactId>jtransformer_projects</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <!-- does not work, yet: findbugs
+  
+  <!-- needed for findbugs -->
    <repositories>
     <repository>
       <id>snapshots.codehaus</id>
       <url>http://snapshots.repository.codehaus.org</url>
     </repository>
   </repositories>
--->
+
   <build>
+	<sourceDirectory>src</sourceDirectory>
        <pluginManagement>
       <plugins>
         <plugin>
@@ -28,14 +30,14 @@
                 
             </configuration>
         </plugin>
-		 <!-- does not work, needed for findbugs:
- 
+		
+		 <!-- needed for findbugs -->
 		  <plugin>  
               <groupId>org.apache.maven.plugins</groupId>  
               <artifactId>maven-pmd-plugin</artifactId>  
               <version>2.5</version>  
            </plugin>  
--->
+
       </plugins>
     </pluginManagement>
     <plugins>
@@ -94,12 +96,13 @@
 		  </includes>
         </configuration>
       </plugin>
- <!-- does not work, need for findbugs:
- 	  
+
+	  <!-- needed for findbugs -->
+
 	   <plugin>  
            <groupId>org.codehaus.mojo</groupId>  
            <artifactId>findbugs-maven-plugin</artifactId>  
-           <version>2.3.2-SNAPSHOT</version>  
+           <version>2.3.2</version>  
            <configuration>  
               <findbugsXmlOutput>true</findbugsXmlOutput>  
               <failOnError>false</failOnError>  
@@ -112,6 +115,24 @@
               </execution>  
            </executions>  
         </plugin>  
+		
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.6</version>
+           <configuration>  
+              <failOnViolation>false</failOnViolation>  			  
+			  <configLocation>checkstyle_checks.xml</configLocation>
+           </configuration>  
+		 <executions>  
+              <execution>  
+                 <goals>  
+                    <goal>check</goal>  
+                 </goals>  
+              </execution>  
+           </executions> 
+      </plugin>
+	  
         <plugin>  
            <groupId>org.apache.maven.plugins</groupId>  
            <artifactId>maven-pmd-plugin</artifactId>  
@@ -129,8 +150,8 @@
                  </goals>  
               </execution>  
            </executions>  
-        </plugin>  
-		-->
+        </plugin> 
+		
     </plugins>
   </build>
   <modules>
