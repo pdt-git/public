@@ -43,12 +43,15 @@ package org.cs3.pdt.internal.editors;
 
 import org.eclipse.swt.graphics.RGB;
 
-public interface IPLColorConstants {
-	RGB PL_DYNAMIC = new RGB(110, 40, 40);
-	RGB PL_VAR = new RGB(139, 0, 0);
-	RGB PL_COMMENT = new RGB(63, 127,95);  //RGB values for Eclipse java comments.	
-	RGB STRING = new RGB(0, 0, 255);
-	RGB DEFAULT = new RGB(0, 0, 0);
-	RGB PL_KEYWORD = new RGB(0, 0, 128);
-	RGB BACKGROUND = new RGB(255, 255, 255);
+public interface PDTColors {
+	RGB BACKGROUND  = new RGB(255, 255, 255);
+	RGB DEFAULT     = new RGB(  0,   0,   0);   // black        
+	RGB STRING      = new RGB(  0,   0, 255);
+	RGB COMMENT     = new RGB( 63, 127,  95);   // RGB values for Eclipse Java comments.	
+	RGB VARIABLE    = new RGB(139,   0,   0);
+	RGB UNDEFINED   = new RGB(255,   0,   0);   // RED = Call to undefined  predicate
+	RGB KEYWORD     = new RGB(  0,   0, 128);   // 
+	RGB DYNAMIC     = new RGB(110,  40,  40);   // dark brown
+	RGB TRANSPARENT = new RGB(255,  80, 180);   // pink for module_transparent
+	RGB META        = new RGB( 15, 160,  15);   // dark green for meta_predicate
 }
