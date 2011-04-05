@@ -377,17 +377,59 @@ pdt_reload(File):-
 
 %% predicates_with_property(+Property,-Predicates) is det.
 %
-% Look up all Predicates with property Property, e.g. dynamic, built_in
-%
-predicates_with_property(Property,Predicates):-
-	setof(Name,
-	   predicate_name_with_property_(Name,Property),
-	   PredicatesList),
-	   sformat(S,'~w',[PredicatesList]),
-	   string_to_atom(S,Predicates).
-	  
-% helper
+% Look up all Predicates with property Property, including atomic
+% properties (e.g. dynamic, built_in) AND properties that are 
+% functions (e.g. meta_predicate(Head)).
+
+% GK, 5. April 2011: Extended the implementation to deal with unary
+% functors. The combination of findall and setof is essentail for 
+% this added functionality. The findall/3 call finds all results
+%   (even if the arguments are free variables -- note that setof/3
+%   would return results one by one in such a case, not a full list!). 
+% Then the setof/3 call eliminates the duplicates from the results
+% of findall/3. 
+% DO NOT CHANGE, unless you consider yourself a Prolog expert.
+
+% Property = undefined | built_in | dynamic | transparent | meta_predicate(_)    
+predicates_with_property(Property, Predicates) :- 
+	findall(Name, predicate_name_with_property_(Name,Property), AllPredicateNames),
+	make_duplicate_free_string(AllPredicateNames,Predicates).
+	
 predicate_name_with_property_(Name,Property):-
+	predicate_property(_M:Head,Property),
+	functor(Head,Name,_),
+	Name \= '[]'.
+	
+make_duplicate_free_string(AllPredicateNames,Predicates) :-
+    setof(Name, member(Name,AllPredicateNames), UniqueNames),
+	sformat(S,'~w',[UniqueNames]),
+	string_to_atom(S,Predicates).
+
+
+	
+%% predicates_with_unary_property(+Property,?Predicates,?PropertyParams) is det.
+%
+% Look up all Predicates with the unary property Property, e.g. meta_predicate(Head) 
+% The element at position i in Predicates is the name of a predicate that has  
+% the property Property with the parameter at position i in PropertyParams.
+%
+% Author: GK, 5 April 2011
+% TODO: Integrate into the editor the ability to show the params as tool tips,
+% e.g. show the metaargument specifications of a metapredicate on mouse over.
+predicates_with_unary_property(Property,Predicates,PropertyArguments):-
+	setof((Name,Arg),
+	   predicate_name_with_unary_property_(Name,Property,Arg),
+	   PredArgList),
+	findall(Pred, member((Pred,_),PredArgList), AllPreds),
+	findall(Arg,  member((_,Arg), PredArgList), AllArgs),
+	sformat(S1,'~w',[AllProps]),
+	sformat(S2,'~w',[AllArgs]),
+	string_to_atom(S1,Predicates),
+	string_to_atom(S2,PropertyArguments).
+	   	  
+% helper
+predicate_name_with_unary_property_(Name,Property,Arg):-
+    Property =.. [F,Arg],
 	predicate_property(_M:Head,Property),
 	functor(Head,Name,_),
 	Name \= '[]'.

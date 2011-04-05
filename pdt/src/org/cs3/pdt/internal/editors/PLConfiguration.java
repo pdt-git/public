@@ -135,7 +135,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		} catch (PrologInterfaceException e) {
 		}
 		scanner.setDefaultReturnToken(new Token(new TextAttribute(colorManager
-				.getColor(IPLColorConstants.DEFAULT))));
+				.getColor(PDTColors.DEFAULT))));
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class PLConfiguration extends SourceViewerConfiguration {
 
 		NonRuleBasedDamagerRepairer ndr = new NonRuleBasedDamagerRepairer(
 				new TextAttribute(colorManager
-						.getColor(IPLColorConstants.PL_COMMENT)));
+						.getColor(PDTColors.COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_MULTI_COMMENT);
 		
@@ -154,12 +154,12 @@ public class PLConfiguration extends SourceViewerConfiguration {
 		reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
 		ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager
-				.getColor(IPLColorConstants.PL_COMMENT)));
+				.getColor(PDTColors.COMMENT)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_COMMENT);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_COMMENT);
 
 		ndr = new NonRuleBasedDamagerRepairer(new TextAttribute(colorManager
-				.getColor(IPLColorConstants.STRING)));
+				.getColor(PDTColors.STRING)));
 		reconciler.setDamager(ndr, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
 		reconciler.setRepairer(ndr, PLPartitionScanner.PL_SINGLE_QUOTED_STRING);
 
