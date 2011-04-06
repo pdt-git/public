@@ -89,119 +89,116 @@ public class PrologSearchQuery implements ISearchQuery {
 			return new Status(IStatus.ERROR,PDT.PLUGIN_ID,42,"Exception caught during search.",t);
 		}
 	}
+	
+	// TODO: The progress monitor parameter is never used. 
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
 			BadLocationException, IOException, PrologException, PrologInterfaceException {
 		result.removeAll();
 		if(data==null){
-			Debug.error("Data is null!");
+			Debug.error("Search goal data is null!");
 			throw new NullPointerException();
 		}
-		PrologSession session = null;
-		if(pif!= null){
-			String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
-	
-			String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
-			+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
-			List<Map<String,Object>> results=null;
+
+		if(pif!= null){ // The project has the PDT nature
+			return searchIfPDTNatureIsSet();
+		} else {                                 
+			return searchIfPDTNatureIsMissing(); 
+		}
+	}
+
+	/**
+	 * @return
+	 * @throws PrologInterfaceException
+	 * @throws PrologException
+	 * @throws IOException
+	 * @throws NumberFormatException
+	 */
+	private IStatus searchIfPDTNatureIsMissing()
+			throws PrologInterfaceException, PrologException, IOException,
+			NumberFormatException {
+
+		if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole() == null){
+			return Status.CANCEL_STATUS;
+		}
+		else {
+			PrologSession session = PrologConsolePlugin.getDefault().getPrologConsoleService()
+			                        .getActivePrologConsole().getPrologInterface().getSession();
+
+			processFoundClauses(findClauses(session));
+			return Status.OK_STATUS;
+		}
+	}
+
+	/**
+	 * @param session
+	 * @return
+	 * @throws PrologException
+	 * @throws PrologInterfaceException
+	 */
+	private List<Map<String, Object>> findClauses(PrologSession session)
+			throws PrologException, PrologInterfaceException {
+		String module = "Module";
+		if(data.getModule()!=null)
+			module ="'"+ data.getModule()+ "'";
+		
+		String enclFile = UIUtils.getFileFromActiveEditor();
+
+		String query = "get_references('"+enclFile+"','" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
+		Debug.info(query);
+		
+		List<Map<String, Object>> clauses = session.queryAll(query);
+		
+		if(clauses.size()==0){ 
+			// a user module predicate (e.g. clause_property/2) is not-yet used in a module:
+			query = "get_references(_,'" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
+			Debug.info("Look up predicate in user module: "+query); 
+			clauses = session.queryAll(query);
+		} 
+		if(clauses.size()>0 && data.getModule()==null){
+			data.setModule((String)clauses.get(0).get("Module"));
+		}
+		return clauses;
+	}
+
+	/**
+	 * @param clauses
+	 * @throws IOException
+	 * @throws NumberFormatException
+	 */
+	private void processFoundClauses(List<Map<String, Object>> clauses)
+			throws IOException, NumberFormatException {
+		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
+			Map<String,Object> m = iterator.next();
+			Debug.info(m.toString());
+			IFile file=null;
+			String path = Util.unquoteAtom((String) m.get("File"));
 			try{
-				session=pif.getSession(PrologInterface.NONE);
-				results = session.queryAll(query);
-			}
-			finally{
-				if(session!=null){
-					session.dispose();
-				}
-			}
-			for (Iterator<Map<String,Object>> iterator = results.iterator(); iterator.hasNext();) {
-				Map<String,Object> m = iterator.next();
-
-				int start = Integer.parseInt((String) m.get("Start"));
-				int end = Integer.parseInt((String) m.get("End"));
-				IFile file=null;
-				String path =null; 
-				try{
-					path = Util.unquoteAtom((String) m.get("File"));
-					file = PDTCoreUtils.findFileForLocation(path);
-				}catch(IllegalArgumentException iae){
-					Debug.report(iae);
-					continue;
-				}
-
-				//IRegion resultRegion = new Region(start,end-start);
-
-				if(file==null||! file.isAccessible()){
-					String msg = "Not found in workspace: "+path;
-					Debug.warning(msg);
-					UIUtils.setStatusErrorMessage(msg);
-					continue;
-				}
-				String type = (String)m.get("Type");
-				PredicateElement pe = new PredicateElement();
-				pe.setLabel((String) m.get("Caller"));
-				pe.setType(type);
-
-				PrologMatch match = new PrologMatch(pe, start, end-start);
-
-				match.type=type;
-				result.addMatch(match);
-
-			}
-		} else { // not pdt nature found
-			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
-					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					String module = "Module";
-					if(data.getModule()!=null)
-						module ="'"+ data.getModule()+ "'";
-					String enclFile = UIUtils.getFileFromActiveEditor();
-
-					
-					String query = "get_references('"+enclFile+"','" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
-					Debug.info(query);
-					List<Map<String, Object>> clauses = session.queryAll(query);
-					
-					if(clauses.size()==0){ 
-						// a user module predicate (e.g. clause_property/2) is not-yet used in a module:
-						query = "get_references(_,'" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
-						Debug.info("Look up predicate in user module: "+query); 
-						clauses = session.queryAll(query);
-					} 
-					if(clauses.size()>0 && data.getModule()==null){
-						data.setModule((String)clauses.get(0).get("Module"));
-					}
-
-					
-					for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
-						Map<String,Object> m = iterator.next();
-						Debug.info(m.toString());
-						IFile file=null;
-						String path = Util.unquoteAtom((String) m.get("File"));
-						try{
-							file = PDTCoreUtils.findFileForLocation(path);
-							
-						}catch(IllegalArgumentException iae){
+				file = PDTCoreUtils.findFileForLocation(path);
+				
+			}catch(IllegalArgumentException iae){
 //							Debug.report(iae);
-						}
-						
-						if(file==null|| !file.isAccessible()){
-							Path location = new Path(path);
-							file = new ExternalFile(location);
-							String msg = "Not found in workspace: "+path;
+			}
+			
+			if(file==null|| !file.isAccessible()){
+				Path location = new Path(path);
+				file = new ExternalFile(location);
+				String msg = "Not found in workspace: "+path;
 //							Debug.warning(msg);
 //							UIUtils.setStatusErrorMessage(msg);
 //							continue;
-						}
-						String type = (String)m.get("RefModule");
-						PredicateElement pe = new PredicateElement();
+			}
+			String type = (String)m.get("RefModule");
+			PredicateElement pe = new PredicateElement();
 
-						String name = (String)m.get("Name");
-						int arity = Integer.parseInt((String)m.get("Arity"));
-						pe.setLabel((String) name + "/" + arity);
-						pe.setType(type);
-						pe.setFile(file);
-						pe.setPredicateName(data.getName());
-						pe.setArity(data.getArity());
+			String name = (String)m.get("Name");
+			int arity = Integer.parseInt((String)m.get("Arity"));
+			pe.setLabel((String) name + "/" + arity);
+			pe.setType(type);
+			pe.setFile(file);
+			pe.setPredicateName(data.getName());
+			pe.setArity(data.getArity());
 
-						int line = Integer.parseInt((String) m.get("Line"))-1;
+			int line = Integer.parseInt((String) m.get("Line"))-1;
 
 //						  ITextFileBufferManager iTextFileBufferManager = FileBuffers.getTextFileBufferManager();
 //						    ITextFileBuffer iTextFileBuffer = null;
@@ -226,20 +223,72 @@ public class PrologSearchQuery implements ISearchQuery {
 //							        iTextFileBufferManager.disconnect(location, LocationKind.NORMALIZE, new NullProgressMonitor());
 //								}
 
-					    	PrologMatch match = new PrologMatch(pe, line,0 ); // the line offset is only used for sorting here
-					        match.setLine(line);
-								match.type=type;
-								result.addMatch(match);
+		    PrologMatch match = new PrologMatch(pe, line,0 ); // the line offset is only used for sorting here
+		    match.setLine(line);
+		    match.type=type;
+			result.addMatch(match);
 //						    } catch (Exception e) {
 //						        e.printStackTrace();
 //						    }
-					}
-					return Status.OK_STATUS;
-			}
-			return Status.CANCEL_STATUS;
-
 		}
-		
+	}
+
+	/**
+	 * @throws PrologInterfaceException
+	 * @throws PrologException
+	 * @throws NumberFormatException
+	 * @throws IOException
+	 */
+	private IStatus searchIfPDTNatureIsSet() throws PrologInterfaceException,
+			PrologException, NumberFormatException, IOException {
+		PrologSession session=null;
+		String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
+
+		String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
+		+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
+		List<Map<String,Object>> results=null;
+		try{
+			session=pif.getSession(PrologInterface.NONE);
+			results = session.queryAll(query);
+		}
+		finally{
+			if(session!=null){
+				session.dispose();
+			}
+		}
+		for (Iterator<Map<String,Object>> iterator = results.iterator(); iterator.hasNext();) {
+			Map<String,Object> m = iterator.next();
+
+			int start = Integer.parseInt((String) m.get("Start"));
+			int end = Integer.parseInt((String) m.get("End"));
+			IFile file=null;
+			String path =null; 
+			try{
+				path = Util.unquoteAtom((String) m.get("File"));
+				file = PDTCoreUtils.findFileForLocation(path);
+			}catch(IllegalArgumentException iae){
+				Debug.report(iae);
+				continue;
+			}
+
+			//IRegion resultRegion = new Region(start,end-start);
+
+			if(file==null||! file.isAccessible()){
+				String msg = "Not found in workspace: "+path;
+				Debug.warning(msg);
+				UIUtils.setStatusErrorMessage(msg);
+				continue;
+			}
+			String type = (String)m.get("Type");
+			PredicateElement pe = new PredicateElement();
+			pe.setLabel((String) m.get("Caller"));
+			pe.setType(type);
+
+			PrologMatch match = new PrologMatch(pe, start, end-start);
+
+			match.type=type;
+			result.addMatch(match);
+		}
 		return Status.OK_STATUS;
 	}
 
