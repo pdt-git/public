@@ -420,7 +420,7 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments):-
 	setof((Name,Arg),
 	   predicate_name_with_unary_property_(Name,Property,Arg),
 	   PredArgList),
-	findall(Pred, member((Pred,_),PredArgList), AllPreds),
+	findall(Pred, member((Pred,_),PredArgList), AllProps),
 	findall(Arg,  member((_,Arg), PredArgList), AllArgs),
 	sformat(S1,'~w',[AllProps]),
 	sformat(S2,'~w',[AllArgs]),
