@@ -51,7 +51,7 @@
     pdt_reload/1,
     activate_warning_and_error_tracing/0,
     deactivate_warning_and_error_tracing/0,
-    predicates_with_property/2,
+    predicates_with_property/3,
     
     manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
     errors_and_warnings/4
@@ -391,12 +391,28 @@ pdt_reload(File):-
 % DO NOT CHANGE, unless you consider yourself a Prolog expert.
 
 % Property = undefined | built_in | dynamic | transparent | meta_predicate(_)    
-predicates_with_property(Property, Predicates) :- 
-	findall(Name, predicate_name_with_property_(Name,Property), AllPredicateNames),
+
+% Look for undefined predicates only in the local context 
+% (of the file whose editor has just been opened):
+%predicates_with_property(undefined, FileName, Predicates) :-
+%    !,
+%    module_of_file(FileName,Module), 
+%	findall(Name, predicate_name_with_property_(Module,Name,undefined), AllPredicateNames),
+%	make_duplicate_free_string(AllPredicateNames,Predicates).
+
+predicates_with_property(Property, _, Predicates) :-
+    findall(Name, predicate_name_with_property_(_,Name,Property), AllPredicateNames),
 	make_duplicate_free_string(AllPredicateNames,Predicates).
-	
-predicate_name_with_property_(Name,Property):-
-	predicate_property(_M:Head,Property),
+
+
+module_of_file(FileName,Module) :-
+    setof( Module, 
+           Pred^predicate_property(Module:Pred,file(FileName)),
+           Set),
+    member(Module,Set).
+    	
+predicate_name_with_property_(Module,Name,Property):-
+	predicate_property(Module:Head,Property),
 	functor(Head,Name,_),
 	Name \= '[]'.
 	
@@ -420,7 +436,7 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments):-
 	setof((Name,Arg),
 	   predicate_name_with_unary_property_(Name,Property,Arg),
 	   PredArgList),
-	findall(Pred, member((Pred,_),PredArgList), AllPreds),
+	findall(Pred, member((Pred,_),PredArgList), AllProps),
 	findall(Arg,  member((_,Arg), PredArgList), AllArgs),
 	sformat(S1,'~w',[AllProps]),
 	sformat(S2,'~w',[AllArgs]),
@@ -429,7 +445,7 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments):-
 	   	  
 % helper
 predicate_name_with_unary_property_(Name,Property,Arg):-
-    Property =.. [F,Arg],
+    Property =.. [__F,Arg],
 	predicate_property(_M:Head,Property),
 	functor(Head,Name,_),
 	Name \= '[]'.
