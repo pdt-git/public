@@ -412,9 +412,11 @@ module_of_file(FileName,Module) :-
     member(Module,Set).
     	
 predicate_name_with_property_(Module,Name,Property):-
-	predicate_property(Module:Head,Property),
-	functor(Head,Name,_),
-	Name \= '[]'.
+    current_module(Module),
+    current_predicate(Module:Name/Arity),
+	Name \= '[]',
+	functor(Head,Name,Arity),
+	predicate_property(Module:Head,Property).
 	
 make_duplicate_free_string(AllPredicateNames,Predicates) :-
     setof(Name, member(Name,AllPredicateNames), UniqueNames),
