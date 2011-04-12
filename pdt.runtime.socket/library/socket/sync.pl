@@ -249,7 +249,7 @@ increment_snapshot_count(NewSnapshotNumber) :-
   plus(SnapshotNumber,1,NewSnapshotNumber),
   add(sync:snapshot_count(NewSnapshotNumber)),
   !.
-increment_snapshot_count(NewSnapshotNumber) :-
+increment_snapshot_count(_) :-
   add(sync:snapshot_count(1)).
 
     

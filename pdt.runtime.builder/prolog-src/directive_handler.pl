@@ -28,10 +28,11 @@ handle_directive(assert,[file_search_path(Name,Path)],_Pos,ParentId,_FileId,_Mod
     	)
     ),
     assert(library_dir(Name,LibDir,ParentId)).		 
-    
 handle_directive(Other,Args,Pos,ParentId,_FileId,_Module):-
 %    writeln(Other),
    categorize_directive(Other,Args,Pos,ParentId).
+   
+   
     															%TODO: es können mehrere Anweisungen in einer Direktiven-Klausel sein.
 categorize_directive(load_files,Args,_Pos,ParentId):-									
     !,												%TODO: Test this
