@@ -59,6 +59,7 @@ compute_new_length(PId,Id) :-
 
 compute_all_predicate_properties:-
     forall(	property_dir(FileId,Functor,Args,ParentId,Pos),
+    		fileT(FileId,_,Module),
     		compute_predicate_property(Functor, Args, ParentId, Module, Pos)
     	).
     	
