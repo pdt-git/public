@@ -238,8 +238,8 @@ abstract public class DefaultPrologInterfaceRegistry implements PrologInterfaceR
 		if (keySet == null) {
 			return;
 		}
-		if (keySet.contains(id)) {
-			keySet.remove(id);
+		if (keySet.contains(subscription)) {
+			keySet.remove(subscription);
 			fireSubscriptionRemoved(subscription);
 
 		}
