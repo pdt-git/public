@@ -45,12 +45,12 @@
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.dump"/>
        <action
-             label="Consult"
+             label="(Re)consult"
              class="org.cs3.pdt.internal.actions.ConsultActionDelegate"
-             accelerator="F9"
              style="push"
              menubarPath="org.cs3.pdt.menus.prolog/separator1"
              id="org.cs3.pdt.internal.actions.consult"/>
+             
        <action
              label="Open Console"
              class="org.cs3.pdt.internal.actions.OpenConsoleAction"
@@ -73,7 +73,7 @@
       <editor
             name="PL Editor"
             icon="icons/prolog_file.gif"
-            extensions="pl , plt"
+            extensions="pl , plt, lgt"
             class="org.cs3.pdt.internal.editors.PLEditor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             id="org.cs3.pdt.internal.editors.PLEditor">
@@ -116,9 +116,24 @@
       point="org.eclipse.ui.commands">
    <command
          categoryId="org.cs3.pdt.editing"
+         description="Show Quick Outline"
+         id="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
+         name="Toggle Comments"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
          description="Toggles comment prefix on selected lines"
          id="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
          name="Toggle Comments"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Save And Consult"
+         id="org.eclipse.pdt.ui.edit.save.consult"
+         name="Save and Consult"/>
+   <command
+         categoryId="org.cs3.pdt.editing"
+         description="Consult"
+         id="org.eclipse.pdt.ui.edit.consult"
+         name="Consult"/>
    <category
          description="Commands for the Prolog Editor"
          id="org.cs3.pdt.editing"
@@ -127,10 +142,26 @@
 <extension
       point="org.eclipse.ui.bindings">
    <key
+         commandId="org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+O"/>
+   <key
          commandId="org.eclipse.pdt.ui.edit.text.prolog.toggle.comments"
          contextId="org.cs3.pdt.editingProlog"
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-         sequence="CTRL+SHIFT+/"/>
+         sequence="CTRL+SHIFT+C"/>
+   <key
+         commandId="org.eclipse.pdt.ui.edit.save.consult"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="CTRL+ALT+S"/>
+   <key
+         commandId="org.eclipse.pdt.ui.edit.consult"
+         contextId="org.cs3.pdt.editingProlog"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="F9"/>
+         
 </extension>
 <extension
       point="org.eclipse.ui.contexts">
@@ -161,4 +192,135 @@
    </editorContribution>
 </extension>-->
 
+<extension point="org.eclipse.ui.editors.annotationTypes">
+      <type
+         name="org.cs3.pdt.occurrences">
+      </type>
+      <type name="org.cs3.pdt.occurrences.singleton"
+      	super="org.cs3.pdt.occurrences">
+      </type>
+      <type name="org.cs3.pdt.occurrences.non.singleton"
+      	super="org.cs3.pdt.occurrences">
+      </type>
+      <type name="org.cs3.pdt.occurrences.singleton.wrong.prefix"
+      	super="org.cs3.pdt.occurrences">
+      </type>
+      
+
+	</extension>
+	
+	<extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+ <specification
+            annotationType="org.cs3.pdt.occurrences"
+            label="Variable occurrence"
+            textPreferenceKey="occurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="occurrenceHighlighting"
+            highlightPreferenceValue="true"
+            contributesToHeader="false"
+            overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="occurrenceIndicationColor"
+            colorPreferenceValue="212,212,212"
+            presentationLayer="4"
+            showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="true"
+            isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
+	        isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+	        isGoToPreviousNavigationTarget="false"
+            textStylePreferenceKey="occurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>
+	  <specification
+            annotationType="org.cs3.pdt.occurrences.singleton"
+            label="Singleton"
+            textPreferenceKey="singletonOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="singletonOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="singletonOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="singletonOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="singletonOccurrenceIndicationColor"
+            colorPreferenceValue="240,216,168"
+            presentationLayer="4"
+            textStylePreferenceKey="singletonOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>	  
+	<specification
+            annotationType="org.cs3.pdt.occurrences.non.singleton"
+            label="Not a singleton although named as a singleton"
+            textPreferenceKey="nonSingletonOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="nonSingletonOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="nonSingletonOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="nonSingletonOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="nonSingletonOccurrenceIndicationColor"
+            colorPreferenceValue="255,193,193"
+            presentationLayer="4"
+            textStylePreferenceKey="nonSingletonOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>	  	  
+	<specification
+            annotationType="org.cs3.pdt.occurrences.singleton.wrong.prefix"
+            label="Singleton, but named as normal variable"
+            textPreferenceKey="singletonWrongPrefixOccurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="singletonWrongPrefixOccurrenceHighlighting"
+            highlightPreferenceValue="true"
+            overviewRulerPreferenceKey="singletonWrongPrefixOccurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="singletonWrongPrefixOccurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="singletonWrongPrefixOccurrenceIndicationColor"
+            colorPreferenceValue="255,237,202"
+            presentationLayer="4"
+            textStylePreferenceKey="singletonWrongPrefixOccurrenceTextStyle"
+            textStylePreferenceValue="NONE">
+	  </specification>	  	  
+	</extension>
+	  <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="PDT"
+            id="org.cs3.pdt.wizards">
+      </category>
+      
+            <wizard
+                  category="org.cs3.pdt.wizards"
+                  class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard"
+                  icon="icons/module_2.png"
+                  id="pdt.module.wizard"
+                  name="Prolog Module">
+         <class class="org.cs3.pdt.internal.wizards.NewModuleCreationWizard">
+            <parameter
+                name="javatype"
+                value="true">
+            </parameter>
+         </class>
+         <description>
+            Create a Prolog Module
+         </description>
+      </wizard>
+    </extension>
+<!--	
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          allPopups="false"
+          locationURI="menu:org.cs3.pdt.menus.Prolog">
+       <command
+             commandId="org.eclipse.pdt.ui.edit.consult"
+             style="push">
+       </command>
+    </menuContribution>
+ </extension>
+-->	
 </plugin>

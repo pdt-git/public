@@ -49,7 +49,7 @@ import java.util.TreeSet;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.console.CompoletionResult;
+import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.PredicateData;
@@ -60,7 +60,7 @@ import org.cs3.pl.prolog.PrologSession;
 
 public class PrologCompletionProvider implements ConsoleCompletionProvider {
 
-	private class _Result implements CompoletionResult {
+	private class _Result implements CompletionResult {
 
 		@Override
 		public String getOriginalLineContent() {
@@ -129,7 +129,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 	 *      int)
 	 */
 	@Override
-	public CompoletionResult doCompletion(String line, int pos) {
+	public CompletionResult doCompletion(String line, int pos) {
 		if (pif == null) {
 			return null;
 		}
@@ -190,7 +190,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			if (filename == null)
 				filename = "_";
 			String query = "find_pred('" + filename + "','" + prefix + "', "
-					+ module + ",Name,Arity,Public)";
+					+ module + ",Name,Arity,Public,_,_)";
 			List<Map<String,Object>> results = session.queryAll(query);
 			List<Predicate> list = new ArrayList<Predicate>();
 			for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {

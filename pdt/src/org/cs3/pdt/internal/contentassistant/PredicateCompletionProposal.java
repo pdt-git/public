@@ -20,11 +20,15 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String name;	
 	private Map<String,?> tags;
 	private String label;
+	private String module;
+	private String doc;
 	
 	public PredicateCompletionProposal(int offset, int length,
-			String name, int arity, Map<String,?> tags) {
+			String name, int arity, Map<String,?> tags, String module) {
 		super(name,offset,length,name.length(),
 				ImageRepository.getImage(
+						arity==-1?
+								ImageRepository.PE_MODULE :
 						isBuiltIn(tags)?
 								ImageRepository.PE_BUILT_IN :
 						isPublic(tags)?
@@ -34,7 +38,45 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		this.length = length;
 		this.name=name;
 		this.tags=tags;
-		this.label = name+"/"+arity;
+		this.module=module;
+		if(arity==-1){
+			this.label=name;
+		} else {
+			this.label = name+"/"+arity;
+
+			CTerm summary = (CTerm) tags.get("summary");
+			Object doc = tags.get("documentation");
+
+			 
+			if(doc != null){
+				 	String value;
+					if(doc instanceof CTerm){
+						value =((CTerm)doc).getFunctorValue();
+					} else {
+						value = (String)doc;
+					}
+				if(value.startsWith("<dl><dt")){
+					label =name + value.substring(value.indexOf("arglist")+9,value.indexOf("</var>"));
+				}else {
+					label=value.indexOf('\n')>0 ?
+						value.substring(0,value.indexOf('\n')):
+						value;
+				}
+				this.doc = value;
+			 } else if(summary!=null){
+					label = label + " - " + summary.getFunctorValue();
+				 
+			 }
+			
+		}
+		if(module!=null){
+			label=module+":" + label;
+		}
+		this.module = module;
+		
+		
+
+		
 	}
 
 	private static boolean isPublic(Map<String, ?> tags) {
@@ -67,16 +109,6 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	 */
 	@Override
 	public String getDisplayString() {
-		CTerm summary = (CTerm) tags.get("summary");
-		CTerm doc = (CTerm) tags.get("documentation");
-		if(summary!=null){
-			return getLabel() + " - " + summary.getFunctorValue();
-		 } else if(doc != null){
-			 String value = doc.getFunctorValue();
-			return value.indexOf('\n')>0 ?
-					value.substring(0,value.indexOf('\n')):
-						value;
-		 }
 		return getLabel();
 	}
 
@@ -106,15 +138,16 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	 */
 	@Override
 	public Object getAdditionalProposalInfo(IProgressMonitor monitor) {
-		CTerm doc = (CTerm) tags.get("documentation");
-		if(doc!=null){
-			return doc.getFunctorValue().replaceAll("\n", "</b>");
+		if(doc!=null) {
+			if(doc.indexOf("\n")>-1){
+				doc="<b>"+doc.replaceFirst("\n", "</b><br/>").replace("\n", "<br/>");
+			}
+			return doc;
 		}
 		CTerm summary = (CTerm) tags.get("summary");
 		if(summary!=null){
 			return "<b>"+getLabel()+"</b></p>"+summary.getFunctorValue();
 		}
-
 		return null;
 	}
 

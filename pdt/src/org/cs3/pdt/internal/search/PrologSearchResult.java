@@ -45,6 +45,8 @@
  */
 package org.cs3.pdt.internal.search;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
@@ -167,10 +169,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			return (IFile) element;
 		}
 		if (element instanceof PredicateElement){
-			return ((PredicateElement) element).file;
+			return ((PredicateElement) element).getFile();
 		}
 		if(element instanceof Match){
-			return ((PredicateElement) ((Match) element).getElement()).file;
+			return ((PredicateElement) ((Match) element).getElement()).getFile();
 		}
 		return null;
 	}
@@ -183,7 +185,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			Vector<PredicateElement> v = new Vector<PredicateElement>();
 			for (int i = 0; i < elms.length; i++) {
 				PredicateElement elm = (PredicateElement) elms[i];
-				if(elm.file.equals(file)){
+				if(elm.getFile().equals(file)){
 					v.add(elm);
 				}
 			}
@@ -196,13 +198,21 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public void addMatch(Match match) {
 		PredicateElement elm = (PredicateElement) match.getElement();
-		fileCache.add(elm.file);
+		fileCache.add(elm.getFile());
 		super.addMatch(match);
 	}
 	
 	public IFile[] getFiles() {
-		
-		return fileCache.toArray(new IFile[fileCache.size()]);
+		IFile[] sortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
+		Arrays.sort(sortedFiles,
+				new Comparator<IFile>() {
+					@Override
+					public int compare(IFile first, IFile second) {
+						return first.getFullPath().toPortableString().compareTo(second.getFullPath().toPortableString());
+					}
+				}
+		);		
+		return sortedFiles;
 	}
 	@Override
 	public void removeAll() {	

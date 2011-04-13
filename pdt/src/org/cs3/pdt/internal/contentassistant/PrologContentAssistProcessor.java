@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.editors.PLPartitionScanner;
 import org.cs3.pl.common.Debug;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -50,12 +50,22 @@ public abstract class PrologContentAssistProcessor {
 	private Prefix calculatePrefix(IDocument document, int offset)
 			throws BadLocationException {
 				int begin=offset;
-				while (PLEditor.isNonQualifiedPredicatenameChar(document
-						.getChar(begin))
-						&& begin > 0)
-					begin--;
-				int length = offset - begin;
-				begin++;
+				int length=0;
+				boolean isPredChar = Util.isNonQualifiedPredicatenameChar(document.getChar(begin));
+				
+				while (isPredChar){
+					length++;
+					int test = begin-1;
+					if(test >=0){
+						isPredChar = Util.isNonQualifiedPredicatenameChar(document.getChar(test));
+						if(!isPredChar){
+							break;
+						}
+					} else {
+						break;
+					}
+					begin=test;
+				}
 				String pre = document.get(begin, length);
 				
 				Prefix prefix = new Prefix(document,begin,pre);
@@ -64,13 +74,16 @@ public abstract class PrologContentAssistProcessor {
 
 	private String retrievePrefixedModule(int documentOffset, IDocument document, int begin)
 			throws BadLocationException {
-				if (document.getChar(begin - 1) == ':') {
+				if (begin>0 && document.getChar(begin - 1) == ':') {
 					int moduleBegin = begin - 2;
-					while (PLEditor.isNonQualifiedPredicatenameChar(document
+					while (Util.isNonQualifiedPredicatenameChar(document
 							.getChar(moduleBegin))
 							&& moduleBegin > 0)
 						moduleBegin--;
-					return document.get(moduleBegin + 1, documentOffset - moduleBegin);
+					String moduleName = document.get(moduleBegin + 1, documentOffset - moduleBegin);
+					if(!Util.isVarPrefix(moduleName)){
+						return moduleName;
+					}
 				}
 				return null;
 			}
@@ -87,7 +100,7 @@ public abstract class PrologContentAssistProcessor {
 	
 			String module = retrievePrefixedModule(documentOffset - pre.length - 1,
 					document, pre.begin);
-	
+			
 			List<ComparableCompletionProposal> proposals = 
 					new ArrayList<ComparableCompletionProposal>();
 			if (module == null || module.equals("")) {

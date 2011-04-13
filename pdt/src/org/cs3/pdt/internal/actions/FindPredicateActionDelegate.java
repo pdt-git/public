@@ -41,11 +41,13 @@
 
 package org.cs3.pdt.internal.actions;
 
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
@@ -64,6 +66,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -144,8 +148,51 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	
 	
 	private void run_impl(Goal goal, IFile file) throws CoreException {
-		IPrologProject plprj;
-		plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		IPrologProject plprj=null;
+		if(file!=null){ // external file
+			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
+		}
+		if(plprj== null){
+			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
+				PrologSession session =null;
+				try {
+					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
+					String module = "_";
+					if(goal.getModule()!=null)
+						module ="'"+ goal.getModule()+ "'";
+					String enclFile = UIUtils.getFileFromActiveEditor();
+					
+					String query = "find_declaration('"+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module  + ",File,Line)";
+					Debug.info("open declaration: " + query);
+					List<Map<String, Object>> clauses = session.queryAll(query);
+					if(clauses.size()>0) {
+						Map<String, Object> clause = clauses.get(0);
+						SourceLocation location = new SourceLocation((String)clause.get("File"), false);
+						location.setLine(Integer.parseInt((String)clause.get("Line"))-1);
+					//	System.out.println(location.offset);
+						
+						PDTUtils.showSourceLocation(location);
+						return;
+					}
+				}catch(Exception e) {
+					Debug.report(e);
+				} finally {
+					if(session!=null)session.dispose();
+				}				
+			} else {
+				UIUtils.getDisplay().asyncExec(new Runnable() {
+					
+					@Override
+					public void run() {
+						MessageBox messageBox = new MessageBox(UIUtils.getActiveShell(), SWT.ICON_WARNING| SWT.OK);
+
+						messageBox.setText("Open Declaration");
+						messageBox.setMessage("Cannot open declaration. No PDT Nature assigned and no active Prolog Console available for a fallback.");
+						messageBox.open();					}
+				});
+			}
+			return;
+		}
 		PrologInterface pif = plprj.getMetadataPrologInterface();
 		SourceLocation loc;
 		try {
@@ -184,8 +231,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		}
 		String fileName = Util.unquoteAtom((String) m.get("File"));
 		SourceLocation loc=new SourceLocation(fileName,false);
-		loc.offset=Integer.parseInt((String)m.get("Start"));
-		loc.endOffset=Integer.parseInt((String)m.get("End"));
+		loc.setOffset(Integer.parseInt((String)m.get("Start")));
+		loc.setEndOffset(Integer.parseInt((String)m.get("End")));
 		
 		return loc;
 	}

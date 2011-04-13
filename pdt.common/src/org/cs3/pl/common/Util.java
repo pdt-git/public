@@ -63,6 +63,8 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.management.RuntimeErrorException;
+
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */
@@ -774,7 +776,7 @@ public class Util {
 	
 	
 	public static String guessEnvironmentVariables() {
-		if (Util.isMacOS()) {
+		if (isMacOS()) {
 			String home = System.getProperty("user.home");
 			return "DISPLAY=:0.0, HOME=" + home;
 		}
@@ -789,16 +791,85 @@ public class Util {
 
 	}
 
+
+	private static String stackCommandLineParameters = null;
 	
+	public static String getStackCommandLineParameters() {
+		System.out.println("DEBUG: getStackCommandLineParameters start");
+		if (stackCommandLineParameters == null) {
+		
+			String swiExecutable;
+			
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			try {
+				Process p = Runtime.getRuntime().exec(new String[]{
+						swiExecutable,
+						"-g",
+						"current_prolog_flag(address_bits,A),writeln(A),halt."});
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				bits = reader.readLine();
+				p.waitFor();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	
+			if (bits.equals("64")) {
+				// no parameters for SWI-Prolog 64bit
+				stackCommandLineParameters = "";
+			} else {
+				stackCommandLineParameters = PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+			}
+
+		}
+		System.out.println("DEBUG: getStackCommandLineParameters end: '" + stackCommandLineParameters+ "'");
+		
+		return stackCommandLineParameters;
+	}
+
+	public static String getCurrentSWIVersionFromCommandLine() throws IOException{
+//		return "51118_64";// TEMPversion +"_"+bits;
+		
+			String swiExecutable;
+			if (isWindows()) {
+				swiExecutable = findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES);			
+			} else {
+				swiExecutable = findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES);
+			}
+			
+			String bits = "";
+			String version ="";
+			Process p = Runtime.getRuntime().exec(new String[]{
+					swiExecutable,
+					"-g",
+					"current_prolog_flag(version,V),writeln(V),current_prolog_flag(address_bits,A),writeln(A),halt."});
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			version = reader.readLine();
+			bits = reader.readLine();
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {
+				// TR: fatal anyway:
+				throw new RuntimeException(e);
+			}
+	
+
+		return version +"_"+bits;
+	}
+
 	private static String guessExecutableName__() {
 
-		if (Util.isWindows()) {
+		if (isWindows()) {
 			return "cmd.exe /c start \"cmdwindow\" /min "
-					+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			// return "plwin";
+				+ findWindowsExecutable(PDTConstants.WINDOWS_EXECUTABLES) + " " + getStackCommandLineParameters();
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 
 	}
 
@@ -812,13 +883,12 @@ public class Util {
 	
 	private static String guessCommandLineExecutableName__() {
 
-		if (Util.isWindows()) {
+		if (isWindows()) {
 			return //"cmd.exe /c start \"cmdwindow\" /min "
-					 findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
-			// return "plwin";
+			findWindowsExecutable(PDTConstants.WINDOWS_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 		}
 		// return "xterm -e xpce"; // For Mac and Linux with console
-		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + PDTConstants.STACK_COMMMAND_LINE_PARAMETERS;
+		return findUnixExecutable(PDTConstants.UNIX_COMMAND_LINE_EXECUTABLES) + " " + getStackCommandLineParameters();
 
 	}
 
@@ -836,7 +906,7 @@ public class Util {
 		String[] appendPath = null;
 
 		// Hack to resolve the issue of locating xpce in MacOS
-		if (Util.isMacOS()) {
+		if (isMacOS()) {
 			appendPath = new String[1];
 			appendPath[0] = "PATH=PATH:/opt/local/bin";
 		}
@@ -898,7 +968,7 @@ public class Util {
 				return default_exec[0];
 
 			// TODO just search in case of executable was not found.
-			String[] paths = Util.split(path, ";");
+			String[] paths = split(path, ";");
 			File exeFile = null;
 
 			for (int i = 0; i < paths.length; i++) {
@@ -928,6 +998,101 @@ public class Util {
 
 			return default_exec[0];
 		}
+	}
+
+	/**
+	 * @param prefix
+	 * @return
+	 */
+	public static boolean isVarChar(char c) {
+		if (c == '_')
+			return true;
+		if (c >= 'A' && c <= 'Z')
+			return true;
+		if (c >= 'a' && c <= 'z')
+			return true;
+		if (c >= '0' && c <= '9')
+			return true;
+		return false;
+	}
+
+	/**
+	 * @param prefix
+	 * @return
+	 */
+	public static boolean isVarPrefix(char c) {
+		if (c == '_')
+			return true;
+		if (c >= 'A' && c <= 'Z')
+			return true;
+		return false;
+	}
+
+	/**
+	 * @param prefix
+	 * @return
+	 */
+	public static boolean isFunctorPrefix(String prefix) {
+		if (prefix == null | prefix.length() == 0)
+			return false;
+		if (prefix.charAt(0) >= 'a' && prefix.charAt(0) <= 'z')
+			return true;
+	
+		return false;
+	}
+
+	/**
+	 * @param prefix
+	 * @return
+	 */
+	public static boolean isVarPrefix(String prefix) {
+		if (prefix.length() == 0)
+			return false;
+		return isVarPrefix(prefix.charAt(0));
+	}
+
+	/**
+	 * @param c
+	 * @return
+	 */
+	static public boolean isPredicatenameChar(char c) {
+		if (c >= 'a' && c <= 'z')
+			return true;
+		if (c >= '0' && c <= '9')
+			return true;
+		if (c >= 'A' && c <= 'Z')
+			return true;
+		if (c == ':' || c == '_' || c == '+' || c == '-' || c == '\\'
+				|| c == '*')
+			return true;
+		return false;
+	}
+
+	static public boolean isNonQualifiedPredicatenameChar(char c) {
+		return isPredicatenameChar(c) && c != ':';
+	}
+
+	static public boolean isFunctorChar(char c) {
+		if (c >= 'a' && c <= 'z')
+			return true;
+		if (c >= '0' && c <= '9')
+			return true;
+		if (c >= 'A' && c <= 'Z')
+			return true;
+		if (c == '_')
+			return true;
+	
+		return false;
+	}
+
+
+
+	public static boolean isSingleSecondChar(char c) {
+		if (c >= '0' && c <= '9')
+			return true;
+		if (c >= 'A' && c <= 'Z')
+			return true;
+		return false;
 	}
 
 }
