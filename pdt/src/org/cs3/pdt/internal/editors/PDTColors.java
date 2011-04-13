@@ -39,20 +39,19 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pl.console.oldui;
+package org.cs3.pdt.internal.editors;
 
-import org.cs3.pl.console.ConsoleModel;
+import org.eclipse.swt.graphics.RGB;
 
-/*
- */
-/**
- */
-public interface ConsoleController {
-    public boolean keyStrokeIntercepted(int keyCode, char keyChar);   
-    public void keyPressed(int keyCode, char keyChar);
-    public boolean inputModificationIntercepted(String text, int from, int to, String string);
-    public void inputModified(String newInput);
-    public void setUI(ConsoleUI consoleUI);
-    public void setModel(ConsoleModel consoleModel);
-    
+public interface PDTColors {
+	RGB BACKGROUND  = new RGB(255, 255, 255);
+	RGB DEFAULT     = new RGB(  0,   0,   0);   // black        
+	RGB STRING      = new RGB(  0,   0, 255);
+	RGB COMMENT     = new RGB( 63, 127,  95);   // RGB values for Eclipse Java comments.	
+	RGB VARIABLE    = new RGB(139,   0,   0);
+	RGB UNDEFINED   = new RGB(255,   0,   0);   // RED = Call to undefined  predicate
+	RGB KEYWORD     = new RGB(  0,   0, 128);   // 
+	RGB DYNAMIC     = new RGB(110,  40,  40);   // dark brown
+	RGB TRANSPARENT = new RGB(255,  80, 180);   // pink for module_transparent
+	RGB META        = new RGB( 15, 160,  15);   // dark green for meta_predicate
 }

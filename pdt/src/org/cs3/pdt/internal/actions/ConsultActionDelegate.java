@@ -75,6 +75,7 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 
 /**
  */
@@ -131,7 +132,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				checkPif();
 				
 
-				setQuery("consult('" + Util.prologFileName(file) + "')");
+				setQuery("pdt_reload('" + Util.prologFileName(file) + "')");
 
 				run();
 			} catch (IOException e) {
@@ -150,6 +151,21 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 //						window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
 			}
 
+		} else if(input instanceof FileStoreEditorInput) {
+			FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
+				File file  =new File(fileInput.getURI());
+				try {
+					plugin.getWorkbench().getActiveWorkbenchWindow()
+							.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+					checkPif();
+
+					setQuery("consult('" + Util.prologFileName(file) + "')");
+
+					run();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+				
 		} else {
 			Debug
 					.warning("Consult action triggered, but active editor input is no file.");

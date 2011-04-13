@@ -70,7 +70,7 @@ public class PLPartitionScanner extends RuleBasedPartitionScanner {
 		rules[1] = new MultiLineRule("/*", "*/", plMultiComment);
 		rules[2] = new SingleLineRule("\"", "\"", plDoubleQuotedString, '\\');
 		// Add a rule for single quotes
-		rules[3] = new SingleLineRule("'", "'", plSingleQuotedString, '\\');
+		rules[3] = new SingleLineRule("'", "'", plSingleQuotedString, '\\'); // The escape character is not correct. Putting ' in there fails rule parsing.
 		// Add generic whitespace rule.
 //        rules[2] = new PredicateRule(plPredicate);
 

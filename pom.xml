@@ -6,7 +6,17 @@
   <artifactId>jtransformer_projects</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
+  
+  <!-- needed for findbugs -->
+   <repositories>
+    <repository>
+      <id>snapshots.codehaus</id>
+      <url>http://snapshots.repository.codehaus.org</url>
+    </repository>
+  </repositories>
+
   <build>
+	<sourceDirectory>src</sourceDirectory>
        <pluginManagement>
       <plugins>
         <plugin>
@@ -20,6 +30,13 @@
                 
             </configuration>
         </plugin>
+		
+		 <!-- needed for findbugs -->
+		  <plugin>  
+              <groupId>org.apache.maven.plugins</groupId>  
+              <artifactId>maven-pmd-plugin</artifactId>  
+              <version>2.5</version>  
+           </plugin>  
 
       </plugins>
     </pluginManagement>
@@ -48,7 +65,7 @@
       <plugin>
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
-        <version>0.8.0</version>
+        <version>0.10.0</version>
         <extensions>true</extensions>
       </plugin>
       <!-- leads to a class cast exception ?!
@@ -65,7 +82,7 @@
 	  <plugin>
         <groupId>org.sonatype.tycho</groupId>
         <artifactId>maven-osgi-test-plugin</artifactId>
-        <version>0.8.0</version>
+        <version>0.10.0</version>
         <configuration>
           <useUIHarness>true</useUIHarness>
           <useUIThread>true</useUIThread>
@@ -79,6 +96,62 @@
 		  </includes>
         </configuration>
       </plugin>
+
+	  <!-- needed for findbugs -->
+
+	   <plugin>  
+           <groupId>org.codehaus.mojo</groupId>  
+           <artifactId>findbugs-maven-plugin</artifactId>  
+           <version>2.3.2</version>  
+           <configuration>  
+              <findbugsXmlOutput>true</findbugsXmlOutput>  
+              <failOnError>false</failOnError>  
+           </configuration>  
+           <executions>  
+              <execution>  
+                 <goals>  
+                    <goal>check</goal>  
+                 </goals>  
+              </execution>  
+           </executions>  
+        </plugin>  
+		
+	  <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.6</version>
+           <configuration>  
+              <failOnViolation>false</failOnViolation>  			  
+			  <configLocation>checkstyle_checks.xml</configLocation>
+           </configuration>  
+		 <executions>  
+              <execution>  
+                 <goals>  
+                    <goal>check</goal>  
+                 </goals>  
+              </execution>  
+           </executions> 
+      </plugin>
+	  
+        <plugin>  
+           <groupId>org.apache.maven.plugins</groupId>  
+           <artifactId>maven-pmd-plugin</artifactId>  
+           <configuration>  
+              <sourceEncoding>utf-8</sourceEncoding>  
+              <minimumTokens>100</minimumTokens>  
+              <targetJdk>1.5</targetJdk>  
+              <format>xml</format>  
+              <failOnViolation>false</failOnViolation>  
+           </configuration>  
+           <executions>  
+              <execution>  
+                 <goals>  
+                    <goal>cpd-check</goal>  
+                 </goals>  
+              </execution>  
+           </executions>  
+        </plugin> 
+		
     </plugins>
   </build>
   <modules>

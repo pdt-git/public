@@ -41,6 +41,9 @@
 
 package org.cs3.pdt.ui.util;
 
+import java.io.File;
+
+import org.cs3.pl.common.Util;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
@@ -49,12 +52,15 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
 
 /**
@@ -277,5 +283,44 @@ public final class UIUtils {
 			return null;
 		}
 		return activePage.showView(viewId);
+	}
+
+	public static String getFileFromActiveEditor() {
+		String enclFile;
+		IEditorInput editorInput = UIUtils.getActiveEditor().getEditorInput();
+		enclFile = getFileNameForEditorInput(editorInput);
+		return enclFile;
+	}
+
+	public static String getFileNameForEditorInput(IEditorInput editorInput) {
+		String enclFile;
+		if(editorInput instanceof FileEditorInput){
+			enclFile = ((FileEditorInput)editorInput).getFile().getRawLocation().toPortableString();
+		} else {
+			enclFile = new File(((FileStoreEditorInput)editorInput).getURI()).getAbsolutePath().replace('\\','/');						
+		}
+		if(Util.isWindows()){
+			enclFile = enclFile.toLowerCase();
+		}
+		return enclFile;
+	}
+	
+	/**
+	 * Open file in its default editor.
+	 * 
+	 * @param file
+	 * @param activate
+	 * @return
+	 * @throws PartInitException
+	 */
+	static public IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
+		if (file != null) {
+			IWorkbenchPage p= getActivePage();
+			if (p != null) {
+				IEditorPart editorPart= IDE.openEditor(p, file, activate);
+				return editorPart;
+			}
+		}
+		return null; 
 	}
 }

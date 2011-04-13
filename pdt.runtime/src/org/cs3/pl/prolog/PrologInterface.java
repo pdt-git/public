@@ -43,6 +43,7 @@ package org.cs3.pl.prolog;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.cs3.pdt.runtime.BootstrapPrologContribution;
 import org.cs3.pl.common.PreferenceProvider;
@@ -236,5 +237,15 @@ public interface PrologInterface {
 	 */
 	public AsyncPrologSession getAsyncSession() throws PrologInterfaceException;
 	public AsyncPrologSession getAsyncSession(int flags) throws PrologInterfaceException;
+	
+	/**
+	 * Is the {@link PrologInterface} in an error state, e.g. the corresponding process has been killed externally.  
+	 * @return
+	 */
+	public boolean hasError();
+	
+	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException;
+	
+	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException;
 
 }

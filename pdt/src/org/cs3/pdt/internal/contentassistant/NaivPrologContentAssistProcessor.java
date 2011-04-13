@@ -1,12 +1,15 @@
 package org.cs3.pdt.internal.contentassistant;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.cterm.CTerm;
@@ -32,7 +35,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 		Set<String> unique = new HashSet<String>();
 		Image image = ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 
-		if (PLEditor.isVarPrefix(prefix) || prefix.length() == 0) {
+		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == 0 ? begin : begin - 1;
 			String proposal = null;
 			while (l > 0 && !PLEditor.predicateDelimiter(document, l)) {
@@ -41,12 +44,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					l = region.getOffset();
 				else {
 					char c = document.getChar(l);
-					if (PLEditor.isVarChar(c)) {
+					if (Util.isVarChar(c)) {
 						if (proposal == null)
 							proposal = "";
 						proposal = c + proposal;
 					} else if (proposal != null) {
-						if (PLEditor.isVarPrefix(proposal.charAt(0))
+						if (Util.isVarPrefix(proposal.charAt(0))
 								&& proposal.regionMatches(true, 0, prefix, 0,
 										prefix.length())
 								&& !unique.contains(proposal) /*
@@ -65,7 +68,7 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 				l--;
 			}
 		}
-		if (PLEditor.isVarPrefix(prefix) || prefix.length() == 0) {
+		if (Util.isVarPrefix(prefix) || prefix.length() == 0) {
 			int l = begin == document.getLength() ? begin : begin + 1;
 			String proposal = null;
 			while (l < document.getLength()
@@ -75,12 +78,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 					l = region.getOffset() + region.getLength();
 				} else {
 					char c = document.getChar(l);
-					if (PLEditor.isVarChar(c)) {
+					if (Util.isVarChar(c)) {
 						if (proposal == null)
 							proposal = "";
 						proposal = proposal + c;
 					} else if (proposal != null) {
-						if (PLEditor.isVarPrefix(proposal.charAt(0))
+						if (Util.isVarPrefix(proposal.charAt(0))
 								&& proposal.regionMatches(true, 0, prefix, 0,
 										prefix.length())
 								&& !unique.contains(proposal) /*
@@ -106,11 +109,61 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 			String prefix, List<ComparableCompletionProposal> proposals, String module)
 			throws PrologInterfaceException, CoreException {
 
-		if (PLEditor.isVarPrefix(prefix)) {
+		if (Util.isVarPrefix(prefix)) {
 			return;
 		}
 		if(getProject() == null) {
-			Debug.warning("Stopped completion proposal creation. No associated Prolog project found for project '" + getFile().getProject().getName() + "'.");
+			if(PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){
+				PrologSession session =null;
+				try {
+					String enclFile = UIUtils.getFileFromActiveEditor();
+					String moduleArg = module!=null?Util.quoteAtom(module):"Module";
+					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
+					String query = "find_pred('"+enclFile+"','"+prefix+"',"+moduleArg+",Name,Arity,Public,Builtin,Doc)";
+					List<Map<String, Object>> predicates = session.queryAll(query);
+					Debug.info("find predicates with prefix: "+ query);
+					for (Map<String, Object> predicate : predicates) {
+						String name = (String) predicate.get("Name");
+						String strArity = (String) predicate.get("Arity");
+						if(predicate.get("Module")!=null){
+							module=(String) predicate.get("Module");
+							if(module.equals("_")){
+								module =null;
+							}
+						}
+						
+						int arity = Integer.parseInt(strArity);
+						String doc = (String)predicate.get("Doc");
+						Map<String, String> tags = new HashMap<String, String>();
+						if(Boolean.parseBoolean((String)predicate.get("Public"))){
+							tags.put("public","true");
+						}
+						if(Boolean.parseBoolean((String)predicate.get("Builtin"))){
+							tags.put("built_in","true");
+						}
+
+						if(!doc.equals("nodoc")){
+							if(doc.startsWith("%%")){
+								
+								doc= doc.replaceAll("%", "").trim();
+							}
+							
+							tags.put("documentation",doc);
+						}
+						
+						ComparableCompletionProposal p = new PredicateCompletionProposal(
+														begin, len, name, arity, tags,module);
+						proposals.add(p);
+					}
+					return;
+				}catch(Exception e) {
+					Debug.report(e);
+				} finally {
+					if(session!=null)session.dispose();
+				}
+			} else {
+				Debug.warning("Stopped completion proposal creation. No associated Prolog project found for project '" + getFile().getProject().getName() + "'.");
+			}
 			return;
 		}
 
@@ -128,11 +181,12 @@ public abstract class NaivPrologContentAssistProcessor extends PrologContentAssi
 
 			for (Map<String, Object> anAnswer : answers) {
 				String name = ((CTerm) anAnswer.get("Name")).getFunctorValue();
-				String arity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
-				int parseInt = Integer.parseInt(arity);
+				String strArity = ((CTerm) anAnswer.get("Arity")).getFunctorValue();
+				String resolvedModule = ((CTerm) anAnswer.get("Module")).getFunctorValue(); //TRHO TODO: not tested, yet
+				int arity = Integer.parseInt(strArity);
 				Map<String, CTerm> tags = CTermUtil.listAsMap((CTerm) anAnswer.get("Tags"));
 				ComparableCompletionProposal p = new PredicateCompletionProposal(
-												begin, len, name, parseInt, tags);
+												begin, len, name, arity, tags,resolvedModule );
 				proposals.add(p);
 			}
 		} finally {

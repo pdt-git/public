@@ -202,7 +202,7 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 	 * @return Returns the length.
 	 */
 	public int getLength() {
-		return knownDefinition==null?-1:knownDefinition.endOffset-knownDefinition.offset;
+		return knownDefinition==null?-1:knownDefinition.getEndOffset()-knownDefinition.getOffset();
 	}
 	
 	
