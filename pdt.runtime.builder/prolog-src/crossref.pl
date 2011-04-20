@@ -2,8 +2,9 @@
            [buildXrefDb/0,
             reportXref/0, listXref/0
      ]).
+     
+:- use_module('analyzer/metafile_referencer.pl').
    
-%:- use_module(basicUtilities).
 /*****************************************************************************
  * Crossreference of Prolog files:
  *
@@ -87,46 +88,8 @@ listXref :-
 
 
 
-/**
- * is_metaterm(?Literal, ?MetaArguments )
- *  Arg1 is a literal representing a metacall and 
- *  Arg2 is the list of its meta-arguments.
- */
-is_metaterm(Literal, MetaArguments) :-
-   ( 	var(Literal) 
-   -> 	(	(	current_predicate(PredicateIndicator) 
-   			; 	user:current_predicate(PredicateIndicator)  
-   			),
-   			PredicateIndicator = Functor/Arity,
-   			functor(Literal,Functor,Arity),	
-   		) 
-   	; 	true
-   	),
-   predicate_property(Literal,meta_predicate(MetaTerm)),
-   Literal =.. [Functor|Args],
-   MetaTerm =.. [Functor|MetaArgs], 
-   collect_meta_args(Args,MetaArgs, MetaArguments ).
 
-collect_meta_args(Args,MetaArgs, MetaArguments ) :- 
-    findall( 
-         Meta,
-         extract_meta_argument(Args,MetaArgs, Meta),
-         MetaArguments
-    ).
     
-extract_meta_argument(Args,MetaArgs, (N,NewArg) ) :- 
-    nth1(N,MetaArgs,MArg),
-    ( MArg == ':' ; integer(MArg)),
-    nth1(N,Args,Arg),
-    additonal_parameters(MArg,Arg,NewArg).
-   
-additonal_parameters(':',Arg,Arg) :- !.
-additonal_parameters(0,Arg,Arg) :- !.
-additonal_parameters(N,Arg,NewArg) :-
-	Arg =.. [Functor | Params],				%Eva: Hier wird erwartet, dass Arg gebunden ist!!!!
-   	length(N_Elems,N),
-   	append(Params,N_Elems,NewParams),
-   	NewArg =.. [Functor | NewParams].
     
  
 /****************************************************************************
@@ -268,7 +231,7 @@ storeXrefInfoForPreds(SingleNonMetaLiteral, Caller) :-
     storeXrefInfoForPred_(Caller, SingleNonMetaLiteral),
     !.
 
-:- endif . % End of conditional compilation 
+%:- endif . % End of conditional compilation 
     
 /**
  * Store Xref Info for one pair of caller (arg1) and called 8arg2) pred.
