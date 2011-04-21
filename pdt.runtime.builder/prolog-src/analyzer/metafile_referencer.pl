@@ -1,10 +1,11 @@
-:- module(metafile_referencer, [file_references_for_metaterm/3	%Arg1=ContextModule %Arg2=MetaCall %Arg3=References (see below)
+:- module(metafile_referencer, [file_references_for_metacall/3,	%Arg1=ContextModule %Arg2=MetaCall %Arg3=References (see description)
+								file_references_for_call/3		%Arg1=ContextModule %Arg2=Term %Arg3=FileSet
 								]).
 								
 :- use_module(org_cs3_lp_utils(utils4modules)).
 
 
-file_references_for_metaterm(Module,MetaTerm,References):-
+file_references_for_metacall(Module,MetaTerm,References):-
     is_metaterm(Module,MetaTerm,MetaArgs),			
     length(MetaArgs,Length),
     length(References,Length),
@@ -63,18 +64,18 @@ additonal_parameters(N,Arg,NewArg) :-
    	NewArg =.. [Functor | NewParams].
     
     
-file_references_for_term(Module, Term, [(Module, 'any')]):-
+file_references_for_call(Module, Term, [(Module, 'any')]):-
     var(Term), !.
-file_references_for_term(Module, Term, FileSet):-
+file_references_for_call(Module, Term, FileSet):-
     findall( ContextFile,							
-    		 (	definition_for_context(Module,Term,_,File), %nonvar(Term) checken
+    		 (	definition_for_context(Module,Term,_,File),
     		 	ContextFile = (Module,File)
     		 ),
     		 Files
     ),
     not(Files = []), !,
     list_to_set(Files,FileSet).
-file_references_for_term(Module, Term, FileSet):-
+file_references_for_call(Module, Term, FileSet):-
     findall(	ContextFile,
     			(	declaring_module_for_context(Module,Term,DeclModule),
     				module_property(DeclModule,file(File)),
@@ -85,5 +86,5 @@ file_references_for_term(Module, Term, FileSet):-
     ), 
     not(Files = []),  !,
     list_to_set(Files,FileSet).
-file_references_for_term(Module, Term, [(Module, 'undefined')]):-
+file_references_for_call(Module, Term, [(Module, 'undefined')]):-
 	visible_in_module(Module,Term).   
