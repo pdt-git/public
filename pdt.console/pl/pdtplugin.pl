@@ -64,7 +64,7 @@
 :- use_module(library('pldoc')).
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
-
+:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
 
 %% get_pred(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Public) is nondet.
@@ -317,6 +317,21 @@ find_declaration(EnclFile,Name,Arity,Module,File,Line):-
 	nth_clause(Module:Goal,_,Ref),
 	clause_property(Ref,file(File)),
     clause_property(Ref,line_count(Line)).
+    
+    
+find_improved_declaration(EnclFile,Term,EnclModule,File,Line):-
+    format('Term: ~w, Module: ~w~n',[Term, EnclModule]),
+    file_references_for_call(EnclModule, Term, [Reference|_MoreRefs]),	%<-- erstmal nur das erste nehmen
+    format('Reference: ~w~n',[Reference]),
+    (	(Reference = 'undefined' ; Reference = 'any')
+    -> 	(File = EnclFile, Line=1)
+    ;	(	Reference=(DefinitionModule,File),  %<-- dies Zusatzinfo evtl auch später rausgeben
+    		nth_clause(DefinitionModule:Term, _, Ref),
+    		clause_property(Ref,file(File)),	%<-- hier als check, um nur gewünschte zu finden!
+    		clause_property(Ref, line_count(Line))
+    	)
+    ). 
+    
 
 
 resolve_module(EnclFile,Module):-
