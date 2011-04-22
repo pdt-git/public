@@ -84,11 +84,16 @@ public class PLScanner extends RuleBasedScanner {
 		IFile file;
 		
 		// TODO: Add treatment of error cases (missing else branches): 
+
+		assert(editor!=null);
+		
 		if (editor.getEditorInput() instanceof IFileEditorInput) {
 			editorInput = (IFileEditorInput) editor.getEditorInput();
 		}
-//		if (editorInput != null) {
+		assert (editorInput != null) ;
+//		{
 			file = editorInput.getFile();
+		assert (file != null) ;
 			project = file.getProject();
 //		}
 		if (project != null && project.exists() && project.hasNature(PDTCore.NATURE_ID)) {
