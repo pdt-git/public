@@ -65,62 +65,83 @@
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
 
+% ===========================================================
+% TO BE MOVED TO "SHARE" PROJECT (lp.utils/utils4modules.pl:
 
 
-%% get_pred(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Public) is nondet.
+%% module_of_file(+EnclFile,?Module)
+module_of_file(EnclFile,Module):-
+    (  module_property(Module,file(EnclFile))  % fails if EnclFile defines no module
+    -> true
+    ;  Module=user
+    ).
+
+%% start_of_nth_clause(+:Head,-N,?File,?Line) is nondet
+%% start_of_nth_clause(+:Head,+N,?File,?Line) is det
 %
-% Looks up all clauses for Name/Arity defined in File.
+% Head must be a Module:Functor(Arg,...) term.
+%
+start_of_nth_clause(Head,N,File,Line) :-
+    nth_clause(Head,N,Ref),
+    clause_property(Ref,file(File)),
+    clause_property(Ref,line_count(Line)).
+
+%% all_clauses_of(+Head,-N,?File,?Line) is nondet
+%% all_clauses_of(+:Head,+N,?File,?Line) is det
+%
+
+% Head must be a Module:Functor(Arg,...) term.
+%
+all_clauses_of(M:Head,N,File,Line) :-
+    current_module(M),
+    start_of_nth_clause(M:Head,N,File,Line).
+
+
+% <-- TO BE MOVED TO "SHARE" PROJECT
+% ===========================================================
+
+
+%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
+%
+% Find line of first clause of the predicate Name/Arity visible 
+% in EnclFile. Note that unlike get_pred/7, find_declaration
+% includes not just the clauses defined in EnclFile but any
+% clause visible in EnclFile!.
+% 
+% Used for the open declaration action in 
+% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
+%
+find_declaration(EnclFile,Name,Arity,Module,File,Line):-
+    module_of_file(EnclFile,Module),
+	functor(Goal,Name,Arity),
+    start_of_nth_clause(Module:Goal,_,File,Line),
+    !.
+
+
+%% get_pred(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
+%
+% Looks up the starting line of each clause of each  
+% predicate Name/Arity defined in File. The boolean
+% properties Dyn(amic), Mul(tifile) and Exported are
+% unified with 1 or 0.
 %
 % @param Line
 %
-% boolean properties are bound to 1 or 0.
-%
-get_pred(_file, _name,_arity,Line,_dyn,_mul,Public) :-
-    source_file(_module_pred, _file),
-	strip_module(_module_pred,_,_pred),
-    nth_clause(_module_pred,_,Ref),
-    functor(_pred,_name,_arity),
-    clause_property(Ref,file(_file)),
-    clause_property(Ref,line_count(Line)),
+% Called from PrologOutlineInformationControl.java
+
+get_pred(File, Name,Arity,Line,_dyn,_mul,Exported) :-
+% Backtrack over all predicates defined in File:
+    source_file(ModuleHead, File),
+	strip_module(ModuleHead,_,Head),
+    functor(Head,Name,Arity),
+% TODO: Move the definition of has_property to the "share"
+% project. It is currently defined in JT!!! -- GK, 21,4,2011   
     has_property(_module_pred,dynamic,_dyn),
     has_property(_module_pred,multifile,_mul),
-    has_property(_module_pred,exported,Public).
-
-
-%%  term_for_signature(+Name, +Arity, -Term) is det.
-%
-term_for_signature(Name,0,Term):-
-    atom_to_term(Name,Term,_).
-
-term_for_signature(Name,Arity,Term):-
-    not(Arity = 0),
-    freeVariables(Arity, '', Vars),    sformat(S,'~w(~w)',[Name,Vars]),
-    atom_to_term(S, Term,_).
-    %functor(Term, Name, Arity).
-
-freeVariables(0, Vars, Vars) :-
-    !.
-
-freeVariables(Arity, Prefix, Complete) :-
-    plus(1, Count, Arity),
-    nextFreeVar(Count, VarAtom),
-    atom_concat(Prefix, VarAtom, Left),
-    freeVariables(Count, Left, Complete).
-
-nextFreeVar(0, '_') :-
-    !.
-nextFreeVar(_, '_, ').
-
-
-
-write_reference(Pred,Name, Arity, Nth):-
-    term_for_signature(Name,Arity,Term),
-    nth_clause(Term,Nth,Ref),
-    clause_property(Ref,file(FileName)),
-    clause_property(Ref,line_count(Count)),
-    term_to_atom(Pred,Atom),
-    format('REFERENCE: ~w:~w: (~w)\n',[FileName,Count,Atom]),
-    flush_output.
+    has_property(_module_pred,exported,Exported),
+% The following backtracks over each clause of each predicate.
+% Do this at the end, after all things that are deterministic: 
+    start_of_nth_clause(ModuleHead,_,File,Line).
 
 
 
@@ -131,17 +152,18 @@ write_reference(Pred,Name, Arity, Nth):-
 %
 get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name,Arity):-
     functor(Pred,PredName,PredArity),
-	resolve_module(EnclFile,Module),
+	module_of_file(EnclFile,Module),
     % INTERNAL, works for swi 5.11.X
     prolog_explain:explain_predicate(Module:Pred,Explanation), 
 %    writeln(Explanation),
     decode_reference(Explanation,Nth, RefModule,Name, Arity),
     number(Arity),
     functor(EnclClause,Name,Arity),
-    %term_for_signature(Name,Arity,EnclClause),
-    nth_clause(RefModule:EnclClause,Nth,Ref),
-    clause_property(Ref,file(FileName)),
-    clause_property(Ref,line_count(Line)).
+    start_of_nth_clause(RefModule:EnclClause,Nth,FileName,Line).
+%   <-- Extracted predicate for:
+%    nth_clause(RefModule:EnclClause,Nth,Ref),
+%    clause_property(Ref,file(FileName)),
+%    clause_property(Ref,line_count(Line)).
 
       
 
@@ -161,23 +183,24 @@ decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
 
 %% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
 %
-% looks up all predicates with prefix Prefix defined or imported in file EnclFile.
+% Looks up all predicates with prefix Prefix defined or imported in file EnclFile.
 %
 % Used by the PLEditor content assist.
 %
 % For performance reasons an empty prefix with an unspecified module
-% will only bind predicates if File is specified.
+% will only bind predicates if EnclFile is specified.
 %
-% <File> specifies the file from where this query is triggered
+% <EnclFile> specifies the file in which this query is triggered
 % <Prefix> specifies the prefix of the predicate
-% <Module> specifies the defining module
-%
+% <Module> specifies the module associated to the file.
 %
 find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+    ground(EnclFile),
+    !,
 	setof(
 	   (Name,Arity),
 	   Prefix^Module^
-	   ( resolve_module(EnclFile,Module),
+	   ( module_of_file(EnclFile,Module),
 	     find_pred_(Prefix,Module,Name,Arity,true)
 	   ),
 	   All
@@ -196,6 +219,9 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 	; Builtin=false
 	),
 	predicate_manual_entry(Module,Name,Arity,Help).
+
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+    throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
 
 
 find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc'):-
@@ -217,15 +243,12 @@ find_pred_(Prefix,Module,Name,Arity,true):-
       ; true
     ).
 
-get_defining_module(_EnclFile,EnclModule,_Name,_Arity):-
-	nonvar(EnclModule),
-	!.
 get_defining_module(EnclFile,Module,Name,Arity):-
-     resolve_module(EnclFile,ModuleCandidate),
-     current_predicate(ModuleCandidate:Name/Arity),
+     module_of_file(EnclFile,ContainingModule),
+     current_predicate(ContainingModule:Name/Arity),
      functor(Head,Name,Arity),
-     ( predicate_property(ModuleCandidate:Head,imported_from(Module))
-     ; Module = ModuleCandidate
+     ( predicate_property(ContainingModule:Head,imported_from(Module))
+     ; Module = ContainingModule
      ),
      !.
 
@@ -306,28 +329,6 @@ manual_entry(Pred,-1,Content) :-
 */
 
 
-%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
-%
-% used for the open declaration action
-%
-find_declaration(EnclFile,Name,Arity,Module,File,Line):-
-    resolve_module(EnclFile,Module),
-%	current_module(Module),
-	functor(Goal,Name,Arity),
-	nth_clause(Module:Goal,_,Ref),
-	clause_property(Ref,file(File)),
-    clause_property(Ref,line_count(Line)).
-
-
-resolve_module(EnclFile,Module):-
- 	var(Module),
-    ( ( nonvar(EnclFile),module_property(Module,file(EnclFile)) )
-    ;  Module=user
-    ).
-
-% Necessary for find_pred/8, TODO: move to find_pred/8
-resolve_module(_EnclFile,_Module).
-
 
 :- dynamic traced_messages/3.
 :- dynamic warning_and_error_tracing/0.
@@ -405,11 +406,6 @@ predicates_with_property(Property, _, Predicates) :-
 	make_duplicate_free_string(AllPredicateNames,Predicates).
 
 
-module_of_file(FileName,Module) :-
-    setof( Module, 
-           Pred^predicate_property(Module:Pred,file(FileName)),
-           Set),
-    member(Module,Set).
     	
 predicate_name_with_property_(Module,Name,Property):-
     current_module(Module),
