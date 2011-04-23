@@ -46,6 +46,7 @@
 :- module(pdtplugin,[
     find_pred/8,
     find_declaration/6,
+    find_improved_declaration/5,
     get_references/8,
     get_pred/7,
     pdt_reload/1,
