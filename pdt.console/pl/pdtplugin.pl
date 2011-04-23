@@ -65,84 +65,48 @@
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
 
-% ===========================================================
-% TO BE MOVED TO "SHARE" PROJECT (lp.utils/utils4modules.pl:
 
-
-%% module_of_file(+EnclFile,?Module)
-module_of_file(EnclFile,Module):-
-    (  module_property(Module,file(EnclFile))  % fails if EnclFile defines no module
-    -> true
-    ;  Module=user
-    ).
-
-%% start_of_nth_clause(+:Head,-N,?File,?Line) is nondet
-%% start_of_nth_clause(+:Head,+N,?File,?Line) is det
-%
-% Head must be a Module:Functor(Arg,...) term.
-%
-start_of_nth_clause(Head,N,File,Line) :-
-    nth_clause(Head,N,Ref),
-    clause_property(Ref,file(File)),
-    clause_property(Ref,line_count(Line)).
-
-%% all_clauses_of(+Head,-N,?File,?Line) is nondet
-%% all_clauses_of(+:Head,+N,?File,?Line) is det
-%
-
-% Head must be a Module:Functor(Arg,...) term.
-%
-all_clauses_of(M:Head,N,File,Line) :-
-    current_module(M),
-    start_of_nth_clause(M:Head,N,File,Line).
-
-
-% <-- TO BE MOVED TO "SHARE" PROJECT
-% ===========================================================
-
-
-%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
-%
-% Find line of first clause of the predicate Name/Arity visible 
-% in EnclFile. Note that unlike get_pred/7, find_declaration
-% includes not just the clauses defined in EnclFile but any
-% clause visible in EnclFile!.
-% 
-% Used for the open declaration action in 
+:- use_module(org_cs3_lp_utils(utils4modules),
+             [ module_of_file/2      % (EnclFile,Module)
+             , start_of_nth_clause/5 % (Module,Head,Nth,File,Line)
+             ]
+             ).
+             
+               /**********************************
+                * TODOs for EVA after WLPE paper *
+                * ********************************/
+ 
+% TO BE INLINED into the call site in 
+% the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
-%
 find_declaration(EnclFile,Name,Arity,Module,File,Line):-
-    module_of_file(EnclFile,Module),
-	functor(Goal,Name,Arity),
-    start_of_nth_clause(Module:Goal,_,File,Line),
-    !.
+    find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line).
 
-
-%% get_pred(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
-%
-% Looks up the starting line of each clause of each  
-% predicate Name/Arity defined in File. The boolean
-% properties Dyn(amic), Mul(tifile) and Exported are
-% unified with 1 or 0.
-%
-% @param Line
-%
-% Called from PrologOutlineInformationControl.java
-
+% TO BE INLINED into call site in
+% pdt/src/org/cs3/pdt/internal/actions/PrologOutlineInformationControl.java
 get_pred(File, Name,Arity,Line,_dyn,_mul,Exported) :-
-% Backtrack over all predicates defined in File:
-    source_file(ModuleHead, File),
-	strip_module(ModuleHead,_,Head),
-    functor(Head,Name,Arity),
-% TODO: Move the definition of has_property to the "share"
-% project. It is currently defined in JT!!! -- GK, 21,4,2011   
-    has_property(_module_pred,dynamic,_dyn),
-    has_property(_module_pred,multifile,_mul),
-    has_property(_module_pred,exported,Exported),
-% The following backtracks over each clause of each predicate.
-% Do this at the end, after all things that are deterministic: 
-    start_of_nth_clause(ModuleHead,_,File,Line).
+    find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported).
 
+% TODO: Move the definition of has_property/3 to the "share" project. 
+% It is currently defined in JT making the PDT dependent on JT!!! 
+% -- GK, 21,4,2011   
+
+               /*************************************
+                * PDT RELAOAD                       *
+                *************************************/
+
+%% pdt_reload(File) is det.
+%
+% wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
+%
+pdt_reload(File):-
+    writeln(File),
+    make:reload_file(File).
+
+
+               /********************************************
+                * FIND REFERENCES TO A PREDICATE DEFINITON *
+                ********************************************/
 
 
 %% get_references(+EnclFile,+PredSignature,?Module, -FileName,-Line,-RefModule,-Name,-Arity) is nondet.
@@ -158,8 +122,8 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
 %    writeln(Explanation),
     decode_reference(Explanation,Nth, RefModule,Name, Arity),
     number(Arity),
-    functor(EnclClause,Name,Arity),
-    start_of_nth_clause(RefModule:EnclClause,Nth,FileName,Line).
+    functor(Head,Name,Arity),
+    start_of_nth_clause(RefModule,Head,Nth,FileName,Line).
 %   <-- Extracted predicate for:
 %    nth_clause(RefModule:EnclClause,Nth,Ref),
 %    clause_property(Ref,file(FileName)),
@@ -181,6 +145,94 @@ decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
     atom_number(ArityAtom,Arity),
     !.
 
+%%%%%%%%%% Tests %%%%%%%%%%%
+
+user:setUp(decode_reference) :-
+	assert(user:testpred(1,2)).
+user:test(decode_reference) :-
+    decode_reference('        Referenced from 1-th clause of user:testpred/2',
+                     1, 'testpred',2).
+
+user:tearDown(decode_reference) :-
+	retract(user:testpred(1,2)).
+
+
+               /*************************************
+                * Find Definitions and Declarations *
+                *************************************/
+
+%% find_definition_visible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
+%
+% Find starting line of clauses of the predicate Name/Arity that are
+% visible in EnclFile. 
+%
+% Used for the open declaration action in 
+% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
+
+find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line):-
+    module_of_file(EnclFile,Module),
+	functor(Head,Name,Arity),
+    start_of_nth_clause(Module,Head,_Nth,File,Line).
+
+%% find_definition_invisible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
+%
+% Find starting line of clause of the predicate Name/Arity  
+% that are not visible in EnclFile. 
+%
+% Used for the open declaration action in 
+% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
+
+find_definition_invisible_in(EnclFile,Name,Arity,Module,File,Line):-
+    find_any_definition(Name,Arity,Module,File,Line),
+    \+ find_definition_visible_in(EnclFile,
+                        Name,Arity,Module,File,Line).
+
+
+%% find_any_definition(+Name,+Arity,?Module,-SrcFile,-Line)
+%
+% Find starting line of any clause of the predicate Name/Arity.  
+% This includes clauses from different, unrelated modules and
+% files (if different definitions of the predicate exist). 
+%
+% (TODO: To be) Used for the findAllDefinitions action in 
+% pdt/src/org/cs3/pdt/internal/actions/...ActionDelegate.java
+% 
+find_any_definition(Name,Arity,Module,File,Line):-
+    % TODO: Input mode checking and exception if violated.
+    functor(Head,Name,Arity),
+    defined_in_module(Module,Head),
+    start_of_nth_clause(Module,Head,_Nth,File,Line).
+
+   
+%% find_definition_contained_in(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
+%
+% Looks up the starting line of each clause of each  
+% predicate Name/Arity defined in File. The boolean
+% properties Dyn(amic), Mul(tifile) and Exported are
+% unified with 1 or 0.
+%
+% Called from PrologOutlineInformationControl.java
+
+find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported) :-
+    % Backtrack over all predicates defined in File:
+    source_file(ModuleHead, File),
+	strip_module(ModuleHead,Module,Head),
+    functor(Head,Name,Arity),
+    % TODO: Move the definition of has_property to the "share"
+    % project. It is currently defined in JT!!! -- GK, 21,4,2011   
+    has_property(_module_pred,dynamic,_dyn),
+    has_property(_module_pred,multifile,_mul),
+    has_property(_module_pred,exported,Exported),
+    % The following backtracks over each clause of each predicate.
+    % Do this at the end, after the things that are deterministic: 
+    start_of_nth_clause(Module,Head,_,File,Line).
+
+
+
+               /***********************************************
+                * FIND VISIBLE PREDICATE (FOR AUTOCOMPLETION) *
+                ***********************************************/
+
 %% find_pred(+EnclFile,+Prefix,-EnclModule,-Name,-Arity,-Exported,-Builtin,-Help) is nondet.
 %
 % Looks up all predicates with prefix Prefix defined or imported in file EnclFile.
@@ -193,10 +245,12 @@ decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
 % <EnclFile> specifies the file in which this query is triggered
 % <Prefix> specifies the prefix of the predicate
 % <Module> specifies the module associated to the file.
-%
+
 find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
-    ground(EnclFile),
-    !,
+    \+ atom(EnclFile),
+    throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
+
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 	setof(
 	   (Name,Arity),
 	   Prefix^Module^
@@ -208,7 +262,7 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 	member((Name,Arity),All),
 	
 	% no enclosing module specified in the code via modulename:..
-	get_defining_module(EnclFile,Module,Name,Arity),
+	get_declaring_module(EnclFile,Module,Name,Arity),
 	functor(Term,Name,Arity),
 	( predicate_property(Module:Term,exported)->
 	  Exported=true
@@ -220,14 +274,12 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 	),
 	predicate_manual_entry(Module,Name,Arity,Help).
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
-    throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
-
-
 find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc'):-
     var(EnclModule),
 	current_module(Name),
     atom_concat(Prefix,_,Name).
+
+
 
 find_pred_(Prefix,Module,Name,Arity,true):-
     ( var(Module)->
@@ -243,7 +295,7 @@ find_pred_(Prefix,Module,Name,Arity,true):-
       ; true
     ).
 
-get_defining_module(EnclFile,Module,Name,Arity):-
+get_declaring_module(EnclFile,Module,Name,Arity):-
      module_of_file(EnclFile,ContainingModule),
      current_predicate(ContainingModule:Name/Arity),
      functor(Head,Name,Arity),
@@ -251,6 +303,11 @@ get_defining_module(EnclFile,Module,Name,Arity):-
      ; Module = ContainingModule
      ),
      !.
+
+
+               /****************************************
+                * GET THE MANUAL ENTRY FOR A PREDICATE *
+                ****************************************/
 
 %% predicate_manual_entry(+Module, +Pred,+Arity,-Content) is det.
 %
@@ -330,6 +387,10 @@ manual_entry(Pred,-1,Content) :-
 
 
 
+               /*************************************
+                * PROLOG ERROR MESSAGE HOOK         *
+                *************************************/
+
 :- dynamic traced_messages/3.
 :- dynamic warning_and_error_tracing/0.
 
@@ -354,8 +415,7 @@ user:message_hook(_Term, Level,Lines) :-
   assert(traced_messages(Level, Line,Lines)),
   fail.
 
-%% errors_and_warnings(Level,Line,0,Message) is nondet.
-%
+%% errors_and_warnings(Level,Line,Length,Message) is nondet.
 %
 errors_and_warnings(Level,Line,0,Message):-
     traced_messages(Level, Line,Lines),
@@ -368,13 +428,11 @@ errors_and_warnings(Level,Line,0,Message):-
     free_memory_file(Handle).
       
 
-%% pdt_reload(File) is det.
-%
-% wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
-%
-pdt_reload(File):-
-    writeln(File),
-    make:reload_file(File).
+
+               /*****************************************
+                * PREDICATE PROPERTIES FOR HIGHLIGHTING *
+                *****************************************/
+                
 
 %% predicates_with_property(+Property,-Predicates) is det.
 %
@@ -448,16 +506,6 @@ predicate_name_with_unary_property_(Name,Property,Arg):-
 	functor(Head,Name,_),
 	Name \= '[]'.
 	
-%%%%%%%%%% Tests %%%%%%%%%%%
-
-user:setUp(decode_reference) :-
-	assert(user:testpred(1,2)).
-user:test(decode_reference) :-
-    decode_reference('        Referenced from 1-th clause of user:testpred/2',
-                     1, 'testpred',2).
-
-user:tearDown(decode_reference) :-
-	retract(user:testpred(1,2)).
 
 
 	
