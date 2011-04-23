@@ -162,8 +162,8 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						module ="'"+ goal.getModule()+ "'";
 					String enclFile = UIUtils.getFileFromActiveEditor();
 					
-					String query = "find_declaration('"+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module  + ",File,Line)";
-					//String query = "find_improved_declaration('"+enclFile +"'," + goal.getTerm()+"," +  module + ",File,Line)";
+					//String query = "find_declaration('"+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module  + ",File,Line)";
+					String query = "find_improved_declaration('"+enclFile +"'," + goal.getTermString()+"," +  module + ",File,Line)";
 					Debug.info("open declaration: " + query);
 					List<Map<String, Object>> clauses = session.queryAll(query);
 					if(clauses.size()>0) {
