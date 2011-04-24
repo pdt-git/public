@@ -47,7 +47,7 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.internal.search.OldReferencesSearchQuery;
+import org.cs3.pdt.internal.search.DefinitionsSearchQuery;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.GoalData;
@@ -62,9 +62,9 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 /**
  * @see IWorkbenchWindowActionDelegate
  */
-public class ReferencesActionDelegate extends TextEditorAction {
-	public ReferencesActionDelegate(ITextEditor editor) {
-		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),ReferencesActionDelegate.class.getName(), editor);
+public class FindDefinitionsActionDelegate extends TextEditorAction {
+	public FindDefinitionsActionDelegate(ITextEditor editor) {
+		super(ResourceBundle.getBundle(PDT.RES_BUNDLE_UI),FindDefinitionsActionDelegate.class.getName(), editor);
 	}
 
 	/**
@@ -94,7 +94,7 @@ public class ReferencesActionDelegate extends TextEditorAction {
 						Debug.warning("data is null");
 						return;
 					}
-					ISearchQuery query = new OldReferencesSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
+					ISearchQuery query = new DefinitionsSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
 					NewSearchUI.activateSearchResultView();
 					NewSearchUI.runQueryInForeground(null,query);
 					if(plProject!=null) plProject.updateMarkers();

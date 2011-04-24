@@ -55,6 +55,7 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
+import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
@@ -63,7 +64,7 @@ import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.metadata.GoalDataProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -445,6 +446,10 @@ public class PLEditor extends TextEditor {
 		addAction(menuMgr, new FindPredicateActionDelegate(this),
 				"Open Declaration", SEP_INSPECT,
 				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
+		
+		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
+				"Find (visible) definitions", SEP_INSPECT,
+				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
 		addAction(menuMgr, new SpyPointActionDelegate(this),
 				"Toggle Spy Point", SEP_INSPECT,
@@ -588,7 +593,7 @@ public class PLEditor extends TextEditor {
 	/**
 	 * @return
 	 */
-	public Goal getSelectedPrologElement() throws BadLocationException {
+	public GoalData getSelectedPrologElement() throws BadLocationException {
 		Document document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
 

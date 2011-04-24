@@ -52,7 +52,6 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
@@ -68,16 +67,21 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 
-public class PrologSearchQuery implements ISearchQuery {
+public abstract class PrologSearchQuery implements ISearchQuery {
 
-	private GoalData data;
+	private static String lineKey = "Line";
+	private static String arityKey = "Arity";
+	private static String functorKey = "Name";
+	private static String moduleKey = "RefModule";
+	private static String fileKey = "File";
+	private GoalData goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
 
-	public PrologSearchQuery(PrologInterface pif, Goal data) {
-		this.data = (GoalData) data;
+	public PrologSearchQuery(PrologInterface pif, GoalData goal) {
+		this.goal = goal;
 		this.pif=pif;
-		result = new PrologSearchResult(this, data);
+		result = new PrologSearchResult(this, goal);
 	}
 
 	@Override
@@ -94,7 +98,7 @@ public class PrologSearchQuery implements ISearchQuery {
 	private IStatus run_impl(IProgressMonitor monitor) throws CoreException,
 			BadLocationException, IOException, PrologException, PrologInterfaceException {
 		result.removeAll();
-		if(data==null){
+		if(goal==null){
 			Debug.error("Search goal data is null!");
 			throw new NullPointerException();
 		}
@@ -124,7 +128,7 @@ public class PrologSearchQuery implements ISearchQuery {
 			PrologSession session = PrologConsolePlugin.getDefault().getPrologConsoleService()
 			                        .getActivePrologConsole().getPrologInterface().getSession();
 
-			processFoundClauses(findClauses(session));
+			processFoundClauses(findReferencedClauses(session));
 			return Status.OK_STATUS;
 		}
 	}
@@ -135,30 +139,26 @@ public class PrologSearchQuery implements ISearchQuery {
 	 * @throws PrologException
 	 * @throws PrologInterfaceException
 	 */
-	private List<Map<String, Object>> findClauses(PrologSession session)
+	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
 			throws PrologException, PrologInterfaceException {
 		String module = "Module";
-		if(data.getModule()!=null)
-			module ="'"+ data.getModule()+ "'";
+		if(goal.getModule()!=null)
+			module ="'"+ goal.getModule()+ "'";
 		
 		String enclFile = UIUtils.getFileFromActiveEditor();
 
-		String query = "get_references('"+enclFile+"','" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
-		Debug.info(query);
-		
-		List<Map<String, Object>> clauses = session.queryAll(query);
-		
-		if(clauses.size()==0){ 
-			// a user module predicate (e.g. clause_property/2) is not-yet used in a module:
-			query = "get_references(_,'" + data.getName()+"'/" + data.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
-			Debug.info("Look up predicate in user module: "+query); 
-			clauses = session.queryAll(query);
-		} 
-		if(clauses.size()>0 && data.getModule()==null){
-			data.setModule((String)clauses.get(0).get("Module"));
-		}
+		String query = buildSearchQuery(module, enclFile, goal);
+		List<Map<String, Object>> clauses = getResultForQuery(session, module,
+				query, goal);
 		return clauses;
 	}
+	
+	abstract protected String buildSearchQuery(String module, String enclFile, GoalData goal);
+
+
+	abstract protected List<Map<String, Object>> getResultForQuery(PrologSession session,
+			String module, String query, GoalData goal) throws PrologInterfaceException ;
+
 
 	/**
 	 * @param clauses
@@ -167,38 +167,26 @@ public class PrologSearchQuery implements ISearchQuery {
 	 */
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 			throws IOException, NumberFormatException {
+
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
-			IFile file=null;
-			String path = Util.unquoteAtom((String) m.get("File"));
-			try{
-				file = PDTCoreUtils.findFileForLocation(path);
-				
-			}catch(IllegalArgumentException iae){
-//							Debug.report(iae);
-			}
 			
-			if(file==null|| !file.isAccessible()){
-				Path location = new Path(path);
-				file = new ExternalFile(location);
-				String msg = "Not found in workspace: "+path;
-//							Debug.warning(msg);
-//							UIUtils.setStatusErrorMessage(msg);
-//							continue;
-			}
-			String type = (String)m.get("RefModule");
+			String type = (String)m.get(getModuleKey());
+			String name = (String)m.get(getFunctorKey());
+			int arity = Integer.parseInt((String)m.get(getArityKey()));
+			
+			IFile file = getFileForString(m, getFileKey());
+			int line = Integer.parseInt((String) m.get(getLineKey()))-1;
+			
 			PredicateElement pe = new PredicateElement();
-
-			String name = (String)m.get("Name");
-			int arity = Integer.parseInt((String)m.get("Arity"));
 			pe.setLabel((String) name + "/" + arity);
 			pe.setType(type);
 			pe.setFile(file);
-			pe.setPredicateName(data.getName());
-			pe.setArity(data.getArity());
+			pe.setPredicateName(goal.getName());
+			pe.setArity(goal.getArity());
 
-			int line = Integer.parseInt((String) m.get("Line"))-1;
+
 
 //						  ITextFileBufferManager iTextFileBufferManager = FileBuffers.getTextFileBufferManager();
 //						    ITextFileBuffer iTextFileBuffer = null;
@@ -233,6 +221,28 @@ public class PrologSearchQuery implements ISearchQuery {
 		}
 	}
 
+	private IFile getFileForString(Map<String, Object> m, String FileString)
+			throws IOException {
+		IFile file = null;
+		String path = Util.unquoteAtom((String) m.get(getFileKey()));
+		try{
+			file = PDTCoreUtils.findFileForLocation(path);
+			
+		}catch(IllegalArgumentException iae){
+//							Debug.report(iae);
+		}
+		
+		if(file==null|| !file.isAccessible()){
+			Path location = new Path(path);
+			file = new ExternalFile(location);
+//				String msg = "Not found in workspace: "+path;
+//							Debug.warning(msg);
+//							UIUtils.setStatusErrorMessage(msg);
+//							continue;
+		}
+		return file;
+	}
+
 	/**
 	 * @throws PrologInterfaceException
 	 * @throws PrologException
@@ -242,9 +252,9 @@ public class PrologSearchQuery implements ISearchQuery {
 	private IStatus searchIfPDTNatureIsSet() throws PrologInterfaceException,
 			PrologException, NumberFormatException, IOException {
 		PrologSession session=null;
-		String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
+		String module=goal.getModule()==null?"_":"'"+goal.getModule()+"'";
 
-		String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
+		String query="pdt_resolve_predicate('"+goal.getFile()+"',"+module+", '"+goal.getName()+"',"+goal.getArity()+",Pred),"
 		+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
 		List<Map<String,Object>> results=null;
 		try{
@@ -264,7 +274,7 @@ public class PrologSearchQuery implements ISearchQuery {
 			IFile file=null;
 			String path =null; 
 			try{
-				path = Util.unquoteAtom((String) m.get("File"));
+				path = Util.unquoteAtom((String) m.get(getFileKey()));
 				file = PDTCoreUtils.findFileForLocation(path);
 			}catch(IllegalArgumentException iae){
 				Debug.report(iae);
@@ -293,10 +303,13 @@ public class PrologSearchQuery implements ISearchQuery {
 	}
 
 
+	protected final GoalData getGoal() {
+		return goal;
+	}
 
 	@Override
 	public String getLabel() {
-		return "Prolog Query: " + data.getSignature();
+		return "Prolog Query: " + goal.getSignature();
 	}
 
 	@Override
@@ -312,6 +325,46 @@ public class PrologSearchQuery implements ISearchQuery {
 	@Override
 	public ISearchResult getSearchResult() {
 		return result;
+	}
+
+	public static void setLineKey(String lINE_INDICATOR) {
+		lineKey = lINE_INDICATOR;
+	}
+
+	public static String getLineKey() {
+		return lineKey;
+	}
+
+	public static void setArityKey(String aRITY_INDICATOR) {
+		arityKey = aRITY_INDICATOR;
+	}
+
+	public static String getArityKey() {
+		return arityKey;
+	}
+
+	public static void setFunctorKey(String functorKey) {
+		PrologSearchQuery.functorKey = functorKey;
+	}
+
+	public static String getFunctorKey() {
+		return functorKey;
+	}
+
+	protected static void setModuleKey(String moduleKey) {
+		PrologSearchQuery.moduleKey = moduleKey;
+	}
+
+	protected static String getModuleKey() {
+		return moduleKey;
+	}
+
+	protected static void setFileKey(String fileKey) {
+		PrologSearchQuery.fileKey = fileKey;
+	}
+
+	protected static String getFileKey() {
+		return fileKey;
 	}
 
 }
