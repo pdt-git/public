@@ -48,6 +48,7 @@
     find_declaration/6,
     find_improved_declaration/5,
     get_references/8,
+    find_definition_visible_in/8,
     get_pred/7,
     pdt_reload/1,
     activate_warning_and_error_tracing/0,
@@ -132,7 +133,7 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
 
       
 
-%% decode_reference(+RefStr,-Nth, +Pred,-Arity) is nondet.
+%% decode_reference(+RefStr,-Nth, -RefModule, +Pred,-Arity) is nondet.
 %
 % Reference string from explain/2 predicate
 % 
@@ -141,7 +142,12 @@ get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name
 %
 decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
     atom_concat('        Referenced from ',Rest,RefStr),
-    atom_concat(NthAtom,'-th clause of ',RefModule,':', Pred,'/',ArityAtom,Rest),
+    atom_concat(NthAtom,Help0,Rest),
+    atom_concat('-th clause of ',PredRef,Help0),
+    atom_concat(RefModule,Help1,PredRef),
+    atom_concat(':',PredicateIndicator,Help1),
+    atom_concat(Pred,Help2,PredicateIndicator),
+    atom_concat('/',ArityAtom,Help2),
     atom_number(NthAtom,Nth),
     atom_number(ArityAtom,Arity),
     !.
@@ -162,7 +168,7 @@ user:tearDown(decode_reference) :-
                 * Find Definitions and Declarations *
                 *************************************/
 
-%% find_definition_visible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
+%% find_definition_visible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line,-Name,-Arity)
 %
 % Find starting line of clauses of the predicate Name/Arity that are
 % visible in EnclFile. 
@@ -170,7 +176,7 @@ user:tearDown(decode_reference) :-
 % Used for the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
-find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line):-
+find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line,Name,Arity):-
     module_of_file(EnclFile,Module),
 	functor(Head,Name,Arity),
     start_of_nth_clause(Module,Head,_Nth,File,Line).

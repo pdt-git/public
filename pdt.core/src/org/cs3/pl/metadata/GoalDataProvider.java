@@ -10,7 +10,7 @@ public class GoalDataProvider {
 	 * @param offset
 	 * @return
 	 */
-	public static Goal getPrologDataFromOffset(String file, IDocument document,
+	public static GoalData getPrologDataFromOffset(String file, IDocument document,
 			int offset) throws BadLocationException {
 	
 		int start = PredicateReadingUtilities.findBeginOfPredicateName(document, offset);
