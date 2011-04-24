@@ -50,6 +50,7 @@ package org.cs3.pdt.internal.editors;
 import junit.framework.TestCase;
 
 import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.GoalDataProvider;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
@@ -62,37 +63,37 @@ import org.eclipse.jface.text.Document;
 public class PLEditorTest extends TestCase {
 	public void testGetPrologDataFromOffset() throws BadLocationException {
 		Document document = new Document("  , ahaha(a,b,c).");
-		Goal data = PLEditor.getPrologDataFromOffset(null,document, 6);
+		Goal data = GoalDataProvider.getPrologDataFromOffset(null,document, 6);
 		assertEquals("ahaha",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document("  , ahah1a(a,b(a),c).");
-		data = PLEditor.getPrologDataFromOffset(null,document, 6);
+		data = GoalDataProvider.getPrologDataFromOffset(null,document, 6);
 		assertEquals("ahah1a",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document("  , ahaha(\"asdf\\\"\'\",b(a),c).");
-		data = PLEditor.getPrologDataFromOffset(null,document, 6);
+		data = GoalDataProvider.getPrologDataFromOffset(null,document, 6);
 		assertEquals("ahaha",data.getName());
 		assertEquals(3,data.getArity());
 	
 		document = new Document("  , ahaha(\"as,df\\\"\'\",b(a),[c,b]).");
-		data = PLEditor.getPrologDataFromOffset(null,document, 6);
+		data = GoalDataProvider.getPrologDataFromOffset(null,document, 6);
 		assertEquals("ahaha",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document("  , aha_ha(\"as,df\\\"\'\",b(a),[c,b]).");
-		data = PLEditor.getPrologDataFromOffset(null,document, 6);
+		data = GoalDataProvider.getPrologDataFromOffset(null,document, 6);
 		assertEquals("aha_ha",data.getName());
 		assertEquals(3,data.getArity());
 
 		document = new Document(" test/12");
-		data = PLEditor.getPrologDataFromOffset(null,document, 3);
+		data = GoalDataProvider.getPrologDataFromOffset(null,document, 3);
 		assertEquals("test",data.getName());
 		assertEquals(12,data.getArity());
 
 		document = new Document("type: ");
-		data = PLEditor.getPrologDataFromOffset(null,document, 3);
+		data = GoalDataProvider.getPrologDataFromOffset(null,document, 3);
 		assertEquals("type",data.getName());
 		assertEquals(-1,data.getArity());
 	}

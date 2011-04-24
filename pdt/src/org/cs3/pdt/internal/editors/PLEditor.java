@@ -64,7 +64,8 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.GoalDataProvider;
+import org.cs3.pl.metadata.PredicateReadingUtilities;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
@@ -571,7 +572,7 @@ public class PLEditor extends TextEditor {
 					.getSelectionProvider().getSelection();
 			IRegion info = document.getLineInformationOfOffset(selection
 					.getOffset());
-			int start = findEndOfWhiteSpace(document, info.getOffset(), info
+			int start = PredicateReadingUtilities.findEndOfWhiteSpace(document, info.getOffset(), info
 					.getOffset()
 					+ info.getLength());
 
@@ -582,18 +583,6 @@ public class PLEditor extends TextEditor {
 
 		}
 		return line;
-	}
-
-	public static int findEndOfWhiteSpace(IDocument document, int offset,
-			int end) throws BadLocationException {
-		while (offset < end) {
-			char c = document.getChar(offset);
-			if (c != ' ' && c != '\t') {
-				return offset;
-			}
-			offset++;
-		}
-		return end;
 	}
 
 	/**
@@ -607,166 +596,7 @@ public class PLEditor extends TextEditor {
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
 
-		return getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
-	}
-
-	/**
-	 * @param document
-	 * @param offset
-	 * @return
-	 */
-	public static Goal getPrologDataFromOffset(String file, IDocument document,
-			int offset) throws BadLocationException {
-
-		int start = offset;
-		int end = offset;
-		while (Util.isPredicatenameChar(document.getChar(start)) && start > 0) {
-			start--; // scan left until first non-predicate char
-		}
-		start++; // start is now the position of the first predictate char
-		// (or module prefix char)
-
-		while (Util.isPredicatenameChar(document.getChar(end))
-				&& end < document.getLength()) {
-			end++;// scan right for first non-predicate char
-		}
-
-		if (start > end) {
-			return null;
-		}
-
-		// element name will be the functor name, prefixed with a module name,
-		// if present.
-		String elementName = document.get(start, end - start);
-
-		int endOfWhiteSpace = findEndOfWhiteSpace(document, end, document
-				.getLength());
-		int arity = 1;
-		if (document.getLength() > endOfWhiteSpace
-				&& document.getChar(endOfWhiteSpace) == '/') {
-			end = endOfWhiteSpace + 1;
-			String buf = "";
-			while (end < document.getLength() && document.getChar(end) >= '0') {
-				buf += document.getChar(end);
-				end++;
-			}
-			if (buf.length() == 0)
-				return null;
-			arity = Integer.parseInt(buf);
-			return new GoalData(file, null, elementName, arity);
-
-		}
-		if (document.getLength() == endOfWhiteSpace
-				|| document.getChar(endOfWhiteSpace) != '(') {
-
-			if (elementName.endsWith(":")) {
-				return new GoalData(file,null, elementName.substring(0, elementName
-						.length() - 1), -1);
-			}
-			String[] fragments = elementName.split(":");
-			if (fragments.length == 2) {
-				return new GoalData(file,fragments[0], fragments[1], 0);
-			}
-			String module = null;
-
-			return new GoalData(file,module, elementName, 0);
-		}
-
-		end = endOfWhiteSpace + 1;
-		whileLoop: while (!isClauseEnd(document, end)) {
-			char c = document.getChar(end);
-			switch (c) {
-			case '(':
-				end = consume(document, end + 1, ')');
-				break;
-			case '[':
-				end = consume(document, end + 1, ']');
-				break;
-			case '"':
-				end = consumeString(document, end + 1, '"');
-				break;
-			case '\'':
-				end = consumeString(document, end + 1, '\'');
-				break;
-			case ',':
-				arity++;
-				break;
-			case ')':
-				break whileLoop;
-			default:
-				end++;
-			}
-
-			if (c == ',')
-
-				end++;
-		}
-
-		String[] fragments = elementName.split(":");
-		if (fragments.length == 2) {
-			return new GoalData(file,fragments[0], fragments[1], arity);
-		}
-		String module = null;
-
-		return new GoalData(file,module, elementName, arity);
-
-	}
-
-	/**
-	 * @param document
-	 * @param end
-	 * @param c
-	 * @return
-	 */
-	public static int consume(IDocument document, int end, char endChar)
-			throws BadLocationException {
-		while (!(document.getChar(end) == endChar)) {
-			char c = document.getChar(end);
-			switch (c) {
-			case '\\':
-				end = end + 2;
-				break;
-			case '(':
-				end = consume(document, end + 1, ')');
-				break;
-			case '[':
-				end = consume(document, end + 1, ']');
-				break;
-			case '"':
-				end = consumeString(document, end + 1, '"');
-				break;
-			case '\'':
-				end = consumeString(document, end + 1, '\'');
-				break;
-			default:
-				end++;
-			}
-		}
-		return end + 1;
-	}
-
-	/**
-	 * @param document
-	 * @param i
-	 * @param c
-	 * @return
-	 */
-	private static int consumeString(IDocument document, int end, char endChar)
-			throws BadLocationException {
-		while (!(document.getChar(end) == endChar)) {
-			char c = document.getChar(end);
-			switch (c) {
-			case '\\':
-				end = end + 2;
-				break;
-			case '"':
-				throw new RuntimeException(
-						"This point should never been reached");
-			default:
-				end++;
-			}
-		}
-		return end + 1;
+		return GoalDataProvider.getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
 	}
 
 	public TextSelection getSelection() {
@@ -1253,22 +1083,6 @@ public class PLEditor extends TextEditor {
 	}
 
 	
-	/**
-	 * @param c
-	 * @return
-	 */
-	public static boolean isClauseEnd(IDocument document, int i) {
-		try {
-			if (document.getChar(i) == '.')
-				return true;
-			if (document.getChar(i) == ':' && document.getLength() > (i + 1)
-					&& document.getChar(i + 1) == '-')
-				return true;
-		} catch (BadLocationException e) {
-			Debug.report(e);
-		}
-		return false;
-	}
 	protected boolean isComment(ITypedRegion region) {
 		return region.getType().equals(PLPartitionScanner.PL_COMMENT)
 				|| region.getType().equals(PLPartitionScanner.PL_MULTI_COMMENT)
