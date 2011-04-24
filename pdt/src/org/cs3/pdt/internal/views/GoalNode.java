@@ -73,4 +73,8 @@ public class GoalNode implements Goal {
 	public CTerm getTerm() {
 		return term;
 	}
+
+	public String getTermString() {
+		return null;
+	}
 }

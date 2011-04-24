@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+
+      <view
+            name="yWorks Demo View"
+            category="org.cs3.pdt"
+            class="pdt.y.main.yWorksDemoView"
+            id="pdt.yworks.swt.views.yWorksDemoView">
+      </view>
+   </extension>
+   <!--
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="pdt.y.swt.commands.LoadCommandHandler"
+            description="LoadCommand"
+            id="graphml.commands.load"
+            name="Load">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:pdt.yworks.swt.views.yWorksDemoView">
+         <command
+               commandId="graphml.commands.load"
+               label="Load"
+               style="push"
+               tooltip="Loads a graph from a GraphML file">
+         </command>
+      </menuContribution>
+   </extension>
+   -->
+</plugin>

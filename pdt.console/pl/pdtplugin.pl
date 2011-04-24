@@ -46,6 +46,7 @@
 :- module(pdtplugin,[
     find_pred/8,
     find_declaration/6,
+    find_improved_declaration/5,
     get_references/8,
     get_pred/7,
     pdt_reload/1,
@@ -64,7 +65,7 @@
 :- use_module(library('pldoc')).
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
-
+:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
 :- use_module(org_cs3_lp_utils(utils4modules),
              [ module_of_file/2      % (EnclFile,Module)
@@ -385,6 +386,44 @@ manual_entry(Pred,-1,Content) :-
     string_to_atom(ContentString,Content).
 */
 
+
+
+%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
+%
+% used for the open declaration action
+%
+find_declaration(EnclFile,Name,Arity,Module,File,Line):-
+    resolve_module(EnclFile,Module),
+%	current_module(Module),
+	functor(Goal,Name,Arity),
+	nth_clause(Module:Goal,_,Ref),
+	clause_property(Ref,file(File)),
+    clause_property(Ref,line_count(Line)).
+    
+    
+find_improved_declaration(EnclFile,Term,EnclModule,File,Line):-
+    format('Term: ~w, Module: ~w~n',[Term, EnclModule]),
+    file_references_for_call(EnclModule, Term, [Reference|_MoreRefs]),	%<-- erstmal nur das erste nehmen
+    format('Reference: ~w~n',[Reference]),
+    (	(Reference = 'undefined' ; Reference = 'any')
+    -> 	(File = EnclFile, Line=1)
+    ;	(	Reference=(DefinitionModule,File),  %<-- dies Zusatzinfo evtl auch später rausgeben
+    		nth_clause(DefinitionModule:Term, _, Ref),
+    		clause_property(Ref,file(File)),	%<-- hier als check, um nur gewünschte zu finden!
+    		clause_property(Ref, line_count(Line))
+    	)
+    ). 
+    
+
+
+resolve_module(EnclFile,Module):-
+ 	var(Module),
+    ( ( nonvar(EnclFile),module_property(Module,file(EnclFile)) )
+    ;  Module=user
+    ).
+
+% Necessary for find_pred/8, TODO: move to find_pred/8
+resolve_module(_EnclFile,_Module).
 
 
                /*************************************
