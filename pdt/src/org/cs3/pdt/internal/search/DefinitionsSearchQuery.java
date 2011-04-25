@@ -37,16 +37,6 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 		Debug.info(query);
 		
 		List<Map<String, Object>> clauses = session.queryAll(query);
-		
-/*		if(clauses.size()==0){ 
-			// a user module predicate (e.g. clause_property/2) is not-yet used in a module:
-			query = "get_references(_,'" + goal.getName()+"'/" + goal.getArity()+ "," + module  + ",File,Line,RefModule,Name,Arity)";
-			Debug.info("Look up predicate in user module: "+query); 
-			clauses = session.queryAll(query);
-		} 
-		if(clauses.size()>0 && goal.getModule()==null){
-			goal.setModule((String)clauses.get(0).get("Module"));
-		}
-*/		return clauses;
+		return clauses;
 	}
 }

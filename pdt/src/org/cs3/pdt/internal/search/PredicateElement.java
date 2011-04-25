@@ -7,10 +7,18 @@ import org.eclipse.core.resources.IFile;
  */
 public class PredicateElement {
 	private IFile file;
-	private String label;
 	private String type;
 	private String predicateName;
 	private int arity;
+	
+	public PredicateElement(IFile file, String type, String predicateName, int arity) {
+		this.file = file;
+		this.type = type;
+		this.predicateName = predicateName;
+		this.arity = arity;
+	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof PredicateElement){
@@ -23,33 +31,24 @@ public class PredicateElement {
 	public int hashCode() {	
 		return getLabel().hashCode();
 	}
-	public void setLabel(String label) {
-		this.label = label;
-	}
+
+	
 	public String getLabel() {
-		return label;
+		return (String) predicateName + "/" + arity;
 	}
-	public void setFile(IFile file) {
-		this.file = file;
-	}
+
 	public IFile getFile() {
 		return file;
 	}
-	public void setType(String type) {
-		this.type = type;
-	}
+
 	public String getType() {
 		return type;
 	}
-	public void setPredicateName(String name) {
-		this.predicateName = name;
-	}
+
 	public String getPredicateName() {
 		return predicateName;
 	}
-	public void setArity(int arity) {
-		this.arity = arity;
-	}
+
 	/**
 	 * The arity of the predicate to look up at the line offset
 	 * @return

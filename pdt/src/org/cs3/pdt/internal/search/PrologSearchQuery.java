@@ -155,10 +155,8 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	
 	abstract protected String buildSearchQuery(String module, String enclFile, GoalData goal);
 
-
 	abstract protected List<Map<String, Object>> getResultForQuery(PrologSession session,
 			String module, String query, GoalData goal) throws PrologInterfaceException ;
-
 
 	/**
 	 * @param clauses
@@ -179,14 +177,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			IFile file = getFileForString(m, getFileKey());
 			int line = Integer.parseInt((String) m.get(getLineKey()))-1;
 			
-			PredicateElement pe = new PredicateElement();
-			pe.setLabel((String) name + "/" + arity);
-			pe.setType(type);
-			pe.setFile(file);
-			pe.setPredicateName(goal.getName());
-			pe.setArity(goal.getArity());
-
-
+			PredicateElement pe = new PredicateElement(file, type, name, arity);
 
 //						  ITextFileBufferManager iTextFileBufferManager = FileBuffers.getTextFileBufferManager();
 //						    ITextFileBuffer iTextFileBuffer = null;
@@ -211,10 +202,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 //							        iTextFileBufferManager.disconnect(location, LocationKind.NORMALIZE, new NullProgressMonitor());
 //								}
 
-		    PrologMatch match = new PrologMatch(pe, line,0 ); // the line offset is only used for sorting here
-		    match.setLine(line);
-		    match.type=type;
-			result.addMatch(match);
+		    createPrologMatchForResult(pe, line, 0);
 //						    } catch (Exception e) {
 //						        e.printStackTrace();
 //						    }
@@ -227,11 +215,9 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		String path = Util.unquoteAtom((String) m.get(getFileKey()));
 		try{
 			file = PDTCoreUtils.findFileForLocation(path);
-			
 		}catch(IllegalArgumentException iae){
 //							Debug.report(iae);
 		}
-		
 		if(file==null|| !file.isAccessible()){
 			Path location = new Path(path);
 			file = new ExternalFile(location);
@@ -290,18 +276,26 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 				continue;
 			}
 			String type = (String)m.get("Type");
-			PredicateElement pe = new PredicateElement();
-			pe.setLabel((String) m.get("Caller"));
-			pe.setType(type);
+			
+			String callerPredicate =(String) m.get("Caller");
+			String[] callerParts=callerPredicate.split("/");
+			String name = callerParts[0];
+			int arity = Integer.getInteger(callerParts[1]);
+			
+			PredicateElement pe = new PredicateElement(file, type, name, arity);
 
-			PrologMatch match = new PrologMatch(pe, start, end-start);
-
-			match.type=type;
-			result.addMatch(match);
+			createPrologMatchForResult(pe, start, end-start);
 		}
 		return Status.OK_STATUS;
 	}
 
+
+	private void createPrologMatchForResult(PredicateElement pe, int line, int length) {
+		PrologMatch match = new PrologMatch(pe, line, length); 
+		match.setLine(line);
+		match.type=pe.getType();
+		result.addMatch(match);
+	}
 
 	protected final GoalData getGoal() {
 		return goal;
@@ -327,16 +321,19 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		return result;
 	}
 
-	public static void setLineKey(String lINE_INDICATOR) {
-		lineKey = lINE_INDICATOR;
+	
+	
+	
+	public static void setLineKey(String lineKey) {
+		PrologSearchQuery.lineKey = lineKey;
 	}
 
 	public static String getLineKey() {
 		return lineKey;
 	}
 
-	public static void setArityKey(String aRITY_INDICATOR) {
-		arityKey = aRITY_INDICATOR;
+	public static void setArityKey(String arityKey) {
+		PrologSearchQuery.arityKey = arityKey;
 	}
 
 	public static String getArityKey() {
