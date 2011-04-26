@@ -105,21 +105,6 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 		this.m_hasKnownDefinition=false;
 	}
 	
-	@Override
-	public int hashCode() {
-		return getSignature().hashCode();
-	}
-	@Override
-	public boolean equals(Object obj) {
-		if(obj==null){
-			return false;
-		}
-		if(obj instanceof PrologElementData){
-			return ((PrologElementData)obj).getSignature().equals(getSignature());
-		}
-		return super.equals(obj);
-	}
-
 	/**
 	 * Creates a PrologElementData Entity. This class is a container for
 	 * Prolog elements like facts, clauses or modules. 
@@ -135,6 +120,21 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 		this.m_hasKnownDefinition=false;
 	}
 
+
+	@Override
+	public int hashCode() {
+		return getSignature().hashCode();
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if(obj==null){
+			return false;
+		}
+		if(obj instanceof PrologElementData){
+			return ((PrologElementData)obj).getSignature().equals(getSignature());
+		}
+		return super.equals(obj);
+	}
 
 	/**
 	 * Returns the signature of the predicate:
