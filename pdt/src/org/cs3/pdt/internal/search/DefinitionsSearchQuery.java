@@ -13,11 +13,11 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 
 	public DefinitionsSearchQuery(PrologInterface pif, GoalData goal) {
 		super(pif, goal);
-		setLineKey("Line");
-		setArityKey("Arity");
-		setFunctorKey("Name");
-		setModuleKey("RefModule");
+		setModuleKey("Module");
 		setFileKey("File");
+		setLineKey("Line");
+		setFunctorKey("Name");
+		setArityKey("Arity");
 	}
 	
 	
