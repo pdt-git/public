@@ -1052,8 +1052,10 @@ public class Util {
 	}
 
 	/**
-	 * @param c
-	 * @return
+	 * Returns true if c is a valid character as part of a Prolog
+	 * predicate name (including module definition).
+	 * @param c character in question
+	 * @return 
 	 */
 	static public boolean isPredicatenameChar(char c) {
 		if (c >= 'a' && c <= 'z')

@@ -214,6 +214,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		);		
 		return sortedFiles;
 	}
+	
 	@Override
 	public void removeAll() {	
 		super.removeAll();
