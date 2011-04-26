@@ -69,11 +69,6 @@ public class GoalNode implements Goal {
 		return module;
 	}
 
-	@Override
-	public CTerm getTerm() {
-		return term;
-	}
-
 	public String getTermString() {
 		return null;
 	}
