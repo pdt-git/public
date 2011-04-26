@@ -72,7 +72,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorMatchAdapter, IFileMatchAdapter {
 
 	private PrologSearchQuery query;
-	private Goal data;
+	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
 	private HashMap<IFile,PredicateElement[]> elementCache = new HashMap<IFile, PredicateElement[]>();
 	private HashSet<IFile> fileCache = new HashSet<IFile>();
@@ -81,9 +81,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	 * @param query
 	 * @param queryString
 	 */
-	public PrologSearchResult(PrologSearchQuery query, Goal data2) {
+	public PrologSearchResult(PrologSearchQuery query, Goal goal) {
 		this.query = query;
-		this.data = data2;
+		this.goal = goal;
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 
 	@Override
 	public String getLabel() {		
-		return "Prolog Search: " + (data==null ? "oops, data is null?!" :data.getModule()+":"+data.getName()+"/"+data.getArity());
+		return "Prolog Search: " + (goal==null ? "oops, goal is null?!" :goal.getModule()+":"+goal.getName()+"/"+goal.getArity());
 	}
 
 	@Override
