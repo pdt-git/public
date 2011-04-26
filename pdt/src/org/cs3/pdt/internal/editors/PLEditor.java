@@ -445,15 +445,19 @@ public class PLEditor extends TextEditor {
 	private void createInspectionMenu(MenuManager menuMgr) {
 		addAction(menuMgr, new FindPredicateActionDelegate(this),
 				"Open Declaration", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.OPEN_EDITOR);
-		
-		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
-				"Find (visible) definitions", SEP_INSPECT,
+				IJavaEditorActionDefinitionIds.OPEN_EDITOR);		
+
+		addAction(menuMgr, new FindVisibleDefinitionsActionDelegate(this),
+				"Find visible definitions", SEP_INSPECT,
 				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
-		addAction(menuMgr, new SpyPointActionDelegate(this),
-				"Toggle Spy Point", SEP_INSPECT,
-				"org.eclipse.debug.ui.commands.ToggleBreakpoint");
+		addAction(menuMgr, new FindInvocableDefinitionsActionDelegate(this),
+				"Find invocable definitions", SEP_INSPECT,
+				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
+
+		addAction(menuMgr, new FindAllDefinitionsActionDelegate(this),
+				"Find all definitions", SEP_INSPECT,
+				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
 		addAction(menuMgr, new ReferencesActionDelegate(this),
 				"Find References", SEP_INSPECT,
