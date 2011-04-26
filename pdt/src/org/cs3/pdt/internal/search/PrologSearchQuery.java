@@ -69,11 +69,6 @@ import org.eclipse.search.ui.ISearchResult;
 
 public abstract class PrologSearchQuery implements ISearchQuery {
 
-	private static String lineKey = "Line";
-	private static String arityKey = "Arity";
-	private static String functorKey = "Name";
-	private static String moduleKey = "RefModule";
-	private static String fileKey = "File";
 	private GoalData goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
@@ -155,8 +150,13 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	
 	abstract protected String buildSearchQuery(String module, String enclFile, GoalData goal);
 
-	abstract protected List<Map<String, Object>> getResultForQuery(PrologSession session,
-			String module, String query, GoalData goal) throws PrologInterfaceException ;
+	protected List<Map<String, Object>> getResultForQuery(PrologSession session, String module, String query,
+			GoalData goal) throws PrologInterfaceException {
+				Debug.info(query);
+				
+				List<Map<String, Object>> clauses = session.queryAll(query);
+				return clauses;
+			}
 
 	/**
 	 * @param clauses
@@ -169,50 +169,25 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
-			
-			String type = (String)m.get(getModuleKey());
-			String name = (String)m.get(getFunctorKey());
-			int arity = Integer.parseInt((String)m.get(getArityKey()));
-			
-			IFile file = getFileForString(m, getFileKey());
-			int line = Integer.parseInt((String) m.get(getLineKey()))-1;
-			
-			PredicateElement pe = new PredicateElement(file, type, name, arity);
-
-//						  ITextFileBufferManager iTextFileBufferManager = FileBuffers.getTextFileBufferManager();
-//						    ITextFileBuffer iTextFileBuffer = null;
-//						    try    {
-//						    	int offset;
-//								IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new URI("file",file,null));
-//								PrologMatch match;
-//								if(file.isAccessible()){
-//							        iTextFileBufferManager.connect(file.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
-//							        iTextFileBuffer = iTextFileBufferManager.getTextFileBuffer(file.getFullPath(), LocationKind.IFILE);
-//							        IDocument doc = iTextFileBuffer.getDocument();
-//							        offset= doc.getLineOffset(line);
-//							        match = new PrologMatch(pe, offset,0 );
-//							        iTextFileBufferManager.disconnect(file.getFullPath(), LocationKind.IFILE, new NullProgressMonitor());
-//								} else {
-//									iTextFileBufferManager.connect(location, LocationKind.NORMALIZE, new NullProgressMonitor());
-//							      
-//									IFileStore fileStore = EFS.getLocalFileSystem().getStore(location);
-//									iTextFileBuffer = iTextFileBufferManager.getFileStoreTextFileBuffer(fileStore);
-//							        IDocument doc = iTextFileBuffer.getDocument();
-//							        offset= doc.getLineOffset(line);
-//							        iTextFileBufferManager.disconnect(location, LocationKind.NORMALIZE, new NullProgressMonitor());
-//								}
-
-		    createPrologMatchForResult(pe, line, 0);
-//						    } catch (Exception e) {
-//						        e.printStackTrace();
-//						    }
+			PrologMatch match = constructPrologMatchForAResult(m);
+			result.addMatch(match);
 		}
 	}
+	
+	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
-	private IFile getFileForString(Map<String, Object> m, String FileString)
+	protected PrologMatch createMatch(String module, String name, int arity, IFile file, int line) {
+		PredicateElement pe = new PredicateElement(file, module, name, arity);
+		PrologMatch match = new PrologMatch(pe, line, 0); 
+		match.setLine(line);
+		match.type=pe.getType();
+		return match;
+	}
+
+	protected IFile getFileForString(String fileName)
 			throws IOException {
 		IFile file = null;
-		String path = Util.unquoteAtom((String) m.get(getFileKey()));
+		String path = Util.unquoteAtom(fileName);
 		try{
 			file = PDTCoreUtils.findFileForLocation(path);
 		}catch(IllegalArgumentException iae){
@@ -260,7 +235,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			IFile file=null;
 			String path =null; 
 			try{
-				path = Util.unquoteAtom((String) m.get(getFileKey()));
+				path = Util.unquoteAtom((String) m.get("File"));
 				file = PDTCoreUtils.findFileForLocation(path);
 			}catch(IllegalArgumentException iae){
 				Debug.report(iae);
@@ -283,22 +258,13 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			int arity = Integer.getInteger(callerParts[1]);
 			
 			PredicateElement pe = new PredicateElement(file, type, name, arity);
+			PrologMatch match = new PrologMatch(pe, start, (end-start)); 
+			match.setLine(start);
+			match.type=pe.getType();
 
-			createPrologMatchForResult(pe, start, end-start);
+			result.addMatch(match);
 		}
 		return Status.OK_STATUS;
-	}
-
-
-	private void createPrologMatchForResult(PredicateElement pe, int line, int length) {
-		PrologMatch match = new PrologMatch(pe, line, length); 
-		match.setLine(line);
-		match.type=pe.getType();
-		result.addMatch(match);
-	}
-
-	protected final GoalData getGoal() {
-		return goal;
 	}
 
 	@Override
@@ -319,49 +285,6 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	@Override
 	public ISearchResult getSearchResult() {
 		return result;
-	}
-
-	
-	
-	
-	public static void setLineKey(String lineKey) {
-		PrologSearchQuery.lineKey = lineKey;
-	}
-
-	public static String getLineKey() {
-		return lineKey;
-	}
-
-	public static void setArityKey(String arityKey) {
-		PrologSearchQuery.arityKey = arityKey;
-	}
-
-	public static String getArityKey() {
-		return arityKey;
-	}
-
-	public static void setFunctorKey(String functorKey) {
-		PrologSearchQuery.functorKey = functorKey;
-	}
-
-	public static String getFunctorKey() {
-		return functorKey;
-	}
-
-	protected static void setModuleKey(String moduleKey) {
-		PrologSearchQuery.moduleKey = moduleKey;
-	}
-
-	protected static String getModuleKey() {
-		return moduleKey;
-	}
-
-	protected static void setFileKey(String fileKey) {
-		PrologSearchQuery.fileKey = fileKey;
-	}
-
-	protected static String getFileKey() {
-		return fileKey;
 	}
 
 }
