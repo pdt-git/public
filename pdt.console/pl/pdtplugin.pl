@@ -46,7 +46,6 @@
 :- module(pdtplugin,[
     find_pred/8,
     find_declaration/6,
-    find_improved_declaration/5,
     get_references/8,
     find_definition_visible_in/8,
     get_pred/7,
@@ -83,6 +82,7 @@
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 find_declaration(EnclFile,Name,Arity,Module,File,Line):-
     find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line).
+    
 
 % TO BE INLINED into call site in
 % pdt/src/org/cs3/pdt/internal/actions/PrologOutlineInformationControl.java
@@ -168,7 +168,33 @@ user:tearDown(decode_reference) :-
                 * Find Definitions and Declarations *
                 *************************************/
 
+% Folgendes sollte durch find_definition_visible_in subsumiert sein:
+%%% find_improved_declaration(+EnclFile,+Term,+EnclModule,File,Line)
+%
+%find_improved_declaration(EnclFile,Term,EnclModule,File,Line):-
+%    format('Term: ~w, Module: ~w~n',[Term, EnclModule]),
+%    file_references_for_call(EnclModule, Term, [Reference|_MoreRefs]),	%<-- erstmal nur das erste nehmen
+%    format('Reference: ~w~n',[Reference]),
+%    (	(Reference = 'undefined' ; Reference = 'any')
+%    -> 	(File = EnclFile, Line=1)
+%    ;	(	Reference=(DefinitionModule,File),  %<-- dies Zusatzinfo evtl auch später rausgeben
+%    		nth_clause(DefinitionModule:Term, _, Ref),
+%    		clause_property(Ref,file(File)),	%<-- hier als check, um nur gewünschte zu finden!
+%    		clause_property(Ref, line_count(Line))
+%    	)
+%    ). 
+    
+
 %% find_definition_visible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line,-Name,-Arity)
+%
+% Eva meint, die Duplizierung der Parameter -Name,-Arity am Ende der Liste würde
+% die Behandlung der Ergebnisse auf der Java-Seite einfacher machen. Das hab ich
+% noch nicht ganz verstanden. TODO: Mit Eva noch mal die Aufrufstelle(n) anschauen. --GK
+
+find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line,Name,Arity) :-
+    find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line).
+    
+%% find_definition_visible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
 %
 % Find starting line of clauses of the predicate Name/Arity that are
 % visible in EnclFile. 
@@ -176,7 +202,7 @@ user:tearDown(decode_reference) :-
 % Used for the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
-find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line,Name,Arity):-
+find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line):-
     module_of_file(EnclFile,Module),
 	functor(Head,Name,Arity),
     start_of_nth_clause(Module,Head,_Nth,File,Line).
@@ -393,43 +419,6 @@ manual_entry(Pred,-1,Content) :-
 */
 
 
-
-%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
-%
-% used for the open declaration action
-%
-find_declaration(EnclFile,Name,Arity,Module,File,Line):-
-    resolve_module(EnclFile,Module),
-%	current_module(Module),
-	functor(Goal,Name,Arity),
-	nth_clause(Module:Goal,_,Ref),
-	clause_property(Ref,file(File)),
-    clause_property(Ref,line_count(Line)).
-    
-    
-find_improved_declaration(EnclFile,Term,EnclModule,File,Line):-
-    format('Term: ~w, Module: ~w~n',[Term, EnclModule]),
-    file_references_for_call(EnclModule, Term, [Reference|_MoreRefs]),	%<-- erstmal nur das erste nehmen
-    format('Reference: ~w~n',[Reference]),
-    (	(Reference = 'undefined' ; Reference = 'any')
-    -> 	(File = EnclFile, Line=1)
-    ;	(	Reference=(DefinitionModule,File),  %<-- dies Zusatzinfo evtl auch später rausgeben
-    		nth_clause(DefinitionModule:Term, _, Ref),
-    		clause_property(Ref,file(File)),	%<-- hier als check, um nur gewünschte zu finden!
-    		clause_property(Ref, line_count(Line))
-    	)
-    ). 
-    
-
-
-resolve_module(EnclFile,Module):-
- 	var(Module),
-    ( ( nonvar(EnclFile),module_property(Module,file(EnclFile)) )
-    ;  Module=user
-    ).
-
-% Necessary for find_pred/8, TODO: move to find_pred/8
-resolve_module(_EnclFile,_Module).
 
 
                /*************************************
