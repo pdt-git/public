@@ -90,6 +90,10 @@ public class ImageRepository {
     public final static String PE_CLAUSE = "clause.gif";
 
     public final static String PE_TERM = "term.gif";
+    
+    public final static String FILE = "prolog_file.gif";
+    
+    public final static String MATCH = "sample.gif";
 
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
 
