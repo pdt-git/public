@@ -41,9 +41,6 @@
 
 package org.cs3.pl.metadata;
 
-import org.cs3.pl.cterm.CTerm;
-
-
 public class GoalData extends PrologElementData implements Goal {
 
 	private static final long serialVersionUID = 1L;
@@ -54,11 +51,6 @@ public class GoalData extends PrologElementData implements Goal {
 		super(module, elementName, arity);
 		this.file=file;
 		this.termString = termString;
-	}
-
-	@Override
-	public CTerm getTerm() {
-		return null;
 	}
 
 	public String getFile() {
