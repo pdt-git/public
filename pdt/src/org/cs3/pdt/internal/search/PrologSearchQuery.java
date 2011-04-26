@@ -180,28 +180,8 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		PredicateElement pe = new PredicateElement(file, module, name, arity);
 		PrologMatch match = new PrologMatch(pe, line, 0); 
 		match.setLine(line);
-		match.type=pe.getType();
+		match.setModule(pe.getType());
 		return match;
-	}
-
-	protected IFile getFileForString(String fileName)
-			throws IOException {
-		IFile file = null;
-		String path = Util.unquoteAtom(fileName);
-		try{
-			file = PDTCoreUtils.findFileForLocation(path);
-		}catch(IllegalArgumentException iae){
-//							Debug.report(iae);
-		}
-		if(file==null|| !file.isAccessible()){
-			Path location = new Path(path);
-			file = new ExternalFile(location);
-//				String msg = "Not found in workspace: "+path;
-//							Debug.warning(msg);
-//							UIUtils.setStatusErrorMessage(msg);
-//							continue;
-		}
-		return file;
 	}
 
 	/**
@@ -260,7 +240,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			PredicateElement pe = new PredicateElement(file, type, name, arity);
 			PrologMatch match = new PrologMatch(pe, start, (end-start)); 
 			match.setLine(start);
-			match.type=pe.getType();
+			match.setModule(pe.getType());
 
 			result.addMatch(match);
 		}
