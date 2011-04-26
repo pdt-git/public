@@ -16,13 +16,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.search.ui.text.Match;
 
 
-
-
-
 public class PrologSearchTreeContentProvider extends PrologSearchContentProvider implements ITreeContentProvider {
 	PrologSearchTreeContentProvider(PrologSearchResultPage page) {
 		super(page);
-		
 	}
 
 	@Override
@@ -58,8 +54,6 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		
 	}
 
-	
-
 	@Override
 	public Object[] getChildren(Object parentElement) {
 		if(parentElement==null||getSearchResult()==null){
@@ -91,14 +85,8 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		getPage().getViewer().refresh();
 	}
 
-
-
 	@Override
 	public void elementsChanged(Object[] updatedElements) {
 		clear();
-		
 	}
-
-	
-
 }

@@ -47,10 +47,10 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.internal.search.PrologSearchQuery;
+import org.cs3.pdt.internal.search.OldReferencesSearchQuery;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
-import org.cs3.pl.metadata.Goal;
+import org.cs3.pl.metadata.GoalData;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IFileEditorInput;
@@ -89,12 +89,12 @@ public class ReferencesActionDelegate extends TextEditorAction {
 //						//Path filepath = new Path(fStoreInput.getURI().getPath());
 //						IFile[] file = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(fStoreInput.getURI());
 //					}
-					Goal data = editor.getSelectedPrologElement();
+					GoalData data = editor.getSelectedPrologElement();
 					if(data == null){
 						Debug.warning("data is null");
 						return;
 					}
-					ISearchQuery query = new PrologSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
+					ISearchQuery query = new OldReferencesSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
 					NewSearchUI.activateSearchResultView();
 					NewSearchUI.runQueryInForeground(null,query);
 					if(plProject!=null) plProject.updateMarkers();

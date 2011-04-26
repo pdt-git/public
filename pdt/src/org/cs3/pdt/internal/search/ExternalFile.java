@@ -6,7 +6,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import org.eclipse.core.internal.resources.Resource;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
@@ -14,7 +13,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.resources.IResourceVisitor;

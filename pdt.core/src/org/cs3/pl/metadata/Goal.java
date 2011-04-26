@@ -59,4 +59,6 @@ public interface Goal {
 	public String getModule();
 
 	public CTerm getTerm();
+
+	public String getTermString();
 }

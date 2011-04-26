@@ -48,16 +48,16 @@ public class GoalData extends PrologElementData implements Goal {
 
 	private static final long serialVersionUID = 1L;
 	private String file;
+	private String termString;
 
-	
-	public GoalData(String file, String module, String elementName, int arity) {
+	public GoalData(String file, String module, String elementName, int arity, String termString) {
 		super(module, elementName, arity);
 		this.file=file;
+		this.termString = termString;
 	}
 
 	@Override
 	public CTerm getTerm() {
-
 		return null;
 	}
 
@@ -67,7 +67,11 @@ public class GoalData extends PrologElementData implements Goal {
 
 	public void setModule(String module) {
 		this.module=module;
-		
+	}
+	
+	@Override
+	public String getTermString() {
+		return termString;
 	}
 
 }
