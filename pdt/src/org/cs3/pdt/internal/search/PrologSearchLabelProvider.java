@@ -24,18 +24,21 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		//TODO: correct image
-		if(!(element instanceof PredicateElement)){
-			return null;
-		}
-		PredicateElement pe = (PredicateElement) element;
-		if("this_pred_ref".equals(pe.getType())){
-			return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
-		}
-		if("unresolved_pred_ref".equals(pe.getType())){
-			return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
-		}
-		return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
+		if (element instanceof IFile) {
+			return ImageRepository.getImage(ImageRepository.FILE);
+		} else 	if (element instanceof PrologMatch) {
+			return ImageRepository.getImage(ImageRepository.MATCH);
+		} else if(element instanceof PredicateElement){
+			PredicateElement pe = (PredicateElement) element;
+			if("this_pred_ref".equals(pe.getType())){
+				return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
+			}
+			if("unresolved_pred_ref".equals(pe.getType())){
+				return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
+			}
+			return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
+		} 
+		return null;
 	}
 
 	@Override
@@ -44,15 +47,19 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			
 			PredicateElement pe = ((PredicateElement)element);
 			String label = pe.getLabel();
-			if(! "this_pred_ref".equals(pe.getType())){
-				label += " ("+pe.getType()+")";
-			}
+			String module = pe.getType();
+			if (module == null || module.isEmpty())
+				module = "user";
+			String fullLabel = module + ":" + label;
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
-			return label+ " (" + count +" match"+plural+")";
+			return fullLabel+ " (" + count +" match"+plural+")";
 		}
 		if(element instanceof IFile){
 			return ((IFile)element).getFullPath().toString();
+		}
+		if(element instanceof PrologMatch) {
+			return Integer.toString(((PrologMatch)element).getLine());
 		}
 		return "no label";
 	}
