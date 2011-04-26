@@ -709,6 +709,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private void addContributions(IContributionManager manager) {
 		IWorkbenchWindow window = getSite().getWorkbenchWindow();
+		manager.add(createProcessAction);
 		manager.add(new Separator("#System"));
 				
 		manager.add(new Separator("#ConsoleInternal"));
@@ -733,7 +734,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS
 				+ "-end"));		
 		manager.add(restartAction);
-		manager.add(createProcessAction);
 
 	}
 
