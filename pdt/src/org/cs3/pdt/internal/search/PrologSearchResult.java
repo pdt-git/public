@@ -45,8 +45,10 @@
  */
 package org.cs3.pdt.internal.search;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
@@ -175,9 +177,24 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		}
 		return null;
 	}
-
 	
-	public Object[] getElements(IFile file) {
+	public ModuleSearchDummy[] getModules(){
+		Object[] elements = getElements();
+		List<PrologMatch> matches = new ArrayList<PrologMatch>();
+		for (int i=0; i< elements.length; i++) {
+			if (elements[i] instanceof PredicateElement){
+				PredicateElement elem = (PredicateElement)elements[i];
+				Match[] matchesForElem = getMatches(elem);
+				for (int j =0; j< matchesForElem.length; j++) {
+					if (matchesForElem[j] instanceof PrologMatch)
+						matches.add((PrologMatch)matchesForElem[j]);
+				}
+			}
+		}
+		return ModuleDummyCreator.getModuleDummiesForMatches(matches);
+	}
+
+	public PredicateElement[] getElements(IFile file) {
 		PredicateElement[] children = elementCache.get(file);
 		if(children==null){
 			Object[] elms = getElements();
@@ -205,7 +222,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		if (query.isCategorized())
 			return getCategories();
 		else
-			return getFiles();
+			return getModules();
 	}
 	
 	
