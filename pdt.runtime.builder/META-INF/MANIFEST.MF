@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Builder
 Bundle-SymbolicName: pdt.runtime.builder;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.2.3.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.cs3.pdt.runtime;bundle-version="0.2.3",
  org.cs3.lp.utils;bundle-version="1.0.0"
