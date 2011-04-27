@@ -74,6 +74,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private PrologSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
+	private CategoryHandler categorieyHandler;
 	private HashMap<IFile,PredicateElement[]> elementCache = new HashMap<IFile, PredicateElement[]>();
 	private HashSet<IFile> fileCache = new HashSet<IFile>();
 
@@ -194,7 +195,18 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		}
 		return children;
 	}
+	
+	public SearchResultCategory[] getCategories() {
+		return ((SearchResultCategory[])categorieyHandler.getCategories().toArray());
+	}
 
+	public Object[] getChildren() {
+		if (categorieyHandler == null)
+			return getFiles();
+		else
+			return getCategories();
+	}
+	
 	@Override
 	public void addMatch(Match match) {
 		PredicateElement elm = (PredicateElement) match.getElement();
