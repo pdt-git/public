@@ -17,7 +17,9 @@ public class CategoryHandler {
 		for(String key:keys) {
 			allCategories.add(categories.get(key));
 		}
-		return (SearchResultCategory[])allCategories.toArray();
+
+		SearchResultCategory[] resultArray = ((SearchResultCategory[])allCategories.toArray(new SearchResultCategory[0]));
+		return resultArray;
 	}
 	
 	public void addMatchToCategory(PrologMatch match, String categoryName) {

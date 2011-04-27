@@ -34,19 +34,23 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
-			throws IOException {
-				String resultModule = module;
-				if (Util.isVariable(module))
-					resultModule = (String)m.get(module);
-		
-				String name = (String)m.get(FUNCTOR_VAR);
-				int arity = Integer.parseInt((String)m.get(ARITY_VAR));
-				
-				IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
-				int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
-				
-				PrologMatch match = createMatch(resultModule, name, arity, file, line);
-				return match;
-			}
+	throws IOException {
+		String resultModule = module;
+		if (Util.isVariable(module))
+			resultModule = (String)m.get(module);
+
+		String name = (String)m.get(FUNCTOR_VAR);
+		int arity = Integer.parseInt((String)m.get(ARITY_VAR));
+
+		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
+		int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
+
+		PrologMatch match = createMatch(resultModule, name, arity, file, line);
+		return match;
+	}
+
+	public boolean isCategorized(){
+		return false;
+	}
 	
 }

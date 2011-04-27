@@ -202,10 +202,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 
 	public Object[] getChildren() {
-		// if (query.isCategorized())
-		 return getCategories();
-		//else
-		//return getFiles();
+		if (query.isCategorized())
+			return getCategories();
+		else
+			return getFiles();
 	}
 	
 	
