@@ -57,7 +57,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 			return null;
 		}
 		if(parentElement instanceof PrologSearchResult){
-			return getSearchResult().getFiles();
+			return getSearchResult().getChildren();
 		}
 		if(parentElement instanceof IFile){
 			return getSearchResult().getElements((IFile) parentElement);
