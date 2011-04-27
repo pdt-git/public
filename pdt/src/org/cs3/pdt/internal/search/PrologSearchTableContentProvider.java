@@ -71,7 +71,6 @@ import org.eclipse.search.ui.text.AbstractTextSearchResult;
 public class PrologSearchTableContentProvider extends PrologSearchContentProvider implements IStructuredContentProvider, ISearchResultListener {
 	PrologSearchTableContentProvider(PrologSearchResultPage page) {
 		super(page);
-		// TODO Auto-generated constructor stub
 	}
 
 	protected final Object[] EMPTY_ARRAY= new Object[0];
@@ -113,7 +112,6 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 
 	@Override
 	public void elementsChanged(Object[] updatedElements) {
-		//TODO: copied from JavaSearchTableContentProvider
 		int addCount= 0;
 		int removeCount= 0;
 		for (int i= 0; i < updatedElements.length; i++) {
@@ -132,7 +130,6 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 	
 	@Override
 	public void clear() {
-		//TODO: copied from JavaSearchTableContentProvider
 		fTableViewer.refresh();
 	}
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.cs3.pdt.runtime.bootstrapContribution">
+      <fileSearchPathContribution
+            alias="pdt_runtime_builder_graphml_creator"
+            id="pdt.runtime.builder.graphml_creator"
+            key="yworks.contribution.key"
+            path="prolog-src/output-converter/">
+      </fileSearchPathContribution>
+   </extension>
+   <extension
+         point="org.cs3.pdt.runtime.bootstrapContribution">
+      <fileSearchPathContribution
+            alias="pdt_runtime_builder_analyzer"
+            id="pdt.runtime.builder.analyzer"
+            path="prolog-src/analyzer/">
+      </fileSearchPathContribution>
+   </extension>
+
+</plugin>

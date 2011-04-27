@@ -48,12 +48,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.console.internal.DefaultPrologConsoleService;
 import org.cs3.pdt.console.internal.ImageRepository;
 import org.cs3.pdt.console.internal.views.ConsoleViewer.SavedState;
+import org.cs3.pdt.runtime.DefaultSubscription;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologContextTracker;
@@ -85,6 +87,8 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -97,9 +101,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.ViewPart;
@@ -316,6 +325,88 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			return "restart";
 		}
 	}
+	
+	private final class CreateProcessAction extends Action{
+		
+		@Override
+		public void run(){
+			Job j = new UIJob("Creating new Prolog Process")
+			{
+				@Override
+				public IStatus runInUIThread(IProgressMonitor arg0) {
+					PrologInterfaceRegistry registry = PrologRuntimePlugin.getDefault().getPrologInterfaceRegistry();
+					final Set<String> pifKeys = registry.getRegisteredKeys();
+					String defaultPifKey = getNameOfProjectOfActiveEditorInput();
+					if (pifKeys.contains(defaultPifKey))
+						defaultPifKey = null;
+
+					IInputValidator validator = new IInputValidator(){
+						@Override
+						public String isValid(String arg0) {
+							if ("".equals(arg0))
+								return "PIF Key must not be empty";
+							else if (pifKeys.contains(arg0))
+								return "PIF Key already used";
+							else
+								return null;
+						}
+					};
+
+					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process", "Enter PIF key:", defaultPifKey, validator);
+					int result = dialog.open();
+					if (result == InputDialog.CANCEL)
+						return Status.CANCEL_STATUS;
+
+					String pifKey = dialog.getValue();
+					DefaultSubscription subscription = new DefaultSubscription(pifKey + "_indepent", pifKey, "Independent prolog process", pifKey + " - PDT");
+					registry.addSubscription(subscription);
+					PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
+
+					if (automatedSelector.getActiveTrackers().isEmpty())
+						PrologConsoleView.this.setPrologInterface(pif);
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
+		}
+		
+		private String getNameOfProjectOfActiveEditorInput(){
+			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+			if (window != null) {
+			    IWorkbenchPage page = window.getActivePage();
+			    if (page != null) {
+			    	IEditorPart editor = page.getActiveEditor();
+			    	if (editor == null)
+			    		return null;
+			    	
+			    	IEditorInput editorInput = editor.getEditorInput();
+			    	if (editorInput == null)
+			    		return null;
+			    	
+		    		IFile file = (IFile) editorInput.getAdapter(IFile.class);
+		    		if (file != null) {
+		    			return file.getProject().getName();
+		    		}
+			    }
+			}
+			return null;
+		}
+		
+		@Override
+		public ImageDescriptor getImageDescriptor() {
+			return ImageRepository.getImageDescriptor(ImageRepository.NEW_PROCESS);
+		}
+
+		@Override
+		public String getToolTipText() {
+			return "create process";
+		}
+
+		@Override
+		public String getText() {
+			return "create process";
+		}
+	}
 
 	public static final String HOOK_ID = "org.cs3.pdt.console.internal.views.PrologConsoleView";
 	private ConsoleViewer viewer;
@@ -330,6 +421,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private GuiTracerAction guiTracerAction;
 	private PasteAction pasteFileNameAction;
 	private RestartAction restartAction;
+	private CreateProcessAction createProcessAction;
 	private HashMap<PrologInterface, PrologSocketConsoleModel> models = new HashMap<PrologInterface, PrologSocketConsoleModel>();
 	private Label title;
 	private HashMap<PrologInterface, SavedState> viewerStates = new HashMap<PrologInterface, SavedState>();
@@ -490,6 +582,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				.setScopes(new String[] { PDTConsole.CONTEXT_USING_CONSOLE_VIEW });
 		keyBindingService.registerAction(pasteFileNameAction);
 		restartAction = new RestartAction();
+		createProcessAction = new CreateProcessAction();
 	}
 
 	private void initMenus(Control parent) {
@@ -521,6 +614,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
+		toolBarManager.add(createProcessAction);
+		
 		createCombo(toolBarManager);
 		addContributions(toolBarManager);
 	

@@ -41,8 +41,6 @@
 
 package org.cs3.pl.metadata;
 
-import org.cs3.pl.cterm.CTerm;
-
 /**
  * WARNING: this is work in progress. 
  * 
@@ -52,11 +50,11 @@ import org.cs3.pl.cterm.CTerm;
  */
 public interface Goal {
 
-	public int getArity();
-
 	public String getName();
 
 	public String getModule();
 
-	public CTerm getTerm();
+	public int getArity();
+
+	public String getTermString();
 }

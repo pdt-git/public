@@ -79,8 +79,6 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	protected void elementsChanged(Object[] objects) {
 		if (fContentProvider != null)
 			fContentProvider.elementsChanged(objects);
-		//System.out.println("changed");
-		
 		StructuredViewer viewer = getViewer();
 		if(viewer!=null){
 		    viewer.refresh();
@@ -104,19 +102,18 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		fContentProvider= new PrologSearchTreeContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 	}
+	
 	@Override
 	public StructuredViewer getViewer() {		
 		return super.getViewer();
 	}
+
 	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		//viewer.setSorter(new JavaElementLineSorter());
 		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
 		fContentProvider= new PrologSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
-		
-		
-		
 	}
 	
 	@Override
@@ -149,11 +146,12 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
 				endOffset);
 		currentLength=endOffset-currentOffset;
-		if (editor != null && activate)
+		if (editor != null && activate) {
 			editor.getEditorSite().getPage().activate(editor);
-		if (editor instanceof ITextEditor) {
-			ITextEditor textEditor= editor;
-			textEditor.selectAndReveal(currentOffset, currentLength);
+			if (editor instanceof ITextEditor) {
+				ITextEditor textEditor= editor;
+				textEditor.selectAndReveal(currentOffset, currentLength);
+			}
 		}
 	}
 
