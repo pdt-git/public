@@ -45,12 +45,11 @@
  */
 package org.cs3.pdt.internal.search;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -74,7 +73,6 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private PrologSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
-	private CategoryHandler categorieyHandler;
 	private HashMap<IFile,PredicateElement[]> elementCache = new HashMap<IFile, PredicateElement[]>();
 	private HashSet<IFile> fileCache = new HashSet<IFile>();
 
@@ -197,15 +195,19 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 	
 	public SearchResultCategory[] getCategories() {
-		return ((SearchResultCategory[])categorieyHandler.getCategories().toArray());
+		if (query.getCategoryHandler() == null) {
+			return new SearchResultCategory[0];
+		}
+		return query.getCategoryHandler().getCategories();
 	}
 
 	public Object[] getChildren() {
-		if (categorieyHandler == null)
-			return getFiles();
-		else
+		if (query.isCategorized())
 			return getCategories();
+		else
+			return getFiles();
 	}
+	
 	
 	@Override
 	public void addMatch(Match match) {
@@ -215,17 +217,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 	
 	public IFile[] getFiles() {
-		IFile[] sortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
-		Arrays.sort(sortedFiles,
-				new Comparator<IFile>() {
-					@Override
-					public int compare(IFile first, IFile second) {
-						return first.getFullPath().toPortableString().compareTo(second.getFullPath().toPortableString());
-					}
-				}
-		);		
-		return sortedFiles;
+		IFile[] unsortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
+		return PDTCoreUtils.sortFileSet(unsortedFiles);
 	}
+
 	
 	@Override
 	public void removeAll() {	
