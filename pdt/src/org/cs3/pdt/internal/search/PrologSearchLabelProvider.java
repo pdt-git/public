@@ -54,13 +54,9 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		if(element instanceof PredicateElement){
 			PredicateElement pe = ((PredicateElement)element);
 			String label = pe.getLabel();
-			String module = pe.getModule();
-			if (module == null || module.isEmpty())
-				module = "user";
-			String fullLabel = module + ":" + label;
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
-			return fullLabel+ " (" + count +" match"+plural+")";
+			return label+ " (" + count +" match"+plural+")";
 		} else if(element instanceof IFile){
 			return ((IFile)element).getFullPath().toString();
 		} else if (element instanceof SearchResultCategory) {
