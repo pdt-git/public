@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PDT yWorks Demo
+Bundle-SymbolicName: pdt.yworks.demo;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.junit4;bundle-version="4.5.0",
+ org.cs3.pdt.runtime;bundle-version="0.2.3",
+ org.cs3.pdt.common;bundle-version="0.2.3",
+ org.cs3.pdt.runtime.ui;bundle-version="0.2.3",
+ org.cs3.pdt.common.ui;bundle-version="0.2.3",
+ org.eclipse.core.resources;bundle-version="3.5.2"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: org.eclipse.ui.forms,
+ org.eclipse.ui.forms.events,
+ org.eclipse.ui.forms.widgets
+Bundle-ClassPath: .,
+ lib/org.eclipse.albireo.core_0.0.3.v20081031.jar,
+ lib/y.jar,
+ lib/hamcrest-core-1.2.jar,
+ lib/hamcrest-library-1.2.jar
+Bundle-Activator: pdt.y.main.PluginActivator
+Bundle-ActivationPolicy: lazy

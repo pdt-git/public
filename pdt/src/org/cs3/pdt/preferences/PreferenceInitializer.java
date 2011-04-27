@@ -7,6 +7,7 @@ import java.net.URL;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pl.common.Debug;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -48,12 +49,13 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	}
 
 	private String getLocation() throws IOException {
-		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
-		String location = null;
-		location = new File(FileLocator.toFileURL(url).getFile()).getAbsolutePath();
-		if (location.charAt(location.length() - 1) == File.separatorChar)
-			location = location.substring(0, location.length() - 1);
-		return location;
+		return ResourcesPlugin.getWorkspace().getRoot().getLocation().append(".metadata").toOSString();
+//		URL url = PDTPlugin.getDefault().getBundle().getEntry("/");
+//		String location = null;
+//		location = new File(FileLocator.toFileURL(url).getFile()).getAbsolutePath();
+//		if (location.charAt(location.length() - 1) == File.separatorChar)
+//			location = location.substring(0, location.length() - 1);
+//		return location;
 	}
 
 }

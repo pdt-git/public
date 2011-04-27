@@ -1027,6 +1027,21 @@ public class Util {
 			return true;
 		return false;
 	}
+	
+	/**
+	 * Returns true if String s is a prolog Variable.
+	 * @param s
+	 * @return
+	 */
+	public static boolean isVariable(String s) {
+		if (s == null) 
+			return false;
+		char firstChar = s.charAt(0);
+		if (isVarPrefix(firstChar))
+			return true;
+		else
+			return false;
+	}
 
 	/**
 	 * @param prefix
@@ -1052,8 +1067,10 @@ public class Util {
 	}
 
 	/**
-	 * @param c
-	 * @return
+	 * Returns true if c is a valid character as part of a Prolog
+	 * predicate name (including module definition).
+	 * @param c character in question
+	 * @return 
 	 */
 	static public boolean isPredicatenameChar(char c) {
 		if (c >= 'a' && c <= 'z')

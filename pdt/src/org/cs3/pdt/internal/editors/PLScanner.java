@@ -42,7 +42,6 @@
 package org.cs3.pdt.internal.editors;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,6 @@ import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
-import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -67,12 +65,8 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IFileEditorInput;
-
-import com.sun.xml.internal.bind.v2.runtime.unmarshaller.XsiNilLoader.Array;
 
 public class PLScanner extends RuleBasedScanner {
 
@@ -84,11 +78,16 @@ public class PLScanner extends RuleBasedScanner {
 		IFile file;
 		
 		// TODO: Add treatment of error cases (missing else branches): 
+
+		assert(editor!=null);
+		
 		if (editor.getEditorInput() instanceof IFileEditorInput) {
 			editorInput = (IFileEditorInput) editor.getEditorInput();
 		}
-//		if (editorInput != null) {
+		assert (editorInput != null) ;
+//		{
 			file = editorInput.getFile();
+		assert (file != null) ;
 			project = file.getProject();
 //		}
 		if (project != null && project.exists() && project.hasNature(PDTCore.NATURE_ID)) {
