@@ -5,9 +5,11 @@ package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 
 public class PrologSearchLabelProvider implements ILabelProvider {
 	/**
@@ -26,14 +28,19 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof IFile) {
 			return ImageRepository.getImage(ImageRepository.FILE);
-		} else 	if (element instanceof PrologMatch) {
-			return ImageRepository.getImage(ImageRepository.MATCH);
+		} else if (element instanceof PrologMatch) {
+			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
+			return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
+		} else if(element instanceof ModuleSearchDummy){
+			//ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
+			//return sharedImagaes.getImage(ISharedImages.IMG_OBJ_FOLDER);
+			return ImageRepository.getImage(ImageRepository.PE_MODULE);
 		} else if(element instanceof PredicateElement){
 			PredicateElement pe = (PredicateElement) element;
-			if("this_pred_ref".equals(pe.getType())){
+			if("this_pred_ref".equals(pe.getModule())){
 				return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
 			}
-			if("unresolved_pred_ref".equals(pe.getType())){
+			if("unresolved_pred_ref".equals(pe.getModule())){
 				return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
 			}
 			return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
@@ -46,7 +53,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		if(element instanceof PredicateElement){
 			PredicateElement pe = ((PredicateElement)element);
 			String label = pe.getLabel();
-			String module = pe.getType();
+			String module = pe.getModule();
 			if (module == null || module.isEmpty())
 				module = "user";
 			String fullLabel = module + ":" + label;
@@ -60,7 +67,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		} else if (element instanceof ModuleSearchDummy) {
 			return ((ModuleSearchDummy)element).getLabel();
 		} else if(element instanceof PrologMatch) {
-			return Integer.toString(((PrologMatch)element).getLine());
+			return "Line: " +Integer.toString(((PrologMatch)element).getLine());
 		}
 		return "no label";
 	}

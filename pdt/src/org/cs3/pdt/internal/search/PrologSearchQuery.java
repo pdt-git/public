@@ -61,7 +61,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.search.ui.ISearchQuery;
@@ -72,6 +71,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	private GoalData goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
+	private CategoryHandler categoryHandler;
 
 	public PrologSearchQuery(PrologInterface pif, GoalData goal) {
 		this.goal = goal;
@@ -180,7 +180,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		PredicateElement pe = new PredicateElement(file, module, name, arity);
 		PrologMatch match = new PrologMatch(pe, line, 0); 
 		match.setLine(line);
-		match.setModule(pe.getType());
+		match.setModule(pe.getModule());
 		return match;
 	}
 
@@ -240,7 +240,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			PredicateElement pe = new PredicateElement(file, type, name, arity);
 			PrologMatch match = new PrologMatch(pe, start, (end-start)); 
 			match.setLine(start);
-			match.setModule(pe.getType());
+			match.setModule(pe.getModule());
 
 			result.addMatch(match);
 		}
@@ -267,4 +267,19 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		return result;
 	}
 
+	public boolean isCategorized(){
+		return categoryHandler != null;
+	}
+	
+	public CategoryHandler getCategoryHandler(){
+		return categoryHandler;
+	}
+	
+	public void addCategoryEntry(PrologMatch match, String categoryName){
+		if (categoryHandler == null) {
+			categoryHandler = new CategoryHandler();
+		}
+		categoryHandler.addMatchToCategory(match, categoryName);
+	}
+	
 }
