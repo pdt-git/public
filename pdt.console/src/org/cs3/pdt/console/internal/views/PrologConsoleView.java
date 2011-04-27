@@ -614,6 +614,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 		IToolBarManager toolBarManager = bars.getToolBarManager();
 
+		toolBarManager.add(createProcessAction);
+		
 		createCombo(toolBarManager);
 		addContributions(toolBarManager);
 	
@@ -709,7 +711,6 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private void addContributions(IContributionManager manager) {
 		IWorkbenchWindow window = getSite().getWorkbenchWindow();
-		manager.add(createProcessAction);
 		manager.add(new Separator("#System"));
 				
 		manager.add(new Separator("#ConsoleInternal"));
