@@ -60,16 +60,20 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
-			throws IOException {
-				String module = (String)m.get(MODULE_VAR);
-				String name = (String)m.get(FUNCTOR_VAR);
-				int arity = Integer.parseInt((String)m.get(ARITY_VAR));
-				
-				IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
-				int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
-				
-				PrologMatch match = createMatch(module, name, arity, file, line);
-				return match;
-			}
+	throws IOException {
+		String module = (String)m.get(MODULE_VAR);
+		String name = (String)m.get(FUNCTOR_VAR);
+		int arity = Integer.parseInt((String)m.get(ARITY_VAR));
+
+		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
+		int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
+
+		PrologMatch match = createMatch(module, name, arity, file, line);
+		return match;
+	}
+	
+	public boolean isCategorized(){
+		return false;
+	}
 	
 }
