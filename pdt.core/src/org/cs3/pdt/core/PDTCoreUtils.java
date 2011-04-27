@@ -264,6 +264,28 @@ public final class PDTCoreUtils {
 		}
 		return file;
 	}
+	
+	/**
+	 * Returns a file even if it is not part of the current Workspace.
+	 * 
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static IFile getFileForLocationIndependentOfWorkspace(String fileName)
+	throws IOException {
+		IFile file = null;
+		String path = Util.unquoteAtom(fileName);
+		try{
+			file = findFileForLocation(path);
+		}catch(IllegalArgumentException iae){
+		}
+		if(file==null|| !file.isAccessible()){
+			Path location = new Path(path);
+			file = new ExternalFile(location);
+		}
+		return file;
+	}
 
 	public static IPath normalize(IPath path) {
 		IPath testLocation = null;
