@@ -394,7 +394,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		
 		@Override
 		public ImageDescriptor getImageDescriptor() {
-			return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_ADD);
+			return ImageRepository.getImageDescriptor(ImageRepository.NEW_PROCESS);
 		}
 
 		@Override
