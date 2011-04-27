@@ -57,7 +57,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
-import org.cs3.pdt.internal.actions.ReferencesActionDelegate;
+import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.views.PrologOutline;
@@ -450,15 +450,14 @@ public class PLEditor extends TextEditor {
 		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
 				"Find (visible) definitions", SEP_INSPECT,
 				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
-
-		addAction(menuMgr, new SpyPointActionDelegate(this),
-				"Toggle Spy Point", SEP_INSPECT,
-				"org.eclipse.debug.ui.commands.ToggleBreakpoint");
-
-		addAction(menuMgr, new ReferencesActionDelegate(this),
+		
+		addAction(menuMgr, new FindReferencesActionDelegate(this),
 				"Find References", SEP_INSPECT,
 				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
 
+//		addAction(menuMgr, new SpyPointActionDelegate(this),
+//				"Toggle Spy Point", SEP_INSPECT,
+//				"org.eclipse.debug.ui.commands.ToggleBreakpoint");
 	}
 
 	/**
