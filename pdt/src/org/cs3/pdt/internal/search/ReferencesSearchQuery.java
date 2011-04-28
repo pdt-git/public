@@ -18,11 +18,11 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 	private static final String MODULE_VAR = "RefModule";
 	private static final String FILE_VAR = "File";
 	
-
 	public ReferencesSearchQuery(PrologInterface pif, GoalData goal) {
 		super(pif, goal);
 	}
-	
+
+	@Override
 	protected String buildSearchQuery(String module, String enclFile, GoalData goal) {
 		String query = "get_references('"+enclFile+"','" + goal.getName()+"'/" + goal.getArity()+ "," + module  + "," +
 						FILE_VAR + "," +
@@ -31,30 +31,6 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 						FUNCTOR_VAR + "," +
 						ARITY_VAR + ")";
 		return query;
-	}
-
-
-	protected List<Map<String, Object>> getResultForQuery(PrologSession session,
-			String module, String query, GoalData goal) throws PrologInterfaceException {
-		Debug.info(query);
-		
-		List<Map<String, Object>> clauses = session.queryAll(query);
-		
-		if(clauses.size()==0){ 
-			// a user module predicate (e.g. clause_property/2) is not-yet used in a module:
-			query = "get_references(_,'" + goal.getName()+"'/" + goal.getArity()+ "," + module  + "," +
-						FILE_VAR + "," +
-						LINE_VAR + "," +
-						MODULE_VAR + "," +
-						FUNCTOR_VAR + "," +
-						ARITY_VAR + ")";
-			Debug.info("Look up predicate in user module: "+query); 
-			clauses = session.queryAll(query);
-		} 
-		if(clauses.size()>0 && goal.getModule()==null){
-			goal.setModule((String)clauses.get(0).get("Module"));
-		}
-		return clauses;
 	}
 
 	@Override

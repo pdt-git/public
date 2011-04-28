@@ -69,7 +69,7 @@ import org.eclipse.search.ui.ISearchResult;
 
 public abstract class PrologSearchQuery implements ISearchQuery {
 
-	private GoalData goal;
+	protected GoalData goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
 
@@ -136,16 +136,38 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	 */
 	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
 			throws PrologException, PrologInterfaceException {
-		String module = "Module";
-		if(goal.getModule()!=null)
-			module ="'"+ goal.getModule()+ "'";
-		
+
 		String enclFile = UIUtils.getFileFromActiveEditor();
 
+		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
+			
+		String module = setModuleQualifier(enclFile, session);
+
 		String query = buildSearchQuery(module, enclFile, goal);
-		List<Map<String, Object>> clauses = getResultForQuery(session, module,
-				query, goal);
+		List<Map<String, Object>> clauses = getResultForQuery(session, module, query, goal);
 		return clauses;
+	}
+
+	/** 
+	 * Get the explicit module qualifier from the goal or 
+	 * determine the implicit one for the enclosing file.
+	 * 
+	 * @param enclFile File for which to determine its module.
+	 * @param session
+	 * @throws PrologInterfaceException
+	 */
+	// TODO: Move this to the place where goals are created. 
+	private String setModuleQualifier(String enclFile, PrologSession session)
+			throws PrologInterfaceException {
+		String module;
+		if(goal.getModule()!=null) {
+			module ="'"+ goal.getModule()+ "'"; 
+		} else {
+			String query = "module_of_file('" + enclFile + "',Module)";
+			module = (String) session.queryOnce(query).get("Module");
+			goal.setModule(module);
+		}
+		return module;
 	}
 	
 	abstract protected String buildSearchQuery(String module, String enclFile, GoalData goal);
@@ -155,8 +177,8 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 				Debug.info(query);
 				
 				List<Map<String, Object>> clauses = session.queryAll(query);
-				return clauses;
-			}
+        return clauses;
+	}
 
 	/**
 	 * @param clauses
