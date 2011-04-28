@@ -119,14 +119,17 @@ pdt_reload(File):-
 %  @param PredSignature PredName/Arity
 %  @author TRHO
 %
-get_references(DefFile, DefName/DefArity,DefModule, RefFile,Line,RefModule,RefName,RefArity):-
-    functor(Pred,DefName,DefArity),
-	module_of_file(DefFile,DefModule),  % Restrict scope of search
+get_references(EnclFile, Name/Arity,Module, RefFile,Line,RefModule,RefName,RefArity):-
+    (  atom(Module)
+    -> true                              % Explicit module qualification
+    ;  module_of_file(EnclFile,Module)   % Implicit module qualification
+    ),
+    functor(Pred,Name,Arity),            % Predicate to be searched 
     % INTERNAL, works for swi 5.11.X
-    prolog_explain:explain_predicate(DefModule:Pred,Explanation), 
+    prolog_explain:explain_predicate(Module:Pred,Explanation), 
 %    writeln(Explanation),
     decode_reference(Explanation,Nth, RefModule,RefName, RefArity),
-    number(Arity),
+    number(RefArity),
     start_of_nth_clause(RefModule,RefName,RefArity,Nth,RefFile,Line).
 %   <-- Extracted predicate for:
 %    nth_clause(RefModule:Head,Nth,Ref),
@@ -205,7 +208,10 @@ find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line,Name,Arity) :-
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
 find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line):-
-    module_of_file(EnclFile,Module),
+    (  atom(Module)
+    -> true                              % Explicit module qualification
+    ;  module_of_file(EnclFile,Module)   % Implicit module qualification
+    ),
     start_of_nth_clause(Module,Name,Arity,_Nth,File,Line).
 
 %% find_definition_invisible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
