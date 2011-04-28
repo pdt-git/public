@@ -143,7 +143,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 			FileEditorInput fi = (FileEditorInput) ei;
 			return result.getMatches(fi.getFile());
 		}
-		return EMPTY_ARR;
+		else return EMPTY_ARR;
 	}
 
 	/*
