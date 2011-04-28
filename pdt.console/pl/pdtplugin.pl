@@ -47,9 +47,12 @@
     find_pred/8,
     find_declaration/6,
     get_references/8,
-    find_definition_visible_in/8,
+    find_definition_visible_in/8,   % eigentlich unnötig...
+    find_definition_visible_in/6,   % (EnclFile,Name,Arity,Module,File,Line)
+    find_definition_invisible_in/6, % (EnclFile,Name,Arity,Module,File,Line)
+    find_any_definition/5,          % (         Name,Arity,Module,File,Line),
     get_pred/7,
-    pdt_reload/1,
+    pdt_reload/1,  
     activate_warning_and_error_tracing/0,
     deactivate_warning_and_error_tracing/0,
     predicates_with_property/3,
@@ -69,7 +72,7 @@
 
 :- use_module(org_cs3_lp_utils(utils4modules),
              [ module_of_file/2      % (EnclFile,Module)
-             , start_of_nth_clause/5 % (Module,Head,Nth,File,Line)
+             , start_of_nth_clause/6 % (Module,Name,Arity, Nth,File,Line)
              ]
              ).
              
@@ -86,8 +89,8 @@ find_declaration(EnclFile,Name,Arity,Module,File,Line):-
 
 % TO BE INLINED into call site in
 % pdt/src/org/cs3/pdt/internal/actions/PrologOutlineInformationControl.java
-get_pred(File, Name,Arity,Line,_dyn,_mul,Exported) :-
-    find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported).
+get_pred(File, Name,Arity,Line,Dynamic,Multifile,Exported) :-
+    find_definition_contained_in(File,Name,Arity,Line,Dynamic,Multifile,Exported).
 
 % TODO: Move the definition of has_property/3 to the "share" project. 
 % It is currently defined in JT making the PDT dependent on JT!!! 
@@ -116,18 +119,17 @@ pdt_reload(File):-
 %  @param PredSignature PredName/Arity
 %  @author TRHO
 %
-get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name,Arity):-
-    functor(Pred,PredName,PredArity),
-	module_of_file(EnclFile,Module),
+get_references(DefFile, DefName/DefArity,DefModule, RefFile,Line,RefModule,RefName,RefArity):-
+    functor(Pred,DefName,DefArity),
+	module_of_file(DefFile,DefModule),  % Restrict scope of search
     % INTERNAL, works for swi 5.11.X
-    prolog_explain:explain_predicate(Module:Pred,Explanation), 
+    prolog_explain:explain_predicate(DefModule:Pred,Explanation), 
 %    writeln(Explanation),
-    decode_reference(Explanation,Nth, RefModule,Name, Arity),
+    decode_reference(Explanation,Nth, RefModule,RefName, RefArity),
     number(Arity),
-    functor(Head,Name,Arity),
-    start_of_nth_clause(RefModule,Head,Nth,FileName,Line).
+    start_of_nth_clause(RefModule,RefName,RefArity,Nth,RefFile,Line).
 %   <-- Extracted predicate for:
-%    nth_clause(RefModule:EnclClause,Nth,Ref),
+%    nth_clause(RefModule:Head,Nth,Ref),
 %    clause_property(Ref,file(FileName)),
 %    clause_property(Ref,line_count(Line)).
 
@@ -204,8 +206,7 @@ find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line,Name,Arity) :-
 
 find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line):-
     module_of_file(EnclFile,Module),
-	functor(Head,Name,Arity),
-    start_of_nth_clause(Module,Head,_Nth,File,Line).
+    start_of_nth_clause(Module,Name,Arity,_Nth,File,Line).
 
 %% find_definition_invisible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
 %
@@ -221,7 +222,7 @@ find_definition_invisible_in(EnclFile,Name,Arity,Module,File,Line):-
                         Name,Arity,Module,File,Line).
 
 
-%% find_any_definition(+Name,+Arity,?Module,-SrcFile,-Line)
+%% find_any_definition(?Name,?Arity,?Module,?SrcFile,?Line) is nondet
 %
 % Find starting line of any clause of the predicate Name/Arity.  
 % This includes clauses from different, unrelated modules and
@@ -231,10 +232,8 @@ find_definition_invisible_in(EnclFile,Name,Arity,Module,File,Line):-
 % pdt/src/org/cs3/pdt/internal/actions/...ActionDelegate.java
 % 
 find_any_definition(Name,Arity,Module,File,Line):-
-    % TODO: Input mode checking and exception if violated.
-    functor(Head,Name,Arity),
-    defined_in_module(Module,Head),
-    start_of_nth_clause(Module,Head,_Nth,File,Line).
+    defined_in_module(Module,Name,Arity),
+    start_of_nth_clause(Module,Name,Arity,_Nth,File,Line).
 
    
 %% find_definition_contained_in(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
@@ -258,7 +257,7 @@ find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported) :-
     has_property(_module_pred,exported,Exported),
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    start_of_nth_clause(Module,Head,_,File,Line).
+    start_of_nth_clause(Module,Name,Arity,_Nth,File,Line).
 
 
 
@@ -364,7 +363,8 @@ predicate_manual_entry(_Module,Pred,Arity,Content) :-
 predicate_manual_entry(Module, Pred,Arity,Content) :-
     %pldoc:doc_comment(Module:Pred/Arity,_File:_,_Summary,Content),
     %TODO: The html code is now available:
-	pldoc:doc_comment(Module:Pred/Arity,File:_,_,_Content),
+	pldoc:bla,
+	doc_comment(Module:Pred/Arity,File:_,_,_Content),
 	gen_html_for_pred_(File,Pred/Arity,Content),
     !.
 	
