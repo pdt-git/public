@@ -41,7 +41,7 @@ public class PredicateElement {
 		return file;
 	}
 
-	public String getType() {
+	public String getModule() {
 		return type;
 	}
 

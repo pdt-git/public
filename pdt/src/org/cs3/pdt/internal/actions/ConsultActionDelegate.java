@@ -221,7 +221,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			IPreferenceStore store = plugin.getPreferenceStore();
 			if (MessageDialogWithToggle.PROMPT.equals(pref)) {
 				MessageDialogWithToggle toggle = MessageDialogWithToggle
-						.openYesNoCancelQuestion(window.getShell(), dialogTitle,
+						.openYesNoCancelQuestion(window == null ? null : window.getShell(), dialogTitle,
 								dialogMessage, toggleMessage, toggleState,
 								store, key);
 				if(toggle.getReturnCode()==IDialogConstants.CANCEL_ID){
