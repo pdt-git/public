@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.prolog.PrologInterface;
@@ -35,16 +36,20 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
-			throws IOException {
-				String module = (String)m.get(MODULE_VAR);
-				String name = (String)m.get(FUNCTOR_VAR);
-				int arity = Integer.parseInt((String)m.get(ARITY_VAR));
-				
-				IFile file = getFileForString((String)m.get(FILE_VAR));
-				int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
-				
-				PrologMatch match = createMatch(module, name, arity, file, line);
-				return match;
-			}
+	throws IOException {
+		String module = (String)m.get(MODULE_VAR);
+		String name = (String)m.get(FUNCTOR_VAR);
+		int arity = Integer.parseInt((String)m.get(ARITY_VAR));
+
+		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
+		int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
+
+		PrologMatch match = createMatch(module, name, arity, file, line);
+		return match;
+	}
+	
+	public boolean isCategorized(){
+		return false;
+	}
 	
 }

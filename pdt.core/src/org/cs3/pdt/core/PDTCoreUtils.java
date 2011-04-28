@@ -44,6 +44,8 @@ package org.cs3.pdt.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -264,6 +266,28 @@ public final class PDTCoreUtils {
 		}
 		return file;
 	}
+	
+	/**
+	 * Returns a file even if it is not part of the current Workspace.
+	 * 
+	 * @param fileName
+	 * @return
+	 * @throws IOException
+	 */
+	public static IFile getFileForLocationIndependentOfWorkspace(String fileName)
+	throws IOException {
+		IFile file = null;
+		String path = Util.unquoteAtom(fileName);
+		try{
+			file = findFileForLocation(path);
+		}catch(IllegalArgumentException iae){
+		}
+		if(file==null|| !file.isAccessible()){
+			Path location = new Path(path);
+			file = new ExternalFile(location);
+		}
+		return file;
+	}
 
 	public static IPath normalize(IPath path) {
 		IPath testLocation = null;
@@ -275,5 +299,17 @@ public final class PDTCoreUtils {
 			throw new RuntimeException(e1);
 		}
 		return testLocation;
+	}
+	
+	public static IFile[] sortFileSet(IFile[] sortedFiles) {
+		Arrays.sort(sortedFiles,
+				new Comparator<IFile>() {
+					@Override
+					public int compare(IFile first, IFile second) {
+						return first.getFullPath().toPortableString().compareTo(second.getFullPath().toPortableString());
+					}
+				}
+		);		
+		return sortedFiles;
 	}
 }

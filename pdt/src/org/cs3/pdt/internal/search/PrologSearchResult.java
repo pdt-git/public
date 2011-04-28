@@ -45,12 +45,13 @@
  */
 package org.cs3.pdt.internal.search;
 
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Vector;
 
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -176,9 +177,24 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		}
 		return null;
 	}
-
 	
-	public Object[] getElements(IFile file) {
+	public ModuleSearchDummy[] getModules(){
+		Object[] elements = getElements();
+		List<PrologMatch> matches = new ArrayList<PrologMatch>();
+		for (int i=0; i< elements.length; i++) {
+			if (elements[i] instanceof PredicateElement){
+				PredicateElement elem = (PredicateElement)elements[i];
+				Match[] matchesForElem = getMatches(elem);
+				for (int j =0; j< matchesForElem.length; j++) {
+					if (matchesForElem[j] instanceof PrologMatch)
+						matches.add((PrologMatch)matchesForElem[j]);
+				}
+			}
+		}
+		return ModuleDummyCreator.getModuleDummiesForMatches(matches);
+	}
+
+	public PredicateElement[] getElements(IFile file) {
 		PredicateElement[] children = elementCache.get(file);
 		if(children==null){
 			Object[] elms = getElements();
@@ -194,7 +210,22 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		}
 		return children;
 	}
+	
+	public SearchResultCategory[] getCategories() {
+		if (query.getCategoryHandler() == null) {
+			return new SearchResultCategory[0];
+		}
+		return query.getCategoryHandler().getCategories();
+	}
 
+	public Object[] getChildren() {
+		if (query.isCategorized())
+			return getCategories();
+		else
+			return getModules();
+	}
+	
+	
 	@Override
 	public void addMatch(Match match) {
 		PredicateElement elm = (PredicateElement) match.getElement();
@@ -203,17 +234,10 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	}
 	
 	public IFile[] getFiles() {
-		IFile[] sortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
-		Arrays.sort(sortedFiles,
-				new Comparator<IFile>() {
-					@Override
-					public int compare(IFile first, IFile second) {
-						return first.getFullPath().toPortableString().compareTo(second.getFullPath().toPortableString());
-					}
-				}
-		);		
-		return sortedFiles;
+		IFile[] unsortedFiles = fileCache.toArray(new IFile[fileCache.size()]);
+		return PDTCoreUtils.sortFileSet(unsortedFiles);
 	}
+
 	
 	@Override
 	public void removeAll() {	

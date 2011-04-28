@@ -11,6 +11,8 @@
 
 package org.cs3.pdt.internal.search;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.search.ui.text.Match;
@@ -22,12 +24,17 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 	}
 
 	@Override
+	protected synchronized void initialize(PrologSearchResult result) {
+		super.initialize(result);
+	}
+
+	@Override
 	public Object getParent(Object child) {
 		if(child==null||getSearchResult()==null){
 			return null;
 		}
 		if(child instanceof IFile){
-			return getSearchResult();
+			return getSearchResult();			//TODO: fix this
 		}
 		if(child instanceof PredicateElement ){
 			return getSearchResult().getFile(child);
@@ -35,8 +42,9 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if(child instanceof Match){
 			Match match = (Match) child;
 			return match.getElement();
+		} if (child instanceof SearchResultCategory) {
+			return getSearchResult();
 		}
-		
 		return null;
 	}
 
@@ -48,26 +56,26 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 	}
 
 	@Override
-	protected synchronized void initialize(PrologSearchResult result) {
-		
-		super.initialize(result);
-		
-	}
-
-	@Override
 	public Object[] getChildren(Object parentElement) {
-		if(parentElement==null||getSearchResult()==null){
+		if (parentElement==null||getSearchResult()==null){
 			return null;
 		}
-		if(parentElement instanceof PrologSearchResult){
-			return getSearchResult().getFiles();
+		if (parentElement instanceof PrologSearchResult){
+			return getSearchResult().getChildren();
 		}
-		if(parentElement instanceof IFile){
+		if (parentElement instanceof SearchResultCategory){
+			List<PrologMatch> matches = ((SearchResultCategory) parentElement).getMatches();
+			return ModuleDummyCreator.getModuleDummiesForMatches(matches);
+		}
+		if (parentElement instanceof ModuleSearchDummy) {
+			return ((ModuleSearchDummy) parentElement).getFiles();
+		}
+		if (parentElement instanceof IFile){
 			return getSearchResult().getElements((IFile) parentElement);
 		}
-		/*if(parentElement instanceof PredicateElement){
+		if (parentElement instanceof PredicateElement){
 			return getSearchResult().getMatches(parentElement);	
-		}*/
+		}
 		return null;
 	}
 
@@ -76,7 +84,11 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if(element==null||getSearchResult()==null){
 			return false;
 		}
-		return element instanceof IFile || element instanceof PrologSearchResult;
+		return element instanceof IFile || 
+				element instanceof PrologSearchResult || 
+				element instanceof PredicateElement ||
+				element instanceof SearchResultCategory ||
+				element instanceof ModuleSearchDummy;
 	}
 
 	@Override
