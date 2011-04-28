@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.search;
 
-
 import java.io.IOException;
 import java.util.Map;
 
@@ -29,13 +28,16 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 		return query;
 	}
 
+
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 			throws IOException {
-				String module = (String)m.get(MODULE_VAR);
-				String name = (String)m.get(FUNCTOR_VAR);
-				int arity = Integer.parseInt((String)m.get(ARITY_VAR));
-				
+				String module = //(String)m.get(MODULE_VAR);
+					            goal.getModule();
+				String name =  // (String)m.get(FUNCTOR_VAR);
+					           goal.getName();
+				int arity =   // Integer.parseInt((String)m.get(ARITY_VAR));
+				              goal.getArity();
 				IFile file = getFileForString((String)m.get(FILE_VAR));
 				int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
 				
