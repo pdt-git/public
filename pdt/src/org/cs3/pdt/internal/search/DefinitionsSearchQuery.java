@@ -14,20 +14,20 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 	private static final String ARITY_VAR = "Arity";
 	private static final String FUNCTOR_VAR = "Name";
 	private static final String FILE_VAR = "File";
-	private String module;
+
 
 	public DefinitionsSearchQuery(PrologInterface pif, GoalData goal) {
 		super(pif, goal);
 	}
 	
 	@Override
-	protected String buildSearchQuery(String module, String enclFile, GoalData goal) {
-		this.module = module;
-		String query = "find_definition_visible_in('"+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module  + "," +
+	protected String buildSearchQuery(GoalData goal, String module) {
+
+		String query = "find_definition_visible_in('" 
+//			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +goal.getModule()+ "'," +
+			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ", " +module          + " ," +
 						FILE_VAR + "," + 
-						LINE_VAR + "," +
-						FUNCTOR_VAR + "," +
-						ARITY_VAR + ")";
+						LINE_VAR + ")";
 		return query;
 	}
 
@@ -35,32 +35,17 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 			throws IOException {
-/*
-				String module = //(String)m.get(MODULE_VAR);
-					            goal.getModule();
-				String name =  // (String)m.get(FUNCTOR_VAR);
-					           goal.getName();
-				int arity =   // Integer.parseInt((String)m.get(ARITY_VAR));
-				              goal.getArity();
-				IFile file = getFileForString((String)m.get(FILE_VAR));
-				int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
+
+		        GoalData goal = getGoal();
+		        
+				String module = goal.getModule();
+				String name =  goal.getName();
+				int arity =   goal.getArity();
+				IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
+				int line = Integer.parseInt((String) m.get(LINE_VAR));
 				
 				PrologMatch match = createMatch(module, name, arity, file, line);
 				return match;
-			}
-*/
-		String resultModule = module;
-		if (Util.isVariable(module))
-			resultModule = (String)m.get(module);
-
-		String name = (String)m.get(FUNCTOR_VAR);
-		int arity = Integer.parseInt((String)m.get(ARITY_VAR));
-
-		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
-		int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
-
-		PrologMatch match = createMatch(resultModule, name, arity, file, line);
-		return match;
 	}
 
 	public boolean isCategorized(){

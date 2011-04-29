@@ -97,10 +97,10 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	@Override
 	public void run() {
 		try {
-			final Goal data = ((PLEditor) editor)
+			final GoalData goal = ((PLEditor) editor)
 					.getSelectedPrologElement();
 			Shell shell = editor.getEditorSite().getShell();
-			if (data == null) {
+			if (goal == null) {
 				
 				UIUtils.displayMessageDialog(shell,
 						"PDT Plugin",
@@ -121,7 +121,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 								IProgressMonitor.UNKNOWN);
 						
 						
-							run_impl(data,file);
+							run_impl(goal,file);
 						
 
 					} catch (Throwable e) {
@@ -147,7 +147,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 	
 	
-	private void run_impl(Goal goal, IFile file) throws CoreException {
+	private void run_impl(GoalData goal, IFile file) throws CoreException {
 		IPrologProject plprj=null;
 		if(file!=null){ // external file
 			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
@@ -157,23 +157,39 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 				PrologSession session =null;
 				try {
 					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
+
+					// TODO: Schon im goal definiert. Müsste nur noch dort gesetzt werden:
+					String enclFile = UIUtils.getFileFromActiveEditor();
+					// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
+						
+					// Folgendes liefert bei Prolog-Libraries die falschen Ergebnisse,
+					// obwohl das aufgerufene Prädikat das Richtige tut, wenn es direkt
+					// in einem Prolog-Prozess aufgerufen wird:
+//					if(goal.getModule()==null) {
+//						String query = "module_of_file('" + enclFile + "',Module)";
+//						String referencedModule = (String) session.queryOnce(query).get("Module");
+//						goal.setModule(referencedModule);
+//					}
+                    // In der Klasse DefinitionsSearchQuery funktioniert es aber! 
+					
 					String module = "_";
 					if(goal.getModule()!=null)
 						module ="'"+ goal.getModule()+ "'";
-					String enclFile = UIUtils.getFileFromActiveEditor();
 					
-					String query = "find_declaration('"+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module  + ",File,Line)";
+					String query = "find_primary_definition_visible_in('"
+						+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module + ",File,Line)";
 					Debug.info("open declaration: " + query);
-					List<Map<String, Object>> clauses = session.queryAll(query);
-					if(clauses.size()>0) {
-						Map<String, Object> clause = clauses.get(0);
+//					List<Map<String, Object>> clauses = session.queryAll(query);
+//					if(clauses.size()>0) {
+//						Map<String, Object> clause = clauses.get(0);
+					    Map<String, Object> clause =  session.queryOnce(query);
 						SourceLocation location = new SourceLocation((String)clause.get("File"), false);
 						location.setLine(Integer.parseInt((String)clause.get("Line"))-1);
 					//	System.out.println(location.offset);
 						
 						PDTUtils.showSourceLocation(location);
 						return;
-					}
+//					}
 				}catch(Exception e) {
 					Debug.report(e);
 				} finally {
