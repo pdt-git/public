@@ -24,8 +24,9 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 	}
 
 	@Override
-	protected String buildSearchQuery(String module, String enclFile, GoalData goal) {
-		String query = "get_references('"+enclFile+"','" + goal.getName()+"'/" + goal.getArity()+ "," + module  + "," +
+	protected String buildSearchQuery(GoalData goal, String module) {
+	 // String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ",'" + goal.getModule() + "'," +
+		String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ", " + module           + " ," +
 						FILE_VAR + "," +
 						LINE_VAR + "," +
 						MODULE_VAR + "," +
@@ -34,6 +35,22 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 		return query;
 	}
 
+
+
+//	protected List<Map<String, Object>> getResultForQuery(PrologSession session,
+//			String module, String query, GoalData goal) throws PrologInterfaceException {
+//		Debug.info(query);
+//		
+//		List<Map<String, Object>> clauses = session.queryAll(query);
+//		
+//		if(clauses.size()>0 && goal.getModule()==null){
+//			goal.setModule((String)clauses.get(0).get("Module"));
+//		}
+//		return clauses;
+//	}
+
+	
+	
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
@@ -42,7 +59,7 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 		int arity = Integer.parseInt((String)m.get(ARITY_VAR));
 
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
-		int line = Integer.parseInt((String) m.get(LINE_VAR))-1;
+		int line = Integer.parseInt((String) m.get(LINE_VAR));
 
 		PrologMatch match = createMatch(module, name, arity, file, line);
 		return match;

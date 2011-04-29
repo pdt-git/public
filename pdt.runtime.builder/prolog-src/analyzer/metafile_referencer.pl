@@ -77,8 +77,7 @@ file_references_for_call(Module, Term, FileSet):-
     functor(Term,Name,Arity),
     findall( ContextFile,							
     		 (	defined_in_module(Module,Name,Arity),
-    		    defined_in_file(Module,Name,Arity,Locations),
-    		    member(File-_Lines,Locations),
+    		    defined_in_file(Module,Name,Arity,_Nth,File,_Line),
     		 	ContextFile = (Module,File)
     		 ),
     		 Files

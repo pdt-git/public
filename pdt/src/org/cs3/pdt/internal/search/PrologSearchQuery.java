@@ -68,7 +68,7 @@ import org.eclipse.search.ui.ISearchResult;
 
 public abstract class PrologSearchQuery implements ISearchQuery {
 
-	protected GoalData goal;
+	private GoalData goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
 	private CategoryHandler categoryHandler;
@@ -137,46 +137,58 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
 			throws PrologException, PrologInterfaceException {
 
-		String enclFile = UIUtils.getFileFromActiveEditor();
+		// Folgendes liefert bei Prolog-Libraries die falschen Ergebnisse,
+		// obwohl das aufgerufene Prädikat das Richtige tut, wenn es direkt
+		// in einem Prolog-Prozess aufgerufen wird:
+        //
+		// setModule(session);
+		
+		// Umgehung des obigen Problems: Wenn keine Explizite  
+		// Modulqualifikatioin im Code, Modul als Variable setzen:
+		
+		String module = "Module";               // Modul ist freie Variable
+		if(goal.getModule()!=null)
+			module ="'"+ goal.getModule()+ "'"; // Modul ist explizit gesetzt
 
-		// TODO: if (enclFile==null) ... Fehlermeldung + Abbruch ...
-			
-		String module = setModuleQualifier(enclFile, session);
-
-		String query = buildSearchQuery(module, enclFile, goal);
-		List<Map<String, Object>> clauses = getResultForQuery(session, module, query, goal);
+		String query = buildSearchQuery(goal, module);
+		List<Map<String, Object>> clauses = getResultForQuery(session, query);
+		
+		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
+		// Seltsamerweise liefert obiges Goal immer das richtige Modul, obwohl es 
+		// auch nur das gleiche Prädikat aufruft wie setModule(session):
+		if(clauses.size()>0 && goal.getModule()==null){
+			goal.setModule((String)clauses.get(0).get("Module"));
+		}
 		return clauses;
 	}
 
 	/** 
-	 * Get the explicit module qualifier from the goal or 
-	 * determine the implicit one for the enclosing file.
+	 * Determine the implicit implicit module qualifier for the goal
+	 * from the enclosing file of the goal. Set the module value of the
+	 * goal accordingly. 
 	 * 
-	 * @param enclFile File for which to determine its module.
-	 * @param session
+	 * @param session  Prolog session to query
 	 * @throws PrologInterfaceException
 	 */
-	// TODO: Move this to the place where goals are created. 
-	private String setModuleQualifier(String enclFile, PrologSession session)
+	// TODO: Fix this (see comments at commented out call site in 
+	// findReferencedClauses) and then move it to the constructor of 
+	// GoalData instances:
+	private void setModule(PrologSession session)
 			throws PrologInterfaceException {
-		String module;
-		if(goal.getModule()!=null) {
-			module ="'"+ goal.getModule()+ "'"; 
-		} else {
-			String query = "module_of_file('" + enclFile + "',Module)";
-			module = (String) session.queryOnce(query).get("Module");
+		if(goal.getModule()==null) {
+			String query = "module_of_file('" + goal.getFile() + "',Module)";
+			String module = (String) session.queryOnce(query).get("Module");
 			goal.setModule(module);
 		}
-		return module;
 	}
 	
-	abstract protected String buildSearchQuery(String module, String enclFile, GoalData goal);
+	abstract protected String buildSearchQuery(GoalData goal, String module);
 
-	protected List<Map<String, Object>> getResultForQuery(PrologSession session, String module, String query,
-			GoalData goal) throws PrologInterfaceException {
-				Debug.info(query);
+	protected List<Map<String, Object>> getResultForQuery(PrologSession session, String query) 
+			throws PrologInterfaceException {
+		Debug.info(query);
 				
-				List<Map<String, Object>> clauses = session.queryAll(query);
+		List<Map<String, Object>> clauses = session.queryAll(query);
         return clauses;
 	}
 
@@ -302,6 +314,14 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			categoryHandler = new CategoryHandler();
 		}
 		categoryHandler.addMatchToCategory(match, categoryName);
+	}
+
+	protected void setGoal(GoalData goal) {
+		this.goal = goal;
+	}
+
+	protected GoalData getGoal() {
+		return goal;
 	}
 	
 }
