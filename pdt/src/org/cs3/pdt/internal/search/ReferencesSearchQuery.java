@@ -1,15 +1,12 @@
 package org.cs3.pdt.internal.search;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.prolog.PrologInterface;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 
 public class ReferencesSearchQuery extends PrologSearchQuery {
@@ -21,9 +18,11 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 	
 	public ReferencesSearchQuery(PrologInterface pif, GoalData goal) {
 		super(pif, goal);
+		setSearchType("References to");
 	}
 
 	@Override
+	// find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefHead,RefFile,RefLine,Nth,Kind)
 	protected String buildSearchQuery(GoalData goal, String module) {
 	 // String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ",'" + goal.getModule() + "'," +
 		String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ", " + module           + " ," +
@@ -35,21 +34,6 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 		return query;
 	}
 
-
-
-//	protected List<Map<String, Object>> getResultForQuery(PrologSession session,
-//			String module, String query, GoalData goal) throws PrologInterfaceException {
-//		Debug.info(query);
-//		
-//		List<Map<String, Object>> clauses = session.queryAll(query);
-//		
-//		if(clauses.size()>0 && goal.getModule()==null){
-//			goal.setModule((String)clauses.get(0).get("Module"));
-//		}
-//		return clauses;
-//	}
-
-	
 	
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)

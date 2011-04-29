@@ -97,9 +97,17 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		return this;
 	}
 
+	private String searchType = "Prolog Search";
 	@Override
-	public String getLabel() {		
-		return "Prolog Search: " + (goal==null ? "oops, goal is null?!" :goal.getModule()+":"+goal.getName()+"/"+goal.getArity());
+	public final String getLabel() {		
+		return searchType + ": " 
+		       + (goal==null ? "oops, goal is null?!" :goal.getModule()+":"+goal.getName()+"/"+goal.getArity())
+		       + " --> " 
+		       + getMatchCount() 
+		       + " matches in active Prolog Console";
+	}
+	public void setSearchType(String s) {
+		searchType=s;
 	}
 
 	@Override

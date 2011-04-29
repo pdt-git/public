@@ -18,6 +18,7 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 
 	public DefinitionsSearchQuery(PrologInterface pif, GoalData goal) {
 		super(pif, goal);
+		setSearchType("Definitions of");
 	}
 	
 	@Override

@@ -18,6 +18,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 	public CategorizedDefinitionsSearchQuery(PrologInterface pif, GoalData goal) {
 		super(pif, goal);
+		setSearchType("Definitions of");
 	}
 	
 	@Override

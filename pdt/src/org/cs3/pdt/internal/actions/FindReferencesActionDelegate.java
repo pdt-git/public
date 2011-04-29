@@ -46,6 +46,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.internal.search.ReferencesSearchQuery;
+import org.cs3.pdt.internal.search.ReferencesSearchQueryDirect;
 import org.cs3.pl.metadata.GoalData;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -62,7 +63,9 @@ public class FindReferencesActionDelegate extends SearchActionDelegate {
 
 	protected ISearchQuery connectSearchQuery(IPrologProject plProject,
 			GoalData data) {
-		ISearchQuery query = new ReferencesSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
+		ISearchQuery query = 
+			// new ReferencesSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
+			new ReferencesSearchQueryDirect(plProject==null?null:plProject.getMetadataPrologInterface(),data);
 		return query;
 	}
 }
