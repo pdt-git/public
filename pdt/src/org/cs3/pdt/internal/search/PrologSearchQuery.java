@@ -78,7 +78,12 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		this.pif=pif;
 		result = new PrologSearchResult(this, goal);
 	}
-
+    
+	// Adapt the text in the header of the search result view:
+	protected void setSearchType(String s)  {
+		result.setSearchType(s);
+	}
+	
 	@Override
 	public IStatus run(IProgressMonitor monitor) {
 		try {
@@ -137,15 +142,6 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	private List<Map<String, Object>> findReferencedClauses(PrologSession session)
 			throws PrologException, PrologInterfaceException {
 
-		// Folgendes liefert bei Prolog-Libraries die falschen Ergebnisse,
-		// obwohl das aufgerufene Prädikat das Richtige tut, wenn es direkt
-		// in einem Prolog-Prozess aufgerufen wird:
-        //
-		// setModule(session);
-		
-		// Umgehung des obigen Problems: Wenn keine Explizite  
-		// Modulqualifikatioin im Code, Modul als Variable setzen:
-		
 		String module = "Module";               // Modul ist freie Variable
 		if(goal.getModule()!=null)
 			module ="'"+ goal.getModule()+ "'"; // Modul ist explizit gesetzt
@@ -154,8 +150,6 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		List<Map<String, Object>> clauses = getResultForQuery(session, query);
 		
 		// Bindung der Modulvariablen aus vorheriger Query abfragen und im Goal setzen.
-		// Seltsamerweise liefert obiges Goal immer das richtige Modul, obwohl es 
-		// auch nur das gleiche Prädikat aufruft wie setModule(session):
 		if(clauses.size()>0 && goal.getModule()==null){
 			goal.setModule((String)clauses.get(0).get("Module"));
 		}
@@ -170,9 +164,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	 * @param session  Prolog session to query
 	 * @throws PrologInterfaceException
 	 */
-	// TODO: Fix this (see comments at commented out call site in 
-	// findReferencedClauses) and then move it to the constructor of 
-	// GoalData instances:
+	// TODO: Fix it an Move it to the constructor of GoalData instances:
 	private void setModule(PrologSession session)
 			throws PrologInterfaceException {
 		if(goal.getModule()==null) {

@@ -218,8 +218,12 @@ find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModul
     -> true                            % Explicit module reference
     ;  ReferencedModule = FileModule   % Implicit module reference
     ),
-    defined_in_module(ReferencedModule,Name,Arity,DefiningModule),
-    defined_in_files(DefiningModule,Name,Arity,Locations).
+    (  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
+    -> defined_in_files(DefiningModule,Name,Arity,Locations)
+    ;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+         defined_in_files(DeclaringModule,Name,Arity,Locations)
+       )
+    ).
 
 %% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
 %
