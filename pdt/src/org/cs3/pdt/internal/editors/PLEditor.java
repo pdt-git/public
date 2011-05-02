@@ -58,7 +58,6 @@ import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
-import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -417,9 +416,9 @@ public class PLEditor extends TextEditor {
 				assistant.showContextInformation();
 			}
 		};
-		addAction(menuMgr, action, "Show Tooltip",
+/*		addAction(menuMgr, action, "Show Tooltip",
 				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SHOW_TOOLTIP);
-
+*/		//TODO: reconnect this - but at the moment it was not connected to anything
 		ToggleCommentAction tca = new ToggleCommentAction(bundle,
 				PLEditor.class.getName() + ".ToggleCommentsAction", this);
 		tca.configure(getSourceViewer(), configuration);

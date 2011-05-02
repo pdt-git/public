@@ -45,7 +45,6 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.internal.search.ReferencesSearchQuery;
 import org.cs3.pdt.internal.search.ReferencesSearchQueryDirect;
 import org.cs3.pl.metadata.GoalData;
 import org.eclipse.search.ui.ISearchQuery;

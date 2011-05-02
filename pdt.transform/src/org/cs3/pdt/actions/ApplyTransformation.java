@@ -22,14 +22,9 @@ public class ApplyTransformation implements IEditorActionDelegate{
 
 	private IEditorPart editor;
 
-	public ApplyTransformation() {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	public void setActiveEditor(IAction action, IEditorPart targetEditor) {
 		this.editor=targetEditor;
-		
 	}
 
 	@Override
@@ -47,14 +42,13 @@ public class ApplyTransformation implements IEditorActionDelegate{
 	    } catch( final InterruptedException irex ) {
 	      // operation was cancelled
 	    }
-		
 	}
 
 	@Override
 	public void selectionChanged(IAction action, ISelection selection) {
-		// TODO Auto-generated method stub
 		
 	}
+	
 	public PrologInterface getCurrentPrologInterface(){
 		IEditorPart editor = UIUtils.getActiveEditor();
 		
@@ -86,7 +80,6 @@ public class ApplyTransformation implements IEditorActionDelegate{
 		if(plProject==null){
 			return null;
 		}
-		
 		return plProject.getMetadataPrologInterface();
 	}
 }

@@ -53,54 +53,48 @@ public class PrologStaticMetaInfoProvider implements IMetaInfoProvider {
 
 	PrologInterface pif;
 	
+	//TODO: check if this class is dead code
+	
 	@Override
 	public Clause[] findClauses(Predicate p) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Predicate[] getPredicatesWithPrefix(String module, String prefix,
 			String activeFileName) throws PrologException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Predicate[] getPredicatesWithPrefix(String string, String prefix)
 			throws NumberFormatException, PrologException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Clause[] retrievePrologElements(String filename)
 			throws PrologException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getHelp(Predicate elm) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public SourceLocation[] findReferences(Predicate data) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Predicate[] findPredicates(Goal data) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getSummary(Predicate data) throws PrologException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -41,7 +41,6 @@
 
 package org.cs3.pdt.internal.actions;
 
-import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
@@ -54,7 +53,6 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
