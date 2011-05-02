@@ -21,6 +21,6 @@ Require-Bundle: org.cs3.pdt.common,
  org.cs3.pdt.common.ui,
  org.eclipse.ui.ide,
  org.eclipse.core.resources,
- pdt.runtime.builder
+ pdt.runtime.builder;bundle-version="0.2.3"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
