@@ -129,4 +129,17 @@ and/or distributed.
          fragment="true"
          unpack="false"/>
 
+   <plugin
+         id="pdt.runtime.builder"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.cs3.lp.utils"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
 </feature>
