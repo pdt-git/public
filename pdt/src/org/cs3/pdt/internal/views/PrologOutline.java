@@ -47,19 +47,15 @@
  */
 package org.cs3.pdt.internal.views;
 
-import java.io.File;
 import java.util.HashSet;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.Predicate;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -68,7 +64,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.viewers.IElementComparer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -78,7 +73,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
@@ -93,31 +87,10 @@ public class PrologOutline extends ContentOutlinePage {
 	private PLEditor editor;
 	private ILabelProvider labelProvider;
 	private PrologOutlineFilter[] filters;
-	private IEditorInput input;
+	IEditorInput input;
 	private TreeViewer viewer;
 	private Menu contextMenu;
 	
-	private final class Comparer implements IElementComparer {
-		@Override
-		public int hashCode(Object element) {
-			if (element instanceof Predicate) {
-				Predicate p = (Predicate) element;
-				return p.getSignature().hashCode();
-			}
-			return element.hashCode();
-		}
-
-		@Override
-		public boolean equals(Object a, Object b) {
-			if (a instanceof Predicate && b instanceof Predicate) {
-				Predicate pa = (Predicate) a;
-				Predicate pb = (Predicate) b;
-				return pa.getSignature().equals(pb.getSignature());
-			}
-			return a.equals(b);
-		}
-	}
-
 	public PrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
@@ -127,33 +100,7 @@ public class PrologOutline extends ContentOutlinePage {
 		super.createControl(parent);
 
 		viewer = getTreeViewer();
-		model = new ContentModel() {
-
-			@Override
-			public File getFile() {
-				try {
-					IFileEditorInput editorInput = null;
-					IFile file = null;
-					IPrologProject plProject = null;
-
-					if (input instanceof IFileEditorInput) {
-						editorInput = (IFileEditorInput) input;
-					}
-					if (editorInput != null) {
-						file = editorInput.getFile();
-						plProject = PDTCoreUtils.getPrologProject(file);
-					}
-
-					if (plProject == null) {
-						file = null;
-					}
-					return file == null ? null : file.getLocation().toFile();
-				} catch (Exception e) {
-					return null;
-				}
-			}
-
-		};
+		model = new PrologOutlineContentModel(this);
 
 		contentProvider = new CTermContentProvider(viewer, model);
 		labelProvider = new PEFLabelProvider();
@@ -162,7 +109,7 @@ public class PrologOutline extends ContentOutlinePage {
 
 		this.convertPositions = true;
 
-		viewer.setComparer(new Comparer());
+		viewer.setComparer(new PrologOutlineComparer());
 
 		viewer.addSelectionChangedListener(this);
 
@@ -180,12 +127,11 @@ public class PrologOutline extends ContentOutlinePage {
 			return;
 		}
 		viewer.setInput(getInput());
-
 	}
 
 
 	private void fillContextMenu(IMenuManager manager) {		
-		// Other plug-ins can contribute there actions here
+		// Other plug-ins can contribute their actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	}
 	
@@ -299,7 +245,6 @@ public class PrologOutline extends ContentOutlinePage {
 
 	@Override
 	public void dispose() {
-
 		super.dispose();
 		contentProvider.dispose();
 		model.dispose();

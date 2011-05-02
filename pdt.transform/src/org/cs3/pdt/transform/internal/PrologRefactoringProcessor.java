@@ -3,8 +3,8 @@ package org.cs3.pdt.transform.internal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pl.common.Option;

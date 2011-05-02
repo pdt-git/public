@@ -196,7 +196,6 @@ private IDocument document;
 
 		@Override
 		public boolean providesWorkingCopies() {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
@@ -226,7 +225,6 @@ private IDocument document;
 
 
 	private class OutlineSorter extends ViewerComparator  {
-
 
 	}
 

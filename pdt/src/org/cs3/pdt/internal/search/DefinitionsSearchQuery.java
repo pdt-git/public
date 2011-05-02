@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.GoalData;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
