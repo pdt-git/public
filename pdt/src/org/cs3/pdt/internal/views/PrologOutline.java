@@ -172,13 +172,14 @@ public class PrologOutline extends ContentOutlinePage {
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
-		
+	
 		if(event.getSelection().isEmpty()){
 			return;
 		}
 		if(!(event.getSelection() instanceof IStructuredSelection)){
 			return;
 		}
+		
 		IStructuredSelection selection = (IStructuredSelection) event.getSelection();
 		Object elm = selection.getFirstElement();
 		if(elm==null||!(elm instanceof PEFNode)){
