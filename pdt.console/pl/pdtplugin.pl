@@ -46,11 +46,13 @@
 :- module(pdtplugin,[
     find_pred/8,
     find_declaration/6,
-    find_improved_declaration/5,
     get_references/8,
-    find_definition_visible_in/8,
+    find_primary_definition_visible_in/6, % (EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine)
+    find_definition_visible_in/6,   % (EnclFile,Name,Arity,ReferencedModule,File,Line)
+    find_definition_invisible_in/6, % (EnclFile,Name,Arity,Module,File,Line)
+    find_any_definition/5,          % (         Name,Arity,Module,File,Line),
     get_pred/7,
-    pdt_reload/1,
+    pdt_reload/1,  
     activate_warning_and_error_tracing/0,
     deactivate_warning_and_error_tracing/0,
     predicates_with_property/3,
@@ -70,7 +72,7 @@
 
 :- use_module(org_cs3_lp_utils(utils4modules),
              [ module_of_file/2      % (EnclFile,Module)
-             , start_of_nth_clause/5 % (Module,Head,Nth,File,Line)
+             , defined_in_file/6     % (Module,Name,Arity, Nth,File,Line)
              ]
              ).
              
@@ -81,13 +83,14 @@
 % TO BE INLINED into the call site in 
 % the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
-find_declaration(EnclFile,Name,Arity,Module,File,Line):-
-    find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line).
+find_declaration(EnclFile,Name,Arity,ReferencedModule,File,Line):-
+    find_primary_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,File,Line).
+    
 
 % TO BE INLINED into call site in
 % pdt/src/org/cs3/pdt/internal/actions/PrologOutlineInformationControl.java
-get_pred(File, Name,Arity,Line,_dyn,_mul,Exported) :-
-    find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported).
+get_pred(File, Name,Arity,Line,Dynamic,Multifile,Exported) :-
+    find_definition_contained_in(File,Name,Arity,Line,Dynamic,Multifile,Exported).
 
 % TODO: Move the definition of has_property/3 to the "share" project. 
 % It is currently defined in JT making the PDT dependent on JT!!! 
@@ -103,7 +106,7 @@ get_pred(File, Name,Arity,Line,_dyn,_mul,Exported) :-
 %
 pdt_reload(File):-
     writeln(File),
-    make:reload_file(File).
+    make:reload_file(File).  % SWI Prolog library
 
 
                /********************************************
@@ -116,18 +119,20 @@ pdt_reload(File):-
 %  @param PredSignature PredName/Arity
 %  @author TRHO
 %
-get_references(EnclFile, PredName/PredArity,Module, FileName,Line,RefModule,Name,Arity):-
-    functor(Pred,PredName,PredArity),
-	module_of_file(EnclFile,Module),
+get_references(EnclFile, Name/Arity,Module, RefFile,Line,RefModule,RefName,RefArity):-
+    (  atom(Module)
+    -> true                              % Explicit module qualification
+    ;  module_of_file(EnclFile,Module)   % Implicit module qualification
+    ),
+    functor(Pred,Name,Arity),            % Predicate to be searched 
     % INTERNAL, works for swi 5.11.X
     prolog_explain:explain_predicate(Module:Pred,Explanation), 
 %    writeln(Explanation),
-    decode_reference(Explanation,Nth, RefModule,Name, Arity),
-    number(Arity),
-    functor(Head,Name,Arity),
-    start_of_nth_clause(RefModule,Head,Nth,FileName,Line).
+    decode_reference(Explanation,Nth, RefModule,RefName, RefArity),
+    number(RefArity),
+    defined_in_file(RefModule,RefName,RefArity,Nth,RefFile,Line).
 %   <-- Extracted predicate for:
-%    nth_clause(RefModule:EnclClause,Nth,Ref),
+%    nth_clause(RefModule:Head,Nth,Ref),
 %    clause_property(Ref,file(FileName)),
 %    clause_property(Ref,line_count(Line)).
 
@@ -166,20 +171,21 @@ user:tearDown(decode_reference) :-
 
                /*************************************
                 * Find Definitions and Declarations *
-                *************************************/
+                *************************************/ 
 
-%% find_definition_visible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line,-Name,-Arity)
+%% find_any_definition(?Name,?Arity,?Module,?SrcFile,?Line) is nondet
 %
-% Find starting line of clauses of the predicate Name/Arity that are
-% visible in EnclFile. 
+% Find starting line of any clause of the predicate Name/Arity.  
+% This includes clauses from different, unrelated modules and
+% files (if different definitions of the predicate exist). 
 %
-% Used for the open declaration action in 
-% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
+% (TODO: To be) Used for the findAllDefinitions action in 
+% pdt/src/org/cs3/pdt/internal/actions/...ActionDelegate.java
+% 
+find_any_definition(Name,Arity,Module,File,Line):-
+    defined_in_module(Module,Name,Arity),
+    defined_in_file(Module,Name,Arity,_Nth,File,Line).
 
-find_definition_visible_in(EnclFile,Name,Arity,Module,File,Line,Name,Arity):-
-    module_of_file(EnclFile,Module),
-	functor(Head,Name,Arity),
-    start_of_nth_clause(Module,Head,_Nth,File,Line).
 
 %% find_definition_invisible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
 %
@@ -195,20 +201,61 @@ find_definition_invisible_in(EnclFile,Name,Arity,Module,File,Line):-
                         Name,Arity,Module,File,Line).
 
 
-%% find_any_definition(+Name,+Arity,?Module,-SrcFile,-Line)
+%% find_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?DefiningModule,-SrcFile,-Line)
 %
-% Find starting line of any clause of the predicate Name/Arity.  
-% This includes clauses from different, unrelated modules and
-% files (if different definitions of the predicate exist). 
+% Find starting line of clauses of the predicate Name/Arity that are
+% visible in EnclFile. 
+
+find_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,File,Line):-
+    find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,_DefiningModule,Locations),
+    member(File-Lines,Locations),
+    member(Line,Lines).
+
+
+find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
+    module_of_file(EnclFile,FileModule),
+    (  atom(ReferencedModule)
+    -> true                            % Explicit module reference
+    ;  ReferencedModule = FileModule   % Implicit module reference
+    ),
+    (  defined_in_module(ReferencedModule,Name,Arity,DefiningModule)
+    -> defined_in_files(DefiningModule,Name,Arity,Locations)
+    ;  ( declared_in_module(ReferencedModule,Name,Arity,DeclaringModule),
+         defined_in_files(DeclaringModule,Name,Arity,Locations)
+       )
+    ).
+
+%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
 %
-% (TODO: To be) Used for the findAllDefinitions action in 
-% pdt/src/org/cs3/pdt/internal/actions/...ActionDelegate.java
-% 
-find_any_definition(Name,Arity,Module,File,Line):-
-    % TODO: Input mode checking and exception if violated.
-    functor(Head,Name,Arity),
-    defined_in_module(Module,Head),
-    start_of_nth_clause(Module,Head,_Nth,File,Line).
+% Find first line of first clause in the main file defining the predicate Name/Arity 
+% visible in ReferencedModule.
+%
+% Used for the open declaration action in 
+% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
+
+find_primary_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+    find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations),
+    primary_location(Locations,DefiningModule,MainFile,FirstLine).
+
+% In case of multifile predicates, the primary file is either 
+% the file whose module is the DefiningModule or otherwise (this 
+% case should not really occur) the file containing most clauses.
+primary_location(Locations,DefiningModule,File,FirstLine) :-
+    member(File-Lines,Locations),
+    module_of_file(File,DefiningModule),
+    !,
+    Lines = [FirstLine|_].
+primary_location(Locations,_,File,FirstLine) :-
+    findall( NrOfClauses-File-FirstLine,
+             ( member(File-Lines,Locations),
+               length(Lines,NrOfClauses),
+               Lines=[FirstLine|_]
+             ),
+             All
+    ),
+    sort(All, Sorted),
+    Sorted = [ NrOfClauses-File-FirstLine |_ ].
+    
 
    
 %% find_definition_contained_in(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
@@ -232,7 +279,7 @@ find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported) :-
     has_property(_module_pred,exported,Exported),
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    start_of_nth_clause(Module,Head,_,File,Line).
+    defined_in_file(Module,Name,Arity,_Nth,File,Line).
 
 
 
@@ -338,7 +385,8 @@ predicate_manual_entry(_Module,Pred,Arity,Content) :-
 predicate_manual_entry(Module, Pred,Arity,Content) :-
     %pldoc:doc_comment(Module:Pred/Arity,_File:_,_Summary,Content),
     %TODO: The html code is now available:
-	pldoc:doc_comment(Module:Pred/Arity,File:_,_,_Content),
+	pldoc:bla,
+	doc_comment(Module:Pred/Arity,File:_,_,_Content),
 	gen_html_for_pred_(File,Pred/Arity,Content),
     !.
 	
@@ -393,43 +441,6 @@ manual_entry(Pred,-1,Content) :-
 */
 
 
-
-%% find_declaration(+EnclFile,+Name,+Arity,?Module,-File,-Line)
-%
-% used for the open declaration action
-%
-find_declaration(EnclFile,Name,Arity,Module,File,Line):-
-    resolve_module(EnclFile,Module),
-%	current_module(Module),
-	functor(Goal,Name,Arity),
-	nth_clause(Module:Goal,_,Ref),
-	clause_property(Ref,file(File)),
-    clause_property(Ref,line_count(Line)).
-    
-    
-find_improved_declaration(EnclFile,Term,EnclModule,File,Line):-
-    format('Term: ~w, Module: ~w~n',[Term, EnclModule]),
-    file_references_for_call(EnclModule, Term, [Reference|_MoreRefs]),	%<-- erstmal nur das erste nehmen
-    format('Reference: ~w~n',[Reference]),
-    (	(Reference = 'undefined' ; Reference = 'any')
-    -> 	(File = EnclFile, Line=1)
-    ;	(	Reference=(DefinitionModule,File),  %<-- dies Zusatzinfo evtl auch später rausgeben
-    		nth_clause(DefinitionModule:Term, _, Ref),
-    		clause_property(Ref,file(File)),	%<-- hier als check, um nur gewünschte zu finden!
-    		clause_property(Ref, line_count(Line))
-    	)
-    ). 
-    
-
-
-resolve_module(EnclFile,Module):-
- 	var(Module),
-    ( ( nonvar(EnclFile),module_property(Module,file(EnclFile)) )
-    ;  Module=user
-    ).
-
-% Necessary for find_pred/8, TODO: move to find_pred/8
-resolve_module(_EnclFile,_Module).
 
 
                /*************************************

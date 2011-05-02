@@ -352,7 +352,7 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 						}
 					};
 
-					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process", "Enter PIF key:", defaultPifKey, validator);
+					InputDialog dialog = new InputDialog(PrologConsoleView.this.getViewSite().getShell(), "Create Prolog Process", "Enter a yet unused name for your new Prolog process:", defaultPifKey, validator);
 					int result = dialog.open();
 					if (result == InputDialog.CANCEL)
 						return Status.CANCEL_STATUS;

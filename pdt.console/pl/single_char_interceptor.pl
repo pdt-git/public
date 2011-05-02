@@ -111,7 +111,8 @@ escape(A,In,Out):-
 sci_load:-
 
     lib_name(LibName),
-    writeln(trying(LibName)),
+    format(' >>> Trying to load optional library: ''~a''.~n', [LibName]),
+    format(' >>> Errors while loading optional libraries can safely be ignored.~n'),
     (	current_foreign_library(LibName,_)
     ->	true
     ;	load_foreign_library(foreign(LibName))
