@@ -629,15 +629,48 @@ public class PLEditor extends TextEditor {
 	 */
 	public static boolean predicateDelimiter(IDocument document, int l)
 			throws BadLocationException {
-		char c = document.getChar(l);
-		if (c == '.') {
-			if (l > 0 && document.getChar(l - 1) == '.')
+		if (isDelimitingDot(document,l)) {
+			if (l > 0 && isDelimitingDot(document,l-1))
 				return false;
-			if (l < document.getLength() - 1 && document.getChar(l + 1) == '.')
+			if (l < document.getLength() - 1 && isDelimitingDot(document,l+1))
 				return false;
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Checks if the character at position l is a delimiting dot, meaning  it is not enclosed by
+	 *  <ul>
+	 *    <li>parentheses</li>
+	 *    <li>numbers</li>
+	 *  </ul>  
+	 * @param document
+	 * @param l
+	 * @return
+	 * @throws BadLocationException
+	 */
+	private static boolean isDelimitingDot(IDocument document, int l) throws BadLocationException {
+		char c = document.getChar(l);
+		if(c != '.') {
+			return false;
+		}
+		if(l == 0 || l == document.getLength() - 1){
+			return false;
+		}
+		if(isNumber(document.getChar(l-1)) && 
+				isNumber(document.getChar(l+1))){
+			return false;
+		}
+		if(document.getChar(l-1)=='(' && 
+		   document.getChar(l+1)==')'){
+			return false;
+		}
+		return true;
+	}
+
+	private static boolean isNumber(char c) {
+		return c >= '0' && c <= '9';
 	}
 
 	/*
@@ -957,7 +990,13 @@ public class PLEditor extends TextEditor {
 		}
 		//fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
-
+	/**
+	 * Looks up all occurrences of (singleton) variables at the current location.
+	 * 
+	 * @param caretOffset
+	 * @param document
+	 * @return
+	 */
 	private ArrayList<OccurrenceLocation> parseOccurrences(int caretOffset, IDocument document) {
 		ArrayList<OccurrenceLocation> locationList = new ArrayList<OccurrenceLocation>();
 		Map<String, List<OccurrenceLocation>> singletonOccurs = new HashMap<String, List<OccurrenceLocation>>(); 
