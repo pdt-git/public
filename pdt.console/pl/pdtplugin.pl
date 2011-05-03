@@ -39,25 +39,18 @@
 %   distributed.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-/*
-    The module pdtplugin provides helper predicates
-    for the PDT Eclipse Plugin  */
+/* The module pdtplugin provides helper predicates for the PDT Eclipse Plugin */
 
 :- module(pdtplugin,[
-    find_pred/8,
-    find_declaration/6,
-    get_references/8,
-    find_primary_definition_visible_in/6, % (EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine)
-    find_definition_visible_in/6,   % (EnclFile,Name,Arity,ReferencedModule,File,Line)
-    find_definition_invisible_in/6, % (EnclFile,Name,Arity,Module,File,Line)
-    find_any_definition/5,          % (         Name,Arity,Module,File,Line),
-    get_pred/7,
     pdt_reload/1,  
+    find_definitions_categorized/8, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
+    find_primary_definition_visible_in/6, % (EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine)
+    get_pred/7,
+    find_pred/8,
+    predicates_with_property/3,
+    manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
     activate_warning_and_error_tracing/0,
     deactivate_warning_and_error_tracing/0,
-    predicates_with_property/3,
-    
-    manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
     errors_and_warnings/4
     ]).
 
@@ -68,33 +61,23 @@
 :- use_module(library('pldoc')).
 :- use_module(library('pldoc/doc_html')).
 :- use_module(library('http/html_write')).
-:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
-:- use_module(org_cs3_lp_utils(utils4modules),
-             [ module_of_file/2      % (EnclFile,Module)
-             , defined_in_file/6     % (Module,Name,Arity, Nth,File,Line)
-             ]
-             ).
+:- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
+:- use_module(org_cs3_lp_utils(utils4modules)).
              
                /**********************************
                 * TODOs for EVA after WLPE paper *
                 * ********************************/
  
-% TO BE INLINED into the call site in 
-% the open declaration action in 
-% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
-find_declaration(EnclFile,Name,Arity,ReferencedModule,File,Line):-
-    find_primary_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,File,Line).
-    
+
+% Move the definition of has_property/3 to the "share" project. 
+% It is currently defined in JT making the PDT dependent on JT!!! 
+% -- GK, 21,4,2011   
 
 % TO BE INLINED into call site in
 % pdt/src/org/cs3/pdt/internal/actions/PrologOutlineInformationControl.java
 get_pred(File, Name,Arity,Line,Dynamic,Multifile,Exported) :-
     find_definition_contained_in(File,Name,Arity,Line,Dynamic,Multifile,Exported).
-
-% TODO: Move the definition of has_property/3 to the "share" project. 
-% It is currently defined in JT making the PDT dependent on JT!!! 
-% -- GK, 21,4,2011   
 
                /*************************************
                 * PDT RELAOAD                       *
@@ -109,107 +92,123 @@ pdt_reload(File):-
     make:reload_file(File).  % SWI Prolog library
 
 
-               /********************************************
-                * FIND REFERENCES TO A PREDICATE DEFINITON *
-                ********************************************/
 
+        /***********************************************************************
+         * Find Definitions and Declarations and categorize them by visibility *
+         * --------------------------------------------------------------------*
+         * for "Find All Declarations" (Ctrl+G) action                         *
+         ***********************************************************************/ 
 
-%% get_references(+EnclFile,+PredSignature,?Module, -FileName,-Line,-RefModule,-Name,-Arity) is nondet.
-%
-%  @param PredSignature PredName/Arity
-%  @author TRHO
-%
-get_references(EnclFile, Name/Arity,Module, RefFile,Line,RefModule,RefName,RefArity):-
-    (  atom(Module)
-    -> true                              % Explicit module qualification
-    ;  module_of_file(EnclFile,Module)   % Implicit module qualification
+find_definitions_categorized(EnclFile,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
+    module_of_file(EnclFile,FileModule),
+    (  atom(ReferencedModule)
+    -> true                            % Explicit module reference
+    ;  ReferencedModule = FileModule   % Implicit module reference
+    ),    
+    find_decl_or_def(ReferencedModule,Name,Arity,Sources),
+    member(Category-DefiningModule-Location,Sources),
+    member(File-Lines,Location),
+    member(Line,Lines).
+
+%% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
+
+find_decl_or_def(Module,Name,Arity,Sources) :-
+    ( var(Module)
+    ; var(Name)
     ),
-    functor(Pred,Name,Arity),            % Predicate to be searched 
-    % INTERNAL, works for swi 5.11.X
-    prolog_explain:explain_predicate(Module:Pred,Explanation), 
-%    writeln(Explanation),
-    decode_reference(Explanation,Nth, RefModule,RefName, RefArity),
-    number(RefArity),
-    defined_in_file(RefModule,RefName,RefArity,Nth,RefFile,Line).
-%   <-- Extracted predicate for:
-%    nth_clause(RefModule:Head,Nth,Ref),
-%    clause_property(Ref,file(FileName)),
-%    clause_property(Ref,line_count(Line)).
+    throw( input_argument_free(find_decl_or_def(Module,Name,Arity,Sources)) ).
 
-      
+find_decl_or_def(CallingModule,Name,Arity,['Missing declarations'-DeclModule-[File-[Line]]]) :-
+   referenced_but_undeclared(CallingModule,Name,Arity),
+   DeclModule = 'No declaration (in any module)',
+   File = 'No declaration (in any file)',
+   Line = 0.
+   
+find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
+   setof( VisibilityText-DeclModule-Location, ContextModule^Name^Arity^ 
+          ( declared_but_undefined(DeclModule,Name,Arity),
+            visibility(Visibility, ContextModule,Name,Arity,DeclModule),
+            declared_in_file(DeclModule,Name,Arity,Location),
+            visibility_text(declared, Visibility, VisibilityText)
+          ),
+          Declarations).
+    
+find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
+%   setof( DefiningModule, Name^Arity^
+%          defined_in_module(DefiningModule,Name,Arity),
+%          DefiningModules
+%   ),
+   setof( VisibilityText-DefiningModule-Locations, ContextModule^Name^Arity^  % Locations is list of File-Lines terms
+          ( defined_in_module(DefiningModule,Name,Arity),
+            visibility(Visibility, ContextModule,Name,Arity,DefiningModule),
+            defined_in_files(DefiningModule,Name,Arity,Locations),
+            visibility_text(defined, Visibility, VisibilityText)
+          ),
+          Definitions
+    ). 
 
-%% decode_reference(+RefStr,-Nth, -RefModule, +Pred,-Arity) is nondet.
+
+visibility_text(declared, local,      'Local declaration' ) :- !.
+visibility_text(declared, supermodule,'Imported declaration' ) :- !.
+visibility_text(declared, submodule,  'Submodule declaration') :- !.
+visibility_text(declared, invisible,  'Locally invisible declaration') :- !.
+
+visibility_text(defined, local,      'Local definitions' ) :- !.
+visibility_text(defined, supermodule,'Imported definitions' ) :- !.
+visibility_text(defined, submodule,  'Submodule definitions') :- !.
+visibility_text(defined, invisible,  'Locally invisible definitions') :- !.
+
+    
+% These clauses must stay in this order since they determine
+% the order of elements in the result of  find_decl_or_def
+% and hence the order of elements in the search result view
+% (which is the INVERSE of the order of elements that we
+% compute here).               
+         
+visibility(invisible, ContextModule,Name,Arity,DeclModule) :-
+    % Take care to generate all values befor using negation.
+    % Otherwise the clause will not be able to generate values.
+    % Negation DOES NOT generate values for unbound variables!
+    
+    % There is some DeclaringModule 
+    declared_in_module(DeclModule,Name,Arity,DeclModule),
+    \+ declared_in_module(ContextModule,Name,Arity,DeclModule),
+    \+ declared_in_module(DeclModule,_,_,ContextModule).
+    
+visibility(submodule, ContextModule,Name,Arity,DeclModule) :-
+    declared_in_module(DeclModule,Name,Arity,DeclModule),
+    % DeclModule is a submodule of ContextModule
+    declared_in_module(DeclModule,_,_,ContextModule), % submodule
+    ContextModule \== DeclModule. 
+
+visibility(supermodule, ContextModule,Name,Arity,DeclModule) :-
+    declared_in_module(ContextModule,Name,Arity,DeclModule),
+    ContextModule \== DeclModule. 
+    
+visibility(local, ContextModule,Name,Arity,DeclModule) :-
+    declared_in_module(ContextModule,Name,Arity,DeclModule),
+    ContextModule == DeclModule.
+   
+
+        /***********************************************************************
+         * Find Primary Definition                                             *
+         * --------------------------------------------------------------------*
+         * for "Open Primary Declaration" (F3) action                          *
+         ***********************************************************************/ 
+
+%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
 %
-% Reference string from explain/2 predicate
-% 
-%  IMPORTANT: Hardcoded reference to the user module!
-%  Only works for predicates defined in the user module!
-%
-decode_reference(RefStr,Nth, RefModule,Pred,Arity):-
-    atom_concat('        Referenced from ',Rest,RefStr),
-    atom_concat(NthAtom,Help0,Rest),
-    atom_concat('-th clause of ',PredRef,Help0),
-    atom_concat(RefModule,Help1,PredRef),
-    atom_concat(':',PredicateIndicator,Help1),
-    atom_concat(Pred,Help2,PredicateIndicator),
-    atom_concat('/',ArityAtom,Help2),
-    atom_number(NthAtom,Nth),
-    atom_number(ArityAtom,Arity),
-    !.
-
-%%%%%%%%%% Tests %%%%%%%%%%%
-
-user:setUp(decode_reference) :-
-	assert(user:testpred(1,2)).
-user:test(decode_reference) :-
-    decode_reference('        Referenced from 1-th clause of user:testpred/2',
-                     1, 'testpred',2).
-
-user:tearDown(decode_reference) :-
-	retract(user:testpred(1,2)).
-
-
-               /*************************************
-                * Find Definitions and Declarations *
-                *************************************/ 
-
-%% find_any_definition(?Name,?Arity,?Module,?SrcFile,?Line) is nondet
-%
-% Find starting line of any clause of the predicate Name/Arity.  
-% This includes clauses from different, unrelated modules and
-% files (if different definitions of the predicate exist). 
-%
-% (TODO: To be) Used for the findAllDefinitions action in 
-% pdt/src/org/cs3/pdt/internal/actions/...ActionDelegate.java
-% 
-find_any_definition(Name,Arity,Module,File,Line):-
-    defined_in_module(Module,Name,Arity),
-    defined_in_file(Module,Name,Arity,_Nth,File,Line).
-
-
-%% find_definition_invisible_in(+EnclFile,+Name,+Arity,?Module,-SrcFile,-Line)
-%
-% Find starting line of clause of the predicate Name/Arity  
-% that are not visible in EnclFile. 
+% Find first line of first clause in the *primary* file defining the predicate Name/Arity 
+% visible in ReferencedModule. In case of multifile predicates, the primary file is either 
+% the file whose module is the DefiningModule or otherwise (this case only occurs
+% for "magic" system modules, (e.g. 'system')) the file containing most clauses.
 %
 % Used for the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
-find_definition_invisible_in(EnclFile,Name,Arity,Module,File,Line):-
-    find_any_definition(Name,Arity,Module,File,Line),
-    \+ find_definition_visible_in(EnclFile,
-                        Name,Arity,Module,File,Line).
-
-
-%% find_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?DefiningModule,-SrcFile,-Line)
-%
-% Find starting line of clauses of the predicate Name/Arity that are
-% visible in EnclFile. 
-
-find_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,File,Line):-
-    find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,_DefiningModule,Locations),
-    member(File-Lines,Locations),
-    member(Line,Lines).
+find_primary_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+    find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations),
+    primary_location(Locations,DefiningModule,MainFile,FirstLine).
 
 
 find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
@@ -225,21 +224,6 @@ find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModul
        )
     ).
 
-%% find_primary_definition_visible_in(+EnclFile,+Name,+Arity,?ReferencedModule,?MainFile,?FirstLine)
-%
-% Find first line of first clause in the main file defining the predicate Name/Arity 
-% visible in ReferencedModule.
-%
-% Used for the open declaration action in 
-% pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
-
-find_primary_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine):-
-    find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations),
-    primary_location(Locations,DefiningModule,MainFile,FirstLine).
-
-% In case of multifile predicates, the primary file is either 
-% the file whose module is the DefiningModule or otherwise (this 
-% case should not really occur) the file containing most clauses.
 primary_location(Locations,DefiningModule,File,FirstLine) :-
     member(File-Lines,Locations),
     module_of_file(File,DefiningModule),
@@ -257,6 +241,13 @@ primary_location(Locations,_,File,FirstLine) :-
     Sorted = [ NrOfClauses-File-FirstLine |_ ].
     
 
+        /***********************************************************************
+         * Find Primary Definition                                             *
+         * --------------------------------------------------------------------*
+         * for "Open Primary Declaration" (F3) action                          *
+         ***********************************************************************/ 
+         
+%% TODO: This is meanwhile subsumed by other predicates. Integrate!
    
 %% find_definition_contained_in(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
 %
@@ -367,7 +358,7 @@ get_declaring_module(EnclFile,Module,Name,Arity):-
 %
 %
 predicate_manual_entry(_Module,Pred,Arity,Content) :-
-    predicate(Pred,Arity,_,FromLine,ToLine),
+    help_index:predicate(Pred,Arity,_,FromLine,ToLine),
     !,
     online_help:line_start(FromLine, From),
     online_help:line_start(ToLine, To),
@@ -378,15 +369,14 @@ predicate_manual_entry(_Module,Pred,Arity,Content) :-
     online_help:copy_chars(Range, Manual, MemStream),
     close(MemStream),
     memory_file_to_atom(Handle,Content),
-    free_memory_file(Handle),
+    free_memory_file(Handle), 
     !.
 
 
 predicate_manual_entry(Module, Pred,Arity,Content) :-
-    %pldoc:doc_comment(Module:Pred/Arity,_File:_,_Summary,Content),
+    %pldoc:doc_comment(Module:Pred/Arity,_File:_,,Content),
     %TODO: The html code is now available:
-	pldoc:bla,
-	doc_comment(Module:Pred/Arity,File:_,_,_Content),
+	pldoc:doc_comment(Module:Pred/Arity,File:_,_Summary,_Content),
 	gen_html_for_pred_(File,Pred/Arity,Content),
     !.
 	
@@ -400,10 +390,10 @@ gen_html_for_pred_(FileSpec,Functor/Arity,Html):-
 	     		\objects([doc(Functor/Arity,FilePos,Doc)], FileOptions)
 	     ]),List),
 	maplist(replace_nl_,List,AtomList),
-	concat_atom(AtomList,Html),
+	concat_atom(AtomList,Html), 
 	!.
 
-replace_nl_(nl(_),''):-!.
+replace_nl_(nl(_),''):-!. 
 replace_nl_(A,A).
 
 write_ranges_to_file(Ranges, Outfile) :-

@@ -192,12 +192,15 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 			throws IOException, NumberFormatException {
 
+		
+		PrologMatch match;
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
-			PrologMatch match = constructPrologMatchForAResult(m);
+			 match = constructPrologMatchForAResult(m);
 			result.addMatch(match);
 		}
+	    		
 	}
 	
 	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;

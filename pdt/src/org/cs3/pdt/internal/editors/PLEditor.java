@@ -307,7 +307,10 @@ public class PLEditor extends TextEditor {
 		}
 	}
 
-	private static final String SEP_INSPECT = "inspect";
+	private static final String SEP_PDT_SEARCH = "pdt_search_actions";
+	private static final String SEP_PDT_INFO = "pdt_info_actions";
+	private static final String SEP_PDT_EDIT = "pdt_edit_actions";
+	private static final String SEP_PDT_LAST = "pdt_dummy";
 
 	private IPath filepath;
 
@@ -350,25 +353,70 @@ public class PLEditor extends TextEditor {
 
 		MenuManager menuMgr = createPopupMenu();
 		
-
 		createInspectionMenu(menuMgr);
-
-		assistant = configuration.getContentAssistant(getSourceViewer());
-		Action action;
-
+		
 		// TODO: create own bundle
 		ResourceBundle bundle = ResourceBundle.getBundle(PDT.RES_BUNDLE_UI);
+
+		createMenuEntryForTooltip(menuMgr, bundle);
+		createMenuEntryForOutlinePresenter(menuMgr, bundle);
+		createMenuEntryForContentAssist(menuMgr,bundle);
+
+		createMenuEntryForReconsult(menuMgr, bundle);
+		createMenuEntryForSaveAndReconsult(menuMgr, bundle);
+		
+		createMenuEntryForToggleComments(menuMgr, bundle);
+		
+		getSourceViewer().getTextWidget().addCaretListener(new CaretListener() {
+			
+			@Override
+			public void caretMoved(CaretEvent event) {
+				updateOccurrenceAnnotations(event.caretOffset);
+				
+			}
+		});
+
+	}
+
+
+	/**
+	 * @param menuMgr
+	 */
+	private void createInspectionMenu(MenuManager menuMgr) {
+		addAction(menuMgr, new FindPredicateActionDelegate(this),
+				"Open Primary Declaration", SEP_PDT_SEARCH,
+				IJavaEditorActionDefinitionIds.OPEN_EDITOR);		
+
+		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
+				"Find All Declarations", SEP_PDT_SEARCH,
+				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
+
+		addAction(menuMgr, new FindReferencesActionDelegate(this),
+				"Find References", SEP_PDT_SEARCH,
+				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
+
+//		addAction(menuMgr, new SpyPointActionDelegate(this),
+//				"Toggle Spy Point", SEP_PDT_INSPECT,
+//				"org.eclipse.debug.ui.commands.ToggleBreakpoint");
+	}
+
+	private void createMenuEntryForTooltip(MenuManager menuMgr,
+			ResourceBundle bundle) {
+		Action action;
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
-				+ ".ContextAssistProposal", this) {
+				+ ".ToolTipAction", this) {
 			@Override
 			public void run() {
-				assistant.showPossibleCompletions();
+				assistant.showContextInformation();
 			}
 		};
-		addAction(menuMgr, action, "Context Assist Proposal",
-				IWorkbenchActionConstants.MB_ADDITIONS,
-				ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		addAction(menuMgr, action, "Show Tooltip",
+				SEP_PDT_INFO, COMMAND_SHOW_TOOLTIP);
+	}
 
+	private void createMenuEntryForOutlinePresenter(MenuManager menuMgr,
+			ResourceBundle bundle) {
+		Action action;
 		
 		fOutlinePresenter= configuration.getOutlinePresenter(this.getSourceViewer());
 		fOutlinePresenter.install(this.getSourceViewer());
@@ -384,9 +432,53 @@ public class PLEditor extends TextEditor {
 				fOutlinePresenter.showInformation();
 			}
 		};
-		addAction(menuMgr, action, "show outline",
-				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SHOW_QUICK_OUTLINE);
+		addAction(menuMgr, action, "Show Outline",
+				SEP_PDT_INFO, COMMAND_SHOW_QUICK_OUTLINE);
+	}
 
+	private void createMenuEntryForContentAssist(MenuManager menuMgr, ResourceBundle bundle) {
+		assistant = configuration.getContentAssistant(getSourceViewer());
+		
+		Action action= new TextEditorAction(bundle, PLEditor.class.getName()
+				+ ".ContextAssistProposal", this) {
+			@Override
+			public void run() {
+				assistant.showPossibleCompletions();
+			}
+		};
+		addAction(menuMgr, action, "Context Assist Proposal",
+				SEP_PDT_INFO,
+				ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+	}
+
+	private void createMenuEntryForToggleComments(MenuManager menuMgr,
+			ResourceBundle bundle) {
+		ToggleCommentAction tca = new ToggleCommentAction(bundle,
+				PLEditor.class.getName() + ".ToggleCommentsAction", this);
+		tca.configure(getSourceViewer(), configuration);
+		tca.setEnabled(true);
+		addAction(menuMgr, tca, "Toggle Comments",
+				SEP_PDT_LAST, COMMAND_TOGGLE_COMMENTS);
+	}
+
+	private void createMenuEntryForReconsult(MenuManager menuMgr,
+			ResourceBundle bundle) {
+		Action action;
+		reloadAction = new TextEditorAction(bundle, PLEditor.class.getName()
+				+ ".ConsultAction", this) {
+			@Override
+			public void run() {
+				ConsultActionDelegate consult = new ConsultActionDelegate();
+				consult.run(null);
+			}
+		};
+		addAction(menuMgr, reloadAction, "(Re)consult",
+				SEP_PDT_EDIT, COMMAND_CONSULT);
+	}
+
+	private void createMenuEntryForSaveAndReconsult(MenuManager menuMgr,
+			ResourceBundle bundle) {
+		Action action;
 		action = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".SaveAndConsultAction", this) {
 			@Override
@@ -397,83 +489,9 @@ public class PLEditor extends TextEditor {
 			}
 		};
 		addAction(menuMgr, action, "Save and (Re)consult",
-				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SAVE_AND_CONSULT);
-
-		reloadAction = new TextEditorAction(bundle, PLEditor.class.getName()
-				+ ".ConsultAction", this) {
-			@Override
-			public void run() {
-				ConsultActionDelegate consult = new ConsultActionDelegate();
-				consult.run(null);
-			}
-		};
-		addAction(menuMgr, reloadAction, "(Re)consult",
-				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_CONSULT);
-
-		action = new TextEditorAction(bundle, PLEditor.class.getName()
-				+ ".ToolTipAction", this) {
-			@Override
-			public void run() {
-				assistant.showContextInformation();
-			}
-		};
-		addAction(menuMgr, action, "Show Tooltip",
-				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_SHOW_TOOLTIP);
-
-		ToggleCommentAction tca = new ToggleCommentAction(bundle,
-				PLEditor.class.getName() + ".ToggleCommentsAction", this);
-		tca.configure(getSourceViewer(), configuration);
-		tca.setEnabled(true);
-		addAction(menuMgr, tca, "Toggle Comments",
-				IWorkbenchActionConstants.MB_ADDITIONS, COMMAND_TOGGLE_COMMENTS);
-		
-		
-		getSourceViewer().getTextWidget().addCaretListener(new CaretListener() {
-			
-			@Override
-			public void caretMoved(CaretEvent event) {
-				updateOccurrenceAnnotations(event.caretOffset);
-				
-			}
-		});
-
+				SEP_PDT_EDIT, COMMAND_SAVE_AND_CONSULT);
 	}
 
-	/**
-	 * @param menuMgr
-	 */
-	private void createInspectionMenu(MenuManager menuMgr) {
-		addAction(menuMgr, new FindPredicateActionDelegate(this),
-				"Open Declaration", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.OPEN_EDITOR);		
-
-		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
-				"Find (visible) definitions", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
-
-/*
-       addAction(menuMgr, new FindVisibleDefinitionsActionDelegate(this),
-				"Find visible definitions", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
-
-
-		addAction(menuMgr, new FindInvocableDefinitionsActionDelegate(this),
-				"Find invocable definitions", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
-
-		addAction(menuMgr, new FindAllDefinitionsActionDelegate(this),
-				"Find all definitions", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
-*/
-
-		addAction(menuMgr, new FindReferencesActionDelegate(this),
-				"Find References", SEP_INSPECT,
-				IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
-
-//		addAction(menuMgr, new SpyPointActionDelegate(this),
-//				"Toggle Spy Point", SEP_INSPECT,
-//				"org.eclipse.debug.ui.commands.ToggleBreakpoint");
-	}
 
 	/**
 	 * @param menuMgr
@@ -496,8 +514,11 @@ public class PLEditor extends TextEditor {
 		MenuManager menuMgr = new MenuManager(
 				"org.cs3.pl.editors.PLEditor", "org.cs3.pl.editors.PLEditor"); //$NON-NLS-1$
 		menuMgr.addMenuListener(getContextMenuListener());
-		menuMgr.add(new Separator(SEP_INSPECT));
-		menuMgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		menuMgr.add(new Separator(SEP_PDT_SEARCH));	
+		menuMgr.add(new Separator(SEP_PDT_INFO));
+		menuMgr.add(new Separator(SEP_PDT_EDIT));
+		menuMgr.add(new Separator(SEP_PDT_LAST));
+//		menuMgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		getSourceViewer().getTextWidget().setMenu(
 				menuMgr.createContextMenu(getSourceViewer().getTextWidget()));
 		getEditorSite().registerContextMenu(menuMgr, getSelectionProvider());
