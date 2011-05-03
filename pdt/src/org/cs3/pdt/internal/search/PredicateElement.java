@@ -6,14 +6,16 @@ import org.eclipse.core.resources.IFile;
  * used in prolog searches to represent a group of matches called from the same predicate.
  */
 public class PredicateElement {
-	private IFile file;
-	private String type;
-	private String predicateName;
-	private int arity;
+	private IFile file;          // file that contains the selected literal (non-null)
+	private String module;       // explicit module prefix of the selected literal (or null)
+	private String predicateName; 
+	private int arity;           
+	private boolean visible;     // visible in the context module of the reference
+	private boolean exported;    // exported by the defining module
 	
-	public PredicateElement(IFile file, String type, String predicateName, int arity) {
+	public PredicateElement(IFile file, String module, String predicateName, int arity) {
 		this.file = file;
-		this.type = type;
+		this.module = module;
 		this.predicateName = predicateName;
 		this.arity = arity;
 	}
@@ -42,7 +44,7 @@ public class PredicateElement {
 	}
 
 	public String getModule() {
-		return type;
+		return module;
 	}
 
 	public String getPredicateName() {
