@@ -312,22 +312,18 @@ public abstract class SelectPifAction extends Action implements IMenuCreator,
 	}
 
 	public void prologInterfaceAdded(PrologInterfaceRegistryEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void prologInterfaceRemoved(PrologInterfaceRegistryEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void subscriptionAdded(PrologInterfaceRegistryEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 
 	public void subscriptionRemoved(PrologInterfaceRegistryEvent e) {
-		// TODO Auto-generated method stub
 
 	}
 

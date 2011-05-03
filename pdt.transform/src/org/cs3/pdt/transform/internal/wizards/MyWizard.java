@@ -12,7 +12,6 @@ public class MyWizard extends RefactoringWizard{
 
 	@Override
 	protected void addUserInputPages() {
-		// TODO Auto-generated method stub
 		
 	}
 

@@ -66,22 +66,18 @@ public final class RenameFileInfo extends PrologRefactoringInfo {
 	@Override
 	public void configure(PrologLibraryManager libman, PrologSession s)
 			throws PrologInterfaceException {
-		// TODO Auto-generated method stub
 		
 	}
 	@Override
 	public String getParameterTerm() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
 	public String getRefactoringId() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	@Override
 	public String getSelectionTerm() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

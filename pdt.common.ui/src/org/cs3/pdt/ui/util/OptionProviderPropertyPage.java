@@ -72,7 +72,7 @@ public abstract class OptionProviderPropertyPage extends PropertyPage implements
      */
     public OptionProviderPropertyPage() {
         super();
-        // TODO Auto-generated constructor stub
+        
     }
 
     /*

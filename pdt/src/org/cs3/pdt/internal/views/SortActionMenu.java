@@ -42,7 +42,6 @@ final class SortActionMenu extends Action implements IMenuCreator,
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -151,13 +150,11 @@ final class SortActionMenu extends Action implements IMenuCreator,
 
 	@Override
 	public void init(IWorkbenchWindow window) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void run(IAction action) {
-		// TODO Auto-generated method stub
 
 	}
 

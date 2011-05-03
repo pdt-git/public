@@ -63,8 +63,6 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.management.RuntimeErrorException;
-
 /**
  * contains static methods that do not quite fit anywhere else :-)=
  */

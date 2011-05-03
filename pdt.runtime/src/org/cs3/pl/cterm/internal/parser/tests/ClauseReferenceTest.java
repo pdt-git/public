@@ -3,11 +3,11 @@ package org.cs3.pl.cterm.internal.parser.tests;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
+import junit.framework.TestCase;
+
 import org.cs3.pl.cterm.internal.parser.ASTAtom;
 import org.cs3.pl.cterm.internal.parser.CanonicalTermParser;
 import org.cs3.pl.cterm.internal.parser.Node;
-
-import junit.framework.TestCase;
 
 public class ClauseReferenceTest extends TestCase {
     CanonicalTermParser termParser;
