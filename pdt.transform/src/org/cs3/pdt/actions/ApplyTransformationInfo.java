@@ -22,43 +22,35 @@ public class ApplyTransformationInfo extends PrologRefactoringInfo{
 	@Override
 	public void configure(PrologLibraryManager libman, PrologSession s)
 			throws PrologInterfaceException {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public String getName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getParameterTerm() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public PrologInterface getPrologInterace() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getRefactoringId() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getSelectionTerm() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Option[] getOptions() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

@@ -24,14 +24,9 @@ public class RenameFile implements IEditorActionDelegate{
 	private IEditorPart editor;
 	private IFile selectedFile;
 
-	public RenameFile() {
-		// TODO Auto-generated constructor stub
-	}
-
 	@Override
 	public void setActiveEditor(IAction action, IEditorPart targetEditor) {
 		this.editor=targetEditor;
-		
 	}
 
 	@Override

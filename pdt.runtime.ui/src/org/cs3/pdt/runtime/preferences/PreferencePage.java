@@ -4,8 +4,8 @@ import java.util.Set;
 
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.jface.preference.BooleanFieldEditor;

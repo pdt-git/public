@@ -50,44 +50,24 @@ package org.cs3.pl.prolog;
  */
 public class PrologInterfaceException extends Exception {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1298404946804072338L;
 
-    
 
-    /**
-     * 
-     */
     public PrologInterfaceException() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param message
-     */
+
     public PrologInterfaceException(String message) {
         super(message);
-        // TODO Auto-generated constructor stub
     }
-
-    /**
-     * @param cause
-     */
+    
     public PrologInterfaceException(Throwable cause) {
         super(cause);
-        // TODO Auto-generated constructor stub
     }
 
-    /**
-     * @param message
-     * @param cause
-     */
     public PrologInterfaceException(String message, Throwable cause) {
         super(message, cause);
-        // TODO Auto-generated constructor stub
-    }
+     }
 
 }

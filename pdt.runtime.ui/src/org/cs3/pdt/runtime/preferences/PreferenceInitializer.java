@@ -1,8 +1,8 @@
 package org.cs3.pdt.runtime.preferences;
 
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
-import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUI;
+import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;

@@ -58,7 +58,6 @@ import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
-import org.cs3.pdt.internal.actions.SpyPointActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
 import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
