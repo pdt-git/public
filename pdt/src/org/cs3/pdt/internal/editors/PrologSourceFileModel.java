@@ -3,6 +3,8 @@ package org.cs3.pdt.internal.editors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.cs3.pdt.internal.views.lightweightOutline.PrologPredicate;
+
 public class PrologSourceFileModel {
 	
 	public PrologSourceFileModel(List<PrologPredicate> predicates, String file) {
