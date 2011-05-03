@@ -16,7 +16,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		setSearchType("Definitions and declarations of");
 	}
 
-	protected String getCategoryDescription(GoalData goal, String category)  {
+	protected String getCategoryDescription(Goal goal, String category)  {
 		return category + " of "+goal.getName()+"/"+goal.getArity()+" in '"+goal.getModule()+"'";
 	}
 
