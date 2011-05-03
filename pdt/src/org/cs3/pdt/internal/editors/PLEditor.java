@@ -661,7 +661,7 @@ public class PLEditor extends TextEditor {
 	}
 
 	/**
-	 * Checks if the character at position l is a delimiting dot, meaning  it is not enclosed by
+	 * Checks if the character at position l is a delimiting dot, meaning it is not enclosed by
 	 *  <ul>
 	 *    <li>parentheses</li>
 	 *    <li>numbers</li>
