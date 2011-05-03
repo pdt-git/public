@@ -44,7 +44,7 @@
 :- module(pdtplugin,[
     pdt_reload/1,  
     find_definitions_categorized/8, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
-    find_primary_definition_visible_in/6, % (EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine)
+    find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
     get_pred/7,
     find_pred/8,
     predicates_with_property/3,
@@ -206,12 +206,32 @@ visibility(local, ContextModule,Name,Arity,DeclModule) :-
 % Used for the open declaration action in 
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
-find_primary_definition_visible_in(EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine):-
-    find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations),
+% The second argument is just an atom contianing the string representation of the term:     
+find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+    atom_to_term(TermString,Term,_Bindings),
+    find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine).
+ 
+% Now the second argument is a real term:     
+find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
+    extract_file_spec(Term,FileSpec),
+    absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File),
+    access_file(File, read),
+    !,
+    Line=1.
+    
+find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+    find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
     primary_location(Locations,DefiningModule,MainFile,FirstLine).
 
 
-find_definition_visible_in___(EnclFile,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
+% Work regardelessly whether the user selected the entire consult/use_module
+% statement or just the file spec. Does NOT work if he only selected a file
+% name within an alias but not the complete alias.
+extract_file_spec(consult(FileSpec),FileSpec) :- !.
+extract_file_spec(use_module(FileSpec),FileSpec) :- !.
+extract_file_spec(Term,Term).
+    
+find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
     -> true                            % Explicit module reference
@@ -247,7 +267,7 @@ primary_location(Locations,_,File,FirstLine) :-
          * for "Open Primary Declaration" (F3) action                          *
          ***********************************************************************/ 
          
-%% TODO: This is meanwhile subsumed by other predicates. Integrate!
+% TODO: This is meanwhile subsumed by other predicates. Integrate!
    
 %% find_definition_contained_in(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
 %
@@ -363,7 +383,8 @@ predicate_manual_entry(_Module,Pred,Arity,Content) :-
     online_help:line_start(FromLine, From),
     online_help:line_start(ToLine, To),
     online_help:online_manual_stream(Manual),
-    new_memory_file(Handle),open_memory_file(Handle, write, MemStream),
+    new_memory_file(Handle),
+    open_memory_file(Handle, write, MemStream),
     seek(Manual,From,bof,_NewOffset),
     Range is To - From,
     online_help:copy_chars(Range, Manual, MemStream),
