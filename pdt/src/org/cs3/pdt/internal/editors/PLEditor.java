@@ -64,7 +64,7 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
-import org.cs3.pl.metadata.GoalDataProvider;
+import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
@@ -614,7 +614,7 @@ public class PLEditor extends TextEditor {
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
 
-		return GoalDataProvider.getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
+		return GoalProvider.getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
 	}
 
 	public TextSelection getSelection() {
