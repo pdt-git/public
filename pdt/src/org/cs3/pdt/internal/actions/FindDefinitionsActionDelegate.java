@@ -46,7 +46,7 @@ import java.util.ResourceBundle;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.internal.search.CategorizedDefinitionsSearchQuery;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -61,7 +61,7 @@ public class FindDefinitionsActionDelegate extends SearchActionDelegate {
 	}
 
 	protected ISearchQuery connectSearchQuery(IPrologProject plProject,
-			GoalData data) {
+			Goal data) {
 		ISearchQuery query = new CategorizedDefinitionsSearchQuery(plProject==null?null:plProject.getMetadataPrologInterface(),data);
 		return query;
 	}
