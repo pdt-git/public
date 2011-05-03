@@ -20,46 +20,33 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PrologSourceFileModel;
-import org.cs3.pdt.internal.editors.StringMatcher;
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.jdt.ui.IWorkingCopyProvider;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 //import org.eclipse.jface.bindings.keys.SWTKeySupport;
@@ -76,7 +63,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	private OutlineContentProvider fOutlineContentProvider;
 	private PrologSourceFileModel fInput= null;
 
-	private OutlineSorter fOutlineSorter;
+	private ViewerComparator fOutlineSorter;
 
 	private OutlineLabelProvider fInnerLabelProvider;
 
@@ -88,259 +75,8 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	 * Category filter action group.
 	 * @since 3.2
 	 */
-	private String fPattern;
+	String fPattern;
 	private IDocument document;
-
-	private class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, IStyledLabelProvider {
-		@Override
-		public String getText(Object element) {
-			PrologPredicate prologPredicate = (PrologPredicate)element;
-			return prologPredicate.name  +"/" + prologPredicate.arity;
-		}
-
-		@Override
-		public Image getImage(Object element) {
-			PrologPredicate prologPredicate = (PrologPredicate) element;
-
-			if (prologPredicate.isPublic()) {
-				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
-			}
-			return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
-		}
-
-	@Override
-	public Color getForeground(Object element) {
-		PrologPredicate prologPredicate = (PrologPredicate) element;
-		if(prologPredicate.multifile) {
-			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-		}
-		return null;
-	}
-
-	@Override
-	public Color getBackground(Object element) {
-		PrologPredicate prologPredicate = (PrologPredicate) element;
-		if(prologPredicate.dynamic) {
-			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		}
-		return null;
-	}
-
-	}
-
-
-	private class OutlineTreeViewer extends TreeViewer {
-
-		private boolean fIsFiltering= false;
-
-		private OutlineTreeViewer(Tree tree) {
-			super(tree);
-
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		protected Object[] getFilteredChildren(Object parent) {
-			Object[] result = getRawChildren(parent);
-			int unfilteredChildren= result.length;
-			ViewerFilter[] filters = getFilters();
-			if (filters != null) {
-				for (int i= 0; i < filters.length; i++)
-					result = filters[i].filter(this, parent, result);
-			}
-			fIsFiltering= unfilteredChildren != result.length;
-			return result;
-		}
-
-	
-
-		
-	}
-
-
-	private class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvider  {
-
-
-		/**
-		 * Creates a new Outline content provider.
-		 *
-		 * @param showInheritedMembers <code>true</code> iff inherited members are shown
-		 */
-		private OutlineContentProvider() {
-
-
-		}
-
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public Object[] getChildren(Object element) {
-			if(element instanceof PrologSourceFileModel){
-				return ((PrologSourceFileModel)element).getPredicates().toArray();
-			}
-			return null;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public void dispose() {
-
-		}
-
-
-		@Override
-		public boolean providesWorkingCopies() {
-			return false;
-		}
-
-
-		@Override
-		public Object[] getElements(Object element) {
-			if(element instanceof PrologSourceFileModel){
-				return ((PrologSourceFileModel)element).getPredicates().toArray();
-			}
-			return null;
-		}
-
-
-		@Override
-		public Object getParent(Object element) {
-			return null;
-		}
-
-
-		@Override
-		public boolean hasChildren(Object element) {
-			return false;
-		}
-	}
-
-
-
-
-	private class OutlineSorter extends ViewerComparator  {
-
-	}
-
-
-	private class LexicalSortingAction extends Action {
-
-		private static final String STORE_LEXICAL_SORTING_CHECKED= "LexicalSortingAction.isChecked"; //$NON-NLS-1$
-
-		private TreeViewer fOutlineViewer;
-
-		private LexicalSortingAction(TreeViewer outlineViewer) {
-			super("lexicalsorting"/*TextMessages.JavaOutlineInformationControl_LexicalSortingAction_label*/, IAction.AS_CHECK_BOX);
-			setToolTipText("lexicalsorting");//TextMessages.JavaOutlineInformationControl_LexicalSortingAction_tooltip);
-			setDescription("lexicalsorting");//TextMessages.JavaOutlineInformationControl_LexicalSortingAction_description);
-
-
-			fOutlineViewer= outlineViewer;
-
-//			boolean checked=getDialogSettings().getBoolean(STORE_LEXICAL_SORTING_CHECKED);
-			//TODO
-			setChecked(true);
-//			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
-		}
-
-		public void run() {
-			valueChanged(isChecked(), true);
-		}
-
-		private void valueChanged(final boolean on, boolean store) {
-			setChecked(on);
-			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
-				public void run() {
-					fOutlineViewer.refresh(false);
-				}
-			});
-
-			if (store)
-				getDialogSettings().put(STORE_LEXICAL_SORTING_CHECKED, on);
-		}
-	}
-
-
-	private class SortByDefiningTypeAction extends Action {
-
-		private static final String STORE_SORT_BY_DEFINING_TYPE_CHECKED= "SortByDefiningType.isChecked"; //$NON-NLS-1$
-
-		private TreeViewer fOutlineViewer;
-
-		/**
-		 * Creates the action.
-		 *
-		 * @param outlineViewer the outline viewer
-		 */
-		private SortByDefiningTypeAction(TreeViewer outlineViewer) {
-			//TRHO:TODO
-			super("sort");//TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_label);
-//			setDescription(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_description);
-//			setToolTipText(TextMessages.JavaOutlineInformationControl_SortByDefiningTypeAction_tooltip);
-//
-//			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.gif"); //$NON-NLS-1$
-
-			fOutlineViewer= outlineViewer;
-
-//			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
-
-			//boolean state= getDialogSettings().getBoolean(STORE_SORT_BY_DEFINING_TYPE_CHECKED);
-			setChecked(false);
-		}
-
-		/*
-		 * @see Action#actionPerformed
-		 */
-		public void run() {
-			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
-				public void run() {
-//					fInnerLabelProvider.setShowDefiningType(isChecked());
-					getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
-
-					setMatcherString(fPattern, false);
-					fOutlineViewer.refresh(true);
-
-					// reveal selection
-					Object selectedElement= getSelectedElement();
-					if (selectedElement != null)
-						fOutlineViewer.reveal(selectedElement);
-				}
-			});
-		}
-	}
-
-	/**
-	 * String matcher that can match two patterns.
-	 *
-	 * @since 3.2
-	 */
-	private static class OrStringMatcher extends StringMatcher {
-
-		private StringMatcher fMatcher1;
-		private StringMatcher fMatcher2;
-
-		private OrStringMatcher(String pattern1, String pattern2, boolean ignoreCase, boolean foo) {
-			super("", false, false); //$NON-NLS-1$
-			fMatcher1= new StringMatcher(pattern1, ignoreCase, false);
-			fMatcher2= new StringMatcher(pattern2, ignoreCase, false);
-		}
-
-		public boolean match(String text) {
-			return fMatcher2.match(text) || fMatcher1.match(text);
-		}
-
-	}
-
 
 	/**
 	 * Creates a new Java outline information control.
@@ -395,13 +131,13 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		//TODO
 		treeViewer.setLabelProvider(fInnerLabelProvider);
 
-		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
+		fLexicalSortingAction= new LexicalSortingAction(this, treeViewer);
 //		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
 		//fCategoryFilterActionGroup= new CategoryFilterActionGroup(treeViewer, getId(), getInputForCategories());
 
 		fOutlineContentProvider= new OutlineContentProvider();
 		treeViewer.setContentProvider(fOutlineContentProvider);
-		fOutlineSorter= new OutlineSorter();
+		fOutlineSorter= new ViewerComparator();
 		treeViewer.setComparator(fOutlineSorter);
 		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 
@@ -455,8 +191,8 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 					return;
 				}
 				session = console.getPrologInterface().getSession();
-				List<Map<String, Object>> result = session.queryAll("get_pred('" + fileName+"',"+
-						"Name,Arity,Line,Dynamic,Multifile,Public)");
+				String query = "get_pred('" + fileName+"',"+"Name,Arity,Line,Dynamic,Multifile,Public)";
+				List<Map<String, Object>> result = session.queryAll(query);
 
 				Set<String> names = new HashSet<String>();
 				for (Map<String, Object> predicate : result) {
@@ -568,6 +304,17 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 			e1.printStackTrace();
 		}
 		close();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.PopupDialog#getDialogSettings()
+	 */
+	@Override
+	// override for visibility reasons
+	//TODO: super call always returns null - maybe it's a good idea to redo this somehow
+	protected IDialogSettings getDialogSettings() {
+		return super.getDialogSettings();
 	}
 
 

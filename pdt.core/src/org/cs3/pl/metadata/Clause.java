@@ -42,6 +42,7 @@
 package org.cs3.pl.metadata;
 
 
+
 /**
  * A prolog clause handle.
  * 
@@ -65,24 +66,23 @@ package org.cs3.pl.metadata;
  * @author lukas
  *
  */
-public interface Clause {
+public class Clause extends PrologElement {
 
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * @return the location in the source code where this clause is 
-	 * defined.
-	 */
-	public SourceLocation getSourceLocation();
-		
-	public String getName();
+	public Clause(String module, String label, int arity, boolean pub,
+			boolean dynamic, boolean multifile, SourceLocation knownDefinition) {
+		super(module, label, arity, pub, dynamic, multifile, knownDefinition);
 	
-	public int getLength();
+	}
 
-	public int getArity();
-	
 	/**
 	 * @return a handle to the Predicate this clause contributes to.
 	 */
-	public Predicate getPredicate();
+	public Predicate getPredicate() {
+		return new Predicate(module,label,arity,pub,dynamic,multifile);
+	}
+
+	
 
 }

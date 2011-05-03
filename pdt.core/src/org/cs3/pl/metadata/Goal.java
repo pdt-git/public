@@ -41,20 +41,28 @@
 
 package org.cs3.pl.metadata;
 
-/**
- * WARNING: this is work in progress. 
- * 
- * 
- * @author lukas
- *
- */
-public interface Goal {
+public class Goal extends PrologElement {
 
-	public String getName();
+	private static final long serialVersionUID = 1L;
+	private String file;
+	private String termString;
 
-	public String getModule();
+	public Goal(String file, String module, String elementName, int arity, String termString) {
+		super(module, elementName, arity);
+		this.file=file;
+		this.termString = termString;
+	}
 
-	public int getArity();
+	public String getFile() {
+		return file;
+	}
 
-	public String getTermString();
+	public void setModule(String module) {
+		this.module=module;
+	}
+	
+	public String getTermString() {
+		return termString;
+	}
+
 }
