@@ -9,17 +9,19 @@
          target this more specifically. This way, we must have the
          refactoring itself decide whether the operation can run.
       -->
-    <viewerContribution targetID="org.cs3.pdt.internal.editors.PLEditor" 
+    <!-- Experimental PDT Refactoring actions by Lukas Degener. Yet unavailable. 
+      <viewerContribution targetID="org.cs3.pdt.internal.editors.PLEditor" 
                         id="org.cs3.pdt.transform.apply_transformation">
       <action label="Apply Transformation"
               class="org.cs3.pdt.actions.ApplyTransformation" 
               menubarPath="additions"
               id="org.cs3.pdt.actions.apply_transformation"/>
-	<action label="Rename File"
+	 <action label="Rename File"
               class="org.cs3.pdt.transform.internal.RenameFile" 
               menubarPath="additions"
               id="org.cs3.pdt.actions.rename_file"/>              
-    </viewerContribution>
+     </viewerContribution>
+    -->
   </extension>
    <extension
          point="org.eclipse.ui.menus">

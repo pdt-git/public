@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
@@ -15,14 +15,14 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 	private static final String MODULE_VAR = "RefModule";
 	private static final String FILE_VAR = "File";
 	
-	public ReferencesSearchQuery(PrologInterface pif, GoalData goal) {
+	public ReferencesSearchQuery(PrologInterface pif, Goal goal) {
 		super(pif, goal);
 		setSearchType("References to");
 	}
 
 	@Override
 	// find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefHead,RefFile,RefLine,Nth,Kind)
-	protected String buildSearchQuery(GoalData goal, String module) {
+	protected String buildSearchQuery(Goal goal, String module) {
 	 // String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ",'" + goal.getModule() + "'," +
 		String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ", " + module           + " ," +
 						FILE_VAR + "," +

@@ -50,11 +50,11 @@ import java.util.Set;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
-import org.cs3.pl.metadata.ClauseData;
+import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.metadata.PredicateData;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
@@ -123,7 +123,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			Map<String,Object> result = it.next();
 			boolean pub = Boolean.valueOf(result.get("Public").toString())
 					.booleanValue();
-			Predicate data = new PredicateData(module, result.get("Name")
+			Predicate data = new Predicate(module, result.get("Name")
 					.toString(), Integer.parseInt(result.get("Arity")
 					.toString()), pub, false, false);
 			list.add(data);
@@ -154,7 +154,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			sl.setOffset(Integer.parseInt(result.get("Pos").toString()));
 			sl.setEndOffset(sl.getOffset()
 					+ Integer.parseInt(result.get("Len").toString()));
-			Clause data = new ClauseData(result.get("Module").toString(),
+			Clause data = new Clause(result.get("Module").toString(),
 					result.get("Name").toString(), java.lang.Integer
 							.parseInt(result.get("Arity").toString()), Boolean
 							.valueOf(result.get("Public").toString())
@@ -219,7 +219,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				SourceLocation sl = new SourceLocation((String) m.get("File"),true);				
 				sl.setOffset(Integer.parseInt( (String) m.get("Pos")));
 				sl.setEndOffset(sl.getOffset()+Integer.parseInt( (String) m.get("Len")));				
-				result[i]=new ClauseData(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
+				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
 			}
 			return result;
 		} finally {
@@ -240,7 +240,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 	 */
 	@Override
 	public Predicate[] findPredicates(Goal g) throws PrologInterfaceException {
-		Set<PredicateData> result = new HashSet<PredicateData>();
+		Set<Predicate> result = new HashSet<Predicate>();
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 		try{
 			String query= "meta_data(File,"
@@ -262,7 +262,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				boolean pub = "1".equals(m.get("Pub"));
 				boolean dyn = "1".equals(m.get("Dyn"));
 				boolean mult = "1".equals(m.get("Mult"));
-				result.add(new PredicateData(module, label,arity,pub,dyn,mult));
+				result.add(new Predicate(module, label,arity,pub,dyn,mult));
 			}
 		}
 		finally{
