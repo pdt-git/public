@@ -53,7 +53,7 @@ import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -95,7 +95,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	@Override
 	public void run() {
 		try {
-			final GoalData goal = ((PLEditor) editor)
+			final Goal goal = ((PLEditor) editor)
 					.getSelectedPrologElement();
 			Shell shell = editor.getEditorSite().getShell();
 			if (goal == null) {
@@ -145,7 +145,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 
 	
 	
-	private void run_impl(GoalData goal, IFile file) throws CoreException {
+	private void run_impl(Goal goal, IFile file) throws CoreException {
 		IPrologProject plprj=null;
 		if(file!=null){ // external file
 			plprj = (IPrologProject) file.getProject().getNature(PDTCore.NATURE_ID);
@@ -212,7 +212,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		PrologInterface pif = plprj.getMetadataPrologInterface();
 		SourceLocation loc;
 		try {
-			loc = findFirstClausePosition((GoalData)goal,pif);
+			loc = findFirstClausePosition((Goal)goal,pif);
 			if(loc!=null){
 				PDTUtils.showSourceLocation(loc);
 			}
@@ -229,7 +229,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 	}
 
 	
-	private SourceLocation findFirstClausePosition(GoalData data, PrologInterface pif) throws PrologInterfaceException{
+	private SourceLocation findFirstClausePosition(Goal data, PrologInterface pif) throws PrologInterfaceException{
 		PrologSession session = null;
 		String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
 		

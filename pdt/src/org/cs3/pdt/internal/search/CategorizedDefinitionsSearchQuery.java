@@ -4,19 +4,19 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
 public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 
-	public CategorizedDefinitionsSearchQuery(PrologInterface pif, GoalData goal) {
+	public CategorizedDefinitionsSearchQuery(PrologInterface pif, Goal goal) {
 		super(pif, goal);
 		setSearchType("Definitions and declarations of");
 	}
 
-	protected String getCategoryDescription(GoalData goal, String category)  {
+	protected String getCategoryDescription(Goal goal, String category)  {
 		return category + " of "+goal.getName()+"/"+goal.getArity()+" in '"+goal.getModule()+"'";
 	}
 
@@ -33,7 +33,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 
 	@Override
-	protected String buildSearchQuery(GoalData goal, String module) {
+	protected String buildSearchQuery(Goal goal, String module) {
 
 		String query = "find_definitions_categorized('" 
 //			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +goal.getModule()+ "'," +
@@ -48,7 +48,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 			throws IOException {
 		
-                GoalData goal = getGoal();
+                Goal goal = getGoal();
         
 		        String definingModule = (String)m.get("DefiningModule");
 		        String contextModule = goal.getModule(); 
