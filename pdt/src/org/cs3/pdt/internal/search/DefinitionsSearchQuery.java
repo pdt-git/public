@@ -10,8 +10,6 @@ import org.eclipse.core.resources.IFile;
 
 public class DefinitionsSearchQuery extends PrologSearchQuery {
 	private static final String LINE_VAR = "Line";
-	private static final String ARITY_VAR = "Arity";
-	private static final String FUNCTOR_VAR = "Name";
 	private static final String FILE_VAR = "File";
 
 
@@ -19,7 +17,8 @@ public class DefinitionsSearchQuery extends PrologSearchQuery {
 		super(pif, goal);
 		setSearchType("Definitions of");
 	}
-	
+
+
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
 
