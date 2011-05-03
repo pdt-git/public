@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.editors;
+package org.cs3.pdt.internal.views.lightweightOutline;
 
 /*******************************************************************************
  * Copyright (c) 2000, 2009 IBM Corporation and others.
@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.editors.PrologSourceFileModel;
+import org.cs3.pdt.internal.editors.StringMatcher;
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -60,6 +62,8 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
+//import org.eclipse.jface.bindings.keys.SWTKeySupport;
+//import org.eclipse.jface.bindings.keys.KeySequence;
 
 /**
  * Show outline in light-weight control.
@@ -85,7 +89,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	 * @since 3.2
 	 */
 	private String fPattern;
-private IDocument document;
+	private IDocument document;
 
 	private class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, IStyledLabelProvider {
 		@Override
