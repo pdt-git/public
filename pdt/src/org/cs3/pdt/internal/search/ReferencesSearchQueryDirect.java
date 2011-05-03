@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
@@ -18,14 +18,14 @@ import org.eclipse.core.resources.IFile;
 public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 
 	
-	public ReferencesSearchQueryDirect(PrologInterface pif, GoalData goal) {
+	public ReferencesSearchQueryDirect(PrologInterface pif, Goal goal) {
 		super(pif, goal);
 		setSearchType("References to");
 	}
 
 
 	@Override
-	protected String buildSearchQuery(GoalData goal, String module) {
+	protected String buildSearchQuery(Goal goal, String module) {
 		String query = "find_reference_to('" 
 			             +goal.getName()+  "', " 
 			             +goal.getArity()+ " ,'" 

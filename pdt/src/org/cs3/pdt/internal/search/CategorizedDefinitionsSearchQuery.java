@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
@@ -15,13 +15,13 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 	private static final String FILE_VAR = "File";
 
 
-	public CategorizedDefinitionsSearchQuery(PrologInterface pif, GoalData goal) {
+	public CategorizedDefinitionsSearchQuery(PrologInterface pif, Goal goal) {
 		super(pif, goal);
 		setSearchType("Definitions of");
 	}
 	
 	@Override
-	protected String buildSearchQuery(GoalData goal, String module) {
+	protected String buildSearchQuery(Goal goal, String module) {
 
 		String query = "find_definition_visible_in('"
 //			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +goal.getModule()+ "'," +
@@ -36,7 +36,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 			throws IOException {
 		
-                GoalData goal = getGoal();
+                Goal goal = getGoal();
         
 		        String module = goal.getModule();
 		        String name =  goal.getName();
