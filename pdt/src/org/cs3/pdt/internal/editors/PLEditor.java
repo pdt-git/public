@@ -63,7 +63,7 @@ import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalDataProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -606,7 +606,7 @@ public class PLEditor extends TextEditor {
 	/**
 	 * @return
 	 */
-	public GoalData getSelectedPrologElement() throws BadLocationException {
+	public Goal getSelectedPrologElement() throws BadLocationException {
 		Document document = (Document) getDocumentProvider().getDocument(
 				getEditorInput());
 

@@ -52,7 +52,7 @@ import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.metadata.GoalData;
+import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -68,12 +68,12 @@ import org.eclipse.search.ui.ISearchResult;
 
 public abstract class PrologSearchQuery implements ISearchQuery {
 
-	private GoalData goal;
+	private Goal goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
 	private CategoryHandler categoryHandler;
 
-	public PrologSearchQuery(PrologInterface pif, GoalData goal) {
+	public PrologSearchQuery(PrologInterface pif, Goal goal) {
 		this.goal = goal;
 		this.pif=pif;
 		result = new PrologSearchResult(this, goal);
@@ -174,7 +174,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		}
 	}
 	
-	abstract protected String buildSearchQuery(GoalData goal, String module);
+	abstract protected String buildSearchQuery(Goal goal, String module);
 
 	protected List<Map<String, Object>> getResultForQuery(PrologSession session, String query) 
 			throws PrologInterfaceException {
@@ -308,11 +308,11 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		categoryHandler.addMatchToCategory(match, categoryName);
 	}
 
-	protected void setGoal(GoalData goal) {
+	protected void setGoal(Goal goal) {
 		this.goal = goal;
 	}
 
-	protected GoalData getGoal() {
+	protected Goal getGoal() {
 		return goal;
 	}
 	

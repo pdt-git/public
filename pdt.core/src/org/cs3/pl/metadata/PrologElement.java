@@ -49,7 +49,7 @@ import java.util.Comparator;
  * a tuple describing a logical prolog element like a predicate or a module..
 
  */
-public class PrologElementData implements Serializable, Comparable<PrologElementData>{
+public class PrologElement implements Serializable, Comparable<PrologElement>{
 
 	/**
      * Comment for <code>serialVersionUID</code>
@@ -77,7 +77,7 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 	 * @param name
 	 * @param arity
 	 */
-	protected PrologElementData(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile, SourceLocation knownDefinition) {
+	protected PrologElement(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile, SourceLocation knownDefinition) {
 		this.pub = pub;
 		this.label = label;
 		this.arity = arity;
@@ -94,7 +94,7 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 	 * @param name
 	 * @param arity
 	 */
-	protected PrologElementData(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile) {
+	protected PrologElement(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile) {
 		this.pub = pub;
 		this.label = label;
 		this.arity = arity;
@@ -112,7 +112,7 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 	 * @param elementName
 	 * @param arity if arity is -1 the element is a module.
 	 */
-	protected PrologElementData(String module,String elementName, int arity) {
+	protected PrologElement(String module,String elementName, int arity) {
 		this.module=module;
 		label = elementName;
 		this.arity = arity;
@@ -130,8 +130,8 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 		if(obj==null){
 			return false;
 		}
-		if(obj instanceof PrologElementData){
-			return ((PrologElementData)obj).getSignature().equals(getSignature());
+		if(obj instanceof PrologElement){
+			return ((PrologElement)obj).getSignature().equals(getSignature());
 		}
 		return super.equals(obj);
 	}
@@ -208,11 +208,11 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 	
 	
 
-	static public Comparator<PrologElementData> getComparator() {
-		return new Comparator<PrologElementData>() {
+	static public Comparator<PrologElement> getComparator() {
+		return new Comparator<PrologElement>() {
 
 			@Override
-			public int compare(PrologElementData arg0, PrologElementData arg1) {
+			public int compare(PrologElement arg0, PrologElement arg1) {
 				return arg0.getSignature().compareTo(
 						arg1.getSignature());
 			}
@@ -221,7 +221,7 @@ public class PrologElementData implements Serializable, Comparable<PrologElement
 	}
 	
 	@Override
-	public int compareTo(PrologElementData arg0) {
+	public int compareTo(PrologElement arg0) {
 		return getSignature().compareTo(((Predicate)arg0).getSignature());
 	}
 	

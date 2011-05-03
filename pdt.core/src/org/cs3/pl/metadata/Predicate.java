@@ -41,7 +41,6 @@
 
 package org.cs3.pl.metadata;
 
-
 /**
  * A handle Prolog predicate.
  * 
@@ -64,7 +63,9 @@ package org.cs3.pl.metadata;
  * @author lukas
  *
  */
-public interface Predicate {
+public class Predicate extends PrologElement {
+	
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * predicate property exported.
@@ -112,49 +113,27 @@ public interface Predicate {
 	 * null means absence of knowledge, i.e. either may be true.
 	 */	
 	public final static String MODULE_TRANSPARENT = "module_transparent";
+
 	
-	
+	public Predicate(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile){
+		super(module,label, arity,pub, dynamic, multifile);
+	}
+
 	/**
 	 * 
 	 * @param the property name.
 	 * @return the property value or null if the property is not set.
 	 */
-	public String getPredicateProperty(String property);
-	
-	public void setPredicateProperty(String property, String value);
-	
-	/**
-	 *  
-	 * @return the signature of the predicate:
-	 * name/arity.
-	 */
-	public String getSignature();
-
-	/**
-	 * get the predicate name.
-	 * 
-	 *  really only the name atom. No arity, no module.
-	 *  e.g. for the builtin system:current_thread/2, this method 
-	 *  returns "current_thread" 
-	 * 
-	 * @return the predicate name.
-	 */
-	public String getName();
-	
-	/**
-	 * @return the arity, i.e. number of arguments of this predicate.
-	 */
-	public int getArity();
-
-	/**
-	 * @return the definition module of this predicate.
-	 */
-	public String getModule();
-	
-	public boolean isDynamic();
-
-	public boolean isMultifile();
-
-	public boolean isPublic();
-
+	public String getPredicateProperty(String property) {
+		if (EXPORTED.equals(property)) {
+			return isPublic()&&! "user".equals(getModule()) ? "true":"false";
+		}
+		if (DYNAMIC.equals(property)){
+			return isDynamic()?"true":"false";
+		}
+		if (MULTIFILE.equals(property)){
+			return isMultifile()?"true":"false";
+		}
+		return null;
+	}
 }

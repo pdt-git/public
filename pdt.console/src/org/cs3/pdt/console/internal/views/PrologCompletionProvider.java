@@ -52,7 +52,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.metadata.PredicateData;
+import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
@@ -197,7 +197,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 				Map<String,Object> result = it.next();
 				boolean pub = Boolean.valueOf(result.get("Public").toString())
 						.booleanValue();
-				Predicate data = new PredicateData(module, result.get("Name")
+				Predicate data = new Predicate(module, result.get("Name")
 						.toString(), Integer.parseInt(result.get("Arity")
 						.toString()), pub, false, false);
 				list.add(data);
