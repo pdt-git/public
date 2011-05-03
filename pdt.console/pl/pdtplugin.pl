@@ -43,6 +43,7 @@
 
 :- module(pdtplugin,[
     pdt_reload/1,  
+    find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
     find_definitions_categorized/8, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
     find_primary_definition_visible_in/6, % (EnclFile,Name,Arity,ReferencedModule,MainFile,FirstLine)
     get_pred/7,
@@ -63,7 +64,11 @@
 :- use_module(library('http/html_write')).
 
 :- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
+
+:- consult(org_cs3_lp_utils(general)).
 :- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
+
              
                /**********************************
                 * TODOs for EVA after WLPE paper *
@@ -271,7 +276,6 @@ find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported) :-
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
     defined_in_file(Module,Name,Arity,_Nth,File,Line).
-
 
 
                /***********************************************
