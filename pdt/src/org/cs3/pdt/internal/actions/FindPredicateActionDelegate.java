@@ -175,7 +175,9 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						module ="'"+ goal.getModule()+ "'";
 					
 					String query = "find_primary_definition_visible_in('"
-						+enclFile+"','" + goal.getName()+"'," + goal.getArity()+ "," + module + ",File,Line)";
+						+enclFile+"','" + goal.getTermString() + "','" + goal.getName()+"'," + goal.getArity()+ ","
+						+module 
+						+",File,Line)";
 					Debug.info("open declaration: " + query);
 //					List<Map<String, Object>> clauses = session.queryAll(query);
 //					if(clauses.size()>0) {
