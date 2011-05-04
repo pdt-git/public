@@ -58,7 +58,7 @@ public class Goal extends PrologElement {
 	}
 
 	public void setModule(String module) {
-		this.module=module;
+		this.contextModule=module;
 	}
 	
 	public String getTermString() {

@@ -3,7 +3,7 @@ package org.cs3.pdt.internal.views;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IElementComparer;
 
-final class PrologOutlineComparer implements IElementComparer {
+public final class PrologOutlineComparer implements IElementComparer {
 	@Override
 	public int hashCode(Object element) {
 		if (element instanceof Predicate) {

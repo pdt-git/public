@@ -71,8 +71,8 @@ public class Clause extends PrologElement {
 	private static final long serialVersionUID = 1L;
 
 	public Clause(String module, String label, int arity, boolean pub,
-			boolean dynamic, boolean multifile, SourceLocation knownDefinition) {
-		super(module, label, arity, pub, dynamic, multifile, knownDefinition);
+			boolean dynamic, boolean multifile) {
+		super(module, label, arity, pub, dynamic, multifile);
 	
 	}
 
@@ -80,7 +80,7 @@ public class Clause extends PrologElement {
 	 * @return a handle to the Predicate this clause contributes to.
 	 */
 	public Predicate getPredicate() {
-		return new Predicate(module,label,arity,pub,dynamic,multifile);
+		return new Predicate(contextModule,functorName,arity,pub,dynamic,multifile);
 	}
 
 	
