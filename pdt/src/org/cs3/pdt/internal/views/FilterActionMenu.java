@@ -22,11 +22,9 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 
-final class FilterActionMenu extends Action implements IMenuCreator,
+public final class FilterActionMenu extends Action implements IMenuCreator,
 		IWorkbenchWindowPulldownDelegate2 {
 	private Menu fCreatedMenu;
-
-	
 
 	private Object fAction;
 

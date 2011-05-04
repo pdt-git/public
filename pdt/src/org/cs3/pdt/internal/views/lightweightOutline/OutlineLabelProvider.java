@@ -11,13 +11,13 @@ import org.eclipse.ui.PlatformUI;
 class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, IStyledLabelProvider {
 	@Override
 	public String getText(Object element) {
-		PrologPredicate prologPredicate = (PrologPredicate)element;
-		return prologPredicate.name  +"/" + prologPredicate.arity;
+		OutlinePredicate prologPredicate = (OutlinePredicate)element;
+		return prologPredicate.getName()  +"/" + prologPredicate.getArity();
 	}
 
 	@Override
 	public Image getImage(Object element) {
-		PrologPredicate prologPredicate = (PrologPredicate) element;
+		OutlinePredicate prologPredicate = (OutlinePredicate) element;
 
 		if (prologPredicate.isPublic()) {
 			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
@@ -27,8 +27,8 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, I
 
 @Override
 public Color getForeground(Object element) {
-	PrologPredicate prologPredicate = (PrologPredicate) element;
-	if(prologPredicate.multifile) {
+	OutlinePredicate prologPredicate = (OutlinePredicate) element;
+	if(prologPredicate.isMultifile()) {
 		return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
 	}
 	return null;
@@ -36,8 +36,8 @@ public Color getForeground(Object element) {
 
 @Override
 public Color getBackground(Object element) {
-	PrologPredicate prologPredicate = (PrologPredicate) element;
-	if(prologPredicate.dynamic) {
+	OutlinePredicate prologPredicate = (OutlinePredicate) element;
+	if(prologPredicate.isDynamic()) {
 		return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
 	}
 	return null;
