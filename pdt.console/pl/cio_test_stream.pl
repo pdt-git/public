@@ -177,10 +177,10 @@ clear_records:-
 
 all_records(List):-
     findall(Record,recorded(cio_callbacks,Record),List).
- 		
-%:-do_test_read.
-:-do_test_write.
-%:-do_test_rawtty.
-%:-do_test_mixed_read.
-:-forall(recorded(cio_callbacks,Record),writeln(Record)).
-:-halt.
+% 		
+%%:-do_test_read.
+%:-do_test_write.
+%%:-do_test_rawtty.
+%%:-do_test_mixed_read.
+%:-forall(recorded(cio_callbacks,Record),writeln(Record)).
+%:-halt.

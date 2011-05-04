@@ -30,23 +30,31 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return ImageRepository.getImage(ImageRepository.FILE);
 		} else if (element instanceof PrologMatch) {
 			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
-			return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
+			return setCategoryImage(sharedImagaes);
 		} else if(element instanceof ModuleSearchDummy){
 			return ImageRepository.getImage(ImageRepository.PE_MODULE);
 		} else if (element instanceof SearchResultCategory) {
 			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
 			return sharedImagaes.getImage(ISharedImages.IMG_OBJ_ADD);
 		} else if(element instanceof PredicateElement){
-			PredicateElement pe = (PredicateElement) element;
-			if("this_pred_ref".equals(pe.getModule())){
-				return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
-			}
-			if("unresolved_pred_ref".equals(pe.getModule())){
-				return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
-			}
-			return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
+			return setPredicateImage(element);
 		} 
 		return null;
+	}
+
+	private Image setPredicateImage(Object element) {
+		PredicateElement pe = (PredicateElement) element;
+		if("this_pred_ref".equals(pe.getModule())){
+			return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
+		}
+		if("unresolved_pred_ref".equals(pe.getModule())){
+			return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
+		}
+		return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
+	}
+
+	private Image setCategoryImage(ISharedImages sharedImagaes) {
+		return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
 	}
 
 	@Override
