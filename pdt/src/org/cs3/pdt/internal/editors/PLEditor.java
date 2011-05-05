@@ -636,7 +636,11 @@ public class PLEditor extends TextEditor {
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
 
-		return GoalProvider.getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
+		return GoalProvider.getPrologDataFromOffset(getPrologFileName(), document, offset);
+	}
+
+	public String getPrologFileName() {
+		return Util.prologFileName(filepath.toFile());
 	}
 
 	public TextSelection getSelection() {

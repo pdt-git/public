@@ -152,7 +152,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	public void setInput(Object information) {
 		if(information instanceof String) {
 			String fileName = (String)information;
-			List<OutlinePredicate> predicates = getPredicatesForFile(fileName, getShell());
+			List<OutlinePredicate> predicates = getPredicatesForFile(fileName/*, getShell()*/);
 
 			PrologSourceFileModel model = new PrologSourceFileModel(predicates);
 			inputChanged(model, predicates.size()>0?predicates.get(0):null);
@@ -168,7 +168,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 
 	}
 
-	public static List<OutlinePredicate> getPredicatesForFile(String fileName, Shell shell) {
+	public static List<OutlinePredicate> getPredicatesForFile(String fileName/*, Shell shell*/) {
 		List<OutlinePredicate> predicates= new ArrayList<OutlinePredicate>();
 		PrologSession session=null;
 		try {
