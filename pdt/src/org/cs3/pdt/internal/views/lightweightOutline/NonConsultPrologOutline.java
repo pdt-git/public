@@ -178,20 +178,26 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	
 	
 	public void setInput(Object information) {
-		String fileName="";
+//		String fileName="";
+		
+		String fileName = editor.getPrologFileName();
 		model = null;
-		if (information instanceof IEditorInput) {
-			input = ((IEditorInput) information);
-			fileName = ((IEditorInput) information).getName();
-		}
-		if (information instanceof String) {
-			fileName = (String)information;
-		}
+//		if (information instanceof IEditorInput) {
+//			input = ((IEditorInput) information);
+//			fileName = ((IEditorInput) information).getName();
+//			String string = ((IEditorInput)information).toString();
+//			IDocument doc = editor.getDocumentProvider().getDocument(input);
+//			String string2 = doc.toString();
+//			fileName =((IEditorInput) information).getToolTipText();
+//		}
+//		if (information instanceof String) {
+//			fileName = (String)information;
+//		}
 		if (fileName != "") {
 			try {
-				Shell shell = getSite().getShell();				
+				//Shell shell = getSite().getShell();				
 			// TODO: Eva: das aus PrologOutlineInformatinControl befreien soweit möglich
-				List<OutlinePredicate> predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName, shell);
+				List<OutlinePredicate> predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName/*, shell*/);
 
 				model = new PrologSourceFileModel(predicates);
 			} catch(Exception e) {
