@@ -85,7 +85,8 @@ public class QueryConsoleThreadAction extends Action{
 	@Override
 	public void run() {
 		try {
-			Job j = new Job(getToolTipText()) {
+			String name = getToolTipText();
+			Job j = new Job(name) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {

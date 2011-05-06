@@ -92,9 +92,9 @@ public class PLEditorTest extends TestCase {
 		assertEquals("test",data.getName());
 		assertEquals(12,data.getArity());
 
-		document = new Document("type: ");
-		data = GoalProvider.getPrologDataFromOffset(null,document, 3);
-		assertEquals("type",data.getName());
-		assertEquals(-1,data.getArity());
+//		document = new Document("type: ");
+//		data = GoalProvider.getPrologDataFromOffset(null,document, 3);
+//		assertEquals("type",data.getName());
+//		assertEquals(-1,data.getArity());
 	}
 }

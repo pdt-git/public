@@ -204,7 +204,10 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 				
 			}
 		}
-		getTreeViewer().setInput(model);
+		TreeViewer treeViewer = getTreeViewer();
+		if (treeViewer != null) {
+			treeViewer.setInput(model);
+		}
 //		inputChanged(model, predicates.size()>0?predicates.get(0):null);
 	}
 
