@@ -64,6 +64,8 @@ import org.cs3.pdt.internal.views.lightweightOutline.NonConsultPrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.console.ConsoleModel;
+import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
@@ -170,9 +172,7 @@ public class PLEditor extends TextEditor {
 						session.queryOnce("activate_warning_and_error_tracing");
 
 						file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						ConsultActionDelegate consult = new ConsultActionDelegate();
-						consult.setSchedulingRule(file);
-						consult.run(null);
+						executeConsult();
 						addMarkers(file);
 						
 					}catch(Exception e) {
@@ -467,8 +467,7 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				ConsultActionDelegate consult = new ConsultActionDelegate();
-				consult.run(null);
+				executeConsult();
 			}
 		};
 		addAction(menuMgr, reloadAction, "(Re)consult",
@@ -522,6 +521,34 @@ public class PLEditor extends TextEditor {
 				menuMgr.createContextMenu(getSourceViewer().getTextWidget()));
 		getEditorSite().registerContextMenu(menuMgr, getSelectionProvider());
 		return menuMgr;
+	}
+
+	private void executeConsult() {
+		IFile file = ((IFileEditorInput)getEditorInput()).getFile();
+		ConsultActionDelegate consult = new ConsultActionDelegate();
+		consult.setSchedulingRule(file);
+		consult.run(null);
+		Job j = new Job(consult.getToolTipText()) {
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				try {
+					if (fOutlinePage != null) {
+						fOutlinePage.setInput(getEditorInput());
+					}
+				} catch (Throwable e) {
+					Debug.report(e);
+					return Status.CANCEL_STATUS;
+				} finally {
+					monitor.done();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+
+		if(file != null) {
+			j.setRule(file);
+		}
+		j.schedule();
 	}
 
 	/**
@@ -716,19 +743,6 @@ public class PLEditor extends TextEditor {
 		super.doSetInput(input);
 	
 		filepath = new Path(UIUtils.getFileNameForEditorInput(input));
-//		if (input instanceof IFileEditorInput) {
-//			IFileEditorInput editorInput = (IFileEditorInput) input;
-//			filepath = editorInput.getFile().getLocation();
-//			
-//		}
-//		if (input instanceof FileStoreEditorInput){
-//			FileStoreEditorInput editorInput = (FileStoreEditorInput) input;
-//			filepath =  new Path(editorInput.getURI().getPath());
-//		}
-//		else{
-//			return;
-//		}
-		
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {
