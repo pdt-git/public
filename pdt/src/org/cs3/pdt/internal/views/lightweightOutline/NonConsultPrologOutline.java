@@ -75,8 +75,10 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -98,7 +100,6 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
 	private PrologSourceFileModel model;
-	private boolean convertPositions;
 	private PLEditor editor;
 	private ILabelProvider labelProvider;
 	private PrologOutlineFilter[] filters;
@@ -121,8 +122,6 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 		
 		labelProvider = new OutlineLabelProvider();
 		viewer.setLabelProvider(labelProvider);
-
-		this.convertPositions = true;
 
 		viewer.setComparer(new PrologOutlineComparer());
 
@@ -180,6 +179,7 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	public void setInput(Object information) {
 //		String fileName="";
 		
+		// TODO: Eva: so umbauen, dass information genommen wird (was aber fast das selbe ist)
 		String fileName = editor.getPrologFileName();
 		model = null;
 //		if (information instanceof IEditorInput) {
@@ -211,50 +211,25 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
-	
+
+		Object elem = getFirstSelectedElement(event);
+		if ((elem != null) && (elem instanceof OutlinePredicate)) { 
+			OutlinePredicate predicate = (OutlinePredicate)elem;
+			editor.gotoLine(predicate.getLine());
+		}
+	}
+
+	private Object getFirstSelectedElement(final SelectionChangedEvent event) {
 		if(event.getSelection().isEmpty()){
-			return;
+			return null;
 		}
 		if(!(event.getSelection() instanceof IStructuredSelection)){
-			return;
+			return null;
 		}
-		
 		IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-		Object elm = selection.getFirstElement();
-		if(elm==null||!(elm instanceof PEFNode)){
-			return;
-		}
-		PEFNode node = (PEFNode)elm;
-		int startOffset = node.getStartPosition();
-		int endOffset = node.getEndPosition();
-		if (convertPositions) {
-			IDocument doc = editor.getDocumentProvider()
-					.getDocument(input);
-			if (doc == null) {
-				// wunder, gr�bel,...
-				Debug.debug("Debug: input=" + input);
-			}
-			try {
-				startOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-						startOffset);
-				endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-						endOffset);
-				Debug.debug(">>"
-						+ doc.get(startOffset, endOffset - startOffset) + "<<");
-				Debug.debug(">>>" + doc.get().substring(startOffset, endOffset)
-						+ "<<<");
-			} catch (BadLocationException e) {
-				Debug.warning("bad location: "+startOffset+", "+endOffset);
-			}
-		}
+		Object elem = selection.getFirstElement();
 
-		if (startOffset >= 0 && endOffset >= 0) {
-			PLEditor editor = ((PLEditor) UIUtils.getActiveEditor());
-			if(editor==null){
-				return ;
-			}
-			editor.selectAndReveal(startOffset, endOffset - startOffset);
-		}
+		return elem;
 	}
 
 	public PrologOutlineFilter[] getAvailableFilters() {
