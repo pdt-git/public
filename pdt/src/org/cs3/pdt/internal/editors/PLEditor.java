@@ -528,27 +528,15 @@ public class PLEditor extends TextEditor {
 		ConsultActionDelegate consult = new ConsultActionDelegate();
 		consult.setSchedulingRule(file);
 		consult.run(null);
-		Job j = new Job(consult.getToolTipText()) {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					if (fOutlinePage != null) {
-						fOutlinePage.setInput(getEditorInput());
-					}
-				} catch (Throwable e) {
-					Debug.report(e);
-					return Status.CANCEL_STATUS;
-				} finally {
-					monitor.done();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-
-		if(file != null) {
-			j.setRule(file);
-		}
-		j.schedule();
+//		Job job = consult.getJob();
+//		try {
+//			job.join();
+//			if (fOutlinePage != null) {
+//				fOutlinePage.setInput(getEditorInput());
+//			}
+//		} catch (InterruptedException e) {
+//			Debug.report(e);
+//		}
 	}
 
 	/**
@@ -585,9 +573,9 @@ public class PLEditor extends TextEditor {
 		}
 	}
 
-//	public PrologOutline getOutlinePage() {
-//		return fOutlinePage;
-//	}
+	public ContentOutlinePage getOutlinePage() {
+		return fOutlinePage;
+	}
 
 	/**
 	 * @param i

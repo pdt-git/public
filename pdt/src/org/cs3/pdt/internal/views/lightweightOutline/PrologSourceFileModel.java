@@ -17,6 +17,11 @@ public class PrologSourceFileModel {
 		return predicates;
 	}
 	
+	public void update(List<OutlinePredicate> predicates){
+		this.predicates = predicates;
+
+	}
+	
 	public void dispose() {
 		predicates.clear();
 	}
