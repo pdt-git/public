@@ -47,6 +47,7 @@
  */
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -103,7 +104,6 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	private PLEditor editor;
 	private ILabelProvider labelProvider;
 	private PrologOutlineFilter[] filters;
-	private IEditorInput input = null;
 	private Menu contextMenu;
 	private StringMatcher matcher;
 	
@@ -128,6 +128,10 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 		viewer.addSelectionChangedListener(this);
 		
 		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		
+		model = new PrologSourceFileModel(new ArrayList<OutlinePredicate>());
+		
+		viewer.setInput(model);
 
 //		String pattern
 //		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
@@ -177,11 +181,8 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	
 	
 	public void setInput(Object information) {
-//		String fileName="";
-		
 		// TODO: Eva: so umbauen, dass information genommen wird (was aber fast das selbe ist)
 		String fileName = editor.getPrologFileName();
-		model = null;
 //		if (information instanceof IEditorInput) {
 //			input = ((IEditorInput) information);
 //			fileName = ((IEditorInput) information).getName();
@@ -193,22 +194,21 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 //		if (information instanceof String) {
 //			fileName = (String)information;
 //		}
+		List<OutlinePredicate> predicates;
 		if (fileName != "") {
-			try {
-				//Shell shell = getSite().getShell();				
+			try {			
 			// TODO: Eva: das aus PrologOutlineInformatinControl befreien soweit möglich
-				List<OutlinePredicate> predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName/*, shell*/);
-
-				model = new PrologSourceFileModel(predicates);
+				predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName);
+				model.update(predicates);
 			} catch(Exception e) {
 				
 			}
 		}
 		TreeViewer treeViewer = getTreeViewer();
 		if (treeViewer != null) {
-			treeViewer.setInput(model);
+//			treeViewer.setInput(model);
+			treeViewer.refresh();
 		}
-//		inputChanged(model, predicates.size()>0?predicates.get(0):null);
 	}
 
 	@Override
