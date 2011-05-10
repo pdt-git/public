@@ -35,14 +35,15 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		}
 		if(child instanceof IFile){
 			return getSearchResult();			//TODO: fix this
-		}
+		} 
 		if(child instanceof PredicateElement ){
 			return getSearchResult().getFile(child);
-		}
+		} 
 		if(child instanceof Match){
 			Match match = (Match) child;
 			return match.getElement();
-		} if (child instanceof SearchResultCategory) {
+		} 
+		if (child instanceof SearchResultCategory) {
 			return getSearchResult();
 		}
 		return null;

@@ -9,14 +9,11 @@ public class PrologMatch extends Match{
 
 	private String module;
 	private int line=-1;
-	//private PredicateElement element = null;
 
 	private boolean isLineLocation= false; 
 	
 	public PrologMatch(Object element, int offset, int length) {
 		super(element, offset, length);
-//		if (element instanceof PredicateElement)
-//			this.element = (PredicateElement)element;
 	}
 
 	public int getLine() {
