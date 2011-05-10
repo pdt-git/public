@@ -94,6 +94,8 @@ public class ImageRepository {
     public final static String FILE = "prolog_file.gif";
     
     public final static String MATCH = "sample.gif";
+    
+    public final static String PACKAGE = "package_obj.gif";
 
     private static HashMap<String, Image> cache = new HashMap<String, Image>();
 
