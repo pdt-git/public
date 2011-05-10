@@ -68,7 +68,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
@@ -154,23 +153,6 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				return;
 			}
 			run();
-//			System.out.println("Outline input anpassen");
-//			Job job = getJob();
-//			while (job.getState() != Job.NONE) {
-//				System.out.println("Jobstatus: "+ job.getState());
-////				Thread.sleep(1);
-//				System.out.println("running");
-//			}
-//			IEditorPart editor = UIUtils.getActiveEditor();
-//			if ((editor == null) || !(editor instanceof PLEditor)) {
-//				return;
-//			}
-//			PLEditor pleditor = (PLEditor)editor;
-//			ContentOutlinePage fOutlinePage = pleditor.getOutlinePage();
-//			if ((fOutlinePage != null) && (fOutlinePage instanceof NonConsultPrologOutline)){
-//				((NonConsultPrologOutline)fOutlinePage).setInput(pleditor.getEditorInput());
-//			}
-//			System.out.println("Outline input gesetzt");
 		} catch (IOException e) {
 			Debug.report(e);
 			//			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
