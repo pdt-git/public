@@ -53,6 +53,7 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -155,5 +156,16 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		}
 	}
 
+	@Override
+	public Match getCurrentMatch() {
+		IStructuredSelection selection = (IStructuredSelection) getViewer().getSelection();
+		Object element = null;
+		if (selection.size() > 0)
+			element = selection.getFirstElement();
+		if ((element != null) && (element instanceof PrologMatch)) {
+			return (PrologMatch)element;
+		}
+		return super.getCurrentMatch();
+	}
 	
 }

@@ -10,8 +10,6 @@ public class PredicateElement {
 	private String module;       // explicit module prefix of the selected literal (or null)
 	private String predicateName; 
 	private int arity;           
-	private boolean visible;     // visible in the context module of the reference
-	private boolean exported;    // exported by the defining module
 	
 	public PredicateElement(IFile file, String module, String predicateName, int arity) {
 		this.file = file;

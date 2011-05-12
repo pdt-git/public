@@ -147,7 +147,7 @@ public final class PDTUtils {
 			if( loc.isLineLocation()){
 				Document document = (Document) editor.getDocumentProvider().getDocument(editor.getEditorInput());
 				try {
-					offset = document.getLineOffset(loc.getLine());
+					offset = document.getLineOffset(loc.getLine()-1);
 					if(loc.getPredicateName()!=null){
 						FindReplaceDocumentAdapter finder = new FindReplaceDocumentAdapter(document);
 						
