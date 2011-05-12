@@ -184,7 +184,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 //						Map<String, Object> clause = clauses.get(0);
 					    Map<String, Object> clause =  session.queryOnce(query);
 						SourceLocation location = new SourceLocation((String)clause.get("File"), false);
-						location.setLine(Integer.parseInt((String)clause.get("Line"))-1);
+						location.setLine(Integer.parseInt((String)clause.get("Line")));
 					//	System.out.println(location.offset);
 						
 						PDTUtils.showSourceLocation(location);
