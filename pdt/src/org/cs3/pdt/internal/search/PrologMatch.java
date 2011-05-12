@@ -13,7 +13,7 @@ public class PrologMatch extends Match{
 	private boolean isLineLocation= false; 
 	
 	public PrologMatch(Object element, int offset, int length) {
-		super(element, offset, length);
+		super(element, UNIT_LINE, offset, length);
 	}
 
 	public int getLine() {
