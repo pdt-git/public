@@ -53,6 +53,8 @@ import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.views.lightweightOutline.NonConsultPrologOutline;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
@@ -65,17 +67,20 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.FileStoreEditorInput;
+import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 /**
  */
@@ -115,61 +120,60 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	 */
 	@Override
 	public void run(IAction action) {
-		PDTPlugin plugin = PDTPlugin.getDefault();
-		IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
-		if (input == null) {
-			Debug
-					.warning("Consult action triggered, but active editor input is null.");
-		}
-		if (input instanceof IFileEditorInput) {
-			IFileEditorInput fileInput = (IFileEditorInput) input;
-			try {
-				File file = fileInput.getFile().getLocation().toFile()
-						.getCanonicalFile();
-				plugin.getWorkbench().getActiveWorkbenchWindow()
-						.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
-				
-				checkPif();
-				
+		try {
+			PDTPlugin plugin = PDTPlugin.getDefault();
+			IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
+			if (input == null) {
+				Debug
+				.warning("Consult action triggered, but active editor input is null.");
+			}
+			if (input instanceof IFileEditorInput) {
+				IFileEditorInput fileInput = (IFileEditorInput) input;
 
+				File file = fileInput.getFile().getLocation().toFile()
+				.getCanonicalFile();
+				plugin.getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+
+				checkPif();
 				setQuery("pdt_reload('" + Util.prologFileName(file) + "')");
 
-				run();
-			} catch (IOException e) {
-				Debug.report(e);
-//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-//						window.getShell(), PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_CONSULT, e);
-			} catch (PartInitException e) {
-				Debug.report(e);
-//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-//						window.getShell(), PDT.ERR_WORKBENCH_UI_PROBLEM, PDT.CX_CONSULT, e);
-			} catch (OperationCanceledException e) {
-				return;
-			} catch (PrologInterfaceException e) {
-				Debug.report(e);
-//				UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
-//						window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
-			}
-
-		} else if(input instanceof FileStoreEditorInput) {
-			FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
-				File file  =new File(fileInput.getURI());
-				try {
-					plugin.getWorkbench().getActiveWorkbenchWindow()
-							.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
-					checkPif();
-
-					setQuery("consult('" + Util.prologFileName(file) + "')");
-
-					run();
-				} catch (Exception e) {
-					e.printStackTrace();
-				} 
+			} else if(input instanceof FileStoreEditorInput) {
+				FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
 				
-		} else {
-			Debug
-					.warning("Consult action triggered, but active editor input is no file.");
+				File file  =new File(fileInput.getURI());
+				plugin.getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				
+				checkPif();
+				setQuery("consult('" + Util.prologFileName(file) + "')");
+			} else {
+				Debug
+				.warning("Consult action triggered, but active editor input is no file.");
+				return;
+			}
+			run();
+		} catch (IOException e) {
+			Debug.report(e);
+			//			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+			//					window.getShell(), PDT.ERR_FILENAME_CONVERSION_PROBLEM, PDT.CX_CONSULT, e);
+		} catch (PartInitException e) {
+			Debug.report(e);
+			//			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+			//					window.getShell(), PDT.ERR_WORKBENCH_UI_PROBLEM, PDT.CX_CONSULT, e);
+		} catch (OperationCanceledException e) {
+			return;
+		} catch (PrologInterfaceException e) {
+			Debug.report(e);
+			//			UIUtils.logAndDisplayError(PDTPlugin.getDefault().getErrorMessageProvider(),
+			//					window.getShell(), PDT.ERR_PIF, PDT.CX_CONSULT, e);
+		} catch (NullPointerException e) {
+			// probably no WorkbenchWindow active
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+
 	}
 
 	private void checkPif() throws OperationCanceledException, PrologInterfaceException{
@@ -243,6 +247,30 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 			}
 		}
 	}
+	
+	
+	@Override
+	public void done(IJobChangeEvent event) {
+		PDTPlugin plugin = PDTPlugin.getDefault();
+		plugin.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				IEditorPart editor = UIUtils.getActiveEditor();
+
+				if ((editor == null) || !(editor instanceof PLEditor)) {
+					return;
+				}
+				PLEditor pleditor = (PLEditor)editor;
+				ContentOutlinePage outlinePage = pleditor.getOutlinePage();
+				if ((outlinePage != null) && (outlinePage instanceof NonConsultPrologOutline)){
+					NonConsultPrologOutline prologOutlinePage = ((NonConsultPrologOutline)outlinePage);
+					System.out.println("bis hier her");
+					prologOutlinePage.setInput(pleditor.getEditorInput());
+					System.out.println("und weiter");
+				}
+			}
+		} );
+	}
+	
 
 	/*
 	 * (non-Javadoc)

@@ -155,24 +155,6 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		}
 		return clauses;
 	}
-
-	/** 
-	 * Determine the implicit implicit module qualifier for the goal
-	 * from the enclosing file of the goal. Set the module value of the
-	 * goal accordingly. 
-	 * 
-	 * @param session  Prolog session to query
-	 * @throws PrologInterfaceException
-	 */
-	// TODO: Fix it an Move it to the constructor of GoalData instances:
-	private void setModule(PrologSession session)
-			throws PrologInterfaceException {
-		if(goal.getModule()==null) {
-			String query = "module_of_file('" + goal.getFile() + "',Module)";
-			String module = (String) session.queryOnce(query).get("Module");
-			goal.setModule(module);
-		}
-	}
 	
 	abstract protected String buildSearchQuery(Goal goal, String module);
 
@@ -191,8 +173,6 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	 */
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 			throws IOException, NumberFormatException {
-
-		
 		PrologMatch match;
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();

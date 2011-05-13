@@ -294,9 +294,12 @@ find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported) :-
     functor(Head,Name,Arity),
     % TODO: Move the definition of has_property to the "share"
     % project. It is currently defined in JT!!! -- GK, 21,4,2011   
-    has_property(_module_pred,dynamic,_dyn),
-    has_property(_module_pred,multifile,_mul),
-    has_property(_module_pred,exported,Exported),
+%    has_property(_module_pred,dynamic,_dyn),
+%    has_property(_module_pred,multifile,_mul),
+%    has_property(_module_pred,exported,Exported),
+    has_property(Head,dynamic,_dyn),
+    has_property(Head,multifile,_mul),
+    has_property(Head,exported,Exported),
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
     defined_in_file(Module,Name,Arity,_Nth,File,Line).

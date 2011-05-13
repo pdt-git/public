@@ -10,15 +10,15 @@ class LexicalSortingAction extends Action {
 		/**
 		 * 
 		 */
-		private final PrologOutlineInformationControl prologOutlineInformationControl;
+//		private final PrologOutlineInformationControl prologOutlineInformationControl;
 
-		private static final String STORE_LEXICAL_SORTING_CHECKED= "LexicalSortingAction.isChecked"; //$NON-NLS-1$
+//		private static final String STORE_LEXICAL_SORTING_CHECKED= "LexicalSortingAction.isChecked"; //$NON-NLS-1$
 
 		private TreeViewer fOutlineViewer;
 
-		LexicalSortingAction(PrologOutlineInformationControl prologOutlineInformationControl, TreeViewer outlineViewer) {
+		LexicalSortingAction(/*PrologOutlineInformationControl prologOutlineInformationControl,*/ TreeViewer outlineViewer) {
 			super("lexicalsorting"/*TextMessages.JavaOutlineInformationControl_LexicalSortingAction_label*/, IAction.AS_CHECK_BOX);
-			this.prologOutlineInformationControl = prologOutlineInformationControl;
+//			this.prologOutlineInformationControl = prologOutlineInformationControl;
 			setToolTipText("lexicalsorting");//TextMessages.JavaOutlineInformationControl_LexicalSortingAction_tooltip);
 			setDescription("lexicalsorting");//TextMessages.JavaOutlineInformationControl_LexicalSortingAction_description);
 
@@ -43,7 +43,7 @@ class LexicalSortingAction extends Action {
 				}
 			});
 
-			if (store)
-				this.prologOutlineInformationControl.getDialogSettings().put(STORE_LEXICAL_SORTING_CHECKED, on);
+//			if (store)
+//				this.prologOutlineInformationControl.getDialogSettings().put(STORE_LEXICAL_SORTING_CHECKED, on);
 		}
 	}

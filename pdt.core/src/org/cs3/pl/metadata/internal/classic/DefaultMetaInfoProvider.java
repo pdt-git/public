@@ -50,10 +50,8 @@ import java.util.Set;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
-import org.cs3.pl.metadata.Clause;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.IMetaInfoProvider;
-import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.metadata.SourceLocation;
 import org.cs3.pl.prolog.PrologException;
@@ -150,17 +148,25 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		List<Clause> list = new ArrayList<Clause>();
 		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
 			Map<String,Object> result = it.next();
-			SourceLocation sl = new SourceLocation(file, true);
-			sl.setOffset(Integer.parseInt(result.get("Pos").toString()));
-			sl.setEndOffset(sl.getOffset()
-					+ Integer.parseInt(result.get("Len").toString()));
+//			SourceLocation sl = new SourceLocation(file, true);
+//			sl.setOffset(Integer.parseInt(result.get("Pos").toString()));
+//			sl.setEndOffset(sl.getOffset()
+//					+ Integer.parseInt(result.get("Len").toString()));
+//			Clause data = new Clause(result.get("Module").toString(),
+//					result.get("Name").toString(), java.lang.Integer
+//							.parseInt(result.get("Arity").toString()), Boolean
+//							.valueOf(result.get("Public").toString())
+//							.booleanValue(), result.get("Dyn").toString()
+//							.equals("1"), result.get("Mul").toString().equals(
+//							"1"), sl);
 			Clause data = new Clause(result.get("Module").toString(),
 					result.get("Name").toString(), java.lang.Integer
 							.parseInt(result.get("Arity").toString()), Boolean
 							.valueOf(result.get("Public").toString())
 							.booleanValue(), result.get("Dyn").toString()
 							.equals("1"), result.get("Mul").toString().equals(
-							"1"), sl);
+							"1"));
+
 			list.add(data);
 
 		}
@@ -215,11 +221,12 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			Clause[] result = new Clause[l.size()];
 			int i=0;
 			for (Iterator<Map<String,Object>> it = l.iterator(); it.hasNext();i++) {
-				Map<String,Object> m = it.next();
-				SourceLocation sl = new SourceLocation((String) m.get("File"),true);				
-				sl.setOffset(Integer.parseInt( (String) m.get("Pos")));
-				sl.setEndOffset(sl.getOffset()+Integer.parseInt( (String) m.get("Len")));				
-				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
+//				Map<String,Object> m = it.next();
+//				SourceLocation sl = new SourceLocation((String) m.get("File"),true);				
+//				sl.setOffset(Integer.parseInt( (String) m.get("Pos")));
+//				sl.setEndOffset(sl.getOffset()+Integer.parseInt( (String) m.get("Len")));				
+//				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
+				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile());
 			}
 			return result;
 		} finally {
