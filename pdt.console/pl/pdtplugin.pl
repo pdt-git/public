@@ -65,7 +65,7 @@
 
 :- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
-:- consult(org_cs3_lp_utils(general)).
+:- ensure_loaded(org_cs3_lp_utils(general)).
 :- use_module(org_cs3_lp_utils(utils4modules)).
 :- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
 
@@ -219,7 +219,10 @@ find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModu
 % Now the second argument is a real term:     
 find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
     extract_file_spec(Term,FileSpec),
-    absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File),
+    catch( absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File),
+           _,
+           fail
+    ),
     access_file(File, read),
     !,
     Line=1.
@@ -232,6 +235,7 @@ find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,M
 % Work regardelessly whether the user selected the entire consult/use_module
 % statement or just the file spec. Does NOT work if he only selected a file
 % name within an alias but not the complete alias.
+extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(consult(FileSpec),FileSpec) :- !.
 extract_file_spec(use_module(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
