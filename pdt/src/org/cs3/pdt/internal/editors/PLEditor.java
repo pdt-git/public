@@ -59,13 +59,10 @@ import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
-import org.cs3.pdt.internal.views.PrologOutline;
 import org.cs3.pdt.internal.views.lightweightOutline.NonConsultPrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
-import org.cs3.pl.console.ConsoleModel;
-import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
@@ -298,6 +295,9 @@ public class PLEditor extends TextEditor {
 		super();
 		try {
 			colorManager = new ColorManager();
+			IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
+			store.addPropertyChangeListener(colorManager);
+			
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);
 			
@@ -1243,7 +1243,7 @@ public class PLEditor extends TextEditor {
 				&& begin > 0)
 			end++;
 		int length = end - begin;
-		String pos = document.get(begin, length);
+//		String pos = document.get(begin, length);
 		
 		return new TextSelection(document,begin,length);
 	}
