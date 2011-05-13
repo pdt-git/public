@@ -263,9 +263,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				ContentOutlinePage outlinePage = pleditor.getOutlinePage();
 				if ((outlinePage != null) && (outlinePage instanceof NonConsultPrologOutline)){
 					NonConsultPrologOutline prologOutlinePage = ((NonConsultPrologOutline)outlinePage);
-					System.out.println("bis hier her");
 					prologOutlinePage.setInput(pleditor.getEditorInput());
-					System.out.println("und weiter");
 				}
 			}
 		} );

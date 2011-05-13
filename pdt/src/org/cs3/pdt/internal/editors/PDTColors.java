@@ -44,14 +44,25 @@ package org.cs3.pdt.internal.editors;
 import org.eclipse.swt.graphics.RGB;
 
 public interface PDTColors {
-	RGB BACKGROUND  = new RGB(255, 255, 255);
-	RGB DEFAULT     = new RGB(  0,   0,   0);   // black        
-	RGB STRING      = new RGB(  0,   0, 255);
-	RGB COMMENT     = new RGB( 63, 127,  95);   // RGB values for Eclipse Java comments.	
-	RGB VARIABLE    = new RGB(139,   0,   0);
-	RGB UNDEFINED   = new RGB(255,   0,   0);   // RED = Call to undefined  predicate
-	RGB KEYWORD     = new RGB(  0,   0, 128);   // 
-	RGB DYNAMIC     = new RGB(110,  40,  40);   // dark brown
-	RGB TRANSPARENT = new RGB(255,  80, 180);   // pink for module_transparent
-	RGB META        = new RGB( 15, 160,  15);   // dark green for meta_predicate
+	public static final RGB BACKGROUND  = new RGB(255, 255, 255);
+	public static final RGB DEFAULT     = new RGB(  0,   0,   0);   // black        
+	public static final RGB STRING      = new RGB(  0,   0, 255);
+	public static final RGB COMMENT     = new RGB( 63, 127,  95);   // RGB values for Eclipse Java comments.	
+	public static final RGB VARIABLE    = new RGB(139,   0,   0);
+	public static final RGB UNDEFINED   = new RGB(255,   0,   0);   // RED = Call to undefined  predicate
+	public static final RGB KEYWORD     = new RGB(  0,   0, 128);   // 
+	public static final RGB DYNAMIC     = new RGB(110,  40,  40);   // dark brown
+	public static final RGB TRANSPARENT = new RGB(255,  80, 180);   // pink for module_transparent
+	public static final RGB META        = new RGB( 15, 160,  15);   // dark green for meta_predicate
+	
+	public static final String PREF_BACKGROUND = "pdt.editor.colors.background";
+	public static final String PREF_DEFAULT = "pdt.editor.colors.default";
+	public static final String PREF_STRING = "pdt.editor.colors.string";
+	public static final String PREF_COMMENT = "pdt.editor.colors.comment";
+	public static final String PREF_VARIABLE = "pdt.editor.colors.variable";
+	public static final String PREF_UNDEFINED = "pdt.editor.colors.undefined";
+	public static final String PREF_KEYWORD = "pdt.editor.colors.keyword";
+	public static final String PREF_DYNAMIC = "pdt.editor.colors.dynamic";
+	public static final String PREF_TRANSPARENT = "pdt.editor.colors.transparent";
+	public static final String PREF_META = "pdt.editor.colors.meta";
 }

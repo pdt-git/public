@@ -45,11 +45,27 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.cs3.pdt.console.PrologConsolePlugin;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
-public class ColorManager {
+public class ColorManager implements IPropertyChangeListener{
+	private RGB background = PDTColors.BACKGROUND;
+	private RGB default_ = PDTColors.DEFAULT;  
+	private RGB string = PDTColors.STRING;
+	private RGB comment = PDTColors.COMMENT;	
+	private RGB variable = PDTColors.VARIABLE;
+	private RGB undefined = PDTColors.UNDEFINED;
+	private RGB keyword = PDTColors.KEYWORD;
+	private RGB dynamic = PDTColors.DYNAMIC;
+	private RGB transparent = PDTColors.TRANSPARENT;
+	private RGB meta = PDTColors.META;
+
 
 	protected Map<RGB, Color> fColorTable = new HashMap<RGB, Color>(10);
 
@@ -58,6 +74,7 @@ public class ColorManager {
 		while (e.hasNext())
 			 e.next().dispose();
 	}
+	
 	public Color getColor(RGB rgb) {
 		Color color = fColorTable.get(rgb);
 		if (color == null) {
@@ -65,5 +82,61 @@ public class ColorManager {
 			fColorTable.put(rgb, color);
 		}
 		return color;
+	}
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+			IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
+
+			background = PreferenceConverter.getColor(store, PDTColors.PREF_BACKGROUND);
+			default_ = PreferenceConverter.getColor(store, PDTColors.PREF_DEFAULT);  
+			string = PreferenceConverter.getColor(store, PDTColors.PREF_STRING);
+			comment = PreferenceConverter.getColor(store, PDTColors.PREF_COMMENT);	
+			variable = PreferenceConverter.getColor(store, PDTColors.PREF_VARIABLE);
+			undefined = PreferenceConverter.getColor(store, PDTColors.PREF_UNDEFINED);
+			keyword = PreferenceConverter.getColor(store, PDTColors.PREF_KEYWORD);
+			dynamic = PreferenceConverter.getColor(store, PDTColors.PREF_DYNAMIC);
+			transparent = PreferenceConverter.getColor(store, PDTColors.PREF_TRANSPARENT);
+			meta = PreferenceConverter.getColor(store, PDTColors.PREF_META);
+	}
+
+	public RGB getBackgroundColor() {
+		return background;
+	}
+
+	public RGB getDefaultColor() {
+		return default_;
+	}
+
+	public RGB getStringColor() {
+		return string;
+	}
+
+	public RGB getCommentColor() {
+		return comment;
+	}
+
+	public RGB getVariableColor() {
+		return variable;
+	}
+
+	public RGB getUndefinedColor() {
+		return undefined;
+	}
+
+	public RGB getKeywordColor() {
+		return keyword;
+	}
+
+	public RGB getDynamicColor() {
+		return dynamic;
+	}
+
+	public RGB getTransparentColor() {
+		return transparent;
+	}
+	
+	public RGB getMetaColor() {
+		return meta;
 	}
 }

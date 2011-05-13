@@ -67,6 +67,12 @@
           id="org.cs3.pdt.internal.preferences.PDTPreferencePage"
           name="PDT Preferences">
     </page>
+    <page
+          category="org.cs3.pdt.internal.preferences.PDTPreferencePage"
+          class="org.cs3.pdt.preferences.PreferencePageColor"
+          id="org.cs3.preferences.PreferencePageColor"
+          name="Editor Colors">
+    </page>
  </extension>
   <extension
          point="org.eclipse.ui.editors">
@@ -310,6 +316,15 @@
          </description>
       </wizard>
     </extension>
+   <extension
+         point="org.eclipse.search.searchPages">
+      <page
+            class="org.cs3.pdt.internal.search.PrologSearchPage"
+            icon="icons/filter.gif"
+            id="org.cs3.pdt.prologSearchPage"
+            label="Prolog search">
+      </page>
+   </extension>
 <!--	
  <extension
        point="org.eclipse.ui.menus">
