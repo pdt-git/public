@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import org.cs3.pdt.internal.editors.StringMatcher;
 
 /**
  * String matcher that can match two patterns.

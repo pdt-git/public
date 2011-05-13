@@ -1,6 +1,5 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import org.cs3.pdt.internal.editors.PrologSourceFileModel;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -14,7 +13,6 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 	 * @param showInheritedMembers <code>true</code> iff inherited members are shown
 	 */
 	OutlineContentProvider() {
-
 
 	}
 

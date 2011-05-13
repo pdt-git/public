@@ -45,14 +45,26 @@
  * To change the template for this generated file go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-package org.cs3.pdt.internal.views;
+package org.cs3.pdt.internal.views.lightweightOutline;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.views.FilterActionMenu;
+import org.cs3.pdt.internal.views.HideDirectivesFilter;
+import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
+import org.cs3.pdt.internal.views.HideSubtermsFilter;
+import org.cs3.pdt.internal.views.PEFLabelProvider;
+import org.cs3.pdt.internal.views.PEFNode;
+import org.cs3.pdt.internal.views.PrologFileContentModel;
+import org.cs3.pdt.internal.views.PrologOutlineComparer;
+import org.cs3.pdt.internal.views.PrologOutlineFilter;
+import org.cs3.pdt.internal.views.ToggleSortAction;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -64,13 +76,19 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -79,19 +97,17 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 
-public class PrologOutline extends ContentOutlinePage {
+public class NonConsultPrologOutline extends ContentOutlinePage {
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
-	private PrologFileContentModel model;
-	private boolean convertPositions;
+	private PrologSourceFileModel model;
 	private PLEditor editor;
 	private ILabelProvider labelProvider;
 	private PrologOutlineFilter[] filters;
-	IEditorInput input;
-	private TreeViewer viewer;
 	private Menu contextMenu;
+	private StringMatcher matcher;
 	
-	public PrologOutline(PLEditor editor) {
+	public NonConsultPrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
 
@@ -99,34 +115,46 @@ public class PrologOutline extends ContentOutlinePage {
 	public void createControl(Composite parent) {
 		super.createControl(parent);
 
-		viewer = getTreeViewer();
-		model = new PrologOutlineContentModel(this);
-
-		contentProvider = new CTermContentProvider(viewer, model);
-		labelProvider = new PEFLabelProvider();
+		TreeViewer viewer = getTreeViewer();
+		
+		contentProvider = new OutlineContentProvider();
 		viewer.setContentProvider(contentProvider);
+		
+		labelProvider = new OutlineLabelProvider();
 		viewer.setLabelProvider(labelProvider);
-
-		this.convertPositions = true;
 
 		viewer.setComparer(new PrologOutlineComparer());
 
 		viewer.addSelectionChangedListener(this);
+		
+		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		
+		model = new PrologSourceFileModel(new ArrayList<OutlinePredicate>());
+		
+		viewer.setInput(model);
 
-		initFilters();
+//		String pattern
+//		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
+//		setfStringMatcher(new StringMatcher(pattern, ignoreCase, false));
+//		viewer.addFilter(new NamePatternFilter());
+		
+		initFilters(); //TODO: hier weiter + sortingAction
 
 		IActionBars actionBars = getSite().getActionBars();
 		IToolBarManager toolBarManager = actionBars.getToolBarManager();
-		Action action = new ToggleSortAction(viewer);
+		Action action = new LexicalSortingAction(viewer);
 		toolBarManager.add(action);
-		action = new FilterActionMenu(this);
-		toolBarManager.add(action);
+//		Action action = new ToggleSortAction(getTreeViewer());
+//		toolBarManager.add(action);
+//		action = new FilterActionMenu(this);
+//		toolBarManager.add(action);
 		
 		hookContextMenu(parent);
-		if(getInput() instanceof FileStoreEditorInput){ // TRHO: deactivated for external files 
-			return;
-		}
-		viewer.setInput(getInput());
+//		if(getInput() instanceof FileStoreEditorInput){ // TRHO: deactivated for external files 
+//			return;
+//		}
+//		viewer.setInput(input);
+		setInput(editor.getEditorInput());
 	}
 
 
@@ -141,81 +169,70 @@ public class PrologOutline extends ContentOutlinePage {
 		menuMgr.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				PrologOutline.this.fillContextMenu(manager);
+				NonConsultPrologOutline.this.fillContextMenu(manager);
 			}
 		});
+		TreeViewer viewer = getTreeViewer();
 		getSite().registerContextMenu(MENU_ID,menuMgr, viewer);
 		contextMenu = menuMgr.createContextMenu(parent);
 		viewer.getControl().setMenu(contextMenu);
 	}
-	
-	
-	@Override
-	public TreeViewer getTreeViewer() {
-		return super.getTreeViewer();
-	}
 
-	public void setInput(IEditorInput input) {
-		this.input = input;
-		TreeViewer viewer = getTreeViewer();
-		if (viewer != null) {
-			viewer.setInput(input);
+	
+	
+	public void setInput(Object information) {
+		// TODO: Eva: so umbauen, dass information genommen wird (was aber fast das selbe ist)
+		String fileName = editor.getPrologFileName();
+//		if (information instanceof IEditorInput) {
+//			input = ((IEditorInput) information);
+//			fileName = ((IEditorInput) information).getName();
+//			String string = ((IEditorInput)information).toString();
+//			IDocument doc = editor.getDocumentProvider().getDocument(input);
+//			String string2 = doc.toString();
+//			fileName =((IEditorInput) information).getToolTipText();
+//		}
+//		if (information instanceof String) {
+//			fileName = (String)information;
+//		}
+		List<OutlinePredicate> predicates;
+		if (fileName != "") {
+			try {			
+			// TODO: Eva: das aus PrologOutlineInformatinControl befreien soweit möglich
+				predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName);
+				model.update(predicates);
+			} catch(Exception e) {
+				
+			}
 		}
-
-	}
-
-	public IEditorInput getInput() {
-		getTreeViewer();
-		return input;
+		TreeViewer treeViewer = getTreeViewer();
+		if (treeViewer != null) {
+//			treeViewer.setInput(model);
+			treeViewer.refresh();
+		}
 	}
 
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
-	
+
+		Object elem = getFirstSelectedElement(event);
+		if ((elem != null) && (elem instanceof OutlinePredicate)) { 
+			OutlinePredicate predicate = (OutlinePredicate)elem;
+			editor.gotoLine(predicate.getLine());
+		}
+	}
+
+	private Object getFirstSelectedElement(final SelectionChangedEvent event) {
 		if(event.getSelection().isEmpty()){
-			return;
+			return null;
 		}
 		if(!(event.getSelection() instanceof IStructuredSelection)){
-			return;
+			return null;
 		}
-		
 		IStructuredSelection selection = (IStructuredSelection) event.getSelection();
-		Object elm = selection.getFirstElement();
-		if(elm==null||!(elm instanceof PEFNode)){
-			return;
-		}
-		PEFNode node = (PEFNode)elm;
-		int startOffset = node.getStartPosition();
-		int endOffset = node.getEndPosition();
-		if (convertPositions) {
-			IDocument doc = editor.getDocumentProvider()
-					.getDocument(getInput());
-			if (doc == null) {
-				// wunder, grï¿½bel,...
-				Debug.debug("Debug: input=" + getInput());
-			}
-			try {
-				startOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-						startOffset);
-				endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-						endOffset);
-				Debug.debug(">>"
-						+ doc.get(startOffset, endOffset - startOffset) + "<<");
-				Debug.debug(">>>" + doc.get().substring(startOffset, endOffset)
-						+ "<<<");
-			} catch (BadLocationException e) {
-				Debug.warning("bad location: "+startOffset+", "+endOffset);
-			}
-		}
+		Object elem = selection.getFirstElement();
 
-		if (startOffset >= 0 && endOffset >= 0) {
-			PLEditor editor = ((PLEditor) UIUtils.getActiveEditor());
-			if(editor==null){
-				return ;
-			}
-			editor.selectAndReveal(startOffset, endOffset - startOffset);
-		}
+		return elem;
 	}
 
 	public PrologOutlineFilter[] getAvailableFilters() {
@@ -243,6 +260,7 @@ public class PrologOutline extends ContentOutlinePage {
 			}
 		}
 	}
+	
 
 	@Override
 	public void dispose() {

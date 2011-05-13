@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.editors;
+package org.cs3.pdt.internal.views.lightweightOutline;
 
 /*******************************************************************************
  * Copyright (c) 2000, 2008 IBM Corporation and others.
