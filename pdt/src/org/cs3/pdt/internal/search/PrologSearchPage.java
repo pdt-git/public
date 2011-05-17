@@ -4,39 +4,31 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.core.IPrologProject;
+import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.ui.util.UIUtils;
+import org.cs3.pl.common.Debug;
+import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
-import org.eclipse.jdt.internal.ui.search.MatchLocations;
-import org.eclipse.jdt.internal.ui.search.MatchLocations.MatchLocationSelectionDialog;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.internal.ui.search.SearchUtil;
-import org.eclipse.jdt.ui.search.ElementQuerySpecification;
-import org.eclipse.jdt.ui.search.PatternQuerySpecification;
-import org.eclipse.jdt.ui.search.QuerySpecification;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
+import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -51,12 +43,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Link;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkingSet;
-import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 
 
@@ -67,40 +56,11 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		private final int searchFor;
 		private final int limitTo;
 		private final String pattern;
-		private final boolean isCaseSensitive;
-		private final int includeMask;
-		private final int matchLocations;
-		private final int scope;
-		private final IWorkingSet[] workingSets;
-		private IJavaElement javaElement;
-		
-		public SearchPatternData(int searchFor, int limitTo, int matchLocations, boolean isCaseSensitive, String pattern, IJavaElement element, int includeMask) {
-			this(searchFor, limitTo, matchLocations, pattern, isCaseSensitive, element, ISearchPageContainer.WORKSPACE_SCOPE, null, includeMask);
-		}
-		
-		public SearchPatternData(int searchFor, int limitTo, int matchLocations, String pattern, boolean isCaseSensitive, IJavaElement element, int scope, IWorkingSet[] workingSets, int includeMask) {
+				
+		public SearchPatternData(int searchFor, int limitTo, String pattern) {
 			this.searchFor= searchFor;
 			this.limitTo= limitTo;
-			this.matchLocations= matchLocations;
 			this.pattern= pattern;
-			this.isCaseSensitive= isCaseSensitive;
-			this.scope= scope;
-			this.workingSets= workingSets;
-			this.includeMask= includeMask;
-			
-			setJavaElement(element);
-		}
-		
-		public void setJavaElement(IJavaElement javaElement) {
-			this.javaElement= javaElement;
-		}
-
-		public boolean isCaseSensitive() {
-			return isCaseSensitive;
-		}
-
-		public IJavaElement getJavaElement() {
-			return javaElement;
 		}
 
 		public int getLimitTo() {
@@ -110,45 +70,14 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		public String getPattern() {
 			return pattern;
 		}
-
-		public int getScope() {
-			return scope;
-		}
-
 		public int getSearchFor() {
 			return searchFor;
-		}
-
-		public IWorkingSet[] getWorkingSets() {
-			return workingSets;
-		}
-		
-		public int getIncludeMask() {
-			return includeMask;
-		}
-		
-		public int getMatchLocations() {
-			return matchLocations;
 		}
 		
 		public void store(IDialogSettings settings) {
 			settings.put("searchFor", searchFor); //$NON-NLS-1$
-			settings.put("scope", scope); //$NON-NLS-1$
 			settings.put("pattern", pattern); //$NON-NLS-1$
 			settings.put("limitTo", limitTo); //$NON-NLS-1$
-			settings.put("matchLocations", matchLocations); //$NON-NLS-1$
-			settings.put("javaElement", javaElement != null ? javaElement.getHandleIdentifier() : ""); //$NON-NLS-1$ //$NON-NLS-2$
-			settings.put("isCaseSensitive", isCaseSensitive); //$NON-NLS-1$
-			if (workingSets != null) {
-				String[] wsIds= new String[workingSets.length];
-				for (int i= 0; i < workingSets.length; i++) {
-					wsIds[i]= workingSets[i].getName();
-				}
-				settings.put("workingSets", wsIds); //$NON-NLS-1$
-			} else {
-				settings.put("workingSets", new String[0]); //$NON-NLS-1$
-			}
-			settings.put("includeMask", includeMask); //$NON-NLS-1$
 		}
 		
 		public static SearchPatternData create(IDialogSettings settings) {
@@ -156,66 +85,26 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			if (pattern.length() == 0) {
 				return null;
 			}
-			IJavaElement elem= null;
-			String handleId= settings.get("javaElement"); //$NON-NLS-1$
-			if (handleId != null && handleId.length() > 0) {
-				IJavaElement restored= JavaCore.create(handleId); 
-				if (restored != null && isSearchableType(restored) && restored.exists()) {
-					elem= restored;
-				}
-			}
-			String[] wsIds= settings.getArray("workingSets"); //$NON-NLS-1$
-			IWorkingSet[] workingSets= null;
-			if (wsIds != null && wsIds.length > 0) {
-				IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
-				workingSets= new IWorkingSet[wsIds.length];
-				for (int i= 0; workingSets != null && i < wsIds.length; i++) {
-					workingSets[i]= workingSetManager.getWorkingSet(wsIds[i]);
-					if (workingSets[i] == null) {
-						workingSets= null;
-					}
-				}
-			}
 
 			try {
 				int searchFor= settings.getInt("searchFor"); //$NON-NLS-1$
-				int scope= settings.getInt("scope"); //$NON-NLS-1$
 				int limitTo= settings.getInt("limitTo"); //$NON-NLS-1$
 				
-				int matchLocations= 0;
-				if (settings.get("matchLocations") != null) { //$NON-NLS-1$
-					matchLocations= settings.getInt("matchLocations"); //$NON-NLS-1$
-				}
-				
-				boolean isCaseSensitive= settings.getBoolean("isCaseSensitive"); //$NON-NLS-1$
-				
-				int includeMask;
-				if (settings.get("includeMask") != null) { //$NON-NLS-1$
-					includeMask= settings.getInt("includeMask"); //$NON-NLS-1$
-				} else {
-					includeMask= JavaSearchScopeFactory.NO_JRE;
-					if (settings.get("includeJRE") == null ? forceIncludeAll(limitTo, elem) : settings.getBoolean("includeJRE")) {  //$NON-NLS-1$ //$NON-NLS-2$
-						includeMask= JavaSearchScopeFactory.ALL;
-					}
-				}
-				return new SearchPatternData(searchFor, limitTo, matchLocations, pattern, isCaseSensitive, elem, scope, workingSets, includeMask);
+				return new SearchPatternData(searchFor, limitTo, pattern);
 			} catch (NumberFormatException e) {
 				return null;
 			}
 		}
-		
 	}
 	
 	// search for
-	private final static int FILE= 0;
-	private final static int MODULE= 1;
-	private final static int PREDICATE= 2;
+	private final static int MODULE= 0;
+	private final static int PREDICATE= 1;
 	//private final static int CONSTRUCTOR= IJavaSearchConstants.CONSTRUCTOR;
 	
 	// limit to
 	private final static int DECLARATIONS= IJavaSearchConstants.DECLARATIONS;
 	private final static int REFERENCES= IJavaSearchConstants.REFERENCES;
-	private final static int ALL_OCCURRENCES= IJavaSearchConstants.ALL_OCCURRENCES;
 	
 	public static final String PARTICIPANT_EXTENSION_POINT= "org.eclipse.jdt.ui.queryParticipants"; //$NON-NLS-1$
 
@@ -226,14 +115,12 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	// Dialog store id constants
 	private final static String PAGE_NAME= "PrologSearchPage"; //$NON-NLS-1$
 //	private final static String STORE_CASE_SENSITIVE= "CASE_SENSITIVE"; //$NON-NLS-1$
-	private final static String STORE_INCLUDE_MASK= "INCLUDE_MASK"; //$NON-NLS-1$
 	private final static String STORE_HISTORY= "HISTORY"; //$NON-NLS-1$
 	private final static String STORE_HISTORY_SIZE= "HISTORY_SIZE"; //$NON-NLS-1$
 	
-	private final List fPreviousSearchPatterns;
+	private final List<SearchPatternData> fPreviousSearchPatterns;
 	
 	private SearchPatternData fInitialData;
-	private IJavaElement fJavaElement;
 	private boolean fFirstTime= true;
 	private IDialogSettings fDialogSettings;
 //	private boolean fIsCaseSensitive;
@@ -244,15 +131,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	
 	private Button[] fSearchFor;
 	private Button[] fLimitTo;
-//	private Button[] fIncludeMasks;
 	private Group fLimitToGroup;
 	
-//	private int fMatchLocations;
-//	private Link fMatchLocationsLink;
-
-
 	public PrologSearchPage() {
-		fPreviousSearchPatterns= new ArrayList();
+		fPreviousSearchPatterns= new ArrayList<SearchPatternData>();
 	}
 	
 	
@@ -264,10 +146,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	
 	private boolean performNewSearch() {
 		SearchPatternData data= getPatternData();
-
-		// Setup search scope
-		IJavaSearchScope scope= null;
-		String scopeDescription= ""; //$NON-NLS-1$
 		
 		int searchFor= data.getSearchFor();
 		int limitTo= data.getLimitTo();
@@ -302,18 +180,34 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 //			}
 //		}
 		
-		QuerySpecification querySpec= null;
-		if (data.getJavaElement() != null && getPattern().equals(fInitialData.getPattern())) {
-			if (limitTo == REFERENCES)
-				SearchUtil.warnIfBinaryConstant(data.getJavaElement(), getShell());
-			querySpec= new ElementQuerySpecification(data.getJavaElement(), limitTo, scope, scopeDescription);
-		} else {
-			querySpec= new PatternQuerySpecification(data.getPattern(), searchFor, data.isCaseSensitive(), limitTo, scope, scopeDescription);
-			data.setJavaElement(null);
-		} 
+		//TODO: Eva: hier Suche rein packen
+//		QuerySpecification querySpec= null;
+//		if (data.getJavaElement() != null && getPattern().equals(fInitialData.getPattern())) {
+//			if (limitTo == REFERENCES)
+//				SearchUtil.warnIfBinaryConstant(data.getJavaElement(), getShell());
+//			querySpec= new ElementQuerySpecification(data.getJavaElement(), limitTo, scope, scopeDescription);
+//		} else {
+//			querySpec= new PatternQuerySpecification(data.getPattern(), searchFor, data.isCaseSensitive(), limitTo);
+//			data.setJavaElement(null);
+//		} 
+//		
+		PrologSearchQuery searchQuery;
 		
-		JavaSearchQuery textSearchJob= new JavaSearchQuery(querySpec);
-		NewSearchUI.runQueryInBackground(textSearchJob);
+		
+		Goal goal;
+		if (searchFor == PREDICATE)
+			goal = new Goal("", "", data.pattern, -1, data.pattern);
+		else
+			goal = new Goal("", data.pattern, "", -1, data.pattern+":Predicate");
+
+		if (limitTo == REFERENCES)
+			searchQuery = new ReferencesSearchQueryDirect(null, goal);
+		else 
+			searchQuery = new CategorizedDefinitionsSearchQuery(null, goal);
+
+//		NewSearchUI.runQueryInBackground(searchQuery);
+		NewSearchUI.activateSearchResultView();
+		NewSearchUI.runQueryInForeground(null,searchQuery);
 		return true;
 	}
 	
@@ -399,8 +293,8 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
 	
 	private SearchPatternData findInPrevious(String pattern) {
-		for (Iterator iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
-			SearchPatternData element= (SearchPatternData) iter.next();
+		for (Iterator<SearchPatternData> iter= fPreviousSearchPatterns.iterator(); iter.hasNext();) {
+			SearchPatternData element= iter.next();
 			if (pattern.equals(element.getPattern())) {
 				return element;
 			}
@@ -414,26 +308,25 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	 * @return the pattern data
 	 */
 	private SearchPatternData getPatternData() {
-//		String pattern= getPattern();
-//		SearchPatternData match= findInPrevious(pattern);
-//		if (match != null) {
-//			fPreviousSearchPatterns.remove(match);
-//		}
-//		match= new SearchPatternData(
-//				getSearchFor(),
-//				getLimitTo(),
-////				fMatchLocations,
-//				pattern,
+		String pattern= getPattern();
+		SearchPatternData match= findInPrevious(pattern);
+		if (match != null) {
+			fPreviousSearchPatterns.remove(match);
+		}
+		match= new SearchPatternData(
+				getSearchFor(),
+				getLimitTo(),
+//				fMatchLocations,
+				pattern
 //				fCaseSensitive.getSelection(),
 //				fJavaElement,
 //				getContainer().getSelectedScope(),
 //				getContainer().getSelectedWorkingSets(),
-////				getIncludeMask()
-//		);
-//			
-//		fPreviousSearchPatterns.add(0, match); // insert on top
-//		return match;
-		return null;
+//				getIncludeMask()
+		);
+			
+		fPreviousSearchPatterns.add(0, match); // insert on top
+		return match;
 	}
 
 	/*
@@ -495,10 +388,10 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		
 		SelectionAdapter javaElementInitializer= new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				if (getSearchFor() == fInitialData.getSearchFor())
-					fJavaElement= fInitialData.getJavaElement();
-				else
-					fJavaElement= null;
+//				if (getSearchFor() == fInitialData.getSearchFor())
+//					fJavaElement= fInitialData.getJavaElement();
+//				else
+//					fJavaElement= null;
 				setLimitTo(getSearchFor(), getLimitTo());
 //				setIncludeMask(getIncludeMask());
 //				doPatternModified();
@@ -571,9 +464,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		if (getPattern().length() == 0) {
 			return false;
 		}
-		if (fJavaElement != null) {
-			return true;
-		}
+//		if (fJavaElement != null) {
+//			return true;
+//		}
 		return SearchPattern.createPattern(getPattern(), getSearchFor(), getLimitTo(), SearchPattern.R_EXACT_MATCH) != null;		
 	}
 	
@@ -612,16 +505,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 
 		fPattern.setText(initialData.getPattern());
 //		fIsCaseSensitive= initialData.isCaseSensitive();
-		fJavaElement= initialData.getJavaElement();
+//		fJavaElement= initialData.getJavaElement();
 //		fCaseSensitive.setEnabled(fJavaElement == null);
 		fCaseSensitive.setEnabled(true);
-		fCaseSensitive.setSelection(initialData.isCaseSensitive());
-
-		
-		if (initialData.getWorkingSets() != null)
-			getContainer().setSelectedWorkingSets(initialData.getWorkingSets());
-		else
-			getContainer().setSelectedScope(initialData.getScope());
 		
 		fInitialData= initialData;
 	}
@@ -633,7 +519,6 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		result.setLayout(new GridLayout(2, true));
 
 		fSearchFor= new Button[] {
-			createButton(result, SWT.RADIO, "File", FILE, true),
 			createButton(result, SWT.RADIO, "Module", MODULE, false),
 			createButton(result, SWT.RADIO, "Predicate", PREDICATE, false),
 		};
@@ -651,7 +536,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		fLimitToGroup.setText("Limit To"); 
 		fLimitToGroup.setLayout(new GridLayout(2, false));
 
-		fillLimitToGroup(ALL_OCCURRENCES);
+		fillLimitToGroup(DECLARATIONS);
 		
 		return fLimitToGroup;
 	}
@@ -660,13 +545,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		Control[] children= fLimitToGroup.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			children[i].dispose();
-		}
-//		fMatchLocationsLink= null;
-		
+		}		
 		ArrayList<Button> buttons= new ArrayList<Button>();
-		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "All occurances", ALL_OCCURRENCES, limitTo == ALL_OCCURRENCES));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations", DECLARATIONS, limitTo == DECLARATIONS));
-
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "References", REFERENCES, limitTo == REFERENCES));
 		
 		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
@@ -774,33 +655,33 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	private void initSelections() {
 		ISelection sel= getContainer().getSelection();
 		
-		IWorkbenchPage activePage= JavaPlugin.getActivePage();
-		if (activePage != null) {
-			IWorkbenchPart activePart= activePage.getActivePart();
-			if (activePart instanceof JavaEditor) {
-				JavaEditor javaEditor= (JavaEditor) activePart;
-				if (javaEditor.isBreadcrumbActive()) {
-					sel= javaEditor.getBreadcrumb().getSelectionProvider().getSelection();
-				}
-			}
-		}
+//		IWorkbenchPage activePage= PDTPlugin.getActivePage();
+//		if (activePage != null) {
+//			IWorkbenchPart activePart= activePage.getActivePart();
+//			if (activePart instanceof JavaEditor) {
+//				JavaEditor javaEditor= (JavaEditor) activePart;
+//				if (javaEditor.isBreadcrumbActive()) {
+//					sel= javaEditor.getBreadcrumb().getSelectionProvider().getSelection();
+//				}
+//			}
+//		}
 		
 		SearchPatternData initData= null;
 
 		if (sel instanceof IStructuredSelection) {
 			initData= tryStructuredSelection((IStructuredSelection) sel);
 		} else if (sel instanceof ITextSelection) {
-			IEditorPart activeEditor= getActiveEditor();
-			if (activeEditor instanceof JavaEditor) {
-				try {
-					IJavaElement[] elements= SelectionConverter.codeResolve((JavaEditor) activeEditor);
-					if (elements != null && elements.length > 0) {
-						initData= determineInitValuesFrom(elements[0]);
-					}
-				} catch (JavaModelException e) {
-					// ignore
-				}
-			}
+//			IEditorPart activeEditor= getActiveEditor();
+//			if (activeEditor instanceof JavaEditor) {
+//				try {
+//					IJavaElement[] elements= SelectionConverter.codeResolve((JavaEditor) activeEditor);
+//					if (elements != null && elements.length > 0) {
+//						initData= determineInitValuesFrom(elements[0]);
+//					}
+//				} catch (JavaModelException e) {
+//					// ignore
+//				}
+//			}
 			if (initData == null) {
 				initData= trySimpleTextSelection((ITextSelection) sel);
 			}
@@ -810,9 +691,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		}
 		
 		fInitialData= initData;
-		fJavaElement= initData.getJavaElement();
-		fCaseSensitive.setSelection(initData.isCaseSensitive());
-		fCaseSensitive.setEnabled(fJavaElement == null);
+//		fJavaElement= initData.getJavaElement();
+//		fCaseSensitive.setSelection(initData.isCaseSensitive());
+//		fCaseSensitive.setEnabled(fJavaElement == null);
 		
 		setSearchFor(initData.getSearchFor());
 		setLimitTo(initData.getSearchFor(), initData.getLimitTo());
@@ -826,9 +707,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 //		setIncludeMask(getIncludeMask());
 //	}
 
-	private static boolean forceIncludeAll(int limitTo, IJavaElement elem) {
-		return elem != null && (limitTo == DECLARATIONS);
-	}
+//	private static boolean forceIncludeAll(int limitTo, IJavaElement elem) {
+//		return elem != null && (limitTo == DECLARATIONS);
+//	}
 
 	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {
 		if (selection == null || selection.size() > 1)
@@ -853,18 +734,18 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		return res;
 	}
 	
-	final static boolean isSearchableType(IJavaElement element) {
-		switch (element.getElementType()) {
-			case IJavaElement.PACKAGE_FRAGMENT:
-			case IJavaElement.PACKAGE_DECLARATION:
-			case IJavaElement.IMPORT_DECLARATION:
-			case IJavaElement.TYPE:
-			case IJavaElement.FIELD:
-			case IJavaElement.METHOD:
-				return true;
-		}
-		return false;
-	}
+//	final static boolean isSearchableType(IJavaElement element) {
+//		switch (element.getElementType()) {
+//			case IJavaElement.PACKAGE_FRAGMENT:
+//			case IJavaElement.PACKAGE_DECLARATION:
+//			case IJavaElement.IMPORT_DECLARATION:
+//			case IJavaElement.TYPE:
+//			case IJavaElement.FIELD:
+//			case IJavaElement.METHOD:
+//				return true;
+//		}
+//		return false;
+//	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
 //		try {
@@ -925,7 +806,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 				i++;
 			}
 			if (i > 0) {
-				return new SearchPatternData(PREDICATE, REFERENCES, 0, true, selectedText.substring(0, i), null, JavaSearchScopeFactory.ALL);
+				return new SearchPatternData(PREDICATE, REFERENCES, selectedText.substring(0, i));
 			}
 		}
 		return null;
@@ -936,17 +817,9 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			return (SearchPatternData) fPreviousSearchPatterns.get(0);
 		}
 
-		return new SearchPatternData(PREDICATE, REFERENCES, 0, true, "", null, getLastIncludeMask()); //$NON-NLS-1$
+		return new SearchPatternData(PREDICATE, REFERENCES, ""); //$NON-NLS-1$
 	}
 	
-	private int getLastIncludeMask() {
-		try {
-			return getDialogSettings().getInt(STORE_INCLUDE_MASK);
-		} catch (NumberFormatException e) {
-			return JavaSearchScopeFactory.NO_JRE;
-		}
-	}
-
 	/*
 	 * Implements method from ISearchPage
 	 */
@@ -962,13 +835,13 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		return fContainer;
 	}
 		
-	private IEditorPart getActiveEditor() {
-		IWorkbenchPage activePage= JavaPlugin.getActivePage();
-		if (activePage != null) {
-			return activePage.getActiveEditor();
-		}
-		return null;
-	}
+//	private IEditorPart getActiveEditor() {
+//		IWorkbenchPage activePage= PDTPlugin.getActivePage();
+//		if (activePage != null) {
+//			return activePage.getActiveEditor();
+//		}
+//		return null;
+//	}
 	
 	//--------------- Configuration handling --------------
 	
@@ -979,7 +852,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	 */
 	private IDialogSettings getDialogSettings() {
 		if (fDialogSettings == null) {
-			fDialogSettings= JavaPlugin.getDefault().getDialogSettingsSection(PAGE_NAME);
+			fDialogSettings= PDTPlugin.getDefault().getDialogSettingsSection(PAGE_NAME);
 		}
 		return fDialogSettings;
 	}
