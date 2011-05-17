@@ -44,6 +44,7 @@ package org.cs3.pdt.internal.actions;
 import java.io.File;
 import java.io.IOException;
 
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.IFile;
@@ -170,7 +171,7 @@ public class ConsoleErrorMessageGotoLineAction extends Action {
 			IFile file = PDTCoreUtils.findFileForLocation(filename);
 	//		file = retriever.fileForLocation(path);
 			
-			IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IWorkbenchPage page= PDTPlugin.getActivePage();
 			IDE.openEditor(page, file, true);
 			
 			IDocument document = ((AbstractTextEditor)page.getActiveEditor()).

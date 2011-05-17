@@ -48,9 +48,13 @@ import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IStartup;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -160,12 +164,37 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 	public ErrorMessageProvider getErrorMessageProvider() {
 		if (errorMessageProvider == null) {
 			errorMessageProvider = new DefaultErrorMessageProvider(this);
-		}
+		};
 		return errorMessageProvider;
 	}
 
+	public static IWorkbenchPage getActivePage() {
+		final IWorkbenchWindow activeWorkbenchWindow = PlatformUI
+			.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null) {
+				return null;
+		}
+		return  activeWorkbenchWindow.getActivePage();
+	}
+	
+
 	@Override
 	public void earlyStartup() {
+	}
+
+	/**
+	 * Returns a section in the Prolog plugin's dialog settings. If the section doesn't exist yet, it is created.
+	 *
+	 * @param name the name of the section
+	 * @return the section of the given name
+	 */
+	public IDialogSettings getDialogSettingsSection(String name) {
+		IDialogSettings dialogSettings= getDialogSettings();
+		IDialogSettings section= dialogSettings.getSection(name);
+		if (section == null) {
+			section= dialogSettings.addNewSection(name);
+		}
+		return section;
 	}
 
 }
