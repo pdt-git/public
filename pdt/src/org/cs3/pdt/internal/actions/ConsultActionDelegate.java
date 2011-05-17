@@ -121,7 +121,6 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 	@Override
 	public void run(IAction action) {
 		try {
-			PDTPlugin plugin = PDTPlugin.getDefault();
 			IEditorInput input = UIUtils.getActiveEditor().getEditorInput();
 			if (input == null) {
 				Debug
@@ -132,8 +131,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 
 				File file = fileInput.getFile().getLocation().toFile()
 				.getCanonicalFile();
-				plugin.getWorkbench().getActiveWorkbenchWindow()
-				.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 
 				checkPif();
 				setQuery("pdt_reload('" + Util.prologFileName(file) + "')");
@@ -142,8 +140,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				FileStoreEditorInput fileInput = (FileStoreEditorInput) input;
 				
 				File file  =new File(fileInput.getURI());
-				plugin.getWorkbench().getActiveWorkbenchWindow()
-				.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 				
 				checkPif();
 				setQuery("consult('" + Util.prologFileName(file) + "')");
@@ -263,9 +260,7 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				ContentOutlinePage outlinePage = pleditor.getOutlinePage();
 				if ((outlinePage != null) && (outlinePage instanceof NonConsultPrologOutline)){
 					NonConsultPrologOutline prologOutlinePage = ((NonConsultPrologOutline)outlinePage);
-					System.out.println("bis hier her");
 					prologOutlinePage.setInput(pleditor.getEditorInput());
-					System.out.println("und weiter");
 				}
 			}
 		} );

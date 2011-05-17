@@ -287,18 +287,13 @@ primary_location(Locations,_,File,FirstLine) :-
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(File, Name,Arity,Line,_dyn,_mul,Exported) :-
+find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
 	strip_module(ModuleHead,Module,Head),
     functor(Head,Name,Arity),
-    % TODO: Move the definition of has_property to the "share"
-    % project. It is currently defined in JT!!! -- GK, 21,4,2011   
-%    has_property(_module_pred,dynamic,_dyn),
-%    has_property(_module_pred,multifile,_mul),
-%    has_property(_module_pred,exported,Exported),
-    has_property(Head,dynamic,_dyn),
-    has_property(Head,multifile,_mul),
+    has_property(Head,dynamic,Dyn),
+    has_property(Head,multifile,Mul),
     has_property(Head,exported,Exported),
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 

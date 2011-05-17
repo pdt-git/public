@@ -40,14 +40,11 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
-//import org.eclipse.jface.bindings.keys.SWTKeySupport;
-//import org.eclipse.jface.bindings.keys.KeySequence;
 
 /**
  * Show outline in light-weight control.
