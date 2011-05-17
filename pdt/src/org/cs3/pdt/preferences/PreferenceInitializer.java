@@ -4,11 +4,13 @@ import java.io.IOException;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.internal.editors.PDTColors;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 
 /**
  * Class used to initialize default preference values.
@@ -41,8 +43,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(PDT.PREF_OUTLINE_FILTERS,"hide_subterms" );
 		store.setDefault(PDT.PREF_OUTLINE_SORT, false);
 		
-		
-
+		initializeDefaultPreferences_FontAndColor(store);		
 	}
 
 	private String getLocation() throws IOException {
@@ -55,4 +56,18 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 //		return location;
 	}
 
+	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){	
+		PreferenceConverter.setDefault(store, PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_DEFAULT, PDTColors.DEFAULT);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_STRING, PDTColors.STRING);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_COMMENT, PDTColors.COMMENT);		
+		PreferenceConverter.setDefault(store, PDTColors.PREF_VARIABLE, PDTColors.VARIABLE);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_UNDEFINED, PDTColors.UNDEFINED);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_KEYWORD, PDTColors.KEYWORD);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_DYNAMIC, PDTColors.DYNAMIC);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_TRANSPARENT, PDTColors.TRANSPARENT);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_META, PDTColors.META);
+	}
+
+	
 }

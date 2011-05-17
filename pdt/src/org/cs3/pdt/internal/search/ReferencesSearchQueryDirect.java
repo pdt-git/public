@@ -26,11 +26,27 @@ public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {
-		String query = "find_reference_to('" 
-			             +goal.getName()+  "', " 
-			             +goal.getArity()+ " ,'" 
-			             +goal.getFile()+  "', " 
-			             +module
+		String arity = Integer.toString(goal.getArity());
+		if (goal.getArity() < 0) 
+			arity = "Arity";
+		
+		String file = "'"+goal.getFile()+"'";
+		if (goal.getFile().equals(""))
+			file = "File";
+		
+		String name = "'"+goal.getName()+"'";
+		if (goal.getName().equals(""))
+			name = "Predicate";
+		
+		String module2 = module;
+		if (module.equals("''"))
+			module2 = "Module";
+		
+		String query = "find_reference_to(" 
+			             +name+  ", " 
+			             +arity+ ", " 
+			             +file+  ", " 
+			             +module2
 		                 +",RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind)";
 		return query;
 	}

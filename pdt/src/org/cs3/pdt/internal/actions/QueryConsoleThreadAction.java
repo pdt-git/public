@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.internal.actions;
 
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
@@ -56,7 +57,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
 public class QueryConsoleThreadAction extends Action implements IJobChangeListener{
 
@@ -135,8 +135,7 @@ public class QueryConsoleThreadAction extends Action implements IJobChangeListen
 		}
 		if(c==null){
 			try {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-				getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 				c=plugin.getPrologConsoleService().getActivePrologConsole();
 			} catch (PartInitException e) {
 				e.printStackTrace();
