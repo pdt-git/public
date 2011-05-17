@@ -163,7 +163,7 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
 		}
 
         // get all the view and editor parts
-        List parts = new ArrayList();
+        List<IWorkbenchPart> parts = new ArrayList<IWorkbenchPart>();
         IWorkbenchPartReference refs[] = page.getViewReferences();
         for (int i = 0; i < refs.length; i++) {
             IWorkbenchPart part = refs[i].getPart(false);
@@ -179,7 +179,7 @@ public class NewModuleCreationWizard extends Wizard implements INewWizard {
         }
 
         final ISelection selection = new StructuredSelection(resource);
-        Iterator itr = parts.iterator();
+        Iterator<IWorkbenchPart> itr = parts.iterator();
         while (itr.hasNext()) {
             IWorkbenchPart part = (IWorkbenchPart) itr.next();
 

@@ -43,12 +43,14 @@ package org.cs3.pdt;
 
 import java.io.FileNotFoundException;
 
+import org.cs3.pdt.internal.editors.ColorManager;
 import org.cs3.pdt.ui.util.DefaultErrorMessageProvider;
 import org.cs3.pdt.ui.util.ErrorMessageProvider;
 import org.cs3.pl.common.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IStartup;
@@ -65,6 +67,8 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 
 	public static final String MODULEPREFIX = "pdtplugin:";
 
+	private static ColorManager colorManager; 
+	
 	// The shared instance.
 	private static PDTPlugin plugin;
 
@@ -195,6 +199,15 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 			section= dialogSettings.addNewSection(name);
 		}
 		return section;
+	}
+
+	public ColorManager getColorManager() {
+		if(colorManager == null) {
+			colorManager = new ColorManager();
+			IPreferenceStore store = getPreferenceStore();
+			store.addPropertyChangeListener(colorManager);
+		}
+		return colorManager;
 	}
 
 }

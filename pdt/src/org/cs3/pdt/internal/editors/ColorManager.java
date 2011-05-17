@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.PDTPlugin;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -86,7 +86,7 @@ public class ColorManager implements IPropertyChangeListener{
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-			IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
+			IPreferenceStore store = PDTPlugin.getDefault().getPreferenceStore();
 
 			background = PreferenceConverter.getColor(store, PDTColors.PREF_BACKGROUND);
 			default_ = PreferenceConverter.getColor(store, PDTColors.PREF_DEFAULT);  
