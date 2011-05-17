@@ -294,9 +294,8 @@ public class PLEditor extends TextEditor {
 	public PLEditor() {
 		super();
 		try {
-			colorManager = new ColorManager();
-			IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
-			store.addPropertyChangeListener(colorManager);
+			PDTPlugin.getDefault();
+			colorManager = PDTPlugin.getDefault().getColorManager();
 			
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);

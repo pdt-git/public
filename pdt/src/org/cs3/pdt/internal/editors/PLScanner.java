@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
@@ -90,7 +91,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 		file = editorInput.getFile();
 		assert (file != null) ;
 		
-		IPreferenceStore store = PrologConsolePlugin.getDefault().getPreferenceStore();
+		IPreferenceStore store = PDTPlugin.getDefault().getPreferenceStore();
 		store.addPropertyChangeListener(this);
 		
 		initHighlighting();
