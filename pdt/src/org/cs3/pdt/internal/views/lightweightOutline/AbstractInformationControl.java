@@ -12,9 +12,6 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.List;
 
-import org.cs3.pdt.internal.editors.StringMatcher;
-import org.eclipse.core.commands.Command;
-import org.eclipse.core.commands.contexts.Context;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -28,9 +25,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.osgi.util.TextProcessor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -62,15 +56,9 @@ import org.eclipse.ui.commands.ActionHandler;
 import org.eclipse.ui.commands.HandlerSubmission;
 import org.eclipse.ui.commands.ICommand;
 import org.eclipse.ui.commands.ICommandManager;
-import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.commands.IKeySequenceBinding;
 import org.eclipse.ui.commands.Priority;
-import org.eclipse.ui.contexts.IContextService;
-import org.eclipse.ui.keys.IBindingService;
-import org.eclipse.ui.services.IServiceLocator;
 import org.eclipse.ui.keys.KeySequence;
-import org.eclipse.jface.bindings.keys.KeyBinding;
-//import org.eclipse.jface.bindings.keys.KeySequence;
 
 
 /**
@@ -80,43 +68,12 @@ import org.eclipse.jface.bindings.keys.KeyBinding;
  */
 public abstract class AbstractInformationControl extends PopupDialog implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, DisposeListener {
 
-	/**
-	 * The NamePatternFilter selects the elements which
-	 * match the given string patterns.
-	 *
-	 * @since 2.0
-	 */
-	protected class NamePatternFilter extends ViewerFilter {
-
-		public NamePatternFilter() {
-		}
-
-		/*
-		 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-		 */
-		public boolean select(Viewer viewer, Object parentElement, Object element) {
-			StringMatcher matcher= getMatcher();
-			if (matcher == null || !(viewer instanceof TreeViewer))
-				return true;
-			TreeViewer treeViewer= (TreeViewer) viewer;
-
-			String matchName= ((ILabelProvider) treeViewer.getLabelProvider()).getText(element);
-			matchName= TextProcessor.deprocess(matchName);
-			if (matchName != null && matcher.match(matchName))
-				return true;
-
-			return false;
-		}
-
-
-	}
-
 	/** The control's text widget */
 	private Text fFilterText;
 	/** The control's tree widget */
 	private TreeViewer fTreeViewer;
 	/** The current string matcher */
-	protected StringMatcher fStringMatcher;
+	private StringMatcher fStringMatcher;
 	private ICommand fInvokingCommand;
 //	private Command fInvokingCommand;
 	private KeySequence[] fInvokingCommandKeySequences;
@@ -177,6 +134,18 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 		// Status field text can only be computed after widgets are created.
 		setInfoText(getStatusFieldText());
+	}
+
+	/**
+	 * Creates a tree information control with the given shell as parent. The given
+	 * styles are applied to the shell and the tree widget.
+	 *
+	 * @param parent the parent shell
+	 * @param shellStyle the additional styles for the shell
+	 * @param treeStyle the additional styles for the tree widget
+	 */
+	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle) {
+		this(parent, shellStyle, treeStyle, null, false);
 	}
 
 	/**
@@ -265,18 +234,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 		addDisposeListener(this);
 		return fTreeViewer.getControl();
-	}
-
-	/**
-	 * Creates a tree information control with the given shell as parent. The given
-	 * styles are applied to the shell and the tree widget.
-	 *
-	 * @param parent the parent shell
-	 * @param shellStyle the additional styles for the shell
-	 * @param treeStyle the additional styles for the tree widget
-	 */
-	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle) {
-		this(parent, shellStyle, treeStyle, null, false);
 	}
 
 	protected abstract TreeViewer createTreeViewer(Composite parent, int style);
@@ -391,10 +348,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 */
 	protected void setMatcherString(String pattern, boolean update) {
 		if (pattern.length() == 0) {
-			fStringMatcher= null;
+			setfStringMatcher(null);
 		} else {
 			boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-			fStringMatcher= new StringMatcher(pattern, ignoreCase, false);
+			setfStringMatcher(new StringMatcher(pattern, ignoreCase, false));
 		}
 
 		if (update)
@@ -402,7 +359,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	protected StringMatcher getMatcher() {
-		return fStringMatcher;
+		return getfStringMatcher();
 	}
 
 	/**
@@ -418,7 +375,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	private void gotoSelectedElement() {
-		Object selectedElement= getSelectedElement();
+//		Object selectedElement= getSelectedElement();
 		//TODO
 //		if (selectedElement != null) {
 //			try {
@@ -457,7 +414,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	private TreeItem findElement(TreeItem[] items, TreeItem[] toBeSkipped, boolean allowToGoUp) {
-		if (fStringMatcher == null)
+		if (getfStringMatcher() == null)
 			return items.length > 0 ? items[0] : null;
 
 		ILabelProvider labelProvider= (ILabelProvider)fTreeViewer.getLabelProvider();
@@ -465,10 +422,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		// First search at same level
 		for (int i= 0; i < items.length; i++) {
 			final TreeItem item= items[i];
-			PrologPredicate element= (PrologPredicate)item.getData();
+			OutlinePredicate element= (OutlinePredicate)item.getData();
 			if (element != null) {
 				String label= labelProvider.getText(element);
-				if (fStringMatcher.match(label))
+				if (getfStringMatcher().match(label))
 					return item;
 			}
 		}
@@ -766,19 +723,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		return fInvokingCommandKeySequences;
 	}
 
-//	/*
-//	 * @see org.eclipse.jface.dialogs.PopupDialog#getDialogSettings()
-//	 */
-//	protected IDialogSettings getDialogSettings() {
-//		String sectionName= getId();
-//
-//		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings().getSection(sectionName);
-//		if (settings == null)
-//			settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
-//
-//		return settings;
-//	}
-
 	/*
 	 * Overridden to insert the filter text into the title and menu area.
 	 *
@@ -832,5 +776,13 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			fViewMenuButtonComposite.setTabList(new Control[] { fFilterText });
 			composite.setTabList(new Control[] { fViewMenuButtonComposite, fTreeViewer.getTree() });
 		}
+	}
+
+	protected void setfStringMatcher(StringMatcher fStringMatcher) {
+		this.fStringMatcher = fStringMatcher;
+	}
+
+	protected StringMatcher getfStringMatcher() {
+		return fStringMatcher;
 	}
 }

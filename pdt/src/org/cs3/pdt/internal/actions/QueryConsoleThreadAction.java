@@ -41,6 +41,7 @@
 
 package org.cs3.pdt.internal.actions;
 
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PDTConsole;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pl.common.Debug;
@@ -49,18 +50,20 @@ import org.cs3.pl.console.prolog.PrologConsole;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 
-public class QueryConsoleThreadAction extends Action{
+public class QueryConsoleThreadAction extends Action implements IJobChangeListener{
 
 	private String query;
 	private final PrologConsole console;
 	private ISchedulingRule schedulingRule;
+	private Job job;
 	
 
 
@@ -85,7 +88,8 @@ public class QueryConsoleThreadAction extends Action{
 	@Override
 	public void run() {
 		try {
-			Job j = new Job(getToolTipText()) {
+			String name = getToolTipText();
+			job = new Job(name) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
@@ -104,10 +108,11 @@ public class QueryConsoleThreadAction extends Action{
 					return Status.OK_STATUS;
 				}
 			};
+			job.addJobChangeListener(this);
 			if(schedulingRule != null) {
-				j.setRule(schedulingRule);
+				job.setRule(schedulingRule);
 			}
-			j.schedule();
+			job.schedule();
 		} catch (Throwable t) {
 			Debug.report(t);
 		}
@@ -130,8 +135,7 @@ public class QueryConsoleThreadAction extends Action{
 		}
 		if(c==null){
 			try {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().
-				getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
+				PDTPlugin.getActivePage().showView(PDTConsole.CONSOLE_VIEW_ID);
 				c=plugin.getPrologConsoleService().getActivePrologConsole();
 			} catch (PartInitException e) {
 				e.printStackTrace();
@@ -150,5 +154,44 @@ public class QueryConsoleThreadAction extends Action{
 		else{
 			this.query = query;	
 		}
+	}
+
+	public Job getJob() {
+		return job;
+	}
+
+	@Override
+	public void aboutToRun(IJobChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void awake(IJobChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void done(IJobChangeEvent event) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void running(IJobChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void scheduled(IJobChangeEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sleeping(IJobChangeEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }

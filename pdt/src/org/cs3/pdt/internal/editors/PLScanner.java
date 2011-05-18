@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
@@ -57,6 +58,7 @@ import org.cs3.pl.prolog.PrologSession;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.rules.IRule;
 import org.eclipse.jface.text.rules.IToken;
@@ -65,39 +67,42 @@ import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IFileEditorInput;
 
-public class PLScanner extends RuleBasedScanner {
+public class PLScanner extends RuleBasedScanner implements IPropertyChangeListener{
+	private ColorManager manager;
+	private IFile file;
 
 	public PLScanner(PLEditor editor, ColorManager manager) 
-	    throws CoreException, PrologInterfaceException {
-		IFileEditorInput editorInput = null;
-		IProject project = null;
-		IPrologProject plProject = null;
-		IFile file;
-		
-		// TODO: Add treatment of error cases (missing else branches): 
+	throws CoreException, PrologInterfaceException {
 
-		assert(editor!=null);
+		this.manager = manager;
+		IFileEditorInput editorInput = null;
 		
+		assert(editor!=null);
+
 		if (editor.getEditorInput() instanceof IFileEditorInput) {
 			editorInput = (IFileEditorInput) editor.getEditorInput();
 		}
 		assert (editorInput != null) ;
-//		{
-			file = editorInput.getFile();
+		file = editorInput.getFile();
 		assert (file != null) ;
-			project = file.getProject();
-//		}
-		if (project != null && project.exists() && project.hasNature(PDTCore.NATURE_ID)) {
-			plProject = (IPrologProject) project.getNature(PDTCore.NATURE_ID);
-		}
 		
+		IPreferenceStore store = PDTPlugin.getDefault().getPreferenceStore();
+		store.addPropertyChangeListener(this);
+		
+		initHighlighting();
+	}
+
+	private void initHighlighting()
+			throws PrologInterfaceException, CoreException {
 		// "Tokens" indicate the desired highlighting
-		IToken variableToken    = tokenFor(PDTColors.VARIABLE,manager);
-		IToken stringToken      = tokenFor(PDTColors.STRING,manager);
-		IToken wordToken        = tokenFor(PDTColors.DEFAULT,manager);
+		IToken variableToken    = tokenFor(manager.getVariableColor());
+		IToken stringToken      = tokenFor(manager.getStringColor());
+		IToken wordToken        = tokenFor(manager.getDefaultColor());
 
         // Create rules for syntax highlighting of ...
 		IRule[] rules = new IRule[5];		
@@ -111,7 +116,7 @@ public class PLScanner extends RuleBasedScanner {
 		rules[3] = new WhitespaceRule(new PLWhitespaceDetector());
 		// - special words: 
 		rules[4] = new WordRule(new WordDetector(), wordToken);
-		addWordsTo((WordRule)rules[4], manager, file, plProject);
+		addWordsTo((WordRule)rules[4]);
 
 		// Activate the defined rules.
 		setRules(rules);
@@ -127,8 +132,7 @@ public class PLScanner extends RuleBasedScanner {
 	 * @param plProject -- The PDT Metadata process.
 	 * @throws PrologInterfaceException
 	 */
-	private void addWordsTo(WordRule wordRule, ColorManager manager, 
-			IFile file, IPrologProject plProject) throws PrologInterfaceException {
+	private void addWordsTo(WordRule wordRule) throws PrologInterfaceException, CoreException {
 		
 		// The order of the following definitions is important!
 		// The latter ones overrule the previous ones. E.g. a predicate
@@ -138,15 +142,15 @@ public class PLScanner extends RuleBasedScanner {
 		// (each metapredicate is transparent but not every transparent
 		// predicate is a metapredicate). -- GK
 		
-		addWordsWithProperty("undefined", tokenFor(PDTColors.UNDEFINED,manager), wordRule, file, plProject);
-		addWordsWithProperty("built_in", tokenFor(PDTColors.KEYWORD,manager), wordRule, file, plProject);
-		addWordsWithProperty("dynamic",  tokenFor(PDTColors.DYNAMIC,manager), wordRule, file, plProject);
-		addWordsWithProperty("transparent", tokenFor(PDTColors.TRANSPARENT,manager), wordRule, file, plProject);
-		addWordsWithProperty("meta_predicate(_)", tokenFor(PDTColors.META,manager), wordRule, file, plProject);
+		addWordsWithProperty("undefined", tokenFor(manager.getUndefinedColor()), wordRule);
+		addWordsWithProperty("built_in", tokenFor(manager.getKeywordColor()), wordRule);
+		addWordsWithProperty("dynamic",  tokenFor(manager.getDynamicColor()), wordRule);
+		addWordsWithProperty("transparent", tokenFor(manager.getTransparentColor()), wordRule);
+		addWordsWithProperty("meta_predicate(_)", tokenFor(manager.getMetaColor()), wordRule);
 	}
 
 
-	private Token tokenFor(RGB color, ColorManager manager) {
+	private Token tokenFor(RGB color) {
 		return new Token(new TextAttribute(manager.getColor(color), null, 1));
 	}
 	
@@ -160,10 +164,10 @@ public class PLScanner extends RuleBasedScanner {
 	 * @param wordRule -- The WordRule to which to add the words.
 	 * @param plProject -- The PDT Metadata process.
 	 * @throws PrologInterfaceException
+	 * @throws CoreException 
 	 */
-	private void addWordsWithProperty(String property, IToken keywordToken, WordRule wordRule,
-			IFile file, IPrologProject plProject) throws PrologInterfaceException {
-		String[] plBuiltInPredicates = getPredicatesWithProperty(property,file,plProject);
+	private void addWordsWithProperty(String property, IToken keywordToken, WordRule wordRule) throws PrologInterfaceException, CoreException {
+		String[] plBuiltInPredicates = getPredicatesWithProperty(property);
 		for (int i = 0; plBuiltInPredicates!=null&&i < plBuiltInPredicates.length; i++){
 			wordRule.addWord(plBuiltInPredicates[i], keywordToken);
 		}
@@ -175,12 +179,21 @@ public class PLScanner extends RuleBasedScanner {
 	 * NonPDT behaviour should not be applied also if the PDT nature 
 	 * is active.  -- GK, April 2011
 	 */
-	private String[] getPredicatesWithProperty(String property,
-			IFile file, IPrologProject plProject) throws PrologInterfaceException {
+	private String[] getPredicatesWithProperty(String property) throws PrologInterfaceException, CoreException {
+		IPrologProject plProject = getPLProjectForFile(file);
+		
 		if (plProject == null) // The project does NOT have the PDT nature
-			return getPredicatesWithProperty__NonPDT(property, file);
+			return getPredicatesWithProperty__NonPDT(property);
 		else
-			return getPredicatesWithProperty__PDT(property, plProject);
+			return getPredicatesWithProperty__PDT(property);
+	}
+
+	public IPrologProject getPLProjectForFile(IFile file) throws CoreException {
+		IProject project = file.getProject();
+		if (project != null && project.exists() && project.hasNature(PDTCore.NATURE_ID)) {
+			return (IPrologProject) project.getNature(PDTCore.NATURE_ID);
+		};
+		return null;
 	}
 
 	/**
@@ -193,7 +206,7 @@ public class PLScanner extends RuleBasedScanner {
 	 * 
 	 * @param plProject
 	 */
-	public String[] getPredicatesWithProperty__NonPDT(String property,IFile file) {
+	public String[] getPredicatesWithProperty__NonPDT(String property) {
 		PrologConsole console = PrologConsolePlugin.getDefault()
 				.getPrologConsoleService().getActivePrologConsole();
 		if (console == null) {
@@ -202,15 +215,12 @@ public class PLScanner extends RuleBasedScanner {
 		PrologSession session = null;
 		try {
 			session = console.getPrologInterface().getSession();
-			// long before=System.currentTimeMillis();
 			Map<String, Object> solutions = session
 					.queryOnce("predicates_with_property(" 
 							+ property
 							+ ",'" 
 							+ file.getName()
 							+ "',Predicates)");
-			// System.out.println("Resolving dynamic predicates took: "
-			// +(System.currentTimeMillis()-before));
 
 			String predicatesStr = (String) solutions.get("Predicates");
 			// swipl 5.8.x adds ", " between list elements when writing
@@ -237,10 +247,10 @@ public class PLScanner extends RuleBasedScanner {
 	 * 
 	 * @param plProject
 	 */
-	private String[] getPredicatesWithProperty__PDT(String property, 
-			IPrologProject plProject) {
+	private String[] getPredicatesWithProperty__PDT(String property) {
 		PrologSession session = null;
 		try {
+			IPrologProject plProject = getPLProjectForFile(file);
 			session = plProject.getMetadataPrologInterface().getSession(
 					PrologInterface.NONE);
 			List<Map<String, Object>> solutions = session
@@ -262,5 +272,18 @@ public class PLScanner extends RuleBasedScanner {
 			if (session != null)
 				session.dispose();
 		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent event) {
+		try {
+			System.out.println("resetting colors");
+			initHighlighting();
+		} catch (CoreException e) {
+			System.out.println("CoreException");
+		}
+		catch (PrologInterfaceException e) {
+			System.out.println("InterfaceException");
+		}	
 	}
 }

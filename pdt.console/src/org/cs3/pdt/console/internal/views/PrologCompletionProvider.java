@@ -52,7 +52,6 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.console.CompletionResult;
 import org.cs3.pl.console.ConsoleCompletionProvider;
 import org.cs3.pl.metadata.Predicate;
-import org.cs3.pl.metadata.Predicate;
 import org.cs3.pl.prolog.PrologException;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
