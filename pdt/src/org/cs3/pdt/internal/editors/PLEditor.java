@@ -59,7 +59,7 @@ import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
-import org.cs3.pdt.internal.views.PrologOutline;
+import org.cs3.pdt.internal.views.lightweightOutline.NonConsultPrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -109,7 +109,6 @@ import org.eclipse.swt.custom.CaretListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -117,6 +116,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
+import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 public class PLEditor extends TextEditor {
@@ -133,7 +133,7 @@ public class PLEditor extends TextEditor {
 
 	private ColorManager colorManager;
 
-	private PrologOutline fOutlinePage;
+	private NonConsultPrologOutline fOutlinePage;
 
 	protected final static char[] BRACKETS = { '(', ')', '[', ']' };
 
@@ -169,9 +169,7 @@ public class PLEditor extends TextEditor {
 						session.queryOnce("activate_warning_and_error_tracing");
 
 						file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						ConsultActionDelegate consult = new ConsultActionDelegate();
-						consult.setSchedulingRule(file);
-						consult.run(null);
+						executeConsult();
 						addMarkers(file);
 						
 					}catch(Exception e) {
@@ -296,7 +294,9 @@ public class PLEditor extends TextEditor {
 	public PLEditor() {
 		super();
 		try {
-			colorManager = new ColorManager();
+			PDTPlugin.getDefault();
+			colorManager = PDTPlugin.getDefault().getColorManager();
+			
 			configuration = new PLConfiguration(colorManager, this);
 			setSourceViewerConfiguration(configuration);
 			
@@ -462,13 +462,11 @@ public class PLEditor extends TextEditor {
 
 	private void createMenuEntryForReconsult(MenuManager menuMgr,
 			ResourceBundle bundle) {
-		Action action;
 		reloadAction = new TextEditorAction(bundle, PLEditor.class.getName()
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				ConsultActionDelegate consult = new ConsultActionDelegate();
-				consult.run(null);
+				executeConsult();
 			}
 		};
 		addAction(menuMgr, reloadAction, "(Re)consult",
@@ -524,6 +522,22 @@ public class PLEditor extends TextEditor {
 		return menuMgr;
 	}
 
+	private void executeConsult() {
+		IFile file = ((IFileEditorInput)getEditorInput()).getFile();
+		ConsultActionDelegate consult = new ConsultActionDelegate();
+		consult.setSchedulingRule(file);
+		consult.run(null);
+//		Job job = consult.getJob();
+//		try {
+//			job.join();
+//			if (fOutlinePage != null) {
+//				fOutlinePage.setInput(getEditorInput());
+//			}
+//		} catch (InterruptedException e) {
+//			Debug.report(e);
+//		}
+	}
+
 	/**
 	 * @param parent
 	 */
@@ -534,7 +548,8 @@ public class PLEditor extends TextEditor {
 		try {
 			if (IContentOutlinePage.class.equals(required)) {
 				if (fOutlinePage == null) {
-					fOutlinePage = new PrologOutline(this);
+//					fOutlinePage = new PrologOutline(this);
+					fOutlinePage = new NonConsultPrologOutline(this);
 					fOutlinePage.setInput(getEditorInput());
 				}
 				return fOutlinePage;
@@ -557,7 +572,7 @@ public class PLEditor extends TextEditor {
 		}
 	}
 
-	public PrologOutline getOutlinePage() {
+	public ContentOutlinePage getOutlinePage() {
 		return fOutlinePage;
 	}
 
@@ -635,7 +650,11 @@ public class PLEditor extends TextEditor {
 				.getSelectionProvider().getSelection();
 		int offset = selection.getOffset();
 
-		return GoalProvider.getPrologDataFromOffset(Util.prologFileName(filepath.toFile()), document, offset);
+		return GoalProvider.getPrologDataFromOffset(getPrologFileName(), document, offset);
+	}
+
+	public String getPrologFileName() {
+		return Util.prologFileName(filepath.toFile());
 	}
 
 	public TextSelection getSelection() {
@@ -711,19 +730,6 @@ public class PLEditor extends TextEditor {
 		super.doSetInput(input);
 	
 		filepath = new Path(UIUtils.getFileNameForEditorInput(input));
-//		if (input instanceof IFileEditorInput) {
-//			IFileEditorInput editorInput = (IFileEditorInput) input;
-//			filepath = editorInput.getFile().getLocation();
-//			
-//		}
-//		if (input instanceof FileStoreEditorInput){
-//			FileStoreEditorInput editorInput = (FileStoreEditorInput) input;
-//			filepath =  new Path(editorInput.getURI().getPath());
-//		}
-//		else{
-//			return;
-//		}
-		
 	}
 
 	private IDocumentProvider createDocumentProvider(IEditorInput input) {
@@ -884,7 +890,7 @@ public class PLEditor extends TextEditor {
 			}
 			
 			int length= locationList.size();
-			Map annotationMap= new HashMap(length);
+			Map<Annotation, Position> annotationMap= new HashMap<Annotation, Position>(length);
 			for (int i= 0; i < length; i++) {
 
 				if (isCanceled(progressMonitor))
@@ -926,13 +932,13 @@ public class PLEditor extends TextEditor {
 					((IAnnotationModelExtension)annotationModel).replaceAnnotations(fOccurrenceAnnotations, annotationMap);
 				} else {
 					removeOccurrenceAnnotations();
-					Iterator iter= annotationMap.entrySet().iterator();
+					Iterator<Map.Entry<Annotation, Position>> iter= annotationMap.entrySet().iterator();
 					while (iter.hasNext()) {
-						Map.Entry mapEntry= (Map.Entry)iter.next();
+						Map.Entry<Annotation, Position> mapEntry= iter.next();
 						annotationModel.addAnnotation((Annotation)mapEntry.getKey(), (Position)mapEntry.getValue());
 					}
 				}
-				fOccurrenceAnnotations= (Annotation[])annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
+				fOccurrenceAnnotations= annotationMap.keySet().toArray(new Annotation[annotationMap.keySet().size()]);
 			}
 
 			return Status.OK_STATUS;
@@ -1206,17 +1212,18 @@ public class PLEditor extends TextEditor {
 		
 	}
 	
-	private class VarPos {
-		int begin;
-		int length;
-		String prefix;
-				
-		VarPos(IDocument document, int begin, String prefix) {
-			this.begin=begin;
-			this.prefix=prefix;
-			this.length=prefix.length();
-		}
-	}
+//	private class VarPos {
+//		int begin;
+//		int length;
+//		String prefix;
+//				
+//		VarPos(IDocument document, int begin, String prefix) {
+//			this.begin=begin;
+//			this.prefix=prefix;
+//			this.length=prefix.length();
+//		}
+//	}
+	
 	private TextSelection getVariableAtOffset(IDocument document, int offset)
 	throws BadLocationException {
 		int begin=offset;
@@ -1235,7 +1242,7 @@ public class PLEditor extends TextEditor {
 				&& begin > 0)
 			end++;
 		int length = end - begin;
-		String pos = document.get(begin, length);
+//		String pos = document.get(begin, length);
 		
 		return new TextSelection(document,begin,length);
 	}

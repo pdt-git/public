@@ -8,16 +8,16 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 
-class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, IStyledLabelProvider {
+class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IStyledLabelProvider*/ {
 	@Override
 	public String getText(Object element) {
-		PrologPredicate prologPredicate = (PrologPredicate)element;
-		return prologPredicate.name  +"/" + prologPredicate.arity;
+		OutlinePredicate prologPredicate = (OutlinePredicate)element;
+		return prologPredicate.getName()  +"/" + prologPredicate.getArity();
 	}
 
 	@Override
 	public Image getImage(Object element) {
-		PrologPredicate prologPredicate = (PrologPredicate) element;
+		OutlinePredicate prologPredicate = (OutlinePredicate) element;
 
 		if (prologPredicate.isPublic()) {
 			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
@@ -25,22 +25,24 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider{//, I
 		return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
 	}
 
-@Override
-public Color getForeground(Object element) {
-	PrologPredicate prologPredicate = (PrologPredicate) element;
-	if(prologPredicate.multifile) {
-		return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-	}
-	return null;
-}
 
-@Override
-public Color getBackground(Object element) {
-	PrologPredicate prologPredicate = (PrologPredicate) element;
-	if(prologPredicate.dynamic) {
-		return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+	@Override
+	public Color getForeground(Object element) {
+		OutlinePredicate prologPredicate = (OutlinePredicate) element;
+		if(prologPredicate.isMultifile()) {
+			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
+		} else {
+			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
+		}
 	}
-	return null;
-}
+
+	@Override
+	public Color getBackground(Object element) {
+		OutlinePredicate prologPredicate = (OutlinePredicate) element;
+		if(prologPredicate.isDynamic()) {
+			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+		}
+		return null;
+	}
 
 }

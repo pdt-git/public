@@ -33,11 +33,26 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 
 	@Override
-	protected String buildSearchQuery(Goal goal, String module) {
-
-		String query = "find_definitions_categorized('" 
+	protected String buildSearchQuery(Goal goal, String module) {		
+		String arity = Integer.toString(goal.getArity());
+		if (goal.getArity() < 0) 
+			arity = "Arity";
+		
+		String file = "'"+goal.getFile()+"'";
+		if (goal.getFile().equals(""))
+			file = "File";
+		
+		String name = "'"+goal.getName()+"'";
+		if (goal.getName().equals(""))
+			name = "Predicate";
+		
+		String module2 = module;
+		if (module.equals("''"))
+			module2 = "Module";
+		
+		String query = "find_definitions_categorized(" 
 //			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +goal.getModule()+ "'," +
-			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ", " +module          + 
+			            + file + "," + name+ ", " + arity+ ", "+ module2 + 
 			            ",Visibility,DefiningModule,File,Line)";
 		return query;
 	}

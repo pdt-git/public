@@ -11,8 +11,6 @@ package org.cs3.pdt.internal.views.lightweightOutline;
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,7 +18,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
-import org.cs3.pdt.internal.editors.PrologSourceFileModel;
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
@@ -43,14 +40,11 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
-//import org.eclipse.jface.bindings.keys.SWTKeySupport;
-//import org.eclipse.jface.bindings.keys.KeySequence;
 
 /**
  * Show outline in light-weight control.
@@ -67,9 +61,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 
 	private OutlineLabelProvider fInnerLabelProvider;
 
-
 	private LexicalSortingAction fLexicalSortingAction;
-//	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 
 	/**
 	 * Category filter action group.
@@ -81,7 +73,6 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	/**
 	 * Creates a new Java outline information control.
 	 * @param iDocument 
-	 *
 	 * @param parent
 	 * @param shellStyle
 	 * @param treeStyle
@@ -119,28 +110,18 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 			}
 		});
 		// Hard-coded filters
-		treeViewer.addFilter(new NamePatternFilter());
-		//treeViewer.addFilter(new MemberFilter());
+		treeViewer.addFilter(new NamePatternFilter(this.getMatcher()));
 
 		fInnerLabelProvider= new OutlineLabelProvider();
-//		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
-//		IDecoratorManager decoratorMgr= PlatformUI.getWorkbench().getDecoratorManager();
-//		if (decoratorMgr.getEnabled("org.eclipse.jdt.ui.override.decorator")) //$NON-NLS-1$
-//			fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
-
-		//TODO
 		treeViewer.setLabelProvider(fInnerLabelProvider);
 
-		fLexicalSortingAction= new LexicalSortingAction(this, treeViewer);
-//		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
-		//fCategoryFilterActionGroup= new CategoryFilterActionGroup(treeViewer, getId(), getInputForCategories());
+		fLexicalSortingAction= new LexicalSortingAction(/*this,*/ treeViewer);
 
 		fOutlineContentProvider= new OutlineContentProvider();
 		treeViewer.setContentProvider(fOutlineContentProvider);
 		fOutlineSorter= new ViewerComparator();
 		treeViewer.setComparator(fOutlineSorter);
-		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
-
+			treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 
 		treeViewer.getTree().addKeyListener(getKeyAdapter());
 
@@ -162,68 +143,18 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		return "org.eclipse.jdt.internal.ui.text.QuickOutline"; //$NON-NLS-1$
 	}
 
-	private InputStream mockStream(String inputText){
-		try {
-			return new ByteArrayInputStream(inputText.getBytes());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setInput(Object information) {
 		if(information instanceof String) {
 			String fileName = (String)information;
-			List<PrologPredicate> predicates= new ArrayList<PrologPredicate>();
-			PrologSession session=null;
-			try {
-				PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
-				if(console==null){
-					MessageBox messageBox = new MessageBox(
-							getShell(), SWT.ICON_WARNING| SWT.OK);
+			List<OutlinePredicate> predicates = getPredicatesForFile(fileName/*, getShell()*/);
 
-					messageBox.setText("Outline");
-					messageBox.setMessage("Cannot open outline, no factbase selected in Prolog Console.");
-					messageBox.open();
-					return;
-				}
-				session = console.getPrologInterface().getSession();
-				String query = "get_pred('" + fileName+"',"+"Name,Arity,Line,Dynamic,Multifile,Public)";
-				List<Map<String, Object>> result = session.queryAll(query);
-
-				Set<String> names = new HashSet<String>();
-				for (Map<String, Object> predicate : result) {
-					String name=(String)predicate.get("Name");
-					int arity=Integer.parseInt((String)predicate.get("Arity"));
-					String signature = name+arity;
-					if(!names.contains(signature)){
-						names.add(signature);
-						PrologPredicate prologPredicate = new PrologPredicate();
-						prologPredicate.name=name;
-						prologPredicate.arity=arity;
-						prologPredicate.setPublic(predicate.get("Public").equals("1"));
-						prologPredicate.setMultifile(predicate.get("Multifile").equals("1"));
-						prologPredicate.setDynamic(predicate.get("Dynamic").equals("1"));
-						
-						prologPredicate.line=Integer.parseInt((String)predicate.get("Line"));
-						predicates.add(prologPredicate);
-					}
-				}
-			}catch(Exception e){
-				Debug.report(e);
-			} finally {
-				if(session!=null)session.dispose();
-			}
-			
-			 
-//			
-		PrologSourceFileModel model = new PrologSourceFileModel(predicates,fileName);
-		inputChanged(model, predicates.size()>0?predicates.get(0):null);
-		fInput=model;
-		return;
+			PrologSourceFileModel model = new PrologSourceFileModel(predicates);
+			inputChanged(model, predicates.size()>0?predicates.get(0):null);
+			fInput=model;
+			return;
 		}
 		if (information == null || information instanceof String) {
 			inputChanged(null, null);
@@ -232,6 +163,49 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 
 		inputChanged(fInput, (PrologFileContentModel)information);
 
+	}
+
+	public static List<OutlinePredicate> getPredicatesForFile(String fileName/*, Shell shell*/) {
+		List<OutlinePredicate> predicates= new ArrayList<OutlinePredicate>();
+		PrologSession session=null;
+		try {
+			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
+			if(console==null){
+//				MessageBox messageBox = new MessageBox(
+//						shell, SWT.ICON_WARNING| SWT.OK);
+//
+//				messageBox.setText("Outline");
+//				messageBox.setMessage("Cannot open outline, no active Prolog Console found.");
+//				messageBox.open();
+				return predicates;
+			}
+			session = console.getPrologInterface().getSession();
+			
+			String query = "get_pred('" + fileName+"',"+"Name,Arity,Line,Dynamic,Multifile,Public)";
+			List<Map<String, Object>> result = session.queryAll(query);
+
+			Set<String> names = new HashSet<String>();
+			for (Map<String, Object> predicate : result) {
+				String name=(String)predicate.get("Name");
+				int arity=Integer.parseInt((String)predicate.get("Arity"));
+				String signature = name+arity;
+				if(!names.contains(signature)){
+					names.add(signature);
+					boolean exported = predicate.get("Public").equals("1");
+					boolean multifile = predicate.get("Multifile").equals("1");
+					boolean dynamic = predicate.get("Dynamic").equals("1");
+					int line = Integer.parseInt((String)predicate.get("Line"));
+					OutlinePredicate prologPredicate = new OutlinePredicate( null, name, arity, 
+															exported, multifile, dynamic, line);
+					predicates.add(prologPredicate);
+				}
+			}
+		}catch(Exception e){
+			Debug.report(e);
+		} finally {
+			if(session!=null)session.dispose();
+		}
+		return predicates;
 	}
 
 	private KeyAdapter getKeyAdapter() {
@@ -269,9 +243,6 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 
 		viewMenu.add(new Separator("Sorters")); //$NON-NLS-1$
 		viewMenu.add(fLexicalSortingAction);
-
-//		viewMenu.add(fSortByDefiningTypeAction);
-
 	}
 
 	/*
@@ -287,7 +258,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 
 		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
 		String pattern2= "*" + pattern; //$NON-NLS-1$
-		fStringMatcher= new OrStringMatcher(pattern, pattern2, ignoreCase, false);
+		setfStringMatcher(new OrStringMatcher(pattern, pattern2, ignoreCase, false));
 
 		if (update)
 			stringMatcherUpdated();
@@ -295,10 +266,10 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	}
 
 	public void gotoSelectedElement() {
-		PrologPredicate predicate= (PrologPredicate)getSelectedElement();					
+		OutlinePredicate predicate= (OutlinePredicate)getSelectedElement();					
 		ISelection selection;
 		try {
-			selection = new TextSelection(document,document.getLineOffset(predicate.line-1),0);
+			selection = new TextSelection(document,document.getLineOffset(predicate.getLine()-1),0);
 			UIUtils.getActiveEditor().getEditorSite().getSelectionProvider().setSelection(selection);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
@@ -316,32 +287,4 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	protected IDialogSettings getDialogSettings() {
 		return super.getDialogSettings();
 	}
-
-
-//	CanonicalTermParser termParser = new CanonicalTermParser(mockStream(document.get()));
-//	try {
-//		termParser.Term();
-//		Node root = termParser.getASTRoot();
-//	int num = root.jjtGetNumChildren();
-//	Set<String> names = new HashSet<String>();
-//	for(int i = 0;i<num;i++){
-//		Node child=root.jjtGetChild(i);
-//		if(child instanceof ASTCompound){
-//			ASTCompound comp = (ASTCompound)child;
-//			String signature = comp.getFunctor() + "/" + comp.jjtGetNumChildren();
-//			if(!names.contains(signature)){
-//				names.add(signature);
-//				PrologPredicate prologPredicate = new PrologPredicate();
-//				prologPredicate.name=comp.getFunctor();
-//				prologPredicate.arity=comp.jjtGetNumChildren();
-//				prologPredicate.line=comp.jjtGetFirstToken().beginLine;
-//				predicates.add(prologPredicate);
-//				
-//			}
-//			
-//		}
-//	}
-//	} catch(Throwable e){
-//		e.printStackTrace();
-//	}
 }

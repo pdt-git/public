@@ -4,38 +4,36 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.ImageRepository;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.viewers.TreeViewer;
 
 public class ToggleSortAction extends Action {
-	private PrologOutline outline;
+	private TreeViewer treeViewer;
 
-	ToggleSortAction(PrologOutline outline) {
+	public ToggleSortAction(TreeViewer treeViewer) {
 		super("Sort", AS_CHECK_BOX);
 		this.setImageDescriptor(ImageRepository
 				.getImageDescriptor(ImageRepository.SORT));
-		this.outline = outline;
+		this.treeViewer = treeViewer;
 		String val = PDTPlugin.getDefault().getPreferenceValue(PDT.PREF_OUTLINE_SORT, "false");
 		if("true".equalsIgnoreCase(val)){
 			setChecked(true);
-			outline.getTreeViewer().setSorter(new LexicalPrologOutlineSorter());	
+			treeViewer.setSorter(new LexicalPrologOutlineSorter());	
 		}
 		else{
 			setChecked(false);
-			outline.getTreeViewer().setSorter(new PositionalPrologOutlineSorter());
+			treeViewer.setSorter(new PositionalPrologOutlineSorter());
 		}
-		
 	}
 
 	@Override
 	public void run() {
 		if(isChecked()){
-			outline.getTreeViewer().setSorter(new LexicalPrologOutlineSorter());
+			treeViewer.setSorter(new LexicalPrologOutlineSorter());
 			PDTPlugin.getDefault().setPreferenceValue(PDT.PREF_OUTLINE_SORT, "true");
 		}
 		else{
-			outline.getTreeViewer().setSorter(new PositionalPrologOutlineSorter());
+			treeViewer.setSorter(new PositionalPrologOutlineSorter());
 			PDTPlugin.getDefault().setPreferenceValue(PDT.PREF_OUTLINE_SORT, "false");
 		}
 	}
-	
-	
 }
