@@ -104,7 +104,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 	
 	private final List<SearchPatternData> fPreviousSearchPatterns;
 	
-	private SearchPatternData fInitialData;
+//	private SearchPatternData fInitialData;
 	private boolean fFirstTime= true;
 	private IDialogSettings fDialogSettings;
 //	private boolean fIsCaseSensitive;
@@ -371,7 +371,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		fPattern.setText(initialData.getPattern());
 		fCaseSensitive.setEnabled(true);
 		
-		fInitialData= initialData;
+//		fInitialData= initialData;
 	}
 	
 
@@ -460,7 +460,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			initData= getDefaultInitValues();
 		}
 		
-		fInitialData= initData;
+//		fInitialData= initData;
 		setSearchFor(initData.getSearchFor());
 		int limitTo = initData.getLimitTo();
 		fillLimitToGroup(limitTo);

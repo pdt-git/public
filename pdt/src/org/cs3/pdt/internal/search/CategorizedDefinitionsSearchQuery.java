@@ -66,7 +66,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
                 Goal goal = getGoal();
         
 		        String definingModule = (String)m.get("DefiningModule");
-		        String contextModule = goal.getModule(); 
+//		        String contextModule = goal.getModule(); 
 		        String name =  goal.getName();
 		        int arity =   goal.getArity();
 				IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("File"));

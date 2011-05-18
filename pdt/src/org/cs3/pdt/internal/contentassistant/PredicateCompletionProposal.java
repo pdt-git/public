@@ -20,7 +20,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 	private String name;	
 	private Map<String,?> tags;
 	private String label;
-	private String module;
+//	private String module;
 	private String doc;
 	
 	public PredicateCompletionProposal(int offset, int length,
@@ -38,7 +38,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		this.length = length;
 		this.name=name;
 		this.tags=tags;
-		this.module=module;
+//		this.module=module;
 		if(arity==-1){
 			this.label=name;
 		} else {
@@ -72,7 +72,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 		if(module!=null){
 			label=module+":" + label;
 		}
-		this.module = module;
+//		this.module = module;
 		
 		
 
