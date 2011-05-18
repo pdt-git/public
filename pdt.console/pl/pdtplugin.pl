@@ -235,9 +235,9 @@ find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,M
 % Work regardelessly whether the user selected the entire consult/use_module
 % statement or just the file spec. Does NOT work if he only selected a file
 % name within an alias but not the complete alias.
-extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(consult(FileSpec),FileSpec) :- !.
 extract_file_spec(use_module(FileSpec),FileSpec) :- !.
+extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
     
 find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
