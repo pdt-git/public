@@ -80,7 +80,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 
-public class NonConsultPrologOutline extends ContentOutlinePage {
+public class NonNaturePrologOutline extends ContentOutlinePage {
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
 	private PrologSourceFileModel model;
@@ -90,7 +90,7 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	private Menu contextMenu;
 	private StringMatcher matcher;
 	
-	public NonConsultPrologOutline(PLEditor editor) {
+	public NonNaturePrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
 
@@ -115,11 +115,6 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 		model = new PrologSourceFileModel(new ArrayList<OutlinePredicate>());
 		
 		viewer.setInput(model);
-
-//		String pattern
-//		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-//		setfStringMatcher(new StringMatcher(pattern, ignoreCase, false));
-//		viewer.addFilter(new NamePatternFilter());
 		
 		initFilters(); //TODO: hier weiter + sortingAction
 
@@ -136,7 +131,6 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 //		if(getInput() instanceof FileStoreEditorInput){ // TRHO: deactivated for external files 
 //			return;
 //		}
-//		viewer.setInput(input);
 		setInput(editor.getEditorInput());
 	}
 
@@ -152,7 +146,7 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 		menuMgr.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				NonConsultPrologOutline.this.fillContextMenu(manager);
+				NonNaturePrologOutline.this.fillContextMenu(manager);
 			}
 		});
 		TreeViewer viewer = getTreeViewer();
