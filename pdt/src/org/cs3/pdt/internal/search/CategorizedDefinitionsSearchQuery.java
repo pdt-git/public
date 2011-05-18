@@ -40,7 +40,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		
 		String file = "'"+goal.getFile()+"'";
 		if (goal.getFile().equals(""))
-			file = "File";
+			file = "OrigFile";
 		
 		String name = "'"+goal.getName()+"'";
 		if (goal.getName().equals(""))
