@@ -56,14 +56,14 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 //		return location;
 	}
 
-	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){	
+	private void initializeDefaultPreferences_FontAndColor(IPreferenceStore store){			
 		PreferenceConverter.setDefault(store, PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_DEFAULT, PDTColors.DEFAULT);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_STRING, PDTColors.STRING);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_COMMENT, PDTColors.COMMENT);		
 		PreferenceConverter.setDefault(store, PDTColors.PREF_VARIABLE, PDTColors.VARIABLE);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_UNDEFINED, PDTColors.UNDEFINED);
-		PreferenceConverter.setDefault(store, PDTColors.PREF_KEYWORD, PDTColors.KEYWORD);
+		PreferenceConverter.setDefault(store, PDTColors.PREF_BUILTIN, PDTColors.BUILTIN);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_DYNAMIC, PDTColors.DYNAMIC);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_TRANSPARENT, PDTColors.TRANSPARENT);
 		PreferenceConverter.setDefault(store, PDTColors.PREF_META, PDTColors.META);
