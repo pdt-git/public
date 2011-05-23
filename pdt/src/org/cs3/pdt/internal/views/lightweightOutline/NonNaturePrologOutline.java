@@ -88,7 +88,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	private ILabelProvider labelProvider;
 	private PrologOutlineFilter[] filters;
 	private Menu contextMenu;
-	private StringMatcher matcher;
+//	private StringMatcher matcher;
 	
 	public NonNaturePrologOutline(PLEditor editor) {
 		this.editor = editor;
@@ -128,9 +128,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 //		toolBarManager.add(action);
 		
 		hookContextMenu(parent);
-//		if(getInput() instanceof FileStoreEditorInput){ // TRHO: deactivated for external files 
-//			return;
-//		}
 		setInput(editor.getEditorInput());
 	}
 
@@ -158,19 +155,8 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	
 	
 	public void setInput(Object information) {
-		// TODO: Eva: so umbauen, dass information genommen wird (was aber fast das selbe ist)
 		String fileName = editor.getPrologFileName();
-//		if (information instanceof IEditorInput) {
-//			input = ((IEditorInput) information);
-//			fileName = ((IEditorInput) information).getName();
-//			String string = ((IEditorInput)information).toString();
-//			IDocument doc = editor.getDocumentProvider().getDocument(input);
-//			String string2 = doc.toString();
-//			fileName =((IEditorInput) information).getToolTipText();
-//		}
-//		if (information instanceof String) {
-//			fileName = (String)information;
-//		}
+		
 		List<OutlinePredicate> predicates;
 		if (fileName != "") {
 			try {			
@@ -183,7 +169,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		}
 		TreeViewer treeViewer = getTreeViewer();
 		if (treeViewer != null) {
-//			treeViewer.setInput(model);
 			treeViewer.refresh();
 		}
 	}

@@ -176,6 +176,7 @@ public class ExternalFile implements IFile {
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Map getPersistentProperties() throws CoreException {
 		return null;
@@ -216,6 +217,7 @@ public class ExternalFile implements IFile {
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Map getSessionProperties() throws CoreException {
 		return null;
@@ -399,6 +401,7 @@ public class ExternalFile implements IFile {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Class adapter) {
 		return null;
