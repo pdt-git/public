@@ -1,6 +1,6 @@
 :- module(literal_parser, [parse_bodies]).
 
-:- consult(crossref).
+:- use_module(crossref).
 :- ensure_loaded(parse_util).
 
 %Todo: Kommentar verfassen
@@ -28,7 +28,7 @@ parse_bodies:-				%TODO: wieder auf Files einschränken!!!!!!!!!!
 parse_bodies.
 
 
-parse_body_literals(Module:Literal, Pos, ParentId, ClauseId, _OrigModule, VarNames) :-
+parse_body_literals(Module:Literal, Pos, _ParentId, ClauseId, _OrigModule, VarNames) :-
     !, 
     Pos = term_position(From, To, _FFrom, _FTo, SubPos),
     SubPos = [ModuleFrom-ModuleTo, LiteralPos],
@@ -39,7 +39,7 @@ parse_body_literals(Module:Literal, Pos, ParentId, ClauseId, _OrigModule, VarNam
 * ToDo: What does I have to assert from all the above?
 ******/
    
-parse_body_literals([A|B], Pos, ParentId, ClauseId, Module, VarNames) :- 
+parse_body_literals([A|B], Pos, _ParentId, _ClauseId, _Module, _VarNames) :- 
    !,
    Pos = list_position(From, To, _ElemPos, _TailPos),		
    assert_new_node([A|B],From,To,_Id).		

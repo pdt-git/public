@@ -34,13 +34,7 @@ derive_edges:-
     			% clauseT(Id,_,Module,Functor,Arity),    %Eva: umstellen auf PredicateT?
      			 assert(call_edge(LId,Id))	
     		  )
-    		  ;	/*
-    			(	( functor(Term,Functor,Arity),
-    			      predicate_property(Term,built_in)
-    			     )
-    		     ->	(write(' interp '),writeln(Functor/Arity))
-    		    ;*/	true
-    		    %)
+    		  ;	true
     		)
     	  ).
 /****
