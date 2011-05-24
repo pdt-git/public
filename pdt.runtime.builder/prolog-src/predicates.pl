@@ -63,7 +63,7 @@ compute_all_predicate_properties:-
     		compute_predicate_property(Functor, Args, ParentId, Module, Pos)
     	).
     	
-compute_predicate_property(Functor, Args, ParentId, Module, Pos).
+compute_predicate_property(_Functor, _Args, _ParentId, _Module, _Pos).
 
 /**
  * analyse_directive(+Directive,+Pos,+ParentId,+Module)

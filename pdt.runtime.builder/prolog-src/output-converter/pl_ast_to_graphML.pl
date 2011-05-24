@@ -1,3 +1,7 @@
+:- module(pl_ast_to_graphML, [write_facts_to_graphML/2,
+								pl_test/0,
+								pl_test/2]).
+
 :- use_module('../prolog_file_reader_quick').
 :- use_module('../analyzer/edge_counter').
 
