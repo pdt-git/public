@@ -251,8 +251,8 @@ private static JackTheProcessRipper processRipper;
 		tmpWriter.println(":- doc_collect(false).");
 		if (socketPif.isHidePlwin()) {
 			tmpWriter.println(":- (  (current_prolog_flag(windows, true))" + "->win_window_pos([show(false)])" + ";true).");
-//			tmpWriter.println(":- (  (current_prolog_flag(executable,_A),atom_concat(_,'plwin.exe',_A))" + "->win_window_pos([show(false)])" + ";true).");
 		}
+		tmpWriter.println(":- (current_prolog_flag(windows,_T) -> set_prolog_flag(tty_control,false); true).");
 
 		if (socketPif.isCreateLogs()) {
 			tmpWriter.println(":- debug(consult_server).");
