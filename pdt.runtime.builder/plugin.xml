@@ -8,6 +8,9 @@
             id="pdt.runtime.builder.graphml_creator"
             key="yworks.contribution.key"
             path="prolog-src/output-converter/">
+         <dependency
+               contribution="org.cs3.lp.utils">
+         </dependency>
       </fileSearchPathContribution>
    </extension>
    <extension
