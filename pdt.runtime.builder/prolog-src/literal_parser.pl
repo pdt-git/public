@@ -1,6 +1,6 @@
 :- module(literal_parser, [parse_bodies]).
 
-:- use_module(crossref).
+:- use_module(analyzer/metafile_referencer).
 :- ensure_loaded(parse_util).
 
 %Todo: Kommentar verfassen
@@ -49,7 +49,8 @@ parse_body_literals([A|B], Pos, _ParentId, _ClauseId, _Module, _VarNames) :-
 **/
    
 parse_body_literals(Body, Pos, ParentId, ClauseId, Module, VarNames) :- 
-   	xref:is_metaterm(Body, MetaArguments),
+   	%xref:is_metaterm(Body, MetaArguments),
+   	metafile_referencer:is_metaterm(Module, Body, MetaArguments),
    	!, 
    	Pos = term_position(From, To, _FFrom, _FTo, SubPos),
    	assert_new_node(Body,From,To,Id),   %<===
