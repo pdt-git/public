@@ -178,6 +178,10 @@ public interface Subscription {
 	/**
 	 * Bootstrap library contribution (key) demanded by this subscription.
 	 * Several plug-ins/fragments may contribute to a contribution key. 
+	 * 
+	 * In case the list is empty the default ("") contribution key is assumed, otherwise 
+	 * only the given keys are processed. Meaning the default key ("") must be added in 
+	 * case its corresponding bootstrap contributions should be added.
 	 *    
 	 * @return
 	 */
