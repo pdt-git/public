@@ -54,11 +54,13 @@ import java.util.List;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.views.FilterActionMenu;
 import org.cs3.pdt.internal.views.HideDirectivesFilter;
 import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
 import org.cs3.pdt.internal.views.HideSubtermsFilter;
 import org.cs3.pdt.internal.views.PrologOutlineComparer;
 import org.cs3.pdt.internal.views.PrologOutlineFilter;
+import org.cs3.pdt.internal.views.ToggleSortAction;
 import org.cs3.pl.common.Util;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -116,14 +118,14 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		
 		viewer.setInput(model);
 		
-		initFilters(); //TODO: hier weiter + sortingAction
+		initFilters();
 
 		IActionBars actionBars = getSite().getActionBars();
 		IToolBarManager toolBarManager = actionBars.getToolBarManager();
-		Action action = new LexicalSortingAction(viewer);
-		toolBarManager.add(action);
-//		Action action = new ToggleSortAction(getTreeViewer());
+//		Action action = new LexicalSortingAction(viewer);
 //		toolBarManager.add(action);
+		Action action = new ToggleSortAction(getTreeViewer());
+		toolBarManager.add(action);
 //		action = new FilterActionMenu(this);
 //		toolBarManager.add(action);
 		
