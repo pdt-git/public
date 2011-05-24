@@ -344,7 +344,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			readerThread.start();
 
 			String valString = PrologConsolePlugin.getDefault()
-					.getPreferenceValue(PDTConsole.PREF_ENABLE_CONSOLE_VOODOO,
+					.getPreferenceValue(PDTConsole.PREF_INTERCEPT_GET_SINGLE_CHAR,
 							"false");
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
