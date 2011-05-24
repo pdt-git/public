@@ -791,8 +791,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
-			int port;
-			String queryString = "use_module(library(pdt_console_server)), "
+			String queryString = 
+				      "use_module(library(pdt_console_server)), "
 					+ "pdt_start_console_server(Port)";
 			Debug.info("starting console server using: " + queryString);
 			
@@ -804,7 +804,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 					throw new RuntimeException("No Server running.");
 				}
 			}
-			port = Integer.parseInt((String) result.get("Port"));
+			
+			int port = Integer.parseInt((String) result.get("Port"));
 			Debug.debug("A server thread seems to be listinging at port "+port);
 		} catch (Throwable e) {
 			Debug.report(e);
@@ -937,8 +938,9 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 		
 		Map<String,?> result = null;
 		try {
-			result = session.queryOnce("use_module(library(pdt_console_server))," +
-					"use_module(library(pdtplugin)),"
+			result = session.queryOnce(
+					"use_module(library(pdt_console_server))," 
+					+ "use_module(library(pdtplugin)),"
 					+ "pdt_current_console_server(Port)");
 			if (result == null) {
 				startServer(pif, session);
