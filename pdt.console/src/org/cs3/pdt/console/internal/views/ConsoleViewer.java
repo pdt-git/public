@@ -146,6 +146,9 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 	private int startOfInput = 0;
 	private boolean enterSendsSemicolon;
 
+	final String PLACEHOLDER_LGT_WARNING = "%         WARNING!";
+	final String PLACEHOLDER_LGT_UNDEFINED = "called but never defined";
+	
 	final String PLACEHOLDER_WARNING = "WARNING";
 	final String PLACEHOLDER_ERROR = "ERROR";
 	final String PLACEHOLDER_DEBUG = "DEBUG";
@@ -691,7 +694,11 @@ public class ConsoleViewer extends Viewer implements ConsoleModelListener {
 					row = Rows[i];
 					// Get the Color-Information
 					String UpperCaseRow = row.toUpperCase();
-					if (lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING)) {
+					if (lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING) &&
+						row.contains(PLACEHOLDER_LGT_UNDEFINED)) {
+						LastOutputColor = COLOR_DEBUG;
+					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_WARNING) ||
+						lineStartsWith(UpperCaseRow, PLACEHOLDER_LGT_WARNING)) {
 						LastOutputColor = COLOR_WARNING;
 					} else if (lineStartsWith(UpperCaseRow, PLACEHOLDER_ERROR)) {
 						LastOutputColor = COLOR_ERROR;
