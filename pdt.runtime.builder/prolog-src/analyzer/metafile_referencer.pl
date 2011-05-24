@@ -1,5 +1,6 @@
 :- module(metafile_referencer, [file_references_for_metacall/3,	%Arg1=ContextModule %Arg2=MetaCall %Arg3=References (see description)
-								file_references_for_call/3		%Arg1=ContextModule %Arg2=Term %Arg3=FileSet
+								file_references_for_call/3,		%Arg1=ContextModule %Arg2=Term %Arg3=FileSet
+								is_metaterm/3					%Arg1=ContextModule %Arg2=Literal %Arg3=MetaArgument
 								]).
 								
 :- use_module(org_cs3_lp_utils(utils4modules)).
