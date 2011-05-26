@@ -46,7 +46,7 @@
     find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
     find_definitions_categorized/8, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
     find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
-    get_pred/7,
+    find_definition_contained_in/7,
     find_pred/8,
     predicates_with_property/3,
     manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
@@ -73,16 +73,11 @@
                /**********************************
                 * TODOs for EVA after WLPE paper *
                 * ********************************/
- 
-
-% Move the definition of has_property/3 to the "share" project. 
-% It is currently defined in JT making the PDT dependent on JT!!! 
-% -- GK, 21,4,2011   
 
 % TO BE INLINED into call site in
 % pdt/src/org/cs3/pdt/internal/actions/PrologOutlineInformationControl.java
-get_pred(File, Name,Arity,Line,Dynamic,Multifile,Exported) :-
-    find_definition_contained_in(File,Name,Arity,Line,Dynamic,Multifile,Exported).
+%get_pred(File, Name,Arity,Line,Dynamic,Multifile,Exported) :-
+%    find_definition_contained_in(File,Name,Arity,Line,Dynamic,Multifile,Exported).
 
                /*************************************
                 * PDT RELAOAD                       *
@@ -292,9 +287,9 @@ find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported) :-
     source_file(ModuleHead, File),
 	strip_module(ModuleHead,Module,Head),
     functor(Head,Name,Arity),
-    has_property(Head,dynamic,Dyn),
-    has_property(Head,multifile,Mul),
-    has_property(Head,exported,Exported),
+    has_property(Module:Head,dynamic,Dyn),
+    has_property(Module:Head,multifile,Mul),
+    has_property(Module:Head,exported,Exported),
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
     defined_in_file(Module,Name,Arity,_Nth,File,Line).
