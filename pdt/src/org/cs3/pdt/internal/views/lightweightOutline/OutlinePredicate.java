@@ -13,7 +13,7 @@ public class OutlinePredicate extends Predicate{
 		this.line = line;
 	}
 
-	int getLine() {
+	public int getLine() {
 		return line;
 	}
 }
