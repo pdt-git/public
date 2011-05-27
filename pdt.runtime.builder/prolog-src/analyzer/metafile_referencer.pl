@@ -4,6 +4,7 @@
 								]).
 								
 :- use_module(org_cs3_lp_utils(utils4modules)).
+:- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
 
 % FÜR EVA: Dies Prädikat müssen wir noch mal besprechen. -- G.
 
@@ -100,3 +101,45 @@ file_references_for_call(Module, Term, FileSet):-
 file_references_for_call(Module, Term, [(Module, 'undefined')]):-
     functor(Term,Name,Arity),
 	visible_in_module(Module,Name,Arity).   
+
+	
+	
+	
+:- dynamic(new_found_meta_predicate/1).	
+	
+find_unknown_meta_predicates:-
+    retractall(new_found_meta_predicate(_)),
+	known_meta_predicate(Module,Name,Arity,Definition),
+    functor(Meta_Head,Name,Arity),
+	
+	current_predicate(RefModule:F/A),     % For all defined predicates	
+	functor(RefHead,F,A),   
+   	nth_clause(RefModule:RefHead,_,Ref),   % For all their clauses
+   	%'$xr_member'(Ref, Module:Meta_Head),                  % Get a term referenced by that clause
+   	clause(CHead,CBody,Ref),
+	%hier müsste ein XReferencer jetzt rein,
+	%wenn man es richtig macht, sollten die variablen-Bindungen auch zu finden sein
+	% vielleicht mal mit den call_edges versuchen - oberste ebene sollte ich ja finden, geschachteltes im nächsten Schritt   	
+   	assert(new_found_meta_predicate(RefModule:F/A)),
+   	fail.
+find_unknown_meta_predicates.
+
+
+
+
+    
+    
+
+
+/**
+ *	know_meta_predicat(?Module,?Name, ?Arity, ?MetaArgs) is nondet
+ *
+ *  succeds when the predicate represented by Arg1:Arg2/Arg3 
+ *  is a meta-predicate. 
+ *  In this case, Arg4 is the meta-predicate definition.
+ **/
+known_meta_predicate(Module,Name,Arity,Definition):-
+    visible_in_module(Module,Name,Arity),
+    functor(Head,Name,Arity),
+    predicate_property(Module:Head,meta_predicate(Definition)).
+    
