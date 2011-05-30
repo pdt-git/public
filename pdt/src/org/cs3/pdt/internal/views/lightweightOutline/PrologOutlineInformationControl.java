@@ -110,7 +110,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 			}
 		});
 		// Hard-coded filters
-		treeViewer.addFilter(new NamePatternFilter(this.getMatcher()));
+		treeViewer.addFilter(new NamePatternFilter(this, this.getMatcher()));
 
 		fInnerLabelProvider= new OutlineLabelProvider();
 		treeViewer.setLabelProvider(fInnerLabelProvider);
