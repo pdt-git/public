@@ -6,8 +6,11 @@
   <artifactId>jtransformer_projects</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
-  <tycho-version>0.12.0</tycho-version>
-  
+ <property>
+    <name>tycho-version</name>
+    <value>0.12.0</value>
+  </property> 
+ 
   <!-- needed for findbugs -->
    <repositories>
     <repository>
