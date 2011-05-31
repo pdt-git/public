@@ -54,7 +54,6 @@ import java.util.List;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.internal.views.FilterActionMenu;
 import org.cs3.pdt.internal.views.HideDirectivesFilter;
 import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
 import org.cs3.pdt.internal.views.HideSubtermsFilter;
@@ -162,8 +161,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		List<OutlinePredicate> predicates;
 		if (fileName != "") {
 			try {			
-			// TODO: Eva: das aus PrologOutlineInformatinControl befreien soweit möglich
-				predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName);
+				predicates = PrologOutlineQuery.getPredicatesForFile(fileName);
 				model.update(predicates);
 			} catch(Exception e) {
 				

@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -196,9 +197,11 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 				Map<String,Object> result = it.next();
 				boolean pub = Boolean.valueOf(result.get("Public").toString())
 						.booleanValue();
+				Vector<String> properties = new Vector<String>();
+				if(pub) properties.add("exported");
 				Predicate data = new Predicate(module, result.get("Name")
 						.toString(), Integer.parseInt(result.get("Arity")
-						.toString()), pub, false, false);
+						.toString()), properties);
 				list.add(data);
 			}
 			return list.toArray(new Predicate[0]);

@@ -2,6 +2,7 @@ package org.cs3.pdt.internal.search;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.metadata.Goal;
@@ -44,7 +45,7 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
 		int line = Integer.parseInt((String) m.get(LINE_VAR));
 
-		PrologMatch match = createMatch(module, name, arity, file, line);
+		PrologMatch match = createMatch(module, name, arity, file, line, new Vector<String>());
 		return match;
 	}
 	

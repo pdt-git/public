@@ -41,6 +41,7 @@
 
 package org.cs3.pl.metadata;
 
+import java.util.List;
 
 
 /**
@@ -70,9 +71,8 @@ public class Clause extends PrologElement {
 
 	private static final long serialVersionUID = 1L;
 
-	public Clause(String module, String label, int arity, boolean pub,
-			boolean dynamic, boolean multifile) {
-		super(module, label, arity, pub, dynamic, multifile);
+	public Clause(String module, String label, int arity, List<String> properties) {
+		super(module, label, arity, properties);
 	
 	}
 
@@ -80,9 +80,8 @@ public class Clause extends PrologElement {
 	 * @return a handle to the Predicate this clause contributes to.
 	 */
 	public Predicate getPredicate() {
-		return new Predicate(contextModule,functorName,arity,pub,dynamic,multifile);
+		return new Predicate(contextModule,functorName,arity,getProperties());
 	}
 
 	
-
 }

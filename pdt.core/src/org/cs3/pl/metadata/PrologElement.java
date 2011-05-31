@@ -43,6 +43,7 @@ package org.cs3.pl.metadata;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.List;
 
 
 /**
@@ -60,11 +61,8 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 	protected String functorName;
 	protected int arity;
 
-	protected boolean dynamic;
-	protected boolean multifile;
-	protected boolean pub;
-
 	protected boolean isKnown;
+	private List<String> properties = null;
 
 	
 	/**
@@ -74,13 +72,11 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 	 * @param functorName
 	 * @param arity if arity is -1 the element is a module.
 	 */
-	protected PrologElement(String contextModule,String functorName, int arity,boolean pub, boolean dynamic, boolean multifile) {
-		this.pub = pub;
+	protected PrologElement(String contextModule,String functorName, int arity, List<String>  properties) {
 		this.functorName = functorName;
 		this.arity = arity;
-		this.dynamic = dynamic;
-		this.multifile =multifile;
 		this.contextModule=contextModule;		
+		this.properties = properties;
 		this.isKnown=true;
 	}
 
@@ -139,21 +135,21 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 		if(!isKnown){
 			throw new UnsupportedOperationException("Not enough information.");
 		}
-		return pub;
+		return properties.contains("exported");
 	}
 
 	public boolean isDynamic() {
 		if(!isKnown){
 			throw new UnsupportedOperationException("Not enough information.");
 		}
-		return dynamic;
+		return properties.contains("dynamic");
 	}
 
 	public boolean isMultifile() {
 		if(!isKnown){
 			throw new UnsupportedOperationException("Not enough information.");
 		}
-		return multifile;
+		return properties.contains("multifile");
 	}
 
 	public boolean isKnown() {
@@ -163,6 +159,10 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 	@Override
 	public int hashCode() {
 		return getSignature().hashCode();
+	}
+
+	public List<String> getProperties() {
+		return properties;
 	}
 
 	@Override
