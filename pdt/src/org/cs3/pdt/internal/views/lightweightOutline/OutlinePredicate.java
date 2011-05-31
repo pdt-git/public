@@ -1,5 +1,7 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import java.util.List;
+
 import org.cs3.pl.metadata.Predicate;
 
 public class OutlinePredicate extends Predicate{
@@ -8,8 +10,8 @@ public class OutlinePredicate extends Predicate{
 	private int line;
 	//private String file;
 	
-	public OutlinePredicate(String module, String functor, int arity, boolean pub, boolean dynamic, boolean multifile, int line){
-		super(module, functor, arity, pub, dynamic, multifile);
+	public OutlinePredicate(String module, String functor, int arity, List<String> properties, int line){
+		super(module, functor, arity, properties);
 		this.line = line;
 	}
 

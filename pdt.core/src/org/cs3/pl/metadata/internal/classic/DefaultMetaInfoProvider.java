@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.metadata.Clause;
@@ -121,9 +122,11 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			Map<String,Object> result = it.next();
 			boolean pub = Boolean.valueOf(result.get("Public").toString())
 					.booleanValue();
+			Vector<String> properties = new Vector<String>();
+			if(pub) properties.add("exported");
 			Predicate data = new Predicate(module, result.get("Name")
 					.toString(), Integer.parseInt(result.get("Arity")
-					.toString()), pub, false, false);
+					.toString()), properties);
 			list.add(data);
 
 		}
@@ -148,6 +151,23 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		List<Clause> list = new ArrayList<Clause>();
 		for (Iterator<Map<String,Object>> it = results.iterator(); it.hasNext();) {
 			Map<String,Object> result = it.next();
+			String module = result.get("Module").toString();
+			String name = result.get("Name").toString();
+			int arity = java.lang.Integer
+					.parseInt(result.get("Arity").toString());
+			boolean exported = Boolean
+					.valueOf(result.get("Public").toString())
+					.booleanValue();
+			boolean dynamic = result.get("Dyn").toString()
+					.equals("1");
+			boolean multifile = result.get("Mul").toString().equals(
+					"1");
+			Vector<String>properties = new Vector<String>();
+			if (exported) properties.add("exported");
+			if (dynamic) properties.add("dynamic");
+			if (multifile) properties.add("multifile");
+			Clause data1 = new Clause(module,
+					name, arity, properties);
 //			SourceLocation sl = new SourceLocation(file, true);
 //			sl.setOffset(Integer.parseInt(result.get("Pos").toString()));
 //			sl.setEndOffset(sl.getOffset()
@@ -159,13 +179,8 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 //							.booleanValue(), result.get("Dyn").toString()
 //							.equals("1"), result.get("Mul").toString().equals(
 //							"1"), sl);
-			Clause data = new Clause(result.get("Module").toString(),
-					result.get("Name").toString(), java.lang.Integer
-							.parseInt(result.get("Arity").toString()), Boolean
-							.valueOf(result.get("Public").toString())
-							.booleanValue(), result.get("Dyn").toString()
-							.equals("1"), result.get("Mul").toString().equals(
-							"1"));
+			
+			Clause data = data1;
 
 			list.add(data);
 
@@ -226,7 +241,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 //				sl.setOffset(Integer.parseInt( (String) m.get("Pos")));
 //				sl.setEndOffset(sl.getOffset()+Integer.parseInt( (String) m.get("Len")));				
 //				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
-				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile());
+				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.getProperties());
 			}
 			return result;
 		} finally {
@@ -269,7 +284,11 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 				boolean pub = "1".equals(m.get("Pub"));
 				boolean dyn = "1".equals(m.get("Dyn"));
 				boolean mult = "1".equals(m.get("Mult"));
-				result.add(new Predicate(module, label,arity,pub,dyn,mult));
+				Vector<String> properties = new Vector<String>();
+				if(pub) properties.add("exported");
+				if(dyn) properties.add("dynamic");
+				if(mult) properties.add("multifile");
+				result.add(new Predicate(module, label,arity,properties));
 			}
 		}
 		finally{

@@ -69,6 +69,7 @@ import org.eclipse.jface.text.rules.WhitespaceRule;
 import org.eclipse.jface.text.rules.WordRule;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.IFileEditorInput;
 
@@ -151,7 +152,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 
 
 	private Token tokenFor(RGB color) {
-		return new Token(new TextAttribute(manager.getColor(color), null, 1));
+		return new Token(new TextAttribute(manager.getColor(color), null, 1)); /*SWT.NORMAL | SWT.ITALIC | SWT.BOLD | TextAttribute.UNDERLINE)*/
 	}
 	
 	/**
@@ -277,13 +278,12 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		try {
-			System.out.println("resetting colors");
 			initHighlighting();
 		} catch (CoreException e) {
-			System.out.println("CoreException");
+
 		}
 		catch (PrologInterfaceException e) {
-			System.out.println("InterfaceException");
+
 		}	
 	}
 }

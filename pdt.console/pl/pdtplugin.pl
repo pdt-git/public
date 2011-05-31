@@ -43,10 +43,10 @@
 
 :- module(pdtplugin,[
     pdt_reload/1,  
-    find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
-    find_definitions_categorized/8, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
+    find_reference_to/12, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
+    find_definitions_categorized/9, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line, PropertyList):-
     find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
-    find_definition_contained_in/7,
+    find_definition_contained_in/6,
     find_pred/8,
     predicates_with_property/3,
     manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
@@ -64,10 +64,12 @@
 :- use_module(library('http/html_write')).
 
 :- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
+:- use_module(pdt_runtime_builder_analyzer(pdt_xref_experimental)).
+:- use_module(pdt_runtime_builder_analyzer(properties)).
 
-:- ensure_loaded(org_cs3_lp_utils(general)).
+%:- ensure_loaded(org_cs3_lp_utils(general)).
 :- use_module(org_cs3_lp_utils(utils4modules)).
-:- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
+
 
              
                /**********************************
@@ -99,7 +101,7 @@ pdt_reload(File):-
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
 
-find_definitions_categorized(EnclFile,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
+find_definitions_categorized(EnclFile,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line, PropertyList):-
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
     -> true                            % Explicit module reference
@@ -108,7 +110,8 @@ find_definitions_categorized(EnclFile,Name,Arity,ReferencedModule,Category, Defi
     find_decl_or_def(ReferencedModule,Name,Arity,Sources),
     member(Category-DefiningModule-Location,Sources),
     member(File-Lines,Location),
-    member(Line,Lines).
+    member(Line,Lines),
+    properties_for_predicate(ReferencedModule,Name,Arity,PropertyList).
 
 %% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
 
@@ -235,7 +238,7 @@ extract_file_spec(consult(FileSpec),FileSpec) :- !.
 extract_file_spec(use_module(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
     
-find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
+find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
     -> true                            % Explicit module reference
@@ -273,23 +276,21 @@ primary_location(Locations,_,File,FirstLine) :-
          
 % TODO: This is meanwhile subsumed by other predicates. Integrate!
    
-%% find_definition_contained_in(+File, -Name,-Arity,-Line,-Dyn,-Mul,-Exported) is nondet.
+%% find_definition_contained_in(+File, -Name,-Arity,-Line,-PropertyList) is nondet.
 %
 % Looks up the starting line of each clause of each  
-% predicate Name/Arity defined in File. The boolean
-% properties Dyn(amic), Mul(tifile) and Exported are
-% unified with 1 or 0.
+% predicate Name/Arity defined in File. Core properties
+% of the predicate are contained in the PropertyList.
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported) :-
+find_definition_contained_in(File,Module,Name,Arity,Line,PropertyList) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
 	strip_module(ModuleHead,Module,Head),
     functor(Head,Name,Arity),
-    has_property(Module:Head,dynamic,Dyn),
-    has_property(Module:Head,multifile,Mul),
-    has_property(Module:Head,exported,Exported),
+    properties_for_predicate(Module,Name,Arity,PropertyList),
+    
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
     defined_in_file(Module,Name,Arity,_Nth,File,Line).
