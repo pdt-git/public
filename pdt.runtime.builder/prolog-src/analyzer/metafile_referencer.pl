@@ -109,14 +109,17 @@ file_references_for_call(Module, Term, [(Module, 'undefined')]):-
 	
 find_unknown_meta_predicates:-
     retractall(new_found_meta_predicate(_)),
-	known_meta_predicate(Module,Name,Arity,Definition),
-    functor(Meta_Head,Name,Arity),
-	
 	current_predicate(RefModule:F/A),     % For all defined predicates	
 	functor(RefHead,F,A),   
-   	nth_clause(RefModule:RefHead,_,Ref),   % For all their clauses
-   	%'$xr_member'(Ref, Module:Meta_Head),                  % Get a term referenced by that clause
-   	clause(CHead,CBody,Ref),
+	\+ predicate_property(RefModule:RefHead, built_in),
+	\+ predicate_property(RefModule:RefHead, autoload(_)),
+    nth_clause(RefModule:RefHead,_,Ref),   % For all their clauses
+   	'$xr_member'(Ref, Module:Meta_Head),                  % Get a term referenced by that clause
+   	
+   	functor(Meta_Head,Name,Arity),
+	known_meta_predicate(Module,Name,Arity,Definition),
+    
+
 	%hier müsste ein XReferencer jetzt rein,
 	%wenn man es richtig macht, sollten die variablen-Bindungen auch zu finden sein
 	% vielleicht mal mit den call_edges versuchen - oberste ebene sollte ich ja finden, geschachteltes im nächsten Schritt   	
@@ -139,7 +142,9 @@ find_unknown_meta_predicates.
  *  In this case, Arg4 is the meta-predicate definition.
  **/
 known_meta_predicate(Module,Name,Arity,Definition):-
-    visible_in_module(Module,Name,Arity),
+    predicate_property(Module:Head,meta_predicate(Definition)),
     functor(Head,Name,Arity),
-    predicate_property(Module:Head,meta_predicate(Definition)).
+    visible_in_module(Module,Name,Arity).
+    
+    
     
