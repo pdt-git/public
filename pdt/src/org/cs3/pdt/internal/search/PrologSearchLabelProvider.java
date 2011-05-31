@@ -4,6 +4,7 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pl.metadata.PrologElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -44,14 +45,11 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 	}
 
 	private Image setPredicateImage(Object element) {
-		PredicateElement pe = (PredicateElement) element;
-		if("this_pred_ref".equals(pe.getModule())){
-			return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
+		PrologElement pe = (PrologElement) element;
+		if (pe.isPublic()) {
+			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 		}
-		if("unresolved_pred_ref".equals(pe.getModule())){
-			return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
-		}
-		return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
+		return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
 	}
 
 	private Image setCategoryImage(ISharedImages sharedImagaes) {
