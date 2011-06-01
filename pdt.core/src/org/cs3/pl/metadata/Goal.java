@@ -45,6 +45,7 @@ public class Goal extends PrologElement {
 
 	private static final long serialVersionUID = 1L;
 	private String file;
+	private String line;
 	private String termString;
 
 	public Goal(String file, String module, String elementName, int arity, String termString) {
@@ -53,6 +54,11 @@ public class Goal extends PrologElement {
 		this.termString = termString;
 	}
 
+	public Goal(String file, int line, String module, String elementName, int arity, String termString) {
+		this( file, module,  elementName,  arity,  termString);
+		this.line = String.valueOf(line);
+	}
+		
 	public String getFile() {
 		return file;
 	}
@@ -63,6 +69,10 @@ public class Goal extends PrologElement {
 	
 	public String getTermString() {
 		return termString;
+	}
+
+	public String getLine() {
+		return line;
 	}
 
 }

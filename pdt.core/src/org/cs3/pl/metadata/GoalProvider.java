@@ -12,7 +12,7 @@ public class GoalProvider {
 	 */
 	public static Goal getPrologDataFromOffset(String file, IDocument document,
 			int offset) throws BadLocationException {
-	
+			
 		int start = PredicateReadingUtilities.findBeginOfPredicateName(document, offset);
 		int end = PredicateReadingUtilities.findEndOfPredicateName(document, offset);
 	
@@ -79,7 +79,9 @@ public class GoalProvider {
 			endOfTerm++;
 		}
 		String term = document.get(start, endOfTerm - start);
-		return new Goal(file,module, functor, arity, term);
+		int line = document.getLineOfOffset(offset);
+
+		return new Goal(file, line, module, functor, arity, term);
 
 	}
 

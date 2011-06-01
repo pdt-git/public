@@ -42,6 +42,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		if (goal.getFile().equals(""))
 			file = "File";
 		
+
 		String name = "'"+goal.getName()+"'";
 		if (goal.getName().equals(""))
 			name = "Predicate";
@@ -50,9 +51,11 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		if (module.equals("''"))
 			module2 = "Module";
 		
+		// TODO: Get Line 
+		
 		String query = "find_definitions_categorized(" 
 //			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +goal.getModule()+ "'," +
-			            + file + "," + name+ ", " + arity+ ", "+ module2 + 
+			            + file + "," + goal.getLine() + "," + goal.getTermString() + "," + name+ ", " + arity+ ", "+ module2 + 
 			            ",Visibility,DefiningModule,File,Line)";
 		return query;
 	}
