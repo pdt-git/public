@@ -67,7 +67,6 @@
 :- use_module(pdt_runtime_builder_analyzer(pdt_xref_experimental)).
 :- use_module(pdt_runtime_builder_analyzer(properties)).
 
-%:- ensure_loaded(org_cs3_lp_utils(general)).
 :- use_module(org_cs3_lp_utils(utils4modules)).
 
 
@@ -287,7 +286,11 @@ primary_location(Locations,_,File,FirstLine) :-
 find_definition_contained_in(File,Module,Name,Arity,Line,PropertyList) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
-	strip_module(ModuleHead,Module,Head),
+	strip_module(ModuleHead,ModuleCandidate,Head),
+	(	module_property(ModuleCandidate, file(File))
+	->	Module = ModuleCandidate
+	;	Module = user
+	),
     functor(Head,Name,Arity),
     properties_for_predicate(Module,Name,Arity,PropertyList),
     
