@@ -87,7 +87,44 @@ listXref :-
     listing(db_xrefFromToFilesOnly).
 
 
+/**
+ * is_metaterm(?Literal, ?MetaArguments )
+ *  Arg1 is a literal representing a metacall and 
+ *  Arg2 is the list of its meta-arguments.
+ */
+is_metaterm(Literal, MetaArguments) :-
+   ( 	var(Literal) 
+   -> 	(	current_predicate(_,Literal) 
+   		; 	user:current_predicate(_,Literal)  
+   		) 
+   	; 	true
+   	),
+   predicate_property(Literal,meta_predicate(MetaTerm)),
+   Literal =.. [Functor|Args],
+   MetaTerm =.. [Functor|MetaArgs], 
+   collect_meta_args(Args,MetaArgs, MetaArguments ).
 
+collect_meta_args(Args,MetaArgs, MetaArguments ) :- 
+    findall( 
+         Meta,
+         extract_meta_argument(Args,MetaArgs, Meta),
+         MetaArguments
+    ).
+    
+extract_meta_argument(Args,MetaArgs, (N,NewArg) ) :- 
+    nth1(N,MetaArgs,MArg),
+    ( MArg == ':' ; integer(MArg)),
+    nth1(N,Args,Arg),
+    additonal_parameters(MArg,Arg,NewArg).
+   
+additonal_parameters(':',Arg,Arg) :- !.
+additonal_parameters(0,Arg,Arg) :- !.
+additonal_parameters(N,Arg,NewArg) :-
+	Arg =.. [Functor | Params],				%Eva: Hier wird erwartet, dass Arg gebunden ist!!!!
+   	length(N_Elems,N),
+   	append(Params,N_Elems,NewParams),
+   	NewArg =.. [Functor | NewParams].
+    
 
     
     

@@ -186,7 +186,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		return null;
 	}
 	
-	public ModuleSearchDummy[] getModules(){
+	public ModuleSearchElement[] getModules(){
 		Object[] elements = getElements();
 		List<PrologMatch> matches = new ArrayList<PrologMatch>();
 		for (int i=0; i< elements.length; i++) {
@@ -199,7 +199,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 				}
 			}
 		}
-		return ModuleDummyCreator.getModuleDummiesForMatches(matches);
+		return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
 	}
 
 	public PredicateElement[] getElements(IFile file) {

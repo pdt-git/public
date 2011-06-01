@@ -22,7 +22,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  */
 
 public class PreferencePageColor extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
-
 	private ColorFieldEditor background;
 	private ColorFieldEditor default_;
 	private ColorFieldEditor string;
@@ -40,7 +39,6 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 		setPreferenceStore(PDTPlugin.getDefault().getPreferenceStore());
 		setDescription("Editor color preferences");
 	}
-
 
 	private void initColorFieldEditors(boolean show_colors){
 		background.setEnabled(show_colors, getFieldEditorParent());
@@ -85,16 +83,16 @@ public class PreferencePageColor extends FieldEditorPreferencePage implements IW
 	 */
 	@Override
 	public void createFieldEditors() {
-		background = new ColorFieldEditor(PDTColors.PREF_BACKGROUND, "Background color", getFieldEditorParent());
-		default_ = new ColorFieldEditor(PDTColors.PREF_DEFAULT, "Default color", getFieldEditorParent());
-		string = new ColorFieldEditor(PDTColors.PREF_STRING, "String color", getFieldEditorParent());
-		comment = new ColorFieldEditor(PDTColors.PREF_COMMENT, "Comment color", getFieldEditorParent());
-		variable = new ColorFieldEditor(PDTColors.PREF_VARIABLE, "Variable color", getFieldEditorParent());
-		undefined = new ColorFieldEditor(PDTColors.PREF_UNDEFINED, "Undefined color", getFieldEditorParent());
-		keyword = new ColorFieldEditor(PDTColors.PREF_KEYWORD, "Keyword color", getFieldEditorParent());
-		dynamic = new ColorFieldEditor(PDTColors.PREF_DYNAMIC, "Dynamic color", getFieldEditorParent());
-		transparent = new ColorFieldEditor(PDTColors.PREF_TRANSPARENT, "Transparent color", getFieldEditorParent());
-		meta = new ColorFieldEditor(PDTColors.PREF_META, "Metapredicate color", getFieldEditorParent());
+		background = new ColorFieldEditor(PDTColors.PREF_BACKGROUND, PDTColors.BACKGROUND_STRING, getFieldEditorParent());
+		default_ = new ColorFieldEditor(PDTColors.PREF_DEFAULT, PDTColors.DEFAULT_STRING, getFieldEditorParent());
+		string = new ColorFieldEditor(PDTColors.PREF_STRING, PDTColors.STRING_STRING, getFieldEditorParent());
+		comment = new ColorFieldEditor(PDTColors.PREF_COMMENT, PDTColors.COMMENT_STRING, getFieldEditorParent());
+		variable = new ColorFieldEditor(PDTColors.PREF_VARIABLE, PDTColors.VARIABLE_STRING, getFieldEditorParent());
+		undefined = new ColorFieldEditor(PDTColors.PREF_UNDEFINED, PDTColors.UNDEFINED_STRING, getFieldEditorParent());
+		keyword = new ColorFieldEditor(PDTColors.PREF_BUILTIN, PDTColors.BUILT_IN_STRING, getFieldEditorParent());
+		dynamic = new ColorFieldEditor(PDTColors.PREF_DYNAMIC, PDTColors.DYNAMIC_STRING, getFieldEditorParent());
+		transparent = new ColorFieldEditor(PDTColors.PREF_TRANSPARENT, PDTColors.MODULE_TRANSPARENT_STRING, getFieldEditorParent());
+		meta = new ColorFieldEditor(PDTColors.PREF_META, PDTColors.META_PREDICATE_STRING, getFieldEditorParent());
 		
 		addField(background);
 		addField(default_);

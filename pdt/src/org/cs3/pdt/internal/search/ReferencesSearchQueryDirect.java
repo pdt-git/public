@@ -4,7 +4,9 @@
 package org.cs3.pdt.internal.search;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.metadata.Goal;
@@ -47,28 +49,29 @@ public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 			             +arity+ ", " 
 			             +file+  ", " 
 			             +module2
-		                 +",RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind)";
+		                 +",RefModule,RefName,RefArity,RefFile,RefLine,Nth,Kind,PropertyList)";
 		return query;
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
 
-//		  The referenced name and arity were input data:
-//        int searchedArity =   getGoal().getArity();     
-//        String searchedName =  getGoal().getName();    
-
-//		 The referencing Module, Name, Arity, File and Line number:
 		String module = (String)m.get("RefModule");
 		String name = (String)m.get("RefName");
 		int arity = Integer.parseInt((String)m.get("RefArity"));
-
+		
+		List<String> properties = null;
+		Object prop = m.get("PropertyList");
+		if (prop instanceof Vector<?>) {
+			properties = (Vector<String>)prop;
+		}
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("RefFile"));
 		int line = Integer.parseInt((String) m.get("RefLine"));
 
-		PrologMatch match = createMatch(module, name, arity, file, line);
+		PrologMatch match = createMatch(module, name, arity, file, line, properties );
 		return match;
 	}
 	

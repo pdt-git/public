@@ -361,8 +361,10 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 					registry.addSubscription(subscription);
 					PrologInterface pif = PrologRuntimeUIPlugin.getDefault().getPrologInterface(subscription);
 
-					if (automatedSelector.getActiveTrackers().isEmpty())
-						PrologConsoleView.this.setPrologInterface(pif);
+                    if (automatedSelector.getActiveTrackers().isEmpty()){
+                        PrologConsoleView.this.setPrologInterface(pif);
+                        PrologConsoleView.this.automatedSelector.setImageDescriptor(ImageRepository.getImageDescriptor(ImageRepository.MANUAL_MODE));
+                    }
 					return Status.OK_STATUS;
 				}
 			};

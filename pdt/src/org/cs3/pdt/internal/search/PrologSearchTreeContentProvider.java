@@ -66,10 +66,10 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		}
 		if (parentElement instanceof SearchResultCategory){
 			List<PrologMatch> matches = ((SearchResultCategory) parentElement).getMatches();
-			return ModuleDummyCreator.getModuleDummiesForMatches(matches);
+			return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
 		}
-		if (parentElement instanceof ModuleSearchDummy) {
-			return ((ModuleSearchDummy) parentElement).getFiles();
+		if (parentElement instanceof ModuleSearchElement) {
+			return ((ModuleSearchElement) parentElement).getFiles();
 		}
 		if (parentElement instanceof IFile){
 			return getSearchResult().getElements((IFile) parentElement);
@@ -89,7 +89,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 				element instanceof PrologSearchResult || 
 				element instanceof PredicateElement ||
 				element instanceof SearchResultCategory ||
-				element instanceof ModuleSearchDummy;
+				element instanceof ModuleSearchElement;
 	}
 
 	@Override

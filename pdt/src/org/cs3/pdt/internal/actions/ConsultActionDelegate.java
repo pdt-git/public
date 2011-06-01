@@ -54,7 +54,7 @@ import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.internal.editors.PLEditor;
-import org.cs3.pdt.internal.views.lightweightOutline.NonConsultPrologOutline;
+import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.runtime.PrologInterfaceRegistry;
 import org.cs3.pdt.runtime.PrologRuntimePlugin;
 import org.cs3.pdt.runtime.ui.PrologRuntimeUIPlugin;
@@ -258,8 +258,8 @@ public class ConsultActionDelegate extends QueryConsoleThreadAction implements
 				}
 				PLEditor pleditor = (PLEditor)editor;
 				ContentOutlinePage outlinePage = pleditor.getOutlinePage();
-				if ((outlinePage != null) && (outlinePage instanceof NonConsultPrologOutline)){
-					NonConsultPrologOutline prologOutlinePage = ((NonConsultPrologOutline)outlinePage);
+				if ((outlinePage != null) && (outlinePage instanceof NonNaturePrologOutline)){
+					NonNaturePrologOutline prologOutlinePage = ((NonNaturePrologOutline)outlinePage);
 					prologOutlinePage.setInput(pleditor.getEditorInput());
 				}
 			}

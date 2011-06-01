@@ -59,7 +59,7 @@ import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
 import org.cs3.pdt.internal.actions.ToggleCommentAction;
-import org.cs3.pdt.internal.views.lightweightOutline.NonConsultPrologOutline;
+import org.cs3.pdt.internal.views.lightweightOutline.NonNaturePrologOutline;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -133,7 +133,7 @@ public class PLEditor extends TextEditor {
 
 	private ColorManager colorManager;
 
-	private NonConsultPrologOutline fOutlinePage;
+	private NonNaturePrologOutline fOutlinePage;
 
 	protected final static char[] BRACKETS = { '(', ')', '[', ']' };
 
@@ -549,7 +549,7 @@ public class PLEditor extends TextEditor {
 			if (IContentOutlinePage.class.equals(required)) {
 				if (fOutlinePage == null) {
 //					fOutlinePage = new PrologOutline(this);
-					fOutlinePage = new NonConsultPrologOutline(this);
+					fOutlinePage = new NonNaturePrologOutline(this);
 					fOutlinePage.setInput(getEditorInput());
 				}
 				return fOutlinePage;

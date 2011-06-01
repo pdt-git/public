@@ -14,7 +14,7 @@ public class NewModuleCreationWizardPage extends WizardNewFileCreationPage {
 	 */
 	
 	
-	private final static String PAGE_NAME= "NewModuleCreationWizardPage"; //$NON-NLS-1$
+//	private final static String PAGE_NAME= "NewModuleCreationWizardPage"; //$NON-NLS-1$
 	
 		
 		/**
