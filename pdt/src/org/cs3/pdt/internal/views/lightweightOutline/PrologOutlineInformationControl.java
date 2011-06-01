@@ -11,6 +11,7 @@ package org.cs3.pdt.internal.views.lightweightOutline;
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.cs3.pdt.internal.views.PrologFileContentModel;
@@ -137,10 +138,10 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	public void setInput(Object information) {
 		if(information instanceof String) {
 			String fileName = (String)information;
-			List<OutlinePredicate> predicates = PrologOutlineQuery.getPredicatesForFile(fileName/*, getShell()*/);
+			List<ModuleOutlineElement> modules = PrologOutlineQuery.getProgramElementsForFile(fileName/*, getShell()*/);
 
-			PrologSourceFileModel model = new PrologSourceFileModel(predicates);
-			inputChanged(model, predicates.size()>0?predicates.get(0):null);
+			PrologSourceFileModel model = new PrologSourceFileModel(modules);
+			inputChanged(model, modules.size()>0?modules.get(0):null);
 			fInput=model;
 			return;
 		}

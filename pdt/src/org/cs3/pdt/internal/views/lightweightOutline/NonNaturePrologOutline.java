@@ -111,11 +111,12 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 
 		viewer.addSelectionChangedListener(this);
 		
-		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		
-		model = new PrologSourceFileModel(new ArrayList<OutlinePredicate>());
+		model = new PrologSourceFileModel(new ArrayList<ModuleOutlineElement>());
 		
 		viewer.setInput(model);
+		
+		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		
 		initFilters();
 
@@ -158,16 +159,21 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	public void setInput(Object information) {
 		String fileName = editor.getPrologFileName();
 		
-		List<OutlinePredicate> predicates;
+		List<ModuleOutlineElement> modules;
+		TreeViewer treeViewer = getTreeViewer();
 		if (fileName != "") {
 			try {			
-				predicates = PrologOutlineQuery.getPredicatesForFile(fileName);
-				model.update(predicates);
+				modules = PrologOutlineQuery.getProgramElementsForFile(fileName);
+				model.update(modules);
+				
+				treeViewer.setInput(model);
+				treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+
 			} catch(Exception e) {
 				
 			}
 		}
-		TreeViewer treeViewer = getTreeViewer();
+		
 		if (treeViewer != null) {
 			treeViewer.refresh();
 		}

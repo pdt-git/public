@@ -32,7 +32,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		} else if (element instanceof PrologMatch) {
 			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
 			return setCategoryImage(sharedImagaes);
-		} else if(element instanceof ModuleSearchDummy){
+		} else if(element instanceof ModuleSearchElement){
 			//return ImageRepository.getImage(ImageRepository.PE_MODULE);
 			return ImageRepository.getImage(ImageRepository.PACKAGE);
 		} else if (element instanceof SearchResultCategory) {
@@ -60,7 +60,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 	public String getText(Object element) {
 		if(element instanceof PredicateElement){
 			PredicateElement pe = ((PredicateElement)element);
-			String label = pe.getLabel();
+			String label = pe.getSignature();
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";
@@ -68,8 +68,8 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return ((IFile)element).getFullPath().toString();
 		} else if (element instanceof SearchResultCategory) {
 			return ((SearchResultCategory)element).getLabel();
-		} else if (element instanceof ModuleSearchDummy) {
-			return ((ModuleSearchDummy)element).getLabel();
+		} else if (element instanceof ModuleSearchElement) {
+			return ((ModuleSearchElement)element).getLabel();
 		} else if(element instanceof PrologMatch) {
 			return "Line: " +Integer.toString(((PrologMatch)element).getLine());
 		}

@@ -1,6 +1,7 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
@@ -11,37 +12,48 @@ import org.eclipse.ui.PlatformUI;
 class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IStyledLabelProvider*/ {
 	@Override
 	public String getText(Object element) {
-		OutlinePredicate prologPredicate = (OutlinePredicate)element;
-		return prologPredicate.getName()  +"/" + prologPredicate.getArity();
+		if(element instanceof PDTTreeElement) {
+			return ((PDTTreeElement) element).getLabel();
+		}
+		return "";
 	}
 
 	@Override
 	public Image getImage(Object element) {
-		OutlinePredicate prologPredicate = (OutlinePredicate) element;
 
-		if (prologPredicate.isPublic()) {
-			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+		if(element instanceof Predicate) {
+			Predicate prologPredicate = (Predicate) element;
+			if (prologPredicate.isPublic()) {
+				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+			}
+			return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
 		}
-		return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
+		if(element instanceof ModuleOutlineElement) {
+//			ModuleOutlineElement module = (ModuleOutlineElement)element;
+//			if(module.hasChildren())
+				return ImageRepository.getImage(ImageRepository.PACKAGE);
+		}
+		return null;
 	}
 
 
 	@Override
 	public Color getForeground(Object element) {
-		OutlinePredicate prologPredicate = (OutlinePredicate) element;
-		if(prologPredicate.isMultifile()) {
+		if(element instanceof Predicate) {
+			Predicate predicate = (Predicate) element;
+			if(predicate.isDynamic()) {
 			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLUE);
-		} else {
-			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
-		}
+			}
+		}	
+		return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 	}
 
 	@Override
 	public Color getBackground(Object element) {
-		OutlinePredicate prologPredicate = (OutlinePredicate) element;
-		if(prologPredicate.isDynamic()) {
-			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
-		}
+//		OutlinePredicate prologPredicate = (OutlinePredicate) element;
+//		if(prologPredicate.isDynamic()) {
+//			return PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+//		}
 		return null;
 	}
 

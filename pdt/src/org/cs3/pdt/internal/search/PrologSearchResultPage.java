@@ -129,7 +129,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 			loc.isWorkspacePath = file.isAccessible();
 			
 			loc.setLine(prologMatch.getLine());
-			loc.setPredicateName(element.getPredicateName());
+			loc.setPredicateName(element.getName());
 			loc.setArity(element.getArity());
 			PDTUtils.showSourceLocation(loc);
 			return;
