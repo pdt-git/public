@@ -59,6 +59,7 @@ import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
 import org.cs3.pdt.internal.views.HideSubtermsFilter;
 import org.cs3.pdt.internal.views.PrologOutlineComparer;
 import org.cs3.pdt.internal.views.PrologOutlineFilter;
+import org.cs3.pdt.internal.views.ToggleSortAction;
 import org.cs3.pl.common.Util;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -80,7 +81,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 
-public class NonConsultPrologOutline extends ContentOutlinePage {
+public class NonNaturePrologOutline extends ContentOutlinePage {
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
 	private PrologSourceFileModel model;
@@ -88,9 +89,9 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	private ILabelProvider labelProvider;
 	private PrologOutlineFilter[] filters;
 	private Menu contextMenu;
-	private StringMatcher matcher;
+//	private StringMatcher matcher;
 	
-	public NonConsultPrologOutline(PLEditor editor) {
+	public NonNaturePrologOutline(PLEditor editor) {
 		this.editor = editor;
 	}
 
@@ -110,33 +111,25 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 
 		viewer.addSelectionChangedListener(this);
 		
-		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		
-		model = new PrologSourceFileModel(new ArrayList<OutlinePredicate>());
+		model = new PrologSourceFileModel(new ArrayList<ModuleOutlineElement>());
 		
 		viewer.setInput(model);
-
-//		String pattern
-//		boolean ignoreCase= pattern.toLowerCase().equals(pattern);
-//		setfStringMatcher(new StringMatcher(pattern, ignoreCase, false));
-//		viewer.addFilter(new NamePatternFilter());
 		
-		initFilters(); //TODO: hier weiter + sortingAction
+		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		
+		initFilters();
 
 		IActionBars actionBars = getSite().getActionBars();
 		IToolBarManager toolBarManager = actionBars.getToolBarManager();
-		Action action = new LexicalSortingAction(viewer);
-		toolBarManager.add(action);
-//		Action action = new ToggleSortAction(getTreeViewer());
+//		Action action = new LexicalSortingAction(viewer);
 //		toolBarManager.add(action);
+		Action action = new ToggleSortAction(getTreeViewer());
+		toolBarManager.add(action);
 //		action = new FilterActionMenu(this);
 //		toolBarManager.add(action);
 		
 		hookContextMenu(parent);
-//		if(getInput() instanceof FileStoreEditorInput){ // TRHO: deactivated for external files 
-//			return;
-//		}
-//		viewer.setInput(input);
 		setInput(editor.getEditorInput());
 	}
 
@@ -152,7 +145,7 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 		menuMgr.addMenuListener(new IMenuListener() {
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				NonConsultPrologOutline.this.fillContextMenu(manager);
+				NonNaturePrologOutline.this.fillContextMenu(manager);
 			}
 		});
 		TreeViewer viewer = getTreeViewer();
@@ -164,32 +157,24 @@ public class NonConsultPrologOutline extends ContentOutlinePage {
 	
 	
 	public void setInput(Object information) {
-		// TODO: Eva: so umbauen, dass information genommen wird (was aber fast das selbe ist)
 		String fileName = editor.getPrologFileName();
-//		if (information instanceof IEditorInput) {
-//			input = ((IEditorInput) information);
-//			fileName = ((IEditorInput) information).getName();
-//			String string = ((IEditorInput)information).toString();
-//			IDocument doc = editor.getDocumentProvider().getDocument(input);
-//			String string2 = doc.toString();
-//			fileName =((IEditorInput) information).getToolTipText();
-//		}
-//		if (information instanceof String) {
-//			fileName = (String)information;
-//		}
-		List<OutlinePredicate> predicates;
+		
+		List<ModuleOutlineElement> modules;
+		TreeViewer treeViewer = getTreeViewer();
 		if (fileName != "") {
 			try {			
-			// TODO: Eva: das aus PrologOutlineInformatinControl befreien soweit möglich
-				predicates = PrologOutlineInformationControl.getPredicatesForFile(fileName);
-				model.update(predicates);
+				modules = PrologOutlineQuery.getProgramElementsForFile(fileName);
+				model.update(modules);
+				
+				treeViewer.setInput(model);
+				treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+
 			} catch(Exception e) {
 				
 			}
 		}
-		TreeViewer treeViewer = getTreeViewer();
+		
 		if (treeViewer != null) {
-//			treeViewer.setInput(model);
 			treeViewer.refresh();
 		}
 	}

@@ -3,6 +3,7 @@
  */
 package org.cs3.pdt.internal.views;
 
+import org.cs3.pdt.internal.views.lightweightOutline.OutlinePredicate;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -10,6 +11,9 @@ final class PositionalPrologOutlineSorter extends ViewerSorter {
 	@Override
 	public int category(Object element) {
 		
+		if(element instanceof OutlinePredicate) {
+			return 2;
+		}
 		
 		if(! (element instanceof PEFNode  ) ){
 			return 0;
@@ -27,6 +31,10 @@ final class PositionalPrologOutlineSorter extends ViewerSorter {
 
 	@Override
 	public int compare(Viewer viewer, Object e1, Object e2) {
+		
+		if ((e1 instanceof OutlinePredicate) && (e2 instanceof OutlinePredicate)) {
+			return ((OutlinePredicate)e1).getLine() - ((OutlinePredicate)e2).getLine();
+		}
 		
 		if (e1 instanceof PEFNode && e2 instanceof PEFNode) {
 			return ((PEFNode)e1).getStartPosition()-((PEFNode)e2).getStartPosition();

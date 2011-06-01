@@ -50,7 +50,6 @@ import org.cs3.pl.common.Debug;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IStartup;
@@ -204,8 +203,6 @@ public class PDTPlugin extends AbstractUIPlugin implements IStartup{
 	public ColorManager getColorManager() {
 		if(colorManager == null) {
 			colorManager = new ColorManager();
-			IPreferenceStore store = getPreferenceStore();
-			store.addPropertyChangeListener(colorManager);
 		}
 		return colorManager;
 	}

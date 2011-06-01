@@ -14,19 +14,19 @@ import org.eclipse.osgi.util.TextProcessor;
  */
 class NamePatternFilter extends ViewerFilter {
 
-//	private final AbstractInformationControl abstractInformationControl;
-	private final StringMatcher matcher;
+	private final AbstractInformationControl abstractInformationControl;
+//	private final StringMatcher matcher;
 
-	public NamePatternFilter(/*AbstractInformationControl abstractInformationControl*/ StringMatcher matcher) {
-//		this.abstractInformationControl = abstractInformationControl;
-		this.matcher = matcher;
+	public NamePatternFilter(AbstractInformationControl abstractInformationControl, StringMatcher matcher) {
+		this.abstractInformationControl = abstractInformationControl;
+//		this.matcher = matcher;
 	}
 
 	/*
 	 * @see org.eclipse.jface.viewers.ViewerFilter#select(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 	 */
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
-//		StringMatcher matcher= this.abstractInformationControl.getMatcher();
+		StringMatcher matcher= this.abstractInformationControl.getMatcher();
 		if (matcher == null || !(viewer instanceof TreeViewer))
 			return true;
 		TreeViewer treeViewer= (TreeViewer) viewer;

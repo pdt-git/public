@@ -4,6 +4,7 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pl.metadata.PrologElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -31,7 +32,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		} else if (element instanceof PrologMatch) {
 			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
 			return setCategoryImage(sharedImagaes);
-		} else if(element instanceof ModuleSearchDummy){
+		} else if(element instanceof ModuleSearchElement){
 			//return ImageRepository.getImage(ImageRepository.PE_MODULE);
 			return ImageRepository.getImage(ImageRepository.PACKAGE);
 		} else if (element instanceof SearchResultCategory) {
@@ -44,14 +45,11 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 	}
 
 	private Image setPredicateImage(Object element) {
-		PredicateElement pe = (PredicateElement) element;
-		if("this_pred_ref".equals(pe.getModule())){
-			return ImageRepository.getImage(ImageRepository.VERIFIED_MATCH);
+		PrologElement pe = (PrologElement) element;
+		if (pe.isPublic()) {
+			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 		}
-		if("unresolved_pred_ref".equals(pe.getModule())){
-			return ImageRepository.getImage(ImageRepository.UNRESOLVED_PRED_MATCH);
-		}
-		return ImageRepository.getImage(ImageRepository.POTENTIAL_MATCH);
+		return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
 	}
 
 	private Image setCategoryImage(ISharedImages sharedImagaes) {
@@ -62,7 +60,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 	public String getText(Object element) {
 		if(element instanceof PredicateElement){
 			PredicateElement pe = ((PredicateElement)element);
-			String label = pe.getLabel();
+			String label = pe.getSignature();
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";
@@ -70,8 +68,8 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return ((IFile)element).getFullPath().toString();
 		} else if (element instanceof SearchResultCategory) {
 			return ((SearchResultCategory)element).getLabel();
-		} else if (element instanceof ModuleSearchDummy) {
-			return ((ModuleSearchDummy)element).getLabel();
+		} else if (element instanceof ModuleSearchElement) {
+			return ((ModuleSearchElement)element).getLabel();
 		} else if(element instanceof PrologMatch) {
 			return "Line: " +Integer.toString(((PrologMatch)element).getLine());
 		}

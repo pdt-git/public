@@ -1,28 +1,33 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class PrologSourceFileModel {
+
+	private List<ModuleOutlineElement> modules;
 	
-	private List<OutlinePredicate> predicates= new ArrayList<OutlinePredicate>();
-
-	public PrologSourceFileModel(List<OutlinePredicate> predicates) {
-		super();
-		this.predicates = predicates;
-	}
-
-	public List<OutlinePredicate> getPredicates() {
-		return predicates;
+	public PrologSourceFileModel(List<ModuleOutlineElement> modules) {
+		this.modules = modules;
 	}
 	
-	public void update(List<OutlinePredicate> predicates){
-		this.predicates = predicates;
+	public void update(List<ModuleOutlineElement> modules){
+		this.modules = modules;
+	}
+	
+	public boolean hasChildren() {
+		if((modules == null) || (modules.isEmpty()))
+			return false;
+		return true;
+	}
 
+	public Object[] getElements() {
+		return modules.toArray();
 	}
 	
 	public void dispose() {
-		predicates.clear();
+		for (ModuleOutlineElement module : modules) {
+				module.dispose();;
+		}
 	}
 }

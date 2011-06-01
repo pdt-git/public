@@ -1,5 +1,7 @@
-%:- consult('util/load_xref.pl').
-%:- use_module('../parse_util.pl').
+:-module(pl_ast_to_abba, [	write_facts_to_abba/1, 
+							pl_test/0,
+							pl_test/2]).
+								
 :- use_module('../prolog_file_reader_quick').
 
 /**
@@ -9,7 +11,8 @@
  *   facts and converts them into abba-sources for Bashaars Tool. This 
  *   sources are written into the file specified by arg1-
  *   The facts that are considered are:
- *   ###### to be completed #########
+ *   - fileT
+ *	 - onlo
  **/
 write_facts_to_abba(File):-
     open(File,write,OutStream,[type(text)]),

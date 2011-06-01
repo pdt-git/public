@@ -41,6 +41,8 @@
 
 package org.cs3.pl.metadata;
 
+import java.util.List;
+
 /**
  * A handle Prolog predicate.
  * 
@@ -115,8 +117,8 @@ public class Predicate extends PrologElement {
 	public final static String MODULE_TRANSPARENT = "module_transparent";
 
 	
-	public Predicate(String module,String label, int arity,boolean pub, boolean dynamic, boolean multifile){
-		super(module,label, arity,pub, dynamic, multifile);
+	public Predicate(String module,String label, int arity, List<String> properties){
+		super(module,label, arity,properties);
 	}
 
 	/**
