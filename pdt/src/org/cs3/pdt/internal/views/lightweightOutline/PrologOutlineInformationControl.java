@@ -181,7 +181,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 			}
 			session = console.getPrologInterface().getSession();
 			
-			String query = "get_pred('" + fileName+"',"+"Name,Arity,Line,Dynamic,Multifile,Public)";
+			String query = "find_definition_contained_in('" + fileName+"',"+"Name,Arity,Line,Dynamic,Multifile,Public)";
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			Set<String> names = new HashSet<String>();
