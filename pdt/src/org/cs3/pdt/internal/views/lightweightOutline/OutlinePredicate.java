@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.cs3.pl.metadata.Predicate;
 
-public class OutlinePredicate extends Predicate{
+public class OutlinePredicate extends Predicate implements PDTTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
 
 	private int line;
@@ -18,5 +18,21 @@ public class OutlinePredicate extends Predicate{
 	public int getLine() {
 		return line;
 	}
+
+	@Override
+	public boolean hasChildren() {
+		return false;
+	}
+
+	@Override
+	public PDTTreeElement[] getChildren() {
+		return new PDTTreeElement[0];
+	}
+
+	@Override
+	public String getLabel() {
+		return getName() + "/" + getArity();
+	}
+	
 }
 

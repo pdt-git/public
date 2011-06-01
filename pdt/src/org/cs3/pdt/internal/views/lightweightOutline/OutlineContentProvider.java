@@ -21,8 +21,11 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 	 * {@inheritDoc}
 	 */
 	public Object[] getChildren(Object element) {
-		if(element instanceof PrologSourceFileModel){
-			return ((PrologSourceFileModel)element).getPredicates().toArray();
+		if(element instanceof PrologSourceFileModel) {
+			return ((PrologSourceFileModel)element).getElements();
+		}	
+		if(element instanceof ModuleOutlineElement) {
+			return ((ModuleOutlineElement)element).getPredicates().toArray();
 		}
 		return null;
 	}
@@ -50,10 +53,14 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 
 	@Override
 	public Object[] getElements(Object element) {
-		if(element instanceof PrologSourceFileModel){
-			return ((PrologSourceFileModel)element).getPredicates().toArray();
+		if(element instanceof PrologSourceFileModel) {
+			if(((PrologSourceFileModel)element).hasChildren())
+				return ((PrologSourceFileModel)element).getElements();
+		}	
+		if(element instanceof ModuleOutlineElement) {
+			return ((ModuleOutlineElement)element).getPredicates().toArray();
 		}
-		return null;
+		return new Object[0];
 	}
 
 
@@ -65,6 +72,10 @@ class OutlineContentProvider implements ITreeContentProvider, IWorkingCopyProvid
 
 	@Override
 	public boolean hasChildren(Object element) {
+		if(element instanceof PrologSourceFileModel)
+			return ((PrologSourceFileModel)element).hasChildren();
+		if(element instanceof ModuleOutlineElement)
+			return ((ModuleOutlineElement)element).hasChildren();
 		return false;
 	}
 }
