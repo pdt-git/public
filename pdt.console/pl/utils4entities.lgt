@@ -8,6 +8,7 @@
 
 :- public( [
            entity_of_file/3,               % File, Line, Entity
+           entity_property/3,
                       
            visible_in_entity/3,	           % Entity, Name, Arity
            declared_in_entity/4,           % Entity, Name, Arity, DeclaringEntity 
@@ -77,11 +78,11 @@ get_entity_data(File, Directory, Line, Entity, Kind, Properties) :-
 	).
 
 entity_property(Object, object, Property) :-
-	object_property(Object, Property).
+	catch(object_property(Object, Property), _, fail).
 entity_property(Category, category, Property) :-
-	category_property(Category, Property).
+	catch(category_property(Category, Property), _, fail).
 entity_property(Protocol, protocol, Property) :-
-	protocol_property(Protocol, Property).
+	catch(protocol_property(Protocol, Property), _, fail).
 	
         
 %% entity_of_file(+File,+Line,?Entity)
@@ -94,10 +95,15 @@ entity_property(Protocol, protocol, Property) :-
 entity_of_file(FullPath,Line,Entity):-
     nonvar(Line),
     !,
+    writeq(entity_of_file(FullPath,Line,Entity)), nl,
     pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt),
+    writeq(pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt)), nl,
 	logtalk::loaded_file(FileName, Directory),
+	writeq(logtalk::loaded_file(FileName, Directory)), nl,
 	entity_property(Entity, Kind, file(FileName, Directory)),
+	writeq(entity_property(Entity, Kind, file(FileName, Directory))), nl,
 	entity_property(Entity, Kind, lines(Begin, End)),
+	writeq(entity_property(Entity, Kind, lines(Begin, End))), nl,
 	Begin =< Line, End >= Line.
 
 entity_of_file(FullPath,Line,Entity):-

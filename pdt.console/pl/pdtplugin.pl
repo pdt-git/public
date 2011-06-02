@@ -74,7 +74,8 @@
 
         
 split_file_path(FullPath, Directory, FileName,BaseName,Extension):-
-    file_directory_name(FullPath, Directory),  % SWI-Prolog
+    file_directory_name(FullPath, Directory0),  % SWI-Prolog
+    atom_concat(Directory0,'/',Directory),
     file_base_name(FullPath,FileName),         % SWI-Prolog
     file_name_extension(BaseName,Extension,FileName).    % SWI-Prolog
             
@@ -107,7 +108,7 @@ pdt_reload(File):-
 % Logtalk
 find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line):-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
-    !,
+    !, write(000),
     logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line).
     
 find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
@@ -306,7 +307,7 @@ find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported):-
     logtalk_adapter::find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported).
 
 
-find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported) :-
+find_definition_contained_in(File, Module, Name,Arity,Line,PropertyList) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
 	strip_module(ModuleHead,ModuleCandidate,Head),

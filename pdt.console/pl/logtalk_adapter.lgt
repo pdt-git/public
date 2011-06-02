@@ -33,6 +33,7 @@
 
 :- uses(list, [member/2]).
 :- uses(meta, [map/3::maplist/3]).
+:- uses(utils4entities, [entity_property/3]).
 
 :- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
@@ -46,7 +47,7 @@
 :- use_module(pdt_runtime_builder_analyzer('metafile_referencer.pl')).
 
 :- use_module(org_cs3_lp_utils(utils4modules)).
-:- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
+%:- use_module(org_cs3_lp_utils(pdt_xref_experimental)).
 
              
 
@@ -77,11 +78,14 @@ pdt_reload(FullPath):-
          ***********************************************************************/ 
 
 % Logtalk
-find_definitions_categorized(EnclFile,Line,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line):-
-    utils4entities::entity_of_file(EnclFile,Line,This),
-    user::decode(Term, This, DefiningEntity, _Kind, _Template, Location, _Properties),
+find_definitions_categorized(EnclFile,ClickedLine,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line):-
+    utils4entities::entity_of_file(EnclFile,ClickedLine,This),
+    decode(Term, This, DefiningEntity, _Kind, _Template, Location, _Properties),
+     write(Location), nl,
     Location = [Directory, File, [Line]],
-    atom_concat(Directory, File, FullPath).
+     write('33333\n'),
+    atom_concat(Directory, File, FullPath),
+    writeln(FullPath).
 
 %% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
 
@@ -700,20 +704,25 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 				\+ specializes_class(This, _) ->			
 				This<<predicate_property(Template, declared_in(Entity))
 			;	create_object(Obj, [instantiates(This)], [], []),
-				Obj<<predicate_property(Template, declared_in(Entity)),
+				once(Obj<<predicate_property(Template, declared_in(Entity))),
 				abolish_object(Obj)
 			)
 		;	%current_category(This) ->
 			create_object(Obj, [imports(This)], [], []),
-			Obj<<predicate_property(Template, declared_in(Entity)),
+			once(Obj<<predicate_property(Template, declared_in(Entity))),
 			abolish_object(Obj)
 		),
-		entity_property(Entity, Kind, declares(Functor/Arity, Properties))
+		write('before declares\n'),
+		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
+		write('after declares'-Entity-Kind), nl
 	;	% definition
 		Entity = This,
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties))
 	),
+	write('before file\n'),
 	entity_property(Entity, Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties).
+	write('after file\n'),
+	list::memberchk(line(Line), Properties),
+	write('end of decode\n').
 
 :- end_object.
