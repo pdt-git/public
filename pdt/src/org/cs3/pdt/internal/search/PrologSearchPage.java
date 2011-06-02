@@ -408,7 +408,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 			children[i].dispose();
 		}		
 		ArrayList<Button> buttons= new ArrayList<Button>();
-		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations", DECLARATIONS, limitTo == DECLARATIONS));
+		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "Declarations & Definitions", DECLARATIONS, limitTo == DECLARATIONS));
 		buttons.add(createButton(fLimitToGroup, SWT.RADIO, "References", REFERENCES, limitTo == REFERENCES));
 		
 		fLimitTo= (Button[]) buttons.toArray(new Button[buttons.size()]);
