@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.core.resources.IFile;
 
-public class ModuleSearchElement {
+public class ModuleSearchElement implements PDTTreeElement {
 	private String name;
 	private List<PrologMatch> element = new ArrayList<PrologMatch>();
 	Set<IFile> files = new HashSet<IFile>();
@@ -25,11 +26,17 @@ public class ModuleSearchElement {
 		element.add(elem);
 		files.add(((PredicateElement)elem.getElement()).getFile());
 	}
-	
-	public IFile[] getFiles() {
+
+	@Override
+	public IFile[] getChildren() {
 		IFile[] unsortedFiles = files.toArray(new IFile[files.size()]);
 		return PDTCoreUtils.sortFileSet(unsortedFiles);
 	}
-	
+
+	@Override
+	public boolean hasChildren() {
+		return !element.isEmpty();
+	}
+
 }
 
