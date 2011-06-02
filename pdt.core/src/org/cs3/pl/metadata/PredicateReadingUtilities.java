@@ -101,7 +101,7 @@ public class PredicateReadingUtilities {
 	public static int findBeginOfPredicateName(IDocument document, int begin)
 			throws BadLocationException {
 		int start = begin;
-		while (Util.isPredicatenameChar(document.getChar(start)) && start > 0) {
+		while (Util.isPredicateNameChar(document.getChar(start)) && start > 0) {
 			start--; // scan left until first non-predicate-name  char
 		}
 		start++; // start is now the position of the first predicate char
@@ -111,7 +111,7 @@ public class PredicateReadingUtilities {
 
 	public static int findEndOfPredicateName(IDocument document, int end)
 			throws BadLocationException {
-		while (Util.isPredicatenameChar(document.getChar(end))
+		while (Util.isPredicateNameChar(document.getChar(end))
 				&& end < document.getLength()) {
 			end++;// scan right for first non-predicate char
 		}

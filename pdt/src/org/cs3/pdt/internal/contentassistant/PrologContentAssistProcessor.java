@@ -51,13 +51,13 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 				int begin=offset;
 				int length=0;
-				boolean isPredChar = Util.isNonQualifiedPredicatenameChar(document.getChar(begin));
+				boolean isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(begin));
 				
 				while (isPredChar){
 					length++;
 					int test = begin-1;
 					if(test >=0){
-						isPredChar = Util.isNonQualifiedPredicatenameChar(document.getChar(test));
+						isPredChar = Util.isNonQualifiedPredicateNameChar(document.getChar(test));
 						if(!isPredChar){
 							break;
 						}
@@ -76,7 +76,7 @@ public abstract class PrologContentAssistProcessor {
 			throws BadLocationException {
 				if (begin>0 && document.getChar(begin - 1) == ':') {
 					int moduleBegin = begin - 2;
-					while (Util.isNonQualifiedPredicatenameChar(document
+					while (Util.isNonQualifiedPredicateNameChar(document
 							.getChar(moduleBegin))
 							&& moduleBegin > 0)
 						moduleBegin--;
