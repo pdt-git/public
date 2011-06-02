@@ -19,7 +19,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 	}
 
 	protected String getCategoryDescription(Goal goal, String category)  {
-		return category + " of "+goal.getName()+"/"+goal.getArity()+" in '"+goal.getModule()+"'";
+		return category + " of "+goal.getName()+"/"+goal.getArity()+" for '"+goal.getModule()+"'";
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 //			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +module2+ "'," +
 			            + file + "," + goal.getLine() + "," + goal.getTermString() + "," + name+ ", " + arity+ ", "+ module2 + 
-			            ",Visibility,DefiningModule,File,Line)";
+			            ",Category,DefiningModule,File,Line)";
 		return query;
 	}
 
@@ -67,15 +67,15 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 				IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("File"));
 				int line = Integer.parseInt((String) m.get("Line"));
 				
-				List<String> properties = null;
-				Object prop = m.get("PropertyList");
-				if (prop instanceof Vector<?>) {
-					properties = (Vector<String>)prop;
-				}
+				List<String> properties = new Vector<String>(); 
+//				Object prop = m.get("PropertyList");
+//				if (prop instanceof Vector<?>) {
+//					properties = (Vector<String>)prop;
+//				}
 				
 				PrologMatch match = createMatch(definingModule, name, arity, file, line, properties);
 				
-				String visibility = (String)m.get("Visibility");
+				String visibility = (String)m.get("Category");
 				addCategoryEntry(match, getCategoryDescription(goal, visibility));			
 
 //				addCategoryEntry(match, getCategoryDescription(goal, "Visible "));			
