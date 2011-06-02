@@ -79,7 +79,7 @@ public class GoalProvider {
 			endOfTerm++;
 		}
 		String term = document.get(start, endOfTerm - start);
-		int line = document.getLineOfOffset(offset);
+		int line = document.getLineOfOffset(offset) +1;
 
 		return new Goal(file, line, module, functor, arity, term);
 
