@@ -3,13 +3,14 @@ package org.cs3.pdt.internal.search;
 import java.util.List;
 import java.util.Vector;
 
+import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 
 /**
- * used in prolog searches to represent a group of matches called from the same predicate.
+ * used in prolog searches and outlines to represent a predicate.
  */
-public class PredicateElement extends Predicate{
+public class PredicateElement extends Predicate implements PDTTreeElement{
 
 	private static final long serialVersionUID = 8822257720982382862L;
 	private IFile file;          // file that contains the selected literal (non-null)        
@@ -29,4 +30,19 @@ public class PredicateElement extends Predicate{
 		return file;
 	}
 
+	@Override
+	public boolean hasChildren() {
+		return false;
+	}
+
+	@Override
+	public PDTTreeElement[] getChildren() {
+		return new PDTTreeElement[0];
+	}
+
+	@Override
+	public String getLabel() {
+		return getName() + "/" + getArity();
+	}
+	
 }
