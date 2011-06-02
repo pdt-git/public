@@ -104,12 +104,12 @@ pdt_reload(File):-
          * --------------------------------------------------------------------*
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/ 
-    
+
 % Logtalk
-find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line):-
+find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line):-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
-    !, write(000),
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line).
+    !,
+    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line).
     
 find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
     module_of_file(EnclFile,FileModule),
