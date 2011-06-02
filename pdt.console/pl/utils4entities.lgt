@@ -95,15 +95,10 @@ entity_property(Protocol, protocol, Property) :-
 entity_of_file(FullPath,Line,Entity):-
     nonvar(Line),
     !,
-    writeq(entity_of_file(FullPath,Line,Entity)), nl,
     pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt),
-    writeq(pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt)), nl,
 	logtalk::loaded_file(FileName, Directory),
-	writeq(logtalk::loaded_file(FileName, Directory)), nl,
 	entity_property(Entity, Kind, file(FileName, Directory)),
-	writeq(entity_property(Entity, Kind, file(FileName, Directory))), nl,
 	entity_property(Entity, Kind, lines(Begin, End)),
-	writeq(entity_property(Entity, Kind, lines(Begin, End))), nl,
 	Begin =< Line, End >= Line.
 
 entity_of_file(FullPath,Line,Entity):-

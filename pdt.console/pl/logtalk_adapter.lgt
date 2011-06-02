@@ -78,14 +78,11 @@ pdt_reload(FullPath):-
          ***********************************************************************/ 
 
 % Logtalk
-find_definitions_categorized(EnclFile,ClickedLine,Term,_Name,_Arity,This,dummy_category, DefiningEntity, FullPath,Line):-
+find_definitions_categorized(EnclFile,ClickedLine,Term,_Name,_Arity,This, SearchCategory, DefiningEntity, FullPath,Line):-
     utils4entities::entity_of_file(EnclFile,ClickedLine,This),
-    decode(Term, This, DefiningEntity, _Kind, _Template, Location, _Properties),
-     write(Location), nl,
+    decode(Term, This, DefiningEntity, _Kind, _Template, Location, _Properties, SearchCategory),
     Location = [Directory, File, [Line]],
-     write('33333\n'),
-    atom_concat(Directory, File, FullPath),
-    writeln(FullPath).
+    atom_concat(Directory, File, FullPath).
 
 %% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
 
@@ -562,7 +559,7 @@ predicate_name_with_unary_property_(Name,Property,Arg):-
 	    
 % decode(Term, This, Entity, Kind, Template, Location, Properties).
 
-decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line]], Properties) :-
+decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
 	nonvar(Object),
 	nonvar(Predicate),
@@ -571,14 +568,17 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 	Object::current_predicate(Functor/Arity),
 	(	% declaration
 		Object::predicate_property(Template, declared_in(Entity)),
-		entity_property(Entity, _, declares(Functor/Arity, Properties))
+		entity_property(Entity, _, declares(Functor/Arity, Properties)),
+		SearchCategory = 'Declaration'
 	;	% definition
 		Object::predicate_property(Template, defined_in(Primary)),
 		(	% local definitions
 			Entity = Primary,
-			entity_property(Primary, _, defines(Functor/Arity, Properties))
+			entity_property(Primary, _, defines(Functor/Arity, Properties)),
+			SearchCategory = 'Definition'
 		;	% multifile definitions
-			entity_property(Primary, _, includes(Functor/Arity, Entity, Properties))			
+			entity_property(Primary, _, includes(Functor/Arity, Entity, Properties)),
+			SearchCategory = 'Multifile definitions'
 		)
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
@@ -586,7 +586,7 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 
 %decode(Module:Predicate, Entity, module, Predicate, [Directory, File, [Line]], Properties) :-
 
-decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties) :-
+decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -605,7 +605,8 @@ decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pr
 			Obj<<predicate_property(Template, declared_in(Entity)),
 			abolish_object(Obj)
 		),
-		entity_property(Entity, Kind, declares(Functor/Arity, Properties))
+		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
+		SearchCategory = 'Declaration'
 	;	% definition
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
@@ -622,16 +623,18 @@ decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pr
 		),
 		(	% local definitions
 			Entity = Primary,
-			entity_property(Primary, Kind, defines(Functor/Arity, Properties))
+			entity_property(Primary, _, defines(Functor/Arity, Properties)),
+			SearchCategory = 'Definition'
 		;	% multifile definitions
-			entity_property(Primary, Kind, includes(Functor/Arity, Entity, Properties))
+			entity_property(Primary, _, includes(Functor/Arity, Entity, Properties)),
+			SearchCategory = 'Multifile definitions'
 		)
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
 
-decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties) :-
+decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties, 'Imported definitions') :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	functor(Template, Functor, Arity),
@@ -660,7 +663,7 @@ decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pro
 	list::memberchk(line(Line), Properties).
 
 
-decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties) :-
+decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, 'Inherited definitions') :-
 	!,
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -677,23 +680,23 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 	list::memberchk(line(Line), Properties).
 
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	entity_property(This, _, uses(Object, OriginalFunctor/Arity, Functor/Arity)),
 	!,
 	functor(Template, OriginalFunctor, Arity),
-	decode(Object::Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties).
+	decode(Object::Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory).
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	entity_property(This, _, use_module(Module, OriginalFunctor/Arity, Functor/Arity)),
 	!,
 	functor(Template, OriginalFunctor, Arity),
-	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties).
+	decode(Module:Template, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory).
 
-decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties) :-
+decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	% local predicate
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
@@ -712,17 +715,17 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 			once(Obj<<predicate_property(Template, declared_in(Entity))),
 			abolish_object(Obj)
 		),
-		write('before declares\n'),
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
-		write('after declares'-Entity-Kind), nl
+		SearchCategory = 'Declaration'
 	;	% definition
 		Entity = This,
-		entity_property(Entity, Kind, defines(Functor/Arity, Properties))
+		entity_property(Entity, _, defines(Functor/Arity, Properties)),
+		SearchCategory = 'Local definition'
+	;	% multifile definitions
+		entity_property(This, _, includes(Functor/Arity, Entity, Properties)),
+		SearchCategory = 'Multifile definitions'
 	),
-	write('before file\n'),
 	entity_property(Entity, Kind, file(File, Directory)),
-	write('after file\n'),
-	list::memberchk(line(Line), Properties),
-	write('end of decode\n').
+	list::memberchk(line(Line), Properties).
 
 :- end_object.
