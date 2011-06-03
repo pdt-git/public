@@ -1070,7 +1070,7 @@ public class Util {
 	 * @param c character in question
 	 * @return 
 	 */
-	static public boolean isPredicatenameChar(char c) {
+	static public boolean isPredicateNameChar(char c) {
 		if (c >= 'a' && c <= 'z')
 			return true;
 		if (c >= '0' && c <= '9')
@@ -1083,8 +1083,8 @@ public class Util {
 		return false;
 	}
 
-	static public boolean isNonQualifiedPredicatenameChar(char c) {
-		return isPredicatenameChar(c) && c != ':';
+	static public boolean isNonQualifiedPredicateNameChar(char c) {
+		return isPredicateNameChar(c) && c != ':';
 	}
 
 	static public boolean isFunctorChar(char c) {

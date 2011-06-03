@@ -69,7 +69,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 			return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
 		}
 		if (parentElement instanceof ModuleSearchElement) {
-			return ((ModuleSearchElement) parentElement).getFiles();
+			return ((ModuleSearchElement) parentElement).getChildren();
 		}
 		if (parentElement instanceof IFile){
 			return getSearchResult().getElements((IFile) parentElement);

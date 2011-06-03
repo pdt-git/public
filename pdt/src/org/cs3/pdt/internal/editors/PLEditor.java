@@ -387,7 +387,7 @@ public class PLEditor extends TextEditor {
 				IJavaEditorActionDefinitionIds.OPEN_EDITOR);		
 
 		addAction(menuMgr, new FindDefinitionsActionDelegate(this),
-				"Find All Declarations", SEP_PDT_SEARCH,
+				"Find all Declarations and Definitions", SEP_PDT_SEARCH,
 				IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
 
 		addAction(menuMgr, new FindReferencesActionDelegate(this),
@@ -1227,17 +1227,17 @@ public class PLEditor extends TextEditor {
 	private TextSelection getVariableAtOffset(IDocument document, int offset)
 	throws BadLocationException {
 		int begin=offset;
-		if(!Util.isNonQualifiedPredicatenameChar(document.getChar(begin)) && begin>0){
+		if(!Util.isNonQualifiedPredicateNameChar(document.getChar(begin)) && begin>0){
 			begin--;
 		}
-		while (Util.isNonQualifiedPredicatenameChar(document
+		while (Util.isNonQualifiedPredicateNameChar(document
 				.getChar(begin))
 				&& begin > 0)
 			begin--;
 		if(begin<offset)
 			begin++;
 		int end = offset;
-		while (Util.isNonQualifiedPredicatenameChar(document
+		while (Util.isNonQualifiedPredicateNameChar(document
 				.getChar(end))
 				&& begin > 0)
 			end++;

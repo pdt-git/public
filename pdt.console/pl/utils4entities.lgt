@@ -8,6 +8,7 @@
 
 :- public( [
            entity_of_file/3,               % File, Line, Entity
+           entity_property/3,
                       
            visible_in_entity/3,	           % Entity, Name, Arity
            declared_in_entity/4,           % Entity, Name, Arity, DeclaringEntity 
@@ -77,11 +78,11 @@ get_entity_data(File, Directory, Line, Entity, Kind, Properties) :-
 	).
 
 entity_property(Object, object, Property) :-
-	object_property(Object, Property).
+	catch(object_property(Object, Property), _, fail).
 entity_property(Category, category, Property) :-
-	category_property(Category, Property).
+	catch(category_property(Category, Property), _, fail).
 entity_property(Protocol, protocol, Property) :-
-	protocol_property(Protocol, Property).
+	catch(protocol_property(Protocol, Property), _, fail).
 	
         
 %% entity_of_file(+File,+Line,?Entity)
