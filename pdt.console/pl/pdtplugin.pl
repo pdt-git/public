@@ -113,7 +113,7 @@ find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This,dummy
 find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
-    -> true                            % Explicit module reference
+    -> true                            % Explicit entity reference ReferencedModule:Term (or ReferencedModule::Term
     ;  ReferencedModule = FileModule   % Implicit module reference
     ),    
     find_decl_or_def(ReferencedModule,Name,Arity,Sources),
