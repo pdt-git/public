@@ -33,7 +33,7 @@ public class PEFLabelProvider implements ILabelProvider {
 				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
 			}
 			
-			return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
+			return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 		}
 		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
 	}

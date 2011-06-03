@@ -14,7 +14,7 @@ properties_for_predicate(Module,Name,Arity,PropertyList):-
     
 entity_property(Head, predicate, PropertyList):-
     predicate_property(Head,_), %Add a Cut here? Maybe it could also be a module?
-    get_property_list(Head, predicate, [dynamic, multifile, exported, transparent, imported_from(_)], PropertyList), !.
+    get_property_list(Head, predicate, [dynamic, multifile, exported, transparent, imported_from(_), number_of_clauses(_)], PropertyList), !.
 entity_property(Name, module, PropertyList):-
     module_property(Name,_), !,
     get_property_list(Name, module, [file(_)], PropertyList).

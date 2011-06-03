@@ -21,7 +21,8 @@
     pdt_reload/1,  
     find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
     find_definitions_categorized/10, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
-    find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
+    find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
+    find_definition_contained_in/8,
     get_pred/7,
     find_pred/8,
     predicates_with_property/3,
@@ -253,17 +254,40 @@ primary_location(Locations,_,File,FirstLine) :-
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported) :-
-    % Backtrack over all predicates defined in File:
-    source_file(ModuleHead, File),
-	strip_module(ModuleHead,Module,Head),
-    functor(Head,Name,Arity),
-    user:has_property(Head,dynamic,Dyn),
-    user:has_property(Head,multifile,Mul),
-    user:has_property(Head,exported,Exported),
-    % The following backtracks over each clause of each predicate.
-    % Do this at the end, after the things that are deterministic: 
-    defined_in_file(Module,Name,Arity,_Nth,File,Line).
+find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCategory, Line, Properties) :-
+	pdtplugin:split_file_path(FullPath, Directory, File, _, lgt),
+	logtalk::loaded_file(File, Directory),		% if this fails we should alert the user that the file is not loaded!
+	entity_property(Entity, Kind, file(File, Directory)),
+    (	% entity declarations
+		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
+		entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)),
+		list::memberchk(clauses(N0), DefinitionProperties),
+		findall(
+			N1,
+			(entity_property(Entity, Kind, includes(Functor/Arity, _, IncludesProperties)),
+			 list::memberchk(clauses(N1), IncludesProperties)),
+			Ns),
+		numberlist::sum([N0| Ns], N),
+		Properties = [clauses(N)| Properties0],
+		SearchCategory = declaration
+	;	% entity definitions
+		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
+		functor(Predicate, Functor, Arity),
+		once(decode(Predicate, Entity, _, _, _, _, DeclarationProperties, 'Declaration')),
+		(	list::member((public), DeclarationProperties) ->
+			Properties = [(public)| Properties0]
+		;	list::member(protected, DeclarationProperties) ->
+			Properties = [protected| Properties0]
+		;	Properties = [private| Properties0]
+		),
+		SearchCategory = definition
+	;	% entity multifile definitions
+		entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0)),
+		Properties = [from(From)| Properties0],
+		SearchCategory = multifile
+	),
+	list::memberchk(line(Line), Properties).
+
 
 
                /***********************************************
