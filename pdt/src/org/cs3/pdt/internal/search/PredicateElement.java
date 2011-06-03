@@ -13,7 +13,8 @@ import org.eclipse.core.resources.IFile;
 public class PredicateElement extends Predicate implements PDTTreeElement{
 
 	private static final long serialVersionUID = 8822257720982382862L;
-	private IFile file;          // file that contains the selected literal (non-null)        
+	private IFile file;          // file that contains the selected literal (non-null)       
+	private PDTTreeElement parent;
 	
 	public PredicateElement(IFile file, String module, String predicateName, int arity, List<String> properties) {
 		super(module,predicateName,arity, properties);
@@ -25,10 +26,10 @@ public class PredicateElement extends Predicate implements PDTTreeElement{
 		this.file = file;
 	}
 	
-
 	public IFile getFile() {
 		return file;
 	}
+	 
 
 	@Override
 	public boolean hasChildren() {
@@ -43,6 +44,14 @@ public class PredicateElement extends Predicate implements PDTTreeElement{
 	@Override
 	public String getLabel() {
 		return getName() + "/" + getArity();
+	}
+
+	public void setParent(PDTTreeElement parent) {
+		this.parent = parent;
+	}
+
+	public PDTTreeElement getParent() {
+		return parent;
 	}
 	
 }

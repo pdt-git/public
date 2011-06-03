@@ -3,9 +3,10 @@
  */
 package org.cs3.pdt.internal.search;
 
+import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.search.ui.text.Match;
 
-public class PrologMatch extends Match{
+public class PrologMatch extends Match implements PDTTreeElement{
 
 	private String module;
 	private int line=-1;
@@ -35,6 +36,21 @@ public class PrologMatch extends Match{
 
 	public String getModule() {
 		return module;
+	}
+
+	@Override
+	public boolean hasChildren() {
+		return false;
+	}
+
+	@Override
+	public Object[] getChildren() {
+		return null;
+	}
+
+	@Override
+	public String getLabel() {
+		return "Line: " + Integer.toString(getLine());
 	}
 	
 }

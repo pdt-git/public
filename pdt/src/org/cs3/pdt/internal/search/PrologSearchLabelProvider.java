@@ -4,6 +4,7 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.cs3.pl.metadata.PrologElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -64,14 +65,14 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";
-		} else if(element instanceof IFile){
-			return ((IFile)element).getFullPath().toString();
-		} else if (element instanceof SearchResultCategory) {
-			return ((SearchResultCategory)element).getLabel();
-		} else if (element instanceof ModuleSearchElement) {
-			return ((ModuleSearchElement)element).getLabel();
-		} else if(element instanceof PrologMatch) {
-			return "Line: " +Integer.toString(((PrologMatch)element).getLine());
+		} else if(element instanceof PDTTreeElement){
+			return ((PDTTreeElement)element).getLabel();
+//		} else if (element instanceof SearchResultCategory) {
+//			return ((SearchResultCategory)element).getLabel();
+//		} else if (element instanceof ModuleSearchElement) {
+//			return ((ModuleSearchElement)element).getLabel();
+//		} else if(element instanceof PrologMatch) {
+//			return (((PrologMatch)element).getLabel());
 		}
 		return "no label";
 	}
