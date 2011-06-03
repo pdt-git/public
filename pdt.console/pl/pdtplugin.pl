@@ -42,7 +42,7 @@
 :- module(pdtplugin,[
     pdt_reload/1,  
     find_reference_to/12, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
-    find_definitions_categorized/10, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
+    find_definitions_categorized/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
     find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
     find_definition_contained_in/8,
     find_pred/8,
@@ -106,12 +106,12 @@ pdt_reload(File):-
          ***********************************************************************/ 
 
 % Logtalk
-find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line):-
+find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line, Properties):-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line).
+    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line, Properties).
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line, PropertyList):-
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
     -> true                            % Explicit module reference

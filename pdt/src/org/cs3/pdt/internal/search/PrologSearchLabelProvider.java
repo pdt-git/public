@@ -52,6 +52,8 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		} 
 		if (pe.isPrivate()) {
 			return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
+		} if (pe.isLocal()) {
+			return ImageRepository.getImage(ImageRepository.PE_LOCAL);
 		}
 		return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 	}
@@ -70,8 +72,8 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 			return label+ " (" + count +" match"+plural+")";
 		} else if(element instanceof PDTTreeElement){
 			return ((PDTTreeElement)element).getLabel();
-//		} else if (element instanceof SearchResultCategory) {
-//			return ((SearchResultCategory)element).getLabel();
+		} else if (element instanceof SearchResultCategory) {
+			return ((SearchResultCategory)element).getLabel();
 //		} else if (element instanceof ModuleSearchElement) {
 //			return ((ModuleSearchElement)element).getLabel();
 //		} else if(element instanceof PrologMatch) {
