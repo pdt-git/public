@@ -51,7 +51,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 //			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +module2+ "'," +
 			            + file + "," + goal.getLine() + "," + goal.getTermString() + "," + name+ ", " + arity+ ", "+ module2 + 
-			            ",Category,DefiningModule,File,Line)";
+			            ", Category, DefiningModule, File, Line, PropertyList)";
 		return query;
 	}
 
@@ -70,11 +70,12 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("File"));
 		int line = Integer.parseInt((String) m.get("Line"));
 
-		List<String> properties = new Vector<String>(); 
-		//				Object prop = m.get("PropertyList");
-		//				if (prop instanceof Vector<?>) {
-		//					properties = (Vector<String>)prop;
-		//				}
+		Object prop = m.get("PropertyList");
+		List<String> properties = null;
+		if (prop instanceof Vector<?>) {
+			properties = (Vector<String>)prop;
+		}	
+
 		String category = (String)m.get("Category");
 
 		String signature = category+definingModule+name+arity+line;

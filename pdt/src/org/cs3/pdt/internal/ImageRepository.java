@@ -83,7 +83,7 @@ public class ImageRepository {
 
     public final static String PE_MULTIFILE = "multifile.gif";
 
-    public final static String PE_VARIABLE = "variable.gif";
+    public final static String PE_LOCAL = "variable.gif";
 
     public final static String PE_MODULE = "module_2.gif";
 

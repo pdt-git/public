@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.core.resources.IFile;
 
@@ -25,7 +24,8 @@ public class ModuleSearchElement implements PDTTreeElement {
 	public void addElement(PrologMatch elem) {
 		element.add(elem);
 		IFile file = ((PredicateElement)elem.getElement()).getFile();
-		boolean found = false;
+		boolean found = false; 
+		
 		for (FileTreeElement fileElement : files) {
 			if (fileElement.getFile().equals(file)) {
 				found = true;
@@ -33,7 +33,9 @@ public class ModuleSearchElement implements PDTTreeElement {
 			}
 		}
 		if (!found) {
-			files.add(new FileTreeElement(file));
+			FileTreeElement fileElement = new FileTreeElement(file);
+			files.add(fileElement);
+			fileElement.addChild((PredicateElement)elem.getElement());
 		}
 	}
 

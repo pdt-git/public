@@ -20,7 +20,7 @@
 :- public([
     pdt_reload/1,  
     find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
-    find_definitions_categorized/10, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
+    find_definitions_categorized/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
     find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
     find_definition_contained_in/8,
     get_pred/7,
@@ -79,9 +79,9 @@ pdt_reload(FullPath):-
          ***********************************************************************/ 
 
 % Logtalk
-find_definitions_categorized(EnclFile,ClickedLine,Term,_Name,_Arity,This, SearchCategory, DefiningEntity, FullPath,Line):-
+find_definitions_categorized(EnclFile,ClickedLine,Term,_Name,_Arity,This, SearchCategory, DefiningEntity, FullPath,Line, Properties):-
     utils4entities::entity_of_file(EnclFile,ClickedLine,This),
-    decode(Term, This, DefiningEntity, _Kind, _Template, Location, _Properties, SearchCategory),
+    decode(Term, This, DefiningEntity, _Kind, _Template, Location, Properties, SearchCategory),
     Location = [Directory, File, [Line]],
     atom_concat(Directory, File, FullPath).
 
@@ -273,12 +273,14 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 	;	% entity definitions
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
 		functor(Predicate, Functor, Arity),
-		once(decode(Predicate, Entity, _, _, _, _, DeclarationProperties, 'Declaration')),
-		(	list::member((public), DeclarationProperties) ->
-			Properties = [(public)| Properties0]
-		;	list::member(protected, DeclarationProperties) ->
-			Properties = [protected| Properties0]
-		;	Properties = [private| Properties0]
+		(	decode(Predicate, Entity, _, _, _, _, DeclarationProperties, 'Declaration') ->
+			(	list::member((public), DeclarationProperties) ->
+				Properties = [(public)| Properties0]
+			;	list::member(protected, DeclarationProperties) ->
+				Properties = [protected| Properties0]
+			;	Properties = [private| Properties0]
+			)
+		;	Properties = [local| Properties0]
 		),
 		SearchCategory = definition
 	;	% entity multifile definitions

@@ -33,7 +33,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if(child==null||getSearchResult()==null){
 			return null;
 		}
-		if(child instanceof IFile){
+		if(child instanceof FileTreeElement){
 			return getSearchResult();			//TODO: fix this
 		} 
 		if(child instanceof PredicateElement ){
@@ -86,6 +86,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 			return false;
 		}
 		return element instanceof IFile || 
+				element instanceof FileTreeElement ||
 				element instanceof PrologSearchResult || 
 				element instanceof PredicateElement ||
 				element instanceof SearchResultCategory ||
