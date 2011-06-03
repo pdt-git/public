@@ -1,17 +1,17 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import java.util.List;
+import java.util.Map;
 
 
 public class PrologSourceFileModel {
 
-	private List<ModuleOutlineElement> modules;
+	private Map<String, ModuleElement> modules;
 	
-	public PrologSourceFileModel(List<ModuleOutlineElement> modules) {
+	public PrologSourceFileModel(Map<String, ModuleElement> modules) {
 		this.modules = modules;
 	}
 	
-	public void update(List<ModuleOutlineElement> modules){
+	public void update(Map<String,ModuleElement> modules){
 		this.modules = modules;
 	}
 	
@@ -22,12 +22,10 @@ public class PrologSourceFileModel {
 	}
 
 	public Object[] getElements() {
-		return modules.toArray();
+		return modules.values().toArray();
 	}
 	
 	public void dispose() {
-		for (ModuleOutlineElement module : modules) {
-				module.dispose();;
-		}
+		modules.clear();
 	}
 }

@@ -49,8 +49,11 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		PrologElement pe = (PrologElement) element;
 		if (pe.isPublic()) {
 			return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+		} 
+		if (pe.isPrivate()) {
+			return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
 		}
-		return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
+		return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 	}
 
 	private Image setCategoryImage(ISharedImages sharedImagaes) {
