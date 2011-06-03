@@ -42,6 +42,7 @@
 package org.cs3.pl.metadata;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -92,6 +93,7 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 		this.functorName = functorName;
 		this.arity = arity;
 		this.isKnown=false;
+		this.properties = new ArrayList<String>();
 	}
 
 	/**

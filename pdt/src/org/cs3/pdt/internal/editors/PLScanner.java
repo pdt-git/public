@@ -41,6 +41,8 @@
 
 package org.cs3.pdt.internal.editors;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -50,11 +52,13 @@ import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologInterface;
 import org.cs3.pl.prolog.PrologInterfaceException;
 import org.cs3.pl.prolog.PrologSession;
+import org.eclipse.core.internal.resources.File;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -71,7 +75,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.ide.FileStoreEditorInput;
 
 public class PLScanner extends RuleBasedScanner implements IPropertyChangeListener{
 	private ColorManager manager;
@@ -81,16 +87,29 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 	throws CoreException, PrologInterfaceException {
 
 		this.manager = manager;
-		IFileEditorInput editorInput = null;
 		
 		assert(editor!=null);
+		
+		IEditorInput input = editor.getEditorInput();
 
-		if (editor.getEditorInput() instanceof IFileEditorInput) {
-			editorInput = (IFileEditorInput) editor.getEditorInput();
+		if (input instanceof IFileEditorInput) {
+			IFileEditorInput editorInput = (IFileEditorInput) input;
+			if (editorInput != null) {
+				file = editorInput.getFile();
+			}
 		}
-		assert (editorInput != null) ;
-		file = editorInput.getFile();
-		assert (file != null) ;
+		else if (input instanceof FileStoreEditorInput) {
+			FileStoreEditorInput storeEditorInput = (FileStoreEditorInput) input;
+			if (storeEditorInput != null) {
+				URI uri = storeEditorInput.getURI();
+				String path = uri.getPath();
+				try {
+					file = PDTCoreUtils.findFileForLocation(path);
+				} catch (IOException e) {
+
+				}
+			}
+		}
 		
 		IPreferenceStore store = PDTPlugin.getDefault().getPreferenceStore();
 		store.addPropertyChangeListener(this);
