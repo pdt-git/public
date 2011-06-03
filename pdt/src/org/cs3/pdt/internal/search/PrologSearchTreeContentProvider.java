@@ -71,8 +71,8 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if (parentElement instanceof ModuleSearchElement) {
 			return ((ModuleSearchElement) parentElement).getChildren();
 		}
-		if (parentElement instanceof IFile){
-			return getSearchResult().getElements((IFile) parentElement);
+		if (parentElement instanceof FileTreeElement){
+			return (((FileTreeElement)parentElement).getChildren());
 		}
 		if (parentElement instanceof PredicateElement){
 			return getSearchResult().getMatches(parentElement);	
