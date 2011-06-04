@@ -42,9 +42,9 @@
 :- module(pdtplugin,[
     pdt_reload/1,  
     find_reference_to/12, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
-    find_definitions_categorized/10, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
+    find_definitions_categorized/11, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
     find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)
-    find_definition_contained_in/6,
+    find_definition_contained_in/8,
     find_pred/8,
     predicates_with_property/3,
     manual_entry/3, % still in use, but probably broken, see predicat_manual_entry
@@ -106,12 +106,12 @@ pdt_reload(File):-
          ***********************************************************************/ 
 
 % Logtalk
-find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line):-
+find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line, Properties):-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line).
+    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine,Term,_Name,_Arity,This, Category, DefiningEntity, FullPath, Line, Properties).
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Name,Arity,ReferencedModule,Category, DefiningModule, File,Line, PropertyList):-
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
     -> true                            % Explicit entity reference ReferencedModule:Term (or ReferencedModule::Term
@@ -301,13 +301,12 @@ primary_location(Locations,_,File,FirstLine) :-
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported):-
+find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, PredicateKind, Line, PropertyList):-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definition_contained_in(File, Name,Arity,Line,Dyn,Mul,Exported).
+    logtalk_adapter::find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, PredicateKind, Line, PropertyList).
 
-
-find_definition_contained_in(File, Module, Name,Arity,Line,PropertyList) :-
+find_definition_contained_in(File, Module, module, Functor, Arity, definition, Line, PropertyList) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
 	strip_module(ModuleHead,ModuleCandidate,Head),
@@ -315,12 +314,12 @@ find_definition_contained_in(File, Module, Name,Arity,Line,PropertyList) :-
 	->	Module = ModuleCandidate
 	;	Module = user
 	),
-    functor(Head,Name,Arity),
-    properties_for_predicate(Module,Name,Arity,PropertyList),
+    functor(Head,Functor,Arity),
+    properties_for_predicate(Module,Functor,Arity,PropertyList),
     
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    defined_in_file(Module,Name,Arity,_Nth,File,Line).
+    defined_in_file(Module,Functor,Arity,_Nth,File,Line).
 
 
                /***********************************************

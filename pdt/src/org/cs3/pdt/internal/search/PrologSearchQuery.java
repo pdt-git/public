@@ -172,21 +172,24 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	 * @throws NumberFormatException
 	 */
 	private void processFoundClauses(List<Map<String, Object>> clauses)
-			throws IOException, NumberFormatException {
+	throws IOException, NumberFormatException {
 		PrologMatch match;
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
-			 match = constructPrologMatchForAResult(m);
-			result.addMatch(match);
+			match = constructPrologMatchForAResult(m);
+			if (result != null) {
+				result.addMatch(match);
+			}
 		}
-	    		
+
 	}
 	
 	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
 	protected PrologMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties) {
 		PredicateElement pe = new PredicateElement(file, module, name, arity, properties);
+		
 		PrologMatch match = new PrologMatch(pe, line, 0); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
