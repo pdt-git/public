@@ -32,7 +32,7 @@ public class PredicateCompletionProposal extends ComparableCompletionProposal im
 						isBuiltIn(tags)?
 								ImageRepository.PE_BUILT_IN :
 						isPublic(tags)?
-								ImageRepository.PE_PUBLIC:ImageRepository.PE_HIDDEN),
+								ImageRepository.PE_PUBLIC:ImageRepository.PE_PROTECTED),
 						null,null,null);
 		this.offset = offset;
 		this.length = length;

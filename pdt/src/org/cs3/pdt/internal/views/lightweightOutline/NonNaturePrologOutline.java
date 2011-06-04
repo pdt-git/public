@@ -47,9 +47,9 @@
  */
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
@@ -67,7 +67,6 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -82,6 +81,7 @@ import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
 public class NonNaturePrologOutline extends ContentOutlinePage {
+	private static final int EXPANDING_LEVEL = 2;
 	public static final String MENU_ID = "org.cs3.pdt.outline.menu";
 	private ITreeContentProvider contentProvider;
 	private PrologSourceFileModel model;
@@ -112,11 +112,11 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		viewer.addSelectionChangedListener(this);
 		
 		
-		model = new PrologSourceFileModel(new ArrayList<ModuleOutlineElement>());
+		model = new PrologSourceFileModel(new HashMap<String,ModuleElement>());
 		
 		viewer.setInput(model);
 		
-		viewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		viewer.setAutoExpandLevel(EXPANDING_LEVEL);
 		
 		initFilters();
 
@@ -159,7 +159,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	public void setInput(Object information) {
 		String fileName = editor.getPrologFileName();
 		
-		List<ModuleOutlineElement> modules;
+		Map<String,ModuleElement> modules;
 		TreeViewer treeViewer = getTreeViewer();
 		if (fileName != "") {
 			try {			
@@ -167,7 +167,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 				model.update(modules);
 				
 				treeViewer.setInput(model);
-				treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+				treeViewer.setAutoExpandLevel(EXPANDING_LEVEL);
 
 			} catch(Exception e) {
 				
@@ -188,6 +188,11 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 			OutlinePredicate predicate = (OutlinePredicate)elem;
 			editor.gotoLine(predicate.getLine());
 		}
+		if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
+			PredicateOccuranceElement occurance = (PredicateOccuranceElement)elem;
+			editor.gotoLine(occurance.getLine());
+		}
+
 	}
 
 	private Object getFirstSelectedElement(final SelectionChangedEvent event) {

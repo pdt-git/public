@@ -25,11 +25,15 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 			Predicate prologPredicate = (Predicate) element;
 			if (prologPredicate.isPublic()) {
 				return ImageRepository.getImage(ImageRepository.PE_PUBLIC);
+			} else if (prologPredicate.isPrivate()) {
+				return ImageRepository.getImage(ImageRepository.PE_PRIVATE);
+			} else if (prologPredicate.isLocal()) {
+				return ImageRepository.getImage(ImageRepository.PE_LOCAL);
 			}
-			return ImageRepository.getImage(ImageRepository.PE_HIDDEN);
+			return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 		}
-		if(element instanceof ModuleOutlineElement) {
-//			ModuleOutlineElement module = (ModuleOutlineElement)element;
+		if(element instanceof ModuleElement) {
+			//			ModuleOutlineElement module = (ModuleOutlineElement)element;
 //			if(module.hasChildren())
 				return ImageRepository.getImage(ImageRepository.PACKAGE);
 		}

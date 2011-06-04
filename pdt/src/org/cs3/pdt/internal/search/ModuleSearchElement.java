@@ -5,14 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.core.resources.IFile;
 
 public class ModuleSearchElement implements PDTTreeElement {
 	private String name;
 	private List<PrologMatch> element = new ArrayList<PrologMatch>();
-	Set<IFile> files = new HashSet<IFile>();
+	Set<FileTreeElement> files = new HashSet<FileTreeElement>();
 	
 	public ModuleSearchElement(String name) {
 		this.name = name;
@@ -24,13 +23,28 @@ public class ModuleSearchElement implements PDTTreeElement {
 	
 	public void addElement(PrologMatch elem) {
 		element.add(elem);
-		files.add(((PredicateElement)elem.getElement()).getFile());
+		IFile file = ((PredicateElement)elem.getElement()).getFile();
+		boolean found = false; 
+		
+		for (FileTreeElement fileElement : files) {
+			if (fileElement.getFile().equals(file)) {
+				found = true;
+				fileElement.addChild((PredicateElement)elem.getElement());
+			}
+		}
+		if (!found) {
+			FileTreeElement fileElement = new FileTreeElement(file);
+			files.add(fileElement);
+			fileElement.addChild((PredicateElement)elem.getElement());
+		}
 	}
 
 	@Override
-	public IFile[] getChildren() {
-		IFile[] unsortedFiles = files.toArray(new IFile[files.size()]);
-		return PDTCoreUtils.sortFileSet(unsortedFiles);
+	public Object[] getChildren() {
+		FileTreeElement[] unsortedFiles = files.toArray(new FileTreeElement[files.size()]);
+		return unsortedFiles;
+		
+//		return PDTCoreUtils.sortFileSet(unsortedFiles);
 	}
 
 	@Override

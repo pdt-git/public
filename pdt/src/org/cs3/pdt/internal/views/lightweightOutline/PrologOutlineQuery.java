@@ -1,10 +1,8 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
@@ -15,9 +13,7 @@ import org.cs3.pl.prolog.PrologSession;
 
 public class PrologOutlineQuery {
 
-
-	public static List<ModuleOutlineElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {
-		ArrayList<ModuleOutlineElement> modules= new ArrayList<ModuleOutlineElement>();		
+	public static Map<String, ModuleElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {	
 		PrologSession session=null;
 		try {
 			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
@@ -28,49 +24,57 @@ public class PrologOutlineQuery {
 				//				messageBox.setText("Outline");
 				//				messageBox.setMessage("Cannot open outline, no active Prolog Console found.");
 				//				messageBox.open();
-				return modules;
+				return new HashMap<String, ModuleElement>();
 			}
 			session = console.getPrologInterface().getSession();
 
-			String query = "find_definition_contained_in('" + fileName+"',"+"Module,Name,Arity,Line,PropertyList)";
+			String query = "find_definition_contained_in('" + fileName+"',"+"Entity, KindOfEntity, Functor, Arity, TypeOfDef, Line, PropertyList)";
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {
-				modules.add(extractResults(result));
+				return extractResults(result);
 			}
 		}catch(Exception e){
 			Debug.report(e);
 		} finally {
 			if(session!=null)session.dispose();
 		}
-		return modules;
+		return new HashMap<String, ModuleElement>();
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ModuleOutlineElement extractResults(List<Map<String, Object>> result) {
-		Set<String> signatures = new HashSet<String>();
-		List<OutlinePredicate> predicates = new ArrayList<OutlinePredicate>();
+	private static Map<String, ModuleElement> extractResults(List<Map<String, Object>> result) {
+		Map<String, ModuleElement> modules= new HashMap<String, ModuleElement>();	
 		String module = "user";
 		for (Map<String, Object> predicate : result) {
-			module=(String)predicate.get("Module");
-			String name=(String)predicate.get("Name");
+			module=(String)predicate.get("Entity");
+			String name=(String)predicate.get("Functor");
+			String kindOfEntity = (String)predicate.get("KindOfEntity");
 			int arity=Integer.parseInt((String)predicate.get("Arity"));
-			String signature = module+name+arity;
-			if(!signatures.contains(signature)){
-				signatures.add(signature);
-				List<String> properties = null;
-				Object prop = predicate.get("PropertyList");
-				if (prop instanceof Vector<?>) {
-					properties = (Vector<String>)prop;
-				}
-				int line = Integer.parseInt((String)predicate.get("Line"));
-				OutlinePredicate prologPredicate = new OutlinePredicate( module, name, arity, 
-						properties, line);
-				predicates.add(prologPredicate);
+			int line = Integer.parseInt((String)predicate.get("Line"));
+			String type = (String)predicate.get("TypeOfDef");
+			Object prop = predicate.get("PropertyList");
+			List<String> properties = null;
+			if (prop instanceof Vector<?>) {
+				properties = (Vector<String>)prop;
+			}				
+			if (!modules.containsKey(module)) {
+				modules.put(module, new ModuleElement(module, kindOfEntity));
 			}
+			ModuleElement currentModuleElem = modules.get(module);
+			String label = module+":"+name+"/"+arity;
+
+			OutlinePredicate prologPredicate;
+			if (currentModuleElem.hasPredicate(label)) {
+				prologPredicate = currentModuleElem.getPredicate(label);
+			} else {
+				prologPredicate = new OutlinePredicate(module, name, arity, properties);
+				currentModuleElem.addChild(label, prologPredicate);
+			}
+			prologPredicate.addOccurance(new PredicateOccuranceElement(type+": "+Integer.toString(line), line, type, prologPredicate));
 		}
-		
-		return new ModuleOutlineElement(module, predicates);
+
+		return modules;
 	}
 	
 }

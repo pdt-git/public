@@ -13,6 +13,7 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
@@ -138,7 +139,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	public void setInput(Object information) {
 		if(information instanceof String) {
 			String fileName = (String)information;
-			List<ModuleOutlineElement> modules = PrologOutlineQuery.getProgramElementsForFile(fileName/*, getShell()*/);
+			Map<String, ModuleElement> modules = PrologOutlineQuery.getProgramElementsForFile(fileName/*, getShell()*/);
 
 			PrologSourceFileModel model = new PrologSourceFileModel(modules);
 			inputChanged(model, modules.size()>0?modules.get(0):null);
@@ -212,11 +213,20 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	}
 
 	public void gotoSelectedElement() {
-		OutlinePredicate predicate= (OutlinePredicate)getSelectedElement();					
-		ISelection selection;
+		Object selection = getSelectedElement();
+		int line = -1;
+		if (selection instanceof OutlinePredicate) {
+			OutlinePredicate predicate=(OutlinePredicate)selection;
+			line = predicate.getLine()-1;
+		} 
+		if (selection instanceof PredicateOccuranceElement) {
+			PredicateOccuranceElement occurance = (PredicateOccuranceElement)selection;
+			line = occurance.getLine()-1;
+		}
+		ISelection textSelection;
 		try {
-			selection = new TextSelection(document,document.getLineOffset(predicate.getLine()-1),0);
-			UIUtils.getActiveEditor().getEditorSite().getSelectionProvider().setSelection(selection);
+			textSelection = new TextSelection(document,document.getLineOffset(line),0);
+			UIUtils.getActiveEditor().getEditorSite().getSelectionProvider().setSelection(textSelection);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
 		}

@@ -137,9 +137,39 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 		if(!isKnown){
 			throw new UnsupportedOperationException("Not enough information.");
 		}
-		return properties.contains("exported");
+		return properties.contains("exported") || properties.contains("public");
 	}
-
+	
+	/**
+	 * @return Returns the pub.
+	 */
+	public boolean isProtected() {
+		if(!isKnown){
+			throw new UnsupportedOperationException("Not enough information.");
+		}
+		return properties.contains("protected");
+	}
+	
+	/**
+	 * @return Returns the pub.
+	 */
+	public boolean isPrivate() {
+		if(!isKnown){
+			throw new UnsupportedOperationException("Not enough information.");
+		}
+		return properties.contains("private");
+	}
+	
+	/**
+	 * @return Returns the pub.
+	 */
+	public boolean isLocal() {
+		if(!isKnown){
+			throw new UnsupportedOperationException("Not enough information.");
+		}
+		return properties.contains("local");
+	}
+	
 	public boolean isDynamic() {
 		if(!isKnown){
 			throw new UnsupportedOperationException("Not enough information.");

@@ -104,7 +104,7 @@ public class PLScanner extends RuleBasedScanner implements IPropertyChangeListen
 				URI uri = storeEditorInput.getURI();
 				String path = uri.getPath();
 				try {
-					file = PDTCoreUtils.findFileForLocation(path);
+					file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(path);
 				} catch (IOException e) {
 
 				}
