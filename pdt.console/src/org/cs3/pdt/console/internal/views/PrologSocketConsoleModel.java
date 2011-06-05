@@ -348,7 +348,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 							"false");
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
-				writer.write("use_module(library(single_char_interceptor)).\n"
+				writer.write("use_module(lib_pdt_console_pl(single_char_interceptor)).\n"
 						+ "sci_install.\n"
 						+ "set_stream(current_output,tty(true)),"
 						+ "set_stream(current_input,tty(true)).\n");

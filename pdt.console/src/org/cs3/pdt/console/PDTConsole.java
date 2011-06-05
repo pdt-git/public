@@ -49,7 +49,7 @@ final public class PDTConsole {
      */
 
 	public static final String CONTRIB_PIF_SELECTOR_ID = "pdt.console.contribution.pifselector";
-	public static final String PL_LIBRARY = "pdt.console.library";
+	public static final String PL_LIBRARY = "pdt.console.pl";
 	public static final String COMMAND_PASTE_FILENAME = "pdt.console.paste_filename";
 	public static final String CONTEXT_USING_CONSOLE_VIEW = "org.cs3.pdt.console";
 	public static final int ERR_UNKNOWN = -1;

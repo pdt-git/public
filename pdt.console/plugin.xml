@@ -56,8 +56,8 @@
     <extension
           point="org.cs3.pdt.runtime.prologLibrary">
        <library
-             alias="library"
-             id="pdt.console.library"
+             alias="lib_pdt_console_pl"
+             id="pdt.console.pl"
              path="pl">
                      <attribute id="hidden" value="true"/>
        </library>
