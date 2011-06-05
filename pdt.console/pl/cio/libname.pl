@@ -1,6 +1,6 @@
 
 :- prolog_load_context(directory,A), user:assert(file_search_path(library,A)).
-:- use_module(library(single_char_interceptor)).
+:- use_module(lib_pdt_console_pl('cio/single_char_interceptor.pl')).
 
 full_name:-
 	arch_lib_name(Name),writeln(Name).
