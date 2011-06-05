@@ -794,8 +794,8 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 	private void startServer(PrologInterface pif, PrologSession session) {
 		try {
 			String queryString = 
-				      "use_module(library(pdt_console_server)), "
-					+ "pdt_start_console_server(Port)";
+				      "use_module(lib_pdt_console_pl(pdt_console_server)), "
+					+ "pdt_console_server:pdt_start_console_server(Port)";
 			Debug.info("starting console server using: " + queryString);
 			
 			Map<String,?> result = session.queryOnce(queryString);
@@ -938,12 +938,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 				.getLibraryManager(), session,
 				new String[] { PDTConsole.PL_LIBRARY });
 		
+		
 		Map<String,?> result = null;
 		try {
-			result = session.queryOnce(
-					"use_module(library(pdt_console_server))," 
-					+ "use_module(library(pdtplugin)),"
-					+ "pdt_current_console_server(Port)");
+			result = session.queryOnce( "consult(lib_pdt_console_pl(loader)).");
+			result = session.queryOnce( "pdt_start_console_server(Port)");
 			if (result == null) {
 				startServer(pif, session);
 				result = session.queryOnce("pdt_current_console_server(Port)");
@@ -951,7 +950,11 @@ public class PrologConsoleView extends ViewPart implements LifeCycleHook,
 			if (result == null) {
 				throw new RuntimeException("could not install console server");
 			}
-		} finally {
+		} 
+		catch (Exception e) {
+			Debug.info(e.toString());
+		}
+		finally {
 			if (session != null) {
 				session.dispose();
 			}
