@@ -66,7 +66,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 	public String getText(Object element) {
 		if(element instanceof PredicateElement){
 			PredicateElement pe = ((PredicateElement)element);
-			String label = pe.getSignature();
+			String label = pe.getLabel();
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";
