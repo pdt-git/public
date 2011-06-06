@@ -122,7 +122,7 @@ public class PrologElement implements Serializable, Comparable<PrologElement>{
 		return contextModule;
 	}
 
-	public String getName() {
+	public String getFunctor() {
 		return functorName;
 	}
 	

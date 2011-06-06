@@ -65,7 +65,7 @@ public class OutlinePredicate extends Predicate implements PDTTreeElement{
 
 	@Override
 	public String getLabel() {
-		StringBuffer label = new StringBuffer(getName());
+		StringBuffer label = new StringBuffer(getFunctor());
 		label.append("/");
 		label.append(getArity());
 		label.append(" (");

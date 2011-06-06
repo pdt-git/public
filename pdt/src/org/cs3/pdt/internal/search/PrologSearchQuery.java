@@ -187,10 +187,10 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	
 	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
-	protected PrologMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties) {
+	protected PrologMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties, String searchCategory) {
 		PredicateElement pe = new PredicateElement(file, module, name, arity, properties);
 		
-		PrologMatch match = new PrologMatch(pe, line, 0); 
+		PrologMatch match = new PrologMatch(pe, line, 0, searchCategory); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
 		return match;
@@ -207,7 +207,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		PrologSession session=null;
 		String module=goal.getModule()==null?"_":"'"+goal.getModule()+"'";
 
-		String query="pdt_resolve_predicate('"+goal.getFile()+"',"+module+", '"+goal.getName()+"',"+goal.getArity()+",Pred),"
+		String query="pdt_resolve_predicate('"+goal.getFile()+"',"+module+", '"+goal.getFunctor()+"',"+goal.getArity()+",Pred),"
 		+ "pdt_predicate_reference(Pred,File,Start,End,Caller,Type)";
 		List<Map<String,Object>> results=null;
 		try{
@@ -250,7 +250,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			int arity = Integer.getInteger(callerParts[1]);
 			
 			PredicateElement pe = new PredicateElement(file, type, name, arity);
-			PrologMatch match = new PrologMatch(pe, start, (end-start)); 
+			PrologMatch match = new PrologMatch(pe, start, (end-start), "definition"); 
 			match.setLine(start);
 			match.setModule(pe.getModule());
 

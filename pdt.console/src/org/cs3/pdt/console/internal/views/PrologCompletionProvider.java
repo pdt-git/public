@@ -151,7 +151,7 @@ public class PrologCompletionProvider implements ConsoleCompletionProvider {
 			completions = new TreeSet<String>();
 			for (int i = 0; i < elems.length; i++) {
 				r.options.add(elems[i].getSignature());
-				completions.add(elems[i].getName());
+				completions.add(elems[i].getFunctor());
 			}
 		} catch (NumberFormatException e) {
 			Debug.report(e);
