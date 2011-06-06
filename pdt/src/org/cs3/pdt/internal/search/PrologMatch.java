@@ -10,11 +10,13 @@ public class PrologMatch extends Match implements PDTTreeElement{
 
 	private String module;
 	private int line=-1;
+	private String kind;
 
 	private boolean isLineLocation= false; 
 	
-	public PrologMatch(Object element, int offset, int length) {
+	public PrologMatch(Object element, int offset, int length, String kind) {
 		super(element, UNIT_LINE, offset, length);
+		this.kind = kind;
 	}
 
 	public int getLine() {
@@ -50,7 +52,12 @@ public class PrologMatch extends Match implements PDTTreeElement{
 
 	@Override
 	public String getLabel() {
-		return "Line: " + Integer.toString(getLine());
+		StringBuffer label = new StringBuffer("Line: ");
+		label.append(Integer.toString(getLine()));
+		label.append(" (");
+		label.append(kind);
+		label.append(")");
+		return label.toString();
 	}
 	
 }

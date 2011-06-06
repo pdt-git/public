@@ -195,7 +195,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		PrologSession session = pif.getSession(PrologInterface.NONE);
 		Map<String,Object> table = null;
 		try {
-			table = session.queryOnce("manual_entry(" + data.getName() + ","
+			table = session.queryOnce("manual_entry(" + data.getFunctor() + ","
 					+ data.getArity() + ",Info)");
 		} catch (PrologException e) {
 			Debug.report(e);
@@ -219,7 +219,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			
 			String query= "meta_data(File,"
 				+"'"+p.getModule()+"',"
-				+"'"+p.getName()+"',"
+				+"'"+p.getFunctor()+"',"
 				+p.getArity()+","
 				+"_,"//whether it is public - we already know this.
 				+"Pos,"
@@ -241,7 +241,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 //				sl.setOffset(Integer.parseInt( (String) m.get("Pos")));
 //				sl.setEndOffset(sl.getOffset()+Integer.parseInt( (String) m.get("Len")));				
 //				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.isPublic(),p.isDynamic(),p.isMultifile(),sl);
-				result[i]=new Clause(p.getModule(),p.getName(),p.getArity(),p.getProperties());
+				result[i]=new Clause(p.getModule(),p.getFunctor(),p.getArity(),p.getProperties());
 			}
 			return result;
 		} finally {
@@ -267,7 +267,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 		try{
 			String query= "meta_data(File,"
 				+"Module,"
-				+"'"+g.getName()+"',"
+				+"'"+g.getFunctor()+"',"
 				+g.getArity()+","
 				+"Pub,"
 				+"_,"
@@ -279,7 +279,7 @@ public class DefaultMetaInfoProvider implements IMetaInfoProvider {
 			for (Iterator<Map<String,Object>> it = l.iterator(); it.hasNext();) {
 				Map<String,Object> m = it.next();
 				String module = (String) m.get("Module");
-				String label = g.getName();
+				String label = g.getFunctor();
 				int arity = g.getArity();
 				boolean pub = "1".equals(m.get("Pub"));
 				boolean dyn = "1".equals(m.get("Dyn"));

@@ -11,13 +11,21 @@ public class GoalProvider {
 	 * @return
 	 */
 	public static Goal getPrologDataFromOffset(String file, IDocument document,
-			int offset) throws BadLocationException {
+			int offset, int length) throws BadLocationException {
 			
-		int start = PredicateReadingUtilities.findBeginOfPredicateName(document, offset);
-		int end = PredicateReadingUtilities.findEndOfPredicateName(document, offset);
-	
-		if (start > end) {
-			return null;
+		int start; 
+		int end;
+		
+		if (length > 0) {
+			start = offset;
+			end = offset + length;
+		} else {
+			start = PredicateReadingUtilities.findBeginOfPredicateName(document, offset);
+			end = PredicateReadingUtilities.findEndOfPredicateName(document, offset);
+
+			if (start > end) {
+				return null;
+			}
 		}
 		String predicateModuleAndName = document.get(start, end - start);
 		

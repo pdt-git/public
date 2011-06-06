@@ -36,8 +36,8 @@ public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 		if (goal.getFile().equals(""))
 			file = "File";
 		
-		String name = "'"+goal.getName()+"'";
-		if (goal.getName().equals(""))
+		String name = "'"+goal.getFunctor()+"'";
+		if (goal.getFunctor().equals(""))
 			name = "Predicate";
 		
 		String module2 = module;
@@ -71,7 +71,7 @@ public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("RefFile"));
 		int line = Integer.parseInt((String) m.get("RefLine"));
 
-		PrologMatch match = createMatch(module, name, arity, file, line, properties );
+		PrologMatch match = createMatch(module, name, arity, file, line, properties, "definition");
 		return match;
 	}
 	

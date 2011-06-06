@@ -25,7 +25,7 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 	// find_reference_to(Functor,Arity,DefFile, DefModule,RefModule,RefHead,RefFile,RefLine,Nth,Kind)
 	protected String buildSearchQuery(Goal goal, String module) {
 	 // String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ",'" + goal.getModule() + "'," +
-		String query = "get_references('" +goal.getFile()+ "','" +goal.getName()+ "'/" +goal.getArity()+ ", " + module           + " ," +
+		String query = "get_references('" +goal.getFile()+ "','" +goal.getFunctor()+ "'/" +goal.getArity()+ ", " + module           + " ," +
 						FILE_VAR + "," +
 						LINE_VAR + "," +
 						MODULE_VAR + "," +
@@ -45,7 +45,7 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
 		int line = Integer.parseInt((String) m.get(LINE_VAR));
 
-		PrologMatch match = createMatch(module, name, arity, file, line, new Vector<String>());
+		PrologMatch match = createMatch(module, name, arity, file, line, new Vector<String>(), "definition");
 		return match;
 	}
 	

@@ -21,37 +21,41 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		setSearchType("Definitions and declarations of");
 	}
 
-	protected String getCategoryDescription(Goal goal, String category)  {
-		return category + " of "+goal.getName()+"/"+goal.getArity()+" for '"+goal.getModule()+"'";
+	protected String getCategoryDescription(String module, String functor, int arity, String category)  {
+		StringBuffer description = new StringBuffer(category);
+		description.append(" of ");
+		description.append(functor);
+		description.append("/");
+		description.append(arity);
+		description.append(" from '");
+		description.append(module);
+		description.append("'");
+		return description.toString();
 	}
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {		
 		signatures.clear();
-		String arity = Integer.toString(goal.getArity());
-		if (goal.getArity() < 0) 
-			arity = "Arity";
 		
 		String file = "'"+goal.getFile()+"'";
 		if (goal.getFile().equals(""))
 			file = "OrigFile";
 		
-
-		String name = "'"+goal.getName()+"'";
-		if (goal.getName().equals(""))
-			name = "Predicate";
+//		String arity = Integer.toString(goal.getArity());
+//		if (goal.getArity() < 0) 
+//			arity = "Arity";
+//		
+//		String name = "'"+goal.getName()+"'";
+//		if (goal.getName().equals(""))
+//			name = "Predicate";
 		
 		String module2 = module;
 		if (module.equals("''"))
 			module2 = "Module";
 		
-		// TODO: Get Line 
-		
 		String query = "find_definitions_categorized(" 
-
-//			            +goal.getFile()+ "','" +goal.getName()+ "'," +goal.getArity()+ ",'" +module2+ "'," +
-			            + file + "," + goal.getLine() + "," + goal.getTermString() + "," + name+ ", " + arity+ ", "+ module2 + 
-			            ", Category, DefiningModule, File, Line, PropertyList)";
+			            + file + "," + goal.getLine() + "," + goal.getTermString() + ", Functor, Arity, "+ module2 + 
+			            ", SearchCategory, DefiningModule, File, Line, PropertyList, ResultsCategory)";
 		return query;
 	}
 
@@ -61,12 +65,9 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 	@Override
 	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
-		Goal goal = getGoal();
-
 		String definingModule = (String)m.get("DefiningModule");
-		//		        String contextModule = goal.getModule(); 
-		String name =  goal.getName();
-		int arity =   goal.getArity();
+		String functor = (String)m.get("Functor");
+		int arity = Integer.parseInt(((String)m.get("Arity")));
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("File"));
 		int line = Integer.parseInt((String) m.get("Line"));
 
@@ -75,22 +76,16 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		if (prop instanceof Vector<?>) {
 			properties = (Vector<String>)prop;
 		}	
+		String resultsCategory = (String)m.get("ResultsCategory");
 
-		String category = (String)m.get("Category");
-
-		String signature = category+definingModule+name+arity+line;
+		String searchCategory = (String)m.get("SearchCategory");
+		String signature = resultsCategory+definingModule+functor+arity+line;
 		if(!signatures.contains(signature)){
 			signatures.add(signature);
 
-			PrologMatch match = createMatch(definingModule, name, arity, file, line, properties);
+			PrologMatch match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory);
 
-			addCategoryEntry(match, getCategoryDescription(goal, category));			
-
-			//				addCategoryEntry(match, getCategoryDescription(goal, "Visible "));			
-			//				addCategoryEntry(match, getCategoryDescription(goal, "Supermodule"));			
-			//				addCategoryEntry(match, getCategoryDescription(goal, "Local"));
-			//				addCategoryEntry(match, getCategoryDescription(goal, "Meta-callable submodule"));
-			//				addCategoryEntry(match, getCategoryDescription(goal, "Locally invisible"));
+			addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
 			return match;
 		}
 		else

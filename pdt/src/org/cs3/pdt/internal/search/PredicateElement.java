@@ -43,7 +43,7 @@ public class PredicateElement extends Predicate implements PDTTreeElement{
 
 	@Override
 	public String getLabel() {
-		return getName() + "/" + getArity();
+		return getFunctor() + "/" + getArity();
 	}
 
 	public void setParent(PDTTreeElement parent) {

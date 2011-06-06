@@ -148,7 +148,7 @@ public class SpyPointActionDelegate extends TextEditorAction {
 											.getShell(),
 									"PDT Plugin",
 									"Note: I found more than one predicate matching the signature \n"
-											+ data.getName()
+											+ data.getFunctor()
 											+ "/"
 											+ data.getArity()
 											+ ".\nSorry, Code analysis is still work in progress. "

@@ -101,7 +101,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	@Override
 	public final String getLabel() {		
 		return searchType + ": " 
-		       + (goal==null ? "oops, goal is null?!" :goal.getModule()+":"+goal.getName()+"/"+goal.getArity())
+		       + (goal==null ? "oops, goal is null?!" :goal.getModule()+":"+goal.getFunctor()+"/"+goal.getArity())
 		       + " --> " 
 		       + getMatchCount() 
 		       + " matches in active Prolog Console";

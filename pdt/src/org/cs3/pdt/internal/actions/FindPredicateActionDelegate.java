@@ -175,7 +175,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 						module ="'"+ goal.getModule()+ "'";
 					
 					String query = "find_primary_definition_visible_in('"
-						+enclFile+"','" + goal.getTermString() + "','" + goal.getName()+"'," + goal.getArity()+ ","
+						+enclFile+"','" + goal.getTermString() + "','" + goal.getFunctor()+"'," + goal.getArity()+ ","
 						+module 
 						+",File,Line)";
 					Debug.info("open declaration: " + query);
@@ -233,7 +233,7 @@ public class FindPredicateActionDelegate extends TextEditorAction {
 		PrologSession session = null;
 		String module=data.getModule()==null?"_":"'"+data.getModule()+"'";
 		
-		String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getName()+"',"+data.getArity()+",Pred),"
+		String query="pdt_resolve_predicate('"+data.getFile()+"',"+module+", '"+data.getFunctor()+"',"+data.getArity()+",Pred),"
 		+ "pdt_predicate_contribution(Pred,File,Start,End)";
 		Map<String,Object> m=null;
 		try{
