@@ -3,6 +3,7 @@
  */
 package org.cs3.pdt.internal.views;
 
+import org.cs3.pdt.internal.views.lightweightOutline.PredicateOccuranceElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -37,6 +38,17 @@ final class LexicalPrologOutlineSorter extends ViewerSorter {
 					&& "pef_toplevel".equals(node2.getType())) {
 				return node1.getStartPosition() - node2.getStartPosition();
 			}
+		}
+		
+		if ((e1 instanceof PredicateOccuranceElement) && (e2 instanceof PredicateOccuranceElement)) {
+			PredicateOccuranceElement occ1 = (PredicateOccuranceElement)e1;
+			PredicateOccuranceElement occ2 = (PredicateOccuranceElement)e2;
+			if (occ1.getType().equals(occ2.getType()))
+				return (occ1).getLine() - (occ2).getLine();
+			if ((occ1.getType().equals("declaration")) || (occ2.getType().equals("multifile")))
+				return -1;
+			if ((occ1.getType().equals("multifile")) || (occ1.getType().equals("declaration")))
+				return 1;
 		}
 		return super.compare(viewer, e1, e2);
 	}
