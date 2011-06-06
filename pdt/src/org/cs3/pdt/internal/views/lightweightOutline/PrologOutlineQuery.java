@@ -71,10 +71,31 @@ public class PrologOutlineQuery {
 				prologPredicate = new OutlinePredicate(module, name, arity, properties);
 				currentModuleElem.addChild(label, prologPredicate);
 			}
-			prologPredicate.addOccurance(new PredicateOccuranceElement(type+": "+Integer.toString(line), line, type, prologPredicate));
+			
+			StringBuffer occuranceLabel = calculateOccuranceLabel(line, type,
+					properties);
+			prologPredicate.addOccurance(new PredicateOccuranceElement(occuranceLabel.toString(), line, type, prologPredicate));
 		}
 
 		return modules;
+	}
+
+	public static StringBuffer calculateOccuranceLabel(int line, String type,
+			List<String> properties) {
+		StringBuffer occuranceLabel = new StringBuffer("Line: ");
+		occuranceLabel.append(Integer.toString(line));
+		occuranceLabel.append(" (");
+		occuranceLabel.append(type);
+		if (type.equals("multifile")) {
+			occuranceLabel.append(" @ ");
+			for (String property : properties) {
+				if (property.startsWith("from(")) {
+					occuranceLabel.append((String) property.subSequence(5, property.length()-1));
+				}
+			}
+		}
+		occuranceLabel.append(")");
+		return occuranceLabel;
 	}
 	
 }
