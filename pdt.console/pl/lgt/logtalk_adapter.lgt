@@ -260,8 +260,11 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 	entity_property(Entity, Kind, file(File, Directory)),
     (	% entity declarations
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
-		entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)),
-		list::memberchk(clauses(N0), DefinitionProperties),
+		% we add a clauses/1 declaration property just to simplify coding in the Java side
+		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)) ->
+			list::memberchk(clauses(N0), DefinitionProperties)
+		;	N0 = 0
+		),
 		findall(
 			N1,
 			(entity_property(Entity, Kind, includes(Functor/Arity, _, IncludesProperties)),
@@ -272,19 +275,23 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		SearchCategory = declaration
 	;	% entity definitions
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
+		% we add a scope property just to simplify coding in the Java side
 		functor(Predicate, Functor, Arity),
 		(	decode(Predicate, Entity, _, _, _, _, DeclarationProperties, 'Declaration') ->
+			% found the scope declaration
 			(	list::member((public), DeclarationProperties) ->
 				Properties = [(public)| Properties0]
 			;	list::member(protected, DeclarationProperties) ->
 				Properties = [protected| Properties0]
 			;	Properties = [private| Properties0]
 			)
-		;	Properties = [local| Properties0]
+		;	% no scope declaration; local predicate
+			Properties = [local| Properties0]
 		),
 		SearchCategory = definition
 	;	% entity multifile definitions
 		entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0)),
+		% we add a from/1 property just to simplify coding in the Java side
 		Properties = [from(From)| Properties0],
 		SearchCategory = multifile
 	),
