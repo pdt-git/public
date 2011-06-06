@@ -7,6 +7,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IStyledLabelProvider*/ {
@@ -37,9 +38,16 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 //			if(module.hasChildren())
 				return ImageRepository.getImage(ImageRepository.PACKAGE);
 		}
+		if (element instanceof PredicateOccuranceElement) {
+			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
+			return setCategoryImage(sharedImagaes);
+		}
 		return null;
 	}
 
+	private Image setCategoryImage(ISharedImages sharedImagaes) {
+		return sharedImagaes.getImage(ISharedImages.IMG_DEF_VIEW);
+	}
 
 	@Override
 	public Color getForeground(Object element) {
