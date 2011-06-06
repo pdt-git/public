@@ -65,7 +65,18 @@ public class OutlinePredicate extends Predicate implements PDTTreeElement{
 
 	@Override
 	public String getLabel() {
-		return getName() + "/" + getArity() + " (" + numberOfClauses() + ")";
+		StringBuffer label = new StringBuffer(getName());
+		label.append("/");
+		label.append(getArity());
+		label.append(" (");
+		int numberOfClauses = numberOfClauses();
+		label.append(numberOfClauses);
+		if (numberOfClauses != 1) {
+			label.append(" clauses)");
+		} else {
+			label.append(" clause)");
+		}
+		return label.toString();
 	}
 	
 }
