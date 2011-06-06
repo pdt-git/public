@@ -123,7 +123,7 @@ public interface PrologInterface {
 	 * Returns a prolog session.<br>
 	 * Use sessions to interact with the prolog system. Sessions can only be
 	 * obtained while the PrologInterface is in UP state. During startup, this
-	 * call will block until the pif is up. in state SHUTODWN or DOWN, this will
+	 * call will block until the pif is up. In state SHUTODWN or DOWN, this will
 	 * raise an IllegalStateException.
 	 * 
 	 * Uses flag=LEGACY

@@ -46,12 +46,11 @@ package org.cs3.pl.prolog;
 /**
  * A pluggable strategy for starting and stopping a PIF server.
  * 
- * Since the Prolog System is living in its own process for 
- * all the implementations we tried until now, and starting 
- * and stopping this "server" process tends to be dependent
- * on a lot of environmental issues (Do I run as an eclipse-plugin?
- * Am I running on a windows box? ... ), I decided to move 
- * some of this problems into a separate pluggable object.   
+ * Since the Prolog System is living in its own process and starting 
+ * and stopping this "server" process is dependent on a lot of issues 
+ *  - Do I run as an eclipse-plugin?
+ *  - Do I run on Windows? ... )
+ * this interface abstracts the common behaviour.    
  *  
  */
 public interface ServerStartAndStopStrategy {
@@ -59,17 +58,14 @@ public interface ServerStartAndStopStrategy {
      * starts the server process, returning its process.
      * 
      * @return the server process, if available, or null.
-     * @param pif
-     *                    the PrologInterface for which the server part should be
-     *                    started.
+     * @param pif the PrologInterface for which the server part should be started.
      */
     public Process startServer(PrologInterface pif);
 
     /**
      * stop the server process
      * 
-     * @param pif
-     *                    the IPrologInterface for which the server should be stopped.
+     * @param pif the IPrologInterface for which the server should be stopped.
      * @throws Throwable 
      */
     public void stopServer(PrologInterface pif);
