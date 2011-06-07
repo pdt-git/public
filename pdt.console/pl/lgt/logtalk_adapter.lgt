@@ -118,6 +118,11 @@ search_term_to_predicate_indicator(_<<Term, Functor/Arity) :- !, functor(Term, F
 search_term_to_predicate_indicator(_:Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
 search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor, Arity).
 
+:- multifile(pdtplugin:results_category_label/2).
+
+pdtplugin:results_category_label(declaration, 'Visible declaration' ).
+pdtplugin:results_category_label(definition, 'Visible definition' ).
+pdtplugin:results_category_label(other, 'Other references').
 
 
 %% find_decl_or_def(+ContextModule,+Name,?Arity,-Visibility,-Sources)
@@ -619,10 +624,6 @@ predicate_name_with_unary_property_(Name,Property,Arg):-
 	functor(Head,Name,_),
 	Name \= '[]'.
 	
-	
-	   /* **********************************************
-	    * LOGTALK decode
-	    * ******************************************** */
 	    
 % decode(Term, This, Entity, Kind, Template, Location, Properties).
 
@@ -651,8 +652,6 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
-%decode(Module:Predicate, Entity, module, Predicate, [Directory, File, [Line]], Properties) :-
-
 decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
 	nonvar(Predicate),
@@ -673,14 +672,14 @@ decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pr
 		Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
 		Obj<<predicate_property(Template, defined_in(Primary)),
 		abolish_object(Obj)
-	),
+	), !,	% cut predicate_property/2 choice-points
 	(	% declaration
-		entity_property(DeclarationEntity, Kind, declares(Functor/Arity, Properties)),
+		entity_property(DeclarationEntity, _, declares(Functor/Arity, Properties)),
 		Entity = DeclarationEntity,
 		SearchCategory = declaration
 	;	% definition
 		entity_property(Primary, _, defines(Functor/Arity, Properties0)),
-		entity_property(DeclarationEntity, Kind, declares(Functor/Arity, DeclarationProperties)),
+		entity_property(DeclarationEntity, _, declares(Functor/Arity, DeclarationProperties)),
 		(	list::member((public), DeclarationProperties) ->
 			Properties = [(public)| Properties0]
 		;	list::member(protected, DeclarationProperties) ->
@@ -695,7 +694,6 @@ decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pr
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
-
 
 decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
@@ -728,7 +726,6 @@ decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pro
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
-
 decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, definition) :-
 	!,
 	nonvar(Predicate),
@@ -744,7 +741,6 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 	entity_property(Entity, Kind, defines(Functor/Arity, Properties)),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
-
 
 decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
