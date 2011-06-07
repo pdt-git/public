@@ -106,12 +106,14 @@ pdt_reload(File):-
          ***********************************************************************/ 
 
 % Logtalk
-find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategory):-
+find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategoryLabel):-
+    Term \= _:_,
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
-    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategory).
+    logtalk_adapter::find_definitions_categorized(EnclFile,SelectionLine, Term, Functor, Arity, This, SearchCategory, DefiningEntity, FullPath, Line, Properties, ResultsCategory),
+    results_category_label(ResultsCategory, ResultsCategoryLabel).
     
-find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity,ReferencedModule, definition, DefiningModule, File,Line, PropertyList, ResultsCategory):-
+find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity, ReferencedModule, definition, DefiningModule, File,Line, PropertyList, ResultsCategoryLabel):-
     search_term_to_predicate_indicator(Term, Functor/Arity),
     module_of_file(EnclFile,FileModule),
     (  atom(ReferencedModule)
@@ -119,7 +121,7 @@ find_definitions_categorized(EnclFile,_SelectionLine,Term,Functor,Arity,Referenc
     ;  ReferencedModule = FileModule   % Implicit module reference
     ),    
     find_decl_or_def(ReferencedModule,Functor,Arity,Sources),
-    member(ResultsCategory-DefiningModule-Location,Sources),
+    member(ResultsCategoryLabel-DefiningModule-Location,Sources),
     member(File-Lines,Location),
     member(Line,Lines),
     properties_for_predicate(ReferencedModule,Functor,Arity,PropertyList).
@@ -147,7 +149,7 @@ find_decl_or_def(ContextModule,Name,Arity,Declarations) :-
           ( declared_but_undefined(DeclModule,Name,Arity),
             visibility(Visibility, ContextModule,Name,Arity,DeclModule),
             declared_in_file(DeclModule,Name,Arity,Location),
-            visibility_text(declared, Visibility, VisibilityText)
+            results_context_category_label(declared, Visibility, VisibilityText)
           ),
           Declarations).
     
@@ -160,21 +162,25 @@ find_decl_or_def(ContextModule,Name,Arity,Definitions) :-
           ( defined_in_module(DefiningModule,Name,Arity),
             visibility(Visibility, ContextModule,Name,Arity,DefiningModule),
             defined_in_files(DefiningModule,Name,Arity,Locations),
-            visibility_text(defined, Visibility, VisibilityText)
+            results_context_category_label(defined, Visibility, VisibilityText)
           ),
           Definitions
     ). 
 
+:- multifile(results_category_label/2).
 
-visibility_text(declared, local,      'Local declaration' ) :- !.
-visibility_text(declared, supermodule,'Imported declaration' ) :- !.
-visibility_text(declared, submodule,  'Submodule declaration') :- !.
-visibility_text(declared, invisible,  'Locally invisible declaration') :- !.
 
-visibility_text(defined, local,      'Local definitions' ) :- !.
-visibility_text(defined, supermodule,'Imported definitions' ) :- !.
-visibility_text(defined, submodule,  'Submodule definitions') :- !.
-visibility_text(defined, invisible,  'Locally invisible definitions') :- !.
+:- multifile(results_context_category_label/3).
+
+results_context_category_label(declared, local,      'Local declaration' ) :- !.
+results_context_category_label(declared, supermodule,'Imported declaration' ) :- !.
+results_context_category_label(declared, submodule,  'Submodule declaration') :- !.
+results_context_category_label(declared, invisible,  'Locally invisible declaration') :- !.
+
+results_context_category_label(defined, local,      'Local definitions' ) :- !.
+results_context_category_label(defined, supermodule,'Imported definitions' ) :- !.
+results_context_category_label(defined, submodule,  'Submodule definitions') :- !.
+results_context_category_label(defined, invisible,  'Locally invisible definitions') :- !.
 
     
 % These clauses must stay in this order since they determine
