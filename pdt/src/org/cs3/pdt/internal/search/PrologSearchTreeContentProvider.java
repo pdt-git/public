@@ -11,8 +11,7 @@
 
 package org.cs3.pdt.internal.search;
 
-import java.util.List;
-
+import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.search.ui.text.Match;
@@ -36,7 +35,7 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if(child instanceof FileTreeElement){
 			return getSearchResult();			//TODO: fix this
 		} 
-		if(child instanceof PredicateElement ){
+		if(child instanceof SearchPredicateElement ){
 			return getSearchResult().getFile(child);
 		} 
 		if(child instanceof Match){
@@ -64,18 +63,12 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if (parentElement instanceof PrologSearchResult){
 			return getSearchResult().getChildren();
 		}
-		if (parentElement instanceof SearchResultCategory){
-			List<PrologMatch> matches = ((SearchResultCategory) parentElement).getMatches();
-			return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
-		}
-		if (parentElement instanceof ModuleSearchElement) {
-			return ((ModuleSearchElement) parentElement).getChildren();
-		}
-		if (parentElement instanceof FileTreeElement){
-			return (((FileTreeElement)parentElement).getChildren());
-		}
-		if (parentElement instanceof PredicateElement){
-			return getSearchResult().getMatches(parentElement);	
+//		if (parentElement instanceof SearchResultCategory){
+//			List<PrologMatch> matches = ((SearchResultCategory) parentElement).getMatches();
+//			return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
+//		}
+		if (parentElement instanceof PDTTreeElement) {
+			return ((PDTTreeElement) parentElement).getChildren();
 		}
 		return null;
 	}
@@ -85,12 +78,12 @@ public class PrologSearchTreeContentProvider extends PrologSearchContentProvider
 		if(element==null||getSearchResult()==null){
 			return false;
 		}
+		if (element instanceof PDTTreeElement) {
+			return ((PDTTreeElement)element).hasChildren();
+		}
 		return element instanceof IFile || 
-				element instanceof FileTreeElement ||
-				element instanceof PrologSearchResult || 
-				element instanceof PredicateElement ||
-				element instanceof SearchResultCategory ||
-				element instanceof ModuleSearchElement;
+				element instanceof PrologSearchResult; // || 
+//				element instanceof SearchResultCategory;
 	}
 
 	@Override

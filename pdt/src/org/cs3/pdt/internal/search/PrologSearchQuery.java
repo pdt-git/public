@@ -188,11 +188,13 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
 	protected PrologMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties, String searchCategory) {
-		PredicateElement pe = new PredicateElement(file, module, name, arity, properties);
+		SearchPredicateElement pe = new SearchPredicateElement(file, module, name, arity, properties);
 		
 		PrologMatch match = new PrologMatch(pe, line, 0, searchCategory); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
+		
+		pe.addOccurence(match);
 		return match;
 	}
 
@@ -249,7 +251,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			String name = callerParts[0];
 			int arity = Integer.getInteger(callerParts[1]);
 			
-			PredicateElement pe = new PredicateElement(file, type, name, arity);
+			SearchPredicateElement pe = new SearchPredicateElement(file, type, name, arity);
 			PrologMatch match = new PrologMatch(pe, start, (end-start), "definition"); 
 			match.setLine(start);
 			match.setModule(pe.getModule());

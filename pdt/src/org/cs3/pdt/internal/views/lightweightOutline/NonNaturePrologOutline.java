@@ -54,6 +54,7 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.search.PrologSearchLabelProvider;
 import org.cs3.pdt.internal.views.HideDirectivesFilter;
 import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
 import org.cs3.pdt.internal.views.HideSubtermsFilter;
@@ -67,6 +68,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -76,6 +78,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 
@@ -104,7 +107,10 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		contentProvider = new OutlineContentProvider();
 		viewer.setContentProvider(contentProvider);
 		
-		labelProvider = new OutlineLabelProvider();
+//		labelProvider = new OutlineLabelProvider();
+		
+		labelProvider = new DecoratingLabelProvider(new OutlineLabelProvider(), 
+				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 		viewer.setLabelProvider(labelProvider);
 
 		viewer.setComparer(new PrologOutlineComparer());

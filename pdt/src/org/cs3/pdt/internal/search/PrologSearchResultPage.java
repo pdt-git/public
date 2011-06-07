@@ -53,6 +53,7 @@ import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
@@ -62,6 +63,7 @@ import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -99,7 +101,9 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	@Override
 	protected void configureTreeViewer(TreeViewer viewer) {
 		//viewer.setSorter(new JavaElementLineSorter());
-		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
+		//viewer.setLabelProvider(new PrologSearchLabelProvider(this));
+		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(this), 
+				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new PrologSearchTreeContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 	}
@@ -112,7 +116,9 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	@Override
 	protected void configureTableViewer(TableViewer viewer) {
 		//viewer.setSorter(new JavaElementLineSorter());
-		viewer.setLabelProvider(new PrologSearchLabelProvider(this));
+		//viewer.setLabelProvider(new PrologSearchLabelProvider(this));
+		viewer.setLabelProvider(new DecoratingLabelProvider(new PrologSearchLabelProvider(this), 
+				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider= new PrologSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
 	}
@@ -121,7 +127,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
 		
 		PLEditor editor= null;
-		PredicateElement element = (PredicateElement)match.getElement();
+		SearchPredicateElement element = (SearchPredicateElement)match.getElement();
 		IFile file = element.getFile();
 		PrologMatch prologMatch = (PrologMatch)match;
 		if(prologMatch.isLineLocation()) {
@@ -164,6 +170,9 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 			element = selection.getFirstElement();
 		if ((element != null) && (element instanceof PrologMatch)) {
 			return (PrologMatch)element;
+		}
+		if ((element != null) && (element instanceof SearchPredicateElement))  {
+			return ((SearchPredicateElement)element).getFirstOccurence();
 		}
 		return super.getCurrentMatch();
 	}

@@ -23,13 +23,13 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 	protected String getCategoryDescription(String module, String functor, int arity, String category)  {
 		StringBuffer description = new StringBuffer(category);
-		description.append(" of ");
-		description.append(functor);
-		description.append("/");
-		description.append(arity);
-		description.append(" from '");
-		description.append(module);
-		description.append("'");
+//		description.append(" of ");
+//		description.append(functor);
+//		description.append("/");
+//		description.append(arity);
+//		description.append(" from '");
+//		description.append(module);
+//		description.append("'");
 		return description.toString();
 	}
 

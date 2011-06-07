@@ -74,7 +74,7 @@ public class PrologOutlineQuery {
 			
 			StringBuffer occuranceLabel = calculateOccuranceLabel(line, type,
 					properties);
-			prologPredicate.addOccurance(new PredicateOccuranceElement(occuranceLabel.toString(), line, type, prologPredicate));
+			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), line, type, prologPredicate));
 		}
 
 		return modules;
