@@ -325,6 +325,23 @@
             label="Prolog search">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            class="org.cs3.pdt.internal.PrologTreeElementLabelDecorator"
+            icon="icons/sample.gif"
+            id="pdt. "
+            label="label"
+            lightweight="true"
+            location="TOP_RIGHT"
+            state="false">
+         <enablement>
+            <objectClass
+                  name="org.cs3.pl.metadata.Predicate">
+            </objectClass>
+         </enablement>
+      </decorator>
+   </extension>
 <!--	
  <extension
        point="org.eclipse.ui.menus">

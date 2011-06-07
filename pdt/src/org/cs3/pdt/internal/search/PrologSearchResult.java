@@ -75,7 +75,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private PrologSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
-	private HashMap<IFile,PredicateElement[]> elementCache = new HashMap<IFile, PredicateElement[]>();
+	private HashMap<IFile,SearchPredicateElement[]> elementCache = new HashMap<IFile, SearchPredicateElement[]>();
 	private HashSet<IFile> fileCache = new HashSet<IFile>();
 
 	/**
@@ -100,9 +100,9 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	private String searchType = "Prolog Search";
 	@Override
 	public final String getLabel() {		
-		return searchType + ": " 
-		       + (goal==null ? "oops, goal is null?!" :goal.getModule()+":"+goal.getFunctor()+"/"+goal.getArity())
-		       + " --> " 
+		return searchType + " "
+		       + (goal==null ? "oops, goal is null?!" : goal.getTermString()/*goal.getModule()+":"+goal.getFunctor()+"/"+goal.getArity()*/ )
+		       + " \u2013 "
 		       + getMatchCount() 
 		       + " matches in active Prolog Console";
 	}
@@ -177,11 +177,11 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		if (element instanceof IFile){
 			return (IFile) element;
 		}
-		if (element instanceof PredicateElement){
-			return ((PredicateElement) element).getFile();
+		if (element instanceof SearchPredicateElement){
+			return ((SearchPredicateElement) element).getFile();
 		}
 		if(element instanceof Match){
-			return ((PredicateElement) ((Match) element).getElement()).getFile();
+			return ((SearchPredicateElement) ((Match) element).getElement()).getFile();
 		}
 		return null;
 	}
@@ -190,8 +190,8 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		Object[] elements = getElements();
 		List<PrologMatch> matches = new ArrayList<PrologMatch>();
 		for (int i=0; i< elements.length; i++) {
-			if (elements[i] instanceof PredicateElement){
-				PredicateElement elem = (PredicateElement)elements[i];
+			if (elements[i] instanceof SearchPredicateElement){
+				SearchPredicateElement elem = (SearchPredicateElement)elements[i];
 				Match[] matchesForElem = getMatches(elem);
 				for (int j =0; j< matchesForElem.length; j++) {
 					if (matchesForElem[j] instanceof PrologMatch)
@@ -202,18 +202,18 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
 	}
 
-	public PredicateElement[] getElements(IFile file) {
-		PredicateElement[] children = elementCache.get(file);
+	public SearchPredicateElement[] getElements(IFile file) {
+		SearchPredicateElement[] children = elementCache.get(file);
 		if(children==null){
 			Object[] elms = getElements();
-			Vector<PredicateElement> v = new Vector<PredicateElement>();
+			Vector<SearchPredicateElement> v = new Vector<SearchPredicateElement>();
 			for (int i = 0; i < elms.length; i++) {
-				PredicateElement elm = (PredicateElement) elms[i];
+				SearchPredicateElement elm = (SearchPredicateElement) elms[i];
 				if(elm.getFile().equals(file)){
 					v.add(elm);
 				}
 			}
-			children = v.toArray(new PredicateElement[v.size()]);
+			children = v.toArray(new SearchPredicateElement[v.size()]);
 			elementCache.put(file, children);
 		}
 		return children;
@@ -236,7 +236,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	
 	@Override
 	public void addMatch(Match match) {
-		PredicateElement elm = (PredicateElement) match.getElement();
+		SearchPredicateElement elm = (SearchPredicateElement) match.getElement();
 		fileCache.add(elm.getFile());
 		super.addMatch(match);
 	}

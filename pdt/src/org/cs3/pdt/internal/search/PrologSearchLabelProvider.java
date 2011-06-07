@@ -39,7 +39,7 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 		} else if (element instanceof SearchResultCategory) {
 			ISharedImages sharedImagaes = PlatformUI.getWorkbench().getSharedImages();
 			return sharedImagaes.getImage(ISharedImages.IMG_OBJ_ADD);
-		} else if(element instanceof PredicateElement){
+		} else if(element instanceof SearchPredicateElement){
 			return setPredicateImage(element);
 		} 
 		return null;
@@ -64,9 +64,10 @@ public class PrologSearchLabelProvider implements ILabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		if(element instanceof PredicateElement){
-			PredicateElement pe = ((PredicateElement)element);
+		if(element instanceof SearchPredicateElement){
+			SearchPredicateElement pe = ((SearchPredicateElement)element);
 			String label = pe.getLabel();
+//			int count = pe.numberOfOccurences();
 			int count = this.prologSearchResultPage.getDisplayedMatchCount(element);
 			String plural = (count==1)?"":"es";
 			return label+ " (" + count +" match"+plural+")";

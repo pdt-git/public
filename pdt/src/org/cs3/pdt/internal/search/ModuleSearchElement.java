@@ -11,7 +11,7 @@ public class ModuleSearchElement implements PDTTreeElement {
 	private IFile file;
 	private List<PrologMatch> element = new ArrayList<PrologMatch>();
 //	Set<FileTreeElement> files = new HashSet<FileTreeElement>();
-	List<PredicateElement> predicates = new ArrayList<PredicateElement>();
+	List<SearchPredicateElement> predicates = new ArrayList<SearchPredicateElement>();
 	
 	public ModuleSearchElement(String name) {
 		this.name = name;
@@ -19,7 +19,7 @@ public class ModuleSearchElement implements PDTTreeElement {
 	
 	public String getLabel() {
 		StringBuffer label = new StringBuffer(name);
-		label.append(" (");
+		label.append(" (in ");
 		label.append(file.getFullPath().toString());
 //		label.append(file.getLocation());
 		label.append(")");
@@ -29,7 +29,7 @@ public class ModuleSearchElement implements PDTTreeElement {
 	public void addElement(PrologMatch elem) {
 		element.add(elem);
 		
-		PredicateElement predicate = (PredicateElement)elem.getElement();
+		SearchPredicateElement predicate = (SearchPredicateElement)elem.getElement();
 		predicates.add(predicate);
 		
 		file = predicate.getFile();
@@ -49,7 +49,7 @@ public class ModuleSearchElement implements PDTTreeElement {
 
 	@Override
 	public Object[] getChildren() {
-		PredicateElement[] unsortedFiles = predicates.toArray(new PredicateElement[predicates.size()]);
+		SearchPredicateElement[] unsortedFiles = predicates.toArray(new SearchPredicateElement[predicates.size()]);
 //		FileTreeElement[] unsortedFiles = files.toArray(new FileTreeElement[files.size()]);
 		return unsortedFiles;
 		

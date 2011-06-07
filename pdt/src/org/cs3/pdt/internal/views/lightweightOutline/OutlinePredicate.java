@@ -14,7 +14,7 @@ public class OutlinePredicate extends Predicate implements PDTTreeElement{
 		super(module, functor, arity, properties);
 	}
 	
-	public void addOccurance(PredicateOccuranceElement occurance) {
+	public void addOccurence(PredicateOccuranceElement occurance) {
 		occurences.add(occurance);
 	}
 
