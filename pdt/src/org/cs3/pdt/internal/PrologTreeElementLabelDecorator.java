@@ -1,7 +1,7 @@
 package org.cs3.pdt.internal;
 
 
-import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.PDTTreeElement;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILabelProviderListener;

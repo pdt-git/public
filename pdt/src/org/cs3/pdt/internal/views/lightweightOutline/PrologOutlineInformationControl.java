@@ -15,6 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.cs3.pdt.internal.queries.PDTOutlineQuery;
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicate;
+import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pdt.internal.views.PrologFileContentModel;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.eclipse.jface.action.IMenuManager;
@@ -145,7 +149,7 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 	public void setInput(Object information) {
 		if(information instanceof String) {
 			String fileName = (String)information;
-			Map<String, ModuleElement> modules = PrologOutlineQuery.getProgramElementsForFile(fileName/*, getShell()*/);
+			Map<String, OutlineModuleElement> modules = PDTOutlineQuery.getProgramElementsForFile(fileName/*, getShell()*/);
 
 			PrologSourceFileModel model = new PrologSourceFileModel(modules);
 			inputChanged(model, modules.size()>0?modules.get(0):null);

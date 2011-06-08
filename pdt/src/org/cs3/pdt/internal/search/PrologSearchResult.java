@@ -52,6 +52,12 @@ import java.util.List;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.queries.PDTSearchQuery;
+import org.cs3.pdt.internal.structureElements.SearchModuleElement;
+import org.cs3.pdt.internal.structureElements.SearchModuleElementCreator;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
+import org.cs3.pdt.internal.structureElements.SearchResultCategory;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -72,7 +78,7 @@ import org.eclipse.ui.part.FileEditorInput;
 public class PrologSearchResult extends AbstractTextSearchResult implements
 		IEditorMatchAdapter, IFileMatchAdapter {
 
-	private PrologSearchQuery query;
+	private PDTSearchQuery query;
 	private Goal goal;
 	private final Match[] EMPTY_ARR = new Match[0];
 	private HashMap<IFile,SearchPredicateElement[]> elementCache = new HashMap<IFile, SearchPredicateElement[]>();
@@ -82,7 +88,7 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 	 * @param query
 	 * @param queryString
 	 */
-	public PrologSearchResult(PrologSearchQuery query, Goal goal) {
+	public PrologSearchResult(PDTSearchQuery query, Goal goal) {
 		this.query = query;
 		this.goal = goal;
 	}
@@ -186,20 +192,20 @@ public class PrologSearchResult extends AbstractTextSearchResult implements
 		return null;
 	}
 	
-	public ModuleSearchElement[] getModules(){
+	public SearchModuleElement[] getModules(){
 		Object[] elements = getElements();
-		List<PrologMatch> matches = new ArrayList<PrologMatch>();
+		List<PDTMatch> matches = new ArrayList<PDTMatch>();
 		for (int i=0; i< elements.length; i++) {
 			if (elements[i] instanceof SearchPredicateElement){
 				SearchPredicateElement elem = (SearchPredicateElement)elements[i];
 				Match[] matchesForElem = getMatches(elem);
 				for (int j =0; j< matchesForElem.length; j++) {
-					if (matchesForElem[j] instanceof PrologMatch)
-						matches.add((PrologMatch)matchesForElem[j]);
+					if (matchesForElem[j] instanceof PDTMatch)
+						matches.add((PDTMatch)matchesForElem[j]);
 				}
 			}
 		}
-		return ModuleSearchElementCreator.getModuleDummiesForMatches(matches);
+		return SearchModuleElementCreator.getModuleDummiesForMatches(matches);
 	}
 
 	public SearchPredicateElement[] getElements(IFile file) {

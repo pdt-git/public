@@ -1,6 +1,9 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import org.cs3.pdt.internal.ImageRepository;
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
+import org.cs3.pdt.internal.structureElements.PDTTreeElement;
+import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -33,7 +36,7 @@ class OutlineLabelProvider extends LabelProvider implements IColorProvider/*, IS
 			}
 			return ImageRepository.getImage(ImageRepository.PE_PROTECTED);
 		}
-		if(element instanceof ModuleElement) {
+		if(element instanceof OutlineModuleElement) {
 			//			ModuleOutlineElement module = (ModuleOutlineElement)element;
 //			if(module.hasChildren())
 				return ImageRepository.getImage(ImageRepository.PACKAGE);

@@ -3,7 +3,7 @@
  */
 package org.cs3.pdt.internal.views;
 
-import org.cs3.pdt.internal.views.lightweightOutline.PredicateOccuranceElement;
+import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 

@@ -54,7 +54,11 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.queries.PDTOutlineQuery;
 import org.cs3.pdt.internal.search.PrologSearchLabelProvider;
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicate;
+import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pdt.internal.views.HideDirectivesFilter;
 import org.cs3.pdt.internal.views.HidePrivatePredicatesFilter;
 import org.cs3.pdt.internal.views.HideSubtermsFilter;
@@ -118,7 +122,7 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		viewer.addSelectionChangedListener(this);
 		
 		
-		model = new PrologSourceFileModel(new HashMap<String,ModuleElement>());
+		model = new PrologSourceFileModel(new HashMap<String,OutlineModuleElement>());
 		
 		viewer.setInput(model);
 		
@@ -165,11 +169,11 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	public void setInput(Object information) {
 		String fileName = editor.getPrologFileName();
 		
-		Map<String,ModuleElement> modules;
+		Map<String,OutlineModuleElement> modules;
 		TreeViewer treeViewer = getTreeViewer();
 		if (fileName != "") {
 			try {			
-				modules = PrologOutlineQuery.getProgramElementsForFile(fileName);
+				modules = PDTOutlineQuery.getProgramElementsForFile(fileName);
 				model.update(modules);
 				
 				treeViewer.setInput(model);

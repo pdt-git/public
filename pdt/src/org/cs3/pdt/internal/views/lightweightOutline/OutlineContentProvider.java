@@ -1,5 +1,6 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import org.cs3.pdt.internal.structureElements.PDTTreeElement;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;

@@ -1,9 +1,8 @@
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.structureElements;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.core.resources.IFile;
 
 public class FileTreeElement implements PDTTreeElement{

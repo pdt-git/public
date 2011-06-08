@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.internal.queries.CategorizedDefinitionsSearchQuery;
+import org.cs3.pdt.internal.queries.PDTSearchQuery;
+import org.cs3.pdt.internal.queries.ReferencesSearchQueryDirect;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
@@ -134,7 +137,7 @@ public class PrologSearchPage extends DialogPage implements ISearchPage {
 		int searchFor= data.getSearchFor();
 		int limitTo= data.getLimitTo();
 	
-		PrologSearchQuery searchQuery;
+		PDTSearchQuery searchQuery;
 		
 		Goal goal;
 		if (searchFor == PREDICATE)

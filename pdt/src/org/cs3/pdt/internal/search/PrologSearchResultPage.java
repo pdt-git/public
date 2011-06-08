@@ -49,6 +49,8 @@ import org.cs3.pdt.PDTUtils;
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
 import org.cs3.pdt.internal.editors.PLEditor;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
@@ -129,7 +131,7 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		PLEditor editor= null;
 		SearchPredicateElement element = (SearchPredicateElement)match.getElement();
 		IFile file = element.getFile();
-		PrologMatch prologMatch = (PrologMatch)match;
+		PDTMatch prologMatch = (PDTMatch)match;
 		if(prologMatch.isLineLocation()) {
 			SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
 			loc.isWorkspacePath = file.isAccessible();
@@ -168,8 +170,8 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 		Object element = null;
 		if (selection.size() > 0)
 			element = selection.getFirstElement();
-		if ((element != null) && (element instanceof PrologMatch)) {
-			return (PrologMatch)element;
+		if ((element != null) && (element instanceof PDTMatch)) {
+			return (PDTMatch)element;
 		}
 		if ((element != null) && (element instanceof SearchPredicateElement))  {
 			return ((SearchPredicateElement)element).getFirstOccurence();
