@@ -45,7 +45,7 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.core.IPrologProject;
-import org.cs3.pdt.internal.search.CategorizedDefinitionsSearchQuery;
+import org.cs3.pdt.internal.queries.CategorizedDefinitionsSearchQuery;
 import org.cs3.pl.metadata.Goal;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;

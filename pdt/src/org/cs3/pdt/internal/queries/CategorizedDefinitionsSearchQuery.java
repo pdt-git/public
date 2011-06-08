@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -8,11 +8,12 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
-public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
+public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 	private Set<String> signatures = new HashSet<String>();
 
 
@@ -23,13 +24,6 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 	protected String getCategoryDescription(String module, String functor, int arity, String category)  {
 		StringBuffer description = new StringBuffer(category);
-//		description.append(" of ");
-//		description.append(functor);
-//		description.append("/");
-//		description.append(arity);
-//		description.append(" from '");
-//		description.append(module);
-//		description.append("'");
 		return description.toString();
 	}
 
@@ -40,15 +34,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		String file = "'"+goal.getFile()+"'";
 		if (goal.getFile().equals(""))
 			file = "OrigFile";
-		
-//		String arity = Integer.toString(goal.getArity());
-//		if (goal.getArity() < 0) 
-//			arity = "Arity";
-//		
-//		String name = "'"+goal.getName()+"'";
-//		if (goal.getName().equals(""))
-//			name = "Predicate";
-		
+
 		String module2 = module;
 		if (module.equals("''"))
 			module2 = "Module";
@@ -63,7 +49,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
+	protected PDTMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
 		String definingModule = (String)m.get("DefiningModule");
 		String functor = (String)m.get("Functor");
@@ -83,7 +69,7 @@ public class CategorizedDefinitionsSearchQuery extends PrologSearchQuery {
 		if(!signatures.contains(signature)){
 			signatures.add(signature);
 
-			PrologMatch match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory);
+			PDTMatch match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory);
 
 			addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
 			return match;

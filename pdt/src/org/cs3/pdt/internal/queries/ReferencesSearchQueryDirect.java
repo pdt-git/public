@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
@@ -17,7 +18,7 @@ import org.eclipse.core.resources.IFile;
  * @author gk
  *
  */
-public class ReferencesSearchQueryDirect extends PrologSearchQuery {
+public class ReferencesSearchQueryDirect extends PDTSearchQuery {
 
 	
 	public ReferencesSearchQueryDirect(PrologInterface pif, Goal goal) {
@@ -56,7 +57,7 @@ public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
+	protected PDTMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
 
 		String module = (String)m.get("RefModule");
@@ -71,7 +72,7 @@ public class ReferencesSearchQueryDirect extends PrologSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get("RefFile"));
 		int line = Integer.parseInt((String) m.get("RefLine"));
 
-		PrologMatch match = createMatch(module, name, arity, file, line, properties, "definition");
+		PDTMatch match = createMatch(module, name, arity, file, line, properties, "definition");
 		return match;
 	}
 	

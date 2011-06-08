@@ -1,12 +1,11 @@
 /**
  * 
  */
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.structureElements;
 
-import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.eclipse.search.ui.text.Match;
 
-public class PrologMatch extends Match implements PDTTreeElement{
+public class PDTMatch extends Match implements PDTTreeElement{
 
 	private String module;
 	private int line=-1;
@@ -14,7 +13,7 @@ public class PrologMatch extends Match implements PDTTreeElement{
 
 	private boolean isLineLocation= false; 
 	
-	public PrologMatch(Object element, int offset, int length, String kind) {
+	public PDTMatch(Object element, int offset, int length, String kind) {
 		super(element, UNIT_LINE, offset, length);
 		this.kind = kind;
 	}

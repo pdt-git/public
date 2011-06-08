@@ -39,7 +39,7 @@
  *   distributed.
  ****************************************************************************/
 
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -49,6 +49,10 @@ import java.util.Map;
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.search.PrologSearchResult;
+import org.cs3.pdt.internal.structureElements.CategoryHandler;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
 import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.common.Util;
@@ -66,14 +70,14 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 
-public abstract class PrologSearchQuery implements ISearchQuery {
+public abstract class PDTSearchQuery implements ISearchQuery {
 
 	private Goal goal;
 	private PrologSearchResult result;
 	private PrologInterface pif;
 	private CategoryHandler categoryHandler;
 
-	public PrologSearchQuery(PrologInterface pif, Goal goal) {
+	public PDTSearchQuery(PrologInterface pif, Goal goal) {
 		this.goal = goal;
 		this.pif=pif;
 		result = new PrologSearchResult(this, goal);
@@ -173,7 +177,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 	 */
 	private void processFoundClauses(List<Map<String, Object>> clauses)
 	throws IOException, NumberFormatException {
-		PrologMatch match;
+		PDTMatch match;
 		for (Iterator<Map<String,Object>> iterator = clauses.iterator(); iterator.hasNext();) {
 			Map<String,Object> m = iterator.next();
 			Debug.info(m.toString());
@@ -185,12 +189,12 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 
 	}
 	
-	protected abstract PrologMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
+	protected abstract PDTMatch constructPrologMatchForAResult(Map<String,Object> m) throws IOException;
 
-	protected PrologMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties, String searchCategory) {
+	protected PDTMatch createMatch(String module, String name, int arity, IFile file, int line, List<String> properties, String searchCategory) {
 		SearchPredicateElement pe = new SearchPredicateElement(file, module, name, arity, properties);
 		
-		PrologMatch match = new PrologMatch(pe, line, 0, searchCategory); 
+		PDTMatch match = new PDTMatch(pe, line, 0, searchCategory); 
 		match.setLine(line);
 		match.setModule(pe.getModule());
 		
@@ -252,7 +256,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 			int arity = Integer.getInteger(callerParts[1]);
 			
 			SearchPredicateElement pe = new SearchPredicateElement(file, type, name, arity);
-			PrologMatch match = new PrologMatch(pe, start, (end-start), "definition"); 
+			PDTMatch match = new PDTMatch(pe, start, (end-start), "definition"); 
 			match.setLine(start);
 			match.setModule(pe.getModule());
 
@@ -289,7 +293,7 @@ public abstract class PrologSearchQuery implements ISearchQuery {
 		return categoryHandler;
 	}
 	
-	public void addCategoryEntry(PrologMatch match, String categoryName){
+	public void addCategoryEntry(PDTMatch match, String categoryName){
 		if (categoryHandler == null) {
 			categoryHandler = new CategoryHandler();
 		}

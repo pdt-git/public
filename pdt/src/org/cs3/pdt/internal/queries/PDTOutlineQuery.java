@@ -1,4 +1,4 @@
-package org.cs3.pdt.internal.views.lightweightOutline;
+package org.cs3.pdt.internal.queries;
 
 import java.util.HashMap;
 import java.util.List;
@@ -6,14 +6,17 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.console.PrologConsolePlugin;
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
+import org.cs3.pdt.internal.structureElements.OutlinePredicate;
+import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
 import org.cs3.pl.common.Debug;
 import org.cs3.pl.console.prolog.PrologConsole;
 import org.cs3.pl.prolog.PrologSession;
 
 
-public class PrologOutlineQuery {
+public class PDTOutlineQuery {
 
-	public static Map<String, ModuleElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {	
+	public static Map<String, OutlineModuleElement> getProgramElementsForFile(String fileName/*, Shell shell*/) {	
 		PrologSession session=null;
 		try {
 			PrologConsole console = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole();
@@ -24,7 +27,7 @@ public class PrologOutlineQuery {
 				//				messageBox.setText("Outline");
 				//				messageBox.setMessage("Cannot open outline, no active Prolog Console found.");
 				//				messageBox.open();
-				return new HashMap<String, ModuleElement>();
+				return new HashMap<String, OutlineModuleElement>();
 			}
 			session = console.getPrologInterface().getSession();
 
@@ -39,12 +42,12 @@ public class PrologOutlineQuery {
 		} finally {
 			if(session!=null)session.dispose();
 		}
-		return new HashMap<String, ModuleElement>();
+		return new HashMap<String, OutlineModuleElement>();
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, ModuleElement> extractResults(List<Map<String, Object>> result) {
-		Map<String, ModuleElement> modules= new HashMap<String, ModuleElement>();	
+	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result) {
+		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		String module = "user";
 		for (Map<String, Object> predicate : result) {
 			module=(String)predicate.get("Entity");
@@ -59,9 +62,9 @@ public class PrologOutlineQuery {
 				properties = (Vector<String>)prop;
 			}				
 			if (!modules.containsKey(module)) {
-				modules.put(module, new ModuleElement(module, kindOfEntity));
+				modules.put(module, new OutlineModuleElement(module, kindOfEntity));
 			}
-			ModuleElement currentModuleElem = modules.get(module);
+			OutlineModuleElement currentModuleElem = modules.get(module);
 			String label = module+":"+name+"/"+arity;
 
 			OutlinePredicate prologPredicate;

@@ -1,10 +1,9 @@
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.structureElements;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import org.cs3.pdt.internal.views.lightweightOutline.PDTTreeElement;
 import org.cs3.pl.metadata.Predicate;
 import org.eclipse.core.resources.IFile;
 
@@ -16,7 +15,7 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 	private static final long serialVersionUID = 8822257720982382862L;
 	private IFile file;          // file that contains the selected literal (non-null)       
 	private PDTTreeElement parent;
-	private List<PrologMatch> occurences = new ArrayList<PrologMatch>();
+	private List<PDTMatch> occurences = new ArrayList<PDTMatch>();
 	
 	public SearchPredicateElement(IFile file, String module, String predicateName, int arity, List<String> properties) {
 		super(module,predicateName,arity, properties);
@@ -32,7 +31,7 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 		return file;
 	} 
 	
-	public void addOccurence(PrologMatch occurance) {
+	public void addOccurence(PDTMatch occurance) {
 		occurences.add(occurance);
 	}
 
@@ -55,10 +54,10 @@ public class SearchPredicateElement extends Predicate implements PDTTreeElement{
 		return occurences.size();
 	}
 	
-	public PrologMatch getFirstOccurence() {
-		PrologMatch firstOccurance = occurences.get(0);
+	public PDTMatch getFirstOccurence() {
+		PDTMatch firstOccurance = occurences.get(0);
 		int firstLine = firstOccurance.getLine();
-		for (PrologMatch occurence : occurences) {
+		for (PDTMatch occurence : occurences) {
 			int line = occurence.getLine();
 			if (line < firstLine) {
 				firstLine = line;

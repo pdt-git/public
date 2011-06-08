@@ -1,17 +1,18 @@
 package org.cs3.pdt.internal.views.lightweightOutline;
 
 import java.util.Map;
+import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 
 
 public class PrologSourceFileModel {
 
-	private Map<String, ModuleElement> modules;
+	private Map<String, OutlineModuleElement> modules;
 	
-	public PrologSourceFileModel(Map<String, ModuleElement> modules) {
+	public PrologSourceFileModel(Map<String, OutlineModuleElement> modules) {
 		this.modules = modules;
 	}
 	
-	public void update(Map<String,ModuleElement> modules){
+	public void update(Map<String,OutlineModuleElement> modules){
 		this.modules = modules;
 	}
 	

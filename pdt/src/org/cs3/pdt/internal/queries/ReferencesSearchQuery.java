@@ -1,15 +1,16 @@
-package org.cs3.pdt.internal.search;
+package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
+import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
-public class ReferencesSearchQuery extends PrologSearchQuery {
+public class ReferencesSearchQuery extends PDTSearchQuery {
 	private static final String LINE_VAR = "Line";
 	private static final String ARITY_VAR = "Arity";
 	private static final String FUNCTOR_VAR = "Name";
@@ -36,7 +37,7 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 
 	
 	@Override
-	protected PrologMatch constructPrologMatchForAResult(Map<String, Object> m)
+	protected PDTMatch constructPrologMatchForAResult(Map<String, Object> m)
 	throws IOException {
 		String module = (String)m.get(MODULE_VAR);
 		String name = (String)m.get(FUNCTOR_VAR);
@@ -45,7 +46,7 @@ public class ReferencesSearchQuery extends PrologSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
 		int line = Integer.parseInt((String) m.get(LINE_VAR));
 
-		PrologMatch match = createMatch(module, name, arity, file, line, new Vector<String>(), "definition");
+		PDTMatch match = createMatch(module, name, arity, file, line, new Vector<String>(), "definition");
 		return match;
 	}
 	

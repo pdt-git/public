@@ -1,14 +1,14 @@
-package org.cs3.pdt.internal.views.lightweightOutline;
+package org.cs3.pdt.internal.structureElements;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ModuleElement implements PDTTreeElement{
+public class OutlineModuleElement implements PDTTreeElement{
 	private String name;
 	private String kind;
 	private Map<String, OutlinePredicate> predicates= new HashMap<String,OutlinePredicate>();
 	
-	public ModuleElement(String name, String kindOfEntity) {
+	public OutlineModuleElement(String name, String kindOfEntity) {
 		this.name = name;
 	}
 	
