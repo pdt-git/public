@@ -37,7 +37,7 @@ public class ValueReader {
 	}
 
 	private Object doReading(int flags)
-			throws IOException {
+	throws IOException {
 		Object value=null;
 		prepeareEverythingForNextReading();
 		char lastReadCharacter = readFirstInterestingCharacter(reader);
@@ -141,7 +141,7 @@ public class ValueReader {
 	}
 
 	private char skipWhiteSpace(BufferedReader reader) throws IOException {
-		reader.mark(1);
+		reader.mark(8); // if set to low, the socket connection may break. Be carefull!!!
 		int readCharacter = reader.read();
 		while (readCharacter != EOF_CHAR && Character.isWhitespace((char) readCharacter)) {
 			reader.mark(1);
