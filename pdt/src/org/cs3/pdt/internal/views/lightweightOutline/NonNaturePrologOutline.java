@@ -55,7 +55,6 @@ import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
-import org.cs3.pdt.internal.search.PrologSearchLabelProvider;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
@@ -192,17 +191,19 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
-
 		Object elem = getFirstSelectedElement(event);
+		
+		int line;
 		if ((elem != null) && (elem instanceof OutlinePredicate)) { 
 			OutlinePredicate predicate = (OutlinePredicate)elem;
-			editor.gotoLine(predicate.getLine());
-		}
-		if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
+			line = predicate.getLine();
+		} else if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
 			PredicateOccuranceElement occurance = (PredicateOccuranceElement)elem;
-			editor.gotoLine(occurance.getLine());
+			line = occurance.getLine();
+		} else {
+			return;
 		}
-
+		editor.gotoLine(line);
 	}
 
 	private Object getFirstSelectedElement(final SelectionChangedEvent event) {
