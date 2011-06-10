@@ -103,6 +103,11 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 
 	private int arity;
 
+	public SourceLocation(String file, boolean isWorkspacePath) {
+		this.file = file;
+		this.isWorkspacePath = isWorkspacePath;
+	}
+
 	public boolean isLineLocation() {
 		return isLineLocation;
 	}
@@ -121,11 +126,6 @@ public final class SourceLocation implements Serializable, Comparable<SourceLoca
 		this.line = line;
 	}
 
-	public SourceLocation(String file, boolean isWorkspacePath) {
-		this.file = file;
-		this.isWorkspacePath = isWorkspacePath;
-	}
-	
 	@Override
 	public String toString() {
 		return file + "/" + getOffset();
