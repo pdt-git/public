@@ -92,17 +92,17 @@ entity_property(Protocol, protocol, Property) :-
 % In mode ++? Line can be any line number that is between the start
 % and end line of Entity.
 % In mode +-? Line is the start line of Entity.
-entity_of_file(FullPath,Line,Entity):-
+entity_of_file(FullPath, Line, Entity) :-
 	nonvar(Line),
 	!,
-	pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt),
+	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Begin, End)),
 	Begin =< Line, End >= Line.
 
-entity_of_file(FullPath,Line,Entity):-
-	pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt),
+entity_of_file(FullPath, Line, Entity) :-
+	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Line, _)).
@@ -327,15 +327,15 @@ assert_in_entity(Entity,Head,Body, [Opt]) :-
  * meanwhile but it sometimes changed, so for safety we prefer to
  * enforce it ourselves.
  */
-clause_in_entity(Entity,Head	)   :- defined_in_entity(Entity, Head), clause( :(Entity,Head),_ ) .
+clause_in_entity(Entity,Head	) :- defined_in_entity(Entity, Head), clause( :(Entity,Head),_ ) .
 clause_in_entity(Entity,Head,Body) :- defined_in_entity(Entity, Head), clause( :(Entity,Head),Body ) .
 
-retract_in_entity(Entity,Head   )  :- defined_in_entity(Entity, Head), retract( :(Entity,Head) ) .
-retract_in_entity(Entity,Head,Body):- defined_in_entity(Entity, Head), retract( :(Entity,':-'(Head,Body)) ) .
+retract_in_entity(Entity,Head   ) :- defined_in_entity(Entity, Head), retract( :(Entity,Head) ) .
+retract_in_entity(Entity,Head,Body) :- defined_in_entity(Entity, Head), retract( :(Entity,':-'(Head,Body)) ) .
 
-retractall_in_entity(Entity,Head)  :- defined_in_entity(Entity, Head) -> retractall( :(Entity,Head) ) ; true.
+retractall_in_entity(Entity,Head) :- defined_in_entity(Entity, Head) -> retractall( :(Entity,Head) ) ; true.
 
-listing_in_entity(Entity,Goal)  :- listing( Entity:Goal ).
+listing_in_entity(Entity,Goal) :- listing( Entity:Goal ).
 
 /*
  * Copy all clauses whose head unifies Arg3 from module Arg1 to
