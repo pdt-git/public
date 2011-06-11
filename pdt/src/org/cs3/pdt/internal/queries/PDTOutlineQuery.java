@@ -90,10 +90,13 @@ public class PDTOutlineQuery {
 		occuranceLabel.append(" (");
 		occuranceLabel.append(type);
 		if (type.equals("multifile")) {
-			occuranceLabel.append(" @ ");
 			for (String property : properties) {
 				if (property.startsWith("from(")) {
+					occuranceLabel.append(" @ ");
 					occuranceLabel.append((String) property.subSequence(5, property.length()-1));
+				} else if (property.startsWith("for(")) {
+					occuranceLabel.append(" @ ");
+					occuranceLabel.append((String) property.subSequence(4, property.length()-1));
 				}
 			}
 		}
