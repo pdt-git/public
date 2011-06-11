@@ -4,7 +4,7 @@
 /*
  * This file contains predicates for working with SWI-Prolog modules.
  */
-:- object( utils4entities).
+:- object(utils4entities).
 
 :- public([
 	entity_of_file/3,               % File, Line, Entity
