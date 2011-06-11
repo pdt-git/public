@@ -32,7 +32,7 @@
 	errors_and_warnings/4
 ]).
 
-:- uses(list, [member/2]).
+:- uses(list, [length/2, member/2]).
 :- uses(meta, [map/3::maplist/3]).
 :- uses(utils4entities, [entity_of_file/3, entity_property/3]).
 
@@ -63,7 +63,7 @@
 % Logtalk
 pdt_reload(FullPath):-
 	writeln(FullPath),
-	pdtplugin:split_file_path(FullPath, Directory,_,BaseName,lgt),
+	pdtplugin:split_file_path(FullPath, Directory, _, BaseName, lgt),
 	setup_call_cleanup(
 		working_directory(Current, Directory),     % SWI-Prolog
 		logtalk_load(BaseName),                    % Logtalk library
@@ -128,9 +128,9 @@ search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor
 
 :- multifile(pdtplugin:results_category_label/2).
 
-pdtplugin:results_category_label(declaration, 'Visible declaration' ).
-pdtplugin:results_category_label(definition, 'Visible definition' ).
-pdtplugin:results_category_label(multifile, 'Visible multifile definitions' ).
+pdtplugin:results_category_label(declaration, 'Visible declaration').
+pdtplugin:results_category_label(definition, 'Visible definition').
+pdtplugin:results_category_label(multifile, 'Visible multifile definitions').
 pdtplugin:results_category_label(other, 'Other references').
 
 
@@ -671,14 +671,14 @@ decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
 				\+ specializes_class(This, _) ->
-				This<<predicate_property(Template, declared_in(DeclarationEntity))
+				once(This<<predicate_property(Template, declared_in(DeclarationEntity)))
 			;	create_object(Obj, [instantiates(This)], [], []),
-				Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
+				once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
 				abolish_object(Obj)
 			)
 		;	%current_category(This) ->
 			create_object(Obj, [imports(This)], [], []),
-			Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
+			once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
 			abolish_object(Obj)
 		),
 		entity_property(DeclarationEntity, _, declares(Functor/Arity, Properties)),
@@ -688,17 +688,17 @@ decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
 				\+ specializes_class(This, _) ->
-				This<<predicate_property(Template, declared_in(DeclarationEntity)),
-				This<<predicate_property(Template, defined_in(Primary))
+				once(This<<predicate_property(Template, declared_in(DeclarationEntity))),
+				once(This<<predicate_property(Template, defined_in(Primary)))
 			;	create_object(Obj, [instantiates(This)], [], []),
-				Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
-				Obj<<predicate_property(Template, defined_in(Primary)),
+				once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+				once(Obj<<predicate_property(Template, defined_in(Primary))),
 				abolish_object(Obj)
 			)
 		;	%current_category(This) ->
 			create_object(Obj, [imports(This)], [], []),
-			Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
-			Obj<<predicate_property(Template, defined_in(Primary)),
+			once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+			once(Obj<<predicate_property(Template, defined_in(Primary))),
 			abolish_object(Obj)
 		),
 		entity_property(Primary, _, defines(Functor/Arity, Properties0)),
@@ -725,9 +725,9 @@ decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prop
 	(	% declaration
 		(	\+ instantiates_class(This, _),
 			\+ specializes_class(This, _) ->
-			This<<predicate_property(Template, declared_in(Entity))
+			once(This<<predicate_property(Template, declared_in(Entity)))
 		;	create_object(Obj, [instantiates(This)], [], []),
-			Obj<<predicate_property(Template, declared_in(Entity)),
+			once(Obj<<predicate_property(Template, declared_in(Entity))),
 			abolish_object(Obj)
 		),
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
@@ -735,7 +735,7 @@ decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prop
 	;	% definition
 		findall(Category, imports_category(This, Category), Categories),
 		create_object(Obj, [imports(Categories)], [], []),
-		Obj<<predicate_property(Template, defined_in(Primary)),
+		once(Obj<<predicate_property(Template, defined_in(Primary))),
 		abolish_object(Obj),
 		(	% local definitions
 			Entity = Primary,
@@ -755,10 +755,10 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 	functor(Predicate, Functor, Arity),
 	functor(Template, Functor, Arity),
 	(	current_object(This) ->
-		This<<predicate_property(Template, redefined_from(Entity))
+		once(This<<predicate_property(Template, redefined_from(Entity)))
 	;	%current_category(This) ->
 		create_object(Obj, [imports(This)], [], []),
-		Obj<<predicate_property(Template, redefined_from(Entity)),
+		once(Obj<<predicate_property(Template, redefined_from(Entity))),
 		abolish_object(Obj)
 	),
 	entity_property(Entity, Kind, defines(Functor/Arity, Properties)),
@@ -790,7 +790,7 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
 				\+ specializes_class(This, _) ->
-				This<<predicate_property(Template, declared_in(Entity))
+				once(This<<predicate_property(Template, declared_in(Entity)))
 			;	create_object(Obj, [instantiates(This)], [], []),
 				once(Obj<<predicate_property(Template, declared_in(Entity))),
 				abolish_object(Obj)
