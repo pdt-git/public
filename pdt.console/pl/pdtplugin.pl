@@ -94,7 +94,7 @@ pdt_reload(File):-
     logtalk_adapter::pdt_reload(File).
     
 pdt_reload(File):-
-    writeln(File),
+    write(File), nl,
     make:reload_file(File).  % SWI Prolog library
 
 
@@ -231,14 +231,14 @@ visibility(local, ContextModule,Name,Arity,DeclModule) :-
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
         
-find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine).
 
 
 % The second argument is just an atom contianing the string representation of the term:     
-find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
     atom_to_term(TermString,Term,_Bindings),
     find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine).
  
@@ -253,7 +253,7 @@ find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
     !,
     Line=1.
     
-find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
     find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
     primary_location(Locations,DefiningModule,MainFile,FirstLine).
 
@@ -312,7 +312,7 @@ primary_location(Locations,_,File,FirstLine) :-
 %
 % Called from PrologOutlineInformationControl.java
 
-find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList):-
+find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
@@ -350,17 +350,17 @@ find_definition_contained_in(File, Module, module, Functor, Arity, definition, L
 % <Prefix> specifies the prefix of the predicate
 % <Module> specifies the module associated to the file.
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
     split_file_path(EnclFile, _Directory,_FileName,_,lgt),
     !,
     logtalk_adapter::find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help).
 
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
     \+ atom(EnclFile),
     throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
 	setof(
 	   (Name,Arity),
 	   Prefix^Module^
@@ -384,16 +384,16 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 	),
 	predicate_manual_entry(Module,Name,Arity,Help).
 
-find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc'):-
+find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc') :-
     var(EnclModule),
 	current_module(Name),
     atom_concat(Prefix,_,Name).
 
 
 
-find_pred_(Prefix,Module,Name,Arity,true):-
+find_pred_(Prefix,Module,Name,Arity,true) :-
     ( var(Module)->
-    	not(Prefix == '')
+    	Prefix \== ''
     ; true
     ), % performance tweak:
     current_predicate(Module:Name/Arity),
@@ -401,11 +401,11 @@ find_pred_(Prefix,Module,Name,Arity,true):-
     % rule out used built-ins, like =../2, in case the enclosing module is given (in this case the prefix might be empty):   
     ( nonvar(Module) ->
       ( functor(Term,Name,Arity),
-    	(not(Prefix == '');not(built_in(Term))) )
+    	(Prefix \== ''; \+ built_in(Term)) )
       ; true
     ).
 
-get_declaring_module(EnclFile,Module,Name,Arity):-
+get_declaring_module(EnclFile,Module,Name,Arity) :-
      module_of_file(EnclFile,ContainingModule),
      current_predicate(ContainingModule:Name/Arity),
      functor(Head,Name,Arity),
@@ -448,7 +448,7 @@ predicate_manual_entry(Module, Pred,Arity,Content) :-
 	
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
-gen_html_for_pred_(FileSpec,Functor/Arity,Html):-    
+gen_html_for_pred_(FileSpec,Functor/Arity,Html) :-    
 	doc_file_objects(FileSpec, _File, Objects, FileOptions, []),
 	member(doc(Signature,FilePos,Doc),Objects),
 	(Functor/Arity=Signature;_Module:Functor/Arity=Signature),
@@ -503,13 +503,13 @@ manual_entry(Pred,-1,Content) :-
                 * PROLOG ERROR MESSAGE HOOK         *
                 *************************************/
 
-:- dynamic traced_messages/3.
-:- dynamic warning_and_error_tracing/0.
+:- dynamic(traced_messages/3).
+:- dynamic(warning_and_error_tracing/0).
 
 activate_warning_and_error_tracing :- 
-	assert(warning_and_error_tracing).
+	assertz(warning_and_error_tracing).
 
-deactivate_warning_and_error_tracing:-
+deactivate_warning_and_error_tracing :-
 	retractall(warning_and_error_tracing),
 	retractall(traced_messages(_,_,_)).
  
@@ -521,15 +521,19 @@ deactivate_warning_and_error_tracing:-
 % 
 % @author trho
 %  
+
+:- multifile(user:message_hook/3).
+:- dynamic(user:message_hook/3).
+
 user:message_hook(_Term, Level,Lines) :-
-  warning_and_error_tracing,
-  prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
-  assert(traced_messages(Level, Line,Lines)),
-  fail.
+	warning_and_error_tracing,
+	prolog_load_context(term_position, '$stream_position'(_,Line,_,_,_)),
+	assertz(traced_messages(Level, Line,Lines)),
+	fail.
 
 %% errors_and_warnings(Level,Line,Length,Message) is nondet.
 %
-errors_and_warnings(Level,Line,0,Message):-
+errors_and_warnings(Level,Line,0,Message) :-
     traced_messages(Level, Line,Lines),
 %	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
     new_memory_file(Handle),
@@ -577,7 +581,7 @@ predicates_with_property(Property, _, Predicates) :-
 
 
     	
-predicate_name_with_property_(Module,Name,Property):-
+predicate_name_with_property_(Module,Name,Property) :-
     current_module(Module),
     current_predicate(Module:Name/Arity),
 	Name \= '[]',
@@ -600,7 +604,7 @@ make_duplicate_free_string(AllPredicateNames,Predicates) :-
 % Author: GK, 5 April 2011
 % TODO: Integrate into the editor the ability to show the params as tool tips,
 % e.g. show the metaargument specifications of a metapredicate on mouse over.
-predicates_with_unary_property(Property,Predicates,PropertyArguments):-
+predicates_with_unary_property(Property,Predicates,PropertyArguments) :-
 	setof((Name,Arg),
 	   predicate_name_with_unary_property_(Name,Property,Arg),
 	   PredArgList),
@@ -612,12 +616,8 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments):-
 	string_to_atom(S2,PropertyArguments).
 	   	  
 % helper
-predicate_name_with_unary_property_(Name,Property,Arg):-
+predicate_name_with_unary_property_(Name,Property,Arg) :-
     Property =.. [__F,Arg],
 	predicate_property(_M:Head,Property),
 	functor(Head,Name,_),
 	Name \= '[]'.
-	
-
-
-	
