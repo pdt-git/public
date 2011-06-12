@@ -10,7 +10,7 @@
 	entity_of_file/3,               % File, Line, Entity
 	entity_property/3,
 
-	visible_in_entity/3,	           % Entity, Name, Arity
+	visible_in_entity/3,	        % Entity, Name, Arity
 	declared_in_entity/4,           % Entity, Name, Arity, DeclaringEntity
 	referenced_but_undeclared/3,    % Entity, Name, Arity
 	declared_but_undefined/3,       % Entity, Name, Arity
@@ -182,7 +182,7 @@ referenced_but_undeclared(Object,Name,Arity) :-
 %  defined_in_file(+Entity,+Name,+Arity,+N,?File,?Line) is det
 %
 %  Get the source locations (File and Line) of all clauses
-%  that define Entity:Name/Arity.
+%  that define Entity::Name/Arity.
 %  NOTE: For Logtalk we can only get the first one!
 
 defined_in_file(Entity, Name, Arity, 1, Path, Line) :-
@@ -301,7 +301,7 @@ call_in_entity(Entity,Goal) :-
  */
 assert_in_entity(Entity,Head      ) :- assertz( :(Entity,Head)            ).
 assert_in_entity(Entity,Head,[]   ) :- assertz( :(Entity,Head)            ).
-assert_in_entity(Entity,Head,Body ) :- not(is_list(Body)), !, assertz( :(Entity,':-'(Head,Body)) ).
+assert_in_entity(Entity,Head,Body ) :- \+ is_list(Body), !, assertz( :(Entity,':-'(Head,Body)) ).
 
 assert_in_entity(Entity,Head, []) :-
 	assert_in_entity(Entity,Head ).
