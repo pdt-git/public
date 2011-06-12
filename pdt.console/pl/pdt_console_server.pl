@@ -113,7 +113,7 @@ server_loop_impl(ServerSocket, Options) :-
 	tcp_accept(ServerSocket, Slave, Peer),
 	server_loop_impl_X(ServerSocket,Options,Slave,Peer).
 
-server_loop_impl_X(ServerSocket,_,Slave,_):-
+server_loop_impl_X(ServerSocket,_,Slave,_) :-
 	recorded(pdt_console_server_flag,shutdown,Ref),
 	!,
 	erase(Ref),
@@ -171,14 +171,14 @@ allow(Peer, Options) :-
 % server(-Port)
 %
 % used internally to store information about running servers
-:- dynamic server/1.
+:- dynamic(server/1).
 
 :- at_initialization(mutex_create(pdt_console_server_mux)).
 %:- at_halt(mutex_destroy(pdt_console_server_mux)).
 
 % pdt_current_console_server(-Port, -LockFile).
 % retrieve information about running servers
-pdt_current_console_server(Port):-
+pdt_current_console_server(Port) :-
     with_mutex(pdt_console_server_mux,
 	    server(Port)
     ).
@@ -187,7 +187,7 @@ pdt_current_console_server(Port):-
 % pdt_start_console_server(?TCPPort)
 % starts a new console server.
 % UDPPort is used for sending back a sync when the server is up.
-pdt_start_console_server(Port):-
+pdt_start_console_server(Port) :-
     with_mutex(pdt_console_server_mux,
     	start_server(Port)
     ).
@@ -199,24 +199,24 @@ pdt_stop_console_server:-
     	stop_server
     ).
 
-:- multifile consult_server:pif_shutdown_hook/0.
+:- multifile(consult_server:pif_shutdown_hook/0).
 consult_server:pif_shutdown_hook:-
     pdt_stop_console_server.
 
-start_server(Port):-
-    \+ current_thread(pdt_console_server,_),
+start_server(Port) :-
+    \+ thread_property(_, alias(pdt_console_server)),
     prolog_server(Port, []),
-    assert(server(Port)).
+    assertz(server(Port)).
 
-stop_server:-
+stop_server :-
 	server(Port),
 	!,
 	do_stop_server(Port,_LockFile).
 stop_server.
 
-do_stop_server(Port):-
-	recordz(pdt_console_server_flag,shutdown),
+do_stop_server(Port) :-
+	recordz(pdt_console_server_flag, shutdown),
 	tcp_socket(Socket),
-	tcp_connect(Socket,localhost:Port),
+	tcp_connect(Socket, localhost:Port),
 	tcp_close_socket(Socket),
 	retractall(server(Port)).
