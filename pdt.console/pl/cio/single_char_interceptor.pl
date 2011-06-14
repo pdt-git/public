@@ -41,7 +41,7 @@
 
 :- module(single_char_interceptor,[arch_lib_name/1,sci_install/0, sci_setting/2]).
 
-:- prolog_load_context(directory,A), user:assert(file_search_path(foreign,A)).
+:- prolog_load_context(directory,A), user:assertz(file_search_path(foreign,A)).
 
 :- dynamic sci_stream_args/2.
 
@@ -151,12 +151,12 @@ sci_install:-
     (	sci_stream_args(OrigIn,_)
     ->	throw(sci(allready_wrapped,input,OrigIn))
     ;    cio_create(single_char_interceptor,sci(read,OrigIn,OrigOut),read,In),
-    		assert(sci_stream_args(In,sci(read,OrigIn,OrigOut)))
+    		assertz(sci_stream_args(In,sci(read,OrigIn,OrigOut)))
     	),
     	(	sci_stream_args(OrigOut,_)
     ->	throw(sci(allready_wrapped,output,OrigOut))
     ;    cio_create(single_char_interceptor,sci(write,OrigIn,OrigOut),write,Out),
-    		assert(sci_stream_args(Out,sci(write,OrigIn,OrigOut)))
+    		assertz(sci_stream_args(Out,sci(write,OrigIn,OrigOut)))
     	),
 	set_prolog_IO(In,Out,Out),
     set_stream(In,tty(true)),

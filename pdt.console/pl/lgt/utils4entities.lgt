@@ -4,13 +4,13 @@
 /*
  * This file contains predicates for working with SWI-Prolog modules.
  */
-:- object( utils4entities).
+:- object(utils4entities).
 
 :- public([
 	entity_of_file/3,               % File, Line, Entity
 	entity_property/3,
 
-	visible_in_entity/3,	           % Entity, Name, Arity
+	visible_in_entity/3,	        % Entity, Name, Arity
 	declared_in_entity/4,           % Entity, Name, Arity, DeclaringEntity
 	referenced_but_undeclared/3,    % Entity, Name, Arity
 	declared_but_undefined/3,       % Entity, Name, Arity
@@ -92,17 +92,17 @@ entity_property(Protocol, protocol, Property) :-
 % In mode ++? Line can be any line number that is between the start
 % and end line of Entity.
 % In mode +-? Line is the start line of Entity.
-entity_of_file(FullPath,Line,Entity):-
+entity_of_file(FullPath, Line, Entity) :-
 	nonvar(Line),
 	!,
-	pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt),
+	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Begin, End)),
 	Begin =< Line, End >= Line.
 
-entity_of_file(FullPath,Line,Entity):-
-	pdtplugin:split_file_path(FullPath, Directory,FileName,_,lgt),
+entity_of_file(FullPath, Line, Entity) :-
+	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Line, _)).
@@ -182,7 +182,7 @@ referenced_but_undeclared(Object,Name,Arity) :-
 %  defined_in_file(+Entity,+Name,+Arity,+N,?File,?Line) is det
 %
 %  Get the source locations (File and Line) of all clauses
-%  that define Entity:Name/Arity.
+%  that define Entity::Name/Arity.
 %  NOTE: For Logtalk we can only get the first one!
 
 defined_in_file(Entity, Name, Arity, 1, Path, Line) :-
@@ -301,7 +301,7 @@ call_in_entity(Entity,Goal) :-
  */
 assert_in_entity(Entity,Head      ) :- assertz( :(Entity,Head)            ).
 assert_in_entity(Entity,Head,[]   ) :- assertz( :(Entity,Head)            ).
-assert_in_entity(Entity,Head,Body ) :- not(is_list(Body)), !, assertz( :(Entity,':-'(Head,Body)) ).
+assert_in_entity(Entity,Head,Body ) :- \+ is_list(Body), !, assertz( :(Entity,':-'(Head,Body)) ).
 
 assert_in_entity(Entity,Head, []) :-
 	assert_in_entity(Entity,Head ).
@@ -327,15 +327,15 @@ assert_in_entity(Entity,Head,Body, [Opt]) :-
  * meanwhile but it sometimes changed, so for safety we prefer to
  * enforce it ourselves.
  */
-clause_in_entity(Entity,Head	)   :- defined_in_entity(Entity, Head), clause( :(Entity,Head),_ ) .
+clause_in_entity(Entity,Head	) :- defined_in_entity(Entity, Head), clause( :(Entity,Head),_ ) .
 clause_in_entity(Entity,Head,Body) :- defined_in_entity(Entity, Head), clause( :(Entity,Head),Body ) .
 
-retract_in_entity(Entity,Head   )  :- defined_in_entity(Entity, Head), retract( :(Entity,Head) ) .
-retract_in_entity(Entity,Head,Body):- defined_in_entity(Entity, Head), retract( :(Entity,':-'(Head,Body)) ) .
+retract_in_entity(Entity,Head   ) :- defined_in_entity(Entity, Head), retract( :(Entity,Head) ) .
+retract_in_entity(Entity,Head,Body) :- defined_in_entity(Entity, Head), retract( :(Entity,':-'(Head,Body)) ) .
 
-retractall_in_entity(Entity,Head)  :- defined_in_entity(Entity, Head) -> retractall( :(Entity,Head) ) ; true.
+retractall_in_entity(Entity,Head) :- defined_in_entity(Entity, Head) -> retractall( :(Entity,Head) ) ; true.
 
-listing_in_entity(Entity,Goal)  :- listing( Entity:Goal ).
+listing_in_entity(Entity,Goal) :- listing( Entity:Goal ).
 
 /*
  * Copy all clauses whose head unifies Arg3 from module Arg1 to
