@@ -317,7 +317,7 @@ find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCat
     !,
     logtalk_adapter::find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList).
 
-find_definition_contained_in(File, Module, module, Functor, Arity, definition, Line, PropertyList) :-
+find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategory, Line, PropertyList) :-
     % Backtrack over all predicates defined in File:
     source_file(ModuleHead, File),
 	strip_module(ModuleHead,ModuleCandidate,Head),
@@ -325,12 +325,27 @@ find_definition_contained_in(File, Module, module, Functor, Arity, definition, L
 	->	Module = ModuleCandidate
 	;	Module = user
 	),
-    functor(Head,Functor,Arity),
-    properties_for_predicate(Module,Functor,Arity,PropertyList),
-    
+    functor(Head, Functor, Arity),
+    properties_for_predicate(Module,Functor, Arity, PropertyList0),
+    (	member(multifile, PropertyList0)
+    -> (	defined_in_file(Module, Functor, Arity, _Nth, DefFile, Line),
+    		(	DefFile \= File
+    		-> 	(	module_property(MultiModule, file(DefFile)),
+    				append([for(MultiModule), clause_file(DefFile)], PropertyList0, PropertyList),
+    				SearchCategory = multifile
+    			)
+    		;	(	PropertyList = PropertyList0,
+    				SearchCategory = definition
+    			)
+    		)
+    	)
+    ;	
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    defined_in_file(Module,Functor,Arity,_Nth,File,Line).
+    	defined_in_file(Module, Functor, Arity, _Nth, File, Line),
+    	PropertyList = PropertyList0,
+    	SearchCategory = definition
+    ).
 
 
                /***********************************************
