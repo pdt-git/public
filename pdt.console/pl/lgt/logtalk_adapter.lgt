@@ -20,7 +20,7 @@
 :- public([
 	pdt_reload/1,
 	find_reference_to/11, % +Functor,+Arity,?DefFile,?DefModule,?RefModule,?RefName,?RefArity,?RefFile,?RefLine,?Nth,?Kind
-	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line):-
+	find_definitions_categorized/12, % (EnclFile,Name,Arity,ReferencedModule,Visibility, DefiningModule, File,Line) :-
 	find_primary_definition_visible_in/7, % (EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine)#
 	find_definition_contained_in/8,
 	get_pred/7,
@@ -32,9 +32,9 @@
 	errors_and_warnings/4
 ]).
 
-:- uses(list, [member/2]).
+:- uses(list, [length/2, member/2]).
 :- uses(meta, [map/3::maplist/3]).
-:- uses(utils4entities, [entity_property/3]).
+:- uses(utils4entities, [entity_of_file/3, entity_property/3]).
 
 :- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
@@ -61,9 +61,9 @@
 % wrapper for consult. Only used to ignore PLEditor triggered consults in the history.
 
 % Logtalk
-pdt_reload(FullPath):-
-	writeln(FullPath),
-	pdtplugin:split_file_path(FullPath, Directory,_,BaseName,lgt),
+pdt_reload(FullPath) :-
+	write(FullPath), nl,
+	pdtplugin:split_file_path(FullPath, Directory, _, BaseName, lgt),
 	setup_call_cleanup(
 		working_directory(Current, Directory),     % SWI-Prolog
 		logtalk_load(BaseName),                    % Logtalk library
@@ -78,22 +78,14 @@ pdt_reload(FullPath):-
          * for "Find All Declarations" (Ctrl+G) action                         *
          ***********************************************************************/
 
-% Logtalk
-find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, declaration, Entity, FullPath, Line, Properties, declaration):-
+find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory, Entity, FullPath, Line, Properties, SearchCategory) :-
 	search_term_to_predicate_indicator(Term, Functor/Arity),
-	utils4entities::entity_of_file(EnclFile,ClickedLine,This),
-	decode(Term, This, Entity, _Kind, _Template, Location, Properties, declaration),
+	entity_of_file(EnclFile,ClickedLine,This),
+	decode(Term, This, Entity, _Kind, _Template, Location, Properties, SearchCategory),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
 
-find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, definition, Entity, FullPath, Line, Properties, definition):-
-	search_term_to_predicate_indicator(Term, Functor/Arity),
-	utils4entities::entity_of_file(EnclFile,ClickedLine,This),
-	decode(Term, This, Entity, _Kind, _Template, Location, Properties, definition),
-	Location = [Directory, File, [Line]],
-	atom_concat(Directory, File, FullPath).
-
-find_definitions_categorized(_EnclFile, _ClickedLine, Term, Functor, Arity, _This, SearchCategory, Entity, FullPath, Line, Properties, other):-
+find_definitions_categorized(_EnclFile, _ClickedLine, Term, Functor, Arity, _This, SearchCategory, Entity, FullPath, Line, Properties, other) :-
 	search_term_to_predicate_indicator(Term, Functor/Arity),
 	(	current_object(Entity)
 	;	current_protocol(Entity)
@@ -120,8 +112,10 @@ search_term_to_predicate_indicator(Term, Functor/Arity) :- functor(Term, Functor
 
 :- multifile(pdtplugin:results_category_label/2).
 
-pdtplugin:results_category_label(declaration, 'Visible declaration' ).
-pdtplugin:results_category_label(definition, 'Visible definition' ).
+pdtplugin:results_category_label(declaration, 'Visible declaration').
+pdtplugin:results_category_label(definition, 'Visible definition').
+pdtplugin:results_category_label('overridden definition', 'Overridden definition').
+pdtplugin:results_category_label(multifile, 'Visible multifile definitions').
 pdtplugin:results_category_label(other, 'Other references').
 
 
@@ -184,22 +178,22 @@ visibility_text(defined, invisible,  'Locally invisible definitions') :- !.
 
 visibility(invisible, ContextEntity,Name,Arity,DeclEntity) :-
 	% There is some DeclaringEntity
-	utils4entities::declared_in_entity(DeclEntity,Name,Arity,DeclEntity),
-	\+ utils4entities::declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
-	\+ utils4entities::declared_in_entity(DeclEntity,_,_,ContextEntity).
+	declared_in_entity(DeclEntity,Name,Arity,DeclEntity),
+	\+ declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
+	\+ declared_in_entity(DeclEntity,_,_,ContextEntity).
 
 visibility(descendant, ContextEntity,Name,Arity,DeclEntity) :-
-	utils4entities::declared_in_entity(DeclEntity,Name,Arity,DeclEntity),
+	declared_in_entity(DeclEntity,Name,Arity,DeclEntity),
 	% DeclEntity is a submodule of ContextEntity
-	utils4entities::declared_in_entity(DeclEntity,_,_,ContextEntity), % submodule
+	declared_in_entity(DeclEntity,_,_,ContextEntity), % submodule
 	ContextEntity \== DeclEntity.
 
 visibility(ancestor, ContextEntity,Name,Arity,DeclEntity) :-
-	utils4entities::declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
+	declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
 	ContextEntity \== DeclEntity.
 
 visibility(local, ContextEntity,Name,Arity,DeclEntity) :-
-	utils4entities::declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
+	declared_in_entity(ContextEntity,Name,Arity,DeclEntity),
 	ContextEntity == DeclEntity.
 
 
@@ -220,19 +214,19 @@ visibility(local, ContextEntity,Name,Arity,DeclEntity) :-
 % pdt/src/org/cs3/pdt/internal/actions/FindPredicateActionDelegate.java
 
 % The second argument is just an atom contianing the string representation of the term:
-find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+find_primary_definition_visible_in(EnclFile,TermString,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
 	atom_to_term(TermString,Term,_Bindings),
 	find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine).
 
 % Now the second argument is a real term:
-find_primary_definition_visible_in__(_,Term,_,_,_,File,Line):-
+find_primary_definition_visible_in__(_,Term,_,_,_,File,Line) :-
 	extract_file_spec(Term,FileSpec),
 	catch(absolute_file_name(FileSpec,[solutions(all),extensions(['.pl', '.lgt', '.ct', '.ctc'])], File), _, fail),
 	access_file(File, read),
 	!,
 	Line=1.
 
-find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine):-
+find_primary_definition_visible_in__(EnclFile,Term,Name,Arity,ReferencedModule,MainFile,FirstLine) :-
 	find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations),
 	primary_location(Locations,DefiningModule,MainFile,FirstLine).
 
@@ -245,7 +239,7 @@ extract_file_spec(use_module(FileSpec),FileSpec) :- !.
 extract_file_spec(ensure_loaded(FileSpec),FileSpec) :- !.
 extract_file_spec(Term,Term).
 
-find_definition_visible_in(EnclFile,Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
+find_definition_visible_in(EnclFile,_Term,Name,Arity,ReferencedModule,DefiningModule,Locations) :-
 	module_of_file(EnclFile,FileModule),
 	(  atom(ReferencedModule)
 	-> true                            % Explicit module reference
@@ -311,7 +305,7 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		SearchCategory = declaration
 	;	% entity definitions
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
-		% we add a scope property just to simplify coding in the Java side
+		% we add a scope/0 property just to simplify coding in the Java side
 		functor(Predicate, Functor, Arity),
 		(	decode(Predicate, Entity, _, _, _, _, DeclarationProperties, declaration) ->
 			% found the scope declaration
@@ -329,7 +323,12 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		entity_property(Entity, Kind, includes(Functor/Arity, From, Properties0)),
 		% we add a from/1 property just to simplify coding in the Java side
 		Properties = [from(From)| Properties0],
-		SearchCategory = multifile
+		SearchCategory = (multifile)
+	;	% entity multifile definitions
+		entity_property(Entity, Kind, provides(Functor/Arity, For, Properties0)),
+		% we add a from/1 property just to simplify coding in the Java side
+		Properties = [for(For)| Properties0],
+		SearchCategory = (multifile)
 	),
 	list::memberchk(line(Line), Properties).
 
@@ -351,12 +350,12 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 % <Prefix> specifies the prefix of the predicate
 % <Module> specifies the module associated to the file.
 
-find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
 	fail.
 %    \+ atom(EnclFile),
 %    throw( first_argument_free_in_call_to(find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help))).
 %
-%find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
+%find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help) :-
 %	setof(
 %	   (Name,Arity),
 %	   Prefix^Module^
@@ -380,16 +379,16 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 %	),
 %	predicate_manual_entry(Module,Name,Arity,Help).
 %
-%find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc'):-
+%find_pred(_EnclFile,Prefix,EnclModule,Name,-1,true,false,'nodoc') :-
 %    var(EnclModule),
 %	current_module(Name),
 %    atom_concat(Prefix,_,Name).
 %
 %
 %
-%find_pred_(Prefix,Module,Name,Arity,true):-
+%find_pred_(Prefix,Module,Name,Arity,true) :-
 %    ( var(Module)->
-%    	not(Prefix == '')
+%    	Prefix \== ''
 %    ; true
 %    ), % performance tweak:
 %    current_predicate(Module:Name/Arity),
@@ -397,11 +396,11 @@ find_pred(EnclFile,Prefix,Module,Name,Arity,Exported,Builtin,Help):-
 %    % rule out used built-ins, like =../2, in case the enclosing module is given (in this case the prefix might be empty):
 %    ( nonvar(Module) ->
 %      ( functor(Term,Name,Arity),
-%    	(not(Prefix == '');not(built_in(Term))) )
+%    	(Prefix \== ''; \+ built_in(Term)) )
 %      ; true
 %    ).
 
-get_declaring_module(EnclFile,Module,Name,Arity):-
+get_declaring_module(EnclFile,Module,Name,Arity) :-
 	module_of_file(EnclFile,ContainingModule),
 	current_predicate(ContainingModule:Name/Arity),
 	functor(Head,Name,Arity),
@@ -444,7 +443,7 @@ predicate_manual_entry(Module, Pred,Arity,Content) :-
 
 predicate_manual_entry(_Module,_Pred,_Arity,'nodoc').
 
-gen_html_for_pred_(FileSpec,Functor/Arity,Html):-
+gen_html_for_pred_(FileSpec,Functor/Arity,Html) :-
 	online_help:doc_file_objects(FileSpec, _File, Objects, FileOptions, []),
 	member(doc(Signature,FilePos,Doc),Objects),
 	(Functor/Arity=Signature;_Module:Functor/Arity=Signature),
@@ -455,8 +454,8 @@ gen_html_for_pred_(FileSpec,Functor/Arity,Html):-
 	atomic_list_concat(AtomList,Html),
 	!.
 
-replace_nl_(nl(_),''):-!.
-replace_nl_(A,A).
+replace_nl_(nl(_), '') :- !.
+replace_nl_(A, A).
 
 write_ranges_to_file(Ranges, Outfile) :-
 	online_help:online_manual_stream(Manual),
@@ -501,8 +500,8 @@ manual_entry(Pred,-1,Content) :-
                 * PROLOG ERROR MESSAGE HOOK         *
                 *************************************/
 
-:- dynamic traced_messages/3.
-:- dynamic warning_and_error_tracing/0.
+:- dynamic(traced_messages/3).
+:- dynamic(warning_and_error_tracing/0).
 
 activate_warning_and_error_tracing :-
 	assertz(warning_and_error_tracing).
@@ -527,7 +526,7 @@ user:message_hook(_Term, Level, Lines) :-
 
 %% errors_and_warnings(Level,Line,Length,Message) is nondet.
 %
-errors_and_warnings(Level,Line,0,Message):-
+errors_and_warnings(Level,Line,0,Message) :-
 	traced_messages(Level, Line,Lines),
 %	traced_messages(error(syntax_error(_Message), file(_File, StartLine, Length, _)), Level,Lines),
 	new_memory_file(Handle),
@@ -579,7 +578,7 @@ predicates_with_property(Property, _, Predicates) :-
 
 
 
-predicate_name_with_property_(Module,Name,Property):-
+predicate_name_with_property_(Module,Name,Property) :-
 	current_module(Module),
 	current_predicate(Module:Name/Arity),
 	Name \= '[]',
@@ -602,7 +601,7 @@ make_duplicate_free_string(AllPredicateNames,Predicates) :-
 % Author: GK, 5 April 2011
 % TODO: Integrate into the editor the ability to show the params as tool tips,
 % e.g. show the metaargument specifications of a metapredicate on mouse over.
-predicates_with_unary_property(Property,Predicates,PropertyArguments):-
+predicates_with_unary_property(Property,Predicates,PropertyArguments) :-
 	setof((Name,Arg),
 	   predicate_name_with_unary_property_(Name,Property,Arg),
 	   PredArgList),
@@ -614,7 +613,7 @@ predicates_with_unary_property(Property,Predicates,PropertyArguments):-
 	string_to_atom(S2,PropertyArguments).
 
 % helper
-predicate_name_with_unary_property_(Name,Property,Arg):-
+predicate_name_with_unary_property_(Name,Property,Arg) :-
     Property =.. [__F,Arg],
 	user::predicate_property(_M:Head,Property),
 	functor(Head,Name,_),
@@ -648,32 +647,45 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
-decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	functor(Template, Functor, Arity),
-	(	current_object(This) ->
-		(	\+ instantiates_class(This, _),
-			\+ specializes_class(This, _) ->
-			This<<predicate_property(Template, declared_in(DeclarationEntity)),
-			This<<predicate_property(Template, defined_in(Primary))
-		;	create_object(Obj, [instantiates(This)], [], []),
-			Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
-			Obj<<predicate_property(Template, defined_in(Primary)),
-			abolish_object(Obj)
-		)
-	;	%current_category(This) ->
-		create_object(Obj, [imports(This)], [], []),
-		Obj<<predicate_property(Template, declared_in(DeclarationEntity)),
-		Obj<<predicate_property(Template, defined_in(Primary)),
-		abolish_object(Obj)
-	), !,	% cut predicate_property/2 choice-points
 	(	% declaration
+		(	current_object(This) ->
+			(	\+ instantiates_class(This, _),
+				\+ specializes_class(This, _) ->
+				once(This<<predicate_property(Template, declared_in(DeclarationEntity)))
+			;	create_object(Obj, [instantiates(This)], [], []),
+				once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+				abolish_object(Obj)
+			)
+		;	%current_category(This) ->
+			create_object(Obj, [imports(This)], [], []),
+			once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+			abolish_object(Obj)
+		),
 		entity_property(DeclarationEntity, _, declares(Functor/Arity, Properties)),
 		Entity = DeclarationEntity,
 		SearchCategory = declaration
 	;	% definition
+		(	current_object(This) ->
+			(	\+ instantiates_class(This, _),
+				\+ specializes_class(This, _) ->
+				once(This<<predicate_property(Template, declared_in(DeclarationEntity))),
+				once(This<<predicate_property(Template, defined_in(Primary)))
+			;	create_object(Obj, [instantiates(This)], [], []),
+				once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+				once(Obj<<predicate_property(Template, defined_in(Primary))),
+				abolish_object(Obj)
+			)
+		;	%current_category(This) ->
+			create_object(Obj, [imports(This)], [], []),
+			once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+			once(Obj<<predicate_property(Template, defined_in(Primary))),
+			abolish_object(Obj)
+		),
 		entity_property(Primary, _, defines(Functor/Arity, Properties0)),
 		entity_property(DeclarationEntity, _, declares(Functor/Arity, DeclarationProperties)),
 		(	list::member((public), DeclarationProperties) ->
@@ -691,16 +703,16 @@ decode(::Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pr
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
-decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Properties, SearchCategory) :-
+decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	functor(Template, Functor, Arity),
 	(	% declaration
 		(	\+ instantiates_class(This, _),
 			\+ specializes_class(This, _) ->
-			This<<predicate_property(Template, declared_in(Entity))
+			once(This<<predicate_property(Template, declared_in(Entity)))
 		;	create_object(Obj, [instantiates(This)], [], []),
-			Obj<<predicate_property(Template, declared_in(Entity)),
+			once(Obj<<predicate_property(Template, declared_in(Entity))),
 			abolish_object(Obj)
 		),
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties)),
@@ -708,7 +720,7 @@ decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pro
 	;	% definition
 		findall(Category, imports_category(This, Category), Categories),
 		create_object(Obj, [imports(Categories)], [], []),
-		Obj<<predicate_property(Template, defined_in(Primary)),
+		once(Obj<<predicate_property(Template, defined_in(Primary))),
 		abolish_object(Obj),
 		(	% local definitions
 			Entity = Primary,
@@ -722,19 +734,54 @@ decode(:Predicate, This, Entity, Kind, Predicate, [Directory, File, [Line]], Pro
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
-decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, definition) :-
+decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
 	nonvar(Predicate),
 	functor(Predicate, Functor, Arity),
 	functor(Template, Functor, Arity),
-	(	current_object(This) ->
-		This<<predicate_property(Template, redefined_from(Entity))
-	;	%current_category(This) ->
-		create_object(Obj, [imports(This)], [], []),
-		Obj<<predicate_property(Template, redefined_from(Entity)),
-		abolish_object(Obj)
+	(	% declaration
+		(	current_object(This) ->
+			(	\+ instantiates_class(This, _),
+				\+ specializes_class(This, _) ->
+				once(This<<predicate_property(Template, declared_in(Entity)))
+			;	create_object(Obj, [instantiates(This)], [], []),
+				once(Obj<<predicate_property(Template, declared_in(Entity))),
+				abolish_object(Obj)
+			)
+		;	%current_category(This) ->
+			create_object(Obj, [imports(This)], [], []),
+			once(Obj<<predicate_property(Template, declared_in(Entity))),
+			abolish_object(Obj)
+		),
+		entity_property(Entity, _, declares(Functor/Arity, Properties)),
+		SearchCategory = declaration
+	;	% definition
+		(	current_object(This) ->
+			(	\+ instantiates_class(This, _),
+				\+ specializes_class(This, _) ->
+				once(This<<predicate_property(Template, declared_in(DeclarationEntity))),
+				once(This<<predicate_property(Template, redefined_from(Entity)))
+			;	create_object(Obj, [instantiates(This)], [], []),
+				once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+				once(Obj<<predicate_property(Template, redefined_from(Entity))),
+				abolish_object(Obj)
+			)
+		;	%current_category(This) ->
+			create_object(Obj, [imports(This)], [], []),
+			once(Obj<<predicate_property(Template, declared_in(DeclarationEntity))),
+			once(Obj<<predicate_property(Template, redefined_from(Entity))),
+			abolish_object(Obj)
+		),
+		entity_property(Entity, _, defines(Functor/Arity, Properties0)),
+		entity_property(DeclarationEntity, _, declares(Functor/Arity, DeclarationProperties)),
+		(	list::member((public), DeclarationProperties) ->
+			Properties = [(public)| Properties0]
+		;	list::member(protected, DeclarationProperties) ->
+			Properties = [protected| Properties0]
+		;	Properties = [private| Properties0]
+		),
+		SearchCategory = 'overridden definition'
 	),
-	entity_property(Entity, Kind, defines(Functor/Arity, Properties)),
 	entity_property(Entity, Kind, file(File, Directory)),
 	list::memberchk(line(Line), Properties).
 
@@ -763,7 +810,7 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 		(	current_object(This) ->
 			(	\+ instantiates_class(This, _),
 				\+ specializes_class(This, _) ->
-				This<<predicate_property(Template, declared_in(Entity))
+				once(This<<predicate_property(Template, declared_in(Entity)))
 			;	create_object(Obj, [instantiates(This)], [], []),
 				once(Obj<<predicate_property(Template, declared_in(Entity))),
 				abolish_object(Obj)
