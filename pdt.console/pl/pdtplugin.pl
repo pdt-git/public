@@ -331,7 +331,7 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     -> (	defined_in_file(Module, Functor, Arity, _Nth, DefFile, Line),
     		(	DefFile \= File
     		-> 	(	module_property(MultiModule, file(DefFile)),
-    				append([for(MultiModule), clause_file(DefFile)], PropertyList0, PropertyList),
+    				append([for(MultiModule), reference_file(DefFile)], PropertyList0, PropertyList),
     				SearchCategory = multifile
     			)
     		;	(	PropertyList = PropertyList0,
@@ -346,6 +346,24 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     	PropertyList = PropertyList0,
     	SearchCategory = definition
     ).
+    
+% The following clause searches for clauses inside the given file, which contribute to multifile 
+% predicates, defined in foreign modules.
+find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Line, PropertyList):-
+%    module_property(FileModule, file(File)),
+    visible_in_module(Module,Functor,Arity),
+    functor(Head, Functor, Arity),
+    predicate_property(Module:Head, multifile),
+    predicate_property(Head, imported_from(Module)),
+%    FileModule \= Module,
+    nth_clause(Module:Head,_,Ref),
+    clause_property(Ref,file(File)),     
+    clause_property(Ref,line_count(Line)),
+    properties_for_predicate(Module, Functor, Arity, PropertyList0),
+    module_property(Module, file(RefFile)),
+    append([from(Module), reference_file(RefFile)], PropertyList0, PropertyList).
+   
+
 
 
                /***********************************************
