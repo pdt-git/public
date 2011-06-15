@@ -34,7 +34,7 @@
 
 :- uses(list, [length/2, member/2]).
 :- uses(meta, [map/3::maplist/3]).
-:- uses(utils4entities, [entity_of_file/3, entity_property/3]).
+:- uses(utils4entities, [source_file_entity/3, entity_property/3]).
 
 :- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
@@ -87,7 +87,7 @@ logtalk_reload(Directory, File, BaseName) :-
 
 find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory, Entity, FullPath, Line, Properties, SearchCategory) :-
 	search_term_to_predicate_indicator(Term, Functor/Arity),
-	entity_of_file(EnclFile,ClickedLine,This),
+	source_file_entity(EnclFile,ClickedLine,This),
 	decode(Term, This, Entity, _Kind, _Template, Location, Properties, SearchCategory),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
@@ -333,8 +333,10 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		SearchCategory = (multifile)
 	;	% entity multifile definitions
 		entity_property(Entity, Kind, provides(Functor/Arity, For, Properties0)),
-		% we add a from/1 property just to simplify coding in the Java side
-		Properties = [for(For)| Properties0],
+		% we add a from/1 + defining_file/1 properties just to simplify coding in the Java side
+		entity_property(Entity, Kind, file(DefiningFile, DefiningDirectory)),
+		atom_concat(DefiningDirectory, DefiningFile, DefiningFullPath),
+		Properties = [for(For), defining_file(DefiningFullPath)| Properties0],
 		SearchCategory = (multifile)
 	),
 	list::memberchk(line(Line), Properties).
