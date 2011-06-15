@@ -46,9 +46,12 @@ public class OutlinePredicate extends Predicate implements PDTTreeElement{
 				String numberString = property.substring(18, property.length()-1);
 				return Integer.parseInt(numberString);
 			} 
-			else if (property.contains("clauses")) {
-				String numberString = property.substring(8, property.length()-1);
-				return Integer.parseInt(numberString);
+//			else if (property.contains("clauses")) {
+//				String numberString = property.substring(8, property.length()-1);
+//				return Integer.parseInt(numberString);
+//			}
+			else {
+				return occurences.size();
 			}
 		}
 		return 0;
