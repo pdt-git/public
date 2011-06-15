@@ -7,7 +7,9 @@
 :- object(utils4entities).
 
 :- public([
-	entity_of_file/3,               % File, Line, Entity
+	source_file_entity/3,           % File, Line, Entity
+	entity_source_file/3,           % Entity, File, Line
+	entity_multifile_predicate_source_file/6,
 	entity_property/3,
 
 	visible_in_entity/3,	        % Entity, Name, Arity
@@ -38,10 +40,10 @@
 	]
 ).
 
-:- uses( list, [member/2]).
-% :- use_entity( library(listing), [listing/1]).
+:- uses(list, [member/2, memberchk/2]).
+% :- use_module( library(listing), [listing/1]).
 
-:- uses( user, [all/1, assert1T/1, ctc_error/2, log_on_stdout/2]).
+:- uses(user, [all/1, assert1T/1, ctc_error/2, log_on_stdout/2]).
 
 :- meta_predicate( call_and_report_contex_entity(0) ).
 
@@ -85,14 +87,14 @@ entity_property(Protocol, protocol, Property) :-
 	catch(protocol_property(Protocol, Property), _, fail).
 
 
-%% entity_of_file(+File,+Line,?Entity)
-%% entity_of_file(+File,-Line,?Entity)
+%% source_file_entity(+File,+Line,?Entity)
+%% source_file_entity(+File,-Line,?Entity)
 %
 % Entity is an entity (object, protocol, category) defined in File.
 % In mode ++? Line can be any line number that is between the start
 % and end line of Entity.
 % In mode +-? Line is the start line of Entity.
-entity_of_file(FullPath, Line, Entity) :-
+source_file_entity(FullPath, Line, Entity) :-
 	nonvar(Line),
 	!,
 	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
@@ -101,16 +103,31 @@ entity_of_file(FullPath, Line, Entity) :-
 	entity_property(Entity, Kind, lines(Begin, End)),
 	Begin =< Line, End >= Line.
 
-entity_of_file(FullPath, Line, Entity) :-
+source_file_entity(FullPath, Line, Entity) :-
 	pdtplugin:split_file_path(FullPath, Directory, FileName, _, lgt),
 	logtalk::loaded_file(FileName, Directory),
 	entity_property(Entity, Kind, file(FileName, Directory)),
 	entity_property(Entity, Kind, lines(Line, _)).
 
 
+entity_source_file(Entity, FullPath, Line) :-
+	entity_property(Entity, _, file(File, Directory)),
+	atom_concat(Directory, File, FullPath),
+	entity_property(Entity, _, lines(Line, _)),
+	!.
+
+
+entity_multifile_predicate_source_file(Entity, Functor, Arity, To, FullPath, Line) :-
+	entity_property(Entity, _, file(File, Directory)),
+	atom_concat(Directory, File, FullPath),
+	entity_property(Entity, _, provides(Functor/Arity, To, Properties)),
+	list::memberchk(line(Line), Properties),
+	!.
+
+
 %% visible_in_entity(?Entity,?Name,?Arity) is nondet.
 %
-% Suceed if the predicate Name/Arity is visible in Entity
+% Succeeds if the predicate Name/Arity is visible in Entity
 % either via a local declaration or import.
 %
 visible_in_entity(Object,Name,Arity) :-   scoped(Object,Name,Arity).
@@ -185,24 +202,24 @@ referenced_but_undeclared(Object,Name,Arity) :-
 %  that define Entity::Name/Arity.
 %  NOTE: For Logtalk we can only get the first one!
 
-defined_in_file(Entity, Name, Arity, 1, Path, Line) :-
+defined_in_file(Entity, Functor, Arity, 1, Path, Line) :-
 	nonvar(Entity),
-	nonvar(Name),
+	nonvar(Functor),
 	nonvar(Arity),
 	!,
-	entity_property(Entity, _Kind, defines(Name/Arity, Properties)),
+	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
 	entity_property(Entity, _Kind, file(File, Directory)), !,
 	atom_concat(Directory, File, Path),
 	list::memberchk(line(Line), Properties).
-defined_in_file(Entity, Name, Arity, 1, Path, Line) :-
+defined_in_file(Entity, Functor, Arity, 1, Path, Line) :-
 	logtalk::loaded_file(File, Directory),
 	entity_property(Entity, _Kind, file(File, Directory)),
 	atom_concat(Directory, File, Path),
-	entity_property(Entity, _Kind, defines(Name/Arity, Properties)),
+	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
 	list::memberchk(line(Line), Properties).
 
-%    declared_in_entity(Entity,Name,Arity,Entity),
-%    functor(Head,Name,Arity),
+%    declared_in_entity(Entity,Functor,Arity,Entity),
+%    functor(Head,Functor,Arity),
 %    nth_clause(Entity:Head,N,Ref),
 %    clause_property(Ref,file(File)),
 %    clause_property(Ref,line_count(Line)).
@@ -281,7 +298,7 @@ call_local_pred_of_entity(Entity, Head) :-
 call_in_entity(Entity,Goal) :-
    ( nonvar(Entity)
    -> Entity::Goal
-    ; ctc_error('Goal called in variable module: ~w:~w.',
+    ; ctc_error('Goal called in variable entity: ~w:~w.',
                  [Entity,Goal])
    ).
 
