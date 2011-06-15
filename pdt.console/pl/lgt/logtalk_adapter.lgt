@@ -63,13 +63,20 @@
 % Logtalk
 pdt_reload(FullPath) :-
 	write(FullPath), nl,
-	pdtplugin:split_file_path(FullPath, Directory, _, BaseName, lgt),
+	pdtplugin:split_file_path(FullPath, Directory, File, BaseName, lgt),
 	setup_call_cleanup(
 		working_directory(Current, Directory),     % SWI-Prolog
-		logtalk_load(BaseName),                    % Logtalk library
+		logtalk_reload(Directory, File, BaseName),
 		working_directory(_, Current)              % SWI-Prolog
    ).
 
+logtalk_reload(Directory, File, BaseName) :-
+	(	logtalk::loaded_file(File, Directory, Options) ->
+		% we're reloading a source file; use the same explicit compilation options as before
+		logtalk_load(BaseName, Options)
+	;	% first time; assume only implicit compilation options
+		logtalk_load(BaseName)
+	).
 
 
         /***********************************************************************
