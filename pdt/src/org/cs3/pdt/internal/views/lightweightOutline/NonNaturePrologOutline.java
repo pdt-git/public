@@ -47,15 +47,17 @@
  */
 package org.cs3.pdt.internal.views.lightweightOutline;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
+import org.cs3.pdt.PDTUtils;
+import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;
-import org.cs3.pdt.internal.search.PrologSearchLabelProvider;
 import org.cs3.pdt.internal.structureElements.OutlineModuleElement;
 import org.cs3.pdt.internal.structureElements.OutlinePredicate;
 import org.cs3.pdt.internal.structureElements.PredicateOccuranceElement;
@@ -66,6 +68,8 @@ import org.cs3.pdt.internal.views.PrologOutlineComparer;
 import org.cs3.pdt.internal.views.PrologOutlineFilter;
 import org.cs3.pdt.internal.views.ToggleSortAction;
 import org.cs3.pl.common.Util;
+import org.cs3.pl.metadata.SourceLocation;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -192,17 +196,35 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
-
 		Object elem = getFirstSelectedElement(event);
+		OutlinePredicate predicate=null;
+		String selectedFile = "";
+		int line;
 		if ((elem != null) && (elem instanceof OutlinePredicate)) { 
-			OutlinePredicate predicate = (OutlinePredicate)elem;
-			editor.gotoLine(predicate.getLine());
-		}
-		if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
+			predicate = (OutlinePredicate)elem;
+			line = predicate.getLine();
+			selectedFile = predicate.getFileName();
+		} else if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
 			PredicateOccuranceElement occurance = (PredicateOccuranceElement)elem;
-			editor.gotoLine(occurance.getLine());
+			line = occurance.getLine();
+			selectedFile = occurance.getFile();
+			predicate = (OutlinePredicate)occurance.getParent();
+		} else {
+			return;
 		}
-
+		
+		String editorFileName = editor.getPrologFileName();
+		if (selectedFile.equals(editorFileName)) {
+			editor.gotoLine(line);
+		} else {
+			IFile file;
+			try {
+				file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace(selectedFile);
+				SourceLocation loc = createLocation(predicate, line, file);
+				PDTUtils.showSourceLocation(loc);
+			} catch (IOException e) {
+			}
+		}
 	}
 
 	private Object getFirstSelectedElement(final SelectionChangedEvent event) {
@@ -216,6 +238,16 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		Object elem = selection.getFirstElement();
 
 		return elem;
+	}
+
+	private SourceLocation createLocation(OutlinePredicate predicate,
+			int line, IFile file) {
+		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+		loc.isWorkspacePath = file.isAccessible();
+		loc.setLine(line);
+		loc.setPredicateName(predicate.getFunctor());
+		loc.setArity(predicate.getArity());
+		return loc;
 	}
 
 	public PrologOutlineFilter[] getAvailableFilters() {

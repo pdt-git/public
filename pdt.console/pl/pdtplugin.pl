@@ -297,9 +297,9 @@ primary_location(Locations,_,File,FirstLine) :-
     
 
         /***********************************************************************
-         * Find Primary Definition                                             *
+         * Find Definitions in File                                            *
          * --------------------------------------------------------------------*
-         * for "Open Primary Declaration" (F3) action                          *
+         * for Outline                                                         *
          ***********************************************************************/ 
          
 % TODO: This is meanwhile subsumed by other predicates. Integrate!
@@ -310,7 +310,7 @@ primary_location(Locations,_,File,FirstLine) :-
 % predicate Name/Arity defined in File. Core properties
 % of the predicate are contained in the PropertyList.
 %
-% Called from PrologOutlineInformationControl.java
+% Called from PDTOutlineQuery.java
 
 find_definition_contained_in(File, Entity, EntityKind, Functor, Arity, SearchCategory, Line, PropertyList) :-
     split_file_path(File, _Directory,_FileName,_,lgt),
@@ -327,11 +327,13 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
 	),
     functor(Head, Functor, Arity),
     properties_for_predicate(Module,Functor, Arity, PropertyList0),
+    % In the case of a multifile predicate, we want to find all clauses for this 
+    % predicate, even when they occur in other files
     (	member(multifile, PropertyList0)
-    -> (	defined_in_file(Module, Functor, Arity, _Nth, DefFile, Line),
-    		(	DefFile \= File
-    		-> 	(	module_property(MultiModule, file(DefFile)),
-    				append([for(MultiModule), reference_file(DefFile)], PropertyList0, PropertyList),
+    -> (	defined_in_file(Module, Functor, Arity, _, DeclFile, Line),
+    		(	DeclFile \= File
+    		-> 	(	module_property(MultiModule, file(DeclFile)),
+    				append([for(MultiModule), defining_file(DeclFile)], PropertyList0, PropertyList),
     				SearchCategory = multifile
     			)
     		;	(	PropertyList = PropertyList0,
@@ -339,29 +341,27 @@ find_definition_contained_in(File, Module, module, Functor, Arity, SearchCategor
     			)
     		)
     	)
-    ;	
+    ;	(	PropertyList = PropertyList0,
+    		SearchCategory = definition,
     % The following backtracks over each clause of each predicate.
     % Do this at the end, after the things that are deterministic: 
-    	defined_in_file(Module, Functor, Arity, _Nth, File, Line),
-    	PropertyList = PropertyList0,
-    	SearchCategory = definition
+    		defined_in_file(Module, Functor, Arity, _, File, Line)
+    	)
     ).
     
 % The following clause searches for clauses inside the given file, which contribute to multifile 
 % predicates, defined in foreign modules.
 find_definition_contained_in(File, Module, module, Functor, Arity, multifile, Line, PropertyList):-
-%    module_property(FileModule, file(File)),
-    visible_in_module(Module,Functor,Arity),
-    functor(Head, Functor, Arity),
+    module_property(FileModule, file(File)),
+    declared_in_module(Module,Head),
+    Module \= FileModule,
     predicate_property(Module:Head, multifile),
-    predicate_property(Head, imported_from(Module)),
-%    FileModule \= Module,
     nth_clause(Module:Head,_,Ref),
     clause_property(Ref,file(File)),     
     clause_property(Ref,line_count(Line)),
+    functor(Head, Functor, Arity),
     properties_for_predicate(Module, Functor, Arity, PropertyList0),
-    module_property(Module, file(RefFile)),
-    append([from(Module), reference_file(RefFile)], PropertyList0, PropertyList).
+    append([from(Module)], PropertyList0, PropertyList).
    
 
 

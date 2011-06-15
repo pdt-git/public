@@ -67,6 +67,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 public final class PDTUtils {
 
@@ -173,6 +174,30 @@ public final class PDTUtils {
 //			editor.gotoOffset(PDTCoreUtils.convertLogicalToPhysicalOffset(
 //					doc.get(), loc.offset));
 
+		}
+	}
+
+	public static void openEditorOnExternalFile(int currentOffset, int currentLength,
+			boolean activate, IFile file) {
+		PLEditor editor= null;
+		try {
+		    editor = (PLEditor) IDE.openEditor(UIUtils.getActivePage(),file);
+		} catch (PartInitException e1) {
+			return;
+		}
+		IDocument doc = editor.getDocumentProvider().getDocument(editor.getEditorInput());
+		int endOffset=currentOffset+currentLength;
+		currentOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
+				currentOffset);
+		endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
+				endOffset);
+		currentLength=endOffset-currentOffset;
+		if (editor != null && activate) {
+			editor.getEditorSite().getPage().activate(editor);
+			if (editor instanceof ITextEditor) {
+				ITextEditor textEditor= editor;
+				textEditor.selectAndReveal(currentOffset, currentLength);
+			}
 		}
 	}
 

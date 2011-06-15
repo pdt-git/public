@@ -46,15 +46,11 @@
 package org.cs3.pdt.internal.search;
 
 import org.cs3.pdt.PDTUtils;
-import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.ImageRepository;
-import org.cs3.pdt.internal.editors.PLEditor;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
 import org.cs3.pdt.internal.structureElements.SearchPredicateElement;
-import org.cs3.pdt.ui.util.UIUtils;
 import org.cs3.pl.metadata.SourceLocation;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -66,8 +62,6 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 
 public class PrologSearchResultPage extends AbstractTextSearchViewPage {
@@ -127,41 +121,27 @@ public class PrologSearchResultPage extends AbstractTextSearchViewPage {
 	
 	@Override
 	protected void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException {
-		
-		PLEditor editor= null;
 		SearchPredicateElement element = (SearchPredicateElement)match.getElement();
 		IFile file = element.getFile();
 		PDTMatch prologMatch = (PDTMatch)match;
 		if(prologMatch.isLineLocation()) {
-			SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
-			loc.isWorkspacePath = file.isAccessible();
-			
-			loc.setLine(prologMatch.getLine());
-			loc.setPredicateName(element.getFunctor());
-			loc.setArity(element.getArity());
+			SourceLocation loc = createLocation(element, file, prologMatch);
 			PDTUtils.showSourceLocation(loc);
 			return;
 		}
-		try {
-			//editor= EditorUtility.openInEditor(file, false);
-		    editor = (PLEditor) IDE.openEditor(UIUtils.getActivePage(),file);
-		} catch (PartInitException e1) {
-			return;
-		}
-		IDocument doc = editor.getDocumentProvider().getDocument(editor.getEditorInput());
-		int endOffset=currentOffset+currentLength;
-		currentOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-				currentOffset);
-		endOffset = PDTCoreUtils.convertLogicalToPhysicalOffset(doc.get(),
-				endOffset);
-		currentLength=endOffset-currentOffset;
-		if (editor != null && activate) {
-			editor.getEditorSite().getPage().activate(editor);
-			if (editor instanceof ITextEditor) {
-				ITextEditor textEditor= editor;
-				textEditor.selectAndReveal(currentOffset, currentLength);
-			}
-		}
+		PDTUtils.openEditorOnExternalFile(currentOffset, currentLength, activate,
+				file);
+	}
+
+	private SourceLocation createLocation(SearchPredicateElement element,
+			IFile file, PDTMatch prologMatch) {
+		SourceLocation loc = new SourceLocation(file.getFullPath().toPortableString(), false);
+		loc.isWorkspacePath = file.isAccessible();
+		
+		loc.setLine(prologMatch.getLine());
+		loc.setPredicateName(element.getFunctor());
+		loc.setArity(element.getArity());
+		return loc;
 	}
 
 	@Override
