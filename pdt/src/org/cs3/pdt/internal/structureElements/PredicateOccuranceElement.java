@@ -11,6 +11,7 @@ public class PredicateOccuranceElement implements PDTTreeElement{
 		this.label = label;
 		this.line = line;
 		this.type = type;
+		this.parent = parent;
 	}
 	
 	public int getLine() {

@@ -8,10 +8,12 @@ import org.cs3.pl.metadata.Predicate;
 public class OutlinePredicate extends Predicate implements PDTTreeElement{
 	private static final long serialVersionUID = 2577159022013132807L;
 	
+	private String fileName;
 	private List<PredicateOccuranceElement> occurences = new ArrayList<PredicateOccuranceElement>();
 	
-	public OutlinePredicate(String module, String functor, int arity, List<String> properties){
+	public OutlinePredicate(String module, String functor, int arity, List<String> properties, String fileName){
 		super(module, functor, arity, properties);
+		this.fileName = fileName;
 	}
 	
 	public void addOccurence(PredicateOccuranceElement occurance) {
@@ -52,6 +54,9 @@ public class OutlinePredicate extends Predicate implements PDTTreeElement{
 		return 0;
 	}
 	
+	public String getFileName() {
+		return fileName;
+	}
 
 	@Override
 	public boolean hasChildren() {
