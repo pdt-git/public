@@ -119,7 +119,8 @@ public class PrologOutlineInformationControl extends AbstractInformationControl 
 		treeViewer.setContentProvider(fOutlineContentProvider);
 		fOutlineSorter= new ViewerComparator();
 		treeViewer.setComparator(fOutlineSorter);
-			treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		//treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
+		treeViewer.setAutoExpandLevel(2);
 
 		treeViewer.getTree().addKeyListener(getKeyAdapter());
 
