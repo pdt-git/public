@@ -35,7 +35,7 @@ public class PDTOutlineQuery {
 			List<Map<String, Object>> result = session.queryAll(query);
 
 			if(! result.isEmpty()) {
-				return extractResults(result);
+				return extractResults(result, fileName);
 			}
 		}catch(Exception e){
 			Debug.report(e);
@@ -46,7 +46,7 @@ public class PDTOutlineQuery {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result) {
+	private static Map<String, OutlineModuleElement> extractResults(List<Map<String, Object>> result, String fileName) {
 		Map<String, OutlineModuleElement> modules= new HashMap<String, OutlineModuleElement>();	
 		String module = "user";
 		for (Map<String, Object> predicate : result) {
@@ -71,13 +71,15 @@ public class PDTOutlineQuery {
 			if (currentModuleElem.hasPredicate(label)) {
 				prologPredicate = currentModuleElem.getPredicate(label);
 			} else {
-				prologPredicate = new OutlinePredicate(module, name, arity, properties);
+				prologPredicate = new OutlinePredicate(module, name, arity, properties, fileName);
 				currentModuleElem.addChild(label, prologPredicate);
 			}
 			
 			StringBuffer occuranceLabel = calculateOccuranceLabel(line, type,
 					properties);
-			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), line, type, prologPredicate));
+			String occuranceFile = getOccuranceFileName(properties, fileName);
+			
+			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), occuranceFile, line, type, prologPredicate));
 		}
 
 		return modules;
@@ -102,6 +104,21 @@ public class PDTOutlineQuery {
 		}
 		occuranceLabel.append(")");
 		return occuranceLabel;
+	}
+	
+	private static String getOccuranceFileName(List<String> properties, String file) {
+		String selectedFile="";
+		if (properties.contains("multifile")) {
+			for (String property : properties) {
+				if (property.startsWith("defining_file(")) {
+					selectedFile = property.substring(15, property.length()-2);
+				}
+			}
+		}
+		if (selectedFile.equals("")) {
+			selectedFile = file;
+		}
+		return selectedFile;
 	}
 	
 }

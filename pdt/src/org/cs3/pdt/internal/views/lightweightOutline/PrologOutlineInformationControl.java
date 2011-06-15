@@ -11,8 +11,6 @@ package org.cs3.pdt.internal.views.lightweightOutline;
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.internal.queries.PDTOutlineQuery;

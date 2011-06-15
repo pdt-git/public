@@ -527,15 +527,6 @@ public class PLEditor extends TextEditor {
 		ConsultActionDelegate consult = new ConsultActionDelegate();
 		consult.setSchedulingRule(file);
 		consult.run(null);
-//		Job job = consult.getJob();
-//		try {
-//			job.join();
-//			if (fOutlinePage != null) {
-//				fOutlinePage.setInput(getEditorInput());
-//			}
-//		} catch (InterruptedException e) {
-//			Debug.report(e);
-//		}
 	}
 
 	/**
