@@ -50,7 +50,6 @@ package org.cs3.pdt.internal.views.lightweightOutline;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import org.cs3.pdt.PDT;
@@ -198,21 +197,21 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 	public void selectionChanged(final SelectionChangedEvent event) {
 		super.selectionChanged(event);
 		Object elem = getFirstSelectedElement(event);
-		
 		OutlinePredicate predicate=null;
+		String selectedFile = "";
 		int line;
 		if ((elem != null) && (elem instanceof OutlinePredicate)) { 
 			predicate = (OutlinePredicate)elem;
 			line = predicate.getLine();
+			selectedFile = predicate.getFileName();
 		} else if ((elem != null) && (elem instanceof PredicateOccuranceElement)) {
 			PredicateOccuranceElement occurance = (PredicateOccuranceElement)elem;
 			line = occurance.getLine();
+			selectedFile = occurance.getFile();
 			predicate = (OutlinePredicate)occurance.getParent();
 		} else {
 			return;
 		}
-		
-		String selectedFile = getFileNameFromSelectedPredicate(predicate);
 		
 		String editorFileName = editor.getPrologFileName();
 		if (selectedFile.equals(editorFileName)) {
@@ -239,22 +238,6 @@ public class NonNaturePrologOutline extends ContentOutlinePage {
 		Object elem = selection.getFirstElement();
 
 		return elem;
-	}
-
-	private String getFileNameFromSelectedPredicate(OutlinePredicate predicate) {
-		List<String> properties = predicate.getProperties();
-		String selectedFile="";
-		if (properties.contains("multifile")) {
-			for (String property : properties) {
-				if (property.startsWith("declaring_file(")) {
-					selectedFile = property.substring(15, property.length());
-				}
-			}
-		}
-		if (selectedFile.equals("")) {
-			selectedFile = predicate.getFileName();
-		}
-		return selectedFile;
 	}
 
 	private SourceLocation createLocation(OutlinePredicate predicate,

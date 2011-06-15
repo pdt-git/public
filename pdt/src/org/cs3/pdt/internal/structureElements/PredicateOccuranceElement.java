@@ -6,11 +6,13 @@ public class PredicateOccuranceElement implements PDTTreeElement{
 	private int line;
 	private String type;
 	private PDTTreeElement parent;
+	private String file;
 	
-	public PredicateOccuranceElement(String label, int line, String type, PDTTreeElement parent) {
+	public PredicateOccuranceElement(String label, String file, int line, String type, PDTTreeElement parent) {
 		this.label = label;
 		this.line = line;
 		this.type = type;
+		this.file = file;
 		this.parent = parent;
 	}
 	
@@ -38,6 +40,10 @@ public class PredicateOccuranceElement implements PDTTreeElement{
 	@Override
 	public String getLabel() {
 		return label;
+	}
+	
+	public String getFile() {
+		return file;
 	}
 
 }
