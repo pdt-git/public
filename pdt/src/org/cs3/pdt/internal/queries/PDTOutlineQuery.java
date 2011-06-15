@@ -77,7 +77,9 @@ public class PDTOutlineQuery {
 			
 			StringBuffer occuranceLabel = calculateOccuranceLabel(line, type,
 					properties);
-			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), line, type, prologPredicate));
+			String occuranceFile = getOccuranceFileName(properties, fileName);
+			
+			prologPredicate.addOccurence(new PredicateOccuranceElement(occuranceLabel.toString(), occuranceFile, line, type, prologPredicate));
 		}
 
 		return modules;
@@ -102,6 +104,21 @@ public class PDTOutlineQuery {
 		}
 		occuranceLabel.append(")");
 		return occuranceLabel;
+	}
+	
+	private static String getOccuranceFileName(List<String> properties, String file) {
+		String selectedFile="";
+		if (properties.contains("multifile")) {
+			for (String property : properties) {
+				if (property.startsWith("defining_file(")) {
+					selectedFile = property.substring(15, property.length()-2);
+				}
+			}
+		}
+		if (selectedFile.equals("")) {
+			selectedFile = file;
+		}
+		return selectedFile;
 	}
 	
 }

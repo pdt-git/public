@@ -34,7 +34,7 @@
 
 :- uses(list, [length/2, member/2]).
 :- uses(meta, [map/3::maplist/3]).
-:- uses(utils4entities, [entity_of_file/3, entity_property/3]).
+:- uses(utils4entities, [source_file_entity/3, entity_property/3]).
 
 :- use_module(library(pldoc/doc_library)).
 :- use_module(library(explain)).
@@ -80,7 +80,7 @@ pdt_reload(FullPath) :-
 
 find_definitions_categorized(EnclFile, ClickedLine, Term, Functor, Arity, This, SearchCategory, Entity, FullPath, Line, Properties, SearchCategory) :-
 	search_term_to_predicate_indicator(Term, Functor/Arity),
-	entity_of_file(EnclFile,ClickedLine,This),
+	source_file_entity(EnclFile,ClickedLine,This),
 	decode(Term, This, Entity, _Kind, _Template, Location, Properties, SearchCategory),
 	Location = [Directory, File, [Line]],
 	atom_concat(Directory, File, FullPath).
