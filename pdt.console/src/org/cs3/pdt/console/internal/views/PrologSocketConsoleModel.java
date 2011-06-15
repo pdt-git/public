@@ -349,7 +349,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 			boolean useVoodoo = Boolean.valueOf(valString).booleanValue();
 			if (useVoodoo) {
 				writer.write("use_module(lib_pdt_console_pl('cio/single_char_interceptor.pl')).\n"
-						+ "sci_install.\n"
+//						+ "sci_install.\n"
 						+ "set_stream(current_output,tty(true)),"
 						+ "set_stream(current_input,tty(true)).\n");
 			} 
@@ -406,7 +406,7 @@ public class PrologSocketConsoleModel implements ConsoleModel {
 
 			ConsoleModelEvent cme = new ConsoleModelEvent(
 					this,
-					"<<< (Not an) ERROR: Connection to Prolog Process closed >>>",
+					"<<< Connection to Prolog Process closed >>>\n\n",
 					true);
 
 			fireOutputEvent(cme);
