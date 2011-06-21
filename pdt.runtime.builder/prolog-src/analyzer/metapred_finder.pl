@@ -17,7 +17,8 @@ find_meta_vars_in_body(A, _, []):-
     var(A),
     !.
 find_meta_vars_in_body(Module:Term, _; MetaVars):-
-    find_meta_vars_in_body(Module, Term, MetaVars).
+    !, 
+    find_meta_vars_in_body(Term, Module, MetaVars).
     
 find_meta_vars_in_body((TermA, TermB), Context, MetaVars):-
 	!, 														% weiterer Parameter für bekannte, dieser dann 
@@ -27,11 +28,11 @@ find_meta_vars_in_body((TermA, TermB), Context, MetaVars):-
    	   	
 find_meta_vars_in_body((TermA; TermB), Context, MetaVars):-
     !, 
-   	find_meta_vars_in_body(TermA, Context, MetaVarsA),
    	find_meta_vars_in_body(TermB, Context, MetaVarsB),
+   	find_meta_vars_in_body(TermA, Context, MetaVarsA),
    	append(MetaVarsA, MetaVarsB, MetaVars).
    	  
-%find_meta_vars_in_body(Context, (TermA = TermB), MetaVars):-
+%find_meta_vars_in_body((TermA = TermB), Context, MetaVars):-
 %   	find_meta_vars_in_body
     	
      
