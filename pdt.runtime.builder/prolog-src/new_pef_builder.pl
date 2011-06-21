@@ -1,7 +1,6 @@
 %:- module(new_builder,[consult_entry_point_and_parse/2]).
 
 :- use_module(prolog_file_reader_quick).
-%:- consult(pl_ast_to_abba).
 
 
 /**
@@ -18,7 +17,6 @@ consult_entry_point_and_parse(File, Project):-
     %consult(File),
     findall(ToParse, 
     		(	source_file(ToParse),
-% 				downcase_atom(Project,Lc_Project),
 				Project = Lc_Project,
       			atom_concat(Lc_Project,_,ToParse)
       		),

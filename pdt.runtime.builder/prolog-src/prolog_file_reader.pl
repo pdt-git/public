@@ -29,7 +29,6 @@ derive_edges:-
     forall( (	literalT(LId,_,_,_Module,Functor,Arity)
     		;	metaT(LId,_,_,_Module,Functor,Arity)
     		),
-    		
     		( (  clauseT_ri(Functor,Arity,Id), 
     			% clauseT(Id,_,Module,Functor,Arity),    %Eva: umstellen auf PredicateT?
      			 assert(call_edge(LId,Id))	
