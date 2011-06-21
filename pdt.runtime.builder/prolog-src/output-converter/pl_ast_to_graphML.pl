@@ -2,7 +2,7 @@
 								pl_test/0,
 								pl_test/2]).
 
-:- use_module('../prolog_file_reader_quick').
+:- use_module('../prolog_file_reader').
 :- use_module('../analyzer/edge_counter').
 
 /**
@@ -265,7 +265,6 @@ write_data(Stream,Key,Value):-
 
 pl_test:-
     pl_test(['Z:/pdt.git/pdt.runtime.ui/library'],'Z:/WorkspaceTeaching3/test6.graphml').           
-   % pl_test(['Z:/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/WorkspaceTeaching3/test5.graphml').
  
 pl_test(Project,Output):-
 	plparser_quick:generate_facts(Project),

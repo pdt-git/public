@@ -2,7 +2,7 @@
 							pl_test/0,
 							pl_test/2]).
 								
-:- use_module('../prolog_file_reader_quick').
+:- use_module('../prolog_file_reader').
 
 /**
  * write_facts_to_abba(+File)

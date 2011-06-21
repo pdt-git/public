@@ -14,30 +14,34 @@
 :- reexport('util/ctc_admin.pl').
 
 :- dynamic fileT/3.			%fileT(Id,FileName,Module)
-:- dynamic literalT/6.		%literalT(Id,ParentId,EnclosingId,Module,Functor,Arity)
-:- dynamic metaT/6.			%metaT(Id,ParentId,EnclosingId,Module,Functor,Arity)		<-- da solll wahrscheinlich noch mehr rein...
-:- dynamic headT/6.			%headT(Id,ParentId,EnclosingId,Module,Functor,Arity)
-:- dynamic clauseT/5.			%clauseT(ClauseId,ParentId,Module,Functor,Arity)
-:- dynamic directiveT/3.	%directiveT(Id,ParentId,Module)
+:- dynamic onloadT/3.		%onloadT(Id,FileId,Module)	
 :- dynamic predicateT/5.	%predicateT(Id,FileId,Functor,Arity,Module)
-:- dynamic onloadT/3.		%onloadT(PId,File,Module)	
+
+:- dynamic directiveT/3.	%directiveT(Id,FileId,Module)
+:- dynamic clauseT/5.		%clauseT(Id,ParentId,Module,Functor,Arity)
+:- dynamic literalT/6.		%literalT(Id,ParentId,EnclosingId,Module,Functor,Arity)
+:- dynamic metaT/6.			%metaT(Id,ParentId,EnclosingId,Module,Functor,Arity)		<-- da soll wahrscheinlich noch mehr rein...
+:- dynamic headT/6.			%headT(Id,ParentId,EnclosingId,Module,Functor,Arity)
+
 :- dynamic operatorT/8.		%operatorT(Id,ParentId,FileId,Module,Name,Arity,Type,Precedence)
 
-:- dynamic dynamicT/5.		%dynamicT(Id,Functor,Arity,Module,ParentId,)  			<-- Id dafür?
-:- dynamic transparentT/5.	%transparentT(Id,Functor,Arity,Module,ParentId) 		<-- Id dafür?
-:- dynamic multifileT/5.	%multifileT(Id,Functor,Arity,Module,ParentId) 		<-- Id dafür?
+:- dynamic dynamicT/5.		%dynamicT(Id,Functor,Arity,Module,ParentId)  			
+:- dynamic transparentT/5.	%transparentT(Id,Functor,Arity,Module,ParentId) 		
+:- dynamic multifileT/5.	%multifileT(Id,Functor,Arity,Module,ParentId) 		
 
 :- dynamic termT/2.			%termT(Id,Term)
-:- dynamic slT/3.			%slT(Id,Pos,Len)    <----- should be taken from JTransformer in the long run!!!!
+:- dynamic slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
 
 :- dynamic call_edge/2.		%call_edge(LId,Id)
-:- dynamic pred_edge/2.		%pred_edge(Id,PId)							<-- ATTENTION: otherway as call_edge
+:- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)							<-- ATTENTION: otherway as call_edge
 :- dynamic onload_edge/2.	%onload_edge(Id,OId)						<-- ATTENTION: otherway as call_edge
 :- dynamic load_edge/4.		%load_edge(LoadingId,FileId,Imports,Directive)
 
-:- dynamic clauseT_ri/3.      %clauseT_ri(Functor,Arity,ClauseId)
-:- dynamic predicateT_ri/4.	%predicateT_ri(Functor,Arity,Module,Id)		
+
 :- dynamic fileT_ri/2.		%fileT_ri(FileName,Id)
+:- dynamic predicateT_ri/4.	%predicateT_ri(Functor,Arity,Module,Id)		
+:- dynamic clauseT_ri/3.    %clauseT_ri(Functor,Arity,ClauseId)
+
 :- dynamic pos_and_vars/3.	%pos_and_vars(ClauseId,BodyPos,VarNames)
 
 :- dynamic import_dir/2.	%import_dir(FileId,DirectiveId)
