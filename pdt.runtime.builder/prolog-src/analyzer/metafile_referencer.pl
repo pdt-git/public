@@ -27,7 +27,7 @@ file_references_for_metacall(Module,MetaTerm,References):-
  */
 is_metaterm(Module, Literal, MetaArguments) :-
    visible_in_module(Module,Functor,Arity),
-   functor(Literal,Functor,Arity),		
+   functor(Literal,Functor,Arity),	
    predicate_property(Module:Literal,meta_predicate(MetaTerm)),
    Literal =.. [Functor|Args],
    MetaTerm =.. [Functor|MetaArgs],
@@ -117,7 +117,7 @@ find_unknown_meta_predicates:-
    	'$xr_member'(Ref, Module:Meta_Head),                  % Get a term referenced by that clause
    	
    	functor(Meta_Head,Name,Arity),
-	known_meta_predicate(Module,Name,Arity,Definition),
+	known_meta_predicate(Module,Name,Arity,_Definition),
     
 
 	%hier müsste ein XReferencer jetzt rein,
