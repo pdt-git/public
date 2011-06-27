@@ -112,18 +112,18 @@ public class PrologSearchTableContentProvider extends PrologSearchContentProvide
 
 	@Override
 	public void elementsChanged(Object[] updatedElements) {
-		int addCount= 0;
-		int removeCount= 0;
+		//int addCount= 0;
+		//int removeCount= 0;
 		for (int i= 0; i < updatedElements.length; i++) {
 			if (fSearchResult.getMatchCount(updatedElements[i]) > 0) {
 				if (fTableViewer.testFindItem(updatedElements[i]) != null)
 					fTableViewer.refresh(updatedElements[i]);
 				else
 					fTableViewer.add(updatedElements[i]);
-				addCount++;
+		//		addCount++;
 			} else {
 				fTableViewer.remove(updatedElements[i]);
-				removeCount++;
+		//		removeCount++;
 			}
 		}
 	}
