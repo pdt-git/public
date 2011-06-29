@@ -1,7 +1,7 @@
 :-module(predicates,[	derive_all_predicates/0,
 						derive_predicate_for_clause/6,
 						derive_onloads/0,
-						analyse_directive/4]).
+						compute_all_predicate_properties/0]).
 :- ensure_loaded(parse_util).
 
 derive_all_predicates:-
@@ -58,77 +58,45 @@ compute_new_length(PId,Id) :-
     assert(slT(PId,NewBegin,NewLength)).
 
 compute_all_predicate_properties:-
-    forall(	property_dir(FileId,Functor,Args,ParentId,Pos),
-    		fileT(FileId,_,Module),
-    		compute_predicate_property(Functor, Args, ParentId, Module, Pos)
+    forall(	property_dir(FileId,Functor,Args,DirectiveId,_Pos),
+    		(	fileT(FileId,_,Module),
+    			compute_predicate_property(Functor, Args, DirectiveId, Module)
+    		)
     	).
-    	
-compute_predicate_property(_Functor, _Args, _ParentId, _Module, _Pos).
 
 /**
- * analyse_directive(+Directive,+Pos,+ParentId,+Module)
+ * analyse_directive(+Directive,+ParentId,+Module)
  *   looks into the term of Arg1 and if it is a known 
  *   kind of directive term stores accordingly information
  *   that can be used in the former parsing or x-referencing
  *   process (like modules, operators, dynamics, transparencies,
  *   metafile,...)
  **/
-analyse_directive(Directive,Pos,ParentId,Module):-     % dynamic
-	Directive =.. [dynamic|Dyns],
-	conjunction_to_list(Dyns,Dynamics),
-	Pos = term_position(_From,_To,_FFrom,_FTo, SubPos),
-	forall(	nth1(Nr,Dynamics,Dynamic),
-		  	(	nth1(Nr,SubPos,SubPosi),
-				SubPosi = term_position(F,T,_FF,_FT,_S),
-				Dynamic=Functor/Arity,
-				assert_new_node(Dynamic,F,T,Id),
-				assert(dynamicT(Id,Functor,Arity,Module,ParentId))
+compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
+	conjunction_to_list(Preds,Predicates),
+	forall(	member(Functor/Arity, Predicates),
+		  	(	predicateT_ri(Functor,Arity,Module,PId),
+				assert_prop(Prop, PId, DirectiveId)
 			)
 		).	
-analyse_directive(Directive,Pos,ParentId,Module):-     % module_transparent
-	Directive =.. [module_transparent|Transps],
-	conjunction_to_list(Transps,Transparents),
-	Pos = term_position(_From,_To,_FFrom,_FTo, SubPos),
-	forall(	nth1(Nr,Transparents,Transparent),
-		  	(	nth1(Nr,SubPos,SubPosi),
-				SubPosi = term_position(F,T,_FF,_FT,_S),
-				Transparent=Functor/Arity,
-				assert_new_node(Transparent,F,T,Id),
-				assert(transparentT(Id,Functor,Arity,Module,ParentId))
-			)
-		).	
-analyse_directive(Directive,Pos,ParentId,Module):-     % multifile
-	Directive =.. [multifile|Multis],
-	conjunction_to_list(Multis,Multifiles),
-	Pos = term_position(_From,_To,_FFrom,_FTo, SubPos),
-	forall(	nth1(Nr,Multifiles,Multifile),
-		  	(	nth1(Nr,SubPos,SubPosi),
-				SubPosi = term_position(F,T,_FF,_FT,_S),
-				Multifile=Functor/Arity,
-				assert_new_node(Multifile,F,T,Id),
-				assert(multifileT(Id,Functor,Arity,Module,ParentId))
-			)
-		).
-/*analyse_directive(Directive,Pos,ParentId,Module):-     % module_transparent
-	Directive =.. [multifile|Multis],
-	conjunction_to_list(Multis,Multifiles),
-	Pos = term_position(_From,_To,_FFrom,_FTo, SubPos),
-	forall(	nth1(Nr,Multifiles,Multifile),
-		  	(	nth1(Nr,SubPos,SubPosi),
-				SubPosi = term_position(F,T,_FF,_FT,_S),
-				Multifile=Functor/Arity,
-				assert_new_node(Multifile,F,T,Id),
-				assert(multifileT(Id,Functor,Arity,Module,ParentId))
-			)
-		).	*/	
-analyse_directive(_,_,_,_). 
-/*****
-* Eva: wirklich assert_new_node oder doch nur new_id? Und wirklich ...T???
-***/   	
+compute_predicate_property(_,_,_). 
+
+ 	
 
 conjunction_to_list([],[]).
 conjunction_to_list([A|B],[A|B]).
 conjunction_to_list((A,B),[A,B]) :-
    atom(B),!. 
 conjunction_to_list((A,B),[A|BasList]) :-
-   conjunction_to_list(B,BasList). 
+   conjunction_to_list(B,BasList).
+   
+   
+assert_prop(dynamic, PredId, DirectiveId):-
+    assert(dynamicT(PredId, DirectiveId)).
+assert_prop(module_transparent, PredId, DirectiveId):-
+    assert(transparentT(PredId, DirectiveId)).
+assert_prop(multifile, PredId, DirectiveId):-
+    assert(multifileT(PredId, DirectiveId)).
+assert_prop(meta_predicate, PredId, DirectiveId):-
+    assert(meta_predT(PredId, DirectiveId)). 
+assert_prp(_,_,_).
