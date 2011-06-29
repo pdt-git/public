@@ -50,11 +50,9 @@ import java.util.ResourceBundle;
 
 import org.cs3.pdt.PDT;
 import org.cs3.pdt.PDTPlugin;
-import org.cs3.pdt.console.PrologConsolePlugin;
 import org.cs3.pdt.core.IPrologProject;
 import org.cs3.pdt.core.PDTCore;
 import org.cs3.pdt.core.PDTCoreUtils;
-import org.cs3.pdt.internal.actions.ConsultActionDelegate;
 import org.cs3.pdt.internal.actions.FindDefinitionsActionDelegate;
 import org.cs3.pdt.internal.actions.FindPredicateActionDelegate;
 import org.cs3.pdt.internal.actions.FindReferencesActionDelegate;
@@ -66,12 +64,7 @@ import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.metadata.GoalProvider;
 import org.cs3.pl.metadata.PredicateReadingUtilities;
-import org.cs3.pl.prolog.PrologInterfaceException;
-import org.cs3.pl.prolog.PrologSession;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -113,7 +106,6 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
-import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
@@ -125,7 +117,7 @@ public class PLEditor extends TextEditor {
 
 	public static String COMMAND_SHOW_QUICK_OUTLINE = "org.eclipse.pdt.ui.edit.text.prolog.show.quick.outline";
 
-	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save.consult";
+	public static String COMMAND_SAVE_AND_CONSULT = "org.eclipse.pdt.ui.edit.save";
 
 	public static String COMMAND_CONSULT = "org.eclipse.pdt.ui.edit.consult";
 
@@ -150,7 +142,8 @@ public class PLEditor extends TextEditor {
 	public void doSave(IProgressMonitor progressMonitor) {
 		super.doSave(progressMonitor);
 		// TRHO: Experimental:
-		//addProblemMarkers();
+		addProblemMarkers();
+		setFocus();
 
 	}
 
@@ -160,94 +153,13 @@ public class PLEditor extends TextEditor {
 			if(!(getEditorInput() instanceof IFileEditorInput)){
 				return;
 			}
-			IFile file = ((IFileEditorInput)getEditorInput()).getFile();
-			if( PDTCoreUtils.getPrologProject(file)==null &&
-				PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole()!= null){ 
-					PrologSession session =null;
-					try {
-						session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-						session.queryOnce("activate_warning_and_error_tracing");
+			PLMarkerUtils.updateFileMarkers(((IFileEditorInput)getEditorInput()).getFile());
 
-						file.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
-						executeConsult();
-						addMarkers(file);
-						
-					}catch(Exception e) {
-						Debug.report(e);
-					} finally {
-						if(session!=null)session.dispose();
-					}
-
-			}
+			
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 	}
-
-	private void addMarkers(final IFile file) throws PrologInterfaceException {
-		Job j = new Job("update markers") {
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				PrologSession session =null;
-				try {
-				
-					final IDocument doc = PDTCoreUtils.getDocument(file);
-					session = PrologConsolePlugin.getDefault().getPrologConsoleService().getActivePrologConsole().getPrologInterface().getSession();
-					Thread.sleep(500); // wait for the prolog messages to complete (TODO: wait until parsing is finished)
-					List<Map<String, Object>> msgs = session.queryAll("pdtplugin:errors_and_warnings(Kind,Line,Length,Message)");
-					for (Map<String, Object> msg : msgs) {
-						int severity=0;
-						try {
-							severity = mapSeverity(((String)msg.get("Kind")));
-						} catch(IllegalArgumentException e){
-							continue;
-						}
-						IMarker marker = file.createMarker(IMarker.PROBLEM);
-
-							marker.setAttribute(IMarker.SEVERITY, severity);
-							String msgText = (String)msg.get("Message");
-							int start = doc.getLineOffset(Integer.parseInt((String)msg.get("Line"))-1);
-							int end = start +Integer.parseInt((String)msg.get("Length"));
-							
-							if(severity==IMarker.SEVERITY_ERROR && msgText.startsWith("Exported procedure ")&& msgText.endsWith(" is not defined\n")){
-								start = end= 0;
-							}
-							MarkerUtilities.setCharStart(marker, start);
-							MarkerUtilities.setCharEnd(marker, end);
-
-							marker.setAttribute(IMarker.MESSAGE, msgText);
-					}
-					session.queryOnce("deactivate_warning_and_error_tracing");
-				} catch (Exception e) {
-					Debug.report(e);
-					return Status.CANCEL_STATUS;
-				} finally {
-					if(session!=null)session.dispose();
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		j.setRule(file);
-		j.schedule();
-			
-		 
-	}
-	
-	private int mapSeverity(String severity) {
-		if ("error".equals(severity)) {
-			return IMarker.SEVERITY_ERROR;
-		}
-		if ("warning".equals(severity)) {
-			return IMarker.SEVERITY_WARNING;
-		}
-		if ("info".equals(severity)) {
-			return IMarker.SEVERITY_INFO;
-		}
-
-		throw new IllegalArgumentException("cannot map severity constant: "
-				+ severity);
-	}
-
 
 	protected abstract class AbstractSelectionChangedListener implements
 			ISelectionChangedListener {
@@ -466,7 +378,8 @@ public class PLEditor extends TextEditor {
 				+ ".ConsultAction", this) {
 			@Override
 			public void run() {
-				executeConsult();
+				addProblemMarkers();
+//				executeConsult();
 			}
 		};
 		addAction(menuMgr, reloadAction, "(Re)consult",
@@ -480,9 +393,11 @@ public class PLEditor extends TextEditor {
 				+ ".SaveAndConsultAction", this) {
 			@Override
 			public void run() {
-				doSave(new NullProgressMonitor());
-				addProblemMarkers();
-				setFocus();
+				// must be super, otherwise doSave will 
+				// consult the file and update the problem markers, too.
+				PLEditor.super.doSave(new NullProgressMonitor());
+//				addProblemMarkers();
+//				setFocus();
 			}
 		};
 		addAction(menuMgr, action, "Save and (Re)consult",
@@ -520,13 +435,6 @@ public class PLEditor extends TextEditor {
 				menuMgr.createContextMenu(getSourceViewer().getTextWidget()));
 		getEditorSite().registerContextMenu(menuMgr, getSelectionProvider());
 		return menuMgr;
-	}
-
-	private void executeConsult() {
-		IFile file = ((IFileEditorInput)getEditorInput()).getFile();
-		ConsultActionDelegate consult = new ConsultActionDelegate();
-		consult.setSchedulingRule(file);
-		consult.run(null);
 	}
 
 	/**
