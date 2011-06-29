@@ -1,12 +1,12 @@
 :- module(parse_util, [assert_new_node/4, cleanup_nodes/0,
 						fileT/3,
-						clauseT/5, directiveT/3, headT/6,
-						literalT/6, metaT/6,
-						predicateT/5, onloadT/3, operatorT/8,
-						slT/3, termT/2,
-						dynamicT/5, transparentT/5, multifileT/5,
+						predicateT/5, onloadT/3,
+						directiveT/3, clauseT/5, literalT/6, metaT/6, headT/6,
+						operatorT/8,
+						dynamicT/2, transparentT/2, multifileT/2, meta_predT/2,
+						termT/2, slT/3, 
 						call_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
-						clauseT_ri/3, predicateT_ri/4, fileT_ri/2,
+						fileT_ri/2, predicateT_ri/4, clauseT_ri/3,  
 						import_dir/2, export_dir/2, load_dir/3, property_dir/5, library_dir/3,
 						pos_and_vars/3, 
 						error/3, warning/3]).
@@ -14,6 +14,7 @@
 :- reexport('util/ctc_admin.pl').
 
 :- dynamic fileT/3.			%fileT(Id,FileName,Module)
+
 :- dynamic onloadT/3.		%onloadT(Id,FileId,Module)	
 :- dynamic predicateT/5.	%predicateT(Id,FileId,Functor,Arity,Module)
 
@@ -25,15 +26,16 @@
 
 :- dynamic operatorT/8.		%operatorT(Id,ParentId,FileId,Module,Name,Arity,Type,Precedence)
 
-:- dynamic dynamicT/5.		%dynamicT(Id,Functor,Arity,Module,ParentId)  			
-:- dynamic transparentT/5.	%transparentT(Id,Functor,Arity,Module,ParentId) 		
-:- dynamic multifileT/5.	%multifileT(Id,Functor,Arity,Module,ParentId) 		
+:- dynamic dynamicT/2.		%dynamicT(PredicateId,DynamicId)  			
+:- dynamic transparentT/2.	%transparentT(PredicateId,DynamicId)		
+:- dynamic multifileT/2.	%multifileT(PredicateId,DynamicId) 
+:- dynamic meta_predT/2.	%meta_predT(PredicateId,DynamicId)		
 
 :- dynamic termT/2.			%termT(Id,Term)
 :- dynamic slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
 
 :- dynamic call_edge/2.		%call_edge(LId,Id)
-:- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)							<-- ATTENTION: otherway as call_edge
+:- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)					<-- ATTENTION: otherway as call_edge
 :- dynamic onload_edge/2.	%onload_edge(Id,OId)						<-- ATTENTION: otherway as call_edge
 :- dynamic load_edge/4.		%load_edge(LoadingId,FileId,Imports,Directive)
 
@@ -47,7 +49,7 @@
 :- dynamic import_dir/2.	%import_dir(FileId,DirectiveId)
 :- dynamic export_dir/2.	%export_dir(Predicates,DirectiveId)
 :- dynamic load_dir/3.		%load_dir(DirectiveId,Args,Imports)
-:- dynamic property_dir/5.	%property_dir(FileId,Functor,Args,DirectiveId,Pos)
+:- dynamic property_dir/5.	%property_dir(FileId,Functor,Args,DirectiveId)
 :- dynamic library_dir/3.	%library_dir(LibName,LibDir,DirectiveId)
 
 :- dynamic error/3.			%error(Error,Context,FileId)  
@@ -67,9 +69,10 @@ cleanup_nodes:-
 	retractall(predicateT(_,_,_,_,_)),
 	retractall(onloadT(_,_,_)),
 	retractall(operatorT(_,_,_,_,_,_,_,_)),
-	retractall(dynamicT(_,_,_,_,_)),
-	retractall(transparentT(_,_,_,_,_)),						
-	retractall(multifileT(_,_,_,_,_)),	
+	retractall(dynamicT(_,_)),
+	retractall(transparentT(_,_)),						
+	retractall(multifileT(_,_)),	
+	retractall(meta_predT(_,_)),
 	retractall(termT(_,_)),
 	retractall(slT(_,_,_)),
 	retractall(call_edge(_,_)),	
