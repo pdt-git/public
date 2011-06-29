@@ -1,4 +1,5 @@
-:-module(metapred_finder, [	infer_meta_arguments_for/3,
+:-module(metapred_finder, [	find_all_meta_predicates/0,
+							infer_meta_arguments_for/3,
 							find_meta_pred_args_in_clause/3]).
 
 :- use_module(metafile_referencer).
@@ -34,15 +35,20 @@ initialize_meta_pred_search:-
     		predicate_property(Module:Head, built_in),
     		predicate_property(Module:Head, meta_predicate(Spec))
     	),
-    	assert(dynamic new_meta_pred(Module, Head, Spec))
+    	assert(new_meta_pred(Module, Head, Spec))
     ).
+    
+%collect_candidates(Candidates):-
+%	forall(	
+%    	new_meta_pred(MetaSpec, Module),
+%    	find_reference
+%        retract(new_meta_pred(MetaSpec, Module))	
     
 prepare_next_step:-
     forall(	
     	new_meta_pred(MetaSpec, Module),
     	(	functor(MetaSpec, Functor, Arity),
-    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, MetaSpec)),
-    		retract(new_meta_pred(MetaSpec, Module))
+    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, MetaSpec))
     	)
     ).
     
@@ -88,14 +94,28 @@ find_meta_pred_args_in_clause(Module, Head, MetaArgs):-
 	 find_meta_vars_in_body(Body, Module, [],  MetaVars),
 	 find_meta_vars_in_head(Head, MetaVars, MetaArgs).
 	 
+
+
 	 
-	 
+/**
+ * find_meta_vars_in_body(+Term, +Context, +MetaVars, -MetaVars) is det
+ * 
+ * Analyses the code of Arg1 for calls to known meta_predicates (in the
+ * module context of Arg2).
+ * If such a meta-call is found, all terms that appear 
+ *  - as arguments of those meta-calls,  
+ *  - are unified / aliased to them,
+ *  - are part of those terms, 
+ *  - or are connected to them via term-manupilation
+ * previously in the code of Arg1, are stored in Arg4. 
+ * Arg3 helps as an accumulator of previously found arguments / terms.
+ */  	 
 find_meta_vars_in_body(A, _, MetaVars, MetaVars):-
-    atomic(A),
+    (	atomic(A)
+    ;	var(A)
+    ),
     !.
-find_meta_vars_in_body(A, _, MetaVars, MetaVars):-
-    var(A),
-    !.
+  
 find_meta_vars_in_body(Module:Term, _, KnownMetaVars, MetaVars):-
     !, 
     find_meta_vars_in_body(Term, Module, KnownMetaVars, MetaVars).
@@ -112,17 +132,59 @@ find_meta_vars_in_body((TermA; TermB), Context, KnownMetaVars, MetaVars):-
    	  
 find_meta_vars_in_body((TermA = TermB), _Context, KnownMetaVars, MetaVars):-
     !,
-%    find_meta_vars_in_body(TermB, Context, KnownMetaVars, MetaVarsB),
-%   	find_meta_vars_in_body(TermA, Context, MetaVarsB, OwnMetaVars),
-   	(	occurs_in(TermA, KnownMetaVars/*OwnMetaVars*/)
-   	->	add_var_to_set(TermB, KnownMetaVars/*OwnMetaVars*/, OwnMetaVars2)
-   	;	OwnMetaVars2 = KnownMetaVars%OwnMetaVars
+   	(	occurs_in(TermA, KnownMetaVars)
+   	->	add_var_to_set(TermB, KnownMetaVars, OwnMetaVars2)
+   	;	OwnMetaVars2 = KnownMetaVars
    	),
    	(	occurs_in(TermB, OwnMetaVars2)
    	->	add_var_to_set(TermA, OwnMetaVars2, MetaVars3)
    	;	MetaVars3 = OwnMetaVars2
    	),
    	check_inner_vars(TermA, TermB, MetaVars3, MetaVars).
+   	
+find_meta_vars_in_body(functor(Term,Functor,_), _Context, KnownMetaVars, MetaVars):-  % Term manipulation predicate
+    !,
+    (  occurs_in(Term,KnownMetaVars)
+    -> add_var_to_set(Functor, KnownMetaVars, MetaVars)
+    ;	(	occurs_in(Functor,KnownMetaVars)
+    	-> 	add_var_to_set(Term, KnownMetaVars, MetaVars)
+    	;  	MetaVars = KnownMetaVars
+    	)
+    ).
+find_meta_vars_in_body(( Term =.. List ), _Context, KnownMetaVars, MetaVars):-
+    !,
+    (	occurs_in(Term,KnownMetaVars)
+    ->  (	add_var_to_set(List, KnownMetaVars, MetaVars1),
+    		(	(	\+(var(List)),
+					List = [Functor|_]											
+				)
+%    	->	combine_sets_nonbinding(List, [List|KnownMetaVars], MetaVars) TODO: etwas in der Art um Zahl raus zu kriegen 
+			->	add_var_to_set(Functor, MetaVars1, MetaVars)				%	oder versteckte meta-pred-Suche	
+    		;	MetaVars = MetaVars1
+    		)	
+    	)
+    ;  (	(	occurs_in(List,KnownMetaVars)
+    		-> 	add_var_to_set(Term, KnownMetaVars, MetaVars)
+    		;  (	(	\+(var(List)),
+    					List = [Functor|_],
+    					occurs_in(Functor, KnownMetaVars)
+    				)
+    			->	add_var_to_set(Term, KnownMetaVars, MetaVars)	
+    			;	MetaVars = KnownMetaVars
+    			)
+    		)
+    	)
+    ).
+find_meta_vars_in_body(arg(_,Term,Arg), _Context, KnownMetaVars, MetaVars):-
+    !,
+    (  occurs_in(Term,KnownMetaVars)
+    -> add_var_to_set(Arg, KnownMetaVars, MetaVars)
+    ;  (	occurs_in(Arg,KnownMetaVars)
+    	-> 	add_var_to_set(Term, KnownMetaVars, MetaVars)
+    	;  	MetaVars = KnownMetaVars
+    	)
+    ).
+
      
 find_meta_vars_in_body(Term, Context, KnownMetaVars, MetaVars):-
     is_metaterm(Context, Term, MetaCombos), !, 
