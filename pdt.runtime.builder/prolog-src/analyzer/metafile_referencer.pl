@@ -6,6 +6,9 @@
 :- use_module(org_cs3_lp_utils(utils4modules)).
 :- use_module(pdt_xref_experimental).
 
+
+:- dynamic user_defined_meta_pred/4.	%user_defined_meta_pred(Functor, Arity ,Module, MetaSpec)
+
 % FÜR EVA: Dies Prädikat müssen wir noch mal besprechen. -- G.
 
 file_references_for_metacall(Module,MetaTerm,References):-
@@ -19,8 +22,8 @@ file_references_for_metacall(Module,MetaTerm,References):-
     
     
 /* *
- * is_metaterm(-Literal, ?MetaArguments ) is non_det
- * is_metaterm(+Literal, ?MetaArguments ) is det
+ * is_metaterm(?Module, -Literal, ?MetaArguments ) is non_det
+ * is_metaterm(?Module, +Literal, ?MetaArguments ) is det
  *  Arg1 is a literal representing a metacall and 
  *  Arg2 is the list of its meta-arguments each of the form:
  *      (Original_argument_position, Argument).
@@ -28,11 +31,18 @@ file_references_for_metacall(Module,MetaTerm,References):-
 is_metaterm(Module, Literal, MetaArguments) :-
    visible_in_module(Module,Functor,Arity),
    functor(Literal,Functor,Arity),	
-   predicate_property(Module:Literal,meta_predicate(MetaTerm)),
+   %predicate_property(Module:Literal,meta_predicate(MetaTerm)),
+   is_meta_pred(Module, Literal, MetaTerm),
    Literal =.. [Functor|Args],
    MetaTerm =.. [Functor|MetaArgs],
    collect_meta_args(Args,MetaArgs, MetaArguments ).
-    
+   
+
+is_meta_pred(Module, Literal, MetaTerm):-	//TODO: auf built_in einschränken!
+    predicate_property(Module:Literal,meta_predicate(MetaTerm)).
+is_meta_pred(Module, Literal, MetaTerm):-    
+    functor(Literal, Functor, Arity),
+    user_defined_meta_pred(Functor, Arity, Module, MetaTerm).
     
 /* *
 * collect_meta_args(+Args,+MetaArgs,?MetaArguments) is det
