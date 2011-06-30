@@ -19,7 +19,7 @@ find_all_meta_predicates:-
 			),
 			assert(new_meta_pred(MetaSpec, Module))
 		),
-		(	new_meta_pred(_)
+		(	new_meta_pred(_,_)
 		->	prepare_next_step
 		;	fail
 		).
@@ -38,11 +38,18 @@ initialize_meta_pred_search:-
     	assert(new_meta_pred(Module, Head, Spec))
     ).
     
-%collect_candidates(Candidates):-
-%	forall(	
-%    	new_meta_pred(MetaSpec, Module),
-%    	find_reference
-%        retract(new_meta_pred(MetaSpec, Module))	
+collect_candidates(Candidates):-
+	findall(
+		CandModule:Candidate,
+    	(	new_meta_pred(MetaSpec, Module),
+    		functor(MetaSpec, Functor, Arity),
+    		literalT(_Id,_ParentId,ClauseId,Module,Functor,Arity),
+			clauseT(ClauseId,_,CandModule,CandFunctor,CandArity),
+			functor(Candidate, CandFunctor, CandArity),
+        	retract(new_meta_pred(MetaSpec, Module))
+        ),
+        Candidates
+	).	
     
 prepare_next_step:-
     forall(	
