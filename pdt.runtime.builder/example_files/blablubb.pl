@@ -1,0 +1,4 @@
+:- module(blablubb,[]).
+
+
+x([]).

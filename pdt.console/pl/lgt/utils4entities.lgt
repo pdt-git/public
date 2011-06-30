@@ -121,7 +121,7 @@ entity_multifile_predicate_source_file(Entity, Functor, Arity, To, FullPath, Lin
 	entity_property(Entity, _, file(File, Directory)),
 	atom_concat(Directory, File, FullPath),
 	entity_property(Entity, _, provides(Functor/Arity, To, Properties)),
-	list::memberchk(line(Line), Properties),
+	list::memberchk(line_count(Line), Properties),
 	!.
 
 
@@ -210,13 +210,13 @@ defined_in_file(Entity, Functor, Arity, 1, Path, Line) :-
 	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
 	entity_property(Entity, _Kind, file(File, Directory)), !,
 	atom_concat(Directory, File, Path),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 defined_in_file(Entity, Functor, Arity, 1, Path, Line) :-
 	logtalk::loaded_file(File, Directory),
 	entity_property(Entity, _Kind, file(File, Directory)),
 	atom_concat(Directory, File, Path),
 	entity_property(Entity, _Kind, defines(Functor/Arity, Properties)),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 %    declared_in_entity(Entity,Functor,Arity,Entity),
 %    functor(Head,Functor,Arity),
@@ -237,7 +237,7 @@ declared_in_file(Entity, Name, Arity, [Path-[Line]]) :-
     entity_property(Entity, _Kind, declares(Name/Arity, Properties)),
     (  entity_property(Entity, _Kind, file(File, Directory))
     ->  atom_concat(Directory, File, Path),
-        ( list::memberchk(line(Line), Properties)            % Line of the scope directive
+        ( list::memberchk(line_count(Line), Properties)            % Line of the scope directive
         -> true
         ;  Line = 0                                          % Implicit dynamic declaration
         )                                                    % via an assert. No line number.

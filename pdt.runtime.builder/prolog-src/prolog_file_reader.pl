@@ -20,6 +20,8 @@ generate_facts(Project):-
 	time(derive_all_predicates),
 	writeln('genereating directive collections'),
 	time(derive_onloads),
+	writeln('compute_predicate_properties'),
+	time(compute_all_predicate_properties),
 	writeln('parse literals'),
 	time(parse_bodies),
 	writeln('generate edges'),

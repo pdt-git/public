@@ -38,7 +38,7 @@ is_metaterm(Module, Literal, MetaArguments) :-
    collect_meta_args(Args,MetaArgs, MetaArguments ).
    
 
-is_meta_pred(Module, Literal, MetaTerm):-	//TODO: auf built_in einschränken!
+is_meta_pred(Module, Literal, MetaTerm):-	%TODO: auf built_in einschränken!
     predicate_property(Module:Literal,meta_predicate(MetaTerm)).
 is_meta_pred(Module, Literal, MetaTerm):-    
     functor(Literal, Functor, Arity),
