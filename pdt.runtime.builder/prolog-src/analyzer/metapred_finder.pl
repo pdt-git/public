@@ -28,14 +28,14 @@ find_all_meta_predicates:-
     
 initialize_meta_pred_search:-
     retractall(metafile_referencer:user_defined_meta_pred(_,_,_,_)),
-    retractall(new_meta_pred(_,_,_)),
+    retractall(new_meta_pred(_,_)),
     forall(	
     	(   current_predicate(Module:Functor/Arity),
     		functor(Head,Functor,Arity),
     		predicate_property(Module:Head, built_in),
     		predicate_property(Module:Head, meta_predicate(Spec))
     	),
-    	assert(new_meta_pred(Module, Head, Spec))
+    	assert(new_meta_pred(Spec, Module))
     ).
     
 collect_candidates(Candidates):-
