@@ -58,8 +58,8 @@ compute_new_length(PId,Id) :-
     assert(slT(PId,NewBegin,NewLength)).
 
 compute_all_predicate_properties:-
-    forall(	property_dir(FileId,Functor,Args,DirectiveId,_Pos),
-    		(	fileT(FileId,_,Module),
+    forall(	parse_util:property_dir(Functor, Args, DirectiveId),
+    		(	directiveT(DirectiveId, _, Module),
     			compute_predicate_property(Functor, Args, DirectiveId, Module)
     		)
     	).
@@ -74,12 +74,24 @@ compute_all_predicate_properties:-
  **/
 compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
 	conjunction_to_list(Preds,Predicates),
-	forall(	member(Functor/Arity, Predicates),
-		  	(	predicateT_ri(Functor,Arity,Module,PId),
-				assert_prop(Prop, PId, DirectiveId)
-			)
-		).	
-compute_predicate_property(_,_,_). 
+	forall(	
+		member(Functor/Arity, Predicates),
+		(	(	predicateT_ri(Functor,Arity,Module,PId)
+			->	true
+			;	(	(Prop = dynamic)
+				->	(	new_node_id(PId),	
+    					assert(node_id(PId)),
+    					directiveT(DirectiveId, File, _),
+    					assert(predicateT(PId,File,Functor,Arity,Module)),
+    					assert(predicateT_ri(Functor,Arity,Module,PId))
+					)
+				;	fail	
+				)
+			),
+			assert_prop(Prop, PId, DirectiveId)
+		)
+	).	
+compute_predicate_property(_,_,_,_). 
 
  	
 
@@ -99,4 +111,4 @@ assert_prop(multifile, PredId, DirectiveId):-
     assert(multifileT(PredId, DirectiveId)).
 assert_prop(meta_predicate, PredId, DirectiveId):-
     assert(meta_predT(PredId, DirectiveId)). 
-assert_prp(_,_,_).
+assert_prop(_,_,_).

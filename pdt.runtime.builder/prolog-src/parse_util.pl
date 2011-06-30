@@ -7,7 +7,7 @@
 						termT/2, slT/3, 
 						call_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
 						fileT_ri/2, predicateT_ri/4, clauseT_ri/3,  
-						import_dir/2, export_dir/2, load_dir/3, property_dir/5, library_dir/3,
+						import_dir/2, export_dir/2, load_dir/3, property_dir/3, library_dir/3,
 						pos_and_vars/3, 
 						error/3, warning/3]).
 
@@ -49,7 +49,7 @@
 :- dynamic import_dir/2.	%import_dir(FileId,DirectiveId)
 :- dynamic export_dir/2.	%export_dir(Predicates,DirectiveId)
 :- dynamic load_dir/3.		%load_dir(DirectiveId,Args,Imports)
-:- dynamic property_dir/5.	%property_dir(FileId,Functor,Args,DirectiveId)
+:- dynamic property_dir/3.	%property_dir(Functor,Args,ParentId)
 :- dynamic library_dir/3.	%library_dir(LibName,LibDir,DirectiveId)
 
 :- dynamic error/3.			%error(Error,Context,FileId)  
@@ -86,7 +86,7 @@ cleanup_nodes:-
 	retractall(import_dir(_,_)),
 	retractall(export_dir(_,_)),
 	retractall(load_dir(_,_,_)),
-	retractall(property_dir(_,_,_,_,_)),
+	retractall(property_dir(_,_,_)),
 	retractall(library_dir(_,_,_)),
 	retractall(error(_,_,_)),
 	retractall(warning(_,_,_)),
