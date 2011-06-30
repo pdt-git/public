@@ -106,7 +106,7 @@ find_definitions_categorized(_EnclFile, _ClickedLine, Term, Functor, Arity, _Thi
 		SearchCategory = multifile
 	),
 	entity_property(Entity, _Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties),
+	list::memberchk(line_count(Line), Properties),
 	atom_concat(Directory, File, FullPath).
 
 search_term_to_predicate_indicator(_::Term, Functor/Arity) :- !, functor(Term, Functor, Arity).
@@ -299,16 +299,16 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		entity_property(Entity, Kind, declares(Functor/Arity, Properties0)),
 		% we add a clauses/1 declaration property just to simplify coding in the Java side
 		(	entity_property(Entity, Kind, defines(Functor/Arity, DefinitionProperties)) ->
-			list::memberchk(clauses(N0), DefinitionProperties)
+			list::memberchk(number_of_clauses(N0), DefinitionProperties)
 		;	N0 = 0
 		),
 		findall(
 			N1,
 			(entity_property(Entity, Kind, includes(Functor/Arity, _, IncludesProperties)),
-			 list::memberchk(clauses(N1), IncludesProperties)),
+			 list::memberchk(number_of_clauses(N1), IncludesProperties)),
 			Ns),
 		numberlist::sum([N0| Ns], N),
-		Properties = [clauses(N)| Properties0],
+		Properties = [number_of_clauses(N)| Properties0],
 		SearchCategory = declaration
 	;	% entity definitions
 		entity_property(Entity, Kind, defines(Functor/Arity, Properties0)),
@@ -339,7 +339,7 @@ find_definition_contained_in(FullPath, Entity, Kind, Functor, Arity, SearchCateg
 		Properties = [for(For), defining_file(DefiningFullPath)| Properties0],
 		SearchCategory = (multifile)
 	),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 
                /***********************************************
@@ -654,7 +654,7 @@ decode(Object::Predicate, _This, Entity, Kind, Template, [Directory, File, [Line
 		)
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
@@ -710,7 +710,7 @@ decode(::Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		SearchCategory = multifile
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
@@ -741,7 +741,7 @@ decode(:Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prop
 		)
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	!,
@@ -792,7 +792,7 @@ decode(^^Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Pro
 		SearchCategory = 'overridden definition'
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Properties, SearchCategory) :-
 	nonvar(Predicate),
@@ -840,6 +840,6 @@ decode(Predicate, This, Entity, Kind, Template, [Directory, File, [Line]], Prope
 		SearchCategory = multifile
 	),
 	entity_property(Entity, Kind, file(File, Directory)),
-	list::memberchk(line(Line), Properties).
+	list::memberchk(line_count(Line), Properties).
 
 :- end_object.
