@@ -3,14 +3,21 @@
 
 
 
+%undeclared_metapredicate(Head):-
+	 
+
+
 pl_test:-
     find_all_loaded_files(Project),
     plparser_quick:generate_facts(Project).       
     
 find_all_loaded_files(Project):-
+    current_prolog_flag(home, PrologHome),
     findall(
     	File,
-    	source_file(File),
+    	(	source_file(File),
+    		\+(string_concat(PrologHome, _, File))
+    	), 
     	Project
     ).	
  
