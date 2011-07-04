@@ -47,26 +47,11 @@ parse_body_literals([A|B], Pos, _ParentId, _ClauseId, _Module, _VarNames) :-
 /**
 * ToDo: list elemens should be visited!!!!
 **/
-   
-parse_body_literals(Body, Pos, ParentId, ClauseId, Module, VarNames) :- 
-   	%xref:is_metaterm(Body, MetaArguments),
-   	catch(	
-   		metafile_referencer:is_metaterm(Module, Body, MetaArguments),
-   		_,
-   		format('problem with metaterm-check for Module: ~w and Body: ~w~n', [Module, Body])
-   	),
-   	!, 
-   	Pos = term_position(From, To, _FFrom, _FTo, SubPos),
-   	assert_new_node(Body,From,To,Id),   %<===
-   	functor(Body,Functor,Arity),
-    assert(metaT(Id,ParentId,ClauseId,Module,Functor,Arity)),
-	forall( member(Meta, MetaArguments), 
-           process_meta_argument(Meta, SubPos, Id, ClauseId, Module, VarNames)			
-   	).		
+
 /**
 * ToDo: edge-references for meta-literals
 **/
-parse_body_literals('$Var'(_A), _Pos, _ParentId, _ClauseId, _Module, _VarNames) :- 
+parse_body_literals('$VAR'(_A), _Pos, _ParentId, _ClauseId, _Module, _VarNames) :- 
 	!. 
 %	Pos = From - To.
 %	assert_new_node('$Var'(A),From,To,_Id).    %<===
@@ -82,6 +67,24 @@ parse_body_literals('$Var'(_A), _Pos, _ParentId, _ClauseId, _Module, _VarNames) 
    	functor(Body,Functor,Arity),
     assert(literalT(Id,ParentId,ClauseId,Functor,Arity)).  							
 */   	
+
+   
+parse_body_literals(Body, Pos, ParentId, ClauseId, Module, VarNames) :- 
+   	%xref:is_metaterm(Body, MetaArguments),
+   	catch(	
+   		metafile_referencer:is_metaterm(Module, Body, MetaArguments),
+   		_,
+   		format('problem with metaterm-check for Module: ~w and Body: ~w~n', [Module, Body])
+   	),
+   	!, 
+   	Pos = term_position(From, To, _FFrom, _FTo, SubPos),
+   	assert_new_node(Body,From,To,Id),   %<===
+   	functor(Body,Functor,Arity),
+    assert(literalT(Id,ParentId,ClauseId,Module,Functor,Arity)),
+    assert(metaT(Id,ParentId,ClauseId,Module,Functor,Arity)),
+	forall( member(Meta, MetaArguments), 
+           process_meta_argument(Meta, SubPos, Id, ClauseId, Module, VarNames)			
+   	).		
   
 parse_body_literals(Literal, Pos, ParentId, ClauseId, Module, _VarNames) :- 
 	% Phuuu, finally a simple literal:
