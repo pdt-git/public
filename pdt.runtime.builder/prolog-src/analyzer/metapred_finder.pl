@@ -7,6 +7,18 @@
 
 
 
+
+
+get_all_userdefined_meta_predicates(MetaPreds):-
+    find_all_meta_predicates,
+    findall(
+    	Module:NewMetaSpec,
+    	metafile_referencer:user_defined_meta_pred(_Functor, _Arity, Module, NewMetaSpec),
+    	MetaPreds
+    ).
+    	
+
+
 :- dynamic new_meta_pred/2.	%new_meta_pred(MetaSpec, Module)
 
 find_all_meta_predicates:-
@@ -16,10 +28,8 @@ find_all_meta_predicates:-
     	forall(
     		(	member(Module:Candidate, Candidates),
     			infer_meta_arguments_for(Module,Candidate,MetaSpec)
-			),
-			(	assert(new_meta_pred(MetaSpec, Module)),
-				format('surviving Candidate: ~w:~w~n', [Module, MetaSpec])
-			)
+ 			),
+			assert(new_meta_pred(MetaSpec, Module))
 		),
 		(	new_meta_pred(_,_)
 		->	(	prepare_next_step,
@@ -35,18 +45,21 @@ initialize_meta_pred_search:-
     retractall(metafile_referencer:user_defined_meta_pred(_,_,_,_)),
     retractall(new_meta_pred(_,_)),
     forall(	
-    	(   current_predicate(Module:Functor/Arity),
-    		functor(Head,Functor,Arity),
-    		predicate_property(Module:Head, built_in),
-    		predicate_property(Module:Head, meta_predicate(Spec)),
-    		is_metaterm(Module, Head, MetaArgs),
-    		(MetaArgs \= [])
+    	(   find_predefined_metas(Spec, Module)
     	),
-    	(	assert(new_meta_pred(Spec, Module)),
-    		format('Initial: ~w:~w~n', [Module, Spec])
-    	)
+    	assert(new_meta_pred(Spec, Module))
+    		%format('Initial: ~w:~w~n', [Module, Spec])
     ).
     
+  
+find_predefined_metas(Spec, Module):-
+    declared_in_module(Module,Functor, Arity, Module),
+    functor(Head,Functor,Arity),
+    predicate_property(Module:Head, built_in),
+   	predicate_property(Module:Head, meta_predicate(Spec)),
+   	is_metaterm(Module, Head, MetaArgs),
+    (MetaArgs \= []).
+        
 collect_candidates(Candidates):-
 	findall(
 		CandModule:Candidate,
@@ -63,22 +76,28 @@ collect_candidates(Candidates):-
 			parse_util:literalT(LiteralId,_ParentId,ClauseId,_AModule,_Functor,_Arity),
 			parse_util:clauseT(ClauseId,_,CandModule,CandFunctor,CandArity),
 			functor(Candidate, CandFunctor, CandArity),
-			format('Candidate: ~w:~w~n', [CandModule, Candidate])
+			\+ (predicate_property(CandModule:Candidate, built-in))%,
+			%format('Candidate: ~w:~w~n', [CandModule, Candidate])
         ),
         CandidateList
 	), 
 	list_to_set(CandidateList, Candidates).	
+	
+	
     
 prepare_next_step:-
     forall(	
     	new_meta_pred(MetaSpec, Module),
     	(	functor(MetaSpec, Functor, Arity),
     		(	metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, OldMetaSpec)
-    		->	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec)
+    		->	(	(MetaSpec \= OldMetaSpec)
+    			->	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec)
+    			;	retract(new_meta_pred(MetaSpec, Module))	% was already there, no need to handle it again 		
+    			)
     		;	NewMetaSpec = MetaSpec
     		),
-    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec)),
-    		format('New meta found: ~w:~w/~w -> ~w~n', [Module, Functor, Arity, NewMetaSpec])
+    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec))%,
+    		%format('New meta found: ~w:~w/~w -> ~w~n', [Module, Functor, Arity, NewMetaSpec])
     	)
     ).
     
