@@ -82,7 +82,8 @@ public class PLMarkerUtils {
 							marker.setAttribute(PDTMarker.QUICKFIX_DESCRIPTION, msg.get("QuickfixDescription").toString());
 	
 							String msgText = (String)msg.get("Description");
-							int start = Integer.parseInt(msg.get("Start").toString());
+							int startPl = Integer.parseInt(msg.get("Start").toString());
+							int start =PDTCoreUtils.convertLogicalToPhysicalOffset(doc,startPl);
 							int length = Integer.parseInt(msg.get("Length").toString());
 									
 	//						marker.setAttribute(IMarker.CHAR_START, start);

@@ -10,7 +10,7 @@ smell_description('MissingMetaPredicateDeclaration', SmellDescription, QuickfixD
 %    
 %QuickfixAction ist der Text, der unmittelbar vor dem Smell eingetragen werden muss (Zeilenumbruch muss mit angegeben werden)
 smell('MissingMetaPredicateDeclaration', File, Offset, 0, QuickfixAction) :-
-    find_undeclared_meta_predicates_position(File, Offset,Spec),
+    find_undeclared_meta_predicates_position(File, Offset, Spec),
     format(atom(QuickfixAction),':- meta_predicate(~w).~n', [Spec]).
     
     
