@@ -74,7 +74,7 @@ public class PLMarkerUtils {
 							marker.setAttribute(IMarker.MESSAGE, msgText);
 						}
 						
-						List<Map<String, Object>> msgsSmells = session.queryAll("smell_marker(Name, Description, QuickfixDescription, QuickfixAction, '" + file.getRawLocation().toPortableString().toLowerCase() + "', Start, Length)");
+						List<Map<String, Object>> msgsSmells = session.queryAll("smell_marker_pdt(Name, Description, QuickfixDescription, QuickfixAction, '" + file.getRawLocation().toPortableString().toLowerCase() + "', Start, Length)");
 						for (Map<String, Object> msg : msgsSmells) {
 							IMarker marker = file.createMarker(IMarker.PROBLEM);
 							marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);

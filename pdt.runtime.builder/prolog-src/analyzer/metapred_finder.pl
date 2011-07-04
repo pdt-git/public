@@ -1,10 +1,10 @@
-:-module(metapred_finder, [	find_all_meta_predicates/0,
+:-module(metapred_finder, [	get_all_userdefined_meta_predicates/1,
+							find_all_meta_predicates/0,
 							infer_meta_arguments_for/3,
 							find_meta_pred_args_in_clause/3]).
 
 :- use_module(metafile_referencer).
 :- use_module(org_cs3_lp_utils(utils4modules)).
-
 
 
 
