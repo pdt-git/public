@@ -1,4 +1,5 @@
-:- module(modules_and_visibility, [	compute_visibility_graph/0]).
+:- module(modules_and_visibility, [	compute_visibility_graph/0,
+									visible_in_module/2]).
 
 :- use_module(parse_util).
 
@@ -31,19 +32,20 @@ build_export_edge(Functor/Arity,Directive):-
     
 
 visible_in_module(Predicate,Module):-
-    visible_in_module_as(Predicate,Module,_).
+    visible_in_module_as(Predicate,Module,_,[Module]).
     
-visible_in_module_as(Predicate,Module,Functor):-
+visible_in_module_as(Predicate,Module,Functor,_):-
     predicateT(Predicate,_,Functor,_,Module). %,
-%    !.
-visible_in_module_as(Predicate,Module,Functor):-
-    not( predicateT(Predicate,_,Functor,_,Module)),
+    %!.
+visible_in_module_as(Predicate,Module,Functor,PreviousModules):-
+    \+( predicateT(Predicate,_,Functor,_,Module)),
     fileT(ModuleFile,_,Module),
     load_edge(ModuleFile,DefiningFile,Imports,_),
     fileT(DefiningFile,_,DefiningModule),
-    visible_in_module_as(Predicate,DefiningModule,DefiningFunctor),
-    exporting(DefiningModule,Predicate,_),
-    compute_importing_functor(Imports,DefiningFunctor,Functor).     %Eva: !!!!! TEST this!!!!!    
+    \+ member(DefiningModule, PreviousModules),
+    compute_importing_functor(Imports,DefiningFunctor,Functor),	   %Eva: !!!!! TEST this!!!!!   
+    visible_in_module_as(Predicate,DefiningModule,DefiningFunctor, [DefiningModule|PreviousModules]),
+    exporting(DefiningModule,Predicate,_).   
    
 compute_importing_functor(all,Functor,Functor):-
     !.
