@@ -6,18 +6,20 @@
 :- dynamic call_edges_for_predicates/3.
 count_call_edges_between_predicates:-
     retractall(call_edges_for_predicates(_,_,_)),
-	forall(	call_edge(SourceLiteralId,TargetRuleId),
+	forall(	call_edge(TargetId, SourceLiteralId),
 			(	(	(	literalT(SourceLiteralId,_,SourceRule,_,_,_)
     				;	metaT(SourceLiteralId,_,SourceRule,_,_,_)
     				),
-    				clauseT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
-    				predicateT_ri(SourceFunctor,SourceArity,SourceModule,SourceId),
+    				pred_edge(SourceRule,SourceId)
+    				%clauseT(SourceRule,_,SourceModule,SourceFunctor,SourceArity),
+    				%predicateT_ri(SourceFunctor,SourceArity,SourceModule,SourceId),
  
-    				clauseT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
-    				predicateT_ri(TargetFunctor,TargetArity,TargetModule,TargetId)
+    				%clauseT(TargetRuleId,_,TargetModule,TargetFunctor,TargetArity),
+    				%predicateT_ri(TargetFunctor,TargetArity,TargetModule,TargetId)
+    				%predicateT(TargetPredId,_,_,_,_)
 				)
 			->	inc_call_edges_for_predicates(SourceId,TargetId)
-			;	format('Problem with call-edge: ~w, ~w~n',[SourceId, TargetId])
+			;	format('Problem with call-edge: ~w, ~w~n',[SourceLiteralId, TargetId])
 			)
 		).	
 
