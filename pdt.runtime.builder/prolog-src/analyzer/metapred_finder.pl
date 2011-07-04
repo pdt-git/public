@@ -17,38 +17,62 @@ find_all_meta_predicates:-
     		(	member(Module:Candidate, Candidates),
     			infer_meta_arguments_for(Module,Candidate,MetaSpec)
 			),
-			assert(new_meta_pred(MetaSpec, Module))
+			(	assert(new_meta_pred(MetaSpec, Module)),
+				format('Candidate: ~w:~w~n', [Module, MetaSpec])
+			)
 		),
-		(	new_meta_pred(_)
-		->	prepare_next_step
-		;	fail
-		).
+		(	new_meta_pred(_,_)
+		->	(	prepare_next_step,
+				fail
+			)
+		;	true
+		),
+	!.
 	    
     
     
 initialize_meta_pred_search:-
     retractall(metafile_referencer:user_defined_meta_pred(_,_,_,_)),
-    retractall(new_meta_pred(_,_,_)),
+    retractall(new_meta_pred(_,_)),
     forall(	
     	(   current_predicate(Module:Functor/Arity),
     		functor(Head,Functor,Arity),
     		predicate_property(Module:Head, built_in),
-    		predicate_property(Module:Head, meta_predicate(Spec))
+    		predicate_property(Module:Head, meta_predicate(Spec)),
+    		is_metaterm(Module, Head, MetaArgs),
+    		(MetaArgs \= [])
     	),
-    	assert(new_meta_pred(Module, Head, Spec))
+    	(	assert(new_meta_pred(Spec, Module)),
+    		format('Candidate: ~w:~w~n', [Module, Spec])
+    	)
     ).
     
-%collect_candidates(Candidates):-
-%	forall(	
-%    	new_meta_pred(MetaSpec, Module),
-%    	find_reference
-%        retract(new_meta_pred(MetaSpec, Module))	
+collect_candidates(Candidates):-
+	findall(
+		CandModule:Candidate,
+    	(	new_meta_pred(MetaSpec, Module),
+    		retract(new_meta_pred(MetaSpec, Module)),
+    		functor(MetaSpec, Functor, Arity),
+    		visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
+    														%		für die ..T-Fakten möglich, aber nicht für die vordefinierten...
+    														%		andererseits: der genaue Test ist ja eh später, hier nur Kandidaten.
+    		parse_util:literalT(_Id,_ParentId,ClauseId,AModule,Functor,Arity),
+			parse_util:clauseT(ClauseId,_,CandModule,CandFunctor,CandArity),
+			functor(Candidate, CandFunctor, CandArity)
+        ),
+        Candidates
+	).	
     
 prepare_next_step:-
     forall(	
     	new_meta_pred(MetaSpec, Module),
     	(	functor(MetaSpec, Functor, Arity),
-    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, MetaSpec))
+    		(	metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, OldMetaSpec)
+    		->	combine_two_arg_lists(OldMetaSpec, MetaSpec, NewMetaSpec)
+    		;	NewMetaSpec = MetaSpec
+    		),
+    		assert(metafile_referencer:user_defined_meta_pred(Functor, Arity, Module, NewMetaSpec)),
+    		format('New meta found: ~w:~w/~w -> ~w~n', [Module, Functor, Arity, NewMetaSpec])
     	)
     ).
     
