@@ -50,7 +50,11 @@ parse_body_literals([A|B], Pos, _ParentId, _ClauseId, _Module, _VarNames) :-
    
 parse_body_literals(Body, Pos, ParentId, ClauseId, Module, VarNames) :- 
    	%xref:is_metaterm(Body, MetaArguments),
-   	metafile_referencer:is_metaterm(Module, Body, MetaArguments),
+   	catch(	
+   		metafile_referencer:is_metaterm(Module, Body, MetaArguments),
+   		_,
+   		format('problem with metaterm-check for Module: ~w and Body: ~w~n', [Module, Body])
+   	),
    	!, 
    	Pos = term_position(From, To, _FFrom, _FTo, SubPos),
    	assert_new_node(Body,From,To,Id),   %<===
