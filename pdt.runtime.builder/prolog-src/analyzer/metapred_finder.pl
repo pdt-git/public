@@ -18,7 +18,7 @@ find_all_meta_predicates:-
     			infer_meta_arguments_for(Module,Candidate,MetaSpec)
 			),
 			(	assert(new_meta_pred(MetaSpec, Module)),
-				format('Candidate: ~w:~w~n', [Module, MetaSpec])
+				format('surviving Candidate: ~w:~w~n', [Module, MetaSpec])
 			)
 		),
 		(	new_meta_pred(_,_)
@@ -43,7 +43,7 @@ initialize_meta_pred_search:-
     		(MetaArgs \= [])
     	),
     	(	assert(new_meta_pred(Spec, Module)),
-    		format('Candidate: ~w:~w~n', [Module, Spec])
+    		format('Initial: ~w:~w~n', [Module, Spec])
     	)
     ).
     
@@ -53,15 +53,21 @@ collect_candidates(Candidates):-
     	(	new_meta_pred(MetaSpec, Module),
     		retract(new_meta_pred(MetaSpec, Module)),
     		functor(MetaSpec, Functor, Arity),
-    		visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
+    		%visible_in_module(AModule, Functor, Arity),		%TODO: hier müsste man eigentlich die Module suchen, die das Modul sehen
     														%		für die ..T-Fakten möglich, aber nicht für die vordefinierten...
     														%		andererseits: der genaue Test ist ja eh später, hier nur Kandidaten.
-    		parse_util:literalT(_Id,_ParentId,ClauseId,AModule,Functor,Arity),
+    		(	predicateT(PredId,_FileId,Functor,Arity,Module)
+    		->	parse_util:call_edge(PredId,LiteralId)
+			;	parse_util:call_built_in(Functor, Arity, Module, LiteralId)
+			),
+			parse_util:literalT(LiteralId,_ParentId,ClauseId,_AModule,_Functor,_Arity),
 			parse_util:clauseT(ClauseId,_,CandModule,CandFunctor,CandArity),
-			functor(Candidate, CandFunctor, CandArity)
+			functor(Candidate, CandFunctor, CandArity),
+			format('Candidate: ~w:~w~n', [CandModule, Candidate])
         ),
-        Candidates
-	).	
+        CandidateList
+	), 
+	list_to_set(CandidateList, Candidates).	
     
 prepare_next_step:-
     forall(	
