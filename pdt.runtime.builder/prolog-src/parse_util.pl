@@ -6,6 +6,7 @@
 						dynamicT/2, transparentT/2, multifileT/2, meta_predT/2,
 						termT/2, slT/3, 
 						call_edge/2, pred_edge/2, onload_edge/2, load_edge/4,
+						call_built_in/4,
 						fileT_ri/2, predicateT_ri/4, clauseT_ri/3,  
 						import_dir/2, export_dir/2, load_dir/3, property_dir/3, library_dir/3,
 						pos_and_vars/3, 
@@ -34,11 +35,12 @@
 :- dynamic termT/2.			%termT(Id,Term)
 :- dynamic slT/3.			%slT(Id,Pos,Len)    <-- should be coordinated with JTransformer in the long run!!!!
 
-:- dynamic call_edge/2.		%call_edge(LId,Id)
-:- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)					<-- ATTENTION: otherway as call_edge
-:- dynamic onload_edge/2.	%onload_edge(Id,OId)						<-- ATTENTION: otherway as call_edge
+:- dynamic call_edge/2.		%call_edge(PredId,LiteralId)
+:- dynamic pred_edge/2.		%pred_edge(ClauseId,PredId)					
+:- dynamic onload_edge/2.	%onload_edge(Id,OId)						
 :- dynamic load_edge/4.		%load_edge(LoadingId,FileId,Imports,Directive)
 
+:- dynamic call_built_in/4.	%call_built_in(Functor, Arity, Module, LiteralId)
 
 :- dynamic fileT_ri/2.		%fileT_ri(FileName,Id)
 :- dynamic predicateT_ri/4.	%predicateT_ri(Functor,Arity,Module,Id)		
@@ -79,6 +81,7 @@ cleanup_nodes:-
 	retractall(pred_edge(_,_)),
 	retractall(onload_edge(_,_)),
 	retractall(load_edge(_,_,_,_)),
+	retractall(call_built_in(_,_,_,_)),
 	retractall(clauseT_ri(_,_,_)),     
 	retractall(predicateT_ri(_,_,_,_)),
 	retractall(fileT_ri(_,_)),
