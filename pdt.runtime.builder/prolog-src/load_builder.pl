@@ -7,7 +7,7 @@
 	 
 
 
-pl_test:-
+generate_factbase:-
     find_all_loaded_files(Project),
     plparser_quick:generate_facts(Project).       
     
