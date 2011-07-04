@@ -77,6 +77,12 @@ write_graphML_keys(OutStream):-
   	nl(OutStream),
   	write(OutStream, '</key>'),
     nl(OutStream),
+    write(OutStream, '<key id="isDynamic" for="node" attr.name="isDeclaredMetaPredicate" attr.type="boolean">'),
+    nl(OutStream),
+    write(OutStream, '    <default>false</default>'),
+  	nl(OutStream),
+  	write(OutStream, '</key>'),
+    nl(OutStream),   
     write(OutStream, '<key id="frequency" for="edge" attr.name="frequency" attr.type="int">'),
     nl(OutStream),
     write(OutStream, '    <default>1</default>'),
@@ -135,18 +141,22 @@ write_predicate(Stream,Id,Functor,Arity,Module):-
 	write_data(Stream,'functor',Functor),
 	write_data(Stream,'arity',Arity),	
 	write_data(Stream,'moduleOfPredicate',Module),	
-	(	dynamicT(_,Functor,Arity,Module,_)
+	(	dynamicT(Id,_)
 	->	write_data(Stream,'isDynamic','true')
 	;	true
 	),
-	(	transparentT(_,Functor,Arity,Module,_)
+	(	transparentT(Id,_)
 	->	write_data(Stream,'isTransparent','true')
 	;	true
 	),	
-	(	multifileT(_,Functor,Arity,Module,_)
+	(	multifileT(Id,_)
 	->	write_data(Stream,'isMultifile','true')
 	;	true
 	),		
+	(	meta_predT(Id,_)
+	->	write_data(Stream,'isDeclaredMetaPredicate','true')
+	;	true
+	),	
 /*	start_graph_element(Stream),
 	write_clauses(Stream,FileName),
 	close_graph_element(Stream),
@@ -263,9 +273,9 @@ write_data(Stream,Key,Value):-
 	
 
 
+
 pl_test_graph:-	
-    pl_test_graph(['C:/Data/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'C:/Data/Workspaces/WorkspaceTeaching3/test6.graphml').           
- 
+    pl_test(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
 pl_test_graph(Project,Output):-
 	plparser_quick:generate_facts(Project),
 	writeln('generating graphml-file'),
