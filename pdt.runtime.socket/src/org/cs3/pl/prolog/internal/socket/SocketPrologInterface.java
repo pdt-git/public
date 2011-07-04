@@ -405,14 +405,23 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	@Override
 	public Map<String, Object> queryOnce(String... predicates) throws PrologInterfaceException {
 		
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String s : predicates) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(",");
+			}
+			buf.append(s);
+		}
+		
 		Map<String, Object> result = null;		 
 		PrologSession session = null;
 		try {
 			session = getSession(PrologInterface.LEGACY);
 		    
-		    for (int i = 0; i < predicates.length; i++) {
-				result = session.queryOnce(predicates[i]);
-			}
+			result = session.queryOnce(buf.toString());
 		} finally {
 		    if (session != null)
 		      session.dispose();
@@ -432,13 +441,21 @@ public class SocketPrologInterface extends AbstractPrologInterface implements So
 	@Override
 	public List<Map<String, Object>> queryAll(String... predicates) throws PrologInterfaceException {
 		
+		StringBuffer buf = new StringBuffer();
+		boolean first = true;
+		for (String s : predicates) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(",");
+			}
+			buf.append(s);
+		}
 		List<Map<String, Object>> result = null;		 
 		PrologSession session = null;
 		try {
 		    session = getSession(PrologInterface.LEGACY);
-		    for (int i = 0; i < predicates.length; i++) {
-				result = session.queryAll(predicates[i]);
-			}
+			result = session.queryAll(buf.toString());
 		} finally {
 		    if (session != null)
 		      session.dispose();
