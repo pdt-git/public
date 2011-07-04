@@ -5,8 +5,9 @@
 :- ensure_loaded(parse_util).
 
 derive_all_predicates:-
-    forall( clauseT(CId,File,Module,Functor,Arity),
-    		derive_predicate_for_clause(CId,Functor,Arity,Module,File,_PId)
+    forall( 
+    	clauseT(CId,File,Module,Functor,Arity),
+    	derive_predicate_for_clause(CId,Functor,Arity,Module,File,_PId)
     ).
     	  
 derive_predicate_for_clause(CId,Functor,Arity,Module,_File,PId):-
@@ -25,26 +26,27 @@ derive_predicate_for_clause(CId,Functor,Arity,Module,File,PId):-
     
     
 derive_onloads:-
-    forall( directiveT(Id,File,Module),
-    	  	(	(	(	onloadT(PId,File,Module)	
-    				->	(	assert(onload_edge(Id,PId)),
-    						compute_new_length(PId,Id)
-    					)	  					
-    				;	(	new_node_id(PId),	
-    						assert(node_id(PId)),
-    						assert(onloadT(PId,File,Module)),  
+    forall( 
+    	directiveT(Id,File,Module),
+		(	(	(	onloadT(PId,File,Module)	
+    			->	(	assert(onload_edge(Id,PId)),
+    					compute_new_length(PId,Id)
+    				)	  					
+    			;	(	new_node_id(PId),	
+    					assert(node_id(PId)),
+    					assert(onloadT(PId,File,Module)),  
     						
-    						slT(Id,Begin,Length),
-    						assert(slT(PId,Begin,Length)),  
+    					slT(Id,Begin,Length),
+    					assert(slT(PId,Begin,Length)),  
    
-    						assert(onload_edge(Id,PId))
-    					)	
-    		  		) 			
-    			)
-    		; 	termT(Id,Term),
-    			writeln(Term)
+    					assert(onload_edge(Id,PId))
+    				)	
+    		  	) 			
     		)
-    	  ). 
+    	; 	termT(Id,Term),
+    		writeln(Term)
+    	)
+	). 
 
 compute_new_length(PId,Id) :-
 	slT(PId,PBegin,PLength),
@@ -58,11 +60,12 @@ compute_new_length(PId,Id) :-
     assert(slT(PId,NewBegin,NewLength)).
 
 compute_all_predicate_properties:-
-    forall(	parse_util:property_dir(Functor, Args, DirectiveId),
-    		(	directiveT(DirectiveId, _, Module),
-    			compute_predicate_property(Functor, Args, DirectiveId, Module)
-    		)
-    	).
+    forall(	
+    	parse_util:property_dir(Functor, Args, DirectiveId),
+    	(	directiveT(DirectiveId, _, Module),
+    		compute_predicate_property(Functor, Args, DirectiveId, Module)
+    	)
+    ).
 
 /**
  * analyse_directive(+Directive,+ParentId,+Module)
@@ -78,15 +81,14 @@ compute_predicate_property(Prop, Preds, DirectiveId, Module):-     % dynamic
 		member(Functor/Arity, Predicates),
 		(	(	predicateT_ri(Functor,Arity,Module,PId)
 			->	true
-			;	(	(Prop = dynamic)
-				->	(	new_node_id(PId),	
-    					assert(node_id(PId)),
-    					directiveT(DirectiveId, File, _),
-    					assert(predicateT(PId,File,Functor,Arity,Module)),
-    					assert(predicateT_ri(Functor,Arity,Module,PId))
-					)
-				;	fail	
-				)
+			;	%(Prop = dynamic)	% because order is not deterministic it is easier to not do this check
+									% this also represents the read code, more. But this should lead to a later
+									% check for missing dynamic declarations - or for a smell about this...
+				new_node_id(PId),		
+    			assert(node_id(PId)),
+    			directiveT(DirectiveId, File, _),
+    			assert(predicateT(PId,File,Functor,Arity,Module)),
+    			assert(predicateT_ri(Functor,Arity,Module,PId))
 			),
 			assert_prop(Prop, PId, DirectiveId)
 		)
