@@ -14,7 +14,7 @@ pl_test:-
 find_all_loaded_files(Project):-
     current_prolog_flag(home, PrologHome),
     findall(
-    	File,
+    	File,					%the following removes the files from prolog itself - maybe this should be changed back
     	(	source_file(File),
     		\+(string_concat(PrologHome, _, File))
     	), 
