@@ -173,7 +173,7 @@ allow(Peer, Options) :-
 % used internally to store information about running servers
 :- dynamic(server/1).
 
-:- at_initialization(mutex_create(pdt_console_server_mux)).
+%:- initialization(mutex_create(pdt_console_server_mux)).
 %:- at_halt(mutex_destroy(pdt_console_server_mux)).
 
 % pdt_current_console_server(-Port, -LockFile).
