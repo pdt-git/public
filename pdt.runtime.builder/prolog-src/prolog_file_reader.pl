@@ -7,6 +7,7 @@
 :- use_module(load_graph).
 :- use_module(modules_and_visibility).
 :- use_module(literal_parser).
+:- use_module(org_cs3_lp_utils(utils4modules)).
 
 
 generate_facts(Project):-
@@ -22,22 +23,48 @@ generate_facts(Project):-
 	time(derive_onloads),
 	writeln('compute_predicate_properties'),
 	time(compute_all_predicate_properties),
+	writeln('compute_visibilities'),
+	time(compute_visibility_graph),
 	writeln('parse literals'),
 	time(parse_bodies),
 	writeln('generate edges'),
 	time(derive_edges).    
         
 derive_edges:-
-    forall( (	literalT(LId,_,_,_Module,Functor,Arity)
-    		;	metaT(LId,_,_,_Module,Functor,Arity)
-    		),
-    		( (  clauseT_ri(Functor,Arity,Id), 
-    			% clauseT(Id,_,Module,Functor,Arity),    %Eva: umstellen auf PredicateT?
-     			 assert(call_edge(LId,Id))	
-    		  )
-    		  ;	true
-    		)
-    	  ).
-/****
-* Eva: Die Modul-Sichtbarkeit berücksichtigen!!!!!!!!
-*/
+    forall( 
+    	(	literalT(LId,_,CId,Module,Functor,Arity)
+    	;	metaT(LId,_,CId,Module,Functor,Arity)
+    	),
+    	( 	(	(	predicateT_ri(Functor,Arity,Module,Id)
+    			->	true
+    			;	(	predicateT_ri(Functor,Arity,_DefModule,Id),
+    					(	visible_in_module(Id, Module)
+    					->	true
+    					;	(	clauseT(CId,ParentId,_Module,_Functor,_Arity),
+    							fileT(ParentId, File, _),	
+    							format('visibility of ~w:~w/~w for Module ~w not found; calling File: ~w~n', [_DefModule, Functor, Arity, Module, File])
+    						)
+    					)
+   					)
+   				)
+    				%clauseT_ri(Functor,Arity,Id),
+    				% clauseT(Id,_,Module,Functor,Arity),    %Eva: umstellen auf PredicateT?
+   			->	assert(call_edge(Id,LId))	
+			;	(	functor(Term, Functor, Arity),
+    		  		(	(	%format('Call to ~w:~w/~w~n', [Module, Functor, Arity]),
+    		  				catch(	
+    		  					(	declared_in_module(Module, Functor, Arity, DefModule),
+    		  				%format('Defined in ~w~n', [DefModule]),
+    		  					predicate_property(DefModule:Term, built_in)
+    		  					),
+    		  					_,
+    		  					format('problem with ~w:~w/~w~n', [Module, Functor, Arity])
+    		  				)
+    		  			)
+    		  		->	assert(call_built_in(Functor, Arity, DefModule, LId))
+    		  		;	format('Call to ~w ~w:~w/~w -> Not found.~n', [Module, DefModule, Functor, Arity])
+    		  		)
+    		  	)
+			)
+    	)
+    ).
