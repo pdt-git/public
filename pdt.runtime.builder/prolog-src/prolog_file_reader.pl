@@ -38,31 +38,26 @@ derive_edges:-
     	( 	(	(	predicateT_ri(Functor,Arity,Module,Id)
     			->	true
     			;	(	predicateT_ri(Functor,Arity,_DefModule,Id),
-    					(	visible_in_module(Id, Module)
-    					->	true
-    					;	(	clauseT(CId,ParentId,_Module,_Functor,_Arity),
-    							fileT(ParentId, File, _),	
-    							format('visibility of ~w:~w/~w for Module ~w not found; calling File: ~w~n', [_DefModule, Functor, Arity, Module, File])
-    						)
-    					)
+    					visible_in_module(Id, Module)
+%    					(	visible_in_module(Id, Module)
+%    					->	true
+%    					;	(	clauseT(CId,ParentId,_Module,_Functor,_Arity),
+%    							fileT(ParentId, File, _),	
+%    							format('visibility of ~w:~w/~w for Module ~w not found; calling File: ~w~n', [_DefModule, Functor, Arity, Module, File])
+%    						)
+%    					)
    					)
    				)
-    				%clauseT_ri(Functor,Arity,Id),
-    				% clauseT(Id,_,Module,Functor,Arity),    %Eva: umstellen auf PredicateT?
    			->	assert(call_edge(Id,LId))	
 			;	(	functor(Term, Functor, Arity),
     		  		(	(	%format('Call to ~w:~w/~w~n', [Module, Functor, Arity]),
-    		  				catch(	
-    		  					(	declared_in_module(Module, Functor, Arity, DefModule),
+    		  				declared_in_module(Module, Term, DefModule),
     		  				%format('Defined in ~w~n', [DefModule]),
-    		  					predicate_property(DefModule:Term, built_in)
-    		  					),
-    		  					_,
-    		  					format('problem with ~w:~w/~w~n', [Module, Functor, Arity])
-    		  				)
+    		  				predicate_property(DefModule:Term, built_in)
     		  			)
     		  		->	assert(call_built_in(Functor, Arity, DefModule, LId))
-    		  		;	format('Call to ~w ~w:~w/~w -> Not found.~n', [Module, DefModule, Functor, Arity])
+    		  		;	%format('Call to ~w ~w:~w/~w -> Not found.~n', [Module, DefModule, Functor, Arity])
+    		  			true			%TODO: here is a possible place to create a warning as soon as it's reduced to "real" problems... 
     		  		)
     		  	)
 			)
