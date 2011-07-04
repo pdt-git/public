@@ -275,7 +275,7 @@ write_data(Stream,Key,Value):-
 
 
 pl_test_graph:-	
-    pl_test(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
+    pl_test_graph(['Z:/Git-Data/pdt.git/pdt.runtime.builder/prolog-src'],'Z:/Workspaces/WorkspaceFresh/test6.graphml'). 
 pl_test_graph(Project,Output):-
 	plparser_quick:generate_facts(Project),
 	writeln('generating graphml-file'),

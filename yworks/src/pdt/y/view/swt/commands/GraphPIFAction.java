@@ -60,7 +60,7 @@ public class GraphPIFAction  extends Action {
 			PrologSession session = pif.getSession(PrologInterface.LEGACY);
 			
 			session.queryOnce("consult("+prologNameOfFileToConsult+").");
-			session.queryOnce("pl_test(['"+folderToParse+"'],'"+Util.prologFileName(helpFile)+"').");
+			session.queryOnce("pl_test_graph(['"+folderToParse+"'],'"+Util.prologFileName(helpFile)+"').");
 			
 			view.loadGraph(helpFile.toURI().toURL());
 		} catch (PrologException e1) {
