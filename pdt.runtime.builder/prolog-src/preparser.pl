@@ -76,13 +76,13 @@ parse_clauses(InStream,FileId):-
 parse_clause_elements(:- Body, Pos, FileId, VarNames, UnchangedModule) :- % Directive
    	!, 
    	Pos = term_position(From, To, _FFrom, _FTo, [SubPos]),
-   	assert_new_node( :- Body,From,To,ClauseId), 
+   	assert_new_node( :- Body,From,To,DirectiveId), 
    	Body =..[Functor|Args],
-   	handle_directive(Functor,Args,SubPos,ClauseId,FileId,UnchangedModule),
+   	handle_directive(Functor,Args,SubPos,DirectiveId,FileId,UnchangedModule),
    	nb_getval(module_to_parse,Module),
-   	assert(directiveT(ClauseId,FileId,Module)),
+   	assert(directiveT(DirectiveId,FileId,Module)),
    	Body =.. [Functor|Args],
- 	assert(pos_and_vars(ClauseId,SubPos,VarNames)).
+ 	assert(pos_and_vars(DirectiveId,SubPos,VarNames)).
    
 parse_clause_elements(Head :- Body, Pos, FileId, VarNames, Module) :-  % Rule
 	!, 

@@ -16,7 +16,7 @@ handle_directive(op,Args,Pos,ParentId,FileId,Module):-
 	assert(operatorT(Id,ParentId,FileId,Module,Name,Arity,Type,Precedence)),
 	Call.
 
-handle_directive(assert,[file_search_path(Name,Path)],_Pos,ParentId,_FileId,_Module):-
+handle_directive(assert,[file_search_path(Name,Path)],_Pos, ParentId,_FileId,_Module):-
     !,				
 	assert(	file_search_path(Name,Path)),
     Path =.. [OtherLib|NewPath],				
@@ -28,8 +28,8 @@ handle_directive(assert,[file_search_path(Name,Path)],_Pos,ParentId,_FileId,_Mod
     	)
     ),
     assert(library_dir(Name,LibDir,ParentId)).		 
-handle_directive(Other,Args,Pos,ParentId,_FileId,_Module):-
-   categorize_directive(Other,Args,Pos,ParentId).
+handle_directive(Other, Args,_Pos, ParentId, _FileId, _Module):-
+   categorize_directive(Other,Args,ParentId).
    
    
     															%TODO: es können mehrere Anweisungen in einer Direktiven-Klausel sein.
@@ -60,7 +60,7 @@ categorize_directive(use_module,Args,ParentId):-
 categorize_directive(ensure_loaded,Args,ParentId):-
 	!,					
 	assert(load_dir(ParentId,Args,all)).			
-categorize_directive(export,Args,_Pos,ParentId):-
+categorize_directive(export,Args,ParentId):-
     !,
     assert(export_dir(Args,ParentId)).
 categorize_directive(reexport,Args,ParentId):-
