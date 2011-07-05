@@ -1,22 +1,18 @@
 package org.cs3.pdt.internal.queries;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 
 import org.cs3.pdt.core.PDTCoreUtils;
 import org.cs3.pdt.internal.structureElements.PDTMatch;
+import org.cs3.pl.common.Util;
 import org.cs3.pl.metadata.Goal;
 import org.cs3.pl.prolog.PrologInterface;
 import org.eclipse.core.resources.IFile;
 
 public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
-	private Set<String> signatures = new HashSet<String>();
-
-
 	public CategorizedDefinitionsSearchQuery(PrologInterface pif, Goal goal) {
 		super(pif, goal);
 		setSearchType("Definitions and declarations of");
@@ -29,8 +25,6 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 
 	@Override
 	protected String buildSearchQuery(Goal goal, String module) {		
-		signatures.clear();
-		
 		String file = "'"+goal.getFile()+"'";
 		if (goal.getFile().equals(""))
 			file = "OrigFile";
@@ -39,8 +33,12 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 		if (module.equals("''"))
 			module2 = "Module";
 		
+		String term = goal.getTermString();
+		//String term = Util.quoteAtom(origTerm);
+		
+		
 		String query = "find_definitions_categorized(" 
-			            + file + "," + goal.getLine() + "," + goal.getTermString() + ", Functor, Arity, "+ module2 + 
+			            + file + "," + goal.getLine() + "," + term + ", Functor, Arity, "+ module2 + 
 			            ", SearchCategory, DefiningModule, File, Line, PropertyList, ResultsCategory)";
 		return query;
 	}
@@ -65,18 +63,13 @@ public class CategorizedDefinitionsSearchQuery extends PDTSearchQuery {
 		String resultsCategory = (String)m.get("ResultsCategory");
 
 		String searchCategory = (String)m.get("SearchCategory");
-		String signature = resultsCategory+definingModule+functor+arity+line;
-		if(!signatures.contains(signature)){
-			signatures.add(signature);
-
-			PDTMatch match = createMatch(definingModule, functor, arity, file, line, properties, searchCategory);
-
-			addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
-			return match;
-		}
-		else
-			return null;
+		
+		
+		PDTMatch match = createUniqueMatch(definingModule, functor, arity,
+				file, line, properties, resultsCategory, searchCategory);
+		
+		addCategoryEntry(match, getCategoryDescription(definingModule, functor, arity, resultsCategory));			
+		return match;
 	}
-
-
+	
 }
