@@ -46,7 +46,7 @@ public class ReferencesSearchQuery extends PDTSearchQuery {
 		IFile file = PDTCoreUtils.getFileForLocationIndependentOfWorkspace((String)m.get(FILE_VAR));
 		int line = Integer.parseInt((String) m.get(LINE_VAR));
 
-		PDTMatch match = createMatch(module, name, arity, file, line, new Vector<String>(), "definition");
+		PDTMatch match = createUniqueMatch(module, name, arity, file, line, new Vector<String>(), null, "definition");
 		return match;
 	}
 	
