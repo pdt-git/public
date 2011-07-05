@@ -27,7 +27,9 @@ public class SearchModuleElement implements PDTTreeElement {
 		elements.add(elem);
 		
 		SearchPredicateElement predicate = (SearchPredicateElement)elem.getElement();
-		predicates.add(predicate);
+		if (!predicates.contains(predicate)) {
+			predicates.add(predicate);
+		}
 		
 		file = predicate.getFile();
 	}
